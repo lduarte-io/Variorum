@@ -113,6 +113,56 @@ nonisolated enum CompareRow: Equatable, Identifiable {
             return "aligned-\(row.anchorBlockID)"
         }
     }
+
+    /// **VX-757 — the row's identity ON SCREEN: its spine, never its kind.**
+    /// The anchor block it holds (`a:‹block›`), else the first peer block it
+    /// holds (`p‹column›:‹block›`). The header toggles move rows between the
+    /// two kinds ("follow this note's order") or change a free row's peer side
+    /// ("related blocks only"), and `id` — kind and running index — changed
+    /// with them, so the board tore down and re-made every such row, every
+    /// cell's pane included: each re-made pane re-measures from its seed, and
+    /// a board of them re-lays at once (the flicker). Unique by construction:
+    /// a block sits in one note (I2), each column shows a block once, and the
+    /// anchor is never a peer.
+    var spineID: String {
+        if let anchor = anchorBlockID { return "a:\(anchor)" }
+        if case .free(_, let peers, _) = self,
+           let column = peers.firstIndex(where: { $0 != nil }), let block = peers[column] {
+            return "p\(column):\(block)"
+        }
+        return id  // unreachable: a composed row always holds a block
+    }
+
+    /// The anchor block this row shows (an aligned row always holds one).
+    var anchorBlockID: String? {
+        switch self {
+        case .free(let anchor, _, _): return anchor
+        case .aligned(let row): return row.anchorBlockID
+        }
+    }
+
+    /// The blocks peer column `column` shows in this row, in order: a free
+    /// row's one block (or none), an aligned row's kin.
+    func peerBlocks(_ column: Int) -> [String] {
+        switch self {
+        case .free(_, let peers, _):
+            return column < peers.count ? peers[column].map { [$0] } ?? [] : []
+        case .aligned(let row):
+            return column < row.peerKin.count ? row.peerKin[column] : []
+        }
+    }
+
+    /// An aligned row's kin in peer column `column` arrived out of that
+    /// note's own order (the "moved" line); never on a free row.
+    func peerMoved(_ column: Int) -> Bool {
+        guard case .aligned(let row) = self, column < row.peerMoved.count else { return false }
+        return row.peerMoved[column] && !peerBlocks(column).isEmpty
+    }
+
+    var isFree: Bool {
+        if case .free = self { return true }
+        return false
+    }
 }
 
 // MARK: - The wire's landing (VX-298)
@@ -1715,7 +1765,10 @@ struct CompareBoardView: View {
                 inset: Self.boardInset, spacing: Self.columnSpacing))
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: Self.rowSpacing) {
-                    ForEach(display.rows) { row in
+                    // VX-757: keyed by the row's SPINE, so a toggle that only
+                    // re-arranges the composition keeps every row (and its
+                    // panes) that still stands on the same block.
+                    ForEach(display.rows, id: \.spineID) { row in
                         rowView(row, lane: lane)
                     }
                     endDropZones
@@ -1730,43 +1783,50 @@ struct CompareBoardView: View {
     static let columnSpacing: CGFloat = 8
     static let rowSpacing: CGFloat = 8
 
-    @ViewBuilder
+    /// **VX-757 — ONE structure for both kinds of row.** The free arm and the
+    /// aligned arm used to be two branches of a `switch` (the free arm's peer
+    /// cells straight in the row, the aligned arm's in a column `VStack`), so
+    /// a toggle that moved a row between the kinds re-made every cell in it
+    /// even when the same blocks sat side by side. Now each row is the anchor
+    /// cell, then one column per peer — the "moved" line when aligned, the
+    /// column's blocks keyed by block id, the free arm's clear space when it
+    /// has none — the same layout each arm drew, so a cell's identity is its
+    /// row's spine, its column and its block, in either kind.
     private func rowView(_ row: CompareRow, lane: CGFloat) -> some View {
         HStack(alignment: .top, spacing: Self.columnSpacing) {
-            switch row {
-            case .free(let anchor, let peers, _):
-                cellOrSpace(postID: postID, blockID: anchor, lane: lane)
-                ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
-                    cellOrSpace(
-                        postID: slot.postID,
-                        blockID: i < peers.count ? peers[i] : nil, lane: lane)
-                }
-            case .aligned(let aligned):
-                cellOrSpace(postID: postID, blockID: aligned.anchorBlockID, lane: lane)
-                ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
-                    VStack(alignment: .leading, spacing: 4) {
-                        if i < aligned.peerMoved.count, aligned.peerMoved[i],
-                           !aligned.peerKin[i].isEmpty {
-                            Text("moved (order differs in this version)")
-                                .font(tokens.small)
-                                // 18j: the voice's own "this one is
-                                // different" slot (its doc's words), never a
-                                // literal hue — this line's whole job is to
-                                // say that one column reads out of order, and
-                                // a colour that cannot follow the appearance
-                                // says it at the wrong weight on black paper.
-                                .foregroundStyle(tokens.alarm)
-                        }
-                        if i < aligned.peerKin.count {
-                            ForEach(aligned.peerKin[i], id: \.self) { kinBlock in
-                                cellOrSpace(postID: slot.postID, blockID: kinBlock, lane: lane)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                }
+            cellOrSpace(postID: postID, blockID: row.anchorBlockID, lane: lane)
+            ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
+                peerColumn(row, column: i, postID: slot.postID, lane: lane)
             }
         }
+    }
+
+    private func peerColumn(
+        _ row: CompareRow, column: Int, postID peerID: String?, lane: CGFloat
+    ) -> some View {
+        let blocks = row.peerBlocks(column)
+        return VStack(alignment: .leading, spacing: 4) {
+            if row.peerMoved(column) {
+                Text("moved (order differs in this version)")
+                    .font(tokens.small)
+                    // 18j: the voice's own "this one is different" slot (its
+                    // doc's words), never a literal hue — this line's whole job
+                    // is to say that one column reads out of order, and a
+                    // colour that cannot follow the appearance says it at the
+                    // wrong weight on black paper.
+                    .foregroundStyle(tokens.alarm)
+            }
+            if blocks.isEmpty, row.isFree {
+                // The free arm's clear SPACE where this column has nothing in
+                // this row (never a "—" blank marker; N29) — `cellOrSpace`'s.
+                Color.clear
+                    .frame(maxWidth: .infinity, minHeight: 1)
+            }
+            ForEach(blocks, id: \.self) { block in
+                cellOrSpace(postID: peerID, blockID: block, lane: lane)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     /// A column's cell — or clear SPACE where this column has nothing in
