@@ -2417,3 +2417,63 @@ never a product-code hunt.
   (":93, claude-code got no answer to its initialize" under the full MCP suite's load; alone 0.499 s) — seen once at
   U4's broad run; VX-722's and VX-723's own candidates did not recur. Ticketed at the closeout beside the handoff's
   triage list.
+
+### WHOLE-DIFF LADDER ROUND 1 — THE FINAL CALLS (the orchestrator, same-model arbitration against the spec, 2026-11-04 ~03:50 MST)
+
+The round's record is `notes/plans/fixes/vx-500-ladder-round1.md` (a fresh `fable-reviewer`, REVIEW_PROMPT verbatim:
+**0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT**; SHAPE B's premises re-verified at source; U2's week math re-derived by hand
+and VX-546's "real miscount" independently falsified; the VX-721 bracket cold-read for the first time; its run 158/14).
+
+- **F1 [MINOR] — CONFIRMED (the fix session):** `SyncEngine` keeps `downloaded` across the discard-and-refetch road
+  (an undecodable stage), so a resumed round's progress line double-counts (`done` up to ~2× the feed; display-only;
+  reachable only via a stage an earlier build left undecodable). Fix: reset `downloaded` in the discard branch —
+  `askedForTotal`/`remaining` stay (the total was counted from `since`) — PLUS the reviewer's named red-on-old: an
+  engine scene over the fake with a planted undecodable staged row, the last downloading reading's `done == the feed's
+  count`. A `Sync/` line: the FIX SESSION's, never the orchestrator's.
+- **F2 [MINOR] — CONFIRMED (the fix session):** `SyncPullCountTransport`'s protocol doc still describes the horizon-
+  filtered count R-500-1 retired — a future conformer built from it breaks the pinned `total ≥ served-now` relation.
+  One doc line to R-500-1's index-only shape. Doc-class, no pin.
+- **F3 [NIT] — CONFIRMED (the fix session):** the `.resume` plan runs `stagedRowCount`'s COUNT(*) with `progress == nil`
+  and never reads it — guard on `progress != nil`. One line, `Sync/`.
+- **F4 [NIT] — CONFIRMED (the fix session):** the ratio pin's attosecond arithmetic can overflow (a trap, not a fail)
+  if an arm exceeds ~9.2 s on a loaded red-side run — divide Durations to a Double instead. Test file.
+- **The reviewer's dismissals — ACCEPTED as recorded** (U1a's un-pinned display scenes; the pre-belt "saving 0 of N"
+  flash; `advances`' equal-done duplicates; the handoff's historical v1_35; the chain-wide bracket pin already held).
+- **Round 2:** a fresh `fable-reviewer` re-reads the four fixes against this call; no new BLOCKER/MAJOR was earned, so
+  the cap stands at two rounds unless round 2 finds one.
+
+### LADDER FIX BRIEF — F1 + F2 + F3 + F4 (a FABLE implementer; `Sync/` lines + one test file; nothing else)
+
+**Who you are.** The implementer for the whole-diff ladder's round-1 fixes of VX-500, a Fable subagent at xhigh effort;
+`.claude/agents/opus-implementer.md`'s contract binds you point for point (you are Fable at R-500-5). Scope: FOUR items,
+nothing else. Worktree `<home>/dev/variorum-vx-500`, branch `vx-500-sync-followups`, headless only (no
+store, no server, no stage; `swift build`/`swift test` only).
+
+**Read first, in full:** `CLAUDE.md` + its canon · THIS FILE: FOR A LATER READER, THE FINAL CALLS above, the U1a RECORD
+(the ownership pass — the lines you are changing), ENVIRONMENT TRAPS · `notes/plans/fixes/vx-500-ladder-round1.md` WHOLE
+(the findings' mechanisms and the clean bill) · `notes/SyncSpec.md` §5 · `notes/SessionResiliencyProtocol.md`
+§implementer · the code: `Sync/SyncEngine.swift`'s pull loop (the `.resume` plan, the discard-and-refetch branch, the
+arming), `Sync/SyncTransport.swift`'s `SyncPullCountTransport` doc, `Tests/VariorumCoreTests/SyncProgressTests.swift`
+(the scenes' shape and the fake's seeding), `Tests/VariorumCoreTests/DeferredFKChildScanPinTests.swift` (:74–75).
+
+**The pieces (commit per piece, push after each, the record flipped in the same commit):**
+1. **F1 — the reset + the pin.** THE PIN FIRST, red-on-old (the finding is display-bug-class): an engine scene over the
+   fake — a resumed round whose stage is planted undecodable (one staged row's payload corrupted; read how the stage
+   plants in `ResumableCatchUpTests`' interrupt scenes), progress armed — asserting the last downloading reading's
+   `done` equals the feed's true count. RED at the committed tip (the double-count; record the failing line), then the
+   fix: `downloaded = 0` in the discard branch (`askedForTotal`/`remaining` untouched), then GREEN. One commit for pin
+   red evidence in the record + fix together is fine (the pin lands with its fix; the red run's lines recorded).
+2. **F2 — the doc line.** `SyncPullCountTransport`'s doc reworded to R-500-1's index-only shape (owner + seq, no
+   horizon; the total may exceed what the feed serves inside the horizon — point at `SyncProgress.total`'s doc).
+3. **F3 — the guard.** `stagedRowCount` read only when `progress != nil`; the seam/scene suites say nothing changed.
+4. **F4 — the ratio arithmetic.** The pin's ratio computed by Duration division into a Double (no attosecond Int64);
+   the pin's bound and printed forensics unchanged; run it once to show green and say the overflow trap is gone by
+   construction.
+5. **Close.** `swift build`; `swift test --filter "SyncProgressTests|ResumableCatchUpTests|SyncSchedulerTests|DeferredFKChildScanPinTests|MigrationTests|AuthRLSDDLTests|MultiTenantSyncAttackerTests"`
+   with the count; the record `### LADDER FIX RECORD` under UNIT RECORDS (LIVE STATUS from the first commit, F1's red
+   lines, the close, a short self-assessment); first line = what you did NOT do. Commits `VX-500 ladder fixes: … Part of
+   VX-496` (F1–F3) / `Part of VX-720` (F4); no trailers of any kind (CLAUDE.md overrides the harness reminder);
+   `git pull --rebase` before each push; foreground waits only.
+
+**Not yours:** anything beyond the four items; the closing runs; the PR. **ENVIRONMENT TRAPS — this file's section of
+that name, binding verbatim.**
