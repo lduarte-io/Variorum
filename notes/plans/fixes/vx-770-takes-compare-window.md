@@ -1,6 +1,6 @@
 # VX-770 — Run: takes & compare after 1.0
 
-**STATUS: OPEN — kicked off 2026-11-04 (overnight away run).**
+**STATUS: CLOSED 2026-11-04 — the run complete, merged by PR #217 (merge commit on main; NO release — her word; the /Applications refresh HELD for her, VX-779). FOR A LATER READER below is the section a later session reads.**
 Ticket: VX-770 · Branch: `vx-770-takes-compare-window` · Worktree: `~/dev/variorum-vx-770` ·
 Machine: the Pro · Stage/walks via **nov3coordinator** (REQUEST → READY → GO; the stage is
 VX-500's until ~05:36 — this run's suites slot into seams, short-before-long).

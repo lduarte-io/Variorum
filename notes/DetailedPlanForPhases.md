@@ -33,7 +33,7 @@ ladder closed at round 2 and re-opened scoped for W2 (round 3: no new findings);
 REAL windows; the merge gate on the merged tree: Mac 5,846/1,019 + phone 18/18 types on COMMITTED pins (the night's
 pin gap closed), the lf-rev red leg 2/2. VX-652 re-owned with its B5-F1 design (not built — her option call).
 Canon: three SurfaceContracts lines + AppSpec §10, in place. Born: VX-781–794 (the pin-upgrade ticket VX-781 High).
-NO release (her word); the /Applications refresh HELD for her (VX-779). PR #<set at merge>, merge <set at merge>.
+NO release (her word); the /Applications refresh HELD for her (VX-779). PR #217, the merge commit on main.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
