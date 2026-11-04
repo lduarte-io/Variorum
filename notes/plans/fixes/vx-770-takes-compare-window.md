@@ -1032,13 +1032,14 @@ window (this session is headless — no `xcodebuild test`, no app, no stage); th
 | piece | state |
 |---|---|
 | Reading (this file whole incl. both batch records + window b2; TEXTKIT2_NOTES in full; SurfaceContracts › The note; the vx-601 VX-428 section; VX-732/VX-733 on Linear) | DONE |
-| Trace, both members (code read; written below before any code) | DONE (this commit) |
-| Pins | NOT STARTED |
-| Fix — VX-732 (the live feed + the panel's seat) | NOT STARTED |
-| Fix — VX-733 (the collapse rule, in-showing + across a mode switch) | NOT STARTED |
-| Behavioural revert + build-for-testing (`DerivedData/vx770-b3-post`, `vx770-b3-rev`) | NOT STARTED |
+| Trace, both members (code read; written below before any code) | DONE (c9c1163df) |
+| Pins (`VariorumTests/TakesPostUndoStalenessTests.swift` — pre-existing API only) | DONE (86d3652ec) |
+| Fix — VX-732 (the live feed + the panel's seat) | DONE (ca980e24b) |
+| Fix — VX-733 (the collapse rule, in-showing + across a mode switch) + the pure-rule pin | DONE (e7f9cefc2) |
+| `DerivedData/vx770-b3-post` build-for-testing at e7f9cefc2 | DONE — TEST BUILD SUCCEEDED (log `App/Variorum/DerivedData/logs/vx770-b3-post-build.log`; no new warning in a touched file) |
+| **Behavioural revert — ANNOUNCED HERE BEFORE IT STARTS:** the six behaviour files (`TakesShared.swift`, `TakesBoardView.swift`, `CommentGutterFace.swift`, `TakesViewModel.swift`, `TakesBoardLayout.swift`, `EditorRouter.swift`) restored to the pins commit 86d3652ec (= the pre-fix behaviour) by `git checkout 86d3652ec --`; the two new files (`TakesCommentFeed.swift`, `TakesOpenFanRule.swift`) stay, unreferenced except by the pure-rule pin; the tests stay at HEAD. Copies + sha256 first in `App/Variorum/DerivedData/vx770-b3-prerevert/` (gitignored); built into `DerivedData/vx770-b3-rev`; then `git checkout HEAD --` and verified by `git diff` + `shasum -c` | IN FLIGHT (announced at this commit) |
 | READY-FOR-SUITES, prediction table, P-8, walk rows, residue, self-assessment | NOT STARTED |
-| Push | after every commit (GitHub mid-incident: one attempt each; refusals noted here) |
+| Push | REFUSED at every commit so far (c9c1163df, 86d3652ec, ca980e24b, e7f9cefc2): `Permission denied (publickey)` — this shell has no ssh agent (batch 2's finding); unpushed: GitHub incident/auth; git config untouched; one attempt per commit, never thrashed — the orchestrator sweeps |
 
 ### THE TRACE (written before any code) — two mechanisms, one class, NOT one mechanism
 
