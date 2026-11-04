@@ -581,9 +581,12 @@ public struct SyncEngine: Sendable {
         var reportsProgress = false
         var askedForTotal = false
         var remaining: Int?
-        if case .resume = plan {
+        // Ladder round 1, F3: the COUNT(*) feeds only `downloaded`, which only
+        // the publishes read — a nil-progress caller (a deliberate-act engine,
+        // a `pullToHead` caller) pays nothing here.
+        if case .resume = plan, progress != nil {
             downloaded = try await database.read { try PullStage.stagedRowCount($0) }
-            reportsProgress = progress != nil
+            reportsProgress = true
         }
         // VX-497 (U1b): the profile seam's lap marks — a nil hook reads no clock (`ApplyProfile.swift`).
         var marks = ApplyProfileMarks(applyProfile)
