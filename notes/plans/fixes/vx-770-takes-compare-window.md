@@ -2626,8 +2626,8 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 | W13 B3-P1 archive road | PASS (Study) |
 | W14 the seat — Takes AND Compare (F1) | PASS — Takes (card press, Study; bar door, Terminal) and Compare (card press, Study) |
 | W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PASS (Study, top + mid: zero board pixels change); Terminal PENDING |
-| W16 VX-740 make outline note ×3 → one column each | PENDING |
-| W17 VX-739 the word count after two take flips | PENDING |
+| W16 VX-740 make outline note ×3 → one column each | PASS (Study) — 3 of 3 one column; one outline per note in the palette |
+| W17 VX-739 the word count after two take flips | PASS — both voices: 11w → 8w → **11w** → **8w** |
 
 **Settings as found (read through Accessibility, 07:47 — no capture of Settings: `words-guard` withholds every
 Settings capture on 27.0.1, AXError -25200, the README's VX-658 class):** Theme **Study** · Appearance **Dark** ·
@@ -2813,3 +2813,24 @@ window (`scratchpad/walk/boarddiff.py`, |Δ| > 40 of 255): any pixel the toggle 
   shows its own order (C4 above C3), the "moved" line goes and the anchor's rows close up by its height; ON → back.
   Each change lands in ONE frame (≈80 ms after the chip) and the next frame is identical — the layout changes as it
   should, in one step, nothing re-grows.
+
+### W16 — VX-740, make outline note (Study)
+Three fresh notes with no versions (`vx770 outline one/two/three`, imported); each: ⌘5 → the offer band (`compare with a
+note` · `make outline note`; the right slot "choose a note") → ONE press on the offer band's "make outline note", the
+window recorded (`.walkshots-vx770/w16-one/`, `w16-two/`, `w16-three/`). **Every time exactly ONE "outline of vx770
+outline …" column** opened, as "versions", beside the note (`w16-one-0-small.png` → `w16-one-after-small.png`;
+`w16-two-three.png`); the burst shows the board change in one or two consecutive frames (≈80 ms apart) and nothing
+after — no second column ever appeared. The palette's search "outline of vx770" lists exactly three, one per note
+(`w16-palette-outlines-crop.png`). (The header-door variant beside an already-open twin was not walked: the run's
+one twin pair carries the W15 reorder; the pin `anOutlineMintedBesideAnOpenNoteStillOpensItsOwnColumn` is its
+evidence.)
+
+### W17 — VX-739, the word count after two take flips (her J3 shape) — PASS, both voices
+`vx770 words walk` (Study) and `vx770 words walk terminal` (Terminal, a fresh import of the same three blocks): Write,
+the caret into block 1 → the bottom bar **"3w block · 11w in note"**; the bottom bar's Takes → the panel; **＋ blank &
+choose** → **"0w block · 8w in note"**; **✓ the original** → **"3w block · 11w in note"** (pre-fix 12w); Close →
+still 11w; reopen; **✓ the blank** → **"0w block · 8w in note"** (pre-fix 9w). Study: `w17s-1-bar.png`,
+`w17s-2-panel-small.png`, `w17s-3-blank-small.png`, `w17s-4-original-small.png`, `w17s-bars.png`,
+`w17s-7-blank-chosen-small.png`; Terminal: `w17t-2-panel-small.png`, `w17t-3-blank-small.png`,
+`w17t-4-original-small.png`, `w17t-6-reopen-small.png`, `w17t-bars.png`. The count stayed true at every step in
+both voices.
