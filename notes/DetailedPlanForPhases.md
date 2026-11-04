@@ -12,24 +12,28 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| **VX-770 — Run: takes & compare after 1.0** (flagship VX-756 — the takes-open mode-switch jumping, trace first, the stay-open behavior itself stays at her word; members VX-757 · VX-740 · VX-730 · VX-731 · VX-732 · VX-733 · VX-728 (ruled YES: Compare shows comments) · VX-758 + riders VX-739 · VX-638 · VX-652 · VX-634) — architect shape, Fable orchestrates, `fable-reviewer` (the editor seam rides); the record `notes/plans/fixes/vx-770-takes-compare-window.md` | VX-770 · `vx-770-takes-compare-window` | `~/dev/variorum-vx-770` · the Pro | IN PROGRESS since 2026-11-04 — overnight away run; no Sync/, no custody, no schema; stage via nov3coordinator; NO release; the PR may merge |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-771 CLOSED 2026-11-04 — RUN: MCP AGENT ERGONOMICS (the record `notes/plans/fixes/vx-771-mcp-agent-ergonomics.md`,
-FOR A LATER READER at its top; the handoff `notes/handoffs/vx-771-handoff.md`).** The planetlillian agent's field
-reports built in one overnight away run under her "rule provisionally": the duplicate-day flagship (P-771-1, the
-shared body + Copy to Wing), duplicate_note's brief form + fan_sha256, copy_note_to_wing, edit_take's honest
-mismatch + the old_str/new_str replace form, the 19-row error sweep (store failures worded), remove_tag's
-still_in_books (the eviction dial DECLINED, R-771-A), create_gathering (R-771-B), B2's close-reason road (the shim's
-stderr + the 0x1E line, A-771-3), VX-763's kind-reverted listing fix (her sighting = the fixed VX-393 class, third
-filing), VX-400's stop-ends-grants, VX-774's null-only guard; VX-767/768 verified already shipped. Four Opus
-batches; one Fable ladder round — no BLOCKER, no MAJOR, closed at round 1. The walk: the dev library found STANDARD,
-so the stop road verified live end to end and the lock road rides her Air check (the handoff); the Mac close
-"287 tests in 42 suites passed", 42/42 executed; core 3,637/489 green on the merged tree. Canon: MCPSpec's ten lines
-+ AppSpec §9's duplicate-day line; PROVISIONALs #257. Born VX-774–778. Nothing mobile-visible beyond the shared-op
-heal (the duplicate-day rule). NO release (her word). Next: hers — the morning bundle is the handoff's checklist.
+**→ VX-770 CLOSED 2026-11-04 — RUN: TAKES & COMPARE AFTER 1.0 (the record `notes/plans/fixes/vx-770-takes-compare-window.md`,
+FOR A LATER READER at its top; the handoff `notes/handoffs/vx-770-handoff.md`).** Her kickoff's post-1.0 Takes/Compare
+window: thirteen members under one overnight /architect-phase run. The flagship VX-756 (the takes-open mode-switch
+jumping, born with VX-428's stay-open memory) traced to the entry landing's single aim against the seeded fans'
+bimodal height estimate, fixed on the existing road (one re-aim per height change), then DEEPENED by the walk's W2
+finding: margin grid's one-turn-late card heights escape the content-change gate — the bounded red-first cycle
+closed the harness gap (red two independent ways) and the one-Bool fix settles every style in one landing (the
+re-walk 6/6, zero hops; the stay-open behavior kept, R-770-1). The comments family landed to her R-770-2: the boards
+and Compare draw through Write's ONE gutter ladder and face (the carousel's "nothing" resolved to the empty Study
+chip), the feed live (VX-732), the collapse closing fans honestly (VX-733), Compare's width-only lane P-770-3;
+VX-740's double outline deduped (P-770-1); VX-757's flicker was real (row re-keying remade every pane) and died by
+spine keying; the singles: the date sort orders every note (AppSpec §10's new line), the word count's caret-context
+guard, the pager forgets closed pages, "Delete Take". Five Opus batches + a reconciliation + the W2 cycle; the
+ladder closed at round 2 and re-opened scoped for W2 (round 3: no new findings); every bug member red-on-old in
+REAL windows; the merge gate on the merged tree: Mac 5,846/1,019 + phone 18/18 types on COMMITTED pins (the night's
+pin gap closed), the lf-rev red leg 2/2. VX-652 re-owned with its B5-F1 design (not built — her option call).
+Canon: three SurfaceContracts lines + AppSpec §10, in place. Born: VX-781–794 (the pin-upgrade ticket VX-781 High).
+NO release (her word); the /Applications refresh HELD for her (VX-779). PR #217, the merge commit on main.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 

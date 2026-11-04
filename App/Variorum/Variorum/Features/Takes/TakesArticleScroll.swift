@@ -198,6 +198,34 @@ final class TakesArticleScroll {
     /// interval later, so the landing reads as one motion.
     @ObservationIgnored private var bandedSecondAim: ArticleRevealAim?
 
+    // MARK: - VX-756 — the entry landing re-aims where the COLUMN re-estimated
+
+    /// **VX-756 — the column's content height the pending landing last JUDGED
+    /// at** (aimed at, or handed to the watch at). A report that arrives at a
+    /// DIFFERENT content height says the lazy column re-estimated under the
+    /// landing since — the one event that earns a re-aim inside the storm
+    /// (`reaimWhereTheColumnReEstimated`). Reset per landing.
+    @ObservationIgnored private var landingJudgedContent: CGFloat?
+    /// VX-756: how many in-storm re-aims this landing may still spend — the
+    /// RESTORE's own pocket (`articleRestoreAttempts`), for the restore's own
+    /// reason: the restore converges by exactly this cadence on this column.
+    @ObservationIgnored private var landingStormAimsLeft = articleRestoreAttempts
+    /// VX-756: the content height at which the landing's TARGET row last
+    /// reported a moved frame. The geometry hook runs BEFORE the rows report
+    /// (the 17q ladder's R1-1), so a frame reported at the column's current
+    /// content height is this pass's evidence; an older one is the previous
+    /// pass's, and a realized row is never re-aimed on it.
+    @ObservationIgnored private var landingTargetFrameContent: CGFloat?
+    /// **VX-770 W2 — the report in hand is the landing's TARGET's own, of a
+    /// frame that just moved** (set by `noteArticleRowFrame`, read and cleared
+    /// by the very next `articleLandingReport` — the view runs the two
+    /// back-to-back for one row). That frame IS this pass's, whatever the
+    /// column has reported yet: a growth SwiftUI lays out itself (margin grid's
+    /// deferred card heights) reports the ROW first and the column's content
+    /// height after — or, coalesced, not at all — so the content stamp above
+    /// cannot vouch for it (the run record's THE W2 CYCLE).
+    @ObservationIgnored private var landingTargetJustMoved = false
+
     /// **Which edge a reveal reaches for.** A banded row that FITS the band
     /// goes by the band: its top above the band's top edge (in the top air, or
     /// above the viewport) → the head; otherwise → the foot. (R-Q1's own rule,
@@ -317,6 +345,11 @@ final class TakesArticleScroll {
         articleLandingAims = 0
         articleEntryRidesThrough = false
         bandedSecondAim = nil
+        // VX-756: the in-storm re-aim's bookkeeping is per landing.
+        landingJudgedContent = nil
+        landingStormAimsLeft = Self.articleRestoreAttempts
+        landingTargetFrameContent = nil
+        landingTargetJustMoved = false
         // 18l-c U8: a new landing ends any arrival flash still on screen.
         if articleArrival != nil { articleArrival = nil }
         // **R-Q20 — THE LANDING WINS** (her 2026-09-13 ruling on J3), keyed
@@ -757,6 +790,9 @@ final class TakesArticleScroll {
         }
         articleLandingAimsLeft -= 1
         articleLandingAims += 1
+        // VX-756: this aim judged the column as it stands now; a later report
+        // at another content height is the column re-estimating under it.
+        landingJudgedContent = lastArticleGeometry?.content
         // The 17q ladder's round 3 (R3-1): a landing's own scroll ends the
         // restore's hold — the bloom door rides through the restore and
         // reveals afterwards (R1-2), and a hold that re-aimed after the
@@ -793,12 +829,21 @@ final class TakesArticleScroll {
     /// whole 64-aim bound in ~70 ms inside the FIRST layout storm — 58 of
     /// them before the proxy's first scroll had even moved the page — and the
     /// block never drew. The re-aim now comes from quiet
-    /// (`articleLandingCorrections`), through the same step.
+    /// (`articleLandingCorrections`), through the same step. **Two in-storm
+    /// exceptions, each one aim per EVENT, never per report:** the band's
+    /// second aim (18l-c U8 — the row reported at the shipped edge), and
+    /// VX-756's re-aim for an entry landing with no restore beside it (the
+    /// column's height changed, or — VX-770 W2 — her row's own frame moved,
+    /// and the row is off home — `reaimWhereTheColumnReEstimated`).
     ///
     /// `order` is an autoclosure for P1's reason on `articleLandingStep`:
     /// with nothing pending, or with the watch holding the landing, the
     /// note's slot order is never built.
     func articleLandingReport(order: @autoclosure () -> [String]) -> ArticleLandingStep {
+        // VX-770 W2: whether THIS report is the target's own moved frame —
+        // consumed here, so it never outlives the one report it describes.
+        let targetJustMoved = landingTargetJustMoved
+        landingTargetJustMoved = false
         guard let landing = articleLanding, watch.anchor == landing else {
             restoreLooksAgainForAWaitingLanding(order: order())
             return articleLandingStep(order: order())
@@ -816,6 +861,7 @@ final class TakesArticleScroll {
                 if landingDecision(frame) != .none, articleLandingAimsLeft > 0 {
                     articleLandingAimsLeft -= 1
                     articleLandingAims += 1
+                    landingJudgedContent = lastArticleGeometry?.content   // VX-756
                     endArticleHold()
                     return .reveal(landing, landingEdge(landing, frame: frame, order: order()))
                 }
@@ -825,8 +871,107 @@ final class TakesArticleScroll {
             watchedContent = content
             watch.contentChanged(content)
         }
+        // VX-756: the column re-estimated under an entry landing that starts
+        // from the mount's top — re-aim now, inside the storm, not a quiet
+        // interval later (`reaimWhereTheColumnReEstimated`).
+        if let step = reaimWhereTheColumnReEstimated(
+            landing, targetJustMoved: targetJustMoved, order: order()) { return step }
         reportWatchedLanding(landing)
         return .wait
+    }
+
+    /// **VX-756 — her report: *"somewhat severe jumping around when takes are
+    /// open and you switch into write, then navigate to a block with takes,
+    /// then go back to takes."*** (the run record
+    /// `notes/plans/fixes/vx-770-takes-compare-window.md`, BATCH 1 — the
+    /// traced mechanism and the measured stories.)
+    ///
+    /// **The road.** Her block CHANGED while she was away, so R-Q20 settles the
+    /// restore and the page starts where a mount starts — the top — and the
+    /// ENTRY landing alone carries it to her block, on the ONE aim its first
+    /// decided step issues at the column's FIRST row report. A lazy column
+    /// places an unrealized row by ESTIMATING the rows above it from the rows
+    /// it has realized, and VX-428's seeded open fans (R-601-2 — they STAY,
+    /// R-770-1) make those rows bimodal: a closed block is a paragraph, an open
+    /// one the paragraph and its fan's cards. So the estimate under that aim
+    /// swings as the realized window crosses open and closed rows (measured on
+    /// VX-428's own landing pin: the column's height 5190 → 2121 → 5190 inside
+    /// one landing), the row comes to rest off home — and, every report being
+    /// only a report once the watch has the landing (U2's rule below), only
+    /// the watch could correct it: from QUIET, ≥ 0.25 s later. The page hopped
+    /// (one hop at ~0.55–0.6 s in stack and margin grid on that pin; up to the
+    /// policy's three).
+    ///
+    /// **The rule — the RESTORE's cadence, given to the landing that has no
+    /// restore beside it.** Each change of the column's content height — the
+    /// lazy column re-estimating — earns AT MOST ONE re-aim, spent on the
+    /// first report after that change that finds the row off home: blind for
+    /// a row the column has not realized (the restore aims blind the same
+    /// way), and for a realized row only on a frame it reported AFTER that
+    /// change (an older frame is the previous pass's — the 17q ladder's R1-1).
+    /// The aim is the ONE step's (`articleLandingStep` — the edge, the band,
+    /// the 64-aim fence), so nothing here is a second landing mechanism; the
+    /// pocket is the restore's own (`articleRestoreAttempts`); the watch stays
+    /// the landing's one lifetime and its backstop. This is U8's own principle
+    /// for the band's second aim — *"the same layout storm, not a quiet
+    /// interval later, so the landing reads as one motion"* — generalised from
+    /// one aim at the edge report to the row the storm re-based, re-aimed at
+    /// the event. U2's measured failure (one aim per ROW report: 64 aims in
+    /// ~70 ms, the block never drawn) cannot recur: at most one aim per change
+    /// of the column's height.
+    ///
+    /// **…and the row's OWN moved frame is an event too (VX-770 W2 — the walk's
+    /// margin-grid hop, 3 of 3 on the merged head; the run record's THE W2
+    /// CYCLE).** The "after that change" test above leans on R1-1's order — the
+    /// column's report first, the rows after — which R1-1 measured for a
+    /// SCROLL. A growth SwiftUI lays out by itself (margin grid's cards, sized a
+    /// deferred turn after their panes measure) reports the other way round:
+    /// her row's grown or pushed-down frame first, while this brain still holds
+    /// the old content height (so no change is seen), then the column's new
+    /// height (by when the row's frame reads as the previous pass's) — or,
+    /// coalesced, no column report at all. Neither report aimed, and the watch
+    /// hopped the row a quiet interval later. So her row's own report of a
+    /// frame that MOVED (`targetJustMoved`) is judged on that frame — it is
+    /// this pass's by construction — with the same one-aim-per-event bound:
+    /// the target moves only when the column re-lays it out, and every aim
+    /// still comes out of the same pocket.
+    ///
+    /// **Which landings.** The ENTRY kind only (every other kind keeps R-Q1's
+    /// shipped reveal), and only one that starts from the mount's top — it
+    /// OUTRANKED the memory, or there was none. Never the RIDE-THROUGH entry
+    /// (R-18l-13, a plain round trip): the restore owns that page and holds it
+    /// by this same cadence, and that landing decides from quiet by design.
+    ///
+    /// Cost (P1): O(1) per report — a comparison and a dictionary read; the
+    /// slot order is built only when a re-aim is decided, at most once per
+    /// change of the column's height or move of her row, and at most the
+    /// pocket's 24 per landing.
+    private func reaimWhereTheColumnReEstimated(
+        _ landing: String, targetJustMoved: Bool, order: @autoclosure () -> [String]
+    ) -> ArticleLandingStep? {
+        guard landingIsBanded, !articleEntryRidesThrough, landingStormAimsLeft > 0,
+              let content = lastArticleGeometry?.content,
+              content != landingJudgedContent || targetJustMoved
+        else { return nil }
+        if let frame = articleRowFrames[landing] {
+            // A realized row is judged on THIS pass's frame only: its own
+            // report (W2), or a frame it reported at this content height.
+            guard targetJustMoved || landingTargetFrameContent == content else { return nil }
+            // Home: nothing to do — and the change stays unjudged, so a later
+            // fresh frame that finds the row re-based off home is still heard.
+            if landingDecision(frame) == .none { return nil }
+        }
+        landingJudgedContent = content
+        let step = articleLandingStep(order: order())
+        switch step {
+        case .reveal:
+            landingStormAimsLeft -= 1
+            return step
+        case .done:
+            return step
+        case .wait:
+            return nil
+        }
     }
 
     /// **A restore a landing is WAITING on looks again when the rows report**
@@ -923,6 +1068,8 @@ final class TakesArticleScroll {
     /// order), never per report.
     private func beginWatch(_ landing: String, order: [String]) {
         watchedContent = lastArticleGeometry?.content
+        // VX-756: the first decided step judges the column as it stands now.
+        landingJudgedContent = lastArticleGeometry?.content
         watch.watch(landing, facts: watchFacts(landing, order: order)) { [weak self] _ in
             self?.articleLandingCorrections += 1
         }
@@ -1013,6 +1160,13 @@ final class TakesArticleScroll {
             return false
         }
         articleRowFrames[placementID] = frame
+        // VX-756: the pending landing's row reported on THIS pass (the geometry
+        // hook has already told this brain the pass's content height).
+        if placementID == articleLanding {
+            landingTargetFrameContent = lastArticleGeometry?.content
+            // VX-770 W2: …and the report that follows is the target's own.
+            landingTargetJustMoved = true
+        }
         return true
     }
 

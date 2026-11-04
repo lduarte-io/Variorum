@@ -276,7 +276,13 @@ struct TakesBoardView: View {
         }
         .reportsMenuLifeEnds { model.lensFilter.closeMenu() }
         .debugProbeScope(session)
+        // VX-770 batch 2 (reconciliation): this board's comment faces are
+        // THIS board's in the DEBUG face oracle (`BoardCommentFaceOracle`).
+        .boardCommentFaceMount(model)
         .task { await model.start() }
+        // VX-732: the article's comments, live for this board's lifetime — the
+        // one board that draws them starts the one per-note read.
+        .task { await model.observeComments() }
         // 13b Stage 3 (3D — N1): the archived listing is its own read
         // (the fans query stays active-only), refreshed at projection
         // cadence — the WriteTakesPanel precedent.
@@ -743,7 +749,12 @@ struct TakesBoardView: View {
         // margin clamps into the room the centering ACTUALLY leaves,
         // instead of hanging a fixed 166pt into space the sidebar owns.
         GeometryReader { proxy in
-            let commentRoom = max((proxy.size.width - articleMeasure) / 2, 0)
+            // VX-770 batch 2: the article column's REAL leading edge — the
+            // centring leftover, or the composition's own 24-pt padding when
+            // the board is narrower than the measure (the old `(w − measure)/2`
+            // understated it there, and the comment face is placed from it).
+            let commentRoom = Self.articleColumnLeading(
+                boardWidth: proxy.size.width, measure: articleMeasure)
             ScrollViewReader { column in
             ScrollView {
                 if model.projection.slots.isEmpty {
@@ -758,7 +769,7 @@ struct TakesBoardView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 60)
                 }
-                LazyVStack(alignment: .leading, spacing: 6) {
+                LazyVStack(alignment: .leading, spacing: Self.articleRowSpacing) {
                     // VX-170 (R-VX170-2): a filter that names no block SAYS so,
                     // in place, in one muted line — never an empty room, and the
                     // note's map (the collapsed rows below) stays whole.
@@ -844,7 +855,7 @@ struct TakesBoardView: View {
                 }
                 .frame(maxWidth: articleMeasure, alignment: .leading)
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, Self.articleSidePadding)
                 // 18l-c U8: the article's resting top air is ONE named constant
                 // (KnownIssues row 94's sketch) — the comfort band's top edge
                 // reads the same number this padding draws.
@@ -1029,6 +1040,64 @@ struct TakesBoardView: View {
         articleCellPadding + PaneTextView.takeSurfaceInset
     }
 
+    /// The article composition's side padding (`singleColumnArticle`).
+    nonisolated static let articleSidePadding: CGFloat = 24
+
+    /// **Where the article column starts, from the board's left edge** — the
+    /// column is `measure` wide, centred in the board less its side padding;
+    /// on a board narrower than that the column fills it from the padding.
+    /// Pure; the comment face's gutter is this number (the narrow-board pin,
+    /// `TakesCommentGutterTests.aOneCommentBlockStillSaysSoInStudyAtANarrowMargin`,
+    /// places a badge from it).
+    nonisolated static func articleColumnLeading(
+        boardWidth: CGFloat, measure: CGFloat
+    ) -> CGFloat {
+        articleSidePadding + max(0, (boardWidth - 2 * articleSidePadding - measure) / 2)
+    }
+
+    /// The article's spacing between rows (VX-770 batch 2 names it: a row's
+    /// comment card is bounded by it — `BlockDecor.roomBelowInOwnRow`).
+    nonisolated static let articleRowSpacing: CGFloat = 6
+
+    /// **Where an article row's first line starts, below the row's top** —
+    /// the cell's padding plus the pane's container inset (VX-770 batch 2:
+    /// the comment face's top, and its text-height arithmetic).
+    @MainActor
+    static var articleTextTopInset: CGFloat {
+        articleCellPadding + PaneTextView.proseTopInset
+    }
+
+    /// **THE ROW'S GUTTER (VX-770 batch 2, T3)** — Write's ladder's inputs for
+    /// this row's comment face, in the board's coordinates: the whitespace the
+    /// centring leaves (`commentRoom`) up to the prose's container edge, with
+    /// a callout frame's pad (the frame insets the row's content) and its
+    /// emoji (the face stacks UNDER it, R-13u3-3) accounted for. Geometry
+    /// only: nothing here reads whether the block has comments, so the row's
+    /// layout cannot depend on them.
+    private func commentGutter(
+        slot: Queries.RenderedBlock, commentRoom: CGFloat
+    ) -> TakesCommentGutter {
+        let frame = model.calloutFrame(slot.blockID)
+        let pad = frame == nil ? 0 : TakesCalloutFrame.pad
+        let rowLeading = commentRoom + pad
+        let inset = Self.articleTextTopInset
+        var top = inset
+        if let emoji = frame?.emoji, !emoji.isEmpty {
+            // The frame's emoji, in the row content's coordinates: the frame's
+            // top-leading corner sits `pad` up and left of the content.
+            top = BlockDecor.commentFaceTop(
+                blockTop: inset,
+                glyph: CGRect(
+                    x: -pad + TakesCalloutFrame.emojiOffset.width,
+                    y: -pad + TakesCalloutFrame.emojiOffset.height,
+                    width: BlockDecor.calloutGlyphBox.width,
+                    height: BlockDecor.calloutGlyphBox.height))
+        }
+        return TakesCommentGutter(
+            textLeft: rowLeading + Self.articleTextLeadingInset, rowLeading: rowLeading,
+            top: top, textInset: inset, rowSpacing: Self.articleRowSpacing)
+    }
+
     /// The composition-measure brain (13b 3F — the D2/AD-6 pin's target):
     /// at rest the article is the 680 prose column in EVERY style; only a
     /// rail that is actually engaged (an open fan in margin grid) widens
@@ -1054,7 +1123,7 @@ struct TakesBoardView: View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 if !splitBloomed {
-                    washedCell(slot: slot, washed: bloomed, commentRoom: commentRoom)
+                    washedCell(slot: slot, washed: bloomed)
                 }
                 if splitBloomed {
                     closeFanLine(slot: slot)
@@ -1074,6 +1143,18 @@ struct TakesBoardView: View {
                 }
             }
             .frame(maxWidth: 680, alignment: .topLeading)
+            // VX-770 batch 2 (T3/T4 — VX-730, VX-731): the block's comments in
+            // the LEFT gutter, through Write's machinery (`CommentMarginNote`).
+            // On the ROW, not the cell: a slot-split bloom replaces the cell,
+            // and the block keeps its comments in every style and state. An
+            // overlay, so the row — and the prose's measure and left edge — is
+            // laid out the same with and without them.
+            .overlay(alignment: .topLeading) {
+                CommentMarginNote(
+                    session: session, blockID: slot.blockID, tokens: tokens,
+                    gutter: commentGutter(slot: slot, commentRoom: commentRoom),
+                    feed: model.commentFeed)
+            }
             if style == .marginGrid, bloomed {
                 // VX-136: this block's OWN column count (her choice, else
                 // the ruled default for its fan).
@@ -1150,14 +1231,9 @@ struct TakesBoardView: View {
     }
 
     private func washedCell(
-        slot: Queries.RenderedBlock, washed: Bool, commentRoom: CGFloat
+        slot: Queries.RenderedBlock, washed: Bool
     ) -> some View {
         let bloomed = model.isBloomed(slot)
-        // N8/AD-8: the comment note clamps into the real gutter — the full
-        // card where ≥90pt of margin exists, the compact // chip below
-        // that; never laid out in space the sidebar owns.
-        let compactNote = commentRoom < 90
-        let noteWidth = min(150, max(commentRoom - 16, 24))
         let picked = model.isSelectedForMerge(slot.blockID)
         let resolved = model.resolvedTake(column: mainColumn, slot: slot)
         return TakesCellView(
@@ -1217,15 +1293,9 @@ struct TakesBoardView: View {
             }
             // Batch 14 (her "even when there is a comment, i can't really
             // see the comment anywhere (I suppose it oculd go on the left
-            // in the blank area)"): the block's comments in the LEFT
-            // margin — the round-2 margin-comment idiom, takes-side.
-            .overlay(alignment: .topLeading) {
-                CommentMarginNote(
-                    session: session, blockID: slot.blockID, tokens: tokens,
-                    compact: compactNote)
-                    .frame(width: noteWidth, alignment: .topLeading)
-                    .offset(x: -(noteWidth + (compactNote ? 4 : 16)))
-            }
+            // in the blank area)"): the block's comments in the LEFT margin —
+            // drawn by the ROW since VX-770 batch 2 (`articleRow`), so a cell
+            // a slot-split bloom replaces no longer takes them with it.
             // The fan door rides the cell's corner (never its own row) —
             // in an engaged grid bloom the rail's own header carries the
             // close instead (the badge would collide with the rail).

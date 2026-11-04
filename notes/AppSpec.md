@@ -528,7 +528,7 @@ One snapping rule serves every cut: plain divide, the ceremony's per-take cuts, 
 
 ## 10. The "80%-edited" sort
 
-Two stamps per post: `last_touched_at` (every keystroke) and `last_major_revision_at` (meaningful edits). The editor reports a character delta per edit; `churn_accumulator` (inserts and deletes, equal weight) accrues against `baseline_length`. When `churn / max(baseline, 1) ≥ threshold` (the `major_revision_threshold` setting, default 0.8), the operation stamps the major revision, resets the accumulator and rebaselines. A manual commit also stamps. A reading's `sort_field` picks the stamp; journals sort by `entry_date`. Churn math is a pure Domain function. The Library's day filter answers "notes edited on this day" as the union of the last-edit stamp and any savepoint written that day.
+Two stamps per post: `last_touched_at` (every keystroke) and `last_major_revision_at` (meaningful edits). The editor reports a character delta per edit; `churn_accumulator` (inserts and deletes, equal weight) accrues against `baseline_length`. When `churn / max(baseline, 1) ≥ threshold` (the `major_revision_threshold` setting, default 0.8), the operation stamps the major revision, resets the accumulator and rebaselines. A manual commit also stamps. A reading's `sort_field` picks the stamp; journals sort by `entry_date`. The date sort orders EVERY note: a note with no entry date takes the day it was written — the Library's own date rule, so a book and the Library order the same notes the same way (VX-758). Churn math is a pure Domain function. The Library's day filter answers "notes edited on this day" as the union of the last-edit stamp and any savepoint written that day.
 
 ## 11. Sync architecture
 

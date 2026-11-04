@@ -787,78 +787,76 @@ struct LineageStripe: View {
 }
 
 /// Batch 14 — the takes article's LEFT-MARGIN comment note (her placement
-/// suggestion; the round-2 margin-comment idiom, takes-side): the block's
-/// first comment, glyph-prefixed, click for the full panel. Fetched per
-/// visible row (LazyVStack — cost ∝ viewport).
+/// suggestion; the round-2 margin-comment idiom, takes-side), click for the
+/// full panel.
+///
+/// **VX-770 batch 2 (T3/T4 — VX-730, VX-731): the note draws through WRITE'S
+/// machinery now** (P-3). It used to be a face of its own — the first comment
+/// only, capped at four lines, "+N more" for the rest (VX-730's "cut short"),
+/// and a compact chip that printed the voice's comment mark (Study's is "",
+/// so a one-comment block's chip printed nothing). Each comment is now its own
+/// whole entry in Write's card, placed by Write's ladder (card / badge / yields
+/// — `BlockDecor.commentFace`) in the gutter the board hands it, drawn by
+/// Write's face (`CommentGutterFace`). It rides the ROW, not the cell, so a
+/// slot-split bloom — which replaces the cell — keeps its gutter (VX-731).
+///
+/// **VX-732 (VX-770 batch 3): the FEED is live.** It used to be one read per
+/// realized row (`.task(id: blockID)`), re-read only after its own panel closed
+/// — a copy keyed on the block id alone, so the comments an undo, the AI or
+/// another window took stayed drawn until the board remounted (her recording:
+/// until the mode switch). The note now draws its block's entries from the
+/// board's one live per-note feed (`TakesCommentFeed`, Write's own query), read
+/// HERE, in its own body, so a comment change re-renders the realized notes
+/// and nothing else. The door is unchanged: her comments panel, its editing and
+/// its unsubmitted-comment park rule are the panel's (and the face keeps its
+/// seat under the open panel — `CommentGutterFace`).
 struct CommentMarginNote: View {
     let session: AppSession
     let blockID: String
     let tokens: VoiceTokens
-    /// 13b 3F (N8/AD-8): under ~90pt of real gutter the full card cannot
-    /// fit — the note degrades to the // chip (count included) instead of
-    /// laying out in space the sidebar owns. Same philosophy as Write's
-    /// `gutterFitsCards` degrade.
-    var compact = false
-    @State private var comments: [BlockComment] = []
-    @State private var panelShown = false
+    /// Where this row's gutter is — the board's answer.
+    let gutter: TakesCommentGutter
+    /// The board's live comment feed (VX-732).
+    let feed: TakesCommentFeed
 
     var body: some View {
-        if let first = comments.first {
-            Button {
-                panelShown = true
-            } label: {
-                VStack(alignment: .leading, spacing: 2) {
-                    if compact {
-                        Text(tokens.chromeLabel(
-                            comments.count > 1
-                                ? "\(tokens.commentPrefix)\(comments.count)"
-                                : tokens.commentPrefix))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.commentInk)
-                            .lineLimit(1)
-                    } else {
-                        Text(tokens.commentPrefix + first.text)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.commentInk)
-                            .lineLimit(4)
-                            .multilineTextAlignment(.leading)
-                        if comments.count > 1 {
-                            Text(tokens.chromeLabel("+\(comments.count - 1) more"))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.faint)
-                        }
-                    }
-                }
-                .padding(.leading, compact ? 0 : 8)
-                .overlay(alignment: .leading) {
-                    if !compact {
-                        Rectangle()
-                            .fill(tokens.commentInk.opacity(0.5))
-                            .frame(width: 2)
-                    }
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .help("This block's comments — click to read, add, or edit them")
-            .popover(isPresented: $panelShown) {
-                CommentsPanel(session: session, blockID: blockID)
-            }
-            .onChange(of: panelShown) { _, shown in
-                if !shown { Task { await refresh() } }
-            }
-            .task(id: blockID) { await refresh() }
-        } else {
-            Color.clear
-                .frame(width: 1, height: 1)
-                .task(id: blockID) { await refresh() }
+        let entries = feed.entries(for: blockID)
+        // The row's own size (an overlay is proposed its host's): the card
+        // grows to the row and never past it.
+        GeometryReader { proxy in
+            CommentGutterFace(
+                session: session, blockID: blockID,
+                entries: entries, tokens: tokens,
+                geometry: gutter.geometry(rowHeight: proxy.size.height))
         }
     }
+}
 
-    private func refresh() async {
-        comments = (try? await session.database.read { [blockID] db in
-            try Queries.blockComments(db, blockID: blockID)
-        }) ?? []
+/// **A Takes article row's gutter** (VX-770 batch 2, T3) — the ladder's inputs
+/// in the row's terms, decided by the board (which knows its own centring and
+/// the row's callout frame) and handed to the row's comment face.
+struct TakesCommentGutter: Equatable {
+    /// The article prose's container edge, measured from the board's left
+    /// edge — the gutter's whole width as Write's ladder reads it.
+    var textLeft: CGFloat
+    /// The row content's own leading edge, from the board's left edge.
+    var rowLeading: CGFloat
+    /// The face's top in the row's coordinates (the first line, or under the
+    /// callout emoji — R-13u3-3's stack).
+    var top: CGFloat
+    /// The row's text inset at its top and at its bottom (the cell's padding
+    /// plus the pane's container inset): the row's height less both is the
+    /// block's text height.
+    var textInset: CGFloat
+    /// The article's spacing between rows.
+    var rowSpacing: CGFloat
+
+    func geometry(rowHeight: CGFloat) -> CommentGutterFace.Geometry {
+        CommentGutterFace.Geometry(
+            textLeft: textLeft, hostLeading: rowLeading, top: top,
+            blockHeight: max(0, rowHeight - 2 * textInset),
+            roomBelow: BlockDecor.roomBelowInOwnRow(
+                rowHeight: rowHeight, top: top, rowSpacing: rowSpacing))
     }
 }
 

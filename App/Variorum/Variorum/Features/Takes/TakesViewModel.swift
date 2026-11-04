@@ -135,6 +135,11 @@ final class TakesViewModel {
     /// projection stay here — so nothing about observation or invalidation
     /// changes with the move. Lazy so the composition can reference `self`.
     @ObservationIgnored private(set) lazy var structure = TakesStructureController(model: self)
+    /// **VX-732 — the article's comments, live** (`TakesCommentFeed`): filled
+    /// by `observeComments`, which only THE takes board starts (Write's panel
+    /// and the Lenses board draw no comments). The feed is its own observable;
+    /// each row's face reads it.
+    @ObservationIgnored let commentFeed = TakesCommentFeed()
     /// Fanned blocks currently bloomed — the board's (forwarded).
     var expandedBlocks: Set<String> { board.expandedBlocks }
     /// The board's transient outcome line, **CLASSED** (the post-13l polish
@@ -393,6 +398,27 @@ final class TakesViewModel {
         }
     }
 
+    /// **VX-732 — the note's comments, one live read for the board's lifetime**
+    /// (THE takes board's `.task`, beside `start()`): `Queries.containerComments`,
+    /// Write's own feed (`EditorViewModel.observeComments`) — so a comment that
+    /// leaves the store by any road (⌥⌘Z of an AI's batch, another window, a
+    /// sync apply) leaves the gutter at the next value. Wakes on comment and
+    /// placement writes only; each value ∝ the note's own comments (P1).
+    func observeComments() async {
+        do {
+            for try await value in session.database.observe({ [postID] db in
+                try Queries.containerComments(db, containerID: postID).mapValues { comments in
+                    comments.map { BlockDecor.CommentBrief(id: $0.id, text: $0.text) }
+                }
+            }) {
+                commentFeed.adopt(value)
+            }
+        } catch is CancellationError {
+        } catch {
+            setRefusal("Comment observation failed: \(error)")
+        }
+    }
+
     // MARK: - Projection deliveries (13e E15 — the board joins the ONE policy)
 
     /// **A DELIVERY may never rewrite the board** (the KnownIssues row *"The
@@ -517,6 +543,10 @@ final class TakesViewModel {
         let parkedTakeBefore = parkedFollow.flatMap {
             stableCellTake(columnID: $0.columnID, blockID: $0.blockID, in: projection)
         }
+        // VX-733: which OPEN blocks held more than one take at the board's last
+        // sight — read while the outgoing projection is still in hand (a
+        // showing's first projection reads the session's, from the last one).
+        let heldBefore = openBlocksHoldingTakes(atFirstProjection: firstProjection)
         projection = new
         // THE CONVERGENCE HALF of the buffer-authoritative discipline
         // (review round 2, MAJOR): adoption only runs clean or at settle
@@ -555,6 +585,12 @@ final class TakesViewModel {
         if firstProjection, landingEnabled {
             board.pruneExpansion(to: Set(new.slots.map(\.blockID)))
         }
+        // VX-733: an open fan this projection COLLAPSED to its one take (an
+        // undo of the AI's takes, a take deleted here or in another window)
+        // closes, its wash with it — and the session learns what the open
+        // blocks hold now. A block that still holds takes, a first-take door,
+        // and a block that left are all untouched (`TakesOpenFanRule`).
+        closeFansThatCollapsed(heldBefore: heldBefore)
         // VX-170: the `show ▾` filter re-reads the fresh projection BEFORE the
         // landings below resolve against it (a landing onto a pane the filter
         // hides opens its block — the filter must already know the shapes).
@@ -2801,9 +2837,12 @@ final class TakesViewModel {
         else { return }
         board.seedExpansion(remembered)
         // A board told AFTER its first projection (a pin's order, never the
-        // app's) prunes against the projection it already holds.
+        // app's) prunes against the projection it already holds — and closes
+        // what collapsed while it was down (VX-733), exactly as `adopt` does.
         if loaded {
+            let heldBefore = rememberedOpenBlocksHoldingTakes()
             board.pruneExpansion(to: Set(projection.slots.map(\.blockID)))
+            closeFansThatCollapsed(heldBefore: heldBefore)
         }
     }
 
@@ -2813,6 +2852,57 @@ final class TakesViewModel {
             session.editorRouter.takesExpandedBlocks.removeValue(forKey: postID)
         } else if session.editorRouter.takesExpandedBlocks[postID] != blockIDs {
             session.editorRouter.takesExpandedBlocks[postID] = blockIDs
+        }
+        rememberOpenBlocksHoldingTakes(blockIDs)
+    }
+
+    // MARK: - VX-733 — an open fan that collapses closes
+
+    /// The open blocks that held more than one take at this board's LAST
+    /// SIGHT (`TakesOpenFanRule`): inside a showing, the outgoing projection;
+    /// at a showing's first projection, the session's record from the last
+    /// showing (THE takes board only — any other host starts with nothing
+    /// open). Nothing at all while nothing is open.
+    private func openBlocksHoldingTakes(atFirstProjection first: Bool) -> Set<String> {
+        guard !board.expandedBlocks.isEmpty else { return [] }
+        if first { return rememberedOpenBlocksHoldingTakes() }
+        return TakesOpenFanRule.holdingTakes(board.expandedBlocks, in: projection.slots)
+    }
+
+    private func rememberedOpenBlocksHoldingTakes() -> Set<String> {
+        guard landingEnabled else { return [] }
+        return (session.editorRouter.takesExpandedHeldTakes[postID] ?? [])
+            .intersection(board.expandedBlocks)
+    }
+
+    /// **The collapse, closed.** Of the blocks that held takes at the last
+    /// sight, those the current projection shows holding exactly one leave the
+    /// open set through the layout's one door for it (`closeCollapsedFans` —
+    /// reported, so the memory follows). Then the session learns what the open
+    /// blocks hold NOW, so a collapse while the board is down can be told from
+    /// a first-take door (`EditorRouter.takesExpandedHeldTakes`).
+    private func closeFansThatCollapsed(heldBefore: Set<String>) {
+        if !heldBefore.isEmpty {
+            board.closeCollapsedFans(TakesOpenFanRule.collapsed(
+                open: board.expandedBlocks, heldBefore: heldBefore, in: projection.slots))
+        }
+        rememberOpenBlocksHoldingTakes()
+    }
+
+    /// Writes the session's record of which open blocks hold more than one
+    /// take, judged against the projection in hand — THE takes board only, and
+    /// only once a projection has arrived (before it, the record is the last
+    /// showing's and the first projection still needs it). No empty set is
+    /// stored; a write that changes nothing writes nothing.
+    private func rememberOpenBlocksHoldingTakes(_ open: Set<String>? = nil) {
+        guard landingEnabled, loaded else { return }
+        let held = TakesOpenFanRule.holdingTakes(open ?? board.expandedBlocks, in: projection.slots)
+        if held.isEmpty {
+            if session.editorRouter.takesExpandedHeldTakes[postID] != nil {
+                session.editorRouter.takesExpandedHeldTakes.removeValue(forKey: postID)
+            }
+        } else if session.editorRouter.takesExpandedHeldTakes[postID] != held {
+            session.editorRouter.takesExpandedHeldTakes[postID] = held
         }
     }
 

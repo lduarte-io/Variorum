@@ -171,4 +171,15 @@ final class EditorRouter {
     /// construction, before the first article geometry report, and writes
     /// every change back (`TakesViewModel.openExpansionMemory`).
     @ObservationIgnored var takesExpandedBlocks: [String: Set<String>] = [:]
+
+    /// **Of each note's remembered open blocks, those that HELD more than one
+    /// take** (active or archived) at the last projection THE takes board
+    /// adopted (VX-733 — `TakesOpenFanRule`). A fan can collapse while the
+    /// board is down (⌥⌘Z pressed in Write, a take deleted in Write's take
+    /// panel, another device); the fresh board then sees an open block with one
+    /// take, and only this says whether that is a collapsed fan (it closes) or
+    /// a first-take door she opened (it stays). Written beside
+    /// `takesExpandedBlocks`, by the same board, under the same rules (no empty
+    /// set stored; session-only, never persisted, never synced).
+    @ObservationIgnored var takesExpandedHeldTakes: [String: Set<String>] = [:]
 }

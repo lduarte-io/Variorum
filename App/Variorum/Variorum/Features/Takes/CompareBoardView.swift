@@ -57,6 +57,12 @@ nonisolated struct CompareProjection: Equatable, Sendable {
         /// nameless journal entry; a note's name is its day, everywhere.
         var displayTitle = ""
         var sealed = false
+        /// **VX-728 (R-770-2, P-770-3): the note's live comments per block**,
+        /// panel order — `Queries.containerComments`, Write's own feed: one
+        /// indexed pass over this note's placements, so the read scales with
+        /// the SHOWN notes' own comments, never the corpus (P1/P-8); live with
+        /// the projection, so Compare never shows a comment the store dropped.
+        var comments: [String: [String]] = [:]
     }
 
     var anchor = PostFace()
@@ -92,20 +98,78 @@ nonisolated struct CompareProjection: Equatable, Sendable {
 /// A display row (the model derives these from `CompareComposition`'s
 /// segments; free segments flatten to index-paired rows so the LazyVStack
 /// virtualizes — P3: realized rows bound the cost, never post size).
-nonisolated enum CompareRow: Equatable, Identifiable {
+nonisolated enum CompareRow: Equatable {
     /// An unrelated stretch's row: each column's next block, side by side,
     /// own orders — absent cells render as clear space, never a "—" blank.
     case free(anchor: String?, peers: [String?], index: Int)
     /// A kin row — lineage speaks; cells align.
     case aligned(CompareComposition.AlignedRow)
 
-    var id: String {
+    /// **The COMPOSITION'S fingerprint — never the row's identity on screen**
+    /// (the VX-770 ladder, round 1 F4: the board keys rows by `spineID` alone,
+    /// so the type is no longer `Identifiable` — a `ForEach` over rows must
+    /// name `\.spineID`). Kind, running index and both sides, so it changes
+    /// whenever a header toggle re-arranges the composition: the VX-757 pins
+    /// read it to know a toggle moved the rows while their panes stayed put.
+    /// It was the row's `id`, and the board's key, before VX-757.
+    var compositionKey: String {
         switch self {
         case .free(let anchor, let peers, let index):
             return "free-\(index)-\(anchor ?? "·")-\(peers.map { $0 ?? "·" }.joined(separator: "|"))"
         case .aligned(let row):
             return "aligned-\(row.anchorBlockID)"
         }
+    }
+
+    /// **VX-757 — the row's identity ON SCREEN: its spine, never its kind.**
+    /// The anchor block it holds (`a:‹block›`), else the first peer block it
+    /// holds (`p‹column›:‹block›`). The header toggles move rows between the
+    /// two kinds ("follow this note's order") or change a free row's peer side
+    /// ("related blocks only"), and the row's old key — kind and running
+    /// index, the row's `id` then, `compositionKey` now — changed with them,
+    /// so the board tore down and re-made every such row, every
+    /// cell's pane included: each re-made pane re-measures from its seed, and
+    /// a board of them re-lays at once (the flicker). Unique by construction:
+    /// a block sits in one note (I2), each column shows a block once, and the
+    /// anchor is never a peer.
+    var spineID: String {
+        if let anchor = anchorBlockID { return "a:\(anchor)" }
+        if case .free(_, let peers, _) = self,
+           let column = peers.firstIndex(where: { $0 != nil }), let block = peers[column] {
+            return "p\(column):\(block)"
+        }
+        return compositionKey  // unreachable: a composed row always holds a block
+    }
+
+    /// The anchor block this row shows (an aligned row always holds one).
+    var anchorBlockID: String? {
+        switch self {
+        case .free(let anchor, _, _): return anchor
+        case .aligned(let row): return row.anchorBlockID
+        }
+    }
+
+    /// The blocks peer column `column` shows in this row, in order: a free
+    /// row's one block (or none), an aligned row's kin.
+    func peerBlocks(_ column: Int) -> [String] {
+        switch self {
+        case .free(_, let peers, _):
+            return column < peers.count ? peers[column].map { [$0] } ?? [] : []
+        case .aligned(let row):
+            return column < row.peerKin.count ? row.peerKin[column] : []
+        }
+    }
+
+    /// An aligned row's kin in peer column `column` arrived out of that
+    /// note's own order (the "moved" line); never on a free row.
+    func peerMoved(_ column: Int) -> Bool {
+        guard case .aligned(let row) = self, column < row.peerMoved.count else { return false }
+        return row.peerMoved[column] && !peerBlocks(column).isEmpty
+    }
+
+    var isFree: Bool {
+        if case .free = self { return true }
+        return false
     }
 }
 
@@ -359,7 +423,9 @@ final class CompareViewModel {
                     db, blockIDs: slots.filter { !$0.isGap }.map(\.blockID)),
                 title: try Queries.containerTitle(db, id: id),
                 displayTitle: try Queries.noteDisplayTitle(db, id: id) ?? DisplayTitle.placeholder,
-                sealed: try Queries.containerHeader(db, containerID: id)?.locked == true)
+                sealed: try Queries.containerHeader(db, containerID: id)?.locked == true,
+                comments: try Queries.containerComments(db, containerID: id)
+                    .mapValues { $0.map(\.text) })
         }
         var peers: [String: CompareProjection.PostFace] = [:]
         var kinship: [String: [String: String]] = [:]
@@ -971,6 +1037,13 @@ final class CompareViewModel {
     /// R99's door, re-homed from the retired Outline tab (S4-3): mint
     /// "outline of <title>" — first sentence per block, linked
     /// block-by-block — and open it as a compare column.
+    ///
+    /// **VX-740 (P-770-1, PROVISIONAL): the outline opens ONCE.** The mint is
+    /// a version peer the moment it commits, so the board's store observation
+    /// can deliver it while this act is still suspended on the mint — and
+    /// `adopt`'s auto-fill then seats it in the empty first slot. That seat
+    /// STANDS; the resume finds the note already open and yields (it used to
+    /// append a second column holding the same note).
     func makeOutlinePost() async {
         statusMessage = nil
         do {
@@ -978,6 +1051,9 @@ final class CompareViewModel {
                 try ops.mintOutlinePost(of: anchorPostID)
             }
             autoFilled = true
+            if peerSlots.contains(where: { $0.postID == result.post.id }) {
+                return  // the auto-fill seated it while the mint was in flight
+            }
             if let index = peerSlots.firstIndex(where: { $0.postID == nil }) {
                 peerSlots[index].postID = result.post.id
             } else if peerSlots.count < 3 {
@@ -1204,6 +1280,9 @@ struct CompareBoardView: View {
         // into this session's scope too — an environment set below a
         // modifier does not reach it.
         .debugProbeScope(session)
+        // VX-770 batch 2 (reconciliation): this board's comment faces are
+        // THIS board's in the DEBUG face oracle (`BoardCommentFaceOracle`).
+        .boardCommentFaceMount(model)
         .task { await model.start() }
         .onAppear {
             // 18o U4 (PROVISIONAL #163): the board's peers leave through the
@@ -1686,64 +1765,86 @@ struct CompareBoardView: View {
     // MARK: Rows
 
     private func boardRows(_ display: CompareViewModel.Display) -> some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 8) {
-                ForEach(display.rows) { row in
-                    rowView(row)
+        // VX-728 (P-770-3): the comment LANE every cell carries — decided by
+        // the columns' width alone (`CompareGutter.lane`), never by comments.
+        GeometryReader { proxy in
+            let lane = CompareGutter.lane(columnWidth: CompareGutter.columnWidth(
+                boardWidth: proxy.size.width, columns: 1 + model.peerSlots.count,
+                inset: Self.boardInset, spacing: Self.columnSpacing))
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Self.rowSpacing) {
+                    // VX-757: keyed by the row's SPINE, so a toggle that only
+                    // re-arranges the composition keeps every row (and its
+                    // panes) that still stands on the same block.
+                    ForEach(display.rows, id: \.spineID) { row in
+                        rowView(row, lane: lane)
+                    }
+                    endDropZones
                 }
-                endDropZones
+                .padding(Self.boardInset)
             }
-            .padding(Self.boardInset)
         }
     }
 
-    @ViewBuilder
-    private func rowView(_ row: CompareRow) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            switch row {
-            case .free(let anchor, let peers, _):
-                cellOrSpace(postID: postID, blockID: anchor)
-                ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
-                    cellOrSpace(
-                        postID: slot.postID,
-                        blockID: i < peers.count ? peers[i] : nil)
-                }
-            case .aligned(let aligned):
-                cellOrSpace(postID: postID, blockID: aligned.anchorBlockID)
-                ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
-                    VStack(alignment: .leading, spacing: 4) {
-                        if i < aligned.peerMoved.count, aligned.peerMoved[i],
-                           !aligned.peerKin[i].isEmpty {
-                            Text("moved (order differs in this version)")
-                                .font(tokens.small)
-                                // 18j: the voice's own "this one is
-                                // different" slot (its doc's words), never a
-                                // literal hue — this line's whole job is to
-                                // say that one column reads out of order, and
-                                // a colour that cannot follow the appearance
-                                // says it at the wrong weight on black paper.
-                                .foregroundStyle(tokens.alarm)
-                        }
-                        if i < aligned.peerKin.count {
-                            ForEach(aligned.peerKin[i], id: \.self) { kinBlock in
-                                cellOrSpace(postID: slot.postID, blockID: kinBlock)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                }
+    /// The board's spacing between columns and between rows (VX-728 names
+    /// them: the lane's column width and a cell card's bound read them).
+    static let columnSpacing: CGFloat = 8
+    static let rowSpacing: CGFloat = 8
+
+    /// **VX-757 — ONE structure for both kinds of row.** The free arm and the
+    /// aligned arm used to be two branches of a `switch` (the free arm's peer
+    /// cells straight in the row, the aligned arm's in a column `VStack`), so
+    /// a toggle that moved a row between the kinds re-made every cell in it
+    /// even when the same blocks sat side by side. Now each row is the anchor
+    /// cell, then one column per peer — the "moved" line when aligned, the
+    /// column's blocks keyed by block id, the free arm's clear space when it
+    /// has none — the same layout each arm drew, so a cell's identity is its
+    /// row's spine, its column and its block, in either kind.
+    private func rowView(_ row: CompareRow, lane: CGFloat) -> some View {
+        HStack(alignment: .top, spacing: Self.columnSpacing) {
+            cellOrSpace(postID: postID, blockID: row.anchorBlockID, lane: lane)
+            ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { i, slot in
+                peerColumn(row, column: i, postID: slot.postID, lane: lane)
             }
         }
+    }
+
+    private func peerColumn(
+        _ row: CompareRow, column: Int, postID peerID: String?, lane: CGFloat
+    ) -> some View {
+        let blocks = row.peerBlocks(column)
+        return VStack(alignment: .leading, spacing: 4) {
+            if row.peerMoved(column) {
+                Text("moved (order differs in this version)")
+                    .font(tokens.small)
+                    // 18j: the voice's own "this one is different" slot (its
+                    // doc's words), never a literal hue — this line's whole job
+                    // is to say that one column reads out of order, and a
+                    // colour that cannot follow the appearance says it at the
+                    // wrong weight on black paper.
+                    .foregroundStyle(tokens.alarm)
+            }
+            if blocks.isEmpty, row.isFree {
+                // The free arm's clear SPACE where this column has nothing in
+                // this row (never a "—" blank marker; N29) — `cellOrSpace`'s.
+                Color.clear
+                    .frame(maxWidth: .infinity, minHeight: 1)
+            }
+            ForEach(blocks, id: \.self) { block in
+                cellOrSpace(postID: peerID, blockID: block, lane: lane)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     /// A column's cell — or clear SPACE where this column has nothing in
     /// this row (never a "—" blank marker; N29).
     @ViewBuilder
-    private func cellOrSpace(postID: String?, blockID: String?) -> some View {
+    private func cellOrSpace(postID: String?, blockID: String?, lane: CGFloat) -> some View {
         if let postID, let blockID, let slot = model.slot(postID: postID, blockID: blockID) {
             CompareCellView(
-                model: model, tokens: tokens, indicator: indicator,
-                postID: postID, slot: slot,
+                model: model, session: session, tokens: tokens, indicator: indicator,
+                postID: postID, slot: slot, lane: lane,
                 dropTargetBlockID: $dropTargetBlockID)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
         } else {
@@ -1965,11 +2066,16 @@ private struct CompareOfferCard: View {
 /// post only), and the in-cell fan bloom (✓ stays the one choosing door).
 private struct CompareCellView: View {
     let model: CompareViewModel
+    /// VX-728: the comments panel's session (the face's door).
+    let session: AppSession
     let tokens: VoiceTokens
     /// 17o batch c (her U-7): pushed down to the panes, decided nowhere here.
     let indicator: EditingIndicatorStyle
     let postID: String
     let slot: Queries.RenderedBlock
+    /// VX-728 (P-770-3): this column's comment lane — the column's width
+    /// decided it, nothing else (`CompareGutter.lane`).
+    let lane: CGFloat
     @Binding var dropTargetBlockID: String?
 
     var body: some View {
@@ -1983,6 +2089,11 @@ private struct CompareCellView: View {
                     Rectangle().fill(tokens.ring).frame(height: 2)
                 }
                 HStack(alignment: .top, spacing: 4) {
+                    // VX-728 (P-770-3): the lane — whitespace of the column's
+                    // width's choosing, present whether or not a comment is.
+                    if lane > 0 {
+                        Color.clear.frame(width: lane, height: 1)
+                    }
                     rail
                     Text("⠿")
                         .font(tokens.small)
@@ -2017,6 +2128,31 @@ private struct CompareCellView: View {
                         }
                     }
                 }
+                // VX-728 (R-770-2): the block's comments IN THE LANE, through
+                // Write's machinery — Write's ladder seats Write's card or badge
+                // there (`CommentGutterFace`). An overlay: the cell's layout,
+                // and the prose's measure and left edge, are the same with and
+                // without comments.
+                //
+                // The face is built wherever a lane stands — comments or none,
+                // Takes' own shape (`CommentMarginNote`) — because the shared
+                // host keeps her open panel's SEAT (`CommentGutterFace`): built
+                // only while the block HAD comments, the face (its state, the
+                // panel's popover anchor) left with the last one deleted from
+                // her open panel, tearing the panel down mid-act (the VX-770
+                // ladder, round 1 F1). With no entries the host draws and
+                // records nothing.
+                .overlay(alignment: .topLeading) {
+                    if lane > 0 {
+                        let entries = model.face(for: postID)?.comments[slot.blockID] ?? []
+                        GeometryReader { proxy in
+                            CommentGutterFace(
+                                session: session, blockID: slot.blockID,
+                                entries: entries, tokens: tokens,
+                                geometry: Self.gutter(lane: lane, cellHeight: proxy.size.height))
+                        }
+                    }
+                }
             }
             .contentShape(Rectangle())
             .dropDestination(for: String.self) { items, _ in
@@ -2040,6 +2176,22 @@ private struct CompareCellView: View {
                 }
             }
         }
+    }
+
+    /// **A Compare cell's gutter, as Write's ladder reads it** (P-770-3). The
+    /// lane IS the gutter: the cell's chrome (the rail, the handle, the pane)
+    /// starts where it ends, so from the face's side the lane's right edge is
+    /// where Write's prose would be (`textLeft`) — a card ends the ladder's
+    /// own clearance short of it, a badge its own air short of it, both inside
+    /// the lane. The face's top is the cell's first line; the card grows to
+    /// the cell and never past the row (`roomBelowInOwnRow`).
+    static func gutter(lane: CGFloat, cellHeight: CGFloat) -> CommentGutterFace.Geometry {
+        let top = PaneTextView.proseTopInset
+        return CommentGutterFace.Geometry(
+            textLeft: lane, hostLeading: 0, top: top,
+            blockHeight: max(0, cellHeight - 2 * top),
+            roomBelow: BlockDecor.roomBelowInOwnRow(
+                rowHeight: cellHeight, top: top, rowSpacing: CompareBoardView.rowSpacing))
     }
 
     @ViewBuilder

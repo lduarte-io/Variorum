@@ -141,7 +141,9 @@ extension Operations {
     public func deleteVariant(_ id: String) throws {
         let wasDefault = try performDeleteVariant(id, quietWhenGone: false) ?? false
         undoStack?.register(
-            label: "Delete Variant",
+            // VX-634: the receipt reads "Undid: <label>" — the app's word is
+            // TAKE (its door is "Delete this take"), never the model's.
+            label: "Delete Take",
             inverse: { try $0.revertDeleteVariant(id, wasDefault: wasDefault) },
             // 13c 1B (A10): re-tombstone the same variant row.
             redo: { try $0.performDeleteVariant(id, quietWhenGone: true) != nil })

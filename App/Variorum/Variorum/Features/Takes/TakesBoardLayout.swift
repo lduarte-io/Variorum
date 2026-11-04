@@ -348,7 +348,9 @@ final class TakesBoardLayout {
     // MARK: - Expansion (per-note session memory — VX-428)
 
     /// Fanned blocks currently bloomed: fans stay open once expanded,
-    /// close-all resets, nothing persists past the session, nothing syncs.
+    /// close-all resets, nothing persists past the session, nothing syncs —
+    /// and a fan that collapses to its one take closes (VX-733,
+    /// `closeCollapsedFans`; a first-take door she opened is not a collapse).
     ///
     /// **VX-428 (her ruling R-601-2, the R-VX170-5 road) supersedes the Takes
     /// plan's MOUNT-ONLY letter** that used to stand here ("session-only …
@@ -394,6 +396,46 @@ final class TakesBoardLayout {
         guard kept.count != expandedBlocks.count else { return }
         expandedBlocks = kept
         expansionChanged()
+    }
+
+    /// **VX-733: closes the open blocks whose fans COLLAPSED** — the
+    /// conductor hands over the set `TakesOpenFanRule.collapsed` decided (this
+    /// component never reads the projection). The open state belonged to takes
+    /// that are gone, so the block's wash and bloom go with them; reported like
+    /// any change, so the session memory follows. Reports only when something
+    /// closed.
+    func closeCollapsedFans(_ blockIDs: Set<String>) {
+        let kept = expandedBlocks.subtracting(blockIDs)
+        guard kept.count != expandedBlocks.count else { return }
+        // A collapsed fan holds one take, so no follow-the-scroll bloom (R25:
+        // fanned AND on screen) keeps its strip mounted — its pages go even
+        // while its row is visible (the VX-770 ladder, round 1 F2).
+        forgetPages(ofClosed: expandedBlocks.subtracting(kept), evenWhileOnScreen: true)
+        expandedBlocks = kept
+        expansionChanged()
+    }
+
+    /// **VX-638 — a fan that closes takes its page with it.** Every card strip
+    /// (slot split, carousel, the margin grid's rail) mounts only while its
+    /// block is bloomed, so a close tears the strip down and a re-open builds
+    /// a NEW one, born at its leading edge — while the pager's caption reads
+    /// `pageOffsets`. Left in the table, the old page made the re-born strip's
+    /// caption lie ("2–3 of 3" over cards 1–2, her slot-split sighting after
+    /// close all → expand all). So the three close doors forget the closed
+    /// blocks' pages, both keys (the block's and `rail-<block>`) — "close-all
+    /// resets", this component's own letter. On the two HAND-close doors (a
+    /// fan's own close, close all) a block follow-the-scroll still blooms (R25:
+    /// on screen, fanned) keeps its strip mounted, so it keeps its page. The
+    /// collapse door passes `evenWhileOnScreen`: a collapsed block is no longer
+    /// fanned, so the scroll's bloom never holds it and its strip unmounts on
+    /// screen or off — the visibility exception is the hand-close doors' only
+    /// (the VX-770 ladder, round 1 F2).
+    private func forgetPages(ofClosed blockIDs: Set<String>, evenWhileOnScreen: Bool = false) {
+        for blockID in blockIDs
+        where evenWhileOnScreen || !(followTheScroll && isRowVisible(blockID)) {
+            pageOffsets[blockID] = nil
+            pageOffsets[Self.railPageKey(blockID)] = nil
+        }
     }
 
 
@@ -517,6 +559,7 @@ final class TakesBoardLayout {
 
     func toggleExpanded(_ blockID: String) {
         if expandedBlocks.contains(blockID) {
+            forgetPages(ofClosed: [blockID])  // VX-638
             expandedBlocks.remove(blockID)
         } else {
             expandedBlocks.insert(blockID)
@@ -536,6 +579,7 @@ final class TakesBoardLayout {
 
     func closeAllFans() {
         let changed = !expandedBlocks.isEmpty
+        forgetPages(ofClosed: expandedBlocks)  // VX-638
         expandedBlocks = []
         if changed { expansionChanged() }
     }

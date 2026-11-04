@@ -264,7 +264,7 @@ struct UndoStackTests {
 
             // Restoring the post unblocks the retry.
             try ops.restoreContainer(post.id)
-            #expect(try stack.undo(with: ops) == "Delete Variant")
+            #expect(try stack.undo(with: ops) == "Delete Take")  // VX-634 — the label speaks the app's word
         }
     }
 
@@ -289,7 +289,7 @@ struct UndoStackTests {
 
             try ops.unlockPost(post.id)
             #expect(try stack.undo(with: ops) == "Archive Variant")
-            #expect(try stack.undo(with: ops) == "Delete Variant")
+            #expect(try stack.undo(with: ops) == "Delete Take")  // VX-634 — the label speaks the app's word
         }
     }
 
