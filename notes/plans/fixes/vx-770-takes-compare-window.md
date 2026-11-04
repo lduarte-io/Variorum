@@ -2611,10 +2611,10 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 
 | row | verdict |
 |---|---|
-| W1 her VX-756 repro, stack, both voices (+ F3's look-only eye) | PENDING |
-| W2 the same, margin grid | PENDING |
-| W3 R-770-1 round trip, fans stay open | PENDING |
-| W4 R-756-2 look-only (block off the page) | PENDING |
+| W1 her VX-756 repro, stack, both voices (+ F3's look-only eye) | Study PASS · Terminal PENDING |
+| W2 the same, margin grid | **FINDING** (Study, ×2): one watch hop of 24–35 pt ~0.25 s after the first rest |
+| W3 R-770-1 round trip, fans stay open | PASS |
+| W4 R-756-2 look-only (block off the page) | look line: 2 hops on the reveal |
 | W5 VX-730 stack comments whole | PENDING |
 | W6 VX-731 slot split keeps the card | PENDING |
 | W7 VX-731 carousel keeps the card; Study narrow → "#1" badge | PENDING |
@@ -2628,3 +2628,75 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 | W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PENDING |
 | W16 VX-740 make outline note ×3 → one column each | PENDING |
 | W17 VX-739 the word count after two take flips | PENDING |
+
+**Settings as found (read through Accessibility, 07:47 — no capture of Settings: `words-guard` withholds every
+Settings capture on 27.0.1, AXError -25200, the README's VX-658 class):** Theme **Study** · Appearance **Dark** ·
+palette **Sea glass** · Confirmations "A quiet line in the bottom bar" · Takes ▸ "Takes open as" **Stack**,
+"follow the scroll" **off** · MCP ▸ "Enable the MCP server" **off** · Protection ▸ **"You're in Standard."** · Sync ▸
+**"This library doesn't sync. Sign in to turn on sync."** (signed out) · the HELD banner ("This is your library as
+of October 20, 2026 … Resume Sync") on the window foot — never pressed.
+
+**Content minted (the agents' store):** seven Pool notes by ONE File ▸ Import… of the walk's own documents
+(`.walkshots-vx770/import/*.md` — the Variorum document format; receipt "Imported 7 notes to the Pool · ⌥⌘Z
+undoes"): `vx770 landing walk` (40 blocks P01–P40; P13…P39 odd each a second take), `vx770 comments walk`
+(C1–C8; C2, C6 a second take), `vx770 undo walk` (U1–U6; U2, U6 two takes, U5 three), `vx770 words walk`
+(her W17 three blocks), `vx770 outline one/two/three`.
+
+**Method for the eye on jumping (W1–W4):** each return to Takes is recorded as a ~13-frame-per-second burst of
+the window (`screencapture -l`, JPEG, ~80 ms apart, 4–5 s), and a per-frame vertical-shift measure of the
+board column (`scratchpad/walk/shift.py`: best row-profile shift between consecutive frames + residual — a pure
+scroll shows as a non-zero shift with ~0 residual); the app's OWN landing story is read beside it (the Debug
+binary launched with `OS_ACTIVITY_DT_MODE=YES`, stderr to `scratchpad/walk/app.log`: the
+`TakesArticle landing — … LAND | … | DONE: settled … after N hops` line per landing).
+
+### W1 — her VX-756 repro, stack — **Study: PASS** (Terminal: below)
+Expand all on `vx770 landing walk`; scrolled deep (P35 mid-page, its fan open and washed); clicked into P35
+(block 35/40); ⌘1; in Write scrolled up and clicked into **P25** (a block with takes, 10 above — block 25/40);
+⌘2 with the burst (`.walkshots-vx770/w1-study-stack/`, contact sheet `contact-1.png`, landed `w1-landed.png`).
+**What the page did:** frames 0–14 Write; frames 15–19 (≈0.39 s) the board's EMPTY-STATE face ("Nothing here
+yet — make the first block here, or start writing.") before its projection arrives; frame 20 the page AT P25 in
+one picture (P24's tail above, P25 washed, its fan open — chosen + choose); frames 21–62 no movement at all
+(shift 0, residual ≤ 0.13 — the arrival flash only). The app's story: `target=24 … content=3243 | 3822 | 6320 |
+5274 | 6559 | DONE: settled at top=0.0 after 0 hops, 1010 ms`. ONE settled landing, no hop; the fan she opened
+stayed open (R-770-1). **F3's look-only eye:** this storm swung (6320 → 5274 → 6559) but revisited no height;
+the page showed no movement after its first paint.
+
+### W2 — the same, margin grid — **Study: FINDING (the hop survives in margin grid)**
+Style → margin grid (the board's `style ▾`), fans open, current block P25; ⌘1; clicked into **P35** (10 below);
+⌘2 with the burst (`.walkshots-vx770/w2-study-margin/`, `contact.png`, `f21-f22.png`, landed `w2-landed.png`).
+Frames 13–17 the empty-state face (and its header momentarily reads "style: stack" — the default's label, not
+the stored margin grid); frame 18 the first board picture; frame 19 (80 ms later) the page moved to P35 with
+P34 above it; frames 19–21 at rest (≈0.24 s); **frame 22 a second, pure scroll of 69 px = 34.5 pt** (residual
+0.02) putting P35 at the top; still after. The app's own story: `target=34 … content=3772 | 4295 | 4649 | 5665 |
+5884 | HOP 1 at 600 ms (top was 34.6) | content=5902 | 5918 | DONE: settled at top=0.0 after 1 hops, 1143 ms`.
+**Reproduced on a second trial** (P35 → Write → P23 → ⌘2; `.walkshots-vx770/w2b-study-margin/`): first rest,
+then a pure 48-px (24-pt) scroll 0.25 s later; story `target=22 … content=3772 | 4732 | 5212 | 6476 | HOP 1 at
+525 ms (top was 24.0) | content=7490 | 7589 | DONE … after 1 hops, 1081 ms`. So in MARGIN GRID her shape still
+lands, rests off home by 24–35 pt, and hops once ~0.25 s later (the watch's correction from quiet — the
+pre-fix mechanism's signature, smaller than the pre-fix −37/−38 pt hop the batch-1 trace measured). The heights
+in both stories are monotonic — NOT F3's revisited-height corner. The stack style (W1) and the plain round trip
+(W3) show 0 hops on the same build. The harness's margin-grid pin
+(`openTakesEnteredOnAnotherBlockLandOnceAndStay(style: .marginGrid)`) was green on post — the live app's
+margin-grid landing is not what that pin stages. For the orchestrator: a byte change means the gate re-builds.
+
+### W3 — R-770-1 + regression: ⌘1 ⌘2 with nothing clicked — **PASS**
+From the W2b page (P23 current, its rail open) ⌘1 ⌘2, burst `.walkshots-vx770/w3-study-margin/`; before/after
+`w3-before-after.png` byte-identical in the board (P22's tail, P23 washed with its open rail). Story `target=22 …
+DONE: settled at top=0.0 after 0 hops`; frames show one in-place repaint, no scroll. Scrolling on: P27, P29, P31
+fans all still open and washed (`w3-fans-below.png`, `w3-scrolltest-text.png`) — every fan she opened stayed
+open. (A look note, not a finding: two wheel posts right after the round trip over the blank area beside P23's
+tall rail did not move the page; a post over the rail did, and the same blank area scrolled normally a minute
+later — unreproduced.)
+
+### W4 — R-756-2, LOOK ONLY (her block scrolled off the page, ⌘1 ⌘2 nothing clicked) — **look line: it hops**
+P23 current, the page scrolled down to P30–P31 (P23 off the page); ⌘1 ⌘2, burst `.walkshots-vx770/w4-study-margin/`
+(`contact.png`). Frame 18 the restored page (P32–P35 — near the page she left); ≈0.63 s still; then the reveal
+moves THREE times in ≈0.33 s: P23 near the top (frame 26) → P23 ~200 pt lower (frame 27) → P23 back near the top
+(frame 30). Story: `target=22 … HOP 1 at 420 ms (unreported) | … | HOP 2 at 1024 ms (top was 280.0) | DONE: settled
+at top=0.0 after 2 hops, 1279 ms`. R-756-2's road as predicted (the restore owns that page; excluded from the fix
+by design) — recorded, no verdict.
+
+**Noticed during W1–W4 (look lines, not rows):** every return to Takes shows the board's EMPTY-STATE face
+"Nothing here yet — make the first block here, or start writing." (with a "+ new block" door) for ≈0.3–0.4 s on a
+40-block note before the projection arrives — a false offer on a full note, every style (`w1-study-stack/contact-1.png`
+frames 15–19); in margin grid its header says "style: stack" for those frames.
