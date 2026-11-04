@@ -7,8 +7,10 @@ import Foundation
 /// Coach marks over the REAL app: a ring on the thing to touch (never a dim —
 /// R-13s-12), a small card saying one idea, her real click advancing, End tour
 /// always there, the step count visible. Thirteen steps since VX-292 U3
-/// (R-292-13's approved flow — step 7 has two beats, step 11 three), an end
-/// card over the note she just opened, a five-stop "keep going" leg, and
+/// (R-292-13's approved flow — step 7 has two beats, step 11 three), the
+/// closing cards (VX-735: the passphrase, then the twelve words — each only
+/// while still owed), an end card over the note she just opened, a five-stop
+/// "keep going" leg, and
 /// both roads ending at the field guide (R-13s-1).
 ///
 /// This file is the tour's WHOLE decision, pure, so every step is walked
@@ -44,6 +46,15 @@ public enum Tour {
         case navigation, seededBook, insideBook, write, makeTake, takeIcon
         case takesMode, takesFlipBack, readInNote, lensesLive, deeperModes
         case upToBook, bookAndRead, downAndUp, home, ownNote
+        /// **The closing cards** (VX-735 — her "splitting into two or three
+        /// cards (tour close · passphrase · twelve words)"): the two asks the
+        /// end card used to stack beside its doors (CastleRules rule 3's "the
+        /// tutorial's last card asks", rule 2's look beside the ask), each a
+        /// centred card of its own, in rule 3's order — the passphrase, then
+        /// the words. Each shows only while its ask is still owed
+        /// (`Facts.asks`), carries next (the ask, never a force) and rings
+        /// nothing.
+        case protectPassphrase, protectWords
         /// "That's the tour." — over the note she just opened (A3).
         case endCard
         // The keep-going leg (R-13s-1's optional leg; Q13's four stops, and
@@ -62,6 +73,9 @@ public enum Tour {
         /// step that has more than one (step 7's flip and its way back, step
         /// 11's book arc). The label says the number alone.
         case main(number: Int, beat: Int)
+        /// A closing card (VX-735 — the passphrase, the twelve words) carries
+        /// no count: the thirteen steps are done.
+        case closing
         /// The end card carries no count.
         case endCard
         /// `number` of `legStopCount`.
@@ -88,6 +102,7 @@ public enum Tour {
         case .downAndUp: .main(number: 11, beat: 3)
         case .home: .main(number: 12, beat: 1)
         case .ownNote: .main(number: 13, beat: 1)
+        case .protectPassphrase, .protectWords: .closing
         case .endCard: .endCard
         case .legStar: .leg(number: 1)
         case .legTags: .leg(number: 2)
@@ -111,10 +126,16 @@ public enum Tour {
     /// 11's first beat describes the book she arrives in, so it waits for her
     /// next like the step it reworks (`placeFollows`); and the Settings stop
     /// carries next because Settings is its own window (PROVISIONAL P-292-10).
+    ///
+    /// VX-735: both closing cards carry next — CastleRules rule 3 makes the
+    /// tutorial's close an ASK, never a force, and rule 2's band card stays
+    /// the recurring home for the words; the app holds the words card's next
+    /// back only while the words are on screen (closing would put them away
+    /// without her warning).
     public static func hasNext(_ step: Step) -> Bool {
         switch step {
         case .navigation, .takesMode, .takesFlipBack, .readInNote, .deeperModes, .upToBook,
-             .legSnippets, .legSettings: true
+             .protectPassphrase, .protectWords, .legSnippets, .legSettings: true
         default: false
         }
     }
@@ -225,6 +246,26 @@ public enum Tour {
         }
     }
 
+    /// **What the closing cards still owe** (VX-735; VX-736 R-736-5 — her
+    /// *"we also have to make sure that this pane doesn't show if they
+    /// already recorded their 12 words and stuff"*): the library's own facts,
+    /// read live from its protection faces (the band card's truths — never a
+    /// second set). A card whose ask is not owed is skipped, and a card whose
+    /// ask is answered while it shows moves on (the tour's tolerance rule: a
+    /// step already satisfied advances).
+    public struct ClosingAsks: Equatable, Sendable {
+        /// CastleRules rule 3's ask: the library has no passphrase yet (the
+        /// set row stands — `offersSetPassphrase`).
+        public var passphrase: Bool
+        /// Rule 2's look: the twelve words are still owed here.
+        public var words: Bool
+
+        public init(passphrase: Bool, words: Bool) {
+            self.passphrase = passphrase
+            self.words = words
+        }
+    }
+
     /// One report of what the window shows.
     public struct Facts: Equatable, Sendable {
         public var place: Place
@@ -250,12 +291,16 @@ public enum Tour {
         /// Facts about the block step 7 flips (`flipInterest`; nil until the
         /// store answered).
         public var block: BlockFacts?
+        /// **What the closing cards still owe** (VX-735). nil: no library's
+        /// protection faces stand (a harness mount) — both cards are skipped,
+        /// exactly as the end card drew without its asks there.
+        public var asks: ClosingAsks?
 
         public init(
             place: Place, noteMode: NoteMode? = nil, caret: Caret? = nil,
             bookNoteLive: Bool = false, bookNoteSelected: Bool = false,
             note: NoteFacts? = nil, bookMode: BookMode? = nil, lensColumns: Int? = nil,
-            block: BlockFacts? = nil
+            block: BlockFacts? = nil, asks: ClosingAsks? = nil
         ) {
             self.place = place
             self.noteMode = noteMode
@@ -266,6 +311,7 @@ public enum Tour {
             self.bookMode = bookMode
             self.lensColumns = lensColumns
             self.block = block
+            self.asks = asks
         }
 
         /// Where a fresh tour begins before the window has said anything.
@@ -290,7 +336,10 @@ public enum Tour {
         public internal(set) var tourBlockID: String?
         /// The note of her own (step 11).
         public internal(set) var ownNoteID: String?
-        /// The end card has been reached: the tour counts as completed.
+        /// The tour's close has been reached — the first closing card, or the
+        /// end card when both asks are skipped (VX-735: the moment the end card
+        /// used to arrive with its asks beside it): the tour counts as
+        /// completed.
         public internal(set) var completed: Bool
         /// The last facts the window reported.
         public internal(set) var facts: Facts
@@ -482,6 +531,12 @@ public enum Tour {
         }
     }
 
+    /// **The steps of the tour's close** (VX-735): the two closing cards and
+    /// the end card — whichever of them arrives first completes the tour.
+    static func closes(_ step: Step) -> Bool {
+        step == .protectPassphrase || step == .protectWords || step == .endCard
+    }
+
     /// The steps at which opening the field guide FINISHES the tour: the
     /// leg's end, whose ring is the guide's row — and (VX-292 U3) the
     /// Settings stop before it, so the leg's destination reached ahead of its
@@ -502,6 +557,9 @@ public enum Tour {
         case .readInNote: .lensesLive
         case .deeperModes: .upToBook
         case .upToBook: .bookAndRead
+        // VX-735: the closing cards in rule 3's order, then the end card.
+        case .protectPassphrase: .protectWords
+        case .protectWords: .endCard
         case .legSnippets: .legSettings
         case .legSettings: .legEnd
         default: nil
@@ -529,7 +587,10 @@ public enum Tour {
             default:
                 break
             }
-            if following == .endCard {
+            // The close counts as completed the moment it arrives (VX-735:
+            // the first closing card, which is where the end card and its
+            // asks used to arrive — the split moves no record's moment).
+            if closes(following), !state.completed {
                 state.completed = true
                 effects.append(.recordCompleted)
             }
@@ -627,7 +688,19 @@ public enum Tour {
             return facts.place == .area(.bookcase) ? .ownNote : nil
 
         case .ownNote:
-            return ownNoteCandidate(state) == nil ? nil : .endCard
+            return ownNoteCandidate(state) == nil ? nil : .protectPassphrase
+
+        case .protectPassphrase:
+            // VX-735 (R-736-5): rule 3's ask shows only while the library has
+            // no passphrase — skipped when one stands, moved on from the
+            // moment she sets one here.
+            return state.facts.asks?.passphrase == true ? nil : .protectWords
+
+        case .protectWords:
+            // …and rule 2's look only while the words are still owed here —
+            // skipped once recorded, moved on from the moment her look here
+            // closes past its warning (the look records them).
+            return state.facts.asks?.words == true ? nil : .endCard
 
         case .legStar:
             return ownFacts(state)?.starred == true ? .legTags : nil
@@ -880,7 +953,8 @@ public enum Tour {
         case .ownNote:
             if case .note(let id) = state.facts.place, id != state.tourNoteID { return id }
             return nil
-        case .endCard, .legStar, .legTags, .legBook, .legSnippets, .legSettings, .legEnd:
+        case .protectPassphrase, .protectWords, .endCard, .legStar, .legTags, .legBook,
+             .legSnippets, .legSettings, .legEnd:
             return state.ownNoteID
         default:
             return nil
@@ -1064,7 +1138,9 @@ public enum Tour {
             return [[bookcase]]
         case .ownNote:
             return facts.place == .area(.bookcase) ? [[.quickEntry]] : [[bookcase]]
-        case .endCard:
+        case .protectPassphrase, .protectWords, .endCard:
+            // VX-735: the closing cards are centred cards like the end card —
+            // nothing in the window to point at.
             return []
         case .legStar:
             return [state.ownNoteID.map { [.sidebarOpenRow($0)] } ?? []]
@@ -1143,7 +1219,8 @@ public enum Tour {
             return place != .area(.pool)
         case .legSnippets:
             return place != .area(.snippets)
-        case .navigation, .home, .endCard, .legStar, .legSettings:
+        case .navigation, .home, .protectPassphrase, .protectWords, .endCard, .legStar,
+             .legSettings:
             return false
         }
     }
@@ -1194,7 +1271,8 @@ public enum Tour {
     public static func fallbackCorner(_ step: Step) -> Corner {
         switch step {
         case .makeTake, .takeIcon: .bottomLeading
-        case .endCard: .center
+        // VX-735: the closing cards sit where the end card does.
+        case .protectPassphrase, .protectWords, .endCard: .center
         default: .topTrailing
         }
     }

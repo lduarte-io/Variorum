@@ -391,6 +391,14 @@ final class AccountPassphraseCardModel {
 final class WordsBandModel {
     /// The words' row is offered (the look closed).
     private(set) var offersWords: Bool
+    /// **VX-735 (VX-736 R-736-5) — the tour's words card is OWED**: on a writing road, the look has never been recorded
+    /// for this library here. ONE ledger mark carries both of rule 2's retirements — a look closed past its warning at
+    /// any home (`wordsRecorded`) and a landed account act (set-up, join, Move — `AppBootstrap.accountActHoldsTheWords`
+    /// writes the mark, then `accountHoldsTheWords` retires this card: a look there would mint fresh words and replace
+    /// the account's). Unlike `offersWords` it ignores the band's own ✕ and *Later*: those retire the BAND, while rule 2
+    /// names the tutorial's last card as a words home of its own (PROVISIONAL P-736-2 — alternative: a dismissal
+    /// retires both).
+    private(set) var wordsLookOwed: Bool
     let look: WordsLookModel
     let reminder: PassphraseReminderModel
     /// VX-538 — the E6 row (nil: no such row composed — a test's hand-made band, a read-only road).
@@ -428,6 +436,7 @@ final class WordsBandModel {
         self.snoozes = snoozes
         self.reminder = reminder
         offersWords = Self.offers(libraryID, writes: writes, ledger: ledger, snoozes: snoozes)
+        wordsLookOwed = writes && !libraryID.isEmpty && !ledger.recorded(libraryID)
         // The first look on a library whose words were never recorded here says nothing of earlier words.
         var recordedHook: () -> Void = {}
         var mintHook: (String?) async -> WordsMintOutcome = mint
@@ -492,6 +501,7 @@ final class WordsBandModel {
         guard !libraryID.isEmpty else { return }
         ledger.record(libraryID)
         offersWords = false
+        wordsLookOwed = false
         ProtectionOpenRoad.log("road: rule 2's look closed — the words card's offer retires")
     }
 
@@ -503,6 +513,7 @@ final class WordsBandModel {
     func accountHoldsTheWords() {
         guard !libraryID.isEmpty else { return }
         offersWords = false
+        wordsLookOwed = false
         ProtectionOpenRoad.log("road: an account act landed — the library holds the account's words; the words card's offer "
             + "retires (VX-511)")
     }
@@ -523,13 +534,26 @@ final class WordsBandModel {
     }
 }
 
-// MARK: - The tour's last card (rule 3: "The tutorial's last card asks, and shows the twelve words beside the ask")
+// MARK: - The tour's close (rule 3: "The tutorial's last card asks, and shows the twelve words beside the ask")
 
-/// The end card's two asks, side by side: the passphrase (rule 3's — only while the library has none) and the words
-/// (rule 2's look). A passphrase set here a moment before the look is handed to it, so she is never asked it twice.
+/// The tour's two closing asks: the passphrase (rule 3's — only while the library has none) and the words (rule 2's
+/// look). VX-735 split them out of the end card into two cards of their own, in the same order (the passphrase, then the
+/// words), ONE model across both, so a passphrase set on the first card a moment before the look is handed to it and
+/// she is never asked it twice.
 @MainActor
 @Observable
 final class TourEndLibraryModel {
+    /// **VX-735 — what the closing cards still owe**, read from the open library's faces (the tour's facts carry it,
+    /// so a card whose ask is not owed is skipped and one whose ask is answered moves on). The passphrase: rule 3's ask
+    /// while the library has no passphrase (`offersSetPassphrase` — the set row's own truth, which this model's ask
+    /// always gated on). The words: rule 2's look while it is still OWED here (`WordsBandModel.wordsLookOwed` — the
+    /// band's own ledger: never recorded, no landed account act; a band dismissal does not retire the tour's ask —
+    /// P-736-2). No band (a test's hand-made faces): nothing owed — that look could only refuse.
+    static func asks(_ standing: RoadStandingModel) -> Tour.ClosingAsks {
+        Tour.ClosingAsks(
+            passphrase: standing.offersSetPassphrase, words: standing.band?.wordsLookOwed ?? false)
+    }
+
     /// The passphrase ask (nil: the library already had one when the card opened).
     let passphrase: SetPassphraseModel?
     /// The passphrase was set at this card.
@@ -556,7 +580,7 @@ final class TourEndLibraryModel {
         if look.phase != .closed { justSet = nil }
     }
 
-    /// The end card's three doors wait while words are on screen (closing the card would put them away without the
-    /// warning).
+    /// The closing card's doors (next, End tour) wait while words are on screen (leaving would put them away without
+    /// the warning) and while a passphrase is being set.
     var holdsTheDoors: Bool { look.holdsWords || passphrase?.busy == true }
 }

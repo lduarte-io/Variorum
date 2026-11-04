@@ -117,9 +117,13 @@ struct TourScriptTests {
     /// recorded in the U3 RECORD with its alternative: the mode list's home
     /// is the sidebar's "this note" section ("the rail" is the code's word,
     /// never the app's), and choosing a take flips ONE paragraph, not the page.
+    /// VX-736 (R-736-5, her audit finding): step 7 says to scroll — the
+    /// take it names can sit below the fold with no road to reveal it.
     static let u3Departures: [Tour.Step: [(from: String, to: String)]] = [
-        .takesMode: [("the page now reads Italian", "this paragraph now reads Italian")],
-        .takesFlipBack: [("the page now reads Italian", "this paragraph now reads Italian")],
+        .takesMode: [("the page now reads Italian", "this paragraph now reads Italian"),
+                     ("now reads Italian. Choose", "now reads Italian. Scroll down if you don't see it. Choose")],
+        .takesFlipBack: [("the page now reads Italian", "this paragraph now reads Italian"),
+                         ("now reads Italian. Choose", "now reads Italian. Scroll down if you don't see it. Choose")],
         .readInNote: [("in the rail", "in the sidebar")],
         .lensesLive: [("in the rail", "in the sidebar")],
     ]
@@ -128,7 +132,7 @@ struct TourScriptTests {
     /// recorded departures, or (VX-292 U3) the U3 drafts with theirs. Every
     /// step is covered by exactly one of the two tables.
     @Test func everyCardIsTheApprovedDraftExceptTheRecordedDepartures() throws {
-        for step in Tour.Step.allCases where step != .endCard {
+        for step in Tour.Step.allCases where !Self.closeSteps.contains(step) {
             let card = try #require(TourScript.card(step), "\(step) has a card")
             if let (draftTitle, draftBody) = Self.u3Drafts[step] {
                 #expect(Self.approved[step.rawValue] == nil || [.takesMode, .deeperModes].contains(step),
@@ -158,6 +162,8 @@ struct TourScriptTests {
             #expect(card.body == expected, "\(step): \(card.body)")
         }
         #expect(TourScript.card(.endCard) == nil, "the end card has its own words")
+        #expect(TourScript.card(.protectPassphrase) == nil && TourScript.card(.protectWords) == nil,
+                "the closing cards' words are the Castle faces' (VX-735)")
         // The end card, verbatim (A3's restaged fork; A6's ⌘J line).
         #expect(TourScript.endTitle == "That's the tour.")
         #expect(TourScript.endBody
@@ -174,6 +180,39 @@ struct TourScriptTests {
         #expect(TourScript.keepGoing == "Keep going: two more minutes on stars, tags, books and snippets")
         #expect(TourScript.openFieldGuide == "Open the field guide, every feature as a lesson")
         #expect(TourScript.done == "Done, go write")
+    }
+
+    /// The steps whose words are not a coach card's: the end card and
+    /// (VX-735) the two closing cards before it.
+    static let closeSteps: Set<Tour.Step> = [.protectPassphrase, .protectWords, .endCard]
+
+    /// **VX-735 — the closing cards say the end card's asks VERBATIM.** The
+    /// split changes the shape, never the words (CastleRules rules 2, 3 and
+    /// 6 are the contract): each card's title is the ask's own approved title
+    /// elsewhere (the set-passphrase sheet's, Settings ▸ Protection's words
+    /// section's — quoted, never new words: the split's one forced
+    /// departure), and every sentence the end card's block said is the same
+    /// constant, byte for byte, as it stood (pinned here by value so a drift
+    /// in the Castle copy is a visible change).
+    @Test func theClosingCardsSayTheEndCardsAsksVerbatim() {
+        #expect(TourScript.protectPassphraseTitle == ProtectionWords.setPassphraseTitle)
+        #expect(TourScript.protectWordsTitle == ProtectionWords.wordsSectionTitle)
+        #expect(TourScript.protectPassphraseTitle == "Set a passphrase")
+        #expect(TourScript.protectWordsTitle == "Your twelve words")
+        #expect(ProtectionWords.setPassphraseLead
+                == "A passphrase is a convenience over your twelve words \u{2014} easier to type, and either one can reset the other.")
+        #expect(ProtectionWords.setPassphraseField == "Passphrase" && ProtectionWords.setPassphraseAgain == "Again")
+        #expect(ProtectionWords.setPassphraseButton == "Set passphrase")
+        #expect(ProtectionWords.wordsCardLine
+                == "Your library is encrypted \u{2014} click here to record the twelve words that are its key.")
+        #expect(ProtectionWords.wordsLookLead
+                == "Write these down now. They open your library \u{2014} on this \(ProtectionCopy.deviceName) and on any copy of it \u{2014} for as long as they are its words.")
+        #expect(ProtectionWords.wordsLookCopied
+                == "Copied. Your clipboard keeps them until you copy something else, your library locks or Variorum quits.")
+        #expect(ProtectionWords.wordsLookWarning == "These words won't be shown again.")
+        #expect(ProtectionWords.wordsLookWrittenDown == "I've written them down")
+        #expect(ProtectionWords.wordsLookGoBack == "Go back" && ProtectionWords.wordsLookClose == "Close")
+        #expect(TourScript.label(.closing) == nil, "a closing card carries no count")
     }
 
     /// **VX-292 U3 — the U3 drafts table IS the plan's own text** (the mockup
@@ -207,6 +246,25 @@ struct TourScriptTests {
             of: "Click into the chapter on whether it is better to be loved or feared.",
             with: TourScript.insideBookRingedChapter) == ringed.body,
                 "only the last sentence changes")
+    }
+
+    /// **VX-736 (R-736-5) — step 7 says to scroll, right after it names the
+    /// take.** Her finding: the take the card names ("il principe 1532") can
+    /// sit below the fold inside the bloomed block's stacked takes, and
+    /// nothing said to scroll. No road brings one take's card on screen (the
+    /// record's trace), so the card says it — one PROVISIONAL sentence, the
+    /// brief's own words. RED on 2d82cb5a8 (the card had no such sentence).
+    @Test func stepSevenSaysToScrollRightAfterItNamesTheTake() throws {
+        #expect(TourScript.takesScrollHint == "Scroll down if you don't see it.")
+        for step in [Tour.Step.takesMode, .takesFlipBack] {
+            let body = try #require(TourScript.card(step)).body
+            let names = try #require(body.range(of: "Find the take named \(TourScript.italianName)"))
+            let hint = try #require(body.range(of: " " + TourScript.takesScrollHint + " "),
+                                    "\(step): the card says to scroll")
+            let between = body[names.upperBound..<hint.lowerBound]
+            #expect(between.filter { $0 == "." }.count == 1,
+                    "\(step): the hint follows the sentence that names the take, so \"it\" is that take")
+        }
     }
 
     /// The departures quote the doors they name — a rename cannot strand them.
@@ -331,10 +389,12 @@ struct TourScriptTests {
     /// promise on the main leg; "two more minutes" lives on the fork's first
     /// door only).
     @Test func theToneRulesHoldOnEveryRenderedString() {
+        // VX-735: the closing cards' titles are the tour's to say (their
+        // bodies are the Castle faces' approved copy, pinned verbatim above).
         var strings: [String] = [
             TourScript.endTitle, TourScript.endBody, TourScript.endAside, TourScript.keepGoing,
             TourScript.openFieldGuide, TourScript.done, TourScript.next, TourScript.endTour,
-            TourScript.roadBack,
+            TourScript.roadBack, TourScript.protectPassphraseTitle, TourScript.protectWordsTitle,
         ]
         for step in Tour.Step.allCases {
             if let card = TourScript.card(step) { strings += [card.title, card.body] }
@@ -801,6 +861,53 @@ struct TourEngineTests {
             engine.choose(.fieldGuide)
             #expect(log.fieldGuides == 1)
             #expect(log.finishes == [true])
+        }
+    }
+
+    /// **VX-735 (VX-736 R-736-5) — the closing asks reach the rule through
+    /// the window's facts, wherever she stands** (the faces' truth is the
+    /// library's, never the place's), and an engine on a library owing both
+    /// lands step 13's own note on the PASSPHRASE card — completed once, at
+    /// once — whose next brings the words card, then the end card.
+    @Test func theClosingAsksReachTheRuleAndTheCloseWalksItsCards() async throws {
+        let owed = Tour.ClosingAsks(passphrase: true, words: true)
+        for selection: SidebarSelection in [.post("mine"), .shelf, .reading("r")] {
+            let facts = TourPlaces.facts(
+                selection: selection, detail: ("mine", .write), caret: nil, bookNoteLive: false,
+                note: nil, isStarred: { _ in false }, asks: owed)
+            #expect(facts.asks == owed, "\(selection): the asks ride every report")
+        }
+        #expect(TourPlaces.facts(
+            selection: .post("mine"), detail: ("mine", .write), caret: nil, bookNoteLive: false,
+            note: nil, isStarred: { _ in false }).asks == nil, "no faces: nothing said")
+        try await withSession { session in
+            let log = DoorLog()
+            let engine = TourEngine(
+                session: session, landmarks: Self.landmarks,
+                facts: Tour.Facts(place: .area(.bookcase)), doors: log.doors)
+            engine.next()
+            engine.observe(.init(place: .book("sherlock")))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write,
+                                 caret: .init(noteID: "scandal", blockID: "b1", ordinal: 1, takeCount: 1)))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write,
+                                 caret: .init(noteID: "scandal", blockID: "b40", ordinal: 40, takeCount: 1)))
+            engine.observe(.init(place: .note("scandal"), noteMode: .write,
+                                 caret: .init(noteID: "scandal", blockID: "b40", ordinal: 40, takeCount: 2)))
+            engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+            walkFromTakesToTheBookcase(engine)
+            #expect(engine.state.step == .ownNote)
+            engine.observe(.init(
+                place: .note("mine"), noteMode: .write,
+                note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0), asks: owed))
+            #expect(engine.state.step == .protectPassphrase)
+            #expect(log.completions == 1, "the close completes the tour the moment it arrives")
+            #expect(engine.spotlight.groups.isEmpty, "a centred card: nothing rung")
+            engine.next()
+            #expect(engine.state.step == .protectWords)
+            engine.next()
+            #expect(engine.state.step == .endCard)
+            #expect(log.completions == 1, "once")
         }
     }
 
@@ -2155,6 +2262,250 @@ struct TourEndCardTests {
             place: .note("mine"), noteMode: .write,
             note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0)))
         return engine
+    }
+
+    /// VX-735: the same road, on a library that owes both closing asks — the
+    /// engine stands on the passphrase card.
+    static func engineAtTheClose(_ session: AppSession) -> TourEngine {
+        let engine = TourEngine(
+            session: session,
+            landmarks: .init(seededBookID: "sherlock", firstStoryID: "scandal", fieldGuideID: "guide"),
+            facts: Tour.Facts(place: .area(.bookcase)),
+            doors: TourEngine.Doors(
+                navigate: { _ in }, openFieldGuide: {}, recordCompleted: {}, finished: { _ in }))
+        func write(_ block: String, _ ordinal: Int, takes: Int = 1) -> Tour.Facts {
+            .init(place: .note("scandal"), noteMode: .write,
+                  caret: .init(noteID: "scandal", blockID: block, ordinal: ordinal, takeCount: takes))
+        }
+        engine.next()
+        engine.observe(.init(place: .book("sherlock")))
+        engine.observe(.init(place: .note("scandal"), noteMode: .write))
+        engine.observe(write("b1", 1))
+        engine.observe(write("b40", 40))
+        engine.observe(write("b40", 40, takes: 2))
+        engine.observe(.init(place: .note("scandal"), noteMode: .takes))
+        walkFromTakesToTheBookcase(engine)
+        engine.observe(.init(
+            place: .note("mine"), noteMode: .write,
+            note: .init(noteID: "mine", starred: false, tagCount: 0, bookCount: 0),
+            asks: .init(passphrase: true, words: true)))
+        return engine
+    }
+}
+
+// MARK: - VX-735 — the closing cards, laid out whole through the live overlay
+
+@Suite("VX-735 — the closing cards lay out whole (the geometry oracle)", .serialized)
+@MainActor
+struct TourClosingCardTests {
+    /// **Her overflow, gone** (VX-735's screenshot: the end card stacked the
+    /// nav summary, the passphrase ask and the twelve words and ran off the
+    /// window). Through the LIVE overlay on a standard window (1100 × 720, the
+    /// end-card pin's), over the real road: the passphrase card and the words
+    /// card — the words shown, copied and at the warning, its tallest state —
+    /// each sit WHOLE inside the window; the words card's clipboard caveat is
+    /// laid out at the card's FULL width under the grid (never a squished side
+    /// column: as wide as the look itself), and its words whole. Both rooms.
+    @Test func theClosingCardsSitWholeOnAStandardWindowWithTheCaveatFullWidth() async throws {
+        #if DEBUG
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            try await Self.walkTheClose(session, scheme: .light)
+            try await Self.walkTheClose(session, scheme: .dark)
+        }
+        #endif
+    }
+
+    #if DEBUG
+    static func walkTheClose(_ session: AppSession, scheme: ColorScheme) async throws {
+        let road = PlantedRoad()
+        let created = try await road.created()
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(
+            created.0, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
+        let library = TourEndLibraryModel(standing: standing)
+        let engine = TourEndCardTests.engineAtTheClose(session)
+        #expect(engine.state.step == .protectPassphrase)
+        TourOracle.cardFrame = nil
+        TourClosingOracle.copiedCaveatFrame = nil
+        TourClosingOracle.stackedLookFrame = nil
+        let window = NSWindow(
+            contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: LiveClosingCardRig(
+            engine: engine, scheme: scheme, standing: standing, library: library))
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        // The passphrase card.
+        await settle(window, hosting) { TourOracle.cardFrame != nil }
+        await settle(window, hosting, turns: 20) { false }
+        try expectWhole("\(scheme) the passphrase card", in: hosting.bounds)
+        // Next → the words card; the look shown, copied, at its warning.
+        engine.next()
+        #expect(engine.state.step == .protectWords)
+        await library.showWords()
+        library.look.copy()
+        library.look.writtenDown()
+        #expect(library.look.phase == .warning && library.holdsTheDoors)
+        await settle(window, hosting) { TourClosingOracle.copiedCaveatFrame != nil }
+        await settle(window, hosting, turns: 30) { false }
+        try expectWhole("\(scheme) the words card at its warning", in: hosting.bounds)
+        let caveat = try #require(TourClosingOracle.copiedCaveatFrame, "\(scheme): the caveat drew")
+        let look = try #require(TourClosingOracle.stackedLookFrame, "\(scheme): the stacked look drew")
+        #expect(abs(caveat.width - look.width) <= 1,
+                "\(scheme): the caveat spans the look's full width (\(caveat.width) of \(look.width))")
+        let card = try #require(TourOracle.cardFrame)
+        #expect(caveat.width >= TourClosingCard.width - 60 - 1,
+                "\(scheme): the caveat has the card's whole measure, never a side column")
+        #expect(caveat.minX >= card.minX && caveat.maxX <= card.maxX + 0.5, "\(scheme): inside the card")
+        // Its words are laid out whole at that width (never truncated).
+        let free = NSHostingView(rootView: Text(ProtectionWords.wordsLookCopied)
+            .font(VoiceTokens.fallback(for: scheme).small)
+            .frame(width: caveat.width, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true))
+        #expect(caveat.height >= free.fittingSize.height - 0.5, "\(scheme): the caveat is whole")
+        library.look.close()
+    }
+
+    /// **F-W3 (the 2026-11-02 walk, adjudicated FIX) — the words card's ASK
+    /// lays out whole, in both voices.** A library WITH a passphrase: the
+    /// passphrase card is skipped, and the words card's look asks the
+    /// passphrase first (rule 6). The walk's W3 found the one-row ask cutting
+    /// "Show my twelve words" to "Show my twelve w…" in Terminal's monospace
+    /// at the card's measure. Through the live overlay, each voice (a real
+    /// `ThemeStore` on the store's voice): the card whole in the window, and
+    /// both ask doors' words drawn at least as wide as the words themselves
+    /// (a truncated one-line label is narrower than its words) and inside the
+    /// card. RED on c50512c0d (the one-row ask) — the record quotes the line.
+    @Test func theWordsCardsAskForThePassphraseLaysOutWholeInBothVoices() async throws {
+        #if DEBUG
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            for voice in [ThemeVoice.terminal, .study] {
+                try await Self.walkTheAsk(session, voice: voice)
+            }
+        }
+        #endif
+    }
+
+    #if DEBUG
+    static func walkTheAsk(_ session: AppSession, voice: ThemeVoice) async throws {
+        try session.operations.setThemeVoice(voice)
+        let theme = ThemeStore(session: session)
+        let themeTask = Task { await theme.start() }
+        defer { themeTask.cancel() }
+        for _ in 0..<100 where theme.settings.voice != voice {
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(theme.settings.voice == voice, "precondition: the store wears \(voice)")
+        let road = PlantedRoad()
+        let created = try await road.created()
+        #expect(await ProtectionOpenRoad.setFirstPassphrase(session: created.0, new: "a passphrase") == .set)
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let standing = RoadStandingModel.make(
+            created.0, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
+        #expect(TourEndLibraryModel.asks(standing) == .init(passphrase: false, words: true))
+        let library = TourEndLibraryModel(standing: standing)
+        let engine = TourEndCardTests.engineAtTheClose(session)
+        TourOracle.cardFrame = nil
+        TourClosingOracle.askDoorFrames = [:]
+        let window = NSWindow(
+            contentRect: NSRect(x: 40, y: 40, width: 1100, height: 720),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: LiveClosingCardRig(
+            engine: engine, scheme: .light, standing: standing, library: library)
+            .environment(theme))
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        // The facts read the library: no passphrase card — the words card.
+        await settle(window, hosting) { engine.state.step == .protectWords }
+        #expect(engine.state.step == .protectWords, "\(voice): the passphrase card is skipped")
+        await library.showWords()
+        #expect(library.look.phase == .asking, "\(voice): the look asks the passphrase (rule 6)")
+        await settle(window, hosting) { TourClosingOracle.askDoorFrames.count == 2 }
+        await settle(window, hosting, turns: 30) { false }
+        try expectWhole("\(voice) the words card asking", in: hosting.bounds)
+        let card = try #require(TourOracle.cardFrame)
+        let tokens = theme.tokens(for: .light)
+        for (key, words, weight) in [("cancel", ProtectionWords.wordsLookCancel, Font.Weight.regular),
+                                     ("show", ProtectionWords.wordsLookShow, Font.Weight.semibold)] {
+            let drawn = try #require(TourClosingOracle.askDoorFrames[key], "\(voice) \(key): the door drew")
+            let free = NSHostingView(rootView: Text(words).font(tokens.small).fontWeight(weight).fixedSize())
+            let needed = free.fittingSize.width
+            #expect(drawn.width >= needed - 0.5,
+                    "\(voice) \(key): drawn \(drawn.width) pt, the words need \(needed) pt — truncated")
+            #expect(drawn.minX >= card.minX && drawn.maxX <= card.maxX + 0.5, "\(voice) \(key): inside the card")
+        }
+        library.look.cancel()
+    }
+    #endif
+
+    /// The card drew at its measure and sits wholly inside the window
+    /// (SwiftUI's global space is the window content's own, top-left origin —
+    /// the hosting view fills it).
+    static func expectWhole(_ what: String, in bounds: CGRect) throws {
+        let card = try #require(TourOracle.cardFrame, "\(what): the card drew")
+        #expect(card.width <= TourClosingCard.width + 0.5, "\(what): the card's measure")
+        #expect(card.height > 60, "\(what): a real card, \(card.height) pt")
+        #expect(card.minY >= -0.5 && card.maxY <= bounds.height + 0.5
+                && card.minX >= -0.5 && card.maxX <= bounds.width + 0.5,
+                "\(what): whole inside the window — \(card) in \(bounds)")
+    }
+    #endif
+}
+
+/// The closing cards' live composition: the real `TourOverlay` with the
+/// closing asks read from the real faces (`TourEndLibraryModel.asks`) and the
+/// overlay's factory handing back the test's own model (so the pin drives
+/// the look the card draws).
+private struct LiveClosingCardRig: View {
+    let engine: TourEngine
+    let scheme: ColorScheme
+    let standing: RoadStandingModel
+    let library: TourEndLibraryModel
+
+    var body: some View {
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay {
+                TourOverlay(
+                    engine: engine,
+                    sources: TourFactSources(
+                        selection: { .post("mine") },
+                        noteDetail: { ("mine", .write) },
+                        caret: { nil },
+                        bookNoteLive: { false },
+                        isStarred: { _ in false },
+                        closingAsks: { [standing] in TourEndLibraryModel.asks(standing) }),
+                    endLibrary: { [library] in library })
+            }
+            .environment(\.colorScheme, scheme)
     }
 }
 

@@ -21,12 +21,15 @@ import VariorumCore
 @MainActor
 @Suite("13n-c UXR1-3 — the bulk row fits the list column at the default window")
 struct LibraryBulkRowGeometryTests {
-    /// The bulk row's room at the app's `defaultSize` (1240 pt) with the info
-    /// panel open: the window − the sidebar's ideal − its seam, then the
-    /// panel's share of what is left − the panel's 1-pt divider, then the
-    /// controls' 24-pt padding either side.
+    /// The bulk row's room at the app's `defaultSize` with the info panel
+    /// open: the window − the sidebar's ideal − its seam, then the panel's
+    /// share of what is left − the panel's 1-pt divider, then the controls'
+    /// 24-pt padding either side. VX-737 (P-736-4): the window is the shell's
+    /// own default (1270 × 840 since the fresh sidebar grew to 240; it was
+    /// 1240 with 210) — the library's 1029 pt is unchanged.
     static var room: CGFloat {
-        let library = 1240 - CGFloat(ShellSplit<EmptyView, EmptyView>.idealWidth)
+        let library = ShellSplit<EmptyView, EmptyView>.defaultWindowSize.width
+            - CGFloat(ShellSplit<EmptyView, EmptyView>.idealWidth)
             - ShellSplit<EmptyView, EmptyView>.dividerWidth
         let list = library - LibraryPanelLayout.width(total: library) - 1
         return list - 2 * 24

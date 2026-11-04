@@ -2,7 +2,8 @@
 //  TourOverlay.swift
 //  Variorum
 //
-//  13s-b U2 — **THE TOUR'S FACES**: the coach card, the end card, and the one
+//  13s-b U2 — **THE TOUR'S FACES**: the coach card, the closing cards (VX-735),
+//  the end card, and the one
 //  ring the overlay draws itself (Write's ⑂ badge is AppKit's). Mockup v5,
 //  frame for frame: a small card saying one idea, its count, the user's real
 //  click advancing, End tour always there; NO DIM, EVER (R-13s-12 — the room
@@ -23,8 +24,9 @@ struct TourOverlay: View {
     let engine: TourEngine
     let sources: TourFactSources
     /// VX-307 U2b (rule 3 as amended: "the tutorial's last card asks, and shows the twelve words beside the ask") —
-    /// the end card's two asks (the composition root's factory; nil while no library's protection faces stand — VX-329
-    /// U1: the one road, so "today's road" no longer has an arm here). Made once, when the end card first shows.
+    /// the tour's two closing asks (the composition root's factory; nil while no library's protection faces stand —
+    /// VX-329 U1: the one road). VX-735: made once, when the close first shows, and shared by both closing cards (a
+    /// passphrase set on the first is handed to the second's look).
     var endLibrary: (@MainActor () -> TourEndLibraryModel)? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -38,7 +40,7 @@ struct TourOverlay: View {
     @State private var probe = TourWindowProbe.Handle()
     /// Write's ⑂ badge, when this step points at it — overlay-local.
     @State private var badgeFrame: CGRect?
-    /// VX-307 U2b — the end card's two asks, made when the end card first shows (the new road only).
+    /// VX-307 U2b — the closing asks, made when the close first shows (VX-735: both closing cards read it).
     @State private var library: TourEndLibraryModel?
 
     private var tokens: VoiceTokens {
@@ -54,7 +56,9 @@ struct TourOverlay: View {
             note: engine.noteFacts, isStarred: sources.isStarred,
             // VX-292 U3: steps 7, 9 and 11's facts.
             bookMode: sources.bookMode(), lensBoard: sources.lensBoard(),
-            block: engine.flipFacts)
+            block: engine.flipFacts,
+            // VX-735 (R-736-5): what the closing cards still owe.
+            asks: sources.closingAsks())
     }
 
     /// The ⑂ badge the current step points at, if any (by its block).
@@ -90,9 +94,9 @@ struct TourOverlay: View {
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { origin = $0 }
         .onChange(of: facts, initial: true) { _, now in engine.observe(now) }
-        // VX-307 U2b: the end card's two asks, made once when it first shows (the new road only).
+        // VX-307 U2b: the closing asks, made once when the close first shows (VX-735: a closing card).
         .onChange(of: engine.state.step, initial: true) { _, step in
-            if step == .endCard, library == nil { library = endLibrary?() }
+            if TourClosingCard.shows(step), library == nil { library = endLibrary?() }
         }
         // A3: while Write's takes panel is up at steps 5–6, the card moves
         // INTO the panel (its slot draws it above the sheet's scrim).
@@ -125,8 +129,7 @@ struct TourOverlay: View {
         if step == .endCard {
             TourEndCard(
                 tokens: tokens, scheme: scheme,
-                readmeExists: engine.readmeNoteExists,
-                library: library
+                readmeExists: engine.readmeNoteExists
             ) { engine.choose($0) }
                 .fixedSize(horizontal: false, vertical: true)
                 .modifier(MeasuredCard(size: $cardSize))
@@ -134,6 +137,17 @@ struct TourOverlay: View {
                 // so its click area and the oracle's reading) IS where it draws.
                 .padding(.leading, spot.width)
                 .padding(.top, spot.height)
+                .transition(.opacity)
+        } else if TourClosingCard.shows(step) {
+            // VX-735: the end card's asks, each a centred card of its own.
+            TourClosingCard(
+                tokens: tokens, scheme: scheme, step: step, library: library,
+                onNext: { engine.next() }, onEnd: { engine.endTour() })
+                .fixedSize(horizontal: false, vertical: true)
+                .modifier(MeasuredCard(size: $cardSize))
+                .padding(.leading, spot.width)
+                .padding(.top, spot.height)
+                .id(step)
                 .transition(.opacity)
         } else if !cardInPanel {
             coachCard(width: TourCoachCard.width)
@@ -352,9 +366,6 @@ struct TourEndCard: View {
     let scheme: ColorScheme
     /// The readme honesty gate (extra-pass MINOR-1).
     let readmeExists: Bool
-    /// VX-307 U2b (rule 3 as amended): the passphrase ask and the twelve words, side by side, above the doors — the
-    /// nil (no protection faces) draws the card without them.
-    var library: TourEndLibraryModel? = nil
     let onChoose: (Tour.EndChoice) -> Void
 
     /// The aside's one choice, pure so the pin can hold it: the full
@@ -386,19 +397,15 @@ struct TourEndCard: View {
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
-            if let library {
-                TourEndLibraryBlock(model: library, tokens: tokens)
-                    .padding(.top, 14)
-            }
+            // VX-735: the passphrase ask and the twelve words left this card
+            // for the closing cards before it (`TourClosingCard`) — the end
+            // card is its title, body, aside and three doors again.
             VStack(alignment: .leading, spacing: 9) {
                 ForEach(Self.choices(tokens), id: \.key) { door in
                     choice(door)
                 }
             }
             .padding(.top, 16)
-            // VX-307 U2b: while the words are on screen the doors wait — leaving would put the once-shown words away
-            // without her warning.
-            .disabled(library?.holdsTheDoors == true)
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 26)
@@ -457,6 +464,80 @@ struct TourEndCard: View {
         .buttonStyle(TourDoorStyle(tokens: tokens, role: door.role, font: door.font))
         .focusEffectDisabled()
         .focusable(false)
+    }
+}
+
+// MARK: - The closing cards (VX-735 — the end card's asks, a card each)
+
+/// **A closing card**: one of the end card's two asks on a centred card of its
+/// own (CastleRules rule 3's passphrase ask, then rule 2's look), her VX-735
+/// direction — *"splitting into two or three cards (tour close · passphrase ·
+/// twelve words)"*. The title is the ask's own approved title (`TourScript`),
+/// the body the Castle face moved whole (`TourPassphraseAsk`, `TourWordsAsk`),
+/// and the ways on are the coach card's: next (the ask, never a force) and End
+/// tour — both waiting while the words are on screen or a passphrase is being
+/// set (leaving would put the once-shown words away without her warning).
+struct TourClosingCard: View {
+    let tokens: VoiceTokens
+    let scheme: ColorScheme
+    let step: Tour.Step
+    /// The closing asks (nil: no protection faces stand — never reached, since
+    /// the rule skips both cards then; the card draws its title and doors).
+    let library: TourEndLibraryModel?
+    let onNext: () -> Void
+    let onEnd: () -> Void
+
+    /// The end card's measure (the mockup's `.centercard`), so the words'
+    /// two columns and the caveat beneath them have room.
+    static let width: CGFloat = TourEndCard.width
+
+    /// The steps drawn by this card.
+    static func shows(_ step: Tour.Step) -> Bool {
+        step == .protectPassphrase || step == .protectWords
+    }
+
+    private var title: String {
+        step == .protectPassphrase ? TourScript.protectPassphraseTitle : TourScript.protectWordsTitle
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(tokens.chromeLabel(title))
+                .font(tokens.title)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.bottom, 10)
+            if let library {
+                if step == .protectPassphrase {
+                    TourPassphraseAsk(model: library, tokens: tokens)
+                } else {
+                    TourWordsAsk(model: library, tokens: tokens)
+                }
+            }
+            Group {
+                if Tour.hasNext(step) {
+                    Button(tokens.chromeLabel(TourScript.next), action: onNext)
+                        .buttonStyle(VoicedButtonStyle(
+                            tokens: tokens, role: .primary, font: tokens.body.weight(.semibold)))
+                        .focusEffectDisabled()
+                        .focusable(false)
+                        .padding(.top, 16)
+                }
+                if Tour.hasEndTour(step) {
+                    Button(tokens.chromeLabel(TourScript.endTour), action: onEnd)
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet, font: tokens.small))
+                        .focusEffectDisabled()
+                        .focusable(false)
+                        .padding(.top, 10)
+                }
+            }
+            .disabled(library?.holdsTheDoors == true)
+        }
+        .padding(.horizontal, 30)
+        .padding(.vertical, 26)
+        .frame(width: Self.width, alignment: .leading)
+        .modifier(TourCardChrome(tokens: tokens, scheme: scheme, cornerRadius: 14))
+        .accessibilityElement(children: .contain)
     }
 }
 

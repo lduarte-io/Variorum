@@ -17,29 +17,24 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 ### Latest closeout
 
-**→ VX-292 (+ VX-559) CLOSED 2026-10-30 — THE ONBOARDING OVERHAUL (the plan + every unit/window record
-`notes/plans/vx-292-onboarding.md`; the ladder `notes/plans/vx-292-ladder-round1.md`; PR at the merge; the
-handoff `notes/handoffs/vx-292-handoff.md`).** Architect shape, one overnight, her advance release word
-(R-292-16). The tour rebuilt around the Prince and grown to thirteen steps + a five-stop leg (the flip and back,
-Read, Lenses live, Compare & Blocks, the book arc, the Settings stop); the tour now DRIVES (landings forced to
-the step's mode once per arrival, step 3's chapter landed through the book's own ascent, her own switches never
-overruled) and MENDS a missing or deletion-broken Prince through its own restore door — after the ladder, only
-where everything the road would do is undoing deletions. The offer line became the band's welcome card
-(yes · no only; the no road names the Help door; never-returns law kept). Sea glass (the icon's #C2DDD3) joined
-as the seventeenth palette and the unset-store default (read-time flip; the voice's colours live on as Classic).
-The Prince swept Sherlock from tour + the guide's classics walk; the two stale Restore-Tutorial labels now quote
-the registry verb. Five units (U1 · U-THEME · U2 · U3 · U4), each closed through a coordinator-granted stage
-window with in-place red-on-old watches and dev-store walks — the windows caught four never-run fixture pins,
-the locked-book gate hole, the test-host's Bookcase polluting unscoped test oracles, and one stale tab-table pin
-(each fixed same-window). One Fable ladder, closed at round 2: the one MAJOR (the mend gate fired on
-renamed/released chapters — edits, not deletions) fixed by the whole-effect gate with five pins; residuals
-recorded (QUESTIONS #255). Merged SECOND after vx-105 (the foreseen pin conflicts resolved to the combined
-truth); the folded 0.10.7 release carried both efforts' public bullets to stargazing.tech. Canon: the two-file
-deltas as drafted; bundle QUESTIONS #255; VX-712 closed hollow by its trace pin, VX-713 fixed, VX-415 superseded
-by VX-559. Born: VX-716/717/718 (all Parked with reasons). HELD FOR HER: the Prince front-note sentence,
-P-292-4/5 (sea-glass depth; Default/Classic naming), the words-card toast observation, the #255 pass. Next: her
-morning checklist in the handoff; the wording-only tour pass at her word (R-292-4's second half).
-
+**→ VX-736 CLOSED 2026-11-02 — THE 1.0.1 HOTFIX: THE TOUR'S CLOSING CARDS AND THE QUICK FIVE
+(the record `notes/plans/fixes/vx-736-hotfix-101.md`, FOR A LATER READER at its top; PR #214; the handoff
+`notes/handoffs/vx-736-handoff.md`).** Her ~2:45 AM kickoff after her fresh-profile test of the shipped 1.0; one
+overnight /architect-phase run, five members under one run ticket. The tour's overflowing final card became the
+CLOSING CARDS — a passphrase card then a twelve-words card, each skipped while its ask is not owed (the band
+card's own ledger truths; the VX-511 landed-account class), then the clean end card — with the onboarding audit
+(29 rows), the step-7 scroll sentence, and F-W3's ask-state truncation fixed test-first (VX-735). VX-727's
+outline is born in its note's wing; VX-737's fresh sidebar is 240 pt inside a 1270 × 840 default window
+(P-736-4 — the Library's one-line row kept); VX-738's wing label is off both quick-entry bars (the toolbar
+switcher stays); VX-729's vanishing take badge traced to the confirmed VX-702 instance (no display pass after a
+frame-constant edit on 27.0.1) and fixed on the house's needsDisplay road with a 14-row sibling sweep. Three
+Opus batches; gates A–D green (52/8 · 45/6 · 108/19 · 57/10); every watch red exactly as predicted; the joint
+walk J0–J5 PASS in both voices. One Fable ladder round: no BLOCKER, no MAJOR — closed at round 1. Canon: the
+tour line and the VX-552 line rewritten in place, §The Library's default 1240 → 1270, AppSpec's First-open
+parenthetical; the CastleRules one-word touch HELD for her. Born: VX-739–745; R-736-8 took the site's noindex
+off the four Variorum pages (stargazing-tech ac74b3a, deployed with the publish). Nothing mobile-visible.
+**Released as 1.0.1 the same night at her advance word** (R-736-4; notes "Minor bug fixes."; the outcome in the
+handoff). Next: hers — the morning bundle is the handoff's checklist.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
