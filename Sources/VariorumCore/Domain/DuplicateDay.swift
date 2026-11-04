@@ -24,8 +24,11 @@ import Foundation
 ///
 /// Never a write of the TITLE (`DisplayTitle` stays a display rule — the name
 /// is still derived), and never a forged `created_at`: the copy's own birth
-/// stays its own. Pure and dependency-free; the copy machine's duplicate road
-/// (`Operations.duplicateAsVersionBody`) is its one caller.
+/// stays its own. Pure and dependency-free; its callers are the copy machine's
+/// duplicate road (`Operations.duplicateAsVersionBody`) and — A-771-1, fork
+/// F-1's option (b) — her Copy to Wing (`Operations.copyNoteToWing`, both its
+/// mint paths), which the wire's `copy_note_to_wing` shares. Promote, diverge,
+/// the ownership forks and the saved version stay verbatim.
 public enum DuplicateDay {
     /// The `entry_date` a duplicate of this source is born with.
     public static func entryDate(

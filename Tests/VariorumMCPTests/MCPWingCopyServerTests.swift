@@ -192,6 +192,44 @@ struct MCPWingCopyServerTests {
         }
     }
 
+    /// **A-771-1 (fork F-1, option (b)):** an undated, untitled source's copy in the other
+    /// wing keeps the day its source is named for — stored as its `entry_date`, its name (the
+    /// one display rule, `mcpScopeTitle`) the source's, and the receipt naming it so. **RED ON
+    /// OLD** (the tree before A-771-1): `entry_date` NULL, the copy named for the harness day.
+    @Test func anUndatedUntitledSourcesWingCopyIsNamedAndDatedAsItsSource() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let research = try h.operations.createWing(name: "research")
+            let source = try h.operations.createPost(title: nil)
+            _ = try h.operations.newBlock(in: source.id, text: "Morning pages.", registeringUndo: false)
+            let bornOn = Date(timeIntervalSince1970: 1_781_956_800)  // 2026-06-20T12:00:00Z
+            try await h.database.write { db in
+                try db.execute(
+                    sql: "UPDATE container SET created_at = ? WHERE id = ?",
+                    arguments: [DateFormatter.variorumISO8601.string(from: bornOn), source.id])
+            }
+            let day = JournalDay.dayString(from: bornOn, calendar: JournalDay.storeCalendar)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.read, .note, source.id))
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.writeNew, .wing, research.id))
+
+            let copied = try await call(connection, "copy_note_to_wing",
+                                        ["note_id": .string(source.id), "wing_id": .string(research.id)])
+            #expect(copied.isError != true, "\(text(copied))")
+            let copyID = try #require(try json(copied)["note_id"] as? String)
+            let (stored, copyName) = try await h.database.read { db in
+                (try Container.fetchOne(db, key: copyID),
+                 try Queries.mcpScopeTitle(db, kind: .note, id: copyID, calendar: JournalDay.storeCalendar))
+            }
+            #expect(stored?.entryDate == day, "the copy keeps the day its source is named for")
+            #expect(stored?.title == nil, "no title is materialized")
+            #expect(copyName == day, "the copy is NAMED as its source is")
+            #expect(h.receipts.value.last?.detail == day, "the receipt names the note by that day")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - The note's own wing (her door never offers it)
 
     /// The wing the note already lives in refuses in words naming the road that copies within

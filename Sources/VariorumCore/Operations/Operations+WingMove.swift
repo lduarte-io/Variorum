@@ -214,17 +214,24 @@ extension Operations {
                  WHERE cb.container_id = ? AND cb.deleted_at IS NULL)
                 """,
             arguments: [postID]) ?? false
+        // A-771-1 (the VX-771 run — fork F-1, option (b)): her Copy to Wing keeps
+        // the day an undated, untitled source is named for (`DuplicateDay`), on
+        // both mint paths — the duplicate doors' rule, so her ⇧⌥⌘L and the wire's
+        // `copy_note_to_wing` never re-date the class (P-771-1's reach).
         if copyable {
             let copied = try copyPost(
                 db, sourceID: postID, chosenPicks: nil, carryFans: true,
-                intoWing: wingID
+                intoWing: wingID, keepingNamedDay: true
             )
             copy = copied.post
             blocks = copied.blocks
         } else {
             let bare = Container(
                 id: newID(), ownerId: currentOwnerID(), kind: .post,
-                title: source.title, profile: source.profile, entryDate: source.entryDate,
+                title: source.title, profile: source.profile,
+                entryDate: DuplicateDay.entryDate(
+                    title: source.title, entryDate: source.entryDate, profile: source.profile,
+                    createdAt: source.createdAt),
                 locked: false, floatingNotes: source.floatingNotes,
                 segmentationDefault: source.segmentationDefault,
                 lastTouchedAt: now, wingId: wingID,

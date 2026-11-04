@@ -784,8 +784,10 @@ extension Operations {
     /// `keepingNamedDay` (VX-759, PROVISIONAL P-771-1): the copy's
     /// `entry_date` by `DuplicateDay` — an undated, untitled, non-journal
     /// source's copy takes the source's creation day, so it is named and
-    /// sorted as its source is; any other source's stays verbatim. Only the
-    /// duplicate road passes `true`; every other copy door is byte-unchanged.
+    /// sorted as its source is; any other source's stays verbatim. The
+    /// duplicate road and (A-771-1) her Copy to Wing pass `true`; every other
+    /// copy door (promote, diverge, the ownership forks, the saved version) is
+    /// byte-unchanged.
     func copyPost(
         _ db: Database, sourceID: String, chosenPicks: [String: String]?, carryFans: Bool,
         intoWing destinationWing: String? = nil, keepingNamedDay: Bool = false
