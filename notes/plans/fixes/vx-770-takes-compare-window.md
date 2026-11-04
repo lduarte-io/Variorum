@@ -2867,7 +2867,7 @@ both voices.
 
 ### THE W2 RE-WALK (the W2 cycle's acceptance — an Opus re-walker under the orchestrator's HELD claim `vx-770-final`, 2026-11-04)
 
-**NOT DONE (first line, kept current):** IN PROGRESS — nothing walked yet.
+**NOT DONE (first line, kept current):** IN PROGRESS — trial 1 walked; trials 2–3, the control, the posture end PENDING.
 
 Build: `App/Variorum/DerivedData/vx770-gatef/Build/Products/Debug/Variorum.app` (FINAL bytes — `nm` finds the W2
 fix's `landingTargetJustMoved` ×6 in its `Variorum.debug.dylib`; branch head 4f0874651). The fix under watch: THE W2
@@ -2876,11 +2876,34 @@ ONE settled landing — the burst shows no second movement after rest, and the a
 
 | row | state |
 |---|---|
-| posture as found (pre-launch) | PENDING |
-| W2-R trial 1 · 2 · 3 (margin grid, her shape, both voices across the three) | PENDING |
+| posture as found (pre-launch) | DONE (below) |
+| W2-R trial 1 (Study, margin grid, P25 → P35) | **PASS — 0 hops, one landing** |
+| W2-R trial 2 · 3 | PENDING |
 | W1-R control (stack) | PENDING |
 | look line: her open fans stay open (R-770-1) | PENDING |
 | posture at the end | PENDING |
+
+**Posture AS FOUND (pre-launch, 10:41):** zero Variorum instances (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty);
+`variorum-restore-hold.json` inode **191598619**, 63 bytes, mtime Oct 20 02:53; `appearanceChoice` = `dark`; the dev
+defaults domain 778 keys (exported to the scratchpad `walk/rewalk/defaults-before.plist` for the end diff); GUI grants
+AX true · SCREEN true; stage HELD by `vx-770-final`; 38 GiB free. Launched the gatef binary directly with
+`OS_ACTIVITY_DT_MODE=YES`, stderr to the scratchpad `walk/rewalk/app.log` (pid 96002; window 1240×840 at (244,155)); no
+What's New sheet. The note opened in Compare (its remembered mode), fans closed; in Takes: **expand all**, then
+`style ▾` → **Margin grid** (`2 high · auto wide`), Study voice (Iowan, as found).
+
+**Method (the original walk's, unchanged):** each ⌘2 is a ~12-frame-per-second JPEG burst of the main window
+(`screencapture -l`, 5.5 s) and the original walker's `shift.py` over the board box (x 540–1860, y 360–1480 px);
+the app's own story is its `TakesArticle landing — … DONE: …` stderr line. Captures under
+`<home>/dev/variorum-vx-770/.walkshots-vx770/rewalk/` (gitignored by `.walkshots-*/`).
+
+**W2-R trial 1 — Study, margin grid, P25 → P35 (10 below): PASS.** Takes on P25 (clicked into it; bar "block
+25/40", its fan and every fan open); ⌘1; in Write scrolled down and clicked into **P35** (bar "block 35/40"); ⌘2 with
+the burst (`rewalk/t1-study-margin-p25-p35/`, `contact-17-23.png`). Frames 0–17 Write; frames 18–21 (≈0.3 s) the
+board's empty-state face (header "style: stack" — the known look line); **frame 22 the first board picture, P35
+already at the top, washed, its rail open (chosen + choose)**; frames 23–66 (≈3.5 s) shift 0 every frame (residual
+≤ 0.13 — the scroller indicator's fade), so no second movement. The story, verbatim:
+`TakesArticle landing — 0E4DB9F6-0D04-4E62-BE1A-563A0812E582 LAND | manifest rows=40 target=34 offset=-1 total=1988 derived=39 exactAbove=N | content=2757 | content=2763 | content=4189 | content=4312 | content=4174 | content=4636 | content=4720 | content=4785 | 0E4DB9F6-0D04-4E62-BE1A-563A0812E582 DONE: settled at top=0.0 after 0 hops, 1010 ms`
+(the same target as the original walk's W2 #1 — `target=34`, there `HOP 1 at 600 ms (top was 34.6)`).
 
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
