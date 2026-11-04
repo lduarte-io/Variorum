@@ -782,3 +782,34 @@ with and without comments").
   not the first grapheme Write draws (R-13u3-4, `BlockDecor.leadingGlyph`).
 - **R-B2-3:** the Study voice's compact comment chip prints an empty string for a one-comment
   block (`TakesShared.swift:811-818` + `commentPrefix == ""`) — dissolved by T3 if built.
+
+### B2-F1 — THE RULING (the orchestrator, 2026-11-04, repo-first before the build resumes)
+
+**P-770-3 (PROVISIONAL): OPTION (B) — a Compare gutter whose lane is a pure function of the
+column's width, never of comment presence.** Why (B) and not (A)/(C): her R-770-2 selection's own
+text was "Compare renders block comments IN THE GUTTER LIKE OTHER SURFACES", and VX-728's framing
+is the pull-request-of-prose case — READING an AI's notes beside the revised copy. (A)'s count
+badge doesn't show them; (C) never shows them in place at any width. (B) is Write's own
+architecture applied per column: a standing lane (so the measure never moves FOR a decoration —
+the lane may not appear or size by comment presence; width only), Write's ladder picking the face
+(card where the lane is wide, badge where narrow, yields below the floor), the shared face
+rendering. Riders binding the build:
+1. The lane is geometry-derived ONLY (column width); adding or deleting a comment never moves the
+   prose's measure or left edge — the per-surface pin asserts it.
+2. One machinery (P-3): T1's shared decision + T2's shared face; Compare grows NO comment code of
+   its own beyond the lane's geometry and the feed.
+3. The feed is the live `containerComments` per shown post (the implementer's proposal — adopted;
+   it also fences Compare out of VX-732's staleness class).
+4. THE TASTE COST IS HERS and goes to the morning bundle as its own QUESTIONS line: under (B),
+   wide Compare columns always carry the lane (≈499 → 340 pt at two columns on the default
+   window), comments or not. One line to overturn: the lane's width table is one function — her
+   "too much" flips it to (C)'s 36-pt badge lane or (A)'s strip badge cheaply, faces unchanged.
+
+**T1–T6: APPROVED as planned** (the oracle seam commits first, behaviour-neutral; red-on-old by
+restoring the two source files to the seam commit). Two notes: (a) the R-B2-3 empty Study chip
+may BE VX-731's carousel sighting (her recording's voice unverified) — if the oracle shows the
+old carousel drawing a face, pin the empty-chip road as the carousel arm's mechanism and fix THAT
+(the member's words still land true: she saw nothing); say which in the record. (b) T6 accepted:
+Takes inherits Write's thresholds and VX-696's short-block clip — VX-696 stays open, one later
+fix heals both; the walk notes the clip if seen, nothing more. Residue R-B2-1/2/3 confirmed as
+closeout ticket candidates (R-B2-1 and R-B2-2 are contract deviations predating this run).
