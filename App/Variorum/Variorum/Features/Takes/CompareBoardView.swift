@@ -98,14 +98,21 @@ nonisolated struct CompareProjection: Equatable, Sendable {
 /// A display row (the model derives these from `CompareComposition`'s
 /// segments; free segments flatten to index-paired rows so the LazyVStack
 /// virtualizes — P3: realized rows bound the cost, never post size).
-nonisolated enum CompareRow: Equatable, Identifiable {
+nonisolated enum CompareRow: Equatable {
     /// An unrelated stretch's row: each column's next block, side by side,
     /// own orders — absent cells render as clear space, never a "—" blank.
     case free(anchor: String?, peers: [String?], index: Int)
     /// A kin row — lineage speaks; cells align.
     case aligned(CompareComposition.AlignedRow)
 
-    var id: String {
+    /// **The COMPOSITION'S fingerprint — never the row's identity on screen**
+    /// (the VX-770 ladder, round 1 F4: the board keys rows by `spineID` alone,
+    /// so the type is no longer `Identifiable` — a `ForEach` over rows must
+    /// name `\.spineID`). Kind, running index and both sides, so it changes
+    /// whenever a header toggle re-arranges the composition: the VX-757 pins
+    /// read it to know a toggle moved the rows while their panes stayed put.
+    /// It was the row's `id`, and the board's key, before VX-757.
+    var compositionKey: String {
         switch self {
         case .free(let anchor, let peers, let index):
             return "free-\(index)-\(anchor ?? "·")-\(peers.map { $0 ?? "·" }.joined(separator: "|"))"
@@ -118,8 +125,9 @@ nonisolated enum CompareRow: Equatable, Identifiable {
     /// The anchor block it holds (`a:‹block›`), else the first peer block it
     /// holds (`p‹column›:‹block›`). The header toggles move rows between the
     /// two kinds ("follow this note's order") or change a free row's peer side
-    /// ("related blocks only"), and `id` — kind and running index — changed
-    /// with them, so the board tore down and re-made every such row, every
+    /// ("related blocks only"), and the row's old key — kind and running
+    /// index, the row's `id` then, `compositionKey` now — changed with them,
+    /// so the board tore down and re-made every such row, every
     /// cell's pane included: each re-made pane re-measures from its seed, and
     /// a board of them re-lays at once (the flicker). Unique by construction:
     /// a block sits in one note (I2), each column shows a block once, and the
@@ -130,7 +138,7 @@ nonisolated enum CompareRow: Equatable, Identifiable {
            let column = peers.firstIndex(where: { $0 != nil }), let block = peers[column] {
             return "p\(column):\(block)"
         }
-        return id  // unreachable: a composed row always holds a block
+        return compositionKey  // unreachable: a composed row always holds a block
     }
 
     /// The anchor block this row shows (an aligned row always holds one).

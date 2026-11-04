@@ -11,7 +11,8 @@
 //  them change the composition — "follow this note's order" moves every row of
 //  a lineage-sharing pair between the ALIGNED and the FREE arm, and "related
 //  blocks only" changes the peer side of a free stretch. The board keyed a
-//  row by its kind and running index (`CompareRow.id`) and drew the two kinds
+//  row by its kind and running index (`CompareRow.id` then, `compositionKey`
+//  now — the composition's fingerprint, read below) and drew the two kinds
 //  through two different view structures, so each such toggle tore down and
 //  re-made every affected row — every cell's pane included. A made pane is
 //  born at a 24-pt seed and measured before it has width; its real height
@@ -334,13 +335,13 @@ struct CompareToggleIdentityTests {
             let mounted = paneObjects(in: hosting)
             try #require(mounted["pane:compare|\(b)"] != nil, "fixture: the draft's unrelated tail shows")
             try #require(mounted["pane:compare|\(x)"] == nil, "fixture: the twin's unrelated tail is filtered away")
-            let rowsBefore = model.rows.map(\.id)
+            let rowsBefore = model.rows.map(\.compositionKey)
 
             let off = await flip("related=off", window, hosting, from: mounted, expecting: world.shownVariants) {
                 model.relatedOnly = false
             }
             try #require(off["pane:compare|\(x)"] != nil, "premise: OFF shows the twin's tail")
-            try #require(model.rows.map(\.id) != rowsBefore,
+            try #require(model.rows.map(\.compositionKey) != rowsBefore,
                          "premise: the toggle changed the composition's rows")
             #expect(remade(mounted, off).isEmpty,
                     "turning it OFF re-made no pane that stayed (re-made: \(remade(mounted, off)))")
@@ -401,11 +402,11 @@ struct CompareToggleIdentityTests {
                 window.close()
             }
             let mounted = paneObjects(in: hosting)
-            let rowsBefore = model.rows.map(\.id)
+            let rowsBefore = model.rows.map(\.compositionKey)
             let off = await flip("stranger follow=off", window, hosting, from: mounted, expecting: world.shownVariants) {
                 model.followAnchorOrder = false
             }
-            #expect(model.rows.map(\.id) == rowsBefore,
+            #expect(model.rows.map(\.compositionKey) == rowsBefore,
                     "the trace's reason: no lineage, the same rows in both arms")
             #expect(remade(mounted, off).isEmpty, "re-made: \(remade(mounted, off))")
         }
