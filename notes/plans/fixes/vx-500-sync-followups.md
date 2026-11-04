@@ -2477,3 +2477,44 @@ arming), `Sync/SyncTransport.swift`'s `SyncPullCountTransport` doc, `Tests/Vario
 
 **Not yours:** anything beyond the four items; the closing runs; the PR. **ENVIRONMENT TRAPS — this file's section of
 that name, binding verbatim.**
+
+### LADDER FIX RECORD (the Fable implementer, 2026-11-04; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+**NOT DONE (the record's first line):** nothing of the brief's four items is left undone (LIVE STATUS below). NOT done
+because not this session's: the closing runs (the Mac suites, core debug + release, the phone build — the
+orchestrator's), the PR, round 2, any store/server/stage contact, anything beyond F1–F4. NOT added though a reviewer
+might want it: an engine-level scene for the discard road under a transport WITH the count surface (the new pin runs
+over `FaultInjectingTransport`, which lacks it, so `total` is nil in the readings and the pin compares `done` against
+the fake's own feed count — the double-count is identical either way, and `askedForTotal`/`remaining` are untouched by
+the fix by design). Push posture per the orchestrator's amendment: ONE push attempt per piece, no retries (GitHub
+incident — Git Operations degraded); unpushed commits noted per row and pushed at the close or the all-clear.
+
+#### LIVE STATUS (the ladder fix session; flipped per piece, in the piece's own commit)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | F1 — `downloaded = 0` in the discard branch + the engine-scene pin (red-on-old) | DONE (this commit) — the pin `SyncProgressTests.aDiscardedUndecodableStageRestartsTheDownloadsProgressCount` (the F1 (2) fixture shape: the 5-window interrupt, one staged payload corrupted in place, `pull(progress:)` driven raw with a `LockIsolated` collector); RED at `8992c4c68` (750 vs 375 — the lines below), GREEN with the one-line reset; `askedForTotal`/`remaining` untouched |
+| 2 | F2 — `SyncPullCountTransport`'s doc to R-500-1's index-only shape | PENDING |
+| 3 | F3 — `stagedRowCount` read only when `progress != nil` | PENDING |
+| 4 | F4 — the ratio pin's arithmetic by Duration division, no attosecond Int64 | PENDING |
+| 5 | Close — build, the brief's filter run with its count, the self-assessment | PENDING |
+
+#### F1 — the red line on the pre-fix tree (piece 1)
+
+At the committed tip `8992c4c68` (tree holding ONLY the new pin), `swift test --filter
+"SyncProgressTests/aDiscardedUndecodableStageRestartsTheDownloadsProgressCount"` →
+`✘ … recorded an issue at SyncProgressTests.swift:183:9: Expectation failed: downloading.last?.done == total` with
+`downloading.last?.done → 750` · `total → 375` — the predicted double-count exactly (the 200-row stage + the 175
+fetched on resume, then the whole 375-row feed re-fetched on top after the discard); then
+`✘ Test run with 1 test in 1 suite failed after 0.646 seconds with 1 issue.` With `downloaded = 0` in the discard
+branch: `swift test --filter "SyncProgressTests"` → "Test run with 8 tests in 1 suite passed after 1.606 seconds";
+`--filter "ResumableCatchUpTests|SyncSchedulerTests"` → "Test run with 29 tests in 3 suites passed after 9.772
+seconds" (the discard road's standing pins unmoved).
+
+#### The close (piece 5)
+
+PENDING.
+
+#### SELF-ASSESSMENT (the first of the two reviews)
+
+PENDING.

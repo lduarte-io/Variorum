@@ -147,6 +147,44 @@ struct SyncProgressTests {
         #expect(try b.cursor() == (await server.headSeq), "converged")
     }
 
+    /// THE PIN (whole-diff ladder round 1, F1; red on the tip `8992c4c68`: the last reading's `done` was TWICE the
+    /// feed — the stage's rows counted once from the stage and again from the refetch). A resumed round whose stage
+    /// will not decode (a stage an earlier build left — the F1 (2) road) discards it and re-fetches from the committed
+    /// cursor; the progress count restarts with the discard, so the download still ends at the feed's true count.
+    @Test func aDiscardedUndecodableStageRestartsTheDownloadsProgressCount() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, seed: 2)
+        try seedCorpus(a, posts: 12, blocksPerPost: 10)
+        try await a.push()
+        let total = try await feedCount(server)
+        await transport.armFailPull(atCall: 6)
+        await #expect(throws: InjectedNetworkFault.self) { try await b.pull(batchSize: 40) }
+        let staged = try #require(try b.db.fetchInt("SELECT COUNT(*) FROM sync_pull_stage"))
+        #expect(staged == 200, "five full windows staged before the fault")
+        // One staged row's payload corrupted in place — the F1 (2) fixture shape
+        // (`ResumableCatchUpTests.anUndecodableStagedRowCostsOneDownloadNeverAWedge`).
+        try await b.db.write { db in
+            try db.execute(sql: """
+                UPDATE sync_pull_stage SET payload = '{"renamed":1}'
+                WHERE rowid = (SELECT MIN(rowid) FROM sync_pull_stage)
+                """)
+        }
+
+        let readings = LockIsolated<[SyncProgress]>([])
+        try await b.withAsync { _ in
+            _ = try await b.engine(batchSize: 40).pull { reading in
+                readings.withValue { $0.append(reading) }
+            }
+        }
+        let downloading = readings.value.filter { $0.phase == .downloading }
+        #expect(!downloading.isEmpty, "the resumed round reported its download")
+        #expect(downloading.last?.done == total,
+                "the count restarts with the discarded stage — the download ends at the feed's count, never the dead stage plus the refetch on top")
+        #expect(try b.cursor() == (await server.headSeq), "the round commits the whole feed")
+    }
+
     /// R-500-1 — the count's relation to the feed, as the server has it: under a non-zero horizon the feed serves nothing
     /// written inside it, while the INDEX-ONLY count counts every committed row past the cursor; once the horizon has
     /// passed the feed serves exactly that many. The fake mirrors the server's shape (owner + seq, no horizon term), so a

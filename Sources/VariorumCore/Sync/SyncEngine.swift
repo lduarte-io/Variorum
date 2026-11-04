@@ -657,6 +657,12 @@ public struct SyncEngine: Sendable {
                 "pull stage: a staged row would not decode; the stage was discarded and the download starts again from the committed cursor \(since, privacy: .public)")
             mayRefetch = false
             fetchCursor = since
+            // Ladder round 1, F1: the honest count restarts with the refetch —
+            // the discarded stage's rows are downloaded again and would
+            // otherwise count twice (`done` up to ~2× the feed).
+            // `askedForTotal`/`remaining` rightly stay: the total was counted
+            // from `since`, which is still the refetch's base.
+            downloaded = 0
         }
         var emptyReport = PullReport()
         emptyReport.newCursor = since
