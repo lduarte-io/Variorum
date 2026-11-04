@@ -2625,7 +2625,7 @@ domain 725 keys; GUI grants AX true · SCREEN true; 51 GiB free.
 | W12 R-770-1 three takes, delete one → stays open | PASS (Study) |
 | W13 B3-P1 archive road | PASS (Study) |
 | W14 the seat — Takes AND Compare (F1) | PASS — Takes (card press, Study; bar door, Terminal) and Compare (card press, Study) |
-| W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PENDING |
+| W15 VX-757 "follow this note's order" ×5, "related blocks only" ×2 | PASS (Study, top + mid: zero board pixels change); Terminal PENDING |
 | W16 VX-740 make outline note ×3 → one column each | PENDING |
 | W17 VX-739 the word count after two take flips | PENDING |
 
@@ -2793,3 +2793,23 @@ its named any-road staging.
   lightweight face — no header, no style bar, no gutter, open fans drawn inline as full-width cards
   (`w10b-main-inactive-small.png`, `w10b-two.png`) — so no Takes gutter is mounted to watch while the other window
   deletes. (A look line for the orchestrator: that face is the one-live-surface rule, presumably by design.)
+
+### W15 — VX-757, the Compare toggles (`vx770 comments walk` beside its Duplicate-with-Tags twin, two columns, the
+auto-fill seated the twin as "versions")
+**Method:** each press is a real click on the chip (`click.sh`, ~3 s apart), the window recorded throughout
+(~13 fps, `screencapture -l`), and every frame diffed against the previous one and against frame 0 over the whole
+window (`scratchpad/walk/boarddiff.py`, |Δ| > 40 of 255): any pixel the toggle moves, blanks or re-grows shows.
+- **Study, top of the board** (`.walkshots-vx770/w15-study-top/`, 559 frames, 14 presses): "follow this note's order"
+  ×10 (five off/on cycles), then "related blocks only" ×4 (two cycles). **Every press changed ONLY the chip row**
+  (bbox y 303–336 px — the chip's own "on"/"off" word and its neighbours' shift); **not one pixel of the board changed
+  at any frame** — no flicker, no row collapsing and re-growing, no jump; every second press returns the window to
+  frame 0 exactly (vs-frame0 = 0).
+- **Study, mid-board** (C2's tail–C4 on screen, `.walkshots-vx770/w15-study-mid/`, 528 frames, the same 14 presses):
+  identical — only the chip row changes, the board never.
+- **Look line, the re-ordered pair** (twin's C4 dragged above C3 by its ⠿ in Compare — "Undo Reorder"; toast
+  "Reordered. This column is following the first note's order right now — the new order shows with “follow this
+  note's order” off."; the twin's C3 then carries "moved (order differs in this version)" —
+  `w15-reorder-small.png`; burst `.walkshots-vx770/w15-study-reordered/`, `contact.png`): follow OFF → the twin column
+  shows its own order (C4 above C3), the "moved" line goes and the anchor's rows close up by its height; ON → back.
+  Each change lands in ONE frame (≈80 ms after the chip) and the next frame is identical — the layout changes as it
+  should, in one step, nothing re-grows.
