@@ -2212,7 +2212,7 @@ boundary is v1_36**: an export from this build refuses on every build before thi
 | # | Piece | Status |
 |---|---|---|
 | 1 | The migration, its own commit FIRST: `v1_36_fk_child_indexes` (the two plain FK child indexes), registered after v1_35; the DDL doc names the mechanism (sqlite.org/foreignkeys.html §4, the feed's registry order), the measured gain (330,231 → 85,315 ms, 3.9×), why NOT a §12 lockstep event (SyncSpec §2 — mirrors carry no indexes; the completeness walk classifies COLUMNS, an index adds none; marker stays 14), and the VX-502 export line; the index-enumerating schema pins updated (`MigrationTests.expectedIndexes`, the `theDaySearchIndexArrivesForAnOlderStore` subtracting set, the new arrival test `theDeferredFKChildIndexesArriveForAnOlderStore` on the v1_34 precedent's shape) | DONE (this commit) — `swift build` green; `swift test --filter MigrationTests` → "Test run with 29 tests in 3 suites passed" (ONE consequential pin edit, annotated in place per the ritual: `theDeadPlacementByBlockIndexArrivesForAnOlderStore` migrates v1_33 → head, so its subtraction now carries v1_36's two beside v1_34's one — v1_34's own claim unchanged) |
-| 2 | The pin (red-on-old, the bisection's arm E/F shape): UNGATED, fast, in-memory — `DeferredFKChildScanPinTests`, a RATIO bound (the pending-violations arm vs the no-pending control) | NOT-STARTED — the settled design: arm E vs arm G at N=8,000 on the real migrated schema under `applyingRemote` + `defer_foreign_keys = ON`, ratio < 4 (old tree reads ~10–16×, new ~1×); red run via the traps' named scratch revert of the v1_36 registration at a committed tip |
+| 2 | The pin (red-on-old, the bisection's arm E/F shape): UNGATED, fast, in-memory — `DeferredFKChildScanPinTests`, a RATIO bound (the pending-violations arm vs the no-pending control) | DONE (this commit) — green on the migrated tree: "[vx720-pin] 8000 takes: pending 0.180538782 seconds · control 0.17602559 seconds · ratio 1.03× (bound 4)", "Test run with 1 test in 1 suite passed after 0.537 seconds". The red-on-old run is next (the named revert below); its lines land in the following commit |
 | 3 | The bench re-run, the evidence: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3` on the migrated store; the INDEX_FIX knob RETIRED (the migration is the fix); the table's new column vs U1b's 330,231 ms; the VX-672 one-paragraph reasoning | NOT-STARTED |
 | 4 | Close: `swift build`; the sync suites filter; the broad core `swift test` foreground (the traps' flake + VX-722/VX-723 named if seen); self-assessment; the orchestrator's LIVE STATUS row 5b flipped | NOT-STARTED |
 
@@ -2231,6 +2231,24 @@ boundary is v1_36**: an export from this build refuses on every build before thi
   The index-enumerating pins elsewhere are per-OTHER-table (`block_comment`, `reading_section`, `mcp_grant`) —
   untouched by construction; `AuthRLSDDLTests` enumerates server DDL, no local index pin. The suite run:
   "Test run with 29 tests in 3 suites passed" (MigrationTests + the two sibling suites its filter matches).
+- **Piece 2 (this commit):** `Tests/VariorumCoreTests/DeferredFKChildScanPinTests.swift` — UNGATED, one test, ~0.5 s.
+  The U1b bisection's arm E (all blocks first, each `default_variant_id` naming its not-yet-inserted take, then the
+  takes — the apply's shape, statement shapes verbatim) against arm G as the in-test CONTROL (defaults NULL — no
+  pending violation, no child search), both on fresh real migrated in-memory stores under `applyingRemote` +
+  `PRAGMA defer_foreign_keys = ON`, the `INSERT INTO variant` statements timed alone, N = 8,000. The assertion is a
+  RATIO (pending/control < 4), never a tight number — **the load story, said honestly:** both arms run inside the one
+  test on the same machine moments apart, so load inflates them together and largely cancels in the ratio; the
+  migrated tree reads ≈ 1.0× (measured 1.03×; both arms ~22 µs a take) and the un-migrated tree ≈ 13–16× (U1b's arm E
+  316 µs vs G 19.4 µs at 10k; the scan grows with N), so the bound of 4 sits ≥ 3× from both sides — a flake needs a
+  4× pause landing inside ONE arm's ~0.18 s and not the other's, not mere machine load. A `PRAGMA foreign_keys == ON`
+  assert guards against a hollow green (with enforcement off no scan runs on ANY tree). The pin prints its
+  measurement on every run (`[vx720-pin] …`) so a future flake has forensics in the log.
+  **The named behavioral revert (the traps' rule, BEFORE it runs):** at the committed tip, revert ONLY
+  `Sources/VariorumCore/Persistence/Migrations.swift`'s `v1_36_fk_child_indexes` registration (the
+  `registerMigration` block — a scratch edit; the doc comment may stay), build, run
+  `swift test --filter DeferredFKChildScanPinTests` → RED recorded; restore by `git checkout --`,
+  `git diff --exit-code` clean; re-run → GREEN. (MigrationTests is NOT run under the revert — its enumerations
+  name the two indexes by design and would read red for the structural reason, not the behavioral one.)
 
 ### THE CLOSING WINDOW AS CONDITIONED BY TONIGHT'S COORDINATOR (nov3coordinator, 2026-11-04 — supersedes the closing-runs bullet's narrower Mac-suites line; accepted after the orchestrator verified the diff)
 
