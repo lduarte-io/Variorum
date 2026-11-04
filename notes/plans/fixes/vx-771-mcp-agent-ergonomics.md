@@ -116,14 +116,14 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | 4 | VX-760 mismatch honesty | 2 | FIXED — pins red on old 363323398, fix d8dd6945d (P-771-9) |
 | 5 | VX-761 replace form | 2 | BUILT — op arm 9074d5e20, wire pins red on old 5ab7c8318, the wire e4eab3416 (P-771-10) |
 | 6 | VX-369 error sweep (rider) | 2 | FIXED — the SWEEP TABLE (19 rows; BATCH 2 RECORD); the store-failure class worded, pins red on old fd71a4597, the words e3990cc0e (P-771-11); row 19 DEFERRED (unpinnable headless) |
-| 7 | VX-764 remove_tag answer | 3 | NOT-STARTED |
-| 8 | VX-769 gathering mint | 3 | NOT-STARTED |
-| 9 | VX-767 section_id verify | 3 | NOT-STARTED |
-| 10 | VX-768 book-form sha256 verify | 3 | NOT-STARTED |
+| 7 | VX-764 remove_tag answer | 3 | IN-PROGRESS (batch 3 — the BATCH 3 RECORD) |
+| 8 | VX-769 gathering mint | 3 | IN-PROGRESS (batch 3 — the BATCH 3 RECORD) |
+| 9 | VX-767 section_id verify | 3 | IN-PROGRESS (batch 3 — the BATCH 3 RECORD) |
+| 10 | VX-768 book-form sha256 verify | 3 | IN-PROGRESS (batch 3 — the BATCH 3 RECORD) |
 | 11 | VX-762 drop verify + B2 | 4 | NOT-STARTED |
 | 12 | VX-763 grant rows | 4 | NOT-STARTED |
 | 13 | VX-400 stop ends grants (rider) | 4 | NOT-STARTED |
-| 14 | VX-774 null-only edit_take empties the take (found in-run, batch 2 O-1; seated as a sub-issue) | 3 | NOT-STARTED |
+| 14 | VX-774 null-only edit_take empties the take (found in-run, batch 2 O-1; seated as a sub-issue) | 3 | IN-PROGRESS (batch 3 — the BATCH 3 RECORD) |
 
 ## Environment traps (every batch brief carries this section VERBATIM)
 
@@ -324,6 +324,53 @@ No revert is in flight.
 - **P-771-9 (VX-760):** the four fact patterns and their words; a character is a UTF-16 unit and the index is into the sent text; the facts are spoken under ANY live grant at edit, an unspent once grant included — the `divide_block` precedent (AF-10 (c): its anchor already answers "isn't in" / "more than once" / "already begins there" under the same refused-act-never-spends rule, so a once holder can already probe a take's text without spending). Alternative: speak the facts only under a standing grant (a once grant hears the table's sentence).
 - **P-771-10 (VX-761):** byte-level matching with overlapping occurrences counted, the exact count named; a replacement leaving the take blank refuses in the whole form's blank sentence; an empty `old_str` refuses at the parse, an empty `new_str` removes the passage; a call with neither form names both. Alternatives: canonical matching (a client's NFC passage finds an NFD take); non-overlapping counting.
 - **P-771-11 (VX-369):** a store failure on the wire says "Variorum's library store refused the work (SQLite error ‹code›: ‹SQLite's message›), so this call may not have landed — read what it touches before trying again." — the code and SQLite's own message (never the executed SQL), and no claim about what landed (a failed refusal-log write can follow a landed act); the catch-alls speak the wire's words alone where it has them. Alternatives: no detail at all (the keyed connection's form, for every store failure); keep the family's "Variorum couldn't complete ‹tool›:" prefix before the store words.
+
+### BATCH 3 RECORD — books & tags on the wire (VX-764 · VX-769 · VX-767/VX-768 verify legs · VX-774)
+
+**NOT DONE in this batch (first, as the protocol asks):** PENDING — written at the batch's close.
+
+**Implementer:** opus-implementer (one fresh session), 2026-11-04. Headless core only (`swift build` / `swift test --filter`), no stage, no xcodebuild. Started at `ebe3df7bc` (`git pull --ff-only`: already up to date).
+
+#### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| 0 — this record: the traces, the designs, VX-769's seam proposal | DONE (this commit) |
+| 1 — VX-774 pins red on old, then the fix | NOT-STARTED — design below |
+| 2 — VX-764 pins red on old, then the build | NOT-STARTED — design below |
+| 3 — VX-769 wire pins red on old, the seam, then the build | NOT-STARTED — design + seam proposal below |
+| 4 — VX-767 / VX-768 verify legs | NOT-STARTED — the suites to name below |
+| 5 — end-of-batch suites | NOT-STARTED |
+
+No revert is in flight.
+
+#### VX-774 — the trace (read before any code)
+
+- **The mechanism** (batch 2's O-1, re-read here): the whole form's blank check is the PARSE's (`MCPWriteTools+Edit.swift` `parseEdit`, `.editTake`'s `text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty` → `editTakeBlankRefusal`), on the text AS SENT. The op strips U+0000 afterwards (`Operations.editTakeUnderInsurance`, `.whole` → `StoredText.stripped(text)`), and U+0000 is not whitespace — so `text: "\u{0}"` passes the parse, the precondition holds, the stored text becomes `""`: R-VX171-2 ("edit_take never empties a take") broken on the wire.
+- **The replace form** checks its RESULT after the strip (`UniqueReplacement.apply(old, with: StoredText.stripped(new), …)` then `.wouldEmptyTake` on a blank result), so a `new_str` of only nulls replacing the whole take already refuses — a guard pin, expected green on both sides.
+- **The fix:** the parse's blank check reads `StoredText.stripped(text)` — one line, the door's own seam; the refusal words unchanged.
+
+#### VX-764 — the trace and the design (R-771-A, scope (a) only — the dial DECLINED)
+
+- **Today:** `remove_tag` (`MCPWriteTools+RemoveTag.swift`) → `Operations.removeTagForClient` (`Operations+MCPWrites.swift`): the application tombstoned, the tag kept, no intake (un-tag is a non-event, §19). Its answer is `{note_id, tag_id, tag, removed}` — silent about the living book the tag brought the note into, which keeps it (the reported board shape).
+- **Which books "still hold the note" by this tag:** the note's LIVE member rows (`status='member'`) in LIVING books — live, `kind='book'`, not finished (`locked = 0`), not archived, a readable rule (`RuleGrammar.read` → `.rule`) — whose rule names the removed tag POSITIVELY: a root in `RuleGrammar.positiveTagIDs(of:)` (the grammar's own walk — a reference under an even number of `not`s) at-or-above the removed tag by path in the book's wing (the subtree rule — intake's own `appliedTag(_:fallsUnderAnyOf:)`, made internal and reused, never a parallel check). PROVISIONAL edges (mine): (a) a rule that names the tag only under `not` is NOT listed — it never collected by the tag (removing it makes the note more eligible, not stranded); alternative: list every book whose rule references the tag at all (intake's hearing set, `tagIDs(of:)`); (b) a listed book is listed whether or not the note still matches its rule by another term (the fact is "this book holds it and collects by this tag"); alternative: evaluate the rule and list only books the note no longer matches; (c) living books only — a finished, sealed or archived book holding the note is not listed (its assembly is frozen or out of view); alternative: every live book.
+- **Read inside the act's own write transaction** (the VX-365 shape — no race with her edits): one statement over the note's memberships (`idx_reading_post_post`, then each reading by its key) — ∝ the note's memberships, never the corpus (P1 — pinned on EXPLAIN QUERY PLAN). Returned as `MCPTagRemoval.stillInBookIDs` (membership order).
+- **The fence:** each book NAMED (`{book_id, name}`) only where this client can READ it (`MCPGrantAuthority.decide(standing, book: mcpBookFacts, rung: .read)` — the `duplicate_note` `landed` / `move_note_to_wing` `left_books` precedent, the standing read just before the act); every other one — a fenced book (a Private book, the daily Journal) among them, since a fenced book matches no grant — COUNTED only. No id of an unreadable book is answered, so hidden never differs from missing.
+- **The answer:** `still_in_books` (the named ones; present whenever any book is stranded — `[]` when all are hidden) + `still_in_books_hidden_count` (absent when 0). A remove_tag that strands nothing answers EXACTLY as today (both keys absent — pinned byte for byte against the pre-change answer). NOTHING lands on any book: no membership row changes (pinned).
+- **The description** gains one sentence: un-tagging never takes a note out of a book that collects by the tag (a non-event, by design) — `still_in_books` says which still hold it; `remove_note_from_book` takes it out; for a board that drops a note when its tag goes, use a gathering (`create_gathering`), which shows exactly what its rule matches.
+
+#### VX-769 — the trace, the design and the SEAM PROPOSAL (R-771-B; P-771-2's tool shape)
+
+- **Her mint door, found:** the Bookcase's Mint gathering sheet (`RuleEditorModel.mint`, `Features/Readings/RuleEditor.swift`) → `ReadingsViewModel.create(name:kind: .gathering, querySpec:, wingId:, shelfId:)` → (in one runner closure) `assertBookNameIsFree(name)` then `Operations.createReading(name:kind: .gathering, profile: nil, sortField: .manual, sortDir: .asc, querySpec:, wingId:, shelfId:)` (`Operations+Reading.swift`) — which refuses a rule-less gathering (`gatheringRequiresRule`, R-13ic-4), requires a live wing, normalizes the rule spec, inserts the row and runs `intakeSweep` (silent for a gathering — intake runs only on a book). `saveFilterAsGathering` is the from-a-filter door (association ∧ filter) — not the plain mint.
+- **SEAM PROPOSAL (proposed here, then built — a code seam, not a product call): SHARE her mint's body.** Extract `createReading`'s transaction body into an internal `insertReading(_ db:, …, now:)` that `createReading` calls inside its write — byte-identical for every door of hers (its pins re-run) — so the wire's mint runs the SAME checks and row construction inside its own transaction (beside the wire's name guard and the rule's path resolution). Mirroring the row instead (`createBook`'s posture) would be a second construction that could drift from hers. The rule's paths resolve exactly as `set_book_rule`'s do (adopt the live same-path tag in the wing, else mint it — her editor's make-in-place): `setBookRule`'s `resolve` closure becomes a shared internal `resolveTagPath(_ db:, _ path:, &adoption)`, byte-identical for set_book_rule.
+- **The tool (PROVISIONAL P-771-2 as adjudicated):** `create_gathering` — `name`, `wing_id`, `rule`, all required (create_book's two sentences for name/wing; a missing or null rule refuses "rule is required — …"; a malformed or empty rule refuses in `MCPBookFacts.decodeRule`'s own words — the ONE wire parser `set_book_rule` reads; legacy terms refuse as there). WRITE NEW on the wing, wing scope only — `create_book`'s decision and ask road (`inWing`), listed where `create_book` is. Not a flushing act.
+- **The op:** `Operations.createGatheringForClient(named:inWing:rule:undoLabel:namesCountedBy:)` — one transaction: the live wing; the name (VX-357 strip, trimmed, `DisplayTitle.placeholder` if blank — `createBook`'s); the VX-259 name guard counting only readings the client can READ (`readableBooks`); the rule's paths resolved (adopt or mint); her `insertReading` body with `kind: .gathering` and her door's defaults (profile nil, manual/asc, no extents, no outflow, unshelved — the wire has no solo'd shelf, `create_book`'s posture — unstarred, unowned, unarchived, open). NOT an applying act: no `reading_post` row anywhere (pinned). ONE client-named undo `"‹client›'s gathering"` (NEW `MCPWriteAct.gathering` — the VX-639 vocabulary): `createBook`'s entry exactly (`revertImportedBook(id, posts: [])` tombstones it; the redo revives on that stamp); minted tags stay as vocabulary (`set_book_rule`'s precedent).
+- **The answer:** `gathering_id`, `name`, `wing_id`, `rule` (echoed in the wire's rule grammar as STORED — `MCPBookFacts.encode` with each tag's live path, the form `list_books` and `set_book_rule` read back; a leading `#` dropped), `notes` (the count `list_books`' gathering entry answers — its one read, `gatheringEntry`'s count, shared, never a second rule), and `minted_tags` when a path minted one (`set_book_rule`'s key). PROVISIONAL edge: the rule echoed as stored rather than byte-as-sent; alternative: the sent object verbatim.
+- **Reach:** nothing (a mint grants nothing — R-VX185-1); `decideGathering` answers the wire's row exactly as hers (pinned). `set_book_rule` on it answers the gathering sentence byte-unchanged (pinned). Activity in words + the receipt (`MCPPaneCopy.swift`, Mac-only — the expected sibling edit; unbuilt until the closing Mac window).
+
+#### VX-767 / VX-768 — the verify legs (plan)
+
+- VX-767: `import_document`'s one-document `section_id` — the parse (`MCPWriteTools.parseImport`), the act (`into` → `ops.importNote(…, section:)`), the schema + description (`MCPToolCatalog.importDocument`); the standing pins `MCPImportSectionServerTests` (VX-566). VX-768: the book form's `notes` records with per-take `sha256` (`MCPWriteTools.perform` `.importBook` → `MCPMintedBlocks.records`); the standing pins `MCPBookImportRecordsServerTests` (VX-567). Verdicts PENDING the suites' run.
 
 ## Morning bundle (grows all night; the closeout moves it to the handoff)
 
