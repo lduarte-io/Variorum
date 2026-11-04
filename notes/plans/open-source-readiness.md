@@ -1,6 +1,6 @@
 # Open-source readiness — decision state, the curated record, and the video fact sheet
 
-**Born 2026-11-03** from her open-source sitting (this file is the durable record of that conversation; the tickets live in the Linear project "Open-source readiness"). Status: **she is leaning toward full open source** (license undecided, AGPL the working lean), with the story/curated record publishable first and independently. Nothing here is a ruling until she says so; this file exists so no later session re-derives the reasoning.
+**Born 2026-11-03** from her open-source sitting (this file is the durable record of that conversation; the tickets live in the Linear project "Open-source readiness"). Status, hardened the same evening: **her stated direction is the FULL story — source code AND all the build documents, moving asap** ("i'm pretty sure i'm just going to be trying to show the whole story and moving asap towards releasing the source code and all of my documents on having built it… i honestly feel good about it"). License still unchosen (AGPL the working lean). The curated edition is thereby DEMOTED from a separate pre-release artifact to the READING-PATHS layer on top of the full release (§2). One launch, not two. Nothing here is a canon ruling; this file exists so no later session re-derives the reasoning.
 
 ## 1. The decision state (2026-11-03)
 
@@ -11,6 +11,8 @@
 - **History:** she leans toward publishing the REAL history ("showing all my cards at once" — commit ddf04e8b8 "Her paranoia was correct…" is a feature, not a liability). So: targeted `git filter-repo` excision of the few genuinely private files, NEVER a fresh-history republish. The audit produces the excision list.
 
 ## 2. The curated record — what is actually shared, story-first
+
+*(Reframed same evening: with the full release decided, this list stops being a privacy fence and becomes the TOUR — the posts, the video and a README-of-the-record that give readers entry points into 6.1M words and 10.7k commits nobody would otherwise navigate. The IN list below is the itinerary; the OUT list becomes VX-754's flag classes rather than withheld material — only other-people's-words, personal-beyond-the-story, credentials machinery and open-security detail stay out of the full release itself.)*
 
 The curated edition is the METHOD, separated from the PRODUCT canon. It is publishable before and independently of any code.
 
@@ -67,4 +69,6 @@ The video's thesis as she framed it: *"I want open source; I put a ton of work i
 4. **Security pass over open tickets & records** — no still-open Castle/sync/MCP finding may ship as a public roadmap; fix or defer each before the records go out.
 5. **Public repo mechanics** — README stance (open source, closed contribution), CONTRIBUTING + PR auto-close, SECURITY.md disclosure contact, the outsider build road (no sync, no signing, no stage).
 6. **Curated record assembly** — §2's IN list built, her editorial pass, the worked examples chosen.
-- Related, already filed: **VX-747** (the open format: tables + document-format spec).
+7. **The deep content sweep (VX-754, fan-out authorized by her 2026-11-03)** — everything in the share-set READ by eyes, not just scanned: every commit message, the full notes tree, skills/Tools/Server, code comments and strings, and the prompt record if she ships it. Flags, she rules; feeds VX-748's verdict list and VX-749's rehearsal.
+- The ticket map: VX-748 audit · VX-749 history rehearsal · VX-750 license+trademark (Needs Lillian) · VX-751 security pass · VX-752 repo mechanics · VX-753 the tour (reframed) · VX-754 deep sweep · VX-747 the open format (rides 13m).
+*[removed for publication]*
