@@ -2884,3 +2884,97 @@ Walk look-lines for closeout: the ~0.3–0.4 s Takes empty-state flash with marg
 reading "style: stack" during it (ticket candidate — a real mislabel); Compare's disabled
 first-comment door (candidate, possibly deliberate); W4's two-hop reveal (R-756-2, already
 residue); W9's VX-696 confirmations (the standing ticket's evidence).
+
+## THE W2 CYCLE (implementer: opus-implementer, 2026-11-04 — the walk's one finding, under THE WALK ADJUDICATION's two-step ruling)
+
+**NOT DONE (first line, kept current):** everything mounted is a PREDICTION until the orchestrator's
+window (this session is headless — no `xcodebuild test`, no app launch, no stage); no walk re-run; the
+scoped round 3.
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (the walk record W1–W17, THE WALK ADJUDICATION, the BATCH 1 RECORD whole, ladder round 1's F3, TEXTKIT2_NOTES in full, the walker's `app.log` landing stories + the W2 burst frames f-21/f-22) | DONE |
+| Gate 1 — the trace (below, written before any code) | DONE |
+| Gate 1 — the harness gap closed: the sibling pin staging the walk's note | NEXT |
+| Gate 2 — the minimal fix behind the predicted red | PENDING |
+| Behavioural revert + build-for-testing `vx770-w2` / `vx770-w2-rev` | PENDING |
+| READY-FOR-SUITES — the W2 cycle | PENDING |
+
+### THE TRACE — W2 (written before any code)
+
+**What the three stories say, line by line** (the walker's `app.log`, the `TakesArticle landing — …`
+lines at 07:54:31, 07:56:00, 08:02:52 — the DEBUG story the one authority NSLogs at its finish):
+1. `LAND | manifest rows=40 target=34|22|32 … derived=39 exactAbove=N` — an ENTRY landing that
+   OUTRANKED the memory (her block changed; `exactAbove=N`, 39 rows on the estimate: the page starts at
+   the mount's top, R-Q20 — the batch-1 road exactly). Every target is below the first screen, so the
+   first decided step aims the shipped `.foot` edge (`LandingAim.MinimalReveal.edge`, target > the
+   realized window).
+2. `content=3772 | 4295 | 4649 | 5665 | 5884` (and the two others) — the column's content height, as
+   the watch heard it (`watch.contentChanged`, one note per change): monotonic, 4–5 changes — NOT
+   F3's revisited-height corner.
+3. `HOP 1 at 600 / 525 / 611 ms (top was 34.6 / 24.0 / 19.6)` — the watch's look found the target's
+   band residual POSITIVE (the row too LOW — its bottom below the band's foot) and corrected from
+   quiet. 600/611 ms is the watch's `maxWait` cap (events kept re-arming the look past 0.35 s); 525 ms
+   is a quiet look 0.25 s after the last event (~275 ms). Either way, after the LAST report the
+   landing heard, the target sat off home and the in-storm re-aim (`reaimWhereTheColumnReEstimated`,
+   batch 1) did not aim.
+4. `content=5902 | 5918 … DONE: settled at top=0.0 after 1 hops` — the correction put it home and it
+   stayed (the walk's burst: ONE pure scroll, residual 0.02).
+
+**The frames (W2 Study #1, `f-21.jpg` → `f-22.jpg`, read at 2 px/pt):** the article viewport ≈ 583 pt;
+P35's row ≈ 515 pt tall (its margin rail: the chosen card at the 330-pt cap, the 99-char alternate's
+card ≈ 124 pt, the doors) — it FITS the band (≤ 583 − 18 − 2·22 = 521). Before the hop its top sat at
+≈ 57 pt, its bottom ≈ 33 pt below the band's foot; after it, its top at ≈ 22 pt and its bottom ON the
+foot. So the landing had placed P35 with its bottom at the foot when the row was ≈ 33 pt SHORTER, and
+the row (or a row above it pushing it down — P33's rail is the row above P34, its doors' dashed edge
+visible at the page's top) then GREW by ≈ 33 pt with no aim answering. A late, non-scroll growth.
+
+**Why ONLY margin grid (the style split the walk measured on the same note and build — stack ×3, slot
+split, carousel 0 hops; margin grid 3/3):** margin grid is the one style whose CARD FRAME waits on a
+deferred turn. A rail card is `takeMiniPane(capped: true)` framed at `model.marginCardHeight(variantID:)`
+(`TakesBoardView.swift:1587–1601`) = `TakesBoardLayout.marginCardHeight(measuredText:)` = 110 until the
+pane's measured height arrives, then `min(max(measured + 26, 110), 330)` (`TakesBoardLayout.swift:69–72`).
+The measurement leaves the pane through `PaneSurface`'s `deliverMeasuredHeight` — **one
+`DispatchQueue.main.async` hop later** (`PaneSurface.swift:2134–2152`) — into the board's OBSERVED
+`measuredTextHeights` (`TakesBoardLayout.swift:161, 177–183`), and only the NEXT render grows the card,
+the rail, the row. Every other style's take heights converge inside the realizing update itself
+(stack's cards and slot split's cards at natural height — slot split's `cardHeight` is nil unless she
+dragged; carousel's one fixed strip, N40). So on margin grid, every open row near her block grows
+AGAIN a turn after the landing's scroll realized it — a growth that is not a scroll.
+
+**THE HARNESS GAP — a staging choice, not a harness limit.** The batch-1 pin's world
+(`withExpansionWorld`, `TakesExpansionMemoryTests.swift:82–85, 122–126`): every block "Paragraph i.
+Honest prose … real height." (~125 chars), every alternate "The other take of paragraph N, its own
+words." (~46 chars). In a 250-pt rail card (≈ 25 Terminal characters a line) those measure ≈ 85 and
+≈ 34 pt of text → `marginCardHeight` = max(…+26, 110) = **110, the sticky, measured or not**. The
+deferred delivery happens and changes nothing: the pin's margin grid has NO late growth at all — its
+margin-grid arm (red on the batch-1 revert, green after) staged only the estimate storm, which the
+batch-1 re-aim answers. The walk's note (`.walkshots-vx770/import/vx770-landing-walk.md`, the walker's
+own fixture): blocks of 12/25/45/70/95 words (58–521 chars) and alternates of 23/43/63 words
+(99–334 chars) — cards of ≈ 120–330 pt, each one growing 10–220 pt on the deferred turn.
+
+**Why the batch-1 re-aim does not answer that growth (the mechanism the fix must close).** The re-aim
+(`TakesArticleScroll.swift:917–941`) fires only at a report where (i) the column's content height
+DIFFERS from the one the landing last judged at, and (ii) for a realized row, the row's frame was
+reported at THAT content height (`landingTargetFrameContent == content`) — premised on the 17q
+ladder's R1-1 measurement "the geometry hook runs BEFORE the rows report". R1-1 measured a SCROLL step
+(AppKit moves the clip; SwiftUI then lays the rows out for it). A deferred growth is the other way
+round: SwiftUI's own update lays the rows out first and the scroll view's content size follows — and
+when the scroll geometry changes more than once in a frame SwiftUI coalesces it (the app's log carries
+`<OnScrollGeometryChange Modifier> tried to update multiple times per frame` at the start of every
+landing in this walk). Either way her row's report of its grown (or pushed-down) frame arrives while
+`lastArticleGeometry` still holds the OLD height: (i) fails at that report (the content still equals
+the judged height) and (ii) fails at the geometry report that follows (the row's frame is stamped with
+the old height) — or that report never comes. No aim; the page holds still off home; the watch's quiet
+look corrects it: ONE HOP, 0.25–0.33 s after the first rest — W2's story, ×3. The batch-1 self-
+assessment's risk (a) named exactly this road ("a style whose card heights settle late (margin grid,
+slot split — measured heights on deferred turns)"). The ORDER itself is SwiftUI's and is not
+observable headlessly; the fix below is written to be correct under either order and under a dropped
+geometry report, so it does not depend on which one the app takes.
+
+**What the trace does NOT settle (stated):** whether, in the harness, the deferred growth arrives
+after the landing's last in-storm aim the way it does in the app (the harness's turns are ~40–60 ms,
+the app's frames 16 ms) — the sibling pin's red is a PREDICTION the orchestrator's window verifies;
+its `W2-TRACE` lines (per turn: offset, content, her block's top, her tallest margin card, aims, hops)
+are built to show it either way.
