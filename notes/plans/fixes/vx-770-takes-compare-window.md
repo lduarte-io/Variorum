@@ -2864,3 +2864,23 @@ both voices.
   mostly the JPEG bursts; deletable after the orchestrator's read). Walk instruments (never in the PR):
   `/private/tmp/claude-501/-<home>-dev-variorum/17b9e621-2e5d-4717-a2d1-529f5d285a91/scratchpad/walk/`
   (`burst.py`, `shift.py`, `boarddiff.py`, `toggles.zsh`, `ax`, `wl`, the app's stderr `app.log` with every landing story).
+
+## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
+
+The walk record above stands: every member's rows PASS except **W2 — margin grid still hops
+once on her exact VX-756 repro** (3/3 trials, both voices; rest 20–35 pt off home, one pure
+scroll at ~0.25–0.33 s post-paint; landing stories `HOP 1 at 600/525/611 ms`; heights
+MONOTONIC, so not F3's corner; the batch-1 pin's margin-grid arm is green because it does not
+stage the live shape — the fix leg's risk (a) named margin grid's deferred-turn heights as
+exactly this hazard). **The ruling: ONE bounded fix cycle under the standing claim, red-first
+absolutely** — (1) the implementer's first deliverable is the HARNESS GAP closed: the
+margin-grid arm (or a sibling pin) staging the live hop, RED at merged HEAD, from the walker's
+app.log stories; if the live shape cannot be made red in the harness, STOP — VX-756 closes as
+the honest partial (the multi-hop storm dead everywhere, stack/slot-split/carousel clean; a
+precise residual ticket with the stories + the pin-gap note; a bundle line for her) and the
+gate runs on current bytes. (2) Only a red pin earns the minimal fix; then a SCOPED round 3
+(fable) over the fix diff, the gate tree rebuilds, and the gate runs on final bytes.
+Walk look-lines for closeout: the ~0.3–0.4 s Takes empty-state flash with margin grid's header
+reading "style: stack" during it (ticket candidate — a real mislabel); Compare's disabled
+first-comment door (candidate, possibly deliberate); W4's two-hop reveal (R-756-2, already
+residue); W9's VX-696 confirmations (the standing ticket's evidence).
