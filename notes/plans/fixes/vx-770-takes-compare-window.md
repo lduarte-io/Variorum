@@ -2887,9 +2887,11 @@ residue); W9's VX-696 confirmations (the standing ticket's evidence).
 
 ## THE W2 CYCLE (implementer: opus-implementer, 2026-11-04 — the walk's one finding, under THE WALK ADJUDICATION's two-step ruling)
 
-**NOT DONE (first line, kept current):** everything mounted is a PREDICTION until the orchestrator's
-window (this session is headless — no `xcodebuild test`, no app launch, no stage); no walk re-run; the
-scoped round 3.
+**NOT DONE (first line, kept current):** every red/green below is a PREDICTION until the orchestrator's
+window runs READY-FOR-SUITES — the W2 cycle (this session is headless: no `xcodebuild test`, no app
+launch, no stage); the mounted red of gate 1 is the open question that decides gate 2 (its reading rule
+below says what follows if it is green); no walk re-run (W2 on the gate tree is the orchestrator's); the
+scoped round 3 (fable) over a5fbc6151 + the two pins.
 
 **LIVE STATUS**
 | piece | state |
@@ -2899,8 +2901,8 @@ scoped round 3.
 | Gate 1 — the harness gap closed: `TakesSeededEntryLandingTests/theWalksNoteLandsOnceAndStays` (×4: the walk's three margin-grid returns + the W1 stack CONTROL) on the walk's own note | DONE c7710ca6e — red on the merged head PREDICTED (the window verifies) |
 | Gate 2 — the mechanism pin `TakesLateRemeasureReaimTests` (pure; red on the merged head by construction) | DONE b44ab4916 (before the fix) |
 | Gate 2 — the fix (`TakesArticleScroll.swift` only: `landingTargetJustMoved`) | DONE a5fbc6151 |
-| **Behavioural revert tree — ANNOUNCED HERE BEFORE IT STARTS:** a `git clone --shared` of this branch at a5fbc6151 into `scratchpad/vx770-w2-rev-src/` (its own index — the shared worktree and its index never move), with exactly ONE behaviour file written there by `git show b44ab4916:App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift >` (the pin commit = the merged head's behaviour; the file is unchanged since cfae861d1); every test file at HEAD; built into `App/Variorum/DerivedData/vx770-w2-rev`. HEAD's file copied + sha256'd first in `App/Variorum/DerivedData/vx770-w2-prerevert/`; HEAD built into `App/Variorum/DerivedData/vx770-w2` from the worktree | IN FLIGHT |
-| READY-FOR-SUITES — the W2 cycle | PENDING |
+| **Behavioural revert tree — ANNOUNCED (7f4e4c0b4) BEFORE IT STARTED:** a `git clone --shared` of this branch at a5fbc6151 into `scratchpad/vx770-w2-rev-src/` (its own index — the shared worktree and its index never move), with exactly ONE behaviour file written there by `git show b44ab4916:App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift >` (the pin commit = the merged head's behaviour; `git diff cfae861d1 b44ab4916 -- <file>` empty); every test file at HEAD; built into `App/Variorum/DerivedData/vx770-w2-rev`. HEAD's file copied + sha256'd first in `App/Variorum/DerivedData/vx770-w2-prerevert/` (`8b3cbbb9…5b9d` = a5fbc6151's blob); HEAD built into `App/Variorum/DerivedData/vx770-w2` from the worktree | DONE 09:23–09:30 — **both TEST BUILD SUCCEEDED** (logs `App/Variorum/DerivedData/logs/vx770-w2-build.log`, `vx770-w2-rev-build.log`; 2.8 / 2.9 GB; zero warnings in the two touched files); the clone's `git diff --stat` = exactly the fix reversed (1 file, 9+ 47−); **the binaries differ as intended:** `nm` finds `landingTargetJustMoved` ×6 in `vx770-w2`'s `Variorum.debug.dylib`, ×0 in `vx770-w2-rev`'s; both test bundles carry both pins (`LateRemeasure` ×230, `theWalksNoteLandsOnceAndStays` ×167 each); **no revert in flight, the shared worktree never moved:** `shasum -a 256 -c …/vx770-w2-prerevert/sha256-head.txt` OK, `git status` clean; 43 GiB free after |
+| READY-FOR-SUITES — the W2 cycle, prediction table, staging argument, P-8, residue, self-assessment | DONE (this commit) |
 
 ### THE TRACE — W2 (written before any code)
 
@@ -2979,3 +2981,191 @@ after the landing's last in-storm aim the way it does in the app (the harness's 
 the app's frames 16 ms) — the sibling pin's red is a PREDICTION the orchestrator's window verifies;
 its `W2-TRACE` lines (per turn: offset, content, her block's top, her tallest margin card, aims, hops)
 are built to show it either way.
+
+### AS BUILT — the W2 cycle
+
+- **Gate 1 — the pin** (c7710ca6e) — `TakesSeededEntryLandingTests/theWalksNoteLandsOnceAndStays(_:)`, ×4
+  (`WalkReturn`), in `App/Variorum/VariorumTests/TakesExpansionMemoryTests.swift` beside the batch-1 pin
+  (which is left byte-identical). The world is the walk's own note (`WalkNote`: the fixture's per-block
+  word counts, its fanned set, its vocabulary); `withExpansionWorld` gained optional `prose:`/`alternate:`
+  (nil = the batch-1 world byte for byte — every existing caller passes nothing). The three margin-grid
+  cases are the walk's three W2 returns; the fourth is the W1 stack return on the same note, the CONTROL.
+  Asserts what the batch-1 pin asserts (the ring on Y; R-Q20's settled restore; aims > 0; the landing
+  ended; **`articleLandingCorrections == 0`**; **no move after a 0.25-s rest**; her block on the page;
+  DEBUG `DONE: settled at top=0.0`; R-770-1's fans still open) plus, in margin grid, **the staging's
+  non-vacuity: `measuredHeightWrites > 0` and her tallest margin card past the 110-pt sticky** — the event
+  the batch-1 world never had. Prints `W2-TRACE` (per changed turn: offset · content · her block's top ·
+  her tallest card · aims · hops), `W2-SUMMARY`, `W2-STORY`.
+- **Gate 2 — the mechanism pin** (b44ab4916, before the fix) — `TakesLateRemeasureReaimTests` (pure brain,
+  same file): an entry landing home in the band, then her row's late re-measure reported ROW-FIRST — her
+  own cards grown 300 → 520, or pushed down 130 by a row above — then the column's new content height.
+  `aLateGrowthHerRowReportsFirstIsReaimedAtHerRowsReport(_:)` ×2 expects `.reveal("far", .foot)` at her
+  row's report and `.wait` at the column's (once); on the merged head both reports are `.wait` — RED BY
+  CONSTRUCTION (the code read is the proof: `content == landingJudgedContent` at the first,
+  `landingTargetFrameContent != content` at the second). `aLateGrowthTheColumnReportsFirstIsStillReaimedOnce`
+  is the GUARD — the column-first order batch 1 was built for still re-aims exactly once (green both sides).
+- **Gate 2 — the fix** (a5fbc6151) — `App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift` only:
+  one per-landing Bool `landingTargetJustMoved`, set where `noteArticleRowFrame` already stamps the
+  target's frame, read-and-cleared at the top of `articleLandingReport` (the view runs the two
+  back-to-back for one row, `TakesBoardView.swift:811–819`), reset in `landArticle`; and
+  `reaimWhereTheColumnReEstimated` takes it: the event gate becomes "the content height changed OR her
+  row's own frame just moved", the freshness gate "her row's own report OR a frame stamped at this
+  height". Everything else is batch 1's road unchanged: the same step (`articleLandingStep` — the edge,
+  the band, the 64 fence), the same pocket (24), the same watch as backstop, entry kind only, never the
+  ride-through (R-18l-13), never a bloom/find/restore. Zero changes to the seed, the prune, the restore,
+  the resolver, the band, the flash, the watch/policy, any view, `PaneSurface`, the margin grid's card
+  arithmetic, any operation, schema, `Sync/`, `Shared/`, `EditorTextView`, `BlockRangeIndex`, the
+  capability registry. No TK1 API, no attribute stamp. **R-770-1:** the open-fan set is untouched (the
+  pin re-asserts it). **MOBILE PARITY: nothing mobile-visible** (the Mac Takes board only).
+
+### THE STAGING ARGUMENT — the pin's world against the app's, line by line
+
+| the app (the walk, merged head a41aadd3d) | the pin |
+|---|---|
+| the note `vx770 landing walk` — 40 blocks, 12–95 words (58–521 chars), P13…P39 odd with a second take of 23/43/63 words (99–334 chars) | `WalkNote` — the same counts and the same fanned set (0-based 12…38 even); the walk's vocabulary at its mean word length; every block within ~10 % of the walk's character count |
+| showing 1 in Takes on block X, fans open (W2: "fans open, current block P25") | `noteFocusedBlock(X)`, mounted, `expandAllFans()`; `remembered == fanned` asserted |
+| she leaves Takes on a row | `takesArticlePlaces[post].rowID != nil` asserted (a memory to outrank) |
+| in Write she clicks into Y (the story's `target=34 / 22 / 32`) | `noteFocusedBlock(Y)` — cases P25→P35, P35→P23, P23→P33 |
+| ⌘2: a fresh board, fans seeded before the first geometry, the projection on `.task`; `LAND … exactAbove=N` — R-Q20 outranked, the page from the top | a BARE model mounted the app's way (`TakesBoardView.init` seeds); `articleRestore == .settled` asserted |
+| margin grid, `2 high · auto wide` (f-21's style bar) | `setFanStyle(.marginGrid)`, a fresh defaults suite → `gridRows` 2, `gridColsChoice` nil |
+| **the late event:** every open row's rail cards at 110 until the deferred measured-height turn, then 120–330 | asserted, not assumed: `measuredHeightWrites > 0`, her tallest card > 111 at the end (the `card=` column traces WHEN it grew against the aims) |
+| her row FITS the band after growing (f-21/22: ≈ 515 of 521 pt, Study) | Terminal estimate in the 619-pt viewport (band ≤ 567): P35 ≈ 540, P23 ≈ 430, P33 ≈ 475 — all fit (estimates; the trace's `her=` says) |
+| `HOP 1 at 525–611 ms (top was 19.6–34.6)` | `articleLandingCorrections == 0` — RED on rev predicted: hops = 1 |
+| the burst: a rest, then ONE later pure scroll | `movesAfterARest(...)` empty — RED on rev predicted: one later move |
+| `DONE: settled at top=0.0 after 1 hops` | the DEBUG `DONE: settled at top=0.0` line — GREEN on both trees (the hop still ends home, as the walk's did) |
+| voices: Study ×2, Terminal ×1 (all hopped) | Terminal (the landing constants' pinned metrics); case 3 IS the walk's Terminal trial |
+| W1 on the same note in stack: `target=24 … 0 hops` ×3 | case 4, the CONTROL: green on both trees |
+
+What still differs, stated: the harness's turns (~40–60 ms: layout, display, a 20-ms pump, a yield, a
+20-ms sleep) against the app's 16-ms frames; the board's viewport (619 vs ≈ 583 pt); Terminal vs Study
+metrics; the words themselves (only their wrap matters). None of them is a mechanism; any of them can
+move WHEN the deferred growth lands relative to the landing's last aim — which is why the red is a
+prediction the window verifies, not a fact.
+
+### THE PREDICTION TABLE — the W2 cycle (PENDING the window)
+
+| # | Test | `vx770-w2-rev` (= the merged head's behaviour) | `vx770-w2` |
+|---|---|---|---|
+| 1 | `TakesLateRemeasureReaimTests/aLateGrowthHerRowReportsFirstIsReaimedAtHerRowsReport(herOwnCardsGrew)` | **R** (certain — the code read: `.wait` at her row's report) | G |
+| 2 | `…(aRowAboveGrew)` | **R** (certain, the same line) | G |
+| 3 | `TakesLateRemeasureReaimTests/aLateGrowthTheColumnReportsFirstIsStillReaimedOnce` (GUARD) | G | G |
+| 4 | `TakesSeededEntryLandingTests/theWalksNoteLandsOnceAndStays(w2MarginGridP25toP35)` | **R predicted** — `hops=1`, one later move; the staging non-vacuity lines GREEN | G predicted |
+| 5 | `…(w2MarginGridP35toP23)` | **R predicted** (as #4) | G predicted |
+| 6 | `…(w2MarginGridP23toP33)` | **R predicted** (as #4) | G predicted |
+| 7 | `…(w1StackP35toP25)` (the CONTROL) | G | G |
+| 8 | `TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay` ×4 (batch 1's) | G | G |
+
+**Reading the runs.** Rows 4–6 RED on rev and GREEN on w2 = **gate 1 closed and the W2 finding FIXED by the
+red/green standard** (then the scoped round 3 and the gate tree). **Rows 4–6 GREEN on rev** = the harness
+still does not stage the live hop: read `W2-TRACE` first — if `card=` grew BEFORE the landing's last aim
+(the growth inside the storm, answered by batch 1's road) the gap is the harness's turn cadence, not a
+staging choice → **gate 1 did not close: the STOP road** — VX-756 closes as the honest partial, a5fbc6151
+is reverted by a revert commit (the orchestrator's call; the pins may stay as evidence or go with it —
+`TakesLateRemeasureReaimTests` would then fail by design and must go), and the residual ticket is
+written from THE TRACE (draft below). A mix (some of 4–6 red) = the cases that red are the gate-1
+evidence; the green ones are recorded with their traces. **Row 7 RED on rev** = the staging over-reaches
+(long takes hop stack in the harness, which the walk's W1 did not) — then rows 4–6's red cannot be
+credited to margin grid's deferred growth alone: read both traces before anything else. **Any of 4–8 RED
+on w2** = read its `W2-STORY`/`VX756-STORY` first — the fix's only new act is an aim at her row's own
+report; a page that moves MORE on w2 is where to look. Rows 1–2 green on rev = impossible by the code
+read; it would mean the rev tree is not what it says (check the `nm` lines above).
+
+**The residual-ticket draft (for the STOP road only):** *"Takes ▸ margin grid: the mode-switch landing
+still hops once (her VX-756 repro) — the walk's three stories (`target=34/22/32 … HOP 1 at 600/525/611 ms
+(top was 34.6/24.0/19.6)`, monotonic heights); margin grid's rail cards are sized a deferred turn after
+their panes measure, a growth that is not a scroll; the batch-1 in-storm re-aim keys on the column's
+content height changing with her row's frame stamped at it — R1-1's scroll-step order — and a
+SwiftUI-laid-out growth reports her row first. Candidate fix: judge her row's own moved-frame report
+(a5fbc6151's shape). The harness gap: \\<what W2-TRACE showed\\>."* (Area: Takes & Lenses · Bug ·
+Confirmed.)
+
+### P-8 — the W2 fix's cost
+
+Per report: one Bool read and write (always), and nothing else unless an ENTRY landing is pending — the
+same guards as batch 1's. The slot order is built only when a re-aim is decided, now at most once per
+change of the column's height or move of her row; the aim budget is unchanged (the pocket's 24 inside the
+step's 64 fence) and every aim is a `scrollTo` the lazy column answers by realizing the viewport (P3). The
+seed, the cards' measurement and the margin grid's arithmetic are untouched, so VX-428's measured bar
+(`TakesExpansionCostTests`) stands as measured.
+
+## READY-FOR-SUITES — the W2 cycle (the orchestrator's window; from `App/Variorum/`)
+
+Both trees are built: `DerivedData/vx770-w2` (HEAD a5fbc6151's behaviour — log `DerivedData/logs/vx770-w2-build.log`)
+and `DerivedData/vx770-w2-rev` (the fix reversed, from the scratchpad clone — log `vx770-w2-rev-build.log`).
+Run `test-without-building`, array args:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building -only-testing:…`.
+Confirm each "Test run with N tests in M suites" line (Swift Testing counts a parameterized test ONCE) and
+read the `skipped:` lines; keep every `W2-TRACE` / `W2-SUMMARY` / `W2-STORY` line for the record.
+
+1. **THE RED RUN** on `vx770-w2-rev` (≈ 1 min):
+   `-only-testing:VariorumTests/TakesLateRemeasureReaimTests -only-testing:VariorumTests/TakesSeededEntryLandingTests`
+   — expect "Test run with 4 tests in 2 suites" FAILING TWO (`aLateGrowthHerRowReportsFirst…` — 2 issues,
+   one per argument; `theWalksNoteLandsOnceAndStays` — predicted 6 issues, two per margin-grid case: the
+   hop count and the later move), the guard and batch 1's pin passing.
+2. **THE GREEN DELTA** on `vx770-w2` — the two pins' suites + batch 1's tier-1 list (the landing/restore
+   family, the Takes board family, the mode-switch suites, the tutorial spine — the same surface):
+   `-only-testing:VariorumTests/TakesLateRemeasureReaimTests -only-testing:VariorumTests/TakesSeededEntryLandingTests -only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakesExpansionCostTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/TakesArticleWatchTests -only-testing:VariorumTests/TakesEntryBandTests -only-testing:VariorumTests/ArticleLandingProjectionArmTests -only-testing:VariorumTests/LandingAimTests -only-testing:VariorumTests/ComfortBandAndFlashTests -only-testing:VariorumTests/RestoreLandingTests -only-testing:VariorumTests/TakesLandingTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/TakesChooseRingTests -only-testing:VariorumTests/TakesFindBoardTests -only-testing:VariorumTests/TakesStepFollowTests -only-testing:VariorumTests/TakesStepFollowModelTests -only-testing:VariorumTests/TakesParkedFollowTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/TakesRoomTests -only-testing:VariorumTests/TakesCardHeightTests -only-testing:VariorumTests/TakesRailPagingTests -only-testing:VariorumTests/TakesSlotDragTests -only-testing:VariorumTests/TakesMarginGridAlignmentTests -only-testing:VariorumTests/TakesMarginGridCaptureTests -only-testing:VariorumTests/TakesArticleRenderTests -only-testing:VariorumTests/TakesEmptyStateTests -only-testing:VariorumTests/TakesEmptyBlockFaceTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakePaneMeasureTests -only-testing:VariorumTests/TakePaneDurabilityTests -only-testing:VariorumTests/PaneRenderRestoreClipTests -only-testing:VariorumTests/OutsideWriteLivePaneTests -only-testing:VariorumTests/ModeSwitchCarryTests -only-testing:VariorumTests/ModeSwitchFeelTests -only-testing:VariorumTests/CurrentBlockContinuityTests -only-testing:VariorumTests/LandingOffsetTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialDoorTests -only-testing:VariorumTests/TutorialWritingActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialStructureActsTests -only-testing:VariorumTests/TutorialLookingActsTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/TutorialDeletionActsTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialPrivacyChapterTests -only-testing:VariorumTests/TutorialFannedMatrixTests`
+   — 52 suite types, all green expected (one trait-gated skip: "Margin grid captures (VX-136)"; the known
+   issue `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` fires as designed). Known
+   load-dependent shapes that are NOT this cycle's: VX-337's `aShortRowStraddlingTheFoldComesBackAboveIt`
+   (run alone first); an unexpected `TakesEntryBandTests` red → the defaults domain first.
+   **The merge gate's WHOLE `VariorumTests` run on the final tree subsumes this delta — never the red run
+   (1.), which is owed on `vx770-w2-rev` separately.**
+3. **Core:** nothing under `Sources/` or `Tests/` changed — no `swift test` owed.
+4. **The walk (the orchestrator's, on the gate tree):** W2 re-run as written (margin grid; fans open;
+   current block changed in Write; ⌘2 with the burst + the app's story) — the acceptance is the story's
+   `DONE: … after 0 hops` and a burst with no second movement; W1 (stack) and W3 (the plain round trip)
+   as regression looks.
+5. Results into the prediction table; then `vx770-w2-rev`, `vx770-w2-prerevert` and the scratchpad clone
+   (`/private/tmp/claude-501/-<home>-dev-variorum/17b9e621-2e5d-4717-a2d1-529f5d285a91/scratchpad/vx770-w2-rev-src/`)
+   may be deleted (`vx770-w2` stays if it becomes the gate tree).
+
+### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
+
+- **R-W2-1 (pin shape):** batch 1's `openTakesEnteredOnAnotherBlockLandOnceAndStay` keeps its short takes
+  (byte-identical — its red/green history stands); the walk's note rides the sibling. R-756-1's lesson
+  extends: a landing pin's WORLD must carry the shapes whose heights arrive late, not only the motion
+  assertions.
+- **R-W2-2 (the order is inferred):** "a SwiftUI-laid-out growth reports the row first (or the column's
+  report coalesces away)" is read from the walk's stories + the `tried to update multiple times per
+  frame` lines, never measured; the fix does not depend on it (it is right under either order), so it was
+  not chased. A DEBUG story note at each in-storm re-aim naming which report aimed would let the next
+  walk's log say — not built.
+- **R-W2-3 (F3, partly closed as a side effect):** ladder round 1's F3 corner (a revisited content height
+  with her row re-based off home) is now heard at her row's own report whenever the re-basing MOVED her
+  realized row — the case F3 describes. An unrealized target still keys on the content height alone.
+- **R-W2-4 (unchanged by design):** R-756-2 (W4's two-hop reveal on the ride-through road) — the
+  ride-through is excluded from the re-aim, as batch 1 excluded it.
+
+## SELF-ASSESSMENT — the W2 cycle (the first of the two reviews — the implementer's)
+
+- **What was traced, and how far.** The three stories, the two burst frames around the hop and the code
+  were read end to end; the margin-grid-only seam (cards framed at the sticky until a deferred main-queue
+  delivery) is code-traced and is the one height event no other style has, which is what the walk's style
+  split needs; the batch-1 world's short takes are shown (by the card arithmetic) never to grow a margin
+  card. The ORDER of the two reports for a SwiftUI-laid-out growth is inferred, not observed (R-W2-2) — so
+  the fix is written to be correct under both orders and under a dropped column report.
+- **Why this fix and not another.** It closes the one blind spot the trace finds — her row's freshest
+  evidence was being refused because the content stamp could not vouch for it — without a new mechanism:
+  the same step, pocket, fence and watch (P-3). Weighed and refused: deferring the judgment to the next
+  main-queue turn (a second scroll road beside the step — P-3); a per-geometry-pass generation stamp (F3's
+  sketch — it cannot tell "this pass, row first" from "the previous pass" either); sizing margin cards
+  synchronously (the deferred delivery is the ruled measurement seam, QoL batch 2 — not this cycle's to
+  change); a curtain or a delay on the landing (product behaviour nobody ruled).
+- **What could regress, and why I think it does not.** (1) *More in-storm aims:* her row's own moved
+  report off home now aims where the old road waited for a content change; every such aim is one the
+  watch would otherwise make from quiet as a visible hop, and the pocket (24) bounds it. (2) *A transient
+  frame:* her row's own report is the freshest frame there is; a placeholder followed by its measured
+  frame earns at most one more aim, inside the storm. (3) *The pure pins that drive
+  `articleLandingReport`* (`TakesEntryBandTests.anUnrealizedTargetIsAimed…` — its "…once" line;
+  `TakesArticleWatchTests`' bloom/no-landing pins) were re-traced: the flag is consumed at the TOP of the
+  report, so the band's second aim's early return cannot leave it set; bloom kinds never reach the re-aim.
+  (4) *The her-gesture pins* (`herNoteWideSplit…`, `herPick…`) end the landing before anything changes —
+  no aim can follow. (5) *Ride-through pins asserting zero aims* — excluded by the guard, unchanged.
+- **Risks I see.** (a) The mounted red is a prediction: the harness's coarser turns could land the
+  deferred growth inside the storm, where batch 1's road already answers it — then rows 4–6 are green on
+  rev and the reading rule's STOP road applies (the trace prints `card=` so the window can see which).
+  (b) A row whose frame OSCILLATES (SwiftUI's re-resolution fighting an aim — R3-1's class, never measured
+  on the landing) could now spend the pocket where it used to hop once; the green delta's landing family
+  and W2/W1's re-walk are where that would show. (c) Terminal-only staging: Study's taller lines change
+  which rows fit the band; the walk hopped in both voices, the pin stages one.
