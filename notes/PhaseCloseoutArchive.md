@@ -1519,3 +1519,18 @@ VariorumMobileTests 852/139 with its only real red pre-existing on main (VM-38).
 VX-722/723/772 (load-flakes), VX-773 (the release-config TEST split, pre-existing), VM-38. PROVISIONALs →
 QUESTIONS #257; her rulings R-500-1…12 in the record; NO RELEASE at her word (R-500-12 — she accumulates PRs).
 Next: VX-683 (a Sync/ design memo + sitting first), then VX-544 (plan ready).
+
+
+**→ VX-771 CLOSED 2026-11-04 — RUN: MCP AGENT ERGONOMICS (the record `notes/plans/fixes/vx-771-mcp-agent-ergonomics.md`,
+FOR A LATER READER at its top; the handoff `notes/handoffs/vx-771-handoff.md`).** The planetlillian agent's field
+reports built in one overnight away run under her "rule provisionally": the duplicate-day flagship (P-771-1, the
+shared body + Copy to Wing), duplicate_note's brief form + fan_sha256, copy_note_to_wing, edit_take's honest
+mismatch + the old_str/new_str replace form, the 19-row error sweep (store failures worded), remove_tag's
+still_in_books (the eviction dial DECLINED, R-771-A), create_gathering (R-771-B), B2's close-reason road (the shim's
+stderr + the 0x1E line, A-771-3), VX-763's kind-reverted listing fix (her sighting = the fixed VX-393 class, third
+filing), VX-400's stop-ends-grants, VX-774's null-only guard; VX-767/768 verified already shipped. Four Opus
+batches; one Fable ladder round — no BLOCKER, no MAJOR, closed at round 1. The walk: the dev library found STANDARD,
+so the stop road verified live end to end and the lock road rides her Air check (the handoff); the Mac close
+"287 tests in 42 suites passed", 42/42 executed; core 3,637/489 green on the merged tree. Canon: MCPSpec's ten lines
++ AppSpec §9's duplicate-day line; PROVISIONALs #257. Born VX-774–778. Nothing mobile-visible beyond the shared-op
+heal (the duplicate-day rule). NO release (her word). Next: hers — the morning bundle is the handoff's checklist.
