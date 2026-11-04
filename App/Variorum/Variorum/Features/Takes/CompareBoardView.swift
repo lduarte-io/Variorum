@@ -979,6 +979,13 @@ final class CompareViewModel {
     /// R99's door, re-homed from the retired Outline tab (S4-3): mint
     /// "outline of <title>" — first sentence per block, linked
     /// block-by-block — and open it as a compare column.
+    ///
+    /// **VX-740 (P-770-1, PROVISIONAL): the outline opens ONCE.** The mint is
+    /// a version peer the moment it commits, so the board's store observation
+    /// can deliver it while this act is still suspended on the mint — and
+    /// `adopt`'s auto-fill then seats it in the empty first slot. That seat
+    /// STANDS; the resume finds the note already open and yields (it used to
+    /// append a second column holding the same note).
     func makeOutlinePost() async {
         statusMessage = nil
         do {
@@ -986,6 +993,9 @@ final class CompareViewModel {
                 try ops.mintOutlinePost(of: anchorPostID)
             }
             autoFilled = true
+            if peerSlots.contains(where: { $0.postID == result.post.id }) {
+                return  // the auto-fill seated it while the mint was in flight
+            }
             if let index = peerSlots.firstIndex(where: { $0.postID == nil }) {
                 peerSlots[index].postID = result.post.id
             } else if peerSlots.count < 3 {
