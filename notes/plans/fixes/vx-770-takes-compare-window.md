@@ -2867,7 +2867,7 @@ both voices.
 
 ### THE W2 RE-WALK (the W2 cycle's acceptance — an Opus re-walker under the orchestrator's HELD claim `vx-770-final`, 2026-11-04)
 
-**NOT DONE (first line, kept current):** IN PROGRESS — all trials walked (five margin grid + the stack control) and the fans look; the voice restore, the quit and the posture end PENDING.
+**NOT DONE (first line):** nothing the brief named is undone. Not adjudicated here (the orchestrator's): the first-paint in-storm correction in the P23 → P33 Terminal shape (trials 3 and 3c — 56 and 166 pt, one burst sample after first paint, before any rest, counted 0 hops by the app); the stack control ran in Terminal only (one control trial, as briefed). The re-walk is CLOSED (10:57). **Verdict: W2-R PASS — 5 of 5 margin-grid trials (Study ×2, Terminal ×3) `settled at top=0.0 after 0 hops`, no movement after rest in any burst; W1-R control PASS (0 hops); R-770-1's look line HOLDS.**
 
 Build: `App/Variorum/DerivedData/vx770-gatef/Build/Products/Debug/Variorum.app` (FINAL bytes — `nm` finds the W2
 fix's `landingTargetJustMoved` ×6 in its `Variorum.debug.dylib`; branch head 4f0874651). The fix under watch: THE W2
@@ -2884,7 +2884,7 @@ ONE settled landing — the burst shows no second movement after rest, and the a
 | W2-R trial 3c (Terminal, margin grid, P23 → P33 — trial 3's exact shape again) | **PASS — 0 hops, no movement after rest; the LOOK LINE REPRODUCES (a 166-pt in-storm correction one sample after first paint)** |
 | W1-R control (Terminal, stack, P33 → P23) | **PASS — 0 hops, first paint = rest** |
 | look line: her open fans stay open (R-770-1) | **HOLDS** — every return, and P27/P29 after the last |
-| posture at the end | PENDING |
+| posture at the end | DONE (below) — as found |
 
 **Posture AS FOUND (pre-launch, 10:41):** zero Variorum instances (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty);
 `variorum-restore-hold.json` inode **191598619**, 63 bytes, mtime Oct 20 02:53; `appearanceChoice` = `dark`; the dev
@@ -2976,6 +2976,43 @@ the start; after each of the six returns the landed page shows its fans open —
 3b), P33's and P31's (trials 3, 3c), P23's and P21's stacks (the control) — and after the last return a scroll down the
 stack board (`rewalk/look-fans-below.png`) shows P27 and P29 still open, washed, with their choose cards. Nothing was
 re-expanded between trials.
+
+**The stories side by side (the same note, the same targets, the original walk's merged-head build vs gatef):**
+
+| shape | original walk (`vx770-mg`, pre-W2-fix) | this re-walk (`vx770-gatef`, final bytes) |
+|---|---|---|
+| Study, margin grid, `target=34` (P25 → P35) | `HOP 1 at 600 ms (top was 34.6)` · `after 1 hops, 1143 ms` | `after 0 hops, 1010 ms` |
+| Study, margin grid, `target=22` (P35 → P23) | `HOP 1 at 525 ms (top was 24.0)` · `after 1 hops, 1081 ms` | `after 0 hops, 1015 ms` |
+| Terminal, margin grid, `target=32` (P23 → P33) | `HOP 1 at 611 ms (top was 19.6)` · `after 1 hops, 1156 ms` | `after 0 hops, 1010 ms` (3) · `after 0 hops, 1000 ms` (3c) |
+| Terminal, margin grid, `target=22` (P33 → P23) | — | `after 0 hops, 1013 ms` (3b) |
+| Terminal, stack, `target=22` (P33 → P23) | `after 0 hops, 1012 ms` | `after 0 hops, 1008 ms` (control) |
+
+**POSTURE AT THE END (10:57, after the quit):**
+- The dev instance (pid 96002, `vx770-gatef`) quit by identity (`tell application id "io.lduarte.Variorum.debug" to
+  quit`); `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before the launch and after the quit — no other Variorum
+  instance at any point (the guard checked before every act; her `/Applications` app never running).
+- Read back in-app just before the quit (Accessibility, no Settings capture): Theme **Study** (restored — flipped to
+  Terminal for trials 3/3b/3c and the control), Appearance **Dark**, palette **Sea glass**, "Takes open as" **Stack**
+  (the board's style ended on Stack, the found value), "follow the scroll" **off**, MCP "Enable the MCP server" **off**,
+  Protection **"You're in Standard."**, Sync **"This library doesn't sync. / Sign in to turn on sync."** (signed out);
+  the HELD banner ("This is your library as of October 20, 2026 …") on the window foot the whole walk — **Resume Sync
+  never pressed**. Settings left on its General pane.
+- On disk: `variorum-restore-hold.json` inode **191598619**, 63 bytes, mtime Oct 20 02:53:29 — UNCHANGED;
+  `appearanceChoice` = `dark` (never written). The dev defaults domain **778 → 778 keys**, none added or removed; five
+  values changed, all walk/launch state: `currentBlock.F75CC504…` and `postMode.F75CC504…` (the walk note's current
+  block and remembered mode — Compare → Takes), `variorum.calmAsks.passphrase.….launches` (the launch counter),
+  `IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log` (the launch's dev-store backup — expected). Before/after
+  exports in the scratchpad `walk/rewalk/defaults-{before,after}.plist`.
+- Content: no text typed, no take, comment, book or setting minted or changed beyond the voice flips (restored) and the
+  board style (restored); the fans were expanded once (expand all) on `vx770 landing walk` and left open.
+- No code bytes touched; the worktree's only change is the pre-existing uncommitted
+  `App/Variorum/Variorum.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved` (present at this walk's
+  start, NOT touched by it — commits were by pathspec; the orchestrator's to disposition per THE MERGE-IN).
+- The app's stderr carries the same ambient SQLCipher `hmac check failed for pgno=1` burst at launch and quit as the
+  original walk's log (196 lines here, 240 there) — not this row's, recorded only so a reader does not chase it.
+- Captures: `<home>/dev/variorum-vx-770/.walkshots-vx770/rewalk/` (≈215 MB, gitignored). Instruments
+  (never in the PR): the scratchpad `walk/rewalk/` (`lib.zsh`, `trial.zsh`, `wash.py`, `bands.py`, `app.log`) beside
+  the original walker's `shift.py` / `boarddiff.py` / `burst.py`.
 
 ## THE WALK ADJUDICATION (the orchestrator, ~09:00) — 16/17 PASS; W2 gets ONE bounded fix cycle
 
