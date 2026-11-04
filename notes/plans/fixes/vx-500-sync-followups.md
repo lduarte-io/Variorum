@@ -253,7 +253,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 3c | THE DEPLOY: run 1 REFUSED (42501 — the artifacts had omitted the 10/14c bracket, VX-721); the DEPLOY-FIX session landed the bracket + the sweep rows + pins (`e01bb7359`, verified 87/2); **run 2 LANDED 2026-11-02 00:41 UTC (`[]`)**; every verify DONE (SHAPE B body; both functions definer-owned with pg_temp; the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans, 779 ms); **the acceptance DONE 00:57 UTC — her week-behind Pro caught up ~23k rows in ~64 s end to end** (the checklist); the whole-diff ladder reads the bracket fix | DEPLOYED + ACCEPTED |
 | 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | DONE (`8c409ba63` P-500-1 · `de88ecc77` P-500-2 · `918bb6df6` P-500-3/P-500-7(a) · `31e1ce752`+`6b4c4825e` the injected clock + the red-on-old · `fcbd86286` VX-490) — the record is `### U2 RECORD`; the close set "Test run with 225 tests in 49 suites passed" |
 | 5 | ~~U3 — the typed-unlock retry + the reachability trigger (D-544)~~ | LIFTED OUT (R-500-10): VX-544 runs as its own ticket run after VX-500's ladder closes; D-544 + the U3 brief move to `notes/plans/fixes/vx-544-offline-typed-unlock.md` at this session's cutover |
-| 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
+| 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | DONE (`2a1b6e600` the migration — **v1_36**, the brief's v1_35 slot taken by main's sweep · `91cc5a656` the pin · `b757a43f1` the red-on-old (ratio 12.44× on the reverted tree) + the knob retired · `809cf898f` the bench re-run: apply 330,231 → 89,187 ms median, 3.7×, + the VX-672 paragraph · the close commit) — the record is `### U4 RECORD`; broad core 3,604/483 passed, sync suites 522/110 passed |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
 | 7 | Closing runs (core debug + release; the Mac suites over every changed source; the phone build) | NOT STARTED |
 | 8 | The PR opened — HELD OPEN at her word; the handoff; memory; the canon deltas DRAFTED for the merge moment | NOT STARTED (the successor's) |
@@ -2192,11 +2192,17 @@ on the phone (shared files, compiled there — the phone build above).
 
 ### U4 RECORD (the Fable implementer, 2026-11-04; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
 
-**NOT DONE (the record's first line):** PENDING at the first commit — filled at the close. NOT this unit's by the brief:
-any `Sync/` line (none was needed — the migration is pure `Persistence/`), the faces, the ladder, the deploy, the PR,
-the Linear comment on VX-672 (the orchestrator's hands; my one-paragraph reasoning is below for it to carry),
-`notes/QUESTIONS.md` (shared ledger — nothing PROVISIONAL-numbered was minted; the one naming deviation is mechanical,
-recorded here).
+**NOT DONE (the record's first line):** NOT this unit's by the brief: any `Sync/` line (none was needed — the migration
+is pure `Persistence/`; the seam U1a built already carries everything the bench reads), the faces, the ladder, the
+deploy, the PR, the Linear comment on VX-672 (the orchestrator's hands; the one-paragraph reasoning is under piece 3
+for it to carry), `notes/QUESTIONS.md` (shared ledger — nothing PROVISIONAL-numbered was minted; the one naming
+deviation is mechanical, recorded below). NOT RUN, deliberately: a Release bench column and an in-memory column (the
+U1b posture — the mechanism is independent of both; the pin is the in-memory witness); any Mac `xcodebuild` suite (a
+`Persistence/`-only core change — headless per the brief; the orchestrator's closing window carries the Mac legs); a
+backfill/upgrade timing measure for an EXISTING store's one-time index build at the migration's first open (O(N) —
+U1b's self-assessment item 7 put it at ms for 36k blocks; not re-measured here, said honestly in the self-assessment).
+NOT FIXED, as the traps demand: the two load-flakes the broad run surfaced (named in the close — both pass alone;
+one is the traps' own, one is a NEW sibling for the orchestrator's triage).
 
 **THE NAMING DEVIATION, up front (the brief's "v1_35" is superseded — the orchestrator and tonight's coordinator both
 confirmed the collision):** main's 1.0.1 merge brought `v1_35_sweep_kill_verdict_markers` (VX-669) into the registry,
@@ -2214,7 +2220,7 @@ boundary is v1_36**: an export from this build refuses on every build before thi
 | 1 | The migration, its own commit FIRST: `v1_36_fk_child_indexes` (the two plain FK child indexes), registered after v1_35; the DDL doc names the mechanism (sqlite.org/foreignkeys.html §4, the feed's registry order), the measured gain (330,231 → 85,315 ms, 3.9×), why NOT a §12 lockstep event (SyncSpec §2 — mirrors carry no indexes; the completeness walk classifies COLUMNS, an index adds none; marker stays 14), and the VX-502 export line; the index-enumerating schema pins updated (`MigrationTests.expectedIndexes`, the `theDaySearchIndexArrivesForAnOlderStore` subtracting set, the new arrival test `theDeferredFKChildIndexesArriveForAnOlderStore` on the v1_34 precedent's shape) | DONE (this commit) — `swift build` green; `swift test --filter MigrationTests` → "Test run with 29 tests in 3 suites passed" (ONE consequential pin edit, annotated in place per the ritual: `theDeadPlacementByBlockIndexArrivesForAnOlderStore` migrates v1_33 → head, so its subtraction now carries v1_36's two beside v1_34's one — v1_34's own claim unchanged) |
 | 2 | The pin (red-on-old, the bisection's arm E/F shape): UNGATED, fast, in-memory — `DeferredFKChildScanPinTests`, a RATIO bound (the pending-violations arm vs the no-pending control) | DONE (this commit) — green on the migrated tree: "[vx720-pin] 8000 takes: pending 0.180538782 seconds · control 0.17602559 seconds · ratio 1.03× (bound 4)", "Test run with 1 test in 1 suite passed after 0.537 seconds". The red-on-old run is next (the named revert below); its lines land in the following commit |
 | 3 | The bench re-run, the evidence: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3` on the migrated store; the INDEX_FIX knob RETIRED (the migration is the fix); the table's new column vs U1b's 330,231 ms; the VX-672 one-paragraph reasoning | DONE (this commit) — the red-on-old + knob retirement in the previous commit (`b757a43f1`); THE BENCH RE-RUN below: **the migrated store's apply 89,187 ms median · 1,224 rows/s (U1b baseline 330,231 ms · 331 rows/s — 3.7×)**, "Test run with 5 tests in 4 suites passed after 410.388 seconds"; the VX-672 paragraph below |
-| 4 | Close: `swift build`; the sync suites filter; the broad core `swift test` foreground (the traps' flake + VX-722/VX-723 named if seen); self-assessment; the orchestrator's LIVE STATUS row 5b flipped | NOT-STARTED |
+| 4 | Close: `swift build`; the sync suites filter; the broad core `swift test` foreground (the traps' flake + VX-722/VX-723 named if seen); self-assessment; the orchestrator's LIVE STATUS row 5b flipped | DONE (this commit) — the close block and SELF-ASSESSMENT below; core 3,604/483 PASSED (5 pre-existing known-issue arms), StringsWorkbook 32/4, MCP 468/85 with TWO load-flakes (both pass alone; one new sibling named for triage) |
 
 #### The pieces (filled per commit)
 
@@ -2305,6 +2311,67 @@ boundary is v1_36**: an export from this build refuses on every build before thi
   O(M·N) class the apply did. v1_36's two indexes turn both searches into probes, so if VX-672's slow post-purge
   round was this mechanism, it is served by this migration — unverified (the ticket also notes it may have dissolved
   with VX-669); the profile on her phone after VM-32 remains the test.
+
+#### The close (piece 4; 2026-11-04, headless throughout — no stage touched, as the brief binds)
+
+- `swift build` → "Build complete!" (and `swift build --build-tests` green at every piece).
+- **The sync suites** — `swift test --filter "Sync|Catch|Purge|Convergence|Repair|Attacker|Tenant|Migration|Schema"`
+  (the regex matches suite NAMES; across the three test targets it drew the full sync/convergence/repair/migration
+  families): **core "Test run with 522 tests in 110 suites passed after 54.511 seconds with 1 known issue"** (the
+  known issue is `PairCatchUpTests`' pre-existing `withKnownIssue` arm — `theResidualCastleAlwaysAskWithOnlyA
+  PassphraseAtTheLobbyHealsAtTheWords`, the U1b close's same class), plus the two sibling targets' matching slices
+  ("3 tests in 1 suite passed" · "1 test in 1 suite passed"). ZERO failures.
+- **The broad core `swift test`** (all three targets, one run, detached to `u4-broad-core.log` and polled in bounded
+  foreground loops):
+  - `VariorumCoreTests`: **"Test run with 3604 tests in 483 suites passed after 289.640 seconds with 5 known
+    issues"** — the 5 are the Castle pair suites' pre-existing `withKnownIssue` arms (`PairCatchUpTests` ×1,
+    `PairInvariantPinsTests` ×4 — U1b's close saw the identical five). U4's net +2 tests (the pin, the arrival test)
+    ride in this count. No real failure.
+  - `StringsWorkbookTests`: **"Test run with 32 tests in 4 suites passed after 35.246 seconds"**.
+  - `VariorumMCPTests`: **"Test run with 468 tests in 85 suites failed after 48.287 seconds with 2 issues"** — BOTH
+    load-flakes, both green alone, neither fixed here (the traps' rule): (1) the traps' OWN named flake
+    `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+    (`ContinuousClock.now - started < .seconds(15)` → 34.3 s under full-suite load; alone → "Test run with 1 test in
+    1 suite passed after 1.045 seconds"); (2) **a NEW sibling of the same initialize-under-load family, for the
+    orchestrator's triage** (a VX-722/VX-723-class candidate, not yet ticketed):
+    `MCPStopRoadsServerTests.aQuitSaysNothingForAConnectionItEnds` at MCPStopRoadsServerTests.swift:93 ("Caught
+    error: claude-code got no answer to its initialize"; alone → "Test run with 1 test in 1 suite passed after
+    0.499 seconds"). VX-722's and VX-723's own named candidates (`MCPReaderAfterCloseTests.aReusedNumber…`,
+    `StarContextTests.aHeldObservation…`) did NOT recur this run.
+
+#### SELF-ASSESSMENT (the first of the two reviews — what I am least sure of; what the cold reviewer should press on)
+
+1. **The pin is a timing ratio, and its green side wobbles with load** (0.64×–1.03× observed across runs tonight;
+   bound 4; red side 12.44×). The two arms run moments apart in one test, so sustained load cancels — the flake shape
+   that remains is a multi-second pause landing inside exactly one arm's ~0.2 s. If it ever flakes in practice, the
+   printed `[vx720-pin]` line carries the forensics and N or the bound have room to move (red is 3× over, green 4×
+   under). Press on: whether a suite-parallel CI-class machine squeezes the margin tighter than tonight's evidence.
+2. **The pin times cached-statement loops, not the engine's own row loop.** It reproduces the bisection's arm E/F
+   statement shapes verbatim rather than driving `pullRound` — deliberately (fast, ungated, no harness), and the
+   bench re-run is the engine-road witness at scale. Press on: whether the pair (micro pin + gated macro bench) is
+   accepted as the bug-class evidence, since the ungated suite alone never exercises the engine path with the index.
+3. **The migration's first open on an EXISTING large store pays the one-time index build** inside the migrator's
+   transaction (O(N log N); U1b's item 7 estimated ms-class at 36k blocks — not re-measured here). The v1_34
+   precedent paid the same class silently. Press on: acceptable without a measured number, or owed one at the ladder.
+4. **Plain, not partial, indexes** — chosen as the measured shape (arm F; the knob). A partial
+   `WHERE default_variant_id IS NOT NULL` would be smaller on disk and SQLite can still prove `col = key` implies
+   NOT NULL, but it was never measured and the FK child-search's internal query is not something I would bet a
+   planner subtlety on. Press on: agree the measured shape wins over the clever one.
+5. **Plan-pin blast radius believed zero, verified by the suites, not by enumeration:** the two new indexes serve
+   seeks BY `default_variant_id`/`chosen_variant_id` (the FK machinery, `deleteVariant`'s chosen-check class,
+   PurgeFamily's json_each membership probes); the pinned EXPLAIN plans constrain by other columns and the negative
+   pins (`!contains("SCAN …")`) can only get easier. The 522/110 + 3,604/483 greens are the evidence. Press on: any
+   plan pin I did not think to grep.
+6. **The VX-672 paragraph is reasoned, not measured** — SET NULL/RESTRICT child searches at parent delete from the
+   SQLite page, applied to the janitor's batch shape. It says "shares the mechanism's SHAPE", not "is the cause";
+   the phone profile after VM-32 stays the verification. Press on: whether the RESTRICT-is-checked-immediately
+   special case is stated right (it is the page's own wording as I know it; the same caveat class as U1b's item 5 —
+   asserted from documentation memory, with the probes as the measured ground).
+7. **The naming deviation (v1_36, not the brief's v1_35)** is threaded through code, pins, bench header and this
+   record, and the export boundary statement names 1.0.1 as already-knowing-v1_35 — but the BRIEF's own text and the
+   orchestrator's row 5b label still say v1_35 (the orchestrator trues those at the next seam, per the coordinator's
+   confirmation). Press on: nothing else in canon names v1_35 for THIS change (I grepped notes/ for
+   "v1_35" beyond the plan file's own brief text and found none tied to VX-720).
 
 ### THE CLOSING WINDOW AS CONDITIONED BY TONIGHT'S COORDINATOR (nov3coordinator, 2026-11-04 — supersedes the closing-runs bullet's narrower Mac-suites line; accepted after the orchestrator verified the diff)
 
