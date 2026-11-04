@@ -552,8 +552,8 @@ struct SyncStatusRow: View {
     @ViewBuilder
     private func rowLabel(for kind: SyncRowFace.Kind) -> some View {
         // VX-510 D-A2: every line is `line(for:)`'s — the one presentation source the account act's first-round sheet
-        // says too.
-        let line = Self.line(for: kind, lastSuccessAt: sync.status.lastSuccessAt)
+        // says too. VX-496 (P-500-1): the running catch-up's numbers ride the same call; only `.syncing` reads them.
+        let line = Self.line(for: kind, lastSuccessAt: sync.status.lastSuccessAt, progress: sync.status.progress)
         switch kind {
         case .devStore, .signedOut, .syncOff:
             Text(line)
@@ -628,13 +628,17 @@ struct SyncStatusRow: View {
 
     /// **VX-510 D-A2 — THE ROW'S LINE, in words: ONE presentation source.** The row renders exactly this for each face,
     /// and an account act's first-round sheet says it for what blocks the round (never re-typed there). `lastSuccessAt`
-    /// is the idle line's stamp.
-    static func line(for kind: SyncRowFace.Kind, lastSuccessAt: Date?) -> String {
+    /// is the idle line's stamp. `progress` (VX-496, P-500-1 — hers; her example "Syncing — 40,000 of 108,000" leads) is
+    /// the running catch-up's numbers (`Status.progress`): only the `.syncing` line reads it, and with none the line is
+    /// "Syncing…" byte-unchanged (every ordinary round — the engine arms a progress only past a first full window).
+    static func line(for kind: SyncRowFace.Kind, lastSuccessAt: Date?, progress: SyncProgress? = nil) -> String {
         switch kind {
         case .devStore: return "Sync off (dev store)"
         case .signedOut: return "Signed out"
         case .syncOff: return "Sync is off"
-        case .syncing: return "Syncing\u{2026}"
+        case .syncing:
+            guard let progress else { return "Syncing\u{2026}" }
+            return "Syncing \u{2014} \(progressCount(progress))"
         case .offline: return offlineLabel
         case .keysLocked: return lockedLabel
         case .notOnYet: return notOnYetLabel
@@ -651,6 +655,22 @@ struct SyncStatusRow: View {
         case .notOnTheProdTestRoad: return notOnTheProdTestRoadLabel
         #endif
         }
+    }
+
+    /// **VX-496 (P-500-1) — THE COUNT, one spelling for every surface**: the row's `.syncing` line says it after its dash,
+    /// and the account act's first-round sheet says the same string beneath its own sentence (P-500-2) — never a second
+    /// spelling (the D-A2 rule). Numbers in the user's locale grouping. Downloading with the server's total →
+    /// "40,000 of 108,000"; without one (no count surface, a refusal, the RPC not deployed) → "40,000 so far"; saving →
+    /// "saving 12,000 of 108,000". The two bounds `SyncProgress.total` names render without nonsense: `done > total`
+    /// (the feed grew during a long download) shows the total RISEN TO `done` — "at most what's done" is never claimed —
+    /// (PROVISIONAL P-500-8: the honest "40,200 of 40,000" is the recorded alternative); the save's `done` may end below
+    /// its total on a straggler stall, which reads plainly. A nil-total save (no engine publishes one today) falls back
+    /// to the "so far" shape rather than inventing a denominator.
+    static func progressCount(_ progress: SyncProgress) -> String {
+        let done = progress.done.formatted()
+        let saving = progress.phase == .saving ? "saving " : ""
+        guard let total = progress.total else { return "\(saving)\(done) so far" }
+        return "\(saving)\(done) of \(max(total, progress.done).formatted())"
     }
 
     @ViewBuilder

@@ -251,7 +251,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
 | 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 (`vx-500-server-half-round2.md`, 0/0/2 MINOR, no round 3) DONE — its two one-line pins landed by the orchestrator under the loosened rule (86/2) · **THE GATE IS OPEN; the deploy HELD for her word** (`notes/plans/vx495-deploy-checklist.md`) | GATE OPEN |
 | 3c | THE DEPLOY: run 1 REFUSED (42501 — the artifacts had omitted the 10/14c bracket, VX-721); the DEPLOY-FIX session landed the bracket + the sweep rows + pins (`e01bb7359`, verified 87/2); **run 2 LANDED 2026-11-02 00:41 UTC (`[]`)**; every verify DONE (SHAPE B body; both functions definer-owned with pg_temp; the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans, 779 ms); **the acceptance DONE 00:57 UTC — her week-behind Pro caught up ~23k rows in ~64 s end to end** (the checklist); the whole-diff ladder reads the bracket fix | DEPLOYED + ACCEPTED |
-| 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | NOT STARTED |
+| 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | IN PROGRESS (the Fable implementer, 2026-11-04) — the record is `### U2 RECORD` |
 | 5 | ~~U3 — the typed-unlock retry + the reachability trigger (D-544)~~ | LIFTED OUT (R-500-10): VX-544 runs as its own ticket run after VX-500's ladder closes; D-544 + the U3 brief move to `notes/plans/fixes/vx-544-offline-typed-unlock.md` at this session's cutover |
 | 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
@@ -1936,3 +1936,47 @@ so the belt pins and the doctored-chain proof read exactly as before — the sui
     (MACHINERY HONESTY); a reader of commits alone would miss where the bracket landed — hence this item, and the close's
     commit list.
 
+
+### U2 RECORD (the Fable implementer, 2026-11-04; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+**NOT DONE (the record's first line):** PENDING until the close flips it — written piece by piece below.
+
+**The stage protocol for this unit (the orchestrator's mid-run amendment, superseding the spawn prompt's fact 2):** the
+claim `vx500-orchestrator` lands on a READY ping — the implementer messages "STAGE-READY" at its first `xcodebuild …
+test`, polls `Tools/stage status` in bounded foreground loops (~20 s steps, ≤ ~20 min), says "SEAM" between distinct
+suite sets, and STOPS (commit + record + report) if the claim never lands. Never claims or steals itself.
+
+#### LIVE STATUS (U2; flipped per piece, in the piece's own commit)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | D-496's words (P-500-1): `SyncStatusRow.line(for:lastSuccessAt:progress:)` + the one count spelling (`progressCount`); "Syncing…" byte-unchanged with no progress; P-500-8 decided (the shown denominator rises to `done`); the new suite `SyncProgressRowTests` | IN PROGRESS (this commit) — code + pins written; the suite's run PENDING the stage |
+| 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | NOT STARTED |
+| 3 | D-505's line (P-500-3): `Kind.retrying` after offline, before every other error class; CF-15's doors; the hover carries the engine's sentence; P-500-7 built as (a) | NOT STARTED |
+| 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | NOT STARTED |
+| 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | NOT STARTED |
+| 6 | Close: `swift build`; the Mac suites under the stage; the self-assessment | NOT STARTED |
+
+#### The PROVISIONALs (recorded here IN FULL — notes/QUESTIONS.md is the merging session's; the orchestrator lands these at the merge)
+
+- **P-500-1 (PROVISIONAL, hers — the progress line's words).** Built: `.syncing` with a downloading progress and a total
+  → "Syncing — 40,000 of 108,000" (her example leads, locale grouping via `formatted()`); without a total → "Syncing —
+  40,000 so far"; a saving progress → "Syncing — saving 12,000 of 108,000"; no progress → "Syncing…" byte-unchanged.
+  One spelling (`SyncStatusRow.progressCount`) serves the row and the sheet. Alternatives recorded: percent instead of
+  counts; "downloading/saving" verbs on both phases; a bare count with no dash.
+- **P-500-8 (PROVISIONAL — the `done > total` render; minted per the brief's piece 1).** Built: (a) the shown
+  denominator RISES to `done` (`max(total, done)`) — the line never claims a total smaller than what is already done;
+  the moment the feed's growth overtakes the armed count the line reads "N of N" and keeps climbing. Alternative (b):
+  show "40,200 of 40,000" honestly (the armed total as the server answered it). (a) chosen as the no-nonsense render of
+  `SyncProgress.total`'s documented bound — a calm surface, not a debug readout; the stored total is untouched (display
+  only).
+
+#### The pieces (filled per commit)
+
+- **Piece 1 (this commit):** `App/Variorum/Shared/SyncStatusViews.swift` — `line(for:lastSuccessAt:progress: SyncProgress?
+  = nil)` (every existing caller byte-unchanged; only `.syncing` reads the parameter), `progressCount(_:)` (the one
+  count spelling, doc'd with P-500-1/P-500-8), the row's one `line` call passes `sync.status.progress`. The face
+  function is untouched (progress-blind — CF-15's doors can't drift). New suite
+  `App/Variorum/VariorumTests/SyncProgressRowTests.swift` (8 pins): the four shapes, her example byte-for-byte under
+  en-US grouping, P-500-8's both directions, the one-spelling rule, CF-15's doors with a progress standing, and
+  every other kind's line byte-identical under the new parameter. PENDING: the suite's first run (the stage).
