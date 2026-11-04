@@ -127,7 +127,7 @@ struct WriteWordCountFlipTests {
             panel.writePanelBlockID = blockID
             defer { panel.teardown() }
 
-            func deliver() throws {
+            @MainActor func deliver() throws {
                 h.model.applyProjection(try h.storeSlots(), fromDelivery: true)
             }
 
