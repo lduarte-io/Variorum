@@ -1468,12 +1468,12 @@ the use walk (W15–W16, both voices); the cold ladder.
 | piece | state |
 |---|---|
 | Reading (this file whole; the vx-736 ladder round 1's VX-740 finding; SurfaceContracts › The note — Compare holds Outline, versions in Compare; VX-757 on Linear — no detail beyond her sentence) | DONE |
-| Trace, both members (code read at HEAD 7c98fcc5f; written below before any code) | DONE (this commit) |
-| VX-740 pin | PENDING |
-| VX-740 fix (P-770-1) | PENDING |
-| VX-757 pin | PENDING |
-| VX-757 fix | PENDING |
-| Build-for-testing: `DerivedData/vx770-b4` (HEAD) + `DerivedData/vx770-b4-rev` (the behavioural revert) | PENDING |
+| Trace, both members (code read at HEAD 7c98fcc5f; written below before any code) | DONE (b268ccf46) |
+| VX-740 pin (`VariorumTests/CompareOutlineMintColumnTests.swift`, pre-existing API only) | DONE (b9d0e1b24) — compile PENDING the b4 build |
+| VX-740 fix (P-770-1 — `makeOutlinePost` yields to the auto-fill's seat) | DONE (a5718b23e) |
+| VX-757 pins (`VariorumTests/CompareToggleIdentityTests.swift`, pre-existing API only) | DONE (8c87bcd0c) — compile PENDING the b4 build |
+| VX-757 fix (`CompareRow.spineID` + one row structure in `rowView`/`peerColumn`) | DONE (eefd41c78) |
+| Build-for-testing: `DerivedData/vx770-b4` (HEAD) + `DerivedData/vx770-b4-rev` (the behavioural revert) | IN PROGRESS — `vx770-b4` building at eefd41c78 |
 | READY-FOR-SUITES, prediction table, walk rows, residue, self-assessment | PENDING |
 
 ### THE TRACE — VX-740 (re-located at HEAD; the vx-736 ladder's mechanism, confirmed by code read)
