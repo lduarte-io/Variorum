@@ -2603,7 +2603,8 @@ guard (`anotherIsLanding`), `redoFoundNothing` (retires the entry — but depth 
 |---|---|---|
 | 1 | THE TRACE — the mechanism to a named line, instrumented (the scratch latch probe, run on the branch AND on main) | DONE (this commit; the probe deleted, both trees `git diff --exit-code` clean) |
 | 2 | CLASSIFICATION — TEST-ONLY race, pre-existing on main; STOP per the brief (no test edit without the orchestrator's call) | DONE (this commit) |
-| 3 | The proposed fix (NOT applied) + the report to the orchestrator | DONE (this commit; the report follows the push) |
+| 3 | The proposed fix (NOT applied) + the report to the orchestrator | DONE (`fb82cd6ee`; the report delivered) |
+| 4 | THE FIX LANDED at the orchestrator's adjudication (option (a) + the invariant comment); probe v2 0/30 held, 30/30 landed; the five consecutive shipped runs green | DONE (this commit) |
 
 #### THE TRACE (the mechanism, file:line)
 
@@ -2658,12 +2659,35 @@ stack, the runner, the status seam or this suite reads.
 **TEST-ONLY.** The product behavior is CORRECT and pinned: a redo pressed while an undo's flight is still landing
 refuses `anotherIsLanding` (18k C5 / 17e P33 — the one-flight latch, deliberately shared across both doors; this
 suite's own two P33 tests pin exactly that refusal). The test presses redo inside that designed window because its
-settle exits on a mid-flight signal. No product line changed behavior; no fix was applied — the brief's stop-and-report
-holds (no test edit without the orchestrator's call).
+settle exits on a mid-flight signal. No product line changed behavior. The stop-and-report ran first (`fb82cd6ee`
+records the trace with the fix NOT applied); **the orchestrator then adjudicated**: classification stands (the shipped
+red was caught twice under the closing window — the full run and the lone 04:0x run — both ending in the probe's
+byte-exact state, so the sampling story is evidenced end to end), and the fix lands as option (a). **This is the
+VX-539/546 class: a pre-existing test race fixed in-window because the merge gate's full re-run would sample it.**
 
-#### THE PROPOSED FIX (for the orchestrator's call; NOT applied)
+#### THE FIX, LANDED AT THE ORCHESTRATOR'S CALL (option (a); this commit)
 
-`DestructiveUndoWarningTests.swift:134` adopts the family's own idiom (the `:233–:236` sibling, verbatim shape):
+`DestructiveUndoWarningTests.swift` (the old :134): the settle adopts the family's own idiom (the
+`aRedoPressedInsideAnUndosFlight…` sibling's first settle, verbatim shape), plus the one-line comment naming the
+invariant the sufficiency rests on (self-assessment item 2: the receipt and the latch-releasing defer run in ONE
+synchronous main-actor job — no await between them; an await inserted there would re-open the window). No assertion
+changed; nothing else touched.
+
+```swift
+await settle {
+    h.session.undoStack.redoDepth == 1
+        && h.session.status.spoken?.text.contains("Undid") == true
+}
+```
+
+**The fix verified by the probe re-run (scratch v2, same 30-iteration dance with the FIXED predicate, deleted after;
+tree clean):** `latchHeldAtSettleExit=0/30 redoLanded=30/30` — "Test run with 1 test in 1 suite passed after 2.358
+seconds with 2 warnings" — against the old predicate's 21/30 held on the same machine. **The five consecutive shipped
+runs (the orchestrator's acceptance), all green:** "Test run with 7 tests in 1 suite passed after 1.382 seconds with
+2 warnings" · "… after 1.426 seconds …" · "… after 1.422 seconds …" · "… after 1.456 seconds …" · "… after 1.431
+seconds …" (each under the standing `vx500-orchestrator` stage claim, `Tools/stage status` read before each).
+
+The proposal as it stood at the stop-and-report, for the record:
 
 ```swift
 await settle {
@@ -2698,10 +2722,11 @@ depth settle, and `approvingRuns…` already waits on the receipt.
    per-condition odds further because the classification does not turn on them: the latch-held-at-settle-exit fact is
    proven on both trees and the end state matches the red byte for byte. If the orchestrator wants the shipped test's
    own red reproduced by me under load, say so and I will run it under a load generator.
-2. **The sufficiency argument for the proposed fix** rests on "no suspension between the receipt and the defer" in
+2. **The sufficiency argument for the fix** rests on "no suspension between the receipt and the defer" in
    `structuralUndo`'s Task — true by inspection today (`:193–:206`: the receipt is the last statement before the do
    block closes; the catch arm likewise ends in a synchronous `refuse`). A later edit inserting an `await` after the
-   receipt would re-open the window; the fix could carry a one-line comment naming that invariant.
+   receipt would re-open the window; the landed fix carries the one-line comment naming that invariant (the
+   orchestrator's call), and probe v2's 0/30 is the empirical side.
 3. **I did not verify the orchestrator's alone-red** (I never caught the shipped test red myself tonight — both my
    samples were green on an idle machine). The probe reproduces the identical end state through the identical door, so
    I treat the orchestrator's xcresult as the red's record; if a doubt stands, the probe file's content is quoted in
