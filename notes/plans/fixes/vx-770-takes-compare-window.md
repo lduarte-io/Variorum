@@ -230,9 +230,9 @@ rushed (members are sub-issues; they close one by one).
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | VX-756 flagship trace + fix | Batch 1 | BUILT — traced (994fa8877), pin (9e8955f9b), fix (91554271e); red/green + walk PENDING the window |
-| 2 | VX-730 stack comments whole | Batch 2 | NOT STARTED |
-| 3 | VX-731 slot split + carousel comments | Batch 2 | NOT STARTED |
-| 4 | VX-728 Compare comments (R-770-2) | Batch 2 | NOT STARTED |
+| 2 | VX-730 stack comments whole | Batch 2 | SURVEYED — mechanism confirmed by code read (first comment only, lineLimit 4); build plan T1–T6 waits on B2-F1's return |
+| 3 | VX-731 slot split + carousel comments | Batch 2 | SURVEYED — slot split confirmed (the bloom replaces the cell the note rides); carousel NOT reproduced by code read (the pin's oracle decides) |
+| 4 | VX-728 Compare comments (R-770-2) | Batch 2 | FORK B2-F1 RETURNED — Compare has no gutter; options A/B/C in the batch 2 record, awaiting the orchestrator's ruling |
 | 5 | VX-732 undo leaves comments drawn | Batch 3 | NOT STARTED |
 | 6 | VX-733 undo leaves the fan wash | Batch 3 | NOT STARTED |
 | 7 | VX-757 track-paragraphs flicker | Batch 4 | NOT STARTED |
@@ -593,3 +593,191 @@ Confirm each "Test run with N tests in M suites" line and read the `skipped:` li
   carousel may be green on rev (the old shape did not hop there). (c) If rows 1–2 are green on rev,
   the harness does not reproduce her hop on this shape and the fix is unproven — the record's
   reading rule says what follows.
+
+---
+
+## BATCH 2 RECORD — VX-730 + VX-731 + VX-728, comments on the board surfaces (implementer: opus-implementer, 2026-11-04)
+
+**NOT DONE (first line, kept current):** NOTHING BUILT YET. The survey is done and written below.
+VX-728 (Compare) reaches the design fork the brief anticipated: Compare's columns have NO whitespace
+gutter, so Write's own machinery answers "yields" (draw nothing), which contradicts R-770-2. Per the
+brief I STOPPED and returned the fork (**B2-F1**, below) for the orchestrator's repo-first ruling.
+The Takes half (VX-730/731) has no product fork; its build plan is below and starts after the
+ruling (or at once if the orchestrator says go on Takes alone). No pins, no fix, no
+build-for-testing, no DerivedData tree yet. `Shared/` is not in the diff (record-only so far).
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (this file whole; SurfaceContracts in full; TEXTKIT2_NOTES in full; the three tickets + VX-696 read on Linear) | DONE |
+| Survey: Write's reference, Takes stack / slot split / carousel, Compare, the feeds' cost bounds | DONE (this commit) |
+| B2-F1, the Compare gutter fork | RETURNED to the orchestrator — awaiting a ruling |
+| Takes build plan (T1–T6) | WRITTEN — proceeding on the orchestrator's word |
+| Seam → pins → fix → behavioural revert → build-for-testing | NOT STARTED |
+| READY-FOR-SUITES, self-assessment | NOT STARTED |
+
+### THE SURVEY (written before any code)
+
+**The reference: Write's gutter (one machinery, three pieces).**
+1. *The feed* — `EditorViewModel.observeComments` (`EditorViewModel.swift:634-658`): one live
+   observation per note of `Queries.containerComments` (`Sources/VariorumCore/Queries/CommentQueries.swift:48-63`),
+   which joins the note's live placements: **cost ∝ the note's own comments**, never the corpus.
+   It becomes `[blockID: [BlockDecor.CommentBrief]]` (id + text, panel order `(created_at, id)`).
+2. *The decision* — pure, in `BlockDecor` (`Features/Editor/BlockDecor.swift`):
+   `commentGutterFaces` (:415-442) picks one `CommentFace` per commented block in the viewport:
+   a **card** when the gutter (`textLeft`, the prose container's left edge) is ≥ 150
+   (`gutterFitsCards`, :470), width `min(210, textLeft − 28)`, height = the block's text height
+   + 24 bounded by the next commented block's face top − 6 (`leftCardRect`, :498-510, R-VX179-2);
+   else a **badge** (`commentBadgeRect`, :314-321, ≥ 19 pt of room); else **yields** (nothing
+   drawn — 13u3 A1, "the one law's other side"). The face's top is the block's first line, or
+   under the callout glyph (`commentFaceTop`, R-13u3-3's stack).
+3. *The face* — `CommentCardView` (`Features/Editor/CommentCard.swift`), an AppKit overlay
+   subview presented by `BlockDecorOverlayController.renderComments` (BlockDecor.swift:883-954):
+   every comment its own wrapping entry (no line cap), hairline separators, an inner scroll when
+   the entries outgrow the card, the card one door to the comments panel (R-VX179-1). Hosts: Write
+   (`EditorView.swift:502/694`, full doors) and the read tier (`ReadPostView.swift:206`, quiet
+   doors) — the read tier is the precedent for "a second HOST of the one machinery".
+   The prose column itself is `ProseGutter`'s (`Surface/ProseGutter.swift`): a pure function of
+   the surface's width, which no decoration can write.
+
+**Takes (all four fan styles) — a SECOND mechanism, not Write's.** The article draws comments
+with its own SwiftUI view, `CommentMarginNote` (`Features/Takes/TakesShared.swift:789-863`, born
+Batch 14, db43f48bf), overlaid on the article CELL (`TakesBoardView.swift:1222-1228`, inside
+`washedCell`, :1152-1255). Its feed is a one-shot per-row read (`Queries.blockComments` on
+`.task(id: blockID)`, re-read only when its own popover closes) — **cost ∝ rows drawn** (the
+LazyVStack realizes the viewport), and **never live**: a store change does not re-read it (that
+staleness is VX-732's class — batch 3's; this batch must not change it silently).
+- **VX-730, stack — CONFIRMED by code read: the truncation.** The note shows ONLY the first
+  comment (`comments.first`, :806), capped at **`.lineLimit(4)`** (:823) in a column at most
+  150 pt wide (`noteWidth = min(150, max(commentRoom − 16, 24))`, TakesBoardView.swift:1160),
+  with "+N more" standing for every other comment (:825-829). Write shows each comment whole as
+  its own entry. Under 90 pt of margin (`compactNote`, :1159) it degrades to a chip that prints
+  `commentPrefix` + the count — and **in Study the prefix is ""** (`Shared/Theme/VoiceTokens.swift:375/412`),
+  so a ONE-comment block's chip prints the empty string: an invisible face (style-independent;
+  a second "shows nothing" road, any style, Study, narrow margin).
+- **VX-731, slot split — CONFIRMED by code read: the gutter is ABSENT.** A bloomed fanned row in
+  slot split REPLACES the article cell with the split cards (`articleRow`, TakesBoardView.swift:
+  1053, 1056-1062: `if !splitBloomed { washedCell(…) }`), and the comment note rides the cell —
+  so every open fan in slot split (expand-all, or follow-the-scroll) draws no comment at all.
+  Unbloomed rows in slot split still draw the (truncating) note.
+- **VX-731, carousel — NOT REPRODUCED BY CODE READ.** The carousel bloom keeps the cell
+  (`carouselBloom` sits UNDER `washedCell`, :1072-1074), so by the code the note draws exactly as
+  in stack, open or closed. No carousel-specific road to "none" was found (the overlay is applied
+  after the cell's `clipShape`; nothing clips the margin; `commentRoom` is style-independent
+  except for margin grid's engaged rail). The candidates that would make her see nothing in
+  carousel are style-independent: the Study empty chip above, or a margin under 24 pt. The pin
+  plan below carries a presence oracle so the window's red run SAYS whether the old tree drew a
+  face in carousel; a presence-green there means carousel's "none" is hollow in the harness (the
+  truncation half stays red, VX-730's mechanism).
+- The prose's left edge on Takes is the article column's + `articleTextLeadingInset` (2 cell
+  padding + 6 container inset, TakesBoardView.swift:1020-1030), the column centred so the left
+  whitespace is `commentRoom = (boardWidth − articleMeasure) / 2` (:746). No pin today asserts
+  that a comment face leaves it unmoved (the old note is an overlay, so it does not move it).
+
+**Compare (VX-728) — no comment read anywhere, and NO GUTTER.** Confirmed: `CompareViewModel.read`
+(`Features/Takes/CompareBoardView.swift:351-389`) reads renderPost/activeFans/title/header per
+column post and nothing about comments; `CompareCellView` (:1966-2088) draws `rail (4) · ⠿ ·
+[⑂n] · PaneSurfaceView`, nothing else. The columns are equal-width `maxWidth: .infinity` cells in
+an 8-pt-spaced `HStack` inside the board's 12-pt inset (:1688-1753): **the prose fills the
+column**; the only room left of a cell's prose is its own chrome strip (rail 4 + 4 + the ⠿ at
+11.5 pt ≈ 7–8 + 4 ≈ 19–20 pt) plus the pane's 6-pt container inset, so `textLeft` ≈ 25–26 pt in
+cell coordinates. Fed to Write's own ladder that is a BADGE of ~20 pt at x ≈ 2 — standing ON the
+lineage rail and the ⠿ handle; there is no whitespace there to stand in. Column widths at the
+1270-pt default (1030-pt board): 2 columns ≈ 499 pt each, 3 ≈ 330, 4 ≈ 245.
+
+**VX-696 (Write's own truncation — NOT a member; a line only).** SHARPENED by code read: it is
+VX-179 U2's inner-scroll card bounded at the block's text height + 24 (R-VX179-2,
+`leftCardRect`), whose overflow is advertised only by an overlay scroller FLASH at first present
+(`CommentCard.swift` `layoutCard`, `flashPending`); on a short block the first entry is clipped
+by the scroll viewport mid-line (no ellipsis — it is a clip, not a truncation) and the second
+entry sits below the viewport (no "+1" — the face has no count when it is a card). Not fixed.
+**Consequence for this batch, stated:** if Takes adopts Write's face (the plan below — P-3), Takes
+inherits exactly this face on SHORT commented blocks, and inherits VX-696's eventual fix with it.
+On her VX-730 sighting's shape (paragraph blocks) Write's card shows the comments whole, which is
+what the stack pin stages.
+
+### B2-F1 — THE COMPARE GUTTER FORK (returned to the orchestrator; NOT built)
+
+The contract line: comments render *in the whitespace gutter outside the text area on every
+surface, stacked vertically, and the prose column's measure and left edge never move for a
+decoration*. The machinery's literal answer for a surface with no gutter is **yields** (nothing
+drawn); R-770-2 says **show them**. Compare has no whitespace gutter, so showing them needs either
+a face in Compare's existing chrome strip or a gutter Compare does not have today. The options:
+
+- **(A) The badge in the existing strip — zero layout change.** Write's narrow-gutter rung (the
+  count badge, a door to the comments panel; `CommentCardLayout.badgeFace` yields "#2" → "2" to
+  fit), stacked vertically UNDER the ⠿ handle in the cell's leading strip, never over the rail or
+  the prose; the strip, the pane and every column's measure unmoved, comments or not. Compare
+  then always sits on the ladder's narrow rung: she sees THAT a block has comments and opens them
+  in the panel; she never reads them in place. Nearly free; nothing to rule on taste except the
+  badge's exact seat.
+- **(B) A Compare gutter as a pure function of the COLUMN's width (ProseGutter's one law,
+  applied to a Compare cell).** Every Compare cell gains a leading gutter whose width depends on
+  the column's width only — e.g. Write's card lane where the column can afford it and still keep a
+  reading measure (≥ ~150 + ~320 + chrome, so 2 columns at the default window), else a badge lane
+  (~36 pt = Write's 32-pt badge + 4 air) — and Write's ladder then picks card / badge / yields.
+  She READS the AI's notes beside the revised copy (her ticket's "pull request of prose" case) at
+  2 columns. Cost: every Compare column's prose narrows by the lane at all times, comments or not
+  (≈ 499 → ≈ 340 pt at 2 columns; ≈ −36 pt at 3–4) — a visible change to Compare's face that
+  nobody has ruled; the thresholds are taste numbers.
+- **(C) A fixed badge lane at every width** — (B)'s narrow arm everywhere: a constant ~36-pt
+  leading gutter on every cell, the badge in it, never the card. Cleaner seat than (A), a
+  permanent measure cost (−36 pt per column), still count-only.
+- *Considered and not pursued:* a lane only on columns whose note HAS comments (the measure would
+  move when the first comment lands — the one law broken); inline strips under the block (the
+  contract puts them in the gutter, and a strip moves the rows below it — R7's opt-in setting
+  stays Write's).
+
+**My recommendation:** (A) as PROVISIONAL — the most spec-defensible: it shows them (R-770-2),
+moves no prose (the one law, trivially), and uses only Write's existing rung and face; (B) is the
+upgrade if she wants to read notes in place, and is hers to rule because it narrows every
+Compare column. **The feed for any option:** add `Queries.containerComments` per shown post to
+`CompareViewModel.read` (one indexed pass per column post — ∝ the shown posts' own comments, the
+same bound as Write's feed and as the projection's existing per-post reads; live, so Compare does
+not inherit the VX-732 staleness class). Pins for any option: a commented block's face present in
+its column (red on old — nothing reads comments there), and the measure/left-edge guard (a
+commented and an uncommented cell's prose start at the same x; for (B) also "the lane is the same
+with and without comments").
+
+### THE TAKES BUILD PLAN (no product fork; proceeding on the orchestrator's word)
+
+- **T1 — one decision.** Move the per-block arm of `BlockDecor.commentGutterFaces` into
+  `BlockDecor.commentFace(textLeft:top:blockHeight:roomBelow:) -> CommentFace`, which
+  `commentGutterFaces` then calls (byte-identical for Write; its existing pins guard it).
+- **T2 — one face.** Move `renderComments`' card and badge arms into one presentation function on
+  `CommentCardView` (the entries, the voice's prefix, ink/rule/separator, the tooltip, the badge's
+  "#n"), which Write's controller and every new host call (byte-identical for Write).
+- **T3 — the Takes host.** `CommentMarginNote` keeps its feed exactly (the per-row
+  `Queries.blockComments` read on appear + after its popover closes — ∝ rows drawn; its staleness
+  is VX-732's and stays batch 3's) and its door (the same `.popover` with `CommentsPanel`; editing
+  and the unsubmitted-comment park rule stay the panel's), but its FACE becomes T2's
+  `CommentCardView` through a thin `NSViewRepresentable`, placed by T1 with `textLeft =
+  commentRoom + articleTextLeadingInset` (the article prose's container edge, in the board's
+  coordinates), `top` = the row's first line (or under the callout emoji, R-13u3-3's stack),
+  `blockHeight` = the row's text region, and `roomBelow` = the row's own extent + the article's
+  6-pt row spacing — the host cannot see its neighbour's comments (the feed is per row), so it
+  assumes the next row may carry a face and never crosses into it (Write's rhythm, conservatively:
+  a one-line unbloomed row's card is ~8 pt shorter than Write's; an open fan gives it the fan's
+  height).
+- **T4 — slot split.** The face rides the row's content column (the article `VStack`), not the
+  cell, so a bloomed split row keeps its gutter; every style draws through the one host.
+- **T5 — pins (red-on-old by behavioural revert).** A behaviour-neutral DEBUG seam FIRST, in its
+  own commit: a session-scoped `TakesCommentFaceOracle` the OLD note writes (the entries it shows,
+  its line cap, card vs chip), so the pins read the same oracle on both trees; then per style —
+  stack (a long comment + a short one on a tall block: both whole, uncapped, the card not
+  overflowing), slot split bloomed (a face present), carousel bloomed (a face present + whole) —
+  and the left-edge guard (a commented and an uncommented row's prose at the same window x, the
+  face wholly left of it). The revert restores the two source files to the seam commit.
+- **T6 — what Takes inherits, stated:** Write's thresholds (card ≥ 150, badge ≥ 19, else yields)
+  replace the old note's 90-pt chip rule, and VX-696's short-block clip.
+
+### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
+
+- **R-B2-1 (a one-law breach in Takes, callouts):** `TakesCalloutFrame` pads the whole row by
+  5 pt (`Features/Takes/TakesCalloutFrame.swift:61-62`), so a callout block's prose starts 5 pt
+  right of a plain block's and its measure is 10 pt narrower — a decoration moving the prose's
+  left edge on the Takes board. Pre-existing; not a member.
+- **R-B2-2:** the Takes callout emoji draws the WHOLE stored emoji (`TakesCalloutFrame.swift:70-74`),
+  not the first grapheme Write draws (R-13u3-4, `BlockDecor.leadingGlyph`).
+- **R-B2-3:** the Study voice's compact comment chip prints an empty string for a one-comment
+  block (`TakesShared.swift:811-818` + `commentPrefix == ""`) — dissolved by T3 if built.
