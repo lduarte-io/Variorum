@@ -2296,3 +2296,22 @@ bytes. Stage released ~07:00; b5 trees + the scratchpad rev-source clone deleted
 ladder (round 1, fable-reviewer, REVIEW_PROMPT verbatim over 93a3ef88d..HEAD), then fixes if
 any, the merge-in of main (now holds VX-500's PR #215), the walk on the merged tree, the merge
 gate (whole target + the six phone suites), closeout.
+
+## THE LADDER — ROUND 1 (fable-reviewer, findings committed 815e1a797; the file `notes/plans/fixes/vx-770-ladder-round1.md`)
+
+**No BLOCKER. Four findings:** F1 MAJOR (Compare's cell mounts the shared comment face
+CONDITIONALLY, so the panel seat batch 3 built never exists there — deleting a block's last
+comment from Compare's open panel tears it down mid-act; pin = the Compare twin of the seat
+test, RED on HEAD predicted; fix = hoist only `lane > 0`, always mount the face); F2 MINOR
+(`forgetPages`' follow-the-scroll exception is wrong for the COLLAPSE door — a collapsed strip
+unmounts regardless, so its page survives and VX-638's lie returns through ⇧⌥⌘Z; pin = pure
+transition, RED on HEAD predicted; fix = the collapse door forgets unconditionally); F3 NIT
+(the re-aim's `content != landingJudgedContent` gate can meet a revisited height — never worse
+than pre-fix, RECORD-ONLY, a walk eye); F4 NIT (`CompareRow.id` survives unread beside
+`spineID` — retire at the next touch, which F1's fix IS). The reviewer's dispositions CONFIRM
+the record's open readings (the :417 oracle mechanism, the warnings pre-existing, the
+Entry-date-arm choice with Library parity verified, VX-739's guard placement, B5-F1 option C).
+Housekeeping: an uncommitted Package.resolved artifact — resolve deliberately at closeout.
+**Flow (cross-model):** F1 + F2 to the fix implementer VERBATIM (+ F4's retire riding F1's
+file touch); agree/dispute returns to the reviewer for the final call on any dispute; the
+implementer applies confirmed fixes red-on-old; ROUND 2 (fresh reviewer) re-checks the fixes.
