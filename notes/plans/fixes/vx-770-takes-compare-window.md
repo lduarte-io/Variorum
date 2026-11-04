@@ -2255,3 +2255,15 @@ Variant · Pool Copy · Convert to Book · Sample Library, one Wording ticket at
 vx770-b5-rev), then ONE WHOLE `VariorumTests` run on vx770-b5 — batch 5's green, the 45
 never-run suites, and the closeout's changed-source coverage in one verdict (updateCaretContext
 runs under every mounted Write editor, so the whole target is the honest gate).
+
+## THE MERGE-GATE PLAN (settled with nov3coordinator, ~06:05)
+
+Tonight's b5gate window is the PRE-LADDER baseline, not the merge gate. **The merge gate runs on
+the MERGED tree at the merge ask, one window: merge main in → WHOLE `VariorumTests` → six phone
+suites on the simulator** (`MobileBooksTests` · `MobileTutorialWalkTests` ·
+`MobileStarterJournalTests` · `MobileShellTests` · `MobileLibraryTests` ·
+`MobileShelfTodayDoorTests` — owed because VX-758's `stampOrder` COALESCE changes an ORDER the
+phone renders through the same core query; all six carry real date/sort/assembly references by
+grep, so the set stands untightened). The undo-label rename owes the phone nothing (the one
+phone hit already reads "Delete Take" on main). The b5gate's keep: a green whole-target baseline
+for the ladder to review against.
