@@ -53,6 +53,55 @@ its merge-in. Closeouts serialize (VX-500 first in queue; shared ledgers only at
 
 ---
 
+
+## FOR A LATER READER (written at the closeout, 2026-11-04 — read this section in place of the file)
+
+**What this run was.** Her post-1.0 Takes/Compare window: thirteen members, one overnight
+/architect-phase run, five Opus batches + a reconciliation + one walk-born fix cycle, a
+three-round ladder (closed finally at round 3 with nothing new), two full walks, and a merge
+gate on the merged tree. Every bug member's fix is red-on-old VERIFIED in a real window.
+
+**The mechanisms as settled, one pointer each:**
+- **VX-756 (the flagship):** with the current block changed while away, the entry landing aims
+  ONCE against the seeded fans' bimodal height estimate and the watch corrects from quiet — the
+  visible hop; margin grid alone re-measures its cards a turn late, escaping the re-aim's
+  content-change gate. Fixed on the existing road: one re-aim per height change
+  (`reaimWhereTheColumnReEstimated`) + the W2 cycle's `landingTargetJustMoved` (her row's own
+  report counts as fresh). BATCH 1 RECORD + THE W2 CYCLE. R-770-1 kept: the stay-open memory
+  untouched.
+- **VX-730/731/728 (comments):** one machinery — Write's ladder (`BlockDecor.commentFace`) and
+  face (`CommentCardView.presentGutterFace`) now serve the Takes host and Compare's width-only
+  lane (`CompareGutter.lane`, P-770-3); the carousel's "nothing" was the empty Study chip.
+  BATCH 2 RECORD + B2-F1 RULING. The ladder's F1 made the Compare face unconditional so the
+  panel's seat survives the last comment's deletion.
+- **VX-732/733 (post-undo staleness):** the comment feed was a per-row one-shot — now the live
+  per-note `TakesCommentFeed`; the wash was open-set membership — now `TakesOpenFanRule` closes
+  a fan that held >1 take and holds 1 (archived counts toward >1, B3-P1; redo returns closed,
+  B3-P2). BATCH 3 RECORD.
+- **VX-757/740 (Compare):** the flicker was row re-keying remaking every pane (now `spineID`
+  keys the ForEach); the double outline was the mint's resume appending beside the auto-fill's
+  seat (now deduped by post id, P-770-1). BATCH 4 RECORD.
+- **The singles:** the Entry-date sort piled undated notes last — now `COALESCE(entry_date,
+  created_at)`, the Library's rule (AppSpec §10); the word count's live-count arm ran during
+  programmatic replaces (`!suppressEditProcessing` guards it); closed strips forget their pages
+  (`forgetPages`, the collapse door unconditional per ladder F2); "Delete Take". BATCH 5 RECORD.
+  VX-652 NOT built (B5-F1 option C — re-owned with its design).
+
+**Her rulings:** R-770-1 (stay-open stays) · R-770-2 (Compare shows comments) + her rider picks.
+**PROVISIONALs + her confirms:** QUESTIONS #259 (P-770-1, P-770-3 + the lane's taste cost,
+B3-P1/2, the toggle-name and Entry-date-arm confirms, VX-794's flash, VX-652's options).
+
+**The evidence lines that matter:** the merge gate (merged tree, COMMITTED pins — the vx770-gatef
+workspace-state): Mac **"5846 tests in 1019 suites passed"**, phone **"86 tests in 18 suites
+passed"** (18/18 types); the red legs: batch-by-batch in the window sections (every member red
+on its revert tree); the walks: 16/17 then the re-walk **6/6, zero hops**; the pin saga: VX-781
+(xcodebuild rewrites the lockfile upward — the w2 pair ran on self-consistent upgraded pins,
+cited behaviorally only).
+
+**Open items:** VX-781 (High — the pin rewriter); VX-652 (re-owned, her option call); the born
+tickets VX-781–795; the /Applications refresh HELD for her (VX-779 + the v1_36 migration);
+her #259 confirms. Everything below this section is the night's working record.
+
 ## Binding principles — the 13b constitution (P-1…P-9, carried per the architect-phase skill)
 
 The skill's P-1…P-9 block and its application notes bind this run verbatim (the skill file is
