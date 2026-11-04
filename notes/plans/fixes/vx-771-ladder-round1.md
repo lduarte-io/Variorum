@@ -49,3 +49,9 @@ No BLOCKER. No MAJOR. Nothing in the diff tracks word-level change, copies text 
 3. **NIT (MCPExpectedTextMismatch.swift:83 — "1 characters"): FIXED NOW as mechanical pluralization** (the batch-2 implementer, resumed; its pin updated if it asserts the string). The words remain PROVISIONAL under P-771-9 for her VX-234-class pass — the pluralization just stops the sentence being wrong at length 1.
 
 Round verdict adopted: the run is unblocked; the walk (Road A) and the closing Mac window remain the gate before closeout. R-771-C's verify verdict stays UNCLAIMED until the walk runs.
+
+## THE ORCHESTRATOR'S LINE-BY-LINE CHECK of the round's fixes (7aebd5d83)
+
+- MINOR pin half: `aWireWingCopyAsksForHerFlushAndCopiesHerLatestText` read in full against the finding — asserts the turn log `["flush:copy_note_to_wing", "act"]`, the copy carrying her latest words, the source keeping them; green-only as ruled. MATCHES.
+- NIT-2: the lengths clause inflects its one noun; the DEPARTURE (the take's length stays elided, uninflected — "the take 1" rides the same noun) is ACCEPTED: inflecting it would add a noun and change P-771-9's words beyond the NIT. The new agreement pin covers 1, 2, 0. MATCHES.
+- Both touched suites re-run by the orchestrator's own hands: 23 tests in 2 suites green. The ladder is CLOSED at round 1.
