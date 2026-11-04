@@ -38,6 +38,8 @@ The video's thesis as she framed it: *"I want open source; I put a ton of work i
 - ~328k lines of non-test Swift; ~401k lines of test code — MORE test than app; 10,771 `@Test` functions.
 - ~6.1M words of notes: specs, plans, rulings, run records (987 files; 656 plan files; 99 fix/run records; 121 handoffs).
 - The always-loaded "constitution" (CLAUDE.md + the three canon files) is ~129k tokens, re-read by every session and subagent.
+- **Her prompting, counted** (the Pro's `~/.claude/history.jsonl`, which keeps every typed prompt even after transcript cleanup): **3,232 prompts · ~232k typed words** across the four months (Jul ~38.6k · Aug ~52.6k · Sep ~38.2k · Oct ~99k · Nov-to-date ~4k), ≈26 prompts/day averaged, ~57/day in October, plus ~12.4k pasted-in words stored beside them. The surviving full transcripts (Oct 5 →) put her median message at 46 words. Claude's replies to the pre-October prompts are gone (transcript cleanup); the prompts — her half of the authorship record — are all still there.
+- Her raw use reports live in `notes/author-reports/` (four reports, ~9.3k words verbatim); each spawned a dispositioned round file (the two big ones: 11.6k and 11.2k lines).
 - 784 tickets minted (VX-747 + VM-37), 520 distinct tickets named in commit subjects; median commit subject 256 characters — the history IS a record, not noise.
 
 **Evidence of human authorship (the Copyright Office's own vocabulary — selection, arrangement, modification, creative control):**
