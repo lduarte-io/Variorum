@@ -127,6 +127,35 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 
 *(appended as batches run — LIVE STATUS per the resiliency protocol)*
 
+### BATCH 1 RECORD — the duplicate family (VX-759 · VX-766 · VX-765)
+
+**Implementer:** opus-implementer (one session), 2026-11-04. Headless core only (`swift build` / `swift test --filter`), no stage, no xcodebuild.
+
+#### LIVE STATUS
+
+| Member | Status |
+|---|---|
+| VX-759 duplicate dating (P-771-1) | IN-PROGRESS — trace done (below); pins + fix next |
+| VX-766 duplicate brief form | NOT-STARTED — `brief: true` per the batch text; the digest half is a FORK (propose before building) |
+| VX-765 copy_note_to_wing | NOT-STARTED — wraps her `copyNoteToWing` body (`Operations+WingMove.swift`) |
+| End-of-batch suites | NOT-STARTED |
+
+No revert is in flight.
+
+#### VX-759 — the trace (done before any code)
+
+- **The derivation that produced "2026-10-20".** `DisplayTitle.note(title:entryDate:createdAt:)` (`Sources/VariorumCore/Domain/DisplayTitle.swift:72`) — the ONE rule every surface and the wire's `mcpScopeTitle` read: the stored title unless blank (`isAbsent`), else `entry_date` when non-empty, else the LOCAL day of `created_at`. So "2026-10-20" was a note with NO typed title and NO `entry_date`, born 2026-10-20: its name is its birth day, derived at read.
+- **The mechanism.** `copyPost` (`Operations+Versions.swift:789–795`) copies `title`, `profile` and `entryDate` verbatim (nil, nil) and stamps `createdAt: now`. The copy's derived name therefore reads the COPY's birth — today — for every copy of an undated, untitled note. 28 copies made on one day all read that day; under any `COALESCE(entry_date, created_at)` sort (the Library's entry-date key, `LibraryPaging.swift`'s `keyExpression`) and any `entry_date` sort (a reading's `sort_field = 'entry_date'`, `ReadingAssembly.swift:553–563` `stampOrder` — a NULL `entry_date` sorts LAST in either direction: the report's "undated pile") the copies leave their sources' place.
+- **A dated or typed-titled source is NOT the class:** its copy's name is the verbatim title or the verbatim `entry_date` — already faithful.
+- **Who shares the body (the doors that heal together).** `duplicateAsVersionBody` (`Operations+Versions.swift:298`), called by her `duplicateAsVersion(_:tags:)` (`:250`) and the wire's `duplicateNoteForClient` (`Operations+MCPDuplicate.swift:101–107`). Her doors on the Mac that reach it: `Core/Views/NoteDuplicate.swift:48` (the copy family's one entry), `Features/Library/LibraryViewModel.swift:241` (row menus, `LibraryCatalogView.swift:1385/1388`, `RootView.swift:1414`), `Features/Takes/TakesViewModel.swift:1865` (`TakesBottomBar.swift:495`, `TakesBoardView.swift:647`). The wire: `MCPWriteTools+DuplicateNote.swift:132/152`. The tutorial seeder's twin (`TutorialSeeder.swift:2043`) rides it too.
+- **Other `copyPost` callers — NOT this body, so unchanged by P-771-1 as briefed:** `promoteLens`/`promotePicks` (`:451/:559`), `mintNoteVersion` (`Operations+NoteVersions.swift:67`, which then clears `entry_date` — V3's must-pin), `copyNoteToWing` (`Operations+WingMove.swift:199`, her ⇧⌥⌘L — VX-765's body), `divergePostForReading` (`Operations+Diverge.swift:91`), the ownership forks (`Operations+Ownership.swift:88`). Each mints a copy of an undated untitled note that re-dates the same way — see the fork F-1 below.
+- **The notebook rule (why a journal-profile source is excluded).** `Queries.canonicalJournalEntry` (`Timeline.swift:257`) finds "the day's entry" by `profile = 'journal' AND entry_date = day` in Home. An undated journal-profile note is reachable (`setEntryDate(id, nil)`); dating its copy would make the copy claim a notebook day the source never claimed (⌘J could open the copy as today's entry when the source was born today). `mintNoteVersion`'s V3 must-pin refuses a copy a day for exactly this reason, so P-771-1 leaves a journal-profile source's copy verbatim.
+- **The day's calendar.** `JournalDay.storeCalendar` (Gregorian, her time zone — the store's day-key calendar, `JournalDay.swift:112`), never `@Dependency(\.calendar)` (its test value reports an issue in every existing suite) and never `Calendar.current` (a non-Gregorian system calendar writes a key `isValid` refuses).
+
+#### Forks awaiting the orchestrator (built to the brief's letter meanwhile)
+
+- **F-1 (VX-759's reach).** P-771-1 is built in the DUPLICATE body only, as briefed. The same re-dating happens on every other `copyPost` road listed above — most visibly her ⇧⌥⌘L Copy to Wing (`copyNoteToWing`), which VX-765's `copy_note_to_wing` shares byte-for-byte, so an agent copying undated notes to another wing still re-dates them. Options: (a) leave the other roads verbatim (as built); (b) extend P-771-1 to `copyNoteToWing` (her door and the wire heal together — one flag in `copyPost`'s call there); (c) extend it to every `copyPost` road but the saved version (promote, diverge, the ownership forks too). Recommendation: (b) at least — a copy to another wing is a duplicate into another room, and the wire tool exists for the agent that reported #14.
+
 ## Morning bundle (grows all night; the closeout moves it to the handoff)
 
 1. *(placeholder — filled as items accrue)*
