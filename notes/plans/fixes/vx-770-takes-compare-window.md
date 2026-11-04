@@ -233,8 +233,8 @@ rushed (members are sub-issues; they close one by one).
 | 2 | VX-730 stack comments whole | Batch 2 | BUILT — seam 2dfd4a4a0, shared machinery 20773ef07, pins 1c4c21d8c, fix 9a02527ea; red/green + walk PENDING the window |
 | 3 | VX-731 slot split + carousel comments | Batch 2 | BUILT — the face rides the row (slot split); carousel: both roads fixed + pinned, note (a)'s verdict PENDING the red run |
 | 4 | VX-728 Compare comments (R-770-2) | Batch 2 | BUILT — P-770-3 (option B, PROVISIONAL): the width-only lane, the live feed, the shared face; red/green + walk PENDING; the taste cost to her bundle |
-| 5 | VX-732 undo leaves comments drawn | Batch 3 | NOT STARTED |
-| 6 | VX-733 undo leaves the fan wash | Batch 3 | NOT STARTED |
+| 5 | VX-732 undo leaves comments drawn | Batch 3 | BUILT — traced (c9c1163df), pins (86d3652ec), fix (ca980e24b): the live per-note feed + the panel's seat; red/green + walk PENDING the window |
+| 6 | VX-733 undo leaves the fan wash | Batch 3 | BUILT — traced (c9c1163df), pins (86d3652ec), fix (e7f9cefc2): `TakesOpenFanRule`, both roads; B3-P1/B3-P2 PROVISIONAL to her bundle; red/green + walk PENDING the window |
 | 7 | VX-757 track-paragraphs flicker | Batch 4 | NOT STARTED |
 | 8 | VX-740 double outline column (P-770-1) | Batch 4 | NOT STARTED |
 | 9 | VX-758 created-sort fallback | Batch 5 | NOT STARTED |
@@ -1024,9 +1024,12 @@ during render?) is the suspect; assess at the reconciliation.
 
 ## BATCH 3 RECORD — VX-732 + VX-733, the post-undo staleness pair (implementer: opus-implementer, 2026-11-04)
 
-**NOT DONE (first line, kept current):** everything below the trace is PLANNED until the LIVE STATUS
-rows say otherwise; every mounted red/green claim will be a PREDICTION until the orchestrator's suite
-window (this session is headless — no `xcodebuild test`, no app, no stage); the use walk; the cold ladder.
+**NOT DONE (first line, kept current):** every mounted red/green claim below is a PREDICTION until the
+orchestrator's suite window (this session is headless — no `xcodebuild test`, no app, no stage); the use
+walk (W10–W14, both voices); the cold ladder; the push (refused from this shell at every commit — the
+commits are local until the orchestrator pushes); the reconciliation of batch 2's one red (a reading
+below, not a fix). No `Shared/`, `Sync/`, schema, registry, `PaneSurface`, `EditorTextView` or
+`BlockRangeIndex` file is in the diff.
 
 **LIVE STATUS**
 | piece | state |
@@ -1037,8 +1040,8 @@ window (this session is headless — no `xcodebuild test`, no app, no stage); th
 | Fix — VX-732 (the live feed + the panel's seat) | DONE (ca980e24b) |
 | Fix — VX-733 (the collapse rule, in-showing + across a mode switch) + the pure-rule pin | DONE (e7f9cefc2) |
 | `DerivedData/vx770-b3-post` build-for-testing at e7f9cefc2 | DONE — TEST BUILD SUCCEEDED (log `App/Variorum/DerivedData/logs/vx770-b3-post-build.log`; no new warning in a touched file) |
-| **Behavioural revert — ANNOUNCED HERE BEFORE IT STARTS:** the six behaviour files (`TakesShared.swift`, `TakesBoardView.swift`, `CommentGutterFace.swift`, `TakesViewModel.swift`, `TakesBoardLayout.swift`, `EditorRouter.swift`) restored to the pins commit 86d3652ec (= the pre-fix behaviour) by `git checkout 86d3652ec --`; the two new files (`TakesCommentFeed.swift`, `TakesOpenFanRule.swift`) stay, unreferenced except by the pure-rule pin; the tests stay at HEAD. Copies + sha256 first in `App/Variorum/DerivedData/vx770-b3-prerevert/` (gitignored); built into `DerivedData/vx770-b3-rev`; then `git checkout HEAD --` and verified by `git diff` + `shasum -c` | IN FLIGHT (announced at this commit) |
-| READY-FOR-SUITES, prediction table, P-8, walk rows, residue, self-assessment | NOT STARTED |
+| **Behavioural revert — ANNOUNCED HERE BEFORE IT STARTS:** the six behaviour files (`TakesShared.swift`, `TakesBoardView.swift`, `CommentGutterFace.swift`, `TakesViewModel.swift`, `TakesBoardLayout.swift`, `EditorRouter.swift`) restored to the pins commit 86d3652ec (= the pre-fix behaviour) by `git checkout 86d3652ec --`; the two new files (`TakesCommentFeed.swift`, `TakesOpenFanRule.swift`) stay, unreferenced except by the pure-rule pin; the tests stay at HEAD. Copies + sha256 first in `App/Variorum/DerivedData/vx770-b3-prerevert/` (gitignored); built into `DerivedData/vx770-b3-rev`; then `git checkout HEAD --` and verified by `git diff` + `shasum -c` | DONE 03:54–03:58 — `vx770-b3-rev` TEST BUILD SUCCEEDED (log `App/Variorum/DerivedData/logs/vx770-b3-rev-build.log` — the pins compile against the pre-fix behaviour); **no revert in flight, the source is HEAD**: `git diff HEAD` empty, `git status` clean, `shasum -a 256 -c …/vx770-b3-prerevert/sha256-head.txt` OK on all six, each byte-identical (`cmp`) to its prerevert copy |
+| READY-FOR-SUITES, prediction table, P-8, walk rows, residue, self-assessment | DONE (this commit) |
 | Push | REFUSED at every commit so far (c9c1163df, 86d3652ec, ca980e24b, e7f9cefc2): `Permission denied (publickey)` — this shell has no ssh agent (batch 2's finding); unpushed: GitHub incident/auth; git config untouched; one attempt per commit, never thrashed — the orchestrator sweeps |
 
 ### THE TRACE (written before any code) — two mechanisms, one class, NOT one mechanism
@@ -1163,3 +1166,191 @@ window), not VX-732's staleness; whether batch 3's live feed turns it green depe
 window's graph still runs its feed (it might — then the face drops by the live road). The window's run
 says which. Batch 3's own pins stage the deletion WHILE the board is up (the arm's honest home) and read
 the AppKit card's presence beside the oracle.
+
+### AS BUILT
+
+Commits: trace c9c1163df · pins 86d3652ec · VX-732 ca980e24b · VX-733 e7f9cefc2 · record aa24c5d24 + this one.
+- **The pins** (86d3652ec, `App/Variorum/VariorumTests/TakesPostUndoStalenessTests.swift`; pre-existing API
+  only, so the revert's red is behavioural) — her acts as the app runs them: the AI's batch through the
+  operation the MCP door calls (`addComments` / `addTakes`, one undo entry each, labeled
+  "claude-code's …"), then `UndoStack.undo` (the ⌥⌘Z door's own call) with THE takes board MOUNTED, the
+  store's change reaching it through its own observations.
+  - `TakesCommentFeedLivenessTests`: `anUndoneAIsCommentsLeaveTheGutter` ×4 styles (fan open: the
+    face drawn → undo → no face in the oracle AND no `CommentCardView` for the block → redo → back);
+    `aCommentChangedFromOutsideTheBoardFollowsTheStore` (edit, delete, delete-last from outside, entry by
+    entry); GUARD `herOpenPanelKeepsItsSeatWhenTheLastCommentLeaves` (the face's door pressed, the last
+    comment deleted: the face stays seated with what it showed).
+  - `TakesCollapsedFanWashTests/anUndoneAIsTakesCloseTheFansTheyCollapsed` ×4 styles: A (her own spare +
+    the AI's), B and C (the AI's only) opened by expand all, D's first-take door open; undo → B, C not
+    bloomed, out of the open set and the memory; A bloomed (R-770-1); D bloomed (R72); then her Write round
+    trip (a fresh, seeded board) → open = {A, D}. The wash is drawn from exactly `isBloomed`
+    (`washedCell(washed: bloomed)`) — the pin reads that input; the drawn wash is the walk's (W11).
+  - `TakesCollapsedFanRoadsTests` (no mount): `aFanThatCollapsesWhileTheBoardIsAwayComesBackClosed`
+    (⌥⌘Z pressed in Write); `deletingAnOpenFansSecondTakeClosesIt` (any road + B3-P2 (a): the take ⌥⌘Z'd
+    back returns CLOSED); GUARDs `archivingAnOpenFansSecondTakeKeepsTheArchivedRoadOpen` (B3-P1 (a)) and
+    `theFirstTakeDoorStaysOpenThroughProjectionsAndARoundTrip` (R72).
+  - `TakesOpenFanRuleTests` (e7f9cefc2, pure): what an open block holds; only a collapsed fan closes
+    (still-fanned, archived, first-take door, gap, left-the-note, not-open — all stay).
+- **VX-732 — the live feed** (ca980e24b): `Features/Takes/TakesCommentFeed.swift` (new — the board's
+  comment projection, plain observable storage, `entries(for:)`, an equality-guarded `adopt`);
+  `TakesViewModel.commentFeed` + `observeComments()` (`Queries.containerComments` live — Write's own
+  query and `CommentBrief` shape); `TakesBoardView` starts it in its own `.task` beside `start()`
+  and hands it to each row; `CommentMarginNote` (`TakesShared.swift`) reads its block's entries in its
+  own body — its `@State` copy, `.task(id: blockID)` read and after-the-panel refresh are gone.
+  `CommentGutterFace`: the `onPanelClosed` hook retires (no host's feed is one-shot now) and the SEAT
+  lands — `shown = panelShown && entries.isEmpty ? seat : entries`, `seat` taken at her press — in the
+  one shared host, so Compare's already-live feed gets the same guard (stated: a latent batch-2 edge,
+  closed by the same lines, not a separate change).
+- **VX-733 — the collapse rule** (e7f9cefc2): `Features/Takes/TakesOpenFanRule.swift` (new, pure:
+  `holdingTakes`, `collapsed`); `TakesBoardLayout.closeCollapsedFans` (the open set's one door for it,
+  reported through the sink so the memory follows; the layout still never reads the projection);
+  `EditorRouter.takesExpandedHeldTakes` (beside `takesExpandedBlocks`, same rules); `TakesViewModel`:
+  `adopt` reads `heldBefore` while the outgoing projection is in hand (the session's record at a
+  showing's first projection), and after VX-428's prune calls `closeFansThatCollapsed`, which closes what
+  the rule names and writes the record; `rememberExpansion` writes the record with every open-set change;
+  `openExpansionMemory`'s pin-order arm does the same as `adopt`. The rule runs on every host (it is the
+  open set's own meaning), the memory only on THE takes board — Write's panel and the Lenses board bloom
+  nothing, so it is inert there.
+- Untouched: `Sync/`, schema, `Shared/` (no `App/Variorum/Shared/` file), the capability registry,
+  `PaneSurface`, `EditorTextView`, `BlockRangeIndex`, `TakesArticleScroll.swift` (batch 1's), the
+  seed/prune/landing roads, the wash's own drawing, `BlockDecor`/`CommentCardView`. No TK1 API, no
+  attribute stamp, no display-pass consumer (the VX-702 class is not this road: both stale states were
+  model state, not an undrawn frame). **MOBILE PARITY: nothing mobile-visible** (the Mac Takes board only;
+  `EditorRouter` is the Mac app's).
+- **Canon delta PROPOSED for the closeout** (SurfaceContracts › The note, the Takes bullet's open-fan
+  sentence, in place): "…fans stay open across a mode switch and back, the seeded set in place before the
+  board's first geometry report, pruned to the note's live blocks; **a fan that collapses to its one take
+  closes, by any road and across a mode switch (a first-take door she opened is not a collapse)**…" + the
+  VX-733 pointer. VX-732 needs no line (the every-surface comments contract already says it; the board
+  now keeps it).
+
+### THE PREDICTION TABLE (PENDING the window)
+
+| # | Test | `vx770-b3-rev` (behaviour at 86d3652ec) | `vx770-b3-post` |
+|---|---|---|---|
+| 1 | `TakesCommentFeedLivenessTests/anUndoneAIsCommentsLeaveTheGutter` ×4 | **R** ×4 — the face (card, or margin grid's badge) still drawn after the undo, the card still in the hierarchy | G |
+| 2 | `…/aCommentChangedFromOutsideTheBoardFollowsTheStore` | **R** — the edit, the delete and the last delete never reach the face | G |
+| 3 | `…/herOpenPanelKeepsItsSeatWhenTheLastCommentLeaves` (GUARD) | G (the one-shot feed never moved) | G — **the risk:** if the test host refuses to present the popover and SwiftUI flips `panelShown` back, the face follows the store and this goes red on post; read its lines first, then W14 |
+| 4 | `TakesCollapsedFanWashTests/anUndoneAIsTakesCloseTheFansTheyCollapsed` ×4 | **R** ×4 — B/C bloomed, in the open set, in the memory; the round trip seeds all four | G (A and D stay open) |
+| 5 | `TakesCollapsedFanRoadsTests/aFanThatCollapsesWhileTheBoardIsAwayComesBackClosed` | **R** — B seeded and kept | G |
+| 6 | `…/deletingAnOpenFansSecondTakeClosesIt` | **R** — stays open (and stays open after the ⌥⌘Z, so the B3-P2 line is red too) | G |
+| 7 | `…/archivingAnOpenFansSecondTakeKeepsTheArchivedRoadOpen` (GUARD) | G | G |
+| 8 | `…/theFirstTakeDoorStaysOpenThroughProjectionsAndARoundTrip` (GUARD) | G | G |
+| 9 | `TakesOpenFanRuleTests` (2, pure — the rule's file stays on rev) | G | G |
+| 10 | batch 2's `TakesCommentGutterTests/aCommentNeverMovesTheTakesProse` | R (as at window b2) | **uncertain** — green only if the closed first window's graph still runs its feed and drops its face (see the reading above); a red here is the harness's closed-window read, not this fix |
+| 11 | the VX-428 family, batch 1's and batch 2's pins, the Takes/Lenses/Write-panel/Compare families, the spine | — | G — predicted; the risks are in the self-assessment |
+
+**Reading the runs:** rows 1, 2, 4, 5, 6 red on rev and green on post = the member is FIXED. Any of them
+GREEN on rev = that pin does not reproduce her staleness in the harness → recorded, never "fixed blind"
+(row 4 green on rev would mean the observation never re-delivered — read whether `slot.hasFan` flipped
+in the fixture line first). A guard red on post: read its own lines before anything else.
+
+### P-8 — the costs, bounded
+
+- **VX-732:** before, one `Queries.blockComments` read per REALIZED row on every realization (every row,
+  commented or not, re-read on each re-realization while scrolling) — ∝ rows drawn, never live. Now ONE
+  observation per mounted board: `Queries.containerComments` (one indexed join over the note's live
+  placements), region `block_comment` + `container_block` — it wakes on comment and placement writes,
+  never on a keystroke (`autosave` writes `variant` and `container` only, `Operations+Variant.swift`
+  :20–31); each wake reads ∝ the note's own comments; `removeDuplicates` + the feed's equality guard keep
+  an unchanged value from touching a face. Exactly Write's cost for the same note (Write runs this same
+  observation for its whole lifetime). Faces: one per realized commented row, as before. Never per row,
+  never polled.
+- **VX-733:** per adopted projection, ZERO work while nothing is open; with fans open, at most three
+  single passes over the slots with set lookups (the outgoing projection's held set, the collapse check
+  only when something was held, the record's write) and one set comparison — inside the class `adopt`
+  already pays per delivery (`pruneMergeSelection`'s `Set(new.slots.map(\.blockID))`, the projection
+  read itself ∝ the note). Per open-set change (her gestures): one pass. Nothing realizes a row, lays out
+  or reads the store.
+
+## READY-FOR-SUITES — batch 3 (the orchestrator's window; from `App/Variorum/`)
+
+Both trees are built (`DerivedData/vx770-b3-post` at HEAD's source, e7f9cefc2 — log
+`DerivedData/logs/vx770-b3-post-build.log`; `DerivedData/vx770-b3-rev` — log `vx770-b3-rev-build.log`;
+both TEST BUILD SUCCEEDED, 2.8 GB each). Run `test-without-building`:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building <args>`.
+Confirm the "Test run with N tests" line and read the `skipped:` lines.
+
+1. **THE RED RUN** on `vx770-b3-rev` (≈ 2–3 min):
+   `-only-testing:VariorumTests/TakesCommentFeedLivenessTests -only-testing:VariorumTests/TakesCollapsedFanWashTests -only-testing:VariorumTests/TakesCollapsedFanRoadsTests -only-testing:VariorumTests/TakesOpenFanRuleTests`
+   — expect 10 test functions, 16 cases (two parameterized ×4); the prediction table's rev column.
+2. **THE GREEN RUN** on `vx770-b3-post` — every suite type in a test file exercising a changed source
+   (`TakesViewModel`, `TakesBoardView`, `TakesBoardLayout`, `TakesShared`, `CommentGutterFace`,
+   `EditorRouter`'s Takes memories; so the Takes, Lenses, Write-panel and Compare families, batch 1's and
+   batch 2's pins) + batch 1's mode-switch/landing suites + the whole `TutorialWalkTests` spine —
+   157 suite types:
+   `-only-testing:VariorumTests/ArchivedListingTests -only-testing:VariorumTests/ArticleLandingProjectionArmTests -only-testing:VariorumTests/AutosaveConsolidationTests -only-testing:VariorumTests/AutosaveRegistryLifecycleTests -only-testing:VariorumTests/AutosaveRegistryReleaseGuardTests -only-testing:VariorumTests/BlockHighlightTests -only-testing:VariorumTests/BlockHistoryPaletteDoorTests -only-testing:VariorumTests/BlockHistoryPaneTests -only-testing:VariorumTests/BlockSelectionRegistryTests -only-testing:VariorumTests/BlockSelectionRuleTests -only-testing:VariorumTests/BlockTOCStatusTests -only-testing:VariorumTests/BoardBlockSelectionTests -only-testing:VariorumTests/BoardCommentGutterRuleTests -only-testing:VariorumTests/BoardDeleteRedoSurvivalTests -only-testing:VariorumTests/BoardDeleteRollbackTests -only-testing:VariorumTests/BoardDeliveryPolicyTests -only-testing:VariorumTests/BoardMergeDiagnosisTests -only-testing:VariorumTests/BookLeavingRegistryTests -only-testing:VariorumTests/BookLeavingSavepointTests -only-testing:VariorumTests/BranchDoorFlushTests -only-testing:VariorumTests/CapabilityRegistryTests -only-testing:VariorumTests/ComfortBandAndFlashTests -only-testing:VariorumTests/CommandRouterTests -only-testing:VariorumTests/CommentPanelHostLeavingTests -only-testing:VariorumTests/CommentPanelHostSuites -only-testing:VariorumTests/CommentPanelReleaseTests -only-testing:VariorumTests/CommentsAndReorderTests -only-testing:VariorumTests/CompareAnchorWholeTests -only-testing:VariorumTests/CompareCommentGutterTests -only-testing:VariorumTests/CompareCompositionTests -only-testing:VariorumTests/CompareLeavingSavepointTests -only-testing:VariorumTests/CompareLensesAlignmentTests -only-testing:VariorumTests/CompareOnePlacementTests -only-testing:VariorumTests/CompareVersionsTests -only-testing:VariorumTests/CompareViewModelTests -only-testing:VariorumTests/ConfirmationsSettingTests -only-testing:VariorumTests/CopyAllTakesDoorTests -only-testing:VariorumTests/CopyDoorFlushTests -only-testing:VariorumTests/CurrentBlockContinuityTests -only-testing:VariorumTests/DebugOracleSingletonWindowTests -only-testing:VariorumTests/DuplicateDoorsTests -only-testing:VariorumTests/FannedDefaultsBoardTests -only-testing:VariorumTests/FannedDefaultsTests -only-testing:VariorumTests/FanReorderDoorTests -only-testing:VariorumTests/FormattingSurfacesTests -only-testing:VariorumTests/LandingAimTests -only-testing:VariorumTests/LandingOffsetTests -only-testing:VariorumTests/LensesReorderTests -only-testing:VariorumTests/LifecycleFacesTests -only-testing:VariorumTests/MCPCompareLandingTests -only-testing:VariorumTests/MCPNavigationTests -only-testing:VariorumTests/MergeSelectionTests -only-testing:VariorumTests/ModeSwitchCarryTests -only-testing:VariorumTests/ModeSwitchFeelTests -only-testing:VariorumTests/MoveAndExecuteTests -only-testing:VariorumTests/NavigationDoorsTests -only-testing:VariorumTests/NavigationHistoryTests -only-testing:VariorumTests/NoLiteralColourTests -only-testing:VariorumTests/NoteVersionsPaneTests -only-testing:VariorumTests/OpenNotesTests -only-testing:VariorumTests/OriginBlockDoorTests -only-testing:VariorumTests/OutsideWriteLivePaneTests -only-testing:VariorumTests/OutsideWriteRingEndTests -only-testing:VariorumTests/PaneFindFaceTests -only-testing:VariorumTests/PaneRenderRestoreClipTests -only-testing:VariorumTests/PostDetailModeMemoryTests -only-testing:VariorumTests/PostDetailRoutingTests -only-testing:VariorumTests/QuitFinalizeSurfacesTests -only-testing:VariorumTests/RecoveryDoorsTests -only-testing:VariorumTests/RestoreLandingTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointNameCopyTests -only-testing:VariorumTests/SavepointNameFaceTests -only-testing:VariorumTests/SavepointRenameDoorTests -only-testing:VariorumTests/SavepointSealedDoorTests -only-testing:VariorumTests/SavepointTakesDoorTests -only-testing:VariorumTests/ScrubAndOutlineTests -only-testing:VariorumTests/SealDoorTests -only-testing:VariorumTests/SealedBookMemberDoorTests -only-testing:VariorumTests/ShowTakeDoorTests -only-testing:VariorumTests/SidebarSmokeTests -only-testing:VariorumTests/SplitAtNewlinesDoorTests -only-testing:VariorumTests/StaleWriteIntentTests -only-testing:VariorumTests/StatusCenterTests -only-testing:VariorumTests/StatusSeamVocabularyTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakeCardMenuTitleTests -only-testing:VariorumTests/TakeChoiceBadgeTests -only-testing:VariorumTests/TakeLabelFaceTests -only-testing:VariorumTests/TakeMovedReceiptWordingTests -only-testing:VariorumTests/TakePaneDurabilityTests -only-testing:VariorumTests/TakePaneMeasureTests -only-testing:VariorumTests/TakesArticleRenderTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/TakesArticleWatchTests -only-testing:VariorumTests/TakesBarTakeCountTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/TakesBufferConvergenceTests -only-testing:VariorumTests/TakesCardHeightTests -only-testing:VariorumTests/TakesChooseRingTests -only-testing:VariorumTests/TakesCollapsedFanRoadsTests -only-testing:VariorumTests/TakesCollapsedFanWashTests -only-testing:VariorumTests/TakesCommentFeedLivenessTests -only-testing:VariorumTests/TakesCommentGutterTests -only-testing:VariorumTests/TakesDivideTests -only-testing:VariorumTests/TakesEmptyBlockFaceTests -only-testing:VariorumTests/TakesEmptyStateTests -only-testing:VariorumTests/TakesEntryBandTests -only-testing:VariorumTests/TakesExpansionCostTests -only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesFindBoardTests -only-testing:VariorumTests/TakesLandingTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/TakesMarginGridAlignmentTests -only-testing:VariorumTests/TakesMarginGridCaptureTests -only-testing:VariorumTests/TakesOpenFanRuleTests -only-testing:VariorumTests/TakesPanelBlockLabelTests -only-testing:VariorumTests/TakesParkedFollowTests -only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/TakesProseFaceTests -only-testing:VariorumTests/TakesRailPagingTests -only-testing:VariorumTests/TakesRoomTests -only-testing:VariorumTests/TakesSeededEntryLandingTests -only-testing:VariorumTests/TakesSlotDragTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakesStepFollowModelTests -only-testing:VariorumTests/TakesStepFollowTests -only-testing:VariorumTests/TakesWordCountTests -only-testing:VariorumTests/TakeToBlockDoorTests -only-testing:VariorumTests/TrashPoolHonestyTests -only-testing:VariorumTests/TrashSurfaceTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialCurrencyTests -only-testing:VariorumTests/TutorialDeletionActsTests -only-testing:VariorumTests/TutorialDoorTests -only-testing:VariorumTests/TutorialFannedMatrixTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/TutorialLookingActsTests -only-testing:VariorumTests/TutorialPrivacyChapterTests -only-testing:VariorumTests/TutorialStructureActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialWritingActsTests -only-testing:VariorumTests/VX347AskedTakeFilingTests -only-testing:VariorumTests/VX347LeaveRuleTests -only-testing:VariorumTests/VX347LeavingBoxTests -only-testing:VariorumTests/VX347OneCommitPerFieldTests -only-testing:VariorumTests/WorkspaceModelTests -only-testing:VariorumTests/WorkspaceNamingTests -only-testing:VariorumTests/WriteBlockSelectionTests -only-testing:VariorumTests/WriteTakesPanelChooseTests -only-testing:VariorumTests/WriteTakesPanelKeysTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/WriteTakesPanelTests`
+   — all green expected, except row 10's uncertainty. Known load-dependent flakes that are NOT this batch's
+   if met: VX-337's two (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt` among them —
+   run alone first). An unexpected `TakesEntryBandTests` red: the defaults domain first. The one
+   deliberate capture-harness skip ("Margin grid captures (VX-136)") is the known shape.
+3. Results into the prediction table; then `vx770-b3-rev` may be deleted (post stays for the walk).
+   Batch 2's `vx770-b2-rev`/`-post` were left exactly as found (not deleted, not reused).
+
+### THE USE WALK — batch 3 rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug from `DerivedData/vx770-b3-post`; both voices; never Resume Sync)
+
+A walk note of ~6 paragraphs; blocks 2 and 4 get a second take; the as-found `fan_style` read first and
+restored at the end. Her undo road is the MCP door's: if a client is approved on the dev app, its
+`add_comments` / `add_takes` are the staging; otherwise the any-road stagings below (each names one).
+- **W10 (VX-732):** Takes up, block 2 with two comments in the gutter. MCP road: the client's
+  `add_comments` on block 2, then ⌥⌘Z in Takes → the card leaves within a beat, no mode switch (her
+  recording's 7 s, gone). No-MCP road: the same note in a second window (Write), delete one of block 2's
+  comments from its panel → the Takes window's card loses that entry live. Capture before/after.
+- **W11 (VX-733, her shape, slot split):** expand all with blocks 2 and 4 fanned; MCP road: `add_takes`
+  on 2 and 4, ⌥⌘Z → the split goes AND the green wash goes from both; ⌘1 ⌘2 → still no wash. No-MCP
+  road: in block 4's open fan, select a span and Move to New Take (one undo entry), then ⌥⌘Z → the new
+  take leaves, block 4's wash goes. Capture the wash before/after, both voices.
+- **W12 (R-770-1):** a block with THREE takes open; delete one → it stays open and washed (two remain).
+- **W13 (B3-P1, the archive road):** archive the second take of an open fan → the block stays open with
+  "archived · 1" under it, as the receipt says. Then Delete forever the archived take → it closes.
+- **W14 (the seat):** a Takes card with one comment; press it (the panel opens), delete the comment in the
+  panel → the panel STAYS (its deleted fold and Restore visible); close it → the card is gone. Same in
+  Compare (the shared host).
+
+### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
+
+- **R-B3-1 (batch 2's one red — the reading above):** `aCommentNeverMovesTheTakesProse`'s deletion arm
+  reads the oracle ACROSS A CLOSED WINDOW; `BoardCommentFaceRecord` forgets only on `.onDisappear`, which
+  a closed-but-alive window need not run. My reading: the surviving record is the first board's, not a
+  staleness of the second (whose read is born after the deletion). Batch 3's pins stage that deletion
+  while the board is up and read the card's presence too. Reconciliation is batch 2's (the orchestrator's
+  plan), not done here.
+- **R-B3-2 (the render-write warnings):** I did not chase the "[SwiftUI] Modifying state during view
+  update" lines (batch 2's reconciliation); for its reader: `BoardCommentFaceRecord` writes a static
+  table in `onAppear`/`onChange` (not body), so it is not observable state and cannot itself raise that
+  warning; batch 1 saw one in `TakesFindBoardTests` before batch 2 existed. Batch 3 removed one
+  per-row `@State` write (the old feed's) and added none in a body.
+- **R-B3-3 (a sibling stale wash, not this road):** with follow-the-scroll ON, a collapsed fan never
+  washed (the rule there requires `hasFan`) — consistent; noted only because W11 should be walked with it
+  off (the default).
+- **R-B3-4 (B3-P2's consequence, for her):** with (a), a ⇧⌥⌘Z that re-adds an AI's takes after she undid
+  them shows those fans closed; the deleted-BLOCK case keeps its open state for a ⌥⌘Z (VX-428's precedent,
+  untouched) — an asymmetry she may want to rule.
+
+## SELF-ASSESSMENT — batch 3 (the first of the two reviews — the implementer's)
+
+- **What is proven, and how far.** Headless only: both trees compile (the pins against the pre-fix
+  behaviour and against the fix), the revert is verified restored, and both mechanisms are code-traced
+  from the operation her undo runs to the line that draws. Every red/green line is a prediction; the
+  drawn wash itself is the walk's (the pins read `isBloomed`, the one input `washedCell` draws it
+  from).
+- **Why these shapes.** VX-732: the feed was the defect (no store axis), so the feed is now the one every
+  other comment surface uses — no undo hook, no per-row re-key (which would read at autosave rate and still
+  miss a count-preserving edit). VX-733: the open set's derivation was the defect, so the open set now
+  hears the one transition that empties it of meaning — no undo hook, no "close unfanned blocks" rule
+  (which would break R72's door and VX-428's own pinned memory of an unfanned bloom). Neither closes a fan
+  she opened that still holds takes (R-770-1), and the archive road keeps its in-place listing.
+- **What could regress, and why I think it does not.** (1) *The comments popover:* the live feed could
+  have yanked her open panel; the seat guards it, in the shared host (Compare gains the same). (2) *A
+  collapse closing more than she expects:* deleting the second take of a fan she is working in now closes
+  the block (its ⑂+ badge reopens it) — that IS the member's rule, but it is a visible change on a road she
+  did not report; W12/W13 look at it. (3) *Two windows on one note:* both boards write the same session
+  keys (pre-existing for the open set; the held record follows the same last-writer rule). (4) *Hosts
+  other than THE board:* the rule runs on Write's panel and the Lenses board too, where nothing blooms —
+  inert by construction; no pin there reads the open set after a collapse (searched).
+- **Risks in the pins themselves.** The seat guard depends on the test host presenting a SwiftUI popover
+  (prediction row 3). The mounted pins wait on two observations (the takes projection and the comments)
+  and settle on both before judging. The VX-732 pin's margin-grid case lands on the badge rung (the
+  engaged rail leaves ~85 pt of gutter), handled by kind.
+- **Scope kept.** Two members only; batch 2's red reconciled by reading, not by edit; `TakesArticleScroll`
+  untouched; no product decision taken beyond B3-P1/B3-P2, both PROVISIONAL and one predicate each.
