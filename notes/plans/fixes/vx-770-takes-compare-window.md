@@ -2896,9 +2896,10 @@ scoped round 3.
 |---|---|
 | Reading (the walk record W1–W17, THE WALK ADJUDICATION, the BATCH 1 RECORD whole, ladder round 1's F3, TEXTKIT2_NOTES in full, the walker's `app.log` landing stories + the W2 burst frames f-21/f-22) | DONE |
 | Gate 1 — the trace (below, written before any code) | DONE |
-| Gate 1 — the harness gap closed: the sibling pin staging the walk's note | NEXT |
-| Gate 2 — the minimal fix behind the predicted red | PENDING |
-| Behavioural revert + build-for-testing `vx770-w2` / `vx770-w2-rev` | PENDING |
+| Gate 1 — the harness gap closed: `TakesSeededEntryLandingTests/theWalksNoteLandsOnceAndStays` (×4: the walk's three margin-grid returns + the W1 stack CONTROL) on the walk's own note | DONE c7710ca6e — red on the merged head PREDICTED (the window verifies) |
+| Gate 2 — the mechanism pin `TakesLateRemeasureReaimTests` (pure; red on the merged head by construction) | DONE b44ab4916 (before the fix) |
+| Gate 2 — the fix (`TakesArticleScroll.swift` only: `landingTargetJustMoved`) | DONE a5fbc6151 |
+| **Behavioural revert tree — ANNOUNCED HERE BEFORE IT STARTS:** a `git clone --shared` of this branch at a5fbc6151 into `scratchpad/vx770-w2-rev-src/` (its own index — the shared worktree and its index never move), with exactly ONE behaviour file written there by `git show b44ab4916:App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift >` (the pin commit = the merged head's behaviour; the file is unchanged since cfae861d1); every test file at HEAD; built into `App/Variorum/DerivedData/vx770-w2-rev`. HEAD's file copied + sha256'd first in `App/Variorum/DerivedData/vx770-w2-prerevert/`; HEAD built into `App/Variorum/DerivedData/vx770-w2` from the worktree | IN FLIGHT |
 | READY-FOR-SUITES — the W2 cycle | PENDING |
 
 ### THE TRACE — W2 (written before any code)
