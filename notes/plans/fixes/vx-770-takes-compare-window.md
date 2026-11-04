@@ -310,11 +310,11 @@ stage); the use walk (her repro by hand, both voices); the cold ladder.
 | Trace (code read + the unified log's measured landing stories) | DONE — written below, before any code |
 | Red-on-old pin (`TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay` ×4 styles, in `TakesExpansionMemoryTests.swift`) | DONE (this commit) — compiles on the pre-fix tree (`DerivedData/vx756-post` build-for-testing, log `App/Variorum/DerivedData/logs/vx756-pin-build.log`); red PENDING the window |
 | Fix (`TakesArticleScroll.reaimWhereTheColumnReEstimated` + its three bookkeeping fields; the report road calls it) | DONE (this commit) — `DerivedData/vx756-post` build-for-testing GREEN (log `App/Variorum/DerivedData/logs/vx756-post-build.log`) |
-| Build-for-testing: `vx756-pre` (APFS clone of the pin-commit build = the pre-fix production), `vx756-post` (HEAD), `vx756-rev` (behavioural revert) | pre + post DONE; rev NOT-STARTED |
+| Build-for-testing: `App/Variorum/DerivedData/vx756-post` (HEAD, 91554271e) and `vx756-rev` (the behavioural revert, built from an APFS clone in its own path — its rpaths are its own) | DONE — both TEST BUILD SUCCEEDED (logs `DerivedData/logs/vx756-post-build.log`, `vx756-rev-build.log`). (A `vx756-pre` clone of the pin build was made and deleted: its test bundle's rpath pointed into `vx756-post`.) |
 | Red/green runs, the P-8 numbers | PENDING (the orchestrator's window) |
-| Self-assessment | NOT-STARTED |
+| READY-FOR-SUITES, prediction table, P-8 note, residue, walk rows, self-assessment | DONE (this commit) |
 
-**REVERT IN FLIGHT (announced before it starts):** `App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift` — `if true { return nil }` as the first statement of `reaimWhereTheColumnReEstimated` (the VX-601 batch-B lesson: never a bare `return` above an expression line); pre-revert copy at `scratchpad/vx756-b1-prerevert/` (gitignored, inside the worktree); the committed source is 91554271e, so `git checkout -- <file>` is the safe restore. A successor reading this line with a non-empty `git diff` on that file: the revert is still applied — restore it.
+**No revert is in flight — the source is HEAD** (the behavioural revert ran 02:27–02:31: `if true { return nil }` atop `reaimWhereTheColumnReEstimated`, built into `DerivedData/vx756-rev`, then restored by `git checkout --`; restore verified: `git diff` empty, sha256 `6219818b…56f2` = the committed fix = the `scratchpad/vx756-b1-prerevert/` copy, no `VX756-REVERT` marker anywhere).
 
 ### THE TRACE (written before the fix)
 
@@ -412,3 +412,154 @@ event". The watch stays the backstop. Nothing about the seed, the prune, the res
 the band or the flash changes; no second mechanism (P-3): the step is the one aim, the watch the one
 lifetime. U2's measured failure (per-ROW-report re-aims spent 64 aims in ~70 ms) is excluded by
 construction: at most one aim per content-height change.
+
+### AS BUILT
+
+- **The pin** (9e8955f9b) — `TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay`
+  ×4 fan styles, in `App/Variorum/VariorumTests/TakesExpansionMemoryTests.swift` (it shares VX-428's
+  `ExpansionWorld`). Her shape, both showings on the APP's road (bare models: `TakesBoardView.init`
+  seeds, the projection arrives on the view's `.task` after the first layout): 40 blocks, the
+  note's opening (blocks 1–12) with no takes, then every other block with a second take; showing 1
+  entered from Write on block 35, expand all, left on a row; Write moves to block 25 (takes);
+  showing 2 recorded from its first turn for up to 6 s (or 0.6 s past the landing's end). Asserts:
+  the ring on block 25; the restore settled (R-Q20 — the landing outranked); the landing aimed and
+  ENDED; **`articleLandingCorrections == 0`** (no watch hop — the bar `aFarEntryRests…` already pins
+  for an unseeded note); **no move of her block after it has held still for 0.25 s**
+  (`movesAfterARest` — the observable "intermediate jump"); her block's top on the page at the end;
+  DEBUG: the story ends `DONE: settled at top=0.0` (home in the entry band, the brain's own
+  residual); **R-770-1: the board is born with the takes open and they are still open at the end**.
+  It prints `VX756-TRACE` (per-turn offset · content height · her block's viewport top · aims ·
+  hops, on change), `VX756-SUMMARY` (aims, hops, restore aims, later moves) and `VX756-STORY` (the
+  landing's DEBUG story) — the window's red run IS the mechanism's on-screen record.
+- **The fix** (91554271e) — `App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift` only:
+  `reaimWhereTheColumnReEstimated` (called from the watched branch of `articleLandingReport`, after
+  the watch hears the content change) + three per-landing fields (`landingJudgedContent`,
+  `landingStormAimsLeft` = `articleRestoreAttempts`, `landingTargetFrameContent`), stamped at the
+  step's aim, the band's second aim, `beginWatch`, and the target's own moved-frame report; reset in
+  `landArticle`; the report road's doc names its two in-storm exceptions in place. Zero changes to
+  the seed, the prune, the restore, the resolver, the band, the flash, the watch/policy, any view,
+  any operation, schema, `Sync/`, `Shared/`, `PaneSurface`, `EditorTextView`, `BlockRangeIndex`,
+  the capability registry. No TK1 API, no attribute stamp. **MOBILE PARITY: nothing
+  mobile-visible** (the Mac Takes board only).
+
+### THE PREDICTION TABLE (PENDING the window)
+
+| # | Test | `vx756-rev` (fix reverted) | `vx756-post` |
+|---|---|---|---|
+| 1 | `TakesSeededEntryLandingTests/openTakesEnteredOnAnotherBlockLandOnceAndStay(style: .stack)` | **R** (the hop: VX-428's own pin hopped in stack) | G |
+| 2 | `…(style: .marginGrid)` | **R** (same) | G |
+| 3 | `…(style: .slotSplit)` | R? — the old 24-block shape did NOT hop in slot split; her shape may. A green here on rev is not hollow evidence for the row (stack is the default and her likely style), only a style the swing does not trip | G |
+| 4 | `…(style: .carousel)` | R? — as #3 | G |
+| 5 | the VX-428 family (`TakesExpansionMemoryTests`, `TakesExpansionRemountTests`, `TakesSlotSplitExpandAllTests`) | G | G — the stay-open memory is untouched |
+| 6 | `TakesExpansionCostTests` | — | G, with its `VX428-MEASURE` lines (the seed's numbers must match batch B's: seed 1.2–4.0 µs; 25 fans below the fold realize what 0 do) |
+| 7 | the landing/restore family (`TakesArticleScrollTests`, `TakesArticleWatchTests`, `TakesEntryBandTests`, …) | G | G — predicted; the risk is named in the self-assessment |
+
+**Reading the runs:** rows 1–2 red on rev and green on post = the row is FIXED. Rows 1–2 GREEN on
+rev = the harness does not reproduce her hop on this shape → the row is NOT dismissed (her report
+is Confirmed; VX-428's own pin measured the hop) — the trace lines say what the page did, and the
+pin is re-shaped from them (e.g. VX-428's own shape: fans above, the far block last), never the fix
+widened blind. Any row-7 red on post: read its story first — the fix's only new act is an aim inside
+the storm.
+
+### P-8 — the fix stays viewport-proportional (the note the brief asks for)
+
+The seed is untouched, so VX-428's measured bar stands as measured (batch B, an unshared machine:
+seed 1.2–4.0 µs in all twelve shapes; 25 fans open below the fold realize exactly what 0 do — 19
+article panes, 0 cards — and 25 at the top one viewport's worth); `TakesExpansionCostTests` on post
+re-prints it. The fix's own cost, by construction: per report O(1) (two comparisons, one dictionary
+read — and nothing at all unless an ENTRY landing with no restore is pending); the slot order (O(N))
+is built only when a re-aim is decided — at most once per change of the column's content height,
+at most 24 per landing (the restore's own pocket; the step's existing aims already read the order
+the same way) — and every aim is a `scrollTo` the lazy column answers by realizing the viewport
+(P3), never the note. The pin's `VX756-SUMMARY` prints the aims each landing spent.
+
+### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
+
+- **R-756-1 (pin strength):** VX-428's `anEntryLandingStillReachesAFarBlockWithFansOpenAboveIt`
+  asserts only the end state, and its own 2026-11-02 run hopped in stack and margin grid unseen.
+  The new pin carries the motion/hop assertion; that pin is left as written.
+- **R-756-2 (the ride-through road, same class, not her shape):** a PLAIN round trip whose
+  restored page does not hold her block reveals it from quiet by design (18l-c U8 — "a block off
+  it: one reveal, after the quiet"); on a seeded board that reveal crosses the same uneven column
+  and could hop. Excluded from the fix deliberately (the restore owns that page); worth one walk
+  look.
+- **R-756-3 (wasted aims, not a mover by the code):** in the app's order the first geometry, read
+  before the projection, spends restore aims on an EMPTY column (`order` nil → `scrollToRow` at an
+  id the column does not hold — the recorded no-op). `articleRestoreAims` counts them. The pin's
+  trace shows whether the page ever visits the remembered row first; if it does, that is
+  hypothesis (a) and its own fix.
+- **R-756-4 (diagnostics):** her real app's `landing surface=TakesArticle …` signposts are not in
+  the unified log days later (only the Debug test host's are) — the signpost's premise "her store
+  reproduces what mine cannot" needs her to read Console near the moment, or a retained log.
+
+### THE USE WALK — batch 1 rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug from `DerivedData/vx756-post`; both voices; never Resume Sync)
+
+A walk note of ~40 paragraphs (quick entry / paste), the first ~10 with no takes, then a second
+take (⌘T, edited) on every other block; the as-found `fan_style` read first and restored at the end.
+- **W1 (her repro, stack):** Takes (⌘2); expand all; scroll so a block deep in the note is mid-page;
+  ⌘1 (Write); click into a DIFFERENT block with takes ~10 blocks above; ⌘2 → **the page lands ONCE
+  on that block** (one motion, then still — no second movement half a second later), its fan
+  still open, the ring in it. Capture as a short screen recording or a 10-frame burst.
+- **W2:** the same in margin grid.
+- **W3 (R-770-1 + regression):** ⌘1 ⌘2 with nothing clicked → the page she left, every fan still
+  open (VX-428's B1/B2 rows).
+- **W4 (R-756-2, look only):** scroll her block off the page in Takes, ⌘1 ⌘2 with nothing clicked →
+  the page comes back, then her block is revealed — note whether it hops (a line in the record,
+  no fix).
+
+## READY-FOR-SUITES — batch 1 (the orchestrator's window; from `App/Variorum/`)
+
+Both trees are built; run `test-without-building` (no rebuild), array args:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building -only-testing:…`.
+Confirm each "Test run with N tests in M suites" line and read the `skipped:` lines; keep the
+`VX756-TRACE` / `VX756-SUMMARY` / `VX756-STORY` and `VX428-MEASURE` lines for the record.
+
+1. **THE RED RUN** on `vx756-rev` (≈1–2 min):
+   `-only-testing:VariorumTests/TakesSeededEntryLandingTests`
+   — expect 4 tests, stack + margin grid RED (the prediction table, rows 1–4).
+2. **THE GREEN RUN, tier 1** on `vx756-post` — the pin, the VX-428 family, the landing/restore
+   family, the Takes board family, the mode-switch suites, and the acceptance spine (every suite
+   type in `TutorialWalkTests.swift`):
+   `-only-testing:VariorumTests/TakesSeededEntryLandingTests -only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakesExpansionCostTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/TakesArticleWatchTests -only-testing:VariorumTests/TakesEntryBandTests -only-testing:VariorumTests/ArticleLandingProjectionArmTests -only-testing:VariorumTests/LandingAimTests -only-testing:VariorumTests/ComfortBandAndFlashTests -only-testing:VariorumTests/RestoreLandingTests -only-testing:VariorumTests/TakesLandingTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/TakesChooseRingTests -only-testing:VariorumTests/TakesFindBoardTests -only-testing:VariorumTests/TakesStepFollowTests -only-testing:VariorumTests/TakesStepFollowModelTests -only-testing:VariorumTests/TakesParkedFollowTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/TakesRoomTests -only-testing:VariorumTests/TakesCardHeightTests -only-testing:VariorumTests/TakesRailPagingTests -only-testing:VariorumTests/TakesSlotDragTests -only-testing:VariorumTests/TakesMarginGridAlignmentTests -only-testing:VariorumTests/TakesMarginGridCaptureTests -only-testing:VariorumTests/TakesArticleRenderTests -only-testing:VariorumTests/TakesEmptyStateTests -only-testing:VariorumTests/TakesEmptyBlockFaceTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakePaneMeasureTests -only-testing:VariorumTests/TakePaneDurabilityTests -only-testing:VariorumTests/PaneRenderRestoreClipTests -only-testing:VariorumTests/OutsideWriteLivePaneTests -only-testing:VariorumTests/ModeSwitchCarryTests -only-testing:VariorumTests/ModeSwitchFeelTests -only-testing:VariorumTests/CurrentBlockContinuityTests -only-testing:VariorumTests/LandingOffsetTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialDoorTests -only-testing:VariorumTests/TutorialWritingActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialStructureActsTests -only-testing:VariorumTests/TutorialLookingActsTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/TutorialDeletionActsTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialPrivacyChapterTests -only-testing:VariorumTests/TutorialFannedMatrixTests`
+   — 51 suite types, all green expected. Known load-dependent flakes that are NOT this batch's if
+   met: VX-337's two (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt` among
+   them — run it alone before reading anything into it). An unexpected `TakesEntryBandTests` red:
+   suspect the defaults domain first (the environment traps).
+3. **Results** land in this record's prediction table (rows flipped from PENDING), with the trace
+   lines of the red run copied under THE TRACE as its on-screen evidence. Then the DerivedData
+   dirs (`vx756-post` ≈ 3 GB, `vx756-rev` ≈ 12 GB) may be deleted once batch 2 supersedes them.
+
+## SELF-ASSESSMENT — batch 1 (the first of the two reviews — the implementer's)
+
+- **What was traced, and how far.** The road is code-traced end to end (the resolver, the first
+  decided step, the report road's U2 rule, the watch's pacing, the restore's contrasting cadence)
+  and the hop is MEASURED — but on VX-428's own pin's shape (fans above, the far block last, the
+  harness order), read from the unified log, not on her exact shape. Her exact shape is what the
+  new pin stages; its red is a prediction. The on-screen picture of the storm's swing (what her eye
+  sees between the first aim and the hop) is not observable headlessly; the pin's trace is built to
+  show it.
+- **Why this fix and not another.** It changes the one thing the trace says is wrong — the
+  landing's cadence when no restore converges the page for it — and nothing the contract rules: the
+  outrank (R-Q20), the band (U8), the ride-through (R-18l-13), the seeded set (R-601-2/R-770-1). The
+  alternatives were weighed and refused: re-targeting the RESTORE at the landing's row (it would
+  rewrite the restore's byte-preserved half and its top-anchored `ArticlePlace` cannot express the
+  band's foot without the row's height); a curtain hiding the board until the landing settles
+  (product behaviour nobody ruled); delaying the seed's blooms (breaks the contract line).
+- **What could regress, and why I think it does not.** (1) *Extra aims on unseeded entries:* a
+  re-aim needs a content-height change since the last judgment AND the row off home on fresh
+  evidence; where the old road settled with 0 hops the row is home after the storm, so the new road
+  adds at most a re-aim the band's second aim or the watch would have made. (2) *Jitter from a
+  transient frame:* a realized row is judged only on a frame reported after the change — but a
+  frame can still be a mid-measure transient (placeholder → measured); the next change re-aims it
+  home, inside the same storm. If the window shows a page that moves MORE on post, this is where to
+  look. (3) *U2's per-report failure:* excluded — at most one aim per content change, pocket 24.
+  (4) *The pure-board pins* that drive `articleLandingReport` (`anUnrealizedTargetIsAimed…`,
+  `aBloomWaitingOnARestore…`, `aRestoreWithNoLandingWaiting…`) were traced line by line: none
+  changes content between judgments, a bloom is excluded by kind, so their answers are unchanged.
+- **Risks I see.** (a) The pin is new and unrun: its motion judge (`movesAfterARest`) could
+  misfire on a style whose card heights settle late (margin grid, slot split — measured heights on
+  deferred turns): a late, real move of her block would read as a second landing on post too —
+  which would be honest (she would see it), but the window must say which. (b) Slot split and
+  carousel may be green on rev (the old shape did not hop there). (c) If rows 1–2 are green on rev,
+  the harness does not reproduce her hop on this shape and the fix is unproven — the record's
+  reading rule says what follows.
