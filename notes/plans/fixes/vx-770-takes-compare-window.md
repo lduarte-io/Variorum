@@ -230,9 +230,9 @@ rushed (members are sub-issues; they close one by one).
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | VX-756 flagship trace + fix | Batch 1 | BUILT — traced (994fa8877), pin (9e8955f9b), fix (91554271e); red/green + walk PENDING the window |
-| 2 | VX-730 stack comments whole | Batch 2 | SURVEYED — mechanism confirmed by code read (first comment only, lineLimit 4); build plan T1–T6 waits on B2-F1's return |
-| 3 | VX-731 slot split + carousel comments | Batch 2 | SURVEYED — slot split confirmed (the bloom replaces the cell the note rides); carousel NOT reproduced by code read (the pin's oracle decides) |
-| 4 | VX-728 Compare comments (R-770-2) | Batch 2 | FORK B2-F1 RETURNED — Compare has no gutter; options A/B/C in the batch 2 record, awaiting the orchestrator's ruling |
+| 2 | VX-730 stack comments whole | Batch 2 | BUILT — seam 2dfd4a4a0, shared machinery 20773ef07, pins 1c4c21d8c, fix 9a02527ea; red/green + walk PENDING the window |
+| 3 | VX-731 slot split + carousel comments | Batch 2 | BUILT — the face rides the row (slot split); carousel: both roads fixed + pinned, note (a)'s verdict PENDING the red run |
+| 4 | VX-728 Compare comments (R-770-2) | Batch 2 | BUILT — P-770-3 (option B, PROVISIONAL): the width-only lane, the live feed, the shared face; red/green + walk PENDING; the taste cost to her bundle |
 | 5 | VX-732 undo leaves comments drawn | Batch 3 | NOT STARTED |
 | 6 | VX-733 undo leaves the fan wash | Batch 3 | NOT STARTED |
 | 7 | VX-757 track-paragraphs flicker | Batch 4 | NOT STARTED |
@@ -598,9 +598,11 @@ Confirm each "Test run with N tests in M suites" line and read the `skipped:` li
 
 ## BATCH 2 RECORD — VX-730 + VX-731 + VX-728, comments on the board surfaces (implementer: opus-implementer, 2026-11-04)
 
-**NOT DONE (first line, kept current):** BUILDING after the ruling (B2-F1 → P-770-3, option B; T1–T6
-approved). Every mounted red/green claim is a PREDICTION until the orchestrator's suite window
-(this session is headless); the use walk; the cold ladder. `Shared/` is not in the diff.
+**NOT DONE (first line, kept current):** every mounted red/green claim below is a PREDICTION until the
+orchestrator's suite window (this session is headless — no `xcodebuild test`, no app, no stage);
+note (a)'s carousel verdict waits on that red run; the use walk (W5–W9, both voices); the cold
+ladder; the push (refused from this shell — the commits are local until the orchestrator pushes).
+`Shared/` is not in the diff.
 
 **LIVE STATUS**
 | piece | state |
@@ -613,8 +615,10 @@ approved). Every mounted red/green claim is a PREDICTION until the orchestrator'
 | A — the shared machinery: T1 `BlockDecor.commentFace` + `roomBelowInOwnRow`, T2 `CommentCardView.presentGutterFace`, the per-row host `CommentGutterFace`, `CompareGutter` (P-770-3's lane), the callout emoji's named offset | DONE (20773ef07) |
 | B — the pins (`VariorumTests/BoardCommentGutterTests.swift`: 3 suites, 11 tests) | DONE (1c4c21d8c) — red/green PENDING the window |
 | C — the behaviour: the Takes host on the row (T3/T4), Compare's lane + live feed + face | DONE (9a02527ea) — `DerivedData/vx770-b2-post` TEST BUILD SUCCEEDED (log `App/Variorum/DerivedData/logs/vx770-b2-post-build.log`) |
-| **Behavioural revert — ANNOUNCED (this commit), not yet started:** restore `TakesShared.swift`, `TakesBoardView.swift`, `CompareBoardView.swift` to 1c4c21d8c (= the seam's versions); prerevert copies + sha256 in `App/Variorum/DerivedData/vx770-b2-prerevert/` (gitignored); build into `DerivedData/vx770-b2-rev`; restore from HEAD; verify `git diff` empty + sha256 | IN PROGRESS |
-| READY-FOR-SUITES, self-assessment | NOT STARTED |
+| **Behavioural revert** (announced 5dce40456 before it started; ran 03:12–03:18): `TakesShared.swift`, `TakesBoardView.swift`, `CompareBoardView.swift` restored to 1c4c21d8c (= the seam's versions) by `git checkout 1c4c21d8c --`, built into `DerivedData/vx770-b2-rev` (TEST BUILD SUCCEEDED — the pins compile against the pre-fix behaviour), then restored by `git checkout HEAD --` | DONE — **no revert in flight; the source is HEAD**: `git diff HEAD` empty, `shasum -a 256 -c` OK on all three against `App/Variorum/DerivedData/vx770-b2-prerevert/sha256-head.txt`, byte-identical to the prerevert copies |
+| `DerivedData/vx770-b2-post` rebuilt at HEAD (a doc-comment edit landed after its first build) | DONE — TEST BUILD SUCCEEDED (`vx770-b2-post-build2.log`) |
+| Red/green runs | PENDING (the orchestrator's window — READY-FOR-SUITES below) |
+| READY-FOR-SUITES, prediction table, P-8, walk rows, residue, self-assessment | DONE (this commit) |
 | Push | after every commit — REFUSED from this session's shell since 2dfd4a4a0 (`Permission denied (publickey)`: no ssh agent here, `SSH_AUTH_SOCK` unset; one `remote: Internal Server Error`); git config untouched; commits local-only until the orchestrator pushes |
 
 ### THE SURVEY (written before any code)
@@ -772,6 +776,123 @@ with and without comments").
 - **T6 — what Takes inherits, stated:** Write's thresholds (card ≥ 150, badge ≥ 19, else yields)
   replace the old note's 90-pt chip rule, and VX-696's short-block clip.
 
+### AS BUILT (after the ruling — P-770-3, T1–T6)
+
+Commits: seam 2dfd4a4a0 · A (shared machinery) 20773ef07 · B (pins) 1c4c21d8c · C (behaviour) 9a02527ea.
+- **The seam** — `Features/Takes/BoardCommentFaceOracle.swift` (DEBUG, session-scoped): what each
+  board's comment face draws for a block (`BoardCommentFace`: card / badge / chip, its entries, their
+  line cap, its label), written on appear and on change, erased on disappear. The pre-fix
+  `CommentMarginNote` reports its own face (first comment, cap 4, "+N more"; the chip's words).
+- **T1 — one decision.** `BlockDecor.commentFace(textLeft:top:blockHeight:roomBelow:)` is the
+  per-block arm of `commentGutterFaces`, moved; Write calls it (byte-identical).
+  `BlockDecor.roomBelowInOwnRow` bounds a card for a host that draws ONE row (assumes the next row
+  may carry a face; the card never reaches it).
+- **T2 — one face.** `CommentCardView.presentGutterFace(_:entries:tokens:)` (in `BlockDecor.swift`):
+  `renderComments`' card and badge arms, moved (byte-identical); `CommentCardView.badgeText`.
+- **The per-row host** — `Features/Takes/CommentGutterFace.swift`: Write's ladder (`commentFace`) +
+  Write's face (`CommentCardView` through an `NSViewRepresentable`, `presentGutterFace`) + the panel
+  door (`CommentsPanel` popover — editing and the park rule stay the panel's), placed by the rect the
+  ladder returns, reporting to the oracle. No decision, measurement or presentation of its own.
+- **T3/T4 — Takes** (`TakesShared.swift`, `TakesBoardView.swift`): `CommentMarginNote` keeps its
+  name, feed and door and draws through the host; `TakesCommentGutter` carries the row's ladder
+  inputs. The face rides the ROW's content column (an overlay after its `.frame(maxWidth: 680)`), so
+  a slot-split bloom keeps it. `TakesBoardView.commentGutter` derives the inputs from geometry only:
+  `textLeft` = the article column's leading edge + `articleTextLeadingInset` (8), the callout frame's
+  5-pt pad, the face's top under a callout emoji (R-13u3-3; `TakesCalloutFrame.emojiOffset` named).
+  `articleColumnLeading(boardWidth:measure:)` replaces the old `(w − measure)/2`, which understated
+  the gutter on boards narrower than 728 pt (the face is placed from it). The old compact chip (and
+  Study's empty mark) is gone; Write's thresholds rule (card ≥ 150, badge ≥ 19, else yields).
+- **Compare (VX-728 — P-770-3, PROVISIONAL)** — `Features/Takes/CompareGutter.swift`: the lane is
+  `CompareGutter.lane(columnWidth:)` — 150 (the card lane = Write's card threshold) while the column
+  keeps ≥ 300 pt of prose, else 38 (Write's full badge + its air + edge margin) while it keeps ≥ 160,
+  else 0 (yields); column width = (board − 2·12 − 8·(n−1)) / n. **Never an input of comments.** At
+  the 1270-pt default (1030-pt board): 2 columns (499 pt) → card lane, prose ≈ 313 pt (was ≈ 465);
+  3 (330) → badge lane, prose ≈ 256; 4 (245) → badge lane, prose ≈ 171. `CompareBoardView.swift`:
+  the rows read the lane from the board's width (a `GeometryReader` around the rows' scroll view),
+  each cell leads with a `Color.clear` lane, and the face is the shared host as an overlay on the
+  cell's row (`CompareCellView.gutter`: the lane's right edge is `textLeft` — the cell's chrome
+  stands where Write's prose would — so a card ends 28 pt and a badge 4 pt short of it, both inside
+  the lane). The feed: `PostFace.comments` from `Queries.containerComments` per shown post, read in
+  `CompareViewModel.read` (live with the projection).
+- Untouched: `Sync/`, schema, `Shared/` (no `App/Variorum/Shared/` file in the diff), `PaneSurface`,
+  `EditorTextView`, `BlockRangeIndex`, the capability registry, the Write gutter's numbers. MOBILE
+  PARITY: nothing mobile-visible (Mac Takes board and Compare only).
+
+**VX-731's carousel arm — which road (the ruling's note (a)), stated:** the build fixes BOTH roads
+(the carousel's face is the shared host, and the empty chip is gone), and pins both:
+`carouselKeepsTheGutterOnAnOpenFan` (presence + whole) and
+`aOneCommentBlockStillSaysSoInStudyAtANarrowMargin` (the empty-chip road, Study at a 60-pt margin,
+one comment). **Which one her sighting was is the window's red run on `vx770-b2-rev`:** if the
+carousel pin's PRESENCE line (`the commented block has a comment face on the board`) is GREEN on
+rev, the old carousel drew a face, so her "none" was the empty chip — pinned red by the Study test
+(record it as the carousel arm's mechanism). If that presence line is RED on rev, carousel had its
+own road and the presence pin is its pin. PENDING.
+
+### THE PREDICTION TABLE (PENDING the window)
+
+| # | Test | `vx770-b2-rev` (behaviour files at 1c4c21d8c) | `vx770-b2-post` |
+|---|---|---|---|
+| 1 | `TakesCommentGutterTests/stackShowsEveryCommentWhole(open: false)` (VX-730) | **R** — entries [long] of 2, cap 4, no `CommentCardView` | G |
+| 2 | `…stackShowsEveryCommentWhole(open: true)` (VX-730) | **R** — same | G |
+| 3 | `…slotSplitKeepsTheGutterOnAnOpenFan` (VX-731) | **R** — no face at all (presence line red) | G |
+| 4 | `…carouselKeepsTheGutterOnAnOpenFan` (VX-731) | **R** on the whole-text lines (VX-730's); presence line predicted **G** by the code read — note (a)'s decider | G |
+| 5 | `…aOneCommentBlockStillSaysSoInStudyAtANarrowMargin` (VX-731 carousel arm) | **R** — a chip printing "" | G (badge "#1") |
+| 6 | `…aCommentNeverMovesTheTakesProse` (the guard) | G | G |
+| 7 | `CompareCommentGutterTests/aCommentedBlockShowsItsCommentsInItsColumn` (VX-728) | **R** — no face | G |
+| 8 | `…aNarrowColumnSeatsWritesCountBadge` (VX-728) | **R** — no face | G |
+| 9 | `…addingOrDeletingACommentNeverMovesTheCompareProse` (rider 1's guard) | **R on its non-vacuity line only** (the face appeared); its position lines G | G |
+| 10 | `BoardCommentGutterRuleTests` (3 functions; one parameterized ×6 — pure) | G | G |
+| 11 | the Write decor, Compare, Takes families + the spine (READY-FOR-SUITES) | — | G — predicted; risks in the self-assessment |
+
+### P-8 — how each surface's comment read is bounded
+
+- **Takes:** unchanged — one `Queries.blockComments` read (indexed by `block_id`) per REALIZED row
+  on its appear and after her panel closes; the LazyVStack realizes the viewport, so reads ∝ rows
+  drawn. Faces: one `CommentCardView` per realized commented row.
+- **Compare:** `Queries.containerComments` once per shown post per projection read — an indexed
+  join over that post's live placements (Write's own feed), ∝ the shown notes' own comments, beside
+  the projection's existing per-post reads (`renderPost`, `activeFans`), never the corpus. Faces:
+  one per realized commented cell (the rows' LazyVStack).
+- **Write:** unchanged (`observeComments`, ∝ the note's comments).
+
+### THE USE WALK — batch 2 rows (an Opus walker under the orchestrator's claim; DEV-STORE Debug from `DerivedData/vx770-b2-post`; both voices; never Resume Sync)
+
+A walk note of ~8 paragraphs, block 2 a long paragraph with two comments (one ~300 characters), block
+5 a one-line block with one comment, block 2 and block 6 with a second take; a twin made by Duplicate
+with Tags (Compare's peer).
+- **W5 (VX-730, stack):** Takes ▸ stack → block 2's card in the left gutter, BOTH comments whole as
+  two entries (as Write shows them); its prose starts where block 3's does; a press opens the
+  comments panel; a scroll with the pointer over the card scrolls the page.
+- **W6 (VX-731, slot split):** expand all → block 2's card stays in the gutter beside the open
+  split.
+- **W7 (VX-731, carousel):** expand all → the card stays. Then Study at a narrow window (≈ 800-pt
+  board, or the Book Panel open) → block 5 shows a "#1" badge, never an empty mark.
+- **W8 (VX-728, Compare):** the note beside its twin → block 2's card in the anchor column's lane;
+  "+ note" to three columns → the badge; add a comment from the panel, then delete it → the face
+  comes and goes, the prose does not move a point. Both voices.
+- **W9 (look only):** block 5 in Takes — the one-line card is short, so a second comment would sit
+  below its fold (VX-696's face, inherited — T6); note it if seen, nothing more.
+
+## READY-FOR-SUITES — batch 2 (the orchestrator's window; from `App/Variorum/`)
+
+Both trees are built (`DerivedData/vx770-b2-post` at HEAD — logs `DerivedData/logs/vx770-b2-post-build.log`,
+`vx770-b2-post-build2.log` (the HEAD rebuild); `DerivedData/vx770-b2-rev` — log
+`vx770-b2-rev-build.log`; both TEST BUILD SUCCEEDED, 2.8 GB each). Run `test-without-building`:
+`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/<tree> test-without-building <args>`.
+Confirm the "Test run with N tests" line and read the `skipped:` lines.
+
+1. **THE RED RUN** on `vx770-b2-rev` (≈ 2–3 min): `-only-testing:VariorumTests/TakesCommentGutterTests -only-testing:VariorumTests/CompareCommentGutterTests -only-testing:VariorumTests/BoardCommentGutterRuleTests`
+   — expect 11 test functions (one parameterized ×6, one ×2); the prediction table's rev column.
+   Read row 4's PRESENCE line for note (a).
+2. **THE GREEN RUN** on `vx770-b2-post` — the batch's three suites, the Write decoration/comment
+   family (T1/T2 touch `BlockDecor.swift`), the comments panel's hosts, the Compare family, the Takes
+   board family (batch 1's list) and the acceptance spine — 87 suite types:
+   `-only-testing:VariorumTests/TakesCommentGutterTests -only-testing:VariorumTests/CompareCommentGutterTests -only-testing:VariorumTests/BoardCommentGutterRuleTests -only-testing:VariorumTests/CommentCardLayoutTests -only-testing:VariorumTests/CommentCardViewTests -only-testing:VariorumTests/CommentCardControllerTests -only-testing:VariorumTests/IndicatorGutterTests -only-testing:VariorumTests/EditorDecorTransactionTests -only-testing:VariorumTests/BlockDecorGeometryTests -only-testing:VariorumTests/CommentsAndReorderTests -only-testing:VariorumTests/EditorTypographyTests -only-testing:VariorumTests/MarginHoverCommentTests -only-testing:VariorumTests/CalmPageHoverTests -only-testing:VariorumTests/DecorRegistrationMappingTests -only-testing:VariorumTests/DecorRegistrationWindowTests -only-testing:VariorumTests/BlockHighlightTests -only-testing:VariorumTests/BoardBlockSelectionTests -only-testing:VariorumTests/ProseGutterTests -only-testing:VariorumTests/FormattingSurfacesTests -only-testing:VariorumTests/NoLiteralColourTests -only-testing:VariorumTests/CommentPanelHostSuites -only-testing:VariorumTests/CommentPanelReleaseTests -only-testing:VariorumTests/CommentPanelHostLeavingTests -only-testing:VariorumTests/CompareCompositionTests -only-testing:VariorumTests/CompareViewModelTests -only-testing:VariorumTests/CompareAnchorWholeTests -only-testing:VariorumTests/CompareOnePlacementTests -only-testing:VariorumTests/CompareLensesAlignmentTests -only-testing:VariorumTests/CompareVersionsTests -only-testing:VariorumTests/MCPCompareLandingTests -only-testing:VariorumTests/CompareLeavingSavepointTests -only-testing:VariorumTests/OutsideWriteRingEndTests -only-testing:VariorumTests/ScrubAndOutlineTests -only-testing:VariorumTests/CapabilityRegistryTests -only-testing:VariorumTests/AutosaveRegistryLifecycleTests -only-testing:VariorumTests/AutosaveRegistryReleaseGuardTests -only-testing:VariorumTests/TakesSeededEntryLandingTests -only-testing:VariorumTests/TakesExpansionMemoryTests -only-testing:VariorumTests/TakesExpansionRemountTests -only-testing:VariorumTests/TakesSlotSplitExpandAllTests -only-testing:VariorumTests/TakesExpansionCostTests -only-testing:VariorumTests/TakesArticleScrollTests -only-testing:VariorumTests/TakesArticleWatchTests -only-testing:VariorumTests/TakesEntryBandTests -only-testing:VariorumTests/ArticleLandingProjectionArmTests -only-testing:VariorumTests/LandingAimTests -only-testing:VariorumTests/ComfortBandAndFlashTests -only-testing:VariorumTests/RestoreLandingTests -only-testing:VariorumTests/TakesLandingTests -only-testing:VariorumTests/TakesBoardSoakTests -only-testing:VariorumTests/TakesBoardTests -only-testing:VariorumTests/TakesPresentationTests -only-testing:VariorumTests/TakesChooseRingTests -only-testing:VariorumTests/TakesFindBoardTests -only-testing:VariorumTests/TakesStepFollowTests -only-testing:VariorumTests/TakesStepFollowModelTests -only-testing:VariorumTests/TakesParkedFollowTests -only-testing:VariorumTests/TakesLensFilterTests -only-testing:VariorumTests/TakesRoomTests -only-testing:VariorumTests/TakesCardHeightTests -only-testing:VariorumTests/TakesRailPagingTests -only-testing:VariorumTests/TakesSlotDragTests -only-testing:VariorumTests/TakesMarginGridAlignmentTests -only-testing:VariorumTests/TakesMarginGridCaptureTests -only-testing:VariorumTests/TakesArticleRenderTests -only-testing:VariorumTests/TakesEmptyStateTests -only-testing:VariorumTests/TakesEmptyBlockFaceTests -only-testing:VariorumTests/TakeCardDoorTests -only-testing:VariorumTests/TakePaneMeasureTests -only-testing:VariorumTests/TakePaneDurabilityTests -only-testing:VariorumTests/PaneRenderRestoreClipTests -only-testing:VariorumTests/OutsideWriteLivePaneTests -only-testing:VariorumTests/ModeSwitchCarryTests -only-testing:VariorumTests/ModeSwitchFeelTests -only-testing:VariorumTests/CurrentBlockContinuityTests -only-testing:VariorumTests/LandingOffsetTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialDoorTests -only-testing:VariorumTests/TutorialWritingActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialStructureActsTests -only-testing:VariorumTests/TutorialLookingActsTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/TutorialDeletionActsTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialPrivacyChapterTests -only-testing:VariorumTests/TutorialFannedMatrixTests`
+   — all green expected. Known load-dependent flakes that are NOT this batch's if met: VX-337's two
+   (`TakesArticleScrollTests.aShortRowStraddlingTheFoldComesBackAboveIt` among them — run alone
+   first). An unexpected `TakesEntryBandTests` red: the defaults domain first.
+3. Results into the prediction table; then `vx770-b2-rev` may be deleted (post stays for the walk).
+
 ### RESIDUE / NOTICED (not fixed — a line each; the orchestrator's to ticket or drop)
 
 - **R-B2-1 (a one-law breach in Takes, callouts):** `TakesCalloutFrame` pads the whole row by
@@ -781,7 +902,15 @@ with and without comments").
 - **R-B2-2:** the Takes callout emoji draws the WHOLE stored emoji (`TakesCalloutFrame.swift:70-74`),
   not the first grapheme Write draws (R-13u3-4, `BlockDecor.leadingGlyph`).
 - **R-B2-3:** the Study voice's compact comment chip prints an empty string for a one-comment
-  block (`TakesShared.swift:811-818` + `commentPrefix == ""`) — dissolved by T3 if built.
+  block (`TakesShared.swift:811-818` + `commentPrefix == ""`) — dissolved by T3 if built. **BUILT:
+  dissolved (9a02527ea); pinned as VX-731's carousel arm.**
+- **R-B2-4 (fixed as a placement input, stated):** the Takes board's `commentRoom` was
+  `(w − measure)/2`, which understates the gutter on boards narrower than measure + 48 (the
+  composition's 24-pt padding then wins); the face is placed from it, so it is now
+  `articleColumnLeading` (identical at ≥ 728 pt). Nothing else reads it.
+- **R-B2-5 (the two boards differ in liveness until batch 3):** Compare's comments are live (the
+  projection's feed); the Takes row's are still one-shot per appear (VX-732's mechanism, untouched
+  here by design — batch 3's).
 
 ### B2-F1 — THE RULING (the orchestrator, 2026-11-04, repo-first before the build resumes)
 
@@ -813,3 +942,37 @@ old carousel drawing a face, pin the empty-chip road as the carousel arm's mecha
 Takes inherits Write's thresholds and VX-696's short-block clip — VX-696 stays open, one later
 fix heals both; the walk notes the clip if seen, nothing more. Residue R-B2-1/2/3 confirmed as
 closeout ticket candidates (R-B2-1 and R-B2-2 are contract deviations predating this run).
+
+## SELF-ASSESSMENT — batch 2 (the first of the two reviews — the implementer's)
+
+- **What is proven, and how far.** Headless only: both trees compile (the pins against the pre-fix
+  behaviour and against the fix), the behavioural revert is verified restored, and the mechanisms
+  are code-traced. Every red/green line is a prediction. Two things the harness cannot show me and
+  the walk must: that the AppKit card, hosted by an `NSViewRepresentable` OFFSET outside its SwiftUI
+  row, takes her press (the panel opens) and routes a wheel to the page (or to itself when it
+  overflows) inside SwiftUI's `ScrollView`; and that its popover anchors on the card.
+- **Why this shape (P-3).** The board surfaces had a second comment face (the SwiftUI note); the
+  fix retires its FACE and keeps its feed and door, so Takes, Compare and Write now share one
+  decision (`commentFace`), one face (`presentGutterFace`) and one door — the per-row host adds no
+  rule of its own. T1/T2 are moves, not rewrites: Write's arithmetic and presentation are byte-for-
+  byte what they were (the Write decor suites in the green run guard that).
+- **What could regress.** (1) *Hit-testing over the row:* the face's overlay is a `GeometryReader`
+  over each commented row's content; it holds no hit-testable content beyond the offset card, but a
+  regression in click-to-focus on a commented Takes row would show here first (the Takes board
+  family's click pins ride the green run). (2) *Compare's measure:* every Compare column's prose is
+  narrower by its lane (the ruled cost — 465 → ≈ 313 pt at two columns on the default window); no
+  existing pin measures Compare pane widths (searched), so nothing goes red by construction — her
+  eye is the judge. (3) *Legacy scrollers:* both hosts take the gutter from a width read outside the
+  scroll view; a legacy vertical scroller (≈ 15 pt) narrows the content, which moves the face
+  further LEFT of the prose, never onto it. (4) *A one-line unbloomed Takes block's card is the
+  row's height (≈ 25 pt Terminal) — shorter than Write's 41 — so a second comment there scrolls
+  inside the card (VX-696's face, inherited and accepted — T6).
+- **Risks in the pins themselves.** The Study pin starts a `ThemeStore` (it adopts Study's
+  typography globally; `TerminalMetricsPin` saves and restores it, the `TakesEntryBandTests`
+  precedent). The "no inner scroll" lines depend on the fixture's block being tall enough at the
+  test host's metrics; if a green-tree run shows a card that overflows by a few points, the
+  fixture's prose (not the fix) is the first suspect. Row 9's non-vacuity line is red on rev by
+  design — not a guard failure.
+- **Scope kept.** No `Sync/`, schema, `Shared/`, `PaneSurface`, `EditorTextView`, `BlockRangeIndex`
+  or registry change; VX-696 not fixed; VX-732's per-row staleness untouched; R-B2-1/2 (Takes
+  callout one-law deviations) noticed, not fixed.
