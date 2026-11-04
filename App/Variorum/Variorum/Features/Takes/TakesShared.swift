@@ -841,6 +841,19 @@ struct CommentMarginNote: View {
             }
             .buttonStyle(.plain)
             .help("This block's comments — click to read, add, or edit them")
+            // VX-770 batch 2 (the seam, behaviour-neutral): what this face
+            // draws, reported to the DEBUG oracle the board pins read.
+            .recordsBoardCommentFace(blockID: blockID, compact
+                ? BoardCommentFace(
+                    kind: .chip, entries: [], lineCap: 1,
+                    label: tokens.chromeLabel(
+                        comments.count > 1
+                            ? "\(tokens.commentPrefix)\(comments.count)"
+                            : tokens.commentPrefix))
+                : BoardCommentFace(
+                    kind: .card, entries: [first.text], lineCap: 4,
+                    label: comments.count > 1
+                        ? tokens.chromeLabel("+\(comments.count - 1) more") : nil))
             .popover(isPresented: $panelShown) {
                 CommentsPanel(session: session, blockID: blockID)
             }

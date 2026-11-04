@@ -598,24 +598,25 @@ Confirm each "Test run with N tests in M suites" line and read the `skipped:` li
 
 ## BATCH 2 RECORD — VX-730 + VX-731 + VX-728, comments on the board surfaces (implementer: opus-implementer, 2026-11-04)
 
-**NOT DONE (first line, kept current):** NOTHING BUILT YET. The survey is done and written below.
-VX-728 (Compare) reaches the design fork the brief anticipated: Compare's columns have NO whitespace
-gutter, so Write's own machinery answers "yields" (draw nothing), which contradicts R-770-2. Per the
-brief I STOPPED and returned the fork (**B2-F1**, below) for the orchestrator's repo-first ruling.
-The Takes half (VX-730/731) has no product fork; its build plan is below and starts after the
-ruling (or at once if the orchestrator says go on Takes alone). No pins, no fix, no
-build-for-testing, no DerivedData tree yet. `Shared/` is not in the diff (record-only so far).
+**NOT DONE (first line, kept current):** BUILDING after the ruling (B2-F1 → P-770-3, option B; T1–T6
+approved). Every mounted red/green claim is a PREDICTION until the orchestrator's suite window
+(this session is headless); the use walk; the cold ladder. `Shared/` is not in the diff.
 
 **LIVE STATUS**
 | piece | state |
 |---|---|
 | Reading (this file whole; SurfaceContracts in full; TEXTKIT2_NOTES in full; the three tickets + VX-696 read on Linear) | DONE |
-| Survey: Write's reference, Takes stack / slot split / carousel, Compare, the feeds' cost bounds | DONE (this commit) |
-| B2-F1, the Compare gutter fork | RETURNED to the orchestrator — awaiting a ruling |
-| Takes build plan (T1–T6) | WRITTEN — proceeding on the orchestrator's word |
-| Seam → pins → fix → behavioural revert → build-for-testing | NOT STARTED |
+| Survey: Write's reference, Takes stack / slot split / carousel, Compare, the feeds' cost bounds | DONE (42a38f9e4) |
+| B2-F1, the Compare gutter fork | RULED (ac94d7997): P-770-3 PROVISIONAL, option B |
+| Takes build plan (T1–T6) | APPROVED (ac94d7997) |
+| The seam (`BoardCommentFaceOracle` + the OLD note reporting what it draws; behaviour-neutral) | DONE (this commit) — compile PENDING (verified by the revert tree's build) |
+| Pins (Takes per style + the empty-chip road + the left-edge guard; Compare face + measure guard) | NEXT |
+| T1/T2 (the one decision, the one face — Write byte-identical) | NOT STARTED |
+| T3/T4 (the Takes host; slot split rides the row) | NOT STARTED |
+| Compare (P-770-3: the width-only lane, the live feed, the shared face) | NOT STARTED |
+| Behavioural revert + build-for-testing (`DerivedData/vx770-b2-post`, `-rev`) | NOT STARTED |
 | READY-FOR-SUITES, self-assessment | NOT STARTED |
-| Push | push refused (GitHub incident, `Permission denied (publickey)` at 42a38f9e4) — commits local-only until the remote catches up (the orchestrator's background retry); retried once per commit, never looped |
+| Push | after every commit; a refusal is noted here (the 02:45 incident: 42a38f9e4/373e0af20 were pushed by the orchestrator) |
 
 ### THE SURVEY (written before any code)
 
