@@ -251,7 +251,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 3 | U1b — the apply PROFILE at scale (D-497 (1)); the FK memo if the profile names it; the chunking memo trued | DONE (`bf33a5d10` the instrument + the threshold · `4e41f8286` the measure · `482991724` the trace · `77cc9caad` the mechanism · `e58f9c776` the fix measured + the memo trued · the close commit) — U1b; the record is `### U1b RECORD`. The FK memo NOT NAMED (0.5%); the real mechanism found and measured (the deferred-FK child scan over unindexed `block(default_variant_id)`, O(N²); two local-only indexes = 3.9× on the apply) — handed to the orchestrator as a TICKET, not built |
 | 3b | THE SERVER-HALF ROUND (R-500-6): round 1 (`vx-500-server-half-round1.md`, 0/0/3 MINOR) DONE · the fix session (F1, F2, the rollback artifact `maintenance/vx495-rollback.sql`) DONE (`a8038ad91`, verified 85/2) · round 2 (`vx-500-server-half-round2.md`, 0/0/2 MINOR, no round 3) DONE — its two one-line pins landed by the orchestrator under the loosened rule (86/2) · **THE GATE IS OPEN; the deploy HELD for her word** (`notes/plans/vx495-deploy-checklist.md`) | GATE OPEN |
 | 3c | THE DEPLOY: run 1 REFUSED (42501 — the artifacts had omitted the 10/14c bracket, VX-721); the DEPLOY-FIX session landed the bracket + the sweep rows + pins (`e01bb7359`, verified 87/2); **run 2 LANDED 2026-11-02 00:41 UTC (`[]`)**; every verify DONE (SHAPE B body; both functions definer-owned with pg_temp; the sweep 65 OK · 4 INFO · 0 fail; the count's live plan 18 index-only scans, 779 ms); **the acceptance DONE 00:57 UTC — her week-behind Pro caught up ~23k rows in ~64 s end to end** (the checklist); the whole-diff ladder reads the bracket fix | DEPLOYED + ACCEPTED |
-| 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | IN PROGRESS (the Fable implementer, 2026-11-04) — the record is `### U2 RECORD` |
+| 4 | U2 — the faces (D-496's words, D-505's line), the retention clock (D-539/VX-546), the leaf constraint (VX-490) | DONE (`8c409ba63` P-500-1 · `de88ecc77` P-500-2 · `918bb6df6` P-500-3/P-500-7(a) · `31e1ce752`+`6b4c4825e` the injected clock + the red-on-old · `fcbd86286` VX-490) — the record is `### U2 RECORD`; the close set "Test run with 225 tests in 49 suites passed" |
 | 5 | ~~U3 — the typed-unlock retry + the reachability trigger (D-544)~~ | LIFTED OUT (R-500-10): VX-544 runs as its own ticket run after VX-500's ladder closes; D-544 + the U3 brief move to `notes/plans/fixes/vx-544-offline-typed-unlock.md` at this session's cutover |
 | 5b | U4 — VX-720: the v1_35 two-index migration + pin + the bench re-run (R-500-7) | NOT STARTED (after U3) |
 | 6 | The ladder (a fresh `fable-reviewer` over the whole diff; rounds per CLAUDE.md) | NOT STARTED |
@@ -1939,7 +1939,17 @@ so the belt pins and the doctored-chain proof read exactly as before — the sui
 
 ### U2 RECORD (the Fable implementer, 2026-11-04; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
 
-**NOT DONE (the record's first line):** PENDING until the close flips it — written piece by piece below.
+**NOT DONE (the record's first line):** nothing of the brief's six pieces is left undone (LIVE STATUS below). NOT done
+because not this unit's: any `Sync/` line (the seam U1a built was sufficient — nothing was missing, so no stop was
+owed); U4; the ladder; the deploy; the PR; `notes/QUESTIONS.md` (the PROVISIONALs are recorded IN FULL here per the
+spawn amendment — the orchestrator lands them at the merge); a FACE WALK — deliberately not owed here (the progress
+needs a live multi-window round against a deployed count, which is her held window; the pins are the evidence for a
+shared-face Wording unit, as the brief says); the phone's TEST suites (the phone BUILD is green below; the shared row
+and the mobile sheet line compile there — the orchestrator's closing runs carry the phone build). NOT built though a
+reviewer may want them: P-500-7 (b) (a second typed belt fact — hers, HELD); a `.retrying`-kind arm in
+`firstRoundCount` (the retrying status clears `progress` with the round's end, so no count can stand there); the :728
+`VaultLeaf` constraint (piece 5's reason). The 4 standing warnings in the close set are a PRE-EXISTING class, not this
+unit's lines (the close below names them).
 
 **The stage protocol for this unit (the orchestrator's mid-run amendment, superseding the spawn prompt's fact 2):** the
 claim `vx500-orchestrator` lands on a READY ping — the implementer messages "STAGE-READY" at its first `xcodebuild …
@@ -1950,12 +1960,12 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | D-496's words (P-500-1): `SyncStatusRow.line(for:lastSuccessAt:progress:)` + the one count spelling (`progressCount`); "Syncing…" byte-unchanged with no progress; P-500-8 decided (the shown denominator rises to `done`); the new suite `SyncProgressRowTests` | IN PROGRESS (this commit) — code + pins written; the suite's run PENDING the stage |
-| 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | DONE (this commit) — pins PENDING the stage |
-| 3 | D-505's line (P-500-3): `Kind.retrying` after offline, before every other error class; CF-15's doors; the hover carries the engine's sentence; P-500-7 built as (a) | DONE (this commit) — pins PENDING the stage |
+| 1 | D-496's words (P-500-1): `SyncStatusRow.line(for:lastSuccessAt:progress:)` + the one count spelling (`progressCount`); "Syncing…" byte-unchanged with no progress; P-500-8 decided (the shown denominator rises to `done`); the new suite `SyncProgressRowTests` | DONE (`8c409ba63`; green in the close set) |
+| 2 | D-496's sheet (P-500-2): the count beneath `firstRoundProgress` when a progress stands, threaded through the outcome's own status (no new global) | DONE (`de88ecc77`; green in the close set) |
+| 3 | D-505's line (P-500-3): `Kind.retrying` after offline, before every other error class; CF-15's doors; the hover carries the engine's sentence; P-500-7 built as (a) | DONE (`918bb6df6`; green in the close set) |
 | 4 | D-539 + VX-546: the pair road's `now` defaults on the injected clock; the suite on FIXED instants; the boundary red-on-old pin (2026-01-04 00:20 UTC) | DONE (`31e1ce752`; the red-on-old cycle run under the stage claim — the lines below) |
-| 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | DONE (this commit) — zero behavior; the suites are the evidence, PENDING the stage |
-| 6 | Close: `swift build`; the Mac suites under the stage; the self-assessment | NOT STARTED |
+| 5 | D-490: `RoadInputs.live`'s leaf `SyncKeysLeaf & Sendable`; the bootstrap's stored leaf drops | DONE (`fcbd86286`; both OneSyncKeysLeaf suites green in the close set) |
+| 6 | Close: `swift build`; the Mac suites under the stage; the self-assessment | DONE (this commit) — the close block and SELF-ASSESSMENT below |
 
 #### The PROVISIONALs (recorded here IN FULL — notes/QUESTIONS.md is the merging session's; the orchestrator lands these at the merge)
 
@@ -2084,3 +2094,79 @@ suite sets, and STOPS (commit + record + report) if the claim never lands. Never
   (`Sources/VariorumCore/.../Leaves.swift`) would retype — a core Protection seam this Mac-app unit does not own — and
   core's test conformer `InterleavingVault` (VaultRaceTests) is not Sendable. A ticket-sized change of its own if
   wanted. Zero behavior in this piece; no pin claimed (the brief); the suites are the evidence.
+
+#### The close (piece 6; 2026-11-04 ~01:35–01:55 MST, the stage HELD by `vx500-orchestrator` throughout — `Tools/stage status` read before every test run)
+
+- `swift build` → "Build complete!" — the core package is UNTOUCHED by U2: `git diff --stat main -- Sources/` shows
+  only U1a's six `Sync/` files (ApplyProfile · PullStage · SupabaseTransport · SyncEngine · SyncScheduler ·
+  SyncTransport), zero U2 lines.
+- Mac `xcodebuild build-for-testing` green after every piece; the PHONE build green
+  (`xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` → "BUILD SUCCEEDED") — the
+  shared row and the mobile sheet's count line compile on the phone.
+- **THE RED-ON-OLD** (piece 4's evidence block above): the boundary pin red at :234/:238 on the reverted road
+  ("Test run with 5 tests in 1 suite failed after 0.604 seconds with 11 issues"), tree restored clean at `fcbd86286`,
+  then **"Test run with 6 tests in 2 suites passed after 0.814 seconds"** (the retention suite + the DEBUG guard pin).
+- **THE CLOSE SET — ONE run over every suite that names a changed type** (the brief's named five + the new three + the
+  grep rule's full sweep: SyncRowFace/SyncStatusRow consumers, firstRoundLine/RoadAccountConfirmModel consumers, the
+  takePair sweep's eight, the AppBootstrap-constructing six, the ProtectionOpenFaces source pins — 49 suite TYPES named
+  individually, never file names): **"Test run with 225 tests in 49 suites passed after 86.036 seconds with 4
+  warnings"**, re-run unfiltered to a kept log → **"Test run with 225 tests in 49 suites passed after 86.080 seconds
+  with 4 warnings"** — 49/49 named types executed (none silently dropped), ZERO failures, ZERO skips. Among the
+  verdicts: "The locked-sync row (VX-486)" · "The stalled-pull row (RUN B B2 row 12 — 17d P31)" · "VX-510 unit A — the
+  first-round road (roundNow, runFirstRound)" · "VX-309 U1a — retention wired…" + its DEBUG guard suite · both
+  "VX-487 F-M1-1 — the process's one sync-keys leaf" suites · "VX-496 — the sync row's progress line (P-500-1)" ·
+  "VX-496 — the first-round sheet's count beneath its sentence (P-500-2)" · "VX-505 — the belt's retrying face
+  (P-500-3)" — every one `✔ passed`.
+- **THE 4 WARNINGS, attributed (the unfiltered log):** all four fire inside
+  `EmptySlotMakeMineRouteTests.theMissingFaceLandsACopyAsANewLibraryAndOpensReadyHeld` — swift-dependencies'
+  `@Dependency(\.date) has no test implementation, but was accessed from a test context` reported as a WARNING at
+  `Date.swift:37` against `Variorum/AppSession.swift:833` (the STANDING `AppSession.init` read; `Test «unknown»` — the
+  library's own host-app gotcha class: the test drives a real `AppBootstrap` whose landing opens libraries and
+  constructs `AppSession` off any test's context). A PRE-EXISTING class on lines U2 never touched (U2's sweep made that
+  suite's one `takePair` call EXPLICIT, removing a read, never adding one); zero failures ride it. FOR THE
+  ORCHESTRATOR'S TRIAGE: a candidate Tests & tooling note (silence it by wrapping that route's bootstrap in
+  `withDependencies` or by a test-target `prepareDependencies`), not fixed here — outside the unit's scope.
+- A FACE WALK IS NOT OWED HERE (the brief's own line): the progress line needs a live multi-window round against the
+  deployed count — her held window; the pins are the evidence for a shared-face Wording unit.
+
+#### MOBILE PARITY (for the closeout's line)
+
+The row is SHARED, so the phone shows every new line with no mobile build of its own: `App/Variorum/Shared/
+SyncStatusViews.swift` (the progress line P-500-1 and the retrying face P-500-3 — the phone's Settings sync row renders
+both through the styled arm; the retrying spinner and hover ride the same `rowLabel` arm) and `App/Variorum/Shared/
+Protection/RoadAccountModel.swift` (`roundCountLine`). One PHONE-ONLY view line was added:
+`App/Variorum/VariorumMobile/Features/Protection/MobileProtectionScreen.swift` renders the P-500-2 count beneath the
+frozen progress sentence exactly as the Mac sheet does. The pair-road clock and the leaf constraint are behavior-free
+on the phone (shared files, compiled there — the phone build above).
+
+#### SELF-ASSESSMENT (the first of the two reviews — what I am least sure of; what the cold reviewer should press on)
+
+1. **P-500-8's clamp (`max(total, done)`)** renders "N of N" while the feed keeps growing — the author's example never
+   showed the grown case, and she may prefer the honest "40,200 of 40,000". Display-only either way; one line to flip
+   (`SyncStatusRow.progressCount`). Press on: whether "of" should ever show a number the server never answered.
+2. **The retrying face keeps "Sync now" DISABLED** (CF-15's `.syncing` doors verbatim). A user watching a stuck
+   "retrying" row has no manual kick until the state clears — but the flag is true exactly when a follow-up WILL run
+   (U1a's ownership pass), so the disabled door is honest. Press on: whether `.retrying` should instead carry the
+   OFFLINE row's enabled "Sync now" — a product call, P-500-3's neighborhood.
+3. **The retrying line drops her draft's terminal period** (the row idiom; the blocked-form composition). Her words had
+   one. PROVISIONAL and flagged in P-500-3's options — but a reviewer should check no other surface re-adds
+   punctuation around the line.
+4. **The retention suite's expected sets are hand-derived week math** (dayIndex/weekIndex floor arithmetic at two fixed
+   instants). I verified them against `Retention.keepDailiesAndWeeklies`'s algorithm by hand (the record's derivations)
+   and the suite is green — but the green could in principle agree with a shared misreading. Press on: offsets 17 · 24 ·
+   31 · 38 (off-boundary) and 21 · 28 · 35 (boundary) against the Monday-aligned `weekIndex`.
+5. **The sweep's `now: Date()` at 19 test call sites** restores today's exact behavior but silently opts those suites
+   OUT of any future `withDependencies` clock — a trap for a later author who wraps one and wonders why the road
+   ignores it. The record says it; a comment at each site would be churn. Press on: whether the eight files deserve a
+   one-line header note instead.
+6. **`firstRoundCount` guards on `rowFace(status).kind == .syncing`**, so a RETRYING outcome shows no count even if a
+   stale `progress` ever rode its status — correct today (the scheduler clears `progress` with `isSyncing` at the
+   round's end), but the guard's correctness leans on that scheduler invariant (U1a's). Press on: the clearing order in
+   `runOneRound`.
+7. **The `.retrying` kind is unreachable on `allowsSync: false` / unconfigured / signed-out rows** (classified inside
+   the error branch) — fine — but a test world that sets the flag WITHOUT an error text renders the CLEAN branch (idle/
+   stalled), silently dropping the flag. The scheduler always writes `lastError` beside the flag, so the pair is
+   invariant; press on whether the face should assert it (a precondition would crash a row — deliberately not done).
+8. **The four `Date.swift:37` warnings** (the close block): attributed, pre-existing, unverified against the pre-U2
+   tree (a warning, not a failure; the lines are not this unit's). A reviewer wanting certainty re-runs
+   `EmptySlotMakeMineRouteTests` at `a0132252a`.
