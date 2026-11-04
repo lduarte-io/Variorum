@@ -40,7 +40,7 @@ The video's thesis as she framed it: *"I want open source; I put a ton of work i
 **Scale (as of 2026-11-03, all verifiable in-repo):**
 - 122 days (first commit 2026-07-04 → 1.0 on 2026-11-01), 10,684 commits ≈ 87/day; 82 merged PRs; 19 shipped releases (0.9.x → 1.0.1).
 - ~328k lines of non-test Swift; ~401k lines of test code — MORE test than app; 10,771 `@Test` functions.
-- ~6.1M words of notes: specs, plans, rulings, run records (987 files; 656 plan files; 99 fix/run records; 121 handoffs).
+- ~6.1M words of notes: specs, plans, rulings, run records (987 files; 656 plan files; 99 fix/run records at ~1.34M words; 121 handoffs at ~169k; QUESTIONS ~150k; the record+archives ~165k; the 8 core canon docs ~46k). Commit messages add ~858k words across the 10.7k commits — **the full shared prose ≈ 7M words** (the honest footnote: the plans bucket includes fixtures and samples; the decision-dense core — canon, record, QUESTIONS, fixes, handoffs — is ~1.9M words).
 - The always-loaded "constitution" (CLAUDE.md + the three canon files) is ~129k tokens, re-read by every session and subagent.
 *[removed for publication]*
 - Her raw use reports live in `notes/author-reports/` (four reports, ~9.3k words verbatim); each spawned a dispositioned round file (the two big ones: 11.6k and 11.2k lines).
