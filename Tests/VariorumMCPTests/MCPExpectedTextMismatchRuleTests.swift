@@ -58,8 +58,21 @@ struct MCPExpectedTextMismatchRuleTests {
             let words = MCPExpectedTextMismatch(pattern: pattern, sentLength: 1, storedLength: 2).words
             #expect(!words.contains("while that gesture was landing"), "\(pattern): \(words)")
             #expect(words.hasSuffix("Nothing was written."), "\(pattern): \(words)")
-            #expect(words.contains("expected_text is 1 characters, the take 2"), "both lengths — \(pattern): \(words)")
+            // The ladder's round 1, NIT-2 (A JUSTIFIED EDIT): the noun agrees
+            // with its number — "1 character", never "1 characters".
+            #expect(words.contains("expected_text is 1 character, the take 2"), "both lengths — \(pattern): \(words)")
+            #expect(!words.contains("1 characters"), "\(pattern): \(words)")
         }
+    }
+
+    /// NIT-2's other side: two or more (and zero) keep the plural.
+    @Test func theLengthsNounAgreesWithItsNumber() {
+        let one = MCPExpectedTextMismatch(pattern: .startOfTake, sentLength: 1, storedLength: 1).words
+        #expect(one.contains("expected_text is 1 character, the take 1"), "\(one)")
+        let two = MCPExpectedTextMismatch(pattern: .startOfTake, sentLength: 2, storedLength: 9).words
+        #expect(two.contains("expected_text is 2 characters, the take 9"), "\(two)")
+        let none = MCPExpectedTextMismatch(pattern: .differs(at: 0), sentLength: 0, storedLength: 9).words
+        #expect(none.contains("expected_text is 0 characters, the take 9"), "\(none)")
     }
 
     // MARK: - The one chain

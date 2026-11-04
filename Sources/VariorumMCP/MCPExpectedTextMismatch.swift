@@ -74,8 +74,11 @@ struct MCPExpectedTextMismatch: Error, Equatable, Sendable {
         return MCPExpectedTextMismatch(pattern: pattern, sentLength: sent.utf16.count, storedLength: stored.utf16.count)
     }
 
+    /// The lengths clause. The ladder's round 1, NIT-2: the noun agrees with
+    /// its number ("1 character", "2 characters"); the take's length rides
+    /// the same noun, elided, so it needs no inflection of its own.
     private var lengths: String {
-        "expected_text is \(sentLength) characters, the take \(storedLength)"
+        "expected_text is \(sentLength) \(sentLength == 1 ? "character" : "characters"), the take \(storedLength)"
     }
 
     /// The refusal, in the MCP room's technical register (P-13n-1).

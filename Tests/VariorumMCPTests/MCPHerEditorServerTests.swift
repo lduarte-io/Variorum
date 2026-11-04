@@ -555,4 +555,32 @@ struct MCPHerEditorServerTests {
             #expect(try await w.rendered(note.id) == "Her line. Her last words.")
         }
     }
+
+    // MARK: - COPY: copy_note_to_wing (VX-765 — the VX-771 ladder, round 1's MINOR; APPENDED)
+
+    /// Her Copy to Wing COPIES every take exactly as her Duplicate does
+    /// (`copyPost`), so the wire's flushes first too, in its own turn before
+    /// the act's (`Job.flushesHerEditorFirst`'s `.copyNoteToWing` arm). The
+    /// behaviour was already right; this pin closes the coverage hole the
+    /// ladder found — GREEN-ONLY by design (no red-on-old is owed: nothing was
+    /// broken).
+    @Test func aWireWingCopyAsksForHerFlushAndCopiesHerLatestText() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try World(h)
+            let research = try h.operations.createWing(name: "research")
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.writeNew, .wing, research.id))
+            let note = try h.operations.createPost(title: "ch 1")
+            let block = try h.operations.newBlock(in: note.id, text: "Her line.", registeringUndo: false)
+            w.editor.type(block.variant.id, "Her line. Her last words.")
+
+            let copied = await w.call("copy_note_to_wing", ["note_id": .string(note.id), "wing_id": .string(research.id)])
+            #expect(copied.isError != true, "\(copied.text)")
+            #expect(w.log.value == ["flush:copy_note_to_wing", "act"], "her flush, THEN the act's own turn")
+            let copyID = try #require(try w.json(copied)["note_id"] as? String)
+            #expect(try await w.rendered(copyID) == "Her line. Her last words.", "the copy carries her latest words")
+            #expect(try await w.rendered(note.id) == "Her line. Her last words.")
+        }
+    }
 }
