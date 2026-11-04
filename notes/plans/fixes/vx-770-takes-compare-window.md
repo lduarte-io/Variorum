@@ -609,14 +609,13 @@ approved). Every mounted red/green claim is a PREDICTION until the orchestrator'
 | Survey: Write's reference, Takes stack / slot split / carousel, Compare, the feeds' cost bounds | DONE (42a38f9e4) |
 | B2-F1, the Compare gutter fork | RULED (ac94d7997): P-770-3 PROVISIONAL, option B |
 | Takes build plan (T1–T6) | APPROVED (ac94d7997) |
-| The seam (`BoardCommentFaceOracle` + the OLD note reporting what it draws; behaviour-neutral) | DONE (this commit) — compile PENDING (verified by the revert tree's build) |
-| Pins (Takes per style + the empty-chip road + the left-edge guard; Compare face + measure guard) | NEXT |
-| T1/T2 (the one decision, the one face — Write byte-identical) | NOT STARTED |
-| T3/T4 (the Takes host; slot split rides the row) | NOT STARTED |
-| Compare (P-770-3: the width-only lane, the live feed, the shared face) | NOT STARTED |
-| Behavioural revert + build-for-testing (`DerivedData/vx770-b2-post`, `-rev`) | NOT STARTED |
+| The seam (`BoardCommentFaceOracle` + the OLD note reporting what it draws; behaviour-neutral) | DONE (2dfd4a4a0) — compiles (the post tree built over it) |
+| A — the shared machinery: T1 `BlockDecor.commentFace` + `roomBelowInOwnRow`, T2 `CommentCardView.presentGutterFace`, the per-row host `CommentGutterFace`, `CompareGutter` (P-770-3's lane), the callout emoji's named offset | DONE (20773ef07) |
+| B — the pins (`VariorumTests/BoardCommentGutterTests.swift`: 3 suites, 11 tests) | DONE (1c4c21d8c) — red/green PENDING the window |
+| C — the behaviour: the Takes host on the row (T3/T4), Compare's lane + live feed + face | DONE (9a02527ea) — `DerivedData/vx770-b2-post` TEST BUILD SUCCEEDED (log `App/Variorum/DerivedData/logs/vx770-b2-post-build.log`) |
+| **Behavioural revert — ANNOUNCED (this commit), not yet started:** restore `TakesShared.swift`, `TakesBoardView.swift`, `CompareBoardView.swift` to 1c4c21d8c (= the seam's versions); prerevert copies + sha256 in `App/Variorum/DerivedData/vx770-b2-prerevert/` (gitignored); build into `DerivedData/vx770-b2-rev`; restore from HEAD; verify `git diff` empty + sha256 | IN PROGRESS |
 | READY-FOR-SUITES, self-assessment | NOT STARTED |
-| Push | after every commit; a refusal is noted here (the 02:45 incident: 42a38f9e4/373e0af20 were pushed by the orchestrator) |
+| Push | after every commit — REFUSED from this session's shell since 2dfd4a4a0 (`Permission denied (publickey)`: no ssh agent here, `SSH_AUTH_SOCK` unset; one `remote: Internal Server Error`); git config untouched; commits local-only until the orchestrator pushes |
 
 ### THE SURVEY (written before any code)
 
