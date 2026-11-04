@@ -1,5 +1,7 @@
 # VX-500 — Run: the 0.10 window follow-ups (the sync follow-ups)
 
+**RESUMED 2026-11-04 ~01:00 MST by the THIRD orchestrator (the successor the second cutover's kickoff names). Her resume word (R-500-12 below) LIFTS the PR hold: the completed PR MAY MERGE (serialized through tonight's coordinator, `nov3coordinator`), while a RELEASE stays withheld — she accumulates PRs before minting one. Main (1.0 + 1.0.1) merged into the branch at `5b66640ad`, clean; the run's suites green on the merged tree (128/10).**
+
 **STATUS: OPEN — SECOND CUTOVER 2026-11-01 ~19:10 MST (the second orchestrator hands off after the server half's DEPLOY and her acceptance; the kickoff prompt at the top of `notes/handoffs/vx-500-handoff.md`; read FOR A LATER READER first). The FIRST cutover 2026-11-01 ~14:00 MDT at her word: the first orchestrator handed off after the PROTOCOL BREACH below (its context ~580k); the next orchestrator resumes from `notes/handoffs/vx-500-handoff.md` (the paste-ready kickoff at its top). RESUMED 2026-11-01 ~13:30 MDT by the second orchestrator (stage claim `vx500-orchestrator`; main merged into the branch at `c64211270` so every brief reads the reworded CLAUDE.md). The cast from here, her ruling at the resume kickoff (R-500-5): FABLE SUBAGENTS implement EVERY unit — U1a · U1b · U2 · U3 — a fresh `fable-reviewer` runs the ladder (SAME-MODEL: the orchestrator arbitrates findings against the spec); the orchestrator writes nothing that ships. Kickoff 2026-11-01 ~12:30 MDT.** Ticket VX-500 (Umbrella, project 18a — Sync
 considerations) · branch `vx-500-sync-followups` · worktree `~/dev/variorum-vx-500` · the Pro. Architect shape
 (`/architect-phase VX-500`); the cast is CLAUDE.md's standing default — **Fable orchestrates, writes every `Sync/`
@@ -256,10 +258,12 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | 7 | Closing runs (core debug + release; the Mac suites over every changed source; the phone build) | NOT STARTED |
 | 8 | The PR opened — HELD OPEN at her word; the handoff; memory; the canon deltas DRAFTED for the merge moment | NOT STARTED (the successor's) |
 | 9 | SECOND CUTOVER (2026-11-01 ~19:10 MST): this file restructured in place (FOR A LATER READER, THE REMAINING WORK, the working record below); U3 lifted out to `vx-544-offline-typed-unlock.md`; the handoff's new top section with the paste-ready kickoff; memory | DONE (this commit) |
+| 0c | RESUME (the third orchestrator, 2026-11-04 ~01:00 MST): the handoff's kickoff + this file WHOLE + the standard preflight read (SyncSpec whole, SurfaceContracts' Doors, the resiliency protocol, the sizing guidance, the master plan's in-flight table, TICKETS, QUESTIONS' tail — next free #257); the bout ritual (both pulls, the board snapshot pushed); MAIN MERGED INTO THE BRANCH (`5b66640ad` — 1.0 + 1.0.1's 92 commits, zero conflicts), `swift build` green, the run's suites "Test run with 128 tests in 10 suites passed"; R-500-12 recorded (the merge word GIVEN, release withheld); the stage routed through `nov3coordinator` | DONE (this commit) |
 
 ## HELD FOR HER (bundled; nothing here is improvised around)
 
-- **The merge** (the freeze) — at her explicit word. ~~The server deploy~~ DONE 2026-11-02 00:41 UTC (R-500-8/-11).
+- ~~**The merge** (the freeze) — at her explicit word.~~ GIVEN 2026-11-04 (R-500-12): the completed PR merges, serialized
+  through the coordinator; a RELEASE stays withheld. ~~The server deploy~~ DONE 2026-11-02 00:41 UTC (R-500-8/-11).
 *[removed for publication]*
 - **The words:** P-500-1 the progress lines (her example leads), P-500-2 the sheet's count, P-500-3 the belt's line
   (her draft), the locked row unchanged. P-500-6 (the count's shape) RULED — R-500-1.
@@ -820,6 +824,14 @@ records; the cast's model rules name which AGENT types, never the orchestrator.
   re-own → revoke in both artifacts; the sweep expects USAGE held, CREATE not held — P-500-9 RESOLVED as the idiom); the
   orchestrator re-runs the deploy through the stored PAT. R-500-9's "restore the grant" is honored for the ACT, not as a
   standing grant. The declined alternative: a standing grant (my first framing).
+- **R-500-12 — THE RESUME WORD (2026-11-04, her kickoff of the third orchestrator; verbatim):** "look at the kickoff
+  prompt at the top of notes/handoffs/vx-500-handoff.md. You are resuming after I released version 1.0 & 1.0.1, so you
+  likely have to merge main into your branch. You can merge a completed PR & you can message coordinatornov3 for the
+  stage. my app is quit and i will be off the pro all night. I will be waiting to accumulate a few PRs before minting a
+  release, do not release when done." Read as: the PR HOLD IS LIFTED — the completed PR merges (the closeout runs whole,
+  serialized through `nov3coordinator`); a RELEASE is withheld (no DMG/appcast mint; the /Applications refresh is the
+  coordinator's end-of-burst call); the stage routes through the coordinator; she is away all night (an away run — her
+  calls stay bundled in the handoff).
 - **R-500-5 — the cast for this run (the resume kickoff, 2026-11-01 ~13:35 MDT; the question tool):** her kickoff
   line "Fable subagents implementing", confirmed against the handoff's Fable-or-Opus question as **"Fable implements
   all three units"** — U1 (`Sync/`), U2 (the faces, the retention clock, the leaf) and U3 (the typed-unlock retry) are
