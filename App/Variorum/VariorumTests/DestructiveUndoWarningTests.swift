@@ -131,7 +131,19 @@ struct DestructiveUndoWarningTests {
             let actions = ShellActions(session: h.session, shell: ShellRouter())
             try await divideThenEdit(h)
             actions.structuralUndo(confirm: { _ in true })
-            await settle { h.session.undoStack.redoDepth == 1 }
+            // The family's compound predicate (the idiom of the
+            // aRedoPressedInsideAnUndosFlight… sibling's first settle):
+            // `redoDepth` flips on the runner MID-FLIGHT, so waiting on it
+            // alone can press the redo into the still-held P33 latch
+            // (`anotherIsLanding`). "Undid" is spoken in the same synchronous
+            // main-actor job whose defer releases the latch — no await sits
+            // between them — so once it is observable the redo door is free.
+            // (An await inserted between the receipt and the door's defer
+            // would re-open this window.)
+            await settle {
+                h.session.undoStack.redoDepth == 1
+                    && h.session.status.spoken?.text.contains("Undid") == true
+            }
 
             actions.structuralRedo()
             // Same rule as above: the report is the last signal, so it is

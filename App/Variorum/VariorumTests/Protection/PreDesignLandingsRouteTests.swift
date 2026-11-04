@@ -77,7 +77,7 @@ struct PreDesignLandingsRouteTests {
     static func rememberingMac(_ world: RoadWorld) async throws -> (words: [String], planted: PreDesignPlant.Planted) {
         let (created, words) = try await world.created()
         _ = try AppDatabase.onDisk(url: world.slotURL, key: created.key)
-        #expect(ProtectionBackupHook.takePair(created) == .written)
+        #expect(ProtectionBackupHook.takePair(created, now: Date()) == .written)
         return (words, try PreDesignPlant.replaceSlot(world.slot.places))
     }
 

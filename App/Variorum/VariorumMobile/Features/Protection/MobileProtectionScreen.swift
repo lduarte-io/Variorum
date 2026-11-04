@@ -477,6 +477,13 @@ struct MobileRoadAccountConfirmSheet: View {
                     .font(tokens.body)
                     .foregroundStyle(tokens.ink)
                     .fixedSize(horizontal: false, vertical: true)
+                // VX-496 (P-500-2): the count beneath the frozen progress sentence — the sync row's own spelling.
+                if let count = model.roundCountLine {
+                    Text(count)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 // VX-510 ladder round 2, F-R2-2: a settle past the bound freezes the progress words as the outcome — the
                 // close note stays with them, so the face still says the road forward.
                 if line == ProtectionWords.firstRoundProgress { closeNote }

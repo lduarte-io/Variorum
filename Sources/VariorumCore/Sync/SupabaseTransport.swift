@@ -26,7 +26,7 @@ import Foundation
 /// only wire mapping and HTTP plumbing. The integration pass against the
 /// real Supabase project is an **author-assist gate** (account, project,
 /// and session are hers).
-public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
+public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotationTransport, SyncPullCountTransport {
     public struct Configuration: Sendable {
         /// `https://<project>.supabase.co`
         public let projectURL: URL
@@ -171,6 +171,28 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
                 "sync_purge_execute returned '\(body)', not an integer")
         }
         return seq
+    }
+
+    // MARK: - SyncPullCountTransport (VX-496 — maintenance/vx495-pull-keyset.sql)
+
+    /// `sync_pull_remaining(since_seq, active_key_id, key_proof, challenge)`:
+    /// a bare bigint on `sync_horizon`'s shape — the rows past the cursor the
+    /// feed would serve. Ordinary RPC posture; a 404 (the function not yet
+    /// deployed) surfaces as the plain HTTP failure the engine reads as "no
+    /// total" (D-496: the count never fails a round).
+    public func pullRemaining(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
+        let data = try await rpc(
+            "sync_pull_remaining",
+            body: PullRemainingRequest(
+                sinceSeq: since, activeKeyID: activeKeyID,
+                keyProof: keyProof.proof, challenge: keyProof.challenge))
+        let body = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard let remaining = Int64(body) else {
+            throw SupabaseTransportError.malformedResult(
+                "sync_pull_remaining returned '\(body)', not an integer")
+        }
+        return remaining
     }
 
     // MARK: - SyncRotationTransport (pre-13x — 11_pre13x_postures.sql)
@@ -438,6 +460,20 @@ struct PurgeKeyOnlyRequest: Encodable {
     let keyProof: String
     let challenge: String
     enum CodingKeys: String, CodingKey {
+        case activeKeyID = "active_key_id"
+        case keyProof = "key_proof"
+        case challenge
+    }
+}
+
+/// VX-496: `sync_pull_remaining`'s body — `sync_purge_ledger`'s shape exactly.
+struct PullRemainingRequest: Encodable {
+    let sinceSeq: Int64
+    let activeKeyID: String
+    let keyProof: String
+    let challenge: String
+    enum CodingKeys: String, CodingKey {
+        case sinceSeq = "since_seq"
         case activeKeyID = "active_key_id"
         case keyProof = "key_proof"
         case challenge

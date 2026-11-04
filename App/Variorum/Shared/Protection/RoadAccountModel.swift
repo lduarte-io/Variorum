@@ -273,6 +273,25 @@ final class RoadAccountConfirmModel: Identifiable {
         return Self.firstRoundLine(outcome, joins: door.joinsAnAccount, follows: door.door == .follow)
     }
 
+    /// **VX-496 (P-500-2, PROVISIONAL, hers)** — the COUNT beneath the sheet's progress sentence: when the round's
+    /// outcome froze still syncing (F-R1-1's honest rare face) with a progress standing, the sheet says the same count
+    /// the sync row does, beneath `firstRoundProgress` — one spelling (`SyncStatusRow.progressCount`), never a second
+    /// one (the D-A2 rule); nil everywhere else. The progress rides the outcome's own status — the road
+    /// `firstRoundLine` already receives — never a new global.
+    var roundCountLine: String? {
+        guard case .done(let outcome)? = round else { return nil }
+        return Self.firstRoundCount(outcome)
+    }
+
+    /// P-500-2's words, beside `firstRoundLine`: the count when the outcome's status wears the syncing face and
+    /// carries a progress; nil for every other outcome (a clean round, a blocked one, a progress-less running round —
+    /// the sentence alone, exactly as before).
+    static func firstRoundCount(_ outcome: FirstRoundOutcome) -> String? {
+        guard case .ran(let status) = outcome, rowFace(status).kind == .syncing, let progress = status.progress
+        else { return nil }
+        return SyncStatusRow.progressCount(progress)
+    }
+
     /// The round's error as the row shows it under its error face (`ErrorCauseNote`'s text) — the sheet shows the same
     /// note beneath the line; nil for every other outcome.
     var roundErrorCause: String? {
@@ -310,7 +329,8 @@ final class RoadAccountConfirmModel: Identifiable {
     static func rowFace(_ status: SyncScheduler.Status) -> SyncRowFace {
         SyncRowFace.face(
             allowsSync: true, isConfigured: true, signedIn: true, isSyncing: status.isSyncing,
-            lastError: status.lastError, lastErrorIsOffline: status.lastErrorIsOffline, stalled: status.pullStalled)
+            lastError: status.lastError, lastErrorIsOffline: status.lastErrorIsOffline,
+            lastErrorIsRetrying: status.lastErrorIsRetrying, stalled: status.pullStalled)
     }
 
     /// The confirm's way out — nothing written. (With the moment standing the act already landed: its way out is the

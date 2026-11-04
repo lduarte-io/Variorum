@@ -58,6 +58,16 @@ public actor SyncScheduler {
         public var pushDeferredCount = 0
         /// Rounds finished (clean or failed) — test observability.
         public var roundsCompleted = 0
+        /// VX-496 (D-496): the running round's catch-up progress — nil on an
+        /// ordinary round (the engine publishes only once a round has needed a
+        /// second window), cleared when the round ends.
+        public var progress: SyncProgress?
+        /// VX-505 (D-505): `lastError` is the one-writer belt's refusal AND a
+        /// healing follow-up round is about to run — a TYPED fact for the row's
+        /// face (never string-matching the engine's sentence). False on every
+        /// other error, and on a belt refusal nothing follows (a refused
+        /// follow-up waits for the next trigger like any failed round).
+        public var lastErrorIsRetrying = false
         public init() {}
     }
 
@@ -117,6 +127,10 @@ public actor SyncScheduler {
     /// follow-up runs once, never a loop; a second refusal waits for the
     /// next trigger like any failed round.
     private var nextRoundIsBeltFollowUp = false
+    /// VX-496: which round a progress publish belongs to — a publish that lands
+    /// after its round ended (the engine's closure hops onto the actor in a
+    /// Task of its own) is dropped, never resurrected onto an idle status.
+    private var roundGeneration = 0
     private var idleWaiters: [CheckedContinuation<Void, Never>] = []
     private var statusContinuations: [Int: AsyncStream<Status>.Continuation] = [:]
     private var nextContinuationKey = 0
@@ -198,7 +212,11 @@ public actor SyncScheduler {
     private func runOneRound() async {
         let isBeltFollowUp = nextRoundIsBeltFollowUp
         nextRoundIsBeltFollowUp = false
+        roundGeneration += 1
+        let generation = roundGeneration
         status.isSyncing = true
+        status.progress = nil
+        status.lastErrorIsRetrying = false
         publishStatus()
         // 13j ladder B (B2): the LEDGER RECONCILIATION runs BEFORE the
         // round's drain — a returner's outbox is screened against other
@@ -239,7 +257,12 @@ public actor SyncScheduler {
         }
         do {
             // Pinned: pull → push (A3).
-            let pullReport = try await engine.pull()
+            // VX-496 (D-496): the engine reports a long catch-up's progress;
+            // the closure hops onto this actor and is dropped once this round
+            // has ended (the generation).
+            let pullReport = try await engine.pull(progress: { [weak self] progress in
+                Task { await self?.publish(progress: progress, generation: generation) }
+            })
             let pushReport = try await engine.push()
             status.lastError = nil
             status.lastErrorIsOffline = false
@@ -298,12 +321,38 @@ public actor SyncScheduler {
             if PullStage.isOneWriterRefusal(error), !retired, !isBeltFollowUp {
                 followUpRequested = true
                 nextRoundIsBeltFollowUp = true
+                // VX-505 (D-505): the row may say "retrying" exactly while a
+                // follow-up is about to run — the typed fact behind the face.
+                status.lastErrorIsRetrying = true
             }
         }
         status.pendingPushCount = (try? await outboxCount()) ?? status.pendingPushCount
         status.isSyncing = false
+        status.progress = nil
         status.roundsCompleted += 1
         publishStatus()
+    }
+
+    /// VX-496: a progress publish from the engine — applied only while its
+    /// round is the running one, and only when it ADVANCES what the row shows
+    /// (the hops onto this actor are unordered Tasks: an earlier window's
+    /// publish may land after a later one's; the saving phase never steps
+    /// back to downloading).
+    private func publish(progress: SyncProgress, generation: Int) {
+        guard generation == roundGeneration, status.isSyncing else { return }
+        if let current = status.progress, !Self.advances(from: current, to: progress) { return }
+        status.progress = progress
+        publishStatus()
+    }
+
+    /// Whether `next` is a later reading than `current`: a later phase, or the
+    /// same phase with at least as many rows done.
+    static func advances(from current: SyncProgress, to next: SyncProgress) -> Bool {
+        switch (current.phase, next.phase) {
+        case (.downloading, .saving): return true
+        case (.saving, .downloading): return false
+        default: return next.done >= current.done
+        }
     }
 
     /// pre-13x 2b: the engine's own primitive (hoisted — the rotation runner

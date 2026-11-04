@@ -105,6 +105,12 @@ struct MigrationTests {
         // NULL`) — the tray badge's cascade-victim fence seeks instead of
         // scanning the library. LOCAL only, no §12 event, marker 14.
         "idx_cblock_dead_block",
+        // VX-720 (A JUSTIFIED EDIT, the ritual — VX-500 U4): v1_36's two
+        // deferred-FK child indexes on the columns pointing at `variant` —
+        // without them a first catch-up's apply scanned `block` per take
+        // insert, O(N²) (the deferred-FK child scan; the U1b record).
+        // LOCAL only, no §12 event, marker 14.
+        "idx_block_default_variant", "idx_cblock_chosen_variant",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -182,7 +188,8 @@ struct MigrationTests {
         // v1_24's two grants-store indexes; VX-168: v1_26's two; VX-258 (A
         // JUSTIFIED EDIT, the ritual): v1_28's two. VX-393 (A JUSTIFIED EDIT,
         // the ritual — VX-348 U5): v1_30's one. VX-647 (A JUSTIFIED EDIT, the
-        // ritual — VX-648 batch 1): v1_34's one.
+        // ritual — VX-648 batch 1): v1_34's one. VX-720 (A JUSTIFIED EDIT,
+        // the ritual — VX-500 U4): v1_36's two.
         #expect(after.subtracting(before) == [
             "idx_commit_created", "idx_shelf_wing",
             "uq_search_doc_src", "idx_container_undated_created",
@@ -191,7 +198,8 @@ struct MigrationTests {
             "uq_mcp_rebind_request_client", "uq_mcp_rebind_request_key",
             "uq_mcp_grant_standing_place",
             "idx_cblock_dead_block",
-        ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 + v1_30 + v1_34 add exactly these indexes")
+            "idx_block_default_variant", "idx_cblock_chosen_variant",
+        ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 + v1_30 + v1_34 + v1_36 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
     }
 
@@ -215,14 +223,63 @@ struct MigrationTests {
         let before = try indexes()
         #expect(!before.contains("idx_cblock_dead_block"))
         try AppDatabase.migrator.migrate(queue)
-        #expect(try indexes().subtracting(before) == ["idx_cblock_dead_block"],
-                "v1_34 adds exactly the one index")
+        // VX-720 (A JUSTIFIED EDIT, the ritual — VX-500 U4): the full chain
+        // past v1_33 now also adds v1_36's two FK child indexes; v1_34's
+        // claim is unchanged — it adds exactly `idx_cblock_dead_block`.
+        #expect(try indexes().subtracting(before) == [
+            "idx_cblock_dead_block",
+            "idx_block_default_variant", "idx_cblock_chosen_variant",
+        ], "v1_34 + v1_36 add exactly these indexes")
         let sql = try queue.read { db in
             try String.fetchOne(
                 db, sql: "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_cblock_dead_block'")
         } ?? ""
         #expect(sql.contains("container_block(block_id, deleted_at)"), "the shape: \(sql)")
         #expect(sql.contains("WHERE deleted_at IS NOT NULL"), "partial on the dead rows: \(sql)")
+    }
+
+    /// **VX-720 — v1_36's two deferred-FK child indexes** (VX-500 U4,
+    /// R-500-7). A store that ran every migration up to v1_35 does not have
+    /// them; the next migration adds exactly the two, each a PLAIN
+    /// single-column index on an FK child column pointing at `variant` —
+    /// the measured shape (the U1b bisection's arm F), deliberately not
+    /// partial. Red on the pre-fix tree by construction: no such migration
+    /// existed. The behavioral red-on-old is `DeferredFKChildScanPinTests`.
+    @Test func theDeferredFKChildIndexesArriveForAnOlderStore() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_35_sweep_kill_verdict_markers")
+        func indexes() throws -> Set<String> {
+            try queue.read { db in
+                Set(try String.fetchAll(
+                    db,
+                    sql: "SELECT name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%'"))
+            }
+        }
+        let before = try indexes()
+        #expect(!before.contains("idx_block_default_variant")
+                && !before.contains("idx_cblock_chosen_variant"),
+                "a v1_35 store pays the deferred-FK child scan")
+        try AppDatabase.migrator.migrate(queue)
+        #expect(try indexes().subtracting(before)
+                == ["idx_block_default_variant", "idx_cblock_chosen_variant"],
+                "v1_36 adds exactly the two indexes")
+        let shapes = try queue.read { db in
+            try Row.fetchAll(db, sql: """
+                SELECT name, sql FROM sqlite_master WHERE type = 'index'
+                AND name IN ('idx_block_default_variant', 'idx_cblock_chosen_variant')
+                """).map { ($0["name"] as String, ($0["sql"] as String?) ?? "") }
+        }
+        for (name, sql) in shapes {
+            switch name {
+            case "idx_block_default_variant":
+                #expect(sql.contains("block(default_variant_id)"), "the shape: \(sql)")
+            case "idx_cblock_chosen_variant":
+                #expect(sql.contains("container_block(chosen_variant_id)"), "the shape: \(sql)")
+            default:
+                Issue.record("unexpected index \(name)")
+            }
+            #expect(!sql.contains("WHERE"), "plain, not partial — the measured shape: \(sql)")
+        }
     }
 
     /// **13o — v1_22's BACKFILL** (the rebuild engine run once inside the

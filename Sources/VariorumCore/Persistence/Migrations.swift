@@ -1124,6 +1124,52 @@ extension AppDatabase {
             try db.execute(
                 sql: "DELETE FROM sync_state WHERE key LIKE 'sample_kill_verdict:%'")
         }
+        // VX-720 (VX-500 U4, seated at R-500-7): a first catch-up's apply was
+        // O(N²). THE MECHANISM — under `PRAGMA defer_foreign_keys = ON`
+        // (SyncSpec §5's apply posture), while ANY deferred FK violation is
+        // pending, every INSERT into a table that is a PARENT in some FK makes
+        // SQLite search each CHILD table for rows naming the new key, to
+        // settle the violation counter (sqlite.org/foreignkeys.html §4: the
+        // child-key search at a parent-key write; an index on the child
+        // column turns the full scan into a probe). The pull feed's registry
+        // order lands every `block` — its `default_variant_id` dangling —
+        // before any take, so the counter sits at ~N_blocks through the whole
+        // variant run and each of N take inserts scanned the N-row unindexed
+        // `block` table: 7 ms a take at her ~36k blocks on disk under
+        // SQLCipher. MEASURED at the U1b bench (109,203 rows, Debug,
+        // on-disk): the apply 330,231 → 85,315 ms (3.9×), 331 → 1,280 rows/s,
+        // with exactly these two indexes. `container_block.chosen_variant_id
+        // → variant` is the same class's second column: empty on a FRESH
+        // device's first catch-up (placements land after takes), but a device
+        // that already holds a library scans its whole placement table per
+        // arriving take — and a parent-row DELETE (the purge janitor's
+        // physical deletes; `deleteVariant`'s chosen-check class) pays the
+        // same child search whether FKs are deferred or not, so both sides
+        // seek through these. Plain single-column, not partial — the measured
+        // shape (the U1b bench's bisection arm F and its INDEX_FIX knob,
+        // since retired). The record: `notes/plans/fixes/
+        // vx-500-sync-followups.md` (U1b THE MECHANISM / THE CANDIDATE FIX
+        // MEASURED; the U4 record).
+        //
+        // **NOT a SyncSpec §12 lockstep event**, on v1_34's own reasoning:
+        // the Postgres mirrors carry no indexes beyond the PK by design
+        // (SyncSpec §2), so a local index changes no wire semantics, no
+        // column and no classification — `SyncSchema`'s completeness walk
+        // classifies COLUMNS, and an index adds none. The marker stays 14;
+        // an un-migrated client simply keeps the quadratic apply. A store
+        // (or plaintext export) that has run this migration reads
+        // `.newerSchema` on an older build and refuses, by the classifier's
+        // applied-vs-known subtraction — VX-502's standing rule, untouched.
+        // Named v1_36, not the plan's v1_35: that slot was taken by main's
+        // kill-verdict sweep when 1.0 merged into the branch (the registry
+        // is append-only). Its own commit, ahead of the pin and the bench
+        // re-run (CLAUDE.md).
+        migrator.registerMigration("v1_36_fk_child_indexes") { db in
+            try db.execute(sql: """
+                CREATE INDEX idx_block_default_variant ON block(default_variant_id);
+                CREATE INDEX idx_cblock_chosen_variant ON container_block(chosen_variant_id);
+                """)
+        }
         return migrator
     }
 }

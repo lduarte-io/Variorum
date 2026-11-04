@@ -68,7 +68,7 @@ struct ProtectionCopyCountsTests {
     @Test func thePairRoadsPairsAreCountedInBothPlaces() async throws {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
         let counts = ProtectionCopyCounts.read(session)
         #expect(counts.container.count == 1 && counts.far.count == 1, "\(counts)")
     }

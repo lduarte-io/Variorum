@@ -1252,3 +1252,37 @@ Her report, on finding the shipped 0.10.5/0.10.6 notes opening with "*Drafted at
 **§9/§12 — VX-729, the vanishing take badge.** Traced as the CONFIRMED instance of VX-702: Write hears a take choice only through its observation; the differential rewrite leaves the paragraph unlaid; the synchronous `refreshBadges` honestly delivers the absence (the VX-230 `.layoutAvailable` rule); and on macOS 27.0.1 a frame-constant storage edit never runs `viewWillDraw`, so the N14 settle hop never re-reads (TEXTKIT2_NOTES §3's VX-677/VX-668 fact). The fix is the notes' own stated rule applied at the consumer: `refreshBadges` sets `textView.needsDisplay` while the overlay generation is undelivered (terminates — delivery is marked before the hop's read). Red run on the pre-fix products: exactly the three bug pins. The 14-row sibling sweep: 6 FIXED, 7 SAFE (the full-render row SAFE by measurement — the anchor jump lays out its landing first), 1 out of scope with VX-702, which stays open for the rest of its class.
 
 **The run.** Architect shape, overnight, her advance release word; Fable orchestrated and cold-reviewed (one round, no BLOCKER/MAJOR, closed at round 1 — the two MINORs dispositioned as tickets: VX-740 upgraded Confirmed with the Compare mint/auto-fill race fully traced and deliberately NOT fixed, which seat yields being hers; VX-739 bounded pre-existing); three fresh Opus implementers; the B1 Gate-B stop was a fixture error in the batch's own new pin, fixed test-first with the teeth proof (the dismissal-read mutation went red exactly). Gates A–D 52/8 · 45/6 · 108/19 · 57/10; every watch red exactly as predicted and restored byte-verified; the joint walk J0–J5 PASS in both voices. Born: VX-739/740/741 (walk observations), VX-742/743 (tour cosmetics), VX-744 (stale comments), VX-745 (the E6 ask). PROVISIONALs: QUESTIONS #256. Released as **1.0.1** ("Minor bug fixes.") the same night; the site publish carried R-736-8's noindex removal.
+
+
+## 2026-11-04 — VX-500, Run: the 0.10 window sync follow-ups (§9 Sync · §12 The app/Doors; branch `vx-500-sync-followups`, PR #215)
+
+**The cast and shape.** Architect shape; THREE Fable orchestrators in sequence (the first cut over after the
+PROTOCOL BREACH — it wrote U1's code itself, her stop verbatim in the plan; the second after the server-half
+DEPLOY; the third closed the run at her resume word). Fable implementers for EVERY unit (her R-500-5: "Fable
+subagents implementing"); fresh `fable-reviewer`s per round. Members: VX-495/496/497/505/539/546/490/720/721;
+VX-504 (memo only), VX-508 (held), VX-544 (lifted out, R-500-10), VX-76 (proposed dup of VX-496).
+
+**Her rulings (ids; words verbatim in the plan file's HER RULINGS):** R-500-1 the index-only count · R-500-2
+VX-544/683 not Pre-launch · R-500-3 the CLAUDE.md cast rule · R-500-4 the recovery shape · R-500-5 Fable implements
+· R-500-6 the server half ships early (the split ladder + the rollback artifact) · R-500-7 VX-720 seated as U4 ·
+R-500-8 the deploy through the PAT · R-500-9/-11 the 10/14c re-own bracket · R-500-10 the cutover + U3 lifted out ·
+R-500-12 the resume word (2026-11-04: "You can merge a completed PR … I will be waiting to accumulate a few PRs
+before minting a release, do not release when done").
+
+**What landed.** §9/Sync: SHAPE B `sync_pull` + `sync_pull_remaining` DEPLOYED 2026-11-02 00:41 UTC (maintenance,
+not a marker event — SyncSpec §12's entry); the engine's `SyncProgress` seam (`pull(progress:)`, the once-per-round
+count through `SyncPullCountTransport`, `Status.progress`, the typed `lastErrorIsRetrying`); the apply profiled at
+scale (the row loop 98.2%; the deferred-FK child scan found O(N²) and fixed by `v1_36_fk_child_indexes` — the
+brief's v1_35 slot was taken by main's VX-669 sweep, so v1_36 is the export boundary; 330 s → 89 s measured);
+the retention suite on the injected clock; `RoadInputs.live`'s leaf constrained. §12: the sync row's progress and
+retrying lines (AppSpec §12 + SurfaceContracts §Doors, in place), one presentation source, both sheets' count.
+
+**The ladder.** Two server-half rounds pre-deploy (0/0/3+2 MINOR); the whole-diff ladder round 1 (0/0/2 MINOR/2 NIT
+— the discard road's `downloaded` double-count, the count doc, the unread COUNT(*), the ratio overflow), the four
+fixes (F1's red 750-vs-375), round 2 CLEAN (F1–F4 closed; F1's red reproduced independently by the reviewer).
+The closing runs: debug core 3,605/483 passed; FULL `VariorumTests` 5,804/1,006 passed on the final tip (its first
+pass caught the pre-existing P33 settle race — fixed, the VX-539/546 class); FULL `VariorumMobileTests` 852/139
+with its only real red PRE-EXISTING on main (VM-38); the release split's TEST target pre-existing broken (VX-773).
+
+**Born:** VX-720/721 (fixed in-run) · VX-722/723/772 (load-flakes) · VX-773 · VM-38. **PROVISIONALs:** QUESTIONS
+#257. **Merged:** PENDING-MERGE-SHA (merge commit). The night's full narrative: `notes/plans/fixes/vx-500-sync-followups.md`.

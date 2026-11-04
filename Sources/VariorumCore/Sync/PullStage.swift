@@ -256,6 +256,11 @@ enum PullStage {
         return nil
     }
 
+    /// VX-496: how many rows the stage holds — a resumed round's download progress starts here (D-496).
+    static func stagedRowCount(_ db: Database) throws -> Int {
+        try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM \(SyncPullStageSchema.table)") ?? 0
+    }
+
     private static func hasStagedRows(_ db: Database) throws -> Bool {
         try Bool.fetchOne(db, sql: "SELECT EXISTS (SELECT 1 FROM \(SyncPullStageSchema.table))") ?? false
     }

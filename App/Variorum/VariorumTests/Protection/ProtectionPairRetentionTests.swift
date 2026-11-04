@@ -8,7 +8,18 @@
 //  safety copies and names no build writes SURVIVE every prune (rule 19's listing of other libraries' copies is U1b's door;
 //  nothing here deletes them). Over a PLANTED road — also headless in the implementer's harness.
 //
+//  VX-539 + VX-546 (VX-500 U2): THE SUITE RUNS ON ONE CLOCK AND FIXED INSTANTS. The old suite planted relative to its
+//  own `Date()` while the road read another (`takePair`'s default) — and worse, the SCENE's true 14 + 4 answer depends
+//  on where "now" sits in the Monday-aligned week (at a week-tail instant the 2…41-day world holds only THREE uncovered
+//  weeks past the dailies, so the planner rightly keeps 17, not 18 — the drift VX-546 caught on a Saturday night). The
+//  road's `now` defaults are the injected `\.date` now, each test wraps planting AND the press in ONE FIXED instant
+//  (`withDependencies { $0.date = .constant(…) }`), and the counts are the planner's true answers at those instants,
+//  deterministic on any run date. The FRESH pair the press writes is stamped by the leaf's own wall clock — months past
+//  the fixed instants — so it reads as a FUTURE stamp: kept, never pruned, claiming no slot (18o U1's trusted-stamp
+//  rule, the same posture production has when a pair's stamp lands past its run's clock; `Retention.plan`'s doc).
+//
 
+import Dependencies
 import Foundation
 import Testing
 
@@ -19,6 +30,15 @@ import VariorumCore
 @MainActor
 struct ProtectionPairRetentionTests {
     static let day: TimeInterval = 86_400
+
+    /// OFF-BOUNDARY: 2026-01-07 12:00:00 UTC — a Wednesday noon, mid-day and mid-week, where the 2…41-day far world
+    /// holds the full four uncovered weeks past the dailies (the planner's 18) and no bucket edge sits near.
+    static let instant = Date(timeIntervalSince1970: 1_767_787_200)
+
+    /// THE WEEK BOUNDARY (D-539's named instant): 2026-01-04 00:20:00 UTC — a Sunday, the LAST day of its Monday-aligned
+    /// week, twenty minutes past the day line. Here the same 2…41-day world holds only THREE uncovered weeks past the
+    /// dailies — the planner's true answer is 17, the shape the live flakes hit.
+    static let boundary = Date(timeIntervalSince1970: 1_767_486_000)
 
     /// Every file under `root`'s `Backups/` and `Previous Libraries/` (relative paths) — the world a prune must leave
     /// alone but for the doomed pairs.
@@ -78,47 +98,56 @@ struct ProtectionPairRetentionTests {
     }
 
     /// BESIDE THE LIBRARY: this Mac's pairs past the newest 14 are pruned after the next pair lands, each snapshot with its
-    /// own pair. RED ON OLD: they accumulate (VX-411 — 21 pairs).
+    /// own pair; the fresh pair (wall-clock-stamped, past the fixed instant) is kept unslotted. RED ON OLD: they
+    /// accumulate (VX-411 — 21 pairs).
     @Test func pairsPastTheNewestFourteenArePrunedBesideTheLibrary() async throws {
         let road = PlantedRoad()
         let (session, _) = try await road.created()
-        let now = Date()
         var planted: [String] = []
-        for offset in 1...20 {
-            planted.append(try FarPlant.pair(
-                in: FarPlant.ownContainer(road, session), libraryID: FarPlant.libraryID(session),
-                at: now.addingTimeInterval(-Double(offset) * Self.day)))
+        try withDependencies { $0.date = .constant(Self.instant) } operation: {
+            for offset in 1...20 {
+                planted.append(try FarPlant.pair(
+                    in: FarPlant.ownContainer(road, session), libraryID: FarPlant.libraryID(session),
+                    at: Self.instant.addingTimeInterval(-Double(offset) * Self.day)))
+            }
+            #expect(ProtectionBackupHook.takePair(session) == .written)
         }
-        #expect(ProtectionBackupHook.takePair(session) == .written)
         let left = FarPlant.snapshots(FarPlant.ownContainer(road, session))
-        #expect(left.count == 14, "the newest 14 stay — \(left.count) left")
-        #expect(Set(planted.prefix(13)).isSubset(of: Set(left)), "the 13 newest planted pairs and the new one")
-        for gone in planted.suffix(7) {
+        #expect(left.count == 15, "the newest 14 planted stay + the fresh pair (future-stamped: unslotted, kept) — \(left.count) left")
+        #expect(Set(planted.prefix(14)).isSubset(of: Set(left)), "the 14 newest planted pairs")
+        for gone in planted.suffix(6) {
             #expect(!left.contains(gone), "\(gone) is past the policy")
             let pair = String(gone.dropLast(".sqlite".count)) + ".keys.json"
             #expect(!FarPlant.names(FarPlant.ownContainer(road, session)).contains(pair), "\(pair) went with its snapshot")
         }
     }
 
-    /// IN THE PICKED FOLDER: this Mac's pairs past 14 dailies + 4 weeklies are pruned after the next far pair lands. RED ON
-    /// OLD: 41 pairs stay.
+    /// IN THE PICKED FOLDER: this Mac's pairs past 14 dailies + 4 weeklies are pruned after the next far pair lands —
+    /// the EXACT kept set at the off-boundary instant (dailies = the 14 newest days, offsets 2…15; weeklies = the
+    /// newest file of each of the four uncovered weeks, offsets 17 · 24 · 31 · 38). RED ON OLD: 41 pairs stay.
     @Test func pairsPastFourteenDailiesAndFourWeekliesArePrunedInThePickedFolder() async throws {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
-        let now = Date()
-        for offset in 2...41 {
-            try FarPlant.pair(
-                in: FarPlant.ownFar(road, session), libraryID: FarPlant.libraryID(session),
-                at: now.addingTimeInterval(-Double(offset) * Self.day))
+        var planted: [Int: String] = [:]
+        try withDependencies { $0.date = .constant(Self.instant) } operation: {
+            for offset in 2...41 {
+                planted[offset] = try FarPlant.pair(
+                    in: FarPlant.ownFar(road, session), libraryID: FarPlant.libraryID(session),
+                    at: Self.instant.addingTimeInterval(-Double(offset) * Self.day))
+            }
+            #expect(ProtectionBackupHook.takePair(session) == .written)
         }
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        let keptOffsets = Set(2...15).union([17, 24, 31, 38])
+        let left = Set(FarPlant.snapshots(FarPlant.ownFar(road, session)))
+        #expect(left.count == 19, "14 dailies + 4 weeklies + the fresh far pair (future-stamped, unslotted) — \(left.count) left")
+        for (offset, name) in planted.sorted(by: { $0.key < $1.key }) {
+            #expect(left.contains(name) == keptOffsets.contains(offset),
+                    "offset \(offset): \(keptOffsets.contains(offset) ? "kept" : "pruned")")
+        }
         let catalog = road.system().lister.catalog()
         let own = OwnCopies.of(
             catalog, libraryID: FarPlant.libraryID(session), thisMac: FarPlant.deviceID(session), in: .farFolder)
-        #expect(own.count == 18, "14 dailies + 4 weeklies — \(own.count) left")
-        let newestDays = own.compactMap(\.stamp).sorted(by: >).prefix(14)
-        #expect(newestDays.first.map { now.timeIntervalSince($0) < Self.day } == true, "today's pair is kept")
-        #expect(FarPlant.snapshots(FarPlant.ownFar(road, session)).count == 18, "the files themselves")
+        #expect(own.count == 19, "the catalogue's own count — \(own.count)")
     }
 
     /// NOTHING ELSE, EVER: another Mac's pairs, another library's, an orphan snapshot, today's flat files, a Previous
@@ -128,20 +157,23 @@ struct ProtectionPairRetentionTests {
     @Test func anotherMacsAndAnotherLibrarysCopiesSurviveEveryPrune() async throws {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
-        let now = Date()
-        try Self.plantForeignWorld(road, session, now: now)
-        let foreignBeside = Self.files(road.slot.container)
-        let foreignFar = Self.files(FarPlant.farRoot(road))
-        for offset in 2...41 {
-            let when = now.addingTimeInterval(-Double(offset) * Self.day)
-            try FarPlant.pair(in: FarPlant.ownContainer(road, session), libraryID: FarPlant.libraryID(session), at: when)
-            try FarPlant.pair(in: FarPlant.ownFar(road, session), libraryID: FarPlant.libraryID(session), at: when)
+        var foreignBeside: Set<String> = []
+        var foreignFar: Set<String> = []
+        try withDependencies { $0.date = .constant(Self.instant) } operation: {
+            try Self.plantForeignWorld(road, session, now: Self.instant)
+            foreignBeside = Self.files(road.slot.container)
+            foreignFar = Self.files(FarPlant.farRoot(road))
+            for offset in 2...41 {
+                let when = Self.instant.addingTimeInterval(-Double(offset) * Self.day)
+                try FarPlant.pair(in: FarPlant.ownContainer(road, session), libraryID: FarPlant.libraryID(session), at: when)
+                try FarPlant.pair(in: FarPlant.ownFar(road, session), libraryID: FarPlant.libraryID(session), at: when)
+            }
+            #expect(ProtectionBackupHook.takePair(session) == .written)
         }
-        #expect(ProtectionBackupHook.takePair(session) == .written)
         #expect(foreignBeside.isSubset(of: Self.files(road.slot.container)), "every foreign copy beside the library survived — gone: \(foreignBeside.subtracting(Self.files(road.slot.container)).sorted().prefix(4))")
         #expect(foreignFar.isSubset(of: Self.files(FarPlant.farRoot(road))), "every foreign copy in the picked folder survived — gone: \(foreignFar.subtracting(Self.files(FarPlant.farRoot(road))).sorted().prefix(4))")
-        #expect(FarPlant.snapshots(FarPlant.ownContainer(road, session)).count == 14)
-        #expect(FarPlant.snapshots(FarPlant.ownFar(road, session)).count == 18)
+        #expect(FarPlant.snapshots(FarPlant.ownContainer(road, session)).count == 15)
+        #expect(FarPlant.snapshots(FarPlant.ownFar(road, session)).count == 19)
     }
 
     /// A delete that fails (here an immutable snapshot) is logged, never raised: the pair still lands, the other doomed
@@ -149,22 +181,63 @@ struct ProtectionPairRetentionTests {
     @Test func aDeleteThatFailsNeverFailsThePairOrStopsThePrune() async throws {
         let road = PlantedRoad()
         let (session, _) = try await road.created()
-        let now = Date()
         var planted: [String] = []
-        for offset in 1...16 {
-            planted.append(try FarPlant.pair(
-                in: FarPlant.ownContainer(road, session), libraryID: FarPlant.libraryID(session),
-                at: now.addingTimeInterval(-Double(offset) * Self.day)))
+        var locked: URL?
+        try withDependencies { $0.date = .constant(Self.instant) } operation: {
+            for offset in 1...16 {
+                planted.append(try FarPlant.pair(
+                    in: FarPlant.ownContainer(road, session), libraryID: FarPlant.libraryID(session),
+                    at: Self.instant.addingTimeInterval(-Double(offset) * Self.day)))
+            }
+            // The two oldest are doomed (16 planted → 14 kept, 2 pruned; the fresh pair claims no slot); the oldest
+            // cannot be removed.
+            let immutable = FarPlant.ownContainer(road, session).appendingPathComponent(planted[15])
+            try FileManager.default.setAttributes([.immutable: true], ofItemAtPath: immutable.path)
+            locked = immutable
+            #expect(ProtectionBackupHook.takePair(session) == .written)
         }
-        // The two oldest are doomed (16 + 1 → 14 kept, 3 pruned); the oldest cannot be removed.
-        let locked = FarPlant.ownContainer(road, session).appendingPathComponent(planted[15])
-        try FileManager.default.setAttributes([.immutable: true], ofItemAtPath: locked.path)
-        defer { try? FileManager.default.setAttributes([.immutable: false], ofItemAtPath: locked.path) }
-        #expect(ProtectionBackupHook.takePair(session) == .written)
+        defer { if let locked { try? FileManager.default.setAttributes([.immutable: false], ofItemAtPath: locked.path) } }
         let left = FarPlant.snapshots(FarPlant.ownContainer(road, session))
         #expect(left.contains(planted[15]), "the immutable one stays")
-        #expect(!left.contains(planted[14]) && !left.contains(planted[13]), "the other doomed pairs still went")
-        #expect(left.count == 15)
+        #expect(left.contains(planted[13]), "the 14th newest is kept — the fresh pair claims no slot")
+        #expect(!left.contains(planted[14]), "the other doomed pair still went")
+        #expect(left.count == 16, "14 kept + the immutable survivor + the fresh pair — \(left.count)")
+    }
+
+    /// **THE RED-ON-OLD PIN (D-539 + VX-546 — the week-boundary instant, 2026-01-04 00:20 UTC, a Sunday).** One fixed
+    /// instant governs the plants and the press. At this week-tail instant the planner's TRUE far answer is 14 dailies
+    /// (offsets 2…15) + THREE weeklies (offsets 21 · 28 · 35) — the 2…41-day world holds only three uncovered weeks
+    /// here, the exact drift the live flakes hit — and a pair planted an hour PAST the instant claims no slot and is
+    /// never pruned (18o U1). ON THE OLD ROAD (`takePair`'s own `Date()`, months past the instant): that future-of-the-
+    /// instant pair reads as trusted-newest and takes a daily slot, offset 15's pair is pruned, and the counts land at
+    /// 18 — RED deterministically, whatever today's date. On the new road both clocks are the instant — green. This
+    /// also falsifies VX-546's "real miscount" reading: the planner is correct under one clock; the suite's two clocks
+    /// (and its runtime-dependent scene) were the whole mechanism.
+    @Test func theWeekBoundaryInstantGovernsThePlantsAndThePressAlike() async throws {
+        let road = PlantedRoad(farFolder: true)
+        let (session, _) = try await road.created()
+        var planted: [Int: String] = [:]
+        var pastTheClock = ""
+        try withDependencies { $0.date = .constant(Self.boundary) } operation: {
+            for offset in 2...41 {
+                planted[offset] = try FarPlant.pair(
+                    in: FarPlant.ownFar(road, session), libraryID: FarPlant.libraryID(session),
+                    at: Self.boundary.addingTimeInterval(-Double(offset) * Self.day))
+            }
+            pastTheClock = try FarPlant.pair(
+                in: FarPlant.ownFar(road, session), libraryID: FarPlant.libraryID(session),
+                at: Self.boundary.addingTimeInterval(3_600))
+            #expect(ProtectionBackupHook.takePair(session) == .written)
+        }
+        let keptOffsets = Set(2...15).union([21, 28, 35])
+        let left = Set(FarPlant.snapshots(FarPlant.ownFar(road, session)))
+        #expect(left.count == 19,
+                "14 dailies + 3 weeklies (the week-tail's true answer) + the past-the-clock pair + the fresh far pair — \(left.count) left")
+        #expect(left.contains(pastTheClock), "a pair stamped past the suite's clock claims no slot and is never pruned")
+        for (offset, name) in planted.sorted(by: { $0.key < $1.key }) {
+            #expect(left.contains(name) == keptOffsets.contains(offset),
+                    "offset \(offset): \(keptOffsets.contains(offset) ? "kept" : "pruned")")
+        }
     }
 }
 
@@ -177,11 +250,14 @@ struct ProtectionPairRetentionGuardMutationTests {
     @Test func theGuardOffPrunesAnotherMacsCopiesThroughThePairRoad() async throws {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
-        try ProtectionPairRetentionTests.plantForeignWorld(road, session, now: Date())
-        let before = ProtectionPairRetentionTests.files(FarPlant.farRoot(road))
-        var off = ProtectionGuards()
-        off.pruneOwnCopiesOnly = false
-        #expect(ProtectionBackupHook.takePair(session, guards: off) == .written)
+        var before: Set<String> = []
+        try withDependencies { $0.date = .constant(ProtectionPairRetentionTests.instant) } operation: {
+            try ProtectionPairRetentionTests.plantForeignWorld(road, session, now: ProtectionPairRetentionTests.instant)
+            before = ProtectionPairRetentionTests.files(FarPlant.farRoot(road))
+            var off = ProtectionGuards()
+            off.pruneOwnCopiesOnly = false
+            #expect(ProtectionBackupHook.takePair(session, guards: off) == .written)
+        }
         let gone = before.subtracting(ProtectionPairRetentionTests.files(FarPlant.farRoot(road)))
         let library8 = ProtectionNames.library8(FarPlant.libraryID(session))
         let mac8 = ProtectionNames.mac8(FarPlant.deviceID(session))

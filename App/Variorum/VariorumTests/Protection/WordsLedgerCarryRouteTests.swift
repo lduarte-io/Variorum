@@ -38,7 +38,7 @@ struct WordsLedgerCarryRouteTests {
             let oldID = try #require(session.library.record?.libraryID)
             Self.ledger.record(oldID)
             defer { Self.forget([oldID]) }
-            #expect(ProtectionBackupHook.takePair(session) == .written)
+            #expect(ProtectionBackupHook.takePair(session, now: Date()) == .written)
             let roads = try #require(bootstrap.copyDoorsRoads())
             let row = try #require(await roads.listing().thisLibrary.first)
             let pair = TypedSecrets(words: words)
