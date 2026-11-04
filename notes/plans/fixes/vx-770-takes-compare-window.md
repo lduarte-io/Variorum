@@ -2860,7 +2860,7 @@ both voices.
   Duplicate-with-Tags twins (`vx770 comments walk`, `vx770 landing walk`), the three "outline of vx770 outline …"
   notes, comments on the comments/undo notes, the takes and the archived/deleted takes the rows made. No book, tag,
   wing or setting changed beyond the voice flips (restored).
-- Captures: `<home>/dev/variorum-vx-770/.walkshots-vx770/` (gitignored by `.walkshots-*/`, ~1.3 GB —
+- Captures: `<home>/dev/variorum-vx-770/.walkshots-vx770/` (gitignored by `.walkshots-*/`, ~1.9 GB —
   mostly the JPEG bursts; deletable after the orchestrator's read). Walk instruments (never in the PR):
   `/private/tmp/claude-501/-<home>-dev-variorum/17b9e621-2e5d-4717-a2d1-529f5d285a91/scratchpad/walk/`
   (`burst.py`, `shift.py`, `boarddiff.py`, `toggles.zsh`, `ax`, `wl`, the app's stderr `app.log` with every landing story).
