@@ -1473,7 +1473,8 @@ the use walk (W15–W16, both voices); the cold ladder.
 | VX-740 fix (P-770-1 — `makeOutlinePost` yields to the auto-fill's seat) | DONE (a5718b23e) |
 | VX-757 pins (`VariorumTests/CompareToggleIdentityTests.swift`, pre-existing API only) | DONE (8c87bcd0c) — compile PENDING the b4 build |
 | VX-757 fix (`CompareRow.spineID` + one row structure in `rowView`/`peerColumn`) | DONE (eefd41c78) |
-| Build-for-testing: `DerivedData/vx770-b4` (HEAD) + `DerivedData/vx770-b4-rev` (the behavioural revert) | IN PROGRESS — `vx770-b4` building at eefd41c78 |
+| Build-for-testing `DerivedData/vx770-b4` at HEAD | DONE — TEST BUILD SUCCEEDED (logs `App/Variorum/DerivedData/logs/vx770-b4-build.log` — the first pass, red on three test-file concurrency errors, fixed in the next commit — and `vx770-b4-build2.log`); no new warning in a touched file |
+| **Behavioural revert — ANNOUNCED HERE BEFORE IT STARTS:** the one behaviour file (`Features/Takes/CompareBoardView.swift`, which carries BOTH fixes) restored to b9d0e1b24 (the VX-740 pin commit — its copy is the pre-fix source for both members) by `git checkout b9d0e1b24 --`; the two pin files stay at HEAD. Copy + sha256 first in `App/Variorum/DerivedData/vx770-b4-prerevert/` (gitignored); built into `DerivedData/vx770-b4-rev`; then `git checkout HEAD --` and verified by `git diff` + `shasum -c` | IN PROGRESS |
 | READY-FOR-SUITES, prediction table, walk rows, residue, self-assessment | PENDING |
 
 ### THE TRACE — VX-740 (re-located at HEAD; the vx-736 ladder's mechanism, confirmed by code read)
