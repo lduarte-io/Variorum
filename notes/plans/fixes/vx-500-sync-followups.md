@@ -2190,6 +2190,48 @@ on the phone (shared files, compiled there — the phone build above).
   ladder brief as press-on points. The 4 close-set warnings are pre-existing (a swift-dependencies host-app read in
   `EmptySlotMakeMineRouteTests`) — a Tests & tooling note for the closeout's triage, not this run's to fix.
 
+### U4 RECORD (the Fable implementer, 2026-11-04; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+**NOT DONE (the record's first line):** PENDING at the first commit — filled at the close. NOT this unit's by the brief:
+any `Sync/` line (none was needed — the migration is pure `Persistence/`), the faces, the ladder, the deploy, the PR,
+the Linear comment on VX-672 (the orchestrator's hands; my one-paragraph reasoning is below for it to carry),
+`notes/QUESTIONS.md` (shared ledger — nothing PROVISIONAL-numbered was minted; the one naming deviation is mechanical,
+recorded here).
+
+**THE NAMING DEVIATION, up front (the brief's "v1_35" is superseded — the orchestrator and tonight's coordinator both
+confirmed the collision):** main's 1.0.1 merge brought `v1_35_sweep_kill_verdict_markers` (VX-669) into the registry,
+so the brief's "v1_35" slot is TAKEN and this unit's migration is **`v1_36_fk_child_indexes`** — v1_36 consistently
+through the DDL doc, the pins, the bench notes and this record; the orchestrator trues the brief's own stale
+references at the next seam, not this unit. The knock-on for VX-502's standing rule: a store or plaintext export
+carrying v1_36 reads `.newerSchema`/`.newer` on an older build and refuses (the classifier's applied-vs-known
+subtraction, derived from the migrator — nothing to edit) — and since 1.0.1 builds already KNOW v1_35, **the refusing
+boundary is v1_36**: an export from this build refuses on every build before this migration, 1.0.1 included.
+
+#### LIVE STATUS (U4; flipped per piece, in the piece's own commit)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The migration, its own commit FIRST: `v1_36_fk_child_indexes` (the two plain FK child indexes), registered after v1_35; the DDL doc names the mechanism (sqlite.org/foreignkeys.html §4, the feed's registry order), the measured gain (330,231 → 85,315 ms, 3.9×), why NOT a §12 lockstep event (SyncSpec §2 — mirrors carry no indexes; the completeness walk classifies COLUMNS, an index adds none; marker stays 14), and the VX-502 export line; the index-enumerating schema pins updated (`MigrationTests.expectedIndexes`, the `theDaySearchIndexArrivesForAnOlderStore` subtracting set, the new arrival test `theDeferredFKChildIndexesArriveForAnOlderStore` on the v1_34 precedent's shape) | DONE (this commit) — `swift build` green; `swift test --filter MigrationTests` → "Test run with 29 tests in 3 suites passed" (ONE consequential pin edit, annotated in place per the ritual: `theDeadPlacementByBlockIndexArrivesForAnOlderStore` migrates v1_33 → head, so its subtraction now carries v1_36's two beside v1_34's one — v1_34's own claim unchanged) |
+| 2 | The pin (red-on-old, the bisection's arm E/F shape): UNGATED, fast, in-memory — `DeferredFKChildScanPinTests`, a RATIO bound (the pending-violations arm vs the no-pending control) | NOT-STARTED — the settled design: arm E vs arm G at N=8,000 on the real migrated schema under `applyingRemote` + `defer_foreign_keys = ON`, ratio < 4 (old tree reads ~10–16×, new ~1×); red run via the traps' named scratch revert of the v1_36 registration at a committed tip |
+| 3 | The bench re-run, the evidence: `VARIORUM_APPLY_PROFILE=1 VARIORUM_APPLY_PROFILE_RUNS=3` on the migrated store; the INDEX_FIX knob RETIRED (the migration is the fix); the table's new column vs U1b's 330,231 ms; the VX-672 one-paragraph reasoning | NOT-STARTED |
+| 4 | Close: `swift build`; the sync suites filter; the broad core `swift test` foreground (the traps' flake + VX-722/VX-723 named if seen); self-assessment; the orchestrator's LIVE STATUS row 5b flipped | NOT-STARTED |
+
+#### The pieces (filled per commit)
+
+- **Piece 1 (this commit):** `Sources/VariorumCore/Persistence/Migrations.swift` — `v1_36_fk_child_indexes`:
+  `CREATE INDEX idx_block_default_variant ON block(default_variant_id)` + `CREATE INDEX idx_cblock_chosen_variant ON
+  container_block(chosen_variant_id)`, plain single-column (the measured shape — the U1b bisection's arm F and the
+  bench's INDEX_FIX knob both measured the plain form; deliberately not partial). The DDL doc carries the mechanism,
+  the measured 3.9×, the §12 reasoning (v1_34's own: SyncSpec §2's index-free mirrors; `SyncSchema`'s completeness
+  walk classifies COLUMNS — read, confirmed: `SyncSchema.columns`/the walk enumerate `PRAGMA table_info`, never
+  indexes — so nothing reclassifies; marker stays 14, no mirror artifact), and the VX-502 export rule with the v1_36
+  boundary. `Tests/VariorumCoreTests/MigrationTests.swift` — `expectedIndexes` + the day-search arrival test's
+  subtracting set gain both names; the new arrival test `theDeferredFKChildIndexesArriveForAnOlderStore` (migrate
+  `upTo: v1_35`, neither present; migrate whole, exactly the two arrive, each plain — `!sql.contains("WHERE")`).
+  The index-enumerating pins elsewhere are per-OTHER-table (`block_comment`, `reading_section`, `mcp_grant`) —
+  untouched by construction; `AuthRLSDDLTests` enumerates server DDL, no local index pin. The suite run:
+  "Test run with 29 tests in 3 suites passed" (MigrationTests + the two sibling suites its filter matches).
+
 ### THE CLOSING WINDOW AS CONDITIONED BY TONIGHT'S COORDINATOR (nov3coordinator, 2026-11-04 — supersedes the closing-runs bullet's narrower Mac-suites line; accepted after the orchestrator verified the diff)
 
 The branch now touches `Shared/AppBootstrap.swift` (the test init every suite host constructs), `Shared/Protection/
