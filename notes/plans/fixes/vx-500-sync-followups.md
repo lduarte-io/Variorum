@@ -2594,3 +2594,115 @@ the committed tip, restored, `git diff --exit-code` clean). The suspects left ar
 the pair road's injected clock, the faces). The redo door's refusal arms (`ShellActions.structuralRedo`): the flight
 guard (`anotherIsLanding`), `redoFoundNothing` (retires the entry — but depth stayed 1), `nothingToRedo`, `redoFailed`
 (keeps the entry). A FRESH implementer traces the mechanism and fixes with red-on-old; the sim leg waits on it.
+
+### REDO REGRESSION RECORD (the fix implementer, 2026-11-04; branch `vx-500-sync-followups`, worktree `~/dev/variorum-vx-500`)
+
+#### LIVE STATUS (flipped per piece)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | THE TRACE — the mechanism to a named line, instrumented (the scratch latch probe, run on the branch AND on main) | DONE (this commit; the probe deleted, both trees `git diff --exit-code` clean) |
+| 2 | CLASSIFICATION — TEST-ONLY race, pre-existing on main; STOP per the brief (no test edit without the orchestrator's call) | DONE (this commit) |
+| 3 | The proposed fix (NOT applied) + the report to the orchestrator | DONE (this commit; the report follows the push) |
+
+#### THE TRACE (the mechanism, file:line)
+
+**`redoNeverAsks` settles on the WRONG signal and presses redo into the undo's still-held flight latch.**
+
+- `App/Variorum/VariorumTests/DestructiveUndoWarningTests.swift:134` waits on
+  `h.session.undoStack.redoDepth == 1` alone. That flips INSIDE `UndoStack.undoReporting`, which runs on
+  `OperationsRunner`'s actor (`App/Variorum/Shared/OperationsRunner.swift:28`) — i.e. MID-FLIGHT, while the undo door's
+  `Task` (`App/Variorum/Variorum/Registry/ShellActions.swift:172–207`) has not yet resumed on the main actor, run
+  `leaveNotesTheActLeftDead()` (`:194` — a real suspension: `await session.database.read` at `:269`, and the harness's
+  editor post IS held, so `candidates` is non-empty), spoken the "Undid" receipt (`:195`), and released the one-flight
+  latch in its `defer` (`:173` → `AppSession.endStructuralUndoDoor`, `App/Variorum/Shared/AppSession.swift:827`).
+- The test then calls `actions.structuralRedo()` (`DestructiveUndoWarningTests.swift:136`) synchronously.
+  `beginStructuralUndoDoor()` (`AppSession.swift:821`) finds the latch held and the redo door refuses
+  `anotherIsLanding` (`ShellActions.swift:220–222`) — the arm the brief suspected first. The P33 latch is SHARED across
+  both doors BY DESIGN (pinned by this file's own `aRedoPressedInsideAnUndosFlightRefusesAndTheUndoDoesWhatItAsked`).
+- The undo flight then lands: its receipt `status.receipt("Undid: Divide")` (quiet slot) CLEARS the refusal toast
+  (`StatusCenter.deliver`, "ONE message at a time … a new one clears the other slot"), so by assert time `spoken` reads
+  "Undid: Divide", not the refusal — which is why the red run shows no refusal text. Nothing retries the redo, so the
+  :139 settle times out (~2.6–5 s of ticks — the observed 4.4–5.9 s), and the end state is exactly the red's three
+  issues: slots merged (:141), `redoDepth == 1` (:142), no "Redid" (:143).
+- The suite's own comments NAME this trap: `:83–:88` ("settle on the LAST signal in the chain … waiting on
+  `depth == 0` can exit before the report exists — the traced shell-redo flake, same door, same window") and the
+  sibling at `:233–:236` already waits on `redoDepth == 1 && spoken.contains("Undid")`. `:134` is the ONE wait in the
+  family on depth alone followed by a press on the shared latch.
+
+**THE INSTRUMENT (scratch, deleted — never committed):** `ScratchRedoRaceProbeTests.swift` in `VariorumTests` — 30
+iterations of the exact dance (divide → edit → `structuralUndo(confirm: true)` → the shipped `:134` settle), recording
+`session.structuralUndoDoorInFlight` at the settle's exit, then pressing `structuralRedo()` and reading the outcome.
+- **On the branch tip `e5f7c7b85` (idle Pro):** `latchHeldAtSettleExit=21/30 redoLanded=9 redoRefusedOrSilent=21` —
+  every held iteration ended in the red's exact state (`redoDepth=1`, spoken "Undid: Divide"); every free iteration
+  redid clean. "Test run with 1 test in 1 suite passed after 21.204 seconds with 2 warnings."
+- **On MAIN `81e175985` (same machine, same hour, probe copied over and deleted after; main's tree left clean):**
+  `latchHeldAtSettleExit=27/30 redoLanded=3 redoRefusedOrSilent=27`. "Test run with 1 test in 1 suite passed after
+  25.989 seconds with 2 warnings." **The window is pre-existing and no narrower on main.**
+- The shipped suite itself sampled GREEN on the branch twice tonight: "Test run with 7 tests in 1 suite passed after
+  1.417 seconds with 2 warnings" (04:32 MST) and "… after 1.532 seconds with 2 warnings" — so the closing window's
+  branch-red/main-green was SAMPLING on a 10–90% condition-dependent race (the full run's and its aftermath's load
+  widens the window), not a branch behavior. (The "2 warnings" — the host-launch `DateGenerator` live-read pair —
+  appear on main's probe run too: not branch-new.)
+
+**Why the branch's diff is exonerated by construction, not only by sampling:**
+`git diff main...HEAD --stat` over the mechanism's whole path — `ShellActions.swift`, `AppSession.swift`,
+`OperationsRunner.swift`, `StatusCenter.swift`, `UndoStack.swift`, `DestructiveUndoWarningTests.swift`,
+`EditorTestSupport.swift` — is EMPTY. v1_36 was already exonerated by the orchestrator's named revert; the `Sync/` six
+never execute in the `withEditor` harness (no scheduler, no engine, fresh in-memory store); the App diff
+(AppBootstrap's dropped never-read leaf, the Protection clock defaults, the faces) touches nothing the door, the
+stack, the runner, the status seam or this suite reads.
+
+#### THE CLASSIFICATION
+
+**TEST-ONLY.** The product behavior is CORRECT and pinned: a redo pressed while an undo's flight is still landing
+refuses `anotherIsLanding` (18k C5 / 17e P33 — the one-flight latch, deliberately shared across both doors; this
+suite's own two P33 tests pin exactly that refusal). The test presses redo inside that designed window because its
+settle exits on a mid-flight signal. No product line changed behavior; no fix was applied — the brief's stop-and-report
+holds (no test edit without the orchestrator's call).
+
+#### THE PROPOSED FIX (for the orchestrator's call; NOT applied)
+
+`DestructiveUndoWarningTests.swift:134` adopts the family's own idiom (the `:233–:236` sibling, verbatim shape):
+
+```swift
+await settle {
+    h.session.undoStack.redoDepth == 1
+        && h.session.status.spoken?.text.contains("Undid") == true
+}
+```
+
+Sufficiency: the "Undid" receipt (`ShellActions.swift:195`) and the latch release (`:173` defer) run in the SAME
+synchronous main-actor job (no suspension between them), so another main-actor job can only observe "Undid" after the
+latch is free — the redo press at `:136` can then never meet `anotherIsLanding`. Not a weakening: it waits for the
+undo flight's last observable signal (the documented `:83–:88` rule) before pressing the next door; every assertion is
+untouched. Alternative (b): settle on `!h.session.structuralUndoDoorInFlight && redoDepth == 1` — more literal, but it
+reads the latch seam no test currently reads; (a) is the family idiom. The same class exists nowhere else in the
+suite: the P33 tests press INTO the window deliberately, `anOrdinaryUndoIsNeverInterrupted` presses nothing after its
+depth settle, and `approvingRuns…` already waits on the receipt.
+
+#### The suites' lines (this session's runs, all under the standing `vx500-orchestrator` stage claim — `Tools/stage status` read before each)
+
+- `-only-testing:VariorumTests/DestructiveUndoWarningTests` (branch tip, shipped suite, two samples):
+  "Test run with 7 tests in 1 suite passed after 1.417 seconds with 2 warnings" ·
+  "Test run with 7 tests in 1 suite passed after 1.532 seconds with 2 warnings".
+- The scratch probe, branch: "Test run with 1 test in 1 suite passed after 21.204 seconds with 2 warnings"
+  (`latchHeldAtSettleExit=21/30`); main: "Test run with 1 test in 1 suite passed after 25.989 seconds with 2 warnings"
+  (`latchHeldAtSettleExit=27/30`).
+- No registry/undo suites re-run beyond the above: NO code changed (the brief's step 3 is conditional on a PRODUCT fix).
+
+#### SELF-ASSESSMENT (what the orchestrator should press on)
+
+1. **The probe's hit rate (70–90%) vs the shipped test's green samples (2/2 tonight)** is unexplained in detail — the
+   shipped test runs once per fresh process with three tests before it; the probe loops hot. I did not chase the
+   per-condition odds further because the classification does not turn on them: the latch-held-at-settle-exit fact is
+   proven on both trees and the end state matches the red byte for byte. If the orchestrator wants the shipped test's
+   own red reproduced by me under load, say so and I will run it under a load generator.
+2. **The sufficiency argument for the proposed fix** rests on "no suspension between the receipt and the defer" in
+   `structuralUndo`'s Task — true by inspection today (`:193–:206`: the receipt is the last statement before the do
+   block closes; the catch arm likewise ends in a synchronous `refuse`). A later edit inserting an `await` after the
+   receipt would re-open the window; the fix could carry a one-line comment naming that invariant.
+3. **I did not verify the orchestrator's alone-red** (I never caught the shipped test red myself tonight — both my
+   samples were green on an idle machine). The probe reproduces the identical end state through the identical door, so
+   I treat the orchestrator's xcresult as the red's record; if a doubt stands, the probe file's content is quoted in
+   this record and rebuilds in one paste.
