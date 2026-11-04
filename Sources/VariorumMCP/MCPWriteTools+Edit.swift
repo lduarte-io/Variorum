@@ -140,7 +140,11 @@ extension MCPWriteTools {
             // standing refusal under it (the probe pin landed the clear and
             // both brackets on the pre-unit tree); this line makes it true.
             // Whitespace alone is blank too (PROVISIONAL P-VX168-U3-2).
-            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            // VX-774 (the VX-771 run, batch 3): blank AS IT WOULD BE STORED —
+            // the op removes every U+0000 (VX-357, `StoredText.stripped`), so a
+            // text of only null characters is the empty take, refused here
+            // exactly as the replace form's stripped result is (`wouldEmptyTake`).
+            guard !StoredText.stripped(text).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 throw ArgumentFailure(message: Self.editTakeBlankRefusal)
             }
             guard let expected = try optionalString(args, "expected_text") else {

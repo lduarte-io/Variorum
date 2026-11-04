@@ -123,7 +123,7 @@ One batch = one acceptance unit = one implementer session. Evidence kind per mem
 | 11 | VX-762 drop verify + B2 | 4 | NOT-STARTED |
 | 12 | VX-763 grant rows | 4 | NOT-STARTED |
 | 13 | VX-400 stop ends grants (rider) | 4 | NOT-STARTED |
-| 14 | VX-774 null-only edit_take empties the take (found in-run, batch 2 O-1; seated as a sub-issue) | 3 | IN-PROGRESS (batch 3 — the BATCH 3 RECORD) |
+| 14 | VX-774 null-only edit_take empties the take (found in-run, batch 2 O-1; seated as a sub-issue) | 3 | FIXED — pin red on old f620fbac3, the fix (the commit "Part of VX-774: the fix …") |
 
 ## Environment traps (every batch brief carries this section VERBATIM)
 
@@ -336,7 +336,7 @@ No revert is in flight.
 | Piece | Status |
 |---|---|
 | 0 — this record: the traces, the designs, VX-769's seam proposal | DONE (this commit) |
-| 1 — VX-774 pins red on old, then the fix | NOT-STARTED — design below |
+| 1 — VX-774 pins red on old, then the fix | DONE — pins red on old f620fbac3 (committed, unpushed: GitHub incident — "Internal Server Error" on the push) — NEW `Tests/VariorumMCPTests/MCPNullOnlyEditServerTests.swift` (2): "Test run with 2 tests in 1 suite failed … with 10 issues" — `aNullOnlyWholeFormRefusesAsEditToEmptyAndWritesNothing` red (the first `"\u{0}"` call answered `changed: true`, `null_characters_removed: 1`, the empty text's digest `e3b0c442…b855`, both bracket commits), the replace-form/worded-text guard green on both sides. FIX (this commit): `MCPWriteTools+Edit.swift` `parseEdit` — the whole form's blank check reads `StoredText.stripped(text)`. GREEN: `MCPNullOnlyEditServerTests\|MCPLensDoorsServerTests\|MCPNullCharacterServerTests\|MCPReplaceTakeServerTests\|MCPEditServerTests` — "37 tests in 6 suites passed" |
 | 2 — VX-764 pins red on old, then the build | NOT-STARTED — design below |
 | 3 — VX-769 wire pins red on old, the seam, then the build | NOT-STARTED — design + seam proposal below |
 | 4 — VX-767 / VX-768 verify legs | NOT-STARTED — the suites to name below |
