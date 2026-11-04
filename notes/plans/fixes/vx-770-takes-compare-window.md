@@ -1749,3 +1749,18 @@ Confirm the "Test run with N tests" line and read the `skipped:` lines; keep the
   thread needs main idle — it is (the test awaits the act); a hang there would show as a timeout, not a pass.
 - **Scope kept.** Two members, one source file. No gutter-lane or oracle change (the brief's STOP line was never
   reached). No `Shared/`, `Sync/`, schema, registry or `PaneSurface` change.
+
+## THE WINDOW RE-SCOPE (the orchestrator, post-batch-4) + a bundle line
+
+The b3r window CONSOLIDATES per batch 4's offer: `vx770-b4` holds batches 3 + reconciliation + 4,
+so ONE green run there (157 ∪ batch 4's delta = 160 types) covers both lists; the red runs stay
+per-batch (`vx770-b3-rev` 4 suites; `vx770-b4-rev` 2 suites). `vx770-recon-post` is superseded
+and deleted. New window estimate ~30 min; re-READY sent before the seam per the coordinator's
+standing rule.
+
+**HER BUNDLE (+1): the toggle-name mapping.** Her report said "track paragraphs"; no control
+carries that name — batch 4 mapped it to "follow this note's order" by its help text (and pinned
+"related blocks only" beside it). The trace's mechanism (every pane re-made on a lineage-sharing
+pair's re-key) fits a flicker on that toggle. CONFIRM with her that "track paragraphs" meant
+"follow this note's order"; if she meant something else, VX-757 reopens on the right control
+(the fix stands on its own merits either way — it removes a real whole-board pane rebuild).
