@@ -1019,3 +1019,146 @@ reconciles (either the live feed makes the line green as-is, or the deletion arm
 **Observation for the implementer:** the run's 4 "[SwiftUI] Modifying state during view update"
 warnings cluster inside the new BoardCommentGutter suites — the DEBUG face oracle (written to
 during render?) is the suspect; assess at the reconciliation.
+
+---
+
+## BATCH 3 RECORD — VX-732 + VX-733, the post-undo staleness pair (implementer: opus-implementer, 2026-11-04)
+
+**NOT DONE (first line, kept current):** everything below the trace is PLANNED until the LIVE STATUS
+rows say otherwise; every mounted red/green claim will be a PREDICTION until the orchestrator's suite
+window (this session is headless — no `xcodebuild test`, no app, no stage); the use walk; the cold ladder.
+
+**LIVE STATUS**
+| piece | state |
+|---|---|
+| Reading (this file whole incl. both batch records + window b2; TEXTKIT2_NOTES in full; SurfaceContracts › The note; the vx-601 VX-428 section; VX-732/VX-733 on Linear) | DONE |
+| Trace, both members (code read; written below before any code) | DONE (this commit) |
+| Pins | NOT STARTED |
+| Fix — VX-732 (the live feed + the panel's seat) | NOT STARTED |
+| Fix — VX-733 (the collapse rule, in-showing + across a mode switch) | NOT STARTED |
+| Behavioural revert + build-for-testing (`DerivedData/vx770-b3-post`, `vx770-b3-rev`) | NOT STARTED |
+| READY-FOR-SUITES, prediction table, P-8, walk rows, residue, self-assessment | NOT STARTED |
+| Push | after every commit (GitHub mid-incident: one attempt each; refusals noted here) |
+
+### THE TRACE (written before any code) — two mechanisms, one class, NOT one mechanism
+
+Both repros are the same night's MCP demo (her recording 2026-11-01): the AI's `add_comments` batch and
+its `add_takes` batch (`Operations+MCPBatches.swift` `addComments` :134–168, `addTakes` :65–100 — one
+structural-undo entry each, the inverse tombstoning every row of the batch in one transaction), undone
+by ⌥⌘Z (`ShellActions.structuralUndo` → `UndoStack.undoReporting`) WITH THE TAKES BOARD MOUNTED. The
+store is right in both (her own words: "the comments were really deleted"); the board's drawn state is
+not. They share the CLASS the run's binding principles name (the overlay/sink delivery law: state that
+no refresh axis reaches) but not a mechanism, a state, or a file: VX-732 is a COPY with no store axis at
+all; VX-733 is DERIVED STATE whose one reconciliation never asks the question that changed.
+
+**VX-732 — the gutter keeps drawing comments the store no longer holds.**
+1. The Takes row's comment face (`CommentMarginNote`, `Features/Takes/TakesShared.swift:808–834` — on
+   her 1.0.1 build the batch-14 SwiftUI note, since batch 2 Write's face through `CommentGutterFace`;
+   the FEED is the same in both) keeps its comments in per-row `@State` (:814) filled by ONE read,
+   `.task(id: blockID) { await refresh() }` (:826 → `Queries.blockComments`, :829–833), re-read only
+   when its own popover closes (:824). Its only key is the block id.
+2. The undo's write DOES reach the board: the takes projection reads `comment_count` per slot
+   (`Queries.renderPost`, `PostRender.swift:146`), so `observeTakes`'s region holds `block_comment`;
+   the delivery lands, `adopt` takes it, and the article re-renders the row with `commentCount` 0.
+3. But the row's note keeps its identity (same row, same block) — so its `@State` survives the
+   re-render, and `.task(id: blockID)` does not re-fire (the id did not change). Nothing else on the
+   undo road (or ANY store road — a comment edited or deleted in another window, by the AI, by a
+   sync apply) re-reads it. The face draws the copy it took at the row's realization.
+4. A mode switch remounts the board (`PostDetailView`'s per-mode `.id`), the row's state is born
+   fresh, the read finds nothing — "gone at the mode switch" (her ~2:07). The ~7 s is simply how
+   long she stayed in Takes; a re-realization of the row (scrolled far out of the lazy column and
+   back) would also clear it.
+   → **No equality gate is involved; the feed has no store axis.** Write (`EditorViewModel.observeComments`,
+   `EditorViewModel.swift:634–658`), the read tier and Compare (batch 2's `PostFace.comments`) all draw
+   from a LIVE per-note read; the Takes row is the one board host that does not (R-B2-5 said exactly
+   this).
+
+**VX-733 — the open-fan wash survives the fan's collapse to one take.**
+1. The wash is `washedCell(…, washed: bloomed)` → `.background(washed && markChangingBlock ? tokens.wash : …)`
+   (`TakesBoardView.swift:1120`, `:1269`), and `bloomed` is `isBloomed(slot)` =
+   `expandedBlocks.contains(blockID) || (followTheScroll && slot.hasFan && visible)`
+   (`TakesBoardLayout.swift:333–337`). Membership in the open set IS the wash (and the bloom).
+2. The open set is reconciled against the projection in exactly ONE place: `adopt`'s VX-428 prune
+   (`TakesViewModel.swift:549–557`) — on the FIRST projection only, and only against block IDS (a
+   block the note no longer holds). Inside a showing, nothing ever reconciles it (by design for a
+   block that LEAVES: "a ⌥⌘Z that puts it back brings it back open").
+3. Her undo tombstones the AI's takes (`revertAddedTakes`); the blocks stay live, `activeVariantCount`
+   drops to 1, `hasFan` goes false. The delivery is adopted; the ids are still in `expandedBlocks`;
+   nothing asks whether an open block still HAS a fan. So `isBloomed` stays true: in slot split the
+   split itself goes (`splitBloomed` requires `hasFan`, :1116 — "the board collapsed to one column"),
+   and the cell draws WASHED with the unfanned bloom's growth doors under it (`fanFooter`, :1126–1131 —
+   the state the ⑂+ first-take door opens on purpose).
+4. The write-back already holds those ids in the session memory (`rememberExpansion`, :2810–2817,
+   written when they bloomed); a Write round trip re-seeds them (`openExpansionMemory`, :2795–2808) and
+   the first projection's prune keeps them (the blocks are live) — "it stayed through a trip to Write
+   and back". Close all (`closeAllFans`) empties the set — "cleared only by close all".
+   → **The wash derives from the memory, and the memory never hears a collapse.** By STATE alone the
+   board cannot tell "a fan she opened collapsed" from "she opened this block's first-take door"
+   (both: open, one take) — R72's door is a deliberate open state the VX-428 pins remember
+   (`theBoardsOpenFansAreWrittenToTheSessionAsTheyChange`, the unfanned b[3]). So the honest fix hears
+   the TRANSITION: an open block that held more than one take before and holds one now.
+5. **The same stale state by a second road (same mechanism, same member):** the collapse can happen
+   while the board is DOWN — ⌥⌘Z pressed in Write (the AI's undo entry is global), a take deleted in
+   Write's take panel, another device. The seeded set brings the block back washed on an unfanned
+   row. The board saw it with a fan; the memory must remember that it did.
+
+**One more road the fix must not break (found while tracing — the archive road, N1/R118):** archiving
+a fan's second take also drops `activeVariantCount` to 1, but the archived take stays ON the block and
+the bloom's footer shows it ("archived · n", `archivedSection`, `TakesBoardView.swift:1710–1749`) — the
+road back the archive receipt names ("“archived · n” under this block's takes brings it back"). A rule
+that closed the block there would hide that road behind ⑂+.
+
+### THE FIX'S SHAPE (decided from the trace)
+
+- **VX-732 — make the feed honest (the brief's preferred road; Write's precedent exactly).** The Takes
+  board's comments come from ONE live per-note observation of `Queries.containerComments` (Write's own
+  query and feed), started by THE takes board's view (`TakesBoardView`'s `.task`, beside
+  `model.start()`; Write's panel and the Lenses board draw no comments and never start it), held by a
+  small `@Observable` feed the conductor owns; each row's `CommentMarginNote` reads its block's entries
+  from it (in its own body — a comment change re-renders the realized notes only). The per-row one-shot
+  read and its after-the-panel refresh retire. **P1/P-8:** the region is `block_comment` +
+  `container_block`, so it fires on comment and placement writes only — never per keystroke (autosave
+  writes `variant` and `container`); each fire reads ∝ the note's own comments (one indexed join over
+  its placements) — Write pays exactly this for the same note; a per-ROW re-key on every projection
+  delivery (the alternative) would re-read per realized row at autosave rate and still miss an edit that
+  keeps the count. **The seat guard:** the Takes face is the comments panel's POPOVER anchor
+  (`CommentGutterFace`), so a live feed that empties the face while her panel is open (she deletes the
+  block's last comment in it) would tear the panel down mid-act, where today it stays (the one-shot feed
+  never updated while it was open). The face keeps its seat — the entries it showed when she opened the
+  panel — until the panel closes, then follows the store. It lives in the one shared host, so Compare
+  (already live since batch 2) gets the same guard.
+- **VX-733 — the open set hears a collapse.** A pure rule (`TakesOpenFanRule`): an open block that held
+  MORE THAN ONE take (active or archived — `liveVariantCount`) at the board's last sight and now stands
+  in the note holding exactly its one take has collapsed; it leaves the open set through the layout's
+  one door for it (reported through the sink, so the memory follows). A block the note no longer holds
+  is never "collapsed" (VX-428's in-showing precedent untouched); a gap slot is no evidence; a block
+  that still holds two takes stays open (R-770-1); a block opened through its first-take door never held
+  two, so it stays open (R72). "Last sight": inside a showing, the outgoing projection; across a mode
+  switch, a sibling session memory beside `takesExpandedBlocks` — of the note's remembered open blocks,
+  those that held more than one take at the last projection THE board adopted — written with the open
+  set, read once at the first projection. Nothing closes a fan she opened that still has takes.
+- **PROVISIONAL (for the closeout's QUESTIONS bundle; one predicate each to overturn):**
+  - **B3-P1 — what "collapsed to one take" counts.** (a) BUILT: one live take, archived included — so
+    archiving the second take keeps the block open with "archived · 1" in place, exactly as today (the
+    archive receipt's road); a delete, an undo of an add, or a "Delete forever" of the last archived take
+    closes it. (b) Active takes only (the fan's own definition): an archive closes the block too, and
+    "archived · n" waits behind ⑂+ (the receipt's "under this block's takes" would then need words).
+    (c) Close only on the undo road (her repro), nothing else — rejected: the stale state is the same on
+    every road.
+  - **B3-P2 — a fan that comes back.** (a) BUILT: a collapsed fan's open state is gone — a ⇧⌥⌘Z that
+    re-adds the AI's takes (or a ⌥⌘Z of a take's delete) shows the fan closed, its ⑂n badge the door.
+    (b) A per-showing shadow of collapsed fans that reopens one when its takes return (the deleted-block
+    precedent's symmetry) — a second set and a ⑂+ rule for shadowed blocks; not built.
+
+### READ OF BATCH 2's ONE GREEN-RUN RED (for the reconciliation the orchestrator scheduled — a reading, not a fix)
+
+`aCommentNeverMovesTheTakesProse`'s deletion arm (`BoardCommentGutterTests.swift:407–417`) CLOSES the
+first board's window, deletes the comments, then mounts a SECOND, fresh board. That board's one-shot
+read is already fresh (born after the deletion) — so the face it would draw is none, on both trees. The
+record the oracle still holds is most likely the FIRST board's: `BoardCommentFaceRecord` forgets on
+`.onDisappear`, and closing a window whose hosting view stays alive (`isReleasedWhenClosed = false`)
+need not run it. If that reading is right, the arm is a harness trap (an oracle read across a closed
+window), not VX-732's staleness; whether batch 3's live feed turns it green depends on whether the closed
+window's graph still runs its feed (it might — then the face drops by the live road). The window's run
+says which. Batch 3's own pins stage the deletion WHILE the board is up (the arm's honest home) and read
+the AppKit card's presence beside the oracle.
