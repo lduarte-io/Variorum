@@ -1783,7 +1783,10 @@ and the batch's other rows); the cold ladder.
 | A · VX-758 fix (630631af6) | DONE — `swift test`: the pins **GREEN, real** (27 tests, 2 suites); the WHOLE core package: 3,590 tests in 478 suites passed (5 known issues) + the second product 467 of 468 — the one red `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (connect bounded < 15 s, took 29.4 s under full-package load) passes alone (3 tests, 2.2 s): load, not the diff |
 | A · VX-758 behavioural revert (announced 25846caac before it started; ran 05:04–05:06): `ReadingAssembly.swift` restored to a6a4ff83a (= the pre-fix source) by `git checkout a6a4ff83a --`, copy + sha256 first in `scratchpad/vx758-prerevert/` | DONE — **RED on the revert, real**: "Test run with 27 tests in 2 suites failed after 3.086 seconds with 9 issues" (the same nine as the pre-fix run). **THE INDEX-SWEEP INCIDENT (recorded, healed):** the orchestrator's ledger commit a63e88c9f (05:04:50, pushed) swept the revert's STAGED file into its own commit, so HEAD briefly held the pre-fix `ReadingAssembly.swift` and my `git checkout HEAD --` restored that shape (sha mismatch caught it: 0067a228… ≠ bf8aaba8…). **HEALED at 1e295451f** (no history rewritten): the file re-taken from 630631af6, verified three ways — working file = 630631af6's blob = the pre-revert copy, sha256 `bf8aaba8…71ce`, `cmp` identical — the pins GREEN on it (27 tests, 2 suites), committed by PATHSPEC, pushed; HEAD's blob now = the fix's blob. No revert in flight; the source is HEAD. Lesson applied on my side too: every later commit of mine is a pathspec commit, and later reverts run on an APFS clone, never in the shared index |
 | B · VX-739 trace (code read + two bare-rig probes, written below before any code) | DONE (this commit) |
-| B · VX-739 pin / fix | NEXT |
+| B · VX-739 pin (7b7ab0566) | DONE — `WriteWordCountFlipTests` (2 functions, 3 cases: flip-twice ×{unmounted, mounted} + the typing guard); compile PENDING the b5 build; red/green PENDING the window (PREDICTED red on rev at flip 2: 12 for 11, then 9 for 8) |
+| B · VX-739 fix (196fdb145) | DONE — CONDITIONAL on the window's red run (green on rev ⇒ revert this one commit, record-only) |
+| C · VX-638 trace + pins (this commit) | DONE — `TakesPagerAfterCloseTests` (6 pure layout transitions); red/green PENDING the window |
+| C · VX-638 fix | NEXT |
 | C · VX-638 | NOT STARTED |
 | D · VX-652 | NOT STARTED |
 | E · VX-634 + the sweep | NOT STARTED |
@@ -1936,3 +1939,37 @@ PREDICTION backed by the measured AppKit fact and the computed counts; the fix r
 **if the window's run of the pin on the revert tree is GREEN, the fix commit is reverted and VX-739
 falls to record-only (the pin kept as the characterization, W17 the eye)**; red on rev + green on HEAD
 = FIXED.
+
+### C · VX-638 — THE TRACE (written before any code)
+
+**Her sighting (the VX-601 batch B walk, row B3 + O-BW-2):** slot split, expand all, block 1 (3 takes)
+"◀ 1–2 of 3 ▶"; **▶ → "2–3 of 3"**; close all; expand all → **"2–3 of 3" over cards 1–2**; ⌘1 ⌘2 →
+"1–2 of 3" over the same cards.
+- **The caption is a pure function of the layout's page table:** `pagedTakesRow`
+  (`TakesBoardView.swift:1639–1675`, slot split's AND carousel's strip, key = the block id) writes
+  `"\(offset + 1)–\(min(offset + beneathCount, n)) of \(n)"` from `model.pageOffset(pageKey, limit:)` =
+  `TakesBoardLayout.pageOffsets` (`TakesBoardLayout.swift:619–634`); the margin grid's rail
+  (`railCards`, key `rail-<block>`) the same way. The CARDS are wherever the strip's own horizontal
+  `ScrollView` sits; the two are tied only by the `scrollPosition(id:)` binding (`stripBinding`).
+- **Every strip mounts only while its block is bloomed** (`articleRow`, `TakesBoardView.swift:1117–1160`:
+  `if splitBloomed { slotSplitBloom }`, `if bloomed … carouselBloom`, `if style == .marginGrid, bloomed`),
+  so close all tears the strip down and expand all builds a NEW one — and the new `ScrollView` is born at
+  its leading edge (cards 1–2: her capture is the measurement; the binding's stored id is not where a
+  freshly built strip comes up, and nothing writes the born position back).
+- **Nothing on the close road touches the page table:** `closeAllFans`, `toggleExpanded`'s close and
+  `closeCollapsedFans` change only `expandedBlocks` (`TakesBoardLayout.swift:407–412, 533–556`), so the
+  re-born strip's caption reads the page its predecessor left: offset 1 → "2–3 of 3". The mode round trip
+  builds a fresh layout (the table empty) → "1–2 of 3". Within one mount, pre-existing, not VX-428's.
+
+**The fix's shape:** the layout's own letter is "close-all resets" (its header): a block whose fan CLOSES
+forgets its pages (both keys — the block's and the rail's), so a re-opened strip starts at page 1 and its
+caption agrees with the cards it is born showing. The three close doors (close all, a fan's own close,
+VX-733's collapse) share one helper. **Guard:** a block still bloomed by follow-the-scroll (R25 — on
+screen, fanned) keeps its strip mounted, so it keeps its page. Nothing about the scroll machinery, the
+binding, the reveal's auto-page (`pageToReveal`) or `expandAll` changes.
+
+**Not covered, by design (residue R-B5-1):** a strip re-born while its block NEVER closed — a lazy row
+de-realized and re-realized (scrolled far away and back), or a follow-the-scroll bloom that leaves and
+re-enters the screen — meets the same born-at-the-leading-edge fact with a non-zero page. The honest
+fix there is the strip honouring its stored page at birth (a SwiftUI scroll on appear — not pinnable
+headlessly, and not her road); a walk look (W18's sibling line).
