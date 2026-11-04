@@ -273,7 +273,7 @@ extension Queries {
             guard let grant = mcpGrant(from: row) else { return nil }
             return MCPSharedRow(
                 grant: grant, clientName: row["client_name"],
-                targetTitle: try mcpScopeTitle(db, kind: grant.scopeKind, id: grant.scopeID, calendar: calendar),
+                targetTitle: try mcpGrantPlaceTitle(db, grant, calendar: calendar),
                 inertFence: try mcpGrantInertFence(db, grant))
         }
     }
@@ -365,6 +365,30 @@ extension Queries {
             return try String.fetchOne(
                 db, sql: "SELECT name FROM wing WHERE id = ? AND deleted_at IS NULL", arguments: [id])
         }
+    }
+
+    /// **A Shared-with-AI row's place name — nil when the place is GONE** (VX-763,
+    /// the VX-771 run's batch 4): `mcpScopeTitle`, except that a BOOK grant
+    /// names its place only while that reading IS a book — the mirror of the
+    /// gathering's read (VX-549). A reading's kind changes under its grants (a
+    /// gathering bound into a book; her ⌥⌘Z of the bind makes it a gathering
+    /// again), and `uq_mcp_grant_standing_place` keys a place as kind × id, so
+    /// a book grant made while it was a book stands beside that gathering's own
+    /// grant: it names no book and reaches nothing, and titled through
+    /// `mcpScopeTitle(.book)` — which names ANY live reading, as the wire's
+    /// receipts and refusals need for a gathering — it listed as a live twin of
+    /// the gathering's row. It reads gone instead: Revoke only, as for a deleted
+    /// book. The listing's three doors read it (`mcpSharedGroups`,
+    /// `mcpSharedActMembers`, `mcpSharedRows`); the wire's titles are unchanged.
+    public static func mcpGrantPlaceTitle(
+        _ db: Database, _ grant: MCPGrantRow, calendar: Calendar = JournalDay.storeCalendar
+    ) throws -> String? {
+        guard grant.scopeKind == .book else {
+            return try mcpScopeTitle(db, kind: grant.scopeKind, id: grant.scopeID, calendar: calendar)
+        }
+        return try String.fetchOne(
+            db, sql: "SELECT name FROM reading WHERE id = ? AND deleted_at IS NULL AND kind = 'book'",
+            arguments: [grant.scopeID])
     }
 
     /// The virtual Home wing's name (R-13ia-2).
