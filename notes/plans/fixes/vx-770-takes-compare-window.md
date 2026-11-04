@@ -1786,7 +1786,10 @@ and the batch's other rows); the cold ladder.
 | B · VX-739 pin (7b7ab0566) | DONE — `WriteWordCountFlipTests` (2 functions, 3 cases: flip-twice ×{unmounted, mounted} + the typing guard); compile PENDING the b5 build; red/green PENDING the window (PREDICTED red on rev at flip 2: 12 for 11, then 9 for 8) |
 | B · VX-739 fix (196fdb145) | DONE — CONDITIONAL on the window's red run (green on rev ⇒ revert this one commit, record-only) |
 | C · VX-638 trace + pins (this commit) | DONE — `TakesPagerAfterCloseTests` (6 pure layout transitions); red/green PENDING the window |
-| C · VX-638 fix | NEXT |
+| C · VX-638 fix (4f1884d72) | DONE — `TakesBoardLayout.forgetPages(ofClosed:)` from the three close doors; red/green PENDING the window |
+| D · VX-652 | premise re-checked; the AppKit-anchoring fork being written (one Sonnet lookup for the external facts, returned) |
+| E · VX-634 sweep + pins (this commit) | DONE — `UndoLabelVocabularyTests` (core): `swift test` on the pre-fix source **RED, real** — "3 tests in 1 suite failed … with 3 issues": the behaviour pin both directions (⌥⌘Z and ⇧⌥⌘Z read "Delete Variant"), the fence's one offender `Operations+Deletion.swift:144 — "Delete Variant"`; the matcher control GREEN |
+| E · VX-634 fix | NEXT |
 | C · VX-638 | NOT STARTED |
 | D · VX-652 | NOT STARTED |
 | E · VX-634 + the sweep | NOT STARTED |
@@ -1973,3 +1976,37 @@ de-realized and re-realized (scrolled far away and back), or a follow-the-scroll
 re-enters the screen — meets the same born-at-the-leading-edge fact with a non-zero page. The honest
 fix there is the strip honouring its stored page at birth (a SwiftUI scroll on appear — not pinnable
 headlessly, and not her road); a walk look (W18's sibling line).
+
+### E · VX-634 — THE TRACE + THE SWEEP (written before the fix)
+
+**Mechanism:** the receipt is `StructuralUndoCopy.undone(label)` = "Undid: \(label)"
+(`App/Variorum/Shared/StructuralUndoCopy.swift:40–41`), and the label is the string the operation
+registers with the session's `UndoStack`; `deleteVariant` registers **"Delete Variant"**
+(`Sources/VariorumCore/Operations/Operations+Deletion.swift:144`). The model word is minted in core,
+so the fix is the label there ("Delete Take" — the app's own door is "Delete this take"), plus the
+label's four existing pins (`UndoStackTests` :267, :292; `RedoStackTests` :306, :312) edited with it.
+
+**The sweep — every structural-undo label the code registers** (literal `label:` arguments in core
+Operations, every `withCompound(label:)` in app/shared/core, the static label constants, and the MCP
+door's computed `"\(client)'s \(kind)"`):
+
+| label | where | verdict |
+|---|---|---|
+| **Delete Variant** | `Operations+Deletion.swift:144` (`deleteVariant`) | **MODEL WORD → FIXED: "Delete Take"** (the member) |
+| **Archive Variant** | `Operations+Deletion.swift:18` (`archiveVariant`) | **MODEL WORD — NOT FIXED (brief: report only)** → closeout ticket candidate "Archive Take"; held by the fence's named allow-list |
+| Pool Copy | `Operations+Pool.swift:105` (`poolDragCopy`) | wording drift, not a model word in the fence's list: the UI calls that area **Snippets** (AppSpec §7: `kind='pool'` is the model term) → ticket candidate line (her wording) |
+| Convert to Book | `Operations+ReadingConversion.swift:221` (the bind) | wording drift: the door is "Bind into a Book…" since 13i-b U3 → ticket candidate line (her wording) |
+| Sample Library | `SampleLibrarySeeder.undoLabel` | wording drift: the restore doors are per-book since VX-105 → ticket candidate line |
+| Adopt Lens ×3 · Promote Lens · Duplicate lens | Versions / Lens | app words — OK |
+| Archive Block · Unarchive Block · Delete Block · New Block · Move Block · Reorder | Block/Placement | app words — OK |
+| Divide ×2 · Divide choosing takes · Extract · Merge · Merge Takes · Split at Newlines · Turn Takes into Blocks · Move into a New Take · Move Take into a Block · Reorder Take | Structural / TakeStructure / SpanToTake / Variant | app words — OK |
+| Make Outline Note · Make Into a Note · Save a Version · Diverge for This Book · Copy In · Import · Delete Tag · Duplicate with Tags · Duplicate without Tags | Versions / NoteVersions / Diverge / Ownership / Import / Tag | app words — OK |
+| Merge Blocks ×3 · Delete Blocks ×3 · Split at Newlines ×2 · Make Block ×2 · Divide ×2 · Order Blocks · Move Blocks · Import | `withCompound` sites (BlockTOC, TakesStructure, Canvas, Import, core) | app words — OK |
+| Quick Note · Edit Across Blocks | `QuickNoteView.undoLabel`, `CrossBlockCompound.undoLabel` | app words — OK |
+| "‹client›'s take choice / take deletion / note title / book name / chapter move / gathering archiving / …" (all 40 kinds) | `Operations+MCPWrites.swift` `undoLabel(client:)` | app words throughout — OK |
+
+**The fence pin** (`Tests/VariorumCoreTests/UndoLabelVocabularyTests.swift`, runnable headlessly):
+every literal undo label scanned from the shipped source; no whole-word variant(s) · post(s) ·
+container · reading(s) · section(s) · savepoint(s); a NAMED allow-list (one entry: "Archive Variant",
+with its reason) whose entries must still exist — so the day the sibling is fixed, the list must shrink
+and the fence closes over it. Non-vacuity: the scan must find > 25 labels and "Delete Block".
