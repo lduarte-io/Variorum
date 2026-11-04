@@ -183,7 +183,14 @@ struct ReadingAssemblyQueryTests {
 
     // MARK: - Sort fields (AppSpec §10: the two stamps + entry_date/created_at)
 
-    @Test func entryDateSortOrdersJournalsAndSortsUndatedLast() throws {
+    /// VX-758 (her words, 2026-11-04: an undated note "should use their
+    /// creation date if they don't have an entry date") re-shaped this pin:
+    /// it used to assert the undated note LAST (`[earlier, later, undated]`
+    /// — the pile her sentence overturns). An undated note now sorts by its
+    /// creation stamp, the Library's own date rule; the harness mints it on
+    /// 2026-07-01, so it sits between the 1st and the 2nd. The full mix is
+    /// `BookDateSortFallbackTests`.
+    @Test func entryDateSortOrdersJournalsAndUndatedNotesByTheirCreation() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(
                 name: "journal", kind: .book, sortField: .entryDate, sortDir: .asc)
@@ -192,7 +199,7 @@ struct ReadingAssemblyQueryTests {
             let undated = try ops.createPost()
             for post in [later, undated, earlier] { try ops.addPostToReading(post.id, to: reading.id) }
             let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
-            #expect(entries.map(\.postID) == [earlier.id, later.id, undated.id])
+            #expect(entries.map(\.postID) == [earlier.id, undated.id, later.id])
         }
     }
 
