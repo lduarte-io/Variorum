@@ -7,7 +7,30 @@ Her away word, verbatim: *"excellent, i'm stepping away for the night, rule prov
 
 ## FOR A LATER READER
 
-*(Written at closeout — until then the LIVE sections below are the record.)*
+*(Drafted at the ladder's close with two PENDING slots; finalized at closeout.)*
+
+**What this run was.** The planetlillian agent's 15 field-report items (the Air's `variorum-mcp-feedback.md`), brought over by her as tickets, built in four batches on 2026-11-04's overnight away run under her "rule provisionally" word. 14 members: VX-759 (flagship) · VX-760–769 · riders VX-369/VX-400 · VX-774 (found in-run). One fable ladder round — no BLOCKER, no MAJOR — closed it.
+
+**The mechanisms as settled, one line each (the batch records below carry the full traces):**
+- **VX-759 — P-771-1 + A-771-1:** `copyPost` copied title/entry_date verbatim, so an undated UNTITLED source's copy was named (DisplayTitle) and sorted by the COPY's birth day. Fix: `Domain/DuplicateDay` — such a source's copy takes the source's creation day as `entry_date`, in the shared duplicate body (her two Duplicate doors + the wire) AND `copyNoteToWing` (her ⇧⌥⌘L + the wire). Journal-profile and titled/dated sources verbatim; promote/diverge/ownership-forks/saved-versions untouched (her F-1(c) call pending).
+- **VX-766:** `duplicate_note brief: true` answers ids + counts + `fan_sha256` (P-771-8 — the spelled, client-recomputable digest; `MCPTextDigest.fanSHA256`); the full form byte-unchanged.
+- **VX-765:** `copy_note_to_wing` — her door's `copyNoteToWing` body on the wire; READ source (fence first) + WRITE NEW destination wing, once grants spent together; brief answer; one client-named undo; flush pinned (the ladder's MINOR).
+- **VX-760 — P-771-9:** the edit_take door diagnoses an expected_text mismatch itself (`MCPExpectedTextMismatch`: whitespace-ends · part-of-the-take · take-and-more · first-difference offset, both lengths) instead of the app table's race sentence; her doors' copy untouched.
+- **VX-761 — P-771-10:** edit_take's replace form (`old_str`/`new_str`, exactly-once byte-level via `Domain/UniqueReplacement` KMP), resolved INSIDE the op's transaction (`MCPTakeRewrite.replacing`); the whole form's bracket/undo/churn ride.
+- **VX-369 — P-771-11:** the 19-row non-OperationError sweep (BATCH 2 RECORD's table): store failures and the catch-alls worded through the one chain (`MCPWireRefusalCopy.unexpected`); row 19 deferred as VX-776.
+- **VX-764 — P-771-12 (R-771-A, dial DECLINED):** a landed `remove_tag` answers `still_in_books` (readable, rule names the tag positively, living books) + `still_in_books_hidden_count`; nothing-stranded answers byte-unchanged; intake untouched.
+- **VX-769 — P-771-2 (R-771-B):** `create_gathering` (name, wing_id, required rule through set_book_rule's one parser) at WRITE NEW on the wing via the extracted `insertReading` (her mint's exact row); seats/bells nothing; rule edits stay hers.
+- **VX-767/VX-768:** verified ALREADY BUILT (VX-566 · VX-567/RB-4); standing pins named, none added.
+- **VX-762 — P-771-3 + A-771-3 (R-771-C):** B2 built whole — the shim's stderr line at an app-ended socket, plus the 0x1E close-reason line (illegal in JSON, impossible mid-UTF-8) the relay diverts to stderr; `session.hangUp(saying:)` under a try()-lock, MSG_DONTWAIT, inside the existing halt step; Activity byte-untouched. **The verify walk: PENDING (Road A) — see below.**
+- **VX-763:** her duplicate-rows sighting = the already-fixed VX-393 class (third filing: VX-393 · VX-565 · VX-763); the one REAL road (a bind/un-bind kind reversion titling a dead book grant as a live book) fixed LISTING-side (`mcpGrantPlaceTitle` kind-checks); NO migration.
+- **VX-400:** the serve task's host-gone arm now ends until-disconnect grants at every door stop (`endWhileConnectedGrants`).
+- **VX-774:** edit_take's blank check now reads the text as stored (after the U+0000 strip), so a null-only whole-form edit refuses (R-VX171-2 enforced).
+
+**Her rulings:** R-771-A..D (section above). **Orchestrator adjudications:** A-771-1..3. **PROVISIONALs:** P-771-1..12 (the ledger above) → QUESTIONS #257 at the merge. **Filed tickets:** VX-774 (seated, fixed) · VX-775 (Needs Lillian) · VX-776 · VX-777 · VX-778; sightings logged on VX-685/VX-722.
+
+**PENDING at this draft:** (1) the VX-762 verify walk (Road A — after VX-500's merge + main merged in; script `notes/plans/fixes/vx-771-walk-script.md` + `Tools/WalkKit/vx771-lock-drop-walk.zsh`; the walked build may be pre-ladder-close tip, the walk changes no code); its verdict lands here. (2) The closing Mac window (the owed-suites list in Coordinator fences) and the evidence line.
+
+**Open items:** her morning bundle (the section below); O-3 (the field guide's MCP chapter doesn't name the new tools — the closeout's call); the canon lines (proposed per batch, applied at closeout with the ladder's flush phrase).
 
 ---
 
