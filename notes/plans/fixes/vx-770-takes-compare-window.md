@@ -314,6 +314,8 @@ stage); the use walk (her repro by hand, both voices); the cold ladder.
 | Red/green runs, the P-8 numbers | PENDING (the orchestrator's window) |
 | Self-assessment | NOT-STARTED |
 
+**REVERT IN FLIGHT (announced before it starts):** `App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift` — `if true { return nil }` as the first statement of `reaimWhereTheColumnReEstimated` (the VX-601 batch-B lesson: never a bare `return` above an expression line); pre-revert copy at `scratchpad/vx756-b1-prerevert/` (gitignored, inside the worktree); the committed source is 91554271e, so `git checkout -- <file>` is the safe restore. A successor reading this line with a non-empty `git diff` on that file: the revert is still applied — restore it.
+
 ### THE TRACE (written before the fix)
 
 **Her shape, as the code runs it (the app's order: a bare model, the projection from the view's
