@@ -1015,8 +1015,9 @@ final class EditorSurfaceController {
     /// — never two blocks from one intent, never a divide at an offset that
     /// has moved). Nothing here edits a row: every arm dispatches to a door
     /// that already runs through `runStructural`, and every refusal — a
-    /// sealed note, a locked take, a block with no interior word edge — is
-    /// that door's own, spoken in its own words.
+    /// sealed note, a locked take, a gap slot — is that door's own, spoken
+    /// in its own words. (A block with no interior word edge used to be the
+    /// fourth; since VX-806 a caret inside its one word pushes it down.)
     private func runTypedReturnAct() async {
         // 18c ladder round 2, R2-1: NO replay here. Whatever road the act
         // takes — a flight, a spoken refusal, the empty block's no-op, a
@@ -1039,6 +1040,15 @@ final class EditorSurfaceController {
             return
         case .divideAtCaret:
             await invokeGesture(.divideAtCursor)
+        case .divideAtWordStart(let entryIndex, _, let cut):
+            // VX-806: the caret's word rides down — the divide door's own
+            // plan at the word's start, taken exactly (never re-settled);
+            // `applyStructural` then runs the plain or keep-on-top road with
+            // its visible snap onto that cut. Re-derived THIS turn, so the
+            // entry index addresses the live tiling.
+            await applyStructural(StructuralGesturePlanner.plan(
+                divideAtExactCut: model.index.range(ofEntryAt: entryIndex).location + cut,
+                world: model.gestureWorld()))
         case .emptyBlock(let edge, let entryIndex, let blockID, let closingEmptyTail):
             if closingEmptyTail { model.closeEmptyTailSeparator() }
             await insertEmptyBlock(edge: edge, entryIndex: entryIndex, blockID: blockID)

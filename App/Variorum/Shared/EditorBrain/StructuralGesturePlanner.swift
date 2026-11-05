@@ -140,17 +140,7 @@ nonisolated enum StructuralGesturePlanner {
     // MARK: - The one entry point (all doors call this)
 
     static func plan(_ command: Command, selection: NSRange, world: World) -> Plan {
-        guard selection.location >= 0, selection.length >= 0,
-              selection.upperBound <= world.index.documentLength
-        else { return .refusal(.invalidSelection) }
-        // The seal outranks every other answer: the menu reads "disabled"
-        // for the same reason the op would refuse.
-        guard !world.sealed else { return .refusal(.sealed) }
-        // The open tail is not a block (idle-mint will make it one) — any
-        // gesture touching the tail region refuses before shape questions.
-        if touchesTailRegion(selection, index: world.index) {
-            return .refusal(.openTailTarget)
-        }
+        if let refusal = frontRefusal(selection, world: world) { return .refusal(refusal) }
         switch command {
         case .divideAtCursor:
             return divide(atCaret: selection.location, world: world)
@@ -163,19 +153,60 @@ nonisolated enum StructuralGesturePlanner {
         }
     }
 
+    /// **VX-806 — the typed Return's divide, at a cut the caller already
+    /// placed** (`TypedReturn.Act.divideAtWordStart`: the start of the word
+    /// the caret sits inside — a member of the one legal-cut set by
+    /// construction, `BoundarySnapping.wordStart(enclosing:in:)`). Exactly
+    /// `.divideAtCursor`'s plan — the same front refusals, the gap slot, the
+    /// locked take, the fanned road with this cut as the displayed take's
+    /// seed — except that a cut ALREADY on the legal interior set is taken
+    /// as it stands, never re-settled: `settle`'s gentle pull lets a
+    /// one-letter sentence opener `settlePull` earlier win an exact tie
+    /// (#161), which would carry that letter down with the word her sentence
+    /// is about. A cut that is not a legal interior one settles exactly as
+    /// the menu door's does (unreachable from the Return key; the planner
+    /// still never asserts). `location` is a document offset.
+    static func plan(divideAtExactCut location: Int, world: World) -> Plan {
+        let selection = NSRange(location: location, length: 0)
+        if let refusal = frontRefusal(selection, world: world) { return .refusal(refusal) }
+        return divide(atCaret: location, world: world, exactCut: true)
+    }
+
+    /// The answers that outrank every command's shape questions — one home
+    /// for both entry points above, so the two can never disagree about
+    /// them.
+    private static func frontRefusal(_ selection: NSRange, world: World) -> Refusal? {
+        guard selection.location >= 0, selection.length >= 0,
+              selection.upperBound <= world.index.documentLength
+        else { return .invalidSelection }
+        // The seal outranks every other answer: the menu reads "disabled"
+        // for the same reason the op would refuse.
+        guard !world.sealed else { return .sealed }
+        // The open tail is not a block (idle-mint will make it one) — any
+        // gesture touching the tail region refuses before shape questions.
+        if touchesTailRegion(selection, index: world.index) {
+            return .openTailTarget
+        }
+        return nil
+    }
+
     // MARK: - Divide (contract items 1–3)
 
     /// A non-empty selection divides at its start — the caret-position
     /// reading of "at Cursor" (the visible snap collapses the selection to
-    /// the snapped cut as part of the action).
-    private static func divide(atCaret caret: Int, world: World) -> Plan {
+    /// the snapped cut as part of the action). `exactCut` is the typed
+    /// Return's road (VX-806, `plan(divideAtExactCut:world:)`): a legal
+    /// interior cut is taken as it stands.
+    private static func divide(atCaret caret: Int, world: World, exactCut: Bool = false) -> Plan {
         guard let (i, intra) = entryTouching(caret: caret, index: world.index) else {
             return .refusal(.nothingToDo)
         }
         let entry = world.index.entries[i]
         guard entry.variantID != nil else { return .refusal(.gapSlot) }
         let text = world.textAt(i)
-        let cut = snapToInteriorBoundary(intra, in: text)
+        let cut = exactCut
+            ? exactInteriorCut(intra, in: text)
+            : snapToInteriorBoundary(intra, in: text)
         if fanArity(world, i) > 1 {
             // The W door: marked variants are COPIED through, so a locked
             // rendered take does not refuse here (Phase 3 op semantics).
@@ -203,6 +234,19 @@ nonisolated enum StructuralGesturePlanner {
         let interior = BoundarySnapping.boundaries(in: text, granularity: .word)
             .filter { $0 != 0 && $0 != end }
         return BoundarySnapping.settle(cut, in: text, among: interior)
+    }
+
+    /// VX-806: `cut` itself when it is a legal INTERIOR cut (a word-rule
+    /// boundary strictly inside the text), else the ordinary settle — the
+    /// one legal-cut set either way, only the choice among its members
+    /// differs.
+    private static func exactInteriorCut(_ cut: Int, in text: String) -> Int? {
+        let end = text.utf16.count
+        if cut > 0, cut < end,
+           BoundarySnapping.boundaries(in: text, granularity: .word).contains(cut) {
+            return cut
+        }
+        return snapToInteriorBoundary(cut, in: text)
     }
 
     // MARK: - Spans: extract & the composed middle-span gesture (items 1–2, 5–6, 8)

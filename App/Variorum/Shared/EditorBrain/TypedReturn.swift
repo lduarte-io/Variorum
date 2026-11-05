@@ -37,9 +37,11 @@
 //  function or they drift.
 //
 //  What it deliberately does NOT decide: refusals. A sealed note, a locked
-//  take, a gap slot and a one-word block all answer through the doors this
-//  routes to, in their own words (P-2 — a rendered door performs the act or
-//  delivers the operations layer's real refusal).
+//  take and a gap slot all answer through the doors this routes to, in
+//  their own words (P-2 — a rendered door performs the act or delivers the
+//  operations layer's real refusal). A one-word block used to be the fourth
+//  (#92(b)); since VX-806 a caret inside a word carries the word down, so
+//  that block is pushed down whole instead of refused.
 //
 //  The tail (AppSpec §7's type-time crystallization) keeps its road: a note
 //  with no blocks yet IS the tail, and a paragraph typed there crystallizes
@@ -77,11 +79,23 @@ nonisolated enum TypedReturn {
         /// a block) and mints below the last block.
         case emptyBlock(edge: Edge, entryIndex: Int, blockID: String,
                         closingEmptyTail: Bool)
-        /// The caret sits inside the block's text: divide at the caret,
+        /// The caret sits inside the block's text, at a word's EDGE (never
+        /// inside a word — that is the case below): divide at the caret,
         /// through the ONE snapping rule (S4-22) the planner already
         /// applies. Single-take: in place, A keeps identity. Fanned: the
         /// keep-on-top default 18c batch 1 built.
         case divideAtCaret(entryIndex: Int, blockID: String)
+        /// **VX-806 — the caret sits INSIDE a word, and the whole word rides
+        /// down.** Divide at `cut`, the start of the caret's word
+        /// (`BoundarySnapping.wordStart(enclosing:in:)` — the floor of the
+        /// one legal-cut set, so a member of it by construction), TAKEN
+        /// EXACTLY by the planner's `plan(divideAtExactCut:world:)` rather
+        /// than re-settled. Every other answer of the divide door stands —
+        /// the locked take's refusal, the gap slot's, the fanned block's
+        /// keep-on-top road (with this cut as the displayed take's). A word
+        /// that starts at the block's very start never comes here: that is
+        /// `.emptyBlock(edge: .above)`, the block pushed down whole.
+        case divideAtWordStart(entryIndex: Int, blockID: String, cut: Int)
         // **`case nothing` RETIRED (R-13u4-2, 13u4 UNIT E1).** It was the
         // empty block's ruled no-op under U-1; her ruling change makes that
         // caret mint like every other end-of-block caret, so nothing returns
@@ -203,6 +217,36 @@ nonisolated enum TypedReturn {
                     return .emptyBlock(
                         edge: .below, entryIndex: i, blockID: entry.blockID,
                         closingEmptyTail: false)
+                }
+                // **VX-806 — a caret INSIDE a word carries the whole word
+                // down** (her report, 2026-11-04, the chip on: *"normally
+                // when you try to make a newline in the middle of a word, it
+                // just moves the whole word down, but with this it just
+                // denies it. standardize it?"*). It SUPERSEDES #92(b)'s built
+                // answer (the divide door's own `nothingToDo`, spoken): the
+                // cut is the caret's word's start — the floor of the one
+                // legal-cut set (S4-22), never `settle`'s nearest member,
+                // which takes a late-in-word caret to the NEXT word and
+                // leaves this one behind. Where the word starts the block
+                // (nothing but whitespace before it — the first word, a
+                // one-word block, her screenshot's caret just past an
+                // opening quote), the cut would be the block's start, which
+                // no divide may take: the block is pushed down whole, the
+                // start arm above ("before any text"). The end arm cannot be
+                // reached from here — the word itself stands after its own
+                // start — so the block's end stays the trailing rule's above.
+                // A caret on a list line never reaches this (the list door's
+                // line rule, above), and a word's EDGE is not inside a word:
+                // both keep the roads they had.
+                if let wordStart = BoundarySnapping.wordStart(
+                    enclosing: clamped, in: text as String) {
+                    if text.substring(to: wordStart).allSatisfy(\.isWhitespace) {
+                        return .emptyBlock(
+                            edge: .above, entryIndex: i, blockID: entry.blockID,
+                            closingEmptyTail: false)
+                    }
+                    return .divideAtWordStart(
+                        entryIndex: i, blockID: entry.blockID, cut: wordStart)
                 }
                 return .divideAtCaret(entryIndex: i, blockID: entry.blockID)
             }

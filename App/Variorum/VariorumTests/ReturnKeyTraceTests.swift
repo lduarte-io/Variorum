@@ -973,6 +973,91 @@ struct TypedReturnKeyTests {
         }
     }
 
+    // MARK: (2b) VX-806 — a caret INSIDE a word carries the whole word down
+
+    /// **HER REPORT (VX-806, 2026-11-04):** *"normally when you try to make a
+    /// newline in the middle of a word, it just moves the whole word down,
+    /// but with this it just denies it. standardize it?"* Late in a word —
+    /// the caret nearer the NEXT word's start than its own — the key cuts at
+    /// the caret's word's start, so "beta" rides down with the caret.
+    ///
+    /// **RED-ON-OLD (by construction):** the key's divide SETTLED to the
+    /// nearest legal cut, 11, and stored `["alpha beta", "gamma", "delta"]` —
+    /// the word she was in left behind.
+    @Test func aReturnInsideAWordCarriesTheWholeWordDown() async throws {
+        try await withEditor(seedBlocks: ["alpha beta gamma", "delta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 9)  // "alpha bet|a gamma"
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta gamma", "delta"])
+            #expect(h.textView.selectedRange().location
+                        == h.model.index.range(ofEntryAt: 1).location,
+                    "the caret lands where the cut went — the word's start, the divide door's own landing")
+            #expect(h.session.undoStack.topLabel == "Divide")
+            #expect(h.model.statusMessage == nil, "nothing refused, nothing to say")
+        }
+    }
+
+    /// **Her screenshot's case:** the caret one character into the block's
+    /// first (and here only) word, just past an opening quote. The word's
+    /// start is the block's start, so the start arm answers — an empty block
+    /// ABOVE, the block pushed down whole, the caret staying with it.
+    ///
+    /// **RED-ON-OLD (by construction):** the planner found no interior word
+    /// edge and the key REFUSED — "No legal cut spot for that here…"
+    /// (`nothingToDo`, #92(b)'s built answer) — with the store untouched.
+    @Test func aReturnInsideAOneWordBlockPushesItDownInsteadOfRefusing() async throws {
+        let quoted = "\u{201C}Onlyword.\u{201D}"
+        try await withEditor(seedBlocks: ["alpha", quoted]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 1)  // "“|Onlyword.”"
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", quoted])
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID,
+                    "the caret stays with her paragraph")
+            #expect(h.model.statusMessage == nil, "no refusal — the key acted")
+            #expect(h.session.undoStack.topLabel == "New Block")
+        }
+    }
+
+    /// The FANNED one-word block took a different refusal road before —
+    /// the keep-on-top divide's nil-cut guard ("No legal cut spot… Divide
+    /// choosing takes (⌥⌘⇧D) can send a whole take to one side."). The start
+    /// arm never reaches the fan: the block, every take with it, is pushed
+    /// down whole.
+    ///
+    /// **RED-ON-OLD (by construction):** that refusal, the store untouched.
+    @Test func aReturnInsideAFannedOneWordBlockPushesItDownToo() async throws {
+        try await withEditor(seedBlocks: ["alpha", "Onlyword."]) { h in
+            let slots = try h.storeSlots()
+            let other = try h.session.operations.branchVariant(
+                slots[1].blockID, from: try #require(slots[1].variantID))
+            try h.session.operations.autosave(other.id, text: "Otherword.", charDelta: 10)
+            try h.reload()
+
+            let window = try hosted(h)
+            defer { window.teardown() }
+            caret(h, entry: 1, offset: 4)  // "Only|word."
+            returnKey(h, window.window)
+            await h.flush()
+
+            let after = try h.storeSlots()
+            #expect(after.map(\.text) == ["alpha", "", "Onlyword."])
+            #expect(after[2].blockID == slots[1].blockID, "the same block, pushed down")
+            #expect(try fan(h, after[2].blockID).map(\.workingText) == ["Onlyword.", "Otherword."],
+                    "its takes ride with it, untouched")
+            #expect(h.model.statusMessage == nil)
+        }
+    }
+
     // MARK: (3) a fanned block — the keep-on-top default (18c batch 1)
 
     /// The key's divide is the SAME divide the door runs, so a fanned block
