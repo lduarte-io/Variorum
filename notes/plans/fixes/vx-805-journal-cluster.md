@@ -419,3 +419,12 @@ Slot: Sync/custody GRANTED 00:41, held until this run answers "nothing further o
 | 5 | NIT (note-only): `clearJournalOneBlockOverrides` N+1 + unindexed scan | ACCEPTED AS NOTED — bounded by design (one-time pass, settles on first empty run, P-805-A5); no change |
 
 Round 2 (a FRESH reviewer) re-reviews: the two adjudication fixes, `91d593c96` (window 4's justified edit), and this record commit — the whole since-round-1 tail `8315ea9b4..`.
+
+##### THE LADDER — ROUND 2 (fresh `fable-reviewer`, the tail `8315ea9b4..25eba6494` against round 1's dispositions, ~06:00–06:20)
+
+**Verdict: NO BLOCKER, NO MAJOR, no new MINOR — the ladder CLOSES, no round 3.** Every round-1 disposition verified FAITHFUL by its own eyes (incl. the falsified premise of finding 4 — the three Home-fixture callers located; and the row-15 re-pin proven COMPLETE limb by limb: the success shape `lastError == nil` + empty status seam traced to `shelvingNote(.shelved) == nil`, the bell law still pinned on ⌘J's road at app and core, nothing lost by the narrowing); the tail confirmed clean of `Sync/`, custody and the editor seam; 27/6 core analogue tests green at HEAD in its session. Two NITs, DISPOSITIONED (orchestrator):
+
+| # | Finding | Disposition |
+|---|---|---|
+| 1 | NIT: the adjudication doc line unwrapped (~230 chars) in a wrapped block | FIXED this commit (comment-only re-wrap, the round's own proposed fix) |
+| 2 | NIT (process): canon deltas sat UNCOMMITTED in the worktree at review time; apply shared canon only at the merge | MOOT + CLARIFIED: those edits were committed on the branch minutes after the reviewed HEAD (`c5164f73c`) — and the merge-moment rule covers the SHARED LEDGERS (master plan, TICKETS, QUESTIONS, AppSpecRecord), none touched; contract-canon (AppSpec/SurfaceContracts/SyncSpec/MCPSpec/OverallModel) rides the run's PR per the closeout ritual, as every prior run's did. The reviewer's underlying caution (no `git add -A`, no shared-ledger edits off main) is the standing law and was kept |
