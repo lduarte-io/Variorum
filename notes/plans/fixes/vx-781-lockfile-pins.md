@@ -809,7 +809,7 @@ stays on the candidates list, with the orchestrator's endorsement.
 
   Red-on-old (the finding's probes, on this committed state, restored by `git checkout --`):
 
-  | probe | PRE-fix test (3a778c9df^…0ea419ecf^ = 23ae5bc71's files) | POST-fix test |
+  | probe | PRE-fix test (the files at 23ae5bc71) | POST-fix test (0ea419ecf) |
   |---|---|---|
   | P1: `ConcurrencyExtras` added to VariorumMCPTests' deps + ref `…04` deleted | **GREEN** `✔ 3 tests … passed` (the hole) | **RED** `["swift-concurrency-extras 1.4.1 (5fa2534): no exactVersion project reference — Xcode would let it float"]` |
   | P2: `Clocks` added to StringsWorkbook (product-less) + ref `…06` deleted | **GREEN** (the hole) | **RED** `["swift-clocks 1.1.0 (72d749b): no exactVersion project reference …"]` |
@@ -852,5 +852,12 @@ stays on the candidates list, with the orchestrator's endorsement.
   and the `Tools/verify-pins` tree guard run right after its build (E12, R1-11; the pre-belt
   export's `verify-pins --ref 68b3d9c53` for R1-3), which are cited beside each.
 
-**Suite counts (round 2, on 3a778c9df's bytes plus this record):** PENDING — the core suite is
-running.
+**Suite counts (round 2; whole core `swift test` on 3a778c9df's code, log `core-test-r2.log`):**
+- VariorumCoreTests **`Test run with 3649 tests in 492 suites passed after 248.838 seconds with 5
+  known issues.`** (PinBeltTests included.)
+- StringsWorkbookTests **`Test run with 32 tests in 4 suites passed after 28.243 seconds.`**
+- VariorumMCPTests `Test run with 549 tests in 100 suites failed after 45.695 seconds with 1 issue`:
+  ONLY VX-132's harness bound (MCPHarnessTimeLimitTests, VX-353/VX-685), the failure present in
+  every sample on both pin sets (THE MCP A/B).
+- Earlier this pass: the Debug app build `** BUILD SUCCEEDED **` with `verify-pins` OK 16;
+  `Tools/pins-belt-check HEAD --keep` exit 0; E14 lockfile byte-clean. No `xcodebuild test` ran.
