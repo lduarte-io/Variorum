@@ -64,50 +64,61 @@ extension Operations {
     ///   cleared — shelves are per-wing and never cross); its star stays.
     @discardableResult
     public func moveReadingToWing(_ readingID: String, to wingID: String) throws -> BookWingMove {
-        try database.write { db in
-            var reading = try liveReading(db, readingID)
-            if try Queries.isTheDailyJournal(db, reading) {
-                throw OperationError.dailyJournalIsHomeOnly(id: readingID)
-            }
-            try requireLiveWing(db, wingID)
-            guard try !sameEffectiveWing(db, reading.wingId, wingID) else {
-                throw OperationError.readingAlreadyInWing(readingID: readingID, wingID: wingID)
-            }
-            let now = date.now
-            let sourceWing = reading.wingId
+        try database.write { db in try moveReadingToWing(db, readingID, to: wingID).move }
+    }
 
-            // Item 5(a): the waiting notes stay behind — their rows decided.
-            let waiting = try Queries.pendingArrivalCount(db, readingID: readingID)
-            if waiting > 0 {
-                try dismissPendingArrivals(db, readingID: readingID, now: now)
-            }
-
-            // Items 1(a) + 4: the members come along, each by the note move.
-            var adoption = TagAdoption(wing: wingID)
-            var alsoLeft: [Queries.AlsoLeaves] = []
-            let members = try Queries.bookMoveMembers(db, readingID: readingID)
-            for member in members {
-                let severed = try relocateNote(
-                    db, postID: member.postID, to: wingID, keeping: [readingID],
-                    adoption: &adoption, now: now)
-                alsoLeft += severed.map {
-                    Queries.AlsoLeaves(noteID: member.postID, note: member.title, book: $0.name)
-                }
-            }
-
-            // Item 2(a): the rule, the outflow, the grouping — by path.
-            try adoptReadingTags(db, &reading, sourceWing: sourceWing, adoption: &adoption)
-
-            // Items 3(a) + 6: the book itself, whole, unshelved.
-            reading.wingId = wingID
-            reading.shelfId = nil
-            reading.shelfPosition = nil
-            reading.updatedAt = now
-            try reading.update(db)
-            return BookWingMove(
-                notes: members.count, alsoLeft: alsoLeft, dismissedArrivals: waiting,
-                adoptedTags: adoption.adopted, mintedTags: adoption.minted)
+    /// **Her door's body, inside the caller's transaction** (VX-807 — the
+    /// VX-809 run, batch 2: moved here VERBATIM so the MCP door's
+    /// `move_book_to_wing` wraps the very same act and its refusals — the
+    /// note move's `moveNoteToWing(db:)` precedent; her public door above
+    /// calls it and is byte-identical). Returns her answer and the clock read
+    /// the act stamped its tombstones with (`date.now`, read at the same point
+    /// as before).
+    func moveReadingToWing(
+        _ db: Database, _ readingID: String, to wingID: String
+    ) throws -> (move: BookWingMove, now: Date) {
+        var reading = try liveReading(db, readingID)
+        if try Queries.isTheDailyJournal(db, reading) {
+            throw OperationError.dailyJournalIsHomeOnly(id: readingID)
         }
+        try requireLiveWing(db, wingID)
+        guard try !sameEffectiveWing(db, reading.wingId, wingID) else {
+            throw OperationError.readingAlreadyInWing(readingID: readingID, wingID: wingID)
+        }
+        let now = date.now
+        let sourceWing = reading.wingId
+
+        // Item 5(a): the waiting notes stay behind — their rows decided.
+        let waiting = try Queries.pendingArrivalCount(db, readingID: readingID)
+        if waiting > 0 {
+            try dismissPendingArrivals(db, readingID: readingID, now: now)
+        }
+
+        // Items 1(a) + 4: the members come along, each by the note move.
+        var adoption = TagAdoption(wing: wingID)
+        var alsoLeft: [Queries.AlsoLeaves] = []
+        let members = try Queries.bookMoveMembers(db, readingID: readingID)
+        for member in members {
+            let severed = try relocateNote(
+                db, postID: member.postID, to: wingID, keeping: [readingID],
+                adoption: &adoption, now: now)
+            alsoLeft += severed.map {
+                Queries.AlsoLeaves(noteID: member.postID, note: member.title, book: $0.name)
+            }
+        }
+
+        // Item 2(a): the rule, the outflow, the grouping — by path.
+        try adoptReadingTags(db, &reading, sourceWing: sourceWing, adoption: &adoption)
+
+        // Items 3(a) + 6: the book itself, whole, unshelved.
+        reading.wingId = wingID
+        reading.shelfId = nil
+        reading.shelfPosition = nil
+        reading.updatedAt = now
+        try reading.update(db)
+        return (BookWingMove(
+            notes: members.count, alsoLeft: alsoLeft, dismissedArrivals: waiting,
+            adoptedTags: adoption.adopted, mintedTags: adoption.minted), now)
     }
 
     /// What the bulk move did — the receipt's facts.
