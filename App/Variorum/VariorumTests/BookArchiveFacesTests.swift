@@ -302,8 +302,11 @@ struct BookArchiveDoorActTests {
             let landed = await doors.perform(.deleteBook, readingID: journal)
             #expect(landed)
             #expect(session.status.spoken?.kind == .receipt)
-            #expect(try await reading(db, journal).deletedAt != nil)
-            #expect(try await reading(db, journal).profile == Queries.dailyJournalDeletedProfile)
+            // The dead row, read RAW: `reading(_:_:)` wraps the tolerant
+            // `Queries.reading`, which answers nil for a tombstone.
+            let dead = try #require(try await db.read { try Reading.fetchOne($0, key: journal) })
+            #expect(dead.deletedAt != nil)
+            #expect(dead.profile == Queries.dailyJournalDeletedProfile)
             #expect(OpsRefusalCopy.words(
                 for: OperationError.readingAlreadyArchived(id: "x"), roads: .mac)
                     == "That book is already archived \u{2014} nothing changed.")
@@ -412,7 +415,9 @@ struct ArchivedBooksGroupTests {
             #expect(ArchivedBooksModel.matches(model.books, query: "ess").map(\.id) == [book.id])
             #expect(ArchivedBookCopy.stamp(model.books[1])?.hasPrefix("archived ") == true)
 
-            // The daily Journal says what it is, and never offers Delete.
+            // The daily Journal says what it is, and offers Delete beside
+            // Unarchive now (VX-436 — a JUSTIFIED EDIT: 13i-e's "never offers
+            // Delete" retired with the op's guard).
             let entry = try ops.createPost(title: nil)
             guard case .shelved(let journal) = ops.shelveInDailyJournalBook(entry.id) else {
                 Issue.record("the daily Journal is minted by the first filing")
@@ -422,7 +427,7 @@ struct ArchivedBooksGroupTests {
             let j = try await reading(db, journal)
             #expect(ArchivedBookCopy.facts(j, notes: 1).hasPrefix("daily Journal"))
             #expect(BookArchiveDoorSet.rendered(for: BookArchiveFacts(j))
-                .filter { $0 != .archiveBook } == [.unarchiveBook])
+                .filter { $0 != .archiveBook } == [.unarchiveBook, .deleteBook])
             #expect(ArchivedView.subtitle == "notes and books you set aside \u{2014} kept, with no countdown")
         }
     }

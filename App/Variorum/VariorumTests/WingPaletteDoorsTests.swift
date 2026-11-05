@@ -268,8 +268,10 @@ struct WingPaletteDoorsTests {
 
             shell.workspace.select(.reading(journalID))
             facts = await actions.paletteListingFacts()
-            #expect(!WingPaletteDoors.lists(.moveBookToWing, facts), "the daily Journal never lists the row")
-            #expect(!(await actions.listedPaletteEntries()).contains { $0.title == WingCopy.moveToWingVerb })
+            // VX-435 (a JUSTIFIED EDIT — the retired ⌘K law): the daily
+            // Journal lists the row like any book while another wing exists.
+            #expect(WingPaletteDoors.lists(.moveBookToWing, facts), "the daily Journal lists the row now")
+            #expect(await actions.listedPaletteEntries().contains { $0.title == WingCopy.moveToWingVerb })
 
             shell.workspace.select(.library)
             facts = await actions.paletteListingFacts()
