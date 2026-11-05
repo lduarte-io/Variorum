@@ -994,11 +994,14 @@ struct TypedReturnKeyTests {
             await h.flush()
 
             #expect(try h.storeSlots().map(\.text) == ["alpha", "beta gamma", "delta"])
+            #expect(h.session.undoStack.topLabel == "Divide")
+            #expect(h.model.statusMessage == nil, "nothing refused, nothing to say")
+            // Count-guarded (the pin must fail CLEAN when red, never trap the
+            // host on a subscript the old road's surface may not have).
+            try #require(h.model.index.entries.count == 3, "the surface tiles the three blocks")
             #expect(h.textView.selectedRange().location
                         == h.model.index.range(ofEntryAt: 1).location,
                     "the caret lands where the cut went — the word's start, the divide door's own landing")
-            #expect(h.session.undoStack.topLabel == "Divide")
-            #expect(h.model.statusMessage == nil, "nothing refused, nothing to say")
         }
     }
 
@@ -1021,10 +1024,13 @@ struct TypedReturnKeyTests {
             await h.flush()
 
             #expect(try h.storeSlots().map(\.text) == ["alpha", "", quoted])
-            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID,
-                    "the caret stays with her paragraph")
             #expect(h.model.statusMessage == nil, "no refusal — the key acted")
             #expect(h.session.undoStack.topLabel == "New Block")
+            // Count-guarded: on the old (refusing) road the surface keeps two
+            // entries, and the pin must fail clean there, never trap the host.
+            try #require(h.model.index.entries.count == 3, "the key made the block above")
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID,
+                    "the caret stays with her paragraph")
         }
     }
 
@@ -1038,8 +1044,10 @@ struct TypedReturnKeyTests {
     @Test func aReturnInsideAFannedOneWordBlockPushesItDownToo() async throws {
         try await withEditor(seedBlocks: ["alpha", "Onlyword."]) { h in
             let slots = try h.storeSlots()
+            try #require(slots.count == 2, "the seed")
+            let seeded = slots[1]
             let other = try h.session.operations.branchVariant(
-                slots[1].blockID, from: try #require(slots[1].variantID))
+                seeded.blockID, from: try #require(seeded.variantID))
             try h.session.operations.autosave(other.id, text: "Otherword.", charDelta: 10)
             try h.reload()
 
@@ -1051,10 +1059,15 @@ struct TypedReturnKeyTests {
 
             let after = try h.storeSlots()
             #expect(after.map(\.text) == ["alpha", "", "Onlyword."])
-            #expect(after[2].blockID == slots[1].blockID, "the same block, pushed down")
-            #expect(try fan(h, after[2].blockID).map(\.workingText) == ["Onlyword.", "Otherword."],
-                    "its takes ride with it, untouched")
             #expect(h.model.statusMessage == nil)
+            // Count-guarded: the old (refusing) road mints nothing, so the
+            // store keeps two slots — the pin must fail CLEAN there (the
+            // revert window's seven .ips were this subscript trapping).
+            try #require(after.count == 3, "the key made the block above")
+            let pushed = after[2]
+            #expect(pushed.blockID == seeded.blockID, "the same block, pushed down")
+            #expect(try fan(h, pushed.blockID).map(\.workingText) == ["Onlyword.", "Otherword."],
+                    "its takes ride with it, untouched")
         }
     }
 
@@ -1361,9 +1374,11 @@ struct TypedReturnKeyTests {
                     "the list ends at its last item; the block below is the key's")
             #expect(h.documentText == "- one\n\ngamma",
                     "landed: the same bytes — the line she was on IS the new block")
-            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
             #expect(h.textView.selectedRange() == NSRange(location: 6, length: 0),
                     "the caret never moved off the line it was on")
+            // Count-guarded: a red road must fail clean, never trap the host.
+            try #require(h.model.index.entries.count == 3, "the key made the block below")
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
         }
     }
 
