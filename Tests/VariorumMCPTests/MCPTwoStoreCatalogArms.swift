@@ -1,0 +1,322 @@
+import Foundation
+import MCP
+
+@testable import VariorumMCP
+
+// THE CATALOG'S ARMS (VX-825 — the two-store pin's walk; the run record's BATCH 1
+// RECORD carries the table). Every tool the door serves, its landed arms and its
+// refusals — the not-shared shape on a hidden target (A passes a hidden id, B
+// and C the same string naming nothing), the rung, the tool's own refusals, and
+// the arms that meet a hidden thing BESIDE a reachable one (the counted arms,
+// the name guard, ownership, capacity, a frozen holder, a Private collecting
+// book, a tag worn only beyond reach). Ordered: reads first, then the rungs
+// upward, each act on rows no later arm needs in their old state.
+
+private func s(_ string: String) -> Value { .string(string) }
+
+extension MCPTwoStoreCatalogServerTests {
+    typealias W = CatalogWorld
+
+    static let arms: [CatalogArm] = readArms + suggestArms + writeNewArms + editArms + tailArms
+
+    // MARK: - READ
+
+    static let readArms: [CatalogArm] = [
+        CatalogArm(label: "list_books", tool: "list_books") { _, _ in [:] },
+        CatalogArm(label: "list_books · include_archived", tool: "list_books") { _, _ in ["include_archived": .bool(true)] },
+        CatalogArm(label: "list_notes", tool: "list_notes") { _, _ in [:] },
+        CatalogArm(label: "list_notes · a shared book with a Private member", tool: "list_notes") { w, _ in ["book_id": s(w.shared)] },
+        CatalogArm(label: "list_notes · a shared book, paged", tool: "list_notes") { w, _ in
+            ["book_id": s(w.shared), "limit": .int(1)] },
+        CatalogArm(label: "list_notes · the capped book", tool: "list_notes") { w, _ in ["book_id": s(w.capped)] },
+        CatalogArm(label: "list_notes · a gathering (a Private note matches its rule)", tool: "list_notes") { w, _ in
+            ["book_id": s(w.gathering)] },
+        CatalogArm(label: "list_notes · a gathering, paged", tool: "list_notes") { w, _ in
+            ["book_id": s(w.gathering), "limit": .int(1)] },
+        CatalogArm(label: "list_notes · everything shared, paged", tool: "list_notes") { _, _ in ["limit": .int(2)] },
+        CatalogArm(label: "list_notes · the Studio wing, paged", tool: "list_notes") { w, _ in
+            ["wing_id": s(w.studio), "limit": .int(1)] },
+        CatalogArm(label: "list_notes · the Studio wing (a Private note in its Pool)", tool: "list_notes") { w, _ in
+            ["wing_id": s(w.studio)] },
+        CatalogArm(label: "list_notes · Home (no wing grant)", tool: "list_notes") { _, _ in ["wing_id": s("")] },
+        CatalogArm(label: "list_notes · a hidden wing", tool: "list_notes") { w, _ in ["wing_id": s(w.attic)] },
+        CatalogArm(label: "list_notes · a hidden owned book", tool: "list_notes") { w, _ in ["book_id": s(w.vault)] },
+        CatalogArm(label: "list_notes · a hidden Private book", tool: "list_notes") { w, _ in ["book_id": s(w.diary)] },
+        CatalogArm(label: "read_note · card with ids (a hidden board holds it)", tool: "read_note") { w, _ in
+            ["note_id": s(w.card), "with_ids": .bool(true)] },
+        CatalogArm(label: "read_note · card, text", tool: "read_note") { w, _ in ["note_id": s(w.card)] },
+        CatalogArm(label: "read_note · card, everything", tool: "read_note") { w, _ in
+            ["note_id": s(w.card), "with_ids": .bool(true), "with_lineage": .bool(true), "with_commits": .bool(true),
+             "with_lenses": .bool(true), "with_tray": .bool(true), "with_versions": .bool(true)] },
+        CatalogArm(label: "read_note · a note a hidden owned book claims", tool: "read_note") { w, _ in
+            ["note_id": s(w.ownedNote), "with_ids": .bool(true)] },
+        CatalogArm(label: "read_note · a note a hidden finished book holds", tool: "read_note") { w, _ in
+            ["note_id": s(w.stuck), "with_ids": .bool(true)] },
+        CatalogArm(label: "read_note · a hidden note", tool: "read_note") { w, _ in ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "read_note · the daily Journal's entry", tool: "read_note") { w, _ in ["note_id": s(w.journalEntry)] },
+        CatalogArm(label: "read_note · a Private member of a shared book", tool: "read_note") { w, _ in
+            ["note_id": s(w.privateShared)] },
+        CatalogArm(label: "read_note · a hidden lens on card", tool: "read_note") { w, _ in
+            ["note_id": s(w.card), "lens_id": s(w.secretLens)] },
+        CatalogArm(label: "search · a word hidden notes hold", tool: "search") { _, _ in ["query": s("zebra")] },
+        CatalogArm(label: "search · words", tool: "search") { _, _ in ["query": s("words")] },
+        CatalogArm(label: "search · #board", tool: "search") { _, _ in ["query": s("#board")] },
+        CatalogArm(label: "search · #secret-topic", tool: "search") { _, _ in ["query": s("#secret-topic")] },
+        CatalogArm(label: "search · in the shared book", tool: "search") { w, _ in ["query": s("words"), "book_id": s(w.shared)] },
+        CatalogArm(label: "search · in a hidden book", tool: "search") { w, _ in ["query": s("words"), "book_id": s(w.atticBook)] },
+        CatalogArm(label: "search · in a hidden note", tool: "search") { w, _ in ["query": s("zebra"), "note_id": s(w.secretNote)] },
+        CatalogArm(label: "export_note · card", tool: "export_note") { w, _ in ["note_id": s(w.card)] },
+        CatalogArm(label: "export_note · a hidden note", tool: "export_note") { w, _ in ["note_id": s(w.atticNote)] },
+        CatalogArm(label: "list_wings", tool: "list_wings") { _, _ in [:] },
+        CatalogArm(label: "show_in_app · card", tool: "show_in_app") { w, _ in ["target": s("note"), "note_id": s(w.card)] },
+        CatalogArm(label: "show_in_app · a hidden note", tool: "show_in_app") { w, _ in
+            ["target": s("note"), "note_id": s(w.secretNote)] },
+        CatalogArm(label: "show_in_app · a hidden wing", tool: "show_in_app") { w, _ in ["target": s("wing"), "wing_id": s(w.attic)] },
+        CatalogArm(label: "show_in_app · a hidden book", tool: "show_in_app") { w, _ in ["target": s("book"), "book_id": s(w.vault)] },
+    ]
+
+    // MARK: - SUGGEST
+
+    static let suggestArms: [CatalogArm] = [
+        CatalogArm(label: "add_take · card", tool: "add_take",
+                   args: { w, _ in ["block_id": s(w.cardBlock), "text": s("A take.")] },
+                   capture: { ["aiTake": $0["take_id"] as? String ?? ""] }),
+        CatalogArm(label: "add_take · a hidden block", tool: "add_take") { w, _ in ["block_id": s(w.secretBlock), "text": s("x")] },
+        CatalogArm(label: "add_comment · card", tool: "add_comment",
+                   args: { w, _ in ["block_id": s(w.cardBlock), "text": s("An AI comment.")] },
+                   capture: { ["comment": $0["comment_id"] as? String ?? ""] }),
+        CatalogArm(label: "add_comment · a hidden block", tool: "add_comment") { w, _ in
+            ["block_id": s(w.secretBlock), "text": s("x")] },
+        CatalogArm(label: "add_takes · card", tool: "add_takes") { w, _ in
+            ["note_id": s(w.card), "takes": .array([.object(["block_id": s(w.cardBlock2), "text": s("Batch take.")])])] },
+        CatalogArm(label: "add_takes · a hidden block inside a shared note's batch", tool: "add_takes") { w, _ in
+            ["note_id": s(w.card), "takes": .array([.object(["block_id": s(w.secretBlock), "text": s("x")])])] },
+        CatalogArm(label: "add_comments · card", tool: "add_comments") { w, _ in
+            ["note_id": s(w.card), "comments": .array([.object(["block_id": s(w.cardBlock), "text": s("Batch comment.")])])] },
+        CatalogArm(label: "add_comments · a hidden note", tool: "add_comments") { w, _ in
+            ["note_id": s(w.secretNote), "comments": .array([.object(["block_id": s(w.secretBlock), "text": s("x")])])] },
+        CatalogArm(label: "delete_comment · its own", tool: "delete_comment") { _, c in ["comment_id": s(c["comment"] ?? "")] },
+        CatalogArm(label: "delete_comment · a hidden comment", tool: "delete_comment") { w, _ in ["comment_id": s(w.secretComment)] },
+        CatalogArm(label: "save_lens · card, pinned", tool: "save_lens",
+                   args: { w, _ in ["note_id": s(w.card), "name": s("AI lens"), "pin_chosen": .bool(true)] },
+                   capture: { ["lens": $0["lens_id"] as? String ?? ""] }),
+        CatalogArm(label: "save_lens · a hidden note", tool: "save_lens") { w, _ in
+            ["note_id": s(w.secretNote), "name": s("x"), "pin_chosen": .bool(true)] },
+    ]
+
+    // MARK: - WRITE NEW
+
+    static let writeNewArms: [CatalogArm] = [
+        CatalogArm(label: "create_note · in Studio", tool: "create_note",
+                   args: { w, _ in ["wing_id": s(w.studio), "text": s("A new studio note.")] },
+                   capture: { ["studioNew": $0["note_id"] as? String ?? ""] }),
+        CatalogArm(label: "create_note · into the shared book", tool: "create_note") { w, _ in
+            ["book_id": s(w.shared), "title": s("filed"), "text": s("Filed words.")] },
+        CatalogArm(label: "create_note · a hidden wing", tool: "create_note") { w, _ in ["wing_id": s(w.attic), "text": s("x")] },
+        CatalogArm(label: "create_note · a hidden book", tool: "create_note") { w, _ in ["book_id": s(w.vault), "text": s("x")] },
+        CatalogArm(label: "create_note · a hidden chapter of a shared book", tool: "create_note") { w, _ in
+            ["book_id": s(w.shared), "section_id": s(w.hiddenChapter), "text": s("x")] },
+        CatalogArm(label: "import_document · in Studio", tool: "import_document") { w, _ in
+            ["wing_id": s(w.studio), "document": s("Imported words.")] },
+        CatalogArm(label: "import_document · a book named as a hidden one is", tool: "import_document") { w, _ in
+            ["wing_id": s(w.studio), "book": .object(["name": s("Twin import"), "documents": .array([s("One.")])])] },
+        CatalogArm(label: "apply_tag · card, a new path", tool: "apply_tag") { w, _ in ["note_id": s(w.card), "tag": s("brand-new")] },
+        CatalogArm(label: "apply_tag · a hidden note", tool: "apply_tag") { w, _ in ["note_id": s(w.secretNote), "tag": s("x")] },
+        CatalogArm(label: "create_book · a name a hidden book wears", tool: "create_book") { w, _ in
+            ["name": s("Twin book"), "wing_id": s(w.studio)] },
+        CatalogArm(label: "create_book · a hidden wing", tool: "create_book") { w, _ in ["name": s("X"), "wing_id": s(w.attic)] },
+        CatalogArm(label: "create_gathering · a name a hidden book wears", tool: "create_gathering") { w, _ in
+            ["name": s("Twin gathering"), "wing_id": s(w.studio), "rule": .object(["tag": s("idea")])] },
+        CatalogArm(label: "create_gathering · a hidden wing", tool: "create_gathering") { w, _ in
+            ["name": s("G"), "wing_id": s(w.attic), "rule": .object(["star": .bool(true)])] },
+        CatalogArm(label: "add_note_to_book · a hidden note", tool: "add_note_to_book") { w, _ in
+            ["note_id": s(w.secretNote), "book_id": s(w.shared)] },
+        CatalogArm(label: "add_note_to_book · into a hidden book", tool: "add_note_to_book") { w, _ in
+            ["note_id": s(w.card), "book_id": s(w.vault)] },
+        CatalogArm(label: "add_note_to_book · already a member", tool: "add_note_to_book") { w, _ in
+            ["note_id": s(w.card), "book_id": s(w.shared)] },
+        CatalogArm(label: "create_section · the shared book", tool: "create_section",
+                   args: { w, _ in ["book_id": s(w.shared), "name": s("Part two")] },
+                   capture: { ["section": $0["section_id"] as? String ?? ""] }),
+        CatalogArm(label: "create_section · a hidden book", tool: "create_section") { w, _ in
+            ["book_id": s(w.secretBoard), "name": s("x")] },
+        CatalogArm(label: "save_version · card", tool: "save_version") { w, _ in ["note_id": s(w.card)] },
+        CatalogArm(label: "save_version · a hidden note", tool: "save_version") { w, _ in ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "file_note_in_chapter · card", tool: "file_note_in_chapter") { w, c in
+            ["note_id": s(w.card), "book_id": s(w.shared), "section_id": s(c["section"] ?? "")] },
+        CatalogArm(label: "file_note_in_chapter · a hidden chapter", tool: "file_note_in_chapter") { w, _ in
+            ["note_id": s(w.card), "book_id": s(w.shared), "section_id": s(w.hiddenChapter)] },
+        CatalogArm(label: "set_book_rule · the shared book collects #board", tool: "set_book_rule") { w, _ in
+            ["book_id": s(w.shared), "rule": .object(["tag": s("board")])] },
+        CatalogArm(label: "set_book_rule · a hidden book", tool: "set_book_rule") { w, _ in
+            ["book_id": s(w.secretBoard), "rule": .object(["tag": s("board")])] },
+        CatalogArm(label: "link_versions · card and second", tool: "link_versions") { w, _ in
+            ["note_a": s(w.card), "note_b": s(w.work),
+             "pairs": .array([.object(["block_a": s(w.cardBlock), "block_b": s(w.workBlock2)])])] },
+        CatalogArm(label: "link_versions · with a hidden note", tool: "link_versions") { w, _ in
+            ["note_a": s(w.card), "note_b": s(w.secretNote),
+             "pairs": .array([.object(["block_a": s(w.cardBlock), "block_b": s(w.secretBlock)])])] },
+        CatalogArm(label: "insert_blocks · card's end", tool: "insert_blocks") { w, _ in
+            ["note_id": s(w.card), "blocks": .array([.object(["text": s("Inserted.")])])] },
+        CatalogArm(label: "insert_blocks · after a hidden block", tool: "insert_blocks") { w, _ in
+            ["note_id": s(w.card), "after_block_id": s(w.secretBlock), "blocks": .array([.object(["text": s("x")])])] },
+        CatalogArm(label: "insert_blocks · a hidden note", tool: "insert_blocks") { w, _ in
+            ["note_id": s(w.secretNote), "blocks": .array([.object(["text": s("x")])])] },
+        CatalogArm(label: "duplicate_note · card into the shared book (a hidden board collects its tag)",
+                   tool: "duplicate_note") { w, _ in ["note_id": s(w.card), "book_id": s(w.shared), "brief": .bool(true)] },
+        CatalogArm(label: "duplicate_note · a hidden note", tool: "duplicate_note") { w, _ in ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "duplicate_note · into a hidden book", tool: "duplicate_note") { w, _ in
+            ["note_id": s(w.card), "book_id": s(w.vault)] },
+        CatalogArm(label: "copy_note_to_wing · card to Studio", tool: "copy_note_to_wing") { w, _ in
+            ["note_id": s(w.card), "wing_id": s(w.studio)] },
+        CatalogArm(label: "copy_note_to_wing · to a hidden wing", tool: "copy_note_to_wing") { w, _ in
+            ["note_id": s(w.seed), "wing_id": s(w.attic)] },
+        CatalogArm(label: "copy_note_to_wing · a hidden note", tool: "copy_note_to_wing") { w, _ in
+            ["note_id": s(w.privateStudio), "wing_id": s("")] },
+    ]
+
+    // MARK: - EDIT
+
+    static let editArms: [CatalogArm] = [
+        CatalogArm(label: "edit_take · card", tool: "edit_take") { w, _ in
+            ["take_id": s(w.cardTake), "expected_text": s("The first words of the card."), "text": s("The first words, edited.")] },
+        CatalogArm(label: "edit_take · a hidden take", tool: "edit_take") { w, _ in
+            ["take_id": s(w.secretTake), "expected_text": s("zebra words, secret."), "text": s("x")] },
+        CatalogArm(label: "divide_block · work", tool: "divide_block") { w, _ in
+            ["block_id": s(w.workBlock1), "second_half_starts_with": s("Beta")] },
+        CatalogArm(label: "divide_block · a hidden block", tool: "divide_block") { w, _ in
+            ["block_id": s(w.secretBlock), "second_half_starts_with": s("words")] },
+        CatalogArm(label: "merge_blocks · a hidden block", tool: "merge_blocks") { w, _ in
+            ["first_block_id": s(w.workBlock2), "second_block_id": s(w.secretBlock)] },
+        CatalogArm(label: "move_block · work's last to its start", tool: "move_block") { w, _ in
+            ["block_id": s(w.workBlock2), "note_id": s(w.work), "at": s("start")] },
+        CatalogArm(label: "move_block · a hidden block", tool: "move_block") { w, _ in ["block_id": s(w.secretBlock), "at": s("start")] },
+        CatalogArm(label: "set_block_name · card", tool: "set_block_name") { w, _ in ["block_id": s(w.cardBlock), "name": s("opener")] },
+        CatalogArm(label: "set_block_name · a hidden block", tool: "set_block_name") { w, _ in
+            ["block_id": s(w.secretBlock), "name": s("x")] },
+        CatalogArm(label: "delete_block · work's last", tool: "delete_block") { w, _ in ["block_id": s(w.workBlock2)] },
+        CatalogArm(label: "put_back · work's block", tool: "put_back") { w, _ in ["block_id": s(w.workBlock2)] },
+        CatalogArm(label: "delete_block · a hidden block", tool: "delete_block") { w, _ in ["block_id": s(w.secretBlock)] },
+        CatalogArm(label: "put_back · a hidden block", tool: "put_back") { w, _ in ["block_id": s(w.secretBlock)] },
+        CatalogArm(label: "set_entry_date · card", tool: "set_entry_date") { w, _ in ["note_id": s(w.card), "entry_date": s("2026-06-01")] },
+        CatalogArm(label: "set_entry_date · a hidden note", tool: "set_entry_date") { w, _ in
+            ["note_id": s(w.secretNote), "entry_date": s("2026-06-01")] },
+        CatalogArm(label: "move_note_to_wing · mover (a hidden board held it too)", tool: "move_note_to_wing") { w, _ in
+            ["note_id": s(w.mover), "wing_id": s(w.studio)] },
+        CatalogArm(label: "move_note_to_wing · to a hidden wing", tool: "move_note_to_wing") { w, _ in
+            ["note_id": s(w.second), "wing_id": s(w.attic)] },
+        CatalogArm(label: "move_note_to_wing · a hidden note", tool: "move_note_to_wing") { w, _ in
+            ["note_id": s(w.privateShared), "wing_id": s(w.studio)] },
+        CatalogArm(label: "save_commit · card", tool: "save_commit") { w, _ in ["take_id": s(w.cardTake), "message": s("saved")] },
+        CatalogArm(label: "save_commit · a hidden take", tool: "save_commit") { w, _ in ["take_id": s(w.secretTake), "message": s("x")] },
+        CatalogArm(label: "choose_take · card", tool: "choose_take") { w, _ in ["take_id": s(w.cardTake2)] },
+        CatalogArm(label: "choose_take · a hidden take", tool: "choose_take") { w, _ in ["take_id": s(w.secretTake)] },
+        CatalogArm(label: "adopt_lens · card's lens", tool: "adopt_lens") { w, _ in ["lens_id": s(w.cardLens)] },
+        CatalogArm(label: "adopt_lens · a hidden lens", tool: "adopt_lens") { w, _ in ["lens_id": s(w.secretLens)] },
+        CatalogArm(label: "remove_tag · card #board (a hidden board holds it)", tool: "remove_tag") { w, _ in
+            ["note_id": s(w.card), "tag": s("board")] },
+        CatalogArm(label: "remove_tag · not worn", tool: "remove_tag") { w, _ in ["note_id": s(w.card), "tag": s("nope")] },
+        CatalogArm(label: "remove_tag · a hidden note", tool: "remove_tag") { w, _ in
+            ["note_id": s(w.secretNote), "tag": s("secret-topic")] },
+        CatalogArm(label: "edit_comment · card's", tool: "edit_comment") { w, _ in
+            ["comment_id": s(w.cardComment), "expected_text": s("a note to self"), "text": s("a note, edited")] },
+        CatalogArm(label: "edit_comment · a hidden comment", tool: "edit_comment") { w, _ in
+            ["comment_id": s(w.secretComment), "expected_text": s("secret comment"), "text": s("x")] },
+        CatalogArm(label: "restore_comment · its own", tool: "restore_comment") { _, c in ["comment_id": s(c["comment"] ?? "")] },
+        CatalogArm(label: "restore_comment · a hidden comment", tool: "restore_comment") { w, _ in ["comment_id": s(w.secretComment)] },
+        CatalogArm(label: "set_take_label · card", tool: "set_take_label") { w, _ in ["take_id": s(w.cardTake2), "label": s("other")] },
+        CatalogArm(label: "set_take_label · a hidden take", tool: "set_take_label") { w, _ in ["take_id": s(w.secretTake), "label": s("x")] },
+        CatalogArm(label: "lock_take · card", tool: "lock_take") { w, _ in ["take_id": s(w.cardTake2)] },
+        CatalogArm(label: "unlock_take · card", tool: "unlock_take") { w, _ in ["take_id": s(w.cardTake2)] },
+        CatalogArm(label: "lock_take · a hidden take", tool: "lock_take") { w, _ in ["take_id": s(w.secretTake)] },
+        CatalogArm(label: "unlock_take · a hidden take", tool: "unlock_take") { w, _ in ["take_id": s(w.secretTake)] },
+        CatalogArm(label: "archive_take · card", tool: "archive_take") { w, _ in ["take_id": s(w.cardTake2)] },
+        CatalogArm(label: "unarchive_take · card", tool: "unarchive_take") { w, _ in ["take_id": s(w.cardTake2)] },
+        CatalogArm(label: "archive_take · a hidden take", tool: "archive_take") { w, _ in ["take_id": s(w.secretTake)] },
+        CatalogArm(label: "unarchive_take · a hidden take", tool: "unarchive_take") { w, _ in ["take_id": s(w.secretTake)] },
+        CatalogArm(label: "delete_take · its own take", tool: "delete_take") { _, c in ["take_id": s(c["aiTake"] ?? "")] },
+        CatalogArm(label: "delete_take · a hidden take", tool: "delete_take") { w, _ in ["take_id": s(w.secretTake)] },
+        CatalogArm(label: "restore_commit · card", tool: "restore_commit") { w, _ in ["commit_id": s(w.cardCommit)] },
+        CatalogArm(label: "restore_commit · a hidden commit", tool: "restore_commit") { w, _ in ["commit_id": s(w.secretCommit)] },
+        CatalogArm(label: "rename_commit · card", tool: "rename_commit") { w, _ in ["commit_id": s(w.cardCommit), "message": s("renamed")] },
+        CatalogArm(label: "rename_commit · a hidden commit", tool: "rename_commit") { w, _ in
+            ["commit_id": s(w.secretCommit), "message": s("x")] },
+        CatalogArm(label: "rename_note · card", tool: "rename_note") { w, _ in ["note_id": s(w.card), "title": s("card, renamed")] },
+        CatalogArm(label: "rename_note · a hidden note", tool: "rename_note") { w, _ in ["note_id": s(w.secretNote), "title": s("x")] },
+        CatalogArm(label: "delete_lens · its own", tool: "delete_lens") { _, c in ["lens_id": s(c["lens"] ?? "")] },
+        CatalogArm(label: "delete_lens · a hidden lens", tool: "delete_lens") { w, _ in ["lens_id": s(w.secretLens)] },
+        CatalogArm(label: "rename_book · toward a name a hidden book wears", tool: "rename_book") { w, _ in
+            ["book_id": s(w.studioBook), "name": s("Twin rename")] },
+        CatalogArm(label: "rename_book · a hidden book", tool: "rename_book") { w, _ in ["book_id": s(w.vault), "name": s("x")] },
+        CatalogArm(label: "move_note_in_book · second to the start", tool: "move_note_in_book") { w, _ in
+            ["book_id": s(w.shared), "note_id": s(w.second), "at": s("start")] },
+        CatalogArm(label: "move_note_in_book · after a hidden member", tool: "move_note_in_book") { w, _ in
+            ["book_id": s(w.shared), "note_id": s(w.second), "after_note_id": s(w.privateShared)] },
+        CatalogArm(label: "rename_chapter · Part one", tool: "rename_chapter") { w, _ in ["section_id": s(w.chapter), "name": s("Part 1")] },
+        CatalogArm(label: "rename_chapter · a hidden chapter", tool: "rename_chapter") { w, _ in
+            ["section_id": s(w.hiddenChapter), "name": s("x")] },
+        CatalogArm(label: "move_chapter · Part 1 to the end", tool: "move_chapter") { w, _ in ["section_id": s(w.chapter), "at": s("end")] },
+        CatalogArm(label: "move_chapter · a hidden chapter", tool: "move_chapter") { w, _ in
+            ["section_id": s(w.hiddenChapter), "at": s("end")] },
+        CatalogArm(label: "delete_chapter · Part two", tool: "delete_chapter") { _, c in ["section_id": s(c["section"] ?? "")] },
+        CatalogArm(label: "delete_chapter · a hidden chapter", tool: "delete_chapter") { w, _ in ["section_id": s(w.hiddenChapter)] },
+        CatalogArm(label: "remove_note_from_book · second", tool: "remove_note_from_book") { w, _ in
+            ["book_id": s(w.shared), "note_id": s(w.second)] },
+        CatalogArm(label: "remove_note_from_book · a hidden member", tool: "remove_note_from_book") { w, _ in
+            ["book_id": s(w.shared), "note_id": s(w.privateShared)] },
+        CatalogArm(label: "set_starred · card", tool: "set_starred") { w, _ in ["note_id": s(w.card), "starred": .bool(true)] },
+        CatalogArm(label: "set_starred · the shared book", tool: "set_starred") { w, _ in ["book_id": s(w.shared), "starred": .bool(true)] },
+        CatalogArm(label: "set_starred · a hidden note", tool: "set_starred") { w, _ in ["note_id": s(w.secretNote), "starred": .bool(true)] },
+        CatalogArm(label: "set_starred · a hidden book", tool: "set_starred") { w, _ in ["book_id": s(w.vault), "starred": .bool(true)] },
+        CatalogArm(label: "archive_note · mover", tool: "archive_note") { w, _ in ["note_id": s(w.mover)] },
+        CatalogArm(label: "unarchive_note · mover", tool: "unarchive_note") { w, _ in ["note_id": s(w.mover)] },
+        CatalogArm(label: "archive_note · a hidden note", tool: "archive_note") { w, _ in ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "unarchive_note · a hidden note", tool: "unarchive_note") { w, _ in ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "finish_book · the shared book (a Private member inside)", tool: "finish_book") { w, _ in
+            ["book_id": s(w.shared)] },
+        CatalogArm(label: "reopen_book · the shared book", tool: "reopen_book") { w, _ in ["book_id": s(w.shared)] },
+        CatalogArm(label: "finish_book · a hidden book", tool: "finish_book") { w, _ in ["book_id": s(w.vault)] },
+        CatalogArm(label: "reopen_book · a hidden book", tool: "reopen_book") { w, _ in ["book_id": s(w.finished)] },
+        CatalogArm(label: "archive_book · a book with a Private member", tool: "archive_book") { w, _ in
+            ["book_id": s(w.doomed)] },
+        CatalogArm(label: "unarchive_book · that book", tool: "unarchive_book") { w, _ in ["book_id": s(w.doomed)] },
+        CatalogArm(label: "archive_book · a hidden book", tool: "archive_book") { w, _ in ["book_id": s(w.vault)] },
+        CatalogArm(label: "unarchive_book · a hidden book", tool: "unarchive_book") { w, _ in ["book_id": s(w.atticBook)] },
+        CatalogArm(label: "list_my_activity", tool: "list_my_activity") { _, _ in ["limit": .int(200)] },
+        CatalogArm(label: "list_books · after the acts", tool: "list_books") { _, _ in [:] },
+        CatalogArm(label: "list_notes · the shared book after the acts", tool: "list_notes") { w, _ in ["book_id": s(w.shared)] },
+        CatalogArm(label: "list_wings · after the acts", tool: "list_wings") { _, _ in [:] },
+        CatalogArm(label: "delete_note · mover", tool: "delete_note") { w, _ in ["note_id": s(w.mover)] },
+        CatalogArm(label: "delete_note · a hidden note", tool: "delete_note") { w, _ in ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "delete_book · a book with a Private member", tool: "delete_book") { w, _ in
+            ["book_id": s(w.doomed)] },
+        CatalogArm(label: "delete_book · a hidden book", tool: "delete_book") { w, _ in ["book_id": s(w.vault)] },
+    ]
+
+    // MARK: - THE TAIL — arms whose act lands in one store and not the other,
+    // or changes what the client reaches (each a recorded exception or
+    // finding — the record's catalog), walked LAST so the state they fork never
+    // reaches an arm compared byte for byte.
+
+    static let tailArms: [CatalogArm] = [
+        CatalogArm(label: "create_note · a capped book (a Private member fills it)", tool: "create_note") { w, _ in
+            ["book_id": s(w.cappedToo), "text": s("Over the cap?")] },
+        CatalogArm(label: "apply_tag · card, a path only a hidden note wears", tool: "apply_tag") { w, _ in
+            ["note_id": s(w.card), "tag": s("secret-topic")] },
+        CatalogArm(label: "apply_tag · a studio note, a Private book's tag", tool: "apply_tag") { w, _ in
+            ["note_id": s(w.studioMember), "tag": s("idea")] },
+        CatalogArm(label: "add_note_to_book · a note an unreadable owned book claims", tool: "add_note_to_book") { w, _ in
+            ["note_id": s(w.ownedNote), "book_id": s(w.shared)] },
+        CatalogArm(label: "add_note_to_book · the capped book (a Private member fills it)", tool: "add_note_to_book") { w, _ in
+            ["note_id": s(w.work), "book_id": s(w.capped)] },
+        CatalogArm(label: "duplicate_note · seed in Studio (a Private book collects its tag)", tool: "duplicate_note",
+                   args: { w, _ in ["note_id": s(w.seed), "brief": .bool(true)] },
+                   capture: { ["seedCopy": $0["note_id"] as? String ?? ""] }),
+        CatalogArm(label: "read_note · the seed's copy (a Private book took it in)", tool: "read_note") { _, c in
+            ["note_id": s(c["seedCopy"] ?? ""), "with_ids": .bool(true)] },
+        CatalogArm(label: "move_note_to_wing · a note an unreadable finished book holds", tool: "move_note_to_wing") { w, _ in
+            ["note_id": s(w.stuck), "wing_id": s(w.studio)] },
+        CatalogArm(label: "remove_tag · card #secret-topic (only a hidden note wears it after)", tool: "remove_tag") { w, _ in
+            ["note_id": s(w.card), "tag": s("secret-topic")] },
+    ]
+}

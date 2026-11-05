@@ -33,7 +33,16 @@ final class ServerHarness: @unchecked Sendable {
     let asks = LockIsolated<[MCPAsk]>([])
     let receipts = LockIsolated<[MCPWriteReceipt]>([])
 
-    init() throws {
+    /// VX-825 (the VX-809 run — the two-store catalog): with a `seed`, the
+    /// position jitter is DETERMINISTIC — one seeded generator, shared by the
+    /// fixture scope (`within`) and the write executor, so two stores driven
+    /// through the same calls mint the same positions. nil (every other
+    /// suite) keeps the system generator, byte-unchanged.
+    private let seededRNG: WithRandomNumberGenerator?
+
+    init(seed: UInt64? = nil) throws {
+        let rng = seed.map { WithRandomNumberGenerator(HarnessSeededGenerator(seed: $0)) }
+        seededRNG = rng
         let database = try AppDatabase.inMemory()
         self.database = database
         let start = Date(timeIntervalSince1970: 1_782_864_000)
@@ -54,7 +63,7 @@ final class ServerHarness: @unchecked Sendable {
             .appendingPathComponent("vmcp-\(UUID().uuidString.prefix(8))", isDirectory: true)
         host = MCPServerHost(
             database: database, operations: operations, directory: directory, version: "test",
-            executor: SeededExecutor(operations: writeOperations))
+            executor: SeededExecutor(operations: writeOperations, rng: rng))
         let asks = self.asks
         let receipts = self.receipts
         host.hooks = MCPHostHooks(
@@ -73,7 +82,7 @@ final class ServerHarness: @unchecked Sendable {
     /// clock.
     func within<T>(_ body: () async throws -> T) async throws -> T {
         try await withDependencies {
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+            $0.withRandomNumberGenerator = seededRNG ?? WithRandomNumberGenerator(SystemRandomNumberGenerator())
         } operation: {
             try await body()
         }
@@ -193,13 +202,32 @@ final class ServerHarness: @unchecked Sendable {
 /// dependencies; production reads the live RNG, as every write does).
 actor SeededExecutor: MCPWriteExecutor {
     private let operations: Operations
-    init(operations: Operations) { self.operations = operations }
+    /// VX-825: a shared seeded generator (the two-store catalog); nil = the
+    /// system generator, as every other suite runs.
+    private let rng: WithRandomNumberGenerator?
+    init(operations: Operations, rng: WithRandomNumberGenerator? = nil) {
+        self.operations = operations
+        self.rng = rng
+    }
     func run<T: Sendable>(_ body: @Sendable (Operations) throws -> T) throws -> T {
         try withDependencies {
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+            $0.withRandomNumberGenerator = rng ?? WithRandomNumberGenerator(SystemRandomNumberGenerator())
         } operation: {
             try body(operations)
         }
+    }
+}
+
+/// SplitMix64 — the harness's deterministic jitter (VX-825's two-store catalog).
+struct HarnessSeededGenerator: RandomNumberGenerator, Sendable {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed }
+    mutating func next() -> UInt64 {
+        state &+= 0x9E37_79B9_7F4A_7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
+        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
+        return z ^ (z >> 31)
     }
 }
 

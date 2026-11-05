@@ -162,12 +162,13 @@ One batch = one acceptance unit = one implementer session. Evidence by kind: the
 | B1-3 | Retire `duplicate_note`'s `landed` counted arm | DONE (`fc45ea23e`) — pins RED on old (the hidden store's `landed` read "…, and a book not shared with you, which collects one of its tags"), GREEN after |
 | B1-4 | Retire `move_note_to_wing`'s `left_books` hidden arm | DONE (`fc45ea23e`) — pin RED on old (`{"book_id":"F0000000-…"}` crossed), GREEN after |
 | B1-5 | The three tool descriptions to the new shape | DONE (`fc45ea23e`) — pin RED on old, GREEN after |
-| B1-6 | Name guard verify (VX-259 / VX-363 / create_gathering) — standing pins named + two-store arms | NOT STARTED |
+| B1-6 | Name guard verify (VX-259 / VX-363 / create_gathering) | DONE — VERIFIED IN CODE, no build: all four wire roads pass `readableBooks(clientName)` (`Operations.BookNameReach` — a colliding reading counts only while this client can READ it): `import_document`'s book form (`MCPWriteTools.swift:533`), `create_book` (`:585`), `create_gathering` (`MCPWriteTools+CreateGathering.swift:66`), `rename_book` incl. gatherings (`MCPWriteTools+LibraryEdits.swift:395`). Standing pins: `MCPBookNameReachServerTests` (rename · create_book · the import book form); `create_gathering` had none — its two-store arm is now the catalog's. Two-store arms (each name worn by a PRIVATE book in Studio in A only): all four LAND, byte-identical across the stores |
 | B1-7 | FORK F-2 (P-809-2) — the ownership refusals (+ S-2 folds in; S-1/#218 stands) | DONE (this commit) — `MCPHiddenCause.swift` (the reachable verdict; the two fixed sentences; a readable claimant's refusal RE-KEYED to readable claimants only, so no unreadable id rides into any host's words); `add_note_to_book` + `move_note_to_wing`'s frozen arm wired. `MCPHiddenCauseServerTests` 5 tests (6 cases) RED on the pre-build call sites (logged: every arm carried `F0000000-…` — the hidden owner/claimant/frozen book's id), GREEN after; one justified edit (`MCPWingMoveServerTests` — the unreadable frozen book now says the move's fixed sentence). Note: no "readable plain book beside a hidden owner" arm exists locally (ownership is exclusive — only a sync residue could make one) |
-| B1-8 | THE TWO-STORE CATALOG PIN — harness + the walk + the catalog table | NOT STARTED |
+| B1-8 | THE TWO-STORE CATALOG PIN | DONE (this commit) — `MCPTwoStoreCatalogServerTests` + `MCPTwoStoreCatalogArms.swift`: 181 arms over all 68 tools (`theWalkCoversEveryDeclaredTool`), three stores (A hidden · B, C none — B==C is the control), GREEN: 176 IDENTICAL · 4 EXCEPTIONS (A-809-4) · 1 PENDING FINDING (F-5, below). It FOUND two more leaks, fixed here (B1-12) |
 | B1-9 | VX-826 — the exact-repro pin, the journal class's pins + fix (F-4, A-809-10) | DONE (this commit). (1) THE EXACT REPRO is HOLLOW on today's tree: `MCPDuplicateDateTitleServerTests` GREEN ×3 forms on `0e8e00830`; with VX-759's `keepingNamedDay` forced off (the named revert, run then `git checkout --`'d — the file restored, `git diff` empty) it went RED ×3 at the copy's `read_note` title ⇒ the agent's 2-of-7 was VX-759's class on a build without VX-759 — recorded fixed-by-VX-759, not re-fixed. (2) THE JOURNAL CLASS (the remainder): `DuplicateDateTitleTests` RED on `0e8e00830` (4 cases: her Duplicate with/without Tags, Copy to Wing's copyPost and bare-row paths — the copy named for today), GREEN after the fix — `DuplicateDay`'s guard drops `profile != .journal` (P-809-7; the edit kept to the guard line + its one doc bullet, `profile` left on the signature unread — the VX-845 seam, coordinator's request). Residuals byte-verbatim and GREEN on both sides: typed-titled undated (journal + generic) stays undated, dated journal verbatim, saved version date-cleared (V3). Justified edits: `DuplicateKeepsItsDayTests` — the rule table's journal arm, and the two "journal stays undated" pins re-pointed to the new class (their canonical-entry asserts dropped — VX-797 owns that seam). Duplicate/date family: 41 + 96 tests green |
 | B1-10 | FORK F-3 — VX-825's titular ask: `tag_unused_in_reach` + THE SHARED BRAIN | RULED IN A-809-9 — DONE (this commit): the brain (signature below), the wire arm, the description; pins GREEN (`TagUsageQueriesTests` 8, `MCPReachPureAnswersServerTests` +4) |
 | B1-11 | Self-assessment + test counts | NOT STARTED |
+| B1-12 | Two leaks the catalog found, fixed (the law is ruled; no new behavior chosen): (a) `list_notes`' `book_ids` listed EVERY live book holding a note — unreadable ones' ids crossed; now readable books only. (b) `list_notes` paged on RAW rows: a hidden row shortened a page, and `next_cursor` (base64 of the last raw row) carried a HIDDEN note's id; a gathering cursor's key was its assembly index, counting hidden notes. Now the page is walked over READABLE rows (`MCPReadTools.listNotes`), the cursor names the last KEPT row, a gathering cursor's key is the readable ordinal | DONE (this commit) — RED-ON-OLD PENDING: the named revert of `MCPReadTools.swift` runs next |
 
 ### THE SHARED UNUSED-TAGS BRAIN — settled (A-809-9; for the relay to vx-828 / VX-840)
 
@@ -184,6 +185,212 @@ One batch = one acceptance unit = one implementer session. Evidence by kind: the
 - **Block tags ARE wire-visible** (the survey A-809-9 asked for): the wire's `search` runs at the PASSAGE level, whose `#tag` filter matches block-level tags (`SearchComposer.tagSubtree`, `.passage` — "`d.block_id IN (… block_tag …)`"), so the wire arm includes block applications on readable notes, as the ruling's default said.
 - **A wire tag listing: NOT APPLICABLE** — no tool lists tags today (the 68-tool catalog has none; tags reach the wire only as a note's header paths and as answer echoes).
 - **For a batch caller** (the sweep over a wing's tags): call it per tag over `Queries.allTags(db, wingID:)` — ∝ the wing's tags × their applications, the sweep's own scale; a batched statement can be added BESIDE it in this file if their pane needs one (same SQL fragments), never a second predicate.
+
+
+### THE CATALOG (B1-8) — tool × arm × verdict (generated by the pin, `VX825_CATALOG_TABLE=<path> swift test --filter MCPTwoStoreCatalogServerTests`)
+
+**Method.** Three stores built through the same calls in the same order: **A** holds the hidden things (an owned Vault claiming a reachable note; a living "Secret board" collecting #board and holding two reachable notes; a finished book holding a reachable note; a PRIVATE "Diary" in Studio collecting #idea; four PRIVATE books named as the client's later mints; a whole ungranted wing "Attic" with a book and a note; the daily Journal and a ⌘J entry; PRIVATE members of four reachable books, one FIRST in its order; a hidden chapter; an ungranted Home note — with a block, take, comment, commit and lens — wearing a vocabulary tag no readable note wears; a PRIVATE Studio note a gathering's rule matches). **B** and **C** hold none (B==C is the harness's determinism CONTROL). Hidden rows are minted by a separate operations value (`F0000000-…` ids, its own clock and jitter), and the harness's jitter is SEEDED (`ServerHarness(seed:)`), so every reachable id/stamp/position aligns. The SAME client (`claude-code`: EDIT on books Shared · Capped · Capped too · Doomed, EDIT on the Studio wing, EDIT on two notes, READ on one) walks 181 arms; A passes hidden ids where B and C pass the same strings naming nothing. Ids the walk MINTS compare as identities (per-arm first-appearance order): production ids are random UUIDv4, so the harness's incrementing counter would otherwise turn a row the client never sees (a hidden book seating a copy) into a shifted id. A crossing check (incl. inside base64 cursors) fails any arm whose A answer carries a hidden id B's does not.
+
+**Exceptions (A-809-4's one class — each asserted to answer exactly the ruled words):** `add_note_to_book` on a note an unreadable owned book claims → P-809-2's sentence · `move_note_to_wing` on a note an unreadable finished book holds → the move's sentence (S-2) · `create_note` / `add_note_to_book` into a capped book a Private member fills → her capacity words about the READABLE target (S-1, #218 stands).
+
+**PENDING FINDING F-5** — see below; the row asserts today's behavior exactly so any change is seen.
+
+| Arm | Answer (A) | Verdict |
+|---|---|---|
+| list_books | landed | IDENTICAL |
+| list_books · include_archived | landed | IDENTICAL |
+| list_notes | landed | IDENTICAL |
+| list_notes · a shared book with a Private member | landed | IDENTICAL |
+| list_notes · a shared book, paged | landed | IDENTICAL |
+| list_notes · the capped book | landed | IDENTICAL |
+| list_notes · a gathering (a Private note matches its rule) | landed | IDENTICAL |
+| list_notes · a gathering, paged | landed | IDENTICAL |
+| list_notes · everything shared, paged | landed | IDENTICAL |
+| list_notes · the Studio wing, paged | landed | IDENTICAL |
+| list_notes · the Studio wing (a Private note in its Pool) | landed | IDENTICAL |
+| list_notes · Home (no wing grant) | refused | IDENTICAL |
+| list_notes · a hidden wing | refused | IDENTICAL |
+| list_notes · a hidden owned book | refused | IDENTICAL |
+| list_notes · a hidden Private book | refused | IDENTICAL |
+| read_note · card with ids (a hidden board holds it) | landed | IDENTICAL |
+| read_note · card, text | landed | IDENTICAL |
+| read_note · card, everything | landed | IDENTICAL |
+| read_note · a note a hidden owned book claims | landed | IDENTICAL |
+| read_note · a note a hidden finished book holds | landed | IDENTICAL |
+| read_note · a hidden note | refused | IDENTICAL |
+| read_note · the daily Journal's entry | refused | IDENTICAL |
+| read_note · a Private member of a shared book | refused | IDENTICAL |
+| read_note · a hidden lens on card | refused | IDENTICAL |
+| search · a word hidden notes hold | landed | IDENTICAL |
+| search · words | landed | IDENTICAL |
+| search · #board | landed | IDENTICAL |
+| search · #secret-topic | landed | IDENTICAL |
+| search · in the shared book | landed | IDENTICAL |
+| search · in a hidden book | refused | IDENTICAL |
+| search · in a hidden note | refused | IDENTICAL |
+| export_note · card | landed | IDENTICAL |
+| export_note · a hidden note | refused | IDENTICAL |
+| list_wings | landed | IDENTICAL |
+| show_in_app · card | landed | IDENTICAL |
+| show_in_app · a hidden note | refused | IDENTICAL |
+| show_in_app · a hidden wing | refused | IDENTICAL |
+| show_in_app · a hidden book | refused | IDENTICAL |
+| add_take · card | landed | IDENTICAL |
+| add_take · a hidden block | refused | IDENTICAL |
+| add_comment · card | landed | IDENTICAL |
+| add_comment · a hidden block | refused | IDENTICAL |
+| add_takes · card | landed | IDENTICAL |
+| add_takes · a hidden block inside a shared note's batch | refused | IDENTICAL |
+| add_comments · card | landed | IDENTICAL |
+| add_comments · a hidden note | refused | IDENTICAL |
+| delete_comment · its own | landed | IDENTICAL |
+| delete_comment · a hidden comment | refused | IDENTICAL |
+| save_lens · card, pinned | landed | IDENTICAL |
+| save_lens · a hidden note | refused | IDENTICAL |
+| create_note · in Studio | landed | IDENTICAL |
+| create_note · into the shared book | landed | IDENTICAL |
+| create_note · a hidden wing | refused | IDENTICAL |
+| create_note · a hidden book | refused | IDENTICAL |
+| create_note · a hidden chapter of a shared book | refused | IDENTICAL |
+| import_document · in Studio | landed | IDENTICAL |
+| import_document · a book named as a hidden one is | landed | IDENTICAL |
+| apply_tag · card, a new path | landed | IDENTICAL |
+| apply_tag · a hidden note | refused | IDENTICAL |
+| create_book · a name a hidden book wears | landed | IDENTICAL |
+| create_book · a hidden wing | refused | IDENTICAL |
+| create_gathering · a name a hidden book wears | landed | IDENTICAL |
+| create_gathering · a hidden wing | refused | IDENTICAL |
+| add_note_to_book · a hidden note | refused | IDENTICAL |
+| add_note_to_book · into a hidden book | refused | IDENTICAL |
+| add_note_to_book · already a member | refused | IDENTICAL |
+| create_section · the shared book | landed | IDENTICAL |
+| create_section · a hidden book | refused | IDENTICAL |
+| save_version · card | landed | IDENTICAL |
+| save_version · a hidden note | refused | IDENTICAL |
+| file_note_in_chapter · card | landed | IDENTICAL |
+| file_note_in_chapter · a hidden chapter | refused | IDENTICAL |
+| set_book_rule · the shared book collects #board | landed | IDENTICAL |
+| set_book_rule · a hidden book | refused | IDENTICAL |
+| link_versions · card and second | landed | IDENTICAL |
+| link_versions · with a hidden note | refused | IDENTICAL |
+| insert_blocks · card's end | landed | IDENTICAL |
+| insert_blocks · after a hidden block | refused | IDENTICAL |
+| insert_blocks · a hidden note | refused | IDENTICAL |
+| duplicate_note · card into the shared book (a hidden board collects its tag) | landed | IDENTICAL |
+| duplicate_note · a hidden note | refused | IDENTICAL |
+| duplicate_note · into a hidden book | refused | IDENTICAL |
+| copy_note_to_wing · card to Studio | landed | IDENTICAL |
+| copy_note_to_wing · to a hidden wing | refused | IDENTICAL |
+| copy_note_to_wing · a hidden note | refused | IDENTICAL |
+| edit_take · card | landed | IDENTICAL |
+| edit_take · a hidden take | refused | IDENTICAL |
+| divide_block · work | landed | IDENTICAL |
+| divide_block · a hidden block | refused | IDENTICAL |
+| merge_blocks · a hidden block | refused | IDENTICAL |
+| move_block · work's last to its start | landed | IDENTICAL |
+| move_block · a hidden block | refused | IDENTICAL |
+| set_block_name · card | landed | IDENTICAL |
+| set_block_name · a hidden block | refused | IDENTICAL |
+| delete_block · work's last | landed | IDENTICAL |
+| put_back · work's block | landed | IDENTICAL |
+| delete_block · a hidden block | refused | IDENTICAL |
+| put_back · a hidden block | refused | IDENTICAL |
+| set_entry_date · card | landed | IDENTICAL |
+| set_entry_date · a hidden note | refused | IDENTICAL |
+| move_note_to_wing · mover (a hidden board held it too) | landed | IDENTICAL |
+| move_note_to_wing · to a hidden wing | refused | IDENTICAL |
+| move_note_to_wing · a hidden note | refused | IDENTICAL |
+| save_commit · card | landed | IDENTICAL |
+| save_commit · a hidden take | refused | IDENTICAL |
+| choose_take · card | landed | IDENTICAL |
+| choose_take · a hidden take | refused | IDENTICAL |
+| adopt_lens · card's lens | landed | IDENTICAL |
+| adopt_lens · a hidden lens | refused | IDENTICAL |
+| remove_tag · card #board (a hidden board holds it) | landed | IDENTICAL |
+| remove_tag · not worn | refused | IDENTICAL |
+| remove_tag · a hidden note | refused | IDENTICAL |
+| edit_comment · card's | landed | IDENTICAL |
+| edit_comment · a hidden comment | refused | IDENTICAL |
+| restore_comment · its own | landed | IDENTICAL |
+| restore_comment · a hidden comment | refused | IDENTICAL |
+| set_take_label · card | landed | IDENTICAL |
+| set_take_label · a hidden take | refused | IDENTICAL |
+| lock_take · card | landed | IDENTICAL |
+| unlock_take · card | landed | IDENTICAL |
+| lock_take · a hidden take | refused | IDENTICAL |
+| unlock_take · a hidden take | refused | IDENTICAL |
+| archive_take · card | landed | IDENTICAL |
+| unarchive_take · card | landed | IDENTICAL |
+| archive_take · a hidden take | refused | IDENTICAL |
+| unarchive_take · a hidden take | refused | IDENTICAL |
+| delete_take · its own take | landed | IDENTICAL |
+| delete_take · a hidden take | refused | IDENTICAL |
+| restore_commit · card | landed | IDENTICAL |
+| restore_commit · a hidden commit | refused | IDENTICAL |
+| rename_commit · card | landed | IDENTICAL |
+| rename_commit · a hidden commit | refused | IDENTICAL |
+| rename_note · card | landed | IDENTICAL |
+| rename_note · a hidden note | refused | IDENTICAL |
+| delete_lens · its own | landed | IDENTICAL |
+| delete_lens · a hidden lens | refused | IDENTICAL |
+| rename_book · toward a name a hidden book wears | landed | IDENTICAL |
+| rename_book · a hidden book | refused | IDENTICAL |
+| move_note_in_book · second to the start | landed | IDENTICAL |
+| move_note_in_book · after a hidden member | refused | IDENTICAL |
+| rename_chapter · Part one | landed | IDENTICAL |
+| rename_chapter · a hidden chapter | refused | IDENTICAL |
+| move_chapter · Part 1 to the end | landed | IDENTICAL |
+| move_chapter · a hidden chapter | refused | IDENTICAL |
+| delete_chapter · Part two | landed | IDENTICAL |
+| delete_chapter · a hidden chapter | refused | IDENTICAL |
+| remove_note_from_book · second | landed | IDENTICAL |
+| remove_note_from_book · a hidden member | refused | IDENTICAL |
+| set_starred · card | landed | IDENTICAL |
+| set_starred · the shared book | landed | IDENTICAL |
+| set_starred · a hidden note | refused | IDENTICAL |
+| set_starred · a hidden book | refused | IDENTICAL |
+| archive_note · mover | landed | IDENTICAL |
+| unarchive_note · mover | landed | IDENTICAL |
+| archive_note · a hidden note | refused | IDENTICAL |
+| unarchive_note · a hidden note | refused | IDENTICAL |
+| finish_book · the shared book (a Private member inside) | landed | IDENTICAL |
+| reopen_book · the shared book | landed | IDENTICAL |
+| finish_book · a hidden book | refused | IDENTICAL |
+| reopen_book · a hidden book | refused | IDENTICAL |
+| archive_book · a book with a Private member | landed | IDENTICAL |
+| unarchive_book · that book | landed | IDENTICAL |
+| archive_book · a hidden book | refused | IDENTICAL |
+| unarchive_book · a hidden book | refused | IDENTICAL |
+| list_my_activity | landed | IDENTICAL |
+| list_books · after the acts | landed | IDENTICAL |
+| list_notes · the shared book after the acts | landed | IDENTICAL |
+| list_wings · after the acts | landed | IDENTICAL |
+| delete_note · mover | landed | IDENTICAL |
+| delete_note · a hidden note | refused | IDENTICAL |
+| delete_book · a book with a Private member | landed | IDENTICAL |
+| delete_book · a hidden book | refused | IDENTICAL |
+| create_note · a capped book (a Private member fills it) | A refused / B landed | EXCEPTION (A-809-4 S-1 — fullness of the readable target; #218 stands) |
+| apply_tag · card, a path only a hidden note wears | landed | IDENTICAL |
+| apply_tag · a studio note, a Private book's tag | landed | IDENTICAL |
+| add_note_to_book · a note an unreadable owned book claims | A refused / B landed | EXCEPTION (A-809-4 / P-809-2 — the owner is beyond reach) |
+| add_note_to_book · the capped book (a Private member fills it) | A refused / B landed | EXCEPTION (A-809-4 S-1 — fullness of the readable target; #218 stands) |
+| duplicate_note · seed in Studio (a Private book collects its tag) | landed | IDENTICAL |
+| read_note · the seed's copy (a Private book took it in) | A refused / B landed | PENDING FINDING (F-5 — an AI-applied tag seats the note into a hidden Private book, fencing it) |
+| move_note_to_wing · a note an unreadable finished book holds | A refused / B landed | EXCEPTION (A-809-4 S-2 — the frozen book is beyond reach) |
+| remove_tag · card #secret-topic (only a hidden note wears it after) | landed | IDENTICAL |
+
+### FINDING F-5 (for the orchestrator — NOT built): an AI act that applies a tag can move the note out of the client's reach, because a hidden PRIVATE book collects that tag
+
+**Mechanism (traced + pinned by the catalog's tail row):** intake is event-driven — an applying act (a tag application, a star) is heard by every living book whose rule collects it, and a book that joins quietly SEATS the note (`IntakeDecision`). The fence's Private leg holds for "a live member of a live reading carrying the Private mark" (`MCPGrantQueries.mcpNoteFacts`). So when a WIRE act applies a tag — `duplicate_note` with_tags (the catalog's arm: the copy of a Studio note lands, then is seated in the hidden PRIVATE "Diary" collecting #idea), `apply_tag`, `set_starred`, and from batch 3 `create_note` tags — and a Private book collects that tag, the note becomes FENCED: the act's own answer is pure (byte-identical across the stores), but the client's NEXT read of that note answers not-shared, where a store without the Private book reads it. What leaks: the bit "a Private book collects tag X" — the topic channel her R-825 question named ("the book subject alone could tell you something").
+
+**Options:**
+- **(a) LEAN — an intake seat a WIRE act triggers never FENCES the note: where the seat would make it fenced (a Private book, or the daily Journal's membership leg), it BELLS instead** (an arrival is no membership, so no fence; her own seat from Arrivals is her act — the same as her marking the note Private). The precedent is P-13nb-U4-16 ("an agent-written rule bells, never backfill-seats" — a rule write must not move the writer's own reach); this is its mirror for applications. Cost: her Private book's auto-intake from AI-applied tags waits at Arrivals. Touches `Operations` intake (an op every AI write rides) — a seam beyond this batch's door files; the author's call (product behavior).
+- **(b) accept it as the law's second recorded exception** (the act's CONSEQUENCE on reach, not its answer) — her Private mark wins ties by design; the topic bit leaks.
+- **(c) refuse the applying act where the seat would fence the note** (a fixed sentence) — the same bit leaks, earlier, and the act is lost; rejected.
+
+### FINDING F-6 (for the orchestrator — a modeling question, NOT built): is a wing's TAG VOCABULARY reachable state?
+
+The catalog models the vocabulary as reachable (the tag `secret-topic` exists in BOTH stores; in A only a hidden note wears it), and under that model every arm is pure (`apply_tag` adopts the same tag; `remove_tag`'s `tag_unused_in_reach` answers `true` in both). But a tag path usually EXISTS because some note was tagged, and several answers say adopt-vs-mint explicitly — `move_note_to_wing`/`copy_note_to_wing`'s `tags: {adopted, made}`, `create_gathering`'s `minted_tags`, `set_book_rule`'s minted tags (and batch 3's `create_note` tags) — so a path worn only by hidden notes (e.g. a Private note's "therapy") is observable as "adopted" where a store without that note "made" it. **Options:** (a) the vocabulary is wing-level configuration, reachable to the wing's clients — as built, no change; (b) a tag counts as reachable only while a note (or block) the client can read wears it — adopt-vs-mint answers would then report such a tag as made (the act still adopts — no twin). Lean (a) for now (tags have no fence of their own and no grant; (b) makes the answer say "made" of a tag that was adopted); hers if (b).
 
 ### FORK F-1 — the fixed scope words (P-809-1) — PROPOSED, orchestrator to rule
 
