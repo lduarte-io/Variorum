@@ -202,9 +202,14 @@ struct MCPWingMoveServerTests {
             #expect(answer["moved"] as? Bool == true)
             #expect(answer["landed"] as? String == "the Pool of \u{201C}variorum\u{201D}")
             let left = try #require(answer["left_books"] as? [[String: Any]])
-            #expect(left.map { $0["book_id"] as? String } == [w.alpha.id, hidden.id])
-            #expect(left.map { $0["name"] as? String } == ["Alpha", nil],
-                    "a book the client can't read is named by id only — names stay with grants")
+            // VX-825 (the VX-809 run, batch 1 — a JUSTIFIED EDIT, her R-825): a
+            // book the client can't read is neither listed nor counted — its id
+            // no longer crosses — and the fixed scope words ride. Her receipt
+            // still counts both (below).
+            #expect(left.map { $0["book_id"] as? String } == [w.alpha.id])
+            #expect(left.map { $0["name"] as? String } == ["Alpha"],
+                    "only the readable book — names stay with grants, and so do ids")
+            #expect(answer["beyond_reach"] as? String == MCPWriteTools.beyondReachWords)
             let tags = try #require(answer["tags"] as? [String: Int])
             #expect(tags == ["adopted": 0, "made": 1], "#writing is made in the new wing by its path")
 

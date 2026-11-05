@@ -392,7 +392,7 @@ struct MCPDuplicateNoteFilingServerTests {
 
     /// The destination COLLECTS one of the copy's tags: the membership comes first, so the copy
     /// is ONE member, filed in its chapter, never an arrival — and the applications are then
-    /// heard by the OTHER books (one the client can't read is said without its name).
+    /// heard by the OTHER books (one the client can't read is not said at all — VX-825).
     /// **RED on old:** the wing's refusal. (The ORDER's own red is the U2 record's revert check.)
     @Test func aDestinationThatCollectsItsTagTakesTheCopyOnceFiledInItsChapter() async throws {
         let h = try ServerHarness()
@@ -421,9 +421,12 @@ struct MCPDuplicateNoteFilingServerTests {
                     "ONE row, a member, filed — never an arrival: \(rows)")
             #expect(try await members(h, hidden.id).contains(copyID), "the other collecting book heard the tag")
             #expect(answer["tag_ids"] as? [String] == [essay.id])
+            // VX-825 (the VX-809 run, batch 1 — a JUSTIFIED EDIT, her R-825): the
+            // book the client can't read is neither named nor counted any more.
             #expect(answer["landed"] as? String
-                    == "the end of \u{201C}drafts\u{201D}, in its chapter \u{201C}second drafts\u{201D}, "
-                    + "and a book not shared with you, which collects one of its tags", "\(answer["landed"] ?? "-")")
+                    == "the end of \u{201C}drafts\u{201D}, in its chapter \u{201C}second drafts\u{201D}",
+                    "\(answer["landed"] ?? "-")")
+            #expect(answer["beyond_reach"] as? String == MCPWriteTools.beyondReachWords)
             await h.hangUp(connection)
         }
     }

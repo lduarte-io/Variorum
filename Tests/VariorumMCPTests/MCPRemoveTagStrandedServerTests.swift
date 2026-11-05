@@ -21,6 +21,14 @@ import Testing
 // fenced book among them; absent when 0) — the `duplicate_note` `landed` /
 // `move_note_to_wing` `left_books` discipline. NOTHING lands on a book.
 //
+// VX-825 (the VX-809 run, batch 1 — her R-825, JUSTIFIED EDITS, the ritual):
+// the count RETIRED — a book this client can't read is neither named nor
+// counted — and every landed answer carries `still_in_books` (`[]` when no
+// readable book holds the note) beside the fixed scope words `beyond_reach`;
+// the "strands nothing answers byte-unchanged" guard became "answers the same
+// two keys" (a bare answer only when nothing hidden held the note would itself
+// tell). `MCPReachPureAnswersServerTests` holds the two-store pins.
+//
 // Wire only (the SDK's own client over a real socket). RED ON OLD: the answer
 // carried neither key (the stranded shapes), and the description said nothing of
 // the books; the strands-nothing golden and the non-event are GUARDS, green on
@@ -87,7 +95,8 @@ struct MCPRemoveTagStrandedServerTests {
             #expect(named?.count == 1 && named?.first?["book_id"] as? String == living.id
                     && named?.first?["name"] as? String == "Board", "the board is named: \(answer)")
             #expect(named?.first?.count == 2, "a book is its id and its name")
-            #expect(answer["still_in_books_hidden_count"] == nil, "nothing hidden, so no count: \(answer)")
+            #expect(answer["still_in_books_hidden_count"] == nil, "no count, ever (VX-825): \(answer)")
+            #expect(answer["beyond_reach"] as? String == MCPWriteTools.beyondReachWords)
 
             let subtree = try json(try await call(connection, "remove_tag", [
                 "note_id": .string(other.id), "tag": .string("board/doing"),
@@ -103,14 +112,14 @@ struct MCPRemoveTagStrandedServerTests {
         }
     }
 
-    // MARK: - Unreadable and fenced books are counted, never named (RED ON OLD: no key)
+    // MARK: - Unreadable and fenced books are neither named nor counted (VX-825)
 
     /// The note is reached by its own per-ask EDIT grant only (it is a member
     /// of a Private book, so it is fenced); the wing grant reads the plain
     /// board. The plain board is named; the Private book — fenced, matching
-    /// no grant — is counted, as is a board of the same wing read by no grant
-    /// at all once the wing grant is gone: one count, no id, no name.
-    @Test func anUnreadableOrFencedBookIsCountedNeverNamed() async throws {
+    /// no grant — is NOT said at all (VX-825 — it used to be counted), nor is a
+    /// board of the same wing read by no grant once the wing grant is gone.
+    @Test func anUnreadableOrFencedBookIsNeitherNamedNorCounted() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -132,13 +141,13 @@ struct MCPRemoveTagStrandedServerTests {
             let answer = try json(removed)
             #expect((answer["still_in_books"] as? [[String: Any]])?.map { $0["book_id"] as? String } == [open.id],
                     "the readable board is named: \(answer)")
-            #expect(answer["still_in_books_hidden_count"] as? Int == 1, "the Private board is counted: \(answer)")
+            #expect(answer["still_in_books_hidden_count"] == nil, "the Private board is not counted: \(answer)")
             #expect(!text(removed).contains(hidden.id) && !text(removed).contains("Secret"),
                     "a fenced book is never named nor its id said")
             #expect(try await memberships(h) == before)
 
-            // A note grant alone reads no book: both boards are counted, and
-            // the named list is there, empty.
+            // A note grant alone reads no book: neither board is said — the
+            // named list is there, empty, beside the scope words.
             _ = try h.undoStack.undo(with: h.writeOperations)
             let wing = try #require(try await h.database.read { db in
                 try String.fetchOne(db, sql: "SELECT id FROM mcp_grant WHERE scope_kind = 'wing' AND revoked_at IS NULL")
@@ -148,20 +157,23 @@ struct MCPRemoveTagStrandedServerTests {
                 "note_id": .string(note.id), "tag": .string("board"),
             ]))
             #expect((alone["still_in_books"] as? [[String: Any]])?.isEmpty == true, "\(alone)")
-            #expect(alone["still_in_books_hidden_count"] as? Int == 2, "both boards counted: \(alone)")
+            #expect(alone["still_in_books_hidden_count"] == nil, "no board counted: \(alone)")
+            #expect(alone["beyond_reach"] as? String == MCPWriteTools.beyondReachWords)
             #expect(try await memberships(h) == before)
             await h.hangUp(connection)
         }
     }
 
-    // MARK: - What strands nothing answers EXACTLY as before (GUARD)
+    // MARK: - What strands nothing answers the two keys, and nothing else (GUARD)
 
     /// The note sits in a hand-made book with no rule, in a living book that
     /// collects by ANOTHER tag, in a living book whose rule names the tag only
     /// under NOT (it never collected by it), in a FINISHED and an ARCHIVED book
     /// whose rule names it (their intake is paused), and is assembled by a
     /// GATHERING naming it (a gathering holds nothing) — none is "still holding
-    /// it by this tag", so the answer is byte for byte the pre-VX-764 answer.
+    /// it by this tag", so the answer is the pre-VX-764 answer plus exactly the
+    /// two keys every landed answer carries since VX-825 (`still_in_books: []`
+    /// and `beyond_reach`), byte for byte.
     @Test func aRemoveTagThatStrandsNothingAnswersExactlyAsBefore() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -196,24 +208,29 @@ struct MCPRemoveTagStrandedServerTests {
             let removed = try await call(connection, "remove_tag", ["note_id": .string(note.id), "tag": .string("board")])
             #expect(removed.isError != true, "\(text(removed))")
             let answer = try json(removed)
-            #expect(Set(answer.keys) == ["note_id", "tag_id", "tag", "removed"], "no new key: \(answer)")
+            #expect(Set(answer.keys) == ["note_id", "tag_id", "tag", "removed", "still_in_books", "beyond_reach"],
+                    "the two VX-825 keys and no other: \(answer)")
             #expect(text(removed) == Self.golden(noteID: note.id, tagID: board.id), "byte for byte: \(text(removed))")
             #expect(try await memberships(h) == before)
             await h.hangUp(connection)
         }
     }
 
-    /// The pre-VX-764 answer's bytes (captured on the old tree, `ebe3df7bc`).
+    /// The pre-VX-764 answer's bytes (captured on the old tree, `ebe3df7bc`),
+    /// with VX-825's two keys spliced in at their sorted places.
     static func golden(noteID: String, tagID: String) -> String {
-        #"{"note_id":"\#(noteID)","removed":true,"tag":"board","tag_id":"\#(tagID)"}"#
+        #"{"beyond_reach":"Books beyond your reach, if any, are not listed.","note_id":"\#(noteID)","#
+            + #""removed":true,"still_in_books":[],"tag":"board","tag_id":"\#(tagID)"}"#
     }
 
     // MARK: - The description says why (RED ON OLD: no sentence)
 
     @Test func theDescriptionSaysUntaggingLeavesTheNoteInItsBooksAndPointsAtGatherings() throws {
         let description = try #require(MCPToolCatalog.declaration(named: "remove_tag")).description
-        for phrase in ["still_in_books", "still_in_books_hidden_count", "remove_note_from_book", "gathering"] {
+        // VX-825 (justified edit): the count retired; the scope key in its place.
+        for phrase in ["still_in_books", "beyond_reach", "remove_note_from_book", "gathering"] {
             #expect(description.contains(phrase), "remove_tag's description says \(phrase): \(description)")
         }
+        #expect(!description.contains("hidden_count"), "no count promised: \(description)")
     }
 }

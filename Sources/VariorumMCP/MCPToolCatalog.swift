@@ -1041,8 +1041,9 @@ enum MCPToolCatalog {
             its tags come with it (a tag the other wing lacks is made there by its path). Needs \
             edit on the note and write new on the wing it goes to. A note in a finished or sealed \
             book can't move until the author reopens it. One undo for the author puts it back, \
-            books and tags too. Returns JSON: where it landed, the books it left (named where you \
-            can read them) and the tags adopted or made.
+            books and tags too. Returns JSON: where it landed, the books it left that you can read \
+            (book_id, name) — \(MCPWriteTools.beyondReachKey) says, always in the same words, that \
+            books beyond your reach, if any, are not listed — and the tags adopted or made.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1188,9 +1189,12 @@ enum MCPToolCatalog {
             fan order (take_id, label where it has one, and sha256 — equal to its source take's), \
             as create_note answers them — its tag_ids and tags (their paths: every tag the copy \
             wears once it lands, a book's outflow included), the book_id and section_id you gave, \
-            and landed: where the copy is. \(digestSentence) For a long note pass brief: true — the \
+            and landed: where the copy is, naming only books you can read — \
+            \(MCPWriteTools.beyondReachKey) says, always in the same words, that books beyond your \
+            reach, if any, are not listed. \(digestSentence) For a long note pass brief: true — the \
             answer is then only the copy's note_id, the source_note_id, its tag_ids and tags, the \
-            book_id and section_id you gave, landed, block_count and take_count (every take in its \
+            book_id and section_id you gave, landed, \(MCPWriteTools.beyondReachKey), block_count \
+            and take_count (every take in its \
             blocks' fans) and \(MCPTextDigest.fanKey), with no per-block records; read_note with \
             ids_only gives those when you need them. \(fanDigestSentence)
             """,
@@ -1270,8 +1274,9 @@ enum MCPToolCatalog {
             way out of a book (remove_note_from_book takes it out; for a board a note should leave \
             when its tag goes, use a gathering — create_gathering — which shows exactly what its \
             rule matches). One undo for the author puts the tag back. Returns JSON; \
-            still_in_books names each book (book_id, name) that collects by the tag and still holds \
-            the note, and still_in_books_hidden_count counts any not shared with you.
+            still_in_books names each book you can read (book_id, name) that collects by the tag and \
+            still holds the note — [] when none — and \(MCPWriteTools.beyondReachKey) says, always \
+            in the same words, that books beyond your reach, if any, are not listed.
             """,
         inputSchema: .object([
             "type": "object",

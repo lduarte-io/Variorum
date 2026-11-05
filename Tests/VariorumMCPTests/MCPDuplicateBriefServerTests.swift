@@ -91,9 +91,10 @@ struct MCPDuplicateBriefServerTests {
             #expect(duplicated.isError != true, "\(text(duplicated))")
             let answer = try json(duplicated)
             // A-771-2 (P-771-8): the brief form ALWAYS carries fan_sha256 — never a brief answer without it.
+            // VX-825 (justified edit): and the fixed scope words, on every landed answer.
             #expect(Set(answer.keys)
                     == ["note_id", "source_note_id", "tag_ids", "tags", "landed", "block_count", "take_count",
-                        "fan_sha256"],
+                        "fan_sha256", "beyond_reach"],
                     "ids, counts and the fan digest — no block_ids, no per-block records")
             let copyID = try #require(answer["note_id"] as? String)
             #expect(copyID != sourceID && answer["source_note_id"] as? String == sourceID)
@@ -138,7 +139,8 @@ struct MCPDuplicateBriefServerTests {
             #expect(duplicated.isError != true, "\(text(duplicated))")
             let answer = try json(duplicated)
             #expect(Set(answer.keys) == ["note_id", "source_note_id", "tag_ids", "tags", "landed", "block_count",
-                                         "take_count", "fan_sha256", "book_id", "section_id"])
+                                         "take_count", "fan_sha256", "book_id", "section_id",
+                                         "beyond_reach"])  // VX-825 (justified edit)
             #expect(answer["book_id"] as? String == book.id && answer["section_id"] as? String == chapter.id)
             #expect(answer["landed"] as? String == "the end of \u{201C}drafts\u{201D}, in its chapter \u{201C}part one\u{201D}")
             #expect(answer["block_count"] as? Int == 3 && answer["take_count"] as? Int == 4)
@@ -264,5 +266,8 @@ struct MCPDuplicateBriefServerTests {
 
     /// Captured on the tree BEFORE VX-766 (commit 3f2f650d4), this world, no
     /// `brief` — the bytes the full form must keep.
-    static let goldenFullAnswer = #"{"block_ids":["00000000-0000-0000-0000-000000000011","00000000-0000-0000-0000-000000000015","00000000-0000-0000-0000-00000000001B"],"blocks":[{"block_id":"00000000-0000-0000-0000-000000000011","shown_take_id":"00000000-0000-0000-0000-000000000012","source_block_id":"00000000-0000-0000-0000-000000000001","takes":[{"sha256":"70277bfc409b502132d7a48b2a3b386294264b31f7bf024a5fb0cafabb8ac122","take_id":"00000000-0000-0000-0000-000000000012"}]},{"block_id":"00000000-0000-0000-0000-000000000015","shown_take_id":"00000000-0000-0000-0000-000000000017","source_block_id":"00000000-0000-0000-0000-000000000004","takes":[{"sha256":"1eb32d1ee4458814f94f8b92d1bd3e06e16dca6fab43d53f700840321f27fdf4","take_id":"00000000-0000-0000-0000-000000000016"},{"label":"again","sha256":"5c70ad9e0d5befba10f7f51a9220133ee069baa71f7720e09af2f05a2ec889d1","take_id":"00000000-0000-0000-0000-000000000017"}]},{"block_id":"00000000-0000-0000-0000-00000000001B","shown_take_id":"00000000-0000-0000-0000-00000000001C","source_block_id":"00000000-0000-0000-0000-000000000009","takes":[{"sha256":"43c4d94ea2cd4fbece4f396e10852401108971f22e2f37707fbbb688ddc7fe3c","take_id":"00000000-0000-0000-0000-00000000001C"}]}],"landed":"the Pool of Home","note_id":"00000000-0000-0000-0000-000000000010","source_note_id":"00000000-0000-0000-0000-000000000000","tag_ids":["00000000-0000-0000-0000-00000000000C"],"tags":["essay"]}"#
+    /// VX-825 (the VX-809 run, batch 1 — a JUSTIFIED EDIT, the ritual): every
+    /// landed answer gains the fixed scope words (`beyond_reach`, her R-825),
+    /// spliced in at their sorted place; every other byte is the VX-766 capture.
+    static let goldenFullAnswer = #"{"beyond_reach":"Books beyond your reach, if any, are not listed.","block_ids":["00000000-0000-0000-0000-000000000011","00000000-0000-0000-0000-000000000015","00000000-0000-0000-0000-00000000001B"],"blocks":[{"block_id":"00000000-0000-0000-0000-000000000011","shown_take_id":"00000000-0000-0000-0000-000000000012","source_block_id":"00000000-0000-0000-0000-000000000001","takes":[{"sha256":"70277bfc409b502132d7a48b2a3b386294264b31f7bf024a5fb0cafabb8ac122","take_id":"00000000-0000-0000-0000-000000000012"}]},{"block_id":"00000000-0000-0000-0000-000000000015","shown_take_id":"00000000-0000-0000-0000-000000000017","source_block_id":"00000000-0000-0000-0000-000000000004","takes":[{"sha256":"1eb32d1ee4458814f94f8b92d1bd3e06e16dca6fab43d53f700840321f27fdf4","take_id":"00000000-0000-0000-0000-000000000016"},{"label":"again","sha256":"5c70ad9e0d5befba10f7f51a9220133ee069baa71f7720e09af2f05a2ec889d1","take_id":"00000000-0000-0000-0000-000000000017"}]},{"block_id":"00000000-0000-0000-0000-00000000001B","shown_take_id":"00000000-0000-0000-0000-00000000001C","source_block_id":"00000000-0000-0000-0000-000000000009","takes":[{"sha256":"43c4d94ea2cd4fbece4f396e10852401108971f22e2f37707fbbb688ddc7fe3c","take_id":"00000000-0000-0000-0000-00000000001C"}]}],"landed":"the Pool of Home","note_id":"00000000-0000-0000-0000-000000000010","source_note_id":"00000000-0000-0000-0000-000000000000","tag_ids":["00000000-0000-0000-0000-00000000000C"],"tags":["essay"]}"#
 }

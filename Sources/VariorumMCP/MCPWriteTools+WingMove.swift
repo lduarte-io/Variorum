@@ -63,26 +63,27 @@ extension MCPWriteTools {
                 }
                 throw error
             }
-            // The books it left — each by id (list_notes' book_ids already
-            // carry them), NAMED only where the client can read that book
-            // (names stay with grants, AF-10 (f); the standing that authorized
-            // this act). PROVISIONAL P-13nc-U6-2.
+            // The books it left — each `{book_id, name}`, listed ONLY where the
+            // client can read that book (names stay with grants, AF-10 (f);
+            // the standing that authorized this act; PROVISIONAL P-13nc-U6-2).
+            // VX-825 (her R-825): a book it can't read is neither listed nor
+            // counted — before, its id crossed with no name — so the list is
+            // a pure function of the client's reach, and `beyond_reach` says
+            // so. Her receipt still counts every book the note left (hers).
             let leftBooks: [[String: Any]] = try database.read { db in
-                try moved.leftBookIDs.map { bookID in
-                    var entry: [String: Any] = ["book_id": bookID]
+                try moved.leftBookIDs.compactMap { bookID in
                     let facts = try Queries.mcpBookFacts(db, readingID: bookID)
-                    if MCPGrantAuthority.decide(standing, book: facts, rung: .read).isAllowed,
-                       let name = try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar) {
-                        entry["name"] = name
-                    }
-                    return entry
+                    guard MCPGrantAuthority.decide(standing, book: facts, rung: .read).isAllowed,
+                          let name = try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar)
+                    else { return nil }
+                    return ["book_id": bookID, "name": name]
                 }
             }
             let wingTitle = wingName ?? Queries.mcpHomeWingName
             let answer: [String: Any] = [
                 "moved": true, "note_id": noteID, "wing_id": wingID,
                 "landed": Self.landedWords(wingTitle: wingTitle, isHome: wingID.isEmpty),
-                "left_books": leftBooks,
+                "left_books": leftBooks, Self.beyondReachKey: Self.beyondReachWords,
                 "tags": ["adopted": moved.move.adoptedTags, "made": moved.move.mintedTags],
             ]
             // The receipt's target is the DESTINATION wing, so a sweep's run

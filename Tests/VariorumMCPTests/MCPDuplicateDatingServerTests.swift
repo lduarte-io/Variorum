@@ -63,7 +63,9 @@ struct MCPDuplicateDatingServerTests {
             #expect(stored?.title == nil, "no title is materialized")
             let receipt = try #require(h.receipts.value.last)
             #expect(receipt.targetTitle == day, "the author's receipt names the copy as its source is named")
-            #expect(Set(answer.keys) == ["note_id", "source_note_id", "block_ids", "blocks", "tag_ids", "tags", "landed"],
+            // VX-825 (the VX-809 run — a justified edit): plus the fixed scope words.
+            #expect(Set(answer.keys) == ["note_id", "source_note_id", "block_ids", "blocks", "tag_ids", "tags", "landed",
+                                         "beyond_reach"],
                     "the answer's shape is unchanged — it never echoed a date")
             await h.hangUp(connection)
         }
