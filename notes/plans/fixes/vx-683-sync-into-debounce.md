@@ -1,6 +1,6 @@
 # VX-683 — the design memo (D-683, for her sitting; no build)
 
-**STATUS: MEMO READY for her sitting (written 2026-11-04, the handoff-walkthrough session; landed post-1.1-release). Her word 2026-11-04: VX-683 runs BUNDLED with VX-544 under one umbrella run after this memo's sitting —
+**STATUS: RULED — the sitting ran 2026-11-04 (MST evening, the handoff-walkthrough session; R-683-1…4 below). READY TO KICK OFF as the bundled run. Her word 2026-11-04: VX-683 runs BUNDLED with VX-544 under one umbrella run after this memo's sitting —
 VX-683 first, one branch, one sync-custody slot, Fable reviewing.**
 
 ## The mechanism (statically traced at VX-677 batch 1; the ticket's trace, re-verified against SyncSpec)
@@ -91,16 +91,17 @@ is "the row" differs only in that sliver.
 - **The live look:** one real two-Mac round with typing in flight (her eyes; the VX-500 live-face precedent —
   can ride the same held window).
 
-## Her questions at the sitting
+## HER RULINGS (the sitting, 2026-11-04 MST evening — each presented with full context, her picks verbatim)
 
-1. The rescue's direction — (i) recommended above.
-2. The conflict card's label: reuse `'conflict'` (one vocabulary), or a distinct label for the typed-over class
-   (e.g. `'conflict'` with no change — recommended: one word, one face)?
-3. Does A's flush fire before EVERY apply (steady-state pulls too) or only when a live editor holds a pending
-   buffer (the hook checks cheaply — recommended: only when pending, so quiet rounds stay zero-cost, P1)?
-4. VX-664's remaining pending-case sliver: fold its closure into this run (the adopt-with-pending face) or leave
-   it to its own ticket? (The fix here makes the pending case SAFE — nothing lost — but the pane's face after a
-   rescue should still be walked.)
+- **R-683-1 — the rescue's direction is (i):** her live buffer keeps the row; the displaced words land as the
+  take ("(i) My buffer keeps the row"). Nothing ever moves under her caret; both texts survive and converge.
+- **R-683-2 — the rescued take wears `'conflict'`:** one vocabulary, one face — every both-versions-survived
+  card looks the same ("Reuse 'conflict'"). Settled after the concrete retelling (two writers racing on one
+  take; a deliberate act of hers never mints this card).
+- **R-683-3 — the flush fires only when typing is pending:** one cheap check; quiet rounds stay strictly
+  zero-cost on the main thread ("Only when typing is pending").
+- **R-683-4 — VX-664's remaining half folds into this run:** the pane's face right after a rescue is walked and
+  polished while the machinery is open; VX-664 closes with the run ("Fold it into the run").
 
 ## The bundle (her word 2026-11-04)
 
