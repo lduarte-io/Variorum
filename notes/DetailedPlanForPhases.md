@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-828 — Run: editor & shell QoL** (umbrella; 8 members: VX-798 · 800 · 806 · 823 · 824 · 833 · 838 · 844) | VX-828 · `vx-828-editor-shell-qol` | `~/dev/variorum-vx-828` · the Pro | Kicked off 2026-11-05; record `notes/plans/fixes/vx-828-editor-shell-qol.md` |
+| **VX-805 — Umbrella: the journal cluster** (6 members: VX-435 · 436 · 797 · 799 · 587 · 832; HOLDS the Sync/custody slot — the §7 keeper/mend class; mirror deploy expected none of its own, the 805+808 lockstep window held until both merge) | VX-805 · `vx-805-journal-cluster` | `~/dev/variorum-vx-805` · the Pro | Kicked off 2026-11-05 (/architect-phase); record `notes/plans/fixes/vx-805-journal-cluster.md` |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
