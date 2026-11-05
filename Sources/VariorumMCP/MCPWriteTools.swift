@@ -50,8 +50,14 @@ struct MCPWriteTools: Sendable {
             if job.flushesHerEditorFirst, let beforeWrite = hooks.beforeWrite {
                 await beforeWrite(job.tool)
             }
+            // A-809-11 (PROVISIONAL P-809-8 — the VX-809 run record, BATCH 3):
+            // THE ONE PLACE the wire's acts are told apart from hers. Every act
+            // runs on the runner's value heard as the client's, so intake never
+            // SEATS a note where membership would fence it (a Private book, THE
+            // daily Journal) — on every road through the one application road;
+            // the would-be seat bells (`IntakeDecision.verdict`'s step 6).
             let result: Result<Landed, Refused> = try await executor.run { ops in
-                try self.perform(job, ops: ops, clientName: clientName)
+                try self.perform(job, ops: ops.heardAsWireClient(), clientName: clientName)
             }
             switch result {
             case .success(let landed):
