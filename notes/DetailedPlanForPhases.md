@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| **VX-828 — Run: editor & shell QoL** (umbrella; 8 members: VX-798 · 800 · 806 · 823 · 824 · 833 · 838 · 844) | VX-828 · `vx-828-editor-shell-qol` | `~/dev/variorum-vx-828` · the Pro | Kicked off 2026-11-05; record `notes/plans/fixes/vx-828-editor-shell-qol.md` |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
