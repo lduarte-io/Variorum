@@ -686,6 +686,155 @@ tickets it. P1 binds: the restore reads rows proportional to the viewport, never
 changes, the deleted-row fallback) + the orchestrator's hands-on walk (List, Cards, with a search
 live, with the day filter on).
 
+#### Batch C — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
+
+**Not done (first line, current):** NOTHING BUILT — C0 (the brief's reading, the trace, THE DESIGN
+FORK below) stops for the orchestrator's ruling under the in-batch fork rule. No code, no pins, no
+canon / QUESTIONS / shared-ledger edit; no `Shared/`, no `Sync/`, custody or keychain file.
+
+| Piece | What | Status |
+|---|---|---|
+| C0 | Preflight (the brief's list, read in this session's own context: the run record's named sections, SurfaceContracts "The Library" whole + "The app" incl. the Open-list follow line, `phase-18l-navigation-feel.md` (kickoff, R-18l-1/2, the U0c brief + RECORD whole), TEXTKIT2_NOTES' 18l-c U8 HARNESS fact and its neighbours, the Library feature folder's catalog files, `SidebarSectionWindow.swift` (the follow idiom), Takes' `ArticlePlace`/`ArticleRestore` docs) + THE TRACE + THE DESIGN FORK | DONE (this commit) — **AWAITING THE ORCHESTRATOR'S RULING** |
+| C1 | The place: a pure resolver (the remembered on-screen rows + neighbourhood → the landing row and its `into` in the CURRENT listing) + exact pins | NOT-STARTED (gated on the ruling) |
+| C2 | The model: remember on leave · restore on mount (the in-place re-ask to the place's depth) · a new question / wing drops it · the return mark (per Q2's ruling) + model pins | NOT-STARTED |
+| C3 | The view: the rows' content-space reports + the scroll memory on the three scroll views (List column · Cards · the answer sheet) + the unbound landing and its hold; mounted pins (red on old: the remount lands at the top) | NOT-STARTED |
+| C4 | Self-assessment, the end-of-batch core `swift test`, the app `build-for-testing` | NOT-STARTED |
+
+#### Batch C — THE TRACE (why the Library forgets — an Improvement, no bug mechanism; read at the code)
+
+1. **The MODEL survives the trip.** The catalog model is `RootView`'s `@State catalog`
+   (`RootView.swift:43`, built at `:208`) — one per window — so the question (query, scope, mode,
+   sort, the armed day, the facets) and the listed rows ALREADY outlive a note round trip: search
+   state and the day filter ride along today.
+2. **The VIEW does not.** Any open swaps `paneDetail`'s `.library` arm (`RootView.swift:1393`) for the
+   `.post` arm, so `LibraryCatalogView` and its scroll views — the List column
+   (`LibraryCatalogView.swift:908`), Cards (`:1135`), the answer sheet (`LibrarySearchSheet.swift:43`)
+   — are torn down with their offsets; the return mounts a fresh one at offset 0.
+3. **The mount re-asks from the top.** `.task(id: session.wing.currentID) { await model.search() }`
+   (`LibraryCatalogView.swift:313`) → `read(startingOver: true)` (`LibraryCatalogModel.swift:641`)
+   → the FIRST page only (80 notes), `visibleNoteIndices` reset (`:737`): a row she opened past the
+   first page is not even listed on return.
+4. **The selection is cleared on the way out.** `openHit` → `model.closeInfo()`
+   (`LibraryCatalogView.swift:505–506`; Act 10's "navigation … clears it"). The card tap (`:1242`) and
+   the row menu's Open (`:1332`) do not — the roads already disagree.
+
+No single line is wrong; the Library has no place memory. The pins are therefore new-behaviour pins
+whose red-on-old is behavioural (the old tree's remount lands at the top / the row unlisted), never a
+bug revert.
+
+#### Batch C — DESIGN FORK (C0 — what "the same place" and "selected" mean; proposed for the orchestrator's ruling BEFORE any build)
+
+**The mechanism I propose (architectural, mine — stated so the questions have a frame):**
+- **The place is the rows on screen, never a pixel.** The Write/Takes precedent (U0b's
+  `ReadingAnchor`, Takes' `ArticlePlace`): the rows the viewport showed, in order, each with how far
+  its top sat below the viewport's top (`into`), plus a bounded neighbourhood of ids just above and
+  below them in the listed order (the fallback's material). Read from each row's frame in its
+  column's CONTENT space (it moves only when layout above it moves — never per scroll frame) and the
+  scroll window (`onScrollGeometryChange`, held by reference — the Open list's `SidebarSectionWindow`
+  idiom: a scroll re-renders nothing). Computed when her scroll RESTS (one coalesced task per
+  burst) and synchronously at a row's open act — never during teardown (whose `onDisappear` order is
+  not ours to assume).
+- **The landing is UNBOUND:** a one-shot `ScrollViewReader` `scrollTo(id, anchor: UnitPoint(y:
+  into / (viewport − rowHeight)))`, unanimated (the Open list's road; Takes measured the proxy
+  honouring this arithmetic, negative `into` included), then a short HOLD that re-aims while the lazy
+  column settles and ends at her hand (`onScrollPhaseChange` interacting/decelerating — the sidebar's
+  measured rule) or a budget. **This is how the 18l-c U8 trap is designed around:** no
+  `.scrollPosition` binding exists anywhere in the Library, so nothing re-applies a stale target over
+  her hand, and the pins can still stage a scroll through `NSClipView` (the
+  `LibraryInfiniteScrollTests` road keeps working — the trap bites only BOUND scroll views).
+- **The landing reads nothing; the re-ask stays honest.** The return lands at once on the rows the
+  model still holds (no read before the first paint, so no top-then-jump). While a place is
+  remembered, the mount's `search()` becomes the existing IN-PLACE re-ask (`read(startingOver:
+  false)`) to the place's depth; when it lands, the place re-resolves by id and the hold re-aims. Any
+  new question (`search()` — the field, scope, sort, day, a facet, ⌘K's Library road) or a wing
+  switch drops the place: today's top-of-list start.
+
+**Q1 — WHAT THE PLACE ANCHORS ON** (product-visible: the brief's letter vs the commonest flow)
+- (a) The OPENED row, re-resolved by id in the current sort (the brief's letter). Consequence: under
+  the default sort (`edited · newest first`) any keystroke inside the note makes it the newest, so the
+  return lands at the TOP of the Library with that row selected — her reported symptom, in the
+  commonest flow (open, type, come back).
+- (b) **The viewport's own rows** (the reading-anchor precedent), each re-resolved by id in the
+  current sort; the opened row is NOT an anchor while any other on-screen row survives (its move is
+  her own act's consequence, not a change of where she was). Fallback order: the next surviving
+  on-screen row at ITS former `into` → the nearest surviving id of the remembered neighbourhood → the
+  top. Never a corpus search.
+- (c) (a) while the opened row stays within a screen of its old place, else (b) — two rules for one
+  question.
+
+**Proposal: (b)** — still "an id re-resolved into the current sort, never a pixel offset"; the
+brief's own fallback ("land where the row would have been — nearest surviving neighbour")
+generalised from a row that LEFT the listing to a row that left its PLACE. PROVISIONAL P-828-11.
+
+**Q2 — WHAT "SELECTED" MEANS ON RETURN** (product-visible: the Library has ONE selection today — the
+info panel's subject, `infoHit`, drawn as the panel + the row's subject border, which "navigation
+clears")
+- (a) The panel: the opened row becomes `infoHit` and the panel slides in on every return. Costs: the
+  list narrows by the panel's column and, at the 1270-pt default, the controls row wraps to two lines
+  (SurfaceContracts "The Library") — the viewport she returns to is not the one she left; reverses
+  "navigation clears it" for this road.
+- (b) **A return MARK: the opened row wears the existing SUBJECT face (`rowBackground(subject:)` — the
+  wash and the fuller border), no panel**, until her next row click, a new question, a mode switch or
+  her next open (which replaces it). No layout change; no new face — an existing face at a new
+  moment; "navigation clears the panel" untouched.
+- (c) Nothing new: whatever selection stood when she left (the panel's subject, the ⌘-pick) is what
+  she finds; a title-click open of an unselected row returns unmarked.
+
+**Proposal: (b)**, PROVISIONAL P-828-12.
+
+**Q3 — WHICH LEAVES REMEMBER, WHICH RETURNS RESTORE** (product-visible)
+- (a) Only a row's own open records the place, restored on the next return.
+- (b) **Every leave of the Library surface records it** (a row's open, the sidebar, ⌘K, ⌥⌘[, the
+  quick entry's new note) **and every return this session restores it while the question is
+  unchanged** — R-18l-1's in-session shape (the session's first visit starts at the top; a re-visit
+  restores), door-agnostic; the ticket's own title is "The Library forgets where you were". A new
+  question or a wing switch starts at the top (today's). The MARK (Q2) is made only by a row's open.
+
+**Proposal: (b)**, PROVISIONAL P-828-13.
+
+**Q4 — CARDS' "SELECTED"** (product-visible): Cards draw no selection in any state today (entering
+Cards clears it; a card tap opens). (a) **The place only — no mark on a card**; (b) a new card wash.
+**Proposal: (a)**, PROVISIONAL P-828-14.
+
+**Q5 — P1's reading** (the orchestrator's constraint): the LANDING reads nothing. The honest re-ask
+that replaces the mount's first-page read is the in-place re-ask to the place's depth — the deepest
+remembered row's listed position + one page (80) — ∝ how far down her place was, ONE statement off
+the main thread, never the corpus and never a page-until-found loop (a row that cannot be found
+falls back by Q1's order). That is the class `refresh()` already runs after every row act (∝ what is
+listed). A read truly ∝ the viewport needs a WINDOWED listing (rows starting mid-corpus, paging
+upward as she scrolls back) — a new paging subsystem with its own scroll-compensation risk, not this
+batch. **Proposal: accept "∝ the place's depth"** (stated in the record and the canon draft); if the
+orchestrator holds the letter, the windowed listing is its own ticket and this batch restores only
+places inside the first page.
+
+**Stated, not asked (scope, mine):** the Timeline is excluded (its own view, its own listing); the
+CAPPED books region (All + many books — its own native `List`) keeps its own scroll at its top and
+its rows are not anchors; the answer sheet's place is its groups (a note group's id is the note's)
+with its open "all N ›" groups re-read in place as today; a split's two Library panes share the
+window's one catalog model (one memory per window; two windows, two memories); nothing persisted,
+nothing synced.
+
+**Pins planned (to the brief's acceptance line):** pure resolver pins (unchanged listing → the same
+row and `into`; the top row deleted / filtered away → the next surviving on-screen row at its own
+`into`; every on-screen row gone → the nearest surviving neighbour; nothing → the top; the opened row
+moved to the top under the edited sort → the place holds (Q1-b)); model pins (a remembered place
+makes the mount's read in place and bounded — the listed count ≤ the place's depth + one page; a new
+question / sort / day / wing drops it; the mark's set and clear roads); mounted pins over the whole
+catalog (scroll the List / Cards / the answer sheet / a day's answer by `NSClipView`, unmount,
+re-mount on the same model → the anchor row's frame back at its `into` within a point — red on the
+old tree, whose remount lands at the top).
+
+**P-828-5 — the book Index/Outline courtesy: ASSESSED, NOT CHEAP — recommend a ticket.** (1) A
+second surface with its own landing family: the ascent (`ShellRouter.pendingBookAscent` →
+`BookViewModel.requestReveal`), VX-630/680's carries, VX-662/663/681's arrivals, VX-624's floor, the
+Outline follower's freeze on programmatic landings (VX-562/646) — any change there re-walks four
+modes. (2) The cheap road (park the existing ascent at the note last opened from the book on every
+plain return) lands that note's card at the page TOP, not where she was, and changes what EVERY
+return to a book opens to this session (the Bookcase row, the sidebar, ⌥⌘[) — itself a product
+call. (3) The honest version is the book's own place memory (this batch's mechanism over the
+Outline's and Index's columns), sized as its own unit. Proposed ticket: *"A book's Outline and Index
+remember where you were on return from a note (VX-823's courtesy)"* — Improvement · Books.
+
 ### Batch B — wings from the keyboard & the switcher: VX-824 + VX-833 + VX-844
 
 **Required reading:** SurfaceContracts "The app" (keyboard family; the wing label VX-552/VX-644
