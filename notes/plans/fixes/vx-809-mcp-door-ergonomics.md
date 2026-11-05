@@ -2,7 +2,9 @@
 
 **Ticket: VX-809 · Branch: `vx-809-mcp-door-ergonomics` · Worktree: `~/dev/variorum-vx-809` · the Pro · Coordinator: nov4coordinator**
 
-**STATUS: OPEN — kicked off 2026-11-05 (/architect-phase). Batches not yet started.**
+**STATUS: OPEN — kicked off 2026-11-05 (/architect-phase). Batch 1 DONE; batch 2 in flight.**
+
+**HER OVERNIGHT WORD (2026-11-05, sent to all sessions, verbatim):** *"I'm going to sleep - continue overnight and rule provisionally for my morning bundle. I want everything merged & a release ready to go, but not yet released to the site, so that when I handle everything in the morning I can go through the bundles and ensure that I don't need any changes before the version releases (or that if I do, I can do them in a quick round)."* — So: this run pushes through its ladder and MERGES tonight (coordinator-serialized); every open call rules PROVISIONAL into the bundle; the release is STAGED by the wave, never published; the morning bundle (HELD FOR HER below + the handoff) is the deliverable she reads first.
 
 ## FOR A LATER READER
 
