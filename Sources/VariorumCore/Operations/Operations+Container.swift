@@ -115,6 +115,62 @@ extension Operations {
         return try Queries.wingIsLive(db, id: standingWing) ? standingWing : ""
     }
 
+    /// What the Journal's New Entry did: the fresh entry, and what the one
+    /// shelving road (`shelveInDailyJournalBook`) said about its filing — so
+    /// each face words it in its own voice (⌘J's `DailyBookShelving`).
+    public struct NewJournalEntryResult: Equatable, Sendable {
+        public let container: Container
+        public let shelving: DailyBookShelving
+    }
+
+    /// **THE JOURNAL'S NEW ENTRY** (VX-797 — the VX-805 run; her ruling: "the
+    /// deliberate new-note doors in the Journal (New Entry, ⌥⌘N in the focused
+    /// book) mint a fresh entry dated today … several entries per day are
+    /// legal"). Mints a FRESH entry every call — never the day's existing one
+    /// (that is ⌘J's open-today, `createOrOpenJournalEntry`) — in exactly the
+    /// day shape ⌘J mints (`profile = 'journal'`, `entry_date`, no title, no
+    /// segmentation override — VX-799), BESIDE the Journal
+    /// (`journalEntryWing`: the live Journal's effective wing, else the
+    /// standing wing, else Home — P-805-B6), so the MCP fence's journal leg,
+    /// the Library's journal lens and the date sort read it as any entry.
+    ///
+    /// **Filed through the SAME gate ⌘J's entry is** — `shelveInDailyJournalBook`,
+    /// its ensure (a Journal minted where she stands when none lives), its
+    /// comes-back (an archived Journal returns, as when a day arrives —
+    /// PROVISIONAL P-805-C3) and its pair-decided law, untouched: a fresh entry
+    /// has no pair row, so it files as ordinary membership at the end,
+    /// unsectioned, the outflow riding (the hand-add's choke point).
+    ///
+    /// **REFUSE BEFORE MINT** (PROVISIONAL P-805-C2 — the mint doctrine of every
+    /// other book door, `newPostInReading`'s and ⌥⌘N's declared refusals): a
+    /// live Journal that cannot take a note — FINISHED (sealed included),
+    /// FULL — throws its add refusal (`lockedReading`, `readingAtCapacity`)
+    /// from inside the mint's own transaction and mints nothing, so a press
+    /// never strands a stray entry in the Pool. A concurrent refusal landing
+    /// between the mint and the filing (sync) reports through `shelving`
+    /// instead, never a throw — the entry still exists and opens.
+    ///
+    /// No undo entry (`createPost`'s and `newPostInReading`'s class — the
+    /// delete is the inverse). A malformed day key refuses at the boundary.
+    @discardableResult
+    public func newJournalEntry(
+        entryDate: String, standingWing: String = ""
+    ) throws -> NewJournalEntryResult {
+        guard JournalDay.isValid(entryDate) else {
+            throw OperationError.invalidEntryDate(entryDate)
+        }
+        let entry = try database.write { db -> Container in
+            if let journalID = try Queries.dailyJournalBookID(db) {
+                try assertReadingAcceptsPosts(db, journalID)
+            }
+            let wing = try journalEntryWing(db, standingWing: standingWing)
+            return try insertPost(
+                db, title: nil, profile: .journal, entryDate: entryDate, wingId: wing)
+        }
+        return NewJournalEntryResult(
+            container: entry, shelving: shelveInDailyJournalBook(entry.id))
+    }
+
     /// What `shelveInDailyJournalBook` did, so each surface can speak in its
     /// own voice while there stays exactly ONE implementation of the rules.
     public enum DailyBookShelving: Equatable, Sendable {

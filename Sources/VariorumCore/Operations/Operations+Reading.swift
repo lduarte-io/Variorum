@@ -907,25 +907,32 @@ extension Operations {
     /// missing/tombstoned reading, wrong kind, locked, at capacity.
     public func assertReadingAcceptsPosts(_ readingID: String) throws {
         try database.read { db in
-            let reading = try liveReading(db, readingID)
-            guard reading.kind == .book else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
-            }
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: readingID)
-            }
-            if let maxPosts = reading.maxPosts {
-                let liveCount = try Int.fetchOne(
-                    db,
-                    sql: """
-                    SELECT COUNT(*) FROM reading_post
-                    WHERE reading_id = ? AND deleted_at IS NULL
-                      AND status = 'member'
-                    """,
-                    arguments: [readingID]) ?? 0
-                if liveCount >= maxPosts {
-                    throw OperationError.readingAtCapacity(id: readingID)
-                }
+            try assertReadingAcceptsPosts(db, readingID)
+        }
+    }
+
+    /// The gate's body at db level (VX-797 — `newJournalEntry` runs it inside
+    /// its mint's own transaction, so the refusal and the mint cannot be
+    /// split by a concurrent lock).
+    func assertReadingAcceptsPosts(_ db: Database, _ readingID: String) throws {
+        let reading = try liveReading(db, readingID)
+        guard reading.kind == .book else {
+            throw OperationError.wrongReadingKind(id: readingID, expected: .book)
+        }
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: readingID)
+        }
+        if let maxPosts = reading.maxPosts {
+            let liveCount = try Int.fetchOne(
+                db,
+                sql: """
+                SELECT COUNT(*) FROM reading_post
+                WHERE reading_id = ? AND deleted_at IS NULL
+                  AND status = 'member'
+                """,
+                arguments: [readingID]) ?? 0
+            if liveCount >= maxPosts {
+                throw OperationError.readingAtCapacity(id: readingID)
             }
         }
     }

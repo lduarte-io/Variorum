@@ -193,3 +193,177 @@ struct JournalDaysFirstEntryTests {
         }
     }
 }
+
+// MARK: - The Journal's New Entry: a fresh entry, every press (the mint)
+
+/// The outbox as a set of `(table, row)` pairs — the exact write set a test
+/// pins after `clearOutbox()`.
+private func outboxSet(_ db: AppDatabase) throws -> Set<String> {
+    try db.read { db in
+        Set(try Row.fetchAll(db, sql: "SELECT table_name, row_id FROM sync_outbox")
+            .map { "\($0["table_name"] as String):\($0["row_id"] as String)" })
+    }
+}
+
+@Suite("VX-797 — the Journal's New Entry mints a fresh entry, filed through ⌘J's own gate")
+struct JournalNewEntryMintTests {
+    /// THE RULING'S CORE: New Entry twice in one day → two live entries, both
+    /// the Journal's members, each a fresh row in the day shape; ⌘J then opens
+    /// the day's FIRST (the earliest-created — here ⌘J's own). The exact
+    /// state transition of one press: the entry row and its membership, at
+    /// the end, unsectioned — nothing else written. RED ON OLD by
+    /// construction (no such op; the daily book's door was create-or-open).
+    @Test func mintingTwiceInOneDayMakesTwoLiveMembersAndCommandJOpensTheFirst() throws {
+        try withOperations { ops, db in
+            let day = "2026-11-05"
+            let opened = try pressCommandJ(ops, day: day).entry.container
+            let journal = try journalID(db)
+            try db.clearOutbox()
+
+            let one = try ops.newJournalEntry(entryDate: day)
+            #expect(one.shelving == .shelved(readingID: journal))
+            let entry = one.container
+            #expect(entry.id != opened.id, "a FRESH entry — never the day's existing one")
+            #expect(entry.kind == .post && entry.profile == .journal && entry.entryDate == day)
+            #expect(entry.title == nil && entry.segmentationDefault == nil && entry.wingId == "")
+            let membership = try #require(try db.read { db in
+                try ReadingPost.fetchOne(
+                    db, sql: "SELECT * FROM reading_post WHERE reading_id = ? AND post_id = ?",
+                    arguments: [journal, entry.id])
+            })
+            #expect(membership.status == .member && membership.sectionId == nil
+                    && membership.deletedAt == nil)
+            let openedPosition = try #require(try db.fetchString(
+                "SELECT position FROM reading_post WHERE reading_id = ? AND post_id = ?",
+                [journal, opened.id]))
+            #expect(membership.position > openedPosition, "filed at the end")
+            #expect(try outboxSet(db) == ["container:\(entry.id)", "reading_post:\(membership.id)"],
+                    "the press writes the entry and its membership — nothing else")
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM block") == 0, "no block minted")
+
+            let two = try ops.newJournalEntry(entryDate: day)
+            #expect(two.shelving == .shelved(readingID: journal))
+            #expect(Set([opened.id, entry.id, two.container.id]).count == 3)
+            for id in [opened.id, entry.id, two.container.id] {
+                #expect(try liveMember(db, id, of: journal))
+            }
+
+            let again = try pressCommandJ(ops, day: day)
+            #expect(!again.entry.created && again.entry.container.id == opened.id,
+                    "⌘J opens the day's first entry")
+            #expect(again.shelving == .alreadyDecided)
+            #expect(try liveNoteCount(db) == 3, "⌘J minted nothing")
+
+            // A day with no entry yet: New Entry is that day's first — and
+            // ⌘J then opens it.
+            let fresh = try ops.newJournalEntry(entryDate: "2026-11-06")
+            #expect(try pressCommandJ(ops, day: "2026-11-06").entry.container.id
+                    == fresh.container.id)
+        }
+    }
+
+    /// The pair-decided law, UNCHANGED: a member she took off the Journal is
+    /// never re-filed by a New Entry (the mint files only its own fresh row),
+    /// and ⌘J then opens the fresh member, not the one she removed.
+    @Test func aRemovedMemberIsNeverRefiledByAMint() throws {
+        try withOperations { ops, db in
+            let day = "2026-11-05"
+            let removed = try pressCommandJ(ops, day: day).entry.container
+            let journal = try journalID(db)
+            _ = try ops.removePostFromReading(removed.id, from: journal)
+
+            let made = try ops.newJournalEntry(entryDate: day)
+            #expect(made.shelving == .shelved(readingID: journal))
+            #expect(try liveMember(db, made.container.id, of: journal))
+            #expect(try !liveMember(db, removed.id, of: journal))
+            #expect(try pairRows(db, removed.id, journal) == 1, "her removal stands — one tombstone")
+            let pressed = try pressCommandJ(ops, day: day)
+            #expect(pressed.entry.container.id == made.container.id,
+                    "⌘J opens the day's first MEMBER")
+            #expect(try pairRows(db, removed.id, journal) == 1)
+        }
+    }
+
+    /// REFUSE BEFORE MINT (P-805-C2): a finished, sealed or full Journal
+    /// refuses New Entry with its add refusal and mints NOTHING — never a
+    /// stray Pool entry per press. RED ON OLD by construction.
+    @Test func aJournalThatCannotTakeANoteRefusesBeforeTheMint() throws {
+        try withOperations { ops, db in
+            let day = "2026-11-05"
+            _ = try pressCommandJ(ops, day: day)
+            let journal = try journalID(db)
+            let before = try liveNoteCount(db)
+
+            try ops.lockReading(journal)
+            #expect(throws: OperationError.lockedReading(id: journal)) {
+                try ops.newJournalEntry(entryDate: day)
+            }
+            #expect(try liveNoteCount(db) == before, "finished: nothing minted")
+            try ops.unlockReading(journal)
+
+            try ops.setReadingMaxPosts(journal, maxPosts: 1)
+            #expect(throws: OperationError.readingAtCapacity(id: journal)) {
+                try ops.newJournalEntry(entryDate: day)
+            }
+            #expect(try liveNoteCount(db) == before, "full: nothing minted")
+            try ops.setReadingMaxPosts(journal, maxPosts: nil)
+
+            _ = try ops.sealReading(journal)
+            #expect(throws: OperationError.lockedReading(id: journal)) {
+                try ops.newJournalEntry(entryDate: day)
+            }
+            #expect(try liveNoteCount(db) == before, "sealed: nothing minted")
+
+            #expect(throws: OperationError.invalidEntryDate("2026-11-5")) {
+                try ops.newJournalEntry(entryDate: "2026-11-5")
+            }
+            #expect(try liveNoteCount(db) == before, "a malformed day mints nothing")
+        }
+    }
+
+    /// The SAME gate as ⌘J (P-805-C3): an ARCHIVED Journal comes back for a
+    /// New Entry, exactly as when a day arrives, and the fresh entry files.
+    @Test func anArchivedJournalComesBackForANewEntry() throws {
+        try withOperations { ops, db in
+            let day = "2026-11-05"
+            _ = try pressCommandJ(ops, day: day)
+            let journal = try journalID(db)
+            try ops.archiveReading(journal)
+
+            let made = try ops.newJournalEntry(entryDate: day)
+            #expect(made.shelving == .shelved(readingID: journal))
+            #expect(try db.fetchString("SELECT archived_at FROM reading WHERE id = ?", [journal]) == nil,
+                    "the Journal is back")
+            #expect(try liveMember(db, made.container.id, of: journal))
+        }
+    }
+
+    /// Beside the Journal (P-805-B6, Unit B's wing scoping): with the Journal
+    /// moved to another wing the fresh entry is born THERE whatever wing she
+    /// stands in, and files; with no Journal living the entry is born where
+    /// she stands and ⌘J's ensure mints the Journal beside it.
+    @Test func theFreshEntryIsBornBesideTheJournal() throws {
+        try withOperations { ops, db in
+            let day = "2026-11-05"
+            let studio = try ops.createWing(name: "Studio")
+            _ = try pressCommandJ(ops, day: day)
+            let journal = try journalID(db)
+            _ = try ops.moveReadingToWing(journal, to: studio.id)
+
+            let made = try ops.newJournalEntry(entryDate: day, standingWing: "")
+            #expect(made.container.wingId == studio.id, "born in the Journal's wing")
+            #expect(made.shelving == .shelved(readingID: journal))
+
+            try ops.deleteReading(journal)
+            let attic = try ops.createWing(name: "Attic")
+            let first = try ops.newJournalEntry(entryDate: day, standingWing: attic.id)
+            #expect(first.container.wingId == attic.id, "no Journal: where she stands")
+            guard case .shelved(let fresh) = first.shelving else {
+                Issue.record("the ensure mints a Journal and files the entry")
+                return
+            }
+            #expect(fresh != journal)
+            #expect(try db.read { try Queries.reading($0, id: fresh) }?.wingId == attic.id)
+        }
+    }
+}
