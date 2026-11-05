@@ -7,8 +7,9 @@ import Testing
 /// **VX-845 (the VX-805 run, Unit A) — P-771-1's keep-the-day rule reaches
 /// every copy road but the saved version.** Her ruling 2026-11-04 (the VX-771
 /// handoff walkthrough, QUESTIONS #258 F-1(c) — "EXTEND to all three"): the
-/// rule (`Domain/DuplicateDay` — an undated, untitled, non-journal source's
-/// copy takes the source's CREATION DAY as `entry_date`) extends to promote
+/// rule (`Domain/DuplicateDay` — an undated, untitled source's copy takes the
+/// source's CREATION DAY as `entry_date`; journal-profile sources are the class
+/// too since VX-826, the VX-809 run's A-809-10 / P-809-7) extends to promote
 /// (lens → note), diverge-for-reading, and the ownership forks. Option (c)'s
 /// own words in the VX-771 record: "extend it to every `copyPost` road but the
 /// saved version (promote, diverge, the ownership forks too)" — so the reach
@@ -31,9 +32,12 @@ import Testing
 /// COPY's own birth day — the field report's re-dating class, on these roads.
 ///
 /// The residuals hold on every road (ruled the same day): a TYPED-titled
-/// undated source's copy stays undated; a dated source's copy keeps its date;
-/// an undated JOURNAL-profile source's copy stays undated (the notebook rule).
-/// The saved version stays date-cleared (V3 — untouched).
+/// undated source's copy stays undated; a dated source's copy keeps its date.
+/// The saved version stays date-cleared (V3 — untouched). (The third residual
+/// this suite was born with — an undated JOURNAL-profile source's copy stays
+/// undated — is the line VX-826 retired; at the VX-805/VX-809 merge-in the
+/// class widening and these call sites compose: such a copy takes the day on
+/// every road, `anUndatedJournalEntrysCopyTakesTheDayOnEveryRoad`.)
 @Suite("VX-845 — every copy road but the saved version keeps the day")
 struct CopyRoadsKeepTheDayTests {
     static let bornOn = DuplicateKeepsItsDayTests.bornOn  // 2026-06-20T12:00:00Z
@@ -155,8 +159,7 @@ struct CopyRoadsKeepTheDayTests {
 
     /// The residuals, on every road (byte-verbatim, as before): a TYPED-titled
     /// undated source's copy stays undated (ruled — no invented dates); a
-    /// DATED source's copy keeps its date; an undated JOURNAL-profile source's
-    /// copy stays undated, so no copy claims a notebook day.
+    /// DATED source's copy keeps its date.
     @Test(arguments: Road.allCases)
     func theResidualsHoldOnEveryRoad(_ road: Road) throws {
         try withOperations { ops, db in
@@ -164,19 +167,35 @@ struct CopyRoadsKeepTheDayTests {
             try ops.seedBlock(in: titled.id, text: "Titled.")
             let dated = try ops.createPost(title: nil, entryDate: "2026-05-05")
             try ops.seedBlock(in: dated.id, text: "Dated.")
-            let journal = try ops.createPost(title: nil, profile: .journal)
-            try ops.seedBlock(in: journal.id, text: "Dear diary.")
-            for id in [titled.id, dated.id, journal.id] { try backdate(db, id) }
+            for id in [titled.id, dated.id] { try backdate(db, id) }
 
             let titledCopy = try row(db, try road.copy(ops, of: titled.id))
             #expect(titledCopy.entryDate == nil && titledCopy.title == "the essay",
                     "a typed-titled undated source's copy stays undated")
             #expect(try row(db, try road.copy(ops, of: dated.id)).entryDate == "2026-05-05",
                     "a dated source's copy keeps its date")
+        }
+    }
+
+    /// VX-826 on VX-845's roads (the VX-805/VX-809 merge-in — A JUSTIFIED EDIT:
+    /// this arm sat in the residuals above asserting "stays undated", the line
+    /// VX-826 — A-809-10, PROVISIONAL P-809-7, her R-826 "never today's" —
+    /// retired): an undated JOURNAL-profile source is the class, so on every
+    /// road its copy takes the day it is named for, as
+    /// `DuplicateKeepsItsDayTests.anUndatedJournalEntrysCopyTakesTheDayItIsNamedFor`
+    /// pins on the duplicate road. The notebook cost P-809-7 names holds here
+    /// too: the copy is then a dated journal-profile note of that day.
+    @Test(arguments: Road.allCases)
+    func anUndatedJournalEntrysCopyTakesTheDayOnEveryRoad(_ road: Road) throws {
+        try withOperations { ops, db in
+            let journal = try ops.createPost(title: nil, profile: .journal)
+            try ops.seedBlock(in: journal.id, text: "Dear diary.")
+            try backdate(db, journal.id)
+
             let journalCopy = try row(db, try road.copy(ops, of: journal.id))
-            #expect(journalCopy.entryDate == nil && journalCopy.profile == .journal,
-                    "an undated journal entry's copy claims no notebook day")
-            #expect(try db.read { try Queries.canonicalJournalEntry($0, day: day) } == nil)
+            #expect(journalCopy.entryDate == day && journalCopy.profile == .journal,
+                    "an undated journal entry's copy keeps the day it is named for")
+            #expect(try row(db, journal.id).entryDate == nil, "the source is never touched")
         }
     }
 

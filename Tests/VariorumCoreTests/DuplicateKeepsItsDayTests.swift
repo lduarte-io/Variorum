@@ -18,10 +18,10 @@ import Testing
 /// P-771-1: such a source's copy takes the source's CREATION DAY as its
 /// `entry_date` (the store's day calendar), so it is named and sorted as its
 /// source is — while its own `created_at` stays its honest birth (never
-/// forged). A DATED or TYPED-TITLED source's copy is byte-verbatim as before,
-/// and an undated JOURNAL-profile source's copy stays undated (the notebook
-/// rule keys on `profile = 'journal' AND entry_date` — a copy never claims a
-/// notebook day its source did not, `mintNoteVersion`'s V3 reason).
+/// forged). A DATED or TYPED-TITLED source's copy is byte-verbatim as before.
+/// (An undated JOURNAL-profile source's copy stayed undated here until VX-826 —
+/// A-809-10, PROVISIONAL P-809-7 — made it the class too; the pins below say
+/// so where they were edited.)
 ///
 /// The body is SHARED (AppSpec §9): her Duplicate with Tags / without Tags and
 /// the wire's `duplicate_note` run `duplicateAsVersionBody`, so one pin set
