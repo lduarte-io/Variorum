@@ -439,6 +439,21 @@
 			packageReferences = (
 				E1C271B22FFC2FB40084BEA6 /* XCLocalSwiftPackageReference "../.." */,
 				E1B5A0012F0000000000AA01 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				E1F781000000000000000001 /* XCRemoteSwiftPackageReference "SQLCipher.swift" */,
+				E1F781000000000000000002 /* XCRemoteSwiftPackageReference "swift-syntax" */,
+				E1F781000000000000000003 /* XCRemoteSwiftPackageReference "xctest-dynamic-overlay" */,
+				E1F781000000000000000004 /* XCRemoteSwiftPackageReference "swift-concurrency-extras" */,
+				E1F781000000000000000005 /* XCRemoteSwiftPackageReference "combine-schedulers" */,
+				E1F781000000000000000006 /* XCRemoteSwiftPackageReference "swift-clocks" */,
+				E1F781000000000000000007 /* XCRemoteSwiftPackageReference "swift-nio" */,
+				E1F781000000000000000008 /* XCRemoteSwiftPackageReference "swift-log" */,
+				E1F781000000000000000009 /* XCRemoteSwiftPackageReference "swift-system" */,
+				E1F78100000000000000000A /* XCRemoteSwiftPackageReference "swift-collections" */,
+				E1F78100000000000000000B /* XCRemoteSwiftPackageReference "swift-atomics" */,
+				E1F78100000000000000000C /* XCRemoteSwiftPackageReference "eventsource" */,
+				E1F78100000000000000000D /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				E1F78100000000000000000E /* XCRemoteSwiftPackageReference "swift-dependencies" */,
+				E1F78100000000000000000F /* XCRemoteSwiftPackageReference "swift-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E1C271892FFC2F420084BEA6 /* Products */;
@@ -1169,6 +1184,126 @@
 			requirement = {
 				kind = exactVersion;
 				version = 2.10.0;
+			};
+		};
+		E1F781000000000000000001 /* XCRemoteSwiftPackageReference "SQLCipher.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sqlcipher/SQLCipher.swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = 4.18.0;
+			};
+		};
+		E1F781000000000000000002 /* XCRemoteSwiftPackageReference "swift-syntax" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swiftlang/swift-syntax";
+			requirement = {
+				kind = exactVersion;
+				version = 602.0.0;
+			};
+		};
+		E1F781000000000000000003 /* XCRemoteSwiftPackageReference "xctest-dynamic-overlay" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/xctest-dynamic-overlay";
+			requirement = {
+				kind = exactVersion;
+				version = 1.11.0;
+			};
+		};
+		E1F781000000000000000004 /* XCRemoteSwiftPackageReference "swift-concurrency-extras" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-concurrency-extras";
+			requirement = {
+				kind = exactVersion;
+				version = 1.4.1;
+			};
+		};
+		E1F781000000000000000005 /* XCRemoteSwiftPackageReference "combine-schedulers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/combine-schedulers";
+			requirement = {
+				kind = exactVersion;
+				version = 1.2.0;
+			};
+		};
+		E1F781000000000000000006 /* XCRemoteSwiftPackageReference "swift-clocks" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-clocks";
+			requirement = {
+				kind = exactVersion;
+				version = 1.1.0;
+			};
+		};
+		E1F781000000000000000007 /* XCRemoteSwiftPackageReference "swift-nio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio.git";
+			requirement = {
+				kind = exactVersion;
+				version = 2.104.0;
+			};
+		};
+		E1F781000000000000000008 /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.16.1;
+			};
+		};
+		E1F781000000000000000009 /* XCRemoteSwiftPackageReference "swift-system" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-system.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.8.1;
+			};
+		};
+		E1F78100000000000000000A /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.7.2;
+			};
+		};
+		E1F78100000000000000000B /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-atomics.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.3.1;
+			};
+		};
+		E1F78100000000000000000C /* XCRemoteSwiftPackageReference "eventsource" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mattt/eventsource.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.5.1;
+			};
+		};
+		E1F78100000000000000000D /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lduarte-io/GRDB.swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = "7.11.1+sqlcipher.1";
+			};
+		};
+		E1F78100000000000000000E /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-dependencies.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.14.1;
+			};
+		};
+		E1F78100000000000000000F /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.12.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

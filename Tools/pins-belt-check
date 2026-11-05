@@ -1,0 +1,82 @@
+#!/bin/bash
+# pins-belt-check — the networked proof of VX-781's belt: does a pin-FREE resolution still land the committed set?
+#
+#   Tools/pins-belt-check [--keep] [<git-rev>]      (default HEAD; options in any order; --help)
+#
+# Exports <rev>'s tree (git archive, no git metadata) into a gitignored work dir, DELETES both of its
+# lockfiles, and resolves from scratch. That is exactly what any resolution does that runs without the
+# pins (a missing or unreadable lockfile, a package update):
+#   1. the Xcode graph:  xcodebuild -resolvePackageDependencies (fresh DerivedData + clone dir)
+#   2. the CLI graph:    swift package resolve (fresh scratch path)
+# then checks each resolved state with Tools/verify-pins --ref <rev> (the rev's OWN lockfile, project and manifest).
+# Exit 0 = both graphs land the committed set (the belt holds) · 1 = drift (named) · 2 = setup error.
+# The belt's every-run static guard is Tests/VariorumCoreTests/PinBeltTests.swift (no network). This
+# script is the deep proof: it needs the network, and it goes red only for a package whose range
+# upstream has moved past.
+# Every path it writes is inside App/Variorum/DerivedData/pins-belt-check.noindex/ (gitignored) except the
+# one thing no flag redirects: xcodebuild's manifest cache (~/Library/Caches/org.swift.swiftpm/manifests,
+# additive entries only — VX-781's record). It never purges or resets anything shared. On exit it removes
+# the run's exported tree and build dirs (several hundred MB) and keeps the two resolve logs, the
+# committed lockfile and both resolved states. --keep keeps everything.
+# On the pre-belt tree (e.g. 68b3d9c53) this exits 1 with SQLCipher 4.20.0 among the drift; on the belt, 0.
+set -uo pipefail
+
+KEEP=""
+REV=""
+for arg in "$@"; do
+  case "$arg" in
+    --keep) KEEP=1 ;;
+    -h|--help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "pins-belt-check: unknown option $arg (see --help)" >&2; exit 2 ;;
+    *) [ -z "$REV" ] || { echo "pins-belt-check: one revision only (got $REV and $arg)" >&2; exit 2; }; REV="$arg" ;;
+  esac
+done
+REV="${REV:-HEAD}"
+REPO="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 2
+SHA="$(git -C "$REPO" rev-parse --short=9 "$REV^{commit}")" || { echo "pins-belt-check: no commit $REV" >&2; exit 2; }
+BASE="$REPO/App/Variorum/DerivedData/pins-belt-check.noindex"
+WORK="$BASE/$SHA-$(date -u +%Y%m%dT%H%M%SZ)"
+CACHE="$BASE/pkgcache"   # repository mirrors only; reused across runs, never shared with anything else
+WS_LOCK="App/Variorum/Variorum.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+VERIFY="$REPO/Tools/verify-pins"
+
+cleanup() {
+  [ -n "$KEEP" ] && return
+  [ -f "$WORK/spm/workspace-state.json" ] && cp "$WORK/spm/workspace-state.json" "$WORK/xcode-workspace-state.json"
+  [ -f "$WORK/cli/workspace-state.json" ] && cp "$WORK/cli/workspace-state.json" "$WORK/cli-workspace-state.json"
+  case "$WORK" in "$BASE"/*) rm -rf "$WORK/tree" "$WORK/dd" "$WORK/spm" "$WORK/cli" "$WORK/cli-config" "$WORK/cli-security" ;; esac
+}
+trap cleanup EXIT
+
+mkdir -p "$WORK/tree" "$CACHE" || exit 2
+git -C "$REPO" archive "$SHA" | tar -x -C "$WORK/tree" || { echo "pins-belt-check: export failed" >&2; exit 2; }
+cp "$WORK/tree/$WS_LOCK" "$WORK/committed-workspace.resolved" || exit 2
+rm -f "$WORK/tree/$WS_LOCK" "$WORK/tree/Package.resolved"
+echo "pins-belt-check: $REV = $SHA exported to $WORK/tree; both lockfiles REMOVED"
+
+echo "-- 1. the Xcode graph (pin-free xcodebuild resolve)"
+( cd "$WORK/tree/App/Variorum" && xcodebuild -resolvePackageDependencies -project Variorum.xcodeproj \
+    -scheme Variorum -derivedDataPath "$WORK/dd" -clonedSourcePackagesDirPath "$WORK/spm" \
+    -packageCachePath "$CACHE" ) > "$WORK/xcode-resolve.log" 2>&1 \
+  || { echo "pins-belt-check: xcodebuild resolve FAILED — $WORK/xcode-resolve.log" >&2; exit 2; }
+
+echo "-- 2. the CLI graph (pin-free swift package resolve)"
+swift package --package-path "$WORK/tree" --scratch-path "$WORK/cli" --cache-path "$CACHE" \
+    --config-path "$WORK/cli-config" --security-path "$WORK/cli-security" --manifest-cache local \
+    resolve > "$WORK/cli-resolve.log" 2>&1 \
+  || { echo "pins-belt-check: swift package resolve FAILED — $WORK/cli-resolve.log" >&2; exit 2; }
+
+status=0
+for args in "" "--cli"; do
+  # shellcheck disable=SC2086
+  "$VERIFY" --ref "$SHA" $args "$WORK/$([ -z "$args" ] && echo spm || echo cli)/workspace-state.json"
+  rc=$?
+  [ "$rc" = 2 ] && { echo "pins-belt-check: verify-pins could not read a resolved state (exit 2) — a setup error, not a verdict" >&2; exit 2; }
+  [ "$rc" = 0 ] || status=1
+done
+if [ "$status" = 0 ]; then
+  echo "pins-belt-check: BELT HOLDS at $SHA — a pin-free resolution lands the committed set in both graphs"
+else
+  echo "pins-belt-check: BELT DOES NOT HOLD at $SHA — a pin-free resolution floats (drift above)"
+fi
+exit "$status"

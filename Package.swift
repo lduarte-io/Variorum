@@ -31,7 +31,9 @@ let package = Package(
         // says `#if SQLITE_HAS_CODEC`, and ours keys with a SQL pragma
         // (spike memo Correction #2 — an unused define invites false dependence).
         .package(url: "https://github.com/lduarte-io/GRDB.swift.git", exact: "7.11.1+sqlcipher.1"),
-        .package(url: "https://github.com/pointfreeco/swift-dependencies.git", from: "1.9.0"),
+        // VX-781: EXACT, like every remote package below (was `from: "1.9.0"`,
+        // which a pin-free resolution floats to 1.17.2). See THE PIN BELT.
+        .package(url: "https://github.com/pointfreeco/swift-dependencies.git", exact: "1.14.1"),
         // 13n-b (R-13n-2, her approval at the 13n sitting): the official MCP
         // Swift SDK — the app's second third-party dependency after GRDB.
         // Pinned EXACT: the SDK is 0.x and churns (the ruling's own words);
@@ -41,6 +43,50 @@ let package = Package(
         // and docs, never linked (the 13n-b plan's U1 record). Licence
         // notices ride Settings ▸ Acknowledgments (`AcknowledgmentsCopy`).
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", exact: "0.12.1"),
+        // THE PIN BELT (VX-781, notes/plans/fixes/vx-781-lockfile-pins.md).
+        // A lockfile holds the dependency set only while a resolution reads
+        // it. Any resolution that runs without the pins (a missing lockfile,
+        // a package update) takes the highest version every range allows, and
+        // the ranges GRDB, swift-dependencies and the MCP SDK declare then
+        // land SQLCipher 4.20, swift-syntax 604 and more. So the MANIFESTS
+        // are the enforcement, in TWO places because there are two roots:
+        // - HERE, for `swift build` / `swift test` (this package is the root):
+        //   every remote package in the resolved graph is constrained EXACT
+        //   at the committed versions, so even a pin-free resolution lands on
+        //   the committed set. These lines are constraints only. No target
+        //   links them (GRDB, the SDK and swift-dependencies already pull
+        //   every one of them in), so nothing new is linked or fetched.
+        // - IN THE XCODE PROJECT, for the apps: there this package is a LOCAL
+        //   DEPENDENCY, and SwiftPM keeps one of its declarations only when a
+        //   target of a product the app links uses it, so these lines alone do
+        //   not hold the app's graph. EVERY remote package is therefore also
+        //   declared as an exact project-level package reference in
+        //   project.pbxproj (XCRemoteSwiftPackageReference, exactVersion),
+        //   which IS the Xcode graph's root. Sparkle lives only there.
+        // Moving any version is deliberate: change it in each place the package
+        // appears (here and the project for all but Sparkle) and re-resolve BOTH
+        // lockfiles in one commit (the record's "UPGRADING A PIN DELIBERATELY").
+        // A NEW package identity is a new third-party dependency, which is
+        // author-only (CLAUDE.md); whether bumping an existing pin is
+        // author-only too is open (the record's P-781-4).
+        // Tests/VariorumCoreTests/PinBeltTests.swift fails the moment the
+        // declarations and the lockfiles disagree; `Tools/verify-pins` checks a
+        // resolved state against the committed workspace lockfile.
+        // Through the GRDB fork (its own manifest: `from: "4.11.0"`):
+        .package(url: "https://github.com/sqlcipher/SQLCipher.swift.git", exact: "4.18.0"),
+        // Through swift-dependencies:
+        .package(url: "https://github.com/swiftlang/swift-syntax", exact: "602.0.0"),
+        .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", exact: "1.11.0"),
+        .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", exact: "1.4.1"),
+        .package(url: "https://github.com/pointfreeco/combine-schedulers", exact: "1.2.0"),
+        .package(url: "https://github.com/pointfreeco/swift-clocks", exact: "1.1.0"),
+        // Through the MCP SDK:
+        .package(url: "https://github.com/apple/swift-nio.git", exact: "2.104.0"),
+        .package(url: "https://github.com/apple/swift-log.git", exact: "1.16.1"),
+        .package(url: "https://github.com/apple/swift-system.git", exact: "1.8.1"),
+        .package(url: "https://github.com/apple/swift-collections.git", exact: "1.7.2"),
+        .package(url: "https://github.com/apple/swift-atomics.git", exact: "1.3.1"),
+        .package(url: "https://github.com/mattt/eventsource.git", exact: "1.5.1"),
     ],
     targets: [
         // Vendored PHC Argon2 reference implementation (Phase 14b, R-7) —
