@@ -42,6 +42,44 @@ struct VersionSchemeTests {
                 "R-13r-6 reserved 1.0 for her public launch, and the launch shipped 1.0: the project's line is 1.x or later — a 0.x here is a skipped release bump (VX-779; read '\(version ?? "nil")')")
     }
 
+    /// VX-779 — the CLASS, not one instance of it: the project's marketing
+    /// version tracks the newest release. R-13r-6's bump commit lands WITH
+    /// that release's notes file (release.sh refuses a release missing
+    /// either), so the host — built from the project's Debug configuration,
+    /// no command-line override — reads the numerically newest
+    /// `ReleaseNotes-<v>.md` in the WhatsNew folder. 0.10.5 through 1.0.1
+    /// shipped while the project still read 0.10.4 and nothing went red; a
+    /// skipped bump is red here at the next suite run. The folder is read the
+    /// way `WhatsNewTests.noReleaseNotesFileCarriesProcessText` reads it, and
+    /// a version is what `Tools/Release/version-guard.sh` accepts (X.Y or
+    /// X.Y.Z, digits only), compared component by component.
+    @Test func theMarketingVersionIsTheNewestReleaseNotesVersion() throws {
+        let folder = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Variorum/Features/WhatsNew")
+        let prefix = "ReleaseNotes-"
+        let notes: [(version: String, parts: [Int])] = try FileManager.default
+            .contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+            .compactMap { file in
+                let name = file.deletingPathExtension().lastPathComponent
+                guard file.pathExtension == "md", name.hasPrefix(prefix) else { return nil }
+                let version = String(name.dropFirst(prefix.count))
+                let fields = version.split(separator: ".", omittingEmptySubsequences: false)
+                guard (2...3).contains(fields.count),
+                      fields.allSatisfy({ field in
+                          !field.isEmpty && field.allSatisfy { $0.isASCII && $0.isNumber }
+                      })
+                else { return nil }
+                return (version: version, parts: fields.compactMap { Int($0) })
+            }
+        let newest = try #require(notes.max { $0.parts.lexicographicallyPrecedes($1.parts) },
+                                  "the WhatsNew folder holds every release's notes file")
+        let built = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        #expect(built == newest.version,
+                "the host reads '\(built ?? "nil")' but the newest release notes are ReleaseNotes-\(newest.version).md: the release's bump commit (R-13r-6) was skipped — set MARKETING_VERSION = \(newest.version) on the Variorum target's Debug and Release configurations (VX-779)")
+    }
+
     /// The phase's SHAPE, read from the project file: it is the Mac target's
     /// LAST build phase (after Resources — so after the Info.plist is
     /// processed; signing always runs after every phase), it is always run,
@@ -81,9 +119,12 @@ struct VersionSchemeTests {
         // 0.10.5 to 1.0.1): the two are found by their bundle identifiers,
         // no longer by the pre-1.0 prefix, because past the launch the test
         // bundles' and the mobile targets' template 1.0 share the "1." prefix
-        // (the mobile app's version is its own project's). The headless
-        // `Tools/Release/version-guard.sh` holds the same pair to the newest
-        // release notes, and release.sh's preflight to the release's version.
+        // (the mobile app's version is its own project's). This test holds
+        // the pair to EACH OTHER; the class (the project lagging the newest
+        // release) is `theMarketingVersionIsTheNewestReleaseNotesVersion`'s.
+        // `Tools/Release/version-guard.sh` checks the same pair headlessly —
+        // run by hand (against the newest release notes) and by release.sh's
+        // preflight (against the release's --version); no suite runs it.
         let builtVersion = try #require(
             Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
         let configurations = project.components(separatedBy: "isa = XCBuildConfiguration;").dropFirst()
