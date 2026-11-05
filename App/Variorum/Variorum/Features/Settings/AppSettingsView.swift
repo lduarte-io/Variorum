@@ -96,7 +96,11 @@ struct AppSettingsView: View {
         mcp: MCPDoor? = nil,
         handOffDoor: (() -> Void)? = nil,
         roadStanding: RoadStandingModel? = nil,
-        roadDoors: RoadDoorsHost? = nil
+        roadDoors: RoadDoorsHost? = nil,
+        // VX-838 (the VX-828 run, batch E): the Tags pane's model, injectable so
+        // a pin can hold the one it mounts (batch D's ruled `model:` seam,
+        // ruling 8). Production passes nothing — the window makes its own.
+        tags: TagsViewModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -109,7 +113,7 @@ struct AppSettingsView: View {
         self.roadStanding = roadStanding
         self.roadDoors = roadDoors
         _theme = State(initialValue: ThemeStore(session: session))
-        _tags = State(initialValue: TagsViewModel(session: session))
+        _tags = State(initialValue: tags ?? TagsViewModel(session: session))
     }
 
     private var tokens: VoiceTokens { theme.tokens(for: scheme) }
@@ -220,7 +224,12 @@ struct AppSettingsView: View {
         .environment(theme)
         .tint(tokens.accent)
         .task { await theme.start() }
-        .task { await tags.start() }
+        // VX-838 (the VX-828 run, batch E — R-828-2: the pane FOLLOWS the app's
+        // wing live). Keyed on the wing, RootView's own idiom for the same
+        // model: a plain `.task` ran once per window, pinned to the wing open
+        // at the time, so a wing switch left Settings ▸ Tags on the old wing's
+        // vocabulary (and a root tag minted there landed, unseen, in the new).
+        .task(id: session.wing.currentID) { await tags.start() }
         // 13n-c U4 — ⌥⌘, (MCP Settings…): the pane OPENS at MCP — on a fresh
         // window (appear) and on a window already up (the request changing).
         .onAppear { adoptMCPRequest() }
@@ -385,9 +394,18 @@ struct AppSettingsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// **The pane's title** — the pane's own name, except Tags, which NAMES the
+    /// wing its list is (VX-838, R-828-2: "Tags — in ‹wing›"; the root bug was
+    /// a wing-scoped list that never said which wing it was). The name is the
+    /// MODEL's — read with the list it titles, never re-derived here.
+    nonisolated static func title(of pane: SettingsPane, tagsWingName: String) -> String {
+        pane == .tags ? TagManagerCopy.title(wingName: tagsWingName) : pane.title
+    }
+
     private var header: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(tokens.chromeLabel(query.isEmpty ? pane.title : "search"))
+            Text(tokens.chromeLabel(
+                query.isEmpty ? Self.title(of: pane, tagsWingName: tags.shownWing.name) : "search"))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
