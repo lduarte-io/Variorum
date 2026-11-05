@@ -170,10 +170,14 @@ At closeout, after the PR merges: retire the in-flight row and **remove the effo
   `notes/plans/workflow-transition-2026-10-06.md`, the board snapshot
   `~/dev/variorum/notes/TICKETS.md` (the frozen ledger it replaced:
   `notes/KnownIssuesArchive-2026-10-06.md`), `notes/QUESTIONS.md`, the phase
-  plan, `notes/SessionResiliencyProtocol.md` — plus `notes/SyncSpec.md`
-  and `notes/TEXTKIT2_NOTES.md` whenever the phase touches their seams
-  (they are NOT auto-loaded; a batch brief that touches sync or the
-  editor seam names them as required reading for the implementer).
+  plan, `notes/SessionResiliencyProtocol.md` — plus, per CLAUDE.md's
+  preflight rule (VX-419 made these explicit-read):
+  `notes/SurfaceContracts.md`'s sections for EVERY surface the phase
+  touches, and `notes/SyncSpec.md`, `notes/TEXTKIT2_NOTES.md`,
+  `notes/MCPSpec.md` and `notes/CastleRules.md` whenever the phase
+  touches their seams (none are auto-loaded; a batch brief that touches
+  one of those seams names its spec as required reading for the
+  implementer).
 - **A FRESH implementer session per batch** (the ~500k
   context-degradation rule), briefed ONLY by the plan file's named
   sections — self-contained briefs are what make cutovers safe. Never

@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| **VX-781 — the lockfile rewriter** (xcodebuild intermittently rewrites the workspace Package.resolved upward; committed pins not enforced — R-770-T1; her word: early, before the Nov 4 umbrellas; merge queued behind the release mint per nov4coordinator) | VX-781 · `vx-781-lockfile-pins` | `~/dev/variorum-vx-781` · the Pro | OPEN 2026-11-04 — build infra only (no Sync/, no editor seam, no store); surfaces: the Xcode workspace's package pins + Tools build scripts |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
