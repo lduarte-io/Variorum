@@ -356,6 +356,61 @@ final class RecoveryViewModel {
         trashTotalLoaded = true
     }
 
+    // MARK: The empty-block sweep (VX-800)
+
+    /// **The Trash blocks R-828-1 calls empty with no history, live** — the
+    /// sweep door's count and its confirm's ids (VX-800; her ask: *"delete
+    /// all empty blocks with no history from trash."*). Its own held
+    /// observation, never riding the listing's: the door is over this wing's
+    /// WHOLE Trash (Empty Trash's scope), so the kind filter must not narrow
+    /// it, and the listing's observation restarts with the filter. Named
+    /// region, so it re-reads on a reader after a commit, never on the
+    /// writer inside one (VX-670).
+    private(set) var emptyBlockIDs: [String] = []
+
+    func startEmptyBlocks() async {
+        do {
+            for try await value in session.database.observeEmptyTrashBlocks(
+                now: session.now, wingID: session.wing.currentID
+            ) {
+                emptyBlockIDs = value
+            }
+        } catch is CancellationError {
+        } catch {
+            // A failed count HIDES the door (P-2: a door that cannot say what
+            // it takes does not draw) — never a guess.
+            emptyBlockIDs = []
+        }
+    }
+
+    /// Tests drive the count the `adopt` way.
+    func adoptEmptyBlocks(_ ids: [String]) {
+        emptyBlockIDs = ids
+    }
+
+    /// The sweep door: raises the confirm with the ids it counted — never
+    /// acts directly, asked every time (round 10). Pressed at zero (the door
+    /// is not drawn then — this answers the race) it says so.
+    func requestDeleteEmptyBlocks() {
+        lastError = nil
+        receipt = nil
+        guard !emptyBlockIDs.isEmpty else {
+            lastError = RecoveryCopy.deleteEmptyBlocksNothingLeft
+            return
+        }
+        pendingConfirm = .deleteEmptyBlocks(emptyBlockIDs)
+    }
+
+    /// **The pick belt** (VX-800, confirmed at the fork): the swept rows leave
+    /// the pick the moment the act answers — the listing's own prune follows
+    /// a beat later on a reader — so no stale bulk Put back can name a block
+    /// that is gone for good.
+    func dropFromPick(_ ids: [String]) {
+        guard !ids.isEmpty else { return }
+        selectedRows.subtract(ids)
+        if let anchor = selectionAnchor, ids.contains(anchor) { selectionAnchor = nil }
+    }
+
     // MARK: A scrap's home is a POOL, and the surface says so (13l, §8b's
     // pool/scraps honesty check)
 
@@ -521,6 +576,12 @@ final class RecoveryViewModel {
                 let result = try await TrashPurge.confirmSelection(session: session, taken)
                 receipt = result.receipt
                 forgetLocalMemories(ofTaken: result.taken)
+            } else if case .deleteEmptyBlocks(let ids) = confirm {
+                // VX-800: the sweep answers the blocks it really took — and
+                // those leave the pick at once (the belt).
+                let result = try await TrashPurge.confirmEmptyBlocks(session: session, ids)
+                receipt = result.receipt
+                dropFromPick(result.taken)
             } else {
                 receipt = try await TrashPurge.confirm(session: session, confirm)
                 forgetLocalMemories(of: confirm)
@@ -789,7 +850,8 @@ struct RecoveryView: View {
     /// 13j batch 6b (P-1): the Trash surface is the ONE renderer of the two
     /// purge acts — the walk's union names every renderer by construction,
     /// so a door leaking into any note context would fail the walk.
-    static let surfaceCapabilities: [CapabilityID] = [.deleteNow, .emptyTrash]
+    /// VX-800 adds the third: the empty-block sweep, the same one renderer.
+    static let surfaceCapabilities: [CapabilityID] = [.deleteNow, .emptyTrash, .deleteEmptyBlocks]
 
     /// **Is the bulk purge door on screen?** (the post-13l polish round,
     /// ledger row 2.) Named rather than written inline so a pin can drive the
@@ -799,6 +861,14 @@ struct RecoveryView: View {
     /// filter that happened to match nothing.
     static func showsEmptyTrashDoor(_ model: RecoveryViewModel) -> Bool {
         !model.trashIsEmptyUnfiltered
+    }
+
+    /// **Is the empty-block sweep on screen?** (VX-800 — P-2, ruled at the
+    /// fork: a door that would take nothing is not drawn.) The count is this
+    /// wing's whole Trash's, never the filtered view's — Empty Trash's rule
+    /// one property up.
+    static func showsDeleteEmptyBlocksDoor(_ model: RecoveryViewModel) -> Bool {
+        !model.emptyBlockIDs.isEmpty
     }
 
     init(
@@ -923,6 +993,8 @@ struct RecoveryView: View {
         // Ledger row 2: the unfiltered truth, on its own observation, which
         // deliberately does NOT restart with the filter.
         .task(id: session.wing.currentID) { await model.startTrashTotal() }
+        // VX-800: the sweep's count, the whole wing's Trash, unfiltered.
+        .task(id: session.wing.currentID) { await model.startEmptyBlocks() }
         // VX-671: the pick follows what is shown — a row put back, purged,
         // filtered or folded away leaves it.
         .onChange(of: visibleRowIDs) { _, shown in model.pruneSelection(toVisible: shown) }
@@ -1065,6 +1137,18 @@ struct RecoveryView: View {
                 set: { model.oldestFirst = $0 }))
                 .toggleStyle(.checkbox)
             Spacer()
+            // VX-800: the empty-block sweep — drawn only while it would take
+            // something (P-2), its label the count it takes, confirmed every
+            // time; left of Empty Trash, the narrower door first.
+            if Self.showsDeleteEmptyBlocksDoor(model) {
+                Button(RecoveryCopy.deleteEmptyBlocksLabel(model.emptyBlockIDs.count)) {
+                    model.requestDeleteEmptyBlocks()
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                .lineLimit(1)
+                .fixedSize()
+                .help(RecoveryCopy.deleteEmptyBlocksHelp)
+            }
             // 13j batch 6b (J1): the bulk purge door — rendered only when
             // the Trash holds something (P-2: a door that cannot act is
             // not rendered); the confirm names the full count by kind.

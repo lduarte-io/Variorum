@@ -549,6 +549,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // EVERY time (round 10 — no session-scoped don't-ask), Empty Trash once
     // naming the FULL count by kind (round 8 — "everything, always").
     case deleteNow, emptyTrash
+    // VX-800 (the VX-828 run, batch D — her ask, verbatim: "delete all empty
+    // blocks with no history from trash."). The Trash's THIRD purge door,
+    // the same `.surface` shape and the same one renderer: it purges every
+    // Trash block row R-828-1 calls empty with no history, confirmed EVERY
+    // time with the count it takes (the fork's ruling, the vx-828 record).
+    case deleteEmptyBlocks
     // 13u4 UNIT C2 — her 13u3 morning addition, item 9, verbatim: *"Having a
     // command where you could highlight part of a block and move it into a
     // take on that block (out of the take it's currently in) would be a nice

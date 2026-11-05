@@ -47,11 +47,15 @@ enum RecoveryRefusal: Error {
     /// VX-671: a bulk Delete Now found none of its rows still in the Trash at
     /// act time — nothing was purged, so the door says so.
     case nothingLeftToDelete
+    /// VX-800: the empty-block sweep found none of the blocks its confirm
+    /// counted still qualifying at act time — nothing was written.
+    case noEmptyBlocksLeft
 
     var sentence: String {
         switch self {
         case .originalHasNoNote: return RecoveryCopy.originalHasNoNote
         case .nothingLeftToDelete: return RecoveryCopy.bulkDeleteNowNothingLeft
+        case .noEmptyBlocksLeft: return RecoveryCopy.deleteEmptyBlocksNothingLeft
         }
     }
 }
@@ -340,11 +344,18 @@ enum TrashPurge {
         /// are what the confirm names as NOT taken (`TrashBulk`). Asked every
         /// time, like its row's door (round 10).
         case deleteSelection([Queries.TrashItem], versionsLeft: Int, ridingOriginals: Int)
+        /// **VX-800 — the empty-block sweep** (her ask: *"delete all empty
+        /// blocks with no history from trash."*). The ids are the ones the
+        /// door counted and the confirm names; the act takes those that
+        /// STILL qualify (`Operations.sweepEmptyTrashBlocks`). Asked every
+        /// time, like every purge door (round 10).
+        case deleteEmptyBlocks([String])
 
         var title: String {
             switch self {
             case .deleteNow, .deleteSelection: return RecoveryCopy.deleteNowVerb
             case .emptyTrash: return RecoveryCopy.emptyTrashVerb
+            case .deleteEmptyBlocks: return RecoveryCopy.deleteEmptyBlocksVerb
             }
         }
 
@@ -353,7 +364,7 @@ enum TrashPurge {
         /// (caught in the phone's visual capture).
         var confirmVerb: String {
             switch self {
-            case .deleteNow, .deleteSelection: return RecoveryCopy.deleteNowVerb
+            case .deleteNow, .deleteSelection, .deleteEmptyBlocks: return RecoveryCopy.deleteNowVerb
             case .emptyTrash: return "Empty Trash"
             }
         }
@@ -369,6 +380,8 @@ enum TrashPurge {
             case .deleteSelection(let taken, let versionsLeft, let ridingOriginals):
                 return RecoveryCopy.bulkDeleteNowConfirm(
                     taken, versionsLeft: versionsLeft, ridingOriginals: ridingOriginals)
+            case .deleteEmptyBlocks(let ids):
+                return RecoveryCopy.deleteEmptyBlocksConfirm(ids.count)
             }
         }
     }
@@ -471,6 +484,8 @@ enum TrashPurge {
                 versions: versionsTaken)
         case .deleteSelection(let taken, _, _):
             receipt = try await deleteSelection(session: session, taken).receipt
+        case .deleteEmptyBlocks(let ids):
+            receipt = try await deleteEmptyBlocks(session: session, ids).receipt
         }
         // On a local-only install the cleanup IS the app's — run it now, so
         // Delete Now means what it says the moment she reads it (a configured
@@ -522,6 +537,46 @@ enum TrashPurge {
         }
         return (RecoveryCopy.bulkDeleteNowReceipt(
             taken, synced: synced, anyFamilyEverSynced: anyFamilySynced), taken)
+    }
+
+    /// **VX-800 — the empty-block sweep, answering what it really took.**
+    /// `confirm`'s road with the taken ids in hand, for a host that must act
+    /// on exactly those afterwards (the Mac drops them from its pick — the
+    /// belt that keeps a swept block out of any stale bulk Put back). The
+    /// same tail: the local sweep before the receipt (her round-11 ruling).
+    static func confirmEmptyBlocks(
+        session: AppSession, _ ids: [String]
+    ) async throws -> (receipt: String, taken: [String]) {
+        let result = try await deleteEmptyBlocks(session: session, ids)
+        await session.sweepLocalPurge()
+        return result
+    }
+
+    /// The sweep's act: ONE operation (`sweepEmptyTrashBlocks` — the
+    /// predicate re-read inside its own transaction, the confirm's ids ∩ what
+    /// still qualifies, purge intents only). Nothing taken ⇒ the refusal,
+    /// nothing written. The receipt's population bit is read AFTER the act
+    /// and over exactly what it took: the intent write moves no seq rows and
+    /// the local sweep has not run yet, so the families read as they stood
+    /// (and a never-synced family an hourly sweep took in between reads
+    /// never-synced, which it was).
+    private static func deleteEmptyBlocks(
+        session: AppSession, _ ids: [String]
+    ) async throws -> (receipt: String, taken: [String]) {
+        let synced = session.syncConfigured()
+        let taken = try await session.runner.run { ops in
+            try ops.sweepEmptyTrashBlocks(ids)
+        }
+        guard !taken.isEmpty else { throw RecoveryRefusal.noEmptyBlocksLeft }
+        var anyFamilySynced = false
+        if !synced {
+            let targets = taken.map { SyncPurgeTarget(table: "block", rowID: $0) }
+            anyFamilySynced = try await session.database.read { db in
+                try PurgeJanitor.anyFamilyEverSynced(db, targets: targets)
+            }
+        }
+        return (RecoveryCopy.deleteEmptyBlocksReceipt(
+            taken.count, synced: synced, anyFamilyEverSynced: anyFamilySynced), taken)
     }
 
     /// **The selection's confirm** (VX-671), or nil when the door takes

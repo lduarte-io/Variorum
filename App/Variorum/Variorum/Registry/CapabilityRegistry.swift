@@ -1123,6 +1123,18 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Empty Trash lives in the Trash — "
                 + "\(RecoveryPath.surface) holds it, never a note.",
             availability: { _ in .act }),
+        // VX-800 (the VX-828 run, batch D): the empty-block sweep — Empty
+        // Trash's shape, narrowed to the Trash's block rows R-828-1 calls
+        // empty with no history. The Trash renders it only while it would
+        // take something (P-2: never a door that cannot act), its label
+        // carrying the count, confirmed every time.
+        Capability(
+            id: .deleteEmptyBlocks, verb: RecoveryCopy.deleteEmptyBlocksVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Deleting empty blocks for good lives in the Trash — "
+                + "\(RecoveryPath.surface) holds it, never a note.",
+            availability: { _ in .act }),
 
         // MARK: Commit + undo
         Capability(
