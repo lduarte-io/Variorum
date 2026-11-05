@@ -67,6 +67,21 @@ Members: VX-799 · VX-832 · VX-587 · VX-845 · VX-615 · VX-561.
 - VX-561: repro FIRST (Esc on the book creation dialog). Red pin confirms → fix; green on old → record-only, close the ticket with the finding (the hollow-pin rule).
 Evidence of the unit's kind: the suite green + the pins; an orchestrator hands-on walk of the date picker/shift-a-day once a stage window runs (folded into the run's walk).
 
+#### Unit A — LIVE STATUS (implementer: Opus, session 1, started 2026-11-05)
+
+*No behavioral revert is in flight unless a line below says "REVERT IN FLIGHT". Pre-revert copies, when any, live in `.unitA-prerevert/` inside this worktree (gitignored).*
+
+| Member | Status |
+|---|---|
+| VX-799 | NOT-STARTED — mint change in `insertPost` + a one-time clearing pass (site to be chosen and written here) |
+| VX-832 | NOT-STARTED — find the masthead date picker; default to creation day when undated |
+| VX-587 | NOT-STARTED — act + menu/⌘K doors + tests; chord PROPOSED here before wiring (turn ends at the proposal) |
+| VX-845 | NOT-STARTED — route promoteLens / diverge / ownership-fork copies through `DuplicateDay` |
+| VX-615 | NOT-STARTED — gathering context-menu delete verb by kind |
+| VX-561 | NOT-STARTED — repro first (pin); hollow ⇒ record-only |
+
+App-target test RUNS are PENDING for the orchestrator's stage window (no stage claim held by this session); their compile is verified by `build-for-testing`.
+
 **Unit B — the Journal's identity: movable + deletable (THE Sync/ batch; phase-sized).**
 Members: VX-435 · VX-436. Opus implements (R-805-1); Fable cold-reviews; the implementer READS IN FULL before building: `notes/SyncSpec.md`, `notes/sync-postmortem-fragments.md`, `notes/MCPSpec.md` (the wire fence pieces), SurfaceContracts' Bookcase/app sections, and §6 (design constraints) below.
 - Ops half: the daily mint lands in the STANDING wing (`Operations+Container` mint sites; ⌘J's ensure); `setDailyJournalBook` drops `dailyJournalIsHomeOnly`; `moveReadingToWing`/`moveWingContents` stop refusing the Journal (members move with the book, tags adopt by path — the existing road); `refuseDeletingTheDailyJournal` retires from `deleteReadingRow`/`deleteReadingWithNotes`/`revertImportedBook`; Delete appears beside Archive on every Journal face (the one `BookStateDoors` table; phone faces follow the same table where they read it — name any `Shared/` file touched); ⌘J follows the Journal's wing on open (WingFollow — opening it is a wing switch); the re-mint lands in the standing wing.
