@@ -160,10 +160,61 @@ reused DerivedData's checkouts win over a clean lockfile — T-3's expected "res
 the current checkouts" road does not happen through `xcodebuild`. The reused-DD road is CLOSED as
 a rewrite source while the lockfile is clean.
 
-### E5 — fresh DD, CLEAN lockfile, `-disableAutomaticPackageResolution` (21:54)
+### E5 — fresh DD, CLEAN lockfile, `-disableAutomaticPackageResolution`
 
 Committed set (4.18.0 / 1.14.1 / 602.0.0 / xctest-dynamic-overlay 1.11.0); lockfile byte-clean;
 no error or warning about the stale originHash. The flag holds the line on clean input.
+
+### E7 — a real Debug BUILD on the clean lockfile, fresh DD, lockfile sampled every second
+
+`xcodebuild build -scheme Variorum -configuration Debug -destination 'platform=macOS'` into
+`vx781-e7` (log `e7-build.log`, `** BUILD SUCCEEDED **`, ~90 s on the shared compilation cache).
+The lockfile hash never changed during the build (sampler log `e7-lockhash.log`); resolved the
+committed set. A build action on clean input does not rewrite either.
+
+### E8 — the UPGRADED lockfile in the tree + fresh DD + `-onlyUsePackageVersionsFromResolvedFile` — ADOPTED
+
+E2's written file copied over the committed one, then a fresh DD with the exactness flag: the
+lockfile untouched (it already said 4.20.0) and the build state = **sqlcipher 4.20.0 ·
+swift-dependencies 1.17.2 · swift-issue-reporting 2.1.2 · swift-syntax 604.0.0**. The exactness
+flags enforce THE FILE, whatever it says. This is VX-770's gate/gate2 result (both carried the
+flags and "upgraded"), reproduced: the flags are not broken — their INPUT was an upgraded file.
+Restored by `git checkout --` (the only change was the copied artifact).
+
+### C1 — the CLI side, OLD manifest: root lockfile removed, isolated resolve — RED
+
+`swift package --scratch-path …/vx781-cli-old --cache-path …/vx781-cli-cache --config-path
+…/vx781-cli-config --security-path …/vx781-cli-security --manifest-cache local resolve` (every
+path inside `App/Variorum/DerivedData/`; nothing shared written). Landed the same upgraded set as
+E2 (4.20.0 / 1.17.2 / 604.0.0 / swift-issue-reporting 2.1.2, xctest-dynamic-overlay gone,
+swift-nio 2.105.0, …); new originHash `a8471237…` = `sha256(Package.swift)` (T-1's formula
+confirmed on a write). Restored.
+
+### THE BELT, first form — exact top-level pins in Package.swift (eda25f273)
+
+All thirteen floating remote packages declared `exact:` at the committed versions (constraints
+only, no target links them), swift-dependencies `from: "1.9.0"` → `exact: "1.14.1"`. The root
+lockfile re-resolved to match: originHash refreshed to `sha256(Package.swift)` = `38e9243c…`
+(so the CLI now takes its lockfile road), and its two drifted pins reconciled to the workspace's
+shipping versions (PROVISIONAL P-781-1 below).
+
+- **C2 — CLI, NEW manifest, root lockfile removed: GREEN.** The written root lockfile's 15 pins
+  equal the committed WORKSPACE lockfile's 15 non-Sparkle pins ENTRY FOR ENTRY (identity, kind,
+  location, revision, version — compared as JSON). The only warning is SQLCipher.swift's own
+  manifest deprecation (`'v4' is deprecated: watchOS 9.0`), present at 4.18.0 regardless.
+- **E10 — xcodebuild, NEW manifest, workspace lockfile removed, fresh DD: RED. THE FIRST FORM
+  DOES NOT HOLD UNDER XCODE.** Only swift-dependencies stayed at 1.14.1; everything else floated
+  exactly as in E2 (SQLCipher **4.20.0**, swift-syntax 604.0.0, swift-nio 2.105.0, …, plus
+  swift-issue-reporting 2.1.2 BESIDE xctest-dynamic-overlay 1.13.1). **Why:** in the Xcode
+  workspace the repo-root package is NOT the root. It is a LOCAL PACKAGE DEPENDENCY of the
+  project, and SwiftPM's target-based resolution prunes a dependency package's declared
+  dependencies down to the ones its used products need. A constraint-only `.package` that no
+  target uses is dropped, so only swift-dependencies (which targets use) kept its exact pin. For
+  the CLI the same package IS the root, where every declared dependency counts, and that is why C2
+  is green. **The load-bearing design fact:** the Xcode graph's ROOT is the project
+  (`project.pbxproj`'s package references, today Sparkle and `../..`). So the belt for the app
+  must live there as project-level exact package references. Package.swift keeps its pins as the
+  CLI's belt. Restored by `git checkout --`.
 
 ### RELEASE-EXPOSURE — did 1.0 (10632) or 1.0.1 (10682) ship floated pins? **NO — both shipped the committed set** (evidence, decisive, read-only)
 
