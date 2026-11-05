@@ -32,3 +32,20 @@ No BLOCKER, no MAJOR.
 Round 1's clean bill covered: the pbxproj diff is exactly the pair; the bump-history story verified in git; spec alignment (R-13r-6/7, the vx-488 M4 fold); the guard executed red-on-old on main's tree and under release.sh's real shell conditions; the pins replayed over 16 configurations; no other pre-1.0 pin in App/Tools/Sources/Tests.
 
 Round 2: the fixes applied for MINOR-1(a) and NIT-1, re-verified (see the closing note below when it lands).
+
+### Round 1 fixes applied (implementer, commits `597072847` · `72b94be9e`)
+
+- **MINOR-1(a), `597072847`.** New `VersionSchemeTests.theMarketingVersionIsTheNewestReleaseNotesVersion`. It reads `Variorum/Features/WhatsNew` through `#filePath`, the same way `WhatsNewTests.noReleaseNotesFileCarriesProcessText` does. It keeps the `ReleaseNotes-<v>.md` names that `version-guard.sh` accepts (X.Y or X.Y.Z, digits only) and takes the numerically newest, comparing component by component. The Debug host's `CFBundleShortVersionString` must equal it. The stamp-phase test's comment no longer claims enforcement: the guard script runs by hand and in release.sh's preflight, and no suite runs it.
+  - **Red-on-old.** A scratch Swift program replayed the test body verbatim, with the folder and the host version as arguments (host = the tree's Debug MARKETING_VERSION).
+    - origin/main's tree (a git-archive extraction): host 0.10.4, 19 notes files, newest 1.0.1 → **FAIL**.
+    - This branch: host 1.0.1 → **PASS**.
+  - The file typechecks standalone against Testing.framework.
+  - Not run under `xcodebuild test`: the stage-held run of the suites stays owed.
+- **NIT-1, `72b94be9e`.** `mac_marketing_versions` now returns a distinct status for each cause: no file, plutil parse failure, no jq, or not exactly one Variorum target. `mac_marketing_version_mismatch` prints one sentence per cause, and each sentence carries its own remedy:
+  - the bump remedy only for a version mismatch;
+  - a project repair for a missing Debug/Release configuration;
+  - cause-specific advice for each read failure.
+  - It still fails closed: every cause refuses. release.sh refuses with the sentence plus "(VX-779)" and appends nothing.
+  - Verified under /bin/bash 3.2.57 with `set -euo pipefail`, in release.sh's exact `if VAR="$(...)"` shape. All seven arms behave as intended: clean, mismatch, absent file, unparseable file, renamed target, renamed Debug configuration, and missing jq (through the `VERSION_GUARD_JQ` seam).
+  - release.sh, on paths it refuses: an unreadable project refuses with the plutil sentence and no bump clause; origin/main's project refuses at `--version 1.0.1`; the branch passes the check at `--version 1.0.1`.
+- Both Package.resolved files are byte-identical. No xcodebuild call was made in this pass.
