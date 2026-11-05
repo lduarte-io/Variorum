@@ -152,12 +152,22 @@ struct WingToolbarLabelTests {
     /// space: the item is EXACTLY its space wide (its right edge is the line
     /// less the air — never past it), and the words stand flush at its
     /// trailing edge, the wash's inset beyond them.
+    ///
+    /// **The trailing tolerance is the pixel grid's, not layout slack** (the
+    /// stage window's red, batch B part 1 — traced): the words' natural width
+    /// is fractional ("in Home" in SF 11.5 advances 44.93 pt — VX-736's
+    /// CoreText measure), so the Spacer absorbs a fraction and SwiftUI snaps
+    /// each frame to the backing grid on its own; the window measured the
+    /// words at (12.5, 45.0) — maxX 57.5, half a point short of 58. Two edges
+    /// each snapped by up to a quarter point at 2× (a half at 1×) can sit up
+    /// to a point apart, so the line allows ≤ 1 pt; R-B3's old leading shape
+    /// misses by ≈ 8 pt and stays red.
     @Test func aShortNameStandsFlushRightInItsSpace() async {
         let frames = await mount(.column(63), words: "in Home")
         #expect(abs(frames.item.width - 63) < 0.5, "the item takes exactly its space: \(frames.item)")
         #expect(frames.words.width > 20 && frames.words.width < 53, "premise: the words fit: \(frames.words)")
-        #expect(abs(frames.words.maxX + VoicedButtonStyle.labelInset - 63) < 0.5,
-                "the words flush at the trailing edge: \(frames.words)")
+        #expect(abs(frames.words.maxX + VoicedButtonStyle.labelInset - 63) <= 1,
+                "the words flush at the trailing edge, within the pixel grid: \(frames.words)")
     }
 
     /// A long name keeps the item's width (never wider — never across the
