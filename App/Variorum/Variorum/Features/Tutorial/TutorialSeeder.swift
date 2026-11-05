@@ -2717,10 +2717,15 @@ enum TutorialSeeder {
             // provider setup's fence, because it names Claude Code's road (O-4);
             // the roads are the clients' documented ones (Claude Code's /mcp ▸
             // Reconnect; a restarted client starts its servers fresh).
-            + "Locking Variorum or quitting it ends every client's connection, by "
-            + "design. Once it's open again, reconnect the client: in Claude Code, "
-            + "choose Reconnect for it in /mcp; any client reconnects when you "
-            + "restart it.",
+            // VX-818 (the VX-809 run, batch 4 — her R-818): a LOCK keeps every
+            // connection now (each request answered that the library is locked,
+            // served again at the unlock); the quit still ends them. PROVISIONAL
+            // words (P-809-4's family, her copy pass).
+            + "Quitting Variorum ends every client's connection, by design. Once "
+            + "it's open again, reconnect the client: in Claude Code, choose "
+            + "Reconnect for it in /mcp; any client reconnects when you restart it. "
+            + "Locking Variorum keeps every connection: while it's locked, a "
+            + "client is told so at each request, and it carries on once you unlock.",
             // O-4 SETUP COPY END
 
             // VX-197 U8b: where a request shows (above the tabs, VX-281), the

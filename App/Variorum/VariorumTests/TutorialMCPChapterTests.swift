@@ -315,13 +315,25 @@ struct TutorialMCPChapterTests {
             // `MacWillLockTests`; headless `MCPAdviceServerTests.theAdviceSaysALock…`
             // executes stop → every connection gone → start → a reconnect served),
             // and the advice says the same, provider-neutral.
-            #expect(text.contains("Locking Variorum or quitting it ends every client's connection, by design. Once "
-                                  + "it's open again, reconnect the client: in Claude Code, choose Reconnect for it in "
-                                  + "/mcp; any client reconnects when you restart it."))
+            // VX-818 (A JUSTIFIED EDIT, the ritual — the VX-809 run, batch 4; her
+            // R-818, A-809-20): a LOCK keeps every connection now — the quit
+            // still ends them. THE TRUTH lives where the mechanics run: the lock
+            // road suspends the host and the next ready resumes it on the same
+            // connections (`MCPStopRoadsDoorTests`, `MacWillLockTests`; headless
+            // `MCPAdviceServerTests.theAdviceSaysAQuitEndsEveryConnectionAndALockKeepsThem`
+            // executes both halves). PROVISIONAL words (P-809-4's family).
+            #expect(text.contains("Quitting Variorum ends every client's connection, by design. Once it's open "
+                                  + "again, reconnect the client: in Claude Code, choose Reconnect for it in /mcp; any "
+                                  + "client reconnects when you restart it. Locking Variorum keeps every connection: "
+                                  + "while it's locked, a client is told so at each request, and it carries on once "
+                                  + "you unlock."))
+            #expect(!text.contains("Locking Variorum or quitting it ends"), "a lock ends nothing now")
             #expect(MCPSetupClient.claudeCode.label == "Claude Code", "the client the road is named for, by its label")
-            #expect(MCPSession.instructions.contains("locking or quitting it ends every connection, by design, "
+            #expect(MCPSession.instructions.contains("quitting it ends every connection, by design, "
                                                      + "so reconnect once it's back"), "the advice says the same (D-2)")
-            #expect(MCPConnectionEnd.allCases.contains(.libraryClosed), "a lock's end is one Activity names")
+            #expect(MCPSession.instructions.contains("while it's locked, calls say so until it's unlocked"),
+                    "…and the lock's half (D-2)")
+            #expect(MCPConnectionEnd.allCases.contains(.libraryClosed), "a closing library's end is one Activity names")
             #expect(text.contains("as a connection request"))
             #expect(MCPPaneCopy.requestsSection == "Connection requests")
             for id in [CapabilityID.mcpApproveClient, .mcpDenyClient, .mcpChangeClientAccess, .mcpRevokeClient] {

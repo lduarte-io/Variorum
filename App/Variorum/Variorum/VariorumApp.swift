@@ -301,7 +301,7 @@ struct VariorumApp: App {
                         // VX-818 (A-809-21): the teardown reads which road runs it — the lock and a
                         // re-keying reopen keep the MCP server, every other road tears it down as before.
                         bootstrap.onWillLock = macLockTeardown(
-                            session: session, door: appDelegate.mcp, road: { [bootstrap] in bootstrap.willLockRoad }
+                            session: session, door: appDelegate.mcp, bootstrap: bootstrap
                         ) {
                             services?.stop()
                             services = nil

@@ -112,6 +112,21 @@ func macLockTeardown(
     }
 }
 
+/// **THE LOCK TEARDOWN AS `VariorumApp` WIRES IT** (VX-818): the road read from
+/// the bootstrap that runs it (`AppBootstrap.willLockRoad`, assigned just before
+/// each `onWillLock`) — ONE composition the app and its pins share.
+@MainActor
+func macLockTeardown(
+    session: AppSession,
+    door: MCPDoor,
+    bootstrap: AppBootstrap,
+    stopServices: @escaping @MainActor () -> Void
+) -> @MainActor () async -> Void {
+    macLockTeardown(
+        session: session, door: door, road: { [weak bootstrap] in bootstrap?.willLockRoad },
+        stopServices: stopServices)
+}
+
 /// **Which teardowns keep the MCP server** (VX-818 — A-809-21's fail-closed
 /// rule, widened to the re-key at the coordinator's word): the lock and the
 /// re-keying reopen of the same library only. Adopt, swap and anything unnamed

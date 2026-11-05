@@ -276,10 +276,19 @@ final class MCPSession: @unchecked Sendable {
     /// her to the app nor calls again to check. The pinned clause ("Never call
     /// show_in_app unless the author asks") is unchanged. 3,011 → 3,061, inside
     /// 3,100 — her standing allowance (up to 3,250) not used. PROVISIONAL.
+    ///
+    /// VX-818 (the VX-809 run, batch 4 — her R-818, A-809-20): a lock no longer
+    /// ends a connection — the server keeps listening and every call answers the
+    /// locked sentence until the unlock, when the same connection is served
+    /// again. The opening says so (the quit still ends every connection, by
+    /// design): "open while Variorum runs: quitting it ends every connection, by
+    /// design, so reconnect once it's back (e.g. with /mcp); while it's locked,
+    /// calls say so until it's unlocked." 3,061 → 3,089, inside 3,100. PROVISIONAL
+    /// (P-809-4's family, her copy pass).
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
-        open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, \
-        so reconnect once it's back (e.g. with /mcp). A new client is a connection request until the author approves \
+        open while Variorum runs: quitting it ends every connection, by design, \
+        so reconnect once it's back (e.g. with /mcp); while it's locked, calls say so until it's unlocked. A new client is a connection request until the author approves \
         it in Variorum \u{25B8} Settings \u{25B8} MCP. Once approved, list_my_activity is always listed; \
         other tools appear only for what the author has shared (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
