@@ -973,6 +973,104 @@ struct TypedReturnKeyTests {
         }
     }
 
+    // MARK: (2b) VX-806 — a caret INSIDE a word carries the whole word down
+
+    /// **HER REPORT (VX-806, 2026-11-04):** *"normally when you try to make a
+    /// newline in the middle of a word, it just moves the whole word down,
+    /// but with this it just denies it. standardize it?"* Late in a word —
+    /// the caret nearer the NEXT word's start than its own — the key cuts at
+    /// the caret's word's start, so "beta" rides down with the caret.
+    ///
+    /// **RED-ON-OLD (by construction):** the key's divide SETTLED to the
+    /// nearest legal cut, 11, and stored `["alpha beta", "gamma", "delta"]` —
+    /// the word she was in left behind.
+    @Test func aReturnInsideAWordCarriesTheWholeWordDown() async throws {
+        try await withEditor(seedBlocks: ["alpha beta gamma", "delta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 9)  // "alpha bet|a gamma"
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta gamma", "delta"])
+            #expect(h.session.undoStack.topLabel == "Divide")
+            #expect(h.model.statusMessage == nil, "nothing refused, nothing to say")
+            // Count-guarded (the pin must fail CLEAN when red, never trap the
+            // host on a subscript the old road's surface may not have).
+            try #require(h.model.index.entries.count == 3, "the surface tiles the three blocks")
+            #expect(h.textView.selectedRange().location
+                        == h.model.index.range(ofEntryAt: 1).location,
+                    "the caret lands where the cut went — the word's start, the divide door's own landing")
+        }
+    }
+
+    /// **Her screenshot's case:** the caret one character into the block's
+    /// first (and here only) word, just past an opening quote. The word's
+    /// start is the block's start, so the start arm answers — an empty block
+    /// ABOVE, the block pushed down whole, the caret staying with it.
+    ///
+    /// **RED-ON-OLD (by construction):** the planner found no interior word
+    /// edge and the key REFUSED — "No legal cut spot for that here…"
+    /// (`nothingToDo`, #92(b)'s built answer) — with the store untouched.
+    @Test func aReturnInsideAOneWordBlockPushesItDownInsteadOfRefusing() async throws {
+        let quoted = "\u{201C}Onlyword.\u{201D}"
+        try await withEditor(seedBlocks: ["alpha", quoted]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 1)  // "“|Onlyword.”"
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", quoted])
+            #expect(h.model.statusMessage == nil, "no refusal — the key acted")
+            #expect(h.session.undoStack.topLabel == "New Block")
+            // Count-guarded: on the old (refusing) road the surface keeps two
+            // entries, and the pin must fail clean there, never trap the host.
+            try #require(h.model.index.entries.count == 3, "the key made the block above")
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID,
+                    "the caret stays with her paragraph")
+        }
+    }
+
+    /// The FANNED one-word block took a different refusal road before —
+    /// the keep-on-top divide's nil-cut guard ("No legal cut spot… Divide
+    /// choosing takes (⌥⌘⇧D) can send a whole take to one side."). The start
+    /// arm never reaches the fan: the block, every take with it, is pushed
+    /// down whole.
+    ///
+    /// **RED-ON-OLD (by construction):** that refusal, the store untouched.
+    @Test func aReturnInsideAFannedOneWordBlockPushesItDownToo() async throws {
+        try await withEditor(seedBlocks: ["alpha", "Onlyword."]) { h in
+            let slots = try h.storeSlots()
+            try #require(slots.count == 2, "the seed")
+            let seeded = slots[1]
+            let other = try h.session.operations.branchVariant(
+                seeded.blockID, from: try #require(seeded.variantID))
+            try h.session.operations.autosave(other.id, text: "Otherword.", charDelta: 10)
+            try h.reload()
+
+            let window = try hosted(h)
+            defer { window.teardown() }
+            caret(h, entry: 1, offset: 4)  // "Only|word."
+            returnKey(h, window.window)
+            await h.flush()
+
+            let after = try h.storeSlots()
+            #expect(after.map(\.text) == ["alpha", "", "Onlyword."])
+            #expect(h.model.statusMessage == nil)
+            // Count-guarded: the old (refusing) road mints nothing, so the
+            // store keeps two slots — the pin must fail CLEAN there (the
+            // revert window's seven .ips were this subscript trapping).
+            try #require(after.count == 3, "the key made the block above")
+            let pushed = after[2]
+            #expect(pushed.blockID == seeded.blockID, "the same block, pushed down")
+            #expect(try fan(h, pushed.blockID).map(\.workingText) == ["Onlyword.", "Otherword."],
+                    "its takes ride with it, untouched")
+        }
+    }
+
     // MARK: (3) a fanned block — the keep-on-top default (18c batch 1)
 
     /// The key's divide is the SAME divide the door runs, so a fanned block
@@ -1226,6 +1324,94 @@ struct TypedReturnKeyTests {
             #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"],
                     "the empty item ended the list — its newline with it — AND the key made the block")
             #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
+    /// **VX-655 — the exit's retraction lands INSIDE the structural flight,
+    /// never ahead of it** (VX-649's trace, `notes/plans/fixes/vx-648-launch-week.md`:
+    /// the line vanished for the flight's whole latency, then "came back" as
+    /// the new block). The writer is held so the flight is observable: from
+    /// the key through the flight's wait the continuation's line stays on
+    /// screen, and the landing turns that same newline into the new block's
+    /// separator — the page's bytes never change at all; only the caret
+    /// moves into the line it was already on.
+    ///
+    /// **RED-ON-OLD (by construction):** R1-3 deleted the newline through
+    /// the ordinary editing path at the CLAIM, synchronously inside the
+    /// keystroke, so the first assertion read `"- one\ngamma"` — the line
+    /// gone a turn (and, here, the held flight) before the block that
+    /// replaces it.
+    @Test func theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt() async throws {
+        try await withEditor(seedBlocks: ["- one", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)  // continues the list
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["- one\n- ", "gamma"])
+
+            let database = h.database
+            let hold = Task.detached {
+                try database.write { _ in Thread.sleep(forTimeInterval: 0.4) }
+            }
+            try await Task.sleep(for: .milliseconds(30))  // let the hold take the writer
+            returnKey(h, window.window)  // the exit: the lead goes, the act is claimed
+            #expect(h.documentText == "- one\n\ngamma",
+                    "the claim's own turn: only the lead went — the continuation's line is still on screen")
+            var spins = 0
+            while !h.model.structuralInFlight, spins < 3000 {
+                spins += 1
+                await Task.yield()
+                try await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(h.model.structuralInFlight, "the flight is up, waiting on the writer")
+            #expect(h.documentText == "- one\n\ngamma",
+                    "mid-flight: the line is still there — the retraction rides the landing")
+            try await hold.value
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"],
+                    "the list ends at its last item; the block below is the key's")
+            #expect(h.documentText == "- one\n\ngamma",
+                    "landed: the same bytes — the line she was on IS the new block")
+            #expect(h.textView.selectedRange() == NSRange(location: 6, length: 0),
+                    "the caret never moved off the line it was on")
+            // Count-guarded: a red road must fail clean, never trap the host.
+            try #require(h.model.index.entries.count == 3, "the key made the block below")
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
+    /// **GREEN ON BOTH SIDES, deliberately — #94's undo shape, whole
+    /// (VX-655's guard).** After the exit the TEXT stack is empty (the
+    /// flight's rewrite clears it, as every structural rewrite does), the
+    /// structural stack holds exactly the key's "New Block", and ⌥⌘Z takes
+    /// that block back while the list keeps ending at its last item — the
+    /// retraction is not an undoable act on either road. Redo puts the
+    /// block back.
+    @Test func theListExitsUndoStoryIsNinetyFoursWhole() async throws {
+        try await withEditor(seedBlocks: ["- one\n- ", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 8)  // after the empty item's "- "
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"])
+            #expect(h.textView.undoManager?.canUndo == false,
+                    "the text stack: cleared by the flight's rewrite")
+            #expect(h.session.undoStack.depth == 1)
+            #expect(h.session.undoStack.topLabel == "New Block")
+
+            let stack = h.session.undoStack
+            try await h.session.runner.run { ops in _ = try stack.undo(with: ops) }
+            try h.reload()
+            #expect(try h.storeSlots().map(\.text) == ["- one", "gamma"],
+                    "⌥⌘Z takes the block back; the list still ends at its last item")
+            try await h.session.runner.run { ops in _ = try stack.redo(with: ops) }
+            try h.reload()
+            #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"])
         }
     }
 

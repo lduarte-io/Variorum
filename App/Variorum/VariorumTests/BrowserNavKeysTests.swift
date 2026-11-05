@@ -76,8 +76,12 @@ struct BrowserNavKeysTests {
         let alternates = CapabilityRegistry.all.compactMap(\.alternateShortcutLabel)
         // VX-563 (A JUSTIFIED EDIT): the book's step joins VX-560's alternates —
         // the same monitor-door shape, ⌘↑ / ⌘↓ (A-648-6 (6)).
-        #expect(Set(alternates) == ["\u{2318}\u{2190}", "\u{2318}\u{2192}", "\u{2318}\u{2191}", "\u{2318}\u{2193}"],
-                "the only alternates: \(alternates)")
+        // VX-824 (the VX-828 run, batch B — A JUSTIFIED EDIT, VX-563's class):
+        // the wing chord joins them — ⌘1–9, the same monitor-door shape (no
+        // menu key: inside a note the mode row owns ⌘1–⌘7), shown by the helper.
+        #expect(Set(alternates) == [
+            "\u{2318}\u{2190}", "\u{2318}\u{2192}", "\u{2318}\u{2191}", "\u{2318}\u{2193}", "\u{2318}1\u{2013}9",
+        ], "the only alternates: \(alternates)")
         #expect(HelperView.shortcutKeysShown.isSuperset(of: Set(alternates)), "the helper (⌘/) shows them")
     }
 

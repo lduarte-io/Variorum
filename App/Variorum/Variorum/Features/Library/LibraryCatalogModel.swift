@@ -293,6 +293,10 @@ final class LibraryCatalogModel {
     /// Owned here the way `bookRowDoors` is; this model routes the field's
     /// question to it and lands the note groups' heads in `noteHits`.
     @ObservationIgnored let searchState: LibrarySearchModel
+    /// **VX-823 — where each Library pane was left, and from what** (its own
+    /// file, `LibraryCatalogPlace.swift` — P-9): it lives HERE because the
+    /// model outlives the view, which dies with every note opened.
+    @ObservationIgnored let placeMemory = LibraryPlaceMemory()
     /// **The listing, by kind** (17y B1 (k) — her launch blocker: the Library
     /// showed the 40 newest notes and stopped). Every book of the wing; the
     /// NOTES paged in as she scrolls (`LibraryCatalogPaging.swift` — keyset
@@ -469,6 +473,8 @@ final class LibraryCatalogModel {
         selectedPosts = next.selection
         selectionAnchor = next.anchor
         infoHit = noteHits.first { $0.id == postID }
+        // VX-823 (P-828-12): her next row click ends the return mark.
+        placeMemory.clearMarks()
     }
 
     /// A click on a BOOK row's body — same ruling, the book's facts.
@@ -476,6 +482,7 @@ final class LibraryCatalogModel {
         selectedPosts = []
         selectionAnchor = nil
         infoHit = hit
+        placeMemory.clearMarks()   // VX-823 (P-828-12)
     }
 
     /// The panel's own close door.
@@ -524,6 +531,10 @@ final class LibraryCatalogModel {
     /// is the one thing an `onChange` could not work out for itself.
     func modeChanged() -> Bool {
         clearSelection()
+        // VX-823: a mode switch ends the return mark (P-828-12) and starts the
+        // new view at its top, as it always did — a mode switch is not a
+        // return (`LibraryCatalogPlace.swift`).
+        placeMemory.questionChanged()
         // VX-281 ladder R2-1: the near window's held facts follow the rows the
         // mode DRAWS — entering the Timeline ends them, leaving re-holds them
         // (`holdNearFacts`' gate; synchronous like the clear above).
@@ -639,9 +650,26 @@ final class LibraryCatalogModel {
     /// groups). The rest arrive as she scrolls (`loadMoreNotes`, 17y B1 (k);
     /// `loadMoreSearchGroups`, 13o U2).
     func search() async {
+        // VX-823: a new question starts at the top — every pane's remembered
+        // place, and every return mark, go (`LibraryCatalogPlace.swift`).
+        placeMemory.questionChanged()
+        await startOver()
+    }
+
+    /// **The SAME question's first page, asked again** — the mount's read when
+    /// the pane remembers no place (VX-823: not a new question, so another
+    /// pane's place survives it). What `search()` read before VX-823, exactly.
+    func startOver() async {
         await read(
             noteDepth: Self.pageSize, groupDepth: LibrarySearchModel.groupPageSize,
             startingOver: true)
+    }
+
+    /// **VX-823 — the return's in-place re-ask** to a remembered place's depth
+    /// (Q5, `LibraryCatalogPlace.listingAppeared`): `refresh()`'s road with the
+    /// place's own depth instead of what is listed.
+    func reread(noteDepth: Int, groupDepth: Int) async {
+        await read(noteDepth: noteDepth, groupDepth: groupDepth, startingOver: false)
     }
 
     /// **VX-384 (the VX-348 run, U4) — the one-shot listing FOLLOWS the held

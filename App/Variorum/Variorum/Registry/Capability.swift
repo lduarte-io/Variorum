@@ -556,6 +556,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // EVERY time (round 10 — no session-scoped don't-ask), Empty Trash once
     // naming the FULL count by kind (round 8 — "everything, always").
     case deleteNow, emptyTrash
+    // VX-800 (the VX-828 run, batch D — her ask, verbatim: "delete all empty
+    // blocks with no history from trash."). The Trash's THIRD purge door,
+    // the same `.surface` shape and the same one renderer: it purges every
+    // Trash block row R-828-1 calls empty with no history, confirmed EVERY
+    // time with the count it takes (the fork's ruling, the vx-828 record).
+    case deleteEmptyBlocks
     // 13u4 UNIT C2 — her 13u3 morning addition, item 9, verbatim: *"Having a
     // command where you could highlight part of a block and move it into a
     // take on that block (out of the take it's currently in) would be a nice
@@ -685,6 +691,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // a distinct verb and its own honest refusal, and a scope hidden inside
     // another act's implementation is exactly what P-1 forbids.
     case replaceAllInEveryTake
+    // VX-798 (the VX-828 run, batch E) — SPELLING, the macOS-standard pair
+    // (her ask, 2026-11-04: "i also want to be able to run a 'one time'
+    // spellcheck with a keyboard shortcut, not just toggle it on or off", and
+    // the menu home a SwiftUI-lifecycle menu bar never carried). Two
+    // declarations for the find family's reason — each carries a KEY (⌘: and
+    // ⌘;), and an undeclared key in the one place keys are declared is P-1's
+    // collision-drift class. One-shot acts down the responder chain; neither
+    // turns the A24 continuous level on (`SpellingDoor`).
+    case showSpellingPanel, checkSpelling
     // 13g batch 3 (L8/L9) — the FORMATTING acts over markdown-as-content
     // (her rulings F-1…F-3). SEVEN declarations rather than one submenu-owning
     // act, for the find family's reason: two of them carry a KEY, and an
@@ -1056,6 +1071,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// VX-238 holds the missing restore road). Deliberately NOT `.palette`:
     /// a taxonomy delete is decided where the taxonomy is shown.
     case deleteTag
+    /// VX-840 (the VX-828 run, batch E — her ask: *"delete every tag that's
+    /// not on a note currently"*): Settings ▸ Tags' sweep — every tag of the
+    /// wing nothing wears, listed checked, the checked ones deleted in ONE
+    /// confirmed act with ONE ⌥⌘Z entry (the fork's ruling, the vx-828
+    /// record). `.surface`, `.deleteTag`'s home; drawn only while the wing has
+    /// an unused tag (P-2), its label carrying the count.
+    case deleteUnusedTags
     /// 13n-b U1 — SETTINGS ▸ MCP's acts (R-13n-4/5; R-13nb-5), `.surface`
     /// on the Data Safety / Diagnostics precedent: each acts on the row she
     /// is looking at (a connection request, a client, a grant) or the pane's
@@ -1120,6 +1142,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// the in-menu picker (a view choice); a CHORD and a cycling door are
     /// doors, and P-1 declares doors.
     case mcpOpenAsk, mcpSettings, switchWing
+    /// **VX-824 (the VX-828 run, batch B — her ruling, shape (a)): ⌘1–⌘9 go
+    /// to wing N in the switcher's order, Home first, wherever no note holds
+    /// the keys** — inside a note those keys stay its mode row. `.surface`:
+    /// its door is the full window's own key monitor (`WingNumberKeyMonitor`,
+    /// the VX-560 / VX-563 shape — a menu key equivalent would take ⌘1–⌘7 from
+    /// the mode row), so the chord is the declaration's ALTERNATE label and
+    /// the helper (⌘/) shows it.
+    case goToWing
     /// VX-258 (VX-246 U1b) — A SETUP WAITING FOR HER OK: a connection that
     /// presented, under the name of a client she approved, a setup key not
     /// copied for that client waits in Settings ▸ MCP ▸ Waiting (admitted with

@@ -185,7 +185,11 @@ struct RootView: View {
         calmAsks: CalmAskScheduler? = nil,
         tourOffer: TourOfferModel? = nil,
         mcp: MCPDoor? = nil,
-        protectionFaces: RoadStandingModel? = nil
+        protectionFaces: RoadStandingModel? = nil,
+        // VX-823: a pin's road to the window's Library model (the return road
+        // through this shell's own arm swap is pinned on it); the app passes
+        // nothing and the shell makes its own, exactly as before.
+        catalog: LibraryCatalogModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -205,7 +209,7 @@ struct RootView: View {
         // 13i-d U5: the Bookcase is ONE wing's surface — the current one.
         _shelf = State(initialValue: ShelfViewModel(
             session: session, wingID: session.wing.currentID))
-        _catalog = State(initialValue: LibraryCatalogModel(session: session))
+        _catalog = State(initialValue: catalog ?? LibraryCatalogModel(session: session))
         _poolPosts = State(initialValue: PoolPostsModel(session: session))
         _palette = State(initialValue: PaletteModel(session: session))
         _stars = State(initialValue: StarsModel(session: session))
@@ -217,8 +221,9 @@ struct RootView: View {
     /// The `.surface` acts this shell renders (P-1's declared ⇔ rendered
     /// walk): the sidebar toggle, a toolbar door since the correction round
     /// made the split ours (row 2); and (VX-644) the toolbar's "in ‹wing›"
-    /// label, the wing switcher's door.
-    static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar, .switchWing]
+    /// label, the wing switcher's door; and (VX-824) ⌘1–⌘9's wing chord, whose
+    /// door is this window's key monitor (`WingNumberKeyMonitor`).
+    static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar, .switchWing, .goToWing]
 
     /// **13n-c U3 — this window's road to the MCP door** (`MCPShareRoad`):
     /// the two gates read off the door's NARROW observables (so this body
@@ -314,18 +319,20 @@ struct RootView: View {
             // note spoken). It still reads "in ‹wing›" at rest.
             ToolbarItem(placement: .navigation) {
                 let tokens = theme.tokens(for: scheme)
-                Button {
-                    ShellActions(session: session, shell: router).openWingSwitcher()
-                } label: {
-                    Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .frame(maxWidth: 160, alignment: .leading)
+                WingToolbarSlot(sidebarShown: router.sidebarShown) { wordsMaxWidth in
+                    Button {
+                        ShellActions(session: session, shell: router).openWingSwitcher()
+                    } label: {
+                        WingMarquee(
+                            words: tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)),
+                            maxWidth: wordsMaxWidth)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help(QuickEntryCopy.wingHelp(wings.currentName))
                 }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help(QuickEntryCopy.wingHelp(wings.currentName))
             }
             .sharedBackgroundVisibility(.hidden)
         }
@@ -362,6 +369,14 @@ struct RootView: View {
         .background {
             BrowserNavKeyMonitor { direction in
                 Self.navigate(direction, session: session, router: router)
+            }
+        }
+        // VX-824 (the VX-828 run): ⌘1–⌘9 go to wing N, landing on its
+        // Bookcase, while no note holds the keys (inside a note they stay the
+        // mode row) — the chord's refusal spoken where no wing answers.
+        .background {
+            WingNumberKeyMonitor { event, window in
+                Self.wingNumberKey(event, window: window, session: session, wings: wings)
             }
         }
         .sheet(isPresented: $paletteOpen) {
@@ -800,7 +815,37 @@ struct RootView: View {
         // move between its panes — carries the app's one wing with it (her
         // ruled cross-wing follow; the receipt "Now in X").
         WingFollow.wire(workspace: router.workspace, session: session)
+        // VX-833: THIS window's deliberate wing switches land on the Bookcase.
+        Self.wireWingLanding(wings: wings, router: router)
         router.workspace.visit(selection ?? .shelf)
+    }
+
+    /// **VX-833 — where this window's deliberate wing switch lands** (her
+    /// ruling: *"let's just keep landing in the bookcase. i want it to be
+    /// consistent"*): the wings model's one deliberate road
+    /// (`WingsModel.goTo`) asks, and the shell's ONE request road answers —
+    /// `pendingSelection = .shelf`, adopted into the focused pane exactly as
+    /// ⌥⌘[ / ⌘⇧n's destinations are (P-4: the model names the moment, the
+    /// shell decides what it means). Per window: the model and the router are
+    /// this window's. Static so a pin drives exactly what the window wires.
+    static func wireWingLanding(wings: WingsModel, router: ShellRouter) {
+        wings.landInBookcase = { [weak router] in
+            router?.pendingSelection = .shelf
+        }
+    }
+
+    /// **VX-824 — ⌘1–⌘9's act** (the `WingNumberKeyMonitor`'s): the registry's
+    /// gate (`.goToWing` — no note detail in the focused pane: the mode row's
+    /// place), the window's keyboard holder (Q-B1 (a)), the switcher's order —
+    /// one pure decision, answered by the wings model (the deliberate road, or
+    /// the spoken refusal). Returns whether the key was the chord's. Static so
+    /// a pin drives exactly what the key runs (`navigate`'s precedent).
+    static func wingNumberKey(
+        _ event: NSEvent, window: NSWindow, session: AppSession, wings: WingsModel
+    ) -> Bool {
+        wings.answer(WingNumberKeys.decision(
+            for: event, available: session.commandRouter.isEnabled(.goToWing),
+            responder: window.firstResponder, wings: wings.switcherRows))
     }
 
     // MARK: - Selection, per pane (13f batch 4 — the gate's (a))
@@ -1422,7 +1467,9 @@ struct RootView: View {
                 // The correction round, batch E (row 33): the panel's book
                 // outline opens the book AT a note — the ascent's landing.
                 onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) },
-                starDoor: starDoor, wings: wings)
+                starDoor: starDoor, wings: wings,
+                // VX-823: the place the Library remembers is this pane's.
+                placeKey: pane.raw)
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts,

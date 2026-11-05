@@ -1749,82 +1749,106 @@ final class EditorViewModel {
         // read once, before anything touches the surface — under `one_block`
         // the key is content again (U-19 (3)) and the exit is 13k K5's,
         // unchanged: the lead goes and she stays on the empty line. The
-        // retraction below exists because U-1 moves the caret INTO a new
-        // block and orphans that line; under the chip nothing moves her, so
-        // retracting there deleted the line she stood on and left ⏎ unable
-        // to end a list at all (`"- one\n- "` ⇄ `"- one"`, forever — every
-        // journal note, which seeds `one_block`). No other road may mutate
-        // ahead of this guard.
+        // exit's retraction (`listContinuationRetraction`) exists because
+        // U-1 moves the caret INTO a new block and orphans that line; under
+        // the chip nothing moves her, so retracting there deleted the line
+        // she stood on and left ⏎ unable to end a list at all (`"- one\n- "`
+        // ⇄ `"- one"`, forever — every journal note, which seeds
+        // `one_block`). **Since VX-655 nothing mutates at the claim at all:**
+        // the retraction rides the act's own flight (see
+        // `listContinuationRetraction`), so the claim decides against the
+        // unretracted surface — which answers the same act, because "at the
+        // end" ignores trailing whitespace (the newline is whitespace).
         guard header?.effectiveSegmentation != .oneBlock else { return false }
-        if afterListExit { retractListContinuationNewline() }
-        guard typedReturnAct() != .content else { return false }
+        let act = typedReturnAct()
+        guard act != .content else { return false }
         // 18c ladder round 1, R1-2: from this claim until the act has
         // landed, every key event is stashed and replayed at the landed
         // caret — the claim-to-turn gap would otherwise put a character
         // into the block the caret is about to leave, and the flight itself
         // would drop it against the disabled surface.
         textView?.beginDeferringKeystrokes()
-        structural.scheduleTypedReturn()
+        // VX-655: the exit NAMES its block, so the act retracts there and
+        // nowhere else — a click between this claim and the act's turn (the
+        // R2-4 residual: clicks are never deferred) cannot hand the
+        // retraction a different block's trailing newline.
+        var listExitBlockID: String?
+        if afterListExit,
+           case .emptyBlock(edge: .below, entryIndex: _, let blockID, closingEmptyTail: false) = act {
+            listExitBlockID = blockID
+        }
+        structural.scheduleTypedReturn(listExitBlockID: listExitBlockID)
         return true
+    }
+
+    /// The list exit's newline retraction, as the act's flight carries it
+    /// (VX-655): which take to write, and its text without the newline.
+    nonisolated struct ListExitRetraction: Equatable, Sendable {
+        let variantID: String
+        let retractedText: String
     }
 
     /// **18c ladder round 1, R1-3 (PROVISIONAL — QUESTIONS #94):** when an
     /// EMPTY list item's ⏎ has just retracted its lead (`.exitList`) and
     /// that item was the block's LAST line, the newline the continuation
-    /// typed one keystroke earlier goes with it — through the ordinary
-    /// editing path — so ⏎⏎ after a list ends the block at its last item
-    /// exactly as ⏎ ends a prose paragraph, and no blank last line is left
-    /// behind. Only the continuation's OWN newline is retracted: the line
-    /// before it must itself be a list line (a continuation always follows
-    /// one), so a blank line she typed above the item (U-19 (2)) is never
-    /// touched, and an item mid-block keeps the seam's k−1 spacing (A11).
-    /// A RESTORATION of the gesture's pre-U-1 shape, not a new behaviour:
-    /// K5 left the caret ON that line, where prose continued in the same
-    /// block; U-1 moves it into a new block, which is what turned the line
-    /// into a leftover. **Chip ON only** (round 2, R2-2 — the guard sits in
-    /// `runTypedReturn`, ahead of this call).
+    /// typed one keystroke earlier goes with it, so ⏎⏎ after a list ends
+    /// the block at its last item exactly as ⏎ ends a prose paragraph, and
+    /// no blank last line is left behind. Only the continuation's OWN
+    /// newline is retracted: the line before it must itself be a list line
+    /// (a continuation always follows one), so a blank line she typed above
+    /// the item (U-19 (2)) is never touched, and an item mid-block keeps the
+    /// seam's k−1 spacing (A11). A RESTORATION of the gesture's pre-U-1
+    /// shape, not a new behaviour: K5 left the caret ON that line, where
+    /// prose continued in the same block; U-1 moves it into a new block,
+    /// which is what turned the line into a leftover. **Chip ON only**
+    /// (round 2, R2-2 — the guard sits in `runTypedReturn`, ahead of the
+    /// act).
     ///
-    /// **A gap, named (18c ladder round 2, R2-3):** this deletion and the
-    /// exit's own lead deletion (`MarkdownActs.deleteWithoutNewline`) are
-    /// two text-undo registrations for one keystroke, against K5's
-    /// one-group rule for the continuation. Unreachable today — the act
-    /// that follows a retraction is always a structural flight (the block
-    /// holds the list it just exited, and R1-4's line-end rule excludes
-    /// `.content`; the empty block's old no-op arm retired with R-13u4-2 and
-    /// would mint here too), and every structural rewrite clears the
-    /// text-undo stack (R-2 residual 1) — and live the day 13u1 relaxes
-    /// that directive: group the two then.
-    private func retractListContinuationNewline() {
-        guard let textView else { return }
+    /// **VX-655 — the retraction lands INSIDE the flight, never ahead of it.**
+    /// It used to be an ordinary surface deletion at the CLAIM, one
+    /// main-actor turn (or a second, on a busy writer) before the empty
+    /// block that replaces the line could land — the line vanished and came
+    /// back (VX-649's trace, `notes/plans/fixes/vx-648-launch-week.md`).
+    /// This is now a pure READ of the live surface at the act's own turn,
+    /// for the act's own block (`entryIndex`/`blockID` — the act is
+    /// `.emptyBlock(edge: .below)` there by construction: the caret sits at
+    /// the block's end behind a newline, which is trailing whitespace). The
+    /// flight writes the retracted text to the store beside the mint
+    /// (`EditorSurfaceController.insertEmptyBlock`), and the landing's
+    /// divide seam turns the newline still on screen INTO the separator of
+    /// the new block — the same bytes, in the turn the block lands, so the
+    /// line she was on simply becomes the block. nil ⇒ nothing to retract.
+    ///
+    /// **The undo story is #94's, whole.** The retraction was never a
+    /// structural act and is not one now: ⌥⌘Z takes back the "New Block"
+    /// and the list block keeps ending at its last item, exactly as before.
+    /// What changed is the TEXT stack, and only by subtraction: the
+    /// retraction is no longer a text-undo registration at all (it is a
+    /// store write inside the flight), so R2-3's named gap — two text-undo
+    /// registrations for one keystroke — is gone; the exit's lead deletion
+    /// remains the one, and the flight's rewrite clears it exactly as ever.
+    func listContinuationRetraction(entryIndex i: Int, blockID: String) -> ListExitRetraction? {
+        guard let textView, i >= 0, i < index.entries.count,
+              index.entries[i].blockID == blockID,
+              let variantID = index.entries[i].variantID
+        else { return nil }
         let selection = textView.selectedRange()
-        guard selection.length == 0, selection.location != NSNotFound,
-              selection.location > 0
-        else { return }
-        let caret = selection.location
-        // The caret's entry (never the tail), and the caret must sit at its
-        // END — the item was the block's last line.
-        var location = 0
-        var entryStart: Int?
-        for entry in index.entries {
-            if caret >= location, caret <= location + entry.length {
-                guard caret == location + entry.length else { return }
-                entryStart = location
-                break
-            }
-            location += entry.length + 1
-        }
-        guard let entryStart, caret - 1 >= entryStart else { return }
-        let text = textView.string as NSString
-        guard text.character(at: caret - 1) == 0x0A else { return }
+        guard selection.length == 0, selection.location != NSNotFound else { return nil }
+        let range = index.range(ofEntryAt: i)
+        // The caret must sit at the entry's END — the item was the block's
+        // last line — behind the continuation's newline.
+        guard selection.location == range.upperBound, range.length > 0 else { return nil }
+        let text = viewText(range) as NSString
+        guard text.character(at: text.length - 1) == 0x0A else { return nil }
         let previous = text.range(
             of: "\n", options: .backwards,
-            range: NSRange(location: entryStart, length: caret - 1 - entryStart))
-        let previousStart = previous.location == NSNotFound ? entryStart : previous.location + 1
+            range: NSRange(location: 0, length: text.length - 1))
+        let previousStart = previous.location == NSNotFound ? 0 : previous.location + 1
         let previousLine = text.substring(
-            with: NSRange(location: previousStart, length: caret - 1 - previousStart))
-        guard MarkdownSyntax.isListLead(previousLine) else { return }
-        let range = NSRange(location: caret - 1, length: 1)
-        OrdinaryInputEdit.apply("", over: range, in: textView)
+            with: NSRange(location: previousStart, length: text.length - 1 - previousStart))
+        guard MarkdownSyntax.isListLead(previousLine) else { return nil }
+        return ListExitRetraction(
+            variantID: variantID, retractedText: text.substring(to: text.length - 1))
     }
 
     /// **18c ladder R1-1 — the ONE tail-opening predicate, asked before a

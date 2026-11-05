@@ -52,6 +52,44 @@ extension Operations {
         }
     }
 
+    /// **The Trash's empty-block sweep** (VX-800 — her ask, verbatim: *"delete
+    /// all empty blocks with no history from trash."*; the predicate is
+    /// R-828-1 as ruled at the VX-828 batch D fork —
+    /// `notes/plans/fixes/vx-828-editor-shell-qol.md`). The Delete Now shape,
+    /// one transaction: purge INTENTS only, never a raw DELETE — the bytes go
+    /// by the existing roads (`LocalPurge` at once for a never-synced family,
+    /// the janitor at the horizon otherwise; purge memo §4f).
+    ///
+    /// `blockIDs` are the ids the confirm showed her. The act takes
+    /// `blockIDs ∩ the blocks that STILL qualify`, re-read INSIDE this
+    /// transaction (`Queries.emptyTrashBlocks`, every wing — the ids were
+    /// wing-scoped when the door counted them): a confirm is a pause, and a
+    /// check made outside the transaction is a check made against a snapshot
+    /// (`deleteBlock`'s precondition lesson). So a block put back in the
+    /// pause, re-deleted as its note's cascade victim, already fenced by
+    /// another intent, or written by a sync apply drops out — and the act
+    /// never takes more than she confirmed (a block that started qualifying
+    /// in the pause is not taken).
+    ///
+    /// Answers the taken ids, in the order given; EMPTY means nothing
+    /// qualified any more and NOTHING WAS WRITTEN — the door speaks that as
+    /// a refusal. No undo entry and no touch or churn: `requestPurge`'s own
+    /// posture (the confirm is the guard; an undo racing the janitor would
+    /// be a door that sometimes lies).
+    @discardableResult
+    public func sweepEmptyTrashBlocks(_ blockIDs: [String]) throws -> [String] {
+        try database.write { db in
+            let now = date.now
+            let qualifying = Set(try Queries.emptyTrashBlocks(db, now: now))
+            var seen = Set<String>()
+            let taken = blockIDs.filter { qualifying.contains($0) && seen.insert($0).inserted }
+            guard !taken.isEmpty else { return [] }
+            try mintPurgeIntents(
+                db, taken.map { SyncPurgeTarget(table: "block", rowID: $0) }, now: now)
+            return taken
+        }
+    }
+
     /// **The intent write, inside a caller's transaction** (the post-13l
     /// polish round, ledger row 23 — V4's restore).
     ///

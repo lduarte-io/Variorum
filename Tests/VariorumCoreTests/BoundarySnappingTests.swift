@@ -250,6 +250,89 @@ struct BoundarySnappingTests {
         #expect(BoundarySnapping.graphemeRange(0..<5, in: "Hi 👩‍👩‍👧‍👦") == nil)
     }
 
+    // MARK: The word a caret sits inside (VX-806 — the typed Return's cut)
+
+    /// A caret anywhere strictly inside a word answers THAT word's start —
+    /// early or late in the word alike. `settle` is shown beside it on the
+    /// late caret, because that is the divergence her sentence decides: the
+    /// nearest legal cut is the NEXT word's start (11), which would leave
+    /// "beta" behind; the word's own start (6) carries it down.
+    @Test func aCaretInsideAWordAnswersThatWordsStart() {
+        let text = "alpha beta gamma"  // words at 0, 6, 11; end 16
+        #expect(BoundarySnapping.boundaries(in: text, granularity: .word) == [0, 6, 11, 16])
+        for caret in 7...9 {
+            #expect(BoundarySnapping.wordStart(enclosing: caret, in: text) == 6, "caret \(caret)")
+        }
+        for caret in 12...15 {
+            #expect(BoundarySnapping.wordStart(enclosing: caret, in: text) == 11, "caret \(caret)")
+        }
+        #expect(BoundarySnapping.settle(9, in: text, among: [6, 11]) == 11,
+                "the divergence, stated: the nearest legal cut leaves the word behind")
+    }
+
+    /// Inside the FIRST word the floor is 0 — the block's very start — and
+    /// the same holds behind leading whitespace (the scanner's leading run
+    /// starts no word) and behind an opening quote (her screenshot's caret:
+    /// one character into the first word, after the quote — the quote is
+    /// part of the word, as every scanner here reads it).
+    @Test func insideTheFirstWordTheAnswerIsTheTextsStart() {
+        #expect(BoundarySnapping.wordStart(enclosing: 2, in: "alpha beta") == 0)
+        #expect(BoundarySnapping.wordStart(enclosing: 4, in: "  hello world") == 0,
+                "behind a leading run: 0, and the prefix before the word is blank")
+        #expect(BoundarySnapping.wordStart(enclosing: 1, in: "\u{201C}Onlyword.\u{201D}") == 0)
+        #expect(BoundarySnapping.wordStart(enclosing: 1, in: "\u{201C}Hello there") == 0)
+        #expect(BoundarySnapping.wordStart(enclosing: 3, in: "Hello") == 0, "a one-word text")
+    }
+
+    /// The floor is EXACT: a one-letter sentence opener `settlePull` before
+    /// the word wins `settle`'s exact tie (#161) and would ride down with
+    /// the word; the word's own start does not move.
+    @Test func theWordsStartIsExactWhereSettlesPullWouldMoveIt() {
+        let text = "Go. I amble."  // "I" at 4 (a sentence start), "amble." at 6
+        #expect(BoundarySnapping.settle(6, in: text, among: [4, 6]) == 4,
+                "the premise: #161's documented tie")
+        #expect(BoundarySnapping.wordStart(enclosing: 8, in: text) == 6)
+    }
+
+    /// A newline is whitespace: the first word of a later line starts after
+    /// it, and that start is a legal cut (a paragraph start, in fact).
+    @Test func aLaterLinesFirstWordStartsAfterItsNewline() {
+        let text = "First line\nSecond line"
+        #expect(BoundarySnapping.wordStart(enclosing: 14, in: text) == 11)
+    }
+
+    /// Not inside a word ⇒ nil: a word's edges, whitespace, the text's
+    /// edges, an empty text, and an offset splitting a grapheme cluster.
+    @Test func aCaretNotInsideAWordAnswersNil() {
+        let text = "alpha beta"
+        #expect(BoundarySnapping.wordStart(enclosing: 5, in: text) == nil, "a word's end")
+        #expect(BoundarySnapping.wordStart(enclosing: 6, in: text) == nil, "a word's start")
+        #expect(BoundarySnapping.wordStart(enclosing: 0, in: text) == nil)
+        #expect(BoundarySnapping.wordStart(enclosing: 10, in: text) == nil)
+        #expect(BoundarySnapping.wordStart(enclosing: 2, in: "a   b") == nil, "in a whitespace run")
+        #expect(BoundarySnapping.wordStart(enclosing: 0, in: "") == nil)
+        #expect(BoundarySnapping.wordStart(enclosing: -1, in: text) == nil)
+        #expect(BoundarySnapping.wordStart(enclosing: 99, in: text) == nil)
+        // "ab👍🏽cd": the emoji is one grapheme of four UTF-16 units (2..<6).
+        let emoji = "ab\u{1F44D}\u{1F3FD}cd"
+        #expect(BoundarySnapping.wordStart(enclosing: 3, in: emoji) == nil, "splits a grapheme")
+        #expect(BoundarySnapping.wordStart(enclosing: 6, in: emoji) == 0, "after it: inside the word")
+    }
+
+    /// Every answer is a member of the one legal-cut set — the word rule's
+    /// grid — so the Return key's cut is S4-22's by construction.
+    @Test func everyAnswerIsALegalCut() {
+        for text in ["alpha beta gamma", "Go. I amble.", "Para one.\n\nPara two.",
+                     "  lead and trail  ", "\u{201C}Quoted words\u{201D} after."] {
+            let legal = Set(BoundarySnapping.boundaries(in: text, granularity: .word))
+            for caret in 0...text.utf16.count {
+                guard let start = BoundarySnapping.wordStart(enclosing: caret, in: text) else { continue }
+                #expect(legal.contains(start), "\(text) @ \(caret) → \(start)")
+                #expect(start <= caret)
+            }
+        }
+    }
+
     // MARK: Extract classification
 
     @Test func prefixAndSuffixSpansClassifyExactly() {

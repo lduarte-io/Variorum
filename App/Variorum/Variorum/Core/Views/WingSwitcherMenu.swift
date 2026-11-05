@@ -172,9 +172,12 @@ struct WingSwitcherMenu: View {
         current: String, name: String, @ViewBuilder label: () -> MenuLabel
     ) -> some View {
         Menu {
+            // VX-833: the list's pick is a DELIBERATE switch — it lands in the
+            // wing's Bookcase (the one road, `WingsModel.goTo`), still silent
+            // (13i-d: she reads the name she picked).
             Picker(selection: Binding(
                 get: { wings.currentID },
-                set: { wings.switchTo($0) })
+                set: { wings.goTo($0, saying: false) })
             ) {
                 ForEach(wings.rows) { row in
                     // 13n-c U4: a wing an ask waits on wears its pending glyph

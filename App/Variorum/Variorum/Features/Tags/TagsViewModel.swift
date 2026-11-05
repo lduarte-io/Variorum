@@ -20,7 +20,24 @@ final class TagsViewModel {
     @ObservationIgnored private let session: AppSession
 
     private(set) var tags: [Tag] = []
+    /// **VX-838 (the VX-828 run, batch E; R-828-2) — the wing `tags` IS**: its
+    /// id and its display name, adopted with the list from ONE read, so a
+    /// face naming the wing ("Tags — in ‹wing›", Settings ▸ Tags' header) can
+    /// never name a wing other than the one listed — and a rename of that
+    /// wing re-titles it live (the read watches the `wing` table too).
+    private(set) var shownWing = ShownWing(id: "", name: WingWords.home)
     private(set) var lastError: String?
+
+    nonisolated struct ShownWing: Equatable, Sendable {
+        let id: String
+        let name: String
+    }
+
+    /// One read's answer: the wing's vocabulary and the wing's name.
+    nonisolated struct Listing: Equatable, Sendable {
+        let tags: [Tag]
+        let wingName: String
+    }
 
     init(session: AppSession) {
         self.session = session
@@ -28,13 +45,23 @@ final class TagsViewModel {
 
     /// Runs for the view's lifetime. The taxonomy is author-scale metadata
     /// (cost ∝ tag count — the unbounded pool/tray precedent).
+    ///
+    /// 13i-d U5: the CURRENT WING's vocabulary (R-13ia-1 — tags are per-wing),
+    /// read ONCE at the start: the wing is fixed for this run, so **every host
+    /// keys its task on the wing** (`.task(id: session.wing.currentID)`) and a
+    /// switch restarts it. RootView always did; Settings ▸ Tags did not — a
+    /// plain `.task` ran once per window, pinned to the wing at open (VX-838,
+    /// her "my settings tab stays stale on the tags for the previous wing").
     func start() async {
-        // 13i-d U5: the CURRENT WING's vocabulary (R-13ia-1 — tags are
-        // per-wing); the shell restarts this task when the wing switches.
+        let wingID = session.wing.currentID
         do {
-            for try await value in session.database.observeTags(
-                wingID: session.wing.currentID) {
-                tags = value
+            for try await value in session.database.observe({ db in
+                Listing(
+                    tags: try Queries.allTags(db, wingID: wingID),
+                    wingName: try Queries.wingName(db, id: wingID, home: WingWords.home)
+                        ?? WingWords.home)
+            }) {
+                adopt(value.tags, wing: ShownWing(id: wingID, name: value.wingName))
             }
         } catch is CancellationError {
         } catch {
@@ -42,9 +69,11 @@ final class TagsViewModel {
         }
     }
 
-    /// Internal so tests drive the listing deterministically.
-    func adopt(_ new: [Tag]) {
+    /// Internal so tests drive the listing deterministically. `wing` nil keeps
+    /// the shown wing (the older pins' road).
+    func adopt(_ new: [Tag], wing: ShownWing? = nil) {
         tags = new
+        if let wing, wing != shownWing { shownWing = wing }
     }
 
     /// Indent depth for the tree presentation (path components below root).
@@ -67,6 +96,45 @@ final class TagsViewModel {
     /// trigger tombstones applications.
     func deleteTag(_ id: String) async {
         await run { ops in try ops.deleteTag(id) }
+    }
+
+    // MARK: - VX-840 — the unused-tags sweep (the VX-828 run, batch E)
+
+    /// **The shown wing's UNUSED tags, live** — every tag of the wing vx-809's
+    /// brain calls unworn (`Queries.unusedTags`; a Trash-held wearer keeps a
+    /// tag in use, P-828-3), path order. Settings ▸ Tags' door counts it and
+    /// its sheet lists it. Held only while the pane is up (its own keyed task);
+    /// the observation's region never wakes on a keystroke (P1).
+    private(set) var unused: [Tag] = []
+
+    /// Runs while the pane shows, keyed on the wing like `start()` — the wing
+    /// is read once, so the host restarts it on a switch.
+    func startUnused() async {
+        let wingID = session.wing.currentID
+        do {
+            for try await value in session.database.observeUnusedTags(wingID: wingID) {
+                if value != unused { unused = value }
+            }
+        } catch is CancellationError {
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    /// **The sweep's act** — `Operations.deleteUnusedTags` (ONE write, ONE
+    /// stamp, ONE "Delete Unused Tags" entry; confirmed ∩ still-unused inside
+    /// the write). Answers how many tags went — 0 when a race left nothing to
+    /// take (nothing was written) — or nil when the act threw (`lastError`
+    /// holds the operations layer's words). The pane speaks the outcome.
+    func deleteUnusedTags(_ ids: [String]) async -> Int? {
+        do {
+            let taken = try await session.runner.run { ops in try ops.deleteUnusedTags(ids) }
+            lastError = nil
+            return taken.count
+        } catch {
+            lastError = Self.message(error)
+            return nil
+        }
     }
 
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {

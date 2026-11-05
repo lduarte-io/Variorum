@@ -1123,6 +1123,18 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Empty Trash lives in the Trash — "
                 + "\(RecoveryPath.surface) holds it, never a note.",
             availability: { _ in .act }),
+        // VX-800 (the VX-828 run, batch D): the empty-block sweep — Empty
+        // Trash's shape, narrowed to the Trash's block rows R-828-1 calls
+        // empty with no history. The Trash renders it only while it would
+        // take something (P-2: never a door that cannot act), its label
+        // carrying the count, confirmed every time.
+        Capability(
+            id: .deleteEmptyBlocks, verb: RecoveryCopy.deleteEmptyBlocksVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Deleting empty blocks for good lives in the Trash — "
+                + "\(RecoveryPath.surface) holds it, never a note.",
+            availability: { _ in .act }),
 
         // MARK: Commit + undo
         Capability(
@@ -1347,6 +1359,57 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
+
+        // MARK: Spelling (VX-798 — the VX-828 run, batch E)
+        //
+        // Her ask (2026-11-04): *"I'd also like a keyboard shortcut for
+        // spellcheck — how am I supposed to even spellcheck, actually? I used
+        // to see it in a menu but now I don't know where it is"* and *"i also
+        // want to be able to run a 'one time' spellcheck with a keyboard
+        // shortcut, not just toggle it on or off."* A SwiftUI-lifecycle menu
+        // bar carries none of AppKit's Spelling and Grammar items; these two
+        // put the macOS-standard pair back, with AppKit's own titles and keys
+        // (TextEdit's, Pages', Mail's) — the words and chords she remembers.
+        //
+        // App scope, `takesAccess: nil`, availability `always`: the acts are
+        // AppKit's (`NSText.showGuessPanel(_:)` / `checkSpelling(_:)`), sent
+        // down the RESPONDER CHAIN by `SpellingDoor` — "a text view holds the
+        // keyboard" is a fact `CapabilityContext` cannot see and the chain
+        // answers exactly (Paste Without Line Breaks' recorded reason). Every
+        // live writing surface answers, because each is an `NSTextView`: Write
+        // and the inline editors (`EditorTextView`), every pane
+        // (`PaneTextView`), the capture boxes (`CaptureNSTextView`), the
+        // comment fields, and any text field's field editor. Where nothing in
+        // the chain takes the act, the door SPEAKS its note (P-2).
+        //
+        // ONE-SHOT, never a toggle: neither act writes the per-view flags the
+        // A24 level owns (`SpellcheckLevel.apply` — continuous checking paired
+        // with completion OFF, the TEXTKIT2 §3 crash pairing), so AppKit's
+        // three toggle items are deliberately NOT here.
+        //
+        // **THE COLLISION SWEEP'S RESULT (2026-11-05, at e0b15ded0):** ⌘; AND
+        // ⌘: ARE FREE — no `;` or `:` chord in `EditorCommands.keyEquivalent`;
+        // none at any `.keyboardShortcut(` call site in `Variorum/` or
+        // `Shared/`; every `NSMenuItem` keyEquivalent empty; the one
+        // `performKeyEquivalent` override (`EditorTextView` — ⌘S and the
+        // non-consuming ⌘Z/⇧⌘Z hint arm) and the three `keyDown` overrides
+        // (Editor, Pane, Capture — ⏎/⇧⏎ and the flight's deferral; key
+        // equivalents never come that way) bind neither; the local
+        // monitors classify ⌘L, ⌘1–9, ⌘←/→, ⌘↑/↓, ←/→, ⌘⏎/⎋ and mouse —
+        // never `;` (DivideWSheet refuses every ⌘ event while it is up, as
+        // for every chord); the system hot keys are [.quickNote] (⌃⌥⌘N).
+        Capability(
+            id: .showSpellingPanel, verb: SpellingDoorCopy.showPanelVerb, scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2318}:", takesAccess: nil,
+            unavailableNote: SpellingDoorCopy.nothingToCheck,
+            availability: always),
+        Capability(
+            id: .checkSpelling, verb: SpellingDoorCopy.checkDocumentVerb, scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2318};", takesAccess: nil,
+            unavailableNote: SpellingDoorCopy.nothingToCheck,
+            availability: always),
 
         // MARK: Formatting (13g batch 3 — L8, her rulings F-1…F-3)
         //
@@ -2567,6 +2630,16 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Tags are deleted from Settings \u{25B8} Tags.",
             availability: always),
+        // VX-840 (the VX-828 run, batch E): the sweep — `.deleteTag`'s home and
+        // shape, one door: the pane's foot, drawn only while the wing holds an
+        // unused tag (its label the count — batch D's ruling 6, P-2). The note
+        // is the act's own refusal, spoken when a race left nothing to take.
+        Capability(
+            id: .deleteUnusedTags, verb: TagManagerCopy.sweepVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: TagManagerCopy.nothingLeftToDelete,
+            availability: always),
 
         // MARK: The MCP door (13n-b U1 — Settings ▸ MCP, R-13n-4/5, R-13nb-5)
         // The Diagnostics shape: `.surface`, app scope, always available as
@@ -2816,6 +2889,43 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2318}L", takesAccess: nil,
             unavailableNote: WingCopy.switchWingUnavailable,
             availability: { ctx in ctx.wingCount > 1 ? .act : .unavailable }),
+        // **VX-824 (the VX-828 run, batch B) — ⌘1–⌘9: WINGS FROM THE KEYBOARD.**
+        // Her ask (2026-11-04): *"map the Command1, command2, command3, etc. to
+        // moving between different wings when you aren't in a note"*; her
+        // ruling, shape (a): contextual — inside a note the keys stay the mode
+        // row; everywhere else ⌘N goes to wing N in the switcher's order (Home
+        // first), landing on its Bookcase (VX-833 — the deliberate road).
+        //
+        // `.surface`, the alternate label, no menu item — VX-563's shape: the
+        // door is the full window's key monitor (`WingNumberKeyMonitor`),
+        // because a menu key equivalent would take ⌘1–⌘7 from the mode row. The
+        // availability is the mode row's MIRROR (no note detail in the focused
+        // pane); the monitor adds the keyboard half of the fork's Q-B1 ruling
+        // (a writing surface holding the keys passes the chord on) — a fact
+        // about the first responder no context can carry (VX-560's
+        // `textIsFirstResponder` precedent). With one wing ⌘1 is Home's
+        // Bookcase (P-828-1 (ii)(a), accepted); a number no wing answers is the
+        // monitor's spoken refusal (P-828-1 (i), `WingCopy.noWingAtNumber`), so
+        // the note here is empty — no dispatch ever speaks it (the
+        // directly-wired idiom, `.lockLibraryNow`).
+        //
+        // THE COLLISION SWEEP (at this tip): the app's only digit chords are the
+        // mode row's ⌘1–⌘n (the contextual partner, by design) and the Open
+        // list's ⌘⇧1–⌘⇧9 (⇧ — never this chord: the classifier demands ⌘
+        // alone); every `.keyboardShortcut(` call site, every `NSMenuItem`
+        // keyEquivalent and the `performKeyEquivalent` overrides carry no other
+        // digit; no local monitor classifies a ⌘digit (`PageTurnKeys`,
+        // `BrowserNavKeys`, `BookNoteStep` arrows; `CommentsPanel` ⌘⏎/⎋;
+        // `WingSwitcherSheet`/`OneWingChord` ⌘L; `DivideWSheet` its own window;
+        // the rest observe or are the mouse's); ⌘1–⌘9 are not reserved by the
+        // system.
+        Capability(
+            id: .goToWing, verb: "Go to Wing", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "",
+            availability: { ctx in ctx.mode == nil ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}1\u{2013}9"),
         // VX-309 U1c — VX-451: Lock Library Now — the File menu's item and the road's Protection pane render THIS
         // declaration (the verb is the one constant, so both faces say the same words). The per-gesture condition (only
         // where the library can lock — Castle) is each door's own (`canLock`; the Castle-only section): `always` as an act,

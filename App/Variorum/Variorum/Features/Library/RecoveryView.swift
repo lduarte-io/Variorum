@@ -356,6 +356,61 @@ final class RecoveryViewModel {
         trashTotalLoaded = true
     }
 
+    // MARK: The empty-block sweep (VX-800)
+
+    /// **The Trash blocks R-828-1 calls empty with no history, live** — the
+    /// sweep door's count and its confirm's ids (VX-800; her ask: *"delete
+    /// all empty blocks with no history from trash."*). Its own held
+    /// observation, never riding the listing's: the door is over this wing's
+    /// WHOLE Trash (Empty Trash's scope), so the kind filter must not narrow
+    /// it, and the listing's observation restarts with the filter. Named
+    /// region, so it re-reads on a reader after a commit, never on the
+    /// writer inside one (VX-670).
+    private(set) var emptyBlockIDs: [String] = []
+
+    func startEmptyBlocks() async {
+        do {
+            for try await value in session.database.observeEmptyTrashBlocks(
+                now: session.now, wingID: session.wing.currentID
+            ) {
+                emptyBlockIDs = value
+            }
+        } catch is CancellationError {
+        } catch {
+            // A failed count HIDES the door (P-2: a door that cannot say what
+            // it takes does not draw) — never a guess.
+            emptyBlockIDs = []
+        }
+    }
+
+    /// Tests drive the count the `adopt` way.
+    func adoptEmptyBlocks(_ ids: [String]) {
+        emptyBlockIDs = ids
+    }
+
+    /// The sweep door: raises the confirm with the ids it counted — never
+    /// acts directly, asked every time (round 10). Pressed at zero (the door
+    /// is not drawn then — this answers the race) it says so.
+    func requestDeleteEmptyBlocks() {
+        lastError = nil
+        receipt = nil
+        guard !emptyBlockIDs.isEmpty else {
+            lastError = RecoveryCopy.deleteEmptyBlocksNothingLeft
+            return
+        }
+        pendingConfirm = .deleteEmptyBlocks(emptyBlockIDs)
+    }
+
+    /// **The pick belt** (VX-800, confirmed at the fork): the swept rows leave
+    /// the pick the moment the act answers — the listing's own prune follows
+    /// a beat later on a reader — so no stale bulk Put back can name a block
+    /// that is gone for good.
+    func dropFromPick(_ ids: [String]) {
+        guard !ids.isEmpty else { return }
+        selectedRows.subtract(ids)
+        if let anchor = selectionAnchor, ids.contains(anchor) { selectionAnchor = nil }
+    }
+
     // MARK: A scrap's home is a POOL, and the surface says so (13l, §8b's
     // pool/scraps honesty check)
 
@@ -521,6 +576,12 @@ final class RecoveryViewModel {
                 let result = try await TrashPurge.confirmSelection(session: session, taken)
                 receipt = result.receipt
                 forgetLocalMemories(ofTaken: result.taken)
+            } else if case .deleteEmptyBlocks(let ids) = confirm {
+                // VX-800: the sweep answers the blocks it really took — and
+                // those leave the pick at once (the belt).
+                let result = try await TrashPurge.confirmEmptyBlocks(session: session, ids)
+                receipt = result.receipt
+                dropFromPick(result.taken)
             } else {
                 receipt = try await TrashPurge.confirm(session: session, confirm)
                 forgetLocalMemories(of: confirm)
@@ -789,7 +850,8 @@ struct RecoveryView: View {
     /// 13j batch 6b (P-1): the Trash surface is the ONE renderer of the two
     /// purge acts — the walk's union names every renderer by construction,
     /// so a door leaking into any note context would fail the walk.
-    static let surfaceCapabilities: [CapabilityID] = [.deleteNow, .emptyTrash]
+    /// VX-800 adds the third: the empty-block sweep, the same one renderer.
+    static let surfaceCapabilities: [CapabilityID] = [.deleteNow, .emptyTrash, .deleteEmptyBlocks]
 
     /// **Is the bulk purge door on screen?** (the post-13l polish round,
     /// ledger row 2.) Named rather than written inline so a pin can drive the
@@ -801,19 +863,86 @@ struct RecoveryView: View {
         !model.trashIsEmptyUnfiltered
     }
 
+    /// **Is the empty-block sweep on screen?** (VX-800 — P-2, ruled at the
+    /// fork: a door that would take nothing is not drawn.) The count is this
+    /// wing's whole Trash's, never the filtered view's — Empty Trash's rule
+    /// one property up.
+    static func showsDeleteEmptyBlocksDoor(_ model: RecoveryViewModel) -> Bool {
+        !model.emptyBlockIDs.isEmpty
+    }
+
+    /// `model` (VX-636, ruled at the VX-828 batch D fork): INTERNAL, for the
+    /// geometry pin only — a test hosts the shipping view over a model it
+    /// owns. Production passes nothing and the view builds its own, exactly as
+    /// before.
     init(
         session: AppSession, library: LibraryViewModel,
         openPost: @escaping (String) -> Void,
-        openPool: ((String) -> Void)? = nil
+        openPool: ((String) -> Void)? = nil,
+        model: RecoveryViewModel? = nil
     ) {
         self.session = session
         self.library = library
         self.openPost = openPost
         self.openPool = openPool
-        _model = State(initialValue: RecoveryViewModel(session: session))
+        _model = State(initialValue: model ?? RecoveryViewModel(session: session))
     }
 
-    var body: some View { list }
+    /// **THE LIST, AND ITS MESSAGE BAND BELOW IT** (VX-636 — seen at VX-601's
+    /// A2 walk: after Delete for Good, *"The note is gone from the app now —
+    /// the app's own cleanup removes the bytes."* drew OVER the bottom visible
+    /// Trash row's text). The mechanism: the message was an
+    /// `.overlay(alignment: .bottom)` on the `List`, which draws on top of the
+    /// list's own frame and gives the list no room — so whatever row sat at
+    /// the bottom of the viewport was written over. The message now has its
+    /// own band, LAID OUT below the list (the Pool's foot idiom: a hairline,
+    /// then the line, present only while something speaks), so the list's
+    /// frame ends where the band begins. Pinned as geometry:
+    /// `TrashMessageBandTests` (the line's frame lies wholly below the list's).
+    var body: some View {
+        VStack(spacing: 0) {
+            list
+            messageFoot
+        }
+        .background(tokens.room)
+        .coordinateSpace(name: TrashMessageFoot.space)
+    }
+
+    /// The band, drawn only while a line speaks — the order ArchivedView's
+    /// slot already keeps: this surface's refusal, then its receipt, else the
+    /// one status seam's quiet line (so a receipt spoken on the seam while the
+    /// Trash shows — ⌥⌘Z's "Undid…" — speaks HERE rather than nowhere).
+    @ViewBuilder
+    private var messageFoot: some View {
+        if let line = TrashMessageFoot.line(
+            error: model.lastError ?? library.lastError, receipt: model.receipt,
+            quietSpeaks: session.status.lineItem != nil)
+        {
+            VStack(alignment: .leading, spacing: 0) {
+                Divider().overlay(tokens.line)
+                Group {
+                    switch line {
+                    case .refusal(let words):
+                        Text(words)
+                            .font(tokens.small)
+                            .alarmVoice()
+                            .textSelection(.enabled)
+                    case .receipt(let words):
+                        Text(words)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .textSelection(.enabled)
+                    case .quiet:
+                        QuietReceiptLine(status: session.status, tokens: tokens)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .trashFootProbe("foot")
+        }
+    }
 
     /// **THE LISTING'S SHAPE** (the post-13l polish round, ledger rows 3 + 22
     /// — A3's naming folded into G7's grouping, which is the same fix twice:
@@ -902,27 +1031,17 @@ struct RecoveryView: View {
         }
         .scrollContentBackground(.hidden)
         .background(tokens.room)
-        .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? library.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .alarmVoice()
-                    .textSelection(.enabled)
-                    .padding(4)
-            } else if let receipt = model.receipt {
-                Text(receipt)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .textSelection(.enabled)
-                    .padding(4)
-            }
-        }
+        // VX-636: the message slot that was an overlay here is `body`'s band
+        // now — laid out BELOW the list, never drawn over its rows.
+        .trashFootProbe("list")
         // Restarts when the filter or the sort changes — both are applied in
         // SQL, so the observation itself is what moves.
         .task(id: "\(model.restartToken)|\(session.wing.currentID)") { await model.startTrash() }
         // Ledger row 2: the unfiltered truth, on its own observation, which
         // deliberately does NOT restart with the filter.
         .task(id: session.wing.currentID) { await model.startTrashTotal() }
+        // VX-800: the sweep's count, the whole wing's Trash, unfiltered.
+        .task(id: session.wing.currentID) { await model.startEmptyBlocks() }
         // VX-671: the pick follows what is shown — a row put back, purged,
         // filtered or folded away leaves it.
         .onChange(of: visibleRowIDs) { _, shown in model.pruneSelection(toVisible: shown) }
@@ -1065,6 +1184,18 @@ struct RecoveryView: View {
                 set: { model.oldestFirst = $0 }))
                 .toggleStyle(.checkbox)
             Spacer()
+            // VX-800: the empty-block sweep — drawn only while it would take
+            // something (P-2), its label the count it takes, confirmed every
+            // time; left of Empty Trash, the narrower door first.
+            if Self.showsDeleteEmptyBlocksDoor(model) {
+                Button(RecoveryCopy.deleteEmptyBlocksLabel(model.emptyBlockIDs.count)) {
+                    model.requestDeleteEmptyBlocks()
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                .lineLimit(1)
+                .fixedSize()
+                .help(RecoveryCopy.deleteEmptyBlocksHelp)
+            }
             // 13j batch 6b (J1): the bulk purge door — rendered only when
             // the Trash holds something (P-2: a door that cannot act is
             // not rendered); the confirm names the full count by kind.
@@ -1245,4 +1376,56 @@ struct RecoveryView: View {
 
     // The archived rows' `title(_:)` builder LEFT with them (ledger row 8) —
     // `ArchivedView` renders that listing now, in its own room.
+}
+
+/// **VX-636 — what the Trash's message band says, if anything** (pure,
+/// pinned): this surface's refusal first, then its receipt, else the one
+/// status seam's quiet line while one speaks; else NOTHING — no band, no
+/// reserved blank line (the Pool's `PoolReceiptFoot` rule).
+nonisolated enum TrashMessageFoot {
+    enum Line: Equatable {
+        case refusal(String)
+        case receipt(String)
+        /// The seam's `QuietReceiptLine` speaks.
+        case quiet
+    }
+
+    static func line(error: String?, receipt: String?, quietSpeaks: Bool) -> Line? {
+        if let error { return .refusal(error) }
+        if let receipt { return .receipt(receipt) }
+        return quietSpeaks ? .quiet : nil
+    }
+
+    /// The surface's named coordinate space — where the DEBUG frame probe
+    /// measures the list and the band against each other.
+    static let space = "trash-surface"
+}
+
+#if DEBUG
+/// **VX-636's geometry oracle** (DEBUG only — the `BaselineProbe` idiom): the
+/// list's frame and the message band's frame, in `TrashMessageFoot.space`,
+/// so a pin holds "the line never draws over the rows" as a number.
+@MainActor
+enum TrashFootProbe {
+    static var frames: [String: CGRect] = [:]
+
+    static func reset() {
+        frames = [:]
+    }
+}
+#endif
+
+extension View {
+    /// Probe this view's frame under `id` in the Trash surface's space. A
+    /// no-op outside DEBUG.
+    @ViewBuilder
+    func trashFootProbe(_ id: String) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(TrashMessageFoot.space))
+        } action: { TrashFootProbe.frames[id] = $0 }
+        #else
+        self
+        #endif
+    }
 }

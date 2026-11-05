@@ -50,7 +50,12 @@ struct WingSwitcherChordTests {
         var opened = WingSwitcherBrain(rows: rows, currentID: "w-let")
         opened.type("")
         #expect(opened.highlight == "w-let", "the field taking focus must not move the highlight off the current wing")
-        #expect(opened.returnPressed() == .close, "Return straight after ⌘L closes — it never switches")
+        // VX-833 (the VX-828 run, P-828-1 (ii)(a) — A JUSTIFIED RE-POINT): the
+        // D-W3 point is the HIGHLIGHT — Return straight after ⌘L names the
+        // current wing, never the first row; since VX-833 that commit lands in
+        // the current wing's Bookcase (it was `.close`).
+        #expect(opened.returnPressed() == .commit("w-let"),
+                "Return straight after ⌘L names the current wing — it never switches to the first row")
 
         var held = WingSwitcherBrain(rows: rows, currentID: "")
         held.tapL()
@@ -76,7 +81,9 @@ struct WingSwitcherChordTests {
         brain.tapL()
         brain.tapL()
         #expect(brain.highlight == "", "it wraps")
-        #expect(brain.commandReleased() == .close, "cycling back to where she is switches nothing")
+        // VX-833 (P-828-1 (ii)(a)): a held cycle released on the current wing is
+        // a deliberate pick of it — it switches nothing and lands (was `.close`).
+        #expect(brain.commandReleased() == .commit(""), "cycling back to where she is picks it")
     }
 
     @Test func aPressAndReleaseLeavesItOpenForTyping() {
@@ -98,9 +105,11 @@ struct WingSwitcherChordTests {
         #expect(brain.returnPressed() == .stay, "nothing matches, nothing commits")
     }
 
-    @Test func returnOnTheCurrentWingClosesAndArrowsNeverArmRelease() {
+    @Test func returnOnTheCurrentWingCommitsItAndArrowsNeverArmRelease() {
         var brain = WingSwitcherBrain(rows: rows, currentID: "w-var")
-        #expect(brain.returnPressed() == .close, "the current wing: close, switch nothing")
+        // VX-833 (P-828-1 (ii)(a)): the current wing is picked like any other —
+        // the deliberate road switches nothing and lands (was `.close`).
+        #expect(brain.returnPressed() == .commit("w-var"), "the current wing: a deliberate pick")
         brain.move(by: 1)
         #expect(brain.highlight == "w-let" && !brain.cycling)
         #expect(brain.commandReleased() == .stay, "↑/↓ choose; only a held-⌘ L arms the release")
@@ -118,10 +127,11 @@ struct WingSwitcherChordTests {
         #expect(brain.commandReleased() == .stay)
     }
 
-    @Test func aRowClickCommitsAndTheCurrentRowCloses() {
+    @Test func aRowClickCommitsTheCurrentRowToo() {
         let brain = WingSwitcherBrain(rows: rows, currentID: "")
         #expect(brain.pick("w-sao") == .commit("w-sao"))
-        #expect(brain.pick("") == .close)
+        // VX-833 (P-828-1 (ii)(a)): was `.close`.
+        #expect(brain.pick("") == .commit(""), "a click on the current row picks it — it lands")
     }
 
     // MARK: - The masthead's cycling click

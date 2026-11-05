@@ -129,15 +129,66 @@ final class WingsModel {
         rows.map { WingSwitcherBrain.Row(id: $0.id, name: $0.name) }
     }
 
-    /// A switch made by the SWITCHER's new doors — ⌘L's commit and the
-    /// masthead word's cycle — SPEAKS the existing "Now in …" receipt (the
-    /// cross-wing follow's, `WingFollow.nowIn`): a cycle is blind until it is
-    /// said. The in-menu picker keeps 13i-d's silence (there she reads the
-    /// name she picked). Switching to where she already is does nothing.
+    /// A switch made by the SWITCHER's new doors — ⌘L's commit, the masthead
+    /// word's cycle and (VX-824) the ⌘digit chord — SPEAKS the existing
+    /// "Now in …" receipt (the cross-wing follow's, `WingFollow.nowIn`): a
+    /// cycle is blind until it is said. The in-menu picker keeps 13i-d's
+    /// silence (there she reads the name she picked) — `goTo(_:saying:)`.
+    /// Switching to where she already is says nothing — and, since VX-833,
+    /// still LANDS (the deliberate road below).
     func switchSaying(_ id: String) {
-        guard id != currentID else { return }
-        switchTo(id)
-        session.status.receipt(WingFollow.nowIn(name(of: id), isHome: id.isEmpty))
+        goTo(id, saying: true)
+    }
+
+    // MARK: - VX-833 — THE DELIBERATE SWITCH LANDS IN THE WING'S BOOKCASE
+
+    /// **Where a deliberate switch lands** — wired by the window that owns
+    /// this model (`RootView.wireWingLanding`: the shell's one request road,
+    /// `pendingSelection = .shelf`, adopted into the focused pane). Composition,
+    /// never a broadcast (P-4): the model says "a deliberate switch happened",
+    /// the window decides it means "show the Bookcase". A model no window
+    /// wired (a pin, a preview) lands nowhere.
+    @ObservationIgnored var landInBookcase: () -> Void = {}
+
+    /// **THE ONE DELIBERATE ROAD** (VX-833, her ruling: *"let's just keep
+    /// landing in the bookcase. i want it to be consistent"*; the run's fork
+    /// ruling, Q-B2 (a) + P-828-1 (ii)(a)). Every door whose act is choosing a
+    /// wing — ⌘L's sheet (and so the toolbar's "in ‹wing›", which opens it),
+    /// the masthead ▾ list, the masthead word's cycle, the ⌘digit chord —
+    /// comes here: the app's one wing switches (when it is another) and the
+    /// focused pane lands on that wing's Bookcase. The CURRENT wing, picked
+    /// deliberately, lands too — "pick a wing" means one thing on every road —
+    /// with no receipt (the wing did not change). NOT here, by the ruling: the
+    /// cross-wing follow (`WingFollow`), New Wing…'s switch-in, Delete Wing's
+    /// return to Home, a dead wing's revalidation, Compare's lineage "go to
+    /// ‹wing› ›" and the MCP door's wing landing.
+    func goTo(_ id: String, saying: Bool) {
+        if id != currentID {
+            switchTo(id)
+            if saying {
+                session.status.receipt(WingFollow.nowIn(name(of: id), isHome: id.isEmpty))
+            }
+        }
+        landInBookcase()
+    }
+
+    /// **VX-824 — the ⌘digit chord's answer** (`WingNumberKeys`' decision): a
+    /// wing goes the deliberate road, said ("Now in …" — a chord is blind
+    /// until it is said, the cycle's reason); a number no wing answers speaks
+    /// its refusal (P-828-1 (i)); a key the chord does not own passes on.
+    /// Returns whether the key was the chord's (the monitor consumes it then).
+    @discardableResult
+    func answer(_ decision: WingNumberKeys.Decision) -> Bool {
+        switch decision {
+        case .passOn:
+            return false
+        case .goTo(let id):
+            goTo(id, saying: true)
+            return true
+        case .refuse(let note):
+            session.status.refuse(note)
+            return true
+        }
     }
 
     /// The masthead's cycling click goes here (nil with one wing — the word
@@ -146,7 +197,8 @@ final class WingsModel {
         WingSwitcherBrain.next(after: currentID, in: switcherRows)
     }
 
-    /// The masthead word, clicked without typing: the next wing, said.
+    /// The masthead word, clicked without typing: the next wing, said — and
+    /// (VX-833) landed on its Bookcase, like every deliberate switch.
     func cycle() {
         if let nextWing { switchSaying(nextWing.id) }
     }
@@ -308,6 +360,17 @@ nonisolated enum WingCopy {
     /// copy pass).
     static let switchWingUnavailable = "There is only one wing so far \u{2014} \(newWingVerb) under the "
         + "wing name at the top of the Bookcase makes another, and then \u{2318}L switches between them."
+    /// **VX-824 — a ⌘digit no wing answers** (P-828-1 (i), the words as drafted
+    /// at the fork — PROVISIONAL, hers to tune): with one wing, ⌘L's ruled
+    /// note's shape naming the next chord; with several, the span that works.
+    static func noWingAtNumber(_ number: Int, wingCount: Int) -> String {
+        guard wingCount > 1 else {
+            return "There is only one wing so far \u{2014} \(newWingVerb) under the wing name at the top "
+                + "of the Bookcase makes another, and then \u{2318}2 goes to it."
+        }
+        return "There's no wing \(number) \u{2014} \u{2318}1\u{2013}\u{2318}\(wingCount) go to your "
+            + "\(wingCount) wings, Home first."
+    }
     /// THE SWITCHER's one quiet line (round 5, her ruling: the wing-isolation
     /// UI makes clear Snippets is the one room shared across wings).
     static let snippetsShared = "Snippets is the one room every wing shares."

@@ -82,9 +82,14 @@ struct TypedReturnTests {
                 == .emptyBlock(edge: .below, entryIndex: 0, blockID: "a",
                                closingEmptyTail: false))
         }
-        // …and one character earlier there IS text to cut off.
+        // …and one character earlier the caret is INSIDE the block's one
+        // word. **RE-POINTED (VX-806 — her ruling supersedes #92(b)):** this
+        // answered `.divideAtCaret`, which the divide door then REFUSED (no
+        // interior word edge — `nothingToDo`, spoken); the word now rides
+        // down, and a word that starts the block pushes the block down whole.
         #expect(act(index, caret: 4, texts: ["alpha  \n "])
-            == .divideAtCaret(entryIndex: 0, blockID: "a"))
+            == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                           closingEmptyTail: false))
     }
 
     /// **18c ladder round 1, R1-5 (red-on-old):** leading whitespace is the
@@ -100,9 +105,18 @@ struct TypedReturnTests {
                 == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
                                closingEmptyTail: false))
         }
-        // …and one character later there IS text before the caret.
+        // **RE-POINTED (VX-806):** one character later used to be "text
+        // before the caret" — `.divideAtCaret`, which the divide door then
+        // refused (a one-word block has no interior cut). The caret is
+        // INSIDE the block's first word there, and a word that starts the
+        // block now pushes the block down whole; the word's END, with a
+        // second word after it, is still the ordinary divide.
         #expect(act(index, caret: 3, texts: ["  hello"])
-            == .divideAtCaret(entryIndex: 0, blockID: "a"))
+            == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                           closingEmptyTail: false))
+        let two = BlockRangeIndex(slots: [slot("a", text: "  hello world")], tail: nil)
+        #expect(act(two, caret: 7, texts: ["  hello world"])
+            == .divideAtCaret(entryIndex: 0, blockID: "a"), "a word's end: the ordinary divide")
     }
 
     /// **The sanity pass's observation on R1-5, pinned (red-on-old):** a
@@ -150,6 +164,101 @@ struct TypedReturnTests {
         #expect(act(last, caret: 5, texts: ["- one"])
             == .emptyBlock(edge: .below, entryIndex: 0, blockID: "a",
                            closingEmptyTail: false))
+    }
+
+    // MARK: - VX-806: a caret INSIDE a word carries the whole word down
+
+    /// **HER REPORT (VX-806, 2026-11-04), the chip on:** *"normally when you
+    /// try to make a newline in the middle of a word, it just moves the whole
+    /// word down, but with this it just denies it. standardize it?"*
+    ///
+    /// **RED-ON-OLD (by construction):** every caret here answered
+    /// `.divideAtCaret`, and the door then SETTLED the cut to the nearest
+    /// legal one — for the late-in-word carets (9, 15) that is the NEXT
+    /// word's start, which left the caret's word behind. The act now names
+    /// the word's start itself.
+    @Test func aCaretInsideAWordDividesAtThatWordsStart() {
+        let text = "alpha beta gamma"  // words at 0, 6, 11
+        let index = BlockRangeIndex(slots: [slot("a", text: text)], tail: nil)
+        for caret in [7, 9] {  // "alpha b|eta", "alpha bet|a"
+            #expect(act(index, caret: caret, texts: [text])
+                == .divideAtWordStart(entryIndex: 0, blockID: "a", cut: 6), "caret \(caret)")
+        }
+        for caret in [12, 15] {  // "g|amma", "gamm|a"
+            #expect(act(index, caret: caret, texts: [text])
+                == .divideAtWordStart(entryIndex: 0, blockID: "a", cut: 11), "caret \(caret)")
+        }
+        // The cut is intra-block; a later block's caret names its own entry.
+        #expect(act(threeBlocks(), caret: 14, texts: ["alpha", "beta gamma", "delta"])
+            == .divideAtWordStart(entryIndex: 1, blockID: "b", cut: 5), "\"beta gam|ma\"")
+        // A later LINE's first word divides at its line's start (the
+        // block's start is not the line's) — a prose line below a list.
+        let list = "- one two\nprose after"
+        let listIndex = BlockRangeIndex(slots: [slot("a", text: list)], tail: nil)
+        #expect(act(listIndex, caret: 12, texts: [list])
+            == .divideAtWordStart(entryIndex: 0, blockID: "a", cut: 10), "\"pr|ose\"")
+    }
+
+    /// **Her screenshot's case:** the caret one character into the block's
+    /// FIRST word, just past an opening quote. The word's start is the
+    /// block's very start, which no divide may take — so the start arm: an
+    /// empty block ABOVE, the block pushed down whole. The same anywhere in
+    /// a first word, and behind leading whitespace.
+    ///
+    /// **RED-ON-OLD (by construction):** `.divideAtCaret` — which the door
+    /// then cut at the next word (`“Hello` / `there`, the word she was in
+    /// left behind) or, with no next word, REFUSED (the next pin).
+    @Test func aCaretInsideTheFirstWordPushesTheBlockDown() {
+        let quoted = "\u{201C}Hello there"
+        let index = BlockRangeIndex(slots: [slot("a", text: quoted)], tail: nil)
+        for caret in [1, 3] {  // "“|Hello", "“He|llo"
+            #expect(act(index, caret: caret, texts: [quoted])
+                == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                               closingEmptyTail: false), "caret \(caret)")
+        }
+        let led = BlockRangeIndex(slots: [slot("a", text: "  hello world")], tail: nil)
+        #expect(act(led, caret: 4, texts: ["  hello world"])
+            == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                           closingEmptyTail: false), "behind a leading run")
+    }
+
+    /// **#92(b)'s one-word block lands an ARM, never a refusal** — the brief's
+    /// "`invalidCut`/`nothingToDo` must no longer be reachable from a mid-word
+    /// caret". Every interior caret of a one-word block (a quoted one too)
+    /// pushes it down.
+    ///
+    /// **RED-ON-OLD (by construction):** `.divideAtCaret`, whose door found
+    /// no interior word edge and refused with "No legal cut spot for that
+    /// here…" (`nothingToDo`; on a fanned block, the keep-on-top road's own
+    /// refusal plus the ceremony hint).
+    @Test func aOneWordBlockLandsTheStartArmNeverARefusal() {
+        for text in ["Onlyword.", "\u{201C}Onlyword.\u{201D}"] {
+            let index = BlockRangeIndex(slots: [slot("a", text: text)], tail: nil)
+            for caret in 1..<text.utf16.count {
+                #expect(act(index, caret: caret, texts: [text])
+                    == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                                   closingEmptyTail: false), "\(text) @ \(caret)")
+            }
+        }
+    }
+
+    /// **GREEN ON BOTH SIDES, deliberately — the roads VX-806 leaves alone.**
+    /// A word's EDGE is not inside a word (the ordinary divide, settled as
+    /// ever); a caret inside a word on a LIST line is the list door's
+    /// (content — #94(b)); the chip OFF is content; a selection is not this
+    /// gesture (#92(a)).
+    @Test func theRoadsAWordsInsideDoesNotReach() {
+        let text = "alpha beta gamma"
+        let index = BlockRangeIndex(slots: [slot("a", text: text)], tail: nil)
+        #expect(act(index, caret: 5, texts: [text])
+            == .divideAtCaret(entryIndex: 0, blockID: "a"), "\"alpha|\" — a word's end")
+        #expect(act(index, caret: 6, texts: [text])
+            == .divideAtCaret(entryIndex: 0, blockID: "a"), "\"|beta\" — a word's start")
+        #expect(act(index, caret: 9, mode: .oneBlock, texts: [text]) == .content, "the chip off")
+        #expect(act(index, caret: 7, length: 2, texts: [text]) == .content, "a selection")
+        let list = "- one two\nprose after"
+        let listIndex = BlockRangeIndex(slots: [slot("a", text: list)], tail: nil)
+        #expect(act(listIndex, caret: 3, texts: [list]) == .content, "\"- o|ne\": the list door's")
     }
 
     // MARK: - The empty block CHAINS (R-13u4-2 — her ruling change, 13u4 E1)

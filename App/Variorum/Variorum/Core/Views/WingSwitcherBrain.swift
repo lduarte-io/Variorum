@@ -22,7 +22,14 @@
 //  · typing filters (the ONE picker brain's sameness — case- and
 //    diacritic-insensitive contains) and highlights the first match; ⏎
 //    commits the highlight; ↑/↓ step it; Esc closes;
-//  · committing the CURRENT wing switches nothing — it closes.
+//  · committing the CURRENT wing switches nothing — it closes. **SUPERSEDED
+//    by VX-833 (the VX-828 run's fork ruling, P-828-1 (ii)(a)):** a
+//    DELIBERATE commit of the current row (⏎ on it, a click on it, a held-⌘
+//    release that wrapped back to it) is a `.commit` like any other — the
+//    window's deliberate road lands it in that wing's Bookcase, switching
+//    nothing ("pick a wing" means one thing on every road, her "i want it to
+//    be consistent"). Esc stays a plain close (the sheet's monitor, never
+//    this brain).
 //  The masthead's cycling click is `next(after:in:)`: the wing after the
 //  current one, wrapping — nil with one wing (there is nothing to cycle to,
 //  so the word is not a cycle door — P-2).
@@ -39,9 +46,12 @@ nonisolated struct WingSwitcherBrain: Equatable, Sendable {
     nonisolated enum Outcome: Equatable, Sendable {
         /// Nothing to do yet — the switcher stays up.
         case stay
-        /// Switch to this wing (never the current one) and close.
+        /// Go to this wing (VX-833: the current one included — the deliberate
+        /// road lands it in its Bookcase) and close.
         case commit(String)
-        /// Close without switching.
+        /// Close without switching. (Since VX-833 no event of the brain's
+        /// answers it — a deliberate pick of the current row commits; Esc is
+        /// the sheet monitor's close. Kept: `apply` still honours it.)
         case close
     }
 
@@ -115,14 +125,14 @@ nonisolated struct WingSwitcherBrain: Equatable, Sendable {
         highlight == nil ? .stay : commit()
     }
 
-    /// A row clicked.
+    /// A row clicked — the current row too (VX-833: it lands in its Bookcase).
     func pick(_ id: String) -> Outcome {
-        id == currentID ? .close : .commit(id)
+        .commit(id)
     }
 
     private func commit() -> Outcome {
         guard let highlight else { return .stay }
-        return highlight == currentID ? .close : .commit(highlight)
+        return .commit(highlight)
     }
 
     // MARK: - The masthead's cycling click

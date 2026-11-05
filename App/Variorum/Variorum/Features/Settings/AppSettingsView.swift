@@ -96,7 +96,11 @@ struct AppSettingsView: View {
         mcp: MCPDoor? = nil,
         handOffDoor: (() -> Void)? = nil,
         roadStanding: RoadStandingModel? = nil,
-        roadDoors: RoadDoorsHost? = nil
+        roadDoors: RoadDoorsHost? = nil,
+        // VX-838 (the VX-828 run, batch E): the Tags pane's model, injectable so
+        // a pin can hold the one it mounts (batch D's ruled `model:` seam,
+        // ruling 8). Production passes nothing — the window makes its own.
+        tags: TagsViewModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -109,7 +113,7 @@ struct AppSettingsView: View {
         self.roadStanding = roadStanding
         self.roadDoors = roadDoors
         _theme = State(initialValue: ThemeStore(session: session))
-        _tags = State(initialValue: TagsViewModel(session: session))
+        _tags = State(initialValue: tags ?? TagsViewModel(session: session))
     }
 
     private var tokens: VoiceTokens { theme.tokens(for: scheme) }
@@ -220,7 +224,12 @@ struct AppSettingsView: View {
         .environment(theme)
         .tint(tokens.accent)
         .task { await theme.start() }
-        .task { await tags.start() }
+        // VX-838 (the VX-828 run, batch E — R-828-2: the pane FOLLOWS the app's
+        // wing live). Keyed on the wing, RootView's own idiom for the same
+        // model: a plain `.task` ran once per window, pinned to the wing open
+        // at the time, so a wing switch left Settings ▸ Tags on the old wing's
+        // vocabulary (and a root tag minted there landed, unseen, in the new).
+        .task(id: session.wing.currentID) { await tags.start() }
         // 13n-c U4 — ⌥⌘, (MCP Settings…): the pane OPENS at MCP — on a fresh
         // window (appear) and on a window already up (the request changing).
         .onAppear { adoptMCPRequest() }
@@ -385,9 +394,18 @@ struct AppSettingsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// **The pane's title** — the pane's own name, except Tags, which NAMES the
+    /// wing its list is (VX-838, R-828-2: "Tags — in ‹wing›"; the root bug was
+    /// a wing-scoped list that never said which wing it was). The name is the
+    /// MODEL's — read with the list it titles, never re-derived here.
+    nonisolated static func title(of pane: SettingsPane, tagsWingName: String) -> String {
+        pane == .tags ? TagManagerCopy.title(wingName: tagsWingName) : pane.title
+    }
+
     private var header: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(tokens.chromeLabel(query.isEmpty ? pane.title : "search"))
+            Text(tokens.chromeLabel(
+                query.isEmpty ? Self.title(of: pane, tagsWingName: tags.shownWing.name) : "search"))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
@@ -1082,8 +1100,9 @@ private struct ShortcutsSettingsPane: View {
 struct TagManagerPane: View {
     /// VX-221 — the pane's declared doors (P-1): the delete act's two — the
     /// row's visible trash and its context row — walked by the registry
-    /// tests. (Create and rename stay the recorded gap.)
-    static let surfaceCapabilities: [CapabilityID] = [.deleteTag]
+    /// tests. (Create and rename stay the recorded gap.) VX-840: + the
+    /// unused-tags sweep's door in the pane's foot.
+    static let surfaceCapabilities: [CapabilityID] = [.deleteTag, .deleteUnusedTags]
     static let contextMenuCapabilities: [CapabilityID] = [.deleteTag]
 
     let session: AppSession
@@ -1097,6 +1116,43 @@ struct TagManagerPane: View {
     @State private var nameField = ""
     @State private var promoteTags: Set<String> = []
     @State private var promoteSheet = false
+    /// VX-840: the sweep sheet's boxes — a SNAPSHOT of the wing's unused tags
+    /// taken at the door's press (the act re-checks every one inside its
+    /// write, so the list need not move under her while she decides); nil
+    /// while the sheet is down.
+    @State private var sweep: UnusedTagSelection?
+    /// VX-840: what the sweep said — its receipt or its refusal — in the
+    /// pane's own message line (the Settings window has no status bar).
+    @State private var sweepLine: SweepLine?
+
+    /// The sweep's spoken outcome (VX-840).
+    nonisolated enum SweepLine: Equatable {
+        case receipt(String)
+        case refusal(String)
+    }
+
+    /// **VX-840 — the door is drawn only while it could act** (P-2; batch D's
+    /// ruling 6 — count 0 ⇒ not rendered): the wing holds an unused tag.
+    nonisolated static func showsSweepDoor(unusedCount: Int) -> Bool {
+        unusedCount > 0
+    }
+
+    /// The sheet's boxes for the listed tags, all checked (Q-E3 (i)).
+    static func selection(for unused: [Tag]) -> UnusedTagSelection {
+        UnusedTagSelection(rows: unused.map {
+            UnusedTagSelection.Row(id: $0.id, name: $0.name, path: $0.path, wingID: $0.wingId)
+        })
+    }
+
+    /// What the act's answer says: how many went (a receipt), none (the race's
+    /// refusal — nothing was written), or nil when the act threw (the model's
+    /// `lastError` speaks the operations layer's words).
+    nonisolated static func sweepLine(taken: Int?) -> SweepLine? {
+        guard let taken else { return nil }
+        return taken > 0
+            ? .receipt(TagManagerCopy.receipt(count: taken))
+            : .refusal(TagManagerCopy.nothingLeftToDelete)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -1158,6 +1214,18 @@ struct TagManagerPane: View {
                     nameField = ""
                     newTagSheet = true
                 }
+                // VX-840 (her "delete every tag that's not on a note
+                // currently"): the sweep's door, counting what it lists, drawn
+                // only while the wing has an unused tag (P-2). It opens the
+                // sheet; the sheet's button is the confirm.
+                if Self.showsSweepDoor(unusedCount: tags.unused.count) {
+                    Button(TagManagerCopy.doorLabel(count: tags.unused.count)) {
+                        sweepLine = nil
+                        sweep = Self.selection(for: tags.unused)
+                    }
+                    .help(TagManagerCopy.doorHelp)
+                    .accessibilityLabel(CapabilityRegistry.capability(.deleteUnusedTags).verb)
+                }
                 Spacer()
                 // R30/R37: promote one or SEVERAL tags to a saved GATHERING —
                 // AND-joined or OR-joined; the tags stay on the posts. 13i-d
@@ -1169,8 +1237,47 @@ struct TagManagerPane: View {
             if let error = tags.lastError {
                 Text(error).font(.caption).alarmVoice()
             }
+            // VX-840: the sweep's receipt (muted) or its refusal (alarm voice).
+            switch sweepLine {
+            case .receipt(let text):
+                Text(text).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+            case .refusal(let text):
+                Text(text).font(.caption).alarmVoice().lineLimit(2)
+            case nil:
+                EmptyView()
+            }
         }
         .padding(12)
+        // VX-840: the wing's unused tags, held only while the pane shows — and,
+        // like the list, restarted on a wing switch (the read is per wing).
+        .task(id: session.wing.currentID) { await tags.startUnused() }
+        // A switch takes the sheet's snapshot (another wing's tags) and the
+        // last sweep's words with it.
+        .onChange(of: session.wing.currentID) { _, _ in
+            sweep = nil
+            sweepLine = nil
+        }
+        // …and the vocabulary GROWING retires the words too: an ⌥⌘Z that
+        // brought the swept tags back (or a new tag) makes "Deleted 3 unused
+        // tags" stale, while the sweep's own shrink leaves its receipt standing.
+        .onChange(of: tags.tags.count) { before, after in
+            if after > before { sweepLine = nil }
+        }
+        .sheet(isPresented: Binding(
+            get: { sweep != nil },
+            set: { if !$0 { sweep = nil } })
+        ) {
+            if let current = sweep {
+                UnusedTagsSheet(
+                    selection: Binding(get: { sweep ?? current }, set: { sweep = $0 }),
+                    wingName: tags.shownWing.name,
+                    onCancel: { sweep = nil },
+                    onDelete: { ids in
+                        sweep = nil
+                        Task { sweepLine = Self.sweepLine(taken: await tags.deleteUnusedTags(ids)) }
+                    })
+            }
+        }
         .alert(newTagParent == nil ? "New Tag" : "New Child Tag", isPresented: $newTagSheet) {
             TextField("Name", text: $nameField)
             Button("Create") {
@@ -1218,6 +1325,59 @@ struct TagManagerPane: View {
         .sheet(isPresented: $promoteSheet) {
             PromoteTagsSheet(session: session, tagPaths: promoteTags.sorted())
         }
+    }
+}
+
+/// **VX-840 — the sweep's sheet** (the fork's ruling Q-E3 (i)): every unused
+/// tag of the wing, indented as the manager indents, all checked, the boxes
+/// LINKED to `deleteTag`'s subtree reality (`UnusedTagSelection`). Its
+/// destructive button IS the one confirm — it names the checked count — and
+/// the act is ONE ⌥⌘Z entry, "Delete Unused Tags".
+struct UnusedTagsSheet: View {
+    @Binding var selection: UnusedTagSelection
+    let wingName: String
+    let onCancel: () -> Void
+    let onDelete: ([String]) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(TagManagerCopy.sheetTitle(wingName: wingName))
+                .font(.headline)
+                .lineLimit(1)
+            Text(TagManagerCopy.sheetLine)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+            List(selection.rows) { row in
+                Toggle(isOn: Binding(
+                    get: { selection.isChecked(row.id) },
+                    set: { _ in selection.toggle(row.id) })
+                ) {
+                    HStack {
+                        Text(String(repeating: "    ", count: row.depth) + row.name)
+                            .lineLimit(1)
+                        Text(row.path)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .toggleStyle(.checkbox)
+            }
+            .frame(minHeight: 200)
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel) { onCancel() }
+                    .keyboardShortcut(.cancelAction)
+                Button(TagManagerCopy.confirmVerb(count: selection.checkedCount), role: .destructive) {
+                    onDelete(selection.checkedIDs)
+                }
+                .disabled(selection.checkedCount == 0)
+            }
+        }
+        .padding(16)
+        .frame(minWidth: 400)
     }
 }
 

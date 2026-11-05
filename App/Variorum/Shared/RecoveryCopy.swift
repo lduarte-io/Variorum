@@ -816,6 +816,64 @@ nonisolated enum RecoveryCopy {
     /// of doors is not drawn then).
     static let bulkNothingSelected = "Nothing is selected."
 
+    // MARK: The empty-block sweep (VX-800 — her ask, verbatim: *"delete all
+    // empty blocks with no history from trash."*). The words are the VX-828
+    // batch D drafts, standing PROVISIONAL (P-828-10) for her wording eye.
+
+    /// The registry's verb (`CapabilityID.deleteEmptyBlocks`).
+    static let deleteEmptyBlocksVerb = "Delete Empty Blocks"
+
+    /// The door's label: the count it takes, sentence case like the bulk
+    /// row's doors; the ellipsis is the confirm it asks, every time.
+    static func deleteEmptyBlocksLabel(_ count: Int) -> String {
+        count == 1 ? "Delete 1 empty block\u{2026}" : "Delete \(count) empty blocks\u{2026}"
+    }
+
+    static let deleteEmptyBlocksHelp =
+        "Every empty block with no history goes for good — asked to confirm every time"
+
+    /// The confirm — what each one is NOT (the six facts of R-828-1, in her
+    /// words' order), the count, and the purge's truth. The app's word for a
+    /// savepoint is "commit" (the commit vocabulary — SurfaceContracts, The
+    /// app; only the tour and the guide keep the old word).
+    static func deleteEmptyBlocksConfirm(_ count: Int) -> String {
+        if count == 1 {
+            return "Delete this empty block for good? It holds no words, commits, comments, "
+                + "name, callout or link to a living block. It skips the rest of its "
+                + "\(TrashWindow.days) days — there's no putting it back."
+        }
+        return "Delete these \(count) empty blocks for good? None holds any words, commits, "
+            + "comments, a name, a callout or a link to a living block. They skip the rest of "
+            + "their \(TrashWindow.days) days — there's no putting them back."
+    }
+
+    /// The receipt — the three populations every purge door tells
+    /// (13j ladder B, B3 + R2-M1), over what the act really took.
+    static func deleteEmptyBlocksReceipt(
+        _ count: Int, synced: Bool, anyFamilyEverSynced: Bool = false
+    ) -> String {
+        if count == 1 {
+            let head = "The empty block is gone from the app now — "
+            if synced { return head + "the bytes follow once every synced device has caught up." }
+            if anyFamilyEverSynced {
+                return head + "it once synced, so the bytes finish clearing after you next sign in."
+            }
+            return head + "the app's own cleanup removes the bytes."
+        }
+        let head = "\(count) empty blocks are gone from the app now — "
+        if synced { return head + "the bytes follow once every synced device has caught up." }
+        if anyFamilyEverSynced {
+            return head + "anything that once synced finishes clearing after you "
+                + "next sign in; the rest the app cleans up now."
+        }
+        return head + "the app's own cleanup removes the bytes."
+    }
+
+    /// Nothing the confirm counted still qualified at act time (put back,
+    /// purged or changed in the pause) — the door did nothing, so it says so.
+    static let deleteEmptyBlocksNothingLeft =
+        "None of those empty blocks are in the \(trashSection) any more — nothing was deleted."
+
     static func capitalizedFirst(_ text: String) -> String {
         text.prefix(1).uppercased() + text.dropFirst()
     }

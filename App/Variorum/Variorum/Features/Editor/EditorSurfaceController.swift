@@ -973,13 +973,34 @@ final class EditorSurfaceController {
     /// The caret: BELOW puts it in the new empty block ("the paragraph I
     /// just started"); ABOVE leaves it in the text block, which is what
     /// "push this paragraph down" means (§5.1).
+    ///
+    /// **`retracting` is the list exit's newline (VX-655 — R1-3's
+    /// retraction, landed INSIDE this flight).** The flight's flush has
+    /// stored the surface as it stands — the continuation's newline still on
+    /// it — and the op body then writes the take WITHOUT it, ahead of the
+    /// mint, in the same serialized runner body: the take's own guards
+    /// (live, active, unlocked, unsealed) answer first, so a refusal writes
+    /// nothing. The fresh projection's first half is then a strict prefix of
+    /// the surface's old text, which is exactly the divide seam's shape: the
+    /// one storage edit that lands the empty block turns the newline still on
+    /// screen INTO its separator. Store and surface agree at the landing, and
+    /// the line never leaves the screen. `.below` only (an exit's caret sits
+    /// at the block's end); nil ⇒ the mint alone, byte-unchanged — ⌘⇧⏎ never
+    /// passes one.
     @discardableResult
     func insertEmptyBlock(
-        edge: TypedReturn.Edge, entryIndex i: Int, blockID: String
+        edge: TypedReturn.Edge, entryIndex i: Int, blockID: String,
+        retracting retraction: EditorViewModel.ListExitRetraction? = nil
     ) async -> Bool {
         await runStructural { [postID = model.postID] ops in
             switch edge {
             case .below:
+                if let retraction {
+                    // The cost is the one character the exit's second
+                    // keystroke takes back — what the surface road charged.
+                    try ops.autosave(
+                        retraction.variantID, text: retraction.retractedText, charDelta: 1)
+                }
                 let result = try ops.newBlock(in: postID, text: "", at: .after(blockID))
                 return StructuralOutcome(
                     caretBlockID: result.block.id, caretOffset: 0,
@@ -1004,8 +1025,16 @@ final class EditorSurfaceController {
     /// it, is "a keystroke whose act runs on the next turn, CHAINED so two
     /// fast keystrokes compose instead of racing, and awaitable by teardown
     /// and by tests".
-    func scheduleTypedReturn() {
-        scheduleCrossBlockCompound { [weak self] in await self?.runTypedReturnAct() }
+    ///
+    /// `listExitBlockID` rides to the act (VX-655): the exit's newline is
+    /// retracted inside the act's flight, so the act must know the key
+    /// arrived from the list door's exit, and on which block — a plain ⏎
+    /// behind a blank line she typed retracts nothing (U-19 (2)), and
+    /// neither does an act whose re-derivation lands on another block.
+    func scheduleTypedReturn(listExitBlockID: String? = nil) {
+        scheduleCrossBlockCompound { [weak self] in
+            await self?.runTypedReturnAct(listExitBlockID: listExitBlockID)
+        }
     }
 
     /// **The dispatch — and it re-derives.** The key answered "mine?" a turn
@@ -1015,9 +1044,10 @@ final class EditorSurfaceController {
     /// — never two blocks from one intent, never a divide at an offset that
     /// has moved). Nothing here edits a row: every arm dispatches to a door
     /// that already runs through `runStructural`, and every refusal — a
-    /// sealed note, a locked take, a block with no interior word edge — is
-    /// that door's own, spoken in its own words.
-    private func runTypedReturnAct() async {
+    /// sealed note, a locked take, a gap slot — is that door's own, spoken
+    /// in its own words. (A block with no interior word edge used to be the
+    /// fourth; since VX-806 a caret inside its one word pushes it down.)
+    private func runTypedReturnAct(listExitBlockID: String? = nil) async {
         // 18c ladder round 2, R2-1: NO replay here. Whatever road the act
         // takes — a flight, a spoken refusal, the empty block's no-op, a
         // `.content` re-derivation — the keys stashed since the CLAIM drain
@@ -1039,9 +1069,25 @@ final class EditorSurfaceController {
             return
         case .divideAtCaret:
             await invokeGesture(.divideAtCursor)
+        case .divideAtWordStart(let entryIndex, _, let cut):
+            // VX-806: the caret's word rides down — the divide door's own
+            // plan at the word's start, taken exactly (never re-settled);
+            // `applyStructural` then runs the plain or keep-on-top road with
+            // its visible snap onto that cut. Re-derived THIS turn, so the
+            // entry index addresses the live tiling.
+            await applyStructural(StructuralGesturePlanner.plan(
+                divideAtExactCut: model.index.range(ofEntryAt: entryIndex).location + cut,
+                world: model.gestureWorld()))
         case .emptyBlock(let edge, let entryIndex, let blockID, let closingEmptyTail):
             if closingEmptyTail { model.closeEmptyTailSeparator() }
-            await insertEmptyBlock(edge: edge, entryIndex: entryIndex, blockID: blockID)
+            // VX-655: the list exit's newline is read HERE, for the exit's
+            // own block, and retracted inside the flight below — never on
+            // the surface ahead of it (R1-3's retraction, re-ordered).
+            let retraction = listExitBlockID == blockID && edge == .below && !closingEmptyTail
+                ? model.listContinuationRetraction(entryIndex: entryIndex, blockID: blockID)
+                : nil
+            await insertEmptyBlock(
+                edge: edge, entryIndex: entryIndex, blockID: blockID, retracting: retraction)
         }
     }
 

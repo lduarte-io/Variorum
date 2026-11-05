@@ -161,6 +161,41 @@ public enum BoundarySnapping {
         }
     }
 
+    // MARK: - The word a caret sits inside (VX-806)
+
+    /// **The start of the word a caret sits INSIDE** — the typed Return's
+    /// cut (VX-806; her report, 2026-11-04: *"normally when you try to make
+    /// a newline in the middle of a word, it just moves the whole word
+    /// down"*). `nil` when `offset` is not strictly inside a word: at either
+    /// text edge, at a word's edge (whitespace on either side of it), or
+    /// splitting a grapheme cluster.
+    ///
+    /// "Inside a word" is this file's own notion of a word — the scanners'
+    /// runs: the grapheme before the caret and the grapheme after it are
+    /// both non-whitespace. The answer is drawn from the ONE legal-cut set
+    /// (S4-22): the greatest `.word` boundary at or before the caret. That
+    /// is either the caret's word's start — a legal interior cut, content
+    /// stands before it — or `0`, when nothing but whitespace stands before
+    /// the word (a leading run starts no word in the scanner, by design).
+    /// Callers read a blank prefix as "the block's very start".
+    ///
+    /// **Deliberately NOT `settle`.** The gentle settle answers the NEAREST
+    /// legal cut, so a caret late in a word lands at the NEXT word's start
+    /// and the word stays behind; and a one-letter sentence opener exactly
+    /// `settlePull` earlier wins an exact tie (#161), carrying that letter
+    /// down too. Her sentence is about the word the caret is in, so this is
+    /// the FLOOR of the legal set, not its nearest member. Cost: one scan,
+    /// O(the text) — `settle`'s own.
+    public static func wordStart(enclosing offset: Int, in text: String) -> Int? {
+        guard offset > 0, offset < text.utf16.count,
+              let index = graphemeIndex(atUTF16: offset, in: text),
+              index > text.startIndex, index < text.endIndex
+        else { return nil }
+        guard !text[text.index(before: index)].isWhitespace, !text[index].isWhitespace
+        else { return nil }
+        return boundaries(in: text, granularity: .word).last { $0 <= offset }
+    }
+
     // MARK: - Extract classification
 
     /// Classifies a span for extract: `.prefix`/`.suffix` when it is

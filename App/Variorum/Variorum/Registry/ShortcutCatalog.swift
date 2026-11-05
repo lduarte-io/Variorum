@@ -68,7 +68,7 @@ nonisolated enum ShortcutCatalog {
         /// P-572-1; VX-234's copy pass).
         var line: String {
             switch self {
-            case .writing: "commit, versions, undo, comments, callouts"
+            case .writing: "commit, versions, undo, comments, callouts, spelling"
             case .formatting: "bold, italic, headings, lists, links"
             case .structure: "divide, extract, merge, a new block"
             case .takes: "a block's takes \u{2014} new, choose, step, archive"
@@ -178,6 +178,16 @@ nonisolated enum ShortcutCatalog {
             words: "callout frame on this block (again to remove it)"),
         Row(group: .writing, keys: .chords([.toggleSeams]),
             words: "toggle block seams (dotted lines between blocks)"),
+        // VX-798 (the VX-828 run, batch E): Edit ▸ Spelling and Grammar's
+        // pair — the one-shot check, and the panel. Neither turns checking as
+        // you type on; the words say where that lives.
+        Row(group: .writing, keys: .chords([.checkSpelling]),
+            words: "check spelling once \u{2014} selects the next misspelled word after the "
+                + "cursor (again for the one after); checking as you type stays a setting "
+                + "(Settings \u{25B8} Editor \u{25B8} Spellchecking)"),
+        Row(group: .writing, keys: .chords([.showSpellingPanel]),
+            words: "the Spelling and Grammar panel \u{2014} the word, its guesses, Change, "
+                + "Ignore and Learn"),
     ]
 
     // 13g batch 3 (L8): the two chords her ruling named, plus the menu-first
@@ -321,8 +331,15 @@ nonisolated enum ShortcutCatalog {
             words: "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
                 + "and tap L to step, release to go; clicking the wing's name in the "
                 + "Bookcase or Library masthead steps to the next one"
-                + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} beside New Note "
-                + "opens this switcher"),
+                + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} at the top of the sidebar "
+                + "opens this switcher; every switch lands on that wing's Bookcase"),
+        // VX-824 (the VX-828 run, batch B): the per-wing chord — the
+        // registry's alternate (no menu item: the mode row owns ⌘1–⌘7 inside a
+        // note), shown here so it is findable (13g L1).
+        Row(group: .navigation, keys: .alternates([.goToWing]),
+            words: "go to a wing by its place in the switcher (Home is \u{2318}1) and land on its "
+                + "Bookcase \u{2014} whenever you're not in a note or writing in one; inside a note "
+                + "these keys are its modes"),
         // VX-632 (her #245 RB-6 ruling): ⌘L's two ⌥ variants.
         Row(group: .navigation, keys: .chords([.moveNoteToWing]),
             words: "move the note or book you're in to another wing \u{2014} "

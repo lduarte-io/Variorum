@@ -206,6 +206,75 @@ struct PlannerDivideTests {
     }
 }
 
+// MARK: - VX-806: the typed Return's exact cut
+
+/// `plan(divideAtExactCut:world:)` — the divide door's plan at a cut the
+/// Return key already placed on the legal set (the start of the caret's
+/// word). Every answer of `.divideAtCursor` stands except the settle.
+@Suite("StructuralGesturePlanner — the typed Return's exact cut (VX-806)")
+struct PlannerExactCutTests {
+    /// "Go. I amble." — "I" opens a sentence at 4, "amble." starts at 6.
+    private let goIAmble = "Go. I amble."
+
+    /// **RED-ON-OLD (by construction — the menu door's settle, which the
+    /// Return key's divide rode before VX-806):** the word's start 6 sits
+    /// exactly `settlePull` after the one-letter sentence opener 4, which
+    /// wins `settle`'s exact tie (#161) — the menu door cuts at 4 and "I"
+    /// would ride down with "amble." Her sentence is about the word the
+    /// caret is in: the exact road cuts at 6.
+    @Test func aLegalCutIsTakenExactlyNeverReSettled() {
+        let world = makeWorld([B(goIAmble)])
+        #expect(Planner.plan(.divideAtCursor, selection: caret(6), world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 4),
+                "the premise: the menu door settles onto the sentence opener")
+        #expect(Planner.plan(divideAtExactCut: 6, world: world)
+            == .divide(entryIndex: 0, blockID: "b0", snappedCut: 6))
+        // A later entry's cut is entry-local, exactly as the menu door's.
+        let two = makeWorld([B(oneSentence), B(goIAmble)])
+        #expect(Planner.plan(divideAtExactCut: start(two, 1) + 6, world: two)
+            == .divide(entryIndex: 1, blockID: "b1", snappedCut: 6))
+    }
+
+    /// The fanned road keeps its shape — the keep-on-top door — seeded with
+    /// the exact cut; a locked rendered take does not refuse there (W copies).
+    @Test func aFannedBlockSeedsTheKeepOnTopRoadWithTheExactCut() {
+        #expect(Planner.plan(divideAtExactCut: 6, world: makeWorld([B(goIAmble, arity: 2)]))
+            == .divideW(entryIndex: 0, blockID: "b0", activeCut: 6))
+        #expect(Planner.plan(
+            divideAtExactCut: 6, world: makeWorld([B(goIAmble, arity: 2, locked: true)]))
+            == .divideW(entryIndex: 0, blockID: "b0", activeCut: 6))
+    }
+
+    /// **GREEN ON BOTH SIDES of any settle question — the refusals stand:**
+    /// the seal, the gap slot, the locked single take, the open tail, an
+    /// out-of-range offset.
+    @Test func everyOtherAnswerOfTheDivideDoorStands() {
+        #expect(Planner.plan(divideAtExactCut: 6, world: makeWorld([B(goIAmble)], sealed: true))
+            == .refusal(.sealed))
+        #expect(Planner.plan(divideAtExactCut: 6, world: makeWorld([B(goIAmble, gap: true)]))
+            == .refusal(.gapSlot))
+        #expect(Planner.plan(divideAtExactCut: 6, world: makeWorld([B(goIAmble, locked: true)]))
+            == .refusal(.lockedVariant))
+        let tailed = makeWorld([B(goIAmble)], tail: "tail text")
+        #expect(Planner.plan(divideAtExactCut: start(tailed, 0) + 12 + 3, world: tailed)
+            == .refusal(.openTailTarget))
+        #expect(Planner.plan(divideAtExactCut: 999, world: makeWorld([B(goIAmble)]))
+            == .refusal(.invalidSelection))
+    }
+
+    /// A cut OFF the legal interior set (unreachable from the Return key,
+    /// whose cut is a word start by construction) settles exactly as the
+    /// menu door's — the planner never asserts, and never cuts mid-word.
+    @Test func anIllegalCutSettlesAsTheMenuDoorsDoes() {
+        let world = makeWorld([B(goIAmble)])
+        for cut in [0, 1, 8, 12] {
+            #expect(Planner.plan(divideAtExactCut: cut, world: world)
+                == Planner.plan(.divideAtCursor, selection: caret(cut), world: world),
+                    "cut \(cut)")
+        }
+    }
+}
+
 // MARK: - Extract Selection
 
 @Suite("StructuralGesturePlanner — extract")
