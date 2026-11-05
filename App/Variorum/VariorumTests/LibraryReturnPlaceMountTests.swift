@@ -187,34 +187,53 @@ struct LibraryReturnPlaceMountTests {
         await settle(window, hosting, timeout: 1.0)
     }
 
-    /// A note row fully on screen in the notes region, by the DEBUG oracle
-    /// (frames in the catalog's own space).
-    private func readingRow() -> (id: String, top: CGFloat)? {
+    /// The listed ids of the rows the listing says are REALIZED now (its own
+    /// appear / disappear bookkeeping).
+    private func realizedIDs(_ model: LibraryCatalogModel) -> Set<String> {
+        Set(model.visibleNoteIndices.compactMap {
+            model.noteHits.indices.contains($0) ? model.noteHits[$0].id : nil
+        })
+    }
+
+    /// **A row ON SCREEN now**, by the DEBUG oracle (frames in the catalog's
+    /// own space): among the rows the listing says are realized — the oracle
+    /// keeps a de-realized row's LAST frame until its catalog leaves, and a
+    /// clip JUMP de-realizes rows without moving their reports (the stage
+    /// window's finding: the first version read such a stale row) — the one
+    /// nearest the catalog's vertical middle, which lies inside the listing
+    /// whatever sits above it (the controls, the search band).
+    private func readingRow(_ model: LibraryCatalogModel) -> (id: String, top: CGFloat)? {
         #if DEBUG
-        guard let region = LibraryPanelOracle.notesRegionFrame else { return nil }
-        let rows = LibraryPanelOracle.noteRowFrames.filter {
-            $0.value.minY >= region.minY + 60 && $0.value.maxY <= region.maxY - 20
-        }
-        return rows.min { $0.value.minY < $1.value.minY }.map { ($0.key, $0.value.minY) }
+        guard let root = LibraryPanelOracle.rootFrame else { return nil }
+        let realized = realizedIDs(model)
+        return LibraryPanelOracle.noteRowFrames
+            .filter { realized.contains($0.key) }
+            .min { abs($0.value.midY - root.midY) < abs($1.value.midY - root.midY) }
+            .map { ($0.key, $0.value.minY) }
         #else
         return nil
         #endif
     }
 
-    private func top(of id: String) -> CGFloat? {
+    /// Where `id`'s row sits now — only while the listing says it is realized
+    /// (never a stale report).
+    private func top(of id: String, _ model: LibraryCatalogModel) -> CGFloat? {
         #if DEBUG
-        LibraryPanelOracle.noteRowFrames[id]?.minY
+        guard realizedIDs(model).contains(id) else { return nil }
+        return LibraryPanelOracle.noteRowFrames[id]?.minY
         #else
-        nil
+        return nil
         #endif
     }
 
     // MARK: - The List, deep in the Library
 
-    /// **She scrolled 130-odd notes down the List, opened one, came back.**
-    /// The row she was reading is back exactly where it sat, and the List
-    /// stands where she left it. RED ON OLD: the List came back at the top
-    /// with only its first page listed — the row off screen, unlisted.
+    /// **She scrolled well past the first page of the List, opened a note,
+    /// came back.** The row she was reading is back exactly where it sat.
+    /// (The oracle is the ROW's place on screen — never the clip's raw offset,
+    /// which is not comparable across two mounts of a lazy column: the rows
+    /// above are estimated until realized.) RED ON OLD: the List came back at
+    /// the top with only its first page listed — the row off screen, unlisted.
     @Test func theListComesBackWhereSheLeftItDeepInTheLibrary() async throws {
         #if DEBUG
         try await withLibrary { session in
@@ -227,21 +246,22 @@ struct LibraryReturnPlaceMountTests {
             await settle(window, hosting, timeout: 1)
             await scrollToTheEnd(model, window, hosting)
             try #require(model.noteHits.count == 200)
-            let scroll = try await scroll(to: 3_500, window, hosting)
-            let before = scroll.contentView.bounds.origin.y
-            let reading = try #require(readingRow(), "a row on screen to read")
+            // 70 % down the document, whatever a row's height in this voice.
+            let document = try #require(Self.listingScroll(hosting)?.documentView).frame.height
+            _ = try await scroll(to: (document * 0.7).rounded(), window, hosting)
+            let reading = try #require(readingRow(model), "a row on screen to read")
             let deepest = try #require(model.noteHits.firstIndex { $0.id == reading.id })
-            #expect(deepest > LibraryCatalogModel.pageSize, "the row lives past the first page")
+            try #require(deepest > LibraryCatalogModel.pageSize, "the row lives past the first page (\(deepest))")
 
             await leaveAndComeBack(session, model, window, hosting) {
-                top(of: reading.id).map { abs($0 - reading.top) <= 1 } ?? false
+                top(of: reading.id, model).map { abs($0 - reading.top) <= 1 } ?? false
             }
-            let after = try #require(top(of: reading.id), "the row she was reading is on screen again")
+            let after = try #require(top(of: reading.id, model), "the row she was reading is on screen again")
             #expect(abs(after - reading.top) <= 1,
                     "the row back where it sat: \(after) vs \(reading.top)")
-            let now = try #require(Self.listingScroll(hosting)).contentView.bounds.origin.y
-            #expect(abs(now - before) <= 1, "the List where she left it: \(now) vs \(before)")
-            #expect(model.noteHits.count < 200, "the return re-asked to her place's depth, not the corpus")
+            // (The re-ask's depth is the model pins' claim — exact there —
+            // `LibraryReturnPlaceTests`; 70 % down 200 notes, the place's
+            // depth plus a page reaches the end, so nothing is said here.)
         }
         #endif
     }
@@ -261,19 +281,21 @@ struct LibraryReturnPlaceMountTests {
             await settle(window, hosting, timeout: 1)
             await scrollToTheEnd(model, window, hosting)
             let scroll = try await scroll(to: 4_000, window, hosting)
-            let before = scroll.contentView.bounds.origin.y
-            try #require(before > 1_000, "deep in the Cards")
-            let firstSeen = model.visibleNoteIndices.min()
+            try #require(scroll.contentView.bounds.origin.y > 1_000, "deep in the Cards")
+            // The oracle is WHICH cards are realized (the listing's own
+            // appear / disappear bookkeeping — the Cards carry no DEBUG row
+            // probe), never the clip's raw offset: two mounts of a lazy column
+            // reach the same cards at different offsets (the rows above are
+            // estimated until realized — the stage window measured 4,129 vs
+            // 4,000 on the very cards she left).
+            let firstSeen = try #require(model.visibleNoteIndices.min())
+            try #require(firstSeen > 20, "deep in the Cards (\(firstSeen))")
 
             await leaveAndComeBack(session, model, window, hosting) {
-                guard let scroll = Self.listingScroll(hosting) else { return false }
-                return abs(scroll.contentView.bounds.origin.y - before) <= 1
+                model.visibleNoteIndices.min().map { abs($0 - firstSeen) <= 1 } ?? false
             }
-            let now = try #require(Self.listingScroll(hosting)).contentView.bounds.origin.y
-            #expect(abs(now - before) <= 1, "the Cards where she left them: \(now) vs \(before)")
-            if let firstSeen, let seenNow = model.visibleNoteIndices.min() {
-                #expect(abs(seenNow - firstSeen) <= 1, "the same cards before her eyes")
-            }
+            let seenNow = try #require(model.visibleNoteIndices.min())
+            #expect(abs(seenNow - firstSeen) <= 1, "the same cards before her eyes: \(seenNow) vs \(firstSeen)")
         }
     }
 
@@ -295,19 +317,19 @@ struct LibraryReturnPlaceMountTests {
             try #require(model.isSearching)
             await scrollToTheEnd(model, window, hosting)
             let scroll = try await scroll(to: 1_800, window, hosting)
-            let before = scroll.contentView.bounds.origin.y
-            try #require(before > 1_000, "deep in the answer")
-            let reading = try #require(readingRow(), "a group head on screen to read")
+            try #require(scroll.contentView.bounds.origin.y > 1_000, "deep in the answer")
+            // (The answer sheet publishes no notes-region frame — the first
+            // version's chooser read one and found nothing; the chooser now
+            // needs only the catalog's own frame.)
+            let reading = try #require(readingRow(model), "a group head on screen to read")
 
             await leaveAndComeBack(session, model, window, hosting) {
-                top(of: reading.id).map { abs($0 - reading.top) <= 1 } ?? false
+                top(of: reading.id, model).map { abs($0 - reading.top) <= 1 } ?? false
             }
             #expect(model.query == "words")
             #expect(model.isSearching)
-            let after = try #require(top(of: reading.id))
+            let after = try #require(top(of: reading.id, model))
             #expect(abs(after - reading.top) <= 1, "the group back where it sat: \(after) vs \(reading.top)")
-            let now = try #require(Self.listingScroll(hosting)).contentView.bounds.origin.y
-            #expect(abs(now - before) <= 1, "the sheet where she left it: \(now) vs \(before)")
         }
         #endif
     }
@@ -330,13 +352,13 @@ struct LibraryReturnPlaceMountTests {
             let scroll = try await scroll(to: 2_200, window, hosting)
             let before = scroll.contentView.bounds.origin.y
             try #require(before > 1_000)
-            let reading = try #require(readingRow())
+            let reading = try #require(readingRow(model))
 
             await leaveAndComeBack(session, model, window, hosting) {
-                top(of: reading.id).map { abs($0 - reading.top) <= 1 } ?? false
+                top(of: reading.id, model).map { abs($0 - reading.top) <= 1 } ?? false
             }
             #expect(model.editedOn == day)
-            let after = try #require(top(of: reading.id))
+            let after = try #require(top(of: reading.id, model))
             #expect(abs(after - reading.top) <= 1, "the row back where it sat: \(after) vs \(reading.top)")
         }
         #endif
