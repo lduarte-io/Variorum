@@ -66,8 +66,8 @@ Decisions were put as question batches; she picked among presented options. Reco
 | 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
 | 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | NOT-STARTED |
 | 6 | VX-823 (HIGH) | the Library remembers scroll + selection on return from a note | C | NOT-STARTED |
-| 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | NOT-STARTED |
-| 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | NOT-STARTED |
+| 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | IN-PROGRESS — design fork PROPOSED (Batch D, D0); the build waits on the orchestrator's ruling |
+| 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | NOT-STARTED (its intended shape is stated in D0 for redirect) |
 | 9 | VX-798 (M) | spellcheck: ⌘; / ⌘: chords + Edit ▸ Spelling and Grammar home | E | NOT-STARTED |
 | 10 | VX-838 (M, Bug) | Settings ▸ Tags names + follows the wing (RULED: R-828-2) | E | NOT-STARTED |
 | 11 | VX-840 (L, rider) | Settings ▸ Tags: delete-every-unused-tag door | E | NOT-STARTED |
@@ -394,6 +394,156 @@ family). Pin where the geometry is pinnable; otherwise the walk verifies and the
 intents minted, horizon honored, restore interplay) + the orchestrator's walk of the door and the
 receipt band.
 
+#### Batch D — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
+
+**Not done by this batch (so far):** NOTHING IS BUILT — the brief's design-fork rule: the predicate,
+the door's confirm and the undo story are proposed below and the build waits on the orchestrator's
+ruling. No `xcodebuild test`, no Debug launch, no walk (all stage-gated — the orchestrator's window,
+by the brief). No `Sync/`, custody or keychain file will be touched (the purge-intent op lives in
+`Operations/`; `PurgeJanitor.anyFamilyEverSynced` and `LocalPurge` are only CALLED, as every Trash
+purge door already calls them).
+
+| Piece | What | Status |
+|---|---|---|
+| D0 | Preflight (the brief's reading list, read in full) + THE DESIGN FORK below | DONE (this commit) — AWAITING THE ORCHESTRATOR'S RULING |
+| D1 | VX-800 core: the pure predicate (`Domain`) + the candidate/facts query + exact-rows tests | NOT-STARTED (waits on D0's ruling) |
+| D2 | VX-800 core: the sweep operation (intents + horizon, act-time re-check) + transition tests | NOT-STARTED |
+| D3 | VX-800 app: registry declaration, the door, the confirm case, the count observation, receipts, app pins | NOT-STARTED |
+| D4 | VX-636: the Trash's message band + pins | NOT-STARTED |
+| D5 | Self-assessment + the record's closing sections | NOT-STARTED |
+
+#### Batch D — THE DESIGN FORK (D0: VX-800's predicate, door, confirm and undo story — proposed for the orchestrator's ruling BEFORE any build)
+
+**The candidate set — which rows the sweep may consider at all.** Exactly the Trash's own BLOCK rows:
+`Queries.trash(db, now:, kinds: [.block], wingID: <the wing the Trash shows>)`, unwindowed, and not
+narrowed by the kind picker (Empty Trash's scope: a door over this wing's whole Trash). Reusing the
+listing's arm (no twin SQL) inherits: the 30-day window; the wing fence; the stamp-aware purge-intent
+fence (a row already going is not re-taken); and — load-bearing — **the cascade-victim exclusion**: a
+block that died WITH its note (same stamp) is part of that note's one row and is never swept alone
+(sweeping it would break the note's whole Put back). Notes, books, snippet groups, takes and
+preserved originals are never candidates (a preserved original is LIVE).
+
+**The predicate (R-828-1), row-level. A candidate qualifies iff ALL six hold:**
+1. **Empty:** no `variant` row of the block — ANY status (active/archived), ANY tombstone state (live,
+   the block's cascade stamp, or deleted on its own stamp earlier) — has `working_text <> ''`. Empty =
+   zero-length, byte-exact: the codebase's own empty test (the seam carve's
+   `variant.workingText.isEmpty`, `Operations+Deletion.swift:325`). ALL variant rows, because the purge
+   family takes all of them (`PurgeFamily.expandBlock`): a take deleted earlier with words in it is
+   words the sweep would destroy.
+2. **No savepoints:** no `commit_point` row on ANY variant of the block (any variant state; quiet or
+   manual alike; `commit_point` has no tombstone). The junk shape passes: an empty, never-committed
+   take never earns a quiet savepoint (`isDirty` is false for it, `Operations+Variant.swift:639`); a
+   take that once held words and was saved fails — as it should.
+3. **No comments:** no `block_comment` row on the block — ANY row, live or tombstoned, any stamp. Every
+   comment row is retrievable: Put back revives the stamp-matched ones, and an individually deleted
+   one stays "visible and resurrectable" in the deleted fold (AppSpec §7's `block_comment` note). The
+   alternative reading ("only revivable ones" = live or the block's stamp) would purge a resurrectable
+   comment — rejected.
+4. **No name:** `block.name IS NULL` (the ops normalize whitespace-only to NULL; a non-NULL `''`,
+   unreachable through the ops, counts as a name — conservative).
+5. **No callout frame:** `block.presentation IS NULL` (any non-NULL value, even malformed JSON that
+   READS as plain, keeps it out — conservative).
+6. **No link to a living block** (her "any live edge to a live block"): no `edge` row of ANY type
+   (`derived_from` either direction, `version_of`) naming the block on one side whose OTHER side is a
+   `block` row with `deleted_at IS NULL` (an archived block is live). **The edge row's own tombstone
+   is NOT consulted, deliberately:** deleting a block cascade-tombstones every edge it has
+   (`cascade_block_tombstone`, `Triggers.swift:44`), so for a trashed block a literally-live edge is
+   all but unreachable and the clause would be vacuous; and the lineage readers (`strandedOriginals`,
+   `PurgeFamily.joinStrandedOriginals`) read `derived_from` PAST edge tombstones ("lineage is a fact
+   about what happened"). This reading also makes the sweep safe BY CONSTRUCTION: the purge family
+   joins any live, unplaced, unarchived original whose every descendant is in the family
+   (`joinStrandedOriginals`) — under (6) no swept block can be directly linked to a living block, so
+   the sweep can never take a living original's words with it. Edges to dead or absent blocks don't
+   save it (ruled); a self-edge doesn't count.
+
+**NOT history** (outside her floor; the purge family takes them with the block): `block_tag`
+applications, take labels, a locked take, `canvas_layout` / `lens_choice` rows, `block.archived_at`,
+`last_container_id`.
+
+**The readings that are genuinely mine — options (each PROVISIONAL until ruled):**
+- **P-828-7 — the edge clause.** (a) PROPOSED: any edge row, whatever its own tombstone, to a live
+  block (above). (b) Only edges live or tombstoned on the block's OWN stamp (what Put back revives) —
+  it would honor a deliberately unlinked version link (`removeVersionOf` / `unmarkPostsAsVersions`
+  tombstone `version_of` on their own stamp), but it would sweep an empty block whose `derived_from`
+  to a live original died on a third stamp, and if that block were the original's last descendant
+  `joinStrandedOriginals` would purge the LIVING original with it. (c) (a) for `derived_from`, (b) for
+  `version_of`.
+- **P-828-8 — "empty".** (a) PROPOSED: zero-length `working_text` only. (b) Whitespace/newlines-only
+  also counts as empty.
+- **P-828-9 — block tags.** (a) PROPOSED: not history (her floor's list is the list). (b) Any
+  `block_tag` row keeps the block out.
+
+**The pure function and its tests.** `Domain/EmptyBlockSweep` — one pure rule over a block's counted
+facts (non-empty takes, savepoints, comments, name, presentation, links to living blocks), exact-rows
+tested; `Queries` gathers the facts for the Trash's block rows in ONE statement (indexed per-candidate
+counts: `idx_variant_block`, `idx_commit_variant`, `idx_block_comment_block`, `idx_edge_source` /
+`idx_edge_target`) — cost ∝ the Trash's block rows (a summoned surface), never the corpus (P1).
+
+**The act — ONE operation in the Delete Now shape** (`Operations.sweepEmptyTrashBlocks(_ ids:)` in
+`Operations+Purge.swift`): ONE write transaction that re-reads the predicate over the confirm's ids
+INSIDE it (the `deleteBlock`-precondition lesson: a check made outside the transaction is a snapshot —
+a block put back, re-deleted as a cascade victim, or written by a sync apply in the pause drops out),
+takes `confirm ids ∩ still-qualifying` (never more than she confirmed — the bulk Delete Now's picked ∩
+present rule, not Empty Trash's take-everything-now), and mints one purge intent per taken block
+through `mintPurgeIntents` (its dedupe, refusals and already-purged skip — one implementation, never
+two). No raw DELETE: the bytes go by the existing roads — `LocalPurge` at once on a never-synced
+install (her round-11 ruling: the local sweep runs before the receipt, as every Trash purge door does),
+the janitor at the horizon otherwise (purge memo §4f). Nothing left ⇒ a refusal, nothing written. It
+answers the taken ids (the receipt's count). No touch, no churn (`requestPurge`'s posture).
+
+**The undo story — none, exactly the vx-678 roads.** No ⌥⌘Z entry (`requestPurge`'s own reason: "the
+confirm is the guard … an undo whose inverse raced the janitor would be a door that sometimes lies");
+confirmed every time (round 10). A swept block is never counted back by Put back: the rows leave the
+listing at the intent write (the stamp-aware fence) and so leave the pick (the listing's prune) —
+plus a BELT: the model drops the swept ids from the pick at the act's answer, so no stale bulk Put back
+can name one; on a never-synced install the rows are physically gone before the receipt speaks, so a
+stale road meets `blockNotFound` and is never counted back; a PEER's Put back that lands before the
+intent arrives is the existing staleness rule (13j B1 — the family never purges, the intent completes
+unhonored), unchanged.
+
+**The door.** A registry-declared `.surface` capability, app scope, the `.deleteNow` / `.emptyTrash`
+shape (verb "Delete Empty Blocks"; `RecoveryView.surfaceCapabilities` gains it, so the surface-walk
+union keeps it Trash-only). In the Trash's controls row, left of Empty Trash, danger role, compact. Its
+label carries the count it takes, sentence case like the bulk row: "Delete 3 empty blocks…" / "Delete
+1 empty block…" (the ellipsis = the confirm it asks every time). Help: "Every empty block with no
+history goes for good — asked to confirm every time".
+**Count 0 (P-2's frame): NOT rendered** — a door that can never act in its context isn't rendered
+(Empty Trash's own visibility rule). The count comes from a dedicated held observation of the
+candidate query on a NAMED region (`observe(tracking:)` — re-fetched on a reader after each commit,
+never on the writer: VX-670's lesson), keyed to the wing, independent of the kind filter. The race
+(drawn at 3, all put back in the pause) answers with the refusal below — a door that did nothing
+speaks a refusal.
+
+**The words (drafts — PROVISIONAL P-828-10, hers to tune):**
+- Confirm, N > 1: "Delete these 3 empty blocks for good? None holds any words, savepoints, comments, a
+  name, a callout or a link to a living block. They skip the rest of their 30 days — there's no putting
+  them back." N = 1: "Delete this empty block for good? It holds no words, savepoints, comments, name,
+  callout or link to a living block. It skips the rest of its 30 days — there's no putting it back."
+- Receipt, the bulk Delete Now's three populations: "3 empty blocks are gone from the app now — the
+  app's own cleanup removes the bytes." / "… — the bytes follow once every synced device has caught
+  up." / "… — anything that once synced finishes clearing after you next sign in; the rest the app
+  cleans up now." N = 1: "The empty block is gone from the app now — …".
+- Fewer qualify at act time than she confirmed: the receipt counts what really went (Empty Trash's
+  rule — "the receipt says what really went, never what the confirm guessed").
+- Refusal, nothing left: "None of those empty blocks are in the Trash any more — nothing was deleted."
+- The receipt and refusal ride the Trash's existing message slot (its `receipt` / `lastError` — the
+  road every Trash door speaks on today), which VX-636 gives its own band.
+
+**VX-636's intended shape (stated now so the ruling can redirect it — not a fork).** The Trash's
+message slot moves from `.overlay(alignment: .bottom)` on the `List` (`RecoveryView.swift:905`, the
+mechanism: an overlay draws OVER the list's last visible row) to a laid-out FOOT BAND below the list —
+the Pool's `PoolReceiptFoot` shape: a hairline, then the line, present only while something speaks
+(no reserved blank line). Precedence is ArchivedView's: the Trash's own error (alarm voice) → its own
+receipt (muted) → else the one status seam's `QuietReceiptLine` (so a seam receipt — ⌥⌘Z's "Undid…" —
+speaks here too, instead of nowhere). Pins: the pure precedence decision, and a HOSTED geometry pin
+(the line's frame lies wholly below the list's frame; red on the overlay) — which needs one internal
+`model:` init parameter on `RecoveryView` (its `@State` model is unreachable from a test today). If
+that seam is declined, the walk verifies the band and the record says so.
+
+**ASKED OF THE ORCHESTRATOR (one ruling unblocks D1–D4):** P-828-7 / -8 / -9; the words (P-828-10 —
+or leave them PROVISIONAL); the act's `ids ∩ still-qualifying` rule; count 0 = not rendered; the pick
+belt; and whether VX-636 may take the `model:` init seam for its geometry pin.
+
 ### Batch C — the Library remembers (VX-823, HIGH)
 
 **Required reading:** SurfaceContracts "The Library" (whole section) and "The app"'s Open-list
@@ -550,6 +700,12 @@ round 2 re-reviews; hard cap three rounds.)*
   landing (the word's start on the new block; the start arm's block start); alternatives (b) the
   caret rides inside the word at its offset, (c) (b) on the divide arm only (batch A proposes —
   its self-assessment).
+- P-828-7: VX-800 — the edge clause's reading: (a) any edge row, whatever its own tombstone, to a
+  live block; (b) live-or-own-stamp edges only; (c) (a) for derived_from, (b) for version_of (batch D
+  proposes (a) — its D0 fork, awaiting the orchestrator's ruling).
+- P-828-8: VX-800 — "empty" = zero-length (a) vs whitespace-only too (b) (batch D proposes (a)).
+- P-828-9: VX-800 — a block tag is not history (a) vs keeps the block out (b) (batch D proposes (a)).
+- P-828-10: VX-800 — the door's label, confirm, receipt and refusal words (batch D drafts them, D0).
 
 #### Batch A — ORCHESTRATOR VERIFICATION (stage window "vx-828-batchA", 2026-11-05)
 
