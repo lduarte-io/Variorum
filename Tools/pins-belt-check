@@ -1,0 +1,54 @@
+#!/bin/bash
+# pins-belt-check — THE PIN for VX-781's belt: does a pin-FREE resolution still land the committed set?
+#
+#   Tools/pins-belt-check [<git-rev>]      (default HEAD)
+#
+# Exports <rev>'s tree (git archive, no git metadata) into a gitignored work dir, DELETES both of its
+# lockfiles, and resolves from scratch — exactly what any resolution does that runs without the pins
+# (a missing or unreadable lockfile, a package update):
+#   1. the Xcode graph:  xcodebuild -resolvePackageDependencies (fresh DerivedData + clone dir)
+#   2. the CLI graph:    swift package resolve (fresh scratch path)
+# then checks each resolved state with Tools/verify-pins against <rev>'s OWN committed workspace lockfile.
+# Exit 0 = both graphs land the committed set (the belt holds) · 1 = drift (named) · 2 = setup error.
+# Every path it writes is inside App/Variorum/DerivedData/pins-belt-check/ (gitignored) except the one
+# thing no flag redirects: xcodebuild's manifest cache (~/Library/Caches/org.swift.swiftpm/manifests,
+# additive entries only — VX-781's record). Never purges or resets anything shared.
+# On the pre-belt tree (e.g. 68b3d9c53) this exits 1 with SQLCipher 4.20.0 among the drift; on the belt, 0.
+set -uo pipefail
+
+REPO="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 2
+REV="${1:-HEAD}"
+SHA="$(git -C "$REPO" rev-parse --short=9 "$REV^{commit}")" || { echo "pins-belt-check: no commit $REV" >&2; exit 2; }
+BASE="$REPO/App/Variorum/DerivedData/pins-belt-check"
+WORK="$BASE/$SHA-$(date -u +%Y%m%dT%H%M%SZ)"
+CACHE="$BASE/pkgcache"   # repository mirrors only; reused across runs, never shared with anything else
+WS_LOCK="App/Variorum/Variorum.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+VERIFY="$REPO/Tools/verify-pins"
+
+mkdir -p "$WORK/tree" "$CACHE" || exit 2
+git -C "$REPO" archive "$SHA" | tar -x -C "$WORK/tree" || { echo "pins-belt-check: export failed" >&2; exit 2; }
+cp "$WORK/tree/$WS_LOCK" "$WORK/committed-workspace.resolved" || exit 2
+rm -f "$WORK/tree/$WS_LOCK" "$WORK/tree/Package.resolved"
+echo "pins-belt-check: $REV = $SHA exported to $WORK/tree; both lockfiles REMOVED"
+
+echo "-- 1. the Xcode graph (pin-free xcodebuild resolve)"
+( cd "$WORK/tree/App/Variorum" && xcodebuild -resolvePackageDependencies -project Variorum.xcodeproj \
+    -scheme Variorum -derivedDataPath "$WORK/dd" -clonedSourcePackagesDirPath "$WORK/spm" \
+    -packageCachePath "$CACHE" ) > "$WORK/xcode-resolve.log" 2>&1 \
+  || { echo "pins-belt-check: xcodebuild resolve FAILED — $WORK/xcode-resolve.log" >&2; exit 2; }
+
+echo "-- 2. the CLI graph (pin-free swift package resolve)"
+swift package --package-path "$WORK/tree" --scratch-path "$WORK/cli" --cache-path "$CACHE" \
+    --config-path "$WORK/cli-config" --security-path "$WORK/cli-security" --manifest-cache local \
+    resolve > "$WORK/cli-resolve.log" 2>&1 \
+  || { echo "pins-belt-check: swift package resolve FAILED — $WORK/cli-resolve.log" >&2; exit 2; }
+
+status=0
+"$VERIFY" --against "$WORK/committed-workspace.resolved" "$WORK/spm/workspace-state.json" || status=1
+"$VERIFY" --against "$WORK/committed-workspace.resolved" --cli "$WORK/cli/workspace-state.json" || status=1
+if [ "$status" = 0 ]; then
+  echo "pins-belt-check: BELT HOLDS at $SHA — a pin-free resolution lands the committed set in both graphs"
+else
+  echo "pins-belt-check: BELT DOES NOT HOLD at $SHA — a pin-free resolution floats (drift above)"
+fi
+exit "$status"

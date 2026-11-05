@@ -64,12 +64,14 @@ hash right for every path; it is right for exactly one directory.
 
 ### T-3. What SwiftPM does with a mismatched originHash (the resolver's road, from its source behaviour — to be confirmed by reproduction below)
 
-PENDING reproduction. The expected roads (SwiftPM's best-effort strategy): originHash MATCHES →
-the lockfile is used AS a lockfile (checkouts are moved to the pins); originHash MISMATCHES →
-"resolve and update": the CURRENT CHECKOUT STATE of that build's SourcePackages is kept if it
-satisfies the requirements (the lockfile's pins are not compared to it), missing packages are
-resolved with the lockfile's pins as PREFERENCES, and the lockfile is then re-written from the
-resulting state with the new (path-dependent) originHash.
+The hypothesis written before reproducing (from memory of SwiftPM's best-effort strategy):
+originHash MATCHES → the lockfile is used AS a lockfile; originHash MISMATCHES → "resolve and
+update", where a build's EXISTING checkouts would be kept if they satisfy the requirements and
+the lockfile re-written from them. **Settled by reproduction, and the second half is FALSE on
+Xcode 27.1:** a mismatched originHash changes nothing observable. With a clean lockfile, missing
+packages resolve to the pins (E1), a reused DerivedData's upgraded checkouts are moved BACK to
+the pins (E3), and the file is never rewritten while the resolved pins equal the stored ones (E1,
+E3, E5, E7). The stale originHash is real (T-1, T-2) but it is NOT the rewrite trigger.
 
 ### T-4. Where the upgrade can come from — the floating requirements
 
@@ -215,6 +217,59 @@ shipping versions (PROVISIONAL P-781-1 below).
   (`project.pbxproj`'s package references, today Sparkle and `../..`). So the belt for the app
   must live there as project-level exact package references. Package.swift keeps its pins as the
   CLI's belt. Restored by `git checkout --`.
+
+### THE BELT, second form — exact PROJECT-LEVEL package references (620cc9019)
+
+The twelve transitive packages are declared in `project.pbxproj` as `XCRemoteSwiftPackageReference`
+entries with `kind = exactVersion` at the committed versions (IDs `E1F781000000000000000001` …
+`…0C`, listed in the project's `packageReferences` after Sparkle; NO `XCSwiftPackageProductDependency`
+— no target links anything new). swift-dependencies needs no project entry: its Package.swift
+requirement is direct and used, so it already counts for Xcode (E10 kept it at 1.14.1). GRDB and
+the MCP SDK are `exact:` direct requirements and are referenced nowhere else, so they cannot float.
+Package.swift's comment names both places. The root lockfile's originHash was refreshed to the
+new manifest bytes by a forced re-resolve (C3: the pins were identical to eda25f273's).
+
+- **E11 — xcodebuild, workspace lockfile REMOVED, fresh DD, on the project-level belt: GREEN.**
+  The written lockfile's 16 pins equal the committed file's ENTRY FOR ENTRY. Only the originHash
+  differs (`087cc552…`: this path, plus the twelve new root URLs in the hash).
+
+### THE PIN — `Tools/pins-belt-check [<rev>]` (red-on-old, green-on-new, revert-verified by rev)
+
+The scripted recipe: `git archive <rev>` into a gitignored work dir
+(`App/Variorum/DerivedData/pins-belt-check/<sha>-<UTC>/`). It DELETES both lockfiles, resolves
+each graph from scratch (a fresh-DD `xcodebuild -resolvePackageDependencies`, and an isolated
+`swift package resolve`), then runs `Tools/verify-pins --against <rev's own committed workspace
+lockfile>` on both resolved states. Exit 0 = the belt holds, 1 = drift.
+
+| rev | what it is | Xcode graph | CLI graph | exit |
+|---|---|---|---|---|
+| `68b3d9c53` | pre-fix (this branch's base = main's code) | **DRIFT ×12** — sqlcipher.swift 4.18.0 → **4.20.0**, swift-dependencies 1.14.1 → 1.17.2, swift-syntax 602.0.0 → 604.0.0, EXTRA swift-issue-reporting 2.1.2, MISSING xctest-dynamic-overlay, + 7 more | **DRIFT ×12** (same set) | **1** |
+| `eda25f273` | the first form alone (Package.swift pins) | **DRIFT ×11** (only swift-dependencies held) | OK, 15 pins | **1** |
+| `fef4800f8` | the full belt | **OK — 16 pins match** | **OK — 15 pins match** | **0** |
+
+The exact output lines, `68b3d9c53`: `pins-belt-check: BELT DOES NOT HOLD at 68b3d9c53 — a
+pin-free resolution floats (drift above)` / `EXIT=1`. `fef4800f8`: `OK …/spm/workspace-state.json:
+16 pins match the committed set` · `OK …/cli/workspace-state.json: 15 pins match the committed set`
+· `pins-belt-check: BELT HOLDS at fef4800f8 — a pin-free resolution lands the committed set in
+both graphs` / `EXIT=0`. The middle row is what proves that BOTH halves of the belt bear load:
+the project-level references hold the app's graph, and Package.swift holds the CLI's graph and
+swift-dependencies.
+
+### `Tools/verify-pins` — the guard (fef4800f8)
+
+**One-line usage:** `Tools/verify-pins "<OUT>/DerivedData"` after a build (or any
+`workspace-state.json`, SourcePackages dir or Package.resolved). Run it with no argument BEFORE a
+build: it checks the working tree's two lockfiles. Exit 0 = every pin matches the workspace
+lockfile AS COMMITTED (git `HEAD`, or `--ref <rev>` / `--against <file>`); 1 = drift, each pin
+named DRIFT/EXTRA/MISSING with versions and revisions; 2 = usage/unreadable input. The originHash
+is ignored (T-2). `--cli` is for the repo-root graph, where the Xcode project's own Sparkle is not
+expected (derived, not hard-coded: project references whose URL Package.swift never names).
+Exercised: the clean tree passes (16 + 15 pins); E1's state passes; E8's state and E2's written
+file each show DRIFT ×12 and exit 1; tree mode exits 1 with the upgraded file in the tree, with the
+lockfile missing ("a build would resolve WITHOUT pins"), and with E11's originHash-only rewrite
+(bytes differ, pins equal: flagged because a dirty file is what a build adopts; release.sh refuses
+a dirty tree for the same reason); bad path or option exits 2. Python 3.9 stdlib only
+(`/usr/bin/python3` 3.9.6).
 
 ### RELEASE-EXPOSURE — did 1.0 (10632) or 1.0.1 (10682) ship floated pins? **NO — both shipped the committed set** (evidence, decisive, read-only)
 
