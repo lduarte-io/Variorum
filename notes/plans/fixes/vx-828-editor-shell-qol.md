@@ -1502,22 +1502,25 @@ group present; the pane following a wing switch; the unused-tags door end to end
 
 #### Batch E — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
 
-**Not done by this batch (first line, kept current):** NO app-suite RUN, NO red-on-old revert RUN of
-an app pin, NO Debug launch, NO walk — all stage-gated, the orchestrator's. VX-840 builds to the fork's
-ruling (4b1d1d47d) — E3 core DONE, E4 app IN-PROGRESS. No canon, QUESTIONS or shared ledger touched;
-no `Sync/`, custody or keychain file; no `App/Variorum/Shared/` file (WingWords is only READ). The
-vendored `TagUsageQueries.swift` (c1554f958) is vx-809's bytes and is never edited here.
+**Not done by this batch (first line, final):** NO app-suite RUN (15 new app tests across
+`SpellingDoorTests` · `SettingsTagsWingFollowTests` · `TagSweepTests`, and their neighbours), NO
+red-on-old revert RUN of an app pin (R-E1, R-E2, R-E3 named below), NO Debug launch, NO walk — all
+stage-gated, the orchestrator's (the self-assessment's PENDING list names each exactly). No canon,
+QUESTIONS or shared ledger touched (drafts in the self-assessment); no `Sync/`, custody or keychain
+file; no `App/Variorum/Shared/` file (WingWords is only READ) — so no phone suites owed by this batch.
+The vendored `TagUsageQueries.swift` (c1554f958) is vx-809's bytes and is never edited here.
 
 | Piece | What | Status |
 |---|---|---|
 | E0 | Preflight (the brief's reading list, read in full; the three tickets' bodies read) + THE DESIGN FORK below | DONE — proposed (c9aba7cb1); RULED (4b1d1d47d, "Batch E — THE FORK'S RULING": Q-E1 (a), P-828-4 one combined entry, Q-E3 (i), Q-E4 (a)) |
-| E1 | VX-798: Edit ▸ Spelling and Grammar (⌘: Show Spelling and Grammar · ⌘; Check Document Now), registry-declared, the responder-chain act + its refusal; pins | DONE (70b4a315e) — `CapabilityID.showSpellingPanel` / `.checkSpelling` + their registry rows (app scope, `[.menuBar]`, `always`, the collision sweep in the comment); `Registry/SpellingDoor.swift` (the act: `NSApp.sendAction(_:to: nil, from:)` on the menu's road, `tryToPerform` from a given responder for pins — never an explicit `to:` target, which AppKit sends to unconditionally and a non-answering one THROWS, probed; the door speaks `SpellingDoorCopy.nothingToCheck` where nothing took it); `EditorCommands`: `menuRendered` + `keyEquivalent` (`":"`/`";"` + ⌘) + the Spelling and Grammar submenu after Find; two helper rows (`ShortcutCatalog`, writing group, its line + "spelling"). Pins `App/Variorum/VariorumTests/SpellingDoorTests.swift` (4 tests; the act one parameterized over 5 surfaces × 2 levels). Mac `build-for-testing` TEST BUILD SUCCEEDED, no warning in a touched file. RUN + revert R-E1 PENDING (the stage window) |
+| E1 | VX-798: Edit ▸ Spelling and Grammar (⌘: Show Spelling and Grammar · ⌘; Check Document Now), registry-declared, the responder-chain act + its refusal; pins | DONE (70b4a315e) — `CapabilityID.showSpellingPanel` / `.checkSpelling` + their registry rows (app scope, `[.menuBar]`, `always`, the collision sweep in the comment); `Registry/SpellingDoor.swift` (the act: `NSApp.sendAction(_:to: nil, from:)` on the menu's road, `tryToPerform` from a given responder for pins — never an explicit `to:` target, which AppKit sends to unconditionally and a non-answering one THROWS, probed; the door speaks `SpellingDoorCopy.nothingToCheck` where nothing took it); `EditorCommands`: `menuRendered` + `keyEquivalent` (`":"`/`";"` + ⌘) + the Spelling and Grammar submenu after Find; two helper rows (`ShortcutCatalog`, writing group, its line + "spelling"). Pins `App/Variorum/VariorumTests/SpellingDoorTests.swift` (5 tests; the act one parameterized over 5 surfaces × 2 levels). Mac `build-for-testing` TEST BUILD SUCCEEDED, no warning in a touched file. RUN + revert R-E1 PENDING (the stage window) |
 | E2 | VX-838: Settings ▸ Tags names its wing ("Tags — in ‹wing›") and follows the app's wing live; pins | DONE (a7d6ab3fe) — `AppSettingsView`: the model's task keyed `.task(id: session.wing.currentID)` (the fix — RootView's idiom), the header's title through `AppSettingsView.title(of:tagsWingName:)` (Tags → `TagManagerCopy.title(wingName:)`, every other pane its own title), the internal `tags:` init seam (D's ruling 8 precedent); `TagsViewModel`: `shownWing` (id + name) adopted with the list from ONE read (`Listing` — `allTags` + `Queries.wingName`, Home's name `WingWords.home`), the start-once-per-wing contract stated in its doc; `Features/Settings/TagManagerCopy.swift` (new). Pins `App/Variorum/VariorumTests/SettingsTagsWingFollowTests.swift` (3: the MOUNTED follow — red-on-old by R-E2; the one-read name + live rename; the pure title). Mac `build-for-testing` TEST BUILD SUCCEEDED; one warning in a touched file, PRE-EXISTING (`AppSettingsView.swift` `PromoteTagsSheet.spec` — untouched code; present in batch C's logs vx828c-bft2/-bft5). RUN + revert R-E2 PENDING (the stage window). Not Shared/ (`WingWords` is read only) |
 | E3 | VX-840 core: the unused listing (consuming `tagSubtreeIsWorn`) + the bulk act + exact-rows pins | DONE (23f68603c; the vendor commit c1554f958 ahead of it, alone) — `Queries/UnusedTagQueries.swift` (new): `Queries.unusedTags(_:wingID:)` = every live tag of the wing with `!tagSubtreeIsWorn(…, .library(countingTrashRevivable: true))`, path order, asking the brain once per maximal unused subtree (UNUSED is closed downward — WORN is subtree-honest; the subtree matched by stored wing + path prefix, `tagSubtree`'s own rule); `Queries.unusedTagRegions()` — tag, post_tag, block_tag whole; `container` / `block` / `wing` NARROWED to `(id, deleted_at)` so autosave's touch/churn stamps and every take write never wake it (P1); `AppDatabase.observeUnusedTags(wingID:)` (`observe(tracking:)`, re-fetched on a reader — VX-670 / batch D's shape). `Operations+Tag.swift`: `deleteUnusedTags(_:)` — ONE write, ONE stamp: walking the confirmed ids in path order, a tag's subtree goes (through `deleteTag`'s own `tombstoneTagSubtree`) only when it is still live, still unused by the brain INSIDE the write, and every live tag under it NOW was confirmed; the passes join into one `TagDeletionPass` and ONE entry `"Delete Unused Tags"` on VX-247's machinery (`registerTagDeletionEntry` gained only `label:`; `deleteTag` passes `"Delete Tag"`, byte-same behaviour); nothing taken ⇒ nothing written, no entry, `[]`. Pins `Tests/VariorumCoreTests/UnusedTagsTests.swift` (7): the listing's wearers (live note · block in a note · snippet · Trash-held note · Trash-held block → off; never applied · removed · removed-then-trashed → on; Put back keeps it off; removing the last wearer lists it), the subtree (and the brain agrees tag by tag), per-wing twins, the region (complete per table×column over every arm; narrow against keystroke writes; woken by trash/application writes), the act's one stamp + one entry + whole undo/redo + the single delete's label unchanged, confirmed ∩ still-unused subtree-aware (worn since · Trash-held since · an unseen child · a child unconfirmed), nothing-left-writes-nothing (no outbox row, no entry). `swift test --filter UnusedTagsTests` 7/7 GREEN headless. **Mutation probes ANNOUNCED here (this commit), each an UNCOMMITTED edit on the committed tree restored by `git checkout --`:** M-E1 `unusedTags` asks `.library(countingTrashRevivable: false)` → expect `whatIsWornOrRevivableNeverLists` red (in-trash, block-in-trash listed); M-E2 `deleteUnusedTags` loses the `confirmed.isSuperset(of: subtree)` guard → expect `theActTakesOnlyWhatTheSheetShowedThatIsStillUnused` red (b with its unseen child, d with its unconfirmed child taken); M-E3 `deleteUnusedTags` loses the in-write worn guard → expect that pin red (a, f taken) AND `nothingLeftWritesNothing` red (x taken, an entry registered). RESULTS (all three red as predicted, each restored by `git checkout --`, `git status` clean, 7/7 green again): M-E1 → `whatIsWornOrRevivableNeverLists` red, 3 issues (the Trash-held note's and block's tags listed — and still listed after the Put back for the block still in the Trash); M-E2 → `theActTakesOnlyWhatTheSheetShowedThatIsStillUnused` red, 2 issues (b went with its unseen child, d with its unconfirmed child); M-E3 → that pin red (2) AND `nothingLeftWritesNothing` red, 4 issues (the worn x deleted, an outbox row written, an entry registered). The in-write guards are load-bearing |
 | E4 | VX-840 app: the door, the sheet, the words; pins | DONE (this commit) — `CapabilityID.deleteUnusedTags` + its registry row (`.surface`, app scope, verb "Delete Unused Tags" = the undo label, note = the race refusal; `.deleteTag`'s home) and `TagManagerPane.surfaceCapabilities` (the surface walk's union carries it); `TagsViewModel`: `unused` held by `startUnused()` (`observeUnusedTags`, keyed per wing like `start()`), `deleteUnusedTags(_:) -> Int?` (the act through the session's runner — so onto the session's ⌥⌘Z stack); `TagManagerPane`: the door "Delete N unused tags…" in the foot beside New Tag…, drawn only while N > 0 (`showsSweepDoor`), its `.task(id: wing)` holding the count only while the pane shows; the sheet `UnusedTagsSheet` over a SNAPSHOT `UnusedTagSelection` (all checked; the LINKED boxes — unchecking a tag unchecks its listed ancestors, checking one checks its listed subtree; "under" = same stored wing + path prefix, `tagSubtree`'s rule), its destructive "Delete N Tags" the one confirm; the outcome in the pane's own line (`sweepLine(taken:)`: receipt muted / refusal alarm; retired on a wing switch, the sheet with it, and when the vocabulary grows — an ⌥⌘Z bringing them back, a new tag); the words in `TagManagerCopy` (P-828-4 drafts verbatim, PROVISIONAL). Pins `App/Variorum/VariorumTests/TagSweepTests.swift` (7: all checked at start; the subtree rule incl. another wing's twin path; no click sequence ever checks a tag without its subtree; the door's visibility + words; the line's three outcomes; the declaration; the model's road — live list, one "Delete Unused Tags" entry on the session's stack, the race's 0 with no entry). Mac `build-for-testing` TEST BUILD SUCCEEDED, no new warning in a touched file. RUN PENDING (the stage window). No Shared/ file |
-| E5 | Self-assessment + the end-of-batch headless suite | NOT-STARTED |
+| E5 | Self-assessment + the end-of-batch headless suite | DONE (this commit) — full core `swift test` at 9a49f7350: `VariorumCoreTests` 3677 tests / 494 suites PASSED (5 known issues; +7 / +1 over batch D's 3670/493 = `UnusedTagsTests`; PinBeltTests rides inside, passed); `StringsWorkbookTests` 32/4 PASSED; the 7 known "dependency not used" warnings (14 lines, build + test); `VariorumMCPTests` 549/100 with 7 issues, ALL the MCP socket harness (`MCPStopRoadsServerTests` ×2, `MCPStopEndsConnectionGrantsServerTests`, `MCPHarnessTimeLimitTests`, `MCPReaderAfterCloseTests`, `MCPDiscoverProbeServerTests`, `MCPCloseReasonTests` — "claude-code got no answer to its initialize" and its kin) — re-run ALONE (`swift test --skip-build --filter` the six): 31 tests / 8 suites PASSED in 12.0 s. This batch touches no MCP code (the vendored brain is read only by Settings) |
 
-**Owed to a stage window for E1/E2 (named now, so a window can take them before E3/E4 land):**
+**Owed to a stage window for E1/E2 (named at E2; the WHOLE batch's list is the self-assessment's
+PENDING section below):**
 - Suites (TYPES): `SpellingDoorTests`, `SettingsTagsWingFollowTests`, plus the registry neighbours
   `CapabilityRegistryTests`, `ShellChromeTests`, `ShortcutCatalogTests`, `SettingsShapeTests`,
   `MCPPaneTabsTests` (mounts `AppSettingsView`), `WingSwitcherTests` (constructs `TagsViewModel`).
@@ -1652,6 +1655,151 @@ and the list changing is its answer): "Deleted 3 unused tags — ⌥⌘Z puts th
 
 **ASKED OF THE ORCHESTRATOR (one ruling unblocks E3–E4):** Q-E1 (a)/(b)/(c); P-828-4 (Q-E2);
 Q-E3's listing; Q-E4's door; the words (or leave them PROVISIONAL).
+
+#### Batch E — IMPLEMENTER SELF-ASSESSMENT (Opus, 2026-11-05)
+
+**Not done (first line, by the brief):** no app-suite RUN, no app red-on-old revert RUN, no walk, no
+Debug launch — all stage-gated, the orchestrator's (named exactly below). No canon, QUESTIONS or other
+shared ledger touched (drafts below). No `Sync/`, custody, keychain or `Shared/` file. Every piece is
+built, the Mac target and its tests compile (build-for-testing green at 9a49f7350), and every headless
+half is green.
+
+**VX-798 — what was missing (an Improvement, no bug mechanism).** A SwiftUI-lifecycle menu bar carries
+none of AppKit's Spelling and Grammar items, and nothing put them back — so spelling had no menu home
+and no chord; only the A24 level (Settings ▸ Editor ▸ Spellchecking) existed, and it is a toggle. Built
+(70b4a315e): the macOS pair under AppKit's own titles and keys, registry-declared
+(`.showSpellingPanel` ⌘: · `.checkSpelling` ⌘;, app scope, `[.menuBar]`, `always`), in an Edit ▸
+Spelling and Grammar submenu after Find; the act (`Registry/SpellingDoor.swift`) walks the responder
+chain — `NSApp.sendAction(_:to: nil, from:)` on the menu's road — and the door speaks its declared
+refusal where nothing took it. **Which responders answer** (every one an `NSTextView`, `NSText`
+implements both acts, none of ours overrides them): Write's editor and the inline book/pool editors
+(`EditorTextView`), every pane — live takes, Read's edit face, lenses, Compare, AND read-only panes,
+which select the misspelling but cannot be edited by the panel's Change (`PaneTextView`), the quick
+entry and quick-note boxes (`CaptureNSTextView`), the comment fields (`CommentNSTextView`), and any
+text field's field editor (Settings' search, the find bar) — standard macOS. One-shot by construction:
+no selector writes a checking flag, and AppKit's three toggles are deliberately absent (each writes a
+per-view flag under the A24 setting; the first would turn continuous checking on with completion still
+on — the TEXTKIT2 §3 pairing).
+
+**VX-838 — the mechanism, traced on this tree.** `AppSettingsView.body` started the Tags model with a
+plain `.task { await tags.start() }` (AppSettingsView.swift:223 before the fix) — once per window — and
+`start()` reads `session.wing.currentID` at subscription, so its `observeTags(wingID:)` stayed pinned to
+the wing open at the time. A switch restarted nothing: the list kept the old wing's vocabulary, and a
+root tag minted from it landed (`createTag(…, wingID: session.wing.currentID)`) in the NEW wing, unseen.
+RootView's twin model was always `.task(id: session.wing.currentID)`. **The fix (a7d6ab3fe):** the task
+keyed on the wing; the model adopts its list and its wing's name from ONE read (`TagsViewModel.Listing`
+— a rename re-titles live, and the header can never name another wing than the one listed); the header
+reads "Tags — in ‹wing›" (`AppSettingsView.title(of:tagsWingName:)` → `TagManagerCopy.title`).
+
+**VX-840 — built to the fork's ruling (4b1d1d47d), one pointer per piece.**
+- `Sources/VariorumCore/Queries/TagUsageQueries.swift` — vx-809's brain, VENDORED byte-identical from
+  5279ec16a (blob 90472b916, unchanged at their tip 8b32bf03f), its own commit c1554f958, never edited.
+- `Sources/VariorumCore/Queries/UnusedTagQueries.swift` (new) — `Queries.unusedTags(_:wingID:)` (the
+  brain per tag, `.library(countingTrashRevivable: true)`; once per maximal unused subtree — UNUSED is
+  closed downward), `Queries.unusedTagRegions()` (narrowed to `(id, deleted_at)` on
+  container/block/wing), `AppDatabase.observeUnusedTags(wingID:)`.
+- `Sources/VariorumCore/Operations/Operations+Tag.swift` — `deleteUnusedTags(_:)` (one write, one
+  stamp, confirmed ∩ still-unused subtree-aware inside it, ONE "Delete Unused Tags" entry);
+  `registerTagDeletionEntry` gains only `label:` (`deleteTag` passes "Delete Tag" — byte-same behaviour).
+- `App/Variorum/Variorum/Features/Tags/TagsViewModel.swift` — `unused` / `startUnused()` /
+  `deleteUnusedTags(_:) -> Int?`.
+- `App/Variorum/Variorum/Features/Settings/TagManagerCopy.swift` — the words (PROVISIONAL) and the pure
+  `UnusedTagSelection` (the linked boxes).
+- `App/Variorum/Variorum/Features/Settings/AppSettingsView.swift` — `TagManagerPane`'s counted door,
+  its keyed `.task`, the sheet (`UnusedTagsSheet`), the line (`sweepLine(taken:)`).
+- `App/Variorum/Variorum/Registry/Capability.swift` + `CapabilityRegistry.swift` — `.deleteUnusedTags`.
+
+**Pins — and exactly what makes each red.**
+| Pin (suite TYPE · test) | Red on old because | Behavioral revert that shows it |
+|---|---|---|
+| `SpellingDoorTests` (app, 5; the act parameterized 5 surfaces × 2 levels) | new feature — compile-red on old (no acts, no door) | **R-E1:** `SpellingDoor.swift`, `case .checkDocument: #selector(NSText.checkSpelling(_:))` → `#selector(NSTextView.toggleContinuousSpellChecking(_:))` → expect `aCheckStepsToTheNextMisspellingAndTurnsNothingOn` red on all five surfaces + `everyWritingSurfaceAnswersBothActs` red; the declaration and refusal pins green. `git checkout --` restores |
+| `SettingsTagsWingFollowTests` · `thePaneFollowsTheAppsWingLive` (app, mounted) | the plain `.task` pins the list to Home: after the switch it stays `["alpha"]` | **R-E2:** `AppSettingsView.swift`, `.task(id: session.wing.currentID) { await tags.start() }` → `.task { await tags.start() }` → expect it red; the other two green |
+| `SettingsTagsWingFollowTests` · the name and title pins | new API (`shownWing`, `title(of:)`) — compile-red on old | — (guards) |
+| `UnusedTagsTests` (core, 7) | new feature — compile-red on old; STRENGTH shown by M-E1…M-E3 on the new code, all red as predicted (E3's row) | — (ran green headless) |
+| `TagSweepTests` (app, 7) | new feature — compile-red on old | **R-E3 (optional, pure):** `TagManagerCopy.swift`, `UnusedTagSelection.toggle` — delete the `for other in rows where Self.isAncestor(other, of: row) { checked.remove(other.id) }` line → expect `theBoxesCarryTheSubtreeRule` + `noClickSequenceEverChecksATagWithoutItsSubtree` red, the rest green |
+
+**PENDING (the orchestrator's stage window).**
+1. Mac suites, by TYPE (a zsh array): `SpellingDoorTests` · `SettingsTagsWingFollowTests` ·
+   `TagSweepTests` — and the neighbours the diff reaches: `CapabilityRegistryTests` ·
+   `ShellChromeTests` · `ShortcutCatalogTests` · `SettingsShapeTests` · `ChromeLineLimitTests` ·
+   `MCPPaneTabsTests` (mounts `AppSettingsView`) · `WingSwitcherTests` (constructs `TagsViewModel`).
+2. Reverts R-E1, R-E2 (R-E3 if the window allows), each one suite, then restore.
+3. The walk (dev store; both voices where a face is voiced): legs (1)–(6) as named in LIVE STATUS, plus
+   (7) THE SWEEP — in a wing holding a tag on a note, a tag whose only note is in the Trash, a tag she
+   removed from a note, and a parent with an unused child: Settings ▸ Tags shows "Delete N unused
+   tags…" with N = only the removed tag and the parent's subtree (the Trash-held one is NOT counted);
+   the sheet lists them checked; unchecking the child unchecks the parent; Cancel changes nothing;
+   re-open, Delete — they leave the list, the receipt "Deleted N unused tags — ⌥⌘Z puts them back."
+   speaks in the pane, the door disappears at 0; ⌥⌘Z in the main window ("Undo Delete Unused Tags")
+   brings every one back at once and the receipt retires; ⇧⌥⌘Z takes them again; (8) the door follows
+   a wing switch (the other wing's count, or no door).
+
+**PROVISIONAL (QUESTIONS entries at the merge moment).** P-828-3 (a Trash-held wearer keeps its tag in
+use — built through the brain's `countingTrashRevivable: true`); P-828-4 (one combined "Delete Unused
+Tags" entry, the redo consequence as ruled); Q-E3 (i) the linked boxes and Q-E4 (a) the counted door
+(the ruling's header: PROVISIONAL for her morning sitting); the VX-840 words verbatim as drafted; and
+VX-798's refusal words ("Spelling checks the text you're writing in — click into a note or a box
+first."), new and mine.
+
+**For the orchestrator's canon pass (DRAFTED — not applied; the two-file rule).**
+- SurfaceContracts, "The app" Keyboard family — ADD before "The Shortcuts & Dictionary helper
+  exists…": "⌘; is Check Document Now and ⌘: Show Spelling and Grammar (Edit ▸ Spelling and Grammar):
+  one-shot acts on whatever text holds the keyboard — never the continuous level, whose one home is
+  Settings ▸ Editor ▸ Spellchecking — and where no text holds it the door says so (VX-798)."
+- SurfaceContracts, "The app" sidebar bullet — after "is tag management's home", ADD: "Settings ▸ Tags
+  names the wing its vocabulary is ("Tags — in ‹wing›") and follows the app's wing live (R-828-2); while
+  the wing holds a tag nothing wears — no live note or block, nothing in the Trash — its foot offers
+  "Delete N unused tags…", a sheet of every such tag checked, its boxes bound to the subtree rule,
+  deleted in one act with one ⌥⌘Z entry, "Delete Unused Tags" (VX-840, PROVISIONAL P-828-3/-4)."
+- AppSpec §9 "Tags, comments, presentation, references" — ADD: "**deleteUnusedTags(ids)** deletes, in
+  one transaction on one stamp, each confirmed tag's subtree that is still unused
+  (`Queries.tagSubtreeIsWorn`, Trash-revivable wearers counting) and wholly confirmed; one "Delete
+  Unused Tags" structural-undo entry on deleteTag's inverse and redo; nothing left writes nothing
+  (VX-840)." And in "Structural undo and redo"'s list: "deleteTag" → "deleteTag and deleteUnusedTags".
+- AppSpec §12 "The app" Keyboard family — ADD "⌘; ⌘: spelling, once (VX-798)".
+- AppSpecRecord: the dated entry + the narrative under §9 (tags) and §12 (Settings ▸ Tags; the menu bar).
+- MOBILE PARITY: nothing mobile-visible (the phone's tag manager has no wing face and no sweep; iOS's
+  own text menus carry spelling). A VM twin of the sweep in the phone's tag manager is a candidate
+  ticket — the orchestrator's call.
+- Rulings reconciled: R-828-2 — "names its wing … FOLLOWS the app's wing live": both built, the follow
+  covering a rename too; R-828-4 — VX-840 built here, consuming vx-809's mint (vendored, Q-E1 (a)).
+
+**Self-assessment.** CONFIDENT: VX-838's mechanism (read in the code; the fix is RootView's idiom); the
+sweep's core (exact rows on every wearer shape, the region pinned per column, the act's in-write
+guards each proven load-bearing by a mutation probe, undo/redo whole through VX-247's untouched
+machinery); VX-798's one-shot property (probed offscreen before the build, pinned on five surfaces at
+two levels). FLAGS FOR THE COLD REVIEWER: (a) VX-798 is editor-ADJACENT: no editor-seam file changed,
+but the Spelling panel's Change edits through `NSTextView`'s ordinary input path into the editor's
+delegate — autocorrect's road at "check and correct" — so walk leg (4) runs it under DEBUG's identity
+oracle; (b) the two items are never grey (availability `always`; P-2 is met by the spoken refusal —
+Paste Without Line Breaks' precedent), and field editors answer too, so ⌘; in a search field checks
+that field; (c) with the Spelling panel itself key, the nil-target chain starts at the panel —
+AppKit-standard, unverified in our app (walk); (d) `unusedTags` asks the brain once per maximal
+unused subtree — correct only because WORN is subtree-honest; `theSubtreeDecides` checks it tag by
+tag; (e) the count's region is COLUMN-narrowed (`container`/`block`/`wing` to `(id, deleted_at)`) —
+it rests on GRDB's column-precise UPDATE tracking, pinned both ways; (f) the act is wing-agnostic over
+the ids it is handed (the door hands one wing's); (g) the redo re-deletes a tag applied between undo
+and redo, with its application (ruled: the single delete's own semantics); (h) the sheet is a
+SNAPSHOT — the door's count moves live, the open sheet does not; the act's in-write re-check is what
+keeps it honest; (i) the pane's sweep line retires on a wing switch and when the vocabulary grows (an
+⌥⌘Z, a new tag), not on a later single delete — a stale "Deleted N…" can sit beside one; (j) RootView's
+`TagsViewModel` now also reads the wing's name in its observation (∝ one row; a wing rename wakes it);
+(k) `AppSettingsView` gained an internal `tags:` init seam (D's ruling 8 precedent); (l) the vendored
+file must stay byte-identical — the merge-in takes theirs.
+
+**Files touched (the whole batch):** `Sources/VariorumCore/Queries/TagUsageQueries.swift` (vendored,
+vx-809's) · `Sources/VariorumCore/Queries/UnusedTagQueries.swift` (new) ·
+`Sources/VariorumCore/Operations/Operations+Tag.swift` · `Tests/VariorumCoreTests/UnusedTagsTests.swift`
+(new) · `App/Variorum/Variorum/Registry/Capability.swift` ·
+`App/Variorum/Variorum/Registry/CapabilityRegistry.swift` ·
+`App/Variorum/Variorum/Registry/ShortcutCatalog.swift` · `App/Variorum/Variorum/Registry/SpellingDoor.swift`
+(new) · `App/Variorum/Variorum/EditorCommands.swift` ·
+`App/Variorum/Variorum/Features/Settings/AppSettingsView.swift` ·
+`App/Variorum/Variorum/Features/Settings/TagManagerCopy.swift` (new) ·
+`App/Variorum/Variorum/Features/Tags/TagsViewModel.swift` ·
+`App/Variorum/VariorumTests/SpellingDoorTests.swift` (new) ·
+`App/Variorum/VariorumTests/SettingsTagsWingFollowTests.swift` (new) ·
+`App/Variorum/VariorumTests/TagSweepTests.swift` (new) · this record.
 
 ## ENVIRONMENT TRAPS (carried into every batch brief VERBATIM)
 
