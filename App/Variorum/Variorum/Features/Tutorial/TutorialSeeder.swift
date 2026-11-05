@@ -276,8 +276,8 @@ enum TutorialSeeder {
         // sentence's truth and every ritual headless. It closes the WORKFLOW
         // (since 13s-b the privacy chapter closes the guide): it leans on
         // tags (the library of things) and on everything a note can do.
-        // Lesson 9's second sentence (archive · can't delete · comes back) is
-        // 13i-e's unbuilt guard and is withheld until it ships (F-U7-2).
+        // Lesson 9's second sentence (archive · comes back · delete · a fresh
+        // one) — 13i-e taught the delete guard here; VX-436 retired it.
         (booksChapter, ["the classics walk", "a book from the inside",
                         "membership, not ownership", "gatherings & arrivals",
                         "owned, finished, sealed", "the bookcase",
@@ -2572,18 +2572,19 @@ enum TutorialSeeder {
             + "live there, never here.",
         ])
 
-        // Lesson 9 WHOLE — its second sentence (archive · can't delete ·
-        // comes back) landed WITH 13i-e's guard (F-U7-2's pin flipped at
-        // 13i-e U2) — + lesson 10, shown on a quick note the READER makes
+        // Lesson 9 WHOLE — its second sentence (archive · comes back ·
+        // delete · a fresh one) re-voiced at VX-436 (the VX-805 run: the
+        // delete guard 13i-e taught here retired; PROVISIONAL WORDING
+        // P-805-B4) — + lesson 10, shown on a quick note the READER makes
         // (13s-b triage landing: the seeded quicknote the Welcome arrangement
         // once left in the Pool is gone from the fresh seed, R-13s-37).
         _ = try lesson(books, "the journal & the pool", [
             "The journal is an ordinary book that is special in one way: it is "
             + "where \u{2318}J and Today's Entry file. It is made the first time "
-            + "you ask for a day's entry, and from then on you can archive it but "
-            + "you can't delete it, and it comes back when a day arrives. Today's "
-            + "Entry sits at the top of the Bookcase; the journal itself waits "
-            + "among your unshelved books until you file it.",
+            + "you ask for a day's entry. Archive it and it comes back when a day "
+            + "arrives; delete it and the next day's entry starts a fresh one. "
+            + "Today's Entry sits at the top of the Bookcase; the journal itself "
+            + "waits among your unshelved books until you file it.",
 
             "The Pool is every note with no book. Notes that show in gatherings "
             + "tuck behind the count in its masthead; one click shows them.",

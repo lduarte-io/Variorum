@@ -481,8 +481,9 @@ extension Queries {
     /// default command J journal I think it's a fair choice but I am
     /// questioning it being applied to all journal style books"). Per note:
     /// 1. its own `profile = 'journal'` — the shape ⌘J's
-    ///    `createOrOpenJournalEntry` gives every day entry (the ONLY door that
-    ///    mints it; the copy roads carry it), so a day entry stays per-ask
+    ///    `createOrOpenJournalEntry` gives every day entry (with the Journal's
+    ///    New Entry, `newJournalEntry` — VX-797 — the ONLY doors that mint it;
+    ///    the copy roads carry it), so a day entry stays per-ask
     ///    wherever it is later filed (13n-c D-1, PROVISIONAL P-13nc-1);
     /// 2. a live MEMBER (status 'member') of a live reading wearing THE daily
     ///    Journal's marker (`profile = 'daily'` — every live bearer, a

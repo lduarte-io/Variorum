@@ -24,10 +24,14 @@ import Foundation
 /// Never a write of the TITLE (`DisplayTitle` stays a display rule — the name
 /// is still derived), and never a forged `created_at`: the copy's own birth
 /// stays its own. Pure and dependency-free; its callers are the copy machine's
-/// duplicate road (`Operations.duplicateAsVersionBody`) and — A-771-1, fork
-/// F-1's option (b) — her Copy to Wing (`Operations.copyNoteToWing`, both its
-/// mint paths), which the wire's `copy_note_to_wing` shares. Promote, diverge,
-/// the ownership forks and the saved version stay verbatim.
+/// duplicate road (`Operations.duplicateAsVersionBody`), her Copy to Wing
+/// (`Operations.copyNoteToWing`, both its mint paths — A-771-1, fork F-1's
+/// option (b)), which the wire's `copy_note_to_wing` shares, and — VX-845, her
+/// F-1(c) ruling, "every `copyPost` road but the saved version" — promote
+/// (`promoteLens`, `promotePicks`), diverge (`divergePostForReading`) and the
+/// ownership forks (`ceremonyCopy`, both its paths: the Own and seal forks,
+/// copy in, the deep duplicate, the bind's copy-in limb). The saved version
+/// alone stays date-cleared (`mintNoteVersion`'s V3).
 public enum DuplicateDay {
     /// The `entry_date` a duplicate of this source is born with.
     public static func entryDate(

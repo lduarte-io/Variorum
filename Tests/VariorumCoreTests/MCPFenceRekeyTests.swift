@@ -137,8 +137,8 @@ struct MCPFenceRekeyTests {
                     id: "ask", rung: .read, scopeKind: .note, scopeID: note, duration: .once)]),
                         "only a per-ask note grant")
             }
-            // Archived, the daily Journal still fences (it is alive — and it can
-            // never be deleted, `dailyJournalCannotBeDeleted`).
+            // Archived, the daily Journal still fences (it is alive; a deleted
+            // one is not — VX-436 made it deletable by her doors).
             try ops.archiveReading(dailyID)
             #expect(try db.read { try Queries.mcpNoteFacts($0, noteID: filed.id) }?.fence == .journal)
         }

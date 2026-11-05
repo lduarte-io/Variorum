@@ -276,9 +276,11 @@ struct WingCopyKeepsItsDayTests {
         }
     }
 
-    /// A-771-1's EDGE, pinned: the roads it left as built still copy verbatim —
-    /// a promote of the class is born undated (option (c) is hers).
-    @Test func thePromoteRoadStaysAsBuilt() throws {
+    /// A-771-1's EDGE, MOVED by her F-1(c) ruling (VX-845 — a JUSTIFIED EDIT:
+    /// this pin asserted the promote road stayed verbatim while option (c) was
+    /// hers; she chose it): a promote of the class now keeps the day too. Every
+    /// road is pinned in `CopyRoadsKeepTheDayTests`.
+    @Test func thePromoteRoadKeepsTheDayToo() throws {
         try withOperations { ops, db in
             let source = try ops.createPost(title: nil)
             _ = try ops.newBlock(in: source.id, text: "Morning pages.", registeringUndo: false)
@@ -286,7 +288,7 @@ struct WingCopyKeepsItsDayTests {
 
             let promoted = try row(db, try ops.promotePicks(post: source.id, picks: [:]).post.id)
 
-            #expect(promoted.entryDate == nil, "promote is verbatim, as built")
+            #expect(promoted.entryDate == day, "promote keeps the day (VX-845)")
         }
     }
 }

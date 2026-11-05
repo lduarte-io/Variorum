@@ -2419,15 +2419,22 @@ final class TakesViewModel {
     /// projection cadence and the setter refreshes itself; an external
     /// change catches up at the next projection — recorded).
     private(set) var postWordTarget: Int?
+    /// VX-832: the note's mint stamp, for the date picker's opening day (an
+    /// undated note opens on its creation day — `EntryDatePickerDay`). Same
+    /// refresh cadence as the two facts above; nil until the first read
+    /// (the picker then keeps today).
+    private(set) var postCreatedAt: String?
 
     func refreshSegmentation() async {
-        // ONE header read now carries BOTH bar facts (4F: + the target).
+        // ONE header read now carries the bar's facts (4F: + the target;
+        // VX-832: + the mint stamp).
         let header = (try? await session.database.read { [postID] db in
             try Queries.containerHeader(db, containerID: postID)
         }) ?? nil
         if let header {
             newlinesMintBlocks = header.effectiveSegmentation != .oneBlock
             postWordTarget = header.wordTarget
+            postCreatedAt = header.createdAt
         }
     }
 

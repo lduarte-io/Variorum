@@ -115,3 +115,20 @@ extension JournalDay {
         return calendar
     }
 }
+
+extension JournalDay {
+    /// **The day key `days` calendar days from `day`** (VX-587 — "Shift date a
+    /// day earlier" is `shifted(day, byDays: -1)`), or nil when `day` is not a
+    /// valid key. Pure calendar arithmetic on the KEY — a fixed UTC Gregorian
+    /// calendar, so no time zone or DST can move it: month and year ends
+    /// and leap days carry exactly ("2024-03-01" − 1 = "2024-02-29").
+    public static func shifted(_ day: String, byDays days: Int) -> String? {
+        guard isValid(day) else { return nil }
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC")!
+        guard let noon = date(from: day, calendar: utc),
+              let moved = utc.date(byAdding: .day, value: days, to: noon)
+        else { return nil }
+        return dayString(from: moved, calendar: utc)
+    }
+}

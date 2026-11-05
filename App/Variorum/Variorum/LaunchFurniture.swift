@@ -55,6 +55,10 @@
 //      not judged by the sync dedupe (that would be `Sync/`), so a fresh
 //      signed-OUT store that later signs into an account already holding a
 //      field guide shows two — both live, nothing lost, either deletable.
+//    · VX-799 (the VX-805 run) — NOT furniture, the launch's one store pass:
+//      the journal entries' stored `one_block` override is cleared
+//      (`JournalSegmentationClearing` — the occasion's rules and residuals
+//      live in its header), LAST, after every seed, behind the same gate.
 //
 
 import Foundation
@@ -71,6 +75,8 @@ enum LaunchFurniture {
         var starred: (load: () -> Bool, save: (Bool) -> Void)?
         /// The Welcome arrangement's launch mark (absent · pending · done · declined).
         var welcome: (load: () -> String?, save: (String) -> Void)?
+        /// VX-799: the journal one_block clearing pass's settled mark.
+        var journalSegmentation: (load: () -> Bool, save: (Bool) -> Void)?
 
         static let production = Marks()
     }
@@ -122,8 +128,35 @@ enum LaunchFurniture {
             firstRoundWait: firstRoundWait ?? SampleLibrarySeeder.firstRoundWait,
             loadMark: marks.starred?.load,
             saveMark: marks.starred?.save)
-        guard let birthOutcome else { return nil }
-        return await SampleLibraryWelcome.arrangeAtLaunch(
+        let arranged: SampleLibraryWelcome.LaunchOutcome?
+        if let birthOutcome {
+            arranged = await arrange(
+                session: session, birthOutcome: birthOutcome,
+                storeVariant: storeVariant, marks: marks)
+        } else {
+            arranged = nil
+        }
+        // VX-799: the store pass, after every seed (silent; settles when a
+        // pass finds nothing left to clear).
+        await JournalSegmentationClearing.runIfNeeded(
+            session: session,
+            storeVariant: storeVariant,
+            gate: gate,
+            firstRoundWait: firstRoundWait ?? SampleLibrarySeeder.firstRoundWait,
+            loadMark: marks.journalSegmentation?.load,
+            saveMark: marks.journalSegmentation?.save)
+        return arranged
+    }
+
+    /// The Welcome arrangement at a fresh store's birth (moved verbatim out
+    /// of `seed`'s tail at VX-799, so the store pass can run after it).
+    private static func arrange(
+        session: AppSession,
+        birthOutcome: SampleLibrarySeeder.Outcome,
+        storeVariant: AppDatabase.StoreVariant,
+        marks: Marks
+    ) async -> SampleLibraryWelcome.LaunchOutcome? {
+        await SampleLibraryWelcome.arrangeAtLaunch(
             session: session, launchSeed: birthOutcome,
             storeVariant: storeVariant,
             guideName: TutorialSeeder.bookName,

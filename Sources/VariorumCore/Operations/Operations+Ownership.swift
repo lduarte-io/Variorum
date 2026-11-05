@@ -81,15 +81,25 @@ extension Operations {
     /// blocks and therefore no lineage edge (an edge joins blocks, and there
     /// is no text to descend). PROVISIONAL P-13ic-U2-2 — a ceremony must not
     /// fail on an empty note it is obliged to fork.
+    ///
+    /// **The day** (VX-845 — her F-1(c) ruling): both paths take the
+    /// duplicate's keep-the-day rule (`DuplicateDay`) — an undated, untitled,
+    /// non-journal source's copy is born dated by the source's creation day,
+    /// so every ownership fork is named and sorted as its source is.
     func ceremonyCopy(_ db: Database, sourceID: String, now: Date) throws -> Container {
         let source = try livePost(db, sourceID)
         let copy: Container
         if try hasCopyableSlot(db, postID: sourceID) {
-            copy = try copyPost(db, sourceID: sourceID, chosenPicks: nil, carryFans: true).post
+            copy = try copyPost(
+                db, sourceID: sourceID, chosenPicks: nil, carryFans: true,
+                keepingNamedDay: true).post
         } else {
             let bare = Container(
                 id: newID(), ownerId: currentOwnerID(), kind: .post,
-                title: source.title, profile: source.profile, entryDate: source.entryDate,
+                title: source.title, profile: source.profile,
+                entryDate: DuplicateDay.entryDate(
+                    title: source.title, entryDate: source.entryDate, profile: source.profile,
+                    createdAt: source.createdAt),
                 locked: false, floatingNotes: source.floatingNotes,
                 segmentationDefault: source.segmentationDefault,
                 lastTouchedAt: now, wingId: source.wingId,

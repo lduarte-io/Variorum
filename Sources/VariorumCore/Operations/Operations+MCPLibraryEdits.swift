@@ -363,15 +363,18 @@ extension Operations {
         public let releasedNotes: Bool
     }
 
-    /// **`delete_book`'s act — her `deleteReading`** (`deleteReadingRow`: THE
-    /// DAILY JOURNAL refuses `dailyJournalCannotBeDeleted`, read inside this
-    /// transaction — its road is archive; the cascade stamps its chapters and
-    /// memberships; an OWNED book's notes are released to the Pool — her
-    /// confirm's FIRST choice, P-VX196-3; `deleteReadingWithNotes` is hers
-    /// alone). ONE entry: her restore door's body (`restoreReadingRows`:
-    /// chapters and memberships on the exact stamp, the ownership pass, the
-    /// catch-up) while the book still wears the act's stamp; the redo deletes
-    /// it again (a book become THE daily Journal since refuses, keeps it).
+    /// **`delete_book`'s act — her `deleteReading`** (`deleteReadingRow`: the
+    /// cascade stamps its chapters and memberships; an OWNED book's notes are
+    /// released to the Pool — her confirm's FIRST choice, P-VX196-3;
+    /// `deleteReadingWithNotes` is hers alone). THE DAILY JOURNAL refuses
+    /// `dailyJournalCannotBeDeleted` — the WIRE's fence since VX-436 retired
+    /// her doors' guard (R-805-5's sibling,
+    /// `refuseDeletingTheDailyJournalOnTheWire`), read inside this
+    /// transaction; its road is archive. ONE entry: her restore door's body
+    /// (`restoreReadingRows`: chapters and memberships on the exact stamp,
+    /// the ownership pass, the catch-up) while the book still wears the act's
+    /// stamp; the redo deletes it again (a book become THE daily Journal
+    /// since refuses at the same fence, keeps it).
     @discardableResult
     public func deleteBookForClient(
         _ readingID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
@@ -379,6 +382,7 @@ extension Operations {
         let landed: (stamp: Date, owned: Bool) = try database.write { db in
             try guardian?(db)
             let owned = try liveReading(db, readingID).owned
+            try Self.refuseDeletingTheDailyJournalOnTheWire(db, readingID: readingID)
             return (try deleteReadingRow(db, readingID), owned)
         }
         let deletedOn = LockIsolated(DateFormatter.variorumISO8601.string(from: landed.stamp))
@@ -410,6 +414,7 @@ extension Operations {
     func redeleteBook(_ readingID: String) throws -> String? {
         try database.write { db in
             guard let reading = try Reading.fetchOne(db, key: readingID), reading.deletedAt == nil else { return nil }
+            try Self.refuseDeletingTheDailyJournalOnTheWire(db, readingID: readingID)
             return DateFormatter.variorumISO8601.string(from: try deleteReadingRow(db, readingID))
         }
     }

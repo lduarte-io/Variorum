@@ -36,6 +36,21 @@ extension SyncEngine {
         // re-applied on top of the server row and pushed on the next cycle.
         if table.hasTombstone, local.isTombstoned, !server.isTombstoned {
             merged.columns["deleted_at"] = local.columns["deleted_at"]
+            // VX-436 — BELT (b): her delete of the daily Journal carries its
+            // MARK with the tombstone (a concurrent rename elsewhere would
+            // otherwise land her delete wearing 'daily' — read everywhere as
+            // the keeper's retirement). SyncSpec §6's "re-apply local intent
+            // on top if still meaningful", for one column of one table.
+            if Self.isDeletedJournalTombstone(local) {
+                merged.columns["profile"] = local.columns["profile"]
+            }
+        }
+        // …and where BOTH sides are dead, her deliberate delete outranks a
+        // repairer's retirement of the same book (`'daily'`, made on an
+        // incomplete picture — the drain's residual corner): the mark rides.
+        if local.isTombstoned, server.isTombstoned, Self.isDeletedJournalTombstone(local),
+           server.columns["profile"] == .text(Queries.dailyJournalBookProfile) {
+            merged.columns["profile"] = local.columns["profile"]
         }
 
         // The one mutable text (S5): whichever side's text loses the row is

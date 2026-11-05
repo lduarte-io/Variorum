@@ -49,15 +49,19 @@ nonisolated enum BookArchiveCopy {
         return nil
     }
 
-    /// The sitting record §10's own wording — the daily Journal's archive
-    /// caption: "the daily Journal can be archived, never deleted; it returns
-    /// when a day arrives."
+    /// The daily Journal's archive caption. Was the sitting record §10's own
+    /// wording ("the daily Journal can be archived, never deleted; it returns
+    /// when a day arrives") until VX-436 (the VX-805 run — her 2026-11-04
+    /// ruling: deletable, ⌘J re-mints) made its second clause false; the
+    /// caption now says both roads. Wording PROVISIONAL (P-805-B4).
     static let dailyJournalCaption =
-        "The daily Journal can be archived, never deleted; it returns when a day arrives."
+        "The daily Journal can be archived \u{2014} it returns when a day arrives \u{2014} or "
+        + "deleted, and the next day's entry starts a new one."
 
     /// The delete guard's refusal (`dailyJournalCannotBeDeleted`) — ONE
     /// sentence for the shared refusal table and the deletion table (the
-    /// phone's delete road), naming the road the op leaves open.
+    /// phone's delete road), naming the road the op leaves open. Since VX-436
+    /// no door of hers meets it (only the MCP door refuses, in its own words).
     static let cannotDeleteDailyJournal =
         "The daily Journal can't be deleted \u{2014} archive it instead; it comes back when a "
         + "day arrives."

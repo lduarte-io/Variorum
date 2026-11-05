@@ -31,11 +31,13 @@ struct EditorSupportQueryTests {
         }
     }
 
-    @Test func journalPostsSeedOneBlockSegmentation() throws {
+    /// VX-799 (the VX-805 run): a journal post inherits the global default
+    /// like any other note (flipped from `journalPostsSeedOneBlockSegmentation`).
+    @Test func journalPostsInheritTheGlobalSegmentation() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(profile: .journal)
             let header = try db.read { try Queries.containerHeader($0, containerID: post.id) }
-            #expect(header?.effectiveSegmentation == .oneBlock)
+            #expect(header?.effectiveSegmentation == .paragraph)
         }
     }
 

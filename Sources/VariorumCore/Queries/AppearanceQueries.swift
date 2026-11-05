@@ -413,6 +413,18 @@ extension Queries {
     /// (`journalTraitProfile`, next) instead.
     public static let dailyJournalBookProfile = "daily"
 
+    /// **THE DELETED-JOURNAL MARK** (VX-436 — the VX-805 run's ruled option
+    /// A, PROVISIONAL spelling P-805-B2): her deliberate delete of the daily
+    /// Journal stamps the tombstone with THIS value instead of `'daily'`, in
+    /// the same row write as `deleted_at` (`Operations.tombstoneReadingRow`),
+    /// so the sync engine tells her delete from the keeper repair's
+    /// retirement (which keeps wearing `'daily'`) by converged state alone —
+    /// SyncSpec §7's daily-Journal keeper. DEAD ROWS ONLY: a restore
+    /// normalizes it (R-805-2 — the trait beside a standing Journal, else
+    /// THE Journal again), purge removes it, a live row never wears it. A
+    /// value in the unconstrained plain `reading.profile` — no DDL.
+    public static let dailyJournalDeletedProfile = "daily_deleted"
+
     /// The JOURNAL TRAIT's profile (13i-a; the sitting record §10): "entries
     /// date-stamped at creation, named by their day, sorted by entry date" —
     /// what `profile='journal'` has always meant, now distinct from THE

@@ -108,7 +108,7 @@ struct MCPWireRefusalSweepTests {
         .invalidWingName(name: ""), .duplicateWingName(name: "work"),
         .wingNotEmpty(id: "w", contents: .init(notes: 1, books: 1, gatherings: 0, tags: 0)),
         .postAlreadyInWing(postID: "p", wingID: "w"), .crossWingMembership(postID: "p", readingID: "r"),
-        .wingMoveChangedSince(postID: "p"), .dailyJournalIsHomeOnly(id: "r"),
+        .wingMoveChangedSince(postID: "p"), .dailyJournalMovesOnlyByHand(id: "r"),
         .readingAlreadyInWing(readingID: "r", wingID: "w"), .wingMoveIntoItself(wingID: "w"),
         .placementAnchorNotOnShelf(readingID: "r", anchorID: "a"),
         .duplicateBookName(name: "letters"),

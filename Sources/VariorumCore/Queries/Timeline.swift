@@ -263,29 +263,72 @@ extension Queries {
     /// must agree on
     /// "the day's entry" uses this, never a re-typed ORDER BY.
     ///
-    /// **13i-d U5 — HOME's day (#169(b), RULED: the daily Journal is
-    /// Home-only; "the entry born in Home beside its Journal; one entry per
-    /// day for the whole store").** The lookup reads HOME (`wingScope` — a
-    /// dangling wing reads as Home), so ⌘J / Today's Entry pressed in ANY wing
-    /// open the same Home entry, and a daily entry the author MOVED to
+    /// **THE JOURNAL'S WING's day** (13i-d U5 read HOME — the daily Journal
+    /// was Home-only, #169(b); VX-435 — the VX-805 run — made it movable to
+    /// any wing, so the lookup reads the wing the caller names: the live
+    /// daily Journal's, else the wing the author is standing in —
+    /// `Operations.journalEntryWing`). `wingScope` reads it as surfaces do (a
+    /// dangling wing reads as Home), so ⌘J pressed anywhere opens the entry
+    /// that lives beside the Journal, and a daily entry the author MOVED to
     /// another wing is no longer the day's (that wing is another library;
-    /// the next press makes Home's). Non-daily journal-trait books never wear
-    /// this shape (they mint `.generic` posts — the Stage B BLOCKER's rule),
-    /// so no other wing can hold a "day's entry" for this door to find.
+    /// the next press makes the Journal's wing's). Non-daily journal-trait
+    /// books never wear this shape (they mint `.generic` posts — the Stage B
+    /// BLOCKER's rule), so no other wing can hold a "day's entry" for this
+    /// door to find. `wingID` '' means Home; the entry road passes the live
+    /// Journal's effective wing (Operations+Container). The default serves
+    /// Home-only test fixtures; a new product caller must pass the Journal's
+    /// wing, never omit it.
+    ///
+    /// **THE DAY'S FIRST ENTRY IS THE JOURNAL'S** (VX-797 — the VX-805 run;
+    /// her ruling: "⌘J keeps open-today and opens the day's FIRST entry", and
+    /// several entries a day are legal since the Journal's New Entry mints
+    /// fresh). Two tiers, the same order in each:
+    /// 1. the day-shaped LIVE MEMBERS (`status = 'member'`, a live row) of
+    ///    THE daily Journal (`dailyJournalBookID` — archived is live). A
+    ///    day-dated journal-shaped note may be a COPY, not an entry (a dated
+    ///    entry's duplicate copies its day verbatim; the cross-run seam with
+    ///    vx-809), and a copy lands bookless — so it never outranks the day's
+    ///    filed entry, and ⌘J never files it;
+    /// 2. only when the Journal holds no member that day, the notebook SHAPE
+    ///    alone (the rule as it always read) — so a day whose entry could not
+    ///    be filed (a finished or full Journal, a filing that bells) re-opens
+    ///    THAT entry on every press rather than minting a stray per press,
+    ///    and the shelving's repair still files it once the Journal can take
+    ///    it; and a member she REMOVED opens again only when no member is
+    ///    left, never re-filed (the pair stays decided).
+    /// PROVISIONAL P-805-C1 (the record's Unit C): the live-over-archived
+    /// tier is kept inside "first" (round 1's reason — open the entry the
+    /// day's page shows); the fallback keeps the precedents above.
+    /// P1: both tiers walk the day's rows through `idx_container_entry_date`,
+    /// the member test one `idx_reading_post_post` probe per row.
     public static func canonicalJournalEntry(
-        _ db: Database, day: String
+        _ db: Database, day: String, wingID: String = ""
     ) throws -> Container? {
-        let home = wingScope(column: "wing_id", wingID: "")
+        let scope = wingScope(column: "c.wing_id", wingID: wingID)
+        let dayShape = """
+            c.kind = 'post' AND c.profile = 'journal'
+              AND c.entry_date = ? AND c.deleted_at IS NULL AND \(scope.sql)
+            """
+        let first = "ORDER BY (c.archived_at IS NOT NULL) ASC, c.created_at ASC, c.id ASC LIMIT 1"
+        if let journalID = try dailyJournalBookID(db),
+           let member = try Container.fetchOne(
+               db,
+               sql: """
+                   SELECT c.* FROM container c
+                   WHERE \(dayShape)
+                     AND EXISTS (
+                       SELECT 1 FROM reading_post rp
+                       WHERE rp.post_id = c.id AND rp.reading_id = ?
+                         AND rp.status = 'member' AND rp.deleted_at IS NULL)
+                   \(first)
+                   """,
+               arguments: StatementArguments([day] + scope.arguments + [journalID])) {
+            return member
+        }
         return try Container.fetchOne(
             db,
-            sql: """
-                SELECT * FROM container
-                WHERE kind = 'post' AND profile = 'journal'
-                  AND entry_date = ? AND deleted_at IS NULL AND \(home.sql)
-                ORDER BY (archived_at IS NOT NULL) ASC, created_at ASC, id ASC
-                LIMIT 1
-                """,
-            arguments: StatementArguments([day] + home.arguments))
+            sql: "SELECT c.* FROM container c WHERE \(dayShape) \(first)",
+            arguments: StatementArguments([day] + scope.arguments))
     }
 
     /// Where "kept, out of view" things are found again (review finding —

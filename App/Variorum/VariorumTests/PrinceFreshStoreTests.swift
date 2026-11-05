@@ -64,6 +64,8 @@ private final class Device {
     var books: [String: Bool] = [:]
     var starred = false
     var welcome: String?
+    /// VX-799: the journal one_block clearing pass's settled mark.
+    var journalSegmentation = false
 
     var marks: LaunchFurniture.Marks {
         LaunchFurniture.Marks(
@@ -72,7 +74,9 @@ private final class Device {
                  save: { self.books[book.name] = $0 })
             },
             starred: (load: { [self] in starred }, save: { [self] in starred = $0 }),
-            welcome: (load: { [self] in welcome }, save: { [self] in welcome = $0 }))
+            welcome: (load: { [self] in welcome }, save: { [self] in welcome = $0 }),
+            journalSegmentation: (load: { [self] in journalSegmentation },
+                                  save: { [self] in journalSegmentation = $0 }))
     }
 
     func load(_ book: SampleLibrarySeeder.Book) -> () -> Bool { { [self] in books[book.name] ?? false } }

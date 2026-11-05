@@ -352,9 +352,6 @@ nonisolated enum OpsRefusalCopy {
         case .crossWingMembership:
             return "That note lives in another wing, and a book only holds notes of its own "
                 + "wing — move the note here first."
-        case .dailyJournalIsHomeOnly:
-            return "Your daily Journal lives in \(WingWords.home) — only a \(WingWords.home) "
-                + "book can be it."
         // 13i-d U5b — the book and bulk moves (R-13id-6). Platform-neutral.
         case .readingAlreadyInWing:
             return "That book is already in that wing — nothing changed."
@@ -365,6 +362,10 @@ nonisolated enum OpsRefusalCopy {
         // 13i-e U2 — BOOK ARCHIVE (R-13ie-1…4; the sitting record §10's
         // never-hard-delete). Platform-neutral: archive is the one road both
         // faces name, and the daily Journal comes back on its own.
+        // VX-436 (the VX-805 run): her doors delete the daily Journal now,
+        // so only the WIRE meets this refusal and speaks its own words first
+        // (`MCPWireRefusalCopy`); this arm stays for the phone's deletion
+        // table's twin (`DeletionRefusal`) and as the chain's fallback.
         case .dailyJournalCannotBeDeleted:
             return BookArchiveCopy.cannotDeleteDailyJournal
         case .readingAlreadyArchived:

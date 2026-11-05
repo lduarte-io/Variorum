@@ -237,4 +237,71 @@ struct NewNoteInBookTests {
             #expect(notesAfter == notesBefore, "a refusal mints no stray note")
         }
     }
+
+    // MARK: - VX-797 — on THE daily Journal the key is the Journal's New Entry
+
+    /// Her ruling (VX-797, the VX-805 run): "the deliberate new-note doors in
+    /// the Journal (New Entry, ⌥⌘N in the focused book) mint a fresh entry
+    /// dated today". The key on the Journal mints a FRESH entry beside the
+    /// day's existing one — filed as the Journal's member, focused and
+    /// revealed as the foot door's — and ⌘J still opens the day's first.
+    /// RED ON OLD: the daily door was create-or-open — the key re-focused the
+    /// day's existing entry and minted nothing.
+    @Test func onTheDailyJournalTheKeyMintsAFreshEntryEvenWhenTheDayHasOne() async throws {
+        try await withMintSession { session, db in
+            let today = JournalDay.dayString(from: Date())
+            let first = try await JournalBooks.openToday(session: session, day: today).postID
+            let journal = try #require(try await db.read { try Queries.dailyJournalBookID($0) })
+            let before = try await members(db, journal)
+
+            let (model, structure, consumed) = try await pressKey(
+                on: journal, session: session, db: db
+            ) { model, _ in
+                model.focusedPostID != nil && model.focusedPostID != first
+            }
+            let after = try await members(db, journal)
+            #expect(after.count == before.count + 1, "one FRESH member minted inside the Journal")
+            let minted = try #require(after.first { !before.contains($0) })
+            #expect(minted != first)
+            #expect(model.focusedPostID == minted, "the new entry is focused")
+            #expect(consumed == 1)
+            #expect(structure.lastError == nil)
+            let shape = try await db.read { db in
+                try Row.fetchOne(
+                    db, sql: "SELECT profile, entry_date FROM container WHERE id = ?",
+                    arguments: [minted]).map(CopiedRow.init)
+            }
+            #expect((shape?["profile"] as String?) == "journal", "the day shape ⌘J mints")
+            #expect((shape?["entry_date"] as String?) != nil, "dated (today)")
+
+            let again = try await JournalBooks.openToday(session: session, day: today)
+            #expect(again.postID == first, "⌘J keeps open-today: the day's first entry")
+        }
+    }
+
+    /// P-805-C2: on a FINISHED Journal the key refuses BEFORE minting, in the
+    /// book's own words (VX-570's declared refusals — the plain book's arm
+    /// above). RED ON OLD: create-or-open opened (or minted) the day's entry
+    /// and spoke "Today's entry opened, but this book is finished…".
+    @Test func onAFinishedJournalTheKeyRefusesBeforeTheMint() async throws {
+        try await withMintSession { session, db in
+            _ = try await JournalBooks.openToday(session: session)
+            let journal = try #require(try await db.read { try Queries.dailyJournalBookID($0) })
+            try session.operations.lockReading(journal)
+            let notesBefore = try await db.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL")
+            }
+            let (_, structure, _) = try await pressKey(on: journal, session: session, db: db) { _, structure in
+                structure.lastError != nil
+            }
+            #expect(structure.lastError == BookStateCopy.refusal(
+                        for: OperationError.lockedReading(id: journal),
+                        name: JournalBooks.defaultDailyBookName, sealed: false),
+                    "the book's own refusal, naming its road (reopen)")
+            let notesAfter = try await db.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL")
+            }
+            #expect(notesAfter == notesBefore, "a refusal mints no stray entry")
+        }
+    }
 }

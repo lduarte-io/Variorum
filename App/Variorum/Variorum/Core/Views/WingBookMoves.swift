@@ -34,11 +34,13 @@ import VariorumCore
 /// The book door's DRAWING RULE — pure data the Bookcase row reads (P-2:
 /// a door that can never act is not drawn), pinned.
 nonisolated enum WingBookMoveDoor {
-    /// Drawn while another wing exists, and never on the daily Journal (its
-    /// 'daily' marker — 13i-a M-3 moves the marker with the designation, so
-    /// the marker IS the daily Journal on every face).
+    /// Drawn while another wing exists — on EVERY book and gathering, the
+    /// daily Journal included since VX-435 (the VX-805 run: one Journal per
+    /// store, movable to any wing; its entries move with it). `reading` stays
+    /// in the signature so a future per-book rule has its one home here.
     static func drawn(reading: Reading, destinations: Int) -> Bool {
-        destinations > 0 && !Queries.isDailyJournalMintShape(reading)
+        _ = reading
+        return destinations > 0
     }
 }
 
@@ -57,8 +59,8 @@ extension WingsModel {
     }
 
     /// The book move's ask. nil = the door spoke instead (a frozen
-    /// stay-behind book refuses naming it; a book gone meanwhile, or the
-    /// daily Journal reached by a stale face, speaks the op's refusal).
+    /// stay-behind book refuses naming it; a book gone meanwhile speaks the
+    /// op's refusal).
     func bookMoveAsk(reading: Reading, to wingID: String) async -> BookMoveAsk? {
         let readingID = reading.id
         let preview = try? await session.database.read { db in
@@ -67,11 +69,6 @@ extension WingsModel {
         guard let preview else {
             session.status.refuse(OpsRefusalCopy.message(
                 for: OperationError.readingNotFound(id: readingID)))
-            return nil
-        }
-        if preview.isDailyJournal {
-            session.status.refuse(OpsRefusalCopy.message(
-                for: OperationError.dailyJournalIsHomeOnly(id: readingID)))
             return nil
         }
         if let frozen = preview.frozen {

@@ -35,8 +35,8 @@
 //  *"it should be under archived — … a book is a set of rules + ordering now
 //  so it makes sense to archive it."* A BOOKS group sits ABOVE the notes:
 //  each archived book or gathering of this wing, its honest facts, and its
-//  doors — Open (the book view), Unarchive, Delete Book… (never on the daily
-//  Journal — `BookArchiveDoorSet`). With no archived book the surface reads
+//  doors — Open (the book view), Unarchive, Delete Book… (the daily Journal
+//  too since VX-436 — `BookArchiveDoorSet`). With no archived book the surface reads
 //  exactly as it always did (no section labels). Kept forever, no countdown.
 //
 //  ── SEARCH ───────────────────────────────────────────────────────────────
@@ -197,7 +197,7 @@ struct ArchivedView: View {
     /// and its inline Delete Note… is `.deleteNote` (13i-d U7 rider, F-U6-4).
     static let surfaceCapabilities: [CapabilityID] = [.unarchiveNote, .deleteNote]
         // 13i-e U2 — the BOOKS group's rows (R-13ie-1): Unarchive, and the
-        // shared Delete Book… road (never on the daily Journal — the table).
+        // shared Delete Book… road (the daily Journal too since VX-436 — the table).
         + [.unarchiveBook, .deleteBook]
     static let emptyLine = "Nothing archived."
     static let noMatchesLine = "No archived note matches that."

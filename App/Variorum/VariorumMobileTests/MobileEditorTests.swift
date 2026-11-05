@@ -347,10 +347,17 @@ struct MobileEditorCrystallizationTests {
         }
     }
 
-    @Test func aJournalEntryMintsExactlyOneBlockAndEnterStaysContent() async throws {
+    /// VX-799 (the VX-805 run): a journal entry no longer seeds `one_block`
+    /// (it inherits the global default like any other note); the one-block
+    /// semantics this test pins are the chip-off state, set explicitly.
+    @Test func aOneBlockEntryMintsExactlyOneBlockAndEnterStaysContent() async throws {
         try await withEditorWorld { session, db in
             let entry = try await session.runner.run { ops in
                 try ops.createOrOpenJournalEntry(entryDate: "2026-08-03")
+            }
+            #expect(entry.container.segmentationDefault == nil, "VX-799: no journal seed")
+            try await session.runner.run { ops in
+                try ops.setSegmentationDefault(entry.container.id, segmentation: .oneBlock)
             }
             let (model, storage) = makeEditor(session, postID: entry.container.id)
             await model.loadOnce()
@@ -370,7 +377,7 @@ struct MobileEditorCrystallizationTests {
             let counts = try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM block") ?? -1
             }
-            #expect(counts == 1, "one-block journal semantics: exactly ONE block, ever")
+            #expect(counts == 1, "one-block semantics: exactly ONE block, ever")
             #expect(try await storedBlockTexts(db, postID: entry.container.id)
                     == ["Dear diary.\nSecond line."])
             #expect(model.identityAuditFailures == 0)

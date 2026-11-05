@@ -382,8 +382,8 @@ extension Operations {
     /// over exactly the notes the import minted — a note of hers she filed
     /// in the book since keeps living; its membership dies with the book and
     /// comes back with it). A book that has since become THE daily Journal
-    /// refuses (`dailyJournalCannotBeDeleted` — the delete doors' own guard;
-    /// the entry stays on the stack). Already dead ⇒ obsolete, quiet.
+    /// goes too, wearing the deleted-Journal mark (VX-436 — the delete doors'
+    /// one tombstone, `tombstoneReadingRow`). Already dead ⇒ obsolete, quiet.
     ///
     /// Returns the stamp it wrote (the store's own spelling of it), which the
     /// entry hands to its redo (ladder round 1, F1) — and NIL when it
@@ -393,9 +393,6 @@ extension Operations {
     func revertImportedBook(_ readingID: String, posts postIDs: [String]) throws -> String? {
         try database.write { db in
             let reading = try Reading.fetchOne(db, key: readingID)
-            if let reading, reading.deletedAt == nil, Queries.isDailyJournalMintShape(reading) {
-                throw OperationError.dailyJournalCannotBeDeleted(id: readingID)
-            }
             let now = date.now
             var tombstonedAnything = false
             for postID in postIDs {
@@ -405,9 +402,7 @@ extension Operations {
                 tombstonedAnything = true
             }
             if var reading, reading.deletedAt == nil {
-                reading.deletedAt = now
-                reading.updatedAt = now
-                try reading.update(db)
+                try tombstoneReadingRow(db, &reading, now: now)
                 tombstonedAnything = true
             }
             return tombstonedAnything ? DateFormatter.variorumISO8601.string(from: now) : nil

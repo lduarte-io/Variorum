@@ -20,10 +20,13 @@ struct ContainerOperationsTests {
         }
     }
 
-    @Test func journalProfileSeedsOneBlockSegmentation() throws {
+    /// VX-799 (the VX-805 run): the journal profile no longer seeds
+    /// `one_block` — a journal entry segments like any other note (flipped
+    /// from the retired `journalProfileSeedsOneBlockSegmentation`).
+    @Test func journalProfileSeedsNoSegmentationOverride() throws {
         try withOperations { ops, _ in
             let journal = try ops.createPost(profile: .journal, entryDate: "2026-07-01")
-            #expect(journal.segmentationDefault == .oneBlock)
+            #expect(journal.segmentationDefault == nil)
 
             let blog = try ops.createPost(profile: .blog)
             #expect(blog.segmentationDefault == nil)

@@ -4,8 +4,9 @@
 //
 //  Phase 13, B3 — the book structure's behavioral seams: chapter grouping
 //  (pure), the finished-opens-into-Read rule (R2), and the journal-book
-//  doors (R50 — the daily book's ensure-membership; the one-entry-per-day
-//  rule UNTOUCHED and scoped to the daily door; other journal books mint
+//  doors (R50 — the daily book's ensure-membership; ⌘J's open-today scoped
+//  to the daily door — since VX-797 it opens the day's FIRST entry, and the
+//  daily book's own New Entry mints fresh ones; other journal books mint
 //  freely).
 //
 
@@ -316,17 +317,41 @@ struct JournalBooksTests {
             }
             #expect((shape?["profile"] as String?) == "generic",
                     "a non-daily entry NEVER wears profile='journal' (the BLOCKER's shape)")
-            #expect((shape?["segmentation_default"] as String?) == "one_block",
-                    "the notebook feel rides explicit segmentation, not the profile")
+            // VX-799 (PROVISIONAL P-805-A1): no explicit one_block — a journal
+            // entry segments like any other note, in every journal book.
+            #expect((shape?["segmentation_default"] as String?) == nil,
+                    "a journal book's entry carries no segmentation override")
 
-            // The DAILY book's own new-entry door routes through
-            // create-or-open — the rule holds there.
-            _ = try await JournalBooks.openToday(session: session, day: "2026-07-19")
-            let dailyID = try await db.read { db in try Queries.dailyJournalBookID(db) }
-            let daily = BookStructureModel(session: session, readingID: try #require(dailyID))
-            let one = await daily.newEntry(day: "2026-07-19")
-            let two = await daily.newEntry(day: "2026-07-19")
-            #expect(one == two, "the daily book's door is create-or-open — one entry per day")
+            // VX-797 (the VX-805 run — A JUSTIFIED EDIT: this arm pinned the
+            // daily book's door as create-or-open, the edge her ruling moved):
+            // the DAILY book's own New Entry MINTS a fresh entry every press,
+            // in the daily shape, each one the Journal's member — and ⌘J
+            // still opens the day's FIRST.
+            let opened = try await JournalBooks.openToday(session: session, day: "2026-07-19")
+            let dailyID = try #require(try await db.read { db in try Queries.dailyJournalBookID(db) })
+            let daily = BookStructureModel(session: session, readingID: dailyID)
+            let one = try #require(await daily.newEntry(day: "2026-07-19"))
+            let two = try #require(await daily.newEntry(day: "2026-07-19"))
+            #expect(Set([opened.postID, one, two]).count == 3,
+                    "several entries a day — each press a fresh one")
+            #expect(daily.lastError == nil)
+            for id in [one, two] {
+                let row = try await db.read { db in
+                    try Row.fetchOne(db, sql: """
+                        SELECT c.profile, c.entry_date,
+                               (SELECT COUNT(*) FROM reading_post rp
+                                WHERE rp.post_id = c.id AND rp.reading_id = ?
+                                  AND rp.deleted_at IS NULL AND rp.status = 'member') AS membered
+                        FROM container c WHERE c.id = ?
+                        """, arguments: [dailyID, id]).map(CopiedRow.init)
+                }
+                #expect((row?["profile"] as String?) == "journal"
+                        && (row?["entry_date"] as String?) == "2026-07-19",
+                        "the daily shape ⌘J mints")
+                #expect((row?["membered"] as Int?) == 1, "filed as the Journal's member")
+            }
+            let again = try await JournalBooks.openToday(session: session, day: "2026-07-19")
+            #expect(again.postID == opened.postID, "⌘J opens the day's first entry")
         }
     }
 
@@ -357,6 +382,40 @@ struct JournalBooksTests {
                     && entryNote.localizedCaseInsensitiveContains("unseal"),
                     "'+ new entry' speaks the same road")
             #expect(!entryNote.contains("is finished"))
+        }
+    }
+
+    /// VX-797 (P-805-C3): the daily book's New Entry files through ⌘J's own
+    /// gate, so an ARCHIVED Journal comes back for it as when a day arrives —
+    /// and the door says so with ⌘J's receipt, on the status seam's receipt
+    /// kind. A removed entry stays removed (the pair-decided law). RED ON OLD
+    /// by construction: the old daily branch opened the day's entry and added
+    /// it directly — an explicit add that left the book archived and spoke
+    /// nothing, and re-filed a removed entry (`addPostToReading` sees only
+    /// live rows).
+    @Test func theDailyNewEntryBringsAnArchivedJournalBackAndSaysSo() async throws {
+        try await withShellSession2 { session, db in
+            let day = "2026-07-26"
+            let removed = try await JournalBooks.openToday(session: session, day: day).postID
+            let dailyID = try #require(try await db.read { try Queries.dailyJournalBookID($0) })
+            try await session.runner.run { ops in
+                _ = try ops.removePostFromReading(removed, from: dailyID)
+                try ops.archiveReading(dailyID)
+            }
+            let daily = BookStructureModel(session: session, readingID: dailyID)
+            let made = try #require(await daily.newEntry(day: day))
+            #expect(made != removed, "a fresh entry")
+            #expect(daily.lastError == nil)
+            #expect(session.status.spoken?.text == BookArchiveCopy.journalCameBack)
+            #expect(session.status.spoken?.kind == .receipt)
+            let facts = try await db.read { db in
+                (try Queries.reading(db, id: dailyID)?.archivedAt,
+                 try Queries.readingsContaining(db, postID: made).map(\.id),
+                 try Queries.readingsContaining(db, postID: removed).map(\.id))
+            }
+            #expect(facts.0 == nil, "the Journal is back on the Bookcase")
+            #expect(facts.1 == [dailyID], "the fresh entry is its member")
+            #expect(facts.2.isEmpty, "her removal stands")
         }
     }
 
@@ -391,8 +450,8 @@ struct JournalBooksTests {
                     "the entry is born in its book's wing (the F-5 class)")
             #expect((shape?["profile"] as String?) == "generic",
                     "the non-daily shape holds — never profile='journal'")
-            #expect((shape?["segmentation_default"] as String?) == "one_block",
-                    "the notebook feel still rides explicit segmentation")
+            #expect((shape?["segmentation_default"] as String?) == nil,
+                    "VX-799: no segmentation override at the trait's door")
             let membered = try await db.read { db in
                 try Int.fetchOne(db, sql: """
                     SELECT COUNT(*) FROM reading_post
@@ -474,23 +533,39 @@ struct JournalBooksTests {
 
     @Test func aLockedBooksEntryDoorFollowsTheOutcomeDoctrine() async throws {
         // Round 3, MINOR (red-on-old by behavioral revert — the pre-fix
-        // door caught only alreadyInReading): on a LOCKED book, the DAILY
-        // branch still opens the entry with a SPEAKING note (never nil +
-        // raw error), and the NON-DAILY branch refuses BEFORE MINTING —
-        // no stray `.generic` post lands in the Pool per click.
+        // door caught only alreadyInReading): on a LOCKED book both branches
+        // speak (never nil + a raw error) and refuse BEFORE MINTING — no
+        // stray post lands in the Pool per click.
         try await withShellSession2 { session, db in
-            // DAILY half: designate, lock, knock.
+            // DAILY half: designate, lock, knock. VX-797 (the VX-805 run — A
+            // JUSTIFIED EDIT, P-805-C2): the daily door MINTS now (her ruling),
+            // so it takes the mint doctrine — it refuses before the mint in
+            // the book's own words, where create-or-open opened the day's
+            // entry with a note ("the entry ALWAYS opens" was that branch's).
             _ = try await JournalBooks.openToday(session: session, day: "2026-07-24")
             let dailyID = try #require(try await db.read { db in
                 try Queries.dailyJournalBookID(db)
             })
             try await session.runner.run { ops in try ops.lockReading(dailyID) }
+            let notesBeforeDaily = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL
+                    """) ?? 0
+            }
             let daily = BookStructureModel(session: session, readingID: dailyID)
             let openedID = await daily.newEntry(day: "2026-07-25")
-            #expect(openedID != nil,
-                    "the entry ALWAYS opens — the locked add never voids the door")
-            #expect(daily.lastError?.contains("finished") == true,
-                    "the note SPEAKS instead of a raw thrown description")
+            #expect(openedID == nil, "a finished Journal's New Entry refuses — nothing opens")
+            #expect(daily.lastError == BookStateCopy.refusal(
+                        for: OperationError.lockedReading(id: dailyID),
+                        name: JournalBooks.defaultDailyBookName, sealed: false),
+                    "the refusal SPEAKS, naming the book's road (reopen)")
+            #expect(daily.lastError?.contains("finished") == true)
+            let notesAfterDaily = try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL
+                    """) ?? 0
+            }
+            #expect(notesAfterDaily == notesBeforeDaily, "REFUSE BEFORE MINT on the Journal too")
 
             // NON-DAILY half: a locked dream journal refuses BEFORE the mint.
             let dreamID = try await session.runner.run { ops -> String in

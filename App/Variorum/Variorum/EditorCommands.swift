@@ -101,6 +101,8 @@ struct EditorCommands: Commands {
         // VX-372 (VX-383 U1 — D-C-2): the two duplicates, beside the version
         // door — a duplicate is a version you write on.
         .duplicateNoteWithTags, .duplicateNoteWithoutTags,
+        // VX-587 (the VX-805 run): ⌥⌘J — Shift date a day earlier, beside them.
+        .shiftEntryDateEarlier,
         .importFiles, .exportLibrary, .exportCaretBlock,
         // VX-125 (the VX-439 run): Export Note… (⌥⌘S), beside the library's.
         .exportNote,
@@ -342,6 +344,7 @@ struct EditorCommands: Commands {
         // table's `s` chords are ⌘S, ⌘⇧S and ⌃⌘S; ⇧⌘E, the ruled first
         // choice, is Extract's).
         case .exportNote: ("s", [.command, .option])
+        case .shiftEntryDateEarlier: ("j", [.command, .option])
         case .helper: ("/", .command)
         // 13f batch 3 (W16) minted ⌘[ / ⌘] here, on the stated reason that
         // *"they are the platform's own back/forward idiom"* — which the
@@ -624,6 +627,12 @@ struct EditorCommands: Commands {
                 .disabled(!enabled(.duplicateNoteWithTags))
             Button(verb(.duplicateNoteWithoutTags)) { actions?.duplicateNote(tags: .none) }
                 .disabled(!enabled(.duplicateNoteWithoutTags))
+            // VX-587 (the VX-805 run; R-805-3, the chord RULED ⌥⌘J): the dated
+            // note on screen, a day earlier — grey while it has no date (P-2;
+            // the registry's `noteHasEntryDate` gate).
+            Button(verb(.shiftEntryDateEarlier)) { actions?.shiftEntryDateEarlier() }
+                .keyboardShortcut("j", modifiers: [.command, .option])
+                .disabled(!enabled(.shiftEntryDateEarlier))
             // Phase 13p Batch 2 — the manual Lock Now act (THE DESIGN:
             // demanded modes ONLY; under Auto the key auto-releases at the
             // next open, so a lock there is theater and no theater ships,
