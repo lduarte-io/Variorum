@@ -60,7 +60,7 @@ SwiftUI + Observation + swift-dependencies (no TCA); the editor core is a TextKi
 - Hallucination guard: no fix without a self-traced concrete mechanism; every bug-class fix lands with a red-on-old pin verified by revert; a pin green on both sides exposes the finding as hollow — record it, don't fix it.
 - PROVISIONAL rule: ambiguity that doesn't gate the core → 2–3 options in the plan, build the most spec-defensible, mark PROVISIONAL, log in `notes/QUESTIONS.md`; ambiguity that gates the core → stop and report.
 - One phase per invocation; hard stop; the author kicks off the next.
-- Author-only, never made autonomously: inventing product behavior or changing canon beyond recorded rulings; relaxing any invariant or budget; adding a third-party dependency; anything needing her accounts, credentials or GUI steps; adjudicating a gate; deleting or overwriting anything she created; history rewrites and force-pushes.
+- Author-only, never made autonomously: inventing product behavior or changing canon beyond recorded rulings; relaxing any invariant or budget; adding a third-party dependency or moving an existing dependency's pinned version (QUESTIONS #260); anything needing her accounts, credentials or GUI steps; adjudicating a gate; deleting or overwriting anything she created; history rewrites and force-pushes.
 
 ## Testing
 Domain rules land with Swift Testing tests; operations get exact state-transition tests; view models focused coverage; UI-only changes may be untested early. Tests run at the END of a step — never the full suite at the start of a session (the previous closeout is the baseline). Editor milestones re-verify after each macOS point release (TEXTKIT2_NOTES §5).

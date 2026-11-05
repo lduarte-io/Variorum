@@ -2,7 +2,7 @@
 
 ## Your checklist
 
-1. **Ratify QUESTIONS #260** (P-781-1..4). The one real decision is **P-781-4 — governance:** is bumping an EXISTING dependency pin's version author-only? CLAUDE.md makes a NEW package identity author-only and says nothing about moves. Options: (a) author-only — the crypto pin argues for it; (b) a session may move a pin with a deliberate commit + a named handoff line; (c) leave unruled. If you pick (a) or (b), one line lands in CLAUDE.md at your word. P-781-1/-2/-3 are built-as-described confirmations (details in #260).
+1. **Ratify QUESTIONS #260's remainder** (P-781-1..3 — built-as-described confirmations: the CLI lockfile alignment with the MCP A/B note, the 15 visible package references, verify-pins' byte-strictness; details in #260). **P-781-4 is RESOLVED** — you ruled at the checkpoint: moving an existing dependency's pinned version is AUTHOR-ONLY; the CLAUDE.md line landed at this close.
 2. **VX-852** (Medium, Todo): wiring `Tools/verify-pins` into release.sh as the standing post-archive check — the diff shape is ready in the record; it ran manually as a GO condition at the 1.1 release. Lands by normal PR flow with your eyes whenever you want it.
 3. Nothing else needs your hands. No release owed (1.1 shipped mid-run, independently, on committed pins — verified).
 
