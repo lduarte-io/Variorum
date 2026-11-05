@@ -688,9 +688,11 @@ live, with the day filter on).
 
 #### Batch C — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
 
-**Not done (first line, current):** building C1–C4 to the ruling (bae4324aa). No app-suite RUN, no
-revert run, no walk, no Debug launch (all the orchestrator's stage window). No canon / QUESTIONS /
-shared-ledger edit; no `Shared/`, no `Sync/`, custody or keychain file.
+**Not done (first line, final):** NO app-suite RUN (the 25 new app pins and their Library
+neighbours), NO behavioural revert run (R-C1 · R-C2 · R-C3), NO walk, NO Debug launch — all
+stage-gated, all the orchestrator's (listed exactly in the self-assessment). No canon / QUESTIONS /
+shared-ledger edit (drafts below). No `Shared/`, no `Sync/`, custody or keychain file; no core
+(`Sources/`) file. P-828-5's book courtesy NOT built (ruled, VX-856).
 
 | Piece | What | Status |
 |---|---|---|
@@ -698,7 +700,7 @@ shared-ledger edit; no `Shared/`, no `Sync/`, custody or keychain file.
 | C1 | The place: a pure resolver (the remembered on-screen rows + neighbourhood → the landing row and its `into` in the CURRENT listing) + exact pins | DONE (this commit) — `Features/Library/LibraryPlace.swift` (capture · resolve · `anchorY` · `isSettled` · `depth` · the `Order` lookups · `Surface`) + `VariorumTests/LibraryPlaceTests.swift` (11 pure pins). Mac `build-for-testing` TEST BUILD SUCCEEDED (`App/Variorum/DerivedData/vx828c-bft1.log`); the RUN is PENDING (app-hosted — the orchestrator's window) |
 | C2 | The model: remember on leave · restore on mount (the in-place re-ask to the place's depth) · a new question / wing drops it · the return mark (per Q2's ruling) + model pins | DONE (this commit) — `Features/Library/LibraryCatalogPlace.swift` (NEW: `LibraryPlaceMemory` — per-pane places, marks, the views' reports, the re-ask token; the model's `placeOrder` · `notePlace` · `rowOpened` · `listingAppeared` · `placeLanding` · `owesReturn`); `LibraryCatalogModel.swift` (`placeMemory`; `search()` = `questionChanged()` + the new `startOver()`; `reread(noteDepth:groupDepth:)`; the mark's clear roads in `clickNoteRow` / `selectBook` / `modeChanged` — a mode switch also drops the places, see the self-assessment); `LibraryPlace.swift` (+ `Surface.isSameKind`, the remembered surface); `VariorumTests/LibraryReturnPlaceTests.swift` (9 model pins). `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`, no warning in a touched file); the RUN is PENDING |
 | C3 | The view: the rows' content-space reports + the scroll memory on the three scroll views (List column · Cards · the answer sheet) + the unbound landing and its hold; mounted pins (red on old: the remount lands at the top) | DONE (this commit) — `Features/Library/LibraryPlaceScroll.swift` (NEW: `libraryPlaceScroll` — the window by reference, the rest watch, the unbound `ScrollViewReader` landing + its hold; `libraryPlaceRow` — the content-space frame); `LibraryCatalogView.swift` (`placeKey`; the mount's `.task` → `listingAppeared`; every row-open door → `rowOpened`; `isSubject` = the panel's subject OR the mark; the List column and the Cards named + tracked); `LibraryBooksRegion.swift` (`LibraryPagedNotes.placeKey` + the rows' reports); `LibrarySearchSheet.swift` (`placeKey`, the groups' and books' reports, the sheet tracked); `RootView.swift` (`placeKey: pane.raw` — one line); `VariorumTests/LibraryReturnPlaceMountTests.swift` (5 mounted pins, compile on the pre-fix tree — their red-on-old is runnable as-is). `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`); the RUN is PENDING |
-| C4 | Self-assessment, the end-of-batch core `swift test`, the app `build-for-testing` | NOT-STARTED |
+| C4 | Self-assessment, the end-of-batch core `swift test`, the app `build-for-testing` | DONE (this commit) — core `swift test` at 27bfde19e: `VariorumCoreTests` 3670 tests / 493 suites PASSED (5 known issues — batch D's count, unchanged: this batch touches no core file; PinBeltTests rides inside); `StringsWorkbookTests` 32/4 PASSED; the 7 known "not used by any target" warnings (14 lines, build + test); `VariorumMCPTests` 549/100 with 3 issues, all the MCP SOCKET-HARNESS class batch D met (`MCPDiscoverProbeServerTests`, `MCPPreInitializeWindowTests`, `MCPHarnessTimeLimitTests` — the VX-685 bound) — re-run ALONE (`swift test --skip-build --filter …`): 16 tests / 3 suites PASSED in 2.3 s. This batch touches no MCP code. App `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`) |
 
 #### Batch C — THE TRACE (why the Library forgets — an Improvement, no bug mechanism; read at the code)
 
@@ -834,6 +836,170 @@ return to a book opens to this session (the Bookcase row, the sidebar, ⌥⌘[) 
 call. (3) The honest version is the book's own place memory (this batch's mechanism over the
 Outline's and Index's columns), sized as its own unit. Proposed ticket: *"A book's Outline and Index
 remember where you were on return from a note (VX-823's courtesy)"* — Improvement · Books.
+
+#### Batch C — IMPLEMENTER SELF-ASSESSMENT (Opus, 2026-11-05)
+
+**Not done (first line, by the brief):** no app-suite RUN, no revert RUN, no walk, no Debug launch —
+all stage-gated, all the orchestrator's (named exactly below). No canon, QUESTIONS or other shared
+ledger touched (drafts below). No `Shared/` file (no phone suites owed by this batch), no `Sync/`,
+custody, keychain or core file. VX-856 (the book courtesy) not built, as ruled.
+
+**VX-823 — the mechanism as traced (an Improvement, no bug class; C0's TRACE above):** the catalog
+MODEL is `RootView`'s `@State` and outlives a note round trip (the question and the listed rows
+survive); the catalog VIEW is replaced by the `.post` arm, so its scroll views and their offsets
+die; the remount's `.task` asked a NEW question (`search()` → the first page, 80 rows,
+`visibleNoteIndices` reset) at offset 0; `openHit` cleared the panel on the way out.
+
+**The fix as built, to the ruling (bae4324aa) — one pointer per piece:**
+- `Features/Library/LibraryPlace.swift` (NEW, pure) — the place = the ON-SCREEN rows (id + `into` +
+  height) and a 12-each-side neighbourhood over the surface's drawn `Order` (two lookups, never a
+  copy); `resolve` = P-828-11's chain (the first surviving on-screen row that is not the opened one,
+  else the opened one, else the nearest surviving neighbour — below first at a tie — where the rows
+  began, else nil = the top); `anchorY` (Takes' measured proxy arithmetic); `isSettled` (½ pt, or
+  as close as the scroll's ends allow); `depth` (Q5: reach + 1 + one page); `Surface` (+ which draw a
+  selection, + `isSameKind`).
+- `Features/Library/LibraryCatalogPlace.swift` (NEW) — `LibraryPlaceMemory` (per pane: the place, the
+  views' window/surface/row frames, the observed marks and the re-ask token; `questionChanged()`
+  drops every place and mark) and the model's acts: `placeOrder`, `notePlace` (capture + the note and
+  group reach), `rowOpened` (the place with its opened row + the mark where the surface draws a
+  selection), `listingAppeared` (a place in this wing → `reread` to its depth, then the token; the
+  wing moved → `search()`; else `startOver()` — not a new question, so another pane's place
+  survives), `placeLanding`, `owesReturn`.
+- `Features/Library/LibraryCatalogModel.swift` — `placeMemory`; `search()` = `questionChanged()` +
+  `startOver()` (what `search()` read before, byte-identical); `reread(noteDepth:groupDepth:)` (the
+  in-place road with the place's depth); the mark's clear roads: `clickNoteRow`, `selectBook`,
+  `modeChanged` (which also drops the places — flag (a)).
+- `Features/Library/LibraryPlaceScroll.swift` (NEW, view) — `libraryPlaceRow` (a row's frame in its
+  column's CONTENT space — written on appear and on a layout shift above it, never per scroll frame;
+  dropped on disappear); `libraryPlaceScroll` (the window by reference, `SidebarSectionWindow`'s
+  posture; the rest watch — 150 ms of stillness notes the place; the return: decided once per mount,
+  landed on this mount's first measured reading by ONE unanimated `ScrollViewReader.scrollTo(id,
+  anchor:)`, then held — re-checked at 40/120/300/650 ms and on any viewport/content change, re-aimed
+  only while off its place, ≤ 12 aims; re-resolved when the re-ask's token lands; ended at once by her
+  hand phase, else when the checks are done and no re-ask is in flight).
+- `Features/Library/LibraryCatalogView.swift` — `placeKey` (default `PaneID.primary.raw`); the
+  mount's `.task(id: wing)` → `listingAppeared`; every row-open door → `rowOpened` (`openHit` — the
+  title, the double-click, the panel's Open, book rows; the card tap; the row menu's Open; a
+  passage; a scraps head and a tag's block line with `marks: false`); `isSubject` (the panel's subject
+  OR this pane's mark) on every List-faced row background, the capped books region's included; the
+  List column (`.list(includesBooks:)`) and the Cards (`.cards`) named and tracked.
+- `Features/Library/LibraryBooksRegion.swift` — `LibraryPagedNotes.placeKey` + the rows' reports.
+- `Features/Library/LibrarySearchSheet.swift` — `placeKey`; the groups' (id = the home's) and the
+  Books section's reports; the sheet tracked (`.sheet`).
+- `RootView.swift` — `placeKey: pane.raw` on the `.library` arm (one line + a comment).
+
+**How the 18l-c U8 trap is designed around (the brief's ask):** the landing is UNBOUND — a one-shot
+proxy `scrollTo`, no `.scrollPosition` / `ScrollPosition` binding anywhere in the Library — so (1)
+nothing re-applies a stale target over her hand on a relayout (the trap's production face; the hold
+is bounded and her hand phase ends it), and (2) a pin may stage "her scroll" through `NSClipView`
+(the `LibraryInfiniteScrollTests` / `VX349ListHeaderRestTests` road — the latter's floating-header
+guard already proves `onScrollGeometryChange` fires on a clip scroll in the test host). The model
+pins stage the scroll through its owning door (`placeMemory.noteWindow` / `noteFrame`) instead.
+
+**Per pane (the ruling's amendment) — REACHED:** every memory value is keyed by `PaneID.raw`, handed
+down by `RootView`'s one `.library` arm (trivially reachable, so preferred as ruled). What stays
+SHARED is the listing itself (the window's one catalog model): two Library panes share the question
+and its rows, so pane 2's restore re-ask also re-reads pane 1's rows in place (harmless — in place),
+and a pane mounting with no place reads the first page (`startOver`) without dropping the other's
+place (`eachPaneKeepsItsOwnPlace`).
+
+**Pins — and exactly what makes each red (the orchestrator's revert window).** Each revert is an
+UNCOMMITTED edit on the committed tree (27bfde19e or later), restored by `git checkout --` (git is the
+honest mid-revert state; no prerevert dir needed — nothing uncommitted rides the tree):
+| Pin (suite TYPE · tests) | Red on old because | Behavioural revert that shows it |
+|---|---|---|
+| `LibraryPlaceTests` (11, pure) | new — compile-red on old; strength = exact values | **R-C1:** in `LibraryPlace.resolve` replace `survivors.first(where: { $0.id != place.openedID }) ?? survivors.first` with `survivors.first` → expect `theOpenedRowIsNotTheAnchorWhileAnotherOnScreenRowSurvives` red (n5 at −15 where n6 at 15 is owed); every other pure pin green |
+| `LibraryReturnPlaceTests` (9, model) | the pre-fix mount asked a NEW question from the top: 80 rows, no place, no landing | **R-C2:** make `LibraryCatalogModel.listingAppeared`'s body `await search()` alone → expect red: `aReturnReasksInPlaceToThePlacesDepthAndLandsWhereSheWas` (80 ≠ 249; landing nil; token 0), `theOpenedRowsOwnMoveDoesNotMoveThePlace` (landing nil), `aDeletedOnScreenRowFallsToTheNextSurvivor` (nil), `theSearchRidesAlongAndTheSheetComesBackWhereSheWas` (25 groups ≠ 74; nil), `theDayRidesAlongAndItsAnswerComesBackWhereSheWas` (nil), `eachPaneKeepsItsOwnPlace` (the third pane's `search()` drops both places); GREEN: `aNewQuestionDropsThePlaceAndTheMark`, `aWingSwitchDropsThePlace`, `theMarkGoes…` (no return in them). **R-C1 also reds** `theOpenedRowsOwnMoveDoesNotMoveThePlace` (the landing names the moved row) |
+| `LibraryReturnPlaceMountTests` (5, mounted) | uses NOTHING the pre-fix tree lacks — runnable as-is on it: the remount lands at offset 0 with the first page alone listed | **R-C3:** in `LibraryPlaceScroll.decide()` set `memory.landingOwed = false` (no return landing; the model's re-ask unchanged) → expect the four return pins red (the List / the Cards / the sheet / the day's answer back at their top: the row off its place or unlisted on screen); GREEN: `aNewQuestionAskedWhileAwayStartsAtTheTop` (a guard, green on both trees) |
+
+**PENDING (the orchestrator's stage window).**
+1. Mac suites, by TYPE (a zsh array): the new `LibraryPlaceTests` · `LibraryReturnPlaceTests` ·
+   `LibraryReturnPlaceMountTests`; the neighbours the diff reaches (every suite naming the catalog's
+   view/model/sheet/paged rows): `LibraryInfiniteScrollTests` · `LibraryPagingModelTests` ·
+   `LibraryPanelHostTests` · `LibraryPreviewBrainTests` · `LibraryListFaceTests` ·
+   `LibraryListFaceRigTests` · `VX349ListHeaderRestTests` · `LibraryRowClickTests` ·
+   `RowClickTimingTests` · `NoteRowRoutingTests` · `NoteRowSelectionRuleTests` ·
+   `LibrarySearchWiringTests` · `LibrarySearchLandingTests` · `LibrarySearchStateTests` ·
+   `LibrarySearchJoinTests` · `LibrarySearchArchivedTests` · `LibrarySearchCommitsFacetTests` ·
+   `LibraryTagListingTests` · `LibraryDayFilterTests` · `LibraryViewScopeSwitchTests` ·
+   `LibraryCardStampsTests` · `LibraryCardsWordTests` · `LibraryControlsGeometryTests` ·
+   `VX350NarrowLibraryTests` · `VX350SearchToggleMountTests` · `VX384LibraryFollowsMintsTests` ·
+   `VX176LibraryTintTests` · `DebugOracleSingletonWindowTests` · `MCPSharedIconClickTests` ·
+   `MCPSharedRowsTests` · `BookRowMenuTests` · `NoteDeletionNavigateAwayTests` ·
+   `TutorialCurrencyTests` · `CapabilityRegistryTests` · `ShellChromeTests` (RootView touched).
+2. Reverts R-C1, R-C2, R-C3 (above), each one suite, then restore.
+3. The walk (dev store, both voices; a Library of a few hundred notes — the dev store's sample books
+   suffice or mint a scratch run): **List** — scroll deep, open a row by its title, type a word, ⌥⌘[
+   back: the same rows where they were, the opened note at the TOP of the edited sort wearing the
+   subject face (no panel), the controls row's line count unchanged; open a row by double-click and by
+   the row menu's Open — the same; leave by the SIDEBAR (Bookcase) and come back — the place, no mark;
+   a body click anywhere ends the mark. **Cards** — the same round trip: the place, no mark. **A search
+   live** — scroll the answer sheet, open a passage, come back: the sheet where it was, the words in
+   the field, the group's head marked. **The day filter** — armed, the round trip lands the day's
+   answer where it was, the day still armed. **A new question** (type in the field, a sort pick, a wing
+   switch, a mode switch) — the top. **A row deleted** (delete the opened note from its own note ▾,
+   come back) — the next row where it sat. **A split** with the Library in both panes (if cheap) — each
+   pane its own place.
+
+**PROVISIONAL (QUESTIONS entries at the merge moment).** P-828-11 (b) · P-828-12 (b) · P-828-13 (b) ·
+P-828-14 (a) — built as ruled. Within them, mine (flags (a), (c)–(e) below are the reviewer's):
+the 150-ms rest; the 12-each-side neighbourhood; a neighbour above lands with its foot where the rows
+began (the lead row's height standing in for its own); the hold's timings and 12-aim budget.
+
+**For the orchestrator's canon pass (DRAFTED — not applied; the two-file rule).**
+- SurfaceContracts, "The Library" — ADD a bullet: "**The Library remembers where you were.** Every
+  leave of a Library pane notes its place — the rows on screen, each by id with where it sat — and
+  every return this session, while the question (the field, scope, sort, the day, the facets) and the
+  wing are unchanged, lands those rows where they sat, re-resolved in the current listing: the row she
+  opened is not the anchor while another on-screen row survives; a row gone since falls to the next
+  on-screen survivor, then its nearest neighbour, then the top. The row she opened from wears the
+  subject face with no panel until her next row click, a new question, a mode switch or her next open;
+  the Cards keep the place only. The landing reads nothing; the return re-asks in place to the place's
+  depth (its deepest remembered row plus one page). A new question, a wing switch or a mode switch
+  starts at the top. Per pane, in memory only; the Timeline and the capped books region keep their own
+  top (VX-823, P-828-11…14, `notes/plans/fixes/vx-828-editor-shell-qol.md`)."
+- AppSpec §12 "The Library" — after "…the controls row that never changes its line count as the author
+  types, sorts or searches." ADD: "A return within the session lands where she left it (VX-823)."
+- AppSpecRecord: the dated entry + the narrative under §12 (The Library) — her ask verbatim, the fork
+  and its ruling, Q5's P1 reading.
+- MOBILE PARITY: nothing mobile-visible (no `Shared/` change; the phone's Library is its own) — a VM
+  twin is a candidate ticket, the orchestrator's call.
+
+**Self-assessment.** CONFIDENT: the trace (read at the code); the pure brain (exact values on every
+fallback shape); the model's state transitions (the re-ask's depth exact, every drop road, the mark's
+set/clear roads, per-pane survival); the U8 design (no binding exists to re-apply anything).
+LESS CERTAIN, ONLY THE STAGE WINDOW CAN SETTLE IT: the view's geometry — that a row's frame in the
+content's NAMED space and `ScrollGeometry.visibleRect` share one origin (no top padding sits between
+them on any of the three scroll views, and none sits at a safe-area edge — each is below the
+catalog's own masthead — so no scroll inset enters; the mounted pins' 1-pt bars and the walk are the
+oracle — a constant offset would red every one of them), and that a one-shot proxy landing plus the bounded hold settles the
+List/Cards/sheet within a point (Takes measured the proxy arithmetic on a lazy column; uniform List
+rows should settle at the first aim). FLAGS FOR THE COLD REVIEWER: **(a)** a MODE switch drops every
+place (`modeChanged` → `questionChanged`), beyond the ruling's named drops (a new question, a wing):
+the reasons are the ruling's own "a mode switch is not a return" and Q2's mark clear, and the
+surface-kind check in `owesReturn` is the belt (a place lands only on its own kind) — PROVISIONAL;
+**(b)** the per-pane memory shares one listing (above); **(c)** a NO-PHASE scroll inside the hold window
+(keyboard paging, if it reports no phase) is re-aimed for up to the hold's last check, and her rests
+are noted only outside the hold — a place left with no scroll since the return keeps the remembered
+one, by construction; **(d)** each row now carries an `onGeometryChange` in Release (content space —
+the action fires on appear and on a layout shift above the row, never per scroll frame; the transform
+itself is SwiftUI's to evaluate); the DEBUG build already carried a per-frame catalog-space probe on
+every note row; **(e)** every `search()` caller now drops the places and marks — all are new-question
+doors (the field, scope, mode-with-a-day, sort, direction, the day, the facets, ⌘K's Library road;
+listed at C0); **(f)** unchanged and noticed: the row menu's Open and the card tap never closed the
+info panel (the title/double-click road does) — a panel open on another row stays open across a menu
+Open; not this batch's to change.
+
+**Files touched (the whole batch):** `App/Variorum/Variorum/Features/Library/LibraryPlace.swift` (new) ·
+`App/Variorum/Variorum/Features/Library/LibraryCatalogPlace.swift` (new) ·
+`App/Variorum/Variorum/Features/Library/LibraryPlaceScroll.swift` (new) ·
+`App/Variorum/Variorum/Features/Library/LibraryCatalogModel.swift` ·
+`App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift` ·
+`App/Variorum/Variorum/Features/Library/LibraryBooksRegion.swift` ·
+`App/Variorum/Variorum/Features/Library/LibrarySearchSheet.swift` · `App/Variorum/Variorum/RootView.swift` ·
+`App/Variorum/VariorumTests/LibraryPlaceTests.swift` (new) ·
+`App/Variorum/VariorumTests/LibraryReturnPlaceTests.swift` (new) ·
+`App/Variorum/VariorumTests/LibraryReturnPlaceMountTests.swift` (new) · this record.
 
 ### Batch B — wings from the keyboard & the switcher: VX-824 + VX-833 + VX-844
 
