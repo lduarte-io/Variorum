@@ -1500,6 +1500,136 @@ orchestrator.
 pane tests for the wing follow + the orchestrator's walk (the chords in Write and a pane; the menu
 group present; the pane following a wing switch; the unused-tags door end to end with ⌥⌘Z).
 
+#### Batch E — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
+
+**Not done by this batch (first line, kept current):** NO app-suite RUN, NO red-on-old revert RUN of
+an app pin, NO Debug launch, NO walk — all stage-gated, the orchestrator's. Nothing of VX-840's act is
+built: it waits on the E0 fork's ruling (Q-E1's seam and P-828-4 below). No canon, QUESTIONS or shared
+ledger touched; no `Sync/`, custody or keychain file; no `App/Variorum/Shared/` file planned (WingWords
+is only READ).
+
+| Piece | What | Status |
+|---|---|---|
+| E0 | Preflight (the brief's reading list, read in full; the three tickets' bodies read) + THE DESIGN FORK below | IN-PROGRESS — proposed (this commit); awaiting the orchestrator's ruling |
+| E1 | VX-798: Edit ▸ Spelling and Grammar (⌘: Show Spelling and Grammar · ⌘; Check Document Now), registry-declared, the responder-chain act + its refusal; pins | NOT-STARTED |
+| E2 | VX-838: Settings ▸ Tags names its wing ("Tags — in ‹wing›") and follows the app's wing live; pins | NOT-STARTED |
+| E3 | VX-840 core: the unused listing (consuming `tagSubtreeIsWorn`) + the bulk act + exact-rows pins | NOT-STARTED — blocked on E0 |
+| E4 | VX-840 app: the door, the sheet, the words; pins | NOT-STARTED — blocked on E0 |
+| E5 | Self-assessment + the end-of-batch headless suite | NOT-STARTED |
+
+#### Batch E — THE DESIGN FORK (E0 — proposed for the orchestrator's ruling BEFORE any of VX-840's act is built)
+
+**Q-E1 — THE SHARED QUERY IS ABSENT FROM THIS TREE (the brief's stop condition, reported).**
+`Sources/VariorumCore/Queries/TagUsageQueries.swift` does not exist at e0b15ded0: vx-809 has not
+merged. It stands on `origin/vx-809-mcp-door-ergonomics` (tip c02250829), minted by 5279ec16a and
+untouched since — read here with `git show` only; its signature is the record's paragraph exactly,
+and it depends on nothing this tree lacks (`Queries.tagSubtree` only). The brief's fallback
+("compiling blind is acceptable for the app half") would leave this SHARED branch unbuildable for
+batch B's remaining window and the merge gate — declined on that ground alone. Three roads:
+- **(a) LEAN — import the owner's file byte-identical, as its own commit** (`git show
+  5279ec16a:Sources/VariorumCore/Queries/TagUsageQueries.swift`; nothing else of vx-809 — not its
+  tests, not its wire change), the message naming the source SHA. Not a twin: one definition, the same
+  bytes, minted by its owner; git merges an identical add cleanly whichever run merges first, and if
+  vx-809's ladder edits the file later the merge-in takes theirs and re-runs `TagUsageQueriesTests` +
+  this batch's pins (the record's "whoever merges second" line already binds that). Buys: the real
+  predicate under every pin tonight, a real in-transaction re-check, and a walk in this run's window.
+- **(b) a `#if VX809_MERGED` seam:** the production call written against the signature inside an
+  inactive branch (parsed, never type-checked — the branch builds today); the act pinned core-side
+  against a test-double predicate; the door NOT rendered until the merge-in deletes the flag lines
+  (P-2: no predicate, no act). Costs: VX-840's walk PENDING the merge-in; code type-checked only
+  then; a forgotten flag is a door that never renders.
+- **(c) hold VX-840** until vx-809 merges to main and main is merged into this branch.
+
+**Q-E2 — P-828-4, the bulk act's undo shape.**
+- **(b) LEAN — ONE compound entry, "Delete Unused Tags"** ("Undo Delete Unused Tags" on ⌥⌘Z). One
+  operation, one write transaction, ONE stamp: each confirmed root's subtree is tombstoned through
+  `deleteTag`'s own row body (`tombstoneTagSubtree` — the subtree rule, the per-tag cascade trigger)
+  and the passes concatenate into ONE `TagDeletionPass`; the entry is VX-247's machinery unchanged
+  (`registerTagDeletionEntry`, gaining only a label argument) — its inverse already walks a pass in
+  path order (parents before children, every revived path rebuilt from its live parent), so a
+  multi-root pass needs no new undo code, and its redo re-deletes exactly what the undo revived. Why:
+  her ask is ONE confirmed act; the house shape is one act = one entry (import, duplicate, diverge,
+  the MCP door's one ⌥⌘Z per write); and one transaction means the act is all-or-nothing. Accepted
+  consequence, stated: the redo is the single delete's redo — a tag she applied to a note between
+  the undo and the redo goes again with its application (VX-247's own redo shape; the next undo
+  brings both back on that stamp).
+- (a) N entries — `deleteTag` once per root, N transactions, N "Delete Tag" entries: twelve tags
+  swept means twelve ⌥⌘Z presses to take the act back, and a failure midway leaves a half-swept wing.
+
+**Q-E3 — the listing and the checkboxes.** "Unused" = `!tagSubtreeIsWorn(db, tagID:, scope:
+.library(countingTrashRevivable: true))` for every live tag of the shown wing (`Queries.allTags`'s
+wing scope). WORN is subtree-honest, so UNUSED is downward-closed: every listed tag's whole subtree
+is listed too. Options:
+- **(i) LEAN — list every unused tag** (her "list every tag"), indented as the manager indents, all
+  checked; the boxes are COUPLED — unchecking a tag unchecks its listed ancestors (an ancestor's
+  delete takes everything under it), checking a tag checks everything listed under it — so a checked
+  tag's subtree is always wholly checked and the act deletes exactly the checked set.
+- (ii) list only each unused subtree's ROOT, the row naming how many ride under it (a child kept
+  only by keeping its whole root).
+- (iii) independent boxes; a checked parent over an unchecked child refuses at the confirm.
+
+**The act's race rule (stated with (i), D's ruled "ids ∩ still-qualifying" carried to subtrees):**
+inside the ONE write, walking the confirmed ids in path order, a tag's subtree is taken only when the
+tag is still live, still unused by the same predicate, and every live tag under it NOW is in the
+confirmed set (a child minted since the sheet opened keeps its ancestors — the act never deletes
+more than the sheet showed); otherwise the walk descends to its confirmed children. Nothing left ⇒ a
+refusal, nothing written, no entry registered.
+
+**Q-E4 — the door.**
+- **(a) LEAN — a held count, D's ruled shape:** a named-region observation re-fetched on a reader
+  after each commit (VX-670's discipline, `observeEmptyTrashBlocks`' precedent), keyed to the shown
+  wing; the door "Delete 3 unused tags…" in the pane's foot row beside New Tag…, NOT rendered at 0
+  (P-2; batch D's ruling 6). The region names `tag`, `post_tag`, `block_tag` and only the columns the
+  predicate reads on `container` / `block` (`id`, `deleted_at`) — so autosave's `container` stamps and
+  `variant` writes never wake it (P1; feasibility checked at build, else whole tables, D's shape).
+- (b) the door rendered while the wing holds any tag; the read runs once at the press; zero speaks
+  the refusal in the pane's line.
+
+**The words (drafts — PROVISIONAL, hers to tune; sentence case).** Door "Delete 3 unused tags…" /
+"Delete 1 unused tag…" (registry verb "Delete Unused Tags"); help "Tags no note, snippet or thing in
+the Trash wears — you choose which go". Sheet title "Unused tags in ‹wing›"; its line "No note or
+block wears these — nothing in the Trash does either. Uncheck any you want to keep; ⌥⌘Z puts the
+rest back." Buttons Cancel · "Delete 3 Tags" (destructive; grey at 0 checked). Receipt — in the
+pane's own message line (the Settings window has no status bar; today's single delete speaks nothing
+and the list changing is its answer): "Deleted 3 unused tags — ⌥⌘Z puts them back." Race refusal:
+"None of those tags are unused any more — nothing was deleted."
+
+**Stated now so the ruling can redirect them — NOT forks (E1, E2 build to these while E0 waits):**
+- **VX-798.** Two registry declarations (doors `[.menuBar]`, scope `.app`, no takes
+  access), AppKit's own titles — "Show Spelling and Grammar" ⌘: and "Check Document Now" ⌘; —
+  rendered in an Edit ▸ Spelling and Grammar submenu right after Find (AppKit's own Edit order), the
+  two items ONLY. Availability `always`; the act sends `showGuessPanel(_:)` / `checkSpelling(_:)` down
+  the responder chain (`NSApp.sendAction(_:to: nil, from:)` — the Paste Without Line Breaks precedent:
+  "a text view holds the keyboard" is a fact `CapabilityContext` cannot see and the chain answers
+  exactly), and where nothing takes it the door SPEAKS its declared refusal (P-2). NOT built: AppKit's
+  three toggles (Check Spelling While Typing · Check Grammar With Spelling · Correct Spelling
+  Automatically) — they write the per-view flags UNDER the A24 setting and would turn continuous
+  checking on without turning completion off, the §3 crash pairing; SwiftUI's `TextEditingCommands()`
+  is refused for the same reason (and it would add a second Find menu). Probe (throwaway, offscreen
+  TK2 `NSTextView` in a window, macOS 27.0.1): `checkSpelling(nil)` selected "brwn" then "jumpd",
+  `isContinuousSpellCheckingEnabled` stayed false, `isAutomaticTextCompletionEnabled` stayed true;
+  outside a window it did nothing. Pins: the pair declared, keyed and in the helper; the act on each
+  live editor kind (selects the first misspelling, the A24 flags untouched); the refusal. Red-on-old:
+  an Improvement — the old tree has no door; the behavioral revert R-E1 (the check door's selector →
+  `toggleContinuousSpellChecking(_:)`) must turn the flags pin red.
+- **VX-838 — the mechanism (traced at the code):** `AppSettingsView.body` starts the pane's model with
+  a plain `.task { await tags.start() }` (AppSettingsView.swift:223) — once per window lifetime; `start()`
+  reads `session.wing.currentID` at subscription and its `observeTags(wingID:)` stays pinned to that
+  wing. A switch changes `session.wing.currentID` and nothing restarts it, so the list keeps the old
+  wing's vocabulary — and a root tag minted from that stale list lands in the NEW wing
+  (`createTag(…, wingID: session.wing.currentID)`) and never appears in it. RootView's twin model has
+  always been `.task(id: session.wing.currentID)` (RootView.swift:629); TagsViewModel's comment
+  ("the shell restarts this task when the wing switches") is true there only. **The fix:** the
+  task keyed on the wing; the model adopts its list AND its wing's name from ONE read (the header can
+  never name a wing other than the one listed, and a wing rename re-titles it live); the header for
+  the Tags pane reads "Tags — in ‹wing›" (the toolbar's own "in ‹wing›" words, voiced as chrome).
+  Pins: a mounted follow pin (red-on-old by R-E2: `.task(id:)` → `.task`), the model's one-read
+  name pin, the pure title pin. Test seam: an internal `tags:` init parameter on `AppSettingsView`
+  (production unchanged by default) — batch D's ruled `model:` precedent (ruling 8).
+
+**ASKED OF THE ORCHESTRATOR (one ruling unblocks E3–E4):** Q-E1 (a)/(b)/(c); P-828-4 (Q-E2);
+Q-E3's listing; Q-E4's door; the words (or leave them PROVISIONAL).
+
 ## ENVIRONMENT TRAPS (carried into every batch brief VERBATIM)
 
 - Branch from main ≥ 8ffdd8278 (carries VX-781's PIN BELT). Core `swift build` prints 7 EXPECTED
