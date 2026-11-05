@@ -871,19 +871,78 @@ struct RecoveryView: View {
         !model.emptyBlockIDs.isEmpty
     }
 
+    /// `model` (VX-636, ruled at the VX-828 batch D fork): INTERNAL, for the
+    /// geometry pin only — a test hosts the shipping view over a model it
+    /// owns. Production passes nothing and the view builds its own, exactly as
+    /// before.
     init(
         session: AppSession, library: LibraryViewModel,
         openPost: @escaping (String) -> Void,
-        openPool: ((String) -> Void)? = nil
+        openPool: ((String) -> Void)? = nil,
+        model: RecoveryViewModel? = nil
     ) {
         self.session = session
         self.library = library
         self.openPost = openPost
         self.openPool = openPool
-        _model = State(initialValue: RecoveryViewModel(session: session))
+        _model = State(initialValue: model ?? RecoveryViewModel(session: session))
     }
 
-    var body: some View { list }
+    /// **THE LIST, AND ITS MESSAGE BAND BELOW IT** (VX-636 — seen at VX-601's
+    /// A2 walk: after Delete for Good, *"The note is gone from the app now —
+    /// the app's own cleanup removes the bytes."* drew OVER the bottom visible
+    /// Trash row's text). The mechanism: the message was an
+    /// `.overlay(alignment: .bottom)` on the `List`, which draws on top of the
+    /// list's own frame and gives the list no room — so whatever row sat at
+    /// the bottom of the viewport was written over. The message now has its
+    /// own band, LAID OUT below the list (the Pool's foot idiom: a hairline,
+    /// then the line, present only while something speaks), so the list's
+    /// frame ends where the band begins. Pinned as geometry:
+    /// `TrashMessageBandTests` (the line's frame lies wholly below the list's).
+    var body: some View {
+        VStack(spacing: 0) {
+            list
+            messageFoot
+        }
+        .background(tokens.room)
+        .coordinateSpace(name: TrashMessageFoot.space)
+    }
+
+    /// The band, drawn only while a line speaks — the order ArchivedView's
+    /// slot already keeps: this surface's refusal, then its receipt, else the
+    /// one status seam's quiet line (so a receipt spoken on the seam while the
+    /// Trash shows — ⌥⌘Z's "Undid…" — speaks HERE rather than nowhere).
+    @ViewBuilder
+    private var messageFoot: some View {
+        if let line = TrashMessageFoot.line(
+            error: model.lastError ?? library.lastError, receipt: model.receipt,
+            quietSpeaks: session.status.lineItem != nil)
+        {
+            VStack(alignment: .leading, spacing: 0) {
+                Divider().overlay(tokens.line)
+                Group {
+                    switch line {
+                    case .refusal(let words):
+                        Text(words)
+                            .font(tokens.small)
+                            .alarmVoice()
+                            .textSelection(.enabled)
+                    case .receipt(let words):
+                        Text(words)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .textSelection(.enabled)
+                    case .quiet:
+                        QuietReceiptLine(status: session.status, tokens: tokens)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .trashFootProbe("foot")
+        }
+    }
 
     /// **THE LISTING'S SHAPE** (the post-13l polish round, ledger rows 3 + 22
     /// — A3's naming folded into G7's grouping, which is the same fix twice:
@@ -972,21 +1031,9 @@ struct RecoveryView: View {
         }
         .scrollContentBackground(.hidden)
         .background(tokens.room)
-        .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? library.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .alarmVoice()
-                    .textSelection(.enabled)
-                    .padding(4)
-            } else if let receipt = model.receipt {
-                Text(receipt)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .textSelection(.enabled)
-                    .padding(4)
-            }
-        }
+        // VX-636: the message slot that was an overlay here is `body`'s band
+        // now — laid out BELOW the list, never drawn over its rows.
+        .trashFootProbe("list")
         // Restarts when the filter or the sort changes — both are applied in
         // SQL, so the observation itself is what moves.
         .task(id: "\(model.restartToken)|\(session.wing.currentID)") { await model.startTrash() }
@@ -1329,4 +1376,56 @@ struct RecoveryView: View {
 
     // The archived rows' `title(_:)` builder LEFT with them (ledger row 8) —
     // `ArchivedView` renders that listing now, in its own room.
+}
+
+/// **VX-636 — what the Trash's message band says, if anything** (pure,
+/// pinned): this surface's refusal first, then its receipt, else the one
+/// status seam's quiet line while one speaks; else NOTHING — no band, no
+/// reserved blank line (the Pool's `PoolReceiptFoot` rule).
+nonisolated enum TrashMessageFoot {
+    enum Line: Equatable {
+        case refusal(String)
+        case receipt(String)
+        /// The seam's `QuietReceiptLine` speaks.
+        case quiet
+    }
+
+    static func line(error: String?, receipt: String?, quietSpeaks: Bool) -> Line? {
+        if let error { return .refusal(error) }
+        if let receipt { return .receipt(receipt) }
+        return quietSpeaks ? .quiet : nil
+    }
+
+    /// The surface's named coordinate space — where the DEBUG frame probe
+    /// measures the list and the band against each other.
+    static let space = "trash-surface"
+}
+
+#if DEBUG
+/// **VX-636's geometry oracle** (DEBUG only — the `BaselineProbe` idiom): the
+/// list's frame and the message band's frame, in `TrashMessageFoot.space`,
+/// so a pin holds "the line never draws over the rows" as a number.
+@MainActor
+enum TrashFootProbe {
+    static var frames: [String: CGRect] = [:]
+
+    static func reset() {
+        frames = [:]
+    }
+}
+#endif
+
+extension View {
+    /// Probe this view's frame under `id` in the Trash surface's space. A
+    /// no-op outside DEBUG.
+    @ViewBuilder
+    func trashFootProbe(_ id: String) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(TrashMessageFoot.space))
+        } action: { TrashFootProbe.frames[id] = $0 }
+        #else
+        self
+        #endif
+    }
 }
