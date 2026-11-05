@@ -699,7 +699,7 @@ shared-ledger edit (drafts below). No `Shared/`, no `Sync/`, custody or keychain
 | C0 | Preflight (the brief's list, read in this session's own context: the run record's named sections, SurfaceContracts "The Library" whole + "The app" incl. the Open-list follow line, `phase-18l-navigation-feel.md` (kickoff, R-18l-1/2, the U0c brief + RECORD whole), TEXTKIT2_NOTES' 18l-c U8 HARNESS fact and its neighbours, the Library feature folder's catalog files, `SidebarSectionWindow.swift` (the follow idiom), Takes' `ArticlePlace`/`ArticleRestore` docs) + THE TRACE + THE DESIGN FORK | DONE (cd50d6ed7) — RULED (bae4324aa, "Batch C — THE FORK'S RULING") |
 | C1 | The place: a pure resolver (the remembered on-screen rows + neighbourhood → the landing row and its `into` in the CURRENT listing) + exact pins | DONE (this commit) — `Features/Library/LibraryPlace.swift` (capture · resolve · `anchorY` · `isSettled` · `depth` · the `Order` lookups · `Surface`) + `VariorumTests/LibraryPlaceTests.swift` (11 pure pins). Mac `build-for-testing` TEST BUILD SUCCEEDED (`App/Variorum/DerivedData/vx828c-bft1.log`); the RUN is PENDING (app-hosted — the orchestrator's window) |
 | C2 | The model: remember on leave · restore on mount (the in-place re-ask to the place's depth) · a new question / wing drops it · the return mark (per Q2's ruling) + model pins | DONE (this commit) — `Features/Library/LibraryCatalogPlace.swift` (NEW: `LibraryPlaceMemory` — per-pane places, marks, the views' reports, the re-ask token; the model's `placeOrder` · `notePlace` · `rowOpened` · `listingAppeared` · `placeLanding` · `owesReturn`); `LibraryCatalogModel.swift` (`placeMemory`; `search()` = `questionChanged()` + the new `startOver()`; `reread(noteDepth:groupDepth:)`; the mark's clear roads in `clickNoteRow` / `selectBook` / `modeChanged` — a mode switch also drops the places, see the self-assessment); `LibraryPlace.swift` (+ `Surface.isSameKind`, the remembered surface); `VariorumTests/LibraryReturnPlaceTests.swift` (9 model pins). `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`, no warning in a touched file); the RUN is PENDING |
-| C3 | The view: the rows' content-space reports + the scroll memory on the three scroll views (List column · Cards · the answer sheet) + the unbound landing and its hold; mounted pins (red on old: the remount lands at the top) | DONE (this commit) — `Features/Library/LibraryPlaceScroll.swift` (NEW: `libraryPlaceScroll` — the window by reference, the rest watch, the unbound `ScrollViewReader` landing + its hold; `libraryPlaceRow` — the content-space frame); `LibraryCatalogView.swift` (`placeKey`; the mount's `.task` → `listingAppeared`; every row-open door → `rowOpened`; `isSubject` = the panel's subject OR the mark; the List column and the Cards named + tracked); `LibraryBooksRegion.swift` (`LibraryPagedNotes.placeKey` + the rows' reports); `LibrarySearchSheet.swift` (`placeKey`, the groups' and books' reports, the sheet tracked); `RootView.swift` (`placeKey: pane.raw` — one line); `VariorumTests/LibraryReturnPlaceMountTests.swift` (5 mounted pins, compile on the pre-fix tree — their red-on-old is runnable as-is). `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`); the RUN is PENDING |
+| C3 | The view: the rows' content-space reports + the scroll memory on the three scroll views (List column · Cards · the answer sheet) + the unbound landing and its hold; mounted pins (red on old: the remount lands at the top) | DONE (this commit) — `Features/Library/LibraryPlaceScroll.swift` (NEW: `libraryPlaceScroll` — the window by reference, the rest watch, the unbound `ScrollViewReader` landing + its hold; `libraryPlaceRow` — the content-space frame); `LibraryCatalogView.swift` (`placeKey`; the mount's `.task` → `listingAppeared`; every row-open door → `rowOpened`; `isSubject` = the panel's subject OR the mark; the List column and the Cards named + tracked); `LibraryBooksRegion.swift` (`LibraryPagedNotes.placeKey` + the rows' reports); `LibrarySearchSheet.swift` (`placeKey`, the groups' and books' reports, the sheet tracked); `RootView.swift` (`placeKey: pane.raw` — one line); `VariorumTests/LibraryReturnPlaceMountTests.swift` (5 mounted pins, compile on the pre-fix tree — their red-on-old is runnable as-is). `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`). Window part 1: 3 mounted pins RED ON NEW — all three FIXTURE (a stale oracle row; raw offsets compared across lazy mounts; a region frame the sheet never publishes), traced and fixed in the pins only (00569c8ce — "THREE MOUNTED PINS RED ON THE NEW TREE" below); the re-run PENDING (the window) |
 | C4 | Self-assessment, the end-of-batch core `swift test`, the app `build-for-testing` | DONE (this commit) — core `swift test` at 27bfde19e: `VariorumCoreTests` 3670 tests / 493 suites PASSED (5 known issues — batch D's count, unchanged: this batch touches no core file; PinBeltTests rides inside); `StringsWorkbookTests` 32/4 PASSED; the 7 known "not used by any target" warnings (14 lines, build + test); `VariorumMCPTests` 549/100 with 3 issues, all the MCP SOCKET-HARNESS class batch D met (`MCPDiscoverProbeServerTests`, `MCPPreInitializeWindowTests`, `MCPHarnessTimeLimitTests` — the VX-685 bound) — re-run ALONE (`swift test --skip-build --filter …`): 16 tests / 3 suites PASSED in 2.3 s. This batch touches no MCP code. App `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`) |
 
 #### Batch C — THE TRACE (why the Library forgets — an Improvement, no bug mechanism; read at the code)
@@ -989,6 +989,41 @@ doors (the field, scope, mode-with-a-day, sort, direction, the day, the facets, 
 listed at C0); **(f)** unchanged and noticed: the row menu's Open and the card tap never closed the
 info panel (the title/double-click road does) — a panel open on another row stays open across a menu
 Open; not this batch's to change.
+
+#### Batch C — THREE MOUNTED PINS RED ON THE NEW TREE (stage window part 1) — traced: all three FIXTURE, the product unchanged
+
+The window ran 258 tests / 38 suites: 255 green (every pure and model pin, all 35 neighbours), three
+of the five mounted pins red. What was actually wrong, each read off the window's log
+(`scratchpad/batchC-suites.log` lines 5085/5469/6144/6547):
+1. **`theListComesBackWhereSheLeftItDeepInTheLibrary` — the pin read a STALE row.** Its chooser took
+   the topmost DEBUG-oracle note frame inside the notes region; the oracle (`OwnedRegistrations`)
+   keeps a de-realized row's LAST frame until its catalog leaves, and a clip JUMP de-realizes rows
+   without moving their reports. `scrollToTheEnd`'s first jump left rows ~65–79 (the first page's
+   end) reported on screen; after the jump to 3,500 pt the chooser picked row 65 (the premise line
+   read `deepest → 65`), which was not on screen — so after the return to the real place row 65 was
+   never re-realized and its frame was absent (`top(of:) → nil`). The landing is not implicated.
+2. **`theCardsComeBackWhereSheLeftThem` — the pin compared raw clip offsets across two mounts of a
+   lazy column**, which are not comparable: the rows above are estimated until realized (Takes'
+   recorded ~390-pt measurement, `EditorRouter.takesArticlePlaces`' own doc — the very reason the
+   product anchors on rows, never pixels). The window measured 4,129 vs 4,000, and in the SAME run the
+   pin's own row-identity check (the first realized card ±1) recorded no issue: the same cards came
+   back.
+3. **`theAnswerSheetComesBackWhereSheLeftIt` — the chooser needed `notesRegionFrame`, which only the
+   List column publishes**; in the answer sheet it is nil, so the `#require` BEFORE the trip failed.
+   Nothing about the return ran.
+
+**The fix — the pins only (`LibraryReturnPlaceMountTests.swift`, 00569c8ce):** the reading row is
+chosen only among rows the listing says are REALIZED (`visibleNoteIndices` — its own appear /
+disappear bookkeeping), the one nearest the catalog's vertical middle (inside the listing whatever
+sits above it — no region frame needed); `top(of:)` answers only while the row is realized; the List
+scrolls to 70 % of its document (well past the first page in any voice) and its premise is a
+`#require`; the Cards' oracle is row identity (the first realized card ±1 — the Cards carry no DEBUG
+row probe), never the offset; the List's and the sheet's raw-offset bars are gone (the row's place on
+screen is the bar); the List's "re-asked short of the corpus" line is gone (at 70 % of 200 notes the
+place's depth plus a page reaches the end; the depth is the model pins' exact claim). Still nothing
+the pre-fix tree lacks (red-on-old runnable as-is); R-C3 still reds the four return pins.
+`build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft4.log`). The re-run is the
+orchestrator's (the window holds).
 
 **Files touched (the whole batch):** `App/Variorum/Variorum/Features/Library/LibraryPlace.swift` (new) ·
 `App/Variorum/Variorum/Features/Library/LibraryCatalogPlace.swift` (new) ·
