@@ -24,7 +24,7 @@ the Xcode project's references whose identity Package.swift never names, read AT
 revision (`--ref`, default HEAD), or from the working tree under `--against`.
 
 exit: 0 every pin matches (a bookkeeping NOTE included) · 1 drift (each drifted pin named) ·
-2 usage or unreadable input.
+2 usage or unreadable input (a file listing one identity twice included).
 The release's post-build check: Tools/verify-pins "<OUT>/DerivedData"
 The belt's static guard is Tests/VariorumCoreTests/PinBeltTests.swift; the networked proof is
 Tools/pins-belt-check.
@@ -72,19 +72,29 @@ def read_file(path):
 
 
 def pins_of(data, where):
-    """identity -> (version, revision), from a Package.resolved OR a workspace-state.json, by content."""
+    """identity -> (version, revision), from a Package.resolved OR a workspace-state.json, by content.
+    An identity listed twice (compared case-insensitively) is refused: which entry pins it is
+    ambiguous, and a dict would silently keep the last one."""
+    out, seen = {}, set()
+
+    def put(ident, pin):
+        if ident.lower() in seen:
+            die(f"the pin identity {ident} is listed more than once: {where}")
+        seen.add(ident.lower())
+        out[ident] = pin
+
     try:
         if isinstance(data, dict) and "pins" in data:
-            return {p["identity"]: (p["state"].get("version"), p["state"].get("revision"))
-                    for p in data["pins"]}
+            for p in data["pins"]:
+                put(p["identity"], (p["state"].get("version"), p["state"].get("revision")))
+            return out
         if isinstance(data, dict) and "dependencies" in data.get("object", {}):
-            out = {}
             for dep in data["object"]["dependencies"]:
                 ref, state = dep["packageRef"], dep.get("state", {})
                 if ref.get("kind") != "remoteSourceControl":
                     continue  # the local package (fileSystem) and anything unpinnable
                 cs = state.get("checkoutState", {})
-                out[ref["identity"]] = (cs.get("version"), cs.get("revision") or state.get("name"))
+                put(ref["identity"], (cs.get("version"), cs.get("revision") or state.get("name")))
             return out
     except (KeyError, TypeError, AttributeError):
         pass
