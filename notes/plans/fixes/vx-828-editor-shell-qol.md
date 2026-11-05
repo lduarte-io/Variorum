@@ -584,3 +584,23 @@ merges second re-runs TagUsageQueriesTests on the merged tree.
 Also for the merge gate (coordinator): merge main ≥ be17fb632 in first (VX-853 — verify-pins
 no-arg guard; a NOTE from verify-pins = bookkeeping-only lockfile drift, restore with
 `git checkout HEAD -- <file>`, never commit it; DRIFT still means stop).
+
+Part 3 (the walk) DONE — Debug dev store (io.lduarte.Variorum.debug), scratch note "vx828 walk A",
+all legs green: (a) mid-word Return carries the word down ("beta" rode whole, caret at the new
+block's start — P-828-6 (a) seen); (b) first-word caret lands the start arm ("beta gamma" pushed
+down whole); (c) HER CASE — the quoted one-word block pushes down with an empty block above, NO
+refusal toast; (d) the fanned one-word block (⑂2) pushes down whole, badge riding, no keep-on-top
+nil-cut refusal; (e) the checklist exit leaves "- [ ] item" whole with the caret on its own line
+below, no artifact (the frame-blank itself is the pin's evidence, not a still's); (f) both voices —
+the store rests in STUDY (legs a–e ran there); the Terminal leg re-exercised the start arm
+identically; the voice was restored to Study and the app quit clean (zero instances). Walk notes
+stay in the dev store (content is the agents'). One machinery note: cliclick resets the HID idle
+clock, so back-to-back click.sh calls under ~2 s trip guard.sh's someone-at-the-machine stop —
+space pointer acts ≥3 s (idle climbed 30→42 s clean, nobody at the machine).
+
+**ONE FINDING (batch A, test hygiene — not a product defect):** the revert-1 runs left SEVEN
+Variorum .ips (01:55:15–01:57:43, all io.lduarte.Variorum.debug, EXC_BREAKPOINT): under the
+reverted old code, `TypedReturnKeyTests.aReturnInsideAFannedOneWordBlockPushesItDownToo`'s closure
+Array-subscripts the store slots the old road never minted — red-on-old BY CRASH (host trap), not a
+clean #expect. Fix owed (implementer): #require the count before indexing so the pin fails clean
+when red; its clean red-on-old re-shows in the next stage window (one revert, one suite) — PENDING.
