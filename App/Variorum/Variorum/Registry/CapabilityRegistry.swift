@@ -2370,15 +2370,26 @@ nonisolated enum CapabilityRegistry {
         // back, the receipt naming the new date (`EntryDateShift`, the ONE
         // act). Doors: both `note ▾` menus (`.bottomBar` — R6-2, drawn on a
         // dated note: the row carries its own note and reads its date) and
-        // ⌘K (`.palette`, LISTED only while the mounted note has a date). The
-        // chord is an in-batch design fork — PROPOSED in the run record's
-        // Unit A section and wired (`.menuBar` + `shortcutLabel`) only at the
-        // orchestrator's ruling. Gate: a detail is mounted and its note has a
+        // ⌘K (`.palette`, LISTED only while the mounted note has a date), and
+        // File ▸ with ⌥⌘J (`.menuBar` — the ruled chord, below). Gate: a
+        // detail is mounted and its note has a
         // date (`noteHasEntryDate` — the `.compareWithLatestVersion` shape).
+        //
+        // **⌥⌘J — THE COLLISION SWEEP (the run record's VX-587 proposal, on
+        // `b616f4fd9`; RULED option 1, `cde42a9d4`).** The ⌥ "deliberate
+        // variant" of ⌘J (Today's Entry), the ⌥⌘Z / ⌥⌘N / ⌥⌘S idiom: ⌘J opens
+        // the day's entry, ⌥⌘J dates the note a day earlier — her late-night
+        // backfill pair. FREE: `EditorCommands.keyEquivalent`'s only `j` chord
+        // is ⌘J; no `.keyboardShortcut(` site in `Variorum/` or `Shared/`
+        // carries another; `EditorTextView.performKeyEquivalent` matches bare
+        // ⌘S/⌘Z only; no key monitor reads `j`; the system hot key is ⌃⌥⌘N;
+        // macOS reserves no ⌥⌘J; the parallel branches (vx-828, vx-809, re-swept
+        // at the wiring) add none. Its menu door is File's note group, grey by
+        // this gate (no mounted dated note).
         Capability(
             id: .shiftEntryDateEarlier, verb: EntryDateShiftCopy.verb, scope: .post,
-            doors: [.bottomBar, .palette],
-            shortcutLabel: nil, takesAccess: .native,
+            doors: [.menuBar, .bottomBar, .palette],
+            shortcutLabel: "\u{2325}\u{2318}J", takesAccess: .native,
             unavailableNote: EntryDateShiftCopy.unavailableNote,
             availability: { ctx in ctx.mode != nil && ctx.noteHasEntryDate ? .act : .unavailable }),
         Capability(

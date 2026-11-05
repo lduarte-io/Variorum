@@ -6,14 +6,15 @@
 //  a day earlier": its declaration (P-1), its gate (P-2: a dated note, the
 //  mounted note's fact for the routed doors), the router's fact, ⌘K's listing,
 //  and the one act's receipt and refusal. The op's own state transition is the
-//  core's `ShiftEntryDateTests`. The chord is an in-batch design fork — these
-//  pins hold the PRE-CHORD declaration (no `.menuBar`, no label) and flip when
-//  her ruling wires it.
+//  core's `ShiftEntryDateTests`. The chord was an in-batch design fork, RULED
+//  ⌥⌘J (option 1 of the run record's proposal) — File's note group, the key
+//  table and the helper carry it.
 //
 
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -44,16 +45,24 @@ private func withShiftWorld<T>(
 @MainActor
 @Suite("VX-587 — Shift date a day earlier", .serialized)
 struct ShiftEntryDateDoorTests {
-    /// Declared once: her words for the verb, note scope, both `note ▾` menus
-    /// and ⌘K — no chord yet (the design fork waits on her ruling).
+    /// Declared once: her words for the verb, note scope, File's note group
+    /// with the RULED chord ⌥⌘J, both `note ▾` menus and ⌘K; the key is wired
+    /// and the helper (⌘/) shows it.
     @Test func theActIsDeclaredOnTheBarsAndThePalette() {
         let door = CapabilityRegistry.capability(.shiftEntryDateEarlier)
         #expect(door.verb == "Shift date a day earlier", "her words (R-805-3)")
         #expect(door.scope == .post)
-        #expect(door.doors == [.bottomBar, .palette], "the chord is wired only at the ruling")
-        #expect(door.shortcutLabel == nil)
+        #expect(door.doors == [.menuBar, .bottomBar, .palette], "the chord ruled ⌥⌘J")
+        #expect(door.shortcutLabel == "\u{2325}\u{2318}J")
+        #expect(door.menuTitle() == "Shift date a day earlier (\u{2325}\u{2318}J)",
+                "the `note ▾` rows say the chord")
         #expect(door.takesAccess == .native)
         #expect(!door.unavailableNote.isEmpty)
+        #expect(EditorCommands.menuRendered.contains(.shiftEntryDateEarlier), "on the File menu")
+        let key = EditorCommands.keyEquivalent(for: .shiftEntryDateEarlier)
+        #expect(key?.0 == "j")
+        #expect(key?.1 == [.command, .option])
+        #expect(HelperView.shortcutKeysShown.contains("\u{2325}\u{2318}J"), "the helper shows it")
         #expect(ShellActions.paletteActs.contains(.shiftEntryDateEarlier))
         for bar in [CommitBar.renderedCapabilities, TakesBottomBar.renderedCapabilities] {
             #expect(bar.contains(.shiftEntryDateEarlier), "both bars (R6-2)")
