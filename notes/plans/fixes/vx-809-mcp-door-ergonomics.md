@@ -2,7 +2,8 @@
 
 **Ticket: VX-809 · Branch: `vx-809-mcp-door-ergonomics` · Worktree: `~/dev/variorum-vx-809` · the Pro · Coordinator: nov4coordinator**
 
-**STATUS: OPEN — kicked off 2026-11-05 (/architect-phase). Batch 1 DONE; batch 2 in flight.**
+**STATUS: OPEN — kicked off 2026-11-05 (/architect-phase). Batch 1 DONE; batch 2 in flight (head fec890964+; both ops landed; catalog 196 arms).**
+**ORCHESTRATOR IN-FLIGHT OBLIGATIONS (kept current for a post-compaction resume):** batch 2's RED-ON-OLD SOCKET TURN is granted and running (the coordinator's quality rule: a red counts only on the ASSERTED expectation; initialize-starvation/timeout = a collision red, re-run alone before counting) — **when the implementer reports the turn's result, send nov4coordinator the one-line close** (legs run, red kind per leg, final green). vx-828 holds whole-package runs ~10 min for this turn.
 
 **HER OVERNIGHT WORD (2026-11-05, sent to all sessions, verbatim):** *"I'm going to sleep - continue overnight and rule provisionally for my morning bundle. I want everything merged & a release ready to go, but not yet released to the site, so that when I handle everything in the morning I can go through the bundles and ensure that I don't need any changes before the version releases (or that if I do, I can do them in a quick round)."* — So: this run pushes through its ladder and MERGES tonight (coordinator-serialized); every open call rules PROVISIONAL into the bundle; the release is STAGED by the wave, never published; the morning bundle (HELD FOR HER below + the handoff) is the deliverable she reads first.
 
