@@ -355,6 +355,8 @@ lockfile missing ("a build would resolve WITHOUT pins"), and with E11's originHa
 a dirty tree for the same reason); bad path or option exits 2. Python 3.9 stdlib only
 (`/usr/bin/python3` 3.9.6).
 
+**Superseded by VX-853 (ad4d7c003; her P-781-3 ruling (b), QUESTIONS #260; spec `notes/plans/vx-781-build-ergonomics-survey.md` §4):** the no-argument guard is now VERSIONS-EQUAL — an originHash-only (bookkeeping-only, every pin identical) change prints a NOTE and exits 0; a missing lockfile or any pin difference still exits 1. The paragraph above is the guard as built at fef4800f8/60cfbd44e.
+
 ### VERIFY — the pre-merge core runs (0d7fd8019; superseded by the merged-tree runs below)
 
 - `swift build` (isolated caches, scratch `vx781-core`): **`Build complete! (40.85 sec)`**. The
