@@ -286,6 +286,9 @@ struct MCPTwoStoreCatalogServerTests {
             let starDiary = try ops.createReading(
                 name: "Star diary", kind: .book, querySpec: try RuleGrammar.encode(.star), wingId: w.studio)
             _ = try ops.setBookPrivate(starDiary.id, true)
+            // VX-814 (batch 3): a tag of the hidden wing whose path a client's
+            // birth tag names — per-wing vocabulary makes it a non-event.
+            _ = try ops.createTag(name: "attic-topic", wingID: w.attic)
         }
     }
 

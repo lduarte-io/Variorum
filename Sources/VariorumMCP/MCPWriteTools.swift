@@ -86,7 +86,9 @@ struct MCPWriteTools: Sendable {
         /// U3 (R-13nb-11 G-2): EITHER payload — plain prose, or the
         /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
         /// VX-252: an optional chapter of the book (`section_id`).
-        case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?)
+        /// VX-814: `tags` — paths the note is born wearing (the header road).
+        case createNote(
+            title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?, tags: [String])
         /// VX-566: `create_note`'s optional chapter, on the one-document form.
         case importNote(VariorumDocument.NamedDocument, place: Place, sectionID: String?)
         case importBook(VariorumDocument.Book, wingID: String)
@@ -280,7 +282,8 @@ struct MCPWriteTools: Sendable {
             }
             return .createNote(
                 title: try optionalString(args, "title"), payload: payload,
-                entryDate: try entryDate(args), place: try place(args), sectionID: sectionID)
+                entryDate: try entryDate(args), place: try place(args), sectionID: sectionID,
+                tags: try birthTags(args))
         case MCPToolCatalog.importDocument.name:
             return try parseImport(args)
         case MCPToolCatalog.applyTag.name:
@@ -350,6 +353,26 @@ struct MCPWriteTools: Sendable {
             }
             return Operations.MCPNoteBlock(text: text, name: name, takes: takes)
         }
+    }
+
+    /// **VX-814 — `create_note`'s `tags`** (the VX-809 run, batch 3): an array
+    /// of tag PATHS, each naming at least one tag by `TagPath.segments` — the
+    /// rule `apply_tag` and the document header read ("/a//b/" is a/b). A path
+    /// naming nothing refuses the call in words before any decision (VX-566's
+    /// never-ignored precedent: a success that tagged less than asked would be
+    /// a quiet lie); a path given twice is applied once. Absent or `[]`: none.
+    func birthTags(_ args: [String: Value]) throws -> [String] {
+        let paths = try stringArray(args, "tags") ?? []
+        for (index, path) in paths.enumerated() where TagPath.segments(path).isEmpty {
+            throw ArgumentFailure(message: Self.emptyTagPathWords(index))
+        }
+        return paths
+    }
+
+    /// The one sentence for a `tags` entry naming no tag (PROVISIONAL, the
+    /// VX-809 bundle — wording hers).
+    static func emptyTagPathWords(_ index: Int) -> String {
+        "tags[\(index)] names no tag — a tag's path has at least one name (e.g. \"percy/pt-en\")."
     }
 
     /// `entry_date`: a real calendar day, `yyyy-MM-dd` — the column's own
@@ -499,7 +522,7 @@ struct MCPWriteTools: Sendable {
                                         targetTitle: title, detail: lens.name,
                                         show: .lens(noteID: noteID, lensID: lens.id)))
             }
-        case .createNote(let title, let payload, let entryDate, let place, let sectionID):
+        case .createNote(let title, let payload, let entryDate, let place, let sectionID, let tags):
             // VX-252 (F-3): the BOOK is decided first (`into`), so an
             // unreachable book answers the one not-shared sentence whatever
             // `section_id` names; inside, every id that isn't a live chapter of
@@ -510,14 +533,16 @@ struct MCPWriteTools: Sendable {
             // `admitsGathering`).
             return try into(place, job: job, clientName: clientName, admitsGathering: true) { destination in
                 let minted: Operations.DocumentImport = switch payload {
+                // VX-814: the birth's tags ride the mint's own transaction and
+                // entry (the header road); the answer lists them first.
                 case .text(let text):
                     try ops.createNote(
                         title: title, text: text, entryDate: entryDate, in: destination, section: sectionID,
-                        undoLabel: label(.note))
+                        tags: tags, undoLabel: label(.note))
                 case .blocks(let blocks):
                     try ops.createStructuredNote(
                         title: title, entryDate: entryDate, blocks: blocks, in: destination, section: sectionID,
-                        undoLabel: label(.note))
+                        tags: tags, undoLabel: label(.note))
                 }
                 return try noteAnswer(minted, act: .note, clientName: clientName, sectionID: sectionID)
             }

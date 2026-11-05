@@ -684,8 +684,11 @@ enum MCPToolCatalog {
             gives chapter ids). Returns JSON with the note_id, its block_ids, and blocks: per \
             block its block_id, the shown_take_id, and every take in fan order (take_id, label \
             where it has one, and sha256), the shown one included — no read_note needed to learn \
-            them. Its tag_ids and tags (their paths) list every tag the note wears once it lands, \
-            a book's outflow or a gathering's rule tags included, so there is nothing to tag again. \
+            them. tags (paths, e.g. ["percy/pt-en"]) tags the note as it is born: each tag adopted or \
+            created by path in the note's wing exactly as apply_tag does, in the same act and the same \
+            undo, so books that collect by them hear the new note. Its tag_ids and tags (their paths) \
+            list every tag the note wears once it lands — yours first, in the order given, then a \
+            book's outflow or a gathering's rule tags, each once — so there is nothing to tag again. \
             \(digestSentence) \
             \(nullSentence) With \
             text, Variorum splits the prose into blocks by its own setting; to verify byte for \
@@ -726,6 +729,11 @@ enum MCPToolCatalog {
                 "section_id": .object(["type": "string",
                                        "description": "File it under this chapter of book_id (with book_id only)."]),
                 "wing_id": .object(["type": "string", "description": "Create it bookless in this wing."]),
+                "tags": .object([
+                    "type": "array",
+                    "description": "Tag paths the note is born wearing (e.g. \"percy/pt-en\"); a missing tag is created.",
+                    "items": .object(["type": "string"]),
+                ]),
             ]),
             "additionalProperties": false,
         ]),

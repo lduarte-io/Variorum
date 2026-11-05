@@ -112,6 +112,18 @@ extension MCPTwoStoreCatalogServerTests {
                    capture: { ["studioNew": $0["note_id"] as? String ?? ""] }),
         CatalogArm(label: "create_note · into the shared book", tool: "create_note") { w, _ in
             ["book_id": s(w.shared), "title": s("filed"), "text": s("Filed words.")] },
+        // VX-814 (batch 3): born wearing a tag a hidden PRIVATE book collects
+        // (#idea — the Diary's would-be seat bells, A-809-11) and a path only a
+        // HIDDEN wing's tag wears (per-wing vocabulary: Studio mints its own),
+        // then the client's next read of it.
+        CatalogArm(label: "create_note · in Studio, born tagged #idea and a hidden wing's path", tool: "create_note",
+                   args: { w, _ in ["wing_id": s(w.studio), "text": s("Born tagged."),
+                                    "tags": .array([s("idea"), s("attic-topic")])] },
+                   capture: { ["bornTagged": $0["note_id"] as? String ?? ""] }),
+        CatalogArm(label: "read_note · the note born tagged", tool: "read_note") { _, c in
+            ["note_id": s(c["bornTagged"] ?? ""), "with_ids": .bool(true)] },
+        CatalogArm(label: "create_note · tags naming no tag", tool: "create_note") { w, _ in
+            ["wing_id": s(w.studio), "text": s("x"), "tags": .array([s("//")])] },
         CatalogArm(label: "create_note · a hidden wing", tool: "create_note") { w, _ in ["wing_id": s(w.attic), "text": s("x")] },
         CatalogArm(label: "create_note · a hidden book", tool: "create_note") { w, _ in ["book_id": s(w.vault), "text": s("x")] },
         CatalogArm(label: "create_note · a hidden chapter of a shared book", tool: "create_note") { w, _ in

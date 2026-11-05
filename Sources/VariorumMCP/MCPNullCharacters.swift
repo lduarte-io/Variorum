@@ -78,11 +78,15 @@ extension MCPWriteTools.Job {
         case .addTake(_, let text, let label): MCPNullCharacters.count(text, label)
         case .addComment(_, let text): MCPNullCharacters.count(text)
         case .saveLens(_, let name, _, _): MCPNullCharacters.count(name)
-        case .createNote(let title, let payload, _, _, _):
-            switch payload {
-            case .text(let text): MCPNullCharacters.count(title, text)
-            case .blocks(let blocks): MCPNullCharacters.count(title) + MCPNullCharacters.count(blocks)
-            }
+        // VX-814: every birth tag's path too (each adopts or mints a tag —
+        // `apply_tag`'s path, counted the same).
+        case .createNote(let title, let payload, _, _, _, let tags):
+            tags.reduce(0) { $0 + StoredText.nullCount($1) } + {
+                switch payload {
+                case .text(let text): MCPNullCharacters.count(title, text)
+                case .blocks(let blocks): MCPNullCharacters.count(title) + MCPNullCharacters.count(blocks)
+                }
+            }()
         case .importNote(let named, _, _): MCPNullCharacters.count(named)
         case .importBook(let book, _): MCPNullCharacters.count(book)
         case .applyTag(_, let path): MCPNullCharacters.count(path)
