@@ -65,7 +65,7 @@ Decisions were put as question batches; she picked among presented options. Reco
 | 3 | VX-824 (M) | ⌘digit contextual — wings from the keyboard (RULED: shape a) | B | NOT-STARTED |
 | 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
 | 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | NOT-STARTED |
-| 6 | VX-823 (HIGH) | the Library remembers scroll + selection on return from a note | C | NOT-STARTED |
+| 6 | VX-823 (HIGH) | the Library remembers scroll + selection on return from a note | C | VERIFIED 2026-11-05 (windows 1+2: 38+3 suites green, R-C1..3 + R-C4b run — road pin hollow, recorded; the fix red-on-old by the CROSS-WINDOW LIVE PAIR; walk primary legs green both voices) — PENDING: the deferred walk legs at the merge gate |
 | 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | VERIFIED 2026-11-05 (window vx-828-batchD: 18 suites/196 green incl. the 7 app pins; walk both voices — count honest, cancel, filter-proof, receipt, door gone at 0) — PENDING: phone suites at the merge gate |
 | 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | VERIFIED 2026-11-05 (geometry pin green; red-on-old by revert R-D4 — both geometry #expects red on the overlay, restored green; the band verified in the walk, both voices) |
 | 9 | VX-798 (M) | spellcheck: ⌘; / ⌘: chords + Edit ▸ Spelling and Grammar home | E | NOT-STARTED |
@@ -1484,3 +1484,36 @@ call in the mount-geometry closure — so a landing again requires a fresh scrol
 new mount, which the real arm swap never sends. Expected: both road arguments red at the top with
 the decide/appear trace printed and no `landing` line. Uncommitted edit on the committed tree
 (3a7dbff78); `git checkout --` restores.
+
+#### Batch C — ORCHESTRATOR VERIFICATION, WINDOW 2 (stage "vx-828-batchC2", 2026-11-05, GO 04:56, hard 60 — VX-823 VERIFIED)
+
+**Suites:** LibraryReturnRoadTests + LibraryReturnPlaceMountTests + LibraryReturnPlaceTests —
+15 tests / 3 suites ALL GREEN on the fix (3a7dbff78).
+**Reverts:** R-C4 as named ran GREEN under the revert — HOLLOW (the per-pane memory persists
+across the trip, so `window.isMeasured` holds from pre-trip scrolling; the guard blocks nothing).
+R-C4b (named above before running — disable the appear/height triggers, the pre-fix reading-only
+shape) ALSO GREEN on both road arguments: **the road pin is HOLLOW as red-on-old evidence** — the
+hosted RootView mount still produces a scroll reading, so the pin never reproduces the live
+no-reading condition even through the real router. Recorded, not fixed (the hallucination guard's
+letter). The pin STAYS as a shell-road regression net; it must NOT be cited as this fix's
+red-on-old. **The fix's red-on-old is the CROSS-WINDOW BEHAVIORAL PAIR:** window 1's walk red
+LIVE on the pre-fix build (two probes, ⌥⌘[ to the top with and without an edit) → window 2's walk
+green LIVE on the fix build, same legs, same store, both voices. FLAG FOR THE LADDER: a pin that
+genuinely reproduces the no-reading mount (a pre-sized pane swap) is worth a reviewer's look.
+**The walk (trimmed at the coordinator's call; the rest DEFERRED to the merge-gate window):**
+Study — (a) deep title-open, NO edit, ⌥⌘[ → the exact neighbourhood restored, the opened row
+wearing the mark, no panel, controls row one line; (b) same WITH a one-char edit (bytes restored)
+→ the neighbourhood held while the opened row left for the top of the edited sort; scrolled up:
+the row sits at the top WEARING THE MARK (P-828-12's accepted consequence, seen); (c) the
+double-click road → place + mark green; (d) the row-menu Open road → place + mark green (the mark
+moved to the newly opened row, the prior cleared — the clear roads seen live). Terminal — the
+voice flip itself KEPT the place (appearance is not a question); title-open + edit + ⌥⌘[ → the
+place held, the opened row to the top, mirror of Study. Zero new `.ips` across the window (count
+10 before and after), no Problem Reporter at quit (checked per the new pre-release rule), both
+strict pgreps empty, Study restored, posture unchanged. Walk machinery note: the guard's
+idle-reset tripped once on a 1.5 s gap (self-inflicted, idle watched climbing 12→18 before
+resuming); a stray pre-leg keystroke landed in QUICK ENTRY and was deleted — no note minted, no
+store change (verified in the capture).
+**DEFERRED to the merge-gate window (walk-only; the pins for each are GREEN):** sidebar leave,
+Cards, the live search sheet, the armed day filter, the new-question / wing / mode resets, the
+deleted-row survivor, the two-pane split. **Ledger row 6 flips VERIFIED** with this note.
