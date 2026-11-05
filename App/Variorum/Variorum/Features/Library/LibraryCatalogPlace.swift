@@ -82,6 +82,13 @@ final class LibraryPlaceMemory {
 
     func noteWindow(_ window: LibraryPlace.Window, surface: LibraryPlace.Surface, key: String) {
         windows[key] = window
+        noteSurface(surface, key: key)
+    }
+
+    /// The scroll view a pane SHOWS — said at its appear too, before any
+    /// reading (a return resolves in the surface it mounted, never in the
+    /// last one that reported).
+    func noteSurface(_ surface: LibraryPlace.Surface, key: String) {
         if surfaces[key] != surface { surfaces[key] = surface }
     }
 

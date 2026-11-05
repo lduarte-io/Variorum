@@ -185,7 +185,11 @@ struct RootView: View {
         calmAsks: CalmAskScheduler? = nil,
         tourOffer: TourOfferModel? = nil,
         mcp: MCPDoor? = nil,
-        protectionFaces: RoadStandingModel? = nil
+        protectionFaces: RoadStandingModel? = nil,
+        // VX-823: a pin's road to the window's Library model (the return road
+        // through this shell's own arm swap is pinned on it); the app passes
+        // nothing and the shell makes its own, exactly as before.
+        catalog: LibraryCatalogModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -205,7 +209,7 @@ struct RootView: View {
         // 13i-d U5: the Bookcase is ONE wing's surface — the current one.
         _shelf = State(initialValue: ShelfViewModel(
             session: session, wingID: session.wing.currentID))
-        _catalog = State(initialValue: LibraryCatalogModel(session: session))
+        _catalog = State(initialValue: catalog ?? LibraryCatalogModel(session: session))
         _poolPosts = State(initialValue: PoolPostsModel(session: session))
         _palette = State(initialValue: PaletteModel(session: session))
         _stars = State(initialValue: StarsModel(session: session))

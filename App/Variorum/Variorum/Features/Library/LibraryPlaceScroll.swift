@@ -18,8 +18,12 @@
 //     burst (`restInterval` of stillness) — so every road out of the Library
 //     finds it noted (P-828-13), and nothing is read during teardown, whose
 //     `onDisappear` order is not ours to assume.
-//  3. **It lands a return, UNBOUND.** On the first measured reading of a pane
-//     that remembers a place: one `ScrollViewReader.scrollTo(row, anchor:)`,
+//  3. **It lands a return, UNBOUND.** As soon as a pane that remembers a
+//     place has its proxy and a viewport height — the scroll view's OWN frame,
+//     which reports at mount; never waiting for a scroll READING, which arrives
+//     only when the scroll geometry CHANGES (the walk's red, window 1: a short
+//     listing whose geometry never changed after the return mount landed
+//     nowhere — see the record): one `ScrollViewReader.scrollTo(row, anchor:)`,
 //     unanimated (the Open list's road; Takes measured the proxy honouring
 //     `into / (viewport − height)`), on the rows the model still holds — then
 //     a short HOLD that re-checks the row's report a few times while the lazy
@@ -92,6 +96,13 @@ final class LibraryPlaceScrollMemory {
     /// THIS mount's reading (the model's per-pane copy may be a previous
     /// mount's until this one's first reading arrives).
     var window = LibraryPlace.Window.unmeasured
+    /// THIS mount's scroll view's own height — reported at mount by its frame
+    /// (`onGeometryChange` calls its action for the first value; a scroll
+    /// READING arrives only when the scroll geometry changes).
+    var height: CGFloat = 0
+    /// Between this mount's appear and its disappear: only a live surface
+    /// notes a place (a reading or a rest during teardown never does).
+    var live = false
     /// Whether this mount has asked the model if a return is owed (decided
     /// once — on the first reading or the appear, whichever comes first).
     var decided = false
@@ -110,6 +121,7 @@ final class LibraryPlaceScrollMemory {
     var restWatch: Task<Void, Never>?
 
     func cancel() {
+        live = false
         checks?.cancel()
         checks = nil
         restWatch?.cancel()
@@ -144,10 +156,17 @@ struct LibraryPlaceScroll: ViewModifier {
             content
                 .onAppear {
                     memory.proxy = proxy
+                    memory.live = true
+                    model.placeMemory.noteSurface(surface, key: key)
                     decide()
-                    // This mount's own reading may already be in (the geometry
-                    // hook can fire first — Takes' measured order).
-                    if memory.landingOwed, memory.window.isMeasured { land() }
+                    trace("appear owed=\(memory.landingOwed) height=\(memory.height)"
+                        + " window=\(memory.window.isMeasured)")
+                    landIfReady("appear")
+                }
+                // The viewport, at mount: the scroll view's own height.
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    memory.height = height
+                    landIfReady("height")
                 }
                 .onScrollGeometryChange(for: LibraryPlace.Window.self) {
                     LibraryPlace.Window($0)
@@ -164,8 +183,9 @@ struct LibraryPlaceScroll: ViewModifier {
                 // fresh rows while the hold stands.
                 .onChange(of: model.placeMemory.relistedToken(key)) {
                     guard memory.holding || memory.landingOwed else { return }
+                    trace("relisted owed=\(memory.landingOwed) holding=\(memory.holding)")
                     if memory.landingOwed {
-                        if memory.window.isMeasured, memory.proxy != nil { land() }
+                        landIfReady("relisted")
                     } else {
                         reaim()
                     }
@@ -181,6 +201,22 @@ struct LibraryPlaceScroll: ViewModifier {
         memory.decided = true
         memory.landingOwed = model.owesReturn(placeKey: key, surface: surface)
         memory.holding = memory.landingOwed
+        trace("decide owed=\(memory.landingOwed) remembered="
+            + "\(model.placeMemory.place(key)?.place.rows.first?.id ?? "nothing")")
+    }
+
+    /// The viewport this mount lands against: its reading's, else its own
+    /// frame's height (both are the scroll view's visible height — no inset
+    /// sits on these scroll views).
+    private var viewport: CGFloat {
+        memory.window.isMeasured ? memory.window.viewport : memory.height
+    }
+
+    /// Land a return as soon as it can be: owed, a proxy, a viewport.
+    private func landIfReady(_ trigger: String) {
+        guard memory.landingOwed, memory.proxy != nil, viewport > 0 else { return }
+        trace("land(\(trigger))")
+        land()
     }
 
     private func reading(old: LibraryPlace.Window, new: LibraryPlace.Window) {
@@ -188,7 +224,7 @@ struct LibraryPlaceScroll: ViewModifier {
         model.placeMemory.noteWindow(new, surface: surface, key: key)
         decide()
         if memory.landingOwed {
-            if new.isMeasured, memory.proxy != nil { land() }
+            landIfReady("reading")
             return
         }
         if memory.holding {
@@ -196,7 +232,7 @@ struct LibraryPlaceScroll: ViewModifier {
             if new.viewport != old.viewport || new.content != old.content { check() }
             return
         }
-        if new.offset != old.offset { armRest() }
+        if new.offset != old.offset, memory.live { armRest() }
     }
 
     // MARK: - The landing and its hold
@@ -204,6 +240,7 @@ struct LibraryPlaceScroll: ViewModifier {
     private func land() {
         memory.landingOwed = false
         memory.landing = model.placeLanding(placeKey: key)
+        trace("landing \(memory.landing.map { "\($0.id) into \($0.into)" } ?? "nil — the top")")
         guard memory.landing != nil else {
             // Nothing she was looking at survives: the top (no aim), and the
             // hold ends once the re-ask is in.
@@ -225,13 +262,14 @@ struct LibraryPlaceScroll: ViewModifier {
     }
 
     private func aim() {
-        let window = memory.window
-        guard let landing = memory.landing, let proxy = memory.proxy, window.isMeasured,
+        let viewport = viewport
+        guard let landing = memory.landing, let proxy = memory.proxy, viewport > 0,
               memory.aims < Self.aimBudget
         else { return }
         memory.aims += 1
         let anchor = LibraryPlace.anchorY(
-            into: landing.into, height: landing.height, viewport: window.viewport)
+            into: landing.into, height: landing.height, viewport: viewport)
+        trace("aim #\(memory.aims) \(landing.id) anchor \(anchor) viewport \(viewport)")
         var unanimated = Transaction()
         unanimated.disablesAnimations = true
         withTransaction(unanimated) {
@@ -239,12 +277,14 @@ struct LibraryPlaceScroll: ViewModifier {
         }
     }
 
-    /// Is the landed row where it belongs? Re-aim while it is not (its report
-    /// missing = not realized yet = aim again).
+    /// Is the landed row where it belongs? Re-aim while it is not — its report
+    /// missing (not realized yet), or no reading yet to judge by (an aim made
+    /// before the scroll view could act on it moves nothing, and a geometry
+    /// that never changes sends no reading): aim again, within the budget.
     private func check() {
+        guard memory.holding, let landing = memory.landing else { return }
         let window = memory.window
-        guard memory.holding, let landing = memory.landing, window.isMeasured else { return }
-        if let frame = model.placeMemory.frame(key, landing.id),
+        if window.isMeasured, let frame = model.placeMemory.frame(key, landing.id),
            LibraryPlace.isSettled(frame: frame, window: window, landing: landing) {
             return
         }
@@ -291,11 +331,38 @@ struct LibraryPlaceScroll: ViewModifier {
                 let quiet = ContinuousClock.now - memory.lastMotion
                 if quiet >= Self.restInterval {
                     memory.restWatch = nil
+                    // Only a surface still on screen notes where it is.
+                    guard memory.live else { return }
                     model.notePlace(placeKey: key)
+                    trace("rest noted \(model.placeMemory.place(key)?.place.rows.first?.id ?? "nothing")")
                     return
                 }
                 try? await Task.sleep(for: Self.restInterval - quiet)
             }
         }
     }
+
+    /// DEBUG: the decision log a pin can read (`LibraryPlaceTrace`).
+    private func trace(_ line: @autoclosure () -> String) {
+        #if DEBUG
+        LibraryPlaceTrace.note(key, line())
+        #endif
+    }
 }
+
+#if DEBUG
+/// **The return's decision log** (VX-823, DEBUG-only — the
+/// `SidebarSectionTrace` shape): off unless a pin installs a `sink`; every
+/// appear, landing decision, aim, re-ask and rest a pane's scroll makes, so a
+/// red pin says WHICH step failed rather than only that the list sat at its
+/// top (the walk's window-1 red was diagnosed by reading alone).
+@MainActor
+enum LibraryPlaceTrace {
+    static var sink: ((String) -> Void)?
+
+    static func note(_ key: String, _ line: @autoclosure () -> String) {
+        guard let sink else { return }
+        sink("[\(key)] " + line())
+    }
+}
+#endif

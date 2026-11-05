@@ -701,6 +701,7 @@ shared-ledger edit (drafts below). No `Shared/`, no `Sync/`, custody or keychain
 | C2 | The model: remember on leave · restore on mount (the in-place re-ask to the place's depth) · a new question / wing drops it · the return mark (per Q2's ruling) + model pins | DONE (this commit) — `Features/Library/LibraryCatalogPlace.swift` (NEW: `LibraryPlaceMemory` — per-pane places, marks, the views' reports, the re-ask token; the model's `placeOrder` · `notePlace` · `rowOpened` · `listingAppeared` · `placeLanding` · `owesReturn`); `LibraryCatalogModel.swift` (`placeMemory`; `search()` = `questionChanged()` + the new `startOver()`; `reread(noteDepth:groupDepth:)`; the mark's clear roads in `clickNoteRow` / `selectBook` / `modeChanged` — a mode switch also drops the places, see the self-assessment); `LibraryPlace.swift` (+ `Surface.isSameKind`, the remembered surface); `VariorumTests/LibraryReturnPlaceTests.swift` (9 model pins). `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`, no warning in a touched file); the RUN is PENDING |
 | C3 | The view: the rows' content-space reports + the scroll memory on the three scroll views (List column · Cards · the answer sheet) + the unbound landing and its hold; mounted pins (red on old: the remount lands at the top) | DONE (this commit) — `Features/Library/LibraryPlaceScroll.swift` (NEW: `libraryPlaceScroll` — the window by reference, the rest watch, the unbound `ScrollViewReader` landing + its hold; `libraryPlaceRow` — the content-space frame); `LibraryCatalogView.swift` (`placeKey`; the mount's `.task` → `listingAppeared`; every row-open door → `rowOpened`; `isSubject` = the panel's subject OR the mark; the List column and the Cards named + tracked); `LibraryBooksRegion.swift` (`LibraryPagedNotes.placeKey` + the rows' reports); `LibrarySearchSheet.swift` (`placeKey`, the groups' and books' reports, the sheet tracked); `RootView.swift` (`placeKey: pane.raw` — one line); `VariorumTests/LibraryReturnPlaceMountTests.swift` (5 mounted pins, compile on the pre-fix tree — their red-on-old is runnable as-is). `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`). Window part 1: 3 mounted pins RED ON NEW — all three FIXTURE (a stale oracle row; raw offsets compared across lazy mounts; a region frame the sheet never publishes), traced and fixed in the pins only (00569c8ce — "THREE MOUNTED PINS RED ON THE NEW TREE" below); the re-run PENDING (the window) |
 | C4 | Self-assessment, the end-of-batch core `swift test`, the app `build-for-testing` | DONE (this commit) — core `swift test` at 27bfde19e: `VariorumCoreTests` 3670 tests / 493 suites PASSED (5 known issues — batch D's count, unchanged: this batch touches no core file; PinBeltTests rides inside); `StringsWorkbookTests` 32/4 PASSED; the 7 known "not used by any target" warnings (14 lines, build + test); `VariorumMCPTests` 549/100 with 3 issues, all the MCP SOCKET-HARNESS class batch D met (`MCPDiscoverProbeServerTests`, `MCPPreInitializeWindowTests`, `MCPHarnessTimeLimitTests` — the VX-685 bound) — re-run ALONE (`swift test --skip-build --filter …`): 16 tests / 3 suites PASSED in 2.3 s. This batch touches no MCP code. App `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft3.log`) |
+| C5 | THE WALK'S RED (window 1 — the live return lands at the top): the mechanism (the landing waited for a scroll READING that never comes when a short listing is swapped into an already-sized pane), the fix (land on proxy + the scroll view's own height; the surface said at appear; the hold re-aims until a reading confirms; a teardown-proof liveness guard; the DEBUG `LibraryPlaceTrace`), the ROAD PIN through the real `RootView` (+ its `catalog:` init seam) | DONE (this commit) — `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft5.log`, no warning in a touched file); the road pin's RUN, its revert R-C4 and the re-walk are PENDING (the next window) — see "Batch C — THE WALK'S RED" |
 
 #### Batch C — THE TRACE (why the Library forgets — an Improvement, no bug mechanism; read at the code)
 
@@ -1024,6 +1025,61 @@ place's depth plus a page reaches the end; the depth is the model pins' exact cl
 the pre-fix tree lacks (red-on-old runnable as-is); R-C3 still reds the four return pins.
 `build-for-testing` TEST BUILD SUCCEEDED (`DerivedData/vx828c-bft4.log`). The re-run is the
 orchestrator's (the window holds).
+
+#### Batch C — THE WALK'S RED (window 1: the live return lands at the top) — the mechanism, the fix, the road pin
+
+**What the walk showed** (the record's "Batch C — ORCHESTRATOR VERIFICATION, WINDOW 1"): in the real
+app, ~47 rows, a title click into a note and ⌥⌘[ back — and, with no edit, the same — the Library
+came back at its TOP; the return MARK came back. So the place memory survived the trip (the mark
+lives beside the place and only `questionChanged` clears both — it never ran), and what failed is the
+RETURN mount's landing.
+
+**The mechanism — traced by reading (no Debug launch, no app test run is mine); the road pin below
+is the instrument that confirms or refutes it in the next window.** The return landing was owed at
+`decide()` but FIRED only from this mount's first scroll READING (`landIfReady`'s predecessor: "the
+first measured reading with a proxy in hand" — the `onAppear` arm also required `memory.window`, i.e.
+a reading). `onScrollGeometryChange` calls its action when the transformed value CHANGES — Apple's own
+words for the `action` parameter ("A closure to run when the transformed data changes"; its initial
+call is undocumented — a read-only lookup, 2026-11-05: developer.apple.com's
+`onScrollGeometryChange(for:of:action:)` page). A short listing swapped into an ALREADY-SIZED pane
+(the shell's `paneDetail` arm swap inside a laid-out `PaneHost`) lays out once and never changes —
+no content re-estimate, no resize — so no reading ever arrived, the owed landing never ran, and the
+hold's checks (which also needed a reading) never re-aimed: the list rested at offset 0, the rows the
+model still held at their natural top. **Why every pin was green:** the mounted pins re-mount the
+catalog onto a fresh hosting ROOT (`hosting.rootView = …`), whose first passes resize the scroll view
+— a geometry change, a reading, a landing; the model pins never touch the view. **Why the departure
+side is not implicated:** the place was noted (the open captures it synchronously; the window's mark
+proves the open ran), and a teardown cannot overwrite it now (below).
+
+**The fix (`Features/Library/LibraryPlaceScroll.swift`; `LibraryCatalogPlace.swift` +
+`noteSurface`):** the return lands as soon as the pane has its PROXY and a VIEWPORT — the viewport
+is the scroll view's OWN height from `onGeometryChange` (which reports its first value at mount:
+the catalog's DEBUG frame probes and its `libraryWidth`/`listAreaHeight` already depend on that),
+else this mount's reading — from `onAppear`, from the height report, from a reading, or from the
+re-ask's token, whichever completes the set (`landIfReady`); the pane's surface is said at `onAppear`
+(`noteSurface`), so the landing resolves in the surface it mounted; the hold's checks re-aim while
+NO reading has yet confirmed the row's place (an aim made before the scroll view could act moves
+nothing and sends no reading) — bounded by the same 12-aim budget. **A guard beside it (not the
+fix):** a surface notes a place only while LIVE (between its appear and its disappear — a rest
+armed or fired during teardown notes nothing), so no teardown reading can overwrite the place an open
+captured. **A DEBUG instrument (stays, off unless a pin installs its sink — the `SidebarSectionTrace`
+shape):** `LibraryPlaceTrace` — decide / appear / land / landing / aim / re-ask / rest lines, so a
+red pin says which step failed instead of only "at the top".
+
+**The road pin (`VariorumTests/LibraryReturnRoadTests.swift`, 2 arguments):** the REAL `RootView`
+(a new internal init seam `catalog:` — production passes nothing; batch D's ruled `model:` seam is
+the precedent) in a window; the Library reached through `ShellRouter.adopt(.library)` (the sidebar's
+road); 5 books + 47 notes (the walk's shape); her scroll by the clip to 75 % and its rest; then
+(a) the catalog's open door's two statements — `rowOpened(row, placeKey:)` then the shell's
+`adopt(.post(row))` (`openHit` minus the panel's close) — or (b) the sidebar's leave to the Bookcase;
+then `router.goBack()` (⌥⌘[). Claims: the row back within 1 pt of where it sat (the DEBUG oracle,
+realized rows only), and on (a) the return mark. Its failure message carries the trace.
+**RED-ON-OLD by revert R-C4:** in `LibraryPlaceScroll.landIfReady` add `memory.window.isMeasured`
+to the guard (the landing gated on a reading again — the pre-fix rule) → expect both arguments red
+(the row not where it sat — the list at its top) with a trace showing `decide owed=true` and no
+`landing` line. **If the pin is GREEN under R-C4, the mechanism above is wrong** — the trace then
+names the step, and this record says so before anything else lands. (The pin needs the new init
+seam, so on the C3 tree it is compile-red; R-C4 is its behavioural red.)
 
 **Files touched (the whole batch):** `App/Variorum/Variorum/Features/Library/LibraryPlace.swift` (new) ·
 `App/Variorum/Variorum/Features/Library/LibraryCatalogPlace.swift` (new) ·
