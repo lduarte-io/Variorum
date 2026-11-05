@@ -2045,3 +2045,30 @@ deleted-row survivor, the two-pane split. **Ledger row 6 flips VERIFIED** with t
 Build B1–B4. The pin plan binds as briefed (routing pins for the chord's three contexts incl.
 the quick-entry pass-through; the registry walk; the marquee's no-clock-when-fit state pin; the
 switcher-alignment geometry pin where reachable).
+
+#### Batch E — THE FORK'S RULING (orchestrator, 2026-11-05 — build E3–E5 to this; everything PROVISIONAL for her morning sitting)
+
+1. **Q-E1 the absent shared query: (a) CONFIRMED** — add vx-809's
+   `Sources/VariorumCore/Queries/TagUsageQueries.swift` BYTE-IDENTICAL as its own commit, the
+   source branch and SHA (5279ec16a) named in the message, and NEVER edited in this worktree
+   afterward. This is "build against the named signature" in its most faithful form — the one
+   mint vendored whole, not a twin (the seam's law is one implementation, and this is vx-809's,
+   bytes and all). Git reconciles identical adds; if vx-809's ladder edits the file first, OUR
+   merge-in takes THEIRS and the second merger re-runs TagUsageQueriesTests — both already the
+   standing rules. (b) would leave VX-840 undrawable and unwalkable tonight; (c) would hold a
+   member open past the run. vx-809's own tests are NOT copied (their branch carries them; less
+   collision surface). The coordinator is being told, so the seam ledger stays straight.
+2. **Q-E2 / P-828-4 the bulk undo: ONE combined entry, "Delete Unused Tags" — CONFIRMED** (the
+   lean). One confirmed act = one ⌥⌘Z entry is the house pattern (the cross-block compound,
+   importDocument's one compound entry); one transaction on one stamp; VX-247's Delete Tag
+   undo/redo reused with only a label. The stated redo consequence (a tag re-applied between
+   undo and redo is deleted again, application riding) MATCHES the single delete's own redo
+   semantics — consistent, accepted, recorded. PROVISIONAL.
+3. **Q-E3 the list: (i) CONFIRMED** — every unused tag listed checked, linked boxes encoding
+   deleteTag's own subtree reality (unchecking a tag unchecks its ancestors, since deleting an
+   ancestor would take the kept child; checking a tag checks its subtree). The act re-checks
+   inside the transaction, subtree-aware confirmed ∩ still-qualifying (batch D's rule applied to
+   subtrees). The boxes never promise what the operation wouldn't do.
+4. **Q-E4 the door: (a) CONFIRMED** — the live count on a narrow observation, "Delete N unused
+   tags…", not drawn at zero (batch D's ruling 6, the P-2 letter). Words stand as drafted,
+   PROVISIONAL, hers to tune.
