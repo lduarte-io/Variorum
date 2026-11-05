@@ -55,10 +55,11 @@ provisional), phone 88/6, walks green both voices; the two Settings walk legs st
 VERIFIED-BY-PINS (words-guard fail-closed with Settings open — the husk-tag fixture is still in
 the dev store if a later session wants the live leg).
 
-**Open items:** QUESTIONS #263 (her bundle — the P-828 set, Q-B1's gate reading, Q-B2's
-cycling-word regression, the two wording items incl. the nothing-left over-claim) · VX-855 (the
-teardown SQLCipher codec race, vx-809's neighborhood) · VX-856 (the book Index/Outline place
-courtesy) · #161 stays open (the menu divide keeps the settle).
+**Open items:** VX-855 (the teardown SQLCipher codec race, vx-809's neighborhood) · VX-856 (the
+book Index/Outline place courtesy) · VX-870 (the Library masthead's cycle in place, her word at
+the bundle sitting) · #161 stays open (the menu divide keeps the settle). QUESTIONS #263 is
+CLOSED — every call ratified or landed at her 2026-11-05 bundle sitting (the addendum at this
+file's end); VX-871's reword shipped in 1.2.
 
 ---
 
@@ -2404,3 +2405,48 @@ sub-24-pt floor / full-screen legs (the space rule and probe pins), the mode-swi
 (drop-road pins). **Posture:** Study restored, ⌘Q clean, both strict pgreps empty, no Problem
 Reporter, .ips count 17 at GO (114055, VX-855's class, coordinator-classed) and 17 at release —
 ZERO new in the window.
+
+---
+
+## ADDENDUM — THE BUNDLE SITTING AND THE 1.2 RELEASE (2026-11-05, afternoon)
+
+**The sitting (in my session, group by group; the question tool's 'n' notes proved broken — her
+edits came as chat text).** Group 1: Q-B1 and P-828-1 ratified. Q-B2 — her words: *"if it brings
+you to the bookcase instead of the library, can't you keep clicking to keep cycling? … it would
+be nice if clicking it in library didn't move you either (a followup ticket could be minted for
+that). if you can't click to cycle anymore at all we need to change it before release."* Verified
+in code: `cycle()` → `goTo` → `landInBookcase()`, and the word lives in BOTH mastheads, so
+click-to-cycle works in place in the Bookcase; only the Library click navigates away. Her
+condition held → no pre-release change; **VX-870** born. P-828-10's flagged sentence — her pick,
+the reword: landed as **VX-871** (PR #225, one literal; review waived in her words, *"i do not
+need an opus review on the word change"*). Group 2: all ratified; her load-bearing clarification
+— *"is a block created by a bunch of returns empty? … does this still find some blocks?"* —
+answered from code (insertEmptyBlock mints `text: ""`; the separator newline is rendered, never
+stored; the predicate's zero-length reading finds exactly her case). Group 3: the ticker
+ratified; VM twins minted (**VM-39/VM-40**); the 1.2 notes approved with her four edits (the
+Return bullet claims only the punctuation fix; the lock bullet says a locked library tells AI
+tools nothing; the AI material its own ## section, parser-verified; "has its Cancel button
+back").
+
+**Process note, on the record:** PR #226 (the pin's literal arm) was merged WITHOUT the
+coordinator's merge GO — test-only, caught by my own filtered run, no harm, but merges serialize
+through the coordinator and the next one asks first (their correction accepted). The pin story:
+my pre-merge claim that no pins move was WRONG — TrashEmptyBlockSweepTests:198 pins the sentence
+both ways (symbol AND bytes), and the bytes arm went red at the release window's filtered run,
+exactly the pin's job; the arm now carries her sentence.
+
+**The 1.2 release (her words: "approved, run the release", then "publish it to the website").**
+Window under `nov4coordinator` (claim vx-828-release, 150 min). (a) filtered: 36/5/0 on
+fddbb72a5 after #226. (b) step-0 PASS, no stops — an Opus driver, both arms, 230/230 md5s,
+posture Standard · MCP OFF · signed out; one finding: the walk's empty libraries clear the
+per-Mac `openNotes.remembered` prefs (ticketed post-window). (c) release.sh --version 1.2 on
+d7b2b7c35 (her doc-only VX-879 commit atop the tested tree): build 11323, notarized+stapled app
+and DMG, spctl accepted, shipped-bytes verify PASS; pins SQLCipher 4.18.0 · swift-dependencies
+1.14.1 · swift-syntax 602.0.0 · GRDB 7.11.1+sqlcipher.1 · no swift-issue-reporting. (d) PUBLISH
+at her word: R2 upload, verify-published dmg PASS (sha256 054ba2416…cf97cfa byte-identical);
+appcast deployed + verify PASS; the page serves 1.2; site commit 343ed99 (bare, the 1.1 shape).
+(e) the /Applications refresh: A1 cmp-verified ×6 (`Backups/safety-copies/A1-20261105-pre-1.2-
+refresh`), installed 11323 codesign deep+strict OK + spctl accepted, the 1.1 app set aside in
+the release OUT, nothing launched, no re-seed. No Problem Reporter; newest Variorum .ips still
+114055. Artifacts: feed DMG + appcast in `~/Library/Developer/Variorum/Releases/feed/`, dSYMs
+under `Releases/1.2/`, OUT `release-1.2-20261105T232228Z.noindex`.
