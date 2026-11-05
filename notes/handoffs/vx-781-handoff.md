@@ -2,7 +2,7 @@
 
 ## Your checklist
 
-1. **QUESTIONS #260 is ratified except one held item.** You ruled at the checkpoint: **P-781-1** (the CLI lockfile alignment) and **P-781-2** (the 15 visible package references) both stand as built; **P-781-4** — moving an existing dependency's pinned version is **AUTHOR-ONLY** (the CLAUDE.md line landed). **P-781-3** (the pin checker's byte-strictness) is HELD at your word for a build-ergonomics survey — tools/practices that make parallel Xcode work less painful — before you pick strict vs versions-equal; the survey: `notes/plans/vx-781-build-ergonomics-survey.md`.
+1. **QUESTIONS #260 is ratified except one held item.** You ruled at the checkpoint: **P-781-1** (the CLI lockfile alignment) and **P-781-2** (the 15 visible package references) both stand as built; **P-781-4** — moving an existing dependency's pinned version is **AUTHOR-ONLY** (the CLAUDE.md line landed). **P-781-3** you ruled the same sitting after the owed survey (`notes/plans/vx-781-build-ergonomics-survey.md`): **versions-equal** — built the same night as **VX-853**; the survey's optional lockfile-mode belt parked as **VX-854**. So #260 is FULLY RESOLVED; nothing left to ratify.
 2. **VX-852** (Medium, Todo): wiring `Tools/verify-pins` into release.sh as the standing post-archive check — the diff shape is ready in the record; it ran manually as a GO condition at the 1.1 release. Lands by normal PR flow with your eyes whenever you want it.
 3. Nothing else needs your hands. No release owed (1.1 shipped mid-run, independently, on committed pins — verified).
 
