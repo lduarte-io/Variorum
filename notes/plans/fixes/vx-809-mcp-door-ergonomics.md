@@ -141,3 +141,75 @@ One batch = one acceptance unit = one implementer session. Evidence by kind: the
 - P-809-1 (the fixed scope words' exact sentence) · P-809-2 (the ownership refusals' shape — the one recorded exception to the law) · P-809-3 (move_book_to_wing's undo story) · P-809-4 (the locked sentence + the while-connected-grants-survive-the-lock consequence) · P-809-5 (Trash wearers ⇒ not unused) · P-809-6 (the docs wording) — all built the lean way, hers to ratify.
 - RIDER OFFER (the kickoff duty — open Low/Medium in this run's areas whose code this run opens): **VX-777** (a stale start's fresh.stop() speaks switch-off words to a replaced host's connections — exactly VX-818's file) · **VX-775** (an Activity-write failure after a landed act answers the client an error — the wire's act path) · **VX-776** (store read failure inside MCPSession's SDK handlers unworded). Not adopted without her word.
 - The field guide re-seed of her REAL store if VX-846 changes chapter content (her hands, A1 rail).
+
+---
+
+## BATCH 1 RECORD — the pure-function law (VX-825) + the duplicate's date title (VX-826)
+
+**Implementer:** opus-implementer (fresh, batch 1), 2026-11-05, worktree `~/dev/variorum-vx-809`. Headless only (`swift test`), no stage claim held. **No revert is in flight.** **No `App/Variorum/Shared/` file is in this batch's diff (none expected).**
+
+### LIVE STATUS (flipped per piece, same commit)
+
+| # | Piece | Status |
+|---|---|---|
+| B1-0 | Preflight read (record whole · MCPSpec in full · QUESTIONS #258 · SurfaceContracts Doors · VX-771 FOR A LATER READER · SessionResiliencyProtocol) + the code survey + VX-825/826 ticket threads | DONE |
+| B1-1 | FORK F-1 (P-809-1) — the fixed scope sentence + its per-tool placement — PROPOSED below, awaiting A-809-N | PROPOSED |
+| B1-2 | Retire `remove_tag`'s `still_in_books_hidden_count` (red-on-old pin, then the build) | NOT STARTED |
+| B1-3 | Retire `duplicate_note`'s `landed` counted arm ("a book not shared with you") | NOT STARTED |
+| B1-4 | Retire `move_note_to_wing`'s `left_books` hidden arm (today it lists an UNREADABLE book's **id**, name-less) | NOT STARTED |
+| B1-5 | The three tool descriptions to the new shape | NOT STARTED |
+| B1-6 | Name guard verify (VX-259 / VX-363 / create_gathering) — standing pins named + two-store arms | NOT STARTED |
+| B1-7 | FORK F-2 (P-809-2) — the ownership refusals: every wire act that hears them, 2–3 shapes + leak analysis — PROPOSED below; **NOT BUILT until A-809-4** | PROPOSED |
+| B1-8 | THE TWO-STORE CATALOG PIN — harness + the walk + the catalog table | NOT STARTED |
+| B1-9 | VX-826 — the trace (below), the exact-repro pin, the remaining class's pin + fix (FORK F-4) | TRACED — pins NOT STARTED |
+| B1-10 | FORK F-3 — scope question: VX-825's TITULAR ask (remove_tag says when a tag looks unused within reach) | ASKED |
+| B1-11 | Self-assessment + test counts | NOT STARTED |
+
+### FORK F-1 — the fixed scope words (P-809-1) — PROPOSED, orchestrator to rule
+
+**The sentence (lean):** `Books beyond your reach, if any, are not listed.` — her sketch, made a sentence.
+**One alternative:** `Only books you can read are listed here.` (positive phrasing; drops "if any", which some readers hear as a hint).
+
+**Placement (lean) — ONE key, one value, everywhere, ALWAYS present on these tools (never conditional — a conditional key is itself an oracle):** `"beyond_reach": "<the sentence>"`.
+- `remove_tag` (landed): `still_in_books` ALWAYS present — the READABLE living books still holding the note by the tag (`{book_id, name}`, `[]` when none) — plus `beyond_reach`. `still_in_books_hidden_count` RETIRES. Consequence: the VX-764 "nothing stranded answers byte-unchanged (no key)" guard is SUPERSEDED — under the law the bare answer cannot stay bare only when nothing hidden is stranded, so every landed `remove_tag` carries the two keys. *(Option (ii), rejected as lean: keys present only when the readable list is non-empty, the bare pre-VX-764 bytes otherwise — pure too, and keeps the old guard, but the bare answer then says nothing exactly when a hidden board kept the note; her "honesty by humility" reads as the always-present words.)*
+- `duplicate_note` (landed, both forms incl. `brief`): `landed`'s prose is computed from READABLE books only ("a book not shared with you" / "N books not shared with you" RETIRE) — and `beyond_reach` rides beside it. Residual, said plainly: when only an unreadable book took the copy in, `landed` reads the Pool words ("the Pool of Home"), which is the client's-eye truth; `beyond_reach` is what keeps that from being a claim of totality.
+- `move_note_to_wing` (landed): `left_books` lists ONLY readable books, each `{book_id, name}` (today an unreadable book is listed by its **id** with no name — the id itself crosses; that is worse than a count and retires with it) — plus `beyond_reach`. Her receipt keeps the full count (hers, not the wire's).
+- Batches 2–3 reuse the same key and sentence (`move_book_to_wing`, `replace_tag`).
+
+Building the plumbing now around a single constant (`MCPWriteTools.beyondReachKey` / `.beyondReachWords`) so the ruling changes one line.
+
+### FORK F-2 — the ownership refusals (P-809-2) — PROPOSED, NOT BUILT
+
+**Every wire act that can hear `noteOwnedElsewhere` / `noteMemberedElsewhere`** (traced from the throw site `Operations+Ownership.swift:35 consultOwnership`, called by `addPostToReading` and `seatArrival`):
+1. **`add_note_to_book`** — `addNoteToBookForClient` → `addPostToReading` (`Operations+MCPWrites.swift:998`) on an EXISTING note: the ONE live wire road. Owned target + the note membered in any other book → `noteMemberedElsewhere`; plain target + the note membered in an owned book → `noteOwnedElsewhere` (`OwnershipDecision.verdict`). The wire speaks her table's words (`OpsRefusalTable`): "That note already lives in another book, and this book owns its notes — …" / "That note belongs to a book that owns its notes — …" — no book named, but the KIND (owned vs membered) of the claimant is said.
+2. NOT reachable (verified in code): `create_note` / `import_document` / `duplicate_note` with `book_id` (each adds a FRESH note, membered nowhere → the consult always says add, `Operations+MCPWrites.swift:662`, `Operations+Versions.swift:321`); every INTAKE road the wire triggers — `apply_tag`, `set_starred`, `set_book_rule`, `create_book`/`create_gathering` with a rule — decides ownership inside `IntakeDecision` and BELLS, never throws; `seatArrival` (her judgment op) has no wire tool; Copy in / Move in / Own have no wire tool (Own is hers alone). *(The kickoff comment's "may be unreachable by construction" is half right: intake never reaches it; the hand-add does.)*
+
+**Siblings of the same class (a refusal forced by a hidden fact, where the none-exist store succeeds) — found in the survey, enumerated so the ruling can speak for them too:**
+- **S-1 capacity** — `add_note_to_book`, `create_note`/`import_document`/`duplicate_note` with `book_id`: `readingAtCapacity` counts hidden members (Private notes in a granted book). Her QUESTIONS #218 ruling ACCEPTED this inference in 2026-10 ("it'll still see that it's hitting the limit, but i think that might be fine") — R-825 post-dates it and says "nothing on the wire may vary"; the orchestrator rules whether #218 stands as a second named exception or folds in.
+- **S-2 the frozen-book move** — `move_note_to_wing` on a note held by a FINISHED or SEALED book the client cannot read: her op refuses (`lockedReading`/`readingSealed`); the wire names the book only where readable (`frozenWords`), else the op's own words ("This book is finished/sealed…") — the move succeeds in the none-exist store.
+
+**Shapes (leak analysis per shape; "the forced bit" = a refusal where the none-exist store succeeds — unavoidable, since ownership/capacity/finish are real):**
+- **(a) LEAN — the reach-pure verdict + ONE fixed sentence.** The refusal's words are a pure function of the REACHABLE verdict and the act's outcome: decide ownership over the claimants the client can READ; where that reachable verdict refuses, her words stand (they describe reachable state — the claimant is readable); where it would ADD but the true verdict refuses (every claimant unreadable — or, S-1/S-2, the cause is hidden), the answer is ONE fixed sentence naming no book, no count, no kind, e.g. *"That note can't be added to this book — something beyond your reach holds it. The author can add it in Variorum."* (per act: "…can't be moved…" for S-2). Leak: exactly the forced bit, said honestly; nothing about WHICH, HOW MANY or WHAT KIND (owned vs membered collapse into one sentence). Recorded as the law's ONE explicit exception with its why (ownership is real; a client can never be told success it did not get).
+- **(b) her words unchanged** (today's behavior). Leak: the forced bit PLUS the claimant's kind ("owns its notes" vs "lives in another book") — two distinguishable answers where (a) has one; and through S-1 a count inference (the #218 class). Rejected as lean: more than the minimum.
+- **(c) an opaque refusal** — *"You can't add this note to this book — ask the author to add it in Variorum."* — no cause at all. Leak: the forced bit only (same as (a)), but the agent can't reason about it, and the words are indistinguishable from a rung problem it could otherwise fix. Rejected as lean: (a) is equally minimal and honest.
+- Off the table (the record's): "pretend the note is fine" (answer not-shared — a lie about a reachable note) and "just succeed" (breaks ownership).
+
+The two-store catalog pin asserts the P-809-2 arms (and S-1/S-2 if ruled in) as the ONLY differing rows, each differing in exactly the ruled way.
+
+### FORK F-3 — scope question (VX-825's titular ask) — ASKED
+
+VX-825's TITLE and its first ask — "remove_tag's answer says when a tag looks unused within the client's reach; deletion stays hers" (the ticket's body: "remove_tag's answer (and the tag listing's rows) speak REACH-SCOPED usage — 'no note this client can see wears it'") — is not one of BATCH 1's four parts, but BATCH 5's VX-840 text refers to "batch 1's arm reads the same predicate under a reach filter". **Question to the orchestrator: is the reach-scoped "unused" fact in this batch?** If yes, the lean shape: a landed `remove_tag` adds `tag_unused_in_reach: true|false` — whether any note this client can READ still wears the tag (post_tag only; the probe stops at the first readable wearer, ∝ the tag's wearers in the worst case), computed through `decide(..., rung: .read)`, never a library-wide count; the description says the fact is reach-scoped and that deleting a tag is the author's (Settings ▸ Tags). Building nothing here until ruled.
+
+### VX-826 — the trace (B1-9)
+
+**The derivation (read in code):** a note's displayed name is `DisplayTitle.note(title, entryDate, createdAt)` — the title, else `entry_date`, else the LOCAL day of `created_at` (`DisplayTitle.swift`; every wire title — `read_note`, `list_notes`, `mcpScopeTitle` — and every app title read the same rule). A copy is born today (`copyPost` stamps `createdAt: now`), so a copy whose title and `entry_date` are both absent reads TODAY. `copyPost(keepingNamedDay: true)` (the shared body, `Operations+Versions.swift:797`) gives the copy `DuplicateDay.entryDate(...)`: an undated, untitled, NON-JOURNAL source's copy takes the source's creation day — so that class reads the source's name. Every other class keeps `title`/`entry_date` verbatim.
+
+**So exactly one title class still derives "today" on the current tree:** a JOURNAL-PROFILE source (`profile = 'journal'` — every ⌘J entry) with no title and no `entry_date` (or `entry_date = ''`) — VX-759 kept it undated deliberately (the notebook rule keys on `profile='journal' AND entry_date`; `DuplicateDay`'s doc). Reachable by HER doors: a ⌘J entry whose date she cleared (Editor's date door, `setEntryDate(nil)`), then Duplicate with/without Tags or Copy to Wing → the copy reads today. **Not reachable on the wire:** `profile='journal'` is a fence leg (`MCPGrantQueries.swift:514`), so `duplicate_note` / `copy_note_to_wing` refuse a journal-profile source in the fence's one sentence.
+
+**The exact repro (the agent's "2 of 7")** — an automatic date title (untitled, undated, non-journal — the only class the wire can duplicate) — reads the SOURCE's day on the current tree (VX-759's class, fixed by `3f2f650d4`). The ticket was filed 2026-11-05T02:56Z (11-04 19:56 MST); VX-771 merged 11-04 07:27 with the /Applications refresh HELD and 1.1 cut at 21:50 — so the agent's 2-of-7 is consistent with a build WITHOUT VX-759 (its "came over correctly dated" matches a dated source's copy, verbatim since long before VX-759). **PENDING the pin:** the exact-repro pin green on the current tree and red with VX-759's `keepingNamedDay` reverted → the reported repro is HOLLOW on today's tree (record, don't re-fix), and the journal class is the real remainder.
+
+**FORK F-4 (proposed P-809-7) — the journal class's fix (R-826: "a date-titled note's copy reads the SOURCE's displayed title, never today's"):**
+- **(a) LEAN — extend `DuplicateDay` to the journal class:** an undated, untitled JOURNAL-profile source's copy takes the source's creation day as `entry_date` too. Keeps `DisplayTitle` a pure display rule (no title write) and keeps the one mechanism VX-759 ratified. Cost, said: such a copy is a journal-profile note dated D, so `canonicalJournalEntry(D)` may pick it when D has no earlier entry (the earliest `created_at` wins, so a day with ANY older entry is unaffected) — the same claim a duplicate of a DATED ⌘J entry already makes today (its `entry_date` is copied verbatim), so the notebook exposure is the shipped one, not a new kind.
+- **(b) materialize the displayed title** (the agent's "copy the displayed title as-is"): the copy's `title` = the source's displayed date string, journal class only. Satisfies R-826 with zero notebook effect, but WRITES a derived title — against `DisplayTitle`'s "never a write … nothing is copied (the no-denormalization rule)".
+- **(c) keep as built** (VX-759's journal exclusion) and record R-826's letter unmet for the class — rejected: R-826 says "never today's".
+Building (a) PROVISIONAL unless ruled otherwise; red-on-old pin on the journal class through her Duplicate doors AND Copy to Wing (the shared body); byte-verbatim pins for the typed-titled and dated classes.
