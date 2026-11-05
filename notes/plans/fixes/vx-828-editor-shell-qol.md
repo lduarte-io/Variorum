@@ -2277,3 +2277,20 @@ per call).
 **Ledger rows 3/4/5/9 flip VERIFIED; rows 10/11 flip VERIFIED-BY-PINS** (the live Settings walk
 deferred as above). Batches A–E are ALL CLOSED pending the merge-gate items; the ladder (round 1
 spawned 10:37, running headless) is the run's last gate before closeout.
+
+#### THE LADDER — ROUND 1 VERDICT (orchestrator's running note; the findings file is
+notes/plans/fixes/vx-828-ladder-round1.md, 4d45798b3 + 51cbb2cb3)
+
+0 BLOCKER · 0 MAJOR · 1 standing MINOR (the road pin's stale red-on-old claim + the missing
+mechanism net — with the implementer for agree/dispute, the reviewer holds the final call) ·
+4 NIT. Dispositions of the NITs that are the ORCHESTRATOR'S: (a) **P-828-6 addendum, recorded
+now:** a caret adjacent to punctuation inside a word's run (e.g. `beta|,`) rides the WHOLE run
+down under wordStart's floor where the old settle would have cut at the next word — within
+R-828's letter ("the whole word rides down") and the ruling's spirit, now NAMED in the
+provisional for her morning eye; (b) the `noEmptyBlocksLeft` refusal's "not in the Trash any
+more" over-claim joins P-828-10's wording-pass list (hers); (c) the ▾-list Picker current-row
+re-pick (SPECULATIVE) joins the merge-gate walk as a micro-leg beside the ▾-list witness;
+(d) the 2,400-char window widening is with the implementer (above). ADDED TO THE MERGE-GATE
+WINDOW: the amended road pin's red-show under R-C4 (one revert, one suite) once the MINOR's fix
+lands. The reviewer's clean-bill highlights and the full verification-debt restatement live in
+the findings file.
