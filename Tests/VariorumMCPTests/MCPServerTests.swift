@@ -40,10 +40,30 @@ final class ServerHarness: @unchecked Sendable {
     /// suite) keeps the system generator, byte-unchanged.
     private let seededRNG: WithRandomNumberGenerator?
 
-    init(seed: UInt64? = nil) throws {
+    /// VX-818 (the VX-809 run, batch 4): a LOCKABLE world — the store on disk
+    /// behind the app's bound view (`asRebindable`), so `lockStore()` closes it
+    /// exactly as the lock road does (`StoreBinding.lock`) and `unlockStore()`
+    /// opens it again under the SAME view (`StoreBinding.adopt`). nil = the
+    /// in-memory store every other suite runs on, byte-unchanged.
+    private let binding: StoreBinding?
+    private let storeURL: URL?
+
+    init(seed: UInt64? = nil, lockable: Bool = false) throws {
         let rng = seed.map { WithRandomNumberGenerator(HarnessSeededGenerator(seed: $0)) }
         seededRNG = rng
-        let database = try AppDatabase.inMemory()
+        let database: AppDatabase
+        if lockable {
+            let url = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                .appendingPathComponent("vlock-\(UUID().uuidString.prefix(8)).sqlite")
+            let bound = try AppDatabase.onDisk(url: url, key: nil).asRebindable()
+            database = bound.view
+            binding = bound.binding
+            storeURL = url
+        } else {
+            database = try AppDatabase.inMemory()
+            binding = nil
+            storeURL = nil
+        }
         self.database = database
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
@@ -95,6 +115,36 @@ final class ServerHarness: @unchecked Sendable {
     func tearDown() {
         host.stop()
         try? FileManager.default.removeItem(at: directory)
+        if let storeURL {
+            binding?.lock()
+            for suffix in ["", "-wal", "-shm"] {
+                try? FileManager.default.removeItem(atPath: storeURL.path + suffix)
+            }
+        }
+    }
+
+    /// VX-818: the library locks — the pool closed under the bound view, as
+    /// `AppBootstrap.lockOnNewRoad` closes it (a lockable world only).
+    func lockStore() throws {
+        guard let binding else { throw HarnessFailure("not a lockable harness") }
+        binding.lock()
+    }
+
+    /// VX-818: the library unlocks — the same file opened again and adopted
+    /// by the same view (a lockable world only).
+    func unlockStore() throws {
+        guard let binding, let storeURL else { throw HarnessFailure("not a lockable harness") }
+        try binding.adopt(try AppDatabase.onDisk(url: storeURL, key: nil))
+    }
+
+    /// VX-818: ANOTHER library opens in the slot beneath the same view — a
+    /// fresh store adopted by the binding (the lobby's empty-slot landing).
+    func swapInAnotherStore() throws -> URL {
+        guard let binding else { throw HarnessFailure("not a lockable harness") }
+        let other = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("vlock-other-\(UUID().uuidString.prefix(8)).sqlite")
+        try binding.adopt(try AppDatabase.onDisk(url: other, key: nil))
+        return other
     }
 
     /// VX-168: each name's own setup key — minted ONCE per name, exactly as

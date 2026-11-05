@@ -29,6 +29,14 @@ public final class MCPServerHost: @unchecked Sendable {
         /// restarted by itself — the door says so and waits for her switch (or
         /// the next unlock), which starts a fresh host.
         case stoppedByItself(String)
+        /// **VX-818 — the library is LOCKED** (her R-818; A-809-20; the record
+        /// `notes/plans/fixes/vx-809-mcp-door-ergonomics.md` BATCH 4): the
+        /// listener keeps listening and every connection SURVIVES, but the store
+        /// is shut — every call answers the locked sentence at its door, a new
+        /// connection is HELD at its admission, nothing is read or written.
+        /// `resume(executor:)` serves again on the same connections; `stop`,
+        /// `stopWithTheProcess` and `abandon` end it as from `.running`.
+        case suspended
     }
 
     private let database: AppDatabase
@@ -36,8 +44,26 @@ public final class MCPServerHost: @unchecked Sendable {
     private let directory: URL
     private let version: String
     /// U2 (AF-8): where the write tools run — the session's runner in the
-    /// app, a serial executor over `operations` otherwise.
-    private let executor: any MCPWriteExecutor
+    /// app, a serial executor over `operations` otherwise. VX-818: through the
+    /// SLOT every session holds, so a resumed host is re-pointed at the fresh
+    /// session's runner (`resume(executor:)`).
+    private let executor: MCPExecutorSlot
+    /// VX-818: the call door's latch, shared with every session.
+    private let latch = MCPStoreLatch()
+    /// VX-818: the grants store's fingerprint when the library locked — the
+    /// library-identity belt's half (`resume`). nil while not suspended; an
+    /// unreadable store at the suspend stores a value no resume can match.
+    private var suspendedFingerprint: String?
+    /// VX-818: the client names whose LAST connection ended while the library
+    /// was locked — their while-connected grants end at the resume (the store
+    /// was shut when they ended; the end is deferred, never skipped).
+    private var deferredGrantEnds: Set<String> = []
+    /// VX-818: the host let its connections go without a word to any store
+    /// (`abandon()` — another library opened beneath them).
+    private var writesNothing = false
+    /// VX-818: the listener died while the library was locked (VX-612's
+    /// failure) — said once the host resumes.
+    private var listenerDiedWhileSuspended: String?
     private let lock = NSLock()
     private var listenFD: Int32 = -1
     private var wakePipe: (read: Int32, write: Int32) = (-1, -1)
@@ -68,7 +94,7 @@ public final class MCPServerHost: @unchecked Sendable {
         self.operations = operations
         self.directory = directory
         self.version = version
-        self.executor = executor ?? MCPSerialExecutor(operations: operations)
+        self.executor = MCPExecutorSlot(executor ?? MCPSerialExecutor(operations: operations))
     }
 
     public var state: State { lock.withLock { _state } }
@@ -82,7 +108,9 @@ public final class MCPServerHost: @unchecked Sendable {
 
     public func start() throws {
         lock.lock()
-        guard _state != .running else { lock.unlock(); return }
+        // VX-818: a suspended host is not restarted — its connections survive,
+        // and `start` would sweep their while-connected grants.
+        guard _state != .running, _state != .suspended else { lock.unlock(); return }
         lock.unlock()
         do {
             try operations.sweepMCPConnectionGrants()
@@ -236,6 +264,132 @@ public final class MCPServerHost: @unchecked Sendable {
         }
     }
 
+    // MARK: - The library locked (VX-818 — the VX-809 run, A-809-20)
+
+    /// **THE LIBRARY IS LOCKING — keep every connection, shut the door to the
+    /// store.** Called by the lock road while the store is STILL OPEN (the app's
+    /// `macLockTeardown`, in the step that used to stop the host): the latch
+    /// shuts FIRST — from this instant every call on every connection answers
+    /// `MCPLockedLibrary.words` before reading anything — then the grants store's
+    /// fingerprint is taken (the identity belt `resume` checks), and the grants
+    /// observation is cancelled (it reads the pool that is about to close). The
+    /// listener keeps listening, the accept loop keeps accepting (a new
+    /// connection is HELD at its admission), every session lives on, and no
+    /// while-connected grant ends. Nothing is written. Answers false — and
+    /// changes nothing — unless the host was running (a host whose listener
+    /// died, or that never started, is the caller's to stop as before).
+    /// Synchronous (one bounded read) — the caller runs it off the main thread.
+    @discardableResult
+    public func suspend() -> Bool {
+        let shutting: Bool = lock.withLock {
+            guard _state == .running else { return false }
+            latch.close()
+            _state = .suspended
+            return true
+        }
+        guard shutting else { return false }
+        let fingerprint = (try? database.read { try Self.grantsFingerprint($0) }) ?? Self.unreadableFingerprint
+        let watcher: Task<Void, Never>? = lock.withLock {
+            suspendedFingerprint = fingerprint
+            defer { observation = nil }
+            return observation
+        }
+        watcher?.cancel()
+        return true
+    }
+
+    /// A fingerprint no read can produce (the store would not answer at the suspend).
+    static let unreadableFingerprint = "\u{0}unreadable"
+
+    /// What a resume did.
+    public enum ResumeOutcome: Equatable, Sendable {
+        /// The same library is back: the connections are served again.
+        case resumed
+        /// Another library opened beneath the held connections (or the store
+        /// could not be read): they were let go (`abandon`), nothing written.
+        case abandoned
+        /// The store is still shut: the host stays suspended, nothing changed.
+        case stillLocked
+        /// The host was not suspended; nothing changed.
+        case notSuspended
+    }
+
+    /// **THE LIBRARY IS BACK — serve the same connections again.** Called once
+    /// the store is open again (the next unlock's ready), with the FRESH
+    /// session's runner: every session's writes run through the host's one
+    /// executor slot, re-pointed here (her new undo stack, her serial road). In
+    /// order: THE IDENTITY BELT — the grants store's fingerprint re-read and
+    /// compared with the suspend's (nothing can change the local-only grants
+    /// family while the store is shut, so a difference means another library
+    /// opened beneath the connections, or a write slipped past the suspend):
+    /// a difference ABANDONS them, never resumes; then the deferred
+    /// while-connected ends (a client whose last connection closed during the
+    /// lock keeps nothing past it — before any connection is served, so a
+    /// reconnect held during the lock finds them ended); the latch opens; the
+    /// grants observation restarts; every HELD connection's admission runs
+    /// (the one op — `MCPSession.admitIfHeld`); and every connection is told
+    /// its tools may have changed (it re-lists from the store — F-15b). A
+    /// listener that died during the lock is said now (VX-612's state).
+    @discardableResult
+    public func resume(executor fresh: any MCPWriteExecutor) async -> ResumeOutcome {
+        let (suspended, expected): (Bool, String?) = lock.withLock { (_state == .suspended, suspendedFingerprint) }
+        guard suspended else { return .notSuspended }
+        let now: String
+        do {
+            now = try await database.read { try Self.grantsFingerprint($0) }
+        } catch is StoreLockedError {
+            return .stillLocked
+        } catch {
+            abandon()
+            return .abandoned
+        }
+        guard now == expected else {
+            abandon()
+            return .abandoned
+        }
+        let ending: Set<String> = lock.withLock {
+            defer { deferredGrantEnds = [] }
+            return deferredGrantEnds
+        }
+        for name in ending.sorted() {
+            guard let client = try? await database.read({ try Queries.mcpClient($0, name: name) }) else { continue }
+            try? operations.endMCPConnectionGrants(clientID: client.id)
+        }
+        executor.repoint(fresh)
+        let (live, died): ([MCPSession], String?) = lock.withLock {
+            suspendedFingerprint = nil
+            let died = listenerDiedWhileSuspended
+            listenerDiedWhileSuspended = nil
+            _state = died.map { .stoppedByItself($0) } ?? .running
+            latch.open()
+            return (Array(sessions.values), died)
+        }
+        startObservingGrants()
+        for session in live where session.isHeld { await session.admitIfHeld() }
+        for session in live { await session.announceToolsChanged() }
+        onConnectionsChanged?()
+        if died != nil { onStateChanged?() }
+        return .resumed
+    }
+
+    /// **Let every connection go without a word to any store** (VX-818 — the
+    /// identity belt's arm): another library opened beneath a suspended host's
+    /// connections (the lock's lobby can land one with no teardown — rule 27's
+    /// face, the pre-design face), so their outgoing library's store is gone and
+    /// the incoming one is not theirs. The listener closes and the socket goes
+    /// (THIS host's — `halt`'s rule); each connection hears the closing road's
+    /// close line ("…locked or closed…"); NOTHING is written — no end line, no
+    /// grant end (a library's next start sweeps its own while-connected grants).
+    public func abandon() {
+        lock.withLock {
+            writesNothing = true
+            deferredGrantEnds = []
+            suspendedFingerprint = nil
+            latch.open()
+        }
+        halt(saying: MCPCloseWords.line(for: .libraryClosed)) { $0.forgoEndLine() }
+    }
+
     // MARK: - Accept
 
     /// How the accept loop ended: woken by a stop, or a FATAL failure (VX-612).
@@ -356,16 +510,27 @@ public final class MCPServerHost: @unchecked Sendable {
     /// `.stoppedByItself` and signals the door. Sessions already served are
     /// left serving (their own descriptors are healthy); a later stop ends them.
     private func listenerDied(_ fd: Int32, reason: String) {
-        let owned: Bool = lock.withLock {
-            guard listenFD == fd, _state == .running else { return false }
-            listenFD = -1
-            _state = .stoppedByItself(reason)
-            return true
+        let (owned, suspended): (Bool, Bool) = lock.withLock {
+            guard listenFD == fd else { return (false, false) }
+            switch _state {
+            case .running:
+                listenFD = -1
+                _state = .stoppedByItself(reason)
+                return (true, false)
+            case .suspended:
+                // VX-818: the library is locked — the host stays suspended (its
+                // connections survive) and says the death at its resume.
+                listenFD = -1
+                listenerDiedWhileSuspended = reason
+                return (true, true)
+            default:
+                return (false, false)
+            }
         }
         guard owned else { return }
         MCPSocketRoad.unlink(directory: directory)
         close(fd)
-        onStateChanged?()
+        if !suspended { onStateChanged?() }
     }
 
     /// Round 1 F7 — the session ceiling: each session costs a reader thread,
@@ -393,7 +558,7 @@ public final class MCPServerHost: @unchecked Sendable {
         // (the door's stops drop it at once) signals no one.
         let session = MCPSession(
             fd: fd, database: database, operations: operations, version: version,
-            executor: executor, hooks: hooks,
+            executor: executor, hooks: hooks, latch: latch,
             onNamed: { [weak self] in self?.onConnectionsChanged?() })
         lock.withLock { sessions[session.id] = session }
         onConnectionsChanged?()
@@ -459,12 +624,27 @@ public final class MCPServerHost: @unchecked Sendable {
     /// hang-up is a no-op once the session has closed — `MCPSession`'s one
     /// lock.)
     private func ended(_ session: MCPSession) {
-        let (name, stillConnected): (String?, Bool) = lock.withLock {
+        let (name, stillConnected, quiet): (String?, Bool, Bool) = lock.withLock {
             sessions[session.id] = nil
             let name = session.clientName
-            return (name, sessions.values.contains { $0.clientName == name && name != nil })
+            let stillConnected = sessions.values.contains { $0.clientName == name && name != nil }
+            // VX-818: a connection ending while the library is LOCKED writes
+            // nothing (the store is shut — the quit precedent): no end line, and
+            // its client's while-connected grants end at the resume instead.
+            // An abandoned host's connections write nothing anywhere.
+            if writesNothing { return (name, stillConnected, true) }
+            if latch.isShut {
+                if let name, !stillConnected { deferredGrantEnds.insert(name) }
+                return (name, stillConnected, true)
+            }
+            return (name, stillConnected, false)
         }
         session.closeConnection()
+        if quiet {
+            session.forgoEndLine()
+            onConnectionsChanged?()
+            return
+        }
         // VX-394 (VX-348 U5): the connection's end, in the activity log, once
         // — why the host ended it (a stop's reason), else the over-cap answer,
         // else the client's own close. Quiet when the store is already gone

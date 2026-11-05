@@ -244,6 +244,11 @@ enum MCPWireRefusalCopy {
             return storeFailureWords("SQLite error \(failure.resultCode.rawValue)\(message)")
         }
         if error is RedactedKeyedStatementError { return storeFailureWords(nil) }
+        // VX-818 (the VX-809 run, A-809-20): a call the LOCK overtook — past the
+        // call door when the store shut, so a read or write met the typed
+        // refusal. The store-failure sentence's honest form, never "ask again":
+        // an act may have landed before a later write of the same call.
+        if error is StoreLockedError { return storeFailureWords(MCPLockedLibrary.overtakenDetail) }
         // VX-760 (the VX-771 run, batch 2): edit_take's mismatch, said as the
         // fact pattern its door PROVED from the sent and stored texts — the
         // door's richer answer, first in the chain (the app's table would read
