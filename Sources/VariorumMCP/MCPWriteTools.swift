@@ -85,7 +85,8 @@ struct MCPWriteTools: Sendable {
         case importNote(VariorumDocument.NamedDocument, place: Place, sectionID: String?)
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
-        case createBook(name: String, wingID: String)
+        /// VX-813: an optional birth ORDER (`create_book`'s `order`).
+        case createBook(name: String, wingID: String, order: Queries.ReadingOrder?)
         /// VX-769 (the VX-771 run, batch 3 — R-771-B): a gathering minted with
         /// its rule, at write new on the wing (`MCPWriteTools+CreateGathering`).
         case createGathering(name: String, wingID: String, rule: RuleTerm)
@@ -282,7 +283,7 @@ struct MCPWriteTools: Sendable {
             guard let wingID = try optionalString(args, "wing_id") else {
                 throw ArgumentFailure(message: "wing_id is required (\"\" is Home).")
             }
-            return .createBook(name: try requiredText(args, "name"), wingID: wingID)
+            return .createBook(name: try requiredText(args, "name"), wingID: wingID, order: try orderOption(args))
         case MCPToolCatalog.createGathering.name:
             return try parseCreateGathering(args)
         case MCPToolCatalog.addNoteToBook.name:
@@ -579,11 +580,18 @@ struct MCPWriteTools: Sendable {
                                               show: .note(noteID: noteID, blockID: nil, select: nil))
                             : nil)
             }
-        case .createBook(let name, let wingID):
+        case .createBook(let name, let wingID, let order):
             return try inWing(wingID, job: job, clientName: clientName) {
                 let book = try ops.createBook(
-                    named: name, inWing: wingID, undoLabel: label(.book), namesCountedBy: readableBooks(clientName))
-                return (["book_id": book.id, "name": book.name],
+                    named: name, inWing: wingID, undoLabel: label(.book), namesCountedBy: readableBooks(clientName),
+                    order: order)
+                // VX-813: the order echoed only when the call gave one (every
+                // other answer byte-unchanged — VX-357's absent-otherwise shape).
+                var answer: [String: Any] = ["book_id": book.id, "name": book.name]
+                if order != nil {
+                    answer["order"] = Self.orderAnswer(.init(field: book.sortField, direction: book.sortDir))
+                }
+                return (answer,
                         MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name,
                                         show: .book(bookID: book.id, sectionID: nil)))
             }
@@ -772,9 +780,14 @@ struct MCPWriteTools: Sendable {
     /// (VX-549: `create_note` and `import_document`'s one document only — never
     /// `create_section` or `set_book_rule`, whose acts are a BOOK's), into a
     /// GATHERING named by its id in `book_id` (`intoGathering`).
+    ///
+    /// VX-813 (A-809-17): `rung` — the BOOK arm's decision (write new by
+    /// default; `set_book_rule` with an `order` decides at EDIT, the
+    /// rung read from its arguments as `insert_blocks`' is). The wing arm is
+    /// always write new.
     func into(
         _ place: Place, job: Job, clientName: String, spendsAfter: Bool = true, admitsGathering: Bool = false,
-        _ act: (Operations.MCPNoteDestination) throws -> Act
+        rung: MCPGrantRule.Rung = .writeNew, _ act: (Operations.MCPNoteDestination) throws -> Act
     ) throws -> Result<Landed, Refused> {
         switch place {
         case .book(let bookID):
@@ -790,11 +803,11 @@ struct MCPWriteTools: Sendable {
                     gathering, name: name, standing: standing, job: job, clientName: clientName,
                     spendsAfter: spendsAfter, act)
             }
-            let decision = MCPGrantAuthority.decide(standing, book: facts, rung: .writeNew, consumes: true)
+            let decision = MCPGrantAuthority.decide(standing, book: facts, rung: rung, consumes: true)
             guard case .allow(let grantID, let consumesOnce) = decision else {
                 try log(clientName, job.tool, "book", bookID, name, allowed: false)
                 let ask = facts.map { MCPAsk(clientName: clientName, scopeKind: .book, scopeID: bookID,
-                                             title: name ?? "", rung: .writeNew, fence: $0.fence) }
+                                             title: name ?? "", rung: rung, fence: $0.fence) }
                 return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
                     .refusal(decision, .book, standing: standing, ask: ask)))
             }

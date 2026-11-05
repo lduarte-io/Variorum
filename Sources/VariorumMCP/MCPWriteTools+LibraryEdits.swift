@@ -44,6 +44,9 @@ extension MCPWriteTools {
         case moveChapter(sectionID: String, to: Slot)
         case deleteNote(noteID: String)
         case setNoteArchived(noteID: String, archived: Bool)
+        /// VX-813 (the VX-809 run, batch 2): a book's or a gathering's order
+        /// (`MCPWriteTools+BookOrder`).
+        case setBookOrder(bookID: String, order: Queries.ReadingOrder)
 
         var tool: String {
             switch self {
@@ -60,6 +63,7 @@ extension MCPWriteTools {
             case .deleteNote: MCPToolCatalog.deleteNote.name
             case .setNoteArchived(_, let archived):
                 archived ? MCPToolCatalog.archiveNote.name : MCPToolCatalog.unarchiveNote.name
+            case .setBookOrder: MCPToolCatalog.setBookOrder.name
             }
         }
 
@@ -73,6 +77,10 @@ extension MCPWriteTools {
             case .deleteNote: true
             case .renameBook, .setFinished, .archiveBook, .unarchiveBook, .deleteBook, .removeNote, .moveNote,
                  .renameChapter, .deleteChapter, .moveChapter, .setNoteArchived:
+                false
+            // VX-813: an order is a book's two columns — no take's text read,
+            // rewritten, copied, frozen or tombstoned.
+            case .setBookOrder:
                 false
             }
         }
@@ -177,6 +185,10 @@ extension MCPWriteTools {
             return .setNoteArchived(noteID: try requiredString(args, "note_id"), archived: true)
         case MCPToolCatalog.unarchiveNote.name:
             return .setNoteArchived(noteID: try requiredString(args, "note_id"), archived: false)
+        case MCPToolCatalog.setBookOrder.name:
+            return .setBookOrder(
+                bookID: try requiredString(args, "book_id"),
+                order: try Self.order(field: args["sort_field"], direction: args["sort_dir"], at: ""))
         default:
             return nil
         }
@@ -564,6 +576,9 @@ extension MCPWriteTools {
                                           show: .note(noteID: noteID, blockID: nil, select: nil))
                         : nil)
             }
+
+        case .setBookOrder(let bookID, let order):
+            return try performBookOrder(bookID: bookID, order: order, job: job, ops: ops, clientName: clientName)
         }
     }
 }

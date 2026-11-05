@@ -163,6 +163,9 @@ enum MCPToolCatalog {
         // VX-596 — her star on the wire (her ruling 2026-10-27: "let's add the
         // star over the wire, it might as well be included"): a note or a book.
         setStarred,
+        // VX-813 (the VX-809 run, batch 2 — R-813): a book's order, her
+        // navigator's Save as This Book's Order (a book or a gathering).
+        setBookOrder,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -247,14 +250,15 @@ enum MCPToolCatalog {
             open book): each book's id, name, wing and live note count, and how it collects — its rule \
             (tags by path: {"tag": "percy"}, {"star": true}, combined with {"and": […]}, {"or": […]}, \
             {"not": …}), its outflow (the tags notes written there wear), new_matches ("join" or \
-            "wait" at Arrivals), word_target / max_notes, and whether it is finished, sealed, owned \
-            or collecting now. Archived books appear only with include_archived: true. The daily \
+            "wait" at Arrivals), word_target / max_notes, its order (sort_field, sort_dir — what \
+            set_book_order sets), and whether it is finished, sealed, owned or collecting now. \
+            Archived books appear only with include_archived: true. The daily \
             Journal and Private books are never listed. A gathering shared with you — its own grant, \
             its wing's, or the open book — lists too (kind "gathering"): a saved rule that gathers \
             notes by tag or star, holding none of its own; list_notes and search take its id like a \
             book's, create_note writes a new note into it, and at edit rename_book, archive_book, \
-            unarchive_book, delete_book and set_starred act on it as on a book (its rule stays the \
-            author's). A wing holding no book lists \
+            unarchive_book, delete_book, set_starred and set_book_order act on it as on a book (its \
+            rule stays the author's). A wing holding no book lists \
             nothing here — list_wings lists the wings themselves. Returns JSON.
             """,
         inputSchema: .object([
@@ -799,13 +803,17 @@ enum MCPToolCatalog {
         name: "create_book", rung: .writeNew, title: "Create a book",
         description: """
             Create a new, empty book in a shared wing ("" is Home). list_wings gives the wing_id of \
-            every wing shared with you, empty ones too. Returns JSON with the book_id.
+            every wing shared with you, empty ones too. order (optional) is the order it shows its \
+            notes in, as set_book_order sets it — e.g. {"sort_field": "entry_date", "sort_dir": \
+            "desc"}; without it a book keeps its notes in the order they are added. Returns JSON \
+            with the book_id (and the order, when you gave one).
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "name": .object(["type": "string", "description": "The book's name."]),
                 "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "order": orderOption,
             ]),
             "required": .array(["name", "wing_id"]),
             "additionalProperties": false,
@@ -1831,6 +1839,56 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
+    // MARK: - VX-813 — a book's order on the wire (the VX-809 run, batch 2)
+
+    /// The order's two arguments, said once (the standalone tool's schema and
+    /// the `order` object on `create_book` / `set_book_rule`).
+    static let orderProperties: [String: Value] = [
+        "sort_field": .object([
+            "type": "string", "enum": .array(MCPWriteTools.orderFields.map { .string($0) }),
+            "description": "manual (the book's hand order), entry_date, created_at, last_touched or last_major_revision.",
+        ]),
+        "sort_dir": .object([
+            "type": "string", "enum": .array(MCPWriteTools.orderDirections.map { .string($0) }),
+            "description": "asc (the default) or desc; manual order has no direction.",
+        ]),
+    ]
+
+    /// The `order` option's schema (`create_book`, `set_book_rule`).
+    static let orderOption: Value = .object([
+        "type": "object",
+        "properties": .object(orderProperties),
+        "required": .array(["sort_field"]),
+        "additionalProperties": false,
+        "description": "The book's order, as set_book_order sets it: {\"sort_field\": …, \"sort_dir\": …}.",
+    ])
+
+    /// Her navigator's Save as This Book's Order (`setReadingSort`) — a book or
+    /// a gathering (her door draws on both); a finished book refuses (her op).
+    static let setBookOrder = MCPToolDeclaration(
+        name: "set_book_order", rung: .edit, title: "Set a book's order",
+        description: """
+            Set the order a book shows its notes in, as the author's "Save as This Book's Order" \
+            does: sort_field manual (the book's own hand order — move_note_in_book places notes \
+            in it), entry_date, created_at, last_touched or last_major_revision (when most of a \
+            note was last rewritten), and sort_dir asc (the default) or desc — e.g. \
+            {"sort_field": "entry_date", "sort_dir": "desc"} for newest first. A gathering takes an \
+            order too (book_id takes its id; an edit grant on it or its wing); its manual order is \
+            oldest note first. A finished or sealed book's order is frozen until the \
+            author reopens it. list_books shows each book's order. Returns JSON with the order and \
+            changed — false when the book was already in that order: nothing was written and \
+            there is nothing to undo. One undo for the author puts the old order back.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object(orderProperties.merging([
+                "book_id": .object(["type": "string", "description": "The book or gathering (list_books gives ids)."]),
+            ]) { $1 }),
+            "required": .array(["book_id", "sort_field"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing, .gathering])
+
     // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
 
     /// VX-169 (her settlement, the 2026-10-12 pre-run sitting): a client
@@ -1981,13 +2039,17 @@ enum MCPToolCatalog {
             starred; {"not": …}; null clears it), outflow (the tag paths notes written in the book \
             wear; [] clears), new_matches ("join" quietly at the end, or "wait" at Arrivals). A \
             missing tag is created in the book's wing. A finished or archived book keeps the \
-            change and collects again when the author reopens it. A gathering's rule stays the \
-            author's. One undo for the author. Returns JSON with the book's collecting facts.
+            change and collects again when the author reopens it. order (optional) also sets the \
+            order the book shows its notes in, exactly as set_book_order does — and so, like it, \
+            needs edit on the book (the rest needs write new) and is refused on a finished or \
+            sealed book. A gathering's rule stays the author's (its order is set_book_order's). One \
+            undo for the author. Returns JSON with the book's collecting facts and its order.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "book_id": .object(["type": "string", "description": "The book."]),
+                "order": orderOption,
                 "rule": .object(["description": "The rule (one term), or null to clear."]),
                 "outflow": .object(["type": "array", "items": .object(["type": "string"]),
                                     "description": "Tag paths, in order."]),

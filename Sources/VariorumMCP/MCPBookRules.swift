@@ -24,6 +24,10 @@ enum MCPBookFacts {
             "finished": reading.locked,
             "sealed": reading.sealedAt != nil,
             "owned": reading.owned,
+            // VX-813 (the VX-809 run, batch 2): the order it shows its notes
+            // in — what `set_book_order` sets, readable so its `changed` is
+            // checkable (a book configuration fact, like the rule).
+            "order": MCPWriteTools.orderAnswer(.init(field: reading.sortField, direction: reading.sortDir)),
         ]
         switch stored {
         case .none: facts["rule"] = NSNull()

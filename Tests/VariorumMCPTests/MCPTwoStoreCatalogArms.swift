@@ -150,6 +150,10 @@ extension MCPTwoStoreCatalogServerTests {
             ["book_id": s(w.shared), "rule": .object(["tag": s("board")])] },
         CatalogArm(label: "set_book_rule · a hidden book", tool: "set_book_rule") { w, _ in
             ["book_id": s(w.secretBoard), "rule": .object(["tag": s("board")])] },
+        // VX-813 (batch 2): create_book's birth order (write new on the wing).
+        CatalogArm(label: "create_book · with an order", tool: "create_book") { w, _ in
+            ["name": s("Ordered"), "wing_id": s(w.studio),
+             "order": .object(["sort_field": s("entry_date"), "sort_dir": s("desc")])] },
         CatalogArm(label: "link_versions · card and second", tool: "link_versions") { w, _ in
             ["note_a": s(w.card), "note_b": s(w.work),
              "pairs": .array([.object(["block_a": s(w.cardBlock), "block_b": s(w.workBlock2)])])] },
@@ -268,6 +272,22 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "set_starred · the shared book", tool: "set_starred") { w, _ in ["book_id": s(w.shared), "starred": .bool(true)] },
         CatalogArm(label: "set_starred · a hidden note", tool: "set_starred") { w, _ in ["note_id": s(w.secretNote), "starred": .bool(true)] },
         CatalogArm(label: "set_starred · a hidden book", tool: "set_starred") { w, _ in ["book_id": s(w.vault), "starred": .bool(true)] },
+        // VX-813 (batch 2): the book's order — on a book whose hidden members
+        // exist (the answer must not vary), the same order again, a gathering
+        // (edit on its wing), set_book_rule's order option (edit on the book),
+        // and the one shape on a hidden book.
+        CatalogArm(label: "set_book_order · the shared book (Private members inside)", tool: "set_book_order") { w, _ in
+            ["book_id": s(w.shared), "sort_field": s("entry_date"), "sort_dir": s("desc")] },
+        CatalogArm(label: "set_book_order · the shared book, the same order", tool: "set_book_order") { w, _ in
+            ["book_id": s(w.shared), "sort_field": s("entry_date"), "sort_dir": s("desc")] },
+        CatalogArm(label: "set_book_order · the gathering", tool: "set_book_order") { w, _ in
+            ["book_id": s(w.gathering), "sort_field": s("last_touched"), "sort_dir": s("desc")] },
+        CatalogArm(label: "set_book_order · a hidden book", tool: "set_book_order") { w, _ in
+            ["book_id": s(w.vault), "sort_field": s("manual")] },
+        CatalogArm(label: "set_book_order · a hidden Private book", tool: "set_book_order") { w, _ in
+            ["book_id": s(w.diary), "sort_field": s("manual")] },
+        CatalogArm(label: "set_book_rule · an order on the shared book", tool: "set_book_rule") { w, _ in
+            ["book_id": s(w.shared), "order": .object(["sort_field": s("created_at")])] },
         CatalogArm(label: "archive_note · mover", tool: "archive_note") { w, _ in ["note_id": s(w.mover)] },
         CatalogArm(label: "unarchive_note · mover", tool: "unarchive_note") { w, _ in ["note_id": s(w.mover)] },
         CatalogArm(label: "archive_note · a hidden note", tool: "archive_note") { w, _ in ["note_id": s(w.secretNote)] },

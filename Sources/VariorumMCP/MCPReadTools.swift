@@ -327,7 +327,8 @@ struct MCPReadTools: Sendable {
             "notes": readable,
         ]
         let bookFacts = try MCPBookFacts.facts(db, readingID: id)
-        for key in ["rule", "rule_unreadable"] { entry[key] = bookFacts[key] }
+        // VX-813: a gathering's order too (set_book_order sets it on one).
+        for key in ["rule", "rule_unreadable", "order"] { entry[key] = bookFacts[key] }
         return entry
     }
 

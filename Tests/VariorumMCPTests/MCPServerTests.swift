@@ -322,7 +322,10 @@ struct MCPServerTests {
                     "delete_note", "archive_note", "unarchive_note",
                     // VX-596 (justified edit, the ritual — her ruling 2026-10-27,
                     // "let's add the star over the wire"): her star, a note or a book.
-                    "set_starred"])
+                    "set_starred",
+                    // VX-813 (the VX-809 run, batch 2 — justified edit, the ritual):
+                    // her navigator's Save as This Book's Order.
+                    "set_book_order"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })

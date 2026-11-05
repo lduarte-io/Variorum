@@ -86,7 +86,7 @@ extension MCPWriteTools.Job {
         case .importNote(let named, _, _): MCPNullCharacters.count(named)
         case .importBook(let book, _): MCPNullCharacters.count(book)
         case .applyTag(_, let path): MCPNullCharacters.count(path)
-        case .createBook(let name, _): MCPNullCharacters.count(name)
+        case .createBook(let name, _, _): MCPNullCharacters.count(name)
         // VX-769: the name, and every path the rule names (it adopts or mints a tag).
         case .createGathering(let name, _, let rule): MCPNullCharacters.count(name) + MCPNullCharacters.count(rule)
         case .insertBlocks(_, _, let blocks): MCPNullCharacters.count(blocks)
@@ -169,8 +169,9 @@ extension MCPWriteTools.LibraryEditJob {
         switch self {
         case .renameBook(_, let name): MCPNullCharacters.count(name)
         case .renameChapter(_, let name): MCPNullCharacters.count(name)
+        // VX-813: an order is two enum words.
         case .setFinished, .archiveBook, .unarchiveBook, .deleteBook, .removeNote, .moveNote, .deleteChapter,
-             .moveChapter, .deleteNote, .setNoteArchived:
+             .moveChapter, .deleteNote, .setNoteArchived, .setBookOrder:
             0
         }
     }

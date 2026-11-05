@@ -498,12 +498,12 @@ Building (a) PROVISIONAL unless ruled otherwise; red-on-old pin on the journal c
 | # | Piece | Status |
 |---|---|---|
 | B2-0 | Preflight read (the record whole · MCPSpec in full · SurfaceContracts Doors + The Bookcase and books · SessionResiliencyProtocol · VX-807/VX-813 ticket texts, no comments on either) + the code survey | DONE |
-| B2-1 | FORK F-7 = P-809-3 — `move_book_to_wing`'s undo story | PROPOSED (below) — STOPPED on that half, awaiting A-809-5 |
-| B2-2 | FORK F-8 — a book move that would SHED a member's fence | PROPOSED (below); building the lean PROVISIONAL |
-| B2-3 | FORK F-9 — gatherings on `move_book_to_wing` (the brief said mirror her door; the survey found a reach-widening) | PROPOSED (below); building the lean PROVISIONAL |
-| B2-4 | FORK F-10 — the rung of `set_book_rule`'s `order` option | PROPOSED (below); building the lean PROVISIONAL |
-| B2-5 | VX-813 op — `setBookOrderForClient` (her `setReadingSort` body, no-op guarded, one CAS entry) | NOT STARTED |
-| B2-6 | VX-813 wire — `set_book_order`; `order` on `create_book` + `set_book_rule`; `order` read back in `list_books` | NOT STARTED |
+| B2-1 | FORK F-7 = P-809-3 — `move_book_to_wing`'s undo story | RULED A-809-14 = option (a), the WRAP (with VX-276's per-row discipline: a partially-aged act refuses WHOLE and keeps the entry; the tag leg from pre-images, never re-adoption; exact-row redo) — building |
+| B2-2 | FORK F-8 — a book move that would SHED a member's fence | RULED A-809-15 (P-809-10) — the lean: refuse whole, the hidden-cause sentence; catalog EXCEPTION row + red-on-old pin — building |
+| B2-3 | FORK F-9 — gatherings on `move_book_to_wing` (the brief said mirror her door; the survey found a reach-widening) | RULED A-809-16 (P-809-11) — the wire does not move a gathering (readable ⇒ the gathering-sentence family; unreadable ⇒ the one shape); no flip path — building |
+| B2-4 | FORK F-10 — the rung of `set_book_rule`'s `order` option | RULED A-809-17 — the lean: `set_book_rule` with `order` decides at EDIT; `create_book`'s order write new — BUILT (B2-6) |
+| B2-5 | VX-813 op — `setBookOrderForClient` (her `setReadingSort` body, no-op guarded, one CAS entry) | DONE (`79b9204a3`) — `writeReadingSort` extracted verbatim (her `setReadingSort` calls it, byte-identical); `createBook(order:)`; `setBookRule`'s order as a fourth CAS part; `MCPBookOrderActsTests` 10/10 green |
+| B2-6 | VX-813 wire — `set_book_order`; `order` on `create_book` + `set_book_rule`; `order` read back in `list_books` | DONE (this commit) — `MCPWriteTools+BookOrder.swift`; `MCPBookOrderServerTests` 6/6 green; catalog arms (6) IDENTICAL; justified edits: `MCPServerTests` (the edit list) + `MCPWriteServerTests` (the suggest-proof's calls) gain `set_book_order` |
 | B2-7 | VX-807 op — `moveReadingToWing`'s body in the caller's transaction (verbatim) + `mcpMoveBookToWing` | NOT STARTED |
 | B2-8 | VX-807 wire — `move_book_to_wing` (A-809-2 grant, the reach-scoped answer, the refusals, R-805-5's tool-level Journal pin) | NOT STARTED |
 | B2-9 | App words — receipts + Activity for both tools (`MCPPaneCopy.swift`, Mac target) + `bookMoveFrozenWords` hook (`MCPDoor.swift`) | NOT STARTED |
