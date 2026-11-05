@@ -274,6 +274,16 @@ reverts).**
 | `TypedReturnKeyTests` · `theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt` | R1-3 deleted the newline at the claim: the claim-turn and mid-flight assertions read `"- one\ngamma"` | restore the claim-time retraction: paste the pre-fix `retractListContinuationNewline()` (`git show 7e7de0b02:App/Variorum/Variorum/Features/Editor/EditorViewModel.swift`, lines 1797–1828) back into `EditorViewModel` and call it as `if afterListExit { retractListContinuationNewline() }` ahead of `let act = typedReturnAct()` in `runTypedReturn` → the claim-turn `#expect` reads `"- one\ngamma"` (the act then finds nothing to retract, and the end state is the old one) |
 | `TypedReturnKeyTests` · `theListExitsUndoStoryIsNinetyFoursWhole` | GREEN ON BOTH SIDES (#94's shape guard) | — |
 
+**Headless suites at the END (at f7b7ae24c, the batch's last code is a34b51244/69ad4c1ab):** full core
+`swift test` — `VariorumCoreTests` 3655 tests / 492 suites PASSED (5 known issues; the VX-781 pin
+belt suite among them, passed); `StringsWorkbookTests` 32/4 PASSED; `VariorumMCPTests` 549/100 with
+4 issues, all in the MCP socket harness (`MCPHarnessTimeLimitTests`, `MCPDiscoverProbeServerTests`,
+`MCPStopRoadsServerTests`, `MCPStopEndsConnectionGrantsServerTests` — "got no answer to its
+initialize") while the VX-809 worktree ran its own MCP server suites on this machine at the same
+moment; those four re-run alone (`swift test --skip-build --filter …`): 17 tests / 4 suites PASSED in
+2.6 s. This batch touches no MCP code. Mac `build-for-testing` (Variorum scheme) and the phone
+target's compile (VariorumMobile, generic iOS Simulator) both SUCCEEDED.
+
 **PENDING (the orchestrator's stage window).** (1) App suites, by TYPE (`-only-testing` takes a zsh
 array of these): `TypedReturnTests` · `ReturnKeyTraceTests` · `SoftNewlineTests` ·
 `TypedReturnKeyTests` · `PlannerFixtureTests` · `PlannerDivideTests` · `PlannerExactCutTests` ·
