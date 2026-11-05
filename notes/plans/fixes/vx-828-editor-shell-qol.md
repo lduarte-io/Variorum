@@ -1134,3 +1134,47 @@ held thereafter.
 (batches A+D: MobileStructuralTests · MobileTakeStructureTests · MobileTrashTests ·
 MobileNoteTrayTests · MobileVersionsTests). For closeout: the implementer's VM-twin candidate (a
 phone Trash sweep door) rides the MOBILE PARITY line — nothing mobile-visible tonight.
+
+#### Batch C — THE FORK'S RULING (orchestrator, 2026-11-05 — build C1–C4 to this; everything below PROVISIONAL for her morning sitting)
+
+1. **Q1 / P-828-11 the place's anchor: (b) CONFIRMED** — the place is the ON-SCREEN ROWS, each
+   re-resolved by id into the current sort; fallback the next surviving on-screen row, then the
+   nearest surviving neighbour, then the top; the opened row is NOT an anchor while another
+   on-screen row survives. Reason, adopted from the trace: under the default edited-newest-first
+   sort any keystroke in the note moves the opened row to the TOP, so (a) re-creates her exact
+   complaint in the most common flow — and her sentence is "keeping where you were", which is the
+   rows that were before her eyes, not the row that left. (c) adds a threshold with no gain: (b)
+   already lands the old neighbourhood whether or not the opened row moved. **The brief's "anchors
+   on the row's ID" line is superseded by this ruling** (it was the orchestrator's translation of
+   the ticket, and the fork surfaced the trap in it).
+2. **Q2 / P-828-12 "selected" on return: (b) CONFIRMED** — the return mark: the opened row wears
+   the existing subject face, no panel. (a) is refused STRUCTURALLY, not by taste: the Library's
+   contract pins the controls row's line count, and the panel-on-return wraps it at the default
+   window. (c) drops her "the row you left from selected" clause. Clear roads as proposed (next
+   row click, new question, mode switch, next open). Accepted consequence, stated: when the opened
+   row moved to the top under the edited sort, the marked row may sit off-screen from the restored
+   place — the place wins, and the mark is findable at the top.
+3. **Q3 / P-828-13 which leaves and returns: (b) CONFIRMED** — every leave records, every
+   in-session return restores while the question is unchanged (R-18l-1's in-session shape, the
+   family precedent); only a row-open makes the Q2 mark (only then does "the row you left from"
+   exist).
+4. **Q4 / P-828-14 Cards: CONFIRMED as proposed** — the place only, no mark. Cards show no
+   selection state today; minting a new card face is a product call that is hers, not tonight's.
+5. **Q5 P1's reading: ACCEPTED — "proportional to the place's depth."** The landing reads nothing;
+   the model's re-read is bounded by the place's listed position plus one page — a quantity SHE
+   created by scrolling there once (paying exactly this cost in pages), bounded by her session,
+   never by the corpus. One statement, off the main thread, refresh()'s own cost class. The
+   windowed upward-paging listing is a new subsystem — disproportionate tonight; if deep places
+   ever feel slow it becomes its own ticket.
+6. **Scope limits: CONFIRMED as stated** (Timeline out; the capped books region keeps its own top;
+   the answer sheet's place is its groups; nothing persisted or synced). ONE amendment: the
+   split's two-Library-panes-share-one-memory shape is accepted PROVISIONAL and FLAGGED for the
+   cold reviewer — if a per-pane memory is trivially reachable, prefer it (a two-Library split
+   restoring pane 1's place in pane 2 is odd); if not, keep shared and say so in the
+   self-assessment.
+7. **P-828-5: ruled NOT CHEAP — TICKETED as VX-856** (Improvement · Books · Low, Backlog; the
+   assessment's reasons on the ticket). Nothing of it builds in this run.
+
+The pin plan is accepted as proposed (resolver pins pure; model pins; mounted whole-catalog pins
+staged through NSClipView, red-on-old = lands at the top). The diff not touching
+`App/Variorum/Shared/` is noted — batch C adds no phone suites to the merge gate.
