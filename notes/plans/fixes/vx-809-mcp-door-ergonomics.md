@@ -841,3 +841,26 @@ The ONE admission (`admitMCPConnection`) is a store WRITE; the store is shut. Ev
 ### VX-855 — the observation (NOTHING built; for the orchestrator to relay to the ticket)
 
 The .ips (`Variorum-2026-11-05-015515.ips`, the DerivedData Debug host, parent launchd): thread 0 is in `__cxa_finalize_ranges` (the PROCESS EXITING — C++/atexit teardown) while thread 7 (`GRDB.DatabasePool.reader.1`) decrypts a page (`sqlcipher_memset ← sqlite3Codec ← readDbPage`) under `PurgeJanitor.collectRoots ← LocalPurge.sweep(afterFamily:)`. So it is VX-657's class — the process exiting over an in-flight local-purge READ — in a TEST HOST, whose exit runs through neither of the two roads that end a sweep: the QUIT road awaits (`AppServices.quiesceForExit` → `AppSession.quiesceLocalPurgeForExit`, cancel-and-await), the LOCK road (`AppServices.stop()` → `AppSession.cancelLocalPurgeSweeps()`) cancels WITHOUT awaiting by design (VX-657 ladder R1 MINOR-3) and relies on `binding.lock()`'s GRDB close waiting out in-flight accesses; an XCTest host simply exits, with the launch-time sweep (`AppServices.start` → the hourly loop's first `sweepLocalPurge`) possibly still in its first read. Not the lock road, and this batch changes neither road's sweep handling.
+
+---
+
+## BATCH 5 RECORD — the app faces + docs: VX-679 (the sidebar AI section) + VX-846 (the docs tail)
+
+**NOT DONE in this batch (first, as the protocol asks):** IN FLIGHT — this line is rewritten at close. Known up front: the App-target pin suites (the new `MCPTrailTests`, the registry walk's new line, `ShellChromeTests`' new fit arm, `TutorialMCPChapterTests`' edits) are COMPILED here (`xcodebuild … build` / `build-for-testing`) but RUN only at the closing Mac window under the stage; the face's hands-on walk is the orchestrator's at that window; canon NOT applied (the closeout's — a CANON DRAFT below); `notes/QUESTIONS.md` NOT touched (the merge moment); `MCPSession.instructions` intended UNTOUCHED (3,089/3,100 — R-VX184-3).
+
+**Implementer:** opus-implementer (fresh, batch 5), 2026-11-05, worktree `~/dev/variorum-vx-809`, branch head at spawn `d0e77ae19`. Headless only (`swift test`; `xcodebuild … build`/`build-for-testing` compile checks — never `xcodebuild test`), no stage claim held. **No revert is in flight.** `App/Variorum/Shared/` files in THIS batch's diff: NONE so far (said here the moment one lands). `Domain/DuplicateDay` and `AppBootstrap.swift`: untouched (off limits).
+
+### LIVE STATUS (flipped per piece, same commit)
+
+| # | Piece | Status |
+|---|---|---|
+| B5-0 | Preflight read (the record whole · MCPSpec IN FULL · SurfaceContracts The app + Doors · SessionResiliencyProtocol · the VX-679 + VX-846 ticket texts — VX-679's carries the sitting rulings verbatim; no comments on either) + the code survey | DONE |
+| B5-1 | VX-679 — the session trail (a pure model, Mac `Features/MCP/`) fed from `landReceipt` (writes with a landing) and `agentShow` (asks offered or shown) — ⌥⌘O's `lastChange` road byte-unchanged | NOT STARTED |
+| B5-2 | VX-679 — the row's two doors: the TEXT lands through the existing landing roads (the ask's take / the receipt's Open ›, the place re-read first, a gone place said where she pressed and its row let go); the SYMBOL opens the request's details popover | NOT STARTED |
+| B5-3 | VX-679 — the face: its own section near the sidebar's bottom (above the sync footer, below the outer scroll), ~3 rows then scrolling within, GONE when empty, "From ‹client› · N", composed by `RootView` and rendered by `SidebarView` (the `noteBox`/`bottom` seam — the sidebar never holds the door) | NOT STARTED |
+| B5-4 | VX-679 — **CAPABILITY DECLARATIONS (a THREE-WAY registry overlap — 828 · 805 · us)**: the row's two doors declared in `Registry/Capability*.swift` + the walk's union line | NOT STARTED — **will declare** (P-1; the shared icon's `.mcpShowSharing` and the ask glyph's `.mcpOpenAsk` precedents) — the merge gate gains `CapabilityRegistryTests` + `ShellChromeTests` |
+| B5-5 | VX-679 — view-model pins (App target, `MCPTrailTests` — compiled, run at the closing window) | NOT STARTED |
+| B5-6 | VX-846 — tool descriptions: `remove_tag`'s gathering pointer + the lesser-grant road; `add_note_to_book` + `move_note_to_wing` say their hidden-cause sentences exist — headless pins | NOT STARTED |
+| B5-7 | VX-846 — the guide's MCP chapter cards (decide-and-draft; P-809-6) + `TutorialMCPChapterTests` edits (compiled; run at the closing window) | NOT STARTED |
+| B5-8 | Whole-package `swift test` + Mac `xcodebuild build` + `build-for-testing` | NOT STARTED |
+| B5-9 | Self-assessment | NOT STARTED |
