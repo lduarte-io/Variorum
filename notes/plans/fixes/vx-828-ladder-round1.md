@@ -11,7 +11,11 @@ SurfaceContracts' touched sections, QUESTIONS #92/#94, and the purge memo's S2 b
 reviewer: 65/65 green. No `Sync/`, custody or keychain file in the diff; canon and QUESTIONS
 untouched (drafts live in the run record — the two-file rule held).
 
-**Verdict: no BLOCKER, no MAJOR.** Two MINOR, four NIT.
+**Verdict: no BLOCKER, no MAJOR.** One standing MINOR (plus one OVERTAKEN mid-round), four NIT.
+
+*(Amendment, same round: this review ran against the tree at its spawn; the orchestrator's
+batches B+E verification commit 6d9c383ad landed while it ran — record-only, no code — and
+overtakes the second MINOR below. The verification-debt section is restated against 6d9c383ad.)*
 
 ---
 
@@ -39,15 +43,14 @@ so the amended assertion is red under R-C4 by construction and green on the fix.
 Pin: the amended trigger assertion, shown red under R-C4 (uncommitted edit, restored), green on
 the committed tree.
 
-**[MINOR] · notes/plans/fixes/vx-828-editor-shell-qol.md:65–67, 71–73 (THE LEDGER) · The ledger
-rows for batches B and E still read NOT-STARTED while both batches are fully built and committed.**
-Evidence: rows 3–5 (VX-824/833/844) and 9–11 (VX-798/838/840) say NOT-STARTED; the Batch B LIVE
-STATUS shows B0–B4 DONE (ec53930ef…1dd4e3233, window part 1 ran 201 tests/36 suites with the three
-reds traced and fixed at 8b8a2b31a) and Batch E shows E0–E5 DONE (c9aba7cb1…9a49f7350). The record's
-own head says "a resuming session reads this file whole" — the first thing it reads contradicts the
-batches' sections, and the resiliency protocol's row-flip rule binds from the first commit.
-Fix: flip the six rows to BUILT — suites/reverts/walk PENDING the stage window (batch B's row
-naming the part-1 run already made). No pin (record hygiene).
+**[MINOR — OVERTAKEN BY 6d9c383ad, no action owed] · notes/plans/fixes/vx-828-editor-shell-qol.md
+(THE LEDGER) · At this review's spawn, rows 3–5 and 9–11 still read NOT-STARTED while batches B and
+E were fully built and committed** (B0–B4 at ec53930ef…8b8a2b31a, E0–E5 at c9aba7cb1…9a49f7350) —
+a resuming session reading the ledger first would have met a state contradicting the batch
+sections. The orchestrator's B+E verification commit (6d9c383ad, mid-round) flipped rows 3/4/5/9
+to VERIFIED and 10/11 to VERIFIED-BY-PINS, which heals it. Recorded for the round's history; the
+residual lesson (flip the ledger row in the same commit as the batch's build, not only at
+verification) is the resiliency protocol's own and goes to the orchestrator, not the implementer.
 
 **[NIT] · Sources/VariorumCore/Domain/BoundarySnapping.swift:189 (+ the record's P-828-6
 neighborhood) · The punctuation-adjacent caret's behavior change is real and unnamed in the
@@ -78,9 +81,10 @@ switcher door, and the brain/sheet/chord now honor it — but the ▾ list's doo
 already-selected row is re-picked is framework behavior I cannot trace in this repo; if it does
 not fire, this one door silently does nothing on the identity pick. SPECULATIVE accordingly — a
 walk observation, not a traced bug.
-Fix: add "▾ list, re-pick the CURRENT wing → its Bookcase" as a micro-leg to batch B's pending
-walk; if dead, either give the current row a Button face or record the exception against the
-ruling. No headless pin possible (framework event delivery).
+Fix: add "▾ list, re-pick the CURRENT wing → its Bookcase" as a micro-leg beside the merge-gate
+walk's already-deferred ▾-list witness (6d9c383ad's deferred list); if dead, either give the
+current row a Button face or record the exception against the ruling. No headless pin possible
+(framework event delivery).
 
 **[NIT] · App/Variorum/VariorumTests/QuickEntryWingLabelTests.swift:85 · The 2,400-char source
 window is one comment away from a false red, and batch B already paid it once.**
@@ -96,17 +100,16 @@ record already owes it; filing it here so it doesn't evaporate. No pin (test hyg
 
 ## Verification debt (not findings — named so the ladder's close is not misread)
 
-The record is honest about all of these; round 2 / the merge gate must see them done, and this
+Restated against 6d9c383ad (the mid-round B+E verification: suites 120/13 with one order-isolation
+flake green alone, all eight reverts red on their asserted lines, the walk's primary B/E legs green
+both voices). The record is honest about all of these; the merge gate must see them done, and this
 round's clean bill does NOT cover them:
-- **Batch B:** the app suites' full run (part 1 ran 33/36 green + 3 traced-and-fixed; the three
-  fixed suites' re-run owed), reverts R-B1 / R-B2 / R-B2b / R-B3 / M-B4, and the walk (chords,
-  landings, the marquee in both voices).
-- **Batch E:** the app suites (`SpellingDoorTests` · `SettingsTagsWingFollowTests` ·
-  `TagSweepTests` + neighbours), reverts R-E1 / R-E2 (/R-E3), and walk legs (1)–(8) — including
-  the Spelling panel's Change under the DEBUG identity oracle (flag E(a)).
+- **The merge-gate walk's deferred legs** (each pin-covered today, per 6d9c383ad): batch C's seven;
+  B's ⌘L-sheet / ▾-list / masthead-cycle landing witnesses, the Library-search-field chord, the
+  snippets-EDITOR chord, the label's seam drag / sub-24-pt floor / full screen / first-frame flash,
+  the ⌘/ helper rows; E's menu-group glance, the capture-box chord, and the two Settings legs
+  (VX-838's live follow, VX-840's live sweep — the husk-tag fixture stands ready).
 - **Batches A + D:** the phone suites at the merge gate (Shared/ changed).
-- **Batch C:** the deferred walk legs at the merge gate (sidebar leave, Cards, live search sheet,
-  day filter, resets, deleted-row survivor, two-pane split).
 - The merge gate's standing items: main ≥ be17fb632 merged in first; `TagUsageQueriesTests` +
   `CapabilityRegistryTests` + `ShellChromeTests` re-run by whoever merges second.
 
