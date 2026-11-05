@@ -277,7 +277,7 @@ struct EditorSessionTests {
     }
 
     @Test func oneBlockJournalPostsMintOnFirstTextAndNeverCrystallize() async throws {
-        try await withEditor(profile: .journal) { h in
+        try await withEditor(profile: .journal, segmentation: .oneBlock) { h in
             h.type("Dear diary")
             await h.settle()
             var slots = try h.storeSlots()

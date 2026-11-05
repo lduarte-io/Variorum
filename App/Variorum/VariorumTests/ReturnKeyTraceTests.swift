@@ -228,7 +228,7 @@ struct ReturnKeyTraceTests {
     /// exactly what A15 asks for, already true.
     @Test func writeUnderOneBlockKeepsBothReturnsAsContent() async throws {
         for shift in [false, true] {
-            try await withEditor(profile: .journal, seedBlocks: ["alpha"]) { h in
+            try await withEditor(profile: .journal, segmentation: .oneBlock, seedBlocks: ["alpha"]) { h in
                 #expect(h.model.header?.effectiveSegmentation == .oneBlock)
                 let hosted = Self.host(try #require(h.textView.enclosingScrollView))
                 defer { hosted.teardown() }
@@ -1153,7 +1153,7 @@ struct TypedReturnKeyTests {
     /// blocks if they want, right?"* — under `one_block` the key is content
     /// again, in the middle of the note exactly as at its end.
     @Test func theChipOffKeepsTheKeyAsContentInTheMiddleToo() async throws {
-        try await withEditor(profile: .journal, seedBlocks: ["alpha beta", "gamma"]) { h in
+        try await withEditor(profile: .journal, segmentation: .oneBlock, seedBlocks: ["alpha beta", "gamma"]) { h in
             #expect(h.model.header?.effectiveSegmentation == .oneBlock)
             let window = try hosted(h)
             defer { window.teardown() }
@@ -1172,10 +1172,11 @@ struct TypedReturnKeyTests {
     /// retracted, and she stays on the empty line to write prose. R1-3's
     /// retraction ran here BEFORE the chip was consulted and deleted that
     /// line (`["- one"]`), leaving ⏎ unable to end a list at all: the next
-    /// ⏎, at the item's end, continued it again. Every journal note seeds
-    /// `one_block`, so this was the daily surface.
+    /// ⏎, at the item's end, continued it again. Every journal note seeded
+    /// `one_block` then, so this was the daily surface (VX-799 retired the
+    /// seed; the chip-off state is set explicitly here).
     @Test func theChipOffKeepsTheListExitAsK5Shipped() async throws {
-        try await withEditor(profile: .journal, seedBlocks: ["- one\n- "]) { h in
+        try await withEditor(profile: .journal, segmentation: .oneBlock, seedBlocks: ["- one\n- "]) { h in
             #expect(h.model.header?.effectiveSegmentation == .oneBlock)
             let window = try hosted(h)
             defer { window.teardown() }

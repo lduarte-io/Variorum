@@ -316,8 +316,10 @@ struct JournalBooksTests {
             }
             #expect((shape?["profile"] as String?) == "generic",
                     "a non-daily entry NEVER wears profile='journal' (the BLOCKER's shape)")
-            #expect((shape?["segmentation_default"] as String?) == "one_block",
-                    "the notebook feel rides explicit segmentation, not the profile")
+            // VX-799 (PROVISIONAL P-805-A1): no explicit one_block — a journal
+            // entry segments like any other note, in every journal book.
+            #expect((shape?["segmentation_default"] as String?) == nil,
+                    "a journal book's entry carries no segmentation override")
 
             // The DAILY book's own new-entry door routes through
             // create-or-open — the rule holds there.
@@ -391,8 +393,8 @@ struct JournalBooksTests {
                     "the entry is born in its book's wing (the F-5 class)")
             #expect((shape?["profile"] as String?) == "generic",
                     "the non-daily shape holds — never profile='journal'")
-            #expect((shape?["segmentation_default"] as String?) == "one_block",
-                    "the notebook feel still rides explicit segmentation")
+            #expect((shape?["segmentation_default"] as String?) == nil,
+                    "VX-799: no segmentation override at the trait's door")
             let membered = try await db.read { db in
                 try Int.fetchOne(db, sql: """
                     SELECT COUNT(*) FROM reading_post

@@ -54,7 +54,8 @@ struct MobileWalkTests {
             await model.awaitMintSettle()
             await model.autosave.flushNow()
 
-            // The autosave landed (one-block journal semantics).
+            // The autosave landed (one paragraph, one block — VX-799: the
+            // entry inherits the global default, no one_block seed).
             #expect(try await storedBlockTexts(db, postID: entry.container.id)
                     == ["Walked and wrote."])
 

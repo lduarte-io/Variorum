@@ -697,9 +697,11 @@ final class BookStructureModel {
     /// "New Entry" on a journal-profile book. THE DAILY BOOK routes
     /// through `createOrOpenJournalEntry` — the one-entry-per-day rule is
     /// the daily Journal's own rule and is UNTOUCHABLE (R50; the retired bridge's too, until 2026-09-04). OTHER journal
-    /// books (the dream journal) mint a **`.generic`** dated post with
-    /// one-block segmentation set explicitly (the notebook feel) and add
-    /// it to THIS book — **NEVER container `profile='journal'`** (Stage B
+    /// books (the dream journal) mint a **`.generic`** dated post and add
+    /// it to THIS book (VX-799, PROVISIONAL P-805-A1: no explicit one-block
+    /// segmentation any more — a journal entry segments like any other note,
+    /// in every journal book, the daily mint's own change at the trait's
+    /// door) — **NEVER container `profile='journal'`** (Stage B
     /// review round 2, BLOCKER: that profile+date shape IS the daily
     /// journal's identity — `canonicalJournalEntry` (and, then, the Fragments
     /// bridge sweep) keyed on it, so a `.journal` dream entry became
@@ -777,7 +779,6 @@ final class BookStructureModel {
                 // non-Home book.
                 let post = try ops.newPostInReading(
                     readingID, profile: .generic, entryDate: entryDay)
-                try ops.setSegmentationDefault(post.id, segmentation: .oneBlock)
                 return (post.id, nil)
             }
             lastError = outcome.note
