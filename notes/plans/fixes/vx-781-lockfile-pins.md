@@ -7,18 +7,68 @@ no custody, no editor seam, no `xcodebuild test`).
 
 ## FOR A LATER READER
 
-PENDING — written at the close.
+**NOT DONE (first line):** the FIRST trigger of VX-770's spontaneous rewrites was not reproduced.
+Every clean-input `xcodebuild` I ran (resolve, reused DerivedData, the exactness flag, a full
+build) left the lockfile byte-clean, and the only road to an upgraded file I reproduced is a
+resolution that runs WITHOUT the pins. The belt makes that road land the committed set, so the
+trigger no longer decides what ships. No `xcodebuild test` ran (no stage claim); release.sh is
+untouched (a wiring PROPOSAL only, below).
+
+**The mechanism as settled.** (1) Without its pins, the manifests' ranges float: the GRDB fork's own
+`SQLCipher.swift from: "4.11.0"`, Package.swift's `swift-dependencies from: "1.9.0"`, and the
+transitive ranges of swift-dependencies and the MCP SDK. A pin-free resolution lands SQLCipher
+**4.20.0**, swift-dependencies 1.17.2, swift-syntax 604.0.0, swift-issue-reporting 2.1.2 and 8 more
+(E2, C1). (2) Once such a file sits in the tree, every later build ADOPTS it, the exactness flags
+included, because they enforce THE FILE (E8 = VX-770's gate/gate2). (3) With a clean lockfile,
+Xcode 27.1 SEEDS the resolver with the pins: a fresh DerivedData (E1, E7), a reused upgraded one
+(E3, the checkouts are moved back) and `-disableAutomaticPackageResolution` (E5) all land the
+committed set and never rewrite. (4) Side facts: the workspace lockfile's originHash is
+`sha256(root URLs + the checkout's ABSOLUTE PATH)` (committed from `~/dev/variorum-vx-124`, so it
+mismatches in every checkout), and the root lockfile's originHash is `sha256(Package.swift)`. A
+mismatch changes nothing observable (T-3).
+
+**THE NON-OBVIOUS FACT a future session will trip over (E10):** in the Xcode workspace the
+repo-root package is a LOCAL PACKAGE DEPENDENCY, not the root, so SwiftPM PRUNES its unused
+`.package` declarations. Exact pins added only to Package.swift do NOTHING for the app: E10 floated
+SQLCipher to 4.20.0 with them in place. The app graph's root is the PROJECT, so its belt is
+project-level package references.
+
+**The belt as built:** Package.swift exact pins for every remote package, the CLI's belt (eda25f273,
+620cc9019) · the same versions as 12 exact `XCRemoteSwiftPackageReference` entries in
+project.pbxproj, the app's belt (620cc9019) · the root lockfile reconciled to the shipping set
+(P-781-1) · `Tools/verify-pins` = the guard (fef4800f8) · `Tools/pins-belt-check` = the pin
+(0d7fd8019). Upgrading a pin deliberately: the numbered procedure below.
+
+**RELEASE-RISK VERDICT:** a clean checkout + fresh `-derivedDataPath` resolves the committed pins
+(E1, E7, and the 1.1 release road's own build, which the coordinator confirmed). The two risk roads
+were a dirty/upgraded lockfile in the tree and any pin-free resolution. The belt closes the second.
+The guards are release.sh's clean-tree refusal plus `Tools/verify-pins "<OUT>/DerivedData"` after
+the archive. **RELEASE-EXPOSURE: 1.0 and 1.0.1 shipped the committed set.** The retained SQLCipher
+dSYM UUIDs `17E38CF7…`/`F0784571…` equal the 4.18.0 xcframework's, and both builds were
+`dirty files: 0`.
+
+**Evidence lines:** `pins-belt-check: BELT DOES NOT HOLD at 68b3d9c53` (Xcode + CLI DRIFT ×12,
+`sqlcipher.swift: committed 4.18.0 (f879fff) -> resolved 4.20.0 (e7415c5)`), exit 1 · `BELT HOLDS
+at f8d2ced67` (the merged tree; 16 + 15 pins), exit 0 · merged-tree Debug build `** BUILD
+SUCCEEDED **`, `verify-pins … vx781-merged …: 16 pins match`, built SQLCipher UUID = 4.18.0's ·
+`** TEST BUILD SUCCEEDED **` · core `3646 tests in 491 suites passed … 5 known issues`,
+StringsWorkbook `32 tests in 4 suites passed`, MCP 549/100 with the three socket-timing tests red
+only under whole-suite load (`16 tests in 3 suites passed` alone).
+
+**Open items:** P-781-1/-2/-3 for QUESTIONS (below) · born-ticket candidates (an upgrade helper, the
+release.sh hook) · the stray default DerivedData from my `xcodebuild -list` (the coordinator's
+sweep) · VX-770's first trigger (mooted, not found).
 
 ## LIVE STATUS (flipped per piece, in the same commit as the piece)
 
 | Piece | Status |
 |---|---|
-| (a) TRACE the mechanism | IN-PROGRESS — the originHash finding is made (below, T-1..T-3); reproductions next |
-| (b) RELEASE-RISK VERDICT | NOT-STARTED |
-| (c) THE BELT (manifest pins + `Tools/verify-pins`) | NOT-STARTED |
-| (d) THE PIN (red-on-old / green-on-new recipe, revert-verified) | NOT-STARTED |
-| (e) VERIFY (`swift build` + `swift test`; one Debug `xcodebuild build`; resolved pins recorded) | NOT-STARTED |
-| (f) THE RECORD's FOR A LATER READER | NOT-STARTED |
+| (a) TRACE the mechanism | DONE — T-1..T-4, E1–E8, E10–E11, C1–C3 (9e9bd78bd → 0d7fd8019). The first spontaneous trigger is NOT reproduced (stated as the record's first line) |
+| (b) RELEASE-RISK VERDICT + RELEASE-EXPOSURE | DONE — sent mid-run (cb0424554); restated in FOR A LATER READER |
+| (c) THE BELT (manifest pins + project refs + `Tools/verify-pins`) | DONE — eda25f273 (Package.swift), 620cc9019 (project.pbxproj), fef4800f8 (verify-pins) |
+| (d) THE PIN (red-on-old / green-on-new recipe, revert-verified) | DONE — `Tools/pins-belt-check` (0d7fd8019): red 68b3d9c53 + eda25f273, green fef4800f8 + f8d2ced67 |
+| (e) VERIFY on the merged tree (f8d2ced67) | DONE — core suite, Debug build + verify-pins, build-for-testing (VERIFY — the merged tree, below) |
+| (f) THE RECORD's FOR A LATER READER | DONE (this commit) |
 
 ## Evidence base read (this session, never delegated)
 
@@ -344,3 +394,169 @@ ROOT set (swift-concurrency-extras 1.4.0, xctest-dynamic-overlay 1.10.1, sqlciph
 which is harmless. The gitignored artifacts were LEFT IN PLACE (deleting files in main would be a
 second touch); reported to the orchestrator. From here on every Bash call starts with `cd
 <home>/dev/variorum-vx-781`.
+
+### THE MERGE — origin/main into the branch (f8d2ced67, at the orchestrator's word, at a clean seam)
+
+Main through 1524ed90f (which includes f3771c146, the 1.1 version bump, and #219, VX-779) merged
+by git's ort strategy with NO conflict. The one intersecting file was
+`App/Variorum/Variorum.xcodeproj/project.pbxproj`: main changed the `MARKETING_VERSION` lines
+(1.1); the belt adds the twelve package references and their `packageReferences` lines. These are
+different hunks, so git combined them automatically. `plutil -lint` reports OK. Package.swift and
+both lockfiles were untouched by main. Tools/Release/{release.sh,version-guard.sh},
+VersionSchemeTests and SupportDraftTests do not intersect this diff. **Disclosure:** the parse
+check was a plain `xcodebuild -list`, and `-list` RESOLVES PACKAGES. So it created a default
+DerivedData for this worktree's path
+(`~/Library/Developer/Xcode/DerivedData/Variorum-bjpkqprpxpdypegopbzojczgvdli`; it resolved the
+committed pins) and ran additive `git fetch`es into the shared repository mirrors of
+`~/Library/Caches/org.swift.swiftpm`. Nothing was purged or reset, and no other session's
+DerivedData was touched. Left in place at the orchestrator's ruling (the coordinator's cleanup
+sweep). Every later xcodebuild carried all three isolation flags.
+
+### VERIFY — the merged tree (f8d2ced67): the canonical evidence
+
+- **The pin, merged:** `Tools/pins-belt-check HEAD` → `OK …/spm/workspace-state.json: 16 pins match
+  the committed set` · `OK …/cli/workspace-state.json: 15 pins match the committed set` ·
+  `pins-belt-check: BELT HOLDS at f8d2ced67 — a pin-free resolution lands the committed set in both
+  graphs`, exit 0.
+- **Core suite** (`swift test`, isolated caches, detached in its own session, log
+  `core-test-merged.log`):
+  - VariorumCoreTests **`Test run with 3646 tests in 491 suites passed after 247.606 seconds with
+    5 known issues.`** (the env-gated measurement suites print `skipped`, as before.)
+  - StringsWorkbookTests **`Test run with 32 tests in 4 suites passed after 29.429 seconds.`**
+  - VariorumMCPTests `Test run with 549 tests in 100 suites failed after 49.136 seconds with 3
+    issues`: the SAME three socket-timing tests as the pre-merge run, under whole-suite load.
+    Alone (`--filter "MCPHarnessTimeLimitTests|MCPPreInitializeWindowTests|
+    MCPDiscoverProbeServerTests"`): **`Test run with 16 tests in 3 suites passed after 2.254
+    seconds.`** This is the load-timing class VX-736's record names for this suite ("three
+    load-timing flakes, each green alone"). The CLI graph's only pin change in this diff is
+    swift-concurrency-extras 1.4.0→1.4.1 and xctest-dynamic-overlay 1.10.1→1.11.0, the versions the
+    app has always run its tests on. No socket or timing code moved.
+- **The app, Debug** (`xcodebuild build -scheme Variorum -configuration Debug -destination
+  'platform=macOS' -derivedDataPath …/vx781-merged -packageCachePath …/vx781-pkgcache`; no clone
+  dir, so SourcePackages lands inside the DerivedData exactly as on the release road):
+  **`** BUILD SUCCEEDED **`**. The workspace lockfile hash was sampled every second through the
+  build and never changed (`e12-lockhash.log`). **`Tools/verify-pins
+  App/Variorum/DerivedData/vx781-merged` → `OK …/vx781-merged/SourcePackages/workspace-state.json:
+  16 pins match the committed set`, exit 0.** The resolved pins (workspace-state): combine-schedulers
+  1.2.0 · eventsource 1.5.1 · grdb.swift 7.11.1+sqlcipher.1 · sparkle 2.10.0 · **sqlcipher.swift
+  4.18.0** · swift-atomics 1.3.1 · swift-clocks 1.1.0 · swift-collections 1.7.2 ·
+  swift-concurrency-extras 1.4.1 · **swift-dependencies 1.14.1** · swift-log 1.16.1 · swift-nio
+  2.104.0 · swift-sdk 0.12.1 · **swift-syntax 602.0.0** · swift-system 1.8.1 ·
+  xctest-dynamic-overlay 1.11.0, and no swift-issue-reporting. The built app's
+  `Contents/Frameworks` holds only Sparkle.framework and SQLCipher.framework (the belt links
+  nothing). Its SQLCipher UUIDs `17E38CF7…`/`F0784571…` equal the 4.18.0 xcframework's and the
+  shipped 1.0/1.0.1's. The tree guard after the build: `Tools/verify-pins` OK (16 + 15). Xcode
+  emitted no package warning for the constraint-only references.
+- **`xcodebuild build-for-testing`** (same DerivedData; compiles the test bundles, runs nothing):
+  **`** TEST BUILD SUCCEEDED **`**.
+- **NOT run:** any `xcodebuild test` (needs a stage claim; the app's pins and code are unchanged by
+  this diff, so the brief's gate did not call for one, and the orchestrator may request a window if
+  the ladder wants one).
+- Corroboration from the coordinator (not my run): the 1.1 (11006) release road's fresh clean-tree,
+  fresh-DerivedData build confirmed the committed pins.
+
+## UPGRADING A PIN DELIBERATELY (the road the belt leaves open — the author's call, every time)
+
+The belt's cost is that a dependency version now lives in up to FOUR places that must agree. Every
+upgrade is deliberate, so this is the whole road, in order:
+
+1. **Decide (author-only).** Name the package and the new version. A NEW package identity entering
+   the graph (e.g. swift-issue-reporting, which swift-dependencies ≥ 1.17.1 brings) counts as a new
+   third-party dependency, an author-only call. If it is linked, its licence notice joins Settings ▸
+   Acknowledgments (`AcknowledgmentsCopy`).
+2. **Edit the declarations, the same version in each place the package appears:**
+   a. `Package.swift`: its `exact:` line. This is the CLI's belt, and for the direct dependencies
+      (the GRDB fork, swift-dependencies, the MCP SDK) the app's belt too.
+   b. `App/Variorum/Variorum.xcodeproj/project.pbxproj`: the matching `XCRemoteSwiftPackageReference`
+      (`kind = exactVersion; version = …;`). This is the app's belt for the twelve transitive
+      packages and the only home of Sparkle. Edit it by hand or through Xcode's Package
+      Dependencies pane, keeping "Exact Version".
+   c. If the upgrade CHANGES THE TRANSITIVE SET (identities added or dropped, as with
+      swift-dependencies 1.17.x: swift-issue-reporting in, xctest-dynamic-overlay out), add or
+      remove the exact lines in BOTH files to match, each version chosen deliberately.
+3. **Re-resolve BOTH lockfiles, in the same commit:**
+   a. root: `rm Package.resolved && swift package resolve`
+   b. workspace: `rm App/Variorum/Variorum.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`,
+      then from `App/Variorum/`: `xcodebuild -resolvePackageDependencies -project Variorum.xcodeproj
+      -scheme Variorum -derivedDataPath <fresh dir> -clonedSourcePackagesDirPath <fresh dir>
+      -packageCachePath <dir>` (all three inside the worktree's gitignored DerivedData).
+   Removing the files is SAFE only because of the belt: a pin-free resolution lands exactly the
+   declared set. Anything you left floating shows up in step 4.
+4. **Verify, after committing:** `Tools/verify-pins` (no argument) must say OK for both lockfiles,
+   and `Tools/pins-belt-check HEAD` must exit 0. **These are the roads that go RED until everything
+   agrees.** A package bumped in only one of Package.swift / project.pbxproj does NOT fail
+   resolution. Xcode prunes Package.swift's line and the CLI never reads the project, so the app and
+   the CLI silently get DIFFERENT versions. That mismatch is caught by verify-pins (the root
+   lockfile vs the committed workspace set) and by pins-belt-check (the CLI graph DRIFTs). A
+   lockfile not re-resolved shows as DRIFT, or as a byte-dirty workspace lockfile after the next
+   build (the tree guard).
+5. **The usual gate** on the new set (core suite, app suites under a stage claim, a walk if behaviour
+   can change), with the upgrade recorded in the effort's record. Like a schema change, the
+   dependency change is its own commit ahead of any code that uses it.
+
+**Born-ticket candidate (not built):** `Tools/upgrade-pin <identity> <version>`. It would edit both
+declarations (and say when the transitive set changes), re-resolve both lockfiles in isolated dirs,
+and run verify-pins + pins-belt-check: steps 2–4 as one command, so the belt never gets worked
+around out of frustration. Suggested: Improvement · Tests & tooling · Low.
+
+## THE release.sh WIRING — a PROPOSAL only (release.sh untouched; the release road is hers)
+
+Two verification-only hooks, no change to the publish flow:
+
+```diff
+ # ------------------------------------------------------------------ 0. preflight  (after the clean-tree refusal, line ~90)
++# VX-781: the pins guard over the lockfiles a build is about to read (the workspace file is already
++# covered by the clean-tree refusal; this also proves the root lockfile agrees with it).
++"${REPO}/Tools/verify-pins" > /dev/null || refuse "the package pins drift from the committed set — run Tools/verify-pins (VX-781)"
+
+ # ------------------------------------------------------------------ 1–2. stamp + archive + export  (after `[ "$AE" -eq 0 ] || …`, line ~171)
++# VX-781: the archive's RESOLVED graph is the committed one — read from its own SourcePackages,
++# before anything is notarized; the result rides beside RELEASE-INFO.txt.
++"${REPO}/Tools/verify-pins" "${BUILD_DIR}/DerivedData" > "${BUILD_DIR}/verify-pins.txt" \
++  || { cat "${BUILD_DIR}/verify-pins.txt" >&2; echo "REFUSED: the archive resolved packages other than the committed pins (VX-781)" >&2; exit 5; }
+```
+
+The second hook is the one that matters: it reads what the archive ACTUALLY built against, so it
+catches every road (a pin-free resolution, an adopted dirty file) that a pre-build check cannot
+see. It is cheap (no network, no xcodebuild). `archive-and-export.sh` writes its DerivedData at
+`${OUT}/build.noindex/DerivedData` = `${BUILD_DIR}/DerivedData`, where `verify-pins` finds
+`SourcePackages/workspace-state.json`. Retaining `verify-pins.txt` into `Releases/<v>/` would make
+it release provenance like the dSYMs. Its wiring is the coordinator's/author's call. Born-ticket
+candidate if wanted: Improvement · Tests & tooling · Medium.
+
+## PROVISIONAL calls (for notes/QUESTIONS.md at the merge — I did not edit the shared ledger)
+
+- **P-781-1 — the two committed lockfiles disagreed** (root: swift-concurrency-extras 1.4.0,
+  xctest-dynamic-overlay 1.10.1; workspace: 1.4.1, 1.11.0, shipping since 2026-08-03's
+  57d749299). **Built (A):** exact-pin the WORKSPACE (shipping) versions; the CLI's root lockfile
+  moves 1.4.0→1.4.1 and 1.10.1→1.11.0, which are versions the app already ships, so nothing new
+  enters any graph. (B) Closed ranges `"1.4.0"..."1.4.1"` / `"1.10.1"..."1.11.0"` keep both files
+  byte-stable, but a pin-free CLI resolution would then land the top of each range, so the CLI half
+  of the belt holds only by luck of the range. (C) Pin the APP DOWN to 1.4.0 / 1.10.1, which changes
+  what ships. (A) is the most defensible: one committed set, the shipping one.
+- **P-781-2 — where the app's belt lives.** **Built (A):** twelve exact project-level package
+  references in project.pbxproj. They are VISIBLE in Xcode's Package Dependencies list, with no
+  product dependency. (B) Package.swift pins only, plus the verify-pins guards: E10 proves a
+  pin-free resolution then floats SQLCipher to 4.20.0, so the guards would refuse builds instead of
+  preventing the float. (C) Restructure to an .xcworkspace that opens the repo package as a ROOT
+  package (root packages are not pruned), so Package.swift alone would belt both graphs. That means
+  every build, script and walk switches to `-workspace`, which is a project restructure and not
+  this ticket's to make. (A) is the only place Xcode reads as root today.
+- **P-781-3 — the tree guard flags an originHash-only byte change** of the workspace lockfile (pins
+  equal), e.g. after a pin-free re-resolution on a new path. **Built (A):** flag it (exit 1), the
+  same stance as release.sh's clean-tree refusal: a dirty file is what a build adopts. (B) Pass when
+  pins are equal (less noise; the post-build check still guards). (A) is conservative and
+  consistent with the release road.
+
+## Machinery honesty
+
+No session death. Three slips, all disclosed the same turn: (1) the stray `swift package --help` in
+the MAIN checkout's gitignored `.build` (INCIDENT above). Its cause: subagent Bash calls reset to
+the session's primary directory, which is main. (2) My own TaskStop of a polling shell killed the
+first `swift test` mid-run (the harness had moved the poll to the background; the stop took the
+whole process group). That run is cited for nothing; every later long run was launched detached in
+its own session and polled in under-180-second foreground calls. (3) The plain `xcodebuild -list`
+parse check (THE MERGE above). Shared-cache writes, all additive and ruled acceptable by the
+orchestrator: manifest-cache entries (E1 onward; `-packageCachePath` does not redirect them) and
+`-list`'s repository-mirror fetches. Nothing shared was ever purged or reset. The global
+DerivedData dirs and the other worktrees were only read.
