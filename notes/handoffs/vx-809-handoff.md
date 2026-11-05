@@ -1,7 +1,6 @@
 # VX-809 handoff — MCP door ergonomics (the agent-side asks)
 
-**DRAFT — the closing window and the merge are PENDING; the marked lines finalize at closeout.**
-Run record: `notes/plans/fixes/vx-809-mcp-door-ergonomics.md` (FOR A LATER READER up top). Ladder: `notes/plans/fixes/vx-809-ladder-round1.md` (PASS at round 1). QUESTIONS entry: **#262** (PENDING the merge moment). PR: **PENDING** (`VX-809: …`, merge commit, on the coordinator's GO).
+Run record: `notes/plans/fixes/vx-809-mcp-door-ergonomics.md` (FOR A LATER READER up top). Ladder: `notes/plans/fixes/vx-809-ladder-round1.md` (PASS at round 1). The provisionals: QUESTIONS **#262**. PR: `VX-809: …` (merge commit, coordinator-serialized).
 
 ## YOUR MORNING CHECKLIST (the bundle, lead line first)
 
@@ -20,10 +19,12 @@ Run record: `notes/plans/fixes/vx-809-mcp-door-ergonomics.md` (FOR A LATER READE
 13. **Born tickets to triage:** VX-858 (Open › names the wing for a gone moved note — pre-existing), VX-859 (above).
 14. **P-809-9** (tag vocabulary stays wing-level reachable state; adopt-vs-mint's thin residue) · **P-809-2's family whole** (S-1/#218 standing; the ownership-refusal hidden arm) · **P-809-3/A-809-14** (the book move's exact-row undo WRAP) — all built the lean way, yours to ratify.
 
-## State at handoff (PENDING lines finalize at closeout)
+## State at handoff
 
-- All five batches DONE + accepted; the ladder PASSED at round 1; main merged in TWICE (be17fb632 clean; vx-805's f1137c88b with the seam reconcile — the fold into their shared Journal fence, acceptance bar green).
-- The closing window (`vx-809-closing` on `d30cafbef`+): **PENDING** — whole-target VariorumTests + phone suites + overlap re-runs + the orchestrator's walk of the sidebar face.
-- The merge + canon application + QUESTIONS #262 + run-finals + ticket closes: **PENDING** the window + the coordinator's GO.
-- MOBILE PARITY: **PENDING** (expected: nothing mobile-visible — the one Shared/ file change is Mac-composition-only; the phone never reads `willLockRoad`).
-- canon-size: **PENDING** (run at the canon application).
+- All five batches DONE + accepted; the ladder PASSED at round 1; main merged in TWICE (be17fb632 clean; vx-805's f1137c88b with the seam reconcile — the fold into their shared Journal fence proven load-bearing, the tool-level Journal pin green on the merged tree).
+- The closing window: DONE and released early — WHOLE target "5891 tests in 1026 suites" on 4ffd1e476 (its one real red was a STALE 17y pin asserting the Journal never offers Delete, superseded by vx-805's merged VX-435/436; fixed test-only with the coordinator's approval, `38828da7e`, the suite filtered green — NOTE: main itself carried that red through vx-805's gate; the coordinator's handoff has it); PHONE suites "852 in 139 passed", zero failures; my hands-on walk of your sidebar AI section, T1–T9 all PASS in both voices (the landing, the details popover, the kind updating shown→opened live, the section gone at rest and surviving navigation; the switch-off close line verbatim; posture restored whole).
+- Canon applied per the five CANON DRAFTs + the VX-859 residual clause (the two-file rule; the dated narrative in `notes/AppSpecRecord.md`); QUESTIONS #262 is the bundle; run-finals + the master plan rows landed with the merge.
+- RULINGS RECONCILED: each ruling's "every/all" re-read against the shipped tree — R-825's "every answer" carries exactly ONE named residual (VX-859, ticketed + in canon); R-812's reach fence, R-679's rows and R-818's "any other moment" (the re-key) shipped to the letter; no unticketed remainder.
+- MOBILE PARITY: nothing mobile-visible (the one Shared/ change is Mac-composition-only; the phone never reads `willLockRoad`; phone suites green).
+- A new .ips during the window was CLASSED as VX-855's standing class (the test-host exit over a purge read) — a fresh-instance comment is on that ticket; not this run's regression.
+- canon-size: 133,361 / 150,000 (headroom 16,639) — reported, no crossing
