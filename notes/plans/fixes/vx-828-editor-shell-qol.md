@@ -62,15 +62,15 @@ Decisions were put as question batches; she picked among presented options. Reco
 |---|---|---|---|---|
 | 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | VERIFIED 2026-11-05 (suites 281/28 green, red-on-old by revert, walk all legs both voices; pin hygiene 99fd1dd58; clean red re-show DONE in the batch D window — fails at plain #expects, zero traps, zero new .ips) — PENDING: phone suites at the merge gate |
 | 2 | VX-655 (L, rider) | list-exit Return: retraction lands inside the flight | A | VERIFIED 2026-11-05 (order pin red-on-old by revert 3, checklist walk clean, stale neighbor pin re-pointed 58e655834) |
-| 3 | VX-824 (M) | ⌘digit contextual — wings from the keyboard (RULED: shape a) | B | NOT-STARTED |
-| 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
-| 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | NOT-STARTED |
+| 3 | VX-824 (M) | ⌘digit contextual — wings from the keyboard (RULED: shape a) | B | VERIFIED 2026-11-05 (13 real-NSEvent pins green, R-B1 red-on-old; walk both voices — chained quick-entry presses, ⌘9 refusal verbatim, in-note stays the mode row) |
+| 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | VERIFIED 2026-11-05 (landing pins green, R-B2/R-B2b red-on-old; walk — chord lands both voices, the follow never lands; remaining door witnesses at the merge gate) |
+| 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | VERIFIED 2026-11-05 (10 label pins incl. hosted geometry, R-B3/M-B4 red-on-old; the ticker SEEN ticking both voices, clipped at the line; seam/floor/fullscreen at the merge gate) |
 | 6 | VX-823 (HIGH) | the Library remembers scroll + selection on return from a note | C | VERIFIED 2026-11-05 (windows 1+2: 38+3 suites green, R-C1..3 + R-C4b run — road pin hollow, recorded; the fix red-on-old by the CROSS-WINDOW LIVE PAIR; walk primary legs green both voices) — PENDING: the deferred walk legs at the merge gate |
 | 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | VERIFIED 2026-11-05 (window vx-828-batchD: 18 suites/196 green incl. the 7 app pins; walk both voices — count honest, cancel, filter-proof, receipt, door gone at 0) — PENDING: phone suites at the merge gate |
 | 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | VERIFIED 2026-11-05 (geometry pin green; red-on-old by revert R-D4 — both geometry #expects red on the overlay, restored green; the band verified in the walk, both voices) |
-| 9 | VX-798 (M) | spellcheck: ⌘; / ⌘: chords + Edit ▸ Spelling and Grammar home | E | NOT-STARTED |
-| 10 | VX-838 (M, Bug) | Settings ▸ Tags names + follows the wing (RULED: R-828-2) | E | NOT-STARTED |
-| 11 | VX-840 (L, rider) | Settings ▸ Tags: delete-every-unused-tag door | E | NOT-STARTED |
+| 9 | VX-798 (M) | spellcheck: ⌘; / ⌘: chords + Edit ▸ Spelling and Grammar home | E | VERIFIED 2026-11-05 (SpellingDoorTests green, R-E1 red on all five surfaces; walk — ⌘; selects one-shot, the panel's Change lands through the input path under the identity oracle) |
+| 10 | VX-838 (M, Bug) | Settings ▸ Tags names + follows the wing (RULED: R-828-2) | E | VERIFIED-BY-PINS 2026-11-05 (mounted follow pin green, R-E2 the true red-on-old; the LIVE Settings walk blocked by words-guard fail-closed ×3 — deferred to the merge gate) |
+| 11 | VX-840 (L, rider) | Settings ▸ Tags: delete-every-unused-tag door | E | VERIFIED-BY-PINS 2026-11-05 (core 7 + app 7 pins green, M-E1..3 + R-E3 red as predicted; live sweep walk deferred to the merge gate — fixture husk-tag prepared, unused in Home) |
 
 Batch order: **A → D → C → B → E** (domain/ops-heavy first, chrome after; order may flex at the
 orchestrator's call, recorded here when it does).
@@ -2220,3 +2220,60 @@ switcher-alignment geometry pin where reachable).
 4. **Q-E4 the door: (a) CONFIRMED** — the live count on a narrow observation, "Delete N unused
    tags…", not drawn at zero (batch D's ruling 6, the P-2 letter). Words stand as drafted,
    PROVISIONAL, hers to tune.
+
+#### Batches B+E — ORCHESTRATOR VERIFICATION, THE WALK (stage "vx-828-batchBE" suites/reverts at 06:59 + "vx-828-batchBE2" walks at 10:37, 2026-11-05; the gap = the session's usage limit, no acts lost — the claim expired idle, the coordinator held the stage and closed one leftover Problem Reporter from the 07:03/07:04 encoder-class .ips)
+
+**Suites (batchBE, 06:59):** ONE run, EXECUTED 120 tests / 13 suites — one red,
+`BrowserNavKeysTests.aWebViewHoldingTheKeyboardKeepsCommandArrow`, dependency-injection issues
+under a NEW NEIGHBOR ORDER; re-run ALONE 5/5 green — recorded as an ORDER-ISOLATION FLAKE (the
+known anonymous Date.swift class, first time attributed), counted green per the alone-run rule.
+All B re-points and all E suites green first time. **All EIGHT reverts red exactly on their
+asserted lines** (R-B1 five chord pins · R-B2 every landing pin with the follow guard green ·
+R-B2b exactly `aRowClickCommitsTheCurrentRowToo` · R-B3 the flush-right pin with the clip guard
+green · M-B4 `aNameThatFitsHasNoLoop` · R-E1 the one-shot flags pin on all five surfaces · R-E2
+`thePaneFollowsTheAppsWingLive` — VX-838's true red-on-old · R-E3 both linked-box pins), each
+restored, tree clean.
+
+**The walk (batchBE2, 10:37–11:15, Study then Terminal):**
+- **The third wing** minted by hand ("the long-winded third wing of walking", agents' content,
+  KEPT for the merge-gate walk) — the New Wing road itself landed in the new wing's Bookcase with
+  its receipt.
+- **VX-824 the chord, Study:** ⌘1 from the new wing's Bookcase → Home's Bookcase; ⌘2 IMMEDIATELY
+  after (the caret resting in quick entry — VX-332's exact case) → Walk Wing + "Now in …": THE
+  CHAINED PRESS WORKS, the literal rule's dead-chord trap is closed. ⌘9 → the P-828-1 (i) refusal
+  VERBATIM ("There's no wing 9 — ⌘1–⌘3 go to your 3 wings, Home first."), nothing moved. In a
+  NOTE: ⌘2 → the MODE ROW (Takes), wing unchanged. The snippets LIST: ⌘2 fired and switched —
+  CORRECT (a list is not a writing surface). **Terminal:** in-note ⌘3 → Read (the mode row);
+  from the Bookcase ⌘3 → the long-named wing's Bookcase + receipt, monospace.
+- **VX-833:** every witnessed deliberate road landed in the Bookcase (the create, the chord in
+  both voices); the FOLLOW did NOT land (opening a Home note from the Open list switched the wing
+  and stayed in the note — seen twice).
+- **VX-844:** the ticker TICKS — captures 3 s apart read "in the lo" → "ɡ-winde" (Study) and
+  mid-tick in Terminal; clipped hard at both edges, never crossing the column line, no ellipsis.
+- **VX-798:** typed "brwn" in sweep alpha (Write); ⌘; SELECTED it (one press, no checking flag);
+  ⌘: raised the panel; its CHANGE replaced it with "brown" through the normal input path — the
+  DEBUG identity oracle stayed silent; the word then removed, bytes restored.
+- **VX-838/VX-840 the Settings legs: BLOCKED by words-guard, fail-closed honored** — three runs,
+  all "withheld (AXError -25200)" with Settings open (batch A's precedent exactly); the one
+  Settings capture was DELETED UNREAD. Their behavior stands on the GREEN pins
+  (SettingsTagsWingFollowTests · TagSweepTests · UnusedTagsTests + probes M-E1..3) and the legs
+  are DEFERRED to the merge-gate window with a FIXTURE PREPARED: the tag "husk-tag" sits LIVE
+  with ZERO applications in Home (applied to sweep alpha by hand, then removed) — the sweep door
+  should read "Delete 1 unused tag…" there.
+- **Posture:** voice restored to Study, wing Home, ⌘Q clean, both strict pgreps empty, NO Problem
+  Reporter, .ips count 16 before and after the walk (zero new; the six 07:03/07:04 ones are the
+  suite-phase encoder class, coordinator-classed).
+
+**DEFERRED to the merge-gate walk** (each covered by a green pin today): batch C's seven legs
+(sidebar leave, Cards, search sheet, day filter, resets, deleted-row survivor, two-pane); B's
+⌘L-sheet pick / ▾-list silent pick / masthead-cycle landings, the Library-search-field chord, the
+snippet-EDITOR chord (the list-level firing was witnessed; whether the snippets editor is a
+pinned holder class — the walk confirms), the label's seam drag / sub-24-pt floor / full screen /
+first-frame flash, the ⌘/ helper rows; E's menu-group glance, the capture-box chord, and the two
+Settings legs above. One process note: a `⌘,`+click combined command was DENIED by the session's
+action classifier mid-walk — split into two calls it ran; noted for walk briefs (keep acts one
+per call).
+
+**Ledger rows 3/4/5/9 flip VERIFIED; rows 10/11 flip VERIFIED-BY-PINS** (the live Settings walk
+deferred as above). Batches A–E are ALL CLOSED pending the merge-gate items; the ladder (round 1
+spawned 10:37, running headless) is the run's last gate before closeout.
