@@ -49,6 +49,18 @@ struct MacWillLockTests {
         }
     }
 
+    /// **VX-818 (the VX-809 run, batch 4 — A-809-21, widened to the re-key):
+    /// which teardowns keep the MCP server** — the lock and the re-keying reopen
+    /// of the same library; adopt and swap (`.closing`) and a road nobody named
+    /// tear it down exactly as before (FAIL-CLOSED). `macWillLock`'s order is
+    /// untouched (the pins above and `MCPConnectionEndDoorTests`' order pin).
+    @Test func onlyTheLockAndAReKeyKeepTheMCPServer() {
+        #expect(mcpServerSurvives(.lock))
+        #expect(mcpServerSurvives(.reKey))
+        #expect(!mcpServerSurvives(.closing), "adopt and swap stay true stops")
+        #expect(!mcpServerSurvives(nil), "an unnamed road is today's teardown")
+    }
+
     /// The order half: the editor's finalize lands its writes BEFORE
     /// `stopServices` runs (a stop that beat the flush would close the
     /// world under her last keystrokes — the phone's `mobileWillLock`
