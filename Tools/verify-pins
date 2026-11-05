@@ -14,13 +14,16 @@ usage:
 CONTENT, so renamed copies work. The reference is the Xcode workspace lockfile as COMMITTED (git,
 never the working-tree copy, which a build can rewrite). Pins compare by identity, version and
 revision. The originHash is ignored: the workspace's is a hash of the checkout's absolute path,
-so it differs on every checkout. The no-argument form also fails when either working-tree lockfile
-differs from the commit in ANY byte, because a build (Xcode or `swift build`) adopts whatever that
-file says. The project-only packages (`--cli`, and the root lockfile in the no-argument form) are
+so it differs on every checkout. The no-argument form is VERSIONS-EQUAL too (VX-853, P-781-3): a
+working-tree lockfile whose bytes differ from the commit while every pin is identical (only
+bookkeeping moved, e.g. the originHash) prints a NOTE and passes — harmless, but restore it with
+git checkout -- before committing, never commit it. A missing lockfile or any pin difference
+fails. The project-only packages (`--cli`, and the root lockfile in the no-argument form) are
 the Xcode project's references whose identity Package.swift never names, read AT the reference
 revision (`--ref`, default HEAD), or from the working tree under `--against`.
 
-exit: 0 every pin matches · 1 drift (each drifted pin named) · 2 usage or unreadable input.
+exit: 0 every pin matches (a bookkeeping NOTE included) · 1 drift (each drifted pin named) ·
+2 usage or unreadable input.
 The release's post-build check: Tools/verify-pins "<OUT>/DerivedData"
 The belt's static guard is Tests/VariorumCoreTests/PinBeltTests.swift; the networked proof is
 Tools/pins-belt-check.
@@ -122,7 +125,9 @@ def short(v):
     return f"{version} ({(rev or '?')[:7]})"
 
 
-def compare(label, got, want, skip=frozenset()):
+def pin_diffs(got, want, skip=frozenset()):
+    """the MISSING/EXTRA/DRIFT lines between a resolved and a committed pin set, by identity,
+    version and revision; empty when every pin matches."""
     lines = []
     for ident in sorted(set(want) | set(got)):
         if ident in skip and ident not in got:
@@ -133,6 +138,11 @@ def compare(label, got, want, skip=frozenset()):
             lines.append(f"  EXTRA   {ident}: resolved {short(got[ident])}, not in the committed set")
         elif got[ident] != want[ident]:
             lines.append(f"  DRIFT   {ident}: committed {short(want[ident])} -> resolved {short(got[ident])}")
+    return lines
+
+
+def compare(label, got, want, skip=frozenset()):
+    lines = pin_diffs(got, want, skip)
     if lines:
         print(f"DRIFT  {label}: {len(lines)} pin(s) differ from the committed set")
         print("\n".join(lines))
@@ -187,11 +197,18 @@ def main(argv):
                 print(f"DRIFT  {rel}: MISSING from the working tree ({absent})")
                 ok = False
                 continue
+            got = pins_of(parse_json(text, rel), rel)
             if not against and text != git_show(root, ref, rel):
-                print(f"DRIFT  {rel}: the working-tree file differs from {ref} "
-                      f"(a build ADOPTS it) — restore it with git checkout -- before building")
-                ok = False
-            ok &= compare(label, pins_of(parse_json(text, rel), rel), want, skipping)
+                if pin_diffs(got, want, skipping):
+                    print(f"DRIFT  {rel}: the working-tree file differs from {ref} "
+                          f"(a build ADOPTS it) — restore it with git checkout -- before building")
+                    ok = False
+                else:
+                    # VERSIONS-EQUAL (VX-853, P-781-3): every pin identical, so only bookkeeping
+                    # moved (the workspace originHash hashes the checkout's path, T-2) — harmless.
+                    print(f"NOTE   {rel}: differs from {ref} only in bookkeeping (pins identical) — "
+                          f"harmless; restore with git checkout -- before committing, never commit it.")
+            ok &= compare(label, got, want, skipping)
     else:
         for s in states:
             path, got = load_state(s)
