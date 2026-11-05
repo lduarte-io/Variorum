@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+"""verify-pins — does a resolved package state match the COMMITTED pins? (VX-781)
+
+usage:
+  Tools/verify-pins                      check the working tree's two lockfiles (the pre-build guard)
+  Tools/verify-pins <state> [<state>...] check resolved states after a build or resolve
+  options: --ref <git-rev>   compare against the lockfile committed at <rev> (default HEAD)
+           --against <file>  compare against this Package.resolved instead of a commit
+           --cli             the state is the CLI (repo-root package) graph, which never holds the
+                             Xcode project's own references (Sparkle) — those are not expected
+
+<state> is any of: a SourcePackages/workspace-state.json · a SourcePackages dir · a DerivedData dir
+(…/SourcePackages/workspace-state.json is found inside) · a Package.resolved. The reference is the
+Xcode workspace lockfile as COMMITTED (git, never the working-tree copy, which a build can rewrite).
+Pins compare by identity, version and revision; the originHash is ignored (the workspace's is a
+hash of the checkout's absolute path, so it differs on every checkout). The no-argument form also
+fails on a working-tree workspace lockfile that differs from the commit in ANY byte, because a
+build adopts whatever that file says.
+
+exit: 0 every pin matches · 1 drift (each drifted pin named) · 2 usage or unreadable input.
+The release's post-build check: Tools/verify-pins "<OUT>/DerivedData"
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+
+WS_LOCK = "App/Variorum/Variorum.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+PBXPROJ = "App/Variorum/Variorum.xcodeproj/project.pbxproj"
+
+
+def die(msg):
+    print(f"verify-pins: {msg}", file=sys.stderr)
+    sys.exit(2)
+
+
+def repo_root():
+    here = os.path.dirname(os.path.realpath(__file__))
+    try:
+        return subprocess.check_output(["git", "-C", here, "rev-parse", "--show-toplevel"],
+                                       text=True, stderr=subprocess.DEVNULL).strip()
+    except (subprocess.CalledProcessError, OSError):
+        die(f"not inside a git checkout: {here}")
+
+
+def git_show(root, rev, path):
+    try:
+        return subprocess.check_output(["git", "-C", root, "show", f"{rev}:{path}"],
+                                       text=True, stderr=subprocess.DEVNULL)
+    except (subprocess.CalledProcessError, OSError):
+        die(f"cannot read {rev}:{path}")
+
+
+def pins_from_resolved(text, where):
+    try:
+        data = json.loads(text)
+        return {p["identity"]: (p["state"].get("version"), p["state"].get("revision"))
+                for p in data["pins"]}
+    except (ValueError, KeyError, TypeError):
+        die(f"not a Package.resolved: {where}")
+
+
+def pins_from_state(path):
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        out = {}
+        for dep in data["object"]["dependencies"]:
+            ref, state = dep["packageRef"], dep.get("state", {})
+            if ref.get("kind") != "remoteSourceControl":
+                continue  # the local package (fileSystem) and anything unpinnable
+            cs = state.get("checkoutState", {})
+            out[ref["identity"]] = (cs.get("version"), cs.get("revision") or state.get("name"))
+        return out
+    except (OSError, ValueError, KeyError, TypeError):
+        die(f"not a readable workspace-state.json: {path}")
+
+
+def load_state(arg):
+    p = os.path.abspath(arg)
+    for cand in (p, os.path.join(p, "workspace-state.json"),
+                 os.path.join(p, "SourcePackages", "workspace-state.json")):
+        if os.path.isfile(cand):
+            if os.path.basename(cand) == "workspace-state.json":
+                return cand, pins_from_state(cand)
+            try:
+                with open(cand) as f:
+                    return cand, pins_from_resolved(f.read(), cand)
+            except OSError:
+                die(f"unreadable: {cand}")
+    die(f"no workspace-state.json or Package.resolved at {arg}")
+
+
+def project_only(root):
+    """identities the Xcode project references but the root Package.swift never names (Sparkle)."""
+    try:
+        pbx = open(os.path.join(root, PBXPROJ)).read()
+        manifest = open(os.path.join(root, "Package.swift")).read()
+    except OSError:
+        die("cannot read project.pbxproj / Package.swift")
+    out = set()
+    for url in re.findall(r'repositoryURL = "([^"]+)";', pbx):
+        if url not in manifest:
+            out.add(url.rstrip("/").split("/")[-1].removesuffix(".git").lower())
+    return out
+
+
+def short(v):
+    version, rev = v
+    return f"{version} ({(rev or '?')[:7]})"
+
+
+def compare(label, got, want, skip=frozenset()):
+    lines = []
+    for ident in sorted(set(want) | set(got)):
+        if ident in skip and ident not in got:
+            continue
+        if ident not in got:
+            lines.append(f"  MISSING {ident}: committed {short(want[ident])}, not in the resolved state")
+        elif ident not in want:
+            lines.append(f"  EXTRA   {ident}: resolved {short(got[ident])}, not in the committed set")
+        elif got[ident] != want[ident]:
+            lines.append(f"  DRIFT   {ident}: committed {short(want[ident])} -> resolved {short(got[ident])}")
+    if lines:
+        print(f"DRIFT  {label}: {len(lines)} pin(s) differ from the committed set")
+        print("\n".join(lines))
+        return False
+    print(f"OK     {label}: {len([i for i in want if i in got])} pins match the committed set")
+    return True
+
+
+def main(argv):
+    ref, against, cli, states = "HEAD", None, False, []
+    it = iter(argv)
+    for a in it:
+        if a in ("-h", "--help"):
+            print(__doc__.strip())
+            return 0
+        if a == "--ref":
+            ref = next(it, None) or die("--ref needs a git revision")
+        elif a == "--against":
+            against = next(it, None) or die("--against needs a file")
+        elif a == "--cli":
+            cli = True
+        elif a.startswith("-"):
+            die(f"unknown option {a} (see --help)")
+        else:
+            states.append(a)
+
+    root = repo_root()
+    if against:
+        try:
+            want = pins_from_resolved(open(against).read(), against)
+        except OSError:
+            die(f"unreadable: {against}")
+        ref_label = against
+    else:
+        want = pins_from_resolved(git_show(root, ref, WS_LOCK), f"{ref}:{WS_LOCK}")
+        ref_label = f"{ref}:{WS_LOCK}"
+    skip = project_only(root)
+    print(f"verify-pins: reference = {ref_label} ({len(want)} pins)")
+
+    ok = True
+    if not states:
+        # The pre-build guard: the working tree's lockfiles, as a build would read them.
+        ws_path = os.path.join(root, WS_LOCK)
+        try:
+            ws_text = open(ws_path).read()
+        except OSError:
+            ws_text = None
+        if ws_text is None:
+            print(f"DRIFT  {WS_LOCK}: MISSING from the working tree (a build would resolve WITHOUT pins)")
+            ok = False
+        else:
+            if not against and ws_text != git_show(root, ref, WS_LOCK):
+                print(f"DRIFT  {WS_LOCK}: the working-tree file differs from {ref} "
+                      f"(a build ADOPTS it) — restore it with git checkout -- before building")
+                ok = False
+            ok &= compare(f"{WS_LOCK} (working tree)", pins_from_resolved(ws_text, ws_path), want)
+        root_lock = os.path.join(root, "Package.resolved")
+        try:
+            root_text = open(root_lock).read()
+        except OSError:
+            print("DRIFT  Package.resolved: MISSING from the working tree (swift build would resolve WITHOUT pins)")
+            return 1
+        ok &= compare("Package.resolved (working tree, the CLI graph)",
+                      pins_from_resolved(root_text, root_lock), want, skip)
+    else:
+        for s in states:
+            path, got = load_state(s)
+            ok &= compare(path, got, want, skip if cli else frozenset())
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
