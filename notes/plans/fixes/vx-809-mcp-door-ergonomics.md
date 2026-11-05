@@ -478,3 +478,39 @@ VX-825's TITLE and its first ask — "remove_tag's answer says when a tag looks 
 - **(b) materialize the displayed title** (the agent's "copy the displayed title as-is"): the copy's `title` = the source's displayed date string, journal class only. Satisfies R-826 with zero notebook effect, but WRITES a derived title — against `DisplayTitle`'s "never a write … nothing is copied (the no-denormalization rule)".
 - **(c) keep as built** (VX-759's journal exclusion) and record R-826's letter unmet for the class — rejected: R-826 says "never today's".
 Building (a) PROVISIONAL unless ruled otherwise; red-on-old pin on the journal class through her Duplicate doors AND Copy to Wing (the shared body); byte-verbatim pins for the typed-titled and dated classes.
+
+---
+
+## BATCH 2 RECORD — books on the wire (VX-807 `move_book_to_wing` + VX-813 the book order)
+
+**NOT DONE in this batch (first, as the protocol asks):** PENDING — kept current per piece; the undo half of `move_book_to_wing` is NOT BUILT until the orchestrator rules P-809-3 (the fork below — the brief's STOP).
+
+**Implementer:** opus-implementer (fresh, batch 2), 2026-11-05, worktree `~/dev/variorum-vx-809`, branch head at spawn `57a829917`. Headless only (`swift test`; the App target compiled by `xcodebuild build` only — never `xcodebuild test`), no stage claim held. **No revert is in flight.** `App/Variorum/Shared/` files in the diff: NONE so far (said here the moment one lands).
+
+### LIVE STATUS (flipped per piece, same commit)
+
+| # | Piece | Status |
+|---|---|---|
+| B2-0 | Preflight read (the record whole · MCPSpec in full · SurfaceContracts Doors + The Bookcase and books · SessionResiliencyProtocol · VX-807/VX-813 ticket texts, no comments on either) + the code survey | DONE |
+| B2-1 | FORK F-7 = P-809-3 — `move_book_to_wing`'s undo story | PROPOSED (below) — STOPPED on that half, awaiting A-809-5 |
+| B2-2 | FORK F-8 — a book move that would SHED a member's fence | PROPOSED (below); building the lean PROVISIONAL |
+| B2-3 | FORK F-9 — gatherings on `move_book_to_wing` (the brief said mirror her door; the survey found a reach-widening) | PROPOSED (below); building the lean PROVISIONAL |
+| B2-4 | FORK F-10 — the rung of `set_book_rule`'s `order` option | PROPOSED (below); building the lean PROVISIONAL |
+| B2-5 | VX-813 op — `setBookOrderForClient` (her `setReadingSort` body, no-op guarded, one CAS entry) | NOT STARTED |
+| B2-6 | VX-813 wire — `set_book_order`; `order` on `create_book` + `set_book_rule`; `order` read back in `list_books` | NOT STARTED |
+| B2-7 | VX-807 op — `moveReadingToWing`'s body in the caller's transaction (verbatim) + `mcpMoveBookToWing` | NOT STARTED |
+| B2-8 | VX-807 wire — `move_book_to_wing` (A-809-2 grant, the reach-scoped answer, the refusals, R-805-5's tool-level Journal pin) | NOT STARTED |
+| B2-9 | App words — receipts + Activity for both tools (`MCPPaneCopy.swift`, Mac target) + `bookMoveFrozenWords` hook (`MCPDoor.swift`) | NOT STARTED |
+| B2-10 | Two-store catalog arms for both tools (+ create_book/set_book_rule `order` arms) | NOT STARTED |
+| B2-11 | Red-on-old verifications (named reverts listed here BEFORE they start) | NOT STARTED |
+| B2-12 | Self-assessment + test counts | NOT STARTED |
+
+### THE SURVEY (B2-0) — what the code says
+
+- **`moveReadingToWing`** (`Operations+WingBookMove.swift:66`) takes books AND gatherings (its doc: "MOVE A BOOK (OR A GATHERING)"); her door (`WingBookMoves.swift` — the Bookcase row's Move to Wing ▸) draws on both, never on the daily Journal. One transaction; NO undo entry ("NO undo on either door — the symmetric door is the net", P-13ic-1; her door always asks — P-13id-U5b-4: "no undo; the confirm is the net"). Refusals: the daily Journal (`dailyJournalIsHomeOnly`), the same wing (`readingAlreadyInWing`), a dead destination (`wingNotFound`), and — through `relocateNote` — a member's stay-behind MEMBER row in a FINISHED or SEALED book (`lockedReading` / `readingSealed`, keyed on that book; her door refuses at the confirm naming the note and the book — `WingCopy.bookFrozen`). It severs each member's stay-behind memberships (member AND arrival rows), dismisses the book's own pending arrivals, re-points tags by path, carries hidden members (a Private note, a ⌘J entry) like any other — the op is not reach-gated.
+- **Her confirm shows** (`WingCopy.bookMoveMessage`): the notes that come (archived said), every severed stay-behind membership ("“note” also leaves “book”"), the waiting count dismissed, "It arrives unshelved.", a destination twin's name. Not tag counts (only the bulk move's confirm speaks tags).
+- **The grant (A-809-2) checks out against MCPSpec** — nothing contradicts at book level: `move_note_to_wing`'s R1 (EDIT on the moving thing through the ordinary rule, WRITE NEW on the destination wing through `decideWing`, once grants of both sides spent as one union inside the act's transaction) lifts directly; the book side decides through `decide(book:)` (a book or wing grant; the fence answers the one shape).
+- **The daily Journal on the wire today** never reaches the op's refusal: its BOOK facts carry the journal fence (`mcpReadingFacts` — `dailyJournalLegForBook`), so every book decision answers the ONE not-shared shape, whatever the client holds (a fenced place answers only a per-ask NOTE grant). R-805-5's tool-level pin therefore asserts that shape; a belt in the MCP op refuses the Journal on its own (independent of `moveReadingToWing`'s guard, which VX-805/VX-435 lifts for her doors).
+- **The book order (VX-813):** her ONE door is the book view navigator's `order ▾` → "Save as This Book's Order" (`BookView.orderControl` → `BookStructureModel.saveOrder` → `Operations.setReadingSort`); NOT the book-settings sheet (it has no order row — the brief's "book-settings sheet" is the navigator's control). It is drawn for a book AND a gathering (no kind check), hidden only while `reading.locked`. The op (`Operations+Reading.swift:217`) refuses a LOCKED (finished — so also sealed) book `lockedReading`, takes any field × direction, never refuses an archived book or a gathering, and has NO no-op guard (it re-writes `updated_at`). Assembly reads `manual` as hand order whatever the direction (`ReadingAssembly` — a gathering's manual is created-ascending, "as collected"). So `set_book_order` acts on a gathering at edit on its place (VX-639's `onBookOrGathering` road) — R-VX184-1 parity; her op is the body (no new operation needed: the thinnest wrapper adds the wire's no-op guard and the one CAS entry, her op left byte-identical).
+- **The read side:** no tool answers a book's order today (`MCPBookFacts.facts` carries collecting facts only; `list_notes(book_id)` pages by position). Adding `order` to the book facts lets a client read what it set (and makes `changed: false` checkable) — in VX-813's surface.
+
