@@ -110,8 +110,9 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "create_note · in Studio", tool: "create_note",
                    args: { w, _ in ["wing_id": s(w.studio), "text": s("A new studio note.")] },
                    capture: { ["studioNew": $0["note_id"] as? String ?? ""] }),
-        CatalogArm(label: "create_note · into the shared book", tool: "create_note") { w, _ in
-            ["book_id": s(w.shared), "title": s("filed"), "text": s("Filed words.")] },
+        CatalogArm(label: "create_note · into the shared book", tool: "create_note",
+                   args: { w, _ in ["book_id": s(w.shared), "title": s("filed"), "text": s("Filed words.")] },
+                   capture: { ["filed": $0["note_id"] as? String ?? ""] }),
         // VX-814 (batch 3): born wearing a tag a hidden PRIVATE book collects
         // (#idea — the Diary's would-be seat bells, A-809-11) and a path only a
         // HIDDEN wing's tag wears (per-wing vocabulary: Studio mints its own),
@@ -134,6 +135,10 @@ extension MCPTwoStoreCatalogServerTests {
             ["wing_id": s(w.studio), "book": .object(["name": s("Twin import"), "documents": .array([s("One.")])])] },
         CatalogArm(label: "apply_tag · card, a new path", tool: "apply_tag") { w, _ in ["note_id": s(w.card), "tag": s("brand-new")] },
         CatalogArm(label: "apply_tag · a hidden note", tool: "apply_tag") { w, _ in ["note_id": s(w.secretNote), "tag": s("x")] },
+        // VX-812 (batch 3): the list form — a note it may tag, a note it may
+        // only read (the rung's refusal, its ask), a hidden note (the one shape).
+        CatalogArm(label: "apply_tag · a list: card, a read-only note, a hidden note", tool: "apply_tag") { w, _ in
+            ["note_ids": .array([s(w.card), s(w.loose), s(w.secretNote)]), "tag": s("listed")] },
         CatalogArm(label: "create_book · a name a hidden book wears", tool: "create_book") { w, _ in
             ["name": s("Twin book"), "wing_id": s(w.studio)] },
         CatalogArm(label: "create_book · a hidden wing", tool: "create_book") { w, _ in ["name": s("X"), "wing_id": s(w.attic)] },
@@ -223,6 +228,10 @@ extension MCPTwoStoreCatalogServerTests {
             ["note_id": s(w.second), "wing_id": s(w.attic)] },
         CatalogArm(label: "move_note_to_wing · a hidden note", tool: "move_note_to_wing") { w, _ in
             ["note_id": s(w.privateShared), "wing_id": s(w.studio)] },
+        // VX-812 (batch 3): the list form — the filed note moves; the hidden
+        // Private member answers its item's one shape.
+        CatalogArm(label: "move_note_to_wing · a list: the filed note and a hidden note", tool: "move_note_to_wing") { w, c in
+            ["note_ids": .array([s(c["filed"] ?? ""), s(w.privateShared)]), "wing_id": s(w.studio)] },
         CatalogArm(label: "save_commit · card", tool: "save_commit") { w, _ in ["take_id": s(w.cardTake), "message": s("saved")] },
         CatalogArm(label: "save_commit · a hidden take", tool: "save_commit") { w, _ in ["take_id": s(w.secretTake), "message": s("x")] },
         CatalogArm(label: "choose_take · card", tool: "choose_take") { w, _ in ["take_id": s(w.cardTake2)] },
@@ -234,6 +243,10 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "remove_tag · not worn", tool: "remove_tag") { w, _ in ["note_id": s(w.card), "tag": s("nope")] },
         CatalogArm(label: "remove_tag · a hidden note", tool: "remove_tag") { w, _ in
             ["note_id": s(w.secretNote), "tag": s("secret-topic")] },
+        // VX-812 (batch 3): the list form — card's #brand-new comes off; the
+        // hidden note answers its item's one shape.
+        CatalogArm(label: "remove_tag · a list: card #brand-new and a hidden note", tool: "remove_tag") { w, _ in
+            ["note_ids": .array([s(w.card), s(w.secretNote)]), "tag": s("brand-new")] },
         CatalogArm(label: "edit_comment · card's", tool: "edit_comment") { w, _ in
             ["comment_id": s(w.cardComment), "expected_text": s("a note to self"), "text": s("a note, edited")] },
         CatalogArm(label: "edit_comment · a hidden comment", tool: "edit_comment") { w, _ in
@@ -334,6 +347,10 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "list_books · after the acts", tool: "list_books") { _, _ in [:] },
         CatalogArm(label: "list_notes · the shared book after the acts", tool: "list_notes") { w, _ in ["book_id": s(w.shared)] },
         CatalogArm(label: "list_wings · after the acts", tool: "list_wings") { _, _ in [:] },
+        // VX-812 (batch 3): the list form — the new studio note goes to the
+        // Trash; the hidden note answers its item's one shape.
+        CatalogArm(label: "delete_note · a list: the new studio note and a hidden note", tool: "delete_note") { w, c in
+            ["note_ids": .array([s(c["studioNew"] ?? ""), s(w.secretNote)])] },
         CatalogArm(label: "delete_note · mover", tool: "delete_note") { w, _ in ["note_id": s(w.mover)] },
         CatalogArm(label: "delete_note · a hidden note", tool: "delete_note") { w, _ in ["note_id": s(w.secretNote)] },
         CatalogArm(label: "delete_book · a book with a Private member", tool: "delete_book") { w, _ in
@@ -383,5 +400,16 @@ extension MCPTwoStoreCatalogServerTests {
             ["note_id": s(w.seed), "starred": .bool(true)] },
         CatalogArm(label: "read_note · seed after its star", tool: "read_note") { w, _ in
             ["note_id": s(w.seed), "with_ids": .bool(true)] },
+        // VX-812 (batch 3): replace_tag across the client's reach — LAST (it
+        // takes #idea off every Studio note the client may edit; a hidden
+        // PRIVATE Studio note wears #idea in A, untouched, unmentioned and
+        // uncounted); a tag only a hidden note wears (Home's #secret-topic,
+        // card's taken off above); a hidden wing.
+        CatalogArm(label: "replace_tag · Studio #idea with #idea-swapped (a hidden Private note wears it)",
+                   tool: "replace_tag") { w, _ in ["wing_id": s(w.studio), "tag": s("idea"), "with": s("idea-swapped")] },
+        CatalogArm(label: "replace_tag · a tag only a hidden note wears", tool: "replace_tag") { _, _ in
+            ["wing_id": s(""), "tag": s("secret-topic"), "with": s("swapped")] },
+        CatalogArm(label: "replace_tag · a hidden wing", tool: "replace_tag") { w, _ in
+            ["wing_id": s(w.attic), "tag": s("attic-topic"), "with": s("swapped")] },
     ]
 }

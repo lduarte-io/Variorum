@@ -525,6 +525,9 @@ nonisolated enum MCPPaneCopy {
         case "delete_comment": return "deleting a comment in \(at)"
         // VX-190 — un-tagging a note at edit.
         case "remove_tag": return "removing a tag from \(at)"
+        // VX-812 — one note's tag replaced, an item of `replace_tag`'s sweep
+        // (logged per note; PROVISIONAL words, the VX-809 bundle).
+        case "replace_tag": return "replacing a tag on \(at)"
         // VX-187 — two notes linked as versions (the log names one side).
         case "link_versions": return "linking \(at) and another note as versions"
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
@@ -665,6 +668,7 @@ nonisolated enum MCPPaneCopy {
         case "list_wings": return "listed its shared wings" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
+        case "replace_tag": return "replaced a tag on \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
         // P-U4-WORDS). A block's LAST take deleted is logged on the BLOCK
@@ -1715,6 +1719,11 @@ nonisolated enum MCPReceiptCopy {
         case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
         // VX-190 — her un-tag, the client's (PROVISIONAL words).
         case .untag: return n == 1 ? "removed the tag #\(receipts[0].detail ?? "")" : "removed \(n) tags"
+        // VX-812 — `replace_tag`'s notes, one receipt each on the call's run
+        // key, so a sweep reads as one line (A-809-19; PROVISIONAL words).
+        case .tagReplace:
+            let swap = "#\(receipts[0].detail ?? "") with #\(receipts[0].replacementPath ?? "")"
+            return n == 1 ? "replaced \(swap) on \(quoted(receipts[0].targetTitle))" : "replaced \(swap) on \(n) notes"
         // VX-187 — two notes made versions (PROVISIONAL words).
         case .versionLink:
             return n == 1

@@ -1003,10 +1003,14 @@ final class MCPDoor {
 
     /// A write landed: say it on the one status seam, coalesced with the
     /// client's run on the same target (P-4: the signal carries no decision).
+    /// VX-812 (A-809-19): a LIST call's items share one `runKey`, which keys
+    /// the run in the target's place — one call reads as ONE line naming the
+    /// count, and a later single act never joins it.
     func landReceipt(_ receipt: MCPWriteReceipt, now: Date = Date()) {
         guard let session else { return }
         if let last = receiptRun.last, last.clientName == receipt.clientName,
-           last.targetID == receipt.targetID, now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {
+           (last.runKey ?? last.targetID) == (receipt.runKey ?? receipt.targetID),
+           now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {
             receiptRun.append(receipt)
         } else {
             receiptRun = [receipt]
