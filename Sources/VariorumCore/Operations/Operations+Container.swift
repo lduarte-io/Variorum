@@ -35,15 +35,23 @@ extension Operations {
         }
     }
 
-    /// The notebook rule (author, 2026-07-07; Phase 8): the dedicated
-    /// journal holds ONE entry per calendar day — "new entry" for a date
-    /// that already has a live journal entry OPENS it instead. Enforced
-    /// here, at the operations level, deliberately NOT as a DB unique index
-    /// (no new sync-repair class): an offline same-day double-create
-    /// converges to two visible entries on that day's page, hand-merged.
+    /// The notebook rule (author, 2026-07-07; Phase 8): ⌘J's day door opens
+    /// the day's entry — "today's entry" for a date that already has a live
+    /// journal entry OPENS it instead of minting. Enforced here, at the
+    /// operations level, deliberately NOT as a DB unique index (no new
+    /// sync-repair class): an offline same-day double-create converges to two
+    /// visible entries on that day's page.
     ///
-    /// When more than one entry carries the date (that converged race),
-    /// preference is **unarchived first, then earliest `(created_at, id)`**
+    /// **VX-797 (the VX-805 run) — several entries a day are legal.** The
+    /// Journal's own New Entry door and ⌥⌘N mint a FRESH entry every press
+    /// (`newJournalEntry`); this door stays open-today and opens the day's
+    /// FIRST entry — the Journal's earliest member that day, else the
+    /// notebook shape (`Queries.canonicalJournalEntry`'s two tiers,
+    /// PROVISIONAL P-805-C1).
+    ///
+    /// When more than one entry carries the date (several entries, or that
+    /// converged race), preference is **unarchived first, then earliest
+    /// `(created_at, id)`**
     /// — deterministic on every device (`archived_at` is converged metadata).
     /// The live-first tier matters when the author archived one half of a
     /// converged double-create: "Today" must open the entry the day's page
