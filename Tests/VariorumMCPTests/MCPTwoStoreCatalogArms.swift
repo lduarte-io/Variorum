@@ -341,6 +341,10 @@ extension MCPTwoStoreCatalogServerTests {
             ["note_id": s(w.card), "tag": s("secret-topic")] },
         CatalogArm(label: "apply_tag · a studio note, a Private book's tag", tool: "apply_tag") { w, _ in
             ["note_id": s(w.studioMember), "tag": s("idea")] },
+        // A-809-11 (batch 3): the client's next read of the note it just tagged
+        // — the Private book's would-be seat bells, so it still reads.
+        CatalogArm(label: "read_note · that studio note after the Private book's tag", tool: "read_note") { w, _ in
+            ["note_id": s(w.studioMember), "with_ids": .bool(true)] },
         CatalogArm(label: "add_note_to_book · a note an unreadable owned book claims", tool: "add_note_to_book") { w, _ in
             ["note_id": s(w.ownedNote), "book_id": s(w.shared)] },
         CatalogArm(label: "add_note_to_book · the capped book (a Private member fills it)", tool: "add_note_to_book") { w, _ in
@@ -348,7 +352,7 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "duplicate_note · seed in Studio (a Private book collects its tag)", tool: "duplicate_note",
                    args: { w, _ in ["note_id": s(w.seed), "brief": .bool(true)] },
                    capture: { ["seedCopy": $0["note_id"] as? String ?? ""] }),
-        CatalogArm(label: "read_note · the seed's copy (a Private book took it in)", tool: "read_note") { _, c in
+        CatalogArm(label: "read_note · the seed's copy (a Private book collects its tag)", tool: "read_note") { _, c in
             ["note_id": s(c["seedCopy"] ?? ""), "with_ids": .bool(true)] },
         CatalogArm(label: "move_note_to_wing · a note an unreadable finished book holds", tool: "move_note_to_wing") { w, _ in
             ["note_id": s(w.stuck), "wing_id": s(w.studio)] },
@@ -360,5 +364,12 @@ extension MCPTwoStoreCatalogServerTests {
                    tool: "move_book_to_wing") { w, _ in ["book_id": s(w.fencedBook), "wing_id": s(w.studio)] },
         CatalogArm(label: "remove_tag · card #secret-topic (only a hidden note wears it after)", tool: "remove_tag") { w, _ in
             ["note_id": s(w.card), "tag": s("secret-topic")] },
+        // A-809-11 (batch 3): a client's STAR on a Studio note a hidden Private
+        // ★ book collects, then its next read (last: before the build, the seat
+        // fenced the seed in A).
+        CatalogArm(label: "set_starred · seed (a Private book collects stars)", tool: "set_starred") { w, _ in
+            ["note_id": s(w.seed), "starred": .bool(true)] },
+        CatalogArm(label: "read_note · seed after its star", tool: "read_note") { w, _ in
+            ["note_id": s(w.seed), "with_ids": .bool(true)] },
     ]
 }

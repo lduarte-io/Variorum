@@ -280,6 +280,12 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try ops.setBookPrivate(locket.id, true)
             w.locket = locket.id
             w.journalBook = try #require(try h.database.read { try Queries.dailyJournalBookID($0) })
+            // A-809-11 (batch 3): a PRIVATE book in Studio collecting ★ — a
+            // client's star on a Studio note is heard there (the tail's F-5
+            // star rows).
+            let starDiary = try ops.createReading(
+                name: "Star diary", kind: .book, querySpec: try RuleGrammar.encode(.star), wingId: w.studio)
+            _ = try ops.setBookPrivate(starDiary.id, true)
         }
     }
 
@@ -400,16 +406,16 @@ struct MCPTwoStoreCatalogServerTests {
         #expect(Set(Self.arms.map(\.label)).count == Self.arms.count, "every arm's label is its own")
     }
 
-    /// **FINDINGS awaiting the orchestrator's ruling** (the record's F-5 — NOT
-    /// exceptions: no ruling covers them yet). An act the CLIENT lands applies a
-    /// tag; a PRIVATE book collecting that tag seats the note (intake, her
-    /// rule); the note is then fenced — so the client's next read of it answers
-    /// not-shared where a store without the Private book reads it. The answer
-    /// to the act itself is pure; its consequence on reach is not.
-    static let pendingFindings: [String: String] = [
-        "read_note · the seed's copy (a Private book took it in)":
-            "F-5 — an AI-applied tag seats the note into a hidden Private book, fencing it",
-    ]
+    /// **FINDINGS awaiting the orchestrator's ruling** — NONE since A-809-11's
+    /// build (the VX-809 run, batch 3). F-5 sat here: an act the CLIENT landed
+    /// applied a tag, a PRIVATE book collecting it SEATED the note, and the
+    /// client's next read answered not-shared where a store without the
+    /// Private book read it. A wire act's would-be seat where membership fences
+    /// now BELLS (P-809-8), so its rows — the seed's copy, the studio member
+    /// after its tag, the seed after its star — are pure arms, compared byte
+    /// for byte (their red-on-old is the record's B3-3). The mechanism stays
+    /// for the next finding a walk turns up.
+    static let pendingFindings: [String: String] = [:]
 
     /// The harness's own (incrementing) ids a text carries.
     static func harnessIDs(in text: String) -> Set<String> {
