@@ -38,11 +38,10 @@ extension Operations {
         /// membership in a Private book or the daily Journal is severed, leaving
         /// the note unfenced in a book the client edits. The move refuses whole.
         case wouldShedAFence
-        /// **R-805-5's belt:** the daily Journal never moves on the wire — its
-        /// own refusal here, independent of her body's (which VX-435 lifts for
-        /// her doors). On the wire its book facts are fenced first, so the one
-        /// not-shared shape answers before this is reached.
-        case dailyJournal
+        // (R-805-5's daily Journal refusal is not one of these: the act calls
+        // the wire's SHARED move fence — `refuseMovingTheDailyJournalOnTheWire`,
+        // `OperationError.dailyJournalMovesOnlyByHand` — folded in at the
+        // VX-805 merge-in, retiring this op's own `.dailyJournal` belt.)
         /// **A-809-16 (P-809-11):** a GATHERING never moves on the wire — its
         /// wing is what its grants reach. The wire refuses first; this is the
         /// op's belt.
@@ -149,7 +148,9 @@ extension Operations {
     /// inside ONE transaction: the caller's guard FIRST (A-809-2's two
     /// decisions, re-made on the act's own facts, once grants stamped there);
     /// then the wire's belts (a gathering — A-809-16; the daily Journal —
-    /// R-805-5); the pre-act reads (the rows, the fences, the answer's
+    /// R-805-5's shared move fence, `refuseMovingTheDailyJournalOnTheWire`:
+    /// her body moves the Journal since VX-435, so on the wire this line is
+    /// what refuses it, behind the fenced book facts); the pre-act reads (the rows, the fences, the answer's
     /// reach-scoped facts); her body (her refusals unchanged: `wingNotFound`,
     /// `readingAlreadyInWing`, a stay-behind MEMBER row in a finished or sealed
     /// book — `lockedReading` / `readingSealed`); then A-809-15 — a member
@@ -167,7 +168,7 @@ extension Operations {
             try guardian?(db)
             let reading = try liveReading(db, readingID)
             guard reading.kind == .book else { throw MCPBookMoveRefusal.gathering }
-            if try Queries.isTheDailyJournal(db, reading) { throw MCPBookMoveRefusal.dailyJournal }
+            try Self.refuseMovingTheDailyJournalOnTheWire(db, readingID: readingID)
             func readable(_ target: MCPReadTarget) throws -> Bool { try reach?(db, target) ?? true }
 
             // The pre-act reads.

@@ -23,8 +23,10 @@ import VariorumCore
 /// what every grant on it reaches. A gathering the client can read hears its
 /// sentence; one it can't, the one shape (`set_book_rule`'s road, A-648-5).
 /// **R-805-5:** the daily Journal refuses at the wire whatever her op does —
-/// its book facts are fenced, so the one shape answers first, and the op's own
-/// belt stands behind it (`MCPBookMoveRefusal.dailyJournal`).
+/// its book facts are fenced, so the one shape answers first, and the wire's
+/// SHARED move fence stands behind it inside the act's transaction
+/// (`Operations.refuseMovingTheDailyJournalOnTheWire` — worded, were it ever
+/// reached, by `MCPWireRefusalCopy`'s one Journal-move sentence).
 ///
 /// **The answer (R-807 + R-825's law):** what her confirm shows, REACH-SCOPED —
 /// the notes that came that the client can read (archived ones said), each
@@ -48,10 +50,6 @@ extension MCPWriteTools {
             + "it would change which notes it gathers and what any grant on it reaches. Moving a gathering is "
             + "the author's, in Variorum."
     }
-
-    /// R-805-5's belt, said (unreachable while the daily Journal's book facts
-    /// are fenced — the one shape answers first). PROVISIONAL.
-    static let dailyJournalMoveWords = "The daily Journal moves only by the author's hand, in Variorum."
 
     /// The answer's list cap (the door's 200 — `lensListCap`'s precedent).
     static let bookMoveListCap = 200
@@ -163,7 +161,6 @@ extension MCPWriteTools {
     static func bookMoveRefusalWords(_ refusal: Operations.MCPBookMoveRefusal, bookName: String?) -> String {
         switch refusal {
         case .wouldShedAFence: bookMoveHiddenCauseWords
-        case .dailyJournal: dailyJournalMoveWords
         case .gathering: gatheringMoveWords(bookName)
         // Only a replay (her ⌥⌘Z / ⇧⌥⌘Z) throws it; her face words it there.
         case .changedSince: bookMoveHiddenCauseWords

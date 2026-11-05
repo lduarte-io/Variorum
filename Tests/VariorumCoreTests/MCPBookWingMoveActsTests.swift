@@ -215,9 +215,11 @@ struct MCPBookWingMoveActsTests {
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-06-30").container
             _ = ops.shelveInDailyJournalBook(entry.id)
             let journal = try #require(try db.read { try Queries.dailyJournalBookID($0) })
-            // The wire's own refusal — NOT her body's `dailyJournalIsHomeOnly`
-            // (R-805-5: VX-435 lifts hers; this one stands).
-            #expect(throws: Operations.MCPBookMoveRefusal.dailyJournal) {
+            // The wire's SHARED move fence (R-805-5) — her body moves the
+            // Journal since VX-435 (its `dailyJournalIsHomeOnly` retired), so
+            // this refusal is the wire's alone; the op's own `.dailyJournal`
+            // belt was folded into the fence at the VX-805 merge-in.
+            #expect(throws: OperationError.dailyJournalMovesOnlyByHand(id: journal)) {
                 try ops.mcpMoveBookToWing(journal, to: studio.id, undoLabel: label)
             }
             #expect(try wing(db, "reading", journal) == "" && stack.depth == 0)
