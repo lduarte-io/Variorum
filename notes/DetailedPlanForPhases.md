@@ -12,7 +12,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| **VX-853 — verify-pins goes versions-equal** (P-781-3 ruled (b) at the VX-781 checkpoint, her "micro-PR tonight" word; the survey `notes/plans/vx-781-build-ergonomics-survey.md` §4 is the spec) | VX-853 · `vx-853-verify-pins-versions-equal` | `~/dev/variorum-vx-853` · the Pro | OPEN 2026-11-05 — Tools script only (no app/core source, no Sync/, no editor seam) |
 | **VX-828 — Run: editor & shell QoL** (umbrella; 8 members: VX-798 · 800 · 806 · 823 · 824 · 833 · 838 · 844) | VX-828 · `vx-828-editor-shell-qol` | `~/dev/variorum-vx-828` · the Pro | Kicked off 2026-11-05; record `notes/plans/fixes/vx-828-editor-shell-qol.md` |
 | **VX-805 — Umbrella: the journal cluster** (6 members: VX-435 · 436 · 797 · 799 · 587 · 832; HOLDS the Sync/custody slot — the §7 keeper/mend class; mirror deploy expected none of its own, the 805+808 lockstep window held until both merge) | VX-805 · `vx-805-journal-cluster` | `~/dev/variorum-vx-805` · the Pro | Kicked off 2026-11-05 (/architect-phase); record `notes/plans/fixes/vx-805-journal-cluster.md` |
 | **VX-809 — Umbrella: MCP door ergonomics** (9 members by the sub-issue listing: VX-825 lead (the pure-function law) · 807 · 812 · 813 · 814 · 818 · 826 · 679 · 846; VX-840 re-seated into VX-828 at her 2026-11-05 ruling, the shared unused-tags brain minted HERE; NO Sync/ or custody — VX-818 is protection-ADJACENT only (server lifecycle around the lock, CastleRules read); surfaces: the MCP door + Operations+MCP, Settings ▸ Tags (OVERLAPS VX-828's VX-838 — second merger re-runs the pane suites), the sidebar (new AI section, beside VX-828's shell work), the field guide's MCP chapter) | VX-809 · `vx-809-mcp-door-ergonomics` | `~/dev/variorum-vx-809` · the Pro | Kicked off 2026-11-05 (/architect-phase); record `notes/plans/fixes/vx-809-mcp-door-ergonomics.md` |
@@ -20,25 +19,19 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 ### Latest closeout
 
-**→ VX-781 CLOSED 2026-11-05 — THE LOCKFILE REWRITER (the record `notes/plans/fixes/vx-781-lockfile-pins.md`,
-FOR A LATER READER at its top; the handoff `notes/handoffs/vx-781-handoff.md`).** Her early-run word (before the
-Nov 4 umbrellas): VX-770's Package.resolved rewrites traced and the committed pins belted. The mechanism: without
-the lockfile the manifests FLOAT (SQLCipher via the GRDB fork's `from: 4.11.0`, swift-dependencies via
-`from: 1.9.0`) to exactly VX-770's upgrade set; a CLEAN committed lockfile seeds the resolver and wins every time
-on Xcode 27.1 (ruled out: cache luck, originHash staleness, reused-DerivedData state); the VX-770 flags never
-failed — their input was already upgraded. What FIRST wrote the upgraded file that night stays unreproduced (a
-second writer; `xcodebuild test` and simulator destinations never sampled) — and the belt makes any such write
-heal or fail closed (E8b). RELEASE-EXPOSURE: NONE — 1.0, 1.0.1 and 1.1 all shipped committed pins (dSYM UUID
-proof). The belt: exact pins in BOTH manifests (15 project-level exactVersion references — E10 measured:
-Package.swift-only pins are PRUNED, the repo package being a local dependency in the workspace), `PinBeltTests`
-hermetic in every `swift test` (red-on-old four ways), `Tools/verify-pins` (the release road's post-build check;
-1.1's GO ran it as a manual condition) and `Tools/pins-belt-check` (the networked from-scratch proof). No
-dependency version moved in the app graph; the CLI graph aligned to what ships (P-781-1). Ladder: two rounds
-(opus-reviewer), 1 MAJOR + 5 MINOR + 11 NIT, all agreed and fixed; the final round's fixes line-by-line checked
-by the orchestrator. Core 3,649/492 green on the merged tree. Born: VX-850 (the MCP socket A/B) · VX-851
-(upgrade-pin helper) · VX-852 (the release.sh hook). PROVISIONALs P-781-1..4 → QUESTIONS #260 (P-781-4 is the
-governance question: is a pin bump author-only). NO release owed (1.1 shipped mid-run, independently). Nothing
-mobile-visible. PR #220, merge af012aa67.
+**→ VX-853 CLOSED 2026-11-05 — VERIFY-PINS GOES VERSIONS-EQUAL (the record `notes/plans/fixes/vx-853-verify-pins-versions-equal.md`,
+FOR A LATER READER at its top; VX-781's follow-up, same night).** Her P-781-3 ruling (QUESTIONS #260, informed by the
+build-ergonomics survey `notes/plans/vx-781-build-ergonomics-survey.md`): the no-argument tree guard passes a lockfile
+whose pins all match its own commit (identity + version + revision) with a one-line NOTE when only bookkeeping bytes
+changed (the path-dependent originHash — the survey traced it in SwiftPM's source, undocumented upstream); any real pin
+change, duplicate identity, added/removed pin or missing file still fails. The ladder (two opus rounds, same-model)
+earned its keep: round 1 caught the NOTE/DRIFT decision judging the root lockfile against the WORKSPACE's committed
+pins (a pin move could print as harmless — each file now judged against its own commit) and made PinBeltTests (3)
+location-normalizing so the belt's two guards agree; round 2 caught the restore advice's git-index semantics (now
+`git checkout HEAD -- <file>`). Gate: PinBeltTests 3/1 green; the probe matrix across three script generations in the
+commit messages; probe drivers durable in PR #221's body. Her other same-sitting rulings: P-781-4 pin bumps AUTHOR-ONLY
+(CLAUDE.md line landed at the VX-781 close) · VX-854 parked (the lockfile-mode flag belt) · the tool landscape
+(Tuist/XcodeGen/Bazel/merge-drivers) ruled NO for this repo. Born: nothing. Nothing mobile-visible. PR #221, merge 2f68875e3.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 

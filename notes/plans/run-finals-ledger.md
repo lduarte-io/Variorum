@@ -172,3 +172,12 @@ Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 �
 - Canon: no contract line changed (nothing ruled); AppSpecRecord 2026-11-05 entry; QUESTIONS #260 (P-781-1..4; P-781-4 the governance fork). Canon-size 130,014/150,000.
 - Born: VX-850 (Medium, the MCP socket A/B) · VX-851 (Low, Tools/upgrade-pin) · VX-852 (Medium, the release.sh verify-pins hook; diff shape in the record).
 - Merge order: merged-in main twice (1.1 at f8d2ced67; the doc commits at 09a2ec59d); PR #220 merge commit af012aa67; ledgers c0a45265a; worktree and branch removed.
+
+## VX-853 — verify-pins goes versions-equal (CLOSED 2026-11-05; PR #221, merge 2f68875e3)
+
+- Cast: Fable orchestrated (the vx-781 session, same night); ONE Opus implementer (6 fix commits over three passes); opus-reviewer rounds 1 AND 2 (fresh each; same-model — orchestrator arbitrated, zero disputes).
+- Member: VX-853 alone (born of her P-781-3 ruling at the VX-781 checkpoint; the survey `notes/plans/vx-781-build-ergonomics-survey.md` was the spec).
+- Ladder: round 1 — 3 MINOR + 3 NIT, all agreed/fixed (own-file NOTE/DRIFT comparison; PinBeltTests location normalization under the orchestrator's declared scope ruling; duplicate-identity refusal); round 2 — no new B/M, 2 MINOR + 2 NIT, all fixed (restore advice `git checkout HEAD -- <file>`; the owed record file); orchestrator line-by-line final check.
+- Machine coordination: nov4coordinator accepted at kickoff (first-ready-merges-first), trial-merged clean against 805/809/828, GO given with the PinBeltTests scope reach accepted; the NOTE/DRIFT sentence rides their wave broadcast.
+- Gates: PinBeltTests 3/1 green on final code; probe matrix across three script generations (P1–P3, R1a/R1b, R4×2, R2v/G1/D1–D3, PA–PD), red-on-old everywhere a fix claimed it; headless throughout, no stage, no xcodebuild.
+- Canon: none (the sitting's canon line was VX-781's P-781-4). Born: none. Merge order: one doc-only merge-in (ffb0a7857), PR #221 merge 2f68875e3.

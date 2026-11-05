@@ -36,3 +36,7 @@ VX-770's intermittent upward rewrites of the workspace Package.resolved, traced 
 ## Ledger state at this close
 
 In-flight row retired; closeout paragraph seated in the master plan (VX-770's rolled to `notes/PhaseCloseoutArchive.md`); AppSpecRecord dated entry appended; QUESTIONS #260 filed; `Tools/canon-size`: **130,014 of 150,000 (headroom 19,986)** — no crossing, no canon contract line changed (nothing was ruled). Branch `vx-781-lockfile-pins` and worktree `~/dev/variorum-vx-781` removed after the merge. Riders: offered at kickoff, you ruled **no riders**. Mobile parity: **nothing mobile-visible**.
+
+## Postscript — VX-853 landed the same night (PR #221, merge 2f68875e3)
+
+Your P-781-3 ruling is BUILT and merged: the tree guard is versions-equal (bookkeeping-only lockfile changes pass with a NOTE advising `git checkout HEAD -- <file>`; every real pin change, duplicate identity or missing file still fails). The two-round ladder record: `notes/plans/fixes/vx-853-verify-pins-versions-equal.md`. Nothing of VX-853 awaits you — all its rulings were yours live at the sitting (versions-equal · tonight · VX-854 parked). The wave sessions get the NOTE/DRIFT vocabulary in the coordinator's main broadcast.
