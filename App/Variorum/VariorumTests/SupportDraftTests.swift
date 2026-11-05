@@ -40,7 +40,8 @@ struct SupportDraftTests {
         let mine = SupportDraft.Versions.thisMac()
         #expect(mine.app == Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
         #expect(mine.build == Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String)
-        #expect(mine.app.hasPrefix("0."), "R-13r-6's pre-1.0 line (0.10 at the VX-329 release word; VX-489)")
+        #expect((mine.app.split(separator: ".").first.flatMap { Int($0) } ?? 0) >= 1,
+                "R-13r-6's launched line: 1.0 shipped at the public launch (VX-779)")
         #expect(mine.os.hasPrefix("macOS "))
     }
 

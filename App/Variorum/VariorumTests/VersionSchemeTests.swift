@@ -3,7 +3,8 @@
 //  VariorumTests
 //
 //  Phase 13r U3-A — R-13r-6, the version scheme: 0.9.x for the friends
-//  beta (1.0.0 is reserved for the launch), and the BUILD NUMBER stamped on
+//  beta (1.0.0 is reserved for the launch — the launch shipped 1.0, so the
+//  line is 1.x now; VX-779 reshaped the pins), and the BUILD NUMBER stamped on
 //  EVERY build — `git rev-list --count HEAD` into CFBundleVersion by the Mac
 //  target's "Stamp Build Number" phase, which runs after the Info.plist is
 //  processed and before code signing, in every configuration.
@@ -20,7 +21,7 @@
 import Foundation
 import Testing
 
-@Suite("The version scheme (13r U3-A — R-13r-6's stamped build number + 0.9.x)")
+@Suite("The version scheme (13r U3-A — R-13r-6's stamped build number + the launched line)")
 struct VersionSchemeTests {
     /// The commit count at which the stamping phase first ran (U3-A piece 1).
     /// Commit counts only rise, so every later build reads at least this.
@@ -34,10 +35,11 @@ struct VersionSchemeTests {
                 "the old constant build number 1 would be offered every public release")
     }
 
-    @Test func theMarketingVersionIsTheFriendsBetasLine() {
+    @Test func theMarketingVersionIsTheLaunchedLine() {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        #expect(version?.hasPrefix("0.") == true,
-                "R-13r-6 as amended at the VX-329 release word (0.10; no 1.0 until her public launch): pre-1.0 until the launch (read '\(version ?? "nil")')")
+        let major = version?.split(separator: ".").first.flatMap { Int($0) }
+        #expect((major ?? 0) >= 1,
+                "R-13r-6 reserved 1.0 for her public launch, and the launch shipped 1.0: the project's line is 1.x or later — a 0.x here is a skipped release bump (VX-779; read '\(version ?? "nil")')")
     }
 
     /// The phase's SHAPE, read from the project file: it is the Mac target's
@@ -74,16 +76,33 @@ struct VersionSchemeTests {
         // the ladder's fix pass; the "0.9." prefix went red at b59c68592's
         // 0.10 bump, her release word — widened to the pre-1.0 line at
         // VX-489). The letter holds: the Mac target's TWO configurations
-        // carry the SAME pre-1.0 line — the one the running test host was
-        // built as — and no other target wears it (the mobile target's is 1.0).
+        // carry the SAME line — the one the running test host was built as.
+        // VX-779 (the launch's 1.0 is spent; the bump had been skipped from
+        // 0.10.5 to 1.0.1): the two are found by their bundle identifiers,
+        // no longer by the pre-1.0 prefix, because past the launch the test
+        // bundles' and the mobile targets' template 1.0 share the "1." prefix
+        // (the mobile app's version is its own project's). The headless
+        // `Tools/Release/version-guard.sh` holds the same pair to the newest
+        // release notes, and release.sh's preflight to the release's version.
         let builtVersion = try #require(
             Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
-        let marketingLines = project.components(separatedBy: "\n")
-            .filter { $0.contains("MARKETING_VERSION = 0.") }
-        #expect(marketingLines.count == 2,
-                "the Mac target's two configurations; the mobile target is not this phase's")
-        #expect(marketingLines.allSatisfy { $0.contains("MARKETING_VERSION = \(builtVersion);") },
-                "both configurations carry the version this host was built as (read \(marketingLines))")
+        let configurations = project.components(separatedBy: "isa = XCBuildConfiguration;").dropFirst()
+        func marketingLines(ofConfigurationFor bundleID: String) -> [String] {
+            configurations
+                .filter { $0.contains("PRODUCT_BUNDLE_IDENTIFIER = \(bundleID);") }
+                .compactMap { configuration in
+                    configuration.components(separatedBy: "\n")
+                        .first { $0.contains("MARKETING_VERSION = ") }?
+                        .trimmingCharacters(in: .whitespaces)
+                }
+        }
+        let expected = ["MARKETING_VERSION = \(builtVersion);"]
+        let debugLines = marketingLines(ofConfigurationFor: "io.lduarte.Variorum.debug")
+        let releaseLines = marketingLines(ofConfigurationFor: "io.lduarte.Variorum")
+        #expect(debugLines == expected,
+                "the Mac target's Debug configuration carries the version this host was built as (read \(debugLines))")
+        #expect(releaseLines == expected,
+                "the Mac target's Release configuration carries the same version (read \(releaseLines))")
         let script = try String(
             contentsOf: appDir.appendingPathComponent("StampBuildNumber.sh"), encoding: .utf8)
         #expect(script.contains("git -C \"${SRCROOT}\" rev-list --count HEAD"))
