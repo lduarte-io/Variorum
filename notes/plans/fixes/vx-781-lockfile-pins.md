@@ -71,12 +71,15 @@ at f8d2ced67` (the merged tree; 16 + 15 pins), exit 0 · merged-tree Debug build
 SUCCEEDED **`, `verify-pins … vx781-merged …: 16 pins match`, built SQLCipher UUID = 4.18.0's ·
 `** TEST BUILD SUCCEEDED **` · core `3646 tests in 491 suites passed … 5 known issues`,
 StringsWorkbook `32 tests in 4 suites passed`, MCP 549/100 with the three socket-timing tests red
-only under whole-suite load (`16 tests in 3 suites passed` alone; VX-353/VX-685 track one of them) ·
+only under load (`16 tests in 3 suites passed` alone; VX-353/VX-685 track one of them). The
+reconciled CLI pins make the VX-180 family trip more often (THE MCP A/B; pre-existing on the old
+pins too) ·
 the phone scheme on the belt `** BUILD SUCCEEDED **`, verify-pins 16 · the round-1 core re-run in
 ROUND 1 FIX LEG.
 
 **Open items:** P-781-1/-2/-3/-4 for QUESTIONS (below) · born-ticket candidates (an upgrade helper,
-the release.sh hook, the two untracked MCP socket-timing flakes) · the stray default DerivedData
+the release.sh hook, the MCP socket-road timing bounds incl. the ConcurrencyExtras 1.4.1 rate
+change) · the stray default DerivedData
 from my `xcodebuild -list` (the coordinator's sweep) · VX-770's first trigger and second writer
 (mooted, not found; `test` and simulator destinations never sampled).
 
@@ -89,7 +92,8 @@ from my `xcodebuild -list` (the coordinator's sweep) · VX-770's first trigger a
 | (c) THE BELT (manifest pins + project refs + `Tools/verify-pins`) | DONE — eda25f273 (Package.swift), 620cc9019 (project.pbxproj), fef4800f8 (verify-pins) |
 | (d) THE PIN (red-on-old / green-on-new recipe, revert-verified) | DONE — `Tools/pins-belt-check` (0d7fd8019): red 68b3d9c53 + eda25f273, green fef4800f8 + f8d2ced67 |
 | (e) VERIFY on the merged tree (f8d2ced67) | DONE — core suite, Debug build + verify-pins, build-for-testing (VERIFY — the merged tree, below) |
-| (f) THE RECORD's FOR A LATER READER | DONE (this commit) |
+| (f) THE RECORD's FOR A LATER READER | DONE (6a14ec72c), kept current through round 1 |
+| LADDER ROUND 1 (opus-reviewer, 11 findings) | ALL AGREED + FIXED — findings 76eec95c2; R1-1 PinBeltTests 95fcc3c4e; R1-5/7/8/9 60cfbd44e; R1-6 dfded4cb9; record fixes 2439c6b73; MCP A/B 965d555ba. Core re-run 3649/492 passed |
 
 ## Evidence base read (this session, never delegated)
 
