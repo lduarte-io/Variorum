@@ -29,8 +29,20 @@ nonisolated enum EntryDateShiftCopy {
         "Shift date a day earlier needs a dated note \u{2014} open one, or set its date "
         + "first (note \u{25BE} \u{25B8} Set date\u{2026})."
 
-    /// The receipt names the new date.
-    static func receipt(_ day: String) -> String { "Now dated \(day)." }
+    /// The receipt names the new date in the app's ONE day voice
+    /// (`TimeStampFace.day` — *Nov 3*, the year riding when it is not this
+    /// one: the note box's and the Library's day words), never the raw key —
+    /// the stage walk's P-805-A3 nit ("Now dated 2026-11-03."). A key that
+    /// will not parse (never, from the op) is said as stored.
+    static func receipt(
+        _ day: String, now: Date,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String {
+        guard let date = JournalDay.date(from: day, calendar: calendar) else {
+            return "Now dated \(day)."
+        }
+        return "Now dated \(TimeStampFace.day(date, now: now, calendar: calendar, locale: locale))."
+    }
 }
 
 @MainActor
@@ -55,7 +67,7 @@ enum EntryDateShift {
                     CapabilityRegistry.capability(.shiftEntryDateEarlier).unavailableNote)
                 return
             }
-            session.status.receipt(EntryDateShiftCopy.receipt(shifted))
+            session.status.receipt(EntryDateShiftCopy.receipt(shifted, now: session.now))
         } catch {
             session.status.refuse(OpsRefusalCopy.message(for: error))
         }

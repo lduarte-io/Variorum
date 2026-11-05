@@ -129,6 +129,19 @@ struct ShiftEntryDateDoorTests {
         }
     }
 
+    /// P-805-A3: the receipt's day is `TimeStampFace.day`'s — *Nov 3* this
+    /// year, *Dec 31, 2025* another — never the stored key.
+    @Test func theReceiptSpeaksTheDayInTheAppsDayVoice() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let locale = Locale(identifier: "en_US")
+        let now = Date(timeIntervalSince1970: 1_793_880_000)  // 2026-11-05T12:00Z
+        #expect(EntryDateShiftCopy.receipt("2026-11-03", now: now, calendar: calendar, locale: locale)
+                == "Now dated Nov 3.")
+        #expect(EntryDateShiftCopy.receipt("2025-12-31", now: now, calendar: calendar, locale: locale)
+                == "Now dated Dec 31, 2025.")
+    }
+
     /// THE ACT: one day earlier in the store, the receipt naming the new date;
     /// a second press goes one more; an undated note speaks the registry's
     /// note and writes nothing.
@@ -147,7 +160,11 @@ struct ShiftEntryDateDoorTests {
 
             await EntryDateShift.shiftEarlier(postID: dated, session: session)
             #expect(try await day(dated) == "2026-02-28")
-            #expect(session.status.spoken?.text == "Now dated 2026-02-28.")
+            // P-805-A3 (the stage walk's nit — A JUSTIFIED EDIT): the receipt
+            // speaks the day in the app's one day voice, never the raw key.
+            #expect(session.status.spoken?.text
+                    == EntryDateShiftCopy.receipt("2026-02-28", now: session.now))
+            #expect(session.status.spoken?.text != "Now dated 2026-02-28.")
             #expect(session.status.spoken?.kind == .receipt)
 
             await EntryDateShift.shiftEarlier(postID: dated, session: session)
