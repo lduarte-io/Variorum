@@ -688,14 +688,14 @@ live, with the day filter on).
 
 #### Batch C — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
 
-**Not done (first line, current):** NOTHING BUILT — C0 (the brief's reading, the trace, THE DESIGN
-FORK below) stops for the orchestrator's ruling under the in-batch fork rule. No code, no pins, no
-canon / QUESTIONS / shared-ledger edit; no `Shared/`, no `Sync/`, custody or keychain file.
+**Not done (first line, current):** building C1–C4 to the ruling (bae4324aa). No app-suite RUN, no
+revert run, no walk, no Debug launch (all the orchestrator's stage window). No canon / QUESTIONS /
+shared-ledger edit; no `Shared/`, no `Sync/`, custody or keychain file.
 
 | Piece | What | Status |
 |---|---|---|
-| C0 | Preflight (the brief's list, read in this session's own context: the run record's named sections, SurfaceContracts "The Library" whole + "The app" incl. the Open-list follow line, `phase-18l-navigation-feel.md` (kickoff, R-18l-1/2, the U0c brief + RECORD whole), TEXTKIT2_NOTES' 18l-c U8 HARNESS fact and its neighbours, the Library feature folder's catalog files, `SidebarSectionWindow.swift` (the follow idiom), Takes' `ArticlePlace`/`ArticleRestore` docs) + THE TRACE + THE DESIGN FORK | DONE (this commit) — **AWAITING THE ORCHESTRATOR'S RULING** |
-| C1 | The place: a pure resolver (the remembered on-screen rows + neighbourhood → the landing row and its `into` in the CURRENT listing) + exact pins | NOT-STARTED (gated on the ruling) |
+| C0 | Preflight (the brief's list, read in this session's own context: the run record's named sections, SurfaceContracts "The Library" whole + "The app" incl. the Open-list follow line, `phase-18l-navigation-feel.md` (kickoff, R-18l-1/2, the U0c brief + RECORD whole), TEXTKIT2_NOTES' 18l-c U8 HARNESS fact and its neighbours, the Library feature folder's catalog files, `SidebarSectionWindow.swift` (the follow idiom), Takes' `ArticlePlace`/`ArticleRestore` docs) + THE TRACE + THE DESIGN FORK | DONE (cd50d6ed7) — RULED (bae4324aa, "Batch C — THE FORK'S RULING") |
+| C1 | The place: a pure resolver (the remembered on-screen rows + neighbourhood → the landing row and its `into` in the CURRENT listing) + exact pins | DONE (this commit) — `Features/Library/LibraryPlace.swift` (capture · resolve · `anchorY` · `isSettled` · `depth` · the `Order` lookups · `Surface`) + `VariorumTests/LibraryPlaceTests.swift` (11 pure pins). Mac `build-for-testing` TEST BUILD SUCCEEDED (`App/Variorum/DerivedData/vx828c-bft1.log`); the RUN is PENDING (app-hosted — the orchestrator's window) |
 | C2 | The model: remember on leave · restore on mount (the in-place re-ask to the place's depth) · a new question / wing drops it · the return mark (per Q2's ruling) + model pins | NOT-STARTED |
 | C3 | The view: the rows' content-space reports + the scroll memory on the three scroll views (List column · Cards · the answer sheet) + the unbound landing and its hold; mounted pins (red on old: the remount lands at the top) | NOT-STARTED |
 | C4 | Self-assessment, the end-of-batch core `swift test`, the app `build-for-testing` | NOT-STARTED |
