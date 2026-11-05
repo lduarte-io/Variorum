@@ -195,7 +195,7 @@ struct TrashEmptyBlockSweepTests {
             }
             await model.confirmPendingPurge(confirm)
             #expect(model.lastError == RecoveryCopy.deleteEmptyBlocksNothingLeft)
-            #expect(model.lastError == "None of those empty blocks are in the Trash any more — nothing was deleted.")
+            #expect(model.lastError == "None of those blocks still qualify — nothing was deleted.")
             #expect(model.receipt == nil)
             #expect(try await count(editor, "SELECT COUNT(*) FROM purge_intent") == 0)
 
