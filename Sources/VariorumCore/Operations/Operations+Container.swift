@@ -57,8 +57,20 @@ extension Operations {
         public let created: Bool
     }
 
+    ///
+    /// `standingWing` (VX-435 — the VX-805 run): the wing the author is
+    /// standing in when she presses the door (the Mac's ⌘J / Today's Entry
+    /// pass the app's one wing; '' = Home, every other caller). The day's
+    /// entry lives BESIDE the daily Journal — in the live Journal's wing,
+    /// wherever it has been moved (`journalEntryWing`) — and only when no
+    /// Journal lives does the standing wing decide, so the entry and the
+    /// fresh Journal `shelveInDailyJournalBook` then mints land together
+    /// where she stands (her ruling: "A fresh ⌘J mint when no Journal lives:
+    /// the wing you're standing in").
     @discardableResult
-    public func createOrOpenJournalEntry(entryDate: String) throws -> JournalEntryResult {
+    public func createOrOpenJournalEntry(
+        entryDate: String, standingWing: String = ""
+    ) throws -> JournalEntryResult {
         // Well-formedness at the operations boundary (review round 2): a
         // malformed key ("2026-7-7") would create a live entry invisible to
         // the canonical "2026-07-07" — two irreconcilable "same-day" pages
@@ -69,17 +81,30 @@ extension Operations {
             throw OperationError.invalidEntryDate(entryDate)
         }
         return try database.write { db in
+            let wing = try journalEntryWing(db, standingWing: standingWing)
             // ONE preference implementation, shared with every door that
             // opens a day by key (round 2, NIT 5).
-            if let existing = try Queries.canonicalJournalEntry(db, day: entryDate) {
+            if let existing = try Queries.canonicalJournalEntry(db, day: entryDate, wingID: wing) {
                 return JournalEntryResult(container: existing, created: false)
             }
-            // 13i-d U5 (#169(b), RULED): the day's entry is born in HOME,
-            // beside its Journal, whichever wing the door was pressed in.
+            // The day's entry is born BESIDE its Journal (13i-d U5's rule,
+            // generalized by VX-435: the Journal's wing, not Home).
             let created = try insertPost(
-                db, title: nil, profile: .journal, entryDate: entryDate, wingId: "")
+                db, title: nil, profile: .journal, entryDate: entryDate, wingId: wing)
             return JournalEntryResult(container: created, created: true)
         }
+    }
+
+    /// **Where a day's entry lives** (VX-435): the live daily Journal's
+    /// EFFECTIVE wing (a dangling wing pointer reads as Home — as surfaces
+    /// read it), else the standing wing while it is live, else Home. One
+    /// read of the marker-bearers (∝ one or two books — P1).
+    func journalEntryWing(_ db: Database, standingWing: String) throws -> String {
+        if let journalID = try Queries.dailyJournalBookID(db),
+           let journal = try Reading.fetchOne(db, key: journalID) {
+            return try Queries.wingIsLive(db, id: journal.wingId) ? journal.wingId : ""
+        }
+        return try Queries.wingIsLive(db, id: standingWing) ? standingWing : ""
     }
 
     /// What `shelveInDailyJournalBook` did, so each surface can speak in its
@@ -182,7 +207,12 @@ extension Operations {
             } else {
                 plan = try database.write { db in
                     if let raced = try Self.shelvingPlan(db, postID: postID) { return raced }
-                    let book = try insertDailyJournalBook(db)
+                    // VX-435: the fresh Journal is born where its first entry
+                    // lives — the wing she stands in (`createOrOpenJournalEntry`
+                    // put the entry there when no Journal lived), so the
+                    // filing below never crosses wings.
+                    let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                    let book = try insertDailyJournalBook(db, wingID: wing)
                     // A book minted in this transaction can carry no
                     // membership row, so nothing is decided about the pair.
                     return (book.id, false)
@@ -302,7 +332,12 @@ extension Operations {
     /// #37(iii) ruling. Same reading (curated, `profile: "journal"`, sorted
     /// by `entry_date` ascending), same designation, same shelf pin; all
     /// three in the CALLER's transaction so a partial state cannot exist.
-    private func insertDailyJournalBook(_ db: Database) throws -> Reading {
+    ///
+    /// `wingID` (VX-435 — the VX-805 run; 13i-d U5's Home-only rule retired):
+    /// the Journal is born in the wing the author stands in — one Journal per
+    /// store, movable to any wing afterwards (`moveReadingToWing`), its
+    /// entries beside it (`journalEntryWing`).
+    private func insertDailyJournalBook(_ db: Database, wingID: String) throws -> Reading {
         let now = date.now
         let book = Reading(
             id: newID(), ownerId: currentOwnerID(),
@@ -310,11 +345,7 @@ extension Operations {
             // The shared mint-mark: the Journal-keeper repair's predicate
             // filters on exactly this constant (pre-13u Act 0).
             profile: Queries.dailyJournalBookProfile, sortField: .entryDate, sortDir: .desc,
-            // 13i-d U5 (#169(b), RULED — KnownIssues row 105): the daily
-            // Journal is HOME-ONLY, so its mint's Home is DELIBERATE, never a
-            // default that happened to hold — the designation refuses any
-            // other wing's book (`setDailyJournalBook`), and no door moves it.
-            wingId: "",
+            wingId: wingID,
             createdAt: now, updatedAt: now)
         try book.insert(db)
         try setDailyJournalBook(db, book.id)

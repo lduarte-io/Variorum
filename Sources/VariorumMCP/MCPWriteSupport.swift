@@ -218,6 +218,17 @@ enum MCPWireRefusalCopy {
             + ", so this call may not have landed — read what it touches before trying again."
     }
 
+    /// R-805-5 — the move fence's sentence (P-805-B5).
+    static let dailyJournalMoveWords =
+        "The daily Journal can't be moved to another wing over this connection \u{2014} only the "
+        + "author moves it, in Variorum."
+
+    /// R-805-5's sibling — the delete fence's sentence (MCPSpec: "the daily
+    /// Journal never deletes" on the wire; P-805-B5).
+    static let dailyJournalDeleteWords =
+        "The daily Journal can't be deleted over this connection \u{2014} only the author deletes "
+        + "it, in Variorum. archive_book puts it away; it comes back when a day arrives."
+
     static func words(_ error: Error) -> String? {
         // VX-369: a store failure (GRDB's `DatabaseError`; a keyed store's
         // sanitized connection error) — the one non-`OperationError` class the
@@ -262,6 +273,17 @@ enum MCPWireRefusalCopy {
         // first), so it is never the not-shared shape and tells nothing hidden.
         case .smartFilterUnsatisfiable(_, let reason):
             return reason
+        // R-805-5 (the VX-805 run) — THE WIRE'S JOURNAL FENCE: her own doors
+        // move and delete the daily Journal like any book since VX-435/436,
+        // so these two refusals are the WIRE's alone now
+        // (`Operations.refuseMovingTheDailyJournalOnTheWire` /
+        // `refuseDeletingTheDailyJournalOnTheWire`) and are worded here, in
+        // the room's register — the app's table keeps no sentence a door of
+        // hers could meet. Wording PROVISIONAL (P-805-B5).
+        case .dailyJournalMovesOnlyByHand:
+            return Self.dailyJournalMoveWords
+        case .dailyJournalCannotBeDeleted:
+            return Self.dailyJournalDeleteWords
         default:
             return nil
         }

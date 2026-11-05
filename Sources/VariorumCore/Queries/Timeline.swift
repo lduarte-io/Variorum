@@ -263,19 +263,22 @@ extension Queries {
     /// must agree on
     /// "the day's entry" uses this, never a re-typed ORDER BY.
     ///
-    /// **13i-d U5 — HOME's day (#169(b), RULED: the daily Journal is
-    /// Home-only; "the entry born in Home beside its Journal; one entry per
-    /// day for the whole store").** The lookup reads HOME (`wingScope` — a
-    /// dangling wing reads as Home), so ⌘J / Today's Entry pressed in ANY wing
-    /// open the same Home entry, and a daily entry the author MOVED to
+    /// **THE JOURNAL'S WING's day** (13i-d U5 read HOME — the daily Journal
+    /// was Home-only, #169(b); VX-435 — the VX-805 run — made it movable to
+    /// any wing, so the lookup reads the wing the caller names: the live
+    /// daily Journal's, else the wing the author is standing in —
+    /// `Operations.journalEntryWing`). `wingScope` reads it as surfaces do (a
+    /// dangling wing reads as Home), so ⌘J pressed anywhere opens the entry
+    /// that lives beside the Journal, and a daily entry the author MOVED to
     /// another wing is no longer the day's (that wing is another library;
-    /// the next press makes Home's). Non-daily journal-trait books never wear
-    /// this shape (they mint `.generic` posts — the Stage B BLOCKER's rule),
-    /// so no other wing can hold a "day's entry" for this door to find.
+    /// the next press makes the Journal's wing's). Non-daily journal-trait
+    /// books never wear this shape (they mint `.generic` posts — the Stage B
+    /// BLOCKER's rule), so no other wing can hold a "day's entry" for this
+    /// door to find. `wingID` defaults to Home (every pre-VX-435 caller).
     public static func canonicalJournalEntry(
-        _ db: Database, day: String
+        _ db: Database, day: String, wingID: String = ""
     ) throws -> Container? {
-        let home = wingScope(column: "wing_id", wingID: "")
+        let home = wingScope(column: "wing_id", wingID: wingID)
         return try Container.fetchOne(
             db,
             sql: """

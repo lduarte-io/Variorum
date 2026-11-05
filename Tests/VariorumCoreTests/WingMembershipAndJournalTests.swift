@@ -11,14 +11,14 @@ import Testing
 ///   refuses a note of another wing (`crossWingMembership`). RED on the
 ///   pre-fix ops — `addPostToReading`, copy in, move in and the arrival seat
 ///   carried no wing check.
-/// - **THE DAILY JOURNAL IS HOME-ONLY** (#169(b), RULED; KnownIssues row 105):
-///   the designation refuses another wing's book; ⌘J / Today's Entry open or
-///   create the day's entry IN HOME whichever wing they are pressed in. Row
-///   105's MECHANISM, traced: ⌘J mints the entry in Home
-///   (`createOrOpenJournalEntry` → `insertPost`'s default) and shelves it into
-///   the DESIGNATED book; designating a book of another wing therefore made
-///   every day's entry a membership across libraries. RED on the pre-fix ops.
-@Suite("13i-d U5 — a book never spans wings; the daily Journal is Home-only")
+/// - **THE DAILY JOURNAL LIVES IN ANY WING** (VX-435 — the VX-805 run;
+///   #169(b)'s Home-only rule, KnownIssues row 105's fix, RETIRED by her
+///   2026-11-04 ruling): the designation takes a book of any wing, and ⌘J /
+///   Today's Entry open or create the day's entry BESIDE the Journal — in its
+///   wing — so the filing never crosses libraries (row 105's mechanism stays
+///   closed by the other road). With no Journal living, the entry is born in
+///   the wing the author stands in (Home for every caller that names none).
+@Suite("13i-d U5 — a book never spans wings; the daily Journal's entries live beside it")
 struct WingMembershipAndJournalTests {
     private func membershipCount(_ db: AppDatabase, _ postID: String, _ readingID: String) throws
         -> Int
@@ -92,40 +92,43 @@ struct WingMembershipAndJournalTests {
         }
     }
 
-    /// ROW 105 — the designation refuses a book of another wing, so the
-    /// daily door can never shelve Home's entry across libraries.
-    @Test func theDailyJournalCannotBeDesignatedOutsideHome() throws {
+    /// ROW 105's class, by the other road (VX-435 — a JUSTIFIED EDIT: the
+    /// pin `theDailyJournalCannotBeDesignatedOutsideHome` encoded #169(b)'s
+    /// Home-only refusal, which her ruling retired): a book of another wing
+    /// DESIGNATES, and the daily door then opens and files the day's entry IN
+    /// THAT WING — never a membership across libraries.
+    @Test func theDailyJournalDesignatesInAnyWingAndFilesBesideItself() throws {
         try withOperations { ops, db in
             let wing = try ops.createWing(name: "Imports")
             let away = try ops.createReading(
                 name: "away journal", kind: .book, profile: Queries.journalTraitProfile,
                 wingId: wing.id)
-            #expect(throws: OperationError.dailyJournalIsHomeOnly(id: away.id)) {
-                try ops.setDailyJournalBook(away.id)
-            }
-            #expect(try db.read { try Queries.dailyJournalBookID($0) } == nil)
+            try ops.setDailyJournalBook(away.id)
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == away.id)
             #expect(try db.read { try Queries.reading($0, id: away.id) }?.profile
-                    == Queries.journalTraitProfile, "the refused book keeps its trait")
-            // ⌘J's composite now mints the Journal in Home and files there —
-            // never a membership in the other wing's book.
+                    == Queries.dailyJournalBookProfile, "the designee wears the marker")
+            // ⌘J's composite, pressed from Home: the entry is born in the
+            // Journal's wing and files there.
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-01")
-            let shelving = ops.shelveInDailyJournalBook(entry.container.id)
-            guard case .shelved(let journalID) = shelving else {
-                Issue.record("expected the entry shelved into a Home Journal, got \(shelving)")
-                return
-            }
-            #expect(try db.read { try Queries.reading($0, id: journalID) }?.wingId == "")
-            #expect(try membershipCount(db, entry.container.id, away.id) == 0)
-            // A Home book designates as before (control).
+            #expect(entry.created && entry.container.wingId == wing.id,
+                    "the day's entry lives beside its Journal")
+            #expect(ops.shelveInDailyJournalBook(entry.container.id) == .shelved(readingID: away.id))
+            #expect(try membershipCount(db, entry.container.id, away.id) == 1)
+            // A Home book designates as before (control) — and the next day's
+            // entry follows the marker home.
             let home = try ops.createReading(name: "home journal", kind: .book)
             try ops.setDailyJournalBook(home.id)
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == home.id)
+            let next = try ops.createOrOpenJournalEntry(entryDate: "2026-07-02")
+            #expect(next.container.wingId == "")
         }
     }
 
-    /// ⌘J from any wing opens or creates the day's entry IN HOME: a
-    /// daily-shaped entry that lives in another wing (moved there) is that
-    /// library's, never the day's entry for the daily door.
+    /// With NO Journal living, the daily door pressed from Home opens or
+    /// creates the day's entry IN HOME: a daily-shaped entry that lives in
+    /// another wing (moved there) is that library's, never Home's day (VX-435
+    /// keeps this edge — the lookup reads the wing the entry would be born
+    /// in).
     @Test func todaysEntryIsHomesWhicheverWingHoldsADailyShape() throws {
         try withOperations { ops, db in
             let wing = try ops.createWing(name: "Imports")

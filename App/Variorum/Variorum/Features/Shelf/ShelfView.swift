@@ -56,8 +56,8 @@ struct ShelfView: View {
         // 13i-d U5b — Move to Wing ▸ (R-13id-6 item 9): books AND gatherings.
         + [.moveBookToWing]
         // 13i-e U2 — Archive beside Delete (R-13ie-1…4; `BookArchiveDoorSet`
-        // — the daily Journal renders Archive and never Delete). Unarchive is
-        // not this menu's: an archived book is never on the Bookcase.
+        // — on the daily Journal too since VX-436). Unarchive is not this
+        // menu's: an archived book is never on the Bookcase.
         + [.archiveBook]
 
     /// 13n-a (R-13n-8): the board's FILE DROP is the import door's second
@@ -868,8 +868,8 @@ struct ShelfView: View {
         }
         // 13i-d U5b — MOVE TO WING ▸ (R-13id-6 item 9; her R-13id-4 family):
         // a book or a gathering to another library, with its notes. The other
-        // wings, Home first; never on the daily Journal (item 7) and never
-        // while one library stands alone (`WingBookMoveDoor.drawn` — P-2).
+        // wings, Home first; the daily Journal too since VX-435, never while
+        // one library stands alone (`WingBookMoveDoor.drawn` — P-2).
         if let wings {
             let others = wings.destinations(from: model.wingID)
             if WingBookMoveDoor.drawn(reading: reading, destinations: others.count) {
@@ -948,11 +948,10 @@ struct ShelfView: View {
         if reading.kind == .book {
             Button("Length & Extent\u{2026}") { extentTarget = reading }
         }
-        // 13i-d U5 (#169(b), RULED — the daily Journal is HOME-ONLY): the
-        // designation door is drawn only on a HOME book (P-2 — the op refuses
-        // any other wing's, `dailyJournalIsHomeOnly`).
-        if reading.kind == .book, Queries.hasJournalTrait(reading.profile),
-           model.wingID.isEmpty {
+        // The designation door is drawn on a journal-trait book of ANY wing
+        // since VX-435 (13i-d U5's Home-only gate retired with the op's
+        // refusal — one Journal per store, in whichever wing it lives).
+        if reading.kind == .book, Queries.hasJournalTrait(reading.profile) {
             // Round 2, MAJOR 2's re-designation door.
             Button("Use as Daily Journal") {
                 Task { await model.designateDailyJournal(reading.id) }

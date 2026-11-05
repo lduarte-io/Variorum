@@ -972,11 +972,19 @@ enum JournalBooks {
     static func openToday(session: AppSession, day: String? = nil) async throws -> Outcome {
         let entryDay = day ?? JournalDay.dayString(from: Date())
         let database = session.database
+        // VX-435 (the VX-805 run): the wing she stands in — where the day's
+        // entry and a fresh Journal are born when NO Journal lives (her
+        // ruling: "A fresh ⌘J mint when no Journal lives: the wing you're
+        // standing in"); a living Journal's entry is born beside it, wherever
+        // it is. Opening the entry is then a wing switch like any open
+        // (`WingFollow` — the focused pane's subject).
+        let standingWing = session.wing.currentID
         // The designation read runs INSIDE the runner (round 2, MINOR:
         // two rapid invocations both saw nil pre-runner and minted two
         // "Journal" books).
         return try await session.runner.run { ops in
-            let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
+            let entry = try ops.createOrOpenJournalEntry(
+                entryDate: entryDay, standingWing: standingWing)
             // 13i-e U2 — read the Journal's archive state BEFORE the filing
             // (the comes-back receipt's first half).
             let before = dailyJournalArchiveState(database)

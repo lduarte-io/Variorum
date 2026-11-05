@@ -7,9 +7,11 @@ import Testing
 // 13i-e U1 — THE DAILY JOURNAL AS RULED (the sitting record §10; the identity
 // memo §3/§4/§5 edge 5; the binding record is the 13i-e plan's U1 RECORD):
 //
-// - THE GUARD — "the daily Journal can be archived, never deleted": both
-//   delete doors refuse a book wearing the 'daily' marker, inside their own
-//   write transaction. (Red on old, by revert: the old tree tombstoned it.)
+// - THE GUARD — RETIRED at VX-436 (the VX-805 run, her 2026-11-04 ruling:
+//   the daily Journal is deletable; ⌘J re-mints): the suite that pinned it
+//   now pins the delete as built — the tombstone wears the deleted-Journal
+//   mark, nothing backfills — and R-805-2's Put back (the JUSTIFIED EDITS
+//   are named per test).
 // - THE DERIVATION — the designation IS the marker: `dailyJournalBookID` reads
 //   the keeper's own smallest-id pick over the live marker-bearers; the
 //   `daily_journal_book` setting is a written CACHE, never read for it. (Red
@@ -94,60 +96,105 @@ private func archivedAt(_ db: AppDatabase, _ table: String, _ id: String) throws
     try db.fetchString("SELECT archived_at FROM \(table) WHERE id = ?", [id])
 }
 
-// MARK: - The guard
+// MARK: - The delete (the guard retired — VX-436)
 
-@Suite("13i-e U1 — the daily Journal can be archived, never deleted (the guard)")
+private func profile(_ db: AppDatabase, _ readingID: String) throws -> String? {
+    try db.fetchString("SELECT profile FROM reading WHERE id = ?", [readingID])
+}
+
+@Suite("VX-436 — the daily Journal deletes, wearing the deleted-Journal mark; no backfill")
 struct DailyJournalDeleteGuardTests {
-    /// RED ON OLD (R1, by revert): the old `deleteReading` tombstoned it.
-    @Test func deleteReadingRefusesTheDailyJournal() throws {
+    /// A JUSTIFIED EDIT (was `deleteReadingRefusesTheDailyJournal` — 13i-e's
+    /// guard, retired by her ruling): her delete lands as any book's — and
+    /// the tombstone trades the marker for the deleted-Journal mark in the
+    /// SAME row write (option A, P-805-B2), the cascade stamping its
+    /// memberships, the entry itself untouched (a plain book's delete never
+    /// touches a note), the derived designation reading none. RED ON OLD:
+    /// the old op threw `dailyJournalCannotBeDeleted` and wrote nothing.
+    @Test func deleteReadingDeletesTheDailyJournalWearingTheMark() throws {
         try withOperations { ops, db in
             let daily = try file(ops, day: "2026-10-01")
             try db.clearOutbox()
 
-            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: daily.bookID)) {
-                try ops.deleteReading(daily.bookID)
-            }
+            try ops.deleteReading(daily.bookID)
 
-            #expect(try db.deletedAt("reading", daily.bookID) == nil)
-            #expect(try liveMember(db, daily.entryID, of: daily.bookID))
-            #expect(try db.fetchInt("SELECT COUNT(*) FROM sync_outbox") == 0, "nothing was written")
+            let stamp = try #require(try db.deletedAt("reading", daily.bookID))
+            #expect(try profile(db, daily.bookID) == Queries.dailyJournalDeletedProfile)
+            #expect(try db.deletedAt("container", daily.entryID) == nil, "the entry stays")
+            #expect(try db.fetchString(
+                "SELECT deleted_at FROM reading_post WHERE reading_id = ? AND post_id = ?",
+                [daily.bookID, daily.entryID]) == stamp, "its membership died on the stamp")
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == nil)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM sync_outbox WHERE table_name = 'reading'") == 1)
+            #expect(try db.outboxContains("reading", daily.bookID), "the one row write pushes")
         }
     }
 
-    /// RED ON OLD (R1, by revert): the old `deleteReadingWithNotes` sent the
-    /// Journal AND its entries to the Trash.
-    @Test func deleteReadingWithNotesRefusesTheDailyJournalAndTouchesNoEntry() throws {
+    /// A JUSTIFIED EDIT (was `…RefusesTheDailyJournalAndTouchesNoEntry`):
+    /// the owned book's second choice deletes the Journal AND its entries on
+    /// one stamp, the mark riding the book's tombstone. RED ON OLD: refused.
+    @Test func deleteReadingWithNotesTakesTheJournalAndItsEntries() throws {
         try withOperations { ops, db in
             let daily = try file(ops, day: "2026-10-01")
 
-            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: daily.bookID)) {
-                try ops.deleteReadingWithNotes(daily.bookID)
-            }
+            let deleted = try ops.deleteReadingWithNotes(daily.bookID)
 
-            #expect(try db.deletedAt("reading", daily.bookID) == nil)
-            #expect(try db.deletedAt("container", daily.entryID) == nil)
-            #expect(try liveMember(db, daily.entryID, of: daily.bookID))
+            #expect(deleted == [daily.entryID])
+            let stamp = try #require(try db.deletedAt("reading", daily.bookID))
+            #expect(try db.deletedAt("container", daily.entryID) == stamp)
+            #expect(try profile(db, daily.bookID) == Queries.dailyJournalDeletedProfile)
         }
     }
 
-    /// The guard keys on the MARKER — never the name, never the setting: a
-    /// RENAMED Journal still refuses; a journal-TRAIT notebook named
-    /// "Journal" deletes; moving the designation moves the protection.
-    @Test func theGuardKeysOnTheMarker() throws {
+    /// The mark keys on the MARKER — never the name, never the setting: a
+    /// RENAMED Journal's delete wears it; a journal-TRAIT notebook named
+    /// "Journal" deletes keeping its trait; the folder import's undo of a
+    /// book become the Journal wears it too (the one tombstone). A JUSTIFIED
+    /// EDIT of `theGuardKeysOnTheMarker`.
+    @Test func theMarkKeysOnTheMarker() throws {
         try withOperations { ops, db in
             let daily = try file(ops, day: "2026-10-01")
             try ops.renameReading(daily.bookID, name: "Days")
-            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: daily.bookID)) {
-                try ops.deleteReading(daily.bookID)
-            }
+            try ops.deleteReading(daily.bookID)
+            #expect(try profile(db, daily.bookID) == Queries.dailyJournalDeletedProfile)
             let notebook = try ops.createReading(
                 name: "Journal", kind: .book, profile: Queries.journalTraitProfile)
-            try ops.setDailyJournalBook(notebook.id)            // the marker moves
-            try ops.deleteReading(daily.bookID)                 // now a trait book: deletable
-            #expect(try db.deletedAt("reading", daily.bookID) != nil)
-            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: notebook.id)) {
-                try ops.deleteReadingWithNotes(notebook.id)
+            try ops.deleteReading(notebook.id)
+            #expect(try profile(db, notebook.id) == Queries.journalTraitProfile,
+                    "a trait book's tombstone keeps its trait")
+        }
+    }
+
+    /// NO BACKFILL (her ruling): after the delete the next ⌘J re-mints a
+    /// fresh Journal in the wing she stands in; the old book's entries never
+    /// re-file — a pair decided with the old book stays decided, and the new
+    /// book only ever receives each day's own filing.
+    @Test func theNextDayReMintsAFreshJournalAndNothingBackfills() throws {
+        try withOperations { ops, db in
+            let wing = try ops.createWing(name: "Studio")
+            let first = try file(ops, day: "2026-10-01")
+            let second = try file(ops, day: "2026-10-02")
+            #expect(second.bookID == first.bookID)
+            try ops.deleteReading(first.bookID)
+
+            // ⌘J pressed while standing in Studio, on a new day.
+            let entry = try ops.createOrOpenJournalEntry(
+                entryDate: "2026-10-03", standingWing: wing.id)
+            #expect(entry.created && entry.container.wingId == wing.id)
+            guard case .shelved(let fresh) = ops.shelveInDailyJournalBook(entry.container.id) else {
+                Issue.record("the re-mint files the day's entry")
+                return
             }
+            #expect(fresh != first.bookID)
+            #expect(try db.read { try Queries.reading($0, id: fresh) }?.wingId == wing.id,
+                    "the re-mint lands in the standing wing")
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == fresh)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                [fresh]) == 1, "only the day's own filing")
+            #expect(try !liveMember(db, first.entryID, of: fresh))
+            #expect(try !liveMember(db, second.entryID, of: fresh))
         }
     }
 

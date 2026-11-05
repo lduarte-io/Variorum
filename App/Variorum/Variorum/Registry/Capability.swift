@@ -939,8 +939,8 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // grounds: each its own door with its own words (Archive may ask on an
     // OWNED book — the delete confirm's twin; Unarchive never asks). WHICH of
     // Archive · Unarchive · Delete a book renders is DATA
-    // (`BookArchiveDoorSet`): the daily Journal never renders Delete (P-2 —
-    // the op refuses it, `dailyJournalCannotBeDeleted`).
+    // (`BookArchiveDoorSet`): since VX-436 Delete renders beside Archive on
+    // every book, the daily Journal included.
     case archiveBook, unarchiveBook
     // `.importFiles` — 13n-a: File ▸ Import… is the VARIORUM DOCUMENT
     // FORMAT's door (a file, or a folder that becomes a book — R-13n-8), and

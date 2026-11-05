@@ -1889,7 +1889,7 @@ nonisolated enum CapabilityRegistry {
         // sheet (`.surface` — an archived book is never on the Bookcase).
         // `always` for `.editRule`'s reason (every renderer carries its
         // book); WHICH renders is DATA — `BookArchiveDoorSet` (archived ⇒
-        // Unarchive, else Archive; the daily Journal never offers Delete).
+        // Unarchive, else Archive; Delete beside either — VX-436).
         // The archive acts' own refusals (already archived / not archived)
         // are the operations', spoken through the shared table.
         Capability(
@@ -2265,12 +2265,12 @@ nonisolated enum CapabilityRegistry {
             availability: noteWingDoor),
         // 13i-d U5b — the book-move half (R-13id-6 item 9). The book door
         // carries its row (the note doors' `.native` precedent) and renders
-        // only while another wing exists and never on the daily Journal
-        // (`WingBookMoveDoor.drawn` — DATA, P-2); the bulk door carries the
+        // only while another wing exists — the daily Journal included since
+        // VX-435 (`WingBookMoveDoor.drawn` — DATA, P-2); the bulk door carries the
         // current wing and renders only on an ADDITIONAL one.
         // VX-377: + `.palette` on the FOCUSED book (or gathering) — the
         // target-less door's gate is a pane showing a book and another wing;
-        // the per-target half (never the daily Journal) is the row door's own
+        // the per-target half is the row door's own
         // `WingBookMoveDoor.drawn`, which ⌘K's listing reads too.
         // VX-632: + `.menuBar` — the SAME View-menu item as the note's Move
         // ("Move to Wing…", ⌥⌘L), which runs THIS act on a book pane

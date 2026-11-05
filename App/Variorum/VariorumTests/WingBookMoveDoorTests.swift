@@ -54,8 +54,8 @@ struct WingBookMoveDoorTests {
     }
 
     /// P-2: the book door is drawn only where it can act — another wing
-    /// exists, and never on the daily Journal (its marker); books AND
-    /// gatherings carry it.
+    /// exists; books AND gatherings carry it, and since VX-435 the daily
+    /// Journal too (a JUSTIFIED EDIT: item 7's "never moves" retired).
     @Test func theBookDoorIsDrawnOnlyWhereItCanAct() {
         let now = Date()
         let book = Reading(id: "b", name: "Alpha", kind: .book, createdAt: now, updatedAt: now)
@@ -66,7 +66,8 @@ struct WingBookMoveDoorTests {
         #expect(WingBookMoveDoor.drawn(reading: book, destinations: 1))
         #expect(WingBookMoveDoor.drawn(reading: gathering, destinations: 2))
         #expect(!WingBookMoveDoor.drawn(reading: book, destinations: 0), "one library — no door")
-        #expect(!WingBookMoveDoor.drawn(reading: journal, destinations: 3), "the daily Journal never moves")
+        #expect(WingBookMoveDoor.drawn(reading: journal, destinations: 3), "the daily Journal moves (VX-435)")
+        #expect(!WingBookMoveDoor.drawn(reading: journal, destinations: 0))
     }
 
     /// The confirm COUNTS (3 notes, 1 archived), LISTS the stay-behind
@@ -181,10 +182,12 @@ struct WingBookMoveDoorTests {
 
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-10-02").container
             _ = ops.shelveInDailyJournalBook(entry.id)
+            // VX-435 (a JUSTIFIED EDIT — the Journal's stale-face refusal
+            // retired): the daily Journal's ask is an ordinary book's,
+            // counting its entry.
             let journal = try await reading(db, try #require(try ops.dailyJournalBookID()))
-            #expect(await wings.bookMoveAsk(reading: journal, to: wing.id) == nil)
-            #expect(spoken(session) == OpsRefusalCopy.message(
-                for: OperationError.dailyJournalIsHomeOnly(id: journal.id)))
+            let ask = try #require(await wings.bookMoveAsk(reading: journal, to: wing.id))
+            #expect(ask.preview.notes == 1)
         }
     }
 

@@ -144,18 +144,20 @@ struct BookArchiveDeclarationTests {
         #expect(ArchivedView.surfaceCapabilities.contains(.deleteBook))
     }
 
-    /// P-1 + P-2: archived ⇒ Unarchive, else Archive; Delete everywhere EXCEPT
-    /// the daily Journal (the op refuses it — a door that could never act).
+    /// P-1 + P-2: archived ⇒ Unarchive, else Archive; Delete EVERYWHERE —
+    /// the daily Journal included since VX-436 (a JUSTIFIED EDIT: this pin
+    /// encoded 13i-e's "Archive in Delete's place", which her 2026-11-04
+    /// ruling retired with the op's guard — "Delete appears beside Archive").
     @Test func theTableIsTheRule() {
         #expect(BookArchiveDoorSet.rendered(for: .init(archived: false, isDailyJournal: false))
                 == [.archiveBook, .deleteBook])
         #expect(BookArchiveDoorSet.rendered(for: .init(archived: true, isDailyJournal: false))
                 == [.unarchiveBook, .deleteBook])
         #expect(BookArchiveDoorSet.rendered(for: .init(archived: false, isDailyJournal: true))
-                == [.archiveBook], "the daily Journal: Archive in Delete's place")
+                == [.archiveBook, .deleteBook], "the daily Journal: Delete beside Archive")
         #expect(BookArchiveDoorSet.rendered(for: .init(archived: true, isDailyJournal: true))
-                == [.unarchiveBook])
-        // The facts read the op guard's OWN predicate — the marker, never a name.
+                == [.unarchiveBook, .deleteBook])
+        // The fact still reads the marker — never a name.
         #expect(BookArchiveFacts(bare("Journal", profile: Queries.dailyJournalBookProfile)).isDailyJournal)
         #expect(!BookArchiveFacts(bare("Journal", profile: Queries.journalTraitProfile)).isDailyJournal)
         #expect(!BookArchiveFacts(bare("g", kind: .gathering, profile: Queries.dailyJournalBookProfile))
@@ -282,10 +284,13 @@ struct BookArchiveDoorActTests {
         }
     }
 
-    /// The daily Journal's delete REFUSES in the shared table's words — the
-    /// door is never drawn (the table), and a road that reached the act anyway
-    /// hears the guard's sentence, never a raw enum.
-    @Test func theDailyJournalsDeleteSpeaksTheGuardsWords() async throws {
+    /// The daily Journal's delete LANDS through the one door (VX-436 — a
+    /// JUSTIFIED EDIT: this pin was `theDailyJournalsDeleteSpeaksTheGuardsWords`,
+    /// 13i-e's refusal): her press deletes it, the receipt is a plain book's,
+    /// and the tombstone wears the deleted-Journal mark. The shared tables
+    /// keep the retired refusal's sentence for the wire's fallback and the
+    /// phone's deletion table.
+    @Test func theDailyJournalsDeleteLandsThroughTheOneDoor() async throws {
         try await withArchiveWorld { session, db in
             let ops = session.operations
             let entry = try ops.createPost(title: nil)
@@ -295,10 +300,10 @@ struct BookArchiveDoorActTests {
             }
             let doors = BookStateDoors(session: session)
             let landed = await doors.perform(.deleteBook, readingID: journal)
-            #expect(!landed)
-            #expect(session.status.spoken?.text == BookArchiveCopy.cannotDeleteDailyJournal)
-            #expect(session.status.spoken?.kind == .refusal)
-            #expect(try await reading(db, journal).deletedAt == nil)
+            #expect(landed)
+            #expect(session.status.spoken?.kind == .receipt)
+            #expect(try await reading(db, journal).deletedAt != nil)
+            #expect(try await reading(db, journal).profile == Queries.dailyJournalDeletedProfile)
             #expect(OpsRefusalCopy.words(
                 for: OperationError.readingAlreadyArchived(id: "x"), roads: .mac)
                     == "That book is already archived \u{2014} nothing changed.")
@@ -327,9 +332,12 @@ struct BookSettingsArchiveRowTests {
                 "a rule-less book has no auto-ingestion to pause")
         #expect(BookArchiveCopy.pausedSentence(for: bare("g", kind: .gathering, archived: true, querySpec: spec))
                 == BookArchiveCopy.pausedGathering)
+        // VX-436 (a JUSTIFIED EDIT — §10's "never deleted" clause retired):
+        // the caption says both roads (PROVISIONAL WORDING P-805-B4).
         #expect(CollectingCopy.archiveCaption(for: bare("J", profile: Queries.dailyJournalBookProfile))
-                == "The daily Journal can be archived, never deleted; it returns when a day arrives.",
-                "§10's own sentence")
+                == BookArchiveCopy.dailyJournalCaption)
+        #expect(BookArchiveCopy.dailyJournalCaption.contains("deleted"))
+        #expect(!BookArchiveCopy.dailyJournalCaption.contains("never deleted"))
     }
 
     /// Mounted: a LIVING archived book's sheet draws Unarchive, the archived

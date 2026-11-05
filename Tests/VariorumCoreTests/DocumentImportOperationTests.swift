@@ -626,18 +626,25 @@ struct DocumentImportOperationTests {
         }
     }
 
-    @Test func undoRefusesWhenTheImportedBookBecameTheDailyJournal() throws {
+    /// VX-436 (the VX-805 run — a JUSTIFIED EDIT: was
+    /// `undoRefusesWhenTheImportedBookBecameTheDailyJournal`, the retired
+    /// delete guard's arm here): the undo takes a book that has since become
+    /// THE daily Journal like any imported book — wearing the deleted-Journal
+    /// mark (the delete doors' one tombstone), so no device reads it as the
+    /// keeper repair's retirement.
+    @Test func undoOfAnImportedBookBecomeTheDailyJournalWearsTheMark() throws {
         try withOperations { _, db in
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let result = try ops.importBook(try folder())
             try ops.setDailyJournalBook(result.reading.id)
-            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: result.reading.id)) {
-                try stack.undo(with: ops)
-            }
-            // Nothing died, and the entry waits on the stack.
-            #expect(try db.deletedAt("reading", result.reading.id) == nil)
-            #expect(stack.depth == 1)
+            _ = try stack.undo(with: ops)
+            #expect(try db.deletedAt("reading", result.reading.id) != nil)
+            #expect(try db.fetchString("SELECT profile FROM reading WHERE id = ?",
+                                       [result.reading.id]) == Queries.dailyJournalDeletedProfile)
+            // The redo brings it back as THE Journal (R-805-2: none stands).
+            _ = try stack.redo(with: ops)
+            #expect(try db.read { try Queries.dailyJournalBookID($0) } == result.reading.id)
         }
     }
 
@@ -646,6 +653,11 @@ struct DocumentImportOperationTests {
         // not overwrite the stamp the real deletion wrote — else the redo
         // looks for rows that died on the fresh stamp, finds none, and the
         // first undo's books stay in the Trash (AppSpec §9's round trip).
+        // VX-436 (a JUSTIFIED EDIT): the daily Journal's delete refusal that
+        // once forced the partial first press is retired, so the retry is
+        // driven at the inverse itself — a second run over rows already dead
+        // tombstones nothing and returns no stamp, and the redo still finds
+        // every row on the real deletion's stamp.
         try withOperations { _, db in
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
@@ -658,17 +670,12 @@ struct DocumentImportOperationTests {
                     unfiled: [.init(fallbackTitle: "b", document: .init(blocks: [.init(text: "B")]))]))
                 return (alpha: alpha, beta: beta)
             }
-            try ops.setDailyJournalBook(pair.alpha.reading.id)
-            // First press: beta's inverse runs (writing its stamp); alpha's refuses.
-            #expect(throws: OperationError.dailyJournalCannotBeDeleted(id: pair.alpha.reading.id)) {
-                try stack.undo(with: ops)
-            }
-            #expect(try db.deletedAt("reading", pair.beta.reading.id) != nil)
-            // She resolves the refusal and presses undo again.
-            let other = try ops.createReading(name: "journal", kind: .book)
-            try ops.setDailyJournalBook(other.id)
             _ = try stack.undo(with: ops)
             #expect(try db.deletedAt("reading", pair.alpha.reading.id) != nil)
+            #expect(try db.deletedAt("reading", pair.beta.reading.id) != nil)
+            // The retried inverse: nothing left to tombstone, no stamp.
+            #expect(try ops.revertImportedBook(pair.alpha.reading.id, posts: pair.alpha.postIDs) == nil)
+            #expect(try ops.revertImportedBook(pair.beta.reading.id, posts: pair.beta.postIDs) == nil)
             // The redo returns EVERYTHING the gesture made.
             _ = try stack.redo(with: ops)
             #expect(try db.deletedAt("reading", pair.alpha.reading.id) == nil)
