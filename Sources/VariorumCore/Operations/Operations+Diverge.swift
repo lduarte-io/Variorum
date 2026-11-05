@@ -70,7 +70,8 @@ extension Operations {
     /// archived takes riding with statuses preserved, commits never copied,
     /// parent trees remapped, block names and presentations copied, per-block
     /// `derived_from` edges plus ONE `version_of` anchor); tags, references
-    /// and lenses do not ride, as in every copy.
+    /// and lenses do not ride, as in every copy. Its `entry_date` follows the
+    /// duplicate's keep-the-day rule (`DuplicateDay` — VX-845).
     @discardableResult
     public func divergePostForReading(
         _ postID: String, in readingID: String
@@ -88,7 +89,10 @@ extension Operations {
                 throw OperationError.postNotInReading(postID: postID, readingID: readingID)
             }
 
-            let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+            // VX-845 (her F-1(c) ruling): a diverged copy of an undated,
+            // untitled note keeps the day its source is named for.
+            let copy = try copyPost(
+                db, sourceID: postID, chosenPicks: nil, carryFans: true, keepingNamedDay: true)
 
             // THE EXACT SLOT: the copy inherits the original's position and
             // its chapter. Position is copied verbatim rather than computed —
