@@ -271,6 +271,30 @@ lockfile missing ("a build would resolve WITHOUT pins"), and with E11's originHa
 a dirty tree for the same reason); bad path or option exits 2. Python 3.9 stdlib only
 (`/usr/bin/python3` 3.9.6).
 
+### VERIFY — the pre-merge core runs (0d7fd8019; superseded by the merged-tree runs below)
+
+- `swift build` (isolated caches, scratch `vx781-core`): **`Build complete! (40.85 sec)`**. The
+  belt's cost: SwiftPM warns `dependency '<x>' is not used by any target` for 7 of the
+  constraint-only lines (sqlcipher.swift, swift-atomics, swift-clocks, swift-concurrency-extras,
+  swift-nio, swift-system, xctest-dynamic-overlay). These are expected and accepted (the brief
+  priced this); no target links anything new.
+- `swift test` — the FIRST attempt was KILLED mid-run by my own TaskStop of a polling shell (the
+  harness had moved it to the background; stopping that shell took its process group, the test
+  run included). Log kept as `core-test-KILLED-by-taskstop.log`; cited for nothing. Re-run
+  detached in its own session:
+  - VariorumCoreTests: **`Test run with 3646 tests in 491 suites passed after 254.213 seconds
+    with 5 known issues.`** (gated suites print `skipped`: VX-670, 13o U3, VX-497, VX-653/654, 13o
+    fork measurements — the env-gated measurement suites.)
+  - StringsWorkbookTests: **`Test run with 32 tests in 4 suites passed after 29.431 seconds.`**
+  - VariorumMCPTests: `Test run with 549 tests in 100 suites failed after 50.993 seconds with 3
+    issues` — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+    (`ContinuousClock.now - started < .seconds(15)`, took 38.7 s), `MCPPreInitializeWindowTests.
+    aBareOpeningIsAnsweredBeforeTheReadBlocks`, `MCPDiscoverProbeServerTests.
+    claudeCodesPipelinedProbeIsAnsweredAndItsInitializeServes`. All three are socket timing under
+    the parallel whole-suite load, and the first one failed in the killed run too. VX-736's record
+    names "three load-timing flakes, each green alone" for this same suite. The isolation re-run
+    is owed on the merged tree (below).
+
 ### RELEASE-EXPOSURE — did 1.0 (10632) or 1.0.1 (10682) ship floated pins? **NO — both shipped the committed set** (evidence, decisive, read-only)
 
 1. **No upgraded set was ever committed, on any ref.** `git log --all` over both lockfiles: the
