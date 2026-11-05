@@ -216,15 +216,23 @@ extension Operations {
     /// finding 2026-07-05).
     public func setReadingSort(_ id: String, field: SortField, direction: SortDirection) throws {
         try database.write { db in
-            var reading = try liveReading(db, id)
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: id)
-            }
-            reading.sortField = field
-            reading.sortDir = direction
-            reading.updatedAt = date.now
-            try reading.update(db)
+            try writeReadingSort(db, id, field: field, direction: direction)
         }
+    }
+
+    /// `setReadingSort`'s row work inside a caller's transaction (VX-813 —
+    /// the VX-809 run, batch 2: the MCP door's `set_book_order` and the
+    /// `order` options of `create_book` / `set_book_rule` run HER body, moved
+    /// here verbatim; her door's behaviour byte-identical).
+    func writeReadingSort(_ db: Database, _ id: String, field: SortField, direction: SortDirection) throws {
+        var reading = try liveReading(db, id)
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: id)
+        }
+        reading.sortField = field
+        reading.sortDir = direction
+        reading.updatedAt = date.now
+        try reading.update(db)
     }
 
     /// The ONE rule write (the choke point every face routes through). On a

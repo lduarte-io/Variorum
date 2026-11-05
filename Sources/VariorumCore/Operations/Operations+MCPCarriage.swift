@@ -220,11 +220,21 @@ extension Operations {
         /// The join dial: `.auto` = "join quietly at the end", `.arrivals` =
         /// "wait at Arrivals".
         public var seating: IntakeSeating?
+        /// VX-813 (the VX-809 run, batch 2 — R-813's "an order option on …
+        /// set_book_rule"): the book's ORDER, written by HER order door's body
+        /// (`writeReadingSort` — a finished or sealed book refuses
+        /// `lockedReading`, rolling the whole call back) in the same
+        /// transaction and the same undo entry; nil = leave as stored.
+        public var order: Queries.ReadingOrder?
 
-        public init(rule: RuleTerm?? = nil, outflowPaths: [String]? = nil, seating: IntakeSeating? = nil) {
+        public init(
+            rule: RuleTerm?? = nil, outflowPaths: [String]? = nil, seating: IntakeSeating? = nil,
+            order: Queries.ReadingOrder? = nil
+        ) {
             self.rule = rule
             self.outflowPaths = outflowPaths
             self.seating = seating
+            self.order = order
         }
     }
 
@@ -245,8 +255,12 @@ extension Operations {
         public let intakeRuns: Bool
         /// Tags the act minted because a path named none (adopt-or-mint).
         public let mintedTags: Int
+        /// VX-813: the book's order before and after (equal unless the write
+        /// named an order that differed from the stored one).
+        public let orderBefore: Queries.ReadingOrder
+        public let orderAfter: Queries.ReadingOrder
 
-        public var changed: Bool { before != after }
+        public var changed: Bool { before != after || orderBefore != orderAfter }
     }
 
     /// Her rule editor's refusals that live in its FACE, mirrored at the act
@@ -293,6 +307,14 @@ extension Operations {
             if write.rule != nil, RuleGrammar.read(reading.querySpec) == .malformed {
                 throw MCPBookRuleRefusal.storedRuleUnreadable
             }
+            // VX-813: an ORDER is her order door's — a finished or sealed book
+            // refuses it (her op's guard, checked first, as `set_book_order`
+            // checks it: the order already as asked is no exemption there
+            // either), and the whole call rolls back with it.
+            if write.order != nil, reading.locked {
+                throw OperationError.lockedReading(id: readingID)
+            }
+            let orderBefore = Queries.ReadingOrder(field: reading.sortField, direction: reading.sortDir)
             let before = MCPCollectingColumns(
                 querySpec: reading.querySpec, autoTagIDs: reading.autoTagIds, intakeSeating: reading.intakeSeating)
             var adoption = TagAdoption(wing: try Queries.wingIsLive(db, id: reading.wingId) ? reading.wingId : "")
@@ -322,6 +344,11 @@ extension Operations {
                         sweepOccasion: .catchUp)
                 }
             }
+            // VX-813: the order last, through her body, only when it changes
+            // what is stored (her Save's own test, each column alike).
+            if let order = write.order, order != orderBefore {
+                try writeReadingSort(db, readingID, field: order.field, direction: order.direction)
+            }
             let landed = try liveReading(db, readingID)
             return MCPBookRuleResult(
                 before: before,
@@ -329,26 +356,32 @@ extension Operations {
                     querySpec: landed.querySpec, autoTagIDs: landed.autoTagIds,
                     intakeSeating: landed.intakeSeating),
                 intakeRuns: IntakeDecision.intakeRuns(try intakeBookFacts(db, landed)),
-                mintedTags: adoption.minted)
+                mintedTags: adoption.minted,
+                orderBefore: orderBefore,
+                orderAfter: Queries.ReadingOrder(field: landed.sortField, direction: landed.sortDir))
         }
         if result.changed {
             let before = result.before, after = result.after
-            // VX-246 U2 — an entry with PARTS (the three columns): each half
-            // writes only the columns its partner last changed (nil after the
-            // act: every column the act changed), so a column she set BACK
-            // herself between ⌥⌘Z and ⇧⌥⌘Z is never re-written by the redo.
+            let orderBefore = result.orderBefore, orderAfter = result.orderAfter
+            // VX-246 U2 — an entry with PARTS (the three columns, and since
+            // VX-813 the order): each half writes only the parts its partner
+            // last changed (nil after the act: every part the act changed), so
+            // a part she set BACK herself between ⌥⌘Z and ⇧⌥⌘Z is never
+            // re-written by the redo.
             let columns = LockIsolated<Set<CollectingColumn>?>(nil)
             undoStack?.register(
                 label: undoLabel,
                 inverse: { ops in
                     let changed = try ops.restoreCollectingColumns(
-                        readingID, from: after, to: before, only: columns.value)
+                        readingID, from: after, to: before, orderFrom: orderAfter, orderTo: orderBefore,
+                        only: columns.value)
                     columns.setValue(changed)
                     return !changed.isEmpty
                 },
                 redo: { ops in
                     let changed = try ops.restoreCollectingColumns(
-                        readingID, from: before, to: after, only: columns.value)
+                        readingID, from: before, to: after, orderFrom: orderBefore, orderTo: orderAfter,
+                        only: columns.value)
                     columns.setValue(changed)
                     return !changed.isEmpty
                 })
@@ -425,8 +458,9 @@ extension Operations {
         return mint
     }
 
-    /// The three collecting columns, as parts of one entry (VX-246 U2).
-    enum CollectingColumn: Sendable, Hashable { case rule, outflow, seating }
+    /// The three collecting columns, as parts of one entry (VX-246 U2) — and,
+    /// since VX-813, the book's ORDER (`sort_field` + `sort_dir`, one part).
+    enum CollectingColumn: Sendable, Hashable { case rule, outflow, seating, order }
 
     /// Both halves of the book-rule entry, COMPARE-AND-SET PER COLUMN (VX-184
     /// ladder round 1 — the undo-overwrite class): each column the act CHANGED
@@ -436,9 +470,15 @@ extension Operations {
     /// registers no entry) is hers. No intake runs — an undo is never an
     /// applying act, and seats stay. A reading gone, or every changed column
     /// hers since, is the world moving past the entry (quiet).
+    ///
+    /// VX-813: the ORDER part (`orderFrom` → `orderTo`) under the same CAS,
+    /// then HER order door's body (`writeReadingSort`) — so a book finished
+    /// since refuses `lockedReading` and the whole entry is kept (resolvable),
+    /// nothing half-written (the refusal rolls the transaction back).
     @discardableResult
     func restoreCollectingColumns(
         _ readingID: String, from: MCPCollectingColumns, to columns: MCPCollectingColumns,
+        orderFrom: Queries.ReadingOrder? = nil, orderTo: Queries.ReadingOrder? = nil,
         only: Set<CollectingColumn>? = nil
     ) throws -> Set<CollectingColumn> {
         try database.write { db in
@@ -446,6 +486,11 @@ extension Operations {
             var querySpec = reading.querySpec, autoTagIDs = reading.autoTagIds, seating = reading.intakeSeating
             var changed: Set<CollectingColumn> = []
             let may = { (column: CollectingColumn) in only?.contains(column) ?? true }
+            if may(.order), let orderFrom, let orderTo, orderFrom != orderTo,
+               Queries.ReadingOrder(field: reading.sortField, direction: reading.sortDir) == orderFrom {
+                try writeReadingSort(db, readingID, field: orderTo.field, direction: orderTo.direction)
+                changed.insert(.order)
+            }
             if may(.rule), from.querySpec != columns.querySpec, querySpec == from.querySpec {
                 querySpec = columns.querySpec
                 changed.insert(.rule)
@@ -458,7 +503,7 @@ extension Operations {
                 seating = columns.intakeSeating
                 changed.insert(.seating)
             }
-            guard !changed.isEmpty else { return [] }
+            guard !changed.subtracting([.order]).isEmpty else { return changed }
             try db.execute(
                 sql: """
                     UPDATE reading SET query_spec = ?, auto_tag_ids = ?, intake_seating = ?, updated_at = ?
