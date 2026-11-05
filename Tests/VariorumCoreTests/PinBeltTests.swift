@@ -20,7 +20,10 @@ import Testing
 /// `Tools/pins-belt-check`. Record: notes/plans/fixes/vx-781-lockfile-pins.md.
 @Suite("VX-781 — the pin belt: every resolved package is declared EXACT where its graph's root reads it (no network)")
 struct PinBeltTests {
-    struct Pin: Equatable, CustomStringConvertible {
+    /// Deliberately NOT Equatable: a synthesized `==` compares the location verbatim, the trap (3)
+    /// left (VX-853). "The same pin" is (3)'s explicit rule: version and revision exactly, the
+    /// location through `sameLocation`.
+    struct Pin: CustomStringConvertible {
         let location: String
         let version: String
         let revision: String
