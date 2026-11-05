@@ -60,8 +60,8 @@ Decisions were put as question batches; she picked among presented options. Reco
 
 | # | Ticket | What | Batch | Status |
 |---|---|---|---|---|
-| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | BUILT (A1 d6d9ddd4a + A2 a34b51244) — the app-suite run + red-on-old revert + walk PENDING (orchestrator's window); P-828-6 proposed |
-| 2 | VX-655 (L, rider) | list-exit Return: retraction lands inside the flight | A | BUILT (A3 69ad4c1ab) — the app-suite run + red-on-old revert + the checklist-exit walk PENDING (orchestrator's window) |
+| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | VERIFIED 2026-11-05 (suites 281/28 green, red-on-old by revert, walk all legs both voices; pin hygiene 99fd1dd58) — PENDING: clean red re-show of revert 1 (next window) + phone suites at the merge gate |
+| 2 | VX-655 (L, rider) | list-exit Return: retraction lands inside the flight | A | VERIFIED 2026-11-05 (order pin red-on-old by revert 3, checklist walk clean, stale neighbor pin re-pointed 58e655834) |
 | 3 | VX-824 (M) | ⌘digit contextual — wings from the keyboard (RULED: shape a) | B | NOT-STARTED |
 | 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
 | 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | NOT-STARTED |
