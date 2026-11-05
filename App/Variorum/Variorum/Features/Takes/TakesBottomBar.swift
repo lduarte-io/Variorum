@@ -521,7 +521,8 @@ struct TakesBottomBar: View {
             }
             Divider()
             Button(model.projection.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
-                pickedDate = CommitBar.date(fromDay: model.projection.entryDate) ?? Date()
+                pickedDate = CommitBar.pickerSeed(
+                    entryDate: model.projection.entryDate, createdAt: model.postCreatedAt)
                 datePickerShown = true
             }
             Divider()

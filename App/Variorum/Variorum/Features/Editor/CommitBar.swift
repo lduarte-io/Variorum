@@ -902,7 +902,8 @@ struct CommitBar: View {
             }
             Divider()
             Button(model.header?.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
-                pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
+                pickedDate = Self.pickerSeed(
+                    entryDate: model.header?.entryDate, createdAt: model.header?.createdAt)
                 datePickerShown = true
             }
             // 13l post-close, her #77 ruling (2026-08-24): the door renders in
@@ -1042,6 +1043,13 @@ struct CommitBar: View {
     /// nonisolated: the View conformance makes CommitBar MainActor-isolated,
     /// and an isolated static traps when called off-main (the 9c
     /// SignInFlow lesson).
+    /// VX-832: the picker's opening date — the note's date, else its
+    /// CREATION day (`EntryDatePickerDay`, the one rule both bars read), else
+    /// today (no stamp yet). Noon-anchored by `date(fromDay:)`.
+    nonisolated static func pickerSeed(entryDate: String?, createdAt: String?) -> Date {
+        date(fromDay: EntryDatePickerDay.day(entryDate: entryDate, createdAt: createdAt)) ?? Date()
+    }
+
     nonisolated static func date(fromDay day: String?) -> Date? {
         guard let day, JournalDay.isValid(day) else { return nil }
         let parts = day.split(separator: "-").compactMap { Int($0) }
