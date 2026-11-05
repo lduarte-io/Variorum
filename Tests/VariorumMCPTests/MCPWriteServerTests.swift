@@ -347,6 +347,13 @@ struct MCPWriteServerTests {
             // VX-807 (the VX-809 run, batch 2 — justified edit, the ritual): her
             // book's move across wings, refusing at the rung.
             calls.append(("move_book_to_wing", ["book_id": .string(book.id), "wing_id": .string(elsewhere.id)]))
+            // VX-812 (the VX-809 run, batch 3 — justified edit, the ritual): the
+            // list forms, aimed at her note, refuse at the rung item by item (an
+            // all-refused list is an error answer); replace_tag sweeps only the
+            // notes the client may EDIT, so under a suggest grant its sweep is
+            // EMPTY — a success that writes nothing (asserted below, not refused).
+            calls.append(("delete_note", ["note_ids": .array([.string(note.id)])]))
+            calls.append(("replace_tag", ["wing_id": .string(""), "tag": .string("x"), "with": .string("y")]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
@@ -354,7 +361,11 @@ struct MCPWriteServerTests {
             calls.append(("export_note", ["note_id": .string(note.id)]))
             for (name, arguments) in calls {
                 let result = try await call(connection, name, arguments)
-                if let rung = MCPToolCatalog.declaration(named: name)?.rung, rung >= .writeNew {
+                if name == "replace_tag" {
+                    let replaced = try json(result)["replaced_count"] as? Int
+                    #expect(result.isError != true && replaced == 0,
+                            "replace_tag's sweep is empty under a suggest grant: \(text(result))")
+                } else if let rung = MCPToolCatalog.declaration(named: name)?.rung, rung >= .writeNew {
                     #expect(result.isError == true, "\(name) refuses under a suggest grant")
                 }
             }

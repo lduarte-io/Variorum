@@ -328,7 +328,10 @@ struct MCPServerTests {
                     "set_book_order",
                     // VX-807 (the VX-809 run, batch 2 — justified edit, the ritual):
                     // her Move to Wing for a whole book.
-                    "move_book_to_wing"])
+                    "move_book_to_wing",
+                    // VX-812 (the VX-809 run, batch 3 — justified edit, the ritual):
+                    // tag A → tag B across the client's reach in a wing.
+                    "replace_tag"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
