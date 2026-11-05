@@ -1517,6 +1517,29 @@ is only READ).
 | E4 | VX-840 app: the door, the sheet, the words; pins | NOT-STARTED — blocked on E0 |
 | E5 | Self-assessment + the end-of-batch headless suite | NOT-STARTED |
 
+**Owed to a stage window for E1/E2 (named now, so a window can take them before E3/E4 land):**
+- Suites (TYPES): `SpellingDoorTests`, `SettingsTagsWingFollowTests`, plus the registry neighbours
+  `CapabilityRegistryTests`, `ShellChromeTests`, `ShortcutCatalogTests`, `SettingsShapeTests`,
+  `MCPPaneTabsTests` (mounts `AppSettingsView`), `WingSwitcherTests` (constructs `TagsViewModel`).
+- **R-E1** (named before running): in `App/Variorum/Variorum/Registry/SpellingDoor.swift`, `case
+  .checkDocument: #selector(NSText.checkSpelling(_:))` → `#selector(NSTextView.toggleContinuousSpellChecking(_:))`.
+  Expect red: `aCheckStepsToTheNextMisspellingAndTurnsNothingOn` on all five surfaces (the flags move,
+  nothing is selected) and `everyWritingSurfaceAnswersBothActs` (the selector); the declaration and
+  refusal pins green. Uncommitted edit; `git checkout --` restores.
+- **R-E2** (named before running): in `AppSettingsView.swift`, `.task(id: session.wing.currentID) {
+  await tags.start() }` → `.task { await tags.start() }` (the pre-fix line). Expect red:
+  `thePaneFollowsTheAppsWingLive` (the list stays `["alpha"]` after the switch); the other two green.
+- Walk legs (dev store, both voices where a face is voiced): (1) Edit ▸ Spelling and Grammar holds
+  exactly Show Spelling and Grammar ⌘: and Check Document Now ⌘;; (2) Write — a note with two
+  misspellings, Spellchecking Off in Settings ▸ Editor: ⌘; selects the first, ⌘; again the second, no
+  red underlines appear as typing resumes (the level stayed Off); (3) a live Takes pane and the quick
+  entry box: ⌘; selects there; (4) ⌘: shows the panel; its Change corrects the word in Write (the
+  DEBUG identity oracle stands — an ordinary text edit, autocorrect's road); (5) the keyboard on no
+  text (e.g. a Library row) — ⌘; speaks "Spelling checks the text you're writing in — click into a
+  note or a box first."; (6) Settings ▸ Tags open in Home reads "Tags — in Home" (Terminal: "tags —
+  in home"); ⌘L to another wing — the pane re-lists that wing's tags and reads "Tags — in ‹wing›"
+  without reopening; back to Home — Home's again.
+
 #### Batch E — THE DESIGN FORK (E0 — proposed for the orchestrator's ruling BEFORE any of VX-840's act is built)
 
 **Q-E1 — THE SHARED QUERY IS ABSENT FROM THIS TREE (the brief's stop condition, reported).**
