@@ -277,7 +277,9 @@ struct MCPStopRoadsDoorTests {
             bound.binding.lock()
             try bound.binding.adopt(try AppDatabase.onDisk(url: stores[1], key: nil))
             door.attach(session: AppSession(database: db))
-            #expect(closeWordsUntilEOF(fd)
+            // Read OFF the main actor: the door's resume (and its abandon) runs there.
+            let said = await Task.detached { closeWordsUntilEOF(fd) }.value
+            #expect(said
                     == "Variorum's library locked or closed, so it closed this connection \u{2014} reconnect with /mcp once it's open again.",
                     "abandoned with the closing road's close line")
             try await Task.sleep(for: .milliseconds(300))

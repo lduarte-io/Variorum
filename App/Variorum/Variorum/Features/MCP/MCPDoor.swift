@@ -137,6 +137,11 @@ final class MCPDoor {
     @ObservationIgnored private var starting = false
     /// VX-818: a suspended host's resume is in flight off the main thread.
     @ObservationIgnored private var resuming = false
+    /// VX-818: the lock road is taking the library down around a suspended host
+    /// — from its connections step until the next ready's attach no snapshot
+    /// may reconcile (a late one would RESUME the host the lock just suspended,
+    /// and the stop step would then tear it down).
+    @ObservationIgnored private var lockingDown = false
     /// R-13nb-6: an adopted library's OFF write has not landed yet — the
     /// server may not start (row 10).
     @ObservationIgnored private var adoptionLandingPending = false
@@ -358,6 +363,7 @@ final class MCPDoor {
         // its connections alive — it is kept (the first snapshot's reconcile
         // resumes it on this session's runner, or the identity belt abandons it).
         if self.session != nil || host?.state != .suspended { detach() }
+        lockingDown = false
         self.session = session
         database = session.database
         runner = session.runner
@@ -449,6 +455,12 @@ final class MCPDoor {
             await recordLibraryClosing()
             return
         }
+        // The store observation goes FIRST — its snapshots (an Activity line, a
+        // last write landing) would otherwise reconcile mid-teardown and resume
+        // the host this step suspends.
+        lockingDown = true
+        observation?.cancel()
+        observation = nil
         _ = await Task.detached(priority: .userInitiated) { host.suspend() }.value
     }
 
@@ -525,6 +537,8 @@ final class MCPDoor {
 
     /// Start or stop the server to match the toggle.
     private func reconcileServer() {
+        // VX-818: nothing reconciles while the lock road takes the library down.
+        guard !lockingDown else { return }
         // VX-818: a host the lock suspended is resumed first (or abandoned —
         // its identity belt), before the switch is read: its connections were
         // never this snapshot's to stop.
