@@ -12,29 +12,29 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| **VX-781 — the lockfile rewriter** (xcodebuild intermittently rewrites the workspace Package.resolved upward; committed pins not enforced — R-770-T1; her word: early, before the Nov 4 umbrellas; merge queued behind the release mint per nov4coordinator) | VX-781 · `vx-781-lockfile-pins` | `~/dev/variorum-vx-781` · the Pro | OPEN 2026-11-04 — build infra only (no Sync/, no editor seam, no store); surfaces: the Xcode workspace's package pins + Tools build scripts |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-770 CLOSED 2026-11-04 — RUN: TAKES & COMPARE AFTER 1.0 (the record `notes/plans/fixes/vx-770-takes-compare-window.md`,
-FOR A LATER READER at its top; the handoff `notes/handoffs/vx-770-handoff.md`).** Her kickoff's post-1.0 Takes/Compare
-window: thirteen members under one overnight /architect-phase run. The flagship VX-756 (the takes-open mode-switch
-jumping, born with VX-428's stay-open memory) traced to the entry landing's single aim against the seeded fans'
-bimodal height estimate, fixed on the existing road (one re-aim per height change), then DEEPENED by the walk's W2
-finding: margin grid's one-turn-late card heights escape the content-change gate — the bounded red-first cycle
-closed the harness gap (red two independent ways) and the one-Bool fix settles every style in one landing (the
-re-walk 6/6, zero hops; the stay-open behavior kept, R-770-1). The comments family landed to her R-770-2: the boards
-and Compare draw through Write's ONE gutter ladder and face (the carousel's "nothing" resolved to the empty Study
-chip), the feed live (VX-732), the collapse closing fans honestly (VX-733), Compare's width-only lane P-770-3;
-VX-740's double outline deduped (P-770-1); VX-757's flicker was real (row re-keying remade every pane) and died by
-spine keying; the singles: the date sort orders every note (AppSpec §10's new line), the word count's caret-context
-guard, the pager forgets closed pages, "Delete Take". Five Opus batches + a reconciliation + the W2 cycle; the
-ladder closed at round 2 and re-opened scoped for W2 (round 3: no new findings); every bug member red-on-old in
-REAL windows; the merge gate on the merged tree: Mac 5,846/1,019 + phone 18/18 types on COMMITTED pins (the night's
-pin gap closed), the lf-rev red leg 2/2. VX-652 re-owned with its B5-F1 design (not built — her option call).
-Canon: three SurfaceContracts lines + AppSpec §10, in place. Born: VX-781–794 (the pin-upgrade ticket VX-781 High).
-NO release (her word); the /Applications refresh HELD for her (VX-779). PR #217, merge 4be6bd7c5.
+**→ VX-781 CLOSED 2026-11-05 — THE LOCKFILE REWRITER (the record `notes/plans/fixes/vx-781-lockfile-pins.md`,
+FOR A LATER READER at its top; the handoff `notes/handoffs/vx-781-handoff.md`).** Her early-run word (before the
+Nov 4 umbrellas): VX-770's Package.resolved rewrites traced and the committed pins belted. The mechanism: without
+the lockfile the manifests FLOAT (SQLCipher via the GRDB fork's `from: 4.11.0`, swift-dependencies via
+`from: 1.9.0`) to exactly VX-770's upgrade set; a CLEAN committed lockfile seeds the resolver and wins every time
+on Xcode 27.1 (ruled out: cache luck, originHash staleness, reused-DerivedData state); the VX-770 flags never
+failed — their input was already upgraded. What FIRST wrote the upgraded file that night stays unreproduced (a
+second writer; `xcodebuild test` and simulator destinations never sampled) — and the belt makes any such write
+heal or fail closed (E8b). RELEASE-EXPOSURE: NONE — 1.0, 1.0.1 and 1.1 all shipped committed pins (dSYM UUID
+proof). The belt: exact pins in BOTH manifests (15 project-level exactVersion references — E10 measured:
+Package.swift-only pins are PRUNED, the repo package being a local dependency in the workspace), `PinBeltTests`
+hermetic in every `swift test` (red-on-old four ways), `Tools/verify-pins` (the release road's post-build check;
+1.1's GO ran it as a manual condition) and `Tools/pins-belt-check` (the networked from-scratch proof). No
+dependency version moved in the app graph; the CLI graph aligned to what ships (P-781-1). Ladder: two rounds
+(opus-reviewer), 1 MAJOR + 5 MINOR + 11 NIT, all agreed and fixed; the final round's fixes line-by-line checked
+by the orchestrator. Core 3,649/492 green on the merged tree. Born: VX-850 (the MCP socket A/B) · VX-851
+(upgrade-pin helper) · VX-852 (the release.sh hook). PROVISIONALs P-781-1..4 → QUESTIONS #260 (P-781-4 is the
+governance question: is a pin bump author-only). NO release owed (1.1 shipped mid-run, independently). Nothing
+mobile-visible. PR #220, merge af012aa67.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 

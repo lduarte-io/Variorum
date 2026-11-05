@@ -1534,3 +1534,25 @@ so the stop road verified live end to end and the lock road rides her Air check 
 "287 tests in 42 suites passed", 42/42 executed; core 3,637/489 green on the merged tree. Canon: MCPSpec's ten lines
 + AppSpec §9's duplicate-day line; PROVISIONALs #257. Born VX-774–778. Nothing mobile-visible beyond the shared-op
 heal (the duplicate-day rule). NO release (her word). Next: hers — the morning bundle is the handoff's checklist.
+
+
+## VX-770 — the master plan closeout paragraph as it stood until the VX-781 merge (2026-11-05)
+
+**→ VX-770 CLOSED 2026-11-04 — RUN: TAKES & COMPARE AFTER 1.0 (the record `notes/plans/fixes/vx-770-takes-compare-window.md`,
+FOR A LATER READER at its top; the handoff `notes/handoffs/vx-770-handoff.md`).** Her kickoff's post-1.0 Takes/Compare
+window: thirteen members under one overnight /architect-phase run. The flagship VX-756 (the takes-open mode-switch
+jumping, born with VX-428's stay-open memory) traced to the entry landing's single aim against the seeded fans'
+bimodal height estimate, fixed on the existing road (one re-aim per height change), then DEEPENED by the walk's W2
+finding: margin grid's one-turn-late card heights escape the content-change gate — the bounded red-first cycle
+closed the harness gap (red two independent ways) and the one-Bool fix settles every style in one landing (the
+re-walk 6/6, zero hops; the stay-open behavior kept, R-770-1). The comments family landed to her R-770-2: the boards
+and Compare draw through Write's ONE gutter ladder and face (the carousel's "nothing" resolved to the empty Study
+chip), the feed live (VX-732), the collapse closing fans honestly (VX-733), Compare's width-only lane P-770-3;
+VX-740's double outline deduped (P-770-1); VX-757's flicker was real (row re-keying remade every pane) and died by
+spine keying; the singles: the date sort orders every note (AppSpec §10's new line), the word count's caret-context
+guard, the pager forgets closed pages, "Delete Take". Five Opus batches + a reconciliation + the W2 cycle; the
+ladder closed at round 2 and re-opened scoped for W2 (round 3: no new findings); every bug member red-on-old in
+REAL windows; the merge gate on the merged tree: Mac 5,846/1,019 + phone 18/18 types on COMMITTED pins (the night's
+pin gap closed), the lf-rev red leg 2/2. VX-652 re-owned with its B5-F1 design (not built — her option call).
+Canon: three SurfaceContracts lines + AppSpec §10, in place. Born: VX-781–794 (the pin-upgrade ticket VX-781 High).
+NO release (her word); the /Applications refresh HELD for her (VX-779). PR #217, merge 4be6bd7c5.

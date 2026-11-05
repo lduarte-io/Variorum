@@ -1,5 +1,7 @@
 # VX-781 — the Package.resolved rewriter: the mechanism traced, the committed pins belted
 
+**STATUS: CLOSED 2026-11-05** — PR #220, merge af012aa67; ladder closed at round 2; PROVISIONALs → QUESTIONS #260; born VX-850/851/852.
+
 Branch `vx-781-lockfile-pins` (worktree `~/dev/variorum-vx-781`), cut from main at 68b3d9c53.
 Ticket VX-781 (High · Bug · Confirmed · Tests & tooling), born at VX-770's closeout (R-770-T1).
 Implementer: opus-implementer, 2026-11-04 (single-ticket effort; build infrastructure; no Sync/,
