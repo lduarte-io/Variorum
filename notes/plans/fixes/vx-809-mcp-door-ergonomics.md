@@ -154,10 +154,10 @@ One batch = one acceptance unit = one implementer session. Evidence by kind: the
 |---|---|---|
 | B1-0 | Preflight read (record whole · MCPSpec in full · QUESTIONS #258 · SurfaceContracts Doors · VX-771 FOR A LATER READER · SessionResiliencyProtocol) + the code survey + VX-825/826 ticket threads | DONE |
 | B1-1 | FORK F-1 (P-809-1) — the fixed scope sentence + its per-tool placement — PROPOSED below, awaiting A-809-N | PROPOSED |
-| B1-2 | Retire `remove_tag`'s `still_in_books_hidden_count` (red-on-old pin, then the build) | NOT STARTED |
-| B1-3 | Retire `duplicate_note`'s `landed` counted arm ("a book not shared with you") | NOT STARTED |
-| B1-4 | Retire `move_note_to_wing`'s `left_books` hidden arm (today it lists an UNREADABLE book's **id**, name-less) | NOT STARTED |
-| B1-5 | The three tool descriptions to the new shape | NOT STARTED |
+| B1-2 | Retire `remove_tag`'s `still_in_books_hidden_count` (red-on-old pin, then the build) | PIN RED ON OLD (`MCPReachPureAnswersServerTests`, two pins: the two stores' answers differ by the count / the key's presence) — build next |
+| B1-3 | Retire `duplicate_note`'s `landed` counted arm ("a book not shared with you") | PIN RED ON OLD (two pins: wing road with a Private collecting book, book road with an unshared collecting book) — build next |
+| B1-4 | Retire `move_note_to_wing`'s `left_books` hidden arm (today it lists an UNREADABLE book's **id**, name-less) | PIN RED ON OLD (the hidden store's answer carried `{"book_id":"F0000000-…"}`) — build next |
+| B1-5 | The three tool descriptions to the new shape | PIN RED ON OLD (`theThreeDescriptionsSayTheScopeWordsAndNoCount`) — build next |
 | B1-6 | Name guard verify (VX-259 / VX-363 / create_gathering) — standing pins named + two-store arms | NOT STARTED |
 | B1-7 | FORK F-2 (P-809-2) — the ownership refusals: every wire act that hears them, 2–3 shapes + leak analysis — PROPOSED below; **NOT BUILT until A-809-4** | PROPOSED |
 | B1-8 | THE TWO-STORE CATALOG PIN — harness + the walk + the catalog table | NOT STARTED |
