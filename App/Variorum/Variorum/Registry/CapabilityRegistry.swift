@@ -2603,6 +2603,16 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "Tags are deleted from Settings \u{25B8} Tags.",
             availability: always),
+        // VX-840 (the VX-828 run, batch E): the sweep — `.deleteTag`'s home and
+        // shape, one door: the pane's foot, drawn only while the wing holds an
+        // unused tag (its label the count — batch D's ruling 6, P-2). The note
+        // is the act's own refusal, spoken when a race left nothing to take.
+        Capability(
+            id: .deleteUnusedTags, verb: TagManagerCopy.sweepVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: TagManagerCopy.nothingLeftToDelete,
+            availability: always),
 
         // MARK: The MCP door (13n-b U1 — Settings ▸ MCP, R-13n-4/5, R-13nb-5)
         // The Diagnostics shape: `.surface`, app scope, always available as

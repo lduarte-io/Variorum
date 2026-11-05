@@ -98,6 +98,45 @@ final class TagsViewModel {
         await run { ops in try ops.deleteTag(id) }
     }
 
+    // MARK: - VX-840 — the unused-tags sweep (the VX-828 run, batch E)
+
+    /// **The shown wing's UNUSED tags, live** — every tag of the wing vx-809's
+    /// brain calls unworn (`Queries.unusedTags`; a Trash-held wearer keeps a
+    /// tag in use, P-828-3), path order. Settings ▸ Tags' door counts it and
+    /// its sheet lists it. Held only while the pane is up (its own keyed task);
+    /// the observation's region never wakes on a keystroke (P1).
+    private(set) var unused: [Tag] = []
+
+    /// Runs while the pane shows, keyed on the wing like `start()` — the wing
+    /// is read once, so the host restarts it on a switch.
+    func startUnused() async {
+        let wingID = session.wing.currentID
+        do {
+            for try await value in session.database.observeUnusedTags(wingID: wingID) {
+                if value != unused { unused = value }
+            }
+        } catch is CancellationError {
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    /// **The sweep's act** — `Operations.deleteUnusedTags` (ONE write, ONE
+    /// stamp, ONE "Delete Unused Tags" entry; confirmed ∩ still-unused inside
+    /// the write). Answers how many tags went — 0 when a race left nothing to
+    /// take (nothing was written) — or nil when the act threw (`lastError`
+    /// holds the operations layer's words). The pane speaks the outcome.
+    func deleteUnusedTags(_ ids: [String]) async -> Int? {
+        do {
+            let taken = try await session.runner.run { ops in try ops.deleteUnusedTags(ids) }
+            lastError = nil
+            return taken.count
+        } catch {
+            lastError = Self.message(error)
+            return nil
+        }
+    }
+
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
         do {
             try await session.runner.run(body)

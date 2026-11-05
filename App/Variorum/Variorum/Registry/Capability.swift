@@ -1059,6 +1059,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// VX-238 holds the missing restore road). Deliberately NOT `.palette`:
     /// a taxonomy delete is decided where the taxonomy is shown.
     case deleteTag
+    /// VX-840 (the VX-828 run, batch E — her ask: *"delete every tag that's
+    /// not on a note currently"*): Settings ▸ Tags' sweep — every tag of the
+    /// wing nothing wears, listed checked, the checked ones deleted in ONE
+    /// confirmed act with ONE ⌥⌘Z entry (the fork's ruling, the vx-828
+    /// record). `.surface`, `.deleteTag`'s home; drawn only while the wing has
+    /// an unused tag (P-2), its label carrying the count.
+    case deleteUnusedTags
     /// 13n-b U1 — SETTINGS ▸ MCP's acts (R-13n-4/5; R-13nb-5), `.surface`
     /// on the Data Safety / Diagnostics precedent: each acts on the row she
     /// is looking at (a connection request, a client, a grant) or the pane's
