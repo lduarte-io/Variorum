@@ -8,7 +8,11 @@
 #             --stop-before-appcast     (everything but the one step that reads HER Keychain)
 #
 # THE ORDER (each step refuses to continue on any failure):
-#   0. preflight   clean tree (a release is ONE commit's build) · ZERO Variorum instances (pgrep, by PATH)
+#   0. preflight   release mode: the PROJECT already reads the version — the Mac target's Debug and Release
+#                  MARKETING_VERSION = --version (VX-779, version-guard.sh's one check: R-13r-6's bump
+#                  commit comes first, so a plain build from main wears the release's number; step 1's
+#                  override alone once hid five skipped bumps) · clean tree (a release is ONE commit's
+#                  build) · ZERO Variorum instances (pgrep, by PATH)
 #                  · the Sparkle tools verified by digest · the notary credential answers · this host may
 #                  script Finder (the DMG window's layout — U3-A) · the version's RELEASE NOTES exist
 #                  (U3-A: release mode REFUSES without them; a walk build may lack them) and carry NO
@@ -55,6 +59,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "${HERE}/../.." && pwd)"
 source "${HERE}/notes-guard.sh"   # VX-708: notes_carry_process_text — the one public-copy shape
+source "${HERE}/version-guard.sh" # VX-779: mac_marketing_version_mismatch — the project tracks the release
 RELEASES="${VARIORUM_RELEASES_DIR:-${HOME}/Library/Developer/Variorum/Releases}"
 NOTARY_PROFILE="VariorumNotary"
 DMG_HOST_PREFIX="https://dl.stargazing.tech/variorum/"
@@ -85,6 +90,13 @@ if [ "$MODE" = walk ]; then
   [[ "$VERSION" =~ ^0\.0\.[0-9]+$ ]] || refuse "a WALK build's version is 0.0.N, so no walk artifact can ever wear a release number (got ${VERSION})"
 else
   [[ "$VERSION" =~ ^0\.0(\.|$) ]] && refuse "0.0.x is the WALK range; pass --walk, or choose a release number"
+  # VX-779: the project's own MARKETING_VERSION must already BE the release's (R-13r-6's bump commit
+  # first). Step 1's override stamps the shipped bundle regardless, which is exactly how 0.10.5 through
+  # 1.0.1 shipped with the project still at 0.10.4. Read from the project file alone — no xcodebuild.
+  if VERSION_MISMATCH="$(mac_marketing_version_mismatch "${REPO}/App/Variorum/Variorum.xcodeproj/project.pbxproj" "$VERSION")"; then
+    refuse "${VERSION_MISMATCH} — set MARKETING_VERSION = ${VERSION} on the Variorum target's Debug and Release configurations and commit it with the release notes (VX-779)"
+  fi
+  say "the project's Mac target reads MARKETING_VERSION = ${VERSION} (Debug and Release)"
 fi
 DIRTY="$(git -C "$REPO" status --porcelain | wc -l | tr -d ' ')"
 [ "$DIRTY" = "0" ] || refuse "the working tree has ${DIRTY} uncommitted change(s): a ${MODE} build is ONE commit's build (commit first)"
