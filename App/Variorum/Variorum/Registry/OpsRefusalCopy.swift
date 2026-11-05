@@ -453,6 +453,15 @@ nonisolated extension OpsRefusalCopy {
     /// The Mac's OWN sentences — each names a Mac chord or surface, or
     /// speaks the Mac's pick vocabulary, so none may live in the shared file.
     static func macWords(for error: Error) -> String? {
+        // VX-807 (the VX-809 run, batch 2 — A-809-14): an AI's book move's undo
+        // or redo found the move partly aged — it refuses WHOLE and keeps the
+        // entry; said with the way through. Mac-local: "Move to Wing" is the
+        // Mac's door. (The act's own refusals are the wire's, never hers.)
+        if case Operations.MCPBookMoveRefusal.changedSince? = error as? Operations.MCPBookMoveRefusal {
+            return "That book or one of its notes changed in its wing since then, so moving it back now "
+                + "would split them across wings \u{2014} put those changes back, or use "
+                + "\(WingCopy.moveToWingVerb), then try again."
+        }
         guard let error = error as? OperationError else { return nil }
         switch error {
         // 13j batch 6b (J1): the purge op's refusal for a deliberate

@@ -565,6 +565,11 @@ nonisolated enum MCPPaneCopy {
         // false) and a coarse log that keeps no direction, so the line says the
         // act without it (PROVISIONAL words, her copy pass — VX-234).
         case "set_starred": return "changing the star on \(at)"
+        // VX-813 / VX-807 (the VX-809 run, batch 2 — PROVISIONAL words, her
+        // copy pass): a book's order; a whole book's move, TWO-SIDED (UXR1-1)
+        // — the book at edit, the destination wing at write new.
+        case "set_book_order": return "setting the order of \(at)"
+        case "move_book_to_wing": return kind == "wing" ? "moving a book to \(at)" : "moving \(at) to another wing"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -700,6 +705,10 @@ nonisolated enum MCPPaneCopy {
         // VX-596 — her star on the wire, either way (the log keeps no
         // direction; the receipt says which — PROVISIONAL words, VX-234).
         case "set_starred": return "changed the star on \(at)" + times
+        // VX-813 / VX-807 (the VX-809 run, batch 2 — PROVISIONAL words): a
+        // book's order; a whole book moved (logged on the BOOK).
+        case "set_book_order": return "set the order of \(at)" + times
+        case "move_book_to_wing": return n == 1 ? "moved \(at) to another wing" : "moved \(at) between wings" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1797,6 +1806,20 @@ nonisolated enum MCPReceiptCopy {
         // `.book`'s line in a gathering's words (PROVISIONAL, her copy pass).
         case .gathering:
             return n == 1 ? "made the gathering \(quoted(receipts[0].targetTitle))" : "made \(n) gatherings"
+        // VX-813 (the VX-809 run, batch 2) — a book's (or a gathering's) order
+        // set on the wire (PROVISIONAL words, her copy pass).
+        case .bookSort:
+            return n == 1 ? "set the order of \(quoted(receipts[0].targetTitle))" : "set the order of \(n) books"
+        case .gatheringSort:
+            return n == 1 ? "set the order of \(quoted(receipts[0].targetTitle))" : "set the order of \(n) gatherings"
+        // VX-807 — a whole book moved to another wing, keyed on the DESTINATION
+        // (the note move's coalescing key) and said as her door's receipt says
+        // it (`WingCopy.bookMoved` — her count, every note; PROVISIONAL words).
+        case .bookWingMove:
+            guard n == 1 else { return "moved \(n) books to \(wingWords(receipts[0]))" }
+            let notes = receipts[0].count
+            return "moved the book \(quoted(receipts[0].detail)) to \(wingWords(receipts[0]))"
+                + (notes == 0 ? "" : " with its \(notes) note\(notes == 1 ? "" : "s")")
         }
     }
 

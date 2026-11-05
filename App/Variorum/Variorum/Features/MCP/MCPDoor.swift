@@ -499,7 +499,11 @@ final class MCPDoor {
             wingMoveFrozenWords: Self.wingMoveFrozenWords,
             // VX-275 (her ruling (a)): her typing lands before a wire act
             // meets the take she may be typing in — `MCPDoor+HerEditor`.
-            beforeWrite: { [weak self] _ in await self?.flushHerEditorBeforeWrite() })
+            beforeWrite: { [weak self] _ in await self?.flushHerEditorBeforeWrite() },
+            // VX-807 (the VX-809 run, batch 2): her Move to Wing door's own
+            // sentence for a BOOK whose note a finished or sealed book holds
+            // (the server speaks it where the client can read both).
+            bookMoveFrozenWords: Self.bookMoveFrozenWords)
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —
@@ -1026,6 +1030,13 @@ final class MCPDoor {
     /// or sealed book: HER door's sentence (`WingCopy.frozen`), ONE source.
     nonisolated static let wingMoveFrozenWords: @Sendable (String, String) -> String = {
         WingCopy.frozen($0, book: $1)
+    }
+
+    /// VX-807 — `move_book_to_wing`'s refusal for a book whose note a finished or
+    /// sealed book that stays behind holds: HER door's sentence
+    /// (`WingCopy.bookFrozen`), ONE source.
+    nonisolated static let bookMoveFrozenWords: @Sendable (String, String, String) -> String = { book, note, frozen in
+        WingCopy.bookFrozen(book, because: Queries.AlsoLeaves(noteID: "", note: note, book: frozen))
     }
 
     // MARK: - Navigation (U4 — R-13nb-23, AF-11 F-2/F-3)
