@@ -871,8 +871,10 @@ nonisolated enum RecoveryCopy {
 
     /// Nothing the confirm counted still qualified at act time (put back,
     /// purged or changed in the pause) — the door did nothing, so it says so.
+    /// "Still qualify", never "not in the Trash any more": a block can sit in
+    /// the Trash and merely no longer qualify (VX-871, her reword).
     static let deleteEmptyBlocksNothingLeft =
-        "None of those empty blocks are in the \(trashSection) any more — nothing was deleted."
+        "None of those blocks still qualify — nothing was deleted."
 
     static func capitalizedFirst(_ text: String) -> String {
         text.prefix(1).uppercased() + text.dropFirst()
