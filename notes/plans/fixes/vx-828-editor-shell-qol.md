@@ -60,7 +60,7 @@ Decisions were put as question batches; she picked among presented options. Reco
 
 | # | Ticket | What | Batch | Status |
 |---|---|---|---|---|
-| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | NOT-STARTED |
+| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | IN-PROGRESS — core piece DONE (see batch A LIVE STATUS); the Return planner + dispatch + app pins remain |
 | 2 | VX-655 (L, rider) | list-exit Return: retraction lands inside the flight | A | NOT-STARTED |
 | 3 | VX-824 (M) | ⌘digit contextual — wings from the keyboard (RULED: shape a) | B | NOT-STARTED |
 | 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
@@ -168,6 +168,19 @@ STOP and report to the orchestrator before building — do not land an unpinned 
 orchestrator's hands-on walk (chip on: mid-word Return in several positions, a one-word block, the
 opening-quote case, a checklist exit) rides the run's walk window before the batch's record closes.
 **This batch touches `App/Variorum/Shared/` ⇒ the merge-gate window adds the phone suites.**
+
+#### Batch A — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
+
+**Not done by this batch (by the brief):** NO `xcodebuild test`, NO Debug launch, NO walk (all
+stage-gated — the orchestrator's window); app-target pins are compiled (`build-for-testing`) and
+their red-on-old is BY CONSTRUCTION, each named below for the orchestrator's behavioral revert.
+
+| Piece | What | Status |
+|---|---|---|
+| A1 | VX-806 core: `BoundarySnapping.wordStart(enclosing:in:)` — the floor of the one legal-cut set for a caret strictly inside a word (never `settle`) + 6 core pins in `BoundarySnappingTests` | DONE (this commit) — `swift test --filter BoundarySnappingTests` 43/43 green headless |
+| A2 | VX-806 app: `TypedReturn.act`'s mid-word arm (word start → divide there; blank prefix → the start arm) + the planner's exact-cut entry + the controller dispatch + pins (`TypedReturnTests`, `StructuralGesturePlannerTests`, `ReturnKeyTraceTests`) | NOT-STARTED |
+| A3 | VX-655: the list-exit retraction moves INTO the flight (a store write inside `insertEmptyBlock`'s op body, landed on the surface by the divide seam in the landing turn) + the order pin + the #94 undo-shape guard | NOT-STARTED |
+| A4 | Self-assessment + the record's closing sections | NOT-STARTED |
 
 ### Batch D — the Trash: VX-800 + VX-636
 
