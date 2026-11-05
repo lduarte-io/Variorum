@@ -1,7 +1,7 @@
 #!/bin/bash
 # pins-belt-check — the networked proof of VX-781's belt: does a pin-FREE resolution still land the committed set?
 #
-#   Tools/pins-belt-check [--keep] [<git-rev>]      (default HEAD)
+#   Tools/pins-belt-check [--keep] [<git-rev>]      (default HEAD; options in any order; --help)
 #
 # Exports <rev>'s tree (git archive, no git metadata) into a gitignored work dir, DELETES both of its
 # lockfiles, and resolves from scratch. That is exactly what any resolution does that runs without the
@@ -22,9 +22,17 @@
 set -uo pipefail
 
 KEEP=""
-if [ "${1:-}" = "--keep" ]; then KEEP=1; shift; fi
+REV=""
+for arg in "$@"; do
+  case "$arg" in
+    --keep) KEEP=1 ;;
+    -h|--help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "pins-belt-check: unknown option $arg (see --help)" >&2; exit 2 ;;
+    *) [ -z "$REV" ] || { echo "pins-belt-check: one revision only (got $REV and $arg)" >&2; exit 2; }; REV="$arg" ;;
+  esac
+done
+REV="${REV:-HEAD}"
 REPO="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" || exit 2
-REV="${1:-HEAD}"
 SHA="$(git -C "$REPO" rev-parse --short=9 "$REV^{commit}")" || { echo "pins-belt-check: no commit $REV" >&2; exit 2; }
 BASE="$REPO/App/Variorum/DerivedData/pins-belt-check.noindex"
 WORK="$BASE/$SHA-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -59,8 +67,13 @@ swift package --package-path "$WORK/tree" --scratch-path "$WORK/cli" --cache-pat
   || { echo "pins-belt-check: swift package resolve FAILED — $WORK/cli-resolve.log" >&2; exit 2; }
 
 status=0
-"$VERIFY" --ref "$SHA" "$WORK/spm/workspace-state.json" || status=1
-"$VERIFY" --ref "$SHA" --cli "$WORK/cli/workspace-state.json" || status=1
+for args in "" "--cli"; do
+  # shellcheck disable=SC2086
+  "$VERIFY" --ref "$SHA" $args "$WORK/$([ -z "$args" ] && echo spm || echo cli)/workspace-state.json"
+  rc=$?
+  [ "$rc" = 2 ] && { echo "pins-belt-check: verify-pins could not read a resolved state (exit 2) — a setup error, not a verdict" >&2; exit 2; }
+  [ "$rc" = 0 ] || status=1
+done
 if [ "$status" = 0 ]; then
   echo "pins-belt-check: BELT HOLDS at $SHA — a pin-free resolution lands the committed set in both graphs"
 else
