@@ -50,15 +50,15 @@ open it. Everything else is a convenience.**
    screen: the first open is the Bookcase and the quick entry with nothing in front of them. They are shown when the
    user asks for them, from the card the app keeps above the quick entry until it is dismissed (*your library is
    encrypted — click here to record the twelve words that are its key*; dismissing it says where to find them in
-   Settings) or at the tutorial's last card. Nothing stores the words, so the first look mints the words the user
+   Settings) or at the tutorial's closing cards. Nothing stores the words, so the first look mints the words the user
    records (rule 6's act — the key unchanged); the card says "write these down now" and warns before it closes that
    they will not be shown again. Until they are recorded, this Mac's quiet roads (rule 8) are the library's only
    opener here, which is why the card stays. Once the library syncs, its pair is the account's (rule 7), so the card
    retires at a landed set-up, join or move: a look there would mint fresh words and replace the account's; fresh
    words live behind the deliberate new-words door. They open the library for as long as they are its words. There is
    no such thing as a library with no secret.
-3. **Every library is asked for a passphrase.** The tutorial's last card asks, and shows the twelve words beside the
-   ask (rule 2). Until a passphrase exists, the app says so now and then — in the same card above the quick entry that
+3. **Every library is asked for a passphrase.** The tutorial's closing cards ask — the passphrase card, then the words
+   card (rule 2). Until a passphrase exists, the app says so now and then — in the same card above the quick entry that
    offers the words, the one home for both asks; never a second bar, never a popup — ("your library is only secured
    through iCloud Keychain right now — please add a passphrase and keep your twelve words to ensure continued access"):
    at the third launch, then weekly twice, then with a "don't show again"; and always right before the first backup and

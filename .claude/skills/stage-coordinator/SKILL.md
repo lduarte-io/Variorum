@@ -226,5 +226,6 @@ When every session is silent: `Tools/ambient off`, release your hold, delete any
 6. Process notes.
 
 Commit it on a branch from a separate worktree (never switch `~/dev/variorum` off
-main), push, open a PR titled `Coordinator handoff <date>`, and give her the path. Mark
-your memory file CLOSED.
+main), push, open a PR titled `Coordinator handoff <date>`, **merge the PR yourself**
+(merge commit — her word 2026-11-04: she doesn't edit handoffs pre-merge, so don't
+leave it open for her), and give her the path. Mark your memory file CLOSED.
