@@ -20,11 +20,14 @@ import Testing
 /// `Tools/pins-belt-check`. Record: notes/plans/fixes/vx-781-lockfile-pins.md.
 @Suite("VX-781 — the pin belt: every resolved package is declared EXACT where its graph's root reads it (no network)")
 struct PinBeltTests {
-    struct Pin: Equatable, CustomStringConvertible {
+    /// Deliberately NOT Equatable: a synthesized `==` compares the location verbatim, the trap (3)
+    /// left (VX-853). "The same pin" is (3)'s explicit rule: version and revision exactly, the
+    /// location through `sameLocation`.
+    struct Pin: CustomStringConvertible {
         let location: String
         let version: String
         let revision: String
-        var description: String { "\(version) (\(revision.prefix(7)))" }
+        var description: String { "\(version) (\(revision.prefix(7))) at \(location)" }
     }
 
     static let repo = URL(fileURLWithPath: #filePath)
@@ -187,7 +190,12 @@ struct PinBeltTests {
         var problems: [String] = []
         for (identity, pin) in appPins.sorted(by: { $0.key < $1.key }) where !projectOnly.contains(identity) {
             if let r = rootPins[identity] {
-                if r != pin { problems.append("\(identity): root \(r) ≠ workspace \(pin)") }
+                // Version and revision exactly; the location as (1) and (2) compare it — the same
+                // repository, either spelling (a `.git` or case flip is bookkeeping, VX-853).
+                if r.version != pin.version || r.revision != pin.revision
+                    || !Self.sameLocation(r.location, pin.location) {
+                    problems.append("\(identity): root \(r) ≠ workspace \(pin)")
+                }
             } else {
                 problems.append("\(identity): in the workspace lockfile (\(pin)) but not the root one")
             }

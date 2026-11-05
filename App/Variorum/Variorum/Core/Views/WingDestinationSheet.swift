@@ -306,12 +306,6 @@ extension WingDestinationModel {
                     for: OperationError.readingNotFound(id: readingID)))
                 return nil
             }
-            if Queries.isDailyJournalMintShape(reading) {
-                // The op's own words (`bookMoveAsk`'s arm for a stale face).
-                session.status.refuse(OpsRefusalCopy.message(
-                    for: OperationError.dailyJournalIsHomeOnly(id: readingID)))
-                return nil
-            }
             guard WingBookMoveDoor.drawn(
                 reading: reading, destinations: wings.destinations(from: reading.wingId).count)
             else {

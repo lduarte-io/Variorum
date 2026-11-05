@@ -18,8 +18,8 @@
 //  P-17y-B3-l1): Open · Star/Unstar · Book/Gathering Settings… · Export
 //  Markdown… · Export PDF… · Archive (or Unarchive) · Delete Book… — or
 //  Delete Gathering… on a gathering, the one capability's verb chosen by the
-//  kind (VX-611, `BookStateCopy.deleteDoorLabel`) — (never on
-//  the daily Journal — `BookArchiveDoorSet`, the op's own guard). The
+//  kind (VX-611, `BookStateCopy.deleteDoorLabel`) — (the daily Journal
+//  too since VX-436 — `BookArchiveDoorSet`). The
 //  Bookcase menu's POSITIONAL doors drop (Move to Shelf ▸, Send to Top /
 //  Bottom — position means nothing off the Bookcase), and so do the
 //  Bookcase-local ceremonies whose home is the board or the book (Move to

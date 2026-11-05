@@ -119,7 +119,7 @@ extension Operations {
     /// its live applications (the note's own + its PLACED blocks' — exactly
     /// the rows her `relocateNote` re-points) and its live versions' stored
     /// wings.
-    private func wingMoveState(_ db: Database, postID: String) throws -> (
+    func wingMoveState(_ db: Database, postID: String) throws -> (
         memberships: Set<String>, applications: [WingMoveApplication], versionWings: [String: String]
     ) {
         let memberships = Set(try wingMoveMemberships(db, postID: postID).map(\.row.id))
@@ -330,7 +330,7 @@ extension Operations {
     /// only while its tag is live, its target is still this note (or a block
     /// still placed in it), and no live twin holds the pair (the live-unique
     /// index). A row that diverged stays as it is (quiet).
-    private func reviveWingMoveApplication(
+    func reviveWingMoveApplication(
         _ db: Database, _ application: WingMoveApplication, postID: String, stamp: String
     ) throws {
         let (column, targetJoin): (String, String) = application.table == "post_tag"
@@ -359,7 +359,7 @@ extension Operations {
 
     /// Revive one membership row the move (or a redo) severed on `stamp`, under
     /// the revival rules `restoreContainer` reads (see the inverse's doc).
-    private func reviveWingMoveMembership(
+    func reviveWingMoveMembership(
         _ db: Database, _ rowID: String, note: Container, stamp: String
     ) throws {
         guard var row = try ReadingPost.fetchOne(
@@ -376,7 +376,7 @@ extension Operations {
 
     /// The note's saved versions re-homed — each only while still live and
     /// still standing in its `from` wing (a version re-homed since stays put).
-    private func rehomeVersions(
+    func rehomeVersions(
         _ db: Database, _ moves: [(id: String, from: String, to: String)], now: Date
     ) throws {
         for move in moves.sorted(by: { $0.id < $1.id }) {

@@ -1952,7 +1952,7 @@ nonisolated enum CapabilityRegistry {
         // sheet (`.surface` — an archived book is never on the Bookcase).
         // `always` for `.editRule`'s reason (every renderer carries its
         // book); WHICH renders is DATA — `BookArchiveDoorSet` (archived ⇒
-        // Unarchive, else Archive; the daily Journal never offers Delete).
+        // Unarchive, else Archive; Delete beside either — VX-436).
         // The archive acts' own refusals (already archived / not archived)
         // are the operations', spoken through the shared table.
         Capability(
@@ -2328,12 +2328,12 @@ nonisolated enum CapabilityRegistry {
             availability: noteWingDoor),
         // 13i-d U5b — the book-move half (R-13id-6 item 9). The book door
         // carries its row (the note doors' `.native` precedent) and renders
-        // only while another wing exists and never on the daily Journal
-        // (`WingBookMoveDoor.drawn` — DATA, P-2); the bulk door carries the
+        // only while another wing exists — the daily Journal included since
+        // VX-435 (`WingBookMoveDoor.drawn` — DATA, P-2); the bulk door carries the
         // current wing and renders only on an ADDITIONAL one.
         // VX-377: + `.palette` on the FOCUSED book (or gathering) — the
         // target-less door's gate is a pane showing a book and another wing;
-        // the per-target half (never the daily Journal) is the row door's own
+        // the per-target half is the row door's own
         // `WingBookMoveDoor.drawn`, which ⌘K's listing reads too.
         // VX-632: + `.menuBar` — the SAME View-menu item as the note's Move
         // ("Move to Wing…", ⌥⌘L), which runs THIS act on a book pane
@@ -2428,6 +2428,33 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2325}\u{2318}S", takesAccess: .native,
             unavailableNote: "Export Note writes the note you have open to a file \u{2014} open one first.",
             availability: noteScoped),
+        // VX-587 (the VX-805 run; R-805-3, her pick "chord + menu act"):
+        // "Shift date a day earlier" — a dated note's `entry_date` one day
+        // back, the receipt naming the new date (`EntryDateShift`, the ONE
+        // act). Doors: both `note ▾` menus (`.bottomBar` — R6-2, drawn on a
+        // dated note: the row carries its own note and reads its date) and
+        // ⌘K (`.palette`, LISTED only while the mounted note has a date), and
+        // File ▸ with ⌥⌘J (`.menuBar` — the ruled chord, below). Gate: a
+        // detail is mounted and its note has a
+        // date (`noteHasEntryDate` — the `.compareWithLatestVersion` shape).
+        //
+        // **⌥⌘J — THE COLLISION SWEEP (the run record's VX-587 proposal, on
+        // `b616f4fd9`; RULED option 1, `cde42a9d4`).** The ⌥ "deliberate
+        // variant" of ⌘J (Today's Entry), the ⌥⌘Z / ⌥⌘N / ⌥⌘S idiom: ⌘J opens
+        // the day's entry, ⌥⌘J dates the note a day earlier — her late-night
+        // backfill pair. FREE: `EditorCommands.keyEquivalent`'s only `j` chord
+        // is ⌘J; no `.keyboardShortcut(` site in `Variorum/` or `Shared/`
+        // carries another; `EditorTextView.performKeyEquivalent` matches bare
+        // ⌘S/⌘Z only; no key monitor reads `j`; the system hot key is ⌃⌥⌘N;
+        // macOS reserves no ⌥⌘J; the parallel branches (vx-828, vx-809, re-swept
+        // at the wiring) add none. Its menu door is File's note group, grey by
+        // this gate (no mounted dated note).
+        Capability(
+            id: .shiftEntryDateEarlier, verb: EntryDateShiftCopy.verb, scope: .post,
+            doors: [.menuBar, .bottomBar, .palette],
+            shortcutLabel: "\u{2325}\u{2318}J", takesAccess: .native,
+            unavailableNote: EntryDateShiftCopy.unavailableNote,
+            availability: { ctx in ctx.mode != nil && ctx.noteHasEntryDate ? .act : .unavailable }),
         Capability(
             id: .exportLibrary, verb: "Export Library…", scope: .app,
             doors: [.menuBar, .palette],
@@ -2806,6 +2833,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "A client's ask to show you something is dismissed from its line at the bottom "
                 + "of the window.",
+            availability: always),
+        // VX-679 (the VX-809 run, batch 5 — her R-679) — the sidebar section's
+        // two row doors: each row carries its request, so `always` is honest;
+        // they render only while a row exists (P-2 — an empty trail draws no
+        // section at all). PROVISIONAL words (P-809-14).
+        Capability(
+            id: .mcpOpenTrailPlace, verb: MCPTrailCopy.openVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .mcpShowTrailDetails, verb: MCPTrailCopy.detailsVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
             availability: always),
         Capability(
             id: .mcpOpenAsk, verb: "Answer\u{2026}", scope: .app,

@@ -216,15 +216,23 @@ extension Operations {
     /// finding 2026-07-05).
     public func setReadingSort(_ id: String, field: SortField, direction: SortDirection) throws {
         try database.write { db in
-            var reading = try liveReading(db, id)
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: id)
-            }
-            reading.sortField = field
-            reading.sortDir = direction
-            reading.updatedAt = date.now
-            try reading.update(db)
+            try writeReadingSort(db, id, field: field, direction: direction)
         }
+    }
+
+    /// `setReadingSort`'s row work inside a caller's transaction (VX-813 —
+    /// the VX-809 run, batch 2: the MCP door's `set_book_order` and the
+    /// `order` options of `create_book` / `set_book_rule` run HER body, moved
+    /// here verbatim; her door's behaviour byte-identical).
+    func writeReadingSort(_ db: Database, _ id: String, field: SortField, direction: SortDirection) throws {
+        var reading = try liveReading(db, id)
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: id)
+        }
+        reading.sortField = field
+        reading.sortDir = direction
+        reading.updatedAt = date.now
+        try reading.update(db)
     }
 
     /// The ONE rule write (the choke point every face routes through). On a
@@ -389,11 +397,12 @@ extension Operations {
     /// notes are released by the cascade and land in the Pool ("nothing of
     /// hers destroyed"); a plain book's delete never touches a note.
     ///
-    /// **13i-e — THE DAILY JOURNAL CAN BE ARCHIVED, NEVER DELETED** (the
-    /// sitting record §10, on the ⌘J ground): a book wearing the 'daily'
-    /// marker refuses `dailyJournalCannotBeDeleted`, read from the row INSIDE
-    /// this transaction (a caller-side check would read a stale projection).
-    /// The road is `archiveReading` — it returns when a day arrives.
+    /// **THE DAILY JOURNAL DELETES LIKE ANY BOOK** (VX-436 — the VX-805 run;
+    /// 13i-e's `dailyJournalCannotBeDeleted` guard retired): its tombstone
+    /// carries the DELETED-JOURNAL mark (`tombstoneReadingRow`), and the next
+    /// ⌘J mints a fresh Journal in the wing she stands in — no backfill: a
+    /// pair decided with the old book stays decided. The MCP door keeps its
+    /// own refusal (R-805-5 — `refuseDeletingTheDailyJournalOnTheWire`).
     public func deleteReading(_ id: String) throws {
         try database.write { db in
             _ = try deleteReadingRow(db, id)
@@ -401,28 +410,34 @@ extension Operations {
     }
 
     /// `deleteReading`'s row work inside a caller's transaction (VX-184 U5 —
-    /// `delete_book`, and its undo's redo). Byte-identical behaviour, the
-    /// daily Journal's guard included. Returns the tombstone's stamp (the
+    /// `delete_book`, and its undo's redo). Returns the tombstone's stamp (the
     /// one the cascade stamps the chapters and memberships with).
     @discardableResult
     func deleteReadingRow(_ db: Database, _ id: String) throws -> Date {
         var reading = try liveReading(db, id)
-        try refuseDeletingTheDailyJournal(reading)
         let now = date.now
-        reading.deletedAt = now
-        reading.updatedAt = now
-        try reading.update(db)
+        try tombstoneReadingRow(db, &reading, now: now)
         return now
     }
 
-    /// THE GUARD, one line for both delete doors (13i-e): keyed on the
-    /// marker (`isDailyJournalMintShape` — kind book + profile 'daily'),
-    /// never the name or the cached setting. Two marker-bearers meeting
-    /// mid-convergence both refuse; the keeper repair's apply-mode tombstone
-    /// is not an operation and is untouched.
-    private func refuseDeletingTheDailyJournal(_ reading: Reading) throws {
-        guard Queries.isDailyJournalMintShape(reading) else { return }
-        throw OperationError.dailyJournalCannotBeDeleted(id: reading.id)
+    /// **THE ONE READING TOMBSTONE of her delete doors** (VX-436 — the VX-805
+    /// run's ruled option A): `deleted_at` and `updated_at` := `now`, and a
+    /// book wearing the daily marker (`isDailyJournalMintShape`) trades
+    /// `'daily'` for the DELETED-JOURNAL mark
+    /// (`Queries.dailyJournalDeletedProfile`) IN THE SAME ROW WRITE — so on
+    /// every device her deliberate delete reads as an ordinary delete and
+    /// never as the keeper repair's retirement (whose apply-mode tombstone
+    /// keeps wearing `'daily'`, untouched; SyncSpec §7): the dead book's
+    /// entries never migrate into a re-minted Journal. Shared by
+    /// `deleteReadingRow`, `deleteReadingWithNotes` and the folder import's
+    /// undo (`revertImportedBook`).
+    func tombstoneReadingRow(_ db: Database, _ reading: inout Reading, now: Date) throws {
+        if Queries.isDailyJournalMintShape(reading) {
+            reading.profile = Queries.dailyJournalDeletedProfile
+        }
+        reading.deletedAt = now
+        reading.updatedAt = now
+        try reading.update(db)
     }
 
     /// **"Delete book and its N notes"** (13i-c U2 — the sitting record §6's
@@ -436,9 +451,9 @@ extension Operations {
     ///
     /// The DOOR offers this only on an OWNED book (ruled — "the asymmetry is
     /// the ownership concept, visible at the door"); the op refuses a
-    /// gathering (`wrongReadingKind` — it holds no notes) and — 13i-e — the
-    /// DAILY JOURNAL (`dailyJournalCannotBeDeleted`, the same guard as
-    /// `deleteReading`, inside this transaction, before any note is touched).
+    /// gathering (`wrongReadingKind` — it holds no notes). The DAILY JOURNAL
+    /// deletes here too (VX-436 — its tombstone wears the deleted-Journal
+    /// mark, `tombstoneReadingRow`).
     /// Returns the notes it deleted, in the book's order. Clears the redo
     /// future (`deleteContainer`'s own rule — a note's content left).
     @discardableResult
@@ -448,7 +463,6 @@ extension Operations {
             guard reading.kind == .book else {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
-            try refuseDeletingTheDailyJournal(reading)
             let now = date.now
             let postIDs = try String.fetchAll(
                 db,
@@ -468,9 +482,7 @@ extension Operations {
                 try tombstoneNoteFamily(db, id: postID, now: now)
                 deleted.append(postID)
             }
-            reading.deletedAt = now
-            reading.updatedAt = now
-            try reading.update(db)
+            try tombstoneReadingRow(db, &reading, now: now)
             return deleted
         }
         undoStack?.clearRedoFuture()
@@ -610,7 +622,8 @@ extension Operations {
 
     /// `restoreReading`'s body at db level (13n-a: an imported book's REDO
     /// revives its notes and then the book in ONE transaction —
-    /// `reapplyImportedBook`). Byte-identical to the body it was.
+    /// `reapplyImportedBook`). Byte-identical to the body it was, but for
+    /// VX-436's Journal rule below (R-805-2).
     func restoreReadingRows(_ db: Database, id: String) throws {
         guard var reading = try Reading.fetchOne(db, key: id) else {
             throw OperationError.readingNotFound(id: id)
@@ -622,6 +635,28 @@ extension Operations {
         let now = date.now
         let nowStamp = DateFormatter.variorumISO8601.string(from: now)
 
+        // VX-436 — R-805-2, THE JOURNAL'S PUT BACK (her kickoff ruling): a
+        // book that was THE daily Journal — wearing the marker (an older
+        // build's tombstone, a keeper retirement put back by hand) or the
+        // deleted-Journal mark her delete stamps — comes back WHOLE, and:
+        // beside a STANDING daily Journal it DEMOTES to the journal TRAIT (the
+        // standing one keeps ⌘J and the marker — a restore never steals the
+        // live Journal; nothing migrates); with none standing it returns as
+        // THE Journal (the marker, and the designation cache through
+        // `setDailyJournalBook`). Either way the deleted-Journal mark is
+        // normalized: a live row never wears it. The candidates read is
+        // live-rows-only, so this dead row is never counted as "standing".
+        var designateAsTheJournal = false
+        if reading.kind == .book,
+           reading.profile == Queries.dailyJournalBookProfile
+            || reading.profile == Queries.dailyJournalDeletedProfile {
+            if try Queries.dailyJournalBookCandidates(db).isEmpty {
+                reading.profile = Queries.dailyJournalBookProfile
+                designateAsTheJournal = true
+            } else {
+                reading.profile = Queries.journalTraitProfile
+            }
+        }
         reading.deletedAt = nil
         reading.updatedAt = now
         // 13i-d U5 — RE-HOME on Put back (PROVISIONAL P-13id-U5-2): a book
@@ -633,6 +668,9 @@ extension Operations {
             reading.shelfPosition = nil
         }
         try reading.update(db)
+        if designateAsTheJournal {
+            try setDailyJournalBook(db, id)
+        }
         // 13j ladder B (B1): a restored row voids any live intent
         // naming it — a leftover intent must never claim it later.
         try voidPurgeIntents(db, table: "reading", rowID: id)
@@ -877,25 +915,32 @@ extension Operations {
     /// missing/tombstoned reading, wrong kind, locked, at capacity.
     public func assertReadingAcceptsPosts(_ readingID: String) throws {
         try database.read { db in
-            let reading = try liveReading(db, readingID)
-            guard reading.kind == .book else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
-            }
-            guard !reading.locked else {
-                throw OperationError.lockedReading(id: readingID)
-            }
-            if let maxPosts = reading.maxPosts {
-                let liveCount = try Int.fetchOne(
-                    db,
-                    sql: """
-                    SELECT COUNT(*) FROM reading_post
-                    WHERE reading_id = ? AND deleted_at IS NULL
-                      AND status = 'member'
-                    """,
-                    arguments: [readingID]) ?? 0
-                if liveCount >= maxPosts {
-                    throw OperationError.readingAtCapacity(id: readingID)
-                }
+            try assertReadingAcceptsPosts(db, readingID)
+        }
+    }
+
+    /// The gate's body at db level (VX-797 — `newJournalEntry` runs it inside
+    /// its mint's own transaction, so the refusal and the mint cannot be
+    /// split by a concurrent lock).
+    func assertReadingAcceptsPosts(_ db: Database, _ readingID: String) throws {
+        let reading = try liveReading(db, readingID)
+        guard reading.kind == .book else {
+            throw OperationError.wrongReadingKind(id: readingID, expected: .book)
+        }
+        guard !reading.locked else {
+            throw OperationError.lockedReading(id: readingID)
+        }
+        if let maxPosts = reading.maxPosts {
+            let liveCount = try Int.fetchOne(
+                db,
+                sql: """
+                SELECT COUNT(*) FROM reading_post
+                WHERE reading_id = ? AND deleted_at IS NULL
+                  AND status = 'member'
+                """,
+                arguments: [readingID]) ?? 0
+            if liveCount >= maxPosts {
+                throw OperationError.readingAtCapacity(id: readingID)
             }
         }
     }

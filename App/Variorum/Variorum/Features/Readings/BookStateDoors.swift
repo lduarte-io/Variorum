@@ -102,9 +102,10 @@ nonisolated enum BookStateDoorSet {
 }
 
 /// The facts the ARCHIVE table reads (13i-e U2): whether the book is archived,
-/// and whether it wears the daily marker — read through
-/// `Queries.isDailyJournalMintShape`, the SAME predicate the delete ops' guard
-/// keys on, so a face can never offer a delete the op refuses.
+/// and whether it wears the daily marker (`Queries.isDailyJournalMintShape`).
+/// Since VX-436 the marker no longer gates Delete — the op deletes the daily
+/// Journal like any book — so the table reads `archived` alone; the fact
+/// stays for the faces that word the Journal's own archive.
 nonisolated struct BookArchiveFacts: Equatable, Sendable {
     var archived: Bool
     var isDailyJournal: Bool
@@ -126,10 +127,11 @@ nonisolated struct BookArchiveFacts: Equatable, Sendable {
 /// renderer reads (P-1: gating is data, never a per-view if):
 /// - archived ⇒ **Unarchive**, else **Archive** — books AND gatherings
 ///   (R-13ie-3: "gatherings archive too, same door");
-/// - **Delete** on every reading EXCEPT the daily Journal: "the daily Journal
-///   can be archived, never deleted; it returns when a day arrives" — the op
-///   refuses it (`dailyJournalCannotBeDeleted`), so a Delete there could
-///   never act (P-2) and Archive stands in its place.
+/// - **Delete** on EVERY reading — the daily Journal included since VX-436
+///   (the VX-805 run, her 2026-11-04 ruling: "Delete appears beside Archive
+///   on the daily Journal"; the next ⌘J re-mints a fresh one, nothing
+///   backfills). 13i-e's "Archive in Delete's place" retired with the op's
+///   `dailyJournalCannotBeDeleted` guard.
 /// Each surface draws the subset its door family carries (the Bookcase row:
 /// Archive + Delete — an archived book is never on it; the Archived surface's
 /// rows: Unarchive + Delete; the settings sheet: Archive/Unarchive).
@@ -137,9 +139,7 @@ nonisolated enum BookArchiveDoorSet {
     static let all: [CapabilityID] = [.archiveBook, .unarchiveBook, .deleteBook]
 
     static func rendered(for facts: BookArchiveFacts) -> [CapabilityID] {
-        var acts: [CapabilityID] = [facts.archived ? .unarchiveBook : .archiveBook]
-        if !facts.isDailyJournal { acts.append(.deleteBook) }
-        return acts
+        [facts.archived ? .unarchiveBook : .archiveBook, .deleteBook]
     }
 }
 

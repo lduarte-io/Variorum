@@ -413,10 +413,16 @@ struct MembershipChoiceTests {
     /// its two DRAG roads (the navigator's and Outline's rows) file and
     /// reorder MEMBERS only — a payload from outside the book decodes to
     /// nothing and adds nothing; its one ADD road is the daily book's
-    /// "+ new entry", whose ownership refusal BELLS exactly as ⌘J does (the
-    /// sitting record §6) — the entry opens, the note names who holds it, and
-    /// the Arrivals line offers the choice (row 19).
-    @Test func row15_theBookViewsRoadsAddNothingByDragAndBellAtTheDailyDoor() async throws {
+    /// "+ new entry", which since VX-797 (the VX-805 run, Unit C) MINTS A
+    /// FRESH entry (`Operations.newJournalEntry` — several entries a day are
+    /// legal) and never opens the day's existing one (that stays ⌘J's
+    /// open-today, whose ownership bell is unchanged). A fresh entry is
+    /// bookless, so it files through the same gate as a PLAIN add
+    /// (`OwnershipDecision`: bookless = plain add) — no bell can arise on
+    /// this road, and the day's entry another book OWNS is left exactly where
+    /// it is, never re-filed. (The superseded create-or-open road opened the
+    /// owned entry and rang the bell here.)
+    @Test func row15_theBookViewsRoadsAddNothingByDragAndTheDailyDoorMintsAFreshMember() async throws {
         try await withChoiceWorld { session, db in
             let ops = session.operations
             let journal = try ops.createReading(
@@ -436,16 +442,36 @@ struct MembershipChoiceTests {
             #expect(!accepted, "a payload from outside the book is refused, never added")
             #expect(try await members(db, journal.id).isEmpty)
 
-            // The daily door's own add road.
-            let opened = await structure.newEntry(day: "2026-06-30")
-            #expect(opened == entry.container.id, "the entry still opens")
-            #expect(structure.lastError == JournalWaitingCopy.note(
-                journal: "Journal", journalOwned: false, elsewhere: ["Claimer"], owner: "Claimer"))
-            #expect(structure.lastError?.contains("because \u{201C}Claimer\u{201D} owns it") == true)
+            // The daily door's own add road (VX-797): a FRESH entry, filed
+            // as a plain member — no bell, the owned entry untouched.
+            let pressed = await structure.newEntry(day: "2026-06-30")
+            let opened = try #require(pressed, "the fresh entry opens")
+            #expect(opened != entry.container.id, "a FRESH entry — never the day's existing one")
+            #expect(try await members(db, journal.id) == [opened],
+                    "the fresh entry is the Journal's live member (a plain add)")
+            #expect(try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM container
+                    WHERE kind = 'post' AND profile = 'journal' AND entry_date = ?
+                      AND deleted_at IS NULL
+                    """, arguments: ["2026-06-30"])
+            } == 2, "the day now has its second entry")
+            // The OLD entry stays exactly where it was: Claimer's member, and
+            // its pair with the Journal never touched (no row, live or dead).
+            #expect(try await members(db, claimer.id) == [entry.container.id])
+            #expect(try await db.read { db in
+                try Int.fetchOne(db, sql: """
+                    SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND post_id = ?
+                    """, arguments: [journal.id, entry.container.id])
+            } == 0, "the owned entry is never re-filed into the Journal")
+            // NO bell: nothing waits at the Journal's door, and the success
+            // path speaks nothing (`shelvingNote(.shelved)` is nil; the
+            // Journal was never archived, so no comes-back receipt).
             #expect(try await db.read {
                 try Queries.pendingArrivalCount($0, readingID: journal.id)
-            } == 1, "it waits at the Journal's door (the bell)")
-            #expect(try await members(db, journal.id).isEmpty)
+            } == 0, "no arrival — the bell does not arise on this road")
+            #expect(structure.lastError == nil, "no JournalWaitingCopy note, no refusal")
+            #expect(session.status.current == nil, "no receipt, no refusal on the status seam")
         }
     }
 

@@ -181,3 +181,54 @@ struct WingFollowTests {
         }
     }
 }
+
+/// VX-435 (the VX-805 run) — ⌘J FOLLOWS THE JOURNAL TO ITS WING (her ruling:
+/// "⌘J follows the Journal to its wing (a wing switch, like opening any
+/// note)"). The door births the day's entry BESIDE the Journal, wherever it
+/// lives, and opening it is the ordinary open the workspace follows — so the
+/// app's one wing switches with the quiet receipt. With NO Journal living, the
+/// door mints in the wing she stands in and nothing switches. RED ON OLD: the
+/// entry was born in Home whatever wing held the Journal (13i-d U5), and the
+/// fresh Journal in Home whatever wing she stood in.
+@MainActor
+@Suite("VX-435 — ⌘J opens beside the Journal and the wing follows", .serialized)
+struct JournalWingFollowTests {
+    @Test func todaysEntryOpensInTheJournalsWingAndTheWingFollows() async throws {
+        try await withFollowWorld { session, db in
+            let ops = session.operations
+            let studio = try ops.createWing(name: "Studio")
+            let first = try await JournalBooks.openToday(session: session, day: "2026-11-01")
+            let journalID = try #require(try ops.dailyJournalBookID())
+            _ = try ops.moveReadingToWing(journalID, to: studio.id)
+            #expect(session.wing.currentID == "", "she stands in Home")
+
+            let outcome = try await JournalBooks.openToday(session: session, day: "2026-11-02")
+            #expect(outcome.note == nil, "filed without a word")
+            let entryID = outcome.postID
+            #expect(try await db.read { try Queries.effectiveWing($0, ofPost: entryID) } == studio.id,
+                    "the day's entry is born beside the Journal")
+            let workspace = WorkspaceModel()
+            WingFollow.wire(workspace: workspace, session: session)
+            workspace.select(.post(entryID))   // ⌘J's open (RootView.openToday → adopt)
+            await settle { session.wing.currentID == studio.id }
+            #expect(session.wing.currentID == studio.id, "the wing followed the Journal")
+            #expect(session.status.spoken?.text == "Now in \u{201C}Studio\u{201D}.")
+            _ = first
+        }
+    }
+
+    @Test func withNoJournalTheDoorMintsWhereSheStands() async throws {
+        try await withFollowWorld { session, db in
+            let ops = session.operations
+            let studio = try ops.createWing(name: "Studio")
+            session.wing.switchTo(studio.id)
+            let outcome = try await JournalBooks.openToday(session: session, day: "2026-11-01")
+            let journalID = try #require(try ops.dailyJournalBookID())
+            #expect(try await db.read { try Queries.reading($0, id: journalID) }?.wingId == studio.id,
+                    "the fresh Journal lands in the standing wing")
+            let entryID = outcome.postID
+            #expect(try await db.read { try Queries.effectiveWing($0, ofPost: entryID) } == studio.id)
+            #expect(WingFollow.decision(current: session.wing.currentID, subjectWing: studio.id) == .stay)
+        }
+    }
+}

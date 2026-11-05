@@ -183,15 +183,15 @@ struct WingContentsMoveTests {
             #expect(throws: OperationError.wingMoveIntoItself(wingID: wing.id)) {
                 try ops.moveWingContents(from: wing.id, to: wing.id)
             }
-            // The belt: a 'daily'-marked book can only ever be sent HOME.
+            // VX-435 (a JUSTIFIED EDIT — P-13id-U5b-11's belt retired with
+            // item 7's guard): a 'daily'-marked book moves with everything
+            // else, to any wing.
             let marked = try ops.createReading(
                 name: "Stray Journal", kind: .book, profile: Queries.dailyJournalBookProfile,
                 wingId: wing.id)
-            #expect(throws: OperationError.dailyJournalIsHomeOnly(id: marked.id)) {
-                try ops.moveWingContents(from: wing.id, to: other.id)
-            }
-            #expect(try reading(db, marked.id).wingId == wing.id, "the refusal wrote nothing")
-            _ = try ops.moveWingContents(from: wing.id, to: "")
+            _ = try ops.moveWingContents(from: wing.id, to: other.id)
+            #expect(try reading(db, marked.id).wingId == other.id, "the Journal moved too")
+            _ = try ops.moveWingContents(from: other.id, to: "")
             #expect(try reading(db, marked.id).wingId == "")
             try ops.deleteWing(wing.id)
             #expect(throws: OperationError.wingNotFound(id: wing.id)) {

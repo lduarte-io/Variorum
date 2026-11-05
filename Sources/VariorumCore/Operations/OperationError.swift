@@ -132,12 +132,13 @@ public enum OperationError: Error, Equatable, Sendable {
     // would orphan the exact-stamp key its archived-with-notes members carry.
     case readingAlreadyArchived(id: String)
     case readingNotArchived(id: String)
-    /// THE DAILY JOURNAL CAN BE ARCHIVED, NEVER DELETED (13i-e — the sitting
-    /// record §10's ruling on the ⌘J ground: "the daily Journal can be
-    /// archived, never deleted; it returns when a day arrives"). Both delete
-    /// doors (`deleteReading`, `deleteReadingWithNotes`) refuse a book
-    /// wearing the 'daily' marker, checked inside their write transaction;
-    /// the road is `archiveReading`.
+    /// THE WIRE'S JOURNAL DELETE REFUSAL (R-805-5's sibling, the VX-805 run):
+    /// the daily Journal never deletes on the MCP side (MCPSpec's standing
+    /// line). 13i-e's op-level guard ("the daily Journal can be archived,
+    /// never deleted") RETIRED at VX-436 — her own doors delete it like any
+    /// book — so only the MCP door's `delete_book` act and its redo throw
+    /// this (`Operations.refuseDeletingTheDailyJournalOnTheWire`), checked
+    /// inside their write transaction.
     case dailyJournalCannotBeDeleted(id: String)
 
     // Structural operations (Phase 3).
@@ -319,9 +320,13 @@ public enum OperationError: Error, Equatable, Sendable {
     /// entry — she takes those off (or moves the note with her own door), then
     /// tries again (PROVISIONAL P-13nc-U6-3).
     case wingMoveChangedSince(postID: String)
-    /// #169(b), RULED — THE DAILY JOURNAL IS HOME-ONLY: a book of another wing
-    /// cannot be designated, and the daily Journal never leaves Home.
-    case dailyJournalIsHomeOnly(id: String)
+    /// R-805-5 (the VX-805 run) — THE WIRE'S JOURNAL MOVE FENCE: moving the
+    /// daily Journal across wings stays the AUTHOR's alone on the MCP side.
+    /// Her own doors move it like any book since VX-435 (the retired
+    /// `dailyJournalIsHomeOnly` — #169(b)'s Home-only rule — is gone with
+    /// them); only `Operations.refuseMovingTheDailyJournalOnTheWire`, the
+    /// shared check every wire tool that moves a book calls, throws this.
+    case dailyJournalMovesOnlyByHand(id: String)
     /// 13i-d U5b — a book or gathering moved to the wing it already lives in
     /// (`moveReadingToWing`; the door lists only the OTHER wings).
     case readingAlreadyInWing(readingID: String, wingID: String)

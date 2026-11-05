@@ -50,12 +50,20 @@ struct MCPWriteTools: Sendable {
             if job.flushesHerEditorFirst, let beforeWrite = hooks.beforeWrite {
                 await beforeWrite(job.tool)
             }
+            // A-809-11 (PROVISIONAL P-809-8 — the VX-809 run record, BATCH 3):
+            // THE ONE PLACE the wire's acts are told apart from hers. Every act
+            // runs on the runner's value heard as the client's, so intake never
+            // SEATS a note where membership would fence it (a Private book, THE
+            // daily Journal) — on every road through the one application road;
+            // the would-be seat bells (`IntakeDecision.verdict`'s step 6).
             let result: Result<Landed, Refused> = try await executor.run { ops in
-                try self.perform(job, ops: ops, clientName: clientName)
+                try self.perform(job, ops: ops.heardAsWireClient(), clientName: clientName)
             }
             switch result {
             case .success(let landed):
-                if let receipt = landed.receipt { hooks.onWrite?(receipt) }
+                // VX-812 (A-809-19): a list form's landed items each send their
+                // receipt (one call-scoped run key — one line at the app).
+                for receipt in landed.receipts { hooks.onWrite?(receipt) }
                 return Outcome(text: landed.answer, isError: false)
             case .failure(let refused):
                 return refused.outcome
@@ -80,12 +88,15 @@ struct MCPWriteTools: Sendable {
         /// U3 (R-13nb-11 G-2): EITHER payload — plain prose, or the
         /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
         /// VX-252: an optional chapter of the book (`section_id`).
-        case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?)
+        /// VX-814: `tags` — paths the note is born wearing (the header road).
+        case createNote(
+            title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?, tags: [String])
         /// VX-566: `create_note`'s optional chapter, on the one-document form.
         case importNote(VariorumDocument.NamedDocument, place: Place, sectionID: String?)
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
-        case createBook(name: String, wingID: String)
+        /// VX-813: an optional birth ORDER (`create_book`'s `order`).
+        case createBook(name: String, wingID: String, order: Queries.ReadingOrder?)
         /// VX-769 (the VX-771 run, batch 3 — R-771-B): a gathering minted with
         /// its rule, at write new on the wing (`MCPWriteTools+CreateGathering`).
         case createGathering(name: String, wingID: String, rule: RuleTerm)
@@ -123,6 +134,12 @@ struct MCPWriteTools: Sendable {
         /// VX-596: her star on the wire — a note or a book, starred or not
         /// (`MCPWriteTools+Star`).
         case setStarred(target: StarTarget, starred: Bool)
+        /// VX-812 (A-809-18): a list form — each item the single call's own job
+        /// (`MCPWriteTools+NoteLists`).
+        case noteList(tool: String, items: [NoteListItem])
+        /// VX-812: tag A → tag B across the client's reach in one wing
+        /// (`MCPWriteTools+TagReplace`).
+        case replaceTag(wingID: String, from: String, to: String)
 
         var tool: String {
             switch self {
@@ -148,6 +165,8 @@ struct MCPWriteTools: Sendable {
             case .duplicateNote: "duplicate_note"
             case .copyNoteToWing: "copy_note_to_wing"
             case .setStarred: "set_starred"
+            case .noteList(let tool, _): tool
+            case .replaceTag: "replace_tag"
             }
         }
 
@@ -203,6 +222,14 @@ struct MCPWriteTools: Sendable {
             // her Duplicate does (`copyPost`) — the same class, the same answer.
             case .copyNoteToWing:
                 true
+            // VX-812: a list flushes when any of its items would (the one flush
+            // ahead of the call's one serial turn covers every item — AF-8).
+            case .noteList(_, let items):
+                items.contains { $0.job.flushesHerEditorFirst }
+            // VX-812: an un-tag and a tag per note — no take's text read,
+            // rewritten, copied, frozen or tombstoned (`apply_tag`/`remove_tag`'s answer).
+            case .replaceTag:
+                false
             }
         }
     }
@@ -224,14 +251,31 @@ struct MCPWriteTools: Sendable {
 
     struct Landed: Sendable {
         let answer: String
-        let receipt: MCPWriteReceipt?
+        /// Every receipt the call sends: the act's one (none when nothing
+        /// landed worth claiming), or — VX-812's list forms — one per landed
+        /// item, on one run key.
+        let receipts: [MCPWriteReceipt]
+
+        init(answer: String, receipt: MCPWriteReceipt?) {
+            self.answer = answer
+            receipts = receipt.map { [$0] } ?? []
+        }
+
+        init(answer: String, receipts: [MCPWriteReceipt]) {
+            self.answer = answer
+            self.receipts = receipts
+        }
+
+        var receipt: MCPWriteReceipt? { receipts.first }
     }
 
     struct Refused: Error, Sendable {
         let outcome: Outcome
     }
 
-    private func parse(_ name: String, _ args: [String: Value]) throws -> Job {
+    func parse(_ name: String, _ args: [String: Value]) throws -> Job {
+        // VX-812 (A-809-18): `note_ids` on the four list-form tools.
+        if let list = try parseNoteList(name, args) { return list }
         switch name {
         case MCPToolCatalog.addTake.name:
             // VX-168 U3 (VX-171 — R-VX171-2, her word, door-only): a BLANK
@@ -273,7 +317,8 @@ struct MCPWriteTools: Sendable {
             }
             return .createNote(
                 title: try optionalString(args, "title"), payload: payload,
-                entryDate: try entryDate(args), place: try place(args), sectionID: sectionID)
+                entryDate: try entryDate(args), place: try place(args), sectionID: sectionID,
+                tags: try birthTags(args))
         case MCPToolCatalog.importDocument.name:
             return try parseImport(args)
         case MCPToolCatalog.applyTag.name:
@@ -282,7 +327,7 @@ struct MCPWriteTools: Sendable {
             guard let wingID = try optionalString(args, "wing_id") else {
                 throw ArgumentFailure(message: "wing_id is required (\"\" is Home).")
             }
-            return .createBook(name: try requiredText(args, "name"), wingID: wingID)
+            return .createBook(name: try requiredText(args, "name"), wingID: wingID, order: try orderOption(args))
         case MCPToolCatalog.createGathering.name:
             return try parseCreateGathering(args)
         case MCPToolCatalog.addNoteToBook.name:
@@ -306,6 +351,7 @@ struct MCPWriteTools: Sendable {
                 return .deleteComment(commentID: try requiredString(args, "comment_id"))
             }
             if name == MCPToolCatalog.removeTag.name { return try parseRemoveTag(args) }
+            if name == MCPToolCatalog.replaceTag.name { return try parseReplaceTag(args) }
             if name == MCPToolCatalog.linkVersions.name { return try parseLinkVersions(args) }
             if let job = try parseNoteEdit(name, args) { return .noteEdit(job) }
             if let job = try parseLibraryEdit(name, args) { return .libraryEdit(job) }
@@ -343,6 +389,26 @@ struct MCPWriteTools: Sendable {
             }
             return Operations.MCPNoteBlock(text: text, name: name, takes: takes)
         }
+    }
+
+    /// **VX-814 — `create_note`'s `tags`** (the VX-809 run, batch 3): an array
+    /// of tag PATHS, each naming at least one tag by `TagPath.segments` — the
+    /// rule `apply_tag` and the document header read ("/a//b/" is a/b). A path
+    /// naming nothing refuses the call in words before any decision (VX-566's
+    /// never-ignored precedent: a success that tagged less than asked would be
+    /// a quiet lie); a path given twice is applied once. Absent or `[]`: none.
+    func birthTags(_ args: [String: Value]) throws -> [String] {
+        let paths = try stringArray(args, "tags") ?? []
+        for (index, path) in paths.enumerated() where TagPath.segments(path).isEmpty {
+            throw ArgumentFailure(message: Self.emptyTagPathWords(index))
+        }
+        return paths
+    }
+
+    /// The one sentence for a `tags` entry naming no tag (PROVISIONAL, the
+    /// VX-809 bundle — wording hers).
+    static func emptyTagPathWords(_ index: Int) -> String {
+        "tags[\(index)] names no tag — a tag's path has at least one name (e.g. \"percy/pt-en\")."
     }
 
     /// `entry_date`: a real calendar day, `yyyy-MM-dd` — the column's own
@@ -448,7 +514,7 @@ struct MCPWriteTools: Sendable {
 
     // MARK: - The serial body (decide → act → spend → log)
 
-    private func perform(_ job: Job, ops: Operations, clientName: String) throws -> Result<Landed, Refused> {
+    func perform(_ job: Job, ops: Operations, clientName: String) throws -> Result<Landed, Refused> {
         let label = { (act: Operations.MCPWriteAct) in act.undoLabel(client: clientName) }
         switch job {
         case .addTake(let blockID, let text, let takeLabel):
@@ -492,7 +558,7 @@ struct MCPWriteTools: Sendable {
                                         targetTitle: title, detail: lens.name,
                                         show: .lens(noteID: noteID, lensID: lens.id)))
             }
-        case .createNote(let title, let payload, let entryDate, let place, let sectionID):
+        case .createNote(let title, let payload, let entryDate, let place, let sectionID, let tags):
             // VX-252 (F-3): the BOOK is decided first (`into`), so an
             // unreachable book answers the one not-shared sentence whatever
             // `section_id` names; inside, every id that isn't a live chapter of
@@ -503,14 +569,16 @@ struct MCPWriteTools: Sendable {
             // `admitsGathering`).
             return try into(place, job: job, clientName: clientName, admitsGathering: true) { destination in
                 let minted: Operations.DocumentImport = switch payload {
+                // VX-814: the birth's tags ride the mint's own transaction and
+                // entry (the header road); the answer lists them first.
                 case .text(let text):
                     try ops.createNote(
                         title: title, text: text, entryDate: entryDate, in: destination, section: sectionID,
-                        undoLabel: label(.note))
+                        tags: tags, undoLabel: label(.note))
                 case .blocks(let blocks):
                     try ops.createStructuredNote(
                         title: title, entryDate: entryDate, blocks: blocks, in: destination, section: sectionID,
-                        undoLabel: label(.note))
+                        tags: tags, undoLabel: label(.note))
                 }
                 return try noteAnswer(minted, act: .note, clientName: clientName, sectionID: sectionID)
             }
@@ -579,11 +647,18 @@ struct MCPWriteTools: Sendable {
                                               show: .note(noteID: noteID, blockID: nil, select: nil))
                             : nil)
             }
-        case .createBook(let name, let wingID):
+        case .createBook(let name, let wingID, let order):
             return try inWing(wingID, job: job, clientName: clientName) {
                 let book = try ops.createBook(
-                    named: name, inWing: wingID, undoLabel: label(.book), namesCountedBy: readableBooks(clientName))
-                return (["book_id": book.id, "name": book.name],
+                    named: name, inWing: wingID, undoLabel: label(.book), namesCountedBy: readableBooks(clientName),
+                    order: order)
+                // VX-813: the order echoed only when the call gave one (every
+                // other answer byte-unchanged — VX-357's absent-otherwise shape).
+                var answer: [String: Any] = ["book_id": book.id, "name": book.name]
+                if order != nil {
+                    answer["order"] = Self.orderAnswer(.init(field: book.sortField, direction: book.sortDir))
+                }
+                return (answer,
                         MCPWriteReceipt(clientName: clientName, act: .book, targetID: book.id, targetTitle: book.name,
                                         show: .book(bookID: book.id, sectionID: nil)))
             }
@@ -592,8 +667,18 @@ struct MCPWriteTools: Sendable {
                 name: name, wingID: wingID, rule: rule, job: job, ops: ops, clientName: clientName)
         case .addNoteToBook(let noteID, let bookID, let sectionID):
             return try noteIntoBook(noteID, bookID, job: job, clientName: clientName) { title, bookName in
-                let added = try ops.addNoteToBookForClient(
-                    noteID, book: bookID, section: sectionID, undoLabel: label(.bookAdd))
+                let added: Operations.MCPBookAdd
+                do {
+                    added = try ops.addNoteToBookForClient(
+                        noteID, book: bookID, section: sectionID, undoLabel: label(.bookAdd))
+                } catch let error as OperationError {
+                    // VX-825 (A-809-4, P-809-2): an ownership refusal whose cause
+                    // is a book beyond this client's reach says the one fixed
+                    // sentence; a readable claimant keeps her words, re-keyed to
+                    // the readable claimants alone.
+                    throw try ownershipRefusalWithinReach(
+                        error, noteID: noteID, bookID: bookID, clientName: clientName) ?? error
+                }
                 // VX-365 (VX-361's shape, P-VX361-1): every tag the note wears
                 // once the act lands — its own, then the book's outflow, each
                 // once — composed inside the act's transaction; `tags` their
@@ -637,6 +722,10 @@ struct MCPWriteTools: Sendable {
             return try performSetStarred(target, starred: starred, job: job, ops: ops, clientName: clientName)
         case .copyNoteToWing(let noteID, let wingID):
             return try performCopyNoteToWing(noteID: noteID, wingID: wingID, job: job, ops: ops, clientName: clientName)
+        case .noteList(let tool, let items):
+            return try performNoteList(items, tool: tool, ops: ops, clientName: clientName)
+        case .replaceTag(let wingID, let from, let to):
+            return try performReplaceTag(wingID: wingID, from: from, to: to, job: job, ops: ops, clientName: clientName)
         }
     }
 
@@ -762,9 +851,14 @@ struct MCPWriteTools: Sendable {
     /// (VX-549: `create_note` and `import_document`'s one document only — never
     /// `create_section` or `set_book_rule`, whose acts are a BOOK's), into a
     /// GATHERING named by its id in `book_id` (`intoGathering`).
+    ///
+    /// VX-813 (A-809-17): `rung` — the BOOK arm's decision (write new by
+    /// default; `set_book_rule` with an `order` decides at EDIT, the
+    /// rung read from its arguments as `insert_blocks`' is). The wing arm is
+    /// always write new.
     func into(
         _ place: Place, job: Job, clientName: String, spendsAfter: Bool = true, admitsGathering: Bool = false,
-        _ act: (Operations.MCPNoteDestination) throws -> Act
+        rung: MCPGrantRule.Rung = .writeNew, _ act: (Operations.MCPNoteDestination) throws -> Act
     ) throws -> Result<Landed, Refused> {
         switch place {
         case .book(let bookID):
@@ -780,11 +874,11 @@ struct MCPWriteTools: Sendable {
                     gathering, name: name, standing: standing, job: job, clientName: clientName,
                     spendsAfter: spendsAfter, act)
             }
-            let decision = MCPGrantAuthority.decide(standing, book: facts, rung: .writeNew, consumes: true)
+            let decision = MCPGrantAuthority.decide(standing, book: facts, rung: rung, consumes: true)
             guard case .allow(let grantID, let consumesOnce) = decision else {
                 try log(clientName, job.tool, "book", bookID, name, allowed: false)
                 let ask = facts.map { MCPAsk(clientName: clientName, scopeKind: .book, scopeID: bookID,
-                                             title: name ?? "", rung: .writeNew, fence: $0.fence) }
+                                             title: name ?? "", rung: rung, fence: $0.fence) }
                 return .failure(Refused(outcome: MCPAsking(onAsk: hooks.onAsk)
                     .refusal(decision, .book, standing: standing, ask: ask)))
             }

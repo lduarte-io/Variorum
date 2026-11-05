@@ -11,7 +11,7 @@ import VariorumCore
 /// act's transaction and spends any once grant there — and ONE client-named
 /// undo entry. Un-tagging stays a NON-EVENT for intake (OverallModel §2;
 /// §19): a book the tag brought the note into keeps it — and since VX-764
-/// the answer says which (`stillInBooks`).
+/// the answer says which (`stillInBooks`), within this client's reach (VX-825).
 extension MCPWriteTools {
     /// The tag the note doesn't wear — one sentence for a tag of its library
     /// and a path naming nothing (the note's own header lists what it wears;
@@ -50,6 +50,7 @@ extension MCPWriteTools {
             }
             var answer: [String: Any] = ["note_id": noteID, "tag_id": removal.tagID, "tag": removal.path, "removed": true]
             for (key, value) in try stillInBooks(removal.stillInBookIDs, standing: standing) { answer[key] = value }
+            answer[Self.tagUnusedKey] = try tagUnusedInReach(removal.tagID, standing: standing)
             return (answer,
                     MCPWriteReceipt(clientName: clientName, act: .untag, targetID: noteID, targetTitle: title,
                                     detail: removal.path, show: .note(noteID: noteID, blockID: nil, select: nil)))
@@ -57,19 +58,20 @@ extension MCPWriteTools {
     }
 
     /// **VX-764 (R-771-A (a) — the dial DECLINED): the books the un-tag left
-    /// the note in, under the fence.** Each living book that collects by the
-    /// tag and still holds the note (`Operations.livingBooksHolding`) is NAMED
-    /// — `{book_id, name}` — only where this client can READ it (the one rule,
-    /// `decide` at read, never consuming); every other one, a fenced book (a
-    /// Private book, the daily Journal — it matches no grant) among them, is
-    /// COUNTED only, with no id: hidden never differs from missing (the
-    /// `duplicate_note` `landed` / `move_note_to_wing` `left_books`
-    /// discipline). Nothing stranded answers NO key, so the answer is the
-    /// pre-VX-764 answer byte for byte; something stranded always says
-    /// `still_in_books` (`[]` when every one is hidden) and the count only
-    /// when it is not 0. ∝ the note's books.
+    /// the note in, under the fence — VX-825 (her R-825): a pure function of
+    /// this client's reach.** Each living book that collects by the tag and
+    /// still holds the note (`Operations.livingBooksHolding`) is NAMED —
+    /// `{book_id, name}` — only where this client can READ it (the one rule,
+    /// `decide` at read, never consuming); every other one — a fenced book (a
+    /// Private book, the daily Journal — it matches no grant) or one no grant
+    /// reaches — is NEITHER named NOR counted: the answer is the answer of a
+    /// store where it does not exist. `still_in_books` is ALWAYS present (`[]`
+    /// when no readable book holds it) beside the fixed scope words
+    /// (`beyond_reach`) — a key that appeared only when something was held
+    /// would itself tell. (`still_in_books_hidden_count` RETIRED at VX-825; the
+    /// VX-764 "nothing stranded answers byte-unchanged" guard went with it — the
+    /// two keys ride every landed answer.) ∝ the note's books.
     private func stillInBooks(_ bookIDs: [String], standing: MCPGrantAuthority.Standing) throws -> [String: Any] {
-        guard !bookIDs.isEmpty else { return [:] }
         let named: [[String: Any]] = try database.read { db in
             try bookIDs.compactMap { bookID in
                 guard MCPGrantAuthority.decide(
@@ -79,8 +81,33 @@ extension MCPWriteTools {
                 return ["book_id": bookID, "name": name]
             }
         }
-        var facts: [String: Any] = ["still_in_books": named]
-        if bookIDs.count > named.count { facts["still_in_books_hidden_count"] = bookIDs.count - named.count }
-        return facts
+        return ["still_in_books": named, Self.beyondReachKey: Self.beyondReachWords]
+    }
+
+    /// The reach-scoped usage fact's key (VX-825's titular ask — A-809-9).
+    static let tagUnusedKey = "tag_unused_in_reach"
+
+    /// **VX-825 (A-809-9 — the titular ask): does any note this client can
+    /// READ still wear the tag, or a tag under it?** ALWAYS answered on a
+    /// landed `remove_tag` (the F-1 discipline — never a key that appears only
+    /// sometimes): `true` when no readable note wears the tag or anything in
+    /// its subtree, itself or through a block it places — so the client can
+    /// PROPOSE the tag's deletion to the author, whose act it stays (Settings ▸
+    /// Tags); never a library-wide fact (her R-825 — a tag worn only beyond the
+    /// client's reach answers `true`, exactly as in a store where those notes do
+    /// not exist). The ONE brain, `Queries.tagSubtreeIsWorn` (`.reach`), the
+    /// same predicate her Settings ▸ Tags sweep reads at `.library` (VX-840);
+    /// readability through the one rule (`decide` at read, never consuming).
+    /// After the act, on its own read. ∝ the tag subtree's wearers, stopping at
+    /// the first readable one.
+    private func tagUnusedInReach(_ tagID: String, standing: MCPGrantAuthority.Standing) throws -> Bool {
+        try database.read { db in
+            try !Queries.tagSubtreeIsWorn(db, tagID: tagID, scope: .reach(readable: { noteIDs in
+                let facts = try Queries.mcpNoteFacts(db, noteIDs: noteIDs)
+                return Set(noteIDs.filter {
+                    MCPGrantAuthority.decide(standing, note: facts[$0], rung: .read, consumes: false).isAllowed
+                })
+            }))
+        }
     }
 }

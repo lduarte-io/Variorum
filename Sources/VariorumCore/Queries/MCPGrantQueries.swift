@@ -481,8 +481,9 @@ extension Queries {
     /// default command J journal I think it's a fair choice but I am
     /// questioning it being applied to all journal style books"). Per note:
     /// 1. its own `profile = 'journal'` — the shape ⌘J's
-    ///    `createOrOpenJournalEntry` gives every day entry (the ONLY door that
-    ///    mints it; the copy roads carry it), so a day entry stays per-ask
+    ///    `createOrOpenJournalEntry` gives every day entry (with the Journal's
+    ///    New Entry, `newJournalEntry` — VX-797 — the ONLY doors that mint it;
+    ///    the copy roads carry it), so a day entry stays per-ask
     ///    wherever it is later filed (13n-c D-1, PROVISIONAL P-13nc-1);
     /// 2. a live MEMBER (status 'member') of a live reading wearing THE daily
     ///    Journal's marker (`profile = 'daily'` — every live bearer, a
@@ -876,6 +877,24 @@ extension Queries {
     /// member leg, the book's facts and the sheet's offer alike, so the three
     /// can never drift apart.
     static let dailyJournalLegForBook = "(r.profile IS NOT NULL AND r.profile = '\(dailyJournalBookProfile)')"
+
+    /// **Does MEMBERSHIP in this book fence a note?** (A-809-11 — the VX-809
+    /// run record, BATCH 3): the fence's two BOOK legs, on the SAME two
+    /// fragments the member legs above read (never a parallel fence) — THE
+    /// daily Journal's marker, or the Private mark. False for a missing or
+    /// tombstoned reading (a dead book's membership fences nothing — the legs'
+    /// own `r.deleted_at IS NULL`). The intake table reads it so a wire act's
+    /// would-be seat here bells instead (`IntakeDecision.verdict`). One indexed
+    /// row per candidate book.
+    public static func membershipFencesNotes(_ db: Database, readingID: String) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT (\(dailyJournalLegForBook)) OR (\(privateLegForBook))
+                FROM reading r WHERE r.id = ? AND r.deleted_at IS NULL
+                """,
+            arguments: [readingID]) ?? false
+    }
 
     // MARK: - The Private mark, as the faces read it (R-13nb-4)
 

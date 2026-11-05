@@ -202,9 +202,14 @@ struct MCPWingMoveServerTests {
             #expect(answer["moved"] as? Bool == true)
             #expect(answer["landed"] as? String == "the Pool of \u{201C}variorum\u{201D}")
             let left = try #require(answer["left_books"] as? [[String: Any]])
-            #expect(left.map { $0["book_id"] as? String } == [w.alpha.id, hidden.id])
-            #expect(left.map { $0["name"] as? String } == ["Alpha", nil],
-                    "a book the client can't read is named by id only — names stay with grants")
+            // VX-825 (the VX-809 run, batch 1 — a JUSTIFIED EDIT, her R-825): a
+            // book the client can't read is neither listed nor counted — its id
+            // no longer crosses — and the fixed scope words ride. Her receipt
+            // still counts both (below).
+            #expect(left.map { $0["book_id"] as? String } == [w.alpha.id])
+            #expect(left.map { $0["name"] as? String } == ["Alpha"],
+                    "only the readable book — names stay with grants, and so do ids")
+            #expect(answer["beyond_reach"] as? String == MCPWriteTools.beyondReachWords)
             let tags = try #require(answer["tags"] as? [String: Int])
             #expect(tags == ["adopted": 0, "made": 1], "#writing is made in the new wing by its path")
 
@@ -239,13 +244,15 @@ struct MCPWingMoveServerTests {
             #expect(readable.isError == true && text(readable) == "HER DOOR: parser notes / Alpha")
 
             // Reached through a NOTE grant only: the book's name stays with
-            // its grants — the op's own refusal speaks instead.
+            // its grants. VX-825 (the VX-809 run, batch 1 — A-809-4 S-2, a
+            // JUSTIFIED EDIT): the cause is a book beyond reach, so the move's
+            // ONE fixed sentence speaks — not the op's own refusal, whose id
+            // (and on the Mac whose "finished") was the hidden book's.
             try h.operations.revokeMCPGrant(try grantIDs(h).first!)
             _ = try h.operations.grantMCPAccess(client, spec(.edit, .note, w.note.id))
             let unreadable = try await call(connection, "move_note_to_wing",
                                             ["note_id": .string(w.note.id), "wing_id": .string(w.wing.id)])
-            #expect(unreadable.isError == true
-                    && text(unreadable) == "Refused: \(OperationError.lockedReading(id: w.alpha.id))")
+            #expect(unreadable.isError == true && text(unreadable) == MCPWriteTools.moveHiddenCauseWords)
             #expect(try wingOf(h, w.note.id) == "")
             await h.hangUp(connection)
         }

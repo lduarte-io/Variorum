@@ -97,9 +97,12 @@ extension Operations {
             pair: try intakePairState(db, readingID: book.id, postID: postID),
             memberedElsewhere: elsewhere.membered,
             ownedElsewhere: elsewhere.owned)
+        // A-809-11: the act's HAND rides into the one table (`intakeActor` —
+        // `.wireClient` only on a value the MCP door derived), so a wire act's
+        // would-be seat where membership fences the note bells instead.
         try materializeIntake(
             db, readingID: book.id, postID: postID,
-            verdict: IntakeDecision.verdict(book: facts, note: note, occasion: .event),
+            verdict: IntakeDecision.verdict(book: facts, note: note, occasion: .event, actor: intakeActor),
             now: now)
     }
 
@@ -139,7 +142,7 @@ extension Operations {
                     matchesRule: true, pair: .fresh,
                     memberedElsewhere: elsewhere.membered,
                     ownedElsewhere: elsewhere.owned),
-                occasion: occasion)
+                occasion: occasion, actor: intakeActor)
             try materializeIntake(
                 db, readingID: book.id, postID: postID, verdict: verdict, now: now)
             if verdict == .seat { facts.memberCount += 1 }
@@ -271,7 +274,8 @@ extension Operations {
             maxPosts: book.maxPosts,
             memberCount: try liveMemberCount(db, readingID: book.id),
             owned: book.owned,
-            archived: book.archivedAt != nil)
+            archived: book.archivedAt != nil,
+            membershipFences: try Queries.membershipFencesNotes(db, readingID: book.id))
     }
 
     /// Live `status='member'` rows — THE count capacity reads (arrivals are

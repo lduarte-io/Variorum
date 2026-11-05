@@ -6,8 +6,13 @@
 //  §U5, VX-394's section): a dropped MCP connection says why in Settings ▸ MCP ▸
 //  Activity. The headless half (the host's lines, once each) is
 //  `MCPConnectionEndServerTests`; these pin the APP's half — the door's two
-//  stop roads carry their reasons, the lock road says the library's closing
-//  BEFORE the services stop, and the four ends read in words.
+//  stop roads carry their reasons, the library's CLOSING road says so BEFORE
+//  the services stop, and the four ends read in words.
+//
+//  VX-818 (the VX-809 run, batch 4 — her R-818; A-809-20/-21): the LOCK is no
+//  longer a stop road — nothing ends, so nothing is said (the lock road's steps
+//  suspend the host and keep it). "The library locked or closed" is now said by
+//  the closing roads (adopt, swap — and a teardown that names no road).
 //
 
 import Darwin
@@ -85,7 +90,7 @@ private func endActs(_ db: AppDatabase) async throws -> [String] {
 @Suite("VX-394 — a dropped connection says why (the app's half)", .serialized)
 struct MCPConnectionEndDoorTests {
     /// RED ON OLD: the door's stops logged nothing. Her switch OFF ends the
-    /// connection as "the server was turned off"; the lock road's record,
+    /// connection as "the server was turned off"; the closing road's record,
     /// then its detach, as "the library locked or closed" — ONCE.
     @Test func theDoorsTwoStopRoadsSayTheirReasonsOnce() async throws {
         try await withDoorWorld { (session: AppSession, db: AppDatabase) async throws in
@@ -120,7 +125,7 @@ struct MCPConnectionEndDoorTests {
             #expect(try await settle { door.serverState == .running })
             let second = try connect(directory, as: "claude-code", key: key)
             defer { close(second) }
-            await door.recordLibraryClosing()   // the lock road, before the store goes
+            await door.recordLibraryClosing()   // the closing road, before the store goes
             #expect(try await endActs(db) == [MCPConnectionEnd.serverOff.act, MCPConnectionEnd.libraryClosed.act])
             door.detach()                        // …then its stop
             try await Task.sleep(for: .milliseconds(300))
@@ -143,6 +148,53 @@ struct MCPConnectionEndDoorTests {
             ) { order.withValue { $0.append("stop") } }
             await teardown()
             #expect(order.value == ["savepoints", "connections", "stop"])
+        }
+    }
+
+    /// **VX-818 — THE LOCK ROAD SAYS NOTHING AND ENDS NOTHING**: its two door
+    /// steps (`suspendForLock` in the connections step, `detachForLock` in the
+    /// stop step) keep the host and its connection — no end line, no hang-up;
+    /// her switch afterwards still says its own reason, once. RED ON OLD (the lock
+    /// road's steps were `recordLibraryClosing` + `detach`): "the library locked
+    /// or closed" was said and the connection hung up.
+    @Test func theLockRoadSaysNothingAndEndsNothing() async throws {
+        try await withDoorWorld { (session: AppSession, db: AppDatabase) async throws in
+            let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                .appendingPathComponent("vend-\(UUID().uuidString.prefix(8))", isDirectory: true)
+            defer { try? FileManager.default.removeItem(at: directory) }
+            let operations = Operations()
+            let door = MCPDoor(serverAllowed: true) { database, executor in
+                MCPServerHost(
+                    database: database, operations: operations, directory: directory, version: "test",
+                    executor: executor)
+            }
+            door.attach(session: session)
+            door.setEnabled(true)
+            #expect(try await settle { door.serverState == .running })
+            let key = try operations.mintMCPSetupKey(copiedFor: "claude-code")
+            let fd = try connect(directory, as: "claude-code", key: key)
+            defer { close(fd) }
+
+            await door.suspendForLock()   // the lock road's connections step
+            door.detachForLock()          // …and its stop step
+            try await Task.sleep(for: .milliseconds(300))
+            #expect(try await endActs(db).isEmpty, "nothing ended, so nothing was said")
+            var timeout = timeval(tv_sec: 0, tv_usec: 300_000)
+            _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+            var byte: UInt8 = 0
+            #expect(read(fd, &byte, 1) != 0, "the connection was not hung up")
+
+            // The next ready resumes it; her switch then ends it with its own reason, once.
+            door.attach(session: AppSession(database: db))
+            #expect(try await settle { door.serverState == .running }, "resumed")
+            door.setEnabled(false)
+            var ends: [String] = []
+            for _ in 0..<300 {
+                ends = try await endActs(db)
+                if !ends.isEmpty { break }
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            #expect(ends == [MCPConnectionEnd.serverOff.act])
         }
     }
 

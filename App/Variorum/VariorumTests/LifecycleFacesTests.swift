@@ -218,6 +218,32 @@ struct LifecycleFacesTests {
         }
     }
 
+    /// VX-832 (the VX-805 run): both bars seed the picker through ONE seam —
+    /// an undated note opens on its CREATION day (the day its name reads), a
+    /// dated note on its date. RED ON OLD: the bars seeded
+    /// `date(fromDay: entryDate) ?? Date()`, so an undated note opened on
+    /// today. The rule's own table is the core's `EntryDatePickerDayTests`.
+    @Test func thePickerSeedOpensAnUndatedNoteOnItsCreationDay() async throws {
+        let stamp = "2026-06-20T12:00:00.000Z"
+        let seeded = CommitBar.pickerSeed(entryDate: nil, createdAt: stamp)
+        #expect(JournalDay.dayString(from: seeded) == DisplayTitle.day(fromStamp: stamp))
+        #expect(JournalDay.dayString(from: CommitBar.pickerSeed(entryDate: "2026-05-05", createdAt: stamp))
+                == "2026-05-05", "a dated note opens on its date, unchanged")
+
+        // Write's bar reads the header's stamp; Takes' bar reads the same
+        // stamp off its model's one header read.
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let created = try #require(h.model.header?.createdAt)
+            let takes = TakesViewModel(session: h.session, postID: h.postID)
+            #expect(takes.postCreatedAt == nil, "nil until the first read — the picker keeps today")
+            await takes.refreshSegmentation()
+            #expect(takes.postCreatedAt == created)
+            #expect(JournalDay.dayString(
+                from: CommitBar.pickerSeed(entryDate: nil, createdAt: takes.postCreatedAt))
+                    == DisplayTitle.day(fromStamp: created))
+        }
+    }
+
     @Test func thePickerConversionRoundTripsTheDayString() {
         // The picker's Date seed and the stored day agree in both
         // directions (the local calendar, midday-anchored against DST).

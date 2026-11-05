@@ -17,18 +17,21 @@ import Foundation
 ///   copy's name and sort key;
 /// - a TYPED-TITLED source keeps no date — its name is its title, already
 ///   faithful, and nothing invents a date for it;
-/// - a JOURNAL-profile source keeps no date — the notebook rule finds "the
-///   day's entry" by `profile = 'journal' AND entry_date`
-///   (`Queries.canonicalJournalEntry`), so a dated copy would claim a notebook
-///   day its source never claimed (`mintNoteVersion`'s V3 reason).
+/// - a JOURNAL-profile source is the class too since VX-826 (A-809-10,
+///   PROVISIONAL P-809-7 — her R-826: "never today's"); `profile` is kept on
+///   the signature, unread.
 ///
 /// Never a write of the TITLE (`DisplayTitle` stays a display rule — the name
 /// is still derived), and never a forged `created_at`: the copy's own birth
 /// stays its own. Pure and dependency-free; its callers are the copy machine's
-/// duplicate road (`Operations.duplicateAsVersionBody`) and — A-771-1, fork
-/// F-1's option (b) — her Copy to Wing (`Operations.copyNoteToWing`, both its
-/// mint paths), which the wire's `copy_note_to_wing` shares. Promote, diverge,
-/// the ownership forks and the saved version stay verbatim.
+/// duplicate road (`Operations.duplicateAsVersionBody`), her Copy to Wing
+/// (`Operations.copyNoteToWing`, both its mint paths — A-771-1, fork F-1's
+/// option (b)), which the wire's `copy_note_to_wing` shares, and — VX-845, her
+/// F-1(c) ruling, "every `copyPost` road but the saved version" — promote
+/// (`promoteLens`, `promotePicks`), diverge (`divergePostForReading`) and the
+/// ownership forks (`ceremonyCopy`, both its paths: the Own and seal forks,
+/// copy in, the deep duplicate, the bind's copy-in limb). The saved version
+/// alone stays date-cleared (`mintNoteVersion`'s V3).
 public enum DuplicateDay {
     /// The `entry_date` a duplicate of this source is born with.
     public static func entryDate(
@@ -36,7 +39,7 @@ public enum DuplicateDay {
         calendar: Calendar = JournalDay.storeCalendar
     ) -> String? {
         let undated = entryDate?.isEmpty ?? true
-        guard undated, DisplayTitle.isAbsent(title), profile != .journal else { return entryDate }
+        guard undated, DisplayTitle.isAbsent(title) else { return entryDate }
         return JournalDay.dayString(from: createdAt, calendar: calendar)
     }
 }

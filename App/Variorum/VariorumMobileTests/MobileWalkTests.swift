@@ -54,9 +54,25 @@ struct MobileWalkTests {
             await model.awaitMintSettle()
             await model.autosave.flushNow()
 
-            // The autosave landed (one-block journal semantics).
+            // VX-799 (the VX-805 run — A JUSTIFIED EDIT): a journal entry no
+            // longer seeds `one_block`, so it segments like any note — a
+            // fresh entry is all TAIL while the first paragraph is mid-thought
+            // (`MobileSpaceEaterTests`' "a fresh note is all tail"; the shared
+            // planner's `.typing` mints only at a crystallized boundary). The
+            // retired seed's `.oneBlock` plan minted the first keystroke; this
+            // walk asserted that, and the stage run (2026-11-05) caught it.
+            #expect(model.hasOpenTail, "the first paragraph is still the open tail")
+            #expect(try await storedBlockTexts(db, postID: entry.container.id) == [],
+                    "nothing mints mid-thought")
+
+            // The autosave lands: the 2 s durability tick (disabled under test)
+            // mints the trailing paragraph — fire the mint it would.
+            model.idleMintTail()
+            await model.awaitMintSettle()
+            await model.autosave.flushNow()
             #expect(try await storedBlockTexts(db, postID: entry.container.id)
                     == ["Walked and wrote."])
+            #expect(!model.hasOpenTail)
 
             // Typing continues into the minted block.
             surface.textView.insertText(" Then more.")
@@ -67,7 +83,7 @@ struct MobileWalkTests {
             let blockCount = try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM block") ?? -1
             }
-            #expect(blockCount == 1, "a journal entry is ONE block")
+            #expect(blockCount == 1, "one paragraph, one block")
 
             // Identity intact: the projection agrees with the index
             // authority everywhere (the obligation-1 audit ran after every

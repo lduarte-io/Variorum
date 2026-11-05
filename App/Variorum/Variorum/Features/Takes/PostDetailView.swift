@@ -665,6 +665,17 @@ struct PostDetailView: View {
                 }
             } catch {}
         }
+        // VX-587 (R-805-3, P-2): the note's stored date, held for the visit and
+        // handed to the router — "Shift date a day earlier" lists in ⌘K (and,
+        // once her chord is ruled, enables in the menu bar) exactly while the
+        // note has one. One container row's read per change, never the corpus.
+        .task(id: postID) {
+            do {
+                for try await header in session.database.observeContainerHeader(postID) {
+                    session.commandRouter.noteEntryDate(header?.entryDate, postID: postID)
+                }
+            } catch {}
+        }
         .onChange(of: inspectorPanel, initial: true) { _, panel in
             #if DEBUG
             PostDetailOracle.recordInspectorPanel(panel, owner: oracleOwner)

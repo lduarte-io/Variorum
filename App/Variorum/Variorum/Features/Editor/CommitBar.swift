@@ -163,6 +163,9 @@ struct CommitBar: View {
             .copyForAI,
             // VX-125 (the VX-439 run): Export Note… — the same text, as a file.
             .exportNote,
+            // VX-587 (the VX-805 run; R-805-3): Shift date a day earlier — under
+            // the date door, drawn on a dated note (`EntryDateShift.doorShows`).
+            .shiftEntryDateEarlier,
             // 13n-b U2 (R-13nb-4): the Private row, beside it (NOTE contexts).
             .markNotePrivate,
             // 13n-b U3: "Allow AI here", the Private row's neighbour.
@@ -902,8 +905,18 @@ struct CommitBar: View {
             }
             Divider()
             Button(model.header?.entryDate.map { "Date: \($0)…" } ?? "Set date…") {
-                pickedDate = Self.date(fromDay: model.header?.entryDate) ?? Date()
+                pickedDate = Self.pickerSeed(
+                    entryDate: model.header?.entryDate, createdAt: model.header?.createdAt)
                 datePickerShown = true
+            }
+            // VX-587 (R-805-3): the date's one-press backfill, under its door —
+            // the ONE act (`EntryDateShift`), drawn only on a dated note (P-2).
+            if EntryDateShift.doorShows(entryDate: model.header?.entryDate) {
+                Button(CapabilityRegistry.capability(.shiftEntryDateEarlier).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await EntryDateShift.shiftEarlier(postID: postID, session: session) }
+                }
             }
             // 13l post-close, her #77 ruling (2026-08-24): the door renders in
             // NOTE contexts only — the scraps editor composes this same bar
@@ -1042,6 +1055,13 @@ struct CommitBar: View {
     /// nonisolated: the View conformance makes CommitBar MainActor-isolated,
     /// and an isolated static traps when called off-main (the 9c
     /// SignInFlow lesson).
+    /// VX-832: the picker's opening date — the note's date, else its
+    /// CREATION day (`EntryDatePickerDay`, the one rule both bars read), else
+    /// today (no stamp yet). Noon-anchored by `date(fromDay:)`.
+    nonisolated static func pickerSeed(entryDate: String?, createdAt: String?) -> Date {
+        date(fromDay: EntryDatePickerDay.day(entryDate: entryDate, createdAt: createdAt)) ?? Date()
+    }
+
     nonisolated static func date(fromDay day: String?) -> Date? {
         guard let day, JournalDay.isValid(day) else { return nil }
         let parts = day.split(separator: "-").compactMap { Int($0) }

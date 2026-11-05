@@ -95,6 +95,13 @@ public struct MCPWriteReceipt: Sendable, Equatable {
     /// pane and no Open row is left standing on a tombstone. Empty for every
     /// act that kills no note.
     public var notesLeftDead: [String]
+    /// **VX-812 — the list call this receipt's act belongs to** (A-809-19): one
+    /// key for every landed item of ONE list call, so the app's run machinery
+    /// coalesces them into one line (its key is `runKey ?? targetID`) and a
+    /// later single act never joins them. nil for every single act.
+    public var runKey: String?
+    /// VX-812: `replace_tag`'s new tag path (`detail` carries the old one).
+    public var replacementPath: String?
 
     public init(
         clientName: String, act: Operations.MCPWriteAct, targetID: String?, targetTitle: String?,
@@ -140,6 +147,14 @@ public struct MCPHostHooks: Sendable {
     /// book (names stay with grants — AF-10 (f)); otherwise, and with no app
     /// around the host, the op's own refusal speaks through `refusalWords`.
     public var wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)?
+    /// VX-807 (the VX-809 run, batch 2): her Move to Wing ▸ door's OWN sentence
+    /// for a BOOK whose member is also in a finished or sealed book that stays
+    /// behind (`WingCopy.bookFrozen` on the Mac), so `move_book_to_wing`
+    /// refuses exactly as her door does — spoken only where the client can READ
+    /// both that note and that book (A-809-4); otherwise the book move's one
+    /// hidden-cause sentence, and with no app around the host the op's own
+    /// refusal through `refusalWords`.
+    public var bookMoveFrozenWords: (@Sendable (_ bookName: String, _ noteTitle: String, _ frozenBook: String) -> String)?
     /// **VX-275 — HER EDITOR FIRST** (her ruling (a), 2026-10-13: before a
     /// wire delete lands, the app saves what she has typed, exactly as her
     /// own Delete door does). Awaited by `MCPWriteTools.call` AFTER the
@@ -161,7 +176,8 @@ public struct MCPHostHooks: Sendable {
         now: @escaping @Sendable () -> Date = { Date() },
         show: (@Sendable (MCPShowRequest) async -> MCPShowRule.Verdict)? = nil,
         wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil,
-        beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil
+        beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil,
+        bookMoveFrozenWords: (@Sendable (_ bookName: String, _ noteTitle: String, _ frozenBook: String) -> String)? = nil
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk
@@ -170,6 +186,7 @@ public struct MCPHostHooks: Sendable {
         self.show = show
         self.wingMoveFrozenWords = wingMoveFrozenWords
         self.beforeWrite = beforeWrite
+        self.bookMoveFrozenWords = bookMoveFrozenWords
     }
 }
 
@@ -218,6 +235,17 @@ enum MCPWireRefusalCopy {
             + ", so this call may not have landed — read what it touches before trying again."
     }
 
+    /// R-805-5 — the move fence's sentence (P-805-B5).
+    static let dailyJournalMoveWords =
+        "The daily Journal can't be moved to another wing over this connection \u{2014} only the "
+        + "author moves it, in Variorum."
+
+    /// R-805-5's sibling — the delete fence's sentence (MCPSpec: "the daily
+    /// Journal never deletes" on the wire; P-805-B5).
+    static let dailyJournalDeleteWords =
+        "The daily Journal can't be deleted over this connection \u{2014} only the author deletes "
+        + "it, in Variorum. archive_book puts it away; it comes back when a day arrives."
+
     static func words(_ error: Error) -> String? {
         // VX-369: a store failure (GRDB's `DatabaseError`; a keyed store's
         // sanitized connection error) — the one non-`OperationError` class the
@@ -227,6 +255,11 @@ enum MCPWireRefusalCopy {
             return storeFailureWords("SQLite error \(failure.resultCode.rawValue)\(message)")
         }
         if error is RedactedKeyedStatementError { return storeFailureWords(nil) }
+        // VX-818 (the VX-809 run, A-809-20): a call the LOCK overtook — past the
+        // call door when the store shut, so a read or write met the typed
+        // refusal. The store-failure sentence's honest form, never "ask again":
+        // an act may have landed before a later write of the same call.
+        if error is StoreLockedError { return storeFailureWords(MCPLockedLibrary.overtakenDetail) }
         // VX-760 (the VX-771 run, batch 2): edit_take's mismatch, said as the
         // fact pattern its door PROVED from the sent and stored texts — the
         // door's richer answer, first in the chain (the app's table would read
@@ -262,6 +295,17 @@ enum MCPWireRefusalCopy {
         // first), so it is never the not-shared shape and tells nothing hidden.
         case .smartFilterUnsatisfiable(_, let reason):
             return reason
+        // R-805-5 (the VX-805 run) — THE WIRE'S JOURNAL FENCE: her own doors
+        // move and delete the daily Journal like any book since VX-435/436,
+        // so these two refusals are the WIRE's alone now
+        // (`Operations.refuseMovingTheDailyJournalOnTheWire` /
+        // `refuseDeletingTheDailyJournalOnTheWire`) and are worded here, in
+        // the room's register — the app's table keeps no sentence a door of
+        // hers could meet. Wording PROVISIONAL (P-805-B5).
+        case .dailyJournalMovesOnlyByHand:
+            return Self.dailyJournalMoveWords
+        case .dailyJournalCannotBeDeleted:
+            return Self.dailyJournalDeleteWords
         default:
             return nil
         }

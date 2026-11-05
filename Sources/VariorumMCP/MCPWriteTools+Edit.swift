@@ -407,11 +407,15 @@ extension MCPWriteTools {
     /// A write-new act in a BOOK (`create_section`), decided again inside the
     /// act's transaction (the same seam, applied to the one new write-new act
     /// of this unit — the U2 ops keep their recorded shape, P-13nb-U2-8).
-    func guardBook(_ clientName: String, _ bookID: String) -> Operations.WriteGuard {
+    /// VX-813 (A-809-17): `rung` — write new by default; `set_book_rule` with
+    /// an `order` re-decides at EDIT.
+    func guardBook(
+        _ clientName: String, _ bookID: String, rung: MCPGrantRule.Rung = .writeNew
+    ) -> Operations.WriteGuard {
         { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
             let decision = MCPGrantAuthority.decide(
-                standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: .writeNew, consumes: true)
+                standing, book: try Queries.mcpBookFacts(db, readingID: bookID), rung: rung, consumes: true)
             guard case .allow(let grantID, let consumesOnce) = decision else { throw Self.refused(decision, .book) }
             if consumesOnce, let grantID { try grants.consumeMCPOnceGrant(db, grantID) }
         }

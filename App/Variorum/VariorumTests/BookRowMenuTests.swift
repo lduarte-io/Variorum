@@ -47,13 +47,18 @@ struct BookRowMenuTests {
                 .contains(.state(.archiveBook)))
     }
 
-    /// The daily Journal never offers Delete (the op refuses it — P-2).
-    @Test func theDailyJournalOffersArchiveNeverDelete() {
+    /// The daily Journal's row offers Archive AND Delete, like any book. (A
+    /// JUSTIFIED EDIT at the VX-805/VX-809 merge-in: this pin was born
+    /// "theDailyJournalOffersArchiveNeverDelete" — "the op refuses it, P-2" —
+    /// and VX-435/436, the VX-805 run, superseded that contract: the daily
+    /// Journal is deletable with the ordinary book confirm (QUESTIONS #261 B8),
+    /// so `BookArchiveDoorSet.rendered` draws Delete for every book.)
+    @Test func theDailyJournalOffersArchiveAndDeleteSinceVX435() {
         let daily = reading("j", profile: "daily")
         #expect(Queries.isDailyJournalMintShape(daily), "the fixture IS the daily Journal's shape")
         let doors = BookRowMenuTable.doors(for: daily)
         #expect(doors.contains(.state(.archiveBook)))
-        #expect(!doors.contains(.state(.deleteBook)))
+        #expect(doors.contains(.state(.deleteBook)), "deletable like any book since VX-435/436")
     }
 
     /// Before the row's facts are read, no state door is drawn (its truth is

@@ -255,9 +255,7 @@ public struct SyncEngine: Sendable {
             report.iterations += 1
 
             var madeProgress = false
-            for chunk in stride(from: 0, to: batch.count, by: batchSize).map({
-                Array(batch[$0..<min($0 + batchSize, batch.count)])
-            }) {
+            for chunk in Self.drainChunks(batch, size: batchSize) {
                 // THE SEAM, push half (Phase 14b): the wire carries sealed
                 // payloads; `chunk` itself stays PLAINTEXT — it is what the
                 // accept bookkeeping compares against the live row
@@ -288,6 +286,14 @@ public struct SyncEngine: Sendable {
                     var result = ChunkResult()
                     var touched = TouchedRows()
                     for (pushed, outcome) in zip(chunk, outcomes) {
+                        // VX-436 — THE DRAIN GUARD (the ruling's item 4): a
+                        // deleted-Journal tombstone the server did not ACCEPT
+                        // holds this drain iteration before any later row.
+                        if Self.isDeletedJournalTombstone(pushed) {
+                            if case .accepted = outcome {} else if case .purged = outcome {} else {
+                                result.holdsTheDrain = true
+                            }
+                        }
                         switch outcome {
                         case .purged:
                             // Phase 13j (the memo's §2 ledger): the server
@@ -390,6 +396,11 @@ public struct SyncEngine: Sendable {
                 report.purged += processed.purged
                 madeProgress = madeProgress || processed.accepted > 0 || processed.rejected > 0
                     || processed.purged > 0
+                // VX-436 — the drain guard ends THIS iteration here: the
+                // merged tombstone re-leads the next one (still dirty, it
+                // sorts first again), so no re-mint ever reaches
+                // `server_seq` ahead of the delete it follows.
+                if processed.holdsTheDrain { break }
             }
             guard madeProgress else { break }
         }
@@ -401,6 +412,31 @@ public struct SyncEngine: Sendable {
         var rejected = 0
         var deferred = 0
         var purged = 0
+        /// VX-436: a deleted-Journal tombstone in this chunk was rejected or
+        /// deferred — the drain guard ends the iteration.
+        var holdsTheDrain = false
+    }
+
+    /// **THE DRAIN'S CHUNKS** (VX-436 — the drain guard's localized half):
+    /// the push's ordinary `size`-row chunks, with ONE extra cut right after
+    /// the last deleted-Journal tombstone (which `precedesInDrain` sorts
+    /// first inside `reading`), so such a tombstone never shares a server
+    /// call with a later `reading` row. The server applies a call row by
+    /// row, so a re-mint in the SAME call would be accepted beside a rejected
+    /// delete; across calls the guard (`ChunkResult.holdsTheDrain`) stops the
+    /// iteration first. Without a deleted-Journal tombstone in the batch the
+    /// chunks are byte-identical to the plain stride.
+    static func drainChunks(_ batch: [SyncRow], size: Int) -> [[SyncRow]] {
+        let size = max(1, size)
+        func chunked(_ rows: ArraySlice<SyncRow>) -> [[SyncRow]] {
+            stride(from: rows.startIndex, to: rows.endIndex, by: size).map {
+                Array(rows[$0..<min($0 + size, rows.endIndex)])
+            }
+        }
+        guard let last = batch.lastIndex(where: isDeletedJournalTombstone) else {
+            return chunked(batch[...])
+        }
+        return chunked(batch[...last]) + chunked(batch[(last + 1)...])
     }
 
     /// **THE DRAIN ORDER** — the one comparator the push sorts the outbox
@@ -417,10 +453,23 @@ public struct SyncEngine: Sendable {
     /// repairer's re-points happen to arrive. Pinned as the architectural
     /// class it is (`TheDrainOrderTests`): green on both sides by nature,
     /// red the day someone changes the comparator.
+    ///
+    /// **VX-436 — BELT (a), the ruled option A:** inside `reading`, a
+    /// DELETED-JOURNAL tombstone (`isDeletedJournalTombstone`) drains ahead
+    /// of every other `reading` row of the push, then ascending id as
+    /// before. So a re-mint can never reach `server_seq` before the delete it
+    /// follows — same device, same push, the re-mint the smaller id included
+    /// (a third device would otherwise meet two live 'daily' books and the
+    /// keeper would MERGE them — a backfill by another door). The R2-7 half
+    /// above is untouched: a keeper RETIREMENT's tombstone keeps wearing
+    /// 'daily', so it still sorts by id behind the keeper's insert.
     static func precedesInDrain(_ lhs: SyncRow, _ rhs: SyncRow) -> Bool {
         let (a, b) = (SyncSchema.applyOrderIndex(of: lhs.table),
                       SyncSchema.applyOrderIndex(of: rhs.table))
-        return a == b ? (lhs.rowID < rhs.rowID) : (a < b)
+        guard a == b else { return a < b }
+        let (lFirst, rFirst) = (isDeletedJournalTombstone(lhs), isDeletedJournalTombstone(rhs))
+        if lFirst != rFirst { return lFirst }
+        return lhs.rowID < rhs.rowID
     }
 
     // MARK: - Pull (SyncSpec §5)

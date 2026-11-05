@@ -60,7 +60,7 @@ struct BookWingMoveTests {
             })
             #expect(preview.notes == 3 && preview.archived == 1)
             #expect(preview.alsoLeaves == [Queries.AlsoLeaves(noteID: three.id, note: "three", book: "Beta")])
-            #expect(preview.frozen == nil && preview.waiting == 0 && !preview.isDailyJournal)
+            #expect(preview.frozen == nil && preview.waiting == 0)
             #expect(preview.nameTakenBy == "ALPHA", "the destination's twin name is named")
 
             let result = try ops.moveReadingToWing(alpha.id, to: wing.id)
@@ -247,28 +247,31 @@ struct BookWingMoveTests {
         }
     }
 
-    /// Item 7: the daily Journal never moves — the designated book refuses,
-    /// and so does a book wearing the 'daily' marker; nothing is written.
-    @Test func theDailyJournalNeverMoves() throws {
+    /// VX-435 (the VX-805 run — a JUSTIFIED EDIT: the pin
+    /// `theDailyJournalNeverMoves` encoded item 7's refusal, which her
+    /// 2026-11-04 ruling retired): the daily Journal MOVES like any book —
+    /// its members come with it, the designation stays on it, and the next
+    /// day's entry is born beside it in its new wing.
+    @Test func theDailyJournalMovesWithItsEntries() throws {
         try withOperations { ops, db in
             let wing = try ops.createWing(name: "Imports")
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-10-02").container
             _ = ops.shelveInDailyJournalBook(entry.id)
             let journalID = try #require(try ops.dailyJournalBookID())
-            #expect(try db.read {
-                try Queries.bookWingMovePreview($0, readingID: journalID, to: wing.id)
-            }?.isDailyJournal == true)
-            #expect(throws: OperationError.dailyJournalIsHomeOnly(id: journalID)) {
-                try ops.moveReadingToWing(journalID, to: wing.id)
-            }
-            #expect(try reading(db, journalID).wingId == "")
-            #expect(try wingOf(db, post: entry.id) == "")
-            // The marker alone answers too (a 'daily' book not designated).
-            let marked = try ops.createReading(
-                name: "Old Journal", kind: .book, profile: Queries.dailyJournalBookProfile)
-            #expect(throws: OperationError.dailyJournalIsHomeOnly(id: marked.id)) {
-                try ops.moveReadingToWing(marked.id, to: wing.id)
-            }
+            let result = try ops.moveReadingToWing(journalID, to: wing.id)
+            #expect(result.notes == 1)
+            #expect(try reading(db, journalID).wingId == wing.id)
+            #expect(try reading(db, journalID).profile == Queries.dailyJournalBookProfile,
+                    "the marker rides the move")
+            #expect(try ops.dailyJournalBookID() == journalID)
+            #expect(try wingOf(db, post: entry.id) == wing.id, "its entry came with it")
+            // The next day's entry lives beside it.
+            let next = try ops.createOrOpenJournalEntry(entryDate: "2026-10-03").container
+            #expect(next.wingId == wing.id)
+            #expect(ops.shelveInDailyJournalBook(next.id) == .shelved(readingID: journalID))
+            // …and the day already filed opens where it went.
+            let again = try ops.createOrOpenJournalEntry(entryDate: "2026-10-02")
+            #expect(!again.created && again.container.id == entry.id)
         }
     }
 
