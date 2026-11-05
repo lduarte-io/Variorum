@@ -138,6 +138,22 @@ extension Operations {
         // write new — `book`'s twin, in a gathering's words ("Undo
         // claude-code's gathering"). PROVISIONAL words, her copy pass.
         case gathering
+        // VX-813 (the VX-809 run, batch 2 — R-813): a book's ORDER set on the
+        // wire (`set_book_order`) — ONE entry per landed act ("Undo
+        // claude-code's book order"), a gathering's in its own words (VX-639's
+        // pair). `.bookOrder` is taken — it is `move_note_in_book`'s "move in a
+        // book". PROVISIONAL words, her copy pass.
+        case bookSort = "book order"
+        case gatheringSort = "gathering order"
+        // VX-807 (the VX-809 run, batch 2 — R-807; A-809-14 = P-809-3 (a)): a
+        // whole book moved to another wing (`move_book_to_wing`) — ONE entry
+        // wrapping her undo-less door, `wingMove`'s lifted ("Undo claude-code's
+        // book wing move"). PROVISIONAL words, her copy pass.
+        case bookWingMove = "book wing move"
+        // VX-812 (the VX-809 run, batch 3 — R-812): one note's tag A → tag B
+        // (`replace_tag`'s item) — ONE entry per note ("Undo claude-code's tag
+        // replacement"). PROVISIONAL words, her copy pass.
+        case tagReplace = "tag replacement"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 
@@ -460,10 +476,23 @@ extension Operations {
     /// of THAT book (`sectionNotFound` / `sectionNotInReading`, checked before
     /// anything is minted; a wing destination has no chapter). The note's ONE
     /// undo entry takes the filing with it, and the redo returns it filed.
+    ///
+    /// `tags` (VX-814 — the VX-809 run, batch 3): tag PATHS the note is born
+    /// wearing, in the same transaction — the document HEADER's road exactly
+    /// (`applyDocumentTags`: each path read by `TagPath.segments`, adopted-else-
+    /// minted in the note's wing by R-13ia-1's one rule — the capture
+    /// microsyntax's `{#tag/path}` and `import_document`'s header read the same
+    /// — and applied through the ONE application road, so every living book
+    /// hears the birth: seat or bell per `IntakeDecision`, after the destination
+    /// book's own membership and outflow and a gathering's rule tags, as a
+    /// header's do). `[]` (the default) tags nothing — every pre-VX-814 caller
+    /// byte-unchanged. The answer's `tagIDs` lead with them in the given order,
+    /// each once (VX-361's rule, `mintedNoteTags`). The ONE undo entry is the
+    /// mint's: the inverse tombstones the note, and its applications die with it.
     @discardableResult
     public func createNote(
         title: String?, text: String, entryDate: String? = nil, in destination: MCPNoteDestination,
-        section: String? = nil, undoLabel: String
+        section: String? = nil, tags: [String] = [], undoLabel: String
     ) throws -> DocumentImport {
         try mintNoteEntry(undoLabel: undoLabel, section: section) { db in
             // VX-357: U+0000 removed before segmenting and trimming
@@ -475,7 +504,7 @@ extension Operations {
             return VariorumDocument.NamedDocument(
                 fallbackTitle: "",
                 document: VariorumDocument.Document(
-                    title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [], blocks: blocks))
+                    title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: tags, blocks: blocks))
         } destination: { destination } finish: { db, minted in
             try stampEntryDate(db, entryDate, on: minted.post.id)
         }
@@ -515,10 +544,11 @@ extension Operations {
     /// this door only; the file doors keep it).
     ///
     /// `section` (VX-252): `createNote`'s — the chapter of the destination book.
+    /// `tags` (VX-814): `createNote`'s — the header road, exactly.
     @discardableResult
     public func createStructuredNote(
         title: String?, entryDate: String?, blocks: [MCPNoteBlock],
-        in destination: MCPNoteDestination, section: String? = nil, undoLabel: String
+        in destination: MCPNoteDestination, section: String? = nil, tags: [String] = [], undoLabel: String
     ) throws -> DocumentImport {
         // VX-357: the title's and each block name's U+0000 removed here
         // (`StoredText`); the takes' texts and labels at the row (`mintFanBlock`).
@@ -526,7 +556,7 @@ extension Operations {
         let document = VariorumDocument.NamedDocument(
             fallbackTitle: "",
             document: VariorumDocument.Document(
-                title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [],
+                title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: tags,
                 blocks: blocks.map { VariorumDocument.Block(text: $0.text, alternates: $0.takes) }))
         return try mintNoteEntry(
             undoLabel: undoLabel, keepingBlankTakes: true, section: section
@@ -908,9 +938,16 @@ extension Operations {
     /// VX-259: `namesCountedBy` — the readings the guard counts (the wire
     /// passes the ones the client can READ — her ruling: an accidental
     /// duplicate is fine, an oracle is not); nil counts every reading.
+    /// VX-813 (the VX-809 run, batch 2 — R-813's "an order option on
+    /// create_book"): `order` — the book is BORN in that order (her
+    /// `setReadingSort`'s two columns on the new row, in the same transaction
+    /// and the same undo entry: the inverse tombstones the book, its order
+    /// with it). A new book is never finished, so her op's one refusal cannot
+    /// arise; nil keeps the column defaults (manual, ascending), byte-unchanged.
     @discardableResult
     public func createBook(
-        named name: String, inWing wingId: String, undoLabel: String, namesCountedBy reach: BookNameReach? = nil
+        named name: String, inWing wingId: String, undoLabel: String, namesCountedBy reach: BookNameReach? = nil,
+        order: Queries.ReadingOrder? = nil
     ) throws -> Reading {
         let reading: Reading = try database.write { db in
             try requireLiveWing(db, wingId)
@@ -920,6 +957,7 @@ extension Operations {
             let now = date.now
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: bookName, kind: .book,
+                sortField: order?.field ?? .manual, sortDir: order?.direction ?? .asc,
                 wingId: wingId, createdAt: now, updatedAt: now)
             try reading.insert(db)
             return reading

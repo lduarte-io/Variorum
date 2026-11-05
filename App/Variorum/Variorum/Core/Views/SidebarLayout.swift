@@ -270,9 +270,51 @@ nonisolated enum SidebarLayout {
     /// at its window too (13u2 item 10):** an eighth starred note scrolls
     /// inside the section, so it must not push the whole column into the
     /// compact pitch — which is exactly what an uncapped count did.
-    static func rowCount(starred: Int, areas: Int, rail: Int, openNotes: Int) -> Int {
+    static func rowCount(starred: Int, areas: Int, rail: Int, openNotes: Int, aiSection: Int = 0) -> Int {
         scrollingSectionRowsCounted(rows: starred)
             + areas + rail + openStripRowsCounted(openNotes: openNotes)
+            + aiSectionRowsCounted(rows: aiSection)
+    }
+
+    // MARK: - The AI section (VX-679 — the VX-809 run, batch 5; her R-679)
+    //
+    // Her refinement: *"a NEW sidebar section of its own, NOT under Open — it
+    // lives near the sidebar's BOTTOM, about three rows reserved for it
+    // (scrolling within when more), and the whole section is GONE when there
+    // are no requests."* It sits OUTSIDE the outer last-resort scroll, just
+    // above the sync footer, so the Open list's tallest form (measured —
+    // `openListMaxHeight`) stops above it by construction. The column's fit
+    // test counts it as one more headed group with its rows capped at the
+    // window, exactly as Starred is counted (an eighth row scrolls inside, it
+    // never pushes the column to the compact pitch).
+
+    /// How many rows the AI section shows before it scrolls in place — her
+    /// "about three rows reserved".
+    static let aiSectionWindow = 3
+
+    /// The section's tallest form: one header and the window, plus half a row
+    /// so a section with more visibly shows there is more (Starred's idiom).
+    static func aiSectionMaxHeight(rowHeight: CGFloat) -> CGFloat {
+        groupHeaderHeight + rowHeight * (CGFloat(aiSectionWindow) + 0.5)
+    }
+
+    /// What the section's rows and headers (one "From ‹client› · N" per
+    /// client) measure, unscrolled.
+    static func aiSectionContentHeight(headers: Int, rows: Int, rowHeight: CGFloat) -> CGFloat {
+        CGFloat(headers) * groupHeaderHeight + CGFloat(rows) * rowHeight
+    }
+
+    /// True ⇒ the section hugs its rows; false ⇒ it takes its tallest form
+    /// and scrolls in place.
+    static func aiSectionFits(headers: Int, rows: Int, rowHeight: CGFloat) -> Bool {
+        aiSectionContentHeight(headers: headers, rows: rows, rowHeight: rowHeight)
+            <= aiSectionMaxHeight(rowHeight: rowHeight)
+    }
+
+    /// How many of the section's rows the column's fit test counts — capped
+    /// at the window it scrolls inside.
+    static func aiSectionRowsCounted(rows: Int) -> Int {
+        min(rows, aiSectionWindow)
     }
 
     // MARK: - The column's one transition beat (U1b — the orchestrator's ruling on P-U1b-5)

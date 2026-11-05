@@ -191,8 +191,9 @@ extension Operations {
     /// whole fans; ignores columns and lenses; unambiguous from anywhere
     /// (round 5's ruling, superseding the round-4 unification). Copies the
     /// container row (title/profile/entry_date/notes/segmentation verbatim —
-    /// save VX-759's one exception, P-771-1: an undated, untitled, non-journal
-    /// source's copy takes the source's creation day as its `entry_date`
+    /// save VX-759's one exception, P-771-1: an undated, untitled source's
+    /// copy (journal-profile ones too since VX-826) takes the source's
+    /// creation day as its `entry_date`
     /// (`DuplicateDay`), so it is named and sorted as its source is;
     /// never born locked — the poolDragCopy copy doctrine), every live slot
     /// (whole live fan, archived takes riding with statuses preserved,
@@ -787,8 +788,9 @@ extension Operations {
     /// opens its own write and registers its own undo entry).
     ///
     /// `keepingNamedDay` (VX-759, PROVISIONAL P-771-1): the copy's
-    /// `entry_date` by `DuplicateDay` — an undated, untitled, non-journal
-    /// source's copy takes the source's creation day, so it is named and
+    /// `entry_date` by `DuplicateDay` — an undated, untitled source's copy
+    /// (journal-profile ones too since VX-826) takes the source's creation
+    /// day, so it is named and
     /// sorted as its source is; any other source's stays verbatim. The
     /// duplicate road and (A-771-1) her Copy to Wing pass `true`, and — VX-845,
     /// her F-1(c) ruling ("extend it to every `copyPost` road but the saved

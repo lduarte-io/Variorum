@@ -102,6 +102,9 @@ final class AppBootstrap {
     /// The composition root's pre-lock teardown (13p): flush pending
     /// buffers, savepoint, stop services. Runs BEFORE the state flips.
     @ObservationIgnored var onWillLock: (@MainActor () async -> Void)?
+    /// VX-818 (A-809-21): which road is running `onWillLock` — set just before each call, read by the Mac's teardown.
+    enum WillLockRoad: Sendable { case lock, reKey, closing }
+    @ObservationIgnored private(set) var willLockRoad: WillLockRoad?
     /// The in-flight open, so a second `retry()` cannot start a second race
     /// for the same store. Test-visible so a pin can await the road rather
     /// than poll it.
@@ -738,6 +741,7 @@ final class AppBootstrap {
         let oldKey = open?.key
         let binding = binding
         if open != nil {
+            willLockRoad = .closing
             await onWillLock?()
             state = .opening
         }
@@ -873,6 +877,7 @@ final class AppBootstrap {
             // VX-307 U2c: the copy as her press opened it — the act takes its key, so one press opens it once.
             opened = look
         }
+        willLockRoad = .closing
         await onWillLock?()
         state = .opening
         // VX-309 U1c — VX-444: the band card's ledger (the outgoing library's words marks carry with the pair).
@@ -1241,6 +1246,7 @@ final class AppBootstrap {
         _ session: ProtectionRoadSession, binding: StoreBinding,
         act: @escaping @Sendable () async -> (result: Result, reopenKey: StoreKey, owed: [String])
     ) async -> Result {
+        willLockRoad = .reKey
         await onWillLock?()
         state = .opening
         let done = await Task.detached(priority: .userInitiated) {
@@ -1373,6 +1379,7 @@ final class AppBootstrap {
             ProtectionOpenRoad.log("road: the lock found no road to land in — the library stays open")
             return
         }
+        willLockRoad = .lock
         await onWillLock?()
         state = .opening
         ProtectionRoadLock.dropSessionMemory(session)

@@ -135,31 +135,53 @@ struct MCPAdviceServerTests {
         #expect(MCPToolCatalog.moveNoteToWing.rung == .edit, "the catalog's fact the sentence states")
     }
 
-    // MARK: - VX-619 (the VX-620 run, batch 3 — her C pick): a lock or a quit ends every connection
+    // MARK: - VX-619 (the VX-620 run, batch 3 — her C pick): a quit ends every connection — VX-818: a lock keeps them
 
     /// The advice says it plainly (provider-neutral — O-4: no client's own
     /// command is named in the advice; the guide's setup lesson names Claude
-    /// Code's), and the sentence's mechanics are EXECUTED: a stop — the lock
-    /// road's own step (A-8; `macLockTeardown` composes it, pinned Mac-side in
-    /// `MCPStopRoadsDoorTests`) — ends every live connection, and once the server
-    /// is back a reconnect is served again. RED ON OLD: never said.
-    @Test func theAdviceSaysALockOrQuitEndsEveryConnectionAndReconnectingWorks() async throws {
+    /// Code's), and the sentence's mechanics are EXECUTED: a stop — the quit's
+    /// (and her switch's) own step — ends every live connection, and once the
+    /// server is back a reconnect is served again.
+    ///
+    /// VX-818 (A JUSTIFIED EDIT, the ritual — the VX-809 run, batch 4; her R-818,
+    /// A-809-20): a LOCK no longer ends a connection. The sentence says the new
+    /// posture ("…quitting it ends every connection, by design, so reconnect once
+    /// it's back (e.g. with /mcp); while it's locked, calls say so until it's
+    /// unlocked."), and its lock half is executed too: the host suspended and the
+    /// store closed beneath it (the lock road's step and the pool's close), a call
+    /// answers the locked sentence, and after the unlock the SAME connection is
+    /// served — no reconnect. RED ON OLD (the letter): the old sentence said a lock
+    /// ends every connection.
+    @Test func theAdviceSaysAQuitEndsEveryConnectionAndALockKeepsThem() async throws {
         // VX-640 (A JUSTIFIED EDIT, the ritual — her RB-13 ruling, 2026-10-28):
         // the sentence names the reconnect road, /mcp, as an example and with no
         // provider's name (O-4's net bans names, not the command).
         #expect(advice.contains(
-            "open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, "
-                + "so reconnect once it's back (e.g. with /mcp)."))
+            "open while Variorum runs: quitting it ends every connection, by design, "
+                + "so reconnect once it's back (e.g. with /mcp); while it's locked, calls say so until it's unlocked."))
+        #expect(!advice.contains("locking or quitting it ends every connection"), "a lock ends nothing now")
         #expect(advice.firstMatch(of: #/(?i)\b(claude|anthropic|codex|openai)\b/#) == nil, "no provider named (O-4)")
-        let h = try ServerHarness()
+        let h = try ServerHarness(lockable: true)
         defer { h.tearDown() }
         try await h.within {
+            let note = try h.operations.createPost(title: "the dunes")
+            _ = try h.operations.newBlock(in: note.id, text: "marram", registeringUndo: false)
             let first = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
             #expect(try await h.eventually { h.host.connectedClientNames == ["claude-code"] })
-            h.host.stop()  // the lock road's step: every session hung up
+            // The lock: the connection lives on, its calls say the library is locked.
+            #expect(h.host.suspend())
+            try h.lockStore()
+            let locked = text(try await first.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)]))
+            #expect(locked == MCPLockedLibrary.words, "while it's locked, calls say so: \(locked)")
+            try h.unlockStore()
+            #expect(await h.host.resume(executor: SeededExecutor(operations: h.writeOperations)) == .resumed)
+            let back = text(try await first.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)]))
+            #expect(back.contains("marram"), "…until it's unlocked: the same connection is served: \(back)")
+            // The quit's step (and her switch's): every connection ends; a reconnect is served.
+            h.host.stop()
             #expect(try await h.eventually { h.host.connectedClientNames.isEmpty }, "every connection ended")
-            try h.host.start()  // the unlock: the server is back
+            try h.host.start()
             let again = try await h.connect(as: "claude-code")
             let tools = try await again.client.listTools().tools.map(\.name)
             #expect(tools.contains("read_note"), "reconnected, the always grant serves again: \(tools)")

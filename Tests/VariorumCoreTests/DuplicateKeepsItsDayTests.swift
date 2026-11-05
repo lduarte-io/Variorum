@@ -18,10 +18,10 @@ import Testing
 /// P-771-1: such a source's copy takes the source's CREATION DAY as its
 /// `entry_date` (the store's day calendar), so it is named and sorted as its
 /// source is — while its own `created_at` stays its honest birth (never
-/// forged). A DATED or TYPED-TITLED source's copy is byte-verbatim as before,
-/// and an undated JOURNAL-profile source's copy stays undated (the notebook
-/// rule keys on `profile = 'journal' AND entry_date` — a copy never claims a
-/// notebook day its source did not, `mintNoteVersion`'s V3 reason).
+/// forged). A DATED or TYPED-TITLED source's copy is byte-verbatim as before.
+/// (An undated JOURNAL-profile source's copy stayed undated here until VX-826 —
+/// A-809-10, PROVISIONAL P-809-7 — made it the class too; the pins below say
+/// so where they were edited.)
 ///
 /// The body is SHARED (AppSpec §9): her Duplicate with Tags / without Tags and
 /// the wire's `duplicate_note` run `duplicateAsVersionBody`, so one pin set
@@ -145,15 +145,18 @@ struct DuplicateKeepsItsDayTests {
         #expect(rule(nil, "2026-01-02", nil) == "2026-01-02")
         #expect(rule("named", nil, nil) == nil)
         #expect(rule("named", "2026-01-02", nil) == "2026-01-02")
-        #expect(rule(nil, nil, .journal) == nil)
+        #expect(rule(nil, nil, .journal) == day)  // VX-826 (A-809-10, justified edit): the journal class too
         #expect(rule(nil, "2026-01-02", .journal) == "2026-01-02")
     }
 
-    /// NOT the class: an undated JOURNAL-profile note's copy stays undated —
-    /// a copy never claims a notebook day (`canonicalJournalEntry` keys on
-    /// `profile = 'journal' AND entry_date`), V3's reason. Born the same day as
-    /// the copy, so a dated copy WOULD have become that day's entry.
-    @Test func anUndatedJournalEntrysCopyStaysUndatedSoTheNotebookRuleHearsNothing() throws {
+    /// VX-826 (the VX-809 run — A-809-10, PROVISIONAL P-809-7; a JUSTIFIED
+    /// EDIT superseding this pin's "stays undated"): an undated JOURNAL-profile
+    /// note's copy takes the day it is named for, as every undated untitled
+    /// source's does (her R-826 — "never today's"). The notebook cost, said:
+    /// born the same day as its copy, the copy is then a dated journal-profile
+    /// note of that day — the claim a dated ⌘J entry's duplicate already makes
+    /// (`DuplicateDateTitleTests` holds the class's pins).
+    @Test func anUndatedJournalEntrysCopyTakesTheDayItIsNamedFor() throws {
         try withOperations { ops, db in
             let source = try ops.createPost(title: nil, profile: .journal)
             _ = try ops.newBlock(in: source.id, text: "Dear diary.", registeringUndo: false)
@@ -161,9 +164,7 @@ struct DuplicateKeepsItsDayTests {
 
             let copy = try row(db, try ops.duplicateAsVersion(source.id).post.id)
 
-            #expect(copy.entryDate == nil && copy.profile == .journal)
-            #expect(try db.read { try Queries.canonicalJournalEntry($0, day: day) } == nil,
-                    "no live journal entry claims the day")
+            #expect(copy.entryDate == day && copy.profile == .journal)
         }
     }
 }
@@ -258,10 +259,10 @@ struct WingCopyKeepsItsDayTests {
         }
     }
 
-    /// NOT the class: an undated JOURNAL-profile note copied INTO HOME stays
-    /// undated — the notebook rule reads Home, so a dated copy there would
-    /// claim the day (born the same day as the copy).
-    @Test func anUndatedJournalEntrysWingCopyIntoHomeStaysUndated() throws {
+    /// VX-826 (A-809-10 — a JUSTIFIED EDIT superseding "stays undated"): an
+    /// undated JOURNAL-profile note copied INTO HOME takes the day it is named
+    /// for — R-826's class on this road too.
+    @Test func anUndatedJournalEntrysWingCopyIntoHomeTakesTheDayItIsNamedFor() throws {
         try withOperations { ops, db in
             let wing = try ops.createWing(name: "elsewhere")
             let source = try ops.createPost(title: nil, profile: .journal, wingId: wing.id)
@@ -271,9 +272,7 @@ struct WingCopyKeepsItsDayTests {
 
             let copy = try row(db, try ops.copyNoteToWing(source.id, to: "").id)
 
-            #expect(copy.wingId == "" && copy.entryDate == nil && copy.profile == .journal)
-            #expect(try db.read { try Queries.canonicalJournalEntry($0, day: sourceDay) } == nil,
-                    "no live Home journal entry claims the day")
+            #expect(copy.wingId == "" && copy.entryDate == sourceDay && copy.profile == .journal)
         }
     }
 

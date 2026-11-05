@@ -33,8 +33,37 @@ final class ServerHarness: @unchecked Sendable {
     let asks = LockIsolated<[MCPAsk]>([])
     let receipts = LockIsolated<[MCPWriteReceipt]>([])
 
-    init() throws {
-        let database = try AppDatabase.inMemory()
+    /// VX-825 (the VX-809 run — the two-store catalog): with a `seed`, the
+    /// position jitter is DETERMINISTIC — one seeded generator, shared by the
+    /// fixture scope (`within`) and the write executor, so two stores driven
+    /// through the same calls mint the same positions. nil (every other
+    /// suite) keeps the system generator, byte-unchanged.
+    private let seededRNG: WithRandomNumberGenerator?
+
+    /// VX-818 (the VX-809 run, batch 4): a LOCKABLE world — the store on disk
+    /// behind the app's bound view (`asRebindable`), so `lockStore()` closes it
+    /// exactly as the lock road does (`StoreBinding.lock`) and `unlockStore()`
+    /// opens it again under the SAME view (`StoreBinding.adopt`). nil = the
+    /// in-memory store every other suite runs on, byte-unchanged.
+    private let binding: StoreBinding?
+    private let storeURL: URL?
+
+    init(seed: UInt64? = nil, lockable: Bool = false) throws {
+        let rng = seed.map { WithRandomNumberGenerator(HarnessSeededGenerator(seed: $0)) }
+        seededRNG = rng
+        let database: AppDatabase
+        if lockable {
+            let url = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                .appendingPathComponent("vlock-\(UUID().uuidString.prefix(8)).sqlite")
+            let bound = try AppDatabase.onDisk(url: url, key: nil).asRebindable()
+            database = bound.view
+            binding = bound.binding
+            storeURL = url
+        } else {
+            database = try AppDatabase.inMemory()
+            binding = nil
+            storeURL = nil
+        }
         self.database = database
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
@@ -54,7 +83,7 @@ final class ServerHarness: @unchecked Sendable {
             .appendingPathComponent("vmcp-\(UUID().uuidString.prefix(8))", isDirectory: true)
         host = MCPServerHost(
             database: database, operations: operations, directory: directory, version: "test",
-            executor: SeededExecutor(operations: writeOperations))
+            executor: SeededExecutor(operations: writeOperations, rng: rng))
         let asks = self.asks
         let receipts = self.receipts
         host.hooks = MCPHostHooks(
@@ -73,7 +102,7 @@ final class ServerHarness: @unchecked Sendable {
     /// clock.
     func within<T>(_ body: () async throws -> T) async throws -> T {
         try await withDependencies {
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+            $0.withRandomNumberGenerator = seededRNG ?? WithRandomNumberGenerator(SystemRandomNumberGenerator())
         } operation: {
             try await body()
         }
@@ -86,6 +115,36 @@ final class ServerHarness: @unchecked Sendable {
     func tearDown() {
         host.stop()
         try? FileManager.default.removeItem(at: directory)
+        if let storeURL {
+            binding?.lock()
+            for suffix in ["", "-wal", "-shm"] {
+                try? FileManager.default.removeItem(atPath: storeURL.path + suffix)
+            }
+        }
+    }
+
+    /// VX-818: the library locks — the pool closed under the bound view, as
+    /// `AppBootstrap.lockOnNewRoad` closes it (a lockable world only).
+    func lockStore() throws {
+        guard let binding else { throw HarnessFailure("not a lockable harness") }
+        binding.lock()
+    }
+
+    /// VX-818: the library unlocks — the same file opened again and adopted
+    /// by the same view (a lockable world only).
+    func unlockStore() throws {
+        guard let binding, let storeURL else { throw HarnessFailure("not a lockable harness") }
+        try binding.adopt(try AppDatabase.onDisk(url: storeURL, key: nil))
+    }
+
+    /// VX-818: ANOTHER library opens in the slot beneath the same view — a
+    /// fresh store adopted by the binding (the lobby's empty-slot landing).
+    func swapInAnotherStore() throws -> URL {
+        guard let binding else { throw HarnessFailure("not a lockable harness") }
+        let other = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("vlock-other-\(UUID().uuidString.prefix(8)).sqlite")
+        try binding.adopt(try AppDatabase.onDisk(url: other, key: nil))
+        return other
     }
 
     /// VX-168: each name's own setup key — minted ONCE per name, exactly as
@@ -193,13 +252,32 @@ final class ServerHarness: @unchecked Sendable {
 /// dependencies; production reads the live RNG, as every write does).
 actor SeededExecutor: MCPWriteExecutor {
     private let operations: Operations
-    init(operations: Operations) { self.operations = operations }
+    /// VX-825: a shared seeded generator (the two-store catalog); nil = the
+    /// system generator, as every other suite runs.
+    private let rng: WithRandomNumberGenerator?
+    init(operations: Operations, rng: WithRandomNumberGenerator? = nil) {
+        self.operations = operations
+        self.rng = rng
+    }
     func run<T: Sendable>(_ body: @Sendable (Operations) throws -> T) throws -> T {
         try withDependencies {
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+            $0.withRandomNumberGenerator = rng ?? WithRandomNumberGenerator(SystemRandomNumberGenerator())
         } operation: {
             try body(operations)
         }
+    }
+}
+
+/// SplitMix64 — the harness's deterministic jitter (VX-825's two-store catalog).
+struct HarnessSeededGenerator: RandomNumberGenerator, Sendable {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed }
+    mutating func next() -> UInt64 {
+        state &+= 0x9E37_79B9_7F4A_7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
+        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
+        return z ^ (z >> 31)
     }
 }
 
@@ -294,7 +372,16 @@ struct MCPServerTests {
                     "delete_note", "archive_note", "unarchive_note",
                     // VX-596 (justified edit, the ritual — her ruling 2026-10-27,
                     // "let's add the star over the wire"): her star, a note or a book.
-                    "set_starred"])
+                    "set_starred",
+                    // VX-813 (the VX-809 run, batch 2 — justified edit, the ritual):
+                    // her navigator's Save as This Book's Order.
+                    "set_book_order",
+                    // VX-807 (the VX-809 run, batch 2 — justified edit, the ritual):
+                    // her Move to Wing for a whole book.
+                    "move_book_to_wing",
+                    // VX-812 (the VX-809 run, batch 3 — justified edit, the ritual):
+                    // tag A → tag B across the client's reach in a wing.
+                    "replace_tag"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })

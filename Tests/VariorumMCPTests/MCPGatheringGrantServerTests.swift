@@ -298,7 +298,7 @@ struct MCPGatheringGrantServerTests {
             let tools = MCPWriteTools(
                 database: h.database, grants: h.operations, executor: SeededExecutor(operations: h.writeOperations))
             let job = MCPWriteTools.Job.createNote(
-                title: nil, payload: .text(""), entryDate: nil, place: .book(w.gathering.id), sectionID: nil)
+                title: nil, payload: .text(""), entryDate: nil, place: .book(w.gathering.id), sectionID: nil, tags: [])
 
             func land(_ id: String, spendsAfter: Bool?) throws -> Operations.MCPNoteDestination? {
                 var landedOn: Operations.MCPNoteDestination?

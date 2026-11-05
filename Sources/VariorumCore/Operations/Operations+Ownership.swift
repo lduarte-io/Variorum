@@ -83,9 +83,10 @@ extension Operations {
     /// fail on an empty note it is obliged to fork.
     ///
     /// **The day** (VX-845 — her F-1(c) ruling): both paths take the
-    /// duplicate's keep-the-day rule (`DuplicateDay`) — an undated, untitled,
-    /// non-journal source's copy is born dated by the source's creation day,
-    /// so every ownership fork is named and sorted as its source is.
+    /// duplicate's keep-the-day rule (`DuplicateDay`) — an undated, untitled
+    /// source's copy (journal-profile ones too since VX-826) is born dated by
+    /// the source's creation day, so every ownership fork is named and sorted
+    /// as its source is.
     func ceremonyCopy(_ db: Database, sourceID: String, now: Date) throws -> Container {
         let source = try livePost(db, sourceID)
         let copy: Container

@@ -135,6 +135,13 @@ final class MCPDoor {
     @ObservationIgnored private var observation: Task<Void, Never>?
     /// A start is in flight off the main thread — never start twice.
     @ObservationIgnored private var starting = false
+    /// VX-818: a suspended host's resume is in flight off the main thread.
+    @ObservationIgnored private var resuming = false
+    /// VX-818: the lock road is taking the library down around a suspended host
+    /// — from its connections step until the next ready's attach no snapshot
+    /// may reconcile (a late one would RESUME the host the lock just suspended,
+    /// and the stop step would then tear it down).
+    @ObservationIgnored private var lockingDown = false
     /// R-13nb-6: an adopted library's OFF write has not landed yet — the
     /// server may not start (row 10).
     @ObservationIgnored private var adoptionLandingPending = false
@@ -248,6 +255,14 @@ final class MCPDoor {
     private(set) var lastChange: ShownChange?
     /// The last change's landing — what ⌥⌘O opens.
     var lastShow: MCPShowTarget? { lastChange?.target }
+    /// **VX-679 — THE TRAIL BEHIND ⌥⌘O** (her R-679): every place a client
+    /// showed her or changed this session, one row per place — the sidebar's
+    /// "From ‹client› · N" section reads it. Fed beside `lastChange` (a write
+    /// with a landing) and by `show_in_app`'s offers and moves; cleared with
+    /// `lastChange` (`letGoOfTheSession`). ⌥⌘O itself still opens the LAST
+    /// change only (`showLastChange`, untouched). Its own observable, so an AI
+    /// write re-renders the section and nothing else.
+    let trail = MCPTrailModel()
     /// U4 (AF-11 F-3): the windows `show_in_app` may move — set at attach.
     @ObservationIgnored private weak var windows: WindowRegistry?
     /// U4 (AF-11 F-3): where the app stands, asked ON THE MAIN ACTOR in the
@@ -352,7 +367,11 @@ final class MCPDoor {
         // Idempotent per session: the same ready re-appearing keeps its
         // server and its connections.
         guard session !== self.session else { return }
-        detach()
+        // VX-818: the ready after a LOCK finds the host the lock suspended,
+        // its connections alive — it is kept (the first snapshot's reconcile
+        // resumes it on this session's runner, or the identity belt abandons it).
+        if self.session != nil || host?.state != .suspended { detach() }
+        lockingDown = false
         self.session = session
         database = session.database
         runner = session.runner
@@ -424,6 +443,89 @@ final class MCPDoor {
         observation?.cancel()
         observation = nil
         stopServer(ending: reason)
+        letGoOfTheSession()
+    }
+
+    // MARK: - VX-818: the server survives the lock (A-809-20/-21)
+
+    /// **The lock road's connections step, when the server survives**
+    /// (`macLockTeardown` — the lock, or a re-keying reopen of the same library):
+    /// in the step that used to say each connection's end, SUSPEND the host while
+    /// the store is still open — its latch shut first (every call from now on
+    /// answers the locked sentence), the grants observation let go, the grants
+    /// store's fingerprint taken for the identity belt; the listener keeps
+    /// listening and every connection lives on. Off the main thread (P2 — one
+    /// bounded read). A host that is not running (still starting, or its
+    /// listener died) takes today's step instead: each end said, and the stop
+    /// step then tears it down (`detachForLock`).
+    func suspendForLock() async {
+        guard let host, host.state == .running, !starting else {
+            await recordLibraryClosing()
+            return
+        }
+        // The store observation goes FIRST — its snapshots (an Activity line, a
+        // last write landing) would otherwise reconcile mid-teardown and resume
+        // the host this step suspends.
+        lockingDown = true
+        observation?.cancel()
+        observation = nil
+        _ = await Task.detached(priority: .userInitiated) { host.suspend() }.value
+    }
+
+    /// **The lock road's stop step, when the server survives:** HER session's
+    /// faces go exactly as `detach()` lets them go (the asks — a dropped ask
+    /// costs the client one re-ask; the standing show ask, which ends when the
+    /// library closes; the receipt run; ⌥⌘O's last change; the share gates) and
+    /// the store observation with them — but the SUSPENDED host stays held, its
+    /// connections alive. A host the connections step did not suspend is torn
+    /// down as today (`detach()`).
+    func detachForLock() {
+        guard host?.state == .suspended else {
+            detach()
+            return
+        }
+        observation?.cancel()
+        observation = nil
+        letGoOfTheSession()
+    }
+
+    /// **The library is back (or another one opened): resume the suspended
+    /// host** — on THIS session's runner (the executor slot re-pointed: her
+    /// fresh undo stack, her serial road), off the main thread. The host's
+    /// identity belt decides: the same library ⇒ the same connections served
+    /// again, no /mcp, no re-grant; another library ⇒ abandoned (each told the
+    /// closing road's close line, nothing written), and the next reconcile
+    /// starts a fresh host if the switch says so.
+    private func resumeSuspended(_ held: MCPServerHost) {
+        guard !resuming, let runner else { return }
+        resuming = true
+        Task { @MainActor [weak self] in
+            let outcome = await Task.detached(priority: .userInitiated) { await held.resume(executor: runner) }.value
+            guard let self else { return }
+            self.resuming = false
+            guard self.host === held else { return }
+            switch outcome {
+            case .resumed:
+                if case .stoppedByItself(let reason) = held.state {
+                    self.serverState = .stoppedByItself(reason)
+                } else {
+                    self.serverState = .running
+                }
+                self.refreshConnected()
+                self.reconcileServer()
+            case .abandoned:
+                self.host = nil
+                self.adoptConnected([])
+                self.reconcileServer()
+            case .stillLocked, .notSuspended:
+                break
+            }
+        }
+    }
+
+    /// What `detach()` and `detachForLock()` both let go of: the session's
+    /// faces and the store's handles.
+    private func letGoOfTheSession() {
         adoptionLandingPending = false
         // A closed library's asks die with it (and so does every glyph — and
         // the ask watch, which an empty queue stops).
@@ -433,6 +535,8 @@ final class MCPDoor {
         answering = []
         receiptRun = []
         lastChange = nil
+        // VX-679: the trail is session-scoped — it goes with ⌥⌘O's last change.
+        trail.update { $0.clear() }
         // A locked library shows no share face (VX-272's gate reads no store).
         if hasApprovedClient { hasApprovedClient = false }
         session = nil
@@ -443,6 +547,16 @@ final class MCPDoor {
 
     /// Start or stop the server to match the toggle.
     private func reconcileServer() {
+        // VX-818: nothing reconciles while the lock road takes the library down.
+        guard !lockingDown else { return }
+        // VX-818: a host the lock suspended is resumed first (or abandoned —
+        // its identity belt), before the switch is read: its connections were
+        // never this snapshot's to stop.
+        if let host, host.state == .suspended {
+            guard serverAllowed, database != nil, !adoptionLandingPending else { return }
+            resumeSuspended(host)
+            return
+        }
         guard snapshot.enabled else {
             // VX-394: her switch OFF — each connection it ends says so.
             stopServer(ending: .serverOff)
@@ -499,7 +613,11 @@ final class MCPDoor {
             wingMoveFrozenWords: Self.wingMoveFrozenWords,
             // VX-275 (her ruling (a)): her typing lands before a wire act
             // meets the take she may be typing in — `MCPDoor+HerEditor`.
-            beforeWrite: { [weak self] _ in await self?.flushHerEditorBeforeWrite() })
+            beforeWrite: { [weak self] _ in await self?.flushHerEditorBeforeWrite() },
+            // VX-807 (the VX-809 run, batch 2): her Move to Wing door's own
+            // sentence for a BOOK whose note a finished or sealed book holds
+            // (the server speaks it where the client can read both).
+            bookMoveFrozenWords: Self.bookMoveFrozenWords)
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —
@@ -543,6 +661,7 @@ final class MCPDoor {
         }
         host = nil
         starting = false
+        resuming = false
         adoptConnected([])
     }
 
@@ -999,10 +1118,14 @@ final class MCPDoor {
 
     /// A write landed: say it on the one status seam, coalesced with the
     /// client's run on the same target (P-4: the signal carries no decision).
+    /// VX-812 (A-809-19): a LIST call's items share one `runKey`, which keys
+    /// the run in the target's place — one call reads as ONE line naming the
+    /// count, and a later single act never joins it.
     func landReceipt(_ receipt: MCPWriteReceipt, now: Date = Date()) {
         guard let session else { return }
         if let last = receiptRun.last, last.clientName == receipt.clientName,
-           last.targetID == receipt.targetID, now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {
+           (last.runKey ?? last.targetID) == (receipt.runKey ?? receipt.targetID),
+           now.timeIntervalSince(receiptRunAt) < Self.receiptWindow {
             receiptRun.append(receipt)
         } else {
             receiptRun = [receipt]
@@ -1016,6 +1139,8 @@ final class MCPDoor {
             ShownChange(target: $0, clientName: receipt.clientName, title: receipt.targetTitle)
         }
         if let change { lastChange = change }
+        // VX-679: the trail behind ⌥⌘O — a write with a landing is a row.
+        trail.update { $0.record(write: receipt, at: now) }
         let door = change.map { change in
             StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(change) }
         }
@@ -1026,6 +1151,13 @@ final class MCPDoor {
     /// or sealed book: HER door's sentence (`WingCopy.frozen`), ONE source.
     nonisolated static let wingMoveFrozenWords: @Sendable (String, String) -> String = {
         WingCopy.frozen($0, book: $1)
+    }
+
+    /// VX-807 — `move_book_to_wing`'s refusal for a book whose note a finished or
+    /// sealed book that stays behind holds: HER door's sentence
+    /// (`WingCopy.bookFrozen`), ONE source.
+    nonisolated static let bookMoveFrozenWords: @Sendable (String, String, String) -> String = { book, note, frozen in
+        WingCopy.bookFrozen(book, because: Queries.AlsoLeaves(noteID: "", note: note, book: frozen))
     }
 
     // MARK: - Navigation (U4 — R-13nb-23, AF-11 F-2/F-3)
@@ -1071,8 +1203,14 @@ final class MCPDoor {
                     return MCPShowRule.verdict(self.currentStanding().0, dial: request.dial) == .navigate
                 })
             switch delivery {
-            case .delivered: return .navigate
-            case .unfinished: return .refuse(MCPShowRule.partialShowWords)
+            case .delivered:
+                // VX-679: the place opened in front of her — a row, `opened`.
+                trail.update { $0.record(show: request, opened: true, at: Date()) }
+                return .navigate
+            case .unfinished:
+                // VX-679: the note opened (the rest never landed) — `opened` too.
+                trail.update { $0.record(show: request, opened: true, at: Date()) }
+                return .refuse(MCPShowRule.partialShowWords)
             case .interrupted:
                 return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.partialShowWords)
             }
@@ -1097,6 +1235,9 @@ final class MCPDoor {
         guard session.status.stand(MCPShowOfferCopy.line(request), id: itemID, action: take, dismiss: dismiss) != nil
         else { return false }
         showOffer = ShowOffer(request: request, itemID: itemID)
+        // VX-679: an offered ask is a row, `shown` — and it stays one after the
+        // ask ends (replaced, dismissed, its client gone): she can still go there.
+        trail.update { $0.record(show: request, opened: false, at: Date()) }
         return true
     }
 
@@ -1130,9 +1271,45 @@ final class MCPDoor {
         Task { @MainActor [weak self] in
             guard let self else { return }
             guard await self.placeStands(request.target) else {
+                // VX-679: a gone place's rows go with it (a dead door — P-2).
+                self.trail.update { $0.forget(placeOf: request.target) }
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return
             }
+            // VX-679: she took it — its row reads `opened`.
+            self.trail.update { $0.markOpened(request) }
+            self.logShowTaken(request)
+            await Self.deliverHerPress(
+                request.target, session: session, into: router,
+                unfinished: MCPShowOfferCopy.unfinished(request))
+        }
+    }
+
+    /// **VX-679 — HER PRESS on a trail row of an ask that no longer stands**
+    /// (taken, replaced, dismissed, or its client gone): the ask's own landing
+    /// road, exactly as her take runs it (`takeShowOffer` — R-679: "clicking
+    /// lands exactly where the offer would have"), minus the standing ask it
+    /// has no longer: the window that can show it (`creationRouter`, raised by
+    /// HER press), the place re-read first (F-L2 — gone ⇒ said where she
+    /// pressed in the take's own words, nothing opened, no take logged, the
+    /// place's rows let go), then the take logged as her take of that ask
+    /// (ruling (4)'s row — PROVISIONAL P-809-14) and the navigator's delivery,
+    /// one that cannot finish said in her words. With no full window it says
+    /// so (the receipt's `noWindow` — there is no ask to keep standing).
+    func landAsk(_ request: MCPShowRequest) {
+        guard let session else { return }
+        guard let router = windows?.creationRouter() else {
+            session.status.refuse(MCPReceiptCopy.noWindow)
+            return
+        }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard await self.placeStands(request.target) else {
+                self.trail.update { $0.forget(placeOf: request.target) }
+                session.status.refuse(MCPShowOfferCopy.gone(request))
+                return
+            }
+            self.trail.update { $0.markOpened(request) }
             self.logShowTaken(request)
             await Self.deliverHerPress(
                 request.target, session: session, into: router,
@@ -1239,6 +1416,8 @@ final class MCPDoor {
             guard let self else { return }
             guard await self.placeStands(change.target) else {
                 if self.lastChange?.target == change.target { self.lastChange = nil }
+                // VX-679: and the place's trail rows go with it (a dead door — P-2).
+                self.trail.update { $0.forget(placeOf: change.target) }
                 session.status.refuse(MCPReceiptCopy.gone(change.target, title: change.title, client: change.clientName))
                 return
             }

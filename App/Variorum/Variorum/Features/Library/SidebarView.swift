@@ -232,6 +232,16 @@ struct SidebarView: View {
     /// were the split view's `safeAreaInset`; with the flat `ShellSplit`
     /// they are the column's own last region, above nothing.
     var bottom: AnyView? = nil
+    /// **VX-679 — a section the composition root composes near the column's
+    /// BOTTOM** (her R-679: the AI section — "its own section near the
+    /// sidebar's bottom, NOT under Open"), rendered just above `bottom`,
+    /// outside the outer scroll. The sidebar never holds the feature it comes
+    /// from: it RENDERS the view and asks the closures how many rows and
+    /// headers it draws (the fit test, and whether it shows at all — none ⇒ the
+    /// whole section and its separator are gone). The closures are read INSIDE
+    /// this column's body, so what they read observes this column, never the
+    /// root's. nil (a harness mount) ⇒ the column is exactly what it was.
+    var footerSection: FooterSection? = nil
     /// VX-425: the wings the note rows' Move/Copy to Wing ▸ doors list (the
     /// composition root's model; nil — a harness mount — draws no wing doors).
     var wings: WingsModel? = nil
@@ -291,6 +301,19 @@ struct SidebarView: View {
         let title: String?
     }
 
+    /// VX-679: the seam `footerSection` rides (see there).
+    struct FooterSection {
+        /// The rows it draws now (0 ⇒ the section is gone).
+        let rows: @MainActor () -> Int
+        /// Its group headers (one per client).
+        let headers: @MainActor () -> Int
+        /// The view, at the column's row pitch.
+        let content: @MainActor (_ rowHeight: CGFloat) -> AnyView
+    }
+
+    /// VX-679: the footer section's rows this pass (0 with none composed).
+    private var footerRows: Int { footerSection?.rows() ?? 0 }
+
     private var tokens: VoiceTokens { theme.tokens(for: scheme) }
 
     /// The note whose rail is showing, if any — the rail's presence AND the
@@ -320,14 +343,16 @@ struct SidebarView: View {
         SidebarLayout.rowCount(
             starred: stars.items.count, areas: Self.areas.count,
             rail: railEquivalentRows,
-            openNotes: openListRows.count)
+            openNotes: openListRows.count,
+            aiSection: footerRows)
     }
 
     /// The headed groups the column is about to draw (ladder R1-12: the
-    /// fit test counts the chrome actually present).
+    /// fit test counts the chrome actually present). VX-679: the footer
+    /// section is one more while it shows.
     private var headedGroupCount: Int {
         (stars.items.isEmpty ? 0 : 1) + (railEquivalentRows == 0 ? 0 : 1)
-            + (openListRows.isEmpty ? 0 : 1)
+            + (openListRows.isEmpty ? 0 : 1) + (footerRows == 0 ? 0 : 1)
     }
 
     private var rowHeight: CGFloat {
@@ -403,6 +428,16 @@ struct SidebarView: View {
                 SidebarGeometry.columnScrollFrames[SidebarGeometry.bodyKey(for: workspace)] = frame
             }
             #endif
+            // VX-679 (her R-679): the AI section, near the column's BOTTOM —
+            // outside the outer scroll, so the Open list stops above it; GONE
+            // (separator and all) while it has no row.
+            if let footerSection, footerRows > 0 {
+                VStack(alignment: .leading, spacing: 0) {
+                    separator
+                    footerSection.content(rowHeight)
+                }
+                .transition(.opacity)
+            }
             if let bottom {
                 Divider().overlay(tokens.line)
                 bottom

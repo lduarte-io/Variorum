@@ -2718,10 +2718,15 @@ enum TutorialSeeder {
             // provider setup's fence, because it names Claude Code's road (O-4);
             // the roads are the clients' documented ones (Claude Code's /mcp ▸
             // Reconnect; a restarted client starts its servers fresh).
-            + "Locking Variorum or quitting it ends every client's connection, by "
-            + "design. Once it's open again, reconnect the client: in Claude Code, "
-            + "choose Reconnect for it in /mcp; any client reconnects when you "
-            + "restart it.",
+            // VX-818 (the VX-809 run, batch 4 — her R-818): a LOCK keeps every
+            // connection now (each request answered that the library is locked,
+            // served again at the unlock); the quit still ends them. PROVISIONAL
+            // words (P-809-4's family, her copy pass).
+            + "Quitting Variorum ends every client's connection, by design. Once "
+            + "it's open again, reconnect the client: in Claude Code, choose "
+            + "Reconnect for it in /mcp; any client reconnects when you restart it. "
+            + "Locking Variorum keeps every connection: while it's locked, a "
+            + "client is told so at each request, and it carries on once you unlock.",
             // O-4 SETUP COPY END
 
             // VX-197 U8b: where a request shows (above the tabs, VX-281), the
@@ -2782,9 +2787,15 @@ enum TutorialSeeder {
             + "one at a time or many at once, and save a lens; it can't change a "
             + "word you wrote.",
 
-            "Write new: it can also make new notes, books, chapters and tags, file "
-            + "notes into books and chapters, and give a book a rule that collects "
-            + "notes by tag. It can add blocks at the end of a note, duplicate a "
+            // VX-846 (the VX-809 run, batch 5 — R-846, PROVISIONAL P-809-6, her
+            // copy pass): the truth-pass rule (VX-197) for this run's and
+            // VX-771's write-new acts — a gathering minted on a wing
+            // (create_gathering, VX-769) and a note born wearing its tags
+            // (create_note's tags, VX-814).
+            "Write new: it can also make new notes, books, gatherings, chapters and "
+            + "tags, file notes into books and chapters, and give a book a rule that "
+            + "collects notes by tag. A note it makes can wear its tags from the "
+            + "start. It can add blocks at the end of a note, duplicate a "
             + "note to work on a copy, and link two notes as versions by naming "
             + "which paragraphs match.",
 
@@ -2803,16 +2814,25 @@ enum TutorialSeeder {
             // lens, naming a block, putting back from the tray, setting a note's
             // date, restoring a deleted comment, taking a note out of a book — and
             // VX-639's gatherings join the library's acts. PROVISIONAL words.
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): this run's
+            // edit-rung acts join the library's list — a tag swapped across a
+            // wing (replace_tag, VX-812), a book's order (set_book_order,
+            // VX-813) and a whole book moved to another wing (move_book_to_wing,
+            // VX-807). (The replace form of a take's edit, old_str/new_str, is
+            // the wire's mechanic and stays the tool description's: "change …
+            // takes" and the commit sentence below are true of both forms.)
             "Edit: it can also do most of what you can do at the keyboard. In a "
             + "note, it can change, choose, commit, lock or unlock, archive or "
             + "delete takes, restore a commit or rename it, make a lens the note or "
             + "delete a lens, add blocks anywhere, divide, merge, move, name or "
             + "delete blocks, put a deleted block or take back from the note's tray, "
             + "set the note's date, and edit, delete or restore any comment. Across "
-            + "the library, it can take a tag off a note, take a note out of a book, "
-            + "star, unstar, rename, archive or delete notes, books and gatherings, "
-            + "finish or reopen a book, reorder a book's notes and chapters, and "
-            + "rename or delete a chapter. When it rewrites the words "
+            + "the library, it can take a tag off a note or swap one tag for another "
+            + "across a wing, take a note out of a book, star, unstar, rename, "
+            + "archive or delete notes, books and gatherings, finish or reopen a "
+            + "book, set a book's order, reorder a book's notes and chapters, rename "
+            + "or delete a chapter, and move a whole book to another wing. When it "
+            + "rewrites the words "
             + "of a take, Variorum first commits the words it replaces, unless the "
             + "take's latest commit already holds them, and then commits the new "
             + "words, so you can always compare and come back. Both commits stay "
@@ -2866,7 +2886,12 @@ enum TutorialSeeder {
             + "gathering itself, but its rule stays yours. And a client can move a note "
             + "to another wing only with edit where the note is and write new in "
             + "the wing it goes to: the note leaves its books there, its tags come "
-            + "along, and \u{2325}\u{2318}Z brings it back.",
+            + "along, and \u{2325}\u{2318}Z brings it back. "
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the book
+            // move's grants (A-809-2) and the two it never moves (A-809-16's
+            // gathering, P-809-11; R-805-5's daily Journal).
+            + "A whole book moves the same way, with edit on the book, but a "
+            + "gathering and your daily Journal move only by your hand.",
 
             "The open book is the widest grant of all: one switch in Settings "
             + "\u{25B8} MCP that lets every approved client read everything, "
@@ -2900,7 +2925,12 @@ enum TutorialSeeder {
 
             "To a client, something it can't reach looks exactly like something "
             + "that isn't there. No answer it gets tells it that a Private page or "
-            + "a journal entry exists.",
+            + "a journal entry exists. "
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): VX-825's
+            // law for refusals (her R-825-sweep; A-809-4's hidden-cause class),
+            // said for the person: a cause beyond reach is one plain sentence.
+            + "And when something it can't reach is why an act can't land, it "
+            + "hears only that: one plain sentence that names nothing.",
         ])
 
         _ = try lesson(door, mcpLessons[4], [
@@ -2980,7 +3010,16 @@ enum TutorialSeeder {
             + "that collects every note wearing a tag. A rule it writes moves "
             + "nothing by itself: notes that already match wait at the book's "
             + "Arrivals for you to let in, and notes it tags afterwards join the way "
-            + "they would if you had tagged them.",
+            + "they would if you had tagged them, "
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the truth
+            // fix A-809-11 (P-809-8) owes this sentence — a client's applying
+            // act never seats a note where membership would fence it — and the
+            // propose-then-you-delete story VX-825's remove_tag answer opens
+            // (`tag_unused_in_reach`; deleting a tag stays hers).
+            + "except in a book marked Private or your daily Journal, where they "
+            + "wait at Arrivals for you. When it takes a tag off and no note it can "
+            + "see still wears that tag, it can suggest you delete the tag; "
+            + "deleting a tag stays yours, in Settings \u{25B8} Tags.",
 
             "For a revision, grant Edit on the note's wing and ask your AI to "
             + "duplicate the note and rewrite the copy. The copy lands in that "
@@ -3041,8 +3080,19 @@ enum TutorialSeeder {
             + "by side in Compare. "
             + "\u{2325}\u{2318}O (Show the AI\u{2019}s Last Change, in the Edit "
             + "menu) takes you there later, even after the line fades. "
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the list
+            // behind ⌥⌘O (VX-679 — her R-679's section and its two doors).
+            + "Near the bottom of the sidebar, a list headed From \u{2039}name\u{203A} "
+            + "keeps each place a client showed you or changed this session: click "
+            + "a row to go there, or the icon at its end to see what it asked or "
+            + "did. "
             + "\u{2325}\u{2318}Z takes a client's act back, one act at a time, and "
-            + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take.",
+            + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take. "
+            // VX-846 — the list forms (VX-812, A-809-18/19): one call, an act per
+            // note, one line naming the count.
+            + "When it acts on many notes in one request, each note is its own "
+            + "act: the line counts them, and \u{2325}\u{2318}Z takes them back one "
+            + "at a time.",
 
             // VX-197 U8b — Compare from the wire (VX-298). VX-676 (the VX-677
             // run — her sitting + mid-run amendment, 2026-10-28): a show LANDS

@@ -315,13 +315,25 @@ struct TutorialMCPChapterTests {
             // `MacWillLockTests`; headless `MCPAdviceServerTests.theAdviceSaysALock…`
             // executes stop → every connection gone → start → a reconnect served),
             // and the advice says the same, provider-neutral.
-            #expect(text.contains("Locking Variorum or quitting it ends every client's connection, by design. Once "
-                                  + "it's open again, reconnect the client: in Claude Code, choose Reconnect for it in "
-                                  + "/mcp; any client reconnects when you restart it."))
+            // VX-818 (A JUSTIFIED EDIT, the ritual — the VX-809 run, batch 4; her
+            // R-818, A-809-20): a LOCK keeps every connection now — the quit
+            // still ends them. THE TRUTH lives where the mechanics run: the lock
+            // road suspends the host and the next ready resumes it on the same
+            // connections (`MCPStopRoadsDoorTests`, `MacWillLockTests`; headless
+            // `MCPAdviceServerTests.theAdviceSaysAQuitEndsEveryConnectionAndALockKeepsThem`
+            // executes both halves). PROVISIONAL words (P-809-4's family).
+            #expect(text.contains("Quitting Variorum ends every client's connection, by design. Once it's open "
+                                  + "again, reconnect the client: in Claude Code, choose Reconnect for it in /mcp; any "
+                                  + "client reconnects when you restart it. Locking Variorum keeps every connection: "
+                                  + "while it's locked, a client is told so at each request, and it carries on once "
+                                  + "you unlock."))
+            #expect(!text.contains("Locking Variorum or quitting it ends"), "a lock ends nothing now")
             #expect(MCPSetupClient.claudeCode.label == "Claude Code", "the client the road is named for, by its label")
-            #expect(MCPSession.instructions.contains("locking or quitting it ends every connection, by design, "
+            #expect(MCPSession.instructions.contains("quitting it ends every connection, by design, "
                                                      + "so reconnect once it's back"), "the advice says the same (D-2)")
-            #expect(MCPConnectionEnd.allCases.contains(.libraryClosed), "a lock's end is one Activity names")
+            #expect(MCPSession.instructions.contains("while it's locked, calls say so until it's unlocked"),
+                    "…and the lock's half (D-2)")
+            #expect(MCPConnectionEnd.allCases.contains(.libraryClosed), "a closing library's end is one Activity names")
             #expect(text.contains("as a connection request"))
             #expect(MCPPaneCopy.requestsSection == "Connection requests")
             for id in [CapabilityID.mcpApproveClient, .mcpDenyClient, .mcpChangeClientAccess, .mcpRevokeClient] {
@@ -477,14 +489,22 @@ struct TutorialMCPChapterTests {
             for name in ["add_take", "add_takes", "add_comment", "add_comments", "save_lens"] {
                 #expect(MCPToolFacts.rung(of: name) == .suggest, "\(name) is a suggest-rung act")
             }
-            #expect(text.contains("Write new: it can also make new notes, books, chapters and tags, file notes into "
-                                  + "books and chapters, and give a book a rule that collects notes by tag. It can add "
-                                  + "blocks at the end of a note, duplicate a note to work on a copy, and link two notes "
-                                  + "as versions by naming which paragraphs match."))
+            // VX-846 (the VX-809 run, batch 5 — A JUSTIFIED EDIT, the ritual; PROVISIONAL
+            // P-809-6): the truth-pass rule for VX-771's and this run's write-new acts —
+            // a gathering minted on a wing (create_gathering joins the loop) and a note
+            // born wearing its tags (create_note's tags). RED ON OLD by absence.
+            #expect(text.contains("Write new: it can also make new notes, books, gatherings, chapters and tags, file "
+                                  + "notes into books and chapters, and give a book a rule that collects notes by tag. "
+                                  + "A note it makes can wear its tags from the start. It can add blocks at the end of "
+                                  + "a note, duplicate a note to work on a copy, and link two notes as versions by "
+                                  + "naming which paragraphs match."))
             for name in ["create_note", "create_book", "create_section", "apply_tag", "add_note_to_book",
-                         "file_note_in_chapter", "set_book_rule", "insert_blocks", "duplicate_note", "link_versions"] {
+                         "file_note_in_chapter", "set_book_rule", "insert_blocks", "duplicate_note", "link_versions",
+                         "create_gathering"] {
                 #expect(MCPToolFacts.rung(of: name) == .writeNew, "\(name) is a write-new act")
             }
+            #expect(try tool("create_note").description.contains("tags the note as it is born"),
+                    "a note it makes can wear its tags from the start (VX-814)")
             #expect(try tool("insert_blocks").description.contains("they go at the note's END — write new on the note "
                                                                      + "is enough"), "write new adds at the end only")
             #expect(try tool("link_versions").description.contains("Name at least one pair"),
@@ -511,9 +531,10 @@ struct TutorialMCPChapterTests {
                 commit, lock or unlock, archive or delete takes, restore a commit or rename it, make a lens the note \
                 or delete a lens, add blocks anywhere, divide, merge, move, name or delete blocks, put a deleted \
                 block or take back from the note's tray, set the note's date, and edit, delete or restore any \
-                comment. Across the library, it can take a tag off a note, take a note out of a book, star, unstar, \
-                rename, archive or delete notes, books and gatherings, finish or reopen a book, reorder a book's \
-                notes and chapters, and rename or delete a chapter.
+                comment. Across the library, it can take a tag off a note or swap one tag for another across a \
+                wing, take a note out of a book, star, unstar, rename, archive or delete notes, books and gatherings, \
+                finish or reopen a book, set a book's order, reorder a book's notes and chapters, rename or delete a \
+                chapter, and move a whole book to another wing.
                 """
             #expect(text.contains(editStep))
             for name in ["edit_take", "choose_take", "save_commit", "archive_take", "delete_take", "restore_commit",
@@ -523,7 +544,10 @@ struct TutorialMCPChapterTests {
                          "rename_chapter", "delete_chapter", "set_starred",
                          // VX-367's eight, one by one.
                          "lock_take", "unlock_take", "rename_commit", "delete_lens", "set_block_name", "put_back",
-                         "set_entry_date", "restore_comment", "remove_note_from_book"] {
+                         "set_entry_date", "restore_comment", "remove_note_from_book",
+                         // VX-846 (the VX-809 run, batch 5 — A JUSTIFIED EDIT, the ritual): this
+                         // run's edit-rung acts, named in the library's list (VX-812 · VX-813 · VX-807).
+                         "replace_tag", "set_book_order", "move_book_to_wing"] {
                 #expect(MCPToolFacts.rung(of: name) == .edit, "\(name) is an edit-rung act")
             }
             #expect(try tool("insert_blocks").description.contains("Placing them anywhere else needs edit"),
@@ -659,6 +683,18 @@ struct TutorialMCPChapterTests {
                                   + "in the wing it goes to"))
             #expect(text.contains("the note leaves its books there, its tags come along, and "
                                   + "\u{2325}\u{2318}Z brings it back"))
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the book move
+            // (VX-807 — A-809-2's grants) and the two it never moves on the wire
+            // (A-809-16's gathering; R-805-5's daily Journal). THE TRUTH is the
+            // catalog's: its rung and its own description's sentence (the acts are
+            // `MCPBookWingMoveServerTests`').
+            #expect(text.contains("A whole book moves the same way, with edit on the book, but a gathering and "
+                                  + "your daily Journal move only by your hand."))
+            #expect(MCPToolFacts.rung(of: "move_book_to_wing") == .edit)
+            #expect(MCPToolFacts.scopes(of: "move_book_to_wing")?.contains(.gathering) == false,
+                    "a gathering grant never lists it")
+            #expect(try tool("move_book_to_wing").description.contains(
+                "A gathering and the daily Journal move only by the author's hand"))
             // "read that wing's gatherings": codex's Home-wing read grant reaches
             // a Home gathering; claude-code's book grant never does.
             let topic = try ops.createTag(name: "drafts")
@@ -819,6 +855,19 @@ struct TutorialMCPChapterTests {
             let wingChord = try #require(CapabilityRegistry.capability(.switchWing).shortcutLabel)
             #expect(text.contains("(\(wingChord) switches wings)"))
             #expect(text.contains("looks exactly like something that isn't there"))
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): VX-825's law for
+            // refusals, said for the person (A-809-4's hidden-cause class). THE TRUTH
+            // is the wire's own sentences — each names nothing (no book, no count, no
+            // kind); their acts are `MCPHiddenCauseServerTests`' and the two-store
+            // catalog's EXCEPTION rows.
+            #expect(text.contains("And when something it can't reach is why an act can't land, it hears only "
+                                  + "that: one plain sentence that names nothing."))
+            for words in [MCPWriteTools.addHiddenCauseWords, MCPWriteTools.moveHiddenCauseWords,
+                          MCPWriteTools.bookMoveHiddenCauseWords] {
+                #expect(words.contains("something beyond your reach holds"), "one plain sentence: \(words)")
+                #expect(!words.contains("Private") && !words.contains("finished") && !words.contains("sealed")
+                        && !words.contains("owns"), "it names nothing of the hidden thing: \(words)")
+            }
 
             let ops = session.operations
             // Wings first, with the open book OFF (it reads every wing).
@@ -1082,9 +1131,21 @@ struct TutorialMCPChapterTests {
             #expect(MCPSession.instructions.contains("put plans, summaries and research into notes"),
                     "the advice says the same (U8a)")
             #expect(MCPToolFacts.scopes(of: "create_book") == [.wing], "making a book takes a wing grant")
+            // VX-846 (the VX-809 run, batch 5 — A JUSTIFIED EDIT, the ritual; PROVISIONAL
+            // P-809-6): the truth fix A-809-11 (P-809-8) owes the sentence — a client's
+            // tag never SEATS a note where membership fences it, so a Private book and
+            // the daily Journal hear it at Arrivals — and VX-825's propose-then-you-delete
+            // story (`tag_unused_in_reach`). Both truths below.
             #expect(text.contains("A rule it writes moves nothing by itself: notes that already match wait at the "
                                   + "book's \(ArrivalsCopy.word) for you to let in, and notes it tags afterwards join "
-                                  + "the way they would if you had tagged them."))
+                                  + "the way they would if you had tagged them, except in a book marked Private or "
+                                  + "your daily Journal, where they wait at \(ArrivalsCopy.word) for you."))
+            #expect(text.contains("When it takes a tag off and no note it can see still wears that tag, it can "
+                                  + "suggest you delete the tag; deleting a tag stays yours, in Settings \u{25B8} "
+                                  + "\(SettingsPane.tags.title)."))
+            #expect(try tool("remove_tag").description.contains("suggest the author delete it in Settings ▸ Tags"),
+                    "the wire tells the client the same (VX-825's tag_unused_in_reach)")
+            #expect(try tool("remove_tag").description.contains(MCPWriteTools.tagUnusedKey))
             #expect(MCPBookFacts.matchesWaitWords.contains("undecided matches wait at Arrivals for the author to let in"),
                     "the wire tells the client the same (P-13nb-U4-16)")
             // THE TRUTH, on the wire's own acts: a note she tagged before the
@@ -1111,6 +1172,30 @@ struct TutorialMCPChapterTests {
             let alsoHers = try note(ops, "her own tea note")
             try ops.applyTag(teaTag.id, toPost: alsoHers)
             #expect(try await standing(alsoHers) == "member", "…as hers would")
+            // VX-846 — THE TRUTH of the exception (A-809-11, P-809-8): a book marked
+            // Private that collects #tea hears a CLIENT's tag (the wire's own value —
+            // `heardAsWireClient`, the one door line `MCPWriteTools.call` hands) at
+            // Arrivals, while her own tag still seats there. The acts are
+            // `WireIntakeNeverFencesTests`' (core) and the wire's state pins.
+            let privateTea = try ops.createReading(name: "private tea", kind: .book)
+            _ = try ops.setBookRule(
+                privateTea.id, Operations.MCPBookRuleWrite(rule: .some(RuleTerm.tag("tea"))),
+                undoLabel: Operations.MCPWriteAct.bookRule.undoLabel(client: "claude-code"))
+            #expect(try ops.setBookPrivate(privateTea.id, true))
+            func standingInPrivate(_ postID: String) async throws -> String? {
+                try await db.read { db in
+                    try String.fetchOne(
+                        db, sql: "SELECT status FROM reading_post WHERE reading_id = ? AND post_id = ? "
+                            + "AND deleted_at IS NULL", arguments: [privateTea.id, postID])
+                }
+            }
+            let clientTagged = try note(ops, "sencha, a client's find")
+            _ = try ops.heardAsWireClient().applyTagPath("tea", toPost: clientTagged, undoLabel: tagLabel)
+            #expect(try await standingInPrivate(clientTagged) == "arrival",
+                    "a client's tag waits at a Private book's Arrivals")
+            let herTagged = try note(ops, "her own sencha")
+            try ops.applyTag(teaTag.id, toPost: herTagged)
+            #expect(try await standingInPrivate(herTagged) == "member", "her own tag still seats there")
 
             // ——— Recipe 6: a revision (VX-311, VX-298) ———
             let compareKey = try #require(PostMode.allCases.firstIndex(of: .compare)) + 1
@@ -1268,6 +1353,32 @@ struct TutorialMCPChapterTests {
                 for: Operations.MCPWriteAct.take.undoLabel(client: "\u{2039}name\u{203A}"))
             #expect(text.contains("the Edit menu names it after the client: \(placeholder)."))
             #expect(!text.localizedCaseInsensitiveContains("claude"))
+            // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the list behind
+            // ⌥⌘O (VX-679, her R-679) — her header's words over the placeholder, the
+            // row's two doors (text: go there; the icon: what it asked or did). THE
+            // TRUTH is the section's own copy and declarations (its acts are
+            // `MCPTrailTests`').
+            #expect(text.contains("Near the bottom of the sidebar, a list headed From \(placeholderName) keeps each "
+                                  + "place a client showed you or changed this session: click a row to go there, or "
+                                  + "the icon at its end to see what it asked or did."))
+            #expect(MCPTrailCopy.header(client: placeholderName, count: 2).hasPrefix("From \(placeholderName)"))
+            #expect(MCPTrailSection.surfaceCapabilities == [.mcpOpenTrailPlace, .mcpShowTrailDetails],
+                    "the row's text and its icon are its two doors")
+            #expect(SidebarLayout.aiSectionWindow == 3, "near the bottom, about three rows")
+            // VX-846 — the list forms (VX-812, A-809-18/19): one request, an act per
+            // note, one line naming the count. THE TRUTH: the description's own
+            // sentence, and the receipt line over a run of one call's items.
+            #expect(text.contains("When it acts on many notes in one request, each note is its own act: the line "
+                                  + "counts them, and \u{2325}\u{2318}Z takes them back one at a time."))
+            #expect(MCPWriteTools.listFormSentence.contains("each its own act with its own undo for the author"))
+            let items = (1 ... 3).map { index -> MCPWriteReceipt in
+                var item = MCPWriteReceipt(
+                    clientName: placeholderName, act: .tag, targetID: "n\(index)", targetTitle: "note \(index)",
+                    detail: "draft")
+                item.runKey = "one-call"
+                return item
+            }
+            #expect(MCPReceiptCopy.line(items).contains("added 3 tags"), "the line counts them")
             // VX-676 (A JUSTIFIED EDIT, the ritual — her sitting 2026-10-28 and her
             // mid-run amendment): the frontmost-only sentence is retired; the
             // lesson says the ask, its line, its two ends, ⌥⌘O, and the dial in

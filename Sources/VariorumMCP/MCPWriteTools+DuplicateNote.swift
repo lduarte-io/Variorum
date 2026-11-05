@@ -193,8 +193,9 @@ extension MCPWriteTools {
             }
             // A book intake seated the copy in is NAMED only where this client
             // can read it (names stay with grants, AF-10 (f) — `move_note_to_
-            // wing`'s `left_books`); the rest are counted.
-            let named: [String?] = try others.map { id in
+            // wing`'s `left_books`); the rest are neither named nor counted
+            // (VX-825, her R-825 — the answer a store without them gives).
+            let named: [String] = try others.compactMap { id in
                 guard MCPGrantAuthority.decide(
                     standing, book: try Queries.mcpBookFacts(db, readingID: id), rung: .read).isAllowed
                 else { return nil }
@@ -204,7 +205,7 @@ extension MCPWriteTools {
         }
         let landed = Self.duplicateLandedWords(
             filedIn: filing.map { _ in bookName ?? "the book" }, chapter: chapterName, poolWords: poolWords,
-            alsoIn: named.compactMap { $0 }, unnamed: named.filter { $0 == nil }.count)
+            alsoIn: named)
         var answer: [String: Any]
         if brief {
             answer = Self.briefCopyAnswer(
@@ -222,6 +223,9 @@ extension MCPWriteTools {
             answer["book_id"] = filing.bookID
             if let sectionID = filing.sectionID { answer["section_id"] = sectionID }
         }
+        // VX-825: `landed` names only what this client reads; the fixed scope
+        // words say so, on every landed answer (both forms).
+        answer[Self.beyondReachKey] = Self.beyondReachWords
         return (answer, MCPWriteReceipt(
             clientName: clientName, act: .duplicate, targetID: copy.post.id, targetTitle: copyTitle,
             detail: filing == nil ? nil : bookName,
@@ -254,20 +258,20 @@ extension MCPWriteTools {
     /// pass): filed — "the end of “B”" (`create_note`'s "it joins the book at
     /// its end"), with ", in its chapter “C”"; not filed — the wing road's
     /// Pool words, unless a book collecting one of its applied tags took it in.
-    /// Every book that took it in by a tag follows, named where this client
-    /// can read it and counted where it can't ("a book not shared with you").
-    /// An ARRIVAL is no membership: a book ringing for the copy is not said.
+    /// Every book that took it in by a tag follows, NAMED — only where this
+    /// client can read it: since VX-825 (her R-825) a book it can't read is
+    /// neither named nor counted (the retired "a book not shared with you"),
+    /// so these words are a pure function of the client's reach and the
+    /// answer's `beyond_reach` says the list is scoped. An ARRIVAL is no
+    /// membership: a book ringing for the copy is not said.
     static func duplicateLandedWords(
-        filedIn book: String?, chapter: String?, poolWords: String, alsoIn named: [String], unnamed: Int
+        filedIn book: String?, chapter: String?, poolWords: String, alsoIn named: [String]
     ) -> String {
-        var items = named.map { "\u{201C}\($0)\u{201D}" }
-        if unnamed == 1 { items.append("a book not shared with you") }
-        if unnamed > 1 { items.append("\(unnamed) books not shared with you") }
-        let total = named.count + unnamed
+        let items = named.map { "\u{201C}\($0)\u{201D}" }
         let tookIn: String? = items.isEmpty ? nil : {
             let list = items.count == 1
                 ? items[0] : items.dropLast().joined(separator: ", ") + " and " + items[items.count - 1]
-            return list + (total == 1 ? ", which collects one of its tags" : ", which collect its tags")
+            return list + (items.count == 1 ? ", which collects one of its tags" : ", which collect its tags")
         }()
         guard let book else { return tookIn ?? poolWords }
         let filed = "the end of \u{201C}\(book)\u{201D}" + (chapter.map { ", in its chapter \u{201C}\($0)\u{201D}" } ?? "")

@@ -78,18 +78,26 @@ extension MCPWriteTools.Job {
         case .addTake(_, let text, let label): MCPNullCharacters.count(text, label)
         case .addComment(_, let text): MCPNullCharacters.count(text)
         case .saveLens(_, let name, _, _): MCPNullCharacters.count(name)
-        case .createNote(let title, let payload, _, _, _):
-            switch payload {
-            case .text(let text): MCPNullCharacters.count(title, text)
-            case .blocks(let blocks): MCPNullCharacters.count(title) + MCPNullCharacters.count(blocks)
-            }
+        // VX-814: every birth tag's path too (each adopts or mints a tag —
+        // `apply_tag`'s path, counted the same).
+        case .createNote(let title, let payload, _, _, _, let tags):
+            tags.reduce(0) { $0 + StoredText.nullCount($1) } + {
+                switch payload {
+                case .text(let text): MCPNullCharacters.count(title, text)
+                case .blocks(let blocks): MCPNullCharacters.count(title) + MCPNullCharacters.count(blocks)
+                }
+            }()
         case .importNote(let named, _, _): MCPNullCharacters.count(named)
         case .importBook(let book, _): MCPNullCharacters.count(book)
         case .applyTag(_, let path): MCPNullCharacters.count(path)
-        case .createBook(let name, _): MCPNullCharacters.count(name)
+        case .createBook(let name, _, _): MCPNullCharacters.count(name)
         // VX-769: the name, and every path the rule names (it adopts or mints a tag).
         case .createGathering(let name, _, let rule): MCPNullCharacters.count(name) + MCPNullCharacters.count(rule)
         case .insertBlocks(_, _, let blocks): MCPNullCharacters.count(blocks)
+        // VX-812: a list's items each count their own (their single `land`);
+        // `replace_tag`'s new path adopts or mints a tag (`apply_tag`'s rule).
+        case .noteList: 0
+        case .replaceTag(_, _, let to): MCPNullCharacters.count(to)
         case .edit(let job): job.nullCharactersWritten
         case .carriage(let job): job.nullCharactersWritten
         case .deliberate(let job): job.nullCharactersWritten
@@ -169,8 +177,9 @@ extension MCPWriteTools.LibraryEditJob {
         switch self {
         case .renameBook(_, let name): MCPNullCharacters.count(name)
         case .renameChapter(_, let name): MCPNullCharacters.count(name)
+        // VX-813: an order is two enum words.
         case .setFinished, .archiveBook, .unarchiveBook, .deleteBook, .removeNote, .moveNote, .deleteChapter,
-             .moveChapter, .deleteNote, .setNoteArchived:
+             .moveChapter, .deleteNote, .setNoteArchived, .setBookOrder, .moveBookToWing:
             0
         }
     }

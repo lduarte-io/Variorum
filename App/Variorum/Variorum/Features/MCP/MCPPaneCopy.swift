@@ -525,6 +525,9 @@ nonisolated enum MCPPaneCopy {
         case "delete_comment": return "deleting a comment in \(at)"
         // VX-190 — un-tagging a note at edit.
         case "remove_tag": return "removing a tag from \(at)"
+        // VX-812 — one note's tag replaced, an item of `replace_tag`'s sweep
+        // (logged per note; PROVISIONAL words, the VX-809 bundle).
+        case "replace_tag": return "replacing a tag on \(at)"
         // VX-187 — two notes linked as versions (the log names one side).
         case "link_versions": return "linking \(at) and another note as versions"
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
@@ -565,6 +568,11 @@ nonisolated enum MCPPaneCopy {
         // false) and a coarse log that keeps no direction, so the line says the
         // act without it (PROVISIONAL words, her copy pass — VX-234).
         case "set_starred": return "changing the star on \(at)"
+        // VX-813 / VX-807 (the VX-809 run, batch 2 — PROVISIONAL words, her
+        // copy pass): a book's order; a whole book's move, TWO-SIDED (UXR1-1)
+        // — the book at edit, the destination wing at write new.
+        case "set_book_order": return "setting the order of \(at)"
+        case "move_book_to_wing": return kind == "wing" ? "moving a book to \(at)" : "moving \(at) to another wing"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -660,6 +668,7 @@ nonisolated enum MCPPaneCopy {
         case "list_wings": return "listed its shared wings" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
+        case "replace_tag": return "replaced a tag on \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
         // P-U4-WORDS). A block's LAST take deleted is logged on the BLOCK
@@ -700,6 +709,10 @@ nonisolated enum MCPPaneCopy {
         // VX-596 — her star on the wire, either way (the log keeps no
         // direction; the receipt says which — PROVISIONAL words, VX-234).
         case "set_starred": return "changed the star on \(at)" + times
+        // VX-813 / VX-807 (the VX-809 run, batch 2 — PROVISIONAL words): a
+        // book's order; a whole book moved (logged on the BOOK).
+        case "set_book_order": return "set the order of \(at)" + times
+        case "move_book_to_wing": return n == 1 ? "moved \(at) to another wing" : "moved \(at) between wings" + times
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1615,6 +1628,13 @@ nonisolated enum MCPReceiptCopy {
     /// default window width (measured at the U2 walk — W-2).
     static let budget = 72
 
+    /// **VX-679 — ONE write said as its receipt says it** ("edited a take",
+    /// "moved “x” to Home"): the trail's details popover names which operation
+    /// in the receipt line's own words — one source, never a second table.
+    static func actPhrase(_ receipt: MCPWriteReceipt) -> String {
+        phrase(receipt.act, [receipt])
+    }
+
     private static func phrase(_ act: Operations.MCPWriteAct, _ receipts: [MCPWriteReceipt]) -> String {
         let n = receipts.count
         let quoted = { (text: String?) in text.map { "\u{201C}\($0)\u{201D}" } ?? "" }
@@ -1706,6 +1726,11 @@ nonisolated enum MCPReceiptCopy {
         case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
         // VX-190 — her un-tag, the client's (PROVISIONAL words).
         case .untag: return n == 1 ? "removed the tag #\(receipts[0].detail ?? "")" : "removed \(n) tags"
+        // VX-812 — `replace_tag`'s notes, one receipt each on the call's run
+        // key, so a sweep reads as one line (A-809-19; PROVISIONAL words).
+        case .tagReplace:
+            let swap = "#\(receipts[0].detail ?? "") with #\(receipts[0].replacementPath ?? "")"
+            return n == 1 ? "replaced \(swap) on \(quoted(receipts[0].targetTitle))" : "replaced \(swap) on \(n) notes"
         // VX-187 — two notes made versions (PROVISIONAL words).
         case .versionLink:
             return n == 1
@@ -1797,6 +1822,20 @@ nonisolated enum MCPReceiptCopy {
         // `.book`'s line in a gathering's words (PROVISIONAL, her copy pass).
         case .gathering:
             return n == 1 ? "made the gathering \(quoted(receipts[0].targetTitle))" : "made \(n) gatherings"
+        // VX-813 (the VX-809 run, batch 2) — a book's (or a gathering's) order
+        // set on the wire (PROVISIONAL words, her copy pass).
+        case .bookSort:
+            return n == 1 ? "set the order of \(quoted(receipts[0].targetTitle))" : "set the order of \(n) books"
+        case .gatheringSort:
+            return n == 1 ? "set the order of \(quoted(receipts[0].targetTitle))" : "set the order of \(n) gatherings"
+        // VX-807 — a whole book moved to another wing, keyed on the DESTINATION
+        // (the note move's coalescing key) and said as her door's receipt says
+        // it (`WingCopy.bookMoved` — her count, every note; PROVISIONAL words).
+        case .bookWingMove:
+            guard n == 1 else { return "moved \(n) books to \(wingWords(receipts[0]))" }
+            let notes = receipts[0].count
+            return "moved the book \(quoted(receipts[0].detail)) to \(wingWords(receipts[0]))"
+                + (notes == 0 ? "" : " with its \(notes) note\(notes == 1 ? "" : "s")")
         }
     }
 
@@ -1812,6 +1851,117 @@ nonisolated enum MCPReceiptCopy {
     private static func joined(_ parts: [String]) -> String {
         guard parts.count > 1 else { return parts.first ?? "" }
         return parts.dropLast().joined(separator: ", ") + " and " + (parts.last ?? "")
+    }
+}
+
+/// **VX-679 — the sidebar's "From ‹client› · N" section, said** (the VX-809
+/// run, batch 5 — her R-679). Her words where she gave them: the header, and
+/// the three kinds (shown · opened · edited). Everything else PROVISIONAL
+/// (P-809-14, her copy pass — VX-234's family): the row's names for a place,
+/// its time, the two doors' verbs and helps, the details popover's lines.
+nonisolated enum MCPTrailCopy {
+    /// Her header (R-679): "From ‹client› · N" — N the places listed.
+    static func header(client: String, count: Int) -> String { "From \(client) \u{00B7} \(count)" }
+
+    /// Her three words (R-679).
+    static func kind(_ kind: MCPTrail.Kind) -> String { kind.rawValue }
+
+    /// The row's text door (`.mcpOpenTrailPlace`) — her own word for it at the
+    /// VX-676 sitting ("so users could 'go there'").
+    static let openVerb = "Go There"
+    /// The row's symbol door (`.mcpShowTrailDetails`).
+    static let detailsVerb = "Show Details"
+    static let unavailableNote =
+        "What a client showed you or changed this session is listed near the bottom of the sidebar while "
+        + "there is any."
+
+    /// When a request came in: its time today; its day and time on another.
+    static func when(_ date: Date, now: Date = Date(), calendar: Calendar = .current) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        guard !calendar.isDate(date, inSameDayAs: now) else { return time }
+        return "\(date.formatted(.dateTime.month(.abbreviated).day())), \(time)"
+    }
+
+    /// The row's line after the place: the kind, then when.
+    static func detail(_ entry: MCPTrail.Entry, now: Date = Date()) -> String {
+        "\(kind(entry.kind)) \u{00B7} \(when(entry.at, now: now))"
+    }
+
+    /// The place a row names, as a sidebar row names it (unquoted, the Open
+    /// list's register): its title, else its noun; a saved version says whose;
+    /// Home is a place-name.
+    static func place(_ target: MCPShowTarget, title: String?) -> String {
+        switch target {
+        case .note, .takes, .lens, .compare: return title ?? "a note"
+        case .version: return title.map { "a saved version of \($0)" } ?? "a saved version"
+        case .book: return title ?? "a book"
+        case .wing(let wingID, let name, _): return wingID.isEmpty ? "Home" : name
+        }
+    }
+
+    /// The row's text door's help: where it goes.
+    static func openHelp(_ entry: MCPTrail.Entry) -> String {
+        "Go to \(place(entry.target, title: entry.title)) \u{2014} where \(entry.clientName)\u{2019}s "
+            + (isAsk(entry) ? "ask" : "change") + " landed"
+    }
+
+    /// The symbol door's help.
+    static func detailsHelp(_ entry: MCPTrail.Entry) -> String {
+        "What \(entry.clientName) asked or did here"
+    }
+
+    // MARK: - The details popover (her refinement: the client · when it came in · the kind of act ·
+    // what it targeted)
+
+    static func detailsWhen(_ entry: MCPTrail.Entry, now: Date = Date()) -> String {
+        "Came in \(Calendar.current.isDate(entry.at, inSameDayAs: now) ? "at " : "")\(when(entry.at, now: now))"
+    }
+
+    /// What kind of act it was: a navigation ask, or a write and which operation.
+    static func detailsAct(_ entry: MCPTrail.Entry) -> String {
+        switch entry.act {
+        case .show(let request):
+            return "A navigation ask: it asked to show you \(MCPShowOfferCopy.thing(request))."
+        case .write(let receipt):
+            return "A write: it \(MCPReceiptCopy.actPhrase(receipt))."
+        }
+    }
+
+    /// What it targeted.
+    static func detailsTarget(_ entry: MCPTrail.Entry) -> String {
+        let named = entry.title.map { "\u{201C}\($0)\u{201D}" }
+        switch entry.target {
+        case .note, .takes, .lens: return "Target: \(named.map { "the note \($0)" } ?? "a note")"
+        case .compare(_, let peerIDs):
+            return "Target: \(named.map { "the note \($0)" } ?? "a note") beside \(peerIDs.count) "
+                + (peerIDs.count == 1 ? "other note" : "other notes") + " in Compare"
+        case .version: return "Target: \(named.map { "a saved version of \($0)" } ?? "a saved version")"
+        case .book: return "Target: \(named.map { "the book \($0)" } ?? "a book")"
+        case .wing(let wingID, let name, _):
+            return "Target: " + (wingID.isEmpty ? "the Home wing" : "the wing \u{201C}\(name)\u{201D}")
+        }
+    }
+
+    /// Where the row stands (an ask's offer, or what opened it) — said only
+    /// for an ask; a write's row is its act.
+    static func detailsState(_ entry: MCPTrail.Entry) -> String? {
+        guard isAsk(entry) else { return nil }
+        switch entry.kind {
+        case .shown: return "Offered to you; not opened yet."
+        case .opened: return "Opened."
+        case .edited: return nil
+        }
+    }
+
+    /// A row that gathers several requests says how many (PROVISIONAL P-809-14:
+    /// one row per place).
+    static func detailsCount(_ entry: MCPTrail.Entry) -> String? {
+        entry.count > 1 ? "The newest of \(entry.count) requests here this session." : nil
+    }
+
+    private static func isAsk(_ entry: MCPTrail.Entry) -> Bool {
+        if case .show = entry.act { return true }
+        return false
     }
 }
 

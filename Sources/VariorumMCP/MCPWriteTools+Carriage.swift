@@ -86,8 +86,10 @@ extension MCPWriteTools {
             case "wait": write.seating = .arrivals
             default: throw ArgumentFailure(message: "new_matches must be \"join\" (join quietly at the end) or \"wait\" (wait at Arrivals).")
             }
-            guard write.rule != nil || write.outflowPaths != nil || write.seating != nil else {
-                throw ArgumentFailure(message: "Pass rule, outflow or new_matches — at least one.")
+            // VX-813 (R-813's fuller paste): the book's order, in the same act.
+            write.order = try orderOption(args)
+            guard write.rule != nil || write.outflowPaths != nil || write.seating != nil || write.order != nil else {
+                throw ArgumentFailure(message: "Pass rule, outflow, new_matches or order — at least one.")
             }
             return .setBookRule(bookID: try requiredString(args, "book_id"), write: write)
         default:
@@ -234,11 +236,15 @@ extension MCPWriteTools {
                 try log(clientName, job.tool, "book", bookID, gathering, allowed: false)
                 return .failure(Refused(outcome: Outcome(text: Self.gatheringWords(gathering), isError: true)))
             }
-            return try into(.book(bookID), job: job, clientName: clientName, spendsAfter: false) { _ in
+            // VX-813 (A-809-17): an ORDER is an edit of the book (set_book_order's
+            // rung) — the call's rung read from its arguments, `insert_blocks`'
+            // precedent; without one, write new byte-unchanged.
+            let rung: MCPGrantRule.Rung = write.order == nil ? .writeNew : .edit
+            return try into(.book(bookID), job: job, clientName: clientName, spendsAfter: false, rung: rung) { _ in
                 let result: Operations.MCPBookRuleResult
                 do {
                     result = try ops.setBookRule(
-                        bookID, write, undoLabel: label(.bookRule), guardedBy: guardBook(clientName, bookID))
+                        bookID, write, undoLabel: label(.bookRule), guardedBy: guardBook(clientName, bookID, rung: rung))
                 } catch Operations.MCPBookRuleRefusal.storedRuleUnreadable {
                     throw Refused(outcome: Outcome(text: MCPBookFacts.unreadableRuleWords, isError: true))
                 }

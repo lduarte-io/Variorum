@@ -2761,6 +2761,22 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "A client's ask to show you something is dismissed from its line at the bottom "
                 + "of the window.",
             availability: always),
+        // VX-679 (the VX-809 run, batch 5 — her R-679) — the sidebar section's
+        // two row doors: each row carries its request, so `always` is honest;
+        // they render only while a row exists (P-2 — an empty trail draws no
+        // section at all). PROVISIONAL words (P-809-14).
+        Capability(
+            id: .mcpOpenTrailPlace, verb: MCPTrailCopy.openVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .mcpShowTrailDetails, verb: MCPTrailCopy.detailsVerb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
         Capability(
             id: .mcpOpenAsk, verb: "Answer\u{2026}", scope: .app,
             doors: [.surface],

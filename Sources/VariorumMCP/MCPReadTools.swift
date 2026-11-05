@@ -327,7 +327,8 @@ struct MCPReadTools: Sendable {
             "notes": readable,
         ]
         let bookFacts = try MCPBookFacts.facts(db, readingID: id)
-        for key in ["rule", "rule_unreadable"] { entry[key] = bookFacts[key] }
+        // VX-813: a gathering's order too (set_book_order sets it on one).
+        for key in ["rule", "rule_unreadable", "order"] { entry[key] = bookFacts[key] }
         return entry
     }
 
@@ -525,10 +526,17 @@ struct MCPReadTools: Sendable {
         // F3: one read snapshot; the log in its own short write after.
         let outcome: Outcome = try database.read { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
-            var page: [PageRow]
+            // VX-825 (her R-825): the page is decided over READABLE rows only.
+            // `fetch` reads one raw page after a cursor (nil = a stale gathering
+            // cursor); the walk below keeps the rows this client can read, until
+            // `limit` are kept or the order runs out — so a hidden row never
+            // shortens a page, and `next_cursor` names the last KEPT row (before
+            // VX-825 it named the last RAW row, a hidden note's id among them).
+            let fetch: (PageCursor?) throws -> [PageRow]?
             // VX-184 U5 (P-VX196-5): a BOOK's chapters, in order — so a chapter
             // with no notes filed is addressable too (the chapter acts).
             var chapters: [[String: Any]]?
+            var gatheringOrdinal: Int?
             if let bookID {
                 let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
                 let decision = MCPGrantAuthority.decide(standing, reading: place)
@@ -538,8 +546,9 @@ struct MCPReadTools: Sendable {
                     if let cursor, cursor.shape != .book {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
                     }
-                    page = try bookPage(
-                        db, bookID: bookID, includeArchived: includeArchived, after: cursor, limit: limit)
+                    fetch = { after in
+                        try bookPage(db, bookID: bookID, includeArchived: includeArchived, after: after, limit: limit)
+                    }
                     chapters = try Row.fetchAll(
                         db,
                         sql: """
@@ -552,31 +561,57 @@ struct MCPReadTools: Sendable {
                     if let cursor, cursor.shape != .gathering {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
                     }
-                    guard let gathered = try gatheringPage(db, gatheringID: bookID, after: cursor, limit: limit)
-                    else { return Outcome(text: Self.staleCursorMessage, isError: true) }
-                    page = gathered
+                    fetch = { after in try gatheringPage(db, gatheringID: bookID, after: after, limit: limit) }
+                    // A gathering cursor resumes by its note's id; its key is the
+                    // READABLE ordinal (VX-825 — it was the assembly index, which
+                    // counted the hidden notes before it).
+                    gatheringOrdinal = cursor.flatMap { Int($0.key) }.map { $0 + 1 } ?? 0
                 }
             } else if let wingID {
                 let decision = MCPGrantAuthority.decideWing(standing, wingID: wingID, rung: .read)
                 guard decision.isAllowed else { return refusal(decision, .wing) }
-                page = try recencyPage(
-                    db, wingID: wingID, candidates: nil, includeArchived: includeArchived, after: cursor, limit: limit)
+                fetch = { after in
+                    try recencyPage(
+                        db, wingID: wingID, candidates: nil, includeArchived: includeArchived, after: after, limit: limit)
+                }
             } else {
                 guard standing.state == .approved else {
                     return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .note)
                 }
-                page = try sharedPage(
-                    db, standing: standing, includeArchived: includeArchived, after: cursor, limit: limit)
+                fetch = { after in
+                    try sharedPage(db, standing: standing, includeArchived: includeArchived, after: after, limit: limit)
+                }
             }
-            let full = page.count == limit
-            let facts = try Queries.mcpNoteFacts(db, noteIDs: page.map(\.id))
+            var kept: [(row: PageRow, facts: MCPGrantRule.NoteFacts)] = []
+            var after = cursor
+            walk: while true {
+                guard let raw = try fetch(after) else { return Outcome(text: Self.staleCursorMessage, isError: true) }
+                let facts = try Queries.mcpNoteFacts(db, noteIDs: raw.map(\.id))
+                for row in raw {
+                    let decision = MCPGrantAuthority.decide(standing, note: facts[row.id], rung: .read, consumes: false)
+                    guard decision.isAllowed, let noteFacts = facts[row.id] else { continue }
+                    kept.append((row, noteFacts))
+                    if kept.count == limit { break walk }
+                }
+                guard raw.count == limit, let last = raw.last else { break }
+                after = last.cursor
+            }
+            // VX-825 (her R-825): a note's `book_ids` are the books THIS client
+            // can read — an unreadable book's id never crosses (it did, every
+            // listed note carried every live book holding it).
+            var readableBook: [String: Bool] = [:]
+            func readsBook(_ id: String) throws -> Bool {
+                if let known = readableBook[id] { return known }
+                let reads = MCPGrantAuthority.decide(
+                    standing, book: try Queries.mcpBookFacts(db, readingID: id), rung: .read).isAllowed
+                readableBook[id] = reads
+                return reads
+            }
             var notes: [[String: Any]] = []
-            for row in page {
-                let decision = MCPGrantAuthority.decide(standing, note: facts[row.id], rung: .read, consumes: false)
-                guard decision.isAllowed, let noteFacts = facts[row.id] else { continue }
+            for (row, noteFacts) in kept {
                 var note: [String: Any] = [
                     "id": row.id, "title": row.title, "edited": row.touched,
-                    "book_ids": noteFacts.bookIDs.sorted(), "wing_id": noteFacts.wingID,
+                    "book_ids": try noteFacts.bookIDs.sorted().filter(readsBook), "wing_id": noteFacts.wingID,
                 ]
                 if let section = row.section {
                     note["section_id"] = section.id
@@ -587,7 +622,12 @@ struct MCPReadTools: Sendable {
             }
             var answer: [String: Any] = ["notes": notes]
             if let chapters { answer["chapters"] = chapters }
-            if full, let last = page.last { answer["next_cursor"] = last.cursor.encoded }
+            if kept.count == limit, let last = kept.last?.row {
+                let resume = gatheringOrdinal.map {
+                    PageCursor(shape: .gathering, key: String($0 + kept.count - 1), id: last.id)
+                } ?? last.cursor
+                answer["next_cursor"] = resume.encoded
+            }
             return Outcome(text: try encode(answer), isError: false)
         }
         try logAfter(clientName, act, bookID != nil ? "book" : (wingID != nil ? "wing" : nil),

@@ -1139,6 +1139,19 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// status seam's two faces (`StatusToast`, `QuietReceiptLine`) render them
     /// only while one stands (`MCPDoor.statusSeamCapabilities`).
     case mcpTakeShowAsk, mcpDismissShowAsk
+    /// VX-679 (the VX-809 run, batch 5 — her R-679): the sidebar's "From
+    /// ‹client› · N" section, one row per place a client showed her or changed
+    /// this session, and the row's TWO doors (her refinement: "the two clicks
+    /// split glance-vs-go the same way the Library rows do"). `mcpOpenTrailPlace`
+    /// — the row's TEXT: go there, exactly where the offer or the receipt would
+    /// have landed (`MCPDoor.openTrailEntry` — the existing landing roads, the
+    /// place re-read first). `mcpShowTrailDetails` — the row's shared-with-AI
+    /// SYMBOL: the request's details (the client, when it came in, the kind of
+    /// act, its target), the shared icon's `.mcpShowSharing` precedent.
+    /// `.surface` on the MCP family's precedent — each row carries its request,
+    /// and `MCPTrailSection` is their only renderer (rendered only while a row
+    /// exists — P-2).
+    case mcpOpenTrailPlace, mcpShowTrailDetails
     /// VX-309 U1c — VX-451 (F-U4-1's option (a)): LOCK LIBRARY NOW, declared at last — ONE act, TWO doors: the File menu's
     /// item (`.menuBar`, ⌃⌘L — rendered only where the library can lock: Castle — `AppBootstrap.canLock`)
     /// and the new road's Protection pane, in the Castle-only "On this Mac" section beside the idle dial (`.surface` —

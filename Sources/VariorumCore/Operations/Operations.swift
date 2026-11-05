@@ -24,8 +24,31 @@ public struct Operations: Sendable {
     /// the stack.
     public let undoStack: UndoStack?
 
+    /// **Whose applying acts this value's intake hears** (A-809-11, PROVISIONAL
+    /// P-809-8 — the VX-809 run record, BATCH 3). `.author` on every value her
+    /// doors run; the MCP door's ONE call site (`MCPWriteTools.call`) hands its
+    /// acts `heardAsWireClient()`, so EVERY road a wire act takes into the one
+    /// application road — `apply_tag`, `set_starred`, `duplicate_note`'s tags,
+    /// a book's outflow on a wire mint or add, an import's header, `create_note`'s
+    /// tags — reaches `intakeEvent` carrying the client's hand, through her own
+    /// shared bodies unchanged. A property of the VALUE, never a global (the
+    /// `undoStack` precedent): two values on one runner never share it, and an
+    /// undo or redo runs on the value its caller hands the entry.
+    public private(set) var intakeActor: IntakeDecision.Actor = .author
+
     public init(undoStack: UndoStack? = nil) {
         self.undoStack = undoStack
+    }
+
+    /// This value, its acts heard as an MCP client's (A-809-11): intake never
+    /// SEATS a note where membership would fence it (a Private book, THE daily
+    /// Journal) — the would-be seat bells (`IntakeDecision.verdict`'s step 6).
+    /// Everything else about the value — its undo stack, its dependencies — is
+    /// the caller's own.
+    public func heardAsWireClient() -> Operations {
+        var copy = self
+        copy.intakeActor = .wireClient
+        return copy
     }
 
     // MARK: - Minting

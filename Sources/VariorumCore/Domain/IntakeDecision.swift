@@ -29,6 +29,19 @@ public enum IntakeDecision {
         case catchUp
     }
 
+    /// **Whose act the occasion is** (VX-825's F-5 — A-809-11, PROVISIONAL
+    /// P-809-8; the run record `notes/plans/fixes/vx-809-mcp-door-ergonomics.md`
+    /// BATCH 3). `author` is every door of hers (and every pre-A-809-11 caller —
+    /// the table's default); `wireClient` is an act an MCP client took on the
+    /// wire (`Operations.heardAsWireClient()`, derived at the wire's ONE call
+    /// door). The two differ in exactly one row of `verdict`'s table (step 6):
+    /// an agent act must not move reach topology — a seat that would FENCE the
+    /// note waits at the door instead, and her own seat from Arrivals is hers.
+    public enum Actor: Equatable, Sendable {
+        case author
+        case wireClient
+    }
+
     /// What the book's stored rule reads as (`RuleGrammar.ReadResult`'s
     /// three states, without the term itself — the table needs only which).
     public enum RuleState: Equatable, Sendable {
@@ -76,11 +89,19 @@ public enum IntakeDecision {
         /// add doors stay open (they never consult this table). Defaulted so
         /// every pre-13i-e fact-builder reads as it always did.
         public var archived: Bool
+        /// **Membership here FENCES a note** (A-809-11): the book carries the
+        /// Private mark or THE daily Journal's marker — the fence's two book
+        /// legs (`Queries.privateLegForBook` / `dailyJournalLegForBook`, the
+        /// ONE derivation site), read for the book by
+        /// `Queries.membershipFencesNotes`. Only a MEMBER is fenced by a book
+        /// (an arrival is no membership). Defaulted so every pre-A-809-11
+        /// fact-builder reads as it always did.
+        public var membershipFences: Bool
 
         public init(
             isLive: Bool, isBook: Bool, rule: RuleState, locked: Bool,
             seating: IntakeSeating?, maxPosts: Int?, memberCount: Int, owned: Bool,
-            archived: Bool = false
+            archived: Bool = false, membershipFences: Bool = false
         ) {
             self.isLive = isLive
             self.isBook = isBook
@@ -91,6 +112,7 @@ public enum IntakeDecision {
             self.memberCount = memberCount
             self.owned = owned
             self.archived = archived
+            self.membershipFences = membershipFences
         }
     }
 
@@ -148,9 +170,17 @@ public enum IntakeDecision {
     /// 5. A would-be seat waits at Arrivals when the book is at capacity
     ///    (§14.3), when the join dial says "wait at Arrivals" (§4), or when
     ///    the occasion is a catch-up (gap = judgment).
-    /// 6. Otherwise: seat (multi-membership is legal).
+    /// 6. **A WIRE CLIENT's act never seats a note where membership FENCES it
+    ///    (A-809-11, PROVISIONAL P-809-8):** a would-be seat in a Private book
+    ///    or THE daily Journal waits at Arrivals instead — an arrival is no
+    ///    membership, so the note stays as reachable as the act found it
+    ///    (P-13nb-U4-16's mirror: an agent's rule write must not EXPAND its
+    ///    reach; an agent's applying act must not SHRINK it, fencing the
+    ///    client's own subject — the topic channel her R-825 named). Her own
+    ///    acts (`author`) are untouched; un-tag and un-star stay non-events.
+    /// 7. Otherwise: seat (multi-membership is legal).
     public static func verdict(
-        book: BookFacts, note: NoteFacts, occasion: Occasion
+        book: BookFacts, note: NoteFacts, occasion: Occasion, actor: Actor = .author
     ) -> Verdict {
         guard intakeRuns(book), note.matchesRule else { return .nothing }
         switch note.pair {
@@ -168,6 +198,7 @@ public enum IntakeDecision {
         if let cap = book.maxPosts, book.memberCount >= cap { return .arrival }
         if book.seating == .arrivals { return .arrival }
         if occasion == .catchUp { return .arrival }
+        if actor == .wireClient, book.membershipFences { return .arrival }
         return .seat
     }
 }

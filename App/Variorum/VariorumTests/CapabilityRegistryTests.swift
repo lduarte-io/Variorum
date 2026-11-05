@@ -711,6 +711,11 @@ struct CapabilityRegistryTests {
             // renderer — and the fold's purge door lives here by the evolved
             // rule (a trash surface), never in the writing flow.
             .union(CommentsPanel.surfaceCapabilities)
+            // VX-679 (the VX-809 run, batch 5 — A JUSTIFIED EDIT, the same
+            // class — a new renderer is a new line): the sidebar's AI section
+            // renders its rows' two doors (the text's go-there, the symbol's
+            // details) and is their ONLY renderer.
+            .union(MCPTrailSection.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

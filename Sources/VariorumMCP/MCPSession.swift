@@ -51,11 +51,44 @@ final class MCPSession: @unchecked Sendable {
     /// allowed it (the name's bound key IS this key) or when it never waited.
     private var awaitingKey: String?
 
+    // MARK: - The library locked (VX-818 — the VX-809 run, A-809-20)
+
+    /// **The call door's latch** — the host's, shared: shut while the library is
+    /// locked (`MCPServerHost.suspend()`), when every call answers
+    /// `MCPLockedLibrary.words` before anything else is read.
+    private let latch: MCPStoreLatch
+
+    /// **What a connection that arrived DURING the lock said** (A-809-20, HOLD):
+    /// its `initialize` name and version and the key its shim presented, kept in
+    /// memory — the ONE admission (`Operations.admitMCPConnection`) is a store
+    /// write, and the store is shut. While held the connection names no one
+    /// (`clientName` nil), lists no tools and answers every call the locked
+    /// sentence; the admission runs, exactly as it would have at connect, once
+    /// the library is back (`admitIfHeld` — the host's resume, or this
+    /// connection's next request after it). nil = never held, or decided.
+    struct HeldOpening: Sendable {
+        let name: String
+        let version: String?
+        let presentedKey: String?
+    }
+    private var held: HeldOpening?
+    /// The held admission, run once whoever asks first (the resume or a request).
+    private var heldAdmission: Task<Bool, Never>?
+
+    /// **F-15b (i): the tool list this connection was last served** — what a
+    /// `tools/list` answers while the library is locked (the same bytes the
+    /// client already holds; nothing read). nil until the first list.
+    private var lastListed: [Tool]?
+
     /// The client's self-declared name, once `initialize` has run — and,
     /// VX-258, only once the connection IS that client: nil while its key
     /// waits for her OK, so a waiting connection never counts as the name's
     /// (the while-connected grants' lifetime, the pane's connected set).
-    var clientName: String? { lock.withLock { awaitingKey == nil ? name : nil } }
+    /// VX-818: nil too while its admission is HELD by the lock.
+    var clientName: String? { lock.withLock { awaitingKey == nil && held == nil ? name : nil } }
+
+    /// VX-818: whether this connection's admission waits for the library.
+    var isHeld: Bool { lock.withLock { held != nil } }
 
     /// The name `initialize` declared, waiting or not.
     private var declaredName: String? { lock.withLock { name } }
@@ -92,7 +125,7 @@ final class MCPSession: @unchecked Sendable {
     /// close. Returns the client name and the end to log, or nil.
     func claimEndLine(_ reason: MCPConnectionEnd? = nil) -> (clientName: String, end: MCPConnectionEnd)? {
         lock.withLock {
-            guard !endSaid, awaitingKey == nil, let name else { return nil }
+            guard !endSaid, awaitingKey == nil, held == nil, let name else { return nil }
             endSaid = true
             if let reason, endReason == nil { endReason = reason }
             return (name, endReason ?? (endedOverLimit ? .overLimit : .clientClosed))
@@ -243,10 +276,19 @@ final class MCPSession: @unchecked Sendable {
     /// her to the app nor calls again to check. The pinned clause ("Never call
     /// show_in_app unless the author asks") is unchanged. 3,011 → 3,061, inside
     /// 3,100 — her standing allowance (up to 3,250) not used. PROVISIONAL.
+    ///
+    /// VX-818 (the VX-809 run, batch 4 — her R-818, A-809-20): a lock no longer
+    /// ends a connection — the server keeps listening and every call answers the
+    /// locked sentence until the unlock, when the same connection is served
+    /// again. The opening says so (the quit still ends every connection, by
+    /// design): "open while Variorum runs: quitting it ends every connection, by
+    /// design, so reconnect once it's back (e.g. with /mcp); while it's locked,
+    /// calls say so until it's unlocked." 3,061 → 3,089, inside 3,100. PROVISIONAL
+    /// (P-809-4's family, her copy pass).
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
-        open only while Variorum runs unlocked: locking or quitting it ends every connection, by design, \
-        so reconnect once it's back (e.g. with /mcp). A new client is a connection request until the author approves \
+        open while Variorum runs: quitting it ends every connection, by design, \
+        so reconnect once it's back (e.g. with /mcp); while it's locked, calls say so until it's unlocked. A new client is a connection request until the author approves \
         it in Variorum \u{25B8} Settings \u{25B8} MCP. Once approved, list_my_activity is always listed; \
         other tools appear only for what the author has shared (re-announced when that changes).
         Grants have four rungs, each including those before it: read (read and search), \
@@ -297,11 +339,13 @@ final class MCPSession: @unchecked Sendable {
 
     init(
         fd: Int32, database: AppDatabase, operations: Operations, version: String,
-        executor: any MCPWriteExecutor, hooks: MCPHostHooks, onNamed: @escaping @Sendable () -> Void = {}
+        executor: any MCPWriteExecutor, hooks: MCPHostHooks, latch: MCPStoreLatch = MCPStoreLatch(),
+        onNamed: @escaping @Sendable () -> Void = {}
     ) {
         self.fd = fd
         self.database = database
         self.operations = operations
+        self.latch = latch
         self.onNamed = onNamed
         var reads = MCPReadTools(database: database, operations: operations)
         reads.hooks = hooks
@@ -333,51 +377,88 @@ final class MCPSession: @unchecked Sendable {
             return
         }
         let declared = MCPHandshake.initialize(opening.firstFrame)
-        // Fail CLOSED: a store that cannot answer admits nobody — and says
-        // THE STORE failed, never the key (ladder R1, F-1: the key advice
-        // would send a correctly keyed client to rotate a good key for
-        // nothing). Nothing is logged for this arm — the store it would log
-        // to is the one that threw.
-        let admission: Operations.MCPConnectionAdmission
-        do {
-            admission = try operations.admitMCPConnection(
-                name: declared?.name ?? "", version: declared?.version, presentedKey: opening.presentedKey)
-        } catch {
-            _ = MCPSocketTransport.writeAll(
-                fd,
-                MCPShim.refusalResponse(
-                    toFirstLine: opening.firstFrame, message: MCPHandshake.storeErrorRefusal))
-            return
+        let held = HeldOpening(name: declared?.name ?? "", version: declared?.version, presentedKey: opening.presentedKey)
+        // VX-818 (A-809-20, HOLD): a connection arriving while the library is
+        // LOCKED is admitted by no one yet — the admission is a store write and
+        // the store is shut. Its decision waits for the library (`admitIfHeld`);
+        // until then it names no one and every call hears the locked sentence.
+        var holding = latch.isShut
+        // The name the `initialize` the SDK reads must carry: the client row's
+        // once admitted; a held connection's own declared name (its admission,
+        // later, decides on that same name).
+        var admitted = held.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !holding {
+            // Fail CLOSED: a store that cannot answer admits nobody — and says
+            // THE STORE failed, never the key (ladder R1, F-1: the key advice
+            // would send a correctly keyed client to rotate a good key for
+            // nothing). Nothing is logged for this arm — the store it would log
+            // to is the one that threw.
+            do {
+                let admission = try operations.admitMCPConnection(
+                    name: held.name, version: held.version, presentedKey: held.presentedKey)
+                guard admission.decision.admits, let name = admission.client?.name else {
+                    // VX-198: a replaced key hears its own sentence; every other
+                    // refusal the one.
+                    let reason: MCPSetupKeyRule.Refusal? =
+                        if case .refuse(let reason) = admission.decision { reason } else { nil }
+                    _ = MCPSocketTransport.writeAll(
+                        fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame, reason: reason))
+                    return
+                }
+                admitted = name
+                // VX-258: a key waiting for her OK is admitted to a REQUEST's face —
+                // no tool runs for it until she allows it (the two handlers below are
+                // the one choke point every list and call passes).
+                if case .awaitRebind = admission.decision {
+                    lock.withLock { awaitingKey = opening.presentedKey.map(MCPSetupKeyRule.hash) }
+                }
+            } catch is StoreLockedError {
+                // VX-818: the library locked under this admission (it wrote
+                // nothing — the store refused before any access): HOLD it.
+                holding = true
+            } catch {
+                _ = MCPSocketTransport.writeAll(
+                    fd,
+                    MCPShim.refusalResponse(
+                        toFirstLine: opening.firstFrame, message: MCPHandshake.storeErrorRefusal))
+                return
+            }
         }
-        guard admission.decision.admits, let admitted = admission.client?.name else {
-            // VX-198: a replaced key hears its own sentence; every other
-            // refusal the one.
-            let reason: MCPSetupKeyRule.Refusal? =
-                if case .refuse(let reason) = admission.decision { reason } else { nil }
-            _ = MCPSocketTransport.writeAll(
-                fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame, reason: reason))
-            return
-        }
-        // VX-258: a key waiting for her OK is admitted to a REQUEST's face —
-        // no tool runs for it until she allows it (the two handlers below are
-        // the one choke point every list and call passes).
-        if case .awaitRebind = admission.decision {
-            lock.withLock { awaitingKey = opening.presentedKey.map(MCPSetupKeyRule.hash) }
-        }
+        if holding { lock.withLock { self.held = held } }
         let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
         lock.withLock { self.transport = transport }
         await server.withMethodHandler(ListTools.self) { [weak self] _ in
-            guard let self, let name = self.declaredName else { return .init(tools: []) }
-            if try self.awaitsHerOK() { return .init(tools: []) }
-            let standing = try self.database.read { try MCPGrantAuthority.standing($0, clientName: name) }
-            return .init(tools: MCPToolCatalog.listed(for: standing))
+            guard let self else { return .init(tools: []) }
+            // VX-818 (F-15b (i)): while the library is locked, the list this
+            // connection was last served — nothing read (a held one: none).
+            if self.latch.isShut { return .init(tools: self.listedWhileLocked) }
+            guard await self.admitIfHeld(), let name = self.declaredName else { return .init(tools: []) }
+            do {
+                if try self.awaitsHerOK() { return .init(tools: self.served([])) }
+                let standing = try await self.database.read { try MCPGrantAuthority.standing($0, clientName: name) }
+                return .init(tools: self.served(MCPToolCatalog.listed(for: standing)))
+            } catch is StoreLockedError {
+                // The lock overtook the list: what this connection was last served.
+                return .init(tools: self.listedWhileLocked)
+            }
         }
         await server.withMethodHandler(CallTool.self) { [weak self] params in
             guard let self else { throw MCPError.internalError("The session ended.") }
+            // VX-818 (her R-818, A-809-20): THE LIBRARY IS LOCKED — checked at
+            // the call door AHEAD OF EVERYTHING: no name, no waiting check (a
+            // store read), no schema, no decision, nothing logged or spent.
+            if self.latch.isShut { return Self.lockedAnswer }
+            // A connection held at its admission is decided before its first
+            // call is served (the resume usually got there first).
+            guard await self.admitIfHeld() else { return Self.lockedAnswer }
             guard let name = self.declaredName else {
                 return .init(content: [.text(text: "Initialize first.", annotations: nil, _meta: nil)], isError: true)
             }
-            if try self.awaitsHerOK() {
+            // VX-818: a lock that overtook the call at its waiting check (a
+            // store read, refused before any access) answers as the door does.
+            let waits: Bool
+            do { waits = try self.awaitsHerOK() } catch is StoreLockedError { return Self.lockedAnswer }
+            if waits {
                 let waiting = Self.waitingAnswer(params.name)
                 return .init(content: [.text(text: waiting.text, annotations: nil, _meta: nil)], isError: waiting.isError)
             }
@@ -401,23 +482,29 @@ final class MCPSession: @unchecked Sendable {
             return .init(
                 content: [.text(text: outcome.text, annotations: nil, _meta: nil)], isError: outcome.isError)
         }
+        let initializeName = admitted
         do {
             try await server.start(transport: transport) { [weak self] info, _ in
                 guard let self else { return }
                 // The SDK reads the SAME replayed frame the handshake decided
                 // on; a name that differs (it cannot, short of two JSON
                 // readers disagreeing) is refused, never served.
-                guard info.name.trimmingCharacters(in: .whitespacesAndNewlines) == admitted else {
+                guard info.name.trimmingCharacters(in: .whitespacesAndNewlines) == initializeName else {
                     throw MCPError.serverError(code: MCPShim.refusalCode, message: MCPHandshake.refusal)
                 }
-                self.lock.withLock { self.name = admitted }
+                self.lock.withLock { self.name = initializeName }
                 // VX-605: the connection has named itself — say so on the
                 // host's one road (a waiting setup's connection reads as no
                 // one's until her OK, `clientName`; the re-read then finds
                 // nothing new, and her Allow is heard through the grants
-                // observation as before).
-                self.onNamed()
+                // observation as before). VX-818: a HELD connection names no
+                // one yet — its admission says so when it lands.
+                if !self.isHeld { self.onNamed() }
             }
+            // VX-818: the library came back between this connection's hold and
+            // now, so the host's resume may have passed it by — decide it here
+            // (one admission, whoever asks first).
+            if holding, !latch.isShut { _ = await admitIfHeld() }
             await server.waitUntilCompleted()
         } catch {
             // A transport that would not start ends the session; the host
@@ -427,6 +514,82 @@ final class MCPSession: @unchecked Sendable {
         let overLimit = await transport.endedOverLimit
         lock.withLock { endedOverLimit = overLimit }
         await server.stop()
+    }
+
+    // MARK: - VX-818: the call door while the library is locked
+
+    /// The locked sentence, as every call answers it while the latch is shut.
+    static var lockedAnswer: CallTool.Result {
+        .init(content: [.text(text: MCPLockedLibrary.words, annotations: nil, _meta: nil)], isError: true)
+    }
+
+    /// F-15b (i): a surviving connection's list while locked is the one it was
+    /// last served; a held connection (no client yet) lists none.
+    private var listedWhileLocked: [Tool] {
+        lock.withLock { held == nil ? (lastListed ?? []) : [] }
+    }
+
+    /// A list answered from the store, remembered for the lock's length.
+    private func served(_ tools: [Tool]) -> [Tool] {
+        lock.withLock { lastListed = tools }
+        return tools
+    }
+
+    /// **The held admission, decided** (A-809-20): the ONE admission
+    /// (`Operations.admitMCPConnection` — the pure `MCPSetupKeyRule`, its effects
+    /// and its log) run exactly as it would have run at connect, once the
+    /// library is back. Called by the host's resume for every held connection,
+    /// and by this connection's own next request — whichever comes first runs it
+    /// (one task). Admitted (any arm that admits — a waiting key keeps VX-258's
+    /// face) → the connection is its client: named, its tools re-announced, no
+    /// reconnect. Refused → the refusal's sentence as the connection's CLOSE
+    /// LINE (its `initialize` was answered long ago — VX-762's road; the shim
+    /// says it on stderr), then the hang-up; it named no one, so it ends nothing.
+    /// A library locked again before the admission could run keeps it held.
+    /// Returns whether the connection may be served: true when it was never
+    /// held or is now admitted; false while it is still held or once refused.
+    @discardableResult
+    func admitIfHeld() async -> Bool {
+        let task: Task<Bool, Never>? = lock.withLock {
+            guard let held else { return nil }
+            if let heldAdmission { return heldAdmission }
+            let admitting = Task { await self.decideHeld(held) }
+            heldAdmission = admitting
+            return admitting
+        }
+        guard let task else { return true }
+        return await task.value
+    }
+
+    private func decideHeld(_ opening: HeldOpening) async -> Bool {
+        let admission: Operations.MCPConnectionAdmission
+        do {
+            admission = try operations.admitMCPConnection(
+                name: opening.name, version: opening.version, presentedKey: opening.presentedKey)
+        } catch is StoreLockedError {
+            lock.withLock { heldAdmission = nil }
+            return false
+        } catch {
+            hangUp(saying: MCPCloseLine.line(MCPHandshake.storeErrorRefusal))
+            return false
+        }
+        guard admission.decision.admits,
+              admission.client?.name == opening.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        else {
+            let reason: MCPSetupKeyRule.Refusal? =
+                if case .refuse(let reason) = admission.decision { reason } else { nil }
+            hangUp(saying: MCPCloseLine.line(reason.map(MCPHandshake.refusal(for:)) ?? MCPHandshake.refusal))
+            return false
+        }
+        lock.withLock {
+            if case .awaitRebind = admission.decision {
+                awaitingKey = opening.presentedKey.map(MCPSetupKeyRule.hash)
+            }
+            held = nil
+        }
+        onNamed()
+        await announceToolsChanged()
+        return true
     }
 
     /// The client's grants changed: ask it to re-read its tools (a signal —

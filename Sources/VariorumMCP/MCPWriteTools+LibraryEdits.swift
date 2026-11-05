@@ -44,6 +44,12 @@ extension MCPWriteTools {
         case moveChapter(sectionID: String, to: Slot)
         case deleteNote(noteID: String)
         case setNoteArchived(noteID: String, archived: Bool)
+        /// VX-813 (the VX-809 run, batch 2): a book's or a gathering's order
+        /// (`MCPWriteTools+BookOrder`).
+        case setBookOrder(bookID: String, order: Queries.ReadingOrder)
+        /// VX-807 (the VX-809 run, batch 2): a whole book to another wing
+        /// (`MCPWriteTools+BookWingMove`).
+        case moveBookToWing(bookID: String, wingID: String)
 
         var tool: String {
             switch self {
@@ -60,6 +66,8 @@ extension MCPWriteTools {
             case .deleteNote: MCPToolCatalog.deleteNote.name
             case .setNoteArchived(_, let archived):
                 archived ? MCPToolCatalog.archiveNote.name : MCPToolCatalog.unarchiveNote.name
+            case .setBookOrder: MCPToolCatalog.setBookOrder.name
+            case .moveBookToWing: MCPToolCatalog.moveBookToWing.name
             }
         }
 
@@ -73,6 +81,15 @@ extension MCPWriteTools {
             case .deleteNote: true
             case .renameBook, .setFinished, .archiveBook, .unarchiveBook, .deleteBook, .removeNote, .moveNote,
                  .renameChapter, .deleteChapter, .moveChapter, .setNoteArchived:
+                false
+            // VX-813: an order is a book's two columns — no take's text read,
+            // rewritten, copied, frozen or tombstoned.
+            case .setBookOrder:
+                false
+            // VX-807: a wing move re-homes notes — no take's text read,
+            // rewritten, copied, frozen or tombstoned (`move_note_to_wing`'s
+            // answer, one level up).
+            case .moveBookToWing:
                 false
             }
         }
@@ -111,13 +128,15 @@ extension MCPWriteTools {
     /// words, the VX-648 record's BATCH 2 bundle): a gathering is renamed,
     /// starred, archived and deleted at edit now, so the sentence says what
     /// still isn't the client's — a finish, its notes' order and membership,
-    /// and its RULE, with the why.
+    /// and its RULE, with the why. VX-813 (the VX-809 run, batch 2 — PROVISIONAL,
+    /// a justified wording edit): a gathering's ORDER is set_book_order's now,
+    /// so the sentence says its notes can't be placed BY HAND, and points there.
     static func gatheringWords(_ name: String?) -> String {
         let named = name.map { "\u{201C}\($0)\u{201D}" } ?? "That"
         return "\(named) is a gathering \u{2014} it shows the notes its rule matches and holds none of its own, "
-            + "so it can't be finished, and its notes can't be ordered or taken out of it: a note leaves it by no "
-            + "longer matching (remove_tag takes a tag off a note). Its rule is the author's, since a client "
-            + "changing it would widen what its own grant reaches."
+            + "so it can't be finished, and its notes can't be placed by hand (set_book_order sorts it) or taken "
+            + "out of it: a note leaves it by no longer matching (remove_tag takes a tag off a note). Its rule is "
+            + "the author's, since a client changing it would widen what its own grant reaches."
     }
 
     /// A note named on a book act that is not one of the book's notes (the
@@ -177,6 +196,15 @@ extension MCPWriteTools {
             return .setNoteArchived(noteID: try requiredString(args, "note_id"), archived: true)
         case MCPToolCatalog.unarchiveNote.name:
             return .setNoteArchived(noteID: try requiredString(args, "note_id"), archived: false)
+        case MCPToolCatalog.setBookOrder.name:
+            return .setBookOrder(
+                bookID: try requiredString(args, "book_id"),
+                order: try Self.order(field: args["sort_field"], direction: args["sort_dir"], at: ""))
+        case MCPToolCatalog.moveBookToWing.name:
+            guard let wingID = try optionalString(args, "wing_id") else {
+                throw ArgumentFailure(message: "wing_id is required (\"\" is Home).")
+            }
+            return .moveBookToWing(bookID: try requiredString(args, "book_id"), wingID: wingID)
         default:
             return nil
         }
@@ -564,6 +592,11 @@ extension MCPWriteTools {
                                           show: .note(noteID: noteID, blockID: nil, select: nil))
                         : nil)
             }
+
+        case .setBookOrder(let bookID, let order):
+            return try performBookOrder(bookID: bookID, order: order, job: job, ops: ops, clientName: clientName)
+        case .moveBookToWing(let bookID, let wingID):
+            return try performBookWingMove(bookID: bookID, wingID: wingID, job: job, ops: ops, clientName: clientName)
         }
     }
 }

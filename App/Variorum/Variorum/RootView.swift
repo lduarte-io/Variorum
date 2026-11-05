@@ -264,6 +264,8 @@ struct RootView: View {
                 postMode: (session.commandRouter.activeMode ?? .takes).rawValue,
                 noteBox: noteBoxView,
                 bottom: statusRows,
+                // VX-679: the AI section, near the column's bottom.
+                footerSection: mcpTrailFooter,
                 // VX-425: the note rows' Move/Copy to Wing ▸ doors.
                 wings: wings)
         } detail: {
@@ -654,6 +656,22 @@ struct RootView: View {
             // (another window's is never touched).
             calmAsks?.unregister(id: CalmAskScheduler.AskID.backupFolder, host: windowID)
         }
+    }
+
+    /// **VX-679 — the AI section** (her R-679): the door's session trail as the
+    /// sidebar's "From ‹client› · N" section, composed HERE and rendered by the
+    /// column (`SidebarView.FooterSection` — the sidebar never holds the door).
+    /// Its closures are read inside the column's own body, so a trail change
+    /// re-renders the column, never this root. nil without a door (a harness).
+    private var mcpTrailFooter: SidebarView.FooterSection? {
+        guard let mcp else { return nil }
+        let theme = theme
+        return SidebarView.FooterSection(
+            rows: { mcp.trail.trail.entries.count },
+            headers: { mcp.trail.trail.groups.count },
+            content: { rowHeight in
+                AnyView(MCPTrailSection(door: mcp, rowHeight: rowHeight).environment(theme))
+            })
     }
 
     /// The sidebar column's BOTTOM — the bottom-left family: the sync row

@@ -140,11 +140,16 @@ enum MCPToolCatalog {
         putBack, setEntryDate,
         // 13n-c U6 — the per-item note move across wings (VX-160).
         moveNoteToWing,
+        // VX-807 (the VX-809 run, batch 2 — R-807): a whole book across wings.
+        moveBookToWing,
         // VX-168 U2 — the deliberate acts: VX-169's commit (her settlement:
         // edit) and VX-174's merge button (R-MERGE-1: edit).
         saveCommit, chooseTake, adoptLens,
         // VX-184 U3 — VX-190: un-tagging a note (her removeTag, §9).
         removeTag,
+        // VX-812 (the VX-809 run, batch 3 — R-812): tag A → tag B across the
+        // client's reach in one wing.
+        replaceTag,
         // VX-184 U4 — VX-195: edit parity inside a note (R-VX184-1) — comments.
         editComment, restoreComment,
         // …the takes family (the LAST take ⇒ the block, R-VX184-1).
@@ -163,6 +168,9 @@ enum MCPToolCatalog {
         // VX-596 — her star on the wire (her ruling 2026-10-27: "let's add the
         // star over the wire, it might as well be included"): a note or a book.
         setStarred,
+        // VX-813 (the VX-809 run, batch 2 — R-813): a book's order, her
+        // navigator's Save as This Book's Order (a book or a gathering).
+        setBookOrder,
     ]
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
@@ -247,14 +255,15 @@ enum MCPToolCatalog {
             open book): each book's id, name, wing and live note count, and how it collects — its rule \
             (tags by path: {"tag": "percy"}, {"star": true}, combined with {"and": […]}, {"or": […]}, \
             {"not": …}), its outflow (the tags notes written there wear), new_matches ("join" or \
-            "wait" at Arrivals), word_target / max_notes, and whether it is finished, sealed, owned \
-            or collecting now. Archived books appear only with include_archived: true. The daily \
+            "wait" at Arrivals), word_target / max_notes, its order (sort_field, sort_dir — what \
+            set_book_order sets), and whether it is finished, sealed, owned or collecting now. \
+            Archived books appear only with include_archived: true. The daily \
             Journal and Private books are never listed. A gathering shared with you — its own grant, \
             its wing's, or the open book — lists too (kind "gathering"): a saved rule that gathers \
             notes by tag or star, holding none of its own; list_notes and search take its id like a \
             book's, create_note writes a new note into it, and at edit rename_book, archive_book, \
-            unarchive_book, delete_book and set_starred act on it as on a book (its rule stays the \
-            author's). A wing holding no book lists \
+            unarchive_book, delete_book, set_starred and set_book_order act on it as on a book (its \
+            rule stays the author's). A wing holding no book lists \
             nothing here — list_wings lists the wings themselves. Returns JSON.
             """,
         inputSchema: .object([
@@ -678,8 +687,11 @@ enum MCPToolCatalog {
             gives chapter ids). Returns JSON with the note_id, its block_ids, and blocks: per \
             block its block_id, the shown_take_id, and every take in fan order (take_id, label \
             where it has one, and sha256), the shown one included — no read_note needed to learn \
-            them. Its tag_ids and tags (their paths) list every tag the note wears once it lands, \
-            a book's outflow or a gathering's rule tags included, so there is nothing to tag again. \
+            them. tags (paths, e.g. ["percy/pt-en"]) tags the note as it is born: each tag adopted or \
+            created by path in the note's wing exactly as apply_tag does, in the same act and the same \
+            undo, so books that collect by them hear the new note. Its tag_ids and tags (their paths) \
+            list every tag the note wears once it lands — yours first, in the order given, then a \
+            book's outflow or a gathering's rule tags, each once — so there is nothing to tag again. \
             \(digestSentence) \
             \(nullSentence) With \
             text, Variorum splits the prose into blocks by its own setting; to verify byte for \
@@ -720,6 +732,11 @@ enum MCPToolCatalog {
                 "section_id": .object(["type": "string",
                                        "description": "File it under this chapter of book_id (with book_id only)."]),
                 "wing_id": .object(["type": "string", "description": "Create it bookless in this wing."]),
+                "tags": .object([
+                    "type": "array",
+                    "description": "Tag paths the note is born wearing (e.g. \"percy/pt-en\"); a missing tag is created.",
+                    "items": .object(["type": "string"]),
+                ]),
             ]),
             "additionalProperties": false,
         ]),
@@ -782,15 +799,16 @@ enum MCPToolCatalog {
             Apply a tag to a note by its path (e.g. "percy/pt-en"); a missing tag is created in the \
             note's wing. Books that collect by that tag hear it, as when the author tags. Returns \
             JSON with the tag_id and changed — false when the note already wore the tag: nothing \
-            was written and there is nothing to undo.
+            was written and there is nothing to undo. \(MCPWriteTools.listFormSentence)
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
                 "tag": .object(["type": "string", "description": "The tag's path."]),
             ]),
-            "required": .array(["note_id", "tag"]),
+            "required": .array(["tag"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -799,13 +817,17 @@ enum MCPToolCatalog {
         name: "create_book", rung: .writeNew, title: "Create a book",
         description: """
             Create a new, empty book in a shared wing ("" is Home). list_wings gives the wing_id of \
-            every wing shared with you, empty ones too. Returns JSON with the book_id.
+            every wing shared with you, empty ones too. order (optional) is the order it shows its \
+            notes in, as set_book_order sets it — e.g. {"sort_field": "entry_date", "sort_dir": \
+            "desc"}; without it a book keeps its notes in the order they are added. Returns JSON \
+            with the book_id (and the order, when you gave one).
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "name": .object(["type": "string", "description": "The book's name."]),
                 "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "order": orderOption,
             ]),
             "required": .array(["name", "wing_id"]),
             "additionalProperties": false,
@@ -846,9 +868,12 @@ enum MCPToolCatalog {
         description: """
             Add a note to a book (at its end), optionally filed under one of the book's chapters \
             (section_id — from list_notes or create_section). Both must be shared with this client \
-            at write new. Returns JSON; its tag_ids and tags (their paths) list every tag the note \
-            wears once it is in the book — its own first, then the book's outflow — so there is \
-            nothing to tag again.
+            at write new. A book that owns its notes takes no note another book holds, and a note \
+            such a book owns joins no other book: the refusal says which in the author's words, or, \
+            when what holds the note is beyond your reach, in one fixed sentence that names nothing \
+            (the author can add it in Variorum). Returns JSON; its tag_ids and tags (their paths) \
+            list every tag the note wears once it is in the book — its own first, then the book's \
+            outflow — so there is nothing to tag again.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1040,20 +1065,64 @@ enum MCPToolCatalog {
             so the note leaves every book it is in here, lands bookless in that wing's Pool, and \
             its tags come with it (a tag the other wing lacks is made there by its path). Needs \
             edit on the note and write new on the wing it goes to. A note in a finished or sealed \
-            book can't move until the author reopens it. One undo for the author puts it back, \
-            books and tags too. Returns JSON: where it landed, the books it left (named where you \
-            can read them) and the tags adopted or made.
+            book can't move until the author reopens it; when that book is beyond your reach, one \
+            fixed sentence says only that something beyond your reach holds the note. One undo for \
+            the author puts it back, \
+            books and tags too. Returns JSON: where it landed, the books it left that you can read \
+            (book_id, name) — \(MCPWriteTools.beyondReachKey) says, always in the same words, that \
+            books beyond your reach, if any, are not listed — and the tags adopted or made. \
+            \(MCPWriteTools.listFormSentence)
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note to move."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
                 "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
             ]),
-            "required": .array(["note_id", "wing_id"]),
+            "required": .array(["wing_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-807 (the VX-809 run, batch 2 — R-807; A-809-2/-14/-15/-16, R-805-5):
+    /// her Move to Wing ▸ for a book, on the wire. Listed at EDIT under a book
+    /// or wing grant (a gathering never moves on the wire — A-809-16): a client
+    /// short on the destination's write new is still offered it, and its
+    /// refusal raises that wing's ask.
+    static let moveBookToWing = MCPToolDeclaration(
+        name: "move_book_to_wing", rung: .edit, title: "Move a book to another wing",
+        description: """
+            Move a whole book to another wing (wing_id; "" is Home; list_wings gives every wing \
+            shared with you, empty ones too), as the author's Move to Wing does: its notes come \
+            with it — their order, chapters, tags (a tag the other wing lacks is made there by \
+            its path) and archive state — and so do its rule, outflow, star and finished or \
+            sealed state; it arrives unshelved. Each wing is a separate library, so a note of the \
+            book that is also in another book here leaves that book, and the notes waiting at its \
+            Arrivals stay behind, dismissed — including any you can't read. Needs edit on the book \
+            and write new on the wing it goes to. A book can't move while one of its notes is also \
+            in a finished or sealed book here (the author reopens that book first), nor while \
+            something beyond your reach holds one of its notes (one sentence says so). A gathering \
+            and the daily Journal move only by the author's hand. One undo for the author puts it \
+            all back — the books its notes left and the waiting notes too. Returns JSON: where it \
+            landed; notes — how many of the notes that came you can read (archived_notes of them \
+            archived); left_books — each note you can read with the book you can read that it \
+            left (note_id, book_id, name; the first \(MCPWriteTools.bookMoveListCap), \
+            left_books_count all of them); dismissed_arrivals — the waiting notes you can read that \
+            were dismissed; same_name_in_wing — books there already wearing its name (both keep \
+            their names); and \(MCPWriteTools.beyondReachKey), which says, always in the same \
+            words, that books beyond your reach, if any, are not listed.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book to move (list_books gives ids)."]),
+                "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
+            ]),
+            "required": .array(["book_id", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
 
     // MARK: - VX-184 U3 — VX-187 link_versions
 
@@ -1188,9 +1257,12 @@ enum MCPToolCatalog {
             fan order (take_id, label where it has one, and sha256 — equal to its source take's), \
             as create_note answers them — its tag_ids and tags (their paths: every tag the copy \
             wears once it lands, a book's outflow included), the book_id and section_id you gave, \
-            and landed: where the copy is. \(digestSentence) For a long note pass brief: true — the \
+            and landed: where the copy is, naming only books you can read — \
+            \(MCPWriteTools.beyondReachKey) says, always in the same words, that books beyond your \
+            reach, if any, are not listed. \(digestSentence) For a long note pass brief: true — the \
             answer is then only the copy's note_id, the source_note_id, its tag_ids and tags, the \
-            book_id and section_id you gave, landed, block_count and take_count (every take in its \
+            book_id and section_id you gave, landed, \(MCPWriteTools.beyondReachKey), block_count \
+            and take_count (every take in its \
             blocks' fans) and \(MCPTextDigest.fanKey), with no per-block records; read_note with \
             ids_only gives those when you need them. \(fanDigestSentence)
             """,
@@ -1268,18 +1340,56 @@ enum MCPToolCatalog {
             it; the tag itself stays in the library. As when the author removes one, nothing else \
             moves: a book the tag brought the note into keeps it, since removing a tag is never a \
             way out of a book (remove_note_from_book takes it out; for a board a note should leave \
-            when its tag goes, use a gathering — create_gathering — which shows exactly what its \
-            rule matches). One undo for the author puts the tag back. Returns JSON; \
-            still_in_books names each book (book_id, name) that collects by the tag and still holds \
-            the note, and still_in_books_hidden_count counts any not shared with you.
+            when its tag goes, use a gathering, which shows exactly what its rule matches: \
+            create_gathering makes one if you hold write new on a wing; otherwise ask the author for \
+            a gathering). One undo for the author puts the tag back. Returns JSON; \
+            still_in_books names each book you can read (book_id, name) that collects by the tag and \
+            still holds the note — [] when none — and \(MCPWriteTools.beyondReachKey) says, always \
+            in the same words, that books beyond your reach, if any, are not listed. \
+            \(MCPWriteTools.tagUnusedKey) is true when no note you can read still wears the tag or a \
+            tag under it (on the note or on one of its blocks) — the tag may be unused, so you can \
+            suggest the author delete it in Settings ▸ Tags; notes beyond your reach are not counted, \
+            and deleting a tag is the author's alone. To swap one tag for another across a wing in \
+            one call, use replace_tag. \(MCPWriteTools.listFormSentence)
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
                 "tag": .object(["type": "string", "description": "The tag's path (as read_note's header shows it)."]),
             ]),
-            "required": .array(["note_id", "tag"]),
+            "required": .array(["tag"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-812 (the VX-809 run, batch 3 — her R-812): tag A → tag B across the
+    /// client's REACH in one wing (`MCPWriteTools+TagReplace`).
+    static let replaceTag = MCPToolDeclaration(
+        name: "replace_tag", rung: .edit, title: "Replace a tag across a wing",
+        description: """
+            Replace one tag with another on every note in a wing (wing_id; "" is Home; list_wings \
+            gives every wing shared with you) that wears it and that you can edit: on each, tag (a \
+            path, e.g. "percy/pt-en") comes off and with goes on — a missing tag is made in the wing \
+            by its path, as apply_tag does. Only the notes you can edit are touched and counted; \
+            exactly that tag, never the tags under it. Each note is its own act with its own undo for \
+            the author, one refusing never stopping the rest (a once grant covers one note); at most \
+            \(MCPWriteTools.listCap) notes a call, oldest first — remaining counts the rest you could \
+            edit, so call again. As with remove_tag, a book the old tag brought a note into keeps it; \
+            books that collect by the new tag hear each note, as when the author tags. Returns JSON: \
+            replaced (note ids) and replaced_count, refused (note_id, refused) and refused_count, \
+            remaining, the tags' paths and with_tag_id, and \(MCPWriteTools.beyondReachKey), which \
+            says, always in the same words, that notes beyond your reach, if any, are not counted.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "tag": .object(["type": "string", "description": "The tag to take off, by its path."]),
+                "with": .object(["type": "string", "description": "The tag to put on, by its path."]),
+            ]),
+            "required": .array(["wing_id", "tag", "with"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -1764,9 +1874,17 @@ enum MCPToolCatalog {
             Delete a note, as the author's Delete does: it goes to the Trash with its saved versions \
             for 30 days, out of every book it was in, and the author can put it back whole. A \
             sealed note can still be deleted, as the author's can. One undo for the author brings \
-            it back. Returns JSON.
+            it back. Returns JSON. \(MCPWriteTools.listFormSentence)
             """,
-        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
 
     /// Her Archive — kept, out of view.
     static let archiveNote = MCPToolDeclaration(
@@ -1821,6 +1939,56 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-813 — a book's order on the wire (the VX-809 run, batch 2)
+
+    /// The order's two arguments, said once (the standalone tool's schema and
+    /// the `order` object on `create_book` / `set_book_rule`).
+    static let orderProperties: [String: Value] = [
+        "sort_field": .object([
+            "type": "string", "enum": .array(MCPWriteTools.orderFields.map { .string($0) }),
+            "description": "manual (the book's hand order), entry_date, created_at, last_touched or last_major_revision.",
+        ]),
+        "sort_dir": .object([
+            "type": "string", "enum": .array(MCPWriteTools.orderDirections.map { .string($0) }),
+            "description": "asc (the default) or desc; manual order has no direction.",
+        ]),
+    ]
+
+    /// The `order` option's schema (`create_book`, `set_book_rule`).
+    static let orderOption: Value = .object([
+        "type": "object",
+        "properties": .object(orderProperties),
+        "required": .array(["sort_field"]),
+        "additionalProperties": false,
+        "description": "The book's order, as set_book_order sets it: {\"sort_field\": …, \"sort_dir\": …}.",
+    ])
+
+    /// Her navigator's Save as This Book's Order (`setReadingSort`) — a book or
+    /// a gathering (her door draws on both); a finished book refuses (her op).
+    static let setBookOrder = MCPToolDeclaration(
+        name: "set_book_order", rung: .edit, title: "Set a book's order",
+        description: """
+            Set the order a book shows its notes in, as the author's "Save as This Book's Order" \
+            does: sort_field manual (the book's own hand order — move_note_in_book places notes \
+            in it), entry_date, created_at, last_touched or last_major_revision (when most of a \
+            note was last rewritten), and sort_dir asc (the default) or desc — e.g. \
+            {"sort_field": "entry_date", "sort_dir": "desc"} for newest first. A gathering takes an \
+            order too (book_id takes its id; an edit grant on it or its wing); its manual order is \
+            oldest note first. A finished or sealed book's order is frozen until the \
+            author reopens it. list_books shows each book's order. Returns JSON with the order and \
+            changed — false when the book was already in that order: nothing was written and \
+            there is nothing to undo. One undo for the author puts the old order back.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object(orderProperties.merging([
+                "book_id": .object(["type": "string", "description": "The book or gathering (list_books gives ids)."]),
+            ]) { $1 }),
+            "required": .array(["book_id", "sort_field"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing, .gathering])
 
     // MARK: - VX-168 U2 — the deliberate acts (VX-169 save_commit; VX-174 the merge button)
 
@@ -1972,13 +2140,17 @@ enum MCPToolCatalog {
             starred; {"not": …}; null clears it), outflow (the tag paths notes written in the book \
             wear; [] clears), new_matches ("join" quietly at the end, or "wait" at Arrivals). A \
             missing tag is created in the book's wing. A finished or archived book keeps the \
-            change and collects again when the author reopens it. A gathering's rule stays the \
-            author's. One undo for the author. Returns JSON with the book's collecting facts.
+            change and collects again when the author reopens it. order (optional) also sets the \
+            order the book shows its notes in, exactly as set_book_order does — and so, like it, \
+            needs edit on the book (the rest needs write new) and is refused on a finished or \
+            sealed book. A gathering's rule stays the author's (its order is set_book_order's). One \
+            undo for the author. Returns JSON with the book's collecting facts and its order.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "book_id": .object(["type": "string", "description": "The book."]),
+                "order": orderOption,
                 "rule": .object(["description": "The rule (one term), or null to clear."]),
                 "outflow": .object(["type": "array", "items": .object(["type": "string"]),
                                     "description": "Tag paths, in order."]),
