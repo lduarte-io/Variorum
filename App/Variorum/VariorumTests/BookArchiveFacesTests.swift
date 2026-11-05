@@ -9,12 +9,12 @@
 //
 //  - the registry: `.archiveBook` / `.unarchiveBook` declared and rendered;
 //    WHICH of Archive · Unarchive · Delete renders is DATA
-//    (`BookArchiveDoorSet` — the daily Journal never offers Delete, P-2);
+//    (`BookArchiveDoorSet` — the daily Journal offers Delete beside Archive since VX-436);
 //  - the doors' acts through the one brain (`BookStateDoors`): a plain book,
 //    a gathering and the daily Journal archive at once; an OWNED book asks
 //    (the delete confirm's twin); unarchive says what came back and what
-//    waits at Arrivals; the daily Journal's delete refuses in the table's
-//    words;
+//    waits at Arrivals; the daily Journal's delete LANDS through the one
+//    door (VX-436 — the tombstone carries the deleted-Journal mark);
 //  - the Book Settings sheet's Archived row and THE VISIBLE PAUSE (mounted);
 //  - the Archived surface's BOOKS group's brain and words;
 //  - the "(archived)" marks (her second rider's lighter road);

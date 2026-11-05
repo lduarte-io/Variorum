@@ -274,7 +274,7 @@ extension Queries {
     /// the next press makes the Journal's wing's). Non-daily journal-trait
     /// books never wear this shape (they mint `.generic` posts — the Stage B
     /// BLOCKER's rule), so no other wing can hold a "day's entry" for this
-    /// door to find. `wingID` defaults to Home (every pre-VX-435 caller).
+    /// door to find. `wingID` '' means Home; the entry road passes the live Journal's effective wing (Operations+Container) — the default serves Home-only test fixtures, and a new product caller must pass the Journal's wing, never omit it.
     ///
     /// **THE DAY'S FIRST ENTRY IS THE JOURNAL'S** (VX-797 — the VX-805 run;
     /// her ruling: "⌘J keeps open-today and opens the day's FIRST entry", and
