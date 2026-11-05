@@ -84,3 +84,16 @@ This branch still names `OperationError.dailyJournalIsHomeOnly`, which VX-805 re
 ## OVERALL VERDICT
 
 **PASS for this round — no BLOCKER, no MAJOR.** 2 MINOR (both RECORD-class: the book cursor's position-key residual made concrete with a pin and fix shape for her choice; the uncleared `willLockRoad` as a latent-future hazard under the coordinator's own condition), 2 NOTE (one final-called as-built, one merge-seam restatement), 2 NIT (one SPECULATIVE, labeled). **The AppBootstrap lines are classified COMPOSITION PLUMBING — the door half may remain.** No finding requires an implementer fix pass before the closing window; the two MINORs land in the bundle/QUESTIONS at the merge moment and as tickets. Per the cross-model flow these findings go to the implementer verbatim for agree/dispute; absent a dispute that changes a mechanism above, round 2 is not earned by this round's content (no new BLOCKER/MAJOR).
+
+---
+
+## DISPOSITIONS (round 1 — the orchestrator, repo-first; NO implementer fix pass owed: the ladder CLOSES at round 1, PASS)
+
+- **MINOR-1 (the book cursor's raw position key):** ACCEPTED AS RECORDED — no tonight fix. The fix is a PRODUCT choice the docs are silent on (an id-resuming cursor trades position-resume's robustness to a departed member); it lands three ways at the merge moment: (1) **ticket VX-859** (minted, Suspected — the pin is constructible, no instance observed); (2) the run's QUESTIONS bundle entry; (3) the closeout's MCPSpec law sentence carries one honest clause naming the residual (the CANON DRAFT is amended at closeout). The catalog harness's structural blindness (the reachable world builds first) is recorded beside the law pin.
+- **MINOR-2 (`willLockRoad` never cleared — the one-shot fail-closed default):** ACCEPTED AS RECORDED — the clearing line would violate A-809-21 condition (1) (EXACTLY the declared shape, no other line in the file); recorded beside the clearance's bundle line for her morning (a one-line amendment if she wants the belt on future callers).
+- **NOTE-1 (replace_tag's empty sweep under suggest):** the reviewer's final call stands — AS BUILT; already in the bundle for her eye.
+- **NOTE-2 (the dailyJournalIsHomeOnly merge-seam collision):** already in the run record's VX-805 seam checklist; the second merger's compile error is the designed signal.
+- **NIT-1 (a racing call hears the locked sentence one frame post-unlock):** record-only — benign; the client's next call serves.
+- **NIT-2 (`try?` on the resume's deferred grant ends — SPECULATIVE, so labeled by its finder):** record-only per the hallucination guard (no fix without a traced concrete mechanism).
+
+No code changed in this round ⇒ `TagUsageQueries.swift` untouched (the vendoring FYI's condition is NOT triggered); no round 2 exists to run (round 2 re-reviews FIXES; none were made); the AppBootstrap classification is COMPOSITION PLUMBING and **the door half stands**.
