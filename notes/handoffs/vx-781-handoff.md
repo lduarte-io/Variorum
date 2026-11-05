@@ -2,7 +2,7 @@
 
 ## Your checklist
 
-1. **Ratify QUESTIONS #260's remainder** (P-781-1..3 — built-as-described confirmations: the CLI lockfile alignment with the MCP A/B note, the 15 visible package references, verify-pins' byte-strictness; details in #260). **P-781-4 is RESOLVED** — you ruled at the checkpoint: moving an existing dependency's pinned version is AUTHOR-ONLY; the CLAUDE.md line landed at this close.
+1. **QUESTIONS #260 is ratified except one held item.** You ruled at the checkpoint: **P-781-1** (the CLI lockfile alignment) and **P-781-2** (the 15 visible package references) both stand as built; **P-781-4** — moving an existing dependency's pinned version is **AUTHOR-ONLY** (the CLAUDE.md line landed). **P-781-3** you ruled the same sitting after the owed survey (`notes/plans/vx-781-build-ergonomics-survey.md`): **versions-equal** — built the same night as **VX-853**; the survey's optional lockfile-mode belt parked as **VX-854**. So #260 is FULLY RESOLVED; nothing left to ratify.
 2. **VX-852** (Medium, Todo): wiring `Tools/verify-pins` into release.sh as the standing post-archive check — the diff shape is ready in the record; it ran manually as a GO condition at the 1.1 release. Lands by normal PR flow with your eyes whenever you want it.
 3. Nothing else needs your hands. No release owed (1.1 shipped mid-run, independently, on committed pins — verified).
 
@@ -36,3 +36,7 @@ VX-770's intermittent upward rewrites of the workspace Package.resolved, traced 
 ## Ledger state at this close
 
 In-flight row retired; closeout paragraph seated in the master plan (VX-770's rolled to `notes/PhaseCloseoutArchive.md`); AppSpecRecord dated entry appended; QUESTIONS #260 filed; `Tools/canon-size`: **130,014 of 150,000 (headroom 19,986)** — no crossing, no canon contract line changed (nothing was ruled). Branch `vx-781-lockfile-pins` and worktree `~/dev/variorum-vx-781` removed after the merge. Riders: offered at kickoff, you ruled **no riders**. Mobile parity: **nothing mobile-visible**.
+
+## Postscript — VX-853 landed the same night (PR #221, merge 2f68875e3)
+
+Your P-781-3 ruling is BUILT and merged: the tree guard is versions-equal (bookkeeping-only lockfile changes pass with a NOTE advising `git checkout HEAD -- <file>`; every real pin change, duplicate identity or missing file still fails). The two-round ladder record: `notes/plans/fixes/vx-853-verify-pins-versions-equal.md`. Nothing of VX-853 awaits you — all its rulings were yours live at the sitting (versions-equal · tonight · VX-854 parked). The wave sessions get the NOTE/DRIFT vocabulary in the coordinator's main broadcast.

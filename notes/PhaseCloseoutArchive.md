@@ -1556,3 +1556,26 @@ REAL windows; the merge gate on the merged tree: Mac 5,846/1,019 + phone 18/18 t
 pin gap closed), the lf-rev red leg 2/2. VX-652 re-owned with its B5-F1 design (not built — her option call).
 Canon: three SurfaceContracts lines + AppSpec §10, in place. Born: VX-781–794 (the pin-upgrade ticket VX-781 High).
 NO release (her word); the /Applications refresh HELD for her (VX-779). PR #217, merge 4be6bd7c5.
+
+
+## VX-781 — the master plan closeout paragraph as it stood until the VX-853 merge (2026-11-05)
+
+**→ VX-781 CLOSED 2026-11-05 — THE LOCKFILE REWRITER (the record `notes/plans/fixes/vx-781-lockfile-pins.md`,
+FOR A LATER READER at its top; the handoff `notes/handoffs/vx-781-handoff.md`).** Her early-run word (before the
+Nov 4 umbrellas): VX-770's Package.resolved rewrites traced and the committed pins belted. The mechanism: without
+the lockfile the manifests FLOAT (SQLCipher via the GRDB fork's `from: 4.11.0`, swift-dependencies via
+`from: 1.9.0`) to exactly VX-770's upgrade set; a CLEAN committed lockfile seeds the resolver and wins every time
+on Xcode 27.1 (ruled out: cache luck, originHash staleness, reused-DerivedData state); the VX-770 flags never
+failed — their input was already upgraded. What FIRST wrote the upgraded file that night stays unreproduced (a
+second writer; `xcodebuild test` and simulator destinations never sampled) — and the belt makes any such write
+heal or fail closed (E8b). RELEASE-EXPOSURE: NONE — 1.0, 1.0.1 and 1.1 all shipped committed pins (dSYM UUID
+proof). The belt: exact pins in BOTH manifests (15 project-level exactVersion references — E10 measured:
+Package.swift-only pins are PRUNED, the repo package being a local dependency in the workspace), `PinBeltTests`
+hermetic in every `swift test` (red-on-old four ways), `Tools/verify-pins` (the release road's post-build check;
+1.1's GO ran it as a manual condition) and `Tools/pins-belt-check` (the networked from-scratch proof). No
+dependency version moved in the app graph; the CLI graph aligned to what ships (P-781-1). Ladder: two rounds
+(opus-reviewer), 1 MAJOR + 5 MINOR + 11 NIT, all agreed and fixed; the final round's fixes line-by-line checked
+by the orchestrator. Core 3,649/492 green on the merged tree. Born: VX-850 (the MCP socket A/B) · VX-851
+(upgrade-pin helper) · VX-852 (the release.sh hook). PROVISIONALs P-781-1..4 → QUESTIONS #260 (P-781-4 is the
+governance question: is a pin bump author-only). NO release owed (1.1 shipped mid-run, independently). Nothing
+mobile-visible. PR #220, merge af012aa67.
