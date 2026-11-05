@@ -61,7 +61,9 @@ struct MCPWriteTools: Sendable {
             }
             switch result {
             case .success(let landed):
-                if let receipt = landed.receipt { hooks.onWrite?(receipt) }
+                // VX-812 (A-809-19): a list form's landed items each send their
+                // receipt (one call-scoped run key — one line at the app).
+                for receipt in landed.receipts { hooks.onWrite?(receipt) }
                 return Outcome(text: landed.answer, isError: false)
             case .failure(let refused):
                 return refused.outcome
@@ -132,6 +134,12 @@ struct MCPWriteTools: Sendable {
         /// VX-596: her star on the wire — a note or a book, starred or not
         /// (`MCPWriteTools+Star`).
         case setStarred(target: StarTarget, starred: Bool)
+        /// VX-812 (A-809-18): a list form — each item the single call's own job
+        /// (`MCPWriteTools+NoteLists`).
+        case noteList(tool: String, items: [NoteListItem])
+        /// VX-812: tag A → tag B across the client's reach in one wing
+        /// (`MCPWriteTools+TagReplace`).
+        case replaceTag(wingID: String, from: String, to: String)
 
         var tool: String {
             switch self {
@@ -157,6 +165,8 @@ struct MCPWriteTools: Sendable {
             case .duplicateNote: "duplicate_note"
             case .copyNoteToWing: "copy_note_to_wing"
             case .setStarred: "set_starred"
+            case .noteList(let tool, _): tool
+            case .replaceTag: "replace_tag"
             }
         }
 
@@ -212,6 +222,14 @@ struct MCPWriteTools: Sendable {
             // her Duplicate does (`copyPost`) — the same class, the same answer.
             case .copyNoteToWing:
                 true
+            // VX-812: a list flushes when any of its items would (the one flush
+            // ahead of the call's one serial turn covers every item — AF-8).
+            case .noteList(_, let items):
+                items.contains { $0.job.flushesHerEditorFirst }
+            // VX-812: an un-tag and a tag per note — no take's text read,
+            // rewritten, copied, frozen or tombstoned (`apply_tag`/`remove_tag`'s answer).
+            case .replaceTag:
+                false
             }
         }
     }
@@ -233,14 +251,31 @@ struct MCPWriteTools: Sendable {
 
     struct Landed: Sendable {
         let answer: String
-        let receipt: MCPWriteReceipt?
+        /// Every receipt the call sends: the act's one (none when nothing
+        /// landed worth claiming), or — VX-812's list forms — one per landed
+        /// item, on one run key.
+        let receipts: [MCPWriteReceipt]
+
+        init(answer: String, receipt: MCPWriteReceipt?) {
+            self.answer = answer
+            receipts = receipt.map { [$0] } ?? []
+        }
+
+        init(answer: String, receipts: [MCPWriteReceipt]) {
+            self.answer = answer
+            self.receipts = receipts
+        }
+
+        var receipt: MCPWriteReceipt? { receipts.first }
     }
 
     struct Refused: Error, Sendable {
         let outcome: Outcome
     }
 
-    private func parse(_ name: String, _ args: [String: Value]) throws -> Job {
+    func parse(_ name: String, _ args: [String: Value]) throws -> Job {
+        // VX-812 (A-809-18): `note_ids` on the four list-form tools.
+        if let list = try parseNoteList(name, args) { return list }
         switch name {
         case MCPToolCatalog.addTake.name:
             // VX-168 U3 (VX-171 — R-VX171-2, her word, door-only): a BLANK
@@ -316,6 +351,7 @@ struct MCPWriteTools: Sendable {
                 return .deleteComment(commentID: try requiredString(args, "comment_id"))
             }
             if name == MCPToolCatalog.removeTag.name { return try parseRemoveTag(args) }
+            if name == MCPToolCatalog.replaceTag.name { return try parseReplaceTag(args) }
             if name == MCPToolCatalog.linkVersions.name { return try parseLinkVersions(args) }
             if let job = try parseNoteEdit(name, args) { return .noteEdit(job) }
             if let job = try parseLibraryEdit(name, args) { return .libraryEdit(job) }
@@ -478,7 +514,7 @@ struct MCPWriteTools: Sendable {
 
     // MARK: - The serial body (decide → act → spend → log)
 
-    private func perform(_ job: Job, ops: Operations, clientName: String) throws -> Result<Landed, Refused> {
+    func perform(_ job: Job, ops: Operations, clientName: String) throws -> Result<Landed, Refused> {
         let label = { (act: Operations.MCPWriteAct) in act.undoLabel(client: clientName) }
         switch job {
         case .addTake(let blockID, let text, let takeLabel):
@@ -686,6 +722,10 @@ struct MCPWriteTools: Sendable {
             return try performSetStarred(target, starred: starred, job: job, ops: ops, clientName: clientName)
         case .copyNoteToWing(let noteID, let wingID):
             return try performCopyNoteToWing(noteID: noteID, wingID: wingID, job: job, ops: ops, clientName: clientName)
+        case .noteList(let tool, let items):
+            return try performNoteList(items, tool: tool, ops: ops, clientName: clientName)
+        case .replaceTag(let wingID, let from, let to):
+            return try performReplaceTag(wingID: wingID, from: from, to: to, job: job, ops: ops, clientName: clientName)
         }
     }
 

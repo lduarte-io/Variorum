@@ -147,6 +147,9 @@ enum MCPToolCatalog {
         saveCommit, chooseTake, adoptLens,
         // VX-184 U3 — VX-190: un-tagging a note (her removeTag, §9).
         removeTag,
+        // VX-812 (the VX-809 run, batch 3 — R-812): tag A → tag B across the
+        // client's reach in one wing.
+        replaceTag,
         // VX-184 U4 — VX-195: edit parity inside a note (R-VX184-1) — comments.
         editComment, restoreComment,
         // …the takes family (the LAST take ⇒ the block, R-VX184-1).
@@ -796,15 +799,16 @@ enum MCPToolCatalog {
             Apply a tag to a note by its path (e.g. "percy/pt-en"); a missing tag is created in the \
             note's wing. Books that collect by that tag hear it, as when the author tags. Returns \
             JSON with the tag_id and changed — false when the note already wore the tag: nothing \
-            was written and there is nothing to undo.
+            was written and there is nothing to undo. \(MCPWriteTools.listFormSentence)
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
                 "tag": .object(["type": "string", "description": "The tag's path."]),
             ]),
-            "required": .array(["note_id", "tag"]),
+            "required": .array(["tag"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -1061,15 +1065,17 @@ enum MCPToolCatalog {
             book can't move until the author reopens it. One undo for the author puts it back, \
             books and tags too. Returns JSON: where it landed, the books it left that you can read \
             (book_id, name) — \(MCPWriteTools.beyondReachKey) says, always in the same words, that \
-            books beyond your reach, if any, are not listed — and the tags adopted or made.
+            books beyond your reach, if any, are not listed — and the tags adopted or made. \
+            \(MCPWriteTools.listFormSentence)
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note to move."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
                 "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
             ]),
-            "required": .array(["note_id", "wing_id"]),
+            "required": .array(["wing_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -1337,15 +1343,47 @@ enum MCPToolCatalog {
             \(MCPWriteTools.tagUnusedKey) is true when no note you can read still wears the tag or a \
             tag under it (on the note or on one of its blocks) — the tag may be unused, so you can \
             suggest the author delete it in Settings ▸ Tags; notes beyond your reach are not counted, \
-            and deleting a tag is the author's alone.
+            and deleting a tag is the author's alone. To swap one tag for another across a wing in \
+            one call, use replace_tag. \(MCPWriteTools.listFormSentence)
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
                 "tag": .object(["type": "string", "description": "The tag's path (as read_note's header shows it)."]),
             ]),
-            "required": .array(["note_id", "tag"]),
+            "required": .array(["tag"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-812 (the VX-809 run, batch 3 — her R-812): tag A → tag B across the
+    /// client's REACH in one wing (`MCPWriteTools+TagReplace`).
+    static let replaceTag = MCPToolDeclaration(
+        name: "replace_tag", rung: .edit, title: "Replace a tag across a wing",
+        description: """
+            Replace one tag with another on every note in a wing (wing_id; "" is Home; list_wings \
+            gives every wing shared with you) that wears it and that you can edit: on each, tag (a \
+            path, e.g. "percy/pt-en") comes off and with goes on — a missing tag is made in the wing \
+            by its path, as apply_tag does. Only the notes you can edit are touched and counted; \
+            exactly that tag, never the tags under it. Each note is its own act with its own undo for \
+            the author, one refusing never stopping the rest (a once grant covers one note); at most \
+            \(MCPWriteTools.listCap) notes a call, oldest first — remaining counts the rest you could \
+            edit, so call again. As with remove_tag, a book the old tag brought a note into keeps it; \
+            books that collect by the new tag hear each note, as when the author tags. Returns JSON: \
+            replaced (note ids) and replaced_count, refused (note_id, refused) and refused_count, \
+            remaining, the tags' paths and with_tag_id, and \(MCPWriteTools.beyondReachKey), which \
+            says, always in the same words, that notes beyond your reach, if any, are not counted.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "tag": .object(["type": "string", "description": "The tag to take off, by its path."]),
+                "with": .object(["type": "string", "description": "The tag to put on, by its path."]),
+            ]),
+            "required": .array(["wing_id", "tag", "with"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -1830,9 +1868,17 @@ enum MCPToolCatalog {
             Delete a note, as the author's Delete does: it goes to the Trash with its saved versions \
             for 30 days, out of every book it was in, and the author can put it back whole. A \
             sealed note can still be deleted, as the author's can. One undo for the author brings \
-            it back. Returns JSON.
+            it back. Returns JSON. \(MCPWriteTools.listFormSentence)
             """,
-        inputSchema: noteIDOnly, scopes: MCPToolDeclaration.everyScope)
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": MCPWriteTools.noteIDsProperty,
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
 
     /// Her Archive — kept, out of view.
     static let archiveNote = MCPToolDeclaration(

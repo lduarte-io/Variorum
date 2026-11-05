@@ -95,6 +95,13 @@ public struct MCPWriteReceipt: Sendable, Equatable {
     /// pane and no Open row is left standing on a tombstone. Empty for every
     /// act that kills no note.
     public var notesLeftDead: [String]
+    /// **VX-812 — the list call this receipt's act belongs to** (A-809-19): one
+    /// key for every landed item of ONE list call, so the app's run machinery
+    /// coalesces them into one line (its key is `runKey ?? targetID`) and a
+    /// later single act never joins them. nil for every single act.
+    public var runKey: String?
+    /// VX-812: `replace_tag`'s new tag path (`detail` carries the old one).
+    public var replacementPath: String?
 
     public init(
         clientName: String, act: Operations.MCPWriteAct, targetID: String?, targetTitle: String?,

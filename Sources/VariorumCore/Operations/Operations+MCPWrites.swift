@@ -150,6 +150,10 @@ extension Operations {
         // wrapping her undo-less door, `wingMove`'s lifted ("Undo claude-code's
         // book wing move"). PROVISIONAL words, her copy pass.
         case bookWingMove = "book wing move"
+        // VX-812 (the VX-809 run, batch 3 — R-812): one note's tag A → tag B
+        // (`replace_tag`'s item) — ONE entry per note ("Undo claude-code's tag
+        // replacement"). PROVISIONAL words, her copy pass.
+        case tagReplace = "tag replacement"
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 

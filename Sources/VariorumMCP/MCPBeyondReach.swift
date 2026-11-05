@@ -22,4 +22,10 @@ extension MCPWriteTools {
 
     /// The one sentence (PROVISIONAL P-809-1 — her sketch, made a sentence).
     static let beyondReachWords = "Books beyond your reach, if any, are not listed."
+
+    /// The same humility for an answer that COUNTS NOTES (VX-812's
+    /// `replace_tag` — R-812: hidden wearers "untouched, unmentioned and
+    /// uncounted"), under the same always-present key. PROVISIONAL (P-809-1's
+    /// family — her sketch's construction, its noun the answer's).
+    static let beyondReachNotesWords = "Notes beyond your reach, if any, are not counted."
 }

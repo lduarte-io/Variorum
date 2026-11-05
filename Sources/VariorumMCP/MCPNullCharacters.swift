@@ -94,6 +94,10 @@ extension MCPWriteTools.Job {
         // VX-769: the name, and every path the rule names (it adopts or mints a tag).
         case .createGathering(let name, _, let rule): MCPNullCharacters.count(name) + MCPNullCharacters.count(rule)
         case .insertBlocks(_, _, let blocks): MCPNullCharacters.count(blocks)
+        // VX-812: a list's items each count their own (their single `land`);
+        // `replace_tag`'s new path adopts or mints a tag (`apply_tag`'s rule).
+        case .noteList: 0
+        case .replaceTag(_, _, let to): MCPNullCharacters.count(to)
         case .edit(let job): job.nullCharactersWritten
         case .carriage(let job): job.nullCharactersWritten
         case .deliberate(let job): job.nullCharactersWritten
