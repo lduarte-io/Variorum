@@ -116,6 +116,9 @@ struct ShelfView: View {
 
     @State private var createPresented = false
     @State private var nameField = ""
+    /// VX-561: the New Book sheet's choice, acted on at its dismissal (nil =
+    /// cancelled — nothing is minted).
+    @State private var newBookChoice: NewBookSheet.Choice?
     @State private var renameTarget: Reading?
     @State private var manageTarget: Reading?
     /// 13i-b U3: the rule editor — the sheet's item IS its model, so the
@@ -330,40 +333,18 @@ struct ShelfView: View {
         .onAppear { BindDoorProbe.openShelfDoor = { openBindOffer($0) } }
         .onDisappear { BookcaseRowOracle.release(owner: oracleOwner) }
         #endif
-        .alert("New Book", isPresented: $createPresented) {
-            TextField("Name", text: $nameField)
-            Button("Create Book") {
-                let name = nameField
-                mint { await readings.create(
-                    name: name.isEmpty ? "Untitled" : name, kind: .book, shelfId: $0) }
-            }
-            // 13i-c U3 (R-13ic-4, F-U1-2): the mint door REQUIRES a rule, so
-            // it opens the mint sheet (the rule drafted inline; Create
-            // disabled until a term exists) instead of minting a rule-less
-            // gathering the op refuses. 13i-d U6 (a): the gathering mint's
-            // words (RuleEditorCopy.mintTitle's door).
-            Button(RuleEditorCopy.mintTitle + "\u{2026}") {
-                let editor = RuleEditorModel(session: session, mintingIn: model.wingID)
-                editor.mintName = nameField
-                // 13i-d U1: the context mint reaches the gathering mint too.
-                editor.mintShelfID = model.mintShelfID
-                mintEditor = editor
-            }
-            // §14 item 10's "starting a 'new' journal as a separate
-            // notebook" — a journal-profile book (dated, one entry after
-            // another; round 2's re-designation door pairs with it).
-            Button("Create Journal Book") {
-                let name = nameField
-                mint { await readings.create(
-                    name: name.isEmpty ? "Untitled Journal" : name,
-                    kind: .book, profile: Queries.journalTraitProfile,
-                    sortField: .entryDate, sortDir: .desc, shelfId: $0) }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(model.mintShelfID.flatMap { id in model.shelves.first { $0.id == id } }
-                .map { "It lands on \u{201C}\($0.name)\u{201D}, the shelf you're looking at. " } ?? "")
-                + Text(BookcaseCopy.newBookMessage)
+        // VX-561 (the VX-805 run): the New Book dialog is a SHEET with a drawn
+        // Cancel on Esc (`NewBookSheet` — the alert it replaces never drew its
+        // cancel-role button, so it had no Esc and no way out but creating).
+        // The choice runs once the sheet has gone, so the gathering door's
+        // mint sheet never races this one; Cancel leaves no choice and mints
+        // nothing.
+        .sheet(isPresented: $createPresented, onDismiss: runNewBookChoice) {
+            NewBookSheet(
+                name: $nameField,
+                shelfLine: model.mintShelfID.flatMap { id in model.shelves.first { $0.id == id } }
+                    .map { "It lands on \u{201C}\($0.name)\u{201D}, the shelf you're looking at. " } ?? "",
+                onChoose: { newBookChoice = $0 })
         }
         .alert(
             "Rename Book",
@@ -507,6 +488,35 @@ struct ShelfView: View {
         section + "\u{1F}" + book
     }
 
+    /// **VX-561 — the New Book sheet's choice, run after the sheet is gone.**
+    /// The three doors the alert carried, byte for byte: Create Book mints a
+    /// book ("Untitled" when nameless), Create Journal Book a journal-trait
+    /// book sorted newest first ("Untitled Journal"), and Create Gathering…
+    /// opens the gathering mint sheet carrying the typed name and the solo'd
+    /// shelf (13i-c U3: a gathering requires a rule, drafted there). No choice
+    /// (Cancel, Esc) does nothing.
+    private func runNewBookChoice() {
+        guard let choice = newBookChoice else { return }
+        newBookChoice = nil
+        let name = nameField
+        switch choice {
+        case .book:
+            mint { await readings.create(
+                name: name.isEmpty ? "Untitled" : name, kind: .book, shelfId: $0) }
+        case .journalBook:
+            // §14 item 10's "starting a 'new' journal as a separate notebook".
+            mint { await readings.create(
+                name: name.isEmpty ? "Untitled Journal" : name,
+                kind: .book, profile: Queries.journalTraitProfile,
+                sortField: .entryDate, sortDir: .desc, shelfId: $0) }
+        case .gathering:
+            let editor = RuleEditorModel(session: session, mintingIn: model.wingID)
+            editor.mintName = name
+            editor.mintShelfID = model.mintShelfID
+            mintEditor = editor
+        }
+    }
+
     /// A book mint from the New Book prompt — the CONTEXT MINT (§19.1/§24:
     /// a solo'd shelf receives it, All leaves it unshelved) — speaking the
     /// door's refusal on the status seam (18i) rather than an overlay.
@@ -542,6 +552,7 @@ struct ShelfView: View {
                 .foregroundStyle(tokens.accent)
             Button(tokens.chromeLabel("+ New Book")) {
                 nameField = ""
+                newBookChoice = nil
                 createPresented = true
             }
             .buttonStyle(.borderless)
