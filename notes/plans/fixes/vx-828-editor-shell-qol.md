@@ -1431,6 +1431,37 @@ Bookcase") — her copy eye.
 `App/Variorum/VariorumTests/ShellChromeTests.swift` · this record. Commits: ec53930ef (B0) · 569f2fcca (B2) ·
 76db05116 (B1) · 1dd4e3233 (B3) · this commit (B4).
 
+#### Batch B — THE WINDOW'S THREE REDS (stage "vx-828-batchB" part 1: 201 tests / 36 suites, 33 green, 3 red, zero .ips) — traced, fixed at 8b8a2b31a
+
+1. **`BrowserNavKeysTests.theAlternatesAreDeclaredAndNoMenuKeyEverTakesTheLineKeys` (line 79) — a stale
+   closed set, the batch A re-point class.** It pinned the registry's alternates to exactly VX-560's and
+   VX-563's four keys; `.goToWing`'s "⌘1–9" is a fifth of the same monitor-door shape. Re-pointed
+   (VX-563's own "A JUSTIFIED EDIT" class, named at the line); the helper-shows-them line still binds.
+   **Sweep:** no other pin asserts a closed set of alternates (`compactMap(\.alternateShortcutLabel)` has
+   one caller); the only exact `RootView.surfaceCapabilities` pin (`ShellChromeTests`) was already
+   re-pointed at B1.
+2. **`QuickEntryWingLabelTests.theToolbarsNewNoteButtonWearsTheWingLabel` (lines 90/92/93) — NOT a lost
+   behaviour.** The pin reads the label through a 2,400-char window after the New Note button
+   (`prefix(2_400)`), then 1,200 from the item. B3 added a 5-line comment above the item: the item moved
+   from 1,397 to 1,781 chars and its body grew 759 → 885, so `.lineLimit(1)` (2,434), `.help(…)` (2,572)
+   and `.sharedBackgroundVisibility(.hidden)` (2,666) fell past 2,400 while every one was still in the
+   source — the muted style, the one-line policy (P-8), the hover and the hidden glass all KEPT on the
+   new slot's button. Fix: the comment is removed (the slot file's header carries the story; the item's
+   code names `WingToolbarSlot` / `WingMarquee`) — the item is back at 1,397…2,318; the pin untouched and
+   green by an offline replay of its exact windows. (The 2,400 window is fragile — about 80 chars of
+   headroom now; a later touch there should widen it.)
+3. **`WingToolbarLabelTests.aShortNameStandsFlushRightInItsSpace` (line 159) — the PIN's arithmetic was
+   wrong, the placement right.** Measured in the window: the item exactly 63 (passed), the words
+   (12.5, 45.0) — maxX 57.5, so maxX + 5 = 62.5, off by exactly 0.5 against a strict `< 0.5`. Mechanism:
+   the words' natural width is fractional ("in Home", SF 11.5: 44.93 pt — VX-736's CoreText measure), the
+   Spacer absorbs the fraction, and SwiftUI snaps each frame edge to the backing grid on its own, so two
+   independently snapped edges can sit up to a point apart (a quarter point each at 2×, a half at 1×).
+   The ruled behaviour (words at the trailing edge) holds within the grid; the line now allows ≤ 1 pt
+   with the reason at the pin, and R-B3's old leading shape still misses by ≈ 8 pt (red).
+
+Next: the orchestrator re-runs the three suites (`BrowserNavKeysTests` · `QuickEntryWingLabelTests` ·
+`WingToolbarLabelTests`); the reverts and the walk stay PENDING as listed in the self-assessment.
+
 ### Batch E — spellcheck & Settings ▸ Tags: VX-798 + VX-838 + VX-840
 
 **Required reading:** SurfaceContracts "The app" (keyboard family, the status seam);
