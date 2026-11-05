@@ -694,12 +694,30 @@ final class BookStructureModel {
 
     // MARK: - The journal-book entry door (R50, the B3 design detail)
 
-    /// "New Entry" on a journal-profile book. THE DAILY BOOK routes
-    /// through `createOrOpenJournalEntry` — the one-entry-per-day rule is
-    /// the daily Journal's own rule and is UNTOUCHABLE (R50; the retired bridge's too, until 2026-09-04). OTHER journal
-    /// books (the dream journal) mint a **`.generic`** dated post with
-    /// one-block segmentation set explicitly (the notebook feel) and add
-    /// it to THIS book — **NEVER container `profile='journal'`** (Stage B
+    /// "New Entry" on a journal-profile book — the foot's "+ new entry", the
+    /// Outline flow's, and ⌥⌘N's act on a journal-trait book (VX-570's one
+    /// mint act, `BookView.mint(.entry, …)`).
+    ///
+    /// **THE DAILY BOOK MINTS A FRESH ENTRY** (VX-797 — the VX-805 run; her
+    /// ruling: "the deliberate new-note doors in the Journal (New Entry, ⌥⌘N
+    /// in the focused book) mint a fresh entry dated today … several entries
+    /// per day are legal"; ⌘J keeps open-today). `Operations.newJournalEntry`
+    /// mints ⌘J's day shape beside the Journal and files it through ⌘J's own
+    /// gate (`shelveInDailyJournalBook` — the ensure, the comes-back, the
+    /// pair-decided law), so its words are ⌘J's (`JournalBooks.shelvingNote`,
+    /// the comes-back receipt). It REFUSES BEFORE MINTING on a finished,
+    /// sealed or full Journal (PROVISIONAL P-805-C2 — the mint doctrine below
+    /// and ⌥⌘N's declared refusals; the superseded create-or-open branch
+    /// opened the day's entry with a note instead), in the words a site that
+    /// holds the book speaks (`BookStateCopy.refusal` — a sealed Journal
+    /// names Unseal, never Reopen). Backdating stays the masthead's date chip.
+    ///
+    /// OTHER journal
+    /// books (the dream journal) mint a **`.generic`** dated post and add
+    /// it to THIS book (VX-799, PROVISIONAL P-805-A1: no explicit one-block
+    /// segmentation any more — a journal entry segments like any other note,
+    /// in every journal book, the daily mint's own change at the trait's
+    /// door) — **NEVER container `profile='journal'`** (Stage B
     /// review round 2, BLOCKER: that profile+date shape IS the daily
     /// journal's identity — `canonicalJournalEntry` (and, then, the Fragments
     /// bridge sweep) keyed on it, so a `.journal` dream entry became
@@ -711,61 +729,55 @@ final class BookStructureModel {
     /// The designation read runs INSIDE the runner (round 2, MINOR: the
     /// pre-runner read raced).
     ///
-    /// Round 3, MINOR — the Outcome doctrine at this sibling door (the
-    /// round-2 ⌘J shape, applied consistently): on a LOCKED/FULL book the
-    /// DAILY branch still opens the entry (the untouchable create-or-open)
-    /// with a SPEAKING note; the NON-DAILY branch refuses BEFORE MINTING —
-    /// `assertReadingAcceptsPosts` runs inside the serialized closure, so
-    /// a concurrent lock can never strand a stray `.generic` post in the
-    /// Pool — and its refusal speaks through the message table (the raw
-    /// `String(describing:)` retired with it).
+    /// Round 3, MINOR — the Outcome doctrine at this sibling door: the
+    /// NON-DAILY branch refuses BEFORE MINTING — `newPostInReading` gates,
+    /// mints and members in one transaction, so a concurrent lock can never
+    /// strand a stray `.generic` post in the Pool — and its refusal speaks
+    /// through the message table (the raw `String(describing:)` retired with
+    /// it). VX-797 brings the DAILY branch under the same doctrine (above).
     func newEntry(day: String? = nil) async -> String? {
         let entryDay = day ?? JournalDay.dayString(from: Date())
         let database = session.database
+        // VX-435's standing wing — only decides when no Journal lives (the
+        // fresh entry is born beside a living one, wherever it is).
+        let standingWing = session.wing.currentID
         do {
             let readingID = readingID
-            let outcome: (id: String, note: String?) = try await session.runner.run { ops in
+            // `refused` carries a pre-mint refusal OUT of the runner — the
+            // book's words are composed back on the main actor.
+            let outcome: (
+                id: String?, note: String?, receipt: String?,
+                refused: (error: OperationError, name: String, sealed: Bool)?
+            ) = try await session.runner.run { ops in
                 if try ops.dailyJournalBookID() == readingID {
-                    let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
+                    // The comes-back receipt's first half (⌘J's shape).
+                    let before = JournalBooks.dailyJournalArchiveState(database)
+                    let made: Operations.NewJournalEntryResult
                     do {
-                        _ = try ops.addPostToReading(entry.container.id, to: readingID)
-                    } catch OperationError.alreadyInReading {
-                    } catch OperationError.lockedReading {
-                        // A SEALED book's road out is Unseal (13i-c ladder
-                        // round 1 — Reopen refuses there, `readingSealed`).
-                        let sealed = ((try? database.read { db in
-                            try Queries.reading(db, id: readingID)?.sealedAt != nil
-                        }) ?? false)
-                        return (entry.container.id,
-                                sealed
-                                ? "Today's entry opened, but this book is sealed — it "
-                                    + "wasn't added. Unseal the book in its settings (that "
-                                    + "reopens it too), or pick a new daily journal "
-                                    + "(Use as Daily Journal)."
-                                : "Today's entry opened, but this book is finished — it "
-                                    + "wasn't added. Reopen the book in its settings, or pick "
-                                    + "a new daily journal (Use as Daily Journal).")
-                    } catch OperationError.readingAtCapacity {
-                        return (entry.container.id,
-                                "Today's entry opened, but this book is at its note cap — "
-                                + "it wasn't added. Extend the cap in the book's settings.")
-                    } catch OperationError.noteOwnedElsewhere, OperationError.noteMemberedElsewhere {
-                        // 13i-c U4 (§4 row 15 — this model's own add road): an
-                        // OWNERSHIP refusal at the daily book's door BELLS,
-                        // exactly as ⌘J does (the sitting record §6: "an
-                        // owned-elsewhere note bells, never throws") — the
-                        // entry still opens, the note names who holds it, and
-                        // the Arrivals line atop this book offers Copy in /
-                        // Move in / Dismiss (row 19). The shared daily door is
-                        // the act, so the pair is decided by the one rule.
-                        let shelving = ops.shelveInDailyJournalBook(entry.container.id)
-                        return (entry.container.id, JournalBooks.shelvingNote(
-                            shelving, entryID: entry.container.id,
-                            bookName: (try? ops.dailyJournalBookName() ?? nil)
-                                ?? JournalBooks.defaultDailyBookName,
-                            database: database))
+                        made = try ops.newJournalEntry(
+                            entryDate: entryDay, standingWing: standingWing)
+                    } catch let refusal as OperationError {
+                        // Refused BEFORE the mint (P-805-C2): nothing was
+                        // made, so nothing opens; the book's own words.
+                        let book = try? database.read { db in
+                            try Queries.reading(db, id: readingID)
+                        }
+                        return (nil, nil, nil, (
+                            refusal,
+                            book?.name ?? JournalBooks.defaultDailyBookName,
+                            book?.sealedAt != nil))
                     }
-                    return (entry.container.id, nil)
+                    let id = made.container.id
+                    return (id,
+                            JournalBooks.shelvingNote(
+                                made.shelving, entryID: id,
+                                bookName: (try? ops.dailyJournalBookName() ?? nil)
+                                    ?? JournalBooks.defaultDailyBookName,
+                                database: database),
+                            JournalBooks.comesBackReceipt(
+                                before: before,
+                                after: JournalBooks.dailyJournalArchiveState(database)),
+                            nil)
                 }
                 // REFUSE BEFORE MINT, now structural (13i-c ladder round 1,
                 // the F-5 wing class): `newPostInReading` gates, mints and
@@ -777,10 +789,19 @@ final class BookStructureModel {
                 // non-Home book.
                 let post = try ops.newPostInReading(
                     readingID, profile: .generic, entryDate: entryDay)
-                try ops.setSegmentationDefault(post.id, segmentation: .oneBlock)
-                return (post.id, nil)
+                return (post.id, nil, nil, nil)
+            }
+            if let refused = outcome.refused {
+                lastError = BookStateCopy.refusal(
+                    for: refused.error, name: refused.name, sealed: refused.sealed)
+                return nil
             }
             lastError = outcome.note
+            // 13i-e U2's comes-back receipt (an archived Journal returned for
+            // the fresh entry, as for ⌘J's) — the status seam's receipt kind.
+            if let receipt = outcome.receipt {
+                session.status.receipt(receipt)
+            }
             return outcome.id
         } catch let error as OperationError {
             lastError = ReadingsViewModel.message(error)
@@ -854,7 +875,9 @@ final class BookStructureModel {
 
 /// The Today's-Entry door with the R50 ensure-membership half (shared by
 /// the shelf button, ⌘J, and the palette): create-or-open THE day's entry
-/// (the untouchable rule), then make sure a designated DAILY JOURNAL BOOK
+/// (open-today — since VX-797 the day's FIRST entry, the Journal's earliest
+/// member that day; the Journal's own New Entry mints fresh ones,
+/// `BookStructureModel.newEntry`), then make sure a designated DAILY JOURNAL BOOK
 /// exists (created + pinned + designated on first use) and holds the
 /// entry — the journal lives on the shelf as ordinary membership (R38 +
 /// R50). PROVISIONAL shape, QUESTIONS bundle.
@@ -971,11 +994,19 @@ enum JournalBooks {
     static func openToday(session: AppSession, day: String? = nil) async throws -> Outcome {
         let entryDay = day ?? JournalDay.dayString(from: Date())
         let database = session.database
+        // VX-435 (the VX-805 run): the wing she stands in — where the day's
+        // entry and a fresh Journal are born when NO Journal lives (her
+        // ruling: "A fresh ⌘J mint when no Journal lives: the wing you're
+        // standing in"); a living Journal's entry is born beside it, wherever
+        // it is. Opening the entry is then a wing switch like any open
+        // (`WingFollow` — the focused pane's subject).
+        let standingWing = session.wing.currentID
         // The designation read runs INSIDE the runner (round 2, MINOR:
         // two rapid invocations both saw nil pre-runner and minted two
         // "Journal" books).
         return try await session.runner.run { ops in
-            let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
+            let entry = try ops.createOrOpenJournalEntry(
+                entryDate: entryDay, standingWing: standingWing)
             // 13i-e U2 — read the Journal's archive state BEFORE the filing
             // (the comes-back receipt's first half).
             let before = dailyJournalArchiveState(database)

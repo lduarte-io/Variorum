@@ -729,34 +729,30 @@ struct TutorialBooksLessonTests {
         }
     }
 
-    /// **Lesson 9 — the daily Journal**, WHOLE (13i-e U2 — F-U7-2's pin
-    /// FLIPPED, the guard having shipped at 13i-e U1): "The daily Journal is
-    /// an ordinary book that is special in one way: it's where ⌘J and Today's
-    /// Entry file. You can archive it; you can't delete it; it comes back when
-    /// a day arrives." The second sentence was withheld until the build could
-    /// say it truthfully; now it is asserted, and its truth executed headless:
-    /// archive the Journal → it leaves the Bookcase → its delete refuses (and
-    /// no face draws a Delete for it) → a day arrives (Today's Entry) → the
-    /// SAME book is back, live, unarchived, the day's entry filed, the receipt
-    /// spoken. (Red on old: the pre-sentence tree's prose lacks the sentence.)
+    /// **Lesson 9 — the daily Journal**, WHOLE (13i-e U2 taught "you can
+    /// archive it; you can't delete it; it comes back when a day arrives").
+    /// **VX-436 (the VX-805 run) — a JUSTIFIED EDIT:** her ruling made the
+    /// Journal deletable (⌘J re-mints; no backfill), so the second sentence
+    /// is re-voiced (PROVISIONAL WORDING P-805-B4) and each claim executed
+    /// headless: archive the Journal → it leaves the Bookcase → a day arrives
+    /// (Today's Entry) → the SAME book is back, its entry filed, the receipt
+    /// spoken; then DELETE it → Delete is drawn beside Archive → the next
+    /// day's entry starts a FRESH one, filing only that day. RED ON OLD: the
+    /// pre-edit prose carries "you can't delete it", and the old op refused.
     @Test func lessonNineTheDailyJournal() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "the journal & the pool")
-            // 13s-b triage landing — A JUSTIFIED EDIT (R-13s-36/37): the lesson
-            // says "the journal" (the lowercase default) and its on-demand
-            // birth ("made the first time you ask for a day's entry"); the
-            // archive · can't-delete · comes-back sentence keeps every claim,
-            // re-voiced into one sentence. Each is executed below.
             #expect(text.contains("The journal is an ordinary book that is special in one way: it is where \u{2318}J and Today's Entry file."))
             let todays = CapabilityRegistry.capability(.todaysEntry)
             #expect(text.contains(todays.verb))
             #expect(text.contains(try #require(todays.shortcutLabel)))
-            // THE SECOND SENTENCE — taught now that the guard ships (F-U7-2).
-            #expect(text.contains("It is made the first time you ask for a day's entry, and from then on you can archive it but you can't delete it, and it comes back when a day arrives."),
-                    "lesson 9's second sentence lands WITH the guard (13i-e), its birth said first")
+            // THE SECOND SENTENCE — re-voiced at VX-436.
+            #expect(text.contains("It is made the first time you ask for a day's entry. Archive it and it comes back when a day arrives; delete it and the next day's entry starts a fresh one."),
+                    "lesson 9's second sentence says both roads (VX-436)")
+            #expect(!text.contains("you can't delete it"), "the retired guard is no longer taught")
             #expect(text.contains("the journal itself waits among your unshelved books until you file it"))
-            #expect(text.contains(CapabilityRegistry.capability(.archiveBook).verb.lowercased()),
-                    "the door it names, by its own verb")
+            #expect(text.contains(CapabilityRegistry.capability(.archiveBook).verb),
+                    "the archive door, by its own verb")
 
             let ops = session.operations
             // "It is made the first time you ask for a day's entry": none
@@ -778,23 +774,11 @@ struct TutorialBooksLessonTests {
             #expect(try await db.read { try Queries.reading($0, id: journal) }?.kind == .book,
                     "an ordinary book")
 
-            // "You can archive it" — and it leaves the Bookcase.
+            // "Archive it" — and it leaves the Bookcase.
             try ops.archiveReading(journal)
             #expect(try await db.read { try Queries.bookshelf($0, wingID: "") }
                 .allSatisfy { $0.reading.id != journal }, "archived: off the Bookcase")
-            // "you can't delete it" — the op refuses, in the table's words, and
-            // no face draws the door (P-2).
-            do {
-                try ops.deleteReading(journal)
-                Issue.record("the daily Journal must refuse its delete")
-            } catch {
-                #expect(error as? OperationError == .dailyJournalCannotBeDeleted(id: journal))
-                #expect(OpsRefusalCopy.words(for: error, roads: .mac)
-                        == BookArchiveCopy.cannotDeleteDailyJournal)
-            }
-            let archived = try #require(try await db.read { try Queries.reading($0, id: journal) })
-            #expect(!BookArchiveDoorSet.rendered(for: BookArchiveFacts(archived)).contains(.deleteBook))
-            // "it comes back when a day arrives" — Today's Entry, the SAME book.
+            // "…and it comes back when a day arrives" — Today's Entry, the SAME book.
             let outcome = try await JournalBooks.openToday(session: session, day: "2026-10-04")
             let back = try #require(try await db.read { try Queries.reading($0, id: journal) })
             #expect(back.archivedAt == nil && back.deletedAt == nil, "back, live")
@@ -803,6 +787,16 @@ struct TutorialBooksLessonTests {
             #expect(try await db.read { try Queries.bookshelf($0, wingID: "") }
                 .contains { $0.reading.id == journal }, "back on the Bookcase")
             #expect(outcome.receipt == BookArchiveCopy.journalCameBack, "and it says so")
+
+            // "Delete it" — the door is drawn beside Archive, and it lands.
+            #expect(BookArchiveDoorSet.rendered(for: BookArchiveFacts(back)) == [.archiveBook, .deleteBook])
+            try ops.deleteReading(journal)
+            #expect(try await db.read { try Queries.dailyJournalBookID($0) } == nil)
+            // "…and the next day's entry starts a fresh one" — only that day.
+            let next = try await JournalBooks.openToday(session: session, day: "2026-10-05")
+            let fresh = try #require(try await db.read { try Queries.dailyJournalBookID($0) })
+            #expect(fresh != journal, "a fresh Journal")
+            #expect(try await memberIDs(db, fresh) == [next.postID], "only the day's own filing")
         }
     }
 

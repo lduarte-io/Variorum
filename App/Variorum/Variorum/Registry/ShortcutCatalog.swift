@@ -159,6 +159,10 @@ nonisolated enum ShortcutCatalog {
             words: "export this note as a Markdown file in the Variorum simple "
                 + "format \u{2014} exactly what Copy full text copies, takes and tags included, "
                 + "so File \u{25B8} Import\u{2026} reads it back"),
+        // VX-587 (the VX-805 run): the date's one-press backfill — ⌘J's ⌥ variant.
+        Row(group: .writing, keys: .chords([.shiftEntryDateEarlier]),
+            words: "date the note you're in a day earlier \u{2014} for an entry written "
+                + "after midnight (it needs a date; set one from note \u{25BE})"),
         // NSTextView's own undo — no act declares it.
         Row(group: .writing, keys: .gesture(["\u{2318}Z"], acts: []),
             words: "text undo (typing only)"),

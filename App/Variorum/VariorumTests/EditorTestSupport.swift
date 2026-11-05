@@ -135,7 +135,9 @@ struct EditorHarness {
 }
 
 /// Runs `body` against a fresh in-memory store + live editor pipeline with
-/// deterministic dependencies. `profile` seeds the post (journal = one_block).
+/// deterministic dependencies. `profile` seeds the post; `segmentation` is the
+/// post's own override (VX-799: no profile seeds one — a suite that wants the
+/// one_block face passes `.oneBlock`, the chip-off state, explicitly).
 /// **The Mac harness world's "now"** (13j): the recovery queries take a
 /// required clock, because the 30-day Trash window is what "in the Trash"
 /// means. Every hosted world here stamps its fixtures from 2026-07-01, so a
@@ -174,6 +176,7 @@ struct TerminalMetricsPin {
 @MainActor
 func withEditor<T>(
     profile: Profile? = nil,
+    segmentation: Segmentation? = nil,
     seedBlocks: [String] = [],
     _ body: @MainActor (EditorHarness) async throws -> T
 ) async throws -> T {
@@ -221,6 +224,9 @@ func withEditor<T>(
         // itself builds its own voiceless store on purpose.
         try session.operations.setThemeVoice(.terminal)
         let post = try session.operations.createPost(title: "T", profile: profile)
+        if let segmentation {
+            try session.operations.setSegmentationDefault(post.id, segmentation: segmentation)
+        }
         for text in seedBlocks {
             // **A FIXTURE MINT IS NOT A GESTURE** (13u1 UNIT 2). `newBlock`
             // joined AppSpec §9's structural-undo list at her ruling R-13u-3,

@@ -35,15 +35,23 @@ extension Operations {
         }
     }
 
-    /// The notebook rule (author, 2026-07-07; Phase 8): the dedicated
-    /// journal holds ONE entry per calendar day — "new entry" for a date
-    /// that already has a live journal entry OPENS it instead. Enforced
-    /// here, at the operations level, deliberately NOT as a DB unique index
-    /// (no new sync-repair class): an offline same-day double-create
-    /// converges to two visible entries on that day's page, hand-merged.
+    /// The notebook rule (author, 2026-07-07; Phase 8): ⌘J's day door opens
+    /// the day's entry — "today's entry" for a date that already has a live
+    /// journal entry OPENS it instead of minting. Enforced here, at the
+    /// operations level, deliberately NOT as a DB unique index (no new
+    /// sync-repair class): an offline same-day double-create converges to two
+    /// visible entries on that day's page.
     ///
-    /// When more than one entry carries the date (that converged race),
-    /// preference is **unarchived first, then earliest `(created_at, id)`**
+    /// **VX-797 (the VX-805 run) — several entries a day are legal.** The
+    /// Journal's own New Entry door and ⌥⌘N mint a FRESH entry every press
+    /// (`newJournalEntry`); this door stays open-today and opens the day's
+    /// FIRST entry — the Journal's earliest member that day, else the
+    /// notebook shape (`Queries.canonicalJournalEntry`'s two tiers,
+    /// PROVISIONAL P-805-C1).
+    ///
+    /// When more than one entry carries the date (several entries, or that
+    /// converged race), preference is **unarchived first, then earliest
+    /// `(created_at, id)`**
     /// — deterministic on every device (`archived_at` is converged metadata).
     /// The live-first tier matters when the author archived one half of a
     /// converged double-create: "Today" must open the entry the day's page
@@ -57,8 +65,20 @@ extension Operations {
         public let created: Bool
     }
 
+    ///
+    /// `standingWing` (VX-435 — the VX-805 run): the wing the author is
+    /// standing in when she presses the door (the Mac's ⌘J / Today's Entry
+    /// pass the app's one wing; '' = Home, every other caller). The day's
+    /// entry lives BESIDE the daily Journal — in the live Journal's wing,
+    /// wherever it has been moved (`journalEntryWing`) — and only when no
+    /// Journal lives does the standing wing decide, so the entry and the
+    /// fresh Journal `shelveInDailyJournalBook` then mints land together
+    /// where she stands (her ruling: "A fresh ⌘J mint when no Journal lives:
+    /// the wing you're standing in").
     @discardableResult
-    public func createOrOpenJournalEntry(entryDate: String) throws -> JournalEntryResult {
+    public func createOrOpenJournalEntry(
+        entryDate: String, standingWing: String = ""
+    ) throws -> JournalEntryResult {
         // Well-formedness at the operations boundary (review round 2): a
         // malformed key ("2026-7-7") would create a live entry invisible to
         // the canonical "2026-07-07" — two irreconcilable "same-day" pages
@@ -69,17 +89,86 @@ extension Operations {
             throw OperationError.invalidEntryDate(entryDate)
         }
         return try database.write { db in
+            let wing = try journalEntryWing(db, standingWing: standingWing)
             // ONE preference implementation, shared with every door that
             // opens a day by key (round 2, NIT 5).
-            if let existing = try Queries.canonicalJournalEntry(db, day: entryDate) {
+            if let existing = try Queries.canonicalJournalEntry(db, day: entryDate, wingID: wing) {
                 return JournalEntryResult(container: existing, created: false)
             }
-            // 13i-d U5 (#169(b), RULED): the day's entry is born in HOME,
-            // beside its Journal, whichever wing the door was pressed in.
+            // The day's entry is born BESIDE its Journal (13i-d U5's rule,
+            // generalized by VX-435: the Journal's wing, not Home).
             let created = try insertPost(
-                db, title: nil, profile: .journal, entryDate: entryDate, wingId: "")
+                db, title: nil, profile: .journal, entryDate: entryDate, wingId: wing)
             return JournalEntryResult(container: created, created: true)
         }
+    }
+
+    /// **Where a day's entry lives** (VX-435): the live daily Journal's
+    /// EFFECTIVE wing (a dangling wing pointer reads as Home — as surfaces
+    /// read it), else the standing wing while it is live, else Home. One
+    /// read of the marker-bearers (∝ one or two books — P1).
+    func journalEntryWing(_ db: Database, standingWing: String) throws -> String {
+        if let journalID = try Queries.dailyJournalBookID(db),
+           let journal = try Reading.fetchOne(db, key: journalID) {
+            return try Queries.wingIsLive(db, id: journal.wingId) ? journal.wingId : ""
+        }
+        return try Queries.wingIsLive(db, id: standingWing) ? standingWing : ""
+    }
+
+    /// What the Journal's New Entry did: the fresh entry, and what the one
+    /// shelving road (`shelveInDailyJournalBook`) said about its filing — so
+    /// each face words it in its own voice (⌘J's `DailyBookShelving`).
+    public struct NewJournalEntryResult: Equatable, Sendable {
+        public let container: Container
+        public let shelving: DailyBookShelving
+    }
+
+    /// **THE JOURNAL'S NEW ENTRY** (VX-797 — the VX-805 run; her ruling: "the
+    /// deliberate new-note doors in the Journal (New Entry, ⌥⌘N in the focused
+    /// book) mint a fresh entry dated today … several entries per day are
+    /// legal"). Mints a FRESH entry every call — never the day's existing one
+    /// (that is ⌘J's open-today, `createOrOpenJournalEntry`) — in exactly the
+    /// day shape ⌘J mints (`profile = 'journal'`, `entry_date`, no title, no
+    /// segmentation override — VX-799), BESIDE the Journal
+    /// (`journalEntryWing`: the live Journal's effective wing, else the
+    /// standing wing, else Home — P-805-B6), so the MCP fence's journal leg,
+    /// the Library's journal lens and the date sort read it as any entry.
+    ///
+    /// **Filed through the SAME gate ⌘J's entry is** — `shelveInDailyJournalBook`,
+    /// its ensure (a Journal minted where she stands when none lives), its
+    /// comes-back (an archived Journal returns, as when a day arrives —
+    /// PROVISIONAL P-805-C3) and its pair-decided law, untouched: a fresh entry
+    /// has no pair row, so it files as ordinary membership at the end,
+    /// unsectioned, the outflow riding (the hand-add's choke point).
+    ///
+    /// **REFUSE BEFORE MINT** (PROVISIONAL P-805-C2 — the mint doctrine of every
+    /// other book door, `newPostInReading`'s and ⌥⌘N's declared refusals): a
+    /// live Journal that cannot take a note — FINISHED (sealed included),
+    /// FULL — throws its add refusal (`lockedReading`, `readingAtCapacity`)
+    /// from inside the mint's own transaction and mints nothing, so a press
+    /// never strands a stray entry in the Pool. A concurrent refusal landing
+    /// between the mint and the filing (sync) reports through `shelving`
+    /// instead, never a throw — the entry still exists and opens.
+    ///
+    /// No undo entry (`createPost`'s and `newPostInReading`'s class — the
+    /// delete is the inverse). A malformed day key refuses at the boundary.
+    @discardableResult
+    public func newJournalEntry(
+        entryDate: String, standingWing: String = ""
+    ) throws -> NewJournalEntryResult {
+        guard JournalDay.isValid(entryDate) else {
+            throw OperationError.invalidEntryDate(entryDate)
+        }
+        let entry = try database.write { db -> Container in
+            if let journalID = try Queries.dailyJournalBookID(db) {
+                try assertReadingAcceptsPosts(db, journalID)
+            }
+            let wing = try journalEntryWing(db, standingWing: standingWing)
+            return try insertPost(
+                db, title: nil, profile: .journal, entryDate: entryDate, wingId: wing)
+        }
+        return NewJournalEntryResult(
+            container: entry, shelving: shelveInDailyJournalBook(entry.id))
     }
 
     /// What `shelveInDailyJournalBook` did, so each surface can speak in its
@@ -182,7 +271,12 @@ extension Operations {
             } else {
                 plan = try database.write { db in
                     if let raced = try Self.shelvingPlan(db, postID: postID) { return raced }
-                    let book = try insertDailyJournalBook(db)
+                    // VX-435: the fresh Journal is born where its first entry
+                    // lives — the wing she stands in (`createOrOpenJournalEntry`
+                    // put the entry there when no Journal lived), so the
+                    // filing below never crosses wings.
+                    let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                    let book = try insertDailyJournalBook(db, wingID: wing)
                     // A book minted in this transaction can carry no
                     // membership row, so nothing is decided about the pair.
                     return (book.id, false)
@@ -302,7 +396,12 @@ extension Operations {
     /// #37(iii) ruling. Same reading (curated, `profile: "journal"`, sorted
     /// by `entry_date` ascending), same designation, same shelf pin; all
     /// three in the CALLER's transaction so a partial state cannot exist.
-    private func insertDailyJournalBook(_ db: Database) throws -> Reading {
+    ///
+    /// `wingID` (VX-435 — the VX-805 run; 13i-d U5's Home-only rule retired):
+    /// the Journal is born in the wing the author stands in — one Journal per
+    /// store, movable to any wing afterwards (`moveReadingToWing`), its
+    /// entries beside it (`journalEntryWing`).
+    private func insertDailyJournalBook(_ db: Database, wingID: String) throws -> Reading {
         let now = date.now
         let book = Reading(
             id: newID(), ownerId: currentOwnerID(),
@@ -310,11 +409,7 @@ extension Operations {
             // The shared mint-mark: the Journal-keeper repair's predicate
             // filters on exactly this constant (pre-13u Act 0).
             profile: Queries.dailyJournalBookProfile, sortField: .entryDate, sortDir: .desc,
-            // 13i-d U5 (#169(b), RULED — KnownIssues row 105): the daily
-            // Journal is HOME-ONLY, so its mint's Home is DELIBERATE, never a
-            // default that happened to hold — the designation refuses any
-            // other wing's book (`setDailyJournalBook`), and no door moves it.
-            wingId: "",
+            wingId: wingID,
             createdAt: now, updatedAt: now)
         try book.insert(db)
         try setDailyJournalBook(db, book.id)
@@ -356,17 +451,69 @@ extension Operations {
     ) throws -> Container {
         let now = date.now
         // VX-357 — the row-level guarantee: a title never stores a U+0000.
-        var post = Container(
+        // VX-799 (the VX-805 run): a journal entry segments like any other
+        // note — no profile seeds a per-post override, so every mint inherits
+        // the global `default_segmentation` (her ask 2026-11-04, superseding
+        // the original "one day, one block" seed). The one_block face stays a
+        // per-note choice (the Write/Takes chip, `setSegmentationDefault`).
+        let post = Container(
             id: newID(), ownerId: currentOwnerID(), kind: .post, title: StoredText.stripped(title),
             profile: profile, entryDate: entryDate, wingId: wingId,
             createdAt: now, updatedAt: now)
-        // A journal post defaults to one-block-per-entry (AppSpec §7): the
-        // journal restriction is a profile seed, never a data-model split.
-        if profile == .journal {
-            post.segmentationDefault = .oneBlock
-        }
         try post.insert(db)
         return post
+    }
+
+    /// **VX-799's one-time clearing pass** (her sitting ruling, 2026-11-04:
+    /// clear the stored `one_block` override on EXISTING journal entries too —
+    /// *"i don't think it matters that much"*). Until VX-799 every
+    /// journal-profile mint stamped `segmentation_default = 'one_block'`
+    /// (`insertPost`'s retired seed); this clears that override on every LIVE
+    /// journal-profile post still carrying it, so each inherits the global
+    /// default like any other note.
+    ///
+    /// Exactly the class, nothing else: `kind = 'post' AND profile = 'journal'
+    /// AND segmentation_default = 'one_block' AND deleted_at IS NULL` —
+    /// archived, sealed and saved-version rows included (all live rows; a
+    /// segmentation override is container metadata a seal never froze — the
+    /// chip's own setter is allowed under seal). Every other row is untouched:
+    /// other profiles' overrides (hers by the chip), a journal entry's
+    /// `paragraph`/`sentence` override, and TOMBSTONED rows (an UPDATE would
+    /// re-push a tombstone for a value nothing reads — v1_20's reasoning; a
+    /// Trash restoree keeps its override, the chip still turns it off).
+    ///
+    /// The write is `setSegmentationDefault`'s own, row by row: `updated_at`
+    /// stamped, no `last_touched_at`, no churn (container metadata — no
+    /// listing reorders), the outbox capturing each through the ordinary
+    /// trigger (CAS metadata; every device running the pass converges on the
+    /// same value). No retroactive re-segmentation: blocks are never touched;
+    /// only future typing at an entry's end crystallizes paragraphs. One
+    /// transaction; idempotent (a second run finds nothing and writes
+    /// nothing). No undo entry (a one-time store pass, not a gesture).
+    /// Returns how many rows it cleared — the occasion's "converged" signal
+    /// (zero means nothing was left to clear).
+    @discardableResult
+    public func clearJournalOneBlockOverrides() throws -> Int {
+        try database.write { db in
+            let ids = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT id FROM container
+                    WHERE kind = 'post' AND profile = 'journal'
+                      AND segmentation_default = 'one_block'
+                      AND deleted_at IS NULL
+                    ORDER BY id
+                    """)
+            guard !ids.isEmpty else { return 0 }
+            let now = date.now
+            for id in ids {
+                guard var post = try Container.fetchOne(db, key: id) else { continue }
+                post.segmentationDefault = nil
+                post.updatedAt = now
+                try post.update(db)
+            }
+            return ids.count
+        }
     }
 
     @discardableResult
@@ -396,6 +543,34 @@ extension Operations {
             throw OperationError.invalidEntryDate(entryDate)
         }
         try updateLiveContainer(id) { $0.entryDate = entryDate }
+    }
+
+    /// **"Shift date a day earlier"** (VX-587 — her 10-20 note: "shortcut to
+    /// make a dated entry one day earlier would be nice", late-night journaling
+    /// backfill; R-805-3). Moves the note's `entry_date` `days` calendar days
+    /// (`JournalDay.shifted` — the door passes −1) and returns the new day.
+    ///
+    /// `setEntryDate`'s own road and posture, in ONE transaction that reads the
+    /// STORED day — so two quick presses land two days earlier, never one day
+    /// twice off a stale read: identity-level date metadata, `updated_at`
+    /// stamped, no `last_touched_at`, no churn, no undo entry (the date
+    /// setter's class); legal wherever `setEntryDate` is (a seal does not
+    /// freeze the date). A note with no valid date has nothing to shift: nil,
+    /// and NOTHING is written (the door speaks the registry's note — P-2's
+    /// belt; the doors draw only on a dated note). A missing or tombstoned
+    /// note refuses as `setEntryDate` does (`containerNotFound`).
+    @discardableResult
+    public func shiftEntryDate(_ id: String, byDays days: Int) throws -> String? {
+        try database.write { db in
+            var container = try liveContainer(db, id)
+            guard let day = container.entryDate,
+                  let shifted = JournalDay.shifted(day, byDays: days)
+            else { return nil }
+            container.entryDate = shifted
+            container.updatedAt = date.now
+            try container.update(db)
+            return shifted
+        }
     }
 
     public func setProfile(_ id: String, profile: Profile?) throws {

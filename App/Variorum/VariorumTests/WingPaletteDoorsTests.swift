@@ -202,7 +202,9 @@ struct WingPaletteDoorsTests {
             (Facts(focus: .note("n"), wingCount: 1), [], "a note, one wing"),
             (Facts(focus: .book(book), wingCount: 2), [.moveBookToWing], "a book, two wings"),
             (Facts(focus: .book(gathering), wingCount: 3), [.moveBookToWing], "a gathering moves too"),
-            (Facts(focus: .book(journal), wingCount: 2), [], "never the daily Journal"),
+            // VX-435 (a JUSTIFIED EDIT — item 7's "never the daily Journal"
+            // retired): the daily Journal moves like any book.
+            (Facts(focus: .book(journal), wingCount: 2), [.moveBookToWing], "the daily Journal moves too"),
             (Facts(focus: .book(book), wingCount: 1), [], "a book, one wing"),
             (Facts(focus: .other, wingCount: 3), [], "a place"),
         ]
@@ -266,8 +268,10 @@ struct WingPaletteDoorsTests {
 
             shell.workspace.select(.reading(journalID))
             facts = await actions.paletteListingFacts()
-            #expect(!WingPaletteDoors.lists(.moveBookToWing, facts), "the daily Journal never lists the row")
-            #expect(!(await actions.listedPaletteEntries()).contains { $0.title == WingCopy.moveToWingVerb })
+            // VX-435 (a JUSTIFIED EDIT — the retired ⌘K law): the daily
+            // Journal lists the row like any book while another wing exists.
+            #expect(WingPaletteDoors.lists(.moveBookToWing, facts), "the daily Journal lists the row now")
+            #expect(await actions.listedPaletteEntries().contains { $0.title == WingCopy.moveToWingVerb })
 
             shell.workspace.select(.library)
             facts = await actions.paletteListingFacts()
@@ -425,10 +429,12 @@ struct WingPaletteDoorsTests {
             _ = ops.shelveInDailyJournalBook(entry.id)
             let journalID = try #require(try ops.dailyJournalBookID())
             session.status.clear()
-            #expect(await WingDestinationModel.open(
-                .init(act: .moveBook(journalID), token: UUID()), wings: wings, session: session) == nil)
-            #expect(spoken(session) == OpsRefusalCopy.message(
-                for: OperationError.dailyJournalIsHomeOnly(id: journalID)))
+            // VX-435 (a JUSTIFIED EDIT — the stale-face Journal refusal
+            // retired): the daily Journal's selector opens like any book's.
+            let journalModel = try #require(await WingDestinationModel.open(
+                .init(act: .moveBook(journalID), token: UUID()), wings: wings, session: session))
+            #expect(await journalModel.choose(.commit(work.id)) == false)
+            #expect(journalModel.pendingBookMove?.readingID == journalID, "it asks, as a book does")
         }
     }
 

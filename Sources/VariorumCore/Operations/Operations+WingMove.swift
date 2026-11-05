@@ -262,6 +262,13 @@ extension Operations {
         var resolved: [String: Tag] = [:]
         var adopted = 0
         var minted = 0
+        /// Every TAG and APPLICATION row the adoption wrote — minted tags, the
+        /// re-pointed applications' tombstones and their fresh copies — in
+        /// write order (VX-435: the sync engine's cross-wing mend runs this
+        /// relocation inside APPLY MODE, where the outbox triggers are
+        /// muted, and enqueues each of these explicitly — SyncSpec §7).
+        /// Ordinary doors ignore it: their triggers capture the same rows.
+        var written: [(table: String, rowID: String)] = []
     }
 
     /// Resolve `tag` BY PATH in the adoption's wing: the live same-path tag
@@ -297,6 +304,7 @@ extension Operations {
                 db, parent: parent?.id, name: segment,
                 wingID: parent == nil ? adoption.wing : nil)
             adoption.minted += 1
+            adoption.written.append(("tag", minted.id))
             parent = minted
         }
         guard let resolved = parent else { return nil }
@@ -346,10 +354,13 @@ extension Operations {
             try db.execute(
                 sql: "UPDATE post_tag SET deleted_at = ? WHERE id = ?",
                 arguments: [stamp, row["application"] as String])
+            adoption.written.append(("post_tag", row["application"]))
             guard try liveApplication(db, table: "post_tag", tagID: target.id,
                                       targetColumn: "post_id", targetID: postID) == nil
             else { continue }
-            try PostTag(id: newID(), tagId: target.id, postId: postID, createdAt: now).insert(db)
+            let copy = PostTag(id: newID(), tagId: target.id, postId: postID, createdAt: now)
+            try copy.insert(db)
+            adoption.written.append(("post_tag", copy.id))
         }
     }
 
@@ -373,11 +384,13 @@ extension Operations {
             try db.execute(
                 sql: "UPDATE block_tag SET deleted_at = ? WHERE id = ?",
                 arguments: [stamp, row["application"] as String])
+            adoption.written.append(("block_tag", row["application"]))
             guard try liveApplication(db, table: "block_tag", tagID: target.id,
                                       targetColumn: "block_id", targetID: blockID) == nil
             else { continue }
-            try BlockTag(id: newID(), tagId: target.id, blockId: blockID, createdAt: now)
-                .insert(db)
+            let copy = BlockTag(id: newID(), tagId: target.id, blockId: blockID, createdAt: now)
+            try copy.insert(db)
+            adoption.written.append(("block_tag", copy.id))
         }
     }
 

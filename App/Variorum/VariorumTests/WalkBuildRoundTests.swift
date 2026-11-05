@@ -436,7 +436,7 @@ struct ListContinuationTests {
     /// `one_block`'s newlines-don't-mint is untouched: the newline AND the
     /// lead are content of the one block.
     @Test func oneBlockKeepsBothTheNewlineAndTheLeadAsContent() async throws {
-        try await withEditor(profile: .journal, seedBlocks: ["- milk"]) { h in
+        try await withEditor(profile: .journal, segmentation: .oneBlock, seedBlocks: ["- milk"]) { h in
             #expect(h.model.header?.effectiveSegmentation == .oneBlock)
             let hosted = Self.host(try #require(h.textView.enclosingScrollView))
             defer { hosted.teardown() }

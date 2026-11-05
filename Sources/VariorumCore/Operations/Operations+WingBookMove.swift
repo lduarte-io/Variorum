@@ -35,10 +35,12 @@ extension Operations {
     /// **MOVE A BOOK (OR A GATHERING) TO ANOTHER WING** — R-13id-6 items 1–7,
     /// ONE transaction:
     ///
-    /// - **Refuses** the daily Journal (item 7 — `dailyJournalIsHomeOnly`;
-    ///   the designation OR the 'daily' marker), the wing it already lives in
-    ///   (`readingAlreadyInWing`), a destination that is not live
-    ///   (`wingNotFound`).
+    /// - **Refuses** the wing it already lives in (`readingAlreadyInWing`), a
+    ///   destination that is not live (`wingNotFound`). THE DAILY JOURNAL
+    ///   MOVES like any book (VX-435 — the VX-805 run; item 7's refusal
+    ///   retired): its members come with it, and the next day's entry is born
+    ///   beside it (`journalEntryWing`). The MCP door keeps a Journal fence of
+    ///   its own (R-805-5 — `refuseMovingTheDailyJournalOnTheWire`).
     /// - **Item 5(a) — its pending ARRIVALS are DISMISSED** (the waiting notes
     ///   are not members; they stay behind): the finish's own predicate
     ///   (`dismissPendingArrivals` — tombstoned decision rows; a FRESH act in
@@ -66,9 +68,6 @@ extension Operations {
     public func moveReadingToWing(_ readingID: String, to wingID: String) throws -> BookWingMove {
         try database.write { db in
             var reading = try liveReading(db, readingID)
-            if try Queries.isTheDailyJournal(db, reading) {
-                throw OperationError.dailyJournalIsHomeOnly(id: readingID)
-            }
             try requireLiveWing(db, wingID)
             guard try !sameEffectiveWing(db, reading.wingId, wingID) else {
                 throw OperationError.readingAlreadyInWing(readingID: readingID, wingID: wingID)
@@ -125,11 +124,10 @@ extension Operations {
     /// R-13id-6 item 8 and the kickoff sketch. ONE transaction:
     ///
     /// - **Refuses** Home or a dead wing as the SOURCE (`wingNotFound` — the
-    ///   door lives on ADDITIONAL wings only; Home is virtual and holds the
-    ///   daily Journal, so the road around item 7's guard is impossible by
-    ///   construction — and a belt: a daily-marked book among the movers
-    ///   refuses unless the destination is Home, P-13id-U5b-11), a dead
-    ///   destination, the source itself (`wingMoveIntoItself`).
+    ///   door lives on ADDITIONAL wings only; Home is virtual), a dead
+    ///   destination, the source itself (`wingMoveIntoItself`). The daily
+    ///   Journal moves with everything else (VX-435 — P-13id-U5b-11's belt
+    ///   retired with item 7's guard).
     /// - **Every live note of the wing** (archived included; saved versions
     ///   ride their notes) relocates with EVERY reading of the wing kept — so
     ///   memberships, waiting arrivals and dismissal records ride untouched
@@ -161,13 +159,6 @@ extension Operations {
                 db,
                 sql: "SELECT * FROM reading WHERE wing_id = ? AND deleted_at IS NULL ORDER BY name, id",
                 arguments: [sourceID])
-            // The belt (P-13id-U5b-11): the daily Journal never leaves Home —
-            // were one ever found here, it may only go home.
-            if !wingID.isEmpty {
-                for reading in readings where try Queries.isTheDailyJournal(db, reading) {
-                    throw OperationError.dailyJournalIsHomeOnly(id: reading.id)
-                }
-            }
             let now = date.now
             let stamp = DateFormatter.variorumISO8601.string(from: now)
             var adoption = TagAdoption(wing: wingID)
@@ -325,7 +316,9 @@ extension Queries {
 
     /// **Is this THE daily Journal?** — the designation OR the 'daily' marker
     /// (13i-a M-3 moves the marker with the designation, so the two agree;
-    /// both are read so neither can slip past item 7's guard).
+    /// both are read so neither can slip past a guard). Since VX-435 the one
+    /// guard reading it is the MCP door's Journal fence (R-805-5 —
+    /// `Operations.refuseMovingTheDailyJournalOnTheWire`).
     public static func isTheDailyJournal(_ db: Database, _ reading: Reading) throws -> Bool {
         if isDailyJournalMintShape(reading) { return true }
         return try dailyJournalBookID(db) == reading.id
@@ -350,8 +343,8 @@ extension Queries {
         /// A live book or gathering in the destination already wearing this
         /// name (E13's key) — named, never refused (item 8(a)'s letter).
         public let nameTakenBy: String?
-        /// The daily Journal never moves (item 7) — the door is not drawn.
-        public let isDailyJournal: Bool
+        // (`isDailyJournal` retired with item 7's guard — VX-435: the daily
+        // Journal moves like any book, so no face reads it.)
     }
 
     public static func bookWingMovePreview(
@@ -393,8 +386,7 @@ extension Queries {
             alsoLeaves: alsoLeaves,
             frozen: frozen,
             waiting: try pendingArrivalCount(db, readingID: readingID),
-            nameTakenBy: destinationNames.first { BookNaming.key($0) == key },
-            isDailyJournal: try isTheDailyJournal(db, reading))
+            nameTakenBy: destinationNames.first { BookNaming.key($0) == key })
     }
 
     /// **What the bulk move would do — its confirm's read.**

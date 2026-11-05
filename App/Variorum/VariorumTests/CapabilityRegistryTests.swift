@@ -108,6 +108,11 @@ struct CapabilityRegistryTests {
         // note has a saved moment — a fact about the NOTE, never a mode alone;
         // without this context it reads `.unavailable` everywhere the walk looks.
         contexts.append(CapabilityContext(mode: .write, noteHasSavedVersion: true))
+        // VX-587 (the VX-805 run — A JUSTIFIED EDIT, the VX-440 line's class):
+        // "Shift date a day earlier" acts where a note's detail is mounted AND
+        // that note has a date — a fact about the NOTE, never a mode alone;
+        // without this context it reads `.unavailable` everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: .write, noteHasEntryDate: true))
         return contexts
     }
 
@@ -285,15 +290,23 @@ struct CapabilityRegistryTests {
         // Compare itself); both contexts satisfy it, so it too is judged on
         // mode alone. Without it the act read `.unavailable` in BOTH contexts
         // and this walk failed its `.native` letter. No other act reads it.
+        // VX-587 (the VX-805 run — A JUSTIFIED EDIT, this SF-1 line's class
+        // exactly): so is the NOTE fact `noteHasEntryDate` — "Shift date a day
+        // earlier" asks whether the mounted note has a date, never which mode
+        // it is in (it acts natively from every mode: the date is the note's,
+        // not a surface's); both contexts satisfy it, so it too is judged on
+        // mode alone. Without it the act read `.unavailable` in BOTH contexts
+        // and this walk failed its `.native` letter (the stage run, 2026-11-05
+        // — the walk had never evaluated the act). No other act reads it.
         let takes = CapabilityContext(
             mode: .takes, undoAvailable: true, redoAvailable: true,
             focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2,
-            noteHasSavedVersion: true)
+            noteHasSavedVersion: true, noteHasEntryDate: true)
         let write = CapabilityContext(
             mode: .write, writeEditorAttached: true,
             undoAvailable: true, redoAvailable: true,
             focusedPaneShowsNote: true, focusedPaneShowsBook: true, wingCount: 2,
-            noteHasSavedVersion: true)
+            noteHasSavedVersion: true, noteHasEntryDate: true)
         for capability in CapabilityRegistry.all {
             guard let access = capability.takesAccess else { continue }
             let inTakes = capability.availability(takes)
