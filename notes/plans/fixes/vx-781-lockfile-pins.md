@@ -762,3 +762,10 @@ Born-ticket candidate (Test-only · Tests & tooling · Medium): "the MCP socket-
 find whether it is test timing or a real latency in the pre-initialize road". The alternatives
 are P-781-1's (B)/(C): B would hold the CLI at the old pair, C would pin the app down. That would
 make the CLI test something other than what ships, or change what ships.
+
+**THE ORCHESTRATOR'S RULING (round 1; pending her ratification at the merge): OPTION A STANDS, no
+build change.** The command-line graph should exercise the versions the app ships. The
+socket-timing failures pre-exist on the old pins (the third 68b3d9c53 sample above), pass alone,
+and already have a ticket family (VX-353/VX-685). A higher trip rate under concurrency-extras 1.4.1
+is signal for the proposed Medium ticket, not grounds to hold the test graph on versions the
+product does not use. P-781-1 stays PROVISIONAL, carrying both this A/B table and this ruling.
