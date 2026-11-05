@@ -1313,6 +1313,92 @@ struct TypedReturnKeyTests {
         }
     }
 
+    /// **VX-655 — the exit's retraction lands INSIDE the structural flight,
+    /// never ahead of it** (VX-649's trace, `notes/plans/fixes/vx-648-launch-week.md`:
+    /// the line vanished for the flight's whole latency, then "came back" as
+    /// the new block). The writer is held so the flight is observable: from
+    /// the key through the flight's wait the continuation's line stays on
+    /// screen, and the landing turns that same newline into the new block's
+    /// separator — the page's bytes never change at all; only the caret
+    /// moves into the line it was already on.
+    ///
+    /// **RED-ON-OLD (by construction):** R1-3 deleted the newline through
+    /// the ordinary editing path at the CLAIM, synchronously inside the
+    /// keystroke, so the first assertion read `"- one\ngamma"` — the line
+    /// gone a turn (and, here, the held flight) before the block that
+    /// replaces it.
+    @Test func theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt() async throws {
+        try await withEditor(seedBlocks: ["- one", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)  // continues the list
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["- one\n- ", "gamma"])
+
+            let database = h.database
+            let hold = Task.detached {
+                try database.write { _ in Thread.sleep(forTimeInterval: 0.4) }
+            }
+            try await Task.sleep(for: .milliseconds(30))  // let the hold take the writer
+            returnKey(h, window.window)  // the exit: the lead goes, the act is claimed
+            #expect(h.documentText == "- one\n\ngamma",
+                    "the claim's own turn: only the lead went — the continuation's line is still on screen")
+            var spins = 0
+            while !h.model.structuralInFlight, spins < 3000 {
+                spins += 1
+                await Task.yield()
+                try await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(h.model.structuralInFlight, "the flight is up, waiting on the writer")
+            #expect(h.documentText == "- one\n\ngamma",
+                    "mid-flight: the line is still there — the retraction rides the landing")
+            try await hold.value
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"],
+                    "the list ends at its last item; the block below is the key's")
+            #expect(h.documentText == "- one\n\ngamma",
+                    "landed: the same bytes — the line she was on IS the new block")
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+            #expect(h.textView.selectedRange() == NSRange(location: 6, length: 0),
+                    "the caret never moved off the line it was on")
+        }
+    }
+
+    /// **GREEN ON BOTH SIDES, deliberately — #94's undo shape, whole
+    /// (VX-655's guard).** After the exit the TEXT stack is empty (the
+    /// flight's rewrite clears it, as every structural rewrite does), the
+    /// structural stack holds exactly the key's "New Block", and ⌥⌘Z takes
+    /// that block back while the list keeps ending at its last item — the
+    /// retraction is not an undoable act on either road. Redo puts the
+    /// block back.
+    @Test func theListExitsUndoStoryIsNinetyFoursWhole() async throws {
+        try await withEditor(seedBlocks: ["- one\n- ", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 8)  // after the empty item's "- "
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"])
+            #expect(h.textView.undoManager?.canUndo == false,
+                    "the text stack: cleared by the flight's rewrite")
+            #expect(h.session.undoStack.depth == 1)
+            #expect(h.session.undoStack.topLabel == "New Block")
+
+            let stack = h.session.undoStack
+            try await h.session.runner.run { ops in _ = try stack.undo(with: ops) }
+            try h.reload()
+            #expect(try h.storeSlots().map(\.text) == ["- one", "gamma"],
+                    "⌥⌘Z takes the block back; the list still ends at its last item")
+            try await h.session.runner.run { ops in _ = try stack.redo(with: ops) }
+            try h.reload()
+            #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"])
+        }
+    }
+
     /// **GREEN ON BOTH SIDES, deliberately (R1-3's guard):** an empty item
     /// exited MID-block is not the block's last line, so nothing is
     /// retracted and the key's divide keeps the seam's k−1 spacing (A11) —

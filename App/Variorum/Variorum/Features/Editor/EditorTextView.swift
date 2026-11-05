@@ -220,8 +220,9 @@ final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface 
             }
             super.insertNewline(sender)
         }
-        // The exit says so: the model may retract the continuation's own
-        // newline before it decides (18c ladder R1-3, PROVISIONAL #94).
+        // The exit says so: the act retracts the continuation's own newline
+        // (18c ladder R1-3, PROVISIONAL #94) — inside its structural flight
+        // since VX-655, never on the surface at this claim.
         if case .exitList = list { _ = claimTypedReturn(afterListExit: true) }
     }
 
