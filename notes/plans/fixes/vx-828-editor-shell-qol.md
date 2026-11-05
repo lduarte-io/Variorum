@@ -1379,3 +1379,39 @@ phone Trash sweep door) rides the MOBILE PARITY line — nothing mobile-visible 
 The pin plan is accepted as proposed (resolver pins pure; model pins; mounted whole-catalog pins
 staged through NSClipView, red-on-old = lands at the top). The diff not touching
 `App/Variorum/Shared/` is noted — batch C adds no phone suites to the merge gate.
+
+#### Batch C — ORCHESTRATOR VERIFICATION, WINDOW 1 (stage "vx-828-batchC", 2026-11-05, GO 04:15 — suites + reverts GREEN, the walk RED; the window released at the red per the coordinator's call)
+
+**Part 1 (suites):** first run 258 tests / 38 suites — 255 green, THREE of the five new MOUNTED
+pins red ON THE NEW TREE. All three were FIXTURE bugs, not product (the implementer's diagnosis,
+mechanisms recorded in "Batch C — THREE MOUNTED PINS RED ON THE NEW TREE"; fix 00569c8ce, pins
+only). Re-run of `LibraryReturnPlaceMountTests` after the fix: 5/5 GREEN. The 2 warnings are the
+known anonymous `Date.swift:37` noise. Zero new `.ips` in the entire window (count 10 before and
+after; no Problem Reporter at quit).
+
+**Part 2 (reverts, uncommitted edits on the committed tree, each restored, tree clean after each):**
+- **R-C1** (resolve → `survivors.first`): red EXACTLY `theOpenedRowIsNotTheAnchorWhileAnotherOn
+  ScreenRowSurvives` + `theOpenedRowsOwnMoveDoesNotMoveThePlace`; the other 18 green. Restored.
+- **R-C2** (`listingAppeared` → bare `search()`): 6 of 9 model pins red (depth, opened-row move,
+  deleted row, sheet, day, each-pane — 14 issues), the new-question + wing-switch guards GREEN as
+  predicted. Restored.
+- **R-C3** (`landingOwed = false`): the four return pins red, the new-question guard green.
+  Restored.
+
+**Part 3 (the walk) — RED ON THE PRIMARY LEG, live.** Study voice, the Library at ~47 rows:
+- Probe 1: scroll deep into the prince's chapters, open XXII by TITLE, one-char edit (typed and
+  deleted — bytes unchanged, stamp moved), ⌥⌘[ back → the list landed AT THE TOP (Books header
+  visible, offset 0), not at the chapters neighbourhood. **The MARK worked:** XXII sat at the top
+  of the edited sort wearing the subject face, no panel.
+- Probe 2 (differential — NO edit, same road): open Dedication by title, ⌥⌘[ back → the TOP again.
+  So the failure is the live return road itself, independent of the sort move.
+- **The clue for the diagnosis:** the mark SURVIVED the round trip, so the per-pane place memory
+  persists across the trip — what failed is the RESTORE side (`listingAppeared` → `owesReturn` /
+  the landing) in the REAL RootView swap, which the mounted harness does not reproduce (it
+  re-mounts onto the same held model by hand). The mounted pins are necessary but not sufficient;
+  a pin that reproduces the real teardown road is owed with the fix.
+
+**Status:** rows 1–2 of the batch C build stand (pure + model + neighbours green; reverts shown);
+VX-823 is NOT verified — the live return fails. Handed back to the implementer with both probes.
+The stage was RELEASED at the red (vx-805's Unit B was waiting); the fixed walk re-runs in a
+fresh window.
