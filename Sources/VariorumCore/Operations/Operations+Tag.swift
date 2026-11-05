@@ -123,12 +123,74 @@ extension Operations {
                 db, try liveTag(db, id),
                 stamp: DateFormatter.variorumISO8601.string(from: date.now))
         }
-        registerTagDeletionEntry(pass)
+        registerTagDeletionEntry(pass, label: Self.deleteTagUndoLabel)
     }
 
     /// The undo entry's words — "Undo Delete Tag" / "Redo Delete Tag", the
     /// act's own verb (`.deleteTag`'s "Delete Tag…", without the ellipsis).
     public static let deleteTagUndoLabel = "Delete Tag"
+
+    /// **VX-840 (the VX-828 run, batch E) — DELETE THE CHECKED UNUSED TAGS,
+    /// ONE ACT.** Settings ▸ Tags' sweep door: her ask, *"delete every tag
+    /// that's not on a note currently"*. The fork's ruling (the run record,
+    /// "Batch E — THE FORK'S RULING"; PROVISIONAL P-828-4):
+    ///
+    /// - **ONE write, ONE stamp, ONE undo entry, "Delete Unused Tags".** Each
+    ///   subtree goes through `deleteTag`'s own row body (`tombstoneTagSubtree`
+    ///   — the subtree rule, the per-tag cascade trigger), the passes join
+    ///   into one `TagDeletionPass`, and the entry is VX-247's unchanged — its
+    ///   inverse walks a pass in path order (parents first, each revived path
+    ///   rebuilt from its live parent), so a pass over several roots needs no
+    ///   new undo code; its redo re-deletes exactly what the undo revived (the
+    ///   single delete's own redo: a tag applied between the undo and the
+    ///   redo goes again with its application — accepted at the ruling).
+    /// - **Confirmed ∩ still-qualifying, subtree-aware (batch D's rule carried
+    ///   to subtrees), decided INSIDE the write** — a check made before it is
+    ///   a snapshot. Walking the confirmed ids in path order, a tag's subtree
+    ///   is taken only when the tag is still live, still unused by the ONE
+    ///   brain (`Queries.tagSubtreeIsWorn`, `.library(countingTrashRevivable:
+    ///   true)` — vx-809's mint; a Trash-revivable wearer keeps it, P-828-3),
+    ///   and every live tag under it NOW was confirmed (a child minted since
+    ///   the sheet opened keeps its ancestors: the act never deletes more than
+    ///   the sheet showed). A tag that fails goes no further; its confirmed
+    ///   children are asked on their own.
+    /// - **Nothing left ⇒ nothing written** — no row, no outbox entry, no undo
+    ///   entry; the answer is empty and the door speaks the refusal.
+    ///
+    /// Returns every tag id it tombstoned, path order (the receipt's count).
+    @discardableResult
+    public func deleteUnusedTags(_ confirmedIDs: [String]) throws -> [String] {
+        let confirmed = Set(confirmedIDs)
+        guard !confirmed.isEmpty else { return [] }
+        let pass = try database.write { db -> TagDeletionPass? in
+            let marks = databaseQuestionMarks(count: confirmed.count)
+            let candidates = try Tag.fetchAll(
+                db,
+                sql: "SELECT * FROM tag WHERE deleted_at IS NULL AND id IN (\(marks)) ORDER BY path, id",
+                arguments: StatementArguments(confirmed.sorted()))
+            let stamp = DateFormatter.variorumISO8601.string(from: date.now)
+            var taken: [String] = []
+            var takenSet: Set<String> = []
+            for tag in candidates where !takenSet.contains(tag.id) {
+                guard try !Queries.tagSubtreeIsWorn(
+                    db, tagID: tag.id, scope: .library(countingTrashRevivable: true))
+                else { continue }
+                let subtree = try Queries.tagSubtree(db, rootID: tag.id).map(\.id)
+                guard confirmed.isSuperset(of: subtree) else { continue }
+                let ids = try tombstoneTagSubtree(db, tag, stamp: stamp).tagIDs
+                taken += ids
+                takenSet.formUnion(ids)
+            }
+            return taken.isEmpty ? nil : TagDeletionPass(tagIDs: taken, stamp: stamp)
+        }
+        guard let pass else { return [] }
+        registerTagDeletionEntry(pass, label: Self.deleteUnusedTagsUndoLabel)
+        return pass.tagIDs
+    }
+
+    /// The sweep's undo entry's words — "Undo Delete Unused Tags" / "Redo
+    /// Delete Unused Tags", the door's own verb (`.deleteUnusedTags`).
+    public static let deleteUnusedTagsUndoLabel = "Delete Unused Tags"
 
     /// What ONE tombstone pass over a tag subtree wrote (VX-247): the tag rows
     /// it tombstoned, parents before children (path order), and the stamp —
@@ -165,12 +227,14 @@ extension Operations {
     /// ONE entry over the delete (VX-247): each half hands its partner
     /// exactly what it changed — the inverse the rows it revived, the redo
     /// the rows it tombstoned and their stamp — so a half never runs over a
-    /// part its partner did not move (VX-246 U2's parts record).
-    private func registerTagDeletionEntry(_ first: TagDeletionPass) {
+    /// part its partner did not move (VX-246 U2's parts record). VX-840: the
+    /// label is the act's (a single delete's "Delete Tag", the sweep's
+    /// "Delete Unused Tags"); the machinery is one.
+    private func registerTagDeletionEntry(_ first: TagDeletionPass, label: String) {
         let lastDeletion = LockIsolated(first)
         let lastRevival = LockIsolated<[String]>([])
         undoStack?.register(
-            label: Self.deleteTagUndoLabel,
+            label: label,
             inverse: { ops in
                 let revived = try ops.revertTagDeletion(lastDeletion.value)
                 guard !revived.isEmpty else { return false }
