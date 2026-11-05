@@ -560,3 +560,11 @@ parse check (THE MERGE above). Shared-cache writes, all additive and ruled accep
 orchestrator: manifest-cache entries (E1 onward; `-packageCachePath` does not redirect them) and
 `-list`'s repository-mirror fetches. Nothing shared was ever purged or reset. The global
 DerivedData dirs and the other worktrees were only read.
+
+**Worktree hygiene at the close:** the superseded experiment dirs (E1–E11 DerivedData + clone dirs,
+the CLI scratch dirs, the pin runs' exported trees and build dirs) were deleted. All of them were
+inside this worktree's gitignored `App/Variorum/DerivedData/`: 20 GB → 5.9 GB. KEPT for the
+ladder: `logs/` (every invocation's log and the E2/E8/E10/E11 written lockfiles), each pin run's
+`xcode-workspace-state.json` + `cli-workspace-state.json` + resolve logs under `pins-belt-check/`,
+`vx781-merged/` (the merged-tree Debug + build-for-testing DerivedData that verify-pins read),
+`vx781-core/` (the core suite's scratch), and the private package/CLI caches.
