@@ -1125,6 +1125,161 @@ cadence/loop shape is the implementer's to propose in the record (PROVISIONAL).
 the contextual chord (in-note vs no-note); the orchestrator's walk (chords, switcher pick lands in
 the Bookcase, the marquee on a long wing name in both voices).
 
+#### Batch B — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
+
+**Not done by this batch (first line, kept current):** NOTHING BUILT YET — the DESIGN FORK below
+waits on the orchestrator's ruling (P-828-1, P-828-2, and two READINGS of the ruled words, Q-B1 and
+Q-B2, each of which decides a core arm). No canon, QUESTIONS or shared ledger touched. No `Sync/`,
+custody or keychain anywhere in this batch's reach.
+
+| Piece | What | Status |
+|---|---|---|
+| B0 | Preflight (the brief's reading list, read in full; her three tickets read on the board) + THE TRACE + THE DESIGN FORK | DONE (this commit) — AWAITING THE RULING |
+| B1 | VX-824: the pure chord rule + the registry declaration (`.goToWing`, the alternate "⌘1–9") + the helper row + the window's key monitor + routing pins | NOT-STARTED |
+| B2 | VX-833 (1): the deliberate switch lands in the wing's Bookcase — one road in `WingsModel`, every switcher door through it — + pins | NOT-STARTED |
+| B3 | VX-833 (2) + VX-844: the label's space (pure) + right-aligned in the column + the marquee (pure plan + view) + pins | NOT-STARTED |
+| B4 | Self-assessment + the end-of-batch headless suite + the app `build-for-testing` | NOT-STARTED |
+
+#### Batch B — THE TRACE (read at the code, this tree)
+
+- **⌘digit today.** The mode row's keys are View-menu items, one per `PostMode` (`EditorCommands.swift:1048-1057`),
+  grey wherever `.switchMode` is unavailable — `ctx.mode != nil` (`CapabilityRegistry.swift:1499`), i.e. no
+  note detail mounted in the key window's focused pane (an unfocused pane mounts no detail; a book's Outline
+  carries no post mode — `CommandRouter.swift:33/103/155`). **A grey menu item swallows its chord in
+  silence** (`OneWingChord.swift`'s header, measured at 13n-c W-UX-6): so outside a note ⌘1–⌘9 do NOTHING
+  today, not even a refusal. A LOCAL key monitor sees a key before the menu does — the two precedents:
+  `BrowserNavKeyMonitor` (per full window, mounted by `RootView.swift:364-368`; VX-560's "outside text"
+  gate is `PageTurnKeys.textIsFirstResponder` — `PageTurnKeys.swift:64`: any `NSText`, any field, a web
+  view) and `OneWingChord` (app-wide, speaks a grey chord's note).
+- **What holds the keyboard where ⌘digit would land.** VX-332: every arrival at the Bookcase puts the caret in
+  its QUICK ENTRY (`CaptureNSTextView` — an `NSTextView`, so an `NSText`) when nothing else holds the keyboard.
+  The note-prose surfaces are `EditorTextView` (Write; a book's live note; the Pool's and Snippets' editors)
+  and `PaneTextView` (the panes' TK2 surface); comments are `CommentNSTextView` / `CommentTwinTextView`.
+- **Wing order.** `WingsModel.rows` (`WingsModel.swift:106-108`): Home first, then `Queries.wings` in switcher
+  order (`wing.position`) — the order ⌘L's sheet and the ▾ menu list.
+- **The switch roads, and that none navigates.** `WingsModel.switchTo` (silent, `:121`), `switchSaying` (the
+  "Now in …" receipt; current wing ⇒ nothing, `:137-141`), `cycle` (`:150`). Doors: ⌘L's sheet →
+  `WingSwitcherModel.apply` → `switchSaying` (`WingSwitcherSheet.swift:48-56`; the brain answers `.close`
+  for the CURRENT wing, `WingSwitcherBrain.swift:119-126`); the masthead ▾ menu's inline picker →
+  `switchTo` (`WingSwitcherMenu.swift:175-177`); the masthead word's cycling click → `cycle`
+  (`WingSwitcherMenu.swift:94-96`); the toolbar label → `ShellActions.openWingSwitcher` → ⌘L's sheet
+  (`RootView.swift:317-331`, `ShellActions.swift:1017`). Every one switches `WingState.currentID` and the
+  focused pane keeps whatever it shows (a listing re-scopes; a note stays — editors never close on a
+  switch, 17y (f)). That is VX-833's mechanism: the pick changes the room but leaves her standing where she
+  was. Not switcher doors: `WingFollow.follow` (`WingFollow.swift:114-129`), `mint` (`WingsModel.swift:157`),
+  `delete` (`:204-208`), `WingState.revalidate`, Compare's lineage "go to ‹wing› ›"
+  (`CompareBoardView.swift:1727`), `MCPNavigator`'s wing landing (`MCPNavigator.swift:125`).
+- **The one navigation request road:** `router.pendingSelection = .shelf`, adopted by the window into its
+  focused pane (`RootView.swift:508-512`) — what `goBack`/`openNote` use.
+- **The label.** `RootView.swift:317-332`: the toolbar's third `.navigation` item (after the sidebar toggle and
+  New Note's glass group), `.frame(maxWidth: 160, alignment: .leading)` + `.truncationMode(.tail)`. The
+  toolbar's leading items are laid out by the WINDOW, never by the column (`ShellSplit` is an `HStack`), and
+  the column's line sits at x = the clamped `shellSidebarWidth` (`ShellSplit.swift`; fresh 240, 180…360).
+  VX-736 measured the label's origin at ≈ 173.8 pt in both voices (`vx-736-hotfix-101.md:370`). **The
+  mechanism for VX-833 (2) and VX-844 together:** the label is placed leading with a fixed 160-pt cap that
+  knows nothing of the column, so it floats after New Note instead of standing at the column's right edge,
+  and any name wider than the ≈ 58 pt left at 240 runs past the line ("in walk wing", Terminal — J5); past
+  160 it tail-truncates (the ellipsis she declined).
+
+#### Batch B — DESIGN FORK (B0 — proposed for the orchestrator's ruling BEFORE the unruled arms are built)
+
+**Q-B1 — what "no note holds the keys" means (a READING of the ruled words; it decides VX-824's core).** The
+brief composes it as the VX-560 family (who holds the keyboard) PLUS the note-focus condition. Read
+literally, the VX-560 half (any text input) collides with VX-332: the Bookcase's resting caret is in its
+quick entry, so ⌘digit would be dead ON THE BOOKCASE — including the second press after a ⌘digit landing,
+since the landing is a Bookcase arrival and puts the caret back in the box. Options:
+- **(a) PROPOSED — the holder must be a NOTE.** The wing arm takes ⌘1–⌘9 unless (1) the focused pane shows a
+  note — the mode row's own gate (`ctx.mode != nil`), whatever holds the keyboard there (her "in a note it
+  stays the mode row") — or (2) a WRITING surface holds the keyboard anywhere in the window: note or snippet
+  prose (`EditorTextView`, `PaneTextView` — a book's live note in Outline/Index, Read's edit face, the Pool,
+  Snippets) or a block comment's text. Every other holder — the capture box, the Library's and a book's search
+  fields, the tag field — is not a note, and ⌘digit has no meaning in any of them (no editing chord is taken),
+  so the chord goes to the wing there.
+- (b) The literal VX-560 rule: any text input (`PageTurnKeys.textIsFirstResponder`) blocks the wing arm — the
+  Bookcase dead-key cost above.
+- (c) The note-focus condition alone (`ctx.mode == nil` ⇒ wing): typing in a book's live note or a snippet,
+  ⌘2 would leave the book under her hands for another wing's Bookcase.
+
+Under (a) and (b) a press the wing arm declines PASSES ON exactly as today: inside a note the menu's mode item
+takes it; in a book's live note it meets the grey mode item and is swallowed silently (today's behaviour,
+untouched). Note-only windows and the quick-note pad carry no monitor (it is the full window's, `RootView`'s,
+the `BrowserNavKeyMonitor` shape), so ⌘digit there is untouched. Sheets are their own windows — untouched.
+
+**P-828-1 — a ⌘digit that names no other wing (the brief's PROVISIONAL; P-2's door-that-did-nothing frame).**
+- *(i) N beyond the wing count* (⌘5 with three wings; ⌘2 with one). **(a) PROPOSED — a refusal on the status
+  seam**, the key consumed (it never reaches the grey mode item): AppSpec §12 "a door that did nothing speaks
+  a refusal", with the two chord precedents (`OneWingChord` — ⌘L with one wing; VX-560's ⌘← with nowhere to
+  go). Draft words (PROVISIONAL, sentence case): one wing — "There is only one wing so far — New Wing… under
+  the wing name at the top of the Bookcase makes another, and then ⌘2 goes to it." (⌘L's ruled note's shape);
+  several — "There's no wing 5 — ⌘1–⌘3 go to your 3 wings, Home first." (b) A quiet no-op — consumed or
+  passed to the grey item, nothing said (today's silent swallow).
+- *(ii) N = the CURRENT wing.* **(a) PROPOSED — it lands in that wing's Bookcase**: the chord means one thing,
+  "wing N's Bookcase"; no receipt (the wing did not change); already on that Bookcase ⇒ nothing moves and
+  nothing is said (the "re-selecting the shown thing is not an act" precedent). AND the switcher's own pick of
+  the current wing lands the same way — today the brain answers `.close` there (a 13n-c reading, not a ruling),
+  and her "i want it to be consistent" reads as one meaning for "pick a wing" on every road; the brain gains a
+  "land here" outcome for a deliberate commit of the current row (⏎, a click, a held-⌘ release on it) while
+  Esc stays a plain close. (b) ⌘digit lands; the switcher's current pick keeps closing (brain untouched).
+  (c) Neither moves — a chord naming the current wing does nothing, silently (`switchSaying`'s rule; a silent
+  chord, P-2's own question). Consequence of (a), stated: with ONE wing, ⌘1 outside a note is Home's
+  Bookcase.
+
+**Q-B2 — which doors are "the switcher's pick" (a READING of VX-833's "one rule for both roads").**
+- **(a) PROPOSED — every door whose act is choosing a wing in the switcher:** ⌘L's sheet (⏎, a row click, the
+  held-⌘ release — and so the toolbar label, which opens it), the masthead ▾ menu's wing list (Bookcase and
+  Library mastheads), and the masthead word's cycling click — plus the chord. Each lands in the chosen wing's
+  Bookcase in the focused pane through the one request road (`pendingSelection = .shelf`). Receipts as
+  today: the sheet and the cycle say "Now in …", the chord says it too (blind like a cycle), the ▾ list stays
+  silent (13i-d — she reads the name she picked).
+- (b) As (a) except the cycling word keeps the surface it was clicked on. The reason to weigh it: on the
+  LIBRARY masthead a cycle that lands on the Bookcase moves the word under her pointer (the Bookcase draws its
+  own elsewhere), so stepping three wings by repeated clicks needs a re-aim after the first; on the Bookcase
+  masthead (a) and (b) are the same.
+- NOT a deliberate switch under either (untouched, named so the ruling can redirect): the cross-wing FOLLOW
+  (the brief's rule), New Wing…'s switch-in ("you're in it now"), Delete Wing's return to Home, a dead wing's
+  revalidation, Compare's lineage "go to ‹wing› ›" (a road from inside a note), and the MCP door's
+  `show_in_app` wing landing (MCPSpec territory; vx-809 holds the door).
+
+**P-828-2 — the marquee (the brief's PROVISIONAL).** Built whichever cadence is ruled (the ruled half): the
+decision to animate is a pure function of (the words' width, the space); when the words fit, the view starts
+NO clock of any kind (no TimelineView, timer or repeating animation exists on the common case — P-8); the loop
+is a cancellable task keyed on (name, space), so a rename, a resize or a switch that makes the name fit stops
+it, and so does the view leaving. The words are clipped hard at the space's two edges (no ellipsis — declined;
+no fade — the car radio's own window). Cadence:
+- **(a) PROPOSED — the ticker, the car radio's own shape:** the label rests showing the name's START for 2.5 s;
+  then the words travel left at a steady 25 pt/s, a 24-pt gap behind them and the name again after it, until
+  that next copy stands exactly where the start rested — a seamless return — and it rests again; one
+  direction only, never a jump back; for as long as it overflows.
+- (b) Ping-pong: rest at the start 2 s, travel left until the END shows, rest 1.5 s, travel back, repeat.
+- (c) One pass per arrival: on appear and on each wing switch, travel once to the end and back, then rest at
+  the start for good (the hover's help carries the whole name).
+- Common to all: **Reduce Motion** (System Settings ▸ Accessibility; the app's `accessibilityReduceMotion`
+  precedent in Takes/Read) ⇒ no movement — the start, clipped; the hover gives the whole name. The numbers
+  (2.5 s, 25 pt/s, 24 pt) are PROVISIONAL for her eye on the walk.
+- Two edges inside P-828-2 (built as proposed unless redirected): **the space's floor** — a column dragged so
+  narrow that the space is under 24 pt (the 180-pt minimum leaves ≈ 0) draws NO label (a sliver that cannot
+  show a letter is no door, P-2; ⌘L and both mastheads remain) — alternative: draw it at the floor and let it
+  cross the line there; **the sidebar hidden** (⌃⌘S) — no column and no line, so the label keeps today's place
+  after New Note with today's 160-pt cap as its space, the marquee past it.
+
+**Not a fork — VX-833 (2) as it will be built (ruled):** the label stays the toolbar's third `.navigation`
+item (VX-644's switcher door) and takes the column's remaining width as its frame — space = the column's line
+(the clamped `shellSidebarWidth`) − 8 pt of air (`FreshSidebarWidthTests.air`) − the item's own leading edge,
+READ live in window coordinates by a zero-size AppKit probe (the leading items are the window's, and they move
+— full screen drops the traffic lights — so the origin is measured, never assumed); the words stand at the
+space's TRAILING edge; the hover wash hugs the words, never the empty run before them.
+
+**Pins planned:** the pure chord rule (in-note ⇒ pass on; a writing surface holding the keys ⇒ pass on; the
+capture box / a field / nothing ⇒ wing N; P-828-1's arms) + real-`NSEvent` classification (the
+`OneWingChord`/`BrowserNavKeys` pin shape); `CapabilityRegistryTests` + `ShortcutCatalogTests` with the new
+declaration; the deliberate road lands `.shelf` from every switcher door (red-on-old by reverting the landing
+call) and the follow does NOT land; the label's space (pure) + a hosted geometry pin of the label at a given
+origin and line (red-on-old by reverting to the leading 160-pt cap); the marquee plan (fits ⇒ still, no loop
+key; overflow ⇒ the ruled cadence; Reduce Motion ⇒ still).
+
+**ASKED OF THE ORCHESTRATOR (one ruling unblocks B1–B3):** Q-B1; P-828-1 (i) and (ii); Q-B2; P-828-2's
+cadence and its two edges.
+
 ### Batch E — spellcheck & Settings ▸ Tags: VX-798 + VX-838 + VX-840
 
 **Required reading:** SurfaceContracts "The app" (keyboard family, the status seam);
