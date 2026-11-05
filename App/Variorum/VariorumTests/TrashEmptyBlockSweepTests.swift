@@ -128,7 +128,7 @@ struct TrashEmptyBlockSweepTests {
             model.requestDeleteEmptyBlocks()
             #expect(model.pendingConfirm == .deleteEmptyBlocks(counted))
             #expect(model.pendingConfirm?.message == "Delete these 2 empty blocks for good? None "
-                + "holds any words, savepoints, comments, a name, a callout or a link to a living "
+                + "holds any words, commits, comments, a name, a callout or a link to a living "
                 + "block. They skip the rest of their 30 days — there's no putting them back.")
             model.cancelPendingPurge()
             #expect(try await count(editor, "SELECT COUNT(*) FROM purge_intent") == 0, "Cancel writes nothing")
@@ -210,7 +210,7 @@ struct TrashEmptyBlockSweepTests {
 
     @Test func theWordsAreTheDraftsVerbatim() {
         #expect(RecoveryCopy.deleteEmptyBlocksConfirm(1) == "Delete this empty block for good? It "
-            + "holds no words, savepoints, comments, name, callout or link to a living block. It "
+            + "holds no words, commits, comments, name, callout or link to a living block. It "
             + "skips the rest of its 30 days — there's no putting it back.")
         #expect(RecoveryCopy.deleteEmptyBlocksReceipt(1, synced: false)
             == "The empty block is gone from the app now — the app's own cleanup removes the bytes.")

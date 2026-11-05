@@ -833,14 +833,16 @@ nonisolated enum RecoveryCopy {
         "Every empty block with no history goes for good — asked to confirm every time"
 
     /// The confirm — what each one is NOT (the six facts of R-828-1, in her
-    /// words' order), the count, and the purge's truth.
+    /// words' order), the count, and the purge's truth. The app's word for a
+    /// savepoint is "commit" (the commit vocabulary — SurfaceContracts, The
+    /// app; only the tour and the guide keep the old word).
     static func deleteEmptyBlocksConfirm(_ count: Int) -> String {
         if count == 1 {
-            return "Delete this empty block for good? It holds no words, savepoints, comments, "
+            return "Delete this empty block for good? It holds no words, commits, comments, "
                 + "name, callout or link to a living block. It skips the rest of its "
                 + "\(TrashWindow.days) days — there's no putting it back."
         }
-        return "Delete these \(count) empty blocks for good? None holds any words, savepoints, "
+        return "Delete these \(count) empty blocks for good? None holds any words, commits, "
             + "comments, a name, a callout or a link to a living block. They skip the rest of "
             + "their \(TrashWindow.days) days — there's no putting them back."
     }
