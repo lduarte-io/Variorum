@@ -315,20 +315,27 @@ struct RootView: View {
             // role) whose press is ⌘L's own act in this window
             // (`ShellActions.openWingSwitcher` — the sheet, or ⌘L's one-wing
             // note spoken). It still reads "in ‹wing›" at rest.
+            // VX-833 (2) + VX-844 (the VX-828 run): it stands RIGHT-ALIGNED in
+            // the column's top bar, never past the line (`WingToolbarSlot` — the
+            // space the column leaves it, read live), and a name longer than
+            // that space SCROLLS in it, the car radio's ticker (`WingMarquee` —
+            // no clock while it fits; no ellipsis, her word).
             ToolbarItem(placement: .navigation) {
                 let tokens = theme.tokens(for: scheme)
-                Button {
-                    ShellActions(session: session, shell: router).openWingSwitcher()
-                } label: {
-                    Text(tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .frame(maxWidth: 160, alignment: .leading)
+                WingToolbarSlot(sidebarShown: router.sidebarShown) { wordsMaxWidth in
+                    Button {
+                        ShellActions(session: session, shell: router).openWingSwitcher()
+                    } label: {
+                        WingMarquee(
+                            words: tokens.chromeLabel(QuickEntryCopy.wingLabel(wings.currentName)),
+                            maxWidth: wordsMaxWidth)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help(QuickEntryCopy.wingHelp(wings.currentName))
                 }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help(QuickEntryCopy.wingHelp(wings.currentName))
             }
             .sharedBackgroundVisibility(.hidden)
         }
