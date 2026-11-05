@@ -723,10 +723,21 @@ struct NestedListDoorTests {
             // when the item was the block's last line (the batch-2 shape
             // here was `"- milk\n  - almond\n"`), and U-1's key then makes
             // the block below.
-            #expect(h.documentText == "- milk\n  - almond", "then exit — its newline with it")
+            // RE-POINTED AGAIN (VX-655 — the retraction lands INSIDE the
+            // flight, never at the keystroke): the keystroke takes only the
+            // lead, so its own turn still shows the continuation's newline
+            // (R1-3's claim-time intermediate was `"- milk\n  - almond"`, the
+            // line gone a flight early). The act then stores the take
+            // without it and the landing turns that same newline into the new
+            // block's separator — the page reads byte-identical before and
+            // after the flight, and the store is R1-3's, unchanged.
+            #expect(h.documentText == "- milk\n  - almond\n",
+                    "then exit — the lead goes; its newline stays on screen until the flight lands")
             await h.flush()
             #expect(try h.storeSlots().map(\.text) == ["- milk\n  - almond", ""],
-                    "…and the key made the block below")
+                    "…and the key made the block below — the newline retracted in the store")
+            #expect(h.documentText == "- milk\n  - almond\n",
+                    "landed: the same bytes — the newline is the new block's separator now")
         }
     }
 

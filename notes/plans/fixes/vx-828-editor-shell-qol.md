@@ -274,6 +274,20 @@ reverts).**
 | `TypedReturnKeyTests` · `theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt` | R1-3 deleted the newline at the claim: the claim-turn and mid-flight assertions read `"- one\ngamma"` | restore the claim-time retraction: paste the pre-fix `retractListContinuationNewline()` (`git show 7e7de0b02:App/Variorum/Variorum/Features/Editor/EditorViewModel.swift`, lines 1797–1828) back into `EditorViewModel` and call it as `if afterListExit { retractListContinuationNewline() }` ahead of `let act = typedReturnAct()` in `runTypedReturn` → the claim-turn `#expect` reads `"- one\ngamma"` (the act then finds nothing to retract, and the end state is the old one) |
 | `TypedReturnKeyTests` · `theListExitsUndoStoryIsNinetyFoursWhole` | GREEN ON BOTH SIDES (#94's shape guard) | — |
 
+**Addendum (after the orchestrator's stage run, 2026-11-05 — 281 tests, 280 green):**
+`NestedListDoorTests` · `returnAtDepthContinuesThenOutdentsThenExits` (`WalkBuildRoundTests.swift`) is
+RE-POINTED by the VX-655 supersession: its post-exit-press assertion pinned R1-3's claim-time
+intermediate `"- milk\n  - almond"`; it now reads `"- milk\n  - almond\n"` (only the lead goes at the
+keystroke), the store assertion `["- milk\n  - almond", ""]` stands unchanged, and a landed-state
+assertion was added (`"- milk\n  - almond\n"` — the newline is the new block's separator). Red-on-old
+is satisfied by the same revert as `theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt` (the
+claim-time retraction restored → the keystroke-turn `#expect` reads `"- milk\n  - almond"`). The sweep
+of both app test targets for other assertions pinning the claim-time intermediate found none: the
+other list-exit pins assert only after a flush (`ListContinuationTests` ·
+`anEmptyListItemExitsTheListAndThenTheKeyMakesTheBlock`, `TypedReturnKeyTests`' list pins), the
+remaining post-press surface asserts are continuations, and the take pane's exit (`aTakePaneContinuesListsToo`)
+never reaches the typed-return claim.
+
 **Headless suites at the END (at f7b7ae24c, the batch's last code is a34b51244/69ad4c1ab):** full core
 `swift test` — `VariorumCoreTests` 3655 tests / 492 suites PASSED (5 known issues; the VX-781 pin
 belt suite among them, passed); `StringsWorkbookTests` 32/4 PASSED; `VariorumMCPTests` 549/100 with
