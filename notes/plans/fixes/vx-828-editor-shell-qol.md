@@ -60,8 +60,8 @@ Decisions were put as question batches; she picked among presented options. Reco
 
 | # | Ticket | What | Batch | Status |
 |---|---|---|---|---|
-| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | IN-PROGRESS — built (A1 d6d9ddd4a + A2); the app-suite run + red-on-old revert + walk are PENDING (orchestrator's window) |
-| 2 | VX-655 (L, rider) | list-exit Return: retraction lands inside the flight | A | IN-PROGRESS — built (A3); the app-suite run + red-on-old revert + the checklist-exit walk are PENDING (orchestrator's window) |
+| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | BUILT (A1 d6d9ddd4a + A2 a34b51244) — the app-suite run + red-on-old revert + walk PENDING (orchestrator's window); P-828-6 proposed |
+| 2 | VX-655 (L, rider) | list-exit Return: retraction lands inside the flight | A | BUILT (A3 69ad4c1ab) — the app-suite run + red-on-old revert + the checklist-exit walk PENDING (orchestrator's window) |
 | 3 | VX-824 (M) | ⌘digit contextual — wings from the keyboard (RULED: shape a) | B | NOT-STARTED |
 | 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
 | 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | NOT-STARTED |
@@ -179,8 +179,162 @@ their red-on-old is BY CONSTRUCTION, each named below for the orchestrator's beh
 |---|---|---|
 | A1 | VX-806 core: `BoundarySnapping.wordStart(enclosing:in:)` — the floor of the one legal-cut set for a caret strictly inside a word (never `settle`) + 6 core pins in `BoundarySnappingTests` | DONE (d6d9ddd4a) — `swift test --filter BoundarySnappingTests` 43/43 green headless |
 | A2 | VX-806 app: `TypedReturn.act`'s mid-word arm (word start → divide there; blank prefix → the start arm) + the planner's exact-cut entry `plan(divideAtExactCut:world:)` + the controller dispatch + pins (`TypedReturnTests`, `StructuralGesturePlannerTests`, `ReturnKeyTraceTests`) | DONE (a34b51244) — Mac `build-for-testing` TEST BUILD SUCCEEDED; the phone target (`VariorumMobile`, generic iOS Simulator, compile only) BUILD SUCCEEDED over the Shared change; no warning in a touched file. The app pins' RUN is PENDING (the orchestrator's stage window) |
-| A3 | VX-655: the list-exit retraction moves INTO the flight (a store write inside `insertEmptyBlock`'s op body, landed on the surface by the divide seam in the landing turn; the claim no longer mutates; the exit names its block) + the order pin + the #94 undo-shape guard | DONE (this commit) — Mac `build-for-testing` TEST BUILD SUCCEEDED, no warning in a touched file (Mac-only files: the phone target is untouched by A3). The pins' RUN is PENDING (the orchestrator's stage window) |
-| A4 | Self-assessment + the record's closing sections | NOT-STARTED |
+| A3 | VX-655: the list-exit retraction moves INTO the flight (a store write inside `insertEmptyBlock`'s op body, landed on the surface by the divide seam in the landing turn; the claim no longer mutates; the exit names its block) + the order pin + the #94 undo-shape guard | DONE (69ad4c1ab) — Mac `build-for-testing` TEST BUILD SUCCEEDED, no warning in a touched file (Mac-only files: the phone target is untouched by A3). The pins' RUN is PENDING (the orchestrator's stage window) |
+| A4 | Self-assessment + the record's closing sections (below) | DONE (this commit) |
+
+#### Batch A — IMPLEMENTER SELF-ASSESSMENT (Opus, 2026-11-05)
+
+**Not done (first line, by the brief):** no app-suite RUN, no red-on-old revert RUN, no walk, no
+Debug launch — all stage-gated, all the orchestrator's (listed below with exact names). No `Sync/`,
+custody or keychain file touched. No canon or shared ledger touched (the drafts are below). Every
+other piece of the batch is built and compiles on both targets.
+
+**VX-806 — the mechanism, as traced on the pre-fix tree.** ⏎ with the chip on and a caret inside a
+word: `TypedReturn.act` answered `.divideAtCaret` (the prefix and suffix both hold text), the act
+re-derived it and called `invokeGesture(.divideAtCursor)`, and the planner's `divide(atCaret:)`
+SETTLED the caret through `snapToInteriorBoundary` — the nearest member of the word-rule's interior
+legal set, with the gentle pull. Three wrong outcomes followed from that one choice: (1) a one-word
+block (her screenshot: the caret one character into a block that is one quoted word) has NO interior
+member, so the plan was `.refusal(.nothingToDo)` and the key spoke "No legal cut spot for that
+here…" — on a fanned block the keep-on-top road's nil-cut refusal instead (`runKeepOnTopDivide`'s
+guard, with the ceremony hint); (2) a caret late in a word is nearer the NEXT word's start, so the
+cut went there and the caret's word stayed behind; (3) a one-letter sentence opener exactly
+`settlePull` before the word wins settle's exact tie (#161), carrying that letter down too.
+**The settle-vs-her-sentence divergence the brief asked to be named: it is (2) and (3).** Her
+sentence governs this door, so the Return's mid-word cut is the FLOOR of the legal set, never its
+nearest member.
+
+**VX-806 — the fix, one pointer per piece.**
+- `Sources/VariorumCore/Domain/BoundarySnapping.swift` — `wordStart(enclosing:in:)`: nil unless the
+  graphemes on both sides of the caret are non-whitespace; else the greatest `.word` boundary ≤ the
+  caret (the caret's word's start, or `0` when only whitespace precedes the word). Always a member of
+  the one legal-cut set, so S4-22's grid holds by construction.
+- `App/Variorum/Shared/EditorBrain/TypedReturn.swift` — the new arm, after the trailing-whitespace
+  end arm and the list-line rule: a blank prefix before the word's start ⇒ `.emptyBlock(.above)` (the
+  block pushed down whole — her screenshot, any first word, a one-word block); otherwise the new
+  `.divideAtWordStart(entryIndex:blockID:cut:)`. **The end arm is unreachable from a mid-word caret**
+  (the word stands after its own start), so the brief's "settles on the block's very END" case has no
+  road here — the existing trailing-whitespace arm remains the end arm, untouched.
+- `App/Variorum/Shared/EditorBrain/StructuralGesturePlanner.swift` — `plan(divideAtExactCut:world:)`:
+  `.divideAtCursor`'s plan with the cut TAKEN when it is a legal interior cut (else settled as the menu
+  door's — unreachable from the key; the planner never asserts). The front refusals (invalid
+  selection, seal, tail) moved into one `frontRefusal` both entry points share, byte-identical.
+- `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` — `runTypedReturnAct`'s
+  `.divideAtWordStart` arm → `applyStructural(plan(divideAtExactCut:))`: the plain divide or the
+  keep-on-top road, with the visible snap, through `runStructural` (the one structural door).
+- Untouched, by construction and by guard pins: ⇧⏎; the chip off; crystallization / the open tail;
+  selections; the list door and its intercept order at `EditorTextView.insertNewline(_:)`; a caret at a
+  word's EDGE (the ordinary settled divide); the menu ⌘⇧D (its settle is S4-22's, unchanged).
+
+**VX-655 — the mechanism (VX-649's trace, re-read on this tree).** On the exit ⏎,
+`EditorViewModel.runTypedReturn` called `retractListContinuationNewline()` BEFORE scheduling the act —
+an ordinary surface deletion (`OrdinaryInputEdit.apply`) inside the keystroke — and the empty block
+that replaces the line landed only when the act's flight returned (a turn later, plus the flight's
+flush + mint + render latency). The line was off the screen for exactly that gap.
+**The order was pinnable headless** (the brief's stop condition did not fire): holding the writer
+makes the flight observable, and the surface text at the claim's turn and mid-flight is a plain
+string assertion.
+
+**VX-655 — the fix.** Nothing mutates at the claim any more; the claim decides against the
+unretracted surface, which answers the same `.emptyBlock(.below)` (the caret sits at the block's end
+behind a newline — trailing whitespace). The claim passes the exit's block id to the act
+(`scheduleTypedReturn(listExitBlockID:)` — so a click between claim and act can never point the
+retraction at another block's newline). At the act's turn `listContinuationRetraction(entryIndex:
+blockID:)` — the old predicate, now a pure read — names the take and its text without the newline;
+`insertEmptyBlock`'s op body writes it (`ops.autosave`, charDelta 1 — the surface road's cost) ahead
+of `newBlock`, in the same serialized runner body. The fresh projection's first half is then a strict
+prefix of the surface's old text — exactly the divide seam's shape — so the ONE seam edit that lands
+the block turns the newline still on screen into the new block's separator: the page's bytes never
+change, the caret never moves off its line, store and surface agree at the landing, the DEBUG oracle
+sees them equal. **#94's undo shape is whole:** the retraction was never structural and is not now
+(⌥⌘Z takes the "New Block", the list still ends at its last item); the text stack changed only by
+subtraction — the retraction is no longer a text-undo registration, so R2-3's named gap (two
+registrations for one keystroke) is closed; the lead deletion stays the one, cleared by the rewrite
+exactly as before. Write order: the take's own guards (live, active, unlocked, unsealed) answer in
+`autosave` first, so a refusal writes nothing; a `newBlock` failing AFTER it (a seal or a dead note
+landing between the two transactions by sync) leaves the store retracted and the surface not, healed
+by the deferred delivery `runStructural`'s defer applies — the same end state the surface road had.
+
+**Pins — and exactly what makes each red on the pre-fix tree (the orchestrator's behavioral
+reverts).**
+| Pin (suite TYPE · test) | Red on old because | Behavioral revert that shows it |
+|---|---|---|
+| `BoundarySnappingTests` · the six `wordStart` pins | (new function — compile-red on old; behavior pinned, not revert-pinned) | — (core, ran green headless 43/43) |
+| `TypedReturnTests` · `aCaretInsideAWordDividesAtThatWordsStart` | old act answered `.divideAtCaret` for every mid-word caret | delete the VX-806 `if let wordStart …` block in `TypedReturn.act` → `.divideAtCaret(...)` observed |
+| `TypedReturnTests` · `aCaretInsideTheFirstWordPushesTheBlockDown` | same — `.divideAtCaret` (whose door then cut `“Hello`/`there`) | same revert |
+| `TypedReturnTests` · `aOneWordBlockLandsTheStartArmNeverARefusal` | same — `.divideAtCaret` (whose door refused `nothingToDo`) | same revert |
+| `TypedReturnTests` · `trailingWhitespaceStillCountsAsTheEnd`, `leadingWhitespaceStillCountsAsTheStart` | RE-POINTED (the ruled supersession of #92(b)) — their caret-4 / caret-3 lines go red | same revert |
+| `TypedReturnTests` · `theRoadsAWordsInsideDoesNotReach` | GREEN ON BOTH SIDES (guard) | — |
+| `PlannerExactCutTests` · `aLegalCutIsTakenExactlyNeverReSettled` | the Return's divide rode the menu door's settle (cut 4, "I" rides down) | make `exactInteriorCut` return `snapToInteriorBoundary(cut, in: text)` → `snappedCut: 4` observed |
+| `PlannerExactCutTests` · `aFannedBlockSeedsTheKeepOnTopRoadWithTheExactCut` | same revert → `activeCut: 4` | same |
+| `PlannerExactCutTests` · `everyOtherAnswerOfTheDivideDoorStands`, `anIllegalCutSettlesAsTheMenuDoorsDoes` | GREEN ON BOTH SIDES (guards) | — |
+| `TypedReturnKeyTests` · `aReturnInsideAWordCarriesTheWholeWordDown` | old key stored `["alpha beta", "gamma", "delta"]` (settled to 11) | the `TypedReturn.act` revert above |
+| `TypedReturnKeyTests` · `aReturnInsideAOneWordBlockPushesItDownInsteadOfRefusing` | old key refused (`nothingToDo`, statusMessage set), store untouched | same |
+| `TypedReturnKeyTests` · `aReturnInsideAFannedOneWordBlockPushesItDownToo` | old key refused on the keep-on-top nil-cut guard | same |
+| `TypedReturnKeyTests` · `theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt` | R1-3 deleted the newline at the claim: the claim-turn and mid-flight assertions read `"- one\ngamma"` | restore the claim-time retraction: paste the pre-fix `retractListContinuationNewline()` (`git show 7e7de0b02:App/Variorum/Variorum/Features/Editor/EditorViewModel.swift`, lines 1797–1828) back into `EditorViewModel` and call it as `if afterListExit { retractListContinuationNewline() }` ahead of `let act = typedReturnAct()` in `runTypedReturn` → the claim-turn `#expect` reads `"- one\ngamma"` (the act then finds nothing to retract, and the end state is the old one) |
+| `TypedReturnKeyTests` · `theListExitsUndoStoryIsNinetyFoursWhole` | GREEN ON BOTH SIDES (#94's shape guard) | — |
+
+**PENDING (the orchestrator's stage window).** (1) App suites, by TYPE (`-only-testing` takes a zsh
+array of these): `TypedReturnTests` · `ReturnKeyTraceTests` · `SoftNewlineTests` ·
+`TypedReturnKeyTests` · `PlannerFixtureTests` · `PlannerDivideTests` · `PlannerExactCutTests` ·
+`PlannerExtractTests` · `PlannerMakeBlockTests` · `PlannerMergeTests` · `PlannerPrecedenceTests` ·
+`PlannerGraphemeTests` — and the neighbours the diff can reach: `ListContinuationTests` ·
+`NestedListDoorTests` (the list-exit pins in `WalkBuildRoundTests.swift`) · `DivideExtractGestureTests`
+· `StructuralRewriteDoorTests` · `DifferentialApplyTests` · `FannedDefaultsTests` ·
+`CommandDeleteLineTraceTests` · `BlockDeletionAndRedoTests` · `CrossBlockCompoundTests` ·
+`ReturnKeyUndoSignTests` · `WriteFloatingViewportTests` · `WriteTopAirTests` · `SeamEditHappyPathTests`
+· `SeamEditFallbackTests` · `SeamEditNonSeamGeometryTests` · `SeamEditRetainedByteTests`. (2) The phone
+suites at the merge gate (Shared changed: `MobileStructuralTests` · `MobileTakeStructureTests` at
+least — the planner's `.divideAtCursor` and `snapToInteriorBoundary` are byte-unchanged for them).
+(3) The red-on-old reverts per the table. (4) The walk: chip on — Return early, mid and late in a
+word; in a first word; after an opening quote in a one-word block; in a fanned one-word block; a
+checklist exit (`- [ ] item`, ⏎, ⏎ — the line must not blink); both voices.
+
+**PROVISIONAL — proposed here (the QUESTIONS entry lands at the merge moment).**
+- **P-828-6 — where the caret lands when the word rides down.** BUILT (a): the divide door's own
+  landing — the successor's start (the word's start; the existing "snap-and-proceed, visibly"
+  contract), and on the start arm the pushed-down block's start (the arm's existing landing). This is
+  also where an ordinary editor's caret sits after ⏎ (the start of the new line). Alternative (b): the
+  caret rides INSIDE the word at its offset (`Hel|lo` stays `Hel|lo` on the new line) — new landing
+  code on both arms. (c) (b) on the divide arm only.
+
+**For the orchestrator's canon pass (DRAFTED — not applied; the two-file rule).**
+- AppSpec §7, the Segmentation / Return-key note: "a divide at the caret inside its text
+  (single-take in place; fanned → keep-on-top)" → "a divide at the caret inside its text — a caret
+  INSIDE a word divides at that word's start so the whole word rides down, and where that word starts
+  the block the block is pushed down with an empty block above (VX-806); single-take in place,
+  fanned → keep-on-top"; the pointer list gains VX-806.
+- AppSpec §9's "One snapping rule serves every cut" stays true as written (the Return's cut is drawn
+  from BoundarySnapping's legal set), but S4-22's GENTLE SETTLE no longer chooses the Return's
+  mid-word cut — her VX-806 sentence does (the floor). Whether §9 should name that exception in place
+  is the orchestrator's call; the menu ⌘⇧D keeps the settle (and #161 stays open for it).
+- QUESTIONS #92(b): SUPERSEDED by VX-806 (her 2026-11-04 report, ruled through the ticket) — a
+  one-word block's mid-word Return lands the start arm. #94(a)'s R2-3 gap note: closed by VX-655.
+- AppSpecRecord: the dated entry + the narrative under §7 (the Return key) and §9 (divide).
+
+**Self-assessment.** CONFIDENT: both mechanisms (read on this tree, line by line, before any edit);
+the cut's legality (a floor of the legal set, pinned for every caret of five texts); the seam shape of
+the VX-655 landing (traced through `StructuralSeamEdit.derive`'s divide arm — prefix 5 ≤ old length 6,
+retained bytes `- one`, replace (5,1) → `"\n"`, the oracle's per-entry text check); #94's undo shape
+(traced: `newBlock` registers the only structural entry; the rewrite clears the text stack on both
+roads). FLAGS FOR THE COLD REVIEWER: (a) the retraction's store write now precedes the mint as a
+second transaction inside one runner body — not one transaction (no public compound-transaction
+road; `editTakesAtomically` would add an undo entry and insurance commits, breaking #94's shape) —
+the partial-failure window is described above; (b) the claim's decision now runs on the UNRETRACTED
+surface — argued equivalent (trailing whitespace is the end), pinned by the list-exit suites; (c)
+`TypedReturn.act` now scans the block once at the claim for a mid-word caret (`wordStart` →
+`boundaries`), O(the caret's block) — P1 holds, the keystroke never reads the document; (d) the
+Return door and the menu ⌘⇧D now answer a mid-word caret differently (floor vs settle) — by the
+brief's "her sentence governs the Return door", stated in canon draft above.
+
+**Files touched (the whole batch):** `Sources/VariorumCore/Domain/BoundarySnapping.swift` ·
+`Tests/VariorumCoreTests/BoundarySnappingTests.swift` · `App/Variorum/Shared/EditorBrain/TypedReturn.swift`
+· `App/Variorum/Shared/EditorBrain/StructuralGesturePlanner.swift` ·
+`App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` ·
+`App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` ·
+`App/Variorum/Variorum/Features/Editor/EditorTextView.swift` (comment only) ·
+`App/Variorum/VariorumTests/TypedReturnTests.swift` · `App/Variorum/VariorumTests/StructuralGesturePlannerTests.swift`
+· `App/Variorum/VariorumTests/ReturnKeyTraceTests.swift` · this record.
 
 ### Batch D — the Trash: VX-800 + VX-636
 
@@ -367,3 +521,7 @@ round 2 re-reviews; hard cap three rounds.)*
 - P-828-5: VX-823 — whether the book Index/Outline courtesy rides (batch C assesses; if skipped,
   it's a ticket at closeout).
 - (VX-806 supersedes QUESTIONS #92(b)'s built answer — #92 gets its update at the merge moment.)
+- P-828-6: VX-806 — where the caret lands when the word rides down: BUILT (a) the divide door's own
+  landing (the word's start on the new block; the start arm's block start); alternatives (b) the
+  caret rides inside the word at its offset, (c) (b) on the divide arm only (batch A proposes —
+  its self-assessment).
