@@ -719,5 +719,42 @@ finding is AGREED; none disputed.** The fixes follow in "ROUND 1 FIX LEG".
 - VariorumMCPTests in the whole run: `549 tests in 100 suites failed … with 12 issues`, all socket
   and timing tests. The machine was otherwise idle; the only CPU consumer was this run's own
   `swiftpm-testing-helper` at ~1000 %. The MCP target ALONE: `549 tests … failed … with 6 issues`
-  (VX-180's pre-initialize probe, VX-394's stop roads, VX-132's harness bound). The pre-belt A/B is
-  PENDING below.
+  (VX-180's pre-initialize probe, VX-394's stop roads, VX-132's harness bound).
+
+**THE MCP A/B — an observation I found myself (not a reviewer finding), for the orchestrator.**
+P-781-1 moves the CLI graph's swift-concurrency-extras 1.4.0→1.4.1 and xctest-dynamic-overlay
+1.10.1→1.11.0. These are the versions the APP has shipped since 2026-08-03, but VariorumMCPTests
+only ever runs in the CLI graph. So I sampled the MCP target alone (`swift test --filter
+VariorumMCPTests`, 549 tests / 100 suites), on 68b3d9c53 exports and on the belt, with the failing
+suites tallied (logs `mcp-*.log`, `core-test*.log`):
+
+| tree · CLI pins | runs: issues (failing suites) |
+|---|---|
+| 68b3d9c53 · its own (1.4.0 / 1.10.1) | 1 (VX-132) · 1 (VX-132) · **3 (VX-132, VX-180 probe, VX-394)** · whole-suite run: 1 (VX-132) |
+| 68b3d9c53 · xctest-dynamic-overlay 1.11.0 only | 1 (VX-132) |
+| 68b3d9c53 · swift-concurrency-extras 1.4.1 only | 2 (VX-132, VX-180 probe) · 2 (same) |
+| 68b3d9c53 · both (= the belt's set) | 2 (VX-132, VX-180 probe) · 1 (VX-132) |
+| the belt, fresh export | 2 (VX-132, VX-180 window) · 2 (VX-132, VX-180) |
+| the belt, the worktree's long-used scratch | 6 · 8 · 4 · 2 (VX-132, VX-180, and VX-184/394/400/548/762 socket suites) |
+| the belt, whole-suite runs | 3 · 3 · 12 (the same socket families) |
+
+**Reading.**
+- Every failing test is a socket-road timing test: a 5 s `SO_RCVTIMEO` read returning nothing, or
+  the 15 s wall-clock bound.
+- VX-132's bound (MCPHarnessTimeLimitTests, VX-353/VX-685) fails in EVERY sample on both sides.
+- The VX-180 family ALSO fails on 68b3d9c53's own pins (its third sample), so it is a pre-existing
+  flake class, not a new failure. The samples suggest it trips MORE OFTEN with
+  swift-concurrency-extras 1.4.1, the likely lever (2/2 with it alone; its 1.4.1 diff is "Enable
+  upcoming features", swift-format and a trait alignment). The suites pass alone: `16 tests in 3
+  suites passed`, on the belt.
+- The worktree scratch's 6/8/4 clustered with a busy machine (Spotlight indexing the fresh
+  exports, builds just finished). The scratch itself later gave 2, like a fresh export.
+
+**Disposition (PROVISIONAL, inside P-781-1; for the orchestrator to rule).** Kept (A): the CLI now
+tests the MCP server against the dependency versions the shipping app runs, which is the truer
+gate. If concurrency-extras 1.4.1 makes the socket road slower, the shipped app already has that.
+Born-ticket candidate (Test-only · Tests & tooling · Medium): "the MCP socket-road suites'
+5 s receive bounds trip under parallel load; more often on the shipping ConcurrencyExtras 1.4.1;
+find whether it is test timing or a real latency in the pre-initialize road". The alternatives
+are P-781-1's (B)/(C): B would hold the CLI at the old pair, C would pin the app down. That would
+make the CLI test something other than what ships, or change what ships.
