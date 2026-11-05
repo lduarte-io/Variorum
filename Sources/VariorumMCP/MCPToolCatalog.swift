@@ -1276,7 +1276,11 @@ enum MCPToolCatalog {
             rule matches). One undo for the author puts the tag back. Returns JSON; \
             still_in_books names each book you can read (book_id, name) that collects by the tag and \
             still holds the note — [] when none — and \(MCPWriteTools.beyondReachKey) says, always \
-            in the same words, that books beyond your reach, if any, are not listed.
+            in the same words, that books beyond your reach, if any, are not listed. \
+            \(MCPWriteTools.tagUnusedKey) is true when no note you can read still wears the tag or a \
+            tag under it (on the note or on one of its blocks) — the tag may be unused, so you can \
+            suggest the author delete it in Settings ▸ Tags; notes beyond your reach are not counted, \
+            and deleting a tag is the author's alone.
             """,
         inputSchema: .object([
             "type": "object",

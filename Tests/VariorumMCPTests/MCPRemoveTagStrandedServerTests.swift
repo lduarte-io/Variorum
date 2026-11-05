@@ -172,8 +172,9 @@ struct MCPRemoveTagStrandedServerTests {
     /// whose rule names it (their intake is paused), and is assembled by a
     /// GATHERING naming it (a gathering holds nothing) — none is "still holding
     /// it by this tag", so the answer is the pre-VX-764 answer plus exactly the
-    /// two keys every landed answer carries since VX-825 (`still_in_books: []`
-    /// and `beyond_reach`), byte for byte.
+    /// three keys every landed answer carries since VX-825 (`still_in_books:
+    /// []`, `beyond_reach`, and `tag_unused_in_reach` — true here: no other
+    /// note wears it), byte for byte.
     @Test func aRemoveTagThatStrandsNothingAnswersExactlyAsBefore() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
@@ -208,8 +209,9 @@ struct MCPRemoveTagStrandedServerTests {
             let removed = try await call(connection, "remove_tag", ["note_id": .string(note.id), "tag": .string("board")])
             #expect(removed.isError != true, "\(text(removed))")
             let answer = try json(removed)
-            #expect(Set(answer.keys) == ["note_id", "tag_id", "tag", "removed", "still_in_books", "beyond_reach"],
-                    "the two VX-825 keys and no other: \(answer)")
+            #expect(Set(answer.keys) == ["note_id", "tag_id", "tag", "removed", "still_in_books", "beyond_reach",
+                                         "tag_unused_in_reach"],
+                    "the three VX-825 keys and no other: \(answer)")
             #expect(text(removed) == Self.golden(noteID: note.id, tagID: board.id), "byte for byte: \(text(removed))")
             #expect(try await memberships(h) == before)
             await h.hangUp(connection)
@@ -217,10 +219,10 @@ struct MCPRemoveTagStrandedServerTests {
     }
 
     /// The pre-VX-764 answer's bytes (captured on the old tree, `ebe3df7bc`),
-    /// with VX-825's two keys spliced in at their sorted places.
+    /// with VX-825's three keys spliced in at their sorted places.
     static func golden(noteID: String, tagID: String) -> String {
         #"{"beyond_reach":"Books beyond your reach, if any, are not listed.","note_id":"\#(noteID)","#
-            + #""removed":true,"still_in_books":[],"tag":"board","tag_id":"\#(tagID)"}"#
+            + #""removed":true,"still_in_books":[],"tag":"board","tag_id":"\#(tagID)","tag_unused_in_reach":true}"#
     }
 
     // MARK: - The description says why (RED ON OLD: no sentence)

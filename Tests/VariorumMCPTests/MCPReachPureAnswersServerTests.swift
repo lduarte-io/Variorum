@@ -245,6 +245,67 @@ struct MCPReachPureAnswersServerTests {
         #expect(answer[MCPWriteTools.beyondReachKey] as? String == MCPWriteTools.beyondReachWords)
     }
 
+    // MARK: - remove_tag's tag_unused_in_reach (VX-825's titular ask, A-809-9)
+
+    /// The fact is ALWAYS answered and reach-scoped: `true` once no note the
+    /// client can read wears the tag (or a tag under it, on the note or a block
+    /// it places); `false` while one does. In the hidden store an UNSHARED note
+    /// still wears it — and the answer is the none-exist store's, byte for byte.
+    @Test func tagUnusedInReachIsAlwaysAnsweredAndBlindToNotesBeyondReach() async throws {
+        let (withHidden, without) = try await twoStores { h, hidden in
+            let board = try h.operations.createTag(name: "board")
+            let open = try h.operations.createReading(name: "Open", kind: .book)
+            let note = try h.operations.createPost(title: "card")
+            _ = try h.operations.newBlock(in: note.id, text: "Ship it.", registeringUndo: false)
+            _ = try h.operations.addPostToReading(note.id, to: open.id)
+            _ = try h.operations.applyTag(board.id, toPost: note.id)
+            if hidden {
+                let ops = hiddenOperations(h)
+                let secret = try ops.createPost(title: "unshared card")
+                _ = try ops.applyTag(board.id, toPost: secret.id)
+            }
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .book, open.id))
+            let removed = try await connection.client.callTool(
+                name: "remove_tag", arguments: ["note_id": .string(note.id), "tag": .string("board")])
+            await h.hangUp(connection)
+            return removed
+        }
+        #expect(withHidden.0 == without.0, "byte-identical:\n\(withHidden.0)\n\(without.0)")
+        let answer = try #require(try JSONSerialization.jsonObject(with: Data(withHidden.0.utf8)) as? [String: Any])
+        #expect(answer[MCPWriteTools.tagUnusedKey] as? Bool == true, "no readable note wears it now: \(answer)")
+    }
+
+    /// `false` while a readable note still wears the tag — itself, through one
+    /// of its BLOCKS, or through a tag UNDER it (deleting the tag deletes its
+    /// subtree, so a worn child keeps it in use).
+    @Test(arguments: ["note", "block", "child"])
+    func tagUnusedInReachIsFalseWhileAReadableWearerRemains(_ how: String) async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let board = try h.operations.createTag(name: "board")
+            let note = try h.operations.createPost(title: "card")
+            _ = try h.operations.newBlock(in: note.id, text: "Ship it.", registeringUndo: false)
+            _ = try h.operations.applyTag(board.id, toPost: note.id)
+            let other = try h.operations.createPost(title: "another")
+            let placed = try h.operations.newBlock(in: other.id, text: "Also.", registeringUndo: false)
+            switch how {
+            case "note": _ = try h.operations.applyTag(board.id, toPost: other.id)
+            case "block": _ = try h.operations.applyTag(board.id, toBlock: placed.block.id)
+            default:
+                let child = try h.operations.createTag(parent: board.id, name: "doing")
+                _ = try h.operations.applyTag(child.id, toPost: other.id)
+            }
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .wing, ""))
+            let answer = try json(try await connection.client.callTool(
+                name: "remove_tag", arguments: ["note_id": .string(note.id), "tag": .string("board")]))
+            #expect(answer[MCPWriteTools.tagUnusedKey] as? Bool == false, "\(how) still wears it: \(answer)")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - The descriptions say the new shape
 
     @Test func theThreeDescriptionsSayTheScopeWordsAndNoCount() throws {

@@ -157,17 +157,33 @@ One batch = one acceptance unit = one implementer session. Evidence by kind: the
 | # | Piece | Status |
 |---|---|---|
 | B1-0 | Preflight read (record whole · MCPSpec in full · QUESTIONS #258 · SurfaceContracts Doors · VX-771 FOR A LATER READER · SessionResiliencyProtocol) + the code survey + VX-825/826 ticket threads | DONE |
-| B1-1 | FORK F-1 (P-809-1) — the fixed scope sentence + its per-tool placement — PROPOSED below, awaiting A-809-N | PROPOSED |
-| B1-2 | Retire `remove_tag`'s `still_in_books_hidden_count` (red-on-old pin, then the build) | PIN RED ON OLD (`MCPReachPureAnswersServerTests`, two pins: the two stores' answers differ by the count / the key's presence) — build next |
-| B1-3 | Retire `duplicate_note`'s `landed` counted arm ("a book not shared with you") | PIN RED ON OLD (two pins: wing road with a Private collecting book, book road with an unshared collecting book) — build next |
-| B1-4 | Retire `move_note_to_wing`'s `left_books` hidden arm (today it lists an UNREADABLE book's **id**, name-less) | PIN RED ON OLD (the hidden store's answer carried `{"book_id":"F0000000-…"}`) — build next |
-| B1-5 | The three tool descriptions to the new shape | PIN RED ON OLD (`theThreeDescriptionsSayTheScopeWordsAndNoCount`) — build next |
+| B1-1 | FORK F-1 (P-809-1) — the fixed scope sentence + its per-tool placement | RULED A-809-8 (the lean, both halves) — wired (`MCPBeyondReach.swift`) |
+| B1-2 | Retire `remove_tag`'s `still_in_books_hidden_count` | DONE (`fc45ea23e`) — pins RED on `56a3a7334`'s tree (logged: the two stores' answers differed by the count / the key's presence), GREEN after |
+| B1-3 | Retire `duplicate_note`'s `landed` counted arm | DONE (`fc45ea23e`) — pins RED on old (the hidden store's `landed` read "…, and a book not shared with you, which collects one of its tags"), GREEN after |
+| B1-4 | Retire `move_note_to_wing`'s `left_books` hidden arm | DONE (`fc45ea23e`) — pin RED on old (`{"book_id":"F0000000-…"}` crossed), GREEN after |
+| B1-5 | The three tool descriptions to the new shape | DONE (`fc45ea23e`) — pin RED on old, GREEN after |
 | B1-6 | Name guard verify (VX-259 / VX-363 / create_gathering) — standing pins named + two-store arms | NOT STARTED |
-| B1-7 | FORK F-2 (P-809-2) — the ownership refusals: every wire act that hears them, 2–3 shapes + leak analysis — PROPOSED below; **NOT BUILT until A-809-4** | PROPOSED |
+| B1-7 | FORK F-2 (P-809-2) — the ownership refusals (+ S-2 folds in; S-1/#218 stands) | RULED A-809-4 (shape (a)) — build NOT STARTED |
 | B1-8 | THE TWO-STORE CATALOG PIN — harness + the walk + the catalog table | NOT STARTED |
-| B1-9 | VX-826 — the trace (below), the exact-repro pin, the remaining class's pin + fix (FORK F-4) | TRACED — pins NOT STARTED |
-| B1-10 | FORK F-3 — scope question: VX-825's TITULAR ask (remove_tag says when a tag looks unused within reach) | ASKED |
+| B1-9 | VX-826 — the trace (below), the exact-repro pin, the remaining class's pin + fix (FORK F-4) | TRACED; F-4 RULED A-809-10 (option (a), P-809-7; keep the `DuplicateDay` edit minimal — the VX-845 seam) — pins NOT STARTED |
+| B1-10 | FORK F-3 — VX-825's titular ask: `tag_unused_in_reach` + THE SHARED BRAIN | RULED IN A-809-9 — DONE (this commit): the brain (signature below), the wire arm, the description; pins GREEN (`TagUsageQueriesTests` 8, `MCPReachPureAnswersServerTests` +4) |
 | B1-11 | Self-assessment + test counts | NOT STARTED |
+
+### THE SHARED UNUSED-TAGS BRAIN — settled (A-809-9; for the relay to vx-828 / VX-840)
+
+- **Name and home:** `Queries.tagSubtreeIsWorn` in **`Sources/VariorumCore/Queries/TagUsageQueries.swift`** (VariorumCore — reachable from the app and the door alike).
+- **Exact signature:**
+  ```swift
+  public enum TagWearerScope {                       // nested: Queries.TagWearerScope
+      case library(countingTrashRevivable: Bool)     // her surface: every live wearer, snippets included
+      case reach(readable: ([String]) throws -> Set<String>)   // the wire: batches of note ids in, the readable ones out
+  }
+  public static func tagSubtreeIsWorn(_ db: Database, tagID: String, scope: TagWearerScope) throws -> Bool
+  ```
+- **Semantics:** WORN = the tag OR any live tag under it (its subtree by materialized path — `deleteTag` deletes the subtree) has a live application on a wearer the scope counts: a live `post_tag` on a live post; a live `block_tag` on a live block — on `.reach` only through the live NOTE that places the block (a snippet / pool block or an unplaced block counts for no client). `.library(countingTrashRevivable: true)` ALSO counts a tombstoned application on the exact stamp of its tombstoned, not-yet-purged wearer (the cascade victims `restoreContainer`/`restoreBlock` revive) — **VX-840's A-809-1 Trash lean is theirs to pass (true = "Trash wearers keep it in use")**; `false` = live wearers only. A missing/tombstoned tag is worn by nothing. "Unused" for the sweep = `!tagSubtreeIsWorn(db, tagID:, scope: .library(...))`, which is subtree-honest by construction. Cost ∝ the subtree's applications; `.reach` pages 200 note ids at a time and stops at the first readable wearer. The wire's consumer: `MCPWriteTools.tagUnusedInReach` (`MCPWriteTools+RemoveTag.swift`) — `.reach` with `MCPGrantAuthority.decide(standing, note:, rung: .read, consumes: false)` over `Queries.mcpNoteFacts`.
+- **Block tags ARE wire-visible** (the survey A-809-9 asked for): the wire's `search` runs at the PASSAGE level, whose `#tag` filter matches block-level tags (`SearchComposer.tagSubtree`, `.passage` — "`d.block_id IN (… block_tag …)`"), so the wire arm includes block applications on readable notes, as the ruling's default said.
+- **A wire tag listing: NOT APPLICABLE** — no tool lists tags today (the 68-tool catalog has none; tags reach the wire only as a note's header paths and as answer echoes).
+- **For a batch caller** (the sweep over a wing's tags): call it per tag over `Queries.allTags(db, wingID:)` — ∝ the wing's tags × their applications, the sweep's own scale; a batched statement can be added BESIDE it in this file if their pane needs one (same SQL fragments), never a second predicate.
 
 ### FORK F-1 — the fixed scope words (P-809-1) — PROPOSED, orchestrator to rule
 

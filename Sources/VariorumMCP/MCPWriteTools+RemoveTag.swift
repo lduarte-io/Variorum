@@ -50,6 +50,7 @@ extension MCPWriteTools {
             }
             var answer: [String: Any] = ["note_id": noteID, "tag_id": removal.tagID, "tag": removal.path, "removed": true]
             for (key, value) in try stillInBooks(removal.stillInBookIDs, standing: standing) { answer[key] = value }
+            answer[Self.tagUnusedKey] = try tagUnusedInReach(removal.tagID, standing: standing)
             return (answer,
                     MCPWriteReceipt(clientName: clientName, act: .untag, targetID: noteID, targetTitle: title,
                                     detail: removal.path, show: .note(noteID: noteID, blockID: nil, select: nil)))
@@ -81,5 +82,32 @@ extension MCPWriteTools {
             }
         }
         return ["still_in_books": named, Self.beyondReachKey: Self.beyondReachWords]
+    }
+
+    /// The reach-scoped usage fact's key (VX-825's titular ask — A-809-9).
+    static let tagUnusedKey = "tag_unused_in_reach"
+
+    /// **VX-825 (A-809-9 — the titular ask): does any note this client can
+    /// READ still wear the tag, or a tag under it?** ALWAYS answered on a
+    /// landed `remove_tag` (the F-1 discipline — never a key that appears only
+    /// sometimes): `true` when no readable note wears the tag or anything in
+    /// its subtree, itself or through a block it places — so the client can
+    /// PROPOSE the tag's deletion to the author, whose act it stays (Settings ▸
+    /// Tags); never a library-wide fact (her R-825 — a tag worn only beyond the
+    /// client's reach answers `true`, exactly as in a store where those notes do
+    /// not exist). The ONE brain, `Queries.tagSubtreeIsWorn` (`.reach`), the
+    /// same predicate her Settings ▸ Tags sweep reads at `.library` (VX-840);
+    /// readability through the one rule (`decide` at read, never consuming).
+    /// After the act, on its own read. ∝ the tag subtree's wearers, stopping at
+    /// the first readable one.
+    private func tagUnusedInReach(_ tagID: String, standing: MCPGrantAuthority.Standing) throws -> Bool {
+        try database.read { db in
+            try !Queries.tagSubtreeIsWorn(db, tagID: tagID, scope: .reach(readable: { noteIDs in
+                let facts = try Queries.mcpNoteFacts(db, noteIDs: noteIDs)
+                return Set(noteIDs.filter {
+                    MCPGrantAuthority.decide(standing, note: facts[$0], rung: .read, consumes: false).isAllowed
+                })
+            }))
+        }
     }
 }
