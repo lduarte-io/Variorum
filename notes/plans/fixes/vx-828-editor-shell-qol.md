@@ -549,3 +549,17 @@ round 2 re-reviews; hard cap three rounds.)*
   landing (the word's start on the new block; the start arm's block start); alternatives (b) the
   caret rides inside the word at its offset, (c) (b) on the divide arm only (batch A proposes —
   its self-assessment).
+
+#### Batch A — ORCHESTRATOR VERIFICATION (stage window "vx-828-batchA", 2026-11-05)
+
+Part 1 (suites): 281 tests / 28 suites — 280 green + ONE stale neighbor pin
+(`NestedListDoorTests.returnAtDepthContinuesThenOutdentsThenExits`, pinning R1-3's claim-time
+intermediate that VX-655 supersedes), re-pointed by the implementer (58e655834, sweep found no
+siblings), re-run green (18/2 with `ListContinuationTests`). Two anonymous warnings at
+`Date.swift:37` (harness noise, no test attributed); the early sqlcipher decrypt errors are the
+test host meeting the locked dev store at launch (pre-existing).
+
+Part 2 (red-on-old reverts) STARTING — three behavioral reverts per the pin table, each an
+UNCOMMITTED edit on the committed tree at 58e655834 (git checkout restores; no prerevert dir
+needed, git diff is the honest mid-revert state): R1 bypass the TypedReturn mid-word arm;
+R2 exactInteriorCut → settle; R3 restore the claim-time retraction from 7e7de0b02. Results follow.
