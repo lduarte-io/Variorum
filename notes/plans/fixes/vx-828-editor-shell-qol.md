@@ -770,3 +770,33 @@ frame on any thread; the host was the re-point re-run's (launched 01:54:59, its 
 in-flight reader races the pool/codec teardown. Not this run's regression (no purge/pool/
 protection code in the diff); the coordinator hands VX-855 to vx-809 (VX-818's teardown
 neighborhood). This run FILED: VX-855.
+
+#### Batch D — THE FORK'S RULING (orchestrator, 2026-11-05 — build to this)
+
+1. **P-828-7 edge clause: (a) CONFIRMED** — any edge row to a live block, whatever the edge's own
+   tombstone. Two reasons, both the implementer's, adopted: the deletion cascade tombstones a dead
+   block's edges, so a live-edges-only reading would make R-828-1's protection vacuous by
+   construction; and (a) makes the sweep UNABLE to strand-and-purge a live released original
+   through `joinStrandedOriginals` — the exact hazard class (b) opens. (c) adds complexity with no
+   traced need.
+2. **P-828-8 empty: (a) CONFIRMED** — zero-length only, the seam carve's own empty test: ONE
+   app-wide meaning of "empty block", and whitespace is content she owns (U-19's precedent).
+   PROVISIONAL stands; if real Trashes keep whitespace-only husks, that's her call later.
+3. **P-828-9 block tags: (a) CONFIRMED** — not history. Her floor named savepoints, comments,
+   takes, name, frame; R-828-1 added edges; tags are metadata whose application on an empty block
+   protects nothing worth a refusal. PROVISIONAL stands.
+4. **P-828-10 words: stand as drafted, PROVISIONAL** — sentence-case checked; her wording eye gets
+   them at the handoff (a Wording follow-up is cheap).
+5. **ids ∩ still-qualifying: CONFIRMED** — the act never deletes more than the confirm showed her;
+   fewer is the race's honest answer, spoken as the drafted refusal.
+6. **Count 0 ⇒ door not rendered: CONFIRMED** — P-2's letter and Empty Trash's own precedent.
+7. **The pick belt: CONFIRMED.**
+8. **VX-636 `model:` init parameter: YES** — internal, test-only injection with production behavior
+   unchanged by default; it buys the geometry pin red-on-old, which outranks a walk-only verify.
+
+Also confirmed with reasons, from the proposal's body: the candidate set is the Trash's own block
+rows (unwindowed, un-narrowed by the kind picker — her "all"), inheriting the wing fence, the
+stamp-aware intent fence and the CASCADE-VICTIM EXCLUSION — a block that died with its note is
+never swept alone, so a note's whole-restore is never broken by this door; the in-transaction
+predicate re-check; LocalPurge before the receipt; no ⌥⌘Z (the requestPurge posture), confirm
+every time. Build D1–D5.
