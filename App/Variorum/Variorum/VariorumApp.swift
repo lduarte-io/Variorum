@@ -298,7 +298,11 @@ struct VariorumApp: App {
                         // locked library serves no one — the door detaches after
                         // the services stop. VX-548 batch 2b: composed in ONE
                         // named, pinnable place (`macLockTeardown`).
-                        bootstrap.onWillLock = macLockTeardown(session: session, door: appDelegate.mcp) {
+                        // VX-818 (A-809-21): the teardown reads which road runs it — the lock and a
+                        // re-keying reopen keep the MCP server, every other road tears it down as before.
+                        bootstrap.onWillLock = macLockTeardown(
+                            session: session, door: appDelegate.mcp, road: { [bootstrap] in bootstrap.willLockRoad }
+                        ) {
                             services?.stop()
                             services = nil
                         }

@@ -73,17 +73,52 @@ func macWillLock(
 /// Make this my library, a plain-text export brought in). ONE named composition —
 /// `VariorumApp` wires exactly this — so the sweep's pin drives what ships
 /// (`MCPStopRoadsDoorTests`); it used to be an inline closure no pin reached.
+///
+/// **VX-818 (the VX-809 run, batch 4 — her R-818; A-809-20/-21): the server
+/// SURVIVES the lock.** `road` reads which road is tearing down
+/// (`AppBootstrap.willLockRoad`, set just before each `onWillLock`). On the LOCK
+/// and the re-keying REOPEN of the same library (P-809-13) the door's two steps
+/// keep their places and change their act: the connections step SUSPENDS the
+/// host instead of saying each end (nothing ends — the listener listens, every
+/// connection lives on, every call answers the locked sentence), and the stop
+/// step lets HER session's faces go while the host stays held; the next ready
+/// resumes it on the same connections (`MCPDoor.reconcileServer`). Every other
+/// road — adopt, swap, and an unset or unknown road (the default here, so a
+/// caller that names none keeps today's teardown) — runs exactly the steps it
+/// ran before, byte for byte: FAIL-CLOSED. `macWillLock`'s order is untouched.
 @MainActor
 func macLockTeardown(
     session: AppSession,
     door: MCPDoor,
+    road: @escaping @MainActor () -> AppBootstrap.WillLockRoad? = { nil },
     stopServices: @escaping @MainActor () -> Void
 ) -> @MainActor () async -> Void {
     macWillLock(
         session: session,
-        endingConnections: { await door.recordLibraryClosing() }
+        endingConnections: {
+            if mcpServerSurvives(road()) {
+                await door.suspendForLock()
+            } else {
+                await door.recordLibraryClosing()
+            }
+        }
     ) {
         stopServices()
-        door.detach()
+        if mcpServerSurvives(road()) {
+            door.detachForLock()
+        } else {
+            door.detach()
+        }
+    }
+}
+
+/// **Which teardowns keep the MCP server** (VX-818 — A-809-21's fail-closed
+/// rule, widened to the re-key at the coordinator's word): the lock and the
+/// re-keying reopen of the same library only. Adopt, swap and anything unnamed
+/// tear it down as before. Pure; pinned.
+func mcpServerSurvives(_ road: AppBootstrap.WillLockRoad?) -> Bool {
+    switch road {
+    case .lock?, .reKey?: true
+    case .closing?, nil: false
     }
 }

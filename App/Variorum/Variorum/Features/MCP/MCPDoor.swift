@@ -135,6 +135,8 @@ final class MCPDoor {
     @ObservationIgnored private var observation: Task<Void, Never>?
     /// A start is in flight off the main thread — never start twice.
     @ObservationIgnored private var starting = false
+    /// VX-818: a suspended host's resume is in flight off the main thread.
+    @ObservationIgnored private var resuming = false
     /// R-13nb-6: an adopted library's OFF write has not landed yet — the
     /// server may not start (row 10).
     @ObservationIgnored private var adoptionLandingPending = false
@@ -352,7 +354,10 @@ final class MCPDoor {
         // Idempotent per session: the same ready re-appearing keeps its
         // server and its connections.
         guard session !== self.session else { return }
-        detach()
+        // VX-818: the ready after a LOCK finds the host the lock suspended,
+        // its connections alive — it is kept (the first snapshot's reconcile
+        // resumes it on this session's runner, or the identity belt abandons it).
+        if self.session != nil || host?.state != .suspended { detach() }
         self.session = session
         database = session.database
         runner = session.runner
@@ -424,6 +429,83 @@ final class MCPDoor {
         observation?.cancel()
         observation = nil
         stopServer(ending: reason)
+        letGoOfTheSession()
+    }
+
+    // MARK: - VX-818: the server survives the lock (A-809-20/-21)
+
+    /// **The lock road's connections step, when the server survives**
+    /// (`macLockTeardown` — the lock, or a re-keying reopen of the same library):
+    /// in the step that used to say each connection's end, SUSPEND the host while
+    /// the store is still open — its latch shut first (every call from now on
+    /// answers the locked sentence), the grants observation let go, the grants
+    /// store's fingerprint taken for the identity belt; the listener keeps
+    /// listening and every connection lives on. Off the main thread (P2 — one
+    /// bounded read). A host that is not running (still starting, or its
+    /// listener died) takes today's step instead: each end said, and the stop
+    /// step then tears it down (`detachForLock`).
+    func suspendForLock() async {
+        guard let host, host.state == .running, !starting else {
+            await recordLibraryClosing()
+            return
+        }
+        _ = await Task.detached(priority: .userInitiated) { host.suspend() }.value
+    }
+
+    /// **The lock road's stop step, when the server survives:** HER session's
+    /// faces go exactly as `detach()` lets them go (the asks — a dropped ask
+    /// costs the client one re-ask; the standing show ask, which ends when the
+    /// library closes; the receipt run; ⌥⌘O's last change; the share gates) and
+    /// the store observation with them — but the SUSPENDED host stays held, its
+    /// connections alive. A host the connections step did not suspend is torn
+    /// down as today (`detach()`).
+    func detachForLock() {
+        guard host?.state == .suspended else {
+            detach()
+            return
+        }
+        observation?.cancel()
+        observation = nil
+        letGoOfTheSession()
+    }
+
+    /// **The library is back (or another one opened): resume the suspended
+    /// host** — on THIS session's runner (the executor slot re-pointed: her
+    /// fresh undo stack, her serial road), off the main thread. The host's
+    /// identity belt decides: the same library ⇒ the same connections served
+    /// again, no /mcp, no re-grant; another library ⇒ abandoned (each told the
+    /// closing road's close line, nothing written), and the next reconcile
+    /// starts a fresh host if the switch says so.
+    private func resumeSuspended(_ held: MCPServerHost) {
+        guard !resuming, let runner else { return }
+        resuming = true
+        Task { @MainActor [weak self] in
+            let outcome = await Task.detached(priority: .userInitiated) { await held.resume(executor: runner) }.value
+            guard let self else { return }
+            self.resuming = false
+            guard self.host === held else { return }
+            switch outcome {
+            case .resumed:
+                if case .stoppedByItself(let reason) = held.state {
+                    self.serverState = .stoppedByItself(reason)
+                } else {
+                    self.serverState = .running
+                }
+                self.refreshConnected()
+                self.reconcileServer()
+            case .abandoned:
+                self.host = nil
+                self.adoptConnected([])
+                self.reconcileServer()
+            case .stillLocked, .notSuspended:
+                break
+            }
+        }
+    }
+
+    /// What `detach()` and `detachForLock()` both let go of: the session's
+    /// faces and the store's handles.
+    private func letGoOfTheSession() {
         adoptionLandingPending = false
         // A closed library's asks die with it (and so does every glyph — and
         // the ask watch, which an empty queue stops).
@@ -443,6 +525,14 @@ final class MCPDoor {
 
     /// Start or stop the server to match the toggle.
     private func reconcileServer() {
+        // VX-818: a host the lock suspended is resumed first (or abandoned —
+        // its identity belt), before the switch is read: its connections were
+        // never this snapshot's to stop.
+        if let host, host.state == .suspended {
+            guard serverAllowed, database != nil, !adoptionLandingPending else { return }
+            resumeSuspended(host)
+            return
+        }
         guard snapshot.enabled else {
             // VX-394: her switch OFF — each connection it ends says so.
             stopServer(ending: .serverOff)
@@ -547,6 +637,7 @@ final class MCPDoor {
         }
         host = nil
         starting = false
+        resuming = false
         adoptConnected([])
     }
 
