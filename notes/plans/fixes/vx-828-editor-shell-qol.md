@@ -1127,8 +1127,9 @@ the Bookcase, the marquee on a long wing name in both voices).
 
 #### Batch B — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
 
-**Not done by this batch (first line, kept current):** NO app-suite RUN, NO red-on-old revert RUN, NO
-walk, NO Debug launch — all stage-gated, all the orchestrator's. No canon, QUESTIONS or shared ledger
+**Not done by this batch (first line, final):** NO app-suite RUN, NO red-on-old revert RUN (R-B1, R-B2,
+R-B2b, R-B3, M-B4), NO walk, NO Debug launch — all stage-gated, all the orchestrator's (named exactly in
+the self-assessment). No `App/Variorum/Shared/` file — no phone suites owed. No canon, QUESTIONS or shared ledger
 touched. No `Sync/`, custody or keychain anywhere in this batch's reach. Built to the fork's ruling
 (0aca117b3, "Batch B — THE FORK'S RULING"); B2 lands before B1 (the chord rides B2's road).
 
@@ -1138,7 +1139,7 @@ touched. No `Sync/`, custody or keychain anywhere in this batch's reach. Built t
 | B1 | VX-824: the pure chord rule + the registry declaration (`.goToWing`, the alternate "⌘1–9") + the helper row + the window's key monitor + routing pins | DONE (this commit) — `Workspace/WingNumberKeys.swift` (NEW: the key = exactly ⌘ + one digit; the pure rule over the registry's gate, the keyboard holder per Q-B1 (a) and the switcher's order; the holder classes; the monitor, the `BrowserNavKeyMonitor` shape); `CapabilityID.goToWing` + its declaration (`.surface`, app scope, alternate "⌘1–9", the mode row's mirror, the collision sweep recorded at the declaration); `RootView`: the monitor mounted, `wingNumberKey` (static — what the key runs), `surfaceCapabilities` + `.goToWing`; `WingsModel.answer`; `WingCopy.noWingAtNumber` (P-828-1 (i) words as drafted); the ⌘/ helper's row (`.alternates`) + the ⌘L row's words name the landing. Pins `WingNumberKeysTests` (13, NEW — the key, the rule's table incl. the three contexts and both P-828-1 arms, the words, the holder classes, the declaration + the catalog's contextual pair, and the WHOLE ROAD with real NSEvents in a real window: the capture box holding the keys ⇒ goes; a note detail ⇒ passes; a book's live note ⇒ passes; ⌘7 with two wings ⇒ refusal; ⌘1 = current ⇒ lands silently; ⌘⇧1 never) + `ShellChromeTests`' exact surface list re-pointed (justified, the VX-644 line's class). Mac `build-for-testing` TEST BUILD SUCCEEDED. RUN + revert R-B1 PENDING (stage) |
 | B2 | VX-833 (1): the deliberate switch lands in the wing's Bookcase — one road in `WingsModel`, every switcher door through it — + pins | DONE (this commit) — `WingsModel.goTo(_:saying:)` + `landInBookcase` (wired per window by `RootView.wireWingLanding` → `pendingSelection = .shelf`); `switchSaying`/`cycle` ride it; the ▾ list's picker → `goTo(saying: false)`; `WingSwitcherBrain` commits the current row (P-828-1 (ii)(a)); pins `WingDeliberateLandingTests` (6, NEW) + 4 justified re-points in `WingSwitcherChordTests` (`.close` → `.commit(current)`). Mac `build-for-testing` TEST BUILD SUCCEEDED. RUN + revert R-B2 PENDING (stage) |
 | B3 | VX-833 (2) + VX-844: the label's space (pure) + right-aligned in the column + the marquee (pure plan + view) + pins | DONE (this commit) — `Core/Views/WingToolbarLabel.swift` (NEW): `WingLabelSpace` (the line − 8 pt air − the item's edge; the 24-pt floor ⇒ not drawn; the hidden sidebar ⇒ the old place and 160-pt cap; VX-736's 169-pt edge until the first read), `WingMarqueePlan` (the ticker: rest 2.5 s, 25 pt/s, 24-pt gap, seamless wrap; still — NO loop — while it fits; Reduce Motion still; the loop key = name, space, plan), `WingMarquee` (the words still or ticking; hard clips; one accessibility label; a cancellable `.task` loop that returns at once for a still plan), `WingLabelPlacementView` (right-aligned in exactly its space), `WingToolbarSlot` (the shell's own `shellSidebarWidth` key, read here so a seam drag re-lays the label alone) and `WindowLeadingEdgeProbe` (the item's edge in WINDOW coordinates — on layout, arrival, resize and full screen; never a hit); `RootView`'s third `.navigation` item rides the slot and the marquee (the old `.frame(maxWidth: 160)` + `.truncationMode(.tail)` gone; the premise strings the three source pins read are kept). Pins `WingToolbarLabelTests` (10, NEW — the space rule + both edges; the plan: fits ⇒ no loop, the ticker's numbers, Reduce Motion, the loop key; HOSTED geometry: a short name flush right in exactly its 63-pt space, a long name keeps the space and its 53-pt window, below the floor nothing; the composition by source). Mac `build-for-testing` TEST BUILD SUCCEEDED. RUN + revert R-B3 + the walk PENDING (stage) |
-| B4 | Self-assessment + the end-of-batch headless suite + the app `build-for-testing` | NOT-STARTED |
+| B4 | Self-assessment + the end-of-batch headless suite + the app `build-for-testing` | DONE (this commit) — full core `swift test` at 1dd4e3233: `VariorumCoreTests` 3670 tests / 493 suites PASSED (5 known issues — unchanged from batch D: this batch touches no package code); `StringsWorkbookTests` 32/4 PASSED; the 7 known "dependency not used" warnings (14 lines); `VariorumMCPTests` 549/100 with 3 issues, all the MCP socket harness (`MCPHarnessTimeLimitTests`, `MCPReaderAfterCloseTests`, `MCPDiscoverProbeServerTests`) — re-run ALONE (`swift test --skip-build --filter …`): 10 tests / 3 suites PASSED. Mac `build-for-testing` TEST BUILD SUCCEEDED at 1dd4e3233, no warning in a touched file. Self-assessment below |
 
 #### Batch B — THE TRACE (read at the code, this tree)
 
@@ -1279,6 +1280,156 @@ key; overflow ⇒ the ruled cadence; Reduce Motion ⇒ still).
 
 **ASKED OF THE ORCHESTRATOR (one ruling unblocks B1–B3):** Q-B1; P-828-1 (i) and (ii); Q-B2; P-828-2's
 cadence and its two edges.
+
+#### Batch B — IMPLEMENTER SELF-ASSESSMENT (Opus, 2026-11-05)
+
+**Not done (first line, by the brief):** no app-suite RUN, no red-on-old revert RUN (R-B1, R-B2,
+R-B2b, R-B3, the mutation M-B4), no walk, no Debug launch — all stage-gated, all the orchestrator's
+(listed exactly below). No canon, QUESTIONS or shared ledger touched (drafts below). No `Sync/`,
+custody, keychain or editor-seam file (`EditorTextView`/`PaneTextView` are only NAMED, as classes the
+chord passes on to). **No `App/Variorum/Shared/` file touched — no phone suites owed by this batch.**
+
+**VX-824 — the mechanism (traced at B0).** Outside a note the View menu's mode items are grey
+(`.switchMode`: `ctx.mode != nil`) and a grey menu item swallows its chord silently, so ⌘1–⌘9 did
+nothing there. **The build** (her shape (a); the fork's Q-B1 (a), P-828-1): one pointer per piece —
+- `App/Variorum/Variorum/Workspace/WingNumberKeys.swift` (NEW) — the key (exactly ⌘ + one digit 1–9),
+  the pure rule (the registry's gate × the keyboard holder × the switcher's order), the holder classes
+  (`EditorTextView`, `PaneTextView`, `CommentNSTextView` = a writing surface; the capture box, fields,
+  nothing = not), and `WingNumberKeyMonitor` (the `BrowserNavKeyMonitor` shape — a local monitor sees the
+  key before the menu; consumed only when it is the chord's).
+- `Registry/Capability.swift` + `Registry/CapabilityRegistry.swift` — `.goToWing` ("Go to Wing",
+  `.surface`, app scope, alternate "⌘1–9", availability = the mode row's mirror; the collision sweep is at
+  the declaration).
+- `RootView.swift` — the monitor mounted beside VX-560's; `wingNumberKey` (static: what the key runs);
+  `surfaceCapabilities` gains `.goToWing`.
+- `Core/Views/WingsModel.swift` — `answer(_:)`; `WingCopy.noWingAtNumber` (P-828-1 (i), the drafts verbatim).
+- `Registry/ShortcutCatalog.swift` — the ⌘/ helper's `.alternates([.goToWing])` row; the ⌘L row's words
+  name the landing and the label's new place.
+
+**VX-833 (1) — the mechanism (traced at B0).** Every switcher door switched `WingState.currentID` and
+nothing else — the focused pane kept what it showed. **The build:** ONE deliberate road —
+`WingsModel.goTo(_:saying:)` (switch when another; "Now in …" where said; then `landInBookcase`), wired
+per window by `RootView.wireWingLanding` to the shell's one request road (`pendingSelection = .shelf`).
+`switchSaying` (⌘L's sheet), `cycle` (the masthead word) and the ⌘digit chord ride it said; the ▾ list's
+picker rides it silent (`WingSwitcherMenu.swift`). `WingSwitcherBrain` commits a deliberate pick of the
+CURRENT row (⏎, a click, a held-⌘ release on it — P-828-1 (ii)(a)); Esc stays the sheet monitor's plain
+close. Untouched by construction (they never call `goTo`): `WingFollow`, `mint`, `delete`,
+`WingState.revalidate`, Compare's go-to, `MCPNavigator`.
+
+**VX-833 (2) + VX-844 — the mechanism (traced at B0).** The label carried `.frame(maxWidth: 160,
+alignment: .leading)` + `.truncationMode(.tail)`: a width blind to the column (the toolbar's leading
+items are the window's), so it floated after New Note, crossed the line past ≈ 58 pt of words at 240, and
+tail-truncated past 160. **The build** — `Core/Views/WingToolbarLabel.swift` (NEW): `WingLabelSpace` (the
+line − 8 pt air − the item's edge; < 24 pt ⇒ not drawn; sidebar hidden ⇒ the old place and cap),
+`WingMarqueePlan` (the ruled ticker; still — no loop — while it fits; Reduce Motion still),
+`WingMarquee` (the view: hard clips, one accessibility label, a cancellable `.task` loop that returns at
+once for a still plan), `WingLabelPlacementView` (right-aligned in exactly its space), `WingToolbarSlot`
+(its own read of the shell's `shellSidebarWidth`, so a seam drag re-lays the label alone) and
+`WindowLeadingEdgeProbe` (the item's edge in window coordinates; re-read on layout, arrival, resize and
+full screen; never a hit). `RootView`'s third `.navigation` item rides the slot and the marquee.
+
+**Pins — and exactly what makes each red (the orchestrator's revert window).** Pre-revert copies are
+not needed: every revert is an UNCOMMITTED edit on the committed tree at the batch's last commit,
+restored by `git checkout -- <file>` (git is the honest mid-revert state — batch A's precedent).
+| Pin (suite TYPE · test) | Red on old because | Behavioral revert that shows it |
+|---|---|---|
+| `WingNumberKeysTests` (13, NEW) | new act — compile-red on old (no `.goToWing`, no `WingNumberKeys`) | **R-B1:** in `Workspace/WingNumberKeys.swift`, make `decide(…)`'s body `return .passOn` (the old silent swallow). Expect RED: `outsideANoteTheKeysGoToTheWingInSwitcherOrder` (3), `aNumberNoWingAnswersIsARefusal` (3), `onTheBookcaseWithTheCaptureBoxHoldingTheKeysTheChordGoes` (4), `aNumberNoWingAnswersSpeaksAndMovesNothing` (3), `theCurrentWingsNumberLandsSilentlyAndShiftIsNotTheChord` (2 — consumed, `.shelf`). GREEN: the key, both in-note tests, the writing-surface test, the words, the holder classes, the declaration, the book-live-note road |
+| `WingDeliberateLandingTests` (6, NEW) | no landing exists on old (no `goTo`) | **R-B2:** in `Core/Views/WingsModel.swift`, comment out `landInBookcase()` in `goTo`. Expect RED: the `.shelf` line in `theSaidRoad…`, `theMenuListsPick…`, `theMastheadCycleLands`, `theSheetsCommitLands…` (2 lines); also `WingNumberKeysTests`' two `.shelf` lines. GREEN: `theFollowAndTheOtherSwitchesNeverLand`, `theWindowWiresItsLanding` and every switch/receipt line |
+| `WingSwitcherChordTests` (4 RE-POINTED lines: `theFieldsUnchangedWriteBackIsNotTyping`, `heldCommandLCyclesAndReleaseCommits`, `returnOnTheCurrentWingCommitsItAndArrowsNeverArmRelease`, `aRowClickCommitsTheCurrentRowToo`) | the old brain answered `.close` for the current row — each re-pointed line is red on old by construction | **R-B2b:** in `Core/Views/WingSwitcherBrain.swift` restore `pick` → `id == currentID ? .close : .commit(id)` and `commit()` → `highlight == currentID ? .close : .commit(highlight)`. Expect RED: those 4 lines + `WingDeliberateLandingTests.theSheetsCommitLandsTheCurrentWingIncluded`'s ⏎-on-current line |
+| `WingToolbarLabelTests` · `aShortNameStandsFlushRightInItsSpace` | the old label was leading at its natural width | **R-B3:** in `Core/Views/WingToolbarLabel.swift`, `WingLabelPlacementView.body`'s `.column(let width)` arm → just `content(words)` (no Spacer, no frame — the old leading shape). Expect RED: the item-width line (≈ 55 ≠ 63) and the flush-trailing line; the premise line green |
+| `WingToolbarLabelTests` · `aLongNameKeepsTheSpaceAndClipsInsideIt`, `belowTheFloorNothingIsDrawn`, the pure space/plan pins, the source pin | new seams — compile-red on old; GREEN under R-B3 (the long name's width comes from the marquee's clamp — a guard, stated) | **M-B4 (mutation, the marquee's teeth):** in `WingMarqueePlan.plan`, drop `words > viewport + tolerance` from the guard. Expect RED: `aNameThatFitsHasNoLoop` (the fits/exact/noise lines) — the "no clock while it fits" state |
+| `ShellChromeTests` · `theSidebarToggleIsDeclaredOnItsTwoDoors` | its exact surface list (RE-POINTED, the VX-644 line's class) | — |
+
+**PENDING (the orchestrator's stage window).**
+1. Mac suites, by TYPE (a zsh array): `WingNumberKeysTests` · `WingDeliberateLandingTests` ·
+   `WingToolbarLabelTests` · `WingSwitcherChordTests` · `ShellChromeTests` · `CapabilityRegistryTests` ·
+   `ShortcutCatalogTests` · `HelperCurrencyTests` · `FreshSidebarWidthTests` · `QuickEntryWingLabelTests` ·
+   `WingChordsAndLabelDoorTests` · `WingSwitcherTests` · `WingFollowTests` · `WingPaletteDoorsTests` ·
+   `ChromeLineLimitTests` · `BrowserNavKeysTests` · `OpenStripMenuTests` · and RootView mounts the new
+   slot/probe/monitor in every shell pin — at least `ShellLandingTests` · `QuickEntryLaunchFocusTests`
+   (VX-332's caret: the slot must never take focus) · `StatusToastPlacementTests` ·
+   `DebugOracleTwoWindowTests` · `WindowsTests` · `PaneSplitTests` (and `TourTests` if the window allows).
+2. Reverts R-B1, R-B2, R-B2b, R-B3 and M-B4 (above), each one suite (+ the named neighbours), then
+   restore.
+3. The walk (dev store, BOTH voices; a second and third wing, one named long — e.g. "walk wing" in
+   Terminal and a much longer one):
+   (a) ⌘digit — on the Bookcase with the caret in quick entry ⌘2 → wing 2's Bookcase + "Now in …"; then
+   ⌘3 at once (the chained press); ⌘1 → Home; ⌘9 → the refusal; the Library with its search field
+   focused ⌘2 → switches; in a note ⌘2 → Takes, no wing change; a book's Outline with the caret in a live
+   note ⌘2 → nothing; a Snippets editor ⌘2 → nothing; ⌘/ shows the row and "cmd 3" finds both.
+   (b) VX-833 — from the Library: ⌘L pick → that wing's Bookcase; ⌘L ⏎ on the current wing → its
+   Bookcase; the toolbar label → sheet → a row → Bookcase; the Library masthead ▾ list → Bookcase,
+   silent; the Library masthead word's cycle → Bookcase + receipt (the re-aim regression, for her eye);
+   a cross-wing note from the Open list → the follow switches and the note STAYS (no landing).
+   (c) VX-833 (2) / VX-844 — the label right-aligned at the column line with ≈ 8 pt air; drag the seam
+   wider / narrower → it follows; narrow below ≈ 201 pt → it disappears; ⌃⌘S → the old place after New
+   Note; full screen → still right-aligned; the long name TICKS (2.5-s rest, steady leftward, seamless
+   wrap), never crosses the line, no ellipsis; rename it short → still; the first frame after a switch
+   shows no left-aligned flash (flag (e)); Reduce Motion on (optional — a global setting) → still.
+
+**PROVISIONAL (QUESTIONS entries at the merge moment).** Q-B1 (a) — her "text input" family read as
+"a writing surface" (flagged for her morning); P-828-1 (i) the refusal words, (ii) the identity switch
+lands on both roads; Q-B2 (a) every switcher door lands — the cycling word's re-aim regression is the
+cheap morning redirect; P-828-2 (a) the ticker's numbers (2.5 s · 25 pt/s · 24 pt), Reduce Motion
+still, the 24-pt floor and the hidden-sidebar place.
+
+**For the orchestrator's canon pass (DRAFTED — not applied; the two-file rule).**
+- SurfaceContracts "The app", keyboard family — ADD: "⌘1–⌘9 go to wing N in the switcher's order (Home
+  first) and land on its Bookcase while no note holds the keys — inside a note they stay its mode row, a
+  writing surface holding the keyboard (a book's live note, a snippet, a comment) passes them on, and a
+  number no wing answers says so (VX-824, `notes/plans/fixes/vx-828-editor-shell-qol.md`)".
+- SurfaceContracts "The app", the wing label sentence — REPLACE "sits beside the window toolbar's New
+  Note button" with: "stands right-aligned at the top of the sidebar's column, never past its line
+  (not drawn below 24 pt of room; with the sidebar hidden it keeps its place after New Note), and a name
+  longer than its room scrolls within it like a car radio's display — never an ellipsis, never moving
+  while it fits or under Reduce Motion (VX-833, VX-844, P-828-2)".
+- SurfaceContracts "The Bookcase and books", the wing switcher bullet — ADD: "Every deliberate switch —
+  ⌘L's sheet (its current wing included), the masthead ▾ list, the masthead word's cycle and ⌘1–⌘9 —
+  lands in that wing's Bookcase; the cross-wing follow never does (VX-833)".
+- AppSpec §12 "Keyboard family" — ADD "⌘1–⌘9 go to a wing outside a note (VX-824)".
+- AppSpecRecord: the dated entry + the narrative under §12 (keyboard family; the wing switcher; the
+  toolbar label). MOBILE PARITY: nothing mobile-visible (Mac chrome; the phone has no wing face).
+
+**Self-assessment.** CONFIDENT: the routing rule and its three contexts (pure + the whole road with real
+NSEvents in a real window through the exact static the monitor runs); the one deliberate road (every
+switcher door through `goTo`; the never-lands list pinned); the space rule and the plan (pure, exact).
+LESS CERTAIN, for the walk: the probe's reading inside a toolbar item (window coordinates via
+`convert(_:to: nil)` — standard, but the toolbar's hosting is SwiftUI's), and the ticker's look.
+FLAGS FOR THE COLD REVIEWER:
+(a) the writing-surface test is by CLASS (`EditorTextView`, `PaneTextView`, `CommentNSTextView`) — a
+future prose surface class would take the chord while typing until added there;
+(b) the digit is read from `charactersIgnoringModifiers` (the menu's own key equivalents are
+character-based); a layout whose unshifted digit row yields other characters (AZERTY) does not reach
+the chord — untested;
+(c) ⏎ straight after ⌘L now LANDS on the current wing's Bookcase (D-W3's "Return closes" became
+"Return lands" — ruled, P-828-1 (ii)(a)); `WingSwitcherBrain.Outcome.close` is no longer produced by the
+brain (kept; `apply` honours it);
+(d) the probe re-reads on layout, arrival, resize and full screen only — a toolbar re-layout with none of
+those would leave a stale edge until the next; reports are thresholded at 0.5 pt (no feedback loop: the
+item's width never moves its own leading edge);
+(e) before the words are measured the marquee's viewport is the max width for one pass — a possible
+one-frame left-aligned flash on a switch (the walk looks);
+(f) the loop's reset after `duration` may beat the animation's presentation end by milliseconds — a
+sub-point jump, invisible by the seamless copy's construction;
+(g) two readers of `shellSidebarWidth` (the shell, the slot) must keep one default — both read
+`ShellSplit.idealWidth`;
+(h) `FreshSidebarWidthTests`' captured-ink oracle now describes the ITEM's leading edge, not the words'
+start (the words now end at line − air − inset by construction): still a valid upper bound, its premise
+strings kept on purpose; its prose is partly stale (a later doc touch);
+(i) with one wing ⌘1 outside a note is a go-to-Bookcase chord (accepted in the ruling);
+(j) the ⌘L helper row's words changed ("at the top of the sidebar"; "every switch lands on that wing's
+Bookcase") — her copy eye.
+
+**Files touched (the whole batch):** `App/Variorum/Variorum/Workspace/WingNumberKeys.swift` (new) ·
+`App/Variorum/Variorum/Core/Views/WingToolbarLabel.swift` (new) ·
+`App/Variorum/Variorum/Core/Views/WingsModel.swift` · `App/Variorum/Variorum/Core/Views/WingSwitcherBrain.swift` ·
+`App/Variorum/Variorum/Core/Views/WingSwitcherMenu.swift` · `App/Variorum/Variorum/Core/Views/WingSwitcherSheet.swift` ·
+`App/Variorum/Variorum/Registry/Capability.swift` · `App/Variorum/Variorum/Registry/CapabilityRegistry.swift` ·
+`App/Variorum/Variorum/Registry/ShortcutCatalog.swift` · `App/Variorum/Variorum/RootView.swift` ·
+`App/Variorum/VariorumTests/WingNumberKeysTests.swift` (new) · `App/Variorum/VariorumTests/WingDeliberateLandingTests.swift` (new) ·
+`App/Variorum/VariorumTests/WingToolbarLabelTests.swift` (new) · `App/Variorum/VariorumTests/WingSwitcherChordTests.swift` ·
+`App/Variorum/VariorumTests/ShellChromeTests.swift` · this record. Commits: ec53930ef (B0) · 569f2fcca (B2) ·
+76db05116 (B1) · 1dd4e3233 (B3) · this commit (B4).
 
 ### Batch E — spellcheck & Settings ▸ Tags: VX-798 + VX-838 + VX-840
 
