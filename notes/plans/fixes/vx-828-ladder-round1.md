@@ -1,0 +1,186 @@
+# VX-828 — Ladder round 1 (cold review, Fable, 2026-11-05)
+
+**Scope reviewed:** the run's whole diff, `git diff 8ffdd8278...HEAD` (60 files, +9,731/−186) —
+batches A (VX-806/VX-655, editor seam), D (VX-800/VX-636), C (VX-823), B (VX-824/833/844),
+E (VX-798/838/840) — against the run record's rulings, AppSpec/OverallModel invariants,
+SurfaceContracts' touched sections, QUESTIONS #92/#94, and the purge memo's S2 bend. The vendored
+`Sources/VariorumCore/Queries/TagUsageQueries.swift` was reviewed as a CONSUMER contract only
+(vx-809's ladder owns its internals); its byte-identity to the owner's mint was verified
+(blob `90472b916` on both `HEAD` and `origin/vx-809-mcp-door-ergonomics`). Core suites
+`BoundarySnappingTests` · `EmptyBlockSweepTests` · `UnusedTagsTests` re-run headless by this
+reviewer: 65/65 green. No `Sync/`, custody or keychain file in the diff; canon and QUESTIONS
+untouched (drafts live in the run record — the two-file rule held).
+
+**Verdict: no BLOCKER, no MAJOR.** Two MINOR, four NIT.
+
+---
+
+## Findings
+
+**[MINOR] · App/Variorum/VariorumTests/LibraryReturnRoadTests.swift:23, :155 · The road pin's own
+text cites R-C4 as its red-on-old — which window 2 proved FALSE — and the fix's mechanism has no
+automated pin at all (the run record's own flag for this ladder).**
+Evidence: the file's header says "RED under revert R-C4 (the landing gated on a reading again…)"
+and line 155 repeats it — but the record's "Batch C — WINDOW 2, R-C4 HOLLOW + R-C4b NAMED" section
+records that BOTH R-C4 and R-C4b ran GREEN under revert on both road arguments (the hosted RootView
+mount still produces a scroll reading, so the pin never reproduces the live no-reading condition),
+and rules that the pin "must NOT be cited as this fix's red-on-old" — the fix's evidence is the
+cross-window live pair. A later round or session reading the test file will cite R-C4 as the pin's
+red and be wrong; and today a change that re-gates `landIfReady` on `memory.window.isMeasured`
+(exactly the pre-fix rule) passes every suite — the verified fix has no regression net for its own
+mechanism.
+Fix (two parts, one commit): (a) re-word the header and the line-155 doc to say the pin is a
+shell-road regression net whose red-on-old is the cross-window behavioral pair (point at the
+record's window-2 section). (b) Make the pin mechanism-honest with the instrument that already
+exists: install the `LibraryPlaceTrace` sink in the pin (it already prints the trace on failure)
+and assert the return's `land(<trigger>)` line's trigger is never `"reading"` — the fix lands from
+`appear`/`height`/`relisted`, while under R-C4 the hosted road's landing fires from `"reading"`,
+so the amended assertion is red under R-C4 by construction and green on the fix.
+Pin: the amended trigger assertion, shown red under R-C4 (uncommitted edit, restored), green on
+the committed tree.
+
+**[MINOR] · notes/plans/fixes/vx-828-editor-shell-qol.md:65–67, 71–73 (THE LEDGER) · The ledger
+rows for batches B and E still read NOT-STARTED while both batches are fully built and committed.**
+Evidence: rows 3–5 (VX-824/833/844) and 9–11 (VX-798/838/840) say NOT-STARTED; the Batch B LIVE
+STATUS shows B0–B4 DONE (ec53930ef…1dd4e3233, window part 1 ran 201 tests/36 suites with the three
+reds traced and fixed at 8b8a2b31a) and Batch E shows E0–E5 DONE (c9aba7cb1…9a49f7350). The record's
+own head says "a resuming session reads this file whole" — the first thing it reads contradicts the
+batches' sections, and the resiliency protocol's row-flip rule binds from the first commit.
+Fix: flip the six rows to BUILT — suites/reverts/walk PENDING the stage window (batch B's row
+naming the part-1 run already made). No pin (record hygiene).
+
+**[NIT] · Sources/VariorumCore/Domain/BoundarySnapping.swift:189 (+ the record's P-828-6
+neighborhood) · The punctuation-adjacent caret's behavior change is real and unnamed in the
+record's PROVISIONAL list.**
+Evidence: `wordStart` treats any non-whitespace run as the word (the scanners' own notion, stated
+in the doc), so a caret between a word and its trailing punctuation — `"alpha beta|, gamma"` —
+is "inside a word" and the whole run `beta,` rides down; pre-VX-806 the settle cut at the NEXT
+word's start (`gamma`), keeping `beta,` behind. Within the ruling's letter, one word-notion by
+design — but it is a visible divergence at a caret ordinary language wouldn't call "the middle of
+a word", and neither the self-assessment's P-828-6 entry nor the canon draft names it for her eye.
+Fix: one sentence in the record's P-828-6/QUESTIONS draft naming the punctuation-adjacent caret.
+No pin (documentation; the behavior itself is the ruled one under the stated word notion).
+
+**[NIT] · App/Variorum/Shared/RecoveryCopy.swift:872 (`deleteEmptyBlocksNothingLeft`) · The race
+refusal's sentence over-claims.**
+Evidence: "None of those empty blocks are in the Trash any more — nothing was deleted." also
+covers the race where a block is still IN the Trash but stopped qualifying (a sync apply wording
+a take or landing a comment in the confirm's pause — the op's `qualifying` re-read, not the
+listing's). The words are PROVISIONAL P-828-10 and hers to tune.
+Fix: carry this case to her wording pass at the handoff (e.g. "…aren't empty-with-no-history any
+more…"). No pin (copy).
+
+**[NIT · SPECULATIVE] · App/Variorum/Variorum/Core/Views/WingSwitcherMenu.swift:175–177 · The
+▾ list's pick of the CURRENT wing may be a dead door under P-828-1 (ii)(a).**
+Evidence: the ruling makes a deliberate pick of the current row land in its Bookcase on every
+switcher door, and the brain/sheet/chord now honor it — but the ▾ list's door is a SwiftUI
+`Picker` binding (`set: { wings.goTo($0, saying: false) }`), and a Picker's setter firing when the
+already-selected row is re-picked is framework behavior I cannot trace in this repo; if it does
+not fire, this one door silently does nothing on the identity pick. SPECULATIVE accordingly — a
+walk observation, not a traced bug.
+Fix: add "▾ list, re-pick the CURRENT wing → its Bookcase" as a micro-leg to batch B's pending
+walk; if dead, either give the current row a Button face or record the exception against the
+ruling. No headless pin possible (framework event delivery).
+
+**[NIT] · App/Variorum/VariorumTests/QuickEntryWingLabelTests.swift:85 · The 2,400-char source
+window is one comment away from a false red, and batch B already paid it once.**
+Evidence: the window-part-1 red #2 was this pin misfiring because a 5-line comment above the
+toolbar item pushed `.lineLimit`/`.help`/`.sharedBackgroundVisibility` past the window; the fix
+DELETED the source comment to appease the pin (8b8a2b31a), and the record itself says "about 80
+chars of headroom now; a later touch there should widen it". Adjusting production source to fit a
+brittle test window is backwards.
+Fix: widen the window (or anchor the scan to the item's closing brace) in a later touch — the
+record already owes it; filing it here so it doesn't evaporate. No pin (test hygiene).
+
+---
+
+## Verification debt (not findings — named so the ladder's close is not misread)
+
+The record is honest about all of these; round 2 / the merge gate must see them done, and this
+round's clean bill does NOT cover them:
+- **Batch B:** the app suites' full run (part 1 ran 33/36 green + 3 traced-and-fixed; the three
+  fixed suites' re-run owed), reverts R-B1 / R-B2 / R-B2b / R-B3 / M-B4, and the walk (chords,
+  landings, the marquee in both voices).
+- **Batch E:** the app suites (`SpellingDoorTests` · `SettingsTagsWingFollowTests` ·
+  `TagSweepTests` + neighbours), reverts R-E1 / R-E2 (/R-E3), and walk legs (1)–(8) — including
+  the Spelling panel's Change under the DEBUG identity oracle (flag E(a)).
+- **Batches A + D:** the phone suites at the merge gate (Shared/ changed).
+- **Batch C:** the deferred walk legs at the merge gate (sidebar leave, Cards, live search sheet,
+  day filter, resets, deleted-row survivor, two-pane split).
+- The merge gate's standing items: main ≥ be17fb632 merged in first; `TagUsageQueriesTests` +
+  `CapabilityRegistryTests` + `ShellChromeTests` re-run by whoever merges second.
+
+---
+
+## Clean bill (checked and found solid)
+
+- **VX-806 (editor seam).** `BoundarySnapping.wordStart` is correct and total: strictly-interior,
+  grapheme-aligned, non-whitespace on both sides; the answer is always a member of S4-22's legal
+  set and strictly BEFORE the caret (every interior boundary has whitespace before it, so the word
+  always rides down whole); the blank-prefix → start-arm fall-through matches the scanner's
+  leading-run-starts-no-word design. `TypedReturn.act`'s arm ordering preserved every prior road
+  (list door first, ⇧⏎, chip off, selections, tail, whitespace arms — guard pins green on both
+  sides); `plan(divideAtExactCut:)` shares `frontRefusal` byte-identically with the menu entry and
+  takes only a legal interior cut (else the menu's settle); the fanned road verified end-to-end:
+  `.divideW` → `applyStructural(ceremony: false)` → `runKeepOnTopDivide(activeCut:)` with the
+  exact cut as the displayed take's seed. The core pins' exact values re-run green by this
+  reviewer. Re-pointed pins (#92(b) supersession; `NestedListDoorTests`) all carry justified,
+  accurate annotations.
+- **VX-655.** The claim no longer mutates; it decides against the unretracted surface (trailing
+  whitespace is the end — the same `.emptyBlock(.below)`); the act names its block so a
+  claim-to-act click can never point the retraction elsewhere; `listContinuationRetraction` is a
+  pure read with the full guard set; the op-body `autosave` refuses first on a sealed/locked/
+  archived take (verified at `editableVariant`, `Operations+Variant.swift:545` — the
+  partial-failure window is behavior-par with the old road and spoken); the order pin holds the
+  writer and asserts the claim-turn, mid-flight and landed bytes exactly; #94's undo story is
+  pinned whole (text stack cleared, one "New Block" entry, the R2-3 double-registration gap closed
+  by subtraction).
+- **VX-800.** The predicate's six readings match R-828-1 and the fork's ruling exactly (any-row
+  counts proven load-bearing by mutation probes M1–M3); the candidate set reuses `Queries.trash`'s
+  block arm (window, wing fence, intent fence, cascade-victim exclusion inherited, never twinned);
+  the op is one transaction, re-reads inside it, takes confirm ∩ still-qualifying, mints intents
+  only through `mintPurgeIntents` — S2's one bend honored, no raw DELETE, no undo entry, no
+  touch/churn; the empty answer writes nothing (pinned incl. the outbox). The door is
+  registry-declared, drawn only at count > 0 (P-2), confirmed every time; the pick belt and the
+  notes-only `forgetLocalMemories` asymmetry are both right (blocks carry no per-note memories).
+  The held observation re-fetches on a reader (VX-670's discipline) with a `now` posture identical
+  to the listing's own.
+- **VX-636.** The mechanism is real (overlay claims no layout room) and the fix is the laid-out
+  band with ArchivedView's precedence order, `library.lastError` included as before; the `.quiet`
+  arm follows the Pool's seam-hosting precedent; the DEBUG probe and the ruled `model:` seam are
+  clean.
+- **VX-823.** The pure brain's capture/resolve/anchorY/isSettled/depth are correct (fallback order
+  below-first at a tie; the opened row deliberately not an anchor per the ruling; `Order` is
+  lookups, never a listing copy — P1); the model's drop roads match the ruling (new question, wing
+  switch; mode switch flagged PROVISIONAL in the record as it must be); per-pane memory reached;
+  the landing reads nothing and the re-ask is depth-bounded (Q5 as ruled); no `.scrollPosition`
+  binding exists anywhere in the Library (the 18l-c U8 trap genuinely designed around); teardown
+  cannot note a place (the liveness guard); `endRestore` always runs (no stuck-restoring road);
+  the hold is budgeted and her hand ends it. Every row-open door routes through `rowOpened` with
+  the right `marks:` value (cards/scraps/block lines markless).
+- **VX-824/833/844.** The chord classifier is exact (⌘ alone, one digit, keyDown only); the
+  writing-surface gate matches the Q-B1 (a) ruling and the registry availability mirrors the mode
+  row; refusal words as drafted; `goTo` is the ONE deliberate road and the never-lands list
+  (follow, mint, delete, revalidate, Compare, MCP) is untouched by construction (none call it);
+  the brain's `.commit(current)` re-points are justified and annotated; the label's space rule,
+  placement, probe and marquee honor P-8 (no clock while it fits; cancellable task; Reduce Motion
+  still; hard clips, no ellipsis); the two edges (24-pt floor, hidden sidebar) are as ruled.
+- **VX-798.** The one-shot property is structural (no selector writes a checking flag; the three
+  AppKit toggles deliberately absent — the TEXTKIT2 §3 pairing protected); responder-chain
+  dispatch with no explicit `to:`; the refusal speaks on P-2; the collision sweep is recorded at
+  the declaration and pinned as data; the menu group sits after Find with the two items only.
+- **VX-838/VX-840.** The wing-follow fix is RootView's own idiom with the name read in the SAME
+  observation as the list (the header can never name another wing); `deleteUnusedTags` is one
+  write on one stamp through `deleteTag`'s own subtree body with the in-write worn + wholly-
+  confirmed guards (each proven load-bearing by M-E1…M-E3), one "Delete Unused Tags" entry on
+  VX-247's machinery gaining only a label; `unusedTags`' downward-closure optimization is sound
+  (worn is subtree-honest, pinned tag-by-tag) and the column-narrowed region covers every table
+  the vendored brain's `.library` arm reads (verified against the brain's SQL: tag, post_tag,
+  block_tag, container/block/wing at (id, deleted_at) only); the linked boxes encode exactly
+  deleteTag's reality and the act deletes exactly the checked set.
+- **Process.** Pin-before-fix held per member (behavioral reverts named before running, mutation
+  probes announced before run, the one hollow pin RECORDED as hollow rather than cited); commits
+  are per piece with no `Co-Authored-By`/`Claude-Session` trailers; the two-file rule held (canon
+  and QUESTIONS untouched; all deltas drafted in the record); no `Sync/`, custody or keychain
+  file anywhere in the diff; the vendored seam is byte-identical to its owner's mint with
+  provenance in the commit.
