@@ -1,6 +1,7 @@
 # VX-809 handoff — MCP door ergonomics (the agent-side asks)
 
 Run record: `notes/plans/fixes/vx-809-mcp-door-ergonomics.md` (FOR A LATER READER up top). Ladder: `notes/plans/fixes/vx-809-ladder-round1.md` (PASS at round 1). The provisionals: QUESTIONS **#262**. **MERGED 2026-11-05 — PR #223, merge `fc82c88a8`.**
+**WALKED 2026-11-05 (the morning round)** — every checklist item ruled; the dispositions are QUESTIONS #262's Status; born at the walkthrough VX-860 · VX-874 · VX-875; the residual ledger `notes/mcp-invisibility-residuals.md`.
 
 ## YOUR MORNING CHECKLIST (the bundle, lead line first)
 
