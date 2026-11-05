@@ -707,6 +707,87 @@ struct JournalPutBackConvergenceTests {
     }
 }
 
+// MARK: - R4: the old client's restore (the ruling's amendment 7)
+
+/// An OLDER build's Trash restore of the deleted Journal, as its row writes
+/// land: the book and its exact-stamp memberships revived, the profile left
+/// as it was — so the row goes LIVE still wearing the deleted-Journal mark
+/// (that build has no normalization). Ordinary writes: the outbox triggers
+/// capture them exactly as that build's restore would.
+private func restoreAsAnOlderBuildWould(_ client: SyncClient, readingID: String) throws {
+    try client.with { _, db in
+        try db.write { db in
+            let stamp = try String.fetchOne(
+                db, sql: "SELECT deleted_at FROM reading WHERE id = ?", arguments: [readingID])
+            try db.execute(
+                sql: "UPDATE reading SET deleted_at = NULL, updated_at = ? WHERE id = ?",
+                arguments: ["2026-11-05T09:00:00.000Z", readingID])
+            try db.execute(
+                sql: "UPDATE reading_post SET deleted_at = NULL WHERE reading_id = ? AND deleted_at = ?",
+                arguments: [readingID, stamp])
+        }
+    }
+}
+
+@Suite("VX-436 — R4: a live row wearing the mark (an older build's restore) demotes, never designates")
+struct JournalOldClientRestoreTests {
+    /// R4, beside a STANDING Journal: the old client's live sentinel row
+    /// arrives; the receiving device demotes it to the trait (explicit
+    /// outbox row, positive activity), and every device converges on ONE live
+    /// Journal — the standing one. RED ON OLD (the repair reverted): the row
+    /// stayed live wearing the mark everywhere.
+    @Test func r4a_besideAStandingJournalTheLiveMarkDemotes() async throws {
+        let (a, b, server) = try furniturePair()
+        let old = try file(a, day: "2026-11-01")
+        try a.with { ops, _ in try ops.deleteReading(old.bookID) }
+        let fresh = try file(a, day: "2026-11-02")
+        try await assertAllConverged([a, b], server: server)
+
+        try restoreAsAnOlderBuildWould(b, readingID: old.bookID)
+        #expect(try profileOf(b, old.bookID) == Queries.dailyJournalDeletedProfile, "the old build's shape")
+        try await b.push()
+        let pulled = try await a.pull()
+        #expect(pulled.repairs > 0, "positive activity: the demotion wrote")
+        #expect(try profileOf(a, old.bookID) == Queries.journalTraitProfile)
+        #expect(try a.outboxContains("reading", old.bookID), "the demotion pushes")
+        #expect(try liveDailyBooks(a) == [fresh.bookID])
+
+        try await assertAllConverged([a, b], server: server)
+        for client in [a, b] {
+            #expect(try profileOf(client, old.bookID) == Queries.journalTraitProfile)
+            #expect(try liveDailyBooks(client) == [fresh.bookID], "one Journal — the standing one")
+            #expect(try isLiveMember(client, old.entryID, of: old.bookID), "it came back whole, as a trait book")
+            #expect(try !isLiveMember(client, old.entryID, of: fresh.bookID), "no backfill")
+        }
+    }
+
+    /// R4, with NONE standing: the live sentinel row still DEMOTES — never
+    /// re-designated (the amendment's refusal; the consequence, bounded to
+    /// the mixed window, bundled under P-805-B2: her next ⌘J mints fresh).
+    @Test func r4b_withNoneStandingTheLiveMarkStillOnlyDemotes() async throws {
+        let (a, b, server) = try furniturePair()
+        let old = try file(a, day: "2026-11-01")
+        try a.with { ops, _ in try ops.deleteReading(old.bookID) }
+        try await assertAllConverged([a, b], server: server)
+
+        try restoreAsAnOlderBuildWould(b, readingID: old.bookID)
+        try await b.push()
+        let pulled = try await a.pull()
+        #expect(pulled.repairs > 0)
+        #expect(try profileOf(a, old.bookID) == Queries.journalTraitProfile)
+        #expect(try a.outboxContains("reading", old.bookID))
+        #expect(try !a.outboxContains("setting", "daily_journal_book"), "never re-designated")
+
+        try await assertAllConverged([a, b], server: server)
+        for client in [a, b] {
+            #expect(try profileOf(client, old.bookID) == Queries.journalTraitProfile)
+            #expect(try liveDailyBooks(client).isEmpty, "no Journal stands — the trait book is not it")
+        }
+        let next = try file(a, day: "2026-11-03")
+        #expect(next.bookID != old.bookID, "her next ⌘J mints fresh")
+    }
+}
+
 // MARK: - DO: the drain order and its guard, pure
 
 @Suite("VX-436 — DO: the deleted-Journal tombstone drains first, in its own call")

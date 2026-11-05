@@ -245,6 +245,21 @@ extension SyncEngine {
             touched.inlineRepairs += try convergeDailyDesignation(
                 db, to: keeperID, retiring: resolved.rowID)
         }
+        // VX-436 — the ruling's AMENDMENT 7 (the mixed-fleet residue): a
+        // LIVE arriving `reading` row wearing the deleted-Journal mark — an
+        // OLDER build's Trash restore, which has no normalization — DEMOTES
+        // to the journal TRAIT. Demote-only, NEVER re-designate (a
+        // conditional re-designation could meet a same-batch Journal and hand
+        // the pair to the keeper — a backfill by another door). Only the
+        // profile moves (the row's own `updated_at` kept), so every device's
+        // demotion is byte-identical; idempotent (a demoted row wears no
+        // mark); enqueued explicitly (apply mode).
+        if resolved.table == "reading", !resolved.isTombstoned,
+           resolved.columns["profile"] == .text(Queries.dailyJournalDeletedProfile) {
+            resolved.columns["profile"] = .text(Queries.journalTraitProfile)
+            try enqueueExplicitly(db, table: resolved.table, rowID: resolved.rowID)
+            touched.inlineRepairs += 1
+        }
         // VX-435 — the cross-wing mend's occasion (b): a live `reading`
         // landing whose wing pointer differs from the local row's (or that
         // is new here) is recorded with the wing it stood in BEFORE — read
