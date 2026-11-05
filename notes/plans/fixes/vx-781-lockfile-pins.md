@@ -123,6 +123,42 @@ only.
   (`~/Library/Developer/Xcode/DerivedData/Variorum-dpoup…`, 20:53, fileSystem root
   `variorum-vx-779`) resolved the same committed set.
 
+### RELEASE-EXPOSURE — did 1.0 (10632) or 1.0.1 (10682) ship floated pins? **NO — both shipped the committed set** (evidence, decisive, read-only)
+
+1. **No upgraded set was ever committed, on any ref.** `git log --all` over both lockfiles: the
+   workspace lockfile last changed at 2f6a92c09 (2026-10-09), the root one at 147637736
+   (2026-10-09); nothing since, on any local or remote-tracking ref. Both release commits
+   (1.0 = 53493f1ca, 1.0.1 = f2477b563) carry the old committed pins.
+2. **Both releases were clean-tree, fresh-DerivedData builds.** Their retained provenance
+   (`~/Library/Developer/Variorum/Releases/<v>/RELEASE-INFO.txt`) records `dirty files: 0`,
+   Xcode 27.1 (27A9275), the commit above; `release.sh` line 89–90 refuses a dirty tree, and
+   `archive-and-export.sh` archives with `-derivedDataPath "${OUT}/DerivedData"` in a fresh OUT —
+   E1's exact shape, which resolves the committed set (and see the WHY below).
+3. **The shipped binaries say so directly.** The retained `SQLCipher.framework.dSYM` of BOTH
+   releases has UUIDs `17E38CF7-60B8-38A5-9B06-612BADC730EA` (x86_64) /
+   `F0784571-EBF5-36BB-93B9-061EF615F641` (arm64) — byte-identical to the binary of the
+   **SQLCipher.swift 4.18.0** xcframework E1 downloaded, and to `/Applications/Variorum.app`'s
+   (1.0.1) `SQLCipher.framework`. **SQLCipher 4.18.0 shipped, exactly.** The
+   `Variorum.app.dSYM` of both releases names `SourcePackages/checkouts/xctest-dynamic-overlay`
+   (144 strings) and NEVER `swift-issue-reporting`; swift-dependencies switched to
+   swift-issue-reporting at 1.17.1 (read from the tags' manifests: 1.14.1–1.17.0 use
+   xctest-dynamic-overlay), so the shipped swift-dependencies is ≤ 1.17.0 by the binary alone and
+   1.14.1 by items 1–2 + the WHY (the file sets of 1.14.1–1.17.0 are identical, so the dSYM cannot
+   split that range further). swift-syntax never ships (macro-time only).
+
+**THE LOAD-BEARING WHY (why a fresh-DD resolve lands the committed pins rather than
+network-latest-in-range):** the resolver is SEEDED with the lockfile's pins as preferred versions.
+In SwiftPM's PubGrub, a package's best version is its pinned version whenever the current
+requirement contains it and the repository still lists that tag; only otherwise does it take the
+highest version in range. The evidence that this, and not a stale cache, did it: E1 ran on a
+private package cache that DID NOT EXIST before the run (`vx781-pkgcache`, created by E1 from the
+network) — its fetched mirrors list SQLCipher.swift 4.20.0, swift-dependencies 1.17.2, swift-syntax
+604.0.0 — and E1 still chose 4.18.0 / 1.14.1 / 602.0.0. The red-side counterpart (E2 below: the
+same fresh shape with the lockfile REMOVED) is what shows the network-latest set when the pins are
+absent. So the guarantee is "a clean committed lockfile + no pre-existing checkouts ⇒ the pinned
+set", and it holds without any cache luck. What it does NOT cover is a reused checkout state or a
+dirty lockfile (the roads below), and that is what the belt closes.
+
 ### INCIDENT — a stray `swift package --help` ran in the MAIN checkout (21:44; stopped)
 
 Subagent Bash calls reset their cwd to the session's primary directory, which is
