@@ -66,8 +66,8 @@ Decisions were put as question batches; she picked among presented options. Reco
 | 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
 | 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | NOT-STARTED |
 | 6 | VX-823 (HIGH) | the Library remembers scroll + selection on return from a note | C | NOT-STARTED |
-| 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | IN-PROGRESS — design fork PROPOSED (Batch D, D0); the build waits on the orchestrator's ruling |
-| 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | NOT-STARTED (its intended shape is stated in D0 for redirect) |
+| 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | BUILT (cdb514168 · cef57334d · 043b8420d) — core 15/15 + full core suite green headless, mutation probes M1–M3 red as predicted; PENDING: the 7 app pins' run + the walk (the orchestrator's stage window) |
+| 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | BUILT (9a251a8ea) — compiled; PENDING: the geometry pin's run + its red-on-old by revert R-D4 + the walk (the orchestrator's stage window) |
 | 9 | VX-798 (M) | spellcheck: ⌘; / ⌘: chords + Edit ▸ Spelling and Grammar home | E | NOT-STARTED |
 | 10 | VX-838 (M, Bug) | Settings ▸ Tags names + follows the wing (RULED: R-828-2) | E | NOT-STARTED |
 | 11 | VX-840 (L, rider) | Settings ▸ Tags: delete-every-unused-tag door | E | NOT-STARTED |
@@ -396,11 +396,12 @@ receipt band.
 
 #### Batch D — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
 
-**Not done by this batch (so far):** D2–D5 (below). The fork was RULED (22a8da5d4) and the build
-follows it. No `xcodebuild test`, no Debug launch, no walk (all stage-gated — the orchestrator's
-window, by the brief). No `Sync/`, custody or keychain file will be touched (the purge-intent op lives in
-`Operations/`; `PurgeJanitor.anyFamilyEverSynced` and `LocalPurge` are only CALLED, as every Trash
-purge door already calls them).
+**Not done by this batch (first line, final):** NO app-suite RUN (the 9 new app pins and their
+neighbours), NO red-on-old revert RUN for VX-636 (R-D4), NO walk, NO Debug launch — all stage-gated,
+all the orchestrator's (listed exactly in the self-assessment). No canon or shared ledger touched
+(drafts below); no `notes/QUESTIONS.md` edit (P-828-7…10 land at the merge moment). No `Sync/`,
+custody or keychain file touched (the op lives in `Operations/`; `PurgeJanitor.anyFamilyEverSynced`
+and `LocalPurge` are only CALLED, as every Trash purge door already calls them).
 
 | Piece | What | Status |
 |---|---|---|
@@ -408,8 +409,8 @@ purge door already calls them).
 | D1 | VX-800 core: the pure predicate (`Domain/EmptyBlockSweep.swift`) + the candidate/facts read and its named-region observation (`Queries/EmptyBlockSweepQueries.swift`) + exact-rows pins (`Tests/VariorumCoreTests/EmptyBlockSweepTests.swift`, 10) | DONE (cdb514168) — `swift test --filter EmptyBlockSweepTests` 10/10 green headless. Mutation probes M1–M3 ANNOUNCED here (this commit), each an UNCOMMITTED edit to the facts SQL in `Sources/VariorumCore/Queries/EmptyBlockSweepQueries.swift` on the committed tree, restored by `git checkout --` (git is the honest mid-probe state; no prerevert dir needed): M1 comments counted live-only (`AND bc.deleted_at IS NULL`) → expect `historyKeepsAnEmptyBlockOutAndMetadataDoesNot` red; M2 edges counted live-only (`AND e.deleted_at IS NULL`, both arms) → expect `aLinkToALivingBlockKeepsItOutAndALinkToADeadOneDoesNot` + `everyEdgeShapeIsReadByTheOtherSidesLifeAlone` red; M3 takes counted live-only (`AND v.deleted_at IS NULL` in `worded_takes`) → expect `theJunkShapeQualifiesAndAnyWordedTakeStaysOut` red. **RESULTS (all three red as predicted, each restored by `git checkout --`, `git status` clean, 10/10 green again):** M1 → `historyKeepsAnEmptyBlockOutAndMetadataDoesNot` red, 3 issues (and STRONGER than predicted: under a live-only count even the COMMENTED block qualifies — the block's own deletion cascade-tombstones its comments on its stamp, so live-only would sweep every commented block); M2 → both lineage pins red (the divide's half, tombstoned on its own stamp, and the version/ancestor/peer-stamp/archived shapes all read 0 living links); M3 → `theJunkShapeQualifies…` red AND both lineage pins red (the cascade tombstones every take of a deleted block, so a live-only take count would call EVERY trashed block empty — the worded source and "A dead block." both became sweepable). The any-row readings are load-bearing, not cautious. |
 | D2 | VX-800 core: `Operations.sweepEmptyTrashBlocks(_:)` (`Operations+Purge.swift` — one write: the predicate re-read inside it over every wing, confirm ids ∩ still-qualifying, intents through `mintPurgeIntents`, empty answer = nothing written) + 5 transition pins in `EmptyBlockSweepTests` | DONE (this commit) — `EmptyBlockSweepTests` 15/15 green headless: one intent per taken block, no undo entry, rows leave the Trash at once, LocalPurge takes never-synced bytes and a Put back then meets `blockNotFound` (`theSweepMintsOneIntentPerTakenBlockAndTheBytesFollow`); a server-seen family keeps its bytes for the horizon (`aSyncedFamilyWaitsForTheHorizon`); put back / re-died as a cascade victim / worded by a sync-shaped write / already fenced / a newcomer — only the untouched confirmed block taken (`theActTakesOnlyWhatTheConfirmShowedThatStillQualifies`); nothing left writes nothing, not even an outbox row (`nothingLeftWritesNothing`); the sweep never takes a living block, with the CONTRAST that a direct purge of a block linked to two live released originals takes both originals' words (`theSweepNeverTakesALivingBlock` — the P-828-7 (a) rationale, pinned) |
 | D3 | VX-800 app: `CapabilityID.deleteEmptyBlocks` + its registry entry (`.surface`, app scope, verb "Delete Empty Blocks"); `RecoveryView.surfaceCapabilities` gains it; the door in the Trash's controls row left of Empty Trash, drawn only while `emptyBlockIDs` is non-empty (`RecoveryView.showsDeleteEmptyBlocksDoor`), label "Delete N empty blocks…"; the model's own named-region observation (`startEmptyBlocks`, wing-keyed, never filter-narrowed); `TrashPurge.Confirm.deleteEmptyBlocks(ids)` through the ONE confirm host, `TrashPurge.confirmEmptyBlocks` (the op, then the local sweep before the receipt), `RecoveryRefusal.noEmptyBlocksLeft`; the pick belt (`dropFromPick`); the words in `RecoveryCopy` (P-828-10 drafts verbatim); app pins `App/Variorum/VariorumTests/TrashEmptyBlockSweepTests.swift` (7) | DONE (043b8420d) — Mac `build-for-testing` TEST BUILD SUCCEEDED, 0 errors, no warning in a touched file. The app pins' RUN is PENDING (the orchestrator's stage window). The phone target (`VariorumMobile`, generic iOS Simulator, compile only) BUILD SUCCEEDED over the Shared change, no warning in `RecoveryActs.swift` / `RecoveryCopy.swift` |
-| D4 | VX-636: `RecoveryView.body` = the list + a laid-out message BAND below it (hairline + line, drawn only while something speaks; order: refusal → receipt → the seam's `QuietReceiptLine`) replacing the `.overlay(alignment: .bottom)` on the `List`; the pure `TrashMessageFoot.line(error:receipt:quietSpeaks:)`; the DEBUG frame oracle `TrashFootProbe` + `trashFootProbe(_:)`; the internal `model:` init seam (ruled); pins `App/Variorum/VariorumTests/TrashMessageBandTests.swift` (2) | DONE (this commit) — Mac `build-for-testing` TEST BUILD SUCCEEDED, no warning in a touched file. Run + red-on-old PENDING (the orchestrator's stage window; revert R-D4 named in the self-assessment) |
-| D5 | Self-assessment + the record's closing sections | NOT-STARTED |
+| D4 | VX-636: `RecoveryView.body` = the list + a laid-out message BAND below it (hairline + line, drawn only while something speaks; order: refusal → receipt → the seam's `QuietReceiptLine`) replacing the `.overlay(alignment: .bottom)` on the `List`; the pure `TrashMessageFoot.line(error:receipt:quietSpeaks:)`; the DEBUG frame oracle `TrashFootProbe` + `trashFootProbe(_:)`; the internal `model:` init seam (ruled); pins `App/Variorum/VariorumTests/TrashMessageBandTests.swift` (2) | DONE (9a251a8ea) — Mac `build-for-testing` TEST BUILD SUCCEEDED, no warning in a touched file. Run + red-on-old PENDING (the orchestrator's stage window; revert R-D4 named in the self-assessment) |
+| D5 | Self-assessment + the record's closing sections + the end-of-batch headless suite | DONE (this commit) — full core `swift test` at 9a251a8ea: `VariorumCoreTests` 3670 tests / 493 suites PASSED (5 known issues; +15 / +1 over batch A's 3655/492 = `EmptyBlockSweepTests`; PinBeltTests rides inside, passed); `StringsWorkbookTests` 32/4 PASSED; the 7 known "dependency not used" warnings (14 lines — build + test print each); `VariorumMCPTests` 549/100 with 2 issues, both the MCP socket harness (`MCPStopRoadsServerTests` "claude-code got no answer to its initialize"; `MCPHarnessTimeLimitTests` the VX-685 bound) — re-run ALONE (`swift test --skip-build --filter "MCPStopRoadsServerTests\|MCPHarnessTimeLimitTests"`): 9 tests / 2 suites PASSED in 2.2 s. This batch touches no MCP code |
 
 #### Batch D — THE DESIGN FORK (D0: VX-800's predicate, door, confirm and undo story — proposed for the orchestrator's ruling BEFORE any build)
 
@@ -542,6 +543,126 @@ that seam is declined, the walk verifies the band and the record says so.
 **ASKED OF THE ORCHESTRATOR (one ruling unblocks D1–D4):** P-828-7 / -8 / -9; the words (P-828-10 —
 or leave them PROVISIONAL); the act's `ids ∩ still-qualifying` rule; count 0 = not rendered; the pick
 belt; and whether VX-636 may take the `model:` init seam for its geometry pin.
+
+#### Batch D — IMPLEMENTER SELF-ASSESSMENT (Opus, 2026-11-05)
+
+**Not done (first line, by the brief):** no app-suite RUN, no VX-636 red-on-old revert RUN, no walk,
+no Debug launch — all stage-gated, all the orchestrator's (listed below with exact names). No canon,
+QUESTIONS or other shared ledger touched (drafts below). No `Sync/`, custody or keychain file. Every
+other piece is built, compiles on both targets, and its headless half is green.
+
+**VX-800 — what was missing (an Improvement, no bug mechanism).** The Trash offered only per-row
+Delete Now, the VX-671 pick and Empty Trash, so the junk the editor's own roads leave there — the
+seam carve's empty blocks (`deleteBlock(requiring: .emptyWithNothingUnshown)`), abandoned
+Return-chained empties — could only go one row at a time or with everything else. Built to the
+fork's ruling (22a8da5d4), one pointer per piece:
+- `Sources/VariorumCore/Domain/EmptyBlockSweep.swift` — R-828-1 as ONE pure rule over counted facts.
+- `Sources/VariorumCore/Queries/EmptyBlockSweepQueries.swift` — `Queries.emptyTrashBlocks` (the
+  candidate set = `Queries.trash`'s own block arm, unwindowed, unfiltered — so the window, the wing
+  fence, the stamp-aware intent fence and the cascade-victim exclusion are inherited, never twinned),
+  `Queries.emptyBlockSweepFacts` (each count's ruled row-level reading, one statement driven by the
+  given ids), `Queries.emptyBlockSweepTables` + `AppDatabase.observeEmptyTrashBlocks` (named region —
+  re-fetched on a reader, never on the writer).
+- `Sources/VariorumCore/Operations/Operations+Purge.swift` — `sweepEmptyTrashBlocks(_:)`: one write;
+  the predicate re-read inside it over every wing; confirm ids ∩ still-qualifying; intents through
+  `mintPurgeIntents` (one implementation); an empty answer = nothing written; no undo entry.
+- `App/Variorum/Shared/RecoveryActs.swift` — `TrashPurge.Confirm.deleteEmptyBlocks(ids)` (through the
+  ONE confirm host), `TrashPurge.confirmEmptyBlocks` (the op, then `sweepLocalPurge` before the
+  receipt — round 11), the three-population receipt bit read AFTER the op over exactly what it took,
+  `RecoveryRefusal.noEmptyBlocksLeft`.
+- `App/Variorum/Shared/RecoveryCopy.swift` — the P-828-10 words, verbatim as drafted.
+- `App/Variorum/Variorum/Registry/Capability.swift` + `CapabilityRegistry.swift` — `.deleteEmptyBlocks`,
+  `.surface`, app scope, verb "Delete Empty Blocks".
+- `App/Variorum/Variorum/Features/Library/RecoveryView.swift` — the model (`emptyBlockIDs`,
+  `startEmptyBlocks`, `adoptEmptyBlocks`, `requestDeleteEmptyBlocks`, the confirm branch, the pick belt
+  `dropFromPick`); the view (`surfaceCapabilities` gains it, `showsDeleteEmptyBlocksDoor`, the
+  count-labelled danger button left of Empty Trash, its wing-keyed `.task`).
+
+**VX-636 — the mechanism, traced on this tree.** `RecoveryView.list` hung its message slot on the
+`List` as `.overlay(alignment: .bottom)` (it was `RecoveryView.swift:975` before this batch): an
+overlay draws on top of the list's OWN frame and claims no layout room, so whichever row sat at the
+bottom of the viewport was written over — her VX-601 A2 sighting after Delete for Good. **The fix:**
+`RecoveryView.body` is now `VStack(spacing: 0) { list; messageFoot }` — the line in its own band
+LAID OUT below the list (a hairline, then the line, drawn only while something speaks: the Pool's
+`PoolReceiptFoot` shape), its order ArchivedView's (`TrashMessageFoot.line`: this surface's refusal →
+its receipt → the seam's `QuietReceiptLine`). The geometry oracle is DEBUG-only (`TrashFootProbe` /
+`trashFootProbe(_:)`, the `BaselineProbe` idiom) and the test reaches the shipping view through the
+ruled internal `model:` init parameter (production passes nothing).
+
+**Pins — and exactly what makes each red (the orchestrator's revert window).**
+| Pin (suite TYPE · test) | Red on old because | Behavioral revert that shows it |
+|---|---|---|
+| `EmptyBlockSweepTests` (core, 15) | new feature — compile-red on old; their STRENGTH was shown by mutation probes M1–M3 on the new SQL (all red as predicted, D1's row) | — (ran green headless; M1–M3 done) |
+| `TrashEmptyBlockSweepTests` (app, 7) | new feature — compile-red on old (no `.deleteEmptyBlocks`, no door, no `emptyBlockIDs`) | — (run PENDING) |
+| `TrashMessageBandTests` · `theReceiptSpeaksInItsOwnBandNeverOverTheRows` | the overlay sits INSIDE the list's frame (`foot.minY < list.maxY`) and the list never gives up height (`list.height == idle.height`) | **R-D4:** in `RecoveryView.swift` replace `body`'s `VStack(spacing: 0) { list; messageFoot }.background(tokens.room)` with `list.overlay(alignment: .bottom) { messageFoot }` (keep the trailing `.coordinateSpace(name: TrashMessageFoot.space)`) → expect exactly the two geometry `#expect`s red; the idle "no band" and premise lines stay green. Restore by `git checkout --`, rebuild, re-run green |
+| `TrashMessageBandTests` · `theBandSaysTheRefusalThenTheReceiptThenTheSeamElseNothing` | GREEN ON BOTH SIDES for its refusal/receipt order (the old inline overlay kept it); the `.quiet` arm is new | — (guard) |
+
+**PENDING (the orchestrator's stage window).**
+1. Mac suites, by TYPE (a zsh array): `TrashEmptyBlockSweepTests` · `TrashMessageBandTests` — and
+   the neighbours the diff reaches: `TrashMultiSelectTests` · `TrashFirstPaintTests` ·
+   `TrashPurgeDoorsTests` · `TrashConfirmEdgeTests` · `TrashPurgeSharedLayerTests` ·
+   `TrashSurfaceTests` · `TrashPoolHonestyTests` · `SnippetGroupTrashTests` · `IAAndTrashShapeTests` ·
+   `RecoveryDoorsTests` · `CapabilityRegistryTests` · `ShellChromeTests` · `ChromeLineLimitTests`
+   (and `TutorialWalkTests` if the window allows — it touches the Trash's surface capabilities).
+2. Revert R-D4 (above), one suite, then restore.
+3. The phone suites at the merge gate (Shared changed): `MobileTrashTests` · `MobileNoteTrayTests` ·
+   `MobileVersionsTests` (the confirm gained an arm the phone never raises).
+4. The walk (dev store, both voices): mint empty blocks (a Return chain, then backspace-carve them or
+   Delete Block them), a worded block, an empty block with a comment, a divide's emptied half (linked
+   to its living source); open the Trash — the door reads "Delete N empty blocks…" with N = only the
+   true empties; Cancel; confirm — the receipt speaks in the BAND below the rows with enough rows to
+   fill the viewport (VX-636: never over the last row); the door disappears at 0; the commented / linked
+   / worded blocks stay; a kind filter (Notes) does not hide or narrow the door.
+
+**PROVISIONAL (QUESTIONS entries at the merge moment).** P-828-7 (a), P-828-8 (a), P-828-9 (a) — built
+as ruled, "PROVISIONAL stands" on -8/-9 per the ruling; P-828-10 the words, verbatim as drafted.
+
+**For the orchestrator's canon pass (DRAFTED — not applied; the two-file rule).**
+- SurfaceContracts, "The Bookcase and books" Delete bullet — after the multi-select sentence, ADD:
+  "Delete N empty blocks… takes every Trash block row that is empty with no history — no take with
+  words, no savepoint, no comment row, no name, no callout, no link to a living block — drawn only
+  while it would take one, confirmed every time with the count, purge intents only, no ⌥⌘Z; the
+  Trash's messages speak in their own band below the rows (VX-800, VX-636, R-828-1,
+  `notes/plans/fixes/vx-828-editor-shell-qol.md`)."
+- AppSpec §9 "Deletion, restoration, the tray" — ADD the op line: "**sweepEmptyTrashBlocks(blockIDs)**
+  — the Trash's empty-block sweep: in one transaction it re-reads R-828-1's predicate over the
+  Trash's own block rows (never a cascade victim; the window and the intent fence) and mints one
+  purge intent per given block that still qualifies — never more than the confirm named; nothing
+  left writes nothing; no undo entry (VX-800)."
+- AppSpecRecord: the dated entry + the narrative under §9 (purge) and §12 (the Trash).
+- MOBILE PARITY: nothing mobile-visible (the phone's Trash draws no sweep door; the Shared confirm
+  case compiles into it unreached) — a VM twin is a candidate ticket, the orchestrator's call.
+
+**Self-assessment.** CONFIDENT: the predicate's row-level readings (exact rows on every shape incl.
+hand-built edges; M1–M3 prove each any-row reading load-bearing — live-only readings would sweep
+commented, linked and even WORDED trashed blocks, because the deletion cascade tombstones a block's
+takes, comments and edges on its own stamp); the act's safety (the in-transaction re-check, the
+stale-pause shapes, nothing-left writes nothing, and the living-original contrast pin showing what
+the edge clause forecloses); the VX-636 mechanism (an overlay claims no layout room — read in the
+code, not inferred). FLAGS FOR THE COLD REVIEWER: (a) the open Trash now holds a THIRD observation
+(the sweep's count) on a named region that includes `variant` — it re-fetches on a reader at
+autosave rate while the Trash is open, ∝ the Trash's block rows (the listing's own posture);
+(b) the act re-reads over EVERY wing and intersects with the confirm's ids (wing-scoped at ask
+time) — a wing switch inside the confirm cannot widen it; (c) the receipt's population bit is read
+AFTER the op (argued in `deleteEmptyBlocks`' doc: the intent write moves no seq rows and the local
+sweep has not run; a never-synced family an hourly sweep took in between reads never-synced, which
+it was); (d) the band's `.quiet` arm is new behavior — a seam receipt now speaks in the Trash
+instead of nowhere (the stated D0 shape, unredirected by the ruling); the band appears and
+disappears with the message (no reserved line — the Pool's rule), so the list's bottom edge moves
+by one line when a message speaks; (e) a stale bulk Put back of a swept block on a SYNCED install
+(intent standing, bytes waiting) would still revive it through `restoreBlock`'s void-the-intent belt
+— the pick belt closes that road on this device; a peer's earlier Put back is 13j B1's staleness rule,
+unchanged; (f) no ⌥⌘Z, by the ruling.
+
+**Files touched (the whole batch):** `Sources/VariorumCore/Domain/EmptyBlockSweep.swift` (new) ·
+`Sources/VariorumCore/Queries/EmptyBlockSweepQueries.swift` (new) ·
+`Sources/VariorumCore/Operations/Operations+Purge.swift` ·
+`Tests/VariorumCoreTests/EmptyBlockSweepTests.swift` (new) · `App/Variorum/Shared/RecoveryActs.swift` ·
+`App/Variorum/Shared/RecoveryCopy.swift` · `App/Variorum/Variorum/Registry/Capability.swift` ·
+`App/Variorum/Variorum/Registry/CapabilityRegistry.swift` ·
+`App/Variorum/Variorum/Features/Library/RecoveryView.swift` ·
+`App/Variorum/VariorumTests/TrashEmptyBlockSweepTests.swift` (new) ·
+`App/Variorum/VariorumTests/TrashMessageBandTests.swift` (new) · this record.
 
 ### Batch C — the Library remembers (VX-823, HIGH)
 
