@@ -58,8 +58,8 @@ extension MCPWriteTools {
                     noteID, to: wingID, undoLabel: Operations.MCPWriteAct.wingMove.undoLabel(client: clientName),
                     guardedBy: guardWingMove(clientName, noteID: noteID, wingID: wingID))
             } catch let error as OperationError {
-                if let words = try frozenWords(error, noteTitle: title, standing: standing) {
-                    throw Refused(outcome: Outcome(text: words, isError: true))
+                if let refused = try frozenWords(error, noteID: noteID, noteTitle: title, clientName: clientName) {
+                    throw refused
                 }
                 throw error
             }
@@ -115,21 +115,32 @@ extension MCPWriteTools {
     /// Her door's own sentence for a note held by a finished or sealed book
     /// (`MCPHostHooks.wingMoveFrozenWords`), where the client can read that
     /// book; nil = the op's own refusal speaks (PROVISIONAL P-13nc-U6-4).
+    ///
+    /// **VX-825 (A-809-4 S-2 — a refusal whose cause is beyond reach):** the
+    /// refusal is decided over the frozen books the client can READ. The first
+    /// readable one in the op's own order (membership age) is the one named —
+    /// by her hook's words, or (no hook) the op's own refusal keyed to THAT book
+    /// — so the answer is the one a store without the unreadable books gives;
+    /// when no frozen book holding the note is readable, the move's one fixed
+    /// sentence speaks (never "finished" or "sealed" — those are the hidden
+    /// book's facts).
     private func frozenWords(
-        _ error: OperationError, noteTitle: String?, standing: MCPGrantAuthority.Standing
-    ) throws -> String? {
-        let bookID: String
+        _ error: OperationError, noteID: String, noteTitle: String?, clientName: String
+    ) throws -> Refused? {
         switch error {
-        case .lockedReading(let id), .readingSealed(let id): bookID = id
+        case .lockedReading, .readingSealed: break
         default: return nil
         }
-        guard let hook = hooks.wingMoveFrozenWords, let noteTitle else { return nil }
-        let (facts, name) = try database.read { db in
-            (try Queries.mcpBookFacts(db, readingID: bookID),
-             try Queries.mcpScopeTitle(db, kind: .book, id: bookID, calendar: calendar))
+        guard let frozen = try readableMemberships(noteID: noteID, excluding: nil, clientName: clientName)
+            .first(where: { $0.sealed || $0.finished })
+        else { return Refused(outcome: Outcome(text: Self.moveHiddenCauseWords, isError: true)) }
+        if let hook = hooks.wingMoveFrozenWords, let noteTitle {
+            return Refused(outcome: Outcome(text: hook(noteTitle, frozen.book.name), isError: true))
         }
-        guard let name, MCPGrantAuthority.decide(standing, book: facts, rung: .read).isAllowed else { return nil }
-        return hook(noteTitle, name)
+        let keyed: OperationError = frozen.sealed
+            ? .readingSealed(id: frozen.book.id) : .lockedReading(id: frozen.book.id)
+        return Refused(outcome: Outcome(
+            text: MCPWireRefusalCopy.spoken(keyed, appWords: hooks.refusalWords), isError: true))
     }
 
     /// Where a moved note lands — bookless, in its new wing's Pool. Home is a

@@ -592,8 +592,18 @@ struct MCPWriteTools: Sendable {
                 name: name, wingID: wingID, rule: rule, job: job, ops: ops, clientName: clientName)
         case .addNoteToBook(let noteID, let bookID, let sectionID):
             return try noteIntoBook(noteID, bookID, job: job, clientName: clientName) { title, bookName in
-                let added = try ops.addNoteToBookForClient(
-                    noteID, book: bookID, section: sectionID, undoLabel: label(.bookAdd))
+                let added: Operations.MCPBookAdd
+                do {
+                    added = try ops.addNoteToBookForClient(
+                        noteID, book: bookID, section: sectionID, undoLabel: label(.bookAdd))
+                } catch let error as OperationError {
+                    // VX-825 (A-809-4, P-809-2): an ownership refusal whose cause
+                    // is a book beyond this client's reach says the one fixed
+                    // sentence; a readable claimant keeps her words, re-keyed to
+                    // the readable claimants alone.
+                    throw try ownershipRefusalWithinReach(
+                        error, noteID: noteID, bookID: bookID, clientName: clientName) ?? error
+                }
                 // VX-365 (VX-361's shape, P-VX361-1): every tag the note wears
                 // once the act lands — its own, then the book's outflow, each
                 // once — composed inside the act's transaction; `tags` their
