@@ -2317,3 +2317,39 @@ WINDOW: green runs of LibraryReturnRoadTests + QuickEntryWingLabelTests on the c
 and the R-C4-UNDER-SEAM red-show (the recipe in the batch C hand-back: the isMeasured guard as an
 uncommitted edit → both road arguments red at "the row back where it sat" with "reading withheld"
 lines and no landing; restore; re-run green).
+
+#### THE MERGE GATE (stage "vx-828-gate", 2026-11-05, GO 12:30 — PASSED)
+
+**Whole target at 674faaaa7:** EXECUTED 5983 tests / 1039 suites in 44 min — ONE real red,
+`DeadVocabularyTests.noLabelOrHeaderSaysSavepoint` (the other 18 issues = 4 warnings + 14 known):
+batch D's facts SQL carried a "savepoints" column-key literal, first caught here because the
+vocabulary fence rides only the whole target. **The tree moved, declared and accepted:**
+3f6d8ab02 (the rename road — `commit_points`, no allowlist entry, the fence stays tight) and
+7d9976721 (the implementer's catch while fixing: the CONFIRM's words said "savepoints" in shown
+prose, violating the commit-vocabulary canon my P-828-10 "as drafted" ruling could not override;
+"savepoints"→"commits", two pins updated; KEPT by the orchestrator's ruling, still PROVISIONAL
+for her wording pass). The coordinator read the delta (3 files, 11 lines) and waived a second
+whole-target run. **Re-runs at the tip 7d9976721, all green:** DeadVocabularyTests +
+TrashEmptyBlockSweepTests + TrashMessageBandTests (13/3) · the phone trio for the Shared/ touch
+(55/3) · LibraryReturnRoadTests + QuickEntryWingLabelTests (4/2). **Phone gate at 674faaaa7:**
+all six TYPEs 88/6 PASSED. **The R-C4-UNDER-SEAM red-show:** both road arguments red at "the row
+back where it sat" with the trace printing withheld readings and NO landing — the amended pin
+reproduces the live mechanism by construction; restored, re-run 1/1 green.
+
+**The deferred walks (Study, Terminal where product-visible):** sidebar leave/return lands the
+deep place, no mark (both voices — the Terminal pass ALSO carried the armed day chip through the
+round trip) · Cards place-only restore (and the Cards layout's per-card tag rows explain an
+earlier capture curiosity — not a filter) · the search sheet returns at its place with the query
+and the opened GROUP HEAD marked · the day filter armed on Nov 5 rides the trip, narrowed 5
+notes · a new question resets to the top · ⌘L ⏎ on the CURRENT wing navigates Library → its
+Bookcase silently (P-828-1 (ii) witnessed; the ▾-Picker variant stands on this + the pins — the
+SPECULATIVE NIT stays speculative) · the SNIPPET EDITOR ("open as editor") swallows ⌘digit — the
+writing-surface gate holds where the snippets LIST rightly fires it · the ⌘/ helper carries the
+new families (Writing: spelling; Navigation: wings). **Settings legs: words-guard WITHHELD ×2
+again (AXError -25200) — fail-closed, no Settings capture read; VX-838/840 stand VERIFIED-BY-PINS
+and the husk-tag fixture stays in Home** for any future sighted pass. **Skipped as pin-covered,
+said honestly:** the deleted-row survivor walk (resolver + model pins), the label's seam-drag /
+sub-24-pt floor / full-screen legs (the space rule and probe pins), the mode-switch reset walk
+(drop-road pins). **Posture:** Study restored, ⌘Q clean, both strict pgreps empty, no Problem
+Reporter, .ips count 17 at GO (114055, VX-855's class, coordinator-classed) and 17 at release —
+ZERO new in the window.
