@@ -380,12 +380,14 @@ public final class MCPServerHost: @unchecked Sendable {
     /// (THIS host's — `halt`'s rule); each connection hears the closing road's
     /// close line ("…locked or closed…"); NOTHING is written — no end line, no
     /// grant end (a library's next start sweeps its own while-connected grants).
+    /// The latch stays SHUT to the end: no call is served from the library now
+    /// open while the hang-ups land.
     public func abandon() {
         lock.withLock {
             writesNothing = true
             deferredGrantEnds = []
             suspendedFingerprint = nil
-            latch.open()
+            latch.close()
         }
         halt(saying: MCPCloseWords.line(for: .libraryClosed)) { $0.forgoEndLine() }
     }
