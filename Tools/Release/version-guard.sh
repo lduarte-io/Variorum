@@ -18,10 +18,18 @@
 #     mobile app is its own project, its version its own).
 #
 #   mac_marketing_version_mismatch PBXPROJ EXPECT
-#       → true (0), printing the reason on stdout, when the Mac app target's configurations do not ALL
-#         carry MARKETING_VERSION = EXPECT (or Debug/Release is missing, or the project cannot be read);
-#         false (1) when they do. Sourced by release.sh's preflight (release mode: EXPECT = --version),
-#         the notes-guard.sh precedent: one definition, so the refusal and the check cannot drift.
+#       → true (0), printing ONE sentence on stdout that names the problem AND its own remedy, when the
+#         Mac app target's configurations do not ALL carry MARKETING_VERSION = EXPECT; false (1) when
+#         they do. It FAILS CLOSED: anything that stops it reading the project (no file, plutil cannot
+#         parse it, /usr/bin/jq missing, not exactly one target named Variorum) or a Debug/Release
+#         configuration gone is also true (0), each with its own sentence — so a caller prints the
+#         sentence and never appends advice of its own (the bump remedy cures only a version mismatch;
+#         the VX-779 ladder's NIT-1). Sourced by release.sh's preflight (release mode: EXPECT =
+#         --version), the notes-guard.sh precedent: one definition, so the refusal and the check cannot
+#         drift. VERSION_GUARD_JQ overrides the jq path — the seam that drives the missing-jq arm.
+#
+# The suite's twin: VersionSchemeTests.theMarketingVersionIsTheNewestReleaseNotesVersion holds the
+# Debug test host to the same newest release notes (a skipped bump goes red at the next suite run).
 #
 #   Tools/Release/version-guard.sh [--expect X.Y[.Z]] [--repo DIR]
 #       → the headless check: read-only, no xcodebuild, no stage. EXPECT defaults to the NEWEST
@@ -32,34 +40,46 @@
 
 # mac_marketing_versions PBXPROJ → one "<configuration name><TAB><MARKETING_VERSION>" line per
 # configuration of the Mac app target. plutil reads the project's old-style plist; jq is the system's.
+# Status: 0 read · 1 no project file · 2 plutil could not parse it · 3 no jq · 4 not the expected shape
+# (not exactly one target named Variorum, or no configuration list under it).
 mac_marketing_versions() {
-  local pbx="$1" json
+  local pbx="$1" jq="${VERSION_GUARD_JQ:-/usr/bin/jq}" json
   [ -f "$pbx" ] || return 1
-  json="$(/usr/bin/plutil -convert json -o - "$pbx" 2>/dev/null)" || return 1
-  printf '%s' "$json" | /usr/bin/jq -r '
+  [ -x "$jq" ] || return 3
+  json="$(/usr/bin/plutil -convert json -o - "$pbx" 2>/dev/null)" || return 2
+  printf '%s' "$json" | "$jq" -r '
     .objects as $o
     | [$o | to_entries[] | select(.value.isa == "PBXNativeTarget" and .value.name == "Variorum") | .value]
     | if length == 1 then .[0] else error("expected exactly one Mac app target named Variorum") end
     | $o[.buildConfigurationList].buildConfigurations[]
     | $o[.]
-    | "\(.name)\t\(.buildSettings.MARKETING_VERSION // "")"' 2>/dev/null
+    | "\(.name)\t\(.buildSettings.MARKETING_VERSION // "")"' 2>/dev/null || return 4
 }
 
 mac_marketing_version_mismatch() {
-  local pbx="$1" expect="$2" lines name version bad="" seen=" "
-  if ! lines="$(mac_marketing_versions "$pbx")" || [ -z "$lines" ]; then
-    echo "cannot read the Mac app target's configurations from ${pbx}"
-    return 0
-  fi
+  local pbx="$1" expect="$2" lines="" status=0 name version bad="" missing="" seen=" "
+  lines="$(mac_marketing_versions "$pbx")" || status=$?
+  [ "$status" -ne 0 ] || [ -n "$lines" ] || status=4
+  case "$status" in
+    0) ;;
+    1) echo "cannot check the project's marketing version: there is no project file at ${pbx} — run from a full checkout of the repo"; return 0 ;;
+    2) echo "cannot check the project's marketing version: plutil cannot parse ${pbx} — repair the project file (it must open in Xcode) and commit the repair"; return 0 ;;
+    3) echo "cannot check the project's marketing version: ${VERSION_GUARD_JQ:-/usr/bin/jq} is missing — run where /usr/bin/jq exists (current macOS ships it there)"; return 0 ;;
+    *) echo "cannot check the project's marketing version: ${pbx} does not hold exactly one target named Variorum with a configuration list — repair the project, or this guard's target lookup if the Mac app target was renamed"; return 0 ;;
+  esac
   while IFS=$'\t' read -r name version; do
     [ -n "$name" ] || continue
     seen="${seen}${name} "
     [ "$version" = "$expect" ] || bad="${bad}${bad:+, }${name} reads '${version:-unset}'"
   done <<< "$lines"
-  case "$seen" in *" Debug "*) ;; *) bad="${bad}${bad:+, }no Debug configuration" ;; esac
-  case "$seen" in *" Release "*) ;; *) bad="${bad}${bad:+, }no Release configuration" ;; esac
+  case "$seen" in *" Debug "*) ;; *) missing="${missing}${missing:+ and }Debug" ;; esac
+  case "$seen" in *" Release "*) ;; *) missing="${missing}${missing:+ and }Release" ;; esac
+  if [ -n "$missing" ]; then
+    echo "the Variorum target has no ${missing} configuration (it has:${seen% }) — restore the project's Debug and Release configurations (CLAUDE.md: never add a custom build configuration)"
+    return 0
+  fi
   [ -n "$bad" ] || return 1
-  echo "the Mac app target's MARKETING_VERSION must read ${expect} in every configuration (${bad}): the version-bump commit comes first at every release (R-13r-6)"
+  echo "the Mac app target's MARKETING_VERSION must read ${expect} in every configuration (${bad}): the version-bump commit comes first at every release (R-13r-6) — set MARKETING_VERSION = ${expect} on the Variorum target's Debug and Release configurations and commit it with that release's notes"
   return 0
 }
 

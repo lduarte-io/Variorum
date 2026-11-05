@@ -93,8 +93,10 @@ else
   # VX-779: the project's own MARKETING_VERSION must already BE the release's (R-13r-6's bump commit
   # first). Step 1's override stamps the shipped bundle regardless, which is exactly how 0.10.5 through
   # 1.0.1 shipped with the project still at 0.10.4. Read from the project file alone — no xcodebuild.
+  # Fails closed: a project it cannot read refuses too. The sentence carries its own remedy, which
+  # differs by cause, so nothing is appended to it here (the VX-779 ladder's NIT-1).
   if VERSION_MISMATCH="$(mac_marketing_version_mismatch "${REPO}/App/Variorum/Variorum.xcodeproj/project.pbxproj" "$VERSION")"; then
-    refuse "${VERSION_MISMATCH} — set MARKETING_VERSION = ${VERSION} on the Variorum target's Debug and Release configurations and commit it with the release notes (VX-779)"
+    refuse "${VERSION_MISMATCH} (VX-779)"
   fi
   say "the project's Mac target reads MARKETING_VERSION = ${VERSION} (Debug and Release)"
 fi
