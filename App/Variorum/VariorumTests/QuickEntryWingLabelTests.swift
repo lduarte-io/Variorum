@@ -82,7 +82,11 @@ struct QuickEntryWingLabelTests {
         let root = try source("RootView.swift")
         let button = try #require(root.range(of: "Button(\"New Note\", systemImage: \"square.and.pencil\")"),
                                   "the toolbar's New Note door")
-        let after = String(root[button.upperBound...].prefix(2_400))
+        // Ladder round 1 NIT: wide enough that a comment above the item cannot
+        // push it past the window (it stood ~80 chars from a false red, and a
+        // source comment was once deleted to appease it); no later `.navigation`
+        // item exists in RootView for a wide window to latch onto.
+        let after = String(root[button.upperBound...].prefix(4_800))
         let item = try #require(after.range(of: "ToolbarItem(placement: .navigation) {"),
                                 "an item follows the New Note door")
         let label = String(after[item.lowerBound...].prefix(1_200))
