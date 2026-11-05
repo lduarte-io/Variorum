@@ -15,10 +15,11 @@ CONTENT, so renamed copies work. The reference is the Xcode workspace lockfile a
 never the working-tree copy, which a build can rewrite). Pins compare by identity, version and
 revision. The originHash is ignored: the workspace's is a hash of the checkout's absolute path,
 so it differs on every checkout. The no-argument form is VERSIONS-EQUAL too (VX-853, P-781-3): a
-working-tree lockfile whose bytes differ from the commit while every pin is identical (only
-bookkeeping moved, e.g. the originHash) prints a NOTE and passes — harmless, but restore it with
-git checkout -- before committing, never commit it. A missing lockfile or any pin difference
-fails. The project-only packages (`--cli`, and the root lockfile in the no-argument form) are
+working-tree lockfile whose bytes differ from its own committed copy while its pins equal that
+copy's exactly (only bookkeeping moved, e.g. the originHash) prints a NOTE and passes — harmless,
+but restore it with git checkout -- before committing, never commit it. A missing lockfile, a pin
+that differs from its own committed copy, or one that differs from the workspace set fails. The
+project-only packages (`--cli`, and the root lockfile in the no-argument form) are
 the Xcode project's references whose identity Package.swift never names, read AT the reference
 revision (`--ref`, default HEAD), or from the working tree under `--against`.
 
@@ -187,6 +188,7 @@ def main(argv):
     ok = True
     if not states:
         # The pre-build guard: the working tree's lockfiles, as a build would read them.
+        restore = "git checkout --" if ref == "HEAD" else f"git checkout {ref} --"
         for rel, label, skipping, absent in (
                 (WS_LOCK, f"{WS_LOCK} (working tree)", frozenset(),
                  "a build would resolve WITHOUT pins"),
@@ -198,16 +200,22 @@ def main(argv):
                 ok = False
                 continue
             got = pins_of(parse_json(text, rel), rel)
-            if not against and text != git_show(root, ref, rel):
-                if pin_diffs(got, want, skipping):
+            committed = None if against else git_show(root, ref, rel)
+            if committed is not None and text != committed:
+                # NOTE or DRIFT is decided against THIS file's own committed pins, exactly (no
+                # project-only skip): the root lockfile is not the workspace one. compare() below
+                # stays the cross-file check against the workspace set.
+                own = pins_of(parse_json(committed, f"{ref}:{rel}"), f"{ref}:{rel}")
+                if pin_diffs(got, own):
                     print(f"DRIFT  {rel}: the working-tree file differs from {ref} "
-                          f"(a build ADOPTS it) — restore it with git checkout -- before building")
+                          f"(a build ADOPTS it) — restore it with {restore} before building")
                     ok = False
                 else:
                     # VERSIONS-EQUAL (VX-853, P-781-3): every pin identical, so only bookkeeping
-                    # moved (the workspace originHash hashes the checkout's path, T-2) — harmless.
+                    # moved (the workspace originHash hashes the checkout's path, VX-781 record
+                    # T-2) — harmless.
                     print(f"NOTE   {rel}: differs from {ref} only in bookkeeping (pins identical) — "
-                          f"harmless; restore with git checkout -- before committing, never commit it.")
+                          f"harmless; restore with {restore} before committing, never commit it.")
             ok &= compare(label, got, want, skipping)
     else:
         for s in states:
