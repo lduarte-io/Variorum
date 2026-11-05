@@ -8,12 +8,14 @@ import Testing
 /// swift-dependencies and the MCP SDK declare float SQLCipher to 4.20 and more. So the set is
 /// enforced by EXACT declarations where each graph's ROOT reads them:
 /// - `Package.swift` for the CLI graph (`swift build` / `swift test`: this package is the root);
-/// - `project.pbxproj`'s `XCRemoteSwiftPackageReference` entries for the apps. In the Xcode
-///   workspace this package is a LOCAL DEPENDENCY and SwiftPM prunes its unused declarations,
-///   so only its direct, USED requirements count there (record E10).
+/// - `project.pbxproj`'s `XCRemoteSwiftPackageReference` entries for the apps: EVERY remote package
+///   in the app graph. In the Xcode workspace this package is a LOCAL DEPENDENCY, and SwiftPM keeps
+///   one of its declarations only when a target of a product the app links uses it (record E10;
+///   ladder round 2, R2-1), so the project, the Xcode graph's root, declares them all. One rule,
+///   no reachability analysis.
 ///
-/// These tests read the four files and fail when a declaration goes missing, floats, or
-/// disagrees with the lockfiles. That covers a reference deleted as "unused", a one-sided bump,
+/// These tests read the four files and fail when a declaration goes missing, floats, points at
+/// another repository, or disagrees with the lockfiles. That covers a reference deleted as "unused", a one-sided bump,
 /// and lockfiles that disagree. No network, no build; the deep, networked proof is
 /// `Tools/pins-belt-check`. Record: notes/plans/fixes/vx-781-lockfile-pins.md.
 @Suite("VX-781 — the pin belt: every resolved package is declared EXACT where its graph's root reads it (no network)")
@@ -73,14 +75,14 @@ struct PinBeltTests {
 
     /// Package.swift's remote requirements: identity → the `exact:` version, every line that is
     /// NOT `exact:` (a range or a branch floats), and every identity it names at all.
-    static func manifestRequirements() throws -> (exact: [String: String], floating: [String], named: Set<String>) {
+    static func manifestRequirements() throws -> (exact: [String: String], floating: [String], named: [String: String]) {
         let manifest = try read("Package.swift")
         var exact: [String: String] = [:]
         var floating: [String] = []
-        var named: Set<String> = []
+        var named: [String: String] = [:]  // identity → URL
         for m in try matches(#"\.package\(\s*url:\s*"([^"]+)"\s*,\s*([^)]*)\)"#, in: manifest) {
             let requirement = m[2].trimmingCharacters(in: .whitespacesAndNewlines)
-            named.insert(identity(ofURL: m[1]))
+            named[identity(ofURL: m[1])] = m[1]
             if let v = try matches(#"^exact:\s*"([^"]+)"$"#, in: requirement).first {
                 exact[identity(ofURL: m[1])] = v[1]
             } else {
@@ -90,26 +92,30 @@ struct PinBeltTests {
         return (exact, floating, named)
     }
 
-    /// Packages a Package.swift TARGET uses (`.product(name:package:)`): the only declarations
-    /// of this package that the Xcode graph does not prune.
-    static func manifestUsedPackages() throws -> Set<String> {
-        let manifest = try read("Package.swift")
-        let used = try matches(#"\.product\(\s*name:\s*"[^"]+"\s*,\s*package:\s*"([^"]+)"\s*\)"#,
-                               in: manifest)
-        return Set(used.map { $0[1].lowercased() })
+    /// The same repository, spelled either way: case and a trailing `.git` / `/` ignored.
+    static func sameLocation(_ a: String, _ b: String) -> Bool {
+        func norm(_ s: String) -> String {
+            var t = s.lowercased()
+            while t.hasSuffix("/") { t.removeLast() }
+            if t.hasSuffix(".git") { t.removeLast(4) }
+            return t
+        }
+        return norm(a) == norm(b)
     }
 
-    /// The project's remote package references: identity → (requirement kind, version).
-    static func projectReferences() throws -> (refs: [String: (kind: String, version: String)], count: Int) {
+    /// The project's remote package references: identity → (requirement kind, version, URL).
+    /// Xcode quotes a version with build metadata (`"7.11.1+sqlcipher.1"`); the quotes are stripped.
+    static func projectReferences() throws -> (refs: [String: (kind: String, version: String, url: String)], count: Int) {
         let project = try read(pbxproj)
-        var refs: [String: (kind: String, version: String)] = [:]
+        var refs: [String: (kind: String, version: String, url: String)] = [:]
         let blocks = try matches(
             #"isa = XCRemoteSwiftPackageReference;\s*repositoryURL = "([^"]+)";\s*requirement = \{([^}]*)\};"#,
             in: project)
         for b in blocks {
             let kind = try matches(#"kind = (\w+);"#, in: b[2]).first?[1] ?? "(none)"
-            let version = try matches(#"\bversion = ([^;]+);"#, in: b[2]).first?[1] ?? "(none)"
-            refs[identity(ofURL: b[1])] = (kind, version)
+            let raw = try matches(#"\bversion = ([^;]+);"#, in: b[2]).first?[1] ?? "(none)"
+            let version = raw.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+            refs[identity(ofURL: b[1])] = (kind, version, b[1])
         }
         let count = try matches(#"isa = XCRemoteSwiftPackageReference;"#, in: project).count
         return (refs, count)
@@ -117,40 +123,56 @@ struct PinBeltTests {
 
     @Test("(1) every CLI-graph pin is declared exact in Package.swift, and nothing there floats")
     func everyRootPinIsDeclaredExactInPackageSwift() throws {
-        let (exact, floating, _) = try Self.manifestRequirements()
+        let (exact, floating, named) = try Self.manifestRequirements()
         #expect(floating.isEmpty, "Package.swift requirements that FLOAT (a pin-free resolution moves them): \(floating)")
+        let rootPins = try Self.pins(Self.rootLockfile)
         var problems: [String] = []
-        for (identity, pin) in try Self.pins(Self.rootLockfile).sorted(by: { $0.key < $1.key }) {
+        for (identity, pin) in rootPins.sorted(by: { $0.key < $1.key }) {
             switch exact[identity] {
             case nil: problems.append("\(identity) \(pin): no `exact:` line in Package.swift")
             case let v? where v != pin.version: problems.append("\(identity): Package.swift exact \(v) ≠ root lockfile \(pin)")
             default: break
             }
         }
+        // The other direction: every declaration resolves to a pin AT THE SAME REPOSITORY.
+        for (identity, url) in named.sorted(by: { $0.key < $1.key }) {
+            if let pin = rootPins[identity] {
+                if !Self.sameLocation(url, pin.location) {
+                    problems.append("\(identity): Package.swift points at \(url), the root lockfile at \(pin.location)")
+                }
+            } else {
+                problems.append("\(identity): declared in Package.swift (\(url)) but not in the root lockfile")
+            }
+        }
         #expect(problems.isEmpty, "the CLI belt is broken: \(problems)")
     }
 
-    @Test("(2) every app-graph pin is declared exact where Xcode reads it: a project reference, or a direct requirement a target uses")
+    @Test("(2) every app-graph pin is declared exact where Xcode reads it: an exactVersion project reference at the same repository")
     func everyAppPinIsDeclaredExactWhereXcodeReadsIt() throws {
         let (refs, blockCount) = try Self.projectReferences()
         #expect(refs.count == blockCount,
                 "project.pbxproj has \(blockCount) XCRemoteSwiftPackageReference entries but only \(refs.count) read as repositoryURL + requirement")
         let floatingRefs = refs.filter { $0.value.kind != "exactVersion" }.map { "\($0.key) — \($0.value.kind)" }
         #expect(floatingRefs.isEmpty, "project package references that are not exactVersion: \(floatingRefs)")
-        let (exact, _, _) = try Self.manifestRequirements()
-        let used = try Self.manifestUsedPackages()
+        let appPins = try Self.pins(Self.workspaceLockfile)
         var problems: [String] = []
-        for (identity, pin) in try Self.pins(Self.workspaceLockfile).sorted(by: { $0.key < $1.key }) {
+        for (identity, pin) in appPins.sorted(by: { $0.key < $1.key }) {
             if let ref = refs[identity] {
                 if ref.kind != "exactVersion" || ref.version != pin.version {
                     problems.append("\(identity): project reference \(ref.kind) \(ref.version) ≠ workspace lockfile \(pin)")
                 }
-            } else if used.contains(identity), let v = exact[identity] {
-                if v != pin.version {
-                    problems.append("\(identity): Package.swift exact \(v) ≠ workspace lockfile \(pin)")
+            } else {
+                problems.append("\(identity) \(pin): no exactVersion project reference — Xcode would let it float")
+            }
+        }
+        // The other direction: every reference resolves to a pin AT THE SAME REPOSITORY.
+        for (identity, ref) in refs.sorted(by: { $0.key < $1.key }) {
+            if let pin = appPins[identity] {
+                if !Self.sameLocation(ref.url, pin.location) {
+                    problems.append("\(identity): the project points at \(ref.url), the workspace lockfile at \(pin.location)")
                 }
             } else {
-                problems.append("\(identity) \(pin): no exact project reference, and not a used direct exact requirement — Xcode would let it float")
+                problems.append("\(identity): a project reference (\(ref.url)) with no workspace lockfile pin")
             }
         }
         #expect(problems.isEmpty, "the app belt is broken: \(problems)")
@@ -161,7 +183,7 @@ struct PinBeltTests {
         let rootPins = try Self.pins(Self.rootLockfile)
         let appPins = try Self.pins(Self.workspaceLockfile)
         let projectOnly = Set(try Self.projectReferences().refs.keys)
-            .subtracting(try Self.manifestRequirements().named)
+            .subtracting(try Self.manifestRequirements().named.keys)
         var problems: [String] = []
         for (identity, pin) in appPins.sorted(by: { $0.key < $1.key }) where !projectOnly.contains(identity) {
             if let r = rootPins[identity] {

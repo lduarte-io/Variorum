@@ -57,17 +57,18 @@ let package = Package(
         //   links them (GRDB, the SDK and swift-dependencies already pull
         //   every one of them in), so nothing new is linked or fetched.
         // - IN THE XCODE PROJECT, for the apps: there this package is a LOCAL
-        //   DEPENDENCY, and SwiftPM prunes a dependency's unused declarations,
-        //   so the lines below do nothing for Xcode (only the direct, used
-        //   requirements above count). The same exact versions are therefore
-        //   declared as project-level package references in project.pbxproj
-        //   (XCRemoteSwiftPackageReference, exactVersion — beside Sparkle's
-        //   2.10.0), which ARE the Xcode graph's root.
-        // Moving any version is deliberate: change it in BOTH places and
-        // re-resolve BOTH lockfiles in one commit (the record's "UPGRADING A
-        // PIN DELIBERATELY"). A NEW package identity is a new third-party
-        // dependency, which is author-only (CLAUDE.md); whether bumping an
-        // existing pin is author-only too is open (the record's P-781-4).
+        //   DEPENDENCY, and SwiftPM keeps one of its declarations only when a
+        //   target of a product the app links uses it, so these lines alone do
+        //   not hold the app's graph. EVERY remote package is therefore also
+        //   declared as an exact project-level package reference in
+        //   project.pbxproj (XCRemoteSwiftPackageReference, exactVersion),
+        //   which IS the Xcode graph's root. Sparkle lives only there.
+        // Moving any version is deliberate: change it in each place the package
+        // appears (here and the project for all but Sparkle) and re-resolve BOTH
+        // lockfiles in one commit (the record's "UPGRADING A PIN DELIBERATELY").
+        // A NEW package identity is a new third-party dependency, which is
+        // author-only (CLAUDE.md); whether bumping an existing pin is
+        // author-only too is open (the record's P-781-4).
         // Tests/VariorumCoreTests/PinBeltTests.swift fails the moment the
         // declarations and the lockfiles disagree; `Tools/verify-pins` checks a
         // resolved state against the committed workspace lockfile.

@@ -451,6 +451,9 @@
 				E1F78100000000000000000A /* XCRemoteSwiftPackageReference "swift-collections" */,
 				E1F78100000000000000000B /* XCRemoteSwiftPackageReference "swift-atomics" */,
 				E1F78100000000000000000C /* XCRemoteSwiftPackageReference "eventsource" */,
+				E1F78100000000000000000D /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				E1F78100000000000000000E /* XCRemoteSwiftPackageReference "swift-dependencies" */,
+				E1F78100000000000000000F /* XCRemoteSwiftPackageReference "swift-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E1C271892FFC2F420084BEA6 /* Products */;
@@ -1277,6 +1280,30 @@
 			requirement = {
 				kind = exactVersion;
 				version = 1.5.1;
+			};
+		};
+		E1F78100000000000000000D /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lduarte-io/GRDB.swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = "7.11.1+sqlcipher.1";
+			};
+		};
+		E1F78100000000000000000E /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-dependencies.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.14.1;
+			};
+		};
+		E1F78100000000000000000F /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.12.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
