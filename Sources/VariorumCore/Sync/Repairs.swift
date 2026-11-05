@@ -56,6 +56,18 @@ struct TouchedRows {
     var membershipPostIDs: Set<String> = []
     /// Applied `shelf` rows — the Welcome-keeper repair's firing scope.
     var shelfIDs: Set<String> = []
+    // ——— VX-435 (the VX-805 run): the cross-wing mend's three occasions ———
+    /// (a) LIVE `reading_post` rows that landed, by reading id → their post
+    /// ids (an inline re-point lands on the keeper's id, so direction 2's
+    /// rows count for the keeper).
+    var liveMembershipLandings: [String: Set<String>] = [:]
+    /// (b) Live `reading` rows that landed with a wing pointer different
+    /// from the local row's — or with no local row at all — by reading id →
+    /// the wing the LOCAL row stood in before the landing (nil = absent).
+    var readingWingLandings: [String: String?] = [:]
+    /// (c) Posts whose Journal memberships direction 1 (inline) handed to the
+    /// keeper this batch.
+    var journalKeeperMovedPostIDs: Set<String> = []
 }
 
 /// Apply-time repairs (SyncSpec §7): concurrent offline writes can produce
@@ -217,8 +229,11 @@ extension SyncEngine {
         // notes/plans/fixes/vx-678-trash-purge-resurrection.md.)
         if resolved.isTombstoned, resolved.table == "reading",
            let keeperID = try journalKeeperBesideRetiring(db, arriving: resolved) {
-            touched.inlineRepairs += try moveJournalChildren(
+            let handed = try moveJournalChildren(
                 db, from: resolved.rowID, to: keeperID, stamp: nowStamp())
+            touched.inlineRepairs += handed.repairs
+            // VX-435: the mend's occasion (c) — the posts now the keeper's.
+            touched.journalKeeperMovedPostIDs.formUnion(handed.posts)
             // …and the DESIGNATION follows the children (the ladder's
             // R2-4): between this tombstone's chunk and the repairer's
             // `setting` chunk, a designation still naming the loser read
@@ -229,6 +244,19 @@ extension SyncEngine {
             // caused, retired by the next batch.
             touched.inlineRepairs += try convergeDailyDesignation(
                 db, to: keeperID, retiring: resolved.rowID)
+        }
+        // VX-435 — the cross-wing mend's occasion (b): a live `reading`
+        // landing whose wing pointer differs from the local row's (or that
+        // is new here) is recorded with the wing it stood in BEFORE — read
+        // now, against the pre-apply local row.
+        if resolved.table == "reading", !resolved.isTombstoned {
+            let prior = try String.fetchOne(
+                db, sql: "SELECT wing_id FROM reading WHERE id = ?", arguments: [resolved.rowID])
+            var arriving = ""
+            if case .text(let wing) = resolved.columns["wing_id"] { arriving = wing }
+            if prior != arriving {
+                touched.readingWingLandings[resolved.rowID] = .some(prior)
+            }
         }
         try resolved.apply(db)
         noteApplied(resolved, touched: &touched)
@@ -258,6 +286,13 @@ extension SyncEngine {
     private func journalKeeperBesideRetiring(
         _ db: Database, arriving row: SyncRow
     ) throws -> String? {
+        // VX-436 BELT (c) — the ruled option A: a tombstone wearing the
+        // DELETED-JOURNAL mark is HER delete, never the keeper's retirement
+        // (which keeps wearing 'daily'), so it is an ordinary delete — its
+        // cascade takes its children and nothing is handed to a re-mint (the
+        // no-backfill law). Read FIRST, before the local leg, so a local row
+        // still wearing the marker cannot turn her delete into a hand-over.
+        if Self.isDeletedJournalTombstone(row) { return nil }
         var isMintShape = false
         if let local = try Reading.fetchOne(db, key: row.rowID) {
             guard local.deletedAt == nil else { return nil }
@@ -380,8 +415,9 @@ extension SyncEngine {
     /// repair and direction 1 above so the two roads cannot drift.
     private func moveJournalChildren(
         _ db: Database, from loserID: String, to keeperID: String, stamp: String
-    ) throws -> Int {
+    ) throws -> (repairs: Int, posts: Set<String>) {
         var repairs = 0
+        var posts: Set<String> = []
         let sections = try String.fetchAll(
             db,
             sql: "SELECT id FROM reading_section WHERE reading_id = ? AND deleted_at IS NULL",
@@ -399,6 +435,7 @@ extension SyncEngine {
             arguments: [loserID])
         for membership in memberships {
             let membershipID: String = membership["id"]
+            posts.insert(membership["post_id"])
             if try keeperHoldsPost(
                 db, keeperID: keeperID, postID: membership["post_id"], excluding: membershipID) {
                 try db.execute(
@@ -412,7 +449,7 @@ extension SyncEngine {
             try enqueueExplicitly(db, table: "reading_post", rowID: membershipID)
             repairs += 1
         }
-        return repairs
+        return (repairs, posts)
     }
 
     /// The nearest locally-dead cascade parent's stamp for a live incoming
@@ -479,6 +516,10 @@ extension SyncEngine {
         case "reading_post":
             if case .text(let postID) = row.columns["post_id"] {
                 touched.membershipPostIDs.insert(postID)
+                // VX-435 — the mend's occasion (a): a LIVE row landing.
+                if !row.isTombstoned, case .text(let readingID) = row.columns["reading_id"] {
+                    touched.liveMembershipLandings[readingID, default: []].insert(postID)
+                }
             }
         case "shelf":
             touched.shelfIDs.insert(row.rowID)
@@ -851,8 +892,20 @@ extension SyncEngine {
         // only when the batch touched a book — one small indexed check per
         // fired batch, then real work only in the once-per-store-life event
         // of two independently-seeded copies actually meeting.
+        var keeperMovedPosts = touched.journalKeeperMovedPostIDs
         if !touched.readingIDs.isEmpty || touched.dailyDesignationTouched {
-            repairs += try convergeDailyJournalDuplicates(db, touched: touched)
+            let converged = try convergeDailyJournalDuplicates(db, touched: touched)
+            repairs += converged.repairs
+            keeperMovedPosts.formUnion(converged.movedPosts)
+        }
+        // VX-435 — THE CROSS-WING MEND, composed right AFTER the keeper (so
+        // its target is the converged Journal and its scope includes every
+        // post the keeper just handed over): a live member of the daily
+        // Journal sitting in another wing moves into the Journal's wing.
+        if !keeperMovedPosts.isEmpty || !touched.liveMembershipLandings.isEmpty
+            || !touched.readingWingLandings.isEmpty {
+            repairs += try mendJournalMembersIntoItsWing(
+                db, touched: touched, keeperMoved: keeperMovedPosts)
         }
         // The dedupe's occasions — PULL-ONLY, three of them (the ladder's
         // F2, then R2-1/R2-6): a book touched by the batch, the one-shot
@@ -1048,15 +1101,20 @@ extension SyncEngine {
     /// the `setting` row still naming it AFTER (registry order), and a
     /// designation left dangling at a dead Journal is exactly what makes
     /// the next ⌘J mint a third.
-    func convergeDailyJournalDuplicates(_ db: Database, touched: TouchedRows) throws -> Int {
+    func convergeDailyJournalDuplicates(
+        _ db: Database, touched: TouchedRows
+    ) throws -> (repairs: Int, movedPosts: Set<String>) {
         let candidates = try Queries.dailyJournalBookCandidates(db)
-        guard let keeperID = candidates.first else { return 0 }
+        guard let keeperID = candidates.first else { return (0, []) }
         var repairs = 0
+        var movedPosts: Set<String> = []
         for loserID in candidates.dropFirst() {
             let stamp = nowStamp()
             // Chapters and memberships move whole to the keeper (the shared
             // leg direction 1 also runs, so the two roads cannot drift).
-            repairs += try moveJournalChildren(db, from: loserID, to: keeperID, stamp: stamp)
+            let handed = try moveJournalChildren(db, from: loserID, to: keeperID, stamp: stamp)
+            repairs += handed.repairs
+            movedPosts.formUnion(handed.posts)
             // The loser retires. Its live children have all just moved, so
             // the (still-active) cascade trigger finds nothing — the victim
             // sweep is the §7 belt for anything it stamped anyway.
@@ -1070,7 +1128,7 @@ extension SyncEngine {
                 arrivingDead: touched.arrivingDeadIDs)
         }
         repairs += try convergeDailyDesignation(db, to: keeperID, retiring: nil)
-        return repairs
+        return (repairs, movedPosts)
     }
 
     /// The daily-book designation converges to the keeper where it names a
