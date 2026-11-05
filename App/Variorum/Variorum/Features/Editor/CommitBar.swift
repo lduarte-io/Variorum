@@ -163,6 +163,9 @@ struct CommitBar: View {
             .copyForAI,
             // VX-125 (the VX-439 run): Export Note… — the same text, as a file.
             .exportNote,
+            // VX-587 (the VX-805 run; R-805-3): Shift date a day earlier — under
+            // the date door, drawn on a dated note (`EntryDateShift.doorShows`).
+            .shiftEntryDateEarlier,
             // 13n-b U2 (R-13nb-4): the Private row, beside it (NOTE contexts).
             .markNotePrivate,
             // 13n-b U3: "Allow AI here", the Private row's neighbour.
@@ -905,6 +908,15 @@ struct CommitBar: View {
                 pickedDate = Self.pickerSeed(
                     entryDate: model.header?.entryDate, createdAt: model.header?.createdAt)
                 datePickerShown = true
+            }
+            // VX-587 (R-805-3): the date's one-press backfill, under its door —
+            // the ONE act (`EntryDateShift`), drawn only on a dated note (P-2).
+            if EntryDateShift.doorShows(entryDate: model.header?.entryDate) {
+                Button(CapabilityRegistry.capability(.shiftEntryDateEarlier).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await EntryDateShift.shiftEarlier(postID: postID, session: session) }
+                }
             }
             // 13l post-close, her #77 ruling (2026-08-24): the door renders in
             // NOTE contexts only — the scraps editor composes this same bar

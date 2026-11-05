@@ -407,6 +407,20 @@ struct ShellActions {
         Task { @MainActor in await NoteExport.export(postID: postID, session: session) }
     }
 
+    /// **⌘K's "Shift date a day earlier"** (VX-587 — R-805-3; and the menu
+    /// bar's key, once her chord is ruled): the MOUNTED detail's note — the
+    /// note the router's `noteHasEntryDate` fact speaks for — one day earlier
+    /// through the ONE act (`EntryDateShift`). With no dated note mounted the
+    /// registry's honest note speaks (P-2 — the row lists only where it acts,
+    /// so this is the belt for a race).
+    func shiftEntryDateEarlier() {
+        guard isEnabled(.shiftEntryDateEarlier), let postID = router.activePostID else {
+            status.refuse(CapabilityRegistry.capability(.shiftEntryDateEarlier).unavailableNote)
+            return
+        }
+        Task { @MainActor in await EntryDateShift.shiftEarlier(postID: postID, session: session) }
+    }
+
     func exportLibrary() {
         guard let folder = ExportPanels.chooseFolder(prompt: "Export Library") else { return }
         Task { @MainActor in
@@ -919,6 +933,9 @@ struct ShellActions {
         .copyForAI,
         // VX-125 (the VX-439 run): Export Note…, typeable — the same note.
         .exportNote,
+        // VX-587 (the VX-805 run; R-805-3): Shift date a day earlier — LISTED
+        // only while the mounted note has a date (`paletteEntries`, P-2).
+        .shiftEntryDateEarlier,
         // VX-372 (VX-383 U1 — D-C-2): the two duplicates, typeable — the note
         // on screen, its tags applied or left behind.
         .duplicateNoteWithTags, .duplicateNoteWithoutTags,
@@ -948,19 +965,24 @@ struct ShellActions {
     func listedPaletteEntries() async -> [(title: String, action: @MainActor () -> Void)] {
         paletteEntries(
             listing: await paletteListingFacts(),
-            noteHasSavedVersion: router.isEnabled(.compareWithLatestVersion))
+            noteHasSavedVersion: router.isEnabled(.compareWithLatestVersion),
+            noteHasEntryDate: router.isEnabled(.shiftEntryDateEarlier))
     }
 
     /// The rows under these facts (nil = every row). Pure over its input, so a
     /// pin reads exactly what an open would list. VX-440 batch 1: "Compare
     /// with Latest Version" lists only while the mounted note has a saved
     /// moment (P-2) — `noteHasSavedVersion`, the router's fact at the open.
+    /// VX-587: "Shift date a day earlier" lists only while the mounted note
+    /// has a date — `noteHasEntryDate`, the router's fact at the open.
     func paletteEntries(
-        listing facts: WingPaletteDoors.Facts?, noteHasSavedVersion: Bool = true
+        listing facts: WingPaletteDoors.Facts?, noteHasSavedVersion: Bool = true,
+        noteHasEntryDate: Bool = true
     ) -> [(title: String, action: @MainActor () -> Void)] {
         Self.paletteActs
             .filter { id in facts.map { WingPaletteDoors.lists(id, $0) } ?? true }
             .filter { id in id != .compareWithLatestVersion || noteHasSavedVersion }
+            .filter { id in id != .shiftEntryDateEarlier || noteHasEntryDate }
             .map { id in (CapabilityRegistry.capability(id).verb, paletteAction(for: id)) }
     }
 
@@ -1067,6 +1089,7 @@ struct ShellActions {
         case .compareWithLatestVersion: return { compareWithLatestVersion() }
         case .copyForAI: return { copyForAI() }
         case .exportNote: return { exportNote() }
+        case .shiftEntryDateEarlier: return { shiftEntryDateEarlier() }
         case .duplicateNoteWithTags: return { duplicateNote(tags: .applied) }
         case .duplicateNoteWithoutTags: return { duplicateNote(tags: .none) }
         case .restoreTutorial: return { restoreTutorial() }

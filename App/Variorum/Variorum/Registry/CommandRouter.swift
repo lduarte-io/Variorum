@@ -98,6 +98,8 @@ final class CommandRouter {
             // VX-440 batch 1: the newest moment was the leaving note's fact;
             // the arriving detail's observation reports its own.
             activeNoteLatestVersionID = nil
+            // VX-587: the date is the leaving note's fact too.
+            activeNoteEntryDate = nil
         }
         activePostID = postID
         activeMode = mode
@@ -154,6 +156,7 @@ final class CommandRouter {
         activePostID = nil
         activeMode = nil
         activeNoteLatestVersionID = nil  // VX-440 batch 1: the fact left with its note
+        activeNoteEntryDate = nil  // VX-587: so did its date
         // A genuine teardown (no successor mounted yet): any parked
         // choreography intent's round is over (round-1 MAJOR, half b).
         pendingWriteIntent = nil
@@ -877,6 +880,24 @@ final class CommandRouter {
         activeNoteLatestVersionID = versionID
     }
 
+    // MARK: - The mounted note's entry date (VX-587)
+
+    /// **The mounted detail's note's stored `entry_date`**, or nil — the fact
+    /// "Shift date a day earlier" lists and enables on for its routed doors
+    /// (⌘K, the menu bar; P-2). Written by the detail's held header
+    /// observation and ONLY for the note it shows; a different note's
+    /// arrival, or the detail leaving, clears it — `activeNoteLatestVersionID`'s
+    /// lifetime exactly. Observable so a shift, a picker Set or a Clear Date
+    /// moves enablement at once.
+    private(set) var activeNoteEntryDate: String?
+
+    /// The detail reports its note's date. A report for a note that is not
+    /// the mounted one (a departing detail's late delivery) is dropped.
+    func noteEntryDate(_ day: String?, postID: String) {
+        guard activePostID == postID, activeNoteEntryDate != day else { return }
+        activeNoteEntryDate = day
+    }
+
     // MARK: - Composition wiring (set once by the session)
 
     /// Speech lands in the StatusCenter (AD-14's one presentation).
@@ -951,7 +972,8 @@ final class CommandRouter {
             focusedPaneShowsBook: focusedPaneShowsBook(),
             windowKind: windowKind(),
             wingCount: wingCount(),
-            noteHasSavedVersion: activeNoteLatestVersionID != nil)
+            noteHasSavedVersion: activeNoteLatestVersionID != nil,
+            noteHasEntryDate: EntryDateShift.doorShows(entryDate: activeNoteEntryDate))
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {

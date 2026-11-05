@@ -345,6 +345,13 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// Version"'s gate: with no moment it could only refuse, so it is not a
     /// live door (P-2).
     var noteHasSavedVersion = false
+    /// **VX-587 — the mounted detail's note has an entry date** (a valid day
+    /// key — `EntryDateShift.doorShows`), through the router's
+    /// `activeNoteEntryDate`, reported by the detail's held header
+    /// observation. "Shift date a day earlier"'s gate for its ROUTED doors
+    /// (⌘K, the menu bar): with no date it could only refuse (P-2). The
+    /// `note ▾` rows carry their own note and read its date directly.
+    var noteHasEntryDate = false
 }
 
 // MARK: - The capability declaration
@@ -948,6 +955,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// FILE — File ▸ Export Note… (⌥⌘S), ⌘K and both `note ▾` menus. Post
     /// scope; reads only.
     case exportNote
+    /// VX-587 (the VX-805 run; R-805-3): "Shift date a day earlier" — a dated
+    /// note's `entry_date` one day back (`EntryDateShift`, the one act). Post
+    /// scope; both `note ▾` menus and ⌘K render it while the note HAS a date
+    /// (`noteHasEntryDate`); the chord is hers to rule (the run record).
+    case shiftEntryDateEarlier
     case toggleSeams, helper
     case restoreTutorial
     /// pre-13u Act 10 (the tenth wave's ruling — "Restore door - yes,

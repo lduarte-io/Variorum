@@ -108,6 +108,11 @@ struct CapabilityRegistryTests {
         // note has a saved moment — a fact about the NOTE, never a mode alone;
         // without this context it reads `.unavailable` everywhere the walk looks.
         contexts.append(CapabilityContext(mode: .write, noteHasSavedVersion: true))
+        // VX-587 (the VX-805 run — A JUSTIFIED EDIT, the VX-440 line's class):
+        // "Shift date a day earlier" acts where a note's detail is mounted AND
+        // that note has a date — a fact about the NOTE, never a mode alone;
+        // without this context it reads `.unavailable` everywhere the walk looks.
+        contexts.append(CapabilityContext(mode: .write, noteHasEntryDate: true))
         return contexts
     }
 

@@ -2365,6 +2365,22 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2325}\u{2318}S", takesAccess: .native,
             unavailableNote: "Export Note writes the note you have open to a file \u{2014} open one first.",
             availability: noteScoped),
+        // VX-587 (the VX-805 run; R-805-3, her pick "chord + menu act"):
+        // "Shift date a day earlier" — a dated note's `entry_date` one day
+        // back, the receipt naming the new date (`EntryDateShift`, the ONE
+        // act). Doors: both `note ▾` menus (`.bottomBar` — R6-2, drawn on a
+        // dated note: the row carries its own note and reads its date) and
+        // ⌘K (`.palette`, LISTED only while the mounted note has a date). The
+        // chord is an in-batch design fork — PROPOSED in the run record's
+        // Unit A section and wired (`.menuBar` + `shortcutLabel`) only at the
+        // orchestrator's ruling. Gate: a detail is mounted and its note has a
+        // date (`noteHasEntryDate` — the `.compareWithLatestVersion` shape).
+        Capability(
+            id: .shiftEntryDateEarlier, verb: EntryDateShiftCopy.verb, scope: .post,
+            doors: [.bottomBar, .palette],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: EntryDateShiftCopy.unavailableNote,
+            availability: { ctx in ctx.mode != nil && ctx.noteHasEntryDate ? .act : .unavailable }),
         Capability(
             id: .exportLibrary, verb: "Export Library…", scope: .app,
             doors: [.menuBar, .palette],

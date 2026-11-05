@@ -82,6 +82,9 @@ struct TakesBottomBar: View {
             .copyForAI,
             // VX-125 (the VX-439 run): Export Note… — Write's bar's twin (R6-2).
             .exportNote,
+            // VX-587 (the VX-805 run): Shift date a day earlier — Write's bar's
+            // twin (R6-2), drawn on a dated note.
+            .shiftEntryDateEarlier,
             // 13n-b U2 (R-13nb-4): the Private row, beside it.
             .markNotePrivate,
             // 13n-b U3: "Allow AI here", the Private row's neighbour.
@@ -524,6 +527,14 @@ struct TakesBottomBar: View {
                 pickedDate = CommitBar.pickerSeed(
                     entryDate: model.projection.entryDate, createdAt: model.postCreatedAt)
                 datePickerShown = true
+            }
+            // VX-587 (R-805-3): Write's bar's row, here too (R6-2).
+            if EntryDateShift.doorShows(entryDate: model.projection.entryDate) {
+                Button(CapabilityRegistry.capability(.shiftEntryDateEarlier).menuTitle()) {
+                    let session = model.session
+                    let postID = model.postID
+                    Task { await EntryDateShift.shiftEarlier(postID: postID, session: session) }
+                }
             }
             Divider()
             // 13i-d U6 (k): the note's own Move/Copy to Wing ▸ — the Library
