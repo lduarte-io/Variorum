@@ -123,6 +123,48 @@ only.
   (`~/Library/Developer/Xcode/DerivedData/Variorum-dpoup…`, 20:53, fileSystem root
   `variorum-vx-779`) resolved the same committed set.
 
+### E2 — the FORCED RE-RESOLUTION, old manifests: lockfile REMOVED, fresh DD (21:48, 37 s) — RED shape
+
+`rm` of the workspace lockfile only, then E1's invocation into `vx781-e2` / `vx781-e2-spm` (log
+`e2-resolve.log`; the written file kept as `DerivedData/logs/e2-lockfile-after.json`). Resolved and
+WRITTEN (lockfile pins vs committed):
+
+| package | committed | E2 (no pins) |
+|---|---|---|
+| sqlcipher.swift | 4.18.0 | **4.20.0** |
+| swift-dependencies | 1.14.1 | **1.17.2** |
+| swift-syntax | 602.0.0 | **604.0.0** |
+| swift-issue-reporting | — | **2.1.2 (new identity)** |
+| xctest-dynamic-overlay | 1.11.0 | **gone** |
+| combine-schedulers | 1.2.0 | 1.2.2 |
+| eventsource | 1.5.1 | 1.6.0 |
+| swift-clocks | 1.1.0 | 1.1.1 |
+| swift-collections | 1.7.2 | 1.7.5 |
+| swift-concurrency-extras | 1.4.1 | 1.4.3 |
+| swift-log | 1.16.1 | 1.17.0 |
+| swift-nio | 2.104.0 | 2.105.0 |
+| grdb.swift · sparkle · swift-sdk · swift-atomics · swift-system | — | unchanged (exact or newest) |
+
+New originHash `eef317c7…` = `sha256("https://github.com/sparkle-project/Sparkle" +
+"<home>/dev/variorum-vx-781")` — T-2's formula confirmed on a write. This is VX-770's
+upgrade set (its four headline names plus everything else in range): **without the pins, the
+manifests' requirements alone land the upgraded set.**
+
+### E3 — CLEAN lockfile restored, E2's UPGRADED DD REUSED (21:50) — the "state wins" theory REFUTED
+
+`git checkout --` of the lockfile (the only change was E2's artifact), then the same invocation
+into `vx781-e2`/`vx781-e2-spm`. **The lockfile stayed byte-clean; the checkouts were MOVED BACK to
+the committed pins** (workspace-state: sqlcipher 4.18.0 · swift-dependencies 1.14.1 · swift-syntax
+602.0.0 · xctest-dynamic-overlay 1.11.0). So on Xcode 27.1 a mismatched originHash does NOT let a
+reused DerivedData's checkouts win over a clean lockfile — T-3's expected "resolve-and-update keeps
+the current checkouts" road does not happen through `xcodebuild`. The reused-DD road is CLOSED as
+a rewrite source while the lockfile is clean.
+
+### E5 — fresh DD, CLEAN lockfile, `-disableAutomaticPackageResolution` (21:54)
+
+Committed set (4.18.0 / 1.14.1 / 602.0.0 / xctest-dynamic-overlay 1.11.0); lockfile byte-clean;
+no error or warning about the stale originHash. The flag holds the line on clean input.
+
 ### RELEASE-EXPOSURE — did 1.0 (10632) or 1.0.1 (10682) ship floated pins? **NO — both shipped the committed set** (evidence, decisive, read-only)
 
 1. **No upgraded set was ever committed, on any ref.** `git log --all` over both lockfiles: the
