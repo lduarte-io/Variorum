@@ -171,7 +171,7 @@ extension MCPWriteTools.LibraryEditJob {
         case .renameChapter(_, let name): MCPNullCharacters.count(name)
         // VX-813: an order is two enum words.
         case .setFinished, .archiveBook, .unarchiveBook, .deleteBook, .removeNote, .moveNote, .deleteChapter,
-             .moveChapter, .deleteNote, .setNoteArchived, .setBookOrder:
+             .moveChapter, .deleteNote, .setNoteArchived, .setBookOrder, .moveBookToWing:
             0
         }
     }

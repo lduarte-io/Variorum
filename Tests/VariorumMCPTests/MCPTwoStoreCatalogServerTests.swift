@@ -51,11 +51,14 @@ struct CatalogWorld: Sendable {
     var cardComment = "", cardCommit = "", cardLens = "", second = "", work = "", workBlock1 = "", workBlock2 = ""
     var mover = "", ownedNote = "", stuck = "", loose = "", capMember = "", chapter = "", doomed = "", secretTopic = ""
     var board = "", freshStart = "", idea = "", cappedToo = "", tooMember = "", gathering = ""
+    // VX-807 (batch 2): the books move_book_to_wing moves.
+    var traveler = "", travOne = "", stuckBook = "", fencedBook = ""
     // hidden (A only)
     var vault = "", secretBoard = "", finished = "", diary = "", twinStudio = "", attic = "", atticBook = ""
     var atticNote = "", journalEntry = "", privateShared = "", privateCapped = "", secretNote = ""
     var secretBlock = "", secretTake = "", secretComment = "", secretCommit = "", secretLens = ""
     var privateStudio = "", hiddenChapter = ""
+    var journalBook = "", locket = ""
 }
 
 /// One call of the walk.
@@ -152,6 +155,22 @@ struct MCPTwoStoreCatalogServerTests {
             default: w.loose = note.id
             }
         }
+        // VX-807 (batch 2): Traveler (Home, collecting #travel at Arrivals) with
+        // a member also in Shared; a book holding `stuck` (which a hidden
+        // finished book holds in A); an empty book a hidden note joins in A.
+        let travel = try ops.createTag(name: "travel")
+        let traveler = try ops.createReading(
+            name: "Traveler", kind: .book, querySpec: try RuleGrammar.encode(.tag(travel.id)), intakeSeating: .arrivals)
+        w.traveler = traveler.id
+        let travOne = try ops.createPost(title: "trav one")
+        _ = try ops.newBlock(in: travOne.id, text: "Travelling words.", registeringUndo: false)
+        _ = try ops.addPostToReading(travOne.id, to: traveler.id)
+        _ = try ops.addPostToReading(travOne.id, to: shared.id)
+        w.travOne = travOne.id
+        let stuckBook = try ops.createReading(name: "Stuck book", kind: .book)
+        _ = try ops.addPostToReading(w.stuck, to: stuckBook.id)
+        w.stuckBook = stuckBook.id
+        w.fencedBook = try ops.createReading(name: "Fenced book", kind: .book).id
         if hidden { try buildHidden(h, &w, board: board.id, idea: idea.id) }
         return w
     }
@@ -237,6 +256,30 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try ops.newBlock(in: first.id, text: "zebra words, first.", registeringUndo: false)
             _ = try ops.setNotePrivate(first.id, true)
             _ = try ops.addPostToReading(first.id, to: w.shared, at: .start)
+            // VX-807 (batch 2): Traveler's hidden things — a Private member, a
+            // hidden book also holding its readable member, a hidden note
+            // waiting at its Arrivals, a hidden twin of its name in Studio.
+            let privateTraveler = try ops.createPost(title: "private traveler")
+            _ = try ops.setNotePrivate(privateTraveler.id, true)
+            _ = try ops.addPostToReading(privateTraveler.id, to: w.traveler)
+            let keeper = try ops.createReading(name: "Keeper", kind: .book)
+            _ = try ops.addPostToReading(w.travOne, to: keeper.id)
+            let travelTag = try #require(try h.database.read {
+                try String.fetchOne($0, sql: "SELECT id FROM tag WHERE path = 'travel' AND wing_id = ''")
+            })
+            let waiter = try ops.createPost(title: "hidden waiter")
+            _ = try ops.applyTag(travelTag, toPost: waiter.id)
+            let twin = try ops.createReading(name: "Traveler", kind: .book, wingId: w.studio)
+            _ = try ops.setBookPrivate(twin.id, true)
+            // A hidden note in the Fenced book, fenced by a hidden PRIVATE book
+            // (the move would shed its fence — A-809-15).
+            let fenced = try ops.createPost(title: "locked away")
+            _ = try ops.addPostToReading(fenced.id, to: w.fencedBook)
+            let locket = try ops.createReading(name: "Locket", kind: .book)
+            _ = try ops.addPostToReading(fenced.id, to: locket.id)
+            _ = try ops.setBookPrivate(locket.id, true)
+            w.locket = locket.id
+            w.journalBook = try #require(try h.database.read { try Queries.dailyJournalBookID($0) })
         }
     }
 
@@ -253,6 +296,10 @@ struct MCPTwoStoreCatalogServerTests {
         _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, w.doomed))
         _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, w.cappedToo))
         for note in [w.ownedNote, w.stuck] { _ = try h.operations.grantMCPAccess(client, spec(.edit, .note, note)) }
+        // VX-807 (batch 2): edit on the books the move arms move.
+        for book in [w.traveler, w.stuckBook, w.fencedBook] {
+            _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, book))
+        }
         _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.loose))
         return connection
     }
@@ -397,6 +444,11 @@ struct MCPTwoStoreCatalogServerTests {
                 (atCapacity(w.cappedToo), "A-809-4 S-1 — fullness of the readable target; #218 stands"),
             "add_note_to_book · the capped book (a Private member fills it)":
                 (atCapacity(w.capped), "A-809-4 S-1 — fullness of the readable target; #218 stands"),
+            // VX-807 (batch 2): the book move's hidden causes.
+            "move_book_to_wing · a book whose note an unreadable finished book holds":
+                (MCPWriteTools.bookMoveHiddenCauseWords, "A-809-4 — the frozen book is beyond reach"),
+            "move_book_to_wing · a book a hidden note in a Private book sits in (its fence would drop)":
+                (MCPWriteTools.bookMoveHiddenCauseWords, "A-809-15 / P-809-10 — the move would shed a fence"),
         ][label]
     }
 }
@@ -410,5 +462,6 @@ extension CatalogWorld {
         secretNote = a.secretNote; secretBlock = a.secretBlock; secretTake = a.secretTake
         secretComment = a.secretComment; secretCommit = a.secretCommit; secretLens = a.secretLens
         privateStudio = a.privateStudio; hiddenChapter = a.hiddenChapter
+        journalBook = a.journalBook; locket = a.locket
     }
 }

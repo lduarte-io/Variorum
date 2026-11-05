@@ -140,6 +140,14 @@ public struct MCPHostHooks: Sendable {
     /// book (names stay with grants — AF-10 (f)); otherwise, and with no app
     /// around the host, the op's own refusal speaks through `refusalWords`.
     public var wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)?
+    /// VX-807 (the VX-809 run, batch 2): her Move to Wing ▸ door's OWN sentence
+    /// for a BOOK whose member is also in a finished or sealed book that stays
+    /// behind (`WingCopy.bookFrozen` on the Mac), so `move_book_to_wing`
+    /// refuses exactly as her door does — spoken only where the client can READ
+    /// both that note and that book (A-809-4); otherwise the book move's one
+    /// hidden-cause sentence, and with no app around the host the op's own
+    /// refusal through `refusalWords`.
+    public var bookMoveFrozenWords: (@Sendable (_ bookName: String, _ noteTitle: String, _ frozenBook: String) -> String)?
     /// **VX-275 — HER EDITOR FIRST** (her ruling (a), 2026-10-13: before a
     /// wire delete lands, the app saves what she has typed, exactly as her
     /// own Delete door does). Awaited by `MCPWriteTools.call` AFTER the
@@ -161,7 +169,8 @@ public struct MCPHostHooks: Sendable {
         now: @escaping @Sendable () -> Date = { Date() },
         show: (@Sendable (MCPShowRequest) async -> MCPShowRule.Verdict)? = nil,
         wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil,
-        beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil
+        beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil,
+        bookMoveFrozenWords: (@Sendable (_ bookName: String, _ noteTitle: String, _ frozenBook: String) -> String)? = nil
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk
@@ -170,6 +179,7 @@ public struct MCPHostHooks: Sendable {
         self.show = show
         self.wingMoveFrozenWords = wingMoveFrozenWords
         self.beforeWrite = beforeWrite
+        self.bookMoveFrozenWords = bookMoveFrozenWords
     }
 }
 

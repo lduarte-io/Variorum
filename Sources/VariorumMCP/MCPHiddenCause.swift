@@ -40,6 +40,16 @@ extension MCPWriteTools {
         "That note can't be moved \u{2014} something beyond your reach holds it. "
         + "The author can move it in Variorum."
 
+    /// `move_book_to_wing`'s hidden-cause sentence (VX-807 — the VX-809 run,
+    /// batch 2; A-809-4's principle, A-809-15): a member held by a finished or
+    /// sealed book the client can't read (or whose NOTE it can't read), or a
+    /// member whose fence the move would shed — never "finished", "sealed" or
+    /// "Private": those are the hidden entity's facts. PROVISIONAL, P-809-2's
+    /// family.
+    static let bookMoveHiddenCauseWords =
+        "That book can't be moved \u{2014} something beyond your reach holds one of its notes. "
+        + "The author can move it in Variorum."
+
     /// **The ownership consult's refusal, reach-pure** (`add_note_to_book`):
     /// the error to throw in its place — her refusal RE-KEYED to the readable
     /// claimants alone (her words stand: a readable claimant explains it, and

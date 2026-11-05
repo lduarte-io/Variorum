@@ -302,6 +302,22 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "unarchive_book · that book", tool: "unarchive_book") { w, _ in ["book_id": s(w.doomed)] },
         CatalogArm(label: "archive_book · a hidden book", tool: "archive_book") { w, _ in ["book_id": s(w.vault)] },
         CatalogArm(label: "unarchive_book · a hidden book", tool: "unarchive_book") { w, _ in ["book_id": s(w.atticBook)] },
+        // VX-807 (batch 2): the book move — Traveler carries a Private member,
+        // a member a hidden book also holds, a hidden waiting note, and a hidden
+        // twin of its name waits in Studio (A); the one shape on a hidden book,
+        // a hidden wing and the daily Journal; a gathering's own sentence.
+        CatalogArm(label: "move_book_to_wing · Traveler to Studio (hidden members, books, waiters, twin)",
+                   tool: "move_book_to_wing") { w, _ in ["book_id": s(w.traveler), "wing_id": s(w.studio)] },
+        CatalogArm(label: "move_book_to_wing · a hidden book", tool: "move_book_to_wing") { w, _ in
+            ["book_id": s(w.vault), "wing_id": s(w.studio)] },
+        CatalogArm(label: "move_book_to_wing · to a hidden wing", tool: "move_book_to_wing") { w, _ in
+            ["book_id": s(w.doomed), "wing_id": s(w.attic)] },
+        CatalogArm(label: "move_book_to_wing · the daily Journal", tool: "move_book_to_wing") { w, _ in
+            ["book_id": s(w.journalBook), "wing_id": s(w.studio)] },
+        CatalogArm(label: "move_book_to_wing · a hidden Private book", tool: "move_book_to_wing") { w, _ in
+            ["book_id": s(w.locket), "wing_id": s(w.studio)] },
+        CatalogArm(label: "move_book_to_wing · the gathering", tool: "move_book_to_wing") { w, _ in
+            ["book_id": s(w.gathering), "wing_id": s("")] },
         CatalogArm(label: "list_my_activity", tool: "list_my_activity") { _, _ in ["limit": .int(200)] },
         CatalogArm(label: "list_books · after the acts", tool: "list_books") { _, _ in [:] },
         CatalogArm(label: "list_notes · the shared book after the acts", tool: "list_notes") { w, _ in ["book_id": s(w.shared)] },
@@ -336,6 +352,12 @@ extension MCPTwoStoreCatalogServerTests {
             ["note_id": s(c["seedCopy"] ?? ""), "with_ids": .bool(true)] },
         CatalogArm(label: "move_note_to_wing · a note an unreadable finished book holds", tool: "move_note_to_wing") { w, _ in
             ["note_id": s(w.stuck), "wing_id": s(w.studio)] },
+        // VX-807 (batch 2): the book move's hidden causes (each lands in B only),
+        // AFTER the note move above (B's stuck has left the Stuck book there).
+        CatalogArm(label: "move_book_to_wing · a book whose note an unreadable finished book holds",
+                   tool: "move_book_to_wing") { w, _ in ["book_id": s(w.stuckBook), "wing_id": s(w.studio)] },
+        CatalogArm(label: "move_book_to_wing · a book a hidden note in a Private book sits in (its fence would drop)",
+                   tool: "move_book_to_wing") { w, _ in ["book_id": s(w.fencedBook), "wing_id": s(w.studio)] },
         CatalogArm(label: "remove_tag · card #secret-topic (only a hidden note wears it after)", tool: "remove_tag") { w, _ in
             ["note_id": s(w.card), "tag": s("secret-topic")] },
     ]

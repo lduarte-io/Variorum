@@ -140,6 +140,8 @@ enum MCPToolCatalog {
         putBack, setEntryDate,
         // 13n-c U6 — the per-item note move across wings (VX-160).
         moveNoteToWing,
+        // VX-807 (the VX-809 run, batch 2 — R-807): a whole book across wings.
+        moveBookToWing,
         // VX-168 U2 — the deliberate acts: VX-169's commit (her settlement:
         // edit) and VX-174's merge button (R-MERGE-1: edit).
         saveCommit, chooseTake, adoptLens,
@@ -1063,6 +1065,45 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-807 (the VX-809 run, batch 2 — R-807; A-809-2/-14/-15/-16, R-805-5):
+    /// her Move to Wing ▸ for a book, on the wire. Listed at EDIT under a book
+    /// or wing grant (a gathering never moves on the wire — A-809-16): a client
+    /// short on the destination's write new is still offered it, and its
+    /// refusal raises that wing's ask.
+    static let moveBookToWing = MCPToolDeclaration(
+        name: "move_book_to_wing", rung: .edit, title: "Move a book to another wing",
+        description: """
+            Move a whole book to another wing (wing_id; "" is Home; list_wings gives every wing \
+            shared with you, empty ones too), as the author's Move to Wing does: its notes come \
+            with it — their order, chapters, tags (a tag the other wing lacks is made there by \
+            its path) and archive state — and so do its rule, outflow, star and finished or \
+            sealed state; it arrives unshelved. Each wing is a separate library, so a note of the \
+            book that is also in another book here leaves that book, and the notes waiting at its \
+            Arrivals stay behind, dismissed — including any you can't read. Needs edit on the book \
+            and write new on the wing it goes to. A book can't move while one of its notes is also \
+            in a finished or sealed book here (the author reopens that book first), nor while \
+            something beyond your reach holds one of its notes (one sentence says so). A gathering \
+            and the daily Journal move only by the author's hand. One undo for the author puts it \
+            all back — the books its notes left and the waiting notes too. Returns JSON: where it \
+            landed; notes — how many of the notes that came you can read (archived_notes of them \
+            archived); left_books — each note you can read with the book you can read that it \
+            left (note_id, book_id, name; the first \(MCPWriteTools.bookMoveListCap), \
+            left_books_count all of them); dismissed_arrivals — the waiting notes you can read that \
+            were dismissed; same_name_in_wing — books there already wearing its name (both keep \
+            their names); and \(MCPWriteTools.beyondReachKey), which says, always in the same \
+            words, that books beyond your reach, if any, are not listed.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "book_id": .object(["type": "string", "description": "The book to move (list_books gives ids)."]),
+                "wing_id": .object(["type": "string", "description": "The wing it goes to (\"\" is Home)."]),
+            ]),
+            "required": .array(["book_id", "wing_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
 
     // MARK: - VX-184 U3 — VX-187 link_versions
 

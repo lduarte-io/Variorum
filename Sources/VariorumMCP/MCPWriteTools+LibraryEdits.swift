@@ -47,6 +47,9 @@ extension MCPWriteTools {
         /// VX-813 (the VX-809 run, batch 2): a book's or a gathering's order
         /// (`MCPWriteTools+BookOrder`).
         case setBookOrder(bookID: String, order: Queries.ReadingOrder)
+        /// VX-807 (the VX-809 run, batch 2): a whole book to another wing
+        /// (`MCPWriteTools+BookWingMove`).
+        case moveBookToWing(bookID: String, wingID: String)
 
         var tool: String {
             switch self {
@@ -64,6 +67,7 @@ extension MCPWriteTools {
             case .setNoteArchived(_, let archived):
                 archived ? MCPToolCatalog.archiveNote.name : MCPToolCatalog.unarchiveNote.name
             case .setBookOrder: MCPToolCatalog.setBookOrder.name
+            case .moveBookToWing: MCPToolCatalog.moveBookToWing.name
             }
         }
 
@@ -81,6 +85,11 @@ extension MCPWriteTools {
             // VX-813: an order is a book's two columns — no take's text read,
             // rewritten, copied, frozen or tombstoned.
             case .setBookOrder:
+                false
+            // VX-807: a wing move re-homes notes — no take's text read,
+            // rewritten, copied, frozen or tombstoned (`move_note_to_wing`'s
+            // answer, one level up).
+            case .moveBookToWing:
                 false
             }
         }
@@ -189,6 +198,11 @@ extension MCPWriteTools {
             return .setBookOrder(
                 bookID: try requiredString(args, "book_id"),
                 order: try Self.order(field: args["sort_field"], direction: args["sort_dir"], at: ""))
+        case MCPToolCatalog.moveBookToWing.name:
+            guard let wingID = try optionalString(args, "wing_id") else {
+                throw ArgumentFailure(message: "wing_id is required (\"\" is Home).")
+            }
+            return .moveBookToWing(bookID: try requiredString(args, "book_id"), wingID: wingID)
         default:
             return nil
         }
@@ -579,6 +593,8 @@ extension MCPWriteTools {
 
         case .setBookOrder(let bookID, let order):
             return try performBookOrder(bookID: bookID, order: order, job: job, ops: ops, clientName: clientName)
+        case .moveBookToWing(let bookID, let wingID):
+            return try performBookWingMove(bookID: bookID, wingID: wingID, job: job, ops: ops, clientName: clientName)
         }
     }
 }

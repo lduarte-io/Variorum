@@ -325,7 +325,10 @@ struct MCPServerTests {
                     "set_starred",
                     // VX-813 (the VX-809 run, batch 2 — justified edit, the ritual):
                     // her navigator's Save as This Book's Order.
-                    "set_book_order"])
+                    "set_book_order",
+                    // VX-807 (the VX-809 run, batch 2 — justified edit, the ritual):
+                    // her Move to Wing for a whole book.
+                    "move_book_to_wing"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })

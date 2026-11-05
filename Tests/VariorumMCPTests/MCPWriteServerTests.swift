@@ -344,6 +344,9 @@ struct MCPWriteServerTests {
             // VX-813 (the VX-809 run, batch 2 — justified edit, the ritual): her
             // book's order, refusing at the rung (an order is an edit).
             calls.append(("set_book_order", ["book_id": .string(book.id), "sort_field": .string("entry_date")]))
+            // VX-807 (the VX-809 run, batch 2 — justified edit, the ritual): her
+            // book's move across wings, refusing at the rung.
+            calls.append(("move_book_to_wing", ["book_id": .string(book.id), "wing_id": .string(elsewhere.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
