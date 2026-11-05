@@ -4,8 +4,9 @@
 //
 //  Phase 13, B3 — the book structure's behavioral seams: chapter grouping
 //  (pure), the finished-opens-into-Read rule (R2), and the journal-book
-//  doors (R50 — the daily book's ensure-membership; the one-entry-per-day
-//  rule UNTOUCHED and scoped to the daily door; other journal books mint
+//  doors (R50 — the daily book's ensure-membership; ⌘J's open-today scoped
+//  to the daily door — since VX-797 it opens the day's FIRST entry, and the
+//  daily book's own New Entry mints fresh ones; other journal books mint
 //  freely).
 //
 
