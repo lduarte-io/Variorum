@@ -11,15 +11,26 @@ no custody, no editor seam, no `xcodebuild test`).
 Every clean-input `xcodebuild` I ran (resolve, reused DerivedData, the exactness flag, a full
 build) left the lockfile byte-clean, and the only road to an upgraded file I reproduced is a
 resolution that runs WITHOUT the pins. The belt makes that road land the committed set, so the
-trigger no longer decides what ships. No `xcodebuild test` ran (no stage claim); release.sh is
-untouched (a wiring PROPOSAL only, below).
+trigger no longer decides what ships. **The ticket's sharpest datum stays unexplained (R1-3):**
+VX-770's gatef rewrote the file "under a build that itself resolved committed pins". A resolution
+that landed the committed set cannot write an upgraded file, so a SECOND writer existed: another
+process, or another resolution path. The actions VX-770 ran around its rewrites were `xcodebuild
+test` and iOS-simulator destinations. I sampled the lockfile through macOS `build` (E7, E12) and
+generic-iOS `build`, both pre-belt (R1-3's sample) and on the belt (R1-11): no change in any of
+them. `xcodebuild test` and simulator destinations were NEVER sampled (stage-gated). No `xcodebuild
+test` ran (no stage claim); release.sh is untouched (a wiring PROPOSAL only, below).
 
 **The mechanism as settled.** (1) Without its pins, the manifests' ranges float: the GRDB fork's own
 `SQLCipher.swift from: "4.11.0"`, Package.swift's `swift-dependencies from: "1.9.0"`, and the
 transitive ranges of swift-dependencies and the MCP SDK. A pin-free resolution lands SQLCipher
 **4.20.0**, swift-dependencies 1.17.2, swift-syntax 604.0.0, swift-issue-reporting 2.1.2 and 8 more
-(E2, C1). (2) Once such a file sits in the tree, every later build ADOPTS it, the exactness flags
-included, because they enforce THE FILE (E8 = VX-770's gate/gate2). (3) With a clean lockfile,
+(E2, C1). (2) **Pre-belt**, once such a file sits in the tree every later build ADOPTS it, the
+exactness flags included, because they enforce THE FILE (E8 = VX-770's gate/gate2). **On the belt
+this road is CLOSED in both graphs (E8b, R1-2):** an upgraded file now contradicts the exact
+declarations. The strict modes FAIL CLOSED (Xcode `-onlyUsePackageVersionsFromResolvedFile` exit 74;
+`swift package --only-use-versions-from-resolved-file` exit 1; both say "an out-of-date resolved
+file was detected"). The plain modes HEAL the file back to the committed set, even in a DerivedData
+already holding upgraded checkouts. (3) With a clean lockfile,
 Xcode 27.1 SEEDS the resolver with the pins: a fresh DerivedData (E1, E7), a reused upgraded one
 (E3, the checkouts are moved back) and `-disableAutomaticPackageResolution` (E5) all land the
 committed set and never rewrite. (4) Side facts: the workspace lockfile's originHash is
@@ -36,28 +47,38 @@ project-level package references.
 **The belt as built:** Package.swift exact pins for every remote package, the CLI's belt (eda25f273,
 620cc9019) · the same versions as 12 exact `XCRemoteSwiftPackageReference` entries in
 project.pbxproj, the app's belt (620cc9019) · the root lockfile reconciled to the shipping set
-(P-781-1) · `Tools/verify-pins` = the guard (fef4800f8) · `Tools/pins-belt-check` = the pin
-(0d7fd8019). Upgrading a pin deliberately: the numbered procedure below.
+(P-781-1) · **`Tests/VariorumCoreTests/PinBeltTests.swift` = the every-run static guard of all four
+places (R1-1, 95fcc3c4e; red-on-old on 68b3d9c53, red on a deleted reference and on one-sided
+bumps)** · `Tools/verify-pins` = the resolved-state guard (fef4800f8, 60cfbd44e) ·
+`Tools/pins-belt-check` = the deep, networked proof (0d7fd8019, 60cfbd44e). Upgrading a pin
+deliberately: the numbered procedure below.
 
 **RELEASE-RISK VERDICT:** a clean checkout + fresh `-derivedDataPath` resolves the committed pins
 (E1, E7, and the 1.1 release road's own build, which the coordinator confirmed). The two risk roads
-were a dirty/upgraded lockfile in the tree and any pin-free resolution. The belt closes the second.
-The guards are release.sh's clean-tree refusal plus `Tools/verify-pins "<OUT>/DerivedData"` after
-the archive. **RELEASE-EXPOSURE: 1.0 and 1.0.1 shipped the committed set.** The retained SQLCipher
+were a dirty/upgraded lockfile in the tree and any pin-free resolution. The belt closes BOTH: a
+pin-free resolution lands the committed set, and an upgraded file fails closed or heals (E8b). The
+guards in place are the belt itself, PinBeltTests in every `swift test`, and release.sh's
+clean-tree refusal (release.sh:103–104). If wired (the proposal below; not applied), `Tools/verify-pins
+"<OUT>/DerivedData"` after the archive adds a check of what the archive actually resolved. **RELEASE-EXPOSURE: 1.0 and 1.0.1 shipped the committed set.** The retained SQLCipher
 dSYM UUIDs `17E38CF7…`/`F0784571…` equal the 4.18.0 xcframework's, and both builds were
 `dirty files: 0`.
 
-**Evidence lines:** `pins-belt-check: BELT DOES NOT HOLD at 68b3d9c53` (Xcode + CLI DRIFT ×12,
+**Evidence lines:** PinBeltTests red-on-old (a 68b3d9c53 export + the test): `✘ Test run with 3 tests
+in 1 suite failed after 0.002 seconds with 4 issues`; green on HEAD `✔ Test run with 3 tests in 1
+suite passed` · `pins-belt-check: BELT DOES NOT HOLD at 68b3d9c53` (Xcode + CLI DRIFT ×12,
 `sqlcipher.swift: committed 4.18.0 (f879fff) -> resolved 4.20.0 (e7415c5)`), exit 1 · `BELT HOLDS
 at f8d2ced67` (the merged tree; 16 + 15 pins), exit 0 · merged-tree Debug build `** BUILD
 SUCCEEDED **`, `verify-pins … vx781-merged …: 16 pins match`, built SQLCipher UUID = 4.18.0's ·
 `** TEST BUILD SUCCEEDED **` · core `3646 tests in 491 suites passed … 5 known issues`,
 StringsWorkbook `32 tests in 4 suites passed`, MCP 549/100 with the three socket-timing tests red
-only under whole-suite load (`16 tests in 3 suites passed` alone).
+only under whole-suite load (`16 tests in 3 suites passed` alone; VX-353/VX-685 track one of them) ·
+the phone scheme on the belt `** BUILD SUCCEEDED **`, verify-pins 16 · the round-1 core re-run in
+ROUND 1 FIX LEG.
 
-**Open items:** P-781-1/-2/-3 for QUESTIONS (below) · born-ticket candidates (an upgrade helper, the
-release.sh hook) · the stray default DerivedData from my `xcodebuild -list` (the coordinator's
-sweep) · VX-770's first trigger (mooted, not found).
+**Open items:** P-781-1/-2/-3/-4 for QUESTIONS (below) · born-ticket candidates (an upgrade helper,
+the release.sh hook, the two untracked MCP socket-timing flakes) · the stray default DerivedData
+from my `xcodebuild -list` (the coordinator's sweep) · VX-770's first trigger and second writer
+(mooted, not found; `test` and simulator destinations never sampled).
 
 ## LIVE STATUS (flipped per piece, in the same commit as the piece)
 
@@ -353,7 +374,8 @@ a dirty tree for the same reason); bad path or option exits 2. Python 3.9 stdlib
    (1.0 = 53493f1ca, 1.0.1 = f2477b563) carry the old committed pins.
 2. **Both releases were clean-tree, fresh-DerivedData builds.** Their retained provenance
    (`~/Library/Developer/Variorum/Releases/<v>/RELEASE-INFO.txt`) records `dirty files: 0`,
-   Xcode 27.1 (27A9275), the commit above; `release.sh` line 89–90 refuses a dirty tree, and
+   Xcode 27.1 (27A9275), the commit above; `release.sh` refuses a dirty tree (lines 89–90 at the
+time; 103–104 since VX-779's merge), and
    `archive-and-export.sh` archives with `-derivedDataPath "${OUT}/DerivedData"` in a fresh OUT —
    E1's exact shape, which resolves the committed set (and see the WHY below).
 3. **The shipped binaries say so directly.** The retained `SQLCipher.framework.dSYM` of BOTH
@@ -427,8 +449,9 @@ sweep). Every later xcodebuild carried all three isolation flags.
     issues`: the SAME three socket-timing tests as the pre-merge run, under whole-suite load.
     Alone (`--filter "MCPHarnessTimeLimitTests|MCPPreInitializeWindowTests|
     MCPDiscoverProbeServerTests"`): **`Test run with 16 tests in 3 suites passed after 2.254
-    seconds.`** This is the load-timing class VX-736's record names for this suite ("three
-    load-timing flakes, each green alone"). The CLI graph's only pin change in this diff is
+    seconds.`** The load-timing class: MCPHarnessTimeLimitTests' overrun is ticketed (VX-353,
+    VX-685, "green in isolation"). MCPPreInitializeWindowTests and MCPDiscoverProbeServerTests have
+    NO ticket, which makes them a born-ticket candidate (Test-only · Tests & tooling · Low). The CLI graph's only pin change in this diff is
     swift-concurrency-extras 1.4.0→1.4.1 and xctest-dynamic-overlay 1.10.1→1.11.0, the versions the
     app has always run its tests on. No socket or timing code moved.
 - **The app, Debug** (`xcodebuild build -scheme Variorum -configuration Debug -destination
@@ -460,10 +483,12 @@ sweep). Every later xcodebuild carried all three isolation flags.
 The belt's cost is that a dependency version now lives in up to FOUR places that must agree. Every
 upgrade is deliberate, so this is the whole road, in order:
 
-1. **Decide (author-only).** Name the package and the new version. A NEW package identity entering
-   the graph (e.g. swift-issue-reporting, which swift-dependencies ≥ 1.17.1 brings) counts as a new
-   third-party dependency, an author-only call. If it is linked, its licence notice joins Settings ▸
-   Acknowledgments (`AcknowledgmentsCopy`).
+1. **Decide.** Name the package and the new version; every move is deliberate. A NEW package
+   identity entering the graph (e.g. swift-issue-reporting, which swift-dependencies ≥ 1.17.1
+   brings) is a new third-party dependency, which is author-only (CLAUDE.md). If it is linked, its
+   licence notice joins Settings ▸ Acknowledgments (`AcknowledgmentsCopy`). Whether bumping an
+   EXISTING pin is author-only too is unruled (P-781-4). Until she rules, treat a crypto pin
+   (SQLCipher, the GRDB fork) as hers.
 2. **Edit the declarations, the same version in each place the package appears:**
    a. `Package.swift`: its `exact:` line. This is the CLI's belt, and for the direct dependencies
       (the GRDB fork, swift-dependencies, the MCP SDK) the app's belt too.
@@ -482,12 +507,14 @@ upgrade is deliberate, so this is the whole road, in order:
       -packageCachePath <dir>` (all three inside the worktree's gitignored DerivedData).
    Removing the files is SAFE only because of the belt: a pin-free resolution lands exactly the
    declared set. Anything you left floating shows up in step 4.
-4. **Verify, after committing:** `Tools/verify-pins` (no argument) must say OK for both lockfiles,
-   and `Tools/pins-belt-check HEAD` must exit 0. **These are the roads that go RED until everything
+4. **Verify, after committing:** `swift test --filter PinBeltTests` (milliseconds, no network)
+   must pass, `Tools/verify-pins` (no argument) must say OK for both lockfiles, and
+   `Tools/pins-belt-check HEAD` must exit 0. **These are the roads that go RED until everything
    agrees.** A package bumped in only one of Package.swift / project.pbxproj does NOT fail
    resolution. Xcode prunes Package.swift's line and the CLI never reads the project, so the app and
-   the CLI silently get DIFFERENT versions. That mismatch is caught by verify-pins (the root
-   lockfile vs the committed workspace set) and by pins-belt-check (the CLI graph DRIFTs). A
+   the CLI silently get DIFFERENT versions. That mismatch is caught by PinBeltTests on every `swift
+   test` (its (2) or (3) goes red, as probes D2/D3 showed), by verify-pins (the root lockfile vs the
+   committed workspace set) and by pins-belt-check (the CLI graph DRIFTs). A
    lockfile not re-resolved shows as DRIFT, or as a byte-dirty workspace lockfile after the next
    build (the tree guard).
 5. **The usual gate** on the new set (core suite, app suites under a stage claim, a walk if behaviour
@@ -504,12 +531,12 @@ around out of frustration. Suggested: Improvement · Tests & tooling · Low.
 Two verification-only hooks, no change to the publish flow:
 
 ```diff
- # ------------------------------------------------------------------ 0. preflight  (after the clean-tree refusal, line ~90)
+ # ------------------------------------------------------------------ 0. preflight  (after the clean-tree refusal, release.sh:104)
 +# VX-781: the pins guard over the lockfiles a build is about to read (the workspace file is already
 +# covered by the clean-tree refusal; this also proves the root lockfile agrees with it).
 +"${REPO}/Tools/verify-pins" > /dev/null || refuse "the package pins drift from the committed set — run Tools/verify-pins (VX-781)"
 
- # ------------------------------------------------------------------ 1–2. stamp + archive + export  (after `[ "$AE" -eq 0 ] || …`, line ~171)
+ # ------------------------------------------------------------------ 1–2. stamp + archive + export  (after `[ "$AE" -eq 0 ] || …`, release.sh:171)
 +# VX-781: the archive's RESOLVED graph is the committed one — read from its own SourcePackages,
 +# before anything is notarized; the result rides beside RELEASE-INFO.txt.
 +"${REPO}/Tools/verify-pins" "${BUILD_DIR}/DerivedData" > "${BUILD_DIR}/verify-pins.txt" \
@@ -547,6 +574,15 @@ candidate if wanted: Improvement · Tests & tooling · Medium.
   same stance as release.sh's clean-tree refusal: a dirty file is what a build adopts. (B) Pass when
   pins are equal (less noise; the post-build check still guards). (A) is conservative and
   consistent with the release road.
+
+- **P-781-4 — is moving an EXISTING pin's version author-only?** CLAUDE.md makes adding a
+  third-party dependency author-only; it says nothing about bumping one. (A) A bump is author-only,
+  like an add; the crypto pin (SQLCipher) makes this the safe reading. (B) Any session may bump
+  within an existing identity through the UPGRADING road, recorded in its effort. (C) Bumps are
+  author-only for the crypto and sync-adjacent pins (SQLCipher, the GRDB fork), free for the rest.
+  **Built:** nothing is decided in code. Package.swift and UPGRADING step 1 now state only the
+  canon (a new identity is author-only) and point here; the record advises treating a crypto pin as
+  hers until she rules. Queued at the orchestrator's note for her ratification at the merge.
 
 ## Machinery honesty
 
@@ -587,3 +623,101 @@ finding is AGREED; none disputed.** The fixes follow in "ROUND 1 FIX LEG".
 | R1-9 | NIT | The no-argument mode byte-checks the workspace lockfile but only pin-compares the root lockfile, which `swift build` adopts the same way. | **AGREE.** Fix: the same byte check on the root lockfile. |
 | R1-10 | NIT | Line references stale after the merge (dirty-tree refusal now release.sh:103–104, `AE` check :174); cite VX-685/VX-353 for the MCP flakes. | **AGREE.** VX-353 and VX-685 (read from main's `notes/TICKETS.md`) cover MCPHarnessTimeLimitTests only. The other two flaking suites (MCPPreInitializeWindowTests, MCPDiscoverProbeServerTests) have NO ticket, so they become a born-ticket candidate. |
 | R1-11 | NIT, SPEC. | The phone scheme was not built on the belt. A headless `-scheme VariorumMobile -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build` needs no stage. | **AGREE.** Fix: that build on the merged belt tree, isolated, lockfile sampled, then verify-pins on its DerivedData. |
+
+## ROUND 1 FIX LEG (implementer) — every agreed finding, with its evidence
+
+- **R1-1 (MAJOR) — FIXED, red-on-old.** `Tests/VariorumCoreTests/PinBeltTests.swift` (95fcc3c4e):
+  three tests over the four files, read by `#filePath`. No network, no build, ~2 ms.
+  - (1) Every root-lockfile pin has an `exact:` Package.swift line at its version, and no
+    Package.swift requirement floats.
+  - (2) Every workspace-lockfile pin is an `exactVersion` project reference at its version, or a
+    direct `exact:` requirement that a target USES (`.product(…, package:)`). Every project
+    reference must be `exactVersion`, and every reference block must parse.
+  - (3) The root pins equal the workspace pins (identity, location, version, revision), minus the
+    project-only references (project identities Package.swift never names, which is Sparkle).
+
+  Evidence:
+  - **GREEN on HEAD:** `✔ Test run with 3 tests in 1 suite passed after 0.002 seconds.`
+  - **RED-ON-OLD:** a `git archive 68b3d9c53` export with ONLY the new test file added, built
+    fresh: `✘ Test run with 3 tests in 1 suite failed after 0.002 seconds with 4 issues`.
+    - (1) `Package.swift requirements that FLOAT …: ["https://github.com/pointfreeco/swift-dependencies.git — from: \"1.9.0\""]`
+      and `the CLI belt is broken: ["combine-schedulers 1.2.0 (dcccb97): no exact: line in Package.swift", …]`.
+    - (2) `the app belt is broken: ["combine-schedulers 1.2.0 (dcccb97): no exact project reference, and not a used direct exact requirement — Xcode would let it float", … "sqlcipher.swift 4.18.0 (f879fff): …", …]`.
+    - (3) `the lockfiles disagree …: ["swift-concurrency-extras: root 1.4.0 (a90e2e4) ≠ workspace 1.4.1 (5fa2534)", "xctest-dynamic-overlay: root 1.10.1 (401bf70) ≠ workspace 1.11.0 (8f6abcf)"]`.
+  - **The finding's own degradations, probed on HEAD.** The working tree was committed first;
+    each probe edited only the named files and was restored by `git checkout --`.
+    - **D1, the swift-atomics reference deleted:** RED, (2) `["swift-atomics 1.3.1 (0442cb5): no
+      exact project reference, and not a used direct exact requirement — Xcode would let it
+      float"]`. verify-pins and pins-belt-check could not see this one.
+    - **D2, a one-sided bump (the project's swift-log → 1.17.0 only):** RED, (2) `["swift-log:
+      project reference exactVersion 1.17.0 ≠ workspace lockfile 1.16.1 (4038b6a)"]`.
+    - **D3, the project + workspace lockfile bumped, the root not:** RED, (3) `["swift-log: root
+      1.16.1 (4038b6a) ≠ workspace 1.17.0 (e3da040)"]`.
+  - `pins-belt-check` stays as the networked proof.
+- **R1-2 (MINOR) — FIXED (measured, then restated).** E8b, on a HEAD (60cfbd44e) export carrying
+  BOTH upgraded lockfiles (E2's and C1's), every directory isolated:
+  - **(a)** Xcode, fresh DerivedData, `-onlyUsePackageVersionsFromResolvedFile`: **exit 74**,
+    `an out-of-date resolved file was detected at …/Package.resolved, which is not allowed when
+    automatic dependency resolution is disabled`. FAILS CLOSED, and the lockfile is unchanged.
+    (Its clone dir was left holding upgraded checkouts, fetched before the refusal; no build can
+    proceed from a failed resolve, and (e) shows they heal.)
+  - **(b)** Xcode, fresh DerivedData, plain: exit 0. The state AND the rewritten lockfile:
+    `verify-pins` **16 pins match**. The file HEALED.
+  - **(c)** CLI strict (`--only-use-versions-from-resolved-file`): **exit 1**, the same
+    out-of-date error, root lockfile unchanged. This reproduces the reviewer's measurement.
+  - **(d)** CLI plain: exit 0, state + rewritten root lockfile **15 pins match**. Healed.
+  - **(e)** Xcode, the upgraded file again, REUSING (a)'s DerivedData (upgraded checkouts), plain:
+    exit 0, **16 pins match**. Healed.
+
+  Mechanism (2) and the RELEASE-RISK verdict in FOR A LATER READER are now split pre-belt /
+  post-belt.
+- **R1-3 (MINOR) — FIXED (the sentence) + two sampled builds.** NOT DONE now names the gatef datum
+  (a second writer), and names `xcodebuild test` and simulator destinations as never sampled.
+  - Pre-belt sample: a 68b3d9c53 export, `-scheme VariorumMobile -destination
+    'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build`, isolated, both lockfiles hashed every
+    second: `** BUILD SUCCEEDED **`, **no change** (`prephone-lockhash.log`), and `verify-pins
+    --ref 68b3d9c53` OK, 16 pins.
+  - The belt sample is R1-11.
+- **R1-4 (MINOR) — FIXED.** The verdict now separates the guards in place (the belt, PinBeltTests,
+  release.sh:103–104) from the proposal ("if wired … not applied").
+- **R1-5 (MINOR) — FIXED** (60cfbd44e). An EXIT trap keeps the two resolve logs, the committed
+  lockfile and both resolved states, and removes `tree/ dd/ spm/ cli/ cli-config/ cli-security/`.
+  It is guarded by a `case` on `$BASE/*`. `--keep` keeps everything, and the base is
+  `pins-belt-check.noindex`. Evidence: `Tools/pins-belt-check HEAD` → `BELT HOLDS at 60cfbd44e`,
+  exit 0, and the run's dir afterwards holds five files, **48K**. The old 600 MB+ trees are gone.
+  It now verifies with `--ref <rev>`, so the rev's own project and manifest decide project-only
+  (R1-8's point carried into the script).
+- **R1-6 (NIT) — FIXED, both halves** (dfded4cb9). Package.swift and UPGRADING step 1 now say only
+  the canon: moves are deliberate, and a new identity is author-only (CLAUDE.md). They point at
+  **P-781-4**, queued in the PROVISIONAL list for her ratification. The root lockfile's originHash
+  was refreshed by a forced re-resolve (C4, pins identical).
+- **R1-7 (NIT) — FIXED** (60cfbd44e). The format is now decided by content (`pins` vs
+  `object.dependencies`). The kept `xcode-workspace-state.json` / `cli-workspace-state.json` copies
+  now read: OK 16 / OK 15 on f8d2ced67's, DRIFT ×12 on 68b3d9c53's. A non-JSON input exits 2
+  ("not JSON").
+- **R1-8 (NIT) — FIXED** (60cfbd44e). The project-only set is parsed by IDENTITY from the
+  pbxproj's `repositoryURL`s minus Package.swift's `.package(url:` identities. It is read at `--ref`
+  (git show), or from the working tree under `--against` (documented). `--ref 68b3d9c53 --cli` on
+  68b3d9c53's CLI state reports DRIFT ×12 against that rev's own lockfile.
+- **R1-9 (NIT) — FIXED** (60cfbd44e). The no-argument guard byte-checks `Package.resolved` too. An
+  originHash-only edit of the root lockfile now reports `DRIFT Package.resolved: the working-tree
+  file differs from HEAD`, exit 1. The clean tree passes.
+- **R1-10 (NIT) — FIXED.** Line references are re-read on f8d2ced67 AND on origin/main: the
+  dirty-tree refusal is release.sh:103–104 and the `AE` check is **:171** on both (the finding said
+  :174; :171 is what the file holds). The MCP flakes cite VX-353/VX-685 for
+  MCPHarnessTimeLimitTests. The other two suites have no ticket, so they are a born-ticket
+  candidate.
+- **R1-11 (NIT) — FIXED.** On the merged belt tree: `-scheme VariorumMobile -destination
+  'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build` with `-derivedDataPath …/vx781-phone
+  -packageCachePath …`, both lockfiles hashed every second: **`** BUILD SUCCEEDED **`**, no change
+  (`phone-lockhash.log`), `Tools/verify-pins App/Variorum/DerivedData/vx781-phone` → **OK 16 pins**.
+
+**Suite re-runs (code changed: a new core test, tool scripts, Package.swift comment):**
+- Core `swift test` on dfded4cb9: VariorumCoreTests **`Test run with 3649 tests in 492 suites passed
+  after 247.183 seconds with 5 known issues.`** (= 3646/491 + PinBeltTests' 3 tests / 1 suite).
+- StringsWorkbookTests **`32 tests in 4 suites passed`**.
+- VariorumMCPTests in the whole run: `549 tests in 100 suites failed … with 12 issues`, all socket
+  and timing tests. The machine was otherwise idle; the only CPU consumer was this run's own
+  `swiftpm-testing-helper` at ~1000 %. The MCP target ALONE: `549 tests … failed … with 6 issues`
+  (VX-180's pre-initialize probe, VX-394's stop roads, VX-132's harness bound). The pre-belt A/B is
+  PENDING below.
