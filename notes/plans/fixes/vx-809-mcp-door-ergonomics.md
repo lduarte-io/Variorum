@@ -2,8 +2,8 @@
 
 **Ticket: VX-809 · Branch: `vx-809-mcp-door-ergonomics` · Worktree: `~/dev/variorum-vx-809` · the Pro · Coordinator: nov4coordinator**
 
-**STATUS: OPEN — kicked off 2026-11-05 (/architect-phase). Batch 1 DONE; batch 2 in flight (head fec890964+; both ops landed; catalog 196 arms).**
-**ORCHESTRATOR IN-FLIGHT OBLIGATIONS (kept current for a post-compaction resume):** batch 2's RED-ON-OLD SOCKET TURN is granted and running (the coordinator's quality rule: a red counts only on the ASSERTED expectation; initialize-starvation/timeout = a collision red, re-run alone before counting) — **when the implementer reports the turn's result, send nov4coordinator the one-line close** (legs run, red kind per leg, final green). vx-828 holds whole-package runs ~10 min for this turn.
+**STATUS: OPEN — kicked off 2026-11-05 (/architect-phase). Batch 1 DONE; batch 2 nearly done (head b464dc64d; both ops landed; catalog 196 arms; B2-11 red-on-old DONE — only B2-12 self-assessment remains).**
+**ORCHESTRATOR IN-FLIGHT OBLIGATIONS (kept current for a post-compaction resume):** the socket turn is CLOSED — every leg RED on the asserted content (no initialize/timeout collisions), restored tree green (wire+catalog 9/9, core acts 11/11) — and **the one-line close was SENT to nov4coordinator 2026-11-05 (window released)**. Nothing granted is in flight; next: accept batch 2 on its self-assessment (verify-don't-trust + the orchestrator's drill), then spawn batch 3 (the P-809-8 bell-not-seat build FIRST).
 
 **HER OVERNIGHT WORD (2026-11-05, sent to all sessions, verbatim):** *"I'm going to sleep - continue overnight and rule provisionally for my morning bundle. I want everything merged & a release ready to go, but not yet released to the site, so that when I handle everything in the morning I can go through the bundles and ensure that I don't need any changes before the version releases (or that if I do, I can do them in a quick round)."* — So: this run pushes through its ladder and MERGES tonight (coordinator-serialized); every open call rules PROVISIONAL into the bundle; the release is STAGED by the wave, never published; the morning bundle (HELD FOR HER below + the handoff) is the deliverable she reads first.
 
@@ -151,7 +151,7 @@ One batch = one acceptance unit = one implementer session. Evidence by kind: the
 | # | Item | Status |
 |---|---|---|
 | 1 | BATCH 1 — VX-825 + VX-826 | **DONE 2026-11-05** (head `54831417f`; the BATCH 1 RECORD below; orchestrator's drill: the catalog + hidden-cause + reach-pure suites alone, "✔ Test run with 15 tests in 3 suites passed"; F-5/F-6 ruled A-809-11/-12 — the F-5 build rides batch 3) |
-| 2 | BATCH 2 — VX-807 + VX-813 | NOT STARTED |
+| 2 | BATCH 2 — VX-807 + VX-813 | IN FLIGHT (B2-0..B2-11 DONE at `b464dc64d`; socket turn closed with the coordinator; B2-12 self-assessment running) |
 | 3 | BATCH 3 — VX-814 + VX-812 | NOT STARTED |
 | 4 | BATCH 4 — VX-818 | NOT STARTED |
 | 5 | BATCH 5 — VX-679 + VX-846 (VX-840 re-seated into VX-828) | NOT STARTED |
