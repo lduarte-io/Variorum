@@ -188,12 +188,12 @@ What the proposal must settle, inside these rails:
 
 | # | Item | Status |
 |---|---|---|
-| 1 | VX-799 — one_block seed retires + existing overrides cleared | NOT-STARTED (Unit A) |
-| 2 | VX-832 — date picker defaults to creation day | NOT-STARTED (Unit A) |
-| 3 | VX-587 — shift-a-day act (chord PROPOSED first) | NOT-STARTED (Unit A) |
-| 4 | VX-845 — keep-the-day extends (promote · diverge · ownership forks) | NOT-STARTED (Unit A) |
-| 5 | VX-615 — gathering delete verb wording | NOT-STARTED (Unit A) |
-| 6 | VX-561 — Esc on book creation dialog (repro first) | NOT-STARTED (Unit A) |
+| 1 | VX-799 — one_block seed retires + existing overrides cleared | DONE (Unit A — `9f8ffdef1`, `a7a1dfba1`; app/phone runs PENDING) |
+| 2 | VX-832 — date picker defaults to creation day | DONE (Unit A — `a71bacb9b`; app run + walk PENDING) |
+| 3 | VX-587 — shift-a-day act (chord PROPOSED first) | IN-PROGRESS (Unit A — act + bars + ⌘K `d7165913d`/`b616f4fd9`; chord PROPOSED, awaiting the ruling) |
+| 4 | VX-845 — keep-the-day extends (promote · diverge · ownership forks) | DONE (Unit A — `9d213a5cb`) |
+| 5 | VX-615 — gathering delete verb wording | DISMISSED AS HOLLOW (Unit A — duplicate of VX-611, `7715a4a3d`) |
+| 6 | VX-561 — Esc on book creation dialog (repro first) | DISMISSED AS HOLLOW by code-trace (Unit A — one walk keystroke owed at the stage window) |
 | 7 | VX-435 — movable Journal (ops + faces + keeper wing-awareness + the mend) | NOT-STARTED (Unit B; design proposal first) |
 | 8 | VX-436 — deletable Journal (guard retires + delete-vs-retirement + R-805-2 restore rule + wire refusals) | NOT-STARTED (Unit B) |
 | 9 | VX-797 — New Entry/⌥⌘N mint; ⌘J opens the day's first | NOT-STARTED (Unit C) |
