@@ -73,7 +73,7 @@ Evidence of the unit's kind: the suite green + the pins; an orchestrator hands-o
 
 | Member | Status |
 |---|---|
-| VX-799 | NOT-STARTED — mint change in `insertPost` + a one-time clearing pass (site to be chosen and written here) |
+| VX-799 | IN-PROGRESS — CORE DONE (this commit): `insertPost` seeds no override; `Operations.clearJournalOneBlockOverrides()` (live journal-profile `one_block` rows only); pins `JournalSegmentationTests` (mint pin RED ON OLD — 8 issues on the pre-fix tree, verified before the fix; green after) + three flipped tests. REMAINS: the occasion (where the pass runs — app side), the journal-trait book door's explicit one_block (PROVISIONAL), the app/phone test sweep |
 | VX-832 | NOT-STARTED — find the masthead date picker; default to creation day when undated |
 | VX-587 | NOT-STARTED — act + menu/⌘K doors + tests; chord PROPOSED here before wiring (turn ends at the proposal) |
 | VX-845 | NOT-STARTED — route promoteLens / diverge / ownership-fork copies through `DuplicateDay` |

@@ -127,8 +127,8 @@ struct JournalEntryTests {
             #expect(entry.kind == .post)
             #expect(entry.profile == .journal)
             #expect(entry.entryDate == "2026-07-07")
-            #expect(entry.segmentationDefault == .oneBlock,
-                    "the journal profile seeds one-block segmentation (AppSpec §7)")
+            #expect(entry.segmentationDefault == nil,
+                    "VX-799: the journal profile seeds no segmentation override")
             // Exactly one container row, nothing else minted.
             #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == 1)
             #expect(try db.fetchInt("SELECT COUNT(*) FROM block") == 0)

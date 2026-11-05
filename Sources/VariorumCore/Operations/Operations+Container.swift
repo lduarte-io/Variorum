@@ -356,17 +356,69 @@ extension Operations {
     ) throws -> Container {
         let now = date.now
         // VX-357 — the row-level guarantee: a title never stores a U+0000.
-        var post = Container(
+        // VX-799 (the VX-805 run): a journal entry segments like any other
+        // note — no profile seeds a per-post override, so every mint inherits
+        // the global `default_segmentation` (her ask 2026-11-04, superseding
+        // the original "one day, one block" seed). The one_block face stays a
+        // per-note choice (the Write/Takes chip, `setSegmentationDefault`).
+        let post = Container(
             id: newID(), ownerId: currentOwnerID(), kind: .post, title: StoredText.stripped(title),
             profile: profile, entryDate: entryDate, wingId: wingId,
             createdAt: now, updatedAt: now)
-        // A journal post defaults to one-block-per-entry (AppSpec §7): the
-        // journal restriction is a profile seed, never a data-model split.
-        if profile == .journal {
-            post.segmentationDefault = .oneBlock
-        }
         try post.insert(db)
         return post
+    }
+
+    /// **VX-799's one-time clearing pass** (her sitting ruling, 2026-11-04:
+    /// clear the stored `one_block` override on EXISTING journal entries too —
+    /// *"i don't think it matters that much"*). Until VX-799 every
+    /// journal-profile mint stamped `segmentation_default = 'one_block'`
+    /// (`insertPost`'s retired seed); this clears that override on every LIVE
+    /// journal-profile post still carrying it, so each inherits the global
+    /// default like any other note.
+    ///
+    /// Exactly the class, nothing else: `kind = 'post' AND profile = 'journal'
+    /// AND segmentation_default = 'one_block' AND deleted_at IS NULL` —
+    /// archived, sealed and saved-version rows included (all live rows; a
+    /// segmentation override is container metadata a seal never froze — the
+    /// chip's own setter is allowed under seal). Every other row is untouched:
+    /// other profiles' overrides (hers by the chip), a journal entry's
+    /// `paragraph`/`sentence` override, and TOMBSTONED rows (an UPDATE would
+    /// re-push a tombstone for a value nothing reads — v1_20's reasoning; a
+    /// Trash restoree keeps its override, the chip still turns it off).
+    ///
+    /// The write is `setSegmentationDefault`'s own, row by row: `updated_at`
+    /// stamped, no `last_touched_at`, no churn (container metadata — no
+    /// listing reorders), the outbox capturing each through the ordinary
+    /// trigger (CAS metadata; every device running the pass converges on the
+    /// same value). No retroactive re-segmentation: blocks are never touched;
+    /// only future typing at an entry's end crystallizes paragraphs. One
+    /// transaction; idempotent (a second run finds nothing and writes
+    /// nothing). No undo entry (a one-time store pass, not a gesture).
+    /// Returns how many rows it cleared — the occasion's "converged" signal
+    /// (zero means nothing was left to clear).
+    @discardableResult
+    public func clearJournalOneBlockOverrides() throws -> Int {
+        try database.write { db in
+            let ids = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT id FROM container
+                    WHERE kind = 'post' AND profile = 'journal'
+                      AND segmentation_default = 'one_block'
+                      AND deleted_at IS NULL
+                    ORDER BY id
+                    """)
+            guard !ids.isEmpty else { return 0 }
+            let now = date.now
+            for id in ids {
+                guard var post = try Container.fetchOne(db, key: id) else { continue }
+                post.segmentationDefault = nil
+                post.updatedAt = now
+                try post.update(db)
+            }
+            return ids.count
+        }
     }
 
     @discardableResult
