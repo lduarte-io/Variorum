@@ -1471,3 +1471,16 @@ after; no Problem Reporter at quit).
 VX-823 is NOT verified — the live return fails. Handed back to the implementer with both probes.
 The stage was RELEASED at the red (vx-805's Unit B was waiting); the fixed walk re-runs in a
 fresh window.
+
+#### Batch C — WINDOW 2, R-C4 HOLLOW + R-C4b NAMED (orchestrator, live during "vx-828-batchC2")
+
+R-C4 as named (add `memory.window.isMeasured` to `landIfReady`'s guard) ran GREEN on both road
+arguments — the revert is HOLLOW, not yet the pin: the per-pane memory persists across the trip
+(the same persistence that carries the mark), so `window.isMeasured` remains true from the
+pre-trip scrolling and the added guard blocks nothing on any return from a scrolled pane.
+**R-C4b, named before running (the honest pre-fix shape):** disable the fix's two new landing
+triggers — the `landIfReady("appear")` call in the appear closure and the `landIfReady("height")`
+call in the mount-geometry closure — so a landing again requires a fresh scroll READING on the
+new mount, which the real arm swap never sends. Expected: both road arguments red at the top with
+the decide/appear trace printed and no `landing` line. Uncommitted edit on the committed tree
+(3a7dbff78); `git checkout --` restores.
