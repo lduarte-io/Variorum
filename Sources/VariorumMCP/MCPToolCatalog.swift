@@ -868,9 +868,12 @@ enum MCPToolCatalog {
         description: """
             Add a note to a book (at its end), optionally filed under one of the book's chapters \
             (section_id — from list_notes or create_section). Both must be shared with this client \
-            at write new. Returns JSON; its tag_ids and tags (their paths) list every tag the note \
-            wears once it is in the book — its own first, then the book's outflow — so there is \
-            nothing to tag again.
+            at write new. A book that owns its notes takes no note another book holds, and a note \
+            such a book owns joins no other book: the refusal says which in the author's words, or, \
+            when what holds the note is beyond your reach, in one fixed sentence that names nothing \
+            (the author can add it in Variorum). Returns JSON; its tag_ids and tags (their paths) \
+            list every tag the note wears once it is in the book — its own first, then the book's \
+            outflow — so there is nothing to tag again.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1062,7 +1065,9 @@ enum MCPToolCatalog {
             so the note leaves every book it is in here, lands bookless in that wing's Pool, and \
             its tags come with it (a tag the other wing lacks is made there by its path). Needs \
             edit on the note and write new on the wing it goes to. A note in a finished or sealed \
-            book can't move until the author reopens it. One undo for the author puts it back, \
+            book can't move until the author reopens it; when that book is beyond your reach, one \
+            fixed sentence says only that something beyond your reach holds the note. One undo for \
+            the author puts it back, \
             books and tags too. Returns JSON: where it landed, the books it left that you can read \
             (book_id, name) — \(MCPWriteTools.beyondReachKey) says, always in the same words, that \
             books beyond your reach, if any, are not listed — and the tags adopted or made. \
@@ -1335,8 +1340,9 @@ enum MCPToolCatalog {
             it; the tag itself stays in the library. As when the author removes one, nothing else \
             moves: a book the tag brought the note into keeps it, since removing a tag is never a \
             way out of a book (remove_note_from_book takes it out; for a board a note should leave \
-            when its tag goes, use a gathering — create_gathering — which shows exactly what its \
-            rule matches). One undo for the author puts the tag back. Returns JSON; \
+            when its tag goes, use a gathering, which shows exactly what its rule matches: \
+            create_gathering makes one if you hold write new on a wing; otherwise ask the author for \
+            a gathering). One undo for the author puts the tag back. Returns JSON; \
             still_in_books names each book you can read (book_id, name) that collects by the tag and \
             still holds the note — [] when none — and \(MCPWriteTools.beyondReachKey) says, always \
             in the same words, that books beyond your reach, if any, are not listed. \
