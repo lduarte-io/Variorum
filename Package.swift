@@ -44,25 +44,30 @@ let package = Package(
         // notices ride Settings ▸ Acknowledgments (`AcknowledgmentsCopy`).
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", exact: "0.12.1"),
         // THE PIN BELT (VX-781, notes/plans/fixes/vx-781-lockfile-pins.md).
-        // The lockfiles cannot hold the dependency set by themselves: the
-        // Xcode workspace's Package.resolved carries an originHash computed
-        // from this checkout's ABSOLUTE PATH (so it matches exactly one
-        // directory on one Mac), and any resolution that runs without the
-        // pins (a missing or unreadable lockfile, a package update) takes the
-        // highest version every range allows. Run without pins, the ranges
-        // that GRDB, swift-dependencies and the MCP SDK declare land SQLCipher
-        // 4.20, swift-dependencies 1.17, swift-syntax 604 and more. So the
-        // MANIFEST is the enforcement: every remote package in the resolved
-        // graph is constrained EXACT here, at the committed versions, so even
-        // a pin-free resolution lands on the committed set. These lines are
-        // constraints only. No target links them (GRDB, the SDK and
-        // swift-dependencies already pull every one of them in), so nothing
-        // new is linked or fetched. Moving any version is a deliberate
-        // upgrade, and that is the author's call: change the line here and
-        // re-resolve both lockfiles in the same commit. `Tools/verify-pins`
-        // checks a resolved state against the committed workspace lockfile.
-        // Sparkle is pinned EXACT in the Xcode project itself
-        // (XCRemoteSwiftPackageReference, exactVersion 2.10.0).
+        // A lockfile holds the dependency set only while a resolution reads
+        // it. Any resolution that runs without the pins (a missing lockfile,
+        // a package update) takes the highest version every range allows, and
+        // the ranges GRDB, swift-dependencies and the MCP SDK declare then
+        // land SQLCipher 4.20, swift-syntax 604 and more. So the MANIFESTS
+        // are the enforcement, in TWO places because there are two roots:
+        // - HERE, for `swift build` / `swift test` (this package is the root):
+        //   every remote package in the resolved graph is constrained EXACT
+        //   at the committed versions, so even a pin-free resolution lands on
+        //   the committed set. These lines are constraints only. No target
+        //   links them (GRDB, the SDK and swift-dependencies already pull
+        //   every one of them in), so nothing new is linked or fetched.
+        // - IN THE XCODE PROJECT, for the apps: there this package is a LOCAL
+        //   DEPENDENCY, and SwiftPM prunes a dependency's unused declarations,
+        //   so the lines below do nothing for Xcode (only the direct, used
+        //   requirements above count). The same exact versions are therefore
+        //   declared as project-level package references in project.pbxproj
+        //   (XCRemoteSwiftPackageReference, exactVersion — beside Sparkle's
+        //   2.10.0), which ARE the Xcode graph's root.
+        // Moving any version is a deliberate upgrade and the author's call:
+        // change it in BOTH places and re-resolve BOTH lockfiles in one
+        // commit. `Tools/verify-pins` checks a resolved state (a
+        // workspace-state.json or a lockfile) against the committed workspace
+        // lockfile.
         // Through the GRDB fork (its own manifest: `from: "4.11.0"`):
         .package(url: "https://github.com/sqlcipher/SQLCipher.swift.git", exact: "4.18.0"),
         // Through swift-dependencies:
