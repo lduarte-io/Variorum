@@ -54,7 +54,9 @@ project.pbxproj (12 at 620cc9019, plus the three direct dependencies at 0ea419ec
 Sparkle's: the app's belt, one rule · the root lockfile reconciled to the shipping set
 (P-781-1) · **`Tests/VariorumCoreTests/PinBeltTests.swift` = the every-run static guard of all four
 places (R1-1, 95fcc3c4e; red-on-old on 68b3d9c53, red on a deleted reference and on one-sided
-bumps)** · `Tools/verify-pins` = the resolved-state guard (fef4800f8, 60cfbd44e) ·
+bumps)** · `Tools/verify-pins` = the resolved-state guard (fef4800f8, 60cfbd44e; the tree guard
+is versions-equal since VX-853, ad4d7c003–998294848, and PinBeltTests (3) compares locations as
+(1)/(2) do since 31ca85d2e) ·
 `Tools/pins-belt-check` = the deep, networked proof (0d7fd8019, 60cfbd44e). Upgrading a pin
 deliberately: the numbered procedure below.
 
@@ -532,7 +534,8 @@ upgrade is deliberate, so this is the whole road, in order:
    test` (its (2) or (3) goes red, as probes D2/D3 showed), by verify-pins (the root lockfile vs the
    committed workspace set) and by pins-belt-check (the CLI graph DRIFTs). A
    lockfile not re-resolved shows as DRIFT, or as a byte-dirty workspace lockfile after the next
-   build (the tree guard).
+   build (the tree guard; since VX-853 a rewrite whose pins equal the committed file's is only a
+   NOTE, and a pin change stays DRIFT).
 5. **The usual gate** on the new set (core suite, app suites under a stage claim, a walk if behaviour
    can change), with the upgrade recorded in the effort's record. Like a schema change, the
    dependency change is its own commit ahead of any code that uses it.
