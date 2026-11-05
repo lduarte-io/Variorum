@@ -60,14 +60,14 @@ Decisions were put as question batches; she picked among presented options. Reco
 
 | # | Ticket | What | Batch | Status |
 |---|---|---|---|---|
-| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | VERIFIED 2026-11-05 (suites 281/28 green, red-on-old by revert, walk all legs both voices; pin hygiene 99fd1dd58) — PENDING: clean red re-show of revert 1 (next window) + phone suites at the merge gate |
+| 1 | VX-806 (M) | Return mid-word snaps instead of refusing (editor seam) | A | VERIFIED 2026-11-05 (suites 281/28 green, red-on-old by revert, walk all legs both voices; pin hygiene 99fd1dd58; clean red re-show DONE in the batch D window — fails at plain #expects, zero traps, zero new .ips) — PENDING: phone suites at the merge gate |
 | 2 | VX-655 (L, rider) | list-exit Return: retraction lands inside the flight | A | VERIFIED 2026-11-05 (order pin red-on-old by revert 3, checklist walk clean, stale neighbor pin re-pointed 58e655834) |
 | 3 | VX-824 (M) | ⌘digit contextual — wings from the keyboard (RULED: shape a) | B | NOT-STARTED |
 | 4 | VX-833 (M) | wing switch navigates to the wing's BOOKCASE; switcher right-aligned | B | NOT-STARTED |
 | 5 | VX-844 (L) | wing indicator marquee (car-radio), never crossing the column line | B | NOT-STARTED |
 | 6 | VX-823 (HIGH) | the Library remembers scroll + selection on return from a note | C | NOT-STARTED |
-| 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | BUILT (cdb514168 · cef57334d · 043b8420d) — core 15/15 + full core suite green headless, mutation probes M1–M3 red as predicted; PENDING: the 7 app pins' run + the walk (the orchestrator's stage window) |
-| 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | BUILT (9a251a8ea) — compiled; PENDING: the geometry pin's run + its red-on-old by revert R-D4 + the walk (the orchestrator's stage window) |
+| 7 | VX-800 (M) | Trash sweep door: delete forever every empty no-history block | D | VERIFIED 2026-11-05 (window vx-828-batchD: 18 suites/196 green incl. the 7 app pins; walk both voices — count honest, cancel, filter-proof, receipt, door gone at 0) — PENDING: phone suites at the merge gate |
+| 8 | VX-636 (L, rider) | the "gone from the app" receipt draws over the bottom Trash row | D | VERIFIED 2026-11-05 (geometry pin green; red-on-old by revert R-D4 — both geometry #expects red on the overlay, restored green; the band verified in the walk, both voices) |
 | 9 | VX-798 (M) | spellcheck: ⌘; / ⌘: chords + Edit ▸ Spelling and Grammar home | E | NOT-STARTED |
 | 10 | VX-838 (M, Bug) | Settings ▸ Tags names + follows the wing (RULED: R-828-2) | E | NOT-STARTED |
 | 11 | VX-840 (L, rider) | Settings ▸ Tags: delete-every-unused-tag door | E | NOT-STARTED |
@@ -920,3 +920,68 @@ stamp-aware intent fence and the CASCADE-VICTIM EXCLUSION — a block that died 
 never swept alone, so a note's whole-restore is never broken by this door; the in-transaction
 predicate re-check; LocalPurge before the receipt; no ⌥⌘Z (the requestPurge posture), confirm
 every time. Build D1–D5.
+
+#### Batch D — ORCHESTRATOR VERIFICATION (stage window "vx-828-batchD", 2026-11-05, GO 03:03)
+
+Hand-back verified against git first: worktree clean at 457101726, the seven commits as listed,
+`EmptyBlockSweepTests` re-run green headless by the orchestrator (15/15); the op read line-by-line
+(in-transaction re-read over every wing, confirm ids ∩ still-qualifying with dedupe, intents only
+through `mintPurgeIntents`, empty answer writes nothing); the band read in the diff (the overlay →
+a laid-out `VStack` foot). One correction to the hand-back's window list: **"TutorialWalkTests" is
+a FILE of eleven suites, not a TYPE** — the two Trash-relevant TYPEs (`TutorialDeletionActsTests`,
+`TutorialDoorTests`) ran instead.
+
+**Part 1 (suites):** ONE run, 18 suites / 196 tests, ALL GREEN in 35.9 s —
+TrashEmptyBlockSweepTests (7) · TrashMessageBandTests (2) · TrashMultiSelectTests ·
+TrashFirstPaintTests · TrashPurgeDoorsTests · TrashConfirmEdgeTests · TrashPurgeSharedLayerTests ·
+TrashSurfaceTests · TrashPoolHonestyTests · SnippetGroupTrashTests · IAAndTrashShapeTests ·
+RecoveryDoorsTests · CapabilityRegistryTests · ShellChromeTests · ChromeLineLimitTests ·
+TutorialDeletionActsTests · TutorialDoorTests · TypedReturnKeyTests (32, the re-show baseline).
+2 warnings = the known anonymous `Date.swift:37` harness noise (batch A's same class).
+
+**Part 2 (reverts, each an uncommitted edit restored by `git checkout --`, tree clean after each):**
+- **R-D4** (body back to `list.overlay(alignment: .bottom) { messageFoot }`): EXACTLY the two
+  geometry `#expect`s red (`foot.minY >= list.maxY - 0.5`, `list.height < idle.height - 0.5`); the
+  order guard stayed green. Restored → 2/2 green.
+- **Batch A's owed CLEAN red re-show of revert 1** (`if false,` on the wordStart arm): the three
+  key pins failed at PLAIN `#expect`s (store-slot comparisons), 12 issues, the RUN COMPLETED —
+  zero `_checkSubscript` traps, zero crash markers in the log, ZERO new `.ips` from the red run.
+  The 99fd1dd58 hygiene holds: red is clean now. Restored → 32/32 green. Batch A's PENDING (1)
+  is CLOSED; only the phone suites at the merge gate remain for batch A.
+
+**The window's `.ips` accounting (baseline 024952, count 8):** TWO new — 030714, 030816 (count 10,
+both mid-window, NONE from the walk; the count was re-checked at quit, still 10). Both are the
+coordinator-pre-classed **swift-testing ABI.Record JSON-encoder stack overflow** (EXC_BAD_ACCESS at
+`___chkstk_darwin` under `Testing ABI.Record.encode(to:)` → `__JSONEncoder.wrapGeneric` recursion,
+~130 frames, no Variorum or SQLCipher frames; each ~5 s after its host's launch, AFTER the verdict
+printed — teardown event-flush). The coordinator classed both in-window ("that's the encoder class,
+not VX-855"); the green re-runs produced none. NOT this run's code; the class rides the harness.
+
+**Part 3 (the walk — dev store Debug `io.lduarte.Variorum.debug`, scratch note "2026-11-05"/
+"sweep alpha" in Home; cast minted by the editor's own roads):** three Return-chained empties
+backspace-CARVED alone; a worded block Delete-Block'd alone ("worded husk"); an empty block with a
+FILED comment ("keeps this husk out of the sweep") Delete-Block'd alone (the carve would refuse a
+commented block — the Delete Block door took it); a mid-word Return INSIDE "beta" (batch A's arm,
+seen again live: the word rode down whole) making a divide successor that was emptied by hand and
+carved — an empty husk whose `derived_from` names the LIVING "sweep" block. Legs, Study voice:
+(a) the door drew "Delete 3 empty blocks…" LEFT of Empty Trash — N counted ONLY the three carved
+empties; the worded, commented and linked husks all sat visibly in the list, uncounted; (b) the
+confirm spoke P-828-10's N>1 draft VERBATIM with the count; CANCEL changed nothing; (c) the kind
+filter set to Notes neither hid nor narrowed the door (same label, same count, zero block rows
+listed); cleared; (d) Delete for Good: the three empties left the listing at once, the worded /
+commented / linked husks STAYED, the door DISAPPEARED (count 0 ⇒ not rendered), and the receipt
+spoke IN ITS OWN BAND below a full viewport of rows — "3 empty blocks are gone from the app now —
+the app's own cleanup removes the bytes." (the never-synced population, right for this store) —
+never over a row (VX-636 seen live). (e) TERMINAL voice (⌘K "Use Terminal Voice"): two fresh
+Return-chained empties carved; the Trash drew "Delete 2 empty blocks…" (the door RE-APPEARED from
+0); the N=2 confirm verbatim; Delete for Good; the receipt in the band, monospace, below the rows;
+the door gone again at 0; the three protected husks untouched throughout. Voice restored to STUDY
+(⌘K), ⌘Q, both strict pgreps empty — zero instances, posture unchanged. One machinery note: the
+guard tripped once mid-walk on the KNOWN self-inflicted idle-reset (a 1 s gap between injected
+acts); idle was watched climbing (11→17 s) before resuming — nobody at the machine; ≥3 s spacing
+held thereafter.
+
+**Batch D is VERIFIED** (ledger rows 7–8 flipped). Owed at the merge gate only: the phone suites
+(batches A+D: MobileStructuralTests · MobileTakeStructureTests · MobileTrashTests ·
+MobileNoteTrayTests · MobileVersionsTests). For closeout: the implementer's VM-twin candidate (a
+phone Trash sweep door) rides the MOBILE PARITY line — nothing mobile-visible tonight.
