@@ -98,6 +98,59 @@ record already owes it; filing it here so it doesn't evaporate. No pin (test hyg
 
 ---
 
+## ROUND 1 FINAL CALLS (cross-model flow — the implementer's agree/dispute returned; the
+reviewer's call, 2026-11-05)
+
+**MINOR 1, part (a) — re-word the two docs: CONFIRMED as agreed**, with one addition now owed by
+part (b)'s recheck: the wording must carry the CORRECTED mechanism — `LibraryPlaceScrollMemory` is
+per-mount `@State` (`LibraryPlaceScroll.swift:137`), so R-C4's `memory.window.isMeasured` guard
+read a MOUNT-LOCAL window, and what fed it in window 2 was the hosted mount's own unavoidable
+scroll reading — not, as the window-2 record argued, a window persisting across the trip (that is
+the model-held `placeMemory.windows`, which the guard never reads). Append a one-line correction
+BESIDE the record's "WINDOW 2, R-C4 HOLLOW" section pointing here; the window log itself stays
+verbatim (the night's record is never rewritten).
+
+**MINOR 1, part (b) — the trigger-order assertion: WITHDRAWN; the dispute is CORRECT, and the
+implementer's seam counter-proposal is CONFIRMED as the fix shape.** Both failure modes were
+re-traced by the reviewer against `LibraryPlaceScroll.body` and verified concrete:
+- FALSE RED on the fix: at mount with the height not yet reported, `landIfReady("appear")` is a
+  no-op (viewport 0); whether the height report or a scroll reading fires next is the framework's
+  order, and a reading-first mount lands from `"reading"` on CORRECT code — the assertion pins
+  callback order, not the mechanism.
+- FALSE GREEN under R-C4: a reading arriving BEFORE `onAppear` measures the mount-local window
+  without landing (no proxy yet — no `land(...)` line), and `onAppear` then passes R-C4's added
+  guard and lands from `"appear"` — the assertion passes under the revert. Hosted mounts do send
+  a reading, so the road is reachable.
+
+**The CONFIRMED fix (the implementer applies):** a DEBUG-only seam,
+`LibraryPlaceTrace.withholdsReadingsUntilAim` (default false; production unaffected — the
+`SidebarSectionWindow.phaseSeam` precedent, batch D's ruling-8 internal-seam class), gating
+`LibraryPlaceScroll.reading()`: while on, a mounting pane receives NO scroll reading until its
+landing has aimed — the live no-reading mount PLAYED deterministically. Constraints the gate must
+honor: (i) while withheld, nothing feeds `memory.window` or `placeMemory.noteWindow` (else R-C4's
+guard is fed again); (ii) after the first aim, readings flow, so the hold's settle checks still
+confirm the row (`check()` needs a measured window); (iii) `decide()` is still reached at
+`onAppear`, so the owed landing is still decided. The road pin's RETURN leg turns the seam on
+(and restores it off — the default — after).
+**The pin and its red:** revert R-C4 (`landIfReady` re-gated on `memory.window.isMeasured`) under
+the seam → no reading ever feeds the guard → never lands → both road arguments red at the top;
+restored → green (the fix lands from appear/height). The red-show rides the merge-gate stage
+window (uncommitted revert, `git checkout --` restores). **R-C4b must NOT be cited for this pin**
+(with the appear/height triggers disabled, the relisted trigger still lands on the pane's own
+height) — the re-worded doc says so.
+
+**MINOR 2 (ledger rows): dispositioned OVERTAKEN above — no action.**
+
+**NIT (QuickEntryWingLabelTests window): CONFIRMED as agreed** — 2,400 → 4,800 with the comment,
+the no-later-navigation-item check done.
+
+**The remaining NITs** (the P-828-6 punctuation-adjacent-caret sentence; the P-828-10 refusal
+wording to her pass; the SPECULATIVE ▾-list current-row micro-leg at the merge-gate walk) stand as
+written — record/handoff/walk items, the orchestrator carries them (already dispositioned in the
+run record at e6215aef9).
+
+---
+
 ## Verification debt (not findings — named so the ladder's close is not misread)
 
 Restated against 6d9c383ad (the mid-round B+E verification: suites 120/13 with one order-isolation
