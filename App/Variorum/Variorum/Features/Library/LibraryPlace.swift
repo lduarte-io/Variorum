@@ -67,6 +67,17 @@ nonisolated struct LibraryPlace: Equatable, Sendable {
         /// the List's rows and the answer sheet's (List-faced in every mode);
         /// the Cards draw none, so a return there is the place alone.
         var drawsSelection: Bool { self != .cards }
+
+        /// The same KIND of scroll view — the List's column with or without
+        /// its books (the capped region comes and goes with the window's
+        /// height) is one kind. A place lands only on its own kind: a mode
+        /// switch is not a return.
+        func isSameKind(as other: Surface) -> Bool {
+            switch (self, other) {
+            case (.list, .list), (.cards, .cards), (.sheet, .sheet): true
+            default: false
+            }
+        }
     }
 
     /// Where a return lands: this row, its top `into` below the viewport's top.
@@ -236,6 +247,8 @@ nonisolated struct LibraryPlace: Equatable, Sendable {
 nonisolated struct LibraryRememberedPlace: Equatable, Sendable {
     let place: LibraryPlace
     let wing: String
+    /// The kind of scroll view it was read on (it lands only on that kind).
+    let surface: LibraryPlace.Surface
     /// The deepest listed NOTE position the place names (the notes' re-ask
     /// depth) — nil when it names none.
     let noteReach: Int?
