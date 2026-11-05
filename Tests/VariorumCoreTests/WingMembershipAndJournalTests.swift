@@ -124,6 +124,35 @@ struct WingMembershipAndJournalTests {
         }
     }
 
+    /// VX-435 — the FIRST Journal is born where she stands (her ruling: "A
+    /// fresh ⌘J mint when no Journal lives: the wing you're standing in"):
+    /// the day's entry and the minted Journal land together in the standing
+    /// wing, the filing never crossing wings; a dead standing wing reads as
+    /// Home (the door never throws for it). RED ON OLD: the entry and the
+    /// Journal were both born in Home whatever wing the door was pressed in.
+    @Test func theFirstJournalIsBornWhereSheStands() throws {
+        try withOperations { ops, db in
+            let studio = try ops.createWing(name: "Studio")
+            let entry = try ops.createOrOpenJournalEntry(
+                entryDate: "2026-07-01", standingWing: studio.id)
+            #expect(entry.created && entry.container.wingId == studio.id)
+            guard case .shelved(let journalID) = ops.shelveInDailyJournalBook(entry.container.id) else {
+                Issue.record("the first filing mints the Journal")
+                return
+            }
+            #expect(try db.read { try Queries.reading($0, id: journalID) }?.wingId == studio.id)
+            #expect(try membershipCount(db, entry.container.id, journalID) == 1)
+            // Pressed later from Home, the day opens beside the Journal.
+            let again = try ops.createOrOpenJournalEntry(entryDate: "2026-07-01", standingWing: "")
+            #expect(!again.created && again.container.id == entry.container.id)
+            // A standing wing that is not live reads as Home.
+            try ops.deleteReading(journalID)
+            let homeless = try ops.createOrOpenJournalEntry(
+                entryDate: "2026-07-02", standingWing: "a-wing-that-is-gone")
+            #expect(homeless.container.wingId == "")
+        }
+    }
+
     /// With NO Journal living, the daily door pressed from Home opens or
     /// creates the day's entry IN HOME: a daily-shaped entry that lives in
     /// another wing (moved there) is that library's, never Home's day (VX-435
