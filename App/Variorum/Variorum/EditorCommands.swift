@@ -133,6 +133,8 @@ struct EditorCommands: Commands {
         .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
         // 13e E9: the find family's takes-aware sixth.
         .replaceAllInEveryTake,
+        // VX-798 (the VX-828 run, batch E): Edit ▸ Spelling and Grammar.
+        .showSpellingPanel, .checkSpelling,
         // 13g batch 3 (L8): the Format menu.
         .formatBold, .formatItalic, .formatStrikethrough, .formatCode,
         // 13g batch 4 (L10): the Add Link door.
@@ -320,6 +322,11 @@ struct EditorCommands: Commands {
         case .findNext: ("g", .command)
         case .findPrevious: ("g", [.command, .shift])
         case .useSelectionForFind: ("e", .command)
+        // VX-798 (the VX-828 run, batch E): AppKit's own Spelling chords —
+        // ⌘: (the `:` key equivalent, as AppKit's Edit menu wears it) and ⌘;.
+        // THE COLLISION SWEEP'S RESULT is the registry rows' (both free).
+        case .showSpellingPanel: (":", .command)
+        case .checkSpelling: (";", .command)
         // 13g batch 3 (L8). THE COLLISION SWEEP'S RESULT: ⌘B and ⌘I are FREE
         // (the same five places swept as ⌘[/⌘], ⌘⇧I and ⌘⇧N were, plus the
         // one `keyDown` override). They are the platform's own emphasis keys,
@@ -765,6 +772,24 @@ struct EditorCommands: Commands {
                     actions?.dispatch(.find(.replaceAllInEveryTake))
                 }
                 .disabled(!enabled(.replaceAllInEveryTake))
+            }
+            // VX-798 (the VX-828 run, batch E) — her "I used to see it in a
+            // menu": AppKit's Spelling and Grammar submenu, right after Find
+            // (AppKit's own Edit order), carrying the one-shot pair ONLY —
+            // never the three toggles, which write the per-view flags the A24
+            // level owns (`SpellingDoor`'s header says why). Both acts go down
+            // the responder chain to the text view holding the keyboard; where
+            // none does, the door speaks (P-2). Enabled always: the chain, not
+            // the registry context, knows whether a text view has the keys.
+            Menu(SpellingDoorCopy.menuTitle) {
+                Button(verb(.showSpellingPanel)) {
+                    SpellingDoor.door(.showPanel) { session?.status.refuse($0) }
+                }
+                .keyboardShortcut(":", modifiers: .command)
+                Button(verb(.checkSpelling)) {
+                    SpellingDoor.door(.checkDocument) { session?.status.refuse($0) }
+                }
+                .keyboardShortcut(";", modifiers: .command)
             }
         }
         // The structural gestures' menu-bar door (Phase 9, contract item 1;

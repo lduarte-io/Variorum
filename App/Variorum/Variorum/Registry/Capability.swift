@@ -684,6 +684,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // a distinct verb and its own honest refusal, and a scope hidden inside
     // another act's implementation is exactly what P-1 forbids.
     case replaceAllInEveryTake
+    // VX-798 (the VX-828 run, batch E) — SPELLING, the macOS-standard pair
+    // (her ask, 2026-11-04: "i also want to be able to run a 'one time'
+    // spellcheck with a keyboard shortcut, not just toggle it on or off", and
+    // the menu home a SwiftUI-lifecycle menu bar never carried). Two
+    // declarations for the find family's reason — each carries a KEY (⌘: and
+    // ⌘;), and an undeclared key in the one place keys are declared is P-1's
+    // collision-drift class. One-shot acts down the responder chain; neither
+    // turns the A24 continuous level on (`SpellingDoor`).
+    case showSpellingPanel, checkSpelling
     // 13g batch 3 (L8/L9) — the FORMATTING acts over markdown-as-content
     // (her rulings F-1…F-3). SEVEN declarations rather than one submenu-owning
     // act, for the find family's reason: two of them carry a KEY, and an

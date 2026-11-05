@@ -1360,6 +1360,57 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
             availability: findFamily),
 
+        // MARK: Spelling (VX-798 — the VX-828 run, batch E)
+        //
+        // Her ask (2026-11-04): *"I'd also like a keyboard shortcut for
+        // spellcheck — how am I supposed to even spellcheck, actually? I used
+        // to see it in a menu but now I don't know where it is"* and *"i also
+        // want to be able to run a 'one time' spellcheck with a keyboard
+        // shortcut, not just toggle it on or off."* A SwiftUI-lifecycle menu
+        // bar carries none of AppKit's Spelling and Grammar items; these two
+        // put the macOS-standard pair back, with AppKit's own titles and keys
+        // (TextEdit's, Pages', Mail's) — the words and chords she remembers.
+        //
+        // App scope, `takesAccess: nil`, availability `always`: the acts are
+        // AppKit's (`NSText.showGuessPanel(_:)` / `checkSpelling(_:)`), sent
+        // down the RESPONDER CHAIN by `SpellingDoor` — "a text view holds the
+        // keyboard" is a fact `CapabilityContext` cannot see and the chain
+        // answers exactly (Paste Without Line Breaks' recorded reason). Every
+        // live writing surface answers, because each is an `NSTextView`: Write
+        // and the inline editors (`EditorTextView`), every pane
+        // (`PaneTextView`), the capture boxes (`CaptureNSTextView`), the
+        // comment fields, and any text field's field editor. Where nothing in
+        // the chain takes the act, the door SPEAKS its note (P-2).
+        //
+        // ONE-SHOT, never a toggle: neither act writes the per-view flags the
+        // A24 level owns (`SpellcheckLevel.apply` — continuous checking paired
+        // with completion OFF, the TEXTKIT2 §3 crash pairing), so AppKit's
+        // three toggle items are deliberately NOT here.
+        //
+        // **THE COLLISION SWEEP'S RESULT (2026-11-05, at e0b15ded0):** ⌘; AND
+        // ⌘: ARE FREE — no `;` or `:` chord in `EditorCommands.keyEquivalent`;
+        // none at any `.keyboardShortcut(` call site in `Variorum/` or
+        // `Shared/`; every `NSMenuItem` keyEquivalent empty; the one
+        // `performKeyEquivalent` override (`EditorTextView` — ⌘S and the
+        // non-consuming ⌘Z/⇧⌘Z hint arm) and the three `keyDown` overrides
+        // (Editor, Pane, Capture — ⏎/⇧⏎ and the flight's deferral; key
+        // equivalents never come that way) bind neither; the local
+        // monitors classify ⌘L, ⌘1–9, ⌘←/→, ⌘↑/↓, ←/→, ⌘⏎/⎋ and mouse —
+        // never `;` (DivideWSheet refuses every ⌘ event while it is up, as
+        // for every chord); the system hot keys are [.quickNote] (⌃⌥⌘N).
+        Capability(
+            id: .showSpellingPanel, verb: SpellingDoorCopy.showPanelVerb, scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2318}:", takesAccess: nil,
+            unavailableNote: SpellingDoorCopy.nothingToCheck,
+            availability: always),
+        Capability(
+            id: .checkSpelling, verb: SpellingDoorCopy.checkDocumentVerb, scope: .app,
+            doors: [.menuBar],
+            shortcutLabel: "\u{2318};", takesAccess: nil,
+            unavailableNote: SpellingDoorCopy.nothingToCheck,
+            availability: always),
+
         // MARK: Formatting (13g batch 3 — L8, her rulings F-1…F-3)
         //
         // Markdown-as-content: these acts insert and remove SYNTAX

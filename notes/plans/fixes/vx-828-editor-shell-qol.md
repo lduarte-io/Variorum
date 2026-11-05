@@ -1510,8 +1510,8 @@ is only READ).
 
 | Piece | What | Status |
 |---|---|---|
-| E0 | Preflight (the brief's reading list, read in full; the three tickets' bodies read) + THE DESIGN FORK below | IN-PROGRESS — proposed (this commit); awaiting the orchestrator's ruling |
-| E1 | VX-798: Edit ▸ Spelling and Grammar (⌘: Show Spelling and Grammar · ⌘; Check Document Now), registry-declared, the responder-chain act + its refusal; pins | NOT-STARTED |
+| E0 | Preflight (the brief's reading list, read in full; the three tickets' bodies read) + THE DESIGN FORK below | IN-PROGRESS — proposed (c9aba7cb1); awaiting the orchestrator's ruling |
+| E1 | VX-798: Edit ▸ Spelling and Grammar (⌘: Show Spelling and Grammar · ⌘; Check Document Now), registry-declared, the responder-chain act + its refusal; pins | DONE (this commit) — `CapabilityID.showSpellingPanel` / `.checkSpelling` + their registry rows (app scope, `[.menuBar]`, `always`, the collision sweep in the comment); `Registry/SpellingDoor.swift` (the act: `NSApp.sendAction(_:to: nil, from:)` on the menu's road, `tryToPerform` from a given responder for pins — never an explicit `to:` target, which AppKit sends to unconditionally and a non-answering one THROWS, probed; the door speaks `SpellingDoorCopy.nothingToCheck` where nothing took it); `EditorCommands`: `menuRendered` + `keyEquivalent` (`":"`/`";"` + ⌘) + the Spelling and Grammar submenu after Find; two helper rows (`ShortcutCatalog`, writing group, its line + "spelling"). Pins `App/Variorum/VariorumTests/SpellingDoorTests.swift` (4 tests; the act one parameterized over 5 surfaces × 2 levels). Mac `build-for-testing` TEST BUILD SUCCEEDED, no warning in a touched file. RUN + revert R-E1 PENDING (the stage window) |
 | E2 | VX-838: Settings ▸ Tags names its wing ("Tags — in ‹wing›") and follows the app's wing live; pins | NOT-STARTED |
 | E3 | VX-840 core: the unused listing (consuming `tagSubtreeIsWorn`) + the bulk act + exact-rows pins | NOT-STARTED — blocked on E0 |
 | E4 | VX-840 app: the door, the sheet, the words; pins | NOT-STARTED — blocked on E0 |

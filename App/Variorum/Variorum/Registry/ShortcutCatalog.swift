@@ -68,7 +68,7 @@ nonisolated enum ShortcutCatalog {
         /// P-572-1; VX-234's copy pass).
         var line: String {
             switch self {
-            case .writing: "commit, versions, undo, comments, callouts"
+            case .writing: "commit, versions, undo, comments, callouts, spelling"
             case .formatting: "bold, italic, headings, lists, links"
             case .structure: "divide, extract, merge, a new block"
             case .takes: "a block's takes \u{2014} new, choose, step, archive"
@@ -174,6 +174,16 @@ nonisolated enum ShortcutCatalog {
             words: "callout frame on this block (again to remove it)"),
         Row(group: .writing, keys: .chords([.toggleSeams]),
             words: "toggle block seams (dotted lines between blocks)"),
+        // VX-798 (the VX-828 run, batch E): Edit ▸ Spelling and Grammar's
+        // pair — the one-shot check, and the panel. Neither turns checking as
+        // you type on; the words say where that lives.
+        Row(group: .writing, keys: .chords([.checkSpelling]),
+            words: "check spelling once \u{2014} selects the next misspelled word after the "
+                + "cursor (again for the one after); checking as you type stays a setting "
+                + "(Settings \u{25B8} Editor \u{25B8} Spellchecking)"),
+        Row(group: .writing, keys: .chords([.showSpellingPanel]),
+            words: "the Spelling and Grammar panel \u{2014} the word, its guesses, Change, "
+                + "Ignore and Learn"),
     ]
 
     // 13g batch 3 (L8): the two chords her ruling named, plus the menu-first
