@@ -396,17 +396,16 @@ receipt band.
 
 #### Batch D — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
 
-**Not done by this batch (so far):** NOTHING IS BUILT — the brief's design-fork rule: the predicate,
-the door's confirm and the undo story are proposed below and the build waits on the orchestrator's
-ruling. No `xcodebuild test`, no Debug launch, no walk (all stage-gated — the orchestrator's window,
-by the brief). No `Sync/`, custody or keychain file will be touched (the purge-intent op lives in
+**Not done by this batch (so far):** D2–D5 (below). The fork was RULED (22a8da5d4) and the build
+follows it. No `xcodebuild test`, no Debug launch, no walk (all stage-gated — the orchestrator's
+window, by the brief). No `Sync/`, custody or keychain file will be touched (the purge-intent op lives in
 `Operations/`; `PurgeJanitor.anyFamilyEverSynced` and `LocalPurge` are only CALLED, as every Trash
 purge door already calls them).
 
 | Piece | What | Status |
 |---|---|---|
-| D0 | Preflight (the brief's reading list, read in full) + THE DESIGN FORK below | DONE (this commit) — AWAITING THE ORCHESTRATOR'S RULING |
-| D1 | VX-800 core: the pure predicate (`Domain`) + the candidate/facts query + exact-rows tests | NOT-STARTED (waits on D0's ruling) |
+| D0 | Preflight (the brief's reading list, read in full) + THE DESIGN FORK below | DONE (057d58114) — RULED (22a8da5d4, "Batch D — THE FORK'S RULING") |
+| D1 | VX-800 core: the pure predicate (`Domain/EmptyBlockSweep.swift`) + the candidate/facts read and its named-region observation (`Queries/EmptyBlockSweepQueries.swift`) + exact-rows pins (`Tests/VariorumCoreTests/EmptyBlockSweepTests.swift`, 10) | DONE (cdb514168) — `swift test --filter EmptyBlockSweepTests` 10/10 green headless. Mutation probes M1–M3 ANNOUNCED here (this commit), each an UNCOMMITTED edit to the facts SQL in `Sources/VariorumCore/Queries/EmptyBlockSweepQueries.swift` on the committed tree, restored by `git checkout --` (git is the honest mid-probe state; no prerevert dir needed): M1 comments counted live-only (`AND bc.deleted_at IS NULL`) → expect `historyKeepsAnEmptyBlockOutAndMetadataDoesNot` red; M2 edges counted live-only (`AND e.deleted_at IS NULL`, both arms) → expect `aLinkToALivingBlockKeepsItOutAndALinkToADeadOneDoesNot` + `everyEdgeShapeIsReadByTheOtherSidesLifeAlone` red; M3 takes counted live-only (`AND v.deleted_at IS NULL` in `worded_takes`) → expect `theJunkShapeQualifiesAndAnyWordedTakeStaysOut` red. Results PENDING (next commit) |
 | D2 | VX-800 core: the sweep operation (intents + horizon, act-time re-check) + transition tests | NOT-STARTED |
 | D3 | VX-800 app: registry declaration, the door, the confirm case, the count observation, receipts, app pins | NOT-STARTED |
 | D4 | VX-636: the Trash's message band + pins | NOT-STARTED |
