@@ -124,6 +124,11 @@ struct LibraryCatalogView: View {
     /// 13i-d U5: the cross-wing note doors' brain (owned by the composition
     /// root); nil in harness mounts — the doors are then not drawn.
     var wings: WingsModel? = nil
+    /// **VX-823 — which pane this catalog is mounted in** (`PaneID.raw`,
+    /// handed down by the shell): the place the Library remembers, and the
+    /// return mark, are this pane's (`LibraryCatalogPlace.swift` — the ruling's
+    /// per-pane amendment). Harness mounts are the primary pane.
+    var placeKey: String = PaneID.primary.raw
     // VX-738 (her R-736-7): the quick-entry bar's "in ‹wing›" label is gone,
     // and with it this view's `onSwitchWing` (VX-644 — the label's press).
     // The tutorial door's property LEFT with the \u{22EF} menu (the post-13l
@@ -309,8 +314,11 @@ struct LibraryCatalogView: View {
         .onDisappear { LibraryPanelOracle.release(owner: oracleOwner) }
         #endif
         // 13i-d U5: a wing switch re-asks the catalog (the wing is part of
-        // the question).
-        .task(id: session.wing.currentID) { await model.search() }
+        // the question). VX-823: the mount's read — a pane that remembers
+        // where it was left re-asks the SAME question in place to that place's
+        // depth (its scroll lands on the rows the model still holds, reading
+        // nothing); a new wing is a new question (`listingAppeared`).
+        .task(id: session.wing.currentID) { await model.listingAppeared(placeKey: placeKey) }
         // 17y B3 item (l): the book rows' menu facts — the listed books only.
         .task(id: model.listedBookIDs) { await model.bookRowDoors.load(model.listedBookIDs) }
         // VX-268: who reaches the listed books and gatherings — HELD while
@@ -458,23 +466,36 @@ struct LibraryCatalogView: View {
                 Task { await model.search() }
             },
             onOpenPassage: { openPassage($0) },
-            onOpenPool: { onOpen(.pool($0)) },
+            onOpenPool: { poolID in
+                // VX-823: a scraps group's head wears no selection face.
+                model.rowOpened(poolID, placeKey: placeKey, marks: false)
+                onOpen(.pool(poolID))
+            },
+            placeKey: placeKey,
             noteHead: { hit in
                 LibraryListRow {
                     postRow(hit)
                 } background: {
                     rowBackground(
                         picked: model.selectedPosts.contains(hit.id),
-                        subject: model.infoHit?.id == hit.id)
+                        subject: isSubject(hit.id))
                 }
             },
             bookRow: { hit in
                 LibraryListRow {
                     bookLine(hit)
                 } background: {
-                    rowBackground(picked: false, subject: model.infoHit?.id == hit.id)
+                    rowBackground(picked: false, subject: isSubject(hit.id))
                 }
             })
+    }
+
+    /// **The row wearing the SUBJECT face** — the info panel's subject, and
+    /// (VX-823, P-828-12) the row this pane was left from by its open: the
+    /// return mark, the same face with no panel, until her next row click, a
+    /// new question, a mode switch or her next open.
+    private func isSubject(_ id: String) -> Bool {
+        model.infoHit?.id == id || model.placeMemory.mark(in: placeKey) == id
     }
 
     /// **A passage was clicked — LAND AT THE MATCH** (13o U2, D6 — her
@@ -486,6 +507,9 @@ struct LibraryCatalogView: View {
     private func openPassage(_ passage: SearchPassage) {
         guard let home = passage.noteID else { return }
         withAnimation(Self.panelAnimation) { model.closeInfo() }
+        // VX-823: the group's place, and its mark (a note group's head wears
+        // the List's selection face; a scraps group's does not).
+        model.rowOpened(home, placeKey: placeKey, marks: passage.family != .scraps)
         let selection: SidebarSelection = passage.family == .scraps ? .pool(home) : .post(home)
         if let block = passage.blockID, let onOpenBlock {
             onOpenBlock(selection, block, SearchLanding.findSeed(
@@ -504,6 +528,8 @@ struct LibraryCatalogView: View {
     /// — is superseded for the session's first open by that ruling.)
     private func openHit(_ hit: Queries.CatalogHit) {
         withAnimation(Self.panelAnimation) { model.closeInfo() }
+        // VX-823: the place she leaves, and the row she left from (P-828-11/12).
+        model.rowOpened(hit.id, placeKey: placeKey)
         onOpen(hit.kind == .book ? .reading(hit.id) : .post(hit.id))
     }
 
@@ -914,9 +940,11 @@ struct LibraryCatalogView: View {
                             LibraryListRow {
                                 bookLine(hit)
                             } background: {
-                                rowBackground(picked: false, subject: model.infoHit?.id == hit.id)
+                                rowBackground(picked: false, subject: isSubject(hit.id))
                             }
                             .modifier(BookRowPitchProbe(index: index) { measuredBookRow(index, $0) })
+                            // VX-823: a row a place may name.
+                            .libraryPlaceRow(hit.id, memory: model.placeMemory, key: placeKey)
                         }
                     } header: {
                         LibraryListHeader(title: tokens.chromeLabel("Books"))
@@ -929,13 +957,15 @@ struct LibraryCatalogView: View {
                         // 17y B1 (k): the PAGED rows live in their own view, so a
                         // page landing re-draws the rows' list — never this whole
                         // catalog (measured: a page's stall was the catalog body).
-                        LibraryPagedNotes(model: model, tokens: tokens, listFace: true) { hit in
+                        LibraryPagedNotes(
+                            model: model, tokens: tokens, placeKey: placeKey, listFace: true
+                        ) { hit in
                             LibraryListRow {
                                 postRow(hit)
                             } background: {
                                 rowBackground(
                                     picked: model.selectedPosts.contains(hit.id),
-                                    subject: model.infoHit?.id == hit.id)
+                                    subject: isSubject(hit.id))
                             }
                         }
                     } header: {
@@ -952,6 +982,7 @@ struct LibraryCatalogView: View {
                         if !showsBooks, !showsNotes { LibraryListLead() }
                         ForEach(model.blockHits, id: \.id) { hit in
                             LibraryListRow { blockLine(hit) }
+                                .libraryPlaceRow(hit.id, memory: model.placeMemory, key: placeKey)
                         }
                     } header: {
                         LibraryListHeader(title: tokens.chromeLabel(LibrarySearchCopy.blocksHeader))
@@ -980,9 +1011,13 @@ struct LibraryCatalogView: View {
                 }
             }
             .padding(.bottom, LibraryListFace.bottomInset)
+            // VX-823: the rows' frames are read in the content's own space.
+            .coordinateSpace(name: LibraryPlace.contentSpace)
         }
         // VX-349: the headers float only once the list has scrolled under them.
         .libraryListScrollReader()
+        // VX-823: where she was in this column — noted at rest, landed on return.
+        .libraryPlaceScroll(model, key: placeKey, surface: .list(includesBooks: includesBooks))
         .background(tokens.surface)
     }
 
@@ -1040,6 +1075,8 @@ struct LibraryCatalogView: View {
         .onTapGesture {
             guard let home = hit.homeContainerID else { return }
             withAnimation(Self.panelAnimation) { model.closeInfo() }
+            // VX-823: the place; a block line wears no selection face.
+            model.rowOpened(hit.id, placeKey: placeKey, marks: false)
             let selection: SidebarSelection = hit.homeIsPool ? .pool(home) : .post(home)
             if let onOpenBlock {
                 onOpenBlock(selection, hit.id, nil)
@@ -1064,7 +1101,7 @@ struct LibraryCatalogView: View {
                 ForEach(Array(model.bookHits.enumerated()), id: \.element.id) { index, hit in
                     bookLine(hit)
                         .listRowBackground(
-                            rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
+                            rowBackground(picked: false, subject: isSubject(hit.id)))
                         .modifier(BookRowPitchProbe(index: index) { measuredBookRow(index, $0) })
                 }
             }
@@ -1134,7 +1171,7 @@ struct LibraryCatalogView: View {
     private var notesBody: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                LibraryPagedNotes(model: model, tokens: tokens) { hit in
+                LibraryPagedNotes(model: model, tokens: tokens, placeKey: placeKey) { hit in
                     VStack(spacing: 0) {
                         noteCard(hit)
                         Divider().overlay(tokens.line.opacity(0.6))
@@ -1153,7 +1190,11 @@ struct LibraryCatalogView: View {
                 }
             }
             .padding(.horizontal, 20)
+            // VX-823: the cards' frames are read in the content's own space.
+            .coordinateSpace(name: LibraryPlace.contentSpace)
         }
+        // VX-823: where she was in the Cards — the place alone (P-828-14).
+        .libraryPlaceScroll(model, key: placeKey, surface: .cards)
         .background(tokens.surface)
     }
 
@@ -1239,7 +1280,11 @@ struct LibraryCatalogView: View {
         .padding(.vertical, face.verticalPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
-        .onTapGesture { onOpen(.post(hit.id)) }
+        .onTapGesture {
+            // VX-823: the place (the Cards draw no selection — no mark, P-828-14).
+            model.rowOpened(hit.id, placeKey: placeKey)
+            onOpen(.post(hit.id))
+        }
         .contextMenu { postRowMenu(hit) }
         // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
         .help(OwnershipBadgeCopy.rowHelp("Open this note", badge: ownedByBadge(extras)))
@@ -1329,7 +1374,12 @@ struct LibraryCatalogView: View {
     /// can never offer different doors on the same note.
     @ViewBuilder
     private func postRowMenu(_ hit: Queries.CatalogHit) -> some View {
-        Button("Open") { onOpen(.post(hit.id)) }
+        Button("Open") {
+            // VX-823: the place and the row she left from (the mark only where
+            // the surface draws a selection — never on a card).
+            model.rowOpened(hit.id, placeKey: placeKey)
+            onOpen(.post(hit.id))
+        }
         if let onOpenBeside {
             Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(hit.id) }
         }

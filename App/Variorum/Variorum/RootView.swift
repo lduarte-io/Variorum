@@ -1404,7 +1404,9 @@ struct RootView: View {
                 // The correction round, batch E (row 33): the panel's book
                 // outline opens the book AT a note — the ascent's landing.
                 onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) },
-                starDoor: starDoor, wings: wings)
+                starDoor: starDoor, wings: wings,
+                // VX-823: the place the Library remembers is this pane's.
+                placeKey: pane.raw)
         case .poolPosts:
             PoolPostsView(
                 session: session, model: poolPosts,

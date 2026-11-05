@@ -75,6 +75,8 @@ struct LibraryMoreNotesRow: View {
 struct LibraryPagedNotes<Row: View>: View {
     let model: LibraryCatalogModel
     let tokens: VoiceTokens
+    /// VX-823: the pane whose place these rows report into.
+    let placeKey: String
     /// librarywalkpolish VR-113: the List mode draws its rows on this same
     /// lazy engine, wearing the List's face — its sentinel row too.
     var listFace = false
@@ -93,6 +95,8 @@ struct LibraryPagedNotes<Row: View>: View {
                 // held facts).
                 .onAppear { model.noteRowAppeared(hit.id) }
                 .onDisappear { model.noteRowDisappeared(hit.id) }
+                // VX-823: a row a place may name — its frame in the content.
+                .libraryPlaceRow(hit.id, memory: model.placeMemory, key: placeKey)
         }
         if model.notesHaveMore {
             Group {

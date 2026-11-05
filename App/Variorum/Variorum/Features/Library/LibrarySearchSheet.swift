@@ -32,6 +32,8 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
     let onOpenPassage: (SearchPassage) -> Void
     /// A scraps group's head was clicked — the scraps area opens.
     let onOpenPool: (String) -> Void
+    /// VX-823: the pane whose place the sheet's rows report into.
+    let placeKey: String
     /// A note group's head: the List's own row, built by the catalog.
     @ViewBuilder let noteHead: (Queries.CatalogHit) -> NoteHead
     /// A Books-section row, built by the catalog.
@@ -58,6 +60,9 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
                             groupView(group)
                                 .onAppear { model.searchGroupAppeared(group) }
                                 .onDisappear { model.searchGroupDisappeared(group) }
+                                // VX-823: a group a place may name (its id is
+                                // its home's).
+                                .libraryPlaceRow(group.homeID, memory: model.placeMemory, key: placeKey)
                         }
                         if state.hasMoreGroups {
                             LibraryListRow {
@@ -87,9 +92,13 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
                 }
             }
             .padding(.bottom, LibraryListFace.bottomInset)
+            // VX-823: the groups' frames are read in the content's own space.
+            .coordinateSpace(name: LibraryPlace.contentSpace)
         }
         // VX-349: the headers float only once the sheet has scrolled under them.
         .libraryListScrollReader()
+        // VX-823: where she was in the answer — its groups (the ruling's scope).
+        .libraryPlaceScroll(model, key: placeKey, surface: .sheet)
         .background(tokens.surface)
     }
 
@@ -100,6 +109,7 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
             LibraryListLead()
             ForEach(state.books, id: \.id) { hit in
                 bookRow(hit)
+                    .libraryPlaceRow(hit.id, memory: model.placeMemory, key: placeKey)
             }
         } header: {
             LibraryListHeader(title: tokens.chromeLabel(LibrarySearchCopy.booksHeader))
