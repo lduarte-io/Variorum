@@ -1,8 +1,10 @@
 # VX-828 — editor & shell QoL: the author's handoff
 
 *(Run record: `notes/plans/fixes/vx-828-editor-shell-qol.md` — read its FOR A LATER READER first.
-Ladder findings: `notes/plans/fixes/vx-828-ladder-round1.md`. DRAFT until the merge; the PR
-number, merge SHA and canon-size line land at closeout.)*
+Ladder findings: `notes/plans/fixes/vx-828-ladder-round1.md`. **MERGED 2026-11-05: PR #224, merge
+commit `8b9ced515`.** Canon applied in the two-file shape; `Tools/canon-size`: **134,616 / 150,000
+(headroom 15,384)** — no crossing. The provisional bundle is QUESTIONS #263; born tickets
+VX-855 (High) · VX-856 (Low).)*
 
 ## YOUR MORNING CHECKLIST
 
@@ -69,7 +71,7 @@ walk catch mattered: VX-823's first build landed at the top on the REAL return r
 mounted pin passed — fixed, re-walked green; the road pin is recorded HOLLOW as red-on-old (the
 cross-window live pair is the evidence) with a ladder flag for a harder pin.
 
-## Deferred to the merge-gate window (each covered by a green pin today)
+## Deferred to the merge-gate window — ALL RAN AT THE GATE (walks green both voices; the Settings legs verified-by-pins, words-guard fail-closed; phone suites 88/6)
 
 Batch C's seven walk legs (Cards, search sheet, day filter, resets, deleted-row, sidebar leave,
 two-pane) · B's remaining door witnesses, label seam/floor/fullscreen, the snippet-editor chord,

@@ -1,13 +1,64 @@
 # VX-828 — Run: editor & shell QoL
 
-**STATUS: OPEN — kicked off 2026-11-05 (/architect-phase vx-828, the architect shape).**
-Branch `vx-828-editor-shell-qol` from main 8ffdd8278 · worktree `~/dev/variorum-vx-828` · the Pro ·
-coordinator `nov4coordinator` (stage protocol below). PR: VX-828, merge commit, at closeout.
+**STATUS: CLOSED — merged 2026-11-05 (PR #224, merge `8b9ced515`).** Branch
+`vx-828-editor-shell-qol` from main 8ffdd8278 · the architect shape · coordinator `nov4coordinator`.
+Her bundle: QUESTIONS #263 + `notes/handoffs/vx-828-handoff.md`.
 
 ## FOR A LATER READER
 
-*(Written at closeout. Until then: the LIVE STATUS ledger below is the run's state; a resuming
-session reads this file whole — the run is open.)*
+**The run, settled.** Eleven members, five batches, merged 2026-11-05 as PR #224 (`8b9ced515`).
+Everything below this section is the night's working record — read it only if reopening this run.
+Her unratified calls live in QUESTIONS #263 (the bundle) and `notes/handoffs/vx-828-handoff.md`
+(her checklist); until she rules, #263 is the open-items list.
+
+**The mechanisms as settled, one pointer each:**
+- **VX-806** — the Return mid-word cut takes the enclosing word's START (the legal set's floor,
+  never the settle), so the whole word rides down; a blank prefix lands the start arm.
+  `Domain/BoundarySnapping.wordStart(enclosing:in:)` + `Shared/EditorBrain/TypedReturn.swift`;
+  canon in AppSpec §7/§9. #92(b) superseded.
+- **VX-655** — the list-exit Return's marker retraction lands INSIDE the structural flight (the
+  claim decides against the unretracted surface; `insertEmptyBlock` writes the take minus the
+  newline; the divide seam reuses the on-screen newline as the separator) — no frame-blank, and
+  #94(a)'s two-registration undo gap closes by subtraction. `TypedReturn.act` + the seam in
+  `EditorTextView.insertNewline(_:)`.
+- **VX-800/636** — the Trash's empty-block sweep: `Operations.sweepEmptyTrashBlocks` re-reads
+  R-828-1's predicate in its transaction (floor: no savepoints/comments/non-empty take/name/
+  presentation/tags AND no live edge to a live block; Trash's own rows only, never cascade
+  victims), mints purge intents only, no ⌥⌘Z; the Trash's messages speak in their own band.
+  `Queries/EmptyBlockSweepQueries.swift` (facts key `commit_points`) + `TrashSweepDoor`.
+- **VX-823** — the Library remembers: per-pane in-memory place = the on-screen row ids re-resolved
+  at return (P-828-11 (b)); the return mark wears the subject face; every leave records; Cards
+  place-only. `Features/Library/LibraryPlaceMemory.swift` / `LibraryPlaceScroll.swift`. The one
+  live catch: the real return landed on top because `onScrollGeometryChange` fires only on CHANGE —
+  the landing now keys on the pane's own mount geometry; the road pin was HOLLOW (recorded, the
+  cross-window live pair is the red-on-old) and is mechanism-honest via the
+  `LibraryPlaceTrace.withholdsReadingsUntilAim` DEBUG seam.
+- **VX-824/833/844** — ⌘1–⌘9 to wings behind a WRITING-SURFACE gate (Q-B1 (a):
+  `WingNumberKeys.decide`, pure; the monitor sees the key before the menu); every deliberate
+  switch lands in the wing's Bookcase (Q-B2 (a), `WingsModel.goTo`; the follow never lands); the
+  toolbar label right-aligned at the column with the car-radio ticker (P-828-2 (a),
+  `Core/Views/WingToolbarLabel.swift`).
+- **VX-798** — ⌘;/⌘: one-shot spelling + Edit ▸ Spelling and Grammar (A24 §3 pairing kept).
+- **VX-838/840** — Settings ▸ Tags names and follows the wing (R-828-2; the pane's `.task` keyed
+  on the wing); the unused-tags sweep (`Operations.deleteUnusedTags`, ONE "Delete Unused Tags"
+  ⌥⌘Z entry) consumes vx-809's `Queries.tagSubtreeIsWorn` with `countingTrashRevivable: true`
+  (P-828-3) — the query was VENDORED byte-identical during the overlap and reconciled at merge.
+
+**Rulings:** hers R-828-1..4 (the sitting record below, verbatim); mine P-828-1..14 + Q-B1/Q-B2/
+Q-E1..4 (the fork sections), all PROVISIONAL in #263.
+
+**Evidence that matters:** every member pin red-on-old by behavioral revert or mutation probe;
+ladder round 1 clean (0 B/M; the one MINOR's cross-model dispute ended with the reviewer
+withdrawing — the implementer's seam stood); merge gate whole-target 5983/1039 (the one red was
+the commit-vocabulary fence → the `commit_points` rename + the confirm's "commits" wording, kept
+provisional), phone 88/6, walks green both voices; the two Settings walk legs stand
+VERIFIED-BY-PINS (words-guard fail-closed with Settings open — the husk-tag fixture is still in
+the dev store if a later session wants the live leg).
+
+**Open items:** QUESTIONS #263 (her bundle — the P-828 set, Q-B1's gate reading, Q-B2's
+cycling-word regression, the two wording items incl. the nothing-left over-claim) · VX-855 (the
+teardown SQLCipher codec race, vx-809's neighborhood) · VX-856 (the book Index/Outline place
+courtesy) · #161 stays open (the menu divide keeps the settle).
 
 ---
 
