@@ -273,6 +273,7 @@ reverts).**
 | `TypedReturnKeyTests` · `aReturnInsideAFannedOneWordBlockPushesItDownToo` | old key refused on the keep-on-top nil-cut guard | same |
 | `TypedReturnKeyTests` · `theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt` | R1-3 deleted the newline at the claim: the claim-turn and mid-flight assertions read `"- one\ngamma"` | restore the claim-time retraction: paste the pre-fix `retractListContinuationNewline()` (`git show 7e7de0b02:App/Variorum/Variorum/Features/Editor/EditorViewModel.swift`, lines 1797–1828) back into `EditorViewModel` and call it as `if afterListExit { retractListContinuationNewline() }` ahead of `let act = typedReturnAct()` in `runTypedReturn` → the claim-turn `#expect` reads `"- one\ngamma"` (the act then finds nothing to retract, and the end state is the old one) |
 | `TypedReturnKeyTests` · `theListExitsUndoStoryIsNinetyFoursWhole` | GREEN ON BOTH SIDES (#94's shape guard) | — |
+| HYGIENE (after the revert window's seven `.ips`) · `aReturnInsideAFannedOneWordBlockPushesItDownToo`, `aReturnInsideAOneWordBlockPushesItDownInsteadOfRefusing`, `aReturnInsideAWordCarriesTheWholeWordDown`, `theListExitsRetractionLandsInsideTheFlightNeverAheadOfIt` | every raw subscript on store slots / index entries now sits behind a `try #require` count guard (the un-indexed expects run first), so a red road fails CLEAN instead of trapping the host in `Array._checkSubscript`. Red-on-old was already shown (a crash is red); the CLEAN red-on-old re-show is PENDING the orchestrator's next stage window | revert 1 again → the fanned and one-word pins fail at their `#require`, no `.ips` |
 
 **Addendum (after the orchestrator's stage run, 2026-11-05 — 281 tests, 280 green):**
 `NestedListDoorTests` · `returnAtDepthContinuesThenOutdentsThenExits` (`WalkBuildRoundTests.swift`) is
@@ -604,3 +605,12 @@ reverted old code, `TypedReturnKeyTests.aReturnInsideAFannedOneWordBlockPushesIt
 Array-subscripts the store slots the old road never minted — red-on-old BY CRASH (host trap), not a
 clean #expect. Fix owed (implementer): #require the count before indexing so the pin fails clean
 when red; its clean red-on-old re-shows in the next stage window (one revert, one suite) — PENDING.
+
+**SECOND FINDING from the window (the coordinator's catch, triaged together): the 01:55:15 .ips is
+a DIFFERENT class — filed as VX-855 (Bug · Suspected · Castle & sync · High).** SIGSEGV in the
+SQLCipher codec on a pool reader under `PurgeJanitor.collectRoots ← LocalPurge.sweep`, no test
+frame on any thread; the host was the re-point re-run's (launched 01:54:59, its 18/2 pass recorded
+~01:55:03, crash at +4.4 s = TEARDOWN after the pass). Suspected: the launch-time purge sweep's
+in-flight reader races the pool/codec teardown. Not this run's regression (no purge/pool/
+protection code in the diff); the coordinator hands VX-855 to vx-809 (VX-818's teardown
+neighborhood). This run FILED: VX-855.
