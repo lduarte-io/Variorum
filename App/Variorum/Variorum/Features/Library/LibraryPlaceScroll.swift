@@ -220,6 +220,17 @@ struct LibraryPlaceScroll: ViewModifier {
     }
 
     private func reading(old: LibraryPlace.Window, new: LibraryPlace.Window) {
+        #if DEBUG
+        // A pin's seam (`LibraryPlaceTrace.withholdsReadingsUntilAim`): the live
+        // return's NO-READING mount, played — no scroll reading reaches this
+        // mount until its landing has aimed. A hosted mount always sends one
+        // (window 2: the road pin green under R-C4 and R-C4b — hollow), so the
+        // live condition is reachable only through this seam.
+        if LibraryPlaceTrace.withholdsReadingsUntilAim, memory.aims == 0 {
+            trace("reading withheld")
+            return
+        }
+        #endif
         memory.window = new
         model.placeMemory.noteWindow(new, surface: surface, key: key)
         decide()
@@ -359,6 +370,9 @@ struct LibraryPlaceScroll: ViewModifier {
 @MainActor
 enum LibraryPlaceTrace {
     static var sink: ((String) -> Void)?
+    /// A pin's seam: while true, a mounting pane gets NO scroll reading until
+    /// its return landing has aimed (the live no-reading mount, played).
+    static var withholdsReadingsUntilAim = false
 
     static func note(_ key: String, _ line: @autoclosure () -> String) {
         guard let sink else { return }

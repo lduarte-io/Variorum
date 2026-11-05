@@ -20,10 +20,24 @@
 //  CHANGES — a short listing swapped into an already-sized pane lays out once
 //  and never changes, so no reading came and nothing landed. The fix lands as
 //  soon as the pane has its proxy and its own height (`onGeometryChange` on the
-//  scroll view, which reports at mount). RED under revert R-C4 (the landing
-//  gated on a reading again — `landIfReady` requiring `memory.window
-//  .isMeasured`). A red here prints the scroll's DEBUG decision log
-//  (`LibraryPlaceTrace`) in its message, so a red says which step failed.
+//  scroll view, which reports at mount).
+//
+//  WHAT THIS PIN PROVES, AND HOW: a hosted mount — even through the real
+//  `RootView` and router — ALWAYS sends a scroll reading, and that reading
+//  feeds the returning pane's MOUNT-LOCAL window (`LibraryPlaceScrollMemory` is
+//  per-mount `@State`); so on its own this pin cannot reproduce the live
+//  no-reading mount (window 2: green under revert R-C4 — HOLLOW, recorded; the
+//  ladder's round-1 final calls correct the window-2 record's reason). Its
+//  RETURN leg therefore plays the live condition through the DEBUG seam
+//  `LibraryPlaceTrace.withholdsReadingsUntilAim`: no scroll reading reaches the
+//  returning pane until its landing has aimed. With the seam, revert R-C4
+//  (`landIfReady` requiring `memory.window.isMeasured` — the pre-fix rule) is
+//  RED by construction (no reading ⇒ never measured ⇒ never lands ⇒ the list
+//  at its top). R-C4b (the appear/height triggers disabled) is NOT this pin's
+//  red — the re-ask's trigger still lands on the pane's own height. The fix's
+//  LIVE red-on-old is the cross-window pair (window 1's walk red on the pre-fix
+//  build → window 2's green on the fix; the record's window-2 section). A red
+//  here prints the DEBUG decision log (`LibraryPlaceTrace`) in its message.
 //
 
 import AppKit
@@ -152,7 +166,9 @@ struct LibraryReturnRoadTests {
     /// `rowOpened`, then the shell's adopt), and ⌥⌘[ brings her back: the row
     /// back where it sat, wearing the return mark. Otherwise she leaves by the
     /// sidebar (the Bookcase) and comes back: the row where it sat, no mark.
-    /// RED under revert R-C4, the walk's own red: the Library at its top.
+    /// The return leg plays the live no-reading mount (the seam, header): RED
+    /// by construction under revert R-C4; the fix's live red-on-old is the
+    /// cross-window pair.
     @Test(arguments: [true, false])
     func theLibraryComesBackWhereSheLeftItThroughTheShell(openedFromARow: Bool) async throws {
         #if DEBUG
@@ -206,6 +222,11 @@ struct LibraryReturnRoadTests {
             await settle(window, hosting, timeout: 1.2)
             #expect(router.workspace.focusedSelection != .library, "she left the Library")
             log.append("— back —")
+            // The live return's condition: no scroll reading reaches the
+            // returning pane until it has landed (the seam — the hosted mount
+            // would otherwise send one and hide the mechanism).
+            LibraryPlaceTrace.withholdsReadingsUntilAim = true
+            defer { LibraryPlaceTrace.withholdsReadingsUntilAim = false }
             router.goBack()
             await settle(window, hosting, timeout: 4) {
                 top(of: reading.id, catalog).map { abs($0 - reading.top) <= 1 } ?? false

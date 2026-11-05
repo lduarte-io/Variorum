@@ -2123,6 +2123,8 @@ new mount, which the real arm swap never sends. Expected: both road arguments re
 the decide/appear trace printed and no `landing` line. Uncommitted edit on the committed tree
 (3a7dbff78); `git checkout --` restores.
 
+*(Correction beside this section — ladder round 1 FINAL CALLS, `notes/plans/fixes/vx-828-ladder-round1.md`, 0b8fd184b: R-C4's guard reads the scroll's MOUNT-LOCAL window (`LibraryPlaceScrollMemory` is per-mount `@State`), which the hosted mount's own unavoidable scroll reading fed — not a window persisting across the trip (that is the model-held `placeMemory.windows`, which the guard never reads); the road pin's red is now R-C4 under the `LibraryPlaceTrace.withholdsReadingsUntilAim` seam.)*
+
 #### Batch C — ORCHESTRATOR VERIFICATION, WINDOW 2 (stage "vx-828-batchC2", 2026-11-05, GO 04:56, hard 60 — VX-823 VERIFIED)
 
 **Suites:** LibraryReturnRoadTests + LibraryReturnPlaceMountTests + LibraryReturnPlaceTests —
