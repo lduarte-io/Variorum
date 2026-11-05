@@ -39,14 +39,17 @@ mismatches in every checkout), and the root lockfile's originHash is `sha256(Pac
 mismatch changes nothing observable (T-3).
 
 **THE NON-OBVIOUS FACT a future session will trip over (E10):** in the Xcode workspace the
-repo-root package is a LOCAL PACKAGE DEPENDENCY, not the root, so SwiftPM PRUNES its unused
-`.package` declarations. Exact pins added only to Package.swift do NOTHING for the app: E10 floated
-SQLCipher to 4.20.0 with them in place. The app graph's root is the PROJECT, so its belt is
-project-level package references.
+repo-root package is a LOCAL PACKAGE DEPENDENCY, not the root, so SwiftPM PRUNES its declarations:
+it keeps one only when a target of a PRODUCT THE APP LINKS uses it. A use by a test target or by a
+product-less target is pruned too (ladder round 2, R2-1, measured by the reviewer). Exact pins
+added only to Package.swift do NOTHING for the app: E10 floated SQLCipher to 4.20.0 with them in
+place. The app graph's root is the PROJECT, so its belt is project-level package references, one
+for EVERY remote package.
 
 **The belt as built:** Package.swift exact pins for every remote package, the CLI's belt (eda25f273,
-620cc9019) · the same versions as 12 exact `XCRemoteSwiftPackageReference` entries in
-project.pbxproj, the app's belt (620cc9019) · the root lockfile reconciled to the shipping set
+620cc9019) · the same versions as 15 exact `XCRemoteSwiftPackageReference` entries in
+project.pbxproj (12 at 620cc9019, plus the three direct dependencies at 0ea419ecf, R2-1), beside
+Sparkle's: the app's belt, one rule · the root lockfile reconciled to the shipping set
 (P-781-1) · **`Tests/VariorumCoreTests/PinBeltTests.swift` = the every-run static guard of all four
 places (R1-1, 95fcc3c4e; red-on-old on 68b3d9c53, red on a deleted reference and on one-sided
 bumps)** · `Tools/verify-pins` = the resolved-state guard (fef4800f8, 60cfbd44e) ·
@@ -81,7 +84,11 @@ ROUND 1 FIX LEG.
 the release.sh hook, the MCP socket-road timing bounds incl. the ConcurrencyExtras 1.4.1 rate
 change) · the stray default DerivedData
 from my `xcodebuild -list` (the coordinator's sweep) · VX-770's first trigger and second writer
-(mooted, not found; `test` and simulator destinations never sampled).
+(mooted, not found; `test` and simulator destinations never sampled) · **after each Xcode/Swift
+update, run `Tools/pins-belt-check HEAD`** (R2-5): the belt rests on two toolchain behaviours (E10's
+pruning, E11's product-less references as root constraints), and PinBeltTests cannot see a
+toolchain that stops honouring the second. Where this line lands in canon (beside the TEXTKIT2 §5
+re-verify ritual?) is the author's call.
 
 ## LIVE STATUS (flipped per piece, in the same commit as the piece)
 
@@ -494,12 +501,12 @@ upgrade is deliberate, so this is the whole road, in order:
    EXISTING pin is author-only too is unruled (P-781-4). Until she rules, treat a crypto pin
    (SQLCipher, the GRDB fork) as hers.
 2. **Edit the declarations, the same version in each place the package appears:**
-   a. `Package.swift`: its `exact:` line. This is the CLI's belt, and for the direct dependencies
-      (the GRDB fork, swift-dependencies, the MCP SDK) the app's belt too.
+   a. `Package.swift`: its `exact:` line. This is the CLI's belt.
    b. `App/Variorum/Variorum.xcodeproj/project.pbxproj`: the matching `XCRemoteSwiftPackageReference`
-      (`kind = exactVersion; version = …;`). This is the app's belt for the twelve transitive
-      packages and the only home of Sparkle. Edit it by hand or through Xcode's Package
-      Dependencies pane, keeping "Exact Version".
+      (`kind = exactVersion; version = …;` — Xcode quotes a version with build metadata, e.g.
+      `"7.11.1+sqlcipher.1"`). This is the app's belt for EVERY remote package (since R2-1) and the
+      only home of Sparkle. Edit it by hand or through Xcode's Package Dependencies pane, keeping
+      "Exact Version". So every package but Sparkle appears in both files.
    c. If the upgrade CHANGES THE TRANSITIVE SET (identities added or dropped, as with
       swift-dependencies 1.17.x: swift-issue-reporting in, xctest-dynamic-overlay out), add or
       remove the exact lines in BOTH files to match, each version chosen deliberately.
@@ -508,7 +515,8 @@ upgrade is deliberate, so this is the whole road, in order:
    b. workspace: `rm App/Variorum/Variorum.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`,
       then from `App/Variorum/`: `xcodebuild -resolvePackageDependencies -project Variorum.xcodeproj
       -scheme Variorum -derivedDataPath <fresh dir> -clonedSourcePackagesDirPath <fresh dir>
-      -packageCachePath <dir>` (all three inside the worktree's gitignored DerivedData).
+      -packageCachePath <dir>` (all three ABSOLUTE paths, inside the worktree's gitignored
+      DerivedData: relative paths make `-resolvePackageDependencies` silently resolve nothing).
    Removing the files is SAFE only because of the belt: a pin-free resolution lands exactly the
    declared set. Anything you left floating shows up in step 4.
 4. **Verify, after committing:** `swift test --filter PinBeltTests` (milliseconds, no network)
@@ -565,8 +573,8 @@ candidate if wanted: Improvement · Tests & tooling · Medium.
   byte-stable, but a pin-free CLI resolution would then land the top of each range, so the CLI half
   of the belt holds only by luck of the range. (C) Pin the APP DOWN to 1.4.0 / 1.10.1, which changes
   what ships. (A) is the most defensible: one committed set, the shipping one.
-- **P-781-2 — where the app's belt lives.** **Built (A):** twelve exact project-level package
-  references in project.pbxproj. They are VISIBLE in Xcode's Package Dependencies list, with no
+- **P-781-2 — where the app's belt lives.** **Built (A):** exact project-level package references
+  in project.pbxproj for every remote package (twelve at first, fifteen since R2-1's road (ii)). They are VISIBLE in Xcode's Package Dependencies list, with no
   product dependency. (B) Package.swift pins only, plus the verify-pins guards: E10 proves a
   pin-free resolution then floats SQLCipher to 4.20.0, so the guards would refuse builds instead of
   preventing the float. (C) Restructure to an .xcworkspace that opens the repo package as a ROOT
@@ -786,3 +794,63 @@ pass's fixes line by line (no later reviewer reads them).
 
 Also, at the orchestrator's word: the MCP socket-timing Medium ticket WILL be filed at closeout. It
 stays on the candidates list, with the orchestrator's endorsement.
+
+## ROUND 2 FIX LEG (implementer) — the final round's fixes, for the orchestrator's line-by-line check
+
+- **R2-1 (MINOR) — FIXED, road (ii)** (0ea419ecf).
+  - Three more exact project references: `E1F78100000000000000000D` GRDB.swift
+    `"7.11.1+sqlcipher.1"` (quoted, as Xcode writes build metadata), `…0E` swift-dependencies
+    1.14.1, `…0F` swift-sdk 0.12.1. The URLs are byte-equal to the lockfile locations.
+  - PinBeltTests (2) is ONE rule: every workspace pin has an `exactVersion` project reference at
+    its version, with quotes stripped. `manifestUsedPackages()` and the used-direct branch are
+    deleted.
+  - The doc comment, Package.swift's comment and FOR A LATER READER now say the pruning rule
+    exactly.
+
+  Red-on-old (the finding's probes, on this committed state, restored by `git checkout --`):
+
+  | probe | PRE-fix test (3a778c9df^…0ea419ecf^ = 23ae5bc71's files) | POST-fix test |
+  |---|---|---|
+  | P1: `ConcurrencyExtras` added to VariorumMCPTests' deps + ref `…04` deleted | **GREEN** `✔ 3 tests … passed` (the hole) | **RED** `["swift-concurrency-extras 1.4.1 (5fa2534): no exactVersion project reference — Xcode would let it float"]` |
+  | P2: `Clocks` added to StringsWorkbook (product-less) + ref `…06` deleted | **GREEN** (the hole) | **RED** `["swift-clocks 1.1.0 (72d749b): no exactVersion project reference …"]` |
+  | P5: the new GRDB reference `…0D` deleted | — | **RED** `["grdb.swift 7.11.1+sqlcipher.1 (404dde0): no exactVersion project reference …"]` |
+
+  - Toolchain checks of the new references:
+    - `Tools/pins-belt-check HEAD --keep` at 3a778c9df: `BELT HOLDS`, exit 0. The pin-free Xcode
+      resolve, quoted GRDB version included, lands 16 pins.
+    - **E14** (clean committed lockfile, fresh DerivedData, the 15 references): exit 0, the
+      lockfile byte-clean, the state OK 16. The extra root URLs change Xcode's originHash formula
+      but trigger no rewrite (pins equal).
+    - A Debug app build on these bytes (`vx781-merged`, incremental): `** BUILD SUCCEEDED **`,
+      `verify-pins` OK 16.
+- **R2-2 (NIT) — FIXED** (0ea419ecf). Both directions, by repository:
+  - (1) Each Package.swift `.package(url:)` needs a root pin with the same identity and location.
+  - (2) Each project reference needs a workspace pin with the same identity and location (case and
+    a trailing `.git`/`/` ignored).
+  - Probes, POST-fix: **P3**, the GRDB reference repointed to `https://github.com/someone-else/GRDB.swift.git`
+    at the same version (the crypto pin's class), is **RED** `["grdb.swift: the project points at
+    https://github.com/someone-else/GRDB.swift.git, the workspace lockfile at
+    https://github.com/lduarte-io/GRDB.swift.git"]`. **P4**, a stray `swift-numerics` 1.0.0
+    reference with no pin, is **RED** `["swift-numerics: a project reference … with no workspace
+    lockfile pin"]`.
+  - The Package.swift direction was not probed live: a repointed manifest URL makes `swift test`
+    re-resolve against the new repository before any test runs. The check is the same code shape
+    as (2)'s.
+- **R2-3 (NIT) — FIXED** (3a778c9df). An argument loop: `HEAD --keep` kept the run dir (1.5 G,
+  then deleted by hand), and `--help` prints the header and exits 0. `--bogus`, two revisions and
+  an unknown revision each exit 2. verify-pins' exit 2 now becomes the script's exit 2 ("a setup
+  error, not a verdict").
+- **R2-4 (NIT) — FIXED.** UPGRADING 3b says ABSOLUTE paths and names the relative-path trap. Step
+  2 and Package.swift say "each place the package appears": both files for every package but
+  Sparkle, which is project-only. Step 2b notes Xcode's quoting of build metadata.
+- **R2-5 (NIT) — FIXED.** An open-item line in FOR A LATER READER: after each Xcode/Swift update,
+  run `Tools/pins-belt-check HEAD`. Its canon home is the author's call.
+- **R2-6 (NIT) — FIXED (wording).** The sampler logs (`e7-`, `e12-`, `phone-`,
+  `prephone-lockhash.log`) record CHANGES ONLY: a start line, then one line per change. A log
+  holding only its start line therefore means "no change seen", and cannot by itself prove the
+  sampler lived to the end. Each no-change conclusion ALSO rests on the byte-clean `git status`
+  and the `Tools/verify-pins` tree guard run right after its build (E12, R1-11; the pre-belt
+  export's `verify-pins --ref 68b3d9c53` for R1-3), which are cited beside each.
+
+**Suite counts (round 2, on 3a778c9df's bytes plus this record):** PENDING — the core suite is
+running.
