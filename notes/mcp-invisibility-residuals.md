@@ -26,7 +26,9 @@ Landed answers that list what an act touched carry fixed, always-present sentenc
 
 ## A ready-to-paste public paragraph (hers to place — privacy policy / the public MCP page)
 
-> Anything you haven't shared is invisible to a connected AI — it can't be read, listed, named, or counted, and a private thing answers exactly as if it didn't exist. There is one honest exception class: where reality makes it impossible to hide that *something* exists, Variorum says that one fact and nothing more. For example, adding a note to a book that unseen notes have filled is refused — the AI learns the book is full, never what fills it; and a note that an unshared book owns can't be added to another book — the AI learns "something beyond your reach holds it," never what. (A book you haven't shared never blocks a note's ordinary moves — the note simply leaves it, unnamed.) In every such case the answer names nothing, counts nothing, and describes nothing.
+> Variorum hides what you haven't shared by making it not exist, as far as an AI can tell. It can't read an unshared note, search it, list it, or count it, and a private note looks exactly like a note that was never written. Hiding completely is impossible in only one kind of moment: when something hidden is in the way of what the AI asked to do. If it tries to add a note to a book that's already full of notes it can't see, the add can't quietly succeed — so Variorum says no, in as few words as possible: the book is full. Not what fills it, not how many, not what they're called. The AI learns that something is in the way, and nothing else.
+
+*(Her final wording, picked 2026-11-05 on VX-879 — "i like A. do that." — now live on both site pages; it supersedes this file's earlier draft.)*
 
 **Corrected 2026-11-05 (VX-879, the site review's catch):** the paragraph's example now names the OWNING book (a plain unshared holder never blocks a move — verified in `Operations+MCPWingMove.swift`), and the closing sentence says "answer" (residual 5 is a success, not a refusal).
 
