@@ -2296,3 +2296,22 @@ re-pick (SPECULATIVE) joins the merge-gate walk as a micro-leg beside the ▾-li
 WINDOW: the amended road pin's red-show under R-C4 (one revert, one suite) once the MINOR's fix
 lands. The reviewer's clean-bill highlights and the full verification-debt restatement live in
 the findings file.
+
+#### THE LADDER — CLOSED (round 1 was the final round)
+
+0 BLOCKER · 0 MAJOR across the whole diff. The one MINOR ran the full cross-model flow: finding →
+the implementer's agree/dispute (the dispute CORRECT — the reviewer's trigger-order assertion
+could false-red and false-green, both modes verified concrete by the reviewer itself) → the
+reviewer's FINAL CALLS (0b8fd184b: assertion withdrawn, the implementer's DEBUG-seam
+counter-proposal confirmed with three constraints, the corrected R-C4 mechanism into the docs and
+a correction line beside the window-2 record) → applied as a9b25bb83 (docs + seam + pin leg +
+record line) and f0cf82ac7 (the 4,800 window). **The orchestrator's line-by-line check of the
+final round's fixes: PASSED on all four counts** — the seam is DEBUG-only default-false and
+honors (i) nothing fed while withheld, (ii) flow after the first aim, (iii) decide() at appear;
+the docs name R-C4-under-the-seam as the pin's red, the cross-window pair as the live red-on-old,
+and R-C4b as not-this-pin's-red; the record correction sits beside the window-2 section with the
+log verbatim; the window constant and comment are the agreed ones. ADDED TO THE MERGE-GATE
+WINDOW: green runs of LibraryReturnRoadTests + QuickEntryWingLabelTests on the committed tree,
+and the R-C4-UNDER-SEAM red-show (the recipe in the batch C hand-back: the isMeasured guard as an
+uncommitted edit → both road arguments red at "the row back where it sat" with "reading withheld"
+lines and no landing; restore; re-run green).
