@@ -356,14 +356,18 @@ public final class MCPServerHost: @unchecked Sendable {
             try? operations.endMCPConnectionGrants(clientID: client.id)
         }
         executor.repoint(fresh)
-        let (live, died): ([MCPSession], String?) = lock.withLock {
+        // A stop that landed while this resume ran (her quit, the door letting
+        // go) keeps the host stopped: nothing reopens, nothing is observed.
+        let (still, live, died): (Bool, [MCPSession], String?) = lock.withLock {
+            guard _state == .suspended else { return (false, [], nil) }
             suspendedFingerprint = nil
             let died = listenerDiedWhileSuspended
             listenerDiedWhileSuspended = nil
             _state = died.map { .stoppedByItself($0) } ?? .running
             latch.open()
-            return (Array(sessions.values), died)
+            return (true, Array(sessions.values), died)
         }
+        guard still else { return .notSuspended }
         startObservingGrants()
         for session in live where session.isHeld { await session.admitIfHeld() }
         for session in live { await session.announceToolsChanged() }
