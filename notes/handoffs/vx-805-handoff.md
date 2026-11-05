@@ -1,6 +1,6 @@
 # VX-805 — the journal cluster: author handoff
 
-**STATUS at writing (~06:10, overnight):** all nine members built and verified; the ladder's round 1 found NO blocker/major (round 2 in flight); canon deltas landed on the branch; the merge-gate whole-target window and the merge itself follow round 2 (the coordinator serializes; this line is updated at merge). Everything below is PROVISIONAL under your overnight directive — ruled to the most spec-defensible option, built, pinned, and bundled here for your morning pass.
+**STATUS: MERGED (2026-11-05 ~07:00 — PR #222, merge `f1137c88b`, the wave's FIRST merger; the ladder closed clean after two rounds; the merge gate ran whole-target green on the exact merged tree). NOT released — per your directive the release-ready window belongs to the wave's LAST merger. The Sync/custody slot is released; no mirror deploy is owed by this run.** Everything below is PROVISIONAL under your overnight directive — ruled to the most spec-defensible option, built, pinned, and bundled here for your morning pass.
 
 ## HER MORNING BUNDLE (the checklist)
 
