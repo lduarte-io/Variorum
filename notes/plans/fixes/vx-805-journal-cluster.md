@@ -156,6 +156,7 @@ What the proposal must settle, inside these rails:
 - Main carries the PIN BELT (VX-781): core `swift build` prints 7 EXPECTED "dependency not used by any target" warnings — not a regression. A build that tries to float a pin fails closed — moving a pinned dependency version is HERS ALONE (CLAUDE.md author-only list); never "fix" a pin refusal by re-pinning.
 - The dev store's Castle credentials are `~/.variorum/dev-castle.env` (never invent, never commit values); dev-store CONTENT is agents' to manage freely; the Debug app never signs into her real account; any prod-test-road act follows the fences (vxtest allowlist only, signed out at rest, never press Resume). Live Castle walk legs go to Opus.
 - Never `git checkout` over uncommitted work; commit before any behavioral revert; pre-revert copies in a gitignored uniquely-named dir INSIDE the worktree, never the scratchpad.
+- **The MCP socket-harness suites are a CROSS-WORKTREE shared resource, even in headless `swift test`** (coordinator, 2026-11-05: vx-828's core run collided with vx-809's concurrent MCP suites — "got no answer to its initialize"; re-run alone they went 17/17 green). A socket-harness red during any concurrent run is NO verdict — re-run those suites ALONE. A merge-gating or red-on-old run of the MCP socket suites is announced to nov4coordinator first, one line (not a stage claim). This run's wire-side Journal fence tests may live in that harness.
 - Screenshots in gitignored dirs. No `Co-Authored-By`/`Claude-Session` trailers on commits.
 
 ## 8. The ledger
