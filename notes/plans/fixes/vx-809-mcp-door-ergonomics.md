@@ -587,3 +587,35 @@ Her door moves a gathering (`moveReadingToWing` takes one). But a gathering asse
 **Files touched (no `App/Variorum/Shared/`, no `Sync/`, no `Protection/`, no custody/keychain, no migration, no dependency, `Domain/DuplicateDay` untouched, no `MacWillLock.swift`/server lifecycle):** Core — `Operations+Reading.swift` (`writeReadingSort` extracted verbatim), `Operations+MCPBookOrder.swift` (new), `Operations+MCPWrites.swift` (`createBook(order:)`; three `MCPWriteAct` cases), `Operations+MCPCarriage.swift` (`setBookRule`'s order part), `Operations+WingBookMove.swift` (`moveReadingToWing(db:)` verbatim), `Operations+MCPBookWingMove.swift` (new), `Operations+MCPWingMove.swift` (four helpers `private` → internal, bodies unchanged). MCP — `MCPWriteTools+BookOrder.swift` (new), `MCPWriteTools+BookWingMove.swift` (new), `MCPWriteTools+LibraryEdits.swift` (two jobs; the gathering sentence), `MCPWriteTools.swift` (`create_book`'s order; `into(rung:)`), `MCPWriteTools+Edit.swift` (`guardBook(rung:)`), `MCPWriteTools+Carriage.swift` (`set_book_rule`'s order + rung), `MCPBookRules.swift` (`order` in the book facts), `MCPReadTools.swift` (a gathering's `order`), `MCPToolCatalog.swift` (two declarations, two schema options, three descriptions), `MCPNullCharacters.swift`, `MCPHiddenCause.swift` (the sentence), `MCPWriteSupport.swift` (the hook). App (Mac target only) — `Features/MCP/MCPPaneCopy.swift`, `Features/MCP/MCPDoor.swift`, `Registry/OpsRefusalCopy.swift`. Tests — new: `MCPBookOrderActsTests`, `MCPBookWingMoveActsTests`, `MCPBookOrderServerTests`, `MCPBookWingMoveServerTests`; justified edits: `MCPServerTests` (the edit list), `MCPWriteServerTests` (the suggest proof's calls), `MCPListWingsServerTests` (the wing_id tool set), `MCPTwoStoreCatalogServerTests` + `MCPTwoStoreCatalogArms` (the arms and their fixtures).
 
 **Surprises:** (1) F-8 — a book move silently UNFENCES a member held by a stay-behind Private book or the daily Journal (the answer stays pure — the catalog's control showed A == B while the fence broke — so the pin is the refusal itself); (2) F-9 — a gathering's wing is reach-defining for every grant on it; (3) on today's wire the daily Journal never reaches the op (its BOOK facts are fenced), so R-805-5's tool pin asserts the one not-shared shape, with the op's own belt behind it; (4) VX-606's undeclared-argument check reaches inside a declared option object, so the parse's own unknown-key check would have been dead code (removed); (5) the existing gathering sentence said its notes "can't be ordered" — false once `set_book_order` sorts a gathering (reworded, PROVISIONAL); (6) the orchestrator writes this record in the same worktree (one mid-run edit seen in `git status`, committed by it as `ada2cbef1`) — record edits here always pull first.
+
+---
+
+## BATCH 3 RECORD — note acts: the F-5 build (A-809-11, P-809-8) + VX-814 (`create_note` tags at birth) + VX-812 (bulk forms + `replace_tag`)
+
+**NOT DONE in this batch (first, as the protocol asks):** PENDING — the batch is in flight; this line is rewritten at the batch's close.
+
+**Implementer:** opus-implementer (fresh, batch 3), 2026-11-05, worktree `~/dev/variorum-vx-809`, branch head at spawn `ad504413e`. Headless only (`swift test`; `xcodebuild … build` compile-check only if an App-target word lands — never `xcodebuild test`), no stage claim held. **No revert is in flight.** `App/Variorum/Shared/` files in the diff: NONE so far (said here the moment one lands).
+
+### LIVE STATUS (flipped per piece, same commit)
+
+| # | Piece | Status |
+|---|---|---|
+| B3-0 | Preflight read (the record whole · MCPSpec in full · SurfaceContracts Doors · SessionResiliencyProtocol · the VX-812/VX-814 ticket texts — no comments on either) + the code survey | DONE |
+| B3-1 | F-5 build (A-809-11): the pure table's wire-client arm, the operations value's applying hand, the wire's ONE call door | NOT STARTED — design below ("Where the wire-vs-her discrimination lives") |
+| B3-2 | F-5 pins: the pure table · the core acts · the wire state pins · the catalog's F-5 row flipped to a pure arm (+ arms) | NOT STARTED |
+| B3-3 | F-5 red-on-old (socket legs — announced through the orchestrator FIRST, its go awaited; the named reverts listed here before they start) | NOT STARTED |
+| B3-4 | VX-814 — `tags` on `create_note` (both payloads; book · wing · gathering) through the header road | NOT STARTED |
+| B3-5 | VX-814 pins + catalog arms | NOT STARTED |
+| B3-6 | VX-812 STOP 1 — the final tool set for the list forms (proposal below; the orchestrator rules) | NOT STARTED |
+| B3-7 | VX-812 STOP 2 — the bulk receipt's Open › (proposal below; the orchestrator rules) | NOT STARTED |
+| B3-8 | VX-812 build — the list forms | NOT STARTED |
+| B3-9 | VX-812 build — `replace_tag` | NOT STARTED |
+| B3-10 | VX-812 pins + catalog arms | NOT STARTED |
+| B3-11 | Self-assessment + whole-package counts | NOT STARTED |
+
+### THE SURVEY (B3-0) — what the code says
+
+- **Every road an applying act takes is ONE event site:** a tag application is `insertPostTag` (`Operations+Intake.swift`) → `intakeAfterTagging`; a note's star is `writeStar` (`Operations+Appearance.swift`) → `intakeAfterStarring`; both decide each candidate book in `intakeEvent` through `IntakeDecision.verdict(…, occasion: .event)`. `insertPostTag`'s callers are twelve (her `applyTag(toPost:)`, the outflow `applyAutoTag` — reached by every hand-add/mint-inside, `tagAllMembers`, the duplicate/version body `applyLiveTags`, the import header `applyDocumentTags`, the gathering collect/new-note doors, and the wire's own `applyTagPath` + its gathering mint) — so a WIRE act reaches the event through shared bodies of hers (the duplicate body, `addPostToReading`'s outflow, the import header, her star write), never only through MCP files.
+- **The fence's two book legs** are `Queries.privateLegForBook` (`r.ai_private_at IS NOT NULL`) and `Queries.dailyJournalLegForBook` (`profile = 'daily'`) — the ONE derivation site (`MCPGrantQueries.swift`); a note is fenced by a book only as a live MEMBER (`status = 'member'`) — an ARRIVAL is no membership, so it fences nothing. `Reading` carries no `ai_private_at` field, so "does membership here fence" is read through those fragments, never a Swift twin.
+- **The wire's acts all run on ONE operations value:** `MCPWriteTools.call` → `executor.run { ops in perform(job, ops: ops, …) }` (the app's executor is her `OperationsRunner`, so `ops` is HER runner's value with the shared undo stack); `perform` is the only write road (no other `executor.run` site; no MCP op constructs its own `Operations`). Undo/redo closures receive the RUNNER's value at undo time (her ⌥⌘Z), and every wire redo revives exact rows (`reapplyAppliedTag`, `replayMCPStar(heard: false)`, the minted-container entry) — no replay fires intake.
+- **Sweeps on the wire already bell:** `set_book_rule`'s sweep passes `.catchUp` (P-13nb-U4-16); `reopen_book`/`unarchive_book` catch up through Arrivals; no wire act backfills. So A-809-11's gap is the EVENT occasion alone.
