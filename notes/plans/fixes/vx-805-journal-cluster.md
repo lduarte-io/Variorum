@@ -314,6 +314,18 @@ Plus every existing keeper pin (`JournalKeeperRepairTests`, `TheDrainOrderTests`
 - `shelveInDailyJournalBook`'s pair-decided law is UNCHANGED (a tombstoned pair row stays decided); the new-mint road files the fresh entry as ordinary membership through the same gate.
 - Evidence: ops/VM tests; the walk covers mint-twice-in-one-day + ⌘J landing on the first.
 
+#### Unit C — LIVE STATUS (implementer: Opus, session 4, started 2026-11-05)
+
+*No behavioral revert is in flight unless a line below says "REVERT IN FLIGHT". A FEATURE row (her ruling moves the edge): the new-op pins are red-on-old BY CONSTRUCTION (no such op); the lookup pins compile on the old tree and are run RED there before the change (pin-before-fix literally).*
+
+| Piece | Status |
+|---|---|
+| Reading (own context) | DONE — the record §1/§3/§5 (Unit B CLOSING, the cross-run seam, Unit C)/§7/§8; SurfaceContracts The app + The Bookcase and books; the code: `createOrOpenJournalEntry`, `journalEntryWing`, `shelveInDailyJournalBook` + `shelvingPlan`, `Queries.canonicalJournalEntry`, `BookStructureModel.newEntry` + `JournalBooks`, `BookView`'s `FootMint`/`mint`/`takeMintRequest` (VX-570's road), `BookFootDoors`, the `.newNoteInBook` declaration, `assertReadingAcceptsPosts`/`newPostInReading`, `BookStateCopy.refusal`, `MobileTodayDoor`, the pins `JournalEntryTests`, `BookStructureTests`' journal suite, `NewNoteInBookTests`, `DailyJournalRulingsTests`, `WingMembershipAndJournalTests` |
+| Core — ⌘J's "first" (members first) | IN PROGRESS |
+| Core — the fresh mint (`newJournalEntry`) | NOT STARTED |
+| App — the Journal's New Entry / ⌥⌘N mint | NOT STARTED |
+| Runs + builds | NOT STARTED |
+
 **Order: A → B (design proposal, then build) → C → the ladder over the whole run diff → closeout.** A fresh implementer per unit (~500k guideline). Sizing: Unit B is the run's one phase-sized unit; A and C are small — within the two-phase-sized-units bound.
 
 ## 6. Unit B design constraints (the sync half — binding on the proposal)
@@ -351,7 +363,7 @@ What the proposal must settle, inside these rails:
 | 6 | VX-561 — Esc on book creation dialog (repro first) | DONE (Unit A — REOPENED CONFIRMED at the walk; the New Book alert → `NewBookSheet` with a drawn Cancel on Esc; run 42/3 green + the pin revert-verified red-on-old + the Esc walk VERIFIED at window 2) |
 | 7 | VX-435 — movable Journal (ops + faces + keeper wing-awareness + the mend) | DONE (Unit B build — `315410167` ops/faces, `68c6bd6ba` the wing-aware keeper + the mend, `075f95852` ⌘J follow, `944dc01a4` the wire move fence; red-on-old by revert per piece; core 3693/504 green, socket reds re-run alone green; Mac + phone `build-for-testing` green; app RUNS + the walk owed at a stage window) |
 | 8 | VX-436 — deletable Journal (guard retires + delete-vs-retirement + R-805-2 restore rule + wire refusals) | DONE (Unit B build — `315410167` the guard retired + the mark + R-805-2 + the wire delete fence, `a9b14e317` Put back pins, `68c6bd6ba` belts (a)(b)(c) + the drain guard (severability check PASSED), `3105df954` amendment 7; red-on-old by revert per belt; same runs as row 7) |
-| 9 | VX-797 — New Entry/⌥⌘N mint; ⌘J opens the day's first | NOT-STARTED (Unit C) |
+| 9 | VX-797 — New Entry/⌥⌘N mint; ⌘J opens the day's first | IN PROGRESS (Unit C — implementer session 4; LIVE STATUS under §5) |
 | 10 | The ladder (Fable, whole run diff) | NOT-STARTED |
 | 11 | Closeout (canon deltas: AppSpec §7/§9/§12 lines, OverallModel §7, SurfaceContracts Bookcase/app lines, MCPSpec wire lines; AppSpecRecord entry; tickets; handoff) | NOT-STARTED |
 
