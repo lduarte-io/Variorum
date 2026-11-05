@@ -75,7 +75,7 @@ Evidence of the unit's kind: the suite green + the pins; an orchestrator hands-o
 |---|---|
 | VX-799 | DONE — core `9f8ffdef1` + app (this commit). Runs: core pins GREEN; app pins PENDING (stage). Details: Unit A records below |
 | VX-832 | DONE (this commit) — core pin RED ON OLD then GREEN; app compile PENDING (next build-for-testing); app run PENDING (stage) |
-| VX-587 | NOT-STARTED — act + menu/⌘K doors + tests; chord PROPOSED here before wiring (turn ends at the proposal) |
+| VX-587 | IN-PROGRESS — CORE DONE (this commit): `JournalDay.shifted` + `Operations.shiftEntryDate` (setEntryDate's road, one transaction), `ShiftEntryDateTests` 4 green. NEXT: the registry capability + `note ▾` (both bars) + ⌘K doors + app tests; then the chord PROPOSAL (turn ends there) |
 | VX-845 | DONE (this commit) — core only; pins RED ON OLD then GREEN (details below) |
 | VX-615 | DISMISSED AS HOLLOW (this commit) — fixed by VX-611 (`7715a4a3d`, 2026-10-28) the day after it was filed; pinned there; no code change |
 | VX-561 | DISMISSED AS HOLLOW by code-trace (this commit) — not reproducible on today's tree; no code change; ONE walk keystroke owed at the stage window as the behavioural confirm |

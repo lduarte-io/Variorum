@@ -450,6 +450,34 @@ extension Operations {
         try updateLiveContainer(id) { $0.entryDate = entryDate }
     }
 
+    /// **"Shift date a day earlier"** (VX-587 — her 10-20 note: "shortcut to
+    /// make a dated entry one day earlier would be nice", late-night journaling
+    /// backfill; R-805-3). Moves the note's `entry_date` `days` calendar days
+    /// (`JournalDay.shifted` — the door passes −1) and returns the new day.
+    ///
+    /// `setEntryDate`'s own road and posture, in ONE transaction that reads the
+    /// STORED day — so two quick presses land two days earlier, never one day
+    /// twice off a stale read: identity-level date metadata, `updated_at`
+    /// stamped, no `last_touched_at`, no churn, no undo entry (the date
+    /// setter's class); legal wherever `setEntryDate` is (a seal does not
+    /// freeze the date). A note with no valid date has nothing to shift: nil,
+    /// and NOTHING is written (the door speaks the registry's note — P-2's
+    /// belt; the doors draw only on a dated note). A missing or tombstoned
+    /// note refuses as `setEntryDate` does (`containerNotFound`).
+    @discardableResult
+    public func shiftEntryDate(_ id: String, byDays days: Int) throws -> String? {
+        try database.write { db in
+            var container = try liveContainer(db, id)
+            guard let day = container.entryDate,
+                  let shifted = JournalDay.shifted(day, byDays: days)
+            else { return nil }
+            container.entryDate = shifted
+            container.updatedAt = date.now
+            try container.update(db)
+            return shifted
+        }
+    }
+
     public func setProfile(_ id: String, profile: Profile?) throws {
         try updateLiveContainer(id) { $0.profile = profile }
     }
