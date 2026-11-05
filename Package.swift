@@ -63,11 +63,14 @@ let package = Package(
         //   declared as project-level package references in project.pbxproj
         //   (XCRemoteSwiftPackageReference, exactVersion — beside Sparkle's
         //   2.10.0), which ARE the Xcode graph's root.
-        // Moving any version is a deliberate upgrade and the author's call:
-        // change it in BOTH places and re-resolve BOTH lockfiles in one
-        // commit. `Tools/verify-pins` checks a resolved state (a
-        // workspace-state.json or a lockfile) against the committed workspace
-        // lockfile.
+        // Moving any version is deliberate: change it in BOTH places and
+        // re-resolve BOTH lockfiles in one commit (the record's "UPGRADING A
+        // PIN DELIBERATELY"). A NEW package identity is a new third-party
+        // dependency, which is author-only (CLAUDE.md); whether bumping an
+        // existing pin is author-only too is open (the record's P-781-4).
+        // Tests/VariorumCoreTests/PinBeltTests.swift fails the moment the
+        // declarations and the lockfiles disagree; `Tools/verify-pins` checks a
+        // resolved state against the committed workspace lockfile.
         // Through the GRDB fork (its own manifest: `from: "4.11.0"`):
         .package(url: "https://github.com/sqlcipher/SQLCipher.swift.git", exact: "4.18.0"),
         // Through swift-dependencies:
