@@ -221,8 +221,9 @@ struct RootView: View {
     /// The `.surface` acts this shell renders (P-1's declared ⇔ rendered
     /// walk): the sidebar toggle, a toolbar door since the correction round
     /// made the split ours (row 2); and (VX-644) the toolbar's "in ‹wing›"
-    /// label, the wing switcher's door.
-    static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar, .switchWing]
+    /// label, the wing switcher's door; and (VX-824) ⌘1–⌘9's wing chord, whose
+    /// door is this window's key monitor (`WingNumberKeyMonitor`).
+    static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar, .switchWing, .goToWing]
 
     /// **13n-c U3 — this window's road to the MCP door** (`MCPShareRoad`):
     /// the two gates read off the door's NARROW observables (so this body
@@ -364,6 +365,14 @@ struct RootView: View {
         .background {
             BrowserNavKeyMonitor { direction in
                 Self.navigate(direction, session: session, router: router)
+            }
+        }
+        // VX-824 (the VX-828 run): ⌘1–⌘9 go to wing N, landing on its
+        // Bookcase, while no note holds the keys (inside a note they stay the
+        // mode row) — the chord's refusal spoken where no wing answers.
+        .background {
+            WingNumberKeyMonitor { event, window in
+                Self.wingNumberKey(event, window: window, session: session, wings: wings)
             }
         }
         .sheet(isPresented: $paletteOpen) {
@@ -803,6 +812,20 @@ struct RootView: View {
         wings.landInBookcase = { [weak router] in
             router?.pendingSelection = .shelf
         }
+    }
+
+    /// **VX-824 — ⌘1–⌘9's act** (the `WingNumberKeyMonitor`'s): the registry's
+    /// gate (`.goToWing` — no note detail in the focused pane: the mode row's
+    /// place), the window's keyboard holder (Q-B1 (a)), the switcher's order —
+    /// one pure decision, answered by the wings model (the deliberate road, or
+    /// the spoken refusal). Returns whether the key was the chord's. Static so
+    /// a pin drives exactly what the key runs (`navigate`'s precedent).
+    static func wingNumberKey(
+        _ event: NSEvent, window: NSWindow, session: AppSession, wings: WingsModel
+    ) -> Bool {
+        wings.answer(WingNumberKeys.decision(
+            for: event, available: session.commandRouter.isEnabled(.goToWing),
+            responder: window.firstResponder, wings: wings.switcherRows))
     }
 
     // MARK: - Selection, per pane (13f batch 4 — the gate's (a))

@@ -1114,6 +1114,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// the in-menu picker (a view choice); a CHORD and a cycling door are
     /// doors, and P-1 declares doors.
     case mcpOpenAsk, mcpSettings, switchWing
+    /// **VX-824 (the VX-828 run, batch B — her ruling, shape (a)): ⌘1–⌘9 go
+    /// to wing N in the switcher's order, Home first, wherever no note holds
+    /// the keys** — inside a note those keys stay its mode row. `.surface`:
+    /// its door is the full window's own key monitor (`WingNumberKeyMonitor`,
+    /// the VX-560 / VX-563 shape — a menu key equivalent would take ⌘1–⌘7 from
+    /// the mode row), so the chord is the declaration's ALTERNATE label and
+    /// the helper (⌘/) shows it.
+    case goToWing
     /// VX-258 (VX-246 U1b) — A SETUP WAITING FOR HER OK: a connection that
     /// presented, under the name of a client she approved, a setup key not
     /// copied for that client waits in Settings ▸ MCP ▸ Waiting (admitted with

@@ -497,7 +497,9 @@ struct ShellChromeTests {
         // VX-644 (VX-648) added the surface wing switcher deliberately; this
         // exact-equality pin names the full declared set (updated at VX-440's
         // merge gate, where main's red was caught — the coordinator's GO).
-        #expect(RootView.surfaceCapabilities == [.toggleSidebar, .switchWing])
+        // VX-824 (the VX-828 run, batch B — A JUSTIFIED EDIT, the VX-644 line's
+        // class): the window's ⌘1–⌘9 key monitor renders `.goToWing`'s door.
+        #expect(RootView.surfaceCapabilities == [.toggleSidebar, .switchWing, .goToWing])
         #expect(EditorCommands.menuRendered.contains(.toggleSidebar))
         let router = ShellRouter()
         #expect(router.sidebarShown, "a window opens with its sidebar")

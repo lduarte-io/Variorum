@@ -317,8 +317,15 @@ nonisolated enum ShortcutCatalog {
             words: "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
                 + "and tap L to step, release to go; clicking the wing's name in the "
                 + "Bookcase or Library masthead steps to the next one"
-                + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} beside New Note "
-                + "opens this switcher"),
+                + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} at the top of the sidebar "
+                + "opens this switcher; every switch lands on that wing's Bookcase"),
+        // VX-824 (the VX-828 run, batch B): the per-wing chord — the
+        // registry's alternate (no menu item: the mode row owns ⌘1–⌘7 inside a
+        // note), shown here so it is findable (13g L1).
+        Row(group: .navigation, keys: .alternates([.goToWing]),
+            words: "go to a wing by its place in the switcher (Home is \u{2318}1) and land on its "
+                + "Bookcase \u{2014} whenever you're not in a note or writing in one; inside a note "
+                + "these keys are its modes"),
         // VX-632 (her #245 RB-6 ruling): ⌘L's two ⌥ variants.
         Row(group: .navigation, keys: .chords([.moveNoteToWing]),
             words: "move the note or book you're in to another wing \u{2014} "

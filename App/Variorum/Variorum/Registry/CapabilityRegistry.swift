@@ -2785,6 +2785,43 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2318}L", takesAccess: nil,
             unavailableNote: WingCopy.switchWingUnavailable,
             availability: { ctx in ctx.wingCount > 1 ? .act : .unavailable }),
+        // **VX-824 (the VX-828 run, batch B) — ⌘1–⌘9: WINGS FROM THE KEYBOARD.**
+        // Her ask (2026-11-04): *"map the Command1, command2, command3, etc. to
+        // moving between different wings when you aren't in a note"*; her
+        // ruling, shape (a): contextual — inside a note the keys stay the mode
+        // row; everywhere else ⌘N goes to wing N in the switcher's order (Home
+        // first), landing on its Bookcase (VX-833 — the deliberate road).
+        //
+        // `.surface`, the alternate label, no menu item — VX-563's shape: the
+        // door is the full window's key monitor (`WingNumberKeyMonitor`),
+        // because a menu key equivalent would take ⌘1–⌘7 from the mode row. The
+        // availability is the mode row's MIRROR (no note detail in the focused
+        // pane); the monitor adds the keyboard half of the fork's Q-B1 ruling
+        // (a writing surface holding the keys passes the chord on) — a fact
+        // about the first responder no context can carry (VX-560's
+        // `textIsFirstResponder` precedent). With one wing ⌘1 is Home's
+        // Bookcase (P-828-1 (ii)(a), accepted); a number no wing answers is the
+        // monitor's spoken refusal (P-828-1 (i), `WingCopy.noWingAtNumber`), so
+        // the note here is empty — no dispatch ever speaks it (the
+        // directly-wired idiom, `.lockLibraryNow`).
+        //
+        // THE COLLISION SWEEP (at this tip): the app's only digit chords are the
+        // mode row's ⌘1–⌘n (the contextual partner, by design) and the Open
+        // list's ⌘⇧1–⌘⇧9 (⇧ — never this chord: the classifier demands ⌘
+        // alone); every `.keyboardShortcut(` call site, every `NSMenuItem`
+        // keyEquivalent and the `performKeyEquivalent` overrides carry no other
+        // digit; no local monitor classifies a ⌘digit (`PageTurnKeys`,
+        // `BrowserNavKeys`, `BookNoteStep` arrows; `CommentsPanel` ⌘⏎/⎋;
+        // `WingSwitcherSheet`/`OneWingChord` ⌘L; `DivideWSheet` its own window;
+        // the rest observe or are the mouse's); ⌘1–⌘9 are not reserved by the
+        // system.
+        Capability(
+            id: .goToWing, verb: "Go to Wing", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "",
+            availability: { ctx in ctx.mode == nil ? .act : .unavailable },
+            alternateShortcutLabel: "\u{2318}1\u{2013}9"),
         // VX-309 U1c — VX-451: Lock Library Now — the File menu's item and the road's Protection pane render THIS
         // declaration (the verb is the one constant, so both faces say the same words). The per-gesture condition (only
         // where the library can lock — Castle) is each door's own (`canLock`; the Castle-only section): `always` as an act,

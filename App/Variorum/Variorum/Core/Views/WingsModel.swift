@@ -172,6 +172,25 @@ final class WingsModel {
         landInBookcase()
     }
 
+    /// **VX-824 — the ⌘digit chord's answer** (`WingNumberKeys`' decision): a
+    /// wing goes the deliberate road, said ("Now in …" — a chord is blind
+    /// until it is said, the cycle's reason); a number no wing answers speaks
+    /// its refusal (P-828-1 (i)); a key the chord does not own passes on.
+    /// Returns whether the key was the chord's (the monitor consumes it then).
+    @discardableResult
+    func answer(_ decision: WingNumberKeys.Decision) -> Bool {
+        switch decision {
+        case .passOn:
+            return false
+        case .goTo(let id):
+            goTo(id, saying: true)
+            return true
+        case .refuse(let note):
+            session.status.refuse(note)
+            return true
+        }
+    }
+
     /// The masthead's cycling click goes here (nil with one wing — the word
     /// is then no cycle door, P-2).
     var nextWing: WingSwitcherBrain.Row? {
@@ -341,6 +360,17 @@ nonisolated enum WingCopy {
     /// copy pass).
     static let switchWingUnavailable = "There is only one wing so far \u{2014} \(newWingVerb) under the "
         + "wing name at the top of the Bookcase makes another, and then \u{2318}L switches between them."
+    /// **VX-824 — a ⌘digit no wing answers** (P-828-1 (i), the words as drafted
+    /// at the fork — PROVISIONAL, hers to tune): with one wing, ⌘L's ruled
+    /// note's shape naming the next chord; with several, the span that works.
+    static func noWingAtNumber(_ number: Int, wingCount: Int) -> String {
+        guard wingCount > 1 else {
+            return "There is only one wing so far \u{2014} \(newWingVerb) under the wing name at the top "
+                + "of the Bookcase makes another, and then \u{2318}2 goes to it."
+        }
+        return "There's no wing \(number) \u{2014} \u{2318}1\u{2013}\u{2318}\(wingCount) go to your "
+            + "\(wingCount) wings, Home first."
+    }
     /// THE SWITCHER's one quiet line (round 5, her ruling: the wing-isolation
     /// UI makes clear Snippets is the one room shared across wings).
     static let snippetsShared = "Snippets is the one room every wing shares."
