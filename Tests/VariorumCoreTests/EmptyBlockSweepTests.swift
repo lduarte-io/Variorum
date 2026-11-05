@@ -42,6 +42,21 @@ private func facts(_ db: AppDatabase, _ ids: [String]) throws -> [EmptyBlockSwee
     try db.read { try Queries.emptyBlockSweepFacts($0, blockIDs: ids) }
 }
 
+/// The Trash's listed ids (every kind), as of the harness's now.
+private func trashIDs(_ db: AppDatabase) throws -> [String] {
+    try db.read { try Queries.trash($0, now: harnessNow).map(\.id) }
+}
+
+/// Marks a row as accepted by the server (what keeps its family off the
+/// local purge road until the horizon passes it).
+private func markSynced(_ db: AppDatabase, table: String, _ id: String) throws {
+    try db.write { database in
+        try database.execute(
+            sql: "INSERT INTO sync_row_seq (table_name, row_id, server_seq) VALUES (?, ?, 7)",
+            arguments: [table, id])
+    }
+}
+
 /// Hand-builds one edge row between two existing blocks.
 private func insertEdge(
     _ db: AppDatabase, id: String, from source: String, to target: String,
@@ -316,6 +331,174 @@ struct EmptyBlockSweepTests {
             let b = try ops.seedBlock(in: note.id, text: "b").block.id
             #expect(try facts(db, [b, "missing", a, b]).map(\.blockID) == [b, a])
             #expect(try facts(db, []).isEmpty)
+        }
+    }
+
+    // MARK: - The act (`Operations.sweepEmptyTrashBlocks`)
+
+    /// One intent per taken block, nothing else written, no undo entry; the
+    /// taken rows leave the Trash at once (the stamp-aware fence) while a
+    /// worded neighbour stays; a never-synced family's bytes then go with the
+    /// local sweep — and a Put back that still names one finds nothing to
+    /// count back.
+    @Test func theSweepMintsOneIntentPerTakenBlockAndTheBytesFollow() async throws {
+        try await withOperationsAsync { ops, db in
+            let stacked = Operations(undoStack: UndoStack())
+            let note = try ops.createPost(title: "home")
+            let a = try ops.seedBlock(in: note.id, text: "")
+            let b = try ops.seedBlock(in: note.id, text: "")
+            let worded = try ops.seedBlock(in: note.id, text: "words").block.id
+            for id in [a.block.id, b.block.id, worded] { try ops.deleteBlock(id) }
+            #expect(try sweepable(db) == [b.block.id, a.block.id])
+
+            let taken = try stacked.sweepEmptyTrashBlocks([a.block.id, b.block.id])
+            #expect(taken == [a.block.id, b.block.id], "the order given")
+            #expect(stacked.undoStack?.depth == 0, "no ⌥⌘Z entry — the confirm is the guard")
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM purge_intent") == 2)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM purge_intent WHERE table_name = 'block' AND deleted_at IS NULL AND row_id IN (?, ?)",
+                [a.block.id, b.block.id]) == 2, "one live intent per taken block")
+            #expect(try trashIDs(db) == [worded],
+                    "the taken rows left the Trash at the intent write; the worded block stays")
+            #expect(try sweepable(db).isEmpty)
+
+            let report = try await LocalPurge(database: db).sweep()
+            #expect(report.familiesPurged == 2)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE id IN (?, ?)", [a.block.id, b.block.id]) == 0)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE id IN (?, ?)", [a.variant.id, b.variant.id]) == 0)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM block WHERE id = ?", [worded]) == 1)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM purge_intent WHERE deleted_at IS NULL") == 0, "intents completed")
+            #expect(throws: OperationError.blockNotFound(id: a.block.id)) {
+                _ = try ops.restoreBlock(a.block.id)
+            }
+        }
+    }
+
+    /// The horizon is honored: a family the server has seen (a `sync_row_seq`
+    /// row) is never removed by the LOCAL road — its intent stands, its bytes
+    /// wait for the janitor, and the Trash already lists it no more.
+    @Test func aSyncedFamilyWaitsForTheHorizon() async throws {
+        try await withOperationsAsync { ops, db in
+            let note = try ops.createPost(title: "home")
+            let synced = try ops.seedBlock(in: note.id, text: "").block.id
+            try ops.deleteBlock(synced)
+            try markSynced(db, table: "block", synced)
+            #expect(try ops.sweepEmptyTrashBlocks([synced]) == [synced])
+            _ = try await LocalPurge(database: db).sweep()
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM block WHERE id = ?", [synced]) == 1,
+                    "the bytes wait for every device to have seen the deletion")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM purge_intent WHERE row_id = ? AND deleted_at IS NULL", [synced]) == 1)
+            #expect(try trashIDs(db).isEmpty)
+        }
+    }
+
+    /// **confirm ids ∩ still-qualifying, re-read inside the transaction.** In
+    /// the pause between the confirm and the act: one block is put back; one
+    /// is put back and then dies again WITH its note (now the note's cascade
+    /// victim — never swept alone); one takes words through a sync-apply-
+    /// shaped write; one is already fenced by another door's intent; and a
+    /// NEW junk block lands in the Trash. Only the untouched confirmed block
+    /// is taken — never more than she confirmed, never a stale row.
+    @Test func theActTakesOnlyWhatTheConfirmShowedThatStillQualifies() throws {
+        try withOperations { ops, db in
+            let home = try ops.createPost(title: "home")
+            let other = try ops.createPost(title: "other")
+            let kept = try ops.seedBlock(in: home.id, text: "").block.id
+            let putBack = try ops.seedBlock(in: home.id, text: "").block.id
+            let victim = try ops.seedBlock(in: other.id, text: "").block.id
+            let worded = try ops.seedBlock(in: home.id, text: "")
+            let fenced = try ops.seedBlock(in: home.id, text: "").block.id
+            for id in [kept, putBack, victim, worded.block.id, fenced] { try ops.deleteBlock(id) }
+            let confirmed = try sweepable(db)
+            #expect(Set(confirmed) == [kept, putBack, victim, worded.block.id, fenced])
+
+            _ = try ops.restoreBlock(putBack)
+            _ = try ops.restoreBlock(victim)
+            try ops.deleteContainer(other.id)
+            try db.write { database in
+                try database.execute(
+                    sql: "UPDATE variant SET working_text = 'arrived by sync' WHERE id = ?",
+                    arguments: [worded.variant.id])
+            }
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: fenced)])
+            let newcomer = try ops.seedBlock(in: home.id, text: "").block.id
+            try ops.deleteBlock(newcomer)
+            let intentsBefore = try db.fetchInt("SELECT COUNT(*) FROM purge_intent")
+
+            #expect(try ops.sweepEmptyTrashBlocks(confirmed + [kept, "no-such-block"]) == [kept])
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM purge_intent") == (intentsBefore ?? 0) + 1,
+                    "exactly one intent written — the kept block's")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM purge_intent WHERE row_id = ? AND deleted_at IS NULL", [kept]) == 1)
+            #expect(try sweepable(db) == [newcomer], "the newcomer waits for its own confirm")
+        }
+    }
+
+    /// Nothing left at act time ⇒ NOTHING WRITTEN, and an empty answer the
+    /// door speaks as a refusal.
+    @Test func nothingLeftWritesNothing() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "home")
+            let junk = try ops.seedBlock(in: note.id, text: "").block.id
+            try ops.deleteBlock(junk)
+            let confirmed = try sweepable(db)
+            _ = try ops.restoreBlock(junk)
+            try db.clearOutbox()
+            #expect(try ops.sweepEmptyTrashBlocks(confirmed).isEmpty)
+            #expect(try ops.sweepEmptyTrashBlocks([]).isEmpty)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM purge_intent") == 0)
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM sync_outbox") == 0, "not one row written")
+        }
+    }
+
+    /// **Why the edge clause reads every edge row (P-828-7 (a)) — the sweep
+    /// can never take a living block.** A merge's fresh block, emptied and
+    /// deleted, is the only descendant of its two LIVE released originals: the
+    /// sweep refuses it (a link to a living block), and the CONTRAST shows
+    /// what a purge of it would do — the purge family takes a stranded
+    /// original with its last descendant, so both originals' words would go.
+    /// One level down, an empty block whose link reaches only the dead merged
+    /// block IS swept, and the originals stay whole: a dead, present
+    /// descendant still protects them.
+    @Test func theSweepNeverTakesALivingBlock() async throws {
+        try await withOperationsAsync { ops, db in
+            let note = try ops.createPost(title: "home")
+            let source = try ops.seedBlock(in: note.id, text: "Alpha beta.")
+            let half = try ops.divide(source.block.id, cut: 6)
+            let merged = try ops.merge(source.block.id, half.block.id)
+            let originals = [source.block.id, half.block.id]
+            let tail = try ops.divide(merged.block.id, cut: 6)
+            try ops.autosave(tail.variant.id, text: "", charDelta: 5)
+            try ops.deleteBlock(tail.block.id)
+            try ops.deleteBlock(merged.block.id)
+            #expect(try sweepable(db) == [tail.block.id],
+                    "the tail's one link reaches the dead merged block; the merged block is worded")
+            #expect(try ops.sweepEmptyTrashBlocks([tail.block.id]) == [tail.block.id])
+            _ = try await LocalPurge(database: db).sweep()
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM block WHERE id = ?", [tail.block.id]) == 0)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE deleted_at IS NULL AND id IN (?, ?)", originals) == 2,
+                    "both living originals stand — the dead merged block still protects them")
+
+            // The merged block itself, emptied: linked to two living originals.
+            let emptied = try ops.seedBlock(in: note.id, text: "Gamma delta.")
+            let half2 = try ops.divide(emptied.block.id, cut: 6)
+            let merged2 = try ops.merge(emptied.block.id, half2.block.id)
+            try ops.autosave(merged2.variant.id, text: "", charDelta: 13)
+            try ops.deleteBlock(merged2.block.id)
+            #expect(try facts(db, [merged2.block.id]).first?.livingLinks == 2)
+            #expect(try ops.sweepEmptyTrashBlocks([merged2.block.id]).isEmpty, "never swept")
+
+            // CONTRAST — the hazard (a) forecloses: purge it anyway.
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: merged2.block.id)])
+            _ = try await LocalPurge(database: db).sweep()
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE id IN (?, ?)", [emptied.block.id, half2.block.id]) == 0,
+                    "the purge family took both LIVING originals with their last descendant")
         }
     }
 
