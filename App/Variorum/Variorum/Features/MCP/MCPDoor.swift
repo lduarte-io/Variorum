@@ -255,6 +255,14 @@ final class MCPDoor {
     private(set) var lastChange: ShownChange?
     /// The last change's landing — what ⌥⌘O opens.
     var lastShow: MCPShowTarget? { lastChange?.target }
+    /// **VX-679 — THE TRAIL BEHIND ⌥⌘O** (her R-679): every place a client
+    /// showed her or changed this session, one row per place — the sidebar's
+    /// "From ‹client› · N" section reads it. Fed beside `lastChange` (a write
+    /// with a landing) and by `show_in_app`'s offers and moves; cleared with
+    /// `lastChange` (`letGoOfTheSession`). ⌥⌘O itself still opens the LAST
+    /// change only (`showLastChange`, untouched). Its own observable, so an AI
+    /// write re-renders the section and nothing else.
+    let trail = MCPTrailModel()
     /// U4 (AF-11 F-3): the windows `show_in_app` may move — set at attach.
     @ObservationIgnored private weak var windows: WindowRegistry?
     /// U4 (AF-11 F-3): where the app stands, asked ON THE MAIN ACTOR in the
@@ -527,6 +535,8 @@ final class MCPDoor {
         answering = []
         receiptRun = []
         lastChange = nil
+        // VX-679: the trail is session-scoped — it goes with ⌥⌘O's last change.
+        trail.update { $0.clear() }
         // A locked library shows no share face (VX-272's gate reads no store).
         if hasApprovedClient { hasApprovedClient = false }
         session = nil
@@ -1129,6 +1139,8 @@ final class MCPDoor {
             ShownChange(target: $0, clientName: receipt.clientName, title: receipt.targetTitle)
         }
         if let change { lastChange = change }
+        // VX-679: the trail behind ⌥⌘O — a write with a landing is a row.
+        trail.update { $0.record(write: receipt, at: now) }
         let door = change.map { change in
             StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(change) }
         }
@@ -1191,8 +1203,14 @@ final class MCPDoor {
                     return MCPShowRule.verdict(self.currentStanding().0, dial: request.dial) == .navigate
                 })
             switch delivery {
-            case .delivered: return .navigate
-            case .unfinished: return .refuse(MCPShowRule.partialShowWords)
+            case .delivered:
+                // VX-679: the place opened in front of her — a row, `opened`.
+                trail.update { $0.record(show: request, opened: true, at: Date()) }
+                return .navigate
+            case .unfinished:
+                // VX-679: the note opened (the rest never landed) — `opened` too.
+                trail.update { $0.record(show: request, opened: true, at: Date()) }
+                return .refuse(MCPShowRule.partialShowWords)
             case .interrupted:
                 return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.partialShowWords)
             }
@@ -1217,6 +1235,9 @@ final class MCPDoor {
         guard session.status.stand(MCPShowOfferCopy.line(request), id: itemID, action: take, dismiss: dismiss) != nil
         else { return false }
         showOffer = ShowOffer(request: request, itemID: itemID)
+        // VX-679: an offered ask is a row, `shown` — and it stays one after the
+        // ask ends (replaced, dismissed, its client gone): she can still go there.
+        trail.update { $0.record(show: request, opened: false, at: Date()) }
         return true
     }
 
@@ -1250,9 +1271,45 @@ final class MCPDoor {
         Task { @MainActor [weak self] in
             guard let self else { return }
             guard await self.placeStands(request.target) else {
+                // VX-679: a gone place's rows go with it (a dead door — P-2).
+                self.trail.update { $0.forget(placeOf: request.target) }
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return
             }
+            // VX-679: she took it — its row reads `opened`.
+            self.trail.update { $0.markOpened(request) }
+            self.logShowTaken(request)
+            await Self.deliverHerPress(
+                request.target, session: session, into: router,
+                unfinished: MCPShowOfferCopy.unfinished(request))
+        }
+    }
+
+    /// **VX-679 — HER PRESS on a trail row of an ask that no longer stands**
+    /// (taken, replaced, dismissed, or its client gone): the ask's own landing
+    /// road, exactly as her take runs it (`takeShowOffer` — R-679: "clicking
+    /// lands exactly where the offer would have"), minus the standing ask it
+    /// has no longer: the window that can show it (`creationRouter`, raised by
+    /// HER press), the place re-read first (F-L2 — gone ⇒ said where she
+    /// pressed in the take's own words, nothing opened, no take logged, the
+    /// place's rows let go), then the take logged as her take of that ask
+    /// (ruling (4)'s row — PROVISIONAL P-809-14) and the navigator's delivery,
+    /// one that cannot finish said in her words. With no full window it says
+    /// so (the receipt's `noWindow` — there is no ask to keep standing).
+    func landAsk(_ request: MCPShowRequest) {
+        guard let session else { return }
+        guard let router = windows?.creationRouter() else {
+            session.status.refuse(MCPReceiptCopy.noWindow)
+            return
+        }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard await self.placeStands(request.target) else {
+                self.trail.update { $0.forget(placeOf: request.target) }
+                session.status.refuse(MCPShowOfferCopy.gone(request))
+                return
+            }
+            self.trail.update { $0.markOpened(request) }
             self.logShowTaken(request)
             await Self.deliverHerPress(
                 request.target, session: session, into: router,
@@ -1359,6 +1416,8 @@ final class MCPDoor {
             guard let self else { return }
             guard await self.placeStands(change.target) else {
                 if self.lastChange?.target == change.target { self.lastChange = nil }
+                // VX-679: and the place's trail rows go with it (a dead door — P-2).
+                self.trail.update { $0.forget(placeOf: change.target) }
                 session.status.refuse(MCPReceiptCopy.gone(change.target, title: change.title, client: change.clientName))
                 return
             }

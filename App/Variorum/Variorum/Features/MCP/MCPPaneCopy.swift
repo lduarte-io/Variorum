@@ -1628,6 +1628,13 @@ nonisolated enum MCPReceiptCopy {
     /// default window width (measured at the U2 walk — W-2).
     static let budget = 72
 
+    /// **VX-679 — ONE write said as its receipt says it** ("edited a take",
+    /// "moved “x” to Home"): the trail's details popover names which operation
+    /// in the receipt line's own words — one source, never a second table.
+    static func actPhrase(_ receipt: MCPWriteReceipt) -> String {
+        phrase(receipt.act, [receipt])
+    }
+
     private static func phrase(_ act: Operations.MCPWriteAct, _ receipts: [MCPWriteReceipt]) -> String {
         let n = receipts.count
         let quoted = { (text: String?) in text.map { "\u{201C}\($0)\u{201D}" } ?? "" }
@@ -1844,6 +1851,117 @@ nonisolated enum MCPReceiptCopy {
     private static func joined(_ parts: [String]) -> String {
         guard parts.count > 1 else { return parts.first ?? "" }
         return parts.dropLast().joined(separator: ", ") + " and " + (parts.last ?? "")
+    }
+}
+
+/// **VX-679 — the sidebar's "From ‹client› · N" section, said** (the VX-809
+/// run, batch 5 — her R-679). Her words where she gave them: the header, and
+/// the three kinds (shown · opened · edited). Everything else PROVISIONAL
+/// (P-809-14, her copy pass — VX-234's family): the row's names for a place,
+/// its time, the two doors' verbs and helps, the details popover's lines.
+nonisolated enum MCPTrailCopy {
+    /// Her header (R-679): "From ‹client› · N" — N the places listed.
+    static func header(client: String, count: Int) -> String { "From \(client) \u{00B7} \(count)" }
+
+    /// Her three words (R-679).
+    static func kind(_ kind: MCPTrail.Kind) -> String { kind.rawValue }
+
+    /// The row's text door (`.mcpOpenTrailPlace`) — her own word for it at the
+    /// VX-676 sitting ("so users could 'go there'").
+    static let openVerb = "Go There"
+    /// The row's symbol door (`.mcpShowTrailDetails`).
+    static let detailsVerb = "Show Details"
+    static let unavailableNote =
+        "What a client showed you or changed this session is listed near the bottom of the sidebar while "
+        + "there is any."
+
+    /// When a request came in: its time today; its day and time on another.
+    static func when(_ date: Date, now: Date = Date(), calendar: Calendar = .current) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        guard !calendar.isDate(date, inSameDayAs: now) else { return time }
+        return "\(date.formatted(.dateTime.month(.abbreviated).day())), \(time)"
+    }
+
+    /// The row's line after the place: the kind, then when.
+    static func detail(_ entry: MCPTrail.Entry, now: Date = Date()) -> String {
+        "\(kind(entry.kind)) \u{00B7} \(when(entry.at, now: now))"
+    }
+
+    /// The place a row names, as a sidebar row names it (unquoted, the Open
+    /// list's register): its title, else its noun; a saved version says whose;
+    /// Home is a place-name.
+    static func place(_ target: MCPShowTarget, title: String?) -> String {
+        switch target {
+        case .note, .takes, .lens, .compare: return title ?? "a note"
+        case .version: return title.map { "a saved version of \($0)" } ?? "a saved version"
+        case .book: return title ?? "a book"
+        case .wing(let wingID, let name, _): return wingID.isEmpty ? "Home" : name
+        }
+    }
+
+    /// The row's text door's help: where it goes.
+    static func openHelp(_ entry: MCPTrail.Entry) -> String {
+        "Go to \(place(entry.target, title: entry.title)) \u{2014} where \(entry.clientName)\u{2019}s "
+            + (isAsk(entry) ? "ask" : "change") + " landed"
+    }
+
+    /// The symbol door's help.
+    static func detailsHelp(_ entry: MCPTrail.Entry) -> String {
+        "What \(entry.clientName) asked or did here"
+    }
+
+    // MARK: - The details popover (her refinement: the client · when it came in · the kind of act ·
+    // what it targeted)
+
+    static func detailsWhen(_ entry: MCPTrail.Entry, now: Date = Date()) -> String {
+        "Came in \(Calendar.current.isDate(entry.at, inSameDayAs: now) ? "at " : "")\(when(entry.at, now: now))"
+    }
+
+    /// What kind of act it was: a navigation ask, or a write and which operation.
+    static func detailsAct(_ entry: MCPTrail.Entry) -> String {
+        switch entry.act {
+        case .show(let request):
+            return "A navigation ask: it asked to show you \(MCPShowOfferCopy.thing(request))."
+        case .write(let receipt):
+            return "A write: it \(MCPReceiptCopy.actPhrase(receipt))."
+        }
+    }
+
+    /// What it targeted.
+    static func detailsTarget(_ entry: MCPTrail.Entry) -> String {
+        let named = entry.title.map { "\u{201C}\($0)\u{201D}" }
+        switch entry.target {
+        case .note, .takes, .lens: return "Target: \(named.map { "the note \($0)" } ?? "a note")"
+        case .compare(_, let peerIDs):
+            return "Target: \(named.map { "the note \($0)" } ?? "a note") beside \(peerIDs.count) "
+                + (peerIDs.count == 1 ? "other note" : "other notes") + " in Compare"
+        case .version: return "Target: \(named.map { "a saved version of \($0)" } ?? "a saved version")"
+        case .book: return "Target: \(named.map { "the book \($0)" } ?? "a book")"
+        case .wing(let wingID, let name, _):
+            return "Target: " + (wingID.isEmpty ? "the Home wing" : "the wing \u{201C}\(name)\u{201D}")
+        }
+    }
+
+    /// Where the row stands (an ask's offer, or what opened it) — said only
+    /// for an ask; a write's row is its act.
+    static func detailsState(_ entry: MCPTrail.Entry) -> String? {
+        guard isAsk(entry) else { return nil }
+        switch entry.kind {
+        case .shown: return "Offered to you; not opened yet."
+        case .opened: return "Opened."
+        case .edited: return nil
+        }
+    }
+
+    /// A row that gathers several requests says how many (PROVISIONAL P-809-14:
+    /// one row per place).
+    static func detailsCount(_ entry: MCPTrail.Entry) -> String? {
+        entry.count > 1 ? "The newest of \(entry.count) requests here this session." : nil
+    }
+
+    private static func isAsk(_ entry: MCPTrail.Entry) -> Bool {
+        if case .show = entry.act { return true }
+        return false
     }
 }
 
