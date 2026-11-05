@@ -17,7 +17,8 @@ revision. The originHash is ignored: the workspace's is a hash of the checkout's
 so it differs on every checkout. The no-argument form is VERSIONS-EQUAL too (VX-853, P-781-3): a
 working-tree lockfile whose bytes differ from its own committed copy while its pins equal that
 copy's exactly (only bookkeeping moved, e.g. the originHash) prints a NOTE and passes — harmless,
-but restore it with git checkout -- before committing, never commit it. A missing lockfile, a pin
+but restore it with git checkout HEAD -- <file> before committing, never commit it (the advice
+names HEAD under --ref too: committing is against HEAD). A missing lockfile, a pin
 that differs from its own committed copy, or one that differs from the workspace set fails. The
 project-only packages (`--cli`, and the root lockfile in the no-argument form) are
 the Xcode project's references whose identity Package.swift never names, read AT the reference
@@ -197,8 +198,9 @@ def main(argv):
 
     ok = True
     if not states:
-        # The pre-build guard: the working tree's lockfiles, as a build would read them.
-        restore = "git checkout --" if ref == "HEAD" else f"git checkout {ref} --"
+        # The pre-build guard: the working tree's lockfiles, as a build would read them. The
+        # restore advice names its source and the path: a bare `git checkout -- <path>` restores
+        # from the INDEX, so a staged rewrite would survive it.
         for rel, label, skipping, absent in (
                 (WS_LOCK, f"{WS_LOCK} (working tree)", frozenset(),
                  "a build would resolve WITHOUT pins"),
@@ -218,14 +220,17 @@ def main(argv):
                 own = pins_of(parse_json(committed, f"{ref}:{rel}"), f"{ref}:{rel}")
                 if pin_diffs(got, own):
                     print(f"DRIFT  {rel}: the working-tree file differs from {ref} "
-                          f"(a build ADOPTS it) — restore it with {restore} before building")
+                          f"(a build ADOPTS it) — restore it with git checkout {ref} -- {rel} "
+                          f"before building")
                     ok = False
                 else:
                     # VERSIONS-EQUAL (VX-853, P-781-3): every pin identical, so only bookkeeping
                     # moved (the workspace originHash hashes the checkout's path, VX-781 record
-                    # T-2) — harmless.
+                    # T-2) — harmless. The advice is HEAD in every mode: committing is against
+                    # HEAD, and `git checkout <rev> --` would STAGE the rev's bytes.
                     print(f"NOTE   {rel}: differs from {ref} only in bookkeeping (pins identical) — "
-                          f"harmless; restore with {restore} before committing, never commit it.")
+                          f"harmless; restore with git checkout HEAD -- {rel} before committing, "
+                          f"never commit it.")
             ok &= compare(label, got, want, skipping)
     else:
         for s in states:
