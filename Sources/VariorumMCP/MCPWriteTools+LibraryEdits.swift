@@ -128,13 +128,15 @@ extension MCPWriteTools {
     /// words, the VX-648 record's BATCH 2 bundle): a gathering is renamed,
     /// starred, archived and deleted at edit now, so the sentence says what
     /// still isn't the client's — a finish, its notes' order and membership,
-    /// and its RULE, with the why.
+    /// and its RULE, with the why. VX-813 (the VX-809 run, batch 2 — PROVISIONAL,
+    /// a justified wording edit): a gathering's ORDER is set_book_order's now,
+    /// so the sentence says its notes can't be placed BY HAND, and points there.
     static func gatheringWords(_ name: String?) -> String {
         let named = name.map { "\u{201C}\($0)\u{201D}" } ?? "That"
         return "\(named) is a gathering \u{2014} it shows the notes its rule matches and holds none of its own, "
-            + "so it can't be finished, and its notes can't be ordered or taken out of it: a note leaves it by no "
-            + "longer matching (remove_tag takes a tag off a note). Its rule is the author's, since a client "
-            + "changing it would widen what its own grant reaches."
+            + "so it can't be finished, and its notes can't be placed by hand (set_book_order sorts it) or taken "
+            + "out of it: a note leaves it by no longer matching (remove_tag takes a tag off a note). Its rule is "
+            + "the author's, since a client changing it would widen what its own grant reaches."
     }
 
     /// A note named on a book act that is not one of the book's notes (the
