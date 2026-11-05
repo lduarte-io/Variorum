@@ -1127,16 +1127,16 @@ the Bookcase, the marquee on a long wing name in both voices).
 
 #### Batch B — LIVE STATUS (implementer: Opus, fresh session, 2026-11-05)
 
-**Not done by this batch (first line, kept current):** NOTHING BUILT YET — the DESIGN FORK below
-waits on the orchestrator's ruling (P-828-1, P-828-2, and two READINGS of the ruled words, Q-B1 and
-Q-B2, each of which decides a core arm). No canon, QUESTIONS or shared ledger touched. No `Sync/`,
-custody or keychain anywhere in this batch's reach.
+**Not done by this batch (first line, kept current):** NO app-suite RUN, NO red-on-old revert RUN, NO
+walk, NO Debug launch — all stage-gated, all the orchestrator's. No canon, QUESTIONS or shared ledger
+touched. No `Sync/`, custody or keychain anywhere in this batch's reach. Built to the fork's ruling
+(0aca117b3, "Batch B — THE FORK'S RULING"); B2 lands before B1 (the chord rides B2's road).
 
 | Piece | What | Status |
 |---|---|---|
-| B0 | Preflight (the brief's reading list, read in full; her three tickets read on the board) + THE TRACE + THE DESIGN FORK | DONE (this commit) — AWAITING THE RULING |
+| B0 | Preflight (the brief's reading list, read in full; her three tickets read on the board) + THE TRACE + THE DESIGN FORK | DONE (ec53930ef) — RULED (0aca117b3) |
 | B1 | VX-824: the pure chord rule + the registry declaration (`.goToWing`, the alternate "⌘1–9") + the helper row + the window's key monitor + routing pins | NOT-STARTED |
-| B2 | VX-833 (1): the deliberate switch lands in the wing's Bookcase — one road in `WingsModel`, every switcher door through it — + pins | NOT-STARTED |
+| B2 | VX-833 (1): the deliberate switch lands in the wing's Bookcase — one road in `WingsModel`, every switcher door through it — + pins | DONE (this commit) — `WingsModel.goTo(_:saying:)` + `landInBookcase` (wired per window by `RootView.wireWingLanding` → `pendingSelection = .shelf`); `switchSaying`/`cycle` ride it; the ▾ list's picker → `goTo(saying: false)`; `WingSwitcherBrain` commits the current row (P-828-1 (ii)(a)); pins `WingDeliberateLandingTests` (6, NEW) + 4 justified re-points in `WingSwitcherChordTests` (`.close` → `.commit(current)`). Mac `build-for-testing` TEST BUILD SUCCEEDED. RUN + revert R-B2 PENDING (stage) |
 | B3 | VX-833 (2) + VX-844: the label's space (pure) + right-aligned in the column + the marquee (pure plan + view) + pins | NOT-STARTED |
 | B4 | Self-assessment + the end-of-batch headless suite + the app `build-for-testing` | NOT-STARTED |
 

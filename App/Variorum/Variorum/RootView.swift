@@ -786,7 +786,23 @@ struct RootView: View {
         // move between its panes — carries the app's one wing with it (her
         // ruled cross-wing follow; the receipt "Now in X").
         WingFollow.wire(workspace: router.workspace, session: session)
+        // VX-833: THIS window's deliberate wing switches land on the Bookcase.
+        Self.wireWingLanding(wings: wings, router: router)
         router.workspace.visit(selection ?? .shelf)
+    }
+
+    /// **VX-833 — where this window's deliberate wing switch lands** (her
+    /// ruling: *"let's just keep landing in the bookcase. i want it to be
+    /// consistent"*): the wings model's one deliberate road
+    /// (`WingsModel.goTo`) asks, and the shell's ONE request road answers —
+    /// `pendingSelection = .shelf`, adopted into the focused pane exactly as
+    /// ⌥⌘[ / ⌘⇧n's destinations are (P-4: the model names the moment, the
+    /// shell decides what it means). Per window: the model and the router are
+    /// this window's. Static so a pin drives exactly what the window wires.
+    static func wireWingLanding(wings: WingsModel, router: ShellRouter) {
+        wings.landInBookcase = { [weak router] in
+            router?.pendingSelection = .shelf
+        }
     }
 
     // MARK: - Selection, per pane (13f batch 4 — the gate's (a))

@@ -42,8 +42,10 @@ final class WingSwitcherModel: Identifiable {
     func tapL() { brain.tapL() }
     func move(by delta: Int) { brain.move(by: delta) }
 
-    /// Act on an outcome — a commit switches and SPEAKS ("Now in …"). Returns
-    /// whether the switcher should close.
+    /// Act on an outcome — a commit switches and SPEAKS ("Now in …"), and
+    /// (VX-833) lands in the wing's Bookcase through the deliberate road — the
+    /// current wing's commit included, which switches and says nothing.
+    /// Returns whether the switcher should close.
     @discardableResult
     func apply(_ outcome: WingSwitcherBrain.Outcome) -> Bool {
         switch outcome {

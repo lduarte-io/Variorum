@@ -129,15 +129,47 @@ final class WingsModel {
         rows.map { WingSwitcherBrain.Row(id: $0.id, name: $0.name) }
     }
 
-    /// A switch made by the SWITCHER's new doors — ⌘L's commit and the
-    /// masthead word's cycle — SPEAKS the existing "Now in …" receipt (the
-    /// cross-wing follow's, `WingFollow.nowIn`): a cycle is blind until it is
-    /// said. The in-menu picker keeps 13i-d's silence (there she reads the
-    /// name she picked). Switching to where she already is does nothing.
+    /// A switch made by the SWITCHER's new doors — ⌘L's commit, the masthead
+    /// word's cycle and (VX-824) the ⌘digit chord — SPEAKS the existing
+    /// "Now in …" receipt (the cross-wing follow's, `WingFollow.nowIn`): a
+    /// cycle is blind until it is said. The in-menu picker keeps 13i-d's
+    /// silence (there she reads the name she picked) — `goTo(_:saying:)`.
+    /// Switching to where she already is says nothing — and, since VX-833,
+    /// still LANDS (the deliberate road below).
     func switchSaying(_ id: String) {
-        guard id != currentID else { return }
-        switchTo(id)
-        session.status.receipt(WingFollow.nowIn(name(of: id), isHome: id.isEmpty))
+        goTo(id, saying: true)
+    }
+
+    // MARK: - VX-833 — THE DELIBERATE SWITCH LANDS IN THE WING'S BOOKCASE
+
+    /// **Where a deliberate switch lands** — wired by the window that owns
+    /// this model (`RootView.wireWingLanding`: the shell's one request road,
+    /// `pendingSelection = .shelf`, adopted into the focused pane). Composition,
+    /// never a broadcast (P-4): the model says "a deliberate switch happened",
+    /// the window decides it means "show the Bookcase". A model no window
+    /// wired (a pin, a preview) lands nowhere.
+    @ObservationIgnored var landInBookcase: () -> Void = {}
+
+    /// **THE ONE DELIBERATE ROAD** (VX-833, her ruling: *"let's just keep
+    /// landing in the bookcase. i want it to be consistent"*; the run's fork
+    /// ruling, Q-B2 (a) + P-828-1 (ii)(a)). Every door whose act is choosing a
+    /// wing — ⌘L's sheet (and so the toolbar's "in ‹wing›", which opens it),
+    /// the masthead ▾ list, the masthead word's cycle, the ⌘digit chord —
+    /// comes here: the app's one wing switches (when it is another) and the
+    /// focused pane lands on that wing's Bookcase. The CURRENT wing, picked
+    /// deliberately, lands too — "pick a wing" means one thing on every road —
+    /// with no receipt (the wing did not change). NOT here, by the ruling: the
+    /// cross-wing follow (`WingFollow`), New Wing…'s switch-in, Delete Wing's
+    /// return to Home, a dead wing's revalidation, Compare's lineage "go to
+    /// ‹wing› ›" and the MCP door's wing landing.
+    func goTo(_ id: String, saying: Bool) {
+        if id != currentID {
+            switchTo(id)
+            if saying {
+                session.status.receipt(WingFollow.nowIn(name(of: id), isHome: id.isEmpty))
+            }
+        }
+        landInBookcase()
     }
 
     /// The masthead's cycling click goes here (nil with one wing — the word
@@ -146,7 +178,8 @@ final class WingsModel {
         WingSwitcherBrain.next(after: currentID, in: switcherRows)
     }
 
-    /// The masthead word, clicked without typing: the next wing, said.
+    /// The masthead word, clicked without typing: the next wing, said — and
+    /// (VX-833) landed on its Bookcase, like every deliberate switch.
     func cycle() {
         if let nextWing { switchSaying(nextWing.id) }
     }
