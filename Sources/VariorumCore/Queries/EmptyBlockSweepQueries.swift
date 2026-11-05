@@ -43,7 +43,8 @@ extension Queries {
     ///   tombstone (the purge family takes all of them), whose text is not
     ///   zero-length (`working_text <> ''` — the carve's empty test; a
     ///   whitespace-only take is worded);
-    /// - `savepoints` — `commit_point` rows on any of those variants;
+    /// - `commit_points` — `commit_point` rows on any of those variants (the
+    ///   alias names the table, not the retired label — R-13s-31's fence);
     /// - `comments` — ANY `block_comment` row, live or tombstoned;
     /// - `name` / `presentation` — the stored columns, verbatim (any non-NULL
     ///   value counts);
@@ -64,7 +65,7 @@ extension Queries {
                 return (id, EmptyBlockSweep.Facts(
                     blockID: id,
                     wordedTakes: row["worded_takes"],
-                    savepoints: row["savepoints"],
+                    savepoints: row["commit_points"],
                     comments: row["comments"],
                     name: row["name"],
                     presentation: row["presentation"],
@@ -87,7 +88,7 @@ extension Queries {
             WHERE v.block_id = b.id AND v.working_text <> '') AS worded_takes,
           (SELECT COUNT(*) FROM commit_point cp
             WHERE cp.variant_id IN (SELECT v.id FROM variant v WHERE v.block_id = b.id))
-            AS savepoints,
+            AS commit_points,
           (SELECT COUNT(*) FROM block_comment bc WHERE bc.block_id = b.id) AS comments,
           (SELECT COUNT(*) FROM edge e JOIN block o ON o.id = e.target_block_id
             WHERE e.source_block_id = b.id AND o.id <> b.id AND o.deleted_at IS NULL)
