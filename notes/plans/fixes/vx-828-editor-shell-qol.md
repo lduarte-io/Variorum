@@ -563,3 +563,24 @@ Part 2 (red-on-old reverts) STARTING — three behavioral reverts per the pin ta
 UNCOMMITTED edit on the committed tree at 58e655834 (git checkout restores; no prerevert dir
 needed, git diff is the honest mid-revert state): R1 bypass the TypedReturn mid-word arm;
 R2 exactInteriorCut → settle; R3 restore the claim-time retraction from 7e7de0b02. Results follow.
+
+Part 2 (reverts) DONE — all three red-on-old CONFIRMED, each restored to the committed state
+(`git status` clean after each):
+- R1 (TypedReturn mid-word arm bypassed): 8 red — the 3 TypedReturnTests pins, the 2 re-pointed
+  whitespace pins, the 3 TypedReturnKeyTests key pins; the VX-655 order pin stayed green.
+- R2 (exactInteriorCut → settle): both exact-cut pins red; both guards green.
+- R3 (claim-time retraction restored from 7e7de0b02): theListExitsRetractionLandsInsideTheFlight
+  NeverAheadOfIt red (claim-turn + mid-flight), the re-pointed NestedListDoorTests pin red the same
+  way; the #94 undo guard and every end-state pin green.
+
+**Batch E's shared-query signature (arrived from vx-809, its batch 1 closed at 54831417f):**
+`Queries.tagSubtreeIsWorn(_ db: Database, tagID: String, scope: Queries.TagWearerScope) throws ->
+Bool` in `Sources/VariorumCore/Queries/TagUsageQueries.swift` (tests `TagUsageQueriesTests`).
+VX-840's unused = `!tagSubtreeIsWorn(db, tagID:, scope: .library(countingTrashRevivable: true))`
+per wing — the `countingTrashRevivable: true` arm IS P-828-3's lean (a Trash-revivable wearer keeps
+the tag worn); WORN is subtree-honest by the materialized path (deleteTag's own rule). Whoever
+merges second re-runs TagUsageQueriesTests on the merged tree.
+
+Also for the merge gate (coordinator): merge main ≥ be17fb632 in first (VX-853 — verify-pins
+no-arg guard; a NOTE from verify-pins = bookkeeping-only lockfile drift, restore with
+`git checkout HEAD -- <file>`, never commit it; DRIFT still means stop).
