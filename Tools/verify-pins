@@ -10,15 +10,20 @@ usage:
                              Xcode project's own references (Sparkle) — those are not expected
 
 <state> is any of: a SourcePackages/workspace-state.json · a SourcePackages dir · a DerivedData dir
-(…/SourcePackages/workspace-state.json is found inside) · a Package.resolved. The reference is the
-Xcode workspace lockfile as COMMITTED (git, never the working-tree copy, which a build can rewrite).
-Pins compare by identity, version and revision; the originHash is ignored (the workspace's is a
-hash of the checkout's absolute path, so it differs on every checkout). The no-argument form also
-fails on a working-tree workspace lockfile that differs from the commit in ANY byte, because a
-build adopts whatever that file says.
+(…/SourcePackages/workspace-state.json is found inside) · a Package.resolved. A file is read by its
+CONTENT, so renamed copies work. The reference is the Xcode workspace lockfile as COMMITTED (git,
+never the working-tree copy, which a build can rewrite). Pins compare by identity, version and
+revision. The originHash is ignored: the workspace's is a hash of the checkout's absolute path,
+so it differs on every checkout. The no-argument form also fails when either working-tree lockfile
+differs from the commit in ANY byte, because a build (Xcode or `swift build`) adopts whatever that
+file says. The project-only packages (`--cli`, and the root lockfile in the no-argument form) are
+the Xcode project's references whose identity Package.swift never names, read AT the reference
+revision (`--ref`, default HEAD), or from the working tree under `--against`.
 
 exit: 0 every pin matches · 1 drift (each drifted pin named) · 2 usage or unreadable input.
 The release's post-build check: Tools/verify-pins "<OUT>/DerivedData"
+The belt's static guard is Tests/VariorumCoreTests/PinBeltTests.swift; the networked proof is
+Tools/pins-belt-check.
 """
 import json
 import os
@@ -27,7 +32,9 @@ import subprocess
 import sys
 
 WS_LOCK = "App/Variorum/Variorum.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+ROOT_LOCK = "Package.resolved"
 PBXPROJ = "App/Variorum/Variorum.xcodeproj/project.pbxproj"
+MANIFEST = "Package.swift"
 
 
 def die(msg):
@@ -52,29 +59,39 @@ def git_show(root, rev, path):
         die(f"cannot read {rev}:{path}")
 
 
-def pins_from_resolved(text, where):
-    try:
-        data = json.loads(text)
-        return {p["identity"]: (p["state"].get("version"), p["state"].get("revision"))
-                for p in data["pins"]}
-    except (ValueError, KeyError, TypeError):
-        die(f"not a Package.resolved: {where}")
-
-
-def pins_from_state(path):
+def read_file(path):
     try:
         with open(path) as f:
-            data = json.load(f)
-        out = {}
-        for dep in data["object"]["dependencies"]:
-            ref, state = dep["packageRef"], dep.get("state", {})
-            if ref.get("kind") != "remoteSourceControl":
-                continue  # the local package (fileSystem) and anything unpinnable
-            cs = state.get("checkoutState", {})
-            out[ref["identity"]] = (cs.get("version"), cs.get("revision") or state.get("name"))
-        return out
-    except (OSError, ValueError, KeyError, TypeError):
-        die(f"not a readable workspace-state.json: {path}")
+            return f.read()
+    except OSError:
+        return None
+
+
+def pins_of(data, where):
+    """identity -> (version, revision), from a Package.resolved OR a workspace-state.json, by content."""
+    try:
+        if isinstance(data, dict) and "pins" in data:
+            return {p["identity"]: (p["state"].get("version"), p["state"].get("revision"))
+                    for p in data["pins"]}
+        if isinstance(data, dict) and "dependencies" in data.get("object", {}):
+            out = {}
+            for dep in data["object"]["dependencies"]:
+                ref, state = dep["packageRef"], dep.get("state", {})
+                if ref.get("kind") != "remoteSourceControl":
+                    continue  # the local package (fileSystem) and anything unpinnable
+                cs = state.get("checkoutState", {})
+                out[ref["identity"]] = (cs.get("version"), cs.get("revision") or state.get("name"))
+            return out
+    except (KeyError, TypeError, AttributeError):
+        pass
+    die(f"neither a Package.resolved nor a workspace-state.json: {where}")
+
+
+def parse_json(text, where):
+    try:
+        return json.loads(text)
+    except ValueError:
+        die(f"not JSON: {where}")
 
 
 def load_state(arg):
@@ -82,28 +99,22 @@ def load_state(arg):
     for cand in (p, os.path.join(p, "workspace-state.json"),
                  os.path.join(p, "SourcePackages", "workspace-state.json")):
         if os.path.isfile(cand):
-            if os.path.basename(cand) == "workspace-state.json":
-                return cand, pins_from_state(cand)
-            try:
-                with open(cand) as f:
-                    return cand, pins_from_resolved(f.read(), cand)
-            except OSError:
+            text = read_file(cand)
+            if text is None:
                 die(f"unreadable: {cand}")
+            return cand, pins_of(parse_json(text, cand), cand)
     die(f"no workspace-state.json or Package.resolved at {arg}")
 
 
-def project_only(root):
+def identity(url):
+    last = url.rstrip("/").split("/")[-1]
+    return (last[:-4] if last.endswith(".git") else last).lower()
+
+
+def project_only(pbx_text, manifest_text):
     """identities the Xcode project references but the root Package.swift never names (Sparkle)."""
-    try:
-        pbx = open(os.path.join(root, PBXPROJ)).read()
-        manifest = open(os.path.join(root, "Package.swift")).read()
-    except OSError:
-        die("cannot read project.pbxproj / Package.swift")
-    out = set()
-    for url in re.findall(r'repositoryURL = "([^"]+)";', pbx):
-        if url not in manifest:
-            out.add(url.rstrip("/").split("/")[-1].removesuffix(".git").lower())
-    return out
+    named = {identity(u) for u in re.findall(r'\.package\(\s*url:\s*"([^"]+)"', manifest_text)}
+    return {identity(u) for u in re.findall(r'repositoryURL = "([^"]+)";', pbx_text)} - named
 
 
 def short(v):
@@ -150,42 +161,37 @@ def main(argv):
 
     root = repo_root()
     if against:
-        try:
-            want = pins_from_resolved(open(against).read(), against)
-        except OSError:
+        text = read_file(against)
+        if text is None:
             die(f"unreadable: {against}")
+        want = pins_of(parse_json(text, against), against)
         ref_label = against
+        skip = project_only(read_file(os.path.join(root, PBXPROJ)) or "",
+                            read_file(os.path.join(root, MANIFEST)) or "")
     else:
-        want = pins_from_resolved(git_show(root, ref, WS_LOCK), f"{ref}:{WS_LOCK}")
+        want = pins_of(parse_json(git_show(root, ref, WS_LOCK), f"{ref}:{WS_LOCK}"), f"{ref}:{WS_LOCK}")
         ref_label = f"{ref}:{WS_LOCK}"
-    skip = project_only(root)
+        skip = project_only(git_show(root, ref, PBXPROJ), git_show(root, ref, MANIFEST))
     print(f"verify-pins: reference = {ref_label} ({len(want)} pins)")
 
     ok = True
     if not states:
         # The pre-build guard: the working tree's lockfiles, as a build would read them.
-        ws_path = os.path.join(root, WS_LOCK)
-        try:
-            ws_text = open(ws_path).read()
-        except OSError:
-            ws_text = None
-        if ws_text is None:
-            print(f"DRIFT  {WS_LOCK}: MISSING from the working tree (a build would resolve WITHOUT pins)")
-            ok = False
-        else:
-            if not against and ws_text != git_show(root, ref, WS_LOCK):
-                print(f"DRIFT  {WS_LOCK}: the working-tree file differs from {ref} "
+        for rel, label, skipping, absent in (
+                (WS_LOCK, f"{WS_LOCK} (working tree)", frozenset(),
+                 "a build would resolve WITHOUT pins"),
+                (ROOT_LOCK, f"{ROOT_LOCK} (working tree, the CLI graph)", skip,
+                 "swift build would resolve WITHOUT pins")):
+            text = read_file(os.path.join(root, rel))
+            if text is None:
+                print(f"DRIFT  {rel}: MISSING from the working tree ({absent})")
+                ok = False
+                continue
+            if not against and text != git_show(root, ref, rel):
+                print(f"DRIFT  {rel}: the working-tree file differs from {ref} "
                       f"(a build ADOPTS it) — restore it with git checkout -- before building")
                 ok = False
-            ok &= compare(f"{WS_LOCK} (working tree)", pins_from_resolved(ws_text, ws_path), want)
-        root_lock = os.path.join(root, "Package.resolved")
-        try:
-            root_text = open(root_lock).read()
-        except OSError:
-            print("DRIFT  Package.resolved: MISSING from the working tree (swift build would resolve WITHOUT pins)")
-            return 1
-        ok &= compare("Package.resolved (working tree, the CLI graph)",
-                      pins_from_resolved(root_text, root_lock), want, skip)
+            ok &= compare(label, pins_of(parse_json(text, rel), rel), want, skipping)
     else:
         for s in states:
             path, got = load_state(s)
