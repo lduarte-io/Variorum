@@ -1672,3 +1672,41 @@ store change (verified in the capture).
 **DEFERRED to the merge-gate window (walk-only; the pins for each are GREEN):** sidebar leave,
 Cards, the live search sheet, the armed day filter, the new-question / wing / mode resets, the
 deleted-row survivor, the two-pane split. **Ledger row 6 flips VERIFIED** with this note.
+
+#### Batch B — THE FORK'S RULING (orchestrator, 2026-11-05 — build B1–B4 to this; everything below PROVISIONAL for her morning sitting)
+
+1. **Q-B1 "no note holds the keys": (a) CONFIRMED** — the mode row takes ⌘digit inside a note
+   detail; otherwise the wing chord takes it UNLESS a writing surface holds the keyboard
+   (`EditorTextView`, `PaneTextView`, a comment text view). Fields and the capture box pass the
+   chord through — ⌘digit has no editing meaning in a text field, and the literal VX-560 reading
+   would kill the chord exactly where it matters most (the Bookcase's resting caret sits in quick
+   entry — VX-332 — and every ⌘digit landing puts it back there, so the second press would always
+   be dead). (c) would jump wings mid-typing in a book's live note — refused. **This interprets
+   her "text input" family — flagged plainly for her morning eye.**
+2. **P-828-1: (i) a refusal on the one status seam** — the chord fired and did nothing, and a
+   door that did nothing speaks a refusal (the seam's own law; OneWingChord/VX-560 precedents).
+   Words as drafted, PROVISIONAL, hers to tune. **(ii) (a) CONFIRMED both roads** — ⌘N naming the
+   CURRENT wing lands in its Bookcase, and the switcher's deliberate pick of the current row
+   commits the same way (the brain's `.close` becomes a commit for a deliberate pick; Esc stays a
+   plain close). Her VX-833 word is "consistent": every deliberate switch lands in the Bookcase,
+   including the identity switch. Accepted consequence, stated: with one wing, ⌘1 outside a note
+   is a go-to-Bookcase chord — harmless and arguably useful.
+3. **Q-B2 which doors: (a) CONFIRMED** — ⌘L's sheet, the toolbar label, the ▾ list, the cycling
+   word AND the chord all land on `.shelf`; receipts as today (the chord says "Now in …", the ▾
+   list stays silent). Her reason was CONSISTENCY, verbatim, so no door is carved out on day one.
+   **The cycling-word regression is REAL and recorded for her morning:** landing moves the word
+   away from the pointer, so stepping wings by repeated clicks now needs a re-aim per step; if
+   that pattern matters to her, flipping that one door is a cheap morning redirect (VX-834
+   remains the eventual preference). Untouched, as listed: the follow, New Wing…, Delete Wing,
+   revalidation, Compare's "go to ‹wing› ›", MCP show_in_app (vx-809's door).
+4. **P-828-2 the marquee: (a) the ticker CONFIRMED** — rest 2.5 s, 25 pt/s leftward, 24-pt gap,
+   seamless wrap, repeat; her "car-radio" names the ticker, not the ping-pong. The ruled half
+   stands as proposed (width-decided, no clock when it fits, cancellable task keyed on
+   (name, space), hard clips). Reduce Motion = no movement (rest at the start). The two edges as
+   proposed: under 24 pt the label is not drawn; hidden sidebar keeps the old place and 160-pt
+   cap. VX-833(2)'s build shape (live-measured leading edge, trailing-aligned words, 8 pt of
+   air) is within the ruled text — build it.
+
+Build B1–B4. The pin plan binds as briefed (routing pins for the chord's three contexts incl.
+the quick-entry pass-through; the registry walk; the marquee's no-clock-when-fit state pin; the
+switcher-alignment geometry pin where reachable).
