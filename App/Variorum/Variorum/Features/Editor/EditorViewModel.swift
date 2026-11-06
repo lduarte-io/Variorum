@@ -3180,12 +3180,26 @@ final class EditorViewModel {
     ///
     /// The act keeps its name, its verb and its two summoned doors; what
     /// changed is where it lands.
+    ///
+    /// **VX-801 (VX-827 U3b — G2's ruling):** the door lands on the LINEAGE
+    /// face with the ORIGINAL selected — its takes and commits in the pane and
+    /// rail, Put back on its header — through the history doors' own road
+    /// (the detail's full pane, this model's sheet where no detail is). The
+    /// Block History panel it used to open is retired whole.
     func revealCaretBlockOrigin() {
-        guard caretBlockOrigin != nil else {
+        guard let origin = caretBlockOrigin else {
             refuse(OriginPeekCopy.noOriginHere)
             return
         }
-        requestBlockHistory()
+        guard let blockID = caretBlockID else {
+            refuse(CapabilityRegistry.capability(.showBlockLineage).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: blockID, focusedVariantID: caretVariantID,
+            opening: .lineage(select: origin.blockID))
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
     }
 
     /// 13j J2: the tray sheet's pending target (`EditorView` presents it).
@@ -3594,9 +3608,11 @@ final class EditorViewModel {
         }
     }
 
-    /// **THE BLOCK HISTORY DOOR** (the post-13l polish round, ledger row 17).
+    /// **THE BLOCK HISTORY DOOR** (the post-13l polish round, ledger row 17;
+    /// since VX-801 / VX-827 U3a it opens the COMMITS FACE — the detail's full
+    /// pane through the router, this model's sheet where no detail is).
     ///
-    /// It asks the router first — one pane, wherever the door is pressed —
+    /// It asks the router first — one face, wherever the door is pressed —
     /// and falls back to its own sheet where no post detail is mounted, which
     /// is `requestNoteTray`'s shape and its reason.
     ///
@@ -3610,6 +3626,21 @@ final class EditorViewModel {
         }
         let request = BlockHistoryRequest(
             postID: postID, blockID: blockID, focusedVariantID: caretVariantID)
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
+    }
+
+    /// **block ▾'s LINEAGE row** (VX-801, VX-827 U3b): the same surface as
+    /// the history door, opened on its Lineage face — the router first, this
+    /// model's sheet where no detail is (`requestBlockHistory`'s road).
+    func requestBlockLineage() {
+        guard let blockID = caretBlockID else {
+            refuse(CapabilityRegistry.capability(.showBlockLineage).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: blockID, focusedVariantID: caretVariantID,
+            opening: .lineage(select: nil))
         if session.commandRouter.requestBlockHistory(request) { return }
         blockHistoryRequest = request
     }

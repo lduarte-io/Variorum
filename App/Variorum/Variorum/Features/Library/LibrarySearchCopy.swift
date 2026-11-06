@@ -22,7 +22,8 @@ nonisolated enum LibrarySearchCopy {
 
     static func echo(_ words: String) -> String { SearchAnswerCopy.echo(words) }
 
-    /// **The honest counts** (D3): what the WHOLE question finds, per kind —
+    /// **The honest counts** (D3; R-819-1): what the picked scope LISTS — All
+    /// the whole question — per kind:
     /// "3 books · 29 notes · 118 passages · 6 scraps", a kind with nothing
     /// left out; nothing at all is said as such.
     static func counts(_ kinds: SearchCounts.Kinds) -> String {
@@ -135,20 +136,20 @@ nonisolated enum LibrarySearchCopy {
     /// words).
     static func blockHome(_ home: String) -> String { "in \(home)" }
 
-    /// **The sort door, while the answer sheet shows** (PROVISIONAL
-    /// P-13o-U2-7): the sheet is ranked by relevance (D2) — the mockup's own
-    /// words, as a label, because a menu that could not change the order
-    /// would be a door that cannot act (P-2).
+    /// **The order door at relevance, while the answer sheet shows** — the
+    /// mockup's own words (13o U2's D2). A plain label until VX-820
+    /// (P-13o-U2-7: a menu that could not change the order was a door that
+    /// could not act); since her R-819-2 the `order ▾` door's relevance face
+    /// (`LibrarySearchOrderFace.doorLabel`), its tooltip composed there.
     static let relevance = "relevance \u{00B7} best first"
-    static let relevanceHelp = "Search results are ranked by how well they match \u{2014} "
-        + "the best match first"
 
     // MARK: - The sheet
 
     static let booksHeader = "Books"
 
     /// The groups' section word, by scope (the mockup's "Notes, with their
-    /// passages"; the Blocks scope's groups are named blocks and scraps).
+    /// passages"; the Blocks scope's groups are the notes holding block-level
+    /// hits and the scraps — R-819-1).
     static func groupsHeader(_ scope: LibraryCatalogModel.Scope) -> String {
         scope == .blocks ? "Blocks & scraps" : "Notes, with their passages"
     }

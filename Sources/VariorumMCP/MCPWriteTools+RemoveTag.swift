@@ -20,14 +20,16 @@ extension MCPWriteTools {
         "That note doesn't wear the tag \u{201C}\(path)\u{201D} \u{2014} read_note's header lists the tags it wears."
     }
 
+    /// The one sentence for a `tag` that names no path (VX-827 U2 shares it with
+    /// `list_notes`' `tag`, which takes this tool's address and parse).
+    static let tagPathWords = "tag must be a tag path \u{2014} names joined by /, e.g. \"percy/pt-en\"."
+
     /// `tag`: a path, a leading `#` tolerated (`set_book_rule`'s outflow).
     func parseRemoveTag(_ args: [String: Value]) throws -> Job {
         let noteID = try requiredString(args, "note_id")
         let raw = try requiredText(args, "tag")
         let path = TagPath.segments(raw.hasPrefix("#") ? String(raw.dropFirst()) : raw).joined(separator: "/")
-        guard !path.isEmpty else {
-            throw ArgumentFailure(message: "tag must be a tag path \u{2014} names joined by /, e.g. \"percy/pt-en\".")
-        }
+        guard !path.isEmpty else { throw ArgumentFailure(message: Self.tagPathWords) }
         return .removeTag(noteID: noteID, path: path)
     }
 

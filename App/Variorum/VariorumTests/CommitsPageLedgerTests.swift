@@ -22,6 +22,15 @@
 //  · the row's height at the column's default width, both voices
 //    (precision 1's "compact").
 //
+//  **VX-827 U3b — the panel retired whole** (`notes/plans/fixes/
+//  vx-827-lineage.md`, U3b RECORD), and the ledger's pins with it, each named
+//  below: what VX-144 ruled for the Commits region either holds on the
+//  surface that succeeds it (no bezels and no system caption type anywhere in
+//  the History feature — re-pointed as one source pin; the moment's details
+//  line says no "saved by hand" and keeps "quiet" — re-pointed onto the
+//  Commits face's own meta line) or retired with the row and region it
+//  shaped.
+//
 
 import AppKit
 import Dependencies
@@ -60,26 +69,25 @@ struct CommitsPageLedgerTests {
         return out
     }
 
-    // MARK: - Precision 6 — the quiet-run line, in the voice (RED ON OLD)
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT, four pins:**
+    // · `theQuietRunLineSpeaksInTheVoice` (the panel's `QuietRunRow`, retired
+    //   with it — the Commits face draws its quiet runs in the voice's small
+    //   type and muted ink; the source pin below keeps the class out of the
+    //   whole History feature);
+    // · `theDefiningSentenceSurvivesAndThePaneBlurbIsGone` (the Commits
+    //   REGION's meaning line; the face carries no region lines — THE DESIGN
+    //   MEMO's composition, her composite — and "saved moment" defines commit
+    //   in its Restore and Bring back hover words; flagged for her eye,
+    //   P-U3b-9);
+    // · `theOpenPreviewKeepsParagraphsCapsAndAddsNoEllipsisOfItsOwn` (the open
+    //   ROW's capped preview — the face's reading pane is the whole moment);
+    // · `theRowIsCompactAndItsActsAreWords` and `theRestingLineSaysWhenThe
+    //   NameAndTheQuietGlyphOnly` (the panel ROW's anatomy and its ◦ glyph —
+    //   the face's rail line is one line, its quiet mark the rail's hollow
+    //   dot; a named moment rests on its name alone —
+    //   `CommitRestingPreviewTests.aNamedCommitKeepsItsNameAlone`).
 
-    /// **RED ON OLD:** the line drew in `.font(.caption)` with
-    /// `.foregroundStyle(.secondary)` — a system sans line between mono rows
-    /// in the Terminal voice (the before-capture `crowded-terminal-light`).
-    @Test func theQuietRunLineSpeaksInTheVoice() {
-        for tokens in [VoiceTokens.studyLight, .terminalLight, .studyDark, .terminalDark] {
-            let row = QuietRunRow(count: 3, expanded: false, tokens: tokens, onToggle: {})
-            let fonts = Self.values(Font.self, in: row.body).map(Self.signature)
-            let inks = Self.values(Color.self, in: row.body).map(Self.signature)
-            #expect(!fonts.contains { $0.contains("TextStyle.caption") },
-                    "no system caption type on the run line")
-            #expect(fonts.contains(Self.signature(tokens.small)),
-                    "the run line wears the voice's small type")
-            #expect(inks.contains(Self.signature(tokens.muted)),
-                    "…in the voice's muted ink (inks: \(inks))")
-        }
-    }
-
-    // MARK: - Precision 3 — no bezels anywhere in the pane (RED ON OLD)
+    // MARK: - Precisions 3 + 6 — no bezels, no system caption (re-pointed)
 
     private static var appRoot: URL {
         URL(fileURLWithPath: #filePath)
@@ -87,200 +95,50 @@ struct CommitsPageLedgerTests {
             .deletingLastPathComponent()  // App/Variorum
     }
 
-    /// **RED ON OLD:** every act in the pane — Name/Rename, Restore,
-    /// Unarchive, Put back, Bring back, Open this note's tray — was a stock
-    /// `.controlSize(.small)` bezel, against `VoiceControls.swift`'s own
-    /// rule ("chrome is quiet text, never bezels"). The pane's Close stays
-    /// the inspector family's stock button (TrayPanel's twin) and is not a
-    /// row act.
-    @Test func theCommitsPageDrawsNoBezels() throws {
-        let source = try String(
-            contentsOf: Self.appRoot.appendingPathComponent(
-                "Variorum/Features/Tray/BlockHistoryPane.swift"),
-            encoding: .utf8)
-        let bezels = source.components(separatedBy: ".controlSize(").count - 1
-        #expect(bezels == 0, "the pane's acts are voiced words, never bezels (\(bezels) left)")
-    }
-
-    // MARK: - Precision 5 — the defining sentence survives; the blurb goes
-
-    /// The Commits section's meaning line DEFINES a commit, and says "saved
-    /// moments" by 13s-b's P-U4-1 — it survives VERBATIM (the literal is
-    /// spelled here on purpose: a rewording must break this pin). The
-    /// pane-level blurb is dropped on this pane (P-VX144-2) — **RED ON OLD**
-    /// for that half.
-    @Test func theDefiningSentenceSurvivesAndThePaneBlurbIsGone() async throws {
-        #expect(BlockHistoryPath.savepointsExplainer
-            == "Each take's saved moments \u{2014} Restore loads one back into its buffer.")
-        try await withWorld { session, seeded in
-            let pane = BlockHistoryPane(
-                session: session,
-                request: BlockHistoryRequest(postID: seeded.postID, blockID: seeded.blockID))
-            await SurfaceComposition.host(pane, size: NSSize(width: 420, height: 700))
-            let shown = SurfaceComposition.text(of: pane.body)
-            #expect(SurfaceComposition.carries(BlockHistoryPath.savepointsSection, in: shown))
-            #expect(SurfaceComposition.carries(BlockHistoryPath.savepointsExplainer, in: shown),
-                    "the commit-defining sentence is on the page")
-            // The fallback voice (no store here) is Terminal, which LOWERCASES
-            // chrome — so the blurb is looked for case-blind, by its opening.
-            #expect(shown.lowercased().contains("everything this block has been") == false,
-                    "the pane-level blurb is gone (P-VX144-2)")
-            // (No apostrophe in the control: `dump` escapes it as `\'`.)
-            #expect(shown.lowercased().contains("restore loads one back into its buffer"),
-                    "control: the case-blind search does see the pane's text")
+    /// **The History feature draws its chrome in the VOICE** — no stock
+    /// `.controlSize(` bezel and no system caption type or secondary ink,
+    /// in any file of the surface that succeeds the panel (VX-144 precisions
+    /// 3 and 6, re-pointed at VX-827 U3b from the retired panel's file).
+    @Test func theHistoryFeatureDrawsNoBezelsAndNoSystemCaption() throws {
+        let folder = Self.appRoot.appendingPathComponent("Variorum/Features/History")
+        let files = try FileManager.default.contentsOfDirectory(atPath: folder.path)
+            .filter { $0.hasSuffix(".swift") }
+        #expect(files.count >= 5, "the surface's files are read: \(files)")
+        for file in files {
+            let source = try String(contentsOf: folder.appendingPathComponent(file), encoding: .utf8)
+            for banned in [".controlSize(", ".font(.caption", ".foregroundStyle(.secondary"] {
+                #expect(!source.contains(banned), "\(file) carries \(banned)")
+            }
         }
     }
 
-    // MARK: - Precisions 1–2 — what the row SAYS (the Mac-local face)
-
-    private static let now = Self.date(2026, 10, 10, 9, 0)
-
-    private static func date(_ y: Int, _ m: Int, _ d: Int, _ h: Int, _ min: Int) -> Date {
-        Calendar.current.date(from: DateComponents(
-            year: y, month: m, day: d, hour: h, minute: min))!
-    }
-
-    private static func commit(
-        _ text: String = "The kettle again.", kind: CommitKind = .manual,
-        message: String? = nil, at when: Date = date(2026, 10, 9, 22, 48)
-    ) -> CommitPoint {
-        CommitPoint(
-            id: UUID().uuidString, variantId: "v1", text: text, kind: kind,
-            message: message, createdAt: when)
-    }
+    // MARK: - Precisions 1–2 — what a moment's line SAYS (re-pointed)
 
     /// "saved by hand" goes (deliberate is the default and earns no words);
-    /// "quiet" stays on automatic commits; "predates a split" stays (it is
-    /// Restore's warning); the year shows only when it is not this year.
-    @Test func theDetailsLineSaysOnlyWhatTellsCommitsApart() {
-        let deliberate = CommitRowFace.details(Self.commit(), predatesSplit: false, now: Self.now)
-        #expect(deliberate.count == 1, "a deliberate commit's line is its stamp alone: \(deliberate)")
-        #expect(!deliberate.joined().contains("saved by hand"))
-        #expect(!deliberate.joined().contains("2026"), "no year in this year: \(deliberate)")
-        #expect(deliberate[0].contains("Oct") && deliberate[0].contains("9"),
-                "…but the month, the day and the time: \(deliberate)")
-
-        let quiet = CommitRowFace.details(
-            Self.commit(kind: .auto), predatesSplit: false, now: Self.now)
-        #expect(quiet.last == "quiet", "an automatic commit keeps its word: \(quiet)")
-
-        let old = CommitRowFace.details(
-            Self.commit(), predatesSplit: true, now: Self.now)
-        #expect(old.last == BlockHistoryCopy.predatesSplitMark, "Restore's warning stays: \(old)")
-
-        let lastYear = CommitRowFace.details(
-            Self.commit(at: Self.date(2025, 12, 30, 8, 5)), predatesSplit: false, now: Self.now)
-        #expect(lastYear[0].contains("2025"), "another year names itself: \(lastYear)")
-        // The phone's face is untouched (precision 7): it still says it.
-        #expect(SavepointRowFace.details(Self.commit(), predatesSplit: false)
-            .contains("saved by hand"))
-    }
-
-    /// **JUSTIFIED PIN EDIT (VX-431, the VX-440 run — the clarity pass):**
-    /// this pin held the RESTING row's one-paragraph preview
-    /// (`CommitRowFace.preview`), and the clarity pass retires the moment's
-    /// words from the resting row (the plan's Batch 2 design, item 1: "one
-    /// line — clock · name (when named) · kind glyph"). The preview now lives
-    /// in the OPEN row, LONGER and with its paragraphs kept; what VX-144 cared
-    /// about here survives unchanged — no ellipsis of the face's own (the
-    /// "…had.…" artifact cannot be produced), leading blank lines dropped, the
-    /// empty moment worded as a take, a cheap cap.
-    @Test func theOpenPreviewKeepsParagraphsCapsAndAddsNoEllipsisOfItsOwn() {
-        let twoParagraphs = "The keeper climbed the stairs at dusk, counting them as he always had."
-            + "\nBelow, the sea rearranged itself around the rocks, patient and loud."
-        let preview = CommitRowFace.expandedPreview(twoParagraphs)
-        #expect(preview == twoParagraphs, "both paragraphs, the newline kept")
-        #expect(!preview.hasSuffix(".\u{2026}"))
-        #expect(CommitRowFace.expandedPreview("\n  \nSecond line leads.") == "Second line leads.")
-        #expect(CommitRowFace.expandedPreview("") == BlockPastCopy.emptyTake)
-        #expect(CommitRowFace.expandedPreview(" \n\t ") == BlockPastCopy.emptyTake)
-        let long = CommitRowFace.expandedPreview(String(repeating: "word. ", count: 400))
-        #expect(long.count == CommitRowFace.expandedCap && !long.hasSuffix("\u{2026}"))
-    }
-
-    // MARK: - Precisions 1 + 3 — the row's anatomy and height
-
-    private static func row(
-        _ commit: CommitPoint, tokens: VoiceTokens, expanded: Bool = false
-    ) -> CommitRowView {
-        CommitRowView(
-            commit: commit, tokens: tokens, predatesSplit: false, now: Self.now,
-            renameOpensField: true, renameAsk: .constant(nil),
-            onName: {}, onRename: { _ in }, onRestore: {},
-            expanded: expanded, onToggle: {}, onReadInFull: {})
-    }
-
-    private static func rowHeight(
-        _ commit: CommitPoint, tokens: VoiceTokens, expanded: Bool = false,
-        width: CGFloat = 396
-    ) -> CGFloat {
-        let host = NSHostingController(rootView: Self.row(commit, tokens: tokens, expanded: expanded))
-        return host.sizeThatFits(in: NSSize(width: width, height: 10_000)).height
-    }
-
-    /// **JUSTIFIED PIN EDIT (VX-431, the VX-440 run — the clarity pass).**
-    /// VX-144's pin held a three-line row (name · preview · details + two
-    /// acts, measured 68 / 49 pt); the clarity pass RESTS the row as ONE line
-    /// (the plan's Batch 2 design, item 1) and opens it in place. What this
-    /// pin still holds is VX-144's own point — the acts are quiet voiced WORDS
-    /// and the row is compact at the column's default width (420 − the pane's
-    /// 24 pt of padding) in both voices — now in the new shape: AT REST one
-    /// voiced word (Restore — her ruled "Restore per row") and one line, named
-    /// or not; OPEN the row's other two doors join it ("Read in full", the
-    /// name door) and the moment's words appear.
-    @Test func theRowIsCompactAndItsActsAreWords() {
-        for tokens in [VoiceTokens.studyLight, .terminalLight] {
-            let words = "The keeper climbed the stairs at dusk, unhurried, a hand on the cold rail."
-            let named = Self.commit(words, message: "before the AI edit")
-            let resting = Self.row(named, tokens: tokens)
-            #expect(Self.values(VoicedButtonStyle.self, in: resting.body).count == 1,
-                    "at rest the one act is Restore, a voiced word")
-            let open = Self.row(named, tokens: tokens, expanded: true)
-            #expect(Self.values(VoicedButtonStyle.self, in: open.body).count == 3,
-                    "open: Read in full, Name/Rename and Restore — voiced words")
-
-            let namedHeight = Self.rowHeight(named, tokens: tokens)
-            let bare = Self.rowHeight(Self.commit(words), tokens: tokens)
-            let openHeight = Self.rowHeight(named, tokens: tokens, expanded: true)
-            print("[VX-431] row heights: named \(namedHeight) · bare \(bare) · open \(openHeight)")
-            // One line of a voiced word (~19 pt) + 10 pt of padding ≈ 29 pt;
-            // the bound leaves 5 pt of OS line-height drift (VX-144's 68 / 49
-            // were three and two lines).
-            #expect(namedHeight <= 34, "a named commit rests on one line: \(namedHeight)")
-            #expect(bare <= 34, "so does an unnamed one: \(bare)")
-            #expect(openHeight > namedHeight + 12, "an open row shows more: \(openHeight)")
+    /// "quiet" stays on automatic commits — on the Commits face's own meta
+    /// line under the moment (VX-827 U3b — A JUSTIFIED EDIT: the panel row's
+    /// `CommitRowFace.details` retired with it; the face says when in its
+    /// relative words, `TimeStampFace`, so the year rule is the stamp face's).
+    @Test func theDetailsLineSaysOnlyWhatTellsCommitsApart() async throws {
+        try await withWorld { session, seeded in
+            let model = CommitsFaceModel(session: session, request: BlockHistoryRequest(
+                postID: seeded.postID, blockID: seeded.blockID, focusedVariantID: seeded.takeID))
+            model.adopt(try await session.database.read { [blockID = seeded.blockID] db in
+                try CommitsFaceModel.read(db, blockID: blockID, now: Date(timeIntervalSince1970: 1_791_331_200))
+            })
+            let moments = model.history.savepoints[seeded.takeID] ?? []
+            let deliberate = try #require(moments.first { $0.kind == .manual })
+            let quiet = try #require(moments.first { $0.kind == .auto })
+            let deliberateMeta = model.meta(.commit(commitID: deliberate.id))
+            #expect(!deliberateMeta.joined().contains("saved by hand"))
+            #expect(!deliberateMeta.contains(CommitRowFace.quietMark))
+            #expect(model.meta(.commit(commitID: quiet.id)).contains(CommitRowFace.quietMark),
+                    "an automatic commit keeps its word")
+            // The phone's face is untouched (precision 7): it still says it.
+            let commit = CommitPoint(
+                id: "c", variantId: "v", text: "x", kind: .manual, createdAt: Date())
+            #expect(SavepointRowFace.details(commit, predatesSplit: false).contains("saved by hand"))
         }
-    }
-
-    /// **VX-431 — what the resting line says.** When, the name (when there is
-    /// one), and the QUIET glyph — a deliberate commit earns none; the open
-    /// row's details words drop the stamp the line already says.
-    @Test func theRestingLineSaysWhenTheNameAndTheQuietGlyphOnly() {
-        let manual = Self.commit(message: "first draft")
-        let quiet = Self.commit(kind: .auto)
-        #expect(CommitRowFace.kindGlyph(manual) == nil, "deliberate is the default: no glyph")
-        #expect(CommitRowFace.kindGlyph(quiet) == CommitRowFace.quietGlyph)
-        #expect(CommitRowFace.quietGlyph.count == 1, "one grapheme")
-        #expect(CommitRowFace.notes(manual, predatesSplit: false).isEmpty)
-        #expect(CommitRowFace.notes(quiet, predatesSplit: true)
-            == [CommitRowFace.quietMark, BlockHistoryCopy.predatesSplitMark])
-
-        // A NAMED moment's words are NOT on the resting row; they are on the
-        // open one. JUSTIFIED PIN EDIT (VX-674, the VX-677 run — her ruling on
-        // P-440-9's flagged gap): this half held the clarity pass's "no words
-        // at rest" for an UNNAMED commit, and the ruling gives an unnamed
-        // commit's resting line its first words (`CommitRestingPreviewTests`
-        // holds that); a named commit keeps its name alone, which is what
-        // this half now says — same fixture words, named.
-        let words = "A sentence only the open row shows."
-        let resting = Self.row(Self.commit(words, message: "a name"), tokens: .studyLight)
-        var dumped = ""
-        dump(resting.body, to: &dumped, maxDepth: 120)
-        #expect(!dumped.contains(words), "a named commit's resting line carries no preview")
-        let open = Self.row(Self.commit(words, message: "a name"), tokens: .studyLight, expanded: true)
-        dumped = ""
-        dump(open.body, to: &dumped, maxDepth: 120)
-        #expect(dumped.contains(words), "the open row does")
     }
 
     // MARK: - Harness

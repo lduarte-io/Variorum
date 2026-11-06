@@ -438,9 +438,15 @@ struct NoteTrayTests {
         // History pane and its door instead. The claim is what it always was:
         // a sentence that teaches a road names a place that exists and the
         // way into it.
-        #expect(DivideWCeremony.checklistExplainer
-            .contains(BlockHistoryPath.doorPhrase))
-        #expect(DivideWCeremony.checklistExplainer.contains(BlockHistoryPath.name))
+        // **VX-827 U3b — A JUSTIFIED EDIT, the same class:** the Block History
+        // panel retired and the original's place on the Mac is the block's
+        // LINEAGE face. The explainer reads the one phrase
+        // (`TrayPath.originalsPathWithDoor` → `BlockLineagePath.placeWithDoor`,
+        // swept at U3b-6 W15), so it names that place and its way in — block
+        // ▾'s Lineage row — and no longer the panel's name or door phrase.
+        #expect(DivideWCeremony.checklistExplainer.contains(BlockLineagePath.place))
+        #expect(DivideWCeremony.checklistExplainer.contains(CommitBar.lineageRowTitle))
+        #expect(!DivideWCeremony.checklistExplainer.contains(BlockHistoryPath.cameFromSection))
         #expect(CapabilityRegistry.capability(.showOriginBlock)
             .unavailableNote.contains(TrayPath.menuLabel))
     }
@@ -550,7 +556,7 @@ struct NoteTrayTests {
             #expect(!model.revealMissing,
                     "the row exists — 'it isn't here' would be the arrival-time lie")
             #expect(model.revealKeptInLineage,
-                    "the third state: kept whole, living under Came from")
+                    "the third state: kept whole, living in the block's Lineage")
             #expect(model.stranded.isEmpty, "nothing is counting — the family is alive")
             #expect(!RecoveryCopy.trayRevealKeptInLineage(.post).isEmpty)
         }

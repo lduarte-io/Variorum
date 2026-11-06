@@ -30,62 +30,16 @@ import VariorumCore
 @MainActor
 @Suite("The Block History pane (post-13l polish round, G2)", .serialized)
 struct BlockHistoryPaneTests {
-    /// **Rows 28 + 65 (the Act 10 correction round): the pane's regions read
-    /// as SECTIONS, and the List that clipped them is gone.** The walk found
-    /// "deleted takes" and "came from" drawn as struck-through slivers — the
-    /// pane was still a `List`, whose fixed section-header measurement is the
-    /// EXACT mechanism Act 10 item 1 traced and killed in the tray. The
-    /// rebuild retires the List for a ScrollView of CalmSectionHeaders (one
-    /// meaning line each — savepoints gains its missing one) over a REAL
-    /// seeded history: a merge's two origins, an archived take, a deleted
-    /// take, savepoints. **RED ON OLD:** the pre-fix body reflects `List<`.
-    @Test func everyRegionReadsAsASectionAndTheListIsGone() async throws {
-        try await withEditor(seedBlocks: ["First half.", "Second half."]) { h in
-            let ops = h.session.operations
-            let slots = try h.storeSlots()
-            let merge = try ops.merge(slots[0].blockID, slots[1].blockID)
-            let mergedID = merge.block.id
-            try ops.commit(merge.variant.id)
-            let branch = try ops.branchVariant(mergedID, from: merge.variant.id)
-            try ops.archiveVariant(branch.id)
-            let doomed = try ops.branchVariant(mergedID, from: merge.variant.id)
-            try ops.deleteVariant(doomed.id)
-
-            let now = h.session.now
-            let history = try await h.session.database.read {
-                try Queries.blockHistory($0, blockID: mergedID, now: now)
-            }
-            #expect(history.origins.count == 2, "the merge's BOTH originals")
-            #expect(!history.archivedTakes.isEmpty)
-            #expect(!history.deletedTakes.isEmpty)
-
-            let model = BlockHistoryModel(
-                session: h.session, postID: h.postID, blockID: mergedID)
-            model.adopt(history)
-            let pane = BlockHistoryPane(
-                session: h.session,
-                request: BlockHistoryRequest(postID: h.postID, blockID: mergedID),
-                model: model)
-            await SurfaceComposition.host(pane, size: NSSize(width: 420, height: 700))
-            let shown = SurfaceComposition.text(of: pane.body)
-
-            // The four section headers AND their meaning lines are in the tree.
-            #expect(SurfaceComposition.carries(BlockHistoryPath.savepointsSection, in: shown))
-            #expect(SurfaceComposition.carries(BlockHistoryPath.savepointsExplainer, in: shown))
-            #expect(SurfaceComposition.carries(BlockHistoryPath.archivedSection, in: shown))
-            #expect(SurfaceComposition.carries(BlockHistoryCopy.archivedExplainer, in: shown))
-            #expect(SurfaceComposition.carries(BlockHistoryPath.deletedSection, in: shown))
-            #expect(SurfaceComposition.carries(BlockHistoryCopy.deletedExplainer, in: shown))
-            #expect(SurfaceComposition.carries(BlockHistoryPath.cameFromSection, in: shown))
-            #expect(SurfaceComposition.carries(OriginPeekCopy.explainer, in: shown))
-
-            // RED ON OLD: the pane was a `List` — the clipping mechanism.
-            #expect(!shown.contains("List<"), "the pane must not be a List again")
-            #expect(shown.contains("ScrollView"), "the calm scroll rebuild")
-            #expect(!shown.contains("DisclosureGroup"),
-                    "the take-run fold is a full-line Button now (row 64's rule)")
-        }
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT** (the panel retired whole,
+    // `notes/plans/fixes/vx-827-lineage.md` U3b RECORD): `everyRegionReadsAs
+    // ASectionAndTheListIsGone` pinned the PANEL's four region headers and
+    // their meaning lines over a non-List scroll. The panel and its regions
+    // are gone; what each region showed lives on the History & Lineage
+    // surface — every take's commits on the Commits face's rail, archived
+    // takes in its take dropdown, deleted takes at the rail's foot
+    // (`CommitsFaceModelTests`), the originals on the Lineage face
+    // (`LineageFamilyTests`, `LineageFaceModelTests`) — and none of it is a
+    // `List` (the rail and the family are lazy stacks in a scroll).
 
     // MARK: - The door, declared and rendered
 
@@ -126,65 +80,30 @@ struct BlockHistoryPaneTests {
     /// the global Trash; the rule she left in its place is that purge doors
     /// live in TRASH SURFACES, and a block's history is not one. It lists
     /// what a block HAS BEEN, which is the opposite of a deadline surface.
+    ///
+    /// **VX-827 U3b — A JUSTIFIED EDIT:** the panel retired whole; its two
+    /// acts (Put back, Unarchive) are the History & Lineage surface's now, and
+    /// the claim is the surface's: no face of it renders a purge door. (The
+    /// panel's deleted-region explainer, which named the tray's road, retired
+    /// with its region — the rail's foot carries each deleted take's clock and
+    /// Put back.)
     @Test func theHistoryPaneOffersPutBackAndUnarchiveAndNoPurgeDoor() {
-        #expect(BlockHistoryPane.surfaceCapabilities == [.restoreTake, .unarchiveTake])
-        #expect(!BlockHistoryPane.surfaceCapabilities.contains(.deleteNow))
-        #expect(!BlockHistoryPane.surfaceCapabilities.contains(.emptyTrash))
-        // …and the deleted region SAYS where the capability does live, so the
-        // absence is an answer rather than a hole.
-        #expect(BlockHistoryCopy.deletedExplainer.contains(TrayPath.menuLabel))
-        #expect(BlockHistoryCopy.deletedExplainer.contains("\(TrashWindow.days)"))
+        for faces in [CommitsFaceView.surfaceCapabilities, LineageFaceView.surfaceCapabilities] {
+            #expect(faces.contains(.restoreTake) && faces.contains(.unarchiveTake))
+            #expect(!faces.contains(.deleteNow))
+            #expect(!faces.contains(.emptyTrash))
+        }
     }
 
     // MARK: - WALK-DRIVEN: the real mounted detail opens the real panel
 
-    /// The detail registers a history seam with the router on appear, so the
-    /// bars' door reaches ONE panel by composition — never a broadcast (P-4),
-    /// and never the handler stack, whose LIFO order would hand the request
-    /// to the editor's own sheet instead.
-    @Test func theMountedDetailOpensTheHistoryPaneInItsRealSidePanel() async throws {
-        try await mounted { session, post, blockID, variantID, window, hosting in
-            #expect(session.commandRouter.activePostID == post, "the detail registered")
-            // JUSTIFIED PIN EDIT (the correction round, row 74): the evidence this
-            // replaces named the SYSTEM inspector's AppKit container
-            // (`InspectorStyleContext`) — the very host row 74 retires, because
-            // it drew its divider in a KEY window only. The column is ours now
-            // (`SideColumn`), and its oracle — our divider's frame, reported
-            // in every window state — is the honest "the pane stands" signal.
-            PostDetailOracle.forgetSideColumnDivider()
-            let atRest = TrayPanelMoveTests.classNames(hosting)
-            #expect(PostDetailOracle.sideColumnDividerFrame == nil,
-                    "the side panel is not on screen at rest")
-            #expect(atRest.contains("EditorTextView"), "the page itself IS mounted")
-
-            #expect(session.commandRouter.requestBlockHistory(
-                BlockHistoryRequest(
-                    postID: post, blockID: blockID, focusedVariantID: variantID)),
-                    "the seam is registered — the request ACTED (P-2)")
-            // JUSTIFIED PIN EDIT (the correction round, rows 28/65): the two
-            // assertions this replaces named the LIST's own backing views
-            // ("OutlineList", "ListTableHeaderView") — and the List's fixed
-            // header measurement was exactly the mechanism that clipped the
-            // region headers to slivers, so the rebuild retired it. The pane
-            // is a ScrollView of calm sections now; its backing is
-            // "HostingScrollView", and the four-regions evidence moved to
-            // `everyRegionReadsAsASectionAndTheListIsGone` (a reflection pin
-            // over a real seeded history, headers AND meaning lines).
-            await Self.settle(window, hosting) {
-                PostDetailOracle.sideColumnDividerFrame != nil
-                    && TrayPanelMoveTests.classNames(hosting).contains("HostingScrollView")
-            }
-            let open = TrayPanelMoveTests.classNames(hosting)
-            #expect(PostDetailOracle.sideColumnDividerFrame != nil,
-                    "the side column really opened — her \"pane to the right\"")
-            #expect(open.contains("HostingScrollView"),
-                    "with the pane's calm scroll inside it (the List is retired)")
-            #expect(!open.contains("ListTableHeaderView"),
-                    "no List section headers — the clipping mechanism is gone")
-            #expect(open.contains("EditorTextView"),
-                    "beside the page, never instead of it (it is a panel, not a sheet)")
-        }
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT:** `theMountedDetailOpens
+    // TheHistoryPaneInItsRealSidePanel` drove the PANEL into the side column
+    // through the origin door's seam (gate G2). The panel and that seam are
+    // gone: every history door — the origin door included, on the Lineage
+    // face — opens the surface in the detail's FULL pane, pinned on the real
+    // mounted detail by `BlockHistoryHostTests` (`theHistoryDoorOpensThe
+    // CommitsFaceInTheFullPane`, `theOriginDoorOpensTheLineageFaceOnTheOriginal`).
 
     /// A request for a post that is NOT mounted is refused rather than lost —
     /// and, unlike the tray's, it never parks: the doors that raise it (both
@@ -201,6 +120,14 @@ struct BlockHistoryPaneTests {
                     "a stale target never opens a panel on the wrong note")
             #expect(router.requestBlockHistory(
                 BlockHistoryRequest(postID: post, blockID: blockID)))
+            // VX-827 U3b — A JUSTIFIED EDIT: the origin door's own seam is
+            // retired (it rides this one, opening on the Lineage face); a
+            // Lineage request keeps the same posture — refused for a note not
+            // mounted, never parked.
+            #expect(!router.requestBlockHistory(BlockHistoryRequest(
+                postID: "some-other-note", blockID: blockID, opening: .lineage(select: nil))))
+            #expect(router.requestBlockHistory(BlockHistoryRequest(
+                postID: post, blockID: blockID, opening: .lineage(select: nil))))
         }
     }
 
@@ -278,16 +205,18 @@ struct BlockHistoryPaneTests {
                     "the second take's run is here too — the strip could show one")
             #expect(!history.isEmpty)
 
-            // Her ruling on which one OPENS: the take she is in.
-            #expect(BlockHistoryModel.initiallyExpanded(history, focused: second.id)
+            // Her ruling on which one OPENS: the take she is in. (VX-827 U3b —
+            // A JUSTIFIED EDIT: the Mac panel's forwarder retired with it; the
+            // rule is the shared one it forwarded to, which the phone reads.)
+            #expect(BlockHistoryExpansion.initiallyExpanded(history, focused: second.id)
                 == [second.id])
             // No focused take named (a ⌘K row carries none) ⇒ the first live
             // one, never an archived one and never nothing.
-            #expect(BlockHistoryModel.initiallyExpanded(history, focused: nil)
+            #expect(BlockHistoryExpansion.initiallyExpanded(history, focused: nil)
                 == [chosen])
             // A focused take that has since gone falls back the same way,
             // rather than opening a section that is not there.
-            #expect(BlockHistoryModel.initiallyExpanded(history, focused: "gone")
+            #expect(BlockHistoryExpansion.initiallyExpanded(history, focused: "gone")
                 == [chosen])
         }
     }
@@ -335,11 +264,12 @@ struct BlockHistoryPaneTests {
             coordinator.record(
                 variantID: chosen, text: "words typed since", charDelta: 17)
 
-            let history = BlockHistoryModel(
-                session: session, postID: postID, blockID: blocks[0],
-                focusedVariantID: chosen)
+            // VX-827 U3b — A JUSTIFIED EDIT: the panel retired; the Commits
+            // face's Restore is the same act with the same flush first.
+            let history = CommitsFaceModel(session: session, request: BlockHistoryRequest(
+                postID: postID, blockID: blocks[0], focusedVariantID: chosen))
             history.adopt(try await session.database.read { [now = session.now] db in
-                try Queries.blockHistory(db, blockID: blocks[0], now: now)
+                try CommitsFaceModel.read(db, blockID: blocks[0], now: now)
             })
             let commit = try #require(history.history.savepoints[chosen]?.first)
             await history.restore(commit, of: chosen)
@@ -498,33 +428,13 @@ struct BlockHistoryPaneTests {
 
     // MARK: - Row 33: the current-block jump
 
-    /// **THE DECISION, AS A PURE RULE.** Her 2026-08-25 refinement ratified the
-    /// request scoping and asked for the way out of it: *"if you've changed
-    /// blocks there should be a small button or something to show current
-    /// block's history, so you don't have to close it and reopen it."*
-    ///
-    /// So the rule is exactly "same note, different block", and everything
-    /// else is no door at all (P-2): an unknown caret, a caret in another
-    /// note, a caret in the block already on screen. The take she is standing
-    /// in rides the request, so her *"the focused take's expanded"* ruling
-    /// survives the jump.
-    @Test func theJumpOffersItselfOnlyWhenTheCaretIsInAnotherBlockOfThisNote() {
-        let here = FocusedBlock(postID: "N", blockID: "B1", variantID: "V1")
-        let there = FocusedBlock(postID: "N", blockID: "B2", variantID: "V2")
-        let elsewhere = FocusedBlock(postID: "OTHER", blockID: "B9", variantID: "V9")
-
-        #expect(BlockHistoryModel.jumpTarget(nil, postID: "N", blockID: "B1") == nil,
-                "no caret reported yet — nothing to offer")
-        #expect(BlockHistoryModel.jumpTarget(here, postID: "N", blockID: "B1") == nil,
-                "the caret is in the very block on screen — the door would do nothing")
-        #expect(BlockHistoryModel.jumpTarget(elsewhere, postID: "N", blockID: "B1") == nil,
-                "another note's caret is not \u{201C}the block you're in\u{201D} here")
-
-        let jump = BlockHistoryModel.jumpTarget(there, postID: "N", blockID: "B1")
-        #expect(jump == BlockHistoryRequest(
-            postID: "N", blockID: "B2", focusedVariantID: "V2"),
-                "the jump carries the take she is in, not just the block")
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT:** `theJumpOffersItselfOnly
+    // WhenTheCaretIsInAnotherBlockOfThisNote` pinned the panel's row-33 jump
+    // rule (`BlockHistoryModel.jumpTarget`). The surface that succeeds the
+    // panel takes the FULL pane, so no caret moves while it stands and the
+    // jump has nothing to do (the U3a record's G2 item 3); the rule retired
+    // with the panel. The caret FACT it read stays — the landings and the
+    // place memory read it, pinned by the two tests below.
 
     /// **The surfaces really report it, and only on a block change.** The
     /// fact is observable and read during `body`, so a report at keystroke
@@ -579,72 +489,9 @@ struct BlockHistoryPaneTests {
         }
     }
 
-    /// **WALK-DRIVEN: the real pane really draws the door, and only then.**
-    ///
-    /// The REAL `BlockHistoryPane` mounted in a real window twice — once with
-    /// the caret in the block it is showing, once with the caret in the block
-    /// next door — and the focusable controls counted in each subtree. The
-    /// second is exactly one higher: the door her ruling asked for, drawn when
-    /// and only when it can act.
-    ///
-    /// **Two mounts rather than one toggled in place, and the reason is
-    /// MEASURED, not assumed** (the same discipline batch 3's empty-AX finding
-    /// and batch 4's zero-`NSButton` finding come out of): in this headless
-    /// host an in-place `@Observable` change does not rebuild the hosted tree
-    /// within any settle window. I probed it with a change that has nothing to
-    /// do with row 33 — adopting a history carrying a deleted take, which adds
-    /// a Put back button — and the count stayed put at 1 through a full settle,
-    /// exactly as the caret report did. It is the HOST, not the read: mounted
-    /// fresh with the caret elsewhere, the pane draws the door every time. That
-    /// is also why `theRealBarDrawsFewerDoorsAtRestThanWithAaOpen` mounts its
-    /// bar twice instead of toggling the fold, one screen up in this file.
-    @Test func theMountedPaneDrawsItsJumpDoorOnlyWhenTheCaretIsElsewhere() async throws {
-        try await withNote(["Alpha one.", "Beta two."]) { session, post, blocks in
-            let here = try await Self.mountedPaneControls(
-                session: session, post: post, pane: blocks[0], caret: blocks[0])
-            let elsewhere = try await Self.mountedPaneControls(
-                session: session, post: post, pane: blocks[0], caret: blocks[1])
-            #expect(here > 0, "the pane is really mounted, not an empty tree")
-            #expect(elsewhere == here + 1,
-                    """
-                    the caret in the next block draws EXACTLY the jump door: \
-                    \(here) with the caret here, \(elsewhere) with it there
-                    """)
-        }
-    }
-
-    /// Mounts the REAL pane with the router's caret fact set, and counts the
-    /// focusable controls in its subtree (`mountedBarControls`' shape and its
-    /// reason: the doors are SwiftUI-drawn, so `KeyViewProxy` is the honest
-    /// probe and the AX tree this host would answer from is empty).
-    private static func mountedPaneControls(
-        session: AppSession, post: String, pane: String, caret: String
-    ) async throws -> Int {
-        let router = session.commandRouter
-        let token = router.registerDetail(postID: post, mode: .write, applyMode: { _ in })
-        defer { router.unregisterDetail(token) }
-        router.noteFocusedBlock(caret, variantID: nil, postID: post)
-
-        let window = NSWindow(
-            contentRect: NSRect(x: 60, y: 60, width: 460, height: 620),
-            styleMask: [.titled], backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false
-        defer {
-            window.orderOut(nil)
-            window.close()
-        }
-        let hosting = NSHostingView(
-            rootView: BlockHistoryPane(
-                session: session,
-                request: BlockHistoryRequest(postID: post, blockID: pane),
-                onJump: { _ in })
-                .environment(ThemeStore(session: session)))
-        hosting.frame = NSRect(x: 0, y: 0, width: 460, height: 620)
-        window.contentView = hosting
-        window.makeKeyAndOrderFront(nil)
-        await settle(window, hosting) { countControls(hosting) > 0 }
-        return countControls(hosting)
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT:** `theMountedPaneDrawsIts
+    // JumpDoorOnlyWhenTheCaretIsElsewhere` mounted the PANEL to count its jump
+    // door; the panel and its jump retired whole (see above).
 
     // MARK: - Row 14 (F1): archive beside delete, and one take-card grammar
 

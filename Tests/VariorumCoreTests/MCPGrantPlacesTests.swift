@@ -168,6 +168,63 @@ struct MCPGrantPlacesTests {
         }
     }
 
+    // MARK: - VX-778: a grant whose place is gone is never counted (RED-FIRST)
+
+    /// VX-778 (VX-771's O-6; the VX-827 run, U2): the client row's count reads
+    /// `mcpGrantReachCounts`, which asked only `mcpGrantInertFence` — and that
+    /// answers nil for a GONE target, so a grant on a deleted note, book, wing or
+    /// gathering, or a book grant on a reading that is a gathering again
+    /// (VX-763), counted as REACHING. Shared with AI lists each of those as gone
+    /// ("(gone)", Revoke only — `mcpGrantPlaceTitle` nil), so the row overstated
+    /// reach. A gone place now counts as neither reaching nor inert: the row's
+    /// "N grants" is the places that still stand. Red on the pre-fix tree (8, 1).
+    @Test func aGrantWhosePlaceIsGoneIsCountedNeitherReachingNorInert() throws {
+        try withOperations { ops, db in
+            let client = try approvedClient(ops)
+            // Three places that stand, and one fenced since (inert).
+            let standingNote = try note(ops, "standing note")
+            let standingBook = try ops.createReading(name: "standing book", kind: .book)
+            _ = try ops.grantMCPAccess(client.id, grant(.note, standingNote.id))
+            _ = try ops.grantMCPAccess(client.id, grant(.book, standingBook.id))
+            _ = try ops.grantMCPAccess(client.id, grant(.wing, ""))
+            let fenced = try ops.createReading(name: "fenced book", kind: .book)
+            _ = try ops.grantMCPAccess(client.id, grant(.book, fenced.id))
+            _ = try ops.setBookPrivate(fenced.id, true)
+            #expect(try db.read { try Queries.mcpGrantReachCounts($0, clientID: client.id) } == (3, 1))
+
+            // Five grants whose PLACE goes: a deleted note, book, wing and
+            // gathering, and a book grant whose reading is a gathering again.
+            let goneNote = try note(ops, "gone note")
+            let goneBook = try ops.createReading(name: "gone book", kind: .book)
+            let goneWing = try ops.createWing(name: "gone wing")
+            let goneGathering = try ops.createReading(
+                name: "gone gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let reverted = try ops.createReading(name: "reverted", kind: .book)
+            _ = try ops.grantMCPAccess(client.id, grant(.note, goneNote.id))
+            _ = try ops.grantMCPAccess(client.id, grant(.book, goneBook.id))
+            _ = try ops.grantMCPAccess(client.id, grant(.wing, goneWing.id))
+            _ = try ops.grantMCPAccess(client.id, grant(.gathering, goneGathering.id))
+            _ = try ops.grantMCPAccess(client.id, grant(.book, reverted.id))
+            #expect(try db.read { try Queries.mcpGrantReachCounts($0, clientID: client.id) } == (8, 1),
+                    "while every place stands, each counts")
+            try ops.deleteContainer(goneNote.id)
+            try ops.deleteReading(goneBook.id)
+            try ops.deleteWing(goneWing.id)
+            try ops.deleteReading(goneGathering.id)
+            // VX-763's road (her ⌥⌘Z of a bind makes the reading a gathering
+            // again under its book grant) — the kind flipped as that undo leaves it.
+            try db.write { try $0.execute(sql: "UPDATE reading SET kind = 'gathering' WHERE id = ?", arguments: [reverted.id]) }
+
+            let gone = try db.read { db in
+                try Queries.mcpSharedRows(db).filter { $0.targetTitle == nil }.map(\.grant.scopeID)
+            }
+            #expect(Set(gone) == [goneNote.id, goneBook.id, goneWing.id, goneGathering.id, reverted.id],
+                    "Shared with AI lists all five as gone (Revoke only)")
+            let counts = try db.read { try Queries.mcpGrantReachCounts($0, clientID: client.id) }
+            #expect(counts == (3, 1), "the client row counts only the places that still stand — not \(counts)")
+        }
+    }
+
     // MARK: - R2-3: an inert grant is never called shared (RED-FIRST)
 
     @Test func aGrantWhoseTargetIsFencedSinceReadsInertAndIsNotCountedShared() throws {

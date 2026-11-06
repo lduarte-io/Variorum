@@ -53,9 +53,11 @@ struct MCPWriteServerTests {
             // approved client (P-VX261-2). VX-811 (the VX-808 run, Unit B2 —
             // justified edit, the ritual): and the read rung's one write,
             // propose_notes_to_book (a book grant reaches a book — A-808-8).
+            // VX-827 U1 (justified edit, the ritual): the read rung gains
+            // VX-817's list_note_lineage.
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
                               "add_take", "add_comment", "save_lens", "add_takes", "add_comments",
-                              "delete_comment", "list_my_activity", "propose_notes_to_book"],
+                              "delete_comment", "list_my_activity", "list_note_lineage", "propose_notes_to_book"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
             let read = try json(try await call(connection, "read_note",
@@ -367,6 +369,10 @@ struct MCPWriteServerTests {
             // And the read rung, for completeness (reads write no take).
             calls.append(("read_note", ["note_id": .string(note.id), "with_ids": .bool(true)]))
             calls.append(("export_note", ["note_id": .string(note.id)]))
+            // VX-817 (the VX-827 run, U1 — justified edit, the ritual: the
+            // proof's completeness grows with the catalog): her note's lineage
+            // peers, read (a read writes no take).
+            calls.append(("list_note_lineage", ["note_id": .string(note.id)]))
             for (name, arguments) in calls {
                 let result = try await call(connection, name, arguments)
                 if name == "replace_tag" {

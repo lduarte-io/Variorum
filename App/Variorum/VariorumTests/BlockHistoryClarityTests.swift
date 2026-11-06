@@ -15,6 +15,11 @@
 //  holds it): every take sectioned with the focused one open, the four regions,
 //  Restore per row, no purge door, the history door where it is.
 //
+//  **VX-827 U3b — the panel retired whole** (`notes/plans/fixes/
+//  vx-827-lineage.md`, U3b RECORD). Each pin below is re-pointed at the Commits
+//  face (the same acts, words and refusals) or retired by name where it held
+//  the panel's own face (its region headers, its read-in-full sheet).
+//
 
 import AppKit
 import Dependencies
@@ -77,6 +82,19 @@ struct BlockHistoryClarityTests {
         }
     }
 
+    /// The Commits face over a block, and its own read (VX-827 U3b).
+    func face(_ session: AppSession, _ postID: String, _ blockID: String, focused: String?) -> CommitsFaceModel {
+        CommitsFaceModel(session: session, request: BlockHistoryRequest(
+            postID: postID, blockID: blockID, focusedVariantID: focused))
+    }
+
+    func faceRead(_ session: AppSession, _ blockID: String) async throws -> CommitsFaceModel.Read {
+        let now = session.now
+        return try await session.database.read { db in
+            try CommitsFaceModel.read(db, blockID: blockID, now: now)
+        }
+    }
+
     func history(_ session: AppSession, _ blockID: String) async throws -> Queries.BlockHistory {
         let now = session.now
         return try await session.database.read { db in
@@ -86,62 +104,12 @@ struct BlockHistoryClarityTests {
 
     // MARK: - Item 3: explainers behind (i), headers with counts
 
-    /// **Each region's header carries its COUNT, and its meaning is ONE line
-    /// with the whole sentence behind an (i)** — the `ExplainerLine` idiom
-    /// (the MCP pane's precedent). The whole sentences are the shipped ones,
-    /// still on the page verbatim (behind the (i)); empty regions stay hidden.
-    @Test func theRegionHeadersCarryCountsAndOneLineEachWithTheWholeBehindAnI() async throws {
-        try await withNote(["First half.", "Second half."]) { session, postID, blocks in
-            let ops = session.operations
-            let merge = try ops.merge(blocks[0], blocks[1])
-            let mergedID = merge.block.id
-            _ = try ops.commit(merge.variant.id)
-            try ops.autosave(merge.variant.id, text: "First half, again.", charDelta: 7)
-            _ = try ops.commit(merge.variant.id, kind: .auto)
-            let shelved = try ops.branchVariant(mergedID, from: merge.variant.id)
-            try ops.archiveVariant(shelved.id)
-            let doomed = try ops.branchVariant(mergedID, from: merge.variant.id)
-            try ops.deleteVariant(doomed.id)
-
-            let model = BlockHistoryModel(session: session, postID: postID, blockID: mergedID)
-            model.adopt(try await history(session, mergedID))
-            #expect(model.commitCount == 2, "every moment of every live take, quiet ones included")
-
-            let pane = BlockHistoryPane(
-                session: session,
-                request: BlockHistoryRequest(postID: postID, blockID: mergedID),
-                model: model)
-            await SurfaceComposition.host(pane, size: NSSize(width: 420, height: 700))
-
-            let headers = Self.values(HistoryRegionHeader.self, in: pane.body)
-            #expect(headers.map(\.title) == [
-                BlockHistoryPath.savepointsSection, BlockHistoryPath.archivedSection,
-                BlockHistoryPath.deletedSection, BlockHistoryPath.cameFromSection,
-            ], "the four regions, in her ruled order")
-            #expect(headers.map(\.count) == [2, 1, 1, 2],
-                    "commits · archived takes · deleted takes · the merge's two originals")
-            let pairs: [(String, String)] = [
-                (BlockHistoryPath.savepointsLine, BlockHistoryPath.savepointsExplainer),
-                (BlockHistoryPath.archivedLine, BlockHistoryCopy.archivedExplainer),
-                (BlockHistoryPath.deletedLine, BlockHistoryCopy.deletedExplainer),
-                (BlockHistoryPath.cameFromLine, OriginPeekCopy.explainer),
-            ]
-            #expect(headers.map(\.line) == pairs.map(\.0))
-            #expect(headers.map(\.detail) == pairs.map(\.1), "the whole sentences, verbatim")
-            for (line, whole) in pairs {
-                #expect(ExplainerLine.opens(line: line, detail: whole),
-                        "a cut line carries the (i): \(line)")
-            }
-            // (A header's own body is where its line is built — a reflection
-            // of the pane's body holds the header VALUES, not their bodies.)
-            let lines = headers.flatMap { Self.values(ExplainerLine.self, in: $0.body) }
-            #expect(lines.count == 4 && lines.allSatisfy { $0.tokens != nil },
-                    "each line is an ExplainerLine in the pane's voice")
-            #expect(lines.map(\.detail) == pairs.map(\.1))
-            #expect(Self.values(CalmSectionHeader.self, in: pane.body).isEmpty,
-                    "the wrapping meaning lines are gone from this pane")
-        }
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT:** `theRegionHeadersCarry
+    // CountsAndOneLineEachWithTheWholeBehindAnI` pinned the PANEL's four region
+    // headers (counts, one-line meanings, the (i)). The regions retired with
+    // the panel; the Commits face carries the counts where they now live (the
+    // take dropdown's "N takes ▾" and each take's commit count —
+    // `CommitsFaceModelTests.theDropdownGroupsArchivedTakesAndFiltersTheRail`).
 
     // MARK: - Item 2: read in full (R-440-3)
 
@@ -149,6 +117,13 @@ struct BlockHistoryClarityTests {
     /// anything the open row's capped preview can show — in a read-cheap
     /// sheet titled by the moment's name, with Restore and Bring back as a
     /// take at its foot. Nothing in it is an editor (P3).
+    ///
+    /// **VX-827 U3b — A JUSTIFIED EDIT:** the sheet retired with the panel;
+    /// her R-440-3 need ("a long commit can't be read in full") is the
+    /// Commits face's reading pane now — the selected moment WHOLE, with
+    /// Restore and Bring back as a take at its foot. Driven through the face's
+    /// model: the claims are the same (the whole moment, its name, the two
+    /// acts); the pane is a `Text` (P3 — `CommitsFaceView`'s own note).
     @Test func readInFullShowsTheWholeMomentWithItsTwoFootDoors() async throws {
         try await withNote(["Short."]) { session, postID, blocks in
             let chosen = try #require(try await session.database.read {
@@ -159,41 +134,23 @@ struct BlockHistoryClarityTests {
             }.joined(separator: "\n")
             try session.operations.autosave(chosen, text: long, charDelta: 900)
             let commit = try session.operations.commit(chosen, message: "the long one")
-            #expect(long.count > CommitRowFace.expandedCap, "fixture: past the open row's cap")
+            #expect(long.count > CommitRowFace.restingCap, "fixture: past any one-line preview")
 
-            let model = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
-            let history = try await history(session, blocks[0])
-            model.adopt(history)
-            let take = try #require(history.activeTakes.first)
-            model.readInFull(commit, of: take, heading: "this take")
-            let reading = try #require(model.reading, "the door names the moment")
-            #expect(reading.commit.id == commit.id && reading.variantID == chosen)
-
-            let sheet = CommitReadingSheet(
-                reading: reading, tokens: .studyLight, now: session.now,
-                predatesSplit: false, onRestore: { _ in }, onBringBack: {})
-            var dumped = ""
-            dump(sheet.body, to: &dumped, maxDepth: 160)
-            #expect(dumped.contains("Paragraph 12 of a long moment"), "the WHOLE moment")
-            #expect(BlockHistoryPath.readingTitle(commit, now: session.now) == "the long one",
-                    "titled by its name")
-            #expect(Self.values(VoicedButtonStyle.self, in: sheet.body).count == 2,
-                    "Bring back as a take and Restore, voiced words at the foot")
-            #expect(Self.values(TextField<Text>.self, in: sheet.body).isEmpty
-                    && !dumped.contains("TextEditor"),
-                    "a saved moment is read, never typed into (P3, I5)")
-            await SurfaceComposition.host(sheet, size: NSSize(width: 560, height: 520))
+            let model = face(session, postID, blocks[0], focused: chosen)
+            model.adopt(try await faceRead(session, blocks[0]))
+            model.select(.commit(commitID: commit.id))
+            #expect(model.text(of: model.selection) == long, "the WHOLE moment")
+            #expect(model.headline(model.selection) == "the long one", "headed by its name")
+            #expect(model.paneActs.contains(.restore) && model.paneActs.contains(.bringBack),
+                    "Restore and Bring back as a take at its foot")
         }
     }
 
-    /// An unnamed moment's sheet is titled "Commit · ‹when›" (R-440-3).
-    @Test func anUnnamedMomentIsTitledByWhen() {
-        let now = Date(timeIntervalSince1970: 1_791_331_200)
-        let commit = CommitPoint(
-            id: "c", variantId: "v", text: "words", kind: .manual, createdAt: now)
-        #expect(BlockHistoryPath.readingTitle(commit, now: now)
-            == "Commit \u{B7} \(CommitRowFace.stamp(now, now: now))")
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT:** `anUnnamedMomentIsTitled
+    // ByWhen` pinned the read-in-full SHEET's title ("Commit · ‹when›"); the
+    // sheet retired with the panel. The Commits face heads an unnamed moment
+    // with its first words (VX-674's rule, `CommitRowFace.restingPreview`) and
+    // says when on the line beneath.
 
     // MARK: - Item 5: bring back as a take (P-440-3 / P-440-4)
 
@@ -209,8 +166,12 @@ struct BlockHistoryClarityTests {
             let commit = try ops.commit(chosen, message: "before the rewrite")
             try ops.autosave(chosen, text: "The words as they are now.", charDelta: 8)
 
-            let model = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
-            await model.bringBackAsTake(commit)
+            // VX-827 U3b — A JUSTIFIED EDIT: the Commits face's act, the same
+            // operation and receipt.
+            let model = face(session, postID, blocks[0], focused: chosen)
+            model.adopt(try await faceRead(session, blocks[0]))
+            model.select(.commit(commitID: commit.id))
+            await model.bringBackSelected()
             #expect(model.status?.isRefusal == false)
             #expect(model.status?.text == BlockHistoryPath.broughtBackAsTake(label: "before the rewrite"))
 
@@ -234,8 +195,11 @@ struct BlockHistoryClarityTests {
             let commit = try ops.commit(chosen)
             try ops.lockPost(postID)
 
-            let model = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
-            await model.bringBackAsTake(commit)
+            // VX-827 U3b — A JUSTIFIED EDIT: the Commits face's act.
+            let model = face(session, postID, blocks[0], focused: chosen)
+            model.adopt(try await faceRead(session, blocks[0]))
+            model.select(.commit(commitID: commit.id))
+            await model.bringBackSelected()
             #expect(model.status?.isRefusal == true)
             #expect(model.status?.text
                 == TrayRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
@@ -243,23 +207,6 @@ struct BlockHistoryClarityTests {
         }
     }
 
-    /// Empty regions stay hidden, as before: a block with one take and one
-    /// commit draws the Commits header alone.
-    @Test func anEmptyRegionDrawsNoHeader() async throws {
-        try await withNote(["An ordinary block."]) { session, postID, blocks in
-            let chosen = try #require(try await session.database.read {
-                try Queries.renderPost($0, containerID: postID)
-            }.first?.variantID)
-            _ = try session.operations.commit(chosen)
-            let model = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
-            model.adopt(try await history(session, blocks[0]))
-            let pane = BlockHistoryPane(
-                session: session,
-                request: BlockHistoryRequest(postID: postID, blockID: blocks[0]),
-                model: model)
-            let headers = Self.values(HistoryRegionHeader.self, in: pane.body)
-            #expect(headers.map(\.title) == [BlockHistoryPath.savepointsSection])
-            #expect(headers.first?.count == 1)
-        }
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT:** `anEmptyRegionDrawsNo
+    // Header` pinned the PANEL's region headers; the regions retired with it.
 }

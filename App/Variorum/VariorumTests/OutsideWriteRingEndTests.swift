@@ -331,8 +331,10 @@ struct OutsideWriteRingEndTests {
             model.focus(TakesViewModel.PaneKey(columnID: "write-panel", blockID: blocks[1], variantID: take))
             #expect(model.focusedPane?.variantID == take, "fixture: the panel's pane is live")
 
-            let history = BlockHistoryModel(
-                session: session, postID: postID, blockID: blocks[1], focusedVariantID: take)
+            // VX-827 U3b — A JUSTIFIED EDIT: the panel retired whole; the
+            // Commits face's Restore is the same restore (an outside write).
+            let history = CommitsFaceModel(session: session, request: BlockHistoryRequest(
+                postID: postID, blockID: blocks[1], focusedVariantID: take))
             await history.restore(commit, of: take)
             #expect(try Self.stored(db, take) == Self.second, "fixture: restored")
             model.adopt(try Self.takesProjection(db, postID))
@@ -357,7 +359,9 @@ struct OutsideWriteRingEndTests {
             model.focus(key)
             #expect(model.authority.isLive(key), "fixture: the anchor cell is live")
 
-            let history = BlockHistoryModel(session: session, postID: postID, blockID: blocks[0])
+            // VX-827 U3b — A JUSTIFIED EDIT: the Commits face's Restore.
+            let history = CommitsFaceModel(session: session, request: BlockHistoryRequest(
+                postID: postID, blockID: blocks[0]))
             await history.restore(commit, of: take)
             model.adopt(try await db.read { try CompareViewModel.read($0, anchor: postID, peers: []) })
 

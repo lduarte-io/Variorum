@@ -541,7 +541,9 @@ struct CapabilityRegistryTests {
             // are the Block History pane's rows now. `.showOriginBlock` is no
             // longer among them: the pane is where that act LANDS, not a door
             // onto it, so it left the `.surface` door set entirely.
-            .union(BlockHistoryPane.surfaceCapabilities)
+            // (VX-827 U3b — A JUSTIFIED EDIT, a renderer gone is a line gone:
+            // the PANE retired whole; its two acts are rendered by the Commits
+            // face's line below.)
             // 13j batch 6b (A JUSTIFIED EDIT, the E2/E8/batch-3 class): the
             // TRASH surface renders the two purge doors — Delete Now per
             // row and Empty Trash — and it is their ONLY legal renderer,
@@ -726,6 +728,25 @@ struct CapabilityRegistryTests {
             // renders its rows' two doors (the text's go-there, the symbol's
             // details) and is their ONLY renderer.
             .union(MCPTrailSection.surfaceCapabilities)
+            // VX-801 (VX-827 U3a — A JUSTIFIED EDIT, the same class — a new
+            // renderer is a new line): the COMMITS FACE renders the moment's
+            // four acts (Restore · Bring back as a take · Compare · Name /
+            // Rename — declared at last, `.restoreCommit` … `.renameCommit`;
+            // the Block History panel rendered the three writers undeclared)
+            // and, beside them, Put back on its deleted takes and Unarchive
+            // on an archived take's now — the panel's two acts (the panel's
+            // own line retired with it at U3b).
+            .union(CommitsFaceView.surfaceCapabilities)
+            // VX-801 (VX-827 U3b — A JUSTIFIED EDIT, the same class — a new
+            // renderer is a new line): the LINEAGE FACE renders its member
+            // header's four acts (Put back · Bring back as a take · Compare
+            // with now · go to its wing — `.putBackLineageBlock` …
+            // `.goToLineageWing`, their ONLY renderer) over the same pane+rail
+            // composition the Commits face draws (`CommitsFaceBody`, whose
+            // relative-moment Bring back is `.bringBackLineageAsTake`); the
+            // Commits face's crumb renders "lineage ›" (`.showBlockLineage`'s
+            // `.surface` door).
+            .union(LineageFaceView.surfaceCapabilities)
             // VX-874 (the VX-878 run, batch 3 — A JUSTIFIED EDIT, the same
             // class): the section's row ✕ — the dismiss's visible door.
             .union(MCPTrailSection.rowManageCapabilities)

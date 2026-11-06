@@ -568,9 +568,14 @@ struct SavepointSealedDoorTests {
 struct SavepointRenameDoorTests {
     /// Builds a note with one block, one take and one savepoint, and returns
     /// the pane's model already holding the block's history.
+    ///
+    /// **VX-827 U3b — A JUSTIFIED EDIT, the whole suite:** the panel retired
+    /// whole; its rename door is the Commits face's (`rename(commitID:to:)` —
+    /// the same op, the same receipts and refusals), so every pin below drives
+    /// that model and keeps its claim.
     private func world(
         _ h: EditorHarness, quiet: Bool = false
-    ) async throws -> (model: BlockHistoryModel, commit: CommitPoint, variantID: String) {
+    ) async throws -> (model: CommitsFaceModel, commit: CommitPoint, variantID: String) {
         let ops = h.session.operations
         let slot = try h.storeSlots()[0]
         let variantID = try #require(slot.variantID)
@@ -581,10 +586,10 @@ struct SavepointRenameDoorTests {
         } else {
             commit = try ops.commit(variantID)
         }
-        let model = BlockHistoryModel(
-            session: h.session, postID: h.postID, blockID: slot.blockID)
+        let model = CommitsFaceModel(session: h.session, request: BlockHistoryRequest(
+            postID: h.postID, blockID: slot.blockID))
         model.adopt(try await h.session.database.read { [now = h.session.now] db in
-            try Queries.blockHistory(db, blockID: slot.blockID, now: now)
+            try CommitsFaceModel.read(db, blockID: slot.blockID, now: now)
         })
         return (model, commit, variantID)
     }
@@ -602,12 +607,12 @@ struct SavepointRenameDoorTests {
             let w = try await world(h)
             #expect(w.commit.message == nil)
 
-            await w.model.rename(w.commit, to: "before the AI edit")
+            await w.model.rename(commitID: w.commit.id, to: "before the AI edit")
             #expect(try await message(h, w.commit.id) == "before the AI edit")
             #expect(w.model.status?.isRefusal == false)
             #expect(w.model.status?.text.contains("before the AI edit") == true)
 
-            await w.model.rename(w.commit, to: "   ")
+            await w.model.rename(commitID: w.commit.id, to: "   ")
             #expect(try await message(h, w.commit.id) == nil, "clearing the field clears it")
             #expect(w.model.status?.text == BlockHistoryCopy.savepointNameCleared)
         }
@@ -624,17 +629,17 @@ struct SavepointRenameDoorTests {
             #expect(w.commit.message == nil)
 
             // Empty ⏎ on an UNNAMED savepoint: no write, no words.
-            await w.model.rename(w.commit, to: "")
+            await w.model.rename(commitID: w.commit.id, to: "")
             #expect(try await message(h, w.commit.id) == nil)
             #expect(w.model.status == nil,
                     "no \u{201C}Name cleared\u{201D} about a name that never existed")
 
             // The real write speaks…
-            await w.model.rename(w.commit, to: "kept")
+            await w.model.rename(commitID: w.commit.id, to: "kept")
             #expect(w.model.status?.isRefusal == false)
 
             // …and the SAME name again (normalisation included) does not.
-            await w.model.rename(w.commit, to: "  kept  ")
+            await w.model.rename(commitID: w.commit.id, to: "  kept  ")
             #expect(try await message(h, w.commit.id) == "kept")
             #expect(w.model.status == nil,
                     "the same name again writes nothing and says nothing")
@@ -648,7 +653,7 @@ struct SavepointRenameDoorTests {
             let w = try await world(h, quiet: true)
             #expect(w.commit.kind == .auto)
 
-            await w.model.rename(w.commit, to: "the one before I left")
+            await w.model.rename(commitID: w.commit.id, to: "the one before I left")
 
             let stored = try await h.session.database.read { [id = w.commit.id] db in
                 try CommitPoint.fetchOne(db, key: id)
@@ -669,7 +674,7 @@ struct SavepointRenameDoorTests {
             try h.session.operations.autosave(
                 w.variantID, text: "The sea gave it back.", charDelta: 6)
 
-            await w.model.rename(w.commit, to: "the first ending")
+            await w.model.rename(commitID: w.commit.id, to: "the first ending")
 
             let stored = try await h.session.database.read { [id = w.commit.id] db in
                 try CommitPoint.fetchOne(db, key: id)
@@ -685,7 +690,7 @@ struct SavepointRenameDoorTests {
             let w = try await world(h)
             try h.session.operations.lockPost(h.postID)
 
-            await w.model.rename(w.commit, to: "too late")
+            await w.model.rename(commitID: w.commit.id, to: "too late")
 
             #expect(try await message(h, w.commit.id) == nil)
             #expect(w.model.status?.isRefusal == true)

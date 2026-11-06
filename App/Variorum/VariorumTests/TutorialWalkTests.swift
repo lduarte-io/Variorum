@@ -2396,7 +2396,11 @@ struct TutorialDeletionActsTests {
             // constant now names the Block History pane's came-from region,
             // because that is where an unclocked original lives after her G5
             // ruling. The lesson quotes the CONSTANT, so it followed for free.
-            #expect(trash.contains(BlockHistoryPath.cameFromSection))
+            // VX-827 U3b — A JUSTIFIED EDIT (P-6): the panel retired and the
+            // original lives on the block's LINEAGE face; the lesson names it
+            // by block ▾'s own row title, so a rename reaches it.
+            #expect(trash.contains(CommitBar.lineageRowTitle))
+            #expect(!trash.contains(BlockHistoryPath.cameFromSection), "the retired region is not named")
             #expect(trash.contains(TrayPath.putBackVerb), "the one verb, both surfaces")
             #expect(trash.contains(RecoveryPath.menuLabel), "how the Library door reads")
             #expect(trash.contains(RecoveryPath.trashSection))
@@ -2419,19 +2423,31 @@ struct TutorialDeletionActsTests {
                     "…and the superseded absolute is gone")
             #expect(TrayPanel.surfaceCapabilities.contains(.deleteNow),
                     "the note's own trash section really carries it")
-            #expect(!BlockHistoryPane.surfaceCapabilities.contains(.deleteNow),
+            // VX-827 U3b — A JUSTIFIED EDIT: the panel retired whole; a block's
+            // history is the History & Lineage surface now, and neither of its
+            // faces carries a purge door.
+            #expect(!CommitsFaceView.surfaceCapabilities.contains(.deleteNow)
+                    && !LineageFaceView.surfaceCapabilities.contains(.deleteNow),
                     "…and a block's history really does not, exactly as the lesson says")
 
             let past = try #require(prose["what a block leaves behind"])
             #expect(past.contains(BlockPastCopy.deletedTakesHeader))
             #expect(past.contains(OriginPeekCopy.doorVerb(op: "divide")),
                     "the context row's ruled wording")
-            // The pane's own verb, not the retired peek's (the post-13l
-            // polish round, ledger row 17): the came-from row's one button.
-            #expect(past.contains(BlockHistoryPath.bringBackVerb))
-            #expect(past.contains(BlockHistoryPath.cameFromSection))
-            #expect(past.contains("the original is preserved"),
-                    "the History face's lineage row, in the lesson's mouth")
+            // VX-827 U3b — A JUSTIFIED EDIT (P-6: the chapter names only doors
+            // and places the app has): the came-from region, its Bring back and
+            // its "the original is preserved" row retired with the panel. The
+            // lesson names the Lineage face by its two doors and quotes its
+            // member's own words and verb — each a constant, so a rename
+            // reaches the lesson.
+            #expect(past.contains(CommitsFaceCopy.lineageDoor), "the face's door on history")
+            #expect(past.contains(CommitBar.lineageRowTitle), "…and block ▾'s row")
+            #expect(past.contains(LineageFaceCopy.keptAsLineage),
+                    "the Lineage face's own row word, in the lesson's mouth")
+            #expect(past.contains(BlockPastCopy.putBackVerb), "the member header's verb")
+            #expect(!past.contains(BlockHistoryPath.cameFromSection)
+                    && !past.contains("the original is preserved"),
+                    "nothing the retired panel said")
             #expect(past.contains(TrayPath.goesWithItsFamily),
                     "the moving-over label, quoted from where it renders")
             // **A7's rider** (the post-13l polish round): her per-merge message
@@ -2959,9 +2975,16 @@ struct TutorialDeletionActsTests {
             #expect(past.deletedTakes.map(\.id) == [spare.id],
                     "listed under \(BlockPastCopy.deletedTakesHeader)")
 
-            let model = BlockHistoryModel(
-                session: session, postID: lesson, blockID: host.blockID)
-            model.adopt(past)
+            // VX-827 U3b — A JUSTIFIED EDIT (the U3a record's owed re-point):
+            // the panel retired whole; the deleted take's Put back is the
+            // Commits face's, at its rail's foot — the same op, the same
+            // receipt.
+            let model = CommitsFaceModel(session: session, request: BlockHistoryRequest(
+                postID: lesson, blockID: host.blockID))
+            model.adopt(try await db.read { [now = session.now] db in
+                try CommitsFaceModel.read(db, blockID: host.blockID, now: now)
+            })
+            #expect(model.history.deletedTakes.map(\.id) == [spare.id], "at the rail's foot")
             await model.putBackTake(spare.id)
             #expect(model.status == .receipt(BlockPastCopy.takeRestored))
 
@@ -3090,7 +3113,9 @@ struct TutorialWherePlacesActsTests {
                     "…and the three things a moment offers")
             #expect(map.contains(BlockHistoryPath.name), "FIVE: the panel's own name")
             #expect(map.contains(BlockHistoryPath.doorLabel), "…and the door's word")
-            #expect(map.contains(BlockHistoryPath.cameFromSection))
+            // VX-827 U3b — A JUSTIFIED EDIT: "the blocks it came out of" sit
+            // behind the face's lineage door now.
+            #expect(map.contains(CommitsFaceCopy.lineageDoor))
             // The take's one home, said in the map so the Trash's absence of
             // takes is an answer rather than a hole (her D1 ruling).
             #expect(map.contains("never rows"))
@@ -3128,7 +3153,9 @@ struct TutorialWherePlacesActsTests {
             #expect(copies.contains(BlockHistoryPath.name)
                 && copies.contains(BlockHistoryPath.doorLabel),
                     "…and where the past she is NOT copying actually lives")
-            #expect(copies.contains(BlockHistoryPath.cameFromSection)
+            // VX-827 U3b — A JUSTIFIED EDIT: the kept originals' place is the
+            // one phrase (`TrayPath.originalsPath` — the block's Lineage).
+            #expect(copies.contains(TrayPath.originalsPath)
                 && copies.contains(TrayPath.menuLabel),
                     "the two populations a version leaves with the note")
             #expect(copies.contains(VersionsPath.promoteVerb)
@@ -3146,10 +3173,13 @@ struct TutorialWherePlacesActsTests {
             #expect(exits.contains(TrayPath.menuLabel), "the first exit's near listing")
             #expect(exits.contains(RecoveryCopy.trashSection), "…and its far one")
             #expect(exits.contains(TrayPath.putBackVerb))
-            #expect(exits.contains(BlockHistoryPath.cameFromSection),
+            // VX-827 U3b — A JUSTIFIED EDIT (P-6): the second exit's home is
+            // the joined block's LINEAGE face, its button the header's Put back.
+            #expect(exits.contains(CommitBar.lineageRowTitle),
                     "the second exit's home")
-            #expect(exits.contains(BlockHistoryPath.bringBackVerb),
+            #expect(exits.contains(BlockPastCopy.putBackVerb),
                     "…and the one button back, by its real word")
+            #expect(!exits.contains(BlockHistoryPath.cameFromSection))
         }
     }
 
@@ -3502,10 +3532,17 @@ struct TutorialWherePlacesActsTests {
                         "transformation never puts anything in the Trash")
             }
 
-            // The one button back, through the door the lesson names.
-            let model = BlockHistoryModel(session: session, postID: lesson, blockID: joined)
-            model.adopt(history)
-            await model.bringBack(first.blockID)
+            // The one button back, through the door the lesson names. (VX-827
+            // U3b — A JUSTIFIED EDIT: the came-from region retired with the
+            // panel; the original is put back from the Lineage face's header,
+            // the same shared composition.)
+            let model = LineageFaceModel(
+                session: session,
+                request: BlockHistoryRequest(postID: lesson, blockID: joined),
+                select: first.blockID)
+            model.adopt(try await db.read { db in try LineageFaceModel.read(db, blockID: joined) })
+            #expect(model.selectedBlockID == first.blockID)
+            await model.putBack()
             #expect(model.status?.isRefusal != true)
             #expect(try await db.read {
                 try Queries.renderPost($0, containerID: lesson).map(\.blockID)

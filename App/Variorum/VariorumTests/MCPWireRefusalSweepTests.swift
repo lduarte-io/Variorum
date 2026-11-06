@@ -93,6 +93,9 @@ struct MCPWireRefusalSweepTests {
         .noOwnerIdentity,
         .cannotVersionLinkBlockToItself(id: "b"), .versionLinkExists(a: "b", b: "c"),
         .versionLinkNotFound(a: "b", b: "c"), .postHasNoBlocks(id: "p"), .postsAlreadyVersionLinked(a: "p", b: "q"),
+        // VX-827 U3b (A JUSTIFIED EDIT — a new case is a new sample): the
+        // lineage bring-back's fence.
+        .notInLineage(sourceBlockID: "b", targetBlockID: "c"),
         .notVersionHistory(version: "v", note: "p"),
         .bufferChangedSinceGesture(variantID: "v"),
         .lensNotFound(id: "l"), .invalidLensName(name: ""), .lensChoiceNotFound(lensID: "l", blockID: "b"),
@@ -139,6 +142,10 @@ struct MCPWireRefusalSweepTests {
         "mcpGrantScopeNotFound": "graph: unreachable",
         "mcpRebindRequestNotFound": "graph: unreachable",
         "noOwnerIdentity": "graph: unreachable",
+        // VX-827 U3b (A JUSTIFIED EDIT): the lineage bring-back's fence — its
+        // one thrower, `bringBackFromLineage`, has NO wire caller (grep:
+        // `Sources/VariorumMCP` names neither the op nor the case).
+        "notInLineage": "graph: unreachable",
         "notVersionHistory": "graph: unreachable",
         "readingHasNoAutoTag": "graph: unreachable",
         "referenceNotFound": "graph: unreachable",
@@ -182,7 +189,8 @@ struct MCPWireRefusalSweepTests {
         // VX-549 (A JUSTIFIED EDIT): `smartFilterUnsatisfiable` left the graph's
         // unreachable set — a new note written into a gathering meets it, and
         // the wire words it (her door's own sentence, `MCPWireRefusalCopy`).
-        #expect(Self.unspokenOnTheWire.count == 32, "16 graph + 13 by hand + 1 posture + 2 by their tool")
+        // VX-827 U3b (A JUSTIFIED EDIT): 17 graph since `notInLineage`.
+        #expect(Self.unspokenOnTheWire.count == 33, "17 graph + 13 by hand + 1 posture + 2 by their tool")
         #expect(Self.unspokenOnTheWire.values.allSatisfy { !$0.isEmpty })
     }
 

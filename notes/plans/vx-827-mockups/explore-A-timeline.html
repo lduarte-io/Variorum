@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History as one timeline — VX-801 explore A</title>
+<style>
+  :root{
+    --page:#f2f4f1;
+    --frame:#e2ede6; --frameline:#cfe0d6;
+    --card:#ffffff; --cardline:#dde7e1;
+    --ink:#23302a; --ink2:#46534c; --muted:#86918b; --faint:#aab3ae;
+    --line:#d3ddd7;
+    --green:#2f4a3f; --act:#2f5f4b;
+    --t1:#6f9a82; --t1bg:#e5f0e9; --t1ink:#3d6a52;   /* plain */
+    --t2:#8296b6; --t2bg:#e9eef6; --t2ink:#4b5e80;   /* long form */
+    --t3:#c0946f; --t3bg:#f6ede4; --t3ink:#86593a;   /* spoken */
+    --arc:#b6b0a7; --arcink:#8d857a;
+    --rm:#f6ddd6; --rmink:#a25446; --rmline:#c4513f;
+    --add:#d4e9dd; --addink:#203b2b;
+    --sans:-apple-system,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;
+    --serif:"New York","Iowan Old Style","Charter",Georgia,serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:36px 32px 100px;background:var(--page);color:var(--ink);font-family:var(--sans);}
+  .wrap{max-width:1380px;margin:0 auto;}
+
+  /* ---------- page chrome ---------- */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:0 0 6px;}
+  .thesis{font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink2);max-width:74ch;margin:0 0 6px;}
+  .small{font-size:13px;color:var(--muted);max-width:90ch;line-height:1.5;margin:0 0 22px;}
+  details{background:#fff;border:1px solid var(--cardline);border-radius:12px;margin:0 0 10px;max-width:1080px;}
+  summary{cursor:pointer;padding:11px 16px;font-size:14px;color:var(--ink2);list-style:none;display:flex;gap:8px;align-items:baseline;}
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:"\25B8";color:var(--muted);font-size:12px;}
+  details[open] summary::before{content:"\25BE";}
+  summary .ct{color:var(--muted);font-size:12.5px;}
+  .dbody{padding:2px 18px 16px;}
+  table.inv{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.45;}
+  table.inv td{padding:7px 10px 7px 0;border-top:1px solid var(--cardline);vertical-align:top;}
+  table.inv td:first-child{width:34%;color:var(--ink);}
+  table.inv td:last-child{color:var(--ink2);}
+  table.inv .st{color:var(--act);font-size:12px;white-space:nowrap;}
+  .round{margin:12px 0 0;}
+  .round h4{font-size:12.5px;color:var(--muted);font-weight:500;margin:0 0 5px;}
+  .round blockquote{margin:0 0 6px;padding:5px 0 5px 12px;border-left:2px solid var(--frameline);font-family:var(--serif);font-size:14.5px;line-height:1.5;color:var(--ink);}
+
+  /* ---------- the states grid ---------- */
+  h2{font-family:var(--serif);font-size:19px;font-weight:600;margin:36px 0 14px;}
+  .states{display:grid;grid-template-columns:repeat(auto-fit,minmax(610px,1fr));gap:34px 34px;align-items:start;}
+  .st-h{font-family:var(--serif);font-size:16px;font-weight:600;margin:0 0 3px;}
+  .st-h b{display:inline-block;width:20px;color:var(--muted);font-weight:500;}
+  .st-n{font-size:13px;color:var(--muted);line-height:1.45;margin:0 0 10px 20px;max-width:64ch;}
+
+  /* ---------- the surface ---------- */
+  .panel{background:var(--frame);border:1px solid var(--frameline);border-radius:16px;padding:10px;box-shadow:0 1px 2px rgba(40,60,50,.05),0 8px 24px rgba(40,60,50,.05);}
+  .phead{display:flex;align-items:center;gap:6px;padding:3px 8px 10px;font-size:13.5px;color:var(--muted);}
+  .phead i{font-style:normal;color:var(--faint);margin:0 3px;}
+  .phead .back{color:var(--act);margin-right:8px;}
+  .door{margin-left:auto;display:inline-flex;gap:6px;align-items:center;color:var(--green);font-size:13px;}
+  .door svg{display:block;}
+  .card{background:var(--card);border:1px solid var(--cardline);border-radius:12px;padding:14px 18px 12px;}
+
+  /* chips: one per take — the legend AND the filter */
+  .chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:0 0 12px;margin:0 0 4px;border-bottom:1px solid var(--cardline);}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 8px 3px 7px;border-radius:999px;border:1px solid var(--cardline);color:var(--ink2);background:#fff;white-space:nowrap;}
+  .chip .sw{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .chip em{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .chip .ck{color:var(--t1ink);}
+  .chip.on{background:var(--green);border-color:var(--green);color:#fff;}
+  .chip.on em,.chip.on .ck{color:#bcd3c5;}
+  .chip.on .sw{box-shadow:0 0 0 1.5px #fff;}
+  .chip.arc{border-style:dashed;color:var(--arcink);}
+  .chip.arc .sw{background:transparent;border:1.5px solid var(--arc);}
+  .chip.arc.on{border-style:solid;color:#fff;}
+  .chip.arc.on .sw{border-color:#fff;box-shadow:none;}
+  .chipsep{font-size:11.5px;color:var(--faint);margin:0 0 0 5px;}
+  .lk{display:inline-block;vertical-align:-1px;color:var(--muted);}
+  .sw.t1{background:var(--t1);} .sw.t2{background:var(--t2);} .sw.t3{background:var(--t3);}
+
+  /* the spine */
+  .spine{position:relative;padding:2px 0 0 30px;}
+  .spine::before{content:"";position:absolute;left:11px;top:16px;bottom:16px;width:1.5px;background:var(--line);}
+  .row{position:relative;display:flex;align-items:baseline;gap:8px;padding:7px 0;font-size:14.5px;line-height:1.35;min-width:0;}
+  .row.blk{display:block;}
+  .line{display:flex;align-items:baseline;gap:8px;min-width:0;}
+  .dot{position:absolute;left:-23px;top:11px;width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 3px #fff;}
+  .dot.t1{background:var(--t1);} .dot.t2{background:var(--t2);} .dot.t3{background:var(--t3);}
+  .dot.arc{background:#fff;border:1.5px solid var(--arc);}
+  .dot.q{width:6px;height:6px;left:-21.5px;top:12.5px;opacity:.75;}
+  .dot.ring{background:#fff;border:2px solid var(--green);}
+  .dot.ring.arc{border:2px solid var(--arc);}
+  .dot.end{width:7px;height:7px;left:-22px;background:var(--line);}
+  .dot.pair{height:21px;border-radius:5px;top:4px;box-shadow:0 0 0 3px #fff,0 0 0 5.5px var(--t1bg);}
+  .stack{position:absolute;left:-21.5px;top:8px;width:6px;height:18px;box-shadow:0 0 0 3px #fff;background:#fff radial-gradient(circle,var(--faint) 2.2px,transparent 2.7px) 0 0/6px 6px repeat-y;}
+  .nm{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .nm.fw{font-family:var(--serif);color:var(--ink2);font-size:15px;}
+  .nm.mut{color:var(--muted);font-size:13.5px;}
+  .nm.arc{color:var(--arcink);}
+  .pairw{color:var(--muted);font-size:12px;white-space:nowrap;}
+  .when{margin-left:auto;color:var(--muted);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums;padding-left:12px;}
+  .tc{font-size:11.5px;padding:1px 8px;border-radius:999px;white-space:nowrap;line-height:1.5;}
+  .tc.t1{background:var(--t1bg);color:var(--t1ink);}
+  .tc.t2{background:var(--t2bg);color:var(--t2ink);}
+  .tc.t3{background:var(--t3bg);color:var(--t3ink);}
+  .tc.arc{border:1px dashed var(--arc);color:var(--arcink);padding:0 7px;}
+  .grp{font-size:11.5px;color:var(--muted);padding:12px 0 1px;letter-spacing:.15px;}
+  .glimpse{font-family:var(--serif);font-size:14.5px;color:var(--ink2);margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .nowtxt{font-family:var(--serif);font-size:15px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;}
+  .row.now .nm{color:var(--green);font-weight:600;overflow:visible;}
+  .nowcard{font-family:var(--serif);font-size:15px;line-height:1.55;color:var(--ink);margin:4px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .nowmeta{display:flex;align-items:baseline;gap:8px;}
+  .nowmeta .lbl{color:var(--green);font-weight:600;font-size:14.5px;}
+  .nowmeta .mk{color:var(--muted);font-size:12.5px;}
+  .nowmeta .act{margin-left:auto;color:var(--act);font-size:13px;}
+  .hide{color:var(--act);font-size:12.5px;}
+
+  /* washes — view-time only, between two identified texts */
+  s{background:var(--rm);color:var(--rmink);text-decoration-color:var(--rmline);border-radius:3px;padding:0 2px;}
+  ins{text-decoration:none;background:var(--add);color:var(--addink);border-radius:3px;padding:0 2px;}
+
+  /* an open commit */
+  .open{margin:4px 0 8px;}
+  .wellhead{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin:0 0 6px;}
+  .seg{display:inline-flex;border:1px solid var(--cardline);border-radius:7px;overflow:hidden;margin-left:auto;background:#fff;}
+  .seg span{padding:2px 10px;font-size:12px;color:var(--muted);}
+  .seg span+span{border-left:1px solid var(--cardline);}
+  .seg span.on{background:var(--frame);color:var(--ink);}
+  .well{background:#fbfcfb;border:1px solid var(--cardline);border-radius:10px;padding:11px 16px;font-family:var(--serif);font-size:15px;line-height:1.62;color:var(--ink);max-height:158px;overflow-y:auto;}
+  .well p{margin:0 0 9px;} .well p:last-child{margin:0;}
+  .wellwrap{position:relative;}
+  .wellwrap::after{content:"";position:absolute;left:1px;right:8px;bottom:1px;height:34px;border-radius:0 0 10px 10px;background:linear-gradient(rgba(251,252,251,0),#fbfcfb 85%);pointer-events:none;}
+  .wellwrap .more{position:absolute;right:14px;bottom:5px;z-index:1;font-family:var(--sans);font-size:11.5px;color:var(--muted);}
+  .well::-webkit-scrollbar{width:7px;}
+  .well::-webkit-scrollbar-thumb{background:#cdd8d1;border-radius:4px;}
+  .acts{display:flex;gap:18px;font-size:13px;color:var(--act);padding:8px 2px 2px;flex-wrap:wrap;}
+  .acts .note{color:var(--muted);}
+
+  /* the AI edit, opened: the reference's before | after */
+  .pair2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px;}
+  .pane{background:#fff;border:1px solid var(--cardline);border-radius:10px;padding:9px 14px 11px;}
+  .pane h5{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--muted);margin:0 0 7px;padding:0 0 7px;border-bottom:1px solid var(--cardline);}
+  .pane.after h5{color:var(--green);}
+  .pane .tx{font-family:var(--serif);font-size:15px;line-height:1.6;}
+  .pane .acts{padding:9px 0 0;}
+  .fadeout{max-height:96px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 25%,transparent);mask-image:linear-gradient(#000 25%,transparent);}
+
+  /* the foot */
+  .foot{display:flex;align-items:baseline;gap:10px;margin:8px 0 0;padding:10px 0 2px;border-top:1px solid var(--cardline);font-size:13px;color:var(--muted);}
+  .foot .lbl{white-space:nowrap;}
+  .foot .fw{font-family:var(--serif);font-size:14px;color:var(--arcink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;}
+  .foot .clock{white-space:nowrap;}
+  .foot .act{color:var(--act);white-space:nowrap;}
+
+  /* lineage, behind its one door */
+  .map{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:2px 0 12px;margin:0 0 10px;border-bottom:1px solid var(--cardline);}
+  .gen{display:flex;flex-direction:column;gap:6px;flex:none;}
+  .wide{grid-column:1/-1;max-width:1000px;}
+  .mc{flex:none;width:150px;background:#fff;border:1px solid var(--cardline);border-radius:9px;padding:6px 9px 6px;line-height:1.3;}
+  .mc .v{display:block;font-size:11px;color:var(--t3ink);}
+  .mc .w{display:block;font-family:var(--serif);font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mc .s{display:block;font-size:11px;color:var(--muted);margin-top:2px;}
+  .mc.here{background:var(--frame);}
+  .mc.sel{border-color:var(--green);box-shadow:0 0 0 1px var(--green);}
+  .mc.trash{opacity:.5;}
+  .arrow{flex:none;color:var(--faint);font-size:14px;}
+  .lhead{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;font-size:14px;}
+  .lhead .v{color:var(--t3ink);font-size:12.5px;}
+  .lhead .s{color:var(--muted);font-size:12.5px;}
+  .lhead .acts{margin-left:auto;padding:0;gap:14px;}
+
+  .ask{background:#fff;border:1px solid var(--cardline);border-left:3px solid var(--green);border-radius:10px;padding:14px 18px;max-width:80ch;margin:40px 0 0;font-family:var(--serif);font-size:16px;line-height:1.55;}
+  .ask .k{display:block;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:0 0 4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>History as one timeline</h1>
+<p class="thesis">Explore A. Commits are the thing you look at: one vertical line of dots, newest at the top, one line per moment. The takes are chips that name a moment and filter the line. Claude's edits sit on the line like any other moment, and their change shows at a glance.</p>
+<p class="small">VX-801 · a local sketch, never published · sample prose invented · drawn in a neutral calm; the build wears the voice's tokens. The fixture is the heavy one: five takes (two archived, one locked), 23 commits, one deleted take, and an AI edit four minutes ago. At rest that is twelve lines.</p>
+
+<details>
+  <summary>What needs to be there <span class="ct">· the inventory, and where each piece lives in this design</span></summary>
+  <div class="dbody">
+    <table class="inv">
+      <tr><td>This block's takes: label, text now, chosen ✓, archived, locked</td><td>The chip row. One chip per take with its commit count, ✓ on the chosen take, a lock on a locked take, and archived takes after a divider with dashed edges. Pick a chip and that take's text now heads the line. <span class="st">A · C · D</span></td></tr>
+      <tr><td>Each take's commits: stamp, name or first words, quiet or by hand</td><td>One line each on the spine. Names are set in sans; a commit saved by hand without a name shows its first words in the text face. In the all-takes view each line carries its take's chip. Runs of quiet commits fold into one line, unless a quiet commit has a name. <span class="st">A</span></td></tr>
+      <tr><td>The full text of any commit, readable and scrollable in place</td><td>Press a line and its full text opens in a well right under it. The well scrolls on its own. One well is open at a time. <span class="st">C</span></td></tr>
+      <tr><td>Compare</td><td>The well's switch compares against <i>the moment before</i> (the default) or <i>now</i>. "Compare with now" is that switch. Changed words are washed: struck red for removed, green for added. <span class="st">C</span></td></tr>
+      <tr><td>Archived takes</td><td>Hollow dots and dashed chips. Their commits stay on the line, quieter. When an archived take is picked, its head offers Unarchive. <span class="st">A · D</span></td></tr>
+      <tr><td>Deleted takes, on the 30-day clock</td><td>A quiet foot under the line, showing the clock and Put back. <span class="st">A</span></td></tr>
+      <tr><td>Per-commit acts: Restore · Bring back as a take · Compare with now · Name</td><td>Under an open well. A door that can't act isn't drawn: a locked take's commit has no Restore, and an archived take's commit offers Restore only after Unarchive. That second one is a PROVISIONAL drawing choice. <span class="st">C · D</span></td></tr>
+      <tr><td>The AI bracket: "before ‹client›'s edit" / "after ‹client›'s edit"</td><td>Both commits share one line, drawn as a two-dot capsule, with the change glimpsed inline. The line opens to before | after, the reference's compare. <span class="st">A · B</span></td></tr>
+      <tr><td>Lineage: ancestors with their verbs (divided, merged, extracted, copied, imported), where each lives (kept as lineage, in a note, in the Trash), their takes' commits, descendants, versions, cross-wing as go to only</td><td>One door, at the top right, and nowhere else on the default face. Behind it is v3's map, which you said "looks better". Under the map is the same timeline for whichever block you pick. <span class="st">E</span></td></tr>
+    </table>
+  </div>
+</details>
+
+<details>
+  <summary>Her feedback, every round, verbatim <span class="ct">· from the run record's sitting entries</span></summary>
+  <div class="dbody">
+    <div class="round"><h4>Before the mockups — the 2026-11-04 sitting, on VX-801</h4>
+      <blockquote>i'm again concerned and want this ticket to explicitly note a spacious, easy to read UI. i feel like lineage could be a significant sized area.</blockquote></div>
+    <div class="round"><h4>Kickoff, 2026-11-05</h4>
+      <blockquote>mockup - but don't use the question tool, just have it ready for me. i'll rule before U3.</blockquote></div>
+    <div class="round"><h4>Mockup v1</h4>
+      <blockquote>when I said popup, I was kind of imagining more that when you go into the block menu that already existed, that it would be there… i do not think a literal popup is needed. at most it would be like the way takes looks.</blockquote>
+      <blockquote>i almost feel like the more relevant issue for redesign is being able to easily see your commits, compare the commit to the current take you're looking at, etc. it just looks crowded and hard to see</blockquote>
+      <blockquote>i also do not like the left to right scroll in the whole area - that gets confusing. maybe we do a verticle scroll where older is above</blockquote>
+      <blockquote>think about git - i know that shows with branches, but like I really do feel like we have to focus on making the information easily accessible. showing compare, letting people look for commits on previous takes of ancestor blocks easily is the goal - what would get us to that point?</blockquote>
+      <blockquote>i agree things can expand piece by piece - nothing at first, then takes, then commits of those takes if you really want.</blockquote></div>
+    <div class="round"><h4>Mockup v2</h4>
+      <blockquote>yes - there should be one door for block history. that makes a lot of sense.</blockquote>
+      <blockquote>the immediate thing you see should be this particular block's history - and it should be easy to see commits BY TAKE, archived takes, etc., and then you should be able to also see lineage.</blockquote>
+      <blockquote>i still don't like this new mockup. i feel like it's a lot of words and not very clear still.</blockquote>
+      <blockquote>maybe the horziontal scroll was actually better, it was actually a lot clearer at least.</blockquote>
+      <blockquote>start by clearly listing all the info that needs to be shown and then let's think about for a complicated block what it would look like.</blockquote></div>
+    <div class="round"><h4>Mockup v3</h4>
+      <blockquote>ok i think that looks better, but lineage should be something you have to expand / go into. the default should be just seeing the commits.</blockquote>
+      <blockquote>i know they're named - you should also be able to scroll through the full text of any commit.</blockquote>
+      <blockquote>i think the fundamental issue is that you are still not representing commits *per take* very clearly. maybe look at how the takes popup on write looks for inspiration - each one should be able to go into the lineage.</blockquote>
+      <blockquote>maybe lineage does need to be a separate door than "commits" still - that might be better if we can't figure out something clear.</blockquote></div>
+    <div class="round"><h4>Mockup v4</h4>
+      <blockquote>ok like look at this mockup. think about what people are using this for - claude just changed something. does it feel easy to look at commits? does it feel good?</blockquote>
+      <blockquote>this is not very clear visually at all.</blockquote>
+      <blockquote>have 2 opus subagents, make them each make a mockup, with what neesd to be there and every round of my feedback verbatim, with new directions. we need to explore other things like this does not look good still and it is not dealing with density well.</blockquote></div>
+  </div>
+</details>
+
+<h2>The surface</h2>
+
+<div class="states">
+
+<!-- ============ A — as it opens ============ -->
+<section>
+  <div class="st-h"><b>A</b>As it opens: claude-code edited "plain" four minutes ago</div>
+  <div class="st-n">Nothing is expanded. The top line is the edit, and you can already read what it changed. Below it, 21 more commits fold to eleven lines, and the deleted take sits at the foot.</div>
+  <div class="panel">
+    <div class="phead">On Rereading <i>›</i> block 2 <i>›</i> history
+      <span class="door"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="4" cy="3.5" r="2"/><circle cx="12" cy="3.5" r="2"/><circle cx="8" cy="12.5" r="2"/><path d="M4 5.5v.8c0 2 1.4 3 4 4.2M12 5.5v.8c0 2-1.4 3-4 4.2"/></svg>lineage ›</span></div>
+    <div class="card">
+      <div class="chips">
+        <span class="chip on">all takes <em>23</em></span>
+        <span class="chip"><span class="sw t1"></span>plain <span class="ck">✓</span> <em>9</em></span>
+        <span class="chip"><span class="sw t2"></span>long form <em>6</em></span>
+        <span class="chip"><span class="sw t3"></span>spoken <svg class="lk" width="8" height="10" viewBox="0 0 10 12"><rect x="1" y="5" width="8" height="6.5" rx="1.5" fill="currentColor"/><path d="M3 5V3.6a2 2 0 0 1 4 0V5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> <em>4</em></span>
+        <span class="chipsep">archived</span>
+        <span class="chip arc"><span class="sw"></span>first pass <em>3</em></span>
+        <span class="chip arc"><span class="sw"></span>cut lines <em>1</em></span>
+      </div>
+      <div class="spine">
+        <div class="row now"><span class="dot ring"></span><span class="nm">now</span><span class="nowtxt">A book read once is a rumor; read twice, it becomes a place. The corners you skipped hold…</span><span class="tc t1">plain ✓</span></div>
+
+        <div class="grp">Today</div>
+        <div class="row blk"><span class="dot t1 pair"></span>
+          <div class="line"><span class="nm">claude-code's edit</span><span class="pairw">before → after</span><span class="tc t1">plain</span><span class="when">4 min ago</span></div>
+          <div class="glimpse">…it <s>starts to become</s> <ins>becomes</ins> a place. The corners you <s>missed the first time</s> <ins>skipped</ins> hold…</div>
+        </div>
+
+        <div class="grp">This week</div>
+        <div class="row"><span class="stack"></span><span class="nm mut">3 quiet commits</span><span class="tc t3">spoken</span><span class="tc t2">long form</span><span class="when">Nov 3 – 4</span></div>
+        <div class="row"><span class="dot t1"></span><span class="nm">tightened the second clause</span><span class="tc t1">plain</span><span class="when">Nov 2</span></div>
+        <div class="row"><span class="stack"></span><span class="nm mut">2 quiet commits</span><span class="tc t1">plain</span><span class="when">Nov 1 – 2</span></div>
+
+        <div class="grp">Last week</div>
+        <div class="row"><span class="stack"></span><span class="nm mut">3 quiet commits</span><span class="tc t1">plain</span><span class="tc t2">long form</span><span class="tc t3">spoken</span><span class="when">Oct 31</span></div>
+        <div class="row"><span class="dot t2"></span><span class="nm">the rumor-of-itself opening</span><span class="tc t2">long form</span><span class="when">Oct 30</span></div>
+        <div class="row"><span class="dot t1"></span><span class="nm">a place, not an address</span><span class="tc t1">plain</span><span class="when">Oct 30</span></div>
+        <div class="row"><span class="dot t3"></span><span class="nm">hearsay, kept</span><span class="tc t3">spoken</span><span class="when">Oct 29</span></div>
+        <div class="row"><span class="stack"></span><span class="nm mut">5 quiet commits</span><span class="tc t1">plain</span><span class="tc t2">long form</span><span class="tc t3">spoken</span><span class="when">Oct 28 – 29</span></div>
+
+        <div class="grp">Earlier</div>
+        <div class="row"><span class="dot arc"></span><span class="nm fw arc">The first read is a tour; the second is tenancy.</span><span class="tc arc">cut lines</span><span class="when">Oct 20</span></div>
+        <div class="row"><span class="dot arc"></span><span class="nm fw arc">Books reward the second visit more than the first…</span><span class="tc arc">first pass</span><span class="when">Oct 12</span></div>
+        <div class="row"><span class="stack"></span><span class="nm mut">2 quiet commits</span><span class="tc arc">first pass</span><span class="when">Oct 11 – 12</span></div>
+        <div class="row"><span class="dot end"></span><span class="nm mut">the block began</span><span class="when">Oct 10</span></div>
+      </div>
+      <div class="foot"><span class="lbl">deleted take</span><span class="fw">A book read twice becomes an address you can give other people.</span><span class="clock">22 days left</span><span class="act">Put back</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B — the edit opened ============ -->
+<section>
+  <div class="st-h"><b>B</b>The edit, opened in place</div>
+  <div class="st-n">Pressing the edit's line opens the two moments side by side, as in your reference. Restore is under "before", since that is the moment you would go back to. The after side can switch to now, in case you've written since.</div>
+  <div class="panel">
+    <div class="phead">On Rereading <i>›</i> block 2 <i>›</i> history
+      <span class="door"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="4" cy="3.5" r="2"/><circle cx="12" cy="3.5" r="2"/><circle cx="8" cy="12.5" r="2"/><path d="M4 5.5v.8c0 2 1.4 3 4 4.2M12 5.5v.8c0 2-1.4 3-4 4.2"/></svg>lineage ›</span></div>
+    <div class="card">
+      <div class="chips">
+        <span class="chip on">all takes <em>23</em></span>
+        <span class="chip"><span class="sw t1"></span>plain <span class="ck">✓</span> <em>9</em></span>
+        <span class="chip"><span class="sw t2"></span>long form <em>6</em></span>
+        <span class="chip"><span class="sw t3"></span>spoken <svg class="lk" width="8" height="10" viewBox="0 0 10 12"><rect x="1" y="5" width="8" height="6.5" rx="1.5" fill="currentColor"/><path d="M3 5V3.6a2 2 0 0 1 4 0V5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> <em>4</em></span>
+        <span class="chipsep">archived</span>
+        <span class="chip arc"><span class="sw"></span>first pass <em>3</em></span>
+        <span class="chip arc"><span class="sw"></span>cut lines <em>1</em></span>
+      </div>
+      <div class="spine">
+        <div class="row now"><span class="dot ring"></span><span class="nm">now</span><span class="nowtxt">A book read once is a rumor; read twice, it becomes a place. The corners you skipped hold…</span><span class="tc t1">plain ✓</span></div>
+        <div class="grp">Today</div>
+        <div class="row blk"><span class="dot t1 pair"></span>
+          <div class="line"><span class="nm">claude-code's edit</span><span class="pairw">before → after</span><span class="tc t1">plain</span><span class="when">4 min ago · 9:06 PM</span></div>
+          <div class="pair2">
+            <div class="pane"><h5>before claude-code's edit</h5>
+              <div class="tx">A book read once is a rumor; read twice, it <s>starts to become</s> a place. The corners you <s>missed the first time</s> hold the furniture of the argument, and you only notice them because you already know the room.</div>
+              <div class="acts"><span>Restore</span><span>Bring back as a take</span></div>
+            </div>
+            <div class="pane after"><h5>after claude-code's edit <span class="seg"><span class="on">after</span><span>now</span></span></h5>
+              <div class="tx">A book read once is a rumor; read twice, it <ins>becomes</ins> a place. The corners you <ins>skipped</ins> hold the furniture of the argument, and you only notice them because you already know the room.</div>
+            </div>
+          </div>
+        </div>
+        <div class="fadeout">
+          <div class="grp">This week</div>
+          <div class="row"><span class="stack"></span><span class="nm mut">3 quiet commits</span><span class="tc t3">spoken</span><span class="tc t2">long form</span><span class="when">Nov 3 – 4</span></div>
+          <div class="row"><span class="dot t1"></span><span class="nm">tightened the second clause</span><span class="tc t1">plain</span><span class="when">Nov 2</span></div>
+          <div class="row"><span class="stack"></span><span class="nm mut">2 quiet commits</span><span class="tc t1">plain</span><span class="when">Nov 1 – 2</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ C — one take ============ -->
+<section>
+  <div class="st-h"><b>C</b>One take: "long form" picked</div>
+  <div class="st-n">The chip filters the line down to one take, which is your reference's "history · this take". The take's text now heads the line. One quiet run is unfolded, so each quiet moment shows what it changed. One commit is open, with its full text scrolling in place.</div>
+  <div class="panel">
+    <div class="phead">On Rereading <i>›</i> block 2 <i>›</i> history
+      <span class="door"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="4" cy="3.5" r="2"/><circle cx="12" cy="3.5" r="2"/><circle cx="8" cy="12.5" r="2"/><path d="M4 5.5v.8c0 2 1.4 3 4 4.2M12 5.5v.8c0 2-1.4 3-4 4.2"/></svg>lineage ›</span></div>
+    <div class="card">
+      <div class="chips">
+        <span class="chip">all takes <em>23</em></span>
+        <span class="chip"><span class="sw t1"></span>plain <span class="ck">✓</span> <em>9</em></span>
+        <span class="chip on"><span class="sw t2"></span>long form <em>6</em></span>
+        <span class="chip"><span class="sw t3"></span>spoken <svg class="lk" width="8" height="10" viewBox="0 0 10 12"><rect x="1" y="5" width="8" height="6.5" rx="1.5" fill="currentColor"/><path d="M3 5V3.6a2 2 0 0 1 4 0V5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> <em>4</em></span>
+        <span class="chipsep">archived</span>
+        <span class="chip arc"><span class="sw"></span>first pass <em>3</em></span>
+        <span class="chip arc"><span class="sw"></span>cut lines <em>1</em></span>
+      </div>
+      <div class="spine">
+        <div class="row blk"><span class="dot ring" style="border-color:var(--t2)"></span>
+          <div class="nowmeta"><span class="lbl" style="color:var(--t2ink)">now</span><span class="mk">long form</span></div>
+          <div class="nowcard">A book read once is only ever a rumor of itself — a report from someone you used to be, filed in a hurry. Read twice, it starts to become a place: the corners you missed the first time hold the furniture of the argument…</div>
+        </div>
+
+        <div class="grp">This week</div>
+        <div class="row"><span class="stack"></span><span class="nm mut">2 quiet commits</span><span class="hide">hide</span><span class="when">Nov 3</span></div>
+        <div class="row"><span class="dot t2 q"></span><span class="nm fw">…someone you used to be, <s>written</s> <ins>filed</ins> in a hurry.</span><span class="when">quiet · 4:12 PM</span></div>
+        <div class="row"><span class="dot t2 q"></span><span class="nm fw">…spines unevenly<ins> — the same forty pages, returned to…</ins></span><span class="when">quiet · 11:02 AM</span></div>
+
+        <div class="grp">Last week</div>
+        <div class="row"><span class="dot t2 q"></span><span class="nm fw">…and you only <s>notice</s> <ins>see</ins> them because…</span><span class="when">quiet · Oct 31</span></div>
+        <div class="row blk"><span class="dot t2"></span>
+          <div class="line"><span class="nm">the rumor-of-itself opening</span><span class="when">saved by hand · Oct 30, 8:03 PM</span></div>
+          <div class="open">
+            <div class="wellhead" style="margin-top:6px">full text, washed against <span class="seg"><span class="on">the moment before</span><span>now</span></span></div>
+            <div class="wellwrap"><span class="more">scrolls ↓</span><div class="well">
+              <p>A book read once is <s>a rumor.</s> <ins>only ever a rumor of itself — a report from someone you used to be, written in a hurry.</ins> Read twice, it starts to become a place: the corners you missed the first time hold the furniture of the argument, and you only notice them because you already know the room. That is why the books that matter wear out their spines unevenly.</p>
+              <p><ins>Nobody teaches this.</ins> We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</p>
+              <p>Rereading is the quiet skill. It asks nothing of the book and everything of you: to come back, to be wrong about it twice, to find the room was bigger than you thought.</p>
+            </div></div>
+            <div class="acts"><span>Restore</span><span>Bring back as a take</span><span>Rename</span></div>
+          </div>
+        </div>
+        <div class="row"><span class="stack"></span><span class="nm mut">2 quiet commits</span><span class="when">Oct 29</span></div>
+        <div class="row"><span class="dot end"></span><span class="nm mut">branched from <span class="tc t1">plain</span></span><span class="when">Oct 29</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ D — an archived take ============ -->
+<section>
+  <div class="st-h"><b>D</b>An archived take: "first pass" picked</div>
+  <div class="st-n">Archived takes keep their whole history. The head says the take is set aside and offers Unarchive. Its commits read and compare like any other take's commits.</div>
+  <div class="panel">
+    <div class="phead">On Rereading <i>›</i> block 2 <i>›</i> history
+      <span class="door"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="4" cy="3.5" r="2"/><circle cx="12" cy="3.5" r="2"/><circle cx="8" cy="12.5" r="2"/><path d="M4 5.5v.8c0 2 1.4 3 4 4.2M12 5.5v.8c0 2-1.4 3-4 4.2"/></svg>lineage ›</span></div>
+    <div class="card">
+      <div class="chips">
+        <span class="chip">all takes <em>23</em></span>
+        <span class="chip"><span class="sw t1"></span>plain <span class="ck">✓</span> <em>9</em></span>
+        <span class="chip"><span class="sw t2"></span>long form <em>6</em></span>
+        <span class="chip"><span class="sw t3"></span>spoken <svg class="lk" width="8" height="10" viewBox="0 0 10 12"><rect x="1" y="5" width="8" height="6.5" rx="1.5" fill="currentColor"/><path d="M3 5V3.6a2 2 0 0 1 4 0V5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> <em>4</em></span>
+        <span class="chipsep">archived</span>
+        <span class="chip arc on"><span class="sw"></span>first pass <em>3</em></span>
+        <span class="chip arc"><span class="sw"></span>cut lines <em>1</em></span>
+      </div>
+      <div class="spine">
+        <div class="row blk"><span class="dot ring arc"></span>
+          <div class="nowmeta"><span class="lbl" style="color:var(--arcink)">now</span><span class="mk">first pass · archived — set aside, out of the fan</span><span class="act">Unarchive</span></div>
+          <div class="nowcard" style="color:var(--ink2)">Books reward the second visit more than the first. The first time through you are only learning the way in.</div>
+        </div>
+        <div class="grp">Earlier</div>
+        <div class="row blk"><span class="dot arc"></span>
+          <div class="line"><span class="nm fw arc">Books reward the second visit more than the first…</span><span class="when">saved by hand · Oct 12, 9:02 PM</span></div>
+          <div class="open">
+            <div class="wellhead" style="margin-top:6px">full text, washed against <span class="seg"><span class="on">the moment before</span><span>now</span></span></div>
+            <div class="well">Books reward the second visit more than the first. <ins>The first time through you are only learning the way in.</ins></div>
+            <div class="acts"><span>Bring back as a take</span><span>Name</span><span class="note">Restore after Unarchive</span></div>
+          </div>
+        </div>
+        <div class="row"><span class="stack"></span><span class="nm mut">2 quiet commits</span><span class="when">Oct 11 – 12</span></div>
+        <div class="row"><span class="dot end"></span><span class="nm mut">born with the block</span><span class="when">Oct 10</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ E — lineage, behind the one door ============ -->
+<section class="wide">
+  <div class="st-h"><b>E</b>Behind the one door: lineage</div>
+  <div class="st-n">This is v3's map, kept: older is to the left, and only this band scrolls sideways. Pick any card and the same timeline below fills with that block's takes and commits, so an ancestor's commits are two presses from the default view.</div>
+  <div class="panel">
+    <div class="phead"><span class="back">‹ history</span>On Rereading <i>›</i> block 2 <i>›</i> lineage</div>
+    <div class="card">
+      <div class="map">
+        <div class="mc"><span class="v">imported</span><span class="w">first draft, longhand…</span><span class="s">kept as lineage</span></div>
+        <span class="arrow">›</span>
+        <div class="gen">
+          <div class="mc"><span class="v">divided</span><span class="w">Rereading gets no respect…</span><span class="s">kept as lineage</span></div>
+          <div class="mc trash"><span class="v">copied from Snippets</span><span class="w">a book read once is just…</span><span class="s">in the Trash</span></div>
+        </div>
+        <span class="arrow">›</span>
+        <div class="gen">
+          <div class="mc sel"><span class="v">merged — left</span><span class="w">A book read once is a rumor.</span><span class="s">kept as lineage</span></div>
+          <div class="mc"><span class="v">merged — right</span><span class="w">Read twice, it starts to…</span><span class="s">kept as lineage</span></div>
+        </div>
+        <span class="arrow">›</span>
+        <div class="mc here"><span class="v" style="color:var(--green)">this block</span><span class="w">A book read once is a rumor; read…</span><span class="s">23 commits</span></div>
+        <span class="arrow">›</span>
+        <div class="gen">
+          <div class="mc"><span class="v">extracted</span><span class="w">The corners you missed…</span><span class="s">this note, below</span></div>
+          <div class="mc"><span class="v">a version</span><span class="w">…an address you can give…</span><span class="s">"drafts" wing · go to ›</span></div>
+        </div>
+      </div>
+      <div class="lhead"><span class="v">merged — left half</span><span class="s">kept as lineage</span><span class="acts"><span>Put back</span><span>Bring back as a take</span></span></div>
+      <div class="chips" style="border-bottom:none;padding-bottom:6px">
+        <span class="chip on">all takes <em>5</em></span>
+        <span class="chip"><span class="sw t1"></span>plain <span class="ck">✓ was chosen</span> <em>3</em></span>
+        <span class="chip"><span class="sw t2"></span>rumor, long <em>2</em></span>
+      </div>
+      <div class="spine">
+        <div class="row"><span class="dot t1"></span><span class="nm">tightened to one clause</span><span class="tc t1">plain</span><span class="when">Oct 9</span></div>
+        <div class="row"><span class="dot t2"></span><span class="nm fw">A book read once is only ever a rumor of itself.</span><span class="tc t2">rumor, long</span><span class="when">Oct 8</span></div>
+        <div class="row"><span class="stack"></span><span class="nm mut">3 quiet commits</span><span class="tc t1">plain</span><span class="tc t2">rumor, long</span><span class="when">Oct 6 – 8</span></div>
+        <div class="row"><span class="dot end"></span><span class="nm mut">the block began</span><span class="when">Oct 6</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="ask"><span class="k">The one thing I'd ask</span>Should the history open on <b>all takes on one line</b> (drawn in A, the block's whole story), or on <b>the take you're in</b> (your reference's "history · this take", drawn in C), with "all takes" one press away?</div>
+
+</div>
+</body>
+</html>

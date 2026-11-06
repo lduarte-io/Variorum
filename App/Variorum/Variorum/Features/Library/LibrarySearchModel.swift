@@ -35,8 +35,10 @@ import VariorumCore
 /// with the day range and the archived facet. Pure, so a pin holds the rule.
 nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// The whole question — words, typed `#tags`, the day range, the facet —
-    /// and NO scope: the band's counts read this (D3 — the counts tell her
-    /// what every scope holds, PROVISIONAL P-13o-U2-2).
+    /// and NO scope. Under All the band counts this; under a picked scope
+    /// the band counts what that scope lists (VX-734, her R-819-1 and the
+    /// sitting's coherent extension, PROVISIONAL — superseding P-13o-U2-2's
+    /// "the counts never move with the scope"; `Queries.searchCounts(…facet:…)`).
     let query: SearchQuery
     /// The words as typed, the `#tags` aside — the band's echo.
     let words: String
@@ -89,23 +91,10 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     }
 
     /// The question narrowed to a scope picker's choice (D3) — what the
-    /// groups and the Books section read.
+    /// groups and the Books section read. The rule is core's
+    /// (`SearchFacet.narrowing`, VX-819 — pinned headless).
     func scoped(_ scope: LibraryCatalogModel.Scope) -> SearchQuery {
-        guard let narrow = Self.scopeFilter(scope) else { return query }
-        var scoped = query
-        scoped.filter = query.filter.map { .all([$0, narrow]) } ?? narrow
-        return scoped
-    }
-
-    /// The scope picker's four answers (D3): All · Notes · Books · Blocks —
-    /// Blocks is the scraps family beside block NAMES (the `.docKind` leaf).
-    static func scopeFilter(_ scope: LibraryCatalogModel.Scope) -> SearchFilter? {
-        switch scope {
-        case .all: nil
-        case .posts: .family(.notes)
-        case .books: .family(.books)
-        case .blocks: .any([.family(.scraps), .docKind(.blockName)])
-        }
+        scope.facet.narrowing(query)
     }
 
     /// **The field's text without one typed `#tag`** — the band chip's ✕.
@@ -152,6 +141,20 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     // (NIT-1, round 1: the token/words/tag reading MOVED to the shared home
     // — `SearchFieldWords`, `Core/Views/SearchAnswerFaces.swift` — the book's
     // band is its second consumer; the rule is the PARSER's letter.)
+}
+
+extension LibraryCatalogModel.Scope {
+    /// **The scope picker's facet in core** (VX-819): the one rule each
+    /// segment narrows by and counts by (`SearchFacet`). `posts` is the
+    /// model term for the segment that says "Notes".
+    nonisolated var facet: SearchFacet {
+        switch self {
+        case .all: .all
+        case .posts: .notes
+        case .books: .books
+        case .blocks: .blocks
+        }
+    }
 }
 
 /// **One read of the answer sheet** — the band's numbers, the Books
@@ -206,6 +209,14 @@ final class LibrarySearchModel {
     /// chip `+ commits`, her R-VX83-9): savepoint history joins the answer.
     /// A question she asks, never remembered (the archived facet's reason).
     private(set) var includesSavepoints = false
+    /// **The answer sheet's ORDER** (VX-820 — her R-819-2, *"Full
+    /// vocabulary"*): relevance (the default, leading) or the Library's own
+    /// sort over each group's home, with direction. A question she asks,
+    /// never remembered (the facets' reason, PROVISIONAL): every NEW search
+    /// starts at relevance, refining a live question keeps her pick, and a
+    /// cleared field discards it with the facets (`resetFacet`). The
+    /// Library's own `sort ▾` preference is a different value, untouched.
+    private(set) var order: SearchOrder = .relevance
 
     /// The question the LISTED answer answers — nil when the Library is not
     /// searching. The band reads it whenever it is non-nil (P-13o-U2-1).
@@ -245,6 +256,9 @@ final class LibrarySearchModel {
     /// the expansions ask the same question).
     @ObservationIgnored private(set) var scope: LibraryCatalogModel.Scope = .all
     @ObservationIgnored private(set) var wing = ""
+    /// The order the listed groups were read in (VX-820 — the next page
+    /// continues the SAME order's keyset).
+    @ObservationIgnored private(set) var listedOrder: SearchOrder = .relevance
     /// The catalog generation the listed answer belongs to.
     @ObservationIgnored private(set) var generation = 0
     /// Each listed group's position (the paging's arithmetic).
@@ -289,12 +303,30 @@ final class LibrarySearchModel {
         bookState = state
     }
 
+    /// **The order door's pick** (VX-820): nil is relevance; a sort takes
+    /// its NATURAL direction (newest first for a stamp, A–Z for a name — the
+    /// Library door's own convention, `LibrarySortFace.naturalDirection`).
+    /// The caller re-reads (this file's convention — a new order is a new
+    /// question's first page).
+    func setOrder(_ sort: Queries.LibrarySort?) {
+        order = sort.map { .home($0, LibrarySortFace.naturalDirection(for: $0)) } ?? .relevance
+    }
+
+    /// The order's direction (a home order only — relevance's best-first is
+    /// its meaning, and it has no direction arm). The caller re-reads.
+    func setOrderDirection(_ direction: SortDirection) {
+        guard case .home(let sort, _) = order else { return }
+        order = .home(sort, direction)
+    }
+
     /// Put the facets back (a cleared field): the living corpus, no state,
-    /// no savepoints.
+    /// no savepoints — and the order back to relevance (VX-820: ending a
+    /// search discards her pick).
     func resetFacet() {
         visibility = .living
         bookState = nil
         includesSavepoints = false
+        order = .relevance
     }
 
     // MARK: - Landing (the catalog's road — `LibrarySearchRouting.swift`)
@@ -304,12 +336,15 @@ final class LibrarySearchModel {
     /// groups she opened.
     func land(
         _ listing: LibrarySearchListing?, question: LibrarySearchQuestion?,
-        scope: LibraryCatalogModel.Scope, wing: String, generation: Int, startingOver: Bool
+        scope: LibraryCatalogModel.Scope, wing: String, generation: Int, startingOver: Bool,
+        order: SearchOrder = .relevance
     ) {
         let sameQuestion = question == self.question && scope == self.scope && wing == self.wing
+            && order == listedOrder
         self.question = question
         self.scope = scope
         self.wing = wing
+        self.listedOrder = order
         self.generation = generation
         counts = listing?.counts
         books = listing?.books ?? []
@@ -418,19 +453,28 @@ final class LibrarySearchModel {
 
     // MARK: - The reads (pure, over a Database)
 
-    /// **The answer sheet, read once** (D2): the band's counts (the whole
-    /// question, no scope — D3), the Books section (scopes All and Books),
+    /// **The answer sheet, read once** (D2): the band's counts (what the
+    /// scope lists; All the whole question — R-819-1), the Books section
+    /// (scopes All and Books),
     /// and `groupDepth` groups (every scope but Books). Each is one
     /// composer statement; the Books section pages the books family to its
     /// end (∝ the wing's books).
+    ///
+    /// `order` (VX-820): the groups' order — relevance, or the Library's
+    /// sort over each group's home (`Queries.searchGroups(…order:)`). The
+    /// Books section keeps its OWN order under every pick (A-819-B2, F1 (a),
+    /// PROVISIONAL): books carry no stamp in the Library's semantics, and the
+    /// associated books stay top-ranked with their reason — so `books` never
+    /// reads the order.
     nonisolated static func listing(
         _ db: Database, question: LibrarySearchQuestion, scope: LibraryCatalogModel.Scope,
-        wing: String, groupDepth: Int, calendar: Calendar = JournalDay.storeCalendar
+        wing: String, groupDepth: Int, order: SearchOrder = .relevance,
+        calendar: Calendar = JournalDay.storeCalendar
     ) throws -> LibrarySearchListing {
         var listing = LibrarySearchListing()
         let where_ = SearchScope(wingID: wing)
         listing.counts = try Queries.searchCounts(
-            db, query: question.query, scope: where_, calendar: calendar)
+            db, query: question.query, facet: scope.facet, scope: where_, calendar: calendar)
         if scope == .all || scope == .books {
             let section = try books(db, question: question, wing: wing, calendar: calendar)
             listing.books = section.hits
@@ -440,27 +484,28 @@ final class LibrarySearchModel {
         // The ranked groups need WORDS; a typed tag alone is the catalog's
         // own narrowed listing (VX-84a, D-1 — `LibraryCatalogModel.listing`).
         // VX-84b (D-2): the tags the words name, offered in the band (the
-        // whole question's, never the scope's — like the counts, D3).
+        // whole question's, never the scope's — an offer is an invitation,
+        // not a count; R-819-1 moved only the numbers).
         listing.tagOffers = try Queries.searchTagOffers(db, query: question.query, scope: where_)
         if scope != .books, question.hasWords {
             let page = try Queries.searchGroups(
                 db, query: question.scoped(scope), scope: where_, limit: groupDepth,
-                perGroup: linesPerGroup, calendar: calendar)
+                perGroup: linesPerGroup, order: order, calendar: calendar)
             listing.groups = page.groups
             listing.next = page.next
         }
         return listing
     }
 
-    /// The next page of groups after `cursor`.
+    /// The next page of groups after `cursor`, in the listed `order`.
     nonisolated static func groupPage(
         _ db: Database, question: LibrarySearchQuestion, scope: LibraryCatalogModel.Scope,
-        wing: String, after cursor: SearchComposer.GroupCursor,
+        wing: String, after cursor: SearchComposer.GroupCursor, order: SearchOrder = .relevance,
         calendar: Calendar = JournalDay.storeCalendar
     ) throws -> SearchGroupPage {
         try Queries.searchGroups(
             db, query: question.scoped(scope), scope: SearchScope(wingID: wing), after: cursor,
-            limit: groupPageSize, perGroup: linesPerGroup, calendar: calendar)
+            limit: groupPageSize, perGroup: linesPerGroup, order: order, calendar: calendar)
     }
 
     /// **The Books section** (13o U3): the books a typed `#tag` is

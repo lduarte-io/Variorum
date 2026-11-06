@@ -220,9 +220,9 @@ final class CommandRouter {
     // MARK: - Where the caret is (the post-13l polish round, ledger row 33)
 
     /// **The block the mounted writing surface is standing in.** A FACT, not a
-    /// request: nothing here decides anything, and the one reader — the Block
-    /// History pane's jump door — compares it against the block it is showing
-    /// (`BlockHistoryModel.jumpTarget`).
+    /// request: nothing here decides anything. (Its first reader was the
+    /// retired Block History panel's jump door — VX-827 U3b; the landings
+    /// and the place memory read it now.)
     ///
     /// Observable, because the door has to APPEAR when she clicks into another
     /// block; cheap, because the surfaces report only when the block CHANGES,
@@ -596,8 +596,10 @@ final class CommandRouter {
 
     // MARK: - The block's history pane (the post-13l polish round, row 17)
 
-    /// How a Block History request reaches the mounted detail's INSPECTOR.
-    /// Its own seam beside `showTray`, for the identical ordering reason —
+    /// How a Block History request reaches the mounted detail — since VX-801
+    /// (VX-827 U3a) the COMMITS FACE in the detail's full pane, where it was
+    /// the inspector's panel. Its own seam beside `showTray`, for the
+    /// identical ordering reason —
     /// `EditorView` registers a handler INSIDE the detail and therefore
     /// later, so a LIFO dispatch would reach the editor's own sheet first and
     /// the same door would land in two different places depending on mount

@@ -96,7 +96,11 @@ struct RecoveryDoorsTests {
             for: .showOriginBlock, context: CapabilityContext()).isEmpty)
         // …and no surface renders it as a row any more: it is the act the
         // pane ANSWERS, not one the pane offers.
-        #expect(!BlockHistoryPane.surfaceCapabilities.contains(.showOriginBlock))
+        // (VX-827 U3b — A JUSTIFIED EDIT: the pane retired whole; neither face
+        // of the History & Lineage surface renders it either — the Lineage
+        // face is where the act LANDS.)
+        #expect(!CommitsFaceView.surfaceCapabilities.contains(.showOriginBlock))
+        #expect(!LineageFaceView.surfaceCapabilities.contains(.showOriginBlock))
     }
 
     /// The deleted take's door, declared (13j, round 5) — the act that had no
@@ -107,8 +111,10 @@ struct RecoveryDoorsTests {
         #expect(door.doors == [.surface])
         #expect(door.takesAccess == .native, "R118: not a Write privilege")
         #expect(!door.unavailableNote.isEmpty)
-        #expect(BlockHistoryPane.surfaceCapabilities.contains(.restoreTake),
-                "the pane's deleted-takes region is where the row lives now")
+        // VX-827 U3b — A JUSTIFIED EDIT: the pane retired; the Commits face's
+        // rail foot is where a deleted take's row lives now.
+        #expect(CommitsFaceView.surfaceCapabilities.contains(.restoreTake),
+                "the Commits face's deleted takes are where the row lives now")
         // Grey where no note is open, live wherever takes are edited.
         #expect(!CapabilityRegistry.isEnabled(.restoreTake, in: CapabilityContext(mode: nil)))
         #expect(CapabilityRegistry.availability(
@@ -141,29 +147,40 @@ struct RecoveryDoorsTests {
             #expect(titles.contains(OriginPeekCopy.doorVerb(op: "divide")))
 
             editor.model.revealCaretBlockOrigin()
+            // VX-827 U3b — A JUSTIFIED PIN EDIT (G2's ruling): the door lands
+            // on the LINEAGE face with the ORIGINAL selected, through the
+            // history doors' own road (no detail here ⇒ this model's sheet).
             let request = try #require(editor.model.blockHistoryRequest)
             #expect(request.blockID == w.first.block.id,
-                    "the pane is the SUCCESSOR's — its came-from names the original")
-            #expect(editor.model.trayRequest == nil, "the pane, not the batch-2 bridge")
+                    "the surface is the SUCCESSOR's — its lineage names the original")
+            #expect(request.opening == .lineage(select: slot.blockID), "the original selected")
+            #expect(editor.model.trayRequest == nil, "the surface, not the batch-2 bridge")
 
-            let history = BlockHistoryModel(
-                session: editor.session, postID: editor.postID,
-                blockID: request.blockID)
-            history.adopt(try await editor.database.read {
-                [blockID = request.blockID] db in
-                try Queries.blockHistory(db, blockID: blockID, now: harnessNow)
+            let lineage = LineageFaceModel(
+                session: editor.session, request: request, select: slot.blockID)
+            lineage.adopt(try await editor.database.read { [blockID = request.blockID] db in
+                try LineageFaceModel.read(db, blockID: blockID)
             })
-            #expect(history.history.origins.map(\.origin.blockID) == [slot.blockID])
-            // The original's own TEXT rides the region, so the row is
+            #expect(lineage.selectedBlockID == slot.blockID, "the original is selected")
+            #expect(lineage.node?.blockID == slot.blockID, "its pane and rail are the original's")
+            // The original's own TEXT rides its member, so the row is
             // recognisable without a second surface to open (what the peek's
-            // whole panel existed for).
-            #expect(history.history.origins.first?.text?.isEmpty == false)
+            // whole panel existed for) — and its takes are the rail's.
+            #expect(lineage.selected?.text?.isEmpty == false)
+            #expect(lineage.selected?.counts?.takes == 2, "both of the original's takes")
             _ = (chosen, take2)
         }
     }
 
     /// **The came-from region's two doors, both of them** — the peek's two
     /// actions, absorbed (the post-13l polish round, ledger row 17).
+    ///
+    /// **VX-827 U3b — A JUSTIFIED EDIT:** the region retired with the panel;
+    /// its Bring back is the Lineage face's Put back on the original's header
+    /// — the SAME shared composition (`PreservedOriginPutBack`), the same
+    /// landing and receipt. Its "Open this note's tray" door is not carried
+    /// (the tray keeps its own masthead door — PROVISIONAL P-U3b-6), so that
+    /// half of this pin retired with it.
     /// **Bring back** lands the original beside its successors through the
     /// one shared composition the tray's own door calls; **Open this note's
     /// tray** is raised as a CALLBACK the host answers, which is how the
@@ -185,23 +202,16 @@ struct RecoveryDoorsTests {
                 try Queries.unplacedOrigins(db, ofBlock: originBlockID)
             }
             let origin = try #require(origins.first)
-            let history = BlockHistoryModel(
-                session: editor.session, postID: editor.postID,
-                blockID: originBlockID)
-
-            // The tray door is a request the HOST answers — the pane never
-            // opens a panel over itself.
-            var trayAskedFor: String?
-            let pane = BlockHistoryPane(
+            let history = LineageFaceModel(
                 session: editor.session,
-                request: BlockHistoryRequest(
-                    postID: editor.postID, blockID: originBlockID),
-                onOpenTray: { trayAskedFor = $0 }, model: history)
-            pane.onOpenTray?(origin.blockID)
-            #expect(trayAskedFor == origin.blockID,
-                    "the host decides where the tray opens — no sheet over a sheet")
+                request: BlockHistoryRequest(postID: editor.postID, blockID: originBlockID),
+                select: origin.blockID)
+            history.adopt(try await editor.database.read { db in
+                try LineageFaceModel.read(db, blockID: originBlockID)
+            })
+            #expect(history.selectedBlockID == origin.blockID)
 
-            await history.bringBack(origin.blockID)
+            await history.putBack()
             #expect(history.status == .receipt(TrayPath.putBackBeside))
             #expect(try editor.storeSlots().map(\.blockID)
                 == [w.first.block.id, w.second.block.id, slot.blockID, tail],
@@ -226,10 +236,15 @@ struct RecoveryDoorsTests {
                 try Queries.unplacedOrigins(db, ofBlock: originBlockID)
             }
             let origin = try #require(origins.first)
-            let history = BlockHistoryModel(
-                session: editor.session, postID: editor.postID,
-                blockID: originBlockID)
-            await history.bringBack(origin.blockID)
+            // VX-827 U3b — A JUSTIFIED EDIT: the Lineage face's Put back.
+            let history = LineageFaceModel(
+                session: editor.session,
+                request: BlockHistoryRequest(postID: editor.postID, blockID: originBlockID),
+                select: origin.blockID)
+            history.adopt(try await editor.database.read { db in
+                try LineageFaceModel.read(db, blockID: originBlockID)
+            })
+            await history.putBack()
             #expect(history.status == .refusal(TrayRefusalCopy.sealed))
             #expect(history.status?.isRefusal == true)
         }
@@ -252,6 +267,12 @@ struct RecoveryDoorsTests {
     /// The block's whole time, as the PANE reads it: its came-from, its
     /// deleted takes, and nothing at all on an ordinary block (a region
     /// renders only where there is something to say — P-2).
+    ///
+    /// **VX-827 U3b — A JUSTIFIED EDIT (this pin and the Put back pins
+    /// below):** the pane retired whole; the Commits face reads the block's
+    /// time through the same projection (its origins are the Lineage face's
+    /// to show — `LineageFamilyTests`), and its deleted takes' Put back is the
+    /// same act with the same receipts and refusals.
     @Test func theBlockHistoryPaneCarriesLineageAndDeletedTakes() async throws {
         try await withEditor(seedBlocks: ["Alpha one. Beta one."]) { editor in
             let ops = editor.session.operations
@@ -263,12 +284,11 @@ struct RecoveryDoorsTests {
             try editor.reload()
 
             let successor = w.first.block.id
-            let past = BlockHistoryModel(
-                session: editor.session, postID: editor.postID, blockID: successor)
+            let past = CommitsFaceModel(session: editor.session, request: BlockHistoryRequest(postID: editor.postID, blockID: successor))
             past.adopt(try await editor.database.read {
-                try Queries.blockHistory($0, blockID: successor, now: harnessNow)
+                try CommitsFaceModel.read($0, blockID: successor, now: harnessNow)
             })
-            #expect(!past.isEmpty)
+            #expect(!past.history.isEmpty)
             #expect(past.history.origins.map(\.origin.blockID) == [slot.blockID])
             #expect(past.history.origins.first?.origin.originOp == "divide")
             #expect(past.history.deletedTakes.isEmpty)
@@ -278,19 +298,18 @@ struct RecoveryDoorsTests {
             try ops.setTakeLabel(extra.id, label: "second thoughts")
             try ops.deleteVariant(extra.id)
             past.adopt(try await editor.database.read {
-                try Queries.blockHistory($0, blockID: successor, now: harnessNow)
+                try CommitsFaceModel.read($0, blockID: successor, now: harnessNow)
             })
             #expect(past.history.deletedTakes.map(\.id) == [extra.id])
             #expect(BlockPastCopy.rowLabel(past.history.deletedTakes[0]) == "second thoughts")
 
             // …and an ordinary block's pane has nothing to show.
             let plain = try ops.newBlock(in: editor.postID, text: "ordinary")
-            let plainPast = BlockHistoryModel(
-                session: editor.session, postID: editor.postID, blockID: plain.block.id)
+            let plainPast = CommitsFaceModel(session: editor.session, request: BlockHistoryRequest(postID: editor.postID, blockID: plain.block.id))
             plainPast.adopt(try await editor.database.read {
-                try Queries.blockHistory($0, blockID: plain.block.id, now: harnessNow)
+                try CommitsFaceModel.read($0, blockID: plain.block.id, now: harnessNow)
             })
-            #expect(plainPast.isEmpty)
+            #expect(plainPast.history.isEmpty)
         }
     }
 
@@ -304,8 +323,7 @@ struct RecoveryDoorsTests {
             let extra = try ops.branchVariant(slot.blockID, from: chosen)
             try ops.deleteVariant(extra.id)
 
-            let past = BlockHistoryModel(
-                session: editor.session, postID: editor.postID, blockID: slot.blockID)
+            let past = CommitsFaceModel(session: editor.session, request: BlockHistoryRequest(postID: editor.postID, blockID: slot.blockID))
             await past.putBackTake(extra.id)
             #expect(past.status == .receipt(BlockPastCopy.takeRestored))
             let fan = try await editor.database.read {
@@ -326,8 +344,7 @@ struct RecoveryDoorsTests {
             try ops.deleteVariant(extra.id)
             try ops.lockPost(editor.postID)
 
-            let past = BlockHistoryModel(
-                session: editor.session, postID: editor.postID, blockID: slot.blockID)
+            let past = CommitsFaceModel(session: editor.session, request: BlockHistoryRequest(postID: editor.postID, blockID: slot.blockID))
             await past.putBackTake(extra.id)
             #expect(past.status == .refusal(TrayRefusalCopy.sealed))
         }
@@ -348,8 +365,7 @@ struct RecoveryDoorsTests {
             let extra = try ops.branchVariant(slot.blockID, from: chosen)
             try ops.deleteVariant(extra.id)
 
-            let past = BlockHistoryModel(
-                session: editor.session, postID: editor.postID, blockID: slot.blockID)
+            let past = CommitsFaceModel(session: editor.session, request: BlockHistoryRequest(postID: editor.postID, blockID: slot.blockID))
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 480, height: 220),
                 styleMask: [.titled], backing: .buffered, defer: false)
@@ -358,11 +374,14 @@ struct RecoveryDoorsTests {
                 window.orderOut(nil)
                 window.close()
             }
-            let hosting = NSHostingView(rootView: BlockHistoryPane(
+            // VX-827 U3b — A JUSTIFIED EDIT: the surface that succeeds the pane
+            // is mounted — the A1 class (a mount that must start its own
+            // observation) moves with it.
+            let hosting = NSHostingView(rootView: CommitsFaceView(
                 session: editor.session,
                 request: BlockHistoryRequest(
                     postID: editor.postID, blockID: slot.blockID),
-                model: past))
+                onBack: {}, model: past))
             hosting.frame = NSRect(x: 0, y: 0, width: 480, height: 220)
             window.contentView = hosting
             window.orderFrontRegardless()
@@ -402,8 +421,7 @@ struct RecoveryDoorsTests {
             #expect(BlockPastCopy.putBackHelp(try #require(listed.first))
                 .contains("archived takes"))
 
-            let past = BlockHistoryModel(
-                session: editor.session, postID: editor.postID, blockID: slot.blockID)
+            let past = CommitsFaceModel(session: editor.session, request: BlockHistoryRequest(postID: editor.postID, blockID: slot.blockID))
             await past.putBackTake(extra.id)
             #expect(past.status == .receipt(BlockPastCopy.takeRestoredArchived),
                     "the receipt reads the op's own status — never \"the fan\" here")

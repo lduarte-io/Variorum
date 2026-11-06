@@ -20,6 +20,12 @@
 //  VX-692 (F-B3-1): no closure-bearing expression sits inside `#expect` or
 //  `#require` here — every value is bound to a local first.
 //
+//  **VX-827 U3b — A JUSTIFIED EDIT:** the Block History panel's row view
+//  (`CommitRowView`) retired with the panel; the ruled rule lives on in the
+//  Commits face's rail, whose moment words are `CommitsRailWords` — so the
+//  two drawing pins read THAT view (the same claims: muted first words when
+//  unnamed, the name alone when named, one line).
+//
 
 import AppKit
 import Foundation
@@ -43,12 +49,8 @@ struct CommitRestingPreviewTests {
             message: message, createdAt: now.addingTimeInterval(-3_600))
     }
 
-    private static func row(_ commit: CommitPoint, tokens: VoiceTokens) -> CommitRowView {
-        CommitRowView(
-            commit: commit, tokens: tokens, predatesSplit: false, now: Self.now,
-            renameOpensField: true, renameAsk: .constant(nil),
-            onName: {}, onRename: { _ in }, onRestore: {},
-            expanded: false, onToggle: {}, onReadInFull: {})
+    private static func row(_ commit: CommitPoint, tokens: VoiceTokens) -> CommitsRailWords {
+        CommitsRailWords(commit: commit, archivedTake: false, tokens: tokens)
     }
 
     /// Every value of type `T` reachable in `subject`'s stored structure, not
@@ -91,8 +93,9 @@ struct CommitRestingPreviewTests {
 
         let quiet = CommitRowFace.restingWords(Self.commit("Quiet words, saved on their own.", kind: .auto))
         #expect(quiet == "Quiet words, saved on their own.")
-        let quietGlyph = CommitRowFace.kindGlyph(Self.commit("x", kind: .auto))
-        #expect(quietGlyph == CommitRowFace.quietGlyph, "the ◦ is unchanged")
+        // (VX-827 U3b — A JUSTIFIED EDIT: the panel row's ◦ glyph retired with
+        // the row; the Commits face's rail marks a quiet moment with its
+        // hollow dot.)
 
         let blankName = CommitRowFace.restingWords(Self.commit("Words under a blank name.", message: "   "))
         #expect(blankName == "Words under a blank name.", "a blank name is no name")

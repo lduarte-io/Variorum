@@ -28,4 +28,14 @@ extension MCPWriteTools {
     /// uncounted"), under the same always-present key. PROVISIONAL (P-809-1's
     /// family — her sketch's construction, its noun the answer's).
     static let beyondReachNotesWords = "Notes beyond your reach, if any, are not counted."
+
+    /// `read_note`'s `with_lineage` answer (VX-827 U1 — her F-U1-1 ruling,
+    /// "Retire the stub": a lineage far side beyond reach is absent, never a
+    /// per-edge stub). The wording is HELD FOR HER (QUESTIONS #264).
+    static let beyondReachLineageWords = "Lineage beyond your reach, if any, is not listed."
+
+    /// `list_note_lineage`'s answer (VX-827 U1 — P-U1-d): a peer note beyond
+    /// reach is simply absent. PROVISIONAL (P-809-1's family; wording hers,
+    /// QUESTIONS #264).
+    static let beyondReachNotesListedWords = "Notes beyond your reach, if any, are not listed."
 }

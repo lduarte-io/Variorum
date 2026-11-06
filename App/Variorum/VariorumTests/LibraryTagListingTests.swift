@@ -174,8 +174,13 @@ struct LibraryTagListingTests {
             await model.search()
             #expect(model.blockHits.map(\.id) == [scrap.block.id] && model.noteHits.isEmpty)
             #expect(model.blockHits.first?.homeIsPool == true && model.blockHits.first?.title == "a classic line")
-            #expect(model.searchState.counts?.living.blocks == 1 && model.searchState.counts?.living.notes == 3,
-                    "the band counts the whole question, whatever the scope (D3)")
+            // JUSTIFIED EDIT (VX-819 batch 1, VX-734 — her R-819-1 and the
+            // sitting's coherent extension, PROVISIONAL): this line said "the
+            // band counts the whole question, whatever the scope (D3)" —
+            // `notes == 3` under Blocks, which lists no note. A picked facet's
+            // band now counts what it lists: the one block, no note.
+            #expect(model.searchState.counts?.living.blocks == 1 && model.searchState.counts?.living.notes == 0,
+                    "the Blocks facet's band counts the blocks it lists — never the notes it does not")
             // Ladder R1 MINOR (U-A AGREED): with the facet toggled, a block
             // whose HOME is archived joins the Blocks listing WEARING its
             // fact — the row says which it is (R-13o-6; the note rows'

@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-827 — Umbrella: lineage, both faces** (VX-801 the lineage door — glance popover + the full Blocks surface; VX-817 reverse lineage on the wire; VX-810 list-by-tag + tags/entry_date in the JSON reads; VX-815 the granted-empty note says so). Surfaces: the MCP door (wire reads), Blocks mode + editor chrome, `Queries` (lineage CTE). NO `Sync/`, no custody, no DDL — runs beside the sync-slot efforts; shares `MCP/` files with VX-808's riders, so merges serialize via nov5. | VX-827 · `vx-827-lineage` | `~/dev/variorum-vx-827` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-827-lineage.md`. |
 | **VX-808 — Umbrella: Arrivals & books** (wave 2's sync-slot effort; twelve members by sub-issue listing: VX-811 · VX-821 · VX-803 · VX-857 · VX-775 · VX-776 · VX-777 · VX-859 · VX-879 · VX-867 · VX-860 · VX-872). **HOLDS THE Sync/-custody SLOT** and carries the wave's ONE SyncSpec §12 lockstep event (`reading_post`'s arrival-provenance + pin columns, one marker bump; mirror deploy HELD for her window). Surfaces: `Sources/VariorumCore/Sync/` (the general book wing mend, the new columns' classification), Persistence migrations + the mirror artifact, Operations (intake/arrivals, the membership pin), the MCP door (bulk propose + riders — SHARES `MCP/` files with VX-827), the Bookcase & books (the Arrivals review face, book-order pins — SHARES book faces with VX-878), the capability registry (three-way: 878 · 827 · us), `AppBootstrap` (VX-860), `ShortcutCatalog` (VX-867). NO editor seam. Fable cold-reviews (Sync/ class). | VX-808 · `vx-808-arrivals-books` | `~/dev/variorum-vx-808` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-808-arrivals-books.md`; coordinator nov5. |
 | **VX-861 — Run: stargazing.tech** (the open-source banner + readme note VX-862, robots + sitemap VX-836, the MCP guide + privacy page catch-up VX-876). SITE REPO ONLY — no app surface, no store, no stage; kept off the site's master so the 1.2 release publish lands there freely. | VX-861 · `vx-861-site-open-source-banner` in `~/dev/stargazing.tech/stargazing-tech` | the Air's site clone · the Air | Live 2026-11-05; record `notes/runs/vx-861-site-open-source-banner.md` in the site repo. |
 | **VX-865 — the /variorum explainers rebuilt in SVG** (the version-control panel's animation; her word 2026-11-05). SITE REPO ONLY — no app surface, no store, no stage; runs beside VX-861 at her word, in its own worktree. | VX-865 · `vx-865-version-control-explainers` | `~/dev/stargazing.tech/stargazing-tech-vx-865` · the Air | Live 2026-11-05; record `notes/runs/vx-865-version-control-explainers.md` in the site repo. |
@@ -21,22 +20,26 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | **VX-882 — the Tags explainer, simpler example** (writing · fiction · nonfiction), parallel to VX-877 at her word 2026-11-05; she picks one. SITE REPO ONLY; its own worktree. | VX-882 · `vx-882-tags-explainer-simple` | `~/dev/stargazing.tech/stargazing-tech-vx-882` · the Air | Live 2026-11-05; record `notes/runs/vx-882-tags-explainer-simple.md` in the site repo. |
 | **VX-884 — the books-loop animation, exact** (her script's site loop rebuilt as written), parallel at her word 2026-11-05. SITE REPO ONLY; its own worktree. | VX-884 · `vx-884-books-loop-exact` | `~/dev/stargazing.tech/stargazing-tech-vx-884` · the Air | Live 2026-11-05; record `notes/runs/vx-884-books-loop-exact.md` in the site repo. |
 | **VX-885 — the books-loop animation, freer** (same concept and look, own examples and wording), parallel at her word 2026-11-05. SITE REPO ONLY; its own worktree. | VX-885 · `vx-885-books-loop-free` | `~/dev/stargazing.tech/stargazing-tech-vx-885` · the Air | Live 2026-11-05; record `notes/runs/vx-885-books-loop-free.md` in the site repo. |
-| **VX-819 — Umbrella: search** (wave 2; members VX-734 Blocks-facet mismatch · VX-820 recency sort · VX-822 sidebar search door). Surfaces: the Library (search, controls row) + the sidebar; NO Sync/, NO custody, NO editor seam; stage only for Mac suite runs/walks (coordinator: nov5). | VX-819 · `vx-819-search` | `~/dev/variorum-vx-819` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-819-search.md`. |
 
 ### Latest closeout
 
-**→ VX-878 CLOSED 2026-11-06 — BOOK DOORS & FACES (the record `notes/plans/fixes/vx-878-book-doors-faces.md`,
-FOR A LATER READER at its top; the VX-808 split's no-sync half, run overnight under /architect-phase, nov5 coordinating).**
-Nine members, four batches, one fable ladder round (no BLOCKER/MAJOR; the F3 dispute resolved reviewer-side — its own
-proposed fix would have broken R-878-K3). The book-row menu is ONE registry table with two derived faces; Book Settings
-gained the wing row; the note-title menu carries the note's own doors; the plain-book delete reads in both arms; a rename
-repaints in place; the book name guard is PER-WING (phone included — MobileSoul PL-69); the Private mark (her closed eye,
-the approved-client gate R-878-K3, the click-door's two arms); the trail's float/dismiss/clear-all/drag + the three-state
-dial on Settings ▸ MCP ▸ Activity (moved there by the window fix after the whole-target gate caught its first seat breaking
-VX-281's pane geometry); the seven-receipt gone-words sweep; the masthead's one-line mode row (R-878-K4 strict). The gate:
-whole-target 6077/1054 + the six-file fix + 92/11 green + phone 852/139; every bug-class pin RUN RED live on its pre-fix
-tree. Born VX-889; VX-855's second sighting commented. Bundle QUESTIONS #264; handoff `notes/handoffs/vx-878-handoff.md`.
-Canon: SurfaceContracts ×6 · MCPSpec ×4 · AppSpec ×2 (135,032/150,000). PR #229, merge 35a98fb6a.
+**→ VX-827 CLOSED 2026-11-06 — LINEAGE, BOTH FACES (the record `notes/plans/fixes/vx-827-lineage.md`, FOR A LATER
+READER at its top; wave 2, /architect-phase, nov5 coordinating).** Five members (VX-801 · VX-817 · VX-810 · VX-815 +
+her kickoff rider VX-778). The wire: `list_note_lineage` (one hop, both-ends-readable, the VX-812 list form), tags +
+`entry_date` on `list_notes` rows and tags in `read_note`'s JSON, the `list_notes` tag filter, the granted-empty
+sentence, and `with_lineage`'s per-edge beyond-grant stub RETIRED at her F-U1-1 ruling (a probe-proven R-825
+collision — absent + one fixed scope sentence; the residuals ledger gained no row). The app: the History & Lineage
+surface succeeds Block History WHOLE (the Commits face's pane + all-takes rail + fast swapper + quiet folds; Compare
+with swappable boxes and the standing "now" third; the vertical Lineage face with the ancestor swap onto ONE shared
+composition; the origin doors landing with the original selected), `Operations.bringBackFromLineage` (U3b-P ruled),
+`Domain/TextCompare` + `CommitRail` + `LineageFamily`, `Queries.lineagePeers`/`lineageTree` (VX-654's discipline,
+P1-pinned). Her design sat FIVE mockup rounds + two Opus explorations in one night; THE DESIGN MEMO in the record is
+the binding shape. The ladder closed at two rounds 0 B/0 M; the gates: the whole target 6091/1056 0-failures, the
+phone 852/139 (the one red = VM-24/34/37's standing), the 17-row live walk (NO product defect; six rows deferred with
+pins named), the post-819 full suite + the 9-suite smoke green on the merged tip. Canon: MCPSpec's stub supersession
++ the lineage/tag/empty reads, SurfaceContracts' History & lineage bullet, AppSpec §9's `bringBackFromLineage`.
+Bundle QUESTIONS #266; handoff `notes/handoffs/vx-827-handoff.md`. Born: VX-892 (the dangling-wing pair, Low) ·
+VM-41 (the phone parity ticket — the MOBILE PARITY line is PL-70). PR #231, merge 602077445.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
