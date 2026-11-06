@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VX-821 — the Arrivals review area (R-808-5 mockup)</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db; --sea:#c2ddd3; --seadeep:#5d8273;
+    --select:#eef4f1;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 80px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 28px;max-width:78ch;line-height:1.5;}
+  h2{font-size:17px;margin:40px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:72ch;line-height:1.45;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:980px;margin:0 0 10px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;position:relative;}
+  .tag{display:inline-block;background:#fff;border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin-bottom:8px;letter-spacing:.3px;font-family:ui-sans-serif,system-ui;}
+  .masthead{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;border-bottom:1px solid var(--hair);}
+  .crumb{font-size:17px;color:var(--rust);font-weight:600;}
+  .crumb .home{color:var(--ink);font-weight:600;}
+  .crumb .dot{color:var(--muted);font-weight:400;padding:0 6px;}
+  .mastright{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:14px;}
+  .mastright b{color:var(--ink);font-weight:600;}
+  .door{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--hair);border-radius:6px;padding:2px 9px;background:#fff;}
+  .door.waiting{border-color:var(--seadeep);color:var(--seadeep);font-weight:600;}
+  .modes{display:flex;gap:18px;padding:8px 20px;border-bottom:1px solid var(--hair);color:var(--muted);font-size:13.5px;}
+  .modes .on{color:var(--ink);font-weight:600;border-bottom:2px solid var(--rust);padding-bottom:2px;}
+  /* the review surface */
+  .review-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px 12px;}
+  .review-head h3{font-size:16.5px;margin:0;font-weight:600;}
+  .review-head .doors{display:flex;gap:10px;align-items:center;}
+  .btn{font-family:ui-sans-serif,system-ui;font-size:12.5px;border:1px solid var(--hair);background:#fff;border-radius:6px;padding:4px 12px;color:var(--ink);}
+  .btn.primary{background:var(--accent-fill);border-color:#d8cdc0;}
+  .btn.quietdone{color:var(--muted);}
+  .rows{border-top:1px solid var(--hair);}
+  .row{display:flex;gap:14px;padding:13px 22px;border-bottom:1px solid var(--hair);align-items:flex-start;}
+  .row.sel{background:var(--select);}
+  .cb{width:15px;height:15px;border:1.5px solid #b9b0a5;border-radius:4px;margin-top:3px;flex:none;background:#fff;}
+  .row.sel .cb{background:var(--seadeep);border-color:var(--seadeep);position:relative;}
+  .row.sel .cb:after{content:"✓";color:#fff;font-size:11px;position:absolute;left:2.5px;top:-1px;font-family:ui-sans-serif;}
+  .rowbody{flex:1;min-width:0;}
+  .rowtitle{font-size:15px;font-weight:600;}
+  .rowtitle .faint{color:var(--muted);font-weight:400;font-style:italic;}
+  .why{color:var(--muted);font-size:13px;margin-top:3px;line-height:1.45;}
+  .why .cause{color:var(--ink);}
+  .why .reason{color:var(--rust);font-style:italic;}
+  .why .since{white-space:nowrap;}
+  .ownline{color:var(--muted);font-size:12.5px;margin-top:2px;}
+  .arms{display:flex;gap:8px;flex:none;margin-top:2px;}
+  .arm{font-family:ui-sans-serif,system-ui;font-size:12px;border:1px solid var(--hair);background:#fff;border-radius:6px;padding:3px 11px;}
+  .arm.add{border-color:#cfe0d8;background:#f3f8f6;}
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:11px 22px;background:var(--washlite);border-top:1px solid var(--hair);font-size:13px;color:var(--muted);}
+  .bar .lead b{color:var(--ink);}
+  .bar .doors{display:flex;gap:10px;align-items:center;}
+  .keys{font-family:ui-sans-serif,system-ui;font-size:12px;letter-spacing:.2px;}
+  .receipt{color:var(--muted);font-size:12.5px;font-style:italic;}
+  /* confirm sheet */
+  .sheetveil{background:rgba(60,50,40,.18);padding:46px 0;}
+  .sheet{background:var(--paper);border:1px solid var(--hair);border-radius:12px;max-width:430px;margin:0 auto;padding:22px 24px;box-shadow:0 12px 40px rgba(60,50,40,.22);}
+  .sheet h4{margin:0 0 8px;font-size:15.5px;}
+  .sheet p{margin:0 0 18px;color:var(--muted);font-size:13.5px;line-height:1.5;}
+  .sheet .doors{display:flex;justify-content:flex-end;gap:10px;}
+  .caption{color:var(--muted);font-size:12.5px;max-width:72ch;line-height:1.5;margin:6px 0 0;}
+  .prov{background:#fff;border:1px solid var(--hair);border-radius:8px;max-width:980px;padding:14px 18px;color:var(--muted);font-size:13px;line-height:1.55;margin-top:36px;}
+  .prov b{color:var(--ink);}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--wash);padding:0 4px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<h1>The Arrivals review area</h1>
+<p class="sub">VX-821 under the VX-808 run — your R-808-5 pick built: <b>the full book area, one home</b>. The masthead Arrivals door opens this surface over the book's content; Done (or esc, a mode tab, any navigation) returns the mode exactly as left; the old popover is retired. Every sentence below is the <i>built</i> copy, verbatim from <code>ArrivalsReviewCopy.swift</code> — all PROVISIONAL, yours to re-cut at the bundle.</p>
+
+<h2>1 · The queue at rest</h2>
+<p class="note">The door (beside the gear) shows the count; clicking it opens the review. Rows say <i>why they wait</i> and <i>since when</i>; a proposal's reason is the client's own words, quoted. Opening a row's name opens the note read-normal — it never adds. The ownership arms are per-row data, exactly the popover's.</p>
+<div class="mock">
+  <div class="masthead">
+    <div class="crumb"><span class="home">harbour notes</span><span class="dot">·</span>6 notes</div>
+    <div class="mastright"><span class="door waiting">⊙ 6</span><span>⚙</span></div>
+  </div>
+  <div class="modes"><span>Outline</span><span>Index</span><span class="on">Arrivals</span><span>Book</span><span>Read</span></div>
+  <div class="review-head">
+    <h3>Arrivals — 6 waiting</h3>
+    <div class="doors"><button class="btn">Add all</button><button class="btn">Dismiss all</button><button class="btn quietdone">Done</button></div>
+  </div>
+  <div class="rows">
+    <div class="row"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">What the tide left</div>
+      <div class="why"><span class="cause">Proposed by Claude Code</span> — <span class="reason">“seems to be about the harbour's winter mornings”</span> · <span class="since">waiting since 2 hours ago</span></div>
+    </div><div class="arms"><span class="arm add">Add</span><span class="arm">Dismiss</span></div></div>
+    <div class="row"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">On mending nets</div>
+      <div class="why"><span class="cause">Matched the book’s new rule</span> · <span class="since">waiting since yesterday</span></div>
+    </div><div class="arms"><span class="arm add">Add</span><span class="arm">Dismiss</span></div></div>
+    <div class="row"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">Morning pages, <span class="faint">tuesday</span></div>
+      <div class="why"><span class="cause">Tagged #harbour</span> · <span class="since">waiting since yesterday</span></div>
+    </div><div class="arms"><span class="arm add">Add</span><span class="arm">Dismiss</span></div></div>
+    <div class="row"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">The long way home</div>
+      <div class="why"><span class="cause">Caught up after un-archiving</span> · <span class="since">waiting since 3 days ago</span></div>
+    </div><div class="arms"><span class="arm add">Add</span><span class="arm">Dismiss</span></div></div>
+    <div class="row"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">A letter I won’t send</div>
+      <div class="why"><span class="cause">Filed here from another wing — the note lives with another book now</span> · <span class="since">waiting since 4 days ago</span></div>
+    </div><div class="arms"><span class="arm add">Add</span><span class="arm">Dismiss</span></div></div>
+    <div class="row"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">Notes from the nursery visit</div>
+      <div class="why"><span class="cause">Tagged #harbour</span> · <span class="since">waiting since 5 days ago</span></div>
+      <div class="ownline">owned by “garden log” — Copy in makes this book its own copy</div>
+    </div><div class="arms"><span class="arm">Copy in</span><span class="arm">Dismiss</span></div></div>
+  </div>
+  <div class="bar"><span class="lead keys">↑ ↓ walk · ⏎ adds · ⌫ dismisses · ⌘A selects all</span><span class="receipt"></span></div>
+</div>
+<p class="caption">The bar's lead is the keys hint while nothing is picked. The sixth row shows the owned-elsewhere arm: Add never runs there — Copy in or Move in decides, your choice at the add, never the proposer's.</p>
+
+<h2>2 · A selection</h2>
+<p class="note">Click, ⇧/⌘ extend, ⌘A. The bar flips to the selection's own doors; ⏎ and ⌫ act on the selection while one exists.</p>
+<div class="mock">
+  <div class="review-head">
+    <h3>Arrivals — 6 waiting</h3>
+    <div class="doors"><button class="btn">Add all</button><button class="btn">Dismiss all</button><button class="btn quietdone">Done</button></div>
+  </div>
+  <div class="rows">
+    <div class="row sel"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">What the tide left</div>
+      <div class="why"><span class="cause">Proposed by Claude Code</span> — <span class="reason">“seems to be about the harbour's winter mornings”</span> · <span class="since">waiting since 2 hours ago</span></div>
+    </div><div class="arms"><span class="arm add">Add</span><span class="arm">Dismiss</span></div></div>
+    <div class="row sel"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">On mending nets</div>
+      <div class="why"><span class="cause">Matched the book’s new rule</span> · <span class="since">waiting since yesterday</span></div>
+    </div><div class="arms"><span class="arm add">Add</span><span class="arm">Dismiss</span></div></div>
+    <div class="row sel"><div class="cb"></div><div class="rowbody">
+      <div class="rowtitle">Notes from the nursery visit</div>
+      <div class="why"><span class="cause">Tagged #harbour</span> · <span class="since">waiting since 5 days ago</span></div>
+      <div class="ownline">owned by “garden log” — Copy in makes this book its own copy</div>
+    </div><div class="arms"><span class="arm">Copy in</span><span class="arm">Dismiss</span></div></div>
+  </div>
+  <div class="bar"><span class="lead"><b>3 selected</b></span><div class="doors"><button class="btn primary">Add 3</button><button class="btn">Dismiss 3</button><button class="btn quietdone">Done</button></div></div>
+</div>
+<p class="caption">Pressing Add 3 here lands two and speaks ONE message with both facts (the third needs your choice): <i>“Added 2 notes at the end of the book. “Notes from the nursery visit” waits on your choice — it lives in another book, so Copy in or Move in on its row decides.”</i> The choice row stays selected and waiting — a retry is one press.</p>
+
+<h2>3 · Dismiss all asks once</h2>
+<p class="note">Dismissal leaves no visible trace and has no undo, and “all” can reach rows below the fold — so the one confirm stands guard. Add has none: its result is visible in the book.</p>
+<div class="mock"><div class="sheetveil"><div class="sheet">
+  <h4>Dismiss all 6 waiting notes?</h4>
+  <p>None of them will come back on their own — you can still add any of them by hand.</p>
+  <div class="doors"><button class="btn">Cancel</button><button class="btn primary">Dismiss 6</button></div>
+</div></div></div>
+<p class="caption">The count is read once at the press — the confirm's number is exactly the set it acts on; a note arriving after the ask is not swept in.</p>
+
+<h2>4 · Nothing waiting</h2>
+<div class="mock">
+  <div class="review-head">
+    <h3>Arrivals — nothing waiting</h3>
+    <div class="doors"><button class="btn quietdone">Done</button></div>
+  </div>
+  <div class="rows"><div class="row"><div class="rowbody">
+    <div class="why">Nothing is waiting. Notes this book’s rule brings in while its dial says “wait at Arrivals,” and notes an AI proposes, wait here for you.</div>
+  </div></div></div>
+</div>
+<p class="caption">After the last row is judged the review stays open on this answer; you leave by Done (P-808-B3-4).</p>
+
+<div class="prov">
+  <b>What this mirrors, and what's open.</b> Everything above is the built behavior at commit <code>04b1c20ec</code> on <code>vx-808-arrivals-books</code>: R-808-5 (full book area, one home, popover retired) + A-808-11 (per-row acts, no undo, one message per press, the Dismiss-all confirm, "all" = the header's N). The why-lines cover A-808-6's nine kinds; rows older than this build show since-when alone. <b>PROVISIONAL, yours at the bundle:</b> every sentence here (P-808-B3-3), the no-undo + single-confirm shape (P-808-B3-2), esc-means-Done and ⇧-arrow selection (P-808-B3-5), the empty state staying open (P-808-B3-4), the client named only on proposed · rule edit · tagged · starred (P-808-B3-7). Wording edits: say them in plain chat and I'll route them to the batch.
+</div>
+
+</body>
+</html>
