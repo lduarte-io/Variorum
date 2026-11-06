@@ -75,7 +75,11 @@ END (or in the closeout checklist) saying the ladder added P-U3a-5b and P-U3b-14
   `shownTakeIDs` private). No pin names the query.
 - **Suites, re-run myself on the fix-leg tree (headless):** `LineageBringBackTests` 12/12
   (the op the fix feeds, untouched by the leg — confirmed via the code diff);
-  `MCPEditServerTests` 10/10 (the renamed divide call site, end to end).
+  `MCPEditServerTests` 10/10 (the renamed divide call site, end to end); and
+  `xcodebuild … build-for-testing` (Mac, Debug) **re-run green by this reviewer at review head**
+  (`** TEST BUILD SUCCEEDED **`) — the two F1 pins compile on the final tree, so the recipe is
+  runnable. (The two commits after the fix leg, b384fc012 and 757828bf6, are record-only — the
+  code diff at review head is still exactly the five files.)
 - **Nothing new entered with the fix leg.** The leg touches no `Sync/`, no custody, no DDL, no
   editor-seam file (the five files re-checked by name); the new SQL helpers are two indexed
   single-row reads (`uq_cblock_ownership`) — P1 ∝ one block; the scraps arm works through the same
