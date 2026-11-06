@@ -188,3 +188,15 @@ carries the shared `noteRenameAlert` modifier both features now render).
 
 **Mandatory foci:** the phase plan carries no "Review foci" section; the orchestrator's one held
 observation (NoteRename's layer placement) is answered as F2.
+
+---
+
+## ORCHESTRATOR DISPOSITIONS (round 1 — before the fix session; the cross-model flow: findings go to the implementer VERBATIM, its agree/dispute returns to the reviewer for the final call, the implementer applies the confirmed fixes)
+
+- **F1 (MINOR, the dangling-wing destination): BUILD** — with the reviewer's named pin (dead-wing fixture → Home not offered; expected RED on this head), revert-verified; prefer the one-heal shape (normalize inside `destinations(from:)`) unless the survey argues otherwise.
+- **F2 (MINOR, NoteRename's home): BUILD** — the mechanical move to `Core/Views/`, the shared-home-at-next-touch rule; no pin owed (clarity class), existing pins expected to pass unmodified (the 3C parity bar).
+- **F3 (NIT, the empty HStack slot): BUILD** — the reviewer's one-line emptiness check; cheap, and the calm state's chrome should not pay an air slot.
+- **F4 (NIT, spawnPrefill's later home): RECORD-ONLY** — as the reviewer scoped it ("no action demanded"); noted for a later touch.
+- **P-a: ALREADY DONE** — the ticket is **VX-889** (filed 2026-11-06, Bug · Confirmed · Settings & onboarding · Medium), minted before this round.
+- **P-b: ON THE CLOSEOUT PLAN** — the canon drafts (batches 3–4's CANON DRAFT sections) land at closeout in the two-file shape; the reviewer's falsified-until-then observation is exactly why they are staged.
+- **P-c: ACKNOWLEDGED** — the closing window's runs are the evidence of record; the record says so honestly throughout.
