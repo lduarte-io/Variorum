@@ -289,13 +289,19 @@ final class MCPSession: @unchecked Sendable {
     /// design, so reconnect once it's back (e.g. with /mcp); while it's locked,
     /// calls say so until it's unlocked." 3,061 → 3,089, inside 3,100. PROVISIONAL
     /// (P-809-4's family, her copy pass).
+    ///
+    /// VX-811's docs tail (the VX-808 run, Unit B5 — A-808-10): the READ rung
+    /// says it proposes ("read (read, search and propose)") — a read-rung client
+    /// sends notes to a book's Arrivals with `propose_notes_to_book`, listed to it
+    /// beside the reads, its own description saying the rest. No trade: 3,089 →
+    /// 3,098, inside 3,100. PROVISIONAL words (her bundle).
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open while Variorum runs: quitting it ends every connection, by design, \
         so reconnect once it's back (e.g. with /mcp); while it's locked, calls say so until it's unlocked. A new client is a connection request until the author approves \
         it in Variorum \u{25B8} Settings \u{25B8} MCP. Once approved, list_my_activity is always listed; \
         other tools appear only for what the author has shared (re-announced when that changes).
-        Grants have four rungs, each including those before it: read (read and search), \
+        Grants have four rungs, each including those before it: read (read, search and propose), \
         suggest (add takes and comments beside their text, save lenses), \
         write new (new notes, books, chapters, tags, versions; blocks added at a note's end), \
         edit (most of what the author can do at the keyboard: edit, choose and commit takes; \

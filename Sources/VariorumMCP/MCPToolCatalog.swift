@@ -921,7 +921,8 @@ enum MCPToolCatalog {
         description: """
             Add a note to a book (at its end), optionally filed under one of the book's chapters \
             (section_id — from list_notes or create_section). Both must be shared with this client \
-            at write new. A book that owns its notes takes no note another book holds, and a note \
+            at write new; with read alone, propose_notes_to_book sends notes to the book's Arrivals \
+            for the author to add instead. A book that owns its notes takes no note another book holds, and a note \
             such a book owns joins no other book: the refusal says which in the author's words, or, \
             when what holds the note is beyond your reach, in one fixed sentence that names nothing \
             (the author can add it in Variorum). Returns JSON; its tag_ids and tags (their paths) \
@@ -2199,7 +2200,10 @@ enum MCPToolCatalog {
             order the book shows its notes in, exactly as set_book_order does — and so, like it, \
             needs edit on the book (the rest needs write new) and is refused on a finished or \
             sealed book. A gathering's rule stays the author's (its order is set_book_order's). One \
-            undo for the author. Returns JSON with the book's collecting facts and its order.
+            undo for the author. Returns JSON with the book's collecting facts and its order; when a \
+            rule lands, matches_wait says its matches wait at Arrivals, \(MCPBookFacts.waitingCountKey) \
+            how many of them you can read, and \(MCPWriteTools.beyondReachKey) that notes beyond your \
+            reach, if any, are not counted.
             """,
         inputSchema: .object([
             "type": "object",

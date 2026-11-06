@@ -78,8 +78,34 @@ struct MCPDocsTailTests {
 
     /// R-VX184-3: the instructions stay inside their bound — and this tail
     /// left them untouched (prefer untouched; batch 4's 3,089 of 3,100).
+    /// (VX-811's tail — the VX-808 run, Unit B5 — then let the read rung say it
+    /// proposes: 3,098 of 3,100.)
     @Test func theInstructionsStayInsideTheirBound() {
         #expect(MCPSession.instructions.count <= MCPSession.instructionsBound)
         #expect(MCPSession.instructionsBound == 3_100)
+    }
+
+    /// **VX-811's docs tail (the VX-808 run, Unit B5 — A-808-10, B2's handoffs;
+    /// PROVISIONAL words for her bundle):** the propose road is said where the
+    /// model reads the door — the advice's READ rung proposes (inside R-VX184-3's
+    /// bound), `set_book_rule` names the count it answers (VX-811 ruling 4) beside
+    /// its scope sentence, and `add_note_to_book` points a client that can only
+    /// read at the road it has. Each truth is the catalog's own (the tool's rung
+    /// and scopes; the answer's keys). RED ON OLD by absence.
+    @Test func theProposeRoadIsSaidWhereTheModelReadsTheDoor() throws {
+        let propose = try #require(MCPToolCatalog.declaration(named: "propose_notes_to_book"))
+        #expect(propose.rung == .read && propose.scopes == [.book, .wing], "the catalog's facts the words state")
+
+        let advice = MCPSession.instructions
+        #expect(advice.contains("read (read, search and propose)"), "the read rung proposes: \(advice.prefix(900))")
+        #expect(advice.count <= MCPSession.instructionsBound, "inside R-VX184-3's bound: \(advice.count)")
+
+        let rule = try description("set_book_rule")
+        #expect(rule.contains(MCPBookFacts.waitingCountKey) && rule.contains(MCPWriteTools.beyondReachKey),
+                "set_book_rule names its count and the scope sentence beside it: \(rule)")
+        #expect(rule.contains("how many of them you can read"), "…and what the count counts: \(rule)")
+
+        let add = try description("add_note_to_book")
+        #expect(add.contains("propose_notes_to_book"), "the read-only road is pointed at: \(add)")
     }
 }
