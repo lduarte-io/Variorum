@@ -186,7 +186,7 @@ safety copy before ANY real-store touch (none expected this run).
 | 2 | U2 — VX-810 + VX-815 + VX-778 (rider, her kickoff pick) | DONE (22c3a5a89…06113a96c; adjudication below) |
 | 3 | VX-801 design pass (5 mockup rounds + 2 explorations) | DONE — THE DESIGN MEMO settled at the exploration sitting |
 | 4 | U3a — the Commits face | DONE (fc8880a53…dc7fde0e5; adjudication below) |
-| 4b | U3b — the Lineage face + origin re-aim + panel retirement | IN PROGRESS (U3b RECORD below) |
+| 4b | U3b — the Lineage face + origin re-aim + panel retirement | DONE (654cf3469…; U3b RECORD below) |
 | 5 | Ladder (whole diff) | NOT-STARTED |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
 | 7 | Closeout ritual (tickets, handoff, canon-size, worktree removal) | NOT-STARTED |
@@ -1601,6 +1601,13 @@ waits, pull first).
 
 ## U3b RECORD — the Lineage face, the origin re-aim, the panel's retirement (VX-801's second half)
 
+**NOT DONE in U3b, said first:** no Mac-target TEST run and no walk (both owed to the run's closing stage window — the
+suites and the walk rows 13–23 are named under "what is OWED"); no canon delta (SurfaceContracts' Block History bullet
+and the Lineage face's line, AppSpec §9's new operation `bringBackFromLineage`, the AppSpecRecord entry) and no
+QUESTIONS edit — the #264 items are P-U3b-1…13 and the sweep's W1–W16 below, for the orchestrator at the merge; no
+`notes/MobileSoul.md` row (the MOBILE PARITY line is drafted below for the closeout); the real store's seeded guide is
+not re-seeded (owed, behind the A1 rail); the ⌘/ helper's block ▾ row is not taught History or Lineage (P-U3b-10).
+
 *Implementer: opus-implementer, fresh session, 2026-11-06. Headless only (`swift build` / `swift test` on the
 package, `xcodebuild build-for-testing` for the App target's compile); no stage, no xcodebuild test, no GUI, no
 store touches. Mac-target pins are written and compiled here and NAMED for the run's closing stage window.*
@@ -1617,8 +1624,8 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-4 | The Lineage face (model + view), its doors (lineage › on the face, Lineage in both block ▾ menus), the registry | DONE (compiled) — `LineageFaceModel` + `LineageFaceView` + `BlockHistorySurface`; `LineageFaceModelTests` (10 pins) + `LineageFaceDoorsTests` (4) written and compiled, RUN owed to the closing window |
 | U3b-5 | The origin door re-aim (G2's ruling) + the old panel's WHOLE retirement + every pin re-pointed or retired by name + the tutorial walk's drive | DONE (compiled — `build-for-testing` green) — the table under U3b-5 below |
 | U3b-6 | The guide sweep (G1's sentences, each listed for #264) | DONE (compiled; phone target compiled too — `RecoveryCopy` is shared) — the list under U3b-6 below |
-| U3b-7 | Walk rows for the Lineage face, appended to the window's walk | NOT-STARTED |
-| U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | NOT-STARTED |
+| U3b-7 | Walk rows for the Lineage face, appended to the window's walk | DONE — rows 13–23 under "what is OWED" below |
+| U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | DONE — below |
 
 
 ### U3b-P — THE PROPOSAL: the cross-block Bring back as take (sent before any op code; build waits on the ruling)
@@ -1765,4 +1772,141 @@ Left as they were, true again now that the Commits face carries "lineage ›" (U
 (not G1's, still true on the Mac): `RecoveryCopy.trayNoTakesArchived` ("under Archived takes in Block History" — the take
 dropdown's archived group). **Owed to her eye, not changed:** the ⌘/ helper's `block ▾` row lists neither History
 (U3a) nor Lineage — a door with no helper line (P-U3b-10).
+
+### U3b — what landed, one pointer per piece
+
+- **The op** (U3b-P RULED): `Sources/VariorumCore/Operations/Operations+LineageBringBack.swift` —
+  `bringBackFromLineage(_:onto:)`, `LineageTakeSource`, `lineageCrossesWing` (the ONE wing rule the face reads too);
+  `OperationError.notInLineage`; its words in `App/Variorum/Shared/OpsRefusalTable.swift`.
+- **The family as a value**: `Sources/VariorumCore/Domain/LineageFamily.swift` (order, places, acts, `opening`);
+  `Sources/VariorumCore/Queries/LineageFamilyCounts.swift`.
+- **The reused composition**: `App/Variorum/Variorum/Features/History/CommitsFaceView.swift` — `CommitsFaceBody` (the
+  ONE pane+rail, extracted from the Commits face; both faces compose it), `CommitsRailWords`, `CommitsFaceStatusLine`,
+  "lineage ›" on the crumb; `CommitsFaceModel.Role` (`.home` / `.relative`) + `LineageBringBack` (the one road both
+  bring-back doors run) in `CommitsFaceModel.swift`.
+- **The Lineage face**: `Features/History/LineageFaceModel.swift` (+ `LineageFaceCopy`, `WingCopy.lineageElsewhere`),
+  `Features/History/LineageFaceView.swift` (+ `BlockHistorySurface` — the ONE host every surface/sheet composes, the
+  request's `opening` choosing the face — and `LineageFaceOracle`).
+- **Doors**: `.showBlockLineage` + the header's four `.surface` acts in `Registry/Capability.swift` /
+  `CapabilityRegistry.swift`; block ▾ Lineage on both bars (`CommitBar.lineageRowTitle`); `requestBlockLineage()` on
+  `EditorViewModel` and `TakesViewModel`.
+- **The re-aim + retirement**: U3b-5 above. **The sweep**: U3b-6 above.
+
+### U3b — PROVISIONAL, for #264 (the orchestrator lands QUESTIONS at the merge)
+
+- **P-U3b-1** — where the Lineage face opens: the origin door's original; else (lineage ›, block ▾ Lineage) the block
+  it came out of — the nearest ancestor, first drawn (A's reach: lineage › then its commits, one press); else this
+  block. Alternative: always on this block.
+- **P-U3b-2** — the geometry: ONE vertical family list ABOVE the pane+rail (A's map turned vertical, her "as in A, but
+  with the verticle view … as in B"), about seven rows before it scrolls on its own; generations as bands (B's gaps),
+  older above; within a generation by the connecting edge's stamp, then id; a block met twice (a duplicate's copy is
+  a descendant AND a version) drawn once, at its first place. Alternative: the family as a third column, or in the
+  rail's place (B's drawing, which loses the selected block's rail).
+- **P-U3b-3** — the row's words: verbs "divided · merged · extracted · copied (Snippets copies and duplicates alike) ·
+  a version · related (an edge with no act)"; places "here · this note · in “‹title›” ( · a saved version) · in
+  Snippets · kept as lineage · set aside · in the Trash · in another library — the wing “‹name›”"; counts "N takes ·
+  M commits" (active takes; the commits of live takes).
+- **P-U3b-4** — a RELATIVE's moments are read, compared (against the block you came from's now) and brought back onto
+  the block you came from — never restored, renamed, unarchived or put back in place from here, and its deleted takes
+  are not listed (a lineage block is not edited from this face).
+- **P-U3b-5** — a Trash member and another wing's member are NOT selectable (no pane+rail); the Trash row keeps its
+  first words, muted; the other-wing row shows no words (#166(e)) and "go to ‹wing› ›" switches the wing (the Compare
+  board's road).
+- **P-U3b-6** — not carried from the panel: "Open this note's tray" (the tray keeps its masthead door) and the row-33
+  jump (U3a's G2.3).
+- **P-U3b-7** — Put back on a SET-ASIDE (archived) member runs the tray's `unarchiveBlock` road; a receipt for a
+  landing in ANOTHER note names it ("In “‹title›”: Put back where it came from.").
+- **P-U3b-8** — the Lineage door always opens (block ▾ and lineage › are always drawn); a block with no lineage shows
+  "Nothing came before or after this block — it was never divided, merged, extracted or copied."
+- **P-U3b-9** — the panel's commit-defining meaning line ("Each take's saved moments — Restore loads one back into its
+  buffer.") has no place on the face; "saved moment" defines commit in Restore's and Bring back's hover words. Should
+  the face carry a defining line?
+- **P-U3b-10** — the ⌘/ helper's block ▾ row lists neither History (U3a) nor Lineage.
+- **P-U3b-11** — "‹ history" returns to the Commits face re-seated on its opening (not the moment last read there);
+  the crumb reads "‹note› › block N/M › lineage" with "‹ history" at the right; ↑/↓ step the selected block's moments.
+- **P-U3b-12** — the cross-block receipt: "Brought back as a take on this block — it's the last take in its fan." /
+  "Brought back as the take “‹label›” on this block — …"; the header verb "Compare with now"; the header and pane
+  help sentences (`LineageFaceCopy`); the door's verb "Block Lineage", its row "Lineage".
+- **P-U3b-13** — the fence's refusal (W16) and the sweep's wordings W1–W15 (U3b-6).
+
+### U3b — what is OWED, and to whom
+
+- **The closing stage window — the Mac runs** (suite-level `-only-testing`), on top of U3a's list:
+  `VariorumTests/LineageFaceModelTests`, `VariorumTests/LineageFaceDoorsTests`, and every suite U3b-5/-6 touched —
+  `BlockHistoryPaneTests`, `BlockHistoryClarityTests`, `BlockHistorySealTests`, `BlockHistoryHostTests`,
+  `EditorSessionTests` (incl. `CommitFlowTests`), `OutsideWriteRingEndTests`, `SavepointNamingTests`
+  (`SavepointRenameDoorTests`), `ChromeMinHeightTests`, `CommitRestingPreviewTests`, `RestoreLandingTests`,
+  `RestoreLandingRewriteHopTests`, `RecoveryDoorsTests`, `OriginBlockDoorTests`, `WriteTakesPanelRoutedTests`,
+  `CommitsPageLedgerTests`, `SavepointOnLeaveTests`, `TutorialWalkTests`, `CapabilityRegistryTests`,
+  `CrossBlockCompoundTests`, `NoteTrayTests`, plus the neighbours the phrase moved under: `MergeArrangementTests`,
+  `ProseCutGeometryTests`, `MergeCeremonySheetTests`, `IAAndTrashShapeTests`, `RecoveryExplainerTests`,
+  `HelperCurrencyTests`, `ShortcutCatalogTests`, `OpsRefusalTableIntegrityTests`, `DeadVocabularyTests`,
+  `CommitVocabularyTests`, `CommandRoutingTests`, `CanvasAndPoolTests`, `ModeSwitchCarryTests`, `ShellChromeTests`;
+  and the phone's `VariorumMobileTests/MobileBlockHistoryTests` + `MobileNoteTrayTests` (the shared
+  `RecoveryCopy` default — compiled here, unchanged in behaviour).
+- **The walk (appended to U3a's twelve; row 12 is SUPERSEDED — "See original from…" opens the Lineage face now, not
+  the old panel).** One capture per row, both voices: (13) block ▾ ▸ Lineage on a merged block → the family older
+  above, both sources kept as lineage, this block marked, the face open on the first source's pane+rail; ↑/↓ swap its
+  moments; (14) "lineage ›" on the Commits face → the same; "‹ history" back; (15) THE ORIGIN DOOR: a divided block's
+  right-click ▸ See original from divide… (and ⌘K's twin) → the Lineage face with the original selected; (16) THE
+  ANCESTOR SWAP: click the other source → its take dropdown, its rail, its commits; a commit's Bring back as a take
+  from the pane's foot → the receipt, the take at the merged block's fan end (Takes); (17) the header's Bring back as
+  take → receipt; Compare with now → two boxes (the source now · this block now); (18) PUT BACK on a kept original →
+  "Put back where it came from.", the row then "this note"; (19) THE TRASH NODE: delete a source (or a descendant) →
+  its row muted, no acts, not selectable; (20) THE CROSS-WING GO-TO: extract and move a block to another wing → its row
+  names the wing, no words, "go to ‹wing› ›" switches the wing; (21) a plain block's Lineage → the empty line; (22) a
+  sheet host (the book's inline editor, Write's take panel) → block ▾ ▸ Lineage in the sheet, ‹ back closes it; (23)
+  the guide, re-seeded on the DEV store: lessons "what a block leaves behind", "the five places", "the two exits" read
+  true against the surface.
+- **The closeout** — the real store's guide re-seeded (Help ▸ Restore Field Guide…, A1 first); canon: SurfaceContracts'
+  Block History bullet rewritten for the History & Lineage surface + the Lineage face, AppSpec §9's
+  `bringBackFromLineage` line (the ruled semantics, U3b-P RULED), AppSpecRecord's entry; QUESTIONS #264 gathers
+  P-U3a-1…11, P-U3b-1…13, W1–W16.
+- **MOBILE PARITY (drafted for the closeout):** the phone's Block History is untouched (its sheet, its Came from region
+  and its Bring back); the Mac's History & Lineage surface — the Commits face, the Lineage face, the cross-block Bring
+  back as take — has no phone face yet: a `notes/MobileSoul.md` ledger row (a VM ticket for the board).
+
+### U3b — END (the suites, on the committed tree; headless)
+
+- `swift build` — Build complete. `LineageBringBackTests` 12/12 · `LineageFamilyTests` 7/7.
+- **`swift test --filter VariorumCoreTests` → "Test run with 3866 tests in 522 suites passed after 272.989 seconds with
+  5 known issues"** (U3a's 3847 + this unit's 19; the five known issues are the standing `withKnownIssue` arms).
+- `swift test --filter 'VariorumMCPTests|StringsWorkbookTests'` — `StringsWorkbookTests` 32/32 green; `VariorumMCPTests`
+  627 tests, FOUR failures, all socket-timing under a load average of 6–11 (other sessions on the Pro):
+  `MCPDiscoverProbeServerTests.claudeCodesPipelinedProbeIsAnsweredAndItsInitializeServes` (`socket.nextResponse()`
+  nil), `MCPStopRoadsServerTests.aClientThatLeftBeforeTheQuitKeepsItsOwnLine`,
+  `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (44 s against a 15 s bound)
+  — U3a's named trio — and `MCPPreInitializeWindowTests.aBareOpeningIsAnsweredBeforeTheReadBlocks` (the window's answer
+  late). **Re-run alone: `swift test --filter 'MCPDiscoverProbeServerTests|MCPStopRoadsServerTests|
+  MCPHarnessTimeLimitTests|MCPPreInitializeWindowTests'` → "Test run with 22 tests in 4 suites passed after 2.309
+  seconds".** This unit's diff carries no `Sources/VariorumMCP`, `Sync/` or `Server/` line (the MCP target compiles
+  against the one new `OperationError` case and nothing else). Recorded as load flakes; the closing window's MCP re-run
+  reads them again.
+- **App targets COMPILE only** (no stage): `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration
+  Debug build-for-testing` → "** TEST BUILD SUCCEEDED **"; `xcodebuild -scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' build-for-testing` → "** TEST BUILD SUCCEEDED **" (the shared `RecoveryCopy` and
+  `OpsRefusalTable` edits).
+- `Tools/verify-pins` → OK both graphs (16 + 15 pins).
+
+### U3b — self-assessment (for the cold reviewer's read, not instead of it)
+
+- **The reuse is real, and it bent the Commits face's model.** `CommitsFaceBody` is the one pane+rail; the Lineage
+  face composes it over a member through `CommitsFaceModel`'s new `Role`. The relative role branches the acts in four
+  places (`paneActs`, `openCompare`, `bringBackSelected`, the swapper's groups) and reads the home block's takes for
+  Compare's "now". Read those branches hardest — a relative must never reach Restore/Rename/Put back/Unarchive (pinned:
+  `selectingAMemberSwapsThePaneAndRailToIt`), and the foot's Bring back must go through the fenced op, never
+  `bringBackCommitAsTake` (it does: `LineageBringBack.run`).
+- **The model grew past U3a's ≈690 lines** (now ≈780). U3a named Compare's state as the split seam; U3b did not split
+  it (one unit, one surface). P-9 is the reviewer's call.
+- **The fence is in the op, and the face reads the op's own wing rule** (`Operations.lineageCrossesWing`), so a member
+  the face offers is a member the op accepts. The op reads `Queries.lineageTree` inside its transaction (∝ the target's
+  lineage — U1's P1 pins bound it).
+- **The retirement deleted three test-host pins and one whole suite** (`RestoreLandingInspectorTests`) whose STRUCTURE
+  (the inspector panel, the read-in-full sheet) no longer exists; each is named in its file and in U3b-5's table. The
+  VX-668 fix pin (`RestoreLandingRewriteHopTests`) stays. The judgment to read: whether the inspector suite's guard has
+  a full-pane analogue worth a new pin (the face in the full pane lands no page — U3a's P-U3a-10 "elsewhere a receipt").
+- **`TrayPath.originalsPath` moved for EVERY Mac sentence at once** (W14/W15) — the constant's purpose, but it means
+  eight receipts and explainers changed words in one line; all listed for her.
+- **Not walked, not run.** Every Mac claim above is compiled, not observed — the Lineage face's geometry (the family
+  band's height, the header line under it, the composition below at the detail's width) has had no eyes on it.
 

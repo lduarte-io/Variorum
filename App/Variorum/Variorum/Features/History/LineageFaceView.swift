@@ -64,7 +64,10 @@ struct LineageFaceView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             crumbRow
-            if let status = model.status ?? model.node?.status {
+            // The newest word wins: the face's own acts clear the pane's line
+            // before they speak, so a pane act's line is never masked by an
+            // older header receipt.
+            if let status = model.node?.status ?? model.status {
                 CommitsFaceStatusLine(status: status, tokens: tokens)
             }
             familyList
