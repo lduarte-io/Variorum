@@ -532,6 +532,15 @@ Dispositions (every finding owned):
 
 Round 2 = a fresh reviewer's FIXES-ONLY re-check (no new BLOCKER/MAJOR arose).
 
+#### ROUND-1 FIXES — LIVE STATUS (implementer: Opus, fresh session, 2026-11-06; F-2 + F-4 only)
+
+*Headless only: no `xcodebuild test`, no walk. The app suites are the orchestrator's queued window.*
+
+| Finding | Status |
+|---|---|
+| F-4 — the masthead Arrivals-door comment (`BookView.swift`, the title line) | **DONE (this commit)**: comment only. It now says a press opens the review area over the book's content and a second press closes it (VX-821, R-808-5 — the popover retired). No code line moved; the source pins that read `BookView.swift` filter `//` lines |
+| F-2 — the why · since line's yield order (a pure rule beside `ArrivalRowFit`, the row's line reading it, a pure pin) | IN PROGRESS |
+
 ## 7b. THE MERGE-IN CHECKLIST (nov5's trial-merge intel; executed by this run's merge-in step, likely the LAST merger since our deploy + release close the stage)
 
 - **vs vx-827 (1a66adce2-era):** three textual conflicts — `Sources/VariorumMCP/MCPToolCatalog.swift`, `Tests/VariorumMCPTests/MCPServerTests.swift`, `Tests/VariorumMCPTests/MCPWriteServerTests.swift` (the tool list + count pins class). Resolve keeping BOTH sides' tools/arms; re-run the MCP server + catalog suites headless on the merged tree.

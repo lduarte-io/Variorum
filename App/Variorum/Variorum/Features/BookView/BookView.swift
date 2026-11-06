@@ -742,8 +742,10 @@ struct BookView: View {
             BookSearchDoor(tokens: tokens, model: bookSearch)
             // 17y B3 item (h) — THE ARRIVALS DOOR (R-17y-1): the small icon
             // beside the gear, calm when nothing waits, presence when
-            // something does; its popover lists the rows. A BOOK's door
-            // only — a gathering holds nothing, so it has none (P-2).
+            // something does; a press opens the review area over the book's
+            // content and a second press closes it (VX-821, R-808-5 — the
+            // popover retired). A BOOK's door only — a gathering holds
+            // nothing, so it has none (P-2).
             if BookArrivalsDoor.isDrawn(for: structure.reading) {
                 BookArrivalsDoor(model: arrivals, structure: structure)
             }
