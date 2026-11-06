@@ -18,6 +18,7 @@ extension MCPTwoStoreCatalogServerTests {
     typealias W = CatalogWorld
 
     static let arms: [CatalogArm] = readArms + suggestArms + writeNewArms + editArms + proposeArms + tailArms
+        + cursorArms
 
     // MARK: - READ
 
@@ -453,5 +454,22 @@ extension MCPTwoStoreCatalogServerTests {
             ["wing_id": s(""), "tag": s("secret-topic"), "with": s("swapped")] },
         CatalogArm(label: "replace_tag · a hidden wing", tool: "replace_tag") { w, _ in
             ["wing_id": s(w.attic), "tag": s("attic-topic"), "with": s("swapped")] },
+    ]
+
+    // MARK: - VX-859 (the VX-808 run, Unit B5): the book cursor resumes by id
+
+    /// The interleaved mint (the VX-809 ladder's MINOR-1 pin): a book whose
+    /// readable members were appended AFTER a hidden one, paged one at a time
+    /// so each page boundary lands on such a member, then resumed from the
+    /// cursor. RED on a raw-position book cursor (its key is the member's
+    /// stored position, whose bytes follow the hidden key in A); identical on
+    /// the id-resuming cursor (the gathering cursor's road).
+    static let cursorArms: [CatalogArm] = [
+        CatalogArm(label: "list_notes · a book whose readable members came after a hidden one, paged",
+                   tool: "list_notes",
+                   args: { w, _ in ["book_id": s(w.interleaved), "limit": .int(1)] },
+                   capture: { ["interleavedCursor": $0["next_cursor"] as? String ?? ""] }),
+        CatalogArm(label: "list_notes · that book, resumed from its cursor", tool: "list_notes") { w, c in
+            ["book_id": s(w.interleaved), "limit": .int(1), "cursor": s(c["interleavedCursor"] ?? "")] },
     ]
 }
