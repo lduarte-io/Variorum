@@ -464,3 +464,25 @@ the two tools then disagree in shape on purpose, and the proposal below does not
 
 **Open, gating nothing in this leg:** F-U1-1 (hers); P-U1-a…g (the orchestrator's); R-U1-1…5 (recorded readings,
 the orchestrator's to overturn).
+
+## U1 ADJUDICATION (the orchestrator, 2026-11-05 — repo-first, before the continuation)
+
+**Verified:** commits c0cad8fd3 · 6046e48a7 · f5b33af76 · f9f53d92b on origin; tree clean;
+the two pin suites re-run independently — 21/21 green, the library pin printing ×1 661 / ×15 661.
+
+**R-U1-1…5 — ALL SUSTAINED.** (1) the exact-stamp cascade fence is `restoreBlock`'s own
+philosophy — without it no Trash node could exist, and an independently-dead edge staying out
+honors tombstone-means-decided; (2) archived ≠ preserved per 13j — U3's Put back branches on it;
+(3) version siblings for the origin only keeps the tree one block's family; (4) the wire's peers
+are placed notes — a released original is no "elsewhere"; (5) no depth cap — the walk is bounded
+by the family and the cycle guard is pinned load-bearing.
+
+**P-U1-a…g — SUSTAINED, with one call made here:** archived peers are ALWAYS listed, marked
+`"archived": true`, no `include_archived` argument — lineage answers a family fact and an omitted
+archived original would un-answer the agent's question; the app's archived-behind-facets listing
+convention argues the other way, so this is **PROVISIONAL (joins bundle #264)**. No edge ids and
+no position keys on the wire (VX-859's lesson) — confirmed. All-items-refused answers as an error
+(VX-812's landed-nothing rule) — confirmed.
+
+**F-U1-1 — TO HER (two ruled lines collide: P-13nb-U4-7's stub vs R-825).** Ruling recorded
+below when it lands.
