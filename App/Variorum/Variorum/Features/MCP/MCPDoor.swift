@@ -1135,8 +1135,14 @@ final class MCPDoor {
         // receipt_style governs it) and grows the one-press door — "Open ›"
         // to the act's landing; the same target is the session's last AI
         // change, which ⌥⌘O opens after the line has faded (or never showed).
+        // VX-858 (the VX-878 run, batch 3): the change is named by its LANDING
+        // — the trail's ONE brain (`MCPTrail.placeTitle`), never a twin — so a
+        // gone place's refusal names what is gone: a moved note, never the
+        // wing its receipt is keyed on (the key, `runKey ?? targetID`, still
+        // coalesces a sweep's moves into one line). Every receipt whose landing
+        // IS its target keeps its title byte for byte.
         let change = receipt.show.map {
-            ShownChange(target: $0, clientName: receipt.clientName, title: receipt.targetTitle)
+            ShownChange(target: $0, clientName: receipt.clientName, title: MCPTrail.placeTitle(of: receipt))
         }
         if let change { lastChange = change }
         // VX-679: the trail behind ⌥⌘O — a write with a landing is a row.

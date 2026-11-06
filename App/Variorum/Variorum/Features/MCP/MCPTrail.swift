@@ -175,14 +175,22 @@ nonisolated struct MCPTrail: Equatable, Sendable {
     /// The landing's place's name, from what the receipt carried: its target's
     /// title where the receipt's target IS the landing's place; for the acts
     /// whose receipt is keyed elsewhere — a note or a book moved or copied to
-    /// a wing (the receipt names the WING), a note added to a book (the receipt
-    /// names the NOTE, its landing the book) — the name it carries as its
-    /// detail; else nil (the row says the place's noun — never a second read).
+    /// a wing (the receipt names the WING), a note added to or taken out of a
+    /// book (the receipt names the NOTE, its landing the book) — the name it
+    /// carries as its detail; else nil (the row says the place's noun — never
+    /// a second read).
+    ///
+    /// **VX-858 (the VX-878 run, batch 3): THE ONE BRAIN for both roads** —
+    /// the trail's rows and the receipt road's gone/unfinished words
+    /// (`MCPDoor.landReceipt`'s `ShownChange`) both read it, so neither ever
+    /// names a place that is not the landing. The remove/release arms joined
+    /// the book add's: their `detail` is the book's name, exactly its shape.
     static func placeTitle(of receipt: MCPWriteReceipt) -> String? {
         guard let target = receipt.show else { return nil }
         switch receipt.act {
         case .wingMove, .wingCopy, .bookWingMove: return receipt.detail
-        case .bookAdd: return Self.landingID(target) == receipt.targetID ? receipt.targetTitle : receipt.detail
+        case .bookAdd, .bookRemove, .bookRelease:
+            return Self.landingID(target) == receipt.targetID ? receipt.targetTitle : receipt.detail
         default: return Self.landingID(target) == receipt.targetID ? receipt.targetTitle : nil
         }
     }

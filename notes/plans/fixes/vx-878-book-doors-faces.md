@@ -226,8 +226,8 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | # | Piece | Status |
 |---|---|---|
 | R-0 | Record opened; VX-858's mechanism traced; VX-816's and VX-874's designs written before code | DONE (this commit) |
-| 858-a | VX-858 pin on the PRE-FIX tree (App target, through the door's real roads) | NOT-STARTED — design below |
-| 858-b | VX-858 fix: the receipt road names the landing through `MCPTrail.placeTitle` | NOT-STARTED |
+| 858-a | VX-858 pin on the PRE-FIX tree (App target, through the door's real roads) | DONE (470615279) — `MCPGonePlaceNamesTests` (3): `aMovedNotesGonePlaceNamesTheNoteNotTheWing` (the exact repro, Open › and ⌥⌘O), `everyReceiptKeyedElsewhereNamesItsLanding` (the class), `theBrainNamesARemovedNotesBook` (+ guards); `build-for-testing` at 470615279 ** TEST BUILD SUCCEEDED ** (the pin compiles on the pre-fix code). RED by evaluation of the pre-fix body: `landReceipt` built `ShownChange(title: receipt.targetTitle)` = "Studio" for the `.wingMove` receipt, so `MCPReceiptCopy.gone` said "“Studio” is gone, so claude-code's change can't be opened." ≠ the pinned "“draft” is gone, …" (and `!contains("Studio")` fails); the class arms likewise ("Studio" ×2, "a note" ×3, "source"); `placeTitle` answered nil for `.bookRemove`/`.bookRelease`. The suite's RUN on 470615279 (RED) and on the fix (GREEN) is the closing window's — PENDING |
+| 858-b | VX-858 fix: the receipt road names the landing through `MCPTrail.placeTitle` | DONE (this commit) — `MCPDoor.landReceipt`'s `ShownChange` reads `MCPTrail.placeTitle(of:)`; `placeTitle`'s book-landing arm gains `.bookRemove`/`.bookRelease`; the coalescing key and the receipt line untouched; `build-for-testing` ** TEST BUILD SUCCEEDED **; RUN PENDING (closing window) |
 | 816-a | VX-816 pins on the PRE-FIX tree — core (the ops on APIs stable across the fix), the wire (socket suites), the App doors | NOT-STARTED |
 | 816-b | VX-816 fix: one predicate scoped to the target's wing; every citer names its wing | NOT-STARTED |
 | 816-c | VX-816 two-store catalog arms for the changed predicate | NOT-STARTED |
