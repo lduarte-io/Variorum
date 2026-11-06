@@ -73,6 +73,33 @@ struct LibraryWhenGridKeysRuleTests {
                 == "2026-12-01", "neither shown: the month's first day")
     }
 
+    /// The press → anchor seam, at the brain: a mouse press hands the keys
+    /// back, and the next arrow lands on the anchor the door hands in — the
+    /// ARMED range it now reads (the door passes `model.editedRange`, re-read
+    /// on every render), not the range the popover opened with.
+    @Test func afterAClickTheNextArrowLandsOnTheArmedDayTheDoorHandsIn() throws {
+        let october = LibraryWhenMonth(year: 2026, month: 10)
+        let today = "2026-10-07"
+        var brain = LibraryWhenDoorBrain.opening(range: nil)
+        _ = brain.moveKey(by: 1, showing: october, range: nil, today: today)
+        _ = brain.moveKey(by: 5, showing: october, range: nil, today: today)
+        #expect(brain.keyDay == "2026-10-12")
+        // (Mutating calls stay OUT of the expectation macros — their
+        // expansion takes the value immutably.)
+        let pressed = brain.press("2026-10-20")
+        let armed = try #require(pressed)
+        #expect(brain.keyDay == nil, "the mouse's press hands the keys back")
+
+        var fresh = brain
+        let shown = fresh.moveKey(by: -1, showing: october, range: armed, today: today)
+        #expect(shown == october)
+        #expect(fresh.keyDay == "2026-10-20", "the next arrow lands on the armed day")
+        // The anchor is the range HANDED IN: a stale nil would land on today.
+        var stale = brain
+        _ = stale.moveKey(by: -1, showing: october, range: nil, today: today)
+        #expect(stale.keyDay == today)
+    }
+
     @Test func theSameDayInAnotherMonthClampsToItsLength() {
         #expect(Keys.sameDay("2026-01-31", in: LibraryWhenMonth(year: 2026, month: 2)) == "2026-02-28")
         #expect(Keys.sameDay("2028-01-31", in: LibraryWhenMonth(year: 2028, month: 2)) == "2028-02-29")
@@ -104,8 +131,34 @@ struct LibraryWhenGridKeysPopoverTests {
         let view: LibraryWhenPopover
         let brain: Box<LibraryWhenDoorBrain>
         let month: Box<LibraryWhenMonth>
+        let now: Date
+        let onPick: (LibraryDayRange) -> Void
         var keyDay: String? { brain.value.keyDay }
         var shown: LibraryWhenMonth { month.value }
+
+        /// **The door's re-render after a pick:** the face is built again with
+        /// the armed `range` (the door hands it `model.editedRange`, which
+        /// `onPick` just set) over the SAME two bindings — the road the app's
+        /// popover content takes, and the key monitor's `updateNSView` with it.
+        @MainActor
+        func rendered(range: LibraryDayRange?) -> Built {
+            LibraryWhenGridKeysPopoverTests.built(
+                range: range, now: now, brain: brain, month: month, onPick: onPick)
+        }
+    }
+
+    /// The face over the given boxed bindings.
+    fileprivate static func built(
+        range: LibraryDayRange?, now: Date, brain: Box<LibraryWhenDoorBrain>,
+        month: Box<LibraryWhenMonth>, onPick: @escaping (LibraryDayRange) -> Void
+    ) -> Built {
+        let view = LibraryWhenPopover(
+            tokens: .resolve(voice: .terminal, dark: false), range: range, now: now, calendar: utc,
+            firstWeekday: 2, locale: Locale(identifier: "en_US"),
+            brain: Binding(get: { brain.value }, set: { brain.value = $0 }),
+            month: Binding(get: { month.value }, set: { month.value = $0 }),
+            onPick: onPick, onClear: {})
+        return Built(view: view, brain: brain, month: month, now: now, onPick: onPick)
     }
 
     /// The popover as the door builds it (`openingState`), its two bindings
@@ -117,13 +170,7 @@ struct LibraryWhenGridKeysPopoverTests {
             range: range, today: JournalDay.dayString(from: now, calendar: utc))
         let brain = Box(opening.brain)
         let month = Box(opening.month ?? LibraryWhenMonth(year: 2026, month: 10))
-        let view = LibraryWhenPopover(
-            tokens: .resolve(voice: .terminal, dark: false), range: range, now: now, calendar: utc,
-            firstWeekday: 2, locale: Locale(identifier: "en_US"),
-            brain: Binding(get: { brain.value }, set: { brain.value = $0 }),
-            month: Binding(get: { month.value }, set: { month.value = $0 }),
-            onPick: onPick, onClear: {})
-        return Built(view: view, brain: brain, month: month)
+        return built(range: range, now: now, brain: brain, month: month, onPick: onPick)
     }
 
     @Test func theFirstArrowLandsOnTodayAndEveryLaterOneMovesTheKeyboardsDay() throws {
@@ -212,12 +259,18 @@ struct LibraryWhenGridKeysPopoverTests {
         #expect(picked.isEmpty, "the month steps arm nothing")
 
         // A click is the mouse's: it arms, and the keyboard's next arrow lands
-        // on the day it armed.
+        // on the day it armed — once the door has re-rendered the face with
+        // the armed range (`onPick` → `model.editedRange` → the presented
+        // content again). The face built before the pick still holds the range
+        // it opened with (nil); asking IT would anchor on today, which is what
+        // this cell measured before the harness took the door's road.
         open.view.press("2026-10-12")
         #expect(open.keyDay == nil, "the mouse's press hands the keys back")
         #expect(picked == [try #require(LibraryDayRange(day: "2026-10-12"))])
-        open.view.moveKey(by: -1)
-        #expect(open.keyDay == "2026-10-12", "the next arrow lands on the armed day")
+        let armed = open.rendered(range: picked.last)
+        armed.view.moveKey(by: -1)
+        #expect(armed.keyDay == "2026-10-12", "the next arrow lands on the armed day")
+        #expect(armed.shown == LibraryWhenMonth(year: 2026, month: 10))
     }
 
     // MARK: - The door, mounted
