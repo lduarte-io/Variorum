@@ -290,9 +290,9 @@ on the package; no stage, no xcodebuild test, no GUI, no store touches). This le
 | U1-6 | LEG 2: the stub retirement in `read_note` `with_lineage` — absent + the fixed sentence — + the A/B catalog arm + the re-pin (`08c12ede2`; revert announced `3c2f7a416`) | DONE — red on the reverted stub (catalog arm + carriage pin), green on the fix; restored, tree clean |
 | U1-7 | LEG 2: `list_note_lineage` + its server suite + six catalog arms + the coverage justified edits + the Activity words (`bf6eadad8`) | DONE — 3/3 + catalog green; the both-ends fence red when the peer filter is removed |
 | U1-8 | LEG 2: DRAFT CANON DELTAS (D-U1-1…4, at the end of this file) | DONE |
-| U1-9 | LEG 2: the END suites (lineage family + every MCP-affected suite; every failing test named) + self-assessment | IN PROGRESS |
+| U1-9 | LEG 2: the END suites + self-assessment (below, "LEG 2 — END") | DONE — green but for the standing socket-timing trio, green alone |
 
-**Leg 1 closed; leg 2 is live (rows U1-6…U1-9).**
+**Leg 1 and leg 2 CLOSED (2026-11-05).** U1 is built and pinned; what remains of the unit is the run's (the one ladder over the whole diff after U3; the canon landing at closeout; the App-target suites and the public guide page — below).
 
 **ANNOUNCED BEHAVIORAL REVERT (U1-6's red-on-old, before it runs):** on the committed `08c12ede2`, the
 working tree's `MCPNoteStructure.swift` will be put back to the OLD lineage behavior ONLY — the
@@ -338,6 +338,44 @@ ritual — the catalog grows): `MCPServerTests` (the read-rung set; a book grant
 red-on-mutation** (on the committed `bf6eadad8`: the peer reach filter replaced by "every peer"): the server suite
 RED (5 issues — hidden peers listed, their ids in the text) and the catalog RED (`list_note_lineage · kin …`: "a
 hidden id crossed" + "varies with what the client cannot reach"); restored, tree clean.
+
+### LEG 2 — END (the suites, on the committed `d766d9363`; headless)
+
+**Not done in this leg, said first:** no App-target TEST run (no stage — the MCP pane's every-tool Activity-words pin,
+W-UX-13, and the rest of `VariorumTests` are owed to the run's closing window); no whole core-package run (this unit's
+core changes are two ADDITIVE files); no edit to MCPSpec, SurfaceContracts or AppSpecRecord (D-U1-1…4 are drafts);
+the public guide page (stargazing.tech/variorum/mcp) is outside the repo — if it describes `with_lineage`'s
+`beyond_grant`, it needs her word at closeout.
+
+- Core lineage family (`--filter 'Lineage|TrashLineage|VX653|VX670'`): "✔ Test run with 63 tests in 11 suites
+  passed"; the MCP target's matches "✔ Test run with 5 tests in 3 suites passed".
+- **The whole MCP test target** (`--filter VariorumMCPTests`): "✘ Test run with 617 tests in 115 suites failed after
+  53.626 seconds with 4 issues" — ALL FOUR the standing socket-timing trio, named: `MCPStopRoadsServerTests
+  .aQuitSaysNothingForAConnectionItEnds` and `.aClientThatLeftBeforeTheQuitKeepsItsOwnLine` ("got no answer to its
+  initialize"), `MCPDiscoverProbeServerTests.claudeCodesPipelinedProbeIsAnsweredAndItsInitializeServes`
+  (`socket.nextResponse()`), `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+  (past 15 s) — the vx-809 record's NO-VERDICT family under a loaded run; the three suites re-run ALONE: "✔ Test run
+  with 14 tests in 3 suites passed". Every other suite green, including the two-store catalog (now with seven U1
+  arms), `MCPUndeclaredArgumentsServerTests` (VX-606 walks the new tool), `MCPWireNeutralityTests`,
+  `MCPAdviceServerTests` (the instructions untouched), `MCPListWingsServerTests`, the carriage and the new suite.
+- App target COMPILE only (allowed without the stage): `xcodebuild -scheme Variorum -destination 'platform=macOS'
+  -configuration Debug build-for-testing` → "** TEST BUILD SUCCEEDED **" (the `MCPPaneCopy` words compile); then
+  `Tools/verify-pins` → OK both graphs (16 + 15 pins); `git status` clean.
+
+**Self-assessment (the implementer's, before the ladder):**
+- *Confident:* both queries' rules and costs (exact rows over every named shape; each P1 claim red on a named naive
+  form); the stub retirement's mechanism and its pin (red on the announced revert, byte-identical across stores on the
+  fix); the new tool's fence (red when the peer filter is removed; the Private and Journal keys beat a Home WING
+  grant in the server suite; hidden = missing per list item).
+- *Watch in review:* (1) the catalog's new reachable note `kin` joins the shared book and its Copy to Wing copy lands
+  in Studio, so several existing arms' answers changed in ALL stores alike (the B == C control and A == B held on
+  every arm; nothing was re-baselined by hand); (2) the list form reuses VX-812's `landed_count` for a READ (a
+  naming reading, recorded); (3) `archived` is an always-present boolean, not a key present only when true;
+  (4) `noteLineage` holds the writer for its item (`read_note`'s once-stamp posture) — ∝ the note's blocks and edges
+  plus one title read per readable peer; (5) the tree's admission rule (R-U1-1) is the one place the new reads
+  deliberately differ from the Trash's walk.
+- *Owed by others:* the App-target suites in the closing window; her wordings (#264: the two scope sentences, the
+  Activity words, the archived-peers call); the closeout's canon landing (D-U1-1…4); U3 consumes `lineageTree`.
 
 ### What landed (deliverables 1 and 2)
 
