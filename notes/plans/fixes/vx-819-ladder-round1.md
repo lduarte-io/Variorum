@@ -5,7 +5,8 @@ Reviewer: `opus-reviewer` (fresh, zero implementation context), running `notes/R
 touches no `Sources/VariorumCore/Sync/`, no custody/keychain code, no editor seam (`EditorTextView`, `BlockRangeIndex`,
 `PaneSurface`, the read tier) — the Opus-eligible class holds.
 
-**STATUS: IN PROGRESS — findings land below as found; the clean bill closes the round.**
+**STATUS: ROUND 1 COMPLETE (2026-11-06).** No BLOCKER, no MAJOR. Three MINOR (F1–F3: two are product-silent edges for
+`notes/QUESTIONS.md`, one a small cross-window hazard), five NIT (F4–F8). Severity order: F1, F2, F3 (MINOR) · F4–F8 (NIT).
 
 ## Findings (severity-ranked at the round's end; appended as found)
 
@@ -125,3 +126,61 @@ focus — superseding P-VX83-B3's "no arrow-key day navigation", `vx-83-search-f
 line's quiet block-name mark. The PROVISIONALs P-a…c, P-d…j, P-819-B3a…h and the VX-90 B2 alternative need their
 `notes/QUESTIONS.md` lines; F1/F3 above add two more edges if not ruled.
 
+## Clean bill — load-bearing things checked and found solid
+
+- **Class check.** The diff touches no `Sources/VariorumCore/Sync/`, no `Protection/`/custody/keychain line, no editor
+  seam (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, the read tier), no schema/migration, no MCP door line
+  (`MCPReadTools.encodePassage` maps fields explicitly — the new `blockName` never reaches the wire), no
+  `Registry/Capability*.swift`. The opus-reviewer class holds. Read-side only: no operation, no write.
+- **VX-734 / R-819-1 (core).** `SearchFacet.blocks` is A-819-B1's set exactly; the savepoint fence stays upstream of
+  every facet (`hits`' `d.kind <> 'savepoint'` off the commits facet). Traced the facet filter at every level it is
+  composed: `.passage` (residual OR per examined match), `.note` (`docKind` → title-only, so worn days never list under
+  Blocks), `.reading` (`family(.scraps)`/`docKind(non-book)` → `0`, so a typed tag's associated books never count under
+  Notes or Blocks — the band cannot disagree with a sheet that shows no Books section). `searchCounts(…facet:)` counts
+  the narrowed question through the one builder; the tag-alone road keeps one kind + its archive share. Ran
+  `SearchFacetTests` 9/9 green.
+- **VX-820 / R-819-2 (core).** `homeOrderedGroups`: `home_key` read off the already-joined `c` (never NULL there —
+  `d.reading_id IS NULL` forces `c.id IS NOT NULL` by the hits' own condition, and every key COALESCEs to the NOT NULL
+  `created_at`, so the non-optional `row["g_key"]` decode is safe); the row-value keyset `(g_key COLLATE NOCASE,
+  g_home) >/< (?, ?)` matches the `ORDER BY` collation-for-collation; passages stay best-first (`rn` untouched).
+  `homeOrderedPage`'s worn-day merge: worn notes with hits list once at their statement place (`wornGroupFacts` over
+  the same builder), worn-only notes are placed inside `(cursor, next]` by a Swift compare that reproduces SQLite
+  BINARY/NOCASE (pinned), the last page (`next == nil`) catching every remaining one — every group once across pages,
+  traced for both directions incl. the title order's digits-before-letters case. P1: same one walk of the matches;
+  `homeKeys` bounded by ids; both plans pinned FTS-driven. The catalog's own listing is the oracle for all eight
+  orders at 1/2/25 a page. Ran `SearchOrderTests` 7/7 green.
+- **VX-90.** `b.name AS block_handle` reads the block row the hits already seek — no join, no plan change
+  (`SearchPassagesTests` EXPLAIN pin green); the mark rides inside the snippet's one Text, never on a block-name hit,
+  never blank; the find seed reads `passage.snippet`, never the marked line, so the landing needle is untouched.
+- **VX-408.** The question token is sound: `search()` bumps `askedQuestion` synchronously before its read; a read
+  carrying an unlisted question lands as that question's first page (depths, resets, no expansion reload); the catch
+  path leaves `listedQuestion` alone (the next read starts over — conservative). Pin A green-on-both is honestly
+  recorded as the hollow half; pin B's interleaving is deterministic (the DEBUG gate is nil outside the pins).
+- **App order lifecycle.** The order resets only where the facets reset (`read()`'s `question == nil`), the paging
+  continues `listedOrder` with its own cursor (a pick goes through `search()`, which bumps the generation, so
+  `canAskForMoreGroups` cannot mix a stale cursor with a new order); `land`'s `sameQuestion` includes the order; the
+  door is drawn only while the sheet answers words (`isAnswering`), so the tag-alone listing keeps the Library's
+  `sort ▾` (SurfaceContracts: "sort and scope live"); the pick's direction rule mirrors `setSort`'s natural direction.
+  The stable-widths count gains the door's relevance form with `voicedMenuChrome`; home forms are the `sort ▾` labels
+  already counted; the line-count sweeps gained three order states.
+- **VX-374.** R2-4's `single` is read only on the one-line road (traced through `arrange`), behaviour-preserving; the
+  caps named, frames byte-identical, the natural ≤ cap guard honestly labelled a guard.
+- **VX-822 (composition and keyboard).** The sidebar holds closures only (CLAUDE.md's cross-feature rule; P-4: no
+  broadcast decides anything); one engine — the field writes `catalog.query` and calls the catalog's own `search()`,
+  wing-scoped by the catalog; `.library` is never deduped by `paneShowing` (notes only), so the ask never meets the
+  same-note refusal; the field is `canBecomeKeyView == false` (VX-332's quick-entry caret is safe at a window's
+  opening — pinned); ⏎/esc are intercepted at `doCommandBy` and return `true`, so editing never ends on them and the
+  follow-on `controlTextDidEndEditing` meets an already-empty rule (`.none`); clearing through the field EDITOR keeps
+  the caret; the click monitor never swallows, is scoped to its own window and is released on a nil window; the
+  overlay takes no layout (the no-shift pin compares the first section's top with and without the field, both
+  Starred states).
+- **VX-98.** The rule is pure and pinned (chords, Esc, letters and ⏎ on an untouched grid pass); nothing arms on a
+  move (`moveKey`/`followMonth` yield no range; only `press`/`pressKey`); the delivery test reuses
+  `CommentPanelKeys.delivers` (a hidden popover window never claims); the release on `willClose` follows the comment
+  panel's FIX LEG 3 precedent; the yield reads only text LIVING in the face's window — the measured
+  `_NSPopoverWindow.firstResponder` quirk — so her Library field keeps its caret and its letters.
+- **Suites run here (headless, no stage):** `swift test --filter 'Search|LibraryDay|TagListing|LibraryPaging'` →
+  161 tests / 27 suites passed (matches the record's batch-2 count); the six touched/neighbour search suites → 43/5
+  passed. The Mac gate claims (b1 23/4, b2 138/20, b3 228/42 and 29/29, the VX-408 and F1 revert legs) are the
+  orchestrator's recorded gate evidence; this round could not re-run them (no `xcodebuild test` by brief) — read the
+  pins instead: none found hollow beyond pin A, which the record already names hollow.
