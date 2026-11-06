@@ -1086,3 +1086,11 @@ family card per take with its commits inside and full text expanding in place; l
 its own step/door (the v3 map+log survives as that second view — "looks better" stands for it);
 the one-door ruling softens to one surface family with a Commits face and a Lineage face, both
 reachable from the block menu.
+
+**Trial-merge heads-up (nov5, 2026-11-06):** origin/vx-827-lineage (1a66adce2) vs
+origin/vx-808-arrivals-books (cc5e4fad0) CONFLICT textually in three files —
+`Sources/VariorumMCP/MCPToolCatalog.swift`, `Tests/VariorumMCPTests/MCPServerTests.swift`,
+`Tests/VariorumMCPTests/MCPWriteServerTests.swift` (both runs add wire tools: the tool list and
+tool-count pins). Against vx-878 and vx-819 we merge clean today. Whichever run merges SECOND
+resolves these three and re-runs the MCP server + catalog suites headless on the merged tree
+(on top of the standing second-merger duties recorded above).
