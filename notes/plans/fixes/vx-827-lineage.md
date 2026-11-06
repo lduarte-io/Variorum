@@ -2278,3 +2278,46 @@ Window-2 runs on the merged tip and doubles as the merge gate against main and v
 6091 tests in 1056 suites, 2725.5 s, 0 failures (4 warnings + the standing 14 known issues).**
 All five window-1 reds green; vx-878's merged content coexists; no host restart, no new .ips.
 SEAM taken: stage released, nov5 pinged; the walk re-enters as vx-827-walk.
+
+## THE WALK (claim vx-827-walk, 2026-11-06 05:26–05:42 — the orchestrator's hands; the acceptance
+gate is USE)
+
+**GREEN, seen live** (captures in `.walkshots/`, deleted at closeout): rows 1–5, 7, 8(partial),
+9, 10, 13–18, 21, 23. The Commits face opens on the newest moment in the full pane from every
+door (Write's bar, Takes' bar, both block ▾ menus); ↑/↓ swaps the pane instantly; plain ·
+against-now washes draw the word-level view-time diff right (adds washed, removals struck);
+the dropdown's per-take rows carry counts, "(empty take)" honesty and the archived group; the
+archived take's now offers Unarchive ALONE and its press speaks "Take unarchived — it's back in
+this block's fan."; quiet commits fold ("2 quiet commits") and the pane header wears `· quiet`;
+Compare = two boxes with grouped-by-take header swappers, re-aim works, "＋ now" appears exactly
+when now leaves the boxes, three boxes wash correctly; Bring back as a take lands cross-block
+with its receipt and the fan count ticks; Put back speaks "Put back where it came from.", the
+family row flips to "this note" and the act disappears on a placed block; ‹ back returns
+exactly (Takes as left; Write at the same spot); the Lineage face is vertical, older above,
+generation-banded, this block marked, the ancestor swap gives any relative's takes and commits
+in two clicks; the ORIGIN DOOR lands on the Lineage face with the original SELECTED (G2 live;
+the old panel unreachable); a plain block speaks "Nothing came before or after this block — it
+was never divided, merged, extracted or copied."; the guide re-seeded through its own door and
+the swept lesson reads true sentence by sentence. BOTH VOICES verified for the two faces and
+Compare (Terminal captures w54–w57); Study for the rest.
+
+**DEFERRED, each with its coverage named:** row 6 (a LIVE AI edit_take with the face opening on
+the after — needs a connected client; the bracket pair's rendering and never-folding are pinned
+in CommitRailTests + CommitsFaceModelTests, the names pinned equal to
+`Operations.mcpEditCommitNames`, and the door's live edit_take was walked at vx-809) · rows
+11/22 (the sheet hosts — the three sheet fallbacks re-aimed at U3a and pinned in
+BlockHistoryHostTests) · row 19 (a Trash member muted, no acts — pinned in
+LineageFaceModelTests) · row 20 (the cross-wing go-to — pinned) · the Restore and Rename
+presses (the panel's own semantics through unchanged operations, re-pointed pins). HER
+ACCEPTANCE can demand any of these live.
+
+**Walk findings:** NO product defect. The mid-walk stumbles were the driver's (the quick-entry
+text interleaving with the note-open transition; menu-adjacent clicks landing "as Chosen" and
+archiving the shown take) — each repaired in-app, and the detour validated extra arms (the
+chosen-empty take rendering "(empty take)" honestly everywhere; the dropdown's archived group
+carrying its commit count). One precision, flagged with P-U3a-5b: Compare's ✕ renders on boxes
+2–3, never the first. The merge door taught its own precondition ("To merge, put the caret at a
+block seam or select across the blocks to join.") — a refusal worth its words.
+
+**Dev-store posture left:** signed out, sync off, Resume untouched, Study voice, windowed;
+new replaceable content: the walk note + the freshly re-seeded guide.
