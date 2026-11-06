@@ -282,10 +282,185 @@ on the package; no stage, no xcodebuild test, no GUI, no store touches). This le
 | # | Piece | Status |
 |---|---|---|
 | U1-0 | Preflight read (CLAUDE.md canon · this file's The run / Fence law / Environment traps / U1 BRIEF · MCPSpec IN FULL · vx-809 FOR A LATER READER · mcp-invisibility-residuals · Trash.swift `originalsStrandedBy`/`strandedOriginals` + `LineageReadP1Tests` · `MCPNoteStructure` lineage/parents/farSides · the two-store catalog + arms · `MCPCarriageServerTests`' stub pin · P-13nb-U4-7's ruling text in the 13n-b record · `Queries/Lineage.swift` · `versionHistoryPredicate`) | DONE |
-| U1-1 | The note-level lineage-peers query + its pins | IN PROGRESS |
-| U1-2 | The block-level lineage-tree query + its pins | NOT STARTED |
-| U1-3 | The P1 pins (library growth, seam-history linearity, plan) for both | NOT STARTED |
-| U1-4 | The reconciliation read of `MCPNoteStructure.lineage`'s stub (stated below) | NOT STARTED |
-| U1-5 | The deliverable-3 proposal (below) — HELD for the orchestrator's ruling | NOT STARTED |
+| U1-1 | The note-level lineage-peers query + its pins (`6046e48a7`) | DONE — 11/11 green; P1 pins red-on-naive verified |
+| U1-2 | The block-level lineage-tree query + its pins (`f5b33af76`) | DONE — 10/10 green; P1 pins red-on-naive verified |
+| U1-3 | The P1 pins (library growth, own-lineage linearity, plan) for both | DONE (inside U1-1/U1-2) |
+| U1-4 | The reconciliation read of `MCPNoteStructure.lineage`'s stub (below) | DONE — **FLAG F-U1-1: the stub and R-825 genuinely collide** (probe-proven); nothing built on that edge |
+| U1-5 | The deliverable-3 proposal (below) | DONE — **HELD for the orchestrator's ruling**; the wire tool is NOT built |
 
-**Next:** U1-1.
+**Next (on the orchestrator's word):** rule on the PROPOSAL (P-U1-a…g below) and carry F-U1-1 to her; then build
+`list_note_lineage` to the ruling + its catalog/list-form/VX-606 arms + the DRAFT CANON DELTAS; then the unit's END
+suites (core lineage family + the MCP overlap suites + the two-store catalog).
+
+### What landed (deliverables 1 and 2)
+
+**`Queries.lineagePeers(db, noteID:) -> [LineagePeer]`** — `Sources/VariorumCore/Queries/LineagePeers.swift`.
+Per peer note: `noteID`, `wingID`, `archivedAt`, `links: [LineageLink]` (`blockID` · `peerBlockID` · `relation`
+`derived_from` (the peer holds an ORIGINAL) | `derived_into` (the peer holds a COPY) | `version_of` · `originOp` ·
+`edgeID` · `at`); convenience `holdsAnOriginal` / `holdsACopy` / `isAVersion`. The rule as built: ONE HOP at the
+block level; both ends LIVE and PLACED; the peer a live POST other than the subject; a pool is never a peer; a saved
+version (born archived — AppSpec §9's letter "`archived_at == created_at` is the version classifier") is never a peer;
+a domain-archived note IS a peer and carries its stamp; a tombstoned edge is absent whatever killed it. Reach-blind
+(the wire's fence goes on top). Order: peers by note id; links in the subject's placement order, then peer block id,
+then relation. Cost: `mine` (the note's placements, `idx_cblock_order`) MATERIALIZED, every join CROSS JOIN-driven —
+`idx_edge_source`/`idx_edge_target`, `uq_cblock_ownership`, PKs.
+
+**`Queries.lineageTree(db, blockID:, calendar:) -> LineageTree?`** — `Sources/VariorumCore/Queries/LineageTree.swift`
+(U3's read). `origin` + `nodes` (ancestors by (depth, id), then descendants by (depth, id), then `version_of`
+siblings by id) + every admitted `edges`. Per node: `blockID`, `direction` (origin · ancestor · descendant ·
+version), shortest `depth`, `via` (the edge from the smallest-id neighbour one level nearer, then the smallest edge
+id; `originOp` reads it), `state` (`placed(containerID)` · `preserved(lastContainerID)` · `archived(lastContainerID)`
+· `deleted(deletedAt, lastContainerID)` · `missing`), `home` (container id, kind, DisplayTitle name, wing, deleted?,
+saved version?), `shownTakeID` + `text` (placed: chosen if live/active/on the block, else default; unplaced: default;
+deleted: the default as it died with it — the Trash's rule). nil when no block row has the id; a DELETED origin
+answers. Walks: one-column `UNION` sets (each node once — terminates on any cycle; never the depth-carrying square),
+MATERIALIZED + CROSS JOIN; depths/`via` by a breadth-first pass in Swift over the fetched edges.
+
+**My readings, recorded (none invents product behavior; each is the orchestrator's to overturn):**
+- **R-U1-1 — the tree's edge admission:** an edge is lineage when LIVE or tombstoned on the EXACT stamp of one of its
+  endpoint blocks (the delete cascade) — `versionHistoryPredicate`'s edge fence verbatim in meaning. The brief asks
+  for both "in the Trash" nodes AND "a tombstoned edge (excluded)"; the cascade tombstones EVERY edge of a deleted
+  block, so without this rule no node could ever be "in the Trash". An edge taken apart on its own
+  (`unmarkPostsAsVersions`, `removeVersionOf`, sync debris) is excluded. Note the deliberate difference from the
+  Trash's own walk (`strandedFamilyWalk` reads past ALL tombstones — a family clock needs history; a navigable
+  surface with acts needs restore-coherent edges). Put back revives the edges and the tree reads them live (pinned).
+- **R-U1-2 — an ARCHIVED block is its own state** (`archived`), never "preserved as lineage": 13j batch 6's ruling
+  (a set-aside she chose; its road is the tray's Put back, not `placeBlock`). U3's Put back must branch on it.
+- **R-U1-3 — `version_of` siblings are the ORIGIN's only** (the brief's "plus version_of siblings for ONE block"),
+  depth 1. Extending to every tree node stays neighbourhood-bounded if U3's design wants it.
+- **R-U1-4 — the note-level family excludes released originals on BOTH sides** (one hop between PLACED blocks): a
+  divide-W's or merge's released original joins neither note (pinned). The note's own released originals stay
+  `read_note` `with_lineage`'s.
+- **R-U1-5 — no depth cap on the tree:** cost ∝ the block's own lineage component, `originalsStrandedBy`'s posture;
+  U3's glance popover (immediate parents/children) can filter depth 1 from the same read. If U3 needs a bounded read
+  for an ambient surface, that's a U3 question (the popover is summoned, not held).
+
+### Evidence (headless, this leg)
+
+- `LineagePeersTests` — "✔ Test run with 11 tests in 1 suite passed": a divide chain across three notes (N↔P↔Q, N and
+  Q never meet), released originals join neither note, an extract moved across wings (the wing named), a pool copy
+  is no peer, a duplicate (every block `derived_into` 'manual' + the ONE `version_of` anchor) and Copy to Wing (the
+  other wing) with a saved version excluded, a tombstoned edge / dead block / dead note absent, an archived take's
+  block present, an archived note present with its stamp, an archived (set-aside) block absent, a hand-built cycle
+  (one link each way), nothing for no lineage / an empty note / a missing id. P1: library ×15 **661 → 661** VM
+  instructions; 20 → 60 links 1935 → 5575 (×2.9, linear); no store-table SCAN in the plan.
+- `LineageTreeTests` — "✔ Test run with 10 tests in 1 suite passed": a divide chain up and down (depths, `via`,
+  homes, texts, edges exact), a merge's sources and a divide-W's original preserved with their texts, an extract
+  across wings + a pool copy (pool home), a duplicate's block as descendant AND version sibling + a saved version's
+  block (`isSavedVersion`), the Trash in the tree (cascade-stamped edges, walked through, a deleted origin answers,
+  Put back revives the edges) vs an edge taken apart (debris stamp; unmarked versions), an archived chosen take's
+  fallback to the default + an archived block's `archived` state, a hand-built cycle through the origin (ancestor
+  AND descendant) + a dangling id (`missing`, walked through) + an id with no row → nil. P1: seam history 20 → 60
+  rounds **6436 → 18676** (×2.9); library ×15 **3376 → 3376**; no store-table SCAN from either end with a deleted
+  block in the history.
+- **Red-on-naive, each verified by a named mutation and restored by `git checkout --` (`git status` clean):**
+  (1) peers rewritten edge-driven (`versionPeerPosts`' shape, `edge e JOIN container_block mine ON mine.block_id IN
+  (…)`) → `theReadNeverScansAStoreTable` RED (`SCAN e USING INDEX uq_edge_live`) and `theReadDoesNotGrowWithTheLibrary`
+  RED (library ×15: **3060 → 35540**); every exact-rows pin green on both (answers unchanged). (2) the tree's ancestor
+  walk carrying DEPTH in the recursion (`anc(id, depth)` — the VX-654 square) → `theTreeGrowsWithTheSeamHistory…` RED
+  (**26295 → 198255**, ×7.5) and the hand-built cycle never TERMINATED (the run was killed after ~5 min at 99% CPU —
+  the cycle guard is load-bearing, not defensive decoration). (3) the tree un-MATERIALIZED with plain JOINs →
+  `theTreeNeverScansAStoreTable` RED (`SCAN e` ×2) and `theTreeDoesNotGrowWithTheLibrary` RED (library ×15: **4308 →
+  9908**).
+- Lineage family on the committed tree (`--filter 'Lineage|TrashLineage|VX653|VX670'`): core "✔ Test run with 63
+  tests in 11 suites passed"; MCP target "✔ Test run with 2 tests in 2 suites passed".
+
+### U1-4 — the reconciliation read: `MCPNoteStructure.lineage`'s beyond-grant stub (P-13nb-U4-7)
+
+**The discipline as built** (`Sources/VariorumMCP/MCPNoteStructure.swift` `lineage` / `farSides` / `parents`; the
+ruling text `notes/plans/phase-13n-b-mcp-door.md` P-13nb-U4-7 + AF-11 F-4's RIDER): `read_note` `with_lineage` reads
+each page block's DIRECT LIVE edges (`derived_from` both ways, `version_of`) and classifies the far block for this
+client: placed in THIS note → `{relation, block_id, origin_op, at}`; a released original of this note (unplaced,
+`last_container_id` = this note) → `+ released: true, text`; placed in one of the family's saved versions →
+`+ version_id`; placed in another note the client can READ (`MCPGrantAuthority.decide(…, rung: .read, consumes:
+false)`) → `+ note_id`; **anything else live — an unreadable note (ungranted, Private, the daily Journal's, another
+wing's), ANY pool, a released original of another note — → the ONE stub `{"beyond_grant": true, "relation": r}`**
+(no id, title, kind, origin_op or stamp). A DEAD or missing far block is OMITTED ("the lineage walks' live-endpoint
+rule"; in practice the delete cascade has already killed the edge). Take ancestry mirrors it, except that a dead or
+missing parent block collapses INTO the stub (`parent_beyond_grant: true` — the F-6 amendment: omission there would
+mint a liveness oracle). The RIDER's stated reason for a stub over omission: *"omission would lie about the tree's
+completeness, a distinguishable stub would open an oracle."*
+
+**How the catalog holds it to R-825: it does not reach it.** The catalog's one lineage arm (`read_note · card,
+everything`) reads `card`, which has no edge to any hidden block in store A (the hidden half mints with
+`createPost`/`newBlock` only), so its `lineage` is `[]` in A, B and C alike. The stub's only pin is
+`MCPCarriageServerTests.lineageAndAncestryAreExactAndBeyondTheGrantIsOneUniformStub` — fenced = unshared = scrap,
+byte-identical, **"none omitted"** asserted.
+
+**FLAG F-U1-1 — the stub and R-825 GENUINELY COLLIDE (for edges; the parent stub does not).** Probe (throwaway, never
+committed — `Tests/VariorumMCPTests/U1StubProbeServerTests.swift`, deleted after the run): two stores built the same
+way, store A alone holding her Duplicate of a shared note (the copy lands ungranted in the Pool); the same client
+with a READ grant on the shared note calls `read_note` `with_lineage`. Store A's block answers
+`"lineage":[{"beyond_grant":true,"relation":"derived_into"},{"beyond_grant":true,"relation":"version_of"}]`; store
+B's answers `"lineage":[]` — **"U1-PROBE identical: false"**. Mechanism: the edge is a row of its own whose far end is
+hidden; the stub speaks it (one per edge — so it COUNTS hidden copies, and it vanishes when the hidden copy is deleted,
+since the cascade kills the edge: a liveness signal on a hidden block), while a store without the hidden copy has no
+row to speak. That is exactly what R-825 forbids ("nothing on the wire may vary with what the client cannot reach")
+and what VX-817's audit line names for edges ("a hidden copy is simply absent, never counted, never hinted"); the
+P-13nb-U4-7 RIDER rules the opposite ("omission would lie about the tree's completeness"). Both are ruled canon —
+MCPSpec's law paragraph names R-825 and, in the same sentence family, "down to the byte-identical beyond-grant
+lineage stub (P-13nb-U4-7)" — and `notes/mcp-invisibility-residuals.md`, her one-place ledger "of those
+impossibilities", does NOT list it (so either the ledger is incomplete or the stub is an unrecorded leak). The parent
+stub (`parent_beyond_grant`) is NOT a collision: it answers a reachable take's own non-null parent pointer that does
+not resolve within reach, identically for hidden, dead and missing parents (F-6 made it so). **Per the brief and the
+VX-825 precedent: nothing built on that edge; ruled canon not changed; this goes to her.** Options for her (my
+recommendation first, the spec-defensible one under her later, general law):
+  (a) RETIRE the edge stub: `with_lineage` omits an edge whose far side is unreadable, exactly VX-817's line, and the
+      RIDER's completeness worry is answered by the fixed-scope-words idiom — an always-present `beyond_reach` on a
+      `with_lineage` answer ("Lineage beyond your reach, if any, is not listed." — wording hers); re-pin
+      `lineageAndAncestry…` (stubs → absent) and add the A/B arm to the two-store catalog (a hidden copy of a
+      reachable note in store A). The parent stub stays.
+  (b) KEEP the stub as a recorded residual: add it to `notes/mcp-invisibility-residuals.md` as the seventh entry
+      (it leaks a count and a liveness bit per edge — harder to square with "never counted" than residuals 1–6, which
+      leak one bit each) and add the catalog arm as an enumerated exception.
+  (c) COLLAPSE it: one fixed per-block marker ("some lineage is beyond your reach") — still one bit per block, never
+      a count; a residual entry either way.
+Until she rules, the NEW tool follows the ticket's line (absent, never a stub) and its own catalog arms prove it pure;
+the two tools then disagree in shape on purpose, and the proposal below does not route through `farSides`.
+
+### U1-5 — THE DELIVERABLE-3 PROPOSAL (held for the orchestrator's ruling; nothing built)
+
+- **P-U1-a — name:** `list_note_lineage` (READ rung; `scopes` as `read_note`'s).
+- **P-U1-b — scope: ONE HOP at the block level, between PLACED blocks** (`Queries.lineagePeers` as built). Why not
+  transitive: a note-to-note chain N → H → Q passes through an intermediate note, and Q's presence would then depend on
+  whether H exists — with H hidden that is a path through unreachable state, R-825's exact failure; one hop with BOTH
+  ends readable is the only shape that is a pure function of reachable state without a per-path reach walk. Released
+  originals stay out (R-U1-4); a client wanting the whole family of one block reads `read_note` `with_lineage` and
+  follows readable `note_id`s.
+- **P-U1-c — `note_ids` RIDES** (1–200, no repeats, exclusive with `note_id` — VX-812's list-form idiom; "which notes
+  have copies elsewhere?" in one call is the ticket's ask): each item its own read decision and once-grant spend
+  (P-809-12), its own Activity line; `results` answers each id in order — the single call's answer, or `{note_id,
+  refused}` with the one not-shared sentence; a call where every item refused is an error answer (VX-812's rule).
+- **P-U1-d — the fence:** the subject decided at READ through `MCPGrantAuthority.decide` (the fence keys win: the daily
+  Journal's and ⌘J entries and the Private mark answer only a per-ask note grant); each PEER kept only when the same
+  rule reads it (`rung: .read, consumes: false` — `farSides`' precedent, so a peer never spends a once grant); a peer
+  the client cannot read is simply absent — never counted, never stubbed; `beyond_reach` ALWAYS present with the notes
+  form, my draft "Notes beyond your reach, if any, are not listed." (P-809-1's family; wording hers).
+- **P-U1-e — the answer (single form):**
+  ```json
+  {"note_id": "N", "title": "Drafts",
+   "copies":    [{"note_id": "P", "title": "Draft, again", "wing_id": "",
+                  "links": [{"block_id": "n1", "peer_block_id": "p1", "origin_op": "divide", "at": "2026-11-05T…"}]}],
+   "originals": [],
+   "versions":  [{"note_id": "P", "title": "Draft, again", "wing_id": "",
+                  "links": [{"block_id": "n1", "peer_block_id": "p1", "origin_op": "manual", "at": "…"}]}],
+   "beyond_reach": "Notes beyond your reach, if any, are not listed."}
+  ```
+  `copies` = peers holding `derived_into` links, `originals` = `derived_from`, `versions` = `version_of`; a peer sits
+  in every bucket it has links for, each entry carrying only that bucket's links (a duplicate is in `copies` by every
+  block and in `versions` by its one anchor). Peers in note-id order, links in the subject's block order (the Core
+  read's — no position key on the wire, A-809-13). The edge id is NOT sent (the door names no edge ids today). An
+  archived peer is LISTED and marked `"archived": true` (lineage is a fact about a reachable note, not a facet
+  listing — omitting a reachable archived copy would make "which notes have copies elsewhere?" lie); the
+  alternative, `include_archived` defaulting out like the listings, is the orchestrator's if preferred.
+- **P-U1-f — cost:** per item ∝ the note's placed blocks + their direct edges + one batched facts read for its peers
+  (`Queries.mcpNoteFacts`) — never the corpus; ≤ 200 items.
+- **P-U1-g — the rest as the brief:** VX-606 schema enforcement at the call door; Activity in words ("‹client› read
+  the lineage of “N”" / "…of 3 notes"); the description per VX-197 (says one hop, both ends readable, what each bucket
+  means, that a once grant covers one item, that `read_note` `with_lineage` reads one block's direct edges);
+  `MCPSession.instructions` NOT edited; catalog arms: a reachable note with a hidden copy in store A (Pool, Private
+  note, another wing, the daily Journal entry), a hidden subject, a list mixing readable and hidden ids, a readable
+  cross-wing peer; the coverage test forces the tool in.
+
+**Open, gating nothing in this leg:** F-U1-1 (hers); P-U1-a…g (the orchestrator's); R-U1-1…5 (recorded readings,
+the orchestrator's to overturn).
