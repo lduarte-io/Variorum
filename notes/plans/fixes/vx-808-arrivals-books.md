@@ -249,6 +249,13 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 
 **Canon owed at the closeout (two-file rule):** AppSpec §7 `reading_post.arrival_provenance` (the nine kinds, `at` on demotions, carry-on-seat) · §9 (the proposal op and its verdicts; every arrival door's stamp; `set_book_rule`'s count) · MCPSpec (the tool: read rung, list grammar, once-spend, the `waits` sentence, `waiting_count`) · SyncSpec §7 (the OWNED repair and the wing mend stamp their demotions with `at`) · SurfaceContracts (the read rung's consent sentence) · the record narrative to `notes/AppSpecRecord.md`.
 
+#### Unit B2 — the orchestrator's acceptance notes (post-build, 2026-11-05)
+
+- Commits 185f6c506 → d189ef9dc spot-checked on origin (the model, the op, the catalog entry, the OWNED stamp site); worktree clean; full core 3838/524 green; the socket-timing class re-run alone green (no verdict, the VX-353 pattern).
+- **PENDING THE STAGE WINDOW (B2's one open item):** five app-side suites compile but are UNRUN — `MCPPaneTabsTests` · `MCPWingFacesTests` · `MCPLibraryParityFacesTests` · `MCPAskAndReceiptTests` · `TutorialMCPChapterTests`. The orchestrator runs them at a nov5 window (claim `vx-808-b2-suites`) before B3's build relies on the words; the result line lands here.
+- **The round-1 reviewer's flags, adopted from the self-assessment above:** (i)/(P-808-B2-2) the once-spend's home; (ii) the NEW OBSERVATION CHANNEL — `changed: false` makes a waiting arrival visible on the wire; the no-new-oracle argument is a FENCE-MEANING claim the Fable reviewer rules (the pair's own reachable fact, or a new R-825 exception for her eyes); (iii) the `at` stamps' CAS byte-divergence — confirm no oscillation class.
+- **Handed to B3:** `Queries.BookArrival` gains the provenance read (live arrival rows only; since-when = `at ?? created_at`); the propose receipt's Open › landing (the book vs the review area) is B3's call at build. **Handed to B5:** the docs tail (A-808-10) + the open book's pane description clause (flag ix).
+
 ### Unit B3 — VX-821: the Arrivals review area (one session; design RULED — R-808-5)
 - **The design is PICKED (R-808-5, §3): the full book area, one home.** The masthead Arrivals door opens the review area in the book's content area (a mode-sized surface with Done returning to the book's mode); **the popover retires** — `BookArrivalsList`'s popover home is replaced, its row semantics (the ownership-aware arms from `ArrivalArms`, the never-seats open) carried into the new surface; `BookArrivalsDoor`'s masthead icon stays the one door (calm/presence unchanged).
 - The face (per the picked preview): the header "Arrivals — N waiting" with Add all · Dismiss all; rows carry the note's first words, WHY it waits ("proposed by ‹client› — ‹reason›" · "rule edit" · "catch-up after un-archiving"; absent provenance = since-when only) and since when (`TimeStampFace`, the one wording brain); multi-select (click, ⇧/⌘ extend, ⌘A); the bottom bar speaks "Add N · Dismiss N"; Add all · Dismiss all beside; keyboard judging (arrows walk, ⏎ adds, ⌫ dismisses); opening a row never seats (the peek stays safe).
@@ -300,7 +307,7 @@ Results + counts here; FOR A LATER READER written last; master plan row retired 
 | 1 | Worktree + branch + in-flight row + slot granted + v1_37 in nov5's ledger | DONE (kickoff) |
 | 2 | Kickoff sitting: cast (Sync/ implementer) · VX-775 direction · VX-872 scope/machines · rider offer | DONE — R-808-1..4 in §3 (Opus implements; VX-775 one-transaction; VX-872 deferred out with the marker-deadline line; no riders) |
 | 3 | Unit B1 (schema + mend) | IN PROGRESS — implementer session B1; LIVE STATUS under §6 Unit B1 |
-| 4 | Unit B2 (bulk propose + provenance) | NOT STARTED |
+| 4 | Unit B2 (bulk propose + provenance) | DONE pending the app-suite window — commits 185f6c506…d189ef9dc; full core 3838/524 green; three reviewer flags adopted; five app suites await claim vx-808-b2-suites |
 | 5 | Unit B3 (the review area) | DESIGN PICKED (R-808-5: full book area, one home; popover retires) — build NOT STARTED |
 | 6 | Unit B4 (pins) | NOT STARTED |
 | 7 | Unit B5 (riders + small members + the docs tail: MCPSession.instructions' propose line, tool-description cross-refs, the field guide's lesson-3 mention — A-808-10) | NOT STARTED |
