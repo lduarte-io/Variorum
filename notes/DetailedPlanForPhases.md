@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
-| **VX-808 — Umbrella: Arrivals & books** (wave 2's sync-slot effort; twelve members by sub-issue listing: VX-811 · VX-821 · VX-803 · VX-857 · VX-775 · VX-776 · VX-777 · VX-859 · VX-879 · VX-867 · VX-860 · VX-872). **HOLDS THE Sync/-custody SLOT** and carries the wave's ONE SyncSpec §12 lockstep event (`reading_post`'s arrival-provenance + pin columns, one marker bump; mirror deploy HELD for her window). Surfaces: `Sources/VariorumCore/Sync/` (the general book wing mend, the new columns' classification), Persistence migrations + the mirror artifact, Operations (intake/arrivals, the membership pin), the MCP door (bulk propose + riders — SHARES `MCP/` files with VX-827), the Bookcase & books (the Arrivals review face, book-order pins — SHARES book faces with VX-878), the capability registry (three-way: 878 · 827 · us), `AppBootstrap` (VX-860), `ShortcutCatalog` (VX-867). NO editor seam. Fable cold-reviews (Sync/ class). | VX-808 · `vx-808-arrivals-books` | `~/dev/variorum-vx-808` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-808-arrivals-books.md`; coordinator nov5. |
 | **VX-861 — Run: stargazing.tech** (the open-source banner + readme note VX-862, robots + sitemap VX-836, the MCP guide + privacy page catch-up VX-876). SITE REPO ONLY — no app surface, no store, no stage; kept off the site's master so the 1.2 release publish lands there freely. | VX-861 · `vx-861-site-open-source-banner` in `~/dev/stargazing.tech/stargazing-tech` | the Air's site clone · the Air | Live 2026-11-05; record `notes/runs/vx-861-site-open-source-banner.md` in the site repo. |
 | **VX-865 — the /variorum explainers rebuilt in SVG** (the version-control panel's animation; her word 2026-11-05). SITE REPO ONLY — no app surface, no store, no stage; runs beside VX-861 at her word, in its own worktree. | VX-865 · `vx-865-version-control-explainers` | `~/dev/stargazing.tech/stargazing-tech-vx-865` · the Air | Live 2026-11-05; record `notes/runs/vx-865-version-control-explainers.md` in the site repo. |
 | **VX-877 — the Tags explainer** (tags → books → gatherings → reading together, animated, fact-checked; her bake-off vs her social team, her word 2026-11-05). SITE REPO ONLY; a sub-issue of VX-865, its own worktree. | VX-877 · `vx-877-tags-explainer` | `~/dev/stargazing.tech/stargazing-tech-vx-877` · the Air | Live 2026-11-05; record `notes/runs/vx-877-tags-explainer.md` in the site repo. |
@@ -23,23 +22,24 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 ### Latest closeout
 
-**→ VX-827 CLOSED 2026-11-06 — LINEAGE, BOTH FACES (the record `notes/plans/fixes/vx-827-lineage.md`, FOR A LATER
-READER at its top; wave 2, /architect-phase, nov5 coordinating).** Five members (VX-801 · VX-817 · VX-810 · VX-815 +
-her kickoff rider VX-778). The wire: `list_note_lineage` (one hop, both-ends-readable, the VX-812 list form), tags +
-`entry_date` on `list_notes` rows and tags in `read_note`'s JSON, the `list_notes` tag filter, the granted-empty
-sentence, and `with_lineage`'s per-edge beyond-grant stub RETIRED at her F-U1-1 ruling (a probe-proven R-825
-collision — absent + one fixed scope sentence; the residuals ledger gained no row). The app: the History & Lineage
-surface succeeds Block History WHOLE (the Commits face's pane + all-takes rail + fast swapper + quiet folds; Compare
-with swappable boxes and the standing "now" third; the vertical Lineage face with the ancestor swap onto ONE shared
-composition; the origin doors landing with the original selected), `Operations.bringBackFromLineage` (U3b-P ruled),
-`Domain/TextCompare` + `CommitRail` + `LineageFamily`, `Queries.lineagePeers`/`lineageTree` (VX-654's discipline,
-P1-pinned). Her design sat FIVE mockup rounds + two Opus explorations in one night; THE DESIGN MEMO in the record is
-the binding shape. The ladder closed at two rounds 0 B/0 M; the gates: the whole target 6091/1056 0-failures, the
-phone 852/139 (the one red = VM-24/34/37's standing), the 17-row live walk (NO product defect; six rows deferred with
-pins named), the post-819 full suite + the 9-suite smoke green on the merged tip. Canon: MCPSpec's stub supersession
-+ the lineage/tag/empty reads, SurfaceContracts' History & lineage bullet, AppSpec §9's `bringBackFromLineage`.
-Bundle QUESTIONS #266; handoff `notes/handoffs/vx-827-handoff.md`. Born: VX-892 (the dangling-wing pair, Low) ·
-VM-41 (the phone parity ticket — the MOBILE PARITY line is PL-70). PR #231, merge 602077445.
+**→ VX-808 CLOSED 2026-11-06 — RUN: ARRIVALS & BOOKS (the record `notes/plans/fixes/vx-808-arrivals-books.md`,
+FOR A LATER READER at its top; wave 2's Sync/-custody-slot run, /architect-phase, nov5 coordinating; PR #232, merge
+29cf674ea).** Ten members landed: VX-811+VX-821 (the coupled pair — `propose_notes_to_book` at READ reach, bells
+never seats, the fence standing; the full-book-area Arrivals review with why-it-waits + since-when, multi-select,
+Add all · Dismiss all, keyboard judging, the ownership arms), VX-803 (pins float above any book sort in the ONE
+order home, within-chapter, `.pinNoteInBook`), VX-857 (the general book wing mend — `Sync/BookWingMend.swift`,
+members only, the fenced→frozen→earliest-accepted rank, demotions as visible arrivals), and the riders
+VX-859/777/776/879/867/860. **The wave's ONE SyncSpec §12 lockstep event: v1_37** (`arrival_provenance` ENCRYPTED +
+`pinned_at` PLAIN), marker 14→15 — **the mirror `Server/supabase/18_vx808_arrivals_pins.sql` is HELD for her deploy
+window; until it runs a main build visibly refuses production sync.** VX-775 and VX-872 deferred at her word
+(R-808-6, R-808-4 — VX-872's 1.1 arm dies at the deploy; both tickets carry the notes). The ladder: round 1 no
+BLOCKER/MAJOR (seven Sync-class rulings), round 2 clean. The gates: the WHOLE VariorumTests 6165/1068 0-failures on
+the final tree; the phone 852/139 (the standing caret red only); captures both voices; both merge-in reconciles
+(vx-878's menu composition, vx-827's MCP files) both-sides-proven. Canon: AppSpec §7/§9/§12 + SurfaceContracts (the
+review-area contract, the pin bullet, the propose line) + MCPSpec (the rung sentence, the VX-859 flip) + SyncSpec §7
+(the general mend), in place with pointers. Bundle QUESTIONS #267; handoff `notes/handoffs/vx-808-handoff.md`.
+Born: VX-891 (the gathering-cursor asymmetry, Low) · VX-893 (the wing-mend recorded corners, Low). **Her deploy
+window + the release FINISH the stage — each at her explicit go.**
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 

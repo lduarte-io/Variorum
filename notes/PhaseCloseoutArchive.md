@@ -1622,3 +1622,21 @@ lines name their block. Gates: per-batch staged suites + live walks; merge gate 
 post-#229 overlap 260/41 + core (the VX-850 flake apart, green alone); SearchPassagesTests' pin green on both merged
 trees (the vx-808 agreement honored). Born VX-888 · VX-890; data points on VX-850/VX-661/VX-855. Bundle QUESTIONS #265;
 handoff `notes/handoffs/vx-819-handoff.md`. Canon: SurfaceContracts ×2 · AppSpec ×1 (135,143/150,000). PR #230, merge 8fb04998b.
+
+**→ VX-827 CLOSED 2026-11-06 — LINEAGE, BOTH FACES (the record `notes/plans/fixes/vx-827-lineage.md`, FOR A LATER
+READER at its top; wave 2, /architect-phase, nov5 coordinating).** Five members (VX-801 · VX-817 · VX-810 · VX-815 +
+her kickoff rider VX-778). The wire: `list_note_lineage` (one hop, both-ends-readable, the VX-812 list form), tags +
+`entry_date` on `list_notes` rows and tags in `read_note`'s JSON, the `list_notes` tag filter, the granted-empty
+sentence, and `with_lineage`'s per-edge beyond-grant stub RETIRED at her F-U1-1 ruling (a probe-proven R-825
+collision — absent + one fixed scope sentence; the residuals ledger gained no row). The app: the History & Lineage
+surface succeeds Block History WHOLE (the Commits face's pane + all-takes rail + fast swapper + quiet folds; Compare
+with swappable boxes and the standing "now" third; the vertical Lineage face with the ancestor swap onto ONE shared
+composition; the origin doors landing with the original selected), `Operations.bringBackFromLineage` (U3b-P ruled),
+`Domain/TextCompare` + `CommitRail` + `LineageFamily`, `Queries.lineagePeers`/`lineageTree` (VX-654's discipline,
+P1-pinned). Her design sat FIVE mockup rounds + two Opus explorations in one night; THE DESIGN MEMO in the record is
+the binding shape. The ladder closed at two rounds 0 B/0 M; the gates: the whole target 6091/1056 0-failures, the
+phone 852/139 (the one red = VM-24/34/37's standing), the 17-row live walk (NO product defect; six rows deferred with
+pins named), the post-819 full suite + the 9-suite smoke green on the merged tip. Canon: MCPSpec's stub supersession
++ the lineage/tag/empty reads, SurfaceContracts' History & lineage bullet, AppSpec §9's `bringBackFromLineage`.
+Bundle QUESTIONS #266; handoff `notes/handoffs/vx-827-handoff.md`. Born: VX-892 (the dangling-wing pair, Low) ·
+VM-41 (the phone parity ticket — the MOBILE PARITY line is PL-70). PR #231, merge 602077445.

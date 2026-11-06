@@ -1402,3 +1402,33 @@ whole VariorumTests 6091/1056 0-failures on the merged tree (the merge gate), th
 walkthrough), the post-819 headless full suite and the 9-suite smoke green on the merged tip. Bundle #266. Merge
 order: vx-878 → vx-819 → vx-827 (the union conflict in CapabilityRegistryTests resolved keep-both; the overlap
 suites re-run at each step). PR #231, merge 602077445.
+
+
+## VX-808 — Run: Arrivals & books (2026-11-05/06; the record `notes/plans/fixes/vx-808-arrivals-books.md`)
+
+The Nov 4 marathon sitting's arrivals-and-books umbrella, wave 2's ONE Sync/-custody-slot run (/architect-phase;
+Fable orchestrated and cold-reviewed — mandatory, the run touches `Sync/` — Opus implemented every unit at her
+R-808-1; nov5 coordinated and serialized the merge). Members: VX-811 + VX-821 (the coupled pair) · VX-803 (pins) ·
+VX-857 (the general wing mend) · the riders VX-859/777/776/879/867/860; VX-775 and VX-872 DEFERRED at her word.
+**Her rulings, in session:** R-808-1 ("Opus implements", all batches incl. Sync/) · R-808-2 → re-ruled **R-808-6**
+("defer it and i'm questioning if we should even do it. can we show an error to just the user?" — VX-775 out, the
+direction reopened, her lean error-to-her/truth-to-client answered feasible on the ticket) · R-808-3 (no riders) ·
+R-808-4 ("this run is quite full, so i'm actually okay deferring it out" — VX-872 out, its 1.1 arm dying at the
+marker-15 deploy, the note on the ticket) · **R-808-5 ("Full book area, one home")** — the Arrivals review area's
+shape, picked at the design sitting over her reviewed mockup ("the mockup is fine as a face, keep going"); her
+masthead one-line feedback was carried to VX-878 by her own hand. **The schema event:** v1_37
+`reading_post.arrival_provenance` (ENCRYPTED canonical JSON, nine open kinds) + `pinned_at` (PLAIN), lockstep marker
+14→15; the mirror `Server/supabase/18_vx808_arrivals_pins.sql` HELD for her deploy window — from this merge a main
+build visibly refuses production sync until it runs. **The orchestrator's adjudications** A-808-1..5 (the mend: one
+general `BookWingMend`, members only, the fenced→frozen→earliest-accepted anchor rank, option D's visible-artifact
+demotions, the frozen loser to the dismissal-record class), A-808-6..10 (the nine-kind provenance vocabulary, the
+propose tool's verdict table, derived-not-stored waiting reasons), A-808-11 (bulk judging: per-row acts, one
+message, no undo, Dismiss all's single confirm), A-808-12 (pins: within-chapter float in the ONE order home,
+`.pinNoteInBook`, the mark on the two TOCs only). **The ladder:** round 1 no BLOCKER/MAJOR with seven Sync-class
+rulings (incl. residual-(6) CLOSED by the FK fixpoint and RULING-2's determinism gap STANDS AS RULED); round 2
+clean, four nits all executed (R2-3 answered at the gate by an AX probe — the yielded since-stamp stays spoken).
+**The gates:** the walk found and fixed W-1..W-4 red-on-old (review-close-on-content, the narrow row arm, stale
+width, chrome clip); the merge gate ran the WHOLE VariorumTests on the final tree — 6165/1068, 0 failures — and the
+full phone suite 852/139 with only the standing caret red; captures both voices incl. the why-wins-since-yields
+fallback. Reconcile 1 (vx-878's BookNoteTitleMenu composition) and 2 (vx-827's MCP files) both-sides-proven.
+Bundle #267. PR #232, merge 29cf674ea.
