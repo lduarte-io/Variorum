@@ -38,12 +38,21 @@ extension Queries {
         /// entry-date-else-"Untitled" behaviour it had before.
         public let createdAt: String?
 
+        /// **VX-803 — the membership is PINNED in this book** (`reading_post
+        /// .pinned_at` non-NULL): the entry sits in the pinned group the
+        /// assembly floats above the book's sort. Always false on a gathering
+        /// (no membership rows). Carried so the book's doors (Pin / Unpin) and
+        /// its mark read the fact from the same row the order came from.
+        /// Defaults false, so every hand-built entry constructs unchanged.
+        public let pinned: Bool
+
         /// Public so view layers and tests can build projections directly
         /// (the RenderedBlock precedent). `sectionID` defaults nil so
         /// pre-13b callers construct unchanged.
         public init(
             postID: String, title: String?, entryDate: String?,
-            sectionPath: String?, sectionID: String? = nil, createdAt: String? = nil
+            sectionPath: String?, sectionID: String? = nil, createdAt: String? = nil,
+            pinned: Bool = false
         ) {
             self.postID = postID
             self.title = title
@@ -51,6 +60,7 @@ extension Queries {
             self.sectionPath = sectionPath
             self.sectionID = sectionID
             self.createdAt = createdAt
+            self.pinned = pinned
         }
 
         /// What this note is CALLED on screen and in an export heading (13g
@@ -269,6 +279,21 @@ extension Queries {
     /// after the reading's own cap (`max_posts` — a capped book's filtered
     /// view never reaches past its cap), before the caller's `limit` window.
     /// nil = unfiltered, byte-identical to before.
+    ///
+    /// **THE PIN FLOAT (VX-803 — her ruling, the run record
+    /// `notes/plans/fixes/vx-808-arrivals-books.md` §3: "SEVERAL pins allowed;
+    /// the pinned group floats on top and orders among itself by the book's own
+    /// sort"; "pins hold EVERYWHERE — Outline, Index, Book, Read and the ⌘↑/⌘↓
+    /// stepper alike").** A BOOK's pinned memberships (`rp.pinned_at` non-NULL)
+    /// sort ahead of the rest, and the pinned group orders among itself by the
+    /// very sort term below — the stored pair or the A31 override, `(position,
+    /// id)` under manual. It lives HERE, in the one ORDER BY every book mode
+    /// reads, and nowhere else: a view re-deriving it is the smell. In a
+    /// CHAPTERED book the float is WITHIN each chapter (and within the unfiled
+    /// group) — chapters stay the frame, so `BookStructureModel.grouped`, which
+    /// re-buckets by chapter keeping this order, needs no second rule
+    /// (PROVISIONAL P-808-B4-2, the B4 fork's (e), A-808-12). A gathering has no
+    /// membership rows and never floats.
     public static func assembleReading(
         _ db: Database, readingID: String, limit: Int? = nil,
         order: ReadingOrder? = nil, filter: RuleTerm? = nil
@@ -366,7 +391,8 @@ extension Queries {
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
                        c.created_at AS created_at,
-                       s.name AS section_path, s.id AS section_id
+                       s.name AS section_path, s.id AS section_id,
+                       (rp.pinned_at IS NOT NULL) AS pinned
                 FROM reading_post rp
                 JOIN container c
                   ON c.id = rp.post_id
@@ -379,7 +405,7 @@ extension Queries {
                  AND s.deleted_at IS NULL
                 WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
                   AND rp.status = 'member'\(filterClause)
-                ORDER BY (s.id IS NULL), s.position, s.id, \(order)
+                ORDER BY (s.id IS NULL), s.position, s.id, (rp.pinned_at IS NULL), \(order)
                 """
             arguments.append(readingID)
             arguments += filterArguments
@@ -391,7 +417,8 @@ extension Queries {
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
                        c.created_at AS created_at,
-                       \(sectionSelect) AS section_path, NULL AS section_id
+                       \(sectionSelect) AS section_path, NULL AS section_id,
+                       (rp.pinned_at IS NOT NULL) AS pinned
                 FROM reading_post rp
                 JOIN container c
                   ON c.id = rp.post_id
@@ -400,7 +427,7 @@ extension Queries {
                  AND c.kind = 'post'
                 WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
                   AND rp.status = 'member'\(filterClause)
-                ORDER BY \(order)
+                ORDER BY (rp.pinned_at IS NULL), \(order)
                 """
             arguments.append(readingID)
             arguments += filterArguments
@@ -422,7 +449,8 @@ extension Queries {
             sql = """
                 SELECT c.id AS post_id, c.title AS title, c.entry_date AS entry_date,
                        c.created_at AS created_at,
-                       \(sectionSelect) AS section_path, NULL AS section_id
+                       \(sectionSelect) AS section_path, NULL AS section_id,
+                       0 AS pinned
                 FROM container c
                 WHERE \(conditions.joined(separator: " AND "))\(filterClause)
                 ORDER BY \(order)
@@ -450,7 +478,8 @@ extension Queries {
                     entryDate: row["entry_date"],
                     sectionPath: row["section_path"],
                     sectionID: row["section_id"],
-                    createdAt: row["created_at"])
+                    createdAt: row["created_at"],
+                    pinned: row["pinned"])
             }
     }
 

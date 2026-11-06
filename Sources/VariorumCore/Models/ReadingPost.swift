@@ -28,6 +28,14 @@ public struct ReadingPost: VariorumRecord {
     /// Every road that mints or re-poses an arrival writes it; ENCRYPTED under
     /// E2EE (an AI-authored reason is prose).
     public var arrivalProvenance: String?
+    /// VX-803 (v1_37 — the run record §5, Unit B4): the membership PIN —
+    /// non-nil = pinned, the stamp doubling as since-when. Meaningful on a live
+    /// MEMBER row: a pinned membership floats above the book's sort, the pinned
+    /// group ordering among itself by that same sort (`Queries.assembleReading`
+    /// — the ONE order every book mode reads). Written only by
+    /// `Operations.setMembershipPinned` and carried by the exact-slot copies.
+    /// PLAIN under E2EE (a bare timestamp).
+    public var pinnedAt: Date?
 
     public init(
         id: String,
@@ -39,7 +47,8 @@ public struct ReadingPost: VariorumRecord {
         createdAt: Date,
         deletedAt: Date? = nil,
         syncVersion: Int = 0,
-        arrivalProvenance: String? = nil
+        arrivalProvenance: String? = nil,
+        pinnedAt: Date? = nil
     ) {
         self.id = id
         self.readingId = readingId
@@ -51,5 +60,6 @@ public struct ReadingPost: VariorumRecord {
         self.deletedAt = deletedAt
         self.syncVersion = syncVersion
         self.arrivalProvenance = arrivalProvenance
+        self.pinnedAt = pinnedAt
     }
 }
