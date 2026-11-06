@@ -431,6 +431,16 @@ final class LibraryCatalogModel {
     /// per-keystroke tasks are unordered; only the NEWEST read may land.
     private(set) var searchGeneration = 0
 
+    #if DEBUG
+    /// **VX-408's pin seam** (DEBUG only; nil everywhere but its pins): awaited
+    /// by the listing's one read AFTER its database answer and BEFORE the
+    /// generation guard, with that read's generation — so a pin can hold ONE
+    /// read's answer until another has landed, the completion order the
+    /// serial in-memory test store can never produce on its own. Changes
+    /// nothing while nil.
+    @ObservationIgnored var listingAnswerGate: (@MainActor (_ generation: Int) async -> Void)?
+    #endif
+
     // MARK: - The ⌘-click pick (P-0, 13l's end-of-phase ladder)
 
     /// The notes she has picked. **Model state, not the view's `@State`** —
@@ -749,6 +759,9 @@ final class LibraryCatalogModel {
                     db, question: question, scope: scope, sort: sort, direction: direction,
                     day: day, wing: wing, noteDepth: noteDepth, groupDepth: groupDepth)
             }
+            #if DEBUG
+            if let gate = listingAnswerGate { await gate(generation) }
+            #endif
             guard generation == searchGeneration else { return }  // stale
             listedGeneration = generation
             bookHits = listing.books
