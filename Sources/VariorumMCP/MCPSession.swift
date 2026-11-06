@@ -35,6 +35,9 @@ final class MCPSession: @unchecked Sendable {
     private let shows: MCPShowTool
     private let database: AppDatabase
     private let operations: Operations
+    /// VX-776: the app's refusal words (the host's `MCPHostHooks.refusalWords`),
+    /// the one chain's second link for an error the SDK handlers meet.
+    private let refusalWords: @Sendable (Error) -> String?
     /// **VX-605 — the naming moment is heard** (the VX-620 run, batch 2): called
     /// once this connection's `initialize` has named it (the host hands it its
     /// one connections-changed road — `MCPServerHost.onConnectionsChanged`, a
@@ -348,6 +351,7 @@ final class MCPSession: @unchecked Sendable {
         self.operations = operations
         self.latch = latch
         self.onNamed = onNamed
+        self.refusalWords = hooks.refusalWords
         var reads = MCPReadTools(database: database, operations: operations)
         reads.hooks = hooks
         self.tools = reads
@@ -442,6 +446,12 @@ final class MCPSession: @unchecked Sendable {
             } catch is StoreLockedError {
                 // The lock overtook the list: what this connection was last served.
                 return .init(tools: self.listedWhileLocked)
+            } catch {
+                // VX-776 (the VX-369 sweep's row 19): any other store failure is
+                // said through THE ONE CHAIN — SQLite's code and its own message,
+                // never the executed SQL (P-771-11) — as the JSON-RPC internal
+                // error the SDK answered before, its words no longer GRDB's.
+                throw MCPError.internalError(MCPWireRefusalCopy.spoken(error, appWords: self.refusalWords))
             }
         }
         await server.withMethodHandler(CallTool.self) { [weak self] params in
@@ -459,7 +469,21 @@ final class MCPSession: @unchecked Sendable {
             // VX-818: a lock that overtook the call at its waiting check (a
             // store read, refused before any access) answers as the door does.
             let waits: Bool
-            do { waits = try self.awaitsHerOK() } catch is StoreLockedError { return Self.lockedAnswer }
+            do {
+                waits = try self.awaitsHerOK()
+            } catch is StoreLockedError {
+                return Self.lockedAnswer
+            } catch {
+                // VX-776 (the VX-369 sweep's row 19): the waiting check's store
+                // read failed — said as a TOOL RESULT through THE ONE CHAIN, the
+                // tool families' catch-all shape (P-771-11: SQLite's code and its
+                // own message, never the SQL), never the SDK's raw internal error.
+                return .init(
+                    content: [.text(
+                        text: MCPWireRefusalCopy.unexpected(error, tool: params.name, appWords: self.refusalWords),
+                        annotations: nil, _meta: nil)],
+                    isError: true)
+            }
             if waits {
                 let waiting = Self.waitingAnswer(params.name)
                 return .init(content: [.text(text: waiting.text, annotations: nil, _meta: nil)], isError: waiting.isError)
