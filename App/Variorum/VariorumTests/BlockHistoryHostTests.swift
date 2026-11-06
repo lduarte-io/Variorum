@@ -238,6 +238,17 @@ struct BlockHistoryHostTests {
     @Test func theOriginDoorOpensTheLineageFaceOnTheOriginal() async throws {
         try await mounted(mode: .write) { session, post, blocks, variants, window, hosting in
             #if DEBUG
+            // A JUSTIFIED EDIT (the window's fix leg 2): stage exactly as
+            // `theHistoryDoorOpensTheCommitsFaceInTheFullPane` does — Write
+            // STANDS with its bar before the door is pressed. The first cut
+            // merged and opened the face as soon as the detail registered, so
+            // the bar's appear raced the face's swap and the per-post refcount
+            // (a global static every test here shares — `.incrementing` ids)
+            // was left off by the straddle; the face's own claims all held.
+            #expect(await Self.settle(window, hosting) {
+                CommitBarGeometry.mounted("horizontal", post: post) >= 1
+            }, "Write stands with its bar")
+            let barsBefore = CommitBarGeometry.mounted("horizontal", post: post)
             let merged = try session.operations.merge(blocks[1], blocks[2])
             let request = BlockHistoryRequest(
                 postID: post, blockID: merged.block.id, focusedVariantID: merged.variant.id,
@@ -256,8 +267,8 @@ struct BlockHistoryHostTests {
             #expect(Set(model.members.map(\.blockID)).isSuperset(of: [blocks[1], blocks[2], merged.block.id]),
                     "both originals and this block")
             #expect(await Self.settle(window, hosting) {
-                CommitBarGeometry.mounted("horizontal", post: post) == 0
-            }, "no editor stands under the face")
+                CommitBarGeometry.mounted("horizontal", post: post) == barsBefore - 1
+            }, "no editor stands under the face — Write's one bar left with it")
             #endif
         }
     }
