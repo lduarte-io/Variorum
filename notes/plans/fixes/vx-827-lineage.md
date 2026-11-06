@@ -2149,3 +2149,10 @@ STANDS (the ritual + the whole target's five named reds). The re-entry is a fres
 five suites' re-runs + the phone arm (VariorumMobileTests — Shared/ files in the diff) + the
 walk; nov5 may slot it at vx-878's SEAM, and may ask for one more whole-target pass if the fix
 touches product code many suites construct (the fix's file list rides READY).
+
+**Window corrections (nov5, 2026-11-06):** a SECOND VX-661-class crash — 00:54:46, the B run,
+same swift-testing ABI.EncodedEvent.encode stack-guard SIGSEGV signature; B's per-test verdicts
+all printed before the death (12 tests, the one expected red), the restart re-ran 1 green — the
+ritual's evidence intact; BOTH .ips commented on VX-661. A Problem Reporter dialog from it
+stood at release (nov5 closed it): **release checks now include `pgrep -fl "Problem Reporter"`**
+— adopted for every future release line this run makes.
