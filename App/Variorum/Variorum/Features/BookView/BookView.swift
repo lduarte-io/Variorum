@@ -654,7 +654,10 @@ struct BookView: View {
     /// documented). The tabs own their line WHOLE (gear on the title line,
     /// labels lineLimit(1) + fixedSize): the first claim that "four labels
     /// + the gear measure under 190 pt" was falsified by the walk — the
-    /// compressed row wrapped the words mid-letter.
+    /// compressed row wrapped the words mid-letter. (VX-887: the ORDER DIAL
+    /// shares the tabs' line wherever the width class says it fits —
+    /// `BookMastheadModeRow` — and drops below them where it does not; the
+    /// tabs themselves still never compress.)
     /// **VX-804 — the open book's name, as every face of this view says it**
     /// (the masthead, the Outline's page heading, Read ▸ Scroll's title):
     /// the reading row the structure model HOLDS for the view's life
