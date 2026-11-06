@@ -136,6 +136,15 @@ final class CommitsFaceModel {
     /// **Compare's boxes**, left to right, or nil while the face shows.
     private(set) var compareBoxes: [CommitRail.Moment]?
 
+    /// **The washes, computed once per pair of texts.** A render reads the
+    /// pane's comparison twice (the washes and the count) and Compare reads
+    /// one per box, while the texts change only when a moment is picked or a
+    /// take's buffer moves — so a pair already compared is answered from
+    /// here (a commit is immutable; a "now" is keyed by its take's
+    /// `updated_at` and length). Bounded: emptied past `compareCacheLimit`.
+    @ObservationIgnored private var compareCache: [String: TextCompare.Comparison] = [:]
+    static let compareCacheLimit = 64
+
     init(session: AppSession, request: BlockHistoryRequest) {
         self.session = session
         self.postID = request.postID
@@ -262,17 +271,43 @@ final class CommitsFaceModel {
     /// **The pane's wash** — the selected moment against its take now, or
     /// nil (plain, a "now", nothing selected).
     var paneComparison: TextCompare.Comparison? {
-        guard wash == .againstNow, let commit = selectedCommit, let take = selectedTake
-        else { return nil }
-        return TextCompare.compare(commit.text, take.workingText)
+        guard wash == .againstNow, let selection, case .commit = selection,
+              let takeID = takeID(of: selection) else { return nil }
+        return comparison(selection, .now(takeID: takeID))
     }
 
     /// "4 changes since" — always the count, whichever wash shows (the toggle
     /// changes what the text looks like, not what is true).
     var changesSince: String? {
-        guard let commit = selectedCommit, let take = selectedTake else { return nil }
-        return CommitsFaceCopy.changesSince(
-            TextCompare.compare(commit.text, take.workingText).changeCount)
+        guard let selection, case .commit = selection,
+              let takeID = takeID(of: selection),
+              let compared = comparison(selection, .now(takeID: takeID)) else { return nil }
+        return CommitsFaceCopy.changesSince(compared.changeCount)
+    }
+
+    /// Two moments compared (`TextCompare`), through the cache.
+    func comparison(
+        _ old: CommitRail.Moment, _ new: CommitRail.Moment
+    ) -> TextCompare.Comparison? {
+        guard let oldText = text(of: old), let newText = text(of: new),
+              let oldKey = cacheKey(old), let newKey = cacheKey(new) else { return nil }
+        let key = oldKey + "\u{1F}" + newKey
+        if let hit = compareCache[key] { return hit }
+        let fresh = TextCompare.compare(oldText, newText)
+        if compareCache.count >= Self.compareCacheLimit { compareCache.removeAll() }
+        compareCache[key] = fresh
+        return fresh
+    }
+
+    /// What identifies a moment's TEXT: a commit's id (its text never
+    /// changes, I5); a take's id with its `updated_at` and length.
+    private func cacheKey(_ moment: CommitRail.Moment) -> String? {
+        switch moment {
+        case .commit(let id): return id
+        case .now(let takeID):
+            guard let take = take(takeID) else { return nil }
+            return "now:\(takeID):\(take.updatedAt.timeIntervalSince1970):\(take.workingText.utf16.count)"
+        }
     }
 
     func predatesSplit(_ commit: CommitPoint) -> Bool {
@@ -505,9 +540,9 @@ final class CommitsFaceModel {
               let text = text(of: boxes[index]) else { return [] }
         if boxes.count < 2 { return text.isEmpty ? [] : [.init(.same, text)] }
         if index == 0 {
-            return TextCompare.compare(text, self.text(of: boxes[1]) ?? "").old
+            return comparison(boxes[0], boxes[1])?.old ?? [.init(.same, text)]
         }
-        return TextCompare.compare(self.text(of: boxes[index - 1]) ?? "", text).new
+        return comparison(boxes[index - 1], boxes[index])?.new ?? [.init(.same, text)]
     }
 
     /// Every moment a box's swapper can be re-aimed at, per take in the
