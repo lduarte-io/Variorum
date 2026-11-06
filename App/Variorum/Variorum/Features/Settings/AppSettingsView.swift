@@ -158,7 +158,8 @@ struct AppSettingsView: View {
         // where a search for the setup's words lands. Ladder R2-3: the Clients
         // tab (its label is the row's title), where "client"/"clients" land.
         // VX-676: the show dial sits above the tabs, beside the server switch.
-        .mcp: ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
+        // VX-874: the trail dial below it, above the tabs too.
+        .mcp: ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],

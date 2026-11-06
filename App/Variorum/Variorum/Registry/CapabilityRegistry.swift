@@ -2886,6 +2886,29 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: MCPTrailCopy.unavailableNote,
             availability: always),
+        // VX-874 (the VX-878 run, batch 3 — her rulings (1)–(4)) — her hand on
+        // the section: each door carries its row or its section, rendered only
+        // while a row is drawn (P-2), so `always` is honest. PROVISIONAL words
+        // (P-874-4).
+        Capability(
+            id: .mcpDismissTrailEntry, verb: MCPTrailCopy.dismissVerb, scope: .app,
+            doors: [.surface, .contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .mcpClearTrail, verb: MCPTrailCopy.clearVerb, scope: .app,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .mcpSetTrailDial, verb: MCPTrailCopy.dialVerb, scope: .app,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "What the sidebar lists of a client\u{2019}s activity is set in Settings "
+                + "\u{25B8} MCP.",
+            availability: always),
         Capability(
             id: .mcpOpenAsk, verb: "Answer\u{2026}", scope: .app,
             doors: [.surface],

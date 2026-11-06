@@ -1193,6 +1193,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// and `MCPTrailSection` is their only renderer (rendered only while a row
     /// exists — P-2).
     case mcpOpenTrailPlace, mcpShowTrailDetails
+    /// VX-874 (the VX-878 run, batch 3 — her rulings (1)–(4)): her hand on that
+    /// section. `mcpDismissTrailEntry` — a row's ✕ (`.surface`) and its
+    /// right-click Dismiss (`.contextMenu`): the ROW goes, nothing else (a
+    /// standing ask keeps its line). `mcpClearTrail` — Clear All on every row's
+    /// and every header's right-click (the Open list's Close All Notes grammar):
+    /// every row goes. `mcpSetTrailDial` — the headers' right-click twin of
+    /// Settings ▸ MCP's three-state control (everything on · notices off ·
+    /// fully off — "welcome if cheap"). `MCPTrailSection` is their only renderer.
+    case mcpDismissTrailEntry, mcpClearTrail, mcpSetTrailDial
     /// VX-309 U1c — VX-451 (F-U4-1's option (a)): LOCK LIBRARY NOW, declared at last — ONE act, TWO doors: the File menu's
     /// item (`.menuBar`, ⌃⌘L — rendered only where the library can lock: Castle — `AppBootstrap.canLock`)
     /// and the new road's Protection pane, in the Castle-only "On this Mac" section beside the idle dial (`.surface` —

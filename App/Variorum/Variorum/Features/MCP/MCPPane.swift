@@ -266,6 +266,20 @@ struct MCPPane: View {
                 }
                 .lineLimit(1)
                 ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)
+                // VX-874 (her ruling (4) — "TWO off switches … ONE control with
+                // three states", home Settings ▸ MCP, her word): THE TRAIL DIAL,
+                // beside the show dial it sits next to in meaning — what the
+                // sidebar's AI section draws (everything on · notices off ·
+                // fully off). One picker, its line, the whole text behind its (i).
+                Picker(SettingsCatalog.title("mcpTrailDial"), selection: Binding(
+                    get: { door.snapshot.trailDial },
+                    set: { door.setTrailDial($0) })) {
+                    ForEach(MCPTrailDial.allCases, id: \.self) { dial in
+                        Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
+                    }
+                }
+                .lineLimit(1)
+                ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
                 // A refusal from any act lands where she is looking first
                 // (the walk's second finding: a caption at the form's foot
                 // sat below the fold).

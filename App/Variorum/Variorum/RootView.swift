@@ -681,9 +681,12 @@ struct RootView: View {
     private var mcpTrailFooter: SidebarView.FooterSection? {
         guard let mcp else { return nil }
         let theme = theme
+        // VX-874: the fit test counts what the section DRAWS under the trail
+        // dial (notices off: the asks alone; fully off: nothing — the section
+        // and its separator gone), read inside the column's body.
         return SidebarView.FooterSection(
-            rows: { mcp.trail.trail.entries.count },
-            headers: { mcp.trail.trail.groups.count },
+            rows: { mcp.trail.trail.drawnRowCount(showing: mcp.trailDial) },
+            headers: { mcp.trail.trail.groups(showing: mcp.trailDial).count },
             content: { rowHeight in
                 AnyView(MCPTrailSection(door: mcp, rowHeight: rowHeight).environment(theme))
             })
