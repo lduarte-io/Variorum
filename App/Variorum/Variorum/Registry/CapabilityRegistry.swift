@@ -2343,9 +2343,12 @@ nonisolated enum CapabilityRegistry {
         // book's act through that one item, by focus. On the daily Journal's
         // pane the selector's open-time re-check speaks the op's own refusal
         // (a menu item cannot read the book row synchronously — RB-6).
+        // VX-829 (her ask, 2026-11-04): + `.surface` — the Book Settings
+        // sheet's State section draws the act as its wing row (the sheet
+        // carries its book), from the row door's own `WingBookMoveDoor.drawn`.
         Capability(
             id: .moveBookToWing, verb: WingCopy.moveToWingVerb, scope: .book,
-            doors: [.contextMenu, .palette, .menuBar],
+            doors: [.contextMenu, .palette, .menuBar, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.bookUnavailableNote,
             availability: { ctx in

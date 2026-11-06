@@ -112,8 +112,8 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | 868-a · VX-868 wording pin (red on the pre-fix tree by construction) | DONE (3263e5877) — `BookDeleteAndDuplicateTests.thePlainBooksDeleteSentenceReadsWithOneNoteAndWithSeveral`; red-on-old by evaluation of the pre-fix body (below); the App-suite RUN of the red and the green is the closing window's (PENDING) |
 | 868-b · VX-868 both arms rewritten | DONE (7656bc887) — `BookStateCopy.plainBookKeepsItsNotes` |
 | 802-a · VX-802 survey + proposed door set (the in-batch fork) | DONE (this commit) — the proposal below, AWAITING THE ORCHESTRATOR'S RULING; nothing of 802's wiring is built |
-| 829-a · VX-829 Book Settings: Move to Wing door | IN-PROGRESS |
-| 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | NOT-STARTED |
+| 829-a · VX-829 Book Settings: Move to Wing door | DONE (this commit) — the State section's wing row (`BookSettingsSheet.state` → `VoicedMenu` of `wingDestinations`, the Bookcase row's `bookMoveAsk` + `wingBookMoveConfirm`); `.moveBookToWing` + `.surface`; pins `BookDoorsEverywhereTests` (3) — COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
+| 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | IN-PROGRESS — design: ONE pure table `BookRowMenuTable.groups(facts, face:)` (elsewhere = [Open] + the Bookcase's groups minus shelf placement, BY CONSTRUCTION), ONE renderer both faces draw, the Bookcase's four undeclared doors declared (`.renameBook`, `.manageBookNotes`, `.setBookExtent`, `.useAsDailyJournal`), the elsewhere face's acts hosted by `BookRowDoors` with the act bodies shared with `ShelfViewModel` (never forked) |
 | 802-b · VX-802 build (gated on the orchestrator's ruling) | NOT-STARTED — awaiting the ruling |
 | V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | NOT-STARTED |
 

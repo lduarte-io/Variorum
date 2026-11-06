@@ -217,6 +217,16 @@ nonisolated enum CollectingCopy {
         if Queries.isDailyJournalMintShape(reading) { return BookArchiveCopy.dailyJournalCaption }
         return reading.archivedAt != nil ? archivedCaption : archiveCaption
     }
+
+    /// VX-829 — the State section's WING row: where the book lives, and what
+    /// a move takes with it (the move's own confirm says the rest — what
+    /// comes, what is severed, a twin name). PROVISIONAL wording (her bundle).
+    static func wingCaption(_ wingName: String, isGathering: Bool) -> String {
+        let place = "In \u{201C}\(wingName)\u{201D}."
+        return isGathering
+            ? place + " A gathering shows the notes of the wing it\u{2019}s in."
+            : place + " Moving the book takes its notes with it."
+    }
 }
 
 // MARK: - What the sheet draws (13i-d U3 — row 107)
@@ -483,6 +493,10 @@ struct BookSettingsSheet: View {
         // 13n-c U3 (R-13n-4's grant face; VX-156 item 2): the grant row's
         // Share… — THE grant sheet pre-filled on this book, over this sheet.
         + [.mcpShareBook]
+        // VX-829 (her 2026-11-04 ask: "the Book Settings sheet has no Move to
+        // Wing door — add it (beside the State doors)"): the State section's
+        // wing row — the Bookcase row's act, a second door on one declaration.
+        + [.moveBookToWing]
 
     let structure: BookStructureModel
     /// The Edit… handoff (W-1): the host presents the editor AFTER this
@@ -499,6 +513,13 @@ struct BookSettingsSheet: View {
     @State private var grantOpening: MCPGrantOpening?
     /// 13n-c U3: the window's road (nil in harness mounts — no grant row).
     @Environment(\.mcpShareRoad) private var mcpShareRoad
+    /// VX-829: the window's one wings brain (the composition root's, carried
+    /// in the environment like the note ▾ menus' — nil in a harness mount
+    /// that hands none: then no wing row draws, P-2).
+    @Environment(WingsModel.self) private var wings: WingsModel?
+    /// VX-829: the book move's counting confirm (its item IS the act's
+    /// preview — the Bookcase row's shape).
+    @State private var bookMoveAsk: WingsModel.BookMoveAsk?
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -575,6 +596,9 @@ struct BookSettingsSheet: View {
             if let reading = structure.reading { await model.load(for: reading) }
         }
         .bookStateConfirms(model.stateDoors)
+        // VX-829: the wing row's counting confirm — the Bookcase row's own
+        // (`wingBookMoveConfirm` — the one presentation of the book move).
+        .wingBookMoveConfirm($bookMoveAsk, wings: wings)
         // 13n-c U3: who reaches the book, held while the sheet is up; and the
         // grant sheet it opens, presented over it.
         .task { await model.watchReach() }
@@ -808,6 +832,44 @@ struct BookSettingsSheet: View {
                 label: archive == .archiveBook
                     ? BookStateCopy.archiveDoorLabel(asks: BookStateCopy.archiveAsks(reading)) : nil)
         }
+        // VX-829 — THE WING ROW (her ask: "the Book Settings sheet has no Move
+        // to Wing door — add it (beside the State doors; it's book
+        // configuration like the rest)"). The Bookcase row's act and drawing
+        // rule (`WingBookMoveDoor.drawn` — while another wing exists, books AND
+        // gatherings, the daily Journal too since VX-435), from the book's OWN
+        // wing; a pick opens the act's counting confirm (or the door speaks a
+        // frozen stay-behind's refusal) — the one `bookMoveAsk` road.
+        if let wings {
+            let destinations = Self.wingDestinations(for: reading, wings: wings)
+            if !destinations.isEmpty {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(tokens.chromeLabel(CollectingCopy.wingCaption(
+                        wings.name(of: reading.wingId), isGathering: reading.kind == .gathering)))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 8)
+                    VoicedMenu(
+                        tokens: tokens, label: CapabilityRegistry.capability(.moveBookToWing).verb
+                    ) {
+                        ForEach(destinations) { row in
+                            Button(row.name) {
+                                Task { bookMoveAsk = await wings.bookMoveAsk(reading: reading, to: row.id) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// VX-829: the wings the row offers — every OTHER wing than the book's
+    /// own, Home first, and none at all while the door cannot act
+    /// (`WingBookMoveDoor.drawn`, the Bookcase row's one rule — P-2).
+    static func wingDestinations(for reading: Reading, wings: WingsModel) -> [WingsModel.Row] {
+        let others = wings.destinations(from: reading.wingId)
+        return WingBookMoveDoor.drawn(reading: reading, destinations: others.count) ? others : []
     }
 
     private func stateRow(
@@ -872,6 +934,8 @@ struct BookSettingsSheet: View {
             + "|\(reading.profile ?? "")|\(String(describing: reading.wordTarget))"
             + "|\(String(describing: reading.maxPosts))"
             + "|\(String(describing: reading.archivedAt))"
+            // VX-829: the wing row reads the wings and the book's own wing.
+            + "|\(reading.wingId)|\(wings?.rows.map(\.id).joined(separator: ",") ?? "-")"
     }
 
     private func record() {
@@ -890,7 +954,8 @@ struct BookSettingsSheet: View {
             finishedShown: BookSettingsFace.showsFinished(for: reading),
             archiveDoor: BookSettingsFace.archiveDoor(for: reading),
             archiveCaption: CollectingCopy.archiveCaption(for: reading),
-            paused: BookArchiveCopy.pausedSentence(for: reading))
+            paused: BookArchiveCopy.pausedSentence(for: reading),
+            wingDestinations: wings.map { Self.wingDestinations(for: reading, wings: $0).map(\.name) })
     }
     #endif
 }
@@ -962,6 +1027,9 @@ enum BookSettingsProbe {
         var archiveDoor: CapabilityID? = nil
         var archiveCaption: String? = nil
         var paused: String? = nil
+        /// VX-829: the wing row's offered wings (empty: no row drawn — one
+        /// library, P-2); nil when the mount carried no wings brain.
+        var wingDestinations: [String]? = nil
     }
 
     static var drawn: [String: Drawn] = [:]
