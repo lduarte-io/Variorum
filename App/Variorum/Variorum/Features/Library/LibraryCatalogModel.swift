@@ -312,6 +312,13 @@ final class LibraryCatalogModel {
     /// (`SidebarSearchFieldRule.Act.start`). The caller spawns `search()`
     /// (this file's convention) and lands the Library where it is not shown.
     func takeSidebarQuestion(_ words: String, startingANewSearch: Bool) {
+        // The ladder's F3 (A-819-L1, amending P-819-B3d): the field opens
+        // empty and clears after every handoff, so every question it starts
+        // is a fresh hunt — a NEW search by R-819-2's own word: relevance,
+        // and no facet carried over from the question it replaces (exactly
+        // what a cleared field resets — the day and the scope stay, as
+        // there). Refining its own question keeps, as refining keeps.
+        if startingANewSearch { searchState.resetFacet() }
         // One engine, one finder: the field's words ARE this model's ONE
         // question — the field holds no search state of its own, mints no
         // second road, and the catalog asks in the current wing.
