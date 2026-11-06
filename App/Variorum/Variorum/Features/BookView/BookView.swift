@@ -210,6 +210,9 @@ struct BookView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// VX-887: the masthead's mode row measures its STABLE widths in the
+    /// view's own font context (`BookMastheadStableWidths.row`).
+    @Environment(\.fontResolutionContext) private var fontContext
     @State private var newChapterPresented = false
     #if DEBUG
     /// **This book's own name in the DEBUG oracles** (18k UNIT C4 — the
@@ -702,13 +705,26 @@ struct BookView: View {
             .help(CapabilityRegistry.capability(.openBookSettings).verb
                 + " — collecting, finish, seal, own, length, rename")
         }
-        HStack(spacing: 8) {
-            // Outline · Index · Book · Read — Index sits beside the
-            // writing surface, mirroring the note row's Write · Takes ·
-            // Index · Read shape (her cohesion mandate, W8-2).
-            ForEach(Self.tabOrder, id: \.self) { mode in
-                modeTab(Self.tabLabel(mode), mode)
+        // VX-887 (her three rulings, 2026-11-05 — "the area in books is a bit
+        // crowded and lacks visual hierarchy"): the ORDER DIAL rides the mode
+        // row's one line — the modes leading, the dial at the trailing end —
+        // and wraps below the modes only when the width class says so. ONE
+        // Layout over these same two views (`BookMastheadModeRow`), decided at
+        // whole points from STABLE widths — the tabs at their widest active
+        // state, the dial at its widest form — never `ViewThatFits`, so a
+        // pick, a rename, a mode switch or a resize back and forth never moves
+        // the line count off the width's own answer.
+        let stable = BookMastheadStableWidths.row(tokens: tokens, in: fontContext)
+        BookMastheadModeRow(tabsWidth: stable.tabs, dialWidest: stable.dial, probeKey: readingID) {
+            HStack(spacing: BookMastheadModeRowRule.tabSpacing) {
+                // Outline · Index · Book · Read — Index sits beside the
+                // writing surface, mirroring the note row's Write · Takes ·
+                // Index · Read shape (her cohesion mandate, W8-2).
+                ForEach(Self.tabOrder, id: \.self) { mode in
+                    modeTab(Self.tabLabel(mode), mode)
+                }
             }
+            orderControl
         }
         // 13c 2C: READ's pair of faces (her direction — "the
         // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
@@ -728,7 +744,6 @@ struct BookView: View {
             .help("Read the book as one continuous scroll, or as real pages "
                 + "with the text flowing across them")
         }
-        orderControl
         // 13i-d U3 — THE GROUPED-BY CONTROL (the sitting record §17(f), ruled:
         // "the Index masthead"): drawn only while the Index is the mode.
         if structure.mode == .index {
@@ -755,14 +770,9 @@ struct BookView: View {
         Button {
             switchMode(to: mode)
         } label: {
-            Text(tokens.chromeLabel(label))
-                .font(structure.mode == mode
-                    ? tokens.small.weight(.semibold) : tokens.small)
-                .foregroundStyle(structure.mode == mode ? tokens.accent : tokens.muted)
-                // P-8: a chrome label never wraps — a compressed row
-                // must yield elsewhere, not split a word.
-                .lineLimit(1)
-                .fixedSize()
+            // VX-887: the words are `BookModeTabLabel` — the face the mode
+            // row's stable width measures (P-8's one line inside it).
+            BookModeTabLabel(tokens: tokens, label: label, active: structure.mode == mode)
         }
         .buttonStyle(.plain)
         .help(modeHelp(mode))
@@ -1541,62 +1551,30 @@ struct BookView: View {
     /// book's own order); "Save as this book's order" is the adopt door
     /// (`setReadingSort`). A FINISHED book browses freely and cannot save —
     /// its order is part of what "done" froze, and the op refuses anyway.
+    ///
+    /// **VX-887:** the dial is `BookOrderDial` (its face, its menu, its help —
+    /// one home beside the mode row that lays it out), and its face names the
+    /// order alone ("Manual order ▾" — the doubled "order" gone). The acts
+    /// are the book view's, unchanged: a pick sets the view order, the adopt
+    /// door saves it and drops the override.
     private var orderControl: some View {
-        let stored = BookOrderChoices.storedLabel(for: structure.reading)
-        let current = model.viewOrder.map(BookOrderChoices.label(for:))
-        // Deliberately NOT `VoicedMenu`: that control carries `.fixedSize()`,
-        // and this label is long enough that forcing its ideal width pushed
-        // the whole 190 pt navigator wider than its frame — every row in the
-        // column lost a character off its left edge (caught in the batch's
-        // visual loop, P-7; the b6dae25 chrome-sizing class). The label
-        // TRUNCATES instead; the menu still says everything in full.
-        return Menu {
-            Button {
-                model.viewOrder = nil
-            } label: {
-                if model.viewOrder == nil {
-                    Label("This book's order (\(stored))", systemImage: "checkmark")
-                } else {
-                    Text("This book's order (\(stored))")
+        let dial = BookOrderDial(
+            tokens: tokens,
+            stored: BookOrderChoices.storedLabel(for: structure.reading),
+            viewOrder: model.viewOrder,
+            canSave: structure.reading?.locked != true,
+            onLook: { model.viewOrder = $0 },
+            onSave: { order in
+                Task {
+                    await structure.saveOrder(order)
+                    // Saved IS the book's order now — drop the override
+                    // so the menu stops claiming a separate way of
+                    // looking (and every other reader agrees).
+                    model.viewOrder = nil
                 }
-            }
-            Divider()
-            ForEach(BookOrderChoices.all) { choice in
-                Button {
-                    model.viewOrder = choice.order
-                } label: {
-                    if model.viewOrder == choice.order {
-                        Label(choice.label, systemImage: "checkmark")
-                    } else {
-                        Text(choice.label)
-                    }
-                }
-            }
-            if let order = model.viewOrder, structure.reading?.locked != true {
-                Divider()
-                Button("Save as This Book's Order") {
-                    Task {
-                        await structure.saveOrder(order)
-                        // Saved IS the book's order now — drop the override
-                        // so the menu stops claiming a separate way of
-                        // looking (and every other reader agrees).
-                        model.viewOrder = nil
-                    }
-                }
-            }
-        } label: {
-            Text(tokens.chromeLabel("order · \(current ?? stored)") + " ▾")
-                .font(tokens.small)
-                .foregroundStyle(model.viewOrder == nil ? tokens.muted : tokens.accent)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-        .menuIndicator(.hidden)
-        .help("Look at this book in a different order — nothing is written until "
-            + "you save it as the book's own order.")
+            })
+        return dial
+            .bookOrderDialProbe(readingID, face: BookOrderDial.face(tokens, order: dial.shownOrder))
     }
 
     // MARK: - Outline's landing (the Act 10 correction round, rows 9/12/14/44/47 — and row 53)

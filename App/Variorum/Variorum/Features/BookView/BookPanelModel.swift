@@ -68,7 +68,7 @@ nonisolated enum BookPanelCopy {
     static let moveChapterDownVerb = "Move Chapter Down"
     /// 17y B2 (e) — a note re-placed inside its own chapter while the book
     /// reads in a stamp order: what happened, why, and the road out (the
-    /// book view navigator's "order · … ▾" → Manual order → Save as This
+    /// book view masthead's order dial "… ▾" → Manual order → Save as This
     /// Book's Order). Wording PROVISIONAL (13s re-voices).
     static func needsManualOrder(book: String, order: String) -> String {
         "\(quoted(book)) is sorted by \(order), so a note can\u{2019}t be placed by hand "
