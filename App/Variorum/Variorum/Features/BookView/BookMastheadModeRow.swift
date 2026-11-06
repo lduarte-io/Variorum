@@ -132,8 +132,12 @@ nonisolated enum BookMastheadModeRowRule {
                 dial: CGRect(origin: CGPoint(x: lineWidth - dialSize.width, y: dialY), size: dialSize),
                 size: CGSize(width: lineWidth, height: max(tabsY + tabsSize.height, dialY + dialSize.height)))
         case .twoLines:
-            let dialSize = dial.size(rowWidth)
-            let lineWidth = max(rowWidth, tabsSize.width, dialSize.width)
+            // The dial's line is as wide as the row — or as the tab line, when
+            // the tabs alone are wider than the room (they never wrap), so a
+            // placement at the reported width offers the dial the same room.
+            let lineRoom = max(rowWidth, tabsSize.width)
+            let dialSize = dial.size(lineRoom)
+            let lineWidth = max(lineRoom, dialSize.width)
             let dialY = tabsSize.height + lineSpacing
             return Arrangement(
                 widthClass: .twoLines,
