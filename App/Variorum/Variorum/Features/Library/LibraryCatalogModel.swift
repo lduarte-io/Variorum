@@ -330,7 +330,7 @@ final class LibraryCatalogModel {
         // answer yields). Her mode does not come back when the search ends
         // (no hidden memory). ⌘K's road and the Library's own field are
         // untouched. On screen the view's `modeChanged` follows as for her
-        // own pick; either way the caller's `search()` reads the new mode.
+        // own pick.
         if mode == .timeline { pickMode(.list) }
     }
 

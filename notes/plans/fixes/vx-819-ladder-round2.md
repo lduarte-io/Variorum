@@ -135,3 +135,13 @@ call.
 **STATUS: ROUND 2 COMPLETE (2026-11-06).** No BLOCKER, no MAJOR — no round 3 is earned. Four NITs (R2-1 stale docs,
 R2-2 the F1 row's expected red count, R2-3 F4's PROVISIONAL missing from the F8 closeout list, R2-4 a pre-existing third
 spelling of the group facts outside F6's scope).
+
+
+## THE ORCHESTRATOR'S DISPOSITIONS (round 2 — final round; line-by-line check is the diff itself; A-819-L2)
+
+- **R2-1 — FIXED BY THE ORCHESTRATOR** (doc-only, the small-adjudication lane: five comment corrections fully specified by the finding, no behavior, no design choice): the three "⌘K's road" docs now name `takeSidebarQuestion` and the sidebar road's own resets; `LibraryCatalogModel`'s wrong `search()`-reads-the-mode clause dropped; the F5 guard doc now says drift fails, agreement passes.
+- **R2-2 — RECORD CORRECTED** in the round-1 file: F1's expected red is ≥1 issue per argument (the mode), not 2.
+- **R2-3 — ACCEPTED**: F4's provisional joins the closeout QUESTIONS list (the F8 entry amended in the round-1 file).
+- **R2-4 — DEBT TICKET** (pre-existing, outside F6's scope): `SearchComposer.wornGroupFacts` restates the group-facts columns beside `groupPage`'s template — minted on the board, not fixed in this run.
+
+No round 3 (no new BLOCKER/MAJOR — the cap's condition unmet). THE LADDER CLOSES: round 1 = 0/0/3/5 all dispositioned and fixed; round 2 = 0/0/0/4 dispositioned above.

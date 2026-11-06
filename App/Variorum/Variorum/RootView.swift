@@ -261,8 +261,9 @@ struct RootView: View {
                 session: session, model: library, pool: pool,
                 workspace: router.workspace, stars: stars, starDoor: starDoor,
                 bookRowDoors: starredBookDoors,
-                // VX-822: the sidebar's search field — ⌘K's road into the
-                // Library's one search (R-819-3/-4).
+                // VX-822: the sidebar's search field — its own landing
+                // (`takeSidebarQuestion`) into the Library's one search
+                // (R-819-3/-4; the F1/F3 resets are the sidebar road's own).
                 searchDoor: sidebarSearchDoor,
                 selection: selectionBinding,
                 onOpenBeside: { router.openBeside(.post($0)) },

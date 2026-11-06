@@ -22,8 +22,10 @@
 //    moves her into the Library (the words carried, the field cleared);
 //    typing is never interrupted. ONE engine, one finder: the field holds no
 //    search state of its own — its words go to the Library's one question
-//    through ⌘K's road (`RootView.searchLibrary`), wing-scoped as the
-//    Library's search already is.
+//    through the catalog's own sidebar landing
+//    (`LibraryCatalogModel.takeSidebarQuestion` — which, unlike ⌘K's road,
+//    resets the order and facets on a fresh hunt and moves a Timeline face
+//    to List), wing-scoped as the Library's search already is.
 //
 //  Three pieces, one file: the RULE (pure — what each of her acts does), the
 //  DOOR (the closures the composition root hands in: the sidebar never holds
@@ -108,7 +110,8 @@ nonisolated struct SidebarSearchFieldRule: Equatable, Sendable {
 /// which owns the Library's model and the window's navigation.
 struct SidebarSearchDoor {
     /// The Library's ONE question becomes `words`, the Library landed in the
-    /// focused pane where it is not already showing (⌘K's road).
+    /// focused pane where it is not already showing (the sidebar's own road,
+    /// `LibraryCatalogModel.takeSidebarQuestion` — not ⌘K's).
     /// `startsNewSearch`: the field went from empty to typed (the rule's
     /// `.start`) — a fresh hunt, not a refinement.
     let ask: @MainActor (_ words: String, _ startsNewSearch: Bool) -> Void

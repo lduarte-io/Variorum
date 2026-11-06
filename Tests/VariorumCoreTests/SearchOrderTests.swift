@@ -237,8 +237,8 @@ struct SearchOrderTests {
     /// fold (`SearchOrder.foldsCase`) and the statement's collation
     /// (`LibrarySort.keyCollation`) both read `LibrarySort.foldsCase`, for
     /// every sort the Library knows and both directions. A GUARD (no bug was
-    /// claimed — the two copies agreed): a future restated literal on either
-    /// side fails here.
+    /// claimed — the two copies agreed): a restated literal that DRIFTS from
+    /// the truth fails here; an agreeing restatement passes.
     @Test func theSwiftFoldAndTheStatementsCollationAreOneTruth() {
         let every: [Queries.LibrarySort] = [.lastTouched, .createdAt, .entryDate, .lastMajorRevision, .title]
         for sort in every {
