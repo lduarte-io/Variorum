@@ -287,15 +287,19 @@ on the package; no stage, no xcodebuild test, no GUI, no store touches). This le
 | U1-3 | The P1 pins (library growth, own-lineage linearity, plan) for both | DONE (inside U1-1/U1-2) |
 | U1-4 | The reconciliation read of `MCPNoteStructure.lineage`'s stub (below) | DONE — **FLAG F-U1-1: the stub and R-825 genuinely collide** (probe-proven); nothing built on that edge |
 | U1-5 | The deliverable-3 proposal (below) | DONE — **HELD for the orchestrator's ruling**; the wire tool is NOT built |
-
 | U1-6 | LEG 2 (the continuation, after the U1 ADJUDICATION + her F-U1-1 "Retire the stub"): the stub retirement in `read_note` `with_lineage` — absent + the fixed sentence — + the A/B catalog arm (red on the old stub by a behavioral revert, announced below before it runs) + the re-pins | IN PROGRESS |
 | U1-7 | LEG 2: `list_note_lineage` (P-U1-a…g + the archived call) + its catalog / list-form arms + the coverage edits + the Activity words | NOT STARTED |
 | U1-8 | LEG 2: DRAFT CANON DELTAS (the new tool's contract line; the P-13nb-U4-7 supersession line) | NOT STARTED |
 | U1-9 | LEG 2: the END suites (lineage family + every MCP-affected suite; every failing test named) + self-assessment | NOT STARTED |
 
-**Leg 1 closed; leg 2 is live (rows U1-6…U1-9).** ~~Next (on the orchestrator's word):** rule on the PROPOSAL (P-U1-a…g below) and carry F-U1-1 to her; then build
-`list_note_lineage` to the ruling + its catalog/list-form/VX-606 arms + the DRAFT CANON DELTAS; then the unit's END
-suites (core lineage family + the MCP overlap suites + the two-store catalog).
+**Leg 1 closed; leg 2 is live (rows U1-6…U1-9).**
+
+**ANNOUNCED BEHAVIORAL REVERT (U1-6's red-on-old, before it runs):** on the committed `08c12ede2`, the
+working tree's `MCPNoteStructure.swift` will be put back to the OLD lineage behavior ONLY — the
+`.beyondGrant` arm appending `{"relation": r, "beyond_grant": true}` again, and no `beyond_reach` key —
+with every new pin kept; the two-store catalog and the carriage suite run; then `git checkout --
+Sources/VariorumMCP/MCPNoteStructure.swift` restores the fix and `git status` must read clean. Expected:
+the catalog's `read_note · kin with lineage …` arm RED (A ≠ B) and the re-pinned carriage test RED.
 
 ### What landed (deliverables 1 and 2)
 
