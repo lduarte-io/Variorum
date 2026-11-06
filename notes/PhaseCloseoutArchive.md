@@ -1579,3 +1579,17 @@ by the orchestrator. Core 3,649/492 green on the merged tree. Born: VX-850 (the 
 (upgrade-pin helper) · VX-852 (the release.sh hook). PROVISIONALs P-781-1..4 → QUESTIONS #260 (P-781-4 is the
 governance question: is a pin bump author-only). NO release owed (1.1 shipped mid-run, independently). Nothing
 mobile-visible. PR #220, merge af012aa67.
+
+**→ VX-853 CLOSED 2026-11-05 — VERIFY-PINS GOES VERSIONS-EQUAL (the record `notes/plans/fixes/vx-853-verify-pins-versions-equal.md`,
+FOR A LATER READER at its top; VX-781's follow-up, same night).** Her P-781-3 ruling (QUESTIONS #260, informed by the
+build-ergonomics survey `notes/plans/vx-781-build-ergonomics-survey.md`): the no-argument tree guard passes a lockfile
+whose pins all match its own commit (identity + version + revision) with a one-line NOTE when only bookkeeping bytes
+changed (the path-dependent originHash — the survey traced it in SwiftPM's source, undocumented upstream); any real pin
+change, duplicate identity, added/removed pin or missing file still fails. The ladder (two opus rounds, same-model)
+earned its keep: round 1 caught the NOTE/DRIFT decision judging the root lockfile against the WORKSPACE's committed
+pins (a pin move could print as harmless — each file now judged against its own commit) and made PinBeltTests (3)
+location-normalizing so the belt's two guards agree; round 2 caught the restore advice's git-index semantics (now
+`git checkout HEAD -- <file>`). Gate: PinBeltTests 3/1 green; the probe matrix across three script generations in the
+commit messages; probe drivers durable in PR #221's body. Her other same-sitting rulings: P-781-4 pin bumps AUTHOR-ONLY
+(CLAUDE.md line landed at the VX-781 close) · VX-854 parked (the lockfile-mode flag belt) · the tool landscape
+(Tuist/XcodeGen/Bazel/merge-drivers) ruled NO for this repo. Born: nothing. Nothing mobile-visible. PR #221, merge 2f68875e3.

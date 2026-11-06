@@ -12,7 +12,7 @@
 
 **Evidence:** every bug-class pin RUN RED LIVE on its pre-fix tree at the closing window (BookRenameRepaintTests · MCPGonePlaceNamesTests · WingDestinationsDeadWingTests; VX-816's core+wire reds run red at build time); the merge gate = whole-target 6077/1054 on da408355a + the six-file window fix + 92/11 green on fbca5d431; phone 852/139 (the one red is main's standing VM-24/34/37/38); the walk record in THE CLOSING WINDOW section below (every member, both voices for the masthead and the mark). Two window reds were REAL and both batch 3's — the pane geometry regression and the trail pin's rig — fixed in-window per nov5's accepted gate shape. Crash sweep: two VX-661-class; one VX-855 SECOND SIGHTING (commented on the ticket).
 
-**Open items:** QUESTIONS #263 (the bundle — D-802-1, D-829-1/2/3, D-831-1/2/3 + the masthead nuance + words, P-874-1…4, D-887-1/2/3/5, VX-868's arms, VX-858's words table, the dial's Activity home) · born VX-889 (Settings ▸ Tags' gathering mints in Home — unowned, Todo) · the VM-24/34/37/38 dedupe (hers) · MOBILE PARITY: a `notes/MobileSoul.md` row — VX-816's per-wing guard reaches the phone's create doors and starter Journal.
+**Open items:** QUESTIONS #264 (the bundle — D-802-1, D-829-1/2/3, D-831-1/2/3 + the masthead nuance + words, P-874-1…4, D-887-1/2/3/5, VX-868's arms, VX-858's words table, the dial's Activity home) · born VX-889 (Settings ▸ Tags' gathering mints in Home — unowned, Todo) · the VM-24/34/37/38 dedupe (hers) · MOBILE PARITY: a `notes/MobileSoul.md` row — VX-816's per-wing guard reaches the phone's create doors and starter Journal.
 
 ---
 
