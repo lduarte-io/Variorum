@@ -2217,3 +2217,50 @@ pre-existing, not ours; no phone/Shared/ file in the fix leg, and the run's Shar
 nowhere near the caret road). Sim shut down, guards + Problem Reporter clean, no new .ips in
 the slot. REMAINING: vx-827-window-2 (whole target on 0930ba69d → SEAM → walk rows 1–23), GO
 after vx-819's merge gate.
+
+## CLOSEOUT PREP (drafted during the window-2 queue wait; PENDING slots filled at close)
+
+**Phone gate ACCEPTED by nov5** (852/139; the one red = VM-24/34/37's standing main-side
+failure, same counts as vx-878's run).
+
+**The #264 bundle (draft; lands in QUESTIONS.md at the merge, on latest main):** THE VX-827
+PROVISIONAL BUNDLE — binding record this file. P-U1 (archived peers always listed, marked;
+`landed_count` meaning "answered" on a read) · P-U2-1…5 · P-U3a-1…11 · P-U3a-5b (✕ on every
+box while three stand) · P-U3b-1…13 · P-U3b-14 (the Lineage face's two "now"s) · the
+`notInLineage` refusal sentence · W1–W22 as shipped, W17–W22 replacing W1/2/3/4/7/9 (the guide's
+lineage sentences) · the G2 origin-door landing (the Lineage face, original selected) for her
+eye. Status line: PROVISIONAL-and-built; nothing gates the core.
+
+**Born tickets (filed + triaged at close):**
+1. The dangling-wing resolution pair — the lineage fence (`lineageCrossesWing`) and
+   `Queries.liveTagIDs` read RAW wing ids where every listing resolves dangling→Home
+   (R-13ia-2); both err closed/empty; sync-only state, no local op mints one. Low · Suspected ·
+   Debt · Castle & sync? (area: the state is sync-born; the readers are Queries) — area
+   Tests & tooling vs Castle & sync decided at filing; one ticket, two named facets.
+2. VM-NN (the VM board): the phone has no History & Lineage face — it keeps Block History +
+   Came from (RecoveryCopy's place is a parameter); the Mac's surface (Commits face + Lineage
+   face + bringBackFromLineage) is the parity target. THE MOBILE PARITY LINE = this ticket +
+   a MobileSoul ledger row.
+3. PENDING: anything the walk births.
+
+**Canon landing at the merge (the two-file rule), all drafted above:** D-U1-1…4 · D-U2-1…5 ·
+D-U3-1/-2 → MCPSpec (the stub supersession + list_note_lineage + the list_notes/read_note/tag
+lines + the empty-note line), SurfaceContracts (The note's History & lineage bullet replacing
+the Block History bullet; Doors' one-liner), AppSpec §9 (bringBackFromLineage beside
+bringBackCommitAsTake). Narrative + dated entry → AppSpecRecord. `Tools/canon-size` run, line
+in the handoff. The real store's seeded guide is STALE at merge → re-seed via Help ▸ Restore
+Field Guide… behind the A1 rail at the refresh window. The public MCP guide page check: does
+it describe `beyond_grant` on `with_lineage`? (outside the repo; her word if it does).
+
+**FOR A LATER READER (draft; finalized at close):** VX-827 shipped lineage both faces. The
+wire: `list_note_lineage` (one hop, both-ends-readable, VX-812 list form), tags/entry_date in
+`list_notes` rows + `read_note` JSON, the list-by-tag filter, the granted-empty honest answer,
+the `with_lineage` stub RETIRED at her F-U1-1 ruling (absent + fixed scope sentence). The app:
+the History & Lineage surface (Commits face default — pane + all-takes rail + fast swapper +
+2+now compare; Lineage face vertical behind one door; the old Block History panel retired
+whole; the origin doors land on the Lineage face), `Operations.bringBackFromLineage` (U3b-P),
+`Domain/TextCompare` + `Domain/CommitRail`, `Queries.lineagePeers`/`lineageTree` (VX-654's
+discipline, P1-pinned). Her design sat five mockup rounds + two Opus explorations; THE DESIGN
+MEMO is the binding shape. The ladder: two rounds, 0 B/0 M. Evidence: the window's whole-target
+run(s) PENDING(window-2), the phone gate (852/139, VM-34's standing red only), the R1-F1
+red-on-old ritual (both reverts, named reds), the walk PENDING. Pins: PENDING(final counts).
