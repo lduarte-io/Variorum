@@ -1128,3 +1128,10 @@ you're in with the rest a press away (B's shape, her reference's "history · thi
 Flagged provisional calls riding the pages: A — the inline change preview, Restore on an
 archived take's commit only after Unarchive, the "branched from" footer; B — opening pre-marked
 against the AI's before-commit, rail newest-top vs family older-above.
+
+**Window term added (nov5, 2026-11-06 — after vx-808 launched a sibling worktree's stale build):**
+the walk's Debug launch comes from THIS worktree's OWN DerivedData, never the newest-modified
+one — pick the `~/Library/Developer/Xcode/DerivedData/Variorum-*` dir whose `info.plist`
+`WorkspacePath` sits inside `~/dev/variorum-vx-827/` (PlistBuddy prints it), or better the
+explicit `-derivedDataPath` the build used; launch `Build/Products/Debug/Variorum.app` from that
+dir and NAME the launched product path in the RELEASE line.
