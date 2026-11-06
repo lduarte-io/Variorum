@@ -716,6 +716,16 @@ struct CapabilityRegistryTests {
             // renders its rows' two doors (the text's go-there, the symbol's
             // details) and is their ONLY renderer.
             .union(MCPTrailSection.surfaceCapabilities)
+            // VX-801 (VX-827 U3a — A JUSTIFIED EDIT, the same class — a new
+            // renderer is a new line): the COMMITS FACE renders the moment's
+            // four acts (Restore · Bring back as a take · Compare · Name /
+            // Rename — declared at last, `.restoreCommit` … `.renameCommit`;
+            // the Block History panel rendered the three writers undeclared)
+            // and, beside them, Put back on its deleted takes and Unarchive
+            // on an archived take's now — the panel's two acts, which the
+            // panel's own line above still renders for the origin door
+            // (gate G2) until the Lineage face retires it.
+            .union(CommitsFaceView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

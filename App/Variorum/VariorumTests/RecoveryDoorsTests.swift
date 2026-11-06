@@ -141,7 +141,13 @@ struct RecoveryDoorsTests {
             #expect(titles.contains(OriginPeekCopy.doorVerb(op: "divide")))
 
             editor.model.revealCaretBlockOrigin()
-            let request = try #require(editor.model.blockHistoryRequest)
+            // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT: the history doors
+            // open the Commits face now (`blockHistoryRequest`'s sheet), and
+            // this door keeps the PANEL through its own slot (gate G2 — the
+            // came-from region is where the originals are shown until the
+            // Lineage face lands). Same claim, the door's own slot.
+            #expect(editor.model.blockHistoryRequest == nil, "not the Commits face")
+            let request = try #require(editor.model.originHistoryRequest)
             #expect(request.blockID == w.first.block.id,
                     "the pane is the SUCCESSOR's — its came-from names the original")
             #expect(editor.model.trayRequest == nil, "the pane, not the batch-2 bridge")
@@ -243,6 +249,8 @@ struct RecoveryDoorsTests {
             editor.model.updateCaretContext()
             editor.model.revealCaretBlockOrigin()
             #expect(editor.model.blockHistoryRequest == nil)
+            // VX-801 (U3a): …and the door's own slot stays empty too.
+            #expect(editor.model.originHistoryRequest == nil)
             #expect(editor.model.statusMessage == OriginPeekCopy.noOriginHere)
         }
     }

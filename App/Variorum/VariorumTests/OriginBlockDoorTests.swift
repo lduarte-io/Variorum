@@ -410,7 +410,11 @@ struct OriginBlockDoorTests {
             #expect(origins.first?.originOp == "divide")
 
             board.model.revealOriginBlock(ofBlock: w.first.block.id)
-            let request = try #require(board.model.blockHistoryRequest)
+            // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT: the origin door keeps
+            // the panel through its OWN slot (gate G2); `blockHistoryRequest`
+            // is the history doors' Commits face now.
+            #expect(board.model.blockHistoryRequest == nil)
+            let request = try #require(board.model.originHistoryRequest)
             #expect(request.postID == board.postID)
             // The pane is scoped to the SUCCESSOR — the block she right-clicked
             // — and its came-from region is what names the original.

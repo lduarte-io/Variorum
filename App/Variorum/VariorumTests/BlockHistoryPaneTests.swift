@@ -157,7 +157,13 @@ struct BlockHistoryPaneTests {
                     "the side panel is not on screen at rest")
             #expect(atRest.contains("EditorTextView"), "the page itself IS mounted")
 
-            #expect(session.commandRouter.requestBlockHistory(
+            // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT: the HISTORY doors
+            // open the Commits face in the full pane now
+            // (`BlockHistoryHostTests.theHistoryDoorOpensTheCommitsFaceInTheFullPane`);
+            // this PANEL stands in the side column behind the origin door
+            // alone (gate G2), so its seam is the one driven here. Every
+            // claim about the panel below is unchanged.
+            #expect(session.commandRouter.requestOriginHistory(
                 BlockHistoryRequest(
                     postID: post, blockID: blockID, focusedVariantID: variantID)),
                     "the seam is registered — the request ACTED (P-2)")
@@ -200,6 +206,12 @@ struct BlockHistoryPaneTests {
                 BlockHistoryRequest(postID: "some-other-note", blockID: blockID)),
                     "a stale target never opens a panel on the wrong note")
             #expect(router.requestBlockHistory(
+                BlockHistoryRequest(postID: post, blockID: blockID)))
+            // VX-801 (VX-827 U3a): the origin door's own seam keeps the same
+            // posture — refused for a note not mounted, never parked.
+            #expect(!router.requestOriginHistory(
+                BlockHistoryRequest(postID: "some-other-note", blockID: blockID)))
+            #expect(router.requestOriginHistory(
                 BlockHistoryRequest(postID: post, blockID: blockID)))
         }
     }

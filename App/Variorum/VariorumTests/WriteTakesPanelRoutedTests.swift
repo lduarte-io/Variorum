@@ -469,9 +469,13 @@ struct WriteTakesPanelRoutedCommandTests {
     @Test func originOpensThePanelsBlocksOriginals() async throws {
         try await withPanel(seed: 1549, mergedPanelBlock: true) { fixture, window, hosting in
             press(.showOriginBlock, fixture)
-            await settle(window, hosting, until: { fixture.model.blockHistoryRequest != nil }, maxTurns: 20)
-            #expect(fixture.model.blockHistoryRequest?.blockID == fixture.panelBlockID,
+            // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT: the origin door
+            // keeps the Block History panel through its OWN slot (gate G2);
+            // `blockHistoryRequest` is the history doors' Commits face now.
+            await settle(window, hosting, until: { fixture.model.originHistoryRequest != nil }, maxTurns: 20)
+            #expect(fixture.model.originHistoryRequest?.blockID == fixture.panelBlockID,
                     "the origin door opened the PANEL's block's History")
+            #expect(fixture.model.blockHistoryRequest == nil, "…not the Commits face")
             #expect(fixture.writeSaw.value.isEmpty, "the origin door is the panel's (saw \(fixture.writeSaw.value))")
         }
     }

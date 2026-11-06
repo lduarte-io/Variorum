@@ -614,12 +614,15 @@ struct PostDetailView: View {
                 // reader has to reason about is one worth not making.)
                 applyMode: { [weak router] m in
                     // VX-801 (U3a): a mode request while the Commits face
-                    // stands closes it — the asked mode's surface comes back
+                    // stands closes it — the asked mode's surface arrives
                     // (the CURRENT mode included: "go to Write" from the face
-                    // is Write, shown), carrying the place the open captured.
+                    // is Write, shown), carrying the place the face's open
+                    // captured. No re-capture here: no surface is mounted to
+                    // ask, and asking would only clear that place.
                     if face.wrappedValue != nil {
                         face.wrappedValue = nil
-                        if binding.wrappedValue == m { return }
+                        binding.wrappedValue = m
+                        return
                     }
                     if binding.wrappedValue != m { router?.carryPlaceAcrossModeSwitch() }
                     binding.wrappedValue = m

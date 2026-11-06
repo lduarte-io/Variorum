@@ -259,20 +259,34 @@ struct RestoreLandingInspectorTests {
         try #require(shows, "fixture: the page shows her typing")
         await Self.pause(window, hosting, 0.3)
 
-        // Write's own history door — the caret's block, the focused take —
-        // which the router hands to the mounted detail's INSPECTOR.
+        // The road that stands the pane in the mounted detail's INSPECTOR —
+        // the caret's block, the focused take.
+        //
+        // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT: Write's HISTORY door
+        // opens the Commits face in the full pane now (Write is replaced, so
+        // there is no page beside it to land on — the face's restore is the
+        // "elsewhere a receipt" arm). The PANEL survives behind the origin
+        // door alone (gate G2), and THAT is the inspector road this suite
+        // guards: the same request, through the origin door's own router seam
+        // (`requestOriginHistory` — what `revealCaretBlockOrigin` calls; the
+        // fixture holds no original, so the seam is driven directly). Every
+        // claim below about the pane, the sheet and the landing is unchanged.
         let foundModel = Self.writeModel(w)
         let writeModel = try #require(foundModel)
         let caretBlock = writeModel.caretBlockID
         #expect(caretBlock == target, "fixture: her caret is in the block she will restore")
-        writeModel.requestBlockHistory()
+        let opened = w.router.requestOriginHistory(BlockHistoryRequest(
+            postID: w.postID, blockID: target, focusedVariantID: writeModel.caretVariantID))
+        try #require(opened, "fixture: the detail took the panel's request")
         // The pane is the INSPECTOR's: the router took the request (Write's own
-        // fallback sheet — `blockHistoryRequest` — never armed) and no sheet
+        // fallback sheets — `blockHistoryRequest`, `originHistoryRequest` —
+        // never armed) and no sheet
         // hangs on the window. Session-scoped facts only, so a parallel
         // suite's detail on the process-wide `PostDetailOracle` cannot answer.
         let paneUp = await Self.settle(window, hosting) {
             BlockHistoryPaneOracle.model(forPost: w.postID)?.blockID == target
                 && writeModel.blockHistoryRequest == nil
+                && writeModel.originHistoryRequest == nil
                 && window.attachedSheet == nil
         }
         let inspectorSaid = PostDetailOracle.inspectorPanel.map { "\($0)" } ?? "nil"

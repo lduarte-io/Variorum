@@ -148,9 +148,17 @@ struct BlockHistoryHostTests {
         }
     }
 
+    // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT, both pins below: the
+    // HISTORY doors no longer open this panel (they open the Commits face in
+    // the full pane — the three new pins at the end of this suite). The panel
+    // survives behind the ORIGIN door only (the run record's gate G2), so its
+    // host's two rulings — scoped to the mode that opened it, the ONE right
+    // region in Blocks — are pinned through that door's road now
+    // (`requestOriginHistory`, the seam the origin door calls). Everything
+    // each pin asserts about the panel is unchanged.
     @Test func aModeSwitchClosesThePaneTheModeOpened() async throws {
         try await mounted(mode: .write) { session, post, blocks, variants, window, hosting in
-            #expect(session.commandRouter.requestBlockHistory(
+            #expect(session.commandRouter.requestOriginHistory(
                 BlockHistoryRequest(postID: post, blockID: blocks[1], focusedVariantID: variants[1])))
             #expect(await Self.settle(window, hosting) {
                 Self.historyOpen() && Self.inspectorColumnMounted(hosting)
@@ -162,7 +170,7 @@ struct BlockHistoryHostTests {
             }, "the pane is GONE with the mode that opened it (it used to persist, stale)")
             #expect(PostDetailOracle.inspectorPanel == nil, "nothing else took the column")
             // The door still works in the new mode: open again, then leave.
-            #expect(session.commandRouter.requestBlockHistory(
+            #expect(session.commandRouter.requestOriginHistory(
                 BlockHistoryRequest(postID: post, blockID: blocks[0], focusedVariantID: variants[0])))
             #expect(await Self.settle(window, hosting) { Self.historyOpen() })
             #expect(session.commandRouter.requestMode(.read, postID: post))
@@ -178,7 +186,7 @@ struct BlockHistoryHostTests {
             let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
             #expect(await Self.settle(window, hosting) { workbench.panelMounted },
                     "Blocks arrived on the current block with its context panel open")
-            #expect(session.commandRouter.requestBlockHistory(
+            #expect(session.commandRouter.requestOriginHistory(
                 BlockHistoryRequest(postID: post, blockID: blocks[1], focusedVariantID: variants[1])))
             #expect(await Self.settle(window, hosting) {
                 Self.historyOpen() && Self.inspectorColumnMounted(hosting)
@@ -209,6 +217,91 @@ struct BlockHistoryHostTests {
             #expect(session.commandRouter.requestMode(.blocks, postID: post))
             #expect(await Self.settle(window, hosting) { workbench.panelMounted },
                     "back in Blocks with no inspector, the context panel stands again")
+        }
+    }
+
+    // MARK: - VX-801 (VX-827 U3a) — the Commits face takes the FULL pane
+
+    /// The face stands in the detail (the oracle's request), its model loaded.
+    private static func faceOpen(_ post: String) -> Bool {
+        PostDetailOracle.historyFace?.postID == post
+            && CommitsFaceOracle.model(forPost: post)?.loaded == true
+    }
+
+    /// **THE DESIGN MEMO: "The surface takes the FULL pane; ‹ back returns
+    /// exactly where she was."** A history door opens the Commits face IN
+    /// PLACE of the mode's surface — never in the inspector, never beside a
+    /// live editor (Write's bar, which the editor composes, is gone while it
+    /// stands) — and a request for the mode it covers (the ‹ back road's own
+    /// state change: the face cleared, the mode unchanged) brings Write back.
+    /// RED on the pre-U3a tree: the door opened the inspector's panel beside
+    /// a still-mounted editor (`historyFace` did not exist).
+    @Test func theHistoryDoorOpensTheCommitsFaceInTheFullPane() async throws {
+        try await mounted(mode: .write) { session, post, blocks, variants, window, hosting in
+            #if DEBUG
+            #expect(await Self.settle(window, hosting) {
+                CommitBarGeometry.mounted("horizontal", post: post) == 1
+            }, "Write stands with its bar")
+            let request = BlockHistoryRequest(
+                postID: post, blockID: blocks[1], focusedVariantID: variants[1])
+            #expect(session.commandRouter.requestBlockHistory(request))
+            #expect(await Self.settle(window, hosting) { Self.faceOpen(post) },
+                    "the Commits face stands, its block's time loaded")
+            #expect(PostDetailOracle.historyFace == request)
+            #expect(PostDetailOracle.inspectorPanel == nil, "not the inspector — the full pane")
+            #expect(await Self.settle(window, hosting) {
+                CommitBarGeometry.mounted("horizontal", post: post) == 0
+            }, "the mode's surface is REPLACED, not covered: no editor stands under the face")
+            let model = try #require(CommitsFaceOracle.model(forPost: post))
+            #expect(model.blockID == blocks[1])
+            let takeID = try #require(variants[1])
+            let newest = try #require(model.history.savepoints[takeID]?.first?.id)
+            #expect(model.selection == .commit(commitID: newest),
+                    "it opens on the newest moment (PROVISIONAL P-U3a-2)")
+            // The same mode, asked: the face goes and Write is back.
+            #expect(session.commandRouter.requestMode(.write, postID: post))
+            #expect(await Self.settle(window, hosting) {
+                PostDetailOracle.historyFace == nil
+                    && CommitBarGeometry.mounted("horizontal", post: post) == 1
+            }, "Write returns where the face stood")
+            #expect(session.commandRouter.activeMode == .write)
+            #endif
+        }
+    }
+
+    /// A mode switch from the face shows the asked mode (row 29's scoping,
+    /// the face's twin): the face is the question one mode asked.
+    @Test func aModeSwitchFromTheFaceShowsTheMode() async throws {
+        try await mounted(mode: .write) { session, post, blocks, variants, window, hosting in
+            #expect(session.commandRouter.requestBlockHistory(
+                BlockHistoryRequest(postID: post, blockID: blocks[0], focusedVariantID: variants[0])))
+            #expect(await Self.settle(window, hosting) { Self.faceOpen(post) })
+            #expect(session.commandRouter.requestMode(.takes, postID: post))
+            #expect(await Self.settle(window, hosting) {
+                session.commandRouter.activeMode == .takes && PostDetailOracle.historyFace == nil
+            }, "Takes shows; the face is gone with the question")
+        }
+    }
+
+    /// From Blocks the face replaces the WORKBENCH (its context panel with
+    /// it — one region, the whole pane), nothing past the window's edge; the
+    /// same-mode request brings the workbench back with its panel.
+    @Test func fromBlocksTheFaceReplacesTheWorkbenchAndGivesItBack() async throws {
+        try await mounted(mode: .blocks, currentBlock: true) { session, post, blocks, variants, window, hosting in
+            let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
+            #expect(await Self.settle(window, hosting) { workbench.panelMounted })
+            #expect(session.commandRouter.requestBlockHistory(
+                BlockHistoryRequest(postID: post, blockID: blocks[1], focusedVariantID: variants[1])))
+            #expect(await Self.settle(window, hosting) {
+                Self.faceOpen(post) && !workbench.panelMounted
+            }, "the face stands where the workbench was")
+            _ = await Self.settle(window, hosting, timeout: 0.5) { false }
+            let offenders = Self.viewsPastTheEdge(hosting, window: window)
+            #expect(offenders.isEmpty, "nothing past the window's edge: \(offenders.prefix(5))")
+            #expect(session.commandRouter.requestMode(.blocks, postID: post))
+            #expect(await Self.settle(window, hosting) {
+                PostDetailOracle.historyFace == nil && workbench.panelMounted
+            }, "back in Blocks, the workbench and its panel stand again")
         }
     }
 }

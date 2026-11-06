@@ -379,7 +379,10 @@ struct BlockHistoryCommitsCaptureTests {
             await settle(window, hosting) {
                 session.commandRouter.activePostID == crowded.postID
             }
-            let opened = session.commandRouter.requestBlockHistory(
+            // VX-801 (VX-827 U3a) — A JUSTIFIED EDIT: the history door opens
+            // the Commits face now; this harness shoots the PANEL, which stands
+            // in the side column behind the origin door's seam (gate G2).
+            let opened = session.commandRouter.requestOriginHistory(
                 BlockHistoryRequest(
                     postID: crowded.postID, blockID: crowded.blockID,
                     focusedVariantID: crowded.focusedVariantID))
