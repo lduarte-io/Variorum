@@ -1373,3 +1373,32 @@ The 2026-11-04 marathon sitting's arrivals-and-books umbrella, SPLIT at her 2026
 **The gates.** b1: 23/4 + the facet walk's evidence pair ("driftglass" listed under Blocks where the old build said Nothing matches; "harbour" All 1 book·1 note·1 passage vs Blocks 1 note·1 passage). b2: 138/20 + VX-408's revert-red executed both ways + the order walk (the title order verified against the Library's OWN NULL-title posture — inherited, not invented). b3, four windows: the first walk caught W10 failing in use where the mounted pin passed (the rig had made the popover key — unrealistic); ended 29/29 with the F1 revert-red 28/1 exact and the lifecycle pin green on both trees; three VX-661 exit-crash .ips on small selections commented (the green-small-selection-at-exit shape, new to that ticket's pattern ledger). Merge gate: the ladder fixes' combined revert-red 4/8 named → 8/8; whole VariorumTests 6019/1047 green, no restarts; full core green with the VX-850 socket family apart (green alone both times); SearchPassagesTests' EXPLAIN pin green on BOTH merged trees — the vx-808 lockstep-era agreement honored ahead of its own merge.
 
 **Born and carried.** VX-888 (Bug · Suspected · Low — the punctuation-only-word-beside-a-tag edge, pre-existing, found not fixed) · VX-890 (Debt · Confirmed · Low). Data-point comments: VX-850 (two + four socket flakes under load, green alone), VX-661 (three .ips, the at-exit shape), VX-855 (the 02:39 sighting reconciled count-once with vx-878's). Canon: SurfaceContracts ×2 bullets + AppSpec §12's sidebar line, in place with pointers; `Tools/canon-size` 135,143/150,000 (headroom 14,857) — no crossing. MOBILE PARITY: nothing mobile-visible.
+
+
+## VX-827 — lineage, both faces (2026-11-06; the record `notes/plans/fixes/vx-827-lineage.md`)
+
+The wave-2 lineage umbrella (/architect-phase; Fable orchestrated and cold-reviewed, Opus implemented every unit;
+nov5 coordinated the stage). Members VX-801 · VX-817 · VX-810 · VX-815 + her kickoff rider VX-778; born VX-892 +
+VM-41 (PL-70). **Her rulings, in session:** the kickoff three (standing cast; "mockup - but don't use the question
+tool, just have it ready for me. i'll rule before U3"; VX-778 rides) · **F-U1-1 "Retire the stub"** (the
+`with_lineage` per-edge beyond-grant stub counted hidden copies — a probe-proven collision between P-13nb-U4-7 and
+her R-825 law; retired to absent + one fixed scope sentence; the parent stub untouched; the residuals ledger gained
+no row) · **the five-round design sitting** (v1 lanes → "a lot of words and not very clear" → v3 "ok i think that
+looks better, but lineage should be something you have to expand / go into. the default should be just seeing the
+commits" → her two-Opus-explorations instruction → the composite: "i'd want to see mockup A's B… with the small
+graph of commits with the take dropdown that mockup B has next to it", "showing all takes on one line is better",
+"being able to open 3 commits… or maybe… always being able to show 'now' as the third compare box option", "maybe a
+fast swapper would be enough", vertical lineage "with the verticle view instead of the horizontal scroll") — THE
+DESIGN MEMO in the record is the settled shape. **The architect's ruled applications:** U3b-P (the cross-block
+`bringBackFromLineage`: both source forms, the source's name as label, the `notInLineage` fence IN the operation, no
+undo entry) · G2 (the origin doors land on the Lineage face with the original selected; the Block History panel
+retires whole). **The ladder:** two rounds, 0 BLOCKER/MAJOR; R1's flush-gap MINOR fixed consult-and-refuse with the
+closing window running the red-on-old ritual by recipe (both named reds, fix green); R1-F2 is VX-892. **The canon
+landed at the merge (the two-file shape):** MCPSpec — the stub supersession in place + the lineage/tag/empty reads'
+contract lines; SurfaceContracts — the History & lineage bullet replacing Block History's (VX-674/VX-668 rules
+carried inside); AppSpec §9 — `bringBackFromLineage` beside `bringBackCommitAsTake`. **The gates:** window-2's
+whole VariorumTests 6091/1056 0-failures on the merged tree (the merge gate), the phone 852/139 accepted, the
+17-row live walk (no product defect; both-voice core coverage; six rows deferred with pins named — hers at the
+walkthrough), the post-819 headless full suite and the 9-suite smoke green on the merged tip. Bundle #266. Merge
+order: vx-878 → vx-819 → vx-827 (the union conflict in CapabilityRegistryTests resolved keep-both; the overlap
+suites re-run at each step). PR #231, merge 602077445.
