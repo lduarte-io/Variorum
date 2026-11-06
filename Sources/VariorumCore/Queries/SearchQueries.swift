@@ -51,6 +51,13 @@ public struct SearchPassage: Equatable, Sendable, Identifiable {
     /// text (VX-72: the line says the day it was saved, P-VX83-C6). nil for
     /// every other kind.
     public let savedAt: String?
+    /// **The name of the block the hit lives on** (VX-90 — her 13o idea,
+    /// *"maybe it should say what block they're in?"*): `block.name`, the
+    /// block's optional handle, for a take / label / name / comment hit (and
+    /// a savepoint's take's block); nil when the block is unnamed or the hit
+    /// lives on no block. Read off the row the hits already seek — zero plan
+    /// cost (`SearchComposer.hits`' `block_handle`).
+    public let blockName: String?
 }
 
 /// One page of passages and the road to the next (R-13o-9 — no capped
@@ -370,7 +377,9 @@ extension Queries {
             homeTitle: homeTitle, isArchived: row["archived"], isRenderedTake: row["rendered"],
             snippet: SearchComposer.snippetSegments(row["snippet"] ?? ""),
             // Only the commits facet's statements carry the column (VX-72).
-            savedAt: row.hasColumn("saved_at") ? row["saved_at"] : nil)
+            savedAt: row.hasColumn("saved_at") ? row["saved_at"] : nil,
+            // VX-90: every hits-built statement carries it.
+            blockName: row.hasColumn("block_handle") ? row["block_handle"] : nil)
     }
 
     // MARK: - The band's counts (13o U2)
@@ -647,7 +656,7 @@ extension Queries {
                 passages.append(SearchPassage(
                     kind: .wornDay, sourceID: id, family: .notes, noteID: id, blockID: nil,
                     readingID: nil, homeTitle: shown, isArchived: row["archived"],
-                    isRenderedTake: false, snippet: [], savedAt: nil))
+                    isRenderedTake: false, snippet: [], savedAt: nil, blockName: nil))
             }
         }
         return passages.sorted { $0.homeTitle > $1.homeTitle || ($0.homeTitle == $1.homeTitle && $0.sourceID < $1.sourceID) }

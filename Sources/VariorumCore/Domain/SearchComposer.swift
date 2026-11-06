@@ -207,9 +207,10 @@ public enum SearchComposer {
     /// ranked → keyset page → snippets for the page rows. nil when the text
     /// half cannot match anything (the caller returns no passages).
     ///
-    /// Result columns: doc_id, kind, src_id, block_id, reading_id, home_id,
-    /// home_kind, home_title, home_entry_date, home_created_at, reading_name,
-    /// reading_kind, archived, rendered, score, snippet.
+    /// Result columns: doc_id, kind, src_id, block_id, block_handle,
+    /// reading_id, home_id, home_kind, home_title, home_entry_date,
+    /// home_created_at, reading_name, reading_kind, archived, rendered, score,
+    /// snippet.
     public static func passages(
         _ query: SearchQuery, scope: SearchScope, after cursor: Cursor?, limit: Int,
         environment: Environment
@@ -286,9 +287,16 @@ public enum SearchComposer {
     /// The hits body; nil when the text half cannot match anything. `extra`
     /// conditions (over `d`, `c`, `b`, `r`) join the scope's, last.
     ///
-    /// Result columns: doc_id, kind, src_id, block_id, reading_id, home_id,
-    /// home_kind, home_title, home_entry_date, home_created_at, reading_name,
-    /// reading_kind, archived, rendered, bm.
+    /// Result columns: doc_id, kind, src_id, block_id, block_handle,
+    /// reading_id, home_id, home_kind, home_title, home_entry_date,
+    /// home_created_at, reading_name, reading_kind, archived, rendered, bm.
+    ///
+    /// `block_handle` (VX-90 — her 13o idea, *"maybe it should say what block
+    /// they're in?"*): the NAME of the block a hit lives on, read off the
+    /// block row the hits already seek (`b`) — no new join, no new seek, so
+    /// every plan stays byte-identical; NULL for an unnamed block and for a
+    /// hit that lives on no block (a title, floating notes, a book, a
+    /// chapter).
     static func hits(
         _ query: SearchQuery, scope: SearchScope, visibility: SearchVisibility,
         extra: [String] = [], environment: Environment
@@ -417,6 +425,7 @@ public enum SearchComposer {
         let sql = """
 
               SELECT d.id AS doc_id, d.kind AS kind, d.src_id AS src_id, \(blockKey) AS block_id,
+                     b.name AS block_handle,
                      d.reading_id AS reading_id, c.id AS home_id, c.kind AS home_kind,
                      c.title AS home_title, c.entry_date AS home_entry_date,
                      c.created_at AS home_created_at, r.name AS reading_name, r.kind AS reading_kind,
