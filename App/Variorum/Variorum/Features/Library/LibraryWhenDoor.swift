@@ -203,6 +203,21 @@ nonisolated enum LibraryWhenGridKeys {
         }
     }
 
+    /// **Does text hold the keys INSIDE the face's own window?** Measured (the
+    /// W10 probe, macOS 27 — the walk's second red): a SwiftUI popover's
+    /// `_NSPopoverWindow` with no first responder of its own answers its
+    /// PARENT window's as `firstResponder` — the Library field's editor in the
+    /// main window — so asking "is text first responder in the face's window"
+    /// said yes to every key while her field held the caret, and the grid
+    /// yielded them all. Text counts only where the responder itself LIVES in
+    /// the face's window (a field of the face's own would). Pure over
+    /// identities, so the rule pins without windows.
+    static func textHoldsTheFacesKeys(
+        responderIsText: Bool, responderWindow: ObjectIdentifier?, faceWindow: ObjectIdentifier
+    ) -> Bool {
+        responderIsText && responderWindow == faceWindow
+    }
+
     /// Where the keyboard first lands in `month`: the armed day (a run's
     /// first) when the grid shows its month, else today when shown, else the
     /// month's first day.

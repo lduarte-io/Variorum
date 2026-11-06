@@ -123,6 +123,23 @@ struct LibraryWhenGridKeysRuleTests {
         #expect(stale.keyDay == today)
     }
 
+    /// The W10 walk's second red, as a rule: text holds the grid's keys only
+    /// where the responder LIVES in the face's own window — the popover's
+    /// window answers the parent's first responder (her Library field's
+    /// editor) as its own, and that text is never the grid's.
+    @Test func onlyTextLivingInTheFacesOwnWindowHoldsItsKeys() {
+        final class Stand {}
+        let faceWindow = Stand(), parentWindow = Stand()
+        let face = ObjectIdentifier(faceWindow), parent = ObjectIdentifier(parentWindow)
+        #expect(!Keys.textHoldsTheFacesKeys(responderIsText: true, responderWindow: parent, faceWindow: face),
+                "her Library field's editor in the PARENT window, reported through the popover's window: not the face's")
+        #expect(Keys.textHoldsTheFacesKeys(responderIsText: true, responderWindow: face, faceWindow: face),
+                "a field of the face's own holds its keys")
+        #expect(!Keys.textHoldsTheFacesKeys(responderIsText: false, responderWindow: face, faceWindow: face))
+        #expect(!Keys.textHoldsTheFacesKeys(responderIsText: true, responderWindow: nil, faceWindow: face))
+        _ = (faceWindow, parentWindow)  // alive through every identity above
+    }
+
     @Test func theSameDayInAnotherMonthClampsToItsLength() {
         #expect(Keys.sameDay("2026-01-31", in: LibraryWhenMonth(year: 2026, month: 2)) == "2026-02-28")
         #expect(Keys.sameDay("2028-01-31", in: LibraryWhenMonth(year: 2028, month: 2)) == "2028-02-29")
@@ -298,15 +315,21 @@ struct LibraryWhenGridKeysPopoverTests {
 
     // MARK: - The door, in its REAL presentation (the walk's W10)
 
-    /// The comment panel's proven key road (`CommentTextAreaTests`): post,
-    /// then let the app's own dispatch run (local monitors see the key in
-    /// `sendEvent`).
+    /// Post, then let the app's own dispatch run (local monitors see the key
+    /// in `sendEvent`) — the WHOLE queue, IN ORDER (`BlocksWorkbenchFaceTests.
+    /// Rig.pump`'s shape: kit-, system- and app-defined events are dequeued and
+    /// dropped, never re-sent — AppKit asserts). Measured (the W10 probe): a
+    /// key dequeued by a key-only mask past queued kit-defined events reaches
+    /// the window's dispatch but never moves a field editor's caret — the
+    /// first build of this rig took the comment rig's key-only pump, and its
+    /// dismissal guard read a caret the arrow had never moved.
     private static func turns(_ count: Int = 20) async {
         for _ in 0..<count {
-            while let event = NSApp.nextEvent(
-                matching: [.keyDown, .leftMouseDown, .leftMouseUp], until: nil,
-                inMode: .default, dequeue: true)
-            {
+            while let event = NSApp.nextEvent(matching: .any, until: nil, inMode: .default, dequeue: true) {
+                if event.type == .appKitDefined || event.type == .systemDefined
+                    || event.type == .applicationDefined {
+                    continue
+                }
                 NSApp.sendEvent(event)
             }
             await Task.yield()
@@ -333,11 +356,15 @@ struct LibraryWhenGridKeysPopoverTests {
     /// ADDRESSED TO THE PARENT (VX-179's F-W-4). Keys posted to the parent:
     /// → shows the keyboard's day, → moves it, ⏎ presses it — and the field
     /// keeps the parent's keyboard throughout (the grid never takes the caret).
-    /// RED ON OLD: the monitor claimed only keys addressed to its OWN window,
-    /// so it never saw one of these (exactly the walk: no ring, no movement,
-    /// the sentence unchanged) — three issues, the first three expectations
-    /// after the premises. The earlier mounted pin passed because its rig made
-    /// the face's own window key, which the live popover never is.
+    /// RED ON OLD, twice over (exactly the walk: no ring, no movement, the
+    /// sentence unchanged — three issues, the first three expectations after
+    /// the premises): at the first build the monitor claimed only keys
+    /// addressed to its OWN window; at `50752340f` it claimed where the key is
+    /// delivered but yielded every key to "text holding the keyboard" — the
+    /// popover's window answers the PARENT's field editor as its own first
+    /// responder (measured, the W10 probe). The earlier mounted pin passed
+    /// because its rig made the face's own window key, which the live popover
+    /// never is.
     /// The dismissal leg is a GUARD (green on both trees): a dismissed
     /// popover's face is never torn down, and it must never claim the main
     /// window's keys afterwards — the arrow is the field's again.
