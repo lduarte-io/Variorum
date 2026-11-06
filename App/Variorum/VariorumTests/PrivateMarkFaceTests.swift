@@ -64,17 +64,24 @@ struct PrivateMarkFaceTests {
         #expect(PrivateMarkFace.book(marked: false, badgesOn: true) == nil)
     }
 
-    @Test func theBadgeFamilysSwitchSilencesItAndTheMastheadKeepsTheLocksGate() {
+    @Test func theBadgeFamilysOneSwitchGovernsTheMarkEverywhereTheMastheadIncluded() throws {
         let fact = Queries.PrivateMark(own: true, viaBooks: [])
         #expect(PrivateMarkFace.note(fact, badgesOn: false) == nil, "ownership_badges off: no mark on a row")
         #expect(PrivateMarkFace.book(marked: true, badgesOn: false) == nil)
-        // The masthead: the row's rule, AND wherever the indicator shows (the
-        // lock it replaced showed there whatever the switch said — D-831-3).
-        #expect(PrivateMarkFace.masthead(fact, badgesOn: true, indicatorOn: false) == .ownNote(alsoVia: []),
-                "N-2: shown with no client at all")
-        #expect(PrivateMarkFace.masthead(fact, badgesOn: false, indicatorOn: true) == .ownNote(alsoVia: []))
-        #expect(PrivateMarkFace.masthead(fact, badgesOn: false, indicatorOn: false) == nil)
-        #expect(PrivateMarkFace.masthead(nil, badgesOn: true, indicatorOn: true) == nil)
+        // The masthead reads the row's own rule, never the indicator's gate:
+        // shown with no client at all (N-2), silenced with the family
+        // (D-831-3 — so the switch's "Off: no marks anywhere" stays true).
+        let indicator = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Core/Views/MCPNoteIndicator.swift"),
+            encoding: .utf8)
+        #expect(indicator.contains(
+            "PrivateMarkFace.note(state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true)"))
+        // The switch says it governs the eye, and still that off changes
+        // nothing else.
+        #expect(OwnershipSettingsCopy.badgesHelp.contains("A Private note or book wears a closed eye"))
+        #expect(OwnershipSettingsCopy.badgesHelp.contains("Off: no marks anywhere; nothing else changes."))
     }
 
     @Test func eachMarksPressIsItsOwnArm() {

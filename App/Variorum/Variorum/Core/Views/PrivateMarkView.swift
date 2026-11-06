@@ -76,14 +76,11 @@ nonisolated enum PrivateMarkFace {
         badgesOn && marked ? .ownBook : nil
     }
 
-    /// **The note's masthead** (the in-note indicator): the row's rule, and
-    /// ALSO whenever the indicator is on — the lock it replaces showed there
-    /// under VX-164 whatever the badge switch said, so turning badges off
-    /// never takes away a Private sign the indicator already gave
-    /// (PROVISIONAL D-831-3).
-    static func masthead(_ fact: Queries.PrivateMark?, badgesOn: Bool, indicatorOn: Bool) -> Mark? {
-        note(fact, badgesOn: badgesOn || indicatorOn)
-    }
+    // (The note's masthead — the in-note indicator — reads `note(_:badgesOn:)`
+    // exactly as a row does: ONE switch governs the mark everywhere, the
+    // ruling's letter, so the switch's own "Off: no marks anywhere" stays
+    // true. The lock the mark replaced showed whenever the indicator did;
+    // with badges off that sign is now gone too — PROVISIONAL D-831-3.)
 
     /// The hover, and the accessibility label.
     static func help(_ mark: Mark) -> String {

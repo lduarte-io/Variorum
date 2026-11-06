@@ -20,8 +20,7 @@
 //  **VX-831 — THE PRIVATE MARK took the lock's place**, and it is the note's
 //  masthead face of the mark every shared-icon host draws (`PrivateMarkView`,
 //  the closed eye): shown on a Private note whatever the clients (N-2), under
-//  the badge family's switch and also wherever the indicator is on (the lock's
-//  old gate, D-831-3); its own mark's press un-privates, a Private book's says
+//  the badge family's one switch (D-831-3); its own mark's press un-privates, a Private book's says
 //  so and offers the book. Nothing true ⇒ NOTHING (calm — "an empty state that
 //  says nothing").
 //
@@ -91,10 +90,8 @@ struct MCPNoteIndicator: View {
     var body: some View {
         let state = MCPNoteIndicatorState.matching(state, postID: postID)
         // VX-831: the masthead's mark — drawn on anything marked, whatever
-        // the clients (N-2), under the badge family's switch, and also
-        // wherever the indicator shows (the lock's old gate — D-831-3).
-        let mark = PrivateMarkFace.masthead(
-            state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true, indicatorOn: indicatorOn)
+        // the clients (N-2), under the badge family's one switch (D-831-3).
+        let mark = PrivateMarkFace.note(state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true)
         HStack(spacing: 4) {
             if indicatorOn, let state, !state.reach.isEmpty {
                 // W-UX-12: at the window's trailing edge — open leftward.
