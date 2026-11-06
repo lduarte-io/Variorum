@@ -2022,3 +2022,14 @@ fact); a pure rename, its two call sites swept (the Commits face model; ONE line
 `Sources/VariorumMCP/MCPWriteTools+Edit.swift`, under the orchestrator's sweep authorization — the run's only
 VariorumMCP touch from U3b).
 
+
+**R1-F1 fix shape, two rulings (the orchestrator, 2026-11-06):** (1) the CONSULT-AND-REFUSE line
+STAYS — `flushExistingAutosave`'s own contract says a caller whose act copies the store must
+consult it (the VersionActs precedent), and the refusal reuses the existing `unsavedChanges`
+sentence: an existing contract honored, not new behavior; the record notes the sentence reuse.
+(2) the Mac-target pin's red-on-old RUN is ACCEPTED as deferred to the closing window — the
+coordinator lives in AppSession, so headless can only write and compile it; CONDITIONS: the
+behavioral-revert recipe lands in the record now (mechanical enough for the window session to
+run it cold), and the window's Mac batch runs that pin RED ON OLD by the recipe, then green on
+the fix, BEFORE the walk — the fix is not "landed" until that run. R1-F5's one-line VariorumMCP
+call-site sweep is within the rename authorization.
