@@ -28,6 +28,7 @@
 //  R1-9).
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -44,7 +45,10 @@ import VariorumCore
 ///
 /// **The no-silent-arm rule is structural:** opening (`opening`) and the mode
 /// row (`ask`) RETURN NOTHING a caller could arm; the one member that yields
-/// a range is `press(_:)`, the act of touching a day.
+/// a range is `press(_:)`, the act of touching a day — and `pressKey()`, the
+/// same act on the day the keyboard stands on (VX-98). The keyboard's own
+/// moves (`moveKey`, `followMonth`) yield no range either: a focused day is
+/// never an armed one.
 nonisolated struct LibraryWhenDoorBrain: Equatable, Sendable {
     /// The mode row's two questions.
     enum Mode: Hashable, CaseIterable, Sendable {
@@ -59,6 +63,11 @@ nonisolated struct LibraryWhenDoorBrain: Equatable, Sendable {
     /// Between days: the day the last press began a run on, waiting for the
     /// run's last day. nil = the next press begins (or, on a day, picks).
     private(set) var runStart: String?
+    /// **VX-98 — the day the KEYBOARD stands on** (the grid draws its mark),
+    /// nil until an arrow is pressed: nothing reads as focused before the keys
+    /// are used, and a mouse press hands the keys back to the anchor
+    /// (PROVISIONAL P-819-B3a). Never armed — only `pressKey()` arms it.
+    private(set) var keyDay: String?
 
     /// Whether the popover is waiting for a run's last day (the foot's hint
     /// says so).
@@ -75,6 +84,7 @@ nonisolated struct LibraryWhenDoorBrain: Equatable, Sendable {
     private init(mode: Mode) {
         self.mode = mode
         self.runStart = nil
+        self.keyDay = nil
     }
 
     /// **The mode row** — changes what the NEXT press means and arms
@@ -94,6 +104,9 @@ nonisolated struct LibraryWhenDoorBrain: Equatable, Sendable {
     /// that is not a real day (a face draws what it has, never a guess).
     mutating func press(_ day: String) -> LibraryDayRange? {
         guard JournalDay.isValid(day) else { return nil }
+        // VX-98: a press is the mouse's — the keyboard's mark goes, and its
+        // next arrow lands on the anchor (the day just armed, when shown).
+        keyDay = nil
         switch mode {
         case .oneDay:
             runStart = nil
@@ -106,6 +119,107 @@ nonisolated struct LibraryWhenDoorBrain: Equatable, Sendable {
             runStart = day
             return LibraryDayRange(day: day)
         }
+    }
+
+    // MARK: VX-98 — the grid's keys (the rule: `LibraryWhenGridKeys`)
+
+    /// **An arrow.** The FIRST lands the keyboard ON the anchor — the armed
+    /// day when the grid shows it, else today when shown, else the shown
+    /// month's first day — so she sees where the keys stand before they move
+    /// (PROVISIONAL P-819-B3a); every later one moves it `days` calendar
+    /// days. Returns the month the grid must show: the month FOLLOWS the
+    /// keyboard past its edge, the system picker's way (PROVISIONAL
+    /// P-819-B3b). Arms nothing.
+    mutating func moveKey(
+        by days: Int, showing month: LibraryWhenMonth, range: LibraryDayRange?, today: String
+    ) -> LibraryWhenMonth {
+        guard let current = keyDay else {
+            keyDay = LibraryWhenGridKeys.anchor(in: month, range: range, today: today)
+            return month
+        }
+        guard let moved = JournalDay.shifted(current, byDays: days),
+              let movedMonth = LibraryWhenMonth(dayKey: moved)
+        else { return month }
+        keyDay = moved
+        return movedMonth
+    }
+
+    /// **‹ / › moved the shown month** — a keyboard day left behind follows
+    /// into it, on the same day of the month (clamped to its length: Jan 31 →
+    /// Feb 28). No keyboard day, nothing to follow. Arms nothing.
+    mutating func followMonth(_ month: LibraryWhenMonth) {
+        guard let keyDay, LibraryWhenMonth(dayKey: keyDay) != month else { return }
+        self.keyDay = LibraryWhenGridKeys.sameDay(keyDay, in: month)
+    }
+
+    /// **⏎ — the keyboard's PRESS:** `press(_:)` on the day the keys stand
+    /// on (on a day: that day; between days: the run's first, then its last),
+    /// and the keys stay where they are (the mouse's press hands them back;
+    /// the keyboard's own never does). nil — and nothing armed — while no day
+    /// is focused: ⏎ on an untouched grid is not a pick.
+    mutating func pressKey() -> LibraryDayRange? {
+        guard let day = keyDay else { return nil }
+        let picked = press(day)
+        keyDay = day
+        return picked
+    }
+}
+
+/// **VX-98 — the month grid's KEYS, as a pure rule** (her R-VX83-8 deferral,
+/// now built): ← → move the keyboard's day by one, ↑ ↓ by a week, ⏎ (or the
+/// keypad's enter) presses it. A chord is never the grid's, and nothing is
+/// while a text field holds the keyboard (none lives in the popover today —
+/// the guard keeps it so). The door is `LibraryWhenKeyMonitor`, scoped to the
+/// popover's own window.
+nonisolated enum LibraryWhenGridKeys {
+    enum Key: Equatable, Sendable {
+        /// Move the keyboard's day by this many calendar days.
+        case move(Int)
+        /// Press the keyboard's day.
+        case press
+    }
+
+    static let leftArrowKeyCode: UInt16 = 123
+    static let rightArrowKeyCode: UInt16 = 124
+    static let downArrowKeyCode: UInt16 = 125
+    static let upArrowKeyCode: UInt16 = 126
+    static let returnKeyCode: UInt16 = 36
+    static let keypadEnterKeyCode: UInt16 = 76
+
+    static func key(
+        keyCode: UInt16, modifiers: NSEvent.ModifierFlags, textIsFirstResponder: Bool
+    ) -> Key? {
+        guard !textIsFirstResponder else { return nil }
+        // Arrows carry `.numericPad`/`.function` in their flags — only the
+        // four chord modifiers make a key someone else's.
+        guard modifiers.intersection([.command, .option, .control, .shift]).isEmpty else { return nil }
+        switch keyCode {
+        case leftArrowKeyCode: return .move(-1)
+        case rightArrowKeyCode: return .move(1)
+        case upArrowKeyCode: return .move(-7)
+        case downArrowKeyCode: return .move(7)
+        case returnKeyCode, keypadEnterKeyCode: return .press
+        default: return nil
+        }
+    }
+
+    /// Where the keyboard first lands in `month`: the armed day (a run's
+    /// first) when the grid shows its month, else today when shown, else the
+    /// month's first day.
+    static func anchor(in month: LibraryWhenMonth, range: LibraryDayRange?, today: String) -> String {
+        if let first = range?.first, LibraryWhenMonth(dayKey: first) == month { return first }
+        if LibraryWhenMonth(dayKey: today) == month { return today }
+        return month.firstDayKey
+    }
+
+    /// `day`'s day of the month in `month`, clamped to the month's length.
+    static func sameDay(_ day: String, in month: LibraryWhenMonth) -> String {
+        let number = Int(day.split(separator: "-").last ?? "") ?? 1
+        for candidate in stride(from: min(max(number, 1), 31), through: 1, by: -1) {
+            let key = String(format: "%04d-%02d-%02d", month.year, month.month, candidate)
+            if JournalDay.isValid(key) { return key }
+        }
+        return month.firstDayKey
     }
 }
 
@@ -166,6 +280,7 @@ struct LibraryWhenDoor: View {
         .onHover { hovering = $0 }
         .help(range == nil ? LibraryDayFace.closedDoorHelp : LibraryDayFace.caveat)
         .popover(isPresented: $shown, arrowEdge: .bottom) {
+            // VX-98: presented WITH its keys (`keyed`).
             LibraryWhenPopover(
                 tokens: tokens, range: range, now: now, calendar: calendar,
                 firstWeekday: firstWeekday,
@@ -183,6 +298,7 @@ struct LibraryWhenDoor: View {
                             month: calendar.component(.month, from: now)) },
                     set: { month = $0 }),
                 onPick: onPick, onClear: onClear)
+            .keyed
         }
     }
 }
@@ -225,9 +341,38 @@ struct LibraryWhenPopover: View {
         brain.ask(mode)
     }
 
-    /// ‹ / ›: shows another month; arms nothing.
+    /// ‹ / ›: shows another month; arms nothing. VX-98: a keyboard day left
+    /// behind follows into the month shown.
     func step(_ months: Int) {
         month = month.adding(months: months)
+        brain.followMonth(month)
+    }
+
+    /// **VX-98 — an arrow:** the keyboard's day moves (the first lands on the
+    /// anchor), and the month follows it past the grid's edge. Arms nothing.
+    func moveKey(by days: Int) {
+        month = brain.moveKey(by: days, showing: month, range: range, today: today)
+    }
+
+    /// **VX-98 — ⏎:** the keyboard's press — `press`'s own road on the day the
+    /// keys stand on. False (the key not taken, nothing armed) while no day
+    /// is focused.
+    @discardableResult
+    func pressKey() -> Bool {
+        guard brain.keyDay != nil else { return false }
+        if let picked = brain.pressKey() { onPick(picked) }
+        return true
+    }
+
+    /// The key monitor's one answer: whether the key was the grid's.
+    func handle(_ key: LibraryWhenGridKeys.Key) -> Bool {
+        switch key {
+        case .move(let days):
+            moveKey(by: days)
+            return true
+        case .press:
+            return pressKey()
+        }
     }
 
     /// *any day*: clears, and forgets a run's waiting start.
@@ -244,6 +389,7 @@ struct LibraryWhenPopover: View {
             LibraryWhenMonthGrid(
                 tokens: tokens, month: month, range: range, today: today,
                 calendar: calendar, firstWeekday: firstWeekday, locale: locale,
+                keyDay: brain.keyDay,
                 onPress: press, onStep: step)
             VStack(alignment: .leading, spacing: 8) {
                 Rectangle()
@@ -277,6 +423,15 @@ struct LibraryWhenPopover: View {
         .frame(width: LibraryWhenMonthGrid.width + 2 * Self.padding)
         .background(tokens.surface)
         .presentationBackground(tokens.surface)
+    }
+
+    /// **VX-98 — the face WITH its keys:** the grid's key monitor, scoped to
+    /// the window the face lives in — the popover's own (the app's key-monitor
+    /// shape: no SwiftUI focus to lose to a click). Kept off `body` so the
+    /// face itself stays pure SwiftUI (the offscreen renders draw it whole);
+    /// the door presents THIS, and the mounted pin mounts it.
+    var keyed: some View {
+        background(LibraryWhenKeyMonitor(onKey: handle))
     }
 
     /// The sentence, its armed words emphasized in the ink.
@@ -370,5 +525,53 @@ struct LibraryWhenFoot: View {
                 .lineLimit(1)
                 .fixedSize()
         }
+    }
+}
+
+/// **VX-98 — the grid's key door:** a zero-size view owning a local `keyDown`
+/// monitor for the window it lives in — the popover's own — for as long as it
+/// lives there (`PageTurnKeyMonitor`'s shape). It asks the pure rule and
+/// swallows a key only when the grid took it, so Esc (the popover's close), a
+/// chord, and ⏎ on an untouched grid pass on exactly as before.
+struct LibraryWhenKeyMonitor: NSViewRepresentable {
+    let onKey: (LibraryWhenGridKeys.Key) -> Bool
+
+    func makeNSView(context: Context) -> MonitorView {
+        let view = MonitorView()
+        view.onKey = onKey
+        return view
+    }
+
+    func updateNSView(_ nsView: MonitorView, context: Context) {
+        nsView.onKey = onKey
+    }
+
+    final class MonitorView: NSView {
+        var onKey: ((LibraryWhenGridKeys.Key) -> Bool)?
+        private var monitor: Any?
+
+        /// Never takes a click — the cells above it do.
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let monitor {
+                NSEvent.removeMonitor(monitor)
+                self.monitor = nil
+            }
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let self, let window = self.window, event.window === window else { return event }
+                guard let key = LibraryWhenGridKeys.key(
+                    keyCode: event.keyCode, modifiers: event.modifierFlags,
+                    textIsFirstResponder: PageTurnKeys.textIsFirstResponder(in: window)),
+                    self.onKey?(key) == true
+                else { return event }
+                return nil  // the grid's key, taken
+            }
+        }
+        // (No `deinit`: the view leaves its window before it dies, and
+        // `viewDidMoveToWindow` — called then with a nil window — removes the
+        // monitor; a nonisolated deinit may not touch it.)
     }
 }
