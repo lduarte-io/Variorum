@@ -2141,3 +2141,11 @@ head, fixture-noise class, noted for the RELEASE line. Logs: /tmp/vx827-revert{A
 Everything else green (the R1-F1 pins green in the full run). The window's FIX LEG goes to the
 U3b implementer; the five suites re-run after its push; the phone-suite arm decided at that
 point against the claim's clock.
+
+**Window interrupted at nov5's call (2026-11-06 ~02:0x):** vx-827-window RELEASED mid-fix-leg
+(the leg is headless; vx-878 was READY since 01:43 — the stage doesn't idle on a fix). No SEAM
+reached, dev store untouched, both instance guards empty, zero booted sims. Part 1's evidence
+STANDS (the ritual + the whole target's five named reds). The re-entry is a fresh READY: the
+five suites' re-runs + the phone arm (VariorumMobileTests — Shared/ files in the diff) + the
+walk; nov5 may slot it at vx-878's SEAM, and may ask for one more whole-target pass if the fix
+touches product code many suites construct (the fix's file list rides READY).
