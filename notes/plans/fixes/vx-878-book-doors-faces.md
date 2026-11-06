@@ -110,9 +110,9 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 |---|---|
 | R-0 · record opened, required reading done (this file whole, SurfaceContracts The app / The Library / The Bookcase and books, SessionResiliencyProtocol) | DONE (this commit) |
 | 868-a · VX-868 wording pin (red on the pre-fix tree by construction) | DONE (3263e5877) — `BookDeleteAndDuplicateTests.thePlainBooksDeleteSentenceReadsWithOneNoteAndWithSeveral`; red-on-old by evaluation of the pre-fix body (below); the App-suite RUN of the red and the green is the closing window's (PENDING) |
-| 868-b · VX-868 both arms rewritten | DONE (this commit) — `BookStateCopy.plainBookKeepsItsNotes` |
-| 802-a · VX-802 survey + proposed door set (the in-batch fork) | IN-PROGRESS |
-| 829-a · VX-829 Book Settings: Move to Wing door | NOT-STARTED |
+| 868-b · VX-868 both arms rewritten | DONE (7656bc887) — `BookStateCopy.plainBookKeepsItsNotes` |
+| 802-a · VX-802 survey + proposed door set (the in-batch fork) | DONE (this commit) — the proposal below, AWAITING THE ORCHESTRATOR'S RULING; nothing of 802's wiring is built |
+| 829-a · VX-829 Book Settings: Move to Wing door | IN-PROGRESS |
 | 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | NOT-STARTED |
 | 802-b · VX-802 build (gated on the orchestrator's ruling) | NOT-STARTED — awaiting the ruling |
 | V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | NOT-STARTED |
@@ -147,3 +147,45 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 ## HELD FOR HER (the bundle; grows as PROVISIONALs land)
 
 *(pending)*
+
+### VX-802 — THE SURVEY AND THE PROPOSAL (the in-batch fork — awaiting the ruling; NOT built)
+
+**What the book views' note-title menu is today.** ONE builder, `outlineChapterMenu(structure:postID:)` (`Features/BookView/BookView.swift`), rendered by FOUR hosts: Outline's expanded note header (`postHeader`), Outline's collapsed card (`collapsedPostCard`), the navigator's note rows in every book mode (Outline · Read · Book), and the navigator's collapsed one-note chapter row (after its chapter menu). It draws, on a BOOK only: Move to Chapter ▸ (`.fileNoteInChapter`) · — · Remove from This Book / Release from This Book (`.removeFromBook`). On a GATHERING it draws nothing at all. (The Index row's ⋯ — `BookIndexView.chapterFilingMenu`, a `.surface` door, not a right-click — carries Show in Outline · Open in the full editor · — · Move to Chapter ▸ · — · Remove.)
+
+**The note rows' existing registry vocabulary (surveyed).**
+- The Open list's row (`SidebarView`): Open Beside · Open in New Window · Star/Unstar · — · Rename… · Move to Wing ▸ · Copy to Wing ▸ · Export Note… · — · Close · Close All Notes · — · Delete Note… (SurfaceContracts, The app — the Open list bullet).
+- The Library's note row (`LibraryCatalogView.postRowMenu`): Open · Open Beside · Star/Unstar · Open in New Window · Rename… · Tags… · [Share with AI…] · — · Mark as Versions with… · Unmark Versions with… · Duplicate with Tags · Duplicate without Tags · Move to Wing ▸ · Copy to Wing ▸ · — · Export ▸ (Markdown… · Markdown with Takes… · PDF…) · — · Archive · Delete Note….
+- The declared grammar: `SidebarView.contextMenuCapabilities` (openBeside · openInNewWindow · toggleStar · deleteNote · archiveNote · moveNoteToWing · copyNoteToWing · duplicateNoteWithTags · duplicateNoteWithoutTags) + `SidebarView.noteRowMenuCapabilities` (renameNote · exportNote).
+
+**PROPOSED door set for the book views' note-title menu** (every verb from its registry declaration; the order follows the Open list's grouping):
+
+```
+Open Beside                         .openBeside            ┐
+Open in New Window                  .openInNewWindow       │ the note's own doors —
+Star / Unstar                       .toggleStar            │ books AND gatherings
+—                                                          │ (a gathering's note has
+Rename…                             .renameNote  (minimum) │ none today)
+Move to Wing ▸ · Copy to Wing ▸     .moveNoteToWing/.copyNoteToWing (drawn only while
+                                     another wing exists, from the note's own wing — P-2)
+Export Note…                        .exportNote            ┘
+—
+Move to Chapter ▸                   .fileNoteInChapter     ┐ the book's structure doors —
+Remove from This Book / Release…    .removeFromBook        ┘ BOOKS only, as shipped
+—
+Archive                             .archiveNote           ┐ set apart, last
+Delete Note…                        .deleteNote  (minimum) ┘ (the one shared confirm)
+```
+
+**Deliberately LEFT OFF, and why:**
+- **Close · Close All Notes** — the Open list's own, list-local view state (her ruling's own carve-out).
+- **Open** — the title's click and "open ↗" are the book's ONE open door (`BookOpenDoor` → Write at her block, VX-303); a menu "Open" would be a second road unless routed through the same landing. (Option: add "Open in the full editor", the Index ⋯'s words, through that same door.)
+- **Tags… · Mark/Unmark Versions with… · Export ▸ (Markdown with Takes / PDF)** — the Library row's own sheets and pickers, not the declared note-row grammar.
+- **Duplicate with Tags / without Tags** — where the copy lands relative to THIS book is undecided (a Library duplicate is bookless unless a tag carries it into a living book); offering it inside a book reads "it will appear here". Left off rather than invent the landing (option: rule it in, landing exactly as the Library row's does).
+- **Share with AI…** — the Library row's own door beyond the grammar; the book's Share road stays the book's.
+
+**The fork's open sub-choices (my recommendation first):**
+1. **Move to Wing ▸ on a member note** — moving severs its membership here (a book only holds notes of its own wing); the wing confirm already lists the severed books. RECOMMEND: include (it is on every other note row; the confirm names the severing). Alternative: Copy to Wing ▸ only.
+2. **Archive inside a book** — an archived member stays a member and moves to the book's archived line (SurfaceContracts, Arrivals bullet). RECOMMEND: include (her ticket names archive among the examples). Alternative: Delete only.
+3. **Scope of hosts** — RECOMMEND: grow the ONE builder (so Outline's header + card and the navigator's rows in every mode carry it); leave the Index ⋯ (a `.surface` button menu, not the right-click her screenshot showed) as shipped. Alternative: the Index ⋯ renders the same note doors below its navigation pair.
+
+**Build cost once ruled (for planning):** `BookView` holds none of these today — it needs a `StarDoor` and the Open Beside / Open in New Window callbacks handed down through composition (the pane host), and hosts the shared rename alert (`noteRenameAlert`), the shared delete confirm (`deleteNoteConfirmDialog` — `NoteDeletion.fire` already moves every pane off the tombstone), and the wing move confirm (`WingsModel` from the environment). `BookView.contextMenuCapabilities` grows by the set; a derivation pin asserts the book menu's note doors ⊆ the note-row grammar (`SidebarView.contextMenuCapabilities ∪ noteRowMenuCapabilities`). No new operation; no registry declaration needed (every act is declared).
