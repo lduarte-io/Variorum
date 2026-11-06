@@ -21,8 +21,12 @@
 //
 //  Day KEYS are the filter's one calendar's (`LibraryDayFace.calendar` —
 //  Gregorian, her zone); only the DISPLAY week order is hers
-//  (`Calendar.current.firstWeekday` — condition 4). No arrow-key day
-//  navigation in this landing (PROVISIONAL P-VX83-B3 — condition 2).
+//  (`Calendar.current.firstWeekday` — condition 4). Arrow-key day
+//  navigation (P-VX83-B3's deferral, VX-98 — the VX-819 run, batch 3): the
+//  keys move a KEYBOARD day the grid marks (`keyDay` — a ring in the accent,
+//  never the "this one" fill: a focused day is not an armed one), ⏎ presses
+//  it; the rule and the door live with the popover's brain
+//  (`LibraryWhenGridKeys`, `LibraryWhenKeyMonitor`).
 //
 
 import SwiftUI
@@ -204,6 +208,9 @@ struct LibraryWhenMonthGrid: View {
     let calendar: Calendar
     let firstWeekday: Int
     var locale: Locale = .current
+    /// VX-98: the day the keyboard stands on (its ring); nil — nothing drawn —
+    /// until an arrow is pressed.
+    var keyDay: String? = nil
     /// A day's press — the popover's `press(_:)`.
     let onPress: (String) -> Void
     /// ‹ / › — the popover's `step(_:)`.
@@ -249,6 +256,7 @@ struct LibraryWhenMonthGrid: View {
                                     tokens: tokens, cell: cells[index],
                                     mark: LibraryWhenGrid.mark(cells[index].day, in: range),
                                     isToday: cells[index].day == today,
+                                    isKeyed: cells[index].day == keyDay,
                                     spoken: LibraryWhenGrid.spoken(
                                         cells[index], range: range, today: today,
                                         calendar: calendar, locale: locale),
@@ -289,9 +297,15 @@ private struct LibraryWhenDayCell: View {
     let cell: LibraryWhenGrid.Cell
     let mark: LibraryWhenGrid.Mark
     let isToday: Bool
+    /// VX-98: the keyboard stands here (a ring — never a fill).
+    let isKeyed: Bool
     let spoken: LibraryWhenGrid.Spoken
     let onPress: (String) -> Void
     @State private var hovering = false
+
+    /// The keyboard's ring: one line in the accent, inside the cell's fill
+    /// inset, so it reads on a bare day, the run's band and an armed end alike.
+    static let keyRingWidth: CGFloat = 1.5
 
     private var ink: Color {
         if isToday { return tokens.accent }
@@ -309,6 +323,13 @@ private struct LibraryWhenDayCell: View {
                 .lineLimit(1)
                 .frame(width: LibraryWhenMonthGrid.cell.width, height: LibraryWhenMonthGrid.cell.height)
                 .background { fill }
+                .overlay {
+                    if isKeyed {
+                        RoundedRectangle(cornerRadius: QuietFill.corner)
+                            .strokeBorder(tokens.accent, lineWidth: Self.keyRingWidth)
+                            .padding(1)
+                    }
+                }
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

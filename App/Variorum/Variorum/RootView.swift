@@ -261,6 +261,10 @@ struct RootView: View {
                 session: session, model: library, pool: pool,
                 workspace: router.workspace, stars: stars, starDoor: starDoor,
                 bookRowDoors: starredBookDoors,
+                // VX-822: the sidebar's search field — its own landing
+                // (`takeSidebarQuestion`) into the Library's one search
+                // (R-819-3/-4; the F1/F3 resets are the sidebar road's own).
+                searchDoor: sidebarSearchDoor,
                 selection: selectionBinding,
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
@@ -1709,6 +1713,38 @@ struct RootView: View {
         catalog.query = words
         Task { await catalog.search() }
         adopt(.library, in: router.workspace.focusedPane)
+    }
+
+    /// **VX-822 — the sidebar field's three roads** (R-819-4: the field keeps
+    /// the keyboard; one engine, one finder). Its words are the Library's ONE
+    /// question, landed through the catalog's own sidebar door
+    /// (`takeSidebarQuestion`) and asked as ⌘K's road above asks — the
+    /// Library landed only where the focused pane is not already showing it,
+    /// so a keystroke never re-navigates (and the catalog asks in the current
+    /// wing, as it always does). Clearing ends the search and stays; ⏎ hands
+    /// the keyboard to the Library's own field, the words carried.
+    private var sidebarSearchDoor: SidebarSearchDoor {
+        SidebarSearchDoor(
+            ask: { [self] words, startsNewSearch in
+                catalog.takeSidebarQuestion(words, startingANewSearch: startsNewSearch)
+                Task { await catalog.search() }
+                if router.workspace.focusedSelection != .library {
+                    adopt(.library, in: router.workspace.focusedPane)
+                }
+            },
+            end: { [self] in
+                catalog.query = ""
+                Task { await catalog.search() }
+            },
+            keyboardToLibrary: { [self] in
+                if router.workspace.focusedSelection != .library {
+                    adopt(.library, in: router.workspace.focusedPane)
+                }
+                catalog.askSearchFieldForKeyboard()
+            },
+            // The ladder's F4: the field drives nothing while ⌘K's palette
+            // is presented over this window (its road asks its own words).
+            inert: paletteOpen)
     }
 
     /// Navigation with an optional caret-precise block landing (Stage C) —

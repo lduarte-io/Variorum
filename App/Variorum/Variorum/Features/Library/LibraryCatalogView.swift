@@ -154,6 +154,9 @@ struct LibraryCatalogView: View {
     /// VX-350: the search field's keyboard focus — the 🔍 door puts the caret
     /// in the field it opens.
     @FocusState private var searchFieldFocused: Bool
+    /// VX-822 (the ladder's F2): the search field's own window, for the
+    /// carried words' caret — never another window's editor.
+    @State private var caretAnchor = CarriedWordsCaret.Anchor()
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     /// 13i-d U5: the move's confirm (the books the note would leave).
     @State private var wingMove: WingsModel.MoveAsk?
@@ -197,6 +200,18 @@ struct LibraryCatalogView: View {
     /// lines at every width. One number for both, so they cannot drift.
     static let searchFieldMaxWidth: CGFloat = 320
 
+    /// **The segmented pickers' frame caps** (VX-374 — the VX-283 ladder's
+    /// R2-3, named so a pin can hold them). Not dead weight: over a
+    /// `fixedSize` picker the flexible frame makes each one natural…cap wide
+    /// and centres it in the wider box at wide widths, so the row's spacing
+    /// and Terminal's one-line threshold read them. The hazard R2-3 named —
+    /// a voice or metrics change pushing a picker's natural width PAST its
+    /// cap, the frame then under-reporting and the picker overlapping its
+    /// neighbour by the excess — is guarded by
+    /// `LibraryControlsGeometryTests.eachSegmentedPickersNaturalWidthIsWithinItsCap`.
+    static let scopePickerMaxWidth: CGFloat = 280
+    static let modePickerMaxWidth: CGFloat = 230
+
     /// Row 24 (the panel half): the panel's presence animates — the column
     /// slides and fades in and out with the row selection. The mutation
     /// sites wrap the model's change in this animation explicitly: an
@@ -208,6 +223,14 @@ struct LibraryCatalogView: View {
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    /// VX-822: the sidebar field's handoff, taken — the keyboard here, the
+    /// caret after the carried words.
+    private func takeCarriedWords() {
+        guard model.takeSearchFieldKeyboardAsk() else { return }
+        searchFieldFocused = true
+        CarriedWordsCaret.toEndSoon(of: model.query, near: caretAnchor)
     }
 
     var body: some View {
@@ -692,7 +715,8 @@ struct LibraryCatalogView: View {
             // field first, scope second (`LibraryControlsFlow`).
             // P-U3-5: the wrap reads STABLE widths only — the field at its
             // PROMPT (never its typed text) and the sort slot at its WIDEST
-            // form (every sort × direction, and the relevance label), so
+            // form (every sort × direction, and the search's `order ▾`
+            // door at relevance — VX-820), so
             // typing, a sort pick or a search never changes the line count.
             let stable = LibraryControlsStableWidths.row(
                 tokens: tokens, prompt: Self.searchPrompt,
@@ -712,6 +736,8 @@ struct LibraryCatalogView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
                     .focused($searchFieldFocused)
+                    // VX-822 (the ladder's F2): the field's window, reported.
+                    .background(CarriedWordsCaret.Probe(anchor: caretAnchor))
                     .frame(maxWidth: Self.searchFieldMaxWidth)
                     .libraryGeometryProbe(.searchField)
                     .libraryControlsFloor(stable.fieldFloor)
@@ -745,7 +771,7 @@ struct LibraryCatalogView: View {
                 // widths only" holds for both pickers. (The swept P-8 lint is
                 // the bare form; a segmented control is no label that wraps.)
                 .fixedSize(horizontal: true, vertical: false)
-                .frame(maxWidth: 280)
+                .frame(maxWidth: Self.scopePickerMaxWidth)
                 // 18h batch 2: a day names NOTES — books and blocks carry no
                 // edit stamp and stand down while one is armed, so the scope
                 // stands down with them rather than offering picks that
@@ -771,7 +797,7 @@ struct LibraryCatalogView: View {
                 // VX-175 (P-U3c-1): fixed horizontally — the scope picker's
                 // reason above (unfixed: 224 → 180 pt Terminal after a search).
                 .fixedSize(horizontal: true, vertical: false)
-                .frame(maxWidth: 230)
+                .frame(maxWidth: Self.modePickerMaxWidth)
                 // 18h batch 1 (her row 10): the notes' order, hers to
                 // choose. The Timeline mode is its own order by definition,
                 // so the door stands down there rather than lying.
@@ -787,25 +813,29 @@ struct LibraryCatalogView: View {
                     // draw on), so the menu and the day door meet the
                     // segmented line by `segmentedLabelDrop`.
                     if model.isSearching {
-                        // 13o U2 (PROVISIONAL P-13o-U2-7): the answer sheet is
-                        // ranked by relevance (D2), so the sort door — which
-                        // could not change that order — stands down for the
-                        // mockup's own words, a label (P-2: a door that
-                        // cannot act is not drawn).
-                        // P-U3-5 / P-8: one line, holding its words — the
-                        // label once wrapped onto three lines when the row
-                        // squeezed it (the walk's F-1); the sort door's own
-                        // `VoicedMenu` and `when ▾` already carry the same
-                        // policy at their homes.
-                        Text(tokens.chromeLabel(LibrarySearchCopy.relevance))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .lineLimit(1)
-                            .fixedSize()
-                            .help(LibrarySearchCopy.relevanceHelp)
-                            .offset(y: Self.segmentedLabelDrop)
-                            .libraryGeometryProbe(.sortSlot)
-                            .libraryControlsWidest(stable.sortWidest)
+                        // VX-820 (her R-819-2, "Full vocabulary"): the answer
+                        // sheet's ORDER door — relevance (the default per
+                        // search) · edited · created · date · title, with
+                        // direction — where P-13o-U2-7's plain relevance
+                        // label stood (the order can change now, so the slot
+                        // is a door — P-2). The search state owns the value
+                        // (a new search starts at relevance; a cleared field
+                        // discards it); the Library's own sort is untouched.
+                        // One line by `VoicedMenu`'s own policy (P-U3-5 /
+                        // P-8), counted at the slot's widest form.
+                        LibrarySearchOrderMenu(
+                            tokens: tokens, order: model.searchState.order,
+                            onPick: { pick in
+                                model.pickSearchOrder(pick)
+                                Task { await model.search() }
+                            },
+                            onDirection: { pick in
+                                model.pickSearchOrderDirection(pick)
+                                Task { await model.search() }
+                            })
+                        .offset(y: Self.segmentedLabelDrop)
+                        .libraryGeometryProbe(.sortSlot)
+                        .libraryControlsWidest(stable.sortWidest)
                     } else {
                         LibrarySortMenu(
                             tokens: tokens, sort: model.sort, direction: model.direction,
@@ -843,6 +873,16 @@ struct LibraryCatalogView: View {
             // so a narrow row never hides the field she is typing in.
             .onChange(of: searchFieldFocused) { _, focused in
                 if focused { model.searchFieldOpened = true }
+            }
+            // VX-822: the sidebar field's ⏎ — this field takes the keyboard
+            // with the carried words, the caret at their END (a field focused
+            // by code selects all, and her next key would replace them); at
+            // once, or at the mount when the Library was not on screen.
+            .onChange(of: model.searchFieldWantsKeyboard) { _, wants in
+                if wants { takeCarriedWords() }
+            }
+            .onAppear {
+                if model.searchFieldWantsKeyboard { takeCarriedWords() }
             }
             // 13n-c UX walk W-UX-3 (T-1): the bulk doors on a ROW OF THEIR
             // OWN under the controls while several notes are picked. In the
@@ -1267,7 +1307,7 @@ struct LibraryCatalogView: View {
                 // one click-flipping stamp where it does not.
                 CatalogCardStamps(
                     tokens: tokens, postID: hit.id,
-                    stamps: LibrarySortFace.rowStamps(model.sort, for: hit))
+                    stamps: LibrarySortFace.rowStamps(model.rowStampSort, for: hit))
                 Spacer(minLength: 0)
                 // 13i-c U4 (§6): the owned-by badge — the note's owner,
                 // clickable (the ascent), before the books line.
@@ -1364,7 +1404,7 @@ struct LibraryCatalogView: View {
             // ladder's R3-2: the one brain's words, standing down under the
             // `date` sort where the trailing stamp already says that day) and
             // the trailing stamp, which IS the sort's own (`sorted`).
-            let stamps = LibrarySortFace.rowStamps(model.sort, for: hit)
+            let stamps = LibrarySortFace.rowStamps(model.rowStampSort, for: hit)
             // 17y B1 (k): the row's OWN slice of the extras, never the whole
             // listing's dictionaries (the measured page-landing stall).
             let extras = model.rowExtras(for: hit.id)

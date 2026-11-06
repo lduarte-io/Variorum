@@ -142,7 +142,10 @@ nonisolated enum LibraryControlsFlowRule {
         guard !children.isEmpty else { return Arrangement(oneLine: true, frames: [], size: .zero) }
         let oneLine = children.count <= lineOneCount
             || fitsOneLine(children, width: width, spacing: spacing)
-        let single = distribute(children, in: width, spacing: spacing)
+        // VX-374 (the VX-283 ladder's R2-4): the whole-line distribution —
+        // one width probe per child — only where it is read, the one-line
+        // road; the two-line road distributes each line on its own below.
+        let single = oneLine ? distribute(children, in: width, spacing: spacing) : []
         let lines: [Range<Int>] = oneLine
             ? [children.indices]
             : [0..<lineOneCount, lineOneCount..<children.count]
@@ -603,7 +606,8 @@ struct LibraryControlsStableWidths: Equatable {
     /// inside the cap today (211.5 / 175 of 320), so the clamp never engages.
     var fieldFloor: CGFloat
     /// **The sort slot at the widest it can read:** every sort × direction as
-    /// the `sort ▾` door draws it, and the search's relevance label.
+    /// the `sort ▾` door draws it, and the search's `order ▾` door at
+    /// relevance (`sortForms`).
     var sortWidest: CGFloat
 
     /// One form of a label: its words and the chrome drawn around them.
@@ -620,7 +624,9 @@ struct LibraryControlsStableWidths: Equatable {
 
     /// Every form the sort slot can take, in the voice's words: the `sort ▾`
     /// door's label for every offered sort × direction, then the search's
-    /// relevance label (no chrome — a plain label).
+    /// `order ▾` door at relevance (VX-820 — a door now, its `▾` and chrome
+    /// with it; its home orders wear the `sort ▾` door's own labels, already
+    /// counted above).
     static func sortForms(_ tokens: VoiceTokens) -> [LabelForm] {
         let doors = LibrarySortFace.offered.flatMap { sort in
             [SortDirection.desc, .asc].map { direction in
@@ -628,7 +634,8 @@ struct LibraryControlsStableWidths: Equatable {
                           chrome: voicedMenuChrome)
             }
         }
-        return doors + [LabelForm(text: tokens.chromeLabel(LibrarySearchCopy.relevance), chrome: 0)]
+        let relevance = LibrarySearchOrderFace.doorLabel(.relevance)
+        return doors + [LabelForm(text: tokens.chromeLabel(relevance) + " \u{25BE}", chrome: voicedMenuChrome)]
     }
 
     /// The row's stable widths in this voice — `prompt` is the field's own

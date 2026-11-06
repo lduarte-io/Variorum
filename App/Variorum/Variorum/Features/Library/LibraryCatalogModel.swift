@@ -288,6 +288,52 @@ final class LibraryCatalogModel {
         return .close
     }
 
+    /// **VX-822 — the sidebar field's ⏎ hands its question here** (R-819-4:
+    /// "⏎ … moves her into the Library, text carried"). A PENDING ask the
+    /// view takes — at once when the Library is on screen, else at its mount —
+    /// by giving this field the keyboard, the caret at the end of the words;
+    /// the field opens where the narrow class hides it (her act, by handoff —
+    /// the 🔍 press's own `searchFieldOpened`).
+    private(set) var searchFieldWantsKeyboard = false
+
+    func askSearchFieldForKeyboard() {
+        searchFieldOpened = true
+        searchFieldWantsKeyboard = true
+    }
+
+    /// The view taking the ask — true exactly once per ask.
+    func takeSearchFieldKeyboardAsk() -> Bool {
+        defer { searchFieldWantsKeyboard = false }
+        return searchFieldWantsKeyboard
+    }
+
+    /// **VX-822 — the sidebar field's words land as the Library's question**
+    /// (R-819-4). `startingANewSearch`: the field went from empty to typed
+    /// (`SidebarSearchFieldRule.Act.start`). The caller spawns `search()`
+    /// (this file's convention) and lands the Library where it is not shown.
+    func takeSidebarQuestion(_ words: String, startingANewSearch: Bool) {
+        // The ladder's F3 (A-819-L1, amending P-819-B3d): the field opens
+        // empty and clears after every handoff, so every question it starts
+        // is a fresh hunt — a NEW search by R-819-2's own word: relevance,
+        // and no facet carried over from the question it replaces (exactly
+        // what a cleared field resets — the day and the scope stay, as
+        // there). Refining its own question keeps, as refining keeps.
+        if startingANewSearch { searchState.resetFacet() }
+        // One engine, one finder: the field's words ARE this model's ONE
+        // question — the field holds no search state of its own, mints no
+        // second road, and the catalog asks in the current wing.
+        query = words
+        // The ladder's F1 (A-819-L1, PROVISIONAL): R-819-4 shows the Library
+        // "with the live answer as you type", and the Timeline takes no
+        // question — so a Library standing in it moves to List as the words
+        // land (the Cards rule's precedent: a view that cannot show the
+        // answer yields). Her mode does not come back when the search ends
+        // (no hidden memory). ⌘K's road and the Library's own field are
+        // untouched. On screen the view's `modeChanged` follows as for her
+        // own pick.
+        if mode == .timeline { pickMode(.list) }
+    }
+
     /// **The search state's own brain** (13o U2, D8 — P-9): the question, the
     /// band's numbers, the Books section, the groups and their expansions.
     /// Owned here the way `bookRowDoors` is; this model routes the field's
@@ -438,6 +484,16 @@ final class LibraryCatalogModel {
     /// Generation-stamped adoption (round 2, MINOR — the Phase 8 ruling):
     /// per-keystroke tasks are unordered; only the NEWEST read may land.
     private(set) var searchGeneration = 0
+
+    #if DEBUG
+    /// **VX-408's pin seam** (DEBUG only; nil everywhere but its pins): awaited
+    /// by the listing's one read AFTER its database answer and BEFORE the
+    /// generation guard, with that read's generation — so a pin can hold ONE
+    /// read's answer until another has landed, the completion order the
+    /// serial in-memory test store can never produce on its own. Changes
+    /// nothing while nil.
+    @ObservationIgnored var listingAnswerGate: (@MainActor (_ generation: Int) async -> Void)?
+    #endif
 
     // MARK: - The ⌘-click pick (P-0, 13l's end-of-phase ladder)
 
@@ -676,6 +732,9 @@ final class LibraryCatalogModel {
         // VX-823: a new question starts at the top — every pane's remembered
         // place, and every return mark, go (`LibraryCatalogPlace.swift`).
         placeMemory.questionChanged()
+        // VX-408: a NEW question is asked — whichever read lands it next
+        // lands it as this question's first page (`read`).
+        askedQuestion += 1
         await startOver()
     }
 
@@ -743,10 +802,31 @@ final class LibraryCatalogModel {
             startingOver: false)
     }
 
+    /// **VX-408 — the QUESTION token, beside the read generation.** The
+    /// generation orders READS (only the newest lands); this says whether
+    /// the question a read answers is the one already LISTED. `search()`
+    /// bumps `askedQuestion`; a read lands `listedQuestion`. An in-place
+    /// re-ask (`refresh` — the listing follow, `.variorumNotesDeleted`, a
+    /// row act) that begins while a newer question's own read is still in
+    /// flight overtakes that read (its generation is newer) and answers the
+    /// current question — so it must land it as the NEW question's first
+    /// page, starting over, never in place at the old listing's depth with
+    /// the old listing's on-screen positions (the traced edge; pinned by
+    /// `VX408ListingRaceTests.aRefreshThatOvertakesANewerQuestionLandsItAsAFirstPage`).
+    @ObservationIgnored private(set) var askedQuestion = 0
+    @ObservationIgnored private(set) var listedQuestion = 0
+
     /// The one read behind both doors.
     private func read(noteDepth: Int, groupDepth: Int, startingOver: Bool) async {
         searchGeneration += 1
         let generation = searchGeneration
+        // VX-408: a read carrying a question not yet listed is that
+        // question's first read, whichever door asked.
+        let asked = askedQuestion
+        let carriesNewQuestion = asked != listedQuestion
+        let startingOver = startingOver || carriesNewQuestion
+        let noteDepth = carriesNewQuestion ? Self.pageSize : noteDepth
+        let groupDepth = carriesNewQuestion ? LibrarySearchModel.groupPageSize : groupDepth
         do {
             let (sort, direction, scope) = (sort, direction, scope)
             // Her day, in her calendar, converted once — the query compares
@@ -764,16 +844,23 @@ final class LibraryCatalogModel {
                 visibility: searchState.visibility, bookState: searchState.bookState,
                 savepoints: searchState.includesSavepoints)
             if question == nil { searchState.resetFacet() }
+            // VX-820: the answer sheet's order (relevance unless she picked
+            // one for this search — a cleared field reset it just above).
+            let order = searchState.order
             // 13i-d U5: the CURRENT WING's catalog (§9 — search scopes by
             // wing; the Library is "everything" in THIS library).
             let wing = session.wing.currentID
             let listing = try await session.database.read { db in
                 try Self.listing(
                     db, question: question, scope: scope, sort: sort, direction: direction,
-                    day: day, wing: wing, noteDepth: noteDepth, groupDepth: groupDepth)
+                    day: day, wing: wing, noteDepth: noteDepth, groupDepth: groupDepth, order: order)
             }
+            #if DEBUG
+            if let gate = listingAnswerGate { await gate(generation) }
+            #endif
             guard generation == searchGeneration else { return }  // stale
             listedGeneration = generation
+            listedQuestion = asked   // VX-408
             bookHits = listing.books
             noteHits = listing.notes
             blockHits = listing.blocks
@@ -782,7 +869,7 @@ final class LibraryCatalogModel {
             notesHaveMore = listing.next != nil
             searchState.land(
                 listing.search, question: question, scope: scope, wing: wing,
-                generation: generation, startingOver: startingOver)
+                generation: generation, startingOver: startingOver, order: order)
             reindexNotes()
             if startingOver {
                 visibleNoteIndices = []
@@ -854,13 +941,13 @@ final class LibraryCatalogModel {
     nonisolated static func listing(
         _ db: Database, question: LibrarySearchQuestion?, scope: Scope,
         sort: Queries.LibrarySort, direction: SortDirection, day: DayBounds?, wing: String,
-        noteDepth: Int, groupDepth: Int
+        noteDepth: Int, groupDepth: Int, order: SearchOrder = .relevance
     ) throws -> Listing {
         var listing = Listing()
         if let question {
             guard question.answers else { return listing }
             let answer = try LibrarySearchModel.listing(
-                db, question: question, scope: scope, wing: wing, groupDepth: groupDepth)
+                db, question: question, scope: scope, wing: wing, groupDepth: groupDepth, order: order)
             listing.books = answer.books
             listing.search = answer
             if question.hasWords {

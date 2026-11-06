@@ -368,8 +368,9 @@ struct LibraryControlsStableWidthsTests {
     }
 
     /// The sort slot is counted at its WIDEST: every form the slot can take —
-    /// the `sort ▾` door at every sort × direction, the relevance label as
-    /// the header draws it — measures no wider than `sortWidest`, and the
+    /// the `sort ▾` door at every sort × direction, the search's `order ▾`
+    /// door at relevance and at every home order (VX-820 — the door that
+    /// replaced the relevance label) — measures no wider than `sortWidest`, and the
     /// widest of them measures exactly it (which keeps `voicedMenuChrome`
     /// and the rounding honest against the real door).
     @Test(arguments: [ThemeVoice.terminal, .study])
@@ -384,8 +385,16 @@ struct LibraryControlsStableWidthsTests {
                 measured[LibrarySortFace.doorLabel(sort, direction)] = Self.ideal(door)
             }
         }
-        measured["relevance"] = Self.ideal(
-            Text(tokens.chromeLabel(LibrarySearchCopy.relevance)).font(tokens.small).lineLimit(1))
+        // VX-820: while the field asks, the slot is the `order ▾` door —
+        // relevance, and every home order (the `sort ▾` door's own words).
+        measured["order relevance"] = Self.ideal(LibrarySearchOrderMenu(
+            tokens: tokens, order: .relevance, onPick: { _ in }, onDirection: { _ in }))
+        for sort in LibrarySortFace.offered {
+            for direction in [SortDirection.desc, .asc] {
+                measured["order " + LibrarySortFace.doorLabel(sort, direction)] = Self.ideal(LibrarySearchOrderMenu(
+                    tokens: tokens, order: .home(sort, direction), onPick: { _ in }, onDirection: { _ in }))
+            }
+        }
         let over = measured.filter { $0.value > widest + 0.5 }
         #expect(over.isEmpty, "\(voice): forms wider than the counted \(widest): \(over)")
         let top = measured.values.max() ?? 0
@@ -565,6 +574,16 @@ struct LibraryControlsGeometryTests {
             await settle()
         }
 
+        /// VX-820: an order pick from the answer sheet's `order ▾` door (nil =
+        /// relevance; a sort takes its natural direction, then `direction`
+        /// if given), and the search the door's pick runs.
+        func order(_ sort: Queries.LibrarySort?, _ direction: SortDirection? = nil) async {
+            model.pickSearchOrder(sort)
+            if let direction { model.pickSearchOrderDirection(direction) }
+            await model.search()
+            await settle()
+        }
+
         /// The mounted search field — the editable field showing the prompt.
         func searchField() -> NSTextField? {
             let prompt = tokens.chromeLabel(LibraryCatalogView.searchPrompt)
@@ -701,7 +720,8 @@ struct LibraryControlsGeometryTests {
     /// window, the panel open (two lines): keystrokes into the field — a
     /// word, then more words, until the question is longer than the prompt —
     /// never change the line count, never leave the field under its prompt,
-    /// and the relevance label stays one line. (Before: the first word
+    /// and the sort slot stays one line (the relevance label then; the
+    /// `order ▾` door since VX-820). (Before: the first word
     /// collapsed the row to one line, the field a sliver at the typed word's
     /// width, the label wrapped onto three lines.) Also the floor the row
     /// counts IS the mounted field's own empty measure (its cell's).
@@ -738,7 +758,7 @@ struct LibraryControlsGeometryTests {
                 #expect(after.field.width >= after.prompt - 0.5,
                         "\(voice): \"\(typed)\" left the field under its prompt (\(after.field.width) of \(after.prompt) pt)")
                 let slot = try #require(after.sortSlot, "\(voice): the sort slot reported")
-                #expect(slot.height <= 20, "\(voice): the relevance label is one line (\(slot.height) pt tall)")
+                #expect(slot.height <= 20, "\(voice): the order door is one line (\(slot.height) pt tall)")
                 #expect(after.controls.maxX <= (after.divider?.minX ?? after.root.maxX) + 0.5,
                         "\(voice): the row stays in the list column")
             }
@@ -748,7 +768,9 @@ struct LibraryControlsGeometryTests {
     /// The row's states the stability pins cycle through: the sort slot's
     /// narrowest and widest door forms and the default one, then a typed word
     /// and a question longer than the prompt (both through the field's
-    /// binding road), then back to empty.
+    /// binding road), the answer sheet's order door picked while searching
+    /// (VX-820 — a home order each way, then back to relevance), then back
+    /// to empty.
     private static let states: [(name: String, act: (Rig) async -> Void)] = [
         ("edited · newest", { await $0.pick(.lastTouched) }),
         ("title · A–Z", { await $0.pick(.title) }),
@@ -756,6 +778,10 @@ struct LibraryControlsGeometryTests {
         ("created · oldest", { await $0.pick(.createdAt, .asc) }),
         ("typed a word", { await $0.ask("pick") }),
         ("typed past the prompt", { await $0.ask("note pick from listing note pick") }),
+        // VX-820: the answer sheet's order door, picked while she searches.
+        ("ordered created · oldest", { await $0.order(.createdAt, .asc) }),
+        ("ordered title · Z–A", { await $0.order(.title, .desc) }),
+        ("ordered relevance", { await $0.order(nil) }),
         ("empty again", { await $0.ask("") }),
     ]
 
@@ -890,6 +916,34 @@ struct LibraryControlsGeometryTests {
             }
         }
     }
+
+    /// **VX-374 (the VX-283 ladder's R2-3) — each segmented picker's NATURAL
+    /// width is within its frame's cap.** A GUARD, said honestly: no
+    /// reachable red exists today (Study's mode picker measures exactly its
+    /// 230). The caps are live layout (`LibraryCatalogView.scopePickerMaxWidth`
+    /// / `modePickerMaxWidth` — the picker flexible natural…cap, centred), so
+    /// they stay; what this holds is R2-3's hazard: a voice or metrics change
+    /// pushing a picker's natural width past its cap would let the flexible
+    /// frame under-report it, the fixed picker then overlapping its
+    /// neighbour by the excess (R1-6's independent-numbers class, one layer
+    /// up). Both voices, mounted, the panel closed at the default window.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func eachSegmentedPickersNaturalWidthIsWithinItsCap(voice: ThemeVoice) async throws {
+        try await withCatalog(voice: voice, width: Self.defaultLibraryWidth, panelOpen: false) { rig in
+            let controls = Self.segmentedControls(in: rig.hosting)
+            #expect(controls.count == 2, "\(voice): both segmented controls are mounted")
+            for control in controls {
+                // Scope offers four segments (All · Notes · Books · Blocks),
+                // mode three (List · Cards · Timeline).
+                let cap = control.segmentCount == LibraryCatalogModel.Scope.allCases.count
+                    ? LibraryCatalogView.scopePickerMaxWidth : LibraryCatalogView.modePickerMaxWidth
+                let natural = control.intrinsicContentSize.width
+                print("[VX-374 R2-3] \(voice) · \(control.label(forSegment: 0) ?? "?") · natural \(natural) of cap \(cap)")
+                #expect(natural <= cap + 0.5,
+                        "\(voice): \(control.label(forSegment: 0) ?? "?")'s natural \(natural) is past its cap \(cap)")
+            }
+        }
+    }
 }
 
 // MARK: - VX-350 — the Library at narrow widths (the VX-348 run, U3)
@@ -921,6 +975,10 @@ struct VX350NarrowLibraryTests {
         ("created · oldest", { await $0.pick(.createdAt, .asc) }),
         ("typed a word", { await $0.ask("pick") }),
         ("typed past the prompt", { await $0.ask("note pick from listing note pick") }),
+        // VX-820: the answer sheet's order door, picked while she searches.
+        ("ordered created · oldest", { await $0.order(.createdAt, .asc) }),
+        ("ordered title · Z–A", { await $0.order(.title, .desc) }),
+        ("ordered relevance", { await $0.order(nil) }),
         ("empty again", { await $0.ask("") }),
     ]
 
@@ -1146,7 +1204,7 @@ struct LibraryControlsU3cProbe {
     ) throws {
         let model = rig.model
         let read = try rig.read()
-        let slot = !model.showsCatalogControls ? "none (timeline)" : (model.isSearching ? "relevance label" : "sort door")
+        let slot = !model.showsCatalogControls ? "none (timeline)" : (model.isSearching ? "order door" : "sort door")
         let sweep = sweepRead.map { "\(LibraryControlsFlowTrace.text($0.height)) pt" } ?? "—"
         print("\(tag) · \(step) · isSearching \(model.isSearching) · slot \(slot) · query \"\(model.query)\""
               + " · sort \(model.sort) \(model.direction) · generations \(model.searchGeneration)/\(model.listedGeneration)"

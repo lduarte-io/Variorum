@@ -209,6 +209,11 @@ struct SidebarView: View {
     /// menu (`BookRowMenu`); the composition root owns its brain. nil (a
     /// harness mount) keeps the plain Star/Unstar menu.
     var bookRowDoors: BookRowDoors? = nil
+    /// **VX-822 — the search field's door** (R-819-3/-4): its three roads into
+    /// the Library's ONE search, composed by the root (the sidebar never holds
+    /// the Library's model). nil (a harness mount) draws no field — the column
+    /// is exactly what it was, which is what the no-shift pin compares.
+    var searchDoor: SidebarSearchDoor? = nil
     @Binding var selection: SidebarSelection?
     /// 13f batch 4 (W1/A25): "Open Beside" on an Open-strip row — the
     /// split's door where the window's open notes already live.
@@ -413,6 +418,20 @@ struct SidebarView: View {
                 // the column keeps it only when there is no list.
                 .padding(.bottom, openListRows.isEmpty ? SidebarLayout.contentBottomPadding : 0)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                // VX-822 (her R-819-3 — "there should be space for it without
+                // it occupying it's own row"): the search field lives IN the
+                // column's empty top band, as an OVERLAY — it takes no layout,
+                // so nothing below it can move, in any state.
+                .overlay(alignment: .top) {
+                    if let searchDoor {
+                        SidebarSearchField(tokens: tokens, door: searchDoor)
+                            #if DEBUG
+                            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                                SidebarGeometry.searchFieldFrames[SidebarGeometry.bodyKey(for: workspace)] = frame
+                            }
+                            #endif
+                    }
+                }
                 // VX-285: the column content's own space — the Open list's
                 // top is read here, unmoved by the outer scroll's offset.
                 .coordinateSpace(.named(Self.columnContentSpace))
@@ -832,6 +851,14 @@ struct SidebarView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                #if DEBUG
+                // VX-822's no-shift oracle: the first area row's box.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
+                    if area == Self.areas.first {
+                        SidebarGeometry.firstAreaRowFrames[SidebarGeometry.bodyKey(for: workspace)] = box
+                    }
+                }
+                #endif
                 // 13s-b U2: each place is a door the tour can point at (step
                 // 10's "Bookcase in the sidebar heads home", and the road back
                 // whenever she wanders off).
@@ -1538,6 +1565,12 @@ enum SidebarGeometry {
     static var sectionDraws: [String: [ScrollingSection: SectionDraw]] = [:]
     /// The column's outer scroll — the visible column ABOVE the sync footer.
     static var columnScrollFrames: [String: CGRect] = [:]
+    /// **VX-822 — the no-shift oracle's two rectangles**, keyed by the
+    /// column's workspace: the search field as drawn, and the five areas'
+    /// first row (the Bookcase's box — the first section's top without
+    /// Starred; Starred's header words are `HeaderReader`'s).
+    static var searchFieldFrames: [String: CGRect] = [:]
+    static var firstAreaRowFrames: [String: CGRect] = [:]
 
     static func recordSection(
         _ section: ScrollingSection, scroll: CGRect, for workspace: WorkspaceModel
@@ -1649,6 +1682,8 @@ enum SidebarGeometry {
         noteRowFromWings[key] = nil
         openRowWingNames[key] = nil
         noteRowWingActDone[key] = nil
+        searchFieldFrames[key] = nil
+        firstAreaRowFrames[key] = nil
     }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the

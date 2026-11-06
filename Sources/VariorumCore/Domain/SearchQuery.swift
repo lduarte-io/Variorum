@@ -107,8 +107,9 @@ public indirect enum SearchFilter: Equatable, Sendable {
     case days(SearchDayRange)
     /// Narrow to one result family (the facet chips).
     case family(SearchFamily)
-    /// Narrow to one doc KIND (13o U2 — the Library's Blocks scope reads
-    /// block NAMES beside the scraps family). A kind is a fact of the hit,
+    /// Narrow to one doc KIND (13o U2 — the Library's Blocks scope; since
+    /// VX-819 it reads every block-level kind beside the scraps family,
+    /// `SearchFacet.blocks`). A kind is a fact of the hit,
     /// never of a note, so a note-level arm (the worn day) reads it as
     /// "only a name-level kind" — `.title` — and nothing else.
     case docKind(SearchDocKind)
