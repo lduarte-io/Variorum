@@ -74,6 +74,9 @@ This run is `/architect-phase vx-808` on the Pro: worktree `~/dev/variorum-vx-80
 
 ### From the kickoff sitting (2026-11-05, question-dialog picks — recorded same turn)
 
+- **R-808-6 (VX-775 re-ruled, 2026-11-05 late — the cost-change sitting), her words verbatim: "defer it and i'm questioning if we should even do it. can we show an error to just the user?"** → VX-775 is DEFERRED OUT of this run (the implementer's door-wide trace rides the ticket as its record). Her standing direction R-808-2 (one transaction) is REOPENED by her own question; her new lean, answered by the orchestrator as feasible and cheap: a landed act answers the CLIENT the act's truth (success) while the Activity-write failure is said TO HER on the app's own status seam (detect-and-say; door-side catch + one app-side line — no transaction refactor). The successor run sizes and builds to whichever she settles; nothing of VX-775 is built here.
+
+
 - **R-808-1 (cast):** "Opus implements" the Sync/ batch — the VX-805 precedent stands; Opus implements every batch, Fable cold-reviews.
 - **R-808-2 (VX-775 direction):** "One transaction" — the act and its Activity line commit together; a log failure fails the whole act cleanly, so the answer, the store and the AI trail can never disagree. Unit B5 builds it.
 - **R-808-3 (riders):** "None" — the run stays at its twelve seated members; VX-778 and VX-364 stay on the board.
@@ -537,7 +540,7 @@ Results + counts here; FOR A LATER READER written last; master plan row retired 
 | 4 | Unit B2 (bulk propose + provenance) | DONE — commits 185f6c506…d189ef9dc; full core 3838/524 green; the five app suites 49/5 GREEN at the 19:39 window; three reviewer flags adopted |
 | 5 | Unit B3 (the review area) | DONE — three windows green (49/5 · 26/2 · 50/4 · W-4 in 173/17); walked both voices; W-1..W-4 fixed and verified live; the ladder re-checks |
 | 6 | Unit B4 (pins) | DONE — built to A-808-12; 173/17 green at the combined window; the pin walk verified live both voices (float, in-group sort, Finished confirm+refusal, marks); the ladder re-checks (flags: the manual-order index trade; the 300-note drop window; the narrow why-vs-since yield) |
-| 7 | Unit B5 (riders + small members + the docs tail: MCPSession.instructions' propose line, tool-description cross-refs, the field guide's lesson-3 mention — A-808-10) | NOT STARTED |
+| 7 | Unit B5 (riders + docs tail) | DONE except VX-775 (deferred, R-808-6) — 859 id-resume (catalog arm red-on-old) · 777 close words · 776 seam+words · 879's three sites (item-2 mechanism corrected by the implementer's own verify) · 867 her words · 860 the belt · docs tail at 3,098/3,100; headless green (core 3869/526; MCP socket class green alone); app suites owed at the b5 window |
 | 8 | Unit L (the live round) | OFF — R-808-4: VX-872 deferred out of the run; re-owned at closeout with the marker-deadline line |
 | 9 | The ladder (Fable, whole diff) | NOT STARTED |
 | 10 | Closeout + deploy window + release (the stage's finish, her go) | NOT STARTED |
