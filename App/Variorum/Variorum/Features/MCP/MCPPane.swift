@@ -93,14 +93,16 @@ nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
     /// row the pane does not show); the setup's words find Connect's own row
     /// and open it there (VX-281 ladder R1-4 — where R-VX184-6 put the
     /// setup); "client"/"clients" find the Clients tab's own row and open it
-    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)). nil: the row sits
-    /// above the tabs (the server switch, Waiting) or the finding is the pane
-    /// itself.
+    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)); VX-874's trail dial
+    /// lives under the Activity tab's log, so finding it opens Activity (a tab
+    /// every library offers). nil: the row sits above the tabs (the server
+    /// switch, the show dial, Waiting) or the finding is the pane itself.
     static func holding(findingLead lead: String) -> MCPPaneTab? {
         switch lead {
         case SettingsCatalog.title("mcpConnect"): .connect
         case SettingsCatalog.title("mcpClients"): .clients
         case SettingsCatalog.title("mcpOpenBook"): .shared
+        case SettingsCatalog.title("mcpTrailDial"): .activity
         default: nil
         }
     }
@@ -266,20 +268,9 @@ struct MCPPane: View {
                 }
                 .lineLimit(1)
                 ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)
-                // VX-874 (her ruling (4) — "TWO off switches … ONE control with
-                // three states", home Settings ▸ MCP, her word): THE TRAIL DIAL,
-                // beside the show dial it sits next to in meaning — what the
-                // sidebar's AI section draws (everything on · notices off ·
-                // fully off). One picker, its line, the whole text behind its (i).
-                Picker(SettingsCatalog.title("mcpTrailDial"), selection: Binding(
-                    get: { door.snapshot.trailDial },
-                    set: { door.setTrailDial($0) })) {
-                    ForEach(MCPTrailDial.allCases, id: \.self) { dial in
-                        Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
-                    }
-                }
-                .lineLimit(1)
-                ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
+                // (VX-874's trail dial lives on the ACTIVITY tab — `activityTab`
+                // — never here: a row above the tabs pushes a fresh pane's
+                // Connect code block out of sight, VX-281's geometry row.)
                 // A refusal from any act lands where she is looking first
                 // (the walk's second finding: a caption at the form's foot
                 // sat below the fold).
@@ -478,7 +469,8 @@ struct MCPPane: View {
         }
     }
 
-    /// ACTIVITY — the coarse log's newest lines and its "all N ›".
+    /// ACTIVITY — the coarse log's newest lines and its "all N ›", then
+    /// (VX-874) the trail dial.
     @ViewBuilder private var activityTab: some View {
         Section {
             if door.snapshot.activity.isEmpty {
@@ -489,6 +481,26 @@ struct MCPPane: View {
             }
         } header: {
             tabRow
+        }
+        // VX-874 (her ruling (4) — "TWO off switches … ONE control with three
+        // states", home Settings ▸ MCP, her word): THE TRAIL DIAL — what the
+        // sidebar's AI section draws (everything on · notices off · fully
+        // off), beside the log of the activity it governs. Its own section
+        // under the tab's list, the Shared tab's open-book precedent — never
+        // above the tabs, where a row pushes a fresh pane's Connect code block
+        // out of sight (VX-281's geometry row; the closing window's red). A
+        // search finding opens this tab (`MCPPaneTab.holding`). One picker,
+        // its line, the whole text behind its (i).
+        Section {
+            Picker(SettingsCatalog.title("mcpTrailDial"), selection: Binding(
+                get: { door.snapshot.trailDial },
+                set: { door.setTrailDial($0) })) {
+                ForEach(MCPTrailDial.allCases, id: \.self) { dial in
+                    Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
+                }
+            }
+            .lineLimit(1)
+            ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
         }
     }
 

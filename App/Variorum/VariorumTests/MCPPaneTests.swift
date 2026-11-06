@@ -133,10 +133,11 @@ struct MCPPaneTests {
         // JUSTIFIED EDIT, the ritual): the Clients tab's row joins —
         // "client"/"clients" land there (PROVISIONAL P-VX281-R2-1 (b)).
         // VX-874 (A JUSTIFIED EDIT, the ritual): the trail dial's row joins,
-        // below the show dial, above the tabs.
+        // under the Activity tab's log — the last tab (never above the tabs:
+        // the fresh-pane geometry row below).
         #expect(AppSettingsView.rowIDsRendered[.mcp]
-                    == ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients",
-                        "mcpOpenBook"],
+                    == ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook",
+                        "mcpTrailDial"],
                 "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
         #expect(SettingsCatalog.title("mcpServer") == "Enable the MCP server")
         for word in ["mcp", "claude", "claude code", "open book"] {

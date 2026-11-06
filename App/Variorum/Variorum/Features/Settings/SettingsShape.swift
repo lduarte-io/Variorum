@@ -403,8 +403,9 @@ nonisolated enum SettingsCatalog {
             keywords: ["show", "show in app", "navigate", "move", "jump", "offer", "never", "mcp", "ai"]),
         // VX-874 (her ruling (4) — "TWO off switches … ONE control with three
         // states", home Settings ▸ MCP): THE TRAIL DIAL — what the sidebar's AI
-        // section draws; its row sits above the tabs beside the show dial, so a
-        // finding lands on no tab. Blurb and keywords are search words; no
+        // section draws; its row sits under the Activity tab's log (never above
+        // the tabs — VX-281's fresh-pane geometry), so a finding opens Activity
+        // (`MCPPaneTab.holding`). Blurb and keywords are search words; no
         // "activity" (the Activity tab keeps that word's first finding), no
         // "ask", "open" or "client" (the show dial's rule).
         SettingsRow(

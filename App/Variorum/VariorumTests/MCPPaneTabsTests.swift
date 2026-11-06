@@ -235,10 +235,11 @@ struct MCPPaneTabsTests {
         // VX-281 ladder R1-4 (A JUSTIFIED EDIT, the ritual): Connect's row joins.
         // Ladder R2-3 (A JUSTIFIED EDIT, the ritual): the Clients tab's row joins.
         // VX-874 (A JUSTIFIED EDIT, the ritual): the trail dial's row joins,
-        // below the show dial, above the tabs.
+        // under the Activity tab's log — the last tab (never above the tabs:
+        // the fresh-pane geometry row below).
         #expect(AppSettingsView.rowIDsRendered[.mcp]
-                    == ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients",
-                        "mcpOpenBook"],
+                    == ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook",
+                        "mcpTrailDial"],
                 "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpConnect")) == .connect)
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpClients")) == .clients)

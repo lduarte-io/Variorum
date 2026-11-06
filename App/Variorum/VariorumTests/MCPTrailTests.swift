@@ -699,12 +699,30 @@ struct MCPTrailHandDoorTests {
     /// nothing while a client's ask STILL lands as its one-press bottom-bar
     /// offer (the separate road, untouched) and the trail still records it;
     /// notices off draws the ask alone.
+    ///
+    /// **THE WINDOW'S RED, RE-SEEDED (A JUSTIFIED EDIT — the batch 3 record's
+    /// "THE CLOSING WINDOW'S TWO REDS, TRACED", red 2):** the first run went red
+    /// at the second `standing` check because the rig's server switch was OFF
+    /// with no connection — every snapshot's `reconcileServer()` then runs its
+    /// OFF arm (`stopServer` → `adoptConnected([])`) and VX-676's disconnect
+    /// rule ends any standing ask: the dial's write re-landed the snapshot, the
+    /// HARNESS ended the ask. In the app an ask stands only while its client is
+    /// connected over a running host, where reconcile returns before touching
+    /// the connected set. So the house fixture for exactly this trap
+    /// (`MCPShowOfferFacesTests.afterTheToastFadesTheAskHoldsTheQuietLine`): the
+    /// switch ON, the first snapshot heard, the asking client connected — and
+    /// the claim is tested as worded, the SAME ask standing across both dial
+    /// writes. Assertions unchanged, plus the same-ask check.
     @Test func theDialFiltersTheSectionAndTheOfferRoadIsUntouched() async throws {
         try await withSession { (session: AppSession, db: AppDatabase) async throws in
             let post = try session.operations.createPost(title: "draft")
             let book = try session.operations.createReading(name: "lessons", kind: .book)
+            try session.operations.setMCPSwitch(.server, on: true)
             let rig = Rig(session)
             defer { rig.door.detach() }
+            let heard = await eventually { rig.door.snapshot.enabled }
+            try #require(heard, "fixture: the door adopted its first snapshot — the server ON")
+            rig.door.previewConnected(["claude-code"])  // the asking client, as the host would report it
             let seenDefault = await eventually { rig.door.snapshot.trailDial == .everything }
             #expect(seenDefault && rig.door.trailDial == .everything, "everything on, the default")
 
@@ -713,9 +731,10 @@ struct MCPTrailHandDoorTests {
             let stored = try await db.read { try Queries.mcpTrailDial($0) }
             #expect(off && stored == .off, "the act writes the store; the door holds it")
             rig.door.landReceipt(receipt(note: post.id, title: "draft"))
-            let verdict = await rig.door.agentShow(MCPShowRequest(
+            let request = MCPShowRequest(
                 target: .book(bookID: book.id, sectionID: nil), clientName: "claude-code", title: "lessons",
-                dial: .ask))
+                dial: .ask)
+            let verdict = await rig.door.agentShow(request)
             #expect(verdict == .offer && session.status.standing != nil, "the offer road is untouched")
             #expect(rig.entries.count == 2, "the trail still records")
             #expect(rig.door.trail.trail.drawnRowCount(showing: rig.door.trailDial) == 0, "fully off draws nothing")
@@ -726,6 +745,7 @@ struct MCPTrailHandDoorTests {
             let drawn = rig.door.trail.trail.groups(showing: rig.door.trailDial).flatMap(\.entries).map(\.place)
             #expect(drawn == ["book:\(book.id)"], "notices off: the ask alone")
             #expect(session.status.standing != nil, "still standing")
+            #expect(rig.door.showOffer?.request == request, "the SAME ask, across both dial writes")
         }
     }
 
@@ -750,13 +770,26 @@ struct MCPTrailHandDoorTests {
         }
     }
 
-    /// Settings ▸ MCP: the dial's row sits above the tabs below the show dial,
-    /// her three words in her order, the line and its whole text.
-    @Test func theTrailDialIsSettingsMCPsRowBelowTheShowDial() {
+    /// Settings ▸ MCP: the dial's row sits under the ACTIVITY tab's log — never
+    /// above the tabs, where a row pushes a fresh pane's Connect code block out
+    /// of sight (VX-281's geometry row, `MCPPaneTabsTests.aFreshPaneOpensOnConnect…`
+    /// — the closing window's red, fixed by this placement); a search finding
+    /// opens that tab; her three words in her order, the line and its whole text.
+    @Test func theTrailDialIsSettingsMCPsRowOnTheActivityTab() throws {
         #expect(SettingsCatalog.title("mcpTrailDial") == MCPPaneCopy.trailDialTitle)
         let rendered = AppSettingsView.rowIDsRendered[.mcp] ?? []
-        #expect(Array(rendered.prefix(3)) == ["mcpServer", "mcpShowDial", "mcpTrailDial"])
-        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil, "above the tabs")
+        #expect(rendered.last == "mcpTrailDial", "the last tab's row")
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == .activity,
+                "a finding opens the Activity tab")
+        #expect(MCPPaneTab.offered(sharing: false).contains(.activity), "a tab every library offers")
+        let pane = try String(
+            contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/MCP/MCPPane.swift"), encoding: .utf8)
+        let picker = "Picker(SettingsCatalog.title(\"mcpTrailDial\")"
+        let activity = try #require(pane.range(of: "@ViewBuilder private var activityTab: some View {"))
+        let tabs = try #require(pane.range(of: "switch shownTab {"))
+        #expect(pane[activity.upperBound...].contains(picker), "the picker is the Activity tab's")
+        #expect(!pane[..<tabs.lowerBound].contains(picker), "never in the sections above the tabs")
         #expect(MCPTrailDial.allCases.map(MCPPaneCopy.trailDialChoice) == ["Everything on", "Notices off", "Fully off"])
         #expect(!MCPPaneCopy.trailDialTitle.contains("AI"), "settings-class wording: client, never AI (VX-272)")
         #expect(MCPPaneCopy.trailDialDetail.contains(MCPPaneCopy.showDialTitle),
