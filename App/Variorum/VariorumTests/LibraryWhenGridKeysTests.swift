@@ -38,19 +38,6 @@ final class WhenPopoverDriver {
     var shown = false
 }
 
-/// **Where an unclaimed key ARRIVES** (the W10 rig's dismissal guard): a plain
-/// responder that records every `keyDown` it is sent — no text system between
-/// the window's dispatch and the observable. The rig's offscreen field editor
-/// does not act on a dispatched key the way a real field does (measured twice:
-/// the guard's caret never moved in the test host, while the live walk's did —
-/// "ferrXy"), so the guard reads the key's ARRIVAL, which is exactly its claim:
-/// nothing in the dismissed face took it.
-final class KeyArrivalRecorder: NSView {
-    private(set) var keyCodes: [UInt16] = []
-    override var acceptsFirstResponder: Bool { true }
-    override func keyDown(with event: NSEvent) { keyCodes.append(event.keyCode) }
-}
-
 /// **The door's real shape:** an anchor in the PARENT window presenting the
 /// face WITH its keys (`keyed`) through SwiftUI's `.popover` — whose window
 /// AppKit makes a CHILD of the parent, the parent keeping key status (VX-179's
@@ -362,28 +349,28 @@ struct LibraryWhenGridKeysPopoverTests {
         await turns()
     }
 
-    /// **W10's state, modelled (RED ON OLD — VX-98's walk).** The Library's
-    /// search field holds the caret in the MAIN window; `when ▾` opens the
-    /// face in SwiftUI's own `.popover`, whose window is a child of the main
-    /// one — and the main window stays KEY, so the keyboard's events are
-    /// ADDRESSED TO THE PARENT (VX-179's F-W-4). Keys posted to the parent:
-    /// → shows the keyboard's day, → moves it, ⏎ presses it — and the field
-    /// keeps the parent's keyboard throughout (the grid never takes the caret).
-    /// RED ON OLD, twice over (exactly the walk: no ring, no movement, the
-    /// sentence unchanged — three issues, the first three expectations after
-    /// the premises): at the first build the monitor claimed only keys
-    /// addressed to its OWN window; at `50752340f` it claimed where the key is
-    /// delivered but yielded every key to "text holding the keyboard" — the
-    /// popover's window answers the PARENT's field editor as its own first
-    /// responder (measured, the W10 probe). The earlier mounted pin passed
-    /// because its rig made the face's own window key, which the live popover
-    /// never is.
-    /// The dismissal leg is a GUARD (green on both trees): a dismissed
-    /// popover's face is never torn down, and it must never claim the main
-    /// window's keys afterwards — the arrow is the field's again.
-    @Test func keysAddressedToTheKeyParentReachTheGridAndTheFieldKeepsTheCaret() async throws {
-        var picked: [LibraryDayRange] = []
-        let open = Self.popover(range: nil, now: try Self.now(), onPick: { picked.append($0) })
+    /// The face presented the PRODUCT's way, in W10's state: an off-display
+    /// parent window whose field (the Library search field's stand-in) holds
+    /// the keyboard, an anchor in it presenting `face.keyed` through SwiftUI's
+    /// own `.popover` — a child window of the parent, the parent keeping key
+    /// status (VX-179's F-W-4). Premises fail by name.
+    struct Presented {
+        let driver: WhenPopoverDriver
+        let parent: NSWindow
+        let popoverWindow: NSWindow
+        let field: NSTextField
+        let editor: NSTextView
+
+        @MainActor
+        func close() {
+            driver.shown = false
+            parent.orderOut(nil)
+            parent.contentView = nil
+            parent.close()
+        }
+    }
+
+    private static func present(_ face: LibraryWhenPopover) async throws -> Presented {
         let driver = WhenPopoverDriver()
         let parent = NSWindow(
             contentRect: NSRect(x: -20_000, y: -20_000, width: 320, height: 240),
@@ -393,73 +380,138 @@ struct LibraryWhenGridKeysPopoverTests {
         // A plain container — the anchor's host and the field side by side
         // (never a subview added into a hosting view).
         let container = NSView(frame: NSRect(x: 0, y: 0, width: 320, height: 240))
-        let hosting = NSHostingView(rootView: WhenPopoverAnchor(driver: driver, face: open.view))
+        let hosting = NSHostingView(rootView: WhenPopoverAnchor(driver: driver, face: face))
         hosting.frame = NSRect(x: 0, y: 40, width: 320, height: 200)
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
         field.stringValue = "harbour"
         container.addSubview(hosting)
         container.addSubview(field)
-        let recorder = KeyArrivalRecorder(frame: NSRect(x: 220, y: 0, width: 40, height: 24))
-        container.addSubview(recorder)
         parent.contentView = container
         let before = Set(NSApp.windows.map(ObjectIdentifier.init))
         parent.orderFront(nil)  // off every display
-        defer {
-            driver.shown = false
-            parent.orderOut(nil)
-            parent.contentView = nil
-            parent.close()
-        }
-        // Premise: this host ROUTES a key addressed to the parent to the
-        // parent's first responder (the guard below reads exactly that road).
-        parent.makeFirstResponder(recorder)
-        await Self.turns()
-        await Self.post(0, "a", to: parent)
-        try #require(recorder.keyCodes == [0],
-                     "premise: a key addressed to the parent arrives at its first responder in this host")
         parent.makeFirstResponder(field)
-        await Self.turns()
-        let editor = try #require(parent.firstResponder as? NSTextView,
-                                  "premise: the search field's stand-in holds the parent's keyboard")
+        await turns()
+        guard let editor = parent.firstResponder as? NSTextView else {
+            parent.orderOut(nil)
+            throw PresentationPremise("the search field's stand-in holds the parent's keyboard")
+        }
         editor.setSelectedRange(NSRange(location: 7, length: 0))
-
         driver.shown = true
-        await Self.turns(60)
-        let popoverWindow = try #require(NSApp.windows.first {
+        await turns(60)
+        guard let popoverWindow = NSApp.windows.first(where: {
             !before.contains(ObjectIdentifier($0)) && $0 !== parent && $0.isVisible
-        }, "premise: the popover is up")
+        }) else {
+            parent.orderOut(nil)
+            throw PresentationPremise("the popover is up")
+        }
         popoverWindow.alphaValue = 0
-        try #require(popoverWindow.parent === parent,
-                     "premise: the popover's window is a CHILD of the window it hangs from")
-        try #require(NSApp.keyWindow == nil || NSApp.keyWindow === parent,
-                     "premise: the parent is key (or the inactive host has none) — never the popover's own window")
+        let presented = Presented(
+            driver: driver, parent: parent, popoverWindow: popoverWindow, field: field, editor: editor)
+        guard popoverWindow.parent === parent else {
+            presented.close()
+            throw PresentationPremise("the popover's window is a CHILD of the window it hangs from")
+        }
+        guard NSApp.keyWindow == nil || NSApp.keyWindow === parent else {
+            presented.close()
+            throw PresentationPremise("the parent is key (or the inactive host has none) — never the popover's own window")
+        }
+        return presented
+    }
 
-        await Self.post(LibraryWhenGridKeys.rightArrowKeyCode, "\u{F703}", to: parent)
+    struct PresentationPremise: Error, CustomStringConvertible {
+        let description: String
+        init(_ premise: String) { description = "premise: " + premise }
+    }
+
+    /// **W10's state, modelled (RED ON OLD — VX-98's walk).** The Library's
+    /// search field holds the caret in the MAIN window; `when ▾` opens the
+    /// face in SwiftUI's own `.popover`, whose window is a child of the main
+    /// one — and the main window stays KEY, so the keyboard's events are
+    /// ADDRESSED TO THE PARENT (VX-179's F-W-4). Keys posted to the parent:
+    /// → shows the keyboard's day, → moves it, ⏎ presses it — and the field
+    /// keeps the parent's keyboard and its words throughout (the grid never
+    /// takes the caret).
+    /// RED ON OLD, twice over (exactly the walk: no ring, no movement, the
+    /// sentence unchanged — three issues, the three keyboard-day
+    /// expectations): at the first build the monitor claimed only keys
+    /// addressed to its OWN window; at `50752340f` it claimed where the key is
+    /// delivered but yielded every key to "text holding the keyboard" — the
+    /// popover's window answers the PARENT's field editor as its own first
+    /// responder (measured, the W10 probe). The earlier mounted pin passed
+    /// because its rig made the face's own window key, which the live popover
+    /// never is.
+    /// (The END-TO-END dismissal claim — after the close her field's arrows
+    /// are hers again — is NOT modelled here: three offscreen modelings each
+    /// met a different host-routing quirk, the last proving this host routes
+    /// a parent-addressed key nowhere (A-819-B3-rig). Its proof of record is
+    /// the live walk's "ferrXy" probe; the lifecycle half is
+    /// `aDismissedPopoversGridStopsListening` below.)
+    @Test func keysAddressedToTheKeyParentReachTheGridAndTheFieldKeepsTheCaret() async throws {
+        var picked: [LibraryDayRange] = []
+        let open = Self.popover(range: nil, now: try Self.now(), onPick: { picked.append($0) })
+        let shown = try await Self.present(open.view)
+        defer { shown.close() }
+
+        await Self.post(LibraryWhenGridKeys.rightArrowKeyCode, "\u{F703}", to: shown.parent)
         #expect(open.keyDay == "2026-10-07", "→ addressed to the key parent reached the grid: today's ring")
-        await Self.post(LibraryWhenGridKeys.rightArrowKeyCode, "\u{F703}", to: parent)
+        await Self.post(LibraryWhenGridKeys.rightArrowKeyCode, "\u{F703}", to: shown.parent)
         #expect(open.keyDay == "2026-10-08", "→ again moved it")
-        await Self.post(LibraryWhenGridKeys.returnKeyCode, "\r", to: parent)
+        await Self.post(LibraryWhenGridKeys.returnKeyCode, "\r", to: shown.parent)
         #expect(picked == [try #require(LibraryDayRange(day: "2026-10-08"))], "⏎ pressed the keyboard's day")
-        #expect(parent.firstResponder === editor, "the grid never took the keyboard: the field keeps the caret")
-        #expect(field.stringValue == "harbour", "…and its words")
+        #expect(shown.parent.firstResponder === shown.editor,
+                "the grid never took the keyboard: the field keeps the caret")
+        #expect(shown.field.stringValue == "harbour", "…and its words")
+    }
 
-        // GUARD — the dismissed popover's face stays alive, and listens no more:
-        // an arrow and a letter addressed to the parent ARRIVE at the parent's
-        // first responder, unclaimed (the live walk's "ferrXy" — her field's
-        // caret moved and the letter landed inside the word — read here as the
-        // keys' arrival, `KeyArrivalRecorder`'s note says why).
-        let held = open.keyDay
-        let picks = picked.count
-        driver.shown = false
+    /// The door's own listening state, read without key routing: the
+    /// monitor view's two handles (the key monitor, the `willClose` observer).
+    private static func handles(of view: LibraryWhenKeyMonitor.MonitorView) -> (monitor: Bool, observer: Bool)? {
+        func isSet(_ label: String) -> Bool? {
+            guard let child = Mirror(reflecting: view).children.first(where: { $0.label == label }) else {
+                return nil
+            }
+            // An optional's mirror has one child when it holds a value.
+            return !Mirror(reflecting: child.value).children.isEmpty
+        }
+        guard let monitor = isSet("monitor"), let observer = isSet("hostClosing") else { return nil }
+        return (monitor, observer)
+    }
+
+    private static func monitorViews(in view: NSView) -> [LibraryWhenKeyMonitor.MonitorView] {
+        ((view as? LibraryWhenKeyMonitor.MonitorView).map { [$0] } ?? []) + view.subviews.flatMap(monitorViews)
+    }
+
+    /// **A dismissed popover's grid stops listening — the LIFECYCLE half**
+    /// (A-819-B3-rig, in place of the unmodelable end-to-end dismissal leg).
+    /// SwiftUI never tears a dismissed popover's content down (VX-179's
+    /// measurement), so the face's key monitor would outlive the popover and
+    /// keep consulting the main window's keys; its popover's `willClose`
+    /// deregisters it. Read as the DOOR's own state — the monitor view's key
+    /// monitor and `willClose` observer, installed while the popover is up and
+    /// both gone once it closed — and, as the belt, the claim rule answering
+    /// "no claim" for the face's now-hidden window. No key routing involved.
+    /// RED ON OLD at `972c0a74e` (no release then: the monitor survived the
+    /// close); GREEN from `50752340f` on.
+    @Test func aDismissedPopoversGridStopsListening() async throws {
+        let open = Self.popover(range: nil, now: try Self.now())
+        let shown = try await Self.present(open.view)
+        defer { shown.close() }
+        let content = try #require(shown.popoverWindow.contentView, "premise: the popover has content")
+        let views = Self.monitorViews(in: content)
+        try #require(views.count == 1, "premise: one key monitor view in the face (found \(views.count))")
+        let view = views[0]
+        let up = try #require(Self.handles(of: view), "premise: the door's handles are readable")
+        #expect(up.monitor && up.observer, "while the popover is up the grid listens")
+
+        shown.driver.shown = false
         await Self.turns(40)
-        parent.makeFirstResponder(recorder)
-        await Self.turns()
-        try #require(parent.firstResponder === recorder, "premise: the recorder holds the parent's keyboard")
-        await Self.post(LibraryWhenGridKeys.leftArrowKeyCode, "\u{F702}", to: parent)
-        await Self.post(7, "x", to: parent)
-        #expect(recorder.keyCodes == [0, LibraryWhenGridKeys.leftArrowKeyCode, 7],
-                "the arrow and the letter reached the parent's first responder — nothing claimed them")
-        #expect(open.keyDay == held && picked.count == picks, "a dismissed popover's grid took no key")
+        #expect(!shown.popoverWindow.isVisible, "premise: the popover closed")
+        let closed = try #require(Self.handles(of: view))
+        #expect(!closed.monitor, "its willClose deregistered the key monitor")
+        #expect(!closed.observer, "…and its own observer")
+        #expect(!CommentPanelKeys.delivers(
+            toPanelIn: shown.popoverWindow, keyWindow: NSApp.keyWindow, eventWindow: shown.parent),
+            "the claim rule answers no claim for the face's hidden window")
     }
 
     // MARK: - The door, mounted
