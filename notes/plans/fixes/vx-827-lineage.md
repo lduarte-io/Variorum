@@ -186,7 +186,7 @@ safety copy before ANY real-store touch (none expected this run).
 | 2 | U2 — VX-810 + VX-815 + VX-778 (rider, her kickoff pick) | DONE (22c3a5a89…06113a96c; adjudication below) |
 | 3 | VX-801 design pass (5 mockup rounds + 2 explorations) | DONE — THE DESIGN MEMO settled at the exploration sitting |
 | 4 | U3a — the Commits face | DONE (fc8880a53…dc7fde0e5; adjudication below) |
-| 4b | U3b — the Lineage face + origin re-aim + panel retirement | NOT-STARTED |
+| 4b | U3b — the Lineage face + origin re-aim + panel retirement | IN PROGRESS (U3b RECORD below) |
 | 5 | Ladder (whole diff) | NOT-STARTED |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
 | 7 | Closeout ritual (tickets, handoff, canon-size, worktree removal) | NOT-STARTED |
@@ -1598,3 +1598,25 @@ green; `Tools/verify-pins` OK. Mac-target RUNS stay owed to the closing window.
 changes, sentence case, the commit vocabulary, one agent + max one Sonnet external, LIVE STATUS
 U3b RECORD from the first commit, "Part of VX-801" commits, no trailers, push each, foreground
 waits, pull first).
+
+## U3b RECORD — the Lineage face, the origin re-aim, the panel's retirement (VX-801's second half)
+
+*Implementer: opus-implementer, fresh session, 2026-11-06. Headless only (`swift build` / `swift test` on the
+package, `xcodebuild build-for-testing` for the App target's compile); no stage, no xcodebuild test, no GUI, no
+store touches. Mac-target pins are written and compiled here and NAMED for the run's closing stage window.*
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| U3b-0 | Preflight read (CLAUDE.md canon · this file: The run, every sitting entry, THE DESIGN MEMO, the U3a RECORD whole, the U3a ADJUDICATION, the U3b BRIEF, Environment traps · SurfaceContracts The app + The note · TEXTKIT2_NOTES whole · both exploration mockups' lineage sections + her composite shot · `Queries/LineageTree.swift` + `LineageTreeTests` · U3a's face (`CommitsFaceModel`, `CommitsFaceView`, `CommitsCompareView`) · the old panel whole (`BlockHistoryPane.swift`) and its every door/host · `Operations.bringBackCommitAsTake` + `insertFanVariant` · `PreservedOriginPutBack` / the tray's put-back roads · the tutorial's lineage lessons · the capability registry + the surface walk) | DONE |
+| U3b-P | PROPOSAL — the cross-block Bring back as take (the brief's hard gate; row semantics sent to the orchestrator before any op code) | SENT — awaiting the ruling |
+| U3b-1 | The family projection (pure, core) + the node counts read + headless suites | NOT-STARTED |
+| U3b-2 | The op, built to the ruling + its exact state-transition suite | GATED on U3b-P |
+| U3b-3 | The Commits face machinery parameterized by block (a relative of the block you came from) — reuse, not a second composition | NOT-STARTED |
+| U3b-4 | The Lineage face (model + view), its doors (lineage › on the face, Lineage in both block ▾ menus), the registry | NOT-STARTED |
+| U3b-5 | The origin door re-aim (G2's ruling) + the old panel's WHOLE retirement + every pin re-pointed or retired by name + the tutorial walk's drive | NOT-STARTED |
+| U3b-6 | The guide sweep (G1's sentences, each listed for #264) | NOT-STARTED |
+| U3b-7 | Walk rows for the Lineage face, appended to the window's walk | NOT-STARTED |
+| U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | NOT-STARTED |
+
