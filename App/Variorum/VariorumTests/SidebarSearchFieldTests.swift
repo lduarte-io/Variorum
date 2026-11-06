@@ -390,6 +390,54 @@ struct SidebarSearchFieldShellTests {
         }
     }
 
+    /// **F4 — ⌘K's palette over the window: the sidebar field drives
+    /// nothing.** While the palette sheet is presented the window keeps the
+    /// sidebar field's editor as its first responder, and the palette's
+    /// "search the Library" road rewrites the Library's question — so the
+    /// field's stale words, back in the window, ended the PALETTE's search on
+    /// esc (and ⏎ handed over the palette's words, not the field's). The
+    /// palette coming up now lets the field's words go — the keyboard has
+    /// left it; the words stay the Library's question, as a click elsewhere
+    /// leaves them — so nothing the palette asks is ended or carried by the
+    /// field (A-819-L1, the smallest honest form).
+    @Test func thePalettesQuestionIsNeverEndedByTheSidebarFieldsStaleWords() async throws {
+        try await withShell { _, router, catalog, window, hosting in
+            defer { window.attachedSheet.map { window.endSheet($0) } }
+            await settle(window, hosting) { Self.sidebarField(hosting) != nil }
+            let field = try #require(Self.sidebarField(hosting))
+            window.makeFirstResponder(field)
+            await settle(window, hosting, timeout: 2) { Self.keyboardField(window) === field }
+            #expect(Self.type("harb", window))
+            await settle(window, hosting) { catalog.query == "harb" && router.workspace.focusedSelection == .library }
+
+            // ⌘K: the palette sheet comes up over the window.
+            router.paletteRequested = true
+            await settle(window, hosting) { window.attachedSheet != nil }
+            let sheet = try #require(window.attachedSheet, "premise: the palette is presented")
+            await settle(window, hosting, timeout: 1) { field.stringValue.isEmpty }
+            #expect(field.stringValue.isEmpty, "the palette coming up lets the field's words go")
+            #expect(catalog.query == "harb", "…and they stay the Library's question")
+
+            // The palette's road asks the Library its own words — what
+            // `RootView.searchLibrary` does, the focused pane already the
+            // Library — and the palette goes.
+            catalog.query = "lamp"
+            await catalog.search()
+            window.endSheet(sheet)
+            await settle(window, hosting) { window.attachedSheet == nil }
+
+            // Back in the window, the caret still in the sidebar field: esc
+            // there must not end the palette's search.
+            try #require(Self.keyboardField(window) === field,
+                         "premise: the sidebar field still holds the window's keyboard")
+            let esc = try #require(Self.key(53, "\u{1B}", window: window))
+            NSApp.sendEvent(esc)
+            await settle(window, hosting, timeout: 0.6)
+            #expect(catalog.query == "lamp", "esc in the field never ends the palette's search")
+            #expect(catalog.searchState.isAnswering, "the Library still answers the palette's words")
+        }
+    }
+
     /// **F3 — a sidebar search is a NEW search.** The sidebar field opens
     /// empty and clears after every handoff, so every question it starts is
     /// a fresh hunt from an empty field — a new search by R-819-2's own word:
