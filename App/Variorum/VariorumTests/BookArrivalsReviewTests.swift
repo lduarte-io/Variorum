@@ -195,12 +195,16 @@ struct BookArrivalsReviewTests {
         #expect(Copy.dismissAllTitle(12) == "Dismiss all 12 waiting notes?")
         #expect(Copy.dismissAllTitle(1) == "Dismiss the waiting note?")
         #expect(Copy.dismissAllConfirm(12) == "Dismiss 12")
-        // Sentence case throughout — never a capital for emphasis.
+        // Sentence case throughout — never a capital for emphasis. Initialisms
+        // are not shouting (the no-shouty-caps rule bans EMPHASIS capitals):
+        // the app's standing ones are allowed, by name, and nothing else.
+        let initialisms: Set<String> = ["AI"]
         for words in [Copy.keysHint, Copy.nothingWaiting, Copy.doneHelp, Copy.addAllHelp,
                       Copy.dismissAllHelp, Copy.dismissedMany(2), Copy.waitOnChoice(["a"])] {
             let shouted = words.split(separator: " ").contains { token in
                 let letters = token.filter(\.isLetter)
                 return letters.count > 1 && letters == letters.uppercased()
+                    && !initialisms.contains(letters)
             }
             #expect(!shouted, "no word in capitals: \(words)")
         }

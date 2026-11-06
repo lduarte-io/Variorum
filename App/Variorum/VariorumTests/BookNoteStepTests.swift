@@ -252,13 +252,25 @@ struct BookNoteStepTests {
     /// The book view installs the monitor, live only in its focused pane, on
     /// its current mode, through the one step act (source — a window's key
     /// monitor is the walk's to press; `BrowserNavKeyMonitor`'s shape).
+    ///
+    /// VX-821 (the VX-808 run, Unit B3 — A JUSTIFIED EDIT): the expected
+    /// `isActive: paneFocused, mode: structure.mode,` is SUPERSEDED by
+    /// `isActive: paneFocused && !arrivals.reviewOpen` — R-808-5's review area
+    /// owns the keys while it shows, so the stepper is off under it. The pin
+    /// now GUARDS that clause inside the monitor's own call (the focused-pane
+    /// half and the mode it reads are unchanged).
     @Test func theBookViewRendersTheMonitorOnItsFocusedPane() throws {
         let text = try String(
             contentsOf: URL(fileURLWithPath: #filePath)
                 .deletingLastPathComponent().deletingLastPathComponent()
                 .appendingPathComponent("Variorum/Features/BookView/BookView.swift"),
             encoding: .utf8)
-        #expect(text.contains("BookNoteStepKeyMonitor(\n                isActive: paneFocused, mode: structure.mode,"))
+        let call = try #require(text.range(of: "BookNoteStepKeyMonitor("), "the book installs the monitor")
+        let arguments = String(text[call.upperBound...].prefix(240))
+        #expect(arguments.contains("isActive: paneFocused && !arrivals.reviewOpen, mode: structure.mode,"),
+                "live only in the focused pane, never under the Arrivals review: \(arguments)")
+        #expect(!text.contains("isActive: paneFocused, mode: structure.mode,"),
+                "the pre-review expression is gone")
         #expect(text.contains("onStep: { stepNote($0) })"))
         #expect(text.contains("BookNoteStepDoor.step(direction, model: model, structure: structure, status: session.status)"))
     }
