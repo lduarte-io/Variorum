@@ -118,6 +118,24 @@ nonisolated enum ArrivalsReviewCopy {
         TimeStampFace.tooltip(labelled: "Waiting since", iso: iso)
     }
 
+    /// **Since when, short.** The form the row's why · since line falls back
+    /// to when the whole form won't fit beside the why (F-2, `ArrivalMetaFit`;
+    /// PROVISIONAL P-808-B3-8): the same stamp without "waiting". nil on the
+    /// same terms as `since`.
+    static func sinceShort(_ iso: String, now: Date) -> String? {
+        guard let date = DateFormatter.variorumISO8601.date(from: iso) else { return nil }
+        return "since " + TimeStampFace.relative(date, now: now)
+    }
+
+    /// **The why's hover**: the why, then the since's whole fact on its own
+    /// line. When the line runs short the since gives way first (F-2), so the
+    /// why's hover keeps the fact the since stops showing. With no stamp, the
+    /// hover is the why alone, byte for byte.
+    static func whyHelp(_ why: String, since sinceHelp: String?) -> String {
+        guard let sinceHelp, !sinceHelp.isEmpty else { return why }
+        return why + "\n" + sinceHelp
+    }
+
     // MARK: The bulk doors' words (A-808-11 F-3 / F-7 — PROVISIONAL P-808-B3-2)
 
     /// Several landed at once — where they went (the single receipt's "at the

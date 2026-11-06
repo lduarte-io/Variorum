@@ -725,6 +725,85 @@ struct BookArrivalsReviewTests {
         #expect(!ArrivalRowFit.stackedArmsIndented(rowWidth: 290, boxWidth: box, armsWidth: arms))
     }
 
+    /// **F-2 (the ladder's round 1; the B3+B4 walk's nit): the WHY gets the
+    /// line's width first and the SINCE gives way first.** At a ~370-pt pane
+    /// the walk saw "Ta…" beside a whole timestamp: the old line fixed the
+    /// since's size and truncated the why. The rule keeps the why's words
+    /// whole while the line holds them. Beside it, the since steps down whole
+    /// → short → dropped and is never cut mid-word, and its whole fact rides
+    /// the why's hover. With room, both show whole. Each threshold is pinned
+    /// to the point.
+    @Test func theWhyWinsTheLineAndTheSinceGivesWayFirst() throws {
+        typealias Fit = ArrivalMetaFit
+        let why: CGFloat = 92  // "Tagged #harbour"
+        let dot: CGFloat = 4
+        let since = (whole: CGFloat(168), short: CGFloat(122))  // "waiting since …" · "since …"
+        let beside = why + 2 * Fit.gap + dot
+        func plan(_ width: CGFloat?) -> Fit.Plan { Fit.plan(width: width, why: why, dot: dot, since: since) }
+
+        // With room, or asked with no width at all: both whole.
+        let roomy = plan(600)
+        #expect(roomy == Fit.Plan(why: why, dot: dot, since: since.whole, form: .whole))
+        #expect(plan(nil) == roomy)
+        #expect(roomy.sinceOffset == beside && roomy.dotOffset == why + Fit.gap)
+        #expect(plan(beside + since.whole) == roomy, "exactly fits: both whole")
+
+        // A point less: the SINCE gives way (to its short form). The why keeps every point.
+        let tighter = plan(beside + since.whole - 1)
+        #expect(tighter == Fit.Plan(why: why, dot: dot, since: since.short, form: .short))
+        #expect(plan(beside + since.short).form == .short, "the short form exactly fits")
+
+        // A point less than that: the since drops whole (never "waiting si…"), the dot
+        // with it. The why is still whole.
+        let dropped = plan(beside + since.short - 1)
+        #expect(dropped == Fit.Plan(why: why, dot: 0, since: 0, form: .dropped))
+        #expect(dropped.width == why)
+
+        // The why truncates ONLY when its own words outrun the line.
+        #expect(plan(why) == dropped, "the why's own width: whole")
+        #expect(plan(why - 1) == Fit.Plan(why: why - 1, dot: 0, since: 0, form: .dropped))
+        #expect(plan(0) == Fit.Plan(why: 0, dot: 0, since: 0, form: .dropped))
+
+        // The walk's line: the old layout left the why 20 pt beside the whole stamp.
+        // Now the why keeps all 92 and the stamp gives way.
+        let walked = plan(20 + 2 * Fit.gap + dot + since.whole)
+        #expect(walked.why == why && walked.form == .dropped, "\(walked)")
+
+        // Never wider than it was offered, at every width; the why gets its
+        // share before the since gets anything.
+        for width in stride(from: CGFloat(0), through: 400, by: 1) {
+            let p = plan(width)
+            #expect(p.width <= width, "\(width): \(p)")
+            #expect(p.since == 0 || p.why == why, "\(width): the since drew while the why was cut")
+        }
+
+        // A since with no why beside it has nothing to give way to: whole, else
+        // short (truncating only past that). It never drops.
+        #expect(Fit.plan(width: 400, why: nil, dot: dot, since: since)
+                == Fit.Plan(why: 0, dot: 0, since: since.whole, form: .whole))
+        #expect(Fit.plan(width: 150, why: nil, dot: dot, since: since)
+                == Fit.Plan(why: 0, dot: 0, since: since.short, form: .short))
+        #expect(Fit.plan(width: 100, why: nil, dot: dot, since: since)
+                == Fit.Plan(why: 0, dot: 0, since: 100, form: .short))
+        // No readable stamp: the why alone.
+        #expect(Fit.plan(width: 400, why: why, dot: dot, since: nil)
+                == Fit.Plan(why: why, dot: 0, since: 0, form: nil))
+
+        // The words (PROVISIONAL P-808-B3-8). The short form is the same stamp
+        // without "waiting". The why's hover carries the since's whole fact,
+        // so a dropped since is still one hover away.
+        let now = Date(timeIntervalSince1970: 1_782_900_000)
+        let then = now.addingTimeInterval(-3 * 86_400)
+        let iso = DateFormatter.variorumISO8601.string(from: then)
+        #expect(ArrivalsReviewCopy.sinceShort(iso, now: now) == "since " + TimeStampFace.relative(then, now: now))
+        #expect(ArrivalsReviewCopy.since(iso, now: now) == "waiting " + (ArrivalsReviewCopy.sinceShort(iso, now: now) ?? ""))
+        #expect(ArrivalsReviewCopy.sinceShort("not a stamp", now: now) == nil)
+        let whole = try #require(ArrivalsReviewCopy.sinceHelp(iso))
+        #expect(ArrivalsReviewCopy.whyHelp("Tagged #harbour", since: whole) == "Tagged #harbour\n" + whole)
+        #expect(ArrivalsReviewCopy.whyHelp("Tagged #harbour", since: nil) == "Tagged #harbour",
+                "no stamp: the why alone, byte for byte")
+    }
+
     /// **W-2 + W-3 mounted (the walk's shape).** An owned book's bell for a
     /// membered note draws THREE arms (Copy In · Move In · Dismiss). At a
     /// narrow pane they sit whole INSIDE the list, under the text; grown back

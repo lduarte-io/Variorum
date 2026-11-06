@@ -319,6 +319,71 @@ nonisolated enum ArrivalRowFit {
     }
 }
 
+// MARK: - One row's why · since line (F-2 — the ladder's round 1)
+
+/// **Which part of a waiting row's WHY · SINCE line gives way when the line
+/// runs short.** Pure, over the line's width and each part's own ideal
+/// width. Her ruling is that every row says WHY it waits and since when. The
+/// why is the main fact, so it gets the width first: it stays whole while the
+/// line can hold it. The SINCE gives way first, in steps: the whole form while
+/// it fits beside the why, then the SHORT form (`ArrivalsReviewCopy.sinceShort`,
+/// "since …"), then nothing. When it shows nothing, its whole fact is on the
+/// why's hover (`ArrivalsReviewCopy.whyHelp`). Beside a why, a stamp is never
+/// cut mid-word ("waiting si…" says nothing). The why truncates only when its
+/// own words are wider than the line, and by then the since is already gone.
+/// The B3+B4 walk's nit (the ladder's F-2): at a ~370-pt pane the why read
+/// "Ta…" beside a whole timestamp, because the old line fixed the since's size
+/// and let the why truncate. The line stays ONE line at every width: the rule
+/// chooses a stamp form, never a shape.
+nonisolated enum ArrivalMetaFit {
+    /// The space on each side of the dot (the old line's `HStack` spacing).
+    static let gap: CGFloat = 6
+
+    /// Which form of the since the line draws.
+    enum SinceForm: Equatable, Sendable { case whole, short, dropped }
+
+    /// The line's plan: each part's width (0 = not drawn) and the since's
+    /// form (nil when the row has no readable stamp).
+    struct Plan: Equatable, Sendable {
+        var why: CGFloat
+        var dot: CGFloat
+        var since: CGFloat
+        var form: SinceForm?
+
+        /// Where the since starts: after the why, the gap, the dot and the
+        /// gap when it sits beside a why; at the line's start when it is alone.
+        var sinceOffset: CGFloat { why > 0 && since > 0 ? why + 2 * ArrivalMetaFit.gap + dot : 0 }
+        /// Where the dot starts (drawn only between a why and a since).
+        var dotOffset: CGFloat { why + ArrivalMetaFit.gap }
+        /// The width the line draws. It is never wider than it was offered.
+        var width: CGFloat { since > 0 ? sinceOffset + since : why }
+    }
+
+    /// - `width`: what the line is offered (nil: every part at its ideal).
+    /// - `why`: the why's ideal width; nil when the row has no why.
+    /// - `dot`: the separator's ideal width.
+    /// - `since`: the ideal widths of the since's two forms; nil when the row
+    ///   has no readable stamp.
+    static func plan(
+        width: CGFloat?, why: CGFloat?, dot: CGFloat, since: (whole: CGFloat, short: CGFloat)?
+    ) -> Plan {
+        let room = max(0, width ?? .infinity)
+        guard let since else {
+            return Plan(why: min(why ?? 0, room), dot: 0, since: 0, form: nil)
+        }
+        guard let why else {
+            // The since alone has nothing to give way to: the whole form while
+            // it fits, else the short form (which truncates only past that).
+            if since.whole <= room { return Plan(why: 0, dot: 0, since: since.whole, form: .whole) }
+            return Plan(why: 0, dot: 0, since: min(since.short, room), form: .short)
+        }
+        let beside = room - why - 2 * gap - dot
+        if since.whole <= beside { return Plan(why: why, dot: dot, since: since.whole, form: .whole) }
+        if since.short <= beside { return Plan(why: why, dot: dot, since: since.short, form: .short) }
+        return Plan(why: min(why, room), dot: 0, since: 0, form: .dropped)
+    }
+}
+
 // MARK: - The header's and the bar's shape (W-4 — the rewalk)
 
 /// **Whether the review's header or bar takes one line or two** — pure, the

@@ -873,6 +873,87 @@ struct ArrivalRowLayout: Layout {
     }
 }
 
+/// **A WAITING ROW'S WHY · SINCE LINE** (F-2 — the ladder's round 1). Its
+/// subviews carry a ROLE: the why, the dot, and the since's two forms (whole
+/// and short). They are laid out at the widths `ArrivalMetaFit.plan` gives
+/// them from each part's own ideal width, so the arithmetic the pin reads IS
+/// the arithmetic the row lays out (the `TakeLabelLayout` precedent). A part
+/// the plan does not draw (the form it did not choose, or the dot beside a
+/// dropped since) is placed with a zero proposal: a `Text` offered nothing
+/// draws nothing and takes no room. Every part is one line in the same font,
+/// so aligning their tops aligns their baselines.
+struct ArrivalMetaLayout: Layout {
+    typealias Role = ArrivalMetaRole
+
+    private func role(_ subview: LayoutSubview) -> Role { subview[ArrivalMetaRoleKey.self] }
+
+    private func plan(width: CGFloat?, subviews: Subviews) -> ArrivalMetaFit.Plan {
+        func ideal(_ wanted: Role) -> CGFloat? {
+            subviews.first { role($0) == wanted }.map { $0.sizeThatFits(.unspecified).width }
+        }
+        let whole = ideal(.sinceWhole)
+        let since = whole.map { (whole: $0, short: ideal(.sinceShort) ?? $0) }
+        return ArrivalMetaFit.plan(width: width, why: ideal(.why), dot: ideal(.dot) ?? 0, since: since)
+    }
+
+    /// Where a part sits and how wide it is, or nil when the plan does not
+    /// draw it.
+    private func frame(_ role: Role, in plan: ArrivalMetaFit.Plan) -> (x: CGFloat, width: CGFloat)? {
+        let drawn: (x: CGFloat, width: CGFloat)
+        switch role {
+        case .why: drawn = (0, plan.why)
+        case .dot: drawn = (plan.dotOffset, plan.dot)
+        case .sinceWhole:
+            guard plan.form == .whole else { return nil }
+            drawn = (plan.sinceOffset, plan.since)
+        case .sinceShort:
+            guard plan.form == .short else { return nil }
+            drawn = (plan.sinceOffset, plan.since)
+        }
+        return drawn.width > 0 ? drawn : nil
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let plan = plan(width: proposal.width, subviews: subviews)
+        var height: CGFloat = 0
+        for subview in subviews {
+            guard let frame = frame(role(subview), in: plan) else { continue }
+            height = max(height, subview.sizeThatFits(ProposedViewSize(width: frame.width, height: nil)).height)
+        }
+        return CGSize(width: plan.width, height: height)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        let plan = plan(width: bounds.width, subviews: subviews)
+        for subview in subviews {
+            guard let frame = frame(role(subview), in: plan) else {
+                subview.place(at: bounds.origin, anchor: .topLeading, proposal: .zero)
+                continue
+            }
+            subview.place(
+                at: CGPoint(x: bounds.minX + frame.x, y: bounds.minY), anchor: .topLeading,
+                proposal: ProposedViewSize(width: frame.width, height: nil))
+        }
+    }
+}
+
+/// A subview's role in `ArrivalMetaLayout`.
+nonisolated enum ArrivalMetaRole: Equatable, Sendable { case why, dot, sinceWhole, sinceShort }
+
+/// The role's layout value (default: the why).
+private nonisolated struct ArrivalMetaRoleKey: LayoutValueKey {
+    static let defaultValue: ArrivalMetaRole = .why
+}
+
+extension View {
+    /// Tag a subview of `ArrivalMetaLayout` with its role.
+    func arrivalMetaRole(_ role: ArrivalMetaRole) -> some View {
+        layoutValue(key: ArrivalMetaRoleKey.self, value: role)
+    }
+}
+
 /// **The waiting rows** — the review area's list (VX-821; the popover's
 /// rows, carried whole). Each row: its checkbox (the pick), the note's NAME
 /// (its first words where it leads with them — a door to the note itself,
@@ -953,7 +1034,10 @@ struct BookArrivalsList: View {
         let picked = model.selection.isPicked(arrival.id)
         let walked = model.selection.walked == arrival.id
         let why = ArrivalsReviewCopy.why(arrival)
-        let since = ArrivalsReviewCopy.since(arrival.waitingSince, now: Date())
+        let now = Date()
+        let since = ArrivalsReviewCopy.since(arrival.waitingSince, now: now)
+        let sinceShort = ArrivalsReviewCopy.sinceShort(arrival.waitingSince, now: now)
+        let sinceHelp = ArrivalsReviewCopy.sinceHelp(arrival.waitingSince)
         let reason = ArrivalsReviewCopy.reason(arrival)
         // W-2 / W-3 (the leg-2 walk): the row's TWO SHAPES by a stable width
         // class — the arms trailing while the row holds them beside the text's
@@ -1005,28 +1089,47 @@ struct BookArrivalsList: View {
                 }
                 // VX-821: WHY it waits and since when. The why line carries
                 // a client's name or a tag path — data, never chrome-cased.
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                // F-2 (the ladder's round 1): the WHY gets the width first
+                // and the SINCE gives way first, whole → short → nothing
+                // (`ArrivalMetaFit`, laid out by `ArrivalMetaLayout`). The
+                // since's whole fact is always on the why's hover too.
+                ArrivalMetaLayout {
                     if let why {
                         Text(why)
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                             .lineLimit(1)
                             .truncationMode(.tail)
-                            .help(why)
+                            .help(ArrivalsReviewCopy.whyHelp(why, since: sinceHelp))
+                            .arrivalMetaRole(.why)
                     }
                     if why != nil, since != nil {
                         Text("\u{00B7}")
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)
                             .lineLimit(1)
+                            .arrivalMetaRole(.dot)
                     }
                     if let since {
                         Text(tokens.chromeLabel(since))
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)
                             .lineLimit(1)
-                            .fixedSize()
-                            .stampHelp(ArrivalsReviewCopy.sinceHelp(arrival.waitingSince))
+                            .stampHelp(sinceHelp)
+                            .arrivalMetaRole(.sinceWhole)
+                    }
+                    if let sinceShort {
+                        // The short form is visual only: it is hidden from
+                        // accessibility so the stamp is never announced
+                        // twice. The whole form keeps its words, and the
+                        // why's hover carries the whole fact at every width.
+                        Text(tokens.chromeLabel(sinceShort))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .stampHelp(sinceHelp)
+                            .accessibilityHidden(true)
+                            .arrivalMetaRole(.sinceShort)
                     }
                 }
                 // A proposal's reason — the client's own prose, quoted.
