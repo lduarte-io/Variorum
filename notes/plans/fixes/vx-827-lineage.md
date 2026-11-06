@@ -1115,3 +1115,16 @@ seed: A = the timeline spine (commits as the primary object, one dot line, takes
 B = the reference's own panel shape (one text pane + one history rail, diff washes, compact).
 The AI-edit use case leads both briefs: "claude just changed something" — note the door's
 edit_take bracket already mints the "before/after ‹client›'s edit" commits the reference names.
+
+**The two explorations landed (2026-11-05 ~21:2x, both on the Air):** A = the timeline spine
+(`explore-A-timeline.html` — one dot line, newest top, take chips filter; the heavy fixture is
+12 lines at rest; Today/This week grouping; the AI pair one line with inline changed words;
+lineage behind the one door reusing v3's map). B = the panel grown (`explore-B-panel.html` — one
+text pane + one rail, ever; the switcher swaps the rail; opens pre-marked against "before
+claude-code's edit"; drawn at panel and full-column widths). Each page carries the inventory and
+her verbatim feedback trail collapsed up top. BOTH agents' reports converge on ONE decisive
+question for her: does history open on ALL takes in one line (A's rest state) or on THE take
+you're in with the rest a press away (B's shape, her reference's "history · this take")?
+Flagged provisional calls riding the pages: A — the inline change preview, Restore on an
+archived take's commit only after Unarchive, the "branched from" footer; B — opening pre-marked
+against the AI's before-commit, rail newest-top vs family older-above.
