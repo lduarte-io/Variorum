@@ -1666,11 +1666,13 @@ enum MCPToolCatalog {
     ])
 
     /// Her rename doors — E13's name guard first; a finished book renames.
+    /// VX-816 (the VX-878 run, batch 3): the guard counts only the book's own
+    /// wing — the sentence says so, so it stays true (VX-197's truth rule).
     static let renameBook = MCPToolDeclaration(
         name: "rename_book", rung: .edit, title: "Rename a book",
         description: """
             Give a book a new name. A name already worn (ignoring case) by another live, unarchived \
-            book or gathering that you can read is refused; one you can't read never counts, so it \
+            book or gathering in its wing that you can read is refused; one you can't read never counts, so it \
             can't block the name. A finished or sealed book can still be renamed, and so can a \
             gathering (book_id takes its id; an edit grant on it or its wing). One undo for the author \
             puts the old name back. Returns JSON.

@@ -1443,7 +1443,9 @@ struct PromoteTagsSheet: View {
                     // name, so it carries the same guard the shelf's does
                     // (her round-3 ruling). Inside the runner closure with
                     // the mint, for that guard's own reason.
-                    try ops.assertBookNameIsFree(bookName)
+                    // VX-816: of the wing the mint lands in — Home, where
+                    // `createReading` below puts it (no wing passed).
+                    try ops.assertBookNameIsFree(bookName, inWing: "")
                     return try ops.createReading(
                         name: bookName, kind: .gathering,
                         querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())

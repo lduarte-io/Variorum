@@ -55,7 +55,7 @@ enum BookRowActs {
             guard gathering.kind == .gathering else {
                 throw OperationError.wrongReadingKind(id: gatheringID, expected: .gathering)
             }
-            try ops.assertBookNameIsFree(name)
+            try ops.assertBookNameIsFree(name, inWing: gathering.wingId)  // VX-816: the sibling's wing
             let ruleState = RuleGrammar.read(gathering.querySpec)
             let outflow = try database.read { db in
                 try chosen.map { ids in
