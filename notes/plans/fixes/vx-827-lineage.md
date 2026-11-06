@@ -1328,3 +1328,132 @@ The dev store now carries replaceable walk fixtures from tonight (harbour review
 ferry" notes, a #harbour tag, a bookless "driftglass" note) — fine to reuse or ignore (dev-store
 content is agents' to manage). Merge note: vx-808's B5 touches `MCPToolCatalog.swift` additively
 — still the second merger's resolution.
+
+### U3a-1/2 — the two pure rules (headless, red by not compiling on the pre-change tree)
+
+- **`Sources/VariorumCore/Domain/TextCompare.swift`** — the view-time word compare (OverallModel §8's legal diff:
+  between two already-identified texts, stored nowhere). Tokens = word runs (an apostrophe inside a word belongs
+  to it) · whitespace runs · single other characters; Myers over interned tokens after a common prefix/suffix
+  trim; ONE cleanup — a plain space (never a line break) between two changes joins them when the joined change
+  still replaces words on both sides, so "slowly becomes" → "starts to become" is one struck phrase beside one
+  washed phrase and counts as ONE change. Three run families (`old` struck side, `new` washed side, `unified` for
+  the single pane) each give their text back byte for byte. **P1:** the edit search is bounded by `editBudget`
+  (1,000 token edits); past it the differing middle is ONE coarse change, never a hang (pinned with a 4,000-word
+  wholesale rewrite: 49 ms). `Tests/VariorumCoreTests/TextCompareTests.swift` 16/16 — her reference edit reads
+  as FOUR changes (removed "slowly becomes" · "whole" · "notice" · "really"; added "starts to become" · "see").
+- **`Sources/VariorumCore/Domain/CommitRail.swift`** — the rail as a value: all takes interleaved newest-first by
+  `(created_at, id)` with ONE "now" line (the lead take); `.take(id)` filters and leads with that take's now; the
+  fold is `SavepointRuns` unchanged with ONE amendment (an AI bracket is never quiet for folding); an "after"
+  directly above its own "before" (same take, same client) shares one `pairID` (the wash), a lone bracket its
+  own; archived takes' moments flagged hollow; `selectable` / `step` (the swapper, stops at the ends, skips a
+  run's own line) / `opening` (the newest moment, even inside a fold) / `runHiding` (the run to open so it
+  shows). The bracket names are parsed locally (a Domain rule does not reach up into Operations) and PINNED
+  EQUAL to `Operations.mcpEditCommitNames`. `Tests/VariorumCoreTests/CommitRailTests.swift` 14/14.
+
+### U3a-3/4/5 — the face, Compare, the re-aim (what landed, one pointer per piece)
+
+- **The model** `App/Variorum/Variorum/Features/History/CommitsFaceModel.swift` — the observed read
+  (`Queries.blockHistory` + the shown take via `Queries.mcpShownTake`, flushed first so "now" is now), the filter
+  (all by default), the selection seated by `CommitRail.opening` and kept across snapshots unless its moment is
+  gone, the open runs, the wash (default against now), the pre-split confirm, the rename ask, Compare's boxes,
+  and the acts — `restoreCommit` (flush first, pre-split ask, the VX-431 landing parcel posted as the panel
+  posts it — inert while the face covers the surface), `bringBackCommitAsTake`, `renameCommitPoint` (the seal's
+  standing refusal, the field never opened under one), `restoreVariant` (Put back), `unarchiveVariant`; every
+  receipt and refusal the panel's own constant (`BlockHistoryCopy`, `BlockPastCopy`, `TrayRefusalCopy`). The
+  washes are cached per pair of texts. The face's own words live in ONE home, `CommitsFaceCopy` (PROVISIONAL).
+- **The view** `App/Variorum/Variorum/Features/History/CommitsFaceView.swift` — the crumb (‹ back · the note ·
+  "block N/M" via `BlockLineLabel` · history), the status line, the reading pane (headline = the name else the
+  first words; meta = when · take ✓ · quiet · predates a split; "N changes since" + plain · against now chips;
+  the whole text as ONE selectable `Text` in a scroll — read tier, no editor, P3; the chosen bar on the leading
+  edge when the moment's take is the one the note shows; the foot acts), the rail (the take dropdown — a popover
+  of tinted rows, "all takes" first, archived grouped; "history · all takes / this take"; the dot timeline with a
+  continuous spine, take chips in the all-takes rail, run lines that open in place, the AI pair on a quiet accent
+  wash; the deleted takes at the foot, one line each with Put back), ↑/↓ on the face (`onKeyPress`, the face
+  holding the keyboard), the VX-668-shape DEBUG pin door `CommitsFaceOracle`.
+- **Compare** `App/Variorum/Variorum/Features/History/CommitsCompareView.swift` — ‹ history, two boxes (a moment
+  beside its take now; an AI half sets before · after), each header a `VoicedMenu` swapper over every moment of
+  every take (now + commits, grouped by take), "＋ now" while fewer than three boxes stand and none is a now, ✕ on
+  a third box only; the first box struck against the second, every later box washed against the one before.
+- **The re-aim.** `PostDetailView.historyFace` — the face REPLACES the mode's surface under the masthead (never
+  beside or over a mounted editor: no hidden editor can take a keystroke or a routed act); the open captures the
+  place exactly as a mode switch does (`carryPlaceAcrossModeSwitch`) and drops the one-shot caret/find seeds
+  (17o's R1-1 class); ‹ back clears it and the mode's surface arrives by the mode round trip's own road; any mode
+  request (the current mode included) closes it keeping the open's carry; a direct mode change closes it too.
+  The router's `showBlockHistory` seam now opens the face; NEW `requestOriginHistory` seam (+ `showOriginHistory`
+  registration) keeps the ORIGIN door on the old inspector panel (G2). The three sheet hosts (`CommitBar`,
+  `TakesBottomBar`, `WriteTakesPanel`) present the face on `blockHistoryRequest` (‹ back dismisses) and the old
+  panel on the new `originHistoryRequest` slot (`EditorViewModel`, `TakesViewModel` — the origin door's
+  requests built byte for byte as before). **block ▾ History** on both bars (`CommitBar.historyRowTitle`, the
+  registry verb's short form "History"), the same act as the history word.
+- **The registry.** Four `.surface` acts declared once (`.restoreCommit`, `.bringBackCommitAsTake`,
+  `.compareCommits`, `.renameCommit`) — the panel rendered the three writers undeclared; `CommitsFaceView.
+  surfaceCapabilities` = those four + `.restoreTake` + `.unarchiveTake`; the surface walk carries the face's line
+  (a named JUSTIFIED EDIT in `CapabilityRegistryTests`). `.showBlockHistory`'s declaration is unchanged
+  (`[.bottomBar, .palette]` — block ▾'s row is a second `.bottomBar` render).
+
+### U3a — PROVISIONAL, for #264 (the orchestrator lands QUESTIONS at the merge)
+
+- **P-U3a-1** — the all-takes rail's per-take "now" rows: ONE "now" line, the lead take's (the take the door was
+  pressed in, else the first live take) — exploration A's drawing; every other take's now is one dropdown pick
+  away. Alternatives: a "now" per live take at the top; none in the all-takes rail.
+- **P-U3a-2** — where the face opens: the newest moment among the shown takes (after an AI edit that IS the
+  after-bracket, the before one ↓ down); a fold holding it opens to show it; a block with no moments opens on its
+  now. (The memo's lean, built.)
+- **P-U3a-3** — the wash's default: against now (her composite draws it; "claude just changed something" is the
+  case). Alternative: plain by default.
+- **P-U3a-4** — the fast swapper's keys: ↑ newer · ↓ older, stopping at the ends, stepping over a run's own line;
+  the face holds the keyboard while it stands. (The memo's lean.)
+- **P-U3a-5** — Compare's third box: the door reads "＋ now" and is offered while fewer than three boxes stand
+  and none of them is a now (the take of the last box); only a third box can be put away (✕); with three boxes
+  the middle one washes what arrived against the first (each later box against the one before). Compare carries
+  no acts of its own (the acts live on the face's pane; B drew Restore · Bring back under its before box).
+- **P-U3a-6** — Unarchive's place (the panel's archived-region job, which the memo does not place): the pane's
+  foot offers Unarchive when the shown moment is an ARCHIVED take's "now" (exploration A's head); Restore on an
+  archived take's commit stays rendered and the op answers (the panel's posture).
+- **P-U3a-7** — the AI pair's wash: the voice's accent at 8 % behind both lines, the dots in the accent.
+- **P-U3a-8** — the deleted takes at the rail's foot: one line per deleted take — "deleted take · ‹its words› ·
+  N days left · Put back" (the memo's "count · days left · Put back", per take so each Put back names its take).
+- **P-U3a-9** — the face's own words (`CommitsFaceCopy`): "‹ back", "history", "the take now", "all takes",
+  "history · all takes / this take", "✓ chosen", "locked", "archived", "archived takes", "plain", "against now",
+  "N changes since" / "1 change since" / "no changes since", "Compare", "＋ now", "deleted take", "N takes ▾",
+  "N commits". The acts keep the panel's shipped verbs — "Bring back as a take" (her composite reads "Bring back
+  as take"; the shipped, pinned constant was kept rather than minting a second spelling — her wording pass).
+- **P-U3a-10** — hosts: the full pane in a note's detail; where no detail is (the book's inline editors, the
+  scraps hosts, Write's take panel) the same face rides a sheet (the panel's own two-host rule), ‹ back closing
+  it. In the full pane a Restore lands no wash on a page (no page stands beside the face — the "elsewhere a
+  receipt" arm of VX-431/VX-668's contract); ‹ back returns to the place the open carried.
+- **P-U3a-11** — the crumb's block place reads `BlockLineLabel`'s "block N/M" (the bars' own words; her
+  composite drew "block 2").
+
+### U3a — what is OWED, and to whom
+
+- **U3b / the orchestrator — G1, the tutorial.** Lesson five's "and Came from, the blocks it came out of" and every
+  "Came from in Block History" sentence (listed in G1) re-pointed at the Lineage face when it lands. The
+  history door's help ("…and the block it came out of") and `.showBlockHistory`'s unavailable note ("…and where
+  it came from") become true again the moment the face carries "lineage ›" — left untouched for that reason.
+- **U3b — G2, the origin door + the old panel.** The origin door lands on the Lineage face; then the panel retires
+  whole: `BlockHistoryPane.swift` (`BlockHistoryModel`, `CommitRowView`, `CommitReadingSheet`,
+  `HistoryRegionHeader`, `BlockHistoryPaneOracle`, `CommitRowFace`'s Mac-local half), the inspector's
+  `.blockHistory` case, the router's `requestOriginHistory` seam and both models' `originHistoryRequest` slots
+  (or they re-aim at the Lineage face), and these pins re-pointed again: `BlockHistoryPaneTests`,
+  `BlockHistoryClarityTests`, `BlockHistorySealTests`, `BlockHistoryHostTests` (its first two), `RestoreLanding*Tests`,
+  `CommitsPageLedgerTests`, `BlockHistoryCommitsCaptureTests`, `RecoveryDoorsTests`' came-from arms,
+  `OriginBlockDoorTests`, `WriteTakesPanelRoutedTests`' origin row, and the tutorial walk's
+  `theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack` (drive `CommitsFaceModel.putBackTake` instead).
+  The header's "lineage ›" door (her composite) is U3b's — not drawn here (P-2: no Lineage face to open yet).
+- **The closing stage window — the Mac runs** (suite-level `-only-testing`): `VariorumTests/CommitsFaceModelTests`,
+  `VariorumTests/CommitsFaceDoorsTests`, `VariorumTests/BlockHistoryHostTests`, `VariorumTests/CapabilityRegistryTests`,
+  and the re-pointed `BlockHistoryPaneTests`, `RecoveryDoorsTests`, `OriginBlockDoorTests`,
+  `RestoreLandingInspectorTests`, `WriteTakesPanelRoutedTests`, plus the neighbours the re-aim touches:
+  `RestoreLandingTests`, `RestoreLandingRewriteHopTests`, `BlockHistoryClarityTests`, `BlockHistorySealTests`,
+  `CommitsPageLedgerTests`, `CommandRoutingTests`, `CanvasAndPoolTests`, `ModeSwitchCarryTests`,
+  `TutorialWalkTests`, `ShellChromeTests`, `DeadVocabularyTests`, `CommitVocabularyTests`,
+  `HelperCurrencyTests`.
+- **The walk (the orchestrator's, the closing window — the acceptance gate is USE).** One capture per row, both
+  voices: (1) Write → bar "history" → the face in the full pane on the newest moment; (2) ↑/↓ swaps the pane;
+  (3) plain · against now; (4) the take dropdown → one take → its now leads; archived take → Unarchive; (5) a
+  quiet run opens in place; (6) an AI edit (the door's `edit_take` on a dev-store note) → the face opens on the
+  after, ↓ the before, washed; (7) Compare from the before → before · after → "＋ now" → three boxes, a header
+  re-aimed; (8) Restore / Bring back as a take / Rename / a deleted take's Put back, each receipt; (9) ‹ back →
+  Write exactly where it was; (10) block ▾ ▸ History from Takes; (11) the book's inline editor → the face in a
+  sheet; (12) "See original from…" still opens the old panel (G2, unchanged).
