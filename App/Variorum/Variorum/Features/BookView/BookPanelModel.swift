@@ -68,7 +68,7 @@ nonisolated enum BookPanelCopy {
     static let moveChapterDownVerb = "Move Chapter Down"
     /// 17y B2 (e) — a note re-placed inside its own chapter while the book
     /// reads in a stamp order: what happened, why, and the road out (the
-    /// book view navigator's "order · … ▾" → Manual order → Save as This
+    /// book view masthead's order dial "… ▾" → Manual order → Save as This
     /// Book's Order). Wording PROVISIONAL (13s re-voices).
     static func needsManualOrder(book: String, order: String) -> String {
         "\(quoted(book)) is sorted by \(order), so a note can\u{2019}t be placed by hand "
@@ -531,6 +531,15 @@ final class BookPanelModel {
     /// drawn (a handful); reads `reading`, `wing` and the grants store, never
     /// `container`, so it never wakes at autosave rate.
     private(set) var readingReach: [String: [MCPPlaceReach]] = [:]
+    /// **VX-831 — each listed NOTE's Private mark** (the closed eye beside
+    /// the shared icon on the panel's note rows): `Queries.privateMarksDrawn`
+    /// over the same entry ids — drawn only while a client is approved
+    /// (R-878-K3).
+    private(set) var privateMarks: [String: Queries.PrivateMark] = [:]
+    /// **VX-831 — the named READINGS that wear the mark** (the shown book; a
+    /// gathering never): `Queries.privateBookMarks` over the same ids the
+    /// reading reach holds.
+    private(set) var privateReadingIDs: Set<String> = []
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -602,6 +611,23 @@ final class BookPanelModel {
         await MCPRowReach.hold(session, { try Queries.mcpBookReaches($0, readingIDs: ids) }) { [weak self] value in
             guard let self, self.readingReach != value else { return }
             self.readingReach = value
+        }
+    }
+
+    /// VX-831 — hold the listed notes' Private marks (the view's `.task(id:)`
+    /// on the entry ids, beside the reach's).
+    func holdPrivateMarks(_ ids: [String]) async {
+        await PrivateMarkHold.notes(session, ids) { [weak self] value in
+            guard let self, self.privateMarks != value else { return }
+            self.privateMarks = value
+        }
+    }
+
+    /// VX-831 — hold the named readings' Private marks (beside their reach).
+    func holdReadingPrivateMarks(_ ids: [String]) async {
+        await PrivateMarkHold.books(session, ids) { [weak self] value in
+            guard let self, self.privateReadingIDs != value else { return }
+            self.privateReadingIDs = value
         }
     }
 

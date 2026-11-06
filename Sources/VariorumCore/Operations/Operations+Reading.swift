@@ -997,9 +997,28 @@ extension Operations {
     /// because SQLite's `NOCASE` collation folds ASCII only, and a rule that
     /// silently stopped applying to a non-ASCII name would be worse than no
     /// rule.
-    public func assertBookNameIsFree(_ name: String, excluding readingID: String? = nil) throws {
+    ///
+    /// ── WHICH WING (VX-816) ──────────────────────────────────────────────
+    /// Only the readings of the TARGET'S WING count — wings isolate totally
+    /// (the tag vocabulary is already per-wing), so "Posted" in one wing never
+    /// blocks "posted" in another. A MINT names the wing it lands in (this
+    /// form — every create door states it, so one that forgets does not
+    /// compile); a RENAME checks the book's own wing (`excluding:`).
+    public func assertBookNameIsFree(_ name: String, inWing wingID: String) throws {
         try database.read { db in
-            try requireBookNameFree(db, name, excluding: readingID)
+            try requireBookNameFree(db, name, inWing: wingID)
+        }
+    }
+
+    /// **The RENAME form** (VX-816): the renamed book's OWN wing, as surfaces
+    /// read it (`Queries.effectiveWing(ofReading:)` — a dangling wing is
+    /// Home's), read inside the check; its own row never collides with itself.
+    /// An unknown row checks nothing — the rename's op then refuses it in its
+    /// own words (`readingNotFound`).
+    public func assertBookNameIsFree(_ name: String, excluding readingID: String) throws {
+        try database.read { db in
+            guard let wingID = try Queries.effectiveWing(db, ofReading: readingID) else { return }
+            try requireBookNameFree(db, name, inWing: wingID, excluding: readingID)
         }
     }
 
@@ -1017,12 +1036,20 @@ extension Operations {
     /// VX-259: `counting` narrows the readings that count (nil = every one —
     /// her doors); it is asked only of a collider, so the scan's cost is
     /// unchanged (a shelf, never a corpus).
+    /// VX-816: `inWing` — only the readings of the target's wing count, as
+    /// surfaces read wings (`Queries.wingScope`: a reading whose wing died is
+    /// Home's). On the wire a collider counts only if it is readable AND in
+    /// that wing.
     func requireBookNameFree(
-        _ db: Database, _ name: String, excluding readingID: String? = nil, counting counts: BookNameReach? = nil
+        _ db: Database, _ name: String, inWing wingID: String, excluding readingID: String? = nil,
+        counting counts: BookNameReach? = nil
     ) throws {
         let key = BookNaming.key(name)
+        let scope = Queries.wingScope(column: "wing_id", wingID: wingID)
         let rows = try Row.fetchAll(
-            db, sql: "SELECT id, name FROM reading WHERE deleted_at IS NULL AND archived_at IS NULL")
+            db,
+            sql: "SELECT id, name FROM reading WHERE deleted_at IS NULL AND archived_at IS NULL AND \(scope.sql)",
+            arguments: StatementArguments(scope.arguments))
         for row in rows {
             let id: String = row["id"]
             guard id != readingID else { continue }

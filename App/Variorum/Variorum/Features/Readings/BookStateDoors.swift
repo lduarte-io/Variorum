@@ -348,14 +348,27 @@ nonisolated enum BookStateCopy {
         BookStateConfirm(
             act: .deleteBook, readingID: readingID,
             title: "Delete \(quoted(name))?",
-            lines: [
-                count == 0
-                    ? "Deleting a plain book never touches a note."
-                    : "Deleting a plain book never touches a note \u{2014} its \(notes(count)) "
-                        + "stay where they are, in the Library and any other book.",
-                trashLine,
-            ],
+            lines: [plainBookKeepsItsNotes(count), trashLine],
             list: [], after: [], confirmLabel: "Delete Book")
+    }
+
+    /// **VX-868 — the plain book's lead sentence, both arms** (PROVISIONAL
+    /// wording, her bundle). Lesson 8's first sentence leads; then where the
+    /// notes stay, agreeing with the count — the old "its \(notes(count)) stay
+    /// where they are, in the Library and any other book" read "its 1 note
+    /// stay" with one note, and badly with several (her word, 2026-11-05).
+    static func plainBookKeepsItsNotes(_ count: Int) -> String {
+        let lead = "Deleting a plain book never touches a note"
+        switch count {
+        case 0:
+            return lead + "."
+        case 1:
+            return lead + " \u{2014} the one note in it stays in the Library, and in any other "
+                + "book that holds it."
+        default:
+            return lead + " \u{2014} the \(count) notes in it stay in the Library, and in any other "
+                + "books that hold them."
+        }
     }
 
     /// An OWNED book's TWO-CHOICE confirm (§6): the book only (its notes go

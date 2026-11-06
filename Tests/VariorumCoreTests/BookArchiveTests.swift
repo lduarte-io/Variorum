@@ -585,13 +585,13 @@ struct ArchivedListingTests {
         try withOperations { ops, _ in
             let ideas = try ops.createReading(name: "Ideas", kind: .book)
             #expect(throws: OperationError.duplicateBookName(name: "Ideas")) {
-                try ops.assertBookNameIsFree("ideas")
+                try ops.assertBookNameIsFree("ideas", inWing: "")
             }
             try ops.archiveReading(ideas.id)
-            try ops.assertBookNameIsFree("ideas")
+            try ops.assertBookNameIsFree("ideas", inWing: "")
             try ops.unarchiveReading(ideas.id)
             #expect(throws: OperationError.duplicateBookName(name: "Ideas")) {
-                try ops.assertBookNameIsFree("ideas")
+                try ops.assertBookNameIsFree("ideas", inWing: "")
             }
         }
     }

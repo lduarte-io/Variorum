@@ -206,9 +206,13 @@ struct BookPanelDeclarationTests {
         // VX-268 (A JUSTIFIED EDIT, the same class — VX-281 U2, her kickoff
         // call "the Book Panel's rows … IN"): a note row's ONE shared icon
         // (`.mcpShowSharing`) and its popover's Change… / Revoke.
+        // VX-831 (A JUSTIFIED EDIT, the same class): the Private mark on a
+        // note row (`.markNotePrivate`; its via-book door is the ascent the
+        // row already declares) and on the shown book (`.markBookPrivate`).
         #expect(BookPanelView.surfaceCapabilities == [
             .openBookAtNote, .removeRuleTag, .mcpOpenAsk,
             .mcpShowSharing, .mcpChangeGrant, .mcpRevokeGrant,
+            .markNotePrivate, .markBookPrivate,
         ])
         #expect(CapabilityRegistry.capability(.moveNoteUpInBook).verb == BookPanelCopy.moveNoteUpVerb)
     }

@@ -247,7 +247,7 @@ struct JournalKeeperRepairTests {
         // book's name against the live Journal).
         let notebooks: [(bookID: String, postID: String)] = try a.with { ops, _ in
             try ["Work journal", "2027"].map { name in
-                try ops.assertBookNameIsFree(name)
+                try ops.assertBookNameIsFree(name, inWing: "")
                 // 13i-a: the deliberate door mints the journal TRAIT —
                 // the 'daily' marker is the one daily mint's alone.
                 let book = try ops.createReading(

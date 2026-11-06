@@ -91,7 +91,10 @@ extension Operations {
             try guardian?(db)
             var reading = try liveReading(db, readingID)
             guard reading.name != newName else { return nil }
-            try requireBookNameFree(db, newName, excluding: readingID, counting: reach)
+            // VX-816: the renamed book's own wing, as surfaces read it.
+            try requireBookNameFree(
+                db, newName, inWing: try Queries.effectiveWing(db, ofReading: readingID) ?? "",
+                excluding: readingID, counting: reach)
             let old = reading.name
             reading.name = newName
             reading.updatedAt = date.now

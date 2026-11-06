@@ -73,6 +73,32 @@ nonisolated enum MCPPaneCopy {
         + "\u{2014} otherwise it asks, so you're never moved somewhere new while you were away. Nothing ever "
         + "brings a window forward. Never shows and offers nothing, and the client is told so."
 
+    // MARK: - The trail dial (VX-874 — her ruling (4); PROVISIONAL words, P-874-4 —
+    // her three words are the choices; settings-class wording: "client", never
+    // "AI" (VX-272); no provider (O-4))
+
+    /// The control's row title — the catalog's (`mcpTrailDial`) and the picker's.
+    static let trailDialTitle = "Client activity in the sidebar"
+
+    /// Her three values, in her order (everything on · notices off · fully off).
+    static func trailDialChoice(_ dial: MCPTrailDial) -> String {
+        switch dial {
+        case .everything: "Everything on"
+        case .asksOnly: "Notices off"
+        case .off: "Fully off"
+        }
+    }
+
+    /// The control's one line (its whole text: `trailDialDetail`).
+    static let trailDialSummary = "Notices off keeps only a client\u{2019}s asks to show you something."
+    /// The control's whole text, behind its (i).
+    static let trailDialDetail =
+        "Near the bottom of the sidebar, Variorum lists each place a client showed you or changed this "
+        + "session. Everything on lists both. Notices off lists only a client\u{2019}s asks to show you "
+        + "something that you haven\u{2019}t opened yet \u{2014} what it changed, and what you opened, are "
+        + "left off. Fully off hides the list. This changes only the list \u{2014} an ask to show you "
+        + "something still lands the way \u{201C}\(showDialTitle)\u{201D} says."
+
     // MARK: - The one-line explainers (VX-281 U1 — R-VX184-6)
     //
     // Her ruling: "every explainer cut to one line with the full text behind
@@ -1938,6 +1964,20 @@ nonisolated enum MCPTrailCopy {
     static func detailsHelp(_ entry: MCPTrail.Entry) -> String {
         "What \(entry.clientName) asked or did here"
     }
+
+    // MARK: - VX-874 — her hand on the section (PROVISIONAL P-874-4, her copy pass)
+
+    /// The row's ✕ and its right-click item (`.mcpDismissTrailEntry`) — her
+    /// word ("be dismissable").
+    static let dismissVerb = "Dismiss"
+    /// The ✕'s help: the row goes, nothing else (rail (b)).
+    static let dismissHelp = "Take this off the list \u{2014} nothing else changes"
+    /// The right-click item on every row and header (`.mcpClearTrail`) — her
+    /// word ("a clear all button").
+    static let clearVerb = "Clear All"
+    /// What the dial's right-click twin is called on a header
+    /// (`.mcpSetTrailDial`) — the pane's own title.
+    static var dialVerb: String { MCPPaneCopy.trailDialTitle }
 
     // MARK: - The details popover (her refinement: the client · when it came in · the kind of act ·
     // what it targeted)

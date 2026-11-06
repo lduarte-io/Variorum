@@ -286,7 +286,11 @@ struct WingBookMoveDoorTests {
         // the same act): + `.palette` — ⌘K's Move to Wing on the focused book.
         // VX-632 (A JUSTIFIED EDIT, the same class): + `.menuBar` — ⌥⌘L, the
         // ONE View-menu Move item it shares with the note's act by focus.
-        #expect(CapabilityRegistry.capability(.moveBookToWing).doors == [.contextMenu, .palette, .menuBar])
+        // VX-829 (A JUSTIFIED EDIT, the same class): + `.surface` — the Book
+        // Settings sheet's wing row (`BookSettingsSheet.surfaceCapabilities`).
+        #expect(CapabilityRegistry.capability(.moveBookToWing).doors
+                == [.contextMenu, .palette, .menuBar, .surface])
+        #expect(BookSettingsSheet.surfaceCapabilities.contains(.moveBookToWing))
         #expect(ShellActions.paletteActs.contains(.moveBookToWing))
         #expect(CapabilityRegistry.capability(.moveWingContents).doors == [.surface])
         #expect(CapabilityRegistry.capability(.moveBookToWing).verb == "Move to Wing")

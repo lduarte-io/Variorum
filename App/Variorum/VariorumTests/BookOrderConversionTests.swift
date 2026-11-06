@@ -89,9 +89,15 @@ struct BookOrderConversionTests {
     @Test func anUnlistedStoredPairStillGetsAReadableName() {
         // A book stored with a pair the menu doesn't offer (last-touched
         // ASCENDING, say) must not render a raw enum in chrome.
+        // VX-887 — A JUSTIFIED EDIT (PROVISIONAL D-887-3): the readable name
+        // is now the LIST's own ("Last touched" + the arrow) rather than the
+        // raw value lowercased — the order dial's widest form is counted over
+        // every name (the masthead's stable width), and the raw spelling
+        // ("last major revision ↑") alone kept Terminal's masthead from ever
+        // fitting one line. The claim — readable, never a raw enum — holds.
         #expect(
             BookOrderChoices.label(for: .init(field: .lastTouched, direction: .asc))
-                == "last touched ↑")
+                == "Last touched ↑")
     }
 
     @Test func aSmartBooksStoredOrderIsNotCalledManual() throws {

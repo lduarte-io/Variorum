@@ -2065,6 +2065,39 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: DuplicateBookCopy.unavailableNote,
             availability: always),
+        // VX-829 (the VX-878 run) — THE BOOK ROW'S FOUR UNDECLARED DOORS,
+        // declared at their second renderer (`.renameNote`'s precedent). Each
+        // is drawn by the ONE book row menu table (`BookRowMenuTable`) on both
+        // faces — the Bookcase row and every row beyond it — never the
+        // shelf-placement family. `always` for `.editRule`'s reason: every
+        // renderer carries its book; WHICH books draw them is DATA in the
+        // table (books only; the designation on a journal-trait book), and
+        // the per-book refusals (a taken name, a finished book's extents, a
+        // designee gone meanwhile) are the operations' own, spoken.
+        Capability(
+            id: .renameBook, verb: BookRowMenuCopy.renameVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .manageBookNotes, verb: BookRowMenuCopy.manageNotesVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .setBookExtent, verb: BookRowMenuCopy.extentVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .useAsDailyJournal, verb: BookRowMenuCopy.useAsDailyJournalVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
         // 13i-d U1 — THE BOOKCASE (the sitting record §7, §19–§24). Every act
         // below carries its target on the thing she points at (a shelf name,
         // a section header, a book row), so `always` is honest for
@@ -2390,9 +2423,12 @@ nonisolated enum CapabilityRegistry {
         // book's act through that one item, by focus. On the daily Journal's
         // pane the selector's open-time re-check speaks the op's own refusal
         // (a menu item cannot read the book row synchronously — RB-6).
+        // VX-829 (her ask, 2026-11-04): + `.surface` — the Book Settings
+        // sheet's State section draws the act as its wing row (the sheet
+        // carries its book), from the row door's own `WingBookMoveDoor.drawn`.
         Capability(
             id: .moveBookToWing, verb: WingCopy.moveToWingVerb, scope: .book,
-            doors: [.contextMenu, .palette, .menuBar],
+            doors: [.contextMenu, .palette, .menuBar, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: WingCopy.bookUnavailableNote,
             availability: { ctx in
@@ -2896,6 +2932,29 @@ nonisolated enum CapabilityRegistry {
             doors: [.surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
+        // VX-874 (the VX-878 run, batch 3 — her rulings (1)–(4)) — her hand on
+        // the section: each door carries its row or its section, rendered only
+        // while a row is drawn (P-2), so `always` is honest. PROVISIONAL words
+        // (P-874-4).
+        Capability(
+            id: .mcpDismissTrailEntry, verb: MCPTrailCopy.dismissVerb, scope: .app,
+            doors: [.surface, .contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .mcpClearTrail, verb: MCPTrailCopy.clearVerb, scope: .app,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: MCPTrailCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .mcpSetTrailDial, verb: MCPTrailCopy.dialVerb, scope: .app,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "What the sidebar lists of a client\u{2019}s activity is set in Settings "
+                + "\u{25B8} MCP.",
             availability: always),
         Capability(
             id: .mcpOpenAsk, verb: "Answer\u{2026}", scope: .app,

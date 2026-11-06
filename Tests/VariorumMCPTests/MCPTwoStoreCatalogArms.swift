@@ -134,6 +134,12 @@ extension MCPTwoStoreCatalogServerTests {
             ["wing_id": s(w.studio), "document": s("Imported words.")] },
         CatalogArm(label: "import_document · a book named as a hidden one is", tool: "import_document") { w, _ in
             ["wing_id": s(w.studio), "book": .object(["name": s("Twin import"), "documents": .array([s("One.")])])] },
+        // VX-816 (the VX-878 run, batch 3): the name guard checks the TARGET'S
+        // WING — a book of another wing, readable or hidden, never blocks the
+        // name (both filters compose: readable AND in the wing).
+        CatalogArm(label: "import_document · into Studio, a book named as a readable Home book is (VX-816)",
+                   tool: "import_document") { w, _ in
+            ["wing_id": s(w.studio), "book": .object(["name": s("Doomed"), "documents": .array([s("One.")])])] },
         CatalogArm(label: "apply_tag · card, a new path", tool: "apply_tag") { w, _ in ["note_id": s(w.card), "tag": s("brand-new")] },
         CatalogArm(label: "apply_tag · a hidden note", tool: "apply_tag") { w, _ in ["note_id": s(w.secretNote), "tag": s("x")] },
         // VX-812 (batch 3): the list form — a note it may tag, a note it may
@@ -143,10 +149,19 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "create_book · a name a hidden book wears", tool: "create_book") { w, _ in
             ["name": s("Twin book"), "wing_id": s(w.studio)] },
         CatalogArm(label: "create_book · a hidden wing", tool: "create_book") { w, _ in ["name": s("X"), "wing_id": s(w.attic)] },
+        // VX-816: another wing's book never blocks the name — readable (Home's
+        // "Shared") or hidden (the Attic's book, A's alone).
+        CatalogArm(label: "create_book · in Studio, a name a readable Home book wears (VX-816)", tool: "create_book") { w, _ in
+            ["name": s("Shared"), "wing_id": s(w.studio)] },
+        CatalogArm(label: "create_book · in Studio, a name a hidden wing's book wears (VX-816)", tool: "create_book") { w, _ in
+            ["name": s("Attic book"), "wing_id": s(w.studio)] },
         CatalogArm(label: "create_gathering · a name a hidden book wears", tool: "create_gathering") { w, _ in
             ["name": s("Twin gathering"), "wing_id": s(w.studio), "rule": .object(["tag": s("idea")])] },
         CatalogArm(label: "create_gathering · a hidden wing", tool: "create_gathering") { w, _ in
             ["name": s("G"), "wing_id": s(w.attic), "rule": .object(["star": .bool(true)])] },
+        CatalogArm(label: "create_gathering · in Studio, a name a readable Home book wears (VX-816)",
+                   tool: "create_gathering") { w, _ in
+            ["name": s("Capped"), "wing_id": s(w.studio), "rule": .object(["tag": s("idea")])] },
         CatalogArm(label: "add_note_to_book · a hidden note", tool: "add_note_to_book") { w, _ in
             ["note_id": s(w.secretNote), "book_id": s(w.shared)] },
         CatalogArm(label: "add_note_to_book · into a hidden book", tool: "add_note_to_book") { w, _ in
@@ -277,6 +292,10 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "delete_lens · a hidden lens", tool: "delete_lens") { w, _ in ["lens_id": s(w.secretLens)] },
         CatalogArm(label: "rename_book · toward a name a hidden book wears", tool: "rename_book") { w, _ in
             ["book_id": s(w.studioBook), "name": s("Twin rename")] },
+        // VX-816: the renamed book's OWN wing — another wing's readable book
+        // never blocks the name (the hidden case is create_book's arm above).
+        CatalogArm(label: "rename_book · toward a name a readable Home book wears (VX-816)", tool: "rename_book") { w, _ in
+            ["book_id": s(w.studioBook), "name": s("Capped too")] },
         CatalogArm(label: "rename_book · a hidden book", tool: "rename_book") { w, _ in ["book_id": s(w.vault), "name": s("x")] },
         CatalogArm(label: "move_note_in_book · second to the start", tool: "move_note_in_book") { w, _ in
             ["book_id": s(w.shared), "note_id": s(w.second), "at": s("start")] },

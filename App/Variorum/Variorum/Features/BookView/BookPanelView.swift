@@ -33,6 +33,9 @@ struct BookPanelView: View {
         + MCPAskGlyph.surfaceCapabilities
         // VX-268: the ONE shared icon on a note row and its popover's doors.
         + MCPSharedIcon.surfaceCapabilities
+        // VX-831: the Private mark on a note row and on the shown book (its
+        // via-book door is the ascent, `.openBookAtNote`, already the row's).
+        + [.markNotePrivate, .markBookPrivate]
 
     let session: AppSession
     let postID: String
@@ -120,6 +123,14 @@ struct BookPanelView: View {
         .task(id: namedReadings(shown)) {
             await model.holdReadingReach(namedReadings(shown))
         }
+        // VX-831: the Private marks of the same notes and the same named
+        // readings — drawn only while a client is approved (R-878-K3).
+        .task(id: model.entryIDs(for: shown?.id)) {
+            await model.holdPrivateMarks(model.entryIDs(for: shown?.id))
+        }
+        .task(id: namedReadings(shown)) {
+            await model.holdReadingPrivateMarks(namedReadings(shown))
+        }
     }
 
     /// VX-354 — the readings whose marks the panel draws now (the pure
@@ -160,7 +171,7 @@ struct BookPanelView: View {
                     .truncationMode(.tail)
             }
             // VX-354: the shown book wears its marks, as its Bookcase row does.
-            if let shown { readingMarks(shown.id) }
+            if let shown { readingMarks(shown) }
             Spacer(minLength: 4)
             if let onClose {
                 Button(BookPanelCopy.close) { onClose() }
@@ -372,10 +383,18 @@ struct BookPanelView: View {
     /// pins). **VX-330:** the collapsed one-note chapter row is its note's row,
     /// so it wears this same pair from the same reads — the note's reach is
     /// already one of `entryIDs` (the hold is unchanged; nothing new is read).
+    /// **VX-831:** the Private mark sits between the two (the masthead's
+    /// order — shared, Private, a waiting ask), from the entry ids' own held
+    /// marks; the collapsed one-note chapter row wears it by the same rule.
     @ViewBuilder
     private func noteMarks(for line: BookPanelBrain.Line) -> some View {
         if let noteID = BookPanelBrain.markedNote(line) {
             MCPSharedIcon(reaches: model.reach[noteID] ?? [], tokens: tokens)
+            PrivateMarkView(
+                door: PrivateMarkFace.note(
+                    model.privateMarks[noteID], badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                    .map { PrivateMarkDoor(mark: $0, subjectID: noteID, session: session) },
+                tokens: tokens)
             MCPAskGlyph(.note(noteID), tokens: tokens)
         }
     }
@@ -391,10 +410,18 @@ struct BookPanelView: View {
     /// `MCPAskQueue.target`, PROVISIONAL MB-17), so this one glyph marks a
     /// waiting ask on a gathering exactly as on a book, as on the Bookcase.
     /// Each mark is its own button: the name's own press never fires for them.
+    /// **VX-831:** a BOOK's own Private mark between the two (a gathering
+    /// never wears it — the facts never name one).
     @ViewBuilder
-    private func readingMarks(_ readingID: String) -> some View {
-        MCPSharedIcon(reaches: model.readingReach[readingID] ?? [], tokens: tokens)
-        MCPAskGlyph(.book(readingID), tokens: tokens)
+    private func readingMarks(_ reading: Reading) -> some View {
+        MCPSharedIcon(reaches: model.readingReach[reading.id] ?? [], tokens: tokens)
+        PrivateMarkView(
+            door: PrivateMarkFace.book(
+                marked: model.privateReadingIDs.contains(reading.id),
+                badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                .map { PrivateMarkDoor(mark: $0, subjectID: reading.id, subjectName: reading.name, session: session) },
+            tokens: tokens)
+        MCPAskGlyph(.book(reading.id), tokens: tokens)
     }
 
     /// The open note's mark — the voice's own selection marker (the
@@ -504,7 +531,7 @@ struct BookPanelView: View {
                             .help(BookPanelCopy.openGatheringHelp(gathering.name))
                             // VX-354: the gathering's marks, right after its
                             // name (the Bookcase row's seat).
-                            readingMarks(gathering.id)
+                            readingMarks(gathering)
                             Spacer(minLength: 4)
                             // §20: a gathering holds no membership — its
                             // honest door is the tag the note wears.

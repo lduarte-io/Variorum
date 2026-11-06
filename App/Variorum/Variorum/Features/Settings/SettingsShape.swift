@@ -401,6 +401,18 @@ nonisolated enum SettingsCatalog {
             // No "ask", "open" or "client": Waiting, the open book and Clients
             // keep those words' first findings (the rank's catalog-order tie).
             keywords: ["show", "show in app", "navigate", "move", "jump", "offer", "never", "mcp", "ai"]),
+        // VX-874 (her ruling (4) — "TWO off switches … ONE control with three
+        // states", home Settings ▸ MCP): THE TRAIL DIAL — what the sidebar's AI
+        // section draws; its row sits under the Activity tab's log (never above
+        // the tabs — VX-281's fresh-pane geometry), so a finding opens Activity
+        // (`MCPPaneTab.holding`). Blurb and keywords are search words; no
+        // "activity" (the Activity tab keeps that word's first finding), no
+        // "ask", "open" or "client" (the show dial's rule).
+        SettingsRow(
+            id: "mcpTrailDial", pane: .mcp, title: MCPPaneCopy.trailDialTitle,
+            blurb: "What the sidebar lists of what a client showed you or changed this session: "
+                + "everything, only its asks to show you something, or nothing.",
+            keywords: ["sidebar", "notices", "list", "trail", "hide", "off", "navigation", "mcp", "ai"]),
         // 13n-c U4 — WAITING (arrival X): where a client's ask waits besides
         // its icon; ⌥⌘, opens the pane there.
         SettingsRow(

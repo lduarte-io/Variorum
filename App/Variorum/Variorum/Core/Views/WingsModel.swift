@@ -107,10 +107,19 @@ final class WingsModel {
         [Row(id: "", name: WingWords.home)] + wings.map { Row(id: $0.id, name: $0.name) }
     }
 
-    /// The wings a note in `wingID` can move or copy to (every other row) —
-    /// empty when only one library exists, so the doors are not drawn (P-2).
+    /// The wings a note or book in `wingID` can move or copy to (every other
+    /// row) — empty when only one library exists, so the doors are not drawn
+    /// (P-2).
+    ///
+    /// VX-878 ladder F1: `wingID` is read as surfaces read it (R-13ia-2 — an
+    /// id naming no live wing is Home's: `Queries.wingScope`,
+    /// `Queries.effectiveWing`, this model's own `name(of:)`), so a book whose
+    /// wing died — a stored, dangling `wing_id` — is never offered Home, where
+    /// it already lives. One heal for every face that hands in a stored id
+    /// (the book rows, Book Settings' wing row, the note-title menu, ⌘K).
     func destinations(from wingID: String) -> [Row] {
-        rows.filter { $0.id != wingID }
+        let effective = wings.contains { $0.id == wingID } ? wingID : ""
+        return rows.filter { $0.id != effective }
     }
 
     // MARK: - The switcher's acts

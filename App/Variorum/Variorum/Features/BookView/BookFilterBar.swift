@@ -207,9 +207,16 @@ enum BookFilterDoor {
             session.status.refuse("A gathering needs a name.")
             return nil
         }
+        let database = session.database
         do {
             let saved = try await session.runner.run { ops in
-                try ops.assertBookNameIsFree(trimmed)
+                // VX-816: the gathering lands beside its book, in the book's
+                // wing (`saveFilterAsGathering`), so the name is checked there;
+                // a book gone since refuses in the op's own words.
+                guard let source = try database.read({ try Queries.reading($0, id: readingID) }) else {
+                    throw OperationError.readingNotFound(id: readingID)
+                }
+                try ops.assertBookNameIsFree(trimmed, inWing: source.wingId)
                 return try ops.saveFilterAsGathering(readingID, filter: filter, name: trimmed)
             }
             session.status.receipt(BookFilterCopy.saved(saved.reading.name))

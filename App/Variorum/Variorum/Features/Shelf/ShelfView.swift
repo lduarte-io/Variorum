@@ -31,34 +31,18 @@ import VariorumCore
 
 struct ShelfView: View {
     /// The REGISTRY capabilities this view's book menu renders (P-1's walk).
-    /// The menu's other items (Rename…, Manage Notes…, Length & Extent…)
-    /// are the shelf's own book-management vocabulary and were never
-    /// registry acts. 13i-b U3 adds the rule editor's door (gatherings AND
-    /// books) and the two strengthening doors (gatherings). 13i-c U3 adds
-    /// the six STATE doors (Finish/Reopen joined the registry with them —
-    /// the settings sheet renders them too) and the Trash door, drawn from
-    /// the declaration it now shares with the rule editor's gathering gate.
-    /// 13i-d U1 adds the Bookcase's three book doors: Move to Shelf ▸ and
-    /// my order's Send to Top / Send to Bottom (§20, §24).
-    static let contextMenuCapabilities: [CapabilityID] = [
-        .toggleStar, .editRule, .bindIntoBook, .makeBookFromGathering,
-    ] + BookStateDoorSet.all + [.deleteBook]
-        // 13n-c U3 (VX-156 item 2): "Share with AI…" — THE grant sheet
-        // pre-filled on this book (VX-272: only with an approved client).
-        + [.mcpShareHere]
-        // 13i-c U4: Duplicate Book… (§6 — shallow or with copies; an owned
-        // book with copies only).
-        + [.duplicateBook]
-        + [.moveBookToShelf, .sendBookToTop, .sendBookToBottom]
-        // 13i-d U3 — the Collecting pane's second road (the sitting record
-        // §4): the book row reaches its settings sheet.
-        + [.openBookSettings]
-        // 13i-d U5b — Move to Wing ▸ (R-13id-6 item 9): books AND gatherings.
-        + [.moveBookToWing]
-        // 13i-e U2 — Archive beside Delete (R-13ie-1…4; `BookArchiveDoorSet`
-        // — on the daily Journal too since VX-436). Unarchive is not this
-        // menu's: an archived book is never on the Bookcase.
-        + [.archiveBook]
+    /// VX-829 (the VX-878 run): the book row menu is ONE table with two faces
+    /// (`BookRowMenuTable` — `Core/Views/BookRowMenu.swift`); this is its
+    /// Bookcase face, the source the face beyond the Bookcase derives from
+    /// (minus the shelf-placement family). Its history: 13f W4 the star;
+    /// 13i-b U3 the rule editor and the two strengthening doors; 13i-c U3 the
+    /// six state doors and Delete; 13i-c U4 Duplicate; 13i-d U1 Move to Shelf
+    /// ▸ and my order's Send to Top / Bottom; 13i-d U3 Book Settings…; 13i-d
+    /// U5b Move to Wing ▸; 13i-e U2 Archive; 13n-c U3 Share with AI…; VX-829
+    /// the four doors that were never declared (Rename…, Manage Notes…, Length
+    /// & Extent…, Use as Daily Journal). Unarchive is not this face's: an
+    /// archived book is never on the Bookcase.
+    static let contextMenuCapabilities: [CapabilityID] = BookRowMenuTable.capabilities(.bookcase)
 
     /// 13n-a (R-13n-8): the board's FILE DROP is the import door's second
     /// renderer — a folder dropped here becomes a book, a document a note.
@@ -67,6 +51,8 @@ struct ShelfView: View {
         + MCPSharedIcon.surfaceCapabilities
         // 13n-c U4: a book row's pending-ask glyph.
         + MCPAskGlyph.surfaceCapabilities
+        // VX-831: a book row's Private mark (the closed eye).
+        + PrivateMarkView.bookSurfaceCapabilities
 
     let session: AppSession
     let model: ShelfViewModel
@@ -119,29 +105,14 @@ struct ShelfView: View {
     /// VX-561: the New Book sheet's choice, acted on at its dismissal (nil =
     /// cancelled — nothing is minted).
     @State private var newBookChoice: NewBookSheet.Choice?
-    @State private var renameTarget: Reading?
-    @State private var manageTarget: Reading?
-    /// 13i-b U3: the rule editor — the sheet's item IS its model, so the
-    /// draft can never be rebuilt under her by a shelf re-render.
-    @State private var ruleEditor: RuleEditorModel?
-    @State private var extentTarget: Reading?
-    /// 13i-b U3: the BIND door's sheet item — and it carries its count
-    /// (F-U2-3: the old door kept the count in a separate `@State` that the
-    /// sheet's closure read from a stale snapshot, promising "0 notes").
-    @State private var bindOffer: BindOffer?
-    /// 13i-c U3: the SPAWN door's sheet — its item carries the gathering,
-    /// the name and the outflow PREFILL.
-    @State private var spawnOffer: SpawnOffer?
+    // VX-829: the book row menu's sheets — Rename, Manage Notes…, the rule
+    // editor, Length & Extent…, Duplicate Book…, the bind and spawn sheets,
+    // Book Settings… and the book move's confirm — are the ONE brain's now
+    // (`model.rowDoors`, hosted below by `.bookRowDoors`), shared with every
+    // book row beyond the Bookcase.
     /// 13i-c U3 (R-13ic-4): the MINT sheet — a gathering is made WITH its
     /// rule. The sheet's item is the mint-mode editor (it carries the name).
     @State private var mintEditor: RuleEditorModel?
-    /// 13i-c U4: Duplicate Book…'s prompt — its item is the book it is FOR.
-    @State private var duplicateOffer: DuplicateBookOffer?
-    /// 13i-d U3 — the BOOK SETTINGS sheet, opened from the row (§4). Its item
-    /// arrives LOADED (`BookSettingsTarget.load`); the sheet's Edit… hands
-    /// the rule editor back here and opens it once the sheet is gone (W-1).
-    @State private var settingsTarget: BookSettingsTarget?
-    @State private var pendingRuleEditor: RuleEditorModel?
     // 13i-d U1 — the shelf doors' prompts (the strip asks; this view owns
     // the presentation, the `BookStateDoors` shape).
     @State private var newShelfPresented = false
@@ -149,8 +120,6 @@ struct ShelfView: View {
     @State private var renameShelfTarget: Shelf?
     @State private var glyphTarget: Shelf?
     @State private var deleteShelfTarget: Shelf?
-    /// 13i-d U5b — the book move's confirm (its item IS the act's preview).
-    @State private var bookMoveAsk: WingsModel.BookMoveAsk?
     /// The book row a dragged BOOK hovers over in "my order" (the insertion
     /// hairline), and the section header a book hovers over (re-shelve).
     @State private var rowDropTarget: String?
@@ -329,8 +298,11 @@ struct ShelfView: View {
         .task { await model.refreshAggregates() }
         // 13n-c U3 (VX-271): the shared icons' held half.
         .task { await model.watchSharing() }
+        // VX-831: the board's books' Private marks, held over its rows.
+        .task(id: model.bookIDs) { await model.holdPrivateMarks(model.bookIDs) }
         #if DEBUG
-        .onAppear { BindDoorProbe.openShelfDoor = { openBindOffer($0) } }
+        // VX-829: the bind door is the one brain's (`model.rowDoors`).
+        .onAppear { BindDoorProbe.openShelfDoor = { reading in Task { await model.rowDoors.openBind(reading) } } }
         .onDisappear { BookcaseRowOracle.release(owner: oracleOwner) }
         #endif
         // VX-561 (the VX-805 run): the New Book dialog is a SHEET with a drawn
@@ -345,23 +317,6 @@ struct ShelfView: View {
                 shelfLine: model.mintShelfID.flatMap { id in model.shelves.first { $0.id == id } }
                     .map { "It lands on \u{201C}\($0.name)\u{201D}, the shelf you're looking at. " } ?? "",
                 onChoose: { newBookChoice = $0 })
-        }
-        .alert(
-            "Rename Book",
-            isPresented: Binding(
-                get: { renameTarget != nil },
-                set: { if !$0 { renameTarget = nil } }),
-            presenting: renameTarget
-        ) { reading in
-            TextField("Name", text: $nameField)
-            Button("Rename") {
-                let name = nameField
-                Task {
-                    await readings.rename(reading.id, to: name)
-                    if let error = readings.lastError { model.refuse(error) }
-                }
-            }
-            Button("Cancel", role: .cancel) {}
         }
         // 13i-d U1 — the shelf prompts.
         .alert("New Shelf", isPresented: $newShelfPresented) {
@@ -408,64 +363,24 @@ struct ShelfView: View {
                 Task { await model.setGlyph(shelf.id, glyph: glyph) }
             }
         }
-        .sheet(item: $manageTarget) { reading in
-            ManageReadingPostsSheet(session: session, model: readings, reading: reading)
-        }
-        // 13i-b U3 walk finding F-U3-1: the board's tags column and word
-        // counts are ONE-SHOT aggregates; a saved rule changes what a
-        // gathering shows, so the row refreshes when the editor closes.
-        .sheet(item: $ruleEditor, onDismiss: {
-            Task { await model.refreshAggregates() }
-        }) { editor in
-            RuleEditorSheet(model: editor)
-        }
-        // 13i-d U3 — the Book Settings sheet from the row (the same sheet the
-        // book's gear opens). Its Edit… is handed back and opens the rule
-        // editor AFTER this sheet dismisses (W-1's rule, the book view's).
-        .sheet(item: $settingsTarget, onDismiss: {
-            Task { await model.refreshAggregates() }
-            if let next = pendingRuleEditor {
-                pendingRuleEditor = nil
-                ruleEditor = next
-            }
-        }) { target in
-            BookSettingsHost(target: target) { editor in pendingRuleEditor = editor }
-        }
         .sheet(item: $mintEditor, onDismiss: {
             Task { await model.refreshAggregates() }
         }) { editor in
             MintGatheringSheet(model: editor, readings: readings)
         }
-        .sheet(item: $extentTarget) { reading in
-            BookExtentSheet(model: model, reading: reading)
-        }
-        // 13i-c U4 — DUPLICATE BOOK… (§6).
-        .sheet(item: $duplicateOffer, onDismiss: {
-            Task { await model.refreshAggregates() }
-        }) { offer in
-            DuplicateBookSheet(session: session, offer: offer)
-        }
-        .sheet(item: $bindOffer) { offer in
-            BindIntoBookSheet(offer: offer) { ownedNotes in
-                Task { await model.bind(offer.reading.id, ownedNotes: ownedNotes) }
-            }
-        }
         // 13i-c U3: the STATE doors' confirms — the one presentation road the
         // settings sheet shares.
         .bookStateConfirms(model.stateDoors)
-        // 13i-d U5b — the book move's counting confirm (R-13id-6).
-        .wingBookMoveConfirm($bookMoveAsk, wings: wings) {
-            Task { await model.refreshAggregates() }
-        }
+        // VX-829 — THE BOOK ROW MENU'S SHEETS, the one brain's (`model.rowDoors`
+        // — Rename, Manage Notes…, the rule editor, Book Settings…, Length &
+        // Extent…, Duplicate Book…, the bind and spawn sheets, the book move's
+        // counting confirm), hosted exactly as on every book row beyond the
+        // Bookcase; its landings re-read the board's one-shot aggregates (the
+        // dismissals' F-U3-1 refresh). The state confirms are hosted above.
+        .bookRowDoors(model.rowDoors, hostsStateConfirms: false)
         // 13i-c U4 (§4 row 17): the row drop's ownership choice.
         .membershipChoices(model.membershipDoors) { _ in
             Task { await model.refreshAggregates() }
-        }
-        // 13i-c U3 — THE SPAWN SHEET.
-        .sheet(item: $spawnOffer) { offer in
-            SpawnBookSheet(offer: offer) { name, outflow in
-                Task { await model.spawnBook(from: offer.source.id, named: name, outflow: outflow) }
-            }
         }
     }
 
@@ -727,6 +642,18 @@ struct ShelfView: View {
                         if let reach = model.aiReach[reading.id], !reach.isEmpty {
                             MCPSharedIcon(reaches: reach, tokens: tokens)
                         }
+                        // VX-831: the book's own Private mark — its press
+                        // un-privates it (Book Settings' Private row's op).
+                        PrivateMarkView(
+                            door: PrivateMarkFace.book(
+                                marked: model.privateBookIDs.contains(reading.id),
+                                badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                                .map {
+                                    PrivateMarkDoor(
+                                        mark: $0, subjectID: reading.id, subjectName: reading.name,
+                                        session: session)
+                                },
+                            tokens: tokens)
                         // 13n-c U4 (VX-271's family; arrival X): an ask
                         // waiting on this book — hover names who and what,
                         // her press opens it. Its own button, like the icon.
@@ -829,186 +756,72 @@ struct ShelfView: View {
             + rest
     }
 
-    @ViewBuilder
+    /// **The Bookcase row's menu** — VX-829: the ONE book row menu's Bookcase
+    /// face (`BookRowMenuItems` over `BookRowMenuTable`), the same renderer
+    /// and brain every book row beyond the Bookcase draws, so the two faces
+    /// cannot drift; the board hands in its own facts and the doors no other
+    /// surface has — the shelf-placement family (`shelfPlacementDoor`).
     private func bookMenu(_ book: Queries.ShelfBook) -> some View {
         let reading = book.reading
-        // 13f batch 6 (W4): starring a BOOK — it joins the sidebar's
-        // Starred list. 13i-d U2 ACT 0 (F-U1-2 (A), ruled): this is the
-        // row's ONE star door — the star floats the book atop its shelf AND
-        // lists it in Starred (one truth, both stores written together), so
-        // "Pin to Shelf Top" RETIRES on the Mac (the phone keeps its words
-        // until its catch-up and writes the same truth).
-        if let starDoor {
-            Button(starDoor.title(for: .reading(reading.id))) {
-                starDoor.toggle(.reading(reading.id))
-            }
-        }
-        // 13i-d U1 — MOVE TO SHELF ▸ (the menu road beside the drag — every
-        // shelf of this wing, and Unshelved; the one it is on is omitted).
-        // Ladder A round 1, NIT 3 (P-2): in a shelf-less wing an unshelved
-        // book has nowhere to move — the submenu is not drawn
-        // (`BookcaseBoard.moveToShelfCanAct`, pinned).
         let here = model.shelfKey(of: reading.id)
-        if BookcaseBoard.moveToShelfCanAct(shelfCount: model.shelves.count, here: here) {
+        return BookRowMenuItems(
+            face: .bookcase, readingID: reading.id,
+            facts: BookMenuFacts(
+                reading: reading,
+                // 13n-c U3 (VX-156 item 2): drawn only while an approved client
+                // exists (VX-272) and only on a reading a grant may name (never
+                // the daily Journal or a Private book — the op refuses those,
+                // P-2); VX-189: a gathering's row too.
+                shareable: (mcpShareRoad?.canShare ?? false) && !model.fencedBooks.contains(reading.id),
+                wingDestinations: wings?.destinations(from: reading.wingId).count ?? 0,
+                // Ladder A round 1, NIT 3 (P-2): in a shelf-less wing an
+                // unshelved book has nowhere to move — no submenu.
+                shelfMoveCanAct: BookcaseBoard.moveToShelfCanAct(
+                    shelfCount: model.shelves.count, here: here),
+                // My order's own doors (§20, §24): only in the PLACING mode —
+                // under A–Z or last edited a hand position would not show.
+                placesByHand: model.placesByHand),
+            doors: model.rowDoors, starDoor: starDoor, wings: wings
+        ) { door in
+            shelfPlacementDoor(door, readingID: reading.id, here: here)
+        }
+    }
+
+    /// The Bookcase's own doors — THE SHELF-PLACEMENT FAMILY (13i-d U1, §20,
+    /// §24), drawn where the table places them and nowhere else (her VX-829
+    /// carve-out: "the shelf options don't need to be there").
+    @ViewBuilder
+    private func shelfPlacementDoor(_ door: BookRowDoor, readingID: String, here: String?) -> some View {
+        switch door {
+        case .moveToShelf:
+            // 13i-d U1 — MOVE TO SHELF ▸ (the menu road beside the drag — every
+            // shelf of this wing, and Unshelved; the one it is on is omitted).
             Menu(CapabilityRegistry.capability(.moveBookToShelf).verb) {
                 ForEach(model.shelves, id: \.id) { shelf in
                     if here != shelf.id {
                         Button(ShelfFace.label(shelf)) {
-                            Task { await model.reshelve(reading.id, to: shelf.id) }
+                            Task { await model.reshelve(readingID, to: shelf.id) }
                         }
                     }
                 }
                 if here != BookcaseBoard.unshelvedKey {
                     if !model.shelves.isEmpty { Divider() }
                     Button(BookcaseCopy.unshelvedName) {
-                        Task { await model.reshelve(reading.id, to: nil) }
+                        Task { await model.reshelve(readingID, to: nil) }
                     }
                 }
             }
-        }
-        // 13i-d U5b — MOVE TO WING ▸ (R-13id-6 item 9; her R-13id-4 family):
-        // a book or a gathering to another library, with its notes. The other
-        // wings, Home first; the daily Journal too since VX-435, never while
-        // one library stands alone (`WingBookMoveDoor.drawn` — P-2).
-        if let wings {
-            let others = wings.destinations(from: model.wingID)
-            if WingBookMoveDoor.drawn(reading: reading, destinations: others.count) {
-                Menu(CapabilityRegistry.capability(.moveBookToWing).verb) {
-                    ForEach(others) { row in
-                        Button(row.name) {
-                            Task { bookMoveAsk = await wings.bookMoveAsk(reading: reading, to: row.id) }
-                        }
-                    }
-                }
-            }
-        }
-        // My order's own doors (§20, §24): rendered only in the PLACING mode
-        // — under A–Z or last edited a hand position would not show (P-2).
-        if model.placesByHand {
+        case .sendToTop:
             Button(CapabilityRegistry.capability(.sendBookToTop).verb) {
-                Task { await model.place(reading.id, at: .top) }
+                Task { await model.place(readingID, at: .top) }
             }
+        case .sendToBottom:
             Button(CapabilityRegistry.capability(.sendBookToBottom).verb) {
-                Task { await model.place(reading.id, at: .bottom) }
+                Task { await model.place(readingID, at: .bottom) }
             }
+        default:
+            EmptyView()
         }
-        Divider()
-        Button("Rename\u{2026}") {
-            nameField = reading.name
-            renameTarget = reading
-        }
-        // 13i-d U3 — the Collecting pane's door from the Bookcase (§4).
-        Button(CollectingCopy.openVerb(isBook: reading.kind == .book)) {
-            openSettings(reading.id)
-        }
-        // 13n-c U3 (VX-156 item 2; mockup §2): share THIS book — drawn only
-        // while an approved client exists (VX-272) and only on a reading a
-        // grant may name (never the daily Journal or a Private book — the op
-        // refuses those; P-2). VX-189 (her word 2026-10-28, book parity): a
-        // GATHERING's row draws it too, the sheet opened on the gathering — a
-        // grant place of its own since VX-549 (the fenced set names a stale
-        // gathering's fence as well).
-        if let road = mcpShareRoad, road.canShare, !model.fencedBooks.contains(reading.id) {
-            Button(CapabilityRegistry.capability(.mcpShareHere).verb) {
-                road.open(MCPGrantOpening(place: .reading(reading), origin: .place))
-            }
-        }
-        // 13i-c U4 — DUPLICATE (§6): books only.
-        if reading.kind == .book {
-            Button(DuplicateBookCopy.verb(owned: reading.owned)) {
-                duplicateOffer = DuplicateBookOffer(
-                    readingID: reading.id, name: reading.name, owned: reading.owned)
-            }
-        }
-        // 13i-b U3: the RULE EDITOR's door, for gatherings AND books.
-        Button(CapabilityRegistry.capability(.editRule).verb) {
-            ruleEditor = RuleEditorModel(session: session, readingID: reading.id)
-        }
-        if reading.kind == .book {
-            Button("Manage Notes\u{2026}") { manageTarget = reading }
-        } else {
-            // 13i-b U3 — THE TWO STRENGTHENING DOORS (the sitting record §3).
-            // Bind hides on a finished gathering and both hide on a rule-less
-            // one (P-2 — the op refuses; a door that can't act isn't drawn).
-            let hasRule = RuleGrammar.read(reading.querySpec) != .none
-            if !reading.locked, hasRule {
-                Button(CapabilityRegistry.capability(.bindIntoBook).verb) {
-                    openBindOffer(reading)
-                }
-            }
-            if hasRule {
-                Button(CapabilityRegistry.capability(.makeBookFromGathering).verb) {
-                    Task { spawnOffer = await SpawnOffer.load(session, gathering: reading) }
-                }
-            }
-        }
-        // 13i-d U1 — KnownIssues row 107's SHELF-MENU half (P-13ic-U3-2,
-        // ruled to the sitting record §3's letter: a gathering has NO word
-        // target or capacity): Length & Extent… is a BOOK's door only.
-        if reading.kind == .book {
-            Button("Length & Extent\u{2026}") { extentTarget = reading }
-        }
-        // The designation door is drawn on a journal-trait book of ANY wing
-        // since VX-435 (13i-d U5's Home-only gate retired with the op's
-        // refusal — one Journal per store, in whichever wing it lives).
-        if reading.kind == .book, Queries.hasJournalTrait(reading.profile) {
-            // Round 2, MAJOR 2's re-designation door.
-            Button("Use as Daily Journal") {
-                Task { await model.designateDailyJournal(reading.id) }
-            }
-        }
-        Divider()
-        // 13i-c U3 — THE STATE DOORS, from the one table and named by the
-        // registry. 13i-d U1 (row 107's shelf half): a gathering has no
-        // FINISH (§3) — the door leaves its menu; Reopen stays ONLY on a
-        // gathering that is already (legacy) finished, as its way out
-        // (PROVISIONAL P-13id-U1-9). 13i-d U3 (F-U1-8): that rule now lives
-        // IN the table, which the settings sheet reads too.
-        ForEach(BookStateDoorSet.rendered(for: BookStateFacts(reading)), id: \.self) { act in
-            Button(CapabilityRegistry.capability(act).verb) {
-                Task { await model.stateDoors.open(act, readingID: reading.id) }
-            }
-        }
-        Divider()
-        Button("Export Markdown\u{2026}") { ReadingExport.export(session: session, reading: reading, asPDF: false) }
-        Button("Export PDF\u{2026}") { ReadingExport.export(session: session, reading: reading, asPDF: true) }
-        Divider()
-        // 13i-e U2 — ARCHIVE beside the ONE delete road (13i-c U3/U4: plain /
-        // owned two-choice / gathering confirms), both from the archive table
-        // (P-1): the daily Journal renders Archive and NO Delete (P-2 — the op
-        // refuses it; "it can be archived, never deleted"). Unarchive is the
-        // Archived surface's door (an archived book never reaches this menu).
-        ForEach(BookArchiveDoorSet.rendered(for: BookArchiveFacts(reading))
-            .filter { $0 != .unarchiveBook }, id: \.self) { act in
-            if act == .deleteBook {
-                // VX-611: the verb chosen by the kind (one capability).
-                Button(BookStateCopy.deleteDoorLabel(reading.kind), role: .destructive) {
-                    Task { await model.stateDoors.open(.deleteBook, readingID: reading.id) }
-                }
-            } else {
-                Button(BookStateCopy.archiveDoorLabel(asks: BookStateCopy.archiveAsks(reading))) {
-                    Task { await model.stateDoors.open(act, readingID: reading.id) }
-                }
-            }
-        }
-    }
-
-    /// 13i-d U3 — the settings door's one road: load the book, then present
-    /// with ONE write (a book deleted in between refuses in words).
-    private func openSettings(_ readingID: String) {
-        Task {
-            if let target = await BookSettingsTarget.load(session: session, readingID: readingID) {
-                settingsTarget = target
-            } else {
-                model.refuse(OpsRefusalCopy.message(for: OperationError.readingNotFound(id: readingID)))
-            }
-        }
-    }
-
-    /// The bind door's one road: load the offer (count included), then
-    /// present it with ONE write — the sheet reads everything from its item.
-    private func openBindOffer(_ reading: Reading) {
-        Task { bindOffer = await BindOffer.load(session, reading: reading) }
     }
 
     // MARK: - Quick entry (R3 — the shared bar; Library carries it too)
@@ -1141,57 +954,6 @@ enum ExtentInput: Equatable {
     var intValue: Int? {
         if case .value(let value) = self { return value }
         return nil
-    }
-}
-
-/// The extent faces (word target / post cap — the machinery that existed
-/// since v1 with "no UI face at all", plus v1_11's words unit).
-struct BookExtentSheet: View {
-    let model: ShelfViewModel
-    let reading: Reading
-    @State private var wordTargetField = ""
-    @State private var maxPostsField = ""
-    @State private var parseError: String?
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Length & Extent — “\(reading.name)”").font(.headline)
-            Text("A word target shows progress on the Bookcase; at its end, extend it or start a new book. The note cap refuses further adds when full. Blank clears.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Form {
-                TextField("Word target (e.g. 10000)", text: $wordTargetField)
-                TextField("Note cap (max notes)", text: $maxPostsField)
-            }
-            if let parseError {
-                Text(parseError).font(.caption).alarmVoice()
-            }
-            HStack {
-                Spacer()
-                Button("Cancel") { dismiss() }
-                Button("Save") {
-                    guard let target = ExtentInput.parse(wordTargetField),
-                          let cap = ExtentInput.parse(maxPostsField)
-                    else {
-                        parseError = "Extents are plain positive numbers (e.g. 10000) — nothing was changed."
-                        return
-                    }
-                    Task {
-                        await model.setWordTarget(reading.id, target: target.intValue)
-                        await model.setMaxPosts(reading.id, maxPosts: cap.intValue)
-                        dismiss()
-                    }
-                }
-                .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(16)
-        .frame(minWidth: 380)
-        .onAppear {
-            wordTargetField = reading.wordTarget.map(String.init) ?? ""
-            maxPostsField = reading.maxPosts.map(String.init) ?? ""
-        }
     }
 }
 

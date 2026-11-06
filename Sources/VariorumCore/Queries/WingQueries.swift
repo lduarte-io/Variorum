@@ -196,6 +196,18 @@ extension Queries {
         return try wingIsLive(db, id: stored) ? stored : ""
     }
 
+    /// The wing a reading lives in, as surfaces READ it — the stored id, or
+    /// Home when that id dangles (the rule above; `effectiveWing(ofPost:)`'s
+    /// twin for a book or gathering). nil when the reading is unknown (any
+    /// state — a tombstoned row still has its wing). VX-816: the name guard's
+    /// rename form checks the renamed book's own wing through it.
+    public static func effectiveWing(_ db: Database, ofReading readingID: String) throws -> String? {
+        guard let stored = try String.fetchOne(
+            db, sql: "SELECT wing_id FROM reading WHERE id = ?", arguments: [readingID])
+        else { return nil }
+        return try wingIsLive(db, id: stored) ? stored : ""
+    }
+
     /// A wing's display name: Home for `''`, the row's name while it is live,
     /// nil otherwise (the lineage line and the move confirms speak this).
     public static func wingName(_ db: Database, id: String, home: String = "Home") throws -> String? {

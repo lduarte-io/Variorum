@@ -53,22 +53,70 @@ enum BookOrderChoices {
     ]
 
     /// What to call an order in chrome. Unlisted pairs (a stored
-    /// `entry_date DESC` on a book created before this list, say) still get
-    /// a readable name rather than a raw enum.
+    /// `last_touched ASC` — the wire's `set_book_order` and the mints can
+    /// store any field × direction) still get a readable name rather than a
+    /// raw enum: **VX-887 (PROVISIONAL D-887-3) — in the list's own words**,
+    /// the field's listed name and the arrow ("Last touched ↑", "Major
+    /// revision ↑", "Manual order ↓"). The fallback used to spell the raw
+    /// value lowercased ("last major revision ↑"); counted as the order
+    /// dial's widest form (the mode row's stable width), that spelling alone
+    /// kept Terminal's masthead from ever fitting one line in the navigator.
     static func label(for order: Queries.ReadingOrder) -> String {
         if let known = all.first(where: { $0.order == order }) { return known.label }
         let arrow = order.direction == .desc ? "↓" : "↑"
-        return "\(order.field.rawValue.replacingOccurrences(of: "_", with: " ")) \(arrow)"
+        return "\(fieldName(order.field)) \(arrow)"
+    }
+
+    /// The list's own name for each field (its arrow aside) — the words the
+    /// unlisted pairs compose from. Exhaustive by construction (a new field
+    /// is a compile error here).
+    static func fieldName(_ field: SortField) -> String {
+        switch field {
+        case .manual: "Manual order"
+        case .entryDate: "Entry date"
+        case .createdAt: "Created"
+        case .lastTouched: "Last touched"
+        case .lastMajorRevision: "Major revision"
+        }
+    }
+
+    /// Every field a stored order can name — `sort_field`'s CHECK values
+    /// (AppSpec §7; pinned against them).
+    static let everyField: [SortField] = [.manual, .entryDate, .createdAt, .lastTouched, .lastMajorRevision]
+
+    /// The stored order's name before the book's row has landed.
+    static let unloadedName = "book's order"
+    /// A gathering's `manual` — it has no hand order (below).
+    static let asCollectedName = "as collected"
+
+    /// **Every name the order dial can show** (VX-887): every field ×
+    /// direction (the view order is always one of them; a stored order may be
+    /// any), plus the gathering's "as collected" and the not-yet-loaded
+    /// "book's order" — the set the mode row counts the dial's WIDEST form
+    /// over, so no pick, load or stored order can move the masthead's line
+    /// count.
+    static var everyName: [String] {
+        var names: [String] = []
+        for field in everyField {
+            for direction in [SortDirection.asc, .desc] {
+                let name = label(for: Queries.ReadingOrder(field: field, direction: direction))
+                if !names.contains(name) { names.append(name) }
+            }
+        }
+        for name in [asCollectedName, unloadedName] where !names.contains(name) {
+            names.append(name)
+        }
+        return names
     }
 
     /// A smart book has no hand order at all: `manual` on one falls back to
     /// created-ascending (the ratified Phase 4 rule), so calling it
     /// "manual" would be a small lie in the one place she is choosing.
     static func storedLabel(for reading: Reading?) -> String {
-        guard let reading else { return "book's order" }
+        guard let reading else { return unloadedName }
         let stored = Queries.ReadingOrder(
             field: reading.sortField, direction: reading.sortDir)
-        if reading.kind == .gathering, reading.sortField == .manual { return "as collected" }
+        if reading.kind == .gathering, reading.sortField == .manual { return asCollectedName }
         return label(for: stored)
     }
 }

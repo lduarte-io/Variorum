@@ -14,7 +14,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 | **VX-827 — Umbrella: lineage, both faces** (VX-801 the lineage door — glance popover + the full Blocks surface; VX-817 reverse lineage on the wire; VX-810 list-by-tag + tags/entry_date in the JSON reads; VX-815 the granted-empty note says so). Surfaces: the MCP door (wire reads), Blocks mode + editor chrome, `Queries` (lineage CTE). NO `Sync/`, no custody, no DDL — runs beside the sync-slot efforts; shares `MCP/` files with VX-808's riders, so merges serialize via nov5. | VX-827 · `vx-827-lineage` | `~/dev/variorum-vx-827` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-827-lineage.md`. |
-| **VX-878 — Umbrella: Book doors & faces** (the VX-808 split's no-sync half; eight members by sub-issue listing: VX-802 · VX-804 · VX-816 · VX-829 · VX-831 · VX-858 · VX-868 · VX-874). Surfaces: the Bookcase & books' doors and faces, the Library's book rows, the capability registry, Settings ▸ MCP + the sidebar AI trail, the receipt seam, the book name guard (wire-cited). NO Sync/-custody; no editor seam. | VX-878 · `vx-878-book-doors-faces` | `~/dev/variorum-vx-878` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-878-book-doors-faces.md`; coordinator nov5. |
+| **VX-808 — Umbrella: Arrivals & books** (wave 2's sync-slot effort; twelve members by sub-issue listing: VX-811 · VX-821 · VX-803 · VX-857 · VX-775 · VX-776 · VX-777 · VX-859 · VX-879 · VX-867 · VX-860 · VX-872). **HOLDS THE Sync/-custody SLOT** and carries the wave's ONE SyncSpec §12 lockstep event (`reading_post`'s arrival-provenance + pin columns, one marker bump; mirror deploy HELD for her window). Surfaces: `Sources/VariorumCore/Sync/` (the general book wing mend, the new columns' classification), Persistence migrations + the mirror artifact, Operations (intake/arrivals, the membership pin), the MCP door (bulk propose + riders — SHARES `MCP/` files with VX-827), the Bookcase & books (the Arrivals review face, book-order pins — SHARES book faces with VX-878), the capability registry (three-way: 878 · 827 · us), `AppBootstrap` (VX-860), `ShortcutCatalog` (VX-867). NO editor seam. Fable cold-reviews (Sync/ class). | VX-808 · `vx-808-arrivals-books` | `~/dev/variorum-vx-808` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-808-arrivals-books.md`; coordinator nov5. |
 | **VX-861 — Run: stargazing.tech** (the open-source banner + readme note VX-862, robots + sitemap VX-836, the MCP guide + privacy page catch-up VX-876). SITE REPO ONLY — no app surface, no store, no stage; kept off the site's master so the 1.2 release publish lands there freely. | VX-861 · `vx-861-site-open-source-banner` in `~/dev/stargazing.tech/stargazing-tech` | the Air's site clone · the Air | Live 2026-11-05; record `notes/runs/vx-861-site-open-source-banner.md` in the site repo. |
 | **VX-865 — the /variorum explainers rebuilt in SVG** (the version-control panel's animation; her word 2026-11-05). SITE REPO ONLY — no app surface, no store, no stage; runs beside VX-861 at her word, in its own worktree. | VX-865 · `vx-865-version-control-explainers` | `~/dev/stargazing.tech/stargazing-tech-vx-865` · the Air | Live 2026-11-05; record `notes/runs/vx-865-version-control-explainers.md` in the site repo. |
 | **VX-877 — the Tags explainer** (tags → books → gatherings → reading together, animated, fact-checked; her bake-off vs her social team, her word 2026-11-05). SITE REPO ONLY; a sub-issue of VX-865, its own worktree. | VX-877 · `vx-877-tags-explainer` | `~/dev/stargazing.tech/stargazing-tech-vx-877` · the Air | Live 2026-11-05; record `notes/runs/vx-877-tags-explainer.md` in the site repo. |
@@ -25,19 +25,18 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 ### Latest closeout
 
-**→ VX-853 CLOSED 2026-11-05 — VERIFY-PINS GOES VERSIONS-EQUAL (the record `notes/plans/fixes/vx-853-verify-pins-versions-equal.md`,
-FOR A LATER READER at its top; VX-781's follow-up, same night).** Her P-781-3 ruling (QUESTIONS #260, informed by the
-build-ergonomics survey `notes/plans/vx-781-build-ergonomics-survey.md`): the no-argument tree guard passes a lockfile
-whose pins all match its own commit (identity + version + revision) with a one-line NOTE when only bookkeeping bytes
-changed (the path-dependent originHash — the survey traced it in SwiftPM's source, undocumented upstream); any real pin
-change, duplicate identity, added/removed pin or missing file still fails. The ladder (two opus rounds, same-model)
-earned its keep: round 1 caught the NOTE/DRIFT decision judging the root lockfile against the WORKSPACE's committed
-pins (a pin move could print as harmless — each file now judged against its own commit) and made PinBeltTests (3)
-location-normalizing so the belt's two guards agree; round 2 caught the restore advice's git-index semantics (now
-`git checkout HEAD -- <file>`). Gate: PinBeltTests 3/1 green; the probe matrix across three script generations in the
-commit messages; probe drivers durable in PR #221's body. Her other same-sitting rulings: P-781-4 pin bumps AUTHOR-ONLY
-(CLAUDE.md line landed at the VX-781 close) · VX-854 parked (the lockfile-mode flag belt) · the tool landscape
-(Tuist/XcodeGen/Bazel/merge-drivers) ruled NO for this repo. Born: nothing. Nothing mobile-visible. PR #221, merge 2f68875e3.
+**→ VX-878 CLOSED 2026-11-06 — BOOK DOORS & FACES (the record `notes/plans/fixes/vx-878-book-doors-faces.md`,
+FOR A LATER READER at its top; the VX-808 split's no-sync half, run overnight under /architect-phase, nov5 coordinating).**
+Nine members, four batches, one fable ladder round (no BLOCKER/MAJOR; the F3 dispute resolved reviewer-side — its own
+proposed fix would have broken R-878-K3). The book-row menu is ONE registry table with two derived faces; Book Settings
+gained the wing row; the note-title menu carries the note's own doors; the plain-book delete reads in both arms; a rename
+repaints in place; the book name guard is PER-WING (phone included — MobileSoul PL-69); the Private mark (her closed eye,
+the approved-client gate R-878-K3, the click-door's two arms); the trail's float/dismiss/clear-all/drag + the three-state
+dial on Settings ▸ MCP ▸ Activity (moved there by the window fix after the whole-target gate caught its first seat breaking
+VX-281's pane geometry); the seven-receipt gone-words sweep; the masthead's one-line mode row (R-878-K4 strict). The gate:
+whole-target 6077/1054 + the six-file fix + 92/11 green + phone 852/139; every bug-class pin RUN RED live on its pre-fix
+tree. Born VX-889; VX-855's second sighting commented. Bundle QUESTIONS #264; handoff `notes/handoffs/vx-878-handoff.md`.
+Canon: SurfaceContracts ×6 · MCPSpec ×4 · AppSpec ×2 (135,032/150,000). PR #229, merge 35a98fb6a.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
