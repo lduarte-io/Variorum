@@ -59,8 +59,21 @@ struct MCPDocsTailTests {
                 "the hidden-cause sentence is said to exist: \(move)")
         #expect(MCPWriteTools.moveHiddenCauseWords.contains("beyond your reach"))
 
-        #expect(try description("move_book_to_wing").contains("something beyond your reach holds one of its notes"),
-                "the precedent stands")
+        // A JUSTIFIED EDIT (VX-879 — the VX-808 run, Unit B5; the site review's
+        // B2-F1, verified in code): this pin asserted the precedent's own words,
+        // "nor while something beyond your reach holds one of its notes" — an
+        // OVERCLAIM: a plain book the client can't read never blocks the move
+        // (her body severs that membership — `relocateNote` refuses only a
+        // FINISHED or SEALED holder; `MCPBookWingMoveServerTests` moves past a
+        // hidden plain holder). What refuses is a frozen holder or a shed fence
+        // (A-809-15); the fixed sentence is still said to exist.
+        let book = try description("move_book_to_wing")
+        #expect(book.contains("finished or sealed") && book.contains("a Private book or the daily Journal"),
+                "the two causes that refuse, named: \(book)")
+        #expect(book.contains("beyond your reach, one sentence says so"), "the hidden-cause sentence exists: \(book)")
+        #expect(book.contains("A book you can't read that simply holds one of its notes never stops the move"),
+                "a plain unreadable holder blocks nothing: \(book)")
+        #expect(!book.contains("something beyond your reach holds one of its notes"), "the overclaim is gone: \(book)")
     }
 
     /// R-VX184-3: the instructions stay inside their bound — and this tail

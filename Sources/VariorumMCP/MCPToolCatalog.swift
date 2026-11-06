@@ -1155,7 +1155,9 @@ enum MCPToolCatalog {
             Arrivals stay behind, dismissed — including any you can't read. Needs edit on the book \
             and write new on the wing it goes to. A book can't move while one of its notes is also \
             in a finished or sealed book here (the author reopens that book first), nor while \
-            something beyond your reach holds one of its notes (one sentence says so). A gathering \
+            the move would take one of its notes out of a Private book or the daily Journal; when \
+            the cause is beyond your reach, one sentence says so. A book you can't read that simply \
+            holds one of its notes never stops the move — the note leaves it. A gathering \
             and the daily Journal move only by the author's hand. One undo for the author puts it \
             all back — the books its notes left and the waiting notes too. Returns JSON: where it \
             landed; notes — how many of the notes that came you can read (archived_notes of them \
