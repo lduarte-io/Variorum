@@ -694,3 +694,63 @@ appended to DRAFT CANON DELTAS (you never edit MCPSpec). One agent; at most ONE 
 for EXTERNAL facts, read-only. Pull the branch first — U1's work is on origin. U2 RECORD section
 with LIVE STATUS from the first commit; commit per piece ending "Part of VX-<member>"; no
 trailers; push every commit; foreground waits only.
+
+## U2 RECORD — VX-810 + VX-815 + VX-778 (the read-ergonomics batch)
+
+*Implementer: opus-implementer, fresh session, 2026-11-05. Headless only (`swift build` / `swift test` on the
+package, `xcodebuild build-for-testing` for the App target's compile); no stage, no xcodebuild test, no GUI, no
+store touches.*
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| U2-0 | Preflight read (CLAUDE.md canon · this file's The run / Fence law / Environment traps / U1 RECORD + DRAFT CANON DELTAS / U2 BRIEF · MCPSpec WHOLE · vx-809 FOR A LATER READER · mcp-invisibility-residuals · the three tickets' full descriptions · `MCPReadTools.swift` whole · `MCPToolCatalog.swift`'s read rung + `apply_tag` / `remove_tag` / `replace_tag` / `create_note` · `MCPWriteTools+RemoveTag` / `+TagReplace` · `MCPNoteStructure.read` · the two-store catalog + its arms · `TagQueries` / `TagUsageQueries` · `mcpGrantReachCounts` / `mcpGrantInertFence` / `mcpGrantPlaceTitle` + the pane's client row) | DONE |
+| U2-1 | A — the tag filter's argument convention (the proposal gate) | DONE — NOT ambiguous (below); no proposal sent |
+| U2-2 | B — VX-815's TRACE (a throwaway probe, never committed) | DONE — below |
+| U2-3 | A — core: the tag-wearer listing + batched note tags, with exact-rows and P1 pins | NEXT |
+| U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | — |
+| U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | — |
+| U2-6 | C — VX-778's predicate + its pin (red-on-old) | — |
+| U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) | — |
+| U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | — |
+
+### U2-1 — the tag filter's argument (the proposal gate: NOT ambiguous)
+
+Every tag tool on the wire takes ONE argument `tag`, a PATH string (`apply_tag`, `remove_tag`, `replace_tag`'s
+`tag`/`with`; `create_note`'s `tags` is its array form): `TagPath.segments` normalization, a leading `#` tolerated,
+an empty result refused at the call door in the one sentence ("tag must be a tag path — names joined by /, e.g.
+"percy/pt-en"."), the path resolved in a WING (`remove_tag`: the note's live wing, else Home). No tool takes a tag
+id as an argument. So `list_notes` takes `tag` (a path) in exactly that form — built without a proposal. How the
+path resolves for a LISTING (the one place the convention needs a reading): in the listing's own wing — `wing_id`'s
+wing, a book's or gathering's wing (`Queries.wingScope`, so Home also holds a dangling wing's, as `list_notes`
+lists notes there) — and, for the bare form (every note shared, across wings), in every wing; the subtree exactly
+as the rule grammar's (`Queries.tagSubtree`: the root by id, its wing's tags under its path).
+
+### U2-2 — VX-815's TRACE (why an empty granted note reads as "nothing")
+
+Probe (throwaway `Tests/VariorumMCPTests/U2EmptyProbeServerTests.swift`, deleted, never committed): a READ book
+grant; an untitled empty note, a titled empty note and an untitled note with one blank block in the book; a hidden
+note and an id naming nothing outside it. Answers on the pre-fix tree:
+
+| call | untitled empty | titled empty | one blank block | hidden | missing |
+|---|---|---|---|---|---|
+| `read_note` (Level 0 text) | `""` | `{t:"An empty one"}` | `""` | refusal¹ | refusal¹ |
+| `read_note` `with_ids` | `{"blocks":[],"books":[…],"note_id":…,"title":"2026-06-30"}` | the same shape, titled | one block, its take `"text":""` | refusal¹ | refusal¹ |
+| `export_note` | `""` | `""` | `""` | refusal¹ | refusal¹ |
+
+¹ `isError: true`, "That note isn't shared with this client, or doesn't exist. The author can share it from
+Variorum ▸ Settings ▸ MCP." — byte-identical for hidden and missing (the fence holds).
+
+**The mechanism.** The TEXT forms answer the core's document read verbatim: `read_note`'s Level 0 is
+`Queries.variorumDocumentText` (`MCPReadTools.readNote`, the `else` arm), `export_note` is `Queries.renderedText`.
+For a note with no title, no tags and no words, the document is the EMPTY STRING — and the empty string is exactly
+the core's TOLERANT READ of a note that does not exist ("A missing or tombstoned note reads as an empty document",
+`Queries.variorumDocument`): the nothing-shape. So a granted empty note answers byte-for-byte what the store would
+answer for nothing at all; the agent's "looks exactly like a note I can't reach" is that nothing. **What the trace
+does NOT support:** the WIRE's fence answer was never byte-identical with it — the fence speaks its refusal sentence
+flagged `isError` — so a pin "granted-empty ≠ the fence answer" is GREEN ON BOTH SIDES (recorded as a control, not
+as the fix's red-on-old). The with_ids form is already honest (title, books, `blocks: []`). The red-on-old pin is
+therefore stated against the nothing-shape the trace found: the granted empty note's text answers stop being
+byte-identical with `Queries.variorumDocumentText` of an id naming nothing (`""`), while the fence's hidden-vs-
+missing answers stay byte-identical (the untouchable control — green on both sides by design).
