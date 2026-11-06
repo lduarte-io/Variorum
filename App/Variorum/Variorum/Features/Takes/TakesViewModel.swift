@@ -2529,8 +2529,26 @@ final class TakesViewModel {
     /// The blockID is named EXPLICITLY by the card that raised it — a
     /// right-click never moves the keyboard, so a routed target could name
     /// another card's block (13k K6's lesson, same fix).
+    ///
+    /// **VX-801 (VX-827 U3a):** the history doors now open the Commits face,
+    /// which shows no originals; this door keeps the Block History PANEL
+    /// through its own road (`CommandRouter.requestOriginHistory`, the
+    /// `originHistoryRequest` sheet where no detail is) — Write's twin, left
+    /// as it was until the Lineage face (U3b) is its home (gate G2).
     func revealOriginBlock(ofBlock blockID: String) {
-        requestBlockHistory(blockID: blockID)
+        // The request `requestBlockHistory(blockID:)` built for this door, byte
+        // for byte (the named slot, else the routed target).
+        guard let slot = projection.slots.first(where: { $0.blockID == blockID })
+            ?? commandTargetSlot else {
+            refuse(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: slot.blockID,
+            focusedVariantID: focusedPane?.blockID == slot.blockID
+                ? focusedPane?.variantID : slot.variantID)
+        if session.commandRouter.requestOriginHistory(request) { return }
+        originHistoryRequest = request
     }
 
     /// The ⌘K row's body on the boards: the focused block's original, or the
@@ -2553,6 +2571,10 @@ final class TakesViewModel {
     /// the reasoning; the only difference here is which block is "the one
     /// you're in".
     var blockHistoryRequest: BlockHistoryRequest?
+    /// **VX-801 (VX-827 U3a) — the ORIGIN door's own fallback sheet** (Write's
+    /// twin): `blockHistoryRequest` presents the Commits face now; the origin
+    /// door keeps the panel (gate G2).
+    var originHistoryRequest: BlockHistoryRequest?
 
     func requestBlockHistory(blockID: String? = nil) {
         guard let slot = blockID.flatMap({ id in

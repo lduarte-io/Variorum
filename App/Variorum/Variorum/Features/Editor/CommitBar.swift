@@ -213,6 +213,14 @@ struct CommitBar: View {
         ]
     }
 
+    /// **block ▾'s History row** (VX-801, VX-827 U3a) — the registry's act,
+    /// in the menu's short words ("History", THE DESIGN MEMO's row), one home
+    /// so a truth pin reads what the menu renders. Both bars' block menus
+    /// render it.
+    static var historyRowTitle: String {
+        CapabilityRegistry.capability(.showBlockHistory).menuTitle("History")
+    }
+
     /// The six rows' acts, one switch so the list above and the doors below
     /// cannot drift into a row that fires the wrong gesture.
     private func run(_ id: CapabilityID) {
@@ -252,26 +260,41 @@ struct CommitBar: View {
             CommitBarGeometry.release(owner: oracleOwner)
         }
 #endif
-        // Ledger row 17: the FALLBACK host. The pane's named home is the post
-        // detail's inspector; this editor is also composed where there is no
-        // detail (the scraps hosts, the book spread's inline form), and a door
-        // that cannot act in its context should not have been rendered (P-2).
+        // Ledger row 17: the FALLBACK host. The history door's named home is
+        // the post detail (since VX-801 / VX-827 U3a the COMMITS FACE in its
+        // full pane); this editor is also composed where there is no detail
+        // (the scraps hosts, the book spread's inline form), and a door that
+        // cannot act in its context should not have been rendered (P-2) — so
+        // the same face rides a sheet here, ‹ back closing it.
         .sheet(item: Binding(
             get: { model.blockHistoryRequest },
             set: { model.blockHistoryRequest = $0 })
+        ) { request in
+            CommitsFaceView(
+                session: model.session, request: request,
+                onBack: { model.blockHistoryRequest = nil })
+                .frame(
+                    minWidth: CommitsFaceSheet.minWidth, idealWidth: CommitsFaceSheet.idealWidth,
+                    minHeight: CommitsFaceSheet.minHeight, idealHeight: CommitsFaceSheet.idealHeight)
+        }
+        // VX-801 (VX-827 U3a) — the gate G2: the ORIGIN door keeps the Block
+        // History panel, exactly as it opened before, through its own slot.
+        .sheet(item: Binding(
+            get: { model.originHistoryRequest },
+            set: { model.originHistoryRequest = $0 })
         ) { request in
             BlockHistoryPane(
                 session: model.session, request: request,
                 onOpenTray: { blockID in
                     // No inspector here either, so the tray takes the same
                     // road this pane did — the bar's own sheet host.
-                    model.blockHistoryRequest = nil
+                    model.originHistoryRequest = nil
                     model.trayRequest = TrayRequest(
                         postID: model.postID, revealBlockID: blockID)
                 },
                 // Ledger row 33: the sheet host re-points the same way the
                 // inspector does — a new request in the same slot.
-                onJump: { request in model.blockHistoryRequest = request })
+                onJump: { request in model.originHistoryRequest = request })
         }
         // Rows 16/23: the same fallback host for the Versions listing, and for
         // the same reason — this editor is composed where no inspector exists.
@@ -751,10 +774,17 @@ struct CommitBar: View {
             Button("− Delete this block") {
                 Task { await model.deleteCaretBlock() }
             }
+            // VX-801 (VX-827 U3a) — THE DESIGN MEMO: "The block menu carries
+            // History and Lineage rows" (her v1 sitting: *"when you go into
+            // the block menu that already existed, that it would be there"*).
+            // The History row: the same act as the bar's history word.
+            // (Lineage is the second face's row — U3b.)
+            Divider()
+            Button(Self.historyRowTitle) { model.requestBlockHistory() }
         }
         .help("Everything block-scoped: divide, extract, make block, merge, "
-            + "the two block mints, splitting this block at its newlines, and "
-            + "the two ways to set a block aside")
+            + "the two block mints, splitting this block at its newlines, "
+            + "the two ways to set a block aside, and its history")
     }
 
     /// The flat row's note half: `note ▾`, comments, the newlines chip — and

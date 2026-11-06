@@ -266,17 +266,30 @@ struct WriteTakesPanel: View {
         ) { target in
             CommentsPanel(session: session, blockID: target.blockID)
         }
+        // VX-801 (VX-827 U3a): the history fallback is the Commits face; the
+        // origin door keeps the panel through its own slot (gate G2).
         .sheet(item: Binding(
             get: { model.blockHistoryRequest },
             set: { model.blockHistoryRequest = $0 })
         ) { request in
+            CommitsFaceView(
+                session: session, request: request,
+                onBack: { model.blockHistoryRequest = nil })
+                .frame(
+                    minWidth: CommitsFaceSheet.minWidth, idealWidth: CommitsFaceSheet.idealWidth,
+                    minHeight: CommitsFaceSheet.minHeight, idealHeight: CommitsFaceSheet.idealHeight)
+        }
+        .sheet(item: Binding(
+            get: { model.originHistoryRequest },
+            set: { model.originHistoryRequest = $0 })
+        ) { request in
             BlockHistoryPane(
                 session: session, request: request,
                 onOpenTray: { blockID in
-                    model.blockHistoryRequest = nil
+                    model.originHistoryRequest = nil
                     model.trayRequest = TrayRequest(postID: postID, revealBlockID: blockID)
                 },
-                onJump: { request in model.blockHistoryRequest = request })
+                onJump: { request in model.originHistoryRequest = request })
         }
         .sheet(item: Binding(
             get: { model.trayRequest },

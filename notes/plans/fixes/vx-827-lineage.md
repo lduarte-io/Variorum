@@ -1268,9 +1268,9 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3a-G2 | GATE — the panel's retirement meets doors/jobs the memo does not cover for U3a (FLAGGED below; left as they were) | FLAGGED |
 | U3a-1 | The pure Domain text-compare (`Domain/TextCompare.swift`) + its own suite | DONE — `TextCompareTests` 16/16 headless (a product row: the suite does not compile on the pre-change tree); her reference edit reads as FOUR changes |
 | U3a-2 | The pure rail projection (`Domain/CommitRail.swift` — interleave, folds, AI pair, filter, now row, swapper order, opening selection) + its suite | DONE — `CommitRailTests` 14/14 headless (product row; the bracket names pinned equal to the door's `Operations.mcpEditCommitNames`) |
-| U3a-3 | The Commits face: model + view (reading pane, rail, take dropdown, fast swapper, deleted-takes foot) | NOT-STARTED |
-| U3a-4 | Compare: two boxes + the standing "now" third, each header a swapper, the washes | NOT-STARTED |
-| U3a-5 | The re-aim: every history door opens the face (full pane in the detail, ‹ back; the sheet where no detail is); the block ▾ History row on both bars; the origin door keeps its old panel (G2) | NOT-STARTED |
+| U3a-3 | The Commits face: model + view (reading pane, rail, take dropdown, fast swapper, deleted-takes foot) | BUILT — `Features/History/CommitsFaceModel.swift` + `CommitsFaceView.swift`; compiles (`build-for-testing` green); pins next |
+| U3a-4 | Compare: two boxes + the standing "now" third, each header a swapper, the washes | BUILT — `Features/History/CommitsCompareView.swift` + the model's compare state; compiles |
+| U3a-5 | The re-aim: every history door opens the face (full pane in the detail, ‹ back; the sheet where no detail is); the block ▾ History row on both bars; the origin door keeps its old panel (G2) | BUILT — router seam `requestOriginHistory`; `PostDetailView.historyFace`; the three sheet hosts; both block ▾ menus; compiles |
 | U3a-6 | Registry: the face's acts declared once; the walk extended; every Block-History-class pin re-pointed as a named justified edit; new Mac pins (compiled, named for the window) | NOT-STARTED |
 | U3a-7 | END: headless core suites, `xcodebuild build-for-testing`, the PROVISIONAL list for #264, self-assessment | NOT-STARTED |
 

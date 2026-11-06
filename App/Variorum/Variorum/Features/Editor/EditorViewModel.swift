@@ -155,6 +155,13 @@ final class EditorViewModel {
     /// with ONE observation, which is what makes "the pane is the one home"
     /// a fact about the code rather than a claim in a comment.)*
     var blockHistoryRequest: BlockHistoryRequest?
+    /// **VX-801 (VX-827 U3a) — the ORIGIN door's own fallback sheet.** Since
+    /// U3a `blockHistoryRequest` presents the Commits face (every history
+    /// door's destination); the origin door keeps the Block History PANEL —
+    /// its came-from region is where the originals are shown until the
+    /// Lineage face lands (the run record's gate G2) — so its sheet fallback
+    /// is its own slot.
+    var originHistoryRequest: BlockHistoryRequest?
     /// **THE VERSIONS PANE'S PENDING REQUEST** (the post-13l polish round,
     /// ledger rows 16/23). Its named home is the post detail's inspector,
     /// reached through the router; this is the FALLBACK sheet, for the reason
@@ -3180,12 +3187,25 @@ final class EditorViewModel {
     ///
     /// The act keeps its name, its verb and its two summoned doors; what
     /// changed is where it lands.
+    ///
+    /// **VX-801 (VX-827 U3a):** the history doors now open the Commits face,
+    /// which shows no originals; this door keeps the panel through its OWN
+    /// road (`CommandRouter.requestOriginHistory`, this model's
+    /// `originHistoryRequest` sheet where no detail is) — left as it was
+    /// until the Lineage face (U3b) is its home (gate G2).
     func revealCaretBlockOrigin() {
         guard caretBlockOrigin != nil else {
             refuse(OriginPeekCopy.noOriginHere)
             return
         }
-        requestBlockHistory()
+        guard let blockID = caretBlockID else {
+            refuse(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: blockID, focusedVariantID: caretVariantID)
+        if session.commandRouter.requestOriginHistory(request) { return }
+        originHistoryRequest = request
     }
 
     /// 13j J2: the tray sheet's pending target (`EditorView` presents it).
@@ -3594,9 +3614,11 @@ final class EditorViewModel {
         }
     }
 
-    /// **THE BLOCK HISTORY DOOR** (the post-13l polish round, ledger row 17).
+    /// **THE BLOCK HISTORY DOOR** (the post-13l polish round, ledger row 17;
+    /// since VX-801 / VX-827 U3a it opens the COMMITS FACE — the detail's full
+    /// pane through the router, this model's sheet where no detail is).
     ///
-    /// It asks the router first — one pane, wherever the door is pressed —
+    /// It asks the router first — one face, wherever the door is pressed —
     /// and falls back to its own sheet where no post detail is mounted, which
     /// is `requestNoteTray`'s shape and its reason.
     ///

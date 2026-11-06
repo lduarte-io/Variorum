@@ -213,6 +213,10 @@ struct TakesBottomBar: View {
                 // live, native (R118 parity with Write's bar).
                 Task { await model.deleteFocusedBlock() }
             }
+            // VX-801 (VX-827 U3a): block ▾'s History row — Write's bar's twin
+            // (R6-2's one grammar), the same act as this bar's history word.
+            Divider()
+            Button(CommitBar.historyRowTitle) { model.requestBlockHistory() }
             Button("＋ New block at the end of the note") {
                 // D3's third leg (13b 1b): native — the minted block's
                 // pane takes the ring; typing continues instantly.
@@ -298,23 +302,36 @@ struct TakesBottomBar: View {
         // 13s-b U2 (A2): the tour's cards never cover the bar.
         .tourKeepClear()
         .task(id: model.projection) { await model.refreshSegmentation() }
-        // Ledger row 17: the FALLBACK host, Write's bar's twin — the pane's
-        // named home is the post detail's inspector, and this bar also rides
-        // surfaces that have none.
+        // Ledger row 17: the FALLBACK host, Write's bar's twin — the history
+        // door's named home is the post detail (since VX-801 / VX-827 U3a the
+        // COMMITS FACE in its full pane), and this bar also rides surfaces
+        // that have none: the same face, in a sheet.
         .sheet(item: Binding(
             get: { model.blockHistoryRequest },
             set: { model.blockHistoryRequest = $0 })
         ) { request in
+            CommitsFaceView(
+                session: model.session, request: request,
+                onBack: { model.blockHistoryRequest = nil })
+                .frame(
+                    minWidth: CommitsFaceSheet.minWidth, idealWidth: CommitsFaceSheet.idealWidth,
+                    minHeight: CommitsFaceSheet.minHeight, idealHeight: CommitsFaceSheet.idealHeight)
+        }
+        // VX-801 (VX-827 U3a) — the gate G2: the ORIGIN door keeps the panel.
+        .sheet(item: Binding(
+            get: { model.originHistoryRequest },
+            set: { model.originHistoryRequest = $0 })
+        ) { request in
             BlockHistoryPane(
                 session: model.session, request: request,
                 onOpenTray: { blockID in
-                    model.blockHistoryRequest = nil
+                    model.originHistoryRequest = nil
                     model.trayRequest = TrayRequest(
                         postID: model.postID, revealBlockID: blockID)
                 },
                 // Ledger row 33: the sheet host re-points the same way the
                 // inspector does — a new request in the same slot.
-                onJump: { request in model.blockHistoryRequest = request })
+                onJump: { request in model.originHistoryRequest = request })
         }
         .sheet(item: Binding(
             get: { model.commentsRequest },

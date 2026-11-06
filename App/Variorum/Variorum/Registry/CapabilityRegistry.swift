@@ -912,6 +912,45 @@ nonisolated enum CapabilityRegistry {
                 + "and where it came from.",
             availability: takeFamily),
 
+        // **VX-801 (VX-827 U3a) — THE COMMITS FACE's acts** (THE DESIGN MEMO,
+        // `notes/plans/fixes/vx-827-lineage.md`: "acts at the foot: Restore ·
+        // Bring back as take · Compare · Rename"). Each is a `.surface` act —
+        // the target is the moment the reading pane shows, pointed at directly
+        // (the `.restoreTake` / `.unarchiveTake` shape) — and each runs the
+        // operation the Block History panel ran (no new op): `restoreCommit`,
+        // `bringBackCommitAsTake`, `renameCommitPoint`; Compare writes nothing.
+        // The panel rendered the three writers inline UNDECLARED; the face that
+        // succeeds it declares them once, which is what P-1 grown incrementally
+        // means. Seals refuse through the operations' own words.
+        Capability(
+            id: .restoreCommit, verb: BlockHistoryCopy.restoreVerb, scope: .take,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A commit is restored from its block's History — open a "
+                + "note and press history in the bottom bar.",
+            availability: takeFamily),
+        Capability(
+            id: .bringBackCommitAsTake, verb: BlockHistoryPath.bringBackAsTakeVerb,
+            scope: .take, doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A commit becomes a take from its block's History — open a "
+                + "note and press history in the bottom bar.",
+            availability: takeFamily),
+        Capability(
+            id: .compareCommits, verb: CommitsFaceCopy.compareVerb, scope: .take,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Commits are compared from their block's History — open a "
+                + "note and press history in the bottom bar.",
+            availability: takeFamily),
+        Capability(
+            id: .renameCommit, verb: BlockHistoryCopy.renameSavepointVerb, scope: .take,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A commit is named from its block's History — open a "
+                + "note and press history in the bottom bar.",
+            availability: takeFamily),
+
         // **THE WHOLE-NOTE VERSIONS DOOR** (the post-13l polish round, ledger
         // rows 16 and 23 — G1 and the V-family). Her ruling, verbatim: *"an
         // easy door would be to make a copy of the note, archive it, and then
