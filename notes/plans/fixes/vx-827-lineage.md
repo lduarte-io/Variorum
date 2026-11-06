@@ -1,12 +1,37 @@
 # VX-827 — Umbrella: lineage, both faces
 
-**STATUS: OPEN (kicked off 2026-11-05, the wave-2 window; nov5 coordinates the stage).**
+**STATUS: CLOSED 2026-11-06 (PR merged at the nov5 window; the merge SHA is in the closeout paragraph and the handoff).**
 Ticket: VX-827 · Project: the Nov-4 sitting umbrellas · Branch: `vx-827-lineage` · Worktree: `~/dev/variorum-vx-827` (the Pro).
 Shape: `/architect-phase` (feature/design-heavy — VX-801 carries a design pass). Record: this file.
 
 ## FOR A LATER READER
 
-*(Written at closeout. Until then the sections below are the night's working record.)*
+**VX-827 shipped lineage, both faces (2026-11-06).** THE WIRE: `list_note_lineage` (one hop,
+both-ends-readable, the VX-812 list form), tags + `entry_date` on `list_notes` rows and tags in
+`read_note`'s JSON, the `list_notes` tag filter, the granted-empty honest sentence, and the
+`with_lineage` per-edge beyond-grant stub RETIRED at her F-U1-1 ruling (absent + one fixed scope
+sentence; the residuals ledger gained no row). THE APP: the History & Lineage surface succeeds
+Block History whole (the Commits face: reading pane + all-takes rail + take dropdown + ↑/↓ fast
+swapper + quiet folds; Compare with swappable boxes and the standing "now" third; the Lineage
+face: the family vertical and older-above, the ancestor swap onto one shared pane+rail, Put
+back/Bring back/Compare on members; the origin doors land here with the original selected — the
+G2 ruling), `Operations.bringBackFromLineage` (U3b-P RULED: both source forms, source's name as
+label, the `notInLineage` fence IN the op, no undo entry), `Domain/TextCompare` +
+`Domain/CommitRail` + `Domain/LineageFamily`, `Queries.lineagePeers`/`lineageTree` (VX-654's
+discipline, exact-rows + P1 pins). VX-778 rode (the pane count skips gone places, core-only).
+THE DESIGN sat five mockup rounds + two Opus explorations in one night; THE DESIGN MEMO (this
+file) is the binding shape; her verbatim words live in the sitting entries. THE LADDER closed at
+two rounds, 0 BLOCKER/MAJOR (R1's flush-gap MINOR fixed with the window-run red-on-old ritual;
+the raw-wing MINOR is the born dangling-wing ticket). EVIDENCE: window-1's R1-F1 ritual (both
+named reds, fix green), window-2's whole target 6091/1056 0-failures (the merge gate), the phone
+gate 852/139 (the one red = VM-24/34/37's standing), the 17-row walk green live in both-voice
+core coverage with NO product defect (six rows deferred, pins named), the post-819 headless
+suite + the 9-suite smoke green on the merged tip. HER WALKTHROUGH BUNDLE is QUESTIONS #266
+(the complete roster line is in LADDER CLOSED). OPEN ITEMS: the deferred walk rows (hers to
+demand live); the public MCP guide page does not yet describe the new reads (checked at
+closeout — her call); the real store's guide re-seed behind A1 at the next refresh window; the
+born tickets (the dangling-wing pair, Low; the VM parity ticket). Everything below this section
+is the night's working record.
 
 ---
 
