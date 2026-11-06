@@ -373,6 +373,48 @@ struct Phase13iRepairTests {
                 WHERE post_id = ? AND reading_id = ? AND deleted_at IS NULL
                 """, [postID, ownedID]) == "arrival",
                 "the later claim waits at Arrivals instead — nothing destroyed, nothing silent")
+            // VX-808 Unit B2 (A-808-7 (i)/(ii) — the stamp assertion this suite
+            // gains): the demotion says why and since when.
+            #expect(try isOwnedElsewhereDemotion(client.db.fetchString(
+                "SELECT arrival_provenance FROM reading_post WHERE post_id = ? AND reading_id = ? AND deleted_at IS NULL",
+                [postID, ownedID])))
+        }
+    }
+
+    /// VX-808 Unit B2 (A-808-7 (i)/(ii)) — the repair's OTHER demotion site: the
+    /// standing claim is OWNED and a later membership in ANOTHER owned book
+    /// (B claimed the note offline, never having seen A's claim) demotes to an
+    /// arrival stamped `owned_elsewhere` with its moment. RED ON OLD (the row
+    /// demoted unstamped).
+    @Test func aLaterOwnedClaimBesideAStandingOwnedClaimDemotesStamped() async throws {
+        let (a, b, server) = try furniturePair()
+        let postID: String = try a.with { ops, _ in try ops.createPost(title: "the twice-claimed note").id }
+        try await a.push()
+        _ = try await b.pull()
+        let firstID: String = try a.with { ops, _ in
+            let first = try ops.createReading(name: "the first Owned", kind: .book)
+            _ = try ops.setReadingOwned(first.id, owned: true)
+            _ = try ops.addPostToReading(postID, to: first.id)
+            return first.id
+        }
+        try await a.push()   // the first claim is accepted FIRST; B never pulls it
+        let laterID: String = try b.with { ops, _ in
+            let later = try ops.createReading(name: "the later Owned", kind: .book)
+            _ = try ops.setReadingOwned(later.id, owned: true)
+            _ = try ops.addPostToReading(postID, to: later.id)
+            return later.id
+        }
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try client.db.fetchString(
+                "SELECT reading_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL AND status = 'member'",
+                [postID]) == firstID, "the standing claim keeps the note")
+            #expect(try client.db.fetchString(
+                "SELECT status FROM reading_post WHERE post_id = ? AND reading_id = ? AND deleted_at IS NULL",
+                [postID, laterID]) == "arrival", "the later owned claim waits at Arrivals")
+            #expect(try isOwnedElsewhereDemotion(client.db.fetchString(
+                "SELECT arrival_provenance FROM reading_post WHERE post_id = ? AND reading_id = ? AND deleted_at IS NULL",
+                [postID, laterID])))
         }
     }
 
@@ -417,4 +459,12 @@ struct Phase13iRepairTests {
                 "both devices' seeded books sit on the keeper")
         }
     }
+}
+
+/// The OWNED repair's demotion stamp (A-808-7): kind `owned_elsewhere`, its
+/// moment as `at`, no client (a repair is no one's act).
+private func isOwnedElsewhereDemotion(_ json: String?) -> Bool {
+    guard let provenance = ArrivalProvenance.decode(json), let at = provenance.at else { return false }
+    return provenance.knownKind == .ownedElsewhere && provenance.client == nil
+        && DateFormatter.variorumISO8601.date(from: at) != nil
 }

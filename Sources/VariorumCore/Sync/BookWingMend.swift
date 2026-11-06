@@ -67,10 +67,16 @@ import GRDB
 // met between its container chunk and its membership-tombstone chunk, and
 // mending then would undo her move.
 extension SyncEngine {
-    /// The provenance every wing-mend demotion stamps (A-808-5). The SPELLING
-    /// is PROVISIONAL until Unit B2's provenance vocabulary ruling, which may
-    /// rename the kind (pre-release, one string). Canonical JSON: the one key.
-    static let wingMendArrivalProvenance = #"{"kind":"wing_mend"}"#
+    /// The provenance every wing-mend demotion stamps (A-808-5; the spelling
+    /// KEPT by Unit B2's vocabulary ruling, A-808-6) — and, a DEMOTION, its
+    /// moment (A-808-7 (ii)): `{"at": <the mend's stamp>, "kind": "wing_mend"}`,
+    /// canonical JSON through `ArrivalProvenance` (a demoted row's `created_at`
+    /// is the ORIGINAL filing's, and would mis-say since when).
+    static func wingMendArrivalProvenance(at stamp: String) throws -> String {
+        var provenance = ArrivalProvenance(kind: .wingMend)
+        provenance.at = stamp
+        return try provenance.encodedJSON()
+    }
 
     /// Whether a `reading_post` row lands as a live MEMBER — the mend's
     /// occasion (a). An absent or NULL status reads as the column's default
@@ -108,6 +114,7 @@ extension SyncEngine {
         let ops = Operations()
         let now = date.now
         let stamp = nowStamp()
+        let demotionStamp = try Self.wingMendArrivalProvenance(at: stamp)
         var adoptions: [String: Operations.TagAdoption] = [:]
         var repairs = 0
         for postID in scope.sorted() {
@@ -162,11 +169,11 @@ extension SyncEngine {
                             SET status = 'arrival', deleted_at = ?, arrival_provenance = ?
                             WHERE id = ?
                             """,
-                        arguments: [stamp, Self.wingMendArrivalProvenance, membership.id])
+                        arguments: [stamp, demotionStamp, membership.id])
                 } else {
                     try db.execute(
                         sql: "UPDATE reading_post SET status = 'arrival', arrival_provenance = ? WHERE id = ?",
-                        arguments: [Self.wingMendArrivalProvenance, membership.id])
+                        arguments: [demotionStamp, membership.id])
                 }
                 try enqueueExplicitly(db, table: "reading_post", rowID: membership.id)
                 repairs += 1

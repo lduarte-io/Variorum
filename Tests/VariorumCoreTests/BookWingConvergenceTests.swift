@@ -113,7 +113,16 @@ private func insertRawMembership(
     }
 }
 
-private let demoted = SyncEngine.wingMendArrivalProvenance
+/// The wing mend's stamp (A-808-5, its spelling kept by A-808-6) — and, a
+/// DEMOTION, its moment (A-808-7 (ii) — VX-808 Unit B2's AMENDMENT of this
+/// suite: the stamp gained `at`, the mend's own stamp, so a demoted row never
+/// mis-says since when): kind `wing_mend`, an `at`, no client (a repair).
+private func isWingMendDemotion(_ json: String?) -> Bool {
+    guard let provenance = ArrivalProvenance.decode(json), let at = provenance.at else { return false }
+    return provenance.knownKind == .wingMend && provenance.client == nil
+        && DateFormatter.variorumISO8601.date(from: at) != nil
+        && json == (try? SyncEngine.wingMendArrivalProvenance(at: at))
+}
 
 // MARK: - The occasions
 
@@ -371,7 +380,7 @@ struct BookWingMendAnchorTests {
         #expect(try wingOf(a, post: world.note) == "", "the anchor (Y, earliest) keeps the note in Home")
         let row = try #require(try pairRow(a, world.note, in: world.x))
         #expect(row.status == "arrival" && !row.dead, "the filing into X waits at X's door")
-        #expect(row.provenance == demoted, "it says why it waits")
+        #expect(isWingMendDemotion(row.provenance), "it says why it waits, and since when")
         #expect(try a.outboxContains("reading_post", row.id), "the demotion pushes")
         #expect(try !a.outboxContains("container", world.note), "the note did not move")
 
@@ -381,7 +390,7 @@ struct BookWingMendAnchorTests {
             #expect(try isLiveMember(client, world.note, of: world.y))
             #expect(try !isLiveMember(client, world.note, of: world.x), "X no longer spans wings")
             let converged = try #require(try pairRow(client, world.note, in: world.x))
-            #expect(converged.status == "arrival" && !converged.dead && converged.provenance == demoted)
+            #expect(converged.status == "arrival" && !converged.dead && isWingMendDemotion(converged.provenance))
         }
     }
 
@@ -414,7 +423,7 @@ struct BookWingMendAnchorTests {
         #expect(try wingOf(a, post: note) == "", "the fenced anchor keeps the note beside it")
         let row = try #require(try pairRow(a, note, in: f))
         #expect(row.status == "arrival" && row.dead, "a dismissal record — no live bell on a finished book")
-        #expect(row.provenance == demoted)
+        #expect(isWingMendDemotion(row.provenance))
         #expect(try a.outboxContains("reading_post", row.id))
 
         try await assertAllConverged([a, b], server: server)
@@ -442,7 +451,7 @@ struct BookWingMendAnchorTests {
         #expect(try wingOf(a, post: world.note) == world.studio, "the note follows the private book")
         #expect(try isLiveMember(a, world.note, of: world.x), "its fence leg stands")
         let row = try #require(try pairRow(a, world.note, in: world.y))
-        #expect(row.status == "arrival" && !row.dead && row.provenance == demoted)
+        #expect(row.status == "arrival" && !row.dead && isWingMendDemotion(row.provenance))
         #expect(try a.outboxContains("reading_post", row.id))
         #expect(try a.outboxContains("container", world.note))
 

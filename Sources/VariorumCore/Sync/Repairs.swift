@@ -998,6 +998,12 @@ extension SyncEngine {
             arguments: [jsonArray(touched.membershipPostIDs), jsonArray(touched.readingIDs)])
         var repairs = 0
         let stamp = nowStamp()
+        // VX-808 Unit B2 (A-808-7 (i)/(ii)): an owned-side DEMOTION says why
+        // and since when — `{"at": <this repair's stamp>, "kind":
+        // "owned_elsewhere"}`, no client (a repair is no one's act).
+        var demotion = ArrivalProvenance(kind: .ownedElsewhere)
+        demotion.at = stamp
+        let demotionStamp = try demotion.encodedJSON()
         for postID in candidatePosts.sorted() {
             let members = try Row.fetchAll(
                 db,
@@ -1028,8 +1034,8 @@ extension SyncEngine {
                     if index == 0 { continue }  // the standing claim
                     if owned {
                         try db.execute(
-                            sql: "UPDATE reading_post SET status = 'arrival' WHERE id = ?",
-                            arguments: [membershipID])
+                            sql: "UPDATE reading_post SET status = 'arrival', arrival_provenance = ? WHERE id = ?",
+                            arguments: [demotionStamp, membershipID])
                     } else {
                         try db.execute(
                             sql: "UPDATE reading_post SET deleted_at = ? WHERE id = ?",
@@ -1041,8 +1047,8 @@ extension SyncEngine {
                     // The note was already membered when the claim arrived:
                     // every owned-side membership bells instead.
                     try db.execute(
-                        sql: "UPDATE reading_post SET status = 'arrival' WHERE id = ?",
-                        arguments: [membershipID])
+                        sql: "UPDATE reading_post SET status = 'arrival', arrival_provenance = ? WHERE id = ?",
+                        arguments: [demotionStamp, membershipID])
                     try enqueueExplicitly(db, table: "reading_post", rowID: membershipID)
                     repairs += 1
                 }

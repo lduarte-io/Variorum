@@ -494,7 +494,9 @@ extension Operations {
                 guard var membership = try ReadingPost.fetchOne(db, key: rows[index]["id"] as String)
                 else { continue }
                 if owned[index] {
+                    // A-808-6/-7: a DEMOTION says why and since when.
                     membership.status = .arrival
+                    membership.arrivalProvenance = try arrivalCause(.ownedElsewhere, at: now).encodedJSON()
                 } else if standingIsOwned {
                     membership.deletedAt = now
                 } else {
@@ -521,7 +523,8 @@ extension Operations {
             try ReadingPost(
                 id: newID(), readingId: readingID, postId: postID,
                 position: try readingPosition(db, readingID: readingID, at: .end),
-                status: .arrival, createdAt: date.now
+                status: .arrival, createdAt: date.now,
+                arrivalProvenance: try arrivalCause(.journalFiling).encodedJSON()
             ).insert(db)
             return true
         }

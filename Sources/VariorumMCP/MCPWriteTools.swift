@@ -56,8 +56,10 @@ struct MCPWriteTools: Sendable {
             // SEATS a note where membership would fence it (a Private book, THE
             // daily Journal) — on every road through the one application road;
             // the would-be seat bells (`IntakeDecision.verdict`'s step 6).
+            // VX-808 Unit B2 (A-808-6): named, so every arrival its acts ring,
+            // re-pose or demote is stamped "by ‹client›".
             let result: Result<Landed, Refused> = try await executor.run { ops in
-                try self.perform(job, ops: ops.heardAsWireClient(), clientName: clientName)
+                try self.perform(job, ops: ops.heardAsWireClient(named: clientName), clientName: clientName)
             }
             switch result {
             case .success(let landed):
