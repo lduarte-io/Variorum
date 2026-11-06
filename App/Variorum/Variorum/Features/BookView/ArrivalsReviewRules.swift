@@ -319,6 +319,42 @@ nonisolated enum ArrivalRowFit {
     }
 }
 
+// MARK: - The header's and the bar's shape (W-4 — the rewalk)
+
+/// **Whether the review's header or bar takes one line or two** — pure, the
+/// row's rule one level up (the Library controls-row law: wrap only by stable
+/// widths). One line while the leading group keeps its FLOOR beside the
+/// trailing door(s) whole; else two — the leading group on the first line,
+/// the door(s) on the second. The rewalk's W-4: at a ~370-pt pane the header's
+/// "Dismiss all" and the bar's "Done" were cut at the window's edge.
+nonisolated enum ReviewChromeFit {
+    /// Between the groups on one line.
+    static let gap: CGFloat = 12
+    /// Between the two lines.
+    static let lineGap: CGFloat = 8
+    /// The header's title keeps this much beside its doors (it truncates
+    /// past it, whole on the line above them below it).
+    static let titleFloor: CGFloat = 140
+
+    /// Two lines when the leading floor, a gap and the trailing group's own
+    /// width do not fit in `width`. Never reads the leading group's words
+    /// beyond its floor, so a title or a count never flips the shape.
+    static func stacked(width: CGFloat, leadingFloor: CGFloat, trailingWidth: CGFloat) -> Bool {
+        leadingFloor + gap + trailingWidth > width
+    }
+
+    /// On one line, the leading group's width: its own ideal while there is
+    /// room, yielding down to its floor so a flexible middle (the receipt)
+    /// gets its ideal first — never below the floor, never past `available`.
+    static func inlineLeadingWidth(
+        available: CGFloat, leadingIdeal: CGFloat, leadingFloor: CGFloat, flexibleIdeal: CGFloat?
+    ) -> CGFloat {
+        guard let flexibleIdeal else { return max(0, min(leadingIdeal, available)) }
+        let yielded = max(leadingFloor, available - gap - flexibleIdeal)
+        return max(0, min(leadingIdeal, yielded, available))
+    }
+}
+
 // MARK: - Which navigation closes the review
 
 /// The book facts a navigation moves. While the review is open, a MOVE in

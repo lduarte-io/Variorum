@@ -1190,7 +1190,7 @@ enum ArrivalsLineProbe {
     }
 
     /// The list's coordinate space (the arms' frames are measured in it).
-    static let space = "ArrivalsLineProbe.list"
+    nonisolated static let space = "ArrivalsLineProbe.list"
 
     static func recordWidth(_ readingID: String, owner: UUID, _ width: CGFloat) {
         var entry = claim(readingID, owner)

@@ -794,6 +794,80 @@ struct BookArrivalsReviewTests {
         }
     }
 
+    /// **W-4 (the rewalk) — the header and the bar by a stable width class.**
+    /// One line while the leading group keeps its floor beside the door(s)
+    /// whole; else two. The leading group yields toward its floor so the
+    /// bar's receipt gets its ideal first, never below the floor.
+    @Test func theHeaderAndTheBarWrapTheirDoorsByAStableWidth() {
+        typealias Fit = ReviewChromeFit
+        // The header: the title's floor beside "Add all · Dismiss all".
+        let doors: CGFloat = 183
+        let fits = Fit.titleFloor + Fit.gap + doors
+        #expect(!Fit.stacked(width: fits, leadingFloor: Fit.titleFloor, trailingWidth: doors))
+        #expect(Fit.stacked(width: fits - 1, leadingFloor: Fit.titleFloor, trailingWidth: doors),
+                "a point less: the doors go under the title")
+        #expect(Fit.stacked(width: 322, leadingFloor: Fit.titleFloor, trailingWidth: doors),
+                "the rewalk's ~370-pt pane (322 inside the padding): two lines")
+        #expect(!Fit.stacked(width: 852, leadingFloor: Fit.titleFloor, trailingWidth: doors))
+        // The bar: the pick's whole group beside Done; the hint yields wholly.
+        let pickGroup: CGFloat = 246
+        let done: CGFloat = 66
+        #expect(Fit.stacked(width: 322, leadingFloor: pickGroup, trailingWidth: done),
+                "the rewalk's pane with a pick: Done takes a second line")
+        #expect(!Fit.stacked(width: 322, leadingFloor: 0, trailingWidth: done),
+                "the hint truncates; it never pushes Done off the line")
+        // On one line the leading group yields to the receipt, down to its floor.
+        #expect(Fit.inlineLeadingWidth(available: 400, leadingIdeal: 300, leadingFloor: 0, flexibleIdeal: nil) == 300)
+        #expect(Fit.inlineLeadingWidth(available: 200, leadingIdeal: 300, leadingFloor: 0, flexibleIdeal: nil) == 200)
+        #expect(Fit.inlineLeadingWidth(available: 400, leadingIdeal: 300, leadingFloor: 0, flexibleIdeal: 150)
+                == 400 - Fit.gap - 150, "the hint gives the receipt its ideal")
+        #expect(Fit.inlineLeadingWidth(available: 400, leadingIdeal: 246, leadingFloor: 246, flexibleIdeal: 300)
+                == 246, "the pick's doors never yield below their whole width")
+    }
+
+    /// **W-4 mounted (the rewalk's shape).** The review at a ~370-pt pane with
+    /// a pick: the header's Dismiss all and the bar's Done sit wholly inside
+    /// the review — none clipped at its edge.
+    @Test func atANarrowPaneTheHeaderAndBarDoorsStayWhole() async throws {
+        ArrivalsReviewProbe.reset()
+        try await withReviewBook(waiting: 5) { session, db, readingID, _, _ in
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            structure.adopt(.init(
+                reading: try await book(db, readingID), sections: [], deletedSections: [],
+                assignments: [:]))
+            let arrivals = BookArrivalsModel(session: session, readingID: readingID)
+            arrivals.setReviewOpen(true)
+            try await refresh(arrivals, db)
+            arrivals.selectAll()
+            let narrow: CGFloat = 370
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: narrow, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: BookArrivalsReview(
+                model: arrivals, structure: structure, onDone: {}))
+            hosting.frame = NSRect(x: 0, y: 0, width: narrow, height: 600)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting) {
+                let drawn = ArrivalsReviewProbe.drawn[readingID]
+                return drawn?.frames["done"] != nil && drawn?.frames["dismissAll"] != nil
+                    && (drawn?.doors.contains("Add 5") ?? false)
+            }
+            let review = try #require(ArrivalsReviewProbe.drawn[readingID])
+            #expect(review.doors == ["Add all", "Dismiss all", "Add 5", "Dismiss 5", "Done"])
+            let done = try #require(review.frames["done"])
+            let dismissAll = try #require(review.frames["dismissAll"])
+            #expect(done.minX >= 0 && done.maxX <= narrow + 0.5, "Done whole inside the review: \(done)")
+            #expect(dismissAll.minX >= 0 && dismissAll.maxX <= narrow + 0.5,
+                    "Dismiss all whole inside the review: \(dismissAll)")
+        }
+    }
+
     @Test func anEmptyReviewSaysNothingIsWaitingBesideDone() async throws {
         ArrivalsReviewProbe.reset()
         try await withReviewBook(waiting: 0) { session, db, readingID, _, _ in
