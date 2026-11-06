@@ -41,8 +41,8 @@ import VariorumCore
 struct SidebarSearchFieldRuleTests {
     @Test func typingAsksAndEmptyingTheWordsEndsTheSearch() {
         var rule = SidebarSearchFieldRule()
-        #expect(rule.edit("h") == .ask("h"))
-        #expect(rule.edit("harbour") == .ask("harbour"), "every keystroke refines the one question")
+        #expect(rule.edit("h") == .start("h"), "the field's first word starts a NEW search (the ladder's F3)")
+        #expect(rule.edit("harbour") == .ask("harbour"), "every later keystroke refines the one question")
         #expect(rule.edit("") == .end, "clearing by hand ends the search")
         #expect(rule.edit("") == .none, "an empty field asks nothing and ends nothing twice")
     }
@@ -71,7 +71,7 @@ struct SidebarSearchFieldRuleTests {
         #expect(rule.leave() == .handOff(keyboardToLibrary: false),
                 "a click into the results: the words stay the Library's, the field clears")
         #expect(rule.text.isEmpty)
-        #expect(rule.edit("x") == .ask("x"), "and the door opens again on the next keystroke")
+        #expect(rule.edit("x") == .start("x"), "and the door opens again on the next keystroke — a new search")
     }
 }
 
@@ -461,7 +461,7 @@ private struct SidebarFieldHost: View {
             pool: PoolViewModel(session: session),
             workspace: workspace, stars: stars,
             searchDoor: field.mounted
-                ? SidebarSearchDoor(ask: { _ in }, end: {}, keyboardToLibrary: {}) : nil,
+                ? SidebarSearchDoor(ask: { _, _ in }, end: {}, keyboardToLibrary: {}) : nil,
             selection: .constant(.shelf),
             noteBox: nil)
             .frame(width: 240)

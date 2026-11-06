@@ -1706,20 +1706,20 @@ struct RootView: View {
 
     /// **VX-822 — the sidebar field's three roads** (R-819-4: the field keeps
     /// the keyboard; one engine, one finder). Its words are the Library's ONE
-    /// question through ⌘K's own road above — the Library landed only where
-    /// the focused pane is not already showing it, so a keystroke never
-    /// re-navigates (and the catalog asks in the current wing, as it always
-    /// does). Clearing ends the search and stays; ⏎ hands the keyboard to the
-    /// Library's own field, the words carried.
+    /// question, landed through the catalog's own sidebar door
+    /// (`takeSidebarQuestion`) and asked as ⌘K's road above asks — the
+    /// Library landed only where the focused pane is not already showing it,
+    /// so a keystroke never re-navigates (and the catalog asks in the current
+    /// wing, as it always does). Clearing ends the search and stays; ⏎ hands
+    /// the keyboard to the Library's own field, the words carried.
     private var sidebarSearchDoor: SidebarSearchDoor {
         SidebarSearchDoor(
-            ask: { [self] words in
-                guard router.workspace.focusedSelection == .library else {
-                    searchLibrary(words)
-                    return
-                }
-                catalog.query = words
+            ask: { [self] words, startsNewSearch in
+                catalog.takeSidebarQuestion(words, startingANewSearch: startsNewSearch)
                 Task { await catalog.search() }
+                if router.workspace.focusedSelection != .library {
+                    adopt(.library, in: router.workspace.focusedPane)
+                }
             },
             end: { [self] in
                 catalog.query = ""

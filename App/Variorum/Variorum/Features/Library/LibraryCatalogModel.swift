@@ -307,6 +307,17 @@ final class LibraryCatalogModel {
         return searchFieldWantsKeyboard
     }
 
+    /// **VX-822 — the sidebar field's words land as the Library's question**
+    /// (R-819-4). `startingANewSearch`: the field went from empty to typed
+    /// (`SidebarSearchFieldRule.Act.start`). The caller spawns `search()`
+    /// (this file's convention) and lands the Library where it is not shown.
+    func takeSidebarQuestion(_ words: String, startingANewSearch: Bool) {
+        // One engine, one finder: the field's words ARE this model's ONE
+        // question — the field holds no search state of its own, mints no
+        // second road, and the catalog asks in the current wing.
+        query = words
+    }
+
     /// **The search state's own brain** (13o U2, D8 — P-9): the question, the
     /// band's numbers, the Books section, the groups and their expansions.
     /// Owned here the way `bookRowDoors` is; this model routes the field's

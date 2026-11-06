@@ -50,8 +50,14 @@ nonisolated struct SidebarSearchFieldRule: Equatable, Sendable {
     enum Act: Equatable, Sendable {
         /// Nothing for the Library.
         case none
-        /// The Library's question becomes these words (landing the Library
-        /// where the focused pane is not already showing it).
+        /// A NEW search: the field went from empty to typed. The Library's
+        /// question becomes these words (landing the Library where the
+        /// focused pane is not already showing it) — a fresh hunt, never a
+        /// refinement of whatever the Library was asking (the VX-819
+        /// ladder's F3).
+        case start(String)
+        /// The field's own search, refined: the Library's question becomes
+        /// these words.
         case ask(String)
         /// The question is cleared: the search ends, the Library stays
         /// (PROVISIONAL P-819-B3e — no navigation-history magic).
@@ -67,7 +73,7 @@ nonisolated struct SidebarSearchFieldRule: Equatable, Sendable {
     mutating func edit(_ words: String) -> Act {
         let wasAsking = !text.isEmpty
         text = words
-        if !words.isEmpty { return .ask(words) }
+        if !words.isEmpty { return wasAsking ? .ask(words) : .start(words) }
         return wasAsking ? .end : .none
     }
 
@@ -103,7 +109,9 @@ nonisolated struct SidebarSearchFieldRule: Equatable, Sendable {
 struct SidebarSearchDoor {
     /// The Library's ONE question becomes `words`, the Library landed in the
     /// focused pane where it is not already showing (⌘K's road).
-    let ask: @MainActor (_ words: String) -> Void
+    /// `startsNewSearch`: the field went from empty to typed (the rule's
+    /// `.start`) — a fresh hunt, not a refinement.
+    let ask: @MainActor (_ words: String, _ startsNewSearch: Bool) -> Void
     /// The question cleared — the search ends; the Library stays.
     let end: @MainActor () -> Void
     /// The Library's own field takes the keyboard, its words carried, the
@@ -166,7 +174,8 @@ struct SidebarSearchField: View {
     private func apply(_ act: SidebarSearchFieldRule.Act) {
         switch act {
         case .none: break
-        case .ask(let words): door.ask(words)
+        case .start(let words): door.ask(words, true)
+        case .ask(let words): door.ask(words, false)
         case .end: door.end()
         case .handOff(let keyboardToLibrary):
             if keyboardToLibrary { door.keyboardToLibrary() }
