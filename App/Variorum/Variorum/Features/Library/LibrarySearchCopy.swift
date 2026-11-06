@@ -149,7 +149,8 @@ nonisolated enum LibrarySearchCopy {
     static let booksHeader = "Books"
 
     /// The groups' section word, by scope (the mockup's "Notes, with their
-    /// passages"; the Blocks scope's groups are named blocks and scraps).
+    /// passages"; the Blocks scope's groups are the notes holding block-level
+    /// hits and the scraps — R-819-1).
     static func groupsHeader(_ scope: LibraryCatalogModel.Scope) -> String {
         scope == .blocks ? "Blocks & scraps" : "Notes, with their passages"
     }

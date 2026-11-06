@@ -19,6 +19,14 @@
 //  (`8c2a25a99`, the behavior-preserving move of the facets to core) —
 //  verified by reverting `Queries/SearchQueries.swift` to it.
 //
+//  The WIDEN half (R-819-1; the architect's set, A-819-B1): Blocks lists
+//  every BLOCK-LEVEL hit — a hit on a block's own content: a take's words, a
+//  take's label, a block's name, a block's comment, a take's commit (behind
+//  `+ commits` alone) — note passages included, Snippets as before; never a
+//  note's title or floating notes, never a book. RED-ON-OLD: the Blocks pins
+//  fail on the old set (`.any([.family(.scraps), .docKind(.blockName)])`) —
+//  verified by reverting `Domain/SearchFacet.swift` to `e145349b9`.
+//
 
 import Foundation
 import GRDB
@@ -235,6 +243,97 @@ struct SearchFacetTests {
             #expect(blocks.living.isEmpty && blocks.all.isEmpty)
             #expect(try counts(db, question("#nothing"), .blocks) == nil,
                     "a question that finds nothing anywhere still counts nothing (no band numbers)")
+        }
+    }
+
+    // MARK: - Blocks lists every block-level hit (R-819-1, A-819-B1)
+
+    /// RED-ON-OLD — VX-734's own screen: a word found ONLY inside notes'
+    /// takes (no scrap, no block name) listed nothing under Blocks while the
+    /// band counted its notes and passages. Under the widened facet the
+    /// passages list, grouped under their notes, and the band says them.
+    @Test func aWordFoundOnlyInsideNotesTakesListsUnderBlocks() throws {
+        try withOperations { ops, db in
+            var notes: Set<String> = []
+            for (i, count) in [3, 2, 1].enumerated() {
+                let note = try ops.createPost(title: "Field \(i)")
+                for j in 0..<count { _ = try ops.newBlock(in: note.id, text: "a quartz seam \(j)") }
+                notes.insert(note.id)
+            }
+            let asked = question("quartz ")
+            let listed = try sheet(db, asked, .blocks)
+            #expect(Set(listed.noteGroups.map(\.homeID)) == notes,
+                    "every note whose takes hold the word lists under Blocks")
+            #expect(listed.passages == 6 && listed.poolGroups.isEmpty)
+            #expect(listed.noteGroups.flatMap(\.lines).allSatisfy { $0.kind == .take })
+            let c = try #require(try counts(db, asked, .blocks))
+            #expect(c.living.notes == 3 && c.living.passages == 6,
+                    "…and the band counts exactly them — \"3 notes · 6 passages\" over a sheet that holds them")
+        }
+    }
+
+    /// RED-ON-OLD: the facet's kind-set (A-819-B1) — every hit on a block's
+    /// own content, in notes and in Snippets; never a note-level or a
+    /// book-level hit.
+    @Test func blocksListsEveryBlockLevelKindAndNoNoteOrBookLevelOne() throws {
+        try withOperations { ops, db in
+            let o = try orchids(ops)
+            let narrowed = SearchFacet.blocks.narrowing(question("orchid "))
+            let found = try db.read { db in
+                var all: [SearchPassage] = []
+                var cursor: SearchComposer.Cursor?
+                repeat {
+                    let page = try Queries.searchPassages(
+                        db, query: narrowed, scope: SearchScope(wingID: ""), after: cursor, limit: 50)
+                    all += page.passages
+                    cursor = page.next
+                } while cursor != nil
+                return all
+            }
+            #expect(Set(found.map(\.kind)) == [.take, .takeLabel, .blockName, .comment],
+                    "takes, labels, names, comments — block-level, all of them")
+            #expect(Set(found.filter { $0.family == .notes }.compactMap(\.noteID)) == [o.titled.id, o.plain.id, o.margins.id],
+                    "note passages included")
+            #expect(found.filter { $0.noteID == o.pool.id }.count == 2, "Snippets as before")
+            #expect(!found.contains { $0.kind == .title || $0.kind == .noteMeta },
+                    "a note's own name and floating notes are the NOTE's, not a block's")
+            #expect(!found.contains { $0.family == .books }, "never a book or a chapter")
+            #expect(SearchFacet.blocks.filter == .any([
+                .family(.scraps), .docKind(.take), .docKind(.takeLabel), .docKind(.blockName),
+                .docKind(.comment), .docKind(.savepoint)]), "the architect's set, A-819-B1")
+            #expect(SearchFacet.notes.filter == .family(.notes) && SearchFacet.books.filter == .family(.books)
+                    && SearchFacet.all.filter == nil, "the other facets unchanged")
+        }
+    }
+
+    /// RED-ON-OLD (A-819-B1's (a)): a take's COMMIT is block-level — under
+    /// `+ commits` a note block's commit lists under Blocks beside a scrap's
+    /// (before, only the scrap's rode in, through the scraps arm). The
+    /// commits facet stays the ONE gate: without it no commit lists, under
+    /// Blocks or anywhere.
+    @Test func aCommitListsUnderBlocksOnlyBehindTheCommitsFacet() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "Logbook")
+            let inNote = try ops.newBlock(in: note.id, text: "the lanterns were lit")
+            let noteCommit = try ops.commit(inNote.variant.id)
+            try ops.autosave(inNote.variant.id, text: "the take moved on entirely", charDelta: 20)
+            let pool = try ops.createPool(title: "Heap")
+            let scrap = try ops.newBlock(in: pool.id, text: "lanterns, loose")
+            let scrapCommit = try ops.commit(scrap.variant.id)
+            try ops.autosave(scrap.variant.id, text: "a different scrap now", charDelta: 20)
+
+            var faceted = question("lanterns ")
+            faceted.includesSavepoints = true
+            let listed = try sheet(db, faceted, .blocks)
+            let lines = (listed.noteGroups + listed.poolGroups).flatMap(\.lines).filter { $0.kind == .savepoint }
+            #expect(Set(lines.map(\.sourceID)) == [noteCommit.id, scrapCommit.id],
+                    "a note block's commit lists under Blocks beside a scrap's")
+            let c = try #require(try counts(db, faceted, .blocks))
+            #expect(c.living.savepoints == 2, "…and the band says \"2 commits\"")
+
+            let plain = try sheet(db, question("lanterns "), .blocks)
+            #expect(plain.noteGroups.isEmpty && plain.poolGroups.isEmpty,
+                    "without the facet no commit lists — the facet is the one gate")
         }
     }
 

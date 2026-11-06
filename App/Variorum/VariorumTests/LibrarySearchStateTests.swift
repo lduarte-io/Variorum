@@ -90,8 +90,13 @@ struct LibrarySearchStateTests {
         #expect(question.scoped(.all) == question.query)
         #expect(question.scoped(.posts).filter == .family(.notes))
         #expect(question.scoped(.books).filter == .family(.books))
-        #expect(question.scoped(.blocks).filter == .any([.family(.scraps), .docKind(.blockName)]),
-                "Blocks = the scraps beside block NAMES (D3)")
+        // JUSTIFIED EDIT (VX-819 batch 1, VX-734 — her R-819-1 "Widen
+        // Blocks", the set A-819-B1): this line read D3's old Blocks, "the
+        // scraps beside block NAMES". Blocks now lists every block-level hit.
+        #expect(question.scoped(.blocks).filter == .any([
+            .family(.scraps), .docKind(.take), .docKind(.takeLabel), .docKind(.blockName),
+            .docKind(.comment), .docKind(.savepoint)]),
+                "Blocks = every hit on a block's own content, Snippets as before (R-819-1)")
     }
 
     @Test func aTagChipsCrossTakesOnlyThatTag() {
@@ -211,8 +216,15 @@ struct LibrarySearchStateTests {
             await model.search()
             try bandIsTheSheets(model, "Blocks")
             #expect(Set(model.searchState.groups.map(\.homeID)) == [note.id, pool.id])
-            #expect(model.searchState.groups.first { $0.homeID == note.id }?.lines.map(\.kind)
-                    == [.blockName], "a note under Blocks shows its block NAME only")
+            // JUSTIFIED EDIT (R-819-1, A-819-B1): this line said "a note under
+            // Blocks shows its block NAME only" — VX-734's very bug. Blocks
+            // now shows the note's prose take beside the name; the title
+            // stays the head's, never a block line. RED-ON-OLD: `[.blockName]`.
+            #expect(Set(model.searchState.groups.first { $0.homeID == note.id }?.lines.map(\.kind) ?? [])
+                    == [.blockName, .take], "a note under Blocks shows its block-level passages — prose included")
+            #expect(model.searchState.counts?.living.notes == 1 && model.searchState.counts?.living.passages == 2
+                    && model.searchState.counts?.living.scraps == 1,
+                    "the Blocks band: 1 note · 2 passages · 1 scrap — what it lists")
             #expect(model.bookHits.isEmpty)
         }
     }

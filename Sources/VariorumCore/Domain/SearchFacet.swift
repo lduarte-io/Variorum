@@ -20,7 +20,16 @@ public enum SearchFacet: String, Equatable, Sendable, CaseIterable {
     case notes
     /// Books, gatherings and chapters by name.
     case books
-    /// Block-level hits (D3): the scraps family beside block NAMES.
+    /// **Every BLOCK-LEVEL hit** (VX-734 — her R-819-1, *"Widen Blocks"*:
+    /// *"it's weird and doesn't make sense to not have blocks in there when
+    /// it's called blocks"*; the set is the architect's, A-819-B1): a hit on
+    /// a block's own content — a take's words, a take's label, a block's
+    /// name, a block's comment, a take's commit — in notes AND in Snippets
+    /// (the scraps family rides as before, its pools' own names included).
+    /// Never a note's title or floating notes (the NOTE's fields), never a
+    /// book or chapter, never the worn day. A commit lists only behind the
+    /// `+ commits` facet — the composer's fence is the one gate, upstream of
+    /// every scope.
     case blocks
 
     /// What the facet narrows the question to; nil = the whole question.
@@ -29,7 +38,10 @@ public enum SearchFacet: String, Equatable, Sendable, CaseIterable {
         case .all: nil
         case .notes: .family(.notes)
         case .books: .family(.books)
-        case .blocks: .any([.family(.scraps), .docKind(.blockName)])
+        case .blocks: .any([
+            .family(.scraps), .docKind(.take), .docKind(.takeLabel), .docKind(.blockName),
+            .docKind(.comment), .docKind(.savepoint),
+        ])
         }
     }
 
