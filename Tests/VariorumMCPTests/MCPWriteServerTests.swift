@@ -50,10 +50,12 @@ struct MCPWriteServerTests {
             // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's
             // batch doors and VX-188's delete_comment. VX-336 U7 (justified
             // edit, the ritual): VX-261's list_my_activity is listed for every
-            // approved client (P-VX261-2).
+            // approved client (P-VX261-2). VX-811 (the VX-808 run, Unit B2 —
+            // justified edit, the ritual): and the read rung's one write,
+            // propose_notes_to_book (a book grant reaches a book — A-808-8).
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
                               "add_take", "add_comment", "save_lens", "add_takes", "add_comments",
-                              "delete_comment", "list_my_activity"],
+                              "delete_comment", "list_my_activity", "propose_notes_to_book"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
             let read = try json(try await call(connection, "read_note",
@@ -354,6 +356,12 @@ struct MCPWriteServerTests {
             // EMPTY — a success that writes nothing (asserted below, not refused).
             calls.append(("delete_note", ["note_ids": .array([.string(note.id)])]))
             calls.append(("replace_tag", ["wing_id": .string(""), "tag": .string("x"), "with": .string("y")]))
+            // VX-811 (the VX-808 run, Unit B2 — justified edit, the ritual: the
+            // proof's completeness grows with the catalog): the read rung's one
+            // write proposes her note to her book — it may land (read reach
+            // suffices), and it mints an ARRIVAL row only: no take, chosen
+            // pointer or default moves (asserted by the snapshot below).
+            calls.append(("propose_notes_to_book", ["note_ids": .array([.string(note.id)]), "book_id": .string(book.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).

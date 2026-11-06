@@ -68,6 +68,18 @@ extension MCPWriteTools {
         if let single = args["note_id"], single != .null {
             throw ArgumentFailure(message: "Pass note_id or note_ids, not both.")
         }
+        let ids = try validatedNoteIDs(value)
+        var single = args
+        single["note_ids"] = nil
+        return .noteList(tool: name, items: try ids.map { id in
+            single["note_id"] = .string(id)
+            return NoteListItem(noteID: id, job: try parse(name, single))
+        })
+    }
+
+    /// The `note_ids` value's own checks — an array of 1 to `listCap` distinct
+    /// strings — shared by the four list forms and (VX-811) `propose_notes_to_book`.
+    func validatedNoteIDs(_ value: Value) throws -> [String] {
         guard let items = value.arrayValue else { throw ArgumentFailure(message: "note_ids must be an array.") }
         let ids = try items.map { item -> String in
             guard let id = item.stringValue else { throw ArgumentFailure(message: "note_ids must hold strings.") }
@@ -78,12 +90,7 @@ extension MCPWriteTools {
             throw ArgumentFailure(message: Self.listCapWords(ids.count))
         }
         guard Set(ids).count == ids.count else { throw ArgumentFailure(message: "note_ids lists a note twice.") }
-        var single = args
-        single["note_ids"] = nil
-        return .noteList(tool: name, items: try ids.map { id in
-            single["note_id"] = .string(id)
-            return NoteListItem(noteID: id, job: try parse(name, single))
-        })
+        return ids
     }
 
     /// PROVISIONAL (the VX-809 bundle's wording list).
@@ -100,8 +107,11 @@ extension MCPWriteTools {
     /// **The list's serial body** — each item through the SINGLE call's own
     /// road (`perform`), in the order given; the results gathered; every landed
     /// item's receipt stamped with the call's one run key.
+    /// `always`: keys every answer of this tool carries, landed or refused
+    /// (VX-811's fixed `waits` sentence — never conditional on any state).
     func performNoteList(
-        _ items: [NoteListItem], tool: String, ops: Operations, clientName: String
+        _ items: [NoteListItem], tool: String, ops: Operations, clientName: String,
+        always: [String: Any] = [:]
     ) throws -> Result<Landed, Refused> {
         let runKey = "\(tool)·\(UUID().uuidString)"
         var results: [Any] = []
@@ -131,9 +141,10 @@ extension MCPWriteTools {
                 results.append(["note_id": item.noteID, "refused": refused.outcome.text] as [String: Any])
             }
         }
-        let answer: [String: Any] = [
+        var answer: [String: Any] = [
             "results": results, "landed_count": landed, "refused_count": items.count - landed,
         ]
+        answer.merge(always) { kept, _ in kept }
         // A call that landed NOTHING is an error answer (the same body — every
         // item's refusal — so the client's error branch fires exactly when
         // nothing happened); any landed item makes it a success (PROVISIONAL,

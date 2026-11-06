@@ -35,7 +35,7 @@ struct MCPWriteTools: Sendable {
     typealias ArgumentFailure = MCPReadTools.ArgumentFailure
 
     static let handledToolNames: Set<String> = Set(
-        (MCPToolCatalog.suggest + MCPToolCatalog.writeNew + MCPToolCatalog.edit).map(\.name))
+        (MCPToolCatalog.proposing + MCPToolCatalog.suggest + MCPToolCatalog.writeNew + MCPToolCatalog.edit).map(\.name))
 
     func call(_ name: String, arguments: [String: Value]?, clientName: String) async -> Outcome {
         let args = arguments ?? [:]
@@ -140,6 +140,10 @@ struct MCPWriteTools: Sendable {
         /// VX-812: tag A → tag B across the client's reach in one wing
         /// (`MCPWriteTools+TagReplace`).
         case replaceTag(wingID: String, from: String, to: String)
+        /// VX-811 (the VX-808 run, Unit B2 — A-808-8): ONE note proposed to a
+        /// book's Arrivals — `propose_notes_to_book`'s item (the call is always
+        /// a `noteList` of these; `MCPWriteTools+Propose`).
+        case proposeNote(noteID: String, bookID: String, reason: String?)
 
         var tool: String {
             switch self {
@@ -167,6 +171,7 @@ struct MCPWriteTools: Sendable {
             case .setStarred: "set_starred"
             case .noteList(let tool, _): tool
             case .replaceTag: "replace_tag"
+            case .proposeNote: MCPToolCatalog.proposeNotesToBook.name
             }
         }
 
@@ -229,6 +234,10 @@ struct MCPWriteTools: Sendable {
             // VX-812: an un-tag and a tag per note — no take's text read,
             // rewritten, copied, frozen or tombstoned (`apply_tag`/`remove_tag`'s answer).
             case .replaceTag:
+                false
+            // VX-811: an arrival row — no take's text read, rewritten, copied,
+            // frozen or tombstoned.
+            case .proposeNote:
                 false
             }
         }
@@ -342,6 +351,8 @@ struct MCPWriteTools: Sendable {
             return try parseCopyNoteToWing(args)
         case MCPToolCatalog.setStarred.name:
             return try parseSetStarred(args)
+        case MCPToolCatalog.proposeNotesToBook.name:
+            return try parsePropose(args)
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
@@ -723,7 +734,11 @@ struct MCPWriteTools: Sendable {
         case .copyNoteToWing(let noteID, let wingID):
             return try performCopyNoteToWing(noteID: noteID, wingID: wingID, job: job, ops: ops, clientName: clientName)
         case .noteList(let tool, let items):
-            return try performNoteList(items, tool: tool, ops: ops, clientName: clientName)
+            return try performNoteList(
+                items, tool: tool, ops: ops, clientName: clientName,
+                always: tool == MCPToolCatalog.proposeNotesToBook.name ? [Self.waitsKey: Self.waitsWords] : [:])
+        case .proposeNote(let noteID, let bookID, let reason):
+            return try performProposeNote(noteID: noteID, bookID: bookID, reason: reason, job: job, ops: ops, clientName: clientName)
         case .replaceTag(let wingID, let from, let to):
             return try performReplaceTag(wingID: wingID, from: from, to: to, job: job, ops: ops, clientName: clientName)
         }

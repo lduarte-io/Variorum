@@ -573,6 +573,10 @@ nonisolated enum MCPPaneCopy {
         // — the book at edit, the destination wing at write new.
         case "set_book_order": return "setting the order of \(at)"
         case "move_book_to_wing": return kind == "wing" ? "moving a book to \(at)" : "moving \(at) to another wing"
+        // VX-811 (the VX-808 run, Unit B2 — PROVISIONAL words, her copy pass): a
+        // proposal is TWO-SIDED (UXR1-1) — the note and the book, both at read —
+        // so the line says the side that refused as itself.
+        case "propose_notes_to_book": return kind == "book" ? "proposing notes to \(at)" : "proposing \(at) to a book"
         // VX-168 — a connection the setup key turned away, said precisely
         // here (the client hears one sentence for all of them).
         case "connect_bare": return "connecting without a setup key"
@@ -713,6 +717,9 @@ nonisolated enum MCPPaneCopy {
         // book's order; a whole book moved (logged on the BOOK).
         case "set_book_order": return "set the order of \(at)" + times
         case "move_book_to_wing": return n == 1 ? "moved \(at) to another wing" : "moved \(at) between wings" + times
+        // VX-811 (the VX-808 run, Unit B2 — PROVISIONAL words): a landed item is
+        // logged on the BOOK, so a call's items coalesce into one line.
+        case "propose_notes_to_book": return n == 1 ? "proposed a note to \(at)" : "proposed \(n) notes to \(at)"
         // VX-168: a known name's first setup key, bound as it connected.
         case "connect_bound": return "connected with a new setup, now bound to its name" + times
         // VX-198 (R-VX184-5): the newest copied setup took the name.
@@ -1122,7 +1129,16 @@ nonisolated enum MCPPaneCopy {
     /// As built, VX-234's to re-voice.
     static func rungDetail(_ rung: MCPGrantRule.Rung, scope: MCPGrantRule.ScopeKind? = nil) -> String {
         switch rung {
-        case .read: "it can read and search what you shared"
+        // VX-811 (the VX-808 run, Unit B2 — A-808-10: a grant's meaning rides the
+        // capability's birth): READ also PROPOSES notes to a book's Arrivals
+        // (`propose_notes_to_book`, scopes book · wing — W-UX-14's truth pin
+        // reads `MCPToolFacts`), so a note or a gathering grant, which can
+        // never reach a book, keeps the old words. PROVISIONAL words.
+        case .read:
+            switch scope {
+            case .note?, .gathering?: "it can read and search what you shared"
+            case .book?, .wing?, nil: "it can read and search what you shared, and propose notes to books"
+            }
         case .suggest:
             "it can add new takes and comments beside your text, and save a lens of its takes "
                 + "\u{2014} it cannot touch a word you wrote"
@@ -1737,8 +1753,8 @@ nonisolated enum MCPReceiptCopy {
         // (PROVISIONAL words, her copy pass).
         case .proposal:
             return n == 1
-                ? "proposed \(quoted(receipts[0].detail)) for \(quoted(receipts[0].targetTitle))"
-                : "proposed \(n) notes for \(quoted(receipts[0].targetTitle))"
+                ? "proposed \(quoted(receipts[0].detail)) to \(quoted(receipts[0].targetTitle))"
+                : "proposed \(n) notes to \(quoted(receipts[0].targetTitle))"
         // VX-187 — two notes made versions (PROVISIONAL words).
         case .versionLink:
             return n == 1

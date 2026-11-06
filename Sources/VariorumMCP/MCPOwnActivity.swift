@@ -33,7 +33,8 @@ import VariorumCore
 enum MCPOwnActivity {
     /// The acts the answer lists: every catalog tool but this one; the read
     /// rung's (`list_books`, `list_notes`, `read_note`, `export_note`,
-    /// `search`, `show_in_app`) only when asked (F-261-5 (a)). Never a
+    /// `search`, `show_in_app`) only when asked (F-261-5 (a)) — a read-rung
+    /// tool that WRITES (VX-811's `propose_notes_to_book`) is an act, always listed. Never a
     /// connection row (`connect_*`, the setup waits) — they are not tools.
     ///
     /// **VX-676:** a `show_in_app` that landed as an ASK is the client's call
@@ -44,7 +45,7 @@ enum MCPOwnActivity {
     /// a client she opened what it offered.
     static func listedActs(includeReads: Bool) -> [String] {
         let tools = MCPToolCatalog.all
-            .filter { $0.name != MCPToolCatalog.listMyActivity.name && (includeReads || $0.rung != .read) }
+            .filter { $0.name != MCPToolCatalog.listMyActivity.name && (includeReads || $0.rung != .read || $0.writes) }
             .map(\.name)
         return includeReads ? tools + [MCPShowActivity.offeredAct] : tools
     }

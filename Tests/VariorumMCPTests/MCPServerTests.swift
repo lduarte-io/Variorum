@@ -382,6 +382,11 @@ struct MCPServerTests {
                     // VX-812 (the VX-809 run, batch 3 — justified edit, the ritual):
                     // tag A → tag B across the client's reach in a wing.
                     "replace_tag"])
+        // VX-811 (the VX-808 run, Unit B2 — justified edit, the ritual): the
+        // read rung's one WRITE, its own list (A-808-8): never read-only.
+        #expect(MCPToolCatalog.proposing.map(\.name) == ["propose_notes_to_book"])
+        #expect(MCPToolCatalog.proposing.allSatisfy { $0.rung == .read && $0.writes })
+        #expect(MCPToolCatalog.all.filter(\.writes).map(\.name) == ["propose_notes_to_book"])
         #expect(MCPToolCatalog.read.allSatisfy { $0.rung == .read })
         #expect(MCPToolCatalog.suggest.allSatisfy { $0.rung == .suggest })
         #expect(MCPToolCatalog.writeNew.allSatisfy { $0.rung == .writeNew })
@@ -465,8 +470,11 @@ struct MCPServerTests {
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
             // VX-336 U7 (justified edit, the ritual): and VX-261's
             // list_my_activity, listed for every approved client (P-VX261-2).
+            // VX-811 (the VX-808 run, Unit B2 — justified edit, the ritual): and
+            // the read rung's one write, propose_notes_to_book (a book grant
+            // reaches a book — A-808-8).
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
-                              "list_my_activity"])
+                              "list_my_activity", "propose_notes_to_book"])
 
             let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
             #expect(books?.map { $0["id"] as? String } == [shared.id], "only the shared book is listed")
