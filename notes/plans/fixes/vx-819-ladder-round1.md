@@ -205,7 +205,7 @@ orchestrator's; every Mac pin below is PENDING it, its red-on-old included); no 
 is the orchestrator's closeout item). The app and its tests only COMPILE (`build-for-testing`).
 
 *Fix session: opus-implementer, seated 2026-11-06. Every claim is PENDING until its suite ran (the line says so when it
-did). No revert is in flight.*
+did).* **REVERT IN FLIGHT (2026-11-06, compile proof of the combined red tree — all four fixes' product hunks reverted in the working tree, nothing committed): restore with `git checkout -- App/Variorum/Variorum/Features/Library/SidebarSearchField.swift App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift App/Variorum/Variorum/Features/Library/LibraryCatalogModel.swift App/Variorum/Variorum/RootView.swift` (every file committed before the revert).**
 
 **Red-on-old shape for the Mac pins** (the batches' precedent): each behaviour pin lands ALONE first (that commit is a
 red-on-old tree), then its fix in its own commit, product files only where possible, so the gate can revert exactly the
