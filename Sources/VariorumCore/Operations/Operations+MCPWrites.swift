@@ -953,7 +953,7 @@ extension Operations {
             try requireLiveWing(db, wingId)
             let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             let bookName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
-            try requireBookNameFree(db, bookName, counting: reach)
+            try requireBookNameFree(db, bookName, inWing: wingId, counting: reach)  // VX-816: its wing
             let now = date.now
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: bookName, kind: .book,

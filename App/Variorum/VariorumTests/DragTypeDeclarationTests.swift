@@ -60,6 +60,10 @@ struct DragTypeDeclarationTests {
          BookPanelDragToken.exportedContentTypes()),
         ("OpenNoteDragToken (the Open strip's reorder — the same class)",
          SidebarView.OpenNoteDragToken.exportedContentTypes()),
+        // VX-874 (A JUSTIFIED EDIT — a new drag token is a new line): the
+        // sidebar AI section's row reorder (the VX-878 run, batch 3).
+        ("MCPTrailDragToken (the sidebar AI section's reorder — VX-874)",
+         MCPTrailDragToken.exportedContentTypes()),
     ]
 
     @Test func theAppsDragTokensExportDeclaredDataTypes() {

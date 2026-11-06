@@ -48,6 +48,10 @@ final class PoolPostsModel {
     /// over `drawnIDs` — ∝ the Pool's own window (`window` loose rows, plus the
     /// tucked run while it shows), held while the page shows.
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
+    /// **VX-831 — each DRAWN note's Private mark** (the closed eye beside the
+    /// shared icon): `Queries.privateMarksDrawn` over the same `drawnIDs`, held
+    /// while the page shows — drawn only while a client is approved (R-878-K3).
+    private(set) var privateMarks: [String: Queries.PrivateMark] = [:]
 
     /// Bounded like every held listing (the observeLibrary discipline).
     nonisolated static let window = 200
@@ -123,6 +127,15 @@ final class PoolPostsModel {
         await MCPRowReach.hold(session, { try Queries.mcpNoteReaches($0, noteIDs: ids) }) { [weak self] value in
             guard let self, self.reach != value else { return }
             self.reach = value
+        }
+    }
+
+    /// VX-831 — hold the drawn rows' Private marks (the view's `.task(id:
+    /// drawnIDs)` beside the reach's).
+    func holdPrivateMarks(_ ids: [String]) async {
+        await PrivateMarkHold.notes(session, ids) { [weak self] value in
+            guard let self, self.privateMarks != value else { return }
+            self.privateMarks = value
         }
     }
 
@@ -227,6 +240,8 @@ struct PoolPostsView: View {
         + MCPAskGlyph.surfaceCapabilities
         // VX-268: the ONE shared icon on a note row and its popover's doors.
         + MCPSharedIcon.surfaceCapabilities
+        // VX-831: the Private mark beside it.
+        + PrivateMarkView.noteSurfaceCapabilities
 
     let session: AppSession
     let model: PoolPostsModel
@@ -374,6 +389,8 @@ struct PoolPostsView: View {
         .task(id: model.session.wing.currentID) { await model.start() }
         // VX-268: who reaches the drawn rows — held, re-aimed as they change.
         .task(id: model.drawnIDs) { await model.holdReach(model.drawnIDs) }
+        // VX-831: the drawn rows' Private marks, held beside the reach.
+        .task(id: model.drawnIDs) { await model.holdPrivateMarks(model.drawnIDs) }
         .wingMoveConfirm($wingMove, wings: wings)
         .onDisappear { model.tuckAway() }
         #if DEBUG
@@ -459,6 +476,13 @@ struct PoolPostsView: View {
                         // VX-268: the ONE shared icon (nothing when nobody
                         // reaches it), then a waiting ask — the Bookcase's order.
                         MCPSharedIcon(reaches: model.reach[item.postID] ?? [], tokens: tokens)
+                        // VX-831: the Private mark (nothing when not Private).
+                        PrivateMarkView(
+                            door: PrivateMarkFace.note(
+                                model.privateMarks[item.postID],
+                                badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                                .map { PrivateMarkDoor(mark: $0, subjectID: item.postID, session: session) },
+                            tokens: tokens)
                         // 13n-c U4: an ask waiting on this note.
                         MCPAskGlyph(.note(item.postID), tokens: tokens)
                         // The quiet day — suppressed when the lead already IS

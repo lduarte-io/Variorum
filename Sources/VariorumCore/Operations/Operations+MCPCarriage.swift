@@ -437,7 +437,7 @@ extension Operations {
             try requireLiveWing(db, wingId)
             let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             let gatheringName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
-            try requireBookNameFree(db, gatheringName, counting: reach)
+            try requireBookNameFree(db, gatheringName, inWing: wingId, counting: reach)  // VX-816: its wing
             var adoption = TagAdoption(wing: wingId)
             let resolved = try rule.mappingTags { try resolveTagPath(db, $0, &adoption) }
             let gathering = try insertReading(

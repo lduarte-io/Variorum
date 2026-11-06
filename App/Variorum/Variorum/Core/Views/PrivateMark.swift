@@ -71,6 +71,46 @@ nonisolated enum PrivateMarkCopy {
         "\u{201C}\(name)\u{201D} is Private \u{2014} no AI client can read its notes."
     }
     static func clearedBook(_ name: String) -> String { "\u{201C}\(name)\u{201D} is no longer Private." }
+
+    // MARK: VX-831 — the visible mark (the closed eye) and its door
+
+    /// "“a”" · "“a” and “b”" · "“a”, “b” and 2 more" — books named in the
+    /// mark's words, alphabetical (the facts' order).
+    static func booksPhrase(_ names: [String]) -> String {
+        let quoted = names.prefix(2).map { "\u{201C}\($0)\u{201D}" }
+        switch names.count {
+        case 0: return ""
+        case 1: return quoted[0]
+        case 2: return "\(quoted[0]) and \(quoted[1])"
+        default: return "\(quoted[0]), \(quoted[1]) and \(names.count - 2) more"
+        }
+    }
+
+    /// The mark's hover (the VX-426 family — the descriptor, an em dash, what
+    /// the click does). PROVISIONAL wording, her bundle (the via-book line is
+    /// hers: "Private — via ‹book›").
+    static let markOwnNoteHelp = "Private \u{2014} click to remove this note\u{2019}s mark"
+    static func markOwnNoteAlsoViaHelp(_ books: [String]) -> String {
+        "Private \u{2014} click to remove this note\u{2019}s own mark (it stays private via \(booksPhrase(books)))"
+    }
+    static func markViaHelp(_ books: [String]) -> String { "Private \u{2014} via \(booksPhrase(books))" }
+    static let markOwnBookHelp = "Private \u{2014} click to remove this book\u{2019}s mark"
+
+    /// The via-book click's saying — her words: "Private via ‹book› — change
+    /// it on the book, or move the note" (the plural arm PROVISIONAL).
+    static func viaBookSaying(_ books: [String]) -> String {
+        "Private via \(booksPhrase(books)) \u{2014} change it on \(books.count > 1 ? "the books" : "the book"), "
+            + "or move the note."
+    }
+    /// Its one door: the first-named book, opened at the note (the owned-by
+    /// badge's click-through). PROVISIONAL.
+    static func openBookDoor(_ name: String) -> String { "Open \u{201C}\(name)\u{201D}" }
+
+    /// The own-arm receipt when a Private book still holds the note — the
+    /// toggle's "No longer Private." would be false there. PROVISIONAL.
+    static func clearedNoteStillVia(_ books: [String]) -> String {
+        "This note\u{2019}s own mark is off \u{2014} it stays Private via \(booksPhrase(books))."
+    }
 }
 
 // (13n-c U3 — VX-271: the Bookcase's "shared with AI" text chip and its

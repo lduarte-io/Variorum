@@ -35,6 +35,9 @@ struct LibraryCatalogView: View {
         // VX-268: the ONE shared icon on the note, book and gathering rows
         // (List, Cards, the answer sheet) and its popover's Change… / Revoke.
         + MCPSharedIcon.surfaceCapabilities
+        // VX-831: the Private mark (the closed eye) beside it — a note's and
+        // a book's (never a gathering's).
+        + PrivateMarkView.noteSurfaceCapabilities + PrivateMarkView.bookSurfaceCapabilities
 
     /// **13n-c Stage B R1 B5 — the NOTE ROW's own context doors** (P-1's
     /// walk): `postRowMenu` renders the note-row grammar from
@@ -324,6 +327,8 @@ struct LibraryCatalogView: View {
         // VX-268: who reaches the listed books and gatherings — HELD while
         // they are listed (a grant from a row's own menu shows at once).
         .task(id: model.listedBookIDs) { await model.holdBookReach(model.listedBookIDs) }
+        // VX-831: the listed books' Private marks, held beside the reach.
+        .task(id: model.listedBookIDs) { await model.holdBookMarks(model.listedBookIDs) }
         .bookRowDoors(model.bookRowDoors)
         .wingMoveConfirm($wingMove, wings: wings) { Task { await model.refresh() } }
         // 13i-c U4: the owned-by badge's facts — 17y B1 (k): the MODEL holds
@@ -1134,7 +1139,9 @@ struct LibraryCatalogView: View {
             association: model.searchState.bookReasons[hit.id].map(LibrarySearchCopy.association),
             onTitleTap: { openHit(hit) },
             // VX-268: who reaches the listed book or gathering (held).
-            reach: model.bookReach[hit.id] ?? [])
+            reach: model.bookReach[hit.id] ?? [],
+            // VX-831: a book's own Private mark (held; never a gathering's).
+            privateMark: privateBookDoor(hit))
         // Row 33 (a): the WHOLE row is the target — the line used to be only
         // as wide as its words, so a click right of "book" was a dead click
         // and the panel kept whatever it was showing.
@@ -1209,6 +1216,21 @@ struct LibraryCatalogView: View {
             badgesOn: themeStore?.settings.ownershipBadges ?? true)
     }
 
+    /// VX-831: a listed note's Private mark (the closed eye) — its row's OWN
+    /// slice's fact, under the badge family's switch; nil draws nothing.
+    private func privateMarkDoor(_ extras: LibraryNoteRowExtras, noteID: String) -> PrivateMarkDoor? {
+        PrivateMarkFace.note(extras.privateMark, badgesOn: themeStore?.settings.ownershipBadges ?? true)
+            .map { PrivateMarkDoor(mark: $0, subjectID: noteID, session: session) }
+    }
+
+    /// VX-831: a listed BOOK's own Private mark (a gathering never wears it).
+    private func privateBookDoor(_ hit: Queries.CatalogHit) -> PrivateMarkDoor? {
+        PrivateMarkFace.book(
+            marked: model.privateBookIDs.contains(hit.id),
+            badgesOn: themeStore?.settings.ownershipBadges ?? true)
+            .map { PrivateMarkDoor(mark: $0, subjectID: hit.id, subjectName: hit.title, session: session) }
+    }
+
     private func noteCard(_ hit: Queries.CatalogHit) -> some View {
         // 17y B1 (k): the card reads its own slice of the extras — never the
         // whole listing's dictionaries (the measured page-landing stall).
@@ -1230,6 +1252,9 @@ struct LibraryCatalogView: View {
                 // VX-268: the ONE shared icon (nothing when nobody reaches
                 // it), then a waiting ask — the List row's order.
                 MCPSharedIcon(reaches: extras.reach, tokens: tokens)
+                // VX-831: the Private mark — the shared icon's counterpart
+                // (nothing when the note is not Private).
+                PrivateMarkView(door: privateMarkDoor(extras, noteID: hit.id), tokens: tokens)
                 // 13n-c U4: an ask waiting on this note (nothing when none).
                 MCPAskGlyph(.note(hit.id), tokens: tokens)
                 // 18h batch 1 (her row 9): the card's date slot is the SORT's
@@ -1363,7 +1388,9 @@ struct LibraryCatalogView: View {
                 archived: hit.isArchived,
                 askTarget: .note(hit.id),
                 // VX-268: the row's own slice — held for the near window.
-                reach: extras.reach)
+                reach: extras.reach,
+                // VX-831: the Private mark, from the same slice.
+                privateMark: privateMarkDoor(extras, noteID: hit.id))
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -1534,6 +1561,9 @@ struct CatalogBookLine: View {
     /// draws nothing, so the shipped alignment pins measure exactly what
     /// they did).
     var reach: [MCPPlaceReach] = []
+    /// VX-831 — the book's own Private mark (nil — the common case — draws
+    /// nothing, so the shipped alignment pins measure exactly what they did).
+    var privateMark: PrivateMarkDoor? = nil
 
     static let probeSpace = "catalog-book-line"
 
@@ -1555,6 +1585,8 @@ struct CatalogBookLine: View {
                 MCPSharedIcon(reaches: reach, tokens: tokens)
                     .baselineProbe("book.shared", in: Self.probeSpace)
             }
+            // VX-831: the Private mark beside it (its own button too).
+            PrivateMarkView(door: privateMark, tokens: tokens)
             if let association {
                 Text(tokens.chromeLabel(association))
                     .font(tokens.small)
@@ -1623,6 +1655,10 @@ struct CatalogNoteLine: View {
     /// row's own slice; empty — the common case — draws nothing, so the
     /// shipped alignment pins measure exactly what they did).
     var reach: [MCPPlaceReach] = []
+    /// VX-831 — the note's Private mark, from the row's own slice (nil — the
+    /// common case — draws nothing, so the shipped alignment pins measure
+    /// exactly what they did).
+    var privateMark: PrivateMarkDoor? = nil
 
     static let probeSpace = "catalog-note-line"
 
@@ -1645,6 +1681,8 @@ struct CatalogNoteLine: View {
                 MCPSharedIcon(reaches: reach, tokens: tokens)
                     .baselineProbe("note.shared", in: Self.probeSpace)
             }
+            // VX-831: the Private mark — shared, private, then a waiting ask.
+            PrivateMarkView(door: privateMark, tokens: tokens)
             if let askTarget {
                 MCPAskGlyph(askTarget, tokens: tokens)
             }

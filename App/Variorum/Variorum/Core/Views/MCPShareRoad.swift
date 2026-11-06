@@ -276,11 +276,9 @@ nonisolated enum MCPShareCopy {
     }
     static let openBookNote = "The open book is switched in Settings \u{25B8} MCP."
 
-    // MARK: - The in-note indicator (VX-164)
-
-    static let lockHelp = "Private \u{2014} click to change"
-    static func privateThrough(_ names: [String]) -> String { PrivateMarkCopy.throughBooks(names) }
-    static let privateThroughNote = "A book's Private mark is changed in its Book Settings."
+    // (VX-831: the in-note indicator's lock and its popover's two lines are
+    // RETIRED — the Private mark, the closed eye, took the lock's place and
+    // speaks `PrivateMarkCopy`'s words on every host.)
 
     // MARK: - Receipts (app voice — P-13n-1)
 

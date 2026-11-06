@@ -65,7 +65,8 @@ final class ReadingsViewModel {
                 // are synchronous, so no other door's write can land between
                 // the read and the insert; the only surviving race is the
                 // cross-device one her ruling deliberately tolerates.
-                try ops.assertBookNameIsFree(name)
+                // VX-816: of the wing it mints in.
+                try ops.assertBookNameIsFree(name, inWing: wingId)
                 // 13i-c (R-13ic-4): a gathering is minted WITH its rule — the
                 // op refuses a rule-less one; the shelf's mint sheet drafts the
                 // rule inline and keeps Create disabled until it has a term

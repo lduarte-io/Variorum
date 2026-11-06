@@ -88,8 +88,15 @@ struct GatheringKindWordTests {
         let root = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("Variorum")
-        for path in ["Core/Views/BookRowMenu.swift", "Features/Shelf/ShelfView.swift",
-                     "Features/Library/ArchivedView.swift"] {
+        // A JUSTIFIED EDIT at VX-829 (the VX-878 run): the Bookcase row's menu
+        // renders through the ONE book row renderer (`BookRowMenuItems`, in
+        // BookRowMenu.swift), so ShelfView.swift no longer spells the delete
+        // door itself — it must draw that renderer instead (asserted below).
+        let shelf = try String(
+            contentsOf: root.appendingPathComponent("Features/Shelf/ShelfView.swift"), encoding: .utf8)
+        #expect(shelf.contains("BookRowMenuItems("), "the Bookcase row draws the one renderer")
+        #expect(!shelf.contains("capability(.deleteBook).verb + \"\\u{2026}\""))
+        for path in ["Core/Views/BookRowMenu.swift", "Features/Library/ArchivedView.swift"] {
             let source = try String(contentsOf: root.appendingPathComponent(path), encoding: .utf8)
             #expect(source.contains("BookStateCopy.deleteDoorLabel("), "\(path) draws the kind's words")
             #expect(!source.contains("capability(.deleteBook).verb + \"\\u{2026}\""),

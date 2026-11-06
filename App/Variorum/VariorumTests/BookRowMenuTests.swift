@@ -33,10 +33,21 @@ struct BookRowMenuTests {
             archivedAt: archived ? now : nil, createdAt: now, updatedAt: now)
     }
 
-    /// The table: the basics, in order; the archive table's state doors.
-    @Test func theTableIsTheBasics() {
+    /// The table, in order. A JUSTIFIED EDIT at VX-829 (the VX-878 run, her
+    /// 2026-11-04 ask — "the options that are available in bookcase on a book
+    /// should be available on library (within reason, like the shelf options
+    /// don't need to be there)"): 17y's trimmed "basics" (Open · Star ·
+    /// Settings · the exports · Archive · Delete — PROVISIONAL P-17y-B3-l1)
+    /// is superseded by the Bookcase row's whole set minus shelf placement,
+    /// Open leading, in the Bookcase's order (the derivation itself is
+    /// `BookDoorsEverywhereTests`'). The subject — the table says exactly what
+    /// a plain book's row draws beyond the Bookcase — is unchanged.
+    @Test func theTableIsTheBookcaseRowsDoorsMinusShelfPlacement() {
         #expect(BookRowMenuTable.doors(for: reading("b")) == [
-            .open, .star, .settings, .exportMarkdown, .exportPDF,
+            .open, .star,
+            .rename, .settings, .duplicate, .editRule, .manageNotes, .extent,
+            .state(.finishBook), .state(.sealBook), .state(.ownBook),
+            .exportMarkdown, .exportPDF,
             .state(.archiveBook), .state(.deleteBook),
         ])
         #expect(BookRowMenuTable.doors(for: reading("g", kind: .gathering)).contains(.state(.deleteBook)))
@@ -71,12 +82,18 @@ struct BookRowMenuTests {
     }
 
     /// Her carve-out: position means nothing off the Bookcase — none of its
-    /// positional doors (nor its board-local ceremonies) is rendered here,
-    /// and every act the menu does render is declared with a context door.
+    /// shelf-placement doors is rendered here, and every act the menu does
+    /// render is declared with a context door. (A JUSTIFIED EDIT at VX-829:
+    /// the board-local ceremonies — Move to Wing ▸, Duplicate Book…, Edit
+    /// Rule…, Bind / Make a Book — left 17y's Bookcase-only list for her
+    /// ask; only the shelf-placement family stays the board's.)
     @Test func thePositionalDoorsStayOnTheBookcase() {
         let rendered = Set(BookRowMenu.contextMenuCapabilities)
-        for act in BookRowMenuTable.bookcaseOnly {
+        #expect(BookRowMenuTable.shelfPlacementCapabilities
+                == [.moveBookToShelf, .sendBookToTop, .sendBookToBottom])
+        for act in BookRowMenuTable.shelfPlacementCapabilities {
             #expect(!rendered.contains(act), "\(act)")
+            #expect(ShelfView.contextMenuCapabilities.contains(act), "\(act) stays the board's")
         }
         #expect(rendered.contains(.toggleStar), "STAR at minimum (her words)")
         for act in rendered {

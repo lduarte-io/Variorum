@@ -115,12 +115,17 @@ struct MCPBookNameReachServerTests {
     /// THIS client can read (`readableBooks`), while her own rename counts
     /// every one. The two pins above run the mechanics; this one holds the
     /// words to them (red on the old description).
+    ///
+    /// VX-816 (A JUSTIFIED EDIT, the VX-878 run, batch 3): the guard counts
+    /// only the book's OWN WING now (`MCPBookNamePerWingServerTests` runs it),
+    /// so the sentence says "in its wing" — without it, it claimed a readable
+    /// book of another wing refuses the name, which is no longer true.
     @Test func renameBooksDescriptionSaysOnlyBooksYouCanReadCount() {
         let words = MCPToolCatalog.renameBook.description
         #expect(!words.contains("as the author's rename is"), "the old claim is gone: \(words)")
         #expect(words.contains(
-            "A name already worn (ignoring case) by another live, unarchived book or gathering that you can "
-                + "read is refused; one you can't read never counts, so it can't block the name."), "\(words)")
+            "A name already worn (ignoring case) by another live, unarchived book or gathering in its wing that "
+                + "you can read is refused; one you can't read never counts, so it can't block the name."), "\(words)")
     }
 
     /// **VX-363 (VX-336 U9 — the third road VX-259 missed; provisional ruling 2):**
