@@ -48,6 +48,12 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "read_note · card, everything", tool: "read_note") { w, _ in
             ["note_id": s(w.card), "with_ids": .bool(true), "with_lineage": .bool(true), "with_commits": .bool(true),
              "with_lenses": .bool(true), "with_tray": .bool(true), "with_versions": .bool(true)] },
+        // VX-827 U1 (her F-U1-1 ruling, "Retire the stub"): RED ON THE OLD
+        // STUB — A's answer carried one `beyond_grant` per edge to a hidden
+        // relative (the Pool copy, the Private note, the hidden wing's note,
+        // the Journal entry); now each is absent and beyond_reach says so.
+        CatalogArm(label: "read_note · kin with lineage (hidden relatives in the Pool, a Private note, a hidden wing, the Journal)",
+                   tool: "read_note") { w, _ in ["note_id": s(w.kin), "with_lineage": .bool(true)] },
         CatalogArm(label: "read_note · a note a hidden owned book claims", tool: "read_note") { w, _ in
             ["note_id": s(w.ownedNote), "with_ids": .bool(true)] },
         CatalogArm(label: "read_note · a note a hidden finished book holds", tool: "read_note") { w, _ in

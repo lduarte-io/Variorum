@@ -177,9 +177,20 @@ struct MCPCarriageServerTests {
         }
     }
 
-    // MARK: - Lineage and take ancestry (AF-11 F-4 + its RIDER)
+    // MARK: - Lineage and take ancestry (AF-11 F-4; the edge stub RETIRED — F-U1-1)
 
-    @Test func lineageAndAncestryAreExactAndBeyondTheGrantIsOneUniformStub() async throws {
+    /// **JUSTIFIED EDIT (VX-827 U1 — her F-U1-1 ruling, "Retire the stub",
+    /// superseding P-13nb-U4-7's per-edge stub; R-825):** this pin asserted
+    /// that an unshared, a journal-fenced and a scrap far side each answered
+    /// the ONE uniform `beyond_grant` stub, "none omitted". That stub spoke an
+    /// edge whose far end is hidden, so a store holding a hidden copy answered
+    /// differently from one holding none (the two-store catalog's
+    /// `read_note · kin with lineage …` arm is the red-on-old pin). Now each of
+    /// those three far sides is ABSENT — byte-identical to having no edge at
+    /// all — and the answer carries `beyond_reach`'s fixed lineage sentence
+    /// whenever lineage is asked (never conditional). Take ancestry is
+    /// untouched: a parent beyond the grant still answers `parent_beyond_grant`.
+    @Test func lineageAndAncestryAreExactAndBeyondTheGrantIsAbsent() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -217,9 +228,12 @@ struct MCPCarriageServerTests {
 
             let plainIDs = try json(try await call(connection, "read_note", ["note_id": .string(note.id), "with_ids": .bool(true)]))
             #expect(blocks(plainIDs).first?["lineage"] == nil, "never ambient")
+            #expect(plainIDs["beyond_reach"] == nil, "the scope sentence rides only an asked lineage")
             let shaped = try json(try await call(connection, "read_note", [
                 "note_id": .string(note.id), "with_lineage": .bool(true),
             ]))
+            #expect(shaped["beyond_reach"] as? String == "Lineage beyond your reach, if any, is not listed.",
+                    "the fixed sentence, always present when lineage is asked")
             let block = try #require(blocks(shaped).first)
             let lineage = try #require(block["lineage"] as? [[String: Any]])
             let released = lineage.filter { $0["released"] as? Bool == true }
@@ -229,19 +243,18 @@ struct MCPCarriageServerTests {
             #expect(released.allSatisfy { $0["relation"] as? String == "derived_from" && $0["origin_op"] as? String == "merge" })
             let toReadable = try #require(lineage.first { $0["block_id"] as? String == readableBlock.block.id })
             #expect(toReadable["note_id"] as? String == readable.id, "a note the client can read is addressable")
-            let stubs = lineage.filter { $0["beyond_grant"] as? Bool == true }
-            #expect(stubs.count == 3, "unshared, journal-fenced and scrap far sides — each a stub, none omitted")
-            let encoded = try stubs.map {
-                String(decoding: try JSONSerialization.data(withJSONObject: $0, options: [.sortedKeys]), as: UTF8.self)
+            #expect(lineage.count == 3, "the two released sources and the readable note — nothing else: \(lineage)")
+            #expect(lineage.allSatisfy { $0["beyond_grant"] == nil }, "no stub, for any far side")
+            let said = text(try await call(connection, "read_note", ["note_id": .string(note.id), "with_lineage": .bool(true)]))
+            for absent in [unshared.id, unsharedBlock.block.id, journal.id, journalBlock.block.id, pool.id,
+                           scrap.block.id, "\"beyond_grant\""] {
+                #expect(!said.contains(absent), "\(absent) appears nowhere")
             }
-            #expect(Set(encoded) == ["{\"beyond_grant\":true,\"relation\":\"derived_from\"}"],
-                    "THE RIDER: a fenced far side is byte-identical to an unshared one — no id, title or kind")
-            #expect(!text(try await call(connection, "read_note", ["note_id": .string(note.id), "with_lineage": .bool(true)]))
-                .contains(journal.id), "the fenced note's id appears nowhere")
 
             let takes = try #require(block["takes"] as? [[String: Any]])
             let shown = try #require(takes.first { $0["take_id"] as? String == merged.variant.id })
-            #expect(shown["parent_beyond_grant"] as? Bool == true && shown["parent_take_id"] == nil)
+            #expect(shown["parent_beyond_grant"] as? Bool == true && shown["parent_take_id"] == nil,
+                    "take ancestry's stub is untouched")
             let branched = try #require(takes.first { $0["take_id"] as? String == branch.id })
             #expect(branched["parent_take_id"] as? String == merged.variant.id, "take ancestry, exact")
             await h.hangUp(connection)

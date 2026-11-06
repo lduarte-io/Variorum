@@ -164,8 +164,9 @@ enum MCPNoteStructure {
     /// VERSION being read on its live note's grant — the live note's id. The
     /// lineage classification then treats the live note (and its released
     /// originals, and its other saved moments) as the note's own family
-    /// instead of stubbing the very note whose grant authorized the call as
-    /// `beyond_grant`; the `books` answer stays the live-note read's alone.
+    /// instead of leaving out the very note whose grant authorized the call
+    /// (it once wore the retired `beyond_grant` stub); the `books` answer
+    /// stays the live-note read's alone.
     /// `echo` (U7c): keys the CALLER's answer carries beside the structure —
     /// a version read's `version_id`, `version_of`, `note_id` (the live note's)
     /// and `saved_at` — set on the answer here so a PAGE's budget weighs them
@@ -366,6 +367,13 @@ enum MCPNoteStructure {
             answer["versions"] = versions.entries
             if versions.truncated { answer["versions_truncated"] = true }
         }
+        // VX-827 U1 (her F-U1-1 ruling, "Retire the stub"; R-825): a lineage
+        // far side beyond the client's reach is ABSENT, and the answer says
+        // the lineage is scoped in ONE fixed sentence, ALWAYS present when
+        // lineage was asked — never conditional (a key that appeared only
+        // when something was left out would be the oracle). Set before the
+        // page is fitted, so a page's budget weighs it as the wire sends it.
+        if options.withLineage { answer[MCPWriteTools.beyondReachKey] = MCPWriteTools.beyondReachLineageWords }
         for (key, value) in echo { answer[key] = value }
         guard page != nil else { return answer }
         if firstPage {
@@ -614,15 +622,15 @@ enum MCPNoteStructure {
         return (entries, all.count > carriageCap)
     }
 
-    /// The ONE uniform stub for a lineage far side beyond the client's grant
-    /// (AF-11 F-4's RIDER): no id, no title, no kind — nothing distinguishes a
-    /// FENCED far side from a merely unshared one, a scrap, or a released
-    /// block of another note. The edge's own relation rides beside it.
-    static func beyondGrant(_ relation: String) -> [String: Any] {
-        ["relation": relation, "beyond_grant": true]
-    }
-
-    /// A take's parent beyond the grant — the same uniform stub's twin.
+    /// A take's parent beyond the grant — the ONE uniform stub (AF-11 F-4's
+    /// RIDER): no id, no title, no kind — nothing distinguishes a FENCED parent
+    /// from a merely unshared one, a scrap's, a dead one or a missing one, so
+    /// it answers a fact of the READABLE take (its parent pointer does not
+    /// resolve within reach) and is a pure function of reach (R-825). Its
+    /// lineage twin — one stub per edge to a far side beyond reach — RETIRED
+    /// at her F-U1-1 ruling (VX-827 U1, "Retire the stub"): that stub spoke a
+    /// row whose far end is hidden, so it counted hidden copies; such an edge
+    /// is now absent (`lineage`), and `beyond_reach` says the lineage is scoped.
     static var beyondGrantParent: [String: Any] { ["parent_beyond_grant": true] }
 
     /// Where a far-side block lives, as the client may know it.
@@ -689,9 +697,13 @@ enum MCPNoteStructure {
     /// (`derived_from` both ways and `version_of`), the far side as the client
     /// may know it: a block of this note, a released original of this note
     /// (with its text — part of the note's own history), a block of one of
-    /// its saved versions, a block of another note the client can read, or
-    /// the ONE uniform stub. A dead far side is left out (the lineage walks'
-    /// live-endpoint rule). ∝ the note's blocks' edges (both indexes).
+    /// its saved versions, or a block of another note the client can read.
+    /// **A far side beyond the client's reach is LEFT OUT** (VX-827 U1 — her
+    /// F-U1-1 ruling, "Retire the stub", superseding P-13nb-U4-7's per-edge
+    /// stub: an edge appears only when both its ends are readable, so the
+    /// answer is a pure function of reach — R-825; the caller's
+    /// `beyond_reach` says so), exactly as a dead far side is (the lineage
+    /// walks' live-endpoint rule). ∝ the note's blocks' edges (both indexes).
     static func lineage(
         _ db: Database, noteID: String, blockIDs: [String], standing: MCPGrantAuthority.Standing?,
         versionOf liveNoteID: String? = nil
@@ -731,8 +743,7 @@ enum MCPNoteStructure {
                 var entry: [String: Any]
                 switch side {
                 case .beyondGrant:
-                    lineage[block, default: []].append(beyondGrant(relation))
-                    continue
+                    continue  // absent — never counted, never hinted (F-U1-1)
                 case .thisNote:
                     entry = ["relation": relation, "block_id": other]
                 case .releasedOriginal(let text):

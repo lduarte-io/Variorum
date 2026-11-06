@@ -325,8 +325,9 @@ enum MCPToolCatalog {
             takes join each block's takes, marked archived); with_tray: true (the note's tray — \
             deleted blocks and takes, kept 30 days; put_back restores one); with_lineage: true \
             (each block's lineage — what it was divided, merged or copied from or into — and each \
-            take's parent_take_id; a relative outside what you can read shows only \
-            beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
+            take's parent_take_id; a relative outside what you can read is left out, and \
+            beyond_reach says so — a take's parent you can't read shows only \
+            parent_beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
             with_versions: true (its saved versions — version_id reads one, in either form). \
             lens_id reads the note through one of its lenses, in either form: each block shows the \
             take the lens shows there, else its chosen take; with with_ids each block's \
