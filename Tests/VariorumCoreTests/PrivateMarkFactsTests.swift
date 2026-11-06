@@ -167,7 +167,10 @@ struct PrivateMarkFactsTests {
             let note = try ops.createPost(title: "watched")
             let vault = try ops.createReading(name: "vault", kind: .book)
             try ops.setBookPrivate(vault.id, true)
-            var values = db.observe { try Queries.privateMarks($0, noteIDs: [note.id]) }
+            // R-878-K3: the hosts hold the GATED read, so a client is approved.
+            let client = try ops.recordMCPContact(name: "claude-code", version: "1")
+            try ops.approveMCPClient(client.id, granting: nil)
+            var values = db.observe { try Queries.privateMarksDrawn($0, noteIDs: [note.id]) }
                 .makeAsyncIterator()
             #expect(try await values.next() == [:])
             try ops.setNotePrivate(note.id, true)
@@ -179,6 +182,79 @@ struct PrivateMarkFactsTests {
                 own: false, viaBooks: [Queries.BookRef(id: vault.id, name: "vault")]))
             _ = try ops.removePostFromReading(note.id, from: vault.id)
             #expect(try await values.next() == [:])
+        }
+    }
+
+    // MARK: - R-878-K3 — the mark DRAWS only while a client is approved
+
+    /// Her pick, "While a client is approved" — the shared icon's exact gate:
+    /// with no approved client (none, a pending one, a denied one) the drawn
+    /// reads say nothing is marked; an approval brings the facts; the plain
+    /// facts (the fence parity, the Private row) never waited.
+    @Test func theDrawnReadsWaitForAnApprovedClient() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "marked")
+            let filed = try ops.createPost(title: "filed")
+            let vault = try ops.createReading(name: "vault", kind: .book)
+            try ops.addPostToReading(filed.id, to: vault.id)
+            try ops.setBookPrivate(vault.id, true)
+            try ops.setNotePrivate(note.id, true)
+            func drawn() throws -> (notes: [String: Queries.PrivateMark], books: Set<String>) {
+                try db.read { db in
+                    (try Queries.privateMarksDrawn(db, noteIDs: [note.id, filed.id]),
+                     try Queries.privateBookMarksDrawn(db, readingIDs: [vault.id]))
+                }
+            }
+            let none = try drawn()
+            #expect(none.notes.isEmpty && none.books.isEmpty, "no client: nothing drawn")
+            let client = try ops.recordMCPContact(name: "claude-code", version: "1")
+            let pending = try drawn()
+            #expect(pending.notes.isEmpty && pending.books.isEmpty, "a waiting client is not approved")
+            try ops.approveMCPClient(client.id, granting: nil)
+            let approved = try drawn()
+            #expect(Set(approved.notes.keys) == [note.id, filed.id])
+            #expect(approved.books == [vault.id])
+            try ops.denyMCPClient(client.id)
+            let denied = try drawn()
+            #expect(denied.notes.isEmpty && denied.books.isEmpty, "denied: no approved client")
+            // The facts themselves never waited.
+            #expect(Set(try marks(db, [note.id, filed.id]).keys) == [note.id, filed.id])
+        }
+    }
+
+    /// "Nothing is read while no client is approved" — the shared icon's law,
+    /// extended to the mark: the gated read's only read then is the grants
+    /// store, so a held one sleeps through autosaves; an approval wakes it
+    /// and the mark arrives.
+    @Test func withNoApprovedClientTheHeldDrawnReadTouchesOnlyTheGrantsStore() async throws {
+        try await withOperationsAsync { ops, db in
+            let note = try ops.createPost(title: "marked")
+            _ = try ops.newBlock(in: note.id, text: "a line", registeringUndo: false)
+            let take = try #require(
+                try await db.read { try Queries.renderPost($0, containerID: note.id) }.first?.variantID)
+            try ops.setNotePrivate(note.id, true)
+            let fetches = LockIsolated(0)
+            var values = db.observe { db -> [String: Queries.PrivateMark] in
+                fetches.withValue { $0 += 1 }
+                return try Queries.privateMarksDrawn(db, noteIDs: [note.id])
+            }.makeAsyncIterator()
+            #expect(try await values.next() == [:])
+            let first = fetches.value
+            for index in 0..<3 {
+                try ops.autosave(take, text: "a line, edited \(index)", charDelta: 2)
+            }
+            try await Task.sleep(for: .milliseconds(300))
+            #expect(fetches.value == first, "no client: nothing past the grants store is read, so no autosave wakes it")
+            let client = try ops.recordMCPContact(name: "claude-code", version: "1")
+            try ops.approveMCPClient(client.id, granting: nil)
+            #expect(try await values.next()?[note.id] == Queries.PrivateMark(own: true, viaBooks: []),
+                    "an approval wakes it, and the mark is drawn")
+            // The control (non-vacuity): with a client approved the read
+            // reaches `container`, so the same autosave now does wake it.
+            let approved = fetches.value
+            try ops.autosave(take, text: "a line, edited again", charDelta: 2)
+            for _ in 0..<100 where fetches.value == approved { try await Task.sleep(for: .milliseconds(10)) }
+            #expect(fetches.value > approved, "approved: the read reaches the note, an autosave re-runs it")
         }
     }
 }

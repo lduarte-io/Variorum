@@ -513,8 +513,9 @@ final class BookPanelModel {
     /// `container`, so it never wakes at autosave rate.
     private(set) var readingReach: [String: [MCPPlaceReach]] = [:]
     /// **VX-831 — each listed NOTE's Private mark** (the closed eye beside
-    /// the shared icon on the panel's note rows): `Queries.privateMarks` over
-    /// the same entry ids — the store's own fact, whatever the clients (N-2).
+    /// the shared icon on the panel's note rows): `Queries.privateMarksDrawn`
+    /// over the same entry ids — drawn only while a client is approved
+    /// (R-878-K3).
     private(set) var privateMarks: [String: Queries.PrivateMark] = [:]
     /// **VX-831 — the named READINGS that wear the mark** (the shown book; a
     /// gathering never): `Queries.privateBookMarks` over the same ids the

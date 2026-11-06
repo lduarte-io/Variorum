@@ -25,10 +25,15 @@
 //    private VIA ITS BOOK cannot be un-privated in place, and the click says
 //    so, naming the book, with one door that opens it at the note (rail (b),
 //    D-831-2);
-//  - it reads the STORE's own fact, independent of client state (N-2), and
-//    only for the rows a host DRAWS (P1 — the shared icon's law, bound
-//    identically: `Queries.privateMarks` / `privateBookMarks`, held by
-//    `PrivateMarkHold` over the drawn ids).
+//  - it reads the STORE's own fact (never reach), ONLY while a client is
+//    approved — her R-878-K3, the shared icon's exact gate, superseding N-2:
+//    the two icons are twins, same hosts, same gate, opposite facts — and only
+//    for the rows a host DRAWS (P1 — the shared icon's law, bound
+//    identically: `Queries.privateMarksDrawn` / `privateBookMarksDrawn`, held
+//    by `PrivateMarkHold` over the drawn ids; with no approved client the
+//    read stops at the grants store and nothing is drawn). The menu's
+//    Private row keeps VX-641 (always on a marked thing), so the un-private
+//    road survives while the mark is hidden.
 //
 //  Pieces (P-9): the RULE (`PrivateMarkFace` — pure), the WORDS
 //  (`PrivateMarkCopy`, in PrivateMark.swift beside the row's), the ACT
@@ -157,7 +162,10 @@ enum PrivateMarkHold {
     /// cancelled (a host's `.task(id:)` restarting on new rows, or its view
     /// leaving), landing each distinct answer. ∝ the ids — the owned-by badge
     /// facts' page-driven posture. A failed read lands nothing (silence,
-    /// never a wrong mark).
+    /// never a wrong mark). R-878-K3: the GATED read — while no client is
+    /// approved it lands nothing marked and its only read is the grants
+    /// store's (so it never wakes at autosave rate then); a client's approval
+    /// wakes it.
     static func notes(
         _ session: AppSession, _ ids: [String],
         land: @escaping @MainActor ([String: Queries.PrivateMark]) -> Void
@@ -167,14 +175,15 @@ enum PrivateMarkHold {
             return
         }
         do {
-            for try await value in session.database.observe({ try Queries.privateMarks($0, noteIDs: ids) }) {
+            for try await value in session.database.observe({ try Queries.privateMarksDrawn($0, noteIDs: ids) }) {
                 guard !Task.isCancelled else { return }
                 land(value)
             }
         } catch {}
     }
 
-    /// The BOOKS' twin (reads `reading` only — never at autosave rate).
+    /// The BOOKS' twin (gated the same way; reads `reading` only — never at
+    /// autosave rate).
     static func books(
         _ session: AppSession, _ ids: [String], land: @escaping @MainActor (Set<String>) -> Void
     ) async {
@@ -183,7 +192,7 @@ enum PrivateMarkHold {
             return
         }
         do {
-            for try await value in session.database.observe({ try Queries.privateBookMarks($0, readingIDs: ids) }) {
+            for try await value in session.database.observe({ try Queries.privateBookMarksDrawn($0, readingIDs: ids) }) {
                 guard !Task.isCancelled else { return }
                 land(value)
             }

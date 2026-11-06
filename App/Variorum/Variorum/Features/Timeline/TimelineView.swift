@@ -70,8 +70,8 @@ final class TimelineViewModel {
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
     /// **VX-831 — each row's Private mark** (the closed eye beside the shared
-    /// icon): `Queries.privateMarks`, HELD over the SAME near window
-    /// (`reachIDs`) — the store's own fact, whatever the clients (N-2).
+    /// icon): `Queries.privateMarksDrawn`, HELD over the SAME near window
+    /// (`reachIDs`) — drawn only while a client is approved (R-878-K3).
     private(set) var privateMarks: [String: Queries.PrivateMark] = [:]
 
     /// **VX-281 ladder R1-1 — the near window** (`NearWindow`, the Library's

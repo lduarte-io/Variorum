@@ -4,8 +4,10 @@ import GRDB
 // VX-831 — THE VISIBLE PRIVATE MARK's facts (her ask, 2026-11-04: "things that
 // are private do not carry a visible mark of being private … we need a
 // deliberate private symbol too"). The mark shows on anything ALREADY marked
-// Private, read from the STORE's own fact — never reach, never client state
-// (the VX-878 record's N-2): a note's own `container.ai_private_at`, or a live
+// Private, read from the STORE's own fact — never reach — and, since her
+// R-878-K3, only while a client is approved (the `…Drawn` reads below, the
+// shared icon's exact gate; the plain fact reads stay ungated for the fence
+// parity and the Private row): a note's own `container.ai_private_at`, or a live
 // MEMBER row in a live reading carrying `ai_private_at` (the fence's
 // `privateLegForNote`, split into its two halves so the mark's door can tell
 // the note's OWN mark from one it wears via a book); a BOOK's own
@@ -65,6 +67,39 @@ extension Queries {
         guard !readingIDs.isEmpty else { return [] }
         let json = String(decoding: try JSONEncoder().encode(readingIDs), as: UTF8.self)
         return Set(try String.fetchAll(db, sql: privateBookMarkSQL, arguments: [json]))
+    }
+
+    // MARK: - R-878-K3 — what the faces DRAW: only while a client is approved
+
+    /// **The mark's gate** (her R-878-K3, 2026-11-06 — "private mark on things
+    /// marked private (only when mcp is connected)", her pick of the readings:
+    /// "While a client is approved"): the shared icon's EXACT gate — at least
+    /// one APPROVED client (VX-272; the first guard of `mcpReachStandings`,
+    /// the same read) — so the two icons are twins: same hosts, same gate,
+    /// opposite facts. Supersedes the VX-878 record's N-2. One tiny read of
+    /// the grants store (local-only, never written at autosave rate).
+    public static func privateMarkGateOpen(_ db: Database) throws -> Bool {
+        !(try mcpClients(db, states: [.approved], limit: 1)).isEmpty
+    }
+
+    /// **The marks a host DRAWS** — `privateMarks` behind the gate: while no
+    /// client is approved NOTHING else is read (the shared icon's law — the
+    /// read stops at the grants store, never touching `container`,
+    /// `reading_post` or `reading`) and nothing is drawn. Every host's hold
+    /// and the note's masthead read THIS. (The menu's Private row keeps
+    /// VX-641 — it reads the facts direct, so the un-private road survives
+    /// while the mark is hidden.)
+    public static func privateMarksDrawn(
+        _ db: Database, noteIDs: [String]
+    ) throws -> [String: PrivateMark] {
+        guard !noteIDs.isEmpty, try privateMarkGateOpen(db) else { return [:] }
+        return try privateMarks(db, noteIDs: noteIDs)
+    }
+
+    /// The BOOKS' twin of `privateMarksDrawn`.
+    public static func privateBookMarksDrawn(_ db: Database, readingIDs: [String]) throws -> Set<String> {
+        guard !readingIDs.isEmpty, try privateMarkGateOpen(db) else { return [] }
+        return try privateBookMarks(db, readingIDs: readingIDs)
     }
 
     /// A note's own half (the fence's `c.ai_private_at IS NOT NULL` over a

@@ -7,9 +7,11 @@
 //  family's switch, the words (the via-book hover is hers: "Private — via
 //  ‹book›"), the door's two arms through the real operations (own: un-private,
 //  no confirm, the Private rows' receipts; via-book: nothing acts, the ruled
-//  sentence speaks with ONE door to the book), the masthead's read (reach only
-//  while the indicator is on — the shared icon's law; the mark whatever the
-//  clients — N-2), and the drawn-rows-only shape on every host (P1). The facts
+//  sentence speaks with ONE door to the book), the gate (her R-878-K3: the
+//  mark draws only while a client is approved — the shared icon's exact gate,
+//  superseding N-2 — while the menu's Private row keeps VX-641), the
+//  masthead's read (the mark only while a client is approved, reach only while
+//  the indicator is on), and the drawn-rows-only shape on every host (P1). The facts
 //  themselves are pinned headless (`PrivateMarkFactsTests`). An Improvement:
 //  no red-on-old is owed; the walk is its evidence.
 //
@@ -68,9 +70,10 @@ struct PrivateMarkFaceTests {
         let fact = Queries.PrivateMark(own: true, viaBooks: [])
         #expect(PrivateMarkFace.note(fact, badgesOn: false) == nil, "ownership_badges off: no mark on a row")
         #expect(PrivateMarkFace.book(marked: true, badgesOn: false) == nil)
-        // The masthead reads the row's own rule, never the indicator's gate:
-        // shown with no client at all (N-2), silenced with the family
-        // (D-831-3 — so the switch's "Off: no marks anywhere" stays true).
+        // The masthead reads the row's own rule over the row's own GATED fact
+        // (R-878-K3 — `theMarkDrawsOnlyWhileAClientIsApproved` pins the gate),
+        // silenced with the family (D-831-3 — so the switch's "Off: no marks
+        // anywhere" stays true).
         let indicator = try String(
             contentsOf: URL(fileURLWithPath: #filePath)
                 .deletingLastPathComponent().deletingLastPathComponent()
@@ -80,8 +83,45 @@ struct PrivateMarkFaceTests {
             "PrivateMarkFace.note(state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true)"))
         // The switch says it governs the eye, and still that off changes
         // nothing else.
-        #expect(OwnershipSettingsCopy.badgesHelp.contains("A Private note or book wears a closed eye"))
+        // R-878-K3: and it says when (it no longer claims the eye with no client).
+        #expect(OwnershipSettingsCopy.badgesHelp.contains(
+            "While an AI client is approved, a Private note or book wears a closed eye"))
         #expect(OwnershipSettingsCopy.badgesHelp.contains("Off: no marks anywhere; nothing else changes."))
+    }
+
+    /// **R-878-K3 — the gate arm** (her pick, "While a client is approved" —
+    /// the shared icon's exact gate, superseding N-2): a thing marked Private,
+    /// with the badges ON, draws NO mark while no client is approved — the
+    /// gated read every host holds answers nothing — and draws it once one is;
+    /// the note menu's Private row keeps VX-641 throughout (always shown on a
+    /// marked thing), so the un-private road survives while the mark is hidden.
+    @Test func theMarkDrawsOnlyWhileAClientIsApproved() async throws {
+        try await withMarkWorld { session, db in
+            let ops = session.operations
+            let note = try ops.createPost(title: "a secret")
+            let book = try ops.createReading(name: "the vault", kind: .book)
+            try ops.setNotePrivate(note.id, true)
+            try ops.setBookPrivate(book.id, true)
+            func drawn() async throws -> (note: PrivateMarkFace.Mark?, book: PrivateMarkFace.Mark?) {
+                let (notes, books) = try await db.read { db in
+                    (try Queries.privateMarksDrawn(db, noteIDs: [note.id]),
+                     try Queries.privateBookMarksDrawn(db, readingIDs: [book.id]))
+                }
+                return (PrivateMarkFace.note(notes[note.id], badgesOn: true),
+                        PrivateMarkFace.book(marked: books.contains(book.id), badgesOn: true))
+            }
+            let none = try await drawn()
+            #expect(none.note == nil && none.book == nil, "marked + badges on + NO approved client ⇒ no mark")
+            #expect(try await db.read { try NotePrivacyState.read($0, postID: note.id) }.showsPrivateRow,
+                    "VX-641 unchanged: the Private row still shows on a marked note — the un-private road")
+            let client = try ops.recordMCPContact(name: "claude-code", version: "2")
+            let pending = try await drawn()
+            #expect(pending.note == nil && pending.book == nil, "a waiting client is not approved")
+            try ops.approveMCPClient(client.id, granting: nil)
+            let approved = try await drawn()
+            #expect(approved.note == .ownNote(alsoVia: []))
+            #expect(approved.book == .ownBook)
+        }
     }
 
     @Test func eachMarksPressIsItsOwnArm() {
@@ -203,18 +243,26 @@ struct PrivateMarkFaceTests {
 
     // MARK: - The masthead's read
 
-    @Test func theMastheadReadsTheMarkAlwaysAndReachOnlyWhileTheIndicatorIsOn() async throws {
+    /// R-878-K3 (A FLIPPED PIN — it read "the mark always", N-2's rule): the
+    /// masthead reads the mark only while a client is approved, and reach only
+    /// while the indicator is on.
+    @Test func theMastheadReadsTheMarkOnlyWhileAClientIsApprovedAndReachOnlyWhileOn() async throws {
         try await withMarkWorld { session, db in
             let ops = session.operations
             let note = try ops.createPost(title: "marked")
             let open = try ops.createPost(title: "an open page")
+            try ops.setNotePrivate(note.id, true)
+            // No client approved: the masthead's read draws nothing marked.
+            let unapproved = try await db.read {
+                try MCPNoteIndicatorState.read($0, postID: note.id, includingReach: false)
+            }
+            #expect(unapproved.mark == nil && unapproved.isEmpty, "no approved client: no mark at the masthead")
             let client = try ops.recordMCPContact(name: "claude-code", version: "2")
             try ops.approveMCPClient(client.id, granting: nil)
             _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
-            try ops.setNotePrivate(note.id, true)
-            // The mark is read whatever the indicator (N-2)…
+            // A client approved: the mark is read whatever the indicator…
             let off = try await db.read { try MCPNoteIndicatorState.read($0, postID: note.id, includingReach: false) }
-            #expect(off.mark == Queries.PrivateMark(own: true, viaBooks: []), "the mark, whatever the indicator")
+            #expect(off.mark == Queries.PrivateMark(own: true, viaBooks: []), "approved: the mark, indicator or not")
             let on = try await db.read { try MCPNoteIndicatorState.read($0, postID: note.id) }
             #expect(on.mark == off.mark)
             // The lock's two fields live on, derived (its pins read them).
@@ -255,11 +303,15 @@ struct PrivateMarkFaceTests {
         #expect(panel.contains("await model.holdPrivateMarks(model.entryIDs(for: shown?.id))"))
         #expect(panel.contains("await model.holdReadingPrivateMarks(namedReadings(shown))"))
         let indicator = try source("Core/Views/MCPNoteIndicator.swift")
-        #expect(indicator.contains("Queries.privateMarks(db, noteIDs: [postID])"), "the masthead: one note")
-        // The hold reads only the facts' two id-driven queries.
+        // R-878-K3 (FLIPPED with the gate): the masthead and every host hold
+        // the GATED reads — the facts' id-driven queries behind the
+        // approved-client gate, never the plain facts.
+        #expect(indicator.contains("Queries.privateMarksDrawn(db, noteIDs: [postID])"), "the masthead: one note")
         let face = try source("Core/Views/PrivateMarkView.swift")
-        #expect(face.contains("try Queries.privateMarks($0, noteIDs: ids)"))
-        #expect(face.contains("try Queries.privateBookMarks($0, readingIDs: ids)"))
+        #expect(face.contains("try Queries.privateMarksDrawn($0, noteIDs: ids)"))
+        #expect(face.contains("try Queries.privateBookMarksDrawn($0, readingIDs: ids)"))
+        #expect(!face.contains("try Queries.privateMarks($0"), "no ungated hold")
+        #expect(!indicator.contains("Queries.privateMarks(db"), "no ungated masthead read")
     }
 
     /// The fences, said as code: the mark only ever CLEARS her own stamps, by

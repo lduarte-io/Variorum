@@ -19,8 +19,9 @@
 //    client's ask waits on this note — her press opens it.
 //  **VX-831 — THE PRIVATE MARK took the lock's place**, and it is the note's
 //  masthead face of the mark every shared-icon host draws (`PrivateMarkView`,
-//  the closed eye): shown on a Private note whatever the clients (N-2), under
-//  the badge family's one switch (D-831-3); its own mark's press un-privates, a Private book's says
+//  the closed eye): shown on a Private note only while a client is approved
+//  (her R-878-K3 — the shared icon's exact gate, superseding N-2), under the
+//  badge family's one switch (D-831-3); its own mark's press un-privates, a Private book's says
 //  so and offers the book. Nothing true ⇒ NOTHING (calm — "an empty state that
 //  says nothing").
 //
@@ -33,10 +34,11 @@ import VariorumCore
 nonisolated struct MCPNoteIndicatorState: Equatable, Sendable {
     let postID: String
     /// **VX-831 — the note's Private mark** (the closed eye's fact: its own
-    /// stamp, or the live Private books holding it — `Queries.privateMarks`,
-    /// the rows' own read); nil when it is not Private. It replaced the lock's
-    /// two fields (`isNotePrivate` + `privateBooksHolding`), which are derived
-    /// below, unchanged in meaning.
+    /// stamp, or the live Private books holding it — `Queries.privateMarksDrawn`,
+    /// the rows' own GATED read); nil when it is not Private, and — R-878-K3 —
+    /// nil while no client is approved (nothing read past the grants store).
+    /// It replaced the lock's two fields (`isNotePrivate` +
+    /// `privateBooksHolding`), which are derived below.
     let mark: Queries.PrivateMark?
     /// Who reaches it now, how far and why (`Queries.mcpNoteReach` — the ONE
     /// rule). Read only while the indicator is ON (`includingReach`) — the
@@ -56,7 +58,7 @@ nonisolated struct MCPNoteIndicatorState: Equatable, Sendable {
     ) throws -> MCPNoteIndicatorState {
         MCPNoteIndicatorState(
             postID: postID,
-            mark: try Queries.privateMarks(db, noteIDs: [postID])[postID],
+            mark: try Queries.privateMarksDrawn(db, noteIDs: [postID])[postID],
             reach: includingReach ? try Queries.mcpNoteReach(db, noteID: postID) : [])
     }
 
@@ -89,8 +91,9 @@ struct MCPNoteIndicator: View {
 
     var body: some View {
         let state = MCPNoteIndicatorState.matching(state, postID: postID)
-        // VX-831: the masthead's mark — drawn on anything marked, whatever
-        // the clients (N-2), under the badge family's one switch (D-831-3).
+        // VX-831: the masthead's mark — drawn on anything marked while a
+        // client is approved (R-878-K3 — the gate rides the read), under the
+        // badge family's one switch (D-831-3).
         let mark = PrivateMarkFace.note(state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true)
         HStack(spacing: 4) {
             if indicatorOn, let state, !state.reach.isEmpty {

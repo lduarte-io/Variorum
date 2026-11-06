@@ -234,8 +234,8 @@ extension LibraryCatalogModel {
                 self?.landReach(value, for: ids)
             }
         }
-        // VX-831: the same notes' Private marks — the store's own fact (read
-        // whatever the clients, N-2), over the SAME window (P1).
+        // VX-831: the same notes' Private marks — the store's own fact, drawn
+        // only while a client is approved (R-878-K3), over the SAME window (P1).
         markHold = Task { @MainActor [weak self] in
             await PrivateMarkHold.notes(session, ids) { value in
                 self?.landMarks(value, for: ids)

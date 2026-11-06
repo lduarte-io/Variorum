@@ -122,7 +122,7 @@ struct BookPanelView: View {
             await model.holdReadingReach(namedReadings(shown))
         }
         // VX-831: the Private marks of the same notes and the same named
-        // readings — the store's own fact, whatever the clients.
+        // readings — drawn only while a client is approved (R-878-K3).
         .task(id: model.entryIDs(for: shown?.id)) {
             await model.holdPrivateMarks(model.entryIDs(for: shown?.id))
         }

@@ -389,7 +389,8 @@ final class LibraryCatalogModel {
     /// **VX-831 — the near window's Private marks** (the closed eye on the
     /// note rows — List, Cards, the answer sheet's heads), HELD beside the
     /// reach over the SAME ids (`holdNearFacts`) — the store's own fact,
-    /// read whatever the clients (N-2), ∝ the window (P1). The last answer
+    /// drawn only while a client is approved (R-878-K3 — the gated read),
+    /// ∝ the window (P1). The last answer
     /// each note had; the rows read theirs through their own slice.
     @ObservationIgnored var heldMarks: [String: Queries.PrivateMark] = [:]
     @ObservationIgnored var markHold: Task<Void, Never>?
@@ -624,7 +625,8 @@ final class LibraryCatalogModel {
 
     /// **VX-831 — the LISTED books that wear the Private mark** (their own
     /// stamp; a gathering never — `Queries.privateBookMarks`), held while
-    /// they are listed, whatever the clients (N-2). Reads `reading` only.
+    /// they are listed, only while a client is approved (R-878-K3). Reads
+    /// `reading` only.
     private(set) var privateBookIDs: Set<String> = []
 
     /// VX-831 — hold the listed books' marks (the view's `.task(id:

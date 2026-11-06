@@ -49,8 +49,8 @@ final class PoolPostsModel {
     /// tucked run while it shows), held while the page shows.
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
     /// **VX-831 — each DRAWN note's Private mark** (the closed eye beside the
-    /// shared icon): `Queries.privateMarks` over the same `drawnIDs`, held
-    /// while the page shows — the store's own fact, whatever the clients.
+    /// shared icon): `Queries.privateMarksDrawn` over the same `drawnIDs`, held
+    /// while the page shows — drawn only while a client is approved (R-878-K3).
     private(set) var privateMarks: [String: Queries.PrivateMark] = [:]
 
     /// Bounded like every held listing (the observeLibrary discipline).

@@ -73,7 +73,8 @@ final class ShelfViewModel {
     private(set) var fencedBooks: Set<String> = []
     /// **VX-831 — the board's books that wear the Private mark** (their own
     /// stamp; a gathering never — `Queries.privateBookMarks`), held over the
-    /// board's own rows (`holdPrivateMarks`), whatever the clients (N-2).
+    /// board's own rows (`holdPrivateMarks`), only while a client is approved
+    /// (R-878-K3).
     /// Reads `reading` only — never at autosave rate.
     private(set) var privateBookIDs: Set<String> = []
 
