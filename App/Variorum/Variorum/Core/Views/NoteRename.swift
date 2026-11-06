@@ -1,6 +1,8 @@
 //
 //  NoteRename.swift
-//  Variorum (Mac)
+//  Variorum (Mac) — Core/Views (the shared home since the VX-878 ladder, F2:
+//  two features render it — the Library's rows and sidebar, and BookView's
+//  note-title menu)
 //
 //  **VX-425 (the VX-439 run, A-439-16) — RENAME NOTE…, one ask for every row
 //  that renders it.** Her ask (2026-10-18) and a beta tester's: the sidebar's
