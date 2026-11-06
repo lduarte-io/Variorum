@@ -274,11 +274,21 @@ nonisolated enum ArrivalsBulk {
 
 // MARK: - Which navigation closes the review
 
-/// The book facts a navigation moves. While the review is open, a CHANGE in
+/// The book facts a navigation moves. While the review is open, a MOVE in
 /// any of them means she asked the book to show her something — a mode, a
 /// note, a reveal, a landing — and the review steps aside so she sees it
 /// (it never stands over a landing). A reveal or landing CONSUMED (going to
 /// nil) is the surface finishing its own work, never her ask.
+///
+/// **W-1 (the leg-2 walk) — the review's OWN acts are never navigation.**
+/// Its seats change the book's CONTENT, and content arriving moves two of
+/// these facts from NOTHING: an empty book's first seat fills the spread's
+/// first page (`BookViewModel.spreadEntries`), and the Index's cold seed
+/// selects its first note (`BookIndexView.landOrSeed`). So the spread's page
+/// and the Index's selection count only when they move from one note to
+/// ANOTHER; a focus counts when it lands on a note, never when the book
+/// releases one it no longer shows (its own housekeeping — every release she
+/// asks for rides a mode, a reveal or a page that does count).
 @MainActor
 struct ArrivalsReviewSignal: Equatable {
     var mode: BookStructureModel.ViewMode
@@ -291,12 +301,18 @@ struct ArrivalsReviewSignal: Equatable {
 
     static func navigated(from old: ArrivalsReviewSignal, to new: ArrivalsReviewSignal) -> Bool {
         if old.mode != new.mode { return true }
-        if old.focusedPostID != new.focusedPostID { return true }
-        if old.indexSelectedPostID != new.indexSelectedPostID { return true }
-        if old.spreadFirstPostID != new.spreadFirstPostID { return true }
+        if let focused = new.focusedPostID, focused != old.focusedPostID { return true }
+        if moved(old.indexSelectedPostID, new.indexSelectedPostID) { return true }
+        if moved(old.spreadFirstPostID, new.spreadFirstPostID) { return true }
         if let reveal = new.reveal, reveal != old.reveal { return true }
         if let chapter = new.chapterReveal, chapter != old.chapterReveal { return true }
         if let landing = new.landingPostID, landing != old.landingPostID { return true }
         return false
+    }
+
+    /// From one note to ANOTHER — never seeded from nothing, never emptied.
+    private static func moved(_ old: String?, _ new: String?) -> Bool {
+        guard let old, let new else { return false }
+        return old != new
     }
 }
