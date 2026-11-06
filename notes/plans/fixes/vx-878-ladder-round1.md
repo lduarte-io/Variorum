@@ -282,3 +282,15 @@ is accepted; the zero-test-files `git diff --stat` parity proof at the fix commi
 **Final lines (head 4e4979691):** `swift build` → `Build complete!` · `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug build` → `** BUILD SUCCEEDED **` · `… build-for-testing` → `** TEST BUILD SUCCEEDED **`. No `Sources/`, `Tests/`, `Server/` or mobile file in the fix session's diff (`a37f7cbe1..HEAD`: MCPNoteIndicator.swift +1 · NoteRename.swift moved 3+/1− · WingsModel.swift 12+/3− · WingDestinationsDeadWingTests.swift +132), so no core suite was owed a run.
 
 **The closing window's new debt** (recorded in the run record's protocol section): `WingDestinationsDeadWingTests` RUN on both trees — 34dc2f22e (expect 2 failing: the two RED ON OLD tests above) and the head (0 failing) — the old tree built off-stage before the claim; plus the F1/F2 touched sources' suites by TYPE name: `WingSwitcherTests` `WingBookMoveDoorTests` `BookDoorsEverywhereTests` `WingPaletteDoorsTests` `SidebarNoteRowMenuTests` `VocabularySweepTests` `BookNoteTitleMenuTests`. For round 2: F3's check is only that the comment line landed.
+
+---
+
+## ORCHESTRATOR LINE-BY-LINE CHECK (the final-round rule: fixes no later round reads, checked against each finding) — LADDER CLOSED, PASS
+
+*Checked by the orchestrator's own eyes on the diffs, 2026-11-06:*
+
+- **F1 ✓** — `bd322c1bf`'s whole diff is `WingsModel.destinations(from:)`: `let effective = wings.contains { $0.id == wingID } ? wingID : ""` then the filter excludes `effective` — exactly the reviewer's confirmed shape (id effective iff "" or a held live wing). Arms verified by reading: a live id is unchanged; Home in ⇒ Home excluded; a dead id ⇒ Home excluded, other wings offered; a dead id with no other live wing ⇒ `[]`, the door undrawn (P-2). The pin `WingDestinationsDeadWingTests` (34dc2f22e, committed ALONE before the fix) holds the three claimed tests by name; red-on-old judged by the old body's evaluation (`['', studio]`/`['']` against `[studio]`/`[]` pinned); the two-tree RUN is the closing window's.
+- **F2 ✓** — `345b09802`'s whole diff-stat is the rename `{Features/Library => Core/Views}/NoteRename.swift | 4 +++-` (the header's home line), ZERO test files — the parity proof as ruled.
+- **F3 ✓** — `4e4979691` adds exactly ONE comment line at the HStack ("Always present, even empty: it carries the held read (`.task` below) — a conditional here strands the server-off mark's read (R-878-K3; VX-878 ladder F3).") and nothing else; the reviewer's round-2 condition ("the comment landed") is met here.
+
+**The ladder closes at round 1 (no BLOCKER, no MAJOR; the three fixes checked above; F4 and the process notes dispositioned).** The closing window owes the two-tree runs named in the run record's protocol section.
