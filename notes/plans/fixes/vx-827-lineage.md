@@ -711,8 +711,8 @@ store touches.*
 | U2-3 | A — core: the tag-wearer listing + batched note tags, with exact-rows and P1 pins | DONE — 7/7 + the shared brain's suites green; both P1 pins red on the naive join (below) |
 | U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | DONE — 6/6 server + the catalog (10 new arms) green; the arms red on the fence mutation (below); ONE justified re-pin |
 | U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | DONE — red exactly as announced on the revert, green on the fix (below) |
-| U2-6 | C — VX-778's predicate + its pin (red-on-old) | NEXT |
-| U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) | — |
+| U2-6 | C — VX-778's predicate + its pin (red-on-old) | DONE — red on the pre-fix tree, green on the fix; predicate-narrow, no App file touched |
+| U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) | NEXT |
 | U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | — |
 
 ### U2-1 — the tag filter's argument (the proposal gate: NOT ambiguous)
@@ -869,3 +869,31 @@ fix cannot move by construction). The brief's literal "granted-empty vs the fenc
 catalog's client — fixture growth, every store alike): `read_note · an empty note (text)` → "“2026-06-30” is an empty
 note — nothing is written in it yet." · `… , with ids` → `{"blocks":[],"books":[],…,"tag_ids":[],"tags":[],"title":
 "2026-06-30"}` · `export_note · an empty note` → the sentence; A == B, B == C.
+
+### U2-6 — VX-778: the client row's count (trace, fix, pin)
+
+**The trace.** MCPSpec's line — "per-client grant rows (counts say "grants")" — checked against the pane: the
+Clients row's detail is `MCPPaneCopy.reads(liveGrantCount, inert: inertGrantCount)` → "1 grant" / "N grants", plus
+"· M inert" (W-UX-10 already moved the noun off "shared places"; the ticket quotes the old words). So "say N
+grants" is already the noun. The COUNT is the defect: `MCPDoor`'s client row reads `Queries.mcpGrantReachCounts`,
+which classified each live grant by `mcpGrantInertFence` alone — and that answers nil for a GONE target (no note
+facts, no book facts, a wing always nil, no gathering facts), so a grant on a deleted note, book, wing or gathering,
+or a book grant on a reading that is a gathering again (VX-763's road), counted as REACHING — while Shared with AI
+lists each as "(gone)", Revoke only (`mcpGrantPlaceTitle` nil, the predicate `MCPChangeOffer` reads). VX-771's O-6
+named exactly this.
+**The fix (predicate-narrow, core only — the vx-878 agreement held: no App file, no row rendering touched).**
+`mcpGrantReachCounts` skips a grant whose place is gone by the listing's OWN gone predicate (`mcpGrantPlaceTitle ==
+nil`) — counted as neither reaching nor inert. **The pin** (`MCPGrantPlacesTests.aGrantWhosePlaceIsGoneIsCountedNeither
+ReachingNorInert`, headless core): three standing places + one inert, then five grants whose places go (deleted note,
+book, wing, gathering; a book grant whose reading is a gathering again); Shared with AI lists all five gone; the
+counts read (3, 1). **RED on the pre-fix tree** (the pin written first): "the client row counts only the places that
+still stand — not (reaching: 8, inert: 1)" ("✘ Test run with 9 tests in 1 suite failed … with 1 issue"); on the fix
+"✔ Test run with 65 tests in 7 suites passed" (`MCPGrantPlacesTests|MCPGrant`). No Mac-target pin was needed (the
+count's source is core); the pane's existing pins (`MCPPaneTests`' `liveGrantCount == 8` over eight standing books;
+`MCPGrantSheetTests`' Deny words) read standing places only and are untouched.
+**One consequence, said plainly (PROVISIONAL, for #264):** Deny's confirm sums the same two counts
+(`MCPPaneCopy.denyClientDetail(grants: live + inert)`), so it too stops naming a gone place's grant — it now names
+what the row she just read names; Deny still revokes the gone rows (they leave Shared with AI). Options: **(a)
+[built]** as is — the confirm agrees with the row; **(b)** a third count (`gone`) carried on `MCPDoor.ClientRow` so
+the confirm names every row the press revokes — an `MCPDoor` + `MCPPane` edit (vx-878's batch-3 files; NOT built,
+outside the narrow agreement); **(c)** the row also says "· K gone" — a rendering change, out of scope.

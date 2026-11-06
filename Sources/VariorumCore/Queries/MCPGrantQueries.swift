@@ -316,13 +316,20 @@ extension Queries {
     }
 
     /// A client's live grants, split by whether they reach (13n-c U2 —
-    /// R2-3's twin on the client row: "N shared places" counts only grants
-    /// that reach; an inert one is said as inert). ∝ the client's grants.
+    /// R2-3's twin on the client row: its "N grants" counts only grants that
+    /// reach; an inert one is said as inert). **VX-778 (VX-827 U2): a grant
+    /// whose PLACE IS GONE counts as NEITHER** — read by the listing's own gone
+    /// predicate (`mcpGrantPlaceTitle` nil: a deleted note, book, wing or
+    /// gathering, or a book grant on a reading that is a gathering again —
+    /// VX-763), the one Shared with AI says "(gone)" by and Change… is gated on.
+    /// `mcpGrantInertFence` answers nil for a gone target, so before this such a
+    /// grant counted as reaching. ∝ the client's grants.
     public static func mcpGrantReachCounts(
         _ db: Database, clientID: String
     ) throws -> (reaching: Int, inert: Int) {
         var reaching = 0, inert = 0
         for grant in try mcpGrants(db, clientID: clientID) where grant.ruleGrant.isLive {
+            guard try mcpGrantPlaceTitle(db, grant) != nil else { continue }
             if try mcpGrantInertFence(db, grant) == nil { reaching += 1 } else { inert += 1 }
         }
         return (reaching, inert)
