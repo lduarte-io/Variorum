@@ -109,13 +109,22 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | Piece | Status |
 |---|---|
 | R-0 · record opened, required reading done (this file whole, SurfaceContracts The app / The Library / The Bookcase and books, SessionResiliencyProtocol) | DONE (this commit) |
-| 868-a · VX-868 wording pin (red on the pre-fix tree by construction) | IN-PROGRESS |
-| 868-b · VX-868 both arms rewritten | NOT-STARTED |
-| 802-a · VX-802 survey + proposed door set (the in-batch fork) | NOT-STARTED |
+| 868-a · VX-868 wording pin (red on the pre-fix tree by construction) | DONE (3263e5877) — `BookDeleteAndDuplicateTests.thePlainBooksDeleteSentenceReadsWithOneNoteAndWithSeveral`; red-on-old by evaluation of the pre-fix body (below); the App-suite RUN of the red and the green is the closing window's (PENDING) |
+| 868-b · VX-868 both arms rewritten | DONE (this commit) — `BookStateCopy.plainBookKeepsItsNotes` |
+| 802-a · VX-802 survey + proposed door set (the in-batch fork) | IN-PROGRESS |
 | 829-a · VX-829 Book Settings: Move to Wing door | NOT-STARTED |
 | 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | NOT-STARTED |
 | 802-b · VX-802 build (gated on the orchestrator's ruling) | NOT-STARTED — awaiting the ruling |
 | V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | NOT-STARTED |
+
+### VX-868 — the traced mechanism, the pin, the words
+
+- **Mechanism:** `BookStateCopy.deletePlainBook` (`Features/Readings/BookStateDoors.swift`) built its lead line as `"… never touches a note — its \(notes(count)) stay where they are, in the Library and any other book."` — `notes(1)` is "1 note", so the one-note arm read "its 1 note stay where they are" (the verb agreed with no subject); the several arm read "its 3 notes stay where they are, in the Library and any other book" (her word: not good English either). One home only — no twin in the tutorial, the guide or the phone (grepped).
+- **Pin:** `BookDeleteAndDuplicateTests.thePlainBooksDeleteSentenceReadsWithOneNoteAndWithSeveral` — both arms exact, the old shape asserted gone, the zero arm unchanged. **Red on old, by evaluation:** the pre-fix body run as a scratch script returns `old(1) = "Deleting a plain book never touches a note — its 1 note stay where they are, in the Library and any other book."` and `old(3) = "… — its 3 notes stay where they are, in the Library and any other book."`; both `== expected` are `false`, and `old(1).contains("stay where they are")` is `true`. The pin was committed alone on the pre-fix code (3263e5877) so the closing window can run the red on that tree and the green on the fix.
+- **The words (PROVISIONAL — HER BUNDLE):**
+  - one note: "Deleting a plain book never touches a note — the one note in it stays in the Library, and in any other book that holds it."
+  - several (3 shown): "Deleting a plain book never touches a note — the 3 notes in it stay in the Library, and in any other books that hold them."
+  - zero (unchanged): "Deleting a plain book never touches a note."
 
 ## LIVE LEDGER (one row per member; flipped as evidence lands)
 
