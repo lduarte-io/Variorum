@@ -623,6 +623,62 @@ P-13nb-U4-7's RIDER reasoning ("omission would lie about the tree's completeness
 
 **`notes/mcp-invisibility-residuals.md`: NO ROW** (her ruling: "that is the point").
 
+**D-U2-1 — `notes/MCPSpec.md`, `list_notes` by tag + the richer rows (VX-810; suggested home: right after
+"`list_notes(book_id)` carries the book's chapters."):**
+
+> **`list_notes` takes `tag` (VX-810 — the VX-827 run; the record `notes/plans/fixes/vx-827-lineage.md` U2):** a
+> tag's PATH in every tag tool's form (a leading `#` tolerated; one that names no path refuses at the call door in
+> `remove_tag`'s sentence), read in the listing's own wing — a book's or a gathering's, `wing_id`'s; the bare form in
+> every wing — and matched as the rule grammar matches a tag term (the tag and its subtree), worn on the note itself
+> or on a live block it places (`Queries.notesWearingTag` — THE ONE wearer rule `tag_unused_in_reach` reads; a snippet
+> never); it filters the listing's own source, every row still through the one rule, paged by that listing's own
+> cursor; a path no readable note wears — naming nothing, worn only beyond reach, an unreachable wing's — lists
+> NOTHING (the empty listing, byte-identical; never a refusal). ∝ the tag's wearers (a book's: its members), never
+> the corpus. **Every row carries `entry_date` (`null` when undated — VX-758's rider) and `tag_ids` + `tags`** (the
+> tags the note itself wears, by path — the Level 0 header's; a block's tags are the block's); **`read_note`'s JSON
+> forms carry `tag_ids` + `tags`** on every page, on the live read only (a saved version's read carries neither, as
+> it carries no `books`).
+
+**D-U2-2 — `notes/MCPSpec.md`, the empty note (VX-815; suggested home: after the "Paged `read_note` (VX-256)"
+sentence):**
+
+> **An empty note says it is empty (VX-815 — the VX-827 run U2):** a TEXT form of a note INSIDE reach — `read_note`'s
+> Level 0 (a lens's too), a saved version's text, `export_note` — whose answer would hold nothing (empty, or only the
+> format's block breaks) answers ONE sentence naming it ("“‹title›” is an empty note — nothing is written in it
+> yet."; a saved version's "This saved version of “‹title›” is empty — nothing was written in it." — PROVISIONAL,
+> #264) in place of the empty string, which is the core's own read of a note that does not exist; a titled or tagged
+> empty note keeps its header (an empty body); the JSON forms already said it (`blocks: []` beside the title); the
+> fence's one byte-identical not-shared shape is untouched (hidden = missing).
+
+**D-U2-3 — `notes/MCPSpec.md`, the pane's count (VX-778):** in "The pane: per-client grant rows (counts say
+"grants")", replace the parenthesis with: "(counts say "grants" and count only grants whose place still stands — a
+gone one, Revoke-only in Shared with AI, counts nowhere: VX-778)".
+
+**D-U2-4 — `notes/SurfaceContracts.md`, Doors (optional, the orchestrator's call):** beside D-U1-3's line, add:
+"`list_notes` takes a tag path and lists the readable notes wearing it or a tag under it, on the note or a block;
+its rows carry each note's own tags and entry date (VX-810)."
+
+**D-U2-5 — `notes/AppSpecRecord.md` (the dated entry's narrative, closeout):** VX-815's trace as recorded (U2-2 —
+the nothing-shape is the core's tolerant read; the wire's fence was never byte-identical with it, so that half is
+stated as a control, not a red-on-old); the P1 lesson (U2-3 — a plain JOIN let SQLite walk every post through
+`idx_container_kind`, a SEARCH that is a corpus scan; the plan pin counts it as one); VX-778's Deny consequence and
+its options (U2-6).
+
+**FOR #264 (the U2 items — the orchestrator lands them at the merge; each built as its (a)):**
+- **P-U2-1 — the empty-note sentences** (U2-5): (a) [built] "“‹title›” is an empty note — nothing is written in it
+  yet." / "This saved version of “‹title›” is empty — nothing was written in it."; (b) one title-less fixed sentence
+  for every empty text read; (c) the Level 0 form keeps an empty answer and only `export_note` speaks.
+- **P-U2-2 — what counts as "holds nothing"** (U2-5): (a) [built] empty or only line breaks (blank blocks are no
+  words; a header or a space is something); (b) only the exactly empty answer; (c) any whitespace-only answer.
+- **P-U2-3 — Deny's confirm after VX-778** (U2-6): (a) [built] it names what the row names (standing places only);
+  (b) a third `gone` count so it names every row the press revokes (an `MCPDoor`/`MCPPane` edit — vx-878's files);
+  (c) the row also says "· K gone".
+- **P-U2-4 — a saved version's JSON read carries no tags** (U2-4): (a) [built] neither key, as `books`; (b) the
+  version container's own tags (`[]` in practice); (c) the live note's tags.
+- **P-U2-5 — rows show the note's OWN tags while the filter also matches a block's** (U2-4): (a) [built] as said in
+  the description; (b) rows also list the tags the note's blocks wear (a separate key); (c) the filter matches note
+  tags only.
+
 ## U1 LEG-2 ADJUDICATION (the orchestrator, 2026-11-05)
 
 **Verified:** commits 08c12ede2 · bf6eadad8 · d766d9363 · 40b8f417a on origin, tree clean;
@@ -712,8 +768,8 @@ store touches.*
 | U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | DONE — 6/6 server + the catalog (10 new arms) green; the arms red on the fence mutation (below); ONE justified re-pin |
 | U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | DONE — red exactly as announced on the revert, green on the fix (below) |
 | U2-6 | C — VX-778's predicate + its pin (red-on-old) | DONE — red on the pre-fix tree, green on the fix; predicate-narrow, no App file touched |
-| U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) | NEXT |
-| U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | — |
+| U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) + the #264 items | DONE — D-U2-1…5, P-U2-1…5 |
+| U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | NEXT |
 
 ### U2-1 — the tag filter's argument (the proposal gate: NOT ambiguous)
 
