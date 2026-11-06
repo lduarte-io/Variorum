@@ -184,8 +184,9 @@ safety copy before ANY real-store touch (none expected this run).
 |---|---|---|
 | 1 | U1 — lineage queries + VX-817 wire + the F-U1-1 stub retirement | DONE (c0cad8fd3…40b8f417a; adjudications below) |
 | 2 | U2 — VX-810 + VX-815 + VX-778 (rider, her kickoff pick) | DONE (22c3a5a89…06113a96c; adjudication below) |
-| 3 | VX-801 design mockup + sitting | MOCKUP READY (notes/plans/vx-827-mockups/lineage-door.html) — HER Q1–Q6 RULINGS OWED, gate for U3 |
-| 4 | U3 — VX-801 build | NOT-STARTED |
+| 3 | VX-801 design pass (5 mockup rounds + 2 explorations) | DONE — THE DESIGN MEMO settled at the exploration sitting |
+| 4 | U3a — the Commits face | DONE (fc8880a53…dc7fde0e5; adjudication below) |
+| 4b | U3b — the Lineage face + origin re-aim + panel retirement | NOT-STARTED |
 | 5 | Ladder (whole diff) | NOT-STARTED |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
 | 7 | Closeout ritual (tickets, handoff, canon-size, worktree removal) | NOT-STARTED |
@@ -1526,3 +1527,74 @@ wording U3b's retirement re-reads), `RecoveryDoorsTests.theHistoryRequestCarries
 - **The old panel lives on** (G2) — two models with the same acts for one run's interval; U3b deletes the old.
 - **Not walked, not run.** Every Mac claim above is compiled, not yet observed. The face's geometry (the rail's
   330 pt, the chips, the dropdown popover) has had no eyes on it.
+
+## U3a ADJUDICATION (the orchestrator, 2026-11-06)
+
+**Verified:** commits fc8880a53…dc7fde0e5 on origin, tree clean; `TextCompareTests` +
+`CommitRailTests` re-run independently, 30/30 green. The three MCP reds are the standing
+socket-timing class (no MCP code in this diff; green alone) — accepted.
+
+**G1 SUSTAINED:** the lesson sentences stay untouched until U3b's Lineage face makes the new
+truth; U3b sweeps them (drafts, wordings to #264). The real store's seeded guide will be STALE
+at merge — the closeout re-seeds via Help ▸ Restore Field Guide… behind the A1 rail (owed list).
+
+**G2 RULED (the architect, within the memo's retirement ruling):** the origin door ("See
+original from…", ⌘K's twin) lands on the LINEAGE face with the ORIGIN NODE SELECTED — the
+panel then retires WHOLE (U3a's listed files and pins), and the tutorial's `putBackTake` drive
+re-points to the face's road. Flagged to #264 for her eye (she sees it at the walkthrough; the
+walk shows it live).
+
+**Sustained besides:** the ‹-back-as-mode-round-trip decision (a hidden mounted editor would
+still take routed acts and keystrokes — the hazard is real; walk row 9 checks); P-U3a-6
+(Unarchive in the pane's foot, exploration A's drawing); the registry catch (three writing acts
+the panel rendered undeclared, now declared — P-1 doing its job). **P-U3a-1…11 join #264.**
+**Carried to the ladder and the window:** every Mac-face claim is compiled, not yet observed —
+the window's runs and the twelve-row walk are the observation.
+
+## U3b BRIEF — the Lineage face, the origin re-aim, the panel's retirement
+
+**Read first (in full):** this file: THE DESIGN MEMO, every sitting entry, the U3a RECORD WHOLE
+(its owed lists, retire lists, walk rows, P-U3a items), "Environment traps", this brief ·
+`notes/SurfaceContracts.md` The note + The app · `notes/TEXTKIT2_NOTES.md` (binding if you touch
+the read tier's seams) · `Sources/VariorumCore/Queries/LineageTree.swift` + its tests (U1 built
+your read; its states are placed · preserved · archived · deleted · missing) · the guide's
+lesson five content (G1's ~10 sentences, listed in the U3a RECORD) · the capability registry.
+
+**Deliverables:**
+1. **The Lineage face** per THE DESIGN MEMO: vertical family, older above, no horizontal
+   scroll; one line per node (origin verb · first words · where it lives · counts), this block
+   marked; selecting a node swaps the SAME pane+rail composition to that block — REUSE the
+   CommitsFace machinery parameterized by block, never a second implementation; node-header
+   acts Put back (placeable states only, the existing op and landing, the receipt names where
+   it landed) · Bring back as take · Compare with now (the same compare); a Trash node muted
+   with no acts; a cross-wing node named with its wing, go-to only. Doors: "lineage ›" on the
+   Commits face's bar, a "Lineage" row in both block ▾ menus, registry-declared.
+2. **The cross-block Bring back as take** — her sitting ruling verbatim: "mints the node's
+   active text as a new take on the block you came from — the bringBackCommitAsTake shape,
+   cross-block; parent lineage via the existing edge." This grows §9 by one operation.
+   **PROPOSE-THEN-BUILD (hard gate):** send the orchestrator the op's exact row semantics
+   BEFORE writing it — name, inputs, the minted take's fields (fan position end, never chosen,
+   never born locked, label?), `parent_variant_id` stance (her "via the existing edge" reads as
+   NO cross-block parent pointer — the derived_from edge already carries the lineage; say if
+   the code argues otherwise), refusals (seal, dead block, I10 irrelevance), touch/churn
+   posture, undo entry. Exact state-transition tests on the ruling.
+3. **The origin door re-aim (G2's ruling above):** "See original from…" and ⌘K's twin land on
+   the Lineage face with the origin node selected; then the OLD PANEL RETIRES WHOLE — the U3a
+   record's file and pin lists executed, every pin re-pointed or retired as a named justified
+   edit, the tutorial's `putBackTake` drive re-pointed to the face's road and GREEN-equivalent
+   (compiled; the window runs it).
+4. **The guide sweep:** G1's sentences reworded to the new truth — drafts faithful to the
+   guide's voice, every changed sentence listed in your record for #264 (her wordings to
+   re-cut); the tutorial walk test's steps kept true.
+5. **Walk rows** for the Lineage face appended to the U3a record's walk list (the origin-door
+   landing, the ancestor swap, Put back's receipt, the cross-wing go-to, the Trash node).
+
+**Evidence:** the new op's exact state-transition suite; face/VM focused coverage (the family
+rows, node selection swap, act availability by state); headless core suites green at the end
+(every failing test named; the socket trio is the known class); `xcodebuild build-for-testing`
+green; `Tools/verify-pins` OK. Mac-target RUNS stay owed to the closing window.
+
+**Constraints:** U3a's constraints verbatim (P3, no `Sync/`, no custody, no schema, no MCP
+changes, sentence case, the commit vocabulary, one agent + max one Sonnet external, LIVE STATUS
+U3b RECORD from the first commit, "Part of VX-801" commits, no trailers, push each, foreground
+waits, pull first).
