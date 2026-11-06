@@ -341,6 +341,39 @@ WHERE: the book masthead — grep "Manual order" / "order ·" around BookView.sw
 
 **Evidence owed:** layout pins — one line at rest with the dial trailing; the wrap at the width class (both passes, whole points); the line count stable under title length, order-value width (the widest form), mode changes and resize; the doubled word gone; the Arrivals door and mode-tab actions untouched (the text-pinned call unreflowed). App-compiled (`build-for-testing`); headless where a core file is touched (none expected). The BATCH 4 RECORD below this brief (LIVE STATUS from the first commit, the wording chosen, pins, the closing window's debt — the masthead suites and one walk row: the one-line masthead + the compression wrap at a narrow column — and surprises). Commits say "Part of VX-887.". No `xcodebuild test`, no walks, no app launches. FENCES as ever; this batch expects NO wire, registry-declaration or core change — a needed one is a STOP-and-report.
 
+## BATCH 4 RECORD (opus-implementer, 2026-11-06)
+
+**NOT DONE in this batch (stated first — kept current):** IN PROGRESS — see LIVE STATUS.
+
+Required reading done in this session, nothing delegated: this record IN FULL · `notes/SurfaceContracts.md` "The Library" (the controls-row law) and "The Bookcase and books" · `notes/SessionResiliencyProtocol.md` · the VX-887 ticket (her three rulings; no comments) · her three screenshots. Head at start: 454095f92, clean. **No revert is in flight.** Fences: no `Sync/`, `Protection/`, custody/keychain, editor seam, migration, dependency; no wire, registry-declaration or core change (none needed — the survey below).
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| R-0 | Record opened; the survey, the measured widths and the design written before code | DONE (this commit) |
+| 887-a | The one-line row: the pure rule, the `Layout`, the stable widths, the dial and tab label faces, the DEBUG probe (new file) + BookView's masthead composing it; the doubled word gone; the unlisted pairs' names in the list's vocabulary | NOT-STARTED — the design below |
+| 887-b | Pins (App target, compiled): the pure rule, the stable widths against SwiftUI's own measures, the mounted row harness (resize sweep, every order form, every active tab), the mounted BookView (title length, order values, modes — the line count never moves), the source-form legs (no `ViewThatFits`, the tabs' action identity, the Arrivals door once) | NOT-STARTED |
+| V | `xcodebuild build` + `build-for-testing`; headless untouched (no core file) | NOT-STARTED |
+| S | Self-assessment, the closing window's debt, surprises | NOT-STARTED |
+
+### The survey (current head)
+
+- **Where:** `BookView.bookMasthead` (`Features/BookView/BookView.swift`) is ONE `@ViewBuilder` drawn by both hosts — the navigator's `VStack(alignment: .leading, spacing: 6)` (a `SideColumn` panel, 190…360 pt, `.padding(12)` → 166…336 pt of masthead) and the Index column's header (240…460 pt, 14-pt sides → 212…432). Its rows: the title line (title · 🔍 · Arrivals · gear — untouched), the mode tabs (`HStack(spacing: 8)` of `modeTab`, each `Button { switchMode(to: mode) }`), Read's Scroll/Pages picker (Read only), `orderControl` (a `Menu` whose label was `"order · ‹order› ▾"` at `.frame(maxWidth: .infinity, alignment: .leading)`, truncating), the Index grouping control (Index only), the state chip.
+- **The order slot's forms (every face it can draw):** the view order (`model.viewOrder`, set only from the menu — always a listed choice) or the stored order (`BookOrderChoices.storedLabel`: "book's order" before the row lands, "as collected" for a gathering's manual, else `label(for:)` of the stored pair). `set_book_order` (the wire) and the mints can store ANY field × direction, so the unlisted pairs' fallback names are reachable: "manual ↓", "last touched ↑", "last major revision ↑" (lowercased rawValues).
+- **Measured** (SwiftUI's own `sizeThatFits`, offscreen, both voices' `small` 11.5-pt faces; whole points): the tab row 151 pt Study / 168 Terminal, the same for every active tab (the semibold tab is absorbed by the whole-point rounding); the slot's forms (with " ▾"): "Manual order" 81 / 100 · "Major revision ↓" 98 / 128 · "Last touched ↓" 93 / 114 · "last major revision ↑" **120 / 164**. Counted at that last form, Terminal's one line would need 168 + 8 + 164 = 340 pt — more than the navigator's 336-pt ceiling: **Terminal could never be one line in the navigator.** Hence D-887-3 below.
+- **Her screenshots, measured** (ink extents at 2×): the masthead's content is ≈258 pt in shot -204301, ≈165 in -205009 (the 190-pt floor), ≈252 in -210400.
+- **vx-808's branch, read (not merged):** it adds `arrivals.setReviewOpen(false)` at the top of `switchMode(to:)` and reflows the stepper call; it does not touch `modeTab` or the masthead's rows. So the tabs keep calling `switchMode(to: mode)` (action identity) and the stepper call is not touched here.
+
+### The design (written before code)
+
+- **One `Layout` over ONE set of views** (`BookMastheadModeRow`, never `ViewThatFits`): subview 1 the tab row (the same `HStack` of `modeTab`s), subview 2 the order dial. **ONE LINE** while the tabs at their stable width + the gap (8 pt, the tabs' own spacing) + the dial at its WIDEST form fit the width — the tabs at the leading edge, the dial at the trailing end, first text baselines aligned; else **TWO LINES**: the tabs, then the dial below at the row's trailing end (it drops straight down — PROVISIONAL D-887-2) after 6 pt (the navigator's own row spacing, so the two-line look is today's minus the word).
+- **Stable widths only** (the controls-row law, P-U3-5): the tab row counted at the widest it reads across the four active tabs (each word at its own weight, rounded up as `Text` rounds, plus the spacing); the dial at the widest of EVERY form it can draw (all ten field × direction names, "as collected", "book's order"), measured in the voice's own `small` face, memoized per face. The live labels are placed, never wider than counted, so a one-line dial never truncates and a pick, a rename, a mode change or a load never moves the line count.
+- **Whole points, both passes:** the row decides and arranges at the offered width floored to a whole point and reports that whole width (or its own wider line's width, a row truly wider than its room), so the placement pass re-decides exactly what the sizing pass measured; the ideal query answers the COUNTED one-line width so a host sizing it at its ideal places one line.
+- **The doubled word (ruling 2):** the dial's face is "‹order› ▾" — "Manual order ▾", "Entry date ↑ ▾", "as collected ▾" (PROVISIONAL D-887-1; the Library's `sort ▾` door is the precedent: its face names the sort, never "sort").
+- **D-887-3 — the unlisted pairs speak the list's own names:** `label(for:)`'s fallback composes the field's listed name + the arrow — "Manual order ↓", "Last touched ↑", "Major revision ↑" (was "manual ↓", "last touched ↑", "last major revision ↑"), so the widest form is "Major revision ↓/↑ ▾" (98 / 128) and the one-line thresholds are 257 pt of masthead in Study (a navigator ≥ 281) and 304 in Terminal (≥ 328).
+- **Untouched:** the title line (its text pinned by VX-804's source pin), the Arrivals door (drawn once), `switchMode(to:)`, the stepper call, Read's picker and the Index grouping control (each its own line below, as today), the chip, the dial's menu, help and colour.
+
 ## LIVE LEDGER (one row per member; flipped as evidence lands)
 
 | # | Member | Batch | Status |
