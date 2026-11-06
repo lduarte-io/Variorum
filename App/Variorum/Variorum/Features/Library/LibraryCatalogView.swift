@@ -794,25 +794,29 @@ struct LibraryCatalogView: View {
                     // draw on), so the menu and the day door meet the
                     // segmented line by `segmentedLabelDrop`.
                     if model.isSearching {
-                        // 13o U2 (PROVISIONAL P-13o-U2-7): the answer sheet is
-                        // ranked by relevance (D2), so the sort door — which
-                        // could not change that order — stands down for the
-                        // mockup's own words, a label (P-2: a door that
-                        // cannot act is not drawn).
-                        // P-U3-5 / P-8: one line, holding its words — the
-                        // label once wrapped onto three lines when the row
-                        // squeezed it (the walk's F-1); the sort door's own
-                        // `VoicedMenu` and `when ▾` already carry the same
-                        // policy at their homes.
-                        Text(tokens.chromeLabel(LibrarySearchCopy.relevance))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .lineLimit(1)
-                            .fixedSize()
-                            .help(LibrarySearchCopy.relevanceHelp)
-                            .offset(y: Self.segmentedLabelDrop)
-                            .libraryGeometryProbe(.sortSlot)
-                            .libraryControlsWidest(stable.sortWidest)
+                        // VX-820 (her R-819-2, "Full vocabulary"): the answer
+                        // sheet's ORDER door — relevance (the default per
+                        // search) · edited · created · date · title, with
+                        // direction — where P-13o-U2-7's plain relevance
+                        // label stood (the order can change now, so the slot
+                        // is a door — P-2). The search state owns the value
+                        // (a new search starts at relevance; a cleared field
+                        // discards it); the Library's own sort is untouched.
+                        // One line by `VoicedMenu`'s own policy (P-U3-5 /
+                        // P-8), counted at the slot's widest form.
+                        LibrarySearchOrderMenu(
+                            tokens: tokens, order: model.searchState.order,
+                            onPick: { pick in
+                                model.pickSearchOrder(pick)
+                                Task { await model.search() }
+                            },
+                            onDirection: { pick in
+                                model.pickSearchOrderDirection(pick)
+                                Task { await model.search() }
+                            })
+                        .offset(y: Self.segmentedLabelDrop)
+                        .libraryGeometryProbe(.sortSlot)
+                        .libraryControlsWidest(stable.sortWidest)
                     } else {
                         LibrarySortMenu(
                             tokens: tokens, sort: model.sort, direction: model.direction,
@@ -1254,7 +1258,7 @@ struct LibraryCatalogView: View {
                 // one click-flipping stamp where it does not.
                 CatalogCardStamps(
                     tokens: tokens, postID: hit.id,
-                    stamps: LibrarySortFace.rowStamps(model.sort, for: hit))
+                    stamps: LibrarySortFace.rowStamps(model.rowStampSort, for: hit))
                 Spacer(minLength: 0)
                 // 13i-c U4 (§6): the owned-by badge — the note's owner,
                 // clickable (the ascent), before the books line.
@@ -1351,7 +1355,7 @@ struct LibraryCatalogView: View {
             // ladder's R3-2: the one brain's words, standing down under the
             // `date` sort where the trailing stamp already says that day) and
             // the trailing stamp, which IS the sort's own (`sorted`).
-            let stamps = LibrarySortFace.rowStamps(model.sort, for: hit)
+            let stamps = LibrarySortFace.rowStamps(model.rowStampSort, for: hit)
             // 17y B1 (k): the row's OWN slice of the extras, never the whole
             // listing's dictionaries (the measured page-landing stall).
             let extras = model.rowExtras(for: hit.id)

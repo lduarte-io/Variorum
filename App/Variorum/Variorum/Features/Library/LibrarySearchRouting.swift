@@ -58,11 +58,11 @@ extension LibraryCatalogModel {
               let question = searchState.question else { return }
         searchState.beginLoadingMore()
         let generation = searchGeneration
-        let (scope, wing) = (searchState.scope, searchState.wing)
+        let (scope, wing, order) = (searchState.scope, searchState.wing, searchState.listedOrder)
         do {
             let page = try await session.database.read { db in
                 try LibrarySearchModel.groupPage(
-                    db, question: question, scope: scope, wing: wing, after: cursor)
+                    db, question: question, scope: scope, wing: wing, after: cursor, order: order)
             }
             guard generation == searchGeneration else {
                 // Superseded: the new question's read owns the listing now.
@@ -109,6 +109,32 @@ extension LibraryCatalogModel {
     /// caller re-reads.
     func toggleSavepointsFacet() {
         searchState.toggleSavepoints()
+    }
+
+    // MARK: - The order door (VX-820 — her R-819-2)
+
+    /// **The `order ▾` door's pick** while the answer sheet shows: nil is
+    /// relevance; a sort takes its natural direction. The caller spawns
+    /// `search()` (this file's convention — a new order is a new question,
+    /// so the sheet starts at its top).
+    func pickSearchOrder(_ sort: Queries.LibrarySort?) {
+        searchState.setOrder(sort)
+    }
+
+    /// The order door's direction pick (a home order only). The caller
+    /// spawns `search()`.
+    func pickSearchOrderDirection(_ direction: SortDirection) {
+        searchState.setOrderDirection(direction)
+    }
+
+    /// **Which sort a note row's stamps speak** (the 18h rule — the trailing
+    /// stamp is the ORDER's own, so the stamp on screen explains the order):
+    /// while the answer sheet is ordered by a home order, that order's sort;
+    /// otherwise the Library's own. Under relevance nothing changes — the
+    /// Library's sort, as before (PROVISIONAL, VX-820).
+    var rowStampSort: Queries.LibrarySort {
+        if isSearching, case .home(let sort, _) = searchState.order { return sort }
+        return sort
     }
 
     // MARK: - The mode facets (13o U3 — the sitting record §12 item 2)

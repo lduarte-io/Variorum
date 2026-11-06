@@ -751,13 +751,16 @@ final class LibraryCatalogModel {
                 visibility: searchState.visibility, bookState: searchState.bookState,
                 savepoints: searchState.includesSavepoints)
             if question == nil { searchState.resetFacet() }
+            // VX-820: the answer sheet's order (relevance unless she picked
+            // one for this search — a cleared field reset it just above).
+            let order = searchState.order
             // 13i-d U5: the CURRENT WING's catalog (§9 — search scopes by
             // wing; the Library is "everything" in THIS library).
             let wing = session.wing.currentID
             let listing = try await session.database.read { db in
                 try Self.listing(
                     db, question: question, scope: scope, sort: sort, direction: direction,
-                    day: day, wing: wing, noteDepth: noteDepth, groupDepth: groupDepth)
+                    day: day, wing: wing, noteDepth: noteDepth, groupDepth: groupDepth, order: order)
             }
             #if DEBUG
             if let gate = listingAnswerGate { await gate(generation) }
@@ -772,7 +775,7 @@ final class LibraryCatalogModel {
             notesHaveMore = listing.next != nil
             searchState.land(
                 listing.search, question: question, scope: scope, wing: wing,
-                generation: generation, startingOver: startingOver)
+                generation: generation, startingOver: startingOver, order: order)
             reindexNotes()
             if startingOver {
                 visibleNoteIndices = []
@@ -844,13 +847,13 @@ final class LibraryCatalogModel {
     nonisolated static func listing(
         _ db: Database, question: LibrarySearchQuestion?, scope: Scope,
         sort: Queries.LibrarySort, direction: SortDirection, day: DayBounds?, wing: String,
-        noteDepth: Int, groupDepth: Int
+        noteDepth: Int, groupDepth: Int, order: SearchOrder = .relevance
     ) throws -> Listing {
         var listing = Listing()
         if let question {
             guard question.answers else { return listing }
             let answer = try LibrarySearchModel.listing(
-                db, question: question, scope: scope, wing: wing, groupDepth: groupDepth)
+                db, question: question, scope: scope, wing: wing, groupDepth: groupDepth, order: order)
             listing.books = answer.books
             listing.search = answer
             if question.hasWords {

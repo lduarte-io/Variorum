@@ -623,7 +623,9 @@ struct LibraryControlsStableWidths: Equatable {
 
     /// Every form the sort slot can take, in the voice's words: the `sort ▾`
     /// door's label for every offered sort × direction, then the search's
-    /// relevance label (no chrome — a plain label).
+    /// `order ▾` door at relevance (VX-820 — a door now, its `▾` and chrome
+    /// with it; its home orders wear the `sort ▾` door's own labels, already
+    /// counted above).
     static func sortForms(_ tokens: VoiceTokens) -> [LabelForm] {
         let doors = LibrarySortFace.offered.flatMap { sort in
             [SortDirection.desc, .asc].map { direction in
@@ -631,7 +633,8 @@ struct LibraryControlsStableWidths: Equatable {
                           chrome: voicedMenuChrome)
             }
         }
-        return doors + [LabelForm(text: tokens.chromeLabel(LibrarySearchCopy.relevance), chrome: 0)]
+        let relevance = LibrarySearchOrderFace.doorLabel(.relevance)
+        return doors + [LabelForm(text: tokens.chromeLabel(relevance) + " \u{25BE}", chrome: voicedMenuChrome)]
     }
 
     /// The row's stable widths in this voice — `prompt` is the field's own
