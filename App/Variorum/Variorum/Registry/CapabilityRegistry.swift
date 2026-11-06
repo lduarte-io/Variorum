@@ -2018,6 +2018,39 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: DuplicateBookCopy.unavailableNote,
             availability: always),
+        // VX-829 (the VX-878 run) — THE BOOK ROW'S FOUR UNDECLARED DOORS,
+        // declared at their second renderer (`.renameNote`'s precedent). Each
+        // is drawn by the ONE book row menu table (`BookRowMenuTable`) on both
+        // faces — the Bookcase row and every row beyond it — never the
+        // shelf-placement family. `always` for `.editRule`'s reason: every
+        // renderer carries its book; WHICH books draw them is DATA in the
+        // table (books only; the designation on a journal-trait book), and
+        // the per-book refusals (a taken name, a finished book's extents, a
+        // designee gone meanwhile) are the operations' own, spoken.
+        Capability(
+            id: .renameBook, verb: BookRowMenuCopy.renameVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .manageBookNotes, verb: BookRowMenuCopy.manageNotesVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .setBookExtent, verb: BookRowMenuCopy.extentVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .useAsDailyJournal, verb: BookRowMenuCopy.useAsDailyJournalVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BookRowMenuCopy.unavailableNote,
+            availability: always),
         // 13i-d U1 — THE BOOKCASE (the sitting record §7, §19–§24). Every act
         // below carries its target on the thing she points at (a shelf name,
         // a section header, a book row), so `always` is honest for

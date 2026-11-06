@@ -846,6 +846,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // shelf row's menu. ONE act whose verb follows the book ("Duplicate with
     // Copies…" on an owned book — `DuplicateBookCopy.verb(owned:)`).
     case duplicateBook
+    // VX-829 (the VX-878 run, batch 1 — her 2026-11-04 ask: "the options that
+    // are available in bookcase on a book should be available on library"):
+    // the Bookcase row's four UNDECLARED doors — Rename…, Manage Notes…,
+    // Length & Extent… and Use as Daily Journal — gain a second renderer (the
+    // book row menu beyond the Bookcase), so each is declared once and both
+    // faces read its verb (`.renameNote`'s VX-425 precedent: a second renderer
+    // is the moment an undeclared door is declared). Four declarations on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds — four ops, four words, four
+    // refusals; `.renameBook` is not `.renameNote` (a different row, op and
+    // name guard — the `.removeFromBook`/`.removeRuleTag` grounds).
+    case renameBook, manageBookNotes, setBookExtent, useAsDailyJournal
     // 13i-d U1 — THE BOOKCASE'S doors (the sitting record §7, §19–§24). The
     // shelf name's right-click carries six acts (§7: "Rename · Set Glyph ·
     // Make Default · Delete", §24: "+ Move to Start / Move to End"); the
