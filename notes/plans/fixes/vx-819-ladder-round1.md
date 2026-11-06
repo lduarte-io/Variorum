@@ -184,3 +184,16 @@ line's quiet block-name mark. The PROVISIONALs P-a…c, P-d…j, P-819-B3a…h a
   passed. The Mac gate claims (b1 23/4, b2 138/20, b3 228/42 and 29/29, the VX-408 and F1 revert legs) are the
   orchestrator's recorded gate evidence; this round could not re-run them (no `xcodebuild test` by brief) — read the
   pins instead: none found hollow beyond pin A, which the record already names hollow.
+
+## THE ORCHESTRATOR'S DISPOSITIONS (same-model ladder — arbitrated against the rulings, 2026-11-06; A-819-L1)
+
+- **F1 — FIX (the sidebar road only), PROVISIONAL + QUESTIONS.** R-819-4's letter ("the Library appears with the live answer as you type") binds the NEW door; a Timeline face with no answer sheet breaks it. The canonical precedent is the Cards rule ("a non-Notes scope picked inside Cards returns the view to List"): a mode that cannot show the answer yields. Build: on the SIDEBAR road, a Library standing in Timeline moves to List as the search lands; her own mode choice returns when the search ends is NOT built (the mode simply stays List — no hidden memory; flag PROVISIONAL). ⌘K's and the Library field's existing behavior UNTOUCHED — their line goes to QUESTIONS at the merge. Mounted pin red-on-old.
+- **F2 — FIX.** Real silent-corruption defect in new code: `CarriedWordsCaret.toEnd` scopes to the Library field's OWN window, never a walk over `NSApp.windows`. Two-window pin red-on-old.
+- **F3 — FIX; P-819-B3d AMENDED.** The tension is between the batch brief's "a NEW search starts at relevance" and the built P-819-B3d ("order and facets kept the way refining keeps them"). Arbitration: the sidebar field CLEARS after every handoff, so every question it starts is a fresh hunt from an empty field — a NEW search by R-819-2's own word. The sidebar road therefore resets the order to relevance and clears the facets when its words land (replacing a standing question included). ⌘K's road keeps its current behavior (its own line rides the F1 QUESTIONS entry). P-819-B3d's record entry is amended to say exactly this. Pin red-on-old.
+- **F4 — FIX in the smallest honest form.** While ⌘K's palette sheet is presented, the sidebar field does not drive the question (keys pass to the palette; the field stays inert). If the smallest form grows beyond a few lines or touches the palette's own seam, STOP and report — it becomes a ticket instead.
+- **F5 — FIX.** One case-folding truth: derive `SearchOrder.foldsCase` from `LibrarySort.keyCollation` (or the reverse) so the database and the Swift merge can never drift.
+- **F6 — FIX if mechanical** (share one grouped-page builder); if the dedup grows beyond a mechanical extraction, ticket as Debt and leave the duplication with a one-line comment naming the twin.
+- **F7 — FIX.** Delete the dead `LibrarySearchQuestion.scopeFilter`; update the two stale relevance-label comments.
+- **F8 — CLOSEOUT ITEM, no code.** The five SurfaceContracts lines and the QUESTIONS entries (P-a…j, P-819-B3a…h as amended, the VX-90 B2 alternative, F1/F3's lines) land at the merge moment in the two-file shape; recorded on the closeout ledger row.
+
+Fixes run in a FRESH session (the ladder's rule); round 2 re-reviews the fixes with a fresh reviewer.
