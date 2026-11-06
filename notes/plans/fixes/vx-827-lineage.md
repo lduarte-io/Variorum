@@ -1661,3 +1661,18 @@ the bringBackCommitAsTake shape, cross-block; parent lineage via the existing ed
   as sources.
 - **Asked:** (a) both source forms or take-only · (b) the source's name as label or none · (c) fence A (new
   error) or B (none) · (d) no undo entry or one. **Leans: both · the source's name · A · none.**
+
+**U3b-P RULED (the orchestrator, 2026-11-06 — the cross-block Bring back as take):** all four
+leans SUSTAINED. (a) BOTH source forms — her sitting ruling names the node's active text (.take)
+and her recorded goal ("letting people look for commits on previous takes of ancestor blocks…
+recovery is the point") needs .commit; the existing bringBackCommitAsTake is the same-block
+precedent the .commit form extends. (b) the source's name as the label — bringBackCommitAsTake's
+own rule (§9: "label = the commit's message when it has one"), applied to both forms. (c) FENCE
+A — the lineage fence lives IN the operation (`notInLineage`, worded in the shared refusal
+table): domain rules are enforced in Operations, never by views, and wing isolation ("the only
+crossings are the explicit move/copy doors") would otherwise be one careless caller away; the
+in-transaction lineageTree read is ∝ the lineage (P1 fine); scraps stays the shared room.
+(d) NO undo entry — branchVariant's posture exactly as the precedent; the road back is deleting
+the take, which is itself undoable. Row semantics, NULL parent (the same-block parent
+convention + the edge already carrying lineage), refusal order and the pin list all sustained
+as proposed. The new refusal's sentence joins the #264 wording list.
