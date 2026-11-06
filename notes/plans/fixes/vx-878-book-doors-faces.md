@@ -102,20 +102,22 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 
 ## BATCH 1 RECORD (opus-implementer, 2026-11-05)
 
+**BATCH 1 CLOSED (implementer side) at bef53a19d** — all three members built to their rulings and compiled; the App-suite runs, the walk and the ladder are the closing window's. Batch 2 starts from this record.
+
 **NOT DONE in this batch (stated first — the batch's close):** (1) **no App-target suite has been RUN** — no stage was held; every App pin is COMPILED (TEST BUILD SUCCEEDED) and its run is the closing window's (the list below); VX-868's red-on-old is shown by evaluation of the pre-fix body, its suite run red→green is the closing window's; (2) **no walk captures** (the closing window's hands-on walk — D-802-1 and D-829-1/2/3 are hers to see there); (3) no canon delta applied (the closeout's — SurfaceContracts' Open-list bullet names the note-row menu; the book views' note-title menu and the shared book-row menu want their contract lines at closeout); (4) nothing else of the batch is open: VX-868, VX-829 and VX-802 are built.
 
 ### LIVE STATUS
 
 | Piece | Status |
 |---|---|
-| R-0 · record opened, required reading done (this file whole, SurfaceContracts The app / The Library / The Bookcase and books, SessionResiliencyProtocol) | DONE (this commit) |
+| R-0 · record opened, required reading done (this file whole, SurfaceContracts The app / The Library / The Bookcase and books, SessionResiliencyProtocol) | DONE (3263e5877) |
 | 868-a · VX-868 wording pin (red on the pre-fix tree by construction) | DONE (3263e5877) — `BookDeleteAndDuplicateTests.thePlainBooksDeleteSentenceReadsWithOneNoteAndWithSeveral`; red-on-old by evaluation of the pre-fix body (below); the App-suite RUN of the red and the green is the closing window's (PENDING) |
 | 868-b · VX-868 both arms rewritten | DONE (7656bc887) — `BookStateCopy.plainBookKeepsItsNotes` |
-| 802-a · VX-802 survey + proposed door set (the in-batch fork) | DONE (this commit) — the proposal below, AWAITING THE ORCHESTRATOR'S RULING; nothing of 802's wiring is built |
+| 802-a · VX-802 survey + proposed door set (the in-batch fork) | DONE (e5bab6d05) — the proposal below; RULED A-878-1 (eeae43cd4): adopted as written |
 | 829-a · VX-829 Book Settings: Move to Wing door | DONE (3b528a5c0) — the State section's wing row (`BookSettingsSheet.state` → `VoicedMenu` of `wingDestinations`, the Bookcase row's `bookMoveAsk` + `wingBookMoveConfirm`); `.moveBookToWing` + `.surface`; pins `BookDoorsEverywhereTests` (3) — COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
-| 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | DONE (this commit) — see the VX-829 section below; pins COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
-| 802-b · VX-802 build (gated on the orchestrator's ruling) | DONE (this commit) — built to A-878-1 (eeae43cd4): `Features/BookView/BookNoteTitleMenu.swift`; pins `BookNoteTitleMenuTests` (11) — COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
-| V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | DONE — at the VX-802 commit's tree: `xcodebuild … build` ** BUILD SUCCEEDED **, `build-for-testing` ** TEST BUILD SUCCEEDED **; no core-package source touched in the whole batch (App/ and notes/ only), `swift build` → Build complete! (re-run at the close); no headless suite exercises a touched file. App-suite RUNS: PENDING (closing window) |
+| 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | DONE (93ef16481) — see the VX-829 section below; pins COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
+| 802-b · VX-802 build (gated on the orchestrator's ruling) | DONE (bef53a19d) — built to A-878-1 (eeae43cd4): `Features/BookView/BookNoteTitleMenu.swift`; pins `BookNoteTitleMenuTests` (11) — COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
+| V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | DONE — at bef53a19d's tree: `xcodebuild … build` ** BUILD SUCCEEDED **, `build-for-testing` ** TEST BUILD SUCCEEDED **; no core-package source touched in the whole batch (App/ and notes/ only), `swift build` → Build complete! (re-run at the close, after bef53a19d); no headless suite exercises a touched file. App-suite RUNS: PENDING (closing window) |
 
 ### VX-868 — the traced mechanism, the pin, the words
 
@@ -131,7 +133,7 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | # | Member | Batch | Status |
 |---|---|---|---|
 | 1 | VX-829 doors everywhere | 1 | BUILT (3b528a5c0, 93ef16481) — compiled; App-suite run + walk PENDING (closing window) |
-| 2 | VX-802 note-title menu | 1 | BUILT to A-878-1 (this commit) — compiled; App-suite run + walk PENDING (closing window); PROVISIONAL D-802-1 |
+| 2 | VX-802 note-title menu | 1 | BUILT to A-878-1 (bef53a19d) — compiled; App-suite run + walk PENDING (closing window); PROVISIONAL D-802-1 |
 | 3 | VX-868 delete-confirm wording | 1 | BUILT (pin 3263e5877, fix 7656bc887) — red-on-old by evaluation; suite run PENDING (closing window); wording PROVISIONAL |
 | 4 | VX-831 the Private mark | 2 | NOT-STARTED |
 | 5 | VX-804 rename repaint | 2 | NOT-STARTED |
@@ -202,7 +204,7 @@ Delete Note…                        .deleteNote  (minimum) ┘ (the one shared
 
 **(1) Book Settings: Move to Wing** (3b528a5c0). The State section's last row is the WING row: "In “‹wing›”. Moving the book takes its notes with it." (a gathering: "… A gathering shows the notes of the wing it’s in." — PROVISIONAL wording, her bundle) and a `VoicedMenu` "Move to Wing ▾" of every OTHER wing from the book's OWN wing, Home first. Drawn only where `WingBookMoveDoor.drawn` says the act can land (another wing exists — books, gatherings, the daily Journal alike since VX-435); a pick runs the Bookcase row's own road (`WingsModel.bookMoveAsk` — a frozen stay-behind refuses at the door — and the one counting confirm `wingBookMoveConfirm`, hosted on the sheet). The wings brain comes from the environment (the note ▾ menus' road; every host of the sheet sits under `RootView`'s / `NoteWindowView`'s `.environment(wings)`). `.moveBookToWing` gains `.surface`; `BookSettingsSheet.surfaceCapabilities` + `.moveBookToWing`; the settings probe records the offered wings.
 
-**(2) One book-row menu table, two faces** (this commit). `Core/Views/BookRowMenu.swift`:
+**(2) One book-row menu table, two faces** (93ef16481). `Core/Views/BookRowMenu.swift`:
 - `BookRowMenuTable.groups(facts, face:)` — the **Bookcase face** is the board's shipped door set and order (star · Move to Shelf ▸ · Move to Wing ▸ · Send to Top/Bottom | Rename… · Book Settings… · Share with AI… · Duplicate Book… · Edit Rule… · Manage Notes… (or Bind / Make a Book on a gathering) · Length & Extent… · Use as Daily Journal | the state doors | the exports | Archive · Delete); the **elsewhere face** (the Library's List Books rows, the sidebar's Starred book rows, the Archived books group) is DERIVED: the Bookcase's groups minus the shelf-placement family (Move to Shelf ▸, Send to Top, Send to Bottom), Open leading. N-1 holds on both faces (the daily Journal: Delete beside Archive).
 - ONE renderer `BookRowMenuItems` draws both faces (words, roles, dividers once); the Bookcase passes only its shelf-placement doors (`placement:`), elsewhere passes none.
 - ONE brain `BookRowDoors` performs and presents every row door on both faces: the Bookcase's instance rides `ShelfViewModel.rowDoors` (sharing the board's `stateDoors`; its landings re-read the board's aggregates — the old dismissals' F-U3-1 refresh); each surface beyond keeps its own. ShelfView's ten row-menu `@State`s and eight sheet/alert hosts left for the brain's one host (`.bookRowDoors`). Every landing re-reads the listed rows' facts (`landed()`), so the next right-click is true (Finish ⇒ Reopen).
