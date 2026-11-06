@@ -287,9 +287,9 @@ on the package; no stage, no xcodebuild test, no GUI, no store touches). This le
 | U1-3 | The P1 pins (library growth, own-lineage linearity, plan) for both | DONE (inside U1-1/U1-2) |
 | U1-4 | The reconciliation read of `MCPNoteStructure.lineage`'s stub (below) | DONE — **FLAG F-U1-1: the stub and R-825 genuinely collide** (probe-proven); nothing built on that edge |
 | U1-5 | The deliverable-3 proposal (below) | DONE — **HELD for the orchestrator's ruling**; the wire tool is NOT built |
-| U1-6 | LEG 2 (the continuation, after the U1 ADJUDICATION + her F-U1-1 "Retire the stub"): the stub retirement in `read_note` `with_lineage` — absent + the fixed sentence — + the A/B catalog arm (red on the old stub by a behavioral revert, announced below before it runs) + the re-pins | IN PROGRESS |
-| U1-7 | LEG 2: `list_note_lineage` (P-U1-a…g + the archived call) + its catalog / list-form arms + the coverage edits + the Activity words | NOT STARTED |
-| U1-8 | LEG 2: DRAFT CANON DELTAS (the new tool's contract line; the P-13nb-U4-7 supersession line) | NOT STARTED |
+| U1-6 | LEG 2: the stub retirement in `read_note` `with_lineage` — absent + the fixed sentence — + the A/B catalog arm + the re-pin (`08c12ede2`; revert announced `3c2f7a416`) | DONE — red on the reverted stub (catalog arm + carriage pin), green on the fix; restored, tree clean |
+| U1-7 | LEG 2: `list_note_lineage` + its server suite + six catalog arms + the coverage justified edits + the Activity words (`bf6eadad8`) | DONE — 3/3 + catalog green; the both-ends fence red when the peer filter is removed |
+| U1-8 | LEG 2: DRAFT CANON DELTAS (below) | IN PROGRESS |
 | U1-9 | LEG 2: the END suites (lineage family + every MCP-affected suite; every failing test named) + self-assessment | NOT STARTED |
 
 **Leg 1 closed; leg 2 is live (rows U1-6…U1-9).**
@@ -300,6 +300,44 @@ working tree's `MCPNoteStructure.swift` will be put back to the OLD lineage beha
 with every new pin kept; the two-store catalog and the carriage suite run; then `git checkout --
 Sources/VariorumMCP/MCPNoteStructure.swift` restores the fix and `git status` must read clean. Expected:
 the catalog's `read_note · kin with lineage …` arm RED (A ≠ B) and the re-pinned carriage test RED.
+
+### LEG 2 — what landed (the continuation: her F-U1-1 ruling + the sustained proposal)
+
+**The stub retirement (`08c12ede2`).** `MCPNoteStructure.lineage`'s `.beyondGrant` arm now `continue`s — an edge
+whose far side the client cannot read is ABSENT, exactly as a dead far side always was; the per-edge
+`beyondGrant(_:)` helper is gone. `MCPNoteStructure.read` sets `beyond_reach` =
+`MCPWriteTools.beyondReachLineageWords` ("Lineage beyond your reach, if any, is not listed." — her ruling's exact
+words, HELD FOR HER #264) whenever `with_lineage` is asked, before the page is fitted (the budget weighs it; a
+version read gets it too); never on any other form. `parent_beyond_grant` untouched. `read_note`'s description: "a
+relative outside what you can read is left out, and beyond_reach says so — a take's parent you can't read shows only
+parent_beyond_grant". Pins: the two-store catalog's NEW arm `read_note · kin with lineage (hidden relatives in the
+Pool, a Private note, a hidden wing, the Journal)` — `kin` is a new reachable note in the shared book with a READABLE
+Copy to Wing copy in Studio (all three stores); store A's hidden half gives kin her Duplicate (`tags: .none`, Home's
+Pool, ungranted) and version links to the Private member, the hidden wing's note and the Journal entry (edges and a
+copy only — no reachable row changes); and `MCPCarriageServerTests.lineageAndAncestryAreExactAndBeyondTheGrantIsAbsent`
+(renamed; justified edit — the three unreadable far sides absent, no `"beyond_grant"` anywhere, the sentence present
+only when lineage is asked, `parent_beyond_grant` kept). **Red-on-old by the announced behavioral revert** (the stub
+append restored and the `beyond_reach` line removed, every new pin kept, on the committed `08c12ede2`): the catalog
+arm RED — "varies with what the client cannot reach", A's first block answering five `{"beyond_grant":true,…}`
+(the Pool copy's `derived_into` + four `version_of`) beside the readable Studio copy's two entries, B the readable two
+alone — and the carriage pin RED (4 issues); "✘ Test run with 17 tests in 2 suites failed … with 5 issues";
+restored by `git checkout --`, `git status` clean; on the fix "✔ Test run with 17 tests in 2 suites passed".
+
+**`list_note_lineage` (`bf6eadad8`).** `MCPToolCatalog.listNoteLineage` (READ, `everyScope`, in `read`),
+`MCPReadTools.listNoteLineage` / `noteLineage` (in `MCPReadTools.swift`, beside `read_note` — its private helpers),
+exactly P-U1-a…g + the archived call. Readings recorded (the orchestrator's to overturn): (i) the list form keeps
+VX-812's keys verbatim — `results`, `landed_count`, `refused_count` — "landed" reading as "answered" for a read; (ii)
+`archived` is an ALWAYS-PRESENT boolean on every peer entry (`list_books`' shape; true when archived); (iii) a peer's
+`wing_id` is the rule's resolved wing (`NoteFacts.wingID` — a dangling wing reads Home, the listings' rule); (iv) a
+peer's `title` is `mcpScopeTitle`'s (`read_note`'s title rule); (v) Activity words in `MCPPaneCopy` (Mac target):
+"reading the lineage of ‹note›" (refused) / "read the lineage of ‹note›" (landed) — PROVISIONAL, #264. Pins:
+`MCPListNoteLineageServerTests` (3) and six catalog arms (kin beside its hidden relatives, kin's Studio copy and its
+original, a hidden subject, the Journal entry, a mixed list, an all-hidden list → error). Justified edits (the
+ritual — the catalog grows): `MCPServerTests` (the read-rung set; a book grant's listed tools),
+`MCPWriteServerTests` (a suggest grant's listed tools; the every-door-that-names-a-note call list). **The fence's
+red-on-mutation** (on the committed `bf6eadad8`: the peer reach filter replaced by "every peer"): the server suite
+RED (5 issues — hidden peers listed, their ids in the text) and the catalog RED (`list_note_lineage · kin …`: "a
+hidden id crossed" + "varies with what the client cannot reach"); restored, tree clean.
 
 ### What landed (deliverables 1 and 2)
 
