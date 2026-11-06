@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History, the panel — VX-801 exploration B</title>
+<style>
+  :root{
+    --desk:#e8ebe9;
+    --frame:#e1ede6; --frame-line:#cbdfd3;
+    --card:#ffffff; --line:#dbe6df; --hair:#e8eeea;
+    --ink:#272e29; --ink2:#4b544e; --muted:#879089; --faint:#b6bdb8;
+    --green:#3e6d56; --deep:#2b4a3d; --chosen-bg:#ebf4ef; --sel:#e6f0ea;
+    --dot:#b8ad9e;
+    --ai:#5b7b90; --ai-bg:#ecf1f5; --ai-sel:#dce6ee;
+    --del-bg:#f7ddd6; --del-ink:#b4513d; --add-bg:#d3e8db;
+    --paper:#fcfcfa;
+    --serif:'Iowan Old Style','Palatino Nova',Palatino,'New York',Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--sans);padding:36px 28px 110px;}
+  .page{max-width:1180px;margin:0 auto;}
+  h1{font-family:var(--serif);font-weight:600;font-size:27px;margin:0 0 6px;letter-spacing:-.2px;}
+  .thesis{font-family:var(--serif);font-size:17.5px;color:var(--ink2);max-width:66ch;line-height:1.5;margin:0 0 6px;}
+  .small{color:var(--muted);font-size:12.5px;margin:0 0 22px;}
+  h2{font-family:var(--serif);font-weight:600;font-size:20px;margin:54px 0 4px;}
+  .cap{color:var(--muted);font-size:13.5px;max-width:80ch;line-height:1.5;margin:0 0 14px;}
+  .cap b{color:var(--ink2);font-weight:600;}
+
+  /* collapsed sections at the top */
+  details.box{background:#f6f8f7;border:1px solid var(--line);border-radius:11px;margin:0 0 10px;max-width:940px;}
+  details.box summary{cursor:pointer;padding:11px 16px;font-size:14px;color:var(--ink2);}
+  details.box .in{padding:0 20px 16px;font-size:13.5px;line-height:1.55;color:var(--ink2);}
+  .inv{border-collapse:collapse;width:100%;}
+  .inv td{border-top:1px solid var(--hair);padding:6px 10px 6px 0;vertical-align:top;}
+  .inv td:first-child{width:46%;color:var(--ink);}
+  .inv td:last-child{color:var(--muted);}
+  .round{margin:14px 0 4px;color:var(--ink);font-weight:600;font-size:13px;}
+  .q{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink);margin:3px 0 6px 12px;padding-left:10px;border-left:2px solid var(--line);}
+
+  /* legend */
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--muted);margin:0 0 14px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .lg{display:inline-block;width:9px;height:9px;border-radius:50%;}
+
+  /* the window around the panel */
+  .win{background:var(--paper);border:1px solid #d4dbd6;border-radius:13px;box-shadow:0 10px 34px rgba(36,48,42,.11);overflow:hidden;}
+  .win .top{display:flex;align-items:center;gap:20px;padding:10px 18px;border-bottom:1px solid var(--hair);font-size:12.5px;color:var(--muted);}
+  .win .top .title{color:var(--ink);font-weight:600;}
+  .win .top .modes span{margin-right:13px;}
+  .win .top .modes .on{color:var(--ink);border-bottom:1.5px solid var(--green);padding-bottom:2px;}
+  .split{display:flex;align-items:stretch;}
+  .prose{flex:1;min-width:0;padding:36px 38px 30px 46px;font-family:var(--serif);font-size:16.5px;line-height:1.66;color:var(--ink);}
+  .prose p{margin:0 0 15px;}
+  .prose .here{background:#edf5f0;border-radius:7px;margin:0 -12px 15px;padding:7px 12px 1px;}
+  .prose .here p{margin:0 0 8px;}
+  .side{width:690px;flex:none;padding:14px 14px 14px 0;}
+
+  /* the panel — the reference's mint frame, white cards */
+  .panel{background:var(--frame);border:1px solid var(--frame-line);border-radius:17px;padding:9px 11px 11px;position:relative;}
+  .phd{display:flex;align-items:baseline;gap:10px;padding:5px 7px 10px;font-size:13.5px;color:#6c7870;}
+  .phd .r{margin-left:auto;color:var(--green);}
+  .phd .r.mute{color:#6c7870;}
+  .two{display:grid;grid-template-columns:1fr 284px;gap:10px;}
+  .full .two{grid-template-columns:1fr 330px;}
+  .lin .two{grid-template-columns:1fr 372px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;}
+
+  /* the text pane */
+  .pane{position:relative;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+  .pane.chosen::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:2px;background:var(--green);}
+  .ph{display:flex;align-items:flex-start;gap:10px;padding:12px 15px 8px 19px;}
+  .ph .who{flex:1;min-width:0;}
+  .ph .mn{display:block;font-size:14px;color:var(--ink);font-weight:500;}
+  .ph .md{display:block;font-size:12px;color:var(--muted);margin-top:2px;}
+  .ck{color:var(--green);}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:11.5px;flex:none;margin-top:1px;}
+  .seg span{padding:3px 9px;color:var(--muted);}
+  .seg span+span{border-left:1px solid var(--line);}
+  .seg span.on{background:#e4efe8;color:var(--deep);}
+  .sum{display:flex;align-items:center;gap:10px;padding:0 15px 9px 19px;font-size:12px;color:var(--muted);}
+  .sum .seg{margin-left:auto;}
+  .well{padding:2px 19px 4px;font-family:var(--serif);font-size:15.5px;line-height:1.63;overflow-y:auto;max-height:262px;border-top:1px solid var(--hair);}
+  .full .well{font-size:17px;line-height:1.66;max-height:none;padding:6px 34px 10px;}
+  .well p{margin:11px 0;}
+  .acts{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 17px;padding:10px 19px 12px;border-top:1px solid var(--hair);font-size:12.5px;color:var(--green);margin-top:auto;}
+  .acts .note{color:var(--muted);font-size:12px;}
+  .live{font-family:var(--serif);font-style:italic;color:#4f6d61;font-size:14px;padding:4px 19px 12px;}
+  del{background:var(--del-bg);text-decoration:line-through;text-decoration-color:var(--del-ink);text-decoration-thickness:1.5px;color:#8d6b62;border-radius:4px;padding:0 2px;}
+  ins{background:var(--add-bg);text-decoration:none;border-radius:4px;padding:0 2px;color:#21473a;}
+
+  /* the rail */
+  .rail{padding:9px 7px 7px;display:flex;flex-direction:column;min-width:0;}
+  .sw{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13px;margin:0 1px 9px;}
+  .sw.chosen{background:var(--chosen-bg);}
+  .sw .bar{width:3px;height:16px;border-radius:2px;background:transparent;flex:none;}
+  .sw.chosen .bar{background:var(--green);}
+  .sw .lbl{font-weight:500;}
+  .sw .ck,.sw .lk{font-size:12px;}
+  .sw .lk{color:var(--muted);}
+  .sw .more{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap;}
+  .rh{font-size:12.5px;color:var(--muted);padding:1px 8px 5px;}
+  .rh b{color:var(--ink2);font-weight:500;}
+  .tl{position:relative;}
+  .tl::before{content:"";position:absolute;left:15px;top:15px;bottom:15px;width:1.5px;background:#d5dfd8;}
+  .row{display:flex;align-items:center;gap:7px;height:30px;padding:0 9px 0 0;border-radius:8px;font-size:13px;}
+  .row .d{width:31px;flex:none;display:flex;justify-content:center;align-items:center;position:relative;z-index:1;}
+  .row .d i{display:block;width:9px;height:9px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 3px #fff;}
+  .row .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);}
+  .row .t{color:var(--muted);font-size:12px;white-space:nowrap;}
+  .row.fw .n{font-family:var(--serif);font-style:italic;color:var(--ink2);font-size:13.5px;}
+  .row.quiet .d i{width:7px;height:7px;background:#fff;border:1.5px solid var(--faint);}
+  .row.run .n{color:var(--muted);}
+  .row.run .d i{width:7px;height:7px;background:#fff;border:1.5px dashed var(--faint);}
+  .row.now .d i{width:10px;height:10px;background:#fff;border:2px solid var(--green);}
+  .row.now .n{color:var(--green);}
+  .row.sel{background:var(--sel);}
+  .row.sel .d i{background:var(--deep);border:none;width:10px;height:10px;box-shadow:0 0 0 3px var(--sel),0 0 0 4.5px #a8c8b6;}
+  .row.sel .n{font-weight:500;color:var(--ink);}
+  .sub .row{padding-left:12px;}
+  .sub .row .d{width:19px;}
+  .aig{background:var(--ai-bg);border-radius:9px;margin:2px 0;position:relative;}
+  .aig .row .d i{background:var(--ai);box-shadow:0 0 0 3px var(--ai-bg);}
+  .aig .row .n{color:#30475a;}
+  .aig .row.sel{background:var(--ai-sel);}
+  .aig .row.sel .d i{background:#2f4a5e;box-shadow:0 0 0 3px var(--ai-sel),0 0 0 4.5px #9db5c6;}
+  .foot{margin-top:auto;border-top:1px solid var(--hair);padding:9px 8px 2px;font-size:12px;color:var(--muted);line-height:1.5;}
+  .foot .go{color:var(--green);}
+  .spacer{height:14px;}
+
+  /* takes, laid open (full column) and in the popup (side) */
+  .takes{display:flex;flex-direction:column;gap:4px;margin:0 1px 12px;}
+  .tk{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:13px;background:#fff;}
+  .tk .bar{width:3px;height:16px;border-radius:2px;background:transparent;flex:none;}
+  .tk.chosen{background:var(--chosen-bg);} .tk.chosen .bar{background:var(--green);}
+  .tk.viewing{box-shadow:0 0 0 1.5px var(--green) inset;}
+  .tk .lbl{font-weight:500;white-space:nowrap;}
+  .tk .ck{font-size:12px;white-space:nowrap;}
+  .tk .lk{color:var(--muted);font-size:12px;}
+  .tk .cn{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap;padding-left:6px;}
+  .tk .fwds{flex:1;min-width:0;color:var(--muted);font-family:var(--serif);font-style:italic;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tk.arch{background:#f5f7f6;color:var(--muted);}
+  .tk.fold{color:var(--muted);background:transparent;border-style:dashed;}
+  .tk2{display:block;padding:8px 11px 8px 11px;}
+  .tk2 .l1{display:flex;align-items:center;gap:8px;}
+  .tk2 .l2{font-family:var(--serif);font-size:13.5px;color:var(--ink2);margin:3px 0 0 11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tk2.arch .l2{color:var(--muted);}
+  .grp{font-size:12px;color:var(--muted);padding:8px 4px 2px;}
+  .pop{position:absolute;right:16px;top:58px;width:372px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(28,44,36,.18),0 1px 3px rgba(28,44,36,.08);padding:9px;z-index:5;}
+  .pop .takes{margin:0;}
+  .dim{opacity:.35;}
+
+  /* compare */
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cmp .card{display:flex;flex-direction:column;}
+  .cmp .ch{display:flex;align-items:baseline;gap:8px;padding:13px 22px 9px;margin:0 0 0;border-bottom:1px solid var(--line);}
+  .cmp .ch .mn{font-size:14px;color:var(--ink2);font-weight:500;}
+  .cmp .ch.after .mn{color:var(--deep);}
+  .cmp .ch .md{margin-left:auto;font-size:12px;color:var(--muted);}
+  .cmp .tx{padding:8px 24px 12px;font-family:var(--serif);font-size:17px;line-height:1.68;}
+  .cmp .tx p{margin:10px 0;}
+
+  /* lineage rail rows */
+  .lrow{display:flex;align-items:center;gap:7px;height:31px;padding:0 9px 0 0;border-radius:8px;font-size:13px;}
+  .lrow .d{width:31px;flex:none;display:flex;justify-content:center;position:relative;z-index:1;}
+  .lrow .d i{display:block;width:9px;height:9px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 3px #fff;}
+  .lrow .v{width:66px;flex:none;color:#9a6a4c;font-size:12px;}
+  .lrow .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--serif);font-size:13.5px;}
+  .lrow .w{color:var(--muted);font-size:12px;white-space:nowrap;}
+  .lrow.sel{background:var(--sel);}
+  .lrow.sel .d i{background:var(--deep);box-shadow:0 0 0 3px var(--sel),0 0 0 4.5px #a8c8b6;}
+  .lrow.this .d i{width:10px;height:10px;background:#fff;border:2px solid var(--green);}
+  .lrow.this .n{font-family:var(--sans);font-size:13px;color:var(--green);}
+  .lrow.trash{opacity:.55;}
+  .gen{height:7px;}
+
+  /* density + calls */
+  .pts{max-width:80ch;margin:6px 0 0;padding:0;list-style:none;}
+  .pts li{position:relative;padding:7px 0 7px 22px;border-top:1px solid #dde3df;font-size:14px;line-height:1.5;color:var(--ink2);}
+  .pts li::before{content:"";position:absolute;left:4px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--dot);}
+  .call{background:#fbfcfb;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:9px;padding:12px 18px;max-width:80ch;margin:0 0 10px;font-size:14px;line-height:1.55;color:var(--ink2);}
+  .call b{color:var(--ink);display:block;margin-bottom:3px;font-weight:600;}
+  .call .rec{color:var(--green);}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .pair .panel .two{grid-template-columns:1fr 250px;min-height:392px;}
+  .lab{font-size:12.5px;color:var(--muted);margin:0 0 7px 4px;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>History, the panel — exploration B</h1>
+<p class="thesis">One text pane, one rail. The rail says <i>when</i>, the pane shows <i>what</i>, and however many takes and commits a block has, there is only ever one of each on screen.</p>
+<p class="small">A sketch of structure and feel, grown from your two reference panels — not final chrome; the build would wear the voices' real tokens. Sample prose invented. A local file, never published.</p>
+
+<details class="box">
+  <summary>what needs to be there — the inventory, and where each piece lives on this panel</summary>
+  <div class="in">
+    <table class="inv">
+      <tr><td>This block's takes — label, the text now, ✓ chosen, archived, locked</td><td>the take switcher above the rail: one tinted row per take, the Write takes-popup family (a popup beside prose; laid open in the full column)</td></tr>
+      <tr><td>Each take's commits — when, name or first words, quiet vs deliberate</td><td>the rail, one line per commit: a filled dot for one you made, a hollow ◦ for a quiet one; quiet runs fold to one line</td></tr>
+      <tr><td>The full text of any commit, readable and scrollable in place</td><td>the text pane — click a dot and the pane is that moment, whole, scrolling in place</td></tr>
+      <tr><td>What changed — any moment against the take now</td><td>the pane's two-state toggle: plain · against now (red strike = gone since, green wash = new since)</td></tr>
+      <tr><td>Archived takes, visible</td><td>the switcher's "archived takes" group; choosing one swaps the rail to its commits, same as any take</td></tr>
+      <tr><td>Deleted takes on the 30-day clock, with Put back</td><td>one quiet line at the rail's foot</td></tr>
+      <tr><td>Per-commit acts: Restore · Bring back as take · Compare with now · Name</td><td>once, under the pane, for the moment you picked — never repeated on every row</td></tr>
+      <tr><td>The AI's bracket — "before ‹client›'s edit" / "after ‹client›'s edit"</td><td>a pair on the rail, washed blue, never folded into a quiet run</td></tr>
+      <tr><td>Compare</td><td>your reference's two panes, before · after — one press from any moment</td></tr>
+      <tr><td>Lineage — ancestors with their verbs (divided · merged · extracted · copied · imported), where each lives (kept as lineage · in a note · in the Trash), their takes' commits, descendants, versions, other wings as "go to" only</td><td>behind ONE door ("lineage ›", top right) — and it is the same panel: the rail lists the family instead of commits, the pane shows the relative you click, "its history ›" puts its commits on the rail</td></tr>
+    </table>
+  </div>
+</details>
+
+<details class="box">
+  <summary>your feedback, every round, verbatim</summary>
+  <div class="in">
+    <div class="round">The 2026-11-04 sitting (on the ticket)</div>
+    <div class="q">"i'm again concerned and want this ticket to explicitly note a spacious, easy to read UI. i feel like lineage could be a significant sized area."</div>
+
+    <div class="round">Kickoff, 2026-11-05</div>
+    <div class="q">"mockup - but don't use the question tool, just have it ready for me. i'll rule before U3."</div>
+
+    <div class="round">Mockup v1</div>
+    <div class="q">"when I said popup, I was kind of imagining more that when you go into the block menu that already existed, that it would be there… i do not think a literal popup is needed. at most it would be like the way takes looks."</div>
+    <div class="q">"i almost feel like the more relevant issue for redesign is being able to easily see your commits, compare the commit to the current take you're looking at, etc. it just looks crowded and hard to see"</div>
+    <div class="q">"i also do not like the left to right scroll in the whole area - that gets confusing. maybe we do a verticle scroll where older is above"</div>
+    <div class="q">"think about git - i know that shows with branches, but like I really do feel like we have to focus on making the information easily accessible. showing compare, letting people look for commits on previous takes of ancestor blocks easily is the goal - what would get us to that point?"</div>
+    <div class="q">"i agree things can expand piece by piece - nothing at first, then takes, then commits of those takes if you really want."</div>
+
+    <div class="round">Mockup v2</div>
+    <div class="q">"yes - there should be one door for block history. that makes a lot of sense."</div>
+    <div class="q">"the immediate thing you see should be this particular block's history - and it should be easy to see commits BY TAKE, archived takes, etc., and then you should be able to also see lineage."</div>
+    <div class="q">"i still don't like this new mockup. i feel like it's a lot of words and not very clear still."</div>
+    <div class="q">"maybe the horziontal scroll was actually better, it was actually a lot clearer at least."</div>
+    <div class="q">"start by clearly listing all the info that needs to be shown and then let's think about for a complicated block what it would look like."</div>
+
+    <div class="round">Mockup v3</div>
+    <div class="q">"ok i think that looks better, but lineage should be something you have to expand / go into. the default should be just seeing the commits."</div>
+    <div class="q">"i know they're named - you should also be able to scroll through the full text of any commit."</div>
+    <div class="q">"i think the fundamental issue is that you are still not representing commits *per take* very clearly. maybe look at how the takes popup on write looks for inspiration - each one should be able to go into the lineage."</div>
+    <div class="q">"maybe lineage does need to be a separate door than "commits" still - that might be better if we can't figure out something clear."</div>
+
+    <div class="round">Mockup v4</div>
+    <div class="q">"ok like look at this mockup. think about what people are using this for - claude just changed something. does it feel easy to look at commits? does it feel good?"</div>
+    <div class="q">"this is not very clear visually at all."</div>
+    <div class="q">"have 2 opus subagents, make them each make a mockup, with what neesd to be there and every round of my feedback verbatim, with new directions. we need to explore other things like this does not look good still and it is not dealing with density well."</div>
+  </div>
+</details>
+
+
+<!-- ============================================================ 1 -->
+<h2>1 · Claude just changed something</h2>
+<p class="cap">Beside the prose, where Block History sits today. claude-code edited the chosen take four minutes ago; the door opens the panel already on <b>before claude-code's edit</b>, washed against now — so the first thing you see is exactly what it changed, in your own words around it. The pane scrolls; the rail is one line per commit.</p>
+<div class="legend">
+  <span><i class="lg" style="border:2px solid var(--green);width:10px;height:10px;"></i>the take now</span>
+  <span><i class="lg" style="background:var(--dot)"></i>a commit you made</span>
+  <span><i class="lg" style="background:#fff;border:1.5px solid var(--faint);width:7px;height:7px;"></i>a quiet commit</span>
+  <span><i class="lg" style="background:var(--ai)"></i>an AI's before / after pair</span>
+  <span><del>gone since</del> <ins>new since</ins></span>
+</div>
+
+<div class="win">
+  <div class="top"><span class="title">On Rereading</span><span class="modes"><span class="on">Write</span><span>Takes</span><span>Read</span><span>Lenses</span><span>Compare</span><span>Blocks</span></span></div>
+  <div class="split">
+    <div class="prose">
+      <p>Rereading is the quiet skill. Nobody grades it, and almost nobody admits how much of their reading is really rereading.</p>
+      <div class="here">
+        <p>A book read once is a rumor; read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument, and you only see them because you already know the room.</p>
+        <p>That is why the books that matter wear out their spines unevenly: the same forty pages, returned to, until the glue gives. Nobody teaches this. We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</p>
+      </div>
+      <p>Which is also why a reread can feel like a small betrayal of the person who read it first.</p>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <div class="phd"><span>On Rereading › block 2 › history</span><span class="r">lineage ›</span></div>
+        <div class="two">
+          <div class="card pane chosen">
+            <div class="ph">
+              <div class="who"><span class="mn">before claude-code's edit</span><span class="md">4 min ago · plain <span class="ck">✓</span> · quiet</span></div>
+            </div>
+            <div class="sum">4 changes since<div class="seg"><span>plain</span><span class="on">against now</span></div></div>
+            <div class="well">
+              <p>A book read once is a rumor; read twice, it <del>slowly becomes</del> <ins>starts to become</ins> a place. The corners you missed the first time hold the <del>whole</del> furniture of the argument, and you only <del>notice</del> <ins>see</ins> them because you already know the room.</p>
+              <p>That is why the books that matter wear out their spines unevenly: the same forty pages, returned to, until the glue gives. Nobody <del>really</del> teaches this. We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</p>
+            </div>
+            <div class="acts"><span>Restore</span><span>Bring back as take</span><span>Compare</span><span>Rename</span></div>
+          </div>
+          <div class="card rail">
+            <div class="sw chosen"><span class="bar"></span><span class="lbl">plain</span><span class="ck">✓ chosen</span><span class="more">5 takes ▾</span></div>
+            <div class="rh">history · <b>this take</b></div>
+            <div class="tl">
+              <div class="row now"><span class="d"><i></i></span><span class="n">the take now</span><span class="t"></span></div>
+              <div class="aig">
+                <div class="row"><span class="d"><i></i></span><span class="n">after claude-code's edit</span><span class="t">4 min</span></div>
+                <div class="row sel"><span class="d"><i></i></span><span class="n">before claude-code's edit</span><span class="t">4 min</span></div>
+              </div>
+              <div class="row"><span class="d"><i></i></span><span class="n">tightened the second clause</span><span class="t">Nov 2</span></div>
+              <div class="row run"><span class="d"><i></i></span><span class="n">3 quiet commits ▸</span><span class="t">Oct 29</span></div>
+              <div class="row"><span class="d"><i></i></span><span class="n">before the long rewrite</span><span class="t">Oct 28</span></div>
+              <div class="row run"><span class="d"><i></i></span><span class="n">2 quiet commits ▸</span><span class="t">Oct 27</span></div>
+              <div class="row"><span class="d"><i></i></span><span class="n">first shape</span><span class="t">Oct 26</span></div>
+            </div>
+            <div class="spacer"></div>
+            <div class="foot">1 deleted take · 26 days left · <span class="go">Put back</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="cap" style="margin-top:12px;">Ten commits on this take, seven lines on the rail. The AI's pair never folds — it is what you came for. Click "the take now" and the pane is the live take, plain; click any other dot and the pane is that moment, whole.</p>
+
+
+<!-- ============================================================ 2 -->
+<h2>2 · Switching takes swaps the rail</h2>
+<p class="cap">Commits <b>by take</b>: the rail only ever holds one take's history, and the switcher above it says whose. The switcher is the Write takes popup's own family — tinted rows, ✓ chosen, locked, the "archived takes" group. Left, the switcher open on this five-take block; right, after choosing <b>spoken</b> (locked, not chosen).</p>
+
+<div class="pair">
+  <div>
+    <div class="lab">the switcher open</div>
+    <div class="panel">
+      <div class="phd"><span>On Rereading › block 2 › history</span><span class="r">lineage ›</span></div>
+      <div class="two">
+        <div class="card pane chosen dim">
+          <div class="ph"><div class="who"><span class="mn">before claude-code's edit</span><span class="md">4 min ago</span></div></div>
+          <div class="well" style="max-height:230px;"><p>A book read once is a rumor; read twice, it <del>slowly becomes</del> <ins>starts to become</ins> a place. The corners you missed the first time hold the <del>whole</del> furniture of the argument…</p></div>
+        </div>
+        <div class="card rail dim">
+          <div class="sw chosen"><span class="bar"></span><span class="lbl">plain</span><span class="ck">✓ chosen</span><span class="more">5 takes ▾</span></div>
+          <div class="tl">
+            <div class="row now"><span class="d"><i></i></span><span class="n">the take now</span></div>
+            <div class="row"><span class="d"><i></i></span><span class="n">after claude-code's edit</span></div>
+            <div class="row"><span class="d"><i></i></span><span class="n">before claude-code's edit</span></div>
+            <div class="row"><span class="d"><i></i></span><span class="n">tightened the second clause</span></div>
+            <div class="row"><span class="d"><i></i></span><span class="n">3 quiet commits</span></div>
+            <div class="row"><span class="d"><i></i></span><span class="n">before the long rewrite</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="pop">
+        <div class="takes">
+          <div class="tk tk2 chosen viewing"><div class="l1"><span class="bar"></span><span class="lbl">plain</span><span class="ck">✓ chosen</span><span class="cn">10 commits</span></div><div class="l2">A book read once is a rumor; read twice, it starts to become a place…</div></div>
+          <div class="tk tk2"><div class="l1"><span class="bar"></span><span class="lbl">long form</span><span class="cn">6 commits</span></div><div class="l2">A book read once is only ever a rumor of itself — a report from someone…</div></div>
+          <div class="tk tk2"><div class="l1"><span class="bar"></span><span class="lbl">spoken</span><span class="lk">locked</span><span class="cn">4 commits</span></div><div class="l2">Read a book once and all you have is hearsay. Read it twice and…</div></div>
+          <div class="grp">archived takes</div>
+          <div class="tk tk2 arch"><div class="l1"><span class="bar"></span><span class="lbl">first pass</span><span class="cn">2 commits</span></div><div class="l2">Books reward the second visit more than the first, and nobody…</div></div>
+          <div class="tk tk2 arch"><div class="l1"><span class="bar"></span><span class="fwds" style="font-style:normal;font-family:var(--sans);font-size:12.5px;">no label</span><span class="cn">1 commit</span></div><div class="l2">The first read is a tour; the second is tenancy.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="lab">after choosing spoken</div>
+    <div class="panel">
+      <div class="phd"><span>On Rereading › block 2 › history</span><span class="r">lineage ›</span></div>
+      <div class="two">
+        <div class="card pane">
+          <div class="ph">
+            <div class="who"><span class="mn">hearsay, kept</span><span class="md">Oct 29 at 11:40 AM · spoken</span></div>
+          </div>
+          <div class="sum">2 changes since<div class="seg"><span class="on">plain</span><span>against now</span></div></div>
+          <div class="well" style="max-height:230px;">
+            <p>Read a book once and all you have is hearsay. Read it twice and you've been somewhere — you know which stair creaks, and where the light falls in the afternoon.</p>
+          </div>
+          <div class="acts"><span>Bring back as take</span><span>Compare</span><span>Rename</span><span class="note">locked · unlock to restore</span></div>
+        </div>
+        <div class="card rail">
+          <div class="sw"><span class="bar"></span><span class="lbl">spoken</span><span class="lk">locked</span><span class="more">5 takes ▾</span></div>
+          <div class="rh">history · <b>this take</b></div>
+          <div class="tl">
+            <div class="row now"><span class="d"><i></i></span><span class="n">the take now</span></div>
+            <div class="row sel"><span class="d"><i></i></span><span class="n">hearsay, kept</span><span class="t">Oct 29</span></div>
+            <div class="row run"><span class="d"><i></i></span><span class="n">2 quiet commits ▸</span><span class="t">Oct 24</span></div>
+            <div class="row fw"><span class="d"><i></i></span><span class="n">Read a book once and you've heard…</span><span class="t">Oct 20</span></div>
+          </div>
+          <div class="spacer"></div>
+          <div class="foot">1 deleted take · 26 days left · <span class="go">Put back</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="cap" style="margin-top:12px;">No green bar on the pane: you are looking at a take the note doesn't show. A commit with no name reads by its first words. Restore isn't drawn on a locked take — a door that can't act isn't rendered.</p>
+
+
+<!-- ============================================================ 3 -->
+<h2>3 · The heavy block, given the full column</h2>
+<p class="cap">Five takes, two archived, 23 commits, one deleted take — the whole fixture. With the room, the takes lie open above the rail (one line each, their counts beside them) instead of in a popup. Here a commit from a week back is open against now; one quiet run is unfolded to show it opens in place.</p>
+
+<div class="win">
+  <div class="top"><span class="title">On Rereading</span><span class="modes"><span class="on">Write</span><span>Takes</span><span>Read</span><span>Lenses</span><span>Compare</span><span>Blocks</span></span></div>
+  <div style="padding:14px;">
+    <div class="panel full">
+      <div class="phd"><span>‹ back to the note</span><span style="margin-left:14px;">On Rereading › block 2 of 4 › history</span><span class="r">lineage ›</span></div>
+      <div class="two">
+        <div class="card pane chosen">
+          <div class="ph" style="padding-left:34px;">
+            <div class="who"><span class="mn">before the long rewrite</span><span class="md">Oct 28 at 6:27 PM · plain <span class="ck">✓</span></span></div>
+          </div>
+          <div class="sum" style="padding-left:34px;">6 changes between this moment and now<div class="seg"><span>plain</span><span class="on">against now</span></div></div>
+          <div class="well">
+            <p>A book read once is a rumor; read twice, it <del>becomes a place you can walk around in</del> <ins>starts to become a place</ins>. The corners you missed <ins>the first time</ins> hold the furniture of the argument<ins>, and you only see them because you already know the room</ins>.</p>
+            <p>That is why the books that matter wear out their spines unevenly<del>.</del><ins>: the same forty pages, returned to, until the glue gives.</ins> Nobody teaches this. <ins>We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</ins></p>
+          </div>
+          <div class="acts" style="padding-left:34px;"><span>Restore</span><span>Bring back as take</span><span>Compare</span><span>Rename</span></div>
+        </div>
+        <div class="card rail">
+          <div class="takes">
+            <div class="tk chosen viewing"><span class="bar"></span><span class="lbl">plain</span><span class="ck">✓ chosen</span><span class="cn">10</span></div>
+            <div class="tk"><span class="bar"></span><span class="lbl">long form</span><span class="cn">6</span></div>
+            <div class="tk"><span class="bar"></span><span class="lbl">spoken</span><span class="lk">locked</span><span class="cn">4</span></div>
+            <div class="tk fold"><span class="bar"></span><span>2 archived takes ▸</span><span class="cn">3</span></div>
+          </div>
+          <div class="rh">history · <b>plain</b></div>
+          <div class="tl">
+            <div class="row now"><span class="d"><i></i></span><span class="n">the take now</span><span class="t"></span></div>
+            <div class="aig">
+              <div class="row"><span class="d"><i></i></span><span class="n">after claude-code's edit</span><span class="t">4 min</span></div>
+              <div class="row"><span class="d"><i></i></span><span class="n">before claude-code's edit</span><span class="t">4 min</span></div>
+            </div>
+            <div class="row"><span class="d"><i></i></span><span class="n">tightened the second clause</span><span class="t">Nov 2</span></div>
+            <div class="row run"><span class="d"><i></i></span><span class="n">3 quiet commits ▾</span><span class="t">Oct 29 – Nov 1</span></div>
+            <div class="sub">
+              <div class="row quiet fw"><span class="d"><i></i></span><span class="n">A book read once is a rumor; read twice, it…</span><span class="t">Nov 1</span></div>
+              <div class="row quiet fw"><span class="d"><i></i></span><span class="n">A book, read once, is a rumor. Read twice…</span><span class="t">Oct 30</span></div>
+              <div class="row quiet fw"><span class="d"><i></i></span><span class="n">A book read once is a rumor. Read twice, it…</span><span class="t">Oct 29</span></div>
+            </div>
+            <div class="row sel"><span class="d"><i></i></span><span class="n">before the long rewrite</span><span class="t">Oct 28</span></div>
+            <div class="row run"><span class="d"><i></i></span><span class="n">2 quiet commits ▸</span><span class="t">Oct 27</span></div>
+            <div class="row"><span class="d"><i></i></span><span class="n">first shape</span><span class="t">Oct 26</span></div>
+          </div>
+          <div class="spacer"></div>
+          <div class="foot">deleted take · "Rereading is the skill; reading is the audition." · 26 days left · <span class="go">Put back</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="cap" style="margin-top:12px;">The counts beside the takes are the whole "per take" story at a glance: 10 · 6 · 4 · 3 archived. Click a take, the rail becomes its history; nothing else on the page moves.</p>
+
+
+<!-- ============================================================ 4 -->
+<h2>4 · Compare — one press from any moment</h2>
+<p class="cap">Your second reference, as the real thing. Compare on the AI's pair sets before beside after; on any other moment, that moment beside now. Each side's ▾ picks any moment of any take of this block, so "this commit against the take I'm looking at" is always one pick away. Compare always takes the full column; from the side panel it widens.</p>
+
+<div class="panel full">
+  <div class="phd"><span>On Rereading › block 2 › compare</span><span class="r mute">before · after</span><span class="r" style="margin-left:18px;">‹ history</span></div>
+  <div class="cmp">
+    <div class="card">
+      <div class="ch"><span class="mn">before claude-code's edit ▾</span><span class="md">4 min ago · plain</span></div>
+      <div class="tx">
+        <p>A book read once is a rumor; read twice, it <del>slowly becomes</del> a place. The corners you missed the first time hold the <del>whole</del> furniture of the argument, and you only <del>notice</del> them because you already know the room.</p>
+        <p>That is why the books that matter wear out their spines unevenly: the same forty pages, returned to, until the glue gives. Nobody <del>really</del> teaches this. We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</p>
+      </div>
+      <div class="acts" style="padding-left:24px;"><span>Restore this</span><span>Bring back as take</span></div>
+    </div>
+    <div class="card">
+      <div class="ch after"><span class="mn">after claude-code's edit ▾</span><span class="md">the take now · plain ✓</span></div>
+      <div class="tx">
+        <p>A book read once is a rumor; read twice, it <ins>starts to become</ins> a place. The corners you missed the first time hold the furniture of the argument, and you only <ins>see</ins> them because you already know the room.</p>
+        <p>That is why the books that matter wear out their spines unevenly: the same forty pages, returned to, until the glue gives. Nobody teaches this. We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ 5 -->
+<h2>5 · Behind the one door — lineage, in the same panel</h2>
+<p class="cap">"lineage ›" is the only lineage door, and it is never on the default face. Through it nothing new is learned: the rail lists the family instead of commits — older above, this block marked — and the pane shows whichever relative you click. "its history ›" puts that block's takes and commits on the rail, exactly as in 1–3, so an ancestor's commits are two clicks away. In the Trash: shown, muted, no acts. Another wing: "go to ›" only.</p>
+
+<div class="panel lin">
+  <div class="phd"><span>On Rereading › block 2 › lineage</span><span class="r">‹ history</span></div>
+  <div class="two">
+    <div class="card pane">
+      <div class="ph">
+        <div class="who"><span class="mn">divided — the original, kept as lineage</span><span class="md">4 takes · 11 commits · was in this note until Oct 12</span></div>
+      </div>
+      <div class="well" style="max-height:none;">
+        <p>Rereading gets no respect. A book read once is a rumor. Read twice it becomes a place, and the corners hold the furniture of the argument — the parts you could only find because you had already been lost in them once.</p>
+      </div>
+      <div class="acts"><span>Put back</span><span>Bring back as take</span><span>Compare with now</span><span>its history ›</span></div>
+    </div>
+    <div class="card rail">
+      <div class="rh">family · <b>older above</b></div>
+      <div class="tl">
+        <div class="lrow"><span class="d"><i></i></span><span class="v">imported</span><span class="n">first draft, longhand…</span><span class="w">lineage</span></div>
+        <div class="gen"></div>
+        <div class="lrow sel"><span class="d"><i></i></span><span class="v">divided</span><span class="n">Rereading gets no respect…</span><span class="w">lineage</span></div>
+        <div class="lrow trash"><span class="d"><i></i></span><span class="v">copied</span><span class="n">a book read once is just a rumor…</span><span class="w">in the Trash</span></div>
+        <div class="gen"></div>
+        <div class="lrow"><span class="d"><i></i></span><span class="v">merged</span><span class="n">A book read once is a rumor.</span><span class="w">lineage</span></div>
+        <div class="lrow"><span class="d"><i></i></span><span class="v">merged</span><span class="n">Read twice, it starts to become…</span><span class="w">lineage</span></div>
+        <div class="gen"></div>
+        <div class="lrow this"><span class="d"><i></i></span><span class="v"></span><span class="n">this block</span><span class="w">here</span></div>
+        <div class="gen"></div>
+        <div class="lrow"><span class="d"><i></i></span><span class="v">extracted</span><span class="n">The corners you missed…</span><span class="w">this note</span></div>
+        <div class="lrow"><span class="d"><i></i></span><span class="v">version</span><span class="n">…an address you can give…</span><span class="w">drafts · go to ›</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="cap" style="margin-top:12px;">Two directions on purpose: the family reads older above (your v1 words), a take's commits read newest on top (your reference's rail). If one direction everywhere matters more, the commit rail flips cheaply.</p>
+
+
+<!-- ============================================================ -->
+<h2>How this handles density</h2>
+<ul class="pts">
+  <li><b>The face never grows.</b> One pane, one rail, always — a block with one take and three commits and this one with five takes and 23 commits are the same size on screen.</li>
+  <li><b>A rail line is one line.</b> Name or first words, and when. Quiet runs fold to a single line and open in place; the AI's pair stays two lines because it is the thing you came for.</li>
+  <li><b>Acts live once.</b> Restore · Bring back as take · Compare · Name sit under the pane for the moment you picked — not on every row, which is most of what made v3 and v4 crowded.</li>
+  <li><b>Takes are rows, not cards.</b> One row each in the switcher, archived in their own group, deleted as one line at the rail's foot. The text you read is only ever in the one pane.</li>
+</ul>
+
+<h2>Your calls</h2>
+<div class="call"><b>1 — one take's history at a time.</b> The bet of this direction: the switcher swaps the rail, so "commits by take" means "pick the take, read its commits". Is that clear enough — or do you want to scan every take's commits at once? <span class="rec">(The alternative keeps one rail but runs all takes down it, each take a tinted band — busier, nothing hidden.)</span></div>
+<div class="call"><b>2 — landing after an AI edit.</b> Drawn: when the newest thing on the take is an AI's pair, the panel opens on its "before", washed against now. <span class="rec">Or it always opens on the take now, plain, with the pair just marked on the rail.</span></div>
+<div class="call"><b>3 — the default seat.</b> Drawn both. <span class="rec">Recommended: beside the prose (Block History's seat), with Compare always widening to the full column.</span> Or the full column every time.</div>
+
+</div>
+</body>
+</html>
