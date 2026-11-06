@@ -1896,7 +1896,7 @@ dropdown's archived group). **Owed to her eye, not changed:** the ⌘/ helper's 
   Compare's "now". Read those branches hardest — a relative must never reach Restore/Rename/Put back/Unarchive (pinned:
   `selectingAMemberSwapsThePaneAndRailToIt`), and the foot's Bring back must go through the fenced op, never
   `bringBackCommitAsTake` (it does: `LineageBringBack.run`).
-- **The model grew past U3a's ≈690 lines** (now ≈780). U3a named Compare's state as the split seam; U3b did not split
+- **The model grew past U3a's ≈690 lines** (now 821). U3a named Compare's state as the split seam; U3b did not split
   it (one unit, one surface). P-9 is the reviewer's call.
 - **The fence is in the op, and the face reads the op's own wing rule** (`Operations.lineageCrossesWing`), so a member
   the face offers is a member the op accepts. The op reads `Queries.lineageTree` inside its transaction (∝ the target's
