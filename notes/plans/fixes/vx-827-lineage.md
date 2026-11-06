@@ -708,8 +708,8 @@ store touches.*
 | U2-0 | Preflight read (CLAUDE.md canon · this file's The run / Fence law / Environment traps / U1 RECORD + DRAFT CANON DELTAS / U2 BRIEF · MCPSpec WHOLE · vx-809 FOR A LATER READER · mcp-invisibility-residuals · the three tickets' full descriptions · `MCPReadTools.swift` whole · `MCPToolCatalog.swift`'s read rung + `apply_tag` / `remove_tag` / `replace_tag` / `create_note` · `MCPWriteTools+RemoveTag` / `+TagReplace` · `MCPNoteStructure.read` · the two-store catalog + its arms · `TagQueries` / `TagUsageQueries` · `mcpGrantReachCounts` / `mcpGrantInertFence` / `mcpGrantPlaceTitle` + the pane's client row) | DONE |
 | U2-1 | A — the tag filter's argument convention (the proposal gate) | DONE — NOT ambiguous (below); no proposal sent |
 | U2-2 | B — VX-815's TRACE (a throwaway probe, never committed) | DONE — below |
-| U2-3 | A — core: the tag-wearer listing + batched note tags, with exact-rows and P1 pins | NEXT |
-| U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | — |
+| U2-3 | A — core: the tag-wearer listing + batched note tags, with exact-rows and P1 pins | DONE — 7/7 + the shared brain's suites green; both P1 pins red on the naive join (below) |
+| U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | NEXT |
 | U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | — |
 | U2-6 | C — VX-778's predicate + its pin (red-on-old) | — |
 | U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) | — |
@@ -754,3 +754,28 @@ as the fix's red-on-old). The with_ids form is already honest (title, books, `bl
 therefore stated against the nothing-shape the trace found: the granted empty note's text answers stop being
 byte-identical with `Queries.variorumDocumentText` of an id naming nothing (`""`), while the fence's hidden-vs-
 missing answers stay byte-identical (the untouchable control — green on both sides by design).
+
+### U2-3 — the core reads (VX-810's source)
+
+- **`Queries.notesWearingTag(db, path:, wingID:)`** (`Queries/TagUsageQueries.swift`, beside the ONE brain): the live
+  tags at exactly `path` (`Queries.liveTagIDs` — one wing as surfaces read it, Home also holding a dead wing's; nil =
+  every wing; one `uq_tag_path_live` probe per wing), each one's subtree by `Queries.tagSubtree` (the rule grammar's
+  — the root and its own wing's tags under its path), and every live POST wearing a subtree tag by THE ONE wearer rule
+  — `tagWearersSQL`, HOISTED byte-for-byte out of `tagSubtreeIsWorn`'s `.reach` walk so the listing and
+  `remove_tag`'s `tag_unused_in_reach` read one text (on the note itself, or a live block it places; a snippet never).
+  Reach-blind, distinct, by note id.
+- **`Queries.wornTags(db, noteIDs:)`** (`Queries/TagQueries.swift`): many notes' OWN live tags at once (`postTags`
+  batched — the header's tags, never a block's), each note's by path then id; `WornTag(id, path)`.
+- Pins (`Tests/VariorumCoreTests/TagWearersListingTests.swift`, "✔ Test run with 7 tests"; with the shared brain's
+  `TagUsageQueriesTests` + `UnusedTagsTests` "✔ Test run with 22 tests in 3 suites passed"): itself vs a placed
+  block, a snippet / deleted block / dead note / removed application out; the subtree (parent lists child wearers,
+  never the reverse; a segment prefix and a bare child name are no path; a dead tag's path holds nothing); the path in
+  one wing, in every wing, a dead wing's tags as Home's; `wornTags`' order, block tags out, agreeing with `postTags`.
+- **P1, red on the naive form, verified by mutation and restored:** the first build joined `container` with a plain
+  `JOIN` — SQLite then walked EVERY post through `idx_container_kind` (a SEARCH that is a corpus scan) probing an
+  automatic index on the wearers: `theListingDoesNotGrowWithTheLibrary` RED (library ×15: **760 → 3560** VM
+  instructions) and `theWearerReadNeverScansAStoreTable` RED (the plan pin counts a SEARCH by the post kind's index as
+  a scan). With `CROSS JOIN` (the wearers drive; each probed by primary key — the VX-654 lesson): library ×15 **484 →
+  484**; wearers 20 → 60: 1086 → 2806 (×2.6, linear); no corpus-table scan. (The SAME plain-JOIN outer shape in
+  `tagSubtreeIsWorn`'s `.reach` walk was measured too, by a throwaway probe: flat, 526 → 526 at library 20 → 300 —
+  its `WHERE wearers.id > :after … LIMIT` drives from the wearers — so it is NOT a finding and stays byte-unchanged.)
