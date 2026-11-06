@@ -36,6 +36,11 @@ nonisolated enum SearchAnswerCopy {
     /// The badge a hit in an UNRENDERED take wears (the mockup's own).
     static let inAnotherTake = "in another take"
 
+    /// **The quiet mark of the block a passage lives in** (VX-90 — her 13o
+    /// idea, *"maybe it should say what block they're in?"*): its block's
+    /// name, after the passage's words. PROVISIONAL wording (VX-819 batch 1).
+    static func blockMark(_ name: String) -> String { "\u{00B7} \(name)" }
+
     /// What a non-prose passage IS — said before its words, so a block's
     /// name never reads as its prose (PROVISIONAL P-13o-U2-8). Takes and
     /// titles say nothing (the line is prose; the head is the title).
@@ -230,7 +235,13 @@ struct LibrarySearchLine: View {
                     // fact; every other kind word hovers nothing.
                     .stampHelp(LibrarySearchFace.kindHelp(kind: passage.kind, savedAt: passage.savedAt))
             }
-            Text(LibrarySearchFace.snippet(passage.snippet, tokens: tokens))
+            // VX-90: the block's name rides INSIDE the snippet's one Text,
+            // after its words — the snippet's measure (its frame, its left
+            // edge, its two lines) never moves for it.
+            Text(LibrarySearchFace.snippet(
+                passage.snippet,
+                blockMark: LibrarySearchFace.blockMark(kind: passage.kind, blockName: passage.blockName),
+                tokens: tokens))
                 .font(tokens.small)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -284,6 +295,33 @@ enum LibrarySearchFace {
             line += run
         }
         return line
+    }
+
+    /// **The snippet with its block's quiet mark** (VX-90): the snippet's
+    /// own runs exactly as `snippet(_:tokens:)` draws them, then — only when
+    /// a mark is given — one faint run, the mark after a gap. With no mark
+    /// the line is byte-identical to the unmarked one.
+    static func snippet(
+        _ segments: [SearchSnippetSegment], blockMark: String?, tokens: VoiceTokens
+    ) -> AttributedString {
+        var line = snippet(segments, tokens: tokens)
+        guard let blockMark else { return line }
+        var mark = AttributedString("  " + blockMark)
+        mark.foregroundColor = tokens.faint
+        line += mark
+        return line
+    }
+
+    /// **The block mark a passage line wears** (VX-90 — her *"maybe it
+    /// should say what block they're in?"*): its block's NAME where one
+    /// exists (PROVISIONAL, VX-819 batch 1). Never on a block-name hit — its
+    /// words already ARE the name — and never blank; a name's own newlines
+    /// fold to one space (the snippet's rule, VX-88). nil draws the line as
+    /// it always was.
+    static func blockMark(kind: SearchPassage.Kind, blockName: String?) -> String? {
+        guard kind != .blockName, let blockName else { return nil }
+        let name = foldingNewlines(blockName).trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : SearchAnswerCopy.blockMark(name)
     }
 
     /// **One visible separator for every newline run** (VX-88, D-5): a run of

@@ -217,15 +217,35 @@ extension Queries.LibrarySort {
     /// The sort's KEY without its collation (`expression` is the two
     /// together, for an `ORDER BY`); the cursor compares the key under the
     /// same collation the order uses.
-    var keyExpression: String {
+    var keyExpression: String { keyExpression(over: nil) }
+
+    /// **The same key over a container ALIAS** (VX-820 — the search answer
+    /// sheet orders its groups by their HOME through the Library's own sort,
+    /// R-819-2): `alias.column` for every column, so the one table of keys
+    /// serves the catalog's bare `container` and the composer's `c`. nil is
+    /// the bare form, byte for byte.
+    func keyExpression(over alias: String?) -> String {
+        let c = alias.map { "\($0)." } ?? ""
         switch self {
-        case .entryDate: "COALESCE(entry_date, created_at)"
-        case .createdAt: "created_at"
-        case .lastTouched: "COALESCE(last_touched_at, created_at)"
-        case .lastMajorRevision: "COALESCE(last_major_revision_at, created_at)"
-        case .title: "COALESCE(NULLIF(title, ''), entry_date, created_at)"
+        case .entryDate: return "COALESCE(\(c)entry_date, \(c)created_at)"
+        case .createdAt: return "\(c)created_at"
+        case .lastTouched: return "COALESCE(\(c)last_touched_at, \(c)created_at)"
+        case .lastMajorRevision: return "COALESCE(\(c)last_major_revision_at, \(c)created_at)"
+        case .title: return "COALESCE(NULLIF(\(c)title, ''), \(c)entry_date, \(c)created_at)"
         }
     }
 
-    var keyCollation: String { self == .title ? " COLLATE NOCASE" : "" }
+    /// **Whether the key compares case-folded** — the ONE truth of the sort's
+    /// collation (the VX-819 ladder's F5): the statement's `keyCollation`
+    /// below and the answer sheet's Swift placement of a worn-only note
+    /// (`SearchOrder.foldsCase` → `SearchOrder.precedes`, which reproduces
+    /// SQLite's `NOCASE`) both read it, so the database and the Swift merge
+    /// can never fold differently. The title's key folds (A–Z with a–z); the
+    /// stamps compare as stored text.
+    var foldsCase: Bool { self == .title }
+
+    /// The key's collation in SQL — `COLLATE NOCASE` exactly when the key
+    /// folds case (`foldsCase`). Only NOCASE is spoken: a sort that ever
+    /// wanted another collation must teach `SearchOrder.compareText` first.
+    var keyCollation: String { foldsCase ? " COLLATE NOCASE" : "" }
 }
