@@ -204,6 +204,8 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 
 *No behavioral revert is in flight unless a line below says "REVERT IN FLIGHT". Reverts are commit-first, the piece's wiring reverted on the committed tree, the pin run red, restored by `git checkout HEAD -- <file>`.*
 
+**REVERT IN FLIGHT (on `09f981d56`):** A-808-7's Sync/ stamps — `Repairs.repairOwnedExclusivity`'s two UPDATEs back to the bare status flip, `BookWingMend`'s stamp back to B1's `{"kind":"wing_mend"}` (no `at`); expected RED: `Phase13iRepairTests` (the mirror's stamp assertion + `aLaterOwnedClaimBesideAStandingOwnedClaimDemotesStamped`) and `BookWingConvergenceTests` BW6/BW6b/BW7 (the `isWingMendDemotion` checks). Restore: `git checkout HEAD -- Sources/VariorumCore/Sync/`.
+
 | Piece | Status |
 |---|---|
 | Red-on-old: P-808-B2-2's once-spend (on `ebff437fa`; `guardProposal` spending only the pure rule's `consumesOnce`) | **DONE — RED as predicted** (`aOnceGrantAboveReadIsSpentByTheOneItemItAuthorized`: the second item landed, the once write-new grant unspent — 3 issues); restored, tree clean |
