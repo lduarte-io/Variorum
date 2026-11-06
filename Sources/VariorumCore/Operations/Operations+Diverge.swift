@@ -98,12 +98,15 @@ extension Operations {
             // its chapter. Position is copied verbatim rather than computed —
             // `(position, id)` is the sort key, and the original's row leaves
             // in this same transaction, so nothing is ever ambiguous.
+            // VX-803 (A-808-12 (f)): and its PIN — the slot is where the reader
+            // sees it, so a pinned original's copy stays in the pinned group.
             let now = date.now
             let membership = ReadingPost(
                 id: newID(), readingId: readingID, postId: copy.post.id,
                 position: original.position,
                 sectionId: original.sectionId,
-                createdAt: now)
+                createdAt: now,
+                pinnedAt: original.pinnedAt)
             try membership.insert(db)
 
             original.deletedAt = now

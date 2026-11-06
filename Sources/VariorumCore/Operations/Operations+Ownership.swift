@@ -157,12 +157,16 @@ extension Operations {
     /// chapter) and the original's membership here is tombstoned — a
     /// member-class decision, so this book's intake never re-adds the
     /// original. The original lives on in its other books.
+    ///
+    /// VX-803 (A-808-12 (f)): the slot carries the membership's PIN too — Own
+    /// Its Notes… and Seal…'s forks never unpin her notes (sealing would
+    /// otherwise reorder the book it promises to keep).
     func forkInPlace(_ db: Database, membership: ReadingPost, now: Date) throws -> Container {
         let copy = try ceremonyCopy(db, sourceID: membership.postId, now: now)
         try ReadingPost(
             id: newID(), readingId: membership.readingId, postId: copy.id,
             position: membership.position, sectionId: membership.sectionId,
-            createdAt: now
+            createdAt: now, pinnedAt: membership.pinnedAt
         ).insert(db)
         var original = membership
         original.deletedAt = now

@@ -590,11 +590,14 @@ extension Operations {
                         originalID: membership.postId, copyID: postID,
                         elsewhereNames: [source.name]))
                 }
+                // VX-803 (A-808-12 (f)): the arrangement is configuration —
+                // positions, chapters AND pins ride the duplicate.
                 try ReadingPost(
                     id: newID(), readingId: duplicate.id, postId: postID,
                     position: membership.position,
                     sectionId: membership.sectionId.flatMap { chapterMap[$0] },
-                    createdAt: now
+                    createdAt: now,
+                    pinnedAt: membership.pinnedAt
                 ).insert(db)
             }
             return BookDuplicateResult(reading: duplicate, copied: copied)
