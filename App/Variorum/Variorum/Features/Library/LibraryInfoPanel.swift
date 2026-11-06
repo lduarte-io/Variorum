@@ -692,7 +692,8 @@ enum LibraryPanelOracle {
 enum LibraryProbeSlot: Hashable {
     case root, divider, panel, message, quickEntry, bookLine
     /// VX-175: the controls row and its search field; P-U3-5: the sort slot
-    /// (the `sort ▾` door, or the relevance label while she searches).
+    /// (the `sort ▾` door, or the search's `order ▾` door while she searches —
+    /// VX-820).
     case controls, searchField, sortSlot
     /// VX-350: the 🔍 door the field collapses to at a narrow width.
     case searchToggle
