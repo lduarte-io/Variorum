@@ -141,6 +141,37 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 
 **Evidence owed:** VX-831 view-model pins — the mark's three states (own · via-book · none), both click arms, the `ownership_badges` gate, the tooltip's words, the drawn-rows-only cost shape; VX-804's red-on-old pin; headless `swift test` where a core file is touched; `xcodebuild build` + `build-for-testing` green; the BATCH 2 RECORD below this brief (LIVE STATUS from the first commit, mechanisms, pins named, the closing window's debt updated, surprises). Commits say "Part of VX-831." / "Part of VX-804.". No `xcodebuild test`; no walk (the closing window's).
 
+## BATCH 2 RECORD (opus-implementer, 2026-11-05/06)
+
+**IN PROGRESS.** Required reading done in this session, nothing delegated: this record whole · `notes/SurfaceContracts.md` IN FULL (the five named sections inside it) · `notes/MCPSpec.md` IN FULL · `notes/SessionResiliencyProtocol.md`. Head at start: 287e26ee4, clean.
+
+### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| R-0 · record opened; both mechanisms/designs written before code | DONE (this commit) |
+| 804-a · VX-804 pin (DEBUG name probe on the three faces + the mount pin), committed on the PRE-FIX behaviour | NOT-STARTED — design below |
+| 804-b · VX-804 fix at the projection seam | NOT-STARTED — design below |
+| 831-a · core: the mark's facts (`Queries.privateMarks` / `privateBookMarks`), the named regions, headless pins | NOT-STARTED — design below |
+| 831-b · the face: the glyph, the pure rule, the words, the door's two arms, the hold, App pins | NOT-STARTED |
+| 831-c · the hosts: note rows (Library List + Cards · Timeline · Pool), book rows (Library · Bookcase), the Book Panel (note rows · the shown book), the note's masthead (the in-note indicator) | NOT-STARTED |
+| V · `swift build` + headless `swift test` (touched suites), `xcodebuild build` + `build-for-testing` | NOT-STARTED |
+
+### VX-804 — the traced mechanism (written before the fix)
+
+- **Inputs → the wrong state.** Book Settings' Close runs `BookSettingsSheet.save()` → `BookStructureModel.rename(to:)` → `assertBookNameIsFree` + `renameReading` — ONE write that lands (the sheet's Name field re-seeds from `structure.reading`, which `BookStructureModel.start()` holds as a live `database.observe` of `Queries.reading` — that is why the tester saw the new name persist across reopening settings). The open book's three name faces — the navigator masthead (`BookView.bookMasthead`, `tokens.path([…])`, one truncating line — "the masthead its truncation"), the Outline's content-column title (the "page heading") and Read ▸ Scroll's title (handed to `ReadingFlowView(readingName:)`) — all read `readingName ?? model.readingName ?? "book"`. `RootView` (the one `BookView(` site, :1547) never passes `readingName`, so every face reads `BookViewModel.readingName` — which `BookViewModel.start()` assigns ONCE, by a one-shot `database.read`, before it enters the entries observation (`observeReading` delivers entries, never the name; the line's own comment: "a rename while the book is open goes stale until reopen — cosmetic at author scale, recorded"). Nothing re-assigns it until `start()` re-runs: the view's `.task(id: model.observationKey)` restarts only on an order/filter/window change, and navigation remounts the view with a fresh model. So the write lands and the faces keep the open-time name "until I left that part of the app". A stale projection, not a lost write — exactly the ticket's reading.
+- **The fix, at the projection seam (NOT built yet):** the faces read the reading row's LIVE projection — `BookStructureModel.reading`, already held for the view's life by `structure.start()` — through one derivation; the one-shot copy `BookViewModel.readingName` (a view model holding a copy of persisted text — CLAUDE.md's rule) is retired, and with it `BookView`'s `readingName:` override, which no host or pin passes and which would re-open the same class if one ever did. No broadcast, no view-side re-read: one observation of the row, one source. The workspace strip's titles are already HELD (row 18 fixed this class there — `WorkspaceModel.observeTitles`), so the open book's faces were the remaining one-shot.
+- **The pin (bug class, red-on-old):** a DEBUG probe records the name each of the three faces DRAWS (instrumentation only — no behaviour change), committed WITH the mount pin on the pre-fix behaviour, so the history carries pin-before-fix: mount `BookView` with injected models, start both models by hand (hosted `.task`s don't fire under the test host), settle until the faces draw the open-time name, rename through Book Settings' own road (`structure.rename(to:)`), assert the store holds the new name (not a lost write), settle, assert the masthead and the Outline title DRAW the new name. RED on the pin commit's tree (the faces read the one-shot); GREEN on the fix. The run of both is the closing window's (no stage here); the red is shown here by evaluation of the pre-fix body.
+
+### VX-831 — the design (written before code; the survey's answers)
+
+- **The fact** (N-2): the STORE's own Private fact, never reach — a note's own `container.ai_private_at`, or a live MEMBER row in a live reading carrying `ai_private_at` (exactly the fence's `privateLegForNote`, split into its two halves so the door can tell own from via-book; the books named, by name); a BOOK's own `reading.ai_private_at`, books only (a gathering never wears it — the ops refuse the mark there; a wing is never markable). Read for the ids a host DRAWS (a `json_each`-driven statement, ∝ the ids — P1), independent of client state.
+- **The hold's cost:** `container` is stamped per autosave by a full-record `update(db)`, and `Container` carries NO `ai_private_at` property — so a hold woken by NAMED regions only (`AppDatabase.observe(tracking:)`: `container(ai_private_at)`, `reading`, `reading_post`) re-runs on a mark, a membership or a book change and never at autosave rate (GRDB filters UPDATE events by column). Pinned headless both ways (a mark wakes it; an autosave does not).
+- **The glyph:** option A, the closed eye with lashes. No SF Symbol draws it (the catalogue's eye family is `eye` · `eye.slash` · `eye.half.closed` · `eyes`, none closed with lashes — rendered and checked), so it is a drawn line glyph: the closed lid as a downward bow, four short lashes below, round caps, in the shared icon's outline family and weight; monochrome in the voice's ink (the in-note lock's firmer W-UX-12 face it replaces). PROVISIONAL D-831-1 (the exact drawing — hers at the walk, against the rendered candidate she picked).
+- **Rail (a) — the click's posture: MATCHED, no confirm.** Survey: every existing Private door is a plain `Toggle` with a receipt and no confirm — the note ▾ menu (`NotePrivacyMenuItems`), the in-note lock's popover (`MCPNoteIndicator`), Book Settings' Private row (`BookSettingsModel.setPrivate`). So the mark's own-arm click runs the same op (`setNotePrivate(id, false)` / `setBookPrivate(id, false)`) with the same receipts ("No longer Private." · "“‹book›” is no longer Private."), plus one honest arm the toggle never needed: a note with its own mark AND a Private book says it stays private via that book. Not open.
+- **Rail (b) — "names the book and points at it": the saying carries ONE door to the book.** The via-book click did not act, so it speaks the ruled sentence ("Private via “‹book›” — change it on the book, or move the note.") with a one-press door "Open “‹book›”" running the badge family's own click-through (`MembershipChip.ascend` — the owned-by badge's road: the book opens at the note). The seam's law classes a line that carries a door as an OFFER (`StatusCenter.offer` — it toasts exactly as a refusal does); the 13i-b teaching offer is the precedent for a door that cannot act naming its road with a press. The alternative weighed — the click itself opening the book (the owned-by badge's click) — moves her view on a press she meant as un-private; the door leaves the going to her. Not genuinely open (the brief's own "a press road to the book"); PROVISIONAL D-831-2 for her walk.
+- **The gate:** the badge family's one switch (`ownership_badges`) silences the mark on every host. The note's masthead (the in-note indicator) ALSO keeps the gate its lock had (VX-164: drawn whenever the indicator is on), so turning badges off never removes a Private sign the indicator already gave — PROVISIONAL D-831-3.
+
 ## LIVE LEDGER (one row per member; flipped as evidence lands)
 
 | # | Member | Batch | Status |
@@ -148,8 +179,8 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | 1 | VX-829 doors everywhere | 1 | BUILT (3b528a5c0, 93ef16481) — compiled; App-suite run + walk PENDING (closing window) |
 | 2 | VX-802 note-title menu | 1 | BUILT to A-878-1 (bef53a19d) — compiled; App-suite run + walk PENDING (closing window); PROVISIONAL D-802-1 |
 | 3 | VX-868 delete-confirm wording | 1 | BUILT (pin 3263e5877, fix 7656bc887) — red-on-old by evaluation; suite run PENDING (closing window); wording PROVISIONAL |
-| 4 | VX-831 the Private mark | 2 | NOT-STARTED |
-| 5 | VX-804 rename repaint | 2 | NOT-STARTED |
+| 4 | VX-831 the Private mark | 2 | IN-PROGRESS (batch 2 record) |
+| 5 | VX-804 rename repaint | 2 | IN-PROGRESS (batch 2 record — mechanism traced) |
 | 6 | VX-874 trail: float · dismiss · clear-all · the dial | 3 | NOT-STARTED |
 | 7 | VX-858 gone-place refusal names the note | 3 | NOT-STARTED |
 | 8 | VX-816 name guard per wing | 3 | NOT-STARTED |
