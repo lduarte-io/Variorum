@@ -1204,3 +1204,48 @@ one step down).
 (pane + rail + dropdown + fast swap + compare + the Domain diff function + registry + the
 panel's retirement); U3b = the Lineage face (the vertical family, the ancestor swap, the acts
 in the tree) + the mobile-parity note. The ladder still runs ONCE over the run's whole diff.
+
+## U3a BRIEF — the Commits face (builds THE DESIGN MEMO's first half)
+
+**Read first (in full):** CLAUDE.md's auto-loaded canon · this file: "The run", THE DESIGN MEMO,
+every "Mockup/exploration sitting" entry (her words are the spec), "Environment traps" ·
+`notes/SurfaceContracts.md` — The note and The app sections · `notes/TEXTKIT2_NOTES.md` (the
+reading pane is read-tier work; if you touch `PaneSurface`, `EditorTextView`, `BlockRangeIndex`
+or the read tier's seams, its rules bind) · the existing Block History implementation WHOLE
+(find the panel, its every door — bottom bar word, block ▾, the inspector road VX-668 named, the
+read-in-full sheet, VX-440's R-440-3 behaviors) · the exploration mockups `explore-A-timeline.html`
++ `explore-B-panel.html` + her composite screenshot `<home>/shots/shot-20261105-220337.png`
+(the drawn target) · U1's `Queries/LineageTree.swift` (U3b consumes it; know its shape) · the
+capability registry (P-1's home) before declaring doors.
+
+**Deliverables:**
+1. The Commits face exactly as THE DESIGN MEMO states it: reading pane + all-takes rail + take
+   dropdown + the fast swapper + the rail foot's deleted takes. Full pane; ‹ back returns.
+2. The pure Domain text-compare function (word-level spans between two given texts, view-time
+   only, nothing stored — OverallModel §8's legal diff), its own test suite; the pane's
+   against-now washes and Compare's washes both read it.
+3. Compare: two boxes + the standing "now" third, each box's header a swapper; from any
+   commit's Compare act.
+4. The Block History panel's RETIREMENT: every door that opened it opens this face; its jobs
+   (per-take commits, read in full, Restore, Bring back as take, Name/Rename, deleted takes +
+   Put back) all live here; remove what nothing composes anymore. The commit vocabulary and
+   every refusal stay the existing operations' — no new ops, no op changes.
+5. Registry: the new/moved doors declared once; the registry-walk test extended and green.
+PROVISIONAL leans (build these, log #264): open on the newest moment (after an AI edit that IS
+the after-bracket, the before one step down); ↑/↓ as the swapper's keys; the memo's other
+flagged items.
+
+**Evidence:** the Domain diff suite; the registry walk; focused view-model coverage for the
+face's projections (rail rows, folds, dropdown, swapper selection); every existing
+Block-History-class pin re-pointed as a JUSTIFIED edit named one by one (nothing silently
+deleted); headless core suites green at the unit's end; `xcodebuild build-for-testing` green.
+Mac-target TEST RUNS are owed to the closing stage window, not this session — write the pins,
+compile them, name them for the window. TutorialWalkTests must COMPILE; if any tutorial step
+touches Block History, FLAG it before changing anything the tutorial walks.
+
+**Constraints:** P3 — the reading pane is a READ surface, no second live editor, no new
+liveness mechanism beside `PaneTextAuthority`; no `Sync/`, no custody, no schema, no MCP-door
+changes; sentence case, the commit vocabulary; one agent, at most ONE Sonnet for EXTERNAL
+facts; LIVE STATUS (U3a RECORD) from the first commit, commit per piece ending "Part of
+VX-801", no trailers, push every commit, foreground waits only; work only in
+`~/dev/variorum-vx-827` (pull first — U1/U2 and the memo are on origin).
