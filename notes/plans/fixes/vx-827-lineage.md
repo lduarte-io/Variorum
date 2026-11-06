@@ -2207,3 +2207,13 @@ vx-827-window-2 = WHOLE VariorumTests on 0930ba69d → SEAM → walk rows 1–23
 evidence. ACCEPTED nov5's offer: the PHONE ARM alone (VariorumMobileTests, fresh sim, settle,
 shutdown) slots earlier at vx-878's SEAM. Any branch change before the window re-sends the
 file list.
+
+**THE PHONE ARM (claim vx-827-phone, GO 02:52, released ~03:0x): CLEAN FOR THIS DIFF.** Full
+VariorumMobileTests on 0930ba69d, fresh iPhone 17 Pro: ✘ 852 tests / 139 suites / 476.8 s with
+6 issues — 4 framework-marked known issues + the ONE standing main-side red
+(`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:)`,
+"hi"/"hello there", desyncRecoveryCount 1 vs 0; red alone too; VM-24/VM-34/VM-37 verbatim —
+pre-existing, not ours; no phone/Shared/ file in the fix leg, and the run's Shared/ touches are
+nowhere near the caret road). Sim shut down, guards + Problem Reporter clean, no new .ips in
+the slot. REMAINING: vx-827-window-2 (whole target on 0930ba69d → SEAM → walk rows 1–23), GO
+after vx-819's merge gate.
