@@ -519,6 +519,19 @@ B1 → B2 → B3 (its design pick may land during B2's build at a sitting) → B
 - **TWO WALK INCIDENTS, recorded honestly (no store damage):** (1) the note-header TAG FIELD is keyboard-blind to synthetic typing while the live editor holds first responder — my re-pose typing twice landed in the BODY instead, and the stray Return ran the TYPED-RETURN STRUCTURAL door (minting a block; the text stack cleared by the compound law — the seam's own refusal diagnosed it verbatim: "Nothing to undo in the text — your last change was structural"). Repaired live by ⌥⌘Z + hand-delete, verified clean; the lesson joins walk-driving-lessons at closeout (type into the tag field only from a fresh note open, or use quick-entry microsyntax). (2) The earlier DerivedData-mtime trap's rule held (launched by WorkspacePath this window).
 - B3 and B4 are both DONE; the ladder re-checks the units over the whole diff.
 
+### THE LADDER — round 1 verdict + the orchestrator's dispositions (2026-11-06; the findings file is `notes/plans/fixes/vx-808-ladder-round1.md`, commit 7fbfded7f)
+
+**NO BLOCKER, NO MAJOR.** 3 MINOR · 4 NIT · 7 reviewer RULINGS (the Sync/ class — the cross-model flow's final calls, landing at closeout as written: residual-(6) CLOSED (R1-RULING-1, superseding the recorded-again stance); the tier-3 gap stands with the `created_at` alternative bundled; the belts keep wired; the once-spend sound; `changed: false` no oracle, no ledger entry owed; the `at`-CAS divergence has no oscillation; fenced-first never strips a last fence leg).
+
+Dispositions (every finding owned):
+- **F-1 (MINOR, the wing-row straggle reach gap): RECORD, not belt — the orchestrator's ruling.** No red-on-old pin is constructible (a reach gap, not a regression), and the hallucination guard's bias binds: un-pinnable Sync/ code at a ladder's tail is not built. The one-shot deferral BELT's shape (the furniture fold's marker pattern) is RECORDED on the closeout's remainder ticket for the successor, beside vx-805's corners (1)–(4) and this run's vacuous remainder from R1-RULING-1.
+- **F-2 (MINOR, the narrow row's yield order): FIX NOW** — the WHY line wins, the SINCE stamp yields first; a pure rule beside `ArrivalRowFit` with its pure pin; words PROVISIONAL. One fix session with F-4.
+- **F-3 (MINOR, pre-existing — the gathering cursor resumes a hidden member's id): TICKET** (filed at this disposition; not this run's diff; the VX-859 fix makes the asymmetry visible).
+- **F-4 (NIT, the stale popover comment): FIX NOW** in F-2's session (the queued one-liner).
+- **F-5/F-6/F-7 (NITs): RECORD-ONLY** as the reviewer wrote them — F-7's accepted index trade keeps its named escape hatch (a composite (reading_id, pinned_at IS NULL, position) index if a huge manual book ever measures slow).
+
+Round 2 = a fresh reviewer's FIXES-ONLY re-check (no new BLOCKER/MAJOR arose).
+
 ## 7b. THE MERGE-IN CHECKLIST (nov5's trial-merge intel; executed by this run's merge-in step, likely the LAST merger since our deploy + release close the stage)
 
 - **vs vx-827 (1a66adce2-era):** three textual conflicts — `Sources/VariorumMCP/MCPToolCatalog.swift`, `Tests/VariorumMCPTests/MCPServerTests.swift`, `Tests/VariorumMCPTests/MCPWriteServerTests.swift` (the tool list + count pins class). Resolve keeping BOTH sides' tools/arms; re-run the MCP server + catalog suites headless on the merged tree.
@@ -561,5 +574,5 @@ Results + counts here; FOR A LATER READER written last; master plan row retired 
 | 6 | Unit B4 (pins) | DONE — built to A-808-12; 173/17 green at the combined window; the pin walk verified live both voices (float, in-group sort, Finished confirm+refusal, marks); the ladder re-checks (flags: the manual-order index trade; the 300-note drop window; the narrow why-vs-since yield) |
 | 7 | Unit B5 (riders + docs tail) | DONE except VX-775 (deferred, R-808-6) — 859 id-resume (catalog arm red-on-old) · 777 close words · 776 seam+words · 879's three sites (item-2 mechanism corrected by the implementer's own verify) · 867 her words · 860 the belt · docs tail at 3,098/3,100; headless green (core 3869/526; MCP socket class green alone); app suites owed at the b5 window |
 | 8 | Unit L (the live round) | OFF — R-808-4: VX-872 deferred out of the run; re-owned at closeout with the marker-deadline line |
-| 9 | The ladder (Fable, whole diff) | NOT STARTED |
+| 9 | The ladder (Fable, whole diff) | ROUND 1 DONE — no BLOCKER/MAJOR; 3 MINOR (F-1 record · F-2 fix · F-3 ticket) · 4 NIT (F-4 fix; F-5/6/7 record) · 7 reviewer rulings land at closeout; round 2 = fixes-only re-check |
 | 10 | Closeout + deploy window + release (the stage's finish, her go) | NOT STARTED |
