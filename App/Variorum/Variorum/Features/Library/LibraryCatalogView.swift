@@ -219,6 +219,14 @@ struct LibraryCatalogView: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// VX-822: the sidebar field's handoff, taken — the keyboard here, the
+    /// caret after the carried words.
+    private func takeCarriedWords() {
+        guard model.takeSearchFieldKeyboardAsk() else { return }
+        searchFieldFocused = true
+        CarriedWordsCaret.toEndSoon(of: model.query)
+    }
+
     var body: some View {
         // The Act 10 correction round, batch E — rows 34 + 24 (the panel
         // half): the right panel is a column of OUR OWN — the list, ONE 1 pt
@@ -854,6 +862,16 @@ struct LibraryCatalogView: View {
             // so a narrow row never hides the field she is typing in.
             .onChange(of: searchFieldFocused) { _, focused in
                 if focused { model.searchFieldOpened = true }
+            }
+            // VX-822: the sidebar field's ⏎ — this field takes the keyboard
+            // with the carried words, the caret at their END (a field focused
+            // by code selects all, and her next key would replace them); at
+            // once, or at the mount when the Library was not on screen.
+            .onChange(of: model.searchFieldWantsKeyboard) { _, wants in
+                if wants { takeCarriedWords() }
+            }
+            .onAppear {
+                if model.searchFieldWantsKeyboard { takeCarriedWords() }
             }
             // 13n-c UX walk W-UX-3 (T-1): the bulk doors on a ROW OF THEIR
             // OWN under the controls while several notes are picked. In the

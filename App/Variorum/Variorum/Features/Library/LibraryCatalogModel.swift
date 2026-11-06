@@ -288,6 +288,25 @@ final class LibraryCatalogModel {
         return .close
     }
 
+    /// **VX-822 — the sidebar field's ⏎ hands its question here** (R-819-4:
+    /// "⏎ … moves her into the Library, text carried"). A PENDING ask the
+    /// view takes — at once when the Library is on screen, else at its mount —
+    /// by giving this field the keyboard, the caret at the end of the words;
+    /// the field opens where the narrow class hides it (her act, by handoff —
+    /// the 🔍 press's own `searchFieldOpened`).
+    private(set) var searchFieldWantsKeyboard = false
+
+    func askSearchFieldForKeyboard() {
+        searchFieldOpened = true
+        searchFieldWantsKeyboard = true
+    }
+
+    /// The view taking the ask — true exactly once per ask.
+    func takeSearchFieldKeyboardAsk() -> Bool {
+        defer { searchFieldWantsKeyboard = false }
+        return searchFieldWantsKeyboard
+    }
+
     /// **The search state's own brain** (13o U2, D8 — P-9): the question, the
     /// band's numbers, the Books section, the groups and their expansions.
     /// Owned here the way `bookRowDoors` is; this model routes the field's

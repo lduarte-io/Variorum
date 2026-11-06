@@ -261,6 +261,9 @@ struct RootView: View {
                 session: session, model: library, pool: pool,
                 workspace: router.workspace, stars: stars, starDoor: starDoor,
                 bookRowDoors: starredBookDoors,
+                // VX-822: the sidebar's search field — ⌘K's road into the
+                // Library's one search (R-819-3/-4).
+                searchDoor: sidebarSearchDoor,
                 selection: selectionBinding,
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
@@ -1699,6 +1702,35 @@ struct RootView: View {
         catalog.query = words
         Task { await catalog.search() }
         adopt(.library, in: router.workspace.focusedPane)
+    }
+
+    /// **VX-822 — the sidebar field's three roads** (R-819-4: the field keeps
+    /// the keyboard; one engine, one finder). Its words are the Library's ONE
+    /// question through ⌘K's own road above — the Library landed only where
+    /// the focused pane is not already showing it, so a keystroke never
+    /// re-navigates (and the catalog asks in the current wing, as it always
+    /// does). Clearing ends the search and stays; ⏎ hands the keyboard to the
+    /// Library's own field, the words carried.
+    private var sidebarSearchDoor: SidebarSearchDoor {
+        SidebarSearchDoor(
+            ask: { [self] words in
+                guard router.workspace.focusedSelection == .library else {
+                    searchLibrary(words)
+                    return
+                }
+                catalog.query = words
+                Task { await catalog.search() }
+            },
+            end: { [self] in
+                catalog.query = ""
+                Task { await catalog.search() }
+            },
+            keyboardToLibrary: { [self] in
+                if router.workspace.focusedSelection != .library {
+                    adopt(.library, in: router.workspace.focusedPane)
+                }
+                catalog.askSearchFieldForKeyboard()
+            })
     }
 
     /// Navigation with an optional caret-precise block landing (Stage C) —
