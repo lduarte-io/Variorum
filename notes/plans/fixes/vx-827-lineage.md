@@ -1059,3 +1059,16 @@ older above, no horizontal scroll); Q3 ANSWERED (collapsed → takes → commits
 DEAD (the door lives in the existing block menu / history door). Mockup v2 owed: ONE vertical
 story surface whose rest state IS the glance, absorbing the Block History redesign question and
 the commit-vs-now compare.
+
+**Mockup v2 sitting (2026-11-05, on the Air):** RULED — *"yes - there should be one door for
+block history. that makes a lot of sense."* (v2's question 1: this surface SUCCEEDS Block
+History, one door). RULED — *"the immediate thing you see should be this particular block's
+history - and it should be easy to see commits BY TAKE, archived takes, etc., and then you
+should be able to also see lineage."* (the surface OPENS on this block — takes with their
+commits, archived takes visible — lineage reachable second; v2's lineage-first vertical order is
+dead). v2's face REJECTED: *"i still don't like this new mockup. i feel like it's a lot of words
+and not very clear still."* Layout reopened: *"maybe the horziontal scroll was actually better,
+it was actually a lot clearer at least."* Her process ask: *"start by clearly listing all the
+info that needs to be shown and then let's think about for a complicated block what it would
+look like."* → v3 direction: this-block-first; information inventory first; the horizontal
+element may return as a bounded MAP (never whole-area scroll); takes as cards, not text rows.
