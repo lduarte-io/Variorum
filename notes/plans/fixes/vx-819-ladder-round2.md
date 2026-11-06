@@ -10,7 +10,7 @@ A-819-L1's dispositions. Branch `vx-819-search`, head `e8b1403da` at the round's
 seam (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, the read tier), no schema, no default's meaning. The
 Opus-eligible class holds.
 
-**STATUS: IN PROGRESS.**
+**STATUS: ROUND 2 COMPLETE (2026-11-06) — see the end of the clean bill.** Severity order: R2-1, R2-2, R2-3, R2-4 (all NIT).
 
 ## Findings (appended as found; severity-ranked at the round's end)
 
@@ -73,4 +73,65 @@ page. Not new, not owed this run (the two statements' materialization differs fo
 mechanical); a shared column-list constant would close it in two lines. Leave or ticket as Debt at the orchestrator's
 call.
 
-## Clean bill
+## Clean bill — load-bearing things checked against A-819-L1 and found solid
+
+- **No BLOCKER, no MAJOR; nothing new of that weight introduced.** Every changed file is inside the brief
+  (`git diff --stat 82b94bd0e^ e8b1403da`: the Library feature's five files, RootView, the sidebar field and its
+  tests, four core files and one core test, the two records); no `Sync/`, schema, custody, MCP, `Registry/` or editor
+  seam line; `CommandPalette.swift` and `SearchPassagesTests.swift` untouched.
+- **F2 (`959d81d41`) does what A-819-L1 ruled.** `toEnd(of:in:)` now reads ONE window — `Anchor.window`, the window of a
+  zero-hit `ProbeView` the Library field wears as `.background` — and `toEndSoon` re-reads it per try, so a mount that
+  lands the probe late still resolves inside the old 20 × 15 ms budget; no `NSApp.windows` walk remains (grep: the only
+  caller is `LibraryCatalogView.takeCarriedWords`; the test host builds no caret). The probe takes no layout (a
+  background sizes to its host), no hit (`hitTest` nil), and is no key-view stop (a plain `NSView` does not accept first
+  responder), so VX-332's opening pick and the controls row's geometry are untouched. The sidebar's own editor stays
+  refused by delegate. **Pin honest:** at `24d34c440` the walk meets a decoy first in either list order (one built
+  before the shell's window, one ordered front after it) — its delegate is a plain `NSTextField`, so the old guard
+  matches it, moves ITS caret and stops, leaving the shell's `(0,7)`; non-vacuity premises throw by name, so a harness
+  miss reds both trees instead of greening the old one.
+- **F1 (`e17a210f1`) and F3 (`bf3b45531`) do what A-819-L1 ruled, on the SIDEBAR road only.** The plumbing
+  (`439d7f187`) is behaviour-preserving by trace: the old two branches (`searchLibrary` = query + `search()` + adopt;
+  or query + `search()`) equal `takeSidebarQuestion` (query) + `search()` + adopt-where-not-shown. F1: `pickMode(.list)`
+  on a `.timeline` mode (scope untouched — `scope(afterPicking: .list)` is the identity); on screen the view's
+  `onChange(of: mode)` runs `modeChanged()` exactly as for her pick (returns false — Timeline already cleared the day);
+  off screen `read()`'s own `holdNearFacts()` and the mount's `onAppear` cover what `modeChanged` would have held. F3:
+  `resetFacet()` on `.start` only — exactly the cleared field's reset (order → relevance, archived / commits / book
+  state off); the `when` day and the scope stay, as on that road, and the amended P-819-B3d says so (a book-state
+  facet that moved the scope to Books leaves Books standing — the scope picker is not a facet; for the QUESTIONS line,
+  not a defect). The first-word reading is the defensible one: a keyboard-free order/facet change mid-typing (a menu
+  command, which the window's mouse-down monitor does not hear) is then KEPT as refining keeps it, where an
+  every-keystroke reset would silently undo it. ⌘K's `searchLibrary` and the Library field's binding are byte-unchanged.
+  **Pins honest:** F1 red on the old tree by the mode alone (R2-2 corrects the count); F3 red by three issues — at
+  `6c38ba2b4` the first word is `.ask` and `read()` resets only on an empty question; the F1 pin also proves the field
+  keeps the keyboard through the mode move (the view swap does not steal it).
+- **F4 (`969ff499a`) closes the round-1 mechanism in the smallest honest form.** `inert` = `paletteOpen`, the ONE state
+  behind the palette sheet (`RootView.swift:56/385/580` — no other writer); as it turns true the field applies its own
+  `leave()` law (the keyboard did leave — to the sheet — though AppKit reports no end of editing because the parent
+  window's first responder never changes), so back in the window esc and ⏎ act on an empty field and the palette's
+  question is never ended or swapped. The guard sits after the rule's mutation; the only acts it can meet while the
+  sheet is key are `.none` / the leave's own `.handOff(false)` (keys go to the sheet; the click monitor ignores the
+  sheet's window), so the rule and the Library cannot diverge on a reachable road. Not generalized to other sheets
+  (correct: no other road rewrites `catalog.query` — grep: `searchLibrary` and the door's `end` are the only writers).
+  The stated consequence (palette dismissed without its road → field empty) is the `leave()` doc's own law; it needs
+  its QUESTIONS line (R2-3). **Pin honest:** red on the old tree by three issues.
+- **F5 (`662d91845`).** `LibrarySort.foldsCase` is the one truth; `keyCollation` (the catalog's keyset AND the answer
+  sheet's statements — `LibraryPaging.swift:211`, `SearchComposer.swift:585`) and `SearchOrder.foldsCase` (the worn
+  merge) both derive from it. Behaviour-preserving.
+- **F6 (`3a328f451`) is mechanical — verified by reading the two texts side by side against `3a328f451^`:**
+  `groupPage`'s template with `keyed: false` and relevance's arguments reproduces the old relevance statement byte for
+  byte (the `g_lines` line, the `ranked` select's trailing comma, the blank keyset line, the argument order hits →
+  cursor → limit → perGroup → match); with `keyed: true` it reproduces the old home statement. The Swift fold and
+  assembly are the two old loops verbatim over one struct; `key` is nil only for relevance groups and worn
+  placeholders, never read there. The relevance cursor still requires `best` (`let best = last.best`); the home cursor's
+  `last.best ?? 0` is unchanged.
+- **F7.** `scopeFilter` has no reader anywhere (grep: app, tests, core); the three comments name the order door.
+- **Revert roads.** All four Mac fix roads (`969ff499a`, `bf3b45531`, `e17a210f1`, `959d81d41` with their named files)
+  re-checked here: `git apply -R --check` CLEAN at head.
+- **Suites run here (headless, no stage):** `swift test --filter 'Search|LibraryDay|TagListing|LibraryPaging'` → **162
+  tests / 27 suites passed** at `e8b1403da` (161 + F5's guard — matches the fix record). The Mac pins (F1 ×2, F2, F3,
+  F4) and their red-on-old remain PENDING the orchestrator's staged gate; this round read them (no `xcodebuild test`
+  by brief) and found none hollow.
+
+**STATUS: ROUND 2 COMPLETE (2026-11-06).** No BLOCKER, no MAJOR — no round 3 is earned. Four NITs (R2-1 stale docs,
+R2-2 the F1 row's expected red count, R2-3 F4's PROVISIONAL missing from the F8 closeout list, R2-4 a pre-existing third
+spelling of the group facts outside F6's scope).
