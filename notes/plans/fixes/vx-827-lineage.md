@@ -2086,3 +2086,11 @@ MCPReaderAfterCloseTests'` → "Test run with 11 tests in 3 suites passed after 
 tool's suites (the renamed call site) are green in the full run. `xcodebuild … build-for-testing` (Mac) → "** TEST
 BUILD SUCCEEDED **" on the rename's tree.
 
+
+**The window's -only-testing decision (the orchestrator, 2026-11-06):** the VX-106 sweep over
+changed app sources reaches 261 of 604 Mac test files (the diff touches CommandRouter, the
+capability registry, EditorViewModel, TakesViewModel, PostDetailView — the spine), so the
+honest batch is THE WHOLE TARGET: `-only-testing:VariorumTests`, preceded by the R1-F1
+red-on-old ritual (revert A → LineageFaceModelTests expecting its named red → restore →
+revert B → same → restore → the fix tree's LineageFaceModelTests green). READY carries exactly
+these names.
