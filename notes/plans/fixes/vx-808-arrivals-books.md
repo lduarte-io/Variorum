@@ -252,7 +252,7 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 #### Unit B2 — the orchestrator's acceptance notes (post-build, 2026-11-05)
 
 - Commits 185f6c506 → d189ef9dc spot-checked on origin (the model, the op, the catalog entry, the OWNED stamp site); worktree clean; full core 3838/524 green; the socket-timing class re-run alone green (no verdict, the VX-353 pattern).
-- **PENDING THE STAGE WINDOW (B2's one open item):** five app-side suites compile but are UNRUN — `MCPPaneTabsTests` · `MCPWingFacesTests` · `MCPLibraryParityFacesTests` · `MCPAskAndReceiptTests` · `TutorialMCPChapterTests`. The orchestrator runs them at a nov5 window (claim `vx-808-b2-suites`) before B3's build relies on the words; the result line lands here.
+- **THE STAGE WINDOW RAN (2026-11-05 19:39–19:44, claim `vx-808-b2-suites`, GO from nov5):** the five app-side suites GREEN — "✔ Test run with 49 tests in 5 suites passed after 9.002 seconds" (MCPPaneTabsTests · MCPWingFacesTests · MCPLibraryParityFacesTests · MCPAskAndReceiptTests · TutorialMCPChapterTests; 0 failures; XCTest buckets Executed 0 — Swift Testing is the verdict), ** TEST SUCCEEDED **, instance guards clear, stage released. B2 is CLOSED.
 - **The round-1 reviewer's flags, adopted from the self-assessment above:** (i)/(P-808-B2-2) the once-spend's home; (ii) the NEW OBSERVATION CHANNEL — `changed: false` makes a waiting arrival visible on the wire; the no-new-oracle argument is a FENCE-MEANING claim the Fable reviewer rules (the pair's own reachable fact, or a new R-825 exception for her eyes); (iii) the `at` stamps' CAS byte-divergence — confirm no oscillation class.
 - **Handed to B3:** `Queries.BookArrival` gains the provenance read (live arrival rows only; since-when = `at ?? created_at`); the propose receipt's Open › landing (the book vs the review area) is B3's call at build. **Handed to B5:** the docs tail (A-808-10) + the open book's pane description clause (flag ix).
 
@@ -307,7 +307,7 @@ Results + counts here; FOR A LATER READER written last; master plan row retired 
 | 1 | Worktree + branch + in-flight row + slot granted + v1_37 in nov5's ledger | DONE (kickoff) |
 | 2 | Kickoff sitting: cast (Sync/ implementer) · VX-775 direction · VX-872 scope/machines · rider offer | DONE — R-808-1..4 in §3 (Opus implements; VX-775 one-transaction; VX-872 deferred out with the marker-deadline line; no riders) |
 | 3 | Unit B1 (schema + mend) | IN PROGRESS — implementer session B1; LIVE STATUS under §6 Unit B1 |
-| 4 | Unit B2 (bulk propose + provenance) | DONE pending the app-suite window — commits 185f6c506…d189ef9dc; full core 3838/524 green; three reviewer flags adopted; five app suites await claim vx-808-b2-suites |
+| 4 | Unit B2 (bulk propose + provenance) | DONE — commits 185f6c506…d189ef9dc; full core 3838/524 green; the five app suites 49/5 GREEN at the 19:39 window; three reviewer flags adopted |
 | 5 | Unit B3 (the review area) | DESIGN PICKED (R-808-5: full book area, one home; popover retires) — build NOT STARTED |
 | 6 | Unit B4 (pins) | NOT STARTED |
 | 7 | Unit B5 (riders + small members + the docs tail: MCPSession.instructions' propose line, tool-description cross-refs, the field guide's lesson-3 mention — A-808-10) | NOT STARTED |
