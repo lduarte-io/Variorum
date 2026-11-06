@@ -73,7 +73,11 @@ This run is `/architect-phase vx-808` on the Pro: worktree `~/dev/variorum-vx-80
 - Her FINAL wording (the later, clearer paragraph — "i like A. do that.") is on the ticket verbatim and is already on both site pages; the app repo's `notes/mcp-invisibility-residuals.md` blockquote becomes it; the catalog description and MCPSpec's VX-639 clause align with verified behavior.
 
 ### From the kickoff sitting (2026-11-05, question-dialog picks — recorded same turn)
-*(Filled at the sitting, below.)*
+
+- **R-808-1 (cast):** "Opus implements" the Sync/ batch — the VX-805 precedent stands; Opus implements every batch, Fable cold-reviews.
+- **R-808-2 (VX-775 direction):** "One transaction" — the act and its Activity line commit together; a log failure fails the whole act cleanly, so the answer, the store and the AI trail can never disagree. Unit B5 builds it.
+- **R-808-3 (riders):** "None" — the run stays at its twelve seated members; VX-778 and VX-364 stay on the board.
+- **R-808-4 (VX-872), her words verbatim:** "cant you run it by opening a phone simulator or something? this run is quite full, so i'm actually okay deferring it out of this run if it would be better to not mix it in." → **DEFERRED OUT OF THE RUN** (the orchestrator's answer, given at the sitting: a Mac Debug instance + an iOS simulator CAN serve as the two clients for the protocol legs, but the 1.1-older-build arm is the fiddly one, and nothing in this run's diff is what the round tests — it tests VX-805's shipped work). The deadline rides the deferral: **the 1.1-restore arm is testable only until the marker-15 mirror deploy**; VX-872 is re-owned at closeout with that line on the ticket, and nov5 holds the sequencing note (the round, if she wants it, runs before the deploy window as its own small stage act — any session can drive it; it does not need this run's scope). Unit L is OFF.
 
 ## 4. The binding principles (the 13b constitution, P-1…P-9 — copied per the architect-phase skill; byte-verbatim)
 
@@ -166,12 +170,12 @@ Results + counts here; FOR A LATER READER written last; master plan row retired 
 | # | Item | Status |
 |---|---|---|
 | 1 | Worktree + branch + in-flight row + slot granted + v1_37 in nov5's ledger | DONE (kickoff) |
-| 2 | Kickoff sitting: cast (Sync/ implementer) · VX-775 direction · VX-872 scope/machines · rider offer | ASKED at kickoff — recorded in §3 on answer |
+| 2 | Kickoff sitting: cast (Sync/ implementer) · VX-775 direction · VX-872 scope/machines · rider offer | DONE — R-808-1..4 in §3 (Opus implements; VX-775 one-transaction; VX-872 deferred out with the marker-deadline line; no riders) |
 | 3 | Unit B1 (schema + mend) | NOT STARTED |
 | 4 | Unit B2 (bulk propose + provenance) | NOT STARTED |
 | 5 | Unit B3 (the review area; design fork first) | NOT STARTED |
 | 6 | Unit B4 (pins) | NOT STARTED |
 | 7 | Unit B5 (riders + small members) | NOT STARTED |
-| 8 | Unit L (the live round) | PENDING her kickoff word |
+| 8 | Unit L (the live round) | OFF — R-808-4: VX-872 deferred out of the run; re-owned at closeout with the marker-deadline line |
 | 9 | The ladder (Fable, whole diff) | NOT STARTED |
 | 10 | Closeout + deploy window + release (the stage's finish, her go) | NOT STARTED |
