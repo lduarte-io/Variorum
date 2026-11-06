@@ -226,8 +226,17 @@ struct SidebarSearchTextField: NSViewRepresentable {
     func updateNSView(_ field: Field, context: Context) {
         context.coordinator.parent = self
         style(field)
-        // The rule's words are the truth: a handoff or esc clears them here.
-        if field.stringValue != text { field.stringValue = text }
+        // The rule's words are the truth: a handoff or esc clears them here —
+        // through the field EDITOR while she is in it, so the caret stays and
+        // the editing session goes on (setting the control's own value can
+        // end an edit in flight).
+        if field.stringValue != text {
+            if let editor = field.currentEditor() as? NSTextView {
+                editor.string = text
+            } else {
+                field.stringValue = text
+            }
+        }
     }
 
     private func style(_ field: Field) {
@@ -352,8 +361,11 @@ enum CarriedWordsCaret {
     static func toEnd(of words: String, in windows: [NSWindow] = NSApp.windows) -> Bool {
         guard !words.isEmpty else { return false }
         for window in windows {
+            // The window's ONE field editor serves whichever field is being
+            // edited: never the sidebar's own (the handoff's leaving field).
             guard let editor = window.firstResponder as? NSTextView, editor.isFieldEditor,
-                  editor.string == words
+                  editor.string == words,
+                  !((editor.delegate as AnyObject?) is SidebarSearchTextField.Field)
             else { continue }
             editor.setSelectedRange(NSRange(location: (editor.string as NSString).length, length: 0))
             return true
