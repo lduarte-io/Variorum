@@ -194,6 +194,18 @@ struct LibraryCatalogView: View {
     /// lines at every width. One number for both, so they cannot drift.
     static let searchFieldMaxWidth: CGFloat = 320
 
+    /// **The segmented pickers' frame caps** (VX-374 — the VX-283 ladder's
+    /// R2-3, named so a pin can hold them). Not dead weight: over a
+    /// `fixedSize` picker the flexible frame makes each one natural…cap wide
+    /// and centres it in the wider box at wide widths, so the row's spacing
+    /// and Terminal's one-line threshold read them. The hazard R2-3 named —
+    /// a voice or metrics change pushing a picker's natural width PAST its
+    /// cap, the frame then under-reporting and the picker overlapping its
+    /// neighbour by the excess — is guarded by
+    /// `LibraryControlsGeometryTests.eachSegmentedPickersNaturalWidthIsWithinItsCap`.
+    static let scopePickerMaxWidth: CGFloat = 280
+    static let modePickerMaxWidth: CGFloat = 230
+
     /// Row 24 (the panel half): the panel's presence animates — the column
     /// slides and fades in and out with the row selection. The mutation
     /// sites wrap the model's change in this animation explicitly: an
@@ -740,7 +752,7 @@ struct LibraryCatalogView: View {
                 // widths only" holds for both pickers. (The swept P-8 lint is
                 // the bare form; a segmented control is no label that wraps.)
                 .fixedSize(horizontal: true, vertical: false)
-                .frame(maxWidth: 280)
+                .frame(maxWidth: Self.scopePickerMaxWidth)
                 // 18h batch 2: a day names NOTES — books and blocks carry no
                 // edit stamp and stand down while one is armed, so the scope
                 // stands down with them rather than offering picks that
@@ -766,7 +778,7 @@ struct LibraryCatalogView: View {
                 // VX-175 (P-U3c-1): fixed horizontally — the scope picker's
                 // reason above (unfixed: 224 → 180 pt Terminal after a search).
                 .fixedSize(horizontal: true, vertical: false)
-                .frame(maxWidth: 230)
+                .frame(maxWidth: Self.modePickerMaxWidth)
                 // 18h batch 1 (her row 10): the notes' order, hers to
                 // choose. The Timeline mode is its own order by definition,
                 // so the door stands down there rather than lying.

@@ -142,7 +142,10 @@ nonisolated enum LibraryControlsFlowRule {
         guard !children.isEmpty else { return Arrangement(oneLine: true, frames: [], size: .zero) }
         let oneLine = children.count <= lineOneCount
             || fitsOneLine(children, width: width, spacing: spacing)
-        let single = distribute(children, in: width, spacing: spacing)
+        // VX-374 (the VX-283 ladder's R2-4): the whole-line distribution —
+        // one width probe per child — only where it is read, the one-line
+        // road; the two-line road distributes each line on its own below.
+        let single = oneLine ? distribute(children, in: width, spacing: spacing) : []
         let lines: [Range<Int>] = oneLine
             ? [children.indices]
             : [0..<lineOneCount, lineOneCount..<children.count]

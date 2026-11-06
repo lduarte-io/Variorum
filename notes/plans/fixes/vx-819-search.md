@@ -212,7 +212,7 @@ You are `opus-implementer` for VX-819 batch 2 (members VX-820 + VX-374 + VX-408)
 | # | Piece | Status |
 |---|---|---|
 | 1 | This LIVE STATUS + the traces | DONE (this commit) |
-| 2 | VX-374: R2-4 `single` computed only on the one-line road (behavior-preserving); R2-3 the natural ≤ cap pin (Mac) | NOT-STARTED |
+| 2 | VX-374: R2-4 `single` computed only on the one-line road (behavior-preserving); R2-3 the natural ≤ cap pin (Mac) | DONE (this commit) — R2-4: `LibraryControlsFlowRule.arrange` distributes the whole line only when `oneLine` (the two-line road never read it); every existing controls pin unchanged. R2-3: the caps NAMED (`LibraryCatalogView.scopePickerMaxWidth` 280 / `modePickerMaxWidth` 230, byte-identical frames) and pinned — Mac `LibraryControlsGeometryTests.eachSegmentedPickersNaturalWidthIsWithinItsCap` (both voices; a GUARD, no reachable red — Study's mode picker sits at 230 of 230). Compile + the Mac run PENDING |
 | 3 | VX-408 pins A (the brief's interleaving — expected GREEN on old, the hollow record) + B (the overtaking interleaving — expected RED on old), committed ALONE so the staged gate can run red-on-old at that commit | NOT-STARTED |
 | 4 | VX-820 core: `SearchOrder` (relevance · the Library's sort × direction); the group page ordered by the home's key, keyset on `(key, home)`, relevance byte-identical; the worn-only merge; core pins | NOT-STARTED |
 | 5 | VX-820 app: the order state (new search → relevance; refining keeps; cleared field discards), the `order ▾` door in the sort slot, the stable widths' relevance form as a door, the note head's stamp follows a stamp order; Mac pins | NOT-STARTED |

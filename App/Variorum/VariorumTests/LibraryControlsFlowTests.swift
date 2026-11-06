@@ -890,6 +890,34 @@ struct LibraryControlsGeometryTests {
             }
         }
     }
+
+    /// **VX-374 (the VX-283 ladder's R2-3) — each segmented picker's NATURAL
+    /// width is within its frame's cap.** A GUARD, said honestly: no
+    /// reachable red exists today (Study's mode picker measures exactly its
+    /// 230). The caps are live layout (`LibraryCatalogView.scopePickerMaxWidth`
+    /// / `modePickerMaxWidth` — the picker flexible natural…cap, centred), so
+    /// they stay; what this holds is R2-3's hazard: a voice or metrics change
+    /// pushing a picker's natural width past its cap would let the flexible
+    /// frame under-report it, the fixed picker then overlapping its
+    /// neighbour by the excess (R1-6's independent-numbers class, one layer
+    /// up). Both voices, mounted, the panel closed at the default window.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func eachSegmentedPickersNaturalWidthIsWithinItsCap(voice: ThemeVoice) async throws {
+        try await withCatalog(voice: voice, width: Self.defaultLibraryWidth, panelOpen: false) { rig in
+            let controls = Self.segmentedControls(in: rig.hosting)
+            #expect(controls.count == 2, "\(voice): both segmented controls are mounted")
+            for control in controls {
+                // Scope offers four segments (All · Notes · Books · Blocks),
+                // mode three (List · Cards · Timeline).
+                let cap = control.segmentCount == LibraryCatalogModel.Scope.allCases.count
+                    ? LibraryCatalogView.scopePickerMaxWidth : LibraryCatalogView.modePickerMaxWidth
+                let natural = control.intrinsicContentSize.width
+                print("[VX-374 R2-3] \(voice) · \(control.label(forSegment: 0) ?? "?") · natural \(natural) of cap \(cap)")
+                #expect(natural <= cap + 0.5,
+                        "\(voice): \(control.label(forSegment: 0) ?? "?")'s natural \(natural) is past its cap \(cap)")
+            }
+        }
+    }
 }
 
 // MARK: - VX-350 — the Library at narrow widths (the VX-348 run, U3)
