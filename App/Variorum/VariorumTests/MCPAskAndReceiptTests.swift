@@ -176,7 +176,13 @@ struct MCPAskAndReceiptTests {
     @Test func theFenceSentencesNameTheDailyJournalNotEveryJournal() {
         #expect(MCPPaneCopy.wingDetail("Home")
                 == "everything in Home except your daily Journal and anything Private, which always ask")
-        #expect(MCPPaneCopy.openBookDetail == "your daily Journal and anything Private still ask every time")
+        // A JUSTIFIED EDIT (VX-811 — the VX-808 run, Unit B5; B2's flag ix,
+        // PROVISIONAL): the open book's line now says its clients may also
+        // propose notes to books (a read-rung act); the fence clause this pin
+        // guards stands word for word after it.
+        #expect(MCPPaneCopy.openBookDetail
+                == "clients can also propose notes to books; your daily Journal and anything Private still ask every time")
+        #expect(MCPPaneCopy.openBookDetail.hasSuffix("your daily Journal and anything Private still ask every time"))
         #expect(MCPPaneCopy.noBooks
                 == "No book can be shared yet (your daily Journal and Private books are shared one ask at a time).")
         #expect(MCPPaneCopy.refusal(OperationError.mcpGrantScopeFenced(kind: "book", id: "x"))

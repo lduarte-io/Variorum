@@ -414,8 +414,10 @@ nonisolated enum SettingsCatalog {
             id: "mcpOpenBook", pane: .mcp, title: MCPPaneCopy.openBookTitle,
             // 13n-c U1 (VX-163, J8): only THE daily Journal and anything
             // Private still ask — a journal-style book reads like any book.
-            blurb: "The open book: every approved MCP client may read everything, always \u{2014} "
-                + "your daily Journal and anything Private still ask every time.",
+            // VX-811 (the VX-808 run, Unit B5 — B2's flag ix; PROVISIONAL): its
+            // clients may also propose notes to books (a read-rung act).
+            blurb: "The open book: every approved MCP client may read everything, always, and propose "
+                + "notes to books \u{2014} your daily Journal and anything Private still ask every time.",
             keywords: ["open book", "mcp", "ai", "read everything", "share all", "always"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",

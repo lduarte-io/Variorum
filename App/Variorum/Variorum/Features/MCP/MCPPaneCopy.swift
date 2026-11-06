@@ -345,8 +345,13 @@ nonisolated enum MCPPaneCopy {
     static let openBookSection = "Open book"
     static let openBookTitle = "Everything is readable, always"
     /// 13n-c U1 (VX-163, J8 — the VX-156 mockup §8's recommended words):
-    /// only THE daily Journal and anything Private still ask.
-    static let openBookDetail = "your daily Journal and anything Private still ask every time"
+    /// only THE daily Journal and anything Private still ask. VX-811 (the
+    /// VX-808 run, Unit B5 — B2's flag ix, A-808-10's family): the open book
+    /// reads everything unfenced, so its clients may PROPOSE notes to books
+    /// too (`propose_notes_to_book` is a read-rung act — her ruling 3's
+    /// letter), and the line says so. PROVISIONAL words, her copy pass.
+    static let openBookDetail =
+        "clients can also propose notes to books; your daily Journal and anything Private still ask every time"
 
     // MARK: - Activity (13n-b U3 — the coarse log's face; R-13n-10's caps)
 
