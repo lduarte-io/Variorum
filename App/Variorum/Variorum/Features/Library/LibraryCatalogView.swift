@@ -151,6 +151,9 @@ struct LibraryCatalogView: View {
     /// VX-350: the search field's keyboard focus — the 🔍 door puts the caret
     /// in the field it opens.
     @FocusState private var searchFieldFocused: Bool
+    /// VX-822 (the ladder's F2): the search field's own window, for the
+    /// carried words' caret — never another window's editor.
+    @State private var caretAnchor = CarriedWordsCaret.Anchor()
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     /// 13i-d U5: the move's confirm (the books the note would leave).
     @State private var wingMove: WingsModel.MoveAsk?
@@ -224,7 +227,7 @@ struct LibraryCatalogView: View {
     private func takeCarriedWords() {
         guard model.takeSearchFieldKeyboardAsk() else { return }
         searchFieldFocused = true
-        CarriedWordsCaret.toEndSoon(of: model.query)
+        CarriedWordsCaret.toEndSoon(of: model.query, near: caretAnchor)
     }
 
     var body: some View {
@@ -728,6 +731,8 @@ struct LibraryCatalogView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
                     .focused($searchFieldFocused)
+                    // VX-822 (the ladder's F2): the field's window, reported.
+                    .background(CarriedWordsCaret.Probe(anchor: caretAnchor))
                     .frame(maxWidth: Self.searchFieldMaxWidth)
                     .libraryGeometryProbe(.searchField)
                     .libraryControlsFloor(stable.fieldFloor)

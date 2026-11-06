@@ -355,31 +355,60 @@ struct SidebarSearchClickMonitor: NSViewRepresentable {
 /// AppKit selects an `NSTextField`'s whole text when it is made first
 /// responder by code, so without this her next key would REPLACE the question
 /// the sidebar just handed over. The field's editor is found by the words it
-/// shows, in the given windows (the app's, by default).
+/// shows — in the Library field's OWN window only (the VX-819 ladder's F2):
+/// a walk over every app window stopped at the first editor showing the same
+/// words, so another window editing them took the caret and the Library's
+/// field kept its select-all. The window is reported by a zero-hit probe
+/// beside the field (`Probe`, holding `Anchor`).
 enum CarriedWordsCaret {
-    @MainActor @discardableResult
-    static func toEnd(of words: String, in windows: [NSWindow] = NSApp.windows) -> Bool {
-        guard !words.isEmpty else { return false }
-        for window in windows {
-            // The window's ONE field editor serves whichever field is being
-            // edited: never the sidebar's own (the handoff's leaving field).
-            guard let editor = window.firstResponder as? NSTextView, editor.isFieldEditor,
-                  editor.string == words,
-                  !((editor.delegate as AnyObject?) is SidebarSearchTextField.Field)
-            else { continue }
-            editor.setSelectedRange(NSRange(location: (editor.string as NSString).length, length: 0))
-            return true
-        }
-        return false
+    /// Where the Library's field lives: the probe's view, held weakly; its
+    /// window is the field's.
+    @MainActor
+    final class Anchor {
+        fileprivate weak var view: NSView?
+        var window: NSWindow? { view?.window }
     }
 
-    /// Tries over a few turns (the focus lands a pass after it is asked).
+    /// The zero-hit probe the Library's field wears, reporting its window.
+    struct Probe: NSViewRepresentable {
+        let anchor: Anchor
+
+        final class ProbeView: NSView {
+            override func hitTest(_ point: NSPoint) -> NSView? { nil }
+        }
+
+        func makeNSView(context: Context) -> ProbeView {
+            let view = ProbeView()
+            anchor.view = view
+            return view
+        }
+
+        func updateNSView(_ nsView: ProbeView, context: Context) {
+            anchor.view = nsView
+        }
+    }
+
+    @MainActor @discardableResult
+    static func toEnd(of words: String, in window: NSWindow?) -> Bool {
+        // The window's ONE field editor serves whichever field is being
+        // edited: never the sidebar's own (the handoff's leaving field).
+        guard !words.isEmpty, let window,
+              let editor = window.firstResponder as? NSTextView, editor.isFieldEditor,
+              editor.string == words,
+              !((editor.delegate as AnyObject?) is SidebarSearchTextField.Field)
+        else { return false }
+        editor.setSelectedRange(NSRange(location: (editor.string as NSString).length, length: 0))
+        return true
+    }
+
+    /// Tries over a few turns (the focus lands a pass after it is asked), in
+    /// the anchor's window as it stands at each try.
     @MainActor
-    static func toEndSoon(of words: String) {
+    static func toEndSoon(of words: String, near anchor: Anchor) {
         Task { @MainActor in
             for _ in 0..<20 {
                 try? await Task.sleep(for: .milliseconds(15))
-                if toEnd(of: words) { return }
+                if toEnd(of: words, in: anchor.window) { return }
             }
         }
     }
