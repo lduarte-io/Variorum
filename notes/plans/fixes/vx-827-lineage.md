@@ -187,7 +187,7 @@ safety copy before ANY real-store touch (none expected this run).
 | 3 | VX-801 design pass (5 mockup rounds + 2 explorations) | DONE — THE DESIGN MEMO settled at the exploration sitting |
 | 4 | U3a — the Commits face | DONE (fc8880a53…dc7fde0e5; adjudication below) |
 | 4b | U3b — the Lineage face + origin re-aim + panel retirement | DONE (654cf3469…; U3b RECORD below) |
-| 5 | Ladder (whole diff) | ROUND 1 DONE + FIX LEG PUSHED (R1-F1 built, landed only at the window's red-then-green; R1-F5 done); ROUND 2 RUNNING |
+| 5 | Ladder (whole diff) | CLOSED at 2 rounds — 0 BLOCKER/MAJOR both rounds; R2's one NIT typed below; R1-F1's landing rides the window's red-then-green |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
 | 7 | Closeout ritual (tickets, handoff, canon-size, worktree removal) | NOT-STARTED |
 
@@ -2101,3 +2101,13 @@ and their test rows). Unchanged vs vx-808 (c373bdd17): the three tool-list files
 `MCPReadTools.swift` is now a SHARED file with vx-808's B5 but merges clean today. Clean with
 vx-819. The second merger against either resolves and re-runs CapabilityRegistryTests +
 ShellChromeTests (plus the MCP catalog and server suites against 808).
+
+## LADDER CLOSED (round 2: 0 BLOCKER / 0 MAJOR / 1 NIT — `vx-827-ladder-round2.md`; no round 3)
+
+**R2-N1 TYPED HERE (the orchestrator's mechanical fix, as the reviewer offered):** the #264
+bundle is P-U1's archived-peers call + the U1/U2 wire-vocabulary items + P-U2-1…5 +
+P-U3a-1…11 + P-U3b-1…13 **+ the two LADDER-BORN lines: P-U3a-5b (✕ on every box while three
+stand) and P-U3b-14 (the Lineage face's two "now"s)** + W1–W16 + the `notInLineage` sentence.
+Any closeout bundling from a single earlier list is wrong; THIS line is the complete roster.
+**Window caveat (R2's clean bill):** re-run `git apply --check` on both revert patches after
+any further `CommitsFaceModel.swift` commit — none is planned before the window.
