@@ -139,4 +139,29 @@ struct BookRenameRepaintTests {
             #endif
         }
     }
+
+    /// The one derivation every face reads (added WITH the fix — supporting,
+    /// not the red-on-old pin): the held row's name, "book" before it lands.
+    @Test func theNameEveryFaceShowsIsTheHeldRowsOwn() {
+        let reading = Reading(id: "r", name: "Renamed Book", kind: .book, createdAt: Date(), updatedAt: Date())
+        #expect(BookView.shownName(of: reading) == "Renamed Book")
+        #expect(BookView.shownName(of: nil) == "book")
+    }
+
+    /// The class closed at its source (added WITH the fix): no face of the
+    /// book view reads a name copied once, and the book model holds none.
+    @Test func noFaceReadsAOneShotCopyOfTheName() throws {
+        let features = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Variorum/Features/BookView")
+        let view = try String(contentsOf: features.appendingPathComponent("BookView.swift"), encoding: .utf8)
+        let model = try String(contentsOf: features.appendingPathComponent("BookViewModel.swift"), encoding: .utf8)
+        #expect(!view.contains("model.readingName"))
+        #expect(!view.contains("var readingName"))
+        #expect(!model.contains("var readingName"))
+        // The three faces read the one derivation.
+        #expect(view.contains("Text(tokens.path([bookName]))"))
+        #expect(view.contains("Text(tokens.chromeLabel(bookName))"))
+        #expect(view.contains("readingName: bookName,"))
+    }
 }

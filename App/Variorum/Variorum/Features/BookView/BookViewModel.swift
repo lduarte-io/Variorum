@@ -42,7 +42,6 @@ final class BookViewModel {
     }
 
     private(set) var entries: [Queries.ReadingEntry] = []
-    private(set) var readingName: String?
     private(set) var lastError: String?
 
     /// A31 — the way she is LOOKING at this book's order right now. nil =
@@ -95,12 +94,10 @@ final class BookViewModel {
     /// Runs for the view's lifetime.
     func start() async {
         do {
-            // One-shot by-key fetch (round 1 NIT); a rename while the book
-            // is open goes stale until reopen — cosmetic at author scale,
-            // recorded.
-            readingName = try await session.database.read { [readingID] db in
-                try Queries.reading(db, id: readingID)?.name
-            }
+            // (VX-804: the one-shot NAME read that led this body is retired —
+            // a rename while the book was open stayed stale until reopen. The
+            // book's faces read the reading row `BookStructureModel` holds;
+            // `BookView.bookName`.)
             for try await value in session.database.observeReading(
                 readingID, limit: window + 1,  // +1: the truncation probe
                 order: viewOrder, filter: viewFilter

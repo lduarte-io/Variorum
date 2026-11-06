@@ -47,7 +47,6 @@ struct BookView: View {
 
     let session: AppSession
     let readingID: String
-    var readingName: String?
     /// 13f batch 4 (the MOUNT rule): whether this book's PANE is focused.
     /// Defaults true, so every pre-split call site reads unchanged.
     var paneFocused: Bool = true
@@ -147,7 +146,7 @@ struct BookView: View {
     /// a caller (or a pin) that needs prose on screen must expand what it
     /// means to read, exactly as she does.
     init(
-        session: AppSession, readingID: String, readingName: String? = nil,
+        session: AppSession, readingID: String,
         model: BookViewModel? = nil,
         structure: BookStructureModel? = nil,
         arrivals: BookArrivalsModel? = nil,
@@ -172,7 +171,6 @@ struct BookView: View {
     ) {
         self.session = session
         self.readingID = readingID
-        self.readingName = readingName
         self.paneFocused = paneFocused
         self.onPaneFocusRequest = onPaneFocusRequest
         self.revealPostID = revealPostID
@@ -385,7 +383,7 @@ struct BookView: View {
                 case .flow:
                     ReadingFlowView(
                         session: session,
-                        readingName: readingName ?? model.readingName,
+                        readingName: bookName,
                         grouped: structure.chaptersActive
                             ? structure.grouped(entries: model.entries)
                             : [(nil, model.entries)],
@@ -654,6 +652,24 @@ struct BookView: View {
     /// labels lineLimit(1) + fixedSize): the first claim that "four labels
     /// + the gear measure under 190 pt" was falsified by the walk — the
     /// compressed row wrapped the words mid-letter.
+    /// **VX-804 — the open book's name, as every face of this view says it**
+    /// (the masthead, the Outline's page heading, Read ▸ Scroll's title):
+    /// the reading row the structure model HOLDS for the view's life
+    /// (`BookStructureModel.start()` observes `Queries.reading`), so a rename
+    /// — Book Settings', a sync's — repaints the open book in place. It used
+    /// to be `BookViewModel.readingName`, read ONCE at `start()` and never
+    /// again (the tester's "couldn't get the new name to appear until I left
+    /// that part of the app"); that copy is retired, and with it the view's
+    /// `readingName:` override, which no host passed and which would have
+    /// frozen the faces the same way. One row, one projection, one source.
+    private var bookName: String { Self.shownName(of: structure.reading) }
+
+    /// The name a book view shows for `reading` (pure — "book" before the
+    /// row arrives, the shipped fallback).
+    nonisolated static func shownName(of reading: Reading?) -> String {
+        reading?.name ?? "book"
+    }
+
     @ViewBuilder private var bookMasthead: some View {
         // The gear rides the TITLE line (which truncates and so always
         // yields), leaving the tab row the column's whole width — in the
@@ -661,8 +677,8 @@ struct BookView: View {
         // into mid-word wraps ("outl/ine"), the b6dae25 class this walk
         // caught live (2026-08-31).
         HStack(spacing: 4) {
-            Text(tokens.path([readingName ?? model.readingName ?? "book"]))
-                .bookNameProbe(.masthead, readingID: readingID, name: readingName ?? model.readingName ?? "book")
+            Text(tokens.path([bookName]))
+                .bookNameProbe(.masthead, readingID: readingID, name: bookName)
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
@@ -2238,10 +2254,8 @@ struct BookView: View {
                     // heads the content column, aligned with the posts —
                     // never floating in rail-side dead space.
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(tokens.chromeLabel(readingName ?? model.readingName ?? "book"))
-                            .bookNameProbe(
-                                .outlineTitle, readingID: readingID,
-                                name: readingName ?? model.readingName ?? "book")
+                        Text(tokens.chromeLabel(bookName))
+                            .bookNameProbe(.outlineTitle, readingID: readingID, name: bookName)
                             .font(tokens.title)
                             .foregroundStyle(tokens.ink)
                         // VX-562 (P-562-3): the count line that led this row
