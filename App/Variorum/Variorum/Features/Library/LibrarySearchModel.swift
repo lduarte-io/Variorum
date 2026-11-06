@@ -97,12 +97,6 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
         scope.facet.narrowing(query)
     }
 
-    /// The scope picker's four answers (D3): All · Notes · Books · Blocks —
-    /// each its core facet's filter (`SearchFacet.filter`).
-    static func scopeFilter(_ scope: LibraryCatalogModel.Scope) -> SearchFilter? {
-        scope.facet.filter
-    }
-
     /// **The field's text without one typed `#tag`** — the band chip's ✕.
     /// Rebuilt token by token (single spaces); a text that ended in space
     /// still does, and so does one whose LAST token was the tag — so the
