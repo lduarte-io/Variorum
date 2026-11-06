@@ -153,9 +153,34 @@ public final class MCPServerHost: @unchecked Sendable {
     /// session ends (the store is open on the switch's road); on the library's
     /// closing road the door has already said it, before the store closed
     /// (`recordConnectionEnds`), and the line is never said twice.
-    public func stop(ending reason: MCPConnectionEnd = .serverOff) {
+    public func stop(ending reason: MCPConnectionEnd) {
+        lock.withLock { stoppedBy = .ending(reason) }
         halt(saying: MCPCloseWords.line(for: reason)) { $0.markEnding(reason) }
     }
+
+    /// **A stop that names no road** (VX-777 — the VX-808 run, Unit B5; the
+    /// VX-771 run's O-5): it REPEATS the road that last stopped this host —
+    /// its close line and its Activity end (the quit's: none) — and a host
+    /// never stopped says the switch's words, as every bare stop always did.
+    /// The door's stale start is the caller (`MCPDoor.reconcileServer`'s
+    /// completion arm, `fresh.stop()`): the door let the starting host go by
+    /// the road's own stop (her switch, the lock, the library closing, the
+    /// quit), its start then completed anyway (VX-613's class), and a
+    /// connection it accepted in those moments heard the SWITCH-OFF words
+    /// whatever had really let it go — honest that it closed, wrong about why.
+    public func stop() {
+        switch lock.withLock({ stoppedBy }) {
+        case .ending(let reason)?: stop(ending: reason)
+        case .withTheProcess?: stopWithTheProcess()
+        case .abandoning?: abandon()
+        case nil: stop(ending: .serverOff)
+        }
+    }
+
+    /// VX-777: the road that last stopped this host (nil: never stopped) —
+    /// what a bare `stop()` repeats.
+    private enum StopRoad { case ending(MCPConnectionEnd), withTheProcess, abandoning }
+    private var stoppedBy: StopRoad?
 
     /// **THE APP QUITS** (VX-394 — VX-548 batch 2b; P-VX394-5, "a QUIT logs
     /// nothing"): the server stops with the process and NO connection's end is
@@ -167,6 +192,7 @@ public final class MCPServerHost: @unchecked Sendable {
     /// locked or closed" on some quits, nothing on others. A connection whose
     /// client had already left keeps its own line (it was said first).
     public func stopWithTheProcess() {
+        lock.withLock { stoppedBy = .withTheProcess }
         halt(saying: MCPCloseWords.quitLine) { $0.forgoEndLine() }
     }
 
@@ -238,6 +264,16 @@ public final class MCPServerHost: @unchecked Sendable {
     /// session's hang-up — where a pin holds the transport's write lock as a
     /// frame mid-write would.
     var hangUpProbe: ((MCPSession) -> Void)?
+
+    /// TEST-ONLY (VX-776 — the VX-808 run, Unit B5): THE FAILING READER — run
+    /// by every session this host serves just before each store read its SDK
+    /// handlers make (the standing read behind `tools/list`, the waiting-key
+    /// check behind every call — `MCPSession.handlerRead`), so a pin can make
+    /// such a read fail as a broken store does (a thrown `DatabaseError`): the
+    /// one failure a headless store cannot produce by itself (its triggers fail
+    /// writes only — the VX-369 sweep's row 19). Read through the host at each
+    /// read, so a probe set after a connection opened still reaches it.
+    var handlerReadProbe: (() throws -> Void)?
     #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
@@ -392,6 +428,7 @@ public final class MCPServerHost: @unchecked Sendable {
             deferredGrantEnds = []
             suspendedFingerprint = nil
             latch.close()
+            stoppedBy = .abandoning
         }
         halt(saying: MCPCloseWords.line(for: .libraryClosed)) { $0.forgoEndLine() }
     }
@@ -566,6 +603,10 @@ public final class MCPServerHost: @unchecked Sendable {
             fd: fd, database: database, operations: operations, version: version,
             executor: executor, hooks: hooks, latch: latch,
             onNamed: { [weak self] in self?.onConnectionsChanged?() })
+        #if DEBUG
+        // VX-776: the failing reader's seam (test-only).
+        session.handlerReadProbe = { [weak self] in try self?.handlerReadProbe?() }
+        #endif
         lock.withLock { sessions[session.id] = session }
         onConnectionsChanged?()
         Task { [weak self] in

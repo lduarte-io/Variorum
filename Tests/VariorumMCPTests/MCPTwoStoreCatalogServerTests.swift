@@ -64,6 +64,10 @@ struct CatalogWorld: Sendable {
     var secretBlock = "", secretTake = "", secretComment = "", secretCommit = "", secretLens = ""
     var privateStudio = "", hiddenChapter = ""
     var journalBook = "", locket = ""
+    // VX-859 (the VX-808 run, Unit B5): a book whose READABLE members were
+    // appended AFTER a hidden member (the interleaved mint — the hidden half
+    // adds the Private member; the reachable two join after it).
+    var interleaved = ""
 }
 
 /// One call of the walk.
@@ -105,6 +109,10 @@ struct MCPTwoStoreCatalogServerTests {
         _ = try ops.newBlock(in: seed.id, text: "A seed of an idea, with words.", registeringUndo: false)
         _ = try ops.applyTag(idea.id, toPost: seed.id)
         w.seed = seed.id
+        // VX-859: the interleaved book — born empty here; in A the hidden half
+        // files a Private member into it, and its readable members join AFTER
+        // that half (below), so their stored positions follow the hidden key.
+        w.interleaved = try ops.createReading(name: "Interleaved", kind: .book).id
         // Home — reached through book and note grants only.
         let shared = try ops.createReading(name: "Shared", kind: .book)
         w.shared = shared.id
@@ -189,6 +197,17 @@ struct MCPTwoStoreCatalogServerTests {
         // say it is empty (one sentence naming it), never the nothing-shape.
         w.empty = try ops.createPost(title: nil).id
         if hidden { try buildHidden(h, &w, board: board.id, idea: idea.id) }
+
+        // VX-859 (red on old): the interleaved book's READABLE members, minted
+        // after the hidden half — in A each is appended after the Private
+        // member (`FractionalIndex.between(hiddenKey, …)`), in B and C after
+        // nothing, so their raw positions differ across the stores while every
+        // id and stamp still aligns. A book cursor that carried a raw position
+        // key answered byte-different `next_cursor`s here.
+        for name in ["late one", "late two"] {
+            let late = try ops.createPost(title: name)
+            _ = try ops.addPostToReading(late.id, to: w.interleaved)
+        }
         return w
     }
 
@@ -248,6 +267,11 @@ struct MCPTwoStoreCatalogServerTests {
                 _ = try ops.addPostToReading(note.id, to: book)
                 if field == 0 { w.privateShared = note.id } else if field == 1 { w.privateCapped = note.id }
             }
+            // VX-859: the interleaved book's first member is a PRIVATE note (its
+            // readable members join after this half — `build`).
+            let early = try ops.createPost(title: "private early")
+            _ = try ops.setNotePrivate(early.id, true)
+            _ = try ops.addPostToReading(early.id, to: w.interleaved)
             // A hidden chapter in a hidden book.
             w.hiddenChapter = try ops.createSection(in: w.secretBoard, name: "Hidden chapter").id
             // An ungranted Home note wearing a tag no readable note wears, with
@@ -340,6 +364,8 @@ struct MCPTwoStoreCatalogServerTests {
         _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, w.doomed))
         _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, w.cappedToo))
         for note in [w.ownedNote, w.stuck] { _ = try h.operations.grantMCPAccess(client, spec(.edit, .note, note)) }
+        // VX-859: read on the interleaved book (its Private member stays fenced).
+        _ = try h.operations.grantMCPAccess(client, spec(.read, .book, w.interleaved))
         // VX-807 (batch 2): edit on the books the move arms move.
         for book in [w.traveler, w.stuckBook, w.fencedBook] {
             _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, book))

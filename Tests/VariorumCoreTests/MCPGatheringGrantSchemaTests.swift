@@ -101,7 +101,7 @@ struct MCPGatheringGrantSchemaTests {
     }
 
     @Test func theFamilyStaysLocalOnlyAndTheMarkerStays() throws {
-        #expect(SyncSchema.lockstepVersion == 14, "a local-only migration never moves the marker")
+        #expect(SyncSchema.lockstepVersion == 15, "a local-only migration never moves the marker")
         #expect(SyncSchema.table(named: "mcp_grant") == nil)
         #expect(MCPGrantSchema.tables.contains("mcp_grant"))
         let db = try AppDatabase.inMemory()

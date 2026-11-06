@@ -17,7 +17,8 @@ private func s(_ string: String) -> Value { .string(string) }
 extension MCPTwoStoreCatalogServerTests {
     typealias W = CatalogWorld
 
-    static let arms: [CatalogArm] = readArms + suggestArms + writeNewArms + editArms + tailArms
+    static let arms: [CatalogArm] = readArms + suggestArms + writeNewArms + editArms + proposeArms + tailArms
+        + cursorArms
 
     // MARK: - READ
 
@@ -426,6 +427,48 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "delete_book · a hidden book", tool: "delete_book") { w, _ in ["book_id": s(w.vault)] },
     ]
 
+    // MARK: - VX-811 (the VX-808 run, Unit B2) — propose_notes_to_book: the
+    // read rung's one write. A book full of Private members still takes a
+    // proposal and a note an unreadable owned book claims still proposes
+    // (capacity and ownership are never consulted — the answer is identical);
+    // a member, a note taken out of the book, a hidden note and a Private
+    // member each answer in their own words; a hidden book, a hidden Private
+    // book, the daily Journal and a hidden wing's book the one shape; a
+    // readable gathering its sentence. Walked before the tail (their arrivals
+    // change nothing a later compared arm reads: an arrival is no membership).
+
+    static let proposeArms: [CatalogArm] = [
+        CatalogArm(label: "propose_notes_to_book · the capped book (a Private member fills it; a hidden owned book claims one)",
+                   tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.loose), s(w.ownedNote)]), "book_id": s(w.capped), "reason": s("For the cap.")] },
+        CatalogArm(label: "propose_notes_to_book · the same two again (already waiting)", tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.loose), s(w.ownedNote)]), "book_id": s(w.capped)] },
+        CatalogArm(label: "propose_notes_to_book · a member, a note taken out, a hidden note, a Private member",
+                   tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.card), s(w.second), s(w.secretNote), s(w.privateShared)]), "book_id": s(w.shared),
+             "reasons": .object([w.card: s("x")])] },
+        CatalogArm(label: "propose_notes_to_book · a note of another wing", tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.seed)]), "book_id": s(w.capped)] },
+        CatalogArm(label: "propose_notes_to_book · to a hidden book", tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.loose)]), "book_id": s(w.vault)] },
+        CatalogArm(label: "propose_notes_to_book · to a hidden Private book", tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.seed)]), "book_id": s(w.diary)] },
+        CatalogArm(label: "propose_notes_to_book · to the daily Journal", tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.loose)]), "book_id": s(w.journalBook)] },
+        CatalogArm(label: "propose_notes_to_book · to a hidden wing's book", tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.loose)]), "book_id": s(w.atticBook)] },
+        CatalogArm(label: "propose_notes_to_book · to the gathering", tool: "propose_notes_to_book") { w, _ in
+            ["note_ids": .array([s(w.seed)]), "book_id": s(w.gathering)] },
+        // VX-811 ruling 4 (A-808-8/D — the count's catalog arm, written FIRST):
+        // a rule naming a tag only a HIDDEN note wears — in A its catch-up bells
+        // that note; the answer's waiting count counts only notes the client can
+        // read, so A and B answer the same.
+        CatalogArm(label: "set_book_rule · the shared book also collects a tag only a hidden note wears",
+                   tool: "set_book_rule") { w, _ in
+            ["book_id": s(w.shared), "rule": .object(["or": .array([.object(["tag": s("board")]),
+                                                              .object(["tag": s("secret-topic")])])])] },
+    ]
+
     // MARK: - THE TAIL — arms whose act lands in one store and not the other,
     // or changes what the client reaches (each a recorded exception or
     // finding — the record's catalog), walked LAST so the state they fork never
@@ -479,5 +522,22 @@ extension MCPTwoStoreCatalogServerTests {
             ["wing_id": s(""), "tag": s("secret-topic"), "with": s("swapped")] },
         CatalogArm(label: "replace_tag · a hidden wing", tool: "replace_tag") { w, _ in
             ["wing_id": s(w.attic), "tag": s("attic-topic"), "with": s("swapped")] },
+    ]
+
+    // MARK: - VX-859 (the VX-808 run, Unit B5): the book cursor resumes by id
+
+    /// The interleaved mint (the VX-809 ladder's MINOR-1 pin): a book whose
+    /// readable members were appended AFTER a hidden one, paged one at a time
+    /// so each page boundary lands on such a member, then resumed from the
+    /// cursor. RED on a raw-position book cursor (its key is the member's
+    /// stored position, whose bytes follow the hidden key in A); identical on
+    /// the id-resuming cursor (the gathering cursor's road).
+    static let cursorArms: [CatalogArm] = [
+        CatalogArm(label: "list_notes · a book whose readable members came after a hidden one, paged",
+                   tool: "list_notes",
+                   args: { w, _ in ["book_id": s(w.interleaved), "limit": .int(1)] },
+                   capture: { ["interleavedCursor": $0["next_cursor"] as? String ?? ""] }),
+        CatalogArm(label: "list_notes · that book, resumed from its cursor", tool: "list_notes") { w, c in
+            ["book_id": s(w.interleaved), "limit": .int(1), "cursor": s(c["interleavedCursor"] ?? "")] },
     ]
 }

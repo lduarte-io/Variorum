@@ -12,6 +12,13 @@
 //  half of each answer is `MCPStopRoadsDoorTests`'. Mac only (the lock and the
 //  crossing on the planted road; adopt and swap on a throwaway keychain scope).
 //
+//  VX-860 (the VX-808 run, Unit B5 — the VX-809 ladder's MINOR-2): THE BELT —
+//  every road ERASES the name once the teardown has read it, so after each road
+//  the bootstrap's `willLockRoad` reads nil again (the fail-closed default holds
+//  for the next call, not only the first). A state-transition pin of the belt
+//  itself: no road on today's tree forgets to name itself, so no bug-pin exists
+//  (the ticket says so); each test below asserts the post-read nil.
+//
 
 import Foundation
 import Testing
@@ -41,6 +48,7 @@ struct MCPWillLockRoadRouteTests {
             _ = try LockWorld.lobby(bootstrap)
             #expect(seen.roads == [.lock])
             #expect(mcpServerSurvives(seen.roads.last ?? nil))
+            #expect(bootstrap.willLockRoad == nil, "VX-860: the name is erased once the teardown read it")
         }
     }
 
@@ -62,6 +70,7 @@ struct MCPWillLockRoadRouteTests {
             #expect(crossings.confirm == nil, "the crossing landed: \(confirm.refusal ?? "-")")
             #expect(seen.roads == [.reKey])
             #expect(mcpServerSurvives(seen.roads.last ?? nil))
+            #expect(bootstrap.willLockRoad == nil, "VX-860: the name is erased once the teardown read it")
         }
     }
 
@@ -86,6 +95,7 @@ struct MCPWillLockRoadRouteTests {
             #expect(await bootstrap.makeThisMyLibrary(row, copySecrets: pair, currentPair: pair) == .made)
             #expect(seen.roads == [.closing])
             #expect(!mcpServerSurvives(seen.roads.last ?? nil))
+            #expect(bootstrap.willLockRoad == nil, "VX-860: the name is erased once the teardown read it")
         }
     }
 
@@ -110,6 +120,7 @@ struct MCPWillLockRoadRouteTests {
             #expect(await bring(export) == .made)
             #expect(seen.roads == [.closing])
             #expect(!mcpServerSurvives(seen.roads.last ?? nil))
+            #expect(bootstrap.willLockRoad == nil, "VX-860: the name is erased once the teardown read it")
         }
     }
 }

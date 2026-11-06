@@ -609,6 +609,11 @@ struct CapabilityRegistryTests {
             // (h), A JUSTIFIED EDIT: the renderer is the masthead door's
             // popover rows, `BookArrivalsList` — the same acts, renamed.)
             .union(BookArrivalsList.surfaceCapabilities)
+            // VX-821 (the VX-808 run, Unit B3 — A JUSTIFIED EDIT, the same
+            // class: a new renderer is a new line): the Arrivals REVIEW AREA
+            // (R-808-5) renders its four bulk doors — Add all · Dismiss all ·
+            // Add N · Dismiss N — and is their only renderer.
+            .union(BookArrivalsReview.surfaceCapabilities)
             // 13i-c U3 (A JUSTIFIED EDIT, the E2/E8/batch-3/6b class): the
             // BOOK SETTINGS sheet renders the six STATE doors (Finish/Reopen ·
             // Seal…/Unseal · Own Its Notes…/Stop Owning — which of each pair,

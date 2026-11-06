@@ -103,7 +103,7 @@ extension Operations {
             // BOOK born with a rule — the spawn door, the from-tag mint —
             // seats its current matches directly (birth = intent). Silent
             // for a gathering or a rule-less book (the sweep's own guard).
-            try intakeSweep(db, book: reading, occasion: .backfill, now: now)
+            try intakeSweep(db, book: reading, occasion: .backfill, cause: arrivalCause(.backfill), now: now)
             return reading
         }
     }
@@ -263,10 +263,14 @@ extension Operations {
     /// which a client's call does not carry — and a seat would pull every
     /// matching unshared note into the client's own book-grant reach (the
     /// pull `noteIntoBook`'s double decision exists to prevent).
+    ///
+    /// Returns the notes the write's sweep BELLED (VX-811 ruling 4 —
+    /// `set_book_rule` counts the ones its client can read).
+    @discardableResult
     func writeReadingQuerySpec(
         _ db: Database, _ id: String, querySpec: String?,
         sweepOccasion override: IntakeDecision.Occasion? = nil
-    ) throws {
+    ) throws -> [String] {
         do {
             var reading = try liveReading(db, id)
             let previous = reading.querySpec
@@ -282,10 +286,12 @@ extension Operations {
             let now = date.now
             reading.updatedAt = now
             try reading.update(db)
-            guard reading.kind == .book, reading.querySpec != previous else { return }
+            guard reading.kind == .book, reading.querySpec != previous else { return [] }
             let occasion: IntakeDecision.Occasion =
                 override ?? (RuleGrammar.read(previous) == .none ? .backfill : .catchUp)
-            try intakeSweep(db, book: reading, occasion: occasion, now: now)
+            // A-808-6: whatever the occasion's class, a rule WRITE's bells say
+            // `rule_edit` (a rule set on a rule-less book included).
+            return try intakeSweep(db, book: reading, occasion: occasion, cause: arrivalCause(.ruleEdit), now: now)
         }
     }
 
@@ -386,7 +392,7 @@ extension Operations {
         reading.updatedAt = now
         try reading.update(db)
         if wasFinished {
-            try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
+            try intakeSweep(db, book: reading, occasion: .catchUp, cause: arrivalCause(.catchup, after: .reopen), now: now)
         }
     }
 
@@ -584,11 +590,14 @@ extension Operations {
                         originalID: membership.postId, copyID: postID,
                         elsewhereNames: [source.name]))
                 }
+                // VX-803 (A-808-12 (f)): the arrangement is configuration —
+                // positions, chapters AND pins ride the duplicate.
                 try ReadingPost(
                     id: newID(), readingId: duplicate.id, postId: postID,
                     position: membership.position,
                     sectionId: membership.sectionId.flatMap { chapterMap[$0] },
-                    createdAt: now
+                    createdAt: now,
+                    pinnedAt: membership.pinnedAt
                 ).insert(db)
             }
             return BookDuplicateResult(reading: duplicate, copied: copied)
@@ -754,7 +763,7 @@ extension Operations {
         // had decided (members, waiting arrivals — both revived — and
         // its older tombstones) stays decided. A finished book restores
         // finished, its intake still paused.
-        try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
+        try intakeSweep(db, book: reading, occasion: .catchUp, cause: arrivalCause(.catchup, after: .restore), now: now)
     }
 
     // MARK: - Curated membership

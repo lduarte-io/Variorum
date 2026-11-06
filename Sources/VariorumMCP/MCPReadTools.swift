@@ -688,6 +688,13 @@ struct MCPReadTools: Sendable {
             // shortens a page, and `next_cursor` names the last KEPT row (before
             // VX-825 it named the last RAW row, a hidden note's id among them).
             let fetch: (PageCursor?) throws -> [PageRow]?
+            // VX-859 (the VX-808 run, Unit B5 — id-resume, PRE-RULED at #262):
+            // a BOOK cursor names a NOTE, never a stored position — `bookAfter`
+            // is where that note stands in the book now (read once the place is
+            // decided), `bookOrdinal` the readable ordinal its next cursor's key
+            // carries (the gathering cursor's road).
+            var bookAfter: PageCursor?
+            var bookOrdinal: Int?
             // VX-184 U5 (P-VX196-5): a BOOK's chapters, in order — so a chapter
             // with no notes filed is addressable too (the chapter acts).
             var chapters: [[String: Any]]?
@@ -722,6 +729,20 @@ struct MCPReadTools: Sendable {
                             """,
                         arguments: [bookID]
                     ).map { ["section_id": $0["id"] as String, "name": $0["name"] as String] }
+                    // VX-859: the cursor resumes after its NOTE's place in the
+                    // book as it stands now — a raw position key's bytes follow
+                    // whatever was filed beside it, hidden members included, so
+                    // the key no longer crosses the wire. A note that is no
+                    // longer a member this client can read (taken out, demoted
+                    // to an arrival, deleted, made Private — or never one: a
+                    // cursor names a hidden note exactly as it names nothing)
+                    // answers the stale sentence and the listing starts again.
+                    if let cursor {
+                        guard let at = try bookResumePoint(db, bookID: bookID, noteID: cursor.id, standing: standing)
+                        else { return Outcome(text: Self.staleCursorMessage, isError: true) }
+                        bookAfter = at
+                    }
+                    bookOrdinal = cursor.flatMap { Int($0.key) }.map { $0 + 1 } ?? 0
                 case .gathering:
                     if let cursor, cursor.shape != .gathering {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
@@ -764,7 +785,7 @@ struct MCPReadTools: Sendable {
                 }
             }
             var kept: [(row: PageRow, facts: MCPGrantRule.NoteFacts)] = []
-            var after = cursor
+            var after = bookAfter ?? cursor
             walk: while true {
                 guard let raw = try fetch(after) else { return Outcome(text: Self.staleCursorMessage, isError: true) }
                 let facts = try Queries.mcpNoteFacts(db, noteIDs: raw.map(\.id))
@@ -813,6 +834,10 @@ struct MCPReadTools: Sendable {
             if kept.count == limit, let last = kept.last?.row {
                 let resume = gatheringOrdinal.map {
                     PageCursor(shape: .gathering, key: String($0 + kept.count - 1), id: last.id)
+                } ?? bookOrdinal.map {
+                    // VX-859: the last KEPT note and its readable ordinal —
+                    // never its stored position.
+                    PageCursor(shape: .book, key: String($0 + kept.count - 1), id: last.id)
                 } ?? last.cursor
                 answer["next_cursor"] = resume.encoded
             }
@@ -872,6 +897,33 @@ struct MCPReadTools: Sendable {
                     section: (row["section_id"] as String?).map { ($0, row["section_name"] as String) },
                     archived: row["archived"], entryDate: row["entry_date"])
         }
+    }
+
+    /// **Where a book cursor resumes** (VX-859 — id-resume, PRE-RULED; the
+    /// VX-809 ladder's MINOR-1): the cursor's NOTE, found by id as a live
+    /// MEMBER of this book that THIS client can read now, and its place there
+    /// as the internal keyset point `bookPage` pages after (`(position, id)` —
+    /// read here, never sent). nil when the note is no longer such a member —
+    /// taken out, demoted to an arrival, deleted, now fenced — or never was:
+    /// the cursor names a hidden note exactly as it names nothing (R-825). An
+    /// archived member resumes (its membership stands; `include_archived`
+    /// decides only what is listed). One indexed read (`uq_reading_post_live`)
+    /// and the note's facts — ∝ one row.
+    private func bookResumePoint(
+        _ db: Database, bookID: String, noteID: String, standing: MCPGrantAuthority.Standing
+    ) throws -> PageCursor? {
+        guard let position = try String.fetchOne(
+            db,
+            sql: """
+                SELECT rp.position FROM reading_post rp JOIN container c ON c.id = rp.post_id
+                WHERE rp.reading_id = ? AND rp.post_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                  AND c.deleted_at IS NULL AND c.kind = 'post'
+                """,
+            arguments: [bookID, noteID])
+        else { return nil }
+        let facts = try Queries.mcpNoteFacts(db, noteID: noteID)
+        guard MCPGrantAuthority.decide(standing, note: facts, rung: .read, consumes: false).isAllowed else { return nil }
+        return PageCursor(shape: .book, key: position, id: noteID)
     }
 
     /// **A GATHERING's notes in its own order** (13n-c VX-273): its assembly
@@ -1345,7 +1397,10 @@ struct MCPReadTools: Sendable {
 /// same words as an undecodable one.
 struct PageCursor: Equatable, Sendable {
     enum Shape: String, Sendable {
-        /// A book's member order — `(position, post id)`.
+        /// A book's member order — `(position, post id)` inside the server;
+        /// ON THE WIRE (VX-859) the key is the readable ordinal and the cursor
+        /// resumes after the note it names (`bookResumePoint`), never a raw
+        /// position (whose bytes follow whatever was filed beside it).
         case book = "b"
         /// Recency — `(touched, id)`, descending.
         case recency = "r"

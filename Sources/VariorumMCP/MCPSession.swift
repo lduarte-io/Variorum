@@ -35,6 +35,9 @@ final class MCPSession: @unchecked Sendable {
     private let shows: MCPShowTool
     private let database: AppDatabase
     private let operations: Operations
+    /// VX-776: the app's refusal words (the host's `MCPHostHooks.refusalWords`),
+    /// the one chain's second link for an error the SDK handlers meet.
+    private let refusalWords: @Sendable (Error) -> String?
     /// **VX-605 — the naming moment is heard** (the VX-620 run, batch 2): called
     /// once this connection's `initialize` has named it (the host hands it its
     /// one connections-changed road — `MCPServerHost.onConnectionsChanged`, a
@@ -189,6 +192,7 @@ final class MCPSession: @unchecked Sendable {
     /// IS this connection's key (her Allow). One indexed read per call.
     private func awaitsHerOK() throws -> Bool {
         guard let key = lock.withLock({ awaitingKey }), let name = declaredName else { return false }
+        try handlerRead()
         let bound = try database.read { db in
             try Queries.mcpClient(db, name: name).flatMap { try Queries.mcpSetupKeyHash(db, clientID: $0.id) }
         }
@@ -285,13 +289,19 @@ final class MCPSession: @unchecked Sendable {
     /// design, so reconnect once it's back (e.g. with /mcp); while it's locked,
     /// calls say so until it's unlocked." 3,061 → 3,089, inside 3,100. PROVISIONAL
     /// (P-809-4's family, her copy pass).
+    ///
+    /// VX-811's docs tail (the VX-808 run, Unit B5 — A-808-10): the READ rung
+    /// says it proposes ("read (read, search and propose)") — a read-rung client
+    /// sends notes to a book's Arrivals with `propose_notes_to_book`, listed to it
+    /// beside the reads, its own description saying the rest. No trade: 3,089 →
+    /// 3,098, inside 3,100. PROVISIONAL words (her bundle).
     static let instructions = """
         Variorum is a writing app; this server is the door to its library, on the author's Mac, \
         open while Variorum runs: quitting it ends every connection, by design, \
         so reconnect once it's back (e.g. with /mcp); while it's locked, calls say so until it's unlocked. A new client is a connection request until the author approves \
         it in Variorum \u{25B8} Settings \u{25B8} MCP. Once approved, list_my_activity is always listed; \
         other tools appear only for what the author has shared (re-announced when that changes).
-        Grants have four rungs, each including those before it: read (read and search), \
+        Grants have four rungs, each including those before it: read (read, search and propose), \
         suggest (add takes and comments beside their text, save lenses), \
         write new (new notes, books, chapters, tags, versions; blocks added at a note's end), \
         edit (most of what the author can do at the keyboard: edit, choose and commit takes; \
@@ -347,6 +357,7 @@ final class MCPSession: @unchecked Sendable {
         self.operations = operations
         self.latch = latch
         self.onNamed = onNamed
+        self.refusalWords = hooks.refusalWords
         var reads = MCPReadTools(database: database, operations: operations)
         reads.hooks = hooks
         self.tools = reads
@@ -435,11 +446,18 @@ final class MCPSession: @unchecked Sendable {
             guard await self.admitIfHeld(), let name = self.declaredName else { return .init(tools: []) }
             do {
                 if try self.awaitsHerOK() { return .init(tools: self.served([])) }
+                try self.handlerRead()
                 let standing = try await self.database.read { try MCPGrantAuthority.standing($0, clientName: name) }
                 return .init(tools: self.served(MCPToolCatalog.listed(for: standing)))
             } catch is StoreLockedError {
                 // The lock overtook the list: what this connection was last served.
                 return .init(tools: self.listedWhileLocked)
+            } catch {
+                // VX-776 (the VX-369 sweep's row 19): any other store failure is
+                // said through THE ONE CHAIN — SQLite's code and its own message,
+                // never the executed SQL (P-771-11) — as the JSON-RPC internal
+                // error the SDK answered before, its words no longer GRDB's.
+                throw MCPError.internalError(MCPWireRefusalCopy.spoken(error, appWords: self.refusalWords))
             }
         }
         await server.withMethodHandler(CallTool.self) { [weak self] params in
@@ -457,7 +475,21 @@ final class MCPSession: @unchecked Sendable {
             // VX-818: a lock that overtook the call at its waiting check (a
             // store read, refused before any access) answers as the door does.
             let waits: Bool
-            do { waits = try self.awaitsHerOK() } catch is StoreLockedError { return Self.lockedAnswer }
+            do {
+                waits = try self.awaitsHerOK()
+            } catch is StoreLockedError {
+                return Self.lockedAnswer
+            } catch {
+                // VX-776 (the VX-369 sweep's row 19): the waiting check's store
+                // read failed — said as a TOOL RESULT through THE ONE CHAIN, the
+                // tool families' catch-all shape (P-771-11: SQLite's code and its
+                // own message, never the SQL), never the SDK's raw internal error.
+                return .init(
+                    content: [.text(
+                        text: MCPWireRefusalCopy.unexpected(error, tool: params.name, appWords: self.refusalWords),
+                        annotations: nil, _meta: nil)],
+                    isError: true)
+            }
             if waits {
                 let waiting = Self.waitingAnswer(params.name)
                 return .init(content: [.text(text: waiting.text, annotations: nil, _meta: nil)], isError: waiting.isError)
@@ -634,7 +666,23 @@ final class MCPSession: @unchecked Sendable {
     /// TEST-ONLY (VX-762, A-771-3 (2)): the transport's write lock, so a pin can
     /// hold it as a frame mid-write would while the server stops.
     var transportWriteLockForTesting: NSLock? { lock.withLock { transport?.writeLock } }
+
+    /// TEST-ONLY (VX-776): the host's failing reader (`MCPServerHost.handlerReadProbe`),
+    /// set once by the host before the session runs.
+    var handlerReadProbe: (() throws -> Void)?
     #endif
+
+    /// **VX-776 — the ONE seam in front of every store read the SDK handlers
+    /// make** (the standing read behind `tools/list`; the waiting-key check
+    /// behind every call — `awaitsHerOK`): a no-op in a shipped build; in a
+    /// DEBUG build the host's failing reader runs here, so a pin can make the
+    /// read fail as a broken store does (the VX-369 sweep's row 19 — a read
+    /// failure a headless store cannot produce by itself).
+    private func handlerRead() throws {
+        #if DEBUG
+        try handlerReadProbe?()
+        #endif
+    }
 
     /// The host's close of this session's descriptor once `run()` has
     /// returned and the host has let go of the session (VX-279): once, under

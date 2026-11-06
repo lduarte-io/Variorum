@@ -25,8 +25,13 @@ struct VX351HoverWordsTests {
     private var whole: String { TimeStampFace.whole(instant) }
 
     @Test func theNamedSpeakersHoverTheWholeFact() {
-        #expect(ArrivalsCopy.arrivedHelp(iso) == "Arrived \(whole)")
-        #expect(ArrivalsCopy.arrivedHelp("soon") == nil, "a stamp that is not one hovers nothing")
+        // VX-821 (the VX-808 run, Unit B3) — A JUSTIFIED EDIT: the Arrivals
+        // speaker's verb changed with its face (R-808-5 — the popover's
+        // "arrived …" retired; the review's rows say since when they WAIT, a
+        // demotion's own moment included). The subject holds: its hover is
+        // the one brain's whole fact, and a non-stamp hovers nothing.
+        #expect(ArrivalsReviewCopy.sinceHelp(iso) == "Waiting since \(whole)")
+        #expect(ArrivalsReviewCopy.sinceHelp("soon") == nil, "a stamp that is not one hovers nothing")
         #expect(ArchivedLineCopy.archivedHelp(iso) == "Archived \(whole)")
         #expect(LibrarySearchFace.kindHelp(kind: .savepoint, savedAt: iso) == "Committed \(whole)")
         #expect(LibrarySearchFace.kindHelp(kind: .take, savedAt: nil) == nil, "prose says no stamp")

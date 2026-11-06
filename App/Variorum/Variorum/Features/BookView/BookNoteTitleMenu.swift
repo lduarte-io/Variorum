@@ -17,9 +17,10 @@
 //    note's acts, never membership's): Open Beside · Open in New Window ·
 //    Star / Unstar | Rename… · Move to Wing ▸ / Copy to Wing ▸ (while another
 //    wing exists, from the note's own wing) · Export Note…;
-//  · the BOOK'S STRUCTURE pair, books only, exactly as shipped: Move to
-//    Chapter ▸ | Remove from This Book (Release on an owned book). A
-//    gathering's membership row is untouched — no "remove #tag" here (A-878-1);
+//  · the BOOK'S STRUCTURE doors, books only, exactly as shipped: Move to
+//    Chapter ▸ · Pin to Top / Unpin (VX-803, A-808-12 (h)) | Remove from This
+//    Book (Release on an owned book). A gathering's membership row is
+//    untouched — no "remove #tag" here (A-878-1);
 //  · set apart, LAST: Archive · Delete Note… (the one shared confirm).
 //
 //  Every word is its registry declaration's (the note rows' grammar —
@@ -66,6 +67,9 @@ nonisolated enum BookNoteTitleDoor: Hashable, Sendable {
     case wingDoors
     case export
     case moveToChapter, removeFromBook
+    /// VX-803 (A-808-12 (h)): Pin to Top / Unpin — beside the book's other
+    /// order door, its word the membership's.
+    case pin
     case archive, delete
 
     /// The registry acts the door draws.
@@ -79,6 +83,7 @@ nonisolated enum BookNoteTitleDoor: Hashable, Sendable {
         case .export: [.exportNote]
         case .moveToChapter: [.fileNoteInChapter]
         case .removeFromBook: [.removeFromBook]
+        case .pin: [.pinNoteInBook]
         case .archive: [.archiveNote]
         case .delete: [.deleteNote]
         }
@@ -111,9 +116,10 @@ nonisolated enum BookNoteTitleMenuTable {
     static let noteDoors: [BookNoteTitleDoor] = [
         .openBeside, .openInNewWindow, .star, .rename, .wingDoors, .export, .archive, .delete,
     ]
-    /// The book's structure pair — a BOOK's notes only (a gathering holds no
-    /// membership; chapters are a book's — QUESTIONS #25(a)).
-    static let structureDoors: [BookNoteTitleDoor] = [.moveToChapter, .removeFromBook]
+    /// The book's structure doors — a BOOK's notes only (a gathering holds no
+    /// membership; chapters are a book's — QUESTIONS #25(a)); VX-803's pin
+    /// rides beside Move to Chapter (A-808-12 (h)).
+    static let structureDoors: [BookNoteTitleDoor] = [.moveToChapter, .pin, .removeFromBook]
 
     static func groups(_ facts: BookNoteTitleFacts) -> [[BookNoteTitleDoor]] {
         var opening: [BookNoteTitleDoor] = []
@@ -122,8 +128,9 @@ nonisolated enum BookNoteTitleMenuTable {
         if facts.canStar { opening.append(.star) }
         var groups: [[BookNoteTitleDoor]] = [opening, [.rename, .wingDoors, .export]]
         if facts.bookKind == .book {
-            // As shipped: Move to Chapter ▸, a divider, Remove / Release.
-            groups += [[.moveToChapter], [.removeFromBook]]
+            // As shipped: Move to Chapter ▸ and Pin to Top / Unpin (VX-803),
+            // a divider, Remove / Release.
+            groups += [[.moveToChapter, .pin], [.removeFromBook]]
         }
         // Set apart, LAST — Delete the very last (the Open list's rule).
         groups.append([.archive, .delete])
@@ -199,6 +206,9 @@ struct BookNoteTitleMenu: View {
     let postID: String
     /// The note's name as the book shows it (the cross-wing confirm's words).
     let title: String
+    /// VX-803 (A-808-12 (h)): the row's own entry's pin — Pin to Top / Unpin
+    /// reads it (one act, its word the membership's).
+    let pinned: Bool
     let doors: BookNoteTitleDoors
     var roads = BookNoteRoads()
     /// The window's wings brain (nil in a harness mount — no wing doors, P-2).
@@ -269,6 +279,16 @@ struct BookNoteTitleMenu: View {
                 Button(RemoveFromBookCopy.verb(owned: book.owned)) {
                     Task {
                         await RemoveFromBookDoor.remove(session: session, postID: postID, book: book)
+                    }
+                }
+            }
+        case .pin:
+            // VX-803 (A-808-12 (h)): the pin — beside the book's other order door.
+            if let book = structure.reading {
+                Button(PinNoteCopy.verb(pinned: pinned)) {
+                    Task {
+                        await PinNoteDoor.setPinned(
+                            session: session, postID: postID, book: book, pinned: !pinned)
                     }
                 }
             }

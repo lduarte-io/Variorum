@@ -98,6 +98,8 @@ extension MCPWriteTools.Job {
         // `replace_tag`'s new path adopts or mints a tag (`apply_tag`'s rule).
         case .noteList: 0
         case .replaceTag(_, _, let to): MCPNullCharacters.count(to)
+        // VX-811: a proposal's reason is prose the act stores.
+        case .proposeNote(_, _, let reason): MCPNullCharacters.count(reason)
         case .edit(let job): job.nullCharactersWritten
         case .carriage(let job): job.nullCharactersWritten
         case .deliberate(let job): job.nullCharactersWritten

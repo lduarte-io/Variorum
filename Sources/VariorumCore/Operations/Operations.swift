@@ -35,6 +35,11 @@ public struct Operations: Sendable {
     /// `undoStack` precedent): two values on one runner never share it, and an
     /// undo or redo runs on the value its caller hands the entry.
     public private(set) var intakeActor: IntakeDecision.Actor = .author
+    /// **The wire client's name** (VX-808 Unit B2 — A-808-6): every arrival a
+    /// value heard as a client's mints, re-poses or demotes is stamped with it
+    /// (`ArrivalProvenance.client`), so her Arrivals can say "by ‹client›". nil
+    /// on her values (and on a value heard as a client without a name).
+    public private(set) var wireClientName: String?
 
     public init(undoStack: UndoStack? = nil) {
         self.undoStack = undoStack
@@ -49,6 +54,25 @@ public struct Operations: Sendable {
         var copy = self
         copy.intakeActor = .wireClient
         return copy
+    }
+
+    /// `heardAsWireClient()`, naming the client (the MCP door's one call site):
+    /// the arrivals its acts ring carry the name (A-808-6).
+    public func heardAsWireClient(named clientName: String) -> Operations {
+        var copy = heardAsWireClient()
+        copy.wireClientName = clientName
+        return copy
+    }
+
+    /// **An arrival's provenance, as this value stamps it** (A-808-6): the
+    /// kind and its facts, with `client` whenever the act was heard as a wire
+    /// client's.
+    func arrivalCause(
+        _ kind: ArrivalProvenance.Kind, tag: String? = nil, after: ArrivalProvenance.CatchUpCause? = nil,
+        at: Date? = nil
+    ) -> ArrivalProvenance {
+        ArrivalProvenance(
+            kind: kind, client: intakeActor == .wireClient ? wireClientName : nil, tag: tag, after: after, at: at)
     }
 
     // MARK: - Minting

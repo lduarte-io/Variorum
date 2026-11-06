@@ -484,6 +484,12 @@ struct TutorialMCPChapterTests {
             // in the catalog the wire serves. RED ON OLD: the old Suggest and
             // Write new sentences named none of the new acts, and the old Edit
             // sentence (A JUSTIFIED EDIT below) stopped at blocks.
+            // VX-811 (the VX-808 run, Unit B5 — A-808-10's docs tail; PROVISIONAL):
+            // Read also proposes — a read-rung act, its notes waiting at the book's
+            // Arrivals for her. RED ON OLD by absence.
+            #expect(text.contains("Read: it can read and search what you shared, and propose notes to a book, where "
+                                  + "they wait at its \(ArrivalsCopy.word) for you to add or dismiss."))
+            #expect(MCPToolFacts.rung(of: "propose_notes_to_book") == .read, "proposing is a read-rung act")
             #expect(text.contains("Suggest: it can add new takes and comments beside your text, one at a time or "
                                   + "many at once, and save a lens"))
             for name in ["add_take", "add_takes", "add_comment", "add_comments", "save_lens"] {

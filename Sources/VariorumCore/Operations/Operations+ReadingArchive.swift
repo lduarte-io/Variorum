@@ -169,7 +169,7 @@ extension Operations {
         reading.archivedAt = nil
         reading.updatedAt = now
         try reading.update(db)
-        try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
+        try intakeSweep(db, book: reading, occasion: .catchUp, cause: arrivalCause(.catchup, after: .unarchive), now: now)
         return returned
     }
 }

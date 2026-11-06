@@ -259,6 +259,10 @@ extension Operations {
         /// named an order that differed from the stored one).
         public let orderBefore: Queries.ReadingOrder
         public let orderAfter: Queries.ReadingOrder
+        /// VX-811 ruling 4 (the VX-808 run, Unit B2): the notes the rule write's
+        /// sweep BELLED, in the order it rang them — the wire counts the ones
+        /// its client can read (never this list's length: R-825).
+        public let belledPostIDs: [String]
 
         public var changed: Bool { before != after || orderBefore != orderAfter }
     }
@@ -325,6 +329,7 @@ extension Operations {
             if let paths = write.outflowPaths {
                 try writeReadingOutflow(db, readingID, tagIDs: try paths.map(resolve))
             }
+            var belled: [String] = []
             if case .some(let term) = write.rule {
                 let resolved = try term.map { try $0.mappingTags(resolve) }
                 if RuleEditing.needsWrite(draft: resolved, stored: reading.querySpec) {
@@ -339,7 +344,7 @@ extension Operations {
                     // warrant is "birth = intent", HERS; an agent's matches
                     // wait at Arrivals, and her seat is the reach-expanding
                     // act. Her own Save keeps backfill untouched.
-                    try writeReadingQuerySpec(
+                    belled = try writeReadingQuerySpec(
                         db, readingID, querySpec: try RuleGrammar.encode(resolved),
                         sweepOccasion: .catchUp)
                 }
@@ -358,7 +363,8 @@ extension Operations {
                 intakeRuns: IntakeDecision.intakeRuns(try intakeBookFacts(db, landed)),
                 mintedTags: adoption.minted,
                 orderBefore: orderBefore,
-                orderAfter: Queries.ReadingOrder(field: landed.sortField, direction: landed.sortDir))
+                orderAfter: Queries.ReadingOrder(field: landed.sortField, direction: landed.sortDir),
+                belledPostIDs: belled)
         }
         if result.changed {
             let before = result.before, after = result.after

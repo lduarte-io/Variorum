@@ -65,8 +65,12 @@ struct BookNoteTitleMenuTests {
             .openBeside, .openInNewWindow, .toggleStar, .renameNote, .moveNoteToWing,
             .copyNoteToWing, .exportNote, .archiveNote, .deleteNote,
         ])
+        // VX-808 merge-in (JUSTIFIED EDIT): VX-803's Pin to Top / Unpin rode
+        // the retired `outlineChapterMenu` beside Move to Chapter (A-808-12
+        // (h)); it rides the structure group here, the pair otherwise unchanged.
         #expect(BookNoteTitleMenuTable.structureDoors.flatMap(\.capabilities)
-                == [.fileNoteInChapter, .removeFromBook], "the shipped pair, unchanged")
+                == [.fileNoteInChapter, .pinNoteInBook, .removeFromBook],
+                "the shipped pair, with the pin beside Move to Chapter")
         let declared = Set(BookView.contextMenuCapabilities)
         for act in BookNoteTitleMenuTable.capabilities {
             #expect(declared.contains(act), "\(act) is declared on the book view")
@@ -91,10 +95,12 @@ struct BookNoteTitleMenuTests {
     /// A BOOK's note: the note's own doors, the shipped structure pair, then
     /// Archive · Delete set apart — Delete the very last.
     @Test func aBooksNoteCarriesItsOwnDoorsTheStructurePairAndDeleteLast() {
+        // VX-808 merge-in (JUSTIFIED EDIT): the pin beside Move to Chapter,
+        // before the divider — `outlineChapterMenu`'s shipped order (A-808-12 (h)).
         #expect(BookNoteTitleMenuTable.groups(Self.allRoads) == [
             [.openBeside, .openInNewWindow, .star],
             [.rename, .wingDoors, .export],
-            [.moveToChapter],
+            [.moveToChapter, .pin],
             [.removeFromBook],
             [.archive, .delete],
         ])
@@ -121,7 +127,8 @@ struct BookNoteTitleMenuTests {
     /// the shipped rule); the note's own doors need no book.
     @Test func anUnreadBookDrawsNoStructureDoor() {
         let doors = BookNoteTitleMenuTable.doors(BookNoteTitleFacts(bookKind: nil))
-        #expect(!doors.contains(.moveToChapter) && !doors.contains(.removeFromBook))
+        #expect(!doors.contains(.moveToChapter) && !doors.contains(.removeFromBook)
+                && !doors.contains(.pin))
         #expect(doors == [.rename, .wingDoors, .export, .archive, .delete])
     }
 

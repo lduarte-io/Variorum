@@ -75,6 +75,21 @@ private func reachesEOF(_ fd: Int32) -> Bool {
     }
 }
 
+/// Every byte until EOF (nil on a timeout — the connection still open). VX-777.
+private func everyByteUntilEOF(_ fd: Int32) -> Data? {
+    var all = Data()
+    var buffer = [UInt8](repeating: 0, count: 4096)
+    while true {
+        let count = read(fd, &buffer, buffer.count)
+        if count == 0 { return all }
+        if count < 0 {
+            if errno == EINTR { continue }
+            return nil
+        }
+        all.append(contentsOf: buffer[0..<count])
+    }
+}
+
 private func eventually(_ condition: () throws -> Bool) async throws -> Bool {
     for _ in 0..<300 {
         if try condition() { return true }
@@ -213,6 +228,54 @@ struct MCPStopRoadsServerTests {
         let logged = try ends(h.database)
         #expect(logged.map(\.client) == ["latecomer"] && logged.map(\.act) == [MCPConnectionEnd.serverOff.act],
                 "\(logged)")
+    }
+
+    // MARK: - VX-777: a stale start's stop says what actually let it go
+
+    /// **RED ON OLD (the lock and the quit; the switch is the guard):** the
+    /// door's stale start (`MCPDoor.reconcileServer` — a host the door let go
+    /// while its start was still in flight) is stopped AGAIN by the start's
+    /// completion arm with a bare `fresh.stop()`. When the start completed
+    /// anyway (VX-613's class — the start itself is not this fix's), any
+    /// connection the host accepted in its moments of life heard the SWITCH-OFF
+    /// words from that bare stop — honest that it closed, wrong about why when
+    /// a lock, a library closing or the quit let the host go. A bare stop now
+    /// repeats the road that let the host go: its close line and its Activity
+    /// end (the quit's: none).
+    @Test(arguments: StopWithAReason.allCases)
+    func aStaleStartsSecondStopSaysTheRoadThatLetItGo(_ road: StopWithAReason) async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        let directory = tempDirectory("vstale")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let fresh = MCPServerHost(
+            database: h.database, operations: h.operations, directory: directory, version: "test",
+            executor: SeededExecutor(operations: h.writeOperations))
+        // The door lets the starting host go (`stopServer` — its own stop, the road's)…
+        try road.stop(fresh)
+        // …and the start completes anyway: the host binds and accepts a client.
+        try fresh.start()
+        let fd = try namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        defer { close(fd) }
+        #expect(fresh.connectedClientNames == ["claude-code"], "the client was served in the host's moments of life")
+        // The completion arm, byte for byte: `fresh.stop()`.
+        fresh.stop()
+        let bytes = everyByteUntilEOF(fd) ?? Data()
+        let expected = MCPCloseLine.line(road.words)!
+        #expect(bytes.suffix(expected.count) == expected,
+                "\(road): the close line says the road that let the host go: \(String(decoding: bytes.suffix(200), as: UTF8.self))")
+        #expect(bytes.filter { $0 == MCPCloseLine.marker }.count == 1, "\(road): one close line")
+        switch road {
+        case .appQuits:
+            try await Task.sleep(for: .milliseconds(400))
+            let logged = try ends(h.database)
+            #expect(logged.isEmpty, "a quit says nothing (P-VX394-5): \(logged)")
+        case .switchOff, .libraryLocks:
+            let end: MCPConnectionEnd = road == .switchOff ? .serverOff : .libraryClosed
+            #expect(try await eventually { try ends(h.database).count == 1 }, "\(road): its end is said")
+            let logged = try ends(h.database)
+            #expect(logged.map(\.act) == [end.act], "\(road): \(logged)")
+        }
     }
 
     // MARK: - GUARD: past the session cap, the refused connection says nothing

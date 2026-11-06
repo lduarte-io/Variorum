@@ -54,6 +54,20 @@
 //  line shows is ONE value (`ArrivalsLineFace.isShown`), so the toggle
 //  composes at that one place when it lands.
 //
+//  VX-821 (the VX-808 run, Unit B3) — THE REVIEW AREA, ONE HOME (R-808-5, her
+//  pick "Full book area, one home"; her bar: "the UX should be clear,
+//  spacious, not cluttered, buttons should be a good size … i think the
+//  seating area probably needs more space"). THE POPOVER RETIRES: the
+//  masthead door (calm/presence unchanged) now OPENS the review area in the
+//  book's content area (`BookArrivalsReview` — drawn OVER the mode's body,
+//  the book search answer's precedent, so Done returns the mode exactly as
+//  she left it). The rows (`BookArrivalsList`) carry the popover's semantics
+//  whole — the ownership arms (`ArrivalArms`), the never-seats open, the
+//  archived mark, the owned-by / also-in line — and gain the pick (click,
+//  ⇧/⌘, ⌘A), the walked row, WHY each waits and since when. The bulk doors
+//  (Add all · Dismiss all · Add N · Dismiss N) are per-row acts with one
+//  message per press (A-808-11 — `BookArrivalsModel+Bulk.swift`).
+//
 
 import GRDB // AsyncValueObservation iteration
 import SwiftUI
@@ -82,23 +96,20 @@ nonisolated enum ArrivalsCopy {
     /// is there and has presence when something is there").
     static func doorCount(_ count: Int) -> String? { count > 0 ? "\(count)" : nil }
 
-    /// The door's hover (wording PROVISIONAL — 13s re-voices).
+    /// The door's hover (wording PROVISIONAL — VX-821 re-cut it for the
+    /// review area and the proposals that wait there too).
     static func doorHelp(count: Int) -> String {
         count == 0
             ? "\(word) \u{2014} nothing waiting"
-            : "\(word) \u{2014} \(count) waiting: notes this book's rule brought in. "
-                + "Open one to read it; add it to the book, or dismiss it."
+            : "\(word) \u{2014} \(count) waiting: notes this book\u{2019}s rule brought in, or an AI "
+                + "proposed. Open \(word) to add them to the book or dismiss them."
     }
 
-    /// The popover's head line.
+    /// **The head line** — the review area's header and the door's spoken
+    /// name, ONE home (VX-821, her picked preview: "Arrivals — N waiting").
     static func header(count: Int) -> String {
-        count == 0 ? word : "\(word) \u{00B7} \(count) waiting"
+        count == 0 ? word : "\(word) \u{2014} \(count) waiting"
     }
-
-    /// The popover's calm answer when nothing waits.
-    static let nothingWaiting =
-        "Nothing is waiting. When this book's rule brings in a note and its dial says "
-        + "\u{201C}wait at \(word),\u{201D} the note waits here for you."
 
     /// A waiting row's NAME is a door to the note itself (17y (h), her
     /// "you should be able to click on the note to see what it is").
@@ -107,21 +118,10 @@ nonisolated enum ArrivalsCopy {
     static let addHelp = "Add this note to the book — it lands at the end"
     static let dismissHelp = "Dismiss — don't add this note to the book"
 
-    /// When a row arrived, in the app's ONE stamp vocabulary
-    /// (`TimeStampFace.relative` — *today 1:33 AM* · *yesterday* · *Sep 9*),
-    /// labelled with this row's own verb. nil when the stamp is unreadable —
-    /// the face draws nothing rather than a lie (TimeStampFace's own rule).
-    static func arrived(_ iso: String, now: Date) -> String? {
-        guard let date = DateFormatter.variorumISO8601.date(from: iso) else { return nil }
-        return "arrived " + TimeStampFace.relative(date, now: now)
-    }
-
-    /// **Its hover — the whole fact** (VX-351 — the VX-348 run, U4; her
-    /// R-VX348-3): *Arrived Oct 13, 2026 at 4:02 PM*. nil on the same terms.
-    static func arrivedHelp(_ iso: String) -> String? {
-        guard DateFormatter.variorumISO8601.date(from: iso) != nil else { return nil }
-        return TimeStampFace.tooltip(labelled: "Arrived", iso: iso)
-    }
+    // (VX-821: `arrived` / `arrivedHelp` — the popover row's "arrived …"
+    // stamp — RETIRED with the popover. The review's rows say since when they
+    // WAIT (`ArrivalsReviewCopy.since` — a demotion's own moment, never the
+    // original filing's), and the popover's empty sentence moved there too.)
 
     /// The expansion's tail when more wait than the window lists — the count
     /// is the door's whole answer, so the listing never pretends to be all.
@@ -313,10 +313,6 @@ final class BookArrivalsModel {
 
     /// The door's answer — the count and (while open) the first rows.
     private(set) var door: Queries.BookArrivals = .none
-    /// Open = the expansion lists the rows. COLLAPSED by default and after
-    /// every emptying (her clutter mandate): a line that reopened itself
-    /// expanded would be the persistent panel the ruling forbids.
-    private(set) var expanded = false
     /// Rows whose judgment is in flight — their doors grey until the store
     /// answers, so a double click cannot fire one act twice.
     private(set) var judging: Set<String> = []
@@ -324,26 +320,91 @@ final class BookArrivalsModel {
     /// facts; an ordinary free note is absent — "silence the common case"),
     /// read once per delivered listing, ∝ the listed rows (P1).
     private(set) var facts: [String: Queries.OwnershipFacts] = [:]
+    /// VX-821: the listed untitled notes' FIRST WORDS — the Library's one
+    /// derivation (`SidebarRowLeads`, read flat in each note's length), read
+    /// with the facts, ∝ the listed rows. A named note (or a daily entry) is
+    /// absent and keeps its display title.
+    private(set) var leads: [String: String] = [:]
 
-    /// 17y B3 (h): whether the masthead door's popover is open — it lists
-    /// the rows while it is (the door hosts the observation).
-    private(set) var doorOpen = false
+    /// **VX-821 (R-808-5): whether the REVIEW AREA is open** — the masthead
+    /// door's press opens it in the book's content area (the popover it
+    /// replaced retired); Done, esc, a mode tab or any navigation the book
+    /// takes closes it. It lists the rows while it is (the door hosts the
+    /// observation). It opens on an EMPTY door too — the calm answer says
+    /// "nothing is waiting" — and judging the last row leaves it open with
+    /// that answer: she leaves by Done (her ruling's door), never by surprise.
+    private(set) var reviewOpen = false
+    /// VX-821: the pick and the walked row (pure — `ArrivalsSelection`).
+    private(set) var selection = ArrivalsSelection()
+    /// VX-821 (A-808-11 F-7(a)): Dismiss all's ask, carrying the rows it names
+    /// — the confirm acts on exactly those (the RecoveryView rule: the value
+    /// rides into the action, so no binding setter can clear it first).
+    var pendingDismissAll: [ArrivalsBulk.Row]?
+    /// VX-821 (F-8): a bulk press is in flight — a second waits for nothing
+    /// (it does nothing).
+    private(set) var bulkInFlight = false
 
-    /// How many rows the open line lists (the count is never windowed).
-    static let window = 30
+    /// How many rows the open review lists (the count is never windowed). The
+    /// full book area has room: rows realize lazily (P3), and the listing,
+    /// its facts and its first words are ∝ this bound, never the corpus.
+    static let window = 100
 
     init(session: AppSession, readingID: String) {
         self.session = session
         self.readingID = readingID
     }
 
-    /// What the observation asks for: the count alone while collapsed (the
-    /// common occupied state pays for no listing), the window while open.
-    var listingLimit: Int { (expanded || doorOpen) ? Self.window : 0 }
+    /// What the observation asks for: the count alone while the review is
+    /// closed (the common occupied state pays for no listing), the window
+    /// while it is open.
+    var listingLimit: Int { reviewOpen ? Self.window : 0 }
 
-    /// The door opened or closed its popover (17y (h)). Unlike `toggle`, it
-    /// opens on an EMPTY door too — the calm door answers "nothing waiting".
-    func setDoorOpen(_ open: Bool) { doorOpen = open }
+    /// The door's press, Done, esc, a navigation: open or close the review.
+    /// Closing forgets the pick (a fresh open starts clean, its keyboard on
+    /// the first row).
+    func setReviewOpen(_ open: Bool) {
+        guard reviewOpen != open else { return }
+        reviewOpen = open
+        if !open {
+            selection = ArrivalsSelection()
+            pendingDismissAll = nil
+        }
+    }
+
+    /// The listed rows' ids, in the listing's order (the pick's order).
+    var order: [String] { door.rows.map(\.id) }
+
+    /// **What a row is called** — its first words when it leads with them
+    /// (the Library's one derivation), else its display title. The row, its
+    /// receipts and the bulk refusals all read this one answer.
+    func label(for arrival: Queries.BookArrival) -> String {
+        leads[arrival.postID] ?? arrival.title
+    }
+
+    // MARK: The pick (VX-821 — the rules are `ArrivalsSelection`'s)
+
+    func click(_ id: String, modifiers: NoteRowClickModifiers) {
+        selection.click(id, modifiers: modifiers, order: order)
+    }
+
+    func togglePick(_ id: String) { selection.toggle(id, order: order) }
+
+    func selectAll() { selection.selectAll(order) }
+
+    func walk(_ direction: ArrivalsSelection.Direction, extend: Bool) {
+        selection.walk(direction, extend: extend, order: order)
+    }
+
+    /// The listed rows ⏎ / ⌫ act on (the pick, else the walked row).
+    var keyTargets: [Queries.BookArrival] {
+        let ids = Set(selection.targets(in: order))
+        return door.rows.filter { ids.contains($0.id) }
+    }
+
+    /// The picked listed rows, in listing order.
+    var pickedRows: [Queries.BookArrival] {
+        door.rows.filter { selection.isPicked($0.id) }
+    }
 
     /// Observe the door. Hosted by the masthead door with `.task(id:
     /// listingLimit)` (17y (h) — the line's host retired), so opening the
@@ -367,21 +428,31 @@ final class BookArrivalsModel {
     /// precedent).
     func adopt(_ value: Queries.BookArrivals) {
         door = value
-        judging.formIntersection(value.rows.map(\.id))
-        if value.count == 0 { expanded = false }
+        // A bulk press greys its rows until it answers — its own rows stay
+        // judging even while the listing re-delivers mid-run.
+        if !bulkInFlight { judging.formIntersection(value.rows.map(\.id)) }
+        // VX-821: the pick follows what is listed; the walked row keeps its
+        // place (the next row slides under the keyboard).
+        selection.prune(toVisible: value.rows.map(\.id))
     }
 
     /// 13i-c U4: read the listed rows' ownership facts — ONE page-driven
     /// statement (`Queries.ownershipFacts`), so each row draws its arms.
+    /// VX-821: and their first words (`SidebarRowLeads` — the Library's one
+    /// derivation, flat in each note's length), in the same read.
     func loadFacts() async {
         let ids = door.rows.map(\.postID)
         guard !ids.isEmpty else {
             facts = [:]
+            leads = [:]
             return
         }
-        facts = (try? await session.database.read { [readingID] db in
-            try Queries.ownershipFacts(db, postIDs: ids, inBook: readingID)
-        }) ?? [:]
+        let read = try? await session.database.read { [readingID] db in
+            (facts: try Queries.ownershipFacts(db, postIDs: ids, inBook: readingID),
+             leads: try SidebarRowLeads.read(db, noteIDs: ids))
+        }
+        facts = read?.facts ?? [:]
+        leads = read?.leads ?? [:]
     }
 
     /// The row's arms, given whether this book owns its notes.
@@ -389,11 +460,9 @@ final class BookArrivalsModel {
         ArrivalArms.of(bookOwned: bookOwned, facts: facts[arrival.postID])
     }
 
-    /// The line's own click: open to the rows, or fold back to the line.
-    func toggle() {
-        guard ArrivalsLineFace.isShown(door) else { return }
-        expanded.toggle()
-    }
+    // (VX-821: `expanded` and `toggle()` — the 13i-b inline line's fold,
+    // kept since 17y moved the rows into the popover — RETIRED with the
+    // popover. The review's one open/close is `setReviewOpen`.)
 
     /// **Add** — seat the arrival: the note lands at the END, unsectioned
     /// (§4). The receipt says where; a refusal is the operation's own, in
@@ -405,7 +474,7 @@ final class BookArrivalsModel {
         do {
             try await session.runner.run { ops in try ops.seatArrival(arrival.id) }
             session.status.receipt(ArrivalsCopy.added(
-                arrival.title, chaptered: chaptered, archived: arrival.archived))
+                label(for: arrival), chaptered: chaptered, archived: arrival.archived))
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
                 for: error, book: book?.name, cap: book?.maxPosts,
@@ -423,7 +492,7 @@ final class BookArrivalsModel {
             _ = try await session.runner.run { ops in
                 try ops.copyPostIntoReading(answering: arrival.id)
             }
-            session.status.receipt(ArrivalsCopy.copiedIn(arrival.title))
+            session.status.receipt(ArrivalsCopy.copiedIn(label(for: arrival)))
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
                 for: error, book: book?.name, cap: book?.maxPosts,
@@ -447,7 +516,7 @@ final class BookArrivalsModel {
                     try leftIDs.compactMap { try Queries.reading(db, id: $0)?.name }
                 }
             }
-            session.status.receipt(ArrivalsCopy.movedIn(arrival.title, left: left))
+            session.status.receipt(ArrivalsCopy.movedIn(label(for: arrival), left: left))
         } catch {
             if case OperationError.lockedReading(let id) = error, id != readingID {
                 // 13i-c ladder round 1: the blocking book's OWN road (reopen ·
@@ -480,11 +549,175 @@ final class BookArrivalsModel {
         defer { judging.remove(arrival.id) }
         do {
             try await session.runner.run { ops in try ops.dismissArrival(arrival.id) }
-            session.status.receipt(ArrivalsCopy.dismissed(arrival.title))
+            session.status.receipt(ArrivalsCopy.dismissed(label(for: arrival)))
         } catch {
             session.status.refuse(ArrivalsCopy.refusal(
                 for: error, book: book?.name, cap: book?.maxPosts,
                 sealed: book?.sealedAt != nil))
+        }
+    }
+}
+
+// MARK: - The bulk doors (VX-821 — A-808-11)
+
+/// **Add all · Dismiss all · Add N · Dismiss N**, built to the orchestrator's
+/// ruling A-808-11 (the run record, Unit B3): PER-ROW acts in listing order —
+/// `seatArrival` / `dismissArrival` once per row, each its own transaction
+/// and its own refusal, no new operation (the Trash bulk precedent) — and NO
+/// undo entry, the single acts' own posture (neither registers one; the
+/// guard where undo is absent is Dismiss all's one confirm, F-7(a)). ONE
+/// message per press (`ArrivalsBulk.words`). A row whose arms need her
+/// choice is never run by Add — named, kept waiting, kept picked (F-4); a
+/// BOOK-level refusal ends the run and counts the rest as still waiting, a
+/// row's own refusal skips the row (F-5); "all" is the header's N read at
+/// the press, in one read with its facts (F-6). One flight at a time (F-8).
+extension BookArrivalsModel {
+    /// A listed row, as a press reads it (its name, its arms' verdict).
+    func bulkRow(_ arrival: Queries.BookArrival, bookOwned: Bool) -> ArrivalsBulk.Row {
+        ArrivalsBulk.Row(
+            id: arrival.id, name: label(for: arrival), archived: arrival.archived,
+            needsChoice: !arms(for: arrival, bookOwned: bookOwned).acts.contains(.seatArrival))
+    }
+
+    /// **Add N** — the picked rows.
+    func addSelected(book: Reading?, chaptered: Bool) async {
+        let rows = pickedRows.map { bulkRow($0, bookOwned: book?.owned ?? false) }
+        guard !rows.isEmpty else {
+            session.status.refuse(ArrivalsReviewCopy.nothingSelected)
+            return
+        }
+        await runBulk(.add, rows: rows, book: book, chaptered: chaptered)
+    }
+
+    /// **Dismiss N** — the picked rows (no confirm: the pick is exactly what
+    /// she chose — F-7(a)).
+    func dismissSelected(book: Reading?) async {
+        let rows = pickedRows.map { bulkRow($0, bookOwned: book?.owned ?? false) }
+        guard !rows.isEmpty else {
+            session.status.refuse(ArrivalsReviewCopy.nothingSelected)
+            return
+        }
+        await runBulk(.dismiss, rows: rows, book: book, chaptered: false)
+    }
+
+    /// **Add all** — every row the header counts, read at the press (F-6).
+    func addAll(book: Reading?, chaptered: Bool) async {
+        guard let rows = await everyWaitingRow(bookOwned: book?.owned ?? false) else { return }
+        guard !rows.isEmpty else {
+            session.status.refuse(ArrivalsReviewCopy.nothingWaitingToJudge)
+            return
+        }
+        await runBulk(.add, rows: rows, book: book, chaptered: chaptered)
+    }
+
+    /// **Dismiss all** — ASKS FIRST (F-7(a)): the rows the header counts are
+    /// read at the press and carried by the ask, and the confirm dismisses
+    /// exactly those (a note that rang after the ask was never asked about).
+    func requestDismissAll(book: Reading?) async {
+        guard let rows = await everyWaitingRow(bookOwned: book?.owned ?? false) else { return }
+        guard !rows.isEmpty else {
+            session.status.refuse(ArrivalsReviewCopy.nothingWaitingToJudge)
+            return
+        }
+        pendingDismissAll = rows
+    }
+
+    /// The confirm's press — the rows ride INTO the act (the RecoveryView
+    /// rule), so no dialog write-back can clear them first.
+    func confirmDismissAll(_ rows: [ArrivalsBulk.Row], book: Reading?) async {
+        pendingDismissAll = nil
+        await runBulk(.dismiss, rows: rows, book: book, chaptered: false)
+    }
+
+    func cancelDismissAll() { pendingDismissAll = nil }
+
+    /// **⏎** — the pick's Add N when something is picked, else the walked
+    /// row's single Add (one row through the same road speaks the single
+    /// act's own words; a choice row hears that it waits on her choice).
+    func addKeyTargets(book: Reading?, chaptered: Bool) async {
+        let rows = keyTargets.map { bulkRow($0, bookOwned: book?.owned ?? false) }
+        guard !rows.isEmpty else { return }
+        await runBulk(.add, rows: rows, book: book, chaptered: chaptered)
+    }
+
+    /// **⌫** — the pick's Dismiss N, else the walked row's single Dismiss.
+    func dismissKeyTargets(book: Reading?) async {
+        let rows = keyTargets.map { bulkRow($0, bookOwned: book?.owned ?? false) }
+        guard !rows.isEmpty else { return }
+        await runBulk(.dismiss, rows: rows, book: book, chaptered: false)
+    }
+
+    /// Every row the door counts, with its arms' verdict — ONE read (the
+    /// listing's own predicate, so "all" is the header's N; its facts in the
+    /// same pass). nil after a refused read (said on the seam).
+    func everyWaitingRow(bookOwned: Bool) async -> [ArrivalsBulk.Row]? {
+        do {
+            let read = try await session.database.read { [readingID] db in
+                let all = try Queries.bookArrivals(db, readingID: readingID, limit: Int(Int32.max))
+                return (all.rows, try Queries.ownershipFacts(
+                    db, postIDs: all.rows.map(\.postID), inBook: readingID))
+            }
+            return read.0.map { arrival in
+                ArrivalsBulk.Row(
+                    id: arrival.id, name: label(for: arrival), archived: arrival.archived,
+                    needsChoice: !ArrivalArms.of(bookOwned: bookOwned, facts: read.1[arrival.postID])
+                        .acts.contains(.seatArrival))
+            }
+        } catch {
+            session.status.refuse(OpsRefusalCopy.message(for: error))
+            return nil
+        }
+    }
+
+    /// **The run** — per row, in order; one message at the end.
+    func runBulk(
+        _ act: ArrivalsBulk.Act, rows: [ArrivalsBulk.Row], book: Reading?, chaptered: Bool
+    ) async {
+        guard !bulkInFlight, !rows.isEmpty else { return }
+        bulkInFlight = true
+        let ids = rows.map(\.id)
+        judging.formUnion(ids)
+        defer {
+            bulkInFlight = false
+            judging.subtract(ids)
+        }
+        var outcomes: [(row: ArrivalsBulk.Row, outcome: ArrivalsBulk.Outcome)] = []
+        var bookRefusal: String?
+        for row in rows {
+            if bookRefusal != nil {
+                outcomes.append((row, .stillWaiting))
+                continue
+            }
+            if act == .add, row.needsChoice {
+                outcomes.append((row, .waitsOnChoice))
+                continue
+            }
+            let id = row.id
+            do {
+                switch act {
+                case .add: _ = try await session.runner.run { ops in try ops.seatArrival(id) }
+                case .dismiss: try await session.runner.run { ops in try ops.dismissArrival(id) }
+                }
+                outcomes.append((row, .landed))
+            } catch {
+                let words = ArrivalsCopy.refusal(
+                    for: error, book: book?.name, cap: book?.maxPosts, sealed: book?.sealedAt != nil)
+                if act == .add, ArrivalsBulk.needsChoice(error) {
+                    outcomes.append((row, .waitsOnChoice))
+                } else if ArrivalsBulk.endsTheRun(error) {
+                    bookRefusal = words
+                    outcomes.append((row, .stillWaiting))
+                } else {
+                    outcomes.append((row, .refused(words)))
+                }
+            }
+        }
+        let words = ArrivalsBulk.words(
+            act, outcomes: outcomes, bookRefusal: bookRefusal, chaptered: chaptered)
+        if let receipt = words.receipt {
+            session.status.receipt(receipt)
+        } else if let refusal = words.refusal {
+            session.status.refuse(refusal)
         }
     }
 }
@@ -495,10 +728,14 @@ final class BookArrivalsModel {
 /// book's mode-row area beside the settings gear — calm when nothing waits,
 /// presence when something does"). Drawn on a BOOK's masthead only (a
 /// gathering has no door — it holds nothing; P-2). CALM: a faint tray icon,
-/// no count. PRESENCE: the accent icon and the count. Its popover lists the
-/// waiting rows (`BookArrivalsList`) — her clutter mandate kept: nothing
-/// lists until she opens it, and the book's content carries no line at all.
-/// It also HOSTS the door's observation (the retired line's job).
+/// no count. PRESENCE: the accent icon and the count. It also HOSTS the
+/// door's observation (the retired line's job).
+///
+/// **VX-821 (R-808-5): its press OPENS THE REVIEW AREA** in the book's content
+/// area (`BookArrivalsReview` — the book composes it over the mode's body);
+/// a second press closes it, as Done does. THE POPOVER RETIRED. Her clutter
+/// mandate kept: nothing lists until she opens it. While the review is open
+/// the glyph is filled — the door says where she is.
 struct BookArrivalsDoor: View {
     let model: BookArrivalsModel
     let structure: BookStructureModel
@@ -525,10 +762,10 @@ struct BookArrivalsDoor: View {
 
     var body: some View {
         Button {
-            model.setDoorOpen(!model.doorOpen)
+            model.setReviewOpen(!model.reviewOpen)
         } label: {
             HStack(spacing: 2) {
-                Image(systemName: "tray.and.arrow.down")
+                Image(systemName: model.reviewOpen ? "tray.and.arrow.down.fill" : "tray.and.arrow.down")
                 if let count = ArrivalsCopy.doorCount(model.door.count) {
                     Text(count)
                         .font(tokens.small.weight(.semibold))
@@ -541,38 +778,12 @@ struct BookArrivalsDoor: View {
         .buttonStyle(.borderless)
         .help(ArrivalsCopy.doorHelp(count: model.door.count))
         .accessibilityLabel(ArrivalsCopy.header(count: model.door.count))
-        .popover(
-            isPresented: Binding(
-                get: { model.doorOpen }, set: { model.setDoorOpen($0) }),
-            arrowEdge: .bottom
-        ) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(tokens.chromeLabel(ArrivalsCopy.header(count: model.door.count)))
-                    .font(tokens.small.weight(.semibold))
-                    .foregroundStyle(tokens.ink)
-                    .lineLimit(1)
-                if presence {
-                    BookArrivalsList(
-                        model: model, structure: structure,
-                        onOpen: { model.setDoorOpen(false) })
-                } else {
-                    ChromeNotice(tokens: tokens, text: ArrivalsCopy.nothingWaiting, lines: 3)
-                }
-            }
-            .padding(12)
-            // 17y B3 (h) — the walk's W-1: at 460 pt an owned book's row (the
-            // "also in …" line, the stamp, three arms) truncated "Copy In" to
-            // "copy…" — a door word must never truncate (the arms are
-            // fixed-size below; the room is here).
-            .frame(width: 600, alignment: .leading)
-            .background(tokens.surface)
-        }
         // The door's observation — the count always, the rows while open.
         .task(id: model.listingLimit) { await model.start() }
         #if DEBUG
         .onAppear { recordDoor() }
         .onChange(of: model.door) { _, _ in recordDoor() }
-        .onChange(of: model.doorOpen) { _, _ in recordDoor() }
+        .onChange(of: model.reviewOpen) { _, _ in recordDoor() }
         .onDisappear { ArrivalsDoorProbe.forget(model.readingID, owner: probeOwner) }
         #endif
     }
@@ -581,20 +792,187 @@ struct BookArrivalsDoor: View {
     private func recordDoor() {
         ArrivalsDoorProbe.record(
             model.readingID, owner: probeOwner,
-            count: model.door.count, presence: presence, open: model.doorOpen)
+            count: model.door.count, presence: presence, open: model.reviewOpen)
     }
     #endif
 }
 
-/// **The waiting rows** — the old line's expansion, now the door's popover
-/// content (17y (h)). Each row: the note's NAME (a door to the note itself,
-/// read-normal — opening never seats), the archived mark, the ownership line,
-/// when it arrived, and its judgment arms (data — `ArrivalArms`).
+/// **ONE WAITING ROW'S TWO SHAPES** (VX-821 — the leg-2 walk's W-2/W-3).
+/// Three subviews: the checkbox, the text column, the arms. INLINE while the
+/// row holds the checkbox, the text column's floor and the arms whole beside
+/// each other — the arms at the trailing edge; else STACKED — the arms wrap
+/// under the text, at the text's left edge (or the row's, when even that
+/// indent cannot hold them). The class is `ArrivalRowFit`'s pure rule over
+/// the row's width and the arms' own ideal width — never the text's — so a
+/// title, a why line or a sort can never change a row's shape (the Library
+/// controls-row law: wrap only by stable widths, never `ViewThatFits`).
+///
+/// `measuredWidth` is the list's measured width less the row's padding — an
+/// INPUT of the layout (W-3: a changed input re-runs the layout of every
+/// realized row on every width change), and the width it answers with when
+/// a parent asks its ideal (a nil proposal).
+struct ArrivalRowLayout: Layout {
+    var measuredWidth: CGFloat
+
+    private struct Plan {
+        var width: CGFloat
+        var stacked: Bool
+        var box: CGSize
+        var arms: CGSize
+        var textWidth: CGFloat
+        var text: CGSize
+    }
+
+    private func plan(width proposed: CGFloat?, subviews: Subviews) -> Plan? {
+        guard subviews.count == 3 else { return nil }
+        let box = subviews[0].sizeThatFits(.unspecified)
+        let arms = subviews[2].sizeThatFits(.unspecified)
+        let width = proposed ?? (measuredWidth > 0
+            ? measuredWidth
+            : ArrivalRowFit.inlineWidth(
+                boxWidth: box.width, textWidth: subviews[1].sizeThatFits(.unspecified).width,
+                armsWidth: arms.width))
+        let stacked = ArrivalRowFit.stacked(rowWidth: width, boxWidth: box.width, armsWidth: arms.width)
+        let textWidth = ArrivalRowFit.textWidth(
+            rowWidth: width, boxWidth: box.width, armsWidth: arms.width, stacked: stacked)
+        let text = subviews[1].sizeThatFits(ProposedViewSize(width: textWidth, height: nil))
+        return Plan(width: width, stacked: stacked, box: box, arms: arms, textWidth: textWidth, text: text)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let plan = plan(width: proposal.width, subviews: subviews) else { return .zero }
+        let height = plan.stacked
+            ? max(plan.box.height, plan.text.height + ArrivalRowFit.stackGap + plan.arms.height)
+            : max(plan.box.height, plan.text.height, plan.arms.height)
+        return CGSize(width: plan.width, height: height)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        guard let plan = plan(width: bounds.width, subviews: subviews) else { return }
+        subviews[0].place(
+            at: CGPoint(x: bounds.minX, y: bounds.minY + ArrivalRowFit.boxDrop),
+            anchor: .topLeading, proposal: .unspecified)
+        let textX = bounds.minX + plan.box.width + ArrivalRowFit.spacing
+        subviews[1].place(
+            at: CGPoint(x: textX, y: bounds.minY), anchor: .topLeading,
+            proposal: ProposedViewSize(width: plan.textWidth, height: nil))
+        if plan.stacked {
+            let x = ArrivalRowFit.stackedArmsIndented(
+                rowWidth: bounds.width, boxWidth: plan.box.width, armsWidth: plan.arms.width)
+                ? textX : bounds.minX
+            subviews[2].place(
+                at: CGPoint(x: x, y: bounds.minY + plan.text.height + ArrivalRowFit.stackGap),
+                anchor: .topLeading, proposal: .unspecified)
+        } else {
+            subviews[2].place(
+                at: CGPoint(x: bounds.maxX - plan.arms.width, y: bounds.minY),
+                anchor: .topLeading, proposal: .unspecified)
+        }
+    }
+}
+
+/// **A WAITING ROW'S WHY · SINCE LINE** (F-2 — the ladder's round 1). Its
+/// subviews carry a ROLE: the why, the dot, and the since's two forms (whole
+/// and short). They are laid out at the widths `ArrivalMetaFit.plan` gives
+/// them from each part's own ideal width, so the arithmetic the pin reads IS
+/// the arithmetic the row lays out (the `TakeLabelLayout` precedent). A part
+/// the plan does not draw (the form it did not choose, or the dot beside a
+/// dropped since) is placed with a zero proposal: a `Text` offered nothing
+/// draws nothing and takes no room. Every part is one line in the same font,
+/// so aligning their tops aligns their baselines.
+struct ArrivalMetaLayout: Layout {
+    typealias Role = ArrivalMetaRole
+
+    private func role(_ subview: LayoutSubview) -> Role { subview[ArrivalMetaRoleKey.self] }
+
+    private func plan(width: CGFloat?, subviews: Subviews) -> ArrivalMetaFit.Plan {
+        func ideal(_ wanted: Role) -> CGFloat? {
+            subviews.first { role($0) == wanted }.map { $0.sizeThatFits(.unspecified).width }
+        }
+        let whole = ideal(.sinceWhole)
+        let since = whole.map { (whole: $0, short: ideal(.sinceShort) ?? $0) }
+        return ArrivalMetaFit.plan(width: width, why: ideal(.why), dot: ideal(.dot) ?? 0, since: since)
+    }
+
+    /// Where a part sits and how wide it is, or nil when the plan does not
+    /// draw it.
+    private func frame(_ role: Role, in plan: ArrivalMetaFit.Plan) -> (x: CGFloat, width: CGFloat)? {
+        let drawn: (x: CGFloat, width: CGFloat)
+        switch role {
+        case .why: drawn = (0, plan.why)
+        case .dot: drawn = (plan.dotOffset, plan.dot)
+        case .sinceWhole:
+            guard plan.form == .whole else { return nil }
+            drawn = (plan.sinceOffset, plan.since)
+        case .sinceShort:
+            guard plan.form == .short else { return nil }
+            drawn = (plan.sinceOffset, plan.since)
+        }
+        return drawn.width > 0 ? drawn : nil
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let plan = plan(width: proposal.width, subviews: subviews)
+        var height: CGFloat = 0
+        for subview in subviews {
+            guard let frame = frame(role(subview), in: plan) else { continue }
+            height = max(height, subview.sizeThatFits(ProposedViewSize(width: frame.width, height: nil)).height)
+        }
+        return CGSize(width: plan.width, height: height)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        // R2-1: plan from the PROPOSAL, exactly as sizeThatFits does — nil
+        // included (the plan's nil is every part at its ideal). bounds.width is
+        // the chosen form's own threshold, where a re-plan must not flip, so
+        // it is never the fallback: under a nil proposal it is the ideal width,
+        // the whole form's threshold to the point (reconcile 2's sanity pass).
+        let plan = plan(width: proposal.width, subviews: subviews)
+        for subview in subviews {
+            guard let frame = frame(role(subview), in: plan) else {
+                subview.place(at: bounds.origin, anchor: .topLeading, proposal: .zero)
+                continue
+            }
+            subview.place(
+                at: CGPoint(x: bounds.minX + frame.x, y: bounds.minY), anchor: .topLeading,
+                proposal: ProposedViewSize(width: frame.width, height: nil))
+        }
+    }
+}
+
+/// A subview's role in `ArrivalMetaLayout`.
+nonisolated enum ArrivalMetaRole: Equatable, Sendable { case why, dot, sinceWhole, sinceShort }
+
+/// The role's layout value (default: the why).
+private nonisolated struct ArrivalMetaRoleKey: LayoutValueKey {
+    static let defaultValue: ArrivalMetaRole = .why
+}
+
+extension View {
+    /// Tag a subview of `ArrivalMetaLayout` with its role.
+    func arrivalMetaRole(_ role: ArrivalMetaRole) -> some View {
+        layoutValue(key: ArrivalMetaRoleKey.self, value: role)
+    }
+}
+
+/// **The waiting rows** — the review area's list (VX-821; the popover's
+/// rows, carried whole). Each row: its checkbox (the pick), the note's NAME
+/// (its first words where it leads with them — a door to the note itself,
+/// read-normal; opening never seats), the archived mark, WHY it waits and
+/// since when, a proposal's own reason, the ownership line, and its judgment
+/// arms (data — `ArrivalArms`). A click on the row's body picks (⌘ toggles,
+/// ⇧ ranges); the keyboard's walked row wears the ring. Read-only text
+/// throughout — no editor (P3); rows realize lazily.
 struct BookArrivalsList: View {
     let model: BookArrivalsModel
     let structure: BookStructureModel
-    /// Called after a row's name opened its note (the door closes its popover).
-    var onOpen: () -> Void = {}
+    /// Called after any row interaction — the review takes the keyboard back
+    /// so ⏎ / ⌫ / the arrows keep working after a click.
+    var onInteract: () -> Void = {}
 
     /// The judgment doors this face renders — the four acts' ONLY renderer,
     /// so the declaration lives with the builder (the `MarkdownActs` /
@@ -611,13 +989,25 @@ struct BookArrivalsList: View {
     /// This list's own name in the DEBUG probe (DEBUG-only; see the probe).
     @State private var probeOwner = UUID()
     #endif
+    /// **W-3 (the leg-2 walk) — the list's measured width, whole points**,
+    /// written on a real change only. Every row's layout takes it as an INPUT
+    /// (`ArrivalRowLayout.measuredWidth`), so a width change re-runs every
+    /// realized row's layout: the lazy stack keeps a realized row's measured
+    /// layout across a pure width change (the walk's crushed titles survived
+    /// the window growing back, until the voice flip rebuilt every row), and a
+    /// changed layout input is what makes it ask again.
+    @State private var listWidth: CGFloat = 0
+
+    /// The row's own horizontal padding (each side) — the layout's width is
+    /// the list's less twice this.
+    static let rowInset: CGFloat = 16
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        LazyVStack(alignment: .leading, spacing: 2) {
             ForEach(model.door.rows) { arrival in
                 row(arrival)
             }
@@ -627,9 +1017,18 @@ struct BookArrivalsList: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
+                    .padding(.horizontal, Self.rowInset)
+                    .padding(.vertical, 10)
             }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width.rounded() } action: { width in
+            if width != listWidth { listWidth = width }
+        }
         #if DEBUG
+        .coordinateSpace(name: ArrivalsLineProbe.space)
+        .onChange(of: listWidth) { _, width in
+            ArrivalsLineProbe.recordWidth(model.readingID, owner: probeOwner, width)
+        }
         .onDisappear { ArrivalsLineProbe.forget(model.readingID, owner: probeOwner) }
         #endif
     }
@@ -637,82 +1036,179 @@ struct BookArrivalsList: View {
     private func row(_ arrival: Queries.BookArrival) -> some View {
         let busy = model.judging.contains(arrival.id)
         let arms = model.arms(for: arrival, bookOwned: structure.reading?.owned ?? false)
-        return HStack(alignment: .firstTextBaseline, spacing: 8) {
-            // The note's NAME is her prose, never chrome — no `chromeLabel`
-            // (the 13u3 UNIT B lesson: the Terminal voice would lowercase it).
-            // 17y (h): it OPENS the note — the ordinary note-open broadcast,
-            // read-normal; opening never seats (only Add does).
+        let picked = model.selection.isPicked(arrival.id)
+        let walked = model.selection.walked == arrival.id
+        let why = ArrivalsReviewCopy.why(arrival)
+        let now = Date()
+        let since = ArrivalsReviewCopy.since(arrival.waitingSince, now: now)
+        let sinceShort = ArrivalsReviewCopy.sinceShort(arrival.waitingSince, now: now)
+        let sinceHelp = ArrivalsReviewCopy.sinceHelp(arrival.waitingSince)
+        let reason = ArrivalsReviewCopy.reason(arrival)
+        // W-2 / W-3 (the leg-2 walk): the row's TWO SHAPES by a stable width
+        // class — the arms trailing while the row holds them beside the text's
+        // floor, else under the text (`ArrivalRowFit`); never `ViewThatFits`,
+        // never an overflow past the pane's edge.
+        return ArrivalRowLayout(measuredWidth: max(0, listWidth - 2 * Self.rowInset)) {
+            // The pick — ⌘-click's meaning, as a box (her picked preview).
             Button {
-                Self.openNote(arrival.postID)
-                onOpen()
+                model.togglePick(arrival.id)
+                onInteract()
             } label: {
-                Text(arrival.title)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.ink)
-                    .underline()
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                Image(systemName: picked ? "checkmark.square.fill" : "square")
+                    .font(tokens.body)
+                    .foregroundStyle(picked ? tokens.accent : tokens.muted)
             }
             .buttonStyle(.plain)
-            .help(ArrivalsCopy.openHelp)
-            // 13i-d U4 (#169(a)(2) — P-13ib-U2-2 reversed): an ARCHIVED
-            // waiter stays at the door, marked; the same doors follow.
-            if arrival.archived {
-                Text(tokens.chromeLabel(ArrivalsCopy.archivedMark))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-                    .fixedSize()
-                    .help(ArrivalsCopy.archivedMarkHelp)
-            }
-            // 13i-c U4 (§18.4): why this row is not an ordinary Add — who owns
-            // it, or where else it lives. Book names are hers, never chrome.
-            if let line = arms.line {
-                Text(line)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    // The walk: a long "also in …" list truncates in the
-                    // middle — the hover says it whole.
-                    .help(line)
-            }
-            Spacer(minLength: 8)
-            if let stamp = ArrivalsCopy.arrived(arrival.arrivedAt, now: Date()) {
-                Text(tokens.chromeLabel(stamp))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
-                    .fixedSize()
-                    .help(ArrivalsCopy.arrivedHelp(arrival.arrivedAt) ?? stamp)  // VX-351
+            .help(ArrivalsReviewCopy.checkboxHelp)
+            .accessibilityLabel(ArrivalsReviewCopy.checkboxHelp)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    // The note's NAME is her prose, never chrome — no
+                    // `chromeLabel` (the 13u3 UNIT B lesson: the Terminal
+                    // voice would lowercase it). 17y (h): it OPENS the note —
+                    // the ordinary note-open broadcast, read-normal; opening
+                    // never seats (only Add does).
+                    Button {
+                        Self.openNote(arrival.postID)
+                    } label: {
+                        Text(model.label(for: arrival))
+                            .font(tokens.body)
+                            .foregroundStyle(tokens.ink)
+                            .underline()
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                    .buttonStyle(.plain)
+                    .help(ArrivalsCopy.openHelp)
+                    // 13i-d U4 (#169(a)(2) — P-13ib-U2-2 reversed): an
+                    // ARCHIVED waiter stays at the door, marked; the same
+                    // doors follow.
+                    if arrival.archived {
+                        Text(tokens.chromeLabel(ArrivalsCopy.archivedMark))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .help(ArrivalsCopy.archivedMarkHelp)
+                    }
+                }
+                // VX-821: WHY it waits and since when. The why line carries
+                // a client's name or a tag path — data, never chrome-cased.
+                // F-2 (the ladder's round 1): the WHY gets the width first
+                // and the SINCE gives way first, whole → short → nothing
+                // (`ArrivalMetaFit`, laid out by `ArrivalMetaLayout`). The
+                // since's whole fact is always on the why's hover too.
+                ArrivalMetaLayout {
+                    if let why {
+                        Text(why)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .help(ArrivalsReviewCopy.whyHelp(why, since: sinceHelp))
+                            .arrivalMetaRole(.why)
+                    }
+                    if why != nil, since != nil {
+                        Text("\u{00B7}")
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .arrivalMetaRole(.dot)
+                    }
+                    if let since {
+                        Text(tokens.chromeLabel(since))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .stampHelp(sinceHelp)
+                            .arrivalMetaRole(.sinceWhole)
+                    }
+                    if let sinceShort {
+                        // The short form is visual only: it is hidden from
+                        // accessibility so the stamp is never announced
+                        // twice. The whole form keeps its words, and the
+                        // why's hover carries the whole fact at every width.
+                        Text(tokens.chromeLabel(sinceShort))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .stampHelp(sinceHelp)
+                            .accessibilityHidden(true)
+                            .arrivalMetaRole(.sinceShort)
+                    }
+                }
+                // A proposal's reason — the client's own prose, quoted.
+                if let reason {
+                    Text(reason)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(2)
+                        .truncationMode(.tail)
+                        .help(reason)
+                }
+                // 13i-c U4 (§18.4): why this row is not an ordinary Add —
+                // who owns it, or where else it lives. Book names are hers,
+                // never chrome.
+                if let line = arms.line {
+                    Text(line)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        // The walk: a long "also in …" list truncates in the
+                        // middle — the hover says it whole.
+                        .help(line)
+                }
             }
             // 13i-c U4: the row's arms are DATA (`ArrivalArms`) — one
-            // renderer per act, in the table's order.
-            ForEach(arms.acts, id: \.self) { act in
-                armButton(act, arrival: arrival)
-                    .disabled(busy)
-                    // W-1: a door's word is never truncated — the ownership
-                    // line yields (it truncates in the middle, whole on hover).
-                    .lineLimit(1)
-                    .fixedSize()
+            // renderer per act, in the table's order. VX-821: bordered and a
+            // good size (her bar), the door's word never truncated (W-1); at
+            // a narrow pane they wrap under the text whole (W-2).
+            HStack(spacing: 8) {
+                ForEach(arms.acts, id: \.self) { act in
+                    armButton(act, arrival: arrival)
+                        .disabled(busy)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+            }
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(ArrivalsLineProbe.space)) } action: { rect in
+                ArrivalsLineProbe.recordArms(model.readingID, owner: probeOwner, arrival.id, rect)
+            }
+            #endif
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, Self.rowInset)
+        .background(picked ? tokens.wash : Color.clear, in: RoundedRectangle(cornerRadius: 7))
+        .overlay {
+            if walked {
+                RoundedRectangle(cornerRadius: 7).stroke(tokens.ring, lineWidth: 1)
             }
         }
+        .contentShape(Rectangle())
+        // The row's BODY picks — the Library's one brain over the click's
+        // modifiers (`NoteRowClickModifiers.current`, its one impure read).
+        .onTapGesture {
+            model.click(arrival.id, modifiers: .current)
+            onInteract()
+        }
         #if DEBUG
-        .onAppear {
-            ArrivalsLineProbe.recordRow(
-                model.readingID, owner: probeOwner, arrival.id,
-                arms.acts.map(ArrivalArms.verb), archived: arrival.archived)
-        }
-        .onChange(of: arms) { _, now in
-            ArrivalsLineProbe.recordRow(
-                model.readingID, owner: probeOwner, arrival.id,
-                now.acts.map(ArrivalArms.verb), archived: arrival.archived)
-        }
+        .onAppear { record(arrival, arms: arms, why: why) }
+        .onChange(of: arms) { _, now in record(arrival, arms: now, why: why) }
         .onDisappear {
             ArrivalsLineProbe.forgetRow(model.readingID, owner: probeOwner, arrival.id)
         }
         #endif
     }
+
+    #if DEBUG
+    private func record(_ arrival: Queries.BookArrival, arms: ArrivalArms, why: String?) {
+        ArrivalsLineProbe.recordRow(
+            model.readingID, owner: probeOwner, arrival.id,
+            arms.acts.map(ArrivalArms.verb), archived: arrival.archived, why: why)
+    }
+    #endif
 
     /// A waiting row's NAME opens the note itself — the app's ordinary
     /// note-open broadcast (the book view's "open ↗" road), read-normal. It
@@ -738,31 +1234,35 @@ struct BookArrivalsList: View {
         switch act {
         case .seatArrival:
             Button(tokens.chromeLabel(ArrivalsCopy.addVerb)) {
+                onInteract()
                 Task {
                     await model.seat(
                         arrival, book: structure.reading,
                         chaptered: structure.chaptersActive)
                 }
             }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
             .help(ArrivalsCopy.addHelp)
         case .copyIn:
             Button(tokens.chromeLabel(MembershipChoiceCopy.copyInVerb)) {
+                onInteract()
                 Task { await model.copyIn(arrival, book: structure.reading) }
             }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
             .help(ArrivalsCopy.copyInHelp)
         case .moveIn:
             Button(tokens.chromeLabel(MembershipChoiceCopy.moveInVerb)) {
+                onInteract()
                 Task { await model.moveIn(arrival, book: structure.reading) }
             }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .secondary))
+            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .ordinary))
             .help(ArrivalsCopy.moveInHelp)
         default:
             Button(tokens.chromeLabel(ArrivalsCopy.dismissVerb)) {
+                onInteract()
                 Task { await model.dismiss(arrival, book: structure.reading) }
             }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .ordinary))
             .help(ArrivalsCopy.dismissHelp)
         }
     }
@@ -773,7 +1273,8 @@ struct BookArrivalsList: View {
 /// pattern, for its measured reason: a hosted SwiftUI tree exposes no
 /// accessibility children in this test host, and a composition dump does not
 /// evaluate a `ForEach`'s content). Recorded from each row's own `onAppear`
-/// (`BookArrivalsList` — since 17y (h) the masthead door's popover content,
+/// (`BookArrivalsList` — since VX-821 the review area's rows (17y (h)'s popover
+/// retired),
 /// mountable on its own), keyed by the book; cleared on disappear — so
 /// "absent" is an honest answer: nothing drew. DEBUG only.
 ///
@@ -787,6 +1288,28 @@ enum ArrivalsLineProbe {
         var rows: [String: [String]] = [:]
         /// 13i-d U4: the rows that drew the "archived" mark.
         var archivedRows: Set<String> = []
+        /// VX-821: arrival row id → the WHY line it drew ("" when it drew
+        /// none — the since-when-only face).
+        var why: [String: String] = [:]
+        /// W-3: the list's measured width, as the rows' layouts last took it.
+        var listWidth: CGFloat = 0
+        /// W-2: arrival row id → its arms' frame in the list's own space.
+        var arms: [String: CGRect] = [:]
+    }
+
+    /// The list's coordinate space (the arms' frames are measured in it).
+    nonisolated static let space = "ArrivalsLineProbe.list"
+
+    static func recordWidth(_ readingID: String, owner: UUID, _ width: CGFloat) {
+        var entry = claim(readingID, owner)
+        entry.listWidth = width
+        drawn[readingID] = entry
+    }
+
+    static func recordArms(_ readingID: String, owner: UUID, _ rowID: String, _ frame: CGRect) {
+        var entry = claim(readingID, owner)
+        entry.arms[rowID] = frame
+        drawn[readingID] = entry
     }
 
     private(set) static var drawn: [String: Drawn] = [:]
@@ -800,10 +1323,11 @@ enum ArrivalsLineProbe {
 
     static func recordRow(
         _ readingID: String, owner: UUID, _ rowID: String, _ verbs: [String],
-        archived: Bool = false
+        archived: Bool = false, why: String? = nil
     ) {
         var entry = claim(readingID, owner)
         entry.rows[rowID] = verbs
+        entry.why[rowID] = why ?? ""
         if archived { entry.archivedRows.insert(rowID) } else { entry.archivedRows.remove(rowID) }
         drawn[readingID] = entry
     }
@@ -812,6 +1336,8 @@ enum ArrivalsLineProbe {
         guard drawn[readingID]?.owner == owner else { return }
         drawn[readingID]?.rows[rowID] = nil
         drawn[readingID]?.archivedRows.remove(rowID)
+        drawn[readingID]?.why[rowID] = nil
+        drawn[readingID]?.arms[rowID] = nil
     }
 
     static func forget(_ readingID: String, owner: UUID) {

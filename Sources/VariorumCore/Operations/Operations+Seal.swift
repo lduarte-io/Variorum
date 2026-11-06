@@ -102,7 +102,7 @@ extension Operations {
             reading.locked = false
             reading.updatedAt = now
             try reading.update(db)
-            try intakeSweep(db, book: reading, occasion: .catchUp, now: now)
+            try intakeSweep(db, book: reading, occasion: .catchUp, cause: arrivalCause(.catchup, after: .unseal), now: now)
         }
     }
 

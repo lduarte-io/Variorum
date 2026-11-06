@@ -49,6 +49,12 @@ struct MCPToolDeclaration: Sendable {
     /// switch, not a grant on any wing, so for it the tool could only ever
     /// answer an empty list (P-2 on the wire: no door that can never act).
     var grantOnly: Bool = false
+    /// VX-811 (the VX-808 run, Unit B2 — A-808-8): a READ-rung tool that WRITES
+    /// (`propose_notes_to_book` — her ruling: "read level on everything should
+    /// be able to propose"). Its MCP hints say so (never read-only, never
+    /// idempotent — a dismissed pair re-poses), and `list_my_activity` lists
+    /// its rows as acts, not reads (`MCPOwnActivity.listedActs`).
+    var writes: Bool = false
 
     /// Listed for this standing? Approved, and the open book (read) or a
     /// live grant at this rung of a scope kind the tool acts under —
@@ -67,8 +73,8 @@ struct MCPToolDeclaration: Sendable {
             annotations: .init(
                 // U3: the edit rung changes what is already there (every act
                 // undoable, the delete a tombstone — but honest hints say so).
-                title: title, readOnlyHint: rung == .read, destructiveHint: destructive ?? (rung == .edit),
-                idempotentHint: rung == .read, openWorldHint: false))
+                title: title, readOnlyHint: rung == .read && !writes, destructiveHint: destructive ?? (rung == .edit),
+                idempotentHint: rung == .read && !writes, openWorldHint: false))
     }
 
     /// VX-549: a GATHERING grant reaches its assembled notes, so every tool
@@ -177,7 +183,11 @@ enum MCPToolCatalog {
     /// U4 (R-13nb-23, AF-11 F-3): the read rung's one navigation tool —
     /// its own handler (it awaits the app), its own list.
     static let navigation: [MCPToolDeclaration] = [showInApp]
-    static let all: [MCPToolDeclaration] = read + navigation + suggest + writeNew + edit
+    /// VX-811 (the VX-808 run, Unit B2 — A-808-8): the read rung's one WRITE —
+    /// a set of notes proposed to a book's Arrivals (its own list: the read
+    /// tools above read; this one mints arrival rows, MCPWriteTools' handler).
+    static let proposing: [MCPToolDeclaration] = [proposeNotesToBook]
+    static let all: [MCPToolDeclaration] = read + navigation + proposing + suggest + writeNew + edit
 
     /// VX-254 (VX-336 U7 — D-254-1, the FOR VX-234 list): THE DIGEST
     /// SENTENCE, said once and shared by every tool that answers a take's
@@ -540,6 +550,49 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-811 — the read rung's one write: a set of notes proposed to a book (the VX-808 run, Unit B2)
+
+    /// **`propose_notes_to_book`** (her VX-811 rulings 2/3/6, A-808-8): each
+    /// note waits at the book's Arrivals for the author to add or dismiss; READ
+    /// reach on every note and on the book; an optional reason per note, shown
+    /// on the waiting row. PROVISIONAL words (the B2 bundle).
+    static let proposeNotesToBook = MCPToolDeclaration(
+        name: "propose_notes_to_book", rung: .read, title: "Propose notes to a book",
+        description: """
+            Propose notes to a book: each note waits at the book's Arrivals for the author to add \
+            or dismiss, so the author can go through a set of notes you picked. It needs only \
+            read: the book and each note must be shared with you. Nothing joins the book until the \
+            author adds it, and a full book still takes proposals. reason (optional) says why, \
+            for every note; reasons (optional) maps a note_id to its own reason instead; a reason \
+            holds at most \(ArrivalProvenance.reasonCap) characters and shows on the waiting row. \
+            note_ids (1 to \(MCPWriteTools.listCap) notes) are each their own act with their own undo \
+            for the author, one refusing never stopping the rest (a once grant covers one note). A \
+            note already waiting answers changed: false; a note already in the book, one taken out \
+            of it, one of another wing, a finished book and a gathering are refused in words. \
+            Returns JSON: results (one per note, in order: note_id, book_id and changed, or note_id \
+            with refused), landed_count, refused_count and waits.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_ids": .object([
+                    "type": "array",
+                    "description": "The notes to propose (1 to \(MCPWriteTools.listCap)) — each its own act.",
+                    "items": .object(["type": "string"]),
+                ]),
+                "book_id": .object(["type": "string", "description": "The book whose Arrivals they wait at."]),
+                "reason": .object(["type": "string", "description": "Why, for every note (optional)."]),
+                "reasons": .object([
+                    "type": "object",
+                    "description": "A note_id (one of note_ids) to its own reason (optional; overrides reason).",
+                    "additionalProperties": .object(["type": "string"]),
+                ]),
+            ]),
+            "required": .array(["note_ids", "book_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing], writes: true)
 
     // MARK: - The SUGGEST rung (U2 — "it cannot touch a word you wrote")
 
@@ -922,7 +975,8 @@ enum MCPToolCatalog {
         description: """
             Add a note to a book (at its end), optionally filed under one of the book's chapters \
             (section_id — from list_notes or create_section). Both must be shared with this client \
-            at write new. A book that owns its notes takes no note another book holds, and a note \
+            at write new; with read alone, propose_notes_to_book sends notes to the book's Arrivals \
+            for the author to add instead. A book that owns its notes takes no note another book holds, and a note \
             such a book owns joins no other book: the refusal says which in the author's words, or, \
             when what holds the note is beyond your reach, in one fixed sentence that names nothing \
             (the author can add it in Variorum). Returns JSON; its tag_ids and tags (their paths) \
@@ -1156,7 +1210,9 @@ enum MCPToolCatalog {
             Arrivals stay behind, dismissed — including any you can't read. Needs edit on the book \
             and write new on the wing it goes to. A book can't move while one of its notes is also \
             in a finished or sealed book here (the author reopens that book first), nor while \
-            something beyond your reach holds one of its notes (one sentence says so). A gathering \
+            the move would take one of its notes out of a Private book or the daily Journal; when \
+            the cause is beyond your reach, one sentence says so. A book you can't read that simply \
+            holds one of its notes never stops the move — the note leaves it. A gathering \
             and the daily Journal move only by the author's hand. One undo for the author puts it \
             all back — the books its notes left and the waiting notes too. Returns JSON: where it \
             landed; notes — how many of the notes that came you can read (archived_notes of them \
@@ -2200,7 +2256,10 @@ enum MCPToolCatalog {
             order the book shows its notes in, exactly as set_book_order does — and so, like it, \
             needs edit on the book (the rest needs write new) and is refused on a finished or \
             sealed book. A gathering's rule stays the author's (its order is set_book_order's). One \
-            undo for the author. Returns JSON with the book's collecting facts and its order.
+            undo for the author. Returns JSON with the book's collecting facts and its order; when a \
+            rule lands, matches_wait says its matches wait at Arrivals, \(MCPBookFacts.waitingCountKey) \
+            how many of them you can read, and \(MCPWriteTools.beyondReachKey) that notes beyond your \
+            reach, if any, are not counted.
             """,
         inputSchema: .object([
             "type": "object",

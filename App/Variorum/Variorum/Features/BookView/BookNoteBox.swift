@@ -69,24 +69,34 @@ nonisolated enum BookNoteBox {
         case modeBottomBar
         /// The main column's foot, trailing (Outline · Read's flow).
         case pageFoot
+        /// VX-821: the Arrivals review area's bar, trailing — while the review
+        /// covers the mode's body, the bar or page foot below it cannot be
+        /// seen, so the review hosts the receipt its own judgments speak.
+        case reviewBar
     }
 
     /// `modeBarShown`: whether Book / Read's pages are drawing their flip bar
     /// (an EMPTY book draws none — then the page's foot hosts instead, so a
-    /// receipt is never left without a home).
+    /// receipt is never left without a home). `reviewing` (VX-821): the
+    /// Arrivals review area is drawn over the mode's body — a home it covers
+    /// (the mode's bar, the page foot) moves to the review's own bar; the
+    /// sidebar's live box and Index's column footer stay in view and keep it.
     static func quietReceiptHome(
         mode: BookStructureModel.ViewMode,
         pagedRead: Bool,
         modeBarShown: Bool,
-        box: NoteBoxState?
+        box: NoteBoxState?,
+        reviewing: Bool = false
     ) -> QuietReceiptHome {
         guard bookHostsQuietReceipt(box) else { return .liveNoteBox }
-        switch mode {
-        case .index: return .indexColumnFooter
-        case .spread: return modeBarShown ? .modeBottomBar : .pageFoot
-        case .read: return pagedRead && modeBarShown ? .modeBottomBar : .pageFoot
-        case .outline: return .pageFoot
+        let home: QuietReceiptHome = switch mode {
+        case .index: .indexColumnFooter
+        case .spread: modeBarShown ? .modeBottomBar : .pageFoot
+        case .read: pagedRead && modeBarShown ? .modeBottomBar : .pageFoot
+        case .outline: .pageFoot
         }
+        guard reviewing else { return home }
+        return home == .indexColumnFooter ? home : .reviewBar
     }
 
     /// The box stands in the sidebar while a book is open in an EDITING mode

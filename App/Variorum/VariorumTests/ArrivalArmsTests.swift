@@ -208,7 +208,9 @@ struct ArrivalArmsTests {
             structure.mode = .index
             let arrivals = BookArrivalsModel(session: session, readingID: readingID)
             arrivals.adopt(try await door(db, readingID))
-            arrivals.toggle()
+            // VX-821 — A JUSTIFIED EDIT: the inline line's `toggle()` retired
+            // with the popover; the door's press opens the review area.
+            arrivals.setReviewOpen(true)
             arrivals.adopt(try await door(db, readingID))
             await arrivals.loadFacts()
             let window = NSWindow(
@@ -219,10 +221,10 @@ struct ArrivalArmsTests {
                 window.orderOut(nil)
                 window.close()
             }
-            // 17y B3 (h) — A JUSTIFIED EDIT: the rows are the masthead door's
-            // POPOVER content now (`BookArrivalsList`); a popover does not
-            // render under the test host, so the rows mount on their own. The
-            // subject — each row draws its arms — is unchanged.
+            // 17y B3 (h) — A JUSTIFIED EDIT: the rows mount on their own
+            // (`BookArrivalsList` — since VX-821 the review area's rows, the
+            // popover retired). The subject — each row draws its arms — is
+            // unchanged.
             _ = model
             let hosting = NSHostingView(rootView: BookArrivalsList(
                 model: arrivals, structure: structure))

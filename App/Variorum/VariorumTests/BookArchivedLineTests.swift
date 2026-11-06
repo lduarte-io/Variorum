@@ -484,7 +484,9 @@ struct BookArchivedLineTests {
             }
             await settle(hosted.window, hosted.hosting)
             #expect(hosted.arrivals.door.count == 1, "the archived waiter is at Arrivals")
-            hosted.arrivals.toggle()
+            // VX-821 — A JUSTIFIED EDIT: the door's press opens the review
+            // area (the inline line's `toggle()` retired with the popover).
+            hosted.arrivals.setReviewOpen(true)
             try await refresh(hosted.arrivals, db)
             // 17y B3 (h) — A JUSTIFIED EDIT: the rows are the masthead door's
             // popover content (`BookArrivalsList`), mounted on their own here

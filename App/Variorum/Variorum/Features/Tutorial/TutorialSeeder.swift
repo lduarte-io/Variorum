@@ -2786,9 +2786,14 @@ enum TutorialSeeder {
             // VX-197 U8b: the four steps' reach AS BUILT (VX-184 U3–U5,
             // VX-246, VX-336 U5–U6), one card per step past Read; every act a
             // card names is a tool at that rung (pinned against the catalog).
+            // VX-811 (the VX-808 run, Unit B5 — A-808-10's docs tail; PROVISIONAL
+            // words, her copy pass): Read also PROPOSES notes to a book
+            // (`propose_notes_to_book`, a read-rung act), each waiting at the
+            // book's Arrivals for her Add or Dismiss — never seated by the AI.
             "Each grant says how much a client may do, in four steps, each "
             + "including the ones before it. Read: it can read and search what you "
-            + "shared. Suggest: it can add new takes and comments beside your text, "
+            + "shared, and propose notes to a book, where they wait at its Arrivals "
+            + "for you to add or dismiss. Suggest: it can add new takes and comments beside your text, "
             + "one at a time or many at once, and save a lens; it can't change a "
             + "word you wrote.",
 

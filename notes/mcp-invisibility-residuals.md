@@ -18,7 +18,7 @@ These acts cannot lie-and-succeed (ownership, capacity and seals are real), so t
 ## The standing residuals outside the refusal class
 
 5. **The tag vocabulary (P-809-9, kept 2026-11-05).** A wing's tag paths are wing-level configuration: answers truthfully say a path was *adopted* even when its only wearer is hidden. One bit — "this word exists as a tag here" — never which note or how many. (The alternative, reporting "made" for an adopted tag, was rejected as a false word on the wire.)
-6. **The book cursor (VX-859 — OPEN, closing).** `list_notes`' book-page cursor resumes by a raw position key whose bytes are insertion-history-dependent. Pre-ruled 2026-11-05: the id-resuming cursor builds with VX-808, retiring this entry when it lands.
+6. **The book cursor (VX-859 — RETIRED 2026-11-06 with the VX-808 run).** The book-page cursor now resumes by the named note's id with the readable ordinal as its wire key; no position bytes cross. The ruled trade that remains is not a leak: a cursor whose note left the book or became unreadable starts the listing again, and a hidden member's id answers exactly as a missing one.
 
 ## The scope words (how partiality is said without counting)
 
@@ -30,6 +30,6 @@ Landed answers that list what an act touched carry fixed, always-present sentenc
 
 *(Her final wording, picked 2026-11-05 on VX-879 — "i like A. do that." — now live on both site pages; it supersedes this file's earlier draft.)*
 
-**Corrected 2026-11-05 (VX-879, the site review's catch):** the paragraph's example now names the OWNING book (a plain unshared holder never blocks a move — verified in `Operations+MCPWingMove.swift`), and the closing sentence says "answer" (residual 5 is a success, not a refusal).
+**Corrected 2026-11-05 (VX-879, the site review's catch — a note on this file's SUPERSEDED earlier draft, not on her final paragraph above):** the paragraph's example now names the OWNING book (a plain unshared holder never blocks a move — verified in `Operations+MCPWingMove.swift`), and the closing sentence says "answer" (residual 5 is a success, not a refusal).
 
 **Her copy lines checked against this ledger (2026-11-05):** the letter's "AI access is impossible when not granted" STANDS (residuals are never access); the site's "Marking a note or book private hides its existence and overrides every grant" STANDS (the precise statement belongs here and on the policy page, not in the marketing line).

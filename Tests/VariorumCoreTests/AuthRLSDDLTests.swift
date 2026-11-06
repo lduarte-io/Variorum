@@ -63,7 +63,34 @@ struct AuthRLSDDLTests {
         // in VX-329's release window at her explicit go (the vx307 deploy
         // checklist; rehearsed green on the throwaway at VX-308 §5R).
         "17_phase_vx307_vault.sql",
+        // VX-808 (the arrivals & pins event, marker 15 — the run record §5):
+        // TWO additive columns on reading_post (`arrival_provenance`
+        // ENCRYPTED, `pinned_at` PLAIN); no table, no RPC change. HELD for
+        // HER window at the run's close; registered here in the SAME commit
+        // as the client's 14→15 bump (VX-329 L0's pairing — the drift pin).
+        "18_vx808_arrivals_pins.sql",
     ]
+
+    /// Encrypted columns born AFTER the rotation era retired (VX-329, marker
+    /// 14 — 17's `key_vault_update` carries no completion guard, so no
+    /// server-side ciphertext map exists for a later column to join). The
+    /// rotation-era map pins subtract exactly these; every column the era
+    /// knew stays pinned byte-exact.
+    private static let encryptedColumnsBornAfterRotation: [String: Set<String>] = [
+        "reading_post": ["arrival_provenance"],  // VX-808, v1_37 (marker 15)
+    ]
+
+    /// The client registry's ciphertext map AS OF THE ROTATION ERA: every
+    /// table's encrypted columns minus `encryptedColumnsBornAfterRotation`,
+    /// a table left with none dropped.
+    private static func rotationEraCiphertextRegistry() -> [String: Set<String>] {
+        var registry: [String: Set<String>] = [:]
+        for table in SyncSchema.tablesCarryingCiphertext {
+            let era = table.encryptedColumns.subtracting(encryptedColumnsBornAfterRotation[table.name] ?? [])
+            if !era.isEmpty { registry[table.name] = era }
+        }
+        return registry
+    }
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside
     /// `active_key_id` (+ the new re-encryption door). `account_purge` is
@@ -2240,9 +2267,10 @@ struct AuthRLSDDLTests {
         // freezes 12's era. The LIVE map's exactness pin is the canonical
         // body's (`theCompletionGuardLivesInTheCanonicalTwelveBody`,
         // resolved through the composition — 13's body since 13i-a).
-        let registry = Dictionary(uniqueKeysWithValues: SyncSchema.tablesCarryingCiphertext
-            .filter { !["wing", "shelf"].contains($0.name) }
-            .map { ($0.name, $0.encryptedColumns) })
+        // VX-808: and the columns born after the rotation era retired
+        // (`rotationEraCiphertextRegistry` — reading_post.arrival_provenance).
+        let registry = Self.rotationEraCiphertextRegistry()
+            .filter { !["wing", "shelf"].contains($0.key) }
         #expect(listed == registry, "the SQL's map is the registry's encrypted columns per table: SQL \(listed) vs registry \(registry)")
         #expect(!registry.isEmpty && registry.count < SyncSchema.tables.count,
                 "the pin isn't vacuous: some tables carry ciphertext, some carry none")
@@ -2649,8 +2677,13 @@ struct AuthRLSDDLTests {
         let decoded = try #require(
             try JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: [String]])
         let listed = decoded.mapValues { Set($0) }
-        let registry = Dictionary(
-            uniqueKeysWithValues: SyncSchema.tablesCarryingCiphertext.map { ($0.name, $0.encryptedColumns) })
+        // VX-808 (A JUSTIFIED EDIT): this is the rotation ERA's map, read from
+        // 13's history file — so it is pinned against the registry AS OF THAT
+        // ERA. An encrypted column born after rotation retired (marker 14)
+        // has no completion guard to join (17's deployed door carries none),
+        // so it is subtracted here exactly as the overlay pin subtracts 13i-a's
+        // tables; every column the era knew still fails HERE if it drifts.
+        let registry = Self.rotationEraCiphertextRegistry()
         #expect(listed == registry,
                 "12's ciphertext map drifted from the registry: \(listed) vs \(registry)")
         // And the superseded overlay says so in its header.

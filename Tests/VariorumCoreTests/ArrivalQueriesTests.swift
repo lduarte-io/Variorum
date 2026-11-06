@@ -259,6 +259,103 @@ struct ArrivalQueriesTests {
         }
     }
 
+    // MARK: - VX-821 (the VX-808 run, Unit B3): WHY each row waits
+
+    /// Every listed row carries its provenance, decoded: a tagging bell says
+    /// `tagged` with the tag's PATH as the store names it NOW (a rename
+    /// follows; a deleted tag falls back to no path, the kind kept); a
+    /// proposal says its client and reason; a fresh bell waits since its own
+    /// `created_at`.
+    @Test func everyListedRowSaysWhyItWaits() throws {
+        try withOperations { ops, db in
+            let work = try ops.createTag(name: "work")
+            let book = try guardedBook(ops, tag: work)
+            let tagged = try ring(ops, work, title: "tagged")
+            let proposedNote = try ops.createPost(title: "proposed")
+            guard case .proposed = try ops.proposeNoteToBook(
+                proposedNote.id, book: book.id,
+                provenance: .proposed(client: "claude-code", reason: "  it fits chapter two  "),
+                undoLabel: "x")
+            else { Issue.record("the proposal did not land"); return }
+
+            let rows = try door(db, book.id).rows
+            try #require(rows.map(\.postID) == [tagged.id, proposedNote.id])
+            #expect(rows[0].provenance?.knownKind == .tagged)
+            #expect(rows[0].provenance?.tag == work.id)
+            #expect(rows[0].tagPath == "work", "the tag by its path")
+            #expect(rows[1].provenance?.knownKind == .proposed)
+            #expect(rows[1].provenance?.client == "claude-code")
+            #expect(rows[1].provenance?.reason == "it fits chapter two")
+            #expect(rows[1].tagPath == nil, "only the tagged cause resolves a tag")
+            #expect(rows.allSatisfy { $0.waitingSince == $0.arrivedAt },
+                    "a fresh bell waits since its own birth")
+
+            try ops.renameTag(work.id, newName: "desk")
+            #expect(try door(db, book.id).rows.first?.tagPath == "desk", "the path as it stands NOW")
+            try ops.deleteTag(work.id)
+            let afterDelete = try door(db, book.id).rows
+            #expect(afterDelete.first?.provenance?.knownKind == .tagged, "the kind is kept")
+            #expect(afterDelete.first?.tagPath == nil, "a dead tag says no path")
+        }
+    }
+
+    /// A DEMOTION waits since its own moment (`at`, A-808-7 (ii)) — never the
+    /// original filing's `created_at`; an `at` that is no stamp, or a
+    /// provenance that is no JSON, falls back honestly (since-when from the
+    /// row; a malformed provenance reads as absent).
+    @Test func aDemotionWaitsSinceItsOwnMomentAndMalformedReadsAsAbsent() throws {
+        try withOperations { ops, db in
+            let work = try ops.createTag(name: "work")
+            let book = try guardedBook(ops, tag: work)
+            _ = try ring(ops, work, title: "demoted")
+            _ = try ring(ops, work, title: "odd stamp")
+            _ = try ring(ops, work, title: "garbled")
+            let ids = try arrivalRowIDs(db, book.id)
+            try #require(ids.count == 3)
+            let at = "2030-01-02T03:04:05.000Z"
+            let demoted = try ArrivalProvenance(
+                kind: .wingMend, at: DateFormatter.variorumISO8601.date(from: at)).encodedJSON()
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading_post SET arrival_provenance = ? WHERE id = ?",
+                    arguments: [demoted, ids[0]])
+                try db.execute(
+                    sql: "UPDATE reading_post SET arrival_provenance = ? WHERE id = ?",
+                    arguments: [#"{"at":"not a stamp","kind":"owned_elsewhere"}"#, ids[1]])
+                try db.execute(
+                    sql: "UPDATE reading_post SET arrival_provenance = ? WHERE id = ?",
+                    arguments: ["{not json", ids[2]])
+            }
+            let rows = try door(db, book.id).rows
+            try #require(rows.map(\.id) == ids)
+            #expect(rows[0].provenance?.knownKind == .wingMend)
+            #expect(rows[0].waitingSince == at, "the demotion's own moment")
+            #expect(rows[0].waitingSince != rows[0].arrivedAt)
+            #expect(rows[1].provenance?.knownKind == .ownedElsewhere)
+            #expect(rows[1].waitingSince == rows[1].arrivedAt, "an unreadable `at` falls back to the row")
+            #expect(rows[2].provenance == nil, "malformed JSON reads as absent")
+            #expect(rows[2].waitingSince == rows[2].arrivedAt)
+        }
+    }
+
+    /// P1 for the tag read: each listed row's tag is a primary-key seek.
+    @Test func theTagPathReadIsAKeySeek() throws {
+        try withOperations { ops, db in
+            let work = try ops.createTag(name: "work")
+            let plan = try db.read { database in
+                try Row.fetchAll(
+                    database,
+                    sql: "EXPLAIN QUERY PLAN \(Queries.arrivalTagPathsSQL(count: 1))",
+                    arguments: [work.id])
+                    .map { ($0["detail"] as String?) ?? "" }
+            }
+            let joined = plan.joined(separator: "\n")
+            #expect(!joined.contains("SCAN tag"), "never a vocabulary scan; plan was:\n\(joined)")
+            #expect(try db.read { try Queries.arrivalTagPaths($0, tagIDs: [work.id, "gone"]) }
+                    == [work.id: "work"])
+        }
+    }
+
     @Test func theObservationDeliversTheDoorLive() async throws {
         try await withOperationsAsync { ops, db in
             let work = try ops.createTag(name: "work")

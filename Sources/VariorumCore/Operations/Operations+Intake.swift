@@ -60,7 +60,7 @@ extension Operations {
             else { continue }
             if starred == nil { starred = try Queries.starredNoteIDs(db) }
             try intakeEvent(db, book: book, term: term, postID: postID,
-                            starredNoteIDs: starred ?? [], now: now)
+                            starredNoteIDs: starred ?? [], cause: arrivalCause(.tagged, tag: appliedTagID), now: now)
         }
     }
 
@@ -76,14 +76,17 @@ extension Operations {
         let starred = try Queries.starredNoteIDs(db)
         for (book, term) in books {
             try intakeEvent(db, book: book, term: term, postID: postID,
-                            starredNoteIDs: starred, now: now)
+                            starredNoteIDs: starred, cause: arrivalCause(.starred), now: now)
         }
     }
 
     /// One pair, one event, through the table.
+    /// `cause` (A-808-6): what an ARRIVAL this event rings is stamped with —
+    /// `tagged` (the applied tag) or `starred`, the client's name riding a
+    /// wire act's (A-809-11's fence bell is this bell, with a client).
     private func intakeEvent(
         _ db: Database, book: Reading, term: RuleTerm, postID: String,
-        starredNoteIDs: [String], now: Date
+        starredNoteIDs: [String], cause: ArrivalProvenance, now: Date
     ) throws {
         let facts = try intakeBookFacts(db, book)
         guard IntakeDecision.intakeRuns(facts) else { return }
@@ -103,7 +106,7 @@ extension Operations {
         try materializeIntake(
             db, readingID: book.id, postID: postID,
             verdict: IntakeDecision.verdict(book: facts, note: note, occasion: .event, actor: intakeActor),
-            now: now)
+            cause: cause, now: now)
     }
 
     // MARK: - Backfill and catch-up (the plan §2.3)
@@ -115,12 +118,19 @@ extension Operations {
     /// Matches seat in creation order (the gathering's own manual-fallback
     /// order, so a book born from a gathering's rule reads as it did).
     /// No-op unless the book's intake runs (P-13ib-5).
+    ///
+    /// `cause` (A-808-6): what each ARRIVAL the sweep rings is stamped with —
+    /// the CALLER's cause (`backfill` at a book's birth, `rule_edit` after a
+    /// rule write, `catchup` + which resume), never the occasion's class.
+    /// Returns the notes it BELLED, in the order it rang them (VX-811 ruling 4:
+    /// `set_book_rule`'s answer counts the ones its client can read).
+    @discardableResult
     func intakeSweep(
-        _ db: Database, book: Reading, occasion: IntakeDecision.Occasion, now: Date
-    ) throws {
-        guard case .rule(let term) = RuleGrammar.read(book.querySpec) else { return }
+        _ db: Database, book: Reading, occasion: IntakeDecision.Occasion, cause: ArrivalProvenance, now: Date
+    ) throws -> [String] {
+        guard case .rule(let term) = RuleGrammar.read(book.querySpec) else { return [] }
         var facts = try intakeBookFacts(db, book)
-        guard IntakeDecision.intakeRuns(facts) else { return }
+        guard IntakeDecision.intakeRuns(facts) else { return [] }
         let match = Queries.ruleMatchSQL(
             term, wingID: book.wingId, starredNoteIDs: try Queries.starredNoteIDs(db))
         let conditions = [
@@ -134,6 +144,7 @@ extension Operations {
                 + conditions.joined(separator: " AND ")
                 + " ORDER BY c.created_at, c.id",
             arguments: StatementArguments(match.arguments + [book.id]))
+        var belled: [String] = []
         for postID in postIDs {
             let elsewhere = try membershipElsewhere(db, postID: postID, readingID: book.id)
             let verdict = IntakeDecision.verdict(
@@ -144,19 +155,23 @@ extension Operations {
                     ownedElsewhere: elsewhere.owned),
                 occasion: occasion, actor: intakeActor)
             try materializeIntake(
-                db, readingID: book.id, postID: postID, verdict: verdict, now: now)
+                db, readingID: book.id, postID: postID, verdict: verdict, cause: cause, now: now)
             if verdict == .seat { facts.memberCount += 1 }
+            if verdict == .arrival { belled.append(postID) }
         }
+        return belled
     }
 
     // MARK: - Materialization
 
     /// Inserts the verdict's row: a member or an arrival, at the END of the
     /// book's list, unsectioned (§4, §14.2 — the unsectioned bin already
-    /// renders last). Insert-only by construction.
+    /// renders last). Insert-only by construction. An ARRIVAL is stamped with
+    /// `cause` (A-808-6 — every road that rings one says why); a member never
+    /// carries one.
     private func materializeIntake(
         _ db: Database, readingID: String, postID: String,
-        verdict: IntakeDecision.Verdict, now: Date
+        verdict: IntakeDecision.Verdict, cause: ArrivalProvenance, now: Date
     ) throws {
         let status: MembershipStatus
         switch verdict {
@@ -167,7 +182,8 @@ extension Operations {
         try ReadingPost(
             id: newID(), readingId: readingID, postId: postID,
             position: try readingPosition(db, readingID: readingID, at: .end),
-            status: status, createdAt: now
+            status: status, createdAt: now,
+            arrivalProvenance: status == .arrival ? try cause.encodedJSON() : nil
         ).insert(db)
     }
 

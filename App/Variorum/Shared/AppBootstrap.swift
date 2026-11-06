@@ -105,6 +105,17 @@ final class AppBootstrap {
     /// VX-818 (A-809-21): which road is running `onWillLock` — set just before each call, read by the Mac's teardown.
     enum WillLockRoad: Sendable { case lock, reKey, closing }
     @ObservationIgnored private(set) var willLockRoad: WillLockRoad?
+    /// **The one road into `onWillLock`** (VX-818, A-809-21 — and VX-860's
+    /// belt, the VX-809 ladder's MINOR-2): names the road just before the call
+    /// and ERASES it once the teardown has read it (the teardown reads it only
+    /// inside the awaited call), so the fail-closed nil default holds for every
+    /// call, never only the first — a future caller that names no road reads
+    /// nil (a true teardown), never the previous road's stale value.
+    private func runWillLock(_ road: WillLockRoad) async {
+        willLockRoad = road
+        await onWillLock?()
+        willLockRoad = nil
+    }
     /// The in-flight open, so a second `retry()` cannot start a second race
     /// for the same store. Test-visible so a pin can await the road rather
     /// than poll it.
@@ -741,8 +752,7 @@ final class AppBootstrap {
         let oldKey = open?.key
         let binding = binding
         if open != nil {
-            willLockRoad = .closing
-            await onWillLock?()
+            await runWillLock(.closing)
             state = .opening
         }
         let closesThePool = open != nil
@@ -877,8 +887,7 @@ final class AppBootstrap {
             // VX-307 U2c: the copy as her press opened it — the act takes its key, so one press opens it once.
             opened = look
         }
-        willLockRoad = .closing
-        await onWillLock?()
+        await runWillLock(.closing)
         state = .opening
         // VX-309 U1c — VX-444: the band card's ledger (the outgoing library's words marks carry with the pair).
         let wordsLedger = WordsCardLedger(defaults: reminderLedger.defaults)
@@ -1246,8 +1255,7 @@ final class AppBootstrap {
         _ session: ProtectionRoadSession, binding: StoreBinding,
         act: @escaping @Sendable () async -> (result: Result, reopenKey: StoreKey, owed: [String])
     ) async -> Result {
-        willLockRoad = .reKey
-        await onWillLock?()
+        await runWillLock(.reKey)
         state = .opening
         let done = await Task.detached(priority: .userInitiated) {
             binding.lock()
@@ -1379,8 +1387,7 @@ final class AppBootstrap {
             ProtectionOpenRoad.log("road: the lock found no road to land in — the library stays open")
             return
         }
-        willLockRoad = .lock
-        await onWillLock?()
+        await runWillLock(.lock)
         state = .opening
         ProtectionRoadLock.dropSessionMemory(session)
         roadStanding = nil

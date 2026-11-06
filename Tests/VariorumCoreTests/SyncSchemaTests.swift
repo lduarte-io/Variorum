@@ -157,7 +157,27 @@ struct SyncSchemaTests {
             // plain column would leak a distinctive per-shelf marker.
             "wing.name",
             "shelf.name", "shelf.glyph",
+            // VX-808 (v1_37 — the recorded reason, the run record §5): the
+            // arrival's WHY carries an AI-authored per-note reason, which is
+            // PROSE (her VX-821 ruling); its kind and client ride inside the
+            // same sealed value. (`reading_post.pinned_at`, the event's other
+            // column, is a bare timestamp — PLAIN, pinned below.)
+            "reading_post.arrival_provenance",
         ])
+    }
+
+    /// VX-808 (v1_37, marker 15): the arrivals & pins event's two columns
+    /// take exactly the sides the run record §5 rules — the provenance
+    /// SEALED, the pin a PLAIN timestamp — and nothing else on the table
+    /// moved side.
+    @Test func theArrivalsAndPinsColumnsTakeTheirRuledSides() throws {
+        let table = try #require(SyncSchema.table(named: "reading_post"))
+        #expect(table.encryptedColumns == ["arrival_provenance"])
+        #expect(table.plainColumns == [
+            "id", "reading_id", "post_id", "position", "section_id",
+            "status", "created_at", "deleted_at", "pinned_at",
+        ])
+        #expect(table.excludedColumns.isEmpty)
     }
 
     /// Apply order is FK-friendly: every FK target precedes its referencing
