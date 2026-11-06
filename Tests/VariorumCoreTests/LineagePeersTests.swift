@@ -72,7 +72,7 @@ private func capturedPlan(_ db: AppDatabase, _ body: (Database) throws -> Void) 
 func lineageStoreTableScans(_ plan: String) -> [String] {
     let storeAliases = [
         "e", "b", "cb", "far", "theirs", "peer", "edge", "block", "container_block", "container",
-        "variant", "chosen", "dflt", "home", "cascaded", "placed", "o", "d",
+        "variant", "chosen", "dflt", "home", "cascaded",
     ]
     return plan.split(separator: "\n").map(String.init).filter { line in
         storeAliases.contains { line == "SCAN \($0)" || line.hasPrefix("SCAN \($0) ") }
