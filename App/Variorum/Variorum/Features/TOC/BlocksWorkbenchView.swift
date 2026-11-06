@@ -273,7 +273,16 @@ struct BlocksWorkbenchView: View {
             await model.awaitPrimed()
             allTags = (try? await session.database.read { try Queries.allTags($0) }) ?? []
         }
-        .onDisappear { model.teardown() }
+        .onDisappear {
+            model.teardown()
+            #if DEBUG
+            // VX-827 (the window's fix leg 2): a workbench that LEAVES takes its
+            // panel with it — the History & Lineage surface replaces the whole
+            // workbench, and the oracle (recorded only on a CHANGE while the
+            // workbench stands) went on reading the panel as standing.
+            BlocksWorkbenchOracle.recordPanel(false, in: session.debugProbeScope)
+            #endif
+        }
         .onChange(of: focusedBlockID) { _, new in
             #if DEBUG
             BlocksWorkbenchOracle.recordFocus(new, in: session.debugProbeScope)
