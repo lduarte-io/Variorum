@@ -110,7 +110,13 @@ enum DuplicateBookDoor {
         let database = session.database
         do {
             let (duplicate, count) = try await session.runner.run { ops -> (Reading, Int) in
-                try ops.assertBookNameIsFree(named)
+                // VX-816: the copy lands in its source's wing (`duplicateReading`),
+                // so the name is checked there; a source gone since refuses in
+                // the op's own words.
+                guard let source = try database.read({ try Queries.reading($0, id: offer.readingID) }) else {
+                    throw OperationError.readingNotFound(id: offer.readingID)
+                }
+                try ops.assertBookNameIsFree(named, inWing: source.wingId)
                 let result = try ops.duplicateReading(offer.readingID, name: named, deep: deepAct)
                 return (result.reading, try database.read { db in
                     try Queries.liveMemberNoteCount(db, readingID: result.reading.id)

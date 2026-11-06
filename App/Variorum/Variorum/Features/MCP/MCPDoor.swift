@@ -86,6 +86,11 @@ final class MCPDoor {
         /// once · ask · never) as the store holds it — the pane's picker reads
         /// it; `show_in_app` reads the store itself, in its decision's read.
         var showDial: MCPShowDial = .default
+        /// **VX-874 — the trail dial** (her ruling (4): Settings ▸ MCP,
+        /// everything on · notices off · fully off) as the store holds it — the
+        /// pane's control reads it; the sidebar's section reads the narrow
+        /// `trailDial` it feeds.
+        var trailDial: MCPTrailDial = .default
 
         /// The shown acts' rows (each act's titled members) — the shape the
         /// pane's pins have read since 13n-b.
@@ -113,6 +118,11 @@ final class MCPDoor {
     /// server switch ON.
     private(set) var hasApprovedClient = false
     private(set) var serverOn = false
+    /// **VX-874 — what the sidebar's AI section draws** (the trail dial), a
+    /// NARROW observable like the two gates above: written only on a change,
+    /// so the sidebar column that reads it never re-renders on a snapshot that
+    /// changed nothing it draws (an Activity line, a grant's title).
+    private(set) var trailDial: MCPTrailDial = .default
     private(set) var serverState: ServerState = .off
     /// The pane's own caption (Settings has no status seam): the last
     /// refusal or receipt, plainly — rendered BESIDE the door that spoke
@@ -417,6 +427,7 @@ final class MCPDoor {
         let approved = snapshot.approvedCount > 0
         if hasApprovedClient != approved { hasApprovedClient = approved }
         if serverOn != snapshot.enabled { serverOn = snapshot.enabled }
+        if trailDial != snapshot.trailDial { trailDial = snapshot.trailDial }
     }
 
     /// The store is closing (lock, quit): stop the server — the socket is
@@ -713,6 +724,12 @@ final class MCPDoor {
     /// **VX-676 — the show dial** (Settings ▸ MCP's picker).
     func setShowDial(_ dial: MCPShowDial) {
         act { try $0.setMCPShowDial(dial) }
+    }
+
+    /// **VX-874 — the trail dial** (Settings ▸ MCP's three-state control, and
+    /// the section headers' right-click twin).
+    func setTrailDial(_ dial: MCPTrailDial) {
+        act { try $0.setMCPTrailDial(dial) }
     }
 
     /// Approve a request (or a denied client). 13n-c UX walk W-UX-2 (her
@@ -1135,8 +1152,14 @@ final class MCPDoor {
         // receipt_style governs it) and grows the one-press door — "Open ›"
         // to the act's landing; the same target is the session's last AI
         // change, which ⌥⌘O opens after the line has faded (or never showed).
+        // VX-858 (the VX-878 run, batch 3): the change is named by its LANDING
+        // — the trail's ONE brain (`MCPTrail.placeTitle`), never a twin — so a
+        // gone place's refusal names what is gone: a moved note, never the
+        // wing its receipt is keyed on (the key, `runKey ?? targetID`, still
+        // coalesces a sweep's moves into one line). Every receipt whose landing
+        // IS its target keeps its title byte for byte.
         let change = receipt.show.map {
-            ShownChange(target: $0, clientName: receipt.clientName, title: receipt.targetTitle)
+            ShownChange(target: $0, clientName: receipt.clientName, title: MCPTrail.placeTitle(of: receipt))
         }
         if let change { lastChange = change }
         // VX-679: the trail behind ⌥⌘O — a write with a landing is a row.
@@ -1597,7 +1620,8 @@ final class MCPDoor {
                 .prefix(activityCap)),
             activityCount: try Queries.mcpActivityCount(db),
             rebinds: try Queries.mcpRebindRequests(db),
-            showDial: try Queries.mcpShowDial(db))
+            showDial: try Queries.mcpShowDial(db),
+            trailDial: try Queries.mcpTrailDial(db))
     }
 
     /// One client's row (13n-c U2, R2-3): its reaching and inert grants.

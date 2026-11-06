@@ -96,6 +96,32 @@ struct BookDeleteAndDuplicateTests {
         #expect(BookStateCopy.deletedPlainBook("Plain").hasSuffix("Its notes are untouched."))
     }
 
+    /// **VX-868 (a bug-class row — red on the pre-fix tree).** The plain
+    /// book's confirm said "its \(notes(count)) stay where they are, in the
+    /// Library and any other book" — "its 1 note stay where they are" with one
+    /// note (the verb agreed with no subject), and her word for several: "it
+    /// isn't good English with several notes either". Both arms are pinned to
+    /// their rewritten sentence (PROVISIONAL wording, her bundle), lesson 8's
+    /// first sentence kept as the lead, and the old shape asserted gone. The
+    /// zero arm is unchanged.
+    @Test func thePlainBooksDeleteSentenceReadsWithOneNoteAndWithSeveral() {
+        let one = BookStateCopy.deletePlainBook(readingID: "p", name: "Plain", notes: 1)
+        #expect(one.lines.first
+                == "Deleting a plain book never touches a note \u{2014} the one note in it stays in "
+                + "the Library, and in any other book that holds it.")
+        let several = BookStateCopy.deletePlainBook(readingID: "p", name: "Plain", notes: 3)
+        #expect(several.lines.first
+                == "Deleting a plain book never touches a note \u{2014} the 3 notes in it stay in the "
+                + "Library, and in any other books that hold them.")
+        for confirm in [one, several] {
+            let line = confirm.lines.first ?? ""
+            #expect(!line.contains("stay where they are"), "the old sentence is gone: \(line)")
+            #expect(!line.contains("its 1 note"), "no count after a bare possessive: \(line)")
+        }
+        #expect(BookStateCopy.deletePlainBook(readingID: "p", name: "Plain", notes: 0).lines.first
+                == "Deleting a plain book never touches a note.", "the zero arm is unchanged")
+    }
+
     // MARK: - The three arms through the one road
 
     @Test func thePlainBooksDeleteNeverTouchesANote() async throws {

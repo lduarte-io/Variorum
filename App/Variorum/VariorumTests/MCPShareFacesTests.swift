@@ -450,8 +450,15 @@ struct MCPShareFacesTests {
         #expect(!BookRowMenuTable.doors(for: gathering, shareable: false).contains(.share),
                 "no approved client, or a fenced gathering ⇒ no door")
         #expect(!BookRowMenuTable.doors(for: nil, shareable: true).contains(.share), "facts unknown ⇒ not drawn")
+        // A JUSTIFIED EDIT at VX-829 (the VX-878 run): the menu beyond the
+        // Bookcase is the Bookcase row's, derived (one table, two faces), so
+        // Share with AI… sits where the Bookcase row has always drawn it —
+        // beside Book Settings…, the book's configuration — rather than 13n-c
+        // mockup §2's after-the-exports slot on the Library row alone.
         let doors = BookRowMenuTable.doors(for: book, shareable: true)
-        #expect(doors.firstIndex(of: .share)! > doors.firstIndex(of: .exportPDF)!, "after the exports (mockup §2)")
+        #expect(doors.firstIndex(of: .share) == doors.firstIndex(of: .settings).map { $0 + 1 },
+                "beside Book Settings…, the Bookcase row's own place")
+        #expect(doors.firstIndex(of: .share)! < doors.firstIndex(of: .exportMarkdown)!)
     }
 
     /// Stage B R1 B4 (A JUSTIFIED EDIT — the ritual): the face takes the
@@ -623,7 +630,9 @@ struct MCPShareFacesTests {
         // VX-272: the settings-class faces carry no "AI".
         for words in [MCPShareCopy.sharedWithLabel, MCPShareCopy.notShared, MCPShareCopy.shareButton,
                       MCPShareCopy.popoverTitle, MCPShareCopy.openBookNote, MCPShareCopy.zeroState,
-                      MCPShareCopy.lockHelp, MCPPaneCopy.groupInert(2), MCPPaneCopy.groupChip] {
+                      // VX-831 (A JUSTIFIED EDIT): the lock's hover retired
+                      // into the Private mark's.
+                      PrivateMarkCopy.markOwnNoteHelp, MCPPaneCopy.groupInert(2), MCPPaneCopy.groupChip] {
             #expect(!words.split(whereSeparator: { !$0.isLetter }).contains("AI"), "\(words)")
         }
     }

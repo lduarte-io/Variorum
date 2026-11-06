@@ -447,6 +447,11 @@ struct CapabilityRegistryTests {
             // new line): the sidebar's NOTE rows' own acts (Rename…, Export
             // Note…), beyond the shared note-row grammar they also render.
             .union(SidebarView.noteRowMenuCapabilities)
+            // VX-874 (the VX-878 run, batch 3 — A JUSTIFIED EDIT, the same
+            // class — a new renderer is a new line): the sidebar AI section's
+            // rows (Dismiss · Clear All) and headers (Clear All · the dial's
+            // twin) — their only renderer.
+            .union(MCPTrailSection.contextMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 
@@ -737,6 +742,9 @@ struct CapabilityRegistryTests {
             // Commits face's crumb renders "lineage ›" (`.showBlockLineage`'s
             // `.surface` door).
             .union(LineageFaceView.surfaceCapabilities)
+            // VX-874 (the VX-878 run, batch 3 — A JUSTIFIED EDIT, the same
+            // class): the section's row ✕ — the dismiss's visible door.
+            .union(MCPTrailSection.rowManageCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

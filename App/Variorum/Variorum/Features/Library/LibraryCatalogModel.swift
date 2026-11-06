@@ -386,6 +386,14 @@ final class LibraryCatalogModel {
     /// each note had; the rows read theirs through their own slice.
     @ObservationIgnored var heldReach: [String: [MCPPlaceReach]] = [:]
     @ObservationIgnored var reachHold: Task<Void, Never>?
+    /// **VX-831 — the near window's Private marks** (the closed eye on the
+    /// note rows — List, Cards, the answer sheet's heads), HELD beside the
+    /// reach over the SAME ids (`holdNearFacts`) — the store's own fact,
+    /// drawn only while a client is approved (R-878-K3 — the gated read),
+    /// ∝ the window (P1). The last answer
+    /// each note had; the rows read theirs through their own slice.
+    @ObservationIgnored var heldMarks: [String: Queries.PrivateMark] = [:]
+    @ObservationIgnored var markHold: Task<Void, Never>?
     /// **Each built row's own observable slice** (17y B1 (k), measured — the
     /// `LibraryNoteRowExtras` reason). Made on a row's first build and kept:
     /// a row SwiftUI keeps alive holds its slice, so a slice is never
@@ -612,6 +620,21 @@ final class LibraryCatalogModel {
         await MCPRowReach.hold(session, { try Queries.mcpBookReaches($0, readingIDs: ids) }) { [weak self] value in
             guard let self, self.bookReach != value else { return }
             self.bookReach = value
+        }
+    }
+
+    /// **VX-831 — the LISTED books that wear the Private mark** (their own
+    /// stamp; a gathering never — `Queries.privateBookMarks`), held while
+    /// they are listed, only while a client is approved (R-878-K3). Reads
+    /// `reading` only.
+    private(set) var privateBookIDs: Set<String> = []
+
+    /// VX-831 — hold the listed books' marks (the view's `.task(id:
+    /// listedBookIDs)` beside the reach's).
+    func holdBookMarks(_ ids: [String]) async {
+        await PrivateMarkHold.books(session, ids) { [weak self] value in
+            guard let self, self.privateBookIDs != value else { return }
+            self.privateBookIDs = value
         }
     }
 
@@ -1091,9 +1114,19 @@ final class LibraryCatalogModel {
         if let slice = rowSlices[id] { return slice }
         let slice = LibraryNoteRowExtras(
             tags: tagsAsWritten[id] ?? [], card: cardsAsWritten[id], facts: heldFacts[id],
-            reach: heldReach[id] ?? [])
+            reach: heldReach[id] ?? [], privateMark: heldMarks[id])
         rowSlices[id] = slice
         return slice
+    }
+
+    /// VX-831 — the held marks for `ids` land in their slices — only the
+    /// notes whose mark changed hear it (a note absent from the answer is not
+    /// Private).
+    func landMarks(_ value: [String: Queries.PrivateMark], for ids: [String]) {
+        for id in ids where heldMarks[id] != value[id] {
+            heldMarks[id] = value[id]
+            rowSlices[id]?.setPrivateMark(value[id])
+        }
     }
 
     /// The held observation's answer for `ids` lands in their slices — only
@@ -1162,15 +1195,19 @@ final class LibraryNoteRowExtras {
     /// reaches — `Queries.mcpNoteReaches`, held for the near window with the
     /// facts); empty when no approved client reaches it.
     private(set) var reach: [MCPPlaceReach]
+    /// VX-831 — the note's Private mark (`Queries.privateMarks`, held for the
+    /// near window with the reach); nil when it is not Private.
+    private(set) var privateMark: Queries.PrivateMark?
 
     init(
         tags: [Tag], card: NoteCards.Card?, facts: Queries.OwnershipFacts?,
-        reach: [MCPPlaceReach] = []
+        reach: [MCPPlaceReach] = [], privateMark: Queries.PrivateMark? = nil
     ) {
         self.tags = tags
         self.card = card
         self.facts = facts
         self.reach = reach
+        self.privateMark = privateMark
     }
 
     // Equal writes never notify (an @Observable setter always would).
@@ -1178,4 +1215,5 @@ final class LibraryNoteRowExtras {
     func setCard(_ value: NoteCards.Card?) { if value != card { card = value } }
     func setFacts(_ value: Queries.OwnershipFacts?) { if value != facts { facts = value } }
     func setReach(_ value: [MCPPlaceReach]) { if value != reach { reach = value } }
+    func setPrivateMark(_ value: Queries.PrivateMark?) { if value != privateMark { privateMark = value } }
 }

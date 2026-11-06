@@ -858,6 +858,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // shelf row's menu. ONE act whose verb follows the book ("Duplicate with
     // Copies…" on an owned book — `DuplicateBookCopy.verb(owned:)`).
     case duplicateBook
+    // VX-829 (the VX-878 run, batch 1 — her 2026-11-04 ask: "the options that
+    // are available in bookcase on a book should be available on library"):
+    // the Bookcase row's four UNDECLARED doors — Rename…, Manage Notes…,
+    // Length & Extent… and Use as Daily Journal — gain a second renderer (the
+    // book row menu beyond the Bookcase), so each is declared once and both
+    // faces read its verb (`.renameNote`'s VX-425 precedent: a second renderer
+    // is the moment an undeclared door is declared). Four declarations on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds — four ops, four words, four
+    // refusals; `.renameBook` is not `.renameNote` (a different row, op and
+    // name guard — the `.removeFromBook`/`.removeRuleTag` grounds).
+    case renameBook, manageBookNotes, setBookExtent, useAsDailyJournal
     // 13i-d U1 — THE BOOKCASE'S doors (the sitting record §7, §19–§24). The
     // shelf name's right-click carries six acts (§7: "Rename · Set Glyph ·
     // Make Default · Delete", §24: "+ Move to Start / Move to End"); the
@@ -1194,6 +1205,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// and `MCPTrailSection` is their only renderer (rendered only while a row
     /// exists — P-2).
     case mcpOpenTrailPlace, mcpShowTrailDetails
+    /// VX-874 (the VX-878 run, batch 3 — her rulings (1)–(4)): her hand on that
+    /// section. `mcpDismissTrailEntry` — a row's ✕ (`.surface`) and its
+    /// right-click Dismiss (`.contextMenu`): the ROW goes, nothing else (a
+    /// standing ask keeps its line). `mcpClearTrail` — Clear All on every row's
+    /// and every header's right-click (the Open list's Close All Notes grammar):
+    /// every row goes. `mcpSetTrailDial` — the headers' right-click twin of
+    /// Settings ▸ MCP's three-state control (everything on · notices off ·
+    /// fully off — "welcome if cheap"). `MCPTrailSection` is their only renderer.
+    case mcpDismissTrailEntry, mcpClearTrail, mcpSetTrailDial
     /// VX-309 U1c — VX-451 (F-U4-1's option (a)): LOCK LIBRARY NOW, declared at last — ONE act, TWO doors: the File menu's
     /// item (`.menuBar`, ⌃⌘L — rendered only where the library can lock: Castle — `AppBootstrap.canLock`)
     /// and the new road's Protection pane, in the Castle-only "On this Mac" section beside the idle dial (`.surface` —

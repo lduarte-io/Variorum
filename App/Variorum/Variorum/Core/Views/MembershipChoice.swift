@@ -349,10 +349,11 @@ final class MembershipDoors {
         let name = trimmed.isEmpty ? "Untitled" : trimmed
         let database = session.database
         let book = try await session.runner.run { ops -> Reading in
-            try ops.assertBookNameIsFree(name)
             let wing = try database.read { db in
                 try Queries.effectiveWing(db, ofPost: postID)
             } ?? ""
+            // VX-816: the name is checked in the wing the book is made in.
+            try ops.assertBookNameIsFree(name, inWing: wing)
             return try ops.createReading(name: name, kind: .book, wingId: wing)
         }
         if let choice = try await add(postID, to: book.id) {

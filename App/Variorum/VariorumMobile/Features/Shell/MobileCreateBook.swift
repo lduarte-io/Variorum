@@ -129,14 +129,14 @@ final class MobileCreateBookModel {
             switch kind {
             case .notes:
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName)
+                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
                     return try ops.createReading(name: bookName, kind: .book)
                 }.id
             case .journal:
                 // The Mac create alert's journal shape, byte-mirrored:
                 // curated, profile 'journal', dated order ascending.
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName)
+                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
                     return try ops.createReading(
                         name: bookName, kind: .book,
                         profile: Queries.journalTraitProfile,
@@ -147,7 +147,7 @@ final class MobileCreateBookModel {
                 let all = joinAll && paths.count > 1
                 let json = try Self.spec(paths: paths, joinAll: all).encodedJSON()
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName)
+                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
                     return try ops.createReading(
                         name: bookName, kind: .gathering, querySpec: json)
                 }.id

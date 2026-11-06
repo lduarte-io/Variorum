@@ -284,7 +284,8 @@ enum MobileStarterJournal {
             // (what Today's Entry does), and is the name already taken (a
             // book she made herself, or a restored one)?
             guard try quiet.dailyJournalBookID() == nil else { return nil }
-            do { try quiet.assertBookNameIsFree(name) }
+            // VX-816: the Journal is minted in Home (the phone's one wing).
+            do { try quiet.assertBookNameIsFree(name, inWing: "") }
             catch let error as OperationError {
                 guard case .duplicateBookName = error else { throw error }
                 return nil

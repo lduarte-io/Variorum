@@ -424,6 +424,19 @@ extension Queries {
             db, sql: "SELECT value FROM mcp_switch WHERE key = ?", arguments: [mcpShowDialKey]))
     }
 
+    /// **VX-874 — the trail dial's row** in the same key/value family (the show
+    /// dial's precedent; local-only, no migration): `all` · `asks` · `off`. Not a
+    /// switch (three values): read only through `mcpTrailDial`.
+    public static let mcpTrailDialKey = "trail_dial"
+
+    /// **VX-874 — what the sidebar's AI section draws** (her ruling (4)). No row
+    /// (or a value this build can't name) reads as everything on
+    /// (`MCPTrailDial.default`).
+    public static func mcpTrailDial(_ db: Database) throws -> MCPTrailDial {
+        MCPTrailDial(stored: try String.fetchOne(
+            db, sql: "SELECT value FROM mcp_switch WHERE key = ?", arguments: [mcpTrailDialKey]))
+    }
+
     // MARK: - Activity
 
     public static func mcpActivity(_ db: Database, limit: Int? = nil) throws -> [MCPActivityRow] {

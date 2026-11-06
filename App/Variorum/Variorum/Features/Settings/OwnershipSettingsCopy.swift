@@ -25,7 +25,13 @@ nonisolated enum OwnershipSettingsCopy {
         "In a book, a small mark on a note that also lives in other books (hover names them "
         + "\u{2014} editing it there edits it here). In gatherings, tag listings and the "
         + "Library, \u{201C}owned by\u{201D} on a note an owned book holds \u{2014} click it to "
-        + "open that book at the note. Off: no marks anywhere; nothing else changes. Synced."
+        + "open that book at the note. "
+        // VX-831 (PROVISIONAL wording, her bundle): the Private mark joins the
+        // family's one switch, so the switch says it governs it — and, since
+        // her R-878-K3, WHEN it shows (only while a client is approved).
+        + "While an AI client is approved, a Private note or book wears a closed eye "
+        + "\u{2014} hover it to see why. "
+        + "Off: no marks anywhere; nothing else changes. Synced."
 
     static let hideOwnedTitle = "Hide notes an owned book holds, in gatherings and tag listings"
 

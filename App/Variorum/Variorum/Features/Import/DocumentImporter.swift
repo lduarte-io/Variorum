@@ -130,7 +130,7 @@ enum DocumentImporter {
             var names = Set<String>()
             for case .book(let book) in items {
                 let name = book.name.trimmingCharacters(in: .whitespacesAndNewlines)
-                try ops.assertBookNameIsFree(name)
+                try ops.assertBookNameIsFree(name, inWing: wing)  // VX-816: the wing it imports into
                 guard names.insert(BookNaming.key(name)).inserted else {
                     throw OperationError.duplicateBookName(name: name)
                 }
