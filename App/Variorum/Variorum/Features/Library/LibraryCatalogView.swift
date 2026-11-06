@@ -707,7 +707,8 @@ struct LibraryCatalogView: View {
             // field first, scope second (`LibraryControlsFlow`).
             // P-U3-5: the wrap reads STABLE widths only — the field at its
             // PROMPT (never its typed text) and the sort slot at its WIDEST
-            // form (every sort × direction, and the relevance label), so
+            // form (every sort × direction, and the search's `order ▾`
+            // door at relevance — VX-820), so
             // typing, a sort pick or a search never changes the line count.
             let stable = LibraryControlsStableWidths.row(
                 tokens: tokens, prompt: Self.searchPrompt,

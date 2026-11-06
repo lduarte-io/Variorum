@@ -606,7 +606,8 @@ struct LibraryControlsStableWidths: Equatable {
     /// inside the cap today (211.5 / 175 of 320), so the clamp never engages.
     var fieldFloor: CGFloat
     /// **The sort slot at the widest it can read:** every sort × direction as
-    /// the `sort ▾` door draws it, and the search's relevance label.
+    /// the `sort ▾` door draws it, and the search's `order ▾` door at
+    /// relevance (`sortForms`).
     var sortWidest: CGFloat
 
     /// One form of a label: its words and the chrome drawn around them.
