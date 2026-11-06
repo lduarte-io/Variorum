@@ -95,6 +95,7 @@ struct MCPNoteIndicator: View {
         // client is approved (R-878-K3 — the gate rides the read), under the
         // badge family's one switch (D-831-3).
         let mark = PrivateMarkFace.note(state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true)
+        // Always present, even empty: it carries the held read (`.task` below) — a conditional here strands the server-off mark's read (R-878-K3; VX-878 ladder F3).
         HStack(spacing: 4) {
             if indicatorOn, let state, !state.reach.isEmpty {
                 // W-UX-12: at the window's trailing edge — open leftward.
