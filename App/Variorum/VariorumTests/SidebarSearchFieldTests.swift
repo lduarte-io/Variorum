@@ -354,6 +354,42 @@ struct SidebarSearchFieldShellTests {
         }
     }
 
+    /// **F1 — a Library standing in Timeline answers the sidebar's words.**
+    /// R-819-4: typing shows the Library "with the live answer as you type".
+    /// The catalog's mode is the window's session state, and the Timeline
+    /// takes no question (it draws its own listing, no answer sheet, no
+    /// band), so a sidebar search landing there changed nothing she could
+    /// see. As the sidebar's words land, the Timeline yields to List — the
+    /// Cards rule's precedent, a view that cannot show the answer yields
+    /// (A-819-L1, PROVISIONAL). Both roads: the Library already shown, and
+    /// landed by the first keystroke.
+    @Test(arguments: [true, false])
+    func aSidebarSearchMovesATimelineLibraryToTheAnswer(libraryShown: Bool) async throws {
+        try await withShell { _, router, catalog, window, hosting in
+            if libraryShown { router.adopt(.library, in: router.workspace.focusedPane) }
+            catalog.pickMode(.timeline)
+            await settle(window, hosting) {
+                Self.sidebarField(hosting) != nil
+                    && router.workspace.focusedSelection
+                        == (libraryShown ? SidebarSelection.library : SidebarSelection.shelf)
+            }
+            await settle(window, hosting, timeout: 0.3)
+            try #require(catalog.mode == .timeline, "premise: the Library stands in Timeline")
+
+            let field = try #require(Self.sidebarField(hosting))
+            window.makeFirstResponder(field)
+            await settle(window, hosting, timeout: 2) { Self.keyboardField(window) === field }
+            #expect(Self.type("harb", window))
+            await settle(window, hosting) {
+                catalog.query == "harb" && catalog.searchState.isAnswering && catalog.mode == .list
+            }
+            #expect(router.workspace.focusedSelection == .library)
+            #expect(catalog.mode == .list, "the Timeline yields to List, the mode that shows the answer")
+            #expect(catalog.isSearching, "the answer sheet answers the sidebar's words")
+            #expect(Self.keyboardField(window) === field, "the field kept the keyboard through the move")
+        }
+    }
+
     /// A door, never a mirror (PROVISIONAL P-819-B3d): while the Library is
     /// already searching its own words, the sidebar field stays empty.
     @Test func theFieldStaysEmptyWhileTheLibrarySearchesItsOwnWords() async throws {
