@@ -2264,3 +2264,12 @@ discipline, P1-pinned). Her design sat five mockup rounds + two Opus exploration
 MEMO is the binding shape. The ladder: two rounds, 0 B/0 M. Evidence: the window's whole-target
 run(s) PENDING(window-2), the phone gate (852/139, VM-34's standing red only), the R1-F1
 red-on-old ritual (both reverts, named reds), the walk PENDING. Pins: PENDING(final counts).
+
+**MAIN MERGED IN (2026-11-06 ~03:3x; vx-878 landed as PR #229):** merge commit 10c30b5a9. The
+one conflict, `CapabilityRegistryTests.swift`, was a clean union (both runs append `.union(...)`
+sets at one insertion point) — resolved keep-both by the orchestrator as merge mechanics, no
+design content. Second-merger re-runs on the merged tree: the MCP catalog/server/two-store
+filters 18/3 green headless; full `swift build` clean; Mac build-for-testing green.
+**#264 is vx-878's now (its closeout renumbered #263→#264): OUR BUNDLE RENUMBERS to the next
+free number at the merge — every "#264" in this record's drafts reads as that number.**
+Window-2 runs on the merged tip and doubles as the merge gate against main and vx-878.
