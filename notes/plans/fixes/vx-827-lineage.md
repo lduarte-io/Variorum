@@ -1249,3 +1249,73 @@ changes; sentence case, the commit vocabulary; one agent, at most ONE Sonnet for
 facts; LIVE STATUS (U3a RECORD) from the first commit, commit per piece ending "Part of
 VX-801", no trailers, push every commit, foreground waits only; work only in
 `~/dev/variorum-vx-827` (pull first — U1/U2 and the memo are on origin).
+
+## U3a RECORD — the Commits face (VX-801's first half)
+
+**NOT DONE in U3a, said first:** (filled at the unit's end — see the END section below; the LIVE STATUS table is
+the truth until then).
+
+*Implementer: opus-implementer, fresh session, 2026-11-05. Headless only (`swift build` / `swift test` on the
+package, `xcodebuild build-for-testing` for the App target's compile); no stage, no xcodebuild test, no GUI, no
+store touches. Mac-target pins are written and compiled here and NAMED for the run's closing stage window.*
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| U3a-0 | Preflight read (CLAUDE.md canon · this file's The run / every sitting entry / THE DESIGN MEMO / Environment traps / the U3a BRIEF · SurfaceContracts The app + The note · TEXTKIT2_NOTES whole · both exploration mockups + her composite shot (read as an image) · the whole Block History implementation: `BlockHistoryPane.swift`, `Shared/BlockHistoryFace.swift`, `SavepointHistory.swift`, the inspector host in `PostDetailView`, the router seam, both bars' doors + sheet fallbacks, the Write take panel's arms, the Blocks workbench's two doors, `ShellActions.showBlockHistory`, the registry rows · `Queries.blockHistory` · U1's `LineageTree` · the walk test · the tutorial's Block History lessons + walk) | DONE |
+| U3a-G1 | GATE — the tutorial walks Block History (FLAGGED below, before anything it walks changes) | FLAGGED |
+| U3a-G2 | GATE — the panel's retirement meets doors/jobs the memo does not cover for U3a (FLAGGED below; left as they were) | FLAGGED |
+| U3a-1 | The pure Domain text-compare (`Domain/TextCompare.swift`) + its own suite | NOT-STARTED |
+| U3a-2 | The pure rail projection (`Domain/CommitRail.swift` — interleave, folds, AI pair, filter, now row, swapper order, opening selection) + its suite | NOT-STARTED |
+| U3a-3 | The Commits face: model + view (reading pane, rail, take dropdown, fast swapper, deleted-takes foot) | NOT-STARTED |
+| U3a-4 | Compare: two boxes + the standing "now" third, each header a swapper, the washes | NOT-STARTED |
+| U3a-5 | The re-aim: every history door opens the face (full pane in the detail, ‹ back; the sheet where no detail is); the block ▾ History row on both bars; the origin door keeps its old panel (G2) | NOT-STARTED |
+| U3a-6 | Registry: the face's acts declared once; the walk extended; every Block-History-class pin re-pointed as a named justified edit; new Mac pins (compiled, named for the window) | NOT-STARTED |
+| U3a-7 | END: headless core suites, `xcodebuild build-for-testing`, the PROVISIONAL list for #264, self-assessment | NOT-STARTED |
+
+### U3a-G1 — GATE: the tutorial walks Block History (FLAGGED before anything changes)
+
+The brief's gate fires. Two tutorial facts touch the panel being retired:
+
+1. **The walk drives the panel's model.** `TutorialWalkTests.theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack`
+   (lesson "what a block leaves behind") builds `BlockHistoryModel` and presses its `putBackTake` — the deleted
+   take's Put back in "the same History face". The new face carries the same act at its rail's foot (the memo:
+   "the deleted takes line at the rail's foot (count · days left · Put back)"), through the same op and the same
+   receipt (`BlockPastCopy.restored`).
+2. **The lessons' WORDS describe the panel.** `TutorialSeeder` lesson "Five: this block's History" says the
+   history door "opens the Block History panel: each live take's saved moments, the takes this block archived, the
+   takes it deleted (with their clocks), and Came from, the blocks it came out of". After U3a's re-aim the history
+   door opens the Commits face: saved moments by take (the rail), archived takes (the dropdown's group, hollow dots),
+   deleted takes (the rail's foot) — but **Came from is not on the Commits face**: the memo puts lineage behind its
+   own door (the Lineage face, U3b). The other Came-from sentences (lessons at `TutorialSeeder` ≈1505, 1569, 1584,
+   1772–1782, 1848–1850, 1876, 1900; `RecoveryCopy` ≈351/369; `OpsRefusalCopy` ≈668; `TrayPath.originalsPath`) all
+   name "Came from in Block History" as where an original waits.
+
+**What U3a does about it:** nothing it walks is changed. The tutorial's TEXT is not edited (product copy about
+lineage is U3b's — the Came-from region's new home is the Lineage face, and its words are owed then, at her
+wording pass); the walk's model stays compiled and green because the old panel survives for the origin door (G2).
+**Owed (U3b + the orchestrator):** lesson five's clause "and Came from, the blocks it came out of" and every
+"Came from in Block History" sentence above re-pointed at the Lineage face when it lands — P-6 says a tutorial
+step that stops being true is a regression, and between U3a and U3b this one is (nothing ships between them; the
+ladder runs once after U3b).
+
+### U3a-G2 — GATE: doors and jobs the memo does not cover for U3a (left as they were)
+
+1. **The origin door — "See original from divide…/merge…" (the block's right-click, ⌘K's "See the Original This
+   Came From").** Today it opens the Block History panel, whose Came-from region shows the originals with Bring back
+   and Open this note's tray. The memo's Commits face shows no originals; their home is the Lineage face (U3b).
+   Re-aiming this door at the Commits face would be a door promising an original and showing commits (P-2's lie),
+   and re-aiming it anywhere else is a design the memo does not make for U3a. **Left as it was:** the origin door
+   keeps opening the old panel (inspector where a detail is mounted, the bars' sheet where none is) through its
+   own road; the old panel's code stays exactly as shipped. **Question for U3b / the orchestrator:** the origin door
+   lands on the Lineage face with the original selected — confirm, and the old panel (`BlockHistoryPane`,
+   `BlockHistoryModel`, `CommitReadingSheet`, `HistoryRegionHeader`, `CommitRowView`, the VX-668 oracle) then retires
+   whole with its pins re-pointed.
+2. **Unarchive (the panel's archived-takes region).** The brief's job list omits it; the memo says "all its jobs
+   live here" and draws archived takes in the dropdown's group with hollow dots, without placing Unarchive.
+   Exploration A (which she said she liked) drew it on an archived take's "now" head. **Built as PROVISIONAL**
+   (P-U3a-6 below): when the selected moment is an ARCHIVED take's "now", the pane's foot offers Unarchive (the
+   existing op, the existing receipt); every other moment's foot is the memo's four acts.
+3. **The panel's "Show the block you're in" jump** (ledger row 33) — the face takes the full pane, so no caret
+   moves while it stands; the jump has nothing to do on the face and is not carried (it stays on the old panel).
