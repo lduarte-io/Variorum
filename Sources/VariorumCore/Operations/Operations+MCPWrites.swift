@@ -154,6 +154,10 @@ extension Operations {
         // (`replace_tag`'s item) — ONE entry per note ("Undo claude-code's tag
         // replacement"). PROVISIONAL words, her copy pass.
         case tagReplace = "tag replacement"
+        // VX-811 (the VX-808 run, Unit B2): one note proposed to a book's
+        // Arrivals (`propose_notes_to_book`'s item) — ONE entry per landed item
+        // ("Undo claude-code's proposal"). PROVISIONAL words, her copy pass.
+        case proposal
 
         public func undoLabel(client: String) -> String { "\(client)'s \(rawValue)" }
 

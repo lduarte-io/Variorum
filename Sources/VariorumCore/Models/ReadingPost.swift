@@ -22,6 +22,12 @@ public struct ReadingPost: VariorumRecord {
     /// 13i-a (v1_18): member = seated membership (truth, counted, ordered);
     /// arrival = intake's bell waiting at the door (sitting record §4).
     public var status: MembershipStatus
+    /// VX-808 (v1_37 — the run record `notes/plans/fixes/vx-808-arrivals-books.md`
+    /// §5): WHY an ARRIVAL waits — canonical JSON (`ArrivalProvenance`), read
+    /// only on a LIVE ARRIVAL row; NULL = an arrival older than the column.
+    /// Every road that mints or re-poses an arrival writes it; ENCRYPTED under
+    /// E2EE (an AI-authored reason is prose).
+    public var arrivalProvenance: String?
 
     public init(
         id: String,
@@ -32,7 +38,8 @@ public struct ReadingPost: VariorumRecord {
         status: MembershipStatus = .member,
         createdAt: Date,
         deletedAt: Date? = nil,
-        syncVersion: Int = 0
+        syncVersion: Int = 0,
+        arrivalProvenance: String? = nil
     ) {
         self.id = id
         self.readingId = readingId
@@ -43,5 +50,6 @@ public struct ReadingPost: VariorumRecord {
         self.createdAt = createdAt
         self.deletedAt = deletedAt
         self.syncVersion = syncVersion
+        self.arrivalProvenance = arrivalProvenance
     }
 }

@@ -207,9 +207,9 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 | Piece | Status |
 |---|---|
 | Reading (own context): this record §1–§9 · MCPSpec IN FULL · `MCPToolCatalog` · `MCPWriteTools` (+NoteLists, +Carriage, +LibraryEdits' gathering words) · `MCPGrantAuthority` / `Domain/MCPGrantRule` (decide, reaches, spends, best) · `MCPOwnActivity` · `MCPNullCharacters` · the two-store catalog + arms · `Domain/IntakeDecision` · `Operations+Intake` (event, sweep, materialize, seat/dismiss) · `+Ownership` (copy/move in, the revival pass, the daily bell) · `+Reading` (create's backfill, the rule write's sweep, reopen, restore, the hand-add) · `+ReadingArchive` / `+Seal` (the catch-ups) · `+MCPCarriage` (set_book_rule) · `+MCPWrites` (the add's undo) · `Sync/BookWingMend.swift` (the stamp) + `Sync/Repairs.swift` (the OWNED demotion, the dedupe promotion — read only) · `Queries/ArrivalQueries` · the app's `MCPPaneCopy` Activity/receipt tables + `MCPTrail` | DONE |
-| THE FORK — the provenance vocabulary + the tool shape + carry/clear + the once-spend + the set_book_rule count shape, SENT to the orchestrator (the message's text is mirrored below once ruled) | **AWAITING RULING** — the other doors are not wired until it lands |
-| 1. Domain `ArrivalProvenance` + the model column on `ReadingPost` | PENDING |
-| 2. The op `proposeNoteToBook` + state-transition tests per verdict row | PENDING |
+| THE FORK — the provenance vocabulary + the tool shape + carry/clear + the once-spend + the set_book_rule count shape, sent to the orchestrator | **RULED — A-808-6..10** (`a343498c7`); built to it |
+| 1. `Models/ArrivalProvenance` (the nine kinds, `client`/`reason`/`tag`/`after`/`at`, canonical sorted-key JSON, open kind, malformed = absent) + `ReadingPost.arrivalProvenance` | DONE (this commit) |
+| 2. The op `proposeNoteToBook` (`Operations+MCPPropose`) + `MCPWriteAct.proposal` (+ its receipt phrase app-side, the exhaustive switch) + `MCPProposeActsTests` (18: every verdict row, the guard first, the undo/redo compare-and-set, the spelling) | DONE (this commit) — 18/1 GREEN |
 | 3. The wire tool `propose_notes_to_book` (catalog, parse, list grammar, guard, undo, receipts, Activity/receipt words app-side) + server tests | PENDING |
 | 4. The two-store catalog arms for the tool | PENDING |
 | 5. Provenance at every arrival door (after the ruling) | PENDING — blocked on the ruling |

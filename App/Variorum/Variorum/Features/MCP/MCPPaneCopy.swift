@@ -1731,6 +1731,14 @@ nonisolated enum MCPReceiptCopy {
         case .tagReplace:
             let swap = "#\(receipts[0].detail ?? "") with #\(receipts[0].replacementPath ?? "")"
             return n == 1 ? "replaced \(swap) on \(quoted(receipts[0].targetTitle))" : "replaced \(swap) on \(n) notes"
+        // VX-811 (the VX-808 run, Unit B2) — `propose_notes_to_book`'s notes, one
+        // receipt each on the call's run key (A-809-19), so a call reads as one
+        // line; the receipt's target is the BOOK, its detail the note
+        // (PROVISIONAL words, her copy pass).
+        case .proposal:
+            return n == 1
+                ? "proposed \(quoted(receipts[0].detail)) for \(quoted(receipts[0].targetTitle))"
+                : "proposed \(n) notes for \(quoted(receipts[0].targetTitle))"
         // VX-187 — two notes made versions (PROVISIONAL words).
         case .versionLink:
             return n == 1
