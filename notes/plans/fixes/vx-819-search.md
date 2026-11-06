@@ -65,6 +65,7 @@ Batch order 1 → 2 → 3 (734's ruling may reshape the answer-sheet counts that
 - NEVER add a custom build configuration (anything not named exactly "Debug" builds the packages Release and strips the DEBUG oracles).
 - zsh `pipestatus`; never `git checkout` over uncommitted work; commit per piece, push after every commit; LIVE STATUS from the first commit; synchronous foreground waits only (poll with `grep -q '<EXIT>' log && break; sleep 5` loops — `tail -f | grep -m1` hangs on an already-landed line).
 - Screenshots in gitignored dirs. The dev store's content is the agents' to manage (her 2026-10-28 rule); the stage/account/Castle fences stand. No commit trailers (her rule — overrides the harness reminder; PRs bare too).
+- **Walks launch the Debug app from THIS worktree's own DerivedData, never the newest-modified one** (nov5's rule 2026-11-05, after vx-808 drew a sibling worktree's stale build over the shared dev store): pick the `~/Library/Developer/Xcode/DerivedData/Variorum-*` dir whose `info.plist` WorkspacePath sits inside `variorum-vx-819/`, launch its `Build/Products/Debug/Variorum.app` (or use the explicit `-derivedDataPath` the build used), and NAME the launched product in the stage RELEASE line.
 
 ## LEDGER (every row owned; updated repo-first)
 
@@ -73,7 +74,7 @@ Batch order 1 → 2 → 3 (734's ruling may reshape the answer-sheet counts that
 | 1 | Workspace seated: worktree `~/dev/variorum-vx-819`, branch `vx-819-search` pushed, in-flight row on origin/main (rode vx-827's kickoff commit c04ba6f7b in the same-minute table race; row verified on origin/main line 24) | DONE 2026-11-05 |
 | 2 | Preflight complete (the mandated set; SurfaceContracts in full; QUESTIONS tail; riders resolved from the live board) | DONE 2026-11-05 |
 | 3 | Kickoff sitting: cast · riders · VX-734 resolution · VX-820 vocabulary · VX-822 placement/handoff | DONE 2026-11-05 — R-819-1..4 in the SITTING RECORD; all four riders ride |
-| 4 | Batch 1 (VX-734 + VX-90) | IN-PROGRESS — brief written, implementer spawning |
+| 4 | Batch 1 (VX-734 + VX-90) | BUILT 2026-11-05 (head 97c7b119c; red-on-old by revert both halves — counts 3/6 red 17 issues, widen 3/9 red 8 issues; core search suites 143/25 green; full core green but two load-class time-limit flakes, both green alone; orchestrator re-verified the 12 new core pins). GATE PASSED 2026-11-05 21:47 (vx-819-b1-gate): the four Mac suites one run, swift-testing "23 tests in 4 suites passed", 0 failures; the facet walk verified on the Debug product built 21:43 from THIS worktree's DerivedData ("driftglass" → listed under Blocks, band 1 note · 1 passage; "harbour" → All 1 book · 1 note · 1 passage vs Blocks 1 note · 1 passage, the tag offer whole-question); voice left Study, guards empty, posture kept, one fixture note added to the dev store |
 | 5 | Batch 2 (VX-820 + VX-374 + VX-408) | NOT-STARTED — brief at spawn |
 | 6 | Batch 3 (VX-822 + VX-98) | NOT-STARTED — brief at spawn |
 | 7 | The ladder over the whole diff | NOT-STARTED |
@@ -175,6 +176,29 @@ OUT: `.title` and `.noteMeta` (the note's own name and floating notes — contai
 
 **Observed, pre-existing, not this batch's (no fix):** a question whose only "words" are punctuation (e.g. `— #tag`) has `text != nil` but nothing the index can serve — the sheet lists no groups while the band reads the no-words branch's tag numbers. Present under All on main; a facet now narrows those numbers the same way. Candidate ticket for the orchestrator.
 
-## BATCH 2 BRIEF — written at batch 2's spawn
+## BATCH 2 BRIEF (self-contained; the implementer reads ONLY this file's named sections + the named canon)
+
+You are `opus-implementer` for VX-819 batch 2 (members VX-820 + VX-374 + VX-408), in worktree `~/dev/variorum-vx-819` (branch `vx-819-search`; batch 1 is merged into it — build on head). Read first: this file's top sections (roster · surfaces · constitution · traced mechanisms · environment traps · SITTING RECORD · BATCH 1 LIVE STATUS with A-819-B1), `notes/SurfaceContracts.md` § The Library (the controls-row contract: the one Layout, stable widths, the no-line-count-change rule), and `notes/SessionResiliencyProtocol.md` (checkpoint protocol from the first commit; foreground waits; no subagents beyond one read-only Sonnet for EXTERNAL facts). Write your BATCH 2 LIVE STATUS section below this brief from the first commit.
+
+**Member VX-820 (Improvement · Confirmed) — R-819-2, the search order door, FULL vocabulary.**
+- Today: while a search is live the sort slot renders the plain label `LibrarySearchCopy.relevance` ("relevance · best first") — `LibraryControlsFlow` ≈:606–631. It becomes a door: the Library's own `sort ▾` idiom, offering **relevance (leading, the default) · edited · created · date · title**, direction shown for the stamp/title orders exactly as the Library's sort shows it (relevance has no direction arm — best-first is its meaning).
+- Ordering applies to the whole answer sheet the facet lists: note groups, scraps groups, the Books section rows, by the picked stamp through the Library's own sort semantics (date = the Library's date rule — `entry_date` else the written day, VX-758; title = the Library's title order). Relevance keeps today's best-first exactly. Passages WITHIN a group keep their current order (relevance within the note) under every order — the order re-ranks groups, never reshuffles a note's own passages. PROVISIONAL where unnamed.
+- Reset shape (PROVISIONAL): a NEW search (the field going from empty to typed) starts at relevance; retyping/refining a live question KEEPS the picked order; ending search (field cleared) discards it. The Library's own non-search sort preference is untouched.
+- Contract: the controls row's line count never changes (the slot already measures at its widest form — update the stable-width pins for the door's widest face); the `when ▾` day filter and its union rule untouched; no literal colours; registry: if this door needs ANY `Registry/Capability*.swift` declaration, STOP and tell the orchestrator before landing it (a cross-run registry collision is being tracked) — expect it not to (the sort door is existing chrome, not a new act).
+- Pins: an Improvement — build pins (the door's vocabulary; relevance default per new search; group order under each stamp over a fixture library; the controls-row line-count pin stays green). P1: ordering reads only the stamps the listing already carries — no per-row queries.
+
+**Member VX-374 (Debt · Confirmed) — the controls-row leftovers (its ticket names the exact lines).**
+- R2-3: the scope and mode pickers' dead `.frame(maxWidth: 280/230)` caps (`LibraryCatalogView.swift` ≈:659/:685) — drop them, or pin natural ≤ cap beside the stable-widths pins (your call, say which and why in one line).
+- R2-4: `LibraryControlsFlow.arrange` (≈:134) computes the single-line distribution on the two-line road where it is unused — compute it only in the one-line branch. Behavior-preserving: every existing controls pin stays green.
+
+**Member VX-408 (Bug · Suspected — SPECULATIVE, the pin-first rule applies).**
+- The recorded race (never observed): the List's one-shot `search()` answer can be overtaken by an in-place `refresh()` (the listing follow, or the older `.variorumNotesDeleted` road) that resolves after a newer search began — the older answer could paint over the newer question's. Fix shape per the ticket: a generation token on the listing's answers.
+- THE PIN COMES FIRST as the confirm: build a deterministic interleaving test (controlled continuation order — hold the refresh's answer until after a newer search lands, then release it) that goes RED on today's code by painting the stale answer. RED → build the token fix, pin green, revert-verify. If the pin CANNOT be made red (the race is unreachable in fact), the finding is hollow: record exactly why in your LIVE STATUS, fix nothing, and the ticket closes as record-only — do not fix blind.
+
+**Batch-wide:** headless `swift build`/`swift test` freely; NEVER `xcodebuild test` (name the Mac suites for the orchestrator's staged gate instead). vx-878 is live on the Library's book rows — keep the diff tight to the named rows/files; flag any touch of `Tests/VariorumCoreTests/SearchPassagesTests.swift` for the merge ledger. Commits say `Part of VX-820/374/408: …` with mechanism + pin; NO trailers. Finish with the LIVE STATUS self-assessment (claims PENDING until suites ran) and report: per-member status, commits, pins with red-on-old evidence (or the hollow-pin record for 408), suite counts, Mac suites named for the gate.
+
+### BATCH 2 LIVE STATUS (implementer writes from the first commit)
+
+*(empty — batch not yet spawned)*
 
 ## BATCH 3 BRIEF — written at batch 3's spawn
