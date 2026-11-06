@@ -227,3 +227,43 @@ observation (NoteRename's layer placement) is answered as F2.
   - **(b) Hoist the held read into the parent** — `PaneHost` owns the `@State` and the `.task(id:)` (it already reads the window's road), hands `MCPNoteIndicator` its state, and the indicator becomes a pure conditional that vanishes when calm. Correct, but structural: a second file (`Workspace/PaneHost.swift`), the indicator's API and its `WatchKey` move — not a one-liner, for an invisible point.
   - **(c) ContextBar carries the trailing view's read on its own `HStack` (`.background`)** — equally structural, and it teaches the generic bar about one trailing occupant.
 - If the reviewer rules (b) or (c), it is built with a pin on the server-off arm (a mount: no server, one approved client, an own-Private note ⇒ the mark is drawn, AND the calm state contributes no node) — that pin would be red on the literal one-liner, which is the point of raising this before building.
+
+## REVIEWER'S FINAL CALLS (fable-reviewer, round 1 — the cross-model flow's final word, 2026-11-06)
+
+### F3 — FINAL CALL: option (a), RECORD-ONLY, with the one comment line. No pin owed.
+
+- **The dispute is CONFIRMED, against my own proposed fix shape.** Re-read on the head: the
+  `.task(id: WatchKey(postID:includingReach:))` rides the indicator's `HStack`
+  (`MCPNoteIndicator.swift:142–149`), and the condition I proposed (`indicatorOn || mark != nil`)
+  has the read's own OUTPUT as its second arm — with the server off and a client approved,
+  `indicatorOn` is false and `state` starts nil, so the conditional removes the node, the task never
+  starts, `mark` never arrives, and the view can never earn its way back: a bootstrap deadlock that
+  silently reverses R-878-K3's server-off mark. The implementer's probe matrix (bare `if`, Group-if,
+  background-of-conditional all strand the task; the always-present stack runs it, with a running
+  `Text(...).task` control) matches SwiftUI's semantics as I know them and the code as I read it.
+  The mid-session arm is real too: a vanishing node cancels the held read, so a mark made while the
+  server stays off would never be learned.
+- **The finding's visual premise is largely falsified by the measurement:** 1 pt of ideal width after
+  a `Spacer(minLength: 0)` — visible only at the bar's compression floor, moving nothing before it.
+  A NIT whose cost is one invisible point does not buy a structural hoist: options (b) and (c) are
+  correct but move the read's ownership across a file seam to save that point — rejected.
+- **The ruled shape (the implementer applies it with F1/F2 — not FINDER-FIXES):** keep the body as
+  built; add ONE comment line at the `HStack` stating that the stack is always present because it
+  carries the held read (`.task`), and that a conditional here strands the mark's server-off read
+  (R-878-K3) — so the stranding "fix" this round itself proposed is never written by a later session.
+  No pin: nothing behavioral changes under this call. (Had (b)/(c) been ruled, the implementer's
+  proposed server-off mount pin would have been owed — recorded for any future reshaping of this seam.)
+- F3's severity falls from NIT to RECORD-ONLY; the next round's reviewer checks only that the comment
+  line landed.
+
+### F1 — shape CONFIRMED as the implementer re-traced it (of the two I offered, the second):
+normalize inside `WingsModel.destinations(from:)` — an id is effective iff it is `""` or names a row
+of the held `wings`, else `""` — healing all four faces AND the ⌘K selector sites the fix session
+found beyond my list (`WingDestinationSheet.swift:310`/`:213`), and restoring consistency with the
+model's own `name(of:)`. The App-target pin as they briefed it (committed on the pre-fix head,
+compiled there, RUN at the closing window), with the second-live-wing arm that distinguishes "Home
+wrongly offered" from "no door drawn". APPROVED to build.
+
+### F2 — shape CONFIRMED: the pure `git mv` to `Core/Views/NoteRename.swift` plus the header's home
+line; the survey (no pbxproj membership exceptions, no path-reading pin names the file, same module)
+is accepted; the zero-test-files `git diff --stat` parity proof at the fix commit. APPROVED to build.
