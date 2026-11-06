@@ -797,6 +797,82 @@ struct BookArrivalsDoor: View {
     #endif
 }
 
+/// **ONE WAITING ROW'S TWO SHAPES** (VX-821 — the leg-2 walk's W-2/W-3).
+/// Three subviews: the checkbox, the text column, the arms. INLINE while the
+/// row holds the checkbox, the text column's floor and the arms whole beside
+/// each other — the arms at the trailing edge; else STACKED — the arms wrap
+/// under the text, at the text's left edge (or the row's, when even that
+/// indent cannot hold them). The class is `ArrivalRowFit`'s pure rule over
+/// the row's width and the arms' own ideal width — never the text's — so a
+/// title, a why line or a sort can never change a row's shape (the Library
+/// controls-row law: wrap only by stable widths, never `ViewThatFits`).
+///
+/// `measuredWidth` is the list's measured width less the row's padding — an
+/// INPUT of the layout (W-3: a changed input re-runs the layout of every
+/// realized row on every width change), and the width it answers with when
+/// a parent asks its ideal (a nil proposal).
+struct ArrivalRowLayout: Layout {
+    var measuredWidth: CGFloat
+
+    private struct Plan {
+        var width: CGFloat
+        var stacked: Bool
+        var box: CGSize
+        var arms: CGSize
+        var textWidth: CGFloat
+        var text: CGSize
+    }
+
+    private func plan(width proposed: CGFloat?, subviews: Subviews) -> Plan? {
+        guard subviews.count == 3 else { return nil }
+        let box = subviews[0].sizeThatFits(.unspecified)
+        let arms = subviews[2].sizeThatFits(.unspecified)
+        let width = proposed ?? (measuredWidth > 0
+            ? measuredWidth
+            : ArrivalRowFit.inlineWidth(
+                boxWidth: box.width, textWidth: subviews[1].sizeThatFits(.unspecified).width,
+                armsWidth: arms.width))
+        let stacked = ArrivalRowFit.stacked(rowWidth: width, boxWidth: box.width, armsWidth: arms.width)
+        let textWidth = ArrivalRowFit.textWidth(
+            rowWidth: width, boxWidth: box.width, armsWidth: arms.width, stacked: stacked)
+        let text = subviews[1].sizeThatFits(ProposedViewSize(width: textWidth, height: nil))
+        return Plan(width: width, stacked: stacked, box: box, arms: arms, textWidth: textWidth, text: text)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let plan = plan(width: proposal.width, subviews: subviews) else { return .zero }
+        let height = plan.stacked
+            ? max(plan.box.height, plan.text.height + ArrivalRowFit.stackGap + plan.arms.height)
+            : max(plan.box.height, plan.text.height, plan.arms.height)
+        return CGSize(width: plan.width, height: height)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
+    ) {
+        guard let plan = plan(width: bounds.width, subviews: subviews) else { return }
+        subviews[0].place(
+            at: CGPoint(x: bounds.minX, y: bounds.minY + ArrivalRowFit.boxDrop),
+            anchor: .topLeading, proposal: .unspecified)
+        let textX = bounds.minX + plan.box.width + ArrivalRowFit.spacing
+        subviews[1].place(
+            at: CGPoint(x: textX, y: bounds.minY), anchor: .topLeading,
+            proposal: ProposedViewSize(width: plan.textWidth, height: nil))
+        if plan.stacked {
+            let x = ArrivalRowFit.stackedArmsIndented(
+                rowWidth: bounds.width, boxWidth: plan.box.width, armsWidth: plan.arms.width)
+                ? textX : bounds.minX
+            subviews[2].place(
+                at: CGPoint(x: x, y: bounds.minY + plan.text.height + ArrivalRowFit.stackGap),
+                anchor: .topLeading, proposal: .unspecified)
+        } else {
+            subviews[2].place(
+                at: CGPoint(x: bounds.maxX - plan.arms.width, y: bounds.minY),
+                anchor: .topLeading, proposal: .unspecified)
+        }
+    }
+}
+
 /// **The waiting rows** — the review area's list (VX-821; the popover's
 /// rows, carried whole). Each row: its checkbox (the pick), the note's NAME
 /// (its first words where it leads with them — a door to the note itself,
@@ -827,6 +903,18 @@ struct BookArrivalsList: View {
     /// This list's own name in the DEBUG probe (DEBUG-only; see the probe).
     @State private var probeOwner = UUID()
     #endif
+    /// **W-3 (the leg-2 walk) — the list's measured width, whole points**,
+    /// written on a real change only. Every row's layout takes it as an INPUT
+    /// (`ArrivalRowLayout.measuredWidth`), so a width change re-runs every
+    /// realized row's layout: the lazy stack keeps a realized row's measured
+    /// layout across a pure width change (the walk's crushed titles survived
+    /// the window growing back, until the voice flip rebuilt every row), and a
+    /// changed layout input is what makes it ask again.
+    @State private var listWidth: CGFloat = 0
+
+    /// The row's own horizontal padding (each side) — the layout's width is
+    /// the list's less twice this.
+    static let rowInset: CGFloat = 16
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -843,11 +931,18 @@ struct BookArrivalsList: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, Self.rowInset)
                     .padding(.vertical, 10)
             }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width.rounded() } action: { width in
+            if width != listWidth { listWidth = width }
+        }
         #if DEBUG
+        .coordinateSpace(name: ArrivalsLineProbe.space)
+        .onChange(of: listWidth) { _, width in
+            ArrivalsLineProbe.recordWidth(model.readingID, owner: probeOwner, width)
+        }
         .onDisappear { ArrivalsLineProbe.forget(model.readingID, owner: probeOwner) }
         #endif
     }
@@ -860,7 +955,11 @@ struct BookArrivalsList: View {
         let why = ArrivalsReviewCopy.why(arrival)
         let since = ArrivalsReviewCopy.since(arrival.waitingSince, now: Date())
         let reason = ArrivalsReviewCopy.reason(arrival)
-        return HStack(alignment: .top, spacing: 14) {
+        // W-2 / W-3 (the leg-2 walk): the row's TWO SHAPES by a stable width
+        // class — the arms trailing while the row holds them beside the text's
+        // floor, else under the text (`ArrivalRowFit`); never `ViewThatFits`,
+        // never an overflow past the pane's edge.
+        return ArrivalRowLayout(measuredWidth: max(0, listWidth - 2 * Self.rowInset)) {
             // The pick — ⌘-click's meaning, as a box (her picked preview).
             Button {
                 model.togglePick(arrival.id)
@@ -953,10 +1052,10 @@ struct BookArrivalsList: View {
                         .help(line)
                 }
             }
-            Spacer(minLength: 12)
             // 13i-c U4: the row's arms are DATA (`ArrivalArms`) — one
             // renderer per act, in the table's order. VX-821: bordered and a
-            // good size (her bar), the door's word never truncated (W-1).
+            // good size (her bar), the door's word never truncated (W-1); at
+            // a narrow pane they wrap under the text whole (W-2).
             HStack(spacing: 8) {
                 ForEach(arms.acts, id: \.self) { act in
                     armButton(act, arrival: arrival)
@@ -965,9 +1064,14 @@ struct BookArrivalsList: View {
                         .fixedSize()
                 }
             }
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(ArrivalsLineProbe.space)) } action: { rect in
+                ArrivalsLineProbe.recordArms(model.readingID, owner: probeOwner, arrival.id, rect)
+            }
+            #endif
         }
         .padding(.vertical, 12)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Self.rowInset)
         .background(picked ? tokens.wash : Color.clear, in: RoundedRectangle(cornerRadius: 7))
         .overlay {
             if walked {
@@ -1079,6 +1183,25 @@ enum ArrivalsLineProbe {
         /// VX-821: arrival row id → the WHY line it drew ("" when it drew
         /// none — the since-when-only face).
         var why: [String: String] = [:]
+        /// W-3: the list's measured width, as the rows' layouts last took it.
+        var listWidth: CGFloat = 0
+        /// W-2: arrival row id → its arms' frame in the list's own space.
+        var arms: [String: CGRect] = [:]
+    }
+
+    /// The list's coordinate space (the arms' frames are measured in it).
+    static let space = "ArrivalsLineProbe.list"
+
+    static func recordWidth(_ readingID: String, owner: UUID, _ width: CGFloat) {
+        var entry = claim(readingID, owner)
+        entry.listWidth = width
+        drawn[readingID] = entry
+    }
+
+    static func recordArms(_ readingID: String, owner: UUID, _ rowID: String, _ frame: CGRect) {
+        var entry = claim(readingID, owner)
+        entry.arms[rowID] = frame
+        drawn[readingID] = entry
     }
 
     private(set) static var drawn: [String: Drawn] = [:]
@@ -1106,6 +1229,7 @@ enum ArrivalsLineProbe {
         drawn[readingID]?.rows[rowID] = nil
         drawn[readingID]?.archivedRows.remove(rowID)
         drawn[readingID]?.why[rowID] = nil
+        drawn[readingID]?.arms[rowID] = nil
     }
 
     static func forget(_ readingID: String, owner: UUID) {

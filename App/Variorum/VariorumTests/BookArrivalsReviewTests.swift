@@ -703,6 +703,97 @@ struct BookArrivalsReviewTests {
         }
     }
 
+    /// **W-2 (the leg-2 walk) — the row's shape by a stable width class.**
+    /// Inline while the box, the text's floor and the arms fit side by side;
+    /// else the arms wrap under the text. The rule reads the row's width and
+    /// the arms' own width only — never the text's.
+    @Test func aRowWrapsItsArmsUnderTheTextByAStableWidth() {
+        let box: CGFloat = 20
+        let arms: CGFloat = 266  // Copy In · Move In · Dismiss
+        let threshold = box + ArrivalRowFit.spacing + ArrivalRowFit.textFloor + ArrivalRowFit.armsGap + arms
+        #expect(!ArrivalRowFit.stacked(rowWidth: threshold, boxWidth: box, armsWidth: arms), "exactly fits: inline")
+        #expect(ArrivalRowFit.stacked(rowWidth: threshold - 1, boxWidth: box, armsWidth: arms), "a point less: stacked")
+        #expect(!ArrivalRowFit.stacked(rowWidth: 868, boxWidth: box, armsWidth: arms), "the full measure: inline")
+        #expect(ArrivalRowFit.stacked(rowWidth: 400, boxWidth: box, armsWidth: arms), "a narrow pane: stacked")
+        // Inline the text keeps what the arms leave; stacked it takes the row.
+        #expect(ArrivalRowFit.textWidth(rowWidth: 868, boxWidth: box, armsWidth: arms, stacked: false)
+                == 868 - box - ArrivalRowFit.spacing - ArrivalRowFit.armsGap - arms)
+        #expect(ArrivalRowFit.textWidth(rowWidth: 400, boxWidth: box, armsWidth: arms, stacked: true)
+                == 400 - box - ArrivalRowFit.spacing)
+        // Stacked arms take the text's indent while it holds them, else the row's edge.
+        #expect(ArrivalRowFit.stackedArmsIndented(rowWidth: 400, boxWidth: box, armsWidth: arms))
+        #expect(!ArrivalRowFit.stackedArmsIndented(rowWidth: 290, boxWidth: box, armsWidth: arms))
+    }
+
+    /// **W-2 + W-3 mounted (the walk's shape).** An owned book's bell for a
+    /// membered note draws THREE arms (Copy In · Move In · Dismiss). At a
+    /// narrow pane they sit whole INSIDE the list, under the text; grown back
+    /// wide, the rows re-measure (the list's width is the rows' layout input)
+    /// and the arms return to the trailing edge, beside the text.
+    @Test func atANarrowPaneTheArmsWrapInsideAndGrowingBackReMeasures() async throws {
+        ArrivalsLineProbe.reset()
+        try await withReviewBook(waiting: 0) { session, db, _, _, _ in
+            let ops = session.operations
+            let t = try ops.createTag(name: "t")
+            let rule = try #require(try RuleGrammar.encode(.tag(t.id)))
+            let mine = try ops.createReading(
+                name: "Mine", kind: .book, querySpec: rule, intakeSeating: .arrivals)
+            try ops.setReadingOwned(mine.id, owned: true)
+            let other = try ops.createReading(name: "Other", kind: .book)
+            let shared = try ops.createPost(title: "Notes from the harbour, a longer title")
+            try ops.addPostToReading(shared.id, to: other.id)
+            _ = try ops.applyTag(t.id, toPost: shared.id)
+            let readingID = mine.id
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            structure.adopt(.init(
+                reading: try await book(db, readingID), sections: [], deletedSections: [],
+                assignments: [:]))
+            let arrivals = BookArrivalsModel(session: session, readingID: readingID)
+            arrivals.setReviewOpen(true)
+            try await refresh(arrivals, db)
+            let rowID = try #require(arrivals.door.rows.first?.id)
+
+            let narrow: CGFloat = 420
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: narrow, height: 400),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: BookArrivalsList(model: arrivals, structure: structure))
+            hosting.frame = NSRect(x: 0, y: 0, width: narrow, height: 400)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting) {
+                (ArrivalsLineProbe.drawn[readingID]?.listWidth ?? 0) == narrow
+                    && ArrivalsLineProbe.drawn[readingID]?.arms[rowID] != nil
+            }
+            let tight = try #require(ArrivalsLineProbe.drawn[readingID])
+            #expect(tight.rows[rowID] == ["Copy In", "Move In", ArrivalsCopy.dismissVerb])
+            let tightArms = try #require(tight.arms[rowID])
+            #expect(tightArms.minX >= 0 && tightArms.maxX <= narrow + 0.5,
+                    "every arm whole inside the pane — none clipped, none off-screen: \(tightArms)")
+            #expect(tightArms.minY > 30, "the arms wrapped UNDER the text: \(tightArms)")
+
+            // W-3: the window grows back — the rows re-measure.
+            let wide: CGFloat = 1100
+            window.setContentSize(NSSize(width: wide, height: 400))
+            hosting.frame = NSRect(x: 0, y: 0, width: wide, height: 400)
+            await settle(window, hosting) {
+                (ArrivalsLineProbe.drawn[readingID]?.listWidth ?? 0) == wide
+                    && (ArrivalsLineProbe.drawn[readingID]?.arms[rowID]?.minY ?? 99) < 30
+            }
+            let roomy = try #require(ArrivalsLineProbe.drawn[readingID])
+            #expect(roomy.listWidth == wide, "the rows' layout input followed the width")
+            let roomyArms = try #require(roomy.arms[rowID])
+            #expect(roomyArms.minY < 30, "inline again, beside the text: \(roomyArms)")
+            #expect(abs(roomyArms.maxX - (wide - BookArrivalsList.rowInset)) < 1,
+                    "at the row's trailing edge: \(roomyArms)")
+        }
+    }
+
     @Test func anEmptyReviewSaysNothingIsWaitingBesideDone() async throws {
         ArrivalsReviewProbe.reset()
         try await withReviewBook(waiting: 0) { session, db, readingID, _, _ in

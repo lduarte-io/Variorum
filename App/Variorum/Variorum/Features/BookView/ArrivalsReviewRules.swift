@@ -23,6 +23,7 @@
 //    stands over a landing she asked to see).
 //
 
+import CoreGraphics
 import Foundation
 import VariorumCore
 
@@ -269,6 +270,52 @@ nonisolated enum ArrivalsBulk {
         guard !message.isEmpty else { return (nil, nil) }
         let clean = choice.isEmpty && refusals.isEmpty && waiting == 0
         return clean ? (message, nil) : (nil, message)
+    }
+}
+
+// MARK: - One row's shape (W-2 / W-3 — the leg-2 walk)
+
+/// **Which of a waiting row's two shapes it takes** — pure, over the row's
+/// width and the arms' own ideal width (NEVER the text's: a title or a why
+/// line can't change a row's shape — the controls-row law's stable widths).
+/// The walk's W-2: at a narrow pane the arms (fixed-size — a door's word is
+/// never truncated) took the row's whole width, crushed the title to
+/// "Not…", clipped Copy In and pushed Dismiss past the window's edge.
+nonisolated enum ArrivalRowFit {
+    /// Checkbox → text.
+    static let spacing: CGFloat = 14
+    /// Text → arms, inline.
+    static let armsGap: CGFloat = 12
+    /// Text → arms, stacked.
+    static let stackGap: CGFloat = 8
+    /// The checkbox's drop to the name's line.
+    static let boxDrop: CGFloat = 2
+    /// The least the text column keeps beside the arms — below it, the arms
+    /// go under the text.
+    static let textFloor: CGFloat = 220
+
+    /// INLINE needs the box, the text's floor and the arms whole, side by side.
+    static func stacked(rowWidth: CGFloat, boxWidth: CGFloat, armsWidth: CGFloat) -> Bool {
+        boxWidth + spacing + textFloor + armsGap + armsWidth > rowWidth
+    }
+
+    /// The text column's width: the row less the box (and, inline, the arms).
+    static func textWidth(
+        rowWidth: CGFloat, boxWidth: CGFloat, armsWidth: CGFloat, stacked: Bool
+    ) -> CGFloat {
+        let beside = rowWidth - boxWidth - spacing
+        return max(0, stacked ? beside : beside - armsGap - armsWidth)
+    }
+
+    /// Stacked arms sit at the text's left edge while that indent holds them
+    /// whole; else they start at the row's edge.
+    static func stackedArmsIndented(rowWidth: CGFloat, boxWidth: CGFloat, armsWidth: CGFloat) -> Bool {
+        boxWidth + spacing + armsWidth <= rowWidth
+    }
+
+    /// The row's ideal width, inline (a parent asking with no width).
+    static func inlineWidth(boxWidth: CGFloat, textWidth: CGFloat, armsWidth: CGFloat) -> CGFloat {
+        boxWidth + spacing + max(textWidth, textFloor) + armsGap + armsWidth
     }
 }
 
