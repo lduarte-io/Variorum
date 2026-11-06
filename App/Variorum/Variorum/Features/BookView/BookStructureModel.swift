@@ -376,10 +376,21 @@ final class BookStructureModel {
     }
 
     /// What a post drop writes: the chapter it joins, and the membership
-    /// anchor it lands above. `before == nil` leaves the book's order alone.
+    /// anchor it lands above — or, at the PIN BOUNDARY, below (`after`, VX-803).
+    /// Both nil leaves the book's order alone; at most one is set.
     nonisolated struct PostDropPlan: Equatable, Sendable {
         var sectionID: String?
         var before: String?
+        /// VX-803 (A-808-12 (g)): a PINNED note dropped among the unpinned rows
+        /// lands at the END of its own pinned run — after the run's last row.
+        var after: String? = nil
+
+        /// The reorder the plan asks for, as the op's own anchor.
+        var anchor: Operations.InsertPosition? {
+            if let before { return .before(before) }
+            if let after { return .after(after) }
+            return nil
+        }
     }
 
     /// `nil` = nothing to do (a post dropped on itself).
@@ -389,18 +400,35 @@ final class BookStructureModel {
     /// looking at, and silently rewriting it from a drop would edit an order
     /// she cannot see. The chapter half of the drop always happens — that is
     /// what her ruling asked for.
+    ///
+    /// **VX-803 — THE PIN BOUNDARY IS A GROUP EDGE** (A-808-12 (g), PROVISIONAL
+    /// P-808-B4-3). A book's pinned notes float above its sort within each
+    /// group (`Queries.assembleReading`), so a manual order is TWO runs per
+    /// group — the pinned run, then the rest — each by position. A landing
+    /// inside the dragged note's OWN run is the shipped rule (above the target);
+    /// a drop onto a row of the OTHER run lands at the NEAR EDGE of the dragged
+    /// note's own run in that group — an unpinned note at the top of the
+    /// unpinned run, a pinned note at the bottom of the pinned run — and a
+    /// chapter heading's drop files it at the top of ITS run there. **A drag
+    /// never pins or unpins**: the pin has exactly one door. (Without this a
+    /// cross-run `.before` lands wherever the target's position happens to fall
+    /// among the other run's positions — traced in the B4 record.)
     nonisolated static func postDropPlan(
         _ site: PostDropSite, dragged postID: String,
         groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])],
         reposition: Bool
     ) -> PostDropPlan? {
+        let draggedPinned = groups.lazy.flatMap(\.entries)
+            .first { $0.postID == postID }?.pinned ?? false
         switch site {
         case .unfiled:
             return PostDropPlan(sectionID: nil, before: nil)
         case .chapter(let sectionID):
-            let first = groups
+            // The top of the dragged note's own run in that chapter.
+            let run = groups
                 .first { $0.section?.id == sectionID }?
-                .entries.first?.postID
+                .entries.filter { $0.pinned == draggedPinned } ?? []
+            let first = run.first?.postID
             return PostDropPlan(
                 sectionID: sectionID,
                 before: (reposition && first != postID) ? first : nil)
@@ -409,10 +437,41 @@ final class BookStructureModel {
             let group = groups.first { group in
                 group.entries.contains { $0.postID == targetID }
             }
+            let targetPinned = group?.entries.first { $0.postID == targetID }?.pinned ?? false
+            guard reposition, targetPinned != draggedPinned, let group else {
+                return PostDropPlan(
+                    sectionID: group?.section?.id,
+                    before: reposition ? targetID : nil)
+            }
+            // Across the boundary: the near edge of the dragged note's own run.
+            let run = group.entries.filter { $0.pinned == draggedPinned }
+            if draggedPinned {
+                let last = run.last?.postID
+                return PostDropPlan(
+                    sectionID: group.section?.id, before: nil,
+                    after: last == postID ? nil : last)
+            }
+            let first = run.first?.postID
             return PostDropPlan(
-                sectionID: group?.section?.id,
-                before: reposition ? targetID : nil)
+                sectionID: group.section?.id, before: first == postID ? nil : first)
         }
+    }
+
+    /// **VX-803 — the hand moves' neighbour, inside the note's own PIN RUN**
+    /// (A-808-12 (g)): Move Up / Move Down (the Book Panel, Manage Notes) stop
+    /// at the boundary exactly as they stop at a chapter's edge — nil there, so
+    /// the item does not render (P-2). `entries` is the group the note is shown
+    /// in; the anchor is the op's own.
+    nonisolated static func runMove(
+        _ postID: String, up: Bool, in entries: [Queries.ReadingEntry]
+    ) -> Operations.InsertPosition? {
+        guard let me = entries.first(where: { $0.postID == postID }) else { return nil }
+        let ids = entries.filter { $0.pinned == me.pinned }.map(\.postID)
+        guard let index = ids.firstIndex(of: postID) else { return nil }
+        if up {
+            return index > 0 ? .before(ids[index - 1]) : nil
+        }
+        return index < ids.count - 1 ? .after(ids[index + 1]) : nil
     }
 
     /// What a post drop RESOLVES to on the book view's own rows (17y B3
@@ -453,13 +512,24 @@ final class BookStructureModel {
         // The gate: a stamp order, a plan that files the note into the
         // chapter it is ALREADY in, where the same drop in manual order
         // would have re-placed it.
-        if !reposition, plan.before == nil,
+        if !reposition, plan.anchor == nil,
            plan.sectionID == chapterKey(of: postID, in: groups),
            let manual = postDropPlan(site, dragged: postID, groups: groups, reposition: true),
-           let before = manual.before, before != postID {
+           let anchor = manual.anchor {
             // Already satisfied (NIT-4): onto its immediate shown successor
             // it would land right where it stands — no placement was asked.
-            if before == shownSuccessor(of: postID, in: groups) { return .nothing }
+            // (VX-803: a pinned note's near-edge landing names its shown
+            // PREDECESSOR the same way.)
+            switch anchor {
+            case .before(let before):
+                guard before != postID else { return .plan(plan) }
+                if before == shownSuccessor(of: postID, in: groups) { return .nothing }
+            case .after(let after):
+                guard after != postID else { return .plan(plan) }
+                if after == shownPredecessor(of: postID, in: groups) { return .nothing }
+            case .start, .end:
+                break
+            }
             return .needsManualOrder
         }
         return .plan(plan)
@@ -484,6 +554,19 @@ final class BookStructureModel {
               index + 1 < entries.count
         else { return nil }
         return entries[index + 1].postID
+    }
+
+    /// The note shown right before `postID` in its own group (nil = first).
+    private nonisolated static func shownPredecessor(
+        of postID: String,
+        in groups: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    ) -> String? {
+        guard let entries = groups.first(where: { $0.entries.contains { $0.postID == postID } })?
+                  .entries,
+              let index = entries.firstIndex(where: { $0.postID == postID }),
+              index > 0
+        else { return nil }
+        return entries[index - 1].postID
     }
 
     /// True when a drop should also reposition the membership — i.e. the book
@@ -598,8 +681,8 @@ final class BookStructureModel {
         }
         await run { [readingID] ops in
             try ops.assignPostToSection(postID, in: readingID, section: plan.sectionID)
-            if let before = plan.before {
-                try ops.reorderReadingPost(postID, in: readingID, to: .before(before))
+            if let anchor = plan.anchor {
+                try ops.reorderReadingPost(postID, in: readingID, to: anchor)
             }
         }
     }

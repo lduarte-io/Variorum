@@ -56,15 +56,19 @@ struct ManageReadingPostsSheet: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                ForEach(Array(members.enumerated()), id: \.element.postID) { i, entry in
+                ForEach(Array(members.enumerated()), id: \.element.postID) { _, entry in
                     HStack {
                         Text(entry.displayTitle)
                         Spacer()
                         if reading.sortField == .manual {
+                            // VX-803: the move's own rule decides the edge — a
+                            // pin run's edge is one (`runMove`).
                             Button("↑") { move(entry.postID, up: true) }
-                                .disabled(i == 0)
+                                .disabled(BookStructureModel.runMove(
+                                    entry.postID, up: true, in: members) == nil)
                             Button("↓") { move(entry.postID, up: false) }
-                                .disabled(i == members.count - 1)
+                                .disabled(BookStructureModel.runMove(
+                                    entry.postID, up: false, in: members) == nil)
                         }
                         // 13i-c U4 (§20): the one remove/release road —
                         // "Release" on an owned book (the note goes back to

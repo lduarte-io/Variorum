@@ -127,20 +127,16 @@ final class ReadingsViewModel {
 
     /// Reorder by one step in MANUAL order: the neighbor comes from the
     /// current assembly (position order), the move is the existing op.
+    /// VX-803 (A-808-12 (g)): inside the note's own PIN RUN — the boundary
+    /// between the pinned notes and the rest is an edge (`runMove`, the one
+    /// rule the Book Panel's moves read).
     func movePost(_ postID: String, in readingID: String, up: Bool) async {
         do {
             let entries = try await session.database.read { [readingID] db in
                 try Queries.assembleReading(db, readingID: readingID)
             }
-            guard let i = entries.firstIndex(where: { $0.postID == postID }) else { return }
-            let target: Operations.InsertPosition
-            if up {
-                guard i > 0 else { return }
-                target = .before(entries[i - 1].postID)
-            } else {
-                guard i < entries.count - 1 else { return }
-                target = .after(entries[i + 1].postID)
-            }
+            guard let target = BookStructureModel.runMove(postID, up: up, in: entries)
+            else { return }
             try await session.runner.run { ops in
                 try ops.reorderReadingPost(postID, in: readingID, to: target)
             }

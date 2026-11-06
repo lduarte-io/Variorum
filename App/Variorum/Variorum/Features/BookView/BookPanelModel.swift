@@ -292,18 +292,17 @@ nonisolated enum BookPanelBrain {
     /// book's MANUAL order is what she sees. nil at the group's edge, and
     /// nil whenever the book reads in a stamp order (a hand position would
     /// not show — P-2; the book view's `repositionsOnDrop` rule).
+    ///
+    /// VX-803 (A-808-12 (g)): within its own PIN RUN too — the boundary between
+    /// a group's pinned notes and the rest is an edge like a chapter's (the one
+    /// rule, `BookStructureModel.runMove`).
     static func noteMove(
         _ postID: String, up: Bool, groups: [Group], manualOrder: Bool
     ) -> Operations.InsertPosition? {
         guard manualOrder,
               let group = groups.first(where: { $0.entries.contains { $0.postID == postID } })
         else { return nil }
-        let ids = group.entries.map(\.postID)
-        guard let index = ids.firstIndex(of: postID) else { return nil }
-        if up {
-            return index > 0 ? .before(ids[index - 1]) : nil
-        }
-        return index < ids.count - 1 ? .after(ids[index + 1]) : nil
+        return BookStructureModel.runMove(postID, up: up, in: group.entries)
     }
 
     /// Whether a chapter row draws its ⠿ grip (17y B2, item (e) — her
@@ -349,8 +348,9 @@ nonisolated enum BookPanelBrain {
     nonisolated enum DropPlan: Equatable {
         /// `assignPostToSection(post, section)` then, when `before` is set,
         /// `reorderReadingPost(post, .before(before))` — the book view's
-        /// `filePost`.
-        case file(postID: String, sectionID: String?, before: String?)
+        /// `filePost`. VX-803: `after` is the pin boundary's near-edge landing
+        /// for a pinned note (`PostDropPlan.after`); at most one is set.
+        case file(postID: String, sectionID: String?, before: String?, after: String? = nil)
         /// `reorderSection(section, to:)` — the book view's `moveChapter`.
         case moveChapter(sectionID: String, to: Operations.InsertPosition)
     }
@@ -373,7 +373,8 @@ nonisolated enum BookPanelBrain {
             guard let plan = BookStructureModel.postDropPlan(
                 postSite, dragged: postID, groups: groups, reposition: manualOrder)
             else { return nil }
-            return .file(postID: postID, sectionID: plan.sectionID, before: plan.before)
+            return .file(
+                postID: postID, sectionID: plan.sectionID, before: plan.before, after: plan.after)
         case .chapter(let sectionID):
             guard sections.contains(where: { $0.id == sectionID }) else { return nil }
             let before: String? = switch site {
@@ -434,17 +435,24 @@ nonisolated enum BookPanelBrain {
         // chapter it is ALREADY in (a write that changes nothing) — where
         // the same drop in manual order would have re-placed it.
         if !manualOrder, case .note(let postID) = drag,
-           case .file(_, let sectionID, nil) = plan,
+           case .file(_, let sectionID, nil, nil) = plan,
            sectionID == chapter(of: postID, in: groups),
-           case .file(_, _, let before?)? = dropPlan(
-               drag, onto: site, groups: groups, sections: sections, manualOrder: true),
-           before != postID {
+           case .file(_, _, let before, let after)? = dropPlan(
+               drag, onto: site, groups: groups, sections: sections, manualOrder: true) {
             // Already satisfied (the B2 ladder's NIT-4): dropped onto its
             // IMMEDIATE shown successor, the note would land right above
             // where it already stands — no placement was asked, so no refusal
-            // is owed (manual order does the same gesture silently).
-            if before == successor(of: postID, in: groups) { return .nothing }
-            return .needsManualOrder
+            // is owed (manual order does the same gesture silently). VX-803: a
+            // pinned note's near-edge landing after its shown PREDECESSOR is the
+            // same "already there".
+            if let before, before != postID {
+                if before == successor(of: postID, in: groups) { return .nothing }
+                return .needsManualOrder
+            }
+            if let after, after != postID {
+                if after == predecessor(of: postID, in: groups) { return .nothing }
+                return .needsManualOrder
+            }
         }
         return .plan(plan)
     }
@@ -463,6 +471,17 @@ nonisolated enum BookPanelBrain {
               index + 1 < entries.count
         else { return nil }
         return entries[index + 1].postID
+    }
+
+    /// The note shown right before `postID` in its own group (nil = it is the
+    /// group's first).
+    private static func predecessor(of postID: String, in groups: [Group]) -> String? {
+        guard let entries = groups.first(where: { $0.entries.contains { $0.postID == postID } })?
+                  .entries,
+              let index = entries.firstIndex(where: { $0.postID == postID }),
+              index > 0
+        else { return nil }
+        return entries[index - 1].postID
     }
 }
 
@@ -655,11 +674,13 @@ final class BookPanelModel {
             plan = resolved
         }
         switch plan {
-        case .file(let postID, let sectionID, let before):
+        case .file(let postID, let sectionID, let before, let after):
             await run(shown) { ops in
                 try ops.assignPostToSection(postID, in: book.id, section: sectionID)
                 if let before {
                     try ops.reorderReadingPost(postID, in: book.id, to: .before(before))
+                } else if let after {
+                    try ops.reorderReadingPost(postID, in: book.id, to: .after(after))
                 }
             }
         case .moveChapter(let sectionID, let target):
