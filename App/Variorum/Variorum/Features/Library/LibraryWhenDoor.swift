@@ -529,10 +529,23 @@ struct LibraryWhenFoot: View {
 }
 
 /// **VX-98 — the grid's key door:** a zero-size view owning a local `keyDown`
-/// monitor for the window it lives in — the popover's own — for as long as it
-/// lives there (`PageTurnKeyMonitor`'s shape). It asks the pure rule and
-/// swallows a key only when the grid took it, so Esc (the popover's close), a
-/// chord, and ⏎ on an untouched grid pass on exactly as before.
+/// monitor while its face is up (`PageTurnKeyMonitor`'s shape). It asks the
+/// pure rule and swallows a key only when the grid took it, so Esc (the
+/// popover's close), a chord, a letter and ⏎ on an untouched grid pass on
+/// exactly as before.
+///
+/// **WHOSE key (the walk's W10 — VX-179's F-W-4 class, its rule reused):** the
+/// face lives in SwiftUI's `.popover`, whose window is a CHILD of the main
+/// window — and the main window stays KEY, so the keyboard's events are
+/// addressed to the PARENT and AppKit delivers them in (measured at VX-179,
+/// `notes/plans/fixes/vx-179-comment-polish.md`). The first build guarded
+/// `event.window === its own window` and never saw one arrow with the Library's
+/// search field holding the caret. A key is the grid's where it is DELIVERED
+/// (`CommentPanelKeys.delivers`: the key window is the face's own, or the
+/// face's VISIBLE window is a child of it), never while that window is
+/// hidden — SwiftUI never tears a dismissed popover's content down — and the
+/// monitor is released when its popover closes. The field's caret is never
+/// taken: the grid claims its keys, it never becomes first responder.
 struct LibraryWhenKeyMonitor: NSViewRepresentable {
     let onKey: (LibraryWhenGridKeys.Key) -> Bool
 
@@ -549,19 +562,44 @@ struct LibraryWhenKeyMonitor: NSViewRepresentable {
     final class MonitorView: NSView {
         var onKey: ((LibraryWhenGridKeys.Key) -> Bool)?
         private var monitor: Any?
+        private var hostClosing: NSObjectProtocol?
 
         /// Never takes a click — the cells above it do.
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
+        private func release() {
             if let monitor {
                 NSEvent.removeMonitor(monitor)
                 self.monitor = nil
             }
+            if let hostClosing {
+                NotificationCenter.default.removeObserver(hostClosing)
+                self.hostClosing = nil
+            }
+        }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            release()
             guard window != nil else { return }
+            // A dismissed popover's face is never torn down: its closing ends
+            // the listening (the comment panel's FIX LEG 3 road).
+            hostClosing = NotificationCenter.default.addObserver(
+                forName: NSPopover.willCloseNotification, object: nil, queue: .main
+            ) { [weak self] note in
+                let closing = note.object as? NSPopover
+                MainActor.assumeIsolated {
+                    guard let self, let window = self.window,
+                          CommentPanelHostWatcher.isHost(closing, ofPanelIn: window)
+                    else { return }
+                    self.release()
+                }
+            }
             monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-                guard let self, let window = self.window, event.window === window else { return event }
+                guard let self, let window = self.window,
+                      CommentPanelKeys.delivers(
+                          toPanelIn: window, keyWindow: NSApp.keyWindow, eventWindow: event.window)
+                else { return event }
                 guard let key = LibraryWhenGridKeys.key(
                     keyCode: event.keyCode, modifiers: event.modifierFlags,
                     textIsFirstResponder: PageTurnKeys.textIsFirstResponder(in: window)),
@@ -571,7 +609,7 @@ struct LibraryWhenKeyMonitor: NSViewRepresentable {
             }
         }
         // (No `deinit`: the view leaves its window before it dies, and
-        // `viewDidMoveToWindow` — called then with a nil window — removes the
-        // monitor; a nonisolated deinit may not touch it.)
+        // `viewDidMoveToWindow` — called then with a nil window — releases
+        // both; a nonisolated deinit may not touch them.)
     }
 }
