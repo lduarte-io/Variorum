@@ -346,6 +346,38 @@ struct BookArrivalsReviewTests {
         #expect(!ArrivalsReviewSignal.navigated(from: rest, to: rest))
     }
 
+    /// **W-1 (the leg-2 walk, A-808-11 F-4)** — the review's OWN acts are
+    /// never navigation. Seating into an EMPTY book fills the spread's first
+    /// page from nothing and seeds the Index's cold selection from nothing
+    /// (`BookIndexView.landOrSeed`), and the book releasing a focus it no
+    /// longer shows is its own housekeeping: none of these is her ask to see
+    /// something. A page or selection MOVING from one note to another, and a
+    /// note focused, still are. Red on old: the old rule closed on any change.
+    @Test func theBooksContentArrivingIsNeverNavigation() {
+        let empty = ArrivalsReviewSignal(
+            mode: .outline, focusedPostID: nil, indexSelectedPostID: nil,
+            spreadFirstPostID: nil, reveal: nil, chapterReveal: nil, landingPostID: nil)
+        var seeded = empty
+        seeded.spreadFirstPostID = "first seated"
+        #expect(!ArrivalsReviewSignal.navigated(from: empty, to: seeded),
+                "an empty book's first seat fills the spread's first page — content, not navigation")
+        seeded.indexSelectedPostID = "first seated"
+        #expect(!ArrivalsReviewSignal.navigated(from: empty, to: seeded),
+                "the Index's cold seed selects from nothing — content, not navigation")
+        var focused = empty
+        focused.focusedPostID = "n1"
+        #expect(!ArrivalsReviewSignal.navigated(from: focused, to: empty),
+                "a released focus is the book's housekeeping, never an ask")
+        // Still navigation: a page or a selection MOVING, a note focused.
+        var paged = seeded
+        paged.spreadFirstPostID = "another"
+        #expect(ArrivalsReviewSignal.navigated(from: seeded, to: paged), "the spread turned")
+        var reselected = seeded
+        reselected.indexSelectedPostID = "another"
+        #expect(ArrivalsReviewSignal.navigated(from: seeded, to: reselected), "the Index moved")
+        #expect(ArrivalsReviewSignal.navigated(from: empty, to: focused), "a note focused")
+    }
+
     @Test func whileTheReviewCoversABarItsOwnBarHostsTheReceipt() {
         typealias Home = BookNoteBox.QuietReceiptHome
         let home = { (mode: BookStructureModel.ViewMode, reviewing: Bool) -> Home in
@@ -602,6 +634,72 @@ struct BookArrivalsReviewTests {
             await settle(window, hosting) { ArrivalsReviewProbe.drawn[readingID] == nil }
             #expect(ArrivalsReviewProbe.drawn[readingID] == nil, "the review left the book's area")
             #expect(ArrivalsDoorProbe.drawn[readingID]?.open == false)
+        }
+    }
+
+    /// **W-1 (the leg-2 walk), mounted — red on old.** The walk's shape: a
+    /// book with NO members, a bulk Add over a pick holding a choice row. The
+    /// free note lands, the book's assembly is no longer empty (the spread's
+    /// first page fills from nothing), and the review must STAY OPEN with
+    /// the choice row still picked — F-4's one-press retry. On the old rule
+    /// the content change read as navigation and closed the review, the
+    /// pick with it.
+    @Test func aBulkAddWithALeftoverKeepsTheReviewOpenWithTheLeftoverPicked() async throws {
+        ArrivalsReviewProbe.reset()
+        try await withReviewBook(waiting: 0) { session, db, _, _, _ in
+            let ops = session.operations
+            let t = try ops.createTag(name: "t")
+            let rule = try #require(try RuleGrammar.encode(.tag(t.id)))
+            let mine = try ops.createReading(
+                name: "Mine", kind: .book, querySpec: rule, intakeSeating: .arrivals)
+            try ops.setReadingOwned(mine.id, owned: true)
+            let other = try ops.createReading(name: "Other", kind: .book)
+            let shared = try ops.createPost(title: "shared")
+            try ops.addPostToReading(shared.id, to: other.id)
+            let free = try ops.createPost(title: "free")
+            _ = try ops.applyTag(t.id, toPost: shared.id)
+            _ = try ops.applyTag(t.id, toPost: free.id)
+            let readingID = mine.id
+
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { try Queries.assembleReading($0, readingID: readingID) })
+            #expect(model.entries.isEmpty, "the walk's shape: a book with no members yet")
+            let structure = BookStructureModel(session: session, readingID: readingID)
+            structure.adopt(.init(
+                reading: try await book(db, readingID), sections: [], deletedSections: [],
+                assignments: [:]))
+            structure.mode = .outline
+            let arrivals = BookArrivalsModel(session: session, readingID: readingID)
+            arrivals.setReviewOpen(true)
+            try await refresh(arrivals, db)
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1300, height: 820),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: BookView(
+                session: session, readingID: readingID,
+                model: model, structure: structure, arrivals: arrivals))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1300, height: 820)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting) { ArrivalsReviewProbe.drawn[readingID] != nil }
+
+            arrivals.selectAll()
+            await arrivals.addSelected(book: try await book(db, readingID), chaptered: false)
+            // What the book's and the door's observations would deliver now.
+            await model.adopt(try await db.read { try Queries.assembleReading($0, readingID: readingID) })
+            try await refresh(arrivals, db)
+            #expect(model.entries.map(\.postID) == [free.id], "the free note landed")
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+
+            let sharedRow = try #require(arrivals.door.rows.first { $0.postID == shared.id })
+            #expect(arrivals.reviewOpen, "the review's own act is never navigation — it stays open")
+            #expect(arrivals.selection.picked == [sharedRow.id], "the leftover stays picked: one press retries")
+            #expect(ArrivalsReviewProbe.drawn[readingID]?.picked == [sharedRow.id])
         }
     }
 
