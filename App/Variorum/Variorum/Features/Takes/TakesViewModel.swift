@@ -2591,6 +2591,24 @@ final class TakesViewModel {
         blockHistoryRequest = request
     }
 
+    /// **block ▾'s LINEAGE row** (VX-801, VX-827 U3b) — Write's twin: the
+    /// history road, opened on the Lineage face.
+    func requestBlockLineage(blockID: String? = nil) {
+        guard let slot = blockID.flatMap({ id in
+            projection.slots.first { $0.blockID == id }
+        }) ?? commandTargetSlot else {
+            refuse(CapabilityRegistry.capability(.showBlockLineage).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: slot.blockID,
+            focusedVariantID: focusedPane?.blockID == slot.blockID
+                ? focusedPane?.variantID : slot.variantID,
+            opening: .lineage(select: nil))
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
+    }
+
     /// 13j J2: the tray sheet's pending target (`TakesBottomBar` presents
     /// it, where the comments sheet lives).
     var trayRequest: TrayRequest?

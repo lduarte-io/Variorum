@@ -1613,8 +1613,8 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-P | PROPOSAL — the cross-block Bring back as take (the brief's hard gate; row semantics sent to the orchestrator before any op code) | RULED (all four leans sustained — U3b-P RULED) |
 | U3b-1 | The family projection (pure, core) + the node counts read + headless suites | DONE — `Domain/LineageFamily.swift` (members older above in generation bands, place + header acts by state, the op's own wing rule, a block met twice drawn once, `opening`), `Queries/LineageFamilyCounts.swift`; `LineageFamilyTests` 7/7 headless (product row) |
 | U3b-2 | The op, built to the ruling + its exact state-transition suite | DONE — `Operations+LineageBringBack.swift` (`bringBackFromLineage`, `LineageTakeSource`, `lineageCrossesWing`), `OperationError.notInLineage`, its words in `OpsRefusalTable`; `LineageBringBackTests` 12/12 headless (a product row: does not compile on the pre-U3b tree) |
-| U3b-3 | The Commits face machinery parameterized by block (a relative of the block you came from) — reuse, not a second composition | NOT-STARTED |
-| U3b-4 | The Lineage face (model + view), its doors (lineage › on the face, Lineage in both block ▾ menus), the registry | NOT-STARTED |
+| U3b-3 | The Commits face machinery parameterized by block (a relative of the block you came from) — reuse, not a second composition | DONE (compiled) — `CommitsFaceModel.Role` (`.home` / `.relative`), the shared `LineageBringBack` road; `CommitsFaceBody` = THE one pane+rail composition both faces draw |
+| U3b-4 | The Lineage face (model + view), its doors (lineage › on the face, Lineage in both block ▾ menus), the registry | IN PROGRESS — face + doors + registry + the surface host (`BlockHistorySurface`) compiled (app `build` green); pins next |
 | U3b-5 | The origin door re-aim (G2's ruling) + the old panel's WHOLE retirement + every pin re-pointed or retired by name + the tutorial walk's drive | NOT-STARTED |
 | U3b-6 | The guide sweep (G1's sentences, each listed for #264) | NOT-STARTED |
 | U3b-7 | Walk rows for the Lineage face, appended to the window's walk | NOT-STARTED |

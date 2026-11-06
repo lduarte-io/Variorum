@@ -726,6 +726,16 @@ struct CapabilityRegistryTests {
             // panel's own line above still renders for the origin door
             // (gate G2) until the Lineage face retires it.
             .union(CommitsFaceView.surfaceCapabilities)
+            // VX-801 (VX-827 U3b — A JUSTIFIED EDIT, the same class — a new
+            // renderer is a new line): the LINEAGE FACE renders its member
+            // header's four acts (Put back · Bring back as a take · Compare
+            // with now · go to its wing — `.putBackLineageBlock` …
+            // `.goToLineageWing`, their ONLY renderer) over the same pane+rail
+            // composition the Commits face draws (`CommitsFaceBody`, whose
+            // relative-moment Bring back is `.bringBackLineageAsTake`); the
+            // Commits face's crumb renders "lineage ›" (`.showBlockLineage`'s
+            // `.surface` door).
+            .union(LineageFaceView.surfaceCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.surface))
     }
 

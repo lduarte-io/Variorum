@@ -951,6 +951,53 @@ nonisolated enum CapabilityRegistry {
                 + "note and press history in the bottom bar.",
             availability: takeFamily),
 
+        // **VX-801 (VX-827 U3b) — THE LINEAGE FACE** (THE DESIGN MEMO: "The
+        // block menu carries History and Lineage rows"; her composite's
+        // "lineage ›" on the Commits face). Block-scoped like History; its two
+        // doors are block ▾'s row on BOTH bars (`.bottomBar`, R6-2's one
+        // grammar) and the Commits face's crumb door (`.surface`). It always
+        // acts: a block with no lineage opens on the honest empty state (the
+        // History door's own posture with no commits).
+        Capability(
+            id: .showBlockLineage, verb: "Block Lineage", scope: .block,
+            doors: [.bottomBar, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Put the caret in a block and its Lineage shows the blocks it "
+                + "came from and what came of it.",
+            availability: takeFamily),
+        // The member header's acts — `.surface` acts on the member she
+        // selected, pointed at directly. Put back runs the tray's two roads
+        // (`PreservedOriginPutBack`, `unarchiveBlock`); Bring back as take runs
+        // `bringBackFromLineage` (U3b-P RULED — the fence and the seal refuse
+        // in the operation's words, and a relative's moment in the pane's foot
+        // is the same act); Compare with now writes nothing; go to its wing is
+        // #166(e)'s plain road. Rendered only where the member can act
+        // (`LineageFamily`'s acts — P-2).
+        Capability(
+            id: .putBackLineageBlock, verb: BlockPastCopy.putBackVerb, scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A block kept as lineage is put back from its block's Lineage.",
+            availability: takeFamily),
+        Capability(
+            id: .bringBackLineageAsTake, verb: BlockHistoryPath.bringBackAsTakeVerb, scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A block's words come back as a take from its block's Lineage.",
+            availability: takeFamily),
+        Capability(
+            id: .compareLineageWithNow, verb: LineageFaceCopy.compareWithNow, scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A block in a lineage is compared from its block's Lineage.",
+            availability: takeFamily),
+        Capability(
+            id: .goToLineageWing, verb: "Go to Its Wing", scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "A block in another wing is reached from its block's Lineage.",
+            availability: takeFamily),
+
         // **THE WHOLE-NOTE VERSIONS DOOR** (the post-13l polish round, ledger
         // rows 16 and 23 — G1 and the V-family). Her ruling, verbatim: *"an
         // easy door would be to make a copy of the note, archive it, and then

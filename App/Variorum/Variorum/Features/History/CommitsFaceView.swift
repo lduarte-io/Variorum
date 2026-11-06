@@ -31,11 +31,10 @@ import VariorumCore
 struct CommitsFaceView: View {
     /// The registry ids this face renders INLINE (P-1's `.surface` door; the
     /// walk unions every renderer). `.deleteNow` is deliberately absent: this
-    /// is not a trash surface (row 21's letter, kept from the panel).
-    static let surfaceCapabilities: [CapabilityID] = [
-        .restoreCommit, .bringBackCommitAsTake, .compareCommits, .renameCommit,
-        .restoreTake, .unarchiveTake,
-    ]
+    /// is not a trash surface (row 21's letter, kept from the panel). The
+    /// crumb row's "lineage ›" is the Lineage face's `.surface` door (U3b).
+    static let surfaceCapabilities: [CapabilityID] =
+        CommitsFaceBody.surfaceCapabilities + [.showBlockLineage]
 
     /// The rail's width — B's full-column rail (330 pt drawn).
     static let railWidth: CGFloat = 330
@@ -43,20 +42,23 @@ struct CommitsFaceView: View {
     let session: AppSession
     /// ‹ back — the host restores exactly what was there.
     let onBack: () -> Void
+    /// "lineage ›" — the host swaps this face for the Lineage face (U3b); nil
+    /// renders no door (P-2).
+    var onLineage: (() -> Void)?
     @State private var model: CommitsFaceModel
     @State private var crumbTitle: String?
     @State private var crumbBlock: String?
-    @State private var takesShown = false
     @FocusState private var keysHeld: Bool
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
     init(
         session: AppSession, request: BlockHistoryRequest, onBack: @escaping () -> Void,
-        model: CommitsFaceModel? = nil
+        onLineage: (() -> Void)? = nil, model: CommitsFaceModel? = nil
     ) {
         self.session = session
         self.onBack = onBack
+        self.onLineage = onLineage
         _model = State(initialValue: model ?? CommitsFaceModel(session: session, request: request))
     }
 
@@ -68,23 +70,9 @@ struct CommitsFaceView: View {
         VStack(alignment: .leading, spacing: 10) {
             crumbRow
             if let status = model.status {
-                Text(status.text)
-                    .font(tokens.small)
-                    .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
-                    .textSelection(.enabled)
-                    .lineLimit(3)
+                CommitsFaceStatusLine(status: status, tokens: tokens)
             }
-            if model.compareBoxes != nil {
-                CommitsCompareView(model: model, tokens: tokens)
-            } else {
-                HStack(alignment: .top, spacing: 10) {
-                    readingPane
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    rail
-                        .frame(width: Self.railWidth)
-                        .frame(maxHeight: .infinity)
-                }
-            }
+            CommitsFaceBody(model: model, session: session, tokens: tokens) { keysHeld = true }
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -106,23 +94,7 @@ struct CommitsFaceView: View {
             return .handled
         }
         .onAppear { keysHeld = true }
-        .task { await model.start() }
-        .task { await model.watchSeal() }
         .task { await readCrumb() }
-        .alert(
-            BlockHistoryCopy.predatesSplitTitle,
-            isPresented: Binding(
-                get: { model.pendingRestore != nil },
-                set: { if !$0 { model.pendingRestore = nil } }),
-            presenting: model.pendingRestore
-        ) { pending in
-            Button(BlockHistoryCopy.restoreAnyway, role: .destructive) {
-                Task { await model.confirmPendingRestore(pending) }
-            }
-            Button("Cancel", role: .cancel) { model.pendingRestore = nil }
-        } message: { _ in
-            Text(BlockHistoryCopy.predatesSplitDetail)
-        }
         #if DEBUG
         .onAppear { CommitsFaceOracle.publish(model, owner: oracleOwner) }
         .onDisappear { CommitsFaceOracle.release(owner: oracleOwner) }
@@ -136,12 +108,10 @@ struct CommitsFaceView: View {
     /// The note's name and the block's place, read once — the crumb her
     /// composite draws ("On Rereading › block 2 › history").
     private func readCrumb() async {
-        let read = try? await session.database.read { [postID = model.postID, blockID = model.blockID] db in
-            (title: try Queries.noteDisplayTitle(db, id: postID),
-             place: try CommitsFaceCrumb.place(db, postID: postID, blockID: blockID))
-        }
+        let read = try? await CommitsFaceCrumb.read(
+            session: session, postID: model.postID, blockID: model.blockID)
         crumbTitle = read?.title ?? nil
-        crumbBlock = (read?.place ?? nil).map { BlockLineLabel.caret(ordinal: $0.ordinal, of: $0.count) }
+        crumbBlock = read?.block
     }
 
     // MARK: - The crumb row
@@ -160,6 +130,82 @@ struct CommitsFaceView: View {
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer(minLength: 0)
+            // U3b: the Lineage face's one door on this face (her composite's
+            // "lineage ›", top right) — the registry's `.showBlockLineage`.
+            if let onLineage {
+                Button(tokens.chromeLabel(CommitsFaceCopy.lineageDoor), action: onLineage)
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                    .help(CommitsFaceCopy.lineageDoorHelp)
+            }
+        }
+    }
+}
+
+/// The face's one status line — a receipt muted, a refusal in the alarm ink.
+struct CommitsFaceStatusLine: View {
+    let status: RecoveryStatus
+    let tokens: VoiceTokens
+
+    var body: some View {
+        Text(status.text)
+            .font(tokens.small)
+            .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
+            .textSelection(.enabled)
+            .lineLimit(3)
+    }
+}
+
+/// **THE PANE + RAIL COMPOSITION, ONE IMPLEMENTATION** (VX-827 U3b — THE
+/// DESIGN MEMO: "selecting an ancestor swaps the SAME pane+rail composition to
+/// that block"). The Commits face composes it over the block the door was
+/// pressed on; the Lineage face composes it over the member she selects — the
+/// model's `role` decides the acts, never this view. Compare stands in its
+/// place while boxes are open.
+struct CommitsFaceBody: View {
+    /// The acts this composition renders inline: the four moment acts, the
+    /// deleted take's Put back and Unarchive (U3a); a relative's moment brings
+    /// back across lineage (U3b).
+    static let surfaceCapabilities: [CapabilityID] = [
+        .restoreCommit, .bringBackCommitAsTake, .compareCommits, .renameCommit,
+        .restoreTake, .unarchiveTake, .bringBackLineageAsTake,
+    ]
+
+    let model: CommitsFaceModel
+    let session: AppSession
+    let tokens: VoiceTokens
+    /// A rail press hands the keyboard back to the face (the fast swapper).
+    var onRailPress: () -> Void = {}
+    @State private var takesShown = false
+
+    var body: some View {
+        Group {
+            if model.compareBoxes != nil {
+                CommitsCompareView(model: model, tokens: tokens)
+            } else {
+                HStack(alignment: .top, spacing: 10) {
+                    readingPane
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    rail
+                        .frame(width: CommitsFaceView.railWidth)
+                        .frame(maxHeight: .infinity)
+                }
+            }
+        }
+        .task { await model.start() }
+        .task { await model.watchSeal() }
+        .alert(
+            BlockHistoryCopy.predatesSplitTitle,
+            isPresented: Binding(
+                get: { model.pendingRestore != nil },
+                set: { if !$0 { model.pendingRestore = nil } }),
+            presenting: model.pendingRestore
+        ) { pending in
+            Button(BlockHistoryCopy.restoreAnyway, role: .destructive) {
+                Task { await model.confirmPendingRestore(pending) }
+            }
+            Button("Cancel", role: .cancel) { model.pendingRestore = nil }
+        } message: { _ in
+            Text(BlockHistoryCopy.predatesSplitDetail)
         }
     }
 
@@ -264,11 +310,14 @@ struct CommitsFaceView: View {
                         Task { await model.bringBackSelected() }
                     }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(BlockHistoryPath.bringBackAsTakeHelp)
+                    .help(model.isRelative
+                        ? LineageFaceCopy.bringBackHelp : BlockHistoryPath.bringBackAsTakeHelp)
                 case .compare:
-                    Button(tokens.chromeLabel(CommitsFaceCopy.compareVerb)) { model.openCompare() }
+                    Button(tokens.chromeLabel(
+                        model.isRelative ? LineageFaceCopy.compareWithNow : CommitsFaceCopy.compareVerb)
+                    ) { model.openCompare() }
                         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                        .help(CommitsFaceCopy.compareHelp)
+                        .help(model.isRelative ? LineageFaceCopy.compareWithNowHelp : CommitsFaceCopy.compareHelp)
                 case .rename:
                     if let commit = model.selectedCommit {
                         Button(tokens.chromeLabel(BlockHistoryCopy.nameVerb(commit))) {
@@ -324,7 +373,9 @@ struct CommitsFaceView: View {
                     withAnimation(.easeInOut(duration: 0.12)) { proxy.scrollTo(id) }
                 }
             }
-            if !model.history.deletedTakes.isEmpty {
+            // A deleted take is put back on its own block's face — a
+            // relative's are not acted on from here (P-U3b-4).
+            if !model.isRelative, !model.history.deletedTakes.isEmpty {
                 Divider().overlay(tokens.line)
                 ForEach(model.history.deletedTakes, id: \.id) { take in
                     deletedLine(take)
@@ -481,7 +532,7 @@ struct CommitsFaceView: View {
             } else if let moment = line.moment {
                 model.select(moment)
             }
-            keysHeld = true
+            onRailPress()
         } label: {
             HStack(spacing: 7) {
                 ZStack {
@@ -624,6 +675,7 @@ struct CommitsFaceView: View {
     }
 }
 
+
 /// **The face in a sheet** (the hosts with no note detail — the book's inline
 /// editors, the scraps hosts, Write's take panel): a reading width for the
 /// pane beside the rail.
@@ -717,6 +769,18 @@ nonisolated enum CommitsFaceText {
 /// indexed count over this note's live placements (the bars' own "block
 /// 6/23" fact), never the corpus.
 nonisolated enum CommitsFaceCrumb {
+    /// The note's name and the block's "block N/M", read once (both faces'
+    /// crumbs).
+    static func read(
+        session: AppSession, postID: String, blockID: String
+    ) async throws -> (title: String?, block: String?) {
+        let read = try await session.database.read { db in
+            (title: try Queries.noteDisplayTitle(db, id: postID),
+             place: try CommitsFaceCrumb.place(db, postID: postID, blockID: blockID))
+        }
+        return (read.title, read.place.map { BlockLineLabel.caret(ordinal: $0.ordinal, of: $0.count) })
+    }
+
     static func place(
         _ db: Database, postID: String, blockID: String
     ) throws -> (ordinal: Int, count: Int)? {

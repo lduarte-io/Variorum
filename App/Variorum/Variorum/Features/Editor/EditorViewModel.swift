@@ -3636,6 +3636,21 @@ final class EditorViewModel {
         blockHistoryRequest = request
     }
 
+    /// **block ▾'s LINEAGE row** (VX-801, VX-827 U3b): the same surface as
+    /// the history door, opened on its Lineage face — the router first, this
+    /// model's sheet where no detail is (`requestBlockHistory`'s road).
+    func requestBlockLineage() {
+        guard let blockID = caretBlockID else {
+            refuse(CapabilityRegistry.capability(.showBlockLineage).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: blockID, focusedVariantID: caretVariantID,
+            opening: .lineage(select: nil))
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
+    }
+
     /// **THE VERSIONS DOOR** (the post-13l polish round, ledger rows 16/23).
     /// Asks the router first — one pane wherever the door is pressed — and
     /// falls back to its own sheet where no post detail is mounted, which is

@@ -69,6 +69,8 @@ struct TakesBottomBar: View {
             // commit, on BOTH bars in the same commit — R6-2's one-grammar
             // rule, which matters most when a door moves.
             .showBlockHistory,
+            // VX-801 (VX-827 U3b): block ▾'s Lineage row — Write's bar's twin.
+            .showBlockLineage,
             // The post-13l polish round (ledger rows 16/23): the NOTE's two
             // time controls, in `note ▾` — Write's bar's pair, here too
             // (R118's letter: no surface is privileged).
@@ -217,6 +219,7 @@ struct TakesBottomBar: View {
             // (R6-2's one grammar), the same act as this bar's history word.
             Divider()
             Button(CommitBar.historyRowTitle) { model.requestBlockHistory() }
+            Button(CommitBar.lineageRowTitle) { model.requestBlockLineage() }
             Button("＋ New block at the end of the note") {
                 // D3's third leg (13b 1b): native — the minted block's
                 // pane takes the ring; typing continues instantly.
@@ -310,7 +313,7 @@ struct TakesBottomBar: View {
             get: { model.blockHistoryRequest },
             set: { model.blockHistoryRequest = $0 })
         ) { request in
-            CommitsFaceView(
+            BlockHistorySurface(
                 session: model.session, request: request,
                 onBack: { model.blockHistoryRequest = nil })
                 .frame(

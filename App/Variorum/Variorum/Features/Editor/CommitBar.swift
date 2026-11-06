@@ -146,6 +146,8 @@ struct CommitBar: View {
             // the natural pair to commit"* — so the bar carries the block's
             // two time controls side by side: write a moment, see the moments.
             .showBlockHistory,
+            // VX-801 (VX-827 U3b): block ▾'s Lineage row, beside History.
+            .showBlockLineage,
             // The post-13l polish round (ledger rows 16/23): the NOTE's two
             // time controls, in the `note ▾` menu — ⌘⇧S saves the whole note as
             // it is, and Versions… is the list of the moments it has. The
@@ -221,6 +223,12 @@ struct CommitBar: View {
         CapabilityRegistry.capability(.showBlockHistory).menuTitle("History")
     }
 
+    /// **block ▾'s Lineage row** (VX-801, VX-827 U3b) — THE DESIGN MEMO's
+    /// second row, in the menu's short words; both bars render it.
+    static var lineageRowTitle: String {
+        CapabilityRegistry.capability(.showBlockLineage).menuTitle("Lineage")
+    }
+
     /// The six rows' acts, one switch so the list above and the doors below
     /// cannot drift into a row that fires the wrong gesture.
     private func run(_ id: CapabilityID) {
@@ -270,7 +278,7 @@ struct CommitBar: View {
             get: { model.blockHistoryRequest },
             set: { model.blockHistoryRequest = $0 })
         ) { request in
-            CommitsFaceView(
+            BlockHistorySurface(
                 session: model.session, request: request,
                 onBack: { model.blockHistoryRequest = nil })
                 .frame(
@@ -781,10 +789,12 @@ struct CommitBar: View {
             // (Lineage is the second face's row — U3b.)
             Divider()
             Button(Self.historyRowTitle) { model.requestBlockHistory() }
+            // U3b: the Lineage row — the Lineage face, on the caret's block.
+            Button(Self.lineageRowTitle) { model.requestBlockLineage() }
         }
         .help("Everything block-scoped: divide, extract, make block, merge, "
             + "the two block mints, splitting this block at its newlines, "
-            + "the two ways to set a block aside, and its history")
+            + "the two ways to set a block aside, and its history and lineage")
     }
 
     /// The flat row's note half: `note ▾`, comments, the newlines chip — and

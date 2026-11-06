@@ -64,7 +64,27 @@ nonisolated enum CommitsFaceCopy {
     static let removeBox = "\u{2715}"
     static let removeBoxHelp = "Put this box away"
     static let deletedTake = "deleted take"
+    /// The Lineage face's door on this face's crumb row (her composite's
+    /// "lineage ›"). PROVISIONAL words.
+    static let lineageDoor = "lineage \u{203A}"
+    static let lineageDoorHelp =
+        "Where this block came from and what came of it \u{2014} the blocks it was divided, "
+        + "merged, extracted or copied from, and into"
+    /// What a relative's moments are compared against, and how the block you
+    /// came from is named beside a relative's (B's list word: "this block").
+    static let thisBlock = "this block"
     static let swapperHelp = "Click a moment, or step with \u{2191} and \u{2193} \u{2014} the pane follows"
+
+    /// A relative's text brought back onto the block you came from
+    /// (`bringBackFromLineage`) — the shipped same-block receipt's shape,
+    /// naming WHERE it landed. PROVISIONAL words (#264).
+    static func broughtBackFromLineage(label: String?) -> String {
+        guard let label else {
+            return "Brought back as a take on this block \u{2014} it's the last take in its fan."
+        }
+        return "Brought back as the take \u{201C}\(label)\u{201D} on this block \u{2014} it's "
+            + "the last take in its fan."
+    }
 
     static func takesCount(_ count: Int) -> String {
         "\(count) take\(count == 1 ? "" : "s") \u{25BE}"
@@ -93,11 +113,33 @@ final class CommitsFaceModel {
     /// The take the door was pressed in — the all-takes rail's one "now" line.
     let focusedVariantID: String?
 
+    /// **Whose moments these are** (VX-827 U3b — THE DESIGN MEMO: "selecting
+    /// an ancestor swaps the SAME pane+rail composition to that block"): the
+    /// block the door was pressed on (`.home` — every act the Commits face
+    /// has), or a RELATIVE of it in the Lineage face, whose moments are read
+    /// and compared and brought back onto the block she came from
+    /// (`bringBackFromLineage`) — never restored, renamed or put back in place
+    /// (PROVISIONAL P-U3b-4: a lineage block is not edited from here).
+    nonisolated enum Role: Equatable, Sendable {
+        case home
+        case relative(homeBlockID: String, homeFocusedVariantID: String?)
+    }
+    let role: Role
+
+    var isRelative: Bool { if case .relative = role { return true }; return false }
+
+    var homeBlockID: String {
+        if case .relative(let home, _) = role { return home }
+        return blockID
+    }
+
     /// What the face reads, together: the block's whole time and the take
-    /// this note shows for it (the "✓ chosen" mark).
+    /// this note shows for it (the "✓ chosen" mark); for a relative, the
+    /// block you came from's live takes too (its "now", for Compare).
     nonisolated struct Read: Equatable, Sendable {
         var history = Queries.BlockHistory()
         var shownTakeID: String?
+        var homeTakes: [Variant] = []
     }
 
     private(set) var read = Read()
@@ -150,14 +192,28 @@ final class CommitsFaceModel {
         self.postID = request.postID
         self.blockID = request.blockID
         self.focusedVariantID = request.focusedVariantID
+        self.role = .home
+    }
+
+    /// A RELATIVE's face (the Lineage face's selected member): `blockID` is
+    /// the member, the request names the block she came from.
+    init(session: AppSession, relative blockID: String, shownTakeID: String?, of home: BlockHistoryRequest) {
+        self.session = session
+        self.postID = home.postID
+        self.blockID = blockID
+        self.focusedVariantID = shownTakeID
+        self.role = .relative(homeBlockID: home.blockID, homeFocusedVariantID: home.focusedVariantID)
     }
 
     // MARK: - The observation
 
-    nonisolated static func read(_ db: Database, blockID: String, now: Date) throws -> Read {
+    nonisolated static func read(
+        _ db: Database, blockID: String, homeBlockID: String? = nil, now: Date
+    ) throws -> Read {
         Read(
             history: try Queries.blockHistory(db, blockID: blockID, now: now),
-            shownTakeID: try Queries.mcpShownTake(db, blockID: blockID)?.id)
+            shownTakeID: try Queries.mcpShownTake(db, blockID: blockID)?.id,
+            homeTakes: try homeBlockID.map { try Queries.blockFan(db, blockID: $0) } ?? [])
     }
 
     /// Held only while the face is on screen. The take's pending typing is
@@ -166,8 +222,9 @@ final class CommitsFaceModel {
     func start() async {
         await session.flushExistingAutosave(forPost: postID)
         do {
-            for try await value in session.database.observe({ [blockID, now = session.now] db in
-                try Self.read(db, blockID: blockID, now: now)
+            let home: String? = isRelative ? homeBlockID : nil
+            for try await value in session.database.observe({ [blockID, home, now = session.now] db in
+                try Self.read(db, blockID: blockID, homeBlockID: home, now: now)
             }) {
                 adopt(value)
             }
@@ -224,7 +281,20 @@ final class CommitsFaceModel {
 
     func take(_ id: String?) -> Variant? {
         guard let id else { return nil }
-        return takes.first { $0.id == id }
+        return takes.first { $0.id == id } ?? read.homeTakes.first { $0.id == id }
+    }
+
+    /// A take of the block you came from (a relative's face only).
+    func isHomeTake(_ id: String?) -> Bool {
+        guard isRelative, let id else { return false }
+        return read.homeTakes.contains { $0.id == id }
+    }
+
+    /// The block you came from's lead take — a relative's Compare stands
+    /// beside it (the take the door was pressed in, else the first live one).
+    var homeLeadTakeID: String? {
+        guard case .relative(_, let focused) = role else { return leadTakeID }
+        return CommitRail.leadTake(read.homeTakes, focused: focused)
     }
 
     func commit(_ id: String) -> (commit: CommitPoint, takeID: String)? {
@@ -319,6 +389,12 @@ final class CommitsFaceModel {
     /// first line (`BlockPastCopy.rowLabel`). Never the raw id.
     func takeTitle(_ id: String) -> String {
         guard let take = take(id) else { return "" }
+        if isHomeTake(id) {
+            let active = read.homeTakes.filter { $0.status == .active }
+            let ordinal = (active.firstIndex { $0.id == id } ?? 0) + 1
+            return CommitsFaceCopy.thisBlock + " \u{B7} "
+                + BlockHistoryPath.takeHeading(take, ordinal: ordinal, of: active.count)
+        }
         if take.status == .archived { return BlockPastCopy.rowLabel(take) }
         let active = history.activeTakes
         let ordinal = (active.firstIndex { $0.id == id } ?? 0) + 1
@@ -393,6 +469,9 @@ final class CommitsFaceModel {
     enum PaneAct: Hashable, Sendable { case restore, bringBack, compare, rename, unarchive }
 
     var paneActs: [PaneAct] {
+        // A relative's moment is read, compared with the block you came from,
+        // and brought back onto it — nothing on the relative is written.
+        if isRelative { return selection == nil ? [] : [.bringBack, .compare] }
         switch selection {
         case .commit?: return [.restore, .bringBack, .compare, .rename]
         case .now(let takeID)?:
@@ -478,12 +557,24 @@ final class CommitsFaceModel {
     /// before beside after; any other moment sits beside its take now (B's
     /// drawing). Each box's header can then be re-aimed at any moment.
     func openCompare() {
+        if isRelative {
+            if let selection { openCompare(against: selection) }
+            return
+        }
         guard case .commit(let id)? = selection, let hit = commit(id) else { return }
         if CommitRail.bracket(hit.commit) != nil, let pair = bracketPair(of: hit.commit, takeID: hit.takeID) {
             compareBoxes = [.commit(commitID: pair.before.id), .commit(commitID: pair.after.id)]
         } else {
             compareBoxes = [.commit(commitID: id), .now(takeID: hit.takeID)]
         }
+    }
+
+    /// **A relative's "Compare with now"** (the Lineage face's header act and
+    /// its pane's Compare): the moment beside the block you came from as it
+    /// stands now.
+    func openCompare(against moment: CommitRail.Moment) {
+        guard let home = homeLeadTakeID else { return }
+        compareBoxes = [moment, .now(takeID: home)]
     }
 
     func closeCompare() { compareBoxes = nil }
@@ -553,7 +644,9 @@ final class CommitsFaceModel {
                 $0.createdAt != $1.createdAt ? $0.createdAt > $1.createdAt : $0.id > $1.id
             }
             return (entry.id, [.now(takeID: entry.id)] + commits.map { .commit(commitID: $0.id) })
-        }
+        } + (isRelative
+            ? read.homeTakes.filter { $0.status == .active }.map { ($0.id, [CommitRail.Moment.now(takeID: $0.id)]) }
+            : [])
     }
 
     /// A moment's line in a swapper menu or a box header: "the take now", or
@@ -614,6 +707,14 @@ final class CommitsFaceModel {
     /// locked, named after the moment; a seal refuses). No flush: it copies
     /// the COMMIT's text, never a buffer.
     func bringBackSelected() async {
+        if isRelative {
+            switch selection {
+            case .commit(let id)?: await bringBackFromLineage(.commit(id))
+            case .now(let takeID)?: await bringBackFromLineage(.take(takeID))
+            case nil: return
+            }
+            return
+        }
         guard let commit = selectedCommit else { return }
         status = nil
         do {
@@ -627,6 +728,24 @@ final class CommitsFaceModel {
             status = .refusal(DeletionRefusal.fallback(error))
         }
     }
+
+    /// **A relative's text onto the block you came from** (U3b-P RULED —
+    /// `bringBackFromLineage`: the fan's end, never chosen, the source's name
+    /// as its label; the fence and the seal refuse in the operation's words).
+    func bringBackFromLineage(_ source: Operations.LineageTakeSource) async {
+        status = nil
+        do {
+            status = .receipt(try await LineageBringBack.run(
+                session: session, source: source, onto: homeBlockID))
+        } catch let error as OperationError {
+            status = .refusal(TrayRefusalCopy.message(for: error))
+        } catch {
+            status = .refusal(DeletionRefusal.fallback(error))
+        }
+    }
+
+    /// Clears the face's line (the Lineage face's own acts speak in its place).
+    func clearStatus() { status = nil }
 
     /// The rename door opens its field — or, under a seal, acts and speaks
     /// the standing refusal (the panel's row-69 rule).
@@ -682,5 +801,21 @@ final class CommitsFaceModel {
         } catch {
             status = .refusal(DeletionRefusal.fallback(error))
         }
+    }
+}
+
+/// **The cross-block Bring back as take, as both doors run it** — the
+/// Lineage face's member header and a relative's pane foot: ONE road, so the
+/// two cannot drift on the operation or the words (the `PreservedOriginPutBack`
+/// shape). Returns the receipt; refusals throw for the caller to word.
+@MainActor
+enum LineageBringBack {
+    static func run(
+        session: AppSession, source: Operations.LineageTakeSource, onto blockID: String
+    ) async throws -> String {
+        let take = try await session.runner.run { ops in
+            try ops.bringBackFromLineage(source, onto: blockID)
+        }
+        return CommitsFaceCopy.broughtBackFromLineage(label: take.label)
     }
 }

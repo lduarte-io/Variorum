@@ -272,7 +272,7 @@ struct WriteTakesPanel: View {
             get: { model.blockHistoryRequest },
             set: { model.blockHistoryRequest = $0 })
         ) { request in
-            CommitsFaceView(
+            BlockHistorySurface(
                 session: session, request: request,
                 onBack: { model.blockHistoryRequest = nil })
                 .frame(

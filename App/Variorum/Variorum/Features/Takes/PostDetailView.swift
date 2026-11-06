@@ -449,7 +449,7 @@ struct PostDetailView: View {
             #endif
             Divider().overlay(tokens.line)
             if let face = historyFace {
-                CommitsFaceView(session: session, request: face, onBack: closeHistoryFace)
+                BlockHistorySurface(session: session, request: face, onBack: closeHistoryFace)
                     .id("history-face-\(face.id)")
             } else {
             switch mode {
