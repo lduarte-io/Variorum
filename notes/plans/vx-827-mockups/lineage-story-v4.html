@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commits & Lineage — VX-801 mockup v4</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db; --green:#4a6a4f;
+    --t1:#f6efe4; --t2:#eef2ea; --t3:#eef0f4;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 90px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .ruled{background:var(--washlite);border:1px solid var(--hair);border-radius:8px;padding:10px 16px;font-size:13.5px;color:var(--muted);max-width:76ch;line-height:1.55;margin:0 0 26px;}
+  .ruled b{color:var(--ink);}
+  h2{font-size:17px;margin:40px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 12px;max-width:76ch;line-height:1.5;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:720px;margin:0 0 12px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;}
+  .bar{display:flex;align-items:baseline;gap:14px;padding:12px 22px 10px;border-bottom:1px solid var(--hair);}
+  .bar .back{color:var(--star);font-size:13.5px;}
+  .bar .title{font-weight:600;font-size:15px;}
+  .bar .right{margin-left:auto;color:var(--muted);font-size:12.5px;}
+  .bar .lin{color:var(--star);font-size:13px;margin-left:18px;}
+
+  .col{padding:16px 24px 22px;}
+  .tk{border:1px solid var(--hair);border-radius:11px;margin:0 0 14px;overflow:hidden;}
+  .tk.c1{background:var(--t1);} .tk.c2{background:var(--t2);} .tk.c3{background:var(--t3);}
+  .tk .hd{display:flex;gap:10px;align-items:baseline;padding:11px 16px 0;font-size:14px;}
+  .tk .hd .lbl{font-weight:600;font-size:15px;}
+  .tk .hd .chosen{color:var(--green);font-size:12px;}
+  .tk .hd .amark{color:var(--muted);font-size:12px;}
+  .tk .hd .branch{color:var(--muted);font-size:11.5px;margin-left:auto;}
+  .tk .now{padding:6px 16px 10px;font-size:13.5px;line-height:1.5;color:var(--ink);}
+  .tk .now .capt{color:var(--muted);font-size:10.5px;letter-spacing:.5px;font-family:ui-sans-serif,system-ui;display:block;margin-bottom:2px;}
+  .cl{background:rgba(255,255,255,.75);border-top:1px solid var(--hair);padding:9px 16px 10px;}
+  .cl .clh{color:var(--muted);font-size:10.5px;letter-spacing:.5px;font-family:ui-sans-serif,system-ui;margin:0 0 5px;}
+  .crow{display:flex;gap:10px;align-items:baseline;padding:4px 0;font-size:12.5px;}
+  .crow .stamp{color:var(--muted);white-space:nowrap;min-width:122px;}
+  .crow .cname{flex:1;color:var(--ink);}
+  .crow .q{color:var(--muted);font-size:11px;}
+  .crow .open{color:var(--star);font-size:12px;}
+  .cfull{border:1px solid var(--hair);border-radius:8px;background:#fff;margin:6px 0 8px;padding:10px 14px;max-height:150px;overflow-y:auto;font-size:13.5px;line-height:1.55;}
+  .cacts{display:flex;gap:16px;padding:2px 0 6px;color:var(--star);font-size:12.5px;}
+  .fold{color:var(--muted);font-size:12px;padding:3px 0 1px;}
+  .grp{color:var(--muted);font-size:11px;letter-spacing:.5px;font-family:ui-sans-serif,system-ui;margin:18px 0 8px;}
+  .del{display:flex;gap:10px;align-items:baseline;border:1px solid var(--hair);border-radius:9px;padding:9px 15px;font-size:13px;color:var(--muted);background:#fff;}
+  .del .pb{margin-left:auto;color:var(--star);font-size:12.5px;}
+  .lindoor{display:flex;gap:8px;align-items:baseline;border-top:1px solid var(--hair);padding:12px 24px 14px;color:var(--star);font-size:13.5px;}
+  .lindoor .why{color:var(--muted);font-size:12.5px;}
+
+  .maplabel{color:var(--muted);font-size:11px;letter-spacing:.5px;font-family:ui-sans-serif,system-ui;padding:12px 22px 0;}
+  .map{display:flex;gap:10px;align-items:center;padding:8px 22px 14px;overflow-x:auto;}
+  .gen{display:flex;flex-direction:column;gap:6px;flex:none;}
+  .mc{flex:none;width:150px;background:#fff;border:1px solid var(--hair);border-radius:8px;padding:7px 10px 6px;font-size:11.5px;line-height:1.35;}
+  .mc .v{color:var(--rust);font-family:ui-sans-serif,system-ui;font-size:10.5px;display:block;margin-bottom:2px;}
+  .mc .w{color:var(--ink);display:block;font-size:12px;}
+  .mc .s{color:var(--muted);display:block;margin-top:3px;font-size:10.5px;}
+  .mc.sel{border:1.5px solid var(--rust);background:var(--wash);}
+  .mc.trash{opacity:.55;}
+  .arrow{color:#cfc7bb;flex:none;font-size:15px;}
+
+  .q2{background:var(--paper);border:1px solid var(--hair);border-left:3px solid var(--rust);border-radius:8px;padding:12px 18px;max-width:76ch;margin:0 0 12px;font-size:14px;line-height:1.55;}
+  .q2 b{display:block;margin-bottom:3px;}
+  .q2 .rec{color:var(--green);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+</style>
+</head>
+<body>
+
+<h1>Commits &amp; Lineage — v4</h1>
+<div class="ruled">
+  <b>Per your v3 notes:</b> the default is COMMITS, nothing else — one tinted card per take (the Write takes-popup
+  family), that take's commits inside it, and any commit opens IN PLACE to its full text, scrolling in its own well.
+  Lineage is gone from the default face entirely: it is a door you go into — on the surface's bar, at its foot, and
+  on every take card — which opens v3's map-and-log as its own view.
+</div>
+
+<h2>The default — Commits, one card per take</h2>
+<p class="note">The second commit on "plain" has been opened: the full moment in its own scrolling well, its doors beneath it. Everything else is one calm line per commit, newest first, quiet ones folded.</p>
+
+<div class="mock">
+  <div class="bar"><span class="back">‹ back</span><span class="title">Commits</span><span class="lin">Lineage ›</span><span class="right">block 2 of 4 · On Rereading</span></div>
+  <div class="col">
+    <div class="tk c1">
+      <div class="hd"><span class="lbl">plain</span><span class="chosen">✓ chosen</span><span class="branch">Lineage ›</span></div>
+      <div class="now"><span class="capt">THE TAKE NOW</span>A book read once is a rumor; read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument…</div>
+      <div class="cl">
+        <div class="clh">ITS COMMITS · 9</div>
+        <div class="crow"><span class="stamp">Nov 2 at 9:14 PM</span><span class="cname">tightened the second clause</span><span class="open">open ▾</span></div>
+        <div class="crow"><span class="stamp">Oct 28 at 6:27 PM</span><span class="cname">before the merge rewrite</span><span class="open">close ▴</span></div>
+        <div class="cfull">A book read once is a rumor. Read twice, it starts to become a place — the corners you missed hold the furniture of the argument, and you only notice them because you already know the room. That is why the books that matter wear out their spines unevenly: the same forty pages, returned to, until the glue gives. Nobody teaches this. We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</div>
+        <div class="cacts"><span>Restore</span><span>Bring back as take</span><span>Compare with now</span><span>Name</span></div>
+        <div class="fold">7 quiet commits · show</div>
+      </div>
+    </div>
+    <div class="tk c2">
+      <div class="hd"><span class="lbl">long form</span><span class="branch">branched from plain · Lineage ›</span></div>
+      <div class="now"><span class="capt">THE TAKE NOW</span>A book read once is only ever a rumor of itself — a report from someone you used to be…</div>
+      <div class="cl"><div class="clh">ITS COMMITS · 6</div>
+        <div class="crow"><span class="stamp">Oct 30 at 8:03 PM</span><span class="cname">the rumor-of-itself opening</span><span class="open">open ▾</span></div>
+        <div class="fold">5 quiet commits · show</div>
+      </div>
+    </div>
+    <div class="tk c3">
+      <div class="hd"><span class="lbl">spoken</span><span class="branch">Lineage ›</span></div>
+      <div class="now"><span class="capt">THE TAKE NOW</span>Read a book once and all you have is hearsay. Read it twice and you've been somewhere.</div>
+      <div class="cl"><div class="clh">ITS COMMITS · 4</div>
+        <div class="crow"><span class="stamp">Oct 29 at 11:40 AM</span><span class="cname">hearsay, kept</span><span class="open">open ▾</span></div>
+        <div class="fold">3 quiet commits · show</div>
+      </div>
+    </div>
+    <div class="grp">ARCHIVED TAKES · 2</div>
+    <div class="tk">
+      <div class="hd"><span class="lbl">first pass</span><span class="amark">archived</span><span class="branch">Lineage ›</span></div>
+      <div class="cl"><div class="clh">ITS COMMITS · 3</div>
+        <div class="crow"><span class="stamp">Oct 12 at 9:02 PM</span><span class="cname">Books reward the second visit more than the first…</span><span class="open">open ▾</span></div>
+        <div class="fold">2 quiet commits · show</div>
+      </div>
+    </div>
+    <div class="grp">DELETED TAKES · ON THE 30-DAY CLOCK</div>
+    <div class="del"><span>(empty take) · deleted Oct 28 · 22 days left</span><span class="pb">Put back</span></div>
+  </div>
+  <div class="lindoor"><span>Lineage ›</span><span class="why">where this block came from, what came of it, and their takes' commits</span></div>
+</div>
+
+<h2>Through the door — Lineage (v3's view, unchanged)</h2>
+<p class="note">The map band, older left; click any card and its takes-and-commits fill the log below in exactly the card shape above. "‹ Commits" returns to the default face.</p>
+
+<div class="mock">
+  <div class="bar"><span class="back">‹ Commits</span><span class="title">Lineage</span><span class="right">block 2 of 4 · On Rereading</span></div>
+  <div class="maplabel">THE FAMILY — OLDER TO THE LEFT</div>
+  <div class="map">
+    <div class="mc"><span class="v">imported</span><span class="w">first draft, longhand…</span><span class="s">kept as lineage · 1 take</span></div>
+    <span class="arrow">›</span>
+    <div class="gen">
+      <div class="mc"><span class="v">divided</span><span class="w">Rereading gets no respect…</span><span class="s">kept as lineage · 4 takes · 11 commits</span></div>
+      <div class="mc trash"><span class="v">copied from Snippets</span><span class="w">a book read once is just a rumor…</span><span class="s">in the Trash · 1 take</span></div>
+    </div>
+    <span class="arrow">›</span>
+    <div class="gen">
+      <div class="mc"><span class="v">merged — left</span><span class="w">A book read once is a rumor.</span><span class="s">kept as lineage · 3 takes · 7 commits</span></div>
+      <div class="mc"><span class="v">merged — right</span><span class="w">Read twice, it starts to become…</span><span class="s">kept as lineage · 1 take · 2 commits</span></div>
+    </div>
+    <span class="arrow">›</span>
+    <div class="mc sel"><span class="v">this block</span><span class="w">A book read once is a rumor; read twice…</span><span class="s">live here · 5 takes · 23 commits</span></div>
+    <span class="arrow">›</span>
+    <div class="gen">
+      <div class="mc"><span class="v">extracted</span><span class="w">The corners you missed…</span><span class="s">this note, below · 1 take</span></div>
+      <div class="mc"><span class="v">a version</span><span class="w">…an address you can give other people.</span><span class="s">On Rereading — v2 · “drafts” wing · go to ›</span></div>
+    </div>
+  </div>
+</div>
+
+<h2>Your calls on v4</h2>
+<div class="q2"><b>1 — the doors.</b> <span class="rec">recommended</span> — the block menu carries BOTH rows, Commits and Lineage (your "separate door" instinct), each landing on its face of this one surface; the bottom bar's history word opens Commits; Lineage › also sits on the Commits face (bar, cards, foot), so it is always one press away but never in the way.</div>
+<div class="q2"><b>2 — per-take commits.</b> The take IS the card; only its commits live inside it; a commit's full text opens in place and scrolls in its own well. Is THIS the clarity you meant?</div>
+<div class="q2"><b>3 — your "each one should be able to go into the lineage".</b> Built as: every take card carries its own Lineage › door (they all open this block's one family — lineage is a block fact). I also added the muted "branched from ‹take›" line where a take was branched. If you meant something else by per-take lineage, say it and I'll redraw.</div>
+
+</body>
+</html>

@@ -253,7 +253,7 @@ extension MCPWriteTools {
 
         case .divide(let blockID, let anchor):
             return try onBlock(blockID, rung: .edit, job: job, clientName: clientName, spendsAfter: false) { noteID, title in
-                guard let shown = try database.read({ try Queries.mcpShownTake($0, blockID: blockID) }) else {
+                guard let shown = try database.read({ try Queries.shownTake($0, blockID: blockID) }) else {
                     throw Refused(outcome: Outcome(text: MCPRefusalCopy.words(.notShared, .note), isError: true))
                 }
                 let cut = try Self.cut(in: shown.workingText, before: anchor)

@@ -487,6 +487,8 @@ nonisolated enum MCPPaneCopy {
             default: return "listing notes"
             }
         case "read_note": return "reading \(at)"
+        // VX-827 U1 — VX-817 (PROVISIONAL words, the run's bundle #264).
+        case "list_note_lineage": return "reading the lineage of \(at)"
         case "export_note": return "exporting \(at)"
         case "search": return "searching"
         case "show_in_app": return "showing you \(at)"
@@ -629,6 +631,8 @@ nonisolated enum MCPPaneCopy {
             default: return "listed its shared notes" + times
             }
         case "read_note": return "read \(at)" + times
+        // VX-827 U1 — VX-817 (PROVISIONAL words, the run's bundle #264).
+        case "list_note_lineage": return "read the lineage of \(at)" + times
         case "export_note": return "exported \(at)" + times
         case "search": return "searched" + times
         case "add_take": return n == 1 ? "added a take to \(at)" : "added \(n) takes to \(at)"

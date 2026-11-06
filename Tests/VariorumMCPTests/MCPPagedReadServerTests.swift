@@ -677,6 +677,11 @@ struct MCPReadFormsUnchangedServerTests {
             let lens = try h.operations.createLens(post: note.id, name: "view")
             _ = try h.operations.setLensChoice(lens: lens.id, block: second.block.id, variant: other.id)
             try h.operations.deleteBlock(gone.block.id)
+            // VX-827 U2 — VX-810, A DELIBERATE FLIP (justified re-pin): every JSON
+            // form grows the note's own `tag_ids` + `tags` (the header's, by path);
+            // the golden note wears one so the bytes pin both keys' place and form.
+            let draft = try h.operations.createTag(name: "draft")
+            _ = try h.operations.applyTag(draft.id, toPost: note.id)
             let connection = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec(.book, book.id))
             let (committedAt, goneAt) = try await h.database.read { db in
@@ -690,7 +695,8 @@ struct MCPReadFormsUnchangedServerTests {
             let comments2 = #"[{"comment_id":"\#(comment.id)","text":"a note on two"}]"#
             let takes2 = #"[{"chosen":true,"take_id":"\#(t2)","text":"Second words."},{"chosen":false,"label":"alt","take_id":"\#(t3)","text":"Other words."}]"#
             let block2 = #"{"block_id":"\#(b2)","comments":\#(comments2),"shown_take_id":"\#(t2)","takes":\#(takes2)}"#
-            let tail = #""books":\#(books),"entry_date":"2026-07-02","note_id":"\#(note.id)","title":"golden"}"#
+            let tagged = #""tag_ids":["\#(draft.id)"],"tags":["draft"]"#
+            let tail = #""books":\#(books),"entry_date":"2026-07-02","note_id":"\#(note.id)",\#(tagged),"title":"golden"}"#
 
             let withIDs = try await call(connection, ["note_id": .string(note.id), "with_ids": .bool(true)])
             #expect(text(withIDs) == #"{"blocks":[\#(block1),\#(block2)],\#(tail)"#, "with_ids:\n\(text(withIDs))")
@@ -705,13 +711,13 @@ struct MCPReadFormsUnchangedServerTests {
             let lenses = #""lenses":[{"dangling_picks":0,"lens_id":"\#(lens.id)","name":"view","picks":[{"block_id":"\#(b2)","take_id":"\#(t3)"}]}]"#
             let tray = #""tray":{"blocks":[{"block_id":"\#(gone.block.id)","deleted_at":"\#(goneAt)","text":"Gone words."}],"takes":[]}"#
             let carried = try await call(connection, ["note_id": .string(note.id), "with_lenses": true, "with_tray": true])
-            #expect(text(carried) == #"{"blocks":[\#(block1),\#(block2)],"books":\#(books),"entry_date":"2026-07-02",\#(lenses),"note_id":"\#(note.id)","title":"golden",\#(tray)}"#,
+            #expect(text(carried) == #"{"blocks":[\#(block1),\#(block2)],"books":\#(books),"entry_date":"2026-07-02",\#(lenses),"note_id":"\#(note.id)",\#(tagged),"title":"golden",\#(tray)}"#,
                     "with_lenses + with_tray:\n\(text(carried))")
 
             let lensed = try await call(connection, ["note_id": .string(note.id), "with_ids": .bool(true), "lens_id": .string(lens.id)])
             let block1l = #"{"block_id":"\#(b1)","comments":[],"shown_take_id":"\#(t1)","takes":[{"chosen":true,"take_id":"\#(t1)","text":"First words."}],"via":"chosen"}"#
             let block2l = #"{"block_id":"\#(b2)","comments":\#(comments2),"shown_take_id":"\#(t3)","takes":\#(takes2),"via":"lens"}"#
-            #expect(text(lensed) == #"{"blocks":[\#(block1l),\#(block2l)],"books":\#(books),"entry_date":"2026-07-02","lens_id":"\#(lens.id)","note_id":"\#(note.id)","title":"golden"}"#,
+            #expect(text(lensed) == #"{"blocks":[\#(block1l),\#(block2l)],"books":\#(books),"entry_date":"2026-07-02","lens_id":"\#(lens.id)","note_id":"\#(note.id)",\#(tagged),"title":"golden"}"#,
                     "through a lens:\n\(text(lensed))")
 
             let plainText = try await call(connection, ["note_id": .string(note.id)])

@@ -58,6 +58,7 @@ struct MCPReadTools: Sendable {
             case MCPToolCatalog.search.name: return try search(args, clientName: clientName)
             case MCPToolCatalog.listMyActivity.name: return try listMyActivity(args, clientName: clientName)
             case MCPToolCatalog.listWings.name: return try listWings(clientName: clientName)
+            case MCPToolCatalog.listNoteLineage.name: return try listNoteLineage(args, clientName: clientName)
             default: return Outcome(text: "Unknown tool: \(name).", isError: true)
             }
         } catch let failure as ArgumentFailure {
@@ -73,6 +74,8 @@ struct MCPReadTools: Sendable {
         "list_books", "list_notes", "read_note", "export_note", "search", "list_my_activity",
         // VX-348 U5 — VX-392.
         "list_wings",
+        // VX-827 U1 — VX-817.
+        "list_note_lineage",
     ]
 
     // MARK: - read_note / export_note
@@ -214,7 +217,156 @@ struct MCPReadTools: Sendable {
                 text = try Queries.variorumDocumentText(db, postID: noteID, throughLens: lensID)
             }
             try log(db, clientName, act, "note", noteID, title, allowed: true)
+            // VX-827 U2 — VX-815: a TEXT form (the Level 0 document, the plain
+            // export, a saved version's text) of a note INSIDE reach that holds
+            // nothing answers the one sentence saying so — never the empty
+            // string, the core's tolerant read of a note that does not exist (the
+            // nothing-shape). Only this allowed road reaches here: the fence's one
+            // refusal above is untouched. The JSON forms already say it
+            // (`blocks: []` beside the title).
+            if plain || !withIDs, Self.holdsNothing(text) {
+                return Outcome(
+                    text: versionID == nil
+                        ? Self.emptyNoteWords(title: title ?? "") : Self.emptyVersionWords(title: title ?? ""),
+                    isError: false)
+            }
             return Outcome(text: text, isError: false)
+        }
+    }
+
+    /// VX-815: a text form holds NOTHING when it is empty or only the line
+    /// breaks the format puts between blocks (a note of blank blocks) — a
+    /// header (`{t:…}`, `{#…}`) or any other character is something.
+    static func holdsNothing(_ text: String) -> Bool {
+        text.allSatisfy(\.isNewline)
+    }
+
+    /// VX-815 — the empty note's one sentence, naming it (PROVISIONAL wording,
+    /// QUESTIONS #264 — hers to re-cut).
+    static func emptyNoteWords(title: String) -> String {
+        "\u{201C}\(title)\u{201D} is an empty note \u{2014} nothing is written in it yet."
+    }
+
+    /// …and a saved version's (read by `version_id` in the text form) —
+    /// PROVISIONAL, #264.
+    static func emptyVersionWords(title: String) -> String {
+        "This saved version of \u{201C}\(title)\u{201D} is empty \u{2014} nothing was written in it."
+    }
+
+    // MARK: - list_note_lineage (VX-827 U1 — VX-817)
+
+    /// **A note's lineage peers on the wire** (P-U1-a…g, the U1 ADJUDICATION):
+    /// `Queries.lineagePeers` — one hop at the block level, both ends live and
+    /// placed, notes only, saved versions out — with the SUBJECT decided at
+    /// READ by the one rule (`read_note`'s decision, its ask and its once
+    /// spend, in one write transaction) and each PEER kept only where the
+    /// same rule reads it (`consumes: false` — `MCPNoteStructure.farSides`'
+    /// precedent: a peer never spends a grant). A peer beyond reach is simply
+    /// ABSENT — never counted, never stubbed (her VX-817 fence line; R-825) —
+    /// and `beyond_reach` says so, always present. An archived peer is listed,
+    /// marked (PROVISIONAL, #264). No edge id and no position key crosses.
+    ///
+    /// `note_ids` (1–200, no repeats, exclusive with `note_id` — VX-812's
+    /// idiom): each item is the single call — its own decision, ask, once
+    /// spend and Activity line, in its own transaction (a once grant covers
+    /// ONE item, P-809-12) — answered in order (the single answer, or
+    /// `{note_id, refused}` with the single call's words), with
+    /// `landed_count` / `refused_count`; a call where every item refused is an
+    /// error answer. Each item ∝ its note's placed blocks and their direct
+    /// edges plus its peers' facts — never the corpus.
+    private func listNoteLineage(_ args: [String: Value], clientName: String) throws -> Outcome {
+        guard let value = args["note_ids"], value != .null else {
+            return try noteLineage(try requiredString(args, "note_id"), clientName: clientName)
+        }
+        if let single = args["note_id"], single != .null {
+            throw ArgumentFailure(message: "Pass note_id or note_ids, not both.")
+        }
+        guard let items = value.arrayValue else { throw ArgumentFailure(message: "note_ids must be an array.") }
+        let ids = try items.map { item -> String in
+            guard let id = item.stringValue else { throw ArgumentFailure(message: "note_ids must hold strings.") }
+            return id
+        }
+        guard !ids.isEmpty else { throw ArgumentFailure(message: "note_ids lists no note.") }
+        guard ids.count <= MCPWriteTools.listCap else {
+            throw ArgumentFailure(message: MCPWriteTools.listCapWords(ids.count))
+        }
+        guard Set(ids).count == ids.count else { throw ArgumentFailure(message: "note_ids lists a note twice.") }
+        var results: [Any] = []
+        var landed = 0
+        for id in ids {
+            let one: Outcome
+            do {
+                one = try noteLineage(id, clientName: clientName)
+            } catch {
+                // An item's unexpected failure is THAT item's refusal, in the
+                // one chain's words (VX-369) — the rest still run (VX-812).
+                one = Outcome(
+                    text: MCPWireRefusalCopy.unexpected(
+                        error, tool: MCPToolCatalog.listNoteLineage.name, appWords: hooks.refusalWords),
+                    isError: true)
+            }
+            if one.isError {
+                results.append(["note_id": id, "refused": one.text] as [String: Any])
+            } else {
+                landed += 1
+                results.append(try JSONSerialization.jsonObject(with: Data(one.text.utf8)))
+            }
+        }
+        let answer: [String: Any] = ["results": results, "landed_count": landed, "refused_count": ids.count - landed]
+        return Outcome(text: try encode(answer), isError: landed == 0)
+    }
+
+    /// ONE subject's answer — the single call.
+    private func noteLineage(_ noteID: String, clientName: String) throws -> Outcome {
+        let act = MCPToolCatalog.listNoteLineage.name
+        return try database.write { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            let facts = try Queries.mcpNoteFacts(db, noteID: noteID)
+            let decision = MCPGrantAuthority.decide(standing, note: facts, rung: .read, consumes: true)
+            let title = facts == nil ? nil : try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar)
+            guard case .allow(let grantID, let consumesOnce) = decision else {
+                try log(db, clientName, act, "note", noteID, title, allowed: false)
+                let ask = facts.map { facts in
+                    MCPAsk(clientName: clientName, scopeKind: .note, scopeID: noteID, title: title ?? "",
+                           rung: .read, fence: facts.fence)
+                }
+                return MCPAsking(onAsk: hooks.onAsk).refusal(decision, .note, standing: standing, ask: ask)
+            }
+            if consumesOnce, let grantID { try operations.consumeMCPOnceGrant(db, grantID) }
+            let peers = try Queries.lineagePeers(db, noteID: noteID)
+            let peerFacts = try Queries.mcpNoteFacts(db, noteIDs: peers.map(\.noteID))
+            var copies: [[String: Any]] = [], originals: [[String: Any]] = [], versions: [[String: Any]] = []
+            for peer in peers {
+                guard let facts = peerFacts[peer.noteID], MCPGrantAuthority.decide(
+                    standing, note: facts, rung: .read, consumes: false).isAllowed
+                else { continue }  // beyond reach: absent, never counted (VX-817's line)
+                let peerTitle = try Queries.mcpScopeTitle(db, kind: .note, id: peer.noteID, calendar: calendar) ?? ""
+                func entry(_ relation: Queries.LineageLink.Relation) -> [String: Any]? {
+                    let links = peer.links.filter { $0.relation == relation }
+                    guard !links.isEmpty else { return nil }
+                    return [
+                        "note_id": peer.noteID, "title": peerTitle, "wing_id": facts.wingID,
+                        "archived": peer.archivedAt != nil,
+                        "links": links.map { link -> [String: Any] in
+                            var said: [String: Any] = [
+                                "block_id": link.blockID, "peer_block_id": link.peerBlockID, "at": link.at,
+                            ]
+                            if let op = link.originOp { said["origin_op"] = op }
+                            return said
+                        },
+                    ]
+                }
+                if let copy = entry(.derivedInto) { copies.append(copy) }
+                if let original = entry(.derivedFrom) { originals.append(original) }
+                if let version = entry(.versionOf) { versions.append(version) }
+            }
+            let answer: [String: Any] = [
+                "note_id": noteID, "title": title ?? "", "copies": copies, "originals": originals,
+                "versions": versions,
+                MCPWriteTools.beyondReachKey: MCPWriteTools.beyondReachNotesListedWords,
+            ]
+            try log(db, clientName, act, "note", noteID, title, allowed: true)
+            return Outcome(text: try encode(answer), isError: false)
         }
     }
 
@@ -522,6 +674,9 @@ struct MCPReadTools: Sendable {
         if let cursor, (bookID != nil) == (cursor.shape == .recency) {
             throw ArgumentFailure(message: Self.staleCursorMessage)
         }
+        // VX-827 U2 — VX-810: `tag`, a PATH in every tag tool's form (`remove_tag`'s
+        // parse and words), parsed before any target is read (no oracle).
+        let tagPath = try optionalTagPath(args)
         let act = MCPToolCatalog.listNotes.name
         // F3: one read snapshot; the log in its own short write after.
         let outcome: Outcome = try database.read { db in
@@ -537,17 +692,27 @@ struct MCPReadTools: Sendable {
             // with no notes filed is addressable too (the chapter acts).
             var chapters: [[String: Any]]?
             var gatheringOrdinal: Int?
+            // VX-810: the tag's wearers in the listing's own wing (nil: every
+            // wing — the bare form lists across wings), read only once the place
+            // is allowed; nil = no filter. Every wearer still passes the per-note
+            // rule below, so a hidden wearer is absent exactly as unfiltered.
+            func wearers(inWing wing: String?) throws -> [String]? {
+                try tagPath.map { try Queries.notesWearingTag(db, path: $0, wingID: wing) }
+            }
             if let bookID {
                 let place = try MCPGrantAuthority.readPlace(db, readingID: bookID)
                 let decision = MCPGrantAuthority.decide(standing, reading: place)
                 guard decision.isAllowed else { return refusal(decision, .book) }
+                let tagged = try wearers(inWing: place.facts?.wingID)
                 switch place {
                 case .book:
                     if let cursor, cursor.shape != .book {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
                     }
                     fetch = { after in
-                        try bookPage(db, bookID: bookID, includeArchived: includeArchived, after: after, limit: limit)
+                        try bookPage(
+                            db, bookID: bookID, includeArchived: includeArchived, tagged: tagged, after: after,
+                            limit: limit)
                     }
                     chapters = try Row.fetchAll(
                         db,
@@ -561,7 +726,9 @@ struct MCPReadTools: Sendable {
                     if let cursor, cursor.shape != .gathering {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
                     }
-                    fetch = { after in try gatheringPage(db, gatheringID: bookID, after: after, limit: limit) }
+                    fetch = { after in
+                        try gatheringPage(db, gatheringID: bookID, tagged: tagged, after: after, limit: limit)
+                    }
                     // A gathering cursor resumes by its note's id; its key is the
                     // READABLE ordinal (VX-825 — it was the assembly index, which
                     // counted the hidden notes before it).
@@ -570,16 +737,30 @@ struct MCPReadTools: Sendable {
             } else if let wingID {
                 let decision = MCPGrantAuthority.decideWing(standing, wingID: wingID, rung: .read)
                 guard decision.isAllowed else { return refusal(decision, .wing) }
+                let tagged = try wearers(inWing: wingID)
                 fetch = { after in
                     try recencyPage(
-                        db, wingID: wingID, candidates: nil, includeArchived: includeArchived, after: after, limit: limit)
+                        db, wingID: wingID, candidates: tagged, includeArchived: includeArchived, after: after,
+                        limit: limit)
                 }
             } else {
                 guard standing.state == .approved else {
                     return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .note)
                 }
-                fetch = { after in
-                    try sharedPage(db, standing: standing, includeArchived: includeArchived, after: after, limit: limit)
+                if let tagged = try wearers(inWing: nil) {
+                    // VX-810: the wearers ARE the candidates — every note the
+                    // rule reads is in the shared listing's sources, so the
+                    // readable wearers are exactly its notes wearing the tag
+                    // (∝ the wearers, never the reached wings' notes).
+                    fetch = { after in
+                        try recencyPage(
+                            db, wingID: nil, candidates: tagged, includeArchived: includeArchived, after: after,
+                            limit: limit)
+                    }
+                } else {
+                    fetch = { after in
+                        try sharedPage(db, standing: standing, includeArchived: includeArchived, after: after, limit: limit)
+                    }
                 }
             }
             var kept: [(row: PageRow, facts: MCPGrantRule.NoteFacts)] = []
@@ -607,11 +788,18 @@ struct MCPReadTools: Sendable {
                 readableBook[id] = reads
                 return reads
             }
+            // VX-827 U2 — VX-810: each row says the tags the note ITSELF wears
+            // (`tag_ids` + `tags`, the header's — the mint answers' pairing) and
+            // its `entry_date` (null when undated — the VX-758 rider). ∝ the page.
+            let worn = try Queries.wornTags(db, noteIDs: kept.map(\.row.id))
             var notes: [[String: Any]] = []
             for (row, noteFacts) in kept {
+                let tags = worn[row.id] ?? []
                 var note: [String: Any] = [
                     "id": row.id, "title": row.title, "edited": row.touched,
                     "book_ids": try noteFacts.bookIDs.sorted().filter(readsBook), "wing_id": noteFacts.wingID,
+                    "entry_date": row.entryDate.flatMap { $0.isEmpty ? nil : $0 } ?? NSNull(),
+                    "tag_ids": tags.map(\.id), "tags": tags.map(\.path),
                 ]
                 if let section = row.section {
                     note["section_id"] = section.id
@@ -647,12 +835,17 @@ struct MCPReadTools: Sendable {
         var section: (id: String, name: String)? = nil
         /// U4: an archived note (listed only under `include_archived`).
         var archived = false
+        /// VX-810 (the VX-758 rider): the note's stored day, nil when undated.
+        var entryDate: String? = nil
     }
 
     /// A book's live member notes in book order, keyset-paged on
-    /// `(position, post id)` — ∝ the page.
+    /// `(position, post id)` — ∝ the page. VX-810: `tagged` (non-nil) keeps
+    /// only those members (the tag's wearers) — still the book's order and
+    /// its cursor, the walk ∝ the book's members.
     private func bookPage(
-        _ db: Database, bookID: String, includeArchived: Bool, after cursor: PageCursor?, limit: Int
+        _ db: Database, bookID: String, includeArchived: Bool, tagged: [String]? = nil,
+        after cursor: PageCursor?, limit: Int
     ) throws -> [PageRow] {
         try Row.fetchAll(
             db,
@@ -667,16 +860,17 @@ struct MCPReadTools: Sendable {
                   AND c.deleted_at IS NULL AND c.kind = 'post'
                   AND (:archived OR c.archived_at IS NULL)
                   AND (:after IS NULL OR (rp.position, c.id) > (:after, :afterID))
+                  AND (:tagged IS NULL OR c.id IN (SELECT value FROM json_each(:tagged)))
                 ORDER BY rp.position, c.id
                 LIMIT :limit
                 """,
             arguments: ["book": bookID, "after": cursor?.key, "afterID": cursor?.id ?? "", "limit": limit,
-                        "archived": includeArchived]
+                        "archived": includeArchived, "tagged": try tagged.map(json)]
         ).map { row in
             PageRow(id: row["id"], title: displayTitle(row), touched: row["touched"],
                     cursor: PageCursor(shape: .book, key: row["position"], id: row["id"]),
                     section: (row["section_id"] as String?).map { ($0, row["section_name"] as String) },
-                    archived: row["archived"])
+                    archived: row["archived"], entryDate: row["entry_date"])
         }
     }
 
@@ -687,9 +881,14 @@ struct MCPReadTools: Sendable {
     /// the cursor — the listing starts again). Cost ∝ the gathering's
     /// assembly, then the page.
     private func gatheringPage(
-        _ db: Database, gatheringID: String, after cursor: PageCursor?, limit: Int
+        _ db: Database, gatheringID: String, tagged: [String]? = nil, after cursor: PageCursor?, limit: Int
     ) throws -> [PageRow]? {
-        let entries = try Queries.assembleReading(db, readingID: gatheringID)
+        var entries = try Queries.assembleReading(db, readingID: gatheringID)
+        // VX-810: only the assembly's notes wearing the tag, in its own order.
+        if let tagged {
+            let wearing = Set(tagged)
+            entries = entries.filter { wearing.contains($0.postID) }
+        }
         var start = 0
         if let cursor {
             guard let index = entries.firstIndex(where: { $0.postID == cursor.id }) else { return nil }
@@ -712,7 +911,8 @@ struct MCPReadTools: Sendable {
                 title: DisplayTitle.note(
                     title: entry.title, entryDate: entry.entryDate, createdAt: entry.createdAt, calendar: calendar),
                 touched: touched[entry.postID] ?? "",
-                cursor: PageCursor(shape: .gathering, key: String(start + offset), id: entry.postID))
+                cursor: PageCursor(shape: .gathering, key: String(start + offset), id: entry.postID),
+                entryDate: entry.entryDate)
         }
     }
 
@@ -763,7 +963,7 @@ struct MCPReadTools: Sendable {
         ).map { row in
             PageRow(id: row["id"], title: displayTitle(row), touched: row["touched"],
                     cursor: PageCursor(shape: .recency, key: row["touched"], id: row["id"]),
-                    archived: row["archived"])
+                    archived: row["archived"], entryDate: row["entry_date"])
         }
     }
 
@@ -1117,6 +1317,16 @@ struct MCPReadTools: Sendable {
             guard let string = item.stringValue else { throw ArgumentFailure(message: "\(key) must hold strings.") }
             return string
         }
+    }
+
+    /// VX-827 U2 — VX-810: `list_notes`' `tag` — a PATH exactly as every tag
+    /// tool takes one (`remove_tag`'s parse: `TagPath.segments`, a leading `#`
+    /// tolerated) and refused in its one sentence when it names no path.
+    private func optionalTagPath(_ args: [String: Value]) throws -> String? {
+        guard let raw = try optionalString(args, "tag") else { return nil }
+        let path = TagPath.segments(raw.hasPrefix("#") ? String(raw.dropFirst()) : raw).joined(separator: "/")
+        guard !path.isEmpty else { throw ArgumentFailure(message: MCPWriteTools.tagPathWords) }
+        return path
     }
 
     private func optionalInt(_ args: [String: Value], _ key: String) throws -> Int? {

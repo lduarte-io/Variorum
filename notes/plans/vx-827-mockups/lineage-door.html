@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The lineage door — VX-801 mockup</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db; --green:#4a6a4f;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 90px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 10px;max-width:78ch;line-height:1.5;}
+  .ruled{background:var(--washlite);border:1px solid var(--hair);border-radius:8px;padding:10px 16px;font-size:13.5px;color:var(--muted);max-width:76ch;line-height:1.55;margin:0 0 30px;}
+  .ruled b{color:var(--ink);}
+  h2{font-size:17px;margin:44px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:76ch;line-height:1.5;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:1080px;margin:0 0 12px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;position:relative;}
+  .tag{display:inline-block;background:#fff;border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin:0 0 8px;letter-spacing:.3px;font-family:ui-sans-serif,system-ui;}
+
+  /* ---- tier 1: write surface + popover ---- */
+  .prose{padding:30px 56px 36px;max-width:660px;font-size:16px;line-height:1.62;}
+  .prose p{margin:0 0 14px;}
+  .prose p.subject{background:var(--wash);border-radius:6px;padding:6px 10px;margin-left:-10px;margin-right:-10px;position:relative;}
+  .pop{position:absolute;left:400px;top:118px;background:#fff;border:1px solid #d8d1c6;border-radius:10px;box-shadow:0 10px 28px rgba(50,40,30,.16),0 1px 3px rgba(50,40,30,.08);width:360px;padding:12px 0 6px;font-size:13px;z-index:3;}
+  .pop .hd{padding:0 16px 8px;color:var(--muted);font-size:12px;letter-spacing:.3px;border-bottom:1px solid var(--hair);}
+  .pop .grp{padding:7px 16px 2px;color:var(--muted);font-size:11.5px;letter-spacing:.4px;}
+  .pop .ln{padding:5px 16px 6px;line-height:1.45;}
+  .pop .ln:hover{background:var(--washlite);}
+  .pop .verb{color:var(--rust);font-size:12px;font-family:ui-sans-serif,system-ui;}
+  .pop .snip{color:var(--ink);display:block;}
+  .pop .where{color:var(--muted);font-size:12px;}
+  .pop .foot{border-top:1px solid var(--hair);margin-top:8px;padding:8px 16px 6px;color:var(--star);font-size:13px;}
+
+  /* ---- tier 2: the tree ---- */
+  .treebar{display:flex;align-items:baseline;gap:14px;padding:14px 22px 10px;border-bottom:1px solid var(--hair);}
+  .treebar .back{color:var(--star);font-size:13.5px;}
+  .treebar .title{font-weight:600;font-size:15px;}
+  .treebar .right{margin-left:auto;color:var(--muted);font-size:12.5px;}
+  .lanes{display:flex;gap:34px;padding:26px 30px 34px;align-items:flex-start;overflow-x:auto;}
+  .lane{flex:1 1 0;min-width:260px;max-width:330px;}
+  .lane .lh{color:var(--muted);font-size:11.5px;letter-spacing:.5px;margin:0 0 12px;font-family:ui-sans-serif,system-ui;}
+  .node{background:#fff;border:1px solid var(--hair);border-radius:10px;padding:13px 16px 11px;margin:0 0 22px;box-shadow:0 1px 2px rgba(60,50,40,.05);}
+  .node .rel{color:var(--rust);font-size:11.5px;font-family:ui-sans-serif,system-ui;letter-spacing:.3px;margin:0 0 6px;}
+  .node .txt{font-size:13.5px;line-height:1.5;margin:0 0 8px;max-height:6.1em;overflow:hidden;}
+  .node .where{color:var(--muted);font-size:12px;margin:0 0 7px;}
+  .node .where .live{color:var(--green);}
+  .node .hist{color:var(--muted);font-size:12px;border-top:1px dashed var(--hair);padding-top:6px;}
+  .node .hist .dis{color:var(--star);}
+  .node .acts{margin-top:8px;display:flex;gap:10px;}
+  .node .acts span{font-size:12px;color:var(--star);border:1px solid var(--hair);border-radius:6px;padding:2px 9px;background:var(--washlite);}
+  .node.subject{border:1.5px solid var(--rust);background:var(--paper);}
+  .node.subject .rel{color:var(--muted);}
+  .node.trash{opacity:.62;}
+  .node .openhist{margin:6px 0 0;padding:7px 10px;background:var(--washlite);border-radius:7px;font-size:12px;line-height:1.55;color:var(--muted);}
+  .node .openhist b{color:var(--ink);font-weight:600;}
+
+  /* ---- questions ---- */
+  .q{background:var(--paper);border:1px solid var(--hair);border-left:3px solid var(--rust);border-radius:8px;padding:12px 18px;max-width:76ch;margin:0 0 12px;font-size:14px;line-height:1.55;}
+  .q b{display:block;margin-bottom:3px;}
+  .q .rec{color:var(--green);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+  .q ul{margin:6px 0 2px;padding-left:20px;}
+  .q li{margin:0 0 4px;}
+</style>
+</head>
+<body>
+
+<h1>The lineage door — VX-801</h1>
+<p class="sub">A sketch of structure, not final chrome — the build composes the voices' real tokens. Sample prose is invented.</p>
+<div class="ruled">
+  <b>Already ruled (your 2026-11-04 sitting, binding):</b> two tiers — a simple glance popover from any block
+  (immediate parents and children, a line each, "Open in Blocks ›") and the full surface in Blocks mode, allowed
+  the full editor space: the whole tree with text previews, commits + takes visible on previous blocks.
+  <b>Spacious, easy to read.</b> Acts live in the tree: <b>Put back</b> (the existing operation and landing;
+  the receipt names where it landed) and <b>Bring back as take</b> (mints the node's active text as a new take on
+  the block you came from). Restore-from-Trash stays on its own surface. The open edges are the numbered
+  questions at the foot.
+</div>
+
+<h2>Tier 1 — the glance</h2>
+<p class="note">From any block, anywhere it shows. One line per immediate relative: the origin verb, the first words, where it lives now. Nothing opens heavy; the foot is the only door deeper.</p>
+
+<div class="mock" style="min-height:360px;">
+  <span class="tag" style="margin:14px 0 0 22px;">Write · the glance popover open on the washed block</span>
+  <div class="prose">
+    <p>Rereading is the quiet skill nobody teaches. We praise the first pass — speed, retention, the clean sweep of a page — and say nothing of the second, where the actual reading happens.</p>
+    <p class="subject">A book read once is a rumor; read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument, and you only see them because you already know the room.</p>
+    <p>That is why the books that matter wear out their spines unevenly — the same forty pages, returned to, until the glue gives.</p>
+  </div>
+  <div class="pop">
+    <div class="hd">Lineage</div>
+    <div class="grp">came from</div>
+    <div class="ln"><span class="verb">merged · two blocks</span><span class="snip">“A book read once is a rumor…” + “…it starts to become a place.”</span><span class="where">both kept as lineage, this note</span></div>
+    <div class="grp">went on to</div>
+    <div class="ln"><span class="verb">extracted</span><span class="snip">“The corners you missed the first time…”</span><span class="where">in this note, the block below</span></div>
+    <div class="ln"><span class="verb">a version</span><span class="snip">“A book read once is a rumor; read twice…”</span><span class="where">in “On Rereading — v2”</span></div>
+    <div class="foot">Open in Blocks ›</div>
+  </div>
+</div>
+
+<h2>Tier 2 — the full surface, in Blocks</h2>
+<p class="note">The full editor space. Generations as lanes: everything the block came from on the left, the block itself centered, everything it went on to on the right; versions share the right lane under their own heading. Each node: the origin, a real preview, where it lives, and its history (takes + commits) behind one quiet disclosure — open on one node below to show the shape. Put back appears only where it can act (a released or trayed block); Bring back as take on any node with readable text.</p>
+
+<div class="mock">
+  <div class="treebar">
+    <span class="back">‹ board</span>
+    <span class="title">Lineage of “A book read once is a rumor…”</span>
+    <span class="right">On Rereading · 6 relatives across 2 notes</span>
+  </div>
+  <div class="lanes">
+    <div class="lane">
+      <div class="lh">CAME FROM · TWO HOPS</div>
+      <div class="node">
+        <div class="rel">divided — the first draft, kept whole</div>
+        <div class="txt">Rereading gets no respect. A book read once is a rumor. Read twice it becomes a place, and the corners hold the furniture of the argument…</div>
+        <div class="where">kept as lineage · this note</div>
+        <div class="hist">3 takes · 2 commits <span class="dis">· history ▾</span></div>
+        <div class="acts"><span>Put back</span><span>Bring back as take</span></div>
+      </div>
+      <div class="node trash">
+        <div class="rel">copied from Snippets</div>
+        <div class="txt">a book read once is just a rumor you heard</div>
+        <div class="where">in the Trash — restore from the Trash</div>
+        <div class="hist">1 take · no commits</div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="lh">CAME FROM · ONE HOP</div>
+      <div class="node">
+        <div class="rel">merged — left half</div>
+        <div class="txt">A book read once is a rumor.</div>
+        <div class="where">kept as lineage · this note</div>
+        <div class="hist">2 takes · 1 commit <span class="dis">· history ▾</span></div>
+        <div class="openhist"><b>takes</b> · “plain” — A book read once is a rumor. · “rumor, long” — A book read once is only ever a rumor of itself.<br><b>commits</b> · Oct 12, 9:14 pm · Oct 3 “first shape”</div>
+        <div class="acts"><span>Put back</span><span>Bring back as take</span></div>
+      </div>
+      <div class="node">
+        <div class="rel">merged — right half</div>
+        <div class="txt">Read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument.</div>
+        <div class="where">kept as lineage · this note</div>
+        <div class="hist">1 take · 1 commit <span class="dis">· history ▾</span></div>
+        <div class="acts"><span>Put back</span><span>Bring back as take</span></div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="lh">THIS BLOCK</div>
+      <div class="node subject">
+        <div class="rel">the block you came from</div>
+        <div class="txt">A book read once is a rumor; read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument, and you only see them because you already know the room.</div>
+        <div class="where"><span class="live">live · On Rereading</span></div>
+        <div class="hist">2 takes · 4 commits <span class="dis">· history ▾</span></div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="lh">WENT ON TO</div>
+      <div class="node">
+        <div class="rel">extracted</div>
+        <div class="txt">The corners you missed the first time hold the furniture of the argument.</div>
+        <div class="where"><span class="live">live · On Rereading, the block below</span></div>
+        <div class="hist">1 take · no commits</div>
+        <div class="acts"><span>Bring back as take</span></div>
+      </div>
+      <div class="lh" style="margin-top:6px;">VERSIONS</div>
+      <div class="node">
+        <div class="rel">a version — linked for Compare</div>
+        <div class="txt">A book read once is a rumor; read twice, it becomes an address you can give other people.</div>
+        <div class="where"><span class="live">live · On Rereading — v2 · in “drafts” wing</span> · go to ›</div>
+        <div class="hist">1 take · 2 commits</div>
+        <div class="acts"><span>Bring back as take</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>The open edges — your rulings</h2>
+
+<div class="q"><b>Q1 — where the glance opens from.</b>
+<ul>
+<li><span class="rec">recommended</span> — a <b>Lineage…</b> act in the block's context menu (and the take panel's block verbs), registry-declared, so it exists on every surface a block shows; the popover anchors on the block.</li>
+<li>alternative — the fanned corner badge's popover gains a lineage section (but the badge is fan-only today: most blocks with lineage have one take, so the door would miss them).</li>
+</ul></div>
+
+<div class="q"><b>Q2 — the tree's layout.</b>
+<ul>
+<li><span class="rec">recommended</span> — generational lanes as drawn: came-from left, the block centered, went-on-to and versions right; reads left-to-right as time, spacious by construction, and wide fans scroll vertically within their lane.</li>
+<li>alternative — one indented outline (ancestors above, descendants below): denser, better for very deep chains, less of a picture.</li>
+</ul></div>
+
+<div class="q"><b>Q3 — how much history shows per node at rest.</b>
+<ul>
+<li><span class="rec">recommended</span> — the counts line always ("3 takes · 2 commits") with <b>history ▾</b> opening takes and commits in place, as on the opened node above — calm at rest, everything reachable.</li>
+<li>alternative — takes + commits always expanded on every came-from node (the ruled words read literally; the surface gets tall fast).</li>
+</ul></div>
+
+<div class="q"><b>Q4 — blocks in the Trash.</b>
+<ul>
+<li><span class="rec">recommended</span> — shown, muted, "in the Trash — restore from the Trash", no acts (as drawn): the family tree stays honest, and restore stays on its own surface as you ruled.</li>
+<li>alternative — absent entirely (the tree only shows what lives; a deleted parent leaves a hole).</li>
+</ul></div>
+
+<div class="q"><b>Q5 — a relative in another wing</b> (planned, not open — the existing cross-wing lineage rule): named with its wing and at most "go to ›", as on the version node above. Confirm it reads right here.</div>
+
+<div class="q"><b>Q6 — entering and leaving the full surface.</b> Planned: the glance's "Open in Blocks ›" and the same Lineage… act inside Blocks open the tree focused on that block; "‹ board" returns to the workbench exactly as left. The tree is a state of Blocks mode, not an eighth mode — the mode row stays six. Confirm.</div>
+
+</body>
+</html>

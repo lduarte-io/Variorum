@@ -363,11 +363,18 @@ nonisolated enum RecoveryCopy {
     /// a lineage door's landing used to mark nothing and say nothing. The
     /// arrival explanation's third state: nothing is wrong, and this is
     /// where the block actually lives.
-    static func trayRevealKeptInLineage(_ home: ContainerKind) -> String {
+    ///
+    /// `place` names where a kept original lives on the platform speaking —
+    /// the phone's Block History came-from region by default; the Mac passes
+    /// its Lineage face's phrase (VX-827 U3b — the Mac's Block History panel
+    /// retired, and its originals moved to the Lineage face).
+    static func trayRevealKeptInLineage(
+        _ home: ContainerKind,
+        place: String = "\(BlockHistoryPath.cameFromSection) in \(BlockHistoryPath.name)"
+    ) -> String {
         "The block you asked about isn't leaving this \(homeWord(home)) — it "
             + "was kept whole by a divide or merge, and it lives under "
-            + "\(BlockHistoryPath.cameFromSection) in \(BlockHistoryPath.name), "
-            + "not in the tray."
+            + "\(place), not in the tray."
     }
 
     /// The takes disclosure's label — collapsed by default, carrying its

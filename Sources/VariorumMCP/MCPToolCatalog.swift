@@ -106,6 +106,8 @@ enum MCPToolCatalog {
         // VX-348 U5 — VX-392 (R-VX348-5): the wings the client holds a grant
         // on, empty ones too (listed only by a wing grant).
         listWings,
+        // VX-827 U1 — VX-817: a note's lineage peers, one hop, both ends readable.
+        listNoteLineage,
     ]
     static let suggest: [MCPToolDeclaration] = [
         addTake, addComment, saveLens,
@@ -284,9 +286,15 @@ enum MCPToolCatalog {
             book's chapters in order (chapters: section_id, name — empty ones too) — or a \
             gathering's notes, in its own order. With \
             wing_id (list_wings gives them): that wing's notes, most recently edited first. With neither: every note \
-            shared with this client, most recently edited first. Paged — pass next_cursor back \
+            shared with this client, most recently edited first. tag (a tag's path, e.g. "percy/pt-en") lists \
+            only the notes wearing that tag or a tag under it — on the note itself or on one of its blocks — \
+            the path read in the book's or wing's own wing (with neither, in each note's wing); a path no \
+            note you can read wears lists none. Paged — pass next_cursor back \
             as cursor. Archived notes appear only with include_archived: true (marked archived). \
-            Daily Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
+            Daily Journal entries and Private notes appear only when shared one ask at a time. Returns JSON: \
+            each note's id, title, edited, wing_id, the book_ids you can read, entry_date (null when the \
+            note has none), and tag_ids and tags (the paths of the tags the note itself wears, as \
+            read_note's header lists them).
             """,
         inputSchema: .object([
             "type": "object",
@@ -295,6 +303,9 @@ enum MCPToolCatalog {
                                              "description": "Also list archived notes (default false)."]),
                 "book_id": .object(["type": "string", "description": "List this book's notes."]),
                 "wing_id": .object(["type": "string", "description": "List this wing's notes (\"\" is Home)."]),
+                // VX-827 U2 — VX-810: the list-by-tag road (every tag tool's path form).
+                "tag": .object(["type": "string",
+                                "description": "Only notes wearing this tag (a path) or a tag under it, on the note or a block."]),
                 "cursor": .object(["type": "string", "description": "next_cursor from the previous page."]),
                 "limit": .object(["type": "integer", "minimum": 1, "maximum": 200,
                                   "description": "Page size (default 50)."]),
@@ -311,12 +322,14 @@ enum MCPToolCatalog {
             the block has other takes — by a "--- Alternates for this block ---" section listing \
             them. Blank lines separate blocks — except in format v2: when a block holds blank lines \
             of its own, the header starts with {v:2} and a "--- next block ---" line separates the \
-            blocks instead. Returns the text. With with_ids: true it returns \
+            blocks instead. Returns the text — for an empty note (no title, tags or words), one \
+            sentence saying it is empty, naming it, in place of empty text. With with_ids: true it returns \
             JSON instead — the note's blocks in order, each with its block_id, its name if the \
             author named it, shown_take_id (the take the block shows), every take (take_id, label, \
             chosen, text — each text once, on its take) and its comments — the ids add_take, \
             add_comment and save_lens address — plus the note's \
-            entry_date and the books (and chapters) holding it that you can read. Ids are live: the \
+            entry_date, its tag_ids and tags (the paths of the tags the note itself wears, as the \
+            header lists them) and the books (and chapters) holding it that you can read. Ids are live: the \
             author's own merges and divides make new blocks, so an id can go stale between calls \
             (a write with a stale id is refused) — read again to get current ids. with_commits: true \
             adds each take's commits (saved moments), newest first, with their text; past about \
@@ -325,8 +338,9 @@ enum MCPToolCatalog {
             takes join each block's takes, marked archived); with_tray: true (the note's tray — \
             deleted blocks and takes, kept 30 days; put_back restores one); with_lineage: true \
             (each block's lineage — what it was divided, merged or copied from or into — and each \
-            take's parent_take_id; a relative outside what you can read shows only \
-            beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
+            take's parent_take_id; a relative outside what you can read is left out, and \
+            beyond_reach says so — a take's parent you can't read shows only \
+            parent_beyond_grant); with_lenses: true (its saved lenses and the take each shows per block); \
             with_versions: true (its saved versions — version_id reads one, in either form). \
             lens_id reads the note through one of its lenses, in either form: each block shows the \
             take the lens shows there, else its chosen take; with with_ids each block's \
@@ -415,7 +429,8 @@ enum MCPToolCatalog {
         name: "export_note", rung: .read, title: "Export a note as plain text",
         description: """
             One note as plain prose: each block's chosen take, joined as the note reads — no \
-            alternates, no header. Returns the text.
+            alternates, no header. Returns the text — for an empty note (no words), one sentence \
+            saying it is empty, naming it, in place of empty text.
             """,
         inputSchema: .object([
             "type": "object",
@@ -486,6 +501,45 @@ enum MCPToolCatalog {
         ]),
         scopes: [.wing],
         grantOnly: true)
+
+    /// **VX-817 (VX-827 U1 — the run record `notes/plans/fixes/vx-827-lineage.md`,
+    /// P-U1-a…g sustained; her VX-817 fence line: an edge appears ONLY when
+    /// BOTH its ends are within the client's read reach):** the other notes
+    /// one of this note's blocks is joined to by ONE edge — `Queries.lineagePeers`
+    /// filtered through the one read rule; a peer beyond reach is simply
+    /// absent, and `beyond_reach` says the list is scoped.
+    static let listNoteLineage = MCPToolDeclaration(
+        name: "list_note_lineage", rung: .read, title: "List a note's lineage",
+        description: """
+            The other notes a note is joined to by lineage, one step away: notes holding a copy of \
+            some of its text (a divided or extracted block moved to another note, a duplicate, a \
+            copy to another wing), notes holding what its text was copied from, and notes linked \
+            to it as versions. Returns JSON: note_id and title, then copies, originals and versions \
+            — each a list of notes (note_id, title, wing_id, archived) with their links: block_id \
+            (this note's block), peer_block_id (the other note's block), origin_op (divide, merge, \
+            extract, pool_copy, or manual for a duplicate or copy) and at (when the link was made). \
+            A duplicate is in copies by every block and in versions by one. One step only: a note \
+            reached only through another note is not listed — ask about that note; a block's \
+            history inside this note is read_note's with_lineage, and its saved versions are \
+            read_note's with_versions. Only notes you can read are listed, and beyond_reach says \
+            so. note_ids (1 to \(MCPWriteTools.listCap) notes, instead of note_id) reads each \
+            note in turn, each its own read (a once grant covers one note); it returns results — \
+            one per note, in the order given: that note's answer, or note_id with refused — and \
+            landed_count and refused_count.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": .object([
+                    "type": "array",
+                    "description": "Up to \(MCPWriteTools.listCap) notes, instead of note_id — each its own read.",
+                    "items": .object(["type": "string"]),
+                ]),
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
 
     // MARK: - The SUGGEST rung (U2 — "it cannot touch a word you wrote")
 

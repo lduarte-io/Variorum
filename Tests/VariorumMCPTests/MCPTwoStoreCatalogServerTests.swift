@@ -53,6 +53,11 @@ struct CatalogWorld: Sendable {
     var board = "", freshStart = "", idea = "", cappedToo = "", tooMember = "", gathering = ""
     // VX-807 (batch 2): the books move_book_to_wing moves.
     var traveler = "", travOne = "", stuckBook = "", fencedBook = ""
+    // VX-827 U1: the lineage arms' note (in the shared book) and its readable
+    // Copy to Wing copy in Studio.
+    var kin = "", kinCopy = ""
+    // VX-827 U2 (VX-815): an empty note (untitled, no blocks) under a READ note grant.
+    var empty = ""
     // hidden (A only)
     var vault = "", secretBoard = "", finished = "", diary = "", twinStudio = "", attic = "", atticBook = ""
     var atticNote = "", journalEntry = "", privateShared = "", privateCapped = "", secretNote = ""
@@ -171,6 +176,18 @@ struct MCPTwoStoreCatalogServerTests {
         _ = try ops.addPostToReading(w.stuck, to: stuckBook.id)
         w.stuckBook = stuckBook.id
         w.fencedBook = try ops.createReading(name: "Fenced book", kind: .book).id
+        // VX-827 U1: `kin` (Home, in the shared book) and its Copy to Wing copy
+        // in Studio — a READABLE peer in another wing; in A the hidden half
+        // gives kin hidden relatives too (below).
+        let kin = try ops.createPost(title: "kin")
+        _ = try ops.newBlock(in: kin.id, text: "Kin words, first.", registeringUndo: false)
+        _ = try ops.newBlock(in: kin.id, text: "Kin words, second.", registeringUndo: false)
+        _ = try ops.addPostToReading(kin.id, to: shared.id)
+        w.kin = kin.id
+        w.kinCopy = try ops.copyNoteToWing(kin.id, to: studio.id).id
+        // VX-827 U2 (VX-815): an EMPTY note the client may read — its text forms
+        // say it is empty (one sentence naming it), never the nothing-shape.
+        w.empty = try ops.createPost(title: nil).id
         if hidden { try buildHidden(h, &w, board: board.id, idea: idea.id) }
         return w
     }
@@ -288,7 +305,25 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try ops.setBookPrivate(starDiary.id, true)
             // VX-814 (batch 3): a tag of the hidden wing whose path a client's
             // birth tag names — per-wing vocabulary makes it a non-event.
-            _ = try ops.createTag(name: "attic-topic", wingID: w.attic)
+            let atticTopic = try ops.createTag(name: "attic-topic", wingID: w.attic)
+            // VX-827 U1 (her F-U1-1 ruling): `kin`'s HIDDEN relatives — her
+            // Duplicate (bookless in Home's Pool, ungranted: a copy by every
+            // block + a version link), and version links to a Private note, a
+            // note in the hidden wing and the daily Journal's entry. Only edges
+            // and a copy are minted; no reachable row changes.
+            _ = try ops.duplicateAsVersion(w.kin, tags: .none)
+            for relative in [w.privateShared, w.atticNote, w.journalEntry] {
+                _ = try ops.markPostsAsVersions(w.kin, relative)
+            }
+            // VX-827 U2 (VX-810): hidden WEARERS of tags the client can name — the
+            // shared book's Private member wears #board, the hidden secret note's
+            // BLOCK wears #board, the hidden wing's note wears its own
+            // #attic-topic (the Private Studio note's #idea is above) — so the
+            // list-by-tag arms meet them: absent, never hinted. Applications only;
+            // no reachable row changes.
+            _ = try ops.applyTag(board, toPost: w.privateShared)
+            _ = try ops.applyTag(board, toBlock: w.secretBlock)
+            _ = try ops.applyTag(atticTopic.id, toPost: w.atticNote)
         }
     }
 
@@ -310,6 +345,7 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, book))
         }
         _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.loose))
+        _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.empty))
         return connection
     }
 

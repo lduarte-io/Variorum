@@ -2529,8 +2529,24 @@ final class TakesViewModel {
     /// The blockID is named EXPLICITLY by the card that raised it — a
     /// right-click never moves the keyboard, so a routed target could name
     /// another card's block (13k K6's lesson, same fix).
+    ///
+    /// **VX-801 (VX-827 U3b — G2's ruling):** the door lands on the LINEAGE
+    /// face with the ORIGINAL selected (Write's twin), through the history
+    /// doors' own road; the Block History panel is retired whole.
     func revealOriginBlock(ofBlock blockID: String) {
-        requestBlockHistory(blockID: blockID)
+        // The named slot, else the routed target (the history door's rule).
+        guard let slot = projection.slots.first(where: { $0.blockID == blockID })
+            ?? commandTargetSlot else {
+            refuse(CapabilityRegistry.capability(.showBlockLineage).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: slot.blockID,
+            focusedVariantID: focusedPane?.blockID == slot.blockID
+                ? focusedPane?.variantID : slot.variantID,
+            opening: .lineage(select: projection.unplacedOrigins[slot.blockID]?.first?.blockID))
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
     }
 
     /// The ⌘K row's body on the boards: the focused block's original, or the
@@ -2565,6 +2581,24 @@ final class TakesViewModel {
             postID: postID, blockID: slot.blockID,
             focusedVariantID: focusedPane?.blockID == slot.blockID
                 ? focusedPane?.variantID : slot.variantID)
+        if session.commandRouter.requestBlockHistory(request) { return }
+        blockHistoryRequest = request
+    }
+
+    /// **block ▾'s LINEAGE row** (VX-801, VX-827 U3b) — Write's twin: the
+    /// history road, opened on the Lineage face.
+    func requestBlockLineage(blockID: String? = nil) {
+        guard let slot = blockID.flatMap({ id in
+            projection.slots.first { $0.blockID == id }
+        }) ?? commandTargetSlot else {
+            refuse(CapabilityRegistry.capability(.showBlockLineage).unavailableNote)
+            return
+        }
+        let request = BlockHistoryRequest(
+            postID: postID, blockID: slot.blockID,
+            focusedVariantID: focusedPane?.blockID == slot.blockID
+                ? focusedPane?.variantID : slot.variantID,
+            opening: .lineage(select: nil))
         if session.commandRouter.requestBlockHistory(request) { return }
         blockHistoryRequest = request
     }

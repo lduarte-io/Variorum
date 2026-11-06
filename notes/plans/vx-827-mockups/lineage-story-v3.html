@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History & lineage — VX-801 mockup v3</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db; --green:#4a6a4f;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 90px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 10px;max-width:78ch;line-height:1.5;}
+  .ruled{background:var(--washlite);border:1px solid var(--hair);border-radius:8px;padding:10px 16px;font-size:13.5px;color:var(--muted);max-width:76ch;line-height:1.55;margin:0 0 26px;}
+  .ruled b{color:var(--ink);}
+  h2{font-size:17px;margin:40px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 12px;max-width:76ch;line-height:1.5;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:900px;margin:0 0 12px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;}
+  .bar{display:flex;align-items:baseline;gap:14px;padding:12px 22px 10px;border-bottom:1px solid var(--hair);}
+  .bar .back{color:var(--star);font-size:13.5px;}
+  .bar .title{font-weight:600;font-size:15px;}
+  .bar .right{margin-left:auto;color:var(--muted);font-size:12.5px;}
+
+  /* the map strip */
+  .maplabel{color:var(--muted);font-size:11px;letter-spacing:.5px;font-family:ui-sans-serif,system-ui;padding:12px 22px 0;}
+  .map{display:flex;gap:10px;align-items:center;padding:8px 22px 14px;border-bottom:1px solid var(--hair);overflow-x:auto;}
+  .gen{display:flex;flex-direction:column;gap:6px;flex:none;}
+  .mc{flex:none;width:150px;background:#fff;border:1px solid var(--hair);border-radius:8px;padding:7px 10px 6px;font-size:11.5px;line-height:1.35;}
+  .mc .v{color:var(--rust);font-family:ui-sans-serif,system-ui;font-size:10.5px;display:block;margin-bottom:2px;}
+  .mc .w{color:var(--ink);display:block;font-size:12px;}
+  .mc .s{color:var(--muted);display:block;margin-top:3px;font-size:10.5px;}
+  .mc.sel{border:1.5px solid var(--rust);background:var(--wash);}
+  .mc.trash{opacity:.55;}
+  .mc.live .s b{color:var(--green);font-weight:400;}
+  .arrow{color:#cfc7bb;flex:none;font-size:15px;}
+
+  /* the log */
+  .log{padding:14px 26px 22px;}
+  .loghd{display:flex;align-items:baseline;gap:12px;margin:2px 0 12px;}
+  .loghd .t{font-weight:600;font-size:15px;}
+  .loghd .c{color:var(--muted);font-size:12.5px;}
+  .loghd .acts{margin-left:auto;color:var(--star);font-size:12.5px;}
+  .loghd .acts span{margin-left:14px;}
+  .grp{color:var(--muted);font-size:11px;letter-spacing:.5px;font-family:ui-sans-serif,system-ui;margin:16px 0 8px;}
+  .tc{border:1px solid var(--hair);border-radius:9px;background:#fff;margin:0 0 10px;padding:11px 15px 9px;}
+  .tc .hd{display:flex;gap:10px;align-items:baseline;font-size:13px;}
+  .tc .hd .lbl{font-weight:600;}
+  .tc .hd .chosen{color:var(--green);font-size:11.5px;}
+  .tc .hd .amark{color:var(--muted);font-size:11.5px;}
+  .tc .hd .cnt{margin-left:auto;color:var(--star);font-size:12.5px;white-space:nowrap;}
+  .tc .txt{font-size:13.5px;line-height:1.5;color:var(--ink);margin:5px 0 2px;max-height:3.1em;overflow:hidden;}
+  .commits{margin:8px 0 2px;border-left:2px solid var(--hair);padding-left:12px;}
+  .crow{display:flex;gap:10px;align-items:baseline;padding:4px 0;font-size:12.5px;}
+  .crow .stamp{color:var(--muted);white-space:nowrap;}
+  .crow .cname{flex:1;color:var(--ink);}
+  .crow .doors{color:var(--star);white-space:nowrap;font-size:12px;}
+  .crow .doors span{margin-left:12px;}
+  .fold{color:var(--muted);font-size:12px;padding:3px 0 1px;}
+  .del{display:flex;gap:10px;align-items:baseline;border:1px solid var(--hair);border-radius:9px;padding:9px 15px;font-size:13px;color:var(--muted);}
+  .del .pb{margin-left:auto;color:var(--star);font-size:12.5px;}
+
+  .q{background:var(--paper);border:1px solid var(--hair);border-left:3px solid var(--rust);border-radius:8px;padding:12px 18px;max-width:76ch;margin:0 0 12px;font-size:14px;line-height:1.55;}
+  .q b{display:block;margin-bottom:3px;}
+  .q .rec{color:var(--green);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+</style>
+</head>
+<body>
+
+<h1>History &amp; lineage — v3, on a complicated block</h1>
+<div class="ruled">
+  <b>Built to your v2 rulings:</b> one door; it opens on THIS block — commits by take, archived takes their own
+  group, deleted takes at the foot. Lineage is the <b>map</b>: one bounded band up top, left → right like v1's lanes
+  (horizontal lives only in that band — the content below never scrolls sideways). Click any card in the map and the
+  log below becomes THAT block's takes and commits — an ancestor's commits are two clicks from anywhere. Compare
+  with now rides every commit row and every ancestor take (the v2 compare face, unchanged).
+  <b>The fixture is deliberately heavy:</b> three generations, a fan of five, 23 commits.
+</div>
+
+<h2>As it opens — the log is this block</h2>
+
+<div class="mock">
+  <div class="bar"><span class="back">‹ back</span><span class="title">History &amp; lineage</span><span class="right">block 2 of 4 · On Rereading</span></div>
+  <div class="maplabel">THE FAMILY — OLDER TO THE LEFT · click a card to read its history below</div>
+  <div class="map">
+    <div class="mc"><span class="v">imported</span><span class="w">first draft, longhand…</span><span class="s">kept as lineage · 1 take</span></div>
+    <span class="arrow">›</span>
+    <div class="gen">
+      <div class="mc"><span class="v">divided</span><span class="w">Rereading gets no respect. A book read once…</span><span class="s">kept as lineage · 4 takes · 11 commits</span></div>
+      <div class="mc trash"><span class="v">copied from Snippets</span><span class="w">a book read once is just a rumor…</span><span class="s">in the Trash · 1 take</span></div>
+    </div>
+    <span class="arrow">›</span>
+    <div class="gen">
+      <div class="mc"><span class="v">merged — left</span><span class="w">A book read once is a rumor.</span><span class="s">kept as lineage · 3 takes · 7 commits</span></div>
+      <div class="mc"><span class="v">merged — right</span><span class="w">Read twice, it starts to become a place…</span><span class="s">kept as lineage · 1 take · 2 commits</span></div>
+    </div>
+    <span class="arrow">›</span>
+    <div class="mc sel live"><span class="v">this block</span><span class="w">A book read once is a rumor; read twice…</span><span class="s"><b>live here</b> · 5 takes · 23 commits</span></div>
+    <span class="arrow">›</span>
+    <div class="gen">
+      <div class="mc live"><span class="v">extracted</span><span class="w">The corners you missed the first time…</span><span class="s"><b>this note, below</b> · 1 take</span></div>
+      <div class="mc live"><span class="v">a version</span><span class="w">…an address you can give other people.</span><span class="s"><b>On Rereading — v2 · “drafts” wing</b> · go to ›</span></div>
+    </div>
+  </div>
+  <div class="log">
+    <div class="loghd"><span class="t">This block</span><span class="c">5 takes · 23 commits</span></div>
+    <div class="tc">
+      <div class="hd"><span class="lbl">plain</span><span class="chosen">✓ chosen</span><span class="cnt">9 commits ▴ · Compare with now</span></div>
+      <div class="txt">A book read once is a rumor; read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument…</div>
+      <div class="commits">
+        <div class="crow"><span class="stamp">Nov 2 at 9:14 PM</span><span class="cname">tightened the second clause</span><span class="doors"><span>Restore</span><span>Bring back as take</span><span>Compare with now</span></span></div>
+        <div class="crow"><span class="stamp">Oct 28 at 6:27 PM</span><span class="cname">A book read once is a rumor; read twice, it starts…</span><span class="doors"><span>Restore</span><span>Bring back as take</span><span>Compare with now</span></span></div>
+        <div class="fold">7 quiet commits · show</div>
+      </div>
+    </div>
+    <div class="tc"><div class="hd"><span class="lbl">long form</span><span class="cnt">6 commits ▸</span></div><div class="txt">A book read once is only ever a rumor of itself — a report from someone you used to be…</div></div>
+    <div class="tc"><div class="hd"><span class="lbl">spoken</span><span class="cnt">4 commits ▸</span></div><div class="txt">Read a book once and all you have is hearsay. Read it twice and you've been somewhere.</div></div>
+    <div class="grp">ARCHIVED TAKES · 2</div>
+    <div class="tc"><div class="hd"><span class="lbl">first pass</span><span class="amark">archived</span><span class="cnt">3 commits ▸</span></div><div class="txt">Books reward the second visit more than the first…</div></div>
+    <div class="tc"><div class="hd"><span class="lbl">cut lines</span><span class="amark">archived</span><span class="cnt">1 commit ▸</span></div><div class="txt">The first read is a tour; the second is tenancy.</div></div>
+    <div class="grp">DELETED TAKES · ON THE 30-DAY CLOCK</div>
+    <div class="del"><span>(empty take) · deleted Oct 28 · 22 days left</span><span class="pb">Put back</span></div>
+  </div>
+</div>
+
+<h2>Two clicks to an ancestor's commits</h2>
+<p class="note">The gen-two "divided" card clicked in the map: the log below is now THAT block's — same shape, its own acts in the header. The map stays put; "this block" stays marked, so the way back is always one click.</p>
+
+<div class="mock">
+  <div class="log" style="padding-top:18px;">
+    <div class="loghd"><span class="t">divided — the original, kept as lineage</span><span class="c">4 takes · 11 commits</span><span class="acts"><span>Put back</span><span>Bring back as take</span><span>Compare with now</span></span></div>
+    <div class="tc">
+      <div class="hd"><span class="lbl">the draft</span><span class="chosen">✓ was chosen</span><span class="cnt">5 commits ▴ · Compare with now</span></div>
+      <div class="txt">Rereading gets no respect. A book read once is a rumor. Read twice it becomes a place, and the corners hold the furniture of the argument…</div>
+      <div class="commits">
+        <div class="crow"><span class="stamp">Oct 12 at 9:02 PM</span><span class="cname">before the divide</span><span class="doors"><span>Restore</span><span>Bring back as take</span><span>Compare with now</span></span></div>
+        <div class="fold">4 quiet commits · show</div>
+      </div>
+    </div>
+    <div class="tc"><div class="hd"><span class="lbl">angrier</span><span class="cnt">3 commits ▸</span></div><div class="txt">Nobody teaches rereading because nobody respects it…</div></div>
+    <div class="tc"><div class="hd"><span class="lbl">gentle open</span><span class="cnt">2 commits ▸</span></div><div class="txt">There is a quieter skill under reading…</div></div>
+    <div class="tc"><div class="hd"><span class="lbl">(unlabeled)</span><span class="cnt">1 commit ▸</span></div><div class="txt">Rereading is the skill; reading is the audition.</div></div>
+  </div>
+</div>
+
+<h2>Your calls on v3</h2>
+<div class="q"><b>1 — the map.</b> Horizontal returns, but only as this one band — the log below never scrolls sideways. <span class="rec">Does the band read as the clarity you liked in v1?</span> (The alternative stays a vertical tree rail on the left; costs width, reads tool-ish.)</div>
+<div class="q"><b>2 — takes as cards.</b> The log's take cards are deliberately the Takes board's family, replacing v2's text rows. Confirm this is the "like takes" you meant.</div>
+<div class="q"><b>3 — versions' seat.</b> Drawn at the map's right end beside descendants. The alternative: their own small group under the log. Either is cheap.</div>
+
+</body>
+</html>

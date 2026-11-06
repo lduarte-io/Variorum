@@ -71,12 +71,18 @@ struct OriginBlockDoorTests {
         // constant for free, which is the whole argument for the constant,
         // made good a second time. The CLAIM is unchanged: the sentence
         // names a place that really has that name and that door.
-        #expect(TrayPath.originalsPath.contains(BlockHistoryPath.name))
-        #expect(TrayPath.originalsPath.contains(BlockHistoryPath.cameFromSection))
+        // **VX-827 U3b — A JUSTIFIED EDIT, a third time:** the Block History
+        // panel retired and the originals' home on the Mac is the block's
+        // LINEAGE face — the constant follows it, and the claim is the same:
+        // the sentence names a place that really has that name and that door.
+        #expect(TrayPath.originalsPath == BlockLineagePath.place)
+        #expect(TrayPath.originalsPath.contains("Lineage"))
+        #expect(!TrayPath.originalsPath.contains(BlockHistoryPath.cameFromSection),
+                "the came-from region retired with the panel — pointing there would be a lie")
         #expect(!TrayPath.originalsPath.contains(TrayPath.menuLabel),
                 "the tray no longer lists them — pointing there would be a lie")
-        #expect(TrayPath.originalsPathWithDoor.contains(BlockHistoryPath.doorPhrase),
-                "the teaching form names the way in, not just the place")
+        #expect(TrayPath.originalsPathWithDoor.contains(CommitBar.lineageRowTitle),
+                "the teaching form names the way in (block ▾'s Lineage row), not just the place")
     }
 
     /// The completion sentence: only when an unchecked take actually rode the
@@ -365,7 +371,11 @@ struct OriginBlockDoorTests {
     /// Fire-and-DO (P-2): invoking opens the block's HISTORY PANE, at its
     /// came-from region — the door's THIRD and last landing (the post-13l
     /// polish round, ledger row 17), after 13f's navigation to the listing J6
-    /// removed and 13j J3's own peek.
+    /// removed and 13j J3's own peek. *(VX-827 U3b: the pane retired; this pin
+    /// drives the HISTORY door's request, whose shape is unchanged — the
+    /// origin door's own landing, the Lineage face on the original, is
+    /// `theBoardsProjectionCarriesTheOriginsAndItsDoorActs` below and
+    /// `RecoveryDoorsTests.theContextRowOpensThePeekAtTheOriginAndItShowsItsTakes`.)*
     ///
     /// **A JUSTIFIED EDIT to what the pin drives, and the claim is stronger
     /// for it:** the peek showed `.first` of an array whose own doc says a
@@ -410,11 +420,15 @@ struct OriginBlockDoorTests {
             #expect(origins.first?.originOp == "divide")
 
             board.model.revealOriginBlock(ofBlock: w.first.block.id)
+            // VX-827 U3b — A JUSTIFIED PIN EDIT (G2's ruling): the origin door
+            // lands on the LINEAGE face with the ORIGINAL selected, through the
+            // history doors' own road (no detail here ⇒ the board's sheet).
             let request = try #require(board.model.blockHistoryRequest)
             #expect(request.postID == board.postID)
-            // The pane is scoped to the SUCCESSOR — the block she right-clicked
-            // — and its came-from region is what names the original.
+            // The surface is scoped to the SUCCESSOR — the block she
+            // right-clicked — and opens on the original it came from.
             #expect(request.blockID == w.first.block.id)
+            #expect(request.opening == .lineage(select: slot.blockID))
         }
     }
 

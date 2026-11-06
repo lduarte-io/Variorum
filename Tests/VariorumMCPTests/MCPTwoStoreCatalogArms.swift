@@ -42,12 +42,55 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "list_notes · a hidden wing", tool: "list_notes") { w, _ in ["wing_id": s(w.attic)] },
         CatalogArm(label: "list_notes · a hidden owned book", tool: "list_notes") { w, _ in ["book_id": s(w.vault)] },
         CatalogArm(label: "list_notes · a hidden Private book", tool: "list_notes") { w, _ in ["book_id": s(w.diary)] },
+        // VX-827 U2 — VX-810: the list-by-tag road. In A a Private member of the
+        // shared book and a hidden note's BLOCK wear #board, a hidden Private
+        // Studio note wears #idea (the gathering's rule), #secret-topic is worn
+        // only beyond reach and the hidden wing's note wears its own
+        // #attic-topic — each absent, never hinted.
+        CatalogArm(label: "list_notes · #board in the shared book (its Private member wears it too)", tool: "list_notes") { w, _ in
+            ["book_id": s(w.shared), "tag": s("board")] },
+        CatalogArm(label: "list_notes · #board in the shared book, paged", tool: "list_notes") { w, _ in
+            ["book_id": s(w.shared), "tag": s("board"), "limit": .int(1)] },
+        CatalogArm(label: "list_notes · #board, everything shared (hidden wearers, a hidden note's block)", tool: "list_notes") { _, _ in
+            ["tag": s("board")] },
+        CatalogArm(label: "list_notes · #board, everything shared, paged", tool: "list_notes") { _, _ in
+            ["tag": s("board"), "limit": .int(1)] },
+        CatalogArm(label: "list_notes · Studio #idea (a hidden Private note wears it)", tool: "list_notes") { w, _ in
+            ["wing_id": s(w.studio), "tag": s("idea")] },
+        CatalogArm(label: "list_notes · the gathering, #idea (a hidden Private note matches and wears it)", tool: "list_notes") { w, _ in
+            ["book_id": s(w.gathering), "tag": s("idea")] },
+        CatalogArm(label: "list_notes · #secret-topic (worn only beyond reach)", tool: "list_notes") { _, _ in
+            ["tag": s("secret-topic")] },
+        CatalogArm(label: "list_notes · a hidden wing's tag path", tool: "list_notes") { _, _ in ["tag": s("attic-topic")] },
+        CatalogArm(label: "list_notes · a tag path naming nothing", tool: "list_notes") { _, _ in ["tag": s("no-such-tag")] },
+        CatalogArm(label: "list_notes · a hidden wing, by its tag", tool: "list_notes") { w, _ in
+            ["wing_id": s(w.attic), "tag": s("attic-topic")] },
         CatalogArm(label: "read_note · card with ids (a hidden board holds it)", tool: "read_note") { w, _ in
             ["note_id": s(w.card), "with_ids": .bool(true)] },
         CatalogArm(label: "read_note · card, text", tool: "read_note") { w, _ in ["note_id": s(w.card)] },
         CatalogArm(label: "read_note · card, everything", tool: "read_note") { w, _ in
             ["note_id": s(w.card), "with_ids": .bool(true), "with_lineage": .bool(true), "with_commits": .bool(true),
              "with_lenses": .bool(true), "with_tray": .bool(true), "with_versions": .bool(true)] },
+        // VX-827 U1 (her F-U1-1 ruling, "Retire the stub"): RED ON THE OLD
+        // STUB — A's answer carried one `beyond_grant` per edge to a hidden
+        // relative (the Pool copy, the Private note, the hidden wing's note,
+        // the Journal entry); now each is absent and beyond_reach says so.
+        CatalogArm(label: "read_note · kin with lineage (hidden relatives in the Pool, a Private note, a hidden wing, the Journal)",
+                   tool: "read_note") { w, _ in ["note_id": s(w.kin), "with_lineage": .bool(true)] },
+        // VX-827 U1 — VX-817's list_note_lineage: a peer appears only when both
+        // its ends are readable — hidden relatives are absent, never counted.
+        CatalogArm(label: "list_note_lineage · kin (hidden relatives beside a readable copy in Studio)",
+                   tool: "list_note_lineage") { w, _ in ["note_id": s(w.kin)] },
+        CatalogArm(label: "list_note_lineage · kin's Studio copy (its original in the shared book)",
+                   tool: "list_note_lineage") { w, _ in ["note_id": s(w.kinCopy)] },
+        CatalogArm(label: "list_note_lineage · a hidden note", tool: "list_note_lineage") { w, _ in
+            ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "list_note_lineage · the daily Journal's entry", tool: "list_note_lineage") { w, _ in
+            ["note_id": s(w.journalEntry)] },
+        CatalogArm(label: "list_note_lineage · a list mixing readable and hidden notes", tool: "list_note_lineage") { w, _ in
+            ["note_ids": .array([s(w.kin), s(w.secretNote), s(w.journalEntry), s(w.kinCopy), s(w.atticNote)])] },
+        CatalogArm(label: "list_note_lineage · a list of hidden notes only (an error)", tool: "list_note_lineage") { w, _ in
+            ["note_ids": .array([s(w.secretNote), s(w.privateShared)])] },
         CatalogArm(label: "read_note · a note a hidden owned book claims", tool: "read_note") { w, _ in
             ["note_id": s(w.ownedNote), "with_ids": .bool(true)] },
         CatalogArm(label: "read_note · a note a hidden finished book holds", tool: "read_note") { w, _ in
@@ -58,6 +101,11 @@ extension MCPTwoStoreCatalogServerTests {
             ["note_id": s(w.privateShared)] },
         CatalogArm(label: "read_note · a hidden lens on card", tool: "read_note") { w, _ in
             ["note_id": s(w.card), "lens_id": s(w.secretLens)] },
+        // VX-827 U2 — VX-815: an empty note the client may read says so (its
+        // text forms: one sentence naming it; with ids: blocks []).
+        CatalogArm(label: "read_note · an empty note (text)", tool: "read_note") { w, _ in ["note_id": s(w.empty)] },
+        CatalogArm(label: "read_note · an empty note, with ids", tool: "read_note") { w, _ in
+            ["note_id": s(w.empty), "with_ids": .bool(true)] },
         CatalogArm(label: "search · a word hidden notes hold", tool: "search") { _, _ in ["query": s("zebra")] },
         CatalogArm(label: "search · words", tool: "search") { _, _ in ["query": s("words")] },
         CatalogArm(label: "search · #board", tool: "search") { _, _ in ["query": s("#board")] },
@@ -67,6 +115,7 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "search · in a hidden note", tool: "search") { w, _ in ["query": s("zebra"), "note_id": s(w.secretNote)] },
         CatalogArm(label: "export_note · card", tool: "export_note") { w, _ in ["note_id": s(w.card)] },
         CatalogArm(label: "export_note · a hidden note", tool: "export_note") { w, _ in ["note_id": s(w.atticNote)] },
+        CatalogArm(label: "export_note · an empty note", tool: "export_note") { w, _ in ["note_id": s(w.empty)] },
         CatalogArm(label: "list_wings", tool: "list_wings") { _, _ in [:] },
         CatalogArm(label: "show_in_app · card", tool: "show_in_app") { w, _ in ["target": s("note"), "note_id": s(w.card)] },
         CatalogArm(label: "show_in_app · a hidden note", tool: "show_in_app") { w, _ in

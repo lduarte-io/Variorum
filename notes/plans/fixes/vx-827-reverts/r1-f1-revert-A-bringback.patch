@@ -1,0 +1,16 @@
+diff --git a/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift b/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift
+index 156310f3b..100878682 100644
+--- a/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift
++++ b/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift
+@@ -851,11 +851,6 @@ enum LineageBringBack {
+     static func run(
+         session: AppSession, source: Operations.LineageTakeSource, onto blockID: String
+     ) async throws -> String {
+-        if case .take(let takeID) = source,
+-           let note = await placedNote(session: session, takeID: takeID),
+-           !(await session.flushExistingAutosave(forPost: note)) {
+-            throw Refusal.unsavedChanges
+-        }
+         let take = try await session.runner.run { ops in
+             try ops.bringBackFromLineage(source, onto: blockID)
+         }

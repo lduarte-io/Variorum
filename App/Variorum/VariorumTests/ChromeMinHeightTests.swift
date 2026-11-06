@@ -87,15 +87,24 @@ struct ChromeMinHeightTests {
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "a note")
             let block = try session.operations.newBlock(in: post.id, text: "A block.").block.id
+            // VX-827 U3b — A JUSTIFIED EDIT: the panel retired whole; the
+            // sheet-hosted surface that succeeds it is probed exactly as its
+            // sheet hosts frame it (`CommitsFaceSheet`'s floor — a face, not a
+            // column, so its floor height is the sheet's own 480 by design;
+            // the class's guard is that nothing grows past the sheet's ideal).
             let pane = NSHostingController(
-                rootView: BlockHistoryPane(
+                rootView: BlockHistorySurface(
                     session: session,
                     request: BlockHistoryRequest(postID: post.id, blockID: block),
-                    onJump: { _ in })
+                    onBack: {})
+                    .frame(
+                        minWidth: CommitsFaceSheet.minWidth, idealWidth: CommitsFaceSheet.idealWidth,
+                        minHeight: CommitsFaceSheet.minHeight, idealHeight: CommitsFaceSheet.idealHeight)
                     .environment(ThemeStore(session: session)))
             let probedPane = pane.sizeThatFits(in: NSSize(width: 1, height: 0))
-            print("[ladder R1-6] the sheet-hosted Block History pane's near-zero-width probe: \(probedPane.height) pt")
-            #expect(probedPane.height < 400, "the pane's minimum height stays bounded: \(probedPane.height)")
+            print("[ladder R1-6] the sheet-hosted history surface's near-zero-width probe: \(probedPane.height) pt")
+            #expect(probedPane.height <= CommitsFaceSheet.idealHeight,
+                    "the surface's minimum height stays bounded: \(probedPane.height)")
 
             let tray = NSHostingController(
                 rootView: TrayPanel(session: session, postID: post.id)

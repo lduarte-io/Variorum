@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The block's story — VX-801 mockup v2</title>
+<style>
+  :root{
+    --paper:#fdfcfa; --ink:#2e2a26; --muted:#8a8178; --rust:#9a4f2e;
+    --hair:#e4ded6; --wash:#f4efe8; --washlite:#faf7f2; --star:#3a5a8c;
+    --accent-fill:#efe6db; --green:#4a6a4f; --diffwash:#f3e9d9;
+  }
+  body{background:#efece7;color:var(--ink);font-family:'Iowan Old Style','Palatino Nova','Palatino','New York',Georgia,serif;margin:0;padding:32px 24px 90px;}
+  h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 10px;max-width:78ch;line-height:1.5;}
+  .ruled{background:var(--washlite);border:1px solid var(--hair);border-radius:8px;padding:10px 16px;font-size:13.5px;color:var(--muted);max-width:76ch;line-height:1.55;margin:0 0 30px;}
+  .ruled b{color:var(--ink);}
+  h2{font-size:17px;margin:44px 0 6px;}
+  .note{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:76ch;line-height:1.5;}
+  .mock{background:var(--paper);border:1px solid var(--hair);border-radius:10px;max-width:760px;margin:0 0 12px;box-shadow:0 1px 3px rgba(60,50,40,.06);overflow:hidden;}
+  .tag{display:inline-block;background:#fff;border:1px solid var(--hair);border-radius:5px;color:var(--muted);font-size:11px;padding:1px 7px;margin:14px 0 8px 22px;letter-spacing:.3px;font-family:ui-sans-serif,system-ui;}
+
+  .bar{display:flex;align-items:baseline;gap:14px;padding:12px 22px 10px;border-bottom:1px solid var(--hair);}
+  .bar .back{color:var(--star);font-size:13.5px;}
+  .bar .title{font-weight:600;font-size:15px;}
+  .bar .right{margin-left:auto;color:var(--muted);font-size:12.5px;}
+
+  .story{padding:14px 26px 24px;}
+  .sect{color:var(--muted);font-size:11.5px;letter-spacing:.5px;font-family:ui-sans-serif,system-ui;margin:18px 0 6px;}
+  .row{display:flex;align-items:baseline;gap:10px;padding:9px 10px;border-bottom:1px solid var(--hair);font-size:14px;line-height:1.5;}
+  .row:hover{background:var(--washlite);}
+  .row .verb{color:var(--rust);font-size:11.5px;font-family:ui-sans-serif,system-ui;white-space:nowrap;}
+  .row .words{flex:1;}
+  .row .where{color:var(--muted);font-size:12px;white-space:nowrap;}
+  .row .counts{color:var(--muted);font-size:12px;white-space:nowrap;}
+  .row.depth2{padding-left:34px;}
+  .row.this{background:var(--wash);border-radius:7px;border-bottom:none;}
+  .row.this .words{font-weight:600;}
+  .row.trash{opacity:.6;}
+  .open{border:1px solid var(--hair);border-radius:9px;margin:8px 0 14px 24px;background:#fff;}
+  .open .ohd{display:flex;gap:10px;align-items:baseline;padding:9px 14px;border-bottom:1px solid var(--hair);font-size:13.5px;}
+  .open .ohd .verb{color:var(--rust);font-size:11.5px;font-family:ui-sans-serif,system-ui;}
+  .open .ohd .close{margin-left:auto;color:var(--muted);font-size:12px;}
+  .take{padding:10px 14px 8px;border-bottom:1px solid var(--hair);}
+  .take .thd{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--muted);}
+  .take .thd .lbl{color:var(--ink);font-weight:600;}
+  .take .thd .chosen{color:var(--green);font-size:11.5px;}
+  .take .thd .dis{margin-left:auto;color:var(--star);}
+  .take .ttxt{font-size:13.5px;line-height:1.5;margin:5px 0 2px;color:var(--ink);}
+  .commits{margin:7px 0 3px;border-left:2px solid var(--hair);padding-left:12px;}
+  .crow{display:flex;gap:10px;align-items:baseline;padding:4px 0;font-size:12.5px;}
+  .crow .stamp{color:var(--muted);white-space:nowrap;}
+  .crow .cname{flex:1;color:var(--ink);}
+  .crow .doors{color:var(--star);white-space:nowrap;}
+  .crow .doors span{margin-left:12px;}
+  .quietfold{color:var(--muted);font-size:12px;padding:3px 0;}
+
+  .cmp{display:flex;gap:0;border:1px solid var(--hair);border-radius:9px;margin:10px 0 16px 24px;overflow:hidden;background:#fff;}
+  .cmp .col{flex:1;padding:12px 16px;font-size:13.5px;line-height:1.55;}
+  .cmp .col+.col{border-left:1px solid var(--hair);}
+  .cmp .chd{color:var(--muted);font-size:11.5px;letter-spacing:.4px;font-family:ui-sans-serif,system-ui;margin:0 0 7px;}
+  .cmp mark{background:var(--diffwash);color:var(--ink);border-radius:3px;padding:0 1px;}
+  .cmp .foot{display:none;}
+
+  .q{background:var(--paper);border:1px solid var(--hair);border-left:3px solid var(--rust);border-radius:8px;padding:12px 18px;max-width:76ch;margin:0 0 12px;font-size:14px;line-height:1.55;}
+  .q b{display:block;margin-bottom:3px;}
+  .q .rec{color:var(--green);font-size:12.5px;font-family:ui-sans-serif,system-ui;}
+  .q ul{margin:6px 0 2px;padding-left:20px;}
+  .q li{margin:0 0 4px;}
+</style>
+</head>
+<body>
+
+<h1>The block's story — v2</h1>
+<p class="sub">Redrawn to your notes on v1. A structure sketch, not final chrome.</p>
+<div class="ruled">
+  <b>What changed from v1, per your words:</b> no popup anywhere — the door is the block menu that already
+  exists (the bottom bar's <b>history</b> door and a <b>block ▾</b> row open the same surface). No left-right
+  scroll — ONE vertical column, <b>older above</b>, reading downward into now. Nothing at first: every relative
+  is one line; a line opens to its <b>takes</b>; a take opens to its <b>commits</b>. And the center of gravity is
+  yours: commits easy to see, and <b>Compare with now</b> on every commit and every ancestor take — the panel's
+  crowding problem is solved by making this surface Block History's successor (question 1 below).
+</div>
+
+<h2>The surface at rest — this IS the old "glance"</h2>
+<p class="note">Opened from <i>block ▾ → History &amp; lineage</i> or the bottom bar's history door. Takes-like presentation: the full single column, calm. Time reads downward: deepest ancestor first, this block washed, what came after it below. Nothing is expanded yet.</p>
+
+<div class="mock">
+  <div class="bar"><span class="back">‹ back</span><span class="title">History &amp; lineage</span><span class="right">block 2 of 4 · On Rereading</span></div>
+  <div class="story">
+    <div class="sect">CAME FROM — OLDEST FIRST</div>
+    <div class="row"><span class="verb">divided</span><span class="words">Rereading gets no respect. A book read once is a rumor. Read twice it becomes a place, and the corners…</span><span class="where">kept as lineage</span><span class="counts">3 takes · 2 commits ▾</span></div>
+    <div class="row trash depth2"><span class="verb">copied from Snippets</span><span class="words">a book read once is just a rumor you heard</span><span class="where">in the Trash</span><span class="counts">1 take ▾</span></div>
+    <div class="row depth2"><span class="verb">merged — left half</span><span class="words">A book read once is a rumor.</span><span class="where">kept as lineage</span><span class="counts">2 takes · 1 commit ▾</span></div>
+    <div class="row depth2"><span class="verb">merged — right half</span><span class="words">Read twice, it starts to become a place. The corners you missed the first time…</span><span class="where">kept as lineage</span><span class="counts">1 take · 1 commit ▾</span></div>
+    <div class="sect">THIS BLOCK</div>
+    <div class="row this"><span class="words">A book read once is a rumor; read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument…</span><span class="counts">2 takes · 4 commits ▾</span></div>
+    <div class="sect">WENT ON TO</div>
+    <div class="row"><span class="verb">extracted</span><span class="words">The corners you missed the first time hold the furniture of the argument.</span><span class="where">this note, below</span><span class="counts">1 take ▾</span></div>
+    <div class="sect">VERSIONS</div>
+    <div class="row"><span class="verb">a version</span><span class="words">A book read once is a rumor; read twice, it becomes an address you can give other people.</span><span class="where">On Rereading — v2 · “drafts” wing · go to ›</span><span class="counts">1 take · 2 commits ▾</span></div>
+  </div>
+</div>
+
+<h2>Piece by piece — a line opened to takes, a take opened to commits</h2>
+<p class="note">The merged-left ancestor's ▾ pressed: its takes appear in place, the chosen one marked. The first take's commits are open under it — each commit: Restore · Bring back as take · <b>Compare with now</b>. Quiet commits fold exactly as the panel folds them today.</p>
+
+<div class="mock">
+  <div class="story" style="padding-top:20px;">
+    <div class="row"><span class="verb">merged — left half</span><span class="words">A book read once is a rumor.</span><span class="where">kept as lineage</span><span class="counts">2 takes · 1 commit ▴</span></div>
+    <div class="open">
+      <div class="take">
+        <div class="thd"><span class="lbl">plain</span><span class="chosen">✓ was chosen</span><span class="dis">commits ▴ · Bring back as take · Compare with now</span></div>
+        <div class="ttxt">A book read once is a rumor.</div>
+        <div class="commits">
+          <div class="crow"><span class="stamp">Oct 12 at 9:14 PM</span><span class="cname">tightened to one clause</span><span class="doors"><span>Restore</span><span>Bring back as take</span><span>Compare with now</span></span></div>
+          <div class="quietfold">2 quiet commits · show</div>
+        </div>
+      </div>
+      <div class="take">
+        <div class="thd"><span class="lbl">rumor, long</span><span class="dis">commits ▾ · Bring back as take · Compare with now</span></div>
+        <div class="ttxt">A book read once is only ever a rumor of itself.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>Compare with now</h2>
+<p class="note">Pressed on the Oct 12 commit: the moment beside the take you're in, changed spans washed. Two identified texts, compared at view time — no word-level tracking is stored anywhere. One door back. (The same face serves comparing an ancestor's take against now.)</p>
+
+<div class="mock">
+  <div class="story" style="padding-top:20px;">
+    <div class="cmp">
+      <div class="col"><div class="chd">THE COMMIT — OCT 12 AT 9:14 PM · “tightened to one clause”</div>A book read once is a rumor.</div>
+      <div class="col"><div class="chd">THE TAKE NOW — THE ONE YOU'RE IN</div>A book read once is a rumor<mark>; read twice, it starts to become a place. The corners you missed the first time hold the furniture of the argument</mark>…</div>
+    </div>
+  </div>
+</div>
+
+<h2>Your calls on v2</h2>
+
+<div class="q"><b>1 — does this surface succeed Block History?</b> Your screenshots' crowding is this panel's content, re-laid: takes as rows, commits under their take, quiet folds kept, deleted takes at the surface's foot on the 30-day clock.
+<ul>
+<li><span class="rec">recommended</span> — yes: ONE door ("History &amp; lineage" — the bottom bar's history door and the block ▾ row open it), the old side panel retires, every job it had lives here.</li>
+<li>alternative — keep Block History as the quick side panel AND add this; two doors to overlapping things.</li>
+</ul></div>
+
+<div class="q"><b>2 — presentation.</b> "At most like the way takes looks":
+<ul>
+<li><span class="rec">recommended</span> — the full single-column area (as drawn), replacing the note's column while open, "‹ back" returns exactly where you were. Spacious by construction.</li>
+<li>alternative — a wide side panel beside the prose (the current Block History's seat, redesigned). Narrower; compare gets cramped.</li>
+</ul></div>
+
+<div class="q"><b>3 — the compare face.</b>
+<ul>
+<li><span class="rec">recommended</span> — side by side with changed spans washed (as drawn; a view-time comparison of two texts, nothing stored).</li>
+<li>alternative — plain side by side, no washes, first pass; washes later.</li>
+</ul></div>
+
+<div class="q"><b>4 — order inside a take's commits.</b> The tree runs older-above. Within ONE take's commit list, today's panel runs newest-first.
+<ul>
+<li><span class="rec">recommended</span> — keep newest-first inside a take (finding the latest moment is the common act; git log reads the same way).</li>
+<li>alternative — oldest-first everywhere, one direction for the whole page.</li>
+</ul></div>
+
+<div class="q"><b>Carried from v1, standing unless you say otherwise:</b> a relative in the Trash shows muted, "in the Trash", no acts (restore stays on its own surface); a relative in another wing is named with its wing and "go to ›" only; Put back keeps its existing landing and receipt, offered only where it can act.</div>
+
+</body>
+</html>

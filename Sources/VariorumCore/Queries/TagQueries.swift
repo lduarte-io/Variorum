@@ -148,6 +148,63 @@ extension Queries {
             arguments: [postID])
     }
 
+    /// A tag a note wears, as the wire names it (VX-827 U2 — VX-810): its id
+    /// and its path, the mint answers' `tag_ids` + `tags` pairing.
+    public struct WornTag: Equatable, Sendable {
+        public let id: String
+        public let path: String
+
+        public init(id: String, path: String) {
+            self.id = id
+            self.path = path
+        }
+    }
+
+    /// **Many notes' own live tags at once** (VX-827 U2 — VX-810: `list_notes`'
+    /// rows and `read_note`'s JSON): `postTags` batched — the tags each note
+    /// ITSELF wears (its document header's `{#…}`; a block's tags are the
+    /// block's), each note's ordered by path, then id. A note wearing none is
+    /// absent. ∝ the notes' own applications (`idx_post_tag_post`).
+    public static func wornTags(_ db: Database, noteIDs: [String]) throws -> [String: [WornTag]] {
+        guard !noteIDs.isEmpty else { return [:] }
+        var answer: [String: [WornTag]] = [:]
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT pt.post_id, t.id, t.path FROM json_each(?) j
+                JOIN post_tag pt ON pt.post_id = j.value AND pt.deleted_at IS NULL
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                ORDER BY pt.post_id, t.path, t.id
+                """,
+            arguments: [String(decoding: try JSONEncoder().encode(noteIDs), as: UTF8.self)]) {
+            answer[row["post_id"], default: []].append(WornTag(id: row["id"], path: row["path"]))
+        }
+        return answer
+    }
+
+    /// **The live tags at exactly one PATH** (VX-827 U2 — VX-810): in ONE wing
+    /// as surfaces read it (`wingScope`'s rule — Home also holds a dead wing's
+    /// tags, as it lists that wing's notes), or, `wingID` nil, in every wing.
+    /// One `uq_tag_path_live(wing_id, path)` probe per wing named — Home and the
+    /// `wing` rows (every row for every wing; the dead ones for Home) — so ∝ the
+    /// wings, shelf-scale. (A tag naming a wing id with no `wing` row at all is
+    /// not probed: no op mints one.) Ordered by id.
+    public static func liveTagIDs(_ db: Database, path: String, wingID: String?) throws -> [String] {
+        let wings: [String] = switch wingID {
+        case nil: [""] + (try String.fetchAll(db, sql: "SELECT id FROM wing ORDER BY id"))
+        case ""?: [""] + (try String.fetchAll(db, sql: "SELECT id FROM wing WHERE deleted_at IS NOT NULL ORDER BY id"))
+        case let wing?: [wing]
+        }
+        return try String.fetchAll(
+            db,
+            sql: """
+                SELECT t.id FROM json_each(?) w
+                CROSS JOIN tag t ON t.wing_id = w.value AND t.path = ? AND t.deleted_at IS NULL
+                ORDER BY t.id
+                """,
+            arguments: [String(decoding: try JSONEncoder().encode(wings), as: UTF8.self), path])
+    }
+
     /// One block's live applied tags (Phase 11, A8 — `postTags`' block
     /// twin; block tags primarily serve the pool, AppSpec §7).
     public static func blockTags(_ db: Database, blockID: String) throws -> [Tag] {

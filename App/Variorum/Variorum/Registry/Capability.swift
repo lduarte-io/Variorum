@@ -501,6 +501,18 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // beside Commit, because *"history is quite similar to commit, it's the
     // natural pair to commit"*.
     case showBlockHistory
+    // VX-801 (VX-827 U3a) — THE COMMITS FACE's own acts, declared at last: the
+    // Block History panel rendered them inline undeclared (its declaration
+    // listed only Put back and Unarchive), and the face that succeeds it
+    // declares each once — `.surface` acts on the moment the pane shows.
+    case restoreCommit, bringBackCommitAsTake, compareCommits, renameCommit
+    // VX-801 (VX-827 U3b) — THE LINEAGE FACE: its door (block ▾'s Lineage row
+    // on both bars, "lineage ›" on the Commits face) and its member header's
+    // four `.surface` acts (THE DESIGN MEMO: "Put back · Bring back as take ·
+    // Compare with now on the selected node's header … a cross-wing node named
+    // with its wing, go-to only").
+    case showBlockLineage
+    case putBackLineageBlock, bringBackLineageAsTake, compareLineageWithNow, goToLineageWing
     // The post-13l polish round (ledger rows 16/23, G1 + the V-family) — **THE
     // WHOLE-NOTE VERSIONS DOOR**, her ruling: *"an easy door would be to make
     // a copy of the note, archive it, and then let you look through the

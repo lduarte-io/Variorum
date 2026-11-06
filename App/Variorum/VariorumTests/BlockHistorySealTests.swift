@@ -20,6 +20,12 @@
 //  operation's own refusal is still the backstop underneath. The only thing
 //  gated is the FIELD.
 //
+//  **VX-827 U3b — A JUSTIFIED EDIT, the whole suite:** the panel retired
+//  whole; its rename door is the Commits face's (`askRenameSelected`), which
+//  carries row 69's rule — the seal watched while the face stands, the field
+//  never opened under it, the standing sentence spoken instead. Every claim
+//  below is the same claim, driven through the face's model.
+//
 
 import Foundation
 import Testing
@@ -32,7 +38,7 @@ import VariorumCore
 struct BlockHistorySealTests {
     private func withSealedNote(
         sealed: Bool,
-        _ body: @escaping (AppSession, BlockHistoryModel) async throws -> Void
+        _ body: @escaping (AppSession, CommitsFaceModel) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
@@ -46,16 +52,19 @@ struct BlockHistorySealTests {
             let minted = try session.operations.newBlock(in: post.id, text: "A paragraph.")
             _ = try session.operations.commit(minted.variant.id, kind: .manual)
             if sealed { try session.operations.lockPost(post.id) }
-            let model = BlockHistoryModel(
-                session: session, postID: post.id, blockID: minted.block.id,
-                focusedVariantID: minted.variant.id)
+            let model = CommitsFaceModel(session: session, request: BlockHistoryRequest(
+                postID: post.id, blockID: minted.block.id, focusedVariantID: minted.variant.id))
+            // The face opens on the newest moment — the fixture's commit.
+            model.adopt(try await session.database.read { db in
+                try CommitsFaceModel.read(db, blockID: minted.block.id, now: Date())
+            })
             try await body(session, model)
         }
     }
 
     /// Polls the model's own watch — the observation is live, so the fact
     /// arrives on its own turn rather than inside the call that starts it.
-    private func settleSeal(_ model: BlockHistoryModel, until wanted: Bool) async {
+    private func settleSeal(_ model: CommitsFaceModel, until wanted: Bool) async {
         let watching = Task { await model.watchSeal() }
         defer { watching.cancel() }
         for _ in 0..<200 {
@@ -71,9 +80,10 @@ struct BlockHistorySealTests {
         try await withSealedNote(sealed: true) { _, model in
             await settleSeal(model, until: true)
             #expect(model.sealed, "the watch landed the note's own seal")
-            #expect(!model.renameOpensTheField,
+            #expect(model.selectedCommit != nil, "the face stands on the fixture's moment")
+            model.askRenameSelected()
+            #expect(model.renameAsk == nil,
                     "RED ON OLD: the pane had no seal fact, so the field always opened")
-            model.refuseRenameUnderSeal()
             guard case .refusal(let said) = model.status else {
                 Issue.record("a door that does nothing speaks a REFUSAL (18i's kind grammar)")
                 return
@@ -89,7 +99,8 @@ struct BlockHistorySealTests {
         try await withSealedNote(sealed: false) { _, model in
             await settleSeal(model, until: false)
             #expect(!model.sealed)
-            #expect(model.renameOpensTheField)
+            model.askRenameSelected()
+            #expect(model.renameAsk != nil, "the field opens")
         }
     }
 
@@ -107,7 +118,8 @@ struct BlockHistorySealTests {
                 try? await Task.sleep(nanoseconds: 5_000_000)
             }
             #expect(sawSeal, "the seal arrived")
-            #expect(!model.renameOpensTheField)
+            model.askRenameSelected()
+            #expect(model.renameAsk == nil)
 
             try session.operations.unlockPost(model.postID)
             var sawUnseal = false
@@ -116,7 +128,8 @@ struct BlockHistorySealTests {
                 try? await Task.sleep(nanoseconds: 5_000_000)
             }
             #expect(sawUnseal, "and the unseal reached the pane without re-opening it")
-            #expect(model.renameOpensTheField)
+            model.askRenameSelected()
+            #expect(model.renameAsk != nil)
         }
     }
 
@@ -130,7 +143,7 @@ struct BlockHistorySealTests {
                 try Queries.blockHistory(db, blockID: blockID, now: Date())
             }.savepoints.values.first?.first
             let savepoint = try #require(commit, "the fixture's own savepoint")
-            await model.rename(savepoint, to: "a name it cannot keep")
+            await model.rename(commitID: savepoint.id, to: "a name it cannot keep")
             guard case .refusal = model.status else {
                 Issue.record("the op's refusal is the backstop and must still fire")
                 return
