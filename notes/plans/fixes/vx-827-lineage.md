@@ -187,7 +187,7 @@ safety copy before ANY real-store touch (none expected this run).
 | 3 | VX-801 design pass (5 mockup rounds + 2 explorations) | DONE — THE DESIGN MEMO settled at the exploration sitting |
 | 4 | U3a — the Commits face | DONE (fc8880a53…dc7fde0e5; adjudication below) |
 | 4b | U3b — the Lineage face + origin re-aim + panel retirement | DONE (654cf3469…; U3b RECORD below) |
-| 5 | Ladder (whole diff) | ROUND 1 DONE (0 BLOCKER/MAJOR, 2 MINOR, 3 NIT — dispositions below); fix leg + round 2 pending |
+| 5 | Ladder (whole diff) | ROUND 1 DONE + FIX LEG PUSHED (R1-F1 built, landed only at the window's red-then-green; R1-F5 done); ROUND 2 RUNNING |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
 | 7 | Closeout ritual (tickets, handoff, canon-size, worktree removal) | NOT-STARTED |
 
