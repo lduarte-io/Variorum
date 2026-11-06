@@ -38,4 +38,32 @@ extension MCPDoor {
             }
         }
     }
+
+    // MARK: - VX-874 — her hand on the section (rulings (1)–(3))
+
+    /// **The row's ✕ and its right-click Dismiss** (`.mcpDismissTrailEntry`):
+    /// the row goes and nothing else (rail (b)) — an ask that still STANDS
+    /// keeps its bottom-bar line, its Open › and its ✕; ⌥⌘O's last change
+    /// stays; nothing is read or written.
+    func dismissTrailEntry(_ id: UUID) {
+        trail.update { $0.dismiss(id) }
+    }
+
+    /// **Clear All** (`.mcpClearTrail` — her "a clear all button, like the
+    /// sidebar too"; the Open list's Close All Notes grammar): every row of
+    /// the section goes, every client's — the rows only (no standing ask
+    /// ends, ⌥⌘O's last change stays).
+    func clearTrail() {
+        trail.update { $0.clear() }
+    }
+
+    /// **A hand drag's landing** (ruling (3) — rail (a), PROVISIONAL P-874-3):
+    /// the row moves among its own stratum (`MCPTrail.reordered` — a drop that
+    /// would not act moves nothing). Returns whether anything moved.
+    @discardableResult
+    func moveTrailEntry(_ id: UUID, onto slot: MCPTrail.Slot) -> Bool {
+        var moved = false
+        trail.update { moved = $0.move(id, onto: slot) }
+        return moved
+    }
 }

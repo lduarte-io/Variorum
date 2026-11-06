@@ -65,32 +65,72 @@ nonisolated struct MCPTrail: Equatable, Sendable {
         var title: String?
         /// How many requests this row gathers (1 for a fresh row).
         var count: Int
+
+        /// **VX-874 — a NAVIGATION ASK** (her "move me" requests): a client's
+        /// ask to show her this place, offered and not yet followed — the row
+        /// kind `shown`. Every other row is a NOTICE (a write — `edited`; an
+        /// ask she took or that moved her — `opened`): her ruling (4)'s
+        /// "notices off (write/opened rows hidden, a client's navigation asks
+        /// still show)" is exactly this split.
+        var isNavigationAsk: Bool { kind == .shown }
     }
 
     /// The most rows kept (PROVISIONAL P-809-14): bounded memory, ∝ nothing
     /// in the library.
     static let cap = 50
 
-    /// Newest first.
+    /// Newest first — save where her hand reordered a stratum (`move`).
     private(set) var entries: [Entry] = []
 
-    /// One client's rows, newest first — a "From ‹client› · N" group.
+    /// One client's rows — a "From ‹client› · N" group: its navigation asks
+    /// first, then its notices, each in the trail's order.
     struct Group: Equatable, Identifiable, Sendable {
         var id: String { clientName }
         let clientName: String
         let entries: [Entry]
     }
 
-    /// The rows by client, each group ordered by its newest row (the clients
-    /// in the order of their newest act).
-    var groups: [Group] {
+    /// The rows by client, everything on (`groups(showing:)`).
+    var groups: [Group] { groups(showing: .everything) }
+
+    /// **VX-874 — THE SECTION'S LAYOUT under the dial** (her rulings (1), (3)'s
+    /// one exception, (4)). Inside the ratified "From ‹client› · N" grouping,
+    /// each group lists its NAVIGATION ASKS first, then its notices, each in
+    /// the trail's order (newest first, save her hand's); groups holding a
+    /// navigation ask come first (by their newest ask), then the rest (by their
+    /// newest act) — so with one client every navigation ask sits at the very
+    /// top of the section: "'move me' requests need to always go to the top of
+    /// this pile". PROVISIONAL P-874-1: with two clients that BOTH hold asks,
+    /// the second's asks sit under the first's notices (recorded for her walk).
+    /// Notices off (`.asksOnly`) lists the navigation asks alone, and a group
+    /// with none goes; fully off (`.off`) lists nothing. Pure: memory in, the
+    /// layout out — nothing read.
+    func groups(showing dial: MCPTrailDial) -> [Group] {
+        guard dial.drawsSection else { return [] }
         var order: [String] = []
-        var byClient: [String: [Entry]] = [:]
-        for entry in entries {
-            if byClient[entry.clientName] == nil { order.append(entry.clientName) }
-            byClient[entry.clientName, default: []].append(entry)
+        var firstAsk: [String: Int] = [:]
+        var asks: [String: [Entry]] = [:]
+        var notices: [String: [Entry]] = [:]
+        for (index, entry) in entries.enumerated() {
+            if !order.contains(entry.clientName) { order.append(entry.clientName) }
+            if entry.isNavigationAsk {
+                if firstAsk[entry.clientName] == nil { firstAsk[entry.clientName] = index }
+                asks[entry.clientName, default: []].append(entry)
+            } else if dial.drawsNotices {
+                notices[entry.clientName, default: []].append(entry)
+            }
         }
-        return order.map { Group(clientName: $0, entries: byClient[$0] ?? []) }
+        let asking = order.filter { firstAsk[$0] != nil }.sorted { (firstAsk[$0] ?? 0) < (firstAsk[$1] ?? 0) }
+        let quiet = order.filter { firstAsk[$0] == nil }
+        return (asking + quiet).compactMap { client in
+            let rows = (asks[client] ?? []) + (notices[client] ?? [])
+            return rows.isEmpty ? nil : Group(clientName: client, entries: rows)
+        }
+    }
+
+    /// The rows the section draws under `dial` — the sidebar's fit test's count.
+    func drawnRowCount(showing dial: MCPTrailDial) -> Int {
+        groups(showing: dial).reduce(0) { $0 + $1.entries.count }
     }
 
     var isEmpty: Bool { entries.isEmpty }
@@ -134,6 +174,71 @@ nonisolated struct MCPTrail: Equatable, Sendable {
     }
 
     mutating func clear() { entries = [] }
+
+    // MARK: - Her hand (VX-874 — rulings (1)–(3))
+
+    /// **Dismiss** (ruling (1): "be dismissable"; rail (b)): THE ROW goes and
+    /// nothing else — a standing ask keeps its bottom-bar line and its doors,
+    /// ⌥⌘O's last change stays. A newer act on the place lands a fresh row.
+    mutating func dismiss(_ id: UUID) {
+        entries.removeAll { $0.id == id }
+    }
+
+    /// A hand drag's drop: before or after a row (the Open list's two halves,
+    /// VX-424).
+    enum Slot: Equatable, Sendable {
+        case before(UUID)
+        case after(UUID)
+
+        var rowID: UUID {
+            switch self {
+            case .before(let id), .after(let id): id
+            }
+        }
+    }
+
+    /// **Where a drop would put the dragged row — nil when it would not act**
+    /// (rail (a), PROVISIONAL P-874-3; the false-offer rule: a slot lights only
+    /// where a drop would act). A row moves only among its own STRATUM — its
+    /// client's rows of its own kind, navigation asks among asks, notices among
+    /// notices — so the float is never violated and a row never leaves its
+    /// group; a drop on its own slot (before or after itself, or the gap it
+    /// already fills) changes nothing. The answer is the stratum's new order.
+    func reordered(_ id: UUID, onto slot: Slot) -> [UUID]? {
+        guard let dragged = entry(id), slot.rowID != id, let target = entry(slot.rowID),
+              target.clientName == dragged.clientName, target.isNavigationAsk == dragged.isNavigationAsk
+        else { return nil }
+        let order = stratum(of: dragged).map { entries[$0].id }
+        var rest = order.filter { $0 != id }
+        guard let at = rest.firstIndex(of: slot.rowID) else { return nil }
+        if case .after = slot { rest.insert(id, at: at + 1) } else { rest.insert(id, at: at) }
+        return rest == order ? nil : rest
+    }
+
+    /// **The landing**: the stratum's rows take their new order IN PLACE — the
+    /// positions the stratum holds in the trail are kept, so no other row, no
+    /// other group and no other stratum moves. A newer act on a place still
+    /// lifts its row to the top (the trail is newest-first; her hand's order
+    /// holds among the rest). Returns whether anything moved.
+    @discardableResult
+    mutating func move(_ id: UUID, onto slot: Slot) -> Bool {
+        guard let dragged = entry(id), let order = reordered(id, onto: slot) else { return false }
+        let positions = stratum(of: dragged)
+        var byID: [UUID: Entry] = [:]
+        for position in positions { byID[entries[position].id] = entries[position] }
+        for (position, rowID) in zip(positions, order) {
+            guard let row = byID[rowID] else { return false }
+            entries[position] = row
+        }
+        return true
+    }
+
+    /// The positions of `entry`'s stratum in the trail, in order.
+    private func stratum(of entry: Entry) -> [Int] {
+        entries.indices.filter {
+            entries[$0].clientName == entry.clientName && entries[$0].isNavigationAsk == entry.isNavigationAsk
+        }
+    }
 
     private mutating func land(
         clientName: String, target: MCPShowTarget, title: String?, kind: Kind, act: Act, at now: Date, id: UUID
