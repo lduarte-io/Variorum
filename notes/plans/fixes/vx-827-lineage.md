@@ -187,7 +187,7 @@ safety copy before ANY real-store touch (none expected this run).
 | 3 | VX-801 design pass (5 mockup rounds + 2 explorations) | DONE — THE DESIGN MEMO settled at the exploration sitting |
 | 4 | U3a — the Commits face | DONE (fc8880a53…dc7fde0e5; adjudication below) |
 | 4b | U3b — the Lineage face + origin re-aim + panel retirement | DONE (654cf3469…; U3b RECORD below) |
-| 5 | Ladder (whole diff) | NOT-STARTED |
+| 5 | Ladder (whole diff) | ROUND 1 RUNNING (fable-reviewer; findings file vx-827-ladder-round1.md) |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
 | 7 | Closeout ritual (tickets, handoff, canon-size, worktree removal) | NOT-STARTED |
 
@@ -1910,3 +1910,25 @@ dropdown's archived group). **Owed to her eye, not changed:** the ⌘/ helper's 
 - **Not walked, not run.** Every Mac claim above is compiled, not observed — the Lineage face's geometry (the family
   band's height, the header line under it, the composition below at the detail's width) has had no eyes on it.
 
+
+## U3b ADJUDICATION (the orchestrator, 2026-11-06)
+
+**Verified:** pushed to ec90f46fa, tree clean; `LineageBringBackTests` + `LineageFamilyTests`
+re-run independently, 19/19 green. Core 3866 passed (the 5 known issues are the standing
+`withKnownIssue` set); the four MCP reds are the socket-timing class (the fourth,
+`MCPPreInitializeWindowTests.aBareOpeningIsAnsweredBeforeTheReadBlocks`, is NEW to the list —
+same class, green alone, no MCP line in this diff; the window's MCP re-run reads it again and
+it joins the flake ledger if it recurs).
+
+**Accepted with named justification:** `RestoreLandingInspectorTests` deleted whole (its
+subject — the inspector panel and read-in-full sheet — no longer exists; the bug's own fix pin
+`RestoreLandingRewriteHopTests` survives); the `TrayPath.originalsPath` wording moving its
+eight sites through the one constant (the W-list carries it for her pass); `CommitsRailWords`
+as a testability seam. **Standing concern for the ladder, named in the implementer's own
+self-assessment:** `CommitsFaceModel` at 821 lines (P-9's class — the TakesViewModel
+counterexample was 890). **P-U3b-1…13 + W1–W16 join #264.** The mobile-parity draft (no phone
+face; a VM ticket at closeout) stands.
+
+**THE BUILD IS COMPLETE.** The ladder opens: one ladder over the run's whole diff
+(origin/main…vx-827-lineage), fresh `fable-reviewer`, REVIEW_PROMPT verbatim; findings land
+repo-first in `notes/plans/fixes/vx-827-ladder-round1.md` before any fix session sees them.
