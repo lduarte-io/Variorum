@@ -44,7 +44,13 @@ the queries and the fence discipline. The lineage CTE work lands ONCE and feeds 
 **No `Sync/`, no custody, no DDL, no lockstep.** The sync slot is vx-808's this window. Overlap:
 vx-808's MCP riders (VX-775/776/777/859) touch `Sources/VariorumMCP` too — merges serialize through
 nov5; whoever merges second merges the first into its branch and re-runs the MCP overlap suites
-before asking for the merge GO.
+before asking for the merge GO. **Declared with vx-878 (2026-11-05):** its batch 3 (VX-874, the
+trail's three-state dial) and our VX-778 both touch the Settings ▸ MCP pane files (the Features/
+Settings MCP pane + MCPPaneCopy), on top of the registry/MCPToolCatalog/two-store-arms overlap.
+Agreement: VX-778 stays NARROW — the count's predicate (count places that still stand, or say
+"N grants"), no Clients-tab row-rendering restructure; if the U2 implementer finds the fix must
+restructure row rendering, the orchestrator messages vx-878 BEFORE that half builds. The second
+merger re-runs the pane suites + CapabilityRegistryTests + ShellChromeTests on its merged tree.
 
 ## Preflight (ran 2026-11-05, this session; reading never delegated)
 
