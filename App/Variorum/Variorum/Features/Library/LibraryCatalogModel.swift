@@ -316,6 +316,15 @@ final class LibraryCatalogModel {
         // question — the field holds no search state of its own, mints no
         // second road, and the catalog asks in the current wing.
         query = words
+        // The ladder's F1 (A-819-L1, PROVISIONAL): R-819-4 shows the Library
+        // "with the live answer as you type", and the Timeline takes no
+        // question — so a Library standing in it moves to List as the words
+        // land (the Cards rule's precedent: a view that cannot show the
+        // answer yields). Her mode does not come back when the search ends
+        // (no hidden memory). ⌘K's road and the Library's own field are
+        // untouched. On screen the view's `modeChanged` follows as for her
+        // own pick; either way the caller's `search()` reads the new mode.
+        if mode == .timeline { pickMode(.list) }
     }
 
     /// **The search state's own brain** (13o U2, D8 — P-9): the question, the
