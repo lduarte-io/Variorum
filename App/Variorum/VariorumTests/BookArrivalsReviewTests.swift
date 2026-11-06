@@ -990,5 +990,12 @@ struct BookArrivalsReviewTests {
         #expect(bookView.components(separatedBy: "BookArrivalsReview(").count == 2,
                 "the book composes the review area once")
         #expect(!(try code("BookArrivals.swift")).contains(".popover("), "the popover retired")
+        // R2-2 (the ladder's round 2): `theWhyWinsTheLineAndTheSinceGivesWayFirst`
+        // holds the rule; this holds that the row READS it. The why · since line
+        // composes `ArrivalMetaLayout` with the since's short form, so the old
+        // HStack (the since `.fixedSize()`, the why truncating) can't silently return.
+        let arrivals = try code("BookArrivals.swift")
+        #expect(arrivals.contains("ArrivalMetaLayout {") && arrivals.contains(".arrivalMetaRole(.sinceShort)"),
+                "the row's why · since line is laid out by ArrivalMetaLayout (R2-2)")
     }
 }

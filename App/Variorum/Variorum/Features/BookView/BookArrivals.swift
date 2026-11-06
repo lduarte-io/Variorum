@@ -926,9 +926,12 @@ struct ArrivalMetaLayout: Layout {
     func placeSubviews(
         in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
     ) {
-        // R2-1: plan from the PROPOSAL, as sizeThatFits does — bounds.width is
-        // exactly the chosen form's threshold, where a re-plan must not flip.
-        let plan = plan(width: proposal.width ?? bounds.width, subviews: subviews)
+        // R2-1: plan from the PROPOSAL, exactly as sizeThatFits does — nil
+        // included (the plan's nil is every part at its ideal). bounds.width is
+        // the chosen form's own threshold, where a re-plan must not flip, so
+        // it is never the fallback: under a nil proposal it is the ideal width,
+        // the whole form's threshold to the point (reconcile 2's sanity pass).
+        let plan = plan(width: proposal.width, subviews: subviews)
         for subview in subviews {
             guard let frame = frame(role(subview), in: plan) else {
                 subview.place(at: bounds.origin, anchor: .topLeading, proposal: .zero)
