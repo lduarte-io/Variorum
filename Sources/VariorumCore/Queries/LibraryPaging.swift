@@ -235,5 +235,17 @@ extension Queries.LibrarySort {
         }
     }
 
-    var keyCollation: String { self == .title ? " COLLATE NOCASE" : "" }
+    /// **Whether the key compares case-folded** — the ONE truth of the sort's
+    /// collation (the VX-819 ladder's F5): the statement's `keyCollation`
+    /// below and the answer sheet's Swift placement of a worn-only note
+    /// (`SearchOrder.foldsCase` → `SearchOrder.precedes`, which reproduces
+    /// SQLite's `NOCASE`) both read it, so the database and the Swift merge
+    /// can never fold differently. The title's key folds (A–Z with a–z); the
+    /// stamps compare as stored text.
+    var foldsCase: Bool { self == .title }
+
+    /// The key's collation in SQL — `COLLATE NOCASE` exactly when the key
+    /// folds case (`foldsCase`). Only NOCASE is spoken: a sort that ever
+    /// wanted another collation must teach `SearchOrder.compareText` first.
+    var keyCollation: String { foldsCase ? " COLLATE NOCASE" : "" }
 }

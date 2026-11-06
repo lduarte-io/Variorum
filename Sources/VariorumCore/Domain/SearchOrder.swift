@@ -32,11 +32,12 @@ public enum SearchOrder: Equatable, Sendable {
     }
 
     /// Whether the key compares case-folded (SQLite's `NOCASE`: ASCII A–Z
-    /// folded, then byte order) — the title order's; the stamps compare as
-    /// stored text.
+    /// folded, then byte order) — read from the sort's ONE collation truth
+    /// (`Queries.LibrarySort.foldsCase`, which the statement's
+    /// `keyCollation` reads too — the VX-819 ladder's F5), never restated.
     var foldsCase: Bool {
         guard case .home(let sort, _) = self else { return false }
-        return sort == .title
+        return sort.foldsCase
     }
 
     // MARK: - The order, in Swift (the worn-day merge — `Queries.searchGroups`)

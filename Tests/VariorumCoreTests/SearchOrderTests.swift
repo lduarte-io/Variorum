@@ -233,6 +233,25 @@ struct SearchOrderTests {
         }
     }
 
+    /// **One case-folding truth** (the VX-819 ladder's F5): the Swift merge's
+    /// fold (`SearchOrder.foldsCase`) and the statement's collation
+    /// (`LibrarySort.keyCollation`) both read `LibrarySort.foldsCase`, for
+    /// every sort the Library knows and both directions. A GUARD (no bug was
+    /// claimed — the two copies agreed): a future restated literal on either
+    /// side fails here.
+    @Test func theSwiftFoldAndTheStatementsCollationAreOneTruth() {
+        let every: [Queries.LibrarySort] = [.lastTouched, .createdAt, .entryDate, .lastMajorRevision, .title]
+        for sort in every {
+            #expect(sort.keyCollation == (sort.foldsCase ? " COLLATE NOCASE" : ""), "\(sort): the SQL reads the truth")
+            for direction in [SortDirection.desc, .asc] {
+                #expect(SearchOrder.home(sort, direction).foldsCase == sort.foldsCase,
+                        "\(sort) \(direction): the Swift merge reads the same truth")
+            }
+        }
+        #expect(Queries.LibrarySort.title.foldsCase, "the title's key folds — the catalog's own NOCASE")
+        #expect(!SearchOrder.relevance.foldsCase, "relevance has no key to fold")
+    }
+
     // MARK: - P1: a home order is the same walk, driven by the index
 
     @Test func everyHomeOrderedStatementStaysDrivenByTheIndex() throws {
