@@ -2124,3 +2124,20 @@ tree: 12/12 green. One VX-661-class host restart during the A run AFTER all verd
 `Variorum-2026-11-06-005307.ips` (00:53:07); two `sqlcipher hmac` ERROR lines at the A-run's
 head, fixture-noise class, noted for the RELEASE line. Logs: /tmp/vx827-revert{A,B}.log,
 /tmp/vx827-fixgreen.log (deleted at closeout per the evidence rule).
+
+**THE WHOLE-TARGET GATE (claim vx-827-window): ✘ 5997 tests in 1041 suites, 2936.8 s, 30 issues
+(2 warnings + 14 known issues + 14 real). EVERY FAILING TEST, named:**
+1. `BlockHistoryHostTests.fromBlocksTheFaceReplacesTheWorkbenchAndGivesItBack` — settle
+   expectation never satisfied; RED ALONE TOO (re-run isolated: 4 tests, same 2 reds) — REAL.
+2. `BlockHistoryHostTests.theOriginDoorOpensTheLineageFaceOnTheOriginal` — same; REAL.
+3. `MCPWireRefusalSweepTests.theSamplesNameEveryCaseExactlyOnce` — Set(sampled) ≠ Set(declared):
+   the new `OperationError.notInLineage` case is missing from the sweep's sample table.
+4. `NoteTrayTests.noShippedCopyStillPointsAtTheRemovedUnplacedListing` — the Divide-W checklist
+   explainer no longer satisfies its BlockHistoryPath containment pins (2 issues).
+5. `TutorialWalkTests.everyDoorTheChapterNamesIsADoorTheAppHas` (4 issues) +
+   `.everyPlaceTheChapterNamesIsAPlaceTheAppHas` (5 issues) — the trash/past/map/copies/exits
+   chapters still name `cameFromSection`, `bringBackVerb` and "the original is preserved": the
+   U3b guide sweep (16 sentences) was INCOMPLETE beyond lesson five's neighborhood.
+Everything else green (the R1-F1 pins green in the full run). The window's FIX LEG goes to the
+U3b implementer; the five suites re-run after its push; the phone-suite arm decided at that
+point against the claim's clock.
