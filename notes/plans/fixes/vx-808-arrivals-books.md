@@ -391,7 +391,7 @@ Results + counts here; FOR A LATER READER written last; master plan row retired 
 | 2 | Kickoff sitting: cast (Sync/ implementer) · VX-775 direction · VX-872 scope/machines · rider offer | DONE — R-808-1..4 in §3 (Opus implements; VX-775 one-transaction; VX-872 deferred out with the marker-deadline line; no riders) |
 | 3 | Unit B1 (schema + mend) | IN PROGRESS — implementer session B1; LIVE STATUS under §6 Unit B1 |
 | 4 | Unit B2 (bulk propose + provenance) | DONE — commits 185f6c506…d189ef9dc; full core 3838/524 green; the five app suites 49/5 GREEN at the 19:39 window; three reviewer flags adopted |
-| 5 | Unit B3 (the review area) | BUILT — commits 741610ffa…(close); fork ruled A-808-11; core 3841/524 green; build-for-testing green; the app suites + the walk PENDING the stage window |
+| 5 | Unit B3 (the review area) | DONE pending folded checks — suites 49/5 + 26/2 + 50/4 green at three windows; WALKED both voices (face stands, R-808-5); W-1..W-3 proven (red at 02d640895 → green on HEAD → live rewalk); W-4 FIXED (e16edf9d8, ReviewChromeFit) with its suite run + narrow re-check FOLDED into B4's window; the ladder re-checks the unit |
 | 6 | Unit B4 (pins) | NOT STARTED |
 | 7 | Unit B5 (riders + small members + the docs tail: MCPSession.instructions' propose line, tool-description cross-refs, the field guide's lesson-3 mention — A-808-10) | NOT STARTED |
 | 8 | Unit L (the live round) | OFF — R-808-4: VX-872 deferred out of the run; re-owned at closeout with the marker-deadline line |
