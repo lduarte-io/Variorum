@@ -335,7 +335,7 @@ closed or re-owned — no orphans; **every ticket the effort FILED
 triaged before it closes** (her word 2026-10-14) to CLAUDE.md's
 labeling rule (one kind, Evidence on a Bug/Improvement/Debt, one Area,
 a Priority, Pre-launch only at her call, Wording, "Needs Lillian",
-never an assignee) — the handoff lists the filed tickets grouped by priority; the PR
+never an assignee) — the filed tickets are listed in the handoff AND given to the author again as the session's VERY LAST chat message, after the handoff is done (her rule 2026-11-05: "give me the tickets filed as a result of the run at the very end … & in the handoff, but again after i handle the handoff"), both times in her checkbox format ordered by priority — a `Tickets filed:` line, then one `- [ ] VX-NNN (Priority, Kind, State): one-line description.` per ticket, `- [x]` for one already closed; the PR
 merges to `main` as a MERGE COMMIT;
 the MOBILE PARITY line (a `notes/MobileSoul.md` ledger row, or the
 words "nothing mobile-visible"); the author handoff
