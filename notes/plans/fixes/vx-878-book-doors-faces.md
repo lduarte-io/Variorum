@@ -102,7 +102,7 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 
 ## BATCH 1 RECORD (opus-implementer, 2026-11-05)
 
-**NOT DONE in this batch (stated first):** PENDING — filled at the batch's end.
+**NOT DONE in this batch (stated first, current as of 93ef16481):** (1) **VX-802's wiring is NOT built** — the proposal below awaits the orchestrator's ruling (the in-batch fork); (2) **no App-target suite has been RUN** — no stage was held; every App pin is COMPILED (TEST BUILD SUCCEEDED) and its run is the closing window's (list below); VX-868's red-on-old is shown by evaluation of the pre-fix body, its suite run red→green is the closing window's; (3) **no walk captures** (the closing window's hands-on walk); (4) no canon delta applied (closeout's).
 
 ### LIVE STATUS
 
@@ -115,7 +115,7 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | 829-a · VX-829 Book Settings: Move to Wing door | DONE (3b528a5c0) — the State section's wing row (`BookSettingsSheet.state` → `VoicedMenu` of `wingDestinations`, the Bookcase row's `bookMoveAsk` + `wingBookMoveConfirm`); `.moveBookToWing` + `.surface`; pins `BookDoorsEverywhereTests` (3) — COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
 | 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | DONE (this commit) — see the VX-829 section below; pins COMPILED (TEST BUILD SUCCEEDED), RUN PENDING (closing window) |
 | 802-b · VX-802 build (gated on the orchestrator's ruling) | NOT-STARTED — awaiting the ruling |
-| V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | IN-PROGRESS — `build` + `build-for-testing` green at every piece so far; headless `swift test` NEXT |
+| V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | DONE for this turn — `xcodebuild … build` ** BUILD SUCCEEDED ** and `build-for-testing` ** TEST BUILD SUCCEEDED ** at 93ef16481's tree; no core-package source touched (`git diff eef66dbd0 --name-only` lists App/ and notes/ only), `swift build` → Build complete!; no headless suite exercises a touched file. App-suite RUNS: PENDING (closing window) |
 
 ### VX-868 — the traced mechanism, the pin, the words
 
@@ -207,3 +207,15 @@ Delete Note…                        .deleteNote  (minimum) ┘ (the one shared
 - **D-829-1 — the whole elsewhere family grows, not the Library's rows alone.** `BookRowMenu` is ONE table for the three surfaces beyond the Bookcase (17y's design), so the Starred book rows and the Archived books group carry the full set too (her ticket's title: "a book's doors everywhere"). Every act is legal on an archived book (AppSpec §9: Finished/Sealed/locked are orthogonal to archive; a move carries it archived; a duplicate is born unarchived). Splitting the three would need a per-surface face — a per-view if (P-1).
 - **D-829-2 — one order: the Bookcase's.** The Library row's old order (exports before Share, Share between dividers) yields to the Bookcase row's; Open stays first beyond the board.
 - **D-829-3 — the wing row's place:** the State section's LAST row, after Archived ("beside the State doors").
+
+### The closing window's debt from this batch (App-target suites to RUN — every touched source's)
+
+`BookDoorsEverywhereTests` (new) · `BookDeleteAndDuplicateTests` (VX-868's pin — run it red on 3263e5877's tree, green on 7656bc887's) · `BookRowMenuTests` · `MCPShareFacesTests` · `GatheringKindWordTests` · `WingBookMoveDoorTests` · `CapabilityRegistryTests` (the union walk — four new `.contextMenu` acts, `.moveBookToWing`'s `.surface`) · `BookCollectingDoorsTests` · `BookArchiveFacesTests` (incl. `BookArchiveDeclarationTests`) · `StarDoorTests` · `BookFootDoorsTests` · `BindDoorTests` (the probe now opens through `model.rowDoors`) · `SpawnAndBindLimbTests` · `BookOrderConversionTests` · `DoorSetTests` · `ShelfAndPaletteTests` · the ShelfView mounts (`BookcaseDragFaceTests`, `BookcaseCensusMenuTests`, `BookcaseRowFreezeTests`, `NewBookSheetTests`, `TourOfferCardTests`) · `SidebarNoteRowMenuTests` · `ShellChromeTests`. Walk rows: the Library book row's menu beside the Bookcase row's (book, gathering, the daily Journal), Starred's and Archived's rows, Book Settings' wing row + its move, Rename/Manage/Length & Extent/Duplicate/Bind/Make a Book from a Library row, a Finish then the next right-click showing Reopen, the plain-book delete confirm with one note and with several.
+
+### Surprises (this batch)
+
+1. The two faces ALREADY disagreed before the merge: the Library row drew Share with AI… after the exports between dividers (13n-c mockup §2, pinned in `MCPShareFacesTests`), the Bookcase row beside Book Settings. One table forced one order — the Bookcase's (D-829-2).
+2. `BookRowMenu` was already ONE table for three surfaces (Library, Starred, Archived — 17y (l)), so growing it grows all three (D-829-1).
+3. Beyond the Bookcase the menu reads ONE-SHOT facts; with the state doors coming over, a landing that does not re-read them would leave "Finish" on the next right-click of a finished book (a door that cannot act — P-2). Built `BookRowDoors.landed()` (re-read ∝ the listed rows) and pinned it.
+4. `ShelfViewModel.designateDailyJournal` had one caller (the board's menu) — removed with the move, not kept as a forked twin.
+5. Machinery: Swift Testing's `#expect(!xs.contains(where: \.keyPath))` mis-expands into an unhandled-throw error — hoist the predicate into a local.
