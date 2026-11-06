@@ -34,6 +34,7 @@
 
 import AppKit
 import SwiftUI
+import VariorumCore
 
 // MARK: - The rule (pure)
 
@@ -128,34 +129,27 @@ struct SidebarSearchField: View {
     let door: SidebarSearchDoor
 
     @State private var rule = SidebarSearchFieldRule()
-    @FocusState private var focused: Bool
 
     var body: some View {
         HStack(spacing: 6) {
             // On the five areas' icon column (`SidebarView.areasGroup`).
             Image(systemName: "magnifyingglass")
                 .font(tokens.small)
-                .foregroundStyle(focused ? tokens.accent : tokens.muted)
+                .foregroundStyle(tokens.muted)
                 .frame(width: 18)
                 .accessibilityHidden(true)
-            TextField(
-                text: Binding(get: { rule.text }, set: { apply(rule.edit($0)) }),
-                prompt: Text(tokens.chromeLabel(SidebarSearchCopy.prompt)).foregroundStyle(tokens.faint)
-            ) {
-                Text(SidebarSearchCopy.accessibilityLabel)
-            }
-            .textFieldStyle(.plain)
-            .font(tokens.small)
-            .foregroundStyle(tokens.ink)
-            .lineLimit(1)
-            .focused($focused)
-            .onSubmit { apply(rule.submit()) }
-            .onExitCommand { apply(rule.escape()) }
-            // The keyboard leaving by any road (a Tab, another field, a list
-            // taking it): the words stay the Library's.
-            .onChange(of: focused) { _, holds in
-                if !holds { apply(rule.leave()) }
-            }
+            SidebarSearchTextField(
+                text: rule.text,
+                prompt: tokens.chromeLabel(SidebarSearchCopy.prompt),
+                font: SidebarSearchFieldLayout.font(for: tokens.voice),
+                ink: NSColor(tokens.ink),
+                promptInk: NSColor(tokens.faint),
+                onEdit: { apply(rule.edit($0)) },
+                onSubmit: { apply(rule.submit()) },
+                onEscape: { apply(rule.escape()) },
+                // The keyboard leaving by any road (another field, a list
+                // taking it): the words stay the Library's.
+                onLeave: { apply(rule.leave()) })
             .help(SidebarSearchCopy.help)
         }
         .padding(.horizontal, SidebarLayout.contentInset)
@@ -180,11 +174,117 @@ struct SidebarSearchField: View {
     }
 }
 
+/// **The field's text field — AppKit's, on purpose.** A SwiftUI `TextField`
+/// is an `NSTextField` in the window's key-view loop, and the column's top is
+/// the loop's FIRST stop: a window opening with the shell as its first
+/// content (a new window on the Bookcase) would make THIS field its opening
+/// first responder (AppKit's own pick — the harness fact
+/// `QuickEntryLaunchFocusTests` records), robbing the Bookcase's quick entry
+/// of VX-332's caret ("start typing" is literal there). This field is never a
+/// key-view stop (`canBecomeKeyView` false — not the opening pick, not a Tab
+/// stop; PROVISIONAL P-819-B3f): a click or her own road puts the caret
+/// here. Its keys are the delegate's: ⏎ (`insertNewline:`) and esc
+/// (`cancelOperation:`) are the rule's, and the editing ending is the
+/// keyboard leaving.
+struct SidebarSearchTextField: NSViewRepresentable {
+    let text: String
+    let prompt: String
+    let font: NSFont
+    let ink: NSColor
+    let promptInk: NSColor
+    let onEdit: (String) -> Void
+    let onSubmit: () -> Void
+    let onEscape: () -> Void
+    let onLeave: () -> Void
+
+    /// The one AppKit subclass: never a key-view stop.
+    final class Field: NSTextField {
+        override var canBecomeKeyView: Bool { false }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
+    func makeNSView(context: Context) -> Field {
+        let field = Field()
+        field.isBordered = false
+        field.isBezeled = false
+        field.drawsBackground = false
+        field.focusRingType = .none
+        field.usesSingleLineMode = true
+        field.lineBreakMode = .byClipping
+        field.cell?.wraps = false
+        field.cell?.isScrollable = true
+        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        field.setAccessibilityLabel(SidebarSearchCopy.accessibilityLabel)
+        field.delegate = context.coordinator
+        style(field)
+        field.stringValue = text
+        return field
+    }
+
+    func updateNSView(_ field: Field, context: Context) {
+        context.coordinator.parent = self
+        style(field)
+        // The rule's words are the truth: a handoff or esc clears them here.
+        if field.stringValue != text { field.stringValue = text }
+    }
+
+    private func style(_ field: Field) {
+        if field.font != font { field.font = font }
+        if field.textColor != ink { field.textColor = ink }
+        let placeholder = NSAttributedString(
+            string: prompt, attributes: [.font: font, .foregroundColor: promptInk])
+        if field.placeholderAttributedString != placeholder { field.placeholderAttributedString = placeholder }
+    }
+
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        var parent: SidebarSearchTextField
+
+        init(parent: SidebarSearchTextField) { self.parent = parent }
+
+        func controlTextDidChange(_ notification: Notification) {
+            guard let field = notification.object as? NSTextField else { return }
+            parent.onEdit(field.stringValue)
+        }
+
+        func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+            switch selector {
+            case #selector(NSResponder.insertNewline(_:)):
+                parent.onSubmit()
+                return true
+            case #selector(NSResponder.cancelOperation(_:)):
+                parent.onEscape()
+                return true
+            default:
+                return false
+            }
+        }
+
+        func controlTextDidEndEditing(_ notification: Notification) {
+            parent.onLeave()
+        }
+    }
+}
+
 /// **Where the field sits** — the column's empty top band, exactly
 /// (`SidebarLayout.topPadding`): its own height IS the band's, so a first
 /// section can never be pushed down by it.
 nonisolated enum SidebarSearchFieldLayout {
     static var height: CGFloat { SidebarLayout.topPadding }
+
+    /// The voice's SMALL face in AppKit (`VoiceTokens.small` — 11.5 pt, the
+    /// system face in Study, monospaced in Terminal), the size the band holds
+    /// (a line of it ≈ 14 pt). Pinned against SwiftUI's own measure of
+    /// `tokens.small` (`SidebarSearchFieldPlaceTests`), so the two cannot drift.
+    static let fontSize: CGFloat = 11.5
+
+    static func font(for voice: ThemeVoice) -> NSFont {
+        switch voice {
+        case .terminal: .monospacedSystemFont(ofSize: fontSize, weight: .regular)
+        case .study: .systemFont(ofSize: fontSize)
+        }
+    }
 }
 
 // MARK: - The click monitor (the window's own mouse-downs)

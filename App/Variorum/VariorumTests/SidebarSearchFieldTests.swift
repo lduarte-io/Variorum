@@ -154,10 +154,10 @@ struct SidebarSearchFieldShellTests {
         (field.placeholderString ?? field.placeholderAttributedString?.string ?? "").lowercased()
     }
 
-    /// The sidebar's field: the editable field whose prompt is the door's.
+    /// The sidebar's field: the door's own AppKit field (its prompt the door's).
     private static func sidebarField(_ hosting: NSView) -> NSTextField? {
         textFields(in: hosting).first {
-            $0.isEditable && prompt(of: $0) == SidebarSearchCopy.prompt.lowercased()
+            $0 is SidebarSearchTextField.Field && prompt(of: $0) == SidebarSearchCopy.prompt.lowercased()
         }
     }
 
@@ -194,6 +194,10 @@ struct SidebarSearchFieldShellTests {
             await settle(window, hosting) { Self.sidebarField(hosting) != nil }
             let field = try #require(Self.sidebarField(hosting), "the sidebar's search field is drawn")
             #expect(router.workspace.focusedSelection == .shelf, "the shell opens on the Bookcase")
+            // VX-332's guard: never a key-view stop, so a window opening on the
+            // Bookcase never makes it the opening first responder.
+            #expect(!field.canBecomeKeyView, "the field is not in the window's key-view loop")
+            #expect(Self.keyboardField(window) !== field, "the shell's opening did not put the caret here")
 
             window.makeFirstResponder(field)
             await settle(window, hosting, timeout: 2) { Self.keyboardField(window) === field }
@@ -324,6 +328,20 @@ private struct SidebarFieldHost: View {
 @MainActor
 @Suite("VX-822 — the field takes the column's empty band and moves nothing", .serialized)
 struct SidebarSearchFieldPlaceTests {
+    /// The AppKit field draws the voice's SMALL face: its words measure what
+    /// SwiftUI's `tokens.small` measures (within a point), in both voices.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func theFieldsFaceIsTheVoicesSmallFace(voice: ThemeVoice) throws {
+        let tokens = VoiceTokens.resolve(voice: voice, dark: false)
+        let sample = "Search the harbour lamp"
+        let renderer = ImageRenderer(content: Text(sample).font(tokens.small).lineLimit(1).fixedSize())
+        renderer.scale = 1
+        let swiftUI = try #require(renderer.nsImage?.size.width, "SwiftUI measured the small face")
+        let appKit = (sample as NSString).size(
+            withAttributes: [.font: SidebarSearchFieldLayout.font(for: voice)]).width
+        #expect(abs(swiftUI - appKit) < 1.5, "\(voice): SwiftUI \(swiftUI) vs AppKit \(appKit)")
+    }
+
     private nonisolated static func pumpRunLoop(_ seconds: TimeInterval) {
         MainActor.assumeIsolated {
             RunLoop.main.run(until: Date().addingTimeInterval(seconds))
