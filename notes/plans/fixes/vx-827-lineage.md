@@ -1025,3 +1025,17 @@ pin; the `kin`/`empty` fixtures' effect on existing catalog arms (controls held,
 re-baselined). **BORN-TICKET CANDIDATE (filed at closeout):** `Queries.liveTagIDs` misses a tag
 whose wing id names no wing row at all — no operation creates one today (Low, Suspected, Debt).
 **P-U2-1…5 join bundle #264.**
+
+## THE CLOSING WINDOW'S TERMS (nov5, 2026-11-06 — binding on whoever runs it)
+
+Queued with nov5: app-target batch (~45 min) FIRST, then ping nov5 "SEAM" before the walk's Debug
+launch (a merge-gating run may slot in; otherwise carry on under the same claim), then the
+lineage-door walk (~20 min). Walk etiquette: dismiss What's New after the Debug launch; the dev
+store stays signed out; Resume never pressed; Castle values only from `~/.variorum/dev-castle.env`
+if the lock screen is met; at RELEASE say the dev-store posture left. RELEASE line: executed
+counts per suite and EVERY failing test by name (or "0 failures"), plus both strict instance
+guards (`pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"`) empty. READY goes to nov5 with a
+claim name once the ladder closes. Merge planning: vx-808 carries the v1_37 schema event and its
+deploy/release CLOSES the stage; it edited SearchPassagesTests (no known overlap with us); merges
+serialize through nov5 — the second merger merges the first and re-runs the MCP overlap suites
+(+ the pane suites + CapabilityRegistryTests + ShellChromeTests per the vx-878 agreement).
