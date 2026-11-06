@@ -283,6 +283,69 @@ struct LineageFaceModelTests {
         }
     }
 
+    // MARK: - Ladder R1-F1 — a relative's pending typing lands first
+
+    /// A relative placed in ANOTHER note, open with typing the debounce has
+    /// not written: the extracted block of this block, moved to "Elsewhere",
+    /// its buffer pending there.
+    private func pendingRelative(_ w: World) async throws
+        -> (face: LineageFaceModel, source: String, relative: String, take: String, note: String)
+    {
+        let ops = w.session.operations
+        let elsewhere = try ops.createPost(title: "Elsewhere")
+        let source = try ops.newBlock(in: w.postID, text: "Kept part. Extracted part.")
+        let extracted = try ops.extract(source.block.id, span: 11..<26)
+        try ops.moveBlock(extracted.block.id, to: elsewhere.id)
+        // "She is still typing" in Elsewhere: recorded, nothing written yet.
+        let coordinator = w.session.autosave(forPost: elsewhere.id, debounce: .seconds(30))
+        coordinator.record(
+            variantID: extracted.variant.id, text: "Extracted part, retyped.", charDelta: 9)
+        let face = LineageFaceModel(session: w.session, request: BlockHistoryRequest(
+            postID: w.postID, blockID: source.block.id, focusedVariantID: source.variant.id))
+        face.adopt(try await w.session.database.read { db in
+            try LineageFaceModel.read(db, blockID: source.block.id)
+        })
+        return (face, source.block.id, extracted.block.id, extracted.variant.id, elsewhere.id)
+    }
+
+    /// **R1-F1, the bring-back half (RED ON OLD by Revert A, the U3b RECORD's
+    /// FIX LEG):** the header's Bring back as take copies the relative's take
+    /// AS SHE LEFT IT — the note it is placed in is flushed first, so the
+    /// minted take carries her pending words, never the stored ones.
+    @Test func aRelativeInAnotherNoteIsFlushedBeforeItsWordsComeBack() async throws {
+        try await withWorld { w in
+            let staged = try await pendingRelative(w)
+            let face = staged.face
+            face.select(staged.relative)
+            #expect(face.selectedBlockID == staged.relative)
+            #expect(face.selected?.acts.contains(.bringBackAsTake) == true)
+            await face.bringBack()
+            #expect(face.status?.isRefusal == false)
+            let minted = try await takes(w, staged.source).last
+            #expect(minted?.workingText == "Extracted part, retyped.",
+                    "RED ON OLD: the stored \"Extracted part.\" was copied, her typing missed")
+        }
+    }
+
+    /// **R1-F1, the read half (RED ON OLD by Revert B):** a relative's face
+    /// writes its note's pending typing before it reads, so "the take now" on
+    /// its pane is now.
+    @Test func aRelativesPaneReadsItsNoteAfterItsPendingTypingLands() async throws {
+        try await withWorld { w in
+            let staged = try await pendingRelative(w)
+            let face = staged.face
+            face.select(staged.relative)
+            let node = try #require(face.node)
+            #expect(node.isRelative)
+            await node.flushBeforeReading()
+            let stored = try await w.session.database.read { [take = staged.take] db in
+                try Variant.fetchOne(db, key: take)?.workingText
+            }
+            #expect(stored == "Extracted part, retyped.",
+                    "RED ON OLD: only the face's own note was flushed; the relative's still pends")
+        }
+    }
+
     /// The receipt names the note when the put back lands in ANOTHER note.
     @Test func aPutBackIntoAnotherNoteNamesIt() {
         let home = Queries.LineageHome(

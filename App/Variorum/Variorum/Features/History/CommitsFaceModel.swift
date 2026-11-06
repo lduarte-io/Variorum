@@ -220,7 +220,7 @@ final class CommitsFaceModel {
     /// written FIRST, so "the take now" is now (the panel's restore rule,
     /// applied to reading as well as to writing).
     func start() async {
-        await session.flushExistingAutosave(forPost: postID)
+        await flushBeforeReading()
         do {
             let home: String? = isRelative ? homeBlockID : nil
             for try await value in session.database.observe({ [blockID, home, now = session.now] db in
@@ -232,6 +232,20 @@ final class CommitsFaceModel {
         } catch {
             status = .refusal(String(describing: error))
         }
+    }
+
+    /// **Every note this face reads, its pending typing written first**
+    /// (VX-827 ladder R1-F1): the face's own note; for a RELATIVE, also the
+    /// note it is placed in — a relative in ANOTHER note, open in a second
+    /// window with typing the debounce has not written, would otherwise read
+    /// as stale words on the pane. Read-only: nothing here copies, so the
+    /// flush's clean answer is not consulted (the bring-back road does).
+    func flushBeforeReading() async {
+        await session.flushExistingAutosave(forPost: postID)
+        guard isRelative,
+              let placed = await LineageBringBack.placedNote(session: session, blockID: blockID),
+              placed != postID else { return }
+        await session.flushExistingAutosave(forPost: placed)
     }
 
     func watchSeal() async {
@@ -737,6 +751,8 @@ final class CommitsFaceModel {
         do {
             status = .receipt(try await LineageBringBack.run(
                 session: session, source: source, onto: homeBlockID))
+        } catch let refusal as LineageBringBack.Refusal {
+            status = .refusal(refusal.sentence)
         } catch let error as OperationError {
             status = .refusal(TrayRefusalCopy.message(for: error))
         } catch {
@@ -810,12 +826,64 @@ final class CommitsFaceModel {
 /// shape). Returns the receipt; refusals throw for the caller to word.
 @MainActor
 enum LineageBringBack {
+    /// A bring-back that did not reach the operation (VX-827 ladder R1-F1).
+    enum Refusal: Error, Equatable {
+        /// The source take's note could not write its pending typing — copying
+        /// the store now would copy words she has since changed (the flush
+        /// road's contract, `AppSession.flushExistingAutosave`; the
+        /// `VersionActs` precedent and its standing sentence).
+        case unsavedChanges
+
+        var sentence: String {
+            switch self {
+            case .unsavedChanges: return OpsRefusalCopy.unsavedChanges
+            }
+        }
+    }
+
+    /// **A `.take` source's pending typing lands FIRST** (VX-827 ladder
+    /// R1-F1): the operation copies the take's `working_text` as stored, so
+    /// the note the source is placed in — another note, perhaps, live in a
+    /// second window — is flushed before the copy, and a flush that keeps
+    /// bytes pending refuses rather than copy stale words. A `.commit` copies
+    /// an immutable snapshot (I5) and needs nothing; an unplaced source has
+    /// no editor and nothing pending.
     static func run(
         session: AppSession, source: Operations.LineageTakeSource, onto blockID: String
     ) async throws -> String {
+        if case .take(let takeID) = source,
+           let note = await placedNote(session: session, takeID: takeID),
+           !(await session.flushExistingAutosave(forPost: note)) {
+            throw Refusal.unsavedChanges
+        }
         let take = try await session.runner.run { ops in
             try ops.bringBackFromLineage(source, onto: blockID)
         }
         return CommitsFaceCopy.broughtBackFromLineage(label: take.label)
+    }
+
+    /// The container a block is live-placed in (a note, or the scraps), or
+    /// nil — one indexed read (`uq_cblock_ownership`).
+    static func placedNote(session: AppSession, blockID: String) async -> String? {
+        try? await session.database.read { db in
+            try String.fetchOne(
+                db,
+                sql: "SELECT container_id FROM container_block WHERE block_id = ? AND deleted_at IS NULL",
+                arguments: [blockID])
+        }
+    }
+
+    /// The container a take's block is live-placed in, or nil.
+    static func placedNote(session: AppSession, takeID: String) async -> String? {
+        try? await session.database.read { db in
+            try String.fetchOne(
+                db,
+                sql: """
+                    SELECT cb.container_id FROM variant v
+                    JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
+                    WHERE v.id = ?
+                    """,
+                arguments: [takeID])
+        }
     }
 }

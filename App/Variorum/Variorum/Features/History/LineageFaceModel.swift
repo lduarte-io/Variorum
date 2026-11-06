@@ -273,6 +273,8 @@ final class LineageFaceModel {
         do {
             status = .receipt(try await LineageBringBack.run(
                 session: session, source: .take(take), onto: request.blockID))
+        } catch let refusal as LineageBringBack.Refusal {
+            status = .refusal(refusal.sentence)
         } catch let error as OperationError {
             status = .refusal(TrayRefusalCopy.message(for: error))
         } catch {
