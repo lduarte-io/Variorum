@@ -1319,3 +1319,12 @@ ladder runs once after U3b).
    existing op, the existing receipt); every other moment's foot is the memo's four acts.
 3. **The panel's "Show the block you're in" jump** (ledger row 33) — the face takes the full pane, so no caret
    moves while it stands; the jump has nothing to do on the face and is not carried (it stays on the old panel).
+
+**Walk lesson adopted (nov5, from vx-808's walk):** the note header's TAG FIELD does not receive
+synthetic typing while a live editor holds first responder — cliclick keys fall through into the
+BODY, and a stray Return fires the structural typed-Return door and divides blocks (repair:
+⌥⌘Z). Seed tags via quick-entry microsyntax (`{#tag/path}`), never by typing into the tag field.
+The dev store now carries replaceable walk fixtures from tonight (harbour review + pins, "Night
+ferry" notes, a #harbour tag, a bookless "driftglass" note) — fine to reuse or ignore (dev-store
+content is agents' to manage). Merge note: vx-808's B5 touches `MCPToolCatalog.swift` additively
+— still the second merger's resolution.
