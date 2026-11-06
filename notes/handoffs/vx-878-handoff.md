@@ -21,3 +21,5 @@ Nine members, four batches, one fable ladder round (no BLOCKER/MAJOR; one disput
 
 - [ ] VX-889 (Medium, Bug, Todo): Settings ▸ Tags' Make a Gathering mints in Home even when the pane shows another wing.
 - [x] VX-887 (Medium, Improvement, done in this run): the book masthead goes one line — seated as a member at your word and shipped.
+
+**Canon size at closeout:** 135,032 of the 150,000 harness limit (headroom 14,968) — no crossing.
