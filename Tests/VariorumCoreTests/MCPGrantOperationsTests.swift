@@ -278,6 +278,43 @@ struct MCPGrantOperationsTests {
         }
     }
 
+    /// **VX-874 — the trail dial** (her ruling (4): everything on · notices off ·
+    /// fully off, home Settings ▸ MCP): ONE row of the same local-only key/value
+    /// family, everything on until set; each value round-trips; a no-op writes
+    /// nothing (everything on with no row included); a value this build can't
+    /// name reads as everything on; it is no switch, and it is not the show dial.
+    @Test func theTrailDialReadsEverythingUntilSetEachValueRoundTripsAndANoOpWritesNothing() throws {
+        try withOperations { ops, db in
+            let rows = { try self.count(db, "SELECT COUNT(*) FROM mcp_switch WHERE key = 'trail_dial'") }
+            #expect(try db.read { try Queries.mcpTrailDial($0) } == .everything, "the section as it always was")
+            try ops.setMCPTrailDial(.everything)
+            #expect(try rows() == 0, "asking for the dial it already reads writes nothing")
+            for dial in [MCPTrailDial.asksOnly, .off, .everything] {
+                try ops.setMCPTrailDial(dial)
+                #expect(try db.read { try Queries.mcpTrailDial($0) } == dial)
+            }
+            #expect(try rows() == 1)
+            let stamp = try db.read {
+                try String.fetchOne($0, sql: "SELECT updated_at FROM mcp_switch WHERE key = 'trail_dial'")
+            }
+            try ops.setMCPTrailDial(.everything)
+            #expect(try db.read {
+                try String.fetchOne($0, sql: "SELECT updated_at FROM mcp_switch WHERE key = 'trail_dial'")
+            } == stamp)
+            try db.write { try $0.execute(sql: "UPDATE mcp_switch SET value = 'someday' WHERE key = 'trail_dial'") }
+            #expect(try db.read { try Queries.mcpTrailDial($0) } == .everything,
+                    "a value this build can't name reads as everything on")
+            for key in MCPSwitch.allCases {
+                #expect(try db.read { try Queries.mcpSwitch($0, key) } == false, "the dial is no switch")
+            }
+            #expect(try db.read { try Queries.mcpShowDial($0) } == .ask, "nor the show dial")
+            #expect(MCPTrailDial.allCases.map(\.rawValue) == ["all", "asks", "off"])
+            #expect(MCPTrailDial.everything.drawsNotices && MCPTrailDial.everything.drawsSection)
+            #expect(!MCPTrailDial.asksOnly.drawsNotices && MCPTrailDial.asksOnly.drawsSection)
+            #expect(!MCPTrailDial.off.drawsNotices && !MCPTrailDial.off.drawsSection)
+        }
+    }
+
     /// **VX-676 ruling (4) — her take is its own Activity row**, under the asking
     /// client's name, on the target its ask named, allowed — and a client's
     /// own-activity read over the tools and the ask never lists it.

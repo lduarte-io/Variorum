@@ -525,4 +525,23 @@ extension Operations {
                             DateFormatter.variorumISO8601.string(from: date.now)])
         }
     }
+
+    /// **VX-874 — the trail dial** (her ruling (4): Settings ▸ MCP, everything on ·
+    /// notices off · fully off). One row of the local-only key/value family,
+    /// no-op-guarded (asking for the dial it already reads writes nothing —
+    /// everything on included, while no row exists yet). Excluded from the grants
+    /// store's fingerprint like the show dial (`MCPServerHost.grantsFingerprint`):
+    /// the tool list never depends on it, so turning it tells no client anything.
+    public func setMCPTrailDial(_ dial: MCPTrailDial) throws {
+        try database.write { db in
+            guard try Queries.mcpTrailDial(db) != dial else { return }
+            try db.execute(
+                sql: """
+                    INSERT INTO mcp_switch (key, value, updated_at) VALUES (?, ?, ?)
+                    ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+                    """,
+                arguments: [Queries.mcpTrailDialKey, dial.rawValue,
+                            DateFormatter.variorumISO8601.string(from: date.now)])
+        }
+    }
 }
