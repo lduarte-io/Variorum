@@ -1,0 +1,184 @@
+import Dependencies
+import Foundation
+import GRDB
+import Testing
+
+@testable import VariorumCore
+
+/// VX-831 — THE VISIBLE PRIVATE MARK's facts (`Queries.privateMarks` /
+/// `privateBookMarks`): the store's own Private fact for the rows a host
+/// draws — own, via a live Private book, none — read for exactly the ids
+/// given (P1, the shared icon's law), never reach, never client state.
+@Suite("VX-831 — the Private mark's facts: own · via a book · none, for the drawn ids only")
+struct PrivateMarkFactsTests {
+    private func marks(_ db: AppDatabase, _ ids: [String]) throws -> [String: Queries.PrivateMark] {
+        try db.read { try Queries.privateMarks($0, noteIDs: ids) }
+    }
+
+    @Test func theThreeStatesOwnViaABookAndNone() throws {
+        try withOperations { ops, db in
+            let free = try ops.createPost(title: "free")
+            let own = try ops.createPost(title: "own")
+            let filed = try ops.createPost(title: "filed")
+            let both = try ops.createPost(title: "both")
+            let vault = try ops.createReading(name: "the vault", kind: .book)
+            try ops.addPostToReading(filed.id, to: vault.id)
+            try ops.addPostToReading(both.id, to: vault.id)
+            try ops.setBookPrivate(vault.id, true)
+            try ops.setNotePrivate(own.id, true)
+            try ops.setNotePrivate(both.id, true)
+
+            let read = try marks(db, [free.id, own.id, filed.id, both.id])
+            let vaultRef = Queries.BookRef(id: vault.id, name: "the vault")
+            #expect(read[free.id] == nil, "an unmarked note reads nothing back")
+            #expect(read[own.id] == Queries.PrivateMark(own: true, viaBooks: []))
+            #expect(read[filed.id] == Queries.PrivateMark(own: false, viaBooks: [vaultRef]))
+            #expect(read[both.id] == Queries.PrivateMark(own: true, viaBooks: [vaultRef]))
+            let allPrivate = read.values.allSatisfy { $0.isPrivate }
+            #expect(allPrivate)
+        }
+    }
+
+    @Test func viaABookMeansALiveMemberOfALivePrivateBook() throws {
+        try withOperations { ops, db in
+            let waiting = try ops.createPost(title: "waiting at the door")
+            let gone = try ops.createPost(title: "in a deleted book")
+            let shelved = try ops.createPost(title: "in an archived book")
+            let plain = try ops.createPost(title: "in a plain book")
+            let vault = try ops.createReading(name: "vault", kind: .book)
+            let dead = try ops.createReading(name: "dead", kind: .book)
+            let kept = try ops.createReading(name: "kept", kind: .book)
+            let open = try ops.createReading(name: "open", kind: .book)
+            try ops.addPostToReading(waiting.id, to: vault.id)
+            try ops.addPostToReading(gone.id, to: dead.id)
+            try ops.addPostToReading(shelved.id, to: kept.id)
+            try ops.addPostToReading(plain.id, to: open.id)
+            for book in [vault, dead, kept] { try ops.setBookPrivate(book.id, true) }
+            // An ARRIVAL is never membership.
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading_post SET status = 'arrival' WHERE post_id = ? AND reading_id = ?",
+                    arguments: [waiting.id, vault.id])
+            }
+            try ops.deleteReading(dead.id)
+            try ops.archiveReading(kept.id)
+
+            let read = try marks(db, [waiting.id, gone.id, shelved.id, plain.id])
+            #expect(read[waiting.id] == nil, "an arrival row is no membership")
+            #expect(read[gone.id] == nil, "a deleted Private book marks nothing")
+            #expect(read[shelved.id]?.viaBooks.map(\.name) == ["kept"], "an archived Private book is alive")
+            #expect(read[plain.id] == nil, "a plain book marks nothing")
+        }
+    }
+
+    /// The mark and the fence can never disagree: for live notes, the mark
+    /// reads Private exactly where the fence's Private leg holds.
+    @Test func theMarkIsExactlyTheFencesPrivateLeg() throws {
+        try withOperations { ops, db in
+            let notes = try (0..<5).map { try ops.createPost(title: "n\($0)") }
+            let vault = try ops.createReading(name: "vault", kind: .book)
+            try ops.setBookPrivate(vault.id, true)
+            try ops.addPostToReading(notes[1].id, to: vault.id)
+            try ops.setNotePrivate(notes[2].id, true)
+            try ops.setNotePrivate(notes[3].id, true)
+            try ops.addPostToReading(notes[3].id, to: vault.id)
+            let ids = notes.map(\.id)
+            let read = try marks(db, ids)
+            let facts = try db.read { try Queries.mcpNoteFacts($0, noteIDs: ids) }
+            for id in ids {
+                #expect((read[id] != nil) == (facts[id]?.fence == .privateMark), "note \(id)")
+            }
+        }
+    }
+
+    @Test func onlyTheAskedIdsAreRead() throws {
+        try withOperations { ops, db in
+            let asked = try ops.createPost(title: "asked")
+            let other = try ops.createPost(title: "not drawn")
+            try ops.setNotePrivate(asked.id, true)
+            try ops.setNotePrivate(other.id, true)
+            #expect(Set(try marks(db, [asked.id]).keys) == [asked.id])
+            #expect(try marks(db, []).isEmpty)
+            #expect(try db.read { try Queries.privateBookMarks($0, readingIDs: []) }.isEmpty)
+        }
+    }
+
+    @Test func aBookWearsItsOwnMarkAndAGatheringNever() throws {
+        try withOperations { ops, db in
+            let vault = try ops.createReading(name: "vault", kind: .book)
+            let open = try ops.createReading(name: "open", kind: .book)
+            let dead = try ops.createReading(name: "dead", kind: .book)
+            let tag = try ops.createTag(name: "t")
+            let gathering = try ops.createReading(
+                name: "gathered", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.tag(tag.id)))
+            try ops.setBookPrivate(vault.id, true)
+            try ops.setBookPrivate(dead.id, true)
+            try ops.deleteReading(dead.id)
+            // The ops refuse a gathering; a stale synced stamp is never drawn.
+            #expect(throws: OperationError.self) { try ops.setBookPrivate(gathering.id, true) }
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET ai_private_at = '2026-11-05T00:00:00.000Z' WHERE id = ?",
+                    arguments: [gathering.id])
+            }
+            let read = try db.read {
+                try Queries.privateBookMarks($0, readingIDs: [vault.id, open.id, dead.id, gathering.id])
+            }
+            #expect(read == [vault.id])
+        }
+    }
+
+    /// P1 — the shared icon's law, bound identically: both note statements
+    /// and the book statement are driven by the ids (seeks), never a scan of
+    /// `container`, `reading_post` or `reading`.
+    @Test func everyStatementIsDrivenByTheIdsNeverAScan() throws {
+        try withOperations { ops, db in
+            let vault = try ops.createReading(name: "vault", kind: .book)
+            for n in 0..<20 {
+                let note = try ops.createPost(title: "n\(n)")
+                try ops.addPostToReading(note.id, to: vault.id)
+            }
+            try ops.setBookPrivate(vault.id, true)
+            for sql in [Queries.privateMarkOwnSQL, Queries.privateMarkViaSQL, Queries.privateBookMarkSQL] {
+                let plan = try db.read { db -> String in
+                    try Row.fetchAll(db, sql: "EXPLAIN QUERY PLAN \(sql)", arguments: ["[\"x\"]"])
+                        .map { ($0["detail"] as String?) ?? "" }.joined(separator: "\n")
+                }
+                for table in ["c", "rp", "r"] {
+                    #expect(!plan.contains("SCAN \(table)"), "\(plan)")
+                }
+                // Non-vacuity: the table is reached, by a seek.
+                #expect(plan.contains("SEARCH"), "\(plan)")
+            }
+            let via = try db.read { db -> String in
+                try Row.fetchAll(db, sql: "EXPLAIN QUERY PLAN \(Queries.privateMarkViaSQL)", arguments: ["[\"x\"]"])
+                    .map { ($0["detail"] as String?) ?? "" }.joined(separator: "\n")
+            }
+            #expect(via.contains("idx_reading_post_post"), "\(via)")
+        }
+    }
+
+    /// The hold re-reads as the facts move: a mark set or cleared, a filing
+    /// into a Private book, a removal from it, the book's mark lifted — the
+    /// held observation each host keeps over its drawn ids.
+    @Test func aHeldReadFollowsEveryChangeOfTheFact() async throws {
+        try await withOperationsAsync { ops, db in
+            let note = try ops.createPost(title: "watched")
+            let vault = try ops.createReading(name: "vault", kind: .book)
+            try ops.setBookPrivate(vault.id, true)
+            var values = db.observe { try Queries.privateMarks($0, noteIDs: [note.id]) }
+                .makeAsyncIterator()
+            #expect(try await values.next() == [:])
+            try ops.setNotePrivate(note.id, true)
+            #expect(try await values.next()?[note.id] == Queries.PrivateMark(own: true, viaBooks: []))
+            try ops.addPostToReading(note.id, to: vault.id)
+            #expect(try await values.next()?[note.id]?.viaBooks.map(\.id) == [vault.id])
+            try ops.setNotePrivate(note.id, false)
+            #expect(try await values.next()?[note.id] == Queries.PrivateMark(
+                own: false, viaBooks: [Queries.BookRef(id: vault.id, name: "vault")]))
+            _ = try ops.removePostFromReading(note.id, from: vault.id)
+            #expect(try await values.next() == [:])
+        }
+    }
+}
