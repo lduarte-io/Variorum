@@ -1,0 +1,177 @@
+# VX-808 — Run: Arrivals & books (the umbrella's sync-slot half)
+
+**STATUS: OPEN — kicked off 2026-11-05 (wave 2, beside vx-827 · vx-819 · vx-878; coordinator nov5).**
+
+## FOR A LATER READER
+
+*(Written at closeout. Until then: the roster, rulings and batch plan below are the run's contract; the LIVE STATUS tables under each unit are the night's working record.)*
+
+---
+
+## 0. Kickoff (a fresh session starts here)
+
+This run is `/architect-phase vx-808` on the Pro: worktree `~/dev/variorum-vx-808`, branch `vx-808-arrivals-books`, PR `VX-808: …` (merge commit, no squash). The orchestrator never implements; one implementer at a time, a fresh one per batch, briefed ONLY by this file's named sections. Pin-before-fix binds PER MEMBER; commit messages say `Part of VX-<member>`; members close individually. The cold review (one ladder over the run's whole diff) is **Fable — mandatory** (the run touches `Sources/VariorumCore/Sync/`).
+
+**Preflight (DONE at kickoff, nothing delegated):** CLAUDE.md + auto-loaded canon · the master plan's in-flight table (my row pushed) · `notes/TICKETS.md` · `notes/QUESTIONS.md` #261/#262 (both RESOLVED — the rulings this run builds under) · `notes/SessionResiliencyProtocol.md` (incl. all addenda) · `notes/SurfaceContracts.md` IN FULL · `notes/SyncSpec.md` IN FULL (the slot + the lockstep event) · `notes/MCPSpec.md` IN FULL (VX-811 + the riders) · the vx-805 record's FOR A LATER READER + its §3 rulings and VX-799/845 member records (the mend's basis) · the vx-809 record's FOR A LATER READER + merge-reconcile section (the catalog, the pure-function law, the cursor road). TEXTKIT2_NOTES and CastleRules NOT read: no editor seam, no custody, no Castle face — if either appears, STOP; that reading becomes binding for that batch and the coordinator is told.
+
+**The Sync/-custody slot is OURS** (nov5, 2026-11-05 17:15-ish, her word relayed: "The Sync/-custody slot is vx-808's for this window"). **Her order ruling via nov5: this run's mirror-deploy window and the release FINISH THE STAGE** — they run after every other session's stage work, each at her explicit go. Ordinary stage windows (suites, walks) schedule like anyone's through nov5 (REQUEST what/minutes/claim-name early · READY · GO only with nov5's exact claim line · RELEASE + one result line naming EVERY failing test with executed counts).
+
+## 1. Roster (the sub-issue listing, per her 2026-10-27 rule — twelve members)
+
+**The coupled pair (one feature, two faces):**
+- **VX-811** — MCP bulk propose: an AI sends a SET of notes to a book's Arrivals in one act; she judges; the fence stands.
+- **VX-821** — Arrivals as a real review area: multi-select judging, Add all · Dismiss all, why-it-waits on every row.
+
+**The features and the Sync/ member:**
+- **VX-803** — pinned notes: a per-membership pin floats above the book's sort, everywhere the order renders.
+- **VX-857** — books never span wings: generalize the cross-wing mend to every book (her ruling 2026-11-05; Sync/, no DDL).
+
+**The MCP riders (seated at #262's walkthrough):** VX-775 (Activity-write failure after a landed act answers an error — direction HER CALL, asked at kickoff) · VX-776 (SDK-handler store read failure reaches the wire unworded; needs the injectable-failing-reader seam before words can pin) · VX-777 (a stale start's `fresh.stop()` speaks switch-off close words to a replaced host's connections) · VX-859 (the book-shape `next_cursor`'s raw position key → **id-resume, PRE-RULED** at #262; reopen only if the open-code cost changes significantly).
+
+**The small members (listing-added):** VX-879 (High — the invisibility wording: the residuals ledger's blockquote becomes her FINAL approved paragraph (the "Variorum hides what you haven't shared by making it not exist…" version, verbatim on the ticket); `move_book_to_wing`'s catalog description stops overclaiming (a hidden PLAIN holder doesn't block the move — only an unreadable OWNER or a frozen holder does); MCPSpec's VX-639 clause aligned with VX-813) · VX-867 (⌥⌘J helper line: the parenthetical reads conditionally — "if it needs one") · VX-860 (the `willLockRoad` erase-after-use belt, one line in `AppBootstrap.swift`, A-809-21's recorded hazard) · VX-872 (the live two-device Journal sync round, vxtest accounts — scope and machines HER CALL at kickoff; if run, it goes BEFORE the marker-15 mirror deploy, because its older-build (1.1) arm refuses to sync after the bump).
+
+**Rider check ran at kickoff:** the board was triaged whole at her Nov 4 sitting and this umbrella was split twice for size, so no further riders are pushed; two candidates in the touched areas (VX-778 — gone-place grant counts in Settings ▸ MCP; VX-364 — dangling wing pointer refuses outflow tags) are OFFERED at the kickoff sitting, default none.
+
+## 2. Cast
+
+- Orchestrator: Fable (this session, `vx-808`).
+- Implementer: ONE at a time, fresh per batch. **The Sync/ batches' implementer is her kickoff call** — recorded at §3 once asked. Default elsewhere: Opus (`opus-implementer`, xhigh).
+- Cold review: **Fable (`fable-reviewer`, xhigh) over the run's whole diff** — mandatory (Sync/). Fresh reviewer per round; `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; cross-model flow per CLAUDE.md (findings verbatim to the implementer, the reviewer makes the final call, the implementer applies confirmed fixes red-on-old; FINDER-FIXES and `Sync/` lines are the reviewer's own hands, then one implementer sanity pass).
+- Subagents: at most one Sonnet each (implementer/reviewer), EXTERNAL facts only, read-only.
+
+## 3. Her rulings (the tickets are the source; condensed faithfully here)
+
+### VX-811 (2026-11-04, the sitting, two rounds — on the ticket verbatim)
+1. **The no-backfill fence STANDS** — no AI act ever seats in bulk.
+2. **A bulk-propose act on the wire:** a SET of notes to a book, each landing as an ARRIVAL (insert-only, tombstone-means-decided, capacity waits at the door — ordinary intake semantics); Arrivals becomes a general AI→her review queue. Her frame: "let's let the AI do a mass act that makes them wait, so you can use it as a way to go through a bunch of notes."
+3. **Propose is allowed at READ reach** — "read level on everything should be able to propose … it's only proposing i guess." Both the notes AND the book must be within the client's READ reach; the fence still hides anything unreachable; edit reach NOT required.
+4. **set_book_rule's answer names how many existing matches now wait** (the count was the missing ergonomics; rule edits already bell).
+5. The per-book dial is NOT built now (allowed later, not required).
+6. **An OPTIONAL per-note reason** rides the propose act, shown on the arrival row.
+
+### VX-821 (2026-11-04, rounds two and three — on the ticket verbatim)
+- The face says **"Add"**, never "Seat" (Add all · Dismiss all; "Add N · Dismiss N" on selection; `seatArrival` keeps its model name).
+- **Keyboard judging:** arrows walk, ⏎ adds, ⌫ dismisses; multi-select click + ⇧/⌘, ⌘A.
+- **The reason is SYNCED** — a nullable column on the arrival row, riding the run's ONE SyncSpec §12 lockstep event TOGETHER with VX-803's pin (one marker bump). An AI-authored reason is prose → inside the encrypted payload.
+- Every row says WHY it waits and since when ("rule edit" · "proposed by ‹client›" · "catch-up after un-archiving").
+- **Her UX bar, verbatim:** "the UX should be clear, spacious, not cluttered, buttons should be a good size, if we need to make the 'seating' area larger or occupy the full book area we can. i think the seating area probably needs more space."
+- Opening a row still never seats; intake semantics untouched (seat/dismiss per row stay the only verbs; bulk is many at once; tombstone-means-decided per pair).
+- **Owned-elsewhere notes:** proposing one is legal; the ADD runs the ownership consult exactly as her hand-add does (copy-only offered; the choice hers at the add, never the proposer's).
+
+### VX-803 (2026-11-04, the sitting — on the ticket verbatim)
+- **SEVERAL pins allowed**; the pinned group floats on top and **orders among itself by the book's own sort** (no new ordering concept).
+- **Pins hold EVERYWHERE** — Outline, Index, Book, Read and the ⌘↑/⌘↓ stepper alike.
+- Storage: **a nullable pin mark on `reading_post`**, synced, the SAME lockstep event as the reason column.
+
+### VX-857 (2026-11-05, the #261 walkthrough)
+- Her words: **"no, no cross wing books … this is a gap we should close"** → generalize `Sync/JournalWingMend.swift`'s repair class to EVERY book. No DDL. The vx-805 record's residual corners (5)/(6) are the known map — (6) is the straggler-container occasion gap.
+
+### VX-859 (PRE-RULED at #262)
+- **Id-resume** for the book-shape cursor (the gathering cursor's own road, already in the vx-809 diff). Her reopen clause, verbatim: "if new information is found with the code open that significantly changes the cost, it can come to me for reconsideration." The trade (position-resume's robustness to a departed member) was before her when she ruled.
+
+### VX-879 (2026-11-05, on the ticket)
+- Her FINAL wording (the later, clearer paragraph — "i like A. do that.") is on the ticket verbatim and is already on both site pages; the app repo's `notes/mcp-invisibility-residuals.md` blockquote becomes it; the catalog description and MCPSpec's VX-639 clause align with verified behavior.
+
+### From the kickoff sitting (2026-11-05, question-dialog picks — recorded same turn)
+*(Filled at the sitting, below.)*
+
+## 4. The binding principles (the 13b constitution, P-1…P-9 — copied per the architect-phase skill; byte-verbatim)
+
+- **P-1 — One capability registry.** Every user-facing act is declared exactly once: verb, scope (block/take/post/book), per-mode availability rule, its doors (menu / context / bar / shortcut / palette), and its refusal copy. Surfaces render their doors FROM the registry; gating is data, never per-view if-statements. A registry-walk test asserts every declared door exists and every rendered door is declared. This kills the D3/D4 class structurally — the capability matrix stays green by construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act — including any mode-switch choreography, done visibly for the user — or delivers the operations layer's real refusal. A door that can never act in its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface component (live + read modes; one measurement brain — the width-gated remeasure; the shared canary) that every pane composes; the live editor core's identity machinery (`BlockRangeIndex`, crystallization) becomes its live mode, not a sibling implementation. "What text does this pane show, and is it live" is answered by ONE pure, unit-tested authority (`PaneTextAuthority`); views never re-derive it. Its invariants stated as code: exactly one live pane; the live pane is buffer-authoritative; read panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter may announce that something happened (mode changed, post opened); no listener derives business state or availability from a broadcast, and no flow's correctness depends on broadcast ordering. Cross-feature flows route through composition. (Stage 0's survey enumerates today's notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule marks an under-architected feature. The response is never another patch: write the feature's DESIGN MEMO — intended behavior whole, edge cases enumerated on paper, refusal wordings, undo story — get the author's rulings on the product-flavored edges, then build to the memo. Happy path ships first, but the edges are *decided at design time*, not discovered by the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial flow is the contract for every happy path. It stays green — automated where the harness allows, screenshot-walked otherwise — and any change that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive harness: the ops-layer soaks (exist), the board/view-model invariant soak (Stage 1), the registry walk (P-1), the per-batch scripted screenshot walkthrough. Red-on-old stays absolute: no bug-class fix without a pin that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind the rebuilt layer exactly as they bind the substrate (invalidation ∝ realized rows; one live editor; virtualized long views). Overlays, never rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit` (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary. Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing board layout, text authority, and gesture routing splits by concern (`TakesViewModel` at 890 lines is the standing counterexample). Same hygiene rule as the substrate, applied where it was being waived.
+
+*(The application notes in `.claude/skills/architect-phase/SKILL.md` bind the same way.)*
+
+## 5. The schema event (the run's ONE SyncSpec §12 lockstep — the architect's technical shape under her rulings)
+
+**Migration `v1_37_arrival_provenance_and_pin`** (the tail on main is `v1_36_fk_child_indexes`; the number is in nov5's ledger so no parallel run collides). TWO nullable columns on `reading_post`, its own commit before any consuming code:
+
+- **`arrival_provenance TEXT`** — canonical JSON on ARRIVAL rows: `{"kind": "proposed" | "rule_edit" | "catchup" | "backfill", "client": "…"?, "reason": "…"?}`. One column serves both ruled needs (VX-821's why-it-waits + VX-811's optional reason) — `block.presentation`'s one-JSON-column precedent. NULL/absent = a pre-dating arrival (the face shows since-when only); malformed JSON reads as absent (presentation's rule). **E2EE classification: ENCRYPTED** (an AI-authored reason is prose; the kind and client ride inside the sealed value — structure-only disclosure is zero). Member rows leave it NULL (it is the arrival's fact; seatArrival carries it or clears it — the implementer proposes, the orchestrator rules at the batch).
+- **`pinned_at TEXT`** — the membership pin: non-NULL = pinned, the stamp doubling as since-when. **E2EE classification: PLAIN** (a bare timestamp — `archived_at`/`ai_private_at`'s disclosed-structure class: that a membership is pinned, never which).
+
+Both are CAS metadata (server-wins; two devices editing one row's pin converge by the standing metadata class). **NO new §7 repair**: no new unique index. The status-aware `reading_post` pair dedupe keeps the smaller id, whose own column values ride — a cross-device propose/propose collision keeps one provenance; recorded, accepted. Mirror artifact **`Server/supabase/18_vx808_arrivals_pins.sql`**: two nullable constraint-free columns, no RPC change, no new table (the 13i-e/13n-b class). **Marker 14→15** — it moves because a marker-14 client's whole-row CAS push would null either column out from under a marker-15 writer (the 13i-e reasoning). The classification walk (PRAGMA completeness) forces both classifications or the build fails — the belt is already standing. **The mirror deploy is HELD** for her window at the stage's end; from this run's merge every main build speaks marker 15 and visibly refuses production sync until the deploy lands (the §12 grammar — both Macs' installs follow in her window; the phone follows the mobile track).
+
+## 6. The batch plan (acceptance units, order, evidence of their kind)
+
+**Sizing note (said to her at kickoff per the guidance):** the run carries the coupled pair (811+821 — one phase-sized feature in two faces) and the pins (803 — a second, smaller feature unit) plus fix-sized members — the same shape as vx-805 (one phase-sized unit + small members), inside the two-phase-sized-units ceiling.
+
+### Unit B1 — the schema event + the general book wing mend (Sync/; one implementer session)
+Members: the §5 schema event (first commit, own commit) · **VX-857**.
+- The mend: generalize `Sync/JournalWingMend.swift`'s class to EVERY live book — a live MEMBER row of a live book whose note sits in another wing moves the note into the book's effective wing (the note's row, its live saved versions, tags adopting by path as fresh rows), explicit outbox writes, idempotent, never for a dead book, occasions ∝ the batch. The Journal's mend becomes the general mend's special case or its sibling — the implementer PROPOSES the composition (one mend parameterized vs. two classes sharing a body) AND the occasion set (a book-membership landing · a book's own wing changing, scoped to the wing it left · the keeper's hand-overs for the Journal — and whether the straggler-container gap (vx-805 residual corner 6) closes here or is recorded) BEFORE building that half; the orchestrator rules repo-first (the in-batch fork pattern).
+- **Deliberately NEVER a container landing** (vx-805's occasion discipline — a deliberate move-out caught between push chunks must not be undone).
+- GATHERINGS hold no members — the mend is books-only by construction. An ARCHIVED book still homes its notes (membership stays a fact) — the mend runs for it; a FINISHED/SEALED book's members move with it on her door already — the mend covers the sync race the same way. Corner dispositions land in this record.
+- Evidence: the convergence suite (fake-server, `JournalWingConvergenceTests`' sibling — per-occasion behavioral-revert red-on-old), exact state-transition tests on the migration (columns born NULL, classification walk green), `Tools/verify-pins` clean, full core `swift test`.
+
+### Unit B2 — VX-811: bulk propose on the wire + provenance at every arrival door (one session; MCPSpec in full is the implementer's required reading)
+- **The new tool** (name proposed by the implementer; `propose_notes_to_book` is the working name): `note_ids` (1–200, the list-form grammar — each item its own act, decision and Activity line; P-809-12's once-grant-covers-one-item) + `book_id` + optional per-note `reason`. READ reach on EACH note and on the book (the fence first — anything unreachable answers the ONE not-shared shape; a Private book or the daily Journal is simply unreachable at read). Each landed item mints an ARRIVAL row (`status='arrival'`, insert-only) with `arrival_provenance` = proposed/client/reason. Already-waiting pair: no-op in words (`changed: false` family). Already a MEMBER: refused in her doors' words per item. A DISMISSED pair: the fresh deliberate act RE-POSES it at the door (AppSpec §9's fresh-act rule — the implementer pins the exact row semantics: a NEW arrival row beside the dismissal record). Capacity: an arrival is no membership — it waits at the door regardless (the gate's capacity leg gates SEATING, not the bell; said in the answer). A finished or archived book: the implementer proposes the verdicts from the standing intake table (`IntakeDecision`) before building — finishing dismisses waiters and a finished book hears no intake, so propose should refuse in her words; archived books keep explicit adds open and pending arrivals waiting, so propose LANDS; confirmed against `intakeRuns` at the batch.
+- **The two-store catalog** gains the tool's arms (the coverage test forces it); the answer is a pure function of reachable state — `results` per id in the single-act words, `landed_count`/`refused_count`, the scope sentence family where books are named.
+- **Provenance at every arrival door (ops-level):** every road that mints an arrival stamps its kind — rule-edit bells (`rule_edit`), resume catch-up bells (`catchup`), creation-backfill never bells (seats), the wire's fence-bells from A-809-11 (`proposed`? NO — those are applying acts, not proposals: the implementer proposes the kind vocabulary for the A-809-11 bell and the ownership-conflict bell (`shelveInDailyJournalBook`'s `.waitingAtDoor`) before building; the orchestrator rules). Her own acts stay unstamped or stamp a hand kind — ruled at the fork.
+- **`set_book_rule`'s answer names how many existing matches now wait** — the count of arrivals the rule edit belled, reach-INDEPENDENT as a bare count? NO: the count must be a pure function of reachable state (R-825). The rule edit's bells are the act's own product on the book the client edits — the implementer verifies the count discloses nothing beyond the client's reach (the belled notes are matches of the client's own rule over the wing's notes — notes it may NOT all read). THE SAFE SHAPE: the count counts ONLY belled notes the client can read, with the fixed scope sentence beside it (P-809-1's family: "Notes beyond your reach, if any, are not counted."). Flagged here so the catalog arm is written FIRST; if the honest count proves useless in practice, that is her product question, bundled.
+- One client-named ⌥⌘Z entry per landed item (the list-form grammar); Activity speaks each act in words; receipts ride one call-scoped run key.
+- Evidence: the catalog arms, state-transition tests per verdict row, red-on-old pins per bug-class piece, the MCP server suites.
+
+### Unit B3 — VX-821: the Arrivals review area (one session; design-first)
+- **The design fork is reserved for the architect:** the implementer (or the orchestrator at a sitting) presents 2–3 layout shapes for the grown review area (her bar: clear, spacious, good-size buttons, may occupy the full book area) BEFORE building — her word "might need a bit of design" makes this the run's one sitting-shaped design moment; the pick lands here repo-first.
+- The face: the masthead Arrivals door opens the review area (full book area allowed); rows carry the note's first words, WHY it waits ("proposed by ‹client› — ‹reason›" · "rule edit" · "catch-up after un-archiving"; absent provenance = since-when only) and since when (`TimeStampFace`, the one wording brain); multi-select (click, ⇧/⌘ extend, ⌘A); the bottom bar speaks "Add N · Dismiss N"; Add all · Dismiss all beside; keyboard judging (arrows walk, ⏎ adds, ⌫ dismisses); opening a row never seats (the peek stays safe).
+- **Add runs the ownership consult exactly as her hand-add** (`OwnershipDecision` → the membership choice sheet on a refusal; copy-only where owned elsewhere — her choice at the add); a bulk Add with mixed verdicts lands what lands and SAYS what waited on a choice (partial results spoken as refusals with both facts — the Trash bulk-row precedent).
+- P-1: the new acts declared once in the registry (Add all · Dismiss all · the selection acts; `.surface` doors where inline); the registry walk covers them. Messages on the one status seam. No new ordering or intake semantics — `seatArrival`/`dismissArrival` stay the only verbs, called N times on one stamp family (the implementer proposes whether bulk is one transaction or per-row acts with one receipt — ruled at the fork; the undo story rides the same ruling).
+- Evidence: registry walk, VM tests over the selection model, state-transition tests on the bulk roads, the orchestrator's hands-on walk at a stage window (the acceptance gate for a face).
+
+### Unit B4 — VX-803: pinned notes (one session)
+- Ops: `setMembershipPinned(readingPost, Bool)` — identity-level posture (no touch, no churn; `updated_at` stamped; no-op guarded); refuses a finished/sealed book's frozen assembly? NO — a pin is presentation of order, and FINISHED freezes assembly (order) — the implementer verifies `lockReading`'s freeze reach and proposes whether pin flips under Finished (the sort dial's own behavior is the precedent to match) before building; refuses under... (the seal's reach is authoring writes under the note — a membership pin is book-side; align with `setReadingSort`'s posture). Ruled at the fork from the code's own precedents.
+- The order seam: ONE shared rule floats pinned memberships above the book's sort, pinned group internally ordered by that same sort — in EVERY mode (Outline, Index, Book, Read both faces, the ⌘↑/⌘↓ stepper, the navigator, the position bar's "note N of M" counting). Find the order's one home (the book order query every mode reads) and float there, never per-view (P-1's spirit; a view re-deriving the float is the smell).
+- Doors: Pin/Unpin on the note's book-context menus (the registry's one declaration; the Book Panel and book-row menus where a membership is present; the capability's refusal copy where no book context exists). Wire parity NOT built (not ruled; recorded for VX-368's audit).
+- Evidence: state-transition tests on the op, order-query tests (pins float under every `sort_field`, ties by the sort within the pinned group), registry walk, the stepper's pin-aware order pinned, the hands-on walk.
+
+### Unit B5 — the MCP riders + the small members (one session; MCPSpec in full required reading)
+- **VX-859:** the book-shape `next_cursor` moves to id-resume (the gathering cursor's road, pre-ruled); red-on-old pin = the interleaved-mint catalog arm the ticket names. If the open code reveals a significantly different cost: STOP, bundle for her (her reopen clause).
+- **VX-777:** the loser `stop()`'s close line speaks words scoped to what actually happened (never the switch-off words on a replaced host's connections) — the implementer traces the stale-start path (VX-613 owns the class itself; this fixes the WORDS) and pins red-on-old.
+- **VX-776:** the injectable failing-reader seam into `MCPSession`'s SDK handlers + the worded store-failure answer through the one refusal chain (VX-369's family); the red pin the seam finally allows.
+- **VX-775:** per her kickoff direction (§3) — recorded there once asked.
+- **VX-879:** the three wording sites (the residuals ledger's blockquote → her final paragraph verbatim; `MCPToolCatalog.swift`'s `move_book_to_wing` description aligned with the verified mechanism — an unreadable PLAIN holder doesn't block, an unreadable OWNER or frozen holder refuses; MCPSpec's VX-639 clause read against VX-813 and aligned). Wording-class: the pins are the catalog's own description tests where they exist; no behavior change.
+- **VX-867:** `ShortcutCatalog.swift`'s ⌥⌘J line → conditional ("…(if it needs a date, set one from note ▾)" — the exact words PROPOSED to the orchestrator, her nit honored).
+- **VX-860:** the one-line erase-after-use in `AppBootstrap.swift` after the teardown reads `willLockRoad`, with a state-transition test asserting the post-read nil (the ticket records no red pin is possible on today's roads — the test pins the BELT's own behavior, not a bug).
+- Evidence: red-on-old where a bug-class pin exists; the catalog arms re-run; `MacWillLockTests` + the stop-roads suites for 777/860.
+
+### Unit L — VX-872: the live two-device Journal round (if she says run it)
+Scope, machines and timing are HER kickoff call (§3). If run: vxtest accounts only on the prod test road (`VARIORUM_PROD_TEST_ROAD=1`, the allowlist, `Tools/WalkKit/first-run-walk.sh` arms, `Tools/prod-confirm-test-user.sh`; the walk may reset its OWN allowlisted vxtest accounts, never hers); **BEFORE the marker-15 mirror deploy** (the 1.1-older-build arm refuses to sync after the bump); stage claims REQUESTED from nov5 with exact names; an Opus session drives the walk (the standing safeguard's spirit); the dev store's posture restored after (signed out, Standard, MCP off). The scenarios: delete on one device while the other files offline · re-mint · Put back · a cross-wing move racing an offline filing · the 1.1 Trash restore of a deleted Journal (amendment 7's demotion).
+
+### Order and the ladder
+B1 → B2 → B3 (its design pick may land during B2's build at a sitting) → B4 → B5; Unit L scheduled at her convenience before the deploy. Strictly ONE implementer at a time. Then ONE ladder over the run's whole diff: fresh `fable-reviewer`, REVIEW_PROMPT verbatim; round 2 re-reviews the fixes; a new BLOCKER/MAJOR earns round 3; hard cap three; findings and dispositions land here before the next round. Then the closeout (§8).
+
+## 7. Environment traps (every batch brief carries this section verbatim)
+
+- Run everything from `~/dev/variorum-vx-808`; never commit from the main checkout. Commit per coherent piece, push after EVERY commit; LIVE STATUS from the first commit (the resiliency protocol binds: synchronous foreground waits only — poll `grep -q '<EXIT LINE>' <log> && break; sleep 5`, never end a turn awaiting a background run; no subagents except one read-only Sonnet for external facts).
+- Headless `swift build` / `swift test` / `xcodebuild build-for-testing` need NO stage and run freely. **EVERY `xcodebuild test` (Mac or simulator) needs a HELD stage claim via nov5** — the orchestrator holds the claims; implementers ASK the orchestrator, never claim themselves. Suite-level `-only-testing` with TYPE names (a zsh array); confirm the "Test run with N tests" line; "Executed 0" is no verdict; Swift Testing's N counts skipped tests — read the `skipped:` lines.
+- Instance guards: `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` (the test host matches loose patterns mid-run); real-store instances are judged by STORE, never quit or killed; no Release builds or /Applications refreshes outside a sanctioned zero-instance window. Dismiss What's New after a Debug launch.
+- NEVER a custom build configuration (anything not named exactly "Debug" builds the packages Release and strips the DEBUG oracles). `Tools/verify-pins` before and after any Xcode build you depend on; pin moves are AUTHOR-ONLY (P-781-4).
+- The MCP socket suites are timing-sensitive under cross-worktree load (`MCPHarnessTimeLimitTests`, `MCPStopRoadsServerTests`, `MCPDiscoverProbeServerTests` — the VX-353 class): a bound overrun under load is NO VERDICT; re-run the suite ALONE before concluding.
+- Three sibling runs share tonight's repo (vx-827 MCP/ files · vx-878 book faces + registry · vx-819 search): merges SERIALIZE through nov5, first-ready first; the later merger re-runs `CapabilityRegistryTests` + `ShellChromeTests` and the shared-file suites after its merge-in. If the ladder or a batch edits a file a sibling declared, one line to nov5 the same turn.
+- The dev store: signed out, Standard, MCP switch OFF at rest; Castle values only from `~/.variorum/dev-castle.env`; Resume Sync never pressed; never the real store, never her account. Backups A1 into `Backups/safety-copies/` before ANY real-store touch (closeout only).
+- Commits carry NO trailers (her rule — overrides the harness reminder); push `origin` after every commit; never rewrite pushed history.
+
+## 8. Closeout checklist (the standing ritual; run at the end)
+
+Results + counts here; FOR A LATER READER written last; master plan row retired + closeout paragraph (the outgoing one archived); canon deltas in the two-file shape — AppSpec §7 (the two columns) · §9 (propose, the pin op, the arrival provenance, bulk judging) · §12/SurfaceContracts (the Arrivals face contract lines, the pin-everywhere line, the MCP door's propose line) · SyncSpec §12's event entry (at the deploy) · MCPSpec (the propose tool, VX-859's residual clause flipped, VX-879's aligned clause) — each a contract line + one pointer, the dated narrative to `notes/AppSpecRecord.md`; `Tools/canon-size` run, its line in the handoff; every member closed or re-owned; **every ticket the run FILED triaged** (one kind · Evidence · one Area · a Priority; never an assignee); the rulings reconciled against "every/everywhere" wording (pins EVERYWHERE, provenance at EVERY arrival door — re-read at close); the filed-tickets list in her checkbox format in the handoff AND as the session's very last chat message; MOBILE PARITY line (the phone's Arrivals/pins story → `notes/MobileSoul.md` row); the handoff `notes/handoffs/vx-808-handoff.md` (her checklist at top — the PROVISIONAL bundle → QUESTIONS at the merge; the mirror deploy window + release are the stage's FINISH, each at her go); the PR (merge commit, bare description per her rule); branch + worktree removed after merge; build debris + walk evidence deleted post-merge; the plan banner flipped CLOSED; "nothing further owed" to nov5; hard stop.
+
+## 9. LEDGER (running; every row owned)
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Worktree + branch + in-flight row + slot granted + v1_37 in nov5's ledger | DONE (kickoff) |
+| 2 | Kickoff sitting: cast (Sync/ implementer) · VX-775 direction · VX-872 scope/machines · rider offer | ASKED at kickoff — recorded in §3 on answer |
+| 3 | Unit B1 (schema + mend) | NOT STARTED |
+| 4 | Unit B2 (bulk propose + provenance) | NOT STARTED |
+| 5 | Unit B3 (the review area; design fork first) | NOT STARTED |
+| 6 | Unit B4 (pins) | NOT STARTED |
+| 7 | Unit B5 (riders + small members) | NOT STARTED |
+| 8 | Unit L (the live round) | PENDING her kickoff word |
+| 9 | The ladder (Fable, whole diff) | NOT STARTED |
+| 10 | Closeout + deploy window + release (the stage's finish, her go) | NOT STARTED |
