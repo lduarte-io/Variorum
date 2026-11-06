@@ -103,7 +103,12 @@ struct IconTooltipTests {
         #expect(WorkspaceNaming.forwardHelp(destination: "Orbit").hasPrefix("Forward to"))
         #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", count: 1).hasPrefix("Open \u{201C}Orbit\u{201D}"))
         #expect(WorkspaceNaming.tagFieldHelp(open: false).hasPrefix("Tag this note"))
-        #expect(MCPShareCopy.lockHelp.hasPrefix("Private"))
+        // VX-831 (A JUSTIFIED EDIT — the lock retired into the Private mark):
+        // the mark's every hover leads with its name.
+        for help in [PrivateMarkCopy.markOwnNoteHelp, PrivateMarkCopy.markOwnBookHelp,
+                     PrivateMarkCopy.markViaHelp(["diary"]), PrivateMarkCopy.markOwnNoteAlsoViaHelp(["diary"])] {
+            #expect(help.hasPrefix("Private \u{2014} "), "\(help)")
+        }
         #expect(StarCopy.rowHelp.hasPrefix("Un-star"))
         #expect(SidebarView.closeRowHelp.hasPrefix("Close this row"))
     }

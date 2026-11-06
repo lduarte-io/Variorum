@@ -10,18 +10,20 @@
 //  pane's, so Write, Takes, Read, Lenses, Compare and Blocks share it) and in
 //  a note-only window. CHROME ONLY: it never touches the editor seam.
 //
-//  It renders ONLY while the server is ON and at least one client is
-//  APPROVED (the window's road — `indicatorOn`), and then says exactly two
-//  things, each only when true:
+//  Its MCP legs render ONLY while the server is ON and at least one client is
+//  APPROVED (the window's road — `indicatorOn`), each only when true:
 //  - THE SHARED ICON (VX-271's one glyph) when an approved client reaches the
 //    note now — hover names who and how far; click shows the permission and
 //    the WHY ("through the Home wing grant");
-//  - THE LOCK when the note is Private — its own mark (click → the Private
-//    toggle) or a Private book's (click → the book's name; the mark is changed
-//    in that book's settings).
-//  Neither ⇒ NOTHING (calm — "an empty state that says nothing"). 13n-c U4
-//  adds the PENDING-ASK leg: the pending-ask mark (`MCPAskGlyph`) while a client's
-//  ask waits on this note — her press opens it.
+//  - 13n-c U4's PENDING-ASK leg: the pending-ask mark (`MCPAskGlyph`) while a
+//    client's ask waits on this note — her press opens it.
+//  **VX-831 — THE PRIVATE MARK took the lock's place**, and it is the note's
+//  masthead face of the mark every shared-icon host draws (`PrivateMarkView`,
+//  the closed eye): shown on a Private note whatever the clients (N-2), under
+//  the badge family's switch and also wherever the indicator is on (the lock's
+//  old gate, D-831-3); its own mark's press un-privates, a Private book's says
+//  so and offers the book. Nothing true ⇒ NOTHING (calm — "an empty state that
+//  says nothing").
 //
 
 import GRDB
@@ -31,24 +33,32 @@ import VariorumCore
 /// What the indicator draws for one note — read in ONE observed read.
 nonisolated struct MCPNoteIndicatorState: Equatable, Sendable {
     let postID: String
-    /// Its OWN Private mark.
-    let ownPrivate: Bool
-    /// Live Private books holding it, by name.
-    let privateBooks: [String]
+    /// **VX-831 — the note's Private mark** (the closed eye's fact: its own
+    /// stamp, or the live Private books holding it — `Queries.privateMarks`,
+    /// the rows' own read); nil when it is not Private. It replaced the lock's
+    /// two fields (`isNotePrivate` + `privateBooksHolding`), which are derived
+    /// below, unchanged in meaning.
+    let mark: Queries.PrivateMark?
     /// Who reaches it now, how far and why (`Queries.mcpNoteReach` — the ONE
-    /// rule).
+    /// rule). Read only while the indicator is ON (`includingReach`) — the
+    /// shared icon's law: nothing read while no client is approved.
     let reach: [MCPPlaceReach]
 
-    var isPrivate: Bool { ownPrivate || !privateBooks.isEmpty }
+    /// Its OWN Private mark.
+    var ownPrivate: Bool { mark?.own ?? false }
+    /// Live Private books holding it, by name.
+    var privateBooks: [String] { mark?.viaBooks.map(\.name) ?? [] }
+    var isPrivate: Bool { mark?.isPrivate ?? false }
     /// Nothing to say — the calm state.
     var isEmpty: Bool { reach.isEmpty && !isPrivate }
 
-    static func read(_ db: Database, postID: String) throws -> MCPNoteIndicatorState {
+    static func read(
+        _ db: Database, postID: String, includingReach: Bool = true
+    ) throws -> MCPNoteIndicatorState {
         MCPNoteIndicatorState(
             postID: postID,
-            ownPrivate: try Queries.isNotePrivate(db, postID: postID),
-            privateBooks: try Queries.privateBooksHolding(db, postID: postID),
-            reach: try Queries.mcpNoteReach(db, noteID: postID))
+            mark: try Queries.privateMarks(db, noteIDs: [postID])[postID],
+            reach: includingReach ? try Queries.mcpNoteReach(db, noteID: postID) : [])
     }
 
     /// Only a state read for THIS note draws (a stale read never draws
@@ -60,10 +70,11 @@ nonisolated struct MCPNoteIndicatorState: Equatable, Sendable {
 
 struct MCPNoteIndicator: View {
     /// P-1's walk: the shared icon (`.mcpShowSharing`, its popover's Change… /
-    /// Revoke) and the lock's Private toggle (`.markNotePrivate`'s `.surface`
-    /// door).
+    /// Revoke) and — VX-831 — the Private mark, the closed eye that replaced
+    /// the lock (`.markNotePrivate`'s `.surface` door, and its via-book arm's
+    /// door, the ascent).
     static let surfaceCapabilities: [CapabilityID] =
-        MCPSharedIcon.surfaceCapabilities + [.markNotePrivate]
+        MCPSharedIcon.surfaceCapabilities + PrivateMarkView.noteSurfaceCapabilities
         // 13n-c U4 — the pending-ask leg (VX-164's third mark).
         + MCPAskGlyph.surfaceCapabilities
 
@@ -71,81 +82,59 @@ struct MCPNoteIndicator: View {
     let postID: String
     let tokens: VoiceTokens
     @Environment(\.mcpShareRoad) private var road
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @State private var state: MCPNoteIndicatorState?
-    @State private var lockShown = false
+
+    /// The indicator's own gate (VX-164): the server on and a client approved.
+    private var indicatorOn: Bool { road?.indicatorOn == true }
 
     var body: some View {
-        if road?.indicatorOn == true {
-            HStack(spacing: 4) {
-                if let state = MCPNoteIndicatorState.matching(state, postID: postID) {
-                    if !state.reach.isEmpty {
-                        // W-UX-12: at the window's trailing edge — open leftward.
-                        MCPSharedIcon(reaches: state.reach, tokens: tokens, arrowEdge: .leading)
-                    }
-                    if state.isPrivate { lock(state) }
-                }
+        let state = MCPNoteIndicatorState.matching(state, postID: postID)
+        // VX-831: the masthead's mark — drawn on anything marked, whatever
+        // the clients (N-2), under the badge family's switch, and also
+        // wherever the indicator shows (the lock's old gate — D-831-3).
+        let mark = PrivateMarkFace.masthead(
+            state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true, indicatorOn: indicatorOn)
+        HStack(spacing: 4) {
+            if indicatorOn, let state, !state.reach.isEmpty {
+                // W-UX-12: at the window's trailing edge — open leftward.
+                MCPSharedIcon(reaches: state.reach, tokens: tokens, arrowEdge: .leading)
+            }
+            // VX-831 — THE PRIVATE MARK (the closed eye), where the lock was:
+            // its own mark's press un-privates; a Private book's says so and
+            // offers the book. Nothing when the note is not Private.
+            PrivateMarkView(
+                door: mark.map { PrivateMarkDoor(mark: $0, subjectID: postID, session: session) },
+                tokens: tokens)
+            if indicatorOn {
                 // 13n-c U4 — VX-164's PENDING-ASK leg: an ask waiting on this
                 // note (the door's projection, not this read — nothing when
                 // none, so the calm state still says nothing).
                 MCPAskGlyph(.note(postID), tokens: tokens)
             }
-            // Held while the indicator is ON (the read touches `container`'s
-            // mark and membership columns, never the buffer's — the note ▾
-            // menu's own privacy read, `NotePrivacyState`, has this shape).
-            .task(id: postID) { await watch() }
+        }
+        // Held for the note (the read touches `container`'s mark and the
+        // membership rows, never the buffer's — the note ▾ menu's own privacy
+        // read, `NotePrivacyState`, has this shape); its reach half only while
+        // the indicator is ON (the shared icon's law), so the read restarts
+        // when the indicator turns on or off.
+        .task(id: WatchKey(postID: postID, includingReach: indicatorOn)) {
+            await watch(includingReach: indicatorOn)
         }
     }
 
-    private func lock(_ state: MCPNoteIndicatorState) -> some View {
-        Button {
-            lockShown.toggle()
-        } label: {
-            // 13n-c UX walk W-UX-12: a FIRMER lock — body ink (it was the
-            // muted tint, faint at the bar's far end), the shared icon's
-            // weight beside it.
-            Image(systemName: "lock")
-                .font(tokens.small)
-                .fontWeight(MCPSharedIcon.rowWeight)
-                .foregroundStyle(tokens.ink)
-                .padding(.horizontal, 2)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help(MCPShareCopy.lockHelp)
-        .accessibilityLabel(MCPShareCopy.lockHelp)
-        .popover(isPresented: $lockShown, arrowEdge: .leading) {
-            VStack(alignment: .leading, spacing: 8) {
-                Toggle(CapabilityRegistry.capability(.markNotePrivate).verb, isOn: Binding(
-                    get: { state.ownPrivate },
-                    set: { on in
-                        let session = session
-                        let postID = postID
-                        Task { await NotePrivacyAct.set(on, postID: postID, session: session) }
-                    }))
-                if !state.privateBooks.isEmpty {
-                    Text(MCPShareCopy.privateThrough(state.privateBooks))
-                        .font(.caption)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(MCPShareCopy.privateThroughNote)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .padding(12)
-            .frame(minWidth: 220, maxWidth: 320, alignment: .leading)
-            .presentationBackground(tokens.room)
-            .tint(tokens.accent)
-        }
+    private struct WatchKey: Hashable {
+        let postID: String
+        let includingReach: Bool
     }
 
-    private func watch() async {
+    private func watch(includingReach: Bool) async {
         let database = session.database
         let postID = postID
         do {
-            for try await value in database.observe({ db in try MCPNoteIndicatorState.read(db, postID: postID) }) {
+            for try await value in database.observe({ db in
+                try MCPNoteIndicatorState.read(db, postID: postID, includingReach: includingReach)
+            }) {
                 guard !Task.isCancelled else { return }
                 if state != value { state = value }
             }

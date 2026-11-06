@@ -207,9 +207,11 @@ extension LibraryCatalogModel {
         heldNoteIDs = ids
         ownershipHold?.cancel()
         reachHold?.cancel()
+        markHold?.cancel()
         guard !ids.isEmpty else {
             ownershipHold = nil
             reachHold = nil
+            markHold = nil
             return
         }
         let session = session
@@ -232,6 +234,13 @@ extension LibraryCatalogModel {
                 self?.landReach(value, for: ids)
             }
         }
+        // VX-831: the same notes' Private marks — the store's own fact (read
+        // whatever the clients, N-2), over the SAME window (P1).
+        markHold = Task { @MainActor [weak self] in
+            await PrivateMarkHold.notes(session, ids) { value in
+                self?.landMarks(value, for: ids)
+            }
+        }
     }
 
     /// The listing left the screen: the held observations end with it.
@@ -240,6 +249,8 @@ extension LibraryCatalogModel {
         ownershipHold = nil
         reachHold?.cancel()
         reachHold = nil
+        markHold?.cancel()
+        markHold = nil
         heldNoteIDs = []
     }
 

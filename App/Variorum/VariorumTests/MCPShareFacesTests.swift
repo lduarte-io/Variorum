@@ -630,7 +630,9 @@ struct MCPShareFacesTests {
         // VX-272: the settings-class faces carry no "AI".
         for words in [MCPShareCopy.sharedWithLabel, MCPShareCopy.notShared, MCPShareCopy.shareButton,
                       MCPShareCopy.popoverTitle, MCPShareCopy.openBookNote, MCPShareCopy.zeroState,
-                      MCPShareCopy.lockHelp, MCPPaneCopy.groupInert(2), MCPPaneCopy.groupChip] {
+                      // VX-831 (A JUSTIFIED EDIT): the lock's hover retired
+                      // into the Private mark's.
+                      PrivateMarkCopy.markOwnNoteHelp, MCPPaneCopy.groupInert(2), MCPPaneCopy.groupChip] {
             #expect(!words.split(whereSeparator: { !$0.isLetter }).contains("AI"), "\(words)")
         }
     }
