@@ -200,6 +200,23 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 - One client-named ⌥⌘Z entry per landed item (the list-form grammar); Activity speaks each act in words; receipts ride one call-scoped run key.
 - Evidence: the catalog arms, state-transition tests per verdict row, red-on-old pins per bug-class piece, the MCP server suites.
 
+#### Unit B2 — LIVE STATUS (implementer: Opus, session B2, started 2026-11-05)
+
+*No behavioral revert is in flight unless a line below says "REVERT IN FLIGHT". Reverts are commit-first, the piece's wiring reverted on the committed tree, the pin run red, restored by `git checkout HEAD -- <file>`.*
+
+| Piece | Status |
+|---|---|
+| Reading (own context): this record §1–§9 · MCPSpec IN FULL · `MCPToolCatalog` · `MCPWriteTools` (+NoteLists, +Carriage, +LibraryEdits' gathering words) · `MCPGrantAuthority` / `Domain/MCPGrantRule` (decide, reaches, spends, best) · `MCPOwnActivity` · `MCPNullCharacters` · the two-store catalog + arms · `Domain/IntakeDecision` · `Operations+Intake` (event, sweep, materialize, seat/dismiss) · `+Ownership` (copy/move in, the revival pass, the daily bell) · `+Reading` (create's backfill, the rule write's sweep, reopen, restore, the hand-add) · `+ReadingArchive` / `+Seal` (the catch-ups) · `+MCPCarriage` (set_book_rule) · `+MCPWrites` (the add's undo) · `Sync/BookWingMend.swift` (the stamp) + `Sync/Repairs.swift` (the OWNED demotion, the dedupe promotion — read only) · `Queries/ArrivalQueries` · the app's `MCPPaneCopy` Activity/receipt tables + `MCPTrail` | DONE |
+| THE FORK — the provenance vocabulary + the tool shape + carry/clear + the once-spend + the set_book_rule count shape, SENT to the orchestrator (the message's text is mirrored below once ruled) | **AWAITING RULING** — the other doors are not wired until it lands |
+| 1. Domain `ArrivalProvenance` + the model column on `ReadingPost` | PENDING |
+| 2. The op `proposeNoteToBook` + state-transition tests per verdict row | PENDING |
+| 3. The wire tool `propose_notes_to_book` (catalog, parse, list grammar, guard, undo, receipts, Activity/receipt words app-side) + server tests | PENDING |
+| 4. The two-store catalog arms for the tool | PENDING |
+| 5. Provenance at every arrival door (after the ruling) | PENDING — blocked on the ruling |
+| 6. `set_book_rule`'s belled count (catalog arm FIRST; red-on-old by a naive-count revert) | PENDING |
+| 7. Docs tail (`MCPSession.instructions`, tool-description cross-refs, the field guide, the read rung's consent sentence) | NOT IN B2 unless the record's text requires it — recorded for the ladder/closeout |
+| Close — full core `swift test` + the MCP target, `Tools/verify-pins`, self-assessment | PENDING |
+
 ### Unit B3 — VX-821: the Arrivals review area (one session; design RULED — R-808-5)
 - **The design is PICKED (R-808-5, §3): the full book area, one home.** The masthead Arrivals door opens the review area in the book's content area (a mode-sized surface with Done returning to the book's mode); **the popover retires** — `BookArrivalsList`'s popover home is replaced, its row semantics (the ownership-aware arms from `ArrivalArms`, the never-seats open) carried into the new surface; `BookArrivalsDoor`'s masthead icon stays the one door (calm/presence unchanged).
 - The face (per the picked preview): the header "Arrivals — N waiting" with Add all · Dismiss all; rows carry the note's first words, WHY it waits ("proposed by ‹client› — ‹reason›" · "rule edit" · "catch-up after un-archiving"; absent provenance = since-when only) and since when (`TimeStampFace`, the one wording brain); multi-select (click, ⇧/⌘ extend, ⌘A); the bottom bar speaks "Add N · Dismiss N"; Add all · Dismiss all beside; keyboard judging (arrows walk, ⏎ adds, ⌫ dismisses); opening a row never seats (the peek stays safe).
