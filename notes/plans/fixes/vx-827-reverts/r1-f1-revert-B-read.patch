@@ -1,0 +1,15 @@
+diff --git a/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift b/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift
+index 156310f3b..4232af4b6 100644
+--- a/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift
++++ b/App/Variorum/Variorum/Features/History/CommitsFaceModel.swift
+@@ -242,10 +242,6 @@ final class CommitsFaceModel {
+     /// flush's clean answer is not consulted (the bring-back road does).
+     func flushBeforeReading() async {
+         await session.flushExistingAutosave(forPost: postID)
+-        guard isRelative,
+-              let placed = await LineageBringBack.placedNote(session: session, blockID: blockID),
+-              placed != postID else { return }
+-        await session.flushExistingAutosave(forPost: placed)
+     }
+ 
+     func watchSeal() async {

@@ -1626,7 +1626,7 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-6 | The guide sweep (G1's sentences, each listed for #264) | DONE (compiled; phone target compiled too — `RecoveryCopy` is shared) — the list under U3b-6 below |
 | U3b-7 | Walk rows for the Lineage face, appended to the window's walk | DONE — rows 13–23 under "what is OWED" below |
 | U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | DONE — below |
-| U3b-FIX-1 | Ladder R1-F1 (the flush gap): AGREED; fix + pin, the behavioral revert announced below BEFORE it runs | IN PROGRESS |
+| U3b-FIX-1 | Ladder R1-F1 (the flush gap): AGREED; fix + pin, the behavioral revert announced below BEFORE it runs | BUILT + COMPILED (429218982) — **NOT LANDED until the closing window runs the recipe below: red on old, then green** |
 | U3b-FIX-5 | Ladder R1-F5 (`mcpShownTake`'s name): AGREED; a pure rename + its call sites | NOT-STARTED |
 
 
@@ -2033,3 +2033,38 @@ behavioral-revert recipe lands in the record now (mechanical enough for the wind
 run it cold), and the window's Mac batch runs that pin RED ON OLD by the recipe, then green on
 the fix, BEFORE the walk — the fix is not "landed" until that run. R1-F5's one-line VariorumMCP
 call-site sweep is within the rename authorization.
+
+#### R1-F1 — what was built, and THE RECIPE the closing window runs cold
+
+**Built (429218982):** `LineageBringBack.run` (in `App/Variorum/Variorum/Features/History/CommitsFaceModel.swift`)
+resolves a `.take` source's live placement (`LineageBringBack.placedNote(session:takeID:)`) and flushes that note
+first; when the flush answers NOT clean it throws `LineageBringBack.Refusal.unsavedChanges`, whose sentence REUSES the
+standing `OpsRefusalCopy.unsavedChanges` ("Unsaved changes couldn't be written — resolve that first, then retry." —
+the `VersionActs` precedent, the orchestrator's ruling (1): no new sentence); both callers (`CommitsFaceModel.
+bringBackFromLineage`, `LineageFaceModel.bringBack`) speak it as a refusal. `CommitsFaceModel.flushBeforeReading()`
+(what `start()` now calls) flushes the face's own note and, for a RELATIVE, the note it is placed in
+(`LineageBringBack.placedNote(session:blockID:)`). Pins: `LineageFaceModelTests.aRelativeInAnotherNoteIsFlushedBeforeItsWordsComeBack`
+and `.aRelativesPaneReadsItsNoteAfterItsPendingTypingLands` (fixture `pendingRelative`: an extracted block moved to a
+second note "Elsewhere", its take's typing recorded on Elsewhere's autosave coordinator with a 30 s debounce — written
+by nothing but a flush).
+
+**THE FIX IS NOT LANDED until the closing window's Mac batch runs this, BEFORE the walk** (the orchestrator's ruling
+(2)). From `~/dev/variorum-vx-827/App/Variorum`, under the held stage claim, the tree clean:
+
+1. **Green on the fix:** `xcodebuild -scheme Variorum -destination 'platform=macOS' test
+   -only-testing:VariorumTests/LineageFaceModelTests` → every test passes (12, the two F1 pins among them).
+2. **Revert A** (the bring-back half): `git apply ../../notes/plans/fixes/vx-827-reverts/r1-f1-revert-A-bringback.patch`
+   (deletes the five-line `.take` flush guard in `LineageBringBack.run`). Run step 1's command. **Expected RED:**
+   `aRelativeInAnotherNoteIsFlushedBeforeItsWordsComeBack` fails at `minted?.workingText == "Extracted part, retyped."`
+   — the minted take holds the stored `"Extracted part."`. (`aRelativesPaneReads…` stays green under A.) Restore:
+   `git apply -R ../../notes/plans/fixes/vx-827-reverts/r1-f1-revert-A-bringback.patch`.
+3. **Revert B** (the read half): `git apply ../../notes/plans/fixes/vx-827-reverts/r1-f1-revert-B-read.patch` (deletes
+   the relative branch of `flushBeforeReading`, keeping the own-note flush). Run step 1's command. **Expected RED:**
+   `aRelativesPaneReadsItsNoteAfterItsPendingTypingLands` fails at `stored == "Extracted part, retyped."` — the stored
+   take still reads `"Extracted part."`. (`aRelativeInAnotherNote…` stays green under B — the bring-back road flushes
+   on its own.) Restore: `git apply -R ../../notes/plans/fixes/vx-827-reverts/r1-f1-revert-B-read.patch`.
+4. `git status` clean; record the three runs' "Test run with N tests" lines and the two red failure lines here.
+
+Both patches were generated from the committed fix by deleting exactly those lines and `git diff`, and both
+`git apply --check` clean against 429218982; each compiles on its own (an unused helper/case is all either leaves).
+
