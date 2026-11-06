@@ -1628,6 +1628,7 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | DONE — below |
 | U3b-FIX-1 | Ladder R1-F1 (the flush gap): AGREED; fix + pin, the behavioral revert announced below BEFORE it runs | BUILT + COMPILED (429218982) — **NOT LANDED until the closing window runs the recipe below: red on old, then green** |
 | U3b-FIX-5 | Ladder R1-F5 (`mcpShownTake`'s name): AGREED; a pure rename + its call sites | DONE — `Queries.shownTake` (the next commit); headless suites below |
+| U3b-FIX2 | The window's whole-target gate: five failing tests, all U3b's (items 1–5) | DONE — pushed a4d9ff666…5adc35629; Mac re-runs are nov5's (FIX LEG 2 below) |
 
 
 ### U3b-P — THE PROPOSAL: the cross-block Bring back as take (sent before any op code; build waits on the ruling)
@@ -2156,3 +2157,37 @@ all printed before the death (12 tests, the one expected red), the restart re-ra
 ritual's evidence intact; BOTH .ips commented on VX-661. A Problem Reporter dialog from it
 stood at release (nov5 closed it): **release checks now include `pgrep -fl "Problem Reporter"`**
 — adopted for every future release line this run makes.
+
+### U3b — FIX LEG 2 (the closing window's whole-target gate: 5997 tests, five failing, all U3b's)
+
+| Item | Failing test | Traced to | What landed |
+|---|---|---|---|
+| 1 | `BlockHistoryHostTests.fromBlocksTheFaceReplacesTheWorkbenchAndGivesItBack` (U3a's pin, first run tonight) | HARNESS: `BlocksWorkbenchOracle.panelMounted` is recorded only by `.onChange(of: panelShown, initial: true)` while the workbench stands; the History & Lineage surface REPLACES the workbench (it unmounts), and its `.onDisappear` recorded nothing — the DEBUG oracle went on reading the panel as standing, so `!workbench.panelMounted` could never hold. Behaviour right. | b519cfe55 — `BlocksWorkbenchView`'s `.onDisappear` records `panelMounted = false` (one DEBUG-gated line); no pin edit |
+| 2 | `BlockHistoryHostTests.theOriginDoorOpensTheLineageFaceOnTheOriginal` | PIN STAGING: every face claim passed (the Lineage face stands and loads, the request, no inspector, the original selected, its node relative, Put back, the members); only the bar refcount failed. The pin opened the face as soon as the detail registered — Write's bar's appear raced the swap — on `CommitBarGeometry.mounted`, a GLOBAL per-post refcount every test in the suite shares (`.incrementing` ids). | 5adc35629 — re-staged to the passing sibling's idiom: settle "Write stands with its bar", then merge and press, then expect the count to drop by exactly that bar (a named justified edit, the mechanism in the pin) |
+| 3 | `MCPWireRefusalSweepTests.theSamplesNameEveryCaseExactlyOnce` | the sweep requires every declared `OperationError` case sampled; `notInLineage` was not | a4d9ff666 — sampled, and listed unspoken on the wire ("graph: unreachable" — its one thrower has no wire caller); the count pin 32 → 33 (17 graph) |
+| 4 | `NoteTrayTests.noShippedCopyStillPointsAtTheRemovedUnplacedListing` (2 issues) | the PIN, not the copy: the Divide-W explainer already reads `TrayPath.originalsPathWithDoor` (W15 — "the block's Lineage (block ▾ ▸ Lineage in the bottom bar)"); the pin still asserted the retired panel's name and door phrase | 67b32c6c4 — the pin asserts `BlockLineagePath.place` and `CommitBar.lineageRowTitle` in the explainer and no "Came from"; no shipped copy changed |
+| 5 | `TutorialWalkTests.everyDoorTheChapterNamesIsADoorTheAppHas` (4) + `.everyPlaceTheChapterNamesIsAPlaceTheAppHas` (5) | the U3b-6 sweep reworded the sentences in LITERALS, and the pins still asserted the retired names (`cameFromSection`, `bringBackVerb`, "the original is preserved", and the map's `BlockHistoryPath.name`) | 50acc576e — the swept sentences now QUOTE the surface's own constants (block ▾'s `CommitBar.lineageRowTitle`, the face's `CommitsFaceCopy.lineageDoor`, the member's `LineageFaceCopy.keptAsLineage`, `BlockPastCopy.putBackVerb`, `BlockHistoryPath.name` back in the map); the pins assert those constants and that no retired name remains (P-6) |
+
+**W17+ — the guide sentences leg 2 changed, for #264** (each supersedes its W-row; Mac only):
+
+| # | Supersedes | Now reads |
+|---|---|---|
+| W17 | W1 | "(… It waits in the Lineage of the block it became. The next lesson has it.)" |
+| W18 | W2 | "…the takes it archived, the takes it deleted, and, one press away under lineage ›, where it came from. ‹ back returns you to the page." |
+| W19 | W3 | "Open the Lineage of either new block (block ▾ ▸ Lineage, or lineage › in its history) and the original is there itself, kept as lineage, with Put back beside it and its own takes and commits underneath. Right-clicking the block ▸ See original from divide… and ⌘K land in the same place, the original already picked. …" |
+| W20 | W4 | "…the block you get lists both of the blocks it joined in its Lineage, each with its own Put back, three of them if you merged three. …" |
+| W21 | W7 | "Five: this block's History. … The history door sits in the bottom bar right beside commit, and it opens Block History in place of the page: every take's saved moments on one line, the takes this block archived, the takes it deleted (with their clocks), and, behind lineage ›, the blocks it came out of. …" |
+| W22 | W9 | "Now look. Put your cursor in the joined paragraph and open its Lineage (block ▾ ▸ Lineage): both originals are there, … and this lineage is where that line points." |
+
+**The leg's files, complete:**
+- **Product copy:** `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift` (W17–W22 — the guide's lineage sentences). (The Divide-W ceremony explainer is NOT changed in this leg — it has read the Lineage phrase since U3b-6, W15.)
+- **The DEBUG oracle line:** `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift` (`.onDisappear` → `BlocksWorkbenchOracle.recordPanel(false, …)`, inside `#if DEBUG`).
+- **Test/table edits:** `App/Variorum/VariorumTests/BlockHistoryHostTests.swift`, `MCPWireRefusalSweepTests.swift`, `NoteTrayTests.swift`, `TutorialWalkTests.swift`.
+- No package source (`Sources/`, `Tests/`) and no `Shared/` file changed in this leg; the phone target is untouched.
+
+
+**FIX LEG 2 — END (headless, on 5adc35629):** `swift test --filter VariorumCoreTests` → "Test run with 3866 tests in
+522 suites passed after 281.596 seconds with 5 known issues" (no package source changed in the leg — the run is the
+standing confirmation); `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug
+build-for-testing` → "** TEST BUILD SUCCEEDED **" on the leg's final tree. The five named tests' Mac re-runs are nov5's,
+under the held stage claim.
