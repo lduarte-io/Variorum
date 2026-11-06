@@ -451,3 +451,318 @@ struct MCPTrailDoorTests {
         }
     }
 }
+
+// MARK: - VX-874 — the trail grows up (the VX-878 run, batch 3)
+
+/// A shown ask on `note` from `client` (the trail's own feed).
+private func ask(_ note: String, client: String = "claude-code", title: String? = nil) -> MCPShowRequest {
+    MCPShowRequest(target: noteTarget(note), clientName: client, title: title ?? note, dial: .ask)
+}
+
+/// **VX-874 — her rulings (1)–(4), the pure trail** (the record
+/// `notes/plans/fixes/vx-878-book-doors-faces.md`, BATCH 3 RECORD). A FEATURE
+/// on the ratified baseline (QUESTIONS #262 — one row per client × place, cap
+/// 50, rows survive a Deny): state pins, no red-on-old owed.
+@MainActor
+@Suite("VX-874 — navigation asks float, rows dismiss, a hand drag stays in its stratum, the dial filters")
+struct MCPTrailHandModelTests {
+    /// Ruling (1): "'move me' requests need to always go to the top of this
+    /// pile". A navigation ask is a `shown` row; each group lists its asks
+    /// first, and a group holding one leads the section.
+    @Test func navigationAsksFloatAboveNoticesAndTheirGroupLeads() {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(write: receipt(client: "codex", note: "n2"), at: at.addingTimeInterval(1))
+        trail.record(show: ask("n3", client: "codex"), opened: false, at: at.addingTimeInterval(2))
+        trail.record(write: receipt(note: "n4"), at: at.addingTimeInterval(3))
+        // claude-code acted last, but codex holds the ask: codex leads, its ask first.
+        let groups = trail.groups(showing: .everything)
+        #expect(groups.map(\.clientName) == ["codex", "claude-code"])
+        #expect(groups.first?.entries.map(\.place) == ["note:n3", "note:n2"])
+        #expect(groups.last?.entries.map(\.place) == ["note:n4", "note:n1"])
+        #expect(trail.entries.first(where: { $0.place == "note:n3" })?.isNavigationAsk == true)
+        #expect(trail.entries.first(where: { $0.place == "note:n4" })?.isNavigationAsk == false)
+
+        // Inside a group the float holds too, and the newest ask leads.
+        trail.record(show: ask("n5"), opened: false, at: at.addingTimeInterval(4))
+        let again = trail.groups(showing: .everything)
+        #expect(again.map(\.clientName) == ["claude-code", "codex"], "the group with the newest ask leads")
+        #expect(again.first?.entries.map(\.place) == ["note:n5", "note:n4", "note:n1"])
+        #expect(trail.groups == again, "`groups` is everything on")
+
+        // Followed, an ask is a notice: it sinks below the asks.
+        trail.markOpened(ask("n5"))
+        #expect(trail.groups(showing: .everything).first?.clientName == "codex")
+        #expect(trail.groups(showing: .everything).last?.entries.map(\.place) == ["note:n5", "note:n4", "note:n1"])
+    }
+
+    /// Ruling (4): notices off draws a client's navigation asks alone (a group
+    /// with none goes); fully off draws nothing. The trail keeps RECORDING
+    /// under every value — the dial filters what is drawn.
+    @Test func theDialFiltersWhatIsDrawnAndTheTrailKeepsRecording() {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(show: ask("n2", client: "codex"), opened: false, at: at.addingTimeInterval(1))
+        trail.record(show: ask("n3", client: "codex"), opened: true, at: at.addingTimeInterval(2))
+        #expect(trail.drawnRowCount(showing: .everything) == 3)
+        let asks = trail.groups(showing: .asksOnly)
+        #expect(asks.map(\.clientName) == ["codex"], "a group with no ask goes")
+        #expect(asks.first?.entries.map(\.place) == ["note:n2"], "an opened ask is a notice")
+        #expect(trail.drawnRowCount(showing: .asksOnly) == 1)
+        #expect(trail.groups(showing: .off).isEmpty && trail.drawnRowCount(showing: .off) == 0)
+        #expect(trail.entries.count == 3, "nothing forgotten — turning notices back on shows them")
+    }
+
+    /// Ruling (1) + rail (b): dismiss takes THE ROW and nothing else; a newer
+    /// act on the place lands a fresh row (a dismissed place is not blocked).
+    @Test func dismissTakesTheRowOnly() throws {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(show: ask("n2"), opened: false, at: at.addingTimeInterval(1))
+        let row = try #require(trail.entries.first { $0.place == "note:n2" })
+        trail.dismiss(row.id)
+        #expect(trail.entries.map(\.place) == ["note:n1"])
+        trail.record(show: ask("n2"), opened: false, at: at.addingTimeInterval(2))
+        #expect(trail.entries.map(\.place) == ["note:n2", "note:n1"], "a newer ask lands a fresh row")
+        #expect(trail.entries.first?.count == 1)
+    }
+
+    /// Rail (a) — PROVISIONAL P-874-3: a row moves only among its own stratum
+    /// (its client's rows of its kind); a drop on its own slot, onto another
+    /// client's row or across the float acts on nothing. A landing permutes the
+    /// stratum IN PLACE (no other row moves), and a newer act still lifts its row.
+    @Test func aHandMoveStaysInsideItsStratum() throws {
+        var trail = MCPTrail()
+        for (index, note) in ["n1", "n2", "n3"].enumerated() {
+            trail.record(write: receipt(note: note), at: at.addingTimeInterval(Double(index)))
+        }
+        trail.record(write: receipt(client: "codex", note: "x1"), at: at.addingTimeInterval(3))
+        trail.record(show: ask("a1"), opened: false, at: at.addingTimeInterval(4))
+        let id = { (place: String) in trail.entries.first { $0.place == "note:\(place)" }?.id ?? UUID() }
+        let (n1, n2, n3, x1, a1) = (id("n1"), id("n2"), id("n3"), id("x1"), id("a1"))
+        // Notices newest first: n3, n2, n1.
+        #expect(trail.reordered(n3, onto: .before(n3)) == nil, "its own slot")
+        #expect(trail.reordered(n3, onto: .after(n3)) == nil, "its own slot")
+        #expect(trail.reordered(n3, onto: .before(n2)) == nil, "the gap it already fills")
+        #expect(trail.reordered(n2, onto: .after(n3)) == nil, "the gap it already fills")
+        #expect(trail.reordered(n3, onto: .before(x1)) == nil, "another client's row")
+        #expect(trail.reordered(n3, onto: .after(a1)) == nil, "across the float — an ask")
+        #expect(trail.reordered(a1, onto: .before(n3)) == nil, "an ask never sinks among notices")
+        #expect(trail.reordered(UUID(), onto: .before(n3)) == nil)
+        #expect(trail.reordered(n3, onto: .after(n1)) == [n2, n1, n3])
+
+        let before = trail.entries.map(\.id)
+        let landed = trail.move(n3, onto: .after(n1))  // hoisted: #expect can't call a mutating member
+        #expect(landed)
+        let after = trail.entries.map(\.id)
+        let others = before.filter { ![n1, n2, n3].contains($0) }
+        #expect(others.allSatisfy { before.firstIndex(of: $0) == after.firstIndex(of: $0) }, "no other row moved")
+        #expect(trail.groups(showing: .everything).map(\.clientName) == ["claude-code", "codex"])
+        #expect(trail.groups(showing: .everything).first?.entries.map(\.id) == [a1, n2, n1, n3])
+        let crossed = trail.move(n3, onto: .before(x1))
+        #expect(!crossed, "a drop that would not act moves nothing")
+
+        trail.record(write: receipt(note: "n3"), at: at.addingTimeInterval(5))
+        #expect(trail.groups(showing: .everything).first?.entries.map(\.id) == [a1, n3, n2, n1],
+                "a newer act on a place still lifts its row to the top of its stratum")
+    }
+
+    /// The slot line lights only where a drop would act (the false-offer
+    /// rule), on the row's top for the slot before it and its bottom for the
+    /// slot after; a drag of another section's never lands here.
+    @Test func theSlotLineAndTheDropActOnlyWhereTheDropWould() throws {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(write: receipt(note: "n2"), at: at.addingTimeInterval(1))
+        let n2 = try #require(trail.entries.first?.id)
+        let n1 = try #require(trail.entries.last?.id)
+        let drag = MCPTrailDragState()
+        #expect(!drag.inFlight(in: trail))
+        drag.began(n2)
+        #expect(drag.inFlight(in: trail))
+        drag.targeted(.after(n1), true)
+        #expect(drag.lineEdge(on: n1, in: trail) == .bottom)
+        #expect(drag.lineEdge(on: n2, in: trail) == nil)
+        drag.targeted(.before(n1), true)
+        #expect(drag.lineEdge(on: n1, in: trail) == nil, "the gap it already fills: no line")
+        drag.targeted(.before(n1), false)
+        #expect(drag.target == nil)
+        drag.ended()
+        #expect(drag.dragging == nil && !drag.inFlight(in: trail))
+    }
+
+    /// P-1: her hand's doors are declared once — the ✕ on the section's surface
+    /// list, the right-clicks on its context list — and the guide's "the row's
+    /// text and its icon are its two doors" list is unchanged.
+    @Test func theHandsDoorsAreDeclaredOnce() {
+        #expect(MCPTrailSection.surfaceCapabilities == [.mcpOpenTrailPlace, .mcpShowTrailDetails])
+        #expect(MCPTrailSection.rowManageCapabilities == [.mcpDismissTrailEntry])
+        #expect(MCPTrailSection.contextMenuCapabilities == [.mcpDismissTrailEntry, .mcpClearTrail, .mcpSetTrailDial])
+        let dismiss = CapabilityRegistry.capability(.mcpDismissTrailEntry)
+        #expect(dismiss.doors == [.surface, .contextMenu] && dismiss.verb == "Dismiss" && dismiss.scope == .app)
+        let clear = CapabilityRegistry.capability(.mcpClearTrail)
+        #expect(clear.doors == [.contextMenu] && clear.verb == "Clear All" && clear.scope == .app)
+        let dial = CapabilityRegistry.capability(.mcpSetTrailDial)
+        #expect(dial.doors == [.contextMenu] && dial.verb == MCPPaneCopy.trailDialTitle)
+    }
+
+    /// The face, read from its source (a context menu and a drag cannot be
+    /// mounted headlessly): every row draws its ✕ BEFORE the symbol (the symbol
+    /// stays at the row's END — the guide's "the icon at its end"), its
+    /// right-click Dismiss and Clear All, its drag and its two halves; every
+    /// header its Clear All and the dial's twin; the section draws what the
+    /// dial lets it; the sidebar's fit counts the same.
+    @Test func theFaceRendersItsDeclaredDoors() throws {
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let section = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPTrailSection.swift"), encoding: .utf8)
+        let rowStart = try #require(section.range(of: "private struct MCPTrailRow"))
+        let row = String(section[rowStart.upperBound...])
+        let cross = try #require(row.range(of: "Button(\"\\u{2715}\")"))
+        let symbol = try #require(row.range(of: "Image(systemName: MCPSharedIcon.symbol)"))
+        #expect(cross.lowerBound < symbol.lowerBound, "the ✕ sits before the symbol, which ends the row")
+        for door in ["CapabilityRegistry.capability(.mcpDismissTrailEntry).verb",
+                     "CapabilityRegistry.capability(.mcpClearTrail).verb", ".draggable(beginDrag())",
+                     ".dropDestination(for: MCPTrailDragToken.self)"] {
+            #expect(row.contains(door), "the row renders \(door)")
+        }
+        let header = try #require(section.range(of: "private func header("))
+        let headerBody = String(section[header.upperBound..<rowStart.lowerBound])
+        #expect(headerBody.contains("CapabilityRegistry.capability(.mcpClearTrail).verb"))
+        #expect(headerBody.contains("CapabilityRegistry.capability(.mcpSetTrailDial).verb"))
+        #expect(section.contains("trail.groups(showing: door.trailDial)"), "the section draws what the dial lets it")
+        let root = try String(contentsOf: app.appendingPathComponent("Variorum/RootView.swift"), encoding: .utf8)
+        #expect(root.contains("drawnRowCount(showing: mcp.trailDial)") && root.contains("groups(showing: mcp.trailDial)"),
+                "the sidebar's fit counts what the section draws")
+    }
+}
+
+/// **VX-874 — her hand through the door's REAL roads**, and the dial read
+/// where the section composes; the ask's bottom-bar offer road is pinned
+/// UNTOUCHED by every value.
+@MainActor
+@Suite("VX-874 — dismiss, Clear All and the dial through the door's real roads", .serialized)
+struct MCPTrailHandDoorTests {
+    /// Rail (b): dismissing an ASK's row removes the row only — the standing
+    /// ask keeps its bottom-bar line and ⌥⌘O still takes it; a write's row
+    /// dismissed leaves ⌥⌘O's last change.
+    @Test func dismissingAnAsksRowLeavesTheStandingAskAlone() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let book = try session.operations.createReading(name: "lessons", kind: .book)
+            let post = try session.operations.createPost(title: "draft")
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+            rig.door.landReceipt(receipt(note: post.id, title: "draft"))
+            let request = MCPShowRequest(
+                target: .book(bookID: book.id, sectionID: nil), clientName: "claude-code", title: "lessons",
+                dial: .ask, activityKind: "book", activityID: book.id)
+            _ = await rig.door.agentShow(request)
+            let askRow = try #require(rig.entries.first { $0.place == "book:\(book.id)" }?.id)
+            let writeRow = try #require(rig.entries.first { $0.place == "note:\(post.id)" }?.id)
+
+            rig.door.dismissTrailEntry(askRow)
+            let stands = rig.door.showOffer?.request == request && session.status.standing != nil
+            #expect(stands, "the ask still stands on its line")
+            #expect(rig.entries.map(\.id) == [writeRow], "only the row went")
+            rig.door.dismissTrailEntry(writeRow)
+            #expect(rig.door.trail.trail.isEmpty)
+            #expect(rig.door.lastShow == noteTarget(post.id), "⌥⌘O's last change stays")
+
+            rig.door.showLastChange()  // ⌥⌘O takes the standing ask first, as ever
+            let took = await eventually { rig.router.workspace.focusedSelection == .reading(book.id) }
+            #expect(took, "the ask's own road, untouched")
+        }
+    }
+
+    /// Ruling (2): Clear All takes every row — every client's — and nothing else.
+    @Test func clearAllTakesEveryRowAndNothingElse() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "draft")
+            let book = try session.operations.createReading(name: "lessons", kind: .book)
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+            rig.door.landReceipt(receipt(note: post.id, title: "draft"))
+            rig.door.landReceipt(receipt(client: "codex", note: post.id, title: "draft"))
+            _ = await rig.door.agentShow(MCPShowRequest(
+                target: .book(bookID: book.id, sectionID: nil), clientName: "claude-code", title: "lessons",
+                dial: .ask))
+            #expect(rig.entries.count == 3)
+            rig.door.clearTrail()
+            #expect(rig.door.trail.trail.isEmpty)
+            #expect(rig.door.showOffer != nil && session.status.standing != nil, "the standing ask stays")
+            #expect(rig.door.lastShow == noteTarget(post.id), "⌥⌘O's last change stays")
+        }
+    }
+
+    /// Ruling (4): the dial lives in the store (one local-only row), the door
+    /// holds it as the section reads it, and under FULLY OFF the section draws
+    /// nothing while a client's ask STILL lands as its one-press bottom-bar
+    /// offer (the separate road, untouched) and the trail still records it;
+    /// notices off draws the ask alone.
+    @Test func theDialFiltersTheSectionAndTheOfferRoadIsUntouched() async throws {
+        try await withSession { (session: AppSession, db: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "draft")
+            let book = try session.operations.createReading(name: "lessons", kind: .book)
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+            let seenDefault = await eventually { rig.door.snapshot.trailDial == .everything }
+            #expect(seenDefault && rig.door.trailDial == .everything, "everything on, the default")
+
+            rig.door.setTrailDial(.off)
+            let off = await eventually { rig.door.trailDial == .off }
+            let stored = try await db.read { try Queries.mcpTrailDial($0) }
+            #expect(off && stored == .off, "the act writes the store; the door holds it")
+            rig.door.landReceipt(receipt(note: post.id, title: "draft"))
+            let verdict = await rig.door.agentShow(MCPShowRequest(
+                target: .book(bookID: book.id, sectionID: nil), clientName: "claude-code", title: "lessons",
+                dial: .ask))
+            #expect(verdict == .offer && session.status.standing != nil, "the offer road is untouched")
+            #expect(rig.entries.count == 2, "the trail still records")
+            #expect(rig.door.trail.trail.drawnRowCount(showing: rig.door.trailDial) == 0, "fully off draws nothing")
+
+            rig.door.setTrailDial(.asksOnly)
+            let asks = await eventually { rig.door.trailDial == .asksOnly }
+            #expect(asks)
+            let drawn = rig.door.trail.trail.groups(showing: rig.door.trailDial).flatMap(\.entries).map(\.place)
+            #expect(drawn == ["book:\(book.id)"], "notices off: the ask alone")
+            #expect(session.status.standing != nil, "still standing")
+        }
+    }
+
+    /// The drop door acts only on THIS section's drag and only where a drop
+    /// would act, landing through the door's one move; the drag ends either way.
+    @Test func theDropDoorLandsOnlyThisSectionsDrag() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let rig = Rig(session)
+            defer { rig.door.detach() }
+            for note in ["n1", "n2", "n3"] { rig.door.landReceipt(receipt(note: note, title: note)) }
+            let ids = rig.entries.map(\.id)  // n3, n2, n1
+            let drag = MCPTrailDragState()
+            drag.began(ids[0])
+            let foreign = MCPTrailDragToken(entryID: ids[0].uuidString, listID: "another section")
+            #expect(!MCPTrailDropDoor.perform([foreign], onto: .after(ids[2]), drag: drag, door: rig.door, animation: nil))
+            #expect(drag.dragging == nil, "the drop ends the drag either way")
+            let own = MCPTrailDragToken(entryID: ids[0].uuidString, listID: drag.listID)
+            #expect(!MCPTrailDropDoor.perform([own], onto: .before(ids[1]), drag: drag, door: rig.door, animation: nil),
+                    "its own gap moves nothing")
+            #expect(MCPTrailDropDoor.perform([own], onto: .after(ids[2]), drag: drag, door: rig.door, animation: nil))
+            #expect(rig.entries.map(\.id) == [ids[1], ids[2], ids[0]])
+        }
+    }
+
+    /// Settings ▸ MCP: the dial's row sits above the tabs below the show dial,
+    /// her three words in her order, the line and its whole text.
+    @Test func theTrailDialIsSettingsMCPsRowBelowTheShowDial() {
+        #expect(SettingsCatalog.title("mcpTrailDial") == MCPPaneCopy.trailDialTitle)
+        let rendered = AppSettingsView.rowIDsRendered[.mcp] ?? []
+        #expect(Array(rendered.prefix(3)) == ["mcpServer", "mcpShowDial", "mcpTrailDial"])
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil, "above the tabs")
+        #expect(MCPTrailDial.allCases.map(MCPPaneCopy.trailDialChoice) == ["Everything on", "Notices off", "Fully off"])
+        #expect(!MCPPaneCopy.trailDialTitle.contains("AI"), "settings-class wording: client, never AI (VX-272)")
+        #expect(MCPPaneCopy.trailDialDetail.contains(MCPPaneCopy.showDialTitle),
+                "the whole text points at the show dial's own road")
+        let found = SettingsSearch.findings(matching: "notices", in: SettingsSearch.settingsEntries)
+            .contains { $0.pane == .mcp }
+        #expect(found, "“notices” finds the row")
+    }
+}
