@@ -113,8 +113,8 @@ You are `opus-implementer` for VX-819 batch 1, in worktree `~/dev/variorum-vx-81
 - NOTE: vx-808's BRANCH edited `Tests/VariorumCoreTests/SearchPassagesTests.swift` (plan-shape pin). Main is untouched — but if you touch that file or its query, say so in your record for the merge ledger.
 
 **Member VX-90 (rider, Low) — passage lines could say which block they're in.**
-- Most defensible shape (PROVISIONAL unless the architect says otherwise mid-batch): a passage line quietly carries its block's NAME when the block has one (`block.name` is optional metadata); unnamed blocks add nothing (no "block 3" noise). Keep the line's one-line face; the Library's controls-row and answer-sheet contracts hold.
-- Pin: a named block's passage line carries the name; an unnamed one is byte-unchanged.
+- The ticket's own shape (her 13o idea): "a quiet per-line mark (block ordinal or block name where one exists)". Build: the passage line quietly carries the block's NAME when one exists, else its ordinal in the note's order ("block 3") — muted, trailing, never moving the snippet's measure. PROVISIONAL; if the ordinal read would cost a per-line placement query that scales past the drawn rows (P1), name-only is the fallback — propose to the architect before building that half.
+- Pin: a named block's passage line carries the name; an unnamed one its ordinal (or, under the fallback, is byte-unchanged).
 
 **Rules that bind every line:** operations through the one API (this batch should be read-side only — if you find yourself writing an operation, stop and report); no literal colours (tokens only); chrome `fixedSize` texts carry `lineLimit`; the controls row's line count never changes; headless `swift test` freely, NO `xcodebuild test` without the orchestrator (stage is coordinated externally — ask, never claim yourself). Commit messages: `Part of VX-734: …` / `Part of VX-90: …`, stating the traced mechanism and the pin for the bug member. NO commit trailers. When done: self-assessment in your LIVE STATUS (claims PENDING until the suite ran), then report.
 
