@@ -685,9 +685,12 @@ struct RootView: View {
     private var mcpTrailFooter: SidebarView.FooterSection? {
         guard let mcp else { return nil }
         let theme = theme
+        // VX-874: the fit test counts what the section DRAWS under the trail
+        // dial (notices off: the asks alone; fully off: nothing — the section
+        // and its separator gone), read inside the column's body.
         return SidebarView.FooterSection(
-            rows: { mcp.trail.trail.entries.count },
-            headers: { mcp.trail.trail.groups.count },
+            rows: { mcp.trail.trail.drawnRowCount(showing: mcp.trailDial) },
+            headers: { mcp.trail.trail.groups(showing: mcp.trailDial).count },
             content: { rowHeight in
                 AnyView(MCPTrailSection(door: mcp, rowHeight: rowHeight).environment(theme))
             })
@@ -1595,7 +1598,14 @@ struct RootView: View {
                         .post(landing.postID), blockID: landing.blockID,
                         offset: landing.offsetInBlock, find: landing.find, mode: landing.mode,
                         in: pane)
-                })
+                },
+                // VX-802 (A-878-1): the note-title menu's roads beyond the book
+                // — the Library rows' own (the union star, Open Beside, Open in
+                // New Window).
+                noteRoads: BookNoteRoads(
+                    starDoor: starDoor,
+                    openBeside: { router.openBeside(.post($0)) },
+                    openInNewWindow: openInNewWindow))
                 .id(readingID)
         case .pool(let poolID):
             if live {

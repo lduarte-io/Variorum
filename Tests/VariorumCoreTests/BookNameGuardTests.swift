@@ -7,6 +7,11 @@ import Testing
 // (her kickoff-sitting round-3 ruling, REFUSE at the door) and the pure
 // naming rule under it. The Mac doors that consult it are pinned in
 // `VariorumTests/DoorSetTests.swift`.
+//
+// VX-816 (A JUSTIFIED EDIT, the VX-878 run, batch 3): the guard checks the
+// TARGET'S WING now, so its create form names one — every book these pins
+// make lives in Home (`inWing: ""`), and every expectation is unchanged. The
+// per-wing behaviour is `BookNameGuardPerWingTests`.
 
 @Suite("E13 — the book-name rule (13e)")
 struct BookNamingRuleTests {
@@ -36,14 +41,14 @@ struct BookNameGuardTests {
             // The refusal carries the EXISTING book's stored casing, so the
             // door can name back the book she already has.
             #expect(throws: OperationError.duplicateBookName(name: "Ideas")) {
-                try ops.assertBookNameIsFree("ideas")
+                try ops.assertBookNameIsFree("ideas", inWing: "")
             }
             #expect(throws: OperationError.duplicateBookName(name: "Ideas")) {
-                try ops.assertBookNameIsFree("  IDEAS  ")
+                try ops.assertBookNameIsFree("  IDEAS  ", inWing: "")
             }
             // A different name is free — including one that only shares a
             // prefix (this is name equality, never a fuzzy match).
-            try ops.assertBookNameIsFree("Ideas 2")
+            try ops.assertBookNameIsFree("Ideas 2", inWing: "")
         }
     }
 
@@ -53,7 +58,7 @@ struct BookNameGuardTests {
         try withOperations { ops, _ in
             _ = try ops.createReading(name: "Ideas", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             #expect(throws: OperationError.duplicateBookName(name: "Ideas")) {
-                try ops.assertBookNameIsFree("Ideas")
+                try ops.assertBookNameIsFree("Ideas", inWing: "")
             }
         }
     }
@@ -80,12 +85,12 @@ struct BookNameGuardTests {
         try withOperations { ops, _ in
             let gone = try ops.createReading(name: "Ideas", kind: .book)
             try ops.deleteReading(gone.id)
-            try ops.assertBookNameIsFree("Ideas")
+            try ops.assertBookNameIsFree("Ideas", inWing: "")
 
             let finished = try ops.createReading(name: "Orbit", kind: .book)
             try ops.lockReading(finished.id)
             #expect(throws: OperationError.duplicateBookName(name: "Orbit")) {
-                try ops.assertBookNameIsFree("Orbit")
+                try ops.assertBookNameIsFree("Orbit", inWing: "")
             }
         }
     }

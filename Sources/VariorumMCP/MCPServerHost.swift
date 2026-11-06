@@ -686,7 +686,9 @@ public final class MCPServerHost: @unchecked Sendable {
     /// it, and the waiting connection is told its tools changed. VX-676: the
     /// show dial's row is NOT among them — the tool list never depends on it
     /// (show_in_app is listed under every dial value), so turning it announces
-    /// nothing to a connected client.
+    /// nothing to a connected client. VX-874: nor is the trail dial's (the
+    /// sidebar's AI section, an app face no tool reads) — the same reason, the
+    /// same exclusion, so turning it changes nothing on the wire.
     static func grantsFingerprint(_ db: Database) throws -> String {
         try String.fetchOne(
             db,
@@ -696,7 +698,7 @@ public final class MCPServerHost: @unchecked Sendable {
                    FROM mcp_client WHERE state <> 'pending')
                   || '|' || (SELECT COUNT(*) || ':' || IFNULL(MAX(created_at), '') || ':'
                              || IFNULL(MAX(revoked_at), '') || ':' || IFNULL(MAX(consumed_at), '') FROM mcp_grant)
-                  || '|' || (SELECT IFNULL(group_concat(key || value, ','), '') FROM mcp_switch WHERE key <> ?)
-                """, arguments: [Queries.mcpShowDialKey]) ?? ""
+                  || '|' || (SELECT IFNULL(group_concat(key || value, ','), '') FROM mcp_switch WHERE key NOT IN (?, ?))
+                """, arguments: [Queries.mcpShowDialKey, Queries.mcpTrailDialKey]) ?? ""
     }
 }

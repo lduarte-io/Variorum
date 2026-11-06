@@ -158,7 +158,8 @@ struct AppSettingsView: View {
         // where a search for the setup's words lands. Ladder R2-3: the Clients
         // tab (its label is the row's title), where "client"/"clients" land.
         // VX-676: the show dial sits above the tabs, beside the server switch.
-        .mcp: ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
+        // VX-874: the trail dial under the Activity tab's log (the last tab).
+        .mcp: ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook", "mcpTrailDial"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],
@@ -1443,7 +1444,9 @@ struct PromoteTagsSheet: View {
                     // name, so it carries the same guard the shelf's does
                     // (her round-3 ruling). Inside the runner closure with
                     // the mint, for that guard's own reason.
-                    try ops.assertBookNameIsFree(bookName)
+                    // VX-816: of the wing the mint lands in — Home, where
+                    // `createReading` below puts it (no wing passed).
+                    try ops.assertBookNameIsFree(bookName, inWing: "")
                     return try ops.createReading(
                         name: bookName, kind: .gathering,
                         querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())

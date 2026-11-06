@@ -203,7 +203,8 @@ extension Operations {
             // E13 — the door guard, inside the act's own transaction: the
             // import names a book, so it refuses a name a live book wears
             // (VX-363: of the books `reach` counts — every one at her doors).
-            try requireBookNameFree(db, name, counting: reach)
+            // VX-816: of the wing it imports into.
+            try requireBookNameFree(db, name, inWing: wingId, counting: reach)
             let now = date.now
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: name, kind: .book,

@@ -71,6 +71,12 @@ final class ShelfViewModel {
     /// "Share with AI…" (P-2; `Queries.mcpFencedBookIDs`, the fence's own
     /// fragments). Held with `aiReach`.
     private(set) var fencedBooks: Set<String> = []
+    /// **VX-831 — the board's books that wear the Private mark** (their own
+    /// stamp; a gathering never — `Queries.privateBookMarks`), held over the
+    /// board's own rows (`holdPrivateMarks`), only while a client is approved
+    /// (R-878-K3).
+    /// Reads `reading` only — never at autosave rate.
+    private(set) var privateBookIDs: Set<String> = []
 
     // MARK: What the board said last (kept for the pins; also spoken)
 
@@ -224,6 +230,12 @@ final class ShelfViewModel {
     @ObservationIgnored let stateDoors: BookStateDoors
     /// 13i-c U4 (§4 row 17): the row drop's ownership CHOICE.
     @ObservationIgnored let membershipDoors: MembershipDoors
+    /// VX-829 — the book rows' ONE brain (`BookRowDoors`, the shared home's):
+    /// every door of the book row menu acts and presents through it, on the
+    /// board exactly as on every row beyond it (the Library's, Starred's,
+    /// Archived's) — sharing this board's state doors, its landings
+    /// re-reading the board's one-shot aggregates.
+    @ObservationIgnored let rowDoors: BookRowDoors
 
     init(session: AppSession, wingID: String = "", defaults: UserDefaults = .standard) {
         self.session = session
@@ -236,8 +248,16 @@ final class ShelfViewModel {
         self.collapsed = prefs.collapsed
         self.defaultShelfID = prefs.defaultShelfID
         self.scope = prefs.defaultShelfID.map(BookcaseScope.shelf) ?? .all
-        self.stateDoors = BookStateDoors(session: session)
+        let stateDoors = BookStateDoors(session: session)
+        self.stateDoors = stateDoors
         self.membershipDoors = MembershipDoors(session: session)
+        self.rowDoors = BookRowDoors(session: session, stateDoors: stateDoors)
+        // A row door that landed (an act, a confirm, a sheet closing — the
+        // rule editor, Book Settings, Duplicate…) re-reads the one-shot
+        // aggregates, as the board's own sheets' dismissals did (F-U3-1).
+        rowDoors.onLanded = { [weak self] in
+            Task { await self?.refreshAggregates() }
+        }
     }
 
     /// The observed snapshot (Equatable for the observe seam; crosses off
@@ -335,6 +355,18 @@ final class ShelfViewModel {
     nonisolated struct SharingSnapshot: Equatable, Sendable {
         var reach: [String: [MCPPlaceReach]]
         var fenced: Set<String>
+    }
+
+    /// The ids of the readings the board holds (its rows' subjects).
+    var bookIDs: [String] { books.map(\.reading.id) }
+
+    /// VX-831 — hold the board's books' Private marks (the view's
+    /// `.task(id: bookIDs)` — a new set of rows restarts it).
+    func holdPrivateMarks(_ ids: [String]) async {
+        await PrivateMarkHold.books(session, ids) { [weak self] value in
+            guard let self, self.privateBookIDs != value else { return }
+            self.privateBookIDs = value
+        }
     }
 
     /// The one-shot half (on appearance and after the board's own acts — a
@@ -553,11 +585,9 @@ final class ShelfViewModel {
         await run { try $0.setReadingMaxPosts(readingID, maxPosts: maxPosts) }
     }
 
-    /// The re-designation door (round 2, MAJOR 2): point Today's Entry at
-    /// a new daily journal book.
-    func designateDailyJournal(_ readingID: String) async {
-        await run { try $0.setDailyJournalBook(readingID) }
-    }
+    // (VX-829: the re-designation door — round 2, MAJOR 2's "Use as Daily
+    // Journal" — moved to the book rows' one brain, `BookRowDoors
+    // .designateDailyJournal`, with the rest of the row menu's acts.)
 
     /// **BIND INTO A BOOK** (13i-b U3 — the sitting record §3, §14.6). The
     /// SAME row becomes the book (§19.6) and it keeps collecting. Reports
@@ -566,14 +596,11 @@ final class ShelfViewModel {
         _ readingID: String, ownedNotes: Operations.BindOwnedNotes = .leaveOut
     ) async {
         do {
-            let result = try await session.runner.run { ops in
-                try ops.convertSmartReadingToCurated(readingID, ownedNotes: ownedNotes)
-            }
-            // 13i-c U3: the receipt names the owned-notes limb's outcome.
-            receipt(BindCopy.bound(
-                result.reading.name, count: result.membershipIDs.count,
-                copied: result.copied.count, leftOut: result.leftOut.count,
-                hearsActs: BindCopy.hearsActs(result.reading)))
+            // VX-829: the act's ONE body (`BookRowActs.bind` — the book row
+            // menu beyond the Bookcase runs it too); the board words its
+            // outcome. 13i-c U3: the receipt names the owned-notes limb's.
+            receipt(try await BookRowActs.bind(
+                session: session, readingID: readingID, ownedNotes: ownedNotes))
         } catch let error as OperationError {
             refuse(bookRefusal(error, readingID: readingID))
         } catch {
@@ -598,35 +625,14 @@ final class ShelfViewModel {
     func spawnBook(
         from gatheringID: String, named name: String, outflow chosen: [String]? = nil
     ) async -> String? {
-        let database = session.database
         do {
-            let (book, seated, ruleState) = try await session.runner.run {
-                ops -> (Reading, Int, RuleGrammar.ReadResult) in
-                guard let gathering = try database.read({
-                    try Queries.reading($0, id: gatheringID)
-                }) else { throw OperationError.readingNotFound(id: gatheringID) }
-                guard gathering.kind == .gathering else {
-                    throw OperationError.wrongReadingKind(id: gatheringID, expected: .gathering)
-                }
-                try ops.assertBookNameIsFree(name)
-                let ruleState = RuleGrammar.read(gathering.querySpec)
-                let outflow = try database.read { db in
-                    try chosen.map { ids in
-                        try ids.filter { try Queries.tagIsLive(db, id: $0, wingID: gathering.wingId) }
-                    } ?? Self.spawnPrefill(db, gathering: gathering)
-                }
-                let book = try ops.createReading(
-                    name: name, kind: .book,
-                    querySpec: gathering.querySpec, wingId: gathering.wingId,
-                    autoTagIDs: outflow)
-                let seated = try database.read {
-                    try Queries.assembleReading($0, readingID: book.id).count
-                }
-                return (book, seated, ruleState)
-            }
-            receipt(BindCopy.spawned(book.name, count: seated, rule: ruleState))
+            // VX-829: the act's ONE body (`BookRowActs.spawnBook` — the book
+            // row menu beyond the Bookcase runs it too); the board words it.
+            let made = try await BookRowActs.spawnBook(
+                session: session, from: gatheringID, named: name, outflow: chosen)
+            receipt(made.receipt)
             await refreshAggregates()
-            return book.id
+            return made.bookID
         } catch let error as OperationError {
             refuse(ReadingsViewModel.message(error))
         } catch {
