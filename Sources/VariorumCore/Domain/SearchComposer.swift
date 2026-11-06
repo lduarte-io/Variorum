@@ -297,9 +297,13 @@ public enum SearchComposer {
     /// every plan stays byte-identical; NULL for an unnamed block and for a
     /// hit that lives on no block (a title, floating notes, a book, a
     /// chapter).
+    ///
+    /// `homeKey` (VX-820): a HOME order's key over `c`, selected as
+    /// `home_key` — read off the home row the hits already join, so no plan
+    /// changes; nil (every relevance statement) leaves the body byte-identical.
     static func hits(
         _ query: SearchQuery, scope: SearchScope, visibility: SearchVisibility,
-        extra: [String] = [], environment: Environment
+        extra: [String] = [], homeKey: String? = nil, environment: Environment
     ) throws -> Hits? {
         guard let text = query.text, let match = try ftsMatch(text) else { return nil }
         var arguments: [Value] = [.text(match)]
@@ -431,7 +435,7 @@ public enum SearchComposer {
                      c.created_at AS home_created_at, r.name AS reading_name, r.kind AS reading_kind,
                      \(archived) AS archived,
                      \(rendered) AS rendered,
-                     bm25(search_fts) AS bm
+                     bm25(search_fts) AS bm\(homeKey.map { ",\n         \($0) AS home_key" } ?? "")
               FROM search_fts
               JOIN search_doc d ON d.id = search_fts.rowid\(takeJoin)
               LEFT JOIN container_block pl ON pl.block_id = \(blockKey) AND pl.deleted_at IS NULL
@@ -447,13 +451,18 @@ public enum SearchComposer {
 
     // MARK: - The group page (13o U2 — Direction C's answer sheet, R-13o-15)
 
-    /// Where a GROUP page resumes: the last group's `(best score, home id)`.
+    /// Where a GROUP page resumes: the last group's `(best score, home id)` —
+    /// or, under a HOME order (VX-820), its `(key, home id)`.
     public struct GroupCursor: Equatable, Sendable {
         public let best: Double
         public let homeID: String
-        public init(best: Double, homeID: String) {
+        /// The last group's home KEY under a home order (`SearchOrder.home`);
+        /// nil under relevance, whose keyset is `best`.
+        public let key: String?
+        public init(best: Double, homeID: String, key: String? = nil) {
             self.best = best
             self.homeID = homeID
+            self.key = key
         }
     }
 
@@ -473,10 +482,23 @@ public enum SearchComposer {
     /// Result columns: the hits' columns, score, g_best, g_hits (every hit of
     /// the group), g_lines (its non-title hits), rn (the hit's place in its
     /// group), snippet — ordered by group, then place.
+    ///
+    /// **`order`** (VX-820 — her R-819-2): relevance is the statement above,
+    /// byte for byte. A HOME order (`SearchOrder.home`) is the same walk with
+    /// the home's key selected off `c` (`home_key`), the groups ordered and
+    /// keyset-paged on `(key, home id)` in the order's direction (the
+    /// title's key compared case-folded — the catalog's own `COLLATE
+    /// NOCASE`), and each group's passages still best-first within it.
+    /// Result columns add `g_key` there.
     public static func groups(
         _ query: SearchQuery, scope: SearchScope, after cursor: GroupCursor?, limit: Int,
-        perGroup: Int, environment: Environment
+        perGroup: Int, order: SearchOrder = .relevance, environment: Environment
     ) throws -> Statement? {
+        if case .home(let sort, let direction) = order {
+            return try homeOrderedGroups(
+                query, scope: scope, after: cursor, limit: limit, perGroup: perGroup,
+                sort: sort, direction: direction, environment: environment)
+        }
         guard let hits = try hits(
             query, scope: scope, visibility: query.visibility,
             extra: ["d.reading_id IS NULL"], environment: environment)
@@ -525,6 +547,86 @@ public enum SearchComposer {
         }
         arguments += [.integer(Int64(limit)), .integer(Int64(max(1, perGroup))), .text(hits.match)]
         return Statement(sql: sql, arguments: arguments)
+    }
+
+    /// **The group page under a HOME order** (VX-820) — `groups`' own shape,
+    /// one walk of the matches (the scored CTE materialized and read twice),
+    /// with the groups ordered and keyset-paged on the HOME's key and id
+    /// instead of the best score. The passages inside each group keep their
+    /// best-first order (`rn`), so the order re-ranks groups and never
+    /// reshuffles a note's own lines.
+    private static func homeOrderedGroups(
+        _ query: SearchQuery, scope: SearchScope, after cursor: GroupCursor?, limit: Int,
+        perGroup: Int, sort: Queries.LibrarySort, direction: SortDirection, environment: Environment
+    ) throws -> Statement? {
+        guard let hits = try hits(
+            query, scope: scope, visibility: query.visibility,
+            extra: ["d.reading_id IS NULL"], homeKey: sort.keyExpression(over: "c"),
+            environment: environment)
+        else { return nil }
+        var arguments = hits.arguments
+        let collation = sort.keyCollation
+        let dir = direction == .desc ? "DESC" : "ASC"
+        let comparison = direction == .desc ? "<" : ">"
+        var keyset = ""
+        if cursor != nil {
+            keyset = "WHERE (g.g_key\(collation), g.g_home) \(comparison) (?, ?)"
+        }
+        let saved = savedAtStage("top", query)
+        // Every hit of a group shares its home, so MIN(home_key) IS the key.
+        let sql = """
+            WITH hits AS (\(hits.sql)),
+            scored AS MATERIALIZED (
+              SELECT h.*, \(scoreSQL(query)) AS score
+              FROM hits h
+            ),
+            grouped AS (
+              SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
+                     SUM(s.kind <> 'title') AS g_lines, MIN(s.home_key) AS g_key
+              FROM scored s
+              GROUP BY s.home_id
+            ),
+            gpage AS (
+              SELECT g.* FROM grouped g
+              \(keyset)
+              ORDER BY g.g_key\(collation) \(dir), g.g_home \(dir)
+              LIMIT ?
+            ),
+            ranked AS (
+              SELECT s.*, g.g_best, g.g_hits, g.g_lines, g.g_key,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY s.home_id ORDER BY (s.kind = 'title'), s.score, s.doc_id
+                     ) AS rn
+              FROM scored s JOIN gpage g ON g.g_home = s.home_id
+            ),
+            top AS (
+              SELECT * FROM ranked WHERE rn <= ?
+            )
+            SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet\(saved.column)
+            FROM search_fts JOIN top ON top.doc_id = search_fts.rowid\(saved.join)
+            WHERE search_fts MATCH ?
+            ORDER BY top.g_key\(collation) \(dir), top.home_id \(dir), top.rn
+            """
+        if let cursor {
+            arguments += [.text(cursor.key ?? ""), .text(cursor.homeID)]
+        }
+        arguments += [.integer(Int64(limit)), .integer(Int64(max(1, perGroup))), .text(hits.match)]
+        return Statement(sql: sql, arguments: arguments)
+    }
+
+    /// **The homes' keys under a home order** (VX-820 — the worn-day merge:
+    /// a nameless note WEARING the named day with no index hit has no row in
+    /// the group statement, so its place among the groups is decided in
+    /// Swift from its key — `SearchOrder.precedes`). Bounded by the ids.
+    /// Result columns: id, home_key.
+    public static func homeKeys(idsJSON: String, order: SearchOrder) -> Statement? {
+        guard let key = order.homeKey(over: "c") else { return nil }
+        return Statement(
+            sql: """
+                SELECT c.id AS id, \(key) AS home_key
+                FROM json_each(?) j CROSS JOIN container c ON c.id = j.value
+                """,
+            arguments: [.text(idsJSON)])
     }
 
     /// **The worn notes' TRUE group facts** (ladder round 1, MINOR-1): for

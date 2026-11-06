@@ -251,12 +251,25 @@ extension Queries {
     ///
     /// P1: one composer statement (∝ the matches) + one bounded read of the
     /// page's homes.
+    ///
+    /// **`order`** (VX-820 — her R-819-2): relevance is the page above, every
+    /// line of it. A HOME order (`SearchOrder.home` — the Library's own sort
+    /// over each group's note or scraps group) is the composer's home-ordered
+    /// statement, keyset-paged on `(key, home id)`; the nameless notes the
+    /// named day finds take their place IN that order rather than leading
+    /// (`homeOrderedPage`).
     public static func searchGroups(
         _ db: Database, query: SearchQuery, scope: SearchScope,
         after cursor: SearchComposer.GroupCursor? = nil, limit: Int = 25, perGroup: Int = 3,
+        order: SearchOrder = .relevance,
         calendar: Calendar = JournalDay.storeCalendar
     ) throws -> SearchGroupPage {
         let environment = try searchEnvironment(db, scope: scope)
+        if order != .relevance {
+            return try homeOrderedPage(
+                db, query: query, scope: scope, after: cursor, limit: limit, perGroup: perGroup,
+                order: order, calendar: calendar, environment: environment)
+        }
         var worn: [SearchPassage] = []
         if cursor == nil, let day = query.wornDay {
             worn = try wornDayPassages(
@@ -316,6 +329,106 @@ extension Queries {
                 note: home.note, isArchived: home.isArchived, bestScore: group.best,
                 hitCount: group.hits, lineCount: group.lines,
                 titleMatched: wornIDs.contains(group.homeID) || group.hits > group.lines,
+                lines: group.rows.filter { $0.kind != .title })
+        }
+        return SearchGroupPage(groups: groups, next: next)
+    }
+
+    /// **One page under a HOME order** (VX-820). The composer's home-ordered
+    /// statement lists the groups in `(key, home id)` order; the nameless
+    /// notes WEARING the named day (R-13o-6) — which lead the relevance
+    /// order's first page — take their place in the order instead, read on
+    /// EVERY page (bounded by the day's own notes):
+    /// - a worn note with index hits IS a group of the statement — it lists
+    ///   on whichever page its key falls (one counts-style statement over the
+    ///   worn ids this page did not list says which have hits — `wornGroupFacts`);
+    /// - a worn note with NO hit has no row there, so it is placed by its key
+    ///   (`SearchComposer.homeKeys`, compared by `SearchOrder.precedes` exactly
+    ///   as the statement orders): on the page whose range holds it — after
+    ///   the cursor, and no further than this page's last group while another
+    ///   page follows — so across the pages every group lists once, in order.
+    /// The next cursor is the statement's last group's, as under relevance.
+    private static func homeOrderedPage(
+        _ db: Database, query: SearchQuery, scope: SearchScope,
+        after cursor: SearchComposer.GroupCursor?, limit: Int, perGroup: Int,
+        order: SearchOrder, calendar: Calendar, environment: SearchComposer.Environment
+    ) throws -> SearchGroupPage {
+        typealias Built = (homeID: String, key: String, best: Double?, hits: Int, lines: Int, rows: [SearchPassage])
+        var built: [Built] = []
+        var next: SearchComposer.GroupCursor?
+        if let statement = try SearchComposer.groups(
+            query, scope: scope, after: cursor, limit: limit, perGroup: perGroup, order: order,
+            environment: environment) {
+            let rows = try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments))
+            for row in rows {
+                let homeID: String = row["home_id"]
+                let passage = passage(from: row, calendar: calendar)
+                if built.last?.homeID == homeID {
+                    if let passage { built[built.count - 1].rows.append(passage) }
+                } else {
+                    built.append((homeID, row["g_key"], row["g_best"], row["g_hits"], row["g_lines"],
+                                  passage.map { [$0] } ?? []))
+                }
+            }
+            if built.count == limit, let last = built.last {
+                next = SearchComposer.GroupCursor(best: last.best ?? 0, homeID: last.homeID, key: last.key)
+            }
+        }
+
+        var wornIDs: [String] = []
+        if let day = query.wornDay {
+            var seen: Set<String> = []
+            wornIDs = try wornDayPassages(
+                db, query: query, scope: scope, day: day, calendar: calendar, environment: environment)
+                .compactMap(\.noteID).filter { seen.insert($0).inserted }
+        }
+        let unlisted = wornIDs.filter { id in !built.contains { $0.homeID == id } }
+        func json(_ ids: [String]) throws -> String {
+            String(decoding: try JSONEncoder().encode(ids), as: UTF8.self)
+        }
+        var withHits: Set<String> = []
+        if !unlisted.isEmpty,
+           let statement = try SearchComposer.wornGroupFacts(
+               query, scope: scope, homeIDsJSON: try json(unlisted), environment: environment) {
+            for row in try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments)) {
+                withHits.insert(row["g_home"])
+            }
+        }
+        let wornOnly = unlisted.filter { !withHits.contains($0) }
+        var placed: [Built] = []
+        if !wornOnly.isEmpty, let statement = SearchComposer.homeKeys(idsJSON: try json(wornOnly), order: order) {
+            let start = cursor.map { SearchOrder.Place(key: $0.key ?? "", homeID: $0.homeID) }
+            let end = next.map { SearchOrder.Place(key: $0.key ?? "", homeID: $0.homeID) }
+            for row in try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments)) {
+                let place = SearchOrder.Place(key: row["home_key"], homeID: row["id"])
+                if let start, !order.precedes(start, place) { continue }   // an earlier page's
+                if let end, order.precedes(end, place) { continue }       // a later page's
+                placed.append((place.homeID, place.key, nil, 1, 0, []))
+            }
+            placed.sort { order.precedes(.init(key: $0.key, homeID: $0.homeID), .init(key: $1.key, homeID: $1.homeID)) }
+        }
+        // Merge (both runs already in order).
+        var ordered: [Built] = []
+        var i = 0, j = 0
+        while i < built.count || j < placed.count {
+            if j < placed.count, i == built.count || order.precedes(
+                .init(key: placed[j].key, homeID: placed[j].homeID),
+                .init(key: built[i].key, homeID: built[i].homeID)) {
+                ordered.append(placed[j]); j += 1
+            } else {
+                ordered.append(built[i]); i += 1
+            }
+        }
+
+        let homes = try searchGroupHomes(db, ids: ordered.map(\.homeID), calendar: calendar)
+        let worn = Set(wornIDs)
+        let groups = ordered.compactMap { group -> SearchGroup? in
+            guard let home = homes[group.homeID] else { return nil }
+            return SearchGroup(
+                homeID: group.homeID, isPool: home.isPool, homeTitle: home.title,
+                note: home.note, isArchived: home.isArchived, bestScore: group.best,
+                hitCount: group.hits, lineCount: group.lines,
+                titleMatched: worn.contains(group.homeID) || group.hits > group.lines,
                 lines: group.rows.filter { $0.kind != .title })
         }
         return SearchGroupPage(groups: groups, next: next)
