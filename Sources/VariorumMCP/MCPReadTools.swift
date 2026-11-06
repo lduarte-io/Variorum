@@ -58,6 +58,7 @@ struct MCPReadTools: Sendable {
             case MCPToolCatalog.search.name: return try search(args, clientName: clientName)
             case MCPToolCatalog.listMyActivity.name: return try listMyActivity(args, clientName: clientName)
             case MCPToolCatalog.listWings.name: return try listWings(clientName: clientName)
+            case MCPToolCatalog.listNoteLineage.name: return try listNoteLineage(args, clientName: clientName)
             default: return Outcome(text: "Unknown tool: \(name).", isError: true)
             }
         } catch let failure as ArgumentFailure {
@@ -73,6 +74,8 @@ struct MCPReadTools: Sendable {
         "list_books", "list_notes", "read_note", "export_note", "search", "list_my_activity",
         // VX-348 U5 — VX-392.
         "list_wings",
+        // VX-827 U1 — VX-817.
+        "list_note_lineage",
     ]
 
     // MARK: - read_note / export_note
@@ -215,6 +218,123 @@ struct MCPReadTools: Sendable {
             }
             try log(db, clientName, act, "note", noteID, title, allowed: true)
             return Outcome(text: text, isError: false)
+        }
+    }
+
+    // MARK: - list_note_lineage (VX-827 U1 — VX-817)
+
+    /// **A note's lineage peers on the wire** (P-U1-a…g, the U1 ADJUDICATION):
+    /// `Queries.lineagePeers` — one hop at the block level, both ends live and
+    /// placed, notes only, saved versions out — with the SUBJECT decided at
+    /// READ by the one rule (`read_note`'s decision, its ask and its once
+    /// spend, in one write transaction) and each PEER kept only where the
+    /// same rule reads it (`consumes: false` — `MCPNoteStructure.farSides`'
+    /// precedent: a peer never spends a grant). A peer beyond reach is simply
+    /// ABSENT — never counted, never stubbed (her VX-817 fence line; R-825) —
+    /// and `beyond_reach` says so, always present. An archived peer is listed,
+    /// marked (PROVISIONAL, #264). No edge id and no position key crosses.
+    ///
+    /// `note_ids` (1–200, no repeats, exclusive with `note_id` — VX-812's
+    /// idiom): each item is the single call — its own decision, ask, once
+    /// spend and Activity line, in its own transaction (a once grant covers
+    /// ONE item, P-809-12) — answered in order (the single answer, or
+    /// `{note_id, refused}` with the single call's words), with
+    /// `landed_count` / `refused_count`; a call where every item refused is an
+    /// error answer. Each item ∝ its note's placed blocks and their direct
+    /// edges plus its peers' facts — never the corpus.
+    private func listNoteLineage(_ args: [String: Value], clientName: String) throws -> Outcome {
+        guard let value = args["note_ids"], value != .null else {
+            return try noteLineage(try requiredString(args, "note_id"), clientName: clientName)
+        }
+        if let single = args["note_id"], single != .null {
+            throw ArgumentFailure(message: "Pass note_id or note_ids, not both.")
+        }
+        guard let items = value.arrayValue else { throw ArgumentFailure(message: "note_ids must be an array.") }
+        let ids = try items.map { item -> String in
+            guard let id = item.stringValue else { throw ArgumentFailure(message: "note_ids must hold strings.") }
+            return id
+        }
+        guard !ids.isEmpty else { throw ArgumentFailure(message: "note_ids lists no note.") }
+        guard ids.count <= MCPWriteTools.listCap else {
+            throw ArgumentFailure(message: MCPWriteTools.listCapWords(ids.count))
+        }
+        guard Set(ids).count == ids.count else { throw ArgumentFailure(message: "note_ids lists a note twice.") }
+        var results: [Any] = []
+        var landed = 0
+        for id in ids {
+            let one: Outcome
+            do {
+                one = try noteLineage(id, clientName: clientName)
+            } catch {
+                // An item's unexpected failure is THAT item's refusal, in the
+                // one chain's words (VX-369) — the rest still run (VX-812).
+                one = Outcome(
+                    text: MCPWireRefusalCopy.unexpected(
+                        error, tool: MCPToolCatalog.listNoteLineage.name, appWords: hooks.refusalWords),
+                    isError: true)
+            }
+            if one.isError {
+                results.append(["note_id": id, "refused": one.text] as [String: Any])
+            } else {
+                landed += 1
+                results.append(try JSONSerialization.jsonObject(with: Data(one.text.utf8)))
+            }
+        }
+        let answer: [String: Any] = ["results": results, "landed_count": landed, "refused_count": ids.count - landed]
+        return Outcome(text: try encode(answer), isError: landed == 0)
+    }
+
+    /// ONE subject's answer — the single call.
+    private func noteLineage(_ noteID: String, clientName: String) throws -> Outcome {
+        let act = MCPToolCatalog.listNoteLineage.name
+        return try database.write { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            let facts = try Queries.mcpNoteFacts(db, noteID: noteID)
+            let decision = MCPGrantAuthority.decide(standing, note: facts, rung: .read, consumes: true)
+            let title = facts == nil ? nil : try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar)
+            guard case .allow(let grantID, let consumesOnce) = decision else {
+                try log(db, clientName, act, "note", noteID, title, allowed: false)
+                let ask = facts.map { facts in
+                    MCPAsk(clientName: clientName, scopeKind: .note, scopeID: noteID, title: title ?? "",
+                           rung: .read, fence: facts.fence)
+                }
+                return MCPAsking(onAsk: hooks.onAsk).refusal(decision, .note, standing: standing, ask: ask)
+            }
+            if consumesOnce, let grantID { try operations.consumeMCPOnceGrant(db, grantID) }
+            let peers = try Queries.lineagePeers(db, noteID: noteID)
+            let peerFacts = try Queries.mcpNoteFacts(db, noteIDs: peers.map(\.noteID))
+            var copies: [[String: Any]] = [], originals: [[String: Any]] = [], versions: [[String: Any]] = []
+            for peer in peers {
+                guard let facts = peerFacts[peer.noteID], MCPGrantAuthority.decide(
+                    standing, note: facts, rung: .read, consumes: false).isAllowed
+                else { continue }  // beyond reach: absent, never counted (VX-817's line)
+                let peerTitle = try Queries.mcpScopeTitle(db, kind: .note, id: peer.noteID, calendar: calendar) ?? ""
+                func entry(_ relation: Queries.LineageLink.Relation) -> [String: Any]? {
+                    let links = peer.links.filter { $0.relation == relation }
+                    guard !links.isEmpty else { return nil }
+                    return [
+                        "note_id": peer.noteID, "title": peerTitle, "wing_id": facts.wingID,
+                        "archived": peer.archivedAt != nil,
+                        "links": links.map { link -> [String: Any] in
+                            var said: [String: Any] = [
+                                "block_id": link.blockID, "peer_block_id": link.peerBlockID, "at": link.at,
+                            ]
+                            if let op = link.originOp { said["origin_op"] = op }
+                            return said
+                        },
+                    ]
+                }
+                if let copy = entry(.derivedInto) { copies.append(copy) }
+                if let original = entry(.derivedFrom) { originals.append(original) }
+                if let version = entry(.versionOf) { versions.append(version) }
+            }
+            let answer: [String: Any] = [
+                "note_id": noteID, "title": title ?? "", "copies": copies, "originals": originals,
+                "versions": versions,
+                MCPWriteTools.beyondReachKey: MCPWriteTools.beyondReachNotesListedWords,
+            ]
+            try log(db, clientName, act, "note", noteID, title, allowed: true)
+            return Outcome(text: try encode(answer), isError: false)
         }
     }
 

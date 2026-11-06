@@ -106,6 +106,8 @@ enum MCPToolCatalog {
         // VX-348 U5 — VX-392 (R-VX348-5): the wings the client holds a grant
         // on, empty ones too (listed only by a wing grant).
         listWings,
+        // VX-827 U1 — VX-817: a note's lineage peers, one hop, both ends readable.
+        listNoteLineage,
     ]
     static let suggest: [MCPToolDeclaration] = [
         addTake, addComment, saveLens,
@@ -487,6 +489,45 @@ enum MCPToolCatalog {
         ]),
         scopes: [.wing],
         grantOnly: true)
+
+    /// **VX-817 (VX-827 U1 — the run record `notes/plans/fixes/vx-827-lineage.md`,
+    /// P-U1-a…g sustained; her VX-817 fence line: an edge appears ONLY when
+    /// BOTH its ends are within the client's read reach):** the other notes
+    /// one of this note's blocks is joined to by ONE edge — `Queries.lineagePeers`
+    /// filtered through the one read rule; a peer beyond reach is simply
+    /// absent, and `beyond_reach` says the list is scoped.
+    static let listNoteLineage = MCPToolDeclaration(
+        name: "list_note_lineage", rung: .read, title: "List a note's lineage",
+        description: """
+            The other notes a note is joined to by lineage, one step away: notes holding a copy of \
+            some of its text (a divided or extracted block moved to another note, a duplicate, a \
+            copy to another wing), notes holding what its text was copied from, and notes linked \
+            to it as versions. Returns JSON: note_id and title, then copies, originals and versions \
+            — each a list of notes (note_id, title, wing_id, archived) with their links: block_id \
+            (this note's block), peer_block_id (the other note's block), origin_op (divide, merge, \
+            extract, pool_copy, or manual for a duplicate or copy) and at (when the link was made). \
+            A duplicate is in copies by every block and in versions by one. One step only: a note \
+            reached only through another note is not listed — ask about that note; a block's \
+            history inside this note is read_note's with_lineage, and its saved versions are \
+            read_note's with_versions. Only notes you can read are listed, and beyond_reach says \
+            so. note_ids (1 to \(MCPWriteTools.listCap) notes, instead of note_id) reads each \
+            note in turn, each its own read (a once grant covers one note); it returns results — \
+            one per note, in the order given: that note's answer, or note_id with refused — and \
+            landed_count and refused_count.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note."]),
+                "note_ids": .object([
+                    "type": "array",
+                    "description": "Up to \(MCPWriteTools.listCap) notes, instead of note_id — each its own read.",
+                    "items": .object(["type": "string"]),
+                ]),
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
 
     // MARK: - The SUGGEST rung (U2 — "it cannot touch a word you wrote")
 

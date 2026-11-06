@@ -54,6 +54,20 @@ extension MCPTwoStoreCatalogServerTests {
         // the Journal entry); now each is absent and beyond_reach says so.
         CatalogArm(label: "read_note · kin with lineage (hidden relatives in the Pool, a Private note, a hidden wing, the Journal)",
                    tool: "read_note") { w, _ in ["note_id": s(w.kin), "with_lineage": .bool(true)] },
+        // VX-827 U1 — VX-817's list_note_lineage: a peer appears only when both
+        // its ends are readable — hidden relatives are absent, never counted.
+        CatalogArm(label: "list_note_lineage · kin (hidden relatives beside a readable copy in Studio)",
+                   tool: "list_note_lineage") { w, _ in ["note_id": s(w.kin)] },
+        CatalogArm(label: "list_note_lineage · kin's Studio copy (its original in the shared book)",
+                   tool: "list_note_lineage") { w, _ in ["note_id": s(w.kinCopy)] },
+        CatalogArm(label: "list_note_lineage · a hidden note", tool: "list_note_lineage") { w, _ in
+            ["note_id": s(w.secretNote)] },
+        CatalogArm(label: "list_note_lineage · the daily Journal's entry", tool: "list_note_lineage") { w, _ in
+            ["note_id": s(w.journalEntry)] },
+        CatalogArm(label: "list_note_lineage · a list mixing readable and hidden notes", tool: "list_note_lineage") { w, _ in
+            ["note_ids": .array([s(w.kin), s(w.secretNote), s(w.journalEntry), s(w.kinCopy), s(w.atticNote)])] },
+        CatalogArm(label: "list_note_lineage · a list of hidden notes only (an error)", tool: "list_note_lineage") { w, _ in
+            ["note_ids": .array([s(w.secretNote), s(w.privateShared)])] },
         CatalogArm(label: "read_note · a note a hidden owned book claims", tool: "read_note") { w, _ in
             ["note_id": s(w.ownedNote), "with_ids": .bool(true)] },
         CatalogArm(label: "read_note · a note a hidden finished book holds", tool: "read_note") { w, _ in
