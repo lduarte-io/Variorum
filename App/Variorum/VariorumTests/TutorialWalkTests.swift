@@ -2396,7 +2396,11 @@ struct TutorialDeletionActsTests {
             // constant now names the Block History pane's came-from region,
             // because that is where an unclocked original lives after her G5
             // ruling. The lesson quotes the CONSTANT, so it followed for free.
-            #expect(trash.contains(BlockHistoryPath.cameFromSection))
+            // VX-827 U3b — A JUSTIFIED EDIT (P-6): the panel retired and the
+            // original lives on the block's LINEAGE face; the lesson names it
+            // by block ▾'s own row title, so a rename reaches it.
+            #expect(trash.contains(CommitBar.lineageRowTitle))
+            #expect(!trash.contains(BlockHistoryPath.cameFromSection), "the retired region is not named")
             #expect(trash.contains(TrayPath.putBackVerb), "the one verb, both surfaces")
             #expect(trash.contains(RecoveryPath.menuLabel), "how the Library door reads")
             #expect(trash.contains(RecoveryPath.trashSection))
@@ -2430,12 +2434,20 @@ struct TutorialDeletionActsTests {
             #expect(past.contains(BlockPastCopy.deletedTakesHeader))
             #expect(past.contains(OriginPeekCopy.doorVerb(op: "divide")),
                     "the context row's ruled wording")
-            // The pane's own verb, not the retired peek's (the post-13l
-            // polish round, ledger row 17): the came-from row's one button.
-            #expect(past.contains(BlockHistoryPath.bringBackVerb))
-            #expect(past.contains(BlockHistoryPath.cameFromSection))
-            #expect(past.contains("the original is preserved"),
-                    "the History face's lineage row, in the lesson's mouth")
+            // VX-827 U3b — A JUSTIFIED EDIT (P-6: the chapter names only doors
+            // and places the app has): the came-from region, its Bring back and
+            // its "the original is preserved" row retired with the panel. The
+            // lesson names the Lineage face by its two doors and quotes its
+            // member's own words and verb — each a constant, so a rename
+            // reaches the lesson.
+            #expect(past.contains(CommitsFaceCopy.lineageDoor), "the face's door on history")
+            #expect(past.contains(CommitBar.lineageRowTitle), "…and block ▾'s row")
+            #expect(past.contains(LineageFaceCopy.keptAsLineage),
+                    "the Lineage face's own row word, in the lesson's mouth")
+            #expect(past.contains(BlockPastCopy.putBackVerb), "the member header's verb")
+            #expect(!past.contains(BlockHistoryPath.cameFromSection)
+                    && !past.contains("the original is preserved"),
+                    "nothing the retired panel said")
             #expect(past.contains(TrayPath.goesWithItsFamily),
                     "the moving-over label, quoted from where it renders")
             // **A7's rider** (the post-13l polish round): her per-merge message
@@ -3101,7 +3113,9 @@ struct TutorialWherePlacesActsTests {
                     "…and the three things a moment offers")
             #expect(map.contains(BlockHistoryPath.name), "FIVE: the panel's own name")
             #expect(map.contains(BlockHistoryPath.doorLabel), "…and the door's word")
-            #expect(map.contains(BlockHistoryPath.cameFromSection))
+            // VX-827 U3b — A JUSTIFIED EDIT: "the blocks it came out of" sit
+            // behind the face's lineage door now.
+            #expect(map.contains(CommitsFaceCopy.lineageDoor))
             // The take's one home, said in the map so the Trash's absence of
             // takes is an answer rather than a hole (her D1 ruling).
             #expect(map.contains("never rows"))
@@ -3139,7 +3153,9 @@ struct TutorialWherePlacesActsTests {
             #expect(copies.contains(BlockHistoryPath.name)
                 && copies.contains(BlockHistoryPath.doorLabel),
                     "…and where the past she is NOT copying actually lives")
-            #expect(copies.contains(BlockHistoryPath.cameFromSection)
+            // VX-827 U3b — A JUSTIFIED EDIT: the kept originals' place is the
+            // one phrase (`TrayPath.originalsPath` — the block's Lineage).
+            #expect(copies.contains(TrayPath.originalsPath)
                 && copies.contains(TrayPath.menuLabel),
                     "the two populations a version leaves with the note")
             #expect(copies.contains(VersionsPath.promoteVerb)
@@ -3157,10 +3173,13 @@ struct TutorialWherePlacesActsTests {
             #expect(exits.contains(TrayPath.menuLabel), "the first exit's near listing")
             #expect(exits.contains(RecoveryCopy.trashSection), "…and its far one")
             #expect(exits.contains(TrayPath.putBackVerb))
-            #expect(exits.contains(BlockHistoryPath.cameFromSection),
+            // VX-827 U3b — A JUSTIFIED EDIT (P-6): the second exit's home is
+            // the joined block's LINEAGE face, its button the header's Put back.
+            #expect(exits.contains(CommitBar.lineageRowTitle),
                     "the second exit's home")
-            #expect(exits.contains(BlockHistoryPath.bringBackVerb),
+            #expect(exits.contains(BlockPastCopy.putBackVerb),
                     "…and the one button back, by its real word")
+            #expect(!exits.contains(BlockHistoryPath.cameFromSection))
         }
     }
 

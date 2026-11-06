@@ -1501,8 +1501,9 @@ enum TutorialSeeder {
             + "the block cards; every card says which kind it is. One verb serves "
             + "every row: Put back, and a block returns to the place it stood in. "
             + "(A block kept whole by a divide or a merge is not leaving "
-            + "anything, so it is not here. It waits in the lineage of the "
-            + "block it became. The next lesson has it.)",
+            + "anything, so it is not here. It waits in the "
+            + "\(CommitBar.lineageRowTitle) of the block it became. The next "
+            + "lesson has it.)",
 
             "The Library holds the other half, in two rooms. Archived is its "
             + "own item in the sidebar: calm and clockless, whole notes you set "
@@ -1552,8 +1553,8 @@ enum TutorialSeeder {
             + "on both bars. Everything this block has been opens in place of the "
             + "page: every take's saved moments on one line, newest at the top, "
             + "the takes it archived, the takes it deleted, and, one press away "
-            + "under lineage, where it came from. \u{2039} back returns you to the "
-            + "page.",
+            + "under \(CommitsFaceCopy.lineageDoor), where it came from. "
+            + "\(CommitsFaceCopy.back) returns you to the page.",
 
             // U-2 (18c batch 1): \u{2318}\u{21E7}D keeps the other takes whole on
             // the TOP block. This lesson and its staged take taught 13j's
@@ -1566,10 +1567,12 @@ enum TutorialSeeder {
             + "What became of the block you cut? It was kept: whole, off to one "
             + "side, not deleted.",
 
-            "Open the lineage of either new block (block \u{25BE} \u{25B8} "
-            + "Lineage, or lineage in its history) and the original is there "
-            + "itself, kept as lineage, with Put back beside it and its own takes "
-            + "and commits underneath. Right-clicking the block \u{25B8} See "
+            "Open the \(CommitBar.lineageRowTitle) of either new block (block "
+            + "\u{25BE} \u{25B8} \(CommitBar.lineageRowTitle), or "
+            + "\(CommitsFaceCopy.lineageDoor) in its history) and the original is "
+            + "there itself, \(LineageFaceCopy.keptAsLineage), with "
+            + "\(BlockPastCopy.putBackVerb) beside it and its own takes and "
+            + "commits underneath. Right-clicking the block \u{25B8} See "
             + "original from divide\u{2026} and \u{2318}K land in the same place, "
             + "the original already picked. They wait there, with no clock, for "
             + "as long as anything descended from them is alive.",
@@ -1581,8 +1584,9 @@ enum TutorialSeeder {
             "Merging keeps its blocks the same way, and says nothing at the "
             + "time. Deliberately: a message on every join would be noise. Merge "
             + "two blocks (or select across them and delete the seam) and the "
-            + "block you get lists both of the blocks it joined in its lineage, "
-            + "each with its own Put back, three of them if you merged three. "
+            + "block you get lists both of the blocks it joined in its "
+            + "\(CommitBar.lineageRowTitle), each with its own "
+            + "\(BlockPastCopy.putBackVerb), three of them if you merged three. "
             + "Nothing was deleted, so nothing "
             + "is counting down; the next chapter has you do it and find them.",
 
@@ -1678,10 +1682,10 @@ enum TutorialSeeder {
 
             "Five: this block's History. Everything one block has been. The "
             + "history door sits in the bottom bar right beside commit, and it "
-            + "opens the block's history in place of the page: every take's "
+            + "opens \(BlockHistoryPath.name) in place of the page: every take's "
             + "saved moments on one line, the takes this block archived, the "
-            + "takes it deleted (with their clocks), and, behind lineage, the "
-            + "blocks it came out of. Two lessons live in there, and they are the "
+            + "takes it deleted (with their clocks), and, behind "
+            + "\(CommitsFaceCopy.lineageDoor), the blocks it came out of. Two lessons live in there, and they are the "
             + "two that follow.",
 
             "Practice me: I'm here to be visited. Put your cursor in me and "
@@ -1845,7 +1849,8 @@ enum TutorialSeeder {
             + "by name.",
 
             "Now look. Put your cursor in the joined paragraph and open its "
-            + "lineage (block \u{25BE} \u{25B8} Lineage): both originals are "
+            + "\(CommitBar.lineageRowTitle) (block \u{25BE} \u{25B8} "
+            + "\(CommitBar.lineageRowTitle)): both originals are "
             + "there, not one of them, each with its own text and a "
             + "\(BlockPastCopy.putBackVerb) that puts it into the note again, "
             + "beside what it became. Nothing counted down. Nothing was in the "
