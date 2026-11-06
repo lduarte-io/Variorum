@@ -1135,3 +1135,72 @@ one — pick the `~/Library/Developer/Xcode/DerivedData/Variorum-*` dir whose `i
 `WorkspacePath` sits inside `~/dev/variorum-vx-827/` (PlistBuddy prints it), or better the
 explicit `-derivedDataPath` the build used; launch `Build/Products/Debug/Variorum.app` from that
 dir and NAME the launched product path in the RELEASE line.
+
+**The exploration sitting (2026-11-05 ~22:03 — DIRECTION ACCEPTED; her words verbatim):** *"ok i
+like these mockups a lot."* · *"these mockups are much better on the whole, it's a direction
+that I like."* The composite she ruled: *"in the editing view, i'd want to see mockup A's B. The
+edit, opened in place view of the edit, but with the small graph of commits with the take
+dropdown that mockup B has next to it still"* (her screenshot = B's pane+rail with "plain ✓
+chosen · 5 takes ▾"); *"(there should be room in the whole pane)"*. Compare: *"i think that the
+side by side is nice, and i think that being able to switch what commits you are comparing is
+also really nice."* Lineage: *"i like in mockup A how you can see the takes of the lineage block
+easily, but i also like mockup B's verticle view of the history. let's make it so that when you
+select an ancestor block, you can still click on its various takes & commits easily, as in A,
+but with the verticle view instead of the horizontal scroll, as in B."* Three-box compare:
+*"i think being able to open 3 commits would be helpful (before claude, after claude, now), is
+just one example. or maybe instead of a third commit, always being able to show "now" as the
+third compare box option."* Browsing: *"i also feel like you should be able to preview or scroll
+through the commit text without opening a named commit, or it could get tedious. maybe a fast
+swapper would be enough of an answer there."* THE DECISIVE QUESTION: *"i think that showing all
+takes on one line is better - sometimes multiple takes will have changed in a single pass
+round."*
+
+## THE DESIGN MEMO — the block's History & Lineage surface (settled at the exploration sitting; U3 builds to THIS)
+
+**The doors (P-1, registry-declared).** The block menu carries History and Lineage rows; the
+bottom bar's history word opens the Commits face. The surface takes the FULL pane; ‹ back
+returns exactly where she was. The old Block History panel RETIRES — every door that opened it
+opens the Commits face; all its jobs live here.
+
+**The Commits face (the default).** Two regions in the whole pane:
+- THE READING PANE (left, generous): the selected moment's full text, scrollable; header: the
+  commit's name (or first words), when, its take + chip, quiet mark, "N changes since"; a
+  plain · against-now wash toggle (word-level, view-time — OverallModel §8's legal diff; a pure
+  Domain text-compare function with tests); acts at the foot: Restore · Bring back as take ·
+  Compare · Rename.
+- THE RAIL (right, narrow): B's vertical dot timeline, newest at top — defaulting to ALL TAKES
+  INTERLEAVED (her ruling), each line dot · name/first words · its take's small chip · relative
+  date; the take dropdown ("5 takes ▾", the Write takes-popup family, archived takes grouped)
+  FILTERS to one take, whose rail then leads with the hollow "the take now" dot; quiet runs
+  fold to one line; an AI bracket pair (before/after ‹client›'s edit) rides a quiet wash and
+  never folds; the deleted takes line at the rail's foot (count · days left · Put back).
+- THE FAST SWAPPER (her ruling): the pane FOLLOWS the rail — a click or ↑/↓ step swaps the
+  pane's text instantly; reading never requires opening or naming anything.
+
+**Compare.** Side by side, from any commit's Compare act: two boxes (the picked moment · now),
+EACH box's header a swapper that can be re-aimed at any take's moment; "now" is ALWAYS offerable
+as a standing third box (her before · after · now example). Word washes in the reference's
+language (removed struck on the left family, added washed on the right).
+
+**The Lineage face (behind its one door).** VERTICAL, older above, NO horizontal scroll
+anywhere: the family as a list (origin verb · first words · where it lives · counts), this
+block marked; selecting an ancestor swaps the SAME pane+rail composition to that block — its
+take dropdown, its rail, its commits, A's two-click reach with B's geometry; Put back ·
+Bring back as take · Compare with now on the selected node's header; a Trash node muted, no
+acts; a cross-wing node named with its wing, go-to only.
+
+**Edges already ruled elsewhere, binding here:** archived takes visible (dropdown group +
+hollow dots); restore-from-Trash stays on its own surface; sentence case; the commit
+vocabulary; P3 — the reading pane is a READ surface (no live editor on this face); the
+registry-walk covers every door; seals refuse the writing acts through the existing operations.
+
+**PROVISIONAL at build (joins #264):** the all-takes rail's handling of per-take "now" rows;
+the exact keys of the fast swapper; the third-box door's wording; the AI-pair wash's exact
+face; whether the pane opens pre-selected on the newest moment or on "before ‹client›'s edit"
+after an AI edit (B's flagged call — lean: newest, which IS the after-bracket, with the before
+one step down).
+
+**U3 SPLITS IN TWO LEGS (sizing honesty, one unit per session):** U3a = the Commits face whole
+(pane + rail + dropdown + fast swap + compare + the Domain diff function + registry + the
+panel's retirement); U3b = the Lineage face (the vertical family, the ancestor swap, the acts
+in the tree) + the mobile-parity note. The ladder still runs ONCE over the run's whole diff.
