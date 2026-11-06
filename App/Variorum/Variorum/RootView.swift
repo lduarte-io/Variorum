@@ -1591,7 +1591,14 @@ struct RootView: View {
                         .post(landing.postID), blockID: landing.blockID,
                         offset: landing.offsetInBlock, find: landing.find, mode: landing.mode,
                         in: pane)
-                })
+                },
+                // VX-802 (A-878-1): the note-title menu's roads beyond the book
+                // — the Library rows' own (the union star, Open Beside, Open in
+                // New Window).
+                noteRoads: BookNoteRoads(
+                    starDoor: starDoor,
+                    openBeside: { router.openBeside(.post($0)) },
+                    openInNewWindow: openInNewWindow))
                 .id(readingID)
         case .pool(let poolID):
             if live {

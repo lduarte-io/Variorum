@@ -13,9 +13,11 @@
 //  The seed is the note's STORED title, never its display answer: an untitled
 //  note is shown by its date (or, in the sidebar, its first words — VX-580),
 //  and naming it after that would be naming it after itself (13g batch 7,
-//  R6-3). The write is the one rename road, `LibraryViewModel.rename`
+//  R6-3). The write is the one rename road, `NoteRename.rename`
 //  (`renameContainer`; a blank stores NULL and the note reads "Untitled"
-//  again).
+//  again) — VX-802 (the VX-878 run) hoisted its body here from
+//  `LibraryViewModel.rename` when the book views' note-title menu became its
+//  third renderer, so both callers run ONE body.
 //
 
 import GRDB
@@ -38,6 +40,16 @@ enum NoteRename {
             try Queries.containerTitle(db, id: postID)
         }
         return (stored ?? nil) ?? ""
+    }
+
+    /// **The one rename road's body**: the words trimmed, a blank stored as
+    /// NULL (the note reads "Untitled" again), through `renameContainer`.
+    /// Throws the operation's own error for the caller to word.
+    static func rename(session: AppSession, postID: String, title: String) async throws {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        try await session.runner.run { ops in
+            try ops.renameContainer(postID, title: trimmed.isEmpty ? nil : trimmed)
+        }
     }
 }
 

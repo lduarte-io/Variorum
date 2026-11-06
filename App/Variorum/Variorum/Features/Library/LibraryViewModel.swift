@@ -149,10 +149,9 @@ final class LibraryViewModel {
     /// shipped in Phase 2). A blank title stores NULL, rendering "Untitled".
     func rename(postID: String, title: String) async {
         do {
-            let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-            try await session.runner.run { ops in
-                try ops.renameContainer(postID, title: trimmed.isEmpty ? nil : trimmed)
-            }
+            // VX-802: the one rename road's body (`NoteRename.rename` — the
+            // book views' note-title menu runs it too).
+            try await NoteRename.rename(session: session, postID: postID, title: title)
         } catch {
             lastError = String(describing: error)
         }

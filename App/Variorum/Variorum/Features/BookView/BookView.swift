@@ -24,6 +24,10 @@ struct BookView: View {
         // the chapter rows' "Move Chapter Up / Down" are the Book Panel's acts
         // with a second renderer here (the drags are their twins' class).
         + [.fileNoteInChapter, .moveChapterUpInBook, .moveChapterDownInBook]
+        // VX-802 (A-878-1, PROVISIONAL D-802-1): the note-title menu's note
+        // doors — the note rows' grammar (`BookNoteTitleMenu`), a further
+        // renderer of each.
+        + BookNoteTitleMenuTable.capabilities
     /// 13i-d U3: the masthead's GEAR is the book's own door into its
     /// settings sheet (the sitting record §4's "the book's ⋯ menu" — the
     /// book's one masthead door, P-13id-U3-1), declared at last.
@@ -105,6 +109,15 @@ struct BookView: View {
     /// the mode the note arrives in — one value, `BookOpenDoor.Landing`. A
     /// nil block is a plain note-open.
     var onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)?
+    /// VX-802 (A-878-1): the note-title menu's roads beyond the book — the
+    /// union star, Open Beside, Open in New Window — handed down by the
+    /// composition root (a harness mount passes none; those doors don't draw).
+    var noteRoads = BookNoteRoads()
+    /// VX-802: the note-title menu's asks (rename, delete, the wing move),
+    /// hosted on the book — an alert cannot hang off a menu item.
+    @State private var noteDoors = BookNoteTitleDoors()
+    /// VX-802: the window's wings brain, for the wing move's confirm.
+    @Environment(WingsModel.self) private var wings: WingsModel?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
     /// 13i-b U2 — the book's DOOR (the Arrivals face's model). Its own model
@@ -154,7 +167,8 @@ struct BookView: View {
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
         onBookMode: ((String, BookStructureModel.ViewMode?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
-        onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil
+        onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil,
+        noteRoads: BookNoteRoads = BookNoteRoads()
     ) {
         self.session = session
         self.readingID = readingID
@@ -171,6 +185,7 @@ struct BookView: View {
         self.onNoteBox = onNoteBox
         self.onBookMode = onBookMode
         self.onOpenSearchHit = onOpenSearchHit
+        self.noteRoads = noteRoads
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
         for postID in initiallyExpanded { resolved.expand(postID) }
         _model = State(initialValue: resolved)
@@ -580,6 +595,9 @@ struct BookView: View {
         .sheet(item: $ruleEditor) { editor in
             RuleEditorSheet(model: editor)
         }
+        // VX-802 (A-878-1): the note-title menu's asks — the ONE rename ask,
+        // the ONE delete confirm, the ONE cross-wing move confirm.
+        .bookNoteTitleAsks(noteDoors, session: session, wings: wings)
         // 13i-b U3 — BIND INTO A BOOK (the door 13c 2D shipped as the
         // conversion offer), opened here by the teaching offer a hand-drag
         // earns (VX-616 retired the navigator's "+ new chapter" road and the
@@ -847,8 +865,12 @@ struct BookView: View {
                                     chapterMenu(section)
                                     if let collapsedNote {
                                         Divider()
-                                        outlineChapterMenu(
-                                            structure: structure, postID: collapsedNote.postID)
+                                        // VX-802: the collapsed note's own row — its
+                                        // note-title menu (A-878-1).
+                                        BookNoteTitleMenu(
+                                            structure: structure, postID: collapsedNote.postID,
+                                            title: collapsedNote.displayTitle,
+                                            doors: noteDoors, roads: noteRoads)
                                     }
                                 }
                                 .draggable(BookStructureModel.BookDrag.chapter(section.id).payload)
@@ -919,9 +941,12 @@ struct BookView: View {
                                 .buttonStyle(.plain)
                                 // VX-646: the row's scroll identity (the follow's reveal).
                                 .id(BookNavigatorFollow.noteRowID(entry.postID))
+                                // VX-802 (A-878-1): the note-title menu.
                                 .contextMenu {
-                                    outlineChapterMenu(
-                                        structure: structure, postID: entry.postID)
+                                    BookNoteTitleMenu(
+                                        structure: structure, postID: entry.postID,
+                                        title: entry.displayTitle,
+                                        doors: noteDoors, roads: noteRoads)
                                 }
                                 // 13f W11: a post row DRAGS (her ruling —
                                 // "pick up a post and move it to another
@@ -2813,7 +2838,9 @@ struct BookView: View {
             badge: ownershipBadge(entry.postID),
             // VX-303: the row's three open doors (the expanded header's
             // "open ↗", the collapsed card's body and its "open ↗").
-            onOpenInWrite: { openInWrite($0) })
+            onOpenInWrite: { openInWrite($0) },
+            // VX-802: the note-title menu's asks and roads.
+            noteDoors: noteDoors, noteRoads: noteRoads)
     }
 }
 
@@ -3622,12 +3649,18 @@ private struct OutlinePostRow: View {
     /// expanded header, its collapsed card's body and that card's "open ↗"
     /// all call it with the row's note.
     let onOpenInWrite: (String) -> Void
+    /// VX-802 (A-878-1): the note-title menu's asks (hosted by the book) and
+    /// its roads beyond the book — the header's and the card's right-click.
+    let noteDoors: BookNoteTitleDoors
+    let noteRoads: BookNoteRoads
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
         entry: Queries.ReadingEntry, tokens: VoiceTokens, gutter: ProseGutter,
         badge: OwnershipBadgeFace.Badge? = nil,
-        onOpenInWrite: @escaping (String) -> Void = { _ in }
+        onOpenInWrite: @escaping (String) -> Void = { _ in },
+        noteDoors: BookNoteTitleDoors = BookNoteTitleDoors(),
+        noteRoads: BookNoteRoads = BookNoteRoads()
     ) {
         self.session = session
         self.model = model
@@ -3637,6 +3670,8 @@ private struct OutlinePostRow: View {
         self.gutter = gutter
         self.badge = badge
         self.onOpenInWrite = onOpenInWrite
+        self.noteDoors = noteDoors
+        self.noteRoads = noteRoads
     }
 
     /// Row 53: is this row near the viewport? An EXPANDED row far from it
@@ -3915,7 +3950,12 @@ private struct OutlinePostRow: View {
         .padding(.top, 10)
         // (The `page-<id>` landing anchor moved to the ROW, at the lazy
         // stack's level — `BookView.outlineAnchor`; the correction round.)
-        .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
+        // VX-802 (A-878-1): the note-title menu.
+        .contextMenu {
+            BookNoteTitleMenu(
+                structure: structure, postID: entry.postID, title: entry.displayTitle,
+                doors: noteDoors, roads: noteRoads)
+        }
     }
 
     // (postBody's two branches were inlined into `body` at wave 2c — the
@@ -3987,7 +4027,12 @@ private struct OutlinePostRow: View {
         // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
         .help(OwnershipBadgeCopy.rowHelp(
             "Click to open this note in the full editor; ▸ unfolds it here", badge: badge))
-        .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
+        // VX-802 (A-878-1): the note-title menu.
+        .contextMenu {
+            BookNoteTitleMenu(
+                structure: structure, postID: entry.postID, title: entry.displayTitle,
+                doors: noteDoors, roads: noteRoads)
+        }
         // 13s-b U2: step 3 points at the first story's card (the card's body
         // IS the door into the note's own page).
         .tourAnchor(.outlineCard(entry.postID), cornerRadius: 10)
@@ -4017,42 +4062,9 @@ private extension View {
     }
 }
 
-/// A post's chapter-filing menu — ONE definition, two callers (the
-/// navigator's rows and the outline's own rows). Curated books only:
-/// chapters are a curated-reading concept (QUESTIONS #25(a)).
-@MainActor
-@ViewBuilder
-private func outlineChapterMenu(
-    structure: BookStructureModel, postID: String
-) -> some View {
-    if let book = structure.reading, book.kind == .book {
-        // 13i-d U3 (F-U2-3): the Book Panel's act, spelled from the registry
-        // — "Move to Chapter ▸" with "No Chapter" (was "Chapter ▸ … None");
-        // 17y (i), R-17y-4: that destination now says the headers' "unfiled".
-        Menu(CapabilityRegistry.capability(.fileNoteInChapter).verb) {
-            ForEach(structure.sections, id: \.id) { section in
-                Button(section.name) {
-                    Task { await structure.assign(postID, to: section.id) }
-                }
-            }
-            Divider()
-            Button(BookPanelCopy.noChapter) {
-                Task { await structure.assign(postID, to: nil) }
-            }
-        }
-        // 13i-c U4 (the sitting record §20): the remove/release door — one
-        // act, its word the book's ("Release from This Book" on an owned
-        // book: the note goes back to the Pool, whole). A gathering holds no
-        // membership, so it renders none here (its honest door is the chip's).
-        Divider()
-        Button(RemoveFromBookCopy.verb(owned: book.owned)) {
-            Task {
-                await RemoveFromBookDoor.remove(
-                    session: structure.session, postID: postID, book: book)
-            }
-        }
-    }
-}
+// (VX-802: `outlineChapterMenu` — the note rows' chapter-filing menu — grew
+// into the book views' NOTE-TITLE menu, `BookNoteTitleMenu`, in its own file:
+// its structure pair unchanged, the note's own doors beside it — A-878-1.)
 
 /// A reading entry's display title — shared by every book surface's rows.
 /// 13g batch 7 (R6-3): the ONE display brain — title, else the note's
