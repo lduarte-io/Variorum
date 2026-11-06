@@ -473,7 +473,7 @@ Results + counts here; FOR A LATER READER written last; master plan row retired 
 | 3 | Unit B1 (schema + mend) | IN PROGRESS — implementer session B1; LIVE STATUS under §6 Unit B1 |
 | 4 | Unit B2 (bulk propose + provenance) | DONE — commits 185f6c506…d189ef9dc; full core 3838/524 green; the five app suites 49/5 GREEN at the 19:39 window; three reviewer flags adopted |
 | 5 | Unit B3 (the review area) | DONE pending folded checks — suites 49/5 + 26/2 + 50/4 green at three windows; WALKED both voices (face stands, R-808-5); W-1..W-3 proven (red at 02d640895 → green on HEAD → live rewalk); W-4 FIXED (e16edf9d8, ReviewChromeFit) with its suite run + narrow re-check FOLDED into B4's window; the ladder re-checks the unit |
-| 6 | Unit B4 (pins) | BUILT — commits b8790fbb0…0064242fc (+ records 6d473eb4c, 45ab68b25 and the close); A-808-12 honored; full core 3869/526 + 32/4 green, MCP socket class 24/5 green alone; build-for-testing green; app suites + the walk OWED at the next stage window (list in the self-assessment) |
+| 6 | Unit B4 (pins) | BUILT to A-808-12 (6d473eb4c…6620fb6ec; core 3869/526 green; red-on-old by revert on the float + carries) — app suites + walk PENDING the combined window (with B3's folded W-4 checks); ladder flags: the manual-order index trade, the 300-note drop window |
 | 7 | Unit B5 (riders + small members + the docs tail: MCPSession.instructions' propose line, tool-description cross-refs, the field guide's lesson-3 mention — A-808-10) | NOT STARTED |
 | 8 | Unit L (the live round) | OFF — R-808-4: VX-872 deferred out of the run; re-owned at closeout with the marker-deadline line |
 | 9 | The ladder (Fable, whole diff) | NOT STARTED |
