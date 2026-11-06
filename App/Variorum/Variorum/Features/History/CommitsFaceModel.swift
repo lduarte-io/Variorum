@@ -212,7 +212,7 @@ final class CommitsFaceModel {
     ) throws -> Read {
         Read(
             history: try Queries.blockHistory(db, blockID: blockID, now: now),
-            shownTakeID: try Queries.mcpShownTake(db, blockID: blockID)?.id,
+            shownTakeID: try Queries.shownTake(db, blockID: blockID)?.id,
             homeTakes: try homeBlockID.map { try Queries.blockFan(db, blockID: $0) } ?? [])
     }
 

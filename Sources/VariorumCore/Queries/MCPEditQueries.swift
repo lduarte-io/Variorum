@@ -44,7 +44,10 @@ extension Queries {
     /// rendered-take rule (`Operations.renderedVariant`): the placement's
     /// chosen take while it is live, ACTIVE and on this block, else the
     /// block's default while it is live. Nil for an unplaced or dead block.
-    public static func mcpShownTake(_ db: Database, blockID: String) throws -> Variant? {
+    /// (Named `mcpShownTake` until VX-827's ladder R1-F5: a rendered-take
+    /// read, not an MCP fact — the MCP door's `divide` and the Commits face
+    /// both read it.)
+    public static func shownTake(_ db: Database, blockID: String) throws -> Variant? {
         guard let row = try Row.fetchOne(
             db,
             sql: """

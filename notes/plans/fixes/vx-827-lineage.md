@@ -1627,7 +1627,7 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-7 | Walk rows for the Lineage face, appended to the window's walk | DONE — rows 13–23 under "what is OWED" below |
 | U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | DONE — below |
 | U3b-FIX-1 | Ladder R1-F1 (the flush gap): AGREED; fix + pin, the behavioral revert announced below BEFORE it runs | BUILT + COMPILED (429218982) — **NOT LANDED until the closing window runs the recipe below: red on old, then green** |
-| U3b-FIX-5 | Ladder R1-F5 (`mcpShownTake`'s name): AGREED; a pure rename + its call sites | NOT-STARTED |
+| U3b-FIX-5 | Ladder R1-F5 (`mcpShownTake`'s name): AGREED; a pure rename + its call sites | DONE — `Queries.shownTake` (the next commit); headless suites below |
 
 
 ### U3b-P — THE PROPOSAL: the cross-block Bring back as take (sent before any op code; build waits on the ruling)
@@ -2067,4 +2067,22 @@ by nothing but a flush).
 
 Both patches were generated from the committed fix by deleting exactly those lines and `git diff`, and both
 `git apply --check` clean against 429218982; each compiles on its own (an unused helper/case is all either leaves).
+
+#### R1-F5 — the rename, and the fix leg's END (headless)
+
+`Queries.mcpShownTake` → `Queries.shownTake` (`Sources/VariorumCore/Queries/MCPEditQueries.swift`, its doc noting the
+old name); call sites swept: `CommitsFaceModel.read` and ONE line in `Sources/VariorumMCP/MCPWriteTools+Edit.swift`
+(the `divide` tool — the orchestrator's sweep authorization). No behaviour; no pin names the query, so every pin
+compiles unchanged. (The record's earlier mentions of the old name are history and stay.)
+
+**Suites, on the fix leg's tree (headless):** `swift build` complete; **`swift test` (the whole package) — core "Test
+run with 3866 tests in 522 suites passed after 286.407 seconds with 5 known issues"; `StringsWorkbookTests` 32/32;
+`VariorumMCPTests` 627 tests, THREE socket-timing failures under a load average of 18–19:**
+`MCPStopRoadsServerTests.aQuitSaysNothingForAConnectionItEnds`,
+`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (43 s against 15 s),
+`MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds(.clientHangsUp)` (`premiseFailures == 0` — the
+harness's own premise under load). **Re-run alone: `swift test --filter 'MCPStopRoadsServerTests|MCPHarnessTimeLimitTests|
+MCPReaderAfterCloseTests'` → "Test run with 11 tests in 3 suites passed after 11.223 seconds".** The MCP `divide`
+tool's suites (the renamed call site) are green in the full run. `xcodebuild … build-for-testing` (Mac) → "** TEST
+BUILD SUCCEEDED **" on the rename's tree.
 
