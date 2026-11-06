@@ -130,9 +130,9 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 
 | # | Member | Batch | Status |
 |---|---|---|---|
-| 1 | VX-829 doors everywhere | 1 | NOT-STARTED |
-| 2 | VX-802 note-title menu | 1 | NOT-STARTED |
-| 3 | VX-868 delete-confirm wording | 1 | NOT-STARTED |
+| 1 | VX-829 doors everywhere | 1 | BUILT (3b528a5c0, 93ef16481) — compiled; App-suite run + walk PENDING (closing window) |
+| 2 | VX-802 note-title menu | 1 | PROPOSAL (e5bab6d05) — awaiting the orchestrator's ruling; NOT built |
+| 3 | VX-868 delete-confirm wording | 1 | BUILT (pin 3263e5877, fix 7656bc887) — red-on-old by evaluation; suite run PENDING (closing window); wording PROVISIONAL |
 | 4 | VX-831 the Private mark | 2 | NOT-STARTED |
 | 5 | VX-804 rename repaint | 2 | NOT-STARTED |
 | 6 | VX-874 trail: float · dismiss · clear-all · the dial | 3 | NOT-STARTED |
