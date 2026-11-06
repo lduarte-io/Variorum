@@ -66,3 +66,62 @@ sidebar field; expect `searchState.order == .relevance` (RED on this head).
 was empty) resets the facets and order before asking — the door starts a new search; (b) keep the carry and say so
 in P-d. Not a ruling here.
 
+### F4 · [NIT] · `App/Variorum/Variorum/RootView.swift:1724–1727` · the sidebar field's `end` clears whatever the Library is asking, not only the question it asked
+
+**What.** The field's words are "the Library's question exactly while they are not empty" (`SidebarSearchFieldRule`'s
+own doc) — true while every other road that rewrites `catalog.query` also takes the keyboard (or a mouse-down, which
+the click monitor hears). One road does neither: ⌘K's palette is a `.sheet` (`RootView.swift:385–394`); while it is
+up the main window keeps the sidebar field editor as its first responder, and its "search the Library" row runs
+`searchLibrary(paletteWords)`. Back in the window the sidebar field still holds ITS words over the palette's
+question: esc → `.end` → `catalog.query = ""` ends the palette's search; ⏎ → hands the Library field the palette's
+words, not the field's.
+
+**Evidence.** Traced by read; a narrow edge (she must leave the caret in the sidebar field, ⌘K, pick the road row).
+A mounted pin is constructible (type in the sidebar field → `searchLibrary("lamp")` → esc → expect `catalog.query ==
+"lamp"`), RED on this head — but the right behaviour is unruled, so it is a NIT, not a bug claim.
+
+**Proposed.** Either guard the door (`end` / the handoff act only while `catalog.query == ` the field's words —
+otherwise the field just clears), or record the edge with P-819-B3d/e. One line either way.
+
+### F5 · [NIT] · `Sources/VariorumCore/Domain/SearchOrder.swift:37–40` vs `Sources/VariorumCore/Queries/LibraryPaging.swift:238` · "the title order folds case" is stated twice
+
+`SearchOrder.foldsCase` (`sort == .title`, read by the Swift worn-day merge `precedes`) and `LibrarySort.keyCollation`
+(`self == .title ? " COLLATE NOCASE" : ""`, read by the SQL statement and the catalog) are two copies of one fact.
+If the catalog's title collation ever changes (or another sort gains one), the statement follows `keyCollation` and
+the worn-only merge keeps the old rule — misplacing a worn-only note across a page boundary. Today they agree, and
+`theOrdersSwiftComparisonIsSQLitesOwn` pins the comparison, not the coupling (`aNamelessNoteWearingTheDayTakesItsPlaceInTheOrder`
+exercises created/date only, never title). Derive one from the other (e.g. `foldsCase` from `keyCollation`, or a
+`LibrarySort.foldsCase` both read). Clarity, no bug today.
+
+### F6 · [NIT] · `Sources/VariorumCore/Domain/SearchComposer.swift:493–630` + `Sources/VariorumCore/Queries/SearchQueries.swift:261–435` · two copies of the group page
+
+`homeOrderedGroups` re-spells `groups`' whole CTE (`scored` / `grouped` / `gpage` / `ranked` / `top` / the snippet
+stage) with three lines changed, and `homeOrderedPage` re-spells `searchGroups`' row-folding loop and its
+`SearchGroup` construction. Keeping relevance's statement byte-identical was a deliberate choice (its EXPLAIN pins),
+but the two copies can now drift — e.g. a future change to `ranked`'s `ROW_NUMBER` order, the savepoint stage or
+`titleMatched` lands in one order family only. Both plans are pinned (`everyHomeOrderedStatementStaysDrivenByTheIndex`,
+`everyFacetsGroupAndCountStatementsStayDrivenByTheIndex`), so the hazard is semantic drift, not P1. A shared builder
+parameterized by (key column, ORDER BY, keyset) would leave relevance's text unchanged. Architectural NIT; not
+worth reopening this run unless a later round touches the group page.
+
+### F7 · [NIT] · stale lines and dead code left by the run
+
+- `App/Variorum/Variorum/Features/Library/LibrarySearchModel.swift:102` — `LibrarySearchQuestion.scopeFilter(_:)` has
+  no reader left anywhere in the repo (app, tests, core) since the facets moved to core; delete it (its doc still says
+  "the scope picker's four answers").
+- `App/Variorum/Variorum/Features/Library/LibraryControlsFlow.swift:609` (`sortWidest`'s doc: "…and the search's
+  relevance label") and `LibraryCatalogView.swift:710` ("…and the relevance label") still name the retired label; the
+  slot's search form is the `order ▾` door (its `sortForms` doc at `:624–628` was updated, these two were not).
+
+### F8 · [NIT · process] · the closeout owes canon lines and QUESTIONS entries the diff already depends on
+
+Not a defect of the diff (ledger row 8 is NOT-STARTED), listed so the closeout does not drop one. SurfaceContracts
+(The Library, The app) has no line yet for: (1) a picked facet's band counting what it lists, All the whole question
+— superseding P-13o-U2-2's "the counts never move with the scope" (13o plan); (2) the search state's `order ▾` door
+(relevance default per search, the four orders with direction, the Books section keeping its own order, the row stamp
+speaking the order) — superseding P-13o-U2-7's plain label; (3) the sidebar field (place, the keyboard law, ⏎/esc/
+click, door-not-mirror, never a key-view stop); (4) the month grid's keys (← → ↑ ↓ ⏎, the ring, nothing arms on
+focus — superseding P-VX83-B3's "no arrow-key day navigation", `vx-83-search-followup.md:509`); (5) the passage
+line's quiet block-name mark. The PROVISIONALs P-a…c, P-d…j, P-819-B3a…h and the VX-90 B2 alternative need their
+`notes/QUESTIONS.md` lines; F1/F3 above add two more edges if not ruled.
+
