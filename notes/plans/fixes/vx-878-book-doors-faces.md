@@ -100,6 +100,23 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 
 **Evidence owed:** registry-walk green with the new declarations (CapabilityRegistryTests updated — COMPILED here, RUN at the closing window); view-model/menu pins for both faces' sets (the Library row's menu = the Bookcase row's menu minus the shelf family — a pin asserting the DERIVATION, not two hand-kept lists, if the shape allows); VX-868's arms pinned red-on-old (the old sentence asserted gone, both new arms asserted present — verified by revert); headless `swift test` green on touched suites; `xcodebuild build` + `build-for-testing` green. Write the BATCH 1 RECORD below this brief: LIVE STATUS from the first commit, the proposal + ruling, files touched, pins named, a NOT-DONE-here list (the closing window's debt), surprises.
 
+## BATCH 1 RECORD (opus-implementer, 2026-11-05)
+
+**NOT DONE in this batch (stated first):** PENDING — filled at the batch's end.
+
+### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| R-0 · record opened, required reading done (this file whole, SurfaceContracts The app / The Library / The Bookcase and books, SessionResiliencyProtocol) | DONE (this commit) |
+| 868-a · VX-868 wording pin (red on the pre-fix tree by construction) | IN-PROGRESS |
+| 868-b · VX-868 both arms rewritten | NOT-STARTED |
+| 802-a · VX-802 survey + proposed door set (the in-batch fork) | NOT-STARTED |
+| 829-a · VX-829 Book Settings: Move to Wing door | NOT-STARTED |
+| 829-b · VX-829 one book-menu table, two faces (Bookcase · elsewhere) + registry declarations | NOT-STARTED |
+| 802-b · VX-802 build (gated on the orchestrator's ruling) | NOT-STARTED — awaiting the ruling |
+| V · `xcodebuild build` + `build-for-testing`, headless `swift test` on touched suites | NOT-STARTED |
+
 ## LIVE LEDGER (one row per member; flipped as evidence lands)
 
 | # | Member | Batch | Status |
