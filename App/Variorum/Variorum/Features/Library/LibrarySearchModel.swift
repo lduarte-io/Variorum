@@ -467,7 +467,11 @@ final class LibrarySearchModel {
     /// end (∝ the wing's books).
     ///
     /// `order` (VX-820): the groups' order — relevance, or the Library's
-    /// sort over each group's home (`Queries.searchGroups(…order:)`).
+    /// sort over each group's home (`Queries.searchGroups(…order:)`). The
+    /// Books section keeps its OWN order under every pick (A-819-B2, F1 (a),
+    /// PROVISIONAL): books carry no stamp in the Library's semantics, and the
+    /// associated books stay top-ranked with their reason — so `books` never
+    /// reads the order.
     nonisolated static func listing(
         _ db: Database, question: LibrarySearchQuestion, scope: LibraryCatalogModel.Scope,
         wing: String, groupDepth: Int, order: SearchOrder = .relevance,

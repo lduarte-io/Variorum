@@ -178,4 +178,36 @@ struct LibrarySearchOrderTests {
             #expect(model.rowStampSort == model.sort, "the search ended: the Library's own again")
         }
     }
+
+    /// **The Books section keeps its own order under every pick** (A-819-B2,
+    /// F1 → (a), PROVISIONAL): the door orders the note and scraps groups
+    /// only — books carry no stamp in the Library's semantics (its catalog
+    /// lists them by name under every sort) and the associated books'
+    /// "top-ranked with the reason said" stays whole, so no book stamp is
+    /// invented. The groups DO move (the pick took effect); the books do not.
+    @Test func theBooksSectionKeepsItsOwnOrderUnderEveryPick() async throws {
+        try await withLibrary(notes: 4) { session, model, _, _ in
+            // Born in this order; their names' A–Z and their hit strengths
+            // disagree with it.
+            for name in ["Zed lantern", "Alpha lantern lantern", "Mid lantern lantern lantern"] {
+                _ = try session.operations.createReading(name: name, kind: .book)
+            }
+            await ask(model, "lantern")
+            let books = model.searchState.books.map(\.id)
+            let groups = model.searchState.groups.map(\.homeID)
+            #expect(books.count == 3, "premise: the Books section lists the three")
+            var movedGroups = false
+            for sort in LibrarySortFace.offered {
+                for direction in [SortDirection.desc, .asc] {
+                    model.pickSearchOrder(sort)
+                    model.pickSearchOrderDirection(direction)
+                    await model.search()
+                    #expect(model.searchState.books.map(\.id) == books,
+                            "\(sort) \(direction): the Books section in its own order")
+                    if model.searchState.groups.map(\.homeID) != groups { movedGroups = true }
+                }
+            }
+            #expect(movedGroups, "premise: the picks re-ordered the groups")
+        }
+    }
 }
