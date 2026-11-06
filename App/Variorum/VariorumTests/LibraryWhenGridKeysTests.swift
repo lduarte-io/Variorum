@@ -395,15 +395,19 @@ struct LibraryWhenGridKeysPopoverTests {
         #expect(field.stringValue == "harbour", "…and its words")
 
         // GUARD — the dismissed popover's face stays alive, and listens no more.
+        // (The field re-seated first, so this leg reads the same on both trees
+        // whatever an unclaimed ⏎ did to its edit on the old one.)
         let held = open.keyDay
         driver.shown = false
         await Self.turns(40)
-        let caret = editor.selectedRange().location
-        try #require(caret > 0, "premise: the caret can move left")
+        parent.makeFirstResponder(field)
+        await Self.turns()
+        let seated = try #require(parent.firstResponder as? NSTextView,
+                                  "premise: the field holds the parent's keyboard again")
+        seated.setSelectedRange(NSRange(location: 7, length: 0))
         await Self.post(LibraryWhenGridKeys.leftArrowKeyCode, "\u{F702}", to: parent)
         #expect(open.keyDay == held, "a dismissed popover's grid takes no key")
-        #expect(parent.firstResponder === editor && editor.selectedRange().location == caret - 1,
-                "…the arrow is the field's again")
+        #expect(seated.selectedRange() == NSRange(location: 6, length: 0), "…the arrow is the field's again")
     }
 
     // MARK: - The door, mounted
