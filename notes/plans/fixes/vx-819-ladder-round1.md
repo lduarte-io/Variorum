@@ -93,7 +93,7 @@ the worn-only merge keeps the old rule — misplacing a worn-only note across a 
 exercises created/date only, never title). Derive one from the other (e.g. `foldsCase` from `keyCollation`, or a
 `LibrarySort.foldsCase` both read). Clarity, no bug today.
 
-### F6 · [NIT] · `Sources/VariorumCore/Domain/SearchComposer.swift:493–630` + `Sources/VariorumCore/Queries/SearchQueries.swift:261–435` · two copies of the group page
+### F6 · [NIT] · `Sources/VariorumCore/Domain/SearchComposer.swift:493–615` + `Sources/VariorumCore/Queries/SearchQueries.swift:261–436` · two copies of the group page
 
 `homeOrderedGroups` re-spells `groups`' whole CTE (`scored` / `grouped` / `gpage` / `ranked` / `top` / the snippet
 stage) with three lines changed, and `homeOrderedPage` re-spells `searchGroups`' row-folding loop and its
