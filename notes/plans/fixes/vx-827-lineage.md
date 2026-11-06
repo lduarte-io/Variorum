@@ -177,7 +177,7 @@ safety copy before ANY real-store touch (none expected this run).
 | # | Item | Status |
 |---|---|---|
 | 1 | U1 — lineage queries + VX-817 wire | NOT-STARTED |
-| 2 | U2 — VX-810 + VX-815 | NOT-STARTED |
+| 2 | U2 — VX-810 + VX-815 + VX-778 (rider, her kickoff pick) | NOT-STARTED |
 | 3 | VX-801 design mockup + sitting | NOT-STARTED |
 | 4 | U3 — VX-801 build | NOT-STARTED |
 | 5 | Ladder (whole diff) | NOT-STARTED |
@@ -186,4 +186,81 @@ safety copy before ANY real-store touch (none expected this run).
 
 ## SITTING RECORD
 
-*(Her rulings land here verbatim-faithful, same turn.)*
+**Kickoff sitting, 2026-11-05 (question-tool batch, three answers):**
+- **Cast:** "Standing default (Recommended)" — Opus implements every unit, `fable-reviewer` runs
+  the one ladder over the whole diff. CONFIRMED.
+- **VX-801 design:** *"mockup - but don't use the question tool, just have it ready for me. i'll
+  rule before U3."* — So: the orchestrator authors the local HTML mockup during U1/U2, hands her
+  the absolute file path in plain chat (never the question tool, never an artifact), and HOLDS
+  U3 until her rulings land. The design-pass questions ride the mockup page itself, not a dialog.
+- **Riders:** VX-778 joins the run (seated as a sub-issue of VX-827 the same turn; it rides U2 —
+  the Settings ▸ MCP client-row count counts only grants whose place still stands, or says
+  "N grants"). VX-787 declined.
+
+## U1 BRIEF — the shared lineage queries + VX-817's wire face
+
+**Read first (in this order, in full):** CLAUDE.md's auto-loaded canon (arrives free) ·
+`notes/MCPSpec.md` IN FULL · this file's sections "The run", "Fence law carried into every MCP
+brief", "Environment traps", and this brief · the FOR A LATER READER section of
+`notes/plans/fixes/vx-809-mcp-door-ergonomics.md` (R-825, the two-store catalog, the scope-word
+idiom) · `notes/mcp-invisibility-residuals.md` (35 lines — the complete leak ledger; your work
+must add NOTHING to it) · `Sources/VariorumCore/Queries/Trash.swift`'s `originalsStrandedBy` and
+its test suites (the VX-654 rewrite: MATERIALIZED + CROSS JOIN, neighbourhood-confined walks,
+library-growth pins — the binding precedent for every CTE you write) ·
+`Sources/VariorumMCP/MCPNoteStructure.swift`'s lineage code (the existing one-hop `with_lineage`
+on `read_note` and its beyond-grant stub, P-13nb-U4-7) · the two-store catalog test (grep the MCP
+test targets for the catalog; it holds ~209 arms and your new tool adds its own).
+
+**Deliverables.**
+1. **The note-level lineage-peers query** (new `Queries` home, e.g. `Queries/Lineage.swift`):
+   for a note, the notes its blocks connect to over LIVE `derived_from` edges (both directions)
+   and `version_of` edges — per peer: the peer note id and the connecting block pairs with
+   `origin_op` and direction. DIRECT (one-hop at block level) is the proposed scope — transitive
+   note-chains stay out of the wire answer; PROPOSE before building if the evidence argues
+   otherwise. Live blocks, live notes; tombstoned edges and dead peers absent.
+2. **The block-level lineage TREE query** (U3 consumes it; lands now with pins): transitive
+   ancestors + descendants over `derived_from` plus `version_of` siblings for ONE block —
+   per node: block id, the connecting edge's `origin_op`, direction, depth, a state
+   classification (placed in note X · preserved as lineage (live, unplaced; `last_container_id`)
+   · in the Trash), and the display text resolvable (chosen/default take). Cycle-guarded
+   (defensive — the vx-654 pins cover dangling + cyclic rows). Bounded to the block's own
+   neighbourhood; cost never corpus-proportional (P1).
+3. **VX-817's wire tool** at the READ rung — proposed name `list_note_lineage` (final name is the
+   orchestrator's at your proposal gate). Takes `note_id` or `note_ids` (1–200, no repeats,
+   exclusive — VX-812's list-form idiom; each item its OWN read decision and once-grant spend,
+   P-809-12; an unreachable subject answers the one not-shared shape as that item's result).
+   Per subject: `copies`, `originals`, `versions` — each entry a readable peer note (id, title,
+   wing_id) with its block-pair edges and origins. **The fence, binding (her 2026-11-04 audit
+   line, on the ticket):** an edge appears ONLY when BOTH ends are within the client's read
+   reach — a hidden peer is simply absent, never counted, never hinted; `beyond_reach` carries
+   the fixed notes-form sentence, ALWAYS present. Private/daily-Journal keys win through the one
+   grant rule. R-825 catalog arms: the answer byte-identical between a store where hidden peers
+   exist and one where none do. Schema enforcement (VX-606) at the call door; Activity in words;
+   the tool description per VX-197's conventions; `MCPSession.instructions` is NOT edited (the
+   3,100-char budget is full; the description teaches the tool).
+4. **MCPSpec draft delta lines** appended to this file under "DRAFT CANON DELTAS" (the
+   orchestrator lands them at closeout; you never edit MCPSpec).
+
+**One required reconciliation, before the tool builds:** read `MCPNoteStructure.lineage`'s
+beyond-grant stub discipline exactly (when does a stub appear, what does a dead or missing far
+side show, how do the catalog's existing arms hold it to R-825) and state it in your record. The
+NEW tool follows the ticket's both-ends-readable line (absent, never a stub). If you find the
+existing stub and R-825 genuinely collide, FLAG it to the orchestrator and build nothing on that
+edge — ruled canon is never silently changed (the VX-825 precedent: colliding ruled lines go to
+her).
+
+**Propose-then-build (the architect's gate):** before writing the tool face, send the
+orchestrator a SHORT proposal — the tool name, the answer shape (keys, one example), the
+one-hop-vs-transitive call, and whether `note_ids` rides — then build to the ruling.
+
+**Evidence (the unit's acceptance):** exact-rows pins for both queries across: a divide chain,
+a merge, an extract, a pool copy, a duplicate (`version_of`), cross-note, cross-wing, a
+tombstoned edge (excluded), a dead block, an archived take's block, a released original, a cycle;
+a library-growth P1 pin (the query's cost flat as unrelated corpus grows — `originalsStrandedBy`'s
+pin style); the wire tool's arms in the headless MCP harness including its two-store catalog
+arms and the list-form arms. Headless `swift test` only — no stage. Tests run at the unit's END.
+
+**Constraints:** no schema change, no `Sync/`, no custody. One agent; at most one Sonnet
+subagent for EXTERNAL facts only, read-only. Commit per piece with LIVE STATUS in this file
+(U1 RECORD section you create), push after every commit, foreground waits only
+(`grep -q … && break; sleep 5` polls). Work only in `~/dev/variorum-vx-827`.
