@@ -2273,3 +2273,8 @@ filters 18/3 green headless; full `swift build` clean; Mac build-for-testing gre
 **#264 is vx-878's now (its closeout renumbered #263→#264): OUR BUNDLE RENUMBERS to the next
 free number at the merge — every "#264" in this record's drafts reads as that number.**
 Window-2 runs on the merged tip and doubles as the merge gate against main and vx-878.
+
+**WINDOW-2's WHOLE TARGET (the merge gate, claim vx-827-window-2, tip 6033016ea): ✔ PASSED —
+6091 tests in 1056 suites, 2725.5 s, 0 failures (4 warnings + the standing 14 known issues).**
+All five window-1 reds green; vx-878's merged content coexists; no host restart, no new .ips.
+SEAM taken: stage released, nov5 pinged; the walk re-enters as vx-827-walk.
