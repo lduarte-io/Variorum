@@ -197,3 +197,29 @@ line's quiet block-name mark. The PROVISIONALs P-a…c, P-d…j, P-819-B3a…h a
 - **F8 — CLOSEOUT ITEM, no code.** The five SurfaceContracts lines and the QUESTIONS entries (P-a…j, P-819-B3a…h as amended, the VX-90 B2 alternative, F1/F3's lines) land at the merge moment in the two-file shape; recorded on the closeout ledger row.
 
 Fixes run in a FRESH session (the ladder's rule); round 2 re-reviews the fixes with a fresh reviewer.
+
+## ROUND 1 FIXES (the fresh fix session, 2026-11-06 — A-819-L1 is the work order)
+
+**NOT DONE BY THE FIX SESSION (first, by the contract):** no Mac test was RUN (no `xcodebuild test` — the staged gate is the
+orchestrator's; every Mac pin below is PENDING it, its red-on-old included); no walk or capture; no QUESTIONS.md entry (F8
+is the orchestrator's closeout item). The app and its tests only COMPILE (`build-for-testing`).
+
+*Fix session: opus-implementer, seated 2026-11-06. Every claim is PENDING until its suite ran (the line says so when it
+did). No revert is in flight.*
+
+**Red-on-old shape for the Mac pins** (the batches' precedent): each behaviour pin lands ALONE first (that commit is a
+red-on-old tree), then its fix in its own commit, product files only where possible, so the gate can revert exactly the
+fix at head (`git show <fix> -- <files> | git apply -R`) — each road is checked with `git apply -R --check` here, and the
+road for all four at once is named so ONE staged run can show every red.
+
+| # | Fix (member) | Status |
+|---|---|---|
+| 0 | This record | DONE (this commit) |
+| F7 | dead `LibrarySearchQuestion.scopeFilter` (VX-734) · the two stale relevance-label comments (VX-820) | NOT-STARTED |
+| F5 | one case-folding truth (VX-820, core) | NOT-STARTED |
+| F2 | `CarriedWordsCaret` scoped to the Library field's own window — two-window pin alone, then the fix (VX-822) | NOT-STARTED |
+| F1 | the sidebar road moves a Timeline Library to List as the search lands — pin alone, then the fix (VX-822) | NOT-STARTED |
+| F3 | the sidebar road starts a new search: relevance, facets cleared — pin alone, then the fix; P-819-B3d amended (VX-822 / VX-820) | NOT-STARTED |
+| F4 | the smallest honest form: the field inert while ⌘K's palette is presented (VX-822) | NOT-STARTED |
+| F6 | one grouped-page builder IF mechanical (VX-820, core) — else a Debt ticket for the orchestrator | NOT-STARTED |
+| END | core suites + `build-for-testing` + the Mac suite list for the gate | NOT-STARTED |
