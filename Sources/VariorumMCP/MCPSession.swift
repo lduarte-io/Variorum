@@ -189,6 +189,7 @@ final class MCPSession: @unchecked Sendable {
     /// IS this connection's key (her Allow). One indexed read per call.
     private func awaitsHerOK() throws -> Bool {
         guard let key = lock.withLock({ awaitingKey }), let name = declaredName else { return false }
+        try handlerRead()
         let bound = try database.read { db in
             try Queries.mcpClient(db, name: name).flatMap { try Queries.mcpSetupKeyHash(db, clientID: $0.id) }
         }
@@ -435,6 +436,7 @@ final class MCPSession: @unchecked Sendable {
             guard await self.admitIfHeld(), let name = self.declaredName else { return .init(tools: []) }
             do {
                 if try self.awaitsHerOK() { return .init(tools: self.served([])) }
+                try self.handlerRead()
                 let standing = try await self.database.read { try MCPGrantAuthority.standing($0, clientName: name) }
                 return .init(tools: self.served(MCPToolCatalog.listed(for: standing)))
             } catch is StoreLockedError {
@@ -634,7 +636,23 @@ final class MCPSession: @unchecked Sendable {
     /// TEST-ONLY (VX-762, A-771-3 (2)): the transport's write lock, so a pin can
     /// hold it as a frame mid-write would while the server stops.
     var transportWriteLockForTesting: NSLock? { lock.withLock { transport?.writeLock } }
+
+    /// TEST-ONLY (VX-776): the host's failing reader (`MCPServerHost.handlerReadProbe`),
+    /// set once by the host before the session runs.
+    var handlerReadProbe: (() throws -> Void)?
     #endif
+
+    /// **VX-776 — the ONE seam in front of every store read the SDK handlers
+    /// make** (the standing read behind `tools/list`; the waiting-key check
+    /// behind every call — `awaitsHerOK`): a no-op in a shipped build; in a
+    /// DEBUG build the host's failing reader runs here, so a pin can make the
+    /// read fail as a broken store does (the VX-369 sweep's row 19 — a read
+    /// failure a headless store cannot produce by itself).
+    private func handlerRead() throws {
+        #if DEBUG
+        try handlerReadProbe?()
+        #endif
+    }
 
     /// The host's close of this session's descriptor once `run()` has
     /// returned and the host has let go of the session (VX-279): once, under

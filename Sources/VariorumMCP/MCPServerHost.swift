@@ -264,6 +264,16 @@ public final class MCPServerHost: @unchecked Sendable {
     /// session's hang-up — where a pin holds the transport's write lock as a
     /// frame mid-write would.
     var hangUpProbe: ((MCPSession) -> Void)?
+
+    /// TEST-ONLY (VX-776 — the VX-808 run, Unit B5): THE FAILING READER — run
+    /// by every session this host serves just before each store read its SDK
+    /// handlers make (the standing read behind `tools/list`, the waiting-key
+    /// check behind every call — `MCPSession.handlerRead`), so a pin can make
+    /// such a read fail as a broken store does (a thrown `DatabaseError`): the
+    /// one failure a headless store cannot produce by itself (its triggers fail
+    /// writes only — the VX-369 sweep's row 19). Read through the host at each
+    /// read, so a probe set after a connection opened still reaches it.
+    var handlerReadProbe: (() throws -> Void)?
     #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
@@ -593,6 +603,10 @@ public final class MCPServerHost: @unchecked Sendable {
             fd: fd, database: database, operations: operations, version: version,
             executor: executor, hooks: hooks, latch: latch,
             onNamed: { [weak self] in self?.onConnectionsChanged?() })
+        #if DEBUG
+        // VX-776: the failing reader's seam (test-only).
+        session.handlerReadProbe = { [weak self] in try self?.handlerReadProbe?() }
+        #endif
         lock.withLock { sessions[session.id] = session }
         onConnectionsChanged?()
         Task { [weak self] in
