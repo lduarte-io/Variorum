@@ -1620,3 +1620,44 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-7 | Walk rows for the Lineage face, appended to the window's walk | NOT-STARTED |
 | U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | NOT-STARTED |
 
+
+### U3b-P — THE PROPOSAL: the cross-block Bring back as take (sent before any op code; build waits on the ruling)
+
+Her ruling (verbatim, the VX-801 sitting): *"mints the node's active text as a new take on the block you came from —
+the bringBackCommitAsTake shape, cross-block; parent lineage via the existing edge."*
+
+- **Name / inputs.** `Operations.bringBackFromLineage(_ source: LineageTakeSource, onto blockID: String) -> Variant`,
+  `enum LineageTakeSource { case take(variantID), commit(commitID) }`. The node header's act passes the node's
+  shown take (`LineageTree`'s read rule: placed → chosen, else default — "the node's active text"); the op copies
+  that take's text AS IT STANDS at act time. The `.commit` form serves the pane's foot when the face shows a
+  RELATIVE's moment (her v1 goal: *"letting people look for commits on previous takes of ancestor blocks easily"*
+  — recovery is the point of finding one). Narrow alternative: `.take` only (a relative's commit is read and
+  compared, never brought back).
+- **The row.** ONE `variant` INSERT: `block_id` = the target · `working_text` = the source's text · 
+  `parent_variant_id` = **NULL** (the code agrees with the brief's reading: every parent pointer in the codebase is
+  same-block — branch, `bringBackCommitAsTake`, `moveSpanToNewTake`, the ceremonies'/duplicates' remapped trees;
+  the MCP door's `create_take` mints NULL; the existing `derived_from`/`version_of` edge carries the lineage; NO new
+  edge) · `status` active · `locked` 0 · `label` = the source's name when it has one (a commit's message / a take's
+  label, through the take label's normalisation), else NULL (alternative: always NULL) · `fan_position` = the
+  fan's END · fresh id, `created_at` = `updated_at` = now. Never chosen (no `container_block` write), never the
+  default (`block.default_variant_id` untouched), never born locked; no edge, commit, comment or presentation
+  written.
+- **Touch / churn / undo.** None — `bringBackCommitAsTake`'s (= `branchVariant`'s) posture: no `last_touched_at`,
+  no churn, NO structural-undo entry; the road back is deleting the take. (Alternative: one undo entry, inverse =
+  tombstone the minted take, exact-row redo.)
+- **Refusals, in order, one transaction:** target missing/dead → `blockNotFound(target)`; target under a sealed
+  post → `lockedPost`; `.commit` unknown → `commitNotFound`; the source take missing/dead → `variantNotFound`
+  (archived or locked source ALLOWED — only read); the source's block dead → `blockNotFound(source)` (a Trash node;
+  the face draws no act there); **the lineage fence (lean A):** the source block must be a node of the target's
+  `Queries.lineageTree` (admitted edges, read in the transaction — cost ∝ that block's lineage, P1), never the
+  target itself, and never across wings (both homes notes in different wings; the scraps are the one shared room)
+  → ONE new `OperationError.notInLineage(sourceBlockID:targetBlockID:)`, worded in the shared refusal table.
+  Alternative B: no fence in the op (the face offers only same-wing live nodes), no new error case. I10
+  irrelevant (adds a take). Sync: a plain insert, the outbox trigger captures it. Not wire-called; no MCP change.
+- **Pins (exact state transitions, headless):** take source and commit source, every field above and every other
+  table unchanged (placements, default, edges, commits, the note's touch/churn stamps); label rules; the fan's end
+  past an archived take; archived/locked source allowed; each refusal writes nothing; the fence's arms (unrelated,
+  same block, cross-wing, a pool home crosses nothing); a placed descendant in another note and a version sibling
+  as sources.
+- **Asked:** (a) both source forms or take-only · (b) the source's name as label or none · (c) fence A (new
+  error) or B (none) · (d) no undo entry or one. **Leans: both · the source's name · A · none.**
