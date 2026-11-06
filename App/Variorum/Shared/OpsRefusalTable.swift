@@ -430,6 +430,12 @@ nonisolated enum OpsRefusalCopy {
         case .blockNotInContainer:
             return "That block is no longer in this note — it may have "
                 + "moved while you worked. Nothing was changed here."
+        // VX-801 (VX-827 U3b — the lineage bring-back's ruled fence): the
+        // source is not in this block's lineage, is this block itself, or
+        // lives in another wing. Platform-neutral. PROVISIONAL words (#264).
+        case .notInLineage:
+            return "That block isn\u{2019}t part of this block\u{2019}s lineage in this wing "
+                + "\u{2014} nothing was brought back."
         default:
             return nil
         }

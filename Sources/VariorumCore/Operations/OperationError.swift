@@ -213,6 +213,12 @@ public enum OperationError: Error, Equatable, Sendable {
     /// The two posts are already version-linked (some live version_of edge
     /// joins their placed blocks).
     case postsAlreadyVersionLinked(a: String, b: String)
+    /// VX-801 (VX-827 U3b, the ruled fence — `notes/plans/fixes/
+    /// vx-827-lineage.md` U3b-P RULED): `bringBackFromLineage`'s source is
+    /// not in the target block's lineage — no admitted edge path joins them,
+    /// it IS the target, or it lives in another wing (wings isolate; the
+    /// scraps are the one shared room).
+    case notInLineage(sourceBlockID: String, targetBlockID: String)
 
     // The VERSIONS family (the post-13l polish round, ledger rows 16/23).
     /// A restore or a promote named a container that is not this note's

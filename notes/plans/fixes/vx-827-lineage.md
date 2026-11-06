@@ -1610,9 +1610,9 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | # | Piece | Status |
 |---|---|---|
 | U3b-0 | Preflight read (CLAUDE.md canon · this file: The run, every sitting entry, THE DESIGN MEMO, the U3a RECORD whole, the U3a ADJUDICATION, the U3b BRIEF, Environment traps · SurfaceContracts The app + The note · TEXTKIT2_NOTES whole · both exploration mockups' lineage sections + her composite shot · `Queries/LineageTree.swift` + `LineageTreeTests` · U3a's face (`CommitsFaceModel`, `CommitsFaceView`, `CommitsCompareView`) · the old panel whole (`BlockHistoryPane.swift`) and its every door/host · `Operations.bringBackCommitAsTake` + `insertFanVariant` · `PreservedOriginPutBack` / the tray's put-back roads · the tutorial's lineage lessons · the capability registry + the surface walk) | DONE |
-| U3b-P | PROPOSAL — the cross-block Bring back as take (the brief's hard gate; row semantics sent to the orchestrator before any op code) | SENT — awaiting the ruling |
+| U3b-P | PROPOSAL — the cross-block Bring back as take (the brief's hard gate; row semantics sent to the orchestrator before any op code) | RULED (all four leans sustained — U3b-P RULED) |
 | U3b-1 | The family projection (pure, core) + the node counts read + headless suites | NOT-STARTED |
-| U3b-2 | The op, built to the ruling + its exact state-transition suite | GATED on U3b-P |
+| U3b-2 | The op, built to the ruling + its exact state-transition suite | DONE — `Operations+LineageBringBack.swift` (`bringBackFromLineage`, `LineageTakeSource`, `lineageCrossesWing`), `OperationError.notInLineage`, its words in `OpsRefusalTable`; `LineageBringBackTests` 12/12 headless (a product row: does not compile on the pre-U3b tree) |
 | U3b-3 | The Commits face machinery parameterized by block (a relative of the block you came from) — reuse, not a second composition | NOT-STARTED |
 | U3b-4 | The Lineage face (model + view), its doors (lineage › on the face, Lineage in both block ▾ menus), the registry | NOT-STARTED |
 | U3b-5 | The origin door re-aim (G2's ruling) + the old panel's WHOLE retirement + every pin re-pointed or retired by name + the tutorial walk's drive | NOT-STARTED |
