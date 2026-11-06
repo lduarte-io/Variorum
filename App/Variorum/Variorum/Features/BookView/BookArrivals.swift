@@ -926,7 +926,9 @@ struct ArrivalMetaLayout: Layout {
     func placeSubviews(
         in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
     ) {
-        let plan = plan(width: bounds.width, subviews: subviews)
+        // R2-1: plan from the PROPOSAL, as sizeThatFits does — bounds.width is
+        // exactly the chosen form's threshold, where a re-plan must not flip.
+        let plan = plan(width: proposal.width ?? bounds.width, subviews: subviews)
         for subview in subviews {
             guard let frame = frame(role(subview), in: plan) else {
                 subview.place(at: bounds.origin, anchor: .topLeading, proposal: .zero)
