@@ -1,10 +1,27 @@
 # VX-808 — Run: Arrivals & books (the umbrella's sync-slot half)
 
-**STATUS: OPEN — kicked off 2026-11-05 (wave 2, beside vx-827 · vx-819 · vx-878; coordinator nov5).**
+**STATUS: CLOSED 2026-11-06 — merged to main (PR number and SHA in §9's final rows). The mirror deploy (marker 14→15) and the release remained HELD for her explicit go at close.**
 
 ## FOR A LATER READER
 
-*(Written at closeout. Until then: the roster, rulings and batch plan below are the run's contract; the LIVE STATUS tables under each unit are the night's working record.)*
+**What this run was.** The Nov 4 sitting's "Arrivals & books" umbrella (wave 2's one Sync/-slot run, twelve members): Arrivals became her AI→you review queue, pins landed, and books stopped spanning wings. One schema event — **v1_37** `reading_post.arrival_provenance` (ENCRYPTED canonical JSON, nine open kinds) + `reading_post.pinned_at` (PLAIN), lockstep marker 14→15, mirror `Server/supabase/18_vx808_arrivals_pins.sql` **deployed only at her window** (until then a main build visibly refuses production sync).
+
+**The pieces as built (one pointer each).**
+- **The general book wing mend** (VX-857): `Sources/VariorumCore/Sync/BookWingMend.swift`, ruled at A-808-1..5 — members only; anchor rank fenced → frozen → earliest-accepted; stay-behinds DEMOTE to visible arrivals stamped `{"kind":"wing_mend"}` (the visible-artifact doctrine), a frozen book's loser taking the dismissal-record class; occasions ∝ the batch, never a container landing; vx-805's note-container residual CLOSED by the pull's FK fixpoint (BW10, the round-1 Fable ruling). Canon: SyncSpec §7 (4).
+- **Provenance at every arrival door + the propose tool** (VX-811): `Models/ArrivalProvenance.swift`, `Operations+MCPPropose.swift`, A-808-6..10 — every road that mints, re-poses or demotes-to an arrival stamps its kind; `propose_notes_to_book` is a READ-rung act (the rung's sentence: "read (read, search and propose)"), bells never seats, verdict per note + the always-present waits sentence; the once-spend inside the guard. Canon: AppSpec §7/§9, MCPSpec.
+- **The review area** (VX-821, her R-808-5 "Full book area, one home"): `App/.../BookView/BookArrivalsReview.swift` + `ArrivalsReviewRules.swift` (pure fits/layouts; why-wins-since-yields) — bulk judging per A-808-11 (per-row acts, one message per press, no undo, Dismiss all alone confirms); the review's own acts never close it (W-1). Copy all PROVISIONAL.
+- **Pins** (VX-803): `Operations+MembershipPin.swift` + the float as ORDER BY terms in `Queries.assembleReading` (the one order home), A-808-12 — within-chapter float, `.pinNoteInBook`, the mark on the two TOCs only, finished refuses.
+- **The riders:** VX-859 id-resume book cursor (the invisibility ledger's entry 6 retired) · VX-777 a bare `stop()` repeats the road that let the host go · VX-776 the SDK-handler failure seam + words · VX-879 the invisibility wording aligned · VX-867 her ⌥⌘J words · VX-860 the willLockRoad belt. VX-775 and VX-872 DEFERRED at her word (R-808-6, R-808-4).
+
+**Her rulings:** R-808-1 (Opus implements, Fable reviews — all batches incl. Sync/) · R-808-2 → re-ruled R-808-6 (VX-775 deferred; her lean error-to-her/truth-to-client on the ticket) · R-808-3 (no riders) · R-808-4 (VX-872 deferred out; its 1.1 arm dies at the deploy) · R-808-5 (the review = full book area, one home). The orchestrator's adjudications A-808-1..12 are §6's; all PROVISIONALs went to her QUESTIONS bundle at the merge (§8's number).
+
+**Evidence that matters.** The ladder: round 1 no BLOCKER/MAJOR (7 Sync-class rulings, `notes/plans/fixes/vx-808-ladder-round1.md`), round 2 clean (`…-round2.md`); every disposition executed. The gate (§7c): Mac WHOLE target **6165/1068, 0 failures** on the final tree; phone 852/139 with only the standing caret red; captures both voices incl. the narrow yield + the R2-3 AX answer (the yielded stamp stays spoken). Convergence: `BookWingConvergenceTests` BW1–BW10 on the production path.
+
+**Open items.** The mirror deploy + release (hers; the stage's finish). The rank's tier-3 determinism gap and the note-container lost-filer corner — the remainder ticket (§8's triage). Wire pin parity → VX-368. The phone's Arrivals/pins faces → MobileSoul.
+
+---
+
+*(Below: the night's working record, kept verbatim — read only if reopening this run.)*
 
 ---
 
