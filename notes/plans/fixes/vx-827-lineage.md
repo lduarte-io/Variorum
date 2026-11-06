@@ -486,3 +486,12 @@ no position keys on the wire (VX-859's lesson) — confirmed. All-items-refused 
 
 **F-U1-1 — TO HER (two ruled lines collide: P-13nb-U4-7's stub vs R-825).** Ruling recorded
 below when it lands.
+
+**F-U1-1 — HER RULING (2026-11-05, in session, the question-tool batch): "Retire the stub".**
+The per-edge `beyond_grant` stub retires: a lineage far side the client can't read is simply
+ABSENT from `read_note`'s `with_lineage` answer; a fixed, always-present scope sentence rides the
+lineage answer instead (the P-809-1 family — "Lineage beyond your reach, if any, is not listed.",
+exact wording HELD FOR HER in bundle #264); re-pinned, plus the A/B two-store catalog arm that was
+missing (the arm that caught this stays as the pin). The parent stub is untouched (no collision).
+P-13nb-U4-7's contract line gets its supersession delta in MCPSpec at closeout; the residuals
+ledger gains NO row (that is the point).
