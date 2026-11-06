@@ -182,7 +182,7 @@ safety copy before ANY real-store touch (none expected this run).
 
 | # | Item | Status |
 |---|---|---|
-| 1 | U1 — lineage queries + VX-817 wire | NOT-STARTED |
+| 1 | U1 — lineage queries + VX-817 wire + the F-U1-1 stub retirement | DONE (c0cad8fd3…40b8f417a; adjudications below) |
 | 2 | U2 — VX-810 + VX-815 + VX-778 (rider, her kickoff pick) | NOT-STARTED |
 | 3 | VX-801 design mockup + sitting | NOT-STARTED |
 | 4 | U3 — VX-801 build | NOT-STARTED |
@@ -622,3 +622,75 @@ stub"), the probe's two answers (leg 1, U1-4), the A/B arm as the pin that was m
 P-13nb-U4-7's RIDER reasoning ("omission would lie about the tree's completeness") by R-825's fixed-scope-words idiom.
 
 **`notes/mcp-invisibility-residuals.md`: NO ROW** (her ruling: "that is the point").
+
+## U1 LEG-2 ADJUDICATION (the orchestrator, 2026-11-05)
+
+**Verified:** commits 08c12ede2 · bf6eadad8 · d766d9363 · 40b8f417a on origin, tree clean;
+`MCPListNoteLineageServerTests` re-run independently, 3/3 green. The four red MCP-target tests are
+the standing socket-timing trio + one (the VX-722/VX-532/VX-850 class, green alone, named in the
+vx-809 record) — accepted as the known flake class, NOT this unit's.
+
+**Leg-2 readings 1–5 ALL SUSTAINED:** (1) VX-812's list-form keys verbatim, `landed_count`
+meaning "answered" on a read — idiom consistency wins; the word flagged to #264; (2) `archived`
+boolean on every peer entry (rides the existing #264 PROVISIONAL); (3) a dangling wing reads Home
+(R-13ia-2); (4) titles through `mcpScopeTitle`, the one road; (5) the Activity wordings
+PROVISIONAL #264, hers to re-cut.
+
+**Carried to the ladder's attention (the implementer's own watch list, kept verbatim in its
+record):** the `kin` fixture's effect on existing catalog arms (controls held, nothing hand
+re-baselined); the R-U1-1 edge-admission difference from the Trash walk; `noteLineage` holding
+the writer per item. **Owed to the closing window:** the App-target suites (W-UX-13 included);
+her #264 wordings; the canon landing (D-U1-1…4); whether the public MCP guide page describes
+`beyond_grant` on `with_lineage` (checked at closeout; her word if it does).
+
+## U2 BRIEF — VX-810 + VX-815 + VX-778 (the read-ergonomics batch)
+
+**Read first (in full):** CLAUDE.md's auto-loaded canon · `notes/MCPSpec.md` WHOLE · this file's
+sections "The run", "Fence law carried into every MCP brief", "Environment traps", the U1 RECORD's
+DRAFT CANON DELTAS (your answers build beside U1's shapes), and this brief · the FOR A LATER
+READER of `notes/plans/fixes/vx-809-mcp-door-ergonomics.md` · `notes/mcp-invisibility-residuals.md`
+· the three member tickets' descriptions (quoted in "The run") · `Sources/VariorumMCP/
+MCPReadTools.swift` + `MCPToolCatalog.swift` + the two-store catalog test before touching answers.
+
+**Deliverable A — VX-810, ALL THREE FACETS (ruled by the orchestrator under the ticket's
+"the run picks"):**
+1. `list_notes` takes an optional tag filter — match the EXISTING tag tools' argument convention
+   (read `apply_tag`/`remove_tag`/`replace_tag` first; if the convention is genuinely ambiguous,
+   PROPOSE before building this facet). Subtree matching exactly as the rule grammar does; the
+   wearers are the post-level and block-level UNION (a block tag counts through its block's
+   placement); wing-scoped as `list_notes` already is; reach-scoped through the one rule; paged
+   as `list_notes` pages; cost ∝ the rows listed, never the corpus. A tag id/path naming nothing
+   the client can know follows the fence (hidden = missing — one worded refusal or empty listing,
+   whichever the existing listing idiom speaks; state your pick in the record).
+2. `list_notes` rows gain `tag_ids` + `tags` (paths, the mint answers' pairing) and `entry_date`
+   (null when undated — the VX-758 rider, the ticket's 2026-11-05 amendment).
+3. `read_note`'s JSON forms gain the note's `tag_ids` + `tags`.
+   Existing pins change bytes — justified re-pins only, named one by one in your record; the
+   two-store catalog's A/B and B==C controls must hold untouched (nothing hand re-baselined).
+**Deliverable B — VX-815.** TRACE FIRST: why does an empty granted note read as the nothing-shape
+today (which form, which code path)? Then the fix: a note INSIDE reach that is empty answers
+HONESTLY (title, metadata, empty body — the normal read's shape with empty content, or the
+minimal honest sentence if the Level 0 text form needs one; any minted sentence is HELD FOR HER
+in #264). The fence's byte-identical hidden-and-missing shape is UNTOUCHABLE — the pin: the
+granted-empty answer and the fence answer stop being byte-identical, while hidden vs missing
+stays byte-identical (red on old by behavioral revert, announced before it runs).
+**Deliverable C — VX-778, PREDICATE-NARROW (the vx-878 agreement, binding):** the Clients tab's
+"N shared places" count overstates reach (gone places count). MCPSpec already says counts say
+"grants" — verify that line against the pane; align the count to what the listing shows or to
+"N grants", whichever the trace supports; NO Clients-tab or Shared-with-AI row-rendering
+restructure. If the fix cannot stay predicate-narrow, STOP that half and report — the
+orchestrator messages vx-878 before anything wider builds. Pin the count's source headlessly
+where it lives; if only a Mac-target test can pin it, WRITE the pin and leave its run to the
+closing stage window (compile-only verify now: `xcodebuild build-for-testing`).
+
+**Evidence (the unit's acceptance):** headless core + MCP suites at the unit's end (name every
+failing test; the socket-timing trio is the known class); the catalog arms for every changed
+answer; VX-815's two byte-pins red-on-old; VX-778's pin red-on-old; `Tools/verify-pins` OK;
+App target compile-only green. NO xcodebuild test, no stage, no GUI, no store.
+
+**Constraints:** no schema change, no `Sync/`, no custody, no cursor changes (`list_notes`' book
+cursor is VX-808's — VX-859); `MCPSession.instructions` untouched; draft canon delta lines
+appended to DRAFT CANON DELTAS (you never edit MCPSpec). One agent; at most ONE Sonnet subagent
+for EXTERNAL facts, read-only. Pull the branch first — U1's work is on origin. U2 RECORD section
+with LIVE STATUS from the first commit; commit per piece ending "Part of VX-<member>"; no
+trailers; push every commit; foreground waits only.
