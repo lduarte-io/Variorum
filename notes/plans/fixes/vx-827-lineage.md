@@ -1072,3 +1072,17 @@ it was actually a lot clearer at least."* Her process ask: *"start by clearly li
 info that needs to be shown and then let's think about for a complicated block what it would
 look like."* → v3 direction: this-block-first; information inventory first; the horizontal
 element may return as a bounded MAP (never whole-area scroll); takes as cards, not text rows.
+
+**Mockup v3 sitting (2026-11-05):** direction accepted with corrections — *"ok i think that looks
+better, but lineage should be something you have to expand / go into. the default should be just
+seeing the commits."* The map band is NOT the default face; commits are. *"i know they're named -
+you should also be able to scroll through the full text of any commit."* (full text readable in
+place, scrollable — names alone insufficient). *"i think the fundamental issue is that you are
+still not representing commits *per take* very clearly. maybe look at how the takes popup on
+write looks for inspiration - each one should be able to go into the lineage."* *"maybe lineage
+does need to be a separate door than "commits" still - that might be better if we can't figure
+out something clear."* → v4 direction: the default view is COMMITS, one generous Takes-popup-
+family card per take with its commits inside and full text expanding in place; lineage behind
+its own step/door (the v3 map+log survives as that second view — "looks better" stands for it);
+the one-door ruling softens to one surface family with a Commits face and a Lineage face, both
+reachable from the block menu.
