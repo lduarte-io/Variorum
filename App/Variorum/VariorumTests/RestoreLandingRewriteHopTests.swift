@@ -224,7 +224,7 @@ struct RestoreLandingRewriteHopTests {
         try #require(shows, "fixture: the page shows her typing")
         await Self.pause(window, hosting, 0.3)
 
-        // The restore's own first step (`BlockHistoryModel.restore`): her
+        // The restore's own first step (`CommitsFaceModel.restore` — the panel's, before VX-827 U3b): her
         // pending typing lands before anything writes the take.
         let flushed = await w.session.flushExistingAutosave(forPost: w.postID)
         let clean = await Self.settle(window, hosting) { !model.autosave.isDirty }
@@ -251,7 +251,7 @@ struct RestoreLandingRewriteHopTests {
         }
     }
 
-    /// The parcel exactly as `BlockHistoryModel.restore` posts it.
+    /// The parcel exactly as `CommitsFaceModel.restore` posts it (the panel's road before VX-827 U3b).
     private func postTheParcel(_ w: World, _ s: Staged) {
         w.router.pendingRestoreLanding = RestoreLanding(
             postID: w.postID, blockID: s.target, variantID: s.take, text: s.commit.text)

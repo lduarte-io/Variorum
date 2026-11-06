@@ -2419,7 +2419,11 @@ struct TutorialDeletionActsTests {
                     "…and the superseded absolute is gone")
             #expect(TrayPanel.surfaceCapabilities.contains(.deleteNow),
                     "the note's own trash section really carries it")
-            #expect(!BlockHistoryPane.surfaceCapabilities.contains(.deleteNow),
+            // VX-827 U3b — A JUSTIFIED EDIT: the panel retired whole; a block's
+            // history is the History & Lineage surface now, and neither of its
+            // faces carries a purge door.
+            #expect(!CommitsFaceView.surfaceCapabilities.contains(.deleteNow)
+                    && !LineageFaceView.surfaceCapabilities.contains(.deleteNow),
                     "…and a block's history really does not, exactly as the lesson says")
 
             let past = try #require(prose["what a block leaves behind"])
@@ -2959,9 +2963,16 @@ struct TutorialDeletionActsTests {
             #expect(past.deletedTakes.map(\.id) == [spare.id],
                     "listed under \(BlockPastCopy.deletedTakesHeader)")
 
-            let model = BlockHistoryModel(
-                session: session, postID: lesson, blockID: host.blockID)
-            model.adopt(past)
+            // VX-827 U3b — A JUSTIFIED EDIT (the U3a record's owed re-point):
+            // the panel retired whole; the deleted take's Put back is the
+            // Commits face's, at its rail's foot — the same op, the same
+            // receipt.
+            let model = CommitsFaceModel(session: session, request: BlockHistoryRequest(
+                postID: lesson, blockID: host.blockID))
+            model.adopt(try await db.read { [now = session.now] db in
+                try CommitsFaceModel.read(db, blockID: host.blockID, now: now)
+            })
+            #expect(model.history.deletedTakes.map(\.id) == [spare.id], "at the rail's foot")
             await model.putBackTake(spare.id)
             #expect(model.status == .receipt(BlockPastCopy.takeRestored))
 
@@ -3502,10 +3513,17 @@ struct TutorialWherePlacesActsTests {
                         "transformation never puts anything in the Trash")
             }
 
-            // The one button back, through the door the lesson names.
-            let model = BlockHistoryModel(session: session, postID: lesson, blockID: joined)
-            model.adopt(history)
-            await model.bringBack(first.blockID)
+            // The one button back, through the door the lesson names. (VX-827
+            // U3b — A JUSTIFIED EDIT: the came-from region retired with the
+            // panel; the original is put back from the Lineage face's header,
+            // the same shared composition.)
+            let model = LineageFaceModel(
+                session: session,
+                request: BlockHistoryRequest(postID: lesson, blockID: joined),
+                select: first.blockID)
+            model.adopt(try await db.read { db in try LineageFaceModel.read(db, blockID: joined) })
+            #expect(model.selectedBlockID == first.blockID)
+            await model.putBack()
             #expect(model.status?.isRefusal != true)
             #expect(try await db.read {
                 try Queries.renderPost($0, containerID: lesson).map(\.blockID)

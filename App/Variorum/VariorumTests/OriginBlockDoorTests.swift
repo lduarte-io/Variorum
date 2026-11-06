@@ -365,7 +365,11 @@ struct OriginBlockDoorTests {
     /// Fire-and-DO (P-2): invoking opens the block's HISTORY PANE, at its
     /// came-from region — the door's THIRD and last landing (the post-13l
     /// polish round, ledger row 17), after 13f's navigation to the listing J6
-    /// removed and 13j J3's own peek.
+    /// removed and 13j J3's own peek. *(VX-827 U3b: the pane retired; this pin
+    /// drives the HISTORY door's request, whose shape is unchanged — the
+    /// origin door's own landing, the Lineage face on the original, is
+    /// `theBoardsProjectionCarriesTheOriginsAndItsDoorActs` below and
+    /// `RecoveryDoorsTests.theContextRowOpensThePeekAtTheOriginAndItShowsItsTakes`.)*
     ///
     /// **A JUSTIFIED EDIT to what the pin drives, and the claim is stronger
     /// for it:** the peek showed `.first` of an array whose own doc says a
@@ -410,15 +414,15 @@ struct OriginBlockDoorTests {
             #expect(origins.first?.originOp == "divide")
 
             board.model.revealOriginBlock(ofBlock: w.first.block.id)
-            // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT: the origin door keeps
-            // the panel through its OWN slot (gate G2); `blockHistoryRequest`
-            // is the history doors' Commits face now.
-            #expect(board.model.blockHistoryRequest == nil)
-            let request = try #require(board.model.originHistoryRequest)
+            // VX-827 U3b — A JUSTIFIED PIN EDIT (G2's ruling): the origin door
+            // lands on the LINEAGE face with the ORIGINAL selected, through the
+            // history doors' own road (no detail here ⇒ the board's sheet).
+            let request = try #require(board.model.blockHistoryRequest)
             #expect(request.postID == board.postID)
-            // The pane is scoped to the SUCCESSOR — the block she right-clicked
-            // — and its came-from region is what names the original.
+            // The surface is scoped to the SUCCESSOR — the block she
+            // right-clicked — and opens on the original it came from.
             #expect(request.blockID == w.first.block.id)
+            #expect(request.opening == .lineage(select: slot.blockID))
         }
     }
 

@@ -193,13 +193,15 @@ nonisolated enum TrayPath {
     /// **The destination MOVED at the post-13l polish round** (batch 4, her
     /// G5 ruling: *"the tray audits what is LEAVING; lineage holds what is
     /// KEPT"*), and the eight sites followed for free — which is the whole
-    /// argument for the constant, made good a second time. It now names the
-    /// Block History pane's came-from region.
-    static var originalsPath: String { BlockHistoryPath.cameFromPath }
+    /// argument for the constant, made good a second time. **And a third at
+    /// VX-827 U3b:** the Block History pane retired whole and its came-from
+    /// region's home on the Mac is the block's LINEAGE face — so the phrase
+    /// names that (`BlockLineagePath`), and every site follows.
+    static var originalsPath: String { BlockLineagePath.place }
 
     /// The same phrase with the door spelled out, for copy that has to teach
     /// the way in rather than merely name the place.
-    static var originalsPathWithDoor: String { BlockHistoryPath.cameFromPathWithDoor }
+    static var originalsPathWithDoor: String { BlockLineagePath.placeWithDoor }
 }
 
 /// A surface's pending request to show the tray — the `CommentsRequest`

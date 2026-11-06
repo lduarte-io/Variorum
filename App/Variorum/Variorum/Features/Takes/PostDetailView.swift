@@ -167,17 +167,10 @@ struct PostDetailView: View {
     /// marks a row (`TrayRequest.revealBlockID`), and a panel identity that
     /// forgot it would land the door somewhere true and say nothing about
     /// which row it meant.
-    /// **…and — the post-13l polish round, ledger row 17 — THE BLOCK HISTORY
-    /// PANE.** Her second-sitting ruling put its door in the bottom chrome
-    /// beside Commit; what it opens is the fourth occupant of this column,
-    /// because a block's whole time is exactly the kind of thing her C1 note
-    /// said the side panel exists for — room to read a list at a reasonable
-    /// size without crowding the page.
-    ///
-    /// The request rides the case (like the tray's reveal) because the pane is
-    /// scoped to the block she is standing in and sections every take with the
-    /// one she is IN expanded — a panel identity that forgot either fact would
-    /// have to guess.
+    /// *(The post-13l polish round's fourth occupant, THE BLOCK HISTORY PANE,
+    /// left this column at VX-801: the block's History & Lineage surface takes
+    /// the detail's full pane instead — `historyFace` below — and the panel
+    /// retired whole at VX-827 U3b.)*
     /// **…and — the post-13l polish round, ledger rows 16/23 — NOTE ▸
     /// VERSIONS**, the round's headline. It carries no payload: the listing is
     /// the note's, and this view already knows which note it is showing.
@@ -187,17 +180,11 @@ struct PostDetailView: View {
         case references
         case scraps
         case tray(revealBlockID: String?)
-        case blockHistory(BlockHistoryRequest)
         case versions
         case book
 
         var isTray: Bool {
             if case .tray = self { return true }
-            return false
-        }
-
-        var isBlockHistory: Bool {
-            if case .blockHistory = self { return true }
             return false
         }
     }
@@ -514,29 +501,6 @@ struct PostDetailView: View {
                 ReferencePanel(session: session, postID: postID)
             case .scraps:
                 ScrapsPanel(session: session)
-            case .blockHistory(let request):
-                // Row 17's pane, in the room her C1 ruling opened. It gets
-                // the tray's own width: both are lists of things with dates
-                // and verbs beside them, and the walk's P-1 squeeze was
-                // exactly what happens when such a list is given less.
-                BlockHistoryPane(
-                    session: session, request: request,
-                    onClose: { withAnimation(Self.panelAnimation) { inspectorPanel = nil } },
-                    // The came-from region's second door swaps the COLUMN's
-                    // occupant rather than stacking a sheet over a sheet —
-                    // which is how the peek's nested tray dissolves (the
-                    // architect's adjudication 3) instead of moving house.
-                    onOpenTray: { blockID in
-                        inspectorPanel = .tray(revealBlockID: blockID)
-                    },
-                    // Ledger row 33: the jump re-points THIS column's
-                    // occupant — the same case, a new request — so the
-                    // `.id` below rebuilds the pane on the block she is in
-                    // without her closing and reopening anything.
-                    onJump: { request in
-                        inspectorPanel = .blockHistory(request)
-                    })
-                    .id("history-\(request.id)")
             case .book:
                 // 13i-d U2 — the Book Panel, in the same room (one width rule,
                 // remembered): the note's book, its chapters and notes. It
@@ -638,10 +602,12 @@ struct PostDetailView: View {
                         panel.wrappedValue = .tray(revealBlockID: request.revealBlockID)
                     }
                 },
-                // VX-801 (VX-827 U3a): every HISTORY door — the bars' word,
-                // block ▾'s History, ⌘K, Blocks' rows — opens the COMMITS
-                // FACE in this detail's full pane (it was the inspector's
-                // Block History panel). The open is a surface swap, so it
+                // VX-801 (VX-827 U3a/U3b): every HISTORY door — the bars'
+                // word, block ▾'s History and Lineage, ⌘K, Blocks' rows, and
+                // the ORIGIN door ("See original from…", which opens the
+                // Lineage face on the original) — opens the History & Lineage
+                // surface in this detail's full pane (it was the inspector's
+                // Block History panel, retired whole at U3b). The open is a surface swap, so it
                 // captures the place exactly as a mode switch does, and the
                 // one-shot caret/find seeds go with the surface they seeded
                 // (17o batch b's R1-1: a seed left standing would re-land a
@@ -657,15 +623,6 @@ struct PostDetailView: View {
                 // composition, never a broadcast (P-4).
                 showVersions: {
                     withAnimation(Self.panelAnimation) { panel.wrappedValue = .versions }
-                },
-                // VX-801 (VX-827 U3a) — the gate G2: the ORIGIN door ("See
-                // original from…", ⌘K's "See the Original This Came From")
-                // keeps its old destination, the Block History panel in this
-                // inspector, until the Lineage face (U3b) is its home.
-                showOriginHistory: { request in
-                    withAnimation(Self.panelAnimation) {
-                        panel.wrappedValue = .blockHistory(request)
-                    }
                 })
         }
         .onDisappear {
@@ -750,15 +707,9 @@ struct PostDetailView: View {
             }
             // Row 29 (her words: "the block history tab stays open as you
             // move to other modes which looks bad and is confusing"): the
-            // pane is SCOPED to the mode that asked — a mode switch CLOSES
-            // it (chosen over re-targeting: the question was asked about a
-            // block in that mode's surface; the next mode asks its own, and
-            // its bar's door is one click away). It can therefore never
-            // show block 3's history beside a mode where block 1 is live
-            // (the walk's captures 45/46).
-            if inspectorPanel?.isBlockHistory == true {
-                withAnimation(Self.panelAnimation) { inspectorPanel = nil }
-            }
+            // block's history is SCOPED to the mode that asked — a mode
+            // switch closes it. (The inspector panel this rule was written
+            // for retired at VX-827 U3b; the surface below inherits it.)
             // VX-801 (U3a): the Commits face is scoped the same way — a mode
             // switch shows the mode (`applyMode` closes it first on every
             // routed road; this catches a switch that sets the mode directly,

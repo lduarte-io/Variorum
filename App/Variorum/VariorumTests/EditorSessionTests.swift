@@ -587,12 +587,14 @@ struct ReviewRoundFixTests {
             try h.session.operations.autosave(
                 slots[0].variantID!, text: "changed since", charDelta: 5)
             try h.reload()
-            let history = BlockHistoryModel(
-                session: h.session, postID: h.postID, blockID: slots[0].blockID,
-                focusedVariantID: slots[0].variantID)
+            // VX-827 U3b — A JUSTIFIED EDIT: the panel retired whole; its
+            // Restore is the Commits face's (the same act, the same address:
+            // the take the moment belongs to).
+            let history = CommitsFaceModel(session: h.session, request: BlockHistoryRequest(
+                postID: h.postID, blockID: slots[0].blockID, focusedVariantID: slots[0].variantID))
             let now = h.session.now
             history.adopt(try await h.database.read {
-                try Queries.blockHistory($0, blockID: slots[0].blockID, now: now)
+                try CommitsFaceModel.read($0, blockID: slots[0].blockID, now: now)
             })
             let commit = try #require(history.history.savepoints[slots[0].variantID!]?.first)
             // The caret wanders to the OTHER block before the restore fires.
@@ -665,12 +667,13 @@ struct CommitFlowTests {
                 try h.storeSlots()[0].blockID, cut: "First half here.".utf16.count)
             try h.reload()
             let blockID = try h.storeSlots()[0].blockID
-            let history = BlockHistoryModel(
-                session: h.session, postID: h.postID, blockID: blockID,
-                focusedVariantID: variantID)
+            // VX-827 U3b — A JUSTIFIED EDIT: the Commits face's Restore asks
+            // the same pre-split question (the panel retired whole).
+            let history = CommitsFaceModel(session: h.session, request: BlockHistoryRequest(
+                postID: h.postID, blockID: blockID, focusedVariantID: variantID))
             let now = h.session.now
             history.adopt(try await h.database.read {
-                try Queries.blockHistory($0, blockID: blockID, now: now)
+                try CommitsFaceModel.read($0, blockID: blockID, now: now)
             })
             let commit = try #require(history.history.savepoints[variantID]?.first)
             #expect(history.predatesSplit(commit))

@@ -320,22 +320,6 @@ struct TakesBottomBar: View {
                     minWidth: CommitsFaceSheet.minWidth, idealWidth: CommitsFaceSheet.idealWidth,
                     minHeight: CommitsFaceSheet.minHeight, idealHeight: CommitsFaceSheet.idealHeight)
         }
-        // VX-801 (VX-827 U3a) — the gate G2: the ORIGIN door keeps the panel.
-        .sheet(item: Binding(
-            get: { model.originHistoryRequest },
-            set: { model.originHistoryRequest = $0 })
-        ) { request in
-            BlockHistoryPane(
-                session: model.session, request: request,
-                onOpenTray: { blockID in
-                    model.originHistoryRequest = nil
-                    model.trayRequest = TrayRequest(
-                        postID: model.postID, revealBlockID: blockID)
-                },
-                // Ledger row 33: the sheet host re-points the same way the
-                // inspector does — a new request in the same slot.
-                onJump: { request in model.originHistoryRequest = request })
-        }
         .sheet(item: Binding(
             get: { model.commentsRequest },
             set: { model.commentsRequest = $0 })

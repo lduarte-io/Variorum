@@ -304,7 +304,7 @@ struct CommitsFaceBody: View {
                         Task { await model.restoreSelected() }
                     }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(CommitRowView.restoreHelp)
+                    .help(BlockHistoryPath.restoreHelp)
                 case .bringBack:
                     Button(tokens.chromeLabel(BlockHistoryPath.bringBackAsTakeVerb)) {
                         Task { await model.bringBackSelected() }
@@ -577,19 +577,7 @@ struct CommitsFaceBody: View {
                 .lineLimit(1)
         case .commit(let commit, let takeID, _):
             HStack(spacing: 6) {
-                if let name = SavepointRowFace.name(commit) {
-                    Text(name)
-                        .font(tokens.small)
-                        .foregroundStyle(line.archivedTake ? tokens.muted : tokens.ink)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                } else {
-                    Text(CommitRowFace.restingPreview(commit.text))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
+                CommitsRailWords(commit: commit, archivedTake: line.archivedTake, tokens: tokens)
                 if model.filter == .all { takeChip(takeID) }
             }
         case .quietRun(_, let count, let takeIDs, _, _, let expanded):
@@ -675,6 +663,32 @@ struct CommitsFaceBody: View {
     }
 }
 
+
+/// **A moment's words on the rail** — its name in ink, or (VX-674, her
+/// ruling) an UNNAMED moment's first words, muted; one line, the layout's
+/// truncation the only ellipsis. An archived take's moment is muted either
+/// way. One small view, so the resting-words pins read what the rail draws.
+struct CommitsRailWords: View {
+    let commit: CommitPoint
+    let archivedTake: Bool
+    let tokens: VoiceTokens
+
+    var body: some View {
+        if let name = SavepointRowFace.name(commit) {
+            Text(name)
+                .font(tokens.small)
+                .foregroundStyle(archivedTake ? tokens.muted : tokens.ink)
+                .lineLimit(1)
+                .truncationMode(.tail)
+        } else {
+            Text(CommitRowFace.restingPreview(commit.text))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+                .truncationMode(.tail)
+        }
+    }
+}
 
 /// **The face in a sheet** (the hosts with no note detail — the book's inline
 /// editors, the scraps hosts, Write's take panel): a reading width for the

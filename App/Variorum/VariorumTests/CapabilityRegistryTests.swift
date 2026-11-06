@@ -536,7 +536,9 @@ struct CapabilityRegistryTests {
             // are the Block History pane's rows now. `.showOriginBlock` is no
             // longer among them: the pane is where that act LANDS, not a door
             // onto it, so it left the `.surface` door set entirely.
-            .union(BlockHistoryPane.surfaceCapabilities)
+            // (VX-827 U3b — A JUSTIFIED EDIT, a renderer gone is a line gone:
+            // the PANE retired whole; its two acts are rendered by the Commits
+            // face's line below.)
             // 13j batch 6b (A JUSTIFIED EDIT, the E2/E8/batch-3 class): the
             // TRASH surface renders the two purge doors — Delete Now per
             // row and Empty Trash — and it is their ONLY legal renderer,
@@ -722,9 +724,8 @@ struct CapabilityRegistryTests {
             // Rename — declared at last, `.restoreCommit` … `.renameCommit`;
             // the Block History panel rendered the three writers undeclared)
             // and, beside them, Put back on its deleted takes and Unarchive
-            // on an archived take's now — the panel's two acts, which the
-            // panel's own line above still renders for the origin door
-            // (gate G2) until the Lineage face retires it.
+            // on an archived take's now — the panel's two acts (the panel's
+            // own line retired with it at U3b).
             .union(CommitsFaceView.surfaceCapabilities)
             // VX-801 (VX-827 U3b — A JUSTIFIED EDIT, the same class — a new
             // renderer is a new line): the LINEAGE FACE renders its member

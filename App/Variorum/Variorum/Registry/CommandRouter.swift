@@ -49,8 +49,7 @@ final class CommandRouter {
         openTagField: (() -> Void)? = nil,
         showTray: ((TrayRequest) -> Void)? = nil,
         showBlockHistory: ((BlockHistoryRequest) -> Void)? = nil,
-        showVersions: (() -> Void)? = nil,
-        showOriginHistory: ((BlockHistoryRequest) -> Void)? = nil
+        showVersions: (() -> Void)? = nil
     ) -> UUID {
         let token = UUID()
         detailToken = token
@@ -109,7 +108,6 @@ final class CommandRouter {
         self.showTray = showTray
         self.showBlockHistory = showBlockHistory
         self.showVersions = showVersions
-        self.showOriginHistory = showOriginHistory
         // The arriving detail consumes a tray request parked for IT — the
         // `pendingWriteIntent` choreography, one act over (see
         // `requestNoteTray`). Stamped, so a park for another post never
@@ -151,7 +149,6 @@ final class CommandRouter {
         showTray = nil
         showBlockHistory = nil
         showVersions = nil
-        showOriginHistory = nil
         // 17o batch b: the leaving note's caret place is written before the
         // fact goes (the session dict keeps it either way; this is what a
         // relaunch reads).
@@ -223,9 +220,9 @@ final class CommandRouter {
     // MARK: - Where the caret is (the post-13l polish round, ledger row 33)
 
     /// **The block the mounted writing surface is standing in.** A FACT, not a
-    /// request: nothing here decides anything, and the one reader — the Block
-    /// History pane's jump door — compares it against the block it is showing
-    /// (`BlockHistoryModel.jumpTarget`).
+    /// request: nothing here decides anything. (Its first reader was the
+    /// retired Block History panel's jump door — VX-827 U3b; the landings
+    /// and the place memory read it now.)
     ///
     /// Observable, because the door has to APPEAR when she clicks into another
     /// block; cheap, because the surfaces report only when the block CHANGES,
@@ -642,29 +639,6 @@ final class CommandRouter {
         guard let fact = focusedBlock, fact.postID == activePostID else { return false }
         return requestBlockHistory(BlockHistoryRequest(
             postID: fact.postID, blockID: fact.blockID, focusedVariantID: fact.variantID))
-    }
-
-    // MARK: - The origin door's panel (VX-827 U3a — the gate G2, left as it was)
-
-    /// **How the ORIGIN door reaches the mounted detail's inspector** — the
-    /// Block History panel, exactly as that door has always opened it.
-    ///
-    /// VX-801 (VX-827 U3a) re-aimed every HISTORY door at the Commits face
-    /// (`showBlockHistory` above now opens the face in the full pane). The
-    /// origin door ("See original from divide…", ⌘K's "See the Original This
-    /// Came From") is not a history door: it shows the originals, whose home
-    /// in the new design is the Lineage face (U3b), and the Commits face shows
-    /// none. Until that face lands the door keeps its old destination through
-    /// its own seam — the run record's gate G2 (`notes/plans/fixes/
-    /// vx-827-lineage.md`, U3a RECORD). Never parks, for `requestBlockHistory`'s
-    /// reason; returns whether the panel opened.
-    @ObservationIgnored private var showOriginHistory: ((BlockHistoryRequest) -> Void)?
-
-    @discardableResult
-    func requestOriginHistory(_ request: BlockHistoryRequest) -> Bool {
-        guard let showOriginHistory, activePostID == request.postID else { return false }
-        showOriginHistory(request)
-        return true
     }
 
     // MARK: - The masthead's tag field (the Act 10 correction round, row 15)

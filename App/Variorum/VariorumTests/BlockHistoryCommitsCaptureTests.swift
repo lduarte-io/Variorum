@@ -20,6 +20,11 @@
 //  recorded reason: the test host's container is TCC-protected from the shell
 //  on the Air. The run record names the decode.
 //
+//  **VX-827 U3b — A JUSTIFIED EDIT:** the panel retired whole; the harness
+//  shoots its successor, the block's History & Lineage surface
+//  (`BlockHistorySurface`, opening on the Commits face) at the face's sheet
+//  width, and in context through the history door's own road.
+//
 //  DISABLED BY DEFAULT: it asserts nothing, and the base64 would bloat every
 //  whole-target log. To re-shoot, drop the `.disabled` trait and run it alone
 //  (`-only-testing:VariorumTests/BlockHistoryCommitsCaptureTests`).
@@ -293,12 +298,12 @@ struct BlockHistoryCommitsCaptureTests {
             window.close()
         }
         let hosting = NSHostingView(
-            rootView: BlockHistoryPane(
+            rootView: BlockHistorySurface(
                 session: session,
                 request: BlockHistoryRequest(
                     postID: seeded.postID, blockID: seeded.blockID,
                     focusedVariantID: seeded.focusedVariantID),
-                onClose: {}, onOpenTray: { _ in }, onJump: { _ in })
+                onBack: {})
                 .environment(theme)
                 .environment(\.colorScheme, dark ? .dark : .light))
         hosting.appearance = window.appearance
@@ -324,27 +329,27 @@ struct BlockHistoryCommitsCaptureTests {
                 // window height…
                 await capturePane(
                     session, typical, theme: theme, dark: false,
-                    size: NSSize(width: 420, height: 820),
+                    size: NSSize(width: CommitsFaceSheet.idealWidth, height: 820),
                     name: "vx144-typical-\(tag)-light.png")
                 await capturePane(
                     session, crowded, theme: theme, dark: false,
-                    size: NSSize(width: 420, height: 820),
+                    size: NSSize(width: CommitsFaceSheet.idealWidth, height: 820),
                     name: "vx144-crowded-\(tag)-light.png")
                 // …and the crowded page whole (tall, so nothing scrolls away).
                 await capturePane(
                     session, crowded, theme: theme, dark: false,
-                    size: NSSize(width: 420, height: 1900),
+                    size: NSSize(width: CommitsFaceSheet.idealWidth, height: 1900),
                     name: "vx144-crowded-\(tag)-light-whole.png")
                 await capturePane(
                     session, crowded, theme: theme, dark: true,
-                    size: NSSize(width: 420, height: 820),
+                    size: NSSize(width: CommitsFaceSheet.idealWidth, height: 820),
                     name: "vx144-crowded-\(tag)-dark.png")
                 if voice == .study {
-                    // The column dragged narrower (its floor is 280; the
-                    // pane's own minWidth is 300).
+                    // The face at its sheet's floor (VX-827 U3b: the panel's
+                    // narrow column retired with it).
                     await capturePane(
                         session, crowded, theme: theme, dark: false,
-                        size: NSSize(width: 320, height: 820),
+                        size: NSSize(width: CommitsFaceSheet.minWidth, height: 820),
                         name: "vx144-crowded-study-light-narrow.png")
                 }
             }
@@ -379,10 +384,9 @@ struct BlockHistoryCommitsCaptureTests {
             await settle(window, hosting) {
                 session.commandRouter.activePostID == crowded.postID
             }
-            // VX-801 (VX-827 U3a) — A JUSTIFIED EDIT: the history door opens
-            // the Commits face now; this harness shoots the PANEL, which stands
-            // in the side column behind the origin door's seam (gate G2).
-            let opened = session.commandRouter.requestOriginHistory(
+            // VX-827 U3b — A JUSTIFIED EDIT: the panel retired; the history
+            // door's own road opens the surface in the full pane.
+            let opened = session.commandRouter.requestBlockHistory(
                 BlockHistoryRequest(
                     postID: crowded.postID, blockID: crowded.blockID,
                     focusedVariantID: crowded.focusedVariantID))

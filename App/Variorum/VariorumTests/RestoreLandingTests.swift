@@ -19,6 +19,12 @@
 //  mode-switch flash setting (PROVISIONAL P-440-8) — the Write pin runs with
 //  that setting OFF for exactly that reason.
 //
+//  **VX-827 U3b — A JUSTIFIED EDIT, the restore driver:** the Block History
+//  panel retired whole; the restores below are driven through the Commits
+//  face's model, which posts the same parcel through the same road (a sheet
+//  host's surface beneath takes it — P-U3a-10). The read-in-full sheet's pin
+//  retired with the sheet (named where it stood).
+//
 
 import AppKit
 import Dependencies
@@ -193,7 +199,7 @@ struct RestoreLandingTests {
             let commit = try ops.commit(take)
             try ops.autosave(take, text: "Other words now.", charDelta: 9)
 
-            let history = BlockHistoryModel(session: w.session, postID: w.postID, blockID: target)
+            let history = CommitsFaceModel(session: w.session, request: BlockHistoryRequest(postID: w.postID, blockID: target))
             await history.restore(commit, of: take)
             let landing = try #require(w.router.pendingRestoreLanding, "the restore landed — it says so")
             #expect(landing.postID == w.postID && landing.blockID == target
@@ -253,8 +259,7 @@ struct RestoreLandingTests {
             ArrivalFlashOracle.reset()
             #endif
 
-            let history = BlockHistoryModel(
-                session: w.session, postID: w.postID, blockID: target, focusedVariantID: take)
+            let history = CommitsFaceModel(session: w.session, request: BlockHistoryRequest(postID: w.postID, blockID: target, focusedVariantID: take))
             await history.restore(commit, of: take)
             #expect(history.status?.isRefusal == false)
             let landed = await Self.settle(window, hosting, timeout: 4) {
@@ -303,7 +308,7 @@ struct RestoreLandingTests {
             await Self.pause(window, hosting, 0.6)
             let before = Self.writeModel(w)?.restoreLandings ?? 0
 
-            let history = BlockHistoryModel(session: w.session, postID: w.postID, blockID: target)
+            let history = CommitsFaceModel(session: w.session, request: BlockHistoryRequest(postID: w.postID, blockID: target))
             await history.restore(commit, of: other.id)
             #expect(history.status?.isRefusal == false, "fixture: the restore itself landed")
             await Self.pause(window, hosting, 1.5)
@@ -384,84 +389,12 @@ struct RestoreLandingTests {
 
     // MARK: - W-2 (the vx440 walk) — the sheet road lands as the row road does
 
-    /// **W-2 — a restore from the READ-IN-FULL SHEET lands exactly as the
-    /// pane row's does: at the block's START, after the sheet has gone.** The
-    /// walk saw the sheet road leave the caret at the block's END (and its
-    /// wash went uncaptured) where the row road lands at the start. The one
-    /// difference between the roads is the sheet: its foot press used to run
-    /// the restore AT ONCE, so the act — the store write, the delivery, the
-    /// landing and its wash — overlapped the sheet's own dismissal (the
-    /// window not key, the sheet still over the page, AppKit/SwiftUI handing
-    /// the window back after it). The road now records the act and runs it
-    /// from the sheet's `onDismiss`, so it is the row road run in the row
-    /// road's window. **RED ON THE PRE-FIX TREE (`readingTrace`):** the act ran
-    /// before the sheet was gone (`[.acted, .dismissed]`). The caret half is
-    /// the walked symptom; whether this host reproduces its END is a fact of
-    /// the run (the record names it either way).
-    @Test func aSheetRestoreLandsWhereTheRowRestoreDoesAfterTheSheetIsGone() async throws {
-        try await withWorld(count: 40, flashOn: false) { w, theme in
-            let ops = w.session.operations
-            let target = w.blocks[29]
-            let take = try await chosen(w, target)
-            let commit = try ops.commit(take, message: "first light")
-            let longer = Self.prose(30) + "\nAfter the moment, a line the moment never had."
-            try ops.autosave(take, text: longer, charDelta: 48)
-            let history = BlockHistoryModel(
-                session: w.session, postID: w.postID, blockID: target, focusedVariantID: take)
-            let window = NSWindow(
-                contentRect: NSRect(x: 60, y: 60, width: 1520, height: 750),
-                styleMask: [.titled], backing: .buffered, defer: false)
-            window.isReleasedWhenClosed = false
-            defer { window.orderOut(nil); window.close() }
-            let hosting = NSHostingView(rootView: HStack(spacing: 0) {
-                PostDetailView(session: w.session, postID: w.postID)
-                    .frame(width: 1100)
-                BlockHistoryPane(
-                    session: w.session,
-                    request: BlockHistoryRequest(postID: w.postID, blockID: target, focusedVariantID: take),
-                    model: history)
-                    .frame(width: 420)
-            }.environment(theme))
-            hosting.frame = NSRect(x: 0, y: 0, width: 1520, height: 750)
-            window.contentView = hosting
-            window.makeKeyAndOrderFront(nil)
-            await writeArrived(w, window, hosting)
-            // Her caret at the END of the block she is about to restore — the
-            // walk's own state (she had typed there).
-            let slots = try await w.session.database.read {
-                try Queries.renderPost($0, containerID: w.postID)
-            }
-            let range = BlockRangeIndex(slots: slots, tail: nil).range(ofEntryAt: 29)
-            Self.editor(hosting)?.setSelectedRange(NSRange(location: range.upperBound, length: 0))
-            await Self.pause(window, hosting, 0.4)
-            let before = Self.writeModel(w)?.restoreLandings ?? 0
-
-            // Read in full — the REAL sheet, presented over the window.
-            let row = try #require(try await w.session.database.read {
-                try Variant.fetchOne($0, key: take)
-            })
-            history.readInFull(commit, of: row, heading: "this take")
-            let presented = await Self.settle(window, hosting) { window.attachedSheet != nil }
-            #expect(presented, "fixture: the read-in-full sheet is up")
-
-            // Its Restore, as the foot does it: the act handed over, the sheet dismissed.
-            let reading = try #require(history.reading)
-            history.readingFootPressed(.restore(confirmed: false), for: reading)
-            history.reading = nil
-            let landed = await Self.settle(window, hosting, timeout: 5) {
-                (Self.writeModel(w)?.restoreLandings ?? 0) > before
-            }
-            #expect(landed, "the sheet road landed the restore")
-            #expect(history.readingTrace == [.dismissed, .acted],
-                    "the act ran after the sheet was gone: \(history.readingTrace)")
-            let start = BlockRangeIndex(slots: try await w.session.database.read {
-                try Queries.renderPost($0, containerID: w.postID)
-            }, tail: nil).range(ofEntryAt: 29).location
-            #expect(Self.editor(hosting)?.selectedRange().location == start,
-                    "the caret at the block's START, as the row road lands it")
-            #expect(try await storeText(w, take) == Self.prose(30), "the restore stands")
-        }
-    }
+    // **RETIRED at VX-827 U3b — A JUSTIFIED EDIT:** `aSheetRestoreLands
+    // WhereTheRowRestoreDoesAfterTheSheetIsGone` pinned the read-in-full
+    // SHEET's W-2 order (its foot act run from the sheet's `onDismiss`). The
+    // sheet retired with the panel: the Commits face's reading pane IS the
+    // whole moment, and its foot's Restore is the one restore road — the row
+    // road this pin compared the sheet against, which the pins above drive.
 
     // MARK: - W-1 (the vx440 walk) — the live pane beside the pane road
 
@@ -524,8 +457,7 @@ struct RestoreLandingTests {
             }
             #expect(live, "fixture: the pane is LIVE")
 
-            let history = BlockHistoryModel(
-                session: w.session, postID: w.postID, blockID: target, focusedVariantID: take)
+            let history = CommitsFaceModel(session: w.session, request: BlockHistoryRequest(postID: w.postID, blockID: target, focusedVariantID: take))
             await history.restore(commit, of: take)
             #expect(history.status?.isRefusal == false)
             let shows = await Self.settle(window, hosting, timeout: 4) {
@@ -573,7 +505,7 @@ struct RestoreLandingTests {
             }
             #expect(live, "fixture: the cell is LIVE")
 
-            let history = BlockHistoryModel(session: w.session, postID: w.postID, blockID: target)
+            let history = CommitsFaceModel(session: w.session, request: BlockHistoryRequest(postID: w.postID, blockID: target))
             await history.restore(commit, of: take)
             let shows = await Self.settle(window, hosting, timeout: 4) {
                 Self.pane("cell", take, in: hosting)?.string == Self.prose(2)

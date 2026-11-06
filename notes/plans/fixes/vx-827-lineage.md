@@ -1615,7 +1615,7 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-2 | The op, built to the ruling + its exact state-transition suite | DONE — `Operations+LineageBringBack.swift` (`bringBackFromLineage`, `LineageTakeSource`, `lineageCrossesWing`), `OperationError.notInLineage`, its words in `OpsRefusalTable`; `LineageBringBackTests` 12/12 headless (a product row: does not compile on the pre-U3b tree) |
 | U3b-3 | The Commits face machinery parameterized by block (a relative of the block you came from) — reuse, not a second composition | DONE (compiled) — `CommitsFaceModel.Role` (`.home` / `.relative`), the shared `LineageBringBack` road; `CommitsFaceBody` = THE one pane+rail composition both faces draw |
 | U3b-4 | The Lineage face (model + view), its doors (lineage › on the face, Lineage in both block ▾ menus), the registry | IN PROGRESS — face + doors + registry + the surface host (`BlockHistorySurface`) compiled (app `build` green); pins next |
-| U3b-5 | The origin door re-aim (G2's ruling) + the old panel's WHOLE retirement + every pin re-pointed or retired by name + the tutorial walk's drive | NOT-STARTED |
+| U3b-5 | The origin door re-aim (G2's ruling) + the old panel's WHOLE retirement + every pin re-pointed or retired by name + the tutorial walk's drive | DONE (compiled — `build-for-testing` green) — the table under U3b-5 below |
 | U3b-6 | The guide sweep (G1's sentences, each listed for #264) | NOT-STARTED |
 | U3b-7 | Walk rows for the Lineage face, appended to the window's walk | NOT-STARTED |
 | U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | NOT-STARTED |
@@ -1676,3 +1676,61 @@ in-transaction lineageTree read is ∝ the lineage (P1 fine); scraps stays the s
 the take, which is itself undoable. Row semantics, NULL parent (the same-block parent
 convention + the edge already carrying lineage), refusal order and the pin list all sustained
 as proposed. The new refusal's sentence joins the #264 wording list.
+
+### U3b-5 — the origin re-aim and the panel's WHOLE retirement (G2's ruling, executed)
+
+**Production.** Both origin doors (`EditorViewModel.revealCaretBlockOrigin`, `TakesViewModel.revealOriginBlock(ofBlock:)`)
+build the history doors' request with `opening: .lineage(select: <the original>)` and ride the history doors' ONE road
+(`CommandRouter.requestBlockHistory` → the detail's full pane; the model's `blockHistoryRequest` sheet where no detail
+is). Gone: `CommandRouter.requestOriginHistory`/`showOriginHistory`, both models' `originHistoryRequest`, the three
+origin sheets (`CommitBar`, `TakesBottomBar`, `WriteTakesPanel`), the inspector's `.blockHistory` case (+
+`isBlockHistory`) and its mode-switch close, `Features/Tray/BlockHistoryPane.swift` WHOLE (`BlockHistoryModel`,
+`BlockHistoryPane`, `CommitRowView`, `CommitReadingSheet`, `CommitRunEntry`, `CommitRowRule`, `HistoryRegionHeader`,
+`BlockHistoryPaneOracle`, the jump door's rule and words, the region lines, the read-in-full words, the Mac
+`deletedExplainer`, `noSavepoints`, `cameFromPathWithDoor`, the open-row anatomy of `CommitRowFace` and its ◦ glyph) and
+`Features/Editor/SavepointHistory.swift` (`QuietRunRow` — the panel's only). Moved, byte-identical
+(`Features/History/HistoryRequests.swift`: `RestoreLanding`, `BlockHistoryRequest` + its new `opening`,
+`FocusedBlock`; `Features/History/HistoryWords.swift`: the Mac door words, the Bring back as a take words,
+`restoreHelp`, `CommitRowFace`'s resting-words half). `TrayPath.originalsPath`/`originalsPathWithDoor` now name
+`BlockLineagePath` (the guide sweep, U3b-6, lists the sentences that follow). The panel's "Open this note's tray" door
+and the row-33 jump are NOT carried (P-U3b-6; the U3a record's G2.3).
+
+**Every pin, by name** (each a JUSTIFIED EDIT in its file, the claim kept where the surface still carries it):
+
+| Pin | Disposition |
+|---|---|
+| `BlockHistoryPaneTests.everyRegionReadsAsASectionAndTheListIsGone` | RETIRED (the panel's regions) |
+| `BlockHistoryPaneTests.theHistoryPaneOffersPutBackAndUnarchiveAndNoPurgeDoor` | RE-POINTED — both faces' declared acts: Put back + Unarchive, no purge door |
+| `BlockHistoryPaneTests.theMountedDetailOpensTheHistoryPaneInItsRealSidePanel` | RETIRED (panel in the side column; the full-pane hosts are `BlockHistoryHostTests`') |
+| `BlockHistoryPaneTests.aHistoryRequestForAnUnmountedPostIsRefused…` | RE-POINTED — the origin seam's arms become Lineage-opening requests on the one seam |
+| `BlockHistoryPaneTests.everyLiveTakesSavepointRunIsInThePane` | RE-POINTED — the shared `BlockHistoryExpansion` the Mac forwarder called |
+| `BlockHistoryPaneTests.aRestoreFlushesThePendingBufferBeforeItLands` | RE-POINTED — `CommitsFaceModel.restore` (the same flush first) |
+| `BlockHistoryPaneTests.theJumpOffersItselfOnly…` · `.theMountedPaneDrawsItsJumpDoorOnly…` (+ its mount helper) | RETIRED (the row-33 jump retired with the panel) |
+| `BlockHistoryClarityTests.theRegionHeadersCarryCounts…` · `.anUnnamedMomentIsTitledByWhen` · `.anEmptyRegionDrawsNoHeader` | RETIRED (region headers; the read-in-full sheet's title) |
+| `BlockHistoryClarityTests.readInFullShowsTheWholeMomentWithItsTwoFootDoors` | RE-POINTED — the face's pane is the whole moment, Restore + Bring back at its foot |
+| `BlockHistoryClarityTests.bringBackAsATakeLandsTheTakeAndSaysSo` · `.bringBackUnderASealRefuses…` | RE-POINTED — `CommitsFaceModel.bringBackSelected` |
+| `BlockHistorySealTests` (all four) | RE-POINTED — the face's `askRenameSelected` (field shut under a seal, the standing sentence) and `rename(commitID:to:)` |
+| `BlockHistoryHostTests.aModeSwitchClosesThePaneTheModeOpened` · `.fromBlocksThePaneIsTheOneRightRegion…` (+ `historyOpen`, `inspectorColumnMounted`) | RETIRED (the panel's host; both rulings stand on the face's pins) |
+| `BlockHistoryHostTests.theOriginDoorOpensTheLineageFaceOnTheOriginal` | NEW (red on the pre-U3b tree: no Lineage face) |
+| `BlockHistoryCommitsCaptureTests` (disabled harness) | RE-POINTED — shoots `BlockHistorySurface` at the face's sheet width; in context through `requestBlockHistory` |
+| `EditorSessionTests.restoreTargetsTheTakeTheRowBelongsToNotTheCaret` · `CommitFlowTests.restoreOfAPreSplitCommitAsksFirst` | RE-POINTED — `CommitsFaceModel` |
+| `OutsideWriteRingEndTests.writePanelRingEnds…` · `.compareRingEnds…` | RE-POINTED — `CommitsFaceModel.restore` as the outside write |
+| `SavepointRenameDoorTests` (all six) | RE-POINTED — `CommitsFaceModel.rename(commitID:to:)` |
+| `ChromeMinHeightTests.sheetHostedRecoveryPanesNearZeroWidthProbeStayBounded` | RE-POINTED — the sheet-hosted surface, framed as its hosts frame it; bound = the sheet's ideal height |
+| `CommitRestingPreviewTests` (two drawing pins) | RE-POINTED — `CommitsRailWords` (the rail's moment words, extracted so the pins read what the rail draws); the ◦ glyph line RETIRED |
+| `RestoreLandingTests.aSheetRestoreLandsWhereTheRowRestoreDoes…` | RETIRED (the read-in-full sheet); the suite's restore driver RE-POINTED to `CommitsFaceModel` |
+| `RestoreLandingInspectorTests` (the file, three pins) | RETIRED (the inspector host + the sheet; VX-668's fix pin `RestoreLandingRewriteHopTests` stays) |
+| `RecoveryDoorsTests` — the declarations' two arms | RE-POINTED — both faces' declared acts |
+| `RecoveryDoorsTests.theContextRowOpensThePeekAtTheOrigin…` | RE-POINTED — the door's request opens the Lineage face on the original; `LineageFaceModel` selects it, its node is the original's |
+| `RecoveryDoorsTests.theCameFromRegionsTwoDoors…` · `.theCameFromsBringBackDiagnosesASealedNote` | RE-POINTED — `LineageFaceModel.putBack` (the same `PreservedOriginPutBack`); the tray-door half RETIRED (P-U3b-6) |
+| `RecoveryDoorsTests.theRoutedActSpeaksWhereTheBlockHasNoOriginal` | the origin-slot arm RETIRED with the slot |
+| `RecoveryDoorsTests` — the regions pin, the two Put back pins, the A1 mount pin, the A3 pin | RE-POINTED — `CommitsFaceModel` / a mounted `CommitsFaceView` |
+| `OriginBlockDoorTests.theBoardsProjectionCarriesTheOriginsAndItsDoorActs` | RE-POINTED — the board's request opens the Lineage face on the original |
+| `WriteTakesPanelRoutedTests.originOpensThePanelsBlocksOriginals` | RE-POINTED — the panel's request, `.lineage(select: original)` |
+| `CommitsPageLedgerTests` — `theCommitsPageDrawsNoBezels` + `theQuietRunLineSpeaksInTheVoice` | RE-POINTED as ONE source pin over `Features/History/` (no bezels, no system caption/secondary) |
+| `CommitsPageLedgerTests.theDetailsLineSaysOnlyWhatTellsCommitsApart` | RE-POINTED — the face's `meta` line |
+| `CommitsPageLedgerTests` — the defining-sentence, open-preview, compact-row and resting-line pins | RETIRED (region line, open row, row anatomy); the defining line flagged P-U3b-9 |
+| `SavepointOnLeaveTests` — `QuietRunRowCaptureTests` | RETIRED (`QuietRunRow` composes nowhere) |
+| `TutorialWalkTests` — the no-purge arm, `theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack`, the exits lesson's Bring back | RE-POINTED — both faces; `CommitsFaceModel.putBackTake` (U3a's owed drive); `LineageFaceModel.putBack` |
+| `CapabilityRegistryTests.theSurfacesRenderExactlyTheDeclaredSurfaceActs` | the pane's line RETIRED; the Lineage face's line ADDED |
+

@@ -469,13 +469,17 @@ struct WriteTakesPanelRoutedCommandTests {
     @Test func originOpensThePanelsBlocksOriginals() async throws {
         try await withPanel(seed: 1549, mergedPanelBlock: true) { fixture, window, hosting in
             press(.showOriginBlock, fixture)
-            // VX-801 (VX-827 U3a) — A JUSTIFIED PIN EDIT: the origin door
-            // keeps the Block History panel through its OWN slot (gate G2);
-            // `blockHistoryRequest` is the history doors' Commits face now.
-            await settle(window, hosting, until: { fixture.model.originHistoryRequest != nil }, maxTurns: 20)
-            #expect(fixture.model.originHistoryRequest?.blockID == fixture.panelBlockID,
-                    "the origin door opened the PANEL's block's History")
-            #expect(fixture.model.blockHistoryRequest == nil, "…not the Commits face")
+            // VX-827 U3b — A JUSTIFIED PIN EDIT (G2's ruling): the origin door
+            // opens the panel's block's surface on its LINEAGE face, the
+            // original selected, through the history doors' own slot.
+            await settle(window, hosting, until: { fixture.model.blockHistoryRequest != nil }, maxTurns: 20)
+            #expect(fixture.model.blockHistoryRequest?.blockID == fixture.panelBlockID,
+                    "the origin door opened the PANEL's block's History & Lineage")
+            if case .lineage(let original?)? = fixture.model.blockHistoryRequest?.opening {
+                #expect(original != fixture.panelBlockID, "…on the Lineage face, an original selected")
+            } else {
+                Issue.record("the origin door opens the Lineage face with the original selected")
+            }
             #expect(fixture.writeSaw.value.isEmpty, "the origin door is the panel's (saw \(fixture.writeSaw.value))")
         }
     }

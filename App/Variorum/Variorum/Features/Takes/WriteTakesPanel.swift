@@ -280,18 +280,6 @@ struct WriteTakesPanel: View {
                     minHeight: CommitsFaceSheet.minHeight, idealHeight: CommitsFaceSheet.idealHeight)
         }
         .sheet(item: Binding(
-            get: { model.originHistoryRequest },
-            set: { model.originHistoryRequest = $0 })
-        ) { request in
-            BlockHistoryPane(
-                session: session, request: request,
-                onOpenTray: { blockID in
-                    model.originHistoryRequest = nil
-                    model.trayRequest = TrayRequest(postID: postID, revealBlockID: blockID)
-                },
-                onJump: { request in model.originHistoryRequest = request })
-        }
-        .sheet(item: Binding(
             get: { model.trayRequest },
             set: { model.trayRequest = $0 })
         ) { request in
