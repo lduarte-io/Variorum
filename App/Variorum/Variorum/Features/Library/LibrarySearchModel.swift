@@ -89,23 +89,16 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     }
 
     /// The question narrowed to a scope picker's choice (D3) — what the
-    /// groups and the Books section read.
+    /// groups and the Books section read. The rule is core's
+    /// (`SearchFacet.narrowing`, VX-819 — pinned headless).
     func scoped(_ scope: LibraryCatalogModel.Scope) -> SearchQuery {
-        guard let narrow = Self.scopeFilter(scope) else { return query }
-        var scoped = query
-        scoped.filter = query.filter.map { .all([$0, narrow]) } ?? narrow
-        return scoped
+        scope.facet.narrowing(query)
     }
 
     /// The scope picker's four answers (D3): All · Notes · Books · Blocks —
-    /// Blocks is the scraps family beside block NAMES (the `.docKind` leaf).
+    /// each its core facet's filter (`SearchFacet.filter`).
     static func scopeFilter(_ scope: LibraryCatalogModel.Scope) -> SearchFilter? {
-        switch scope {
-        case .all: nil
-        case .posts: .family(.notes)
-        case .books: .family(.books)
-        case .blocks: .any([.family(.scraps), .docKind(.blockName)])
-        }
+        scope.facet.filter
     }
 
     /// **The field's text without one typed `#tag`** — the band chip's ✕.
@@ -152,6 +145,20 @@ nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     // (NIT-1, round 1: the token/words/tag reading MOVED to the shared home
     // — `SearchFieldWords`, `Core/Views/SearchAnswerFaces.swift` — the book's
     // band is its second consumer; the rule is the PARSER's letter.)
+}
+
+extension LibraryCatalogModel.Scope {
+    /// **The scope picker's facet in core** (VX-819): the one rule each
+    /// segment narrows by and counts by (`SearchFacet`). `posts` is the
+    /// model term for the segment that says "Notes".
+    nonisolated var facet: SearchFacet {
+        switch self {
+        case .all: .all
+        case .posts: .notes
+        case .books: .books
+        case .blocks: .blocks
+        }
+    }
 }
 
 /// **One read of the answer sheet** — the band's numbers, the Books
@@ -430,7 +437,7 @@ final class LibrarySearchModel {
         var listing = LibrarySearchListing()
         let where_ = SearchScope(wingID: wing)
         listing.counts = try Queries.searchCounts(
-            db, query: question.query, scope: where_, calendar: calendar)
+            db, query: question.query, facet: scope.facet, scope: where_, calendar: calendar)
         if scope == .all || scope == .books {
             let section = try books(db, question: question, wing: wing, calendar: calendar)
             listing.books = section.hits

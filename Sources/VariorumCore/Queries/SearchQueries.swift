@@ -422,6 +422,17 @@ extension Queries {
             archivedPlaces: row["archived_places"])
     }
 
+    /// **The band's numbers under a FACET** (the Library's scope picker,
+    /// `SearchFacet`). D3 (PROVISIONAL P-13o-U2-2): the counts are the WHOLE
+    /// question's, whatever the facet — they tell her what every scope
+    /// holds.
+    public static func searchCounts(
+        _ db: Database, query: SearchQuery, facet: SearchFacet, scope: SearchScope,
+        calendar: Calendar = JournalDay.storeCalendar
+    ) throws -> SearchCounts? {
+        try searchCounts(db, query: query, scope: scope, calendar: calendar)
+    }
+
     // MARK: - The tag-association join (13o U3 — the 13i sitting record §12)
 
     /// **The books and gatherings a typed `#tag` is ASSOCIATED with** —
