@@ -2191,3 +2191,10 @@ stood at release (nov5 closed it): **release checks now include `pgrep -fl "Prob
 standing confirmation); `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug
 build-for-testing` → "** TEST BUILD SUCCEEDED **" on the leg's final tree. The five named tests' Mac re-runs are nov5's,
 under the held stage claim.
+
+**FIX LEG 2 VERIFIED + READY round 2 sent (2026-11-06):** HEAD 0930ba69d verified (file list
+matches the leg's claim exactly: TutorialSeeder copy + one DEBUG oracle line + four test files;
+no Sources/, no Shared/; zero retired names left in the seeder). W17–W22 replace W1/2/3/4/7/9
+in the #264 roster. READY round 2 is with nov5: claim vx-827-window-2 — the four failing
+suites + the twelve constructor add-ons (named in the READY message), nov5 to rule targeted vs
+fresh whole target; then VariorumMobileTests on a fresh-booted sim; then the walk.
