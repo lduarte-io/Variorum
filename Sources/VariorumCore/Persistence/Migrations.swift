@@ -1170,6 +1170,55 @@ extension AppDatabase {
                 CREATE INDEX idx_cblock_chosen_variant ON container_block(chosen_variant_id);
                 """)
         }
+        // **VX-808 — THE ARRIVALS & PINS EVENT (SyncSpec §12 lockstep, marker
+        // 14 → 15; the run record `notes/plans/fixes/vx-808-arrivals-books.md`
+        // §5, the architect's shape under her VX-821 + VX-803 rulings: "the
+        // reason is SYNCED — a nullable column on the arrival row, riding the
+        // run's ONE SyncSpec §12 lockstep event TOGETHER with VX-803's pin",
+        // and "a nullable pin mark on `reading_post`, synced, the SAME
+        // lockstep event as the reason column").** Two additive, nullable,
+        // constraint-free TEXT columns on `reading_post`:
+        //
+        // - `arrival_provenance` — WHY an ARRIVAL waits: canonical JSON
+        //   `{"kind": "proposed"|"rule_edit"|"catchup"|"backfill",
+        //   "client": "…"?, "reason": "…"?}` (one column serves VX-821's
+        //   why-it-waits and VX-811's optional per-note reason —
+        //   `block.presentation`'s one-JSON-column precedent). NULL = a
+        //   pre-dating arrival (the face shows since-when only); MALFORMED
+        //   JSON READS AS ABSENT (presentation's rule — a reader never throws
+        //   on it). Member rows leave it NULL (it is the arrival's fact).
+        //   ENCRYPTED under E2EE: an AI-authored reason is prose, and the kind
+        //   and client ride inside the one sealed value, so the structure it
+        //   discloses is nil beyond a non-NULL ciphertext.
+        // - `pinned_at` — the membership pin: non-NULL = pinned, the stamp
+        //   doubling as since-when. PLAIN — a bare timestamp, the
+        //   `archived_at` / `ai_private_at` disclosed-structure class (that a
+        //   membership is pinned, never which words).
+        //
+        // The marker moves because a marker-14 client's whole-row CAS push
+        // would silently null either column out from under a marker-15 writer
+        // (13i-e's reasoning, verbatim). Mirror DDL `18_vx808_arrivals_pins.sql`
+        // — HELD; the deploy is HER window at the run's close, never
+        // pre-authorized.
+        //
+        // **NO new §7 repair:** no new live-unique index, and both columns are
+        // CAS metadata (server-wins; two devices editing one row's pin converge
+        // by the standing metadata class). RECORDED, ACCEPTED: the status-aware
+        // `reading_post` pair dedupe keeps the SMALLER id and its own column
+        // values ride — a cross-device propose/propose (or pin/pin) collision
+        // on one pair keeps the kept row's provenance and pin; the retired
+        // row's die with it.
+        //
+        // No backfill: nothing is pinned or provenanced at birth (a bare ADD
+        // COLUMN writes no row, so the outbox is untouched). No index (both are
+        // read per book, through the existing `idx_reading_post_order`). A store
+        // or plaintext export that ran this reads `.newerSchema` on an older
+        // build (VX-502's classifier — standing, untouched). Its own commit,
+        // ahead of any consuming code (CLAUDE.md).
+        migrator.registerMigration("v1_37_arrival_provenance_and_pin") { db in
+            try db.execute(sql: "ALTER TABLE reading_post ADD COLUMN arrival_provenance TEXT")
+            try db.execute(sql: "ALTER TABLE reading_post ADD COLUMN pinned_at TEXT")
+        }
         return migrator
     }
 }

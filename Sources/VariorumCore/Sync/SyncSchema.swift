@@ -154,11 +154,20 @@ public enum SyncSchema {
     /// release window at her explicit go; mirror DDL
     /// 17_phase_vx307_vault.sql — the vx307 deploy checklist, never
     /// pre-authorized).
+    /// version 15 = the VX-808 ARRIVALS & PINS event (the run record
+    /// `notes/plans/fixes/vx-808-arrivals-books.md` §5: TWO additive columns
+    /// on `reading_post` — `arrival_provenance` (ENCRYPTED: the arrival's
+    /// why, an AI-authored reason being prose) and `pinned_at` (PLAIN, the
+    /// archived_at class); no table, no RPC change; the marker moves
+    /// because a marker-14 client's CAS whole-row push would silently null
+    /// either column out from under a marker-15 writer; mirror DDL
+    /// 18_vx808_arrivals_pins.sql — HELD for HER window at the run's close,
+    /// never pre-authorized).
     /// **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 14
+    public static let lockstepVersion = 15
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -288,7 +297,21 @@ public enum SyncSchema {
             plain: [
                 "id", "reading_id", "post_id", "position", "section_id",
                 "status", "created_at", "deleted_at",
-            ]),
+                // VX-808 (v1_37, marker 14→15 — the run record §5): the
+                // membership PIN. PLAIN — a bare timestamp, the
+                // archived_at / ai_private_at class (disclosed structure:
+                // that a membership is pinned, never which words).
+                "pinned_at",
+            ],
+            // VX-808 (v1_37): WHY an arrival waits — canonical JSON
+            // {kind, client?, reason?}. ENCRYPTED: an AI-authored reason is
+            // PROSE (her VX-821 ruling: "an AI-authored reason is prose →
+            // inside the encrypted payload"), and the kind and client ride
+            // inside the same sealed value, so nothing of it is disclosed
+            // beyond a non-NULL ciphertext. The FIRST encrypted column on
+            // this table — born after the rotation era retired (17), so no
+            // server-side ciphertext registry exists to join.
+            encrypted: ["arrival_provenance"]),
         SyncTable(
             "post_tag",
             plain: ["id", "tag_id", "post_id", "created_at", "deleted_at"]),

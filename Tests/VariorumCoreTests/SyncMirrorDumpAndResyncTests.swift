@@ -86,6 +86,25 @@ struct SyncMirrorDumpAndResyncTests {
                                 '2026-09-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z')
                         """)
             }
+            // VX-808 (v1_37): an ARRIVAL carrying its provenance — the
+            // table's first encrypted column — and a PIN on the member row.
+            // Direct SQL (the propose act and the pin op arrive at B2/B4);
+            // the ciphertext walk needs the provenance populated.
+            let waiting = try ops.createPost(title: "a proposed note", profile: .generic)
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO reading_post (id, reading_id, post_id, position, status,
+                                                  created_at, arrival_provenance)
+                        VALUES ('0A000000-0000-4000-8000-0000000A0001', ?, ?, 'b1', 'arrival',
+                                '2026-11-05T00:00:00.000Z',
+                                '{"kind":"proposed","client":"Claude","reason":"a reason in her words"}')
+                        """,
+                    arguments: [reading.id, waiting.id])
+                try database.execute(
+                    sql: "UPDATE reading_post SET pinned_at = '2026-11-05T00:00:00.000Z' WHERE reading_id = ? AND post_id = ?",
+                    arguments: [reading.id, post.id])
+            }
         }
     }
 

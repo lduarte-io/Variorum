@@ -126,7 +126,11 @@ struct VX307VaultArtifactTests {
     @Test func theHeldMarkerIsTheClientVersionsSuccessorWhileHeld() throws {
         let sql = Self.stripped(try Self.artifact())
         #expect(sql.contains("('lockstep_version', '14')"))
-        #expect(SyncSchema.lockstepVersion == 13 || SyncSchema.lockstepVersion == 14,
-                "13 while 17 is held; 14 the moment VX-329 deploys and registers it")
+        // VX-808 (A JUSTIFIED EDIT): 17 is registered and deployed (VX-329), so
+        // the client may only be AT or PAST its marker now — 15 since the
+        // arrivals & pins event (18). The registered chain's ordering is the
+        // drift pin's (`AuthRLSDDLTests`), which now reads 18.
+        #expect(SyncSchema.lockstepVersion >= 14,
+                "13 while 17 was held; 14 once VX-329 registered it; later events only move it up")
     }
 }
