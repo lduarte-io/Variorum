@@ -204,6 +204,8 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 
 *No behavioral revert is in flight unless a line below says "REVERT IN FLIGHT". Reverts are commit-first, the piece's wiring reverted on the committed tree, the pin run red, restored by `git checkout HEAD -- <file>`.*
 
+**REVERT IN FLIGHT (on `ebff437fa`):** P-808-B2-2's once-spend — `guardProposal` spends only the pure rule's `consumesOnce` (the pre-fix reading); expected RED: `MCPProposeServerTests.aOnceGrantAboveReadIsSpentByTheOneItemItAuthorized`. Restore: `git checkout HEAD -- Sources/VariorumMCP/MCPWriteTools+Propose.swift`.
+
 | Piece | Status |
 |---|---|
 | Reading (own context): this record §1–§9 · MCPSpec IN FULL · `MCPToolCatalog` · `MCPWriteTools` (+NoteLists, +Carriage, +LibraryEdits' gathering words) · `MCPGrantAuthority` / `Domain/MCPGrantRule` (decide, reaches, spends, best) · `MCPOwnActivity` · `MCPNullCharacters` · the two-store catalog + arms · `Domain/IntakeDecision` · `Operations+Intake` (event, sweep, materialize, seat/dismiss) · `+Ownership` (copy/move in, the revival pass, the daily bell) · `+Reading` (create's backfill, the rule write's sweep, reopen, restore, the hand-add) · `+ReadingArchive` / `+Seal` (the catch-ups) · `+MCPCarriage` (set_book_rule) · `+MCPWrites` (the add's undo) · `Sync/BookWingMend.swift` (the stamp) + `Sync/Repairs.swift` (the OWNED demotion, the dedupe promotion — read only) · `Queries/ArrivalQueries` · the app's `MCPPaneCopy` Activity/receipt tables + `MCPTrail` | DONE |
