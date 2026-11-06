@@ -2198,3 +2198,12 @@ no Sources/, no Shared/; zero retired names left in the seeder). W17–W22 repla
 in the #264 roster. READY round 2 is with nov5: claim vx-827-window-2 — the four failing
 suites + the twelve constructor add-ons (named in the READY message), nov5 to rule targeted vs
 fresh whole target; then VariorumMobileTests on a fresh-booted sim; then the walk.
+
+**READY round 2 ruled (nov5, 2026-11-06): FRESH WHOLE TARGET.** TutorialSeeder has 42
+constructors in this tree — a seed copy change can move counts, search hits and word
+assertions far outside the Tutorial suites, so the targeted set is superseded.
+vx-827-window-2 = WHOLE VariorumTests on 0930ba69d → SEAM → walk rows 1–23; GO expected after
+~04:30 (queue: vx-878 → vx-819's merge gate → us); the window doubles as our merge-gate
+evidence. ACCEPTED nov5's offer: the PHONE ARM alone (VariorumMobileTests, fresh sim, settle,
+shutdown) slots earlier at vx-878's SEAM. Any branch change before the window re-sends the
+file list.
