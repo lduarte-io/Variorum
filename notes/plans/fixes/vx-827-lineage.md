@@ -753,6 +753,13 @@ trailers; push every commit; foreground waits only.
 
 ## U2 RECORD — VX-810 + VX-815 + VX-778 (the read-ergonomics batch)
 
+**NOT DONE in U2, said first:** no App-target TEST run (no stage — U2 touched no App file; U1's owed Mac pins stand for
+the closing window, and no new Mac pin was needed: VX-778's count lives in core and is pinned there); no edit to
+MCPSpec, SurfaceContracts, AppSpecRecord or QUESTIONS (D-U2-1…5 and P-U2-1…5 are drafts for the orchestrator); the
+public MCP guide page (stargazing.tech/variorum/mcp, outside the repo) may want `list_notes`' `tag`, the richer rows
+and the empty-note sentence — her word at closeout; the stale "N shared places" wording in `MCPDoor`/`MCPPaneCopy`
+COMMENTS (vx-878's files) left as is.
+
 *Implementer: opus-implementer, fresh session, 2026-11-05. Headless only (`swift build` / `swift test` on the
 package, `xcodebuild build-for-testing` for the App target's compile); no stage, no xcodebuild test, no GUI, no
 store touches.*
@@ -769,7 +776,7 @@ store touches.*
 | U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | DONE — red exactly as announced on the revert, green on the fix (below) |
 | U2-6 | C — VX-778's predicate + its pin (red-on-old) | DONE — red on the pre-fix tree, green on the fix; predicate-narrow, no App file touched |
 | U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) + the #264 items | DONE — D-U2-1…5, P-U2-1…5 |
-| U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | NEXT |
+| U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | DONE — below |
 
 ### U2-1 — the tag filter's argument (the proposal gate: NOT ambiguous)
 
@@ -953,3 +960,44 @@ what the row she just read names; Deny still revokes the gone rows (they leave S
 [built]** as is — the confirm agrees with the row; **(b)** a third count (`gone`) carried on `MCPDoor.ClientRow` so
 the confirm names every row the press revokes — an `MCPDoor` + `MCPPane` edit (vx-878's batch-3 files; NOT built,
 outside the narrow agreement); **(c)** the row also says "· K gone" — a rendering change, out of scope.
+
+### U2 — END (the suites, on the committed `50f6953e7`; headless)
+
+- **The whole package, headless** (`swift test`, every target): core "✔ Test run with 3817 tests in 518 suites passed
+  after 262.268 seconds with 5 known issues" (the standing known-issue set); a further target "✔ Test run with 32 tests
+  in 4 suites passed"; **the MCP target** "✘ Test run with 627 tests in 117 suites failed after 56.990 seconds with 4
+  issues" — ALL FOUR the socket-timing NO-VERDICT class under a loaded run, named:
+  `MCPStopRoadsServerTests.aClientThatLeftBeforeTheQuitKeepsItsOwnLine`,
+  `MCPDiscoverProbeServerTests.claudeCodesPipelinedProbeIsAnsweredAndItsInitializeServes`,
+  `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (past 15 s) and
+  `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds(_:)` (`.clientHangsUp` — its PREMISE failed:
+  "every session's initialize was answered (1 not)"). The five socket suites re-run ALONE (with
+  `MCPPreInitializeWindowTests`, red once in a mid-unit run): "✔ Test run with 24 tests in 5 suites passed". Every
+  other suite green — the two-store catalog (now with U2's 13 arms), `MCPUndeclaredArgumentsServerTests`,
+  `MCPListNotesByTagServerTests`, `MCPEmptyNoteServerTests`, the re-pinned golden guard, `MCPAdviceServerTests` (the
+  instructions untouched), the shared brain's `TagUsageQueriesTests`/`UnusedTagsTests`, `MCPGrantPlacesTests`.
+- **App target COMPILE only** (no stage needed): `xcodebuild -scheme Variorum -destination 'platform=macOS'
+  -configuration Debug build-for-testing` → "** TEST BUILD SUCCEEDED **".
+- `Tools/verify-pins` → OK both graphs (16 + 15 pins); `git status` clean.
+
+**Row dispositions.** VX-810 — BUILT (all three facets; feature pins + 10 catalog arms red on the fence mutation; one
+justified re-pin). VX-815 — FIXED (the trace's nothing-shape pinned red by the announced revert; the literal "≠ the
+fence answer" half green on both sides — recorded, asserted as a control, never claimed). VX-778 — FIXED (red on the
+pre-fix tree; predicate-narrow, core only; its Deny consequence to #264 as P-U2-3).
+
+**Self-assessment (the implementer's, before the ladder):**
+- *Confident:* the wearer read's rule (one text with the shared brain) and its cost (the library pin flat, red on the
+  naive join by measurement and by plan); the tagged listings' fence (every catalog arm pure, red when the walk's rule
+  is skipped); VX-815's mechanism and that the fence is untouched by construction (every refusal returns before the
+  substitution; hidden = missing pinned in three forms); VX-778's predicate is the listing's own.
+- *Watch in review:* (1) the BARE tagged listing reads the wearers as its candidates instead of `sharedPage`'s
+  sources — sound only while every grant kind's reach is in the sources (pinned: the tagged listing == the
+  unfiltered listing's wearers, same order; a future grant kind must keep both); (2) a tagged BOOK listing walks the
+  book's members filtering by `IN json_each` — ∝ the book, not the page; (3) `liveTagIDs` probes Home + the `wing`
+  rows, so a tag naming a wing id with no row at all is missed (no op mints one; said in its doc); (4) the rows' `tags`
+  are the note's own while the filter also matches a block's (the description says both; P-U2-5); (5) the catalog's
+  new reachable `empty` note (a READ note grant) and the hidden half's three applications changed several existing
+  arms' answers in all stores alike — A == B and B == C held, nothing re-baselined; (6) VX-778's Deny-confirm
+  consequence (P-U2-3).
+- *Owed by others:* the closing window's App-target suites; her #264 words and calls (P-U2-1…5); the canon landing
+  (D-U2-1…5); the public guide page.
