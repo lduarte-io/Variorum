@@ -187,7 +187,7 @@ safety copy before ANY real-store touch (none expected this run).
 | 3 | VX-801 design pass (5 mockup rounds + 2 explorations) | DONE — THE DESIGN MEMO settled at the exploration sitting |
 | 4 | U3a — the Commits face | DONE (fc8880a53…dc7fde0e5; adjudication below) |
 | 4b | U3b — the Lineage face + origin re-aim + panel retirement | DONE (654cf3469…; U3b RECORD below) |
-| 5 | Ladder (whole diff) | ROUND 1 RUNNING (fable-reviewer; findings file vx-827-ladder-round1.md) |
+| 5 | Ladder (whole diff) | ROUND 1 DONE (0 BLOCKER/MAJOR, 2 MINOR, 3 NIT — dispositions below); fix leg + round 2 pending |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
 | 7 | Closeout ritual (tickets, handoff, canon-size, worktree removal) | NOT-STARTED |
 
@@ -1943,3 +1943,52 @@ before the GO.
 our walk's launch will likely restore full-screen — where cliclick's typing (t:/kp:) stops
 landing while clicks still work (System Events keystrokes do work). The walk's FIRST step is
 ⌃⌘F to a normal window; the window is left WINDOWED at quit.
+
+## LADDER ROUND 1 — DISPOSITIONS (the orchestrator, 2026-11-06; the findings file is
+`notes/plans/fixes/vx-827-ladder-round1.md`, committed by the reviewer at 840f91f92)
+
+**R1-F1 [MINOR, the flush gap] — FIX THIS RUN.** The mechanism is traced and real (a relative
+placed in another note, live in a second window with pending typing → a stale pane "now" and a
+stale minted take), flush-first is the standing precedent, and the reviewer names a workable
+red-on-old pin. Goes to the U3b implementer verbatim for agree/dispute; on agreement it applies
+the fix (flush the source block's placed note inside `LineageBringBack.run`; relative-role
+`start()` flushes the relative's placed note) with the pin red on old, revert-verified.
+**R1-F2 [MINOR, the raw-wing fence] — RECORD, NOT A LADDER FIX** (the reviewer's own proposed
+disposition): the fence errs CLOSED (nothing unsafe; a dangling wing is a sync-only state no
+local op mints), and a pin would be hollow without hand-built rows. JOINS the liveTagIDs
+born-ticket as one dangling-wing facet pair (Low · Suspected · Debt, filed at closeout).
+**R1-F3 [NIT, canon drafts] — DONE BELOW** (D-U3-1/-2 drafted; the closeout's landing is now
+mechanical).
+**R1-F4 [NIT, ✕ semantics + the two nows] — #264** as their own P-lines: **P-U3a-5b** — ✕
+renders on every box while three stand and removes any down to two (the defensible reading,
+as built); **P-U3b-14** — on the Lineage face "now" is two things: the pane's against-now wash
+compares against the RELATIVE's own take-now, the header's Compare with now against the HOME
+block's now (both leans kept; hers to re-cut).
+**R1-F5 [NIT, the `mcpShownTake` name] — FIX THIS RUN as a mechanical rider** on R1-F1's core
+touch (the reviewer's "rename at next core touch" — this IS the next core touch): a faithful
+generic name (the implementer picks; the rule is a rendered-take read, not an MCP fact), call
+sites swept, no behavior, pins compile unchanged.
+
+## DRAFT CANON DELTAS — D-U3 (land at closeout, two-file rule)
+
+**D-U3-1 (SurfaceContracts, The note — REPLACES the "Block History (vx-440, R-440-3)" bullet;
+VX-674's unnamed-commit-rests-on-first-words and VX-668's restore-landing rules survive inside
+it):** *History & lineage (VX-801): one surface, two faces; every history door opens it and the
+Block History panel is retired. Commits is the default face: the selected moment's full text as
+a reading pane (plain · against-now washes — a view-time word compare, stored nowhere) beside
+the all-takes rail (newest first, each line its take's chip, the take dropdown filtering to one
+take led by its "take now", quiet runs folded, an AI edit's before/after pair never folding,
+deleted takes at the foot with Put back); ↑/↓ steps the pane; a moment's acts are Restore ·
+Bring back as take · Compare · Name, an unnamed moment resting on its first words; Compare is
+two swappable boxes with "now" always offerable as a standing third. The Lineage face is behind
+its own door: the family vertical, older above; selecting a member swaps the same pane and rail
+to that block; member acts Put back · Bring back as take · Compare with now; a Trash member
+muted with no acts; another wing's member named with go-to only; the origin doors land here
+with the original selected. (notes/plans/fixes/vx-827-lineage.md, THE DESIGN MEMO)*
+**D-U3-2 (AppSpec §9, beside bringBackCommitAsTake):** *bringBackFromLineage(source, onto) —
+mints a take on the target block from a lineage relative's take or commit: text as stored,
+label = the source's name when it has one, fan's end, never chosen, never born locked, NULL
+parent (the existing edge carries the lineage); no touch, no churn, no undo entry (delete the
+take is the road back); refuses a dead or sealed target, a dead source, and a source outside
+the target's lineage neighbourhood (`notInLineage` — the fence lives in the operation; scraps
+stays the shared room). (vx-827-lineage.md, U3b-P RULED)*
