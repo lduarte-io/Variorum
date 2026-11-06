@@ -51,15 +51,42 @@ extension Queries {
         /// the ownership table reads). Defaulted so a hand-built row reads as
         /// an ordinary waiter.
         public let archived: Bool
+        /// **VX-821 (the VX-808 run, Unit B3) — WHY it waits**: the row's
+        /// `arrival_provenance`, decoded (`ArrivalProvenance.decode` —
+        /// malformed or absent reads as nil). Read on LIVE ARRIVAL rows only,
+        /// which is this listing's own predicate, so a member row's carried
+        /// value (A-808-9's carry-on-seat) is never spoken. nil = an arrival
+        /// older than the column: the face says since-when alone.
+        public let provenance: ArrivalProvenance?
+        /// The `tagged` cause's tag, by its PATH as the store names it now
+        /// (resolved in one statement over the listed rows' tag ids); nil for
+        /// every other cause and for a tag since deleted (the face then says
+        /// the bare kind word).
+        public let tagPath: String?
 
         public init(
-            id: String, postID: String, title: String, arrivedAt: String, archived: Bool = false
+            id: String, postID: String, title: String, arrivedAt: String, archived: Bool = false,
+            provenance: ArrivalProvenance? = nil, tagPath: String? = nil
         ) {
             self.id = id
             self.postID = postID
             self.title = title
             self.arrivedAt = arrivedAt
             self.archived = archived
+            self.provenance = provenance
+            self.tagPath = tagPath
+        }
+
+        /// **Since when it waits** (A-808-7 (ii)): a DEMOTION's own moment
+        /// (`provenance.at` — a demoted row's `created_at` is its ORIGINAL
+        /// filing's and would mis-say how long it has waited) when it reads as
+        /// a stamp, else the row's `created_at` (a fresh bell's moment IS its
+        /// birth). Raw canonical ISO text, worded by the face.
+        public var waitingSince: String {
+            if let at = provenance?.at, DateFormatter.variorumISO8601.date(from: at) != nil {
+                return at
+            }
+            return arrivedAt
         }
     }
 
@@ -110,19 +137,58 @@ extension Queries {
         let count = try Int.fetchOne(
             db, sql: bookArrivalCountSQL, arguments: [readingID]) ?? 0
         guard count > 0, limit > 0 else { return BookArrivals(count: count, rows: []) }
-        let rows = try Row.fetchAll(
+        let fetched = try Row.fetchAll(
             db, sql: bookArrivalRowsSQL, arguments: [readingID, limit]
         ).map { row in
-            BookArrival(
+            (row: row, provenance: ArrivalProvenance.decode(row["provenance"]))
+        }
+        // VX-821: the `tagged` causes' tags, by path — ONE statement over the
+        // listed rows' tag ids (∝ the listing, never the vocabulary).
+        let tagIDs = Set(fetched.compactMap { entry -> String? in
+            guard entry.provenance?.knownKind == .tagged else { return nil }
+            return entry.provenance?.tag
+        }).sorted()
+        let paths = try arrivalTagPaths(db, tagIDs: tagIDs)
+        let rows = fetched.map { entry in
+            let row = entry.row
+            let tagPath: String? = entry.provenance?.knownKind == .tagged
+                ? entry.provenance?.tag.flatMap { paths[$0] } : nil
+            return BookArrival(
                 id: row["id"],
                 postID: row["post_id"],
                 title: DisplayTitle.note(
                     title: row["title"], entryDate: row["entry_date"],
                     createdAt: row["note_created_at"]),
                 arrivedAt: row["arrived_at"],
-                archived: row["archived"])
+                archived: row["archived"],
+                provenance: entry.provenance,
+                tagPath: tagPath)
         }
         return BookArrivals(count: count, rows: rows)
+    }
+
+    /// The live tags' paths among `tagIDs` (a dead or unknown id is absent) —
+    /// a primary-key seek per id.
+    static func arrivalTagPaths(_ db: Database, tagIDs: [String]) throws -> [String: String] {
+        guard !tagIDs.isEmpty else { return [:] }
+        let rows = try Row.fetchAll(
+            db, sql: arrivalTagPathsSQL(count: tagIDs.count), arguments: StatementArguments(tagIDs))
+        var paths: [String: String] = [:]
+        for row in rows {
+            let id: String = row["id"]
+            let path: String = row["path"]
+            paths[id] = path
+        }
+        return paths
+    }
+
+    /// The tag-path statement (the plan pin reads THIS text). Placeholders:
+    /// `count` tag ids.
+    static func arrivalTagPathsSQL(count: Int) -> String {
+        """
+        SELECT id, path FROM tag
+        WHERE id IN (\(databaseQuestionMarks(count: count))) AND deleted_at IS NULL
+        """
     }
 
     /// The ONE predicate both statements share — so a pin's
@@ -142,6 +208,7 @@ extension Queries {
     /// limit.
     static let bookArrivalRowsSQL = """
         SELECT rp.id AS id, rp.post_id AS post_id, rp.created_at AS arrived_at,
+               rp.arrival_provenance AS provenance,
                c.title AS title, c.entry_date AS entry_date,
                c.created_at AS note_created_at,
                (c.archived_at IS NOT NULL) AS archived
