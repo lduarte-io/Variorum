@@ -183,8 +183,8 @@ safety copy before ANY real-store touch (none expected this run).
 | # | Item | Status |
 |---|---|---|
 | 1 | U1 — lineage queries + VX-817 wire + the F-U1-1 stub retirement | DONE (c0cad8fd3…40b8f417a; adjudications below) |
-| 2 | U2 — VX-810 + VX-815 + VX-778 (rider, her kickoff pick) | NOT-STARTED |
-| 3 | VX-801 design mockup + sitting | NOT-STARTED |
+| 2 | U2 — VX-810 + VX-815 + VX-778 (rider, her kickoff pick) | DONE (22c3a5a89…06113a96c; adjudication below) |
+| 3 | VX-801 design mockup + sitting | MOCKUP READY (notes/plans/vx-827-mockups/lineage-door.html) — HER Q1–Q6 RULINGS OWED, gate for U3 |
 | 4 | U3 — VX-801 build | NOT-STARTED |
 | 5 | Ladder (whole diff) | NOT-STARTED |
 | 6 | MCPSpec/SurfaceContracts deltas + AppSpecRecord entry (closeout, two-file rule) | NOT-STARTED |
@@ -1001,3 +1001,27 @@ pre-fix tree; predicate-narrow, core only; its Deny consequence to #264 as P-U2-
   consequence (P-U2-3).
 - *Owed by others:* the closing window's App-target suites; her #264 words and calls (P-U2-1…5); the canon landing
   (D-U2-1…5); the public guide page.
+
+## U2 ADJUDICATION (the orchestrator, 2026-11-06 — after independent verification)
+
+**Verified:** commits 22c3a5a89…06113a96c on origin, tree clean; the new suites re-run
+independently (TagWearersListingTests 16/16 incl. the flat library pin; the filtered MCP/core
+set 19/19 green). The core's "5 known issues" are Swift Testing's expected-failure standing set
+on a PASSED run; the MCP target's four reds are the standing socket-timing class, named in the
+record, green alone — accepted, not this unit's.
+
+**Sustained:** the no-proposal call (every tag tool takes `tag` as a path — the convention was
+not ambiguous); VX-810's fence pick (a path naming nothing, a tag worn only beyond reach and a
+hidden wing's tag all answer the SAME empty listing, never a refusal — the listing idiom, hidden
+= missing); VX-815's pin honesty — the briefed "granted-empty ≠ fence" red-on-old was IMPOSSIBLE
+(the fence was always a worded refusal; the empty read was `""`), so it stands as a green control
+while the CHANGE (the says-it's-empty sentence) is pinned red-on-old by announced revert — the
+ticket's substance is delivered; VX-778 as built with the P-U2-3 Deny-confirm consequence
+(option (a); (b) touches vx-878's files and was rightly not built) — PROVISIONAL #264.
+
+**Carried to the ladder's attention:** the tagged BOOK listing costs ∝ the book's members (bounded
+by membership, never the corpus — a deliberate flag, not a verdict); the wearers-equality premise
+pin; the `kin`/`empty` fixtures' effect on existing catalog arms (controls held, nothing hand
+re-baselined). **BORN-TICKET CANDIDATE (filed at closeout):** `Queries.liveTagIDs` misses a tag
+whose wing id names no wing row at all — no operation creates one today (Low, Suspected, Debt).
+**P-U2-1…5 join bundle #264.**
