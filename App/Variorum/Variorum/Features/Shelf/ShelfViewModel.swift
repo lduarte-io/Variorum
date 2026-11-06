@@ -71,6 +71,11 @@ final class ShelfViewModel {
     /// "Share with AI…" (P-2; `Queries.mcpFencedBookIDs`, the fence's own
     /// fragments). Held with `aiReach`.
     private(set) var fencedBooks: Set<String> = []
+    /// **VX-831 — the board's books that wear the Private mark** (their own
+    /// stamp; a gathering never — `Queries.privateBookMarks`), held over the
+    /// board's own rows (`holdPrivateMarks`), whatever the clients (N-2).
+    /// Reads `reading` only — never at autosave rate.
+    private(set) var privateBookIDs: Set<String> = []
 
     // MARK: What the board said last (kept for the pins; also spoken)
 
@@ -349,6 +354,18 @@ final class ShelfViewModel {
     nonisolated struct SharingSnapshot: Equatable, Sendable {
         var reach: [String: [MCPPlaceReach]]
         var fenced: Set<String>
+    }
+
+    /// The ids of the readings the board holds (its rows' subjects).
+    var bookIDs: [String] { books.map(\.reading.id) }
+
+    /// VX-831 — hold the board's books' Private marks (the view's
+    /// `.task(id: bookIDs)` — a new set of rows restarts it).
+    func holdPrivateMarks(_ ids: [String]) async {
+        await PrivateMarkHold.books(session, ids) { [weak self] value in
+            guard let self, self.privateBookIDs != value else { return }
+            self.privateBookIDs = value
+        }
     }
 
     /// The one-shot half (on appearance and after the board's own acts — a

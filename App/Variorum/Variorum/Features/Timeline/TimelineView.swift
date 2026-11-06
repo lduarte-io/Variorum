@@ -69,6 +69,11 @@ final class TimelineViewModel {
     /// answer until she scrolls back (the Library's own rule).
     private(set) var reach: [String: [MCPPlaceReach]] = [:]
 
+    /// **VX-831 — each row's Private mark** (the closed eye beside the shared
+    /// icon): `Queries.privateMarks`, HELD over the SAME near window
+    /// (`reachIDs`) — the store's own fact, whatever the clients (N-2).
+    private(set) var privateMarks: [String: Queries.PrivateMark] = [:]
+
     /// **VX-281 ladder R1-1 — the near window** (`NearWindow`, the Library's
     /// own rule, over this list's 50-row pages): the pages around the rows on
     /// screen. Only a page boundary moves it.
@@ -139,6 +144,17 @@ final class TimelineViewModel {
         }
     }
 
+    /// VX-831 — hold the window's Private marks (the view's `.task(id:
+    /// reachIDs)` beside the reach's). Only the held rows' answers land.
+    func holdPrivateMarks(_ ids: [String]) async {
+        await PrivateMarkHold.notes(session, ids) { [weak self] value in
+            guard let self else { return }
+            var next = self.privateMarks
+            for id in ids { next[id] = value[id] }
+            if next != self.privateMarks { self.privateMarks = next }
+        }
+    }
+
     private func landReach(_ value: [String: [MCPPlaceReach]], for ids: [String]) {
         var next = reach
         for id in ids {
@@ -203,6 +219,8 @@ struct TimelineView: View {
     /// VX-268 (P-1's declared ⇔ rendered walk): a row's ONE shared icon and
     /// its popover's Change… / Revoke.
     static let surfaceCapabilities: [CapabilityID] = MCPSharedIcon.surfaceCapabilities
+        // VX-831: the Private mark beside it.
+        + PrivateMarkView.noteSurfaceCapabilities
 
     let session: AppSession
     var openPost: (String) -> Void
@@ -287,6 +305,8 @@ struct TimelineView: View {
         // VX-268: who reaches the rows — held over the near window (VX-281
         // R1-1), re-aimed only when the window crosses a page.
         .task(id: model.reachIDs) { await model.holdReach(model.reachIDs) }
+        // VX-831: the same window's Private marks.
+        .task(id: model.reachIDs) { await model.holdPrivateMarks(model.reachIDs) }
     }
 
     /// **A timeline row, in the voice's own type** (row 54): the same
@@ -309,6 +329,13 @@ struct TimelineView: View {
             // VX-268: the ONE shared icon (nothing when nobody reaches the
             // note) — its own button: the row's open never fires for it.
             MCPSharedIcon(reaches: model.reach[item.postID] ?? [], tokens: tokens)
+            // VX-831: the Private mark (nothing when the note is not Private).
+            PrivateMarkView(
+                door: PrivateMarkFace.note(
+                    model.privateMarks[item.postID],
+                    badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                    .map { PrivateMarkDoor(mark: $0, subjectID: item.postID, session: session) },
+                tokens: tokens)
             // R3-2's rule, applied by hand because this row holds one hit
             // and not a catalog's: under the entry-date lens the trailing
             // stamp already SAYS the stated day, so the row never prints

@@ -51,6 +51,8 @@ struct ShelfView: View {
         + MCPSharedIcon.surfaceCapabilities
         // 13n-c U4: a book row's pending-ask glyph.
         + MCPAskGlyph.surfaceCapabilities
+        // VX-831: a book row's Private mark (the closed eye).
+        + PrivateMarkView.bookSurfaceCapabilities
 
     let session: AppSession
     let model: ShelfViewModel
@@ -296,6 +298,8 @@ struct ShelfView: View {
         .task { await model.refreshAggregates() }
         // 13n-c U3 (VX-271): the shared icons' held half.
         .task { await model.watchSharing() }
+        // VX-831: the board's books' Private marks, held over its rows.
+        .task(id: model.bookIDs) { await model.holdPrivateMarks(model.bookIDs) }
         #if DEBUG
         // VX-829: the bind door is the one brain's (`model.rowDoors`).
         .onAppear { BindDoorProbe.openShelfDoor = { reading in Task { await model.rowDoors.openBind(reading) } } }
@@ -638,6 +642,18 @@ struct ShelfView: View {
                         if let reach = model.aiReach[reading.id], !reach.isEmpty {
                             MCPSharedIcon(reaches: reach, tokens: tokens)
                         }
+                        // VX-831: the book's own Private mark — its press
+                        // un-privates it (Book Settings' Private row's op).
+                        PrivateMarkView(
+                            door: PrivateMarkFace.book(
+                                marked: model.privateBookIDs.contains(reading.id),
+                                badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                                .map {
+                                    PrivateMarkDoor(
+                                        mark: $0, subjectID: reading.id, subjectName: reading.name,
+                                        session: session)
+                                },
+                            tokens: tokens)
                         // 13n-c U4 (VX-271's family; arrival X): an ask
                         // waiting on this book — hover names who and what,
                         // her press opens it. Its own button, like the icon.
