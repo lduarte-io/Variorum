@@ -1039,3 +1039,23 @@ claim name once the ladder closes. Merge planning: vx-808 carries the v1_37 sche
 deploy/release CLOSES the stage; it edited SearchPassagesTests (no known overlap with us); merges
 serialize through nov5 — the second merger merges the first and re-runs the MCP overlap suites
 (+ the pane suites + CapabilityRegistryTests + ShellChromeTests per the vx-878 agreement).
+
+**Mockup v1 sitting (2026-11-05 evening, on the Air — her feedback verbatim-faithful, supersedes
+v1's drawn shapes):** the glance is NOT a literal popup — *"when I said popup, I was kind of
+imagining more that when you go into the block menu that already existed, that it would be
+there… i do not think a literal popup is needed. at most it would be like the way takes looks."*
+She asked whether the popup was already built — it is NOT (nothing of VX-801 is built; U1's
+queries only). The redesign's center of gravity moves: *"i almost feel like the more relevant
+issue for redesign is being able to easily see your commits, compare the commit to the current
+take you're looking at, etc. it just looks crowded and hard to see"* (two Block History panel
+screenshots attached in session). Layout: *"i also do not like the left to right scroll in the
+whole area - that gets confusing. maybe we do a verticle scroll where older is above"*; *"think
+about git - i know that shows with branches, but like I really do feel like we have to focus on
+making the information easily accessible. showing compare, letting people look for commits on
+previous takes of ancestor blocks easily is the goal - what would get us to that point?"*
+Progressive disclosure ruled: *"i agree things can expand piece by piece - nothing at first,
+then takes, then commits of those takes if you really want."* → v1's Q2 is ANSWERED (vertical,
+older above, no horizontal scroll); Q3 ANSWERED (collapsed → takes → commits); Q1's popup arm is
+DEAD (the door lives in the existing block menu / history door). Mockup v2 owed: ONE vertical
+story surface whose rest state IS the glance, absorbing the Block History redesign question and
+the commit-vs-now compare.
