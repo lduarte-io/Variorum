@@ -386,17 +386,26 @@ struct SearchPassagesTests {
                      "SEARCH c USING INDEX sqlite_autoindex_container_1 (id=?)",
                      "SEARCH b USING INDEX sqlite_autoindex_block_1 (id=?)",
                      "SEARCH r USING INDEX sqlite_autoindex_reading_1 (id=?)",
-                     "SEARCH rp USING INDEX idx_reading_post_order (reading_id=?)", // the book's members
                      "SEARCH pt USING INDEX idx_post_tag_tag (tag_id=?)",          // a tag's own applications
                      "SEARCH bt USING INDEX idx_block_tag_tag (tag_id=?)"] {
             #expect(text.contains(seek), "\(seek) — missing:\n\(text)")
         }
+        // The book's members: an index SEEK on reading_id. VX-808 (A JUSTIFIED
+        // EDIT — the v1_37 schema event): which of the table's two
+        // reading_id-leading indexes the planner takes follows the row's width —
+        // `reading_post`'s two new columns tipped it from `idx_reading_post_order`
+        // to the partial live-row `uq_reading_post_live`, which matches the
+        // subquery's own `deleted_at IS NULL` and covers its `post_id`. Either is
+        // the bounded seek this pin guards; a SCAN of rp fails below.
+        #expect(text.contains("SEARCH rp USING INDEX uq_reading_post_live (reading_id=?)")
+                    || text.contains("SEARCH rp USING INDEX idx_reading_post_order (reading_id=?)"),
+                "the book's members by an index seek on reading_id — missing:\n\(text)")
         #expect(text.contains("SEARCH applied USING INDEX uq_tag_path_live (wing_id=? AND path>? AND path<?)"),
                 "the subtree is an index RANGE on the root's path:\n\(text)")
         // (A typed `#path` resolves its ROOT by a case-folded walk of the tag
         // VOCABULARY — `SCAN root USING INDEX uq_tag_path_live` — bounded by
         // her tag tree, never by what she wrote; an id-term is a PK seek.)
-        for alias in ["d", "pl", "c", "b", "r", "pt", "bt", "applied", "search_doc", "container", "variant"] {
+        for alias in ["d", "pl", "c", "b", "r", "rp", "pt", "bt", "applied", "search_doc", "container", "variant"] {
             #expect(!plan.contains { $0 == "SCAN \(alias)" || $0.hasPrefix("SCAN \(alias) ") },
                     "SCAN \(alias) is a corpus walk:\n\(text)")
         }
