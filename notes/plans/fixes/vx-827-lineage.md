@@ -2094,3 +2094,10 @@ honest batch is THE WHOLE TARGET: `-only-testing:VariorumTests`, preceded by the
 red-on-old ritual (revert A → LineageFaceModelTests expecting its named red → restore →
 revert B → same → restore → the fix tree's LineageFaceModelTests green). READY carries exactly
 these names.
+
+**Trial-merge update (nov5, 2026-11-06 00:4x):** NEW conflict with vx-878 (4b1b10847) in
+`App/Variorum/VariorumTests/CapabilityRegistryTests.swift` (both runs add registry declarations
+and their test rows). Unchanged vs vx-808 (c373bdd17): the three tool-list files;
+`MCPReadTools.swift` is now a SHARED file with vx-808's B5 but merges clean today. Clean with
+vx-819. The second merger against either resolves and re-runs CapabilityRegistryTests +
+ShellChromeTests (plus the MCP catalog and server suites against 808).
