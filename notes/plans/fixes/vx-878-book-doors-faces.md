@@ -91,9 +91,10 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | 7 | VX-858 gone-place refusal names the note | 3 | NOT-STARTED |
 | 8 | VX-816 name guard per wing | 3 | NOT-STARTED |
 
-## Her rulings at the kickoff sitting (recorded verbatim-faithful as they land)
+## Her rulings at the kickoff sitting (2026-11-05, the question batch)
 
-*(pending — the sitting runs after this file's first commit)*
+- **R-878-K1 — the cast:** fable-reviewer for the run's one ladder (her pick of the recommended option); Opus implements every batch. CONFIRMED.
+- **R-878-K2 — riders: NONE.** Her words: "pretty sure another run is taking vx-788 - check on it and send a message about overlap to whatever session claimed. no riders." Checked: she means **VX-778** (VX-788 is unclaimed PaneSurface editor debt) — VX-778 was seated under **VX-827** minutes before the sitting (parentId VX-827, updated 2026-11-06T00:34Z). The overlap message went to the vx-827 session same turn: both runs may touch the Settings ▸ MCP pane (their VX-778 Clients-tab count; our VX-874 trail dial); merges serialize via nov5, the second merger re-runs the pane suites. VX-830 and VX-364 stay unclaimed on the board; the eight seated members are the whole roster.
 
 ## HELD FOR HER (the bundle; grows as PROVISIONALs land)
 
