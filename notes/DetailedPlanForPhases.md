@@ -21,22 +21,23 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | **VX-882 — the Tags explainer, simpler example** (writing · fiction · nonfiction), parallel to VX-877 at her word 2026-11-05; she picks one. SITE REPO ONLY; its own worktree. | VX-882 · `vx-882-tags-explainer-simple` | `~/dev/stargazing.tech/stargazing-tech-vx-882` · the Air | Live 2026-11-05; record `notes/runs/vx-882-tags-explainer-simple.md` in the site repo. |
 | **VX-884 — the books-loop animation, exact** (her script's site loop rebuilt as written), parallel at her word 2026-11-05. SITE REPO ONLY; its own worktree. | VX-884 · `vx-884-books-loop-exact` | `~/dev/stargazing.tech/stargazing-tech-vx-884` · the Air | Live 2026-11-05; record `notes/runs/vx-884-books-loop-exact.md` in the site repo. |
 | **VX-885 — the books-loop animation, freer** (same concept and look, own examples and wording), parallel at her word 2026-11-05. SITE REPO ONLY; its own worktree. | VX-885 · `vx-885-books-loop-free` | `~/dev/stargazing.tech/stargazing-tech-vx-885` · the Air | Live 2026-11-05; record `notes/runs/vx-885-books-loop-free.md` in the site repo. |
-| **VX-819 — Umbrella: search** (wave 2; members VX-734 Blocks-facet mismatch · VX-820 recency sort · VX-822 sidebar search door). Surfaces: the Library (search, controls row) + the sidebar; NO Sync/, NO custody, NO editor seam; stage only for Mac suite runs/walks (coordinator: nov5). | VX-819 · `vx-819-search` | `~/dev/variorum-vx-819` · the Pro | Live 2026-11-05; record `notes/plans/fixes/vx-819-search.md`. |
 
 ### Latest closeout
 
-**→ VX-878 CLOSED 2026-11-06 — BOOK DOORS & FACES (the record `notes/plans/fixes/vx-878-book-doors-faces.md`,
-FOR A LATER READER at its top; the VX-808 split's no-sync half, run overnight under /architect-phase, nov5 coordinating).**
-Nine members, four batches, one fable ladder round (no BLOCKER/MAJOR; the F3 dispute resolved reviewer-side — its own
-proposed fix would have broken R-878-K3). The book-row menu is ONE registry table with two derived faces; Book Settings
-gained the wing row; the note-title menu carries the note's own doors; the plain-book delete reads in both arms; a rename
-repaints in place; the book name guard is PER-WING (phone included — MobileSoul PL-69); the Private mark (her closed eye,
-the approved-client gate R-878-K3, the click-door's two arms); the trail's float/dismiss/clear-all/drag + the three-state
-dial on Settings ▸ MCP ▸ Activity (moved there by the window fix after the whole-target gate caught its first seat breaking
-VX-281's pane geometry); the seven-receipt gone-words sweep; the masthead's one-line mode row (R-878-K4 strict). The gate:
-whole-target 6077/1054 + the six-file fix + 92/11 green + phone 852/139; every bug-class pin RUN RED live on its pre-fix
-tree. Born VX-889; VX-855's second sighting commented. Bundle QUESTIONS #264; handoff `notes/handoffs/vx-878-handoff.md`.
-Canon: SurfaceContracts ×6 · MCPSpec ×4 · AppSpec ×2 (135,032/150,000). PR #229, merge 35a98fb6a.
+**→ VX-819 CLOSED 2026-11-06 — THE SEARCH UMBRELLA (the record `notes/plans/fixes/vx-819-search.md`, FOR A LATER
+READER at its top; wave 2, run overnight under /architect-phase, nov5 coordinating).** Seven members (three + her four
+riders, all seated at the kickoff sitting), three batches, a two-round opus ladder (R1 0/0/3/5 all fixed pin-first;
+R2 0/0/0/4; no round 3). The Blocks facet lists every block-level match and the band counts what the picked facet lists
+(R-819-1; P-13o-U2-2 superseded); the search order door speaks the Library's whole vocabulary, relevance the per-search
+default, ordered IN the group statement so pages hold (R-819-2); the sidebar search field lives in the top band as a door
+into the one search (R-819-3/-4; never a key-view stop — the VX-332 trap closed pre-gate; a sidebar ask is a fresh hunt;
+a Timeline Library moves to List); the when-grid answers arrows (the measured _NSPopoverWindow first-responder proxy;
+keys claimed where delivered, the live ferrXy probe the dismissal proof); VX-408 split honestly (the overtaking edge
+fixed, the feared stale-paint half proven hollow); VX-374's "dead caps" premise corrected (kept and pinned); passage
+lines name their block. Gates: per-batch staged suites + live walks; merge gate whole-target 6019/1047 green + the
+post-#229 overlap 260/41 + core (the VX-850 flake apart, green alone); SearchPassagesTests' pin green on both merged
+trees (the vx-808 agreement honored). Born VX-888 · VX-890; data points on VX-850/VX-661/VX-855. Bundle QUESTIONS #265;
+handoff `notes/handoffs/vx-819-handoff.md`. Canon: SurfaceContracts ×2 · AppSpec ×1 (135,143/150,000). PR #230, merge 8fb04998b.
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
