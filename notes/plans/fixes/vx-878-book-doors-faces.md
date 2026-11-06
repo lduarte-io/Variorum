@@ -150,7 +150,7 @@ A book's and a note's doors declared once and rendered everywhere they belong. (
 | Piece | Status |
 |---|---|
 | R-0 · record opened; both mechanisms/designs written before code | DONE (this commit) |
-| 804-a · VX-804 pin (DEBUG name probe on the three faces + the mount pin), committed on the PRE-FIX behaviour | NOT-STARTED — design below |
+| 804-a · VX-804 pin (DEBUG name probe on the faces + the mount pin), committed on the PRE-FIX behaviour | DONE (this commit) — `Features/BookView/BookNameProbe.swift` (the masthead + the Outline heading, DEBUG-only, no behaviour change) + `BookRenameRepaintTests.aRenameInBookSettingsRepaintsTheOpenBooksMastheadAndHeading`; `build-for-testing` ** TEST BUILD SUCCEEDED ** on this tree; its RUN (red here) is the closing window's — PENDING |
 | 804-b · VX-804 fix at the projection seam | NOT-STARTED — design below |
 | 831-a · core: the mark's facts (`Queries.privateMarks` / `privateBookMarks`), the named regions, headless pins | NOT-STARTED — design below |
 | 831-b · the face: the glyph, the pure rule, the words, the door's two arms, the hold, App pins | NOT-STARTED |

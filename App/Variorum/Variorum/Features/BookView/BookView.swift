@@ -662,6 +662,7 @@ struct BookView: View {
         // caught live (2026-08-31).
         HStack(spacing: 4) {
             Text(tokens.path([readingName ?? model.readingName ?? "book"]))
+                .bookNameProbe(.masthead, readingID: readingID, name: readingName ?? model.readingName ?? "book")
                 .font(tokens.heading)
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
@@ -2238,6 +2239,9 @@ struct BookView: View {
                     // never floating in rail-side dead space.
                     VStack(alignment: .leading, spacing: 2) {
                         Text(tokens.chromeLabel(readingName ?? model.readingName ?? "book"))
+                            .bookNameProbe(
+                                .outlineTitle, readingID: readingID,
+                                name: readingName ?? model.readingName ?? "book")
                             .font(tokens.title)
                             .foregroundStyle(tokens.ink)
                         // VX-562 (P-562-3): the count line that led this row
