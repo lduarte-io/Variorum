@@ -270,3 +270,22 @@ arms and the list-form arms. Headless `swift test` only — no stage. Tests run 
 subagent for EXTERNAL facts only, read-only. Commit per piece with LIVE STATUS in this file
 (U1 RECORD section you create), push after every commit, foreground waits only
 (`grep -q … && break; sleep 5` polls). Work only in `~/dev/variorum-vx-827`.
+
+## U1 RECORD — the shared lineage queries (leg 1: deliverables 1–2 + the reconciliation + the deliverable-3 proposal)
+
+*Implementer: opus-implementer, fresh session, 2026-11-05. Headless only (`swift build` / `swift test`
+on the package; no stage, no xcodebuild test, no GUI, no store touches). This leg builds deliverables
+1 and 2 and PROPOSES deliverable 3; the wire tool is NOT built until the orchestrator rules.*
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| U1-0 | Preflight read (CLAUDE.md canon · this file's The run / Fence law / Environment traps / U1 BRIEF · MCPSpec IN FULL · vx-809 FOR A LATER READER · mcp-invisibility-residuals · Trash.swift `originalsStrandedBy`/`strandedOriginals` + `LineageReadP1Tests` · `MCPNoteStructure` lineage/parents/farSides · the two-store catalog + arms · `MCPCarriageServerTests`' stub pin · P-13nb-U4-7's ruling text in the 13n-b record · `Queries/Lineage.swift` · `versionHistoryPredicate`) | DONE |
+| U1-1 | The note-level lineage-peers query + its pins | IN PROGRESS |
+| U1-2 | The block-level lineage-tree query + its pins | NOT STARTED |
+| U1-3 | The P1 pins (library growth, seam-history linearity, plan) for both | NOT STARTED |
+| U1-4 | The reconciliation read of `MCPNoteStructure.lineage`'s stub (stated below) | NOT STARTED |
+| U1-5 | The deliverable-3 proposal (below) — HELD for the orchestrator's ruling | NOT STARTED |
+
+**Next:** U1-1.
