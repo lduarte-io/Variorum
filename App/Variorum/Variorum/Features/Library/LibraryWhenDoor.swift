@@ -560,7 +560,10 @@ struct LibraryWhenFoot: View {
 /// face's VISIBLE window is a child of it), never while that window is
 /// hidden — SwiftUI never tears a dismissed popover's content down — and the
 /// monitor is released when its popover closes. The field's caret is never
-/// taken: the grid claims its keys, it never becomes first responder.
+/// taken: the grid claims its keys, it never becomes first responder — and
+/// the "text holds the keyboard" yield reads only text LIVING in the face's
+/// window (`LibraryWhenGridKeys.textHoldsTheFacesKeys` — the popover's window
+/// reports the parent's field editor as its own first responder, measured).
 struct LibraryWhenKeyMonitor: NSViewRepresentable {
     let onKey: (LibraryWhenGridKeys.Key) -> Bool
 
@@ -615,9 +618,17 @@ struct LibraryWhenKeyMonitor: NSViewRepresentable {
                       CommentPanelKeys.delivers(
                           toPanelIn: window, keyWindow: NSApp.keyWindow, eventWindow: event.window)
                 else { return event }
+                // Text in charge INSIDE the face only: the popover's window
+                // answers the parent's first responder as its own (measured),
+                // and her Library field's caret there is never the grid's
+                // business — the grid claims its keys, the field keeps its caret.
+                let textInFace = LibraryWhenGridKeys.textHoldsTheFacesKeys(
+                    responderIsText: PageTurnKeys.textIsFirstResponder(in: window),
+                    responderWindow: (window.firstResponder as? NSView)?.window.map(ObjectIdentifier.init),
+                    faceWindow: ObjectIdentifier(window))
                 guard let key = LibraryWhenGridKeys.key(
                     keyCode: event.keyCode, modifiers: event.modifierFlags,
-                    textIsFirstResponder: PageTurnKeys.textIsFirstResponder(in: window)),
+                    textIsFirstResponder: textInFace),
                     self.onKey?(key) == true
                 else { return event }
                 return nil  // the grid's key, taken
