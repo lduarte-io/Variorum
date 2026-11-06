@@ -394,20 +394,19 @@ nonisolated enum BookMastheadProbe {
         var dialWidest: CGFloat
     }
 
+    /// The LAST placement per book — one entry per book a session opens (a
+    /// Debug app records on every layout pass, so nothing here may grow with
+    /// them; a sweep pin reads this after each step).
     nonisolated(unsafe) static var placed: [String: Placement] = [:]
-    /// Every placement, in order (a pin reads the line counts a sweep drew).
-    nonisolated(unsafe) static var history: [String: [Placement]] = [:]
     /// The dial's face as drawn, keyed by the book's id.
     nonisolated(unsafe) static var dialFace: [String: String] = [:]
 
     static func record(_ key: String, _ placement: Placement) {
         placed[key] = placement
-        history[key, default: []].append(placement)
     }
 
     static func reset(_ key: String) {
         placed[key] = nil
-        history[key] = nil
         dialFace[key] = nil
     }
 }
