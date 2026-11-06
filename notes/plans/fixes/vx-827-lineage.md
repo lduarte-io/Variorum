@@ -289,8 +289,8 @@ on the package; no stage, no xcodebuild test, no GUI, no store touches). This le
 | U1-5 | The deliverable-3 proposal (below) | DONE — **HELD for the orchestrator's ruling**; the wire tool is NOT built |
 | U1-6 | LEG 2: the stub retirement in `read_note` `with_lineage` — absent + the fixed sentence — + the A/B catalog arm + the re-pin (`08c12ede2`; revert announced `3c2f7a416`) | DONE — red on the reverted stub (catalog arm + carriage pin), green on the fix; restored, tree clean |
 | U1-7 | LEG 2: `list_note_lineage` + its server suite + six catalog arms + the coverage justified edits + the Activity words (`bf6eadad8`) | DONE — 3/3 + catalog green; the both-ends fence red when the peer filter is removed |
-| U1-8 | LEG 2: DRAFT CANON DELTAS (below) | IN PROGRESS |
-| U1-9 | LEG 2: the END suites (lineage family + every MCP-affected suite; every failing test named) + self-assessment | NOT STARTED |
+| U1-8 | LEG 2: DRAFT CANON DELTAS (D-U1-1…4, at the end of this file) | DONE |
+| U1-9 | LEG 2: the END suites (lineage family + every MCP-affected suite; every failing test named) + self-assessment | IN PROGRESS |
 
 **Leg 1 closed; leg 2 is live (rows U1-6…U1-9).**
 
@@ -542,3 +542,45 @@ exact wording HELD FOR HER in bundle #264); re-pinned, plus the A/B two-store ca
 missing (the arm that caught this stays as the pin). The parent stub is untouched (no collision).
 P-13nb-U4-7's contract line gets its supersession delta in MCPSpec at closeout; the residuals
 ledger gains NO row (that is the point).
+
+## DRAFT CANON DELTAS (U1 — drafted by the implementer; the orchestrator lands them at closeout, two-file rule; MCPSpec is not edited here)
+
+**D-U1-1 — `notes/MCPSpec.md`, the fence sentence (P-13nb-U4-7's supersession).** In "**The fence (VX-163's keys, 13n-c
+U1 …):** … everything unreachable answers ONE uniform not-shared shape — no fenced-vs-unshared oracle anywhere, for
+BOOKS too (F-7), down to the byte-identical beyond-grant lineage stub (P-13nb-U4-7); …", replace the clause from "down
+to" through "(P-13nb-U4-7)" with:
+
+> … for BOOKS too (F-7); **a lineage far side beyond reach is ABSENT from `read_note`'s `with_lineage` (VX-827 — her
+> F-U1-1 ruling, "Retire the stub", superseding P-13nb-U4-7's per-edge `beyond_grant` stub; the record
+> `notes/plans/fixes/vx-827-lineage.md`): an edge is spoken only when both its ends are readable, and a `with_lineage`
+> answer always carries `beyond_reach` — "Lineage beyond your reach, if any, is not listed." (PROVISIONAL wording,
+> #264); a take's parent beyond reach still answers the one `parent_beyond_grant` stub, the same for a hidden, a dead
+> and a missing parent**; …
+
+**D-U1-2 — `notes/MCPSpec.md`, the new tool (a contract line; suggested home: after the `list_wings` sentence in "THE
+PRE-LAUNCH SWEEP'S MCP TRIO", or as its own bolded sentence beside the VX-336 wire tools):**
+
+> **`list_note_lineage` (VX-817 — the VX-827 run; the record `notes/plans/fixes/vx-827-lineage.md` U1, P-U1-a…g):** a
+> READ-rung tool answering the other notes a note is joined to by ONE live edge between their live, placed blocks
+> (`Queries.lineagePeers` — `derived_from` either way, `version_of`; a released original, a pool and a saved version
+> are never a peer): `copies` (a peer's block derived from the note's), `originals` (the note's derived from a
+> peer's) and `versions` (a `version_of` link), each peer with `note_id`, `title`, `wing_id`, `archived` (an archived
+> peer always listed, marked — PROVISIONAL, #264) and its `links` (`block_id`, `peer_block_id`, `origin_op`, `at`); no
+> edge id and no position key crosses. The subject is decided at READ by the one rule (`read_note`'s decision, ask
+> and once spend); a PEER is kept only where the same rule reads it, never spending a grant — **an edge appears only
+> when BOTH its ends are within reach** (her VX-817 line): a peer beyond reach is absent, never counted or hinted,
+> and `beyond_reach` always says "Notes beyond your reach, if any, are not listed." (PROVISIONAL wording, #264). One
+> hop only: a chain through another note is never followed. `note_ids` (1–200, no repeats, exclusive with `note_id`)
+> reads each note as the single call — VX-812's list form (`results`, `landed_count`, `refused_count`; a once grant
+> covers one item; an all-refused list an error answer). ∝ each note's placed blocks and their direct edges, never
+> the corpus. Activity speaks it in words.
+
+**D-U1-3 — `notes/SurfaceContracts.md`, Doors (optional, the orchestrator's call):** after "`list_wings` lists the
+wings the client holds a standing wing grant on, a granted empty wing included.", add: "`list_note_lineage` lists the
+notes one edge away from a note — copies, originals, versions — only where both ends are readable (VX-817)."
+
+**D-U1-4 — `notes/AppSpecRecord.md` (the dated entry's narrative, closeout):** her F-U1-1 ruling verbatim ("Retire the
+stub"), the probe's two answers (leg 1, U1-4), the A/B arm as the pin that was missing, and the supersession of
+P-13nb-U4-7's RIDER reasoning ("omission would lie about the tree's completeness") by R-825's fixed-scope-words idiom.
+
+**`notes/mcp-invisibility-residuals.md`: NO ROW** (her ruling: "that is the point").
