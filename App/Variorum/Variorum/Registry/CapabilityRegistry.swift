@@ -1824,7 +1824,7 @@ nonisolated enum CapabilityRegistry {
 
         // 13i-b U2 — THE ARRIVALS FACE (the 13i-b plan §3; the sitting record
         // §4). Two `.surface` acts on the Arrivals line's own rows
-        // (`BookArrivalsList` — their ONE renderer, the masthead door's popover since 17y (h)), book scope. `always` for
+        // (`BookArrivalsList` — their ONE renderer, the review area's rows since VX-821), book scope. `always` for
         // `.archiveNote`'s exact reason: the target is the arrival row the
         // door carries, never derived from whatever mode a pane is in — so
         // `takesAccess: .native` is honest rather than an exemption (Takes is
@@ -1841,6 +1841,39 @@ nonisolated enum CapabilityRegistry {
             availability: always),
         Capability(
             id: .dismissArrival, verb: ArrivalsCopy.dismissVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ArrivalsCopy.unavailableNote,
+            availability: always),
+        // VX-821 (the VX-808 run, Unit B3 — R-808-5; the bulk ruling A-808-11)
+        // — THE REVIEW AREA's four bulk doors, rendered by `BookArrivalsReview`
+        // alone (the header's pair, the bar's pair over the pick). `always`
+        // and `.native` for the arrival doors' exact reason (the surface
+        // carries its book, never a mode). No key and no palette row: ⏎ / ⌫
+        // are the review's own surface-local keys over the same acts (the pick,
+        // else the walked row), recorded here rather than as helper chords.
+        // Dismiss all asks once (F-7(a) — the guard where undo is absent; no
+        // judgment act registers ⌥⌘Z). The per-row refusals are the ops'.
+        Capability(
+            id: .addAllArrivals, verb: ArrivalsReviewCopy.addAllVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ArrivalsCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .dismissAllArrivals, verb: ArrivalsReviewCopy.dismissAllVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ArrivalsCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .addSelectedArrivals, verb: ArrivalsReviewCopy.addSelectedVerb, scope: .book,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: ArrivalsCopy.unavailableNote,
+            availability: always),
+        Capability(
+            id: .dismissSelectedArrivals, verb: ArrivalsReviewCopy.dismissSelectedVerb, scope: .book,
             doors: [.surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: ArrivalsCopy.unavailableNote,

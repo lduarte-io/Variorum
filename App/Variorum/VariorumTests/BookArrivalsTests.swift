@@ -34,6 +34,17 @@
 //  door, now in EVERY mode; the rows still carry both judgment doors; the
 //  last judgment still returns the face to its quiet state.
 //
+//  VX-821 (the VX-808 run, Unit B3 — R-808-5) — JUSTIFIED EDITS, THE POPOVER
+//  RETIRED: the door's press opens the REVIEW AREA in the book's content area
+//  (`setReviewOpen` replaces `setDoorOpen`, and the 13i-b inline line's
+//  `toggle()` / `expanded`, kept since 17y, retired with it); the header is
+//  her picked preview's "Arrivals — N waiting"; the row's stamp says since
+//  when it WAITS ("arrived …" retired); and an emptied review STAYS OPEN with
+//  its calm answer — she leaves by Done, never by surprise (the subject of
+//  the old "folds shut" pin — the face returns to calm — holds on the door).
+//  The review's own pins (the pick, the keys, the bulk doors, why it waits)
+//  are `BookArrivalsReviewTests`.
+//
 
 import AppKit
 import Dependencies
@@ -186,18 +197,21 @@ struct BookArrivalsTests {
         #expect(ArrivalsCopy.word == "Arrivals")
         #expect(ArrivalsCopy.doorCount(0) == nil, "calm: no count")
         #expect(ArrivalsCopy.doorCount(12) == "12")
-        #expect(ArrivalsCopy.header(count: 3) == "Arrivals \u{00B7} 3 waiting")
+        // VX-821 — A JUSTIFIED EDIT: her picked preview's header words.
+        #expect(ArrivalsCopy.header(count: 3) == "Arrivals \u{2014} 3 waiting")
+        #expect(ArrivalsCopy.header(count: 0) == "Arrivals")
         #expect(ArrivalsCopy.doorHelp(count: 0).hasPrefix("Arrivals"))
         #expect(ArrivalsCopy.more(4) == "and 4 more waiting")
 
-        // When it arrived — the app's ONE stamp vocabulary, with this row's
-        // own verb; an unreadable stamp says nothing rather than a lie.
+        // Since when it waits — the app's ONE stamp vocabulary, with this
+        // row's own verb; an unreadable stamp says nothing rather than a lie.
+        // (VX-821 — A JUSTIFIED EDIT: "arrived …" retired with the popover.)
         let now = Date(timeIntervalSince1970: 1_782_900_000)
         let then = now.addingTimeInterval(-3 * 86_400)
         let iso = DateFormatter.variorumISO8601.string(from: then)
-        #expect(ArrivalsCopy.arrived(iso, now: now)
-                == "arrived " + TimeStampFace.relative(then, now: now))
-        #expect(ArrivalsCopy.arrived("not a stamp", now: now) == nil)
+        #expect(ArrivalsReviewCopy.since(iso, now: now)
+                == "waiting since " + TimeStampFace.relative(then, now: now))
+        #expect(ArrivalsReviewCopy.since("not a stamp", now: now) == nil)
 
         // The receipts say where Add landed — the END (§4), outside the
         // chapters when there are chapters — and what Dismiss did. (13i-d U6
@@ -326,9 +340,9 @@ struct BookArrivalsTests {
                 reading: try await db.read { try Queries.reading($0, id: readingID) },
                 sections: [], deletedSections: [], assignments: [:]))
             let arrivals = BookArrivalsModel(session: session, readingID: readingID)
-            arrivals.setDoorOpen(true)
+            arrivals.setReviewOpen(true)
             #expect(arrivals.listingLimit == BookArrivalsModel.window,
-                    "opening the door asks the observation for the rows")
+                    "opening the review asks the observation for the rows")
             try await refreshDoor(arrivals, db)
             #expect(arrivals.door.rows.map(\.postID) == waitingIDs,
                     "the waiting notes, oldest arrival first")
@@ -347,8 +361,8 @@ struct BookArrivalsTests {
                 #expect(verbs == [ArrivalsCopy.addVerb, ArrivalsCopy.dismissVerb],
                         "each row carries both judgment doors")
             }
-            // Closing the door stops the listing (the count alone again).
-            arrivals.setDoorOpen(false)
+            // Closing the review stops the listing (the count alone again).
+            arrivals.setReviewOpen(false)
             #expect(arrivals.listingLimit == 0)
         }
     }
@@ -359,9 +373,7 @@ struct BookArrivalsTests {
         try await withArrivalsBook(members: 2, waiting: 2, chaptered: true) {
             session, db, readingID, memberIDs, waitingIDs in
             let arrivals = BookArrivalsModel(session: session, readingID: readingID)
-            arrivals.toggle()  // a no-op while the door reads empty…
-            try await refreshDoor(arrivals, db)
-            arrivals.toggle()  // …and opens once something waits
+            arrivals.setReviewOpen(true)  // the door's press (VX-821)
             try await refreshDoor(arrivals, db)
             let first = try #require(arrivals.door.rows.first)
             #expect(first.postID == waitingIDs[0])
@@ -405,7 +417,7 @@ struct BookArrivalsTests {
         try await withArrivalsBook(members: 1, waiting: 1) { session, db, readingID, memberIDs, _ in
             let arrivals = BookArrivalsModel(session: session, readingID: readingID)
             try await refreshDoor(arrivals, db)
-            arrivals.toggle()
+            arrivals.setReviewOpen(true)
             try await refreshDoor(arrivals, db)
             let waiting = try #require(arrivals.door.rows.first)
             let book = try await db.read { try Queries.reading($0, id: readingID) }
@@ -421,7 +433,10 @@ struct BookArrivalsTests {
             #expect(assembled == memberIDs, "dismissing never touches membership")
             try await refreshDoor(arrivals, db)
             #expect(arrivals.door == .none)
-            #expect(arrivals.expanded == false, "the emptied door folds shut")
+            // VX-821 — A JUSTIFIED EDIT: the emptied REVIEW stays open with
+            // its calm answer (she leaves by Done); the face's quiet state is
+            // the door's (`whenTheLastArrivalIsJudgedTheDoorGoesCalm`).
+            #expect(arrivals.reviewOpen, "the emptied review stays open — she leaves by Done")
             #expect(session.status.spoken?.kind == .receipt)
             #expect(session.status.spoken?.text == ArrivalsCopy.dismissed(waiting.title))
         }
@@ -437,7 +452,7 @@ struct BookArrivalsTests {
             let arrivals = BookArrivalsModel(session: session, readingID: readingID)
             try await refreshDoor(arrivals, db)
             #expect(arrivals.door.count == 1, "at capacity, intake waits at the door")
-            arrivals.toggle()
+            arrivals.setReviewOpen(true)
             try await refreshDoor(arrivals, db)
             let waiting = try #require(arrivals.door.rows.first)
             #expect(waiting.postID == waitingIDs[0])
@@ -463,7 +478,7 @@ struct BookArrivalsTests {
         try await withArrivalsBook(members: 0, waiting: 1) { session, db, readingID, _, _ in
             let arrivals = BookArrivalsModel(session: session, readingID: readingID)
             try await refreshDoor(arrivals, db)
-            arrivals.toggle()
+            arrivals.setReviewOpen(true)
             try await refreshDoor(arrivals, db)
             let waiting = try #require(arrivals.door.rows.first)
             let book = try await db.read { try Queries.reading($0, id: readingID) }
@@ -490,7 +505,7 @@ struct BookArrivalsTests {
                 hosted.window.orderOut(nil)
                 hosted.window.close()
             }
-            hosted.arrivals.setDoorOpen(true)
+            hosted.arrivals.setReviewOpen(true)
             try await refreshDoor(hosted.arrivals, db)
             await settle(hosted.window, hosted.hosting) {
                 ArrivalsDoorProbe.drawn[readingID]?.count == 1
@@ -532,5 +547,18 @@ struct BookArrivalsTests {
         // The verbs the rows draw ARE the declared verbs.
         #expect(CapabilityRegistry.capability(.seatArrival).verb == ArrivalsCopy.addVerb)
         #expect(CapabilityRegistry.capability(.dismissArrival).verb == ArrivalsCopy.dismissVerb)
+        // VX-821: the review's four bulk doors, declared once, drawn by the
+        // review alone (the surface walk's union line names it).
+        #expect(BookArrivalsReview.surfaceCapabilities
+                == [.addAllArrivals, .dismissAllArrivals, .addSelectedArrivals, .dismissSelectedArrivals])
+        for id in BookArrivalsReview.surfaceCapabilities {
+            let capability = CapabilityRegistry.capability(id)
+            #expect(capability.doors == [.surface], "\(id): an inline door, no key, no palette row")
+            #expect(capability.scope == .book)
+            #expect(capability.shortcutLabel == nil && capability.alternateShortcutLabel == nil)
+            #expect(CapabilityRegistry.availability(id, in: CapabilityContext()) == .act)
+        }
+        #expect(CapabilityRegistry.capability(.addAllArrivals).verb == "Add all")
+        #expect(CapabilityRegistry.capability(.dismissAllArrivals).verb == "Dismiss all")
     }
 }

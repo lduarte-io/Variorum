@@ -798,6 +798,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // declaration could not say that. Both are `.surface` acts whose target
     // is the ARRIVAL ROW you point at on the line — the `.archiveNote` class.
     case seatArrival, dismissArrival
+    // VX-821 (the VX-808 run, Unit B3 — R-808-5, A-808-11) — THE ARRIVALS
+    // REVIEW AREA's four bulk doors: the header's Add all · Dismiss all and
+    // the bar's Add N · Dismiss N over the pick. Four declarations on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds — each its own door, words
+    // and refusal (nothing waits · nothing is picked); every one drives the
+    // per-row `seatArrival` / `dismissArrival`, never a new operation.
+    case addAllArrivals, dismissAllArrivals, addSelectedArrivals, dismissSelectedArrivals
     // 13i-b U3 — THE RULE EDITOR's door (the 13i-b plan §4 item 1): one
     // act on a shelf row's menu, for a gathering's rule and a book's intake.
     case editRule

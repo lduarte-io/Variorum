@@ -108,8 +108,9 @@ struct BookView: View {
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
     /// 13i-b U2 — the book's DOOR (the Arrivals face's model). Its own model
-    /// rather than more of `BookViewModel` (P-9): the line atop Index and Book
-    /// observes and judges arrivals and nothing else.
+    /// rather than more of `BookViewModel` (P-9): it observes and judges
+    /// arrivals and nothing else — since VX-821 through the review area the
+    /// masthead door opens over the mode's body.
     @State private var arrivals: BookArrivalsModel
     /// 13i-d U4 — the book's ARCHIVED LINE (her #169(a)(1)): its own model
     /// (P-9), the Arrivals line's sibling on the same three hosts.
@@ -307,7 +308,12 @@ struct BookView: View {
                     hostsQuietReceipt: quietReceiptHome == .indexColumnFooter,
                     // 13o U3 (F1): in Index the answer covers the PANE — the
                     // column keeps the masthead (and so the field) in view.
-                    searchAnswer: bookSearch.isAnswering ? AnyView(searchSheet) : nil,
+                    // VX-821: the Arrivals review area rides the same slot
+                    // (and wins it while open — the masthead door stays in
+                    // view beside it).
+                    searchAnswer: arrivals.reviewOpen
+                        ? AnyView(arrivalsReview)
+                        : (bookSearch.isAnswering ? AnyView(searchSheet) : nil),
                     onEditInOutline: { postID in
                         // Editing lives where editing lives: land the note
                         // focused in Outline through the ascent's own door
@@ -346,7 +352,7 @@ struct BookView: View {
                         readingID: readingID, model: model, structure: structure,
                         archivedCount: archived.door.count, tokens: tokens)
                 }
-                .overlay { searchAnswerOverlay }
+                .overlay { contentOverlay }
             case .spread:
                 // The picker's "Book" (13c 2A's rename, 2B's build): the
                 // TWO-UP spread — each page a whole scrollable post, the
@@ -360,7 +366,7 @@ struct BookView: View {
                     // VX-303: the page header's "open ↗".
                     onOpenInWrite: { openInWrite($0) })
                     .overlay(alignment: .bottomTrailing) { pageFootReceipt }
-                    .overlay { searchAnswerOverlay }
+                    .overlay { contentOverlay }
             case .read:
                 // READ is a PAIR (13c 2C, her direction): the vertical
                 // infinite scroll, and true book pagination. Neither is
@@ -391,13 +397,13 @@ struct BookView: View {
                         onViewed: { model.noteFlowViewed($0) })
                     // WA-1: the receipt at the page's foot, trailing.
                     .overlay(alignment: .bottomTrailing) { pageFootReceipt }
-                    .overlay { searchAnswerOverlay }
+                    .overlay { contentOverlay }
                 case .pages:
                     pagedRead
                         // WA-1: the page foot only while an empty book
                         // draws no flip bar (the bar hosts otherwise).
                         .overlay(alignment: .bottomTrailing) { pageFootReceipt }
-                        .overlay { searchAnswerOverlay }
+                        .overlay { contentOverlay }
                 }
             }
         } panel: {
@@ -409,7 +415,8 @@ struct BookView: View {
         // focused pane, never while text holds the keyboard, never in Index.
         .background {
             BookNoteStepKeyMonitor(
-                isActive: paneFocused, mode: structure.mode,
+                // VX-821: never under the review area — its keys are its own.
+                isActive: paneFocused && !arrivals.reviewOpen, mode: structure.mode,
                 onStep: { stepNote($0) })
                 .frame(width: 0, height: 0)
         }
@@ -528,6 +535,14 @@ struct BookView: View {
         // 13f W20(a): the ascent's request, taken once — whether this book
         // was already open (onChange) or opened by the ascent (onAppear).
         .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
+        // VX-821: any navigation the book takes while the review is open —
+        // a mode, a note focused, a reveal or a landing asked for — closes it,
+        // so it never stands over what she asked to see.
+        .onChange(of: reviewSignal) { old, new in
+            if arrivals.reviewOpen, ArrivalsReviewSignal.navigated(from: old, to: new) {
+                arrivals.setReviewOpen(false)
+            }
+        }
         // 13n-b U4: the chapter landing, taken once (open already or opened by it).
         .onChange(of: revealSectionID) { _, _ in takeChapterRequest() }
         // VX-570 (the VX-439 run): ⌥⌘N's request, taken once — or as soon as
@@ -614,10 +629,40 @@ struct BookView: View {
     /// its own body; an overlay leaves every mode's layout, scroll and live
     /// editor exactly as they were, so clearing the field returns the mode
     /// untouched).
-    @ViewBuilder private var searchAnswerOverlay: some View {
-        if bookSearch.isAnswering {
+    ///
+    /// **VX-821 (R-808-5): the Arrivals review area is drawn here too, and
+    /// wins while open** — the same overlay grammar, for her ruling's own
+    /// reason: Done returns the book's prior mode exactly as she left it.
+    @ViewBuilder private var contentOverlay: some View {
+        if arrivals.reviewOpen {
+            arrivalsReview
+        } else if bookSearch.isAnswering {
             searchSheet
         }
+    }
+
+    /// **The Arrivals review area** (VX-821 — R-808-5, one home): the
+    /// masthead door's press opens it over the mode's body; Done, esc, the
+    /// door again, a mode tab or any navigation the book takes closes it
+    /// (`ArrivalsReviewSignal`).
+    private var arrivalsReview: some View {
+        BookArrivalsReview(
+            model: arrivals, structure: structure,
+            hostsQuietReceipt: quietReceiptHome == .reviewBar,
+            onDone: { arrivals.setReviewOpen(false) })
+    }
+
+    /// The book facts a navigation moves — while the review is open, a change
+    /// she asked for closes it so she sees what she asked for.
+    private var reviewSignal: ArrivalsReviewSignal {
+        ArrivalsReviewSignal(
+            mode: structure.mode,
+            focusedPostID: model.focusedPostID,
+            indexSelectedPostID: model.indexSelectedPostID,
+            spreadFirstPostID: model.spreadEntries.first?.postID,
+            reveal: model.pendingReveal,
+            chapterReveal: model.pendingChapterReveal,
+            landingPostID: model.pendingLanding?.postID)
     }
 
     // MARK: - The navigator (R43: chapters · outline · settings)
@@ -1063,7 +1108,9 @@ struct BookView: View {
             mode: structure.mode, pagedRead: structure.readForm == .pages,
             // Both flip bars draw only over a book with notes.
             modeBarShown: !model.entries.isEmpty,
-            box: noteBoxReport?.state)
+            box: noteBoxReport?.state,
+            // VX-821: the review area covers the mode's bar and page foot.
+            reviewing: arrivals.reviewOpen)
     }
 
     /// **The page foot's quiet slot** (WA-1 — Outline and Read's flow have no
@@ -1444,6 +1491,9 @@ struct BookView: View {
     /// landing, because "reveal" means something different on a scroll, a
     /// spread and a page domain).
     private func switchMode(to newMode: BookStructureModel.ViewMode) {
+        // VX-821: a mode tab is a road back to the book — the review area
+        // steps aside, the CURRENT mode's tab included (it returns to it).
+        arrivals.setReviewOpen(false)
         guard newMode != structure.mode else { return }
         // VX-304: the click-over carries her BLOCK out of Outline too (Index
         // arrives with it live — `BookAnchor.landing`); VX-630: and out of
