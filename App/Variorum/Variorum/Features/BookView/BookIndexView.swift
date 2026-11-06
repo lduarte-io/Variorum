@@ -261,6 +261,8 @@ nonisolated enum BookIndexColumn {
     /// 13i-c U4: the Index note row's ⋯ menu renders the remove/release door
     /// (§20) — its `.surface` declaration lives with the column it rides.
     static let surfaceCapabilities: [CapabilityID] = [.removeFromBook]
+        // VX-803 (A-808-12 (h)): the row's ⋯ menu carries Pin to Top / Unpin.
+        + [.pinNoteInBook]
         // 13i-d U3 (F-U2-3): the row ⋯'s "Move to Chapter ▸".
         + [.fileNoteInChapter]
 
@@ -1083,6 +1085,14 @@ struct BookIndexView<Masthead: View>: View {
             // one act, its word the book's (owned ⇒ Release). Books only: a
             // gathering holds no membership (its honest door is the chip's).
             if let book = structure.reading {
+                // VX-803 (A-808-12 (h)): the pin — the row's own entry's state.
+                let pinned = model.entries.first { $0.postID == postID }?.pinned ?? false
+                Button(PinNoteCopy.verb(pinned: pinned)) {
+                    Task {
+                        await PinNoteDoor.setPinned(
+                            session: session, postID: postID, book: book, pinned: !pinned)
+                    }
+                }
                 Divider()
                 Button(RemoveFromBookCopy.verb(owned: book.owned)) {
                     Task {

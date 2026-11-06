@@ -24,6 +24,9 @@ struct BookView: View {
         // the chapter rows' "Move Chapter Up / Down" are the Book Panel's acts
         // with a second renderer here (the drags are their twins' class).
         + [.fileNoteInChapter, .moveChapterUpInBook, .moveChapterDownInBook]
+        // VX-803 (A-808-12 (h)): the same note-row menus carry Pin to Top /
+        // Unpin (`outlineChapterMenu`).
+        + [.pinNoteInBook]
     /// 13i-d U3: the masthead's GEAR is the book's own door into its
     /// settings sheet (the sitting record §4's "the book's ⋯ menu" — the
     /// book's one masthead door, P-13id-U3-1), declared at last.
@@ -893,7 +896,8 @@ struct BookView: View {
                                     if let collapsedNote {
                                         Divider()
                                         outlineChapterMenu(
-                                            structure: structure, postID: collapsedNote.postID)
+                                            structure: structure, postID: collapsedNote.postID,
+                                            pinned: collapsedNote.pinned)
                                     }
                                 }
                                 .draggable(BookStructureModel.BookDrag.chapter(section.id).payload)
@@ -966,7 +970,8 @@ struct BookView: View {
                                 .id(BookNavigatorFollow.noteRowID(entry.postID))
                                 .contextMenu {
                                     outlineChapterMenu(
-                                        structure: structure, postID: entry.postID)
+                                        structure: structure, postID: entry.postID,
+                                        pinned: entry.pinned)
                                 }
                                 // 13f W11: a post row DRAGS (her ruling —
                                 // "pick up a post and move it to another
@@ -3292,6 +3297,9 @@ private struct NavigatorNoteLabel: View {
                 .font(tokens.small)
                 .foregroundStyle(marked ? tokens.ink : tokens.muted)
                 .lineLimit(1)
+            // VX-803 (A-808-12 (i)): a pinned note's muted pin — the table of
+            // contents says why it leads its group.
+            PinMark(pinned: entry.pinned, tokens: tokens)
         }
         .modifier(NavigatorFollowReport(
             memory: follow, rowID: BookNavigatorFollow.noteRowID(entry.postID),
@@ -3965,7 +3973,9 @@ private struct OutlinePostRow: View {
         .padding(.top, 10)
         // (The `page-<id>` landing anchor moved to the ROW, at the lazy
         // stack's level — `BookView.outlineAnchor`; the correction round.)
-        .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
+        .contextMenu {
+            outlineChapterMenu(structure: structure, postID: entry.postID, pinned: entry.pinned)
+        }
     }
 
     // (postBody's two branches were inlined into `body` at wave 2c — the
@@ -4037,7 +4047,9 @@ private struct OutlinePostRow: View {
         // 13i-c U4 walk (W-2): the card's hover carries its badge's sentence.
         .help(OwnershipBadgeCopy.rowHelp(
             "Click to open this note in the full editor; ▸ unfolds it here", badge: badge))
-        .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
+        .contextMenu {
+            outlineChapterMenu(structure: structure, postID: entry.postID, pinned: entry.pinned)
+        }
         // 13s-b U2: step 3 points at the first story's card (the card's body
         // IS the door into the note's own page).
         .tourAnchor(.outlineCard(entry.postID), cornerRadius: 10)
@@ -4070,10 +4082,13 @@ private extension View {
 /// A post's chapter-filing menu — ONE definition, two callers (the
 /// navigator's rows and the outline's own rows). Curated books only:
 /// chapters are a curated-reading concept (QUESTIONS #25(a)).
+///
+/// VX-803 (A-808-12 (h)): `pinned` is the row's own entry's pin — the menu's
+/// Pin to Top / Unpin reads it (one act, its word the membership's).
 @MainActor
 @ViewBuilder
 private func outlineChapterMenu(
-    structure: BookStructureModel, postID: String
+    structure: BookStructureModel, postID: String, pinned: Bool
 ) -> some View {
     if let book = structure.reading, book.kind == .book {
         // 13i-d U3 (F-U2-3): the Book Panel's act, spelled from the registry
@@ -4088,6 +4103,13 @@ private func outlineChapterMenu(
             Divider()
             Button(BookPanelCopy.noChapter) {
                 Task { await structure.assign(postID, to: nil) }
+            }
+        }
+        // VX-803 (A-808-12 (h)): the pin — beside the book's other order door.
+        Button(PinNoteCopy.verb(pinned: pinned)) {
+            Task {
+                await PinNoteDoor.setPinned(
+                    session: structure.session, postID: postID, book: book, pinned: !pinned)
             }
         }
         // 13i-c U4 (the sitting record §20): the remove/release door — one

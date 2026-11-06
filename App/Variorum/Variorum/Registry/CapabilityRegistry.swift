@@ -2040,6 +2040,20 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: RemoveFromBookCopy.unavailableNote,
             availability: always),
+        // VX-803 — PIN TO TOP (A-808-12 (h)): `.removeFromBook`'s shape — ONE
+        // act, its verb the membership's ("Pin to Top" / "Unpin",
+        // `PinNoteCopy.verb(pinned:)`). The book's note-row CONTEXT menus (the
+        // navigator's and Outline's rows — `BookView`; the Book Panel's note
+        // menu — `BookPanelView`) and the Index row's ⋯ menu (`.surface` —
+        // `BookIndexColumn`). `always`: every renderer carries its note AND its
+        // book (and renders on books only — a gathering holds no membership);
+        // a finished or sealed book's refusal is the op's, named with its road.
+        Capability(
+            id: .pinNoteInBook, verb: PinNoteCopy.pinVerb, scope: .book,
+            doors: [.contextMenu, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: PinNoteCopy.unavailableNote,
+            availability: always),
         // 13i-c U4 — DUPLICATE BOOK… (§6): the shelf row's menu, books only
         // (a gathering has no duplicate op — the menu hides it, P-2). `always`
         // for `.editRule`'s reason (the row carries its target); the per-book

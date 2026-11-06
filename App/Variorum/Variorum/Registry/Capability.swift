@@ -884,6 +884,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     case showBookPanel
     case fileNoteInChapter, moveNoteUpInBook, moveNoteDownInBook
     case moveChapterUpInBook, moveChapterDownInBook
+    // VX-803 — PIN TO TOP (the B4 fork's ruling, A-808-12 (h)): ONE act whose
+    // verb follows the membership ("Pin to Top" / "Unpin" — `PinNoteCopy
+    // .verb(pinned:)`, `.removeFromBook`'s per-target shape), rendered by the
+    // book's note-row menus (the navigator's and Outline's), the Book Panel's
+    // note menu and the Index row's ⋯ menu. `setMembershipPinned`.
+    case pinNoteInBook
     // 13i-d U3 — THE COLLECTING PANE'S DOORS and THE FILTER BAR's one write
     // (the sitting record §4: the settings sheet "reachable from the book's ⋯
     // menu and the Bookcase row's context menu"; §10: the journal-trait row

@@ -25,6 +25,8 @@ struct BookPanelView: View {
     static let contextMenuCapabilities: [CapabilityID] = [
         .fileNoteInChapter, .moveNoteUpInBook, .moveNoteDownInBook,
         .moveChapterUpInBook, .moveChapterDownInBook, .removeFromBook,
+        // VX-803 (A-808-12 (h)): Pin to Top / Unpin on the note menu.
+        .pinNoteInBook,
     ]
     static let surfaceCapabilities: [CapabilityID] = [.openBookAtNote, .removeRuleTag]
         // 13n-c U4: a note row's pending-ask glyph (the book TOC's rows).
@@ -341,6 +343,9 @@ struct BookPanelView: View {
                     .foregroundStyle(isThis ? tokens.ink : tokens.muted)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                // VX-803 (A-808-12 (i)): the navigator's mark, one size smaller
+                // in grammar — a pinned note's muted pin.
+                PinMark(pinned: entry.pinned, tokens: tokens)
                 noteMarks(for: line)
             }
             .padding(.leading, indented ? 10 : 0)
@@ -426,6 +431,14 @@ struct BookPanelView: View {
             }
         }
         let manual = snapshot.reading?.sortField == .manual
+        // VX-803 (A-808-12 (h)): the row's own pin, from the entry the order came from.
+        let pinned = snapshot.entries.first { $0.postID == notePostID }?.pinned ?? false
+        Button(PinNoteCopy.verb(pinned: pinned)) {
+            Task {
+                await PinNoteDoor.setPinned(
+                    session: session, postID: notePostID, book: book, pinned: !pinned)
+            }
+        }
         if BookPanelBrain.noteMove(notePostID, up: true, groups: groups, manualOrder: manual) != nil {
             Button(CapabilityRegistry.capability(.moveNoteUpInBook).verb) {
                 Task { await model.move(notePostID, in: book, up: true) }
