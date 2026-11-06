@@ -2111,3 +2111,16 @@ stand) and P-U3b-14 (the Lineage face's two "now"s)** + W1–W16 + the `notInLin
 Any closeout bundling from a single earlier list is wrong; THIS line is the complete roster.
 **Window caveat (R2's clean bill):** re-run `git apply --check` on both revert patches after
 any further `CommitsFaceModel.swift` commit — none is planned before the window.
+
+## THE CLOSING WINDOW — Part 1 (claim vx-827-window, GO 00:51; head 577f90d29)
+
+**R1-F1 RED-ON-OLD RITUAL — PASSED, the fix is LANDED.** apply --check re-run clean (R2's
+caveat). Revert A: `aRelativeInAnotherNoteIsFlushedBeforeItsWordsComeBack` RED at its exact
+named shape (minted "Extracted part." not "Extracted part, retyped."; the pin's own RED ON OLD
+message), 12 tests / 1 issue, the read pin green; restored, tree clean. Revert B:
+`aRelativesPaneReadsItsNoteAfterItsPendingTypingLands` RED at its named shape (stored still
+"Extracted part."), 12 / 1, the bring-back pin green; restored, tree clean at 577f90d29. Fix
+tree: 12/12 green. One VX-661-class host restart during the A run AFTER all verdicts recorded —
+`Variorum-2026-11-06-005307.ips` (00:53:07); two `sqlcipher hmac` ERROR lines at the A-run's
+head, fixture-noise class, noted for the RELEASE line. Logs: /tmp/vx827-revert{A,B}.log,
+/tmp/vx827-fixgreen.log (deleted at closeout per the evidence rule).
