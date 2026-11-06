@@ -22,7 +22,8 @@ nonisolated enum LibrarySearchCopy {
 
     static func echo(_ words: String) -> String { SearchAnswerCopy.echo(words) }
 
-    /// **The honest counts** (D3): what the WHOLE question finds, per kind —
+    /// **The honest counts** (D3; R-819-1): what the picked scope LISTS — All
+    /// the whole question — per kind:
     /// "3 books · 29 notes · 118 passages · 6 scraps", a kind with nothing
     /// left out; nothing at all is said as such.
     static func counts(_ kinds: SearchCounts.Kinds) -> String {

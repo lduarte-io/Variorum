@@ -167,6 +167,27 @@ public struct SearchCounts: Equatable, Sendable {
     public func kinds(_ visibility: SearchVisibility) -> Kinds {
         visibility == .living ? living : all
     }
+
+    /// **A tag alone's numbers kept to the ONE kind a facet lists** (VX-734,
+    /// R-819-1's coherent extension): Notes the notes, Books the books,
+    /// Blocks the blocks — and the archive's share of that kind alone (what
+    /// the facet would add there). All is the whole. The text-less road
+    /// searches no text, so passages, scraps and savepoints are 0 already.
+    func keepingTheTagRoadsKind(of facet: SearchFacet) -> SearchCounts {
+        func kept(_ k: Kinds) -> Kinds {
+            switch facet {
+            case .all: k
+            case .notes: Kinds(books: 0, notes: k.notes, passages: 0, scraps: 0)
+            case .books: Kinds(books: k.books, notes: 0, passages: 0, scraps: 0)
+            case .blocks: Kinds(books: 0, notes: 0, passages: 0, scraps: 0, blocks: k.blocks)
+            }
+        }
+        guard facet != .all else { return self }
+        let living = kept(self.living), all = kept(self.all)
+        return SearchCounts(
+            living: living, all: all,
+            archivedPlaces: (all.books - living.books) + (all.notes - living.notes) + (all.blocks - living.blocks))
+    }
 }
 
 extension Queries {
@@ -423,14 +444,33 @@ extension Queries {
     }
 
     /// **The band's numbers under a FACET** (the Library's scope picker,
-    /// `SearchFacet`). D3 (PROVISIONAL P-13o-U2-2): the counts are the WHOLE
-    /// question's, whatever the facet — they tell her what every scope
-    /// holds.
+    /// `SearchFacet`) — VX-734, her R-819-1 (*"Widen Blocks"*: the facet
+    /// lists every block-level match "and its band counts what it lists"),
+    /// with the sitting's coherent extension, PROVISIONAL: **every facet's
+    /// band counts what THAT FACET lists; All keeps the whole question's
+    /// numbers** (they tell her what every facet holds — P-13o-U2-2's
+    /// reading, kept for All alone). The header never disagrees with the
+    /// body:
+    /// - **with words** (the answer sheet): the ONE composer's counts over
+    ///   the facet's NARROWED question — the same hits builder the facet's
+    ///   groups and Books section list from, so the numbers ARE its sheet's
+    ///   (the worn day and the tag association are narrowed the same way);
+    /// - **a tag alone** (the catalog's narrowed listing, VX-84a): each facet
+    ///   lists ONE kind — Notes the tagged notes, Books the associated books,
+    ///   Blocks the tagged blocks — so the band keeps that kind, and the
+    ///   archive's share of it, from the whole question's numbers.
     public static func searchCounts(
         _ db: Database, query: SearchQuery, facet: SearchFacet, scope: SearchScope,
         calendar: Calendar = JournalDay.storeCalendar
     ) throws -> SearchCounts? {
-        try searchCounts(db, query: query, scope: scope, calendar: calendar)
+        guard facet != .all else {
+            return try searchCounts(db, query: query, scope: scope, calendar: calendar)
+        }
+        if query.text != nil {
+            return try searchCounts(db, query: facet.narrowing(query), scope: scope, calendar: calendar)
+        }
+        return try searchCounts(db, query: query, scope: scope, calendar: calendar)?
+            .keepingTheTagRoadsKind(of: facet)
     }
 
     // MARK: - The tag-association join (13o U3 — the 13i sitting record §12)

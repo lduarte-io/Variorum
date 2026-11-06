@@ -35,8 +35,10 @@ import VariorumCore
 /// with the day range and the archived facet. Pure, so a pin holds the rule.
 nonisolated struct LibrarySearchQuestion: Equatable, Sendable {
     /// The whole question — words, typed `#tags`, the day range, the facet —
-    /// and NO scope: the band's counts read this (D3 — the counts tell her
-    /// what every scope holds, PROVISIONAL P-13o-U2-2).
+    /// and NO scope. Under All the band counts this; under a picked scope
+    /// the band counts what that scope lists (VX-734, her R-819-1 and the
+    /// sitting's coherent extension, PROVISIONAL — superseding P-13o-U2-2's
+    /// "the counts never move with the scope"; `Queries.searchCounts(…facet:…)`).
     let query: SearchQuery
     /// The words as typed, the `#tags` aside — the band's echo.
     let words: String
@@ -425,8 +427,9 @@ final class LibrarySearchModel {
 
     // MARK: - The reads (pure, over a Database)
 
-    /// **The answer sheet, read once** (D2): the band's counts (the whole
-    /// question, no scope — D3), the Books section (scopes All and Books),
+    /// **The answer sheet, read once** (D2): the band's counts (what the
+    /// scope lists; All the whole question — R-819-1), the Books section
+    /// (scopes All and Books),
     /// and `groupDepth` groups (every scope but Books). Each is one
     /// composer statement; the Books section pages the books family to its
     /// end (∝ the wing's books).
@@ -447,7 +450,8 @@ final class LibrarySearchModel {
         // The ranked groups need WORDS; a typed tag alone is the catalog's
         // own narrowed listing (VX-84a, D-1 — `LibraryCatalogModel.listing`).
         // VX-84b (D-2): the tags the words name, offered in the band (the
-        // whole question's, never the scope's — like the counts, D3).
+        // whole question's, never the scope's — an offer is an invitation,
+        // not a count; R-819-1 moved only the numbers).
         listing.tagOffers = try Queries.searchTagOffers(db, query: question.query, scope: where_)
         if scope != .books, question.hasWords {
             let page = try Queries.searchGroups(

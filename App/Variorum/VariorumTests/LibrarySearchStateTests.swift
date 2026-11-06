@@ -170,9 +170,17 @@ struct LibrarySearchStateTests {
         }
     }
 
-    // MARK: - Scopes (D3) — the counts are the whole question's
+    // MARK: - Scopes (D3) — each facet's band counts what it lists (R-819-1)
 
-    @Test func theScopePickerNarrowsTheSheetNeverTheCounts() async throws {
+    /// JUSTIFIED EDIT (VX-819 batch 1, VX-734): this pin was
+    /// `theScopePickerNarrowsTheSheetNeverTheCounts` under PROVISIONAL
+    /// P-13o-U2-2 ("the band's numbers never move with the scope"). Her
+    /// R-819-1 supersedes it — the Blocks facet's band counts what it lists,
+    /// and the sitting's coherent extension (PROVISIONAL) every facet's; All
+    /// keeps the whole question's. RED-ON-OLD on the counts lines: the old
+    /// band said the whole question's numbers under every facet. The core
+    /// twin is `SearchFacetTests`.
+    @Test func theScopePickerNarrowsTheSheetAndItsBandCountsWhatItLists() async throws {
         try await withLibrary { session, model in
             let ops = session.operations
             let note = try ops.createPost(title: "Ember")
@@ -183,24 +191,43 @@ struct LibrarySearchStateTests {
             let book = try ops.createReading(name: "Ember Book", kind: .book)
             model.query = "ember "
             await model.search()
-            let counts = model.searchState.counts
+            let whole = try #require(model.searchState.counts)
+            #expect(whole.living.books == 1 && whole.living.notes == 1 && whole.living.scraps == 1,
+                    "All: the whole question's numbers — what every facet holds")
 
             model.pickScope(.posts)
             await model.search()
             #expect(model.searchState.groups.map(\.homeID) == [note.id] && model.bookHits.isEmpty)
-            #expect(model.searchState.counts == counts, "the band's numbers never move with the scope")
+            try bandIsTheSheets(model, "Notes")
+            #expect(model.searchState.counts?.living.books == 0 && model.searchState.counts?.living.scraps == 0,
+                    "Notes never counts the book or the scrap it does not list")
 
             model.pickScope(.books)
             await model.search()
             #expect(model.searchState.groups.isEmpty && model.bookHits.map(\.id) == [book.id])
+            try bandIsTheSheets(model, "Books")
 
             model.pickScope(.blocks)
             await model.search()
+            try bandIsTheSheets(model, "Blocks")
             #expect(Set(model.searchState.groups.map(\.homeID)) == [note.id, pool.id])
             #expect(model.searchState.groups.first { $0.homeID == note.id }?.lines.map(\.kind)
                     == [.blockName], "a note under Blocks shows its block NAME only")
             #expect(model.bookHits.isEmpty)
         }
+    }
+
+    /// The band under the picked facet says exactly what its sheet lists
+    /// (R-819-1): its note groups, their lines, its scraps groups' lines,
+    /// its Books section.
+    private func bandIsTheSheets(_ model: LibraryCatalogModel, _ facet: String) throws {
+        let counts = try #require(model.searchState.counts)
+        let notes = model.searchState.groups.filter { !$0.isPool }
+        let pools = model.searchState.groups.filter(\.isPool)
+        #expect(counts.living.notes == notes.count, "\(facet): notes")
+        #expect(counts.living.passages == notes.map(\.lineCount).reduce(0, +), "\(facet): passages")
+        #expect(counts.living.scraps == pools.map(\.lineCount).reduce(0, +), "\(facet): scraps")
+        #expect(counts.living.books == model.bookHits.count, "\(facet): books")
     }
 
     // MARK: - The cap's death (R-13o-9) — the 41st is reachable
