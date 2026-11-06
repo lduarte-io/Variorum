@@ -120,7 +120,22 @@ You are `opus-implementer` for VX-819 batch 1, in worktree `~/dev/variorum-vx-81
 
 ### BATCH 1 LIVE STATUS (implementer writes from the first commit)
 
-*(empty — batch not yet spawned)*
+*Implementer: opus-implementer, seated 2026-11-05. No revert is in flight. Every claim below is PENDING until its suite ran (the line says so when it did).*
+
+**The re-trace (VX-734 — CONFIRMED by the implementer's own read, 2026-11-05).** Inputs: a word that matches only inside notes' takes (no scrap, no block name). `LibrarySearchQuestion.scopeFilter(.blocks)` (`Features/Library/LibrarySearchModel.swift:102–108`) narrows the groups' question to `.any([.family(.scraps), .docKind(.blockName)])`; the composer reads that as `(c.kind = 'pool' OR d.kind = 'block_name')` over each match (`SearchComposer.composeFilter`, `.family`/`.docKind` at `.passage`), so a note's take hit (`d.kind = 'take'`, `c.kind = 'post'`) is dropped → `LibrarySearchModel.listing` (`:445–451`) lists zero groups → the sheet's empty arm (`LibrarySearchSheet.swift:82–89`) says "Nothing matches." Meanwhile `listing` reads the band's counts from `question.query` — the UN-scoped question (`:432–433`, D3 / P-13o-U2-2) — so the band says "N notes · M passages". Wrong state: the header counts what the facet never lists. Same disagreement, smaller, under Notes/Books (the band counts the other families) and on the text-less tag road (a `#tag` alone counts notes + blocks + books under every facet while each facet lists one kind — `Queries.searchCounts`' no-words branch, `SearchQueries.swift:394–410`).
+
+**Pieces (flipped per commit):**
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | This LIVE STATUS + the confirmed trace | DONE (this commit) |
+| 2 | Refactor, behavior-preserving: the Library's facets move to core (`Domain/SearchFacet.swift` — the OLD Blocks set, byte-identical) + a facet-aware counts read in core that still reads the whole question (the OLD behavior); the App forwards (`scopeFilter`, `listing`) | NOT-STARTED |
+| 3 | VX-734 counts half: a picked facet's band counts what it lists (words: the composer's counts over the facet's narrowed question — one builder; tag alone: the facet's one listed kind); All unchanged. PROVISIONAL (the sitting's coherent extension). Core pin red-on-old by revert; App pins' justified edits | NOT-STARTED |
+| 4 | VX-90 name half: `SearchPassage` carries its block's name (read at zero plan cost from the already-joined `b`); the passage line wears it quietly, trailing | NOT-STARTED |
+| 5 | FORK — proposals to the architect: (A) the widened Blocks kind-set; (B) VX-90's ordinal vs name-only (P1) | NOT-STARTED |
+| 6 | VX-734 widen half (after the architect's go on A) — pin (1) red-on-old by revert | NOT-STARTED — waits on the go |
+| 7 | VX-90 ordinal half or its fallback (after the go on B) | NOT-STARTED — waits on the go |
+| 8 | Suites green at the end (core `swift test` filtered + the full core run; the Mac suites named for the orchestrator's staged run) + self-assessment | NOT-STARTED |
 
 ## BATCH 2 BRIEF — written at batch 2's spawn
 
