@@ -72,13 +72,56 @@ Batch order 1 → 2 → 3 (734's ruling may reshape the answer-sheet counts that
 |---|---|---|
 | 1 | Workspace seated: worktree `~/dev/variorum-vx-819`, branch `vx-819-search` pushed, in-flight row on origin/main (rode vx-827's kickoff commit c04ba6f7b in the same-minute table race; row verified on origin/main line 24) | DONE 2026-11-05 |
 | 2 | Preflight complete (the mandated set; SurfaceContracts in full; QUESTIONS tail; riders resolved from the live board) | DONE 2026-11-05 |
-| 3 | Kickoff sitting: cast · riders · VX-734 resolution · VX-820 vocabulary · VX-822 placement/handoff | PENDING — her answers land in the SITTING RECORD below |
-| 4 | Batch 1 (VX-734) | NOT-STARTED |
-| 5 | Batch 2 (VX-820) | NOT-STARTED |
-| 6 | Batch 3 (VX-822) | NOT-STARTED |
+| 3 | Kickoff sitting: cast · riders · VX-734 resolution · VX-820 vocabulary · VX-822 placement/handoff | DONE 2026-11-05 — R-819-1..4 in the SITTING RECORD; all four riders ride |
+| 4 | Batch 1 (VX-734 + VX-90) | IN-PROGRESS — brief written, implementer spawning |
+| 5 | Batch 2 (VX-820 + VX-374 + VX-408) | NOT-STARTED — brief at spawn |
+| 6 | Batch 3 (VX-822 + VX-98) | NOT-STARTED — brief at spawn |
 | 7 | The ladder over the whole diff | NOT-STARTED |
 | 8 | Closeout (canon deltas two-file shape · tickets · handoff · tickets-filed list last) | NOT-STARTED |
 
-## SITTING RECORD — kickoff, 2026-11-05
+## SITTING RECORD — kickoff, 2026-11-05 (two question batches; her words verbatim-faithful)
 
-*(Her rulings land here verbatim-faithful, same turn.)*
+- **Cast:** Opus implements per batch; **opus-reviewer** on the ladder (the eligible class); Fable orchestrates. Her pick: "Opus reviews".
+- **Riders — ALL FOUR RIDE:** VX-408 · VX-374 · VX-98 · VX-90 (she picked all four offered). Seated as sub-issues of VX-819.
+- **R-819-1 (VX-734) — WIDEN BLOCKS.** Round 1, her words: *"i do think that the wording should be fixed? like snippets + block names? idk that's a bit lengthy. but it's weird and doesn't make sense to not have blocks in there when it's called blocks"* — leaned two ways, so round 2 re-asked plainly; her pick: **"Widen Blocks"** — the facet earns its name: it lists every block-level match — note passages included, Snippets and block names as before — and its band counts what it lists. *(Orchestrator's coherent extension, PROVISIONAL: every facet's band counts what that facet lists; All keeps the full counts — the header can never disagree with the body. P-13o-U2-2's un-scoped counts are superseded by this ruling. The exact kind-set "block-level" covers is the implementer's proposal to the architect — see BATCH 1 BRIEF.)*
+- **R-819-2 (VX-820) — FULL VOCABULARY.** Round 1 she challenged the cost: *"why is it heavy to allow the whole library search ?"* — the honest answer (given in round 2's question): it isn't; the orchestrator overcalled it. Her pick: **"Full vocabulary"** — while a search is live the sort door offers relevance (default per search) · edited · created · date · title, with direction, exactly like the Library's own `sort ▾`.
+- **R-819-3 (VX-822, placement) — UNDER THE WING NAME, IN THE EXISTING SPACE.** Her words: *"under wing name is fine, there should be empty space there when there are starred and without starred items. don't shift everything down for it - there should be space for it without it occupying it's "own" row, which i think would look weird"* (screenshot attached: the sidebar's top — the title-bar row with "in v^2", then the empty band above the first section — that band is the field's home). Binding: the field lives in the existing empty space under the wing-name row, above the first section; **content below does not shift down**; it never reads as its own list row.
+- **R-819-4 (VX-822, handoff) — THE FIELD KEEPS THE KEYBOARD.** Her pick: typing in the sidebar field shows the Library beside it with the live answer as you type; ⏎ or clicking into results moves her into the Library (text carried, field clears); typing is never interrupted. One engine, one finder — the field drives the Library's one search question.
+
+## COORDINATION LEDGER (nov5, 2026-11-05 — the window's facts)
+
+- nov5 confirms: vx-819 logged, **no slot needed**; vx-808 holds the Sync slot. Stage protocol: REQUEST (what/minutes/claim name) early → separate READY ping → GO only from nov5 with the exact claim line → RELEASE + one result line naming EVERY failing test with executed counts; `-only-testing` takes TYPE names (file names silently drop); "Executed 0" is no verdict. Instance guards: `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"`. Dismiss What's New after a Debug launch; dev Castle values only from `~/.variorum/dev-castle.env`; dev store stays signed out; Resume never pressed.
+- **Overlap watch:** vx-878 touches the Library's book rows and the SidebarView FOOTER seam — VX-822's sidebar field (top seam) and VX-820's sort may brush; merges serialize first-ready-first; each merge ask nov5 trial-merges against every open branch. **If VX-822 declares a door in `Registry/Capability*.swift`, tell nov5** (the registry would go four-way: 808 · 827 · 878 · us; every later merger re-runs CapabilityRegistryTests + ShellChromeTests after its merge-in).
+- **vx-808 relay:** its branch (not main) edited `Tests/VariorumCoreTests/SearchPassagesTests.swift` — its v1_37 widened `reading_post` and tipped a query plan; the EXPLAIN pin `thePageStatementIsDrivenByTheIndexAndSeeksEveryHome` now accepts either reading_post index seek and fails on a full scan. If our batches touch that file/query, expect a conflict; **whichever of us merges second re-runs SearchPassagesTests on the merged tree** (headless). We likely merge first (vx-808's deploy+release close the stage).
+- The /Applications refresh decision is nov5's (folded refresh from merged main); a RELEASE is only ever her word; whether our merge rides vx-808's end-of-stage release is hers.
+
+## THE BATCHES, RE-CUT WITH RIDERS (post-sitting)
+
+- **BATCH 1 — VX-734 (widen Blocks, R-819-1) + VX-90 (passage lines say their block).** Core query/listing + answer-sheet face.
+- **BATCH 2 — VX-820 (full sort vocabulary, R-819-2) + VX-374 (controls-row debt) + VX-408 (the search-overtaken-by-refresh race; generation token).** The controls row + the answer path.
+- **BATCH 3 — VX-822 (the sidebar field, R-819-3/-4) + VX-98 (when-door month-grid arrow keys).** Chrome + input.
+
+## BATCH 1 BRIEF (self-contained; the implementer reads ONLY this file's named sections + the named canon)
+
+You are `opus-implementer` for VX-819 batch 1, in worktree `~/dev/variorum-vx-819` (branch `vx-819-search` — run everything from this absolute path). Read first: this file's top sections (roster · surfaces · constitution · traced mechanisms · environment traps · the SITTING RECORD) and `notes/SurfaceContracts.md` § The Library; consult `notes/plans/phase-13o-search.md` (the 13o design record: the scope picker D3, the counts provisional P-13o-U2-2) and `notes/plans/fixes/vx-83-search-followup.md` where the design's why is needed. `notes/SessionResiliencyProtocol.md` binds you: commit per piece, push after every commit, LIVE STATUS below from the first commit, foreground waits only, no subagents (one Sonnet for EXTERNAL facts only if truly needed).
+
+**Member VX-734 (Bug · Suspected → confirm by trace) — R-819-1, widen the Blocks facet.**
+- Mechanism as traced at kickoff: `LibrarySearchModel.scopeFilter(.blocks)` narrows to `.any([.family(.scraps), .docKind(.blockName)])` while the band's counts read the un-scoped query. Re-trace yourself; the pin comes from your trace.
+- The ruling: Blocks lists EVERY block-level match — note passages included, Snippets and block names as before. Propose the exact kind-set to the orchestrator BEFORE building that half (the in-batch fork rule): the defensible line is the kinds whose hit lives on a block's own content (take text, take label, block name, block comment), leaving note titles/meta, books, chapters and savepoints out (savepoints stay behind `+ commits`). Await the architect's go on the set.
+- Counts: under a picked facet the band counts what that facet lists; All keeps the full counts (PROVISIONAL, the sitting's coherent extension — build it, mark it in your record).
+- Pins, red-on-old, revert-verified: (1) a query matching only note passages lists them under Blocks (red on old); (2) the band under Blocks counts the facet's own answer (red on old); keep every existing search pin green — P1 pinned: the widened facet must still scale with matches, never the corpus (no new full scans; check the EXPLAIN-style pins' neighborhood).
+- NOTE: vx-808's BRANCH edited `Tests/VariorumCoreTests/SearchPassagesTests.swift` (plan-shape pin). Main is untouched — but if you touch that file or its query, say so in your record for the merge ledger.
+
+**Member VX-90 (rider, Low) — passage lines could say which block they're in.**
+- Most defensible shape (PROVISIONAL unless the architect says otherwise mid-batch): a passage line quietly carries its block's NAME when the block has one (`block.name` is optional metadata); unnamed blocks add nothing (no "block 3" noise). Keep the line's one-line face; the Library's controls-row and answer-sheet contracts hold.
+- Pin: a named block's passage line carries the name; an unnamed one is byte-unchanged.
+
+**Rules that bind every line:** operations through the one API (this batch should be read-side only — if you find yourself writing an operation, stop and report); no literal colours (tokens only); chrome `fixedSize` texts carry `lineLimit`; the controls row's line count never changes; headless `swift test` freely, NO `xcodebuild test` without the orchestrator (stage is coordinated externally — ask, never claim yourself). Commit messages: `Part of VX-734: …` / `Part of VX-90: …`, stating the traced mechanism and the pin for the bug member. NO commit trailers. When done: self-assessment in your LIVE STATUS (claims PENDING until the suite ran), then report.
+
+### BATCH 1 LIVE STATUS (implementer writes from the first commit)
+
+*(empty — batch not yet spawned)*
+
+## BATCH 2 BRIEF — written at batch 2's spawn
+
+## BATCH 3 BRIEF — written at batch 3's spawn
