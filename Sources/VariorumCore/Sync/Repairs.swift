@@ -56,11 +56,14 @@ struct TouchedRows {
     var membershipPostIDs: Set<String> = []
     /// Applied `shelf` rows — the Welcome-keeper repair's firing scope.
     var shelfIDs: Set<String> = []
-    // ——— VX-435 (the VX-805 run): the cross-wing mend's three occasions ———
-    /// (a) LIVE `reading_post` rows that landed, by reading id → their post
-    /// ids (an inline re-point lands on the keeper's id, so direction 2's
-    /// rows count for the keeper).
-    var liveMembershipLandings: [String: Set<String>] = [:]
+    // ——— the cross-wing mend's three occasions (VX-435 built them for the
+    // daily Journal; VX-857 — the VX-808 run — generalized them to every
+    // book: `BookWingMend.swift`) ———
+    /// (a) Post ids named by `reading_post` rows that LANDED as a live MEMBER
+    /// — as they arrived, or as an inline repair resolved them (a dedupe's
+    /// promotion; the keeper's direction-2 re-point). An ARRIVAL landing is
+    /// never an occasion (A-808-3).
+    var liveMemberLandingPosts: Set<String> = []
     /// (b) Live `reading` rows that landed with a wing pointer different
     /// from the local row's — or with no local row at all — by reading id →
     /// the wing the LOCAL row stood in before the landing (nil = absent).
@@ -259,6 +262,18 @@ extension SyncEngine {
             resolved.columns["profile"] = .text(Queries.journalTraitProfile)
             try enqueueExplicitly(db, table: resolved.table, rowID: resolved.rowID)
             touched.inlineRepairs += 1
+        }
+        // VX-857 — the general mend's occasion (a): a `reading_post` row
+        // landing as a live MEMBER, as it arrived or as the inline repairs
+        // above resolved it (an incoming member a dedupe retired beside a
+        // rival it promoted still names a pair that now has a live member).
+        // Over-inclusion is cheap and safe — the mend's per-note evaluation
+        // is a pure function of the rows — while an ARRIVAL alone never
+        // enters the scope (A-808-3).
+        if resolved.table == "reading_post",
+           Self.landsAsLiveMember(row) || Self.landsAsLiveMember(resolved),
+           case .text(let postID) = resolved.columns["post_id"] {
+            touched.liveMemberLandingPosts.insert(postID)
         }
         // VX-435 — the cross-wing mend's occasion (b): a live `reading`
         // landing whose wing pointer differs from the local row's (or that
@@ -531,10 +546,6 @@ extension SyncEngine {
         case "reading_post":
             if case .text(let postID) = row.columns["post_id"] {
                 touched.membershipPostIDs.insert(postID)
-                // VX-435 — the mend's occasion (a): a LIVE row landing.
-                if !row.isTombstoned, case .text(let readingID) = row.columns["reading_id"] {
-                    touched.liveMembershipLandings[readingID, default: []].insert(postID)
-                }
             }
         case "shelf":
             touched.shelfIDs.insert(row.rowID)
@@ -913,13 +924,17 @@ extension SyncEngine {
             repairs += converged.repairs
             keeperMovedPosts.formUnion(converged.movedPosts)
         }
-        // VX-435 — THE CROSS-WING MEND, composed right AFTER the keeper (so
-        // its target is the converged Journal and its scope includes every
-        // post the keeper just handed over): a live member of the daily
-        // Journal sitting in another wing moves into the Journal's wing.
-        if !keeperMovedPosts.isEmpty || !touched.liveMembershipLandings.isEmpty
+        // THE CROSS-WING MEND (VX-435 for the daily Journal; VX-857 — the
+        // VX-808 run — for EVERY book, `BookWingMend.swift`), composed right
+        // AFTER the keeper (so a Journal's members land in the converged
+        // keeper's wing and the scope includes every post it just handed
+        // over) and BEFORE OWNED exclusivity (which then meets a single-wing
+        // set — A-808's repair order): a live member of a live book sitting in
+        // another wing follows its anchor book; a membership left in a book
+        // of another wing demotes to an arrival.
+        if !keeperMovedPosts.isEmpty || !touched.liveMemberLandingPosts.isEmpty
             || !touched.readingWingLandings.isEmpty {
-            repairs += try mendJournalMembersIntoItsWing(
+            repairs += try mendBookMembersIntoTheirWing(
                 db, touched: touched, keeperMoved: keeperMovedPosts)
         }
         // The dedupe's occasions — PULL-ONLY, three of them (the ladder's
