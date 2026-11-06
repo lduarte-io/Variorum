@@ -1938,3 +1938,8 @@ VX-850's — our data point COMMENTED there (no new ticket; the U3b adjudication
 line is satisfied by that comment). The READY message to nov5 must carry the WHOLE
 `-only-testing` type list for the Mac batch; nov5 checks every name against the worktree
 before the GO.
+
+**Walk trap (nov5, 2026-11-06):** vx-819 quit the dev-store Debug app FULL-SCREEN tonight, so
+our walk's launch will likely restore full-screen — where cliclick's typing (t:/kp:) stops
+landing while clicks still work (System Events keystrokes do work). The walk's FIRST step is
+⌃⌘F to a normal window; the window is left WINDOWED at quit.
