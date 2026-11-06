@@ -118,6 +118,8 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 
 *No behavioral revert is in flight unless a line below says "REVERT IN FLIGHT". Reverts are commit-first, then the occasion's wiring commented out on the committed tree, the scenario run red, restored by `git checkout HEAD -- <file>`.*
 
+**REVERT IN FLIGHT (on `d10fc9784`):** the count's purity — `waiting_count` as the bare `belledPostIDs.count` (every note the write rang, readable or not); expected RED: `MCPTwoStoreCatalogServerTests` at the arm "set_book_rule · the shared book also collects a tag only a hidden note wears" (A counts the hidden note). Restore: `git checkout HEAD -- Sources/VariorumMCP/MCPWriteTools+Carriage.swift`.
+
 | Piece | Status |
 |---|---|
 | Reading (own context): this record §1–§9 · SyncSpec IN FULL · the vx-805 record's FOR A LATER READER + Unit B (proposal, ruling, residual corners) · SyncSpec §7's vx-805 entries · `JournalWingMend.swift` · `Repairs.swift` (writeResolvedRow, noteApplied, the keeper, OWNED, the post-batch order) · `Operations+WingMove.swift` / `+WingBookMove.swift` · `JournalWingConvergenceTests` · `Migrations.swift` tail · `SyncSchema.swift` · mirror 15/16/17 · the DDL/serializer/disclosure pins | DONE |
