@@ -170,15 +170,17 @@ struct BookWingMendOccasionTests {
     }
 
     /// BW2 — occasion (b), the other order, met at the BOOK's landing: B's
-    /// filing reaches the server first; A moves X without having seen it; B
-    /// meets the moved book (its own filing sits in the wing X left). RED ON
-    /// OLD.
+    /// filing reaches the server first (and B consumes its own echo, so its
+    /// membership never re-lands — only the book's row can be the occasion);
+    /// A moves X without having seen the filing; B meets the moved book (its
+    /// own filing sits in the wing X left). RED ON OLD.
     @Test func bw2_theOtherOrder_metAtTheBooksLanding() async throws {
         let (a, b, server) = try furniturePair()
         let book = try a.with { ops, _ in try ops.createReading(name: "Harbour", kind: .book) }
         try await assertAllConverged([a, b], server: server)
         let note = try fileOffline(b, into: book.id)
         try await b.push()
+        try await b.pull()   // the echo of B's own filing, consumed before the move lands
         let studio = try a.with { ops, _ in try ops.createWing(name: "Studio") }
         _ = try a.with { ops, _ in try ops.moveReadingToWing(book.id, to: studio.id) }
         try await a.push()   // A has NOT pulled B's filing: it moved no such member
