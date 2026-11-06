@@ -64,7 +64,7 @@ struct CrossBlockCompoundTests {
                 }
             }
             #expect(ancestors.sorted() == ["Alpha one.", "Beta two."],
-                    "both halves are kept whole under Came from")
+                    "both halves are kept whole in the block's Lineage")
         }
     }
 
@@ -502,7 +502,9 @@ struct CrossBlockCompoundTests {
             await h.flush()
             let status = try #require(h.model.statusMessage)
             #expect(status.contains(TrayPath.menuLabel), "where the middle went")
-            #expect(status.contains(BlockHistoryPath.cameFromSection),
+            // VX-827 U3b — A JUSTIFIED EDIT: the originals' home is the
+            // block's Lineage now (the one phrase).
+            #expect(status.contains(TrayPath.originalsPath),
                     "where the two ends went")
             #expect(status.contains("\u{2325}\u{2318}Z"), "and the road back")
             #expect(status.count <= 100,

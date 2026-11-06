@@ -866,7 +866,8 @@ struct TrayPanel: View {
                 // (Ladder R1-6: not the b6dae25 class — the tray pins
                 // `minWidth: 280`, so the near-zero-width probe measures 280 pt
                 // either way; pinned in `ChromeMinHeightTests`. Left here.)
-                Text(tokens.chromeLabel(RecoveryCopy.trayRevealKeptInLineage(home)))
+                Text(tokens.chromeLabel(RecoveryCopy.trayRevealKeptInLineage(
+                    home, place: TrayPath.originalsPath)))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(nil)

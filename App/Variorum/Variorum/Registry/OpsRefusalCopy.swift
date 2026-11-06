@@ -650,8 +650,9 @@ nonisolated enum CrossBlockEditCopy {
     ///
     /// The nouns are the shared constants, not new words: the tray the bulk
     /// bar names (`TrayPath.menuLabel`, home-aware — the scraps editor
-    /// composes this bar too) and the lineage region Block History names
-    /// (`BlockHistoryPath.cameFromSection`). One grammar is kept where it
+    /// composes this bar too) and the block's lineage (`TrayPath.originalsPath`
+    /// — Block History's came-from region until VX-827 U3b moved the originals
+    /// to the Lineage face). One grammar is kept where it
     /// matters — the same PLACES, called the same things, with the same ⌥⌘Z.
     static func receipt(
         _ outcome: CrossBlockCompound.Outcome, home: ContainerKind = .post
@@ -664,8 +665,10 @@ nonisolated enum CrossBlockEditCopy {
         if outcome.merged {
             // Her condition on the join ruling: *the previous blocks must be
             // EASY TO SEE in lineage.* The region's own name is the road.
+            // (VX-827 U3b: the originals' home on the Mac is the block's
+            // LINEAGE face — the one phrase, `TrayPath.originalsPath`.)
             clauses.append(
-                "the ends joined \u{2014} originals under \(BlockHistoryPath.cameFromSection)")
+                "the ends joined \u{2014} originals in \(TrayPath.originalsPath)")
         } else if outcome.joinSuppressedByFan {
             // #11a's standing rule, said out loud instead of left to be
             // noticed: the halves join only where no fan hangs on the seam.

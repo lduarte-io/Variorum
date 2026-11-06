@@ -1616,7 +1616,7 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-3 | The Commits face machinery parameterized by block (a relative of the block you came from) — reuse, not a second composition | DONE (compiled) — `CommitsFaceModel.Role` (`.home` / `.relative`), the shared `LineageBringBack` road; `CommitsFaceBody` = THE one pane+rail composition both faces draw |
 | U3b-4 | The Lineage face (model + view), its doors (lineage › on the face, Lineage in both block ▾ menus), the registry | DONE (compiled) — `LineageFaceModel` + `LineageFaceView` + `BlockHistorySurface`; `LineageFaceModelTests` (10 pins) + `LineageFaceDoorsTests` (4) written and compiled, RUN owed to the closing window |
 | U3b-5 | The origin door re-aim (G2's ruling) + the old panel's WHOLE retirement + every pin re-pointed or retired by name + the tutorial walk's drive | DONE (compiled — `build-for-testing` green) — the table under U3b-5 below |
-| U3b-6 | The guide sweep (G1's sentences, each listed for #264) | NOT-STARTED |
+| U3b-6 | The guide sweep (G1's sentences, each listed for #264) | DONE (compiled; phone target compiled too — `RecoveryCopy` is shared) — the list under U3b-6 below |
 | U3b-7 | Walk rows for the Lineage face, appended to the window's walk | NOT-STARTED |
 | U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | NOT-STARTED |
 
@@ -1733,4 +1733,36 @@ and the row-33 jump are NOT carried (P-U3b-6; the U3a record's G2.3).
 | `SavepointOnLeaveTests` — `QuietRunRowCaptureTests` | RETIRED (`QuietRunRow` composes nowhere) |
 | `TutorialWalkTests` — the no-purge arm, `theDeletedSpareTakeWaitsInTheBlocksPastAndComesBack`, the exits lesson's Bring back | RE-POINTED — both faces; `CommitsFaceModel.putBackTake` (U3a's owed drive); `LineageFaceModel.putBack` |
 | `CapabilityRegistryTests.theSurfacesRenderExactlyTheDeclaredSurfaceActs` | the pane's line RETIRED; the Lineage face's line ADDED |
+
+### U3b-6 — the guide sweep (G1, executed): every changed sentence, for #264 (her wordings to re-cut)
+
+Mac only — the phone's Block History keeps its Came from region and every shared sentence's default. Drafted in the
+guide's voice; the tutorial walk's finders still hold (the deleted-takes paragraph still opens "Deleted takes wait…",
+the divide paragraph still names "See original from divide…"). **The real store's seeded guide is stale until Help ▸
+Restore Field Guide… re-seeds it** (the U3a adjudication's owed item, behind the A1 rail).
+
+| # | Where | Was | Now |
+|---|---|---|---|
+| W1 | `TutorialSeeder` — the tray lesson's last parenthesis | "It waits in the block it became, under Came from." | "It waits in the lineage of the block it became." |
+| W2 | lesson "what a block leaves behind", ¶1 | "Everything this block has been opens in the panel on the right: every take's saved moments, the takes it archived, the takes it deleted, and where it came from." | "Everything this block has been opens in place of the page: every take's saved moments on one line, newest at the top, the takes it archived, the takes it deleted, and, one press away under lineage, where it came from. ‹ back returns you to the page." |
+| W3 | same lesson, ¶3 | "Open history on either new block and its Came from region shows the original itself ("From a divide on ‹date› — the original is preserved") with Bring back beside it. Right-clicking the block ▸ See original from divide… and ⌘K land in the same place." | "Open the lineage of either new block (block ▾ ▸ Lineage, or lineage in its history) and the original is there itself, kept as lineage, with Put back beside it and its own takes and commits underneath. Right-clicking the block ▸ See original from divide… and ⌘K land in the same place, the original already picked." |
+| W4 | same lesson, ¶4 (merges) | "…lists both of the blocks it joined in Came from, each with its own Bring back, three of them…" | "…lists both of the blocks it joined in its lineage, each with its own Put back, three of them…" |
+| W5 | same lesson, ¶5 | "Deleted takes wait in the same panel, under Deleted takes, each with the days it has left." | "Deleted takes wait in the same history, at the foot of its line of moments, each with the days it has left." |
+| W6 | the spare take's own text | "…then put me back from the block's history panel." | "…then put me back from the block's history." |
+| W7 | lesson "the five places", Five | "…it opens the Block History panel: each live take's saved moments, the takes this block archived, the takes it deleted (with their clocks), and Came from, the blocks it came out of." | "…it opens the block's history in place of the page: every take's saved moments on one line, the takes this block archived, the takes it deleted (with their clocks), and, behind lineage, the blocks it came out of." |
+| W8 | lesson "what a copy carries", ¶3 | "(Came from)" | "(in the block's Lineage)" |
+| W9 | lesson "the two exits", "Now look." | "…press history: its Came from region lists both originals, … and a Bring back button that puts it into the note again … and this panel is where that line points." | "…open its lineage (block ▾ ▸ Lineage): both originals are there, … and a Put back that puts it into the note again … and this lineage is where that line points." |
+| W10 | same lesson, the join paragraph | "…both originals kept whole under Came from." | "…both originals kept whole in the joined block's lineage." |
+| W11 | same lesson, the closing paragraph | "…look inside what it became, under Came from." | "…look in the lineage of what it became." |
+| W12 | `OpsRefusalCopy.receipt` (the cross-block join's quiet line) | "the ends joined — originals under Came from" | "the ends joined — originals in the block's Lineage" (≤ 100 chars kept: 95 in the pinned case) |
+| W13 | `RecoveryCopy.trayRevealKeptInLineage` (the Mac passes its place; the phone keeps the default) | "…it lives under Came from in Block History, not in the tray." | "…it lives under the block's Lineage, not in the tray." |
+| W14 | `TrayPath.originalsPath` (one constant — the divide ceremony's checklist + released-original note, the take cards' three lines, the merge arrangement's status, the merge ceremony's stay-behind line, the four merge receipts, the helper's merge entry follow it) | "Block History → Came from" | "the block's Lineage" |
+| W15 | `TrayPath.originalsPathWithDoor` | "Block History → Came from (the history door in the note's bottom bar)" | "the block's Lineage (block ▾ ▸ Lineage in the bottom bar)" |
+| W16 | `OperationError.notInLineage`'s words (`OpsRefusalTable`, the ruled fence) | — | "That block isn't part of this block's lineage in this wing — nothing was brought back." |
+
+Left as they were, true again now that the Commits face carries "lineage ›" (U3a's note): the history door's help,
+`.showBlockHistory`'s unavailable note, the ⌘/ helper's Block History row ("…and the block it came out of"). Not swept
+(not G1's, still true on the Mac): `RecoveryCopy.trayNoTakesArchived` ("under Archived takes in Block History" — the take
+dropdown's archived group). **Owed to her eye, not changed:** the ⌘/ helper's `block ▾` row lists neither History
+(U3a) nor Lineage — a door with no helper line (P-U3b-10).
 

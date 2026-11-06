@@ -550,7 +550,7 @@ struct NoteTrayTests {
             #expect(!model.revealMissing,
                     "the row exists — 'it isn't here' would be the arrival-time lie")
             #expect(model.revealKeptInLineage,
-                    "the third state: kept whole, living under Came from")
+                    "the third state: kept whole, living in the block's Lineage")
             #expect(model.stranded.isEmpty, "nothing is counting — the family is alive")
             #expect(!RecoveryCopy.trayRevealKeptInLineage(.post).isEmpty)
         }

@@ -71,12 +71,18 @@ struct OriginBlockDoorTests {
         // constant for free, which is the whole argument for the constant,
         // made good a second time. The CLAIM is unchanged: the sentence
         // names a place that really has that name and that door.
-        #expect(TrayPath.originalsPath.contains(BlockHistoryPath.name))
-        #expect(TrayPath.originalsPath.contains(BlockHistoryPath.cameFromSection))
+        // **VX-827 U3b — A JUSTIFIED EDIT, a third time:** the Block History
+        // panel retired and the originals' home on the Mac is the block's
+        // LINEAGE face — the constant follows it, and the claim is the same:
+        // the sentence names a place that really has that name and that door.
+        #expect(TrayPath.originalsPath == BlockLineagePath.place)
+        #expect(TrayPath.originalsPath.contains("Lineage"))
+        #expect(!TrayPath.originalsPath.contains(BlockHistoryPath.cameFromSection),
+                "the came-from region retired with the panel — pointing there would be a lie")
         #expect(!TrayPath.originalsPath.contains(TrayPath.menuLabel),
                 "the tray no longer lists them — pointing there would be a lie")
-        #expect(TrayPath.originalsPathWithDoor.contains(BlockHistoryPath.doorPhrase),
-                "the teaching form names the way in, not just the place")
+        #expect(TrayPath.originalsPathWithDoor.contains(CommitBar.lineageRowTitle),
+                "the teaching form names the way in (block ▾'s Lineage row), not just the place")
     }
 
     /// The completion sentence: only when an unchecked take actually rode the

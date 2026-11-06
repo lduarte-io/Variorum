@@ -1501,9 +1501,8 @@ enum TutorialSeeder {
             + "the block cards; every card says which kind it is. One verb serves "
             + "every row: Put back, and a block returns to the place it stood in. "
             + "(A block kept whole by a divide or a merge is not leaving "
-            + "anything, so it is not here. It waits in the block it became, "
-            + "under \(BlockHistoryPath.cameFromSection). The next lesson has "
-            + "it.)",
+            + "anything, so it is not here. It waits in the lineage of the "
+            + "block it became. The next lesson has it.)",
 
             "The Library holds the other half, in two rooms. Archived is its "
             + "own item in the sidebar: calm and clockless, whole notes you set "
@@ -1550,9 +1549,11 @@ enum TutorialSeeder {
         let past = try lesson(deleting, "what a block leaves behind", [
             "A block remembers more than its text. Put your cursor in one and "
             + "press history in the bottom bar, the pair to commit, the same door "
-            + "on both bars. Everything this block has been opens in the panel on "
-            + "the right: every take's saved moments, the takes it archived, the "
-            + "takes it deleted, and where it came from.",
+            + "on both bars. Everything this block has been opens in place of the "
+            + "page: every take's saved moments on one line, newest at the top, "
+            + "the takes it archived, the takes it deleted, and, one press away "
+            + "under lineage, where it came from. \u{2039} back returns you to the "
+            + "page.",
 
             // U-2 (18c batch 1): \u{2318}\u{21E7}D keeps the other takes whole on
             // the TOP block. This lesson and its staged take taught 13j's
@@ -1565,13 +1566,13 @@ enum TutorialSeeder {
             + "What became of the block you cut? It was kept: whole, off to one "
             + "side, not deleted.",
 
-            "Open history on either new block and its "
-            + "\(BlockHistoryPath.cameFromSection) region shows the original "
-            + "itself (\u{201C}From a divide on \u{2039}date\u{203A} \u{2014} the "
-            + "original is preserved\u{201D}) with Bring back beside it. "
-            + "Right-clicking the block \u{25B8} See original from divide\u{2026} "
-            + "and \u{2318}K land in the same place. They wait there, with no "
-            + "clock, for as long as anything descended from them is alive.",
+            "Open the lineage of either new block (block \u{25BE} \u{25B8} "
+            + "Lineage, or lineage in its history) and the original is there "
+            + "itself, kept as lineage, with Put back beside it and its own takes "
+            + "and commits underneath. Right-clicking the block \u{25B8} See "
+            + "original from divide\u{2026} and \u{2318}K land in the same place, "
+            + "the original already picked. They wait there, with no clock, for "
+            + "as long as anything descended from them is alive.",
 
             // The post-13l polish round, her A7 ruling: the per-merge message
             // is DECLINED (*"it's annoying to see that message every time"*)
@@ -1580,9 +1581,9 @@ enum TutorialSeeder {
             "Merging keeps its blocks the same way, and says nothing at the "
             + "time. Deliberately: a message on every join would be noise. Merge "
             + "two blocks (or select across them and delete the seam) and the "
-            + "block you get lists both of the blocks it joined in "
-            + "\(BlockHistoryPath.cameFromSection), each with its own Bring back, "
-            + "three of them if you merged three. Nothing was deleted, so nothing "
+            + "block you get lists both of the blocks it joined in its lineage, "
+            + "each with its own Put back, three of them if you merged three. "
+            + "Nothing was deleted, so nothing "
             + "is counting down; the next chapter has you do it and find them.",
 
             // 13u3 UNIT H: the row is named by the ROW's own title and the
@@ -1591,9 +1592,8 @@ enum TutorialSeeder {
             // It used to send a reader to "the ⋯ menu" without a place, and
             // the surface she is most likely standing on after the takes
             // chapter — the Takes board — had no ⋯ on its cards at all.
-            "Deleted takes wait in the same panel, under "
-            + "\(BlockPastCopy.deletedTakesHeader), each with the days it has "
-            + "left. This paragraph carries a spare take for the experiment: open "
+            "Deleted takes wait in the same history, at the foot of its line of "
+            + "moments, each with the days it has left. This paragraph carries a spare take for the experiment: open "
             + "its takes (\u{2318}\u{21E7}T in Write, or the Takes tab, "
             + "\u{2318}2, where every take card carries the same menu) and on the "
             + "spare card use \(TakeCardMenuCopy.menuGlyph) \u{25B8} "
@@ -1626,7 +1626,7 @@ enum TutorialSeeder {
         try take(on: past.blocks[4],
             "the spare take: delete me from my own card's \(TakeCardMenuCopy.menuGlyph) menu (every take "
             + "card has one, in Takes and in Write's takes panel), then put me back "
-            + "from the block's history panel.")
+            + "from the block's history.")
 
         // ————————————————————————— where things go ——————————————————————————
         //
@@ -1678,11 +1678,11 @@ enum TutorialSeeder {
 
             "Five: this block's History. Everything one block has been. The "
             + "history door sits in the bottom bar right beside commit, and it "
-            + "opens the Block History panel: each live take's saved moments, the "
-            + "takes this block archived, the takes it deleted (with their "
-            + "clocks), and \(BlockHistoryPath.cameFromSection), the blocks it "
-            + "came out of. Two lessons live in there, and they are the two that "
-            + "follow.",
+            + "opens the block's history in place of the page: every take's "
+            + "saved moments on one line, the takes this block archived, the "
+            + "takes it deleted (with their clocks), and, behind lineage, the "
+            + "blocks it came out of. Two lessons live in there, and they are the "
+            + "two that follow.",
 
             "Practice me: I'm here to be visited. Put your cursor in me and "
             + "press history in the bottom bar to read my (empty) past. Then come "
@@ -1779,7 +1779,7 @@ enum TutorialSeeder {
             "And a copy holds only what the note places: the paragraphs on the "
             + "page, in their order. A note keeps things beside its page that are "
             + "not on it: blocks a divide or a merge set aside whole "
-            + "(\(BlockHistoryPath.cameFromSection)), blocks you archived, blocks "
+            + "(in \(TrayPath.originalsPath)), blocks you archived, blocks "
             + "on their way out in \(TrayPath.menuLabel). None of those are in a "
             + "saved version. They belong to the note and they stay with it, "
             + "exactly where the map two lessons ago says they are.",
@@ -1844,14 +1844,14 @@ enum TutorialSeeder {
             "Exit two, second half: and what we become will remember us both, "
             + "by name.",
 
-            "Now look. Put your cursor in the joined paragraph and press "
-            + "history: its \(BlockHistoryPath.cameFromSection) region lists both "
-            + "originals, not one of them, each with its own text and a "
-            + "\(BlockHistoryPath.bringBackVerb) button that puts it into the "
-            + "note again, beside what it became. Nothing counted down. Nothing "
-            + "was in the Trash. All the app said at the time was one quiet line "
-            + "at the bottom, naming where the two originals went, and this panel "
-            + "is where that line points.",
+            "Now look. Put your cursor in the joined paragraph and open its "
+            + "lineage (block \u{25BE} \u{25B8} Lineage): both originals are "
+            + "there, not one of them, each with its own text and a "
+            + "\(BlockPastCopy.putBackVerb) that puts it into the note again, "
+            + "beside what it became. Nothing counted down. Nothing was in the "
+            + "Trash. All the app said at the time was one quiet line at the "
+            + "bottom, naming where the two originals went, and this lineage is "
+            + "where that line points.",
 
             // **13u1 UNIT 2 — the FANNED CROSS-BLOCK MATRIX**, which row 27
             // deliberately left to this phase (*"the fanned cross-block
@@ -1872,8 +1872,8 @@ enum TutorialSeeder {
             "The two ends then join, or they don't, and that is decided by "
             + "where you cut. Cut in the middle of a paragraph at both ends and "
             + "the remainders become one paragraph, the way any editor would join "
-            + "them: the second exit, with both originals kept whole under "
-            + "\(BlockHistoryPath.cameFromSection). Cut at a paragraph break at "
+            + "them: the second exit, with both originals kept whole in the "
+            + "joined block's lineage. Cut at a paragraph break at "
             + "either end (the top of a block, the bottom of one, or a line break "
             + "inside one) and the ends keep their own blocks. You meant whole "
             + "paragraphs, so whole paragraphs is what you get.",
@@ -1896,8 +1896,8 @@ enum TutorialSeeder {
 
             "So, whenever something is missing: if you deleted it, look where "
             + "things are leaving, the note's tray, then the Trash. If you "
-            + "changed it (merged, divided), look inside what it became, under "
-            + "\(BlockHistoryPath.cameFromSection). There is one place the two "
+            + "changed it (merged, divided), look in the lineage of what it "
+            + "became. There is one place the two "
             + "exits meet, and it is honest about itself: a preserved original "
             + "has no clock only while something descended from it is alive, so "
             + "deleting the last of those descendants moves it, visibly, into the "
