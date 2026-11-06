@@ -215,9 +215,9 @@ road for all four at once is named so ONE staged run can show every red.
 | # | Fix (member) | Status |
 |---|---|---|
 | 0 | This record | DONE (this commit) |
-| F7 | dead `LibrarySearchQuestion.scopeFilter` (VX-734) · the two stale relevance-label comments (VX-820) | NOT-STARTED |
-| F5 | one case-folding truth (VX-820, core) | NOT-STARTED |
-| F2 | `CarriedWordsCaret` scoped to the Library field's own window — two-window pin alone, then the fix (VX-822) | NOT-STARTED |
+| F7 | dead `LibrarySearchQuestion.scopeFilter` (VX-734) · the two stale relevance-label comments (VX-820) | DONE (`5da995e87` the dead method — no reader in app, tests or core; `f39b8307b` + `f86f6f3f7` the comments: `sortWidest`'s doc, the catalog's stable-widths comment, and a THIRD of the same class found beside them — `LibraryProbeSlot.sortSlot`'s doc in `LibraryInfoPanel.swift`; `f86f6f3f7` carries the third because the tool refused its edit in the first commit, whose message already named it). No behaviour; compile proof at END |
+| F5 | one case-folding truth (VX-820, core) | DONE (`662d91845`) — `Queries.LibrarySort.foldsCase` is the one truth; `keyCollation` (the statements) and `SearchOrder.foldsCase` (the worn-day merge's Swift compare) both derive from it. Behaviour-preserving (the copies agreed — a NIT, no red-on-old owed); GUARD pin `SearchOrderTests.theSwiftFoldAndTheStatementsCollationAreOneTruth` (every sort × direction). RAN: `swift test --filter 'SearchOrderTests\|LibraryPagingTests'` → 16 tests / 2 suites passed |
+| F2 | `CarriedWordsCaret` scoped to the Library field's own window — two-window pin alone, then the fix (VX-822) | IN-PROGRESS — the pin ALONE (this commit — the red-on-old tree): `SidebarSearchFieldShellTests.theHandoffsCaretLandsInItsOwnWindowNeverAnotherEditingTheSameWords`; the fix next |
 | F1 | the sidebar road moves a Timeline Library to List as the search lands — pin alone, then the fix (VX-822) | NOT-STARTED |
 | F3 | the sidebar road starts a new search: relevance, facets cleared — pin alone, then the fix; P-819-B3d amended (VX-822 / VX-820) | NOT-STARTED |
 | F4 | the smallest honest form: the field inert while ⌘K's palette is presented (VX-822) | NOT-STARTED |

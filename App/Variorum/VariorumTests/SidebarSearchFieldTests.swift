@@ -281,6 +281,79 @@ struct SidebarSearchFieldShellTests {
         }
     }
 
+    // MARK: The ladder's round 1 (notes/plans/fixes/vx-819-ladder-round1.md)
+
+    /// A window editing `words` in a plain field — the field editor holds
+    /// them, AppKit's select-all on it (a focus by code).
+    private static func decoy(_ words: String, at x: CGFloat) -> (window: NSWindow, field: NSTextField) {
+        let window = KeyedTestWindow(
+            contentRect: NSRect(x: x, y: 40, width: 320, height: 80),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let field = NSTextField(string: words)
+        field.frame = NSRect(x: 12, y: 24, width: 260, height: 24)
+        window.contentView?.addSubview(field)
+        window.orderFrontRegardless()
+        window.makeFirstResponder(field)
+        return (window, field)
+    }
+
+    private static func dismiss(_ window: NSWindow) {
+        window.makeFirstResponder(nil)
+        window.orderOut(nil)
+        window.close()
+    }
+
+    /// **F2 — ⏎'s caret lands in the Library field's OWN window.** Another
+    /// window editing the same words must neither take the caret nor rob
+    /// the Library's field of it: AppKit's select-all on a field focused by
+    /// code would then stand, and her next key would REPLACE the carried
+    /// question. Two decoys, one built before the shell's window and one
+    /// ordered in front after it, so whichever order the app's window list
+    /// is walked in, a decoy comes before the shell's window in it (the
+    /// red-on-old tree walked `NSApp.windows` and stopped at the first match).
+    @Test func theHandoffsCaretLandsInItsOwnWindowNeverAnotherEditingTheSameWords() async throws {
+        let before = Self.decoy("harbour", at: 1180)
+        defer { Self.dismiss(before.window) }
+        try await withShell { _, router, catalog, window, hosting in
+            let after = Self.decoy("harbour", at: 1520)
+            defer { Self.dismiss(after.window) }
+            await settle(window, hosting) { Self.sidebarField(hosting) != nil }
+            let field = try #require(Self.sidebarField(hosting))
+            window.makeFirstResponder(field)
+            await settle(window, hosting, timeout: 2) { Self.keyboardField(window) === field }
+            #expect(Self.type("harbour", window))
+            await settle(window, hosting) { catalog.query == "harbour" && Self.libraryField(hosting) != nil }
+
+            // Non-vacuity: each decoy's field editor holds the same words —
+            // the walk the fix retired WOULD have stopped at it.
+            var decoyRanges: [NSRange] = []
+            for decoy in [before, after] {
+                let editor = try #require(decoy.window.firstResponder as? NSTextView, "the decoy is editing")
+                try #require(editor.isFieldEditor && editor.string == "harbour", "the decoy shows the same words")
+                decoyRanges.append(editor.selectedRange())
+            }
+
+            let enter = try #require(Self.key(36, "\r", window: window))
+            NSApp.sendEvent(enter)
+            await settle(window, hosting) {
+                field.stringValue.isEmpty && Self.keyboardField(window) === Self.libraryField(hosting)
+            }
+            #expect(router.workspace.focusedSelection == .library)
+            #expect(Self.keyboardField(window) === Self.libraryField(hosting), "⏎ moved the keyboard into the Library's field")
+            await settle(window, hosting, timeout: 1) {
+                (window.firstResponder as? NSTextView)?.selectedRange() == NSRange(location: 7, length: 0)
+            }
+            await settle(window, hosting, timeout: 0.4)
+            #expect((window.firstResponder as? NSTextView)?.selectedRange() == NSRange(location: 7, length: 0),
+                    "the caret after the carried words in the Library's own window")
+            for (decoy, range) in zip([before, after], decoyRanges) {
+                #expect((decoy.window.firstResponder as? NSTextView)?.selectedRange() == range,
+                        "another window's editor is never touched by the handoff")
+            }
+        }
+    }
+
     /// A door, never a mirror (PROVISIONAL P-819-B3d): while the Library is
     /// already searching its own words, the sidebar field stays empty.
     @Test func theFieldStaysEmptyWhileTheLibrarySearchesItsOwnWords() async throws {
