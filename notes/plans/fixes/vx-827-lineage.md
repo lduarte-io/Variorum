@@ -710,8 +710,8 @@ store touches.*
 | U2-2 | B — VX-815's TRACE (a throwaway probe, never committed) | DONE — below |
 | U2-3 | A — core: the tag-wearer listing + batched note tags, with exact-rows and P1 pins | DONE — 7/7 + the shared brain's suites green; both P1 pins red on the naive join (below) |
 | U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | DONE — 6/6 server + the catalog (10 new arms) green; the arms red on the fence mutation (below); ONE justified re-pin |
-| U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | NEXT |
-| U2-6 | C — VX-778's predicate + its pin (red-on-old) | — |
+| U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | DONE — red exactly as announced on the revert, green on the fix (below) |
+| U2-6 | C — VX-778's predicate + its pin (red-on-old) | NEXT |
 | U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) | — |
 | U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | — |
 
@@ -854,3 +854,18 @@ note's answers byte-identical with the nothing-shape `""`); the control `theFenc
 GREEN (hidden = missing on both sides; the empty note never equalled the refusal — the trace); the catalog GREEN on
 both sides (its three new empty-note arms answer the same in every store either way — they are R-825 arms, not the
 fix's pin).
+
+**The revert's result (ran on the committed `e672c14f5`, the substitution removed, every pin kept):** exactly as
+announced — `readNoteSaysAGrantedEmptyNoteIsEmpty` RED (3 issues: the untitled empty note's Level 0 `==` the
+nothing-shape `""`; the sentence absent; the blank-block note the same) and `exportNoteSaysAGrantedEmptyNoteIsEmpty`
+RED (6 issues: all three empty notes exported `""`); the control `theFenceStaysOneShapeAndTheEmptyNoteIsNotIt` GREEN;
+the two-store catalog GREEN ("✘ Test run with 6 tests in 2 suites failed … with 9 issues"); restored by `git checkout
+--`, `git status` clean; on the fix "✔ Test run with 6 tests in 2 suites passed". **The two byte-pins, as the trace
+allows them:** (1) granted-empty vs the NOTHING-SHAPE — red on old, green on the fix; (2) hidden vs missing — byte-
+identical in the Level 0, with_ids and export forms, green on BOTH sides (the untouchable control; a pin that the
+fix cannot move by construction). The brief's literal "granted-empty vs the fence answer" is green on both sides
+(the fence always spoke its refusal) — recorded in U2-2, asserted in the control, not claimed as red-on-old.
+**Catalog:** three new arms on a reachable EMPTY note (untitled, no blocks, under a READ note grant added to the
+catalog's client — fixture growth, every store alike): `read_note · an empty note (text)` → "“2026-06-30” is an empty
+note — nothing is written in it yet." · `… , with ids` → `{"blocks":[],"books":[],…,"tag_ids":[],"tags":[],"title":
+"2026-06-30"}` · `export_note · an empty note` → the sentence; A == B, B == C.
