@@ -275,20 +275,11 @@ extension Queries {
             worn = try wornDayPassages(
                 db, query: query, scope: scope, day: day, calendar: calendar, environment: environment)
         }
-        var built: [(homeID: String, best: Double?, hits: Int, lines: Int, rows: [SearchPassage])] = []
+        var built: [FoldedGroup] = []
         var next: SearchComposer.GroupCursor?
         if let statement = try SearchComposer.groups(
             query, scope: scope, after: cursor, limit: limit, perGroup: perGroup, environment: environment) {
-            let rows = try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments))
-            for row in rows {
-                let homeID: String = row["home_id"]
-                let passage = passage(from: row, calendar: calendar)
-                if built.last?.homeID == homeID {
-                    if let passage { built[built.count - 1].rows.append(passage) }
-                } else {
-                    built.append((homeID, row["g_best"], row["g_hits"], row["g_lines"], passage.map { [$0] } ?? []))
-                }
-            }
+            built = try foldGroups(db, statement, keyed: false, calendar: calendar)
             if built.count == limit, let last = built.last, let best = last.best {
                 next = SearchComposer.GroupCursor(best: best, homeID: last.homeID)
             }
@@ -316,22 +307,70 @@ extension Queries {
         }
         var ordered = wornIDs.map { id in
             built.first { $0.homeID == id }
-                ?? wornFacts[id].map { (homeID: id, best: Optional($0.best), hits: $0.hits, lines: $0.lines, rows: []) }
-                ?? (homeID: id, best: nil, hits: 1, lines: 0, rows: [])
+                ?? wornFacts[id].map {
+                    FoldedGroup(homeID: id, key: nil, best: $0.best, hits: $0.hits, lines: $0.lines, rows: [])
+                }
+                ?? FoldedGroup(homeID: id, key: nil, best: nil, hits: 1, lines: 0, rows: [])
         }
         ordered += built.filter { !wornIDs.contains($0.homeID) }
 
+        let groups = try assembleGroups(db, ordered, worn: Set(wornIDs), calendar: calendar)
+        return SearchGroupPage(groups: groups, next: next)
+    }
+
+    /// **One group as the page's rows fold it** (the VX-819 ladder's F6 —
+    /// both orders' pages fold the same statement shape, `SearchComposer
+    /// .groupPage`, into these, and assemble them the same way).
+    private struct FoldedGroup {
+        let homeID: String
+        /// The group's home key under a home order (`g_key`); nil under
+        /// relevance, whose keyset is `best`.
+        let key: String?
+        let best: Double?
+        let hits: Int
+        let lines: Int
+        var rows: [SearchPassage]
+    }
+
+    /// The group statement's rows folded into their groups, in the
+    /// statement's order (its rows arrive grouped: by the group, then each
+    /// hit's place in it). `keyed`: the statement carries `g_key` (a home
+    /// order's).
+    private static func foldGroups(
+        _ db: Database, _ statement: SearchComposer.Statement, keyed: Bool, calendar: Calendar
+    ) throws -> [FoldedGroup] {
+        var built: [FoldedGroup] = []
+        for row in try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments)) {
+            let homeID: String = row["home_id"]
+            let passage = passage(from: row, calendar: calendar)
+            if built.last?.homeID == homeID {
+                if let passage { built[built.count - 1].rows.append(passage) }
+            } else {
+                built.append(FoldedGroup(
+                    homeID: homeID, key: keyed ? row["g_key"] as String : nil,
+                    best: row["g_best"], hits: row["g_hits"], lines: row["g_lines"],
+                    rows: passage.map { [$0] } ?? []))
+            }
+        }
+        return built
+    }
+
+    /// The page's groups with their heads — the homes read once for the
+    /// page (∝ the page). A home gone since drops its group; a worn note's
+    /// group says its name matched.
+    private static func assembleGroups(
+        _ db: Database, _ ordered: [FoldedGroup], worn: Set<String>, calendar: Calendar
+    ) throws -> [SearchGroup] {
         let homes = try searchGroupHomes(db, ids: ordered.map(\.homeID), calendar: calendar)
-        let groups = ordered.compactMap { group -> SearchGroup? in
+        return ordered.compactMap { group -> SearchGroup? in
             guard let home = homes[group.homeID] else { return nil }
             return SearchGroup(
                 homeID: group.homeID, isPool: home.isPool, homeTitle: home.title,
                 note: home.note, isArchived: home.isArchived, bestScore: group.best,
                 hitCount: group.hits, lineCount: group.lines,
-                titleMatched: wornIDs.contains(group.homeID) || group.hits > group.lines,
+                titleMatched: worn.contains(group.homeID) || group.hits > group.lines,
                 lines: group.rows.filter { $0.kind != .title })
         }
-        return SearchGroupPage(groups: groups, next: next)
     }
 
     /// **One page under a HOME order** (VX-820). The composer's home-ordered
@@ -353,23 +392,12 @@ extension Queries {
         after cursor: SearchComposer.GroupCursor?, limit: Int, perGroup: Int,
         order: SearchOrder, calendar: Calendar, environment: SearchComposer.Environment
     ) throws -> SearchGroupPage {
-        typealias Built = (homeID: String, key: String, best: Double?, hits: Int, lines: Int, rows: [SearchPassage])
-        var built: [Built] = []
+        var built: [FoldedGroup] = []
         var next: SearchComposer.GroupCursor?
         if let statement = try SearchComposer.groups(
             query, scope: scope, after: cursor, limit: limit, perGroup: perGroup, order: order,
             environment: environment) {
-            let rows = try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments))
-            for row in rows {
-                let homeID: String = row["home_id"]
-                let passage = passage(from: row, calendar: calendar)
-                if built.last?.homeID == homeID {
-                    if let passage { built[built.count - 1].rows.append(passage) }
-                } else {
-                    built.append((homeID, row["g_key"], row["g_best"], row["g_hits"], row["g_lines"],
-                                  passage.map { [$0] } ?? []))
-                }
-            }
+            built = try foldGroups(db, statement, keyed: true, calendar: calendar)
             if built.count == limit, let last = built.last {
                 next = SearchComposer.GroupCursor(best: last.best ?? 0, homeID: last.homeID, key: last.key)
             }
@@ -395,42 +423,34 @@ extension Queries {
             }
         }
         let wornOnly = unlisted.filter { !withHits.contains($0) }
-        var placed: [Built] = []
+        // A keyed group's place in the order (every keyed group has its key).
+        func place(_ group: FoldedGroup) -> SearchOrder.Place {
+            SearchOrder.Place(key: group.key ?? "", homeID: group.homeID)
+        }
+        var placed: [FoldedGroup] = []
         if !wornOnly.isEmpty, let statement = SearchComposer.homeKeys(idsJSON: try json(wornOnly), order: order) {
             let start = cursor.map { SearchOrder.Place(key: $0.key ?? "", homeID: $0.homeID) }
             let end = next.map { SearchOrder.Place(key: $0.key ?? "", homeID: $0.homeID) }
             for row in try Row.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments)) {
-                let place = SearchOrder.Place(key: row["home_key"], homeID: row["id"])
-                if let start, !order.precedes(start, place) { continue }   // an earlier page's
-                if let end, order.precedes(end, place) { continue }       // a later page's
-                placed.append((place.homeID, place.key, nil, 1, 0, []))
+                let at = SearchOrder.Place(key: row["home_key"], homeID: row["id"])
+                if let start, !order.precedes(start, at) { continue }   // an earlier page's
+                if let end, order.precedes(end, at) { continue }       // a later page's
+                placed.append(FoldedGroup(homeID: at.homeID, key: at.key, best: nil, hits: 1, lines: 0, rows: []))
             }
-            placed.sort { order.precedes(.init(key: $0.key, homeID: $0.homeID), .init(key: $1.key, homeID: $1.homeID)) }
+            placed.sort { order.precedes(place($0), place($1)) }
         }
         // Merge (both runs already in order).
-        var ordered: [Built] = []
+        var ordered: [FoldedGroup] = []
         var i = 0, j = 0
         while i < built.count || j < placed.count {
-            if j < placed.count, i == built.count || order.precedes(
-                .init(key: placed[j].key, homeID: placed[j].homeID),
-                .init(key: built[i].key, homeID: built[i].homeID)) {
+            if j < placed.count, i == built.count || order.precedes(place(placed[j]), place(built[i])) {
                 ordered.append(placed[j]); j += 1
             } else {
                 ordered.append(built[i]); i += 1
             }
         }
 
-        let homes = try searchGroupHomes(db, ids: ordered.map(\.homeID), calendar: calendar)
-        let worn = Set(wornIDs)
-        let groups = ordered.compactMap { group -> SearchGroup? in
-            guard let home = homes[group.homeID] else { return nil }
-            return SearchGroup(
-                homeID: group.homeID, isPool: home.isPool, homeTitle: home.title,
-                note: home.note, isArchived: home.isArchived, bestScore: group.best,
-                hitCount: group.hits, lineCount: group.lines,
-                titleMatched: worn.contains(group.homeID) || group.hits > group.lines,
-                lines: group.rows.filter { $0.kind != .title })
-        }
+        let groups = try assembleGroups(db, ordered, worn: Set(wornIDs), calendar: calendar)
         return SearchGroupPage(groups: groups, next: next)
     }
 

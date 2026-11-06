@@ -503,11 +503,29 @@ public enum SearchComposer {
             query, scope: scope, visibility: query.visibility,
             extra: ["d.reading_id IS NULL"], environment: environment)
         else { return nil }
-        var arguments = hits.arguments
-        var keyset = ""
-        if cursor != nil {
-            keyset = "WHERE (g.g_best > ? OR (g.g_best = ? AND g.g_home > ?))"
-        }
+        return groupPage(
+            query, hits: hits, keyed: false,
+            keyset: cursor == nil ? "" : "WHERE (g.g_best > ? OR (g.g_best = ? AND g.g_home > ?))",
+            pageOrder: "g.g_best, g.g_home",
+            sheetOrder: "top.g_best, top.home_id, top.rn",
+            cursorArguments: cursor.map { [.real($0.best), .real($0.best), .text($0.homeID)] } ?? [],
+            limit: limit, perGroup: perGroup)
+    }
+
+    /// **The group page's ONE statement** (the VX-819 ladder's F6) — the
+    /// shape `groups` (relevance) and `homeOrderedGroups` (a home order)
+    /// share: one walk of the matches (the scored CTE materialized and read
+    /// twice), the groups keyset-paged, each group's top `perGroup` hits
+    /// best-first (`rn`) with their snippets cut for the page only. The two
+    /// orders differ ONLY in what is handed in: whether each group carries
+    /// its home's key (`keyed` — `g_key`, off the hits' `home_key`), the
+    /// keyset, and the page's and the sheet's ORDER BY. Relevance's text is
+    /// the shipped statement, byte for byte.
+    private static func groupPage(
+        _ query: SearchQuery, hits: Hits, keyed: Bool, keyset: String,
+        pageOrder: String, sheetOrder: String, cursorArguments: [Value],
+        limit: Int, perGroup: Int
+    ) -> Statement {
         let saved = savedAtStage("top", query)
         let sql = """
             WITH hits AS (\(hits.sql)),
@@ -517,18 +535,18 @@ public enum SearchComposer {
             ),
             grouped AS (
               SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
-                     SUM(s.kind <> 'title') AS g_lines
+                     SUM(s.kind <> 'title') AS g_lines\(keyed ? ", MIN(s.home_key) AS g_key" : "")
               FROM scored s
               GROUP BY s.home_id
             ),
             gpage AS (
               SELECT g.* FROM grouped g
               \(keyset)
-              ORDER BY g.g_best, g.g_home
+              ORDER BY \(pageOrder)
               LIMIT ?
             ),
             ranked AS (
-              SELECT s.*, g.g_best, g.g_hits, g.g_lines,
+              SELECT s.*, g.g_best, g.g_hits, g.g_lines,\(keyed ? " g.g_key," : "")
                      ROW_NUMBER() OVER (
                        PARTITION BY s.home_id ORDER BY (s.kind = 'title'), s.score, s.doc_id
                      ) AS rn
@@ -540,18 +558,18 @@ public enum SearchComposer {
             SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet\(saved.column)
             FROM search_fts JOIN top ON top.doc_id = search_fts.rowid\(saved.join)
             WHERE search_fts MATCH ?
-            ORDER BY top.g_best, top.home_id, top.rn
+            ORDER BY \(sheetOrder)
             """
-        if let cursor {
-            arguments += [.real(cursor.best), .real(cursor.best), .text(cursor.homeID)]
-        }
-        arguments += [.integer(Int64(limit)), .integer(Int64(max(1, perGroup))), .text(hits.match)]
+        let arguments = hits.arguments + cursorArguments
+            + [.integer(Int64(limit)), .integer(Int64(max(1, perGroup))), .text(hits.match)]
         return Statement(sql: sql, arguments: arguments)
     }
 
-    /// **The group page under a HOME order** (VX-820) — `groups`' own shape,
-    /// one walk of the matches (the scored CTE materialized and read twice),
-    /// with the groups ordered and keyset-paged on the HOME's key and id
+    /// **The group page under a HOME order** (VX-820) — `groups`' own
+    /// statement (`groupPage`, one walk of the matches — the scored CTE
+    /// materialized and read twice), each group keyed by its home's key
+    /// (`home_key` off the already-joined `c`), the groups ordered and
+    /// keyset-paged on the HOME's key and id
     /// instead of the best score. The passages inside each group keep their
     /// best-first order (`rn`), so the order re-ranks groups and never
     /// reshuffles a note's own lines.
@@ -564,54 +582,17 @@ public enum SearchComposer {
             extra: ["d.reading_id IS NULL"], homeKey: sort.keyExpression(over: "c"),
             environment: environment)
         else { return nil }
-        var arguments = hits.arguments
         let collation = sort.keyCollation
         let dir = direction == .desc ? "DESC" : "ASC"
         let comparison = direction == .desc ? "<" : ">"
-        var keyset = ""
-        if cursor != nil {
-            keyset = "WHERE (g.g_key\(collation), g.g_home) \(comparison) (?, ?)"
-        }
-        let saved = savedAtStage("top", query)
         // Every hit of a group shares its home, so MIN(home_key) IS the key.
-        let sql = """
-            WITH hits AS (\(hits.sql)),
-            scored AS MATERIALIZED (
-              SELECT h.*, \(scoreSQL(query)) AS score
-              FROM hits h
-            ),
-            grouped AS (
-              SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
-                     SUM(s.kind <> 'title') AS g_lines, MIN(s.home_key) AS g_key
-              FROM scored s
-              GROUP BY s.home_id
-            ),
-            gpage AS (
-              SELECT g.* FROM grouped g
-              \(keyset)
-              ORDER BY g.g_key\(collation) \(dir), g.g_home \(dir)
-              LIMIT ?
-            ),
-            ranked AS (
-              SELECT s.*, g.g_best, g.g_hits, g.g_lines, g.g_key,
-                     ROW_NUMBER() OVER (
-                       PARTITION BY s.home_id ORDER BY (s.kind = 'title'), s.score, s.doc_id
-                     ) AS rn
-              FROM scored s JOIN gpage g ON g.g_home = s.home_id
-            ),
-            top AS (
-              SELECT * FROM ranked WHERE rn <= ?
-            )
-            SELECT top.*, snippet(search_fts, 0, char(2), char(3), '…', 16) AS snippet\(saved.column)
-            FROM search_fts JOIN top ON top.doc_id = search_fts.rowid\(saved.join)
-            WHERE search_fts MATCH ?
-            ORDER BY top.g_key\(collation) \(dir), top.home_id \(dir), top.rn
-            """
-        if let cursor {
-            arguments += [.text(cursor.key ?? ""), .text(cursor.homeID)]
-        }
-        arguments += [.integer(Int64(limit)), .integer(Int64(max(1, perGroup))), .text(hits.match)]
-        return Statement(sql: sql, arguments: arguments)
+        return groupPage(
+            query, hits: hits, keyed: true,
+            keyset: cursor == nil ? "" : "WHERE (g.g_key\(collation), g.g_home) \(comparison) (?, ?)",
+            pageOrder: "g.g_key\(collation) \(dir), g.g_home \(dir)",
+            sheetOrder: "top.g_key\(collation) \(dir), top.home_id \(dir), top.rn",
+            cursorArguments: cursor.map { [.text($0.key ?? ""), .text($0.homeID)] } ?? [],
+            limit: limit, perGroup: perGroup)
     }
 
     /// **The homes' keys under a home order** (VX-820 — the worn-day merge:
