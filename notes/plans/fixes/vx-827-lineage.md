@@ -1626,6 +1626,8 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3b-6 | The guide sweep (G1's sentences, each listed for #264) | DONE (compiled; phone target compiled too — `RecoveryCopy` is shared) — the list under U3b-6 below |
 | U3b-7 | Walk rows for the Lineage face, appended to the window's walk | DONE — rows 13–23 under "what is OWED" below |
 | U3b-8 | END: headless suites, `build-for-testing`, `Tools/verify-pins`, the PROVISIONAL list, self-assessment | DONE — below |
+| U3b-FIX-1 | Ladder R1-F1 (the flush gap): AGREED; fix + pin, the behavioral revert announced below BEFORE it runs | IN PROGRESS |
+| U3b-FIX-5 | Ladder R1-F5 (`mcpShownTake`'s name): AGREED; a pure rename + its call sites | NOT-STARTED |
 
 
 ### U3b-P — THE PROPOSAL: the cross-block Bring back as take (sent before any op code; build waits on the ruling)
@@ -1992,3 +1994,31 @@ parent (the existing edge carries the lineage); no touch, no churn, no undo entr
 take is the road back); refuses a dead or sealed target, a dead source, and a source outside
 the target's lineage neighbourhood (`notInLineage` — the fence lives in the operation; scraps
 stays the shared room). (vx-827-lineage.md, U3b-P RULED)*
+
+### U3b — FIX LEG (ladder round 1, the two items the orchestrator sent; dispositions in "LADDER ROUND 1 — DISPOSITIONS")
+
+**R1-F1 — AGREE** (traced again here, not taken on the reviewer's word): `CommitsFaceModel.start()` flushes only its own
+`postID` — the HOME note; `LineageBringBack.run` flushes nothing; `bringBackFromLineage(.take)` copies `working_text`
+as STORED. A relative placed in ANOTHER note, live in a second window with typing the debounce has not written, is
+read stale on the pane ("the take now") and brought back stale (the minted take misses her last words). The `.commit`
+form copies an immutable snapshot (I5) and needs nothing. **The fix:** `LineageBringBack.run` resolves a `.take`
+source's live placement and flushes that note FIRST — and, the flush road's own contract ("a caller whose act COPIES
+the store must consult it" — `AppSession.flushExistingAutosave`, the `VersionActs` precedent), a flush that leaves
+bytes pending refuses with the standing `OpsRefusalCopy.unsavedChanges` rather than copying stale words; the
+relative role's `start()` flushes the relative's placed note too (`flushBeforeReading`).
+
+**The behavioral revert, ANNOUNCED BEFORE IT RUNS** (the pins are Mac-target — the autosave coordinator is
+`AppSession`'s — so headless they are written and compiled here; the RUNS are the closing window's, in this order:
+fixed tree green → revert → red → restore):
+- **Revert A** (the bring-back half): in `LineageBringBack.run`, delete the `.take` flush guard (the `if case .take …
+  throw Refusal.unsavedChanges }` statement). Pin `LineageFaceModelTests.aRelativeInAnotherNoteIsFlushedBeforeItsWordsComeBack`
+  must go RED (the minted take holds the stored "Extracted part." instead of the typed "Extracted part, retyped.").
+- **Revert B** (the read half): in `CommitsFaceModel.flushBeforeReading`, delete the relative branch (keep the
+  `postID` flush). Pin `LineageFaceModelTests.aRelativesPaneReadsItsNoteAfterItsPendingTypingLands` must go RED (the
+  stored take still reads the old words after the face's read flush).
+
+**R1-F5 — AGREE**: `Queries.mcpShownTake` → `Queries.shownTake` (the structural ops' rendered-take rule, not an MCP
+fact); a pure rename, its two call sites swept (the Commits face model; ONE line in
+`Sources/VariorumMCP/MCPWriteTools+Edit.swift`, under the orchestrator's sweep authorization — the run's only
+VariorumMCP touch from U3b).
+
