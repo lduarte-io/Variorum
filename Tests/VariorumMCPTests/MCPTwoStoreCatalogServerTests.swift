@@ -56,6 +56,8 @@ struct CatalogWorld: Sendable {
     // VX-827 U1: the lineage arms' note (in the shared book) and its readable
     // Copy to Wing copy in Studio.
     var kin = "", kinCopy = ""
+    // VX-827 U2 (VX-815): an empty note (untitled, no blocks) under a READ note grant.
+    var empty = ""
     // hidden (A only)
     var vault = "", secretBoard = "", finished = "", diary = "", twinStudio = "", attic = "", atticBook = ""
     var atticNote = "", journalEntry = "", privateShared = "", privateCapped = "", secretNote = ""
@@ -183,6 +185,9 @@ struct MCPTwoStoreCatalogServerTests {
         _ = try ops.addPostToReading(kin.id, to: shared.id)
         w.kin = kin.id
         w.kinCopy = try ops.copyNoteToWing(kin.id, to: studio.id).id
+        // VX-827 U2 (VX-815): an EMPTY note the client may read — its text forms
+        // say it is empty (one sentence naming it), never the nothing-shape.
+        w.empty = try ops.createPost(title: nil).id
         if hidden { try buildHidden(h, &w, board: board.id, idea: idea.id) }
         return w
     }
@@ -340,6 +345,7 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try h.operations.grantMCPAccess(client, spec(.edit, .book, book))
         }
         _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.loose))
+        _ = try h.operations.grantMCPAccess(client, spec(.read, .note, w.empty))
         return connection
     }
 

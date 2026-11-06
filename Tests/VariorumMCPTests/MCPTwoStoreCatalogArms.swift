@@ -101,6 +101,11 @@ extension MCPTwoStoreCatalogServerTests {
             ["note_id": s(w.privateShared)] },
         CatalogArm(label: "read_note · a hidden lens on card", tool: "read_note") { w, _ in
             ["note_id": s(w.card), "lens_id": s(w.secretLens)] },
+        // VX-827 U2 — VX-815: an empty note the client may read says so (its
+        // text forms: one sentence naming it; with ids: blocks []).
+        CatalogArm(label: "read_note · an empty note (text)", tool: "read_note") { w, _ in ["note_id": s(w.empty)] },
+        CatalogArm(label: "read_note · an empty note, with ids", tool: "read_note") { w, _ in
+            ["note_id": s(w.empty), "with_ids": .bool(true)] },
         CatalogArm(label: "search · a word hidden notes hold", tool: "search") { _, _ in ["query": s("zebra")] },
         CatalogArm(label: "search · words", tool: "search") { _, _ in ["query": s("words")] },
         CatalogArm(label: "search · #board", tool: "search") { _, _ in ["query": s("#board")] },
@@ -110,6 +115,7 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "search · in a hidden note", tool: "search") { w, _ in ["query": s("zebra"), "note_id": s(w.secretNote)] },
         CatalogArm(label: "export_note · card", tool: "export_note") { w, _ in ["note_id": s(w.card)] },
         CatalogArm(label: "export_note · a hidden note", tool: "export_note") { w, _ in ["note_id": s(w.atticNote)] },
+        CatalogArm(label: "export_note · an empty note", tool: "export_note") { w, _ in ["note_id": s(w.empty)] },
         CatalogArm(label: "list_wings", tool: "list_wings") { _, _ in [:] },
         CatalogArm(label: "show_in_app · card", tool: "show_in_app") { w, _ in ["target": s("note"), "note_id": s(w.card)] },
         CatalogArm(label: "show_in_app · a hidden note", tool: "show_in_app") { w, _ in

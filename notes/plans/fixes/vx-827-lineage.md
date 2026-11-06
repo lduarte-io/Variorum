@@ -830,3 +830,27 @@ wearer's id that crossed ("✘ Test run with 8 tests in 2 suites failed … with
    both keys' place (sorted between `note_id` and `title`) and form. The Level 0 and export arms unchanged.
 2. The catalog's hidden half (A only) gains the three applications above — fixture growth for the new arms, not a
    re-baseline (the catalog compares stores live; B == C held).
+
+### U2-5 — VX-815: the fix, and THE ANNOUNCED BEHAVIORAL REVERT (written before it runs)
+
+**The fix (committed with this paragraph).** `MCPReadTools.readNote`: after the allowed read's log line, a TEXT form
+(`export_note`; `read_note` without `with_ids` and its implications — the Level 0 document, through a lens, a saved
+version's text) whose answer `holdsNothing` (empty, or only the line breaks the format puts between blank blocks —
+any header `{t:…}` / `{#…}` or other character is something) answers ONE sentence instead: `emptyNoteWords(title:)`
+— "“‹title›” is an empty note — nothing is written in it yet." — or, for a saved version's text,
+`emptyVersionWords(title:)` — "This saved version of “‹title›” is empty — nothing was written in it." (the read's own
+title, `mcpScopeTitle`; BOTH PROVISIONAL, HELD FOR HER in #264). A titled or tagged empty note keeps its Level 0
+header (the normal read's shape with an empty body); the JSON forms are untouched (already honest). The fence's
+refusal roads all return BEFORE this line, so hidden = missing is untouched by construction. Descriptions:
+`read_note` and `export_note` each say an empty note answers the sentence in place of empty text.
+`MCPSession.instructions` untouched.
+
+**ANNOUNCED BEHAVIORAL REVERT (before it runs).** On the committed fix, the working tree's `MCPReadTools.swift` will
+be put back to the OLD behavior ONLY — the `if plain || !withIDs, Self.holdsNothing(text) { … }` substitution removed
+(the helpers and sentences kept, so every pin compiles) — and `MCPEmptyNoteServerTests` + the two-store catalog run;
+then `git checkout -- Sources/VariorumMCP/MCPReadTools.swift` restores the fix and `git status` must read clean.
+Expected: `readNoteSaysAGrantedEmptyNoteIsEmpty` and `exportNoteSaysAGrantedEmptyNoteIsEmpty` RED (the granted empty
+note's answers byte-identical with the nothing-shape `""`); the control `theFenceStaysOneShapeAndTheEmptyNoteIsNotIt`
+GREEN (hidden = missing on both sides; the empty note never equalled the refusal — the trace); the catalog GREEN on
+both sides (its three new empty-note arms answer the same in every store either way — they are R-825 arms, not the
+fix's pin).

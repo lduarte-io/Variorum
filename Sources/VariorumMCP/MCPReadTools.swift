@@ -217,8 +217,40 @@ struct MCPReadTools: Sendable {
                 text = try Queries.variorumDocumentText(db, postID: noteID, throughLens: lensID)
             }
             try log(db, clientName, act, "note", noteID, title, allowed: true)
+            // VX-827 U2 — VX-815: a TEXT form (the Level 0 document, the plain
+            // export, a saved version's text) of a note INSIDE reach that holds
+            // nothing answers the one sentence saying so — never the empty
+            // string, the core's tolerant read of a note that does not exist (the
+            // nothing-shape). Only this allowed road reaches here: the fence's one
+            // refusal above is untouched. The JSON forms already say it
+            // (`blocks: []` beside the title).
+            if plain || !withIDs, Self.holdsNothing(text) {
+                return Outcome(
+                    text: versionID == nil
+                        ? Self.emptyNoteWords(title: title ?? "") : Self.emptyVersionWords(title: title ?? ""),
+                    isError: false)
+            }
             return Outcome(text: text, isError: false)
         }
+    }
+
+    /// VX-815: a text form holds NOTHING when it is empty or only the line
+    /// breaks the format puts between blocks (a note of blank blocks) — a
+    /// header (`{t:…}`, `{#…}`) or any other character is something.
+    static func holdsNothing(_ text: String) -> Bool {
+        text.allSatisfy(\.isNewline)
+    }
+
+    /// VX-815 — the empty note's one sentence, naming it (PROVISIONAL wording,
+    /// QUESTIONS #264 — hers to re-cut).
+    static func emptyNoteWords(title: String) -> String {
+        "\u{201C}\(title)\u{201D} is an empty note \u{2014} nothing is written in it yet."
+    }
+
+    /// …and a saved version's (read by `version_id` in the text form) —
+    /// PROVISIONAL, #264.
+    static func emptyVersionWords(title: String) -> String {
+        "This saved version of \u{201C}\(title)\u{201D} is empty \u{2014} nothing was written in it."
     }
 
     // MARK: - list_note_lineage (VX-827 U1 — VX-817)

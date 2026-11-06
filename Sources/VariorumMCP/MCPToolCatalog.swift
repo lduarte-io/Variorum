@@ -322,7 +322,8 @@ enum MCPToolCatalog {
             the block has other takes — by a "--- Alternates for this block ---" section listing \
             them. Blank lines separate blocks — except in format v2: when a block holds blank lines \
             of its own, the header starts with {v:2} and a "--- next block ---" line separates the \
-            blocks instead. Returns the text. With with_ids: true it returns \
+            blocks instead. Returns the text — for an empty note (no title, tags or words), one \
+            sentence saying it is empty, naming it, in place of empty text. With with_ids: true it returns \
             JSON instead — the note's blocks in order, each with its block_id, its name if the \
             author named it, shown_take_id (the take the block shows), every take (take_id, label, \
             chosen, text — each text once, on its take) and its comments — the ids add_take, \
@@ -428,7 +429,8 @@ enum MCPToolCatalog {
         name: "export_note", rung: .read, title: "Export a note as plain text",
         description: """
             One note as plain prose: each block's chosen take, joined as the note reads — no \
-            alternates, no header. Returns the text.
+            alternates, no header. Returns the text — for an empty note (no words), one sentence \
+            saying it is empty, naming it, in place of empty text.
             """,
         inputSchema: .object([
             "type": "object",
