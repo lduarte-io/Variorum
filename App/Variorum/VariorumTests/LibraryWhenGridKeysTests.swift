@@ -38,6 +38,19 @@ final class WhenPopoverDriver {
     var shown = false
 }
 
+/// **Where an unclaimed key ARRIVES** (the W10 rig's dismissal guard): a plain
+/// responder that records every `keyDown` it is sent — no text system between
+/// the window's dispatch and the observable. The rig's offscreen field editor
+/// does not act on a dispatched key the way a real field does (measured twice:
+/// the guard's caret never moved in the test host, while the live walk's did —
+/// "ferrXy"), so the guard reads the key's ARRIVAL, which is exactly its claim:
+/// nothing in the dismissed face took it.
+final class KeyArrivalRecorder: NSView {
+    private(set) var keyCodes: [UInt16] = []
+    override var acceptsFirstResponder: Bool { true }
+    override func keyDown(with event: NSEvent) { keyCodes.append(event.keyCode) }
+}
+
 /// **The door's real shape:** an anchor in the PARENT window presenting the
 /// face WITH its keys (`keyed`) through SwiftUI's `.popover` — whose window
 /// AppKit makes a CHILD of the parent, the parent keeping key status (VX-179's
@@ -386,6 +399,8 @@ struct LibraryWhenGridKeysPopoverTests {
         field.stringValue = "harbour"
         container.addSubview(hosting)
         container.addSubview(field)
+        let recorder = KeyArrivalRecorder(frame: NSRect(x: 220, y: 0, width: 40, height: 24))
+        container.addSubview(recorder)
         parent.contentView = container
         let before = Set(NSApp.windows.map(ObjectIdentifier.init))
         parent.orderFront(nil)  // off every display
@@ -395,6 +410,13 @@ struct LibraryWhenGridKeysPopoverTests {
             parent.contentView = nil
             parent.close()
         }
+        // Premise: this host ROUTES a key addressed to the parent to the
+        // parent's first responder (the guard below reads exactly that road).
+        parent.makeFirstResponder(recorder)
+        await Self.turns()
+        await Self.post(0, "a", to: parent)
+        try #require(recorder.keyCodes == [0],
+                     "premise: a key addressed to the parent arrives at its first responder in this host")
         parent.makeFirstResponder(field)
         await Self.turns()
         let editor = try #require(parent.firstResponder as? NSTextView,
@@ -421,20 +443,23 @@ struct LibraryWhenGridKeysPopoverTests {
         #expect(parent.firstResponder === editor, "the grid never took the keyboard: the field keeps the caret")
         #expect(field.stringValue == "harbour", "…and its words")
 
-        // GUARD — the dismissed popover's face stays alive, and listens no more.
-        // (The field re-seated first, so this leg reads the same on both trees
-        // whatever an unclaimed ⏎ did to its edit on the old one.)
+        // GUARD — the dismissed popover's face stays alive, and listens no more:
+        // an arrow and a letter addressed to the parent ARRIVE at the parent's
+        // first responder, unclaimed (the live walk's "ferrXy" — her field's
+        // caret moved and the letter landed inside the word — read here as the
+        // keys' arrival, `KeyArrivalRecorder`'s note says why).
         let held = open.keyDay
+        let picks = picked.count
         driver.shown = false
         await Self.turns(40)
-        parent.makeFirstResponder(field)
+        parent.makeFirstResponder(recorder)
         await Self.turns()
-        let seated = try #require(parent.firstResponder as? NSTextView,
-                                  "premise: the field holds the parent's keyboard again")
-        seated.setSelectedRange(NSRange(location: 7, length: 0))
+        try #require(parent.firstResponder === recorder, "premise: the recorder holds the parent's keyboard")
         await Self.post(LibraryWhenGridKeys.leftArrowKeyCode, "\u{F702}", to: parent)
-        #expect(open.keyDay == held, "a dismissed popover's grid takes no key")
-        #expect(seated.selectedRange() == NSRange(location: 6, length: 0), "…the arrow is the field's again")
+        await Self.post(7, "x", to: parent)
+        #expect(recorder.keyCodes == [0, LibraryWhenGridKeys.leftArrowKeyCode, 7],
+                "the arrow and the letter reached the parent's first responder — nothing claimed them")
+        #expect(open.keyDay == held && picked.count == picks, "a dismissed popover's grid took no key")
     }
 
     // MARK: - The door, mounted
