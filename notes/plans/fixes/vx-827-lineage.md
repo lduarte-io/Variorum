@@ -1252,8 +1252,13 @@ VX-801", no trailers, push every commit, foreground waits only; work only in
 
 ## U3a RECORD — the Commits face (VX-801's first half)
 
-**NOT DONE in U3a, said first:** (filled at the unit's end — see the END section below; the LIVE STATUS table is
-the truth until then).
+**NOT DONE in U3a, said first:** no Mac-target TEST run and no walk (both owed to the run's closing stage window —
+the suites and the twelve walk rows are named under "what is OWED"); the old Block History PANEL is NOT deleted —
+the origin door still opens it (gate G2, left as it was for U3b); the tutorial's Came-from sentences are NOT
+reworded (gate G1, flagged — owed when the Lineage face lands); no "lineage ›" door on the face (U3b's); no
+canon delta (SurfaceContracts' Block History bullet, the AppSpecRecord entry) and no QUESTIONS edit — the #264
+items are P-U3a-1…11 below, for the orchestrator at the merge; no mobile change (the phone's Block History is
+untouched — the MOBILE PARITY line is U3b's per the memo).
 
 *Implementer: opus-implementer, fresh session, 2026-11-05. Headless only (`swift build` / `swift test` on the
 package, `xcodebuild build-for-testing` for the App target's compile); no stage, no xcodebuild test, no GUI, no
@@ -1268,11 +1273,11 @@ store touches. Mac-target pins are written and compiled here and NAMED for the r
 | U3a-G2 | GATE — the panel's retirement meets doors/jobs the memo does not cover for U3a (FLAGGED below; left as they were) | FLAGGED |
 | U3a-1 | The pure Domain text-compare (`Domain/TextCompare.swift`) + its own suite | DONE — `TextCompareTests` 16/16 headless (a product row: the suite does not compile on the pre-change tree); her reference edit reads as FOUR changes |
 | U3a-2 | The pure rail projection (`Domain/CommitRail.swift` — interleave, folds, AI pair, filter, now row, swapper order, opening selection) + its suite | DONE — `CommitRailTests` 14/14 headless (product row; the bracket names pinned equal to the door's `Operations.mcpEditCommitNames`) |
-| U3a-3 | The Commits face: model + view (reading pane, rail, take dropdown, fast swapper, deleted-takes foot) | BUILT — `Features/History/CommitsFaceModel.swift` + `CommitsFaceView.swift`; compiles (`build-for-testing` green); pins next |
-| U3a-4 | Compare: two boxes + the standing "now" third, each header a swapper, the washes | BUILT — `Features/History/CommitsCompareView.swift` + the model's compare state; compiles |
-| U3a-5 | The re-aim: every history door opens the face (full pane in the detail, ‹ back; the sheet where no detail is); the block ▾ History row on both bars; the origin door keeps its old panel (G2) | BUILT — router seam `requestOriginHistory`; `PostDetailView.historyFace`; the three sheet hosts; both block ▾ menus; compiles |
-| U3a-6 | Registry: the face's acts declared once; the walk extended; every Block-History-class pin re-pointed as a named justified edit; new Mac pins (compiled, named for the window) | NOT-STARTED |
-| U3a-7 | END: headless core suites, `xcodebuild build-for-testing`, the PROVISIONAL list for #264, self-assessment | NOT-STARTED |
+| U3a-3 | The Commits face: model + view (reading pane, rail, take dropdown, fast swapper, deleted-takes foot) | DONE (compiled) — `Features/History/CommitsFaceModel.swift` + `CommitsFaceView.swift`; `CommitsFaceModelTests` 11 pins written + compiled, RUN owed to the closing window |
+| U3a-4 | Compare: two boxes + the standing "now" third, each header a swapper, the washes | DONE (compiled) — `Features/History/CommitsCompareView.swift` + the model's compare state; two Compare pins in `CommitsFaceModelTests` |
+| U3a-5 | The re-aim: every history door opens the face (full pane in the detail, ‹ back; the sheet where no detail is); the block ▾ History row on both bars; the origin door keeps its old panel (G2) | DONE (compiled) — router seam `requestOriginHistory`; `PostDetailView.historyFace`; the three sheet hosts; both block ▾ menus; three host pins in `BlockHistoryHostTests` |
+| U3a-6 | Registry: the face's acts declared once; the walk extended; every Block-History-class pin re-pointed as a named justified edit; new Mac pins (compiled, named for the window) | DONE (compiled) — four `.surface` acts; the walk's line; `CommitsFaceDoorsTests`; the re-points listed under U3a-6 below |
+| U3a-7 | END: headless core suites, `xcodebuild build-for-testing`, the PROVISIONAL list for #264, self-assessment | DONE — below |
 
 ### U3a-G1 — GATE: the tutorial walks Block History (FLAGGED before anything changes)
 
@@ -1457,3 +1462,67 @@ content is agents' to manage). Merge note: vx-808's B5 touches `MCPToolCatalog.s
   re-aimed; (8) Restore / Bring back as a take / Rename / a deleted take's Put back, each receipt; (9) ‹ back →
   Write exactly where it was; (10) block ▾ ▸ History from Takes; (11) the book's inline editor → the face in a
   sheet; (12) "See original from…" still opens the old panel (G2, unchanged).
+
+### U3a-6 — the Block-History-class pins, re-pointed one by one (each a named JUSTIFIED EDIT in its file)
+
+Nothing was deleted. The rule applied: a pin about WHERE A HISTORY DOOR LANDS moves to the face; a pin about the
+PANEL keeps every claim and is driven through the road that still opens the panel (the origin door's, gate G2).
+
+| Pin | Edit |
+|---|---|
+| `BlockHistoryHostTests.aModeSwitchClosesThePaneTheModeOpened` | driven by `requestOriginHistory` (the panel's surviving road); claims unchanged |
+| `BlockHistoryHostTests.fromBlocksThePaneIsTheOneRightRegion…` | the same |
+| `BlockHistoryHostTests` — NEW `theHistoryDoorOpensTheCommitsFaceInTheFullPane`, `aModeSwitchFromTheFaceShowsTheMode`, `fromBlocksTheFaceReplacesTheWorkbenchAndGivesItBack` | the face's host (red on the pre-U3a tree: the door opened the inspector beside a mounted editor; `historyFace` did not exist) |
+| `BlockHistoryPaneTests.theMountedDetailOpensTheHistoryPaneInItsRealSidePanel` | driven by `requestOriginHistory`; claims unchanged |
+| `BlockHistoryPaneTests.aHistoryRequestForAnUnmountedPostIsRefused…` | unchanged arms + two for the origin seam (refused off-note, never parked) |
+| `RestoreLandingInspectorTests` (VX-668's three) | the inspector road opened through `requestOriginHistory` (the history door now REPLACES Write, so there is no page beside the face to land on — the "elsewhere a receipt" arm); every landing claim unchanged |
+| `RecoveryDoorsTests.theContextRowOpensThePeekAtTheOriginAndItShowsItsTakes` | reads `originHistoryRequest` (+ `blockHistoryRequest == nil`) |
+| `RecoveryDoorsTests.theRoutedActSpeaksWhereTheBlockHasNoOriginal` | + `originHistoryRequest == nil` |
+| `OriginBlockDoorTests.theBoardsProjectionCarriesTheOriginsAndItsDoorActs` | reads `originHistoryRequest` (+ `blockHistoryRequest == nil`) |
+| `WriteTakesPanelRoutedTests.originOpensThePanelsBlocksOriginals` | reads `originHistoryRequest` (+ not the face) |
+| `BlockHistoryCommitsCaptureTests.captureTheCommitsPaneInContextBesideTheNote` (disabled harness) | shoots the panel through `requestOriginHistory` |
+| `CapabilityRegistryTests.theSurfacesRenderExactlyTheDeclaredSurfaceActs` | + the face's line |
+
+Left as they were, still true: `OriginBlockDoorTests.theDoorOpensTheBlocksHistoryAtItsCameFrom` (it drives the
+HISTORY door's request — whose fallback slot is still `blockHistoryRequest`; its doc names the origin door, a
+wording U3b's retirement re-reads), `RecoveryDoorsTests.theHistoryRequestCarriesTheCaretsBlockAndItsTake`,
+`WriteTakesPanelRoutedTests.blockHistoryOpensForThePanelsBlock` (the fallback sheet now presents the face),
+`CommandRoutingTests`/`CanvasAndPoolTests`' `registerDetail(showBlockHistory:)` arms, the panel's model suites
+(`BlockHistoryClarityTests`, `BlockHistorySealTests`, `CommitsPageLedgerTests`), the tutorial walk (G1).
+
+### U3a — END (the suites, on the committed tree; headless)
+
+- `swift build` — Build complete. `TextCompareTests` 16/16 · `CommitRailTests` 14/14.
+- **`swift test --filter VariorumCoreTests` → "Test run with 3847 tests in 520 suites passed after 270.536 seconds
+  with 5 known issues"** (the known issues are standing `withKnownIssue` arms, none of this unit's).
+- The whole package's `swift test` (all targets): every target green but `VariorumMCPTests`, which reported THREE
+  failures — `MCPDiscoverProbeServerTests.claudeCodesPipelinedProbeIsAnsweredAndItsInitializeServes`
+  (`socket.nextResponse()` nil), `MCPStopRoadsServerTests.aClientThatLeftBeforeTheQuitKeepsItsOwnLine` ("claude-code
+  got no answer to its initialize"), `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`
+  (41.9 s against a 15 s bound) — socket-timing suites over code this unit never touched (no `Sources/VariorumMCP`
+  line in the diff), run under a load average of 13–16 (other sessions on the Pro). **Re-run alone:
+  `swift test --filter 'MCPDiscoverProbeServerTests|MCPStopRoadsServerTests|MCPHarnessTimeLimitTests'` → "Test run
+  with 14 tests in 3 suites passed after 2.300 seconds".** Recorded as load flakes, not dismissed silently: the
+  closing window's MCP re-run (the second-merger duty) is where they are read again.
+- **App target COMPILE only** (no stage): `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration
+  Debug build-for-testing` → "** TEST BUILD SUCCEEDED **" (default DerivedData — this worktree's own
+  `Variorum-*` dir; TutorialWalkTests compiles).
+- `Tools/verify-pins` → OK both graphs (16 + 15 pins).
+
+### U3a — self-assessment (for the cold reviewer's read, not instead of it)
+
+- **The hosting call is the one to read hardest.** The memo says "full pane; ‹ back returns exactly where she
+  was". Built: the face REPLACES the mode's surface (never covers a mounted one — a hidden editor would keep the
+  keyboard's routed acts and could take keystrokes), and ‹ back re-arrives through the mode round trip (the carry
+  captured at the open, the caret/find seeds dropped as leaving Write drops them). So "exactly" is the mode round
+  trip's exactness — the carried block at its viewport fraction, the caret at her remembered offset — not a
+  frozen view. The alternative (keep the surface mounted under an opaque face, hand the first responder back) is
+  exact by construction but leaves Write's handlers live under a face she cannot see. Named for the walk (row 9).
+- **The model is long (≈690 lines, much of it doc).** One surface's brain — projections, selection, the acts, and
+  Compare's boxes; the decisions themselves are the two pure Domain rules. If P-9 bites, Compare's state is the
+  clean seam to split out.
+- **`Queries.mcpShownTake`** is read for the ✓ chosen mark — a core query named for the MCP door but generic
+  (the structural ops' rendered-take rule); no MCP file touched.
+- **The old panel lives on** (G2) — two models with the same acts for one run's interval; U3b deletes the old.
+- **Not walked, not run.** Every Mac claim above is compiled, not yet observed. The face's geometry (the rail's
+  330 pt, the chips, the dropdown popover) has had no eyes on it.
