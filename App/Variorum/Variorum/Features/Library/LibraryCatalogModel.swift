@@ -663,6 +663,9 @@ final class LibraryCatalogModel {
         // VX-823: a new question starts at the top — every pane's remembered
         // place, and every return mark, go (`LibraryCatalogPlace.swift`).
         placeMemory.questionChanged()
+        // VX-408: a NEW question is asked — whichever read lands it next
+        // lands it as this question's first page (`read`).
+        askedQuestion += 1
         await startOver()
     }
 
@@ -730,10 +733,31 @@ final class LibraryCatalogModel {
             startingOver: false)
     }
 
+    /// **VX-408 — the QUESTION token, beside the read generation.** The
+    /// generation orders READS (only the newest lands); this says whether
+    /// the question a read answers is the one already LISTED. `search()`
+    /// bumps `askedQuestion`; a read lands `listedQuestion`. An in-place
+    /// re-ask (`refresh` — the listing follow, `.variorumNotesDeleted`, a
+    /// row act) that begins while a newer question's own read is still in
+    /// flight overtakes that read (its generation is newer) and answers the
+    /// current question — so it must land it as the NEW question's first
+    /// page, starting over, never in place at the old listing's depth with
+    /// the old listing's on-screen positions (the traced edge; pinned by
+    /// `VX408ListingRaceTests.aRefreshThatOvertakesANewerQuestionLandsItAsAFirstPage`).
+    @ObservationIgnored private(set) var askedQuestion = 0
+    @ObservationIgnored private(set) var listedQuestion = 0
+
     /// The one read behind both doors.
     private func read(noteDepth: Int, groupDepth: Int, startingOver: Bool) async {
         searchGeneration += 1
         let generation = searchGeneration
+        // VX-408: a read carrying a question not yet listed is that
+        // question's first read, whichever door asked.
+        let asked = askedQuestion
+        let carriesNewQuestion = asked != listedQuestion
+        let startingOver = startingOver || carriesNewQuestion
+        let noteDepth = carriesNewQuestion ? Self.pageSize : noteDepth
+        let groupDepth = carriesNewQuestion ? LibrarySearchModel.groupPageSize : groupDepth
         do {
             let (sort, direction, scope) = (sort, direction, scope)
             // Her day, in her calendar, converted once — the query compares
@@ -767,6 +791,7 @@ final class LibraryCatalogModel {
             #endif
             guard generation == searchGeneration else { return }  // stale
             listedGeneration = generation
+            listedQuestion = asked   // VX-408
             bookHits = listing.books
             noteHits = listing.notes
             blockHits = listing.blocks
