@@ -1094,3 +1094,24 @@ origin/vx-808-arrivals-books (cc5e4fad0) CONFLICT textually in three files —
 tool-count pins). Against vx-878 and vx-819 we merge clean today. Whichever run merges SECOND
 resolves these three and re-runs the MCP server + catalog suites headless on the merged tree
 (on top of the standing second-merger duties recorded above).
+
+**Mockup v4 sitting (2026-11-05, ~21:05):** v4 REJECTED on visual clarity and density. Her words,
+verbatim: *"ok like look at this mockup. think about what people are using this for - claude just
+changed something. does it feel easy to look at commits? does it feel good?"* (said over two
+REFERENCE mockups she attached — `<home>/shots/shot-20261105-210521.png`: a compact
+"readme (draft) › takes" panel, the chosen take's text with red strikethrough washes and
+"claude-code is editing…", beside a "history · this take" DOT TIMELINE — one line per commit,
+name + relative date: "before claude-code's edit · now", "tightened · Oct 31", "first draft ·
+Oct 30"; and `<home>/shots/shot-20261105-210542.png`: a "readme (draft) › compare"
+two-pane before/after of claude-code's edit, removed words struck red on the left, added words
+washed green on the right). Of v4 (`<home>/shots/shot-20261105-210749.png`): *"this
+is not very clear visually at all."* Her instruction: *"have 2 opus subagents, make them each
+make a mockup, with what neesd to be there and every round of my feedback verbatim, with new
+directions. we need to explore other things like this does not look good still and it is not
+dealing with density well."* → TWO Opus design agents spawned in parallel (her explicit word —
+the one-at-a-time default is hers to lift), each with the information inventory, the full
+verbatim feedback trail (this file's sitting entries), the three shots, and a DISTINCT direction
+seed: A = the timeline spine (commits as the primary object, one dot line, takes as facets);
+B = the reference's own panel shape (one text pane + one history rail, diff washes, compact).
+The AI-edit use case leads both briefs: "claude just changed something" — note the door's
+edit_take bracket already mints the "before/after ‹client›'s edit" commits the reference names.
