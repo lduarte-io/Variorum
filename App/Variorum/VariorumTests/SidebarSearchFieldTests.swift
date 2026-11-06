@@ -390,6 +390,41 @@ struct SidebarSearchFieldShellTests {
         }
     }
 
+    /// **F3 — a sidebar search is a NEW search.** The sidebar field opens
+    /// empty and clears after every handoff, so every question it starts is
+    /// a fresh hunt from an empty field — a new search by R-819-2's own word:
+    /// it starts at relevance with no facet carried over from the question it
+    /// replaces (A-819-L1, amending P-819-B3d). The order and facets she
+    /// picked for the old question never ride onto the new one.
+    @Test func aSidebarSearchStartsNewAtRelevanceWithNoFacetCarriedOver() async throws {
+        try await withShell { _, router, catalog, window, hosting in
+            router.adopt(.library, in: router.workspace.focusedPane)
+            await settle(window, hosting) { Self.libraryField(hosting) != nil && Self.sidebarField(hosting) != nil }
+            catalog.query = "lamp"
+            await catalog.search()
+            catalog.pickSearchOrder(.createdAt)
+            catalog.pickSearchOrderDirection(.asc)
+            catalog.toggleArchivedFacet()
+            catalog.toggleSavepointsFacet()
+            await catalog.search()
+            try #require(catalog.searchState.order == .home(.createdAt, .asc), "premise: her order for the standing question")
+            try #require(catalog.searchState.visibility == .includingArchived && catalog.searchState.includesSavepoints,
+                         "premise: two facets armed on the standing question")
+
+            let field = try #require(Self.sidebarField(hosting))
+            window.makeFirstResponder(field)
+            await settle(window, hosting, timeout: 2) { Self.keyboardField(window) === field }
+            #expect(Self.type("harb", window))
+            await settle(window, hosting) { catalog.query == "harb" && catalog.searchState.isAnswering }
+            await settle(window, hosting, timeout: 0.3)
+            #expect(catalog.query == "harb", "the sidebar's words replaced the standing question")
+            #expect(catalog.searchState.order == .relevance, "a new search starts at relevance")
+            #expect(catalog.searchState.visibility == .living, "the archived facet does not ride over")
+            #expect(!catalog.searchState.includesSavepoints, "the commits facet does not ride over")
+            #expect(Self.keyboardField(window) === field)
+        }
+    }
+
     /// A door, never a mirror (PROVISIONAL P-819-B3d): while the Library is
     /// already searching its own words, the sidebar field stays empty.
     @Test func theFieldStaysEmptyWhileTheLibrarySearchesItsOwnWords() async throws {
