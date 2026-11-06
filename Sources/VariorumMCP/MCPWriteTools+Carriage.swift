@@ -267,11 +267,34 @@ extension MCPWriteTools {
                     // whenever a rule landed (a sentence said only when
                     // something matched would be a match oracle).
                     answer["matches_wait"] = MCPBookFacts.matchesWaitWords
+                    // VX-811 ruling 4 (the VX-808 run, Unit B2 — A-808-8 D):
+                    // how many of the matches this write rang now wait — the
+                    // ones THIS client can read, with the fixed scope sentence
+                    // beside it (P-809-1's family), both present exactly when
+                    // `matches_wait` is. A bare count would tell how many
+                    // unshared notes wear the probed tag (R-825; the two-store
+                    // catalog's arm).
+                    answer[MCPBookFacts.waitingCountKey] = try readableCount(result.belledPostIDs, clientName: clientName)
+                    answer[Self.beyondReachKey] = Self.beyondReachNotesWords
                 }
                 return (answer, result.changed
                         ? MCPWriteReceipt(clientName: clientName, act: .bookRule, targetID: bookID, targetTitle: name,
                                           show: .book(bookID: bookID, sectionID: nil))
                         : nil)
+            }
+        }
+    }
+
+    /// **How many of `noteIDs` this client can READ right now** — each decided
+    /// through the one rule, non-consuming (a count never spends a once
+    /// grant); ∝ the ids given.
+    func readableCount(_ noteIDs: [String], clientName: String) throws -> Int {
+        guard !noteIDs.isEmpty else { return 0 }
+        return try database.read { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            let facts = try Queries.mcpNoteFacts(db, noteIDs: noteIDs)
+            return noteIDs.count { id in
+                MCPGrantAuthority.decide(standing, note: facts[id], rung: .read, consumes: false).isAllowed
             }
         }
     }
@@ -345,6 +368,10 @@ extension MCPBookFacts {
     /// EVERY case (the sanity-pass rewording: no readability claim — a wing
     /// or note grant may already reach a match; members stay members;
     /// dismissed pairs stay decided). 13s-a sweepable.
+    /// VX-811 ruling 4: the key of `set_book_rule`'s count of the matches its
+    /// write rang that the client can read (PROVISIONAL — the B2 bundle).
+    static let waitingCountKey = "waiting_count"
+
     static let matchesWaitWords =
         "Saved — this write makes no note a member; "
         + "undecided matches wait at Arrivals for the author to let in."

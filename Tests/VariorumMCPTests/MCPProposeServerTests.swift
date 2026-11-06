@@ -307,4 +307,43 @@ struct MCPProposeServerTests {
             await h.hangUp(connection)
         }
     }
+
+    // MARK: - VX-811 ruling 4 — set_book_rule names how many matches now wait
+
+    /// A rule written on the wire bells its matches; the answer counts the ones
+    /// this client can READ (`waiting_count`), beside the fixed sentence — a
+    /// note it can't read is rung all the same and never counted. A write that
+    /// lands no rule (an outflow alone) and a rule on a finished book (intake
+    /// paused) carry neither key.
+    @Test func setBookRuleCountsTheBelledMatchesTheClientCanRead() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "Lisbon", kind: .book)
+            let done = try h.operations.createReading(name: "Done", kind: .book)
+            try h.operations.lockReading(done.id)
+            let tag = try h.operations.createTag(name: "lisbon")
+            let shared = try note(h, "shared"), unshared = try note(h, "unshared"), alsoUnshared = try note(h, "also")
+            for one in [shared, unshared, alsoUnshared] { _ = try h.operations.applyTag(tag.id, toPost: one.id) }
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .book, book.id))
+            let client = try h.client("claude-code").id
+            _ = try h.operations.grantMCPAccess(client, spec(.read, .note, shared.id))
+            _ = try h.operations.grantMCPAccess(client, spec(.writeNew, .book, done.id))
+            let ruled = try await connection.client.callTool(
+                name: "set_book_rule", arguments: ["book_id": .string(book.id), "rule": .object(["tag": .string("lisbon")])])
+            let answer = try json(ruled)
+            #expect(answer[MCPBookFacts.waitingCountKey] as? Int == 1, "\(text(ruled))")
+            #expect(answer[MCPWriteTools.beyondReachKey] as? String == MCPWriteTools.beyondReachNotesWords)
+            #expect(try [shared, unshared, alsoUnshared].allSatisfy { try arrival(h, $0.id, book.id) != nil },
+                    "every match rings — the count is only what the client is told")
+            let outflow = try await connection.client.callTool(
+                name: "set_book_rule", arguments: ["book_id": .string(book.id), "outflow": .array([.string("lisbon")])])
+            #expect(try json(outflow)[MCPBookFacts.waitingCountKey] == nil && json(outflow)[MCPWriteTools.beyondReachKey] == nil)
+            let paused = try await connection.client.callTool(
+                name: "set_book_rule", arguments: ["book_id": .string(done.id), "rule": .object(["tag": .string("lisbon")])])
+            #expect(try json(paused)["intake_paused"] != nil && json(paused)[MCPBookFacts.waitingCountKey] == nil)
+            await h.hangUp(connection)
+        }
+    }
 }

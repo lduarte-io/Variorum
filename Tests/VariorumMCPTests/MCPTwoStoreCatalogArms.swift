@@ -390,6 +390,14 @@ extension MCPTwoStoreCatalogServerTests {
             ["note_ids": .array([s(w.loose)]), "book_id": s(w.atticBook)] },
         CatalogArm(label: "propose_notes_to_book · to the gathering", tool: "propose_notes_to_book") { w, _ in
             ["note_ids": .array([s(w.seed)]), "book_id": s(w.gathering)] },
+        // VX-811 ruling 4 (A-808-8/D — the count's catalog arm, written FIRST):
+        // a rule naming a tag only a HIDDEN note wears — in A its catch-up bells
+        // that note; the answer's waiting count counts only notes the client can
+        // read, so A and B answer the same.
+        CatalogArm(label: "set_book_rule · the shared book also collects a tag only a hidden note wears",
+                   tool: "set_book_rule") { w, _ in
+            ["book_id": s(w.shared), "rule": .object(["or": .array([.object(["tag": s("board")]),
+                                                              .object(["tag": s("secret-topic")])])])] },
     ]
 
     // MARK: - THE TAIL — arms whose act lands in one store and not the other,
