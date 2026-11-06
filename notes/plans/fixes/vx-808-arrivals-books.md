@@ -120,9 +120,9 @@ Members: the §5 schema event (first commit, own commit) · **VX-857**.
 | Piece | Status |
 |---|---|
 | Reading (own context): this record §1–§9 · SyncSpec IN FULL · the vx-805 record's FOR A LATER READER + Unit B (proposal, ruling, residual corners) · SyncSpec §7's vx-805 entries · `JournalWingMend.swift` · `Repairs.swift` (writeResolvedRow, noteApplied, the keeper, OWNED, the post-batch order) · `Operations+WingMove.swift` / `+WingBookMove.swift` · `JournalWingConvergenceTests` · `Migrations.swift` tail · `SyncSchema.swift` · mirror 15/16/17 · the DDL/serializer/disclosure pins | DONE |
-| Half 2 fork — the proposal (below) | SENT to vx-808; AWAITING the ruling (lands here) |
-| Half 1 — the schema event (v1_37 + classification + marker 15 + mirror 18 + pins) | NOT STARTED |
-| Half 2 — VX-857 the general book wing mend | BLOCKED on the ruling |
+| Half 2 fork — the proposal (below) | RULED — A-808-1..5 (`e5c986693`); built to it |
+| Half 1 — the schema event (v1_37 + classification + marker 15 + mirror 18 + pins) | **DONE `57b698dfd`** — `ArrivalsPinsSchemaEventTests` (6: fresh shape · the exact v1_36→v1_37 transition · fresh vs migrated agree · the provenance stored only as `e1:` and round-tripping byte-exact, the pin plain · a propose/propose pair collision keeps the smaller id's provenance, the repair tombstone in both outboxes · two offline pins converge) + `SyncSchemaTests` (the disclosure list + the ruled sides). JUSTIFIED EDITS (in the commit message): the six local-only marker pins → 15; VX307's held-marker pin → `>= 14`; the two rotation-era ciphertext-map pins subtract the columns born after rotation retired (`rotationEraCiphertextRegistry`); the mirror-dump fixture populates the provenance. Run: 236/20 + 100/12 GREEN |
+| Half 2 — VX-857 the general mend (`Sync/BookWingMend.swift`) | **BUILT `835a75461`** — `JournalWingConvergenceTests` UNMODIFIED + keeper/furniture suites 61/10 GREEN. The matrix `BookWingConvergenceTests`: IN PROGRESS |
 | Close — full core `swift test`, self-assessment | NOT STARTED |
 
 #### Unit B1 — THE IN-BATCH FORK: the general mend (implementer's proposal, for the orchestrator's ruling)
