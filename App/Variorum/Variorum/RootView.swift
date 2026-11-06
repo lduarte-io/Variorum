@@ -1730,7 +1730,10 @@ struct RootView: View {
                     adopt(.library, in: router.workspace.focusedPane)
                 }
                 catalog.askSearchFieldForKeyboard()
-            })
+            },
+            // The ladder's F4: the field drives nothing while ⌘K's palette
+            // is presented over this window (its road asks its own words).
+            inert: paletteOpen)
     }
 
     /// Navigation with an optional caret-precise block landing (Stage C) —

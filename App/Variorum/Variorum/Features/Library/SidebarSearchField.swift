@@ -117,6 +117,14 @@ struct SidebarSearchDoor {
     /// The Library's own field takes the keyboard, its words carried, the
     /// caret at their end (⏎'s handoff).
     let keyboardToLibrary: @MainActor () -> Void
+    /// **⌘K's palette is presented over this window** (the VX-819 ladder's
+    /// F4). Its "search the Library" road rewrites the question while the
+    /// window keeps this field's editor, so the field's words would go
+    /// stale over the palette's question (esc would end it). While inert the
+    /// field drives nothing, and as it turns inert it lets its words go —
+    /// the keyboard has left it for the palette; the words stay the
+    /// Library's question, as a click elsewhere leaves them.
+    var inert = false
 }
 
 // MARK: - The words
@@ -169,9 +177,16 @@ struct SidebarSearchField: View {
         .background(SidebarSearchClickMonitor(armed: !rule.text.isEmpty) {
             apply(rule.leave())
         })
+        // ⌘K's palette came up (the ladder's F4): the keyboard has left the
+        // field — its words go, staying the Library's question.
+        .onChange(of: door.inert) { _, inert in
+            if inert { apply(rule.leave()) }
+        }
     }
 
     private func apply(_ act: SidebarSearchFieldRule.Act) {
+        // While the palette is presented the field drives nothing (F4).
+        guard !door.inert else { return }
         switch act {
         case .none: break
         case .start(let words): door.ask(words, true)
