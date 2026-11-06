@@ -286,9 +286,15 @@ enum MCPToolCatalog {
             book's chapters in order (chapters: section_id, name — empty ones too) — or a \
             gathering's notes, in its own order. With \
             wing_id (list_wings gives them): that wing's notes, most recently edited first. With neither: every note \
-            shared with this client, most recently edited first. Paged — pass next_cursor back \
+            shared with this client, most recently edited first. tag (a tag's path, e.g. "percy/pt-en") lists \
+            only the notes wearing that tag or a tag under it — on the note itself or on one of its blocks — \
+            the path read in the book's or wing's own wing (with neither, in each note's wing); a path no \
+            note you can read wears lists none. Paged — pass next_cursor back \
             as cursor. Archived notes appear only with include_archived: true (marked archived). \
-            Daily Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
+            Daily Journal entries and Private notes appear only when shared one ask at a time. Returns JSON: \
+            each note's id, title, edited, wing_id, the book_ids you can read, entry_date (null when the \
+            note has none), and tag_ids and tags (the paths of the tags the note itself wears, as \
+            read_note's header lists them).
             """,
         inputSchema: .object([
             "type": "object",
@@ -297,6 +303,9 @@ enum MCPToolCatalog {
                                              "description": "Also list archived notes (default false)."]),
                 "book_id": .object(["type": "string", "description": "List this book's notes."]),
                 "wing_id": .object(["type": "string", "description": "List this wing's notes (\"\" is Home)."]),
+                // VX-827 U2 — VX-810: the list-by-tag road (every tag tool's path form).
+                "tag": .object(["type": "string",
+                                "description": "Only notes wearing this tag (a path) or a tag under it, on the note or a block."]),
                 "cursor": .object(["type": "string", "description": "next_cursor from the previous page."]),
                 "limit": .object(["type": "integer", "minimum": 1, "maximum": 200,
                                   "description": "Page size (default 50)."]),
@@ -318,7 +327,8 @@ enum MCPToolCatalog {
             author named it, shown_take_id (the take the block shows), every take (take_id, label, \
             chosen, text — each text once, on its take) and its comments — the ids add_take, \
             add_comment and save_lens address — plus the note's \
-            entry_date and the books (and chapters) holding it that you can read. Ids are live: the \
+            entry_date, its tag_ids and tags (the paths of the tags the note itself wears, as the \
+            header lists them) and the books (and chapters) holding it that you can read. Ids are live: the \
             author's own merges and divides make new blocks, so an id can go stale between calls \
             (a write with a stale id is refused) — read again to get current ids. with_commits: true \
             adds each take's commits (saved moments), newest first, with their text; past about \

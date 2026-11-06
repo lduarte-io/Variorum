@@ -42,6 +42,29 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "list_notes · a hidden wing", tool: "list_notes") { w, _ in ["wing_id": s(w.attic)] },
         CatalogArm(label: "list_notes · a hidden owned book", tool: "list_notes") { w, _ in ["book_id": s(w.vault)] },
         CatalogArm(label: "list_notes · a hidden Private book", tool: "list_notes") { w, _ in ["book_id": s(w.diary)] },
+        // VX-827 U2 — VX-810: the list-by-tag road. In A a Private member of the
+        // shared book and a hidden note's BLOCK wear #board, a hidden Private
+        // Studio note wears #idea (the gathering's rule), #secret-topic is worn
+        // only beyond reach and the hidden wing's note wears its own
+        // #attic-topic — each absent, never hinted.
+        CatalogArm(label: "list_notes · #board in the shared book (its Private member wears it too)", tool: "list_notes") { w, _ in
+            ["book_id": s(w.shared), "tag": s("board")] },
+        CatalogArm(label: "list_notes · #board in the shared book, paged", tool: "list_notes") { w, _ in
+            ["book_id": s(w.shared), "tag": s("board"), "limit": .int(1)] },
+        CatalogArm(label: "list_notes · #board, everything shared (hidden wearers, a hidden note's block)", tool: "list_notes") { _, _ in
+            ["tag": s("board")] },
+        CatalogArm(label: "list_notes · #board, everything shared, paged", tool: "list_notes") { _, _ in
+            ["tag": s("board"), "limit": .int(1)] },
+        CatalogArm(label: "list_notes · Studio #idea (a hidden Private note wears it)", tool: "list_notes") { w, _ in
+            ["wing_id": s(w.studio), "tag": s("idea")] },
+        CatalogArm(label: "list_notes · the gathering, #idea (a hidden Private note matches and wears it)", tool: "list_notes") { w, _ in
+            ["book_id": s(w.gathering), "tag": s("idea")] },
+        CatalogArm(label: "list_notes · #secret-topic (worn only beyond reach)", tool: "list_notes") { _, _ in
+            ["tag": s("secret-topic")] },
+        CatalogArm(label: "list_notes · a hidden wing's tag path", tool: "list_notes") { _, _ in ["tag": s("attic-topic")] },
+        CatalogArm(label: "list_notes · a tag path naming nothing", tool: "list_notes") { _, _ in ["tag": s("no-such-tag")] },
+        CatalogArm(label: "list_notes · a hidden wing, by its tag", tool: "list_notes") { w, _ in
+            ["wing_id": s(w.attic), "tag": s("attic-topic")] },
         CatalogArm(label: "read_note · card with ids (a hidden board holds it)", tool: "read_note") { w, _ in
             ["note_id": s(w.card), "with_ids": .bool(true)] },
         CatalogArm(label: "read_note · card, text", tool: "read_note") { w, _ in ["note_id": s(w.card)] },

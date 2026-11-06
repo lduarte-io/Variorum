@@ -350,6 +350,15 @@ enum MCPNoteStructure {
         if let standing, liveNoteID == nil {
             answer["books"] = try books(db, noteID: noteID, standing: standing)
         }
+        // VX-827 U2 — VX-810: the tags the note ITSELF wears, as its header
+        // lists them (`tag_ids` + `tags`, the mint answers' pairing), on every
+        // page as `entry_date` rides — the live read's alone, as `books` is (a
+        // saved version is a moment of the note, and the key is the live read's).
+        if liveNoteID == nil {
+            let tags = try Queries.wornTags(db, noteIDs: [noteID])[noteID] ?? []
+            answer["tag_ids"] = tags.map(\.id)
+            answer["tags"] = tags.map(\.path)
+        }
         if let trayAnswer { answer["tray"] = trayAnswer }
         if options.withLenses {
             // VX-256 (F-256-7 (a)): the list on every page, each lens's picks

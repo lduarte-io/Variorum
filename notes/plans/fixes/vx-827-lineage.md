@@ -709,8 +709,8 @@ store touches.*
 | U2-1 | A — the tag filter's argument convention (the proposal gate) | DONE — NOT ambiguous (below); no proposal sent |
 | U2-2 | B — VX-815's TRACE (a throwaway probe, never committed) | DONE — below |
 | U2-3 | A — core: the tag-wearer listing + batched note tags, with exact-rows and P1 pins | DONE — 7/7 + the shared brain's suites green; both P1 pins red on the naive join (below) |
-| U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | NEXT |
-| U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | — |
+| U2-4 | A — `list_notes` `tag` + rows' `tag_ids`/`tags`/`entry_date` + `read_note` JSON's `tag_ids`/`tags`; server suite; catalog arms; justified re-pins | DONE — 6/6 server + the catalog (10 new arms) green; the arms red on the fence mutation (below); ONE justified re-pin |
+| U2-5 | B — VX-815's fix + its byte-pins (red by announced behavioral revert) + catalog arms | NEXT |
 | U2-6 | C — VX-778's predicate + its pin (red-on-old) | — |
 | U2-7 | Draft canon delta lines (appended to DRAFT CANON DELTAS) | — |
 | U2-8 | END: headless core + MCP suites, `Tools/verify-pins`, App compile-only; self-assessment | — |
@@ -779,3 +779,54 @@ missing answers stay byte-identical (the untouchable control — green on both s
   484**; wearers 20 → 60: 1086 → 2806 (×2.6, linear); no corpus-table scan. (The SAME plain-JOIN outer shape in
   `tagSubtreeIsWorn`'s `.reach` walk was measured too, by a throwaway probe: flat, 526 → 526 at library 20 → 300 —
   its `WHERE wearers.id > :after … LIMIT` drives from the wearers — so it is NOT a finding and stays byte-unchanged.)
+
+### U2-4 — VX-810 on the wire (what landed)
+
+- **`list_notes` takes `tag`** (`MCPReadTools.listNotes` + `optionalTagPath`): `remove_tag`'s parse — a path, a
+  leading `#` tolerated, `TagPath.segments` — and its one sentence, now a shared constant
+  (`MCPWriteTools.tagPathWords`, byte-identical), refused at the call door BEFORE any read (nothing logged). Read
+  only once the place is allowed: a BOOK's and a GATHERING's in the place's wing (`facts.wingID`), `wing_id`'s in that
+  wing, the BARE form in every wing (`Queries.notesWearingTag`). The wearers then filter the listing's OWN source —
+  `bookPage`'s members (`c.id IN json_each(:tagged)`; book order and cursor untouched, ∝ the book's members), the
+  gathering's assembly (filtered before the slice, its id-resuming cursor untouched), `recencyPage`'s candidates
+  (wing: `wingID` + candidates; bare: the wearers ARE the candidates — every note the rule reads is in the shared
+  listing's sources, so the readable wearers are exactly its notes wearing the tag; pinned against the unfiltered
+  listing) — and every kept row still passes the per-note rule, so a hidden wearer is absent exactly as unfiltered.
+  **The fence pick (the brief asked me to state it):** a path naming nothing, a tag worn only beyond reach and a tag
+  of an unreachable wing all answer the EMPTY LISTING — the listing idiom (a filter that matches nothing lists
+  nothing); never a refusal, so nothing distinguishes a tag that exists from one that doesn't (pinned byte-identical
+  in all three listing forms). No cursor shape changed (VX-859 stays VX-808's).
+- **Rows** gain `entry_date` (the stored day; `null` — always present — when undated or blank) and `tag_ids` +
+  `tags` (the note's OWN tags, `Queries.wornTags` batched per page; by path, the header's order — a block's tags are
+  the block's, so a note listed through a BLOCK tag shows it in neither key; the description says both).
+- **`read_note`'s JSON forms** (`MCPNoteStructure.read`) gain `tag_ids` + `tags` beside `books` — every page, as
+  `entry_date` rides — on the LIVE read only: a saved version's read carries neither, exactly as it carries no
+  `books` (my reading of "the note's tags": a version is a moment of the note and wears none of its own; the key is
+  the live read's). The Level 0 text is unchanged (its header already says the tags).
+- **Descriptions** (`MCPToolCatalog`): `list_notes` says `tag` (the path, the subtree, a note or one of its blocks,
+  the wing it is read in, a path no readable note wears lists none) and every row key; `read_note` names `tag_ids`
+  and `tags`; the schema declares `tag` (VX-606 serves it, refuses the plural `tags` — pinned).
+  `MCPSession.instructions` untouched.
+
+**Pins.** `MCPListNotesByTagServerTests` (6 — "✔ Test run with 7 tests in 2 suites passed" with the re-pinned guard):
+the listing's own wing / the subtree / the post+block union / the fence in a book, a wing, a gathering and the bare
+form; the bare tagged listing == the unfiltered listing's wearers, same order; worn-only-beyond-reach == naming
+nothing, byte for byte, in all three forms; `///` refused in the one sentence, unlogged; paging by each cursor ==
+the unpaged answer; every row's `tag_ids`/`tags`/`entry_date` (null present); `read_note`'s with_ids, both pages,
+the version read without the keys; VX-606's `tag` served and `tags` refused. **The two-store catalog** — 10 new
+`list_notes · … tag …` arms in the read block (the shared book and its page, the bare form and its page, Studio
+#idea, the gathering's #idea, #secret-topic, a hidden wing's path, a path naming nothing, a hidden wing's listing),
+store A's hidden half gaining hidden WEARERS only (the shared book's Private member wears #board, the secret note's
+BLOCK wears #board, the attic note its own #attic-topic — applications on hidden notes, no reachable row changes):
+A == B and B == C on every arm, nothing hand re-baselined; every existing arm's answer grew the new keys in all
+three stores alike. **Red on the fence mutation** (the walk's rule skipped for tagged listings — `decision.isAllowed
+|| tagPath != nil`, restored by copy, `grep` clean): the catalog RED on 7 of the new arms, each naming the hidden
+wearer's id that crossed ("✘ Test run with 8 tests in 2 suites failed … with 17 issues").
+
+**Justified re-pins (one by one):**
+1. `MCPReadFormsUnchangedServerTests.everyFormWithoutTheNewAsksIsByteUnchanged` (`MCPPagedReadServerTests.swift`,
+   G-256-1's golden guard — 4 expectations: with_ids, with_commits, with_lenses+with_tray, through a lens): VX-810
+   DELIBERATELY grows every JSON form with `tag_ids` + `tags`; the golden note now wears `#draft` so the bytes pin
+   both keys' place (sorted between `note_id` and `title`) and form. The Level 0 and export arms unchanged.
+2. The catalog's hidden half (A only) gains the three applications above — fixture growth for the new arms, not a
+   re-baseline (the catalog compares stores live; B == C held).

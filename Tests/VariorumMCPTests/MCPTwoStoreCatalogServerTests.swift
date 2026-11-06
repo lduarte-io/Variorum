@@ -300,7 +300,7 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try ops.setBookPrivate(starDiary.id, true)
             // VX-814 (batch 3): a tag of the hidden wing whose path a client's
             // birth tag names — per-wing vocabulary makes it a non-event.
-            _ = try ops.createTag(name: "attic-topic", wingID: w.attic)
+            let atticTopic = try ops.createTag(name: "attic-topic", wingID: w.attic)
             // VX-827 U1 (her F-U1-1 ruling): `kin`'s HIDDEN relatives — her
             // Duplicate (bookless in Home's Pool, ungranted: a copy by every
             // block + a version link), and version links to a Private note, a
@@ -310,6 +310,15 @@ struct MCPTwoStoreCatalogServerTests {
             for relative in [w.privateShared, w.atticNote, w.journalEntry] {
                 _ = try ops.markPostsAsVersions(w.kin, relative)
             }
+            // VX-827 U2 (VX-810): hidden WEARERS of tags the client can name — the
+            // shared book's Private member wears #board, the hidden secret note's
+            // BLOCK wears #board, the hidden wing's note wears its own
+            // #attic-topic (the Private Studio note's #idea is above) — so the
+            // list-by-tag arms meet them: absent, never hinted. Applications only;
+            // no reachable row changes.
+            _ = try ops.applyTag(board, toPost: w.privateShared)
+            _ = try ops.applyTag(board, toBlock: w.secretBlock)
+            _ = try ops.applyTag(atticTopic.id, toPost: w.atticNote)
         }
     }
 
