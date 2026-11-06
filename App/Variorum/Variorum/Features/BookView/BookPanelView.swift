@@ -31,8 +31,9 @@ struct BookPanelView: View {
         + MCPAskGlyph.surfaceCapabilities
         // VX-268: the ONE shared icon on a note row and its popover's doors.
         + MCPSharedIcon.surfaceCapabilities
-        // VX-831: the Private mark on a note row and on the shown book.
-        + PrivateMarkView.noteSurfaceCapabilities + PrivateMarkView.bookSurfaceCapabilities
+        // VX-831: the Private mark on a note row and on the shown book (its
+        // via-book door is the ascent, `.openBookAtNote`, already the row's).
+        + [.markNotePrivate, .markBookPrivate]
 
     let session: AppSession
     let postID: String
