@@ -1932,3 +1932,9 @@ face; a VM ticket at closeout) stands.
 **THE BUILD IS COMPLETE.** The ladder opens: one ladder over the run's whole diff
 (origin/main…vx-827-lineage), fresh `fable-reviewer`, REVIEW_PROMPT verbatim; findings land
 repo-first in `notes/plans/fixes/vx-827-ladder-round1.md` before any fix session sees them.
+
+**Window terms, two riders (nov5, 2026-11-06):** the MCPPreInitializeWindowTests load red is
+VX-850's — our data point COMMENTED there (no new ticket; the U3b adjudication's flake-ledger
+line is satisfied by that comment). The READY message to nov5 must carry the WHOLE
+`-only-testing` type list for the Mac batch; nov5 checks every name against the worktree
+before the GO.
