@@ -293,7 +293,7 @@ struct QuickEntryFileWithoutOpeningModelTests {
                     name: "drafts", kind: .book, querySpec: try RuleGrammar.encode(.tag(draft.id)))
             }
             let box = QuickEntryModel(session: session)
-            box.text = "{#draft} {t:\"Morning\"} the lines"
+            box.text = "the lines {#draft} {t:\"Morning\"}"
             let filed = try #require(await box.fileWithoutOpening { _ in })
             let title = try await db.read { db in
                 try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = ?", arguments: [filed])
