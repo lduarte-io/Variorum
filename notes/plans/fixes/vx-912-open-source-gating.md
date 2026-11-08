@@ -104,7 +104,7 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 | 0 | Kickoff: worktree, in-flight row, slot granted, sitting rulings R-912-1..9, VX-508 act | DONE (this commit) |
 | B0 | VX-751 trimmed re-verify (orchestrator) | **DONE** — `notes/plans/fixes/vx-912-b0-security-verify.md` (guard verified; door inventory; 4 flags → R-912-10/-11; 2 stale closes → R-912-12); VX-751 closes at the merge |
 | B1 | VX-604 host crash + false-green gate | BUILT + PINNED headless — **STAGE REQUEST PENDING** ("## B1 record", end of file): legs A–F |
-| B2 | VX-892 readers + VX-893 belt/rank/sized corners | IN PROGRESS — "## B2 record" (end of file): design written; builds held for the B1 stage window |
+| B2 | VX-892 readers + VX-893 belt/rank/sized corners | **BUILT + PINNED, headless** — "## B2 record" (end of file): VX-892 both readers FIXED; VX-893 (1) belt + (3) rank FIXED, (2) COVERED; **(4)(1)/(2) and (4)(3) sized BIG — shapes returned for her sitting, unbuilt**; full core suite green; canon (SyncSpec §7, two lines) PROPOSED for the merge |
 | B3 | VX-752 + LICENSE rider | NOT STARTED |
 | B4 | VX-891 + VX-396 (the MCP riders) | NOT STARTED |
 | L | The ladder (fable-reviewer, whole diff) | NOT STARTED |
