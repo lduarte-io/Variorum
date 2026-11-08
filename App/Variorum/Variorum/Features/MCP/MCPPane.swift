@@ -216,6 +216,7 @@ struct MCPPane: View {
     var body: some View {
         ScrollViewReader { proxy in
             form
+                .mcpPaneProbe(.form)
                 .onAppear { landAtWaiting(proxy) }
                 .onChange(of: door.settingsRequest) { _, _ in landAtWaiting(proxy) }
                 // UXR1-6: Waiting's caption leaves with the pane — it never
@@ -278,7 +279,9 @@ struct MCPPane: View {
                     }
                 }
                 .lineLimit(1)
+                .mcpPaneProbe(.showDial)
                 ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)
+                    .mcpPaneProbe(.showDialLine)
                 // VX-903 (the VX-914 run, batch 1 — her #264 word: "I also don't
                 // think it should be in activity, i think it should be right
                 // under 'when a client shows you something'"; PROVISIONAL F-903
@@ -304,6 +307,7 @@ struct MCPPane: View {
                         }
                     }
                     .lineLimit(1)
+                    .mcpPaneProbe(.trailDial)
                     ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
                 }
                 // A refusal from any act lands where she is looking first
@@ -428,6 +432,7 @@ struct MCPPane: View {
             Spacer(minLength: 0)
         }
         .padding(.bottom, 4)
+        .mcpPaneProbe(.tabRow)
     }
 
     /// CONNECT — the setup first (her "you wouldn't know without scrolling
@@ -1250,3 +1255,72 @@ struct MCPFullListSheet: View {
         }
     }
 }
+
+// MARK: - The pane's geometry oracle (the VX-914 run, batch 1 — its gate round)
+
+/// **The marks a pin reads in Settings ▸ MCP** — the two dials, the show
+/// dial's line, the tab row and the form itself. On macOS 27.1 the grouped
+/// form draws its `Picker`s natively (no `NSPopUpButton`, no vended
+/// accessibility element without a client — the gate round's measured
+/// mechanism), so a pin cannot find a dial in AppKit's tree; the pane reports
+/// each mark's frame instead, in SwiftUI's own (global, y-down) space.
+nonisolated enum MCPPaneMark: String, CaseIterable, Sendable {
+    case form, showDial, showDialLine, trailDial, tabRow
+}
+
+extension View {
+    /// Report this view's frame as `mark` under the surface's probe scope
+    /// (`DebugProbeScope` — a surface that forgets its scope reports under
+    /// `unscoped`, which no pin reads: loud, never silent). A no-op outside
+    /// DEBUG, so nothing ships.
+    @ViewBuilder
+    func mcpPaneProbe(_ mark: MCPPaneMark) -> some View {
+        #if DEBUG
+        modifier(MCPPaneProbe(mark: mark))
+        #else
+        self
+        #endif
+    }
+}
+
+#if DEBUG
+/// **THE DIALS' ORACLE** (DEBUG only; the `SidebarGeometry` precedent, scoped by
+/// the pin's own session): a mark DRAWN reports its frame; a mark that leaves
+/// (or was never drawn — the trail dial with no approved client) has none, so
+/// a pin that finds the show dial and not the trail dial discriminates.
+enum MCPPaneGeometry {
+    private static var worlds: [String: [MCPPaneMark: CGRect]] = [:]
+
+    static func record(_ mark: MCPPaneMark, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: [:]][mark] = frame
+    }
+
+    static func forget(_ mark: MCPPaneMark, in scope: String) {
+        worlds[scope]?[mark] = nil
+    }
+
+    /// A pin clears its OWN scope before it mounts (a freed session's address
+    /// can be reused by the next).
+    static func reset(_ scope: String) {
+        worlds[scope] = nil
+    }
+
+    /// The frame `mark` last reported under `scope` — nil while not drawn.
+    static func frame(_ mark: MCPPaneMark, in scope: String) -> CGRect? {
+        worlds[scope]?[mark]
+    }
+}
+
+private struct MCPPaneProbe: ViewModifier {
+    let mark: MCPPaneMark
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                MCPPaneGeometry.record(mark, frame, in: scope)
+            }
+            .onDisappear { MCPPaneGeometry.forget(mark, in: scope) }
+    }
+}
+#endif

@@ -494,6 +494,10 @@ struct MCPPaneTabsTests {
             door.attach(session: session)
             defer { door.detach() }
             door.requestSettings()  // ⌥⌘, — the window opens AT the MCP pane
+            #if DEBUG
+            // The VX-914 gate round: this pin's OWN oracle rows, cleared first.
+            MCPPaneGeometry.reset(session.debugProbeScope)
+            #endif
 
             let size = AppSettingsView.contentSize
             let (window, host) = mount(AppSettingsView(session: session, mcp: door), size: size)
@@ -533,9 +537,16 @@ struct MCPPaneTabsTests {
             // fresh pane draws NONE, and everything above is VX-281's geometry
             // unchanged. Non-vacuity: the show dial's picker IS found, so the
             // search for pickers sees this section.
-            let pickers = Self.popUps(in: host)
-            #expect(pickers.contains(where: Self.isShowDial), "\(voice): the show dial is drawn (non-vacuity)")
-            #expect(!pickers.contains(where: Self.isTrailDial), "\(voice): a fresh pane draws no trail dial")
+            // THE GATE ROUND'S FINDER (the record's GATE ROUND): 27.1 draws a
+            // grouped form's Picker natively — no NSPopUpButton exists — so the
+            // dials are found through the pane's scoped DEBUG oracle
+            // (`MCPPaneGeometry`): a drawn mark reports its frame, an undrawn
+            // one has none. Both assertions unchanged in meaning.
+            #if DEBUG
+            let scope = session.debugProbeScope
+            #expect(MCPPaneGeometry.frame(.showDial, in: scope) != nil, "\(voice): the show dial is drawn (non-vacuity)")
+            #expect(MCPPaneGeometry.frame(.trailDial, in: scope) == nil, "\(voice): a fresh pane draws no trail dial")
+            #endif
         }
     }
 
@@ -597,31 +608,21 @@ struct MCPPaneTabsTests {
 
     // MARK: - VX-903 — the geometry contract's grown arm (both dials seated together)
 
-    /// Every `NSPopUpButton` a mounted surface built (a SwiftUI `Picker` in the
-    /// grouped form is one — `ChromeMenuRowSizeTests`' road).
-    static func popUps(in view: NSView) -> [NSPopUpButton] {
-        var found = (view as? NSPopUpButton).map { [$0] } ?? []
-        for sub in view.subviews { found += popUps(in: sub) }
-        return found
-    }
-
-    /// The trail dial's picker: its items are her three values.
-    static func isTrailDial(_ popUp: NSPopUpButton) -> Bool {
-        Set(MCPTrailDial.allCases.map(MCPPaneCopy.trailDialChoice)).isSubset(of: Set(popUp.itemTitles))
-    }
-
-    /// The show dial's picker: its items are her three values.
-    static func isShowDial(_ popUp: NSPopUpButton) -> Bool {
-        Set(MCPShowDial.allCases.map(MCPPaneCopy.showDialChoice)).isSubset(of: Set(popUp.itemTitles))
-    }
-
     /// **VX-903 — her #264 word: "right under 'when a client shows you
     /// something'".** With a client APPROVED the pane opens on Clients
     /// (VX-281's rule) and its top section seats BOTH dials together — the
-    /// trail dial the very next picker under the show dial — with the tab row
-    /// whole and in sight, unscrolled, inside VX-214's 748 × 520, both voices.
-    /// This is the arm the contract GREW by (the record's BATCH 1 LIVE STATUS
-    /// names it); the fresh arm above is VX-281's own, unweakened.
+    /// trail dial the very next row under the show dial's line — with the tab
+    /// row whole and in sight, unscrolled, inside VX-214's 748 × 520, both
+    /// voices. This is the arm the contract GREW by (the record's BATCH 1 LIVE
+    /// STATUS names it); the fresh arm above is VX-281's own, unweakened.
+    ///
+    /// **The finder (the VX-914 gate round):** 27.1 draws a grouped form's
+    /// `Picker` natively — no `NSPopUpButton`, no accessibility element vended
+    /// without a client (measured by the round's offscreen probe) — so the
+    /// dials, the show dial's line, the tab row and the form report their
+    /// frames through the pane's scoped DEBUG oracle (`MCPPaneGeometry`), in
+    /// SwiftUI's global, y-DOWN space; the AppKit tab-row checks stand as they
+    /// were. Every assertion below says what it said before.
     @Test(arguments: [ThemeVoice.terminal, .study])
     func anApprovedClientsPaneSeatsBothDialsTogetherWithItsTabRowInSight(voice: ThemeVoice) async throws {
         try await withPaneWorld { session, _ in
@@ -638,13 +639,19 @@ struct MCPPaneTabsTests {
             #expect(door.snapshot.approvedCount == 1, "\(voice): fixture — one client approved")
             #expect(MCPPane.drawsTrailDial(door.snapshot), "\(voice): the gate opens with an approved client")
             door.requestSettings()  // ⌥⌘, — the window opens AT the MCP pane
+            #if DEBUG
+            let scope = session.debugProbeScope
+            MCPPaneGeometry.reset(scope)  // this pin's OWN oracle rows, cleared first
+            #endif
 
             let size = AppSettingsView.contentSize
             let (window, host) = mount(AppSettingsView(session: session, mcp: door), size: size)
             defer { unmount(window) }
-            await settle(host, until: {
-                tabRow(in: host) != nil && Self.popUps(in: host).contains(where: Self.isTrailDial)
-            })
+            #if DEBUG
+            await settle(host, until: { tabRow(in: host) != nil && MCPPaneGeometry.frame(.trailDial, in: scope) != nil })
+            #else
+            await settle(host, until: { tabRow(in: host) != nil })
+            #endif
             await settle(host, until: { false }, turns: 15)
 
             let tabs = try #require(tabRow(in: host), "\(voice): the pane renders her four tabs")
@@ -654,20 +661,25 @@ struct MCPPaneTabsTests {
             let visible = clip.convert(clip.bounds, to: nil)
             #expect(visible.contains(tabFrame), "\(voice): the tab row is whole and in sight, unscrolled (\(tabFrame) in \(visible))")
 
-            let pickers = Self.popUps(in: host)
-            let show = try #require(pickers.first(where: Self.isShowDial), "\(voice): the show dial is drawn")
-            let trail = try #require(pickers.first(where: Self.isTrailDial), "\(voice): the trail dial is drawn")
-            let showFrame = show.convert(show.bounds, to: nil)
-            let trailFrame = trail.convert(trail.bounds, to: nil)
-            #expect(visible.contains(showFrame) && visible.contains(trailFrame), "\(voice): both dials in sight")
-            // Window coordinates grow upward: under = a smaller y.
-            #expect(trailFrame.maxY <= showFrame.minY, "\(voice): the trail dial sits under the show dial")
-            #expect(trailFrame.minY > tabFrame.maxY, "\(voice): both sit above the tabs, in the top section")
-            let between = pickers.filter { picker in
-                let frame = picker.convert(picker.bounds, to: nil)
-                return frame.midY < showFrame.minY && frame.midY > trailFrame.maxY
-            }
-            #expect(between.isEmpty, "\(voice): nothing seated between the two dials but the show dial's line")
+            #if DEBUG
+            let form = try #require(MCPPaneGeometry.frame(.form, in: scope), "\(voice): the pane's form reports its frame")
+            let show = try #require(MCPPaneGeometry.frame(.showDial, in: scope), "\(voice): the show dial is drawn")
+            let line = try #require(MCPPaneGeometry.frame(.showDialLine, in: scope), "\(voice): the show dial's line is drawn")
+            let trail = try #require(MCPPaneGeometry.frame(.trailDial, in: scope), "\(voice): the trail dial is drawn")
+            let tabRowFrame = try #require(MCPPaneGeometry.frame(.tabRow, in: scope), "\(voice): the tab row reports its frame")
+            #expect(form.contains(show) && form.contains(trail), "\(voice): both dials in sight (\(show), \(trail) in \(form))")
+            // SwiftUI's global space grows DOWNWARD: under = a larger y.
+            #expect(show.maxY <= line.minY && line.maxY <= trail.minY,
+                    "\(voice): the trail dial sits under the show dial (\(show) · its line \(line) · \(trail))")
+            #expect(trail.maxY <= tabRowFrame.minY, "\(voice): both sit above the tabs, in the top section (\(tabRowFrame))")
+            // Nothing seated between the two dials but the show dial's line: the
+            // gap from that line to the trail dial is the form's own row gap (the
+            // show dial's to its line, measured here) — never room for a row more.
+            let rowGap = line.minY - show.maxY
+            let gap = trail.minY - line.maxY
+            #expect(gap < rowGap + min(line.height, trail.height),
+                    "\(voice): nothing seated between the two dials but the show dial's line (gap \(gap) pt, row gap \(rowGap) pt)")
+            #endif
         }
     }
 }

@@ -471,7 +471,10 @@ struct AppSettingsView: View {
             // 13n-b U1: the MCP door's pane — the app's ONE door owner, handed
             // down like `crashReports` (P-1: its acts render from the registry).
             if let mcp {
+                // The VX-914 gate round: the pane's DEBUG geometry oracle reports
+                // under this window's session (`MCPPaneGeometry`; a no-op outside DEBUG).
                 MCPPane(door: mcp)
+                    .debugProbeScope(session)
             }
         case .acknowledgments:
             // 13p Batch 1 (R13p-11's attribution obligation): the Zetetic
