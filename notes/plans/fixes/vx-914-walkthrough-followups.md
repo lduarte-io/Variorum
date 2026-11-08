@@ -282,6 +282,8 @@ Carry on; the gate list at the end as usual, and confirm the registry-walk test 
 
 ##### BATCH 3 — GATE ROUND 1 (nov7's stage window, 2026-11-08: 424 tests / 71 suites on the batch's TYPE list — TWO reds, everything else green, the tightened counted-face pin `everyFaceIsCountedAtItsOwnWidth` PASSED)
 
+**RE-GATE RAN (the orchestrator, nov7's vx914-b3-regate window, 2026-11-08 ~10:31, tree `c9b536714`): Test run with 81 tests in 7 suites PASSED after 1.4 s, exit 0, zero failures** (4 warnings = the VX-665 class). The six exact-set pins land; batch 3 is fully gated (424/71 with two stale-pin reds, the sweep's six fixes, then 81/7 green — four of the fixed suites first-run here). nov7's note adopted: the merge gate's changed-source + phone window is the standing net for this cross-file class.
+
 **Mechanism (traced, both reds one class): STALE EXACT-SET DOOR PINS ON A DELIBERATE REGISTRY CHANGE.** VX-901 added `.surface` to eight declarations (the Index row's ⋯ is the note-title table's derived face — the registry walk's both-ways equality requires it); two pins OUTSIDE the batch's touched files pinned those declarations' door sets EXACTLY, in the bound-variable form (`let rename = CapabilityRegistry.capability(.renameNote)` … `rename.doors == …`) that the batch's one-line sweep (`capability(.X)…doors ==` on one line) did not reach.
 
 | # | Red | Fix (an exact-set pin kept exact — the registry's honesty, never loosened to `contains`) | Status |
