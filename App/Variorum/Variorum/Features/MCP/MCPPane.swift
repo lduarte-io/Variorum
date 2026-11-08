@@ -542,7 +542,11 @@ struct MCPPane: View {
             Text(MCPPaneCopy.requestTitle(request.name))
                 .font(.callout.weight(.semibold))
                 .lineLimit(1)
-            quiet(MCPPaneCopy.requestDetail(firstSeen: Self.relative(request.firstSeenAt)))
+            // VX-401 (the VX-914 run, batch 1): the age reads live — every
+            // half-minute, never per frame — as Waiting's row does.
+            SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                quiet(MCPPaneCopy.requestDetail(firstSeen: Self.relative(request.firstSeenAt, now: context.date)))
+            }
             HStack(spacing: 10) {
                 Button(Self.verb(.mcpApproveClient)) {
                     granting = MCPGrantOpening(client: request, approving: true)
@@ -622,10 +626,11 @@ struct MCPPane: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// "a minute ago", "yesterday", … from a stored ISO stamp.
-    static func relative(_ stamp: String) -> String {
+    /// "a minute ago", "yesterday", … from a stored ISO stamp — against `now`
+    /// (VX-401: a `TimelineView`'s tick, so a shown stamp keeps reading true).
+    static func relative(_ stamp: String, now: Date = Date()) -> String {
         guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return stamp }
-        return relative(date)
+        return relative(date, now: now)
     }
 
     /// 13n-c U4 — the same words from a date (Waiting's age).
@@ -739,10 +744,11 @@ struct MCPClientRow: View {
     /// its "all N ›" sheet render this one row).
     @State private var confirmingDeny = false
 
-    private var detail: String {
+    /// VX-401: against `now` — the row's `TimelineView` tick.
+    private func detail(now: Date) -> String {
         var parts: [String] = []
         parts.append(connected ? MCPPaneCopy.connectedNow
-                     : MCPPaneCopy.lastSeen(MCPPane.relative(row.client.lastSeenAt)))
+                     : MCPPaneCopy.lastSeen(MCPPane.relative(row.client.lastSeenAt, now: now)))
         switch row.client.state {
         case .denied: parts.append(MCPPaneCopy.deniedState)
         case .approved:
@@ -761,10 +767,14 @@ struct MCPClientRow: View {
                 Text(row.client.name)
                     .font(.callout.weight(.semibold))
                     .lineLimit(1)
-                Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                // VX-401 (the VX-914 run, batch 1): "last seen …" reads live —
+                // every half-minute, never per frame — as Waiting's row does.
+                SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                    Text(detail(now: context.date))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
             Spacer(minLength: 0)
             if row.client.state == .approved {
@@ -1053,12 +1063,17 @@ struct MCPActivityRowView: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 8)
-            Text(MCPPane.relative(line.at))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                // VX-351: the act's whole fact on hover (the line names the act).
-                .stampHelp(MCPPane.whole(line.at))
+            // VX-401 (the VX-914 run, batch 1): the stamp reads live — every
+            // half-minute, never per frame — as Waiting's row does ("39
+            // seconds ago" stuck until the next line landed).
+            SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                Text(MCPPane.relative(line.at, now: context.date))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            // VX-351: the act's whole fact on hover (the line names the act).
+            .stampHelp(MCPPane.whole(line.at))
         }
     }
 }
