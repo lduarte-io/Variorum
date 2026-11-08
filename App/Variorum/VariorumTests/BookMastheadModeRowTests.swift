@@ -32,6 +32,20 @@
 //
 //  The record: `notes/plans/fixes/vx-878-book-doors-faces.md` (BATCH 4 RECORD).
 //
+//  **VX-896 (the VX-914 run, batch 3 — A DELIBERATE RE-WRITE of this family's
+//  threshold, her Nov 7 ruling):** *"it should go on the row above as soon as
+//  it would have standard spacing that the others have, it's weird it needs
+//  such a wide gap to go up."* The dial is counted at the face it SHOWS
+//  (PROVISIONAL F-896 (1), ruled), no longer at the widest face it could ever
+//  draw (R-878-K4's strict count, superseded). Old → new one-line thresholds
+//  for "Manual order ▾" (pt of masthead): Study 257 → 240, Terminal 304 →
+//  276; her -210400 seat (≈ 252, Study) was two lines and is one; the widest
+//  face ("Major revision ↓ ▾") keeps 257 / 304 for itself. Each re-written pin
+//  says so in place; every claim that does not depend on the counted face is
+//  kept as it was (whole points, both passes, the active tab, the title, the
+//  modes, the dial never truncated on one line). The ACCEPTED consequence is
+//  pinned too: at a fixed width a wider LOOK can move the line count.
+//
 
 import AppKit
 import Dependencies
@@ -85,10 +99,12 @@ struct BookMastheadModeRowRuleTests {
         }
     }
 
+    /// VX-896: the dial is COUNTED at the face it shows — `face` both draws
+    /// and counts (the masthead hands the row the shown face's stable width).
     static func arrange(_ voice: Voice, face: CGFloat, width: CGFloat, tabsLive: CGFloat? = nil) -> Rule.Arrangement {
         Rule.arrange(
             width: width, tabs: tabs(tabsLive ?? voice.tabs), dial: dial(face),
-            tabsWidth: voice.tabs, dialWidest: voice.widest)
+            tabsWidth: voice.tabs, dialCounted: face)
     }
 
     /// Ruling 1, at rest: a wide masthead is ONE line — the modes at the
@@ -117,31 +133,58 @@ struct BookMastheadModeRowRuleTests {
         #expect(row.size == CGSize(width: 200, height: 14 + Rule.lineSpacing + 14))
     }
 
-    /// **One answer per width, whatever the dial shows** — every face, the
-    /// widest included, decides the same at every width (the dial is counted
-    /// at its widest), and the decision has ONE threshold: two lines below
-    /// it, one line from it on. The threshold IS the counted line.
+    /// **One threshold per face, at that face's own counted line** (VX-896 —
+    /// A DELIBERATE RE-WRITE: this pin said every face decided the same at
+    /// every width, the dial counted at its widest). Every face the dial can
+    /// show goes one line EXACTLY where the tabs + the standard gap + that
+    /// face fit — two lines below, one line from there on, never back — so
+    /// the air at its threshold is the standard spacing, and a narrower face
+    /// joins the modes sooner than the widest.
     @Test(arguments: [ThemeVoice.terminal, .study])
-    func theDecisionIsOneAnswerPerWidthWhateverTheDialShows(voice: ThemeVoice) {
+    func eachFaceGoesOneLineAtItsOwnCountedLine(voice: ThemeVoice) {
         let measured = Self.measured(voice)
-        var width: CGFloat = 120
-        var seenOneLine = false
-        var unstable: [CGFloat] = []
-        var flips: [CGFloat] = []
-        var firstOneLine: CGFloat?
-        while width <= 480 {
-            let answers = Set(measured.faces.map { Self.arrange(measured, face: $0, width: width).lineCount })
-            if answers.count != 1 { unstable.append(width) }
-            let oneLine = answers == [1]
-            if seenOneLine && !oneLine { flips.append(width) }
-            if oneLine && firstOneLine == nil { firstOneLine = width }
-            seenOneLine = seenOneLine || oneLine
-            width += 0.25
+        var wrong: [String] = []
+        for face in Set(measured.faces) {
+            var width: CGFloat = 120
+            var seenOneLine = false
+            var firstOneLine: CGFloat?
+            var flips: [CGFloat] = []
+            while width <= 480 {
+                let oneLine = Self.arrange(measured, face: face, width: width).lineCount == 1
+                if seenOneLine && !oneLine { flips.append(width) }
+                if oneLine && firstOneLine == nil { firstOneLine = width }
+                seenOneLine = seenOneLine || oneLine
+                width += 0.25
+            }
+            let counted: CGFloat = Rule.countedLine(tabs: measured.tabs, dialCounted: face)
+            if firstOneLine != counted || !flips.isEmpty {
+                wrong.append("face \(face): one line from \(String(describing: firstOneLine)), not \(counted); flips \(flips.prefix(3))")
+            }
         }
-        #expect(unstable.isEmpty, "\(voice): the dial's words moved the decision at \(unstable.prefix(5))")
-        #expect(flips.isEmpty, "\(voice): back to two lines at \(flips.prefix(5))")
-        let counted: CGFloat = Rule.countedLine(tabs: measured.tabs, dialWidest: measured.widest)
-        #expect(firstOneLine == counted, "\(voice): one line from the counted line \(counted), not \(String(describing: firstOneLine))")
+        #expect(wrong.isEmpty, "\(voice): \(wrong.prefix(4))")
+        let manual = measured.faces[0]
+        #expect(Rule.countedLine(tabs: measured.tabs, dialCounted: manual)
+                < Rule.countedLine(tabs: measured.tabs, dialCounted: measured.widest),
+                "\(voice): \"Manual order\" joins the modes before the widest face would")
+    }
+
+    /// **VX-896's ACCEPTED consequence, pinned** (the orchestrator's ruling,
+    /// for her bundle): at a fixed width a LOOK whose face is wider than the
+    /// room left can move the line count — the dial drops to its own line
+    /// rather than sit closer than standard spacing or truncate — and the
+    /// book's own order brings it back up. (R-878-K4's "a pick never moves
+    /// the line count" is superseded at exactly this one input.)
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func aWiderLookCanMoveTheLineCountAtAFixedWidth(voice: ThemeVoice) {
+        let measured = Self.measured(voice)
+        let manual = measured.faces[0]
+        let widest = measured.widest
+        let between = Rule.countedLine(tabs: measured.tabs, dialCounted: manual)
+        #expect(Self.arrange(measured, face: manual, width: between).lineCount == 1, "\(voice): at rest, one line")
+        #expect(Self.arrange(measured, face: widest, width: between).lineCount == 2,
+                "\(voice): the widest look at the same width drops to its own line")
+        #expect(Self.arrange(measured, face: widest, width: between).dial.width == widest,
+                "\(voice): … whole, never truncated")
     }
 
     /// **Mode changes:** the active tab wears the semibold face, so the live
@@ -203,10 +246,13 @@ struct BookMastheadModeRowRuleTests {
         // The decision is at the whole point: half a point short of the
         // counted line is still two lines; the counted line plus a fraction
         // is one.
-        let counted: CGFloat = Rule.countedLine(tabs: measured.tabs, dialWidest: measured.widest)
-        #expect(Self.arrange(measured, face: 81, width: counted - 0.5).widthClass == .twoLines)
-        #expect(Self.arrange(measured, face: 81, width: counted + 0.9).widthClass == .oneLine)
-        #expect(Self.arrange(measured, face: 81, width: counted + 0.9).size.width == counted)
+        // VX-896 (re-written deliberately): the counted line is the shown
+        // face's — "Manual order" here.
+        let face = measured.faces[0]
+        let counted: CGFloat = Rule.countedLine(tabs: measured.tabs, dialCounted: face)
+        #expect(Self.arrange(measured, face: face, width: counted - 0.5).widthClass == .twoLines)
+        #expect(Self.arrange(measured, face: face, width: counted + 0.9).widthClass == .oneLine)
+        #expect(Self.arrange(measured, face: face, width: counted + 0.9).size.width == counted)
     }
 
     /// The ideal query (no width offered) answers the COUNTED one-line width
@@ -215,7 +261,8 @@ struct BookMastheadModeRowRuleTests {
     /// tabs never wrap; the row's honest minimum).
     @Test func theIdealIsTheCountedLineAndTheMinimumIsTheTabLine() {
         let study = Self.measured(.study)
-        let counted: CGFloat = Rule.countedLine(tabs: study.tabs, dialWidest: study.widest)
+        // VX-896: the counted line is the shown face's (81 — "Manual order").
+        let counted: CGFloat = Rule.countedLine(tabs: study.tabs, dialCounted: 81)
         let ideal = Self.arrange(study, face: 81, width: .infinity)
         #expect(ideal.widthClass == .oneLine && ideal.size.width == counted)
         #expect(Self.arrange(study, face: 81, width: ideal.size.width).widthClass == .oneLine)
@@ -229,24 +276,35 @@ struct BookMastheadModeRowRuleTests {
     }
 
     /// **GUARD — the thresholds at the measured widths** (documents the
-    /// margins; the rule is the pin above). One line from the counted line:
-    /// Study 151 + 8 + 98 = 257 pt of masthead (a navigator ≥ 281 — its
-    /// 12-pt sides), Terminal 168 + 8 + 128 = 304 (≥ 328, inside the 360
-    /// ceiling). Her screenshots' masthead widths (≈258 and ≈252 pt, Study):
-    /// the first is one line, the second wraps (the record's D-887-4). The
-    /// navigator's floor (166) wraps in both voices.
+    /// margins; the rule is the pins above). **VX-896 — A DELIBERATE RE-WRITE,
+    /// the old and new values named:** "Manual order ▾" (81 Study / 100
+    /// Terminal) goes one line at Study 151 + 8 + 81 = **240** pt of masthead
+    /// (was 257 — a navigator ≥ 264, was 281; its 12-pt sides) and Terminal
+    /// 168 + 8 + 100 = **276** (was 304 — ≥ 300, was 328). Her screenshots'
+    /// masthead widths (≈258 and ≈252 pt, Study): BOTH one line now (≈252 was
+    /// two — the record's D-887-4, her VX-896 ask). The widest face, "Major
+    /// revision ↓ ▾" (98 / 128), keeps the old numbers for itself (257 /
+    /// 304); "as collected ▾" (75 / 100) goes at 234 / 276. The navigator's
+    /// floor (166) still wraps in both voices.
     @Test func atTheMeasuredWidthsTheThresholdsAreTheCountedLines() {
         let study = Self.measured(.study)
         let terminal = Self.measured(.terminal)
-        #expect(Self.arrange(study, face: 81, width: 257).widthClass == .oneLine)
-        #expect(Self.arrange(study, face: 81, width: 256).widthClass == .twoLines)
-        #expect(Self.arrange(terminal, face: 100, width: 304).widthClass == .oneLine)
-        #expect(Self.arrange(terminal, face: 100, width: 303).widthClass == .twoLines)
+        #expect(Self.arrange(study, face: 81, width: 240).widthClass == .oneLine, "Study: 257 → 240")
+        #expect(Self.arrange(study, face: 81, width: 239).widthClass == .twoLines)
+        #expect(Self.arrange(terminal, face: 100, width: 276).widthClass == .oneLine, "Terminal: 304 → 276")
+        #expect(Self.arrange(terminal, face: 100, width: 275).widthClass == .twoLines)
         #expect(Self.arrange(study, face: 81, width: 258).widthClass == .oneLine, "her -204301 seat")
-        #expect(Self.arrange(study, face: 81, width: 252).widthClass == .twoLines, "her -210400 seat")
+        #expect(Self.arrange(study, face: 81, width: 252).widthClass == .oneLine,
+                "her -210400 seat — two lines before VX-896, one line now")
+        #expect(Self.arrange(study, face: 98, width: 257).widthClass == .oneLine, "the widest face keeps 257")
+        #expect(Self.arrange(study, face: 98, width: 256).widthClass == .twoLines)
+        #expect(Self.arrange(terminal, face: 128, width: 304).widthClass == .oneLine, "… and 304")
+        #expect(Self.arrange(terminal, face: 128, width: 303).widthClass == .twoLines)
+        #expect(Self.arrange(study, face: 75, width: 234).widthClass == .oneLine, "as collected, Study")
+        #expect(Self.arrange(study, face: 75, width: 233).widthClass == .twoLines)
         #expect(Self.arrange(study, face: 81, width: 166).widthClass == .twoLines, "the navigator's floor")
         #expect(Self.arrange(terminal, face: 100, width: 166).widthClass == .twoLines, "the navigator's floor")
-        #expect(Self.arrange(terminal, face: 100, width: 336).widthClass == .oneLine, "the navigator's ceiling")
+        #expect(Self.arrange(terminal, face: 128, width: 336).widthClass == .oneLine, "the navigator's ceiling")
     }
 }
 
@@ -317,8 +375,12 @@ struct BookMastheadStableWidthsTests {
             .sizeThatFits(in: CGSize(width: 10_000, height: 10_000)).width
     }
 
-    private static func stable(_ tokens: VoiceTokens) -> BookMastheadStableWidths {
-        BookMastheadStableWidths.row(tokens: tokens, in: EnvironmentValues().fontResolutionContext)
+    /// VX-896: the stable widths for the masthead showing `order` (default
+    /// "Manual order" — a fresh book's face).
+    static func stable(_ tokens: VoiceTokens, order: String = "Manual order") -> BookMastheadStableWidths {
+        BookMastheadStableWidths.row(
+            tokens: tokens, in: EnvironmentValues().fontResolutionContext,
+            face: BookOrderDial.face(tokens, order: order))
     }
 
     /// The tab row exactly as the book view builds it (`modeTab`'s plain
@@ -356,34 +418,47 @@ struct BookMastheadStableWidthsTests {
         #expect(abs(top - counted) < 1, "\(voice): the widest row \(top) vs the counted \(counted) — \(measured)")
     }
 
-    /// The dial is counted at its WIDEST face: every name it can show — as
-    /// the book's own order and as a look picked — measures no wider than the
-    /// counted width, and the widest of them measures it.
+    /// **The dial is counted at the face it SHOWS** (VX-896 — A DELIBERATE
+    /// RE-WRITE: this pin counted every face at the widest of them). Every
+    /// name it can show — as the book's own order and as a look picked — is
+    /// counted at its OWN stable width, which is the real control's measure
+    /// within the rounding and never narrower than it (so one line never
+    /// truncates it).
     @Test(arguments: [ThemeVoice.terminal, .study])
-    func theDialIsCountedAtItsWidestFace(voice: ThemeVoice) {
+    func everyFaceIsCountedAtItsOwnWidth(voice: ThemeVoice) {
         let tokens = VoiceTokens.resolve(voice: voice, dark: false)
-        let counted = Self.stable(tokens).dial
-        var measured: [String: CGFloat] = [:]
+        var wrong: [String] = []
+        func check(_ label: String, counted: CGFloat, drawn: CGFloat) {
+            if drawn > counted + 0.5 || abs(drawn - counted) >= 1 {
+                wrong.append("\(label): drawn \(drawn) vs counted \(counted)")
+            }
+        }
         for name in BookOrderChoices.everyName {
-            measured[name] = Self.ideal(Self.dial(tokens, stored: name))
+            check(name, counted: Self.stable(tokens, order: name).dial,
+                  drawn: Self.ideal(Self.dial(tokens, stored: name)))
         }
         for choice in BookOrderChoices.all {
-            measured["look: \(choice.label)"] = Self.ideal(
-                Self.dial(tokens, stored: "Manual order", viewOrder: choice.order))
+            let shown = BookOrderDial.shownOrder(stored: "Manual order", viewOrder: choice.order)
+            #expect(shown == choice.label, "a look names its own order")
+            check("look: \(choice.label)", counted: Self.stable(tokens, order: shown).dial,
+                  drawn: Self.ideal(Self.dial(tokens, stored: "Manual order", viewOrder: choice.order)))
         }
-        let over = measured.filter { $0.value > counted + 0.5 }
-        #expect(over.isEmpty, "\(voice): faces wider than the counted \(counted): \(over)")
-        let top = measured.values.max() ?? 0
-        #expect(abs(top - counted) < 1, "\(voice): the widest face \(top) vs the counted \(counted) — \(measured)")
+        #expect(wrong.isEmpty, "\(voice): \(wrong.prefix(5))")
     }
 
     /// GUARD — the numbers the pure suite's thresholds are written in (the
-    /// record's survey): Study 151 / 98, Terminal 168 / 128, within a point.
+    /// record's survey), within a point: the tabs 151 Study / 168 Terminal;
+    /// VX-896 — the dial counted at the shown face: "Manual order" 81 / 100,
+    /// the widest ("Major revision ↓") 98 / 128.
     @Test func theStableWidthsAreTheSurveysNumbers() {
-        let study = Self.stable(VoiceTokens.resolve(voice: .study, dark: false))
-        let terminal = Self.stable(VoiceTokens.resolve(voice: .terminal, dark: false))
-        #expect(abs(study.tabs - 151) < 1 && abs(study.dial - 98) < 1, "\(study)")
-        #expect(abs(terminal.tabs - 168) < 1 && abs(terminal.dial - 128) < 1, "\(terminal)")
+        let studyTokens = VoiceTokens.resolve(voice: .study, dark: false)
+        let terminalTokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        let study = Self.stable(studyTokens)
+        let terminal = Self.stable(terminalTokens)
+        #expect(abs(study.tabs - 151) < 1 && abs(study.dial - 81) < 1, "\(study)")
+        #expect(abs(terminal.tabs - 168) < 1 && abs(terminal.dial - 100) < 1, "\(terminal)")
+        #expect(abs(Self.stable(studyTokens, order: "Major revision \u{2193}").dial - 98) < 1)
+        #expect(abs(Self.stable(terminalTokens, order: "Major revision \u{2193}").dial - 128) < 1)
     }
 }
 
@@ -407,13 +482,16 @@ fileprivate final class RowState {
 /// `state.width`.
 private struct RowHarness: View {
     let tokens: VoiceTokens
-    let stable: BookMastheadStableWidths
     let key: String
     let state: RowState
 
     var body: some View {
+        // VX-896: the row counts the face the dial SHOWS, as the book view
+        // hands it.
+        let stable = BookMastheadStableWidthsTests.stable(
+            tokens, order: BookOrderDial.shownOrder(stored: state.stored, viewOrder: state.viewOrder))
         VStack(alignment: .leading, spacing: 6) {
-            BookMastheadModeRow(tabsWidth: stable.tabs, dialWidest: stable.dial, probeKey: key) {
+            BookMastheadModeRow(tabsWidth: stable.tabs, dialCounted: stable.dial, probeKey: key) {
                 BookMastheadStableWidthsTests.tabRow(tokens, active: state.active)
                 BookMastheadStableWidthsTests.dial(tokens, stored: state.stored, viewOrder: state.viewOrder)
             }
@@ -435,14 +513,20 @@ struct BookMastheadModeRowMountedTests {
         let hosting: NSView
         let key: String
         let state: RowState
-        let stable: BookMastheadStableWidths
+        let tokens: VoiceTokens
 
-        init(window: NSWindow, hosting: NSView, key: String, state: RowState, stable: BookMastheadStableWidths) {
+        init(window: NSWindow, hosting: NSView, key: String, state: RowState, tokens: VoiceTokens) {
             self.window = window
             self.hosting = hosting
             self.key = key
             self.state = state
-            self.stable = stable
+            self.tokens = tokens
+        }
+
+        /// VX-896: the stable widths for the face the dial shows NOW.
+        var stable: BookMastheadStableWidths {
+            BookMastheadStableWidthsTests.stable(
+                tokens, order: BookOrderDial.shownOrder(stored: state.stored, viewOrder: state.viewOrder))
         }
 
         func settle(turns: Int = 4) async {
@@ -468,10 +552,10 @@ struct BookMastheadModeRowMountedTests {
 
         /// The line count the rule gives the width the row was placed at.
         func ruled(_ width: CGFloat) -> Int {
-            Rule.widthClass(width: width, tabs: stable.tabs, dialWidest: stable.dial) == .oneLine ? 1 : 2
+            Rule.widthClass(width: width, tabs: stable.tabs, dialCounted: stable.dial) == .oneLine ? 1 : 2
         }
 
-        var counted: CGFloat { Rule.countedLine(tabs: stable.tabs, dialWidest: stable.dial) }
+        var counted: CGFloat { Rule.countedLine(tabs: stable.tabs, dialCounted: stable.dial) }
     }
 
     /// Ruling 1, mounted: at the navigator's ceiling (336 pt of masthead) the
@@ -545,37 +629,70 @@ struct BookMastheadModeRowMountedTests {
         }
     }
 
-    /// **No order form and no active tab moves the line count.** At the
-    /// counted line (one line) and one point under it (two), every name the
-    /// dial can show — as the book's own order and as every look — and every
-    /// active tab draws the same line count.
+    /// **Every order form decides at its OWN counted line, and no active tab
+    /// moves the line count** (VX-896 — A DELIBERATE RE-WRITE: this pin held
+    /// every form to ONE count at the widest face). Mounted with the real
+    /// faces: each name the dial can show — as the book's own order and as
+    /// every look — draws one line at its own counted line (the tabs + the
+    /// standard gap + its face) and two a point under it; at the book's own
+    /// order's line, every active tab draws the same; and there, the WIDEST
+    /// look drops the dial to its own line and the book's order brings it back
+    /// — the accepted consequence, live.
     @Test(arguments: [ThemeVoice.terminal, .study])
-    func noOrderFormAndNoActiveTabMovesTheLineCount(voice: ThemeVoice) async throws {
+    func everyOrderFormDecidesAtItsOwnLineAndNoActiveTabMovesIt(voice: ThemeVoice) async throws {
         try await mount(voice: voice, width: 300) { rig in
             #if DEBUG
             var wrong: [String] = []
-            for (width, expected) in [(rig.counted, 1), (rig.counted - 1, 2)] {
+            @MainActor func expectLines(_ step: String, at width: CGFloat, _ expected: Int) async {
                 await rig.resize(to: width)
-                for name in BookOrderChoices.everyName {
-                    rig.state.viewOrder = nil
-                    rig.state.stored = name
-                    await rig.settle()
-                    let lines = rig.placed?.arrangement.lineCount
-                    if lines != expected { wrong.append("\(width) stored \(name): \(String(describing: lines))") }
-                }
-                for choice in BookOrderChoices.all {
-                    rig.state.viewOrder = choice.order
-                    await rig.settle()
-                    let lines = rig.placed?.arrangement.lineCount
-                    if lines != expected { wrong.append("\(width) look \(choice.label): \(String(describing: lines))") }
-                }
+                let lines = rig.placed?.arrangement.lineCount
+                if lines != expected { wrong.append("\(step) at \(width): \(String(describing: lines))") }
+            }
+            for name in BookOrderChoices.everyName {
                 rig.state.viewOrder = nil
+                rig.state.stored = name
+                await rig.settle()
+                let line = rig.counted
+                await expectLines("stored \(name)", at: line, 1)
+                await expectLines("stored \(name)", at: line - 1, 2)
+            }
+            rig.state.stored = "Manual order"
+            for choice in BookOrderChoices.all {
+                rig.state.viewOrder = choice.order
+                await rig.settle()
+                let line = rig.counted
+                await expectLines("look \(choice.label)", at: line, 1)
+                await expectLines("look \(choice.label)", at: line - 1, 2)
+            }
+            rig.state.viewOrder = nil
+            await rig.settle()
+            let manualLine = rig.counted
+            for (width, expected) in [(manualLine, 1), (manualLine - 1, 2)] {
+                await rig.resize(to: width)
                 for mode in BookView.tabOrder {
                     rig.state.active = mode
                     await rig.settle()
                     let lines = rig.placed?.arrangement.lineCount
                     if lines != expected { wrong.append("\(width) tab \(mode): \(String(describing: lines))") }
                 }
+            }
+            rig.state.active = .outline
+            // The accepted consequence: at the book's own order's line, the
+            // widest look is two lines; back to the book's order, one.
+            await rig.resize(to: manualLine)
+            let widest = BookOrderChoices.all.max { a, b in
+                BookMastheadStableWidthsTests.stable(rig.tokens, order: a.label).dial
+                    < BookMastheadStableWidthsTests.stable(rig.tokens, order: b.label).dial
+            }
+            if let widest {
+                rig.state.viewOrder = widest.order
+                await rig.settle()
+                if rig.placed?.arrangement.lineCount != 2 { wrong.append("the widest look \(widest.label) stayed up") }
+                rig.state.viewOrder = nil
+                await rig.settle()
+                if rig.placed?.arrangement.lineCount != 1 { wrong.append("back to the book's order: not one line") }
+            } else {
+                wrong.append("no look to pick")
             }
             #expect(wrong.isEmpty, "\(voice): \(wrong.prefix(6))")
             #endif
@@ -604,7 +721,6 @@ struct BookMastheadModeRowMountedTests {
     private func mount(voice: ThemeVoice, width: CGFloat, _ body: (Rig) async throws -> Void) async throws {
         #if DEBUG
         let tokens = VoiceTokens.resolve(voice: voice, dark: false)
-        let stable = BookMastheadStableWidths.row(tokens: tokens, in: EnvironmentValues().fontResolutionContext)
         let key = "vx887-row-\(UUID().uuidString)"
         let state = RowState()
         state.width = width
@@ -613,7 +729,7 @@ struct BookMastheadModeRowMountedTests {
             styleMask: [.titled], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.appearance = NSAppearance(named: .aqua)
-        let hosting = NSHostingView(rootView: RowHarness(tokens: tokens, stable: stable, key: key, state: state))
+        let hosting = NSHostingView(rootView: RowHarness(tokens: tokens, key: key, state: state))
         hosting.frame = NSRect(x: 0, y: 0, width: 520, height: 120)
         window.contentView = hosting
         window.orderFrontRegardless()
@@ -623,7 +739,7 @@ struct BookMastheadModeRowMountedTests {
             window.close()
             BookMastheadProbe.reset(key)
         }
-        let rig = Rig(window: window, hosting: hosting, key: key, state: state, stable: stable)
+        let rig = Rig(window: window, hosting: hosting, key: key, state: state, tokens: tokens)
         await rig.settle(turns: 8)
         try await body(rig)
         #endif
@@ -690,10 +806,15 @@ struct BookMastheadMountedTests {
     /// the host's (a remembered drag in the test host's own defaults, or the
     /// shipped 190) — so every claim is relative to the width actually
     /// placed: the line count is the rule's at that whole point, the dial
-    /// sits on its line's trailing end, and a long title, every view order
-    /// and the mode switches (Book, Read — the navigator host; Index — the
-    /// index column's) never change the COUNTED widths, so at an unchanged
-    /// width the line count never changes. The dial's face says "order" once.
+    /// sits on its line's trailing end, and a long title and the mode switches
+    /// (Book, Read — the navigator host; Index — the index column's) never
+    /// change the COUNTED widths, so at an unchanged width the line count
+    /// never changes. **VX-896 (A DELIBERATE RE-WRITE):** the dial is counted
+    /// at the face it DRAWS — every view order's counted width is its drawn
+    /// face's stable width (so a look may move the line count; the pure and
+    /// row suites pin that consequence), and back at the book's order the
+    /// counted widths are the first ones again. The dial's face says "order"
+    /// once.
     @Test(arguments: [ThemeVoice.terminal, .study])
     func theMastheadsRowIsTheWidthsOwnAnswerThroughEveryState(voice: ThemeVoice) async throws {
         try await withMastheadBook(voice: voice) { session, readingID, model, structure, theme in
@@ -722,24 +843,32 @@ struct BookMastheadMountedTests {
             await settle(window, hosting, turns: 4)
             let first = try #require(BookMastheadProbe.placed[readingID], "\(voice): the masthead's row placed")
             let tokens = theme.tokens(for: .light)
-            let expectedStable = BookMastheadStableWidths.row(
-                tokens: tokens, in: EnvironmentValues().fontResolutionContext)
-            #expect(abs(first.tabsWidth - expectedStable.tabs) < 1 && abs(first.dialWidest - expectedStable.dial) < 1,
-                    "\(voice): the row counts the voice's stable widths (\(first.tabsWidth)/\(first.dialWidest) vs \(expectedStable))")
+            let expectedStable = BookMastheadStableWidthsTests.stable(tokens)
+            #expect(abs(first.tabsWidth - expectedStable.tabs) < 1 && abs(first.dialCounted - expectedStable.dial) < 1,
+                    "\(voice): the row counts the voice's stable widths (\(first.tabsWidth)/\(first.dialCounted) vs \(expectedStable))")
             #expect(BookMastheadProbe.dialFace[readingID] == BookOrderDial.face(tokens, order: "Manual order"),
                     "\(voice): the dial names the order once (\(String(describing: BookMastheadProbe.dialFace[readingID])))")
 
             var wrong: [String] = []
-            @MainActor func check(_ step: String) {
+            @MainActor func check(_ step: String, look: String? = nil) {
                 guard let placed = BookMastheadProbe.placed[readingID] else {
                     wrong.append("\(step): no placement"); return
                 }
                 let row = placed.arrangement
                 let ruled = Rule.widthClass(
-                    width: placed.decidedWidth, tabs: placed.tabsWidth, dialWidest: placed.dialWidest)
+                    width: placed.decidedWidth, tabs: placed.tabsWidth, dialCounted: placed.dialCounted)
                 if row.widthClass != ruled { wrong.append("\(step): drew \(row.widthClass) at \(placed.decidedWidth)") }
-                if placed.tabsWidth != first.tabsWidth || placed.dialWidest != first.dialWidest {
-                    wrong.append("\(step): the counted widths moved (\(placed.tabsWidth)/\(placed.dialWidest))")
+                if placed.tabsWidth != first.tabsWidth {
+                    wrong.append("\(step): the tabs' counted width moved (\(placed.tabsWidth))")
+                }
+                if let look {
+                    // VX-896: a look is counted at the face it draws.
+                    let drawn = BookMastheadStableWidthsTests.stable(tokens, order: look).dial
+                    if abs(placed.dialCounted - drawn) > 0.5 {
+                        wrong.append("\(step): counted \(placed.dialCounted), not the drawn face's \(drawn)")
+                    }
+                } else if placed.dialCounted != first.dialCounted {
+                    wrong.append("\(step): the dial's counted width moved (\(placed.dialCounted))")
                 }
                 if abs(row.dial.maxX - row.size.width) > 0.5 { wrong.append("\(step): the dial off the trailing end \(row.dial)") }
                 if row.widthClass == .oneLine, row.dial.minY >= row.tabs.maxY {
@@ -748,7 +877,8 @@ struct BookMastheadMountedTests {
                 if row.widthClass == .twoLines, row.dial.minY < row.tabs.maxY {
                     wrong.append("\(step): two lines but the dial beside the modes")
                 }
-                if placed.decidedWidth == first.decidedWidth, row.lineCount != first.arrangement.lineCount {
+                if placed.decidedWidth == first.decidedWidth, placed.dialCounted == first.dialCounted,
+                   row.lineCount != first.arrangement.lineCount {
                     wrong.append("\(step): the line count moved at an unchanged width")
                 }
             }
@@ -761,11 +891,12 @@ struct BookMastheadMountedTests {
             await settle(window, hosting, turns: 6)
             check("a long title")
 
-            // Every view order (the dial's face changes; its counted width does not).
+            // Every view order (VX-896: the dial's face changes and its counted
+            // width follows the face it draws).
             for choice in BookOrderChoices.all {
                 model.viewOrder = choice.order
                 await settle(window, hosting, turns: 4)
-                check("look \(choice.label)")
+                check("look \(choice.label)", look: choice.label)
                 if BookMastheadProbe.dialFace[readingID] != BookOrderDial.face(tokens, order: choice.label) {
                     wrong.append("look \(choice.label): the face drew \(String(describing: BookMastheadProbe.dialFace[readingID]))")
                 }

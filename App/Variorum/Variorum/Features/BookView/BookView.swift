@@ -767,11 +767,17 @@ struct BookView: View {
         // and wraps below the modes only when the width class says so. ONE
         // Layout over these same two views (`BookMastheadModeRow`), decided at
         // whole points from STABLE widths — the tabs at their widest active
-        // state, the dial at its widest form — never `ViewThatFits`, so a
-        // pick, a rename, a mode switch or a resize back and forth never moves
-        // the line count off the width's own answer.
-        let stable = BookMastheadStableWidths.row(tokens: tokens, in: fontContext)
-        BookMastheadModeRow(tabsWidth: stable.tabs, dialWidest: stable.dial, probeKey: readingID) {
+        // state, the dial at the stable width of the face it SHOWS (VX-896,
+        // PROVISIONAL F-896 (1): "as soon as it would have standard spacing")
+        // — never `ViewThatFits`, so a rename, a mode switch or a resize back
+        // and forth never moves the line count off the width's own answer; a
+        // look whose face needs more room than standard spacing leaves can.
+        let stable = BookMastheadStableWidths.row(
+            tokens: tokens, in: fontContext,
+            face: BookOrderDial.face(tokens, order: BookOrderDial.shownOrder(
+                stored: BookOrderChoices.storedLabel(for: structure.reading),
+                viewOrder: model.viewOrder)))
+        BookMastheadModeRow(tabsWidth: stable.tabs, dialCounted: stable.dial, probeKey: readingID) {
             HStack(spacing: BookMastheadModeRowRule.tabSpacing) {
                 // Outline · Index · Book · Read — Index sits beside the
                 // writing surface, mirroring the note row's Write · Takes ·

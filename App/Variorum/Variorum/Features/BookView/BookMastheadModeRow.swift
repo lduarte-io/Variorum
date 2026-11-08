@@ -16,11 +16,24 @@
 //  Library; `LibraryControlsFlow`, VX-175/VX-350): ONE `Layout` over ONE set
 //  of views — never `ViewThatFits` — whose wrap is a width-class decision at
 //  WHOLE POINTS from STABLE widths only: the tab row at the widest it reads
-//  across the four active tabs (`BookMastheadStableWidths.tabs`), the dial at
-//  the WIDEST of every face it can draw (`.dial` — every stored field ×
-//  direction, "as collected", "book's order"). So typing a title, a view
-//  order picked, a mode switched or a row landing never changes the line
-//  count: the class is a function of the width (and the voice) alone.
+//  across the four active tabs (`BookMastheadStableWidths.tabs`), and the
+//  dial at the stable width of the FACE IT SHOWS (`.dial` — that face's words
+//  measured in the voice's own font, never the live control's size).
+//
+//  **VX-896 (the VX-914 run, batch 3 — her Nov 7 walkthrough):** *"it should
+//  go on the row above as soon as it would have standard spacing that the
+//  others have, it's weird it needs such a wide gap to go up."* The dial was
+//  counted at the WIDEST face it could ever draw ("Major revision ↓ ▾"), so
+//  "Manual order ▾" joined the modes only past 257 pt of masthead in Study
+//  (304 in Terminal) — ≈ 25 pt of air at the threshold. It is counted at the
+//  face it SHOWS now (PROVISIONAL F-896 (1), ruled): one line from 240 pt in
+//  Study (276 in Terminal) for "Manual order ▾", at standard spacing (the
+//  8-pt gap — the tabs' own). Typing a title, a mode switched, the active tab
+//  or a row landing still never changes the line count; a LOOK picked whose
+//  face is wider than the room can (the dial then needs more than standard
+//  spacing allows) — the one input R-878-K4's strict count held still,
+//  superseded at exactly that input (the record names it). It never
+//  truncates on one line.
 //
 //  ONE LINE: the tabs at the leading edge, the dial at the trailing end,
 //  first text baselines aligned. TWO LINES: the tabs, then the dial on a line
@@ -42,8 +55,9 @@ nonisolated enum BookMastheadModeRowRule {
     /// Between two tabs (the shipped `HStack(spacing: 8)`).
     static let tabSpacing: CGFloat = 8
     /// The least air between the last tab and the dial on one line — the
-    /// tabs' own spacing (the dial is counted at its widest form, so with any
-    /// shorter face the air it shows is wider).
+    /// tabs' own spacing, "the standard spacing that the others have" (VX-896:
+    /// the dial is counted at the face it shows, so at the threshold the air
+    /// it shows IS this gap).
     static let gap: CGFloat = 8
     /// Between the tab line and the dial's line when it wraps — the
     /// navigator's own row spacing, so the two-line look is today's rows
@@ -81,18 +95,19 @@ nonisolated enum BookMastheadModeRowRule {
     }
 
     /// The one line, COUNTED: the tabs at their stable width, the gap, the
-    /// dial at its widest form.
-    static func countedLine(tabs: CGFloat, dialWidest: CGFloat, gap: CGFloat = gap) -> CGFloat {
-        tabs + gap + dialWidest
+    /// dial at its counted width (VX-896: the stable width of the face it
+    /// shows).
+    static func countedLine(tabs: CGFloat, dialCounted: CGFloat, gap: CGFloat = gap) -> CGFloat {
+        tabs + gap + dialCounted
     }
 
     /// **The class, decided** from the counted (stable) widths alone — never
     /// a live label. An unbounded width (the ideal query) is one line.
     static func widthClass(
-        width: CGFloat, tabs: CGFloat, dialWidest: CGFloat, gap: CGFloat = gap
+        width: CGFloat, tabs: CGFloat, dialCounted: CGFloat, gap: CGFloat = gap
     ) -> WidthClass {
         guard width.isFinite else { return .oneLine }
-        return countedLine(tabs: tabs, dialWidest: dialWidest, gap: gap) <= width ? .oneLine : .twoLines
+        return countedLine(tabs: tabs, dialCounted: dialCounted, gap: gap) <= width ? .oneLine : .twoLines
     }
 
     /// **The row's arrangement**, decided and arranged at `decidingWidth`.
@@ -105,18 +120,18 @@ nonisolated enum BookMastheadModeRowRule {
     /// row at its ideal places one line there.
     static func arrange(
         width offered: CGFloat, tabs: Child, dial: Child,
-        tabsWidth: CGFloat, dialWidest: CGFloat,
+        tabsWidth: CGFloat, dialCounted: CGFloat,
         gap: CGFloat = gap, lineSpacing: CGFloat = lineSpacing
     ) -> Arrangement {
         let width = decidingWidth(offered)
-        let decided = widthClass(width: width, tabs: tabsWidth, dialWidest: dialWidest, gap: gap)
+        let decided = widthClass(width: width, tabs: tabsWidth, dialCounted: dialCounted, gap: gap)
         let rowWidth = width.isFinite
-            ? max(0, width) : countedLine(tabs: tabsWidth, dialWidest: dialWidest, gap: gap)
+            ? max(0, width) : countedLine(tabs: tabsWidth, dialCounted: dialCounted, gap: gap)
         let tabsSize = tabs.size(rowWidth)
         switch decided {
         case .oneLine:
             // The dial is offered the room right of the tabs — never less
-            // than its widest form while the class holds, so it never
+            // than its counted face while the class holds, so it never
             // truncates on one line.
             let room = max(0, rowWidth - tabsSize.width - gap)
             let dialSize = dial.size(room)
@@ -155,8 +170,9 @@ nonisolated enum BookMastheadModeRowRule {
 struct BookMastheadModeRow: Layout {
     /// The tab row's STABLE width (`BookMastheadStableWidths.tabs`).
     var tabsWidth: CGFloat
-    /// The dial's WIDEST form (`BookMastheadStableWidths.dial`).
-    var dialWidest: CGFloat
+    /// The dial's COUNTED width — the stable width of the face it shows
+    /// (`BookMastheadStableWidths.dial`, VX-896).
+    var dialCounted: CGFloat
     var gap: CGFloat = BookMastheadModeRowRule.gap
     var lineSpacing: CGFloat = BookMastheadModeRowRule.lineSpacing
     /// The DEBUG probe's key (the book's id) — nil records nothing.
@@ -186,7 +202,7 @@ struct BookMastheadModeRow: Layout {
             BookMastheadProbe.record(probeKey, .init(
                 boundsWidth: bounds.width,
                 decidedWidth: BookMastheadModeRowRule.decidingWidth(bounds.width),
-                arrangement: arranged, tabsWidth: tabsWidth, dialWidest: dialWidest))
+                arrangement: arranged, tabsWidth: tabsWidth, dialCounted: dialCounted))
         }
         #endif
     }
@@ -202,7 +218,7 @@ struct BookMastheadModeRow: Layout {
         }
         return BookMastheadModeRowRule.arrange(
             width: width, tabs: child(subviews[0]), dial: child(subviews[1]),
-            tabsWidth: tabsWidth, dialWidest: dialWidest, gap: gap, lineSpacing: lineSpacing)
+            tabsWidth: tabsWidth, dialCounted: dialCounted, gap: gap, lineSpacing: lineSpacing)
     }
 }
 
@@ -210,24 +226,26 @@ struct BookMastheadModeRow: Layout {
 
 /// **What the wrap decision counts**: the tab row at the widest it can read
 /// (whichever tab is active wears the semibold face) and the order dial at
-/// its WIDEST form — measured in the voice's own `small` face, each word
-/// rounded UP to a whole point as a SwiftUI `Text` sizes itself. Numbers that
-/// move only when the voice does, never with what the book shows.
+/// the face it SHOWS (VX-896 — it was the widest face it could ever draw) —
+/// measured in the voice's own `small` face, each word rounded UP to a whole
+/// point as a SwiftUI `Text` sizes itself. The tab number moves only when the
+/// voice does; the dial's only when its face's WORDS do (a look picked, the
+/// book's own order saved) — never with a title, a mode or a landing.
 struct BookMastheadStableWidths: Equatable {
     var tabs: CGFloat
     var dial: CGFloat
 
     /// The masthead's stable widths in this voice — the tabs' own words
-    /// (`BookView.tabOrder` / `tabLabel`) and every face the dial can draw
-    /// (`BookOrderChoices.everyName` through `BookOrderDial.face`), resolved
-    /// in the view's own font context; memoized per face, so a render never
-    /// re-measures.
-    static func row(tokens: VoiceTokens, in context: Font.Context) -> Self {
+    /// (`BookView.tabOrder` / `tabLabel`) and the dial's drawn `face`
+    /// (`BookOrderDial.face` of `BookOrderDial.shownOrder` — the ONE spelling
+    /// the dial draws), resolved in the view's own font context; memoized per
+    /// face, so a render never re-measures.
+    static func row(tokens: VoiceTokens, in context: Font.Context, face: String) -> Self {
         let regular = tokens.small.resolve(in: context).ctFont as NSFont
         let active = tokens.small.weight(.semibold).resolve(in: context).ctFont as NSFont
         return measure(
             tabLabels: BookView.tabOrder.map { tokens.chromeLabel(BookView.tabLabel($0)) },
-            dialFaces: BookOrderChoices.everyName.map { BookOrderDial.face(tokens, order: $0) },
+            dialFaces: [face],
             regular: regular, active: active, spacing: BookMastheadModeRowRule.tabSpacing)
     }
 
@@ -244,7 +262,8 @@ struct BookMastheadStableWidths: Equatable {
 
     /// The measurement itself: the tab row as the `HStack` lays it (every
     /// word at its own width, `spacing` between) with each tab in turn in the
-    /// active face, the widest of those; and the widest dial face.
+    /// active face, the widest of those; and the widest of the dial faces
+    /// given (the masthead hands the one it shows).
     static func measure(
         tabLabels: [String], dialFaces: [String], regular: NSFont, active: NSFont, spacing: CGFloat
     ) -> Self {
@@ -305,6 +324,8 @@ struct BookModeTabLabel: View {
 /// this label TRUNCATES under a narrower offer instead (the menu still says
 /// everything in full). The mode row offers it at least its widest form on
 /// one line, so it truncates only on a line of its own narrower than it.
+/// (VX-896: "at least its widest form" became "at least the face it shows" —
+/// still never truncated on one line.)
 struct BookOrderDial: View {
     let tokens: VoiceTokens
     /// The book's own order, named (`BookOrderChoices.storedLabel`).
@@ -327,7 +348,12 @@ struct BookOrderDial: View {
     }
 
     /// The order the face names: the look, else the book's own.
-    var shownOrder: String {
+    var shownOrder: String { Self.shownOrder(stored: stored, viewOrder: viewOrder) }
+
+    /// VX-896: the ONE rule for the order the face names — the dial draws it
+    /// and the mode row counts it (`BookMastheadStableWidths.row(face:)`), so
+    /// the two can never disagree.
+    static func shownOrder(stored: String, viewOrder: Queries.ReadingOrder?) -> String {
         viewOrder.map(BookOrderChoices.label(for:)) ?? stored
     }
 
@@ -389,9 +415,10 @@ nonisolated enum BookMastheadProbe {
         var boundsWidth: CGFloat
         var decidedWidth: CGFloat
         var arrangement: BookMastheadModeRowRule.Arrangement
-        /// The stable widths the decision counted.
+        /// The stable widths the decision counted (VX-896: the dial's is the
+        /// face it showed).
         var tabsWidth: CGFloat
-        var dialWidest: CGFloat
+        var dialCounted: CGFloat
     }
 
     /// The LAST placement per book — one entry per book a session opens (a
