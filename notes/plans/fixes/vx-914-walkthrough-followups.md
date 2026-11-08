@@ -128,6 +128,35 @@ Carry on: finish 902/903/905 to these rulings, keep committing per piece, and re
 - **The laws that must not move:** reach is read through the one rule (`decide`/`decideGathering`/`decideWing`) for the rows DRAWN, never the corpus (P1); **nothing is read while no client is approved** — the dimmed state exists only in the approved-client world; the via-book eye semantics (full strength, "Private — via ‹book›") unchanged; the menu's Private row keeps VX-641.
 - **Evidence:** pins — (a) approved client + server OFF ⇒ both marks drawn dimmed, hover says the server is off; (b) no client approved ⇒ neither drawn, nothing read (the existing no-client read-fence pin extended, not weakened); (c) approved + server ON ⇒ today's behavior byte-unchanged. Dimming via tokens (no literal colour — the token-layer law).
 
+#### BATCH 2 — LIVE STATUS (implementer: opus-implementer, session started 2026-11-08)
+
+*Code + headless verification only (the brief: no GUI, no store, no `xcodebuild test` — Mac pins land PENDING(gate)). Builds on batch 1's head `b5abfbb7a`.*
+
+**What the trace found (inputs → today's state), recorded before any code:**
+- **The ROWS never waited for the server.** Every row host (Library List/Cards/answer sheet, Timeline, Pool, Bookcase, Book Panel, ⌘L's sheet) draws `MCPSharedIcon` from a core reach read (`Queries.mcpNoteReaches` / `mcpBookReaches` / `mcpWingReaches`, gated inside by `mcpReachStandings` — ≥1 approved client, then a live grant or the open book) and NO host reads the server switch; the VX-878 record says the same (:167, :504 — "the rows' reach reads never ask the server"). With the switch OFF a row's icon draws today at FULL strength wherever an "always" grant or the open book reaches (a while-connected grant is revoked by the stop — `MCPStopEndsConnectionGrantsServerTests`). So the record's "supersedes the shared icon's wait-for-the-server on rows" changes nothing on rows but the NEW dimmed state; the build is the same.
+- **The one waiter was the note's masthead.** `MCPNoteIndicator` drew its shared icon and read its reach only under `MCPShareRoad.indicatorOn` (= `hasApprovedClient && serverOn`, VX-164), while the eye beside it followed R-878-K3 (approved alone) — #264's masthead nuance exactly.
+- **The server fact** every window already holds is `MCPDoor.serverOn` (the Settings switch — her "flip the server to on"), handed to the road only inside `indicatorOn`.
+
+| Piece | Item | Status |
+|---|---|---|
+| 1 | The road carries the server fact (`MCPShareRoad.serverOn`, `indicatorOn` derived); ONE pure rule for the server-off face (`MCPServerOffFace` — dimmed + the hover's sentence); both faces read it (`MCPSharedIcon` accent → the dimmed ink; `PrivateMarkView` ink → the dimmed ink; each hover + accessibility label gains the sentence); the DEBUG probes record each drawn face's dimmed state + hover | NOT-STARTED |
+| 2 | The masthead: the shared icon drawn while a client is APPROVED (the road's `canShare`), its reach read through the rows' own GATED batched read (`mcpNoteReaches(noteIDs: [postID])` — the gate rides the read, so nothing past the grants store is read with no approved client even when the door's gate lags); the pending-ask leg keeps `indicatorOn` (an ask lives only while connected) | NOT-STARTED |
+| 3 | Pins (a) server OFF ⇒ both drawn dimmed, hover says so (mounted faces + the masthead mounted over a store) · (b) no approved client ⇒ neither drawn, nothing read — the core fences extended with the switch OFF and ON (`MCPRowReachTests`, `PrivateMarkFactsTests`) + the masthead's composed read traced · (c) server ON ⇒ byte-identical (faces' tokens + hovers equal today's strings) | NOT-STARTED |
+| 4 | Justified edits: the `MCPShareRoad(` constructions (three test rigs + two windows), `theMastheadReadsTheMarkOnlyWhileAClientIsApprovedAndReachOnlyWhileOn` (its "reach only while the indicator is on" was the masthead's wait-for-the-server), the field guide's lesson-7 masthead sentence ("while the door is open … or a lock" — stale twice over) | NOT-STARTED |
+| 5 | `swift build` + headless suites; `xcodebuild build-for-testing`; self-assessment + the exact gate TYPE list | NOT-STARTED |
+
+##### BATCH 2 — FORKS PROPOSED TO THE ORCHESTRATOR (2026-11-08; recommendation first; the recommended forms are BUILT as PROVISIONAL while the ruling is pending — each is one constant to swap)
+
+**F-900-A — the dimmed ink (tokens only).** (1) **RECOMMENDED: `tokens.faint`** for both glyphs (the shared icon's `accent` and the eye's `ink` both give way to it) — the app's ONE disabled ink, `CalmButtonStyle`'s disabled face (VX-194, "fix it in the style"), so "greyed out" reads as the app already says it; (2) `tokens.muted` — a step stronger, reads "secondary" more than "off"; (3) each mark's own token at a fixed opacity (keeps the accent's hue, but adds a literal factor beside the token).
+
+**F-900-B — the hover's server-off words** (the hover is also the accessibility label). (1) **RECOMMENDED: today's hover unchanged, then one sentence: "… The MCP server is off."** — "Shared with claude-code (read and suggest) — click for details. The MCP server is off." · "Private — via “the vault”. The MCP server is off." · "Private — click to remove this note’s mark. The MCP server is off." ("the MCP server" is the pane's own noun — "Enable the MCP server"; no "AI", VX-272's settings-class rule); (2) lead with the fact ("The MCP server is off — shared with claude-code …") — rewrites every base hover's grammar; (3) a trailing clause (" · the MCP server is off").
+
+**F-900-C — the shared icon's popover (Change… · Revoke).** (1) **RECOMMENDED: unchanged** — the ruling names the hover; every fact in the popover stays true with the server off (grants are local rows) and its doors still act; (2) a quiet caption under its title, "The MCP server is off."
+
+**F-900-D — the field guide's lesson-7 masthead sentence** (`TutorialSeeder` ~:3064, unpinned): today "Inside a note, while the door is open, the same icon sits at the right end of the context bar above the page, or a lock when the note is Private." — false twice after this batch (it draws while a client is approved; the lock retired into the eye at VX-831). (1) **RECOMMENDED:** "Inside a note, the same icon sits at the right end of the context bar above the page, or a closed eye when the note is Private. While the server is off, both still show, greyed out." (2) the minimal truth fix only: "Inside a note, the same icon sits at the right end of the context bar above the page, or a closed eye when the note is Private." Either way the real store's seeded guide goes stale (the re-seed already owed from vx-827 — hers, behind A1).
+
+**Read as settled, no fork (said so a ruling can flip them):** (i) the via-book eye dims exactly as an own mark does — "full strength" is its relation to the own mark (never a muted twin), kept in both states; (ii) the server fact is the SWITCH (`MCPDoor.serverOn`, the one `indicatorOn` already read — her "flip the server to on"); a listener that stopped by itself (VX-612) with the switch ON reads as ON — the pane's status line says that stop; (iii) the badge switch governs what it governs today — the eye, its dimmed face included — and NOT the shared icon (F-905's ruling; the shared icon under the switch stays her call, not built); (iv) the ⌘L ▾ MENU's mark is a menu item's image (system-drawn ink, no hover), so it can carry neither the dim nor the sentence — it stays the plain mark (residual, recorded).
+
 ### BATCH 3 — the book faces (VX-901 · VX-896 · VX-897 · riders VX-45 · VX-667)
 
 **Required reading: SurfaceContracts "The Bookcase and books" in full.**
@@ -184,7 +213,7 @@ Carry on: finish 902/903/905 to these rulings, keep committing per piece, and re
 | 3 | VX-902 trail heading → provider/MCP | 1 | BUILT — pins RUN PENDING(gate) |
 | 4 | VX-904 client group collapse | 1 | BUILT — pins RUN PENDING(gate) |
 | 5 | VX-401 Activity stamps recompute (rider) | 1 | BUILT — pin RUN PENDING(gate) |
-| 6 | VX-900 the icon twins' one rule + dimmed state | 2 | NOT-STARTED |
+| 6 | VX-900 the icon twins' one rule + dimmed state | 2 | IN-PROGRESS — LIVE STATUS opened; trace recorded |
 | 7 | VX-901 Index ⋯ carries the note-title set | 3 | NOT-STARTED |
 | 8 | VX-896 masthead one-line threshold | 3 | NOT-STARTED |
 | 9 | VX-897 delete/archive confirm em-dashes → commas | 3 | NOT-STARTED |
