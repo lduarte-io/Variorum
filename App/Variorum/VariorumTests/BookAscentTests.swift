@@ -360,16 +360,21 @@ struct BookChooserOrderTests {
     /// `ContextBarDoors.bookClick` and whose words are
     /// `WorkspaceNaming.ascentHelp`. The ORDER the sentence read from is
     /// untouched, and is pinned by the three tests above.
+    ///
+    /// VX-667 (the VX-914 run, batch 3 — A JUSTIFIED EDIT): the counts arrive
+    /// BY KIND now (books · gatherings); every books-only sentence below is
+    /// byte-for-byte the shipped one — the kind arms are
+    /// `AscentKindWordsTests`'.
     @Test func theBooksWordsNowLiveOnTheIconsHelp() {
-        #expect(WorkspaceNaming.ascentHelp(topBook: nil, count: 0)
+        #expect(WorkspaceNaming.ascentHelp(topBook: nil, bookCount: 0, gatheringCount: 0)
                 == "This note isn't in any book yet")
-        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", count: 1)
+        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", bookCount: 1, gatheringCount: 0)
                 == "Open \u{201c}Orbit\u{201d} at this note (\u{2318}-click to see it listed)")
-        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", count: 3)
+        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", bookCount: 3, gatheringCount: 0)
                 == "This note is in 3 books — click to pick one")
-        #expect(WorkspaceNaming.ascentListHeader(count: 1)
+        #expect(WorkspaceNaming.ascentListHeader(bookCount: 1, gatheringCount: 0)
                 == "This note is in 1 book — open it at this note:")
-        #expect(WorkspaceNaming.ascentListHeader(count: 3)
+        #expect(WorkspaceNaming.ascentListHeader(bookCount: 3, gatheringCount: 0)
                 == "This note is in 3 books — open one at this note:")
     }
 }

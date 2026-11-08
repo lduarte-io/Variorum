@@ -390,7 +390,10 @@ nonisolated enum BookStateCopy {
                 "\(quoted(name)) owns its notes. Delete the book only, and its \(notes(count)) "
                     + "go back to the Pool \u{2014} or delete the book and its \(notes(count)) "
                     + "together.",
-                "Either way the book goes to the Trash for \(TrashWindow.days) days \u{2014} and "
+                // VX-897 (RULED, her chat Nov 7): the em dash becomes a comma —
+                // "…for 30 days, and Put back returns whatever went in together,
+                // together."
+                "Either way the book goes to the Trash for \(TrashWindow.days) days, and "
                     + "Put back returns whatever went in together, together.",
             ],
             list: [], after: [], confirmLabel: "Delete Book Only",
@@ -432,8 +435,9 @@ nonisolated enum BookStateCopy {
     static func archiveAsks(_ reading: Reading) -> Bool { reading.kind == .book && reading.owned }
 
     /// The keep-forever promise (her rider: "you do want to keep it forever").
+    /// VX-897 (RULED with its delete twin): the em dash becomes a comma.
     static let keptLine =
-        "Either way it's kept under Archived, with no countdown \u{2014} and Unarchive brings "
+        "Either way it's kept under Archived, with no countdown, and Unarchive brings "
         + "back whatever went in together, together."
 
     /// An OWNED book's TWO-CHOICE archive confirm (R-13ie-2 — lesson 8's

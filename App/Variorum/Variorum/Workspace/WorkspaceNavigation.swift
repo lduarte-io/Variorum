@@ -547,13 +547,38 @@ nonisolated enum WorkspaceNaming {
     /// Takes a NAME and a COUNT rather than the rows themselves: this
     /// vocabulary stays free of the core's model types, exactly as `label`
     /// takes a title map rather than containers.
-    static func ascentHelp(topBook: String?, count: Int) -> String {
+    ///
+    /// **VX-667 (the VX-914 run, batch 3):** the counts come in BY KIND — the
+    /// icon lists every book holding the note AND every gathering whose rule
+    /// shows it (`Queries.readingsContaining`), and a gathering is not a book
+    /// (it holds nothing; the note appears in it). One book and one gathering
+    /// said "This note is in 2 books" while the membership chip beside it said
+    /// "in ‹book› · 1 gathering"; the words follow the chip's headline grammar
+    /// now (13i-d U6 (g) F-U3-4's fix, one surface over — VX-611's kind-word
+    /// family): books "in", gatherings "appears in".
+    static func ascentHelp(topBook: String?, bookCount: Int, gatheringCount: Int) -> String {
+        let count = bookCount + gatheringCount
         guard count > 0, let topBook else { return "This note isn't in any book yet" }
         if count == 1 {
             return "Open \u{201c}\(topBook)\u{201d} at this note (\u{2318}-click to see it listed)"
         }
-        return "This note is in \(count) books — click to pick one"
+        return "\(ascentPlaces(bookCount: bookCount, gatheringCount: gatheringCount)) — click to pick one"
     }
+
+    /// VX-667: "This note is in 2 books" · "This note appears in 2 gatherings"
+    /// · "This note is in 1 book and appears in 1 gathering" — where the note
+    /// is, by kind (the membership chip's headline grammar).
+    static func ascentPlaces(bookCount: Int, gatheringCount: Int) -> String {
+        switch (bookCount, gatheringCount) {
+        case (0, 0): return "This note isn't in any book yet"
+        case (let b, 0): return "This note is in \(booksWord(b))"
+        case (0, let g): return "This note appears in \(gatheringsWord(g))"
+        case (let b, let g): return "This note is in \(booksWord(b)) and appears in \(gatheringsWord(g))"
+        }
+    }
+
+    private static func booksWord(_ n: Int) -> String { "\(n) book\(n == 1 ? "" : "s")" }
+    private static func gatheringsWord(_ n: Int) -> String { "\(n) gathering\(n == 1 ? "" : "s")" }
 
     /// 13e E11 — the ascent's DECLARED refusal, the one thing the act was
     /// missing besides its catalog row (#55(i)'s "a formal availability rule
@@ -565,11 +590,14 @@ nonisolated enum WorkspaceNaming {
         + "chip above the note."
 
     /// The dropdown's own line, so the icon's help and the list it opens
-    /// cannot disagree about how many books there are.
-    static func ascentListHeader(count: Int) -> String {
-        count == 1
-            ? "This note is in 1 book — open it at this note:"
-            : "This note is in \(count) books — open one at this note:"
+    /// cannot disagree about how many books there are — and, since VX-667,
+    /// about which of them are books and which gatherings (one place: "open
+    /// it"; several: "open one").
+    static func ascentListHeader(bookCount: Int, gatheringCount: Int) -> String {
+        let places = ascentPlaces(bookCount: bookCount, gatheringCount: gatheringCount)
+        return bookCount + gatheringCount == 1
+            ? places + " — open it at this note:"
+            : places + " — open one at this note:"
     }
 
     /// 13k K12 — the ＃ door's two states. Her ruling made folding a
