@@ -399,6 +399,13 @@ nonisolated enum ShortcutCatalog {
                 + "closes; the new-note box on the Bookcase files it and opens it. "
                 + "\u{21E7}\u{23CE} adds another paragraph instead, so a capture can be "
                 + "as long as the thought is"),
+        // VX-911 (the VX-914 run, batch 4): the band's second filing — the
+        // registry's alternate (no menu item: inside a note ⌘⏎ is Choose This
+        // Take), shown here so it is findable (13g L1).
+        Row(group: .windows, keys: .alternates([.fileWithoutOpening]),
+            words: "in the new-note box on the Bookcase or in the Library: file what you have written "
+                + "without opening it \u{2014} the box clears for the next note (the File button "
+                + "in the box does the same)"),
         Row(group: .windows, keys: .menu("View", .openBeside),
             words: "put a second note beside this one (right-click a "
                 + "note row for that note; the menu takes the most recent other one)"),

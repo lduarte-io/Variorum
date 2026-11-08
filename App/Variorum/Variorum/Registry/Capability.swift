@@ -786,6 +786,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // ⌘⇧N, and a File-menu item. The TRUE system-wide hotkey is out of v1
     // by her ruling (round 14.4 — ledger row W26).
     case quickNote
+    // VX-911 (the VX-914 run, batch 4 — her ask: *"a button + an enter chord
+    // … that lets you file a quicknote without entering into the quicknote —
+    // sometimes i want to write a bunch and file them in succession from that
+    // main page"*): the new-note band's second filing — the note is made and
+    // the band clears for the next one, nothing opens. A `.surface` act (the
+    // band's own button), its only key the capture box's focus-scoped ⌘⏎.
+    case fileWithoutOpening
     // The peer column's open door in Compare (her W16 second half: *"in
     // compare … you should be able to click on the post you're comparing
     // it with"*). A `.surface` act — its target is the column you point at.

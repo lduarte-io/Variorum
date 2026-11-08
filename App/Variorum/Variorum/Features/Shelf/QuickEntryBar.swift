@@ -129,6 +129,51 @@ final class QuickEntryModel {
         }
     }
 
+    // MARK: - VX-911 — FILE WITHOUT OPENING (the forks RULED, PROVISIONAL)
+
+    /// **Is there something to file?** The submit road's own test — the
+    /// capture with its tokens taken out, trimmed — so the button is grey
+    /// exactly where ⏎ would file nothing (an empty box, a capture of nothing
+    /// but tokens, #127(f)), and while a staying filing is in flight.
+    var canFile: Bool {
+        !filingWithoutOpening && !CaptureMicrosyntax.parse(text).text
+            .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// A staying filing is in flight: a second press (a double click on the
+    /// button, ⌘⏎ held into a repeat) lands on THAT filing rather than minting
+    /// the same words twice — the box clears only when the mint returns.
+    private(set) var filingWithoutOpening = false
+
+    /// **⌘⏎ and the band's button** (`.fileWithoutOpening`): the note is made
+    /// through the SAME road as ⏎ (`submit` — the microsyntax at the hand-off,
+    /// the title chip, the clear-only-what-minted rule, a refusal keeping her
+    /// text), and then NOTHING opens: the box is already clear for the next
+    /// note, and a quiet receipt says where this one landed — the duplicate's
+    /// landing read (books only: an arrival is no membership, so a note
+    /// waiting at a book's Arrivals is still in the Pool), carrying a one-press
+    /// door to the note through `open` (the host's own road, never a
+    /// broadcast). Returns the note, or nil when nothing was filed (an empty
+    /// box says nothing, exactly as ⏎ does).
+    @discardableResult
+    func fileWithoutOpening(open: @escaping @MainActor (String) -> Void) async -> String? {
+        guard !filingWithoutOpening else { return nil }
+        filingWithoutOpening = true
+        defer { filingWithoutOpening = false }
+        guard let postID = await submit() else { return nil }
+        let books = try? await session.database.read { db in
+            try Queries.readingsContaining(db, postID: postID)
+                .filter { $0.kind == .book }
+                .map(\.name)
+        }
+        session.status.deliver(
+            QuickEntryFileCopy.landed(books: books), kind: .receipt,
+            action: StatusCenter.Item.Action(label: QuickEntryFileCopy.openNote) {
+                open(postID)
+            })
+        return postID
+    }
+
     private func mintNow(_ submitted: String, title: String?) async throws -> String {
         if let mint { return try await mint(submitted, title) }
         // 13i-d U5: the Bookcase's capture lands in the wing she stands in.
@@ -182,7 +227,46 @@ enum QuickEntryCopy {
     }
 }
 
+/// **VX-911 — File Without Opening's words, in one place** (the forks RULED,
+/// PROVISIONAL — her wording bundle). `nonisolated` for `DuplicateCopy`'s
+/// reason: the capability table is nonisolated and reads the verb here.
+nonisolated enum QuickEntryFileCopy {
+    /// The registry's verb (`.fileWithoutOpening`).
+    static let verb = "File Without Opening"
+    /// The button's word; the chord beside it is READ from the declaration
+    /// (`buttonLabel`), never typed twice.
+    static let buttonWord = "File"
+    /// The button's face: its word and the act's declared key ("File ⌘⏎").
+    static func buttonLabel(chord: String?) -> String {
+        guard let chord, !chord.isEmpty else { return buttonWord }
+        return "\(buttonWord) \(chord)"
+    }
+    /// Its hover — what it does, and what happens to the box.
+    static let help = "File it without opening it \u{2014} the box clears for the next note"
+    /// The receipt's one-press door to the note it filed (the duplicate's
+    /// "Open ›", the AI receipts' idiom).
+    static let openNote = "Open \u{203A}"
+
+    /// **Where it landed** — the pad's "Filed in …" grammar, with the
+    /// duplicate's book read: no book holds it → the Pool (bookless is the
+    /// Pool's definition); a book a `{#tag}` seated it in → named; several →
+    /// counted. Nil — the landing could not be read — says only that it filed.
+    static func landed(books: [String]?) -> String {
+        guard let books else { return "Filed." }
+        switch books.count {
+        case 0: return "Filed in the Pool."
+        case 1: return "Filed in \u{201C}\(books[0])\u{201D}."
+        default: return "Filed in \(books.count) books."
+        }
+    }
+}
+
 struct QuickEntryBar: View {
+    /// P-1: the band's one declared door — VX-911's File Without Opening,
+    /// declared with the BUILDER so both hosts (the Bookcase's band and the
+    /// Library's) are covered by construction (the `MarkdownActs` precedent).
+    static let surfaceCapabilities: [CapabilityID] = [.fileWithoutOpening]
+
     let onOpen: (SidebarSelection) -> Void
     /// Batch 9 (R102): the shelf is the terminal home — it opens with the
     /// cursor already in the bar, so "start typing" is literal. Library
@@ -266,46 +350,56 @@ struct QuickEntryBar: View {
         // the box as the placeholder; typing replaces it.
         @Bindable var box = box
         return VStack(alignment: .leading, spacing: 4) {
-            ZStack(alignment: .topLeading) {
-                if box.text.isEmpty {
-                    HStack(spacing: 6) {
-                        Text(tokens.chromeLabel(QuickEntryCopy.placeholder))
-                            .font(tokens.body)
-                            .foregroundStyle(tokens.faint)
-                            .lineLimit(1)
-                        if tokens.showsBlockCursor && !entryFocused {
-                            Rectangle()
-                                .fill(tokens.accent)
-                                .frame(width: 8, height: 16)
-                                .opacity(cursorOn ? 1 : 0)
-                                .task {
-                                    while !Task.isCancelled {
-                                        try? await Task.sleep(for: .milliseconds(550))
-                                        cursorOn.toggle()
+            // VX-911 (F-911 seat (1), RULED PROVISIONAL): the box and, at its
+            // trailing end on its first line, File Without Opening — inside the
+            // dashed cutout, so the door sits beside what it files.
+            HStack(alignment: .top, spacing: 10) {
+                ZStack(alignment: .topLeading) {
+                    if box.text.isEmpty {
+                        HStack(spacing: 6) {
+                            Text(tokens.chromeLabel(QuickEntryCopy.placeholder))
+                                .font(tokens.body)
+                                .foregroundStyle(tokens.faint)
+                                .lineLimit(1)
+                            if tokens.showsBlockCursor && !entryFocused {
+                                Rectangle()
+                                    .fill(tokens.accent)
+                                    .frame(width: 8, height: 16)
+                                    .opacity(cursorOn ? 1 : 0)
+                                    .task {
+                                        while !Task.isCancelled {
+                                            try? await Task.sleep(for: .milliseconds(550))
+                                            cursorOn.toggle()
+                                        }
                                     }
-                                }
+                            }
                         }
+                        // VX-179 U3 (F-U3-1 ruling Q-2): the hint sits ON the
+                        // box's first line — the box's own named origin, never
+                        // the ZStack's top (measured: 2 pt high, so the words
+                        // dropped as she started typing).
+                        .padding(.leading, Self.placeholderOrigin.x)
+                        .padding(.top, Self.placeholderOrigin.y)
+                        .allowsHitTesting(false)
                     }
-                    // VX-179 U3 (F-U3-1 ruling Q-2): the hint sits ON the
-                    // box's first line — the box's own named origin, never
-                    // the ZStack's top (measured: 2 pt high, so the words
-                    // dropped as she started typing).
-                    .padding(.leading, Self.placeholderOrigin.x)
-                    .padding(.top, Self.placeholderOrigin.y)
-                    .allowsHitTesting(false)
+                    // 13u3 UNIT C — THE ONE CAPTURE BOX (R-13u-4): ⏎ files it
+                    // (and opens it, R3's grammar), ⇧⏎ makes a paragraph, and
+                    // the floating quick-note pad answers the same two keys
+                    // through this same component.
+                    CaptureTextView(
+                        text: $box.text,
+                        style: CaptureTextStyle(tokens: tokens),
+                        maxHeight: Self.maxBoxHeight,
+                        focusRequest: focusRequest,
+                        openingFocusRequest: openingFocusRequest,
+                        onFocusChange: { entryFocused = $0 },
+                        onFile: { submit() },
+                        // VX-911: the box claims ⌘⏎ only because THIS host hands
+                        // it the act (the pad hands none — its own File It keeps
+                        // the key), and only while the box holds the keyboard.
+                        onFileWithoutOpening: { fileWithoutOpening() })
                 }
-                // 13u3 UNIT C — THE ONE CAPTURE BOX (R-13u-4): ⏎ files it
-                // (and opens it, R3's grammar), ⇧⏎ makes a paragraph, and
-                // the floating quick-note pad answers the same two keys
-                // through this same component.
-                CaptureTextView(
-                    text: $box.text,
-                    style: CaptureTextStyle(tokens: tokens),
-                    maxHeight: Self.maxBoxHeight,
-                    focusRequest: focusRequest,
-                    openingFocusRequest: openingFocusRequest,
-                    onFocusChange: { entryFocused = $0 },
-                    onFile: { submit() })
+                fileButton
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
@@ -372,6 +466,47 @@ struct QuickEntryBar: View {
     private func submit() {
         Task {
             if let postID = await box.submit() { onOpen(.post(postID)) }
+        }
+    }
+
+    // MARK: - VX-911 — File Without Opening (F-911 seat (1) + receipt (a), RULED PROVISIONAL)
+
+    /// **The band's button** — the pad's File It idiom: always drawn, grey
+    /// while the box holds nothing to file (P-2: honestly grey, never enabled
+    /// into nothing), its word and the act's DECLARED key ("File ⌘⏎" — read
+    /// from the registry, never typed twice), its hover the act. Never a
+    /// key-view stop: it is clicked, and ⌘⏎ is its key — a Tab from the box
+    /// never lands here, so the opening-caret law (VX-332) and the box's own
+    /// keys stay whole (the coach card's `.focusable(false)` precedent).
+    private var fileButton: some View {
+        let act = CapabilityRegistry.capability(.fileWithoutOpening)
+        return Button(tokens.chromeLabel(
+            QuickEntryFileCopy.buttonLabel(chord: act.alternateShortcutLabel))
+        ) {
+            fileWithoutOpening()
+            // The press hands the caret straight back to the box (the title
+            // chip's road — an explicit ask, never the opening one), so the
+            // next note is typed without reaching for the box again.
+            focusRequest += 1
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        .disabled(!box.canFile)
+        .focusEffectDisabled()
+        .focusable(false)
+        .help(QuickEntryFileCopy.help)
+        .accessibilityLabel(act.verb)
+        // On the box's first line (its own named origin, as the placeholder).
+        .padding(.top, Self.placeholderOrigin.y)
+        .fixedSize()
+    }
+
+    /// File it and stay: the band clears for the next note (the model's own
+    /// clear-only-what-minted rule) and the receipt's Open › reaches the note
+    /// through THIS host's open road.
+    private func fileWithoutOpening() {
+        let open = onOpen
+        Task {
+            await box.fileWithoutOpening { postID in open(.post(postID)) }
         }
     }
 }

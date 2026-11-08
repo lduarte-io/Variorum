@@ -682,6 +682,12 @@ struct CapabilityRegistryTests {
             // new line): the BOOKCASE's file drop renders the import door
             // (`.importFiles` — a folder becomes a book).
             .union(ShelfView.surfaceCapabilities)
+            // VX-911 (the VX-914 run, batch 4 — A JUSTIFIED EDIT, the same
+            // class: a new renderer is a new line): the new-note band renders
+            // File Without Opening (its button; ⌘⏎ is the box's own key). The
+            // declaration lives with the BUILDER (`QuickEntryBar`), so the
+            // Bookcase's band and the Library's are covered by construction.
+            .union(QuickEntryBar.surfaceCapabilities)
             // 13n-b U1 (A JUSTIFIED EDIT, the same class — a new renderer is
             // a new line): Settings ▸ MCP renders the door's seven acts and
             // is their ONLY renderer (the grant sheet's confirm included).

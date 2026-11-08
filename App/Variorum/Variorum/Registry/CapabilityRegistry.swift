@@ -1843,6 +1843,37 @@ nonisolated enum CapabilityRegistry {
             // and ⌘ and sits outside it (and the sitting's live probe fired
             // it three times with no prompt).
             systemShortcutLabel: "\u{2303}\u{2325}\u{2318}N"),
+        // VX-911 (the VX-914 run, batch 4; the forks RULED, PROVISIONAL —
+        // `notes/plans/fixes/vx-914-walkthrough-followups.md`): FILE WITHOUT
+        // OPENING — the new-note band's second filing. The note is made through
+        // the band's own road (`QuickEntryModel.submit`: the microsyntax, the
+        // title chip, the clear-only-what-minted rule) and NOTHING opens: the
+        // band clears for the next note and a quiet receipt says where it
+        // landed. `.surface` — the band's button, declared with its BUILDER
+        // (`QuickEntryBar.surfaceCapabilities`), so the Bookcase's band and the
+        // Library's are covered by construction. `always`, honestly so: the
+        // door lives only where the band is, and the band is its context.
+        //
+        // THE KEY (the collision sweep at this tip, the record's table): ⌘⏎ —
+        // the quick-note pad's own file chord (`QuickNoteView`), so the gesture
+        // is one thing on both capture doors. The registry's two Return chords
+        // with ⌘ are take acts inside a note — ⌘⏎ Choose This Take and ⌥⌘⏎
+        // Move Take into a Block Below — so ⌥⌘⏎ would escape nothing, and ⌘⏎
+        // already lives beside Choose Take as a composer-local key (the pad in
+        // its own window; the comments panel's Add/Save, its local monitor).
+        // So it is NOT a menu key and NOT a window-wide shortcut: the capture
+        // box claims ⌘⏎ only while it holds the keyboard and only where its
+        // host hands it this act (`CaptureNSTextView.performKeyEquivalent`),
+        // and a split window's note pane keeps Choose Take. Declared as the
+        // act's ALTERNATE — its only key, reached by its own door rather than a
+        // menu key equivalent (VX-563's ⌘↑/⌘↓ shape, VX-824's ⌘1–9) — so the
+        // helper (⌘/) shows it.
+        Capability(
+            id: .fileWithoutOpening, verb: QuickEntryFileCopy.verb, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always,
+            alternateShortcutLabel: "\u{2318}\u{23CE}"),
         // 13f batch 6 — W4's STARS (her round-3 ruling: *"up to 5 notes or
         // books, star/unstar via context menu + ⌘K, section at the
         // sidebar's top"*). The gate governs the ⌘K door ONLY: at the shelf
