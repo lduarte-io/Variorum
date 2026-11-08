@@ -205,6 +205,11 @@ struct VariorumMobileApp: App {
             case .roadInterlude(let interlude):
                 // VX-306 U3: rule 21's notice, then the key-file offer — once, before the library shows.
                 MobileRoadInterludeCard(model: interlude, tokens: lockedTokens)
+            case .hostingTests:
+                // VX-604: this process is a test runner's host — the shared bootstrap opened nothing
+                // (`AppBootstrap.Launch`); the suites mount their own worlds.
+                Text(AppBootstrap.Launch.hostFace)
+                    .padding(24)
             }
         }
         .onChange(of: scenePhase) { _, phase in

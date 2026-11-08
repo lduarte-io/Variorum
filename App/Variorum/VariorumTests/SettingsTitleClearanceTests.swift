@@ -20,6 +20,17 @@
 //  is the Debug app, whose own title ("Variorum Dev Settings") is longer —
 //  the RELEASE string is what ships.
 //
+//  VX-604 (`notes/plans/fixes/vx-912-open-source-gating.md`, "## B1
+//  record"): the host now boots INERT under a test runner — no library is
+//  open, so the window holds the host's face (`SettingsSceneContent`'s
+//  `.hostingTests`), which carries the PANES' declared size
+//  (`AppSettingsView.contentSize`, the frame `AppSettingsView` itself
+//  wears). The window, its titlebar and its width are therefore the real
+//  ones; what this suite measures — the title field and the column it must
+//  clear — never depended on the panes' contents. Until VX-604 the suite
+//  read the dev store's own open Settings, which a Castle-locked dev store
+//  (the lobby) could not show.
+//
 
 import AppKit
 import Testing
@@ -106,7 +117,7 @@ struct SettingsTitleClearanceTests {
         // The window grew by exactly the column's delta: the detail column,
         // where every pane was laid out, keeps its width.
         #expect(window.frame.width == AppSettingsView.contentSize.width,
-                "the real window is the declared content width (\(window.frame.width))")
+                "the real window takes the panes' declared content width (\(window.frame.width)) — the inert host's face wears that size (VX-604)")
         #expect(AppSettingsView.contentSize.width - AppSettingsView.sidebarWidth - 1 == 523,
                 "the detail column stays 523 pt — 720 − 196 − the hairline, as it was")
     }

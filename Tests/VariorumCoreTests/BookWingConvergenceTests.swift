@@ -594,26 +594,30 @@ struct BookWingMendGuardTests {
 
 // MARK: - The rank, pure
 
-@Suite("VX-857 — the anchor rank, pure (A-808-4)")
+@Suite("VX-857 — the anchor rank, pure (A-808-4; tier 3 re-keyed by VX-893 (3))")
 struct BookWingMendRankTests {
     private func membership(
-        _ id: String, fenced: Bool = false, frozen: Bool = false, seq: Int64
+        _ id: String, fenced: Bool = false, frozen: Bool = false, filed: String
     ) -> SyncEngine.Membership {
-        SyncEngine.Membership(id: id, readingID: "r-\(id)", wingID: "", fenced: fenced, frozen: frozen, seq: seq)
+        SyncEngine.Membership(
+            id: id, readingID: "r-\(id)", wingID: "", fenced: fenced, frozen: frozen, createdAt: filed)
     }
 
-    /// fenced → frozen → earliest-accepted (never-accepted LAST) → id; within
-    /// a tier, ties fall through to the next term; a strict order.
-    @Test func theRankIsFencedThenFrozenThenEarliestAcceptedThenID() {
-        let plainEarly = membership("p1", seq: 5)
-        let plainLate = membership("p2", seq: 9)
-        let neverAccepted = membership("p0", seq: 0)
-        let frozen = membership("f1", frozen: true, seq: 50)
-        let fencedLate = membership("z2", fenced: true, seq: 80)
-        let fencedEarly = membership("z1", fenced: true, seq: 70)
-        let all = [plainLate, neverAccepted, frozen, plainEarly, fencedLate, fencedEarly]
-        #expect(all.sorted(by: SyncEngine.outranks).map(\.id) == ["z1", "z2", "f1", "p1", "p2", "p0"])
-        #expect(SyncEngine.outranks(membership("a", seq: 0), membership("b", seq: 0)), "a 0/0 tie breaks by id")
+    /// fenced → frozen → earliest-FILED (`reading_post.created_at` — VX-893
+    /// (3), the VX-912 run: converged bytes, replacing the per-device
+    /// `sync_row_seq` and its never-accepted-last rule) → id; within a tier,
+    /// ties fall through to the next term; a strict order.
+    @Test func theRankIsFencedThenFrozenThenEarliestFiledThenID() {
+        let plainEarly = membership("p1", filed: "2026-11-01T00:00:05.000Z")
+        let plainLate = membership("p2", filed: "2026-11-01T00:00:09.000Z")
+        let plainTwin = membership("p0", filed: "2026-11-01T00:00:09.000Z")   // p2's stamp: by id
+        let frozen = membership("f1", frozen: true, filed: "2026-11-01T00:00:50.000Z")
+        let fencedLate = membership("z2", fenced: true, filed: "2026-11-01T00:01:20.000Z")
+        let fencedEarly = membership("z1", fenced: true, filed: "2026-11-01T00:01:10.000Z")
+        let all = [plainLate, plainTwin, frozen, plainEarly, fencedLate, fencedEarly]
+        #expect(all.sorted(by: SyncEngine.outranks).map(\.id) == ["z1", "z2", "f1", "p1", "p0", "p2"])
+        #expect(SyncEngine.outranks(plainTwin, plainLate), "a created_at tie breaks by id")
+        #expect(SyncEngine.outranks(plainEarly, frozen) == false, "a frozen book outranks an earlier filing")
         for x in all {
             #expect(!SyncEngine.outranks(x, x))
             for y in all where x.id != y.id {

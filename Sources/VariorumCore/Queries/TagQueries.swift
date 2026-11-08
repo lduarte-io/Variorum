@@ -183,17 +183,23 @@ extension Queries {
     }
 
     /// **The live tags at exactly one PATH** (VX-827 U2 — VX-810): in ONE wing
-    /// as surfaces read it (`wingScope`'s rule — Home also holds a dead wing's
-    /// tags, as it lists that wing's notes), or, `wingID` nil, in every wing.
-    /// One `uq_tag_path_live(wing_id, path)` probe per wing named — Home and the
-    /// `wing` rows (every row for every wing; the dead ones for Home) — so ∝ the
-    /// wings, shelf-scale. (A tag naming a wing id with no `wing` row at all is
-    /// not probed: no op mints one.) Ordered by id.
+    /// as surfaces read it, or, `wingID` nil, in every wing. VX-892: the wings
+    /// compare through THE dangling-wing rule (`effectiveWingID` — a dead wing,
+    /// or a wing id no row carries at all, is Home's, as Home lists its notes),
+    /// the requested wing included. One `uq_tag_path_live(wing_id, path)` probe
+    /// per wing id that qualifies — a live wing: itself alone; Home and the
+    /// every-wing form: the DISTINCT wing ids live tags carry, found by a loose
+    /// index scan over the same index (one seek per distinct id) — so ∝ the
+    /// wings, shelf-scale, never the vocabulary. Ordered by id.
     public static func liveTagIDs(_ db: Database, path: String, wingID: String?) throws -> [String] {
-        let wings: [String] = switch wingID {
-        case nil: [""] + (try String.fetchAll(db, sql: "SELECT id FROM wing ORDER BY id"))
-        case ""?: [""] + (try String.fetchAll(db, sql: "SELECT id FROM wing WHERE deleted_at IS NOT NULL ORDER BY id"))
-        case let wing?: [wing]
+        let liveWingIDs = Set(try String.fetchAll(db, sql: "SELECT id FROM wing WHERE deleted_at IS NULL"))
+        let wings: [String]
+        switch wingID.map({ effectiveWingID($0, liveWingIDs: liveWingIDs) }) {
+        case let wing? where !wing.isEmpty:
+            wings = [wing]
+        case let wanted:
+            let carried = try liveTagWingIDs(db)
+            wings = wanted == nil ? carried : carried.filter { effectiveWingID($0, liveWingIDs: liveWingIDs).isEmpty }
         }
         return try String.fetchAll(
             db,
@@ -203,6 +209,30 @@ extension Queries {
                 ORDER BY t.id
                 """,
             arguments: [String(decoding: try JSONEncoder().encode(wings), as: UTF8.self), path])
+    }
+
+    /// The DISTINCT wing ids live tags carry, `''` included when Home holds
+    /// one — a LOOSE INDEX SCAN over `uq_tag_path_live(wing_id, path)`: each
+    /// step one `ORDER BY wing_id LIMIT 1` seek past the last id found (the
+    /// first from `>= ''`, which every `TEXT NOT NULL` id satisfies — a seek,
+    /// never a walk; the partial index covers exactly the live rows), so the
+    /// read costs one seek
+    /// per distinct wing id — ∝ the wings, never the vocabulary. It finds the
+    /// ids no `wing` row carries (a tag that landed ahead of its wing's row),
+    /// which the `wing` table cannot enumerate.
+    static func liveTagWingIDs(_ db: Database) throws -> [String] {
+        try String.fetchAll(db, sql: """
+            WITH RECURSIVE carried(id) AS (
+                SELECT (SELECT t.wing_id FROM tag t WHERE t.deleted_at IS NULL AND t.wing_id >= ''
+                        ORDER BY t.wing_id LIMIT 1)
+                UNION ALL
+                SELECT (SELECT t.wing_id FROM tag t
+                        WHERE t.deleted_at IS NULL AND t.wing_id > carried.id
+                        ORDER BY t.wing_id LIMIT 1)
+                FROM carried WHERE carried.id IS NOT NULL
+            )
+            SELECT id FROM carried WHERE id IS NOT NULL
+            """)
     }
 
     /// One block's live applied tags (Phase 11, A8 — `postTags`' block

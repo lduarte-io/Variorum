@@ -68,6 +68,10 @@ struct CatalogWorld: Sendable {
     // appended AFTER a hidden member (the interleaved mint — the hidden half
     // adds the Private member; the reachable two join after it).
     var interleaved = ""
+    // VX-891 (the VX-912 run, B4): the interleaved GATHERING — Studio's, its
+    // rule #interleave; in A the hidden half tags a Private Studio note it
+    // gathers (`privateGathered`, hidden), and the readable two after it.
+    var interleavedGathering = "", interleaveTag = "", privateGathered = ""
 }
 
 /// One call of the walk.
@@ -196,6 +200,16 @@ struct MCPTwoStoreCatalogServerTests {
         // VX-827 U2 (VX-815): an EMPTY note the client may read — its text forms
         // say it is empty (one sentence naming it), never the nothing-shape.
         w.empty = try ops.createPost(title: nil).id
+        // VX-891 (the VX-912 run, B4): the interleaved GATHERING — born here
+        // with its rule; in A the hidden half tags a Private Studio note it
+        // gathers, on the hidden clock (a day behind), so that note LEADS the
+        // assembly (a gathering's manual order is created-at); its readable
+        // notes are tagged after that half (below).
+        let interleave = try ops.createTag(name: "interleave", wingID: studio.id)
+        w.interleaveTag = interleave.id
+        w.interleavedGathering = try ops.createReading(
+            name: "Interleaved gathering", kind: .gathering,
+            querySpec: try RuleGrammar.encode(.tag(interleave.id)), wingId: studio.id).id
         if hidden { try buildHidden(h, &w, board: board.id, idea: idea.id) }
 
         // VX-859 (red on old): the interleaved book's READABLE members, minted
@@ -207,6 +221,12 @@ struct MCPTwoStoreCatalogServerTests {
         for name in ["late one", "late two"] {
             let late = try ops.createPost(title: name)
             _ = try ops.addPostToReading(late.id, to: w.interleaved)
+        }
+        // VX-891: the interleaved gathering's READABLE notes — in A they follow
+        // the Private note the rule gathers; in B and C nothing comes before.
+        for name in ["gathered one", "gathered two"] {
+            let gathered = try ops.createPost(title: name, wingId: studio.id)
+            _ = try ops.applyTag(interleave.id, toPost: gathered.id)
         }
         return w
     }
@@ -348,6 +368,13 @@ struct MCPTwoStoreCatalogServerTests {
             _ = try ops.applyTag(board, toPost: w.privateShared)
             _ = try ops.applyTag(board, toBlock: w.secretBlock)
             _ = try ops.applyTag(atticTopic.id, toPost: w.atticNote)
+            // VX-891 (the VX-912 run, B4): a PRIVATE Studio note the interleaved
+            // gathering's rule gathers — first in its assembly (the hidden
+            // clock runs a day behind); the fence keeps it from every listing.
+            let gathered = try ops.createPost(title: "private gathered", wingId: w.studio)
+            _ = try ops.setNotePrivate(gathered.id, true)
+            _ = try ops.applyTag(w.interleaveTag, toPost: gathered.id)
+            w.privateGathered = gathered.id
         }
     }
 
@@ -534,5 +561,6 @@ extension CatalogWorld {
         secretComment = a.secretComment; secretCommit = a.secretCommit; secretLens = a.secretLens
         privateStudio = a.privateStudio; hiddenChapter = a.hiddenChapter
         journalBook = a.journalBook; locket = a.locket
+        privateGathered = a.privateGathered
     }
 }

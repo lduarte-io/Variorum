@@ -1,0 +1,44 @@
+name: Close pull requests
+
+# Variorum is open source but not open to contributions (CONTRIBUTING.md).
+# A pull request opened from a fork gets one polite comment and is closed.
+#
+# What this never does:
+# - touch a pull request from a branch of this repository (the maintainer's
+#   own work arrives that way), or one the owner opened;
+# - run while the repository is private (the job's condition reads the
+#   event's own `repository.private`, so it starts acting only once the
+#   repository is public);
+# - check out, build or run anything from the pull request. The
+#   pull_request_target trigger runs in this repository's context so the
+#   token may comment and close; nothing of the fork's is ever executed, and
+#   no text from the pull request is ever placed into the shell.
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions: {}
+
+jobs:
+  close:
+    if: >-
+      github.event.repository.private == false &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      github.event.pull_request.author_association != 'OWNER'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment and close
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          BODY: |
+            Thank you for taking the time to put this together.
+
+            Variorum doesn't accept outside contributions, so this pull request has been closed automatically. It isn't a judgment on the change: the code keeps a single owner, and CONTRIBUTING.md explains why.
+
+            If this fixes a bug or adds something you'd like to see, an issue describing it is the best way to reach me. Every issue goes into my work queue.
+        run: gh pr close "$NUMBER" --comment "$BODY"

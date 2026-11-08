@@ -18,7 +18,7 @@ These acts cannot lie-and-succeed (ownership, capacity and seals are real), so t
 ## The standing residuals outside the refusal class
 
 5. **The tag vocabulary (P-809-9, kept 2026-11-05).** A wing's tag paths are wing-level configuration: answers truthfully say a path was *adopted* even when its only wearer is hidden. One bit — "this word exists as a tag here" — never which note or how many. (The alternative, reporting "made" for an adopted tag, was rejected as a false word on the wire.)
-6. **The book cursor (VX-859 — RETIRED 2026-11-06 with the VX-808 run).** The book-page cursor now resumes by the named note's id with the readable ordinal as its wire key; no position bytes cross. The ruled trade that remains is not a leak: a cursor whose note left the book or became unreadable starts the listing again, and a hidden member's id answers exactly as a missing one.
+6. **The book cursor (VX-859 — RETIRED 2026-11-06 with the VX-808 run).** The book-page cursor now resumes by the named note's id with the readable ordinal as its wire key; no position bytes cross. The ruled trade that remains is not a leak: a cursor whose note left the book or became unreadable starts the listing again, and a hidden member's id answers exactly as a missing one. The GATHERING cursor took the same rule at VX-891 (the VX-912 run) — the gathering form was an unrecorded instance of this class until then.
 
 ## The scope words (how partiality is said without counting)
 

@@ -34,6 +34,10 @@ extension Queries {
         public let kind: ContainerKind
         /// The display name (`DisplayTitle.note` / `.pool` — never a write).
         public let title: String
+        /// The container's wing AS SURFACES READ IT (VX-892): a pointer naming
+        /// a dead wing, or no wing row at all, is Home's `''` — the listings'
+        /// rule (`Queries.effectiveWingID`), so the lineage fence and the face
+        /// compare the wings the author sees, never raw ids.
         public let wingID: String
         /// The container is itself tombstoned.
         public let isDeleted: Bool
@@ -340,7 +344,7 @@ extension Queries {
                        COALESCE(chosen.working_text, dflt.working_text) AS text,
                        home.id AS home_id, home.kind AS home_kind, home.title AS home_title,
                        home.entry_date AS home_entry_date, home.created_at AS home_created_at,
-                       home.wing_id AS home_wing, home.deleted_at AS home_deleted,
+                       \(effectiveWingSQL("home.wing_id")) AS home_wing, home.deleted_at AS home_deleted,
                        (home.archived_at IS NOT NULL AND home.archived_at = home.created_at) AS home_version
                 FROM json_each(?) j
                 LEFT JOIN block b ON b.id = j.value
