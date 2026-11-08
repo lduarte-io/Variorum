@@ -257,4 +257,82 @@ struct PrivateMarkFactsTests {
             #expect(fetches.value > approved, "approved: the read reaches the note, an autosave re-runs it")
         }
     }
+
+    // MARK: - VX-900 — the twins' one rule: the switch dims a face, never gates a read
+
+    /// Her ruling (the #264 sitting): both marks draw while a client is
+    /// approved and only DIM while the server is off — so the server's switch
+    /// must neither open the drawn reads' fence nor change what they answer.
+    /// With no approved client, under BOTH switch states, the drawn reads say
+    /// nothing is marked and read nothing but the client list; with one
+    /// approved they answer the same with the switch off as on. A GUARD, green
+    /// before VX-900 by nature (these reads never asked the server): the law
+    /// the batch must not move — the existing fence above, extended across the
+    /// switch.
+    @Test func theServerSwitchNeitherOpensTheDrawnReadsFenceNorChangesTheirAnswer() throws {
+        try withOperations { ops, db in
+            let note = try ops.createPost(title: "marked")
+            let filed = try ops.createPost(title: "filed")
+            let vault = try ops.createReading(name: "vault", kind: .book)
+            try ops.addPostToReading(filed.id, to: vault.id)
+            try ops.setBookPrivate(vault.id, true)
+            try ops.setNotePrivate(note.id, true)
+            _ = try ops.recordMCPContact(name: "asking", version: "1")
+            func traced() throws -> (notes: [String: Queries.PrivateMark], books: Set<String>, sqls: [String]) {
+                try db.read { db in
+                    var sqls: [String] = []
+                    db.trace { sqls.append($0.description) }
+                    defer { db.trace(options: [], nil) }
+                    let notes = try Queries.privateMarksDrawn(db, noteIDs: [note.id, filed.id])
+                    let books = try Queries.privateBookMarksDrawn(db, readingIDs: [vault.id])
+                    return (notes, books, sqls)
+                }
+            }
+            for on in [false, true] {
+                try ops.setMCPSwitch(.server, on: on)
+                let read = try traced()
+                let label = on ? "server ON" : "server OFF"
+                #expect(read.notes.isEmpty && read.books.isEmpty, "\(label): no approved client, nothing drawn")
+                #expect(!read.sqls.isEmpty, "\(label): the gate ran (non-vacuity)")
+                for table in ["container", "reading"] {
+                    #expect(!read.sqls.contains { $0.contains(table) },
+                            "\(label): nothing past the client list is read — no `\(table)` (\(read.sqls))")
+                }
+            }
+            let client = try ops.recordMCPContact(name: "claude-code", version: "1")
+            try ops.approveMCPClient(client.id, granting: nil)
+            try ops.setMCPSwitch(.server, on: true)
+            let whileOn = try traced()
+            try ops.setMCPSwitch(.server, on: false)
+            let whileOff = try traced()
+            #expect(Set(whileOn.notes.keys) == [note.id, filed.id] && whileOn.books == [vault.id],
+                    "approved: the marks are drawn (non-vacuity)")
+            #expect(whileOff.notes == whileOn.notes && whileOff.books == whileOn.books,
+                    "the switch off changes nothing a drawn read answers — the face dims, the mark stays")
+        }
+    }
+
+    /// The held twin: with no approved client a held drawn read sleeps through
+    /// the server's switch flipping as it sleeps through autosaves — its only
+    /// region is the client list, and the switch lives elsewhere.
+    @Test func withNoApprovedClientTheSwitchFlippingWakesNoHeldDrawnRead() async throws {
+        try await withOperationsAsync { ops, db in
+            let note = try ops.createPost(title: "marked")
+            try ops.setNotePrivate(note.id, true)
+            let fetches = LockIsolated(0)
+            var values = db.observe { db -> [String: Queries.PrivateMark] in
+                fetches.withValue { $0 += 1 }
+                return try Queries.privateMarksDrawn(db, noteIDs: [note.id])
+            }.makeAsyncIterator()
+            #expect(try await values.next() == [:])
+            let first = fetches.value
+            for on in [true, false, true] { try ops.setMCPSwitch(.server, on: on) }
+            try await Task.sleep(for: .milliseconds(300))
+            #expect(fetches.value == first, "no client: the switch flipping wakes nothing — nothing past the grants store")
+            let client = try ops.recordMCPContact(name: "claude-code", version: "1")
+            try ops.approveMCPClient(client.id, granting: nil)
+            #expect(try await values.next()?[note.id] == Queries.PrivateMark(own: true, viaBooks: []),
+                    "an approval wakes it (control) — the mark drawn whatever the switch")
+        }
+    }
 }

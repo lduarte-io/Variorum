@@ -182,6 +182,77 @@ struct MCPRowReachTests {
         }
     }
 
+    /// **VX-900 — the icon twins' one rule, said at the core: the server's
+    /// switch neither opens the fence nor gates a reach.** Her ruling draws both
+    /// marks while a client is approved and only DIMS them while the server is
+    /// off — the dim is the face's (`MCPServerOffFace`), never the read's. So,
+    /// under BOTH switch states: with no approved client (a pending one, a
+    /// denied one holding a wing grant, the open book on) every rows' read —
+    /// notes, listed books, the whole Bookcase map, wings — answers nobody and
+    /// reads nothing past the grants store (the fence above, extended across
+    /// the switch); and with a client approved the answers are the SAME with
+    /// the switch off as on (a row keeps its icon; its face dims). A GUARD,
+    /// green on the pre-VX-900 tree by nature (the reads never asked the
+    /// server): it pins the law the batch must not move.
+    @Test func theServerSwitchNeitherOpensTheFenceNorGatesAReach() throws {
+        try withOperations { ops, db in
+            let ids = try (0..<3).map { try note(ops, "note \($0)").id }
+            let book = try ops.createReading(name: "a book", kind: .book)
+            _ = try ops.addPostToReading(ids[0], to: book.id)
+            _ = try ops.createWing(name: "elsewhere")
+            _ = try ops.recordMCPContact(name: "asking", version: nil)
+            let denied = try approvedClient(ops, "denied")
+            _ = try ops.grantMCPAccess(denied.id, grant(.edit, .wing, ""))
+            try ops.denyMCPClient(denied.id)
+            try ops.setMCPSwitch(.openBook, on: true)
+
+            typealias Answers = (
+                notes: [String: [MCPPlaceReach]], listed: [String: [MCPPlaceReach]],
+                bookcase: [String: [MCPPlaceReach]], wings: [String: [MCPPlaceReach]])
+            func traced() throws -> (Answers, [String]) {
+                try db.read { db -> (Answers, [String]) in
+                    var sqls: [String] = []
+                    db.trace { sqls.append($0.description) }
+                    defer { db.trace(options: [], nil) }
+                    let answers: Answers = (
+                        try Queries.mcpNoteReaches(db, noteIDs: ids),
+                        try Queries.mcpBookReaches(db, readingIDs: [book.id]),
+                        try Queries.mcpBookReaches(db),
+                        try Queries.mcpWingReaches(db))
+                    return (answers, sqls)
+                }
+            }
+            for on in [false, true] {
+                try ops.setMCPSwitch(.server, on: on)
+                let (answers, sqls) = try traced()
+                let label = on ? "server ON" : "server OFF"
+                #expect(answers.notes.isEmpty && answers.listed.isEmpty && answers.bookcase.isEmpty
+                        && answers.wings.isEmpty, "\(label): no approved client, no reach anywhere")
+                #expect(!sqls.isEmpty, "\(label): the gate itself ran (non-vacuity)")
+                for table in ["container", "reading", "FROM wing", "mcp_grant"] {
+                    #expect(!sqls.contains { $0.contains(table) },
+                            "\(label): nothing past the client list is read — no `\(table)` (\(sqls))")
+                }
+            }
+
+            // A client approved: the switch changes no answer (the face dims; the
+            // row keeps its icon).
+            let claude = try approvedClient(ops)
+            try ops.setMCPSwitch(.openBook, on: false)
+            _ = try ops.grantMCPAccess(claude.id, grant(.read, .wing, ""))
+            try ops.setMCPSwitch(.server, on: true)
+            let (whileOn, _) = try traced()
+            try ops.setMCPSwitch(.server, on: false)
+            let (whileOff, _) = try traced()
+            #expect(!whileOn.notes.isEmpty && !whileOn.bookcase.isEmpty && !whileOn.wings.isEmpty,
+                    "approved + an always wing grant: the rows' reads answer (non-vacuity)")
+            #expect(whileOff.notes == whileOn.notes, "the notes' reach is the same with the switch off")
+            #expect(whileOff.listed == whileOn.listed && whileOff.bookcase == whileOn.bookcase,
+                    "the books' reach is the same with the switch off")
+            #expect(whileOff.wings == whileOn.wings, "the wings' reach is the same with the switch off")
+        }
+    }
+
     /// **P1 — ∝ the rows shown, never per row:** the statements the batched read
     /// runs do not grow with the ids (one facts read for the page, one grants read
     /// per approved client), where the singular read per row would.
