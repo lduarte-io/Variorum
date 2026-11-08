@@ -152,8 +152,58 @@ struct MCPTrailModelTests {
         #expect(groups.map(\.clientName) == ["claude-code", "codex"])
         #expect(groups.first?.entries.map(\.place) == ["note:n2", "note:n1"])
         #expect(groups.last?.entries.map(\.place) == ["note:n1"], "another client's row of the same place")
-        #expect(MCPTrailCopy.header(client: "claude-code", count: 2) == "From claude-code \u{00B7} 2",
-                "her header, her words")
+        // VX-902 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1): her #264
+        // word supersedes R-679's "From ‹client› · N" — the setup menu's label for
+        // a client its table names ("claude-code" is Claude Code's tab's name).
+        #expect(MCPTrailCopy.header(client: "claude-code", count: 2)
+                    == "From \(MCPSetupClient.claudeCode.label) \u{00B7} 2",
+                "her header, her words (VX-902)")
+    }
+
+    /// **VX-902 — the heading never says the client's raw name** (her #264
+    /// word: "I don't like the From random name"; PROVISIONAL F-902 (a)+(w1)+(i)):
+    /// "From ‹provider› · N" where the setup menu's OWN table names the client
+    /// (the fenced labels, read — never a new literal, O-4), else "MCP · N".
+    /// The client's own name stays everywhere it was: the row's helps, the
+    /// details popover (its first line), the header's hover; two clients that
+    /// both read MCP keep two groups (per client underneath — VX-904 folds a
+    /// client's), told apart by the hover.
+    @Test func theHeadingNamesTheProviderWhereTheSetupMenuDoesElseMCP() throws {
+        // Her own example, verbatim in shape: "from claude" / "from codex".
+        #expect(MCPTrailCopy.header(client: "claude-code", count: 3) == "From Claude Code \u{00B7} 3")
+        #expect(MCPTrailCopy.header(client: "codex-mcp-client", count: 1) == "From Codex \u{00B7} 1")
+        #expect(MCPTrailCopy.provider(of: "claude-code") == MCPSetupClient.claudeCode.label)
+        #expect(MCPTrailCopy.provider(of: "codex-mcp-client") == MCPSetupClient.codex.label)
+        // "or just mcp": her dev client that night, and any other name.
+        for name in ["variorum-de", "cursor", "Claude-Code", "claude-code ", "", "codex"] {
+            let heading = MCPTrailCopy.header(client: name, count: 2)
+            #expect(heading == "MCP \u{00B7} 2", "“\(name)” names no setup — MCP (got “\(heading)”)")
+            if !name.isEmpty { #expect(!heading.contains(name), "never the raw name: \(heading)") }
+        }
+        #expect(MCPTrailCopy.provider(of: "anything") == nil)
+        #expect(MCPSetupClient.anyClient.expectedName == nil, "“Any MCP client” names nobody")
+
+        // Two clients that both read MCP: two groups, one per client, both "MCP · N".
+        var trail = MCPTrail()
+        trail.record(write: receipt(client: "variorum-de", note: "n1"), at: at)
+        trail.record(write: receipt(client: "cursor", note: "n2"), at: at.addingTimeInterval(1))
+        let groups = trail.groups(showing: .everything)
+        #expect(groups.map(\.clientName) == ["cursor", "variorum-de"], "groups stay per client underneath")
+        #expect(groups.map { MCPTrailCopy.header(client: $0.clientName, count: $0.entries.count) }
+                    == ["MCP \u{00B7} 1", "MCP \u{00B7} 1"])
+        let hovers = groups.map { MCPTrailCopy.foldHelp(client: $0.clientName, folded: false) }
+        #expect(hovers == ["Fold cursor\u{2019}s rows", "Fold variorum-de\u{2019}s rows"],
+                "the header's hover tells two MCP groups apart")
+
+        // The client's own name stays where it was (UNCHANGED by VX-902).
+        let row = try #require(trail.entries.first { $0.clientName == "variorum-de" })
+        #expect(MCPTrailCopy.openHelp(row).contains("variorum-de"))
+        #expect(MCPTrailCopy.detailsHelp(row) == "What variorum-de asked or did here")
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let section = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPTrailSection.swift"), encoding: .utf8)
+        let details = try #require(section.range(of: "struct MCPTrailDetails: View {"))
+        #expect(section[details.upperBound...].contains("Text(entry.clientName)"), "the popover names the real client")
     }
 
     /// Bounded memory: past the cap the OLDEST place falls off.

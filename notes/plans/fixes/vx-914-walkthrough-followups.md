@@ -56,7 +56,7 @@ All in Settings ▸ MCP and the sidebar AI section. **Required reading for the i
 |---|---|---|
 | 1 | VX-903 trail dial → top section (+ VX-281 geometry contract grown, named) | NOT-STARTED |
 | 2 | VX-905 ownership-badges row → Settings ▸ MCP (+ search entry, help sentence proposed) | NOT-STARTED |
-| 3 | VX-902 trail heading → provider / "MCP" (fork proposal to the orchestrator first) | NOT-STARTED |
+| 3 | VX-902 trail heading → provider / "MCP" (fork proposal to the orchestrator first) | DONE (this commit) — to F-902 (a)+(w1)+(i): `MCPTrailCopy.header` reads `provider(of:)` = the setup menu's own table (`MCPSetupClient.expectedName` → `.label`, no literal outside the O-4 fence): "From Claude Code · N" / "From Codex · N" / "MCP · N"; groups stay per client (two MCP groups both "MCP · N", the header's hover — VX-904's "Fold/Show ‹client›'s rows" — names each client); the client's own name UNCHANGED in the row's helps, the details popover's first line (`Text(entry.clientName)`) and Activity. The field guide's lesson-7 card re-worded provider-neutral ("a list for each client — headed MCP, or From and its name where the setup menu names it — keeps each place…"; PROVISIONAL wording, her bundle) — the real store's seeded guide goes stale; the re-seed is already owed from vx-827 (hers, behind A1). Pins: `MCPTrailModelTests.theHeadingNamesTheProviderWhereTheSetupMenuDoesElseMCP` (new) + two JUSTIFIED edits (`theRowsGroupByClientNewestFirst`, `TutorialMCPChapterTests`' lesson-7 lines) — RUN PENDING(gate); O-4's `MCPProviderNeutralityTests` headless run PENDING (in flight) |
 | 4 | VX-904 whole client group collapses | DONE (this commit) — pure fold in the trail's session memory (`MCPTrail.folded` · `toggleFold` · `Group.folded`/`drawnEntries`; a fold lives as long as its group — dismiss/forget/the cap let an empty client's fold go; `clear()` forgets every fold); the door's `toggleTrailFold`; the header is the press (▾/▸ trailing, the Shortcuts tab's pair; hover "Fold/Show ‹client›'s rows"); the section draws `drawnEntries` and fits by them; `SidebarView` keeps the section while any header draws (`footerShows` reads `headers()`). Pins `MCPTrailFoldTests` (5) — RUN PENDING(gate); compile PENDING (next build-for-testing) |
 | 5 | VX-401 Activity stamps recompute (TimelineView, three sites) | DONE (this commit) — `TimelineView(.periodic(from: .now, by: 30))` on the Activity line (`MCPActivityRowView`), the connection request's first-seen (`MCPPane.requestRow`) and the client's last-seen (`MCPClientRow`); `MCPPane.relative(_ stamp:now:)` gains `now:`; VX-351's hover kept outside the tick. Pin `MCPPaneStampsTickTests` (3): predicates evaluated RED on the pre-fix blob (0/0/0 sites, 4 frozen `relative(` calls) and GREEN on the fix by script; the suite's RUN is PENDING(gate); compile PENDING (next build-for-testing) |
 
@@ -164,7 +164,7 @@ Carry on: finish 902/903/905 to these rulings, keep committing per piece, and re
 |---|---|---|---|
 | 1 | VX-903 trail dial moves to the top section | 1 | NOT-STARTED |
 | 2 | VX-905 ownership badges row moves to Settings ▸ MCP | 1 | NOT-STARTED |
-| 3 | VX-902 trail heading → provider/MCP | 1 | NOT-STARTED |
+| 3 | VX-902 trail heading → provider/MCP | 1 | BUILT — pins RUN PENDING(gate) |
 | 4 | VX-904 client group collapse | 1 | BUILT — pins RUN PENDING(gate) |
 | 5 | VX-401 Activity stamps recompute (rider) | 1 | BUILT — pin RUN PENDING(gate) |
 | 6 | VX-900 the icon twins' one rule + dimmed state | 2 | NOT-STARTED |

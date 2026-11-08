@@ -3092,7 +3092,10 @@ enum TutorialSeeder {
             + "menu) takes you there later, even after the line fades. "
             // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the list
             // behind ⌥⌘O (VX-679 — her R-679's section and its two doors).
-            + "Near the bottom of the sidebar, a list headed From \u{2039}name\u{203A} "
+            // VX-902 (the VX-914 run, batch 1 — PROVISIONAL F-902): the heading
+            // names the client's setup where the menu names it, else MCP.
+            + "Near the bottom of the sidebar, a list for each client \u{2014} headed "
+            + "MCP, or From and its name where the setup menu names it \u{2014} "
             + "keeps each place a client showed you or changed this session: click "
             + "a row to go there, or the icon at its end to see what it asked or "
             + "did. "
