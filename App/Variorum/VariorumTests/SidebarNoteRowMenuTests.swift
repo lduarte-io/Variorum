@@ -57,7 +57,12 @@ struct SidebarNoteRowMenuTests {
         let rename = CapabilityRegistry.capability(.renameNote)
         #expect(rename.verb == "Rename\u{2026}")
         #expect(rename.scope == .post)
-        #expect(rename.doors == [.contextMenu])
+        // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT): + `.surface` —
+        // the book Index row's ⋯ now draws Rename… as part of the note-title
+        // table's DERIVED face (`BookNoteTitleMenuTable.capabilities(.indexRow)`,
+        // the walk line `BookIndexColumn.surfaceCapabilities`); still exactly
+        // these two doors, still no key.
+        #expect(rename.doors == [.contextMenu, .surface])
         #expect(rename.shortcutLabel == nil)
         #expect(CapabilityRegistry.availability(.renameNote, in: CapabilityContext()) == .act,
                 "the door carries its row — no context gates it")

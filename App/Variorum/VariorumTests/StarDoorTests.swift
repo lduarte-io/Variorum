@@ -108,7 +108,13 @@ struct StarTargetingTests {
 struct StarDeclarationTests {
     @Test func theActIsDeclaredWithItsTwoDoorFamiliesAndNoKey() {
         let capability = CapabilityRegistry.capability(.toggleStar)
-        #expect(capability.doors == [.contextMenu, .palette],
+        // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT): + `.surface` —
+        // the book Index row's ⋯ (a row menu drawn as a button menu, so the
+        // walk counts it `.surface`) now carries Star / Unstar as part of the
+        // note-title table's DERIVED face (`BookNoteTitleMenuTable
+        // .capabilities(.indexRow)`). Her W4 ruling holds whole: the row menus
+        // and ⌘K by name — still no menu-bar item, no chord.
+        #expect(capability.doors == [.contextMenu, .palette, .surface],
                 "her ruling: the row menus and ⌘K by name — no menu-bar item, no chord")
         #expect(capability.shortcutLabel == nil,
                 "an invented chord would owe a collision sweep no ruling asked for")

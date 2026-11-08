@@ -213,7 +213,11 @@ struct NoteExportTests {
         #expect(door.scope == .post)
         // VX-425 — edited deliberately: + `.contextMenu`, the sidebar's note
         // rows (`SidebarView.noteRowMenuCapabilities`), each carrying its row.
-        #expect(Set(door.doors) == [.menuBar, .palette, .bottomBar, .contextMenu])
+        // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT): + `.surface` —
+        // the book Index row's ⋯ now draws Export Note… as part of the
+        // note-title table's DERIVED face (`BookNoteTitleMenuTable
+        // .capabilities(.indexRow)`); the chord and the other four unchanged.
+        #expect(Set(door.doors) == [.menuBar, .palette, .bottomBar, .contextMenu, .surface])
         #expect(SidebarView.noteRowMenuCapabilities.contains(.exportNote))
         #expect(door.shortcutLabel == "\u{2325}\u{2318}S")
         let key = EditorCommands.keyEquivalent(for: .exportNote)
