@@ -1378,16 +1378,21 @@ struct TutorialMCPChapterTests {
             // setup menu's label where its table names the client, else MCP — so the
             // card says so, provider-neutral (O-4: no provider outside the setup).
             // (The VX-914 gate round: its own sentence, no em dash — R-13s-22's rule above.)
+            // The VX-914 ladder's N1 (A JUSTIFIED EDIT — the card's literal follows
+            // its one honest word swap): the heading shows the setup menu's LABEL,
+            // never the client's own name, so the card says "the setup menu's label".
             #expect(text.contains("Near the bottom of the sidebar, a list for each client keeps each place that "
                                   + "client showed you or changed this session: click a row to go there, or the "
                                   + "icon at its end to see what it asked or did. Each list is headed MCP, or From "
-                                  + "and the client's name where the setup menu names it."))
+                                  + "and the setup menu's label where the setup menu names it."))
+            #expect(!text.contains("From and the client's name"), "the card never calls the label the client's name")
             #expect(MCPTrailCopy.header(client: placeholderName, count: 2) == "MCP \u{00B7} 2",
                     "a client the setup menu does not name reads MCP")
             for setup in MCPSetupClient.allCases {
                 guard let name = setup.expectedName else { continue }
                 #expect(MCPTrailCopy.header(client: name, count: 2) == "From \(setup.label) \u{00B7} 2",
-                        "“From and the client's name where the setup menu names it”")
+                        "“From and the setup menu's label where the setup menu names it”")
+                #expect(setup.label != name, "the heading's word is the label, not the client's own name")
             }
             #expect(MCPTrailSection.surfaceCapabilities == [.mcpOpenTrailPlace, .mcpShowTrailDetails],
                     "the row's text and its icon are its two doors")
