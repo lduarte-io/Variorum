@@ -36,6 +36,28 @@ extension Queries {
         return ("\(column) = ?", [wingID])
     }
 
+    /// **THE DANGLING-WING RULE as one function** (VX-892 — the VX-912 run,
+    /// `notes/plans/fixes/vx-912-open-source-gating.md` B2): the wing a
+    /// stored pointer names as surfaces read it — the id itself while a LIVE
+    /// wing row carries it, else Home (`''`): a dead wing, or an id no wing
+    /// row carries at all (a row that landed ahead of its wing's). `wingScope`
+    /// is the same rule as a WHERE fragment, `effectiveWingSQL` as a
+    /// projection, `effectiveWing(ofPost:)` / `(ofReading:)` per row. (The MCP
+    /// door's facts spell the projection twice more — `mcpResolvedWing`,
+    /// `MCPReadTools.resolvedWing` — byte-equivalent; folding them onto this
+    /// one is the door's own change, recorded in the B2 record.)
+    public static func effectiveWingID(_ stored: String, liveWingIDs: Set<String>) -> String {
+        liveWingIDs.contains(stored) ? stored : ""
+    }
+
+    /// `effectiveWingID` as a SQL projection over a compile-time column
+    /// reference (`home.wing_id`), never user data. The subquery is over the
+    /// `wing` table alone (author-scale — a handful of rows; P1-trivial).
+    public static func effectiveWingSQL(_ column: String) -> String {
+        "CASE WHEN \(column) = '' OR \(column) NOT IN (SELECT w.id FROM wing w WHERE w.deleted_at IS NULL) "
+            + "THEN '' ELSE \(column) END"
+    }
+
     /// **THE REVIVAL'S WING RULE** (13i-d U5b — F-U5b-1, PROVISIONAL
     /// P-13id-U5b-5): a Put back revives a membership only when the note and
     /// the book live in the SAME wing as surfaces read them — a book never

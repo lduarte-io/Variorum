@@ -98,7 +98,10 @@ extension Operations {
 
     /// **The wing fence's one rule** — two homes cross only when BOTH are
     /// notes and their wings differ; the scraps (a pool) are the one shared
-    /// room, and a home that is not known crosses nothing.
+    /// room, and a home that is not known crosses nothing. The homes carry
+    /// their wings as surfaces read them (VX-892 — `LineageHome.wingID`: a
+    /// dead or absent wing is Home's), so a note listed under Home is never
+    /// "in another library" from a Home note.
     public static func lineageCrossesWing(
         _ target: Queries.LineageHome?, _ source: Queries.LineageHome?
     ) -> Bool {
