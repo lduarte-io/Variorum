@@ -6,4 +6,18 @@
 
 ## Findings (in the order found; ranked at the end)
 
-*(in progress)*
+### F1 — [MINOR] · `Features/BookView/BookView.swift:776–780` + `BookMastheadModeRow.swift` (VX-896) · the book's own row LANDING now moves the masthead's line count on open — an input neither the ruling nor the record's "accepted consequence" names
+
+**What's wrong.** The counted dial face is now `BookOrderDial.face(… shownOrder(stored: BookOrderChoices.storedLabel(for: structure.reading), viewOrder: …))`. Before the book's row lands, `structure.reading == nil` and `storedLabel(for: nil)` is `unloadedName` = "book's order" (`Readings/BookOrderAndConversion.swift:115–116`). The masthead is composed (and laid out) before that read returns — nothing in `BookView`'s masthead waits on the row. So the first layout counts "book's order ▾", the landed row recounts the book's real face, and in a width band between the two thresholds the class flips.
+
+**Mechanism, measured** (a throwaway `NSString` measure in my scratchpad with the voices' `small` faces — `.system(size: 11.5)` / monospaced 11.5 — rounded up exactly as `BookMastheadStableWidths.measure` does; tabs = 151 Study / 168 Terminal, gap 8, from the record's own numbers):
+- "book's order ▾" = 78 (Study) / 100 (Terminal) → unloaded threshold **237 / 276**.
+- A book stored "Major revision ↓" (98 / 128 → **257 / 304**): opened at a masthead of 237–256 pt (Study) or 276–303 (Terminal), it lays out ONE line, then drops the dial to a second line when the row lands.
+- A book stored "Created ↓" (65 / 79 → 224 / 255): opened at 224–236 (Study) / 255–275 (Terminal), TWO lines, then rises to one.
+- "Manual order" (81 → 240): a 237–239 Study band, one line → two.
+
+Before VX-896 the count was the widest face over `BookOrderChoices.everyName`, which deliberately INCLUDES `unloadedName` — its doc comment still says so: *"the set the mode row counts the dial's WIDEST form over, so no pick, load or stored order can move the masthead's line count"* (`BookOrderAndConversion.swift:91–97`). That comment is now false (and `everyName` is read only by tests). The F-896 ruling accepted ONE new input ("a wider LOOK pick can move the masthead's line count — this supersedes the pick-never-moves sub-rule at that ONE input (title, mode, landing, active tab still never move it)"); the record's struct comment (`BookMastheadModeRow.swift:229–233`) adds "the book's own order saved". Neither names the row's load on open, nor a sync-applied change of the book's stored order from another device (the same `structure.reading` re-read), both of which now move the line count too.
+
+**Evidence a pin can carry.** Mounted-book pin (the `BookMastheadMountedTests` rig, which already reads `BookMastheadProbe`): a book whose stored order is `last_major_revision desc`, mounted at a masthead width inside (237, 257) Study, recording every placement from the first one — assert the arrangement's `lineCount` never changes between the first placement and the settled one. GREEN on `origin/main` (widest count — two lines from the first frame), RED on this tip (one line, then two). Whether the transient is visible depends on how many frames precede the row's read; the probe records it either way.
+
+**Proposed fix (the orchestrator's call — the ruling is provisional):** (a) hold the class until the row lands — e.g. while `structure.reading == nil` count the widest face (`everyName`), accepting the one-way two→one rise for narrow faces, or better, decide with the CACHED stored label the navigator/Bookcase already holds for this book id if one is at hand; or (b) keep the build and widen the recorded consequence honestly: "a look picked, the book's own row landing on open, and a stored order changed elsewhere can move the line count; a title, a mode, a note landing and the active tab never do" — for her bundle. Either way, re-word or delete `everyName`'s stale doc comment (it now describes a rule nothing applies).
