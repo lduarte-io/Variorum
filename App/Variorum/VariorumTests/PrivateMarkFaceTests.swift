@@ -245,8 +245,16 @@ struct PrivateMarkFaceTests {
 
     /// R-878-K3 (A FLIPPED PIN — it read "the mark always", N-2's rule): the
     /// masthead reads the mark only while a client is approved, and reach only
-    /// while the indicator is on.
-    @Test func theMastheadReadsTheMarkOnlyWhileAClientIsApprovedAndReachOnlyWhileOn() async throws {
+    /// while the window asks for it. **VX-900 (A JUSTIFIED EDIT — renamed from
+    /// "…AndReachOnlyWhileOn"):** the window asks for reach while a client is
+    /// approved (the road's `canShare` — `MCPNoteIndicator.drawsReach`), the
+    /// server on or off — it was VX-164's `indicatorOn` (server AND client),
+    /// the masthead's wait-for-the-server; the reach read is now the rows'
+    /// gated batched one, so even ASKED with no approved client it answers
+    /// nobody (the trace of that is `MCPIconTwinsTests`' (b) pin). Every
+    /// assertion below is kept; the words "indicator on/off" now read "asked /
+    /// not asked".
+    @Test func theMastheadReadsTheMarkOnlyWhileAClientIsApprovedAndReachOnlyWhenAsked() async throws {
         try await withMarkWorld { session, db in
             let ops = session.operations
             let note = try ops.createPost(title: "marked")
@@ -257,23 +265,27 @@ struct PrivateMarkFaceTests {
                 try MCPNoteIndicatorState.read($0, postID: note.id, includingReach: false)
             }
             #expect(unapproved.mark == nil && unapproved.isEmpty, "no approved client: no mark at the masthead")
+            // VX-900: asked for reach with no approved client, still nothing.
+            let askedUnapproved = try await db.read { try MCPNoteIndicatorState.read($0, postID: open.id) }
+            #expect(askedUnapproved.isEmpty, "no approved client: reach asked for, nobody answers")
             let client = try ops.recordMCPContact(name: "claude-code", version: "2")
             try ops.approveMCPClient(client.id, granting: nil)
             _ = try ops.grantMCPAccess(client.id, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
-            // A client approved: the mark is read whatever the indicator…
+            // A client approved: the mark is read whether reach is asked or not…
             let off = try await db.read { try MCPNoteIndicatorState.read($0, postID: note.id, includingReach: false) }
-            #expect(off.mark == Queries.PrivateMark(own: true, viaBooks: []), "approved: the mark, indicator or not")
+            #expect(off.mark == Queries.PrivateMark(own: true, viaBooks: []), "approved: the mark, reach asked or not")
             let on = try await db.read { try MCPNoteIndicatorState.read($0, postID: note.id) }
             #expect(on.mark == off.mark)
             // The lock's two fields live on, derived (its pins read them).
             #expect(on.ownPrivate && on.privateBooks.isEmpty && on.isPrivate)
-            // …and reach only while the indicator is on (the shared icon's law).
+            // …and reach only when asked (the shared icon's law — the window
+            // asks while a client is approved).
             let reachOff = try await db.read {
                 try MCPNoteIndicatorState.read($0, postID: open.id, includingReach: false)
             }
-            #expect(reachOff.reach.isEmpty && reachOff.mark == nil, "indicator off: no reach read")
+            #expect(reachOff.reach.isEmpty && reachOff.mark == nil, "not asked: no reach read")
             let reachOn = try await db.read { try MCPNoteIndicatorState.read($0, postID: open.id) }
-            #expect(reachOn.reach.map(\.clientName) == ["claude-code"], "indicator on: the wing grant's reach")
+            #expect(reachOn.reach.map(\.clientName) == ["claude-code"], "asked: the wing grant's reach")
         }
     }
 
