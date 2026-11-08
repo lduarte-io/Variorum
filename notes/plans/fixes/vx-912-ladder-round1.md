@@ -62,3 +62,17 @@ No BLOCKER. No MAJOR.
 - `swift test --filter 'MCPNullIdentifier|MCPGatheringCursor'` → **22 tests / 3 suites PASSED** (1.1 s) — the 12 server pins, the 4 unit pins (classification exhaustiveness included) and the 6 gathering-cursor edges, over the real socket.
 - `shasum -a 256 LICENSE` → `0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0` (34,523 bytes) — the record's claim reproduced.
 - Red-on-old evidence was NOT re-run by this reviewer (the reverts' exact red sets are recorded per commit in the run record and were spot-checked for internal consistency against the pins' names); stage legs A–F are the orchestrator's recorded runs.
+
+---
+
+## FINAL CALLS (round 1 → the orchestrator's dispositions confirmed/overridden)
+
+The reviewer's final calls under the cross-model flow (the implementers' positions were already on record: B2 returned F-R1-1's subject as a born-ticket candidate deliberately outside its headless diff; B4 labeled the walk's scope). One fact arrived from outside the repo via the orchestrator: **VX-920 is already minted on Linear** ("The lineage face shows Home as an empty name…", Low · Bug · Confirmed, pointing at the B2 record's one-line fix shape), minted at B2's hand-back before this round started.
+
+1. **F-R1-1 — CONFIRMED: disposed by ticket (VX-920).** The minted arm of my call is satisfied; no fix lands in this run. A rider next wave is her ordering. The red-on-old pin shape (a `LineageFaceModelTests` arm over `.otherWing(wingID: "")` asserting the Home wording) rides the ticket.
+2. **F-R1-2 — CONFIRMED: accepted, orchestrator executes at closeout.** `vx-912-b0-security-verify.md` joins the flip checklist / VX-754's sweep scope, and the VX-849-before-flip dependency lands as a flip gate line in the handoff.
+3. **F-R1-3 — CONFIRMED: record-only,** per the hallucination guard (no combinator exists in the catalog, so no red is possible today). The guard-pin shape — assert no declared schema uses `anyOf`/`oneOf`/`allOf`, or teach the walk the three keys — is noted for the next MCP effort's kickoff beside VX-922/VX-925.
+4. **F-R1-4 — CONFIRMED: record-only.** A comment re-wrap on a Sync/ file is below the fix-cycle bar; a FINDER-FIXES commit plus an implementer sanity pass for a reflow would be disproportionate. Taken at the file's next real touch.
+5. **F-R1-5 — CONFIRMED: record-only.** The gate fails closed; the over-match note belongs in `CRASH_MARKS`' comment at a future touch.
+
+**Ladder reading — YES, confirmed:** zero fixes land post-round-1, so a round 2 would have nothing to re-review; the ladder closes at ONE round. These dispositions are the round's repo-first record.
