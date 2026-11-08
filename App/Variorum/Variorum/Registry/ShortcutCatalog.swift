@@ -327,12 +327,15 @@ nonisolated enum ShortcutCatalog {
         Row(group: .navigation, keys: .chords([.todaysEntry]),
             words: "today's journal entry"),
         // 13n-c U4 — VX-157 (her ratified chord); VX-644: the label's door.
+        // VX-870 (the VX-914 run, batch 4): the Library masthead's step stays
+        // in the Library — the one switch that does not land on the Bookcase.
         Row(group: .navigation, keys: .chords([.switchWing]),
             words: "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
                 + "and tap L to step, release to go; clicking the wing's name in the "
                 + "Bookcase or Library masthead steps to the next one"
                 + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} at the top of the sidebar "
-                + "opens this switcher; every switch lands on that wing's Bookcase"),
+                + "opens this switcher; every switch lands on that wing's Bookcase, except "
+                + "the Library masthead's step, which keeps you in the Library"),
         // VX-824 (the VX-828 run, batch B): the per-wing chord — the
         // registry's alternate (no menu item: the mode row owns ⌘1–⌘7 inside a
         // note), shown here so it is findable (13g L1).

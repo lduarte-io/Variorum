@@ -683,8 +683,10 @@ struct LibraryCatalogView: View {
                 // the Bookcase only, which is weird". The Library lists ONE
                 // wing, so it says which — "Library · Home ▾" — and cycles
                 // and switches exactly as the Bookcase's does (one view).
+                // VX-870 (the VX-914 run, batch 4): save that its cycling word
+                // switches IN PLACE — she stays in the Library, re-scoped.
                 if let wings {
-                    WingSwitcherMenu(tokens: tokens, wings: wings)
+                    WingSwitcherMenu(tokens: tokens, wings: wings, host: .library)
                 }
                 Text(tokens.chromeLabel("everything — sortable, searchable"))
                     .font(tokens.small)
