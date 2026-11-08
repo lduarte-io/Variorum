@@ -418,6 +418,11 @@ struct VariorumApp: App {
             case .roadInterlude(let interlude):
                 // VX-306 U2: rule 21's notice, then the key-file offer — once, before the library shows.
                 RoadInterludeCard(model: interlude)
+            case .hostingTests:
+                // VX-604: this process is a test runner's host — nothing was opened (`AppBootstrap.Launch`); the
+                // suites mount their own worlds, and the menus and scenes stand as ever.
+                Text(AppBootstrap.Launch.hostFace)
+                    .padding(24)
             }
     }
 
@@ -449,6 +454,10 @@ struct VariorumApp: App {
                     .padding(24)
             case (.libraryMissing, _):
                 Text("\(ProtectionCopy.libraryMissingTitle) See the main window.")
+                    .padding(24)
+            case (.hostingTests, _):
+                // VX-604: a test runner's host opens nothing.
+                Text(AppBootstrap.Launch.hostFace)
                     .padding(24)
             default:
                 // No note handed over (a restored window whose value did not

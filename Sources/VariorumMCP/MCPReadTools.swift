@@ -747,6 +747,21 @@ struct MCPReadTools: Sendable {
                     if let cursor, cursor.shape != .gathering {
                         return Outcome(text: Self.staleCursorMessage, isError: true)
                     }
+                    // VX-891 (the VX-912 run, B4 — VX-859's rule, the gathering
+                    // form): the cursor resumes only after a note THIS client
+                    // can read now. Its assembly holds notes the fence hides (a
+                    // Private note its rule gathers, a Journal entry), and a
+                    // cursor naming one used to resume after it while an id
+                    // naming nothing answered stale — hidden told from missing.
+                    // Now one that names a hidden member, a member made Private
+                    // since, or nothing at all answers the stale sentence, and
+                    // the listing starts again. `gatheringPage` still says
+                    // whether the note is in the assembly (a departed one) and
+                    // pages on past hidden rows inside the walk — those raw
+                    // cursors never cross the wire.
+                    if let cursor, !(try cursorNoteIsReadable(db, noteID: cursor.id, standing: standing)) {
+                        return Outcome(text: Self.staleCursorMessage, isError: true)
+                    }
                     fetch = { after in
                         try gatheringPage(db, gatheringID: bookID, tagged: tagged, after: after, limit: limit)
                     }
@@ -926,12 +941,29 @@ struct MCPReadTools: Sendable {
         return PageCursor(shape: .book, key: position, id: noteID)
     }
 
+    /// **Whether a gathering cursor's note is one this client can read now**
+    /// (VX-891 — the VX-912 run, B4; `bookResumePoint`'s readability half, the
+    /// gathering form): the listing's own keep rule (`decide(…, rung: .read,
+    /// consumes: false)` — never spends), so a cursor resumes only after a
+    /// note the page itself could have listed. False for a note the fence
+    /// hides, one made Private since, and an id naming no live note — one
+    /// answer for all three (R-825). ∝ one note's facts.
+    private func cursorNoteIsReadable(
+        _ db: Database, noteID: String, standing: MCPGrantAuthority.Standing
+    ) throws -> Bool {
+        MCPGrantAuthority.decide(
+            standing, note: try Queries.mcpNoteFacts(db, noteID: noteID), rung: .read, consumes: false
+        ).isAllowed
+    }
+
     /// **A GATHERING's notes in its own order** (13n-c VX-273): its assembly
     /// (`assembleReading` — the ONE membership function; living notes only,
     /// so `include_archived` has nothing to add), resumed after the cursor's
     /// note. nil when that note is no longer in the assembly (it moved under
-    /// the cursor — the listing starts again). Cost ∝ the gathering's
-    /// assembly, then the page.
+    /// the cursor — the listing starts again). Whether a CLIENT's cursor names
+    /// a note it can read is decided before the first page (VX-891,
+    /// `cursorNoteIsReadable`); the walk's own continuation may resume after a
+    /// hidden row here. Cost ∝ the gathering's assembly, then the page.
     private func gatheringPage(
         _ db: Database, gatheringID: String, tagged: [String]? = nil, after cursor: PageCursor?, limit: Int
     ) throws -> [PageRow]? {
@@ -1423,7 +1455,11 @@ struct PageCursor: Equatable, Sendable {
 
     init?(encoded: String) {
         guard let data = Data(base64Encoded: encoded),
-              let text = String(data: data, encoding: .utf8)
+              let text = String(data: data, encoding: .utf8),
+              // VX-396 (the VX-912 run, B4): no cursor this server mints holds
+              // U+0000 (ids, positions, ordinals, stamps), and an id holding one
+              // binds as its prefix — such a cursor is not one it returned.
+              !StoredText.containsNull(text)
         else { return nil }
         let parts = text.split(separator: "\n", maxSplits: 2, omittingEmptySubsequences: false)
         guard parts.count == 3, let shape = Shape(rawValue: String(parts[0])) else { return nil }

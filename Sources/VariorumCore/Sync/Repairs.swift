@@ -932,8 +932,10 @@ extension SyncEngine {
         // set — A-808's repair order): a live member of a live book sitting in
         // another wing follows its anchor book; a membership left in a book
         // of another wing demotes to an arrival.
-        if !keeperMovedPosts.isEmpty || !touched.liveMemberLandingPosts.isEmpty
-            || !touched.readingWingLandings.isEmpty {
+        // VX-893 (1): and, under a pull, a deferral the straggle belt left.
+        if try !keeperMovedPosts.isEmpty || !touched.liveMemberLandingPosts.isEmpty
+            || !touched.readingWingLandings.isEmpty
+            || (touched.isPullBatch && wingMendDeferralPending(db)) {
             repairs += try mendBookMembersIntoTheirWing(
                 db, touched: touched, keeperMoved: keeperMovedPosts)
         }

@@ -31,7 +31,21 @@
 //  changing a line; an access racing the lock gets the typed
 //  `StoreLockedError`.
 //
+//  THE TEST HOST IS INERT (VX-604, `notes/plans/fixes/vx-912-open-source-gating.md`
+//  "## B1 record"): the app target's suites run INSIDE this app — the test
+//  host is the Debug app, and its own launch used to open the dev store and
+//  build the whole ready shell beside the suites, outside any test's scope.
+//  Every dependency read of that launch is a test-context read (swift-
+//  dependencies keys `.test` on `isTesting`), so it reported: a recursion
+//  that crashed one-suite Swift Testing runs before their first test, a
+//  "0 tests passed" false green, and a failing pseudo-test ("Issues recorded
+//  without an associated test or suite") in green runs. Under a test runner
+//  the production init therefore opens NOTHING and lands in
+//  `.hostingTests` (`Launch`); the test bootstrap (`init(testStoreURL:
+//  protectionRoad:)`) is untouched and opens its own slot as before.
+//
 
+import Dependencies
 import Foundation
 import Observation
 import VariorumCore
@@ -79,6 +93,31 @@ final class AppBootstrap {
         /// library's open (PROVISIONAL P-VX306-U2-1): rule 21's notice (once), then the key-file offer; the last
         /// card answered, the open goes on.
         case roadInterlude(RoadInterludeModel)
+        /// VX-604 — this process is a TEST RUNNER'S HOST (`Launch.hostingTests`): nothing was opened and nothing
+        /// will be — no road, no store, no session, no services. Settled from the first instant and never left; no
+        /// app launch reaches it. Not `.opening`, which promises an open in flight (the lock seam waits on it).
+        case hostingTests
+    }
+
+    /// **How this process boots** (VX-604). The production init reads it once; a test bootstrap never does.
+    nonisolated enum Launch: Equatable, Sendable {
+        /// The app: route on the protection road, then open the library.
+        case app
+        /// A test runner's host: open nothing (`State.hostingTests`).
+        case hostingTests
+
+        /// The decision for a process: inert exactly when it is running tests — IssueReporting's `isTesting`
+        /// (re-exported by `Dependencies`), the very predicate swift-dependencies keys its `.test` context on, so
+        /// the host is inert exactly when every dependency read its launch would make is a test-context read with
+        /// no test around it. (The library's own answer to this gotcha: swift-dependencies' "Testing host
+        /// application".)
+        static func decide(isTesting: Bool) -> Launch { isTesting ? .hostingTests : .app }
+
+        /// This process's launch, decided once.
+        static let thisProcess: Launch = decide(isTesting: isTesting)
+
+        /// What every root shows in an inert host — the one sentence (the suites mount their own worlds).
+        static let hostFace = "Running tests \u{2014} no library is open."
     }
 
     private(set) var state: State = .opening
@@ -177,11 +216,32 @@ final class AppBootstrap {
     /// VX-307 U2a — this Mac's scheduled plain-text export (the weekly copy's switch, `MarkdownInsurance`): the
     /// production instance's standard defaults; a test bootstrap's own suite, never the app's domain.
     @ObservationIgnored private let exportSwitch: ScheduledExportSwitch
+    /// VX-604: a production bootstrap in a test runner's host — inert for its whole life (`State.hostingTests`; every
+    /// road into an open refuses). Always false on a test bootstrap.
+    @ObservationIgnored private let hostsTests: Bool
 
-    init(variant: AppDatabase.StoreVariant = StoreLocation.resolve()) {
+    /// The app's bootstrap (the two app roots are its only callers). Under a test runner (`launch == .hostingTests`,
+    /// decided by `Launch.thisProcess`) it is INERT: it reaches no store, no Keychain item and none of the app's
+    /// defaults domains — throwaway in-memory sign-in, a road that composes nothing, the test suites' defaults — and
+    /// starts no monitor and no open.
+    init(variant: AppDatabase.StoreVariant = StoreLocation.resolve(), launch: Launch = .thisProcess) {
         storeVariant = variant
         isTestBootstrap = false
         testStoreURL = nil
+        if launch == .hostingTests {
+            hostsTests = true
+            auth = Self.authority(.inMemory())
+            roadInputs = RoadInputs(makeSystem: { nil }, sessionFact: { .signedOut }, writes: false, open: nil)
+            reminderLedger = PassphraseReminderLedger(
+                defaults: UserDefaults(suiteName: PassphraseReminderLedger.testSuiteName) ?? .standard)
+            exportSwitch = Self.markdownInsuranceSwitch(suiteName: Self.crossingTestExportSuiteName)
+            protection = ProtectionController()
+            protection.performLock = { [weak self] in await self?.lock() }
+            protection.roadRelock = { [weak self] in self?.roadRelockPolicy }
+            state = .hostingTests
+            return
+        }
+        hostsTests = false
         // pre-13x 2c (corner 47): the session's Keychain item is SCOPED by store variant — a dev-store build starts
         // signed out and never adopts the installed build's session.
         auth = Self.authority(.keychain(scope: variant.rawValue))
@@ -215,6 +275,7 @@ final class AppBootstrap {
     init(testStoreURL: URL? = nil, protectionRoad: ProtectionRoadTestHarness) {
         storeVariant = .dev
         isTestBootstrap = true
+        hostsTests = false
         self.testStoreURL = testStoreURL
         // VX-423: a test bootstrap's authority is signed out and in memory — its road is the harness's (a planted
         // system), and no test reaches the scope's Keychain item through it.
@@ -251,7 +312,8 @@ final class AppBootstrap {
     // MARK: - The open road (routes first)
 
     private func beginOpening(unlockedKey: StoreKey? = nil, roadOpened: ProtectionRoadSession? = nil) {
-        guard opening == nil else { return }
+        // VX-604: the inert host opens nothing, on every road (its init never calls this; the belt is for the rest).
+        guard !hostsTests, opening == nil else { return }
         state = .opening
         let variant = storeVariant
         let storeURL = liveStoreURL
@@ -602,9 +664,11 @@ final class AppBootstrap {
         }
     }
 
-    /// The live store's url (the slot, and the hold marker's home) — the test slot's under a test bootstrap.
+    /// The live store's url (the slot, and the hold marker's home) — the test slot's under a test bootstrap; none in
+    /// an inert test host (VX-604 — it names no store at all).
     var liveStoreURL: URL? {
-        isTestBootstrap
+        if hostsTests { return nil }
+        return isTestBootstrap
             ? testStoreURL
             : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
     }

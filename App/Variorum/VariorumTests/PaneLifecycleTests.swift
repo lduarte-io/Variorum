@@ -121,6 +121,13 @@ fileprivate struct LifecycleHost: View {
 /// began 0.42 s after its store opened, with no dependency issue at all);
 /// bounded, because a host that cannot open (a lobby) builds no shell at all;
 /// and once per process — the latch makes every later call free.
+///
+/// **VX-604 (the B1 record of `notes/plans/fixes/vx-912-open-source-gating.md`):
+/// the host now boots INERT under a test runner** (`AppBootstrap.Launch` —
+/// `State.hostingTests`: no store, no shell, no session), so there is no
+/// launch in flight to pump into and no shell to set the signal: it settles
+/// at once. (The old wait stays for a host that is not inert, which a test
+/// process no longer is — without this line it would burn its 20-s bound.)
 @MainActor
 enum HostLaunchSettle {
     private static var settled = false
@@ -128,6 +135,7 @@ enum HostLaunchSettle {
     static func wait(upTo limit: Duration = .seconds(20)) async {
         guard !settled else { return }
         defer { settled = true }
+        if AppBootstrap.Launch.thisProcess == .hostingTests { return }
         let deadline = ContinuousClock.now.advanced(by: limit)
         while !EditorTypography.isAdopted, ContinuousClock.now < deadline {
             try? await Task.sleep(for: .milliseconds(50))

@@ -50,16 +50,21 @@ enum MCPArgumentSchema {
     /// wire's technical register, as its other parse refusals ("note_id is
     /// required.", "section_id isn't a chapter of this book …").
     static func words(tool: String, undeclared names: [String]) -> String {
+        let verb = names.count == 1 ? "isn't an argument" : "aren't arguments"
+        return "\(spelled(names)) \(verb) of \(tool), so nothing was done — send only the arguments its input schema lists."
+    }
+
+    /// The parse refusals' list grammar — "a", "a and b", "a, b and c", past
+    /// five "a, b, c, d, e and 2 more" (shared with VX-396's null-identifier
+    /// sentence, `MCPNullIdentifier.words`).
+    static func spelled(_ names: [String]) -> String {
         let shown = Array(names.prefix(namedLimit))
         let more = names.count - shown.count
-        let list: String
         switch (shown.count, more) {
-        case (1, _): list = shown[0]
-        case (_, 0): list = shown.dropLast().joined(separator: ", ") + " and " + shown[shown.count - 1]
-        default: list = shown.joined(separator: ", ") + " and \(more) more"
+        case (1, _): return shown[0]
+        case (_, 0): return shown.dropLast().joined(separator: ", ") + " and " + shown[shown.count - 1]
+        default: return shown.joined(separator: ", ") + " and \(more) more"
         }
-        let verb = names.count == 1 ? "isn't an argument" : "aren't arguments"
-        return "\(list) \(verb) of \(tool), so nothing was done — send only the arguments its input schema lists."
     }
 
     // MARK: - The walk

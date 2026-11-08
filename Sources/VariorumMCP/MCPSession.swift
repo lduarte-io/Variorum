@@ -388,6 +388,21 @@ final class MCPSession: @unchecked Sendable {
             return
         }
         let declared = MCPHandshake.initialize(opening.firstFrame)
+        // VX-396 (the VX-912 run, B4): a declared name holding U+0000 is, to
+        // every SQL read and write, the name before the NUL — the admission
+        // would read and write THAT client's rows (log under her client's
+        // name, mint a waiting setup on it, mint a client named ''). Refused
+        // here, at naming, on the frame's own id: before the hold (a parse of
+        // its own bytes needs no store, locked or not) and before the
+        // admission — nothing read, written or logged; it names no one.
+        if let refusal = MCPNullIdentifier.clientName(declared?.name) {
+            _ = MCPSocketTransport.writeAll(
+                fd,
+                MCPShim.refusalResponse(
+                    toFirstLine: opening.firstFrame,
+                    message: MCPWireRefusalCopy.spoken(refusal, appWords: refusalWords)))
+            return
+        }
         let held = HeldOpening(name: declared?.name ?? "", version: declared?.version, presentedKey: opening.presentedKey)
         // VX-818 (A-809-20, HOLD): a connection arriving while the library is
         // LOCKED is admitted by no one yet — the admission is a store write and
@@ -502,6 +517,19 @@ final class MCPSession: @unchecked Sendable {
             // sentence for every known tool (VX-258), as for every parse refusal.
             if let refusal = MCPArgumentSchema.refusal(tool: params.name, arguments: params.arguments) {
                 return .init(content: [.text(text: refusal, annotations: nil, _meta: nil)], isError: true)
+            }
+            // VX-396 (the VX-912 run, B4): an IDENTIFIER argument holding
+            // U+0000 binds as its prefix on every SQL read and write — refused
+            // here, ONE check for every tool, at any depth the schema describes
+            // (a parse refusal: nothing read, written, asked, spent or logged),
+            // worded through THE ONE CHAIN. After VX-606's check, so an
+            // undeclared argument still refuses first, byte-unchanged.
+            if let refusal = MCPNullIdentifier.call(tool: params.name, arguments: params.arguments) {
+                return .init(
+                    content: [.text(
+                        text: MCPWireRefusalCopy.spoken(refusal, appWords: self.refusalWords),
+                        annotations: nil, _meta: nil)],
+                    isError: true)
             }
             // U2: the write rungs run on the session's executor (AF-8);
             // the reads stay where U1 built them.

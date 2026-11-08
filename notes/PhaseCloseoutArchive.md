@@ -1640,3 +1640,21 @@ pins named), the post-819 full suite + the 9-suite smoke green on the merged tip
 + the lineage/tag/empty reads, SurfaceContracts' History & lineage bullet, AppSpec §9's `bringBackFromLineage`.
 Bundle QUESTIONS #266; handoff `notes/handoffs/vx-827-handoff.md`. Born: VX-892 (the dangling-wing pair, Low) ·
 VM-41 (the phone parity ticket — the MOBILE PARITY line is PL-70). PR #231, merge 602077445.
+**→ VX-808 CLOSED 2026-11-06 — RUN: ARRIVALS & BOOKS (the record `notes/plans/fixes/vx-808-arrivals-books.md`,
+FOR A LATER READER at its top; wave 2's Sync/-custody-slot run, /architect-phase, nov5 coordinating; PR #232, merge
+29cf674ea).** Ten members landed: VX-811+VX-821 (the coupled pair — `propose_notes_to_book` at READ reach, bells
+never seats, the fence standing; the full-book-area Arrivals review with why-it-waits + since-when, multi-select,
+Add all · Dismiss all, keyboard judging, the ownership arms), VX-803 (pins float above any book sort in the ONE
+order home, within-chapter, `.pinNoteInBook`), VX-857 (the general book wing mend — `Sync/BookWingMend.swift`,
+members only, the fenced→frozen→earliest-accepted rank, demotions as visible arrivals), and the riders
+VX-859/777/776/879/867/860. **The wave's ONE SyncSpec §12 lockstep event: v1_37** (`arrival_provenance` ENCRYPTED +
+`pinned_at` PLAIN), marker 14→15 — **the mirror `Server/supabase/18_vx808_arrivals_pins.sql` is HELD for her deploy
+window; until it runs a main build visibly refuses production sync.** VX-775 and VX-872 deferred at her word
+(R-808-6, R-808-4 — VX-872's 1.1 arm dies at the deploy; both tickets carry the notes). The ladder: round 1 no
+BLOCKER/MAJOR (seven Sync-class rulings), round 2 clean. The gates: the WHOLE VariorumTests 6165/1068 0-failures on
+the final tree; the phone 852/139 (the standing caret red only); captures both voices; both merge-in reconciles
+(vx-878's menu composition, vx-827's MCP files) both-sides-proven. Canon: AppSpec §7/§9/§12 + SurfaceContracts (the
+review-area contract, the pin bullet, the propose line) + MCPSpec (the rung sentence, the VX-859 flip) + SyncSpec §7
+(the general mend), in place with pointers. Bundle QUESTIONS #267; handoff `notes/handoffs/vx-808-handoff.md`.
+Born: VX-891 (the gathering-cursor asymmetry, Low) · VX-893 (the wing-mend recorded corners, Low). **Her deploy
+window + the release FINISH the stage — each at her explicit go.**

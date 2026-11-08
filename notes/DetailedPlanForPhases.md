@@ -12,29 +12,31 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| **VX-912 — Umbrella: open-source gating** (the code gates before the repo goes public: VX-751 security pass · VX-752 repo mechanics/outsider build road · VX-604 false-green harness · VX-893/VX-892 wing corners; `/architect-phase`, kicked off 2026-11-08). Touches `Sync/` (VX-893) — holds the Sync/-custody slot this window (VX-849 unstarted; granted by nov7 in writing at kickoff). Record: `notes/plans/fixes/vx-912-open-source-gating.md` | VX-912 · `vx-912-open-source-gating` | `~/dev/variorum-vx-912` · the Pro | OPEN |
+| **VX-914 — Umbrella: the walkthrough followups** (her Nov 7–8 walkthrough + bundle rulings, built: VX-900/901/902/903/904/905/911/870 + wording riders VX-896/897/898/909; `/architect-phase`, kicked off 2026-11-08). Surfaces: Settings ▸ MCP pane, the sidebar AI section, the icon twins, book Index/masthead/confirm faces, the quick-entry band, the Library masthead, the sync row's wording (app-side `Shared/SyncStatusViews.swift` — zero `Sync/`, zero custody; opus-reviewer eligible). Record: `notes/plans/fixes/vx-914-walkthrough-followups.md` | VX-914 · `vx-914-walkthrough-followups` | `~/dev/variorum-vx-914` · the Pro | OPEN |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-808 CLOSED 2026-11-06 — RUN: ARRIVALS & BOOKS (the record `notes/plans/fixes/vx-808-arrivals-books.md`,
-FOR A LATER READER at its top; wave 2's Sync/-custody-slot run, /architect-phase, nov5 coordinating; PR #232, merge
-29cf674ea).** Ten members landed: VX-811+VX-821 (the coupled pair — `propose_notes_to_book` at READ reach, bells
-never seats, the fence standing; the full-book-area Arrivals review with why-it-waits + since-when, multi-select,
-Add all · Dismiss all, keyboard judging, the ownership arms), VX-803 (pins float above any book sort in the ONE
-order home, within-chapter, `.pinNoteInBook`), VX-857 (the general book wing mend — `Sync/BookWingMend.swift`,
-members only, the fenced→frozen→earliest-accepted rank, demotions as visible arrivals), and the riders
-VX-859/777/776/879/867/860. **The wave's ONE SyncSpec §12 lockstep event: v1_37** (`arrival_provenance` ENCRYPTED +
-`pinned_at` PLAIN), marker 14→15 — **the mirror `Server/supabase/18_vx808_arrivals_pins.sql` is HELD for her deploy
-window; until it runs a main build visibly refuses production sync.** VX-775 and VX-872 deferred at her word
-(R-808-6, R-808-4 — VX-872's 1.1 arm dies at the deploy; both tickets carry the notes). The ladder: round 1 no
-BLOCKER/MAJOR (seven Sync-class rulings), round 2 clean. The gates: the WHOLE VariorumTests 6165/1068 0-failures on
-the final tree; the phone 852/139 (the standing caret red only); captures both voices; both merge-in reconciles
-(vx-878's menu composition, vx-827's MCP files) both-sides-proven. Canon: AppSpec §7/§9/§12 + SurfaceContracts (the
-review-area contract, the pin bullet, the propose line) + MCPSpec (the rung sentence, the VX-859 flip) + SyncSpec §7
-(the general mend), in place with pointers. Bundle QUESTIONS #267; handoff `notes/handoffs/vx-808-handoff.md`.
-Born: VX-891 (the gathering-cursor asymmetry, Low) · VX-893 (the wing-mend recorded corners, Low). **Her deploy
-window + the release FINISH the stage — each at her explicit go.**
+**→ VX-912 CLOSED 2026-11-08 — UMBRELLA: OPEN-SOURCE GATING (the record `notes/plans/fixes/vx-912-open-source-gating.md`,
+FOR A LATER READER at its top; wave 3's Sync/-custody-slot run, /architect-phase, nov7 coordinating; PR #234, merge
+f22ac20ee).** The pre-OSS code gates, one day: VX-508 closed AT the kickoff sitting (her word — the dormant
+Apple-wrapped master copy DELETED in production; zero Apple-wrap rows remain); VX-751 TRIMMED at her ruling and run
+as the orchestrator's B0 (the 13y abuse-guard numbers verified EXACT in the deployed sync_push; every authenticated
+RPC door quota'd or exempt-with-reason; the exploit-text flag pass — VX-443 promoted into VX-849, VX-212/VX-475
+closed stale); VX-604 (the inert test host + Tools/assert-tests-ran, six stage legs incl. the crash reproduced
+red-on-old AT the stage); VX-893/VX-892 (the wing corners: the straggle belt as local-only one-shot state, the
+tier-3 anchor rank moved to earliest-filed `created_at`, the one dangling-wing rule — two corners sized BIG and
+returned to her unbuilt); VX-752 + the LICENSE rider (AGPLv3; 19 dependencies, NO incompatibility; the cold-clone
+build road PROVEN; README/CONTRIBUTING/SECURITY/BUILDING all PROVISIONAL for her pass; Issues ON at her word); the
+riders VX-891/VX-396 (the gathering-cursor fence rule; the U+0000 identifier guard at three seams). Her standing
+basis R-912-7a: "do it right, in a way that we won't regret 3 years from now, everywhere." The ladder: ONE round, 0
+BLOCKER/MAJOR (3 MINOR/2 NIT, all dispositions confirmed; zero fixes landed, so one round closed it). The gates:
+Mac WHOLE target 6139 executed / 0 failures / no pseudo-test node; phone 852/139 with only the standing caret red.
+Canon: SyncSpec §7 (the belt + the earliest-filed rank) + MCPSpec (the gathering cursor + the NUL guard) in place
+with pointers; QUESTIONS #268; the AppSpecRecord entry. Born: VX-917–VX-925 (triaged; the handoff lists them).
+NO lockstep event, no marker, no refresh owed (the wave's folded refresh is vx-914's). The night survived one Opus
+and one Fable budget death with zero commits lost. Handoff `notes/handoffs/vx-912-handoff.md`. **Her morning
+bundle: #268 + the B2 BIG-corner shapes + the B3 drafts' editorial pass + the GRDB-fork her-hands rows.**
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
