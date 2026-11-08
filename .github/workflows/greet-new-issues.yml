@@ -1,0 +1,39 @@
+name: Greet new issues
+
+# Issues are open: they're how people tell me about bugs. Each new issue gets
+# one automatic comment saying where it goes.
+#
+# What this never does:
+# - comment on an issue the owner opened;
+# - run while the repository is private (the job's condition reads the
+#   event's own `repository.private`, so it starts acting only once the
+#   repository is public);
+# - place any text from the issue into the shell.
+
+on:
+  issues:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  greet:
+    if: >-
+      github.event.repository.private == false &&
+      github.event.issue.author_association != 'OWNER'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: |
+            Thanks for writing this up. It's gone into my private work queue, where it will be prioritized with everything else.
+
+            I work on Variorum in bursts, so a quiet thread doesn't mean it was missed. If this is a security problem, please email the address in SECURITY.md instead of discussing it here.
+
+            (This is an automatic reply.)
+        run: gh issue comment "$NUMBER" --body "$BODY"
