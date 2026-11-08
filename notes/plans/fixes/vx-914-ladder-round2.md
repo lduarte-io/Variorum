@@ -28,3 +28,19 @@
 
 **The pins discriminate.** `theDeleteConfirmSaysWhatTheReceiptWillSay` drives the real door (an owned book, 2 live + 1 archived via `archiveContainer`, `open` → `pending` → `confirm` → `status.spoken`) and asserts the exact first line — the pre-fix body fed `liveMemberNoteCount` = 3 says "its 3 notes go back to the Pool", RED; `anAllArchivedOwnedBooksConfirmSaysTheyStayArchived` (one archived member: the old line "its 1 note go back to the Pool", RED); `theConfirmsBookOnlyHalfFollowsTheSplit` pins the forms pure. Pre-fix API only, liftable. `TutorialBooksChapterTests.lessonEightDeleting`'s `deleteOwnedBook(…, notes: 2)` `.contains("go back to the Pool")` stays green through the default argument.
 
+### N1 (round 1 NIT) — FIXED, verified
+
+The lesson-7 card (`TutorialSeeder.swift:3109–3110`) now says "Each list is headed MCP, or From and the setup menu's label where the setup menu names it." — true: the heading is `MCPTrailCopy.header` → "From ‹`MCPSetupClient.label`›" for a setup the table names (`MCPPaneCopy.swift:1310–1334`: "Claude Code" / "Codex"; `anyClient.expectedName == nil` reads MCP). No em dash, no provider name, sentence case. The pin's new `setup.label != name` line holds for both named setups ("Claude Code" ≠ "claude-code", "Codex" ≠ "codex-mcp-client"), so it would catch a heading that drew the client's own name; the exact `contains` literal flips red on either side by construction. The real store's seeded guide stays stale until the re-seed already owed (recorded). Wording PROVISIONAL (the record's PROVISIONALs list carries before → after). The sentence says "setup menu" twice in one clause — a wording note for her bundle, not a truth problem.
+
+### N2 (round 1 NIT) — FIXED, verified
+
+`BookEmptyStateCopy.gathering` is now "This gathering shows no notes yet." (`BookEmptyState.swift:36`), drawn by the one `line(for:)` on the three faces (`BookView.swift:2343`, `PagedReadView.swift:98`, `SpreadBookView.swift:101`) whenever a live gathering's assembly is empty — true for a rule matching nothing, for hide-owned hiding every match, and for every match archived. The archived gathering's and the book's lines are untouched. The new pin `aGatheringWhoseMatchesAreAllHiddenIsNotSaidToMatchNothing` builds the reachable state over real rows (an owned book's note + an archived note, both tagged; the gathering's own hide-owned toggle on), asserts the assembly is empty (non-vacuity) and the line; the justified edit adds "never says match". Wording PROVISIONAL, before → after in the record.
+
+### N3 (round 1 NIT) — FIXED, verified
+
+`theActIsDeclaredOnceAsTheBandsSurfaceDoorWithItsAlternateKey`'s hollow line now reads `HelperView.groups` (the projection Settings ▸ Shortcuts and its search draw, `HelperView.swift:63–69`) for a row whose keys equal the declaration's alternate AND whose words carry "in the new-note box" and "without opening it" — only the band's row (`ShortcutCatalog.swift:408–411`) has those words, so removing that row turns the line red, which the old `shortcutKeysShown.contains("⌘⏎")` never did (Choose This Take's row kept it green). Not hollow now; the reason is said in place.
+
+### F4 (round 1 MINOR) — FIXED, verified
+
+The run record's LIVE LEDGER (`vx-914-walkthrough-followups.md:435–449`) reads rows 1–11 "DONE — gated green (‹batch›…)" and rows 12–15 "BUILT — gate HELD for the post-ladder-fix window" — batch 4 is now distinguishable as the ungated batch.
+
