@@ -3093,12 +3093,13 @@ enum TutorialSeeder {
             // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the list
             // behind ⌥⌘O (VX-679 — her R-679's section and its two doors).
             // VX-902 (the VX-914 run, batch 1 — PROVISIONAL F-902): the heading
-            // names the client's setup where the menu names it, else MCP.
-            + "Near the bottom of the sidebar, a list for each client \u{2014} headed "
-            + "MCP, or From and its name where the setup menu names it \u{2014} "
-            + "keeps each place a client showed you or changed this session: click "
-            + "a row to go there, or the icon at its end to see what it asked or "
-            + "did. "
+            // names the client's setup where the menu names it, else MCP — said
+            // in its own sentence, no em dash (R-13s-22's chapter rule).
+            + "Near the bottom of the sidebar, a list for each client keeps each "
+            + "place that client showed you or changed this session: click a row "
+            + "to go there, or the icon at its end to see what it asked or did. "
+            + "Each list is headed MCP, or From and the client's name where the "
+            + "setup menu names it. "
             + "\u{2325}\u{2318}Z takes a client's act back, one act at a time, and "
             + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take. "
             // VX-846 — the list forms (VX-812, A-809-18/19): one call, an act per

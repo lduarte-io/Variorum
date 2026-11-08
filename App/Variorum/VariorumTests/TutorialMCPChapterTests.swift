@@ -1368,16 +1368,17 @@ struct TutorialMCPChapterTests {
             // word, PROVISIONAL F-902): the heading drops "From ‹client-name›" — the
             // setup menu's label where its table names the client, else MCP — so the
             // card says so, provider-neutral (O-4: no provider outside the setup).
-            #expect(text.contains("Near the bottom of the sidebar, a list for each client \u{2014} headed MCP, or "
-                                  + "From and its name where the setup menu names it \u{2014} keeps each place a "
+            // (The VX-914 gate round: its own sentence, no em dash — R-13s-22's rule above.)
+            #expect(text.contains("Near the bottom of the sidebar, a list for each client keeps each place that "
                                   + "client showed you or changed this session: click a row to go there, or the "
-                                  + "icon at its end to see what it asked or did."))
+                                  + "icon at its end to see what it asked or did. Each list is headed MCP, or From "
+                                  + "and the client's name where the setup menu names it."))
             #expect(MCPTrailCopy.header(client: placeholderName, count: 2) == "MCP \u{00B7} 2",
                     "a client the setup menu does not name reads MCP")
             for setup in MCPSetupClient.allCases {
                 guard let name = setup.expectedName else { continue }
                 #expect(MCPTrailCopy.header(client: name, count: 2) == "From \(setup.label) \u{00B7} 2",
-                        "“From and its name where the setup menu names it”")
+                        "“From and the client's name where the setup menu names it”")
             }
             #expect(MCPTrailSection.surfaceCapabilities == [.mcpOpenTrailPlace, .mcpShowTrailDetails],
                     "the row's text and its icon are its two doors")
