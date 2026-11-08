@@ -342,7 +342,10 @@ struct BookView: View {
                         structure.mode = .outline
                     },
                     // VX-303: the row menu's "Open in the full editor".
-                    onOpenInWrite: { openInWrite($0) })
+                    onOpenInWrite: { openInWrite($0) },
+                    // VX-901: the row ⋯ carries the note-title set — the
+                    // book's hosted asks and the composition's roads.
+                    noteDoors: noteDoors, noteRoads: noteRoads)
             case .outline:
                 // 13i-d U4: the archived line atop the content (zero height
                 // when nothing is set aside). 17y B3 (h): the Arrivals line

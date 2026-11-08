@@ -631,6 +631,13 @@ struct CapabilityRegistryTests {
             .union(MembershipChoiceSheet.surfaceCapabilities)
             // 13i-c U4 (the same class): the remove/release door's `.surface`
             // rows beyond the chip — the Index row's ⋯ menu and Manage Notes….
+            // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT, the same
+            // class: a new renderer is a new line): the Index row's ⋯ is the
+            // note-title table's DERIVED face, so this line now carries its
+            // every act (`BookNoteTitleMenuTable.capabilities(.indexRow)`) —
+            // eight of them newly doored `.surface` (openBeside ·
+            // openInNewWindow · toggleStar · renameNote · moveNoteToWing ·
+            // copyNoteToWing · exportNote · archiveNote).
             .union(BookIndexColumn.surfaceCapabilities)
             .union(ManageReadingPostsSheet.surfaceCapabilities)
             // 13i-c U4: the owned-by badge is the book ascent's third renderer.

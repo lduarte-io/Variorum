@@ -1154,7 +1154,9 @@ nonisolated enum CapabilityRegistry {
         // exactly the pair `.deleteNote` reaches.
         Capability(
             id: .archiveNote, verb: "Archive", scope: .post,
-            doors: [.contextMenu],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.contextMenu, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Archiving acts on a note's row \u{2014} "
                 + "right-click one in the Library. \(RecoveryPath.archivedSurface) keeps it, "
@@ -1172,7 +1174,9 @@ nonisolated enum CapabilityRegistry {
         // (AppSpec §9: a seal never refuses a retitle).
         Capability(
             id: .renameNote, verb: "Rename\u{2026}", scope: .post,
-            doors: [.contextMenu],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.contextMenu, .surface],
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: "Renaming acts on a note's row \u{2014} right-click one in the sidebar "
                 + "or the Library.",
@@ -1750,7 +1754,9 @@ nonisolated enum CapabilityRegistry {
         // twice, and Lenses/Compare are the same-note surfaces.
         Capability(
             id: .openBeside, verb: WorkspaceNaming.openBesideVerb, scope: .app,
-            doors: [.menuBar, .contextMenu],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.menuBar, .contextMenu, .surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "There's no other open note to put beside this one yet — "
                 + "open a second note and it can sit alongside.",
@@ -1799,7 +1805,9 @@ nonisolated enum CapabilityRegistry {
         // `always` as an oversight.
         Capability(
             id: .openInNewWindow, verb: "Open in New Window", scope: .app,
-            doors: [.contextMenu],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.contextMenu, .surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
         // 13f batch 6 — W5's QUICK NOTE. `always`, and honestly so: a pad
@@ -1845,7 +1853,9 @@ nonisolated enum CapabilityRegistry {
         // is the registry's; the per-TARGET condition is the surface's).
         Capability(
             id: .toggleStar, verb: StarCopy.verb, scope: .app,
-            doors: [.contextMenu, .palette],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.contextMenu, .palette, .surface],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: StarCopy.unavailableNote,
             availability: { ctx in ctx.canStarCurrent ? .act : .unavailable }),
@@ -2481,14 +2491,18 @@ nonisolated enum CapabilityRegistry {
         Capability(
             id: .moveNoteToWing, verb: WingCopy.moveToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar, .palette, .menuBar],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.contextMenu, .bottomBar, .palette, .menuBar, .surface],
             shortcutLabel: "\u{2325}\u{2318}L", takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: noteWingDoor),
         Capability(
             id: .copyNoteToWing, verb: WingCopy.copyToWingVerb, scope: .post,
             // 13i-d U6 (k): + the note ▾ menu in both bars (R6-2's grammar).
-            doors: [.contextMenu, .bottomBar, .palette, .menuBar],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.contextMenu, .bottomBar, .palette, .menuBar, .surface],
             shortcutLabel: "\u{21E7}\u{2325}\u{2318}L", takesAccess: .native,
             unavailableNote: WingCopy.noteUnavailableNote,
             availability: noteWingDoor),
@@ -2593,7 +2607,9 @@ nonisolated enum CapabilityRegistry {
         // `.toggleStar` / `.openInNewWindow` split).
         Capability(
             id: .exportNote, verb: "Export Note\u{2026}", scope: .post,
-            doors: [.menuBar, .palette, .bottomBar, .contextMenu],
+            // VX-901 (the VX-914 run, batch 3): + `.surface` — the book Index
+            // row's ⋯, the note-title table's DERIVED face (`BookIndexColumn`).
+            doors: [.menuBar, .palette, .bottomBar, .contextMenu, .surface],
             shortcutLabel: "\u{2325}\u{2318}S", takesAccess: .native,
             unavailableNote: "Export Note writes the note you have open to a file \u{2014} open one first.",
             availability: noteScoped),

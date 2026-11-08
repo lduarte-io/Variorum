@@ -32,6 +32,14 @@
 //  the ruling: Close / Close All (the Open list's own), an "Open" duplicating
 //  the title's click, Duplicate, Share with AI…, Tags…, versions, Export ▸.
 //
+//  VX-901 (the VX-914 run, batch 3 — her Nov 7 walkthrough: "the index ...
+//  line should get the same options"): the table has TWO FACES (the VX-829
+//  book-row precedent, P-1): the note-title right-click (the source face) and
+//  the book INDEX row's ⋯ — DERIVED from it in code, so the two cannot drift:
+//  the Index's own navigation pair (Show in Outline · Open in the full
+//  editor) leads the table's first group, every other door is the source
+//  face's. ONE renderer (`BookNoteTitleMenu`) draws both faces.
+//
 
 import SwiftUI
 import VariorumCore
@@ -60,6 +68,10 @@ struct BookNoteRoads {
 
 /// One door of the note-title menu.
 nonisolated enum BookNoteTitleDoor: Hashable, Sendable {
+    /// VX-901: the book Index row's OWN pair, its ⋯ face only — the
+    /// navigation doors the Index has always drawn (never registry acts:
+    /// local navigation, undeclared as shipped).
+    case showInOutline, openInFullEditor
     case openBeside, openInNewWindow, star
     case rename
     /// Move to Wing ▸ and Copy to Wing ▸ — one pair, drawn by the shared
@@ -75,6 +87,7 @@ nonisolated enum BookNoteTitleDoor: Hashable, Sendable {
     /// The registry acts the door draws.
     var capabilities: [CapabilityID] {
         switch self {
+        case .showInOutline, .openInFullEditor: []
         case .openBeside: [.openBeside]
         case .openInNewWindow: [.openInNewWindow]
         case .star: [.toggleStar]
@@ -88,6 +101,16 @@ nonisolated enum BookNoteTitleDoor: Hashable, Sendable {
         case .delete: [.deleteNote]
         }
     }
+}
+
+/// **Which face of the one table a host draws** (VX-901 — the VX-829
+/// `BookMenuFace` precedent).
+nonisolated enum BookNoteTitleFace: Sendable {
+    /// The four right-click sites (Outline's header and card, the navigator's
+    /// note rows, the collapsed one-note chapter row) — the SOURCE face.
+    case titleMenu
+    /// The book Index row's ⋯ (a `.surface` button menu) — DERIVED.
+    case indexRow
 }
 
 /// The facts the table reads: the book's kind (nil — not read yet) and which
@@ -121,7 +144,30 @@ nonisolated enum BookNoteTitleMenuTable {
     /// rides beside Move to Chapter (A-808-12 (h)).
     static let structureDoors: [BookNoteTitleDoor] = [.moveToChapter, .pin, .removeFromBook]
 
-    static func groups(_ facts: BookNoteTitleFacts) -> [[BookNoteTitleDoor]] {
+    /// VX-901: the Index row's own pair — what its ⋯ always led with.
+    static let indexLocalDoors: [BookNoteTitleDoor] = [.showInOutline, .openInFullEditor]
+
+    /// The groups a face draws, in order. **The Index face is DERIVED from
+    /// the title menu's** — the same groups with the Index's own pair at the
+    /// head of the FIRST (the opening doors' group — VX-829's `.open`
+    /// precedent, `derived[0].insert(.open, at: 0)`), so a door added to the
+    /// note-title menu comes over to the Index by construction.
+    static func groups(
+        _ facts: BookNoteTitleFacts, face: BookNoteTitleFace = .titleMenu
+    ) -> [[BookNoteTitleDoor]] {
+        var groups = sourceGroups(facts)
+        switch face {
+        case .titleMenu:
+            break
+        case .indexRow:
+            groups[0].insert(contentsOf: indexLocalDoors, at: 0)
+        }
+        return groups.filter { !$0.isEmpty }
+    }
+
+    /// The title menu's groups, UNFILTERED — the opening group stays in place
+    /// even when no road arrived (the Index face's pair rides into it).
+    private static func sourceGroups(_ facts: BookNoteTitleFacts) -> [[BookNoteTitleDoor]] {
         var opening: [BookNoteTitleDoor] = []
         if facts.canOpenBeside { opening.append(.openBeside) }
         if facts.canOpenInNewWindow { opening.append(.openInNewWindow) }
@@ -134,17 +180,39 @@ nonisolated enum BookNoteTitleMenuTable {
         }
         // Set apart, LAST — Delete the very last (the Open list's rule).
         groups.append([.archive, .delete])
-        return groups.filter { !$0.isEmpty }
+        return groups
     }
 
-    static func doors(_ facts: BookNoteTitleFacts) -> [BookNoteTitleDoor] {
-        groups(facts).flatMap { $0 }
+    static func doors(
+        _ facts: BookNoteTitleFacts, face: BookNoteTitleFace = .titleMenu
+    ) -> [BookNoteTitleDoor] {
+        groups(facts, face: face).flatMap { $0 }
     }
 
-    /// P-1's walk line: every act the menu can draw.
-    static var capabilities: [CapabilityID] {
-        (noteDoors + structureDoors).flatMap(\.capabilities)
+    /// P-1's walk line: every act a face can draw. The two faces draw the
+    /// same registry acts — the Index's own pair is local navigation.
+    static func capabilities(_ face: BookNoteTitleFace) -> [CapabilityID] {
+        let doors = noteDoors + structureDoors
+        switch face {
+        case .titleMenu: return doors.flatMap(\.capabilities)
+        case .indexRow: return (indexLocalDoors + doors).flatMap(\.capabilities)
+        }
     }
+
+    /// The title menu's walk line (VX-802's spelling, kept for its pins).
+    static var capabilities: [CapabilityID] { capabilities(.titleMenu) }
+}
+
+/// **The Index row's own pair's roads** (VX-901): the book's two navigation
+/// doors its ⋯ has always led with — Show this note focused in Outline, and
+/// the book's ONE open door (`BookView.openInWrite`, VX-303). Their words live
+/// here, beside the one renderer that draws them.
+struct BookNoteIndexActs {
+    static let showInOutlineWord = "Show in Outline"
+    static let openInFullEditorWord = "Open in the full editor"
+
+    var showInOutline: (String) -> Void
+    var openInFullEditor: (String) -> Void
 }
 
 // MARK: - The asks (the menu's state, hosted by the book)
@@ -201,6 +269,8 @@ final class BookNoteTitleDoors {
 // MARK: - The menu
 
 /// **The note-title menu** — the table's doors, each its registry act's word.
+/// ONE renderer for both faces (VX-901): the four right-click sites draw the
+/// source face, the Index row's ⋯ the derived one with its own pair's roads.
 struct BookNoteTitleMenu: View {
     let structure: BookStructureModel
     let postID: String
@@ -211,6 +281,10 @@ struct BookNoteTitleMenu: View {
     let pinned: Bool
     let doors: BookNoteTitleDoors
     var roads = BookNoteRoads()
+    /// VX-901: which face this host draws (the right-click sites: the source).
+    var face: BookNoteTitleFace = .titleMenu
+    /// VX-901: the Index face's own pair's roads (nil — those doors don't draw, P-2).
+    var indexActs: BookNoteIndexActs? = nil
     /// The window's wings brain (nil in a harness mount — no wing doors, P-2).
     @Environment(WingsModel.self) private var wings: WingsModel?
 
@@ -221,7 +295,7 @@ struct BookNoteTitleMenu: View {
             bookKind: structure.reading?.kind,
             canOpenBeside: roads.openBeside != nil,
             canOpenInNewWindow: roads.openInNewWindow != nil,
-            canStar: roads.starDoor != nil))
+            canStar: roads.starDoor != nil), face: face)
         ForEach(Array(groups.enumerated()), id: \.offset) { index, group in
             if index > 0 { Divider() }
             ForEach(group, id: \.self) { door in
@@ -235,6 +309,16 @@ struct BookNoteTitleMenu: View {
     @ViewBuilder
     private func item(_ door: BookNoteTitleDoor) -> some View {
         switch door {
+        case .showInOutline:
+            // VX-901: the Index's own pair, its words and roads as shipped.
+            if let acts = indexActs {
+                Button(BookNoteIndexActs.showInOutlineWord) { acts.showInOutline(postID) }
+            }
+        case .openInFullEditor:
+            // VX-303: the book's ONE open door (`BookView.openInWrite`).
+            if let acts = indexActs {
+                Button(BookNoteIndexActs.openInFullEditorWord) { acts.openInFullEditor(postID) }
+            }
         case .openBeside:
             if let open = roads.openBeside { Button(verb(.openBeside)) { open(postID) } }
         case .openInNewWindow:
