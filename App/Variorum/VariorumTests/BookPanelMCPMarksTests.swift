@@ -151,7 +151,7 @@ struct BookPanelMCPMarksTests {
     /// the press, not the sheet it would open).
     private func road(_ answered: AnsweredAsks) -> MCPShareRoad {
         MCPShareRoad(
-            canShare: true, indicatorOn: true, open: { _ in },
+            canShare: true, serverOn: true, open: { _ in },  // VX-900: the label renamed (was indicatorOn: true — the same state)
             sheet: { _, _ in AnyView(EmptyView()) }, revoke: { _ in },
             answerAsk: { answered.ids.append($0) })
     }

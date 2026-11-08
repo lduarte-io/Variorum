@@ -30,6 +30,11 @@
 //  that grant — confirming REPLACES it, T-U3-8) · Revoke. The open book has no
 //  grant to change or revoke: its row says where the switch lives.
 //
+//  VX-900 — THE ICON TWINS' ONE RULE: drawn while an approved client reaches
+//  the place, the server on or off; while the server's switch is OFF it wears
+//  the dimmed face and its hover appends "The MCP server is off."
+//  (`MCPServerOffFace`, beside the road) — exactly as the Private eye does.
+//
 
 import AppKit
 import SwiftUI
@@ -81,6 +86,13 @@ struct MCPSharedIcon: View {
         // so every host writes the icon once, unguarded, and a row nobody
         // reaches measures exactly what it did.
         if !reaches.isEmpty {
+            // VX-900 — the icon twins' one rule: drawn wherever an approved
+            // client reaches the place (the gated read every host holds);
+            // while the server's switch is OFF, the dimmed face and the hover
+            // saying so (`MCPServerOffFace`). Switch ON or no road: today's
+            // face, byte for byte. The popover is unchanged (F-900-C).
+            let dimmed = MCPServerOffFace.dimmed(serverOn: road?.serverOn)
+            let help = MCPServerOffFace.help(MCPShareCopy.iconHelp(reaches), dimmed: dimmed)
             Button {
                 presented.wrappedValue.toggle()
             } label: {
@@ -88,20 +100,20 @@ struct MCPSharedIcon: View {
                     .font(font ?? tokens.small)
                     .fontWeight(Self.rowWeight)
                     .imageScale(Self.rowScale)
-                    .foregroundStyle(tokens.accent)
+                    .foregroundStyle(MCPServerOffFace.ink(tokens.accent, tokens, dimmed: dimmed))
                     .padding(.horizontal, 2)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .help(MCPShareCopy.iconHelp(reaches))
-            .accessibilityLabel(MCPShareCopy.iconHelp(reaches))
+            .help(help)
+            .accessibilityLabel(help)
             .popover(isPresented: presented, arrowEdge: arrowEdge) {
                 MCPReachPopover(reaches: reaches, road: road, onChanged: onChanged) {
                     presented.wrappedValue = false
                 }
                 .sharedIconPopoverProbe(reaches)
             }
-            .sharedIconAnchorProbe()
+            .sharedIconAnchorProbe(dimmed: dimmed, help: help)
         }
     }
 }
@@ -143,34 +155,58 @@ enum MCPSharedIconProbe {
             .map { $0.convert($0.bounds, to: nil) }
     }
 
+    /// **VX-900 — the face each drawn icon wears** (dimmed or not, and the
+    /// hover it carries — the accessibility label is the same string),
+    /// recorded on its anchor as it renders.
+    struct Face: Equatable {
+        let dimmed: Bool
+        let help: String
+    }
+
+    /// The faces of the icons drawn in `window` now, top to bottom.
+    static func faces(in window: NSWindow) -> [Face] {
+        anchors.removeAll { $0.view == nil }
+        return anchors.compactMap { $0.view as? MCPSharedIconAnchor.AnchorView }
+            .filter { $0.window === window && !$0.isHiddenOrHasHiddenAncestor }
+            .sorted { $0.convert($0.bounds, to: nil).midY > $1.convert($1.bounds, to: nil).midY }
+            .map(\.face)
+    }
+
     static func presentations(of client: String) -> Int {
         presented[client] ?? 0
     }
 }
 
-/// The anchor behind the icon's button: transparent to every click.
+/// The anchor behind the icon's button: transparent to every click. VX-900:
+/// it carries the face the icon drew (the probe's `faces(in:)`).
 private struct MCPSharedIconAnchor: NSViewRepresentable {
+    let face: MCPSharedIconProbe.Face
+
     final class AnchorView: NSView {
+        var face = MCPSharedIconProbe.Face(dimmed: false, help: "")
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 
     func makeNSView(context: Context) -> AnchorView {
         let view = AnchorView()
+        view.face = face
         MCPSharedIconProbe.anchors.removeAll { $0.view == nil }
         MCPSharedIconProbe.anchors.append(.init(view))
         return view
     }
 
-    func updateNSView(_ view: AnchorView, context: Context) {}
+    func updateNSView(_ view: AnchorView, context: Context) {
+        view.face = face
+    }
 }
 #endif
 
 extension View {
-    /// The icon's place, for the DEBUG click pins (a no-op outside DEBUG).
+    /// The icon's place and face, for the DEBUG pins (a no-op outside DEBUG).
     @ViewBuilder
-    fileprivate func sharedIconAnchorProbe() -> some View {
+    fileprivate func sharedIconAnchorProbe(dimmed: Bool, help: String) -> some View {
         #if DEBUG
-        background(MCPSharedIconAnchor())
+        background(MCPSharedIconAnchor(face: .init(dimmed: dimmed, help: help)))
         #else
         self
         #endif

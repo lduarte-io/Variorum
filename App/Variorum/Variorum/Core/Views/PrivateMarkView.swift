@@ -33,7 +33,12 @@
 //    by `PrivateMarkHold` over the drawn ids; with no approved client the
 //    read stops at the grants store and nothing is drawn). The menu's
 //    Private row keeps VX-641 (always on a marked thing), so the un-private
-//    road survives while the mark is hidden.
+//    road survives while the mark is hidden;
+//  - VX-900 (her ruling, the #264 sitting — "they should both be
+//    standardized"): the twins share the server-off face too — while the MCP
+//    server's switch is OFF the eye still draws, in the dimmed ink, its hover
+//    appending "The MCP server is off." (`MCPServerOffFace`, the shared
+//    icon's own rule).
 //
 //  Pieces (P-9): the RULE (`PrivateMarkFace` — pure), the WORDS
 //  (`PrivateMarkCopy`, in PrivateMark.swift beside the row's), the ACT
@@ -228,10 +233,19 @@ struct PrivateMarkView: View {
 
     let door: PrivateMarkDoor?
     let tokens: VoiceTokens
+    /// VX-900: the window's road — only for the server's switch (the face).
+    @Environment(\.mcpShareRoad) private var road
 
     var body: some View {
         if let door {
-            let help = PrivateMarkFace.help(door.mark)
+            // VX-900 — the icon twins' one rule (the shared icon's twin face):
+            // while the server's switch is OFF the eye wears the dimmed ink
+            // and its hover appends the server-off sentence; ON, or no road,
+            // today's face byte for byte. A via-book eye dims exactly as an
+            // own mark does — never a muted twin of it. Its press is
+            // unchanged in both states (un-privating needs no server).
+            let dimmed = MCPServerOffFace.dimmed(serverOn: road?.serverOn)
+            let help = MCPServerOffFace.help(PrivateMarkFace.help(door.mark), dimmed: dimmed)
             Button {
                 Task {
                     await PrivateMarkAct.perform(
@@ -241,7 +255,7 @@ struct PrivateMarkView: View {
             } label: {
                 ClosedEyeGlyph()
                     .stroke(style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(tokens.ink)
+                    .foregroundStyle(MCPServerOffFace.ink(tokens.ink, tokens, dimmed: dimmed))
                     .frame(width: Self.glyphSize.width, height: Self.glyphSize.height)
                     .padding(.horizontal, 2)
                     .padding(.vertical, 3)
@@ -252,7 +266,7 @@ struct PrivateMarkView: View {
             .alignmentGuide(.firstTextBaseline) { $0[.bottom] - 3 }
             .help(help)
             .accessibilityLabel(help)
-            .privateMarkProbe(door)
+            .privateMarkProbe(door, dimmed: dimmed, help: help)
         }
     }
 }
@@ -301,19 +315,38 @@ nonisolated struct ClosedEyeGlyph: Shape {
 @MainActor
 enum PrivateMarkProbe {
     static var drawn: [String: PrivateMarkFace.Mark] = [:]
-    static func reset() { drawn = [:] }
+    /// **VX-900 — the face each subject's mark wears** (dimmed or not, and
+    /// the hover — the accessibility label is the same string), kept beside
+    /// `drawn` on the same appear/change/disappear rule.
+    struct Face: Equatable {
+        let dimmed: Bool
+        let help: String
+    }
+    static var faces: [String: Face] = [:]
+    static func reset() {
+        drawn = [:]
+        faces = [:]
+    }
 }
 #endif
 
 extension View {
     @ViewBuilder
-    fileprivate func privateMarkProbe(_ door: PrivateMarkDoor) -> some View {
+    fileprivate func privateMarkProbe(_ door: PrivateMarkDoor, dimmed: Bool, help: String) -> some View {
         #if DEBUG
         let id = door.subjectID
         let mark = door.mark
-        onAppear { PrivateMarkProbe.drawn[id] = mark }
-            .onChange(of: mark) { _, now in PrivateMarkProbe.drawn[id] = now }
-            .onDisappear { if PrivateMarkProbe.drawn[id] == mark { PrivateMarkProbe.drawn[id] = nil } }
+        let face = PrivateMarkProbe.Face(dimmed: dimmed, help: help)
+        onAppear {
+            PrivateMarkProbe.drawn[id] = mark
+            PrivateMarkProbe.faces[id] = face
+        }
+        .onChange(of: mark) { _, now in PrivateMarkProbe.drawn[id] = now }
+        .onChange(of: face) { _, now in PrivateMarkProbe.faces[id] = now }
+        .onDisappear {
+            if PrivateMarkProbe.drawn[id] == mark { PrivateMarkProbe.drawn[id] = nil }
+            if PrivateMarkProbe.faces[id] == face { PrivateMarkProbe.faces[id] = nil }
+        }
         #else
         self
         #endif
