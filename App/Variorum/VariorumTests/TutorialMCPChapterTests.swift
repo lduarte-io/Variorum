@@ -1315,7 +1315,16 @@ struct TutorialMCPChapterTests {
                     "a chapter sharing a row with its one note wears that note's icon")
             #expect(text.contains("(through the Home wing grant, say)"))
             #expect(text.contains("with \(MCPShareCopy.change) and \(MCPShareCopy.revoke)"))
-            #expect(text.contains("the right end of the context bar above the page, or a lock when the note is Private"))
+            // VX-900 (A JUSTIFIED EDIT — F-900-D, PROVISIONAL wording): the
+            // masthead no longer waits for the server ("while the door is
+            // open" is gone), the lock is the closed eye since VX-831, and the
+            // server-off face is taught whole; no em dash (R-13s-22, the
+            // chapter's own sweep above).
+            #expect(text.contains("Inside a note, the same icon sits at the right end of the context bar above the "
+                                  + "page, or a closed eye when the note is Private. While the server is off, both "
+                                  + "still show, greyed out."))
+            #expect(!text.contains("while the door is open"), "the masthead's icon no longer waits for the server")
+            #expect(!text.contains("or a lock when the note is Private"), "the lock retired into the eye (VX-831)")
             // Stage B R1 B10: Activity is coarse and capped (the store keeps the
             // newest `mcpActivityCap` lines), so the lesson says "recently",
             // never "every call".

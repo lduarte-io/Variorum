@@ -3052,7 +3052,11 @@ enum TutorialSeeder {
             // VX-197 U8b: "a book or a gathering" (VX-184 U2's carry, VX-185)
             // and the icon's rows as built — the Library (VX-268, VX-281), the
             // Pool, the book panel with its one-note chapter rows (VX-330), the
-            // ⌘L sheet's wings.
+            // ⌘L sheet's wings. VX-900 (F-900-D, PROVISIONAL wording, her
+            // bundle; no em dash — R-13s-22): the masthead draws while a client
+            // is approved, the server on or off (it no longer waits for "the
+            // door is open"), the lock is the closed eye since VX-831, and the
+            // server-off face is taught whole.
             "On the Bookcase, a small icon beside a book or a gathering means a "
             + "client can reach it. The same icon shows on notes, books and "
             + "gatherings in the Library, on notes in the Pool, on the notes listed "
@@ -3060,9 +3064,10 @@ enum TutorialSeeder {
             + "that \u{2318}L opens. In that panel, a chapter that shares a row with "
             + "its only note wears the note's icon. Point at the icon to see who and how "
             + "far; click it for the details, including why (through the Home wing "
-            + "grant, say), with Change\u{2026} and Revoke. Inside a note, while "
-            + "the door is open, the same icon sits at the right end of the context "
-            + "bar above the page, or a lock when the note is Private.",
+            + "grant, say), with Change\u{2026} and Revoke. Inside a note, the same "
+            + "icon sits at the right end of the context bar above the page, or a "
+            + "closed eye when the note is Private. While the server is off, both "
+            + "still show, greyed out.",
 
             // VX-197 U8b — VX-261: a client's own recent acts, and the line
             // Activity says for them (P-VX261-2).
