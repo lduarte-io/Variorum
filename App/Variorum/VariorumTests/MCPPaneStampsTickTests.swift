@@ -20,6 +20,7 @@
 
 import Foundation
 import Testing
+import VariorumCore
 @testable import Variorum
 
 @Suite("VX-401 — Settings ▸ MCP's relative stamps read live")
