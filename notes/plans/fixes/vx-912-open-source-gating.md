@@ -103,7 +103,7 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 |---|---|---|
 | 0 | Kickoff: worktree, in-flight row, slot granted, sitting rulings R-912-1..9, VX-508 act | DONE (this commit) |
 | B0 | VX-751 trimmed re-verify (orchestrator) | **DONE** — `notes/plans/fixes/vx-912-b0-security-verify.md` (guard verified; door inventory; 4 flags → R-912-10/-11; 2 stale closes → R-912-12); VX-751 closes at the merge |
-| B1 | VX-604 host crash + false-green gate | IN PROGRESS — record at "## B1 record" (end of file); design settled, pieces landing |
+| B1 | VX-604 host crash + false-green gate | BUILT + PINNED headless — **STAGE REQUEST PENDING** ("## B1 record", end of file): legs A–F |
 | B2 | VX-892 readers + VX-893 belt/rank/sized corners | NOT STARTED |
 | B3 | VX-752 + LICENSE rider | NOT STARTED |
 | B4 | VX-891 + VX-396 (the MCP riders) | NOT STARTED |
@@ -124,7 +124,7 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 
 ## B1 record
 
-**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind was run (no stage claim — the brief's rule); every app-suite claim below is **PENDING** on the STAGE REQUEST at the end of this section. The phone host becomes inert too (the bootstrap is shared) — its simulator leg is in the stage request, unverified.
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind was run and no Debug app was launched (no stage claim — the brief's rule): every app-suite and use claim below is **PENDING** on the STAGE REQUEST at the end of this section (legs A–F), including the red-on-old run of R-604-H, the touched-suite set, the whole target, the phone (its host becomes inert too — the bootstrap is shared) and the normal-launch capture. Done and verified headless: both halves built and pinned; the gate's pins and its four reverts run; Mac + phone `build-for-testing` green.
 
 ### LIVE STATUS
 
@@ -132,9 +132,9 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 |---|---|---|
 | P0 | This record + the design (below) | DONE (`cf957985e`) |
 | P1 | The inert test host: `AppBootstrap.Launch` + `State.hostingTests` + the three roots' faces + `HostLaunchSettle` + the Settings suite's header | DONE (`fae643a05`) — `build-for-testing` GREEN headless, Mac (`scratchpad/b1/dd`) AND phone (generic iOS Simulator, `scratchpad/b1/dd-phone`), no warning in a touched file; behavior PENDING the stage |
-| P2 | The app pins (`TestHostInertTests`) + the named revert R-604-H, built for testing headless | IN-PROGRESS — the pins built green inside P1's build (uncommitted until this piece's commit); R-604-H's tree NEXT |
+| P2 | The app pins (`TestHostInertTests`) + the named revert R-604-H, built for testing headless | DONE (`c631b621a`; R-604-H this commit) — the pins built green in P1's build; R-604-H's tree built for testing into `scratchpad/b1/dd-revH` (patch `scratchpad/b1/reverts/r-604-h.patch`), source restored byte-identical (sha `b4b54b71`); the runs are the stage's |
 | P3 | The false-green gate `Tools/assert-tests-ran` + its headless pins (`TestRunGateTests`, core) + the named reverts R-604-G0/-GC/-GS/-GO | DONE (`256565661`; reverts this commit) — 7/7 GREEN headless; all four reverts RED on exactly their named pins; restored byte-identical (sha `5a975771`) |
-| P4 | The STAGE REQUEST (the verification runs, written below) | NOT STARTED |
+| P4 | The STAGE REQUEST (the verification runs, written below) | DONE (this commit) — legs A–F **PENDING** the stage |
 
 ### The mechanism (re-read on this tip, not re-derived)
 
@@ -163,3 +163,86 @@ The VX-601 rev-tree launch deaths (`HostLaunchSettle`'s doc, `PaneLifecycleTests
 | R-604-H | the production init without its inert arm (`if launch == .hostingTests` → `if false`: the pre-fix behavior) | `TestHostInertTests`: `theProductionBootstrapBeginsNoOpenUnderATestRunner` (also red on the untouched pre-fix tree — it names only old API), `itLandsInHostingTestsAndEveryDoorStaysShut`, `theSettingsFaceKeepsThePanesGeometry`. GREEN on both by design: `theDecisionIsTheDependencyLibrarysOwnTestRule` (the pure decision — a guard pin, the revert leaves it in place) | STAGE (in the request) |
 
 The gate's reverts ran headless (`swift test --filter TestRunGateTests`, logs `scratchpad/b1/reverts/run-*.log`; the helper `scratchpad/b1/reverts/apply.py` refuses an anchor found other than once).
+
+### The invocation convention (the gate's header carries the same text; adopting it in the skills / the resiliency protocol is the closeout's call — no other doc was edited)
+
+Every app-suite run a gate reads names its result bundle and is judged by the gate, never by xcodebuild's exit status or a grep of "Test run with N tests":
+
+```zsh
+cd App/Variorum
+R=<a fresh path>.xcresult        # xcodebuild refuses an existing bundle
+only=(-only-testing:VariorumTests/SuiteA -only-testing:VariorumTests/SuiteB)   # TYPE names, a zsh array
+xcodebuild test -scheme Variorum -destination 'platform=macOS' -resultBundlePath "$R" "${only[@]}" 2>&1 | tee "$LOG"
+print -r -- "xcodebuild exit: ${pipestatus[1]}"
+../../Tools/assert-tests-ran "$R" "$LOG" --expect-at-least <the tests the named suites hold>
+```
+
+Exit 0 green · 1 red · 2 zero executed (or under the expected count, or no count establishable) · 3 host crash · 4 usage. `test-without-building` and the phone's runs take the same shape. The gate counts EXECUTED (passed + failed + expected failures; skipped never), treats the "Issues recorded without an associated test or suite" pseudo-test as a failure and never a test, and fails closed.
+
+### Row dispositions
+
+| Row | Disposition |
+|---|---|
+| VX-604 (1) — the host crash | **FIXED** (`fae643a05`) — the inert host; pins `TestHostInertTests` (`c631b621a`), red-on-old by R-604-H and, for the first pin, on the untouched pre-fix tree. **Behavior PENDING the stage (legs A–C, F).** |
+| VX-604 (2) — the zero-executed false green | **FIXED** (`256565661`) — `Tools/assert-tests-ran`; pins `TestRunGateTests` 7/7 headless, red under R-604-G0/-GC/-GS/-GO; read against the two real pre-fix bundles (RED, 36 and 11 executed, the issue at `AppSession.swift:833` named). |
+| The false RED of 2026-11-05/-08 (found tonight: the same cause) | **FIXED by (1)** — PENDING leg D: no "Issues recorded without an associated test or suite" node in a whole-target bundle. |
+| The phone's test host (the shared bootstrap makes it inert too) | **BUILT** (phone `build-for-testing` green); **PENDING leg E**. If the orchestrator prefers the Mac alone this batch, the asymmetry is one `#if os(macOS)` in `Launch.decide`'s caller — not recommended (the phone host has the identical latent defect). |
+| `NoteExportMenuGateTests` (VX-603's probe, `.disabled` for the VX-604 class) | **DEFERRED to VX-603** — its blocker is gone; re-enabling and reading it is VX-603's unit (App shell), not this one. |
+| Whether `isTesting` fires inside an XCUIApplication-launched app process | **DEFERRED — owner: the orchestrator** (unverified external fact). No UI-test target runs in any gate: the Variorum scheme's test action is `VariorumTests` only; the phone's UI targets are the Stage 0 throwaway spike and Xcode templates. If a UI-test target is ever revived, check it first. |
+| The face's sentence "Running tests — no library is open." | Not product copy (rendered only in a test runner's host); sentence case; no QUESTIONS entry. |
+
+### STAGE REQUEST (B1 — VX-604). Claim name: `vx-912-b1-verify`. Size: four Mac `test-without-building` runs (two of one 4-test suite, one of 12 suites / 56 tests, one whole target), one phone whole-target run, one Debug launch with one capture. Nothing needs building at the stage — every tree is built.
+
+Before anything: the strict instance checks (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"`); real-store instances untouched. Common prefix for every leg:
+
+```zsh
+cd <home>/dev/variorum-vx-912/App/Variorum
+B=<home>/dev/variorum-vx-912/scratchpad/b1; S=$B/stage; mkdir -p $S
+```
+
+**Leg A — RED ON OLD: the previously-crashing shape (a Swift-Testing-only, one-suite run) on the R-604-H build** (`$B/dd-revH`, built with the patch `$B/reverts/r-604-h.patch` applied; the source tree is clean):
+```zsh
+only=(-only-testing:VariorumTests/TestHostInertTests)
+xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath $B/dd-revH -resultBundlePath $S/A-revH.xcresult "${only[@]}" 2>&1 | tee $S/A-revH.log
+print -r -- "xcodebuild exit: ${pipestatus[1]}"
+../../Tools/assert-tests-ran $S/A-revH.xcresult $S/A-revH.log --expect-at-least 4
+```
+Expected NOT GREEN — any of: (a) exit 3, the host crash (the 2026-10-27 03:45 shape); (b) exit 2, zero executed (the 03:46 shape); (c) exit 1 with `theProductionBootstrapBeginsNoOpenUnderATestRunner`, `itLandsInHostingTestsAndEveryDoorStaysShut`, `theSettingsFaceKeepsThePanesGeometry` FAILED and `theDecisionIsTheDependencyLibrarysOwnTestRule` passed, likely with the issue outside every test at `AppSession.swift:833`. Record which. (On this tree the host and the pin's production bootstraps open the dev store on the READ-ONLY road — exactly what every pre-fix test launch did; nothing writes.)
+
+**Leg B — the same shape on the FIXED build** (`$B/dd` = HEAD):
+```zsh
+only=(-only-testing:VariorumTests/TestHostInertTests)
+xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath $B/dd -resultBundlePath $S/B-fixed.xcresult "${only[@]}" 2>&1 | tee $S/B-fixed.log
+print -r -- "xcodebuild exit: ${pipestatus[1]}"
+../../Tools/assert-tests-ran $S/B-fixed.xcresult $S/B-fixed.log --expect-at-least 4
+```
+Expected GREEN (0): `executed 4 (passed 4 …) - skipped 0`, no FAILURE line (in particular no issue outside every test), no HOST CRASH MARK.
+
+**Leg C — the touched set, one run, the fixed build** (56 tests: TestHostInert 4 · SettingsTitleClearance 1 · SettingsLockClose 5 · ViewMenuSeparator 1 · AppMenuServices 2 · FindAndReplace 17 · HelperWindowTheme 3 · AppBootstrapOffMain 4 · OneRefreshAuthorityComposition 4 · WordsConcealedClipboard 4 · EditorUndoLifecycle 4 · PaneCaretPress 7):
+```zsh
+only=(-only-testing:VariorumTests/TestHostInertTests -only-testing:VariorumTests/SettingsTitleClearanceTests -only-testing:VariorumTests/SettingsLockCloseTests -only-testing:VariorumTests/ViewMenuSeparatorTests -only-testing:VariorumTests/AppMenuServicesTests -only-testing:VariorumTests/FindAndReplaceTests -only-testing:VariorumTests/HelperWindowThemeTests -only-testing:VariorumTests/AppBootstrapOffMainTests -only-testing:VariorumTests/OneRefreshAuthorityCompositionTests -only-testing:VariorumTests/WordsConcealedClipboardTests -only-testing:VariorumTests/EditorUndoLifecycleTests -only-testing:VariorumTests/PaneCaretPressTests)
+xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath $B/dd -resultBundlePath $S/C-touched.xcresult "${only[@]}" 2>&1 | tee $S/C-touched.log
+print -r -- "xcodebuild exit: ${pipestatus[1]}"
+../../Tools/assert-tests-ran $S/C-touched.xcresult $S/C-touched.log --expect-at-least 56
+```
+Expected GREEN, executed 56. What each proves: the menu suites — the inert host still builds its real menus; `SettingsTitleClearanceTests` — the real Settings window over the inert face keeps its geometry (if RED, its printed `VX-225 title field origin=…` line is the evidence I need — resume me); `EditorUndoLifecycleTests`/`PaneCaretPressTests` — `HostLaunchSettle` settles at once (the first mounted test no longer carries a ~20 s settle); the source pins — the bootstrap's composition lines intact.
+
+**Leg D — the whole Mac target, the fixed build** (nov7's whole-target class; may fold into the merge gate at the orchestrator's call):
+```zsh
+xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath $B/dd -resultBundlePath $S/D-whole.xcresult 2>&1 | tee $S/D-whole.log
+print -r -- "xcodebuild exit: ${pipestatus[1]}"
+../../Tools/assert-tests-ran $S/D-whole.xcresult $S/D-whole.log --expect-at-least <the last whole-target baseline's executed count>
+```
+The observable of the fix across the target: NO "Issues recorded without an associated test or suite" node (the gate prints it if present). Failures expected only among the named false reds — VX-850 (MCP socket timing), VX-661 (the encoder SIGSEGV — the gate will print a HOST CRASH MARK for it; name it), VX-855 (purge-sweep teardown SIGSEGV). Any other red: name it with its Executed counts and resume me.
+
+**Leg E — the phone's whole target, the fixed build** (`$B/dd-phone`, built for the generic iOS Simulator; if `test-without-building` refuses the concrete destination, `build-for-testing` for it first — headless, no stage):
+```zsh
+xcodebuild test-without-building -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -derivedDataPath $B/dd-phone -resultBundlePath $S/E-phone.xcresult 2>&1 | tee $S/E-phone.log
+print -r -- "xcodebuild exit: ${pipestatus[1]}"
+../../Tools/assert-tests-ran $S/E-phone.xcresult $S/E-phone.log
+```
+Expected: no issue outside every test; failures only the standing `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`.
+
+**Leg F — USE: an app launch is never inert** (the fixed build's Debug app, `$B/dd/Build/Products/Debug/Variorum.app`, the dev store, launched the WalkKit way — not under a test runner): one capture to `notes/plans/vx-912-b1-screens/F-launch.png` (gitignore the folder as the repo's screens folders are): the dev store opens as it always does (its Bookcase, or its Castle lobby — `~/.variorum/dev-castle.env` if it asks), NEVER the sentence "Running tests — no library is open." Dismiss a What's New sheet if one shows; quit it after. One voice suffices: the inert face is never shown to a user, and the launch road is voice-independent.
+
+RELEASE line wanted: every leg's gate VERDICT line, every failing test named with its Executed counts.
