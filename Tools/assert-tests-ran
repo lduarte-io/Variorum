@@ -99,6 +99,7 @@ class Run:
         self.failures = []        # one line each
         self.crashes = []         # one line each
         self.notes = []
+        self.bundles = set()      # the bundles already read into this run
 
     def crash(self, where, text):
         line = text.strip().splitlines()[0] if text.strip() else text
@@ -203,6 +204,11 @@ def xcresulttool(kind, bundle):
 
 
 def read_bundle(run, bundle):
+    # One read per bundle per run, whatever the order the inputs name it in (a log names its own bundle).
+    real = os.path.realpath(bundle)
+    if real in run.bundles:
+        return
+    run.bundles.add(real)
     try:
         read_tree(run, xcresulttool("tests", bundle))
     except (RuntimeError, ValueError) as error:
@@ -234,7 +240,7 @@ def read_log(run, text):
     swift_runs = []
     verdicts = []
     bundle = None
-    host_noted = False
+    host_noted = orphan_noted = False
     lines = text.splitlines()
     for index, line in enumerate(lines):
         if CRASH_RE.search(line):
@@ -271,7 +277,8 @@ def read_log(run, text):
                 if found:
                     bundle = found.group(1)
                     break
-        if ORPHAN in line:
+        if ORPHAN in line and not orphan_noted:
+            orphan_noted = True
             run.failures.append(f'an issue recorded outside every test ("{ORPHAN}")')
         if HOST_NOTE in line and not host_noted:
             host_noted = True
