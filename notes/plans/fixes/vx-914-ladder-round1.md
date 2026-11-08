@@ -102,3 +102,15 @@ No BLOCKER. Nothing tracks word-level change, copies text across entities, or sc
 - **N2 (NIT) — CONFIRMED, fix session:** the fold-in sentence over-claims under hide-owned/archived assembly; minimal truth fix (the sentence must be unconditionally true), PROVISIONAL — it revises the fold-in already flagged for her bless, so the bundle shows before → after.
 - **N3 (NIT) — CONFIRMED (the hollow-pin class), fix session:** the helper's ⌘⏎ check is green on old (Choose This Take's row already shows ⌘⏎), so the assertion is TIGHTENED to discriminate (the quick-entry row's own presence) or dropped with the reason — recorded per the hallucination guard, never left as false evidence.
 - **N4 (NIT) — ACCEPTED as a walk row:** the closing walk presses the REAL ⌘⏎ chord through the app's dispatch (the mounted pin's forwarding shortcut is named in the walk plan).
+
+## LADDER ROUND 1 — FIX ROUND (the implementer)
+
+*A fresh `opus-implementer` session, 2026-11-08, briefed on the DISPOSITIONS above and nothing else (F2 and F4 were the orchestrator's; N4 is a walk row). Headless only — `swift build` / `build-for-testing`, never `xcodebuild test`: every App pin's RUN is round 2's / the merge gate's, PENDING(gate). Red-on-old is stated per fix with HOW it was shown (by evaluation, or by construction — never claimed as a suite run).*
+
+| Fix | Mechanism as fixed | Pin | Status |
+|---|---|---|---|
+| F1 | — | — | NOT-STARTED — the mode row (tabs + dial, one Layout) draws only once the book's row has landed; `everyName`'s doc corrected; a pre-landing-sampling mounted pin |
+| F3 | — | — | NOT-STARTED — the owned delete confirm reads `Queries.memberNoteSplit` and speaks the receipt's split grammar |
+| N1 | — | — | NOT-STARTED — "the client's name" → "the setup menu's label" |
+| N2 | — | — | NOT-STARTED — the live gathering's empty line made unconditionally true |
+| N3 | — | — | NOT-STARTED — the helper check re-aimed at the act's own row |
