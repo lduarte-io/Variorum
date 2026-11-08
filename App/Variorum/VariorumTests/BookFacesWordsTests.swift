@@ -315,7 +315,12 @@ struct BookCopyFamilyTests {
             let liveBook = try await reading(book.id)
             let liveGathering = try await reading(gathering.id)
             #expect(BookEmptyStateCopy.line(for: liveBook) == "This book has no notes yet.")
-            #expect(BookEmptyStateCopy.line(for: liveGathering) == "No note matches this gathering yet.")
+            // The VX-914 ladder's N2 (A JUSTIFIED EDIT — the fold-in's words made
+            // unconditionally true): the line says the gathering SHOWS nothing and
+            // never claims nothing MATCHES (the arm below is a reachable empty
+            // gathering whose rule does match).
+            #expect(BookEmptyStateCopy.line(for: liveGathering) == "This gathering shows no notes yet.")
+            #expect(BookEmptyStateCopy.gathering.lowercased().contains("match") == false)
             try ops.archiveReading(gathering.id)
             try ops.archiveReading(book.id)
             let archivedGathering = try await reading(gathering.id)
@@ -326,6 +331,36 @@ struct BookCopyFamilyTests {
             #expect(BookEmptyStateCopy.line(for: archivedBook)
                     == "This book has no notes yet.", "an archived BOOK still holds its notes")
             #expect(BookEmptyStateCopy.line(for: nil) == BookEmptyStateCopy.book, "not read yet")
+        }
+    }
+
+    /// **The VX-914 ladder's N2 — where the old fold-in words were false:** a
+    /// live gathering whose rule DOES match notes but whose assembly hides them
+    /// all — a note an owned book holds, under the gathering's own hide-owned
+    /// toggle (`OwnershipHideAndBadgesTests` pins the exclusion), and an
+    /// archived note (the assembly reads only un-archived notes) — draws the
+    /// empty state, and its line ("No note matches this gathering yet." before)
+    /// now says only what is true there.
+    @Test func aGatheringWhoseMatchesAreAllHiddenIsNotSaidToMatchNothing() async throws {
+        try await withWordsWorld { session, db in
+            let ops = session.operations
+            let tag = try ops.createTag(name: "t")
+            let gathering = try ops.createReading(
+                name: "G", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(tag.id)))
+            let owned = try ops.createReading(name: "Owned", kind: .book)
+            try ops.setReadingOwned(owned.id, owned: true)
+            let claimed = try ops.createPost(title: "claimed")
+            _ = try ops.addPostToReading(claimed.id, to: owned.id)
+            let shelved = try ops.createPost(title: "put away")
+            for note in [claimed, shelved] { _ = try ops.applyTag(tag.id, toPost: note.id) }
+            try ops.archiveContainer(shelved.id)
+            try ops.setReadingHideOwned(gathering.id, true)
+            let shown = try await db.read { [id = gathering.id] in
+                try Queries.assembleReading($0, readingID: id).map(\.postID)
+            }
+            #expect(shown.isEmpty, "every match is hidden, so the face draws the empty state")
+            let live = try await db.read { [id = gathering.id] in try Reading.fetchOne($0, key: id) }
+            #expect(BookEmptyStateCopy.line(for: live) == "This gathering shows no notes yet.")
         }
     }
 

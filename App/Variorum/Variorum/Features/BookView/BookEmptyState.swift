@@ -13,6 +13,14 @@
 //  book with no notes either — it speaks its own kind. A book's line is
 //  byte-for-byte the shipped one. PROVISIONAL wording, her bundle.
 //
+//  The VX-914 ladder's N2: the fold-in first said "No note matches this
+//  gathering yet." — false when notes DO match the rule but the assembly
+//  hides them (a gathering showing no owned notes, by its own toggle or the
+//  global default, whose matches are all owned; or matches that are all
+//  archived — the assembly reads only un-archived notes). The line says what
+//  is true whenever the face draws it — the gathering shows nothing — and
+//  claims nothing about why.
+//
 
 import VariorumCore
 
@@ -22,8 +30,10 @@ nonisolated enum BookEmptyStateCopy {
     /// An archived gathering — it shows nothing while archived.
     static let archivedGathering =
         "This gathering is archived, so it shows nothing until you unarchive it."
-    /// A live gathering whose rule matches nothing (the fold-in).
-    static let gathering = "No note matches this gathering yet."
+    /// A live gathering that shows nothing (the fold-in) — its rule matching
+    /// nothing, or every match hidden (owned notes it hides, archived notes);
+    /// the line is true of all of them (the ladder's N2).
+    static let gathering = "This gathering shows no notes yet."
 
     /// The line for the book on screen (nil — not read yet — is a book's).
     static func line(for reading: Reading?) -> String {
