@@ -6,6 +6,16 @@
 
 ## Findings (in the order found; ranked at the end)
 
+### F2 — [MAJOR] · `Features/Shelf/QuickEntryBar.swift:500` (VX-911's `fileButton`) · a bare `.fixedSize()` with no line policy — P-8's letter broken, and the standing sweep pin `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` goes RED on this tip
+
+**What's wrong.** `fileButton` ends `.help(…) · .accessibilityLabel(act.verb) · // comment · .padding(.top, …) · .fixedSize()` — no `lineLimit(` within the four lines above the site or on it. P-8 (the 13b constitution, pasted verbatim in the run record): *"Chrome `fixedSize` texts always carry a `lineLimit` (the b6dae25 class)."* The b6dae25 hazard is the window-minimum probe: an unlimited text measured at near-zero width reports one character per line, and `fixedSize` hands that ideal straight to the layout — here inside the Bookcase's/Library's band, which sits in the main window.
+
+**Evidence (traced, run).** I replicated the pin's exact rule (`ChromeLineLimitTests.swift:73–103`: every code line containing `.fixedSize()` under `App/Variorum/Variorum/`, a `lineLimit(` within `lines[i-4...i]`) as a throwaway script over both trees: `origin/main` (`~/dev/variorum` at `8386ec28e`) — 131 sites, **0 offenders**; this tip — 133 sites, **1 offender: `Variorum/Features/Shelf/QuickEntryBar.swift:500: .fixedSize()`**. The pin is not in batch 4's gate TYPE list (`ChromeLineLimitTests` appears nowhere in the record), so it was never run against this code; the merge gate's whole-target window would be the first to see it. Every sibling site in the diff gets it right (`MCPTrailSection`'s fold glyph `.lineLimit(1)` · `.fixedSize()`; `ChromePullDown`'s own `.lineLimit(1)` · `.fixedSize()`).
+
+**Pin.** The existing one — red on the tip, green on `origin/main` (just measured); no new pin needed.
+
+**Proposed fix.** `.lineLimit(1)` on the button (before `.fixedSize()`, the `ChromePullDown` spelling — "a chrome label is one line"). One line; mechanical; no design choice.
+
 ### F1 — [MINOR] · `Features/BookView/BookView.swift:776–780` + `BookMastheadModeRow.swift` (VX-896) · the book's own row LANDING now moves the masthead's line count on open — an input neither the ruling nor the record's "accepted consequence" names
 
 **What's wrong.** The counted dial face is now `BookOrderDial.face(… shownOrder(stored: BookOrderChoices.storedLabel(for: structure.reading), viewOrder: …))`. Before the book's row lands, `structure.reading == nil` and `storedLabel(for: nil)` is `unloadedName` = "book's order" (`Readings/BookOrderAndConversion.swift:115–116`). The masthead is composed (and laid out) before that read returns — nothing in `BookView`'s masthead waits on the row. So the first layout counts "book's order ▾", the landed row recounts the book's real face, and in a width band between the two thresholds the class flips.
