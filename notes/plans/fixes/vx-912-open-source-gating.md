@@ -131,7 +131,7 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 | Piece | What | Status |
 |---|---|---|
 | P0 | This record + the design (below) | DONE (this commit) |
-| P1 | The inert test host: `AppBootstrap.Launch` + `State.hostingTests` + the three roots' faces + `HostLaunchSettle` + the Settings suite's header | NOT STARTED |
+| P1 | The inert test host: `AppBootstrap.Launch` + `State.hostingTests` + the three roots' faces + `HostLaunchSettle` + the Settings suite's header | DONE (this commit) — Mac `build-for-testing` GREEN headless (`scratchpad/b1/dd`); the phone build NOT YET RUN; behavior PENDING the stage |
 | P2 | The app pins (`TestHostInertTests`) + the named revert R-604-H, built for testing headless | NOT STARTED |
 | P3 | The false-green gate `Tools/assert-tests-ran` + its headless pins (`TestRunGateTests`, core) + the named reverts R-604-G0/-GC | NOT STARTED |
 | P4 | The STAGE REQUEST (the verification runs, written below) | NOT STARTED |

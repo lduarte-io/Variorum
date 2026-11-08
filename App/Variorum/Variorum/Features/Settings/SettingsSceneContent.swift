@@ -46,6 +46,8 @@ struct SettingsSceneContent: View {
         switch state {
         case .ready, .opening: false
         case .libraryMissing, .failed, .roadLobby, .newLibraryWords, .roadInterlude: true
+        // VX-604: a test runner's host never had a library to close — the window stays (it is never a transition).
+        case .hostingTests: false
         }
     }
 
@@ -59,10 +61,15 @@ struct SettingsSceneContent: View {
     enum NonReadyFace: Equatable {
         case opening
         case stub
+        /// VX-604: a test runner's host — the one sentence, at the PANES' declared size
+        /// (`AppSettingsView.contentSize`), so the real Settings window a suite opens through the app menu keeps the
+        /// real window's geometry (its titlebar, its width) with no library behind it (`SettingsTitleClearanceTests`).
+        case hostingTests
     }
 
     static func nonReadyFace(_ state: AppBootstrap.State) -> NonReadyFace {
         if case .opening = state { return .opening }
+        if case .hostingTests = state { return .hostingTests }
         return .stub
     }
 
@@ -147,6 +154,9 @@ struct SettingsSceneContent: View {
             case .stub:
                 Text(Copy.stub)
                     .padding(24)
+            case .hostingTests:
+                Text(AppBootstrap.Launch.hostFace)
+                    .frame(width: AppSettingsView.contentSize.width, height: AppSettingsView.contentSize.height)
             }
         }
     }
