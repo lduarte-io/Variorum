@@ -27,8 +27,12 @@ import GRDB
 //       fence), so a resolution can never strip a note's fence leg;
 //   (2) then a FROZEN book (finished or sealed — her door never severs a
 //       frozen member; it refuses);
-//   (3) then the EARLIEST-ACCEPTED membership (`sync_row_seq` ascending, a
-//       never-accepted row last, ties by id — SyncSpec §7's OWNED rank).
+//   (3) then the EARLIEST-FILED membership (`reading_post.created_at`
+//       ascending, ties by id — VX-893 (3), the VX-912 run: CONVERGED bytes,
+//       so every device holding the same rows picks the same anchor; the seq
+//       rank it replaces read each device's own latest-known `sync_row_seq`,
+//       and an innocuous later edit of one row — a pin, a reorder — let two
+//       mid-convergence devices anchor different rows and demote both).
 // Within a tier, ties fall through to the next term. The note moves into the
 // anchor's EFFECTIVE wing through the note move's ONE relocation
 // (`Operations.relocateNote`, every reading KEPT — this act severs nothing
@@ -45,9 +49,9 @@ import GRDB
 //
 // Every write enqueues its outbox row explicitly (apply mode mutes the outbox
 // triggers — SyncSpec §7). Deterministic on every device (books, wings and
-// accepted seqs are converged state; two devices mending one note write the
-// same wing and statuses, and their fresh application/tag ids converge by the
-// standing tag.path and pure-duplicate repairs). Idempotent: afterwards every
+// the memberships' creation stamps are converged state; two devices mending
+// one note write the same wing and statuses, and their fresh application/tag
+// ids converge by the standing tag.path and pure-duplicate repairs). Idempotent: afterwards every
 // member row of the note sits in the note's wing, and a demoted row is an
 // arrival, which never re-enters scope. Never for a dead book: the member
 // query joins live books only.
@@ -275,17 +279,21 @@ extension SyncEngine {
         let wingID: String
         let fenced: Bool
         let frozen: Bool
-        /// The row's known `server_seq`; 0 = never accepted (ranks LAST).
-        let seq: Int64
+        /// The row's `created_at` — immutable, the same bytes on every device
+        /// holding the row (tier 3, VX-893 (3)).
+        let createdAt: String
     }
 
-    /// The ruled rank (A-808-4): fenced → frozen → earliest-accepted → id.
-    /// True when `lhs` outranks `rhs` (the anchor is the minimum).
+    /// The ruled rank (A-808-4, tier 3 re-keyed by VX-893 (3)): fenced →
+    /// frozen → earliest-filed (`created_at`) → id. True when `lhs` outranks
+    /// `rhs` (the anchor is the minimum). A pure function of the rows: a
+    /// device deciding on a SUBSET of a note's memberships only ever demotes
+    /// rows that are non-anchors of the whole set too, since no term of an
+    /// unchanged row ever moves.
     static func outranks(_ lhs: Membership, _ rhs: Membership) -> Bool {
         if lhs.fenced != rhs.fenced { return lhs.fenced }
         if lhs.frozen != rhs.frozen { return lhs.frozen }
-        let (left, right) = (lhs.seq == 0 ? Int64.max : lhs.seq, rhs.seq == 0 ? Int64.max : rhs.seq)
-        if left != right { return left < right }
+        if lhs.createdAt != rhs.createdAt { return lhs.createdAt < rhs.createdAt }
         return lhs.id < rhs.id
     }
 
@@ -300,10 +308,9 @@ extension SyncEngine {
                 SELECT rp.id AS id, r.id AS reading_id, r.wing_id AS wing_id,
                        ((\(Queries.dailyJournalLegForBook)) OR (\(Queries.privateLegForBook))) AS fenced,
                        (r.locked = 1 OR r.sealed_at IS NOT NULL) AS frozen,
-                       COALESCE(s.server_seq, 0) AS seq
+                       rp.created_at AS created_at
                 FROM reading_post rp
                 JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL AND r.kind = 'book'
-                LEFT JOIN sync_row_seq s ON s.table_name = 'reading_post' AND s.row_id = rp.id
                 WHERE rp.post_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
                 ORDER BY rp.id
                 """,
@@ -311,7 +318,7 @@ extension SyncEngine {
         ).map { row in
             Membership(
                 id: row["id"], readingID: row["reading_id"], wingID: row["wing_id"],
-                fenced: row["fenced"], frozen: row["frozen"], seq: row["seq"])
+                fenced: row["fenced"], frozen: row["frozen"], createdAt: row["created_at"])
         }
     }
 
