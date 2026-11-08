@@ -130,6 +130,8 @@ Carry on: finish 902/903/905 to these rulings, keep committing per piece, and re
 
 **Verification this round (headless only):** `xcodebuild … -configuration Debug build-for-testing` → `** TEST BUILD SUCCEEDED **` on `6e8448a52` (no warning in the round's files); `swift build` → Build complete; the source-form pins that read `MCPPane.swift` (`theTrailDialIsSettingsMCPsRowUnderTheShowDial`'s order/between/once checks, VX-905's anchors, VX-401's no-frozen-clock sweep) re-evaluated by script against the probed file — all hold. **The re-gate's list:** `MCPPaneTabsTests` · `SettingsAccountSurfaceTests` · `TutorialMCPChapterTests` (+ `MCPTrailHandDoorTests`, whose source-form pin reads the lines the probes sit beside).
 
+**RE-GATE RAN (the orchestrator, nov7's vx914-b1-regate window, 2026-11-08 ~09:17, tree `57dd3ccfc`): Test run with 32 tests in 4 suites PASSED after 11.0 s, exit 0, zero failures** (4 warnings = the VX-665 Date.swift class, named not chased). G1–G4 all land; every PENDING(re-gate) above reads GREEN. Batch 1 is fully gated: 21 suites green across the two windows (208/21 with the four pre-fix reds, then 32/4 green on the fixes).
+
 ### BATCH 2 — the icon twins (VX-900)
 
 **Required reading: `notes/MCPSpec.md` IN FULL (the shared-icon law); SurfaceContracts — the Private mark bullet and the shared-icon lines.**
