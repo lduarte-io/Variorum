@@ -497,6 +497,7 @@ struct QuickEntryBar: View {
         .accessibilityLabel(act.verb)
         // On the box's first line (its own named origin, as the placeholder).
         .padding(.top, Self.placeholderOrigin.y)
+        .lineLimit(1)
         .fixedSize()
     }
 
