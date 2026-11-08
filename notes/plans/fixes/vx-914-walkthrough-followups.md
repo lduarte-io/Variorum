@@ -227,7 +227,7 @@ READ-AS-SETTLED: all accepted. The server-fact-is-the-SWITCH arm is accepted PRO
 | 2 | VX-897 — the two lines' em dashes → commas, exactly as ruled; exact word pins (new) | NOT-STARTED |
 | 3 | VX-667 — the ascent's popover header and its hover speak kinds (the chip headline's grammar); word pins (new) + the justified edit to `BookAscentTests.theBooksWordsNowLiveOnTheIconsHelp` | NOT-STARTED |
 | 4 | VX-896 — the dial counted at the face it SHOWS (F-896 (1), PROVISIONAL while the ruling is pending); the D-887 pins re-written to the new threshold, old and new values named | NOT-STARTED — fork F-896 sent to the orchestrator; the recommended form will be BUILT as PROVISIONAL (one call-site swap to (2)) |
-| 5 | VX-45 — the copy family | NOT-STARTED — WAITING ON THE RULING (the brief: message before building); words proposed below |
+| 5 | VX-45 — the copy family | NOT-STARTED — RULED (below): (a) the split inside `deleteReading`'s transaction + the three word forms, red-on-old; (b) one empty-state home, the archived gathering's words + the FOLD-IN (a live gathering with no match); (c) DISMISSED AS SUPERSEDED, nothing built |
 | 6 | Headless verification, `build-for-testing`, self-assessment + the gate TYPE list | NOT-STARTED |
 
 ##### BATCH 3 — FORKS PROPOSED TO THE ORCHESTRATOR (2026-11-08; recommendation first)
@@ -243,6 +243,22 @@ READ-AS-SETTLED: all accepted. The server-fact-is-the-SWITCH arm is accepted PRO
 - **(a) the book-only receipt** — RECOMMENDED: the split is read INSIDE `deleteReading`'s own transaction (the row's recorded remedy — `@discardableResult` return of a `Queries` member split {in-the-Pool, archived}, read before the tombstone; source-compatible for every caller; no wire change — `delete_book` rides `deleteReadingRow`), and the receipt says what the Pool shows: no members → "Deleted “X” — it’s in the Trash." (unchanged) · none archived → "Deleted “X” — it’s in the Trash; its 2 notes are in the Pool now." (unchanged) · mixed → **"Deleted “X” — it’s in the Trash; 2 of its notes are in the Pool now, and 1 stays archived."** · all archived → **"Deleted “X” — it’s in the Trash; its 2 notes stay archived."** (one: "its note stays archived"; the remove doors' "It stays archived." twin). Pin red-on-old: an owned book with one archived member, book only → today's receipt says "in the Pool now". *Alternative:* the same words with the split read app-side beside today's count (no core change; the race NIT stays recorded).
 - **(b) the archived gathering's empty state** — RECOMMENDED: one copy home for the three empty states (Outline, Read ▸ Pages, Book), an archived gathering reading **"This gathering is archived, so it shows nothing until you unarchive it."** (the Archived row's own "shows nothing while archived"; the kind named; no em dash); every other empty book unchanged ("This book has no notes yet."). *Alternative:* 13i-e's drafted words verbatim, "Archived — it shows nothing until you unarchive it." *Observation, not proposed for building:* a LIVE gathering that matches nothing also says "This book has no notes yet." (VX-611's kind-word class) — one more arm of the same home if you want it.
 - **(c) "(M archived)"** — RECOMMENDED: **dismissed as superseded, nothing built** — the suffix existed because N counted waiters the door did not show; 13i-d made archived waiters visible (marked "archived") at the door, so N is the door's own rows, and §24's line is hers verbatim. *Alternative:* "3 waiting at Arrivals will be dismissed (1 of them archived)." when M > 0 (a new core count: the act's set with `c.archived_at IS NOT NULL`).
+
+##### BATCH 3 FORKS RULED (provisional, orchestrator, 2026-11-08)
+
+*(The orchestrator's ruling block, pasted verbatim.)*
+
+Orchestrator rulings — ALL PROVISIONAL (away run, her bundle). Paste this block verbatim into the record under BATCH 3 — FORKS PROPOSED as "BATCH 3 FORKS RULED (provisional, orchestrator, 2026-11-08)", then build to it.
+
+F-896 → OPTION (1), the face the dial SHOWS, measured from its words in the voice font, rounded up and memoized. Grounds: her words exactly ("as soon as it would have standard spacing"), and it keeps K4's nothing-truncates, which (2) gives up; (3) she already declined. The named consequence is ACCEPTED and must be recorded precisely for her bundle: at a fixed width a wider LOOK pick can move the masthead's line count — this supersedes the pick-never-moves sub-rule at that ONE input (title, mode, landing, active tab still never move it), and the masthead adapting to a deliberate pick that changes what it must fit is coherent with her ruling's own logic. The canon delta at closeout: the SurfaceContracts masthead line's "the dial at its widest face — kept strict at her word, R-878-K4" clause gives way to the shown face's stable width, pointer VX-896. Keep the old and new threshold numbers in the record (257→240 Study / 304→276 Terminal for Manual order) — her bundle reads them.
+
+F-901 → NO OBJECTION, build as described: derived from BookNoteTitleMenuTable the VX-829 way, the local pair (Show in Outline · Open in the full editor) at the head of the first group per the derived[0] precedent, `.surface` added to the 8 declarations so the registry walk holds both ways. One requirement: your record names the 8 declarations explicitly (the ladder's reviewer and nov7's trial merge both read that list).
+
+VX-45 → (a) AS RECOMMENDED: the split read inside deleteReading's own transaction (@discardableResult {in-Pool, archived}, source-compatible, no wire change — row 102's own remedy), the three word forms as proposed with honest counts and the singular form; red-on-old pin. Wording PROVISIONAL, her bundle. (b) AS RECOMMENDED: "This gathering is archived, so it shows nothing until you unarchive it." — one copy home for the three faces. AND fold in your side observation as part of the same copy-home touch: a LIVE gathering with no matches must not say "This book has no notes yet" — speak the gathering's kind there too (the VX-611 kind-word family, VX-667's own class; one line in copy you are already rewriting). Flag the fold-in distinctly in your record and in the PROVISIONALs list — it is a batch-expansion of the kind-word class, hers to bless. (c) AS RECOMMENDED: dismiss as SUPERSEDED, build nothing — the suffix's reason died when 13i-d U4 made archived waiters visible at the door and §24's line is her verbatim; record the dismissal with exactly that reasoning so VX-45 closes honestly on (a)+(b) built and (c) recorded.
+
+Carry on; the gate list at the end as usual, and confirm the registry-walk test covers the new .surface face.
+
+**Implementer's notes on the ruling:** the eight declarations that gain `.surface` (F-901's required list): `.openBeside` · `.openInNewWindow` · `.toggleStar` · `.renameNote` · `.moveNoteToWing` · `.copyNoteToWing` · `.exportNote` · `.archiveNote` (`.deleteNote` already carried it — the Archived view's inline row, 13i-d U7 rider F-U6-4; `.fileNoteInChapter` · `.pinNoteInBook` · `.removeFromBook` already carried it for the Index ⋯). **The VX-45 (b) FOLD-IN (a batch expansion of the kind-word class — FLAGGED, hers to bless):** a LIVE gathering whose rule matches nothing reads **"No note matches this gathering yet."** (PROVISIONAL wording; the kind named, no em dash, sentence case) in the same copy home; a book's empty state keeps "This book has no notes yet." byte-for-byte.
 
 ### BATCH 4 — the shell singles (VX-911 · VX-870 · VX-898 · VX-909)
 
@@ -290,9 +306,9 @@ READ-AS-SETTLED: all accepted. The server-fact-is-the-SWITCH arm is accepted PRO
 | 5 | VX-401 Activity stamps recompute (rider) | 1 | BUILT — pin RUN PENDING(gate) |
 | 6 | VX-900 the icon twins' one rule + dimmed state | 2 | BUILT — core fences GREEN headless (18/18); App pins RUN PENDING(gate) |
 | 7 | VX-901 Index ⋯ carries the note-title set | 3 | IN-PROGRESS — traced, designed (BATCH 3 LIVE STATUS) |
-| 8 | VX-896 masthead one-line threshold | 3 | IN-PROGRESS — traced; F-896 sent |
+| 8 | VX-896 masthead one-line threshold | 3 | IN-PROGRESS — F-896 (1) ruled |
 | 9 | VX-897 delete/archive confirm em-dashes → commas | 3 | IN-PROGRESS — traced |
-| 10 | VX-45 copy family (rider) | 3 | WAITING ON THE RULING — words proposed |
+| 10 | VX-45 copy family (rider) | 3 | IN-PROGRESS — ruled (a)+(b) to build, (c) dismissed as superseded |
 | 11 | VX-667 popover kind-words (rider) | 3 | IN-PROGRESS — traced |
 | 12 | VX-911 quick-entry files without opening | 4 | NOT-STARTED |
 | 13 | VX-870 Library masthead cycles in place | 4 | NOT-STARTED |
