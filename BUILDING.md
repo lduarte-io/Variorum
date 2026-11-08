@@ -81,4 +81,4 @@ Each of these keeps its own license. The versions are pinned in `Package.swift`,
 | [swift-nio](https://github.com/apple/swift-nio), [swift-collections](https://github.com/apple/swift-collections), [swift-atomics](https://github.com/apple/swift-atomics) | fetched with the MCP SDK, not part of the app | Apache-2.0 |
 | [Sparkle](https://github.com/sparkle-project/Sparkle) | updates for the released Mac app (prebuilt framework) | MIT, with BSD-2-Clause and zlib parts |
 | [Argon2](https://github.com/P-H-C/phc-winner-argon2) reference implementation, vendored in `Vendor/CArgon2/` | passphrase key derivation | CC0-1.0 or Apache-2.0 |
-| [BIP-39](https://github.com/bitcoin/bips/tree/master/bip-0039) English wordlist, vendored | the twelve-word recovery phrase | MIT |
+| [BIP-39](https://github.com/bitcoin/bips/tree/master/bip-0039) English wordlist, vendored | the twelve words | MIT |
