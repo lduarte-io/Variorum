@@ -14,6 +14,12 @@ import MCP
 
 private func s(_ string: String) -> Value { .string(string) }
 
+/// VX-891: a gathering cursor as a client could spell one — `g`, a readable
+/// ordinal, the note's id (`PageCursor`'s wire form).
+private func gatheringCursor(_ noteID: String) -> String {
+    Data("g\n0\n\(noteID)".utf8).base64EncodedString()
+}
+
 extension MCPTwoStoreCatalogServerTests {
     typealias W = CatalogWorld
 
@@ -539,5 +545,27 @@ extension MCPTwoStoreCatalogServerTests {
                    capture: { ["interleavedCursor": $0["next_cursor"] as? String ?? ""] }),
         CatalogArm(label: "list_notes · that book, resumed from its cursor", tool: "list_notes") { w, c in
             ["book_id": s(w.interleaved), "limit": .int(1), "cursor": s(c["interleavedCursor"] ?? "")] },
+        // VX-891 (the VX-912 run, B4): the GATHERING form. A gathering whose
+        // readable notes follow a hidden one in its assembly, paged and resumed
+        // (guards — VX-825 made the walk pure), then resumed from a cursor
+        // naming that hidden member: RED on the pre-fix gathering cursor, which
+        // resumed after any note its assembly held — A listed the page behind
+        // the hidden note where B, whose same string names nothing, answered
+        // the stale sentence. Identical once the cursor's note must be one the
+        // client can read (the book cursor's VX-859 rule). Last, a cursor
+        // naming no note at all — what the hidden-member arm must equal.
+        CatalogArm(label: "list_notes · a gathering whose readable notes came after a hidden one, paged",
+                   tool: "list_notes",
+                   args: { w, _ in ["book_id": s(w.interleavedGathering), "limit": .int(1)] },
+                   capture: { ["interleavedGatheringCursor": $0["next_cursor"] as? String ?? ""] }),
+        CatalogArm(label: "list_notes · that gathering, resumed from its cursor", tool: "list_notes") { w, c in
+            ["book_id": s(w.interleavedGathering), "limit": .int(1),
+             "cursor": s(c["interleavedGatheringCursor"] ?? "")] },
+        CatalogArm(label: "list_notes · that gathering, from a cursor naming its hidden member",
+                   tool: "list_notes") { w, _ in
+            ["book_id": s(w.interleavedGathering), "limit": .int(1), "cursor": s(gatheringCursor(w.privateGathered))] },
+        CatalogArm(label: "list_notes · that gathering, from a cursor naming no note", tool: "list_notes") { w, _ in
+            ["book_id": s(w.interleavedGathering), "limit": .int(1),
+             "cursor": s(gatheringCursor("ffffffff-ffff-4fff-bfff-ffffffffffff"))] },
     ]
 }
