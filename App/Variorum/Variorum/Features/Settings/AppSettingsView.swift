@@ -158,8 +158,9 @@ struct AppSettingsView: View {
         // where a search for the setup's words lands. Ladder R2-3: the Clients
         // tab (its label is the row's title), where "client"/"clients" land.
         // VX-676: the show dial sits above the tabs, beside the server switch.
-        // VX-874: the trail dial under the Activity tab's log (the last tab).
-        .mcp: ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook", "mcpTrailDial"],
+        // VX-903 (the VX-914 run, batch 1): VX-874's trail dial directly under the
+        // show dial, above the tabs (drawn while a client is approved).
+        .mcp: ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],
@@ -381,6 +382,8 @@ struct AppSettingsView: View {
                     accountSection: roadStanding?.account != nil,
                     // VX-590: the MCP pane's Shared with AI tab only once the library has had a client.
                     mcpSharingFace: mcp.map { MCPPane.showsSharingFace($0.snapshot) } ?? true,
+                    // VX-903: the MCP pane's trail dial only while a client is approved.
+                    mcpTrailDial: mcp.map { MCPPane.drawsTrailDial($0.snapshot) } ?? true,
                     onOpen: { finding in
                         query = ""
                         // VX-281 U1: the MCP pane is in tabs — a finding whose
@@ -488,12 +491,15 @@ private struct SettingsResultsPane: View {
     let accountSection: Bool
     /// VX-590: whether Settings ▸ MCP shows its sharing face (Shared with AI and the open book inside it).
     let mcpSharingFace: Bool
+    /// VX-903: whether Settings ▸ MCP draws its trail dial (a client is approved).
+    let mcpTrailDial: Bool
     let onOpen: (SettingsFinding) -> Void
 
     private var findings: [SettingsFinding] {
         SettingsSearch.findings(
             matching: query,
-            in: SettingsSearch.wholeIndex(accountSection: accountSection, mcpSharingFace: mcpSharingFace))
+            in: SettingsSearch.wholeIndex(
+                accountSection: accountSection, mcpSharingFace: mcpSharingFace, mcpTrailDial: mcpTrailDial))
     }
 
     var body: some View {

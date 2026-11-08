@@ -403,11 +403,13 @@ nonisolated enum SettingsCatalog {
             keywords: ["show", "show in app", "navigate", "move", "jump", "offer", "never", "mcp", "ai"]),
         // VX-874 (her ruling (4) — "TWO off switches … ONE control with three
         // states", home Settings ▸ MCP): THE TRAIL DIAL — what the sidebar's AI
-        // section draws; its row sits under the Activity tab's log (never above
-        // the tabs — VX-281's fresh-pane geometry), so a finding opens Activity
-        // (`MCPPaneTab.holding`). Blurb and keywords are search words; no
-        // "activity" (the Activity tab keeps that word's first finding), no
-        // "ask", "open" or "client" (the show dial's rule).
+        // section draws. VX-903 (the VX-914 run, batch 1): its row sits directly
+        // under the show dial, above the tabs, drawn while a client is approved
+        // (`MCPPane.drawsTrailDial`), so a finding lands on no tab and the
+        // search leaves it out while the pane draws none (`settingsEntries`).
+        // Blurb and keywords are search words; no "activity" (the Activity tab
+        // keeps that word's first finding), no "ask", "open" or "client" (the
+        // show dial's rule).
         SettingsRow(
             id: "mcpTrailDial", pane: .mcp, title: MCPPaneCopy.trailDialTitle,
             blurb: "What the sidebar lists of what a client showed you or changed this session: "
@@ -548,10 +550,17 @@ nonisolated enum SettingsSearch {
     /// rows whose finding lands there, `MCPPaneTab.holding` — the open book),
     /// so the search never names a row the pane does not show. Default true:
     /// every row, as before.
-    static func settingsEntries(accountSection: Bool, mcpSharingFace: Bool = true) -> [Entry] {
+    ///
+    /// VX-903 (the VX-914 run, batch 1): `mcpTrailDial` false — the pane draws
+    /// no trail dial (no client is approved, `MCPPane.drawsTrailDial`) — leaves
+    /// the dial's row out, by the same promise. Default true.
+    static func settingsEntries(
+        accountSection: Bool, mcpSharingFace: Bool = true, mcpTrailDial: Bool = true
+    ) -> [Entry] {
         let rows = SettingsCatalog.rows.filter { row in
             (accountSection || row.id != SettingsCatalog.accountRow.id)
                 && (mcpSharingFace || MCPPaneTab.holding(findingLead: row.title) != .shared)
+                && (mcpTrailDial || row.id != "mcpTrailDial")
         }
         return rows.map { row in
             Entry(
@@ -583,8 +592,11 @@ extension SettingsSearch {
     /// asks with the account section's presence, so a search never names the
     /// section where the pane does not render it.
     /// VX-590: and with the MCP pane's sharing face (`settingsEntries`).
-    @MainActor static func wholeIndex(accountSection: Bool, mcpSharingFace: Bool = true) -> [Entry] {
-        settingsEntries(accountSection: accountSection, mcpSharingFace: mcpSharingFace)
+    /// VX-903: and with whether the pane draws its trail dial.
+    @MainActor static func wholeIndex(
+        accountSection: Bool, mcpSharingFace: Bool = true, mcpTrailDial: Bool = true
+    ) -> [Entry] {
+        settingsEntries(accountSection: accountSection, mcpSharingFace: mcpSharingFace, mcpTrailDial: mcpTrailDial)
             + shortcutEntries + dictionaryEntries
     }
 

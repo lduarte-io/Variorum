@@ -234,13 +234,16 @@ struct MCPPaneTabsTests {
         #expect(MCPPaneTab.holding(findingLead: found.lead) == .shared, "the finding's own lead lands the tab")
         // VX-281 ladder R1-4 (A JUSTIFIED EDIT, the ritual): Connect's row joins.
         // Ladder R2-3 (A JUSTIFIED EDIT, the ritual): the Clients tab's row joins.
-        // VX-874 (A JUSTIFIED EDIT, the ritual): the trail dial's row joins,
-        // under the Activity tab's log — the last tab (never above the tabs:
-        // the fresh-pane geometry row below).
+        // VX-874 (A JUSTIFIED EDIT, the ritual): the trail dial's row joins.
+        // VX-903 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1): it
+        // moves under the show dial, above the tabs, drawn while a client is
+        // approved (the fresh-pane geometry row below grew an arm for it).
         #expect(AppSettingsView.rowIDsRendered[.mcp]
-                    == ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook",
-                        "mcpTrailDial"],
+                    == ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients",
+                        "mcpOpenBook"],
                 "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil,
+                "VX-903: the trail dial sits above the tabs")
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpConnect")) == .connect)
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpClients")) == .clients)
         #expect(SettingsCatalog.title("mcpClients") == MCPPaneTab.clients.label,
@@ -517,6 +520,92 @@ struct MCPPaneTabsTests {
             // block's padding are in sight below the menu, unscrolled.
             #expect(menuFrame.minY - visible.minY >= 56,
                     "\(voice): the setup's first lines are in sight below the menu (\(menuFrame.minY - visible.minY) pt)")
+
+            // VX-903 (THE CONTRACT GROWN DELIBERATELY — the VX-914 run, batch 1;
+            // PROVISIONAL F-903 (1)): the trail dial now sits under the show dial
+            // in the top section, drawn only while a client is APPROVED — so a
+            // fresh pane draws NONE, and everything above is VX-281's geometry
+            // unchanged. Non-vacuity: the show dial's picker IS found, so the
+            // search for pickers sees this section.
+            let pickers = Self.popUps(in: host)
+            #expect(pickers.contains(where: Self.isShowDial), "\(voice): the show dial is drawn (non-vacuity)")
+            #expect(!pickers.contains(where: Self.isTrailDial), "\(voice): a fresh pane draws no trail dial")
+        }
+    }
+
+    // MARK: - VX-903 — the geometry contract's grown arm (both dials seated together)
+
+    /// Every `NSPopUpButton` a mounted surface built (a SwiftUI `Picker` in the
+    /// grouped form is one — `ChromeMenuRowSizeTests`' road).
+    static func popUps(in view: NSView) -> [NSPopUpButton] {
+        var found = (view as? NSPopUpButton).map { [$0] } ?? []
+        for sub in view.subviews { found += popUps(in: sub) }
+        return found
+    }
+
+    /// The trail dial's picker: its items are her three values.
+    static func isTrailDial(_ popUp: NSPopUpButton) -> Bool {
+        Set(MCPTrailDial.allCases.map(MCPPaneCopy.trailDialChoice)).isSubset(of: Set(popUp.itemTitles))
+    }
+
+    /// The show dial's picker: its items are her three values.
+    static func isShowDial(_ popUp: NSPopUpButton) -> Bool {
+        Set(MCPShowDial.allCases.map(MCPPaneCopy.showDialChoice)).isSubset(of: Set(popUp.itemTitles))
+    }
+
+    /// **VX-903 — her #264 word: "right under 'when a client shows you
+    /// something'".** With a client APPROVED the pane opens on Clients
+    /// (VX-281's rule) and its top section seats BOTH dials together — the
+    /// trail dial the very next picker under the show dial — with the tab row
+    /// whole and in sight, unscrolled, inside VX-214's 748 × 520, both voices.
+    /// This is the arm the contract GREW by (the record's BATCH 1 LIVE STATUS
+    /// names it); the fresh arm above is VX-281's own, unweakened.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func anApprovedClientsPaneSeatsBothDialsTogetherWithItsTabRowInSight(voice: ThemeVoice) async throws {
+        try await withPaneWorld { session, _ in
+            try session.operations.setThemeVoice(voice)
+            let client = try session.operations.recordMCPContact(name: "claude-code", version: "2")
+            _ = try session.operations.approveMCPClient(client.id, granting: nil)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            for _ in 0..<200 where door.snapshot.approvedCount == 0 {
+                pump()
+                await Task.yield()
+            }
+            #expect(door.snapshot.approvedCount == 1, "\(voice): fixture — one client approved")
+            #expect(MCPPane.drawsTrailDial(door.snapshot), "\(voice): the gate opens with an approved client")
+            door.requestSettings()  // ⌥⌘, — the window opens AT the MCP pane
+
+            let size = AppSettingsView.contentSize
+            let (window, host) = mount(AppSettingsView(session: session, mcp: door), size: size)
+            defer { unmount(window) }
+            await settle(host, until: {
+                tabRow(in: host) != nil && Self.popUps(in: host).contains(where: Self.isTrailDial)
+            })
+            await settle(host, until: { false }, turns: 15)
+
+            let tabs = try #require(tabRow(in: host), "\(voice): the pane renders her four tabs")
+            #expect(tabs.selectedSegment == 1, "\(voice): a client approved — the pane opens on Clients")
+            let tabFrame = tabs.convert(tabs.bounds, to: nil)
+            let clip = tabs.enclosingScrollView?.contentView ?? host
+            let visible = clip.convert(clip.bounds, to: nil)
+            #expect(visible.contains(tabFrame), "\(voice): the tab row is whole and in sight, unscrolled (\(tabFrame) in \(visible))")
+
+            let pickers = Self.popUps(in: host)
+            let show = try #require(pickers.first(where: Self.isShowDial), "\(voice): the show dial is drawn")
+            let trail = try #require(pickers.first(where: Self.isTrailDial), "\(voice): the trail dial is drawn")
+            let showFrame = show.convert(show.bounds, to: nil)
+            let trailFrame = trail.convert(trail.bounds, to: nil)
+            #expect(visible.contains(showFrame) && visible.contains(trailFrame), "\(voice): both dials in sight")
+            // Window coordinates grow upward: under = a smaller y.
+            #expect(trailFrame.maxY <= showFrame.minY, "\(voice): the trail dial sits under the show dial")
+            #expect(trailFrame.minY > tabFrame.maxY, "\(voice): both sit above the tabs, in the top section")
+            let between = pickers.filter { picker in
+                let frame = picker.convert(picker.bounds, to: nil)
+                return frame.midY < showFrame.minY && frame.midY > trailFrame.maxY
+            }
+            #expect(between.isEmpty, "\(voice): nothing seated between the two dials but the show dial's line")
         }
     }
 }

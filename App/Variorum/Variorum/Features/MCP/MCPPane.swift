@@ -93,16 +93,14 @@ nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
     /// row the pane does not show); the setup's words find Connect's own row
     /// and open it there (VX-281 ladder R1-4 — where R-VX184-6 put the
     /// setup); "client"/"clients" find the Clients tab's own row and open it
-    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)); VX-874's trail dial
-    /// lives under the Activity tab's log, so finding it opens Activity (a tab
-    /// every library offers). nil: the row sits above the tabs (the server
-    /// switch, the show dial, Waiting) or the finding is the pane itself.
+    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)). nil: the row sits
+    /// above the tabs (the server switch, the show dial, VX-903's trail dial
+    /// under it, Waiting), or the finding is the pane itself.
     static func holding(findingLead lead: String) -> MCPPaneTab? {
         switch lead {
         case SettingsCatalog.title("mcpConnect"): .connect
         case SettingsCatalog.title("mcpClients"): .clients
         case SettingsCatalog.title("mcpOpenBook"): .shared
-        case SettingsCatalog.title("mcpTrailDial"): .activity
         default: nil
         }
     }
@@ -183,6 +181,19 @@ struct MCPPane: View {
     /// waits for an approved client (VX-272's `hasApprovedClient`). Pure, pinned.
     nonisolated static func showsSharingFace(_ snapshot: MCPDoor.Snapshot) -> Bool {
         !saysClientsBelongToTheLibrary(snapshot)
+    }
+
+    /// **VX-903 — the trail dial draws in the top section, under the show
+    /// dial, while a client is APPROVED** (PROVISIONAL F-903 (1); VX-272's
+    /// gate, the shared icon's and the Private mark's): the sidebar's AI
+    /// section only ever holds an approved client's acts, and every pane that
+    /// opens on Connect by its rule has none — so VX-281's fresh-open geometry
+    /// is untouched by construction. The Settings search follows it
+    /// (`SettingsSearch.settingsEntries`'s `mcpTrailDial`). Pure, pinned. (The
+    /// alternative, always seated beside the always-shown show dial, is one
+    /// line to flip — recorded for her bundle.)
+    nonisolated static func drawsTrailDial(_ snapshot: MCPDoor.Snapshot) -> Bool {
+        snapshot.approvedCount > 0
     }
 
     /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
@@ -268,9 +279,33 @@ struct MCPPane: View {
                 }
                 .lineLimit(1)
                 ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)
-                // (VX-874's trail dial lives on the ACTIVITY tab — `activityTab`
-                // — never here: a row above the tabs pushes a fresh pane's
-                // Connect code block out of sight, VX-281's geometry row.)
+                // VX-903 (the VX-914 run, batch 1 — her #264 word: "I also don't
+                // think it should be in activity, i think it should be right
+                // under 'when a client shows you something'"; PROVISIONAL F-903
+                // (1)): THE TRAIL DIAL (VX-874) — what the sidebar's AI section
+                // draws (everything on · notices off · fully off), seated
+                // directly under the show dial, drawn only while a client is
+                // APPROVED (`drawsTrailDial` — VX-272's gate: the trail only
+                // ever holds an approved client's acts). THE VX-281 TRAP, solved
+                // rather than repeated: the pane opens on Connect exactly while
+                // no client is approved (`MCPPaneTab.opening`), so every pane
+                // that opens on Connect by its rule draws this section
+                // byte-identical to before and the fresh-open geometry oracle
+                // stands; the contract GREW by one named arm (an approved
+                // client's pane: both dials seated, the tab row in sight —
+                // `MCPPaneTabsTests`). One picker, its line, the whole text
+                // behind its (i).
+                if Self.drawsTrailDial(door.snapshot) {
+                    Picker(SettingsCatalog.title("mcpTrailDial"), selection: Binding(
+                        get: { door.snapshot.trailDial },
+                        set: { door.setTrailDial($0) })) {
+                        ForEach(MCPTrailDial.allCases, id: \.self) { dial in
+                            Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
+                        }
+                    }
+                    .lineLimit(1)
+                    ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
+                }
                 // A refusal from any act lands where she is looking first
                 // (the walk's second finding: a caption at the form's foot
                 // sat below the fold).
@@ -469,8 +504,8 @@ struct MCPPane: View {
         }
     }
 
-    /// ACTIVITY — the coarse log's newest lines and its "all N ›", then
-    /// (VX-874) the trail dial.
+    /// ACTIVITY — the coarse log's newest lines and its "all N ›". (VX-874's
+    /// trail dial lived under it until VX-903 seated it under the show dial.)
     @ViewBuilder private var activityTab: some View {
         Section {
             if door.snapshot.activity.isEmpty {
@@ -481,26 +516,6 @@ struct MCPPane: View {
             }
         } header: {
             tabRow
-        }
-        // VX-874 (her ruling (4) — "TWO off switches … ONE control with three
-        // states", home Settings ▸ MCP, her word): THE TRAIL DIAL — what the
-        // sidebar's AI section draws (everything on · notices off · fully
-        // off), beside the log of the activity it governs. Its own section
-        // under the tab's list, the Shared tab's open-book precedent — never
-        // above the tabs, where a row pushes a fresh pane's Connect code block
-        // out of sight (VX-281's geometry row; the closing window's red). A
-        // search finding opens this tab (`MCPPaneTab.holding`). One picker,
-        // its line, the whole text behind its (i).
-        Section {
-            Picker(SettingsCatalog.title("mcpTrailDial"), selection: Binding(
-                get: { door.snapshot.trailDial },
-                set: { door.setTrailDial($0) })) {
-                ForEach(MCPTrailDial.allCases, id: \.self) { dial in
-                    Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
-                }
-            }
-            .lineLimit(1)
-            ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
         }
     }
 

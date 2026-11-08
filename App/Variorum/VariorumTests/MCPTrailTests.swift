@@ -820,33 +820,67 @@ struct MCPTrailHandDoorTests {
         }
     }
 
-    /// Settings ▸ MCP: the dial's row sits under the ACTIVITY tab's log — never
-    /// above the tabs, where a row pushes a fresh pane's Connect code block out
-    /// of sight (VX-281's geometry row, `MCPPaneTabsTests.aFreshPaneOpensOnConnect…`
-    /// — the closing window's red, fixed by this placement); a search finding
-    /// opens that tab; her three words in her order, the line and its whole text.
-    @Test func theTrailDialIsSettingsMCPsRowOnTheActivityTab() throws {
+    /// **VX-903 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1; her
+    /// #264 word: "I also don't think it should be in activity, i think it
+    /// should be right under 'when a client shows you something'"; PROVISIONAL
+    /// F-903 (1)).** Settings ▸ MCP: the dial's row sits DIRECTLY under the
+    /// show dial in the pane's top section, above the tabs, drawn only while a
+    /// client is approved (`MCPPane.drawsTrailDial`) — every pane that opens on
+    /// Connect by its rule has none, so VX-281's fresh-open geometry stands
+    /// (`MCPPaneTabsTests` — its fresh arm and the grown approved arm); a
+    /// search finding lands on no tab, and the search leaves the row out while
+    /// the pane draws none; her three words in her order, the line and its
+    /// whole text. (Was: the row under the ACTIVITY tab's log — VX-874's window
+    /// fix, now superseded.)
+    @Test func theTrailDialIsSettingsMCPsRowUnderTheShowDial() throws {
         #expect(SettingsCatalog.title("mcpTrailDial") == MCPPaneCopy.trailDialTitle)
         let rendered = AppSettingsView.rowIDsRendered[.mcp] ?? []
-        #expect(rendered.last == "mcpTrailDial", "the last tab's row")
-        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == .activity,
-                "a finding opens the Activity tab")
-        #expect(MCPPaneTab.offered(sharing: false).contains(.activity), "a tab every library offers")
+        let show = try #require(rendered.firstIndex(of: "mcpShowDial"))
+        #expect(rendered.firstIndex(of: "mcpTrailDial") == show + 1, "right under the show dial")
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil, "above the tabs")
+
+        // The gate, pure: an approved client draws it; none approved draws none.
+        var snapshot = MCPDoor.Snapshot()
+        #expect(!MCPPane.drawsTrailDial(snapshot), "no client approved — no dial (the fresh pane's geometry)")
+        snapshot.approvedCount = 1
+        #expect(MCPPane.drawsTrailDial(snapshot))
+        #expect(MCPPaneTab.opening(remembered: nil, approvedCount: 0) == .connect,
+                "the gate's ground: the pane opens on Connect exactly while none is approved")
+
+        // The face, read from source: under the show dial's line, behind the gate,
+        // above the tabs — and no longer on the Activity tab.
         let pane = try String(
             contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
                 .appendingPathComponent("Variorum/Features/MCP/MCPPane.swift"), encoding: .utf8)
         let picker = "Picker(SettingsCatalog.title(\"mcpTrailDial\")"
-        let activity = try #require(pane.range(of: "@ViewBuilder private var activityTab: some View {"))
+        let showLine = try #require(pane.range(
+            of: "ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)"))
+        let gate = try #require(pane.range(of: "if Self.drawsTrailDial(door.snapshot) {"))
+        let seat = try #require(pane.range(of: picker))
         let tabs = try #require(pane.range(of: "switch shownTab {"))
-        #expect(pane[activity.upperBound...].contains(picker), "the picker is the Activity tab's")
-        #expect(!pane[..<tabs.lowerBound].contains(picker), "never in the sections above the tabs")
+        #expect(showLine.upperBound <= gate.lowerBound && gate.upperBound <= seat.lowerBound
+                    && seat.upperBound <= tabs.lowerBound,
+                "the show dial's line, then the gate, then the picker — all above the tabs")
+        let between = pane[showLine.upperBound..<gate.lowerBound]
+        #expect(!between.contains("Picker(") && !between.contains("Toggle(") && !between.contains("ExplainerLine("),
+                "nothing seated between the show dial and the trail dial")
+        let activity = try #require(pane.range(of: "@ViewBuilder private var activityTab: some View {"))
+        #expect(!pane[activity.upperBound...].contains(picker), "no longer on the Activity tab")
+        #expect(pane.components(separatedBy: picker).count == 2, "drawn once")
+
+        // The search follows the face (VX-590's road).
+        let shown = SettingsSearch.settingsEntries(accountSection: true, mcpTrailDial: true)
+        let hidden = SettingsSearch.settingsEntries(accountSection: true, mcpTrailDial: false)
+        #expect(SettingsSearch.findings(matching: "notices", in: shown).contains { $0.pane == .mcp },
+                "“notices” finds the row while it is drawn")
+        #expect(!SettingsSearch.findings(matching: "notices", in: hidden).contains { $0.pane == .mcp },
+                "…and names no row the pane does not draw")
+        #expect(hidden.count == shown.count - 1, "only the dial's row leaves")
+
         #expect(MCPTrailDial.allCases.map(MCPPaneCopy.trailDialChoice) == ["Everything on", "Notices off", "Fully off"])
         #expect(!MCPPaneCopy.trailDialTitle.contains("AI"), "settings-class wording: client, never AI (VX-272)")
         #expect(MCPPaneCopy.trailDialDetail.contains(MCPPaneCopy.showDialTitle),
                 "the whole text points at the show dial's own road")
-        let found = SettingsSearch.findings(matching: "notices", in: SettingsSearch.settingsEntries)
-            .contains { $0.pane == .mcp }
-        #expect(found, "“notices” finds the row")
     }
 }
 
