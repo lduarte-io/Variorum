@@ -284,12 +284,8 @@ nonisolated enum SettingsCatalog {
                 + "and Read, fading in about a second. On by default; synced.",
             keywords: ["flash", "highlight", "cursor", "caret", "mode", "switch", "find my place",
                        "blink", "pulse", "where am i"]),
-        // 13i-c U4 (the sitting record §6): the two ownership settings.
-        SettingsRow(
-            id: "ownershipBadges", pane: .editor, title: OwnershipSettingsCopy.badgesTitle,
-            blurb: "Marks on notes that live in several books, and \u{201C}owned by\u{201D} on notes "
-                + "an owned book holds. On by default; synced.",
-            keywords: ["badge", "owned", "owner", "shared", "mark", "book", "membership"]),
+        // 13i-c U4 (the sitting record §6): the hide-owned default (its twin,
+        // the badge switch, moved to Settings ▸ MCP — VX-905, below).
         SettingsRow(
             id: "hideOwnedDefault", pane: .editor, title: OwnershipSettingsCopy.hideOwnedTitle,
             blurb: "Leave notes an owned book holds out of gatherings and tag listings. Off by "
@@ -433,6 +429,17 @@ nonisolated enum SettingsCatalog {
             blurb: "The open book: every approved MCP client may read everything, always, and propose "
                 + "notes to books \u{2014} your daily Journal and anything Private still ask every time.",
             keywords: ["open book", "mcp", "ai", "read everything", "share all", "always"]),
+        // 13i-c U4 (the sitting record §6): the badge family's ONE switch.
+        // VX-905 (the VX-914 run, batch 1 — her #264 word: "it makes more sense
+        // there"): Settings ▸ MCP, its own section at the pane's FOOT under
+        // whichever tab shows, so a finding lands on no tab
+        // (`MCPPaneTab.holding` → nil) and every library keeps it. The blurb
+        // names what it governs today (the Private eye joined at VX-831).
+        SettingsRow(
+            id: "ownershipBadges", pane: .mcp, title: OwnershipSettingsCopy.badgesTitle,
+            blurb: "Marks on notes that live in several books, \u{201C}owned by\u{201D} on notes an "
+                + "owned book holds, and the closed eye on Private ones. On by default; synced.",
+            keywords: ["badge", "owned", "owner", "shared", "mark", "book", "membership", "private", "eye"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",
             blurb: "The passphrase, when the library locks, escrow and the recovery key.",

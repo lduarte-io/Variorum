@@ -144,8 +144,9 @@ struct AppSettingsView: View {
         // VX-589: + "hideStarredFromOpen", the Open notes section's second toggle.
         .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "hideStarredFromOpen",
                    "updates"],
+        // VX-905 (the VX-914 run, batch 1): "ownershipBadges" moved to Settings ▸ MCP.
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
-                  "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
+                  "arrivalFlash", "hideOwnedDefault",
                   "hoverHandles", "spellcheck", "longBlocks"],
         .takes: ["fanStyle", "followScroll"],
         .writing: ["segmentation", "cadence", "pruning"],
@@ -160,7 +161,11 @@ struct AppSettingsView: View {
         // VX-676: the show dial sits above the tabs, beside the server switch.
         // VX-903 (the VX-914 run, batch 1): VX-874's trail dial directly under the
         // show dial, above the tabs (drawn while a client is approved).
-        .mcp: ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook"],
+        // VX-905 (the VX-914 run, batch 1): the badge family's switch at the
+        // pane's FOOT, under whichever tab shows (every library — owned-by chips
+        // exist without AI; nothing above the tabs grows).
+        .mcp: ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook",
+               "ownershipBadges"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],
@@ -762,17 +767,10 @@ private struct EditorSettingsPane: View {
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // 13i-c U4 (the sitting record §6): the badge family's one switch
-            // and the hide-owned global default — synced, like the flash.
+            // 13i-c U4 (the sitting record §6): the hide-owned global default —
+            // synced, like the flash. (VX-905, the VX-914 run: the badge
+            // family's one switch moved to Settings ▸ MCP's foot — `MCPPane`.)
             Section(OwnershipSettingsCopy.section) {
-                Toggle(SettingsCatalog.title("ownershipBadges"), isOn: Binding(
-                    get: { theme.settings.ownershipBadges },
-                    set: { theme.setOwnershipBadges($0) }))
-                Text(OwnershipSettingsCopy.badgesHelp)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(6)
-                    .fixedSize(horizontal: false, vertical: true)
                 Toggle(SettingsCatalog.title("hideOwnedDefault"), isOn: Binding(
                     get: { theme.settings.hideOwnedByDefault },
                     set: { theme.setHideOwnedDefault($0) }))

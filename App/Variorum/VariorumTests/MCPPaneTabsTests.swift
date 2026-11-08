@@ -237,10 +237,11 @@ struct MCPPaneTabsTests {
         // VX-874 (A JUSTIFIED EDIT, the ritual): the trail dial's row joins.
         // VX-903 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1): it
         // moves under the show dial, above the tabs, drawn while a client is
-        // approved (the fresh-pane geometry row below grew an arm for it).
+        // approved (the fresh-pane geometry row below grew an arm for it). VX-905
+        // (A JUSTIFIED EDIT, the ritual): the badge switch joins, at the pane's foot.
         #expect(AppSettingsView.rowIDsRendered[.mcp]
                     == ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients",
-                        "mcpOpenBook"],
+                        "mcpOpenBook", "ownershipBadges"],
                 "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil,
                 "VX-903: the trail dial sits above the tabs")
@@ -318,6 +319,11 @@ struct MCPPaneTabsTests {
             (MCPPaneCopy.stdioSummary, MCPPaneCopy.stdioLine),
             // VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's line.
             (MCPPaneCopy.showDialSummary, MCPPaneCopy.showDialDetail),
+            // VX-903 / VX-905 (A JUSTIFIED EDIT, the ritual — the VX-914 run,
+            // batch 1): the trail dial's line (now beside the show dial's) and
+            // the badge switch's (now at the pane's foot).
+            (MCPPaneCopy.trailDialSummary, MCPPaneCopy.trailDialDetail),
+            (OwnershipSettingsCopy.badgesSummary, OwnershipSettingsCopy.badgesHelp),
         ]
         for client in MCPSetupClient.allCases { pairs.append((client.summary, client.sentence)) }
         for (line, whole) in pairs {
@@ -531,6 +537,62 @@ struct MCPPaneTabsTests {
             #expect(pickers.contains(where: Self.isShowDial), "\(voice): the show dial is drawn (non-vacuity)")
             #expect(!pickers.contains(where: Self.isTrailDial), "\(voice): a fresh pane draws no trail dial")
         }
+    }
+
+    // MARK: - VX-905 — "Show ownership badges" moves to Settings ▸ MCP
+
+    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
+    /// ownership badges' into the mcp part of settings - it makes more sense
+    /// there"; PROVISIONAL F-905 (1)).** The badge family's one switch is
+    /// Settings ▸ MCP's row now — its own untitled section at the pane's FOOT,
+    /// under whichever tab shows, so EVERY library keeps it (a library that
+    /// never had a client still switches its owned-by chips) and nothing above
+    /// the tabs grows; Settings ▸ Editor no longer renders it (its "Books"
+    /// section keeps the hide-owned default); the search follows the move and
+    /// lands on the pane with no tab to pick. Its line names exactly what it
+    /// governs today — the other-books mark, the owned-by chip, the Private eye
+    /// (never the shared icon, which draws without it).
+    @Test func theBadgeSwitchIsSettingsMCPsRowAtThePanesFoot() throws {
+        let row = try #require(SettingsCatalog.rows.first { $0.id == "ownershipBadges" })
+        #expect(row.pane == .mcp && row.title == OwnershipSettingsCopy.badgesTitle, "the catalog row moved")
+        #expect(AppSettingsView.rowIDsRendered[.mcp]?.last == "ownershipBadges", "the pane's foot")
+        #expect(AppSettingsView.rowIDsRendered[.editor]?.contains("ownershipBadges") == false, "no longer Editor's")
+        #expect(AppSettingsView.rowIDsRendered[.editor]?.contains("hideOwnedDefault") == true, "its neighbour stays")
+        #expect(MCPPaneTab.holding(findingLead: row.title) == nil, "every tab shows it — a finding picks none")
+        for word in ["ownership badges", "badge", "badges", "owned by"] {
+            let found = SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
+                .first { $0.kind == .setting && $0.lead == row.title }
+            #expect(found?.pane == .mcp, "“\(word)” lands on Settings ▸ MCP")
+        }
+        // A library that never had a client: the row is still searchable (its
+        // sharing face hidden, its trail dial undrawn — the row is neither).
+        let fresh = SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: false, mcpTrailDial: false)
+        #expect(fresh.contains { $0.finding.lead == row.title && $0.finding.pane == .mcp }, "every library keeps it")
+
+        // The line: what it governs today, nothing more.
+        let line = OwnershipSettingsCopy.badgesSummary
+        #expect(line == "One switch for the marks on notes in other books, owned notes and Private ones.")
+        #expect(!line.localizedCaseInsensitiveContains("shared"), "the shared icon draws without this switch")
+        #expect(OwnershipSettingsCopy.badgesHelp.contains("Off: no marks anywhere; nothing else changes."),
+                "the whole text behind its (i), unchanged")
+
+        // The face, from source: after the shown tab, inside the one form —
+        // never in the top section; Editor's pane no longer draws it.
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let pane = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPPane.swift"), encoding: .utf8)
+        let tabs = try #require(pane.range(of: "case .activity: activityTab\n            }"))
+        let foot = try #require(pane.range(of: "badgesSection\n        }\n        .formStyle(.grouped)"))
+        #expect(tabs.upperBound <= foot.lowerBound, "the section follows whichever tab shows")
+        let body = try #require(pane.range(of: "@ViewBuilder private var badgesSection: some View {"))
+        let section = String(pane[body.upperBound...].prefix(600))
+        #expect(section.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"))
+        #expect(section.contains("themeStore.setOwnershipBadges($0)"), "the one synced setting's own act")
+        #expect(section.contains(
+            "ExplainerLine(line: OwnershipSettingsCopy.badgesSummary, detail: OwnershipSettingsCopy.badgesHelp)"))
+        let settings = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/Settings/AppSettingsView.swift"), encoding: .utf8)
+        #expect(!settings.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"), "Editor's pane draws none")
     }
 
     // MARK: - VX-903 — the geometry contract's grown arm (both dials seated together)

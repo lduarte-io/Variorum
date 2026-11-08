@@ -359,6 +359,7 @@ struct MCPPane: View {
             case .shared: sharedTab
             case .activity: activityTab
             }
+            badgesSection
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
@@ -516,6 +517,29 @@ struct MCPPane: View {
             }
         } header: {
             tabRow
+        }
+    }
+
+    // MARK: - The badge family's switch (VX-905)
+
+    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
+    /// ownership badges' into the mcp part of settings - it makes more sense
+    /// there"; PROVISIONAL F-905 (1))**: the badge family's ONE switch
+    /// (`ownership_badges`, synced) — its own untitled section at the pane's
+    /// FOOT, under whichever tab shows. Every library keeps it (the owned-by
+    /// chips exist with no client at all, so it never waits for one), and
+    /// nothing above the tabs grows (VX-281's fresh-open geometry). The toggle,
+    /// its one line and the whole text behind its (i). Rendered only where the
+    /// window hands the pane its theme (a bare mount has no store to write —
+    /// P-2's dead door).
+    @ViewBuilder private var badgesSection: some View {
+        if let themeStore {
+            Section {
+                Toggle(SettingsCatalog.title("ownershipBadges"), isOn: Binding(
+                    get: { themeStore.settings.ownershipBadges },
+                    set: { themeStore.setOwnershipBadges($0) }))
+                ExplainerLine(line: OwnershipSettingsCopy.badgesSummary, detail: OwnershipSettingsCopy.badgesHelp)
+            }
         }
     }
 

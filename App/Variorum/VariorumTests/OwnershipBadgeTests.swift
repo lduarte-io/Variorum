@@ -207,11 +207,18 @@ struct OwnershipBadgeTests {
         #expect(BookStateCopy.navigatorChip(finished: true, sealed: true) == "\u{2713} sealed")
     }
 
-    @Test func theTwoSettingsRowsAreWhereTheEditorPaneRendersThem() {
+    /// VX-905 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1; her #264
+    /// word: "ticket moving 'show ownership badges' into the mcp part of
+    /// settings"): the badge switch is Settings ▸ MCP's row now (its pin:
+    /// `MCPPaneTabsTests.theBadgeSwitchIsSettingsMCPsRowAtThePanesFoot`); the
+    /// hide-owned default stays the Editor pane's.
+    @Test func theTwoSettingsRowsAreWhereTheirPanesRenderThem() {
         #expect(SettingsCatalog.title("ownershipBadges") == OwnershipSettingsCopy.badgesTitle)
         #expect(SettingsCatalog.title("hideOwnedDefault") == OwnershipSettingsCopy.hideOwnedTitle)
         let editor = AppSettingsView.rowIDsRendered[.editor] ?? []
-        #expect(editor.contains("ownershipBadges") && editor.contains("hideOwnedDefault"))
+        let mcp = AppSettingsView.rowIDsRendered[.mcp] ?? []
+        #expect(mcp.contains("ownershipBadges") && !editor.contains("ownershipBadges"))
+        #expect(editor.contains("hideOwnedDefault"))
         // The truths the help must not overclaim.
         #expect(OwnershipSettingsCopy.hideOwnedHelp.contains("The Library always shows everything"))
         #expect(OwnershipSettingsCopy.badgesHelp.contains("nothing else changes"))
