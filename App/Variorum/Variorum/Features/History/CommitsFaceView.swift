@@ -571,7 +571,9 @@ struct CommitsFaceBody: View {
     @ViewBuilder private func rowWords(_ line: CommitRail.Line) -> some View {
         switch line.content {
         case .now:
-            Text(tokens.chromeLabel(CommitsFaceCopy.theTakeNow))
+            // VX-898: the rail is THIS block's — "the take as kept" on an
+            // unplaced lineage member, else "the take now".
+            Text(tokens.chromeLabel(model.nowName))
                 .font(tokens.small)
                 .foregroundStyle(tokens.chosen)
                 .lineLimit(1)
