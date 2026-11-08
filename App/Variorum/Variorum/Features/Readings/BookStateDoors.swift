@@ -375,7 +375,18 @@ nonisolated enum BookStateCopy {
     /// to the Pool — nothing of hers destroyed) or the book AND its N notes
     /// (both to the Trash on one stamp — Put back returns them together).
     /// An owned book with no notes has nothing to choose: one button.
-    static func deleteOwnedBook(readingID: String, name: String, notes count: Int) -> BookStateConfirm {
+    ///
+    /// `notes` is the N the second choice takes (archived members included —
+    /// `deleteReadingWithNotes`' set); `archived` is how many of them are
+    /// archived. **The VX-914 ladder's F3 (PROVISIONAL wording, her bundle):**
+    /// the book-only half speaks the receipt's split (VX-45 (a) —
+    /// `deletedBookOnly`), because the Pool is every live, UN-archived
+    /// bookless note: an archived member never goes "back to the Pool", it
+    /// stays archived — so the confirm and the receipt after it agree. With
+    /// none archived the line is byte-for-byte the shipped one.
+    static func deleteOwnedBook(
+        readingID: String, name: String, notes count: Int, archived: Int = 0
+    ) -> BookStateConfirm {
         guard count > 0 else {
             return BookStateConfirm(
                 act: .deleteBook, readingID: readingID,
@@ -387,9 +398,9 @@ nonisolated enum BookStateCopy {
             act: .deleteBook, readingID: readingID,
             title: "Delete \(quoted(name))?",
             lines: [
-                "\(quoted(name)) owns its notes. Delete the book only, and its \(notes(count)) "
-                    + "go back to the Pool \u{2014} or delete the book and its \(notes(count)) "
-                    + "together.",
+                "\(quoted(name)) owns its notes. Delete the book only, and "
+                    + bookOnlyShare(notes: count, archived: archived)
+                    + " \u{2014} or delete the book and its \(notes(count)) together.",
                 // VX-897 (RULED, her chat Nov 7): the em dash becomes a comma —
                 // "…for 30 days, and Put back returns whatever went in together,
                 // together."
@@ -399,6 +410,25 @@ nonisolated enum BookStateCopy {
             list: [], after: [], confirmLabel: "Delete Book Only",
             alternateLabel: count == 1
                 ? "Delete Book and Its Note" : "Delete Book and Its \(count) Notes")
+    }
+
+    /// **Where the book-only choice leaves its notes** (the ladder's F3) — the
+    /// receipt's forms (`deletedBookOnly`) as the confirm says them ahead of
+    /// the act: "its 2 notes go back to the Pool" (none archived — the shipped
+    /// words) · "2 of its notes go back to the Pool, and 1 stays archived" ·
+    /// "its 2 notes stay archived" · "its note stays archived".
+    static func bookOnlyShare(notes count: Int, archived: Int) -> String {
+        let archived = min(max(archived, 0), count)
+        let pool = count - archived
+        switch (pool, archived) {
+        case (_, 0):
+            return "its \(notes(count)) go back to the Pool"
+        case (0, _):
+            return archived == 1 ? "its note stays archived" : "its \(notes(archived)) stay archived"
+        default:
+            return "\(pool) of its notes \(pool == 1 ? "goes" : "go") back to the Pool, and "
+                + "\(archived) \(archived == 1 ? "stays" : "stay") archived"
+        }
     }
 
     /// A plain book's delete landed — its notes untouched (lesson 8).
@@ -607,8 +637,11 @@ final class BookStateDoors {
         let pendingArrivals: Int
         let sealPreview: Queries.SealPreview
         let ownForks: [Queries.SharedMember]
-        /// The delete confirm's N (13i-c U4).
-        let memberNotes: Int
+        /// The delete confirm's N (13i-c U4), split by archive (the ladder's
+        /// F3 — `Queries.memberNoteSplit`, the `liveMemberNoteCount` set
+        /// counted in two): the plain confirm says the total, the owned
+        /// confirm's book-only half says where each share goes.
+        let memberNotes: Queries.MemberNoteSplit
         /// The owned archive confirm's N (13i-e U2) — the set
         /// `archiveReadingWithNotes` takes (`Queries.archiveWithNotesCount`).
         var archiveNotes: Int = 0
@@ -635,7 +668,8 @@ final class BookStateDoors {
                     ownForks: act == .ownBook
                         ? try Queries.ownConversionPreview(db, readingID: readingID) : [],
                     memberNotes: act == .deleteBook
-                        ? try Queries.liveMemberNoteCount(db, readingID: readingID) : 0,
+                        ? try Queries.memberNoteSplit(db, readingID: readingID)
+                        : Queries.MemberNoteSplit.none,
                     archiveNotes: act == .archiveBook
                         ? try Queries.archiveWithNotesCount(db, readingID: readingID) : 0)
             }) else {
@@ -700,10 +734,11 @@ final class BookStateDoors {
                 pending = BookStateCopy.deleteGathering(readingID: readingID, name: reading.name)
             case (.book, true):
                 pending = BookStateCopy.deleteOwnedBook(
-                    readingID: readingID, name: reading.name, notes: opening.memberNotes)
+                    readingID: readingID, name: reading.name, notes: opening.memberNotes.total,
+                    archived: opening.memberNotes.archived)
             case (.book, false):
                 pending = BookStateCopy.deletePlainBook(
-                    readingID: readingID, name: reading.name, notes: opening.memberNotes)
+                    readingID: readingID, name: reading.name, notes: opening.memberNotes.total)
             }
         case .archiveBook:
             // 13i-e U2 (R-13ie-2): an OWNED book asks — the delete confirm's

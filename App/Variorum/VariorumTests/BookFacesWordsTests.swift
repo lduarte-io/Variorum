@@ -201,6 +201,91 @@ struct BookCopyFamilyTests {
         #expect(say(2, 3) == lead + "2 of its notes are in the Pool now, and 3 stay archived.")
     }
 
+    /// An owned book whose notes are `live` + `archived` members, its Delete
+    /// door opened (the confirm asked, nothing pressed yet).
+    private func openOwnedDelete(
+        _ session: AppSession, live: Int, archived: Int
+    ) async throws -> (doors: BookStateDoors, confirm: BookStateConfirm) {
+        let ops = session.operations
+        let mine = try ops.createReading(name: "Mine", kind: .book)
+        try ops.setReadingOwned(mine.id, owned: true)
+        for index in 0..<(live + archived) {
+            let note = try ops.createPost(title: "n\(index)")
+            _ = try ops.addPostToReading(note.id, to: mine.id)
+            if index >= live { try ops.archiveContainer(note.id) }
+        }
+        let doors = BookStateDoors(session: session)
+        await doors.open(.deleteBook, readingID: mine.id)
+        return (doors, try #require(doors.pending, "an owned book's delete asks"))
+    }
+
+    /// **The VX-914 ladder's F3 — RED ON OLD: the CONFIRM never sends an
+    /// archived member "back to the Pool"** (VX-45's own class, one press
+    /// earlier). The confirm read the book's member count, archived included,
+    /// and promised "its 3 notes go back to the Pool" — then the book-only
+    /// receipt said "2 of its notes are in the Pool now, and 1 stays archived":
+    /// one act, two sentences that disagree, the confirm's the false one (the
+    /// Pool lists only UN-archived notes). The confirm speaks the receipt's
+    /// split now, and the two agree. Drives the door's own read and act; only
+    /// pre-fix API, so it runs red on the pre-fix tree.
+    @Test func theDeleteConfirmSaysWhatTheReceiptWillSay() async throws {
+        try await withWordsWorld { session, _ in
+            let (doors, confirm) = try await openOwnedDelete(session, live: 2, archived: 1)
+            #expect(confirm.lines.first
+                    == "\u{201C}Mine\u{201D} owns its notes. Delete the book only, and 2 of its notes go back "
+                    + "to the Pool, and 1 stays archived \u{2014} or delete the book and its 3 notes together.")
+            #expect(confirm.lines.first?.contains("its 3 notes go back to the Pool") == false,
+                    "the archived member is never counted into the Pool")
+            #expect(confirm.alternateLabel == "Delete Book and Its 3 Notes", "the second choice takes all three")
+            await doors.confirm()   // the first choice: the book only
+            let receipt = try #require(session.status.spoken?.text)
+            #expect(receipt.hasSuffix("2 of its notes are in the Pool now, and 1 stays archived."))
+            #expect(confirm.lines.first?.contains("2 of its notes go back to the Pool, and 1 stays archived") == true
+                    && receipt.contains("2 of its notes are in the Pool now, and 1 stays archived"),
+                    "the confirm and its receipt name the same two shares")
+        }
+    }
+
+    /// Every member archived: the confirm says they stay archived — the
+    /// receipt's "its note stays archived" (RED ON OLD too: the old confirm
+    /// said "its 1 note go back to the Pool").
+    @Test func anAllArchivedOwnedBooksConfirmSaysTheyStayArchived() async throws {
+        try await withWordsWorld { session, _ in
+            let (_, confirm) = try await openOwnedDelete(session, live: 0, archived: 1)
+            #expect(confirm.lines.first
+                    == "\u{201C}Mine\u{201D} owns its notes. Delete the book only, and its note stays archived "
+                    + "\u{2014} or delete the book and its 1 note together.")
+            #expect(confirm.lines.first?.contains("Pool") == false)
+        }
+    }
+
+    /// The confirm's book-only forms, pure (PROVISIONAL wording, her bundle —
+    /// the receipt's forms mirrored): none archived is byte-for-byte the
+    /// shipped line; the first line keeps its em dash (outside VX-897's two
+    /// ruled lines).
+    @Test func theConfirmsBookOnlyHalfFollowsTheSplit() {
+        func first(_ count: Int, archived: Int) -> String? {
+            BookStateCopy.deleteOwnedBook(readingID: "o", name: "X", notes: count, archived: archived).lines.first
+        }
+        let lead = "\u{201C}X\u{201D} owns its notes. Delete the book only, and "
+        #expect(first(2, archived: 0) == lead + "its 2 notes go back to the Pool \u{2014} or delete the book "
+                + "and its 2 notes together.")
+        #expect(first(2, archived: 0) == BookStateCopy.deleteOwnedBook(readingID: "o", name: "X", notes: 2)
+            .lines.first, "none archived: the shipped call, unchanged")
+        #expect(first(3, archived: 1) == lead + "2 of its notes go back to the Pool, and 1 stays archived "
+                + "\u{2014} or delete the book and its 3 notes together.")
+        #expect(first(2, archived: 1) == lead + "1 of its notes goes back to the Pool, and 1 stays archived "
+                + "\u{2014} or delete the book and its 2 notes together.")
+        #expect(first(5, archived: 3) == lead + "2 of its notes go back to the Pool, and 3 stay archived "
+                + "\u{2014} or delete the book and its 5 notes together.")
+        #expect(first(1, archived: 1) == lead + "its note stays archived \u{2014} or delete the book and "
+                + "its 1 note together.")
+        #expect(first(2, archived: 2) == lead + "its 2 notes stay archived \u{2014} or delete the book and "
+                + "its 2 notes together.")
+        #expect(BookStateCopy.deleteOwnedBook(readingID: "o", name: "X", notes: 0, archived: 0).alternateLabel == nil,
+                "an owned book with no notes still has nothing to choose")
+    }
+
     /// The door reads the split from the ACT (`deleteReading`'s own
     /// transaction), never a count read beside it — grep form.
     @Test func theDoorReadsTheSplitFromTheAct() throws {
