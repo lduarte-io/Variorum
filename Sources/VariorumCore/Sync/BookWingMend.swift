@@ -66,6 +66,29 @@ import GRDB
 // Deliberately NEVER a container landing: a deliberate note move-out can be
 // met between its container chunk and its membership-tombstone chunk, and
 // mending then would undo her move.
+//
+// THE STRAGGLE BELT (VX-893 (1) — the VX-912 run, `notes/plans/fixes/vx-912-
+// open-source-gating.md` B2; the vx-808 ladder's F-1): a note whose
+// membership's book names a wing with NO local row is skipped — rightly, its
+// effective wing is unknown. But `reading.wing_id` carries no FK (the virtual
+// Home), so the pull's FK fixpoint never holds a book back for its wing, and
+// the state-based feed delivers the wing's LATEST row at the seq of its latest
+// edit, which can sit beyond the round's reach; the wing's later landing is no
+// occasion. So the skip is RECORDED — the seeded-furniture fold's one-shot
+// deferral marker (SyncSpec §7), LOCAL-ONLY `sync_state` (`book_wing_mend_
+// deferred`: canonical JSON, post id → the note's stored wing when it was
+// skipped) — and the NEXT PULL's mend takes those notes back into scope:
+//   (d) the deferred notes — spent FIRST (the R2-3 lesson: a pass that runs
+//       consumes the marker before deciding anything), each one only while
+//       its note still sits in the wing it sat in when the mend deferred. A
+//       note whose container moved since (her deliberate move-out, met
+//       between its chunks; another device's mend) has left the deferred
+//       picture: judging it now is exactly the container-landing judgment
+//       the discipline above forbids, so the entry is dropped unjudged and a
+//       real span re-enters by an ordinary occasion.
+// Every note that straggles in a pass — pull or push-reject — is (re-)armed.
+// Never at an empty window (nothing landed, so nothing deferred can have
+// become decidable). Cost ∝ the marker, never the corpus.
 extension SyncEngine {
     /// The provenance every wing-mend demotion stamps (A-808-5; the spelling
     /// KEPT by Unit B2's vocabulary ruling, A-808-6) — and, a DEMOTION, its
@@ -94,7 +117,7 @@ extension SyncEngine {
     ) throws -> Int {
         var wings = WingLookup()
 
-        // The scope — the three occasions, never the corpus.
+        // The scope — the occasions and the belt's deferrals, never the corpus.
         var scope = keeperMoved                                     // (c)
         scope.formUnion(touched.liveMemberLandingPosts)              // (a)
         for (readingID, landing) in touched.readingWingLandings {    // (b)
@@ -109,6 +132,14 @@ extension SyncEngine {
                 scope.formUnion(members)
             }
         }
+        if touched.isPullBatch {                                     // (d)
+            for (postID, deferredWing) in try spendWingMendDeferrals(db) {
+                let stored = try String.fetchOne(
+                    db, sql: "SELECT wing_id FROM container WHERE id = ?", arguments: [postID])
+                guard stored == deferredWing else { continue }   // moved since: dropped unjudged
+                scope.insert(postID)
+            }
+        }
         guard !scope.isEmpty else { return 0 }
 
         let ops = Operations()
@@ -117,6 +148,7 @@ extension SyncEngine {
         let demotionStamp = try Self.wingMendArrivalProvenance(at: stamp)
         var adoptions: [String: Operations.TagAdoption] = [:]
         var repairs = 0
+        var deferred: [String: String] = [:]
         for postID in scope.sorted() {
             guard let post = try Container.fetchOne(db, key: postID),
                   post.deletedAt == nil, post.kind == .post,
@@ -135,7 +167,11 @@ extension SyncEngine {
                 guard try wings.isKnown(db, membership.wingID) else { straggles = true; break }
                 placed.append((membership, try wings.effective(db, membership.wingID)))
             }
-            guard !straggles, placed.contains(where: { $0.wing != noteWing }) else { continue }
+            if straggles {
+                deferred[postID] = post.wingId   // the belt: re-judged at the next pull
+                continue
+            }
+            guard placed.contains(where: { $0.wing != noteWing }) else { continue }
 
             let anchor = placed.min { Self.outranks($0.membership, $1.membership) }!
             let target = anchor.wing
@@ -185,7 +221,49 @@ extension SyncEngine {
                 repairs += 1
             }
         }
+        if !deferred.isEmpty { try armWingMendDeferrals(db, deferred) }
         return repairs
+    }
+
+    // MARK: - The straggle belt's marker (VX-893 (1))
+
+    /// LOCAL-ONLY (`sync_state`, never synced — it names a fact about this
+    /// device's apply history, not about the corpus): the notes a mend
+    /// skipped on a straggling wing, each with its note's stored wing then.
+    static let wingMendDeferralKey = "book_wing_mend_deferred"
+
+    /// Whether a deferral waits — `runPostApplyRepairs`' pull-only occasion.
+    func wingMendDeferralPending(_ db: Database) throws -> Bool {
+        try Bool.fetchOne(
+            db, sql: "SELECT EXISTS (SELECT 1 FROM sync_state WHERE key = ?)",
+            arguments: [Self.wingMendDeferralKey]) ?? false
+    }
+
+    /// Reads and DELETES the marker (one-shot); an unreadable value reads as
+    /// no deferral (the safe direction — an ordinary occasion re-enters a
+    /// real span).
+    private func spendWingMendDeferrals(_ db: Database) throws -> [String: String] {
+        let json = try String.fetchOne(
+            db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [Self.wingMendDeferralKey])
+        guard let json else { return [:] }
+        try db.execute(sql: "DELETE FROM sync_state WHERE key = ?", arguments: [Self.wingMendDeferralKey])
+        return (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: String] ?? [:]
+    }
+
+    /// Arms the marker with `entries`, merged over any deferral still waiting
+    /// (a push-reject pass never spends it); canonical JSON (sorted keys).
+    private func armWingMendDeferrals(_ db: Database, _ entries: [String: String]) throws {
+        var all: [String: String] = [:]
+        if let json = try String.fetchOne(
+            db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [Self.wingMendDeferralKey]),
+           let waiting = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: String] {
+            all = waiting
+        }
+        all.merge(entries) { _, fresh in fresh }
+        let data = try JSONSerialization.data(withJSONObject: all, options: [.sortedKeys])
+        try db.execute(
+            sql: "INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)",
+            arguments: [Self.wingMendDeferralKey, String(decoding: data, as: UTF8.self)])
     }
 
     // MARK: - The anchor
