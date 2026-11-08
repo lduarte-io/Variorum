@@ -406,12 +406,30 @@ nonisolated enum BookStateCopy {
         deleted(name) + " Its notes are untouched."
     }
 
-    /// Book-only, owned: the notes are in the Pool now.
-    static func deletedBookOnly(_ name: String, released count: Int) -> String {
-        count == 0
-            ? deleted(name)
-            : "Deleted \(quoted(name)) \u{2014} it\u{2019}s in the Trash; its \(notes(count)) "
-                + "\(count == 1 ? "is" : "are") in the Pool now."
+    /// Book-only, owned: where its notes are now. **VX-45 (the VX-914 run —
+    /// KnownIssues row 102; PROVISIONAL wording, her bundle):** the Pool is
+    /// every live, UN-archived bookless note, so an ARCHIVED member is never
+    /// said to be in it — it stays archived (the remove doors' twin, 13i-d U4).
+    /// The split is the act's own (`deleteReading`'s return, read in its
+    /// transaction). "Deleted “X” — it’s in the Trash; its 2 notes are in the
+    /// Pool now." · "…; 2 of its notes are in the Pool now, and 1 stays
+    /// archived." · "…; its 2 notes stay archived." · "…; its note stays
+    /// archived."
+    static func deletedBookOnly(_ name: String, released held: Queries.MemberNoteSplit) -> String {
+        let lead = "Deleted \(quoted(name)) \u{2014} it\u{2019}s in the Trash; "
+        switch (held.unarchived, held.archived) {
+        case (0, 0):
+            return deleted(name)
+        case (let pool, 0):
+            return lead + "its \(notes(pool)) \(pool == 1 ? "is" : "are") in the Pool now."
+        case (0, let archived):
+            return lead + (archived == 1
+                ? "its note stays archived."
+                : "its \(notes(archived)) stay archived.")
+        case (let pool, let archived):
+            return lead + "\(pool) of its notes \(pool == 1 ? "is" : "are") in the Pool now, and "
+                + "\(archived) \(archived == 1 ? "stays" : "stay") archived."
+        }
     }
 
     /// With its notes: one stamp, one Put back.
@@ -774,13 +792,12 @@ final class BookStateDoors {
                     let notes = try ops.deleteReadingWithNotes(readingID)
                     return BookStateCopy.deletedWithNotes(name, notes: notes.count)
                 case .deleteBook:
-                    let released = owned
-                        ? try database.read { db in
-                            try Queries.liveMemberNoteCount(db, readingID: readingID)
-                        } : 0
-                    try ops.deleteReading(readingID)
+                    // VX-45: what the book held, split by archive, read in the
+                    // act's OWN transaction (13i-c's NIT — the count is never a
+                    // moment stale) — so the receipt says what the Pool shows.
+                    let held = try ops.deleteReading(readingID)
                     if named?.kind == .gathering { return BookStateCopy.deleted(name) }
-                    return owned ? BookStateCopy.deletedBookOnly(name, released: released)
+                    return owned ? BookStateCopy.deletedBookOnly(name, released: held)
                         : BookStateCopy.deletedPlainBook(name)
                 default:
                     throw OperationError.readingNotFound(id: readingID)

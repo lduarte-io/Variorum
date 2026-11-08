@@ -2321,7 +2321,9 @@ struct BookView: View {
                     }
                     .padding(.bottom, 22)
                     if model.entries.isEmpty {
-                        Text("This book has no notes yet.")
+                        // VX-45: the one empty-state home (an archived or live gathering
+                        // speaks its own kind).
+                        Text(BookEmptyStateCopy.line(for: structure.reading))
                             .foregroundStyle(tokens.muted)
                     }
                     // ONE flat ForEach whose identities ARE the landing

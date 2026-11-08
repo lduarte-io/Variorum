@@ -546,7 +546,7 @@ enum TutorialSeeder {
             try? ops.deleteContainer(poolID)
         }
         for readingID in existing.readingIDs {
-            try? ops.deleteReading(readingID)
+            _ = try? ops.deleteReading(readingID)  // VX-45: the op returns its split now
         }
     }
 

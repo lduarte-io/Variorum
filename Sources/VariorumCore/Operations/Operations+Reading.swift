@@ -409,9 +409,19 @@ extension Operations {
     /// ⌘J mints a fresh Journal in the wing she stands in — no backfill: a
     /// pair decided with the old book stays decided. The MCP door keeps its
     /// own refusal (R-805-5 — `refuseDeletingTheDailyJournalOnTheWire`).
-    public func deleteReading(_ id: String) throws {
+    ///
+    /// **Returns the member notes it held, split by archive** (VX-45 — the
+    /// VX-914 run; KnownIssues row 102's recorded remedy): read in THIS
+    /// transaction, before the tombstone, so the book-only receipt says what
+    /// the act actually left where (an archived member stays archived; the
+    /// rest are in the Pool) and never a count read a moment earlier that a
+    /// sync apply could have moved. Discardable: every other caller ignores it.
+    @discardableResult
+    public func deleteReading(_ id: String) throws -> Queries.MemberNoteSplit {
         try database.write { db in
+            let held = try Queries.memberNoteSplit(db, readingID: id)
             _ = try deleteReadingRow(db, id)
+            return held
         }
     }
 

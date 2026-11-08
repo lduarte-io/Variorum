@@ -190,7 +190,7 @@ enum MobileTutorialSeeder {
         }
         for readingID in existing.readingIDs {
             try? ops.setShelfPinned(readingID, pinned: false)
-            try? ops.deleteReading(readingID)
+            _ = try? ops.deleteReading(readingID)  // VX-45: the op returns its split now
         }
     }
 
