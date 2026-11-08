@@ -85,3 +85,14 @@ The run record's LIVE LEDGER (`vx-914-walkthrough-followups.md:435–449`) reads
 - **Scope:** no `Sync/`, custody/keychain or editor-seam line; no schema; no dependency; no attribution trailer on the fix commits (checked `git log`).
 
 **VERDICT: no new BLOCKER/MAJOR — the ladder closes at round 2.** Remaining: R2-F1 (MINOR, a one-line adjudication-fix candidate or a ticketed remainder) and four record/comment NITs; the post-fix gate window must still RUN the new pins.
+
+
+## DISPOSITIONS (the orchestrator, 2026-11-08 — the ladder CLOSES at round 2)
+
+- **VERDICT ACCEPTED: no new BLOCKER/MAJOR — the ladder closes at round 2.** Every round-1 finding confirmed fixed or honestly dispositioned; F1's two weak spots accepted with the reviewer's reasoning.
+- **R2-F1 (MINOR) — CONFIRMED, FIXED by the orchestrator** under the small-adjudication-fix allowance (the reviewer's exact one-line fix + its exact pin, both landed; red on the pre-fix body; her VX-868 word is the authority against the slip). As a final-round fix no later round reads, it carries the orchestrator's line-by-line check: the diff is the ternary + the pin's two arms, nothing else.
+- **R2-N1 — FIXED (comment amendment, same commit).**
+- **R2-N2 — FIXED in the record: the walk plan now carries the three rows (the real ⌘⏎ key event; the cold book open in both voices; the archived-member confirm → receipt agreement).**
+- **R2-N3 — FIXED in the record: the VX-896 canon-delta line now carries the stored/synced-order clause the PROVISIONAL already had.**
+- **R2-N4 — ACCEPTED-MOOT: the merge gate is the whole Mac target (nov7's rule), which contains the six missing suites by construction; recorded, no list edit owed.**
+- The fix round's two seen-not-touched items (lesson 8's "(they go to the Pool)" over-say; the old singular slip now fixed as R2-F1) and the standing residuals join the closeout's ticket-candidate list.
