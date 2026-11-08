@@ -428,8 +428,12 @@ struct BookMastheadStableWidthsTests {
     func everyFaceIsCountedAtItsOwnWidth(voice: ThemeVoice) {
         let tokens = VoiceTokens.resolve(voice: voice, dark: false)
         var wrong: [String] = []
+        // VX-896: at a face's own threshold the dial is offered EXACTLY its
+        // counted width, so the counted width must never be narrower than
+        // the real control (else one line would truncate it there) — strict,
+        // where the widest-face count could allow the precedent's half point.
         func check(_ label: String, counted: CGFloat, drawn: CGFloat) {
-            if drawn > counted + 0.5 || abs(drawn - counted) >= 1 {
+            if drawn > counted + 0.01 || abs(drawn - counted) >= 1 {
                 wrong.append("\(label): drawn \(drawn) vs counted \(counted)")
             }
         }
@@ -864,7 +868,7 @@ struct BookMastheadMountedTests {
                 if let look {
                     // VX-896: a look is counted at the face it draws.
                     let drawn = BookMastheadStableWidthsTests.stable(tokens, order: look).dial
-                    if abs(placed.dialCounted - drawn) > 0.5 {
+                    if abs(placed.dialCounted - drawn) >= 1 {
                         wrong.append("\(step): counted \(placed.dialCounted), not the drawn face's \(drawn)")
                     }
                 } else if placed.dialCounted != first.dialCounted {
