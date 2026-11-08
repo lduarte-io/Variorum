@@ -450,7 +450,9 @@ VX-870 → no objection; the host-fact approach as described, the helper's .swit
 
 ## PROVISIONALs (filed to QUESTIONS at the merge moment)
 
-*(none yet)*
+*(The batches' own PROVISIONAL lists live in their self-assessments above and are gathered here at the merge moment; the ladder round 1 fix round's entries land here first — `notes/plans/fixes/vx-914-ladder-round1.md`.)*
+
+- **F-896 (1) — the dial counted at the face it shows (VX-896, batch 3), its ACCEPTED CONSEQUENCE as widened at ladder F1:** at a fixed width a LOOK picked whose face is wider or narrower can move the masthead's line count, and so can **the book's own stored order changing — saved here, or ARRIVING BY SYNC from another device** (the same consequence, one input over: the same `structure.reading` re-read recounts the stored face); a title, a mode switch, the active tab and **the book's row LANDING never do** — ladder F1 made that true by construction: the mode row (tabs and dial, one decision) is drawn only once the book's row has landed, so its first paint counts the real face and the placeholder "book's order ▾" is never counted. Her bundle reads the old → new thresholds in batch 3's row 4 (257 → 240 Study / 304 → 276 Terminal for "Manual order ▾").
 
 ## Sitting records
 

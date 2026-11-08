@@ -28,12 +28,19 @@
 //  (304 in Terminal) — ≈ 25 pt of air at the threshold. It is counted at the
 //  face it SHOWS now (PROVISIONAL F-896 (1), ruled): one line from 240 pt in
 //  Study (276 in Terminal) for "Manual order ▾", at standard spacing (the
-//  8-pt gap — the tabs' own). Typing a title, a mode switched, the active tab
-//  or a row landing still never changes the line count; a LOOK picked whose
-//  face is wider than the room can (the dial then needs more than standard
-//  spacing allows) — the one input R-878-K4's strict count held still,
-//  superseded at exactly that input (the record names it). It never
-//  truncates on one line.
+//  8-pt gap — the tabs' own). Typing a title, a mode switched or the active
+//  tab still never changes the line count; a LOOK picked whose face is wider
+//  than the room can (the dial then needs more than standard spacing allows)
+//  — the input R-878-K4's strict count held still, superseded there (the
+//  record names it) — and so can the book's own stored order changing to a
+//  wider or narrower face, whether saved here or arriving by sync from
+//  another device (the same consequence, one input over). It never truncates
+//  on one line.
+//
+//  **The VX-914 ladder's F1:** the book's row LANDING never moves it — the
+//  row (tabs and dial, one decision) is drawn only once `BookView` holds the
+//  book's row, so its first paint counts the real face and the placeholder
+//  "book's order ▾" is never counted (`BookView.bookMasthead`).
 //
 //  ONE LINE: the tabs at the leading edge, the dial at the trailing end,
 //  first text baselines aligned. TWO LINES: the tabs, then the dial on a line
@@ -230,7 +237,8 @@ struct BookMastheadModeRow: Layout {
 /// measured in the voice's own `small` face, each word rounded UP to a whole
 /// point as a SwiftUI `Text` sizes itself. The tab number moves only when the
 /// voice does; the dial's only when its face's WORDS do (a look picked, the
-/// book's own order saved) — never with a title, a mode or a landing.
+/// book's own order saved here or arriving by sync) — never with a title, a
+/// mode or a landing (the row waits for the book's row — the ladder's F1).
 struct BookMastheadStableWidths: Equatable {
     var tabs: CGFloat
     var dial: CGFloat

@@ -923,6 +923,120 @@ struct BookMastheadMountedTests {
             #endif
         }
     }
+
+    /// **The VX-914 ladder's F1 — RED ON OLD: the row waits for the book's
+    /// row.** Since VX-896 the dial is counted at the face it shows, and before
+    /// the book's row lands `storedLabel(for: nil)` is the placeholder
+    /// "book's order" — the old masthead drew the row then and decided its line
+    /// count from the placeholder (78 Study / 100 Terminal), so a book stored
+    /// "Major revision ↓" (98 / 128) could open on ONE line and drop to two
+    /// when its row landed (Study 237–256 pt of masthead; Terminal 276–303).
+    /// A SETTLED sample cannot see that (it is green on both trees — the
+    /// reviewer's proof), so this pin samples the PRE-LANDING state: the
+    /// book's row is withheld (tombstoned — `Queries.reading` reads it as
+    /// absent, exactly the not-yet-landed state the structure model holds), the
+    /// view mounted and settled through its own `.task`s, and the probe read
+    /// while the row is still absent. Old tree: a placement exists, counted at
+    /// "book's order ▾", and the dial drew that face — RED. Fixed: the masthead
+    /// drew (its title reads the pre-landing "book"), no row was placed and no
+    /// dial face drew. Then the row lands through the structure's own
+    /// observation (a restore), and the FIRST placement counts the book's real
+    /// face. Only pre-fix API — the gate may lift it onto the pre-fix tree.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func theRowWaitsForTheBooksRowAndFirstPaintsAtItsRealFace(voice: ThemeVoice) async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 914))
+        } operation: { @MainActor in
+            #if DEBUG
+            let session = AppSession(database: db)
+            let ops = session.operations
+            // A stored order whose face differs from the placeholder's in BOTH
+            // voices (the reviewer's measured example).
+            let stored = Queries.ReadingOrder(field: .lastMajorRevision, direction: .desc)
+            let reading = try ops.createReading(
+                name: "the late row", kind: .book, sortField: stored.field, sortDir: stored.direction)
+            let post = try ops.createPost(title: "a note in it")
+            _ = try ops.newBlock(in: post.id, text: "A line of prose in the book.")
+            try ops.addPostToReading(post.id, to: reading.id)
+            try ops.setThemeVoice(voice)
+            let theme = ThemeStore(session: session)
+            let observing = Task { await theme.start() }
+            defer { observing.cancel() }
+            for _ in 0..<60 where theme.settings.voice != voice {
+                pump(0.02)
+                await Task.yield()
+            }
+            try #require(theme.settings.voice == voice, "\(voice): the theme reached the voice")
+            let tokens = theme.tokens(for: .light)
+            let realFace = BookOrderDial.face(tokens, order: BookOrderChoices.label(for: stored))
+            let placeholderFace = BookOrderDial.face(tokens, order: BookOrderChoices.unloadedName)
+            #expect(realFace != placeholderFace)
+            #expect(BookMastheadStableWidthsTests.stable(tokens, order: BookOrderChoices.label(for: stored)).dial
+                    != BookMastheadStableWidthsTests.stable(tokens, order: BookOrderChoices.unloadedName).dial,
+                    "\(voice): the two faces count differently, so the sample discriminates")
+
+            // The row WITHHELD: the book's row reads as absent until restored.
+            try ops.deleteReading(reading.id)
+            BookMastheadProbe.reset(reading.id)
+            BookNameProbe.drawn[BookNameProbe.key(reading.id, .masthead)] = nil
+            let structure = BookStructureModel(session: session, readingID: reading.id)
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.appearance = NSAppearance(named: .aqua)
+            let hosting = NSHostingView(rootView: BookView(
+                session: session, readingID: reading.id, structure: structure)
+                .environment(theme))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 700)
+            window.contentView = hosting
+            window.orderFrontRegardless()
+            defer {
+                window.orderOut(nil)
+                window.contentView = nil
+                window.close()
+                BookMastheadProbe.reset(reading.id)
+            }
+            await settle(window, hosting, turns: 12)
+
+            // THE PRE-LANDING SAMPLE.
+            #expect(structure.reading == nil, "\(voice): the book's row has not landed")
+            #expect(BookNameProbe.name(reading.id, .masthead) == BookView.shownName(of: nil),
+                    "\(voice): the masthead drew before the row landed (non-vacuity)")
+            let early = BookMastheadProbe.placed[reading.id]
+            #expect(early == nil,
+                    "\(voice): no mode row placed before the book's row landed — it counted \(String(describing: early?.dialCounted)) at \(String(describing: early?.decidedWidth)), \(String(describing: early?.arrangement.lineCount)) line(s)")
+            #expect(BookMastheadProbe.dialFace[reading.id] == nil,
+                    "\(voice): the placeholder face never drew (\(String(describing: BookMastheadProbe.dialFace[reading.id])))")
+
+            // The row LANDS through the structure's own observation.
+            try ops.restoreReading(reading.id)
+            await settle(window, hosting, turns: 40, until: {
+                structure.reading != nil && BookMastheadProbe.placed[reading.id] != nil
+            })
+            if structure.reading == nil {
+                // A host whose `.task`s never fire: land it by hand, as the
+                // mounted rigs do.
+                structure.adopt(.init(
+                    reading: try await db.read { [id = reading.id] in try Queries.reading($0, id: id) },
+                    sections: [], deletedSections: [], assignments: [:]))
+                await settle(window, hosting, turns: 20, until: { BookMastheadProbe.placed[reading.id] != nil })
+            }
+            let landed = try #require(BookMastheadProbe.placed[reading.id], "\(voice): the row placed once the row landed")
+            let realStable = BookMastheadStableWidthsTests.stable(tokens, order: BookOrderChoices.label(for: stored))
+            #expect(abs(landed.dialCounted - realStable.dial) < 1,
+                    "\(voice): the first placement counts the real face (\(landed.dialCounted) vs \(realStable.dial))")
+            #expect(landed.arrangement.widthClass == Rule.widthClass(
+                width: landed.decidedWidth, tabs: landed.tabsWidth, dialCounted: landed.dialCounted))
+            #expect(BookMastheadProbe.dialFace[reading.id] == realFace,
+                    "\(voice): the dial drew the book's own face (\(String(describing: BookMastheadProbe.dialFace[reading.id])))")
+            #endif
+        }
+    }
 }
 
 // MARK: - The source legs
@@ -946,7 +1060,16 @@ struct BookMastheadSourceTests {
         #expect(book.components(separatedBy: "BookMastheadModeRow(").count == 2, "the row composed once")
         #expect(!book.contains("ViewThatFits") && !row.contains("ViewThatFits"))
         #expect(book.components(separatedBy: "orderControl").count == 3, "the dial: its definition and its one use")
-        #expect(book.contains("            orderControl\n        }\n"), "the dial is the row's second view")
+        // The VX-914 ladder's F1 (A JUSTIFIED EDIT — the indentation only): the
+        // row now sits inside the landed-row guard, so its two views are one
+        // level deeper; the claim — the dial is the row's second view — is
+        // unchanged. And the guard itself: the row is composed only once the
+        // book's row is held (its first paint counts the real face).
+        #expect(book.contains("                orderControl\n            }\n        }\n"),
+                "the dial is the row's second view")
+        #expect(book.contains("        if let reading = structure.reading {\n"
+                              + "            let stable = BookMastheadStableWidths.row("),
+                "the row waits for the book's row (ladder F1)")
         #expect(!book.contains("order \u{00B7} "), "the doubled word is gone")
     }
 

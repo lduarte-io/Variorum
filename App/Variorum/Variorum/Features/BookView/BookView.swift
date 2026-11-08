@@ -772,21 +772,32 @@ struct BookView: View {
         // — never `ViewThatFits`, so a rename, a mode switch or a resize back
         // and forth never moves the line count off the width's own answer; a
         // look whose face needs more room than standard spacing leaves can.
-        let stable = BookMastheadStableWidths.row(
-            tokens: tokens, in: fontContext,
-            face: BookOrderDial.face(tokens, order: BookOrderDial.shownOrder(
-                stored: BookOrderChoices.storedLabel(for: structure.reading),
-                viewOrder: model.viewOrder)))
-        BookMastheadModeRow(tabsWidth: stable.tabs, dialCounted: stable.dial, probeKey: readingID) {
-            HStack(spacing: BookMastheadModeRowRule.tabSpacing) {
-                // Outline · Index · Book · Read — Index sits beside the
-                // writing surface, mirroring the note row's Write · Takes ·
-                // Index · Read shape (her cohesion mandate, W8-2).
-                ForEach(Self.tabOrder, id: \.self) { mode in
-                    modeTab(Self.tabLabel(mode), mode)
+        //
+        // VX-914 ladder F1 — THE ROW WAITS FOR THE BOOK'S ROW. The dial is
+        // counted at the face it shows, and before the book's row lands that
+        // face is the placeholder "book's order ▾" — so a row drawn then
+        // decided its line count from a placeholder and could flip it when the
+        // real face landed (one line to two, or two to one, in a width band).
+        // The tabs and the dial are ONE layout and ONE decision, so the whole
+        // row draws only once the row it counts is here: its first paint is at
+        // the book's real face, and no placeholder is ever counted.
+        if let reading = structure.reading {
+            let stable = BookMastheadStableWidths.row(
+                tokens: tokens, in: fontContext,
+                face: BookOrderDial.face(tokens, order: BookOrderDial.shownOrder(
+                    stored: BookOrderChoices.storedLabel(for: reading),
+                    viewOrder: model.viewOrder)))
+            BookMastheadModeRow(tabsWidth: stable.tabs, dialCounted: stable.dial, probeKey: readingID) {
+                HStack(spacing: BookMastheadModeRowRule.tabSpacing) {
+                    // Outline · Index · Book · Read — Index sits beside the
+                    // writing surface, mirroring the note row's Write · Takes ·
+                    // Index · Read shape (her cohesion mandate, W8-2).
+                    ForEach(Self.tabOrder, id: \.self) { mode in
+                        modeTab(Self.tabLabel(mode), mode)
+                    }
                 }
+                orderControl
             }
-            orderControl
         }
         // 13c 2C: READ's pair of faces (her direction — "the
         // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
