@@ -1,0 +1,406 @@
+#!/usr/bin/env python3
+"""assert-tests-ran — did a test run EXECUTE tests, and did its host survive? (VX-604)
+
+A run that executes zero tests must never read as green. When the test host died before its
+first test (VX-604, 2026-10-27 03:46), xcodebuild said "** TEST SUCCEEDED **" and Swift Testing
+said "Test run with 0 tests in 1 suite passed": both green, both false. This gate is the verdict
+our gates read; xcodebuild's exit status alone is not.
+
+usage:
+  Tools/assert-tests-ran <input> [<input>...] [--expect-at-least N]
+
+  <input> is any of:
+    - a result bundle (*.xcresult): THE AUTHORITY. Its test tree and summary are read with
+      `xcrun xcresulttool get test-results tests|summary --path <bundle>`.
+    - a saved JSON from `xcrun xcresulttool get test-results tests` or `... summary`.
+    - an xcodebuild console log (`... 2>&1 | tee LOG`). When the log names its result bundle
+      ("Test session results, code coverage, and logs:") and that bundle exists, the bundle is
+      read too, as the same run.
+  Each bundle, JSON or log is one RUN (a log and the bundle it names are one run). Every run must
+  execute at least one test; --expect-at-least N applies to the total over all runs.
+
+THE INVOCATION CONVENTION (every app-suite run a gate reads; from App/Variorum):
+  R=<a fresh path>.xcresult        # xcodebuild refuses an existing bundle
+  only=(-only-testing:VariorumTests/SuiteA -only-testing:VariorumTests/SuiteB)   # TYPE names, a zsh array
+  xcodebuild test -scheme Variorum -destination 'platform=macOS' -resultBundlePath "$R" "${only[@]}" 2>&1 | tee "$LOG"
+  print -r -- "xcodebuild exit: ${pipestatus[1]}"
+  ../../Tools/assert-tests-ran "$R" "$LOG" --expect-at-least <the tests the named suites hold>
+  (test-without-building takes the same -resultBundlePath; the phone's runs are the same shape.)
+
+WHAT COUNTS:
+  EXECUTED = test cases that PASSED, FAILED or were an EXPECTED FAILURE. A skipped test is never
+  executed: Swift Testing's "Test run with N tests" counts skipped tests (the resiliency protocol's
+  addendum), so N is never read as a count. XCTest's "Executed 0 tests" appears in every
+  Swift-Testing-only run and is no verdict on its own. The pseudo-test "Issues recorded without an
+  associated test or suite" is not a test: it is an issue raised outside every test (VX-604's was
+  the test host's own launch), and it counts as a FAILURE.
+  HOST CRASH = a runner-level crash or unexpected-exit mark anywhere in an input (an exact phrase
+  list below, never the bare word "crash": suites have that word in their names).
+  The log road counts DISTINCT test names (a console line names a function, not its suite), so it
+  can undercount; the bundle is exact. When no executed count can be established, the gate fails
+  closed.
+
+exit: 0 GREEN   every run executed tests, the total meets --expect-at-least, no failure, no crash
+      1 RED     a failure: a test, an issue outside any test, or xcodebuild's own TEST FAILED
+      2 ZERO    a run executed nothing, the total is under --expect-at-least, or no count could be
+                established (the false-green class)
+      3 CRASH   a host crash or unexpected-exit mark
+      4 USAGE   bad arguments or an input that does not exist / cannot be read
+  When several hold, the higher-numbered verdict among 3, 2 and 1 wins. Every finding is printed.
+
+Pins: Tests/VariorumCoreTests/TestRunGateTests.swift (headless: synthetic logs and trees).
+Record: notes/plans/fixes/vx-912-open-source-gating.md, "## B1 record".
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+
+ORPHAN = "Issues recorded without an associated test or suite"
+# swift-dependencies' own words on an issue a host APPLICATION raised at launch (VX-604's class).
+HOST_NOTE = "This issue was emitted from tests running in a host application"
+
+# Runner-level crash marks (case-insensitive). Tight on purpose: a suite name can contain "crash".
+CRASH_MARKS = [
+    r"unexpected exit",                      # "Restarting after unexpected exit, crash, or test timeout",
+                                             # "Early unexpected exit, operation never finished bootstrapping"
+    r"never finished bootstrapping",
+    r"crashed with signal",                  # "Test crashed with signal segv."
+    r"test runner (?:exited|crashed)",       # "The test runner exited with code ...", "... crashed before ..."
+    r"lost connection to (?:the )?test",
+    r"terminated due to signal",
+    r"\bCrash:\s",                           # a crash recorded as a test failure in a result bundle
+    r"\bEXC_(?:BAD_ACCESS|BAD_INSTRUCTION|CRASH|BREAKPOINT)\b",
+]
+CRASH_RE = re.compile("|".join(CRASH_MARKS), re.IGNORECASE)
+
+# Console patterns.
+SWIFT_DONE = re.compile(
+    r"^\s*\S{1,2}\s+Test\s+(?!run with\b)(?!case\b)(?P<name>.+?)\s+(?P<verb>passed|failed)\s+after\s")
+SWIFT_SKIP = re.compile(r"^\s*\S{1,2}\s+Test\s+(?!run with\b)(?P<name>.+?)\s+skipped\b")
+SWIFT_RUN = re.compile(
+    r"Test run with (?P<n>\d+) tests? in (?P<m>\d+) suites? (?P<verb>passed|failed)\b")
+CASE_LINE = re.compile(r"^\s*Test [Cc]ase '(?P<name>[^']+)' (?P<verb>passed|failed|skipped)\b")
+XCT_EXECUTED = re.compile(r"Executed (?P<n>\d+) tests?, with (?P<f>\d+) failures?")
+XCB_VERDICT = re.compile(r"\*\* TEST (?:EXECUTE )?(?P<verb>SUCCEEDED|FAILED) \*\*")
+BUNDLE_LINE = re.compile(r"(\S+\.xcresult)\s*$")
+
+OK, RED, ZERO, CRASH, USAGE = 0, 1, 2, 3, 4
+NAMES = {OK: "GREEN", RED: "RED", ZERO: "ZERO EXECUTED", CRASH: "HOST CRASH", USAGE: "USAGE"}
+
+
+class Run:
+    def __init__(self, label):
+        self.label = label
+        self.executed = None      # an exact or lower-bound count; None = not established
+        self.exact = False
+        self.passed = self.failed = self.expected = self.skipped = 0
+        self.failures = []        # one line each
+        self.crashes = []         # one line each
+        self.notes = []
+
+    def crash(self, where, text):
+        line = text.strip().splitlines()[0] if text.strip() else text
+        self.crashes.append(f"{where}: {line[:240]}")
+
+    def scan_crash(self, where, text):
+        for line in text.splitlines():
+            if CRASH_RE.search(line):
+                self.crash(where, line)
+
+
+def first_line(text):
+    text = (text or "").strip()
+    return text.splitlines()[0][:240] if text else ""
+
+
+# ---------------------------------------------------------------- the structured road (bundles, JSON)
+
+def read_tree(run, tree):
+    """Counts from `xcresulttool get test-results tests` — exact."""
+    counts = {"Passed": 0, "Failed": 0, "Expected Failure": 0, "Skipped": 0, "other": 0}
+    orphans = []
+
+    def walk(node, parent_type):
+        node_type = node.get("nodeType")
+        name = node.get("name", "")
+        if node_type == "Test Case":
+            if name == ORPHAN or node.get("nodeIdentifier") == ORPHAN:
+                orphans.append(node)
+            else:
+                result = node.get("result")
+                counts[result if result in counts else "other"] += 1
+        if node_type == "Failure Message":
+            run.scan_crash("failure message", name)
+            if parent_type in ("Test Plan", "Unit test bundle", "UI test bundle"):
+                run.failures.append(f"a failure outside every test case: {first_line(name)}")
+        if node.get("details"):
+            run.scan_crash("details", node["details"])
+        for child in node.get("children", []) or []:
+            walk(child, node_type)
+
+    for top in tree.get("testNodes", []) or []:
+        walk(top, None)
+    run.passed += counts["Passed"]
+    run.failed += counts["Failed"]
+    run.expected += counts["Expected Failure"]
+    run.skipped += counts["Skipped"]
+    executed = counts["Passed"] + counts["Failed"] + counts["Expected Failure"]
+    run.executed = executed if run.executed is None else max(run.executed, executed)
+    run.exact = True
+    if counts["other"]:
+        run.notes.append(f"{counts['other']} test case(s) carry no result (not counted as executed)")
+    if counts["Failed"]:
+        run.failures.append(f"{counts['Failed']} test case(s) failed")
+    for orphan in orphans:
+        detail = ""
+        for child in orphan.get("children", []) or []:
+            detail = detail or first_line(child.get("name", ""))
+        run.failures.append(
+            f'an issue recorded outside every test ("{ORPHAN}"){": " + detail if detail else ""}'
+            " - the test host's own launch was VX-604's source")
+        run.scan_crash("issue outside every test", json.dumps(orphan))
+
+
+def read_summary(run, summary):
+    """`xcresulttool get test-results summary` — its failure texts; its counts only when no tree was read."""
+    orphan_failures = 0
+    for failure in summary.get("testFailures", []) or []:
+        text = failure.get("failureText", "")
+        run.scan_crash("test failure", text)
+        if failure.get("testName") == ORPHAN or failure.get("testIdentifierString") == ORPHAN:
+            orphan_failures += 1
+            if orphan_failures == 1:
+                location = re.search(r"Location:\s*\n\s*(\S+)", text)
+                run.notes.append(f"the first issue outside every test: {first_line(text)}"
+                                 + (f" (at {location.group(1)})" if location else ""))
+    if not run.exact:
+        passed = int(summary.get("passedTests", 0))
+        failed = int(summary.get("failedTests", 0)) - orphan_failures
+        expected = int(summary.get("expectedFailures", 0))
+        run.passed, run.failed, run.expected = passed, max(failed, 0), expected
+        run.skipped = int(summary.get("skippedTests", 0))
+        run.executed = passed + max(failed, 0) + expected
+        run.exact = True
+        if failed > 0:
+            run.failures.append(f"{failed} test case(s) failed")
+        if orphan_failures:
+            run.failures.append(
+                f'{orphan_failures} issue(s) recorded outside every test ("{ORPHAN}")'
+                " - the test host's own launch was VX-604's source")
+    for warning in summary.get("runtimeWarnings", []) or []:
+        run.scan_crash("runtime warning", warning.get("message", ""))
+
+
+def xcresulttool(kind, bundle):
+    out = subprocess.run(
+        ["xcrun", "xcresulttool", "get", "test-results", kind, "--path", bundle],
+        capture_output=True, text=True)
+    if out.returncode != 0:
+        raise RuntimeError(first_line(out.stderr or out.stdout) or f"xcresulttool {kind} failed")
+    return json.loads(out.stdout)
+
+
+def read_bundle(run, bundle):
+    try:
+        read_tree(run, xcresulttool("tests", bundle))
+    except (RuntimeError, ValueError) as error:
+        run.notes.append(f"the bundle's test tree could not be read ({error})")
+    try:
+        read_summary(run, xcresulttool("summary", bundle))
+    except (RuntimeError, ValueError) as error:
+        run.notes.append(f"the bundle's summary could not be read ({error})")
+
+
+def read_json(run, path):
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    if "testNodes" in data:
+        read_tree(run, data)
+    elif "passedTests" in data:
+        read_summary(run, data)
+    else:
+        raise ValueError("neither a test tree (testNodes) nor a summary (passedTests)")
+
+
+# ---------------------------------------------------------------- the console road (logs)
+
+def read_log(run, text):
+    """Returns the result bundle the log names, if any."""
+    swift_passed, swift_failed, swift_skipped = set(), set(), set()
+    case_passed, case_failed = set(), set()
+    xct_executed, xct_failed = None, 0
+    swift_runs = []
+    verdicts = []
+    bundle = None
+    host_noted = False
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if CRASH_RE.search(line):
+            run.crash("log", line)
+        match = SWIFT_DONE.match(line)
+        if match:
+            (swift_failed if match["verb"] == "failed" else swift_passed).add(match["name"])
+            continue
+        match = SWIFT_SKIP.match(line)
+        if match:
+            swift_skipped.add(match["name"])
+            continue
+        match = CASE_LINE.match(line)
+        if match:
+            if match["verb"] == "failed":
+                case_failed.add(match["name"])
+            elif match["verb"] == "passed":
+                case_passed.add(match["name"])
+            continue
+        match = SWIFT_RUN.search(line)
+        if match:
+            swift_runs.append((int(match["n"]), match["verb"]))
+        match = XCT_EXECUTED.search(line)
+        if match:
+            n = int(match["n"])
+            xct_executed = n if xct_executed is None else max(xct_executed, n)
+            xct_failed = max(xct_failed, int(match["f"]))
+        match = XCB_VERDICT.search(line)
+        if match:
+            verdicts.append(match["verb"])
+        if "Test session results, code coverage, and logs:" in line:
+            for follow in lines[index:index + 3]:
+                found = BUNDLE_LINE.search(follow.strip())
+                if found:
+                    bundle = found.group(1)
+                    break
+        if ORPHAN in line:
+            run.failures.append(f'an issue recorded outside every test ("{ORPHAN}")')
+        if HOST_NOTE in line and not host_noted:
+            host_noted = True
+            run.failures.append(
+                "an issue raised by the test host's own launch (swift-dependencies: \"" + HOST_NOTE + "\") - VX-604's class")
+    swift_executed = len(swift_passed | swift_failed)
+    case_executed = len(case_passed | case_failed)
+    estimate = max(swift_executed + (xct_executed or 0), case_executed)
+    if run.executed is None:
+        if swift_executed or case_executed or xct_executed is not None:
+            run.executed = estimate
+        elif swift_runs:
+            run.notes.append("the log has a Swift Testing summary but no per-test lines - pass the bundle")
+    run.skipped = max(run.skipped, len(swift_skipped - swift_passed - swift_failed))
+    if not run.exact:
+        run.passed = len(swift_passed - swift_failed) + len(case_passed - case_failed)
+        run.failed = len(swift_failed) + len(case_failed)
+    if swift_failed or case_failed:
+        run.failures.append(f"{len(swift_failed | case_failed)} test(s) failed in the log")
+    if xct_failed:
+        run.failures.append(f"XCTest reported {xct_failed} failure(s)")
+    if any(verb == "failed" for _, verb in swift_runs):
+        run.failures.append("Swift Testing's run summary says failed")
+    if "FAILED" in verdicts:
+        run.failures.append("xcodebuild said TEST FAILED")
+    if swift_runs and max(n for n, _ in swift_runs) == 0:
+        run.notes.append('Swift Testing said "Test run with 0 tests" - the VX-604 false green\'s own words')
+    if "SUCCEEDED" in verdicts and (run.executed or 0) == 0:
+        run.notes.append("xcodebuild said TEST SUCCEEDED over a run that executed nothing - a FALSE GREEN")
+    return bundle
+
+
+# ---------------------------------------------------------------- the verdict
+
+def verdict_of(run):
+    if run.crashes:
+        return CRASH
+    if not run.executed:
+        return ZERO
+    if run.failures:
+        return RED
+    return OK
+
+
+def main(argv):
+    expect = None
+    inputs = []
+    args = iter(argv)
+    for arg in args:
+        if arg == "--expect-at-least":
+            try:
+                expect = int(next(args))
+            except (StopIteration, ValueError):
+                print("assert-tests-ran: --expect-at-least needs a whole number", file=sys.stderr)
+                return USAGE
+        elif arg in ("-h", "--help"):
+            print(__doc__)
+            return OK
+        else:
+            inputs.append(arg)
+    if not inputs:
+        print(__doc__, file=sys.stderr)
+        return USAGE
+
+    runs = []
+    by_bundle = {}
+    for path in inputs:
+        if not os.path.exists(path):
+            print(f"assert-tests-ran: no such input: {path}", file=sys.stderr)
+            return USAGE
+        real = os.path.realpath(path)
+        if path.endswith(".xcresult") or os.path.isdir(path):
+            run = by_bundle.get(real) or Run(path)
+            if real not in by_bundle:
+                by_bundle[real] = run
+                runs.append(run)
+            read_bundle(run, path)
+            continue
+        try:
+            if path.endswith(".json"):
+                run = Run(path)
+                runs.append(run)
+                read_json(run, path)
+                continue
+            with open(path, encoding="utf-8", errors="replace") as handle:
+                text = handle.read()
+        except (OSError, ValueError) as error:
+            print(f"assert-tests-ran: cannot read {path}: {error}", file=sys.stderr)
+            return USAGE
+        named = None
+        for line in text.splitlines():
+            found = BUNDLE_LINE.search(line.strip()) if ".xcresult" in line else None
+            if found and os.path.exists(found.group(1)):
+                named = os.path.realpath(found.group(1))
+        if named and named in by_bundle:
+            run = by_bundle[named]
+        else:
+            run = Run(path)
+            runs.append(run)
+            if named:
+                by_bundle[named] = run
+                read_bundle(run, named)
+        read_log(run, text)
+
+    worst = OK
+    total = 0
+    for run in runs:
+        verdict = verdict_of(run)
+        total += run.executed or 0
+        source = "result bundle" if run.exact else "console log (distinct names; may undercount)"
+        executed = "not established" if run.executed is None else str(run.executed)
+        print(f"assert-tests-ran: {run.label}")
+        print(f"  executed {executed} (passed {run.passed}, failed {run.failed}, expected failures "
+              f"{run.expected}) - skipped {run.skipped} - from the {source}")
+        for line in run.crashes:
+            print(f"  HOST CRASH MARK - {line}")
+        if not run.executed:
+            print("  ZERO EXECUTED - this run ran no test (a green verdict here would be false)")
+        for line in run.failures:
+            print(f"  FAILURE - {line}")
+        for line in run.notes:
+            print(f"  note - {line}")
+        worst = max(worst, verdict)
+    if expect is not None and total < expect:
+        print(f"  ZERO EXECUTED - {total} executed in all, under the expected {expect}")
+        worst = max(worst, ZERO)
+    print(f"VERDICT: {NAMES[worst]} ({worst}) - {total} test(s) executed over {len(runs)} run(s)")
+    return worst
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
