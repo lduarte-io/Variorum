@@ -130,10 +130,10 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 
 | Piece | What | Status |
 |---|---|---|
-| P0 | This record + the design (below) | DONE (this commit) |
-| P1 | The inert test host: `AppBootstrap.Launch` + `State.hostingTests` + the three roots' faces + `HostLaunchSettle` + the Settings suite's header | DONE (this commit) — Mac `build-for-testing` GREEN headless (`scratchpad/b1/dd`); the phone build NOT YET RUN; behavior PENDING the stage |
-| P2 | The app pins (`TestHostInertTests`) + the named revert R-604-H, built for testing headless | NOT STARTED |
-| P3 | The false-green gate `Tools/assert-tests-ran` + its headless pins (`TestRunGateTests`, core) + the named reverts R-604-G0/-GC | IN-PROGRESS — gate + pins DONE (this commit; `swift test --filter TestRunGateTests` 7/7 GREEN); the named reverts NEXT (no revert in flight at this commit) |
+| P0 | This record + the design (below) | DONE (`cf957985e`) |
+| P1 | The inert test host: `AppBootstrap.Launch` + `State.hostingTests` + the three roots' faces + `HostLaunchSettle` + the Settings suite's header | DONE (`fae643a05`) — `build-for-testing` GREEN headless, Mac (`scratchpad/b1/dd`) AND phone (generic iOS Simulator, `scratchpad/b1/dd-phone`), no warning in a touched file; behavior PENDING the stage |
+| P2 | The app pins (`TestHostInertTests`) + the named revert R-604-H, built for testing headless | IN-PROGRESS — the pins built green inside P1's build (uncommitted until this piece's commit); R-604-H's tree NEXT |
+| P3 | The false-green gate `Tools/assert-tests-ran` + its headless pins (`TestRunGateTests`, core) + the named reverts R-604-G0/-GC/-GS/-GO | DONE (`256565661`; reverts this commit) — 7/7 GREEN headless; all four reverts RED on exactly their named pins; restored byte-identical (sha `5a975771`) |
 | P4 | The STAGE REQUEST (the verification runs, written below) | NOT STARTED |
 
 ### The mechanism (re-read on this tip, not re-derived)
@@ -156,8 +156,10 @@ The VX-601 rev-tree launch deaths (`HostLaunchSettle`'s doc, `PaneLifecycleTests
 
 | Revert | What it puts back | Pins expected RED | Result |
 |---|---|---|---|
-| R-604-G0 | the gate without its zero rule (`verdict_of` never returns ZERO) | `theVX604FalseGreenReadsZeroExecuted`, `swiftTestingsCountOfSkippedTestsIsNeverAnExecutedCount`, `theTreeCountsExecutedExactly`, `everyRunMustExecuteAndAMissingInputIsUsage` | PENDING |
-| R-604-GC | the gate without crash marks (the pattern matches nothing) | `aHostCrashOutranksEverything` | PENDING |
-| R-604-GS | the old reading: Swift Testing's "Test run with N tests" taken as the executed count | `swiftTestingsCountOfSkippedTestsIsNeverAnExecutedCount` | PENDING |
-| R-604-GO | the pseudo-test counted as a test (no orphan rule in the tree road) | `anIssueOutsideEveryTestIsAFailureNeverATest` | PENDING |
-| R-604-H | the production init without its inert arm (`launch` ignored — the pre-fix behavior) | `TestHostInertTests` (all four; the first also red on the untouched pre-fix tree, it names only old API) | STAGE (in the request) |
+| R-604-G0 | the gate without its zero rule (`verdict_of` never returns ZERO) | `theVX604FalseGreenReadsZeroExecuted`, `swiftTestingsCountOfSkippedTestsIsNeverAnExecutedCount`, `theTreeCountsExecutedExactly`, `everyRunMustExecuteAndAMissingInputIsUsage` | **RED, exactly those four** (3 green) |
+| R-604-GC | the gate without crash marks (the pattern matches nothing) | `aHostCrashOutranksEverything` | **RED, exactly that one** |
+| R-604-GS | the old reading: Swift Testing's "Test run with N tests" taken as the executed count | `swiftTestingsCountOfSkippedTestsIsNeverAnExecutedCount` | **RED, exactly that one** — on the SECOND definition: the first (N taken only when no other count existed) never fired, because XCTest's "Executed 0" line is in every log; the faithful old reading takes N outright. A revert defect, not a hollow pin. |
+| R-604-GO | the pseudo-test counted as a test (no orphan rule in the tree road) | `anIssueOutsideEveryTestIsAFailureNeverATest` | **RED, exactly that one** |
+| R-604-H | the production init without its inert arm (`if launch == .hostingTests` → `if false`: the pre-fix behavior) | `TestHostInertTests`: `theProductionBootstrapBeginsNoOpenUnderATestRunner` (also red on the untouched pre-fix tree — it names only old API), `itLandsInHostingTestsAndEveryDoorStaysShut`, `theSettingsFaceKeepsThePanesGeometry`. GREEN on both by design: `theDecisionIsTheDependencyLibrarysOwnTestRule` (the pure decision — a guard pin, the revert leaves it in place) | STAGE (in the request) |
+
+The gate's reverts ran headless (`swift test --filter TestRunGateTests`, logs `scratchpad/b1/reverts/run-*.log`; the helper `scratchpad/b1/reverts/apply.py` refuses an anchor found other than once).
