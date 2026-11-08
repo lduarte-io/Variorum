@@ -105,7 +105,7 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 | B0 | VX-751 trimmed re-verify (orchestrator) | **DONE** — `notes/plans/fixes/vx-912-b0-security-verify.md` (guard verified; door inventory; 4 flags → R-912-10/-11; 2 stale closes → R-912-12); VX-751 closes at the merge |
 | B1 | VX-604 host crash + false-green gate | BUILT + PINNED; stage legs A–E RUN 2026-11-08 (orchestrator; claims vx-912-b1-verify / -2): **A = NOT GREEN as designed** (gate exit 3, host-crash shape — 3 of 4 tests HOST CRASH at the swift-testing encoder frame; the 06:34 .ips trio is these, nov7's faulting-thread read concurs) · **B = GREEN 4/4** · **C = GREEN 56/56** · **D = GREEN, Executed 6139 (6135 passed · 4 expected failures · 30 skipped), 0 failures, NO pseudo-test node, known false reds quiet** · **E = the expected shape exactly: Executed 852 (849 passed · 2 expected failures), the ONE red the standing MobileMarkdownCaretTests caret test, no out-of-test node**. **F = PASSED** (claim vx-912-b1-verify-3): the launch landed the dev-store identity alert (the known dev-slot state; OK dismissed) then the REAL Bookcase — never the inert sentence; Resume Sync and the MCP switch untouched; clean quit; strict instance checks empty after; captures `notes/plans/vx-912-b1-screens/F0-w0.png` + `F1-w0.png` (gitignored). **B1 VERIFICATION COMPLETE — VX-604 Done at the merge.** The 07:00–08:30 gap was the Opus usage-limit stop; claim 1 expired unreleased (recorded honestly; nov7 held the stage; nothing ran unattended). |
 | B2 | VX-892 readers + VX-893 belt/rank/sized corners | **BUILT + PINNED, headless** — "## B2 record" (end of file): VX-892 both readers FIXED; VX-893 (1) belt + (3) rank FIXED, (2) COVERED; **(4)(1)/(2) and (4)(3) sized BIG — shapes returned for her sitting, unbuilt**; full core suite green; canon (SyncSpec §7, two lines) PROPOSED for the merge |
-| B3 | VX-752 + LICENSE rider | NOT STARTED |
+| B3 | VX-752 + LICENSE rider | **IN-PROGRESS** — "## B3 record" (end of file): P0 record + premise check |
 | B4 | VX-891 + VX-396 (the MCP riders) | NOT STARTED |
 | L | The ladder (fable-reviewer, whole diff) | NOT STARTED |
 | C | Closeout: canon deltas (SyncSpec §7 tier-3 line; AppSpec/SurfaceContracts only if a contract line moved), AppSpecRecord entry, master plan, handoff, tickets triaged | NOT STARTED |
@@ -340,3 +340,25 @@ Pins: **W1** (the convergence pin, two clients + the fake server with the A5 vis
 - **(vii) The lineage face names Home as “”.** `LineageFaceModel.place`'s `.otherWing` line reads `wingNames[wingID] ?? ""` and Home is never in `wingNames` — PRE-EXISTING for a Home member seen from a live wing's note; after P1 a DEAD-wing member (which used to show the dead wing's stale name — the face's name read does not filter `deleted_at`) takes the same empty name. App code (`App/Variorum/Variorum/Features/History/LineageFaceModel.swift`), outside this headless batch — a born-ticket candidate with its one-line shape (`wingID.isEmpty ? WingWords.home : …`).
 - **(viii) The OWNED exclusivity repair keeps the seq rank** (`repairOwnedExclusivity`, SyncSpec §7 OWNED, PROVISIONAL #167) — the same determinism class tier 3 just left. Out of this batch's scope; a candidate follow-on under R-912-7a's "everywhere".
 - **(ix) Two more spellings of the projection** live in the MCP door's facts (`Queries.mcpResolvedWing`, `MCPReadTools.resolvedWing`) — byte-equivalent to `effectiveWingSQL`; folding them onto it is the door's own (MCPSpec-read) change, left untouched here.
+
+## B3 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** nothing published, nothing pushed to any public place, no repository setting changed — every stranger-facing file is a PROVISIONAL draft for her editorial pass. No `xcodebuild test`, no stage claim, no Debug launch. Everything below the LIVE STATUS is PENDING until its row says DONE.
+
+*Machinery: Opus implementer, fresh session, briefed by this file's §2/§4 B3/§6/§7 + the resiliency protocol + `notes/plans/open-source-readiness.md` (read in full) + the root `README.md`. No revert is ever in flight in this batch (docs + build road; nothing to revert).*
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record + the premise check (below) | IN-PROGRESS (this commit) |
+| P1 | `LICENSE` — the AGPLv3 text, byte-identical to gnu.org's; the per-dependency compatibility check (the whole resolved graph + the vendored two + Sparkle) | NOT-STARTED |
+| P2 | `CONTRIBUTING.md` + `SECURITY.md` + `.github/workflows/` (PR comment-and-close; the new-issue greeting) — both workflows inert while the repo is private | NOT-STARTED |
+| P3 | The outsider build road: a fresh clone of this tip, no credentials, no caches → `swift build` + `swift test` on the core + an unsigned Xcode Debug build; `BUILDING.md` | NOT-STARTED |
+| P4 | The README stance, joined to the existing README; the composition proposal | NOT-STARTED |
+| P5 | The ship-as-is-vs-trimmed inventory of `.claude/`, `Tools/`, `Server/` (an inventory, never a deletion) | NOT-STARTED |
+| P6 | Close: owed-by-her list, PROVISIONAL bundle, findings, self-assessment, ledger row | NOT-STARTED |
+
+### The premise check (re-read before any line)
+
+The brief names the root `README.md` as her letter (VX-105). **It is not.** The root `README.md` is the Phase 0 pointer (two paragraphs, last touched `34005d07b` "Phase 0: canonical docs"): a one-paragraph product description and a "Start here: `CLAUDE.md` → …" reading order. **Her letter** is the app's seeded `readme` note: its text is `notes/plans/vx-105-letter-content/read-me.txt` (17 paragraphs after a capture-token header line; R-13s-28 binds it byte-exact, R-105-6 trimmed), seeded by `ReadmeSeeder` into every fresh store and restorable from Help. So "join without displacing her words" is honoured two ways at once: the README's existing two paragraphs stay byte-exact at its top, and her letter is POINTED AT, never copied, edited or excerpted (the composition is P4's).
