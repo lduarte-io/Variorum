@@ -48,6 +48,18 @@ All in Settings ▸ MCP and the sidebar AI section. **Required reading for the i
 
 **Evidence:** the VX-281 fresh-open geometry pin green WITH the moved dial (the contract grown deliberately, the growth named in the batch record); Settings-search pins for both moved rows; a heading pin (approved client ⇒ "MCP"/provider form, never the raw client name); a collapse state test if the section has a test home, else the walk row; stamps-recompute covered by code shape (TimelineView present) + the walk.
 
+#### BATCH 1 — LIVE STATUS (implementer: opus-implementer, session started 2026-11-08)
+
+*Code + headless verification only (the brief: no GUI, no store, no `xcodebuild test` — Mac pins land PENDING(gate)).*
+
+| Piece | Item | Status |
+|---|---|---|
+| 1 | VX-903 trail dial → top section (+ VX-281 geometry contract grown, named) | NOT-STARTED |
+| 2 | VX-905 ownership-badges row → Settings ▸ MCP (+ search entry, help sentence proposed) | NOT-STARTED |
+| 3 | VX-902 trail heading → provider / "MCP" (fork proposal to the orchestrator first) | NOT-STARTED |
+| 4 | VX-904 whole client group collapses | NOT-STARTED |
+| 5 | VX-401 Activity stamps recompute (TimelineView, two sites) | NOT-STARTED |
+
 ### BATCH 2 — the icon twins (VX-900)
 
 **Required reading: `notes/MCPSpec.md` IN FULL (the shared-icon law); SurfaceContracts — the Private mark bullet and the shared-icon lines.**
