@@ -356,6 +356,33 @@ Carry on; the gate list at the end as usual, and confirm the registry-walk test 
 2. title **"Update Variorum to keep syncing"** (an instruction) · body **"Your account's sync format is newer than this version. Nothing is lost while sync is paused."** — loses the "Sync paused" head the row's other paused states share.
 3. title **"Sync paused"** · the body carries everything ("This version of Variorum is older than your account's sync format. Update to continue syncing; nothing is lost while sync is paused.") — the shortest title, but the first-round sheet would then say only "Sync hasn't run yet: Sync paused." (no fact) — not recommended.
 
+##### BATCH 4 FORKS RULED (provisional, orchestrator, 2026-11-08)
+
+*(The orchestrator's ruling block, pasted verbatim.)*
+
+Orchestrator rulings — ALL PROVISIONAL (her bundle). Paste verbatim into the record under BATCH 4 FORKS PROPOSED as "BATCH 4 FORKS RULED (provisional, orchestrator, 2026-11-08)", then build to them.
+
+CHORD (VX-911) → your analysis ACCEPTED as recorded: ⌘⏎ scoped to the capture box's focus via performKeyEquivalent with the keyDown belt, never a menu key or window-wide claim — the in-note take chords keep their meaning untouched (the keyboard-family pass-on precedent); .fileWithoutOpening declared with doors [.surface], alternateShortcutLabel "⌘⏎", availability always, the QuickEntryBar builder covering both bands. Record the collision table (chooseTake ⌘⏎ · takeToBlockBelow ⌥⌘⏎ · the pad · the comments panel) exactly as you stated it — the ladder's reviewer reads it.
+
+F-911 → SEAT (1) + RECEIPT (a). The pad's File It idiom is the governing precedent on both halves: always drawn, greyed while empty, inside the dashed box at its trailing end, "File ⌘⏎" with your hover; the receipt in the pad's "Filed in …" grammar with the duplicate receipt's landing read (books only) and its Open › through the host's onOpen, never the broadcast. One check to pin: the greyed button is NOT a key-view/Tab stop (the sidebar field's precedent — the opening-caret law stays whole).
+
+N-898 → OPTION (1), place-aware naming: an unplaced member's moment is "the take as kept"; a placed member keeps "the take now" (true there); an unlabeled one-take heading reads "its only take" on every member. The place from the lineage face's own read, refreshing live so Put back flips it. The home face byte-unchanged. Your residual (the against-now wash chip + "N changes since" still say "now" on a member — true facts, stale word) is RECORDED, not built: list it in the PROVISIONALs for her bundle as a candidate born ticket at closeout, her call.
+
+S-909 → OPTION (1): title "Sync paused — Variorum needs an update" / body "Your account syncs in a newer format than this version reads. Nothing is lost while sync is paused." Grounds: the first-round sheet shows the title alone, so the title must keep fact + action; the row's status-first grammar stands; the duplication dies because the body now carries the WHY and the reassurance instead of restating the action. The em dash stays — the sync row's own grammar; VX-897's ruling was those two confirm lines, never global (say so in the record so the ladder doesn't flag it). Both platforms + the sheet's composed form pinned in SyncOutOfDateFaceTests.
+
+VX-870 → no objection; the host-fact approach as described, the helper's .switchWing sentence following. Carry on — gate list and the capability relay line at the end as usual.
+
+**Implementer's notes on the ruling.** *The collision table (VX-911's chord, as checked against the registry and every other ⌘⏎ claimant at `538247eca`):*
+
+| Claimant | Chord | Where it lives | Context | Why the band's ⌘⏎ does not collide |
+|---|---|---|---|---|
+| `.chooseTake` (Choose This Take) | ⌘⏎ | menu bar key equivalent (`EditorCommands.keyEquivalent`) | a note's take family + Canvas (`takeFamilyPlusCanvas`) | the band never draws inside a note; the box claims ⌘⏎ only while IT holds the keyboard, so a split window's note pane keeps Choose Take |
+| `.takeToBlockBelow` (Move Take into a Block Below) | ⌥⌘⏎ | menu bar key equivalent | a note's take family (`takeFamily`) | not the band's chord (⌥⌘⏎ was the alternative; it is equally a take act's, so flipping would escape nothing) |
+| the quick-note pad's File It | ⌘⏎ | a SwiftUI `.keyboardShortcut(.return, modifiers: .command)` in the pad's OWN window (`QuickNoteView.swift:357`) | the pad | the pad's box is handed no staying-file act, so it never claims ⌘⏎; the pad's button keeps it byte-unchanged |
+| the comments panel's Add/Save | ⌘⏎ | the panel's local key monitor; declared with NO `shortcutLabel` (`CapabilityRegistry.swift` ~:1319) | the comments panel's composer inside a note | the band and the panel never share a window's keyboard holder |
+
+*S-909's em dash:* the title keeps its em dash on purpose — it is the sync row's own status-first grammar ("Sync locked — …", "Sync paused — …"); VX-897's comma ruling governed the book delete/archive confirm's two lines only, never the app's copy at large.
+
 ## Order, gates, the ladder
 
 1. Batches run 1 → 2 → 3 → 4, one FRESH `opus-implementer` each, strictly sequential. Headless `swift build` + any core-level suites freely; **targeted Mac-suite runs per batch go through nov7** (REQUEST early; `-only-testing` takes TYPE names as a zsh array; "Executed 0" is no verdict). Batch 2 may fold into batch 1's gate window if timing suits.
