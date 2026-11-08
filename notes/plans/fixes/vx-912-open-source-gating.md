@@ -103,7 +103,7 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 |---|---|---|
 | 0 | Kickoff: worktree, in-flight row, slot granted, sitting rulings R-912-1..9, VX-508 act | DONE (this commit) |
 | B0 | VX-751 trimmed re-verify (orchestrator) | **DONE** — `notes/plans/fixes/vx-912-b0-security-verify.md` (guard verified; door inventory; 4 flags → R-912-10/-11; 2 stale closes → R-912-12); VX-751 closes at the merge |
-| B1 | VX-604 host crash + false-green gate | IN PROGRESS (implementer spawned; R-912-7a seam amendment sent) |
+| B1 | VX-604 host crash + false-green gate | IN PROGRESS — record at "## B1 record" (end of file); design settled, pieces landing |
 | B2 | VX-892 readers + VX-893 belt/rank/sized corners | NOT STARTED |
 | B3 | VX-752 + LICENSE rider | NOT STARTED |
 | B4 | VX-891 + VX-396 (the MCP riders) | NOT STARTED |
@@ -121,3 +121,33 @@ One ladder over the run's whole diff after B1–B3 land: fresh `fable-reviewer` 
 - After any Debug launch: dismiss a What's New sheet if one shows. Dev-store Castle values only from `~/.variorum/dev-castle.env`. The dev store's MCP server is ON with variorum-de approved — don't "restore" it to off. Never press Resume Sync.
 - prod-read probes (`Tools/prod-read.sh`) need no stage; anything beyond read-only on production is her hand / her explicit word only.
 - Backups: A1 safety copies into `Backups/safety-copies/`, never loose in `Backups/`.
+
+## B1 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind was run (no stage claim — the brief's rule); every app-suite claim below is **PENDING** on the STAGE REQUEST at the end of this section. The phone host becomes inert too (the bootstrap is shared) — its simulator leg is in the stage request, unverified.
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record + the design (below) | DONE (this commit) |
+| P1 | The inert test host: `AppBootstrap.Launch` + `State.hostingTests` + the three roots' faces + `HostLaunchSettle` + the Settings suite's header | NOT STARTED |
+| P2 | The app pins (`TestHostInertTests`) + the named revert R-604-H, built for testing headless | NOT STARTED |
+| P3 | The false-green gate `Tools/assert-tests-ran` + its headless pins (`TestRunGateTests`, core) + the named reverts R-604-G0/-GC | NOT STARTED |
+| P4 | The STAGE REQUEST (the verification runs, written below) | NOT STARTED |
+
+### The mechanism (re-read on this tip, not re-derived)
+
+The ticket's trace stands (VX-439 Ledger "B1 W-439-1 timebox"); the read moved to `App/Variorum/Shared/AppSession.swift:833` (`@Dependency(\.date)` in `init`). The host is `VariorumApp`'s `@State bootstrap = AppBootstrap()` — the production init — which under a test runner still routes, opens the dev store (read-only road) and builds `AppSession` and the whole ready shell OUTSIDE any test's scope. swift-dependencies' default context is `.test` exactly when IssueReporting's `isTesting` is true (`DependencyValues.swift` `defaultContext`, 1.14.1), so every such read reports "has no test implementation". Three faces of that one cause, all evidenced:
+1. the crash (a Swift-Testing-only one-suite run: the report recurses XCTest fallback ↔ Swift Testing interop to the stack guard; 2026-10-27 03:45);
+2. the false green ("Test run with 0 tests in 1 suite passed", 03:46);
+3. **a false RED, read headless tonight from DerivedData** — `Test-Variorum-2026.11.08_01-39-54--0700.xcresult` (FirstRunDrillTests, 11 of 11 real tests PASSED) and `Test-Variorum-2026.11.05_16-07-10--0700.xcresult` (36 passed) both read `result: Failed`, `failedTests: 1`: the failing "test" is the pseudo-node *Issues recorded without an associated test or suite*, its text the `AppSession.swift:833` read, swift-dependencies' own note: "This issue was emitted from tests running in a host application (io.lduarte.Variorum.debug). This can lead to false positives…". (These two bundles are the pre-fix evidence; they are not committed — DerivedData paths, read with `xcrun xcresulttool get test-results summary|tests`.)
+The VX-601 rev-tree launch deaths (`HostLaunchSettle`'s doc, `PaneLifecycleTests.swift`) and the oracles the host's live Bookcase could answer (VX-292 U4's justified edits) are the same cause: the host runs the real app beside the suites.
+
+### The design (R-912-7a: the DESIGNED inert road, not a spot-guard)
+
+- **The rule:** under a test runner the production bootstrap opens NOTHING — no road, no store, no `AppSession`, no services, no relock monitors — and lands in a distinct state, `AppBootstrap.State.hostingTests`. The decision is `AppBootstrap.Launch.thisProcess`: IssueReporting's `isTesting` (re-exported by `Dependencies`), the predicate swift-dependencies keys its `.test` context on — so the host is inert exactly when its own dependency reads would be test-context reads, and the library's documented answer to this gotcha ("Testing host application", swift-dependencies `Testing.md`) is this shape.
+- **Why a state, not `.opening`:** `.opening` means an open is in flight — `awaitTheLockSeam` loops on it and the Settings face says "Opening your library…". A host that will never open is its own fact; the exhaustive switches (the Mac main window, `SettingsSceneContent.libraryClosed`, the phone's root) each say what it shows.
+- **Who keeps working (checked before choosing):** the production init `AppBootstrap(variant:)` has exactly two callers, the two app roots. Every test bootstrap uses `init(testStoreURL:protectionRoad:)` (untouched — it always opens its own slot). The 361 test files that construct `AppSession` do so directly, in their own dependency scope (untouched). The menu suites (`ViewMenuSeparatorTests`, `AppMenuServicesTests`, `FindAndReplaceTests`) read the host's SwiftUI menus, which the scenes build whatever the state. The one suite that read a READY host is `SettingsTitleClearanceTests` (the real Settings window's width = `AppSettingsView.contentSize`, only true with the panes mounted): the inert Settings face carries the panes' declared size, so the real window keeps its real geometry; the suite's header says so.
+- **`HostLaunchSettle`** (40 call sites) waits on a signal only a ready host shell sets (`EditorTypography.isAdopted`); with an inert host it would burn its 20 s bound once per process. It settles at once when the host is inert — there is no launch in flight to pump into.
+- **Not touched:** `Sources/VariorumCore/Sync/`, the editor seam, `Shared/Protection/` (the inert road inputs are built with `RoadInputs`' memberwise init in `AppBootstrap.swift`), `KeychainCustody.swift` (its tripwire stays as it is), the app delegate (its launch reads no dependency and builds no session).
