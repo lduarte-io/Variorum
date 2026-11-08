@@ -432,21 +432,21 @@ VX-870 → no objection; the host-fact approach as described, the helper's .swit
 
 | # | Item | Batch | Status |
 |---|---|---|---|
-| 1 | VX-903 trail dial moves to the top section | 1 | BUILT — geometry arms RUN PENDING(gate) |
-| 2 | VX-905 ownership badges row moves to Settings ▸ MCP | 1 | BUILT — pins RUN PENDING(gate) |
-| 3 | VX-902 trail heading → provider/MCP | 1 | BUILT — pins RUN PENDING(gate) |
-| 4 | VX-904 client group collapse | 1 | BUILT — pins RUN PENDING(gate) |
-| 5 | VX-401 Activity stamps recompute (rider) | 1 | BUILT — pin RUN PENDING(gate) |
-| 6 | VX-900 the icon twins' one rule + dimmed state | 2 | BUILT — core fences GREEN headless (18/18); App pins RUN PENDING(gate) |
-| 7 | VX-901 Index ⋯ carries the note-title set | 3 | BUILT (`a5b30429a`) — pins RUN PENDING(gate) |
-| 8 | VX-896 masthead one-line threshold | 3 | BUILT — Manual order 257→240 Study / 304→276 Terminal; pins RUN PENDING(gate) |
-| 9 | VX-897 delete/archive confirm em-dashes → commas | 3 | BUILT — pins RUN PENDING(gate) |
-| 10 | VX-45 copy family (rider) | 3 | BUILT — (a)+(b) built (core split GREEN headless; app pins RUN PENDING(gate)); (c) DISMISSED AS SUPERSEDED |
-| 11 | VX-667 popover kind-words (rider) | 3 | BUILT — red-on-old by evaluation; pins RUN PENDING(gate) |
-| 12 | VX-911 quick-entry files without opening | 4 | BUILT — `.fileWithoutOpening` (`.surface`, alternate ⌘⏎); pins RUN PENDING(gate) |
-| 13 | VX-870 Library masthead cycles in place | 4 | BUILT — `cycleInPlace` + the menu's host; VX-833 pins grown; RUN PENDING(gate) |
-| 14 | VX-898 lineage header naming | 4 | BUILT — "the take as kept" / "its only take" (place-aware, live); RUN PENDING(gate) |
-| 15 | VX-909 sync-pause face says it once | 4 | BUILT — the title keeps the fact, the body the why + reassurance (Mac + phone + the sheet); RUN PENDING(gate) |
+| 1 | VX-903 trail dial moves to the top section | 1 | DONE — gated green (b1 gate + re-gate); CLOSED on Linear |
+| 2 | VX-905 ownership badges row moves to Settings ▸ MCP | 1 | DONE — gated green (b1); CLOSED |
+| 3 | VX-902 trail heading → provider/MCP | 1 | DONE — gated green (b1); CLOSED |
+| 4 | VX-904 client group collapse | 1 | DONE — gated green (b1); CLOSED |
+| 5 | VX-401 Activity stamps recompute (rider) | 1 | DONE — gated green (b1); CLOSED |
+| 6 | VX-900 the icon twins' one rule + dimmed state | 2 | DONE — gated green (b2, 155/14 first pass); CLOSED |
+| 7 | VX-901 Index ⋯ carries the note-title set | 3 | DONE — gated green (b3 gate + re-gate); CLOSED |
+| 8 | VX-896 masthead one-line threshold | 3 | DONE — gated green (b3; 257→240 Study / 304→276 Terminal); CLOSED; ladder F1's pre-load count flip in the fix round |
+| 9 | VX-897 delete/archive confirm em-dashes → commas | 3 | DONE — gated green (b3); CLOSED |
+| 10 | VX-45 copy family (rider) | 3 | DONE — gated green (b3); (c) dismissed as superseded; CLOSED; ladder F3 (the confirm's stale count) in the fix round |
+| 11 | VX-667 popover kind-words (rider) | 3 | DONE — gated green (b3); CLOSED |
+| 12 | VX-911 quick-entry files without opening | 4 | BUILT — gate HELD for the post-ladder-fix window; ladder F2 fixed (the File button's lineLimit) |
+| 13 | VX-870 Library masthead cycles in place | 4 | BUILT — gate HELD for the post-ladder-fix window |
+| 14 | VX-898 lineage header naming | 4 | BUILT — gate HELD for the post-ladder-fix window |
+| 15 | VX-909 sync-pause face says it once | 4 | BUILT — gate HELD for the post-ladder-fix window |
 
 ## PROVISIONALs (filed to QUESTIONS at the merge moment)
 
