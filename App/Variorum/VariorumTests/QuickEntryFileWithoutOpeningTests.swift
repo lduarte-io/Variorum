@@ -189,7 +189,17 @@ struct QuickEntryFileWithoutOpeningDeclarationTests {
             if case .alternates(let ids) = $0.keys { return ids == [.fileWithoutOpening] }
             return false
         }, "the helper (⌘/) shows the key")
-        #expect(HelperView.shortcutKeysShown.contains("\u{2318}\u{23CE}"))
+        // The VX-914 ladder's N3 (the hollow-pin class — TIGHTENED): this line
+        // read `HelperView.shortcutKeysShown.contains("⌘⏎")`, which is green on
+        // the pre-fix tree too (Choose This Take's row already shows ⌘⏎), so it
+        // proved nothing about the new row. It now reads the helper's SHOWN
+        // projection (`HelperView.groups` — Settings ▸ Shortcuts and its search)
+        // for THIS act's own row: the chord read from the declaration, beside
+        // the new-note box's words — a row no pre-fix list carries.
+        #expect(HelperView.groups.flatMap(\.items).contains {
+            $0.keys == act.alternateShortcutLabel
+                && $0.does.contains("in the new-note box") && $0.does.contains("without opening it")
+        }, "the helper shows the band's own \u{2318}\u{23CE} row")
     }
 
     /// The collision table, as the record states it: the two take chords keep
