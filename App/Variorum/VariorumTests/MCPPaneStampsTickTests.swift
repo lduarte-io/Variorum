@@ -23,6 +23,7 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
+@MainActor
 @Suite("VX-401 — Settings ▸ MCP's relative stamps read live")
 struct MCPPaneStampsTickTests {
     private static func paneSource() throws -> String {
