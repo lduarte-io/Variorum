@@ -151,3 +151,13 @@ The VX-601 rev-tree launch deaths (`HostLaunchSettle`'s doc, `PaneLifecycleTests
 - **Who keeps working (checked before choosing):** the production init `AppBootstrap(variant:)` has exactly two callers, the two app roots. Every test bootstrap uses `init(testStoreURL:protectionRoad:)` (untouched — it always opens its own slot). The 361 test files that construct `AppSession` do so directly, in their own dependency scope (untouched). The menu suites (`ViewMenuSeparatorTests`, `AppMenuServicesTests`, `FindAndReplaceTests`) read the host's SwiftUI menus, which the scenes build whatever the state. The one suite that read a READY host is `SettingsTitleClearanceTests` (the real Settings window's width = `AppSettingsView.contentSize`, only true with the panes mounted): the inert Settings face carries the panes' declared size, so the real window keeps its real geometry; the suite's header says so.
 - **`HostLaunchSettle`** (40 call sites) waits on a signal only a ready host shell sets (`EditorTypography.isAdopted`); with an inert host it would burn its 20 s bound once per process. It settles at once when the host is inert — there is no launch in flight to pump into.
 - **Not touched:** `Sources/VariorumCore/Sync/`, the editor seam, `Shared/Protection/` (the inert road inputs are built with `RoadInputs`' memberwise init in `AppBootstrap.swift`), `KeychainCustody.swift` (its tripwire stays as it is), the app delegate (its launch reads no dependency and builds no session).
+
+### The named reverts (each applied to the working tree ONLY, run, then restored with `git checkout -- <file>` from the committed state; `git diff` shows exactly what is reverted at any instant)
+
+| Revert | What it puts back | Pins expected RED | Result |
+|---|---|---|---|
+| R-604-G0 | the gate without its zero rule (`verdict_of` never returns ZERO) | `theVX604FalseGreenReadsZeroExecuted`, `swiftTestingsCountOfSkippedTestsIsNeverAnExecutedCount`, `theTreeCountsExecutedExactly`, `everyRunMustExecuteAndAMissingInputIsUsage` | PENDING |
+| R-604-GC | the gate without crash marks (the pattern matches nothing) | `aHostCrashOutranksEverything` | PENDING |
+| R-604-GS | the old reading: Swift Testing's "Test run with N tests" taken as the executed count | `swiftTestingsCountOfSkippedTestsIsNeverAnExecutedCount` | PENDING |
+| R-604-GO | the pseudo-test counted as a test (no orphan rule in the tree road) | `anIssueOutsideEveryTestIsAFailureNeverATest` | PENDING |
+| R-604-H | the production init without its inert arm (`launch` ignored — the pre-fix behavior) | `TestHostInertTests` (all four; the first also red on the untouched pre-fix tree, it names only old API) | STAGE (in the request) |
