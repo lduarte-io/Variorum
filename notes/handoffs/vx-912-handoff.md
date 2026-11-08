@@ -15,8 +15,8 @@
 
 ## The gates (the numbers)
 
-- Mac WHOLE target at the merge gate: *(filled at RELEASE — see the record's ledger C row)*.
-- Phone WHOLE target: *(same)*.
+- Mac WHOLE target at the merge gate: **GREEN — Executed 6139 (6135 passed · 4 expected failures · 30 skipped), 0 failures, no out-of-test issue node** (claim vx-912-merge-gate, 2026-11-08 ~15:07–16:0x).
+- Phone WHOLE target: **Executed 852 in 139 suites (849 passed · 2 expected failures), the ONE red the standing `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` (:215)** — the named baseline exactly; simulator shut down after.
 - Core at B2/B4 close: 4,002/545 + 32/4 green (one StarContext timing red, green alone — VX-924).
 - B1's six legs: A red-on-old (host-crash) · B 4/4 · C 56/56 · D 6139/0 · E 852 (the standing caret red only) · F never-inert proven.
 - `Tools/canon-size`: **139,567 / 150,000 (headroom 10,433)** — no crossing.
