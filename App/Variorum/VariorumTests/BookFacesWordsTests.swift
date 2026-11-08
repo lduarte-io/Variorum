@@ -272,6 +272,10 @@ struct BookCopyFamilyTests {
                 + "and its 2 notes together.")
         #expect(first(2, archived: 0) == BookStateCopy.deleteOwnedBook(readingID: "o", name: "X", notes: 2)
             .lines.first, "none archived: the shipped call, unchanged")
+        // R2-F1 (ladder round 2): one live member agrees in number — red on the pre-fix body.
+        #expect(first(1, archived: 0) == lead + "its 1 note goes back to the Pool \u{2014} or delete the book "
+                + "and its 1 note together.")
+        #expect(first(1, archived: 0)?.contains("its 1 note go back") == false)
         #expect(first(3, archived: 1) == lead + "2 of its notes go back to the Pool, and 1 stays archived "
                 + "\u{2014} or delete the book and its 3 notes together.")
         #expect(first(2, archived: 1) == lead + "1 of its notes goes back to the Pool, and 1 stays archived "

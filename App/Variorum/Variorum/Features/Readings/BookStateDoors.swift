@@ -422,7 +422,8 @@ nonisolated enum BookStateCopy {
         let pool = count - archived
         switch (pool, archived) {
         case (_, 0):
-            return "its \(notes(count)) go back to the Pool"
+            // R2-F1: the singular agrees ("goes") — her VX-868 word against this slip.
+            return count == 1 ? "its 1 note goes back to the Pool" : "its \(notes(count)) go back to the Pool"
         case (0, _):
             return archived == 1 ? "its note stays archived" : "its \(notes(archived)) stay archived"
         default:

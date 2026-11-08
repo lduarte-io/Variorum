@@ -780,7 +780,9 @@ struct BookView: View {
         // real face landed (one line to two, or two to one, in a width band).
         // The tabs and the dial are ONE layout and ONE decision, so the whole
         // row draws only once the row it counts is here: its first paint is at
-        // the book's real face, and no placeholder is ever counted.
+        // the book's real face, and no placeholder is ever counted. (A book
+        // tombstoned while open reads as the same nil, so the row retires with
+        // it — R2-N1, accepted.)
         if let reading = structure.reading {
             let stable = BookMastheadStableWidths.row(
                 tokens: tokens, in: fontContext,
