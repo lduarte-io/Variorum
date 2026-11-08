@@ -913,7 +913,11 @@ struct NotePageCursor: Equatable, Sendable {
     }
 
     init?(encoded: String) {
-        guard let data = Data(base64Encoded: encoded), let text = String(data: data, encoding: .utf8) else {
+        // VX-396 (the VX-912 run, B4): a cursor holding U+0000 is not one this
+        // server returned (its ids would bind as their prefix) — stale.
+        guard let data = Data(base64Encoded: encoded), let text = String(data: data, encoding: .utf8),
+              !StoredText.containsNull(text)
+        else {
             return nil
         }
         let parts = text.split(separator: "\n", maxSplits: 3, omittingEmptySubsequences: false).map(String.init)

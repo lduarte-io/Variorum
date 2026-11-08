@@ -1455,7 +1455,11 @@ struct PageCursor: Equatable, Sendable {
 
     init?(encoded: String) {
         guard let data = Data(base64Encoded: encoded),
-              let text = String(data: data, encoding: .utf8)
+              let text = String(data: data, encoding: .utf8),
+              // VX-396 (the VX-912 run, B4): no cursor this server mints holds
+              // U+0000 (ids, positions, ordinals, stamps), and an id holding one
+              // binds as its prefix — such a cursor is not one it returned.
+              !StoredText.containsNull(text)
         else { return nil }
         let parts = text.split(separator: "\n", maxSplits: 2, omittingEmptySubsequences: false)
         guard parts.count == 3, let shape = Shape(rawValue: String(parts[0])) else { return nil }

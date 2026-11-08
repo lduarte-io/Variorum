@@ -247,6 +247,10 @@ enum MCPWireRefusalCopy {
         + "it, in Variorum. archive_book puts it away; it comes back when a day arrives."
 
     static func words(_ error: Error) -> String? {
+        // VX-396 (the VX-912 run, B4): an identifier holding U+0000 — the
+        // door's own parse refusal (a client name at naming, an id at the call
+        // door), worded once in its type.
+        if let null = error as? MCPNullIdentifier { return null.words }
         // VX-369: a store failure (GRDB's `DatabaseError`; a keyed store's
         // sanitized connection error) — the one non-`OperationError` class the
         // sweep found reachable on the wire.
