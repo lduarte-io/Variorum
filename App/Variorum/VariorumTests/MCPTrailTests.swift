@@ -799,3 +799,141 @@ struct MCPTrailHandDoorTests {
         #expect(found, "“notices” finds the row")
     }
 }
+
+// MARK: - VX-904 — a whole client group folds (the VX-914 run, batch 1)
+
+/// **VX-904 — her word at the #264 sitting: "asks floating within each client
+/// group - fine, maybe add ability to collapse a whole client group."** An
+/// Improvement on the as-built ordering (which stands): state pins on the pure
+/// trail, the door's press, the session's end, and the face read from source.
+/// PROVISIONAL edges (the record's BATCH 1 block): a fold lives as long as its
+/// group; a new act or ask lands in a folded group FOLDED; Clear All and the
+/// session's end forget every fold.
+@MainActor
+@Suite("VX-904 — a whole client group folds, its count honest, the ordering as built")
+struct MCPTrailFoldTests {
+    /// The fold: the group keeps EVERY row the dial lets it draw (the header's
+    /// honest count) while drawing none; the fit test counts the drawn rows
+    /// only; the header stays — so the section stays.
+    @Test func aFoldedGroupDrawsItsHeaderAloneWithAnHonestCount() {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(write: receipt(note: "n2"), at: at.addingTimeInterval(1))
+        trail.record(write: receipt(client: "codex", note: "x1"), at: at.addingTimeInterval(2))
+        #expect(trail.drawnRowCount(showing: .everything) == 3)
+
+        trail.toggleFold("claude-code")
+        #expect(trail.folded == ["claude-code"])
+        let groups = trail.groups(showing: .everything)
+        let folded = groups.first { $0.clientName == "claude-code" }
+        #expect(folded?.folded == true && folded?.entries.count == 2, "the count stays honest")
+        #expect(folded?.drawnEntries.isEmpty == true, "a folded group draws no row")
+        #expect(groups.first { $0.clientName == "codex" }?.folded == false, "only THAT client's group folds")
+        #expect(trail.drawnRowCount(showing: .everything) == 1, "the fit counts the drawn rows")
+        #expect(groups.count == 2, "both headers still draw — the section stays")
+        #expect(MCPTrailCopy.header(client: "claude-code", count: folded?.entries.count ?? 0)
+                    == MCPTrailCopy.header(client: "claude-code", count: 2), "the header says every row")
+
+        trail.toggleFold("claude-code")
+        #expect(trail.folded.isEmpty && trail.drawnRowCount(showing: .everything) == 3, "her press opens it again")
+        trail.toggleFold("nobody")
+        #expect(trail.folded.isEmpty, "a client with no row has no group to fold")
+    }
+
+    /// The ordering stands AS BUILT (her ruling): a fold changes what a group
+    /// draws, never where it stands — an ask-holding folded group still LEADS;
+    /// a new ask landing in a folded group leaves it folded (PROVISIONAL), its
+    /// count growing.
+    @Test func aFoldedAskHoldingGroupStillLeadsAndANewAskLeavesItFolded() {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(show: ask("a1", client: "codex"), opened: false, at: at.addingTimeInterval(1))
+        trail.record(write: receipt(note: "n2"), at: at.addingTimeInterval(2))
+        trail.toggleFold("codex")
+        let groups = trail.groups(showing: .everything)
+        #expect(groups.map(\.clientName) == ["codex", "claude-code"], "the ask-holding group leads, folded or not")
+        #expect(groups.first?.folded == true)
+
+        trail.record(show: ask("a2", client: "codex"), opened: false, at: at.addingTimeInterval(3))
+        let after = trail.groups(showing: .everything).first
+        #expect(after?.clientName == "codex" && after?.folded == true, "her fold stands")
+        #expect(after?.entries.map(\.place) == ["note:a2", "note:a1"], "the count grows honestly")
+
+        // Notices off: a folded group's asks still count; the fold is kept.
+        #expect(trail.groups(showing: .asksOnly).first?.entries.count == 2)
+        #expect(trail.groups(showing: .asksOnly).first?.folded == true)
+    }
+
+    /// A fold lives as long as its group (and the session): Clear All forgets
+    /// every fold; a folded client's last row going — dismissed, or its place
+    /// gone — lets its fold go, so a later act lands an OPEN group.
+    @Test func aFoldLivesAsLongAsItsGroup() throws {
+        var trail = MCPTrail()
+        trail.record(write: receipt(client: "codex", note: "x1"), at: at)
+        trail.toggleFold("codex")
+        let only = try #require(trail.entries.first?.id)
+        trail.dismiss(only)
+        #expect(trail.folded.isEmpty, "its last row dismissed — no group, no fold")
+        trail.record(write: receipt(client: "codex", note: "x2"), at: at.addingTimeInterval(1))
+        #expect(trail.groups(showing: .everything).first?.folded == false, "a later act lands an open group")
+
+        trail.toggleFold("codex")
+        trail.forget(placeOf: noteTarget("x2"))
+        #expect(trail.folded.isEmpty, "its place gone — the fold with it")
+
+        trail.record(write: receipt(note: "n1"), at: at.addingTimeInterval(2))
+        trail.toggleFold("claude-code")
+        trail.clear()
+        #expect(trail.folded.isEmpty && trail.isEmpty, "Clear All forgets every fold")
+    }
+
+    /// Her press goes through the door (view state in the trail's session
+    /// memory — no act, no store); the session's end forgets the fold with the
+    /// rows (`letGoOfTheSession`).
+    @Test func herPressFoldsThroughTheDoorAndTheSessionsEndForgetsIt() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "draft")
+            let rig = Rig(session)
+            rig.door.landReceipt(receipt(note: post.id, title: "draft"))
+            rig.door.toggleTrailFold("claude-code")
+            #expect(rig.door.trail.trail.folded == ["claude-code"])
+            #expect(rig.door.trail.trail.drawnRowCount(showing: rig.door.trailDial) == 0)
+            #expect(rig.door.trail.trail.groups(showing: rig.door.trailDial).count == 1, "the header stays")
+            rig.door.detach()
+            #expect(rig.door.trail.trail.folded.isEmpty && rig.door.trail.trail.isEmpty, "gone with the session")
+        }
+    }
+
+    /// The face, read from its source: the whole header is the press, its
+    /// glyph the app's fold pair at the trailing end, its hover naming the
+    /// client; the section draws a group's DRAWN rows and fits by them; the
+    /// header's right-click is unchanged; the sidebar keeps the section while
+    /// any header draws (a folded group's header alone).
+    @Test func theHeaderIsTheFoldsPressAndTheSidebarKeepsAFoldedSection() throws {
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let section = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPTrailSection.swift"), encoding: .utf8)
+        let header = try #require(section.range(of: "private func header(_ group: MCPTrail.Group)"))
+        let rowStart = try #require(section.range(of: "private struct MCPTrailRow"))
+        let headerBody = String(section[header.upperBound..<rowStart.lowerBound])
+        #expect(headerBody.contains("door.toggleTrailFold(group.clientName)"), "the header's press folds")
+        #expect(headerBody.contains("MCPTrailCopy.foldGlyph(folded: group.folded)"))
+        #expect(headerBody.contains(".help(MCPTrailCopy.foldHelp(client: group.clientName, folded: group.folded))"))
+        #expect(headerBody.contains("count: group.entries.count"), "the header counts every row, folded or not")
+        #expect(headerBody.contains("CapabilityRegistry.capability(.mcpClearTrail).verb")
+                    && headerBody.contains("CapabilityRegistry.capability(.mcpSetTrailDial).verb"),
+                "the right-click is unchanged")
+        #expect(section.contains("ForEach(group.drawnEntries)"), "a folded group draws no row")
+        #expect(section.contains("$0 + $1.drawnEntries.count"), "the section fits by its drawn rows")
+        #expect(MCPTrailCopy.foldGlyph(folded: false) == "\u{25BE}" && MCPTrailCopy.foldGlyph(folded: true) == "\u{25B8}",
+                "the Shortcuts tab's pair")
+        #expect(MCPTrailCopy.foldHelp(client: "variorum-de", folded: false) == "Fold variorum-de\u{2019}s rows")
+        #expect(MCPTrailCopy.foldHelp(client: "variorum-de", folded: true) == "Show variorum-de\u{2019}s rows")
+
+        let sidebar = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/Library/SidebarView.swift"), encoding: .utf8)
+        #expect(sidebar.contains("private var footerShows: Bool { (footerSection?.headers() ?? 0) > 0 }"))
+        #expect(sidebar.contains("if let footerSection, footerShows {"), "a folded section still draws")
+        #expect(!sidebar.contains("footerRows > 0"), "presence is no longer the drawn-row count")
+    }
+}

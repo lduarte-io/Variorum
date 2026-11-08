@@ -82,12 +82,29 @@ nonisolated struct MCPTrail: Equatable, Sendable {
     /// Newest first — save where her hand reordered a stratum (`move`).
     private(set) var entries: [Entry] = []
 
-    /// One client's rows — a "From ‹client› · N" group: its navigation asks
-    /// first, then its notices, each in the trail's order.
+    /// **VX-904 — the clients whose group she FOLDED** (her press on its
+    /// header; her word: "maybe add ability to collapse a whole client group").
+    /// Session memory like the rows (`clear` — the session's end and Clear All
+    /// — forgets it), and a fold lives exactly as long as its group: a client
+    /// whose last row goes is no longer folded, so a later act of its lands an
+    /// open group. Its own act lands in a folded group FOLDED (PROVISIONAL —
+    /// her fold is her gesture; the ask's bottom-bar offer road is untouched;
+    /// the alternative, a new navigation ask unfolding its group, recorded).
+    private(set) var folded: Set<String> = []
+
+    /// One client's rows — a client's group (its header: `MCPTrailCopy.header`):
+    /// its navigation asks first, then its notices, each in the trail's order.
     struct Group: Equatable, Identifiable, Sendable {
         var id: String { clientName }
         let clientName: String
+        /// Every row the dial lets the group draw — what the header COUNTS,
+        /// folded or not (VX-904: a folded group's count stays honest).
         let entries: [Entry]
+        /// VX-904: folded — the group draws its header alone.
+        var folded: Bool = false
+
+        /// The rows the section DRAWS for this group (none while folded).
+        var drawnEntries: [Entry] { folded ? [] : entries }
     }
 
     /// The rows by client, everything on (`groups(showing:)`).
@@ -122,15 +139,19 @@ nonisolated struct MCPTrail: Equatable, Sendable {
         }
         let asking = order.filter { firstAsk[$0] != nil }.sorted { (firstAsk[$0] ?? 0) < (firstAsk[$1] ?? 0) }
         let quiet = order.filter { firstAsk[$0] == nil }
+        // VX-904: a fold changes what a group DRAWS, never where it stands —
+        // an ask-holding folded group still leads (the ordering as built).
         return (asking + quiet).compactMap { client in
             let rows = (asks[client] ?? []) + (notices[client] ?? [])
-            return rows.isEmpty ? nil : Group(clientName: client, entries: rows)
+            return rows.isEmpty ? nil : Group(clientName: client, entries: rows, folded: folded.contains(client))
         }
     }
 
-    /// The rows the section draws under `dial` — the sidebar's fit test's count.
+    /// The rows the section draws under `dial` — the sidebar's fit test's
+    /// count. VX-904: a folded group's rows are not drawn, so not counted (its
+    /// header is — `groups(showing:).count`).
     func drawnRowCount(showing dial: MCPTrailDial) -> Int {
-        groups(showing: dial).reduce(0) { $0 + $1.entries.count }
+        groups(showing: dial).reduce(0) { $0 + $1.drawnEntries.count }
     }
 
     var isEmpty: Bool { entries.isEmpty }
@@ -171,9 +192,35 @@ nonisolated struct MCPTrail: Equatable, Sendable {
     mutating func forget(placeOf target: MCPShowTarget) {
         let place = Self.placeKey(target)
         entries.removeAll { $0.place == place }
+        letGoOfEmptyFolds()
     }
 
-    mutating func clear() { entries = [] }
+    /// Clear All and the session's end: every row goes, and every fold with
+    /// its group (VX-904).
+    mutating func clear() {
+        entries = []
+        folded = []
+    }
+
+    // MARK: - VX-904 — her fold
+
+    /// **Her press on a group's header**: fold an open group, open a folded
+    /// one. A client with no row has no group to fold — nothing changes.
+    mutating func toggleFold(_ clientName: String) {
+        if folded.contains(clientName) {
+            folded.remove(clientName)
+        } else if entries.contains(where: { $0.clientName == clientName }) {
+            folded.insert(clientName)
+        }
+    }
+
+    /// A fold lives as long as its group: a client with no row left is no
+    /// longer folded.
+    private mutating func letGoOfEmptyFolds() {
+        guard !folded.isEmpty else { return }
+        let clients = Set(entries.map(\.clientName))
+        folded.formIntersection(clients)
+    }
 
     // MARK: - Her hand (VX-874 — rulings (1)–(3))
 
@@ -182,6 +229,7 @@ nonisolated struct MCPTrail: Equatable, Sendable {
     /// ⌥⌘O's last change stays. A newer act on the place lands a fresh row.
     mutating func dismiss(_ id: UUID) {
         entries.removeAll { $0.id == id }
+        letGoOfEmptyFolds()
     }
 
     /// A hand drag's drop: before or after a row (the Open list's two halves,
@@ -259,7 +307,10 @@ nonisolated struct MCPTrail: Equatable, Sendable {
                       target: target, title: title, count: 1),
                 at: 0)
         }
-        if entries.count > Self.cap { entries.removeLast(entries.count - Self.cap) }
+        if entries.count > Self.cap {
+            entries.removeLast(entries.count - Self.cap)
+            letGoOfEmptyFolds()  // VX-904: the cap can take a folded client's last row
+        }
     }
 
     // MARK: - The place

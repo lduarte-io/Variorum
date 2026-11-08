@@ -71,19 +71,21 @@ struct MCPTrailSection: View {
         // VX-874: what the dial lets the section draw, the asks floated.
         let groups = trail.groups(showing: door.trailDial)
         if !groups.isEmpty {
+            // VX-904: a folded group draws its header alone — the fit counts
+            // the rows DRAWN (`drawnEntries`), every header still one.
             let fits = SidebarLayout.aiSectionFits(
-                headers: groups.count, rows: groups.reduce(0) { $0 + $1.entries.count }, rowHeight: rowHeight)
+                headers: groups.count, rows: groups.reduce(0) { $0 + $1.drawnEntries.count }, rowHeight: rowHeight)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                     ForEach(groups) { group in
                         Section {
-                            ForEach(group.entries) { entry in
+                            ForEach(group.drawnEntries) { entry in
                                 MCPTrailRow(
                                     door: door, entry: entry, trail: trail, drag: drag,
                                     rowHeight: rowHeight, tokens: tokens)
                             }
                         } header: {
-                            header(MCPTrailCopy.header(client: group.clientName, count: group.entries.count))
+                            header(group)
                         }
                     }
                 }
@@ -101,31 +103,56 @@ struct MCPTrailSection: View {
     /// accent, on the rows' text edge, at the header row's pitch — on the
     /// room's ground, since it pins while the rows scroll under it. VX-874:
     /// its right-click carries Clear All and the dial's twin.
-    private func header(_ title: String) -> some View {
-        Text(tokens.chromeLabel(title))
-            .font(tokens.small)
-            .foregroundStyle(tokens.accent)
-            .lineLimit(1)
-            .truncationMode(.tail)
+    ///
+    /// VX-904 (the VX-914 run, batch 1 — her word: "maybe add ability to
+    /// collapse a whole client group"): the whole header is the press that
+    /// folds or opens its client's group (`MCPDoor.toggleTrailFold` — view
+    /// state, never an act), ▾ open / ▸ folded — the Shortcuts tab's fold
+    /// glyphs, the app's one fold idiom — at the header's TRAILING end, so the
+    /// title keeps the rows' text edge. A folded header keeps its honest
+    /// count (every row the dial lets the group draw). Its hover names the
+    /// client (F-902 (i) — two groups may share a heading).
+    private func header(_ group: MCPTrail.Group) -> some View {
+        Button {
+            door.toggleTrailFold(group.clientName)
+        } label: {
+            HStack(spacing: 4) {
+                Text(tokens.chromeLabel(MCPTrailCopy.header(client: group.clientName, count: group.entries.count)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Spacer(minLength: 4)
+                Text(MCPTrailCopy.foldGlyph(folded: group.folded))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .accessibilityHidden(true)
+            }
             .padding(.horizontal, SidebarLayout.rowPadding)
             .padding(.bottom, SidebarLayout.headerAir)
             .frame(maxWidth: .infinity, alignment: .bottomLeading)
             .frame(height: SidebarLayout.groupHeaderHeight, alignment: .bottomLeading)
             .background(tokens.room)
             .contentShape(Rectangle())
-            .contextMenu {
-                Button(CapabilityRegistry.capability(.mcpClearTrail).verb) { door.clearTrail() }
-                Divider()
-                // The dial's twin ("welcome if cheap"): the pane's own three
-                // values, the stored one checked.
-                Picker(CapabilityRegistry.capability(.mcpSetTrailDial).verb, selection: Binding(
-                    get: { door.trailDial },
-                    set: { door.setTrailDial($0) })) {
-                    ForEach(MCPTrailDial.allCases, id: \.self) { dial in
-                        Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
-                    }
+        }
+        .buttonStyle(.plain)
+        .help(MCPTrailCopy.foldHelp(client: group.clientName, folded: group.folded))
+        .accessibilityHint(MCPTrailCopy.foldHelp(client: group.clientName, folded: group.folded))
+        .contextMenu {
+            Button(CapabilityRegistry.capability(.mcpClearTrail).verb) { door.clearTrail() }
+            Divider()
+            // The dial's twin ("welcome if cheap"): the pane's own three
+            // values, the stored one checked.
+            Picker(CapabilityRegistry.capability(.mcpSetTrailDial).verb, selection: Binding(
+                get: { door.trailDial },
+                set: { door.setTrailDial($0) })) {
+                ForEach(MCPTrailDial.allCases, id: \.self) { dial in
+                    Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
                 }
             }
+        }
     }
 }
 

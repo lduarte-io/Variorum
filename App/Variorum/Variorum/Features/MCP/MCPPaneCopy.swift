@@ -1983,6 +1983,19 @@ nonisolated enum MCPTrailCopy {
     /// (`.mcpSetTrailDial`) — the pane's own title.
     static var dialVerb: String { MCPPaneCopy.trailDialTitle }
 
+    // MARK: - VX-904 — a whole client group folds (PROVISIONAL, her bundle)
+
+    /// The header's fold glyph — the Shortcuts tab's pair (▾ open, ▸ folded),
+    /// the app's one fold idiom.
+    static func foldGlyph(folded: Bool) -> String { folded ? "\u{25B8}" : "\u{25BE}" }
+
+    /// The header's hover — the Shortcuts tab's "Fold ‹X›" / "Show ‹X›"
+    /// grammar, naming the CLIENT (F-902 (i): two groups may share a heading,
+    /// so the hover tells them apart).
+    static func foldHelp(client: String, folded: Bool) -> String {
+        folded ? "Show \(client)\u{2019}s rows" : "Fold \(client)\u{2019}s rows"
+    }
+
     // MARK: - The details popover (her refinement: the client · when it came in · the kind of act ·
     // what it targeted)
 

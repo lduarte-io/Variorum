@@ -57,7 +57,7 @@ All in Settings ▸ MCP and the sidebar AI section. **Required reading for the i
 | 1 | VX-903 trail dial → top section (+ VX-281 geometry contract grown, named) | NOT-STARTED |
 | 2 | VX-905 ownership-badges row → Settings ▸ MCP (+ search entry, help sentence proposed) | NOT-STARTED |
 | 3 | VX-902 trail heading → provider / "MCP" (fork proposal to the orchestrator first) | NOT-STARTED |
-| 4 | VX-904 whole client group collapses | NOT-STARTED |
+| 4 | VX-904 whole client group collapses | DONE (this commit) — pure fold in the trail's session memory (`MCPTrail.folded` · `toggleFold` · `Group.folded`/`drawnEntries`; a fold lives as long as its group — dismiss/forget/the cap let an empty client's fold go; `clear()` forgets every fold); the door's `toggleTrailFold`; the header is the press (▾/▸ trailing, the Shortcuts tab's pair; hover "Fold/Show ‹client›'s rows"); the section draws `drawnEntries` and fits by them; `SidebarView` keeps the section while any header draws (`footerShows` reads `headers()`). Pins `MCPTrailFoldTests` (5) — RUN PENDING(gate); compile PENDING (next build-for-testing) |
 | 5 | VX-401 Activity stamps recompute (TimelineView, three sites) | DONE (this commit) — `TimelineView(.periodic(from: .now, by: 30))` on the Activity line (`MCPActivityRowView`), the connection request's first-seen (`MCPPane.requestRow`) and the client's last-seen (`MCPClientRow`); `MCPPane.relative(_ stamp:now:)` gains `now:`; VX-351's hover kept outside the tick. Pin `MCPPaneStampsTickTests` (3): predicates evaluated RED on the pre-fix blob (0/0/0 sites, 4 frozen `relative(` calls) and GREEN on the fix by script; the suite's RUN is PENDING(gate); compile PENDING (next build-for-testing) |
 
 ##### BATCH 1 — FORKS PROPOSED TO THE ORCHESTRATOR (2026-11-08; recommendation first in each; built only after a ruling)
@@ -165,7 +165,7 @@ Carry on: finish 902/903/905 to these rulings, keep committing per piece, and re
 | 1 | VX-903 trail dial moves to the top section | 1 | NOT-STARTED |
 | 2 | VX-905 ownership badges row moves to Settings ▸ MCP | 1 | NOT-STARTED |
 | 3 | VX-902 trail heading → provider/MCP | 1 | NOT-STARTED |
-| 4 | VX-904 client group collapse | 1 | NOT-STARTED |
+| 4 | VX-904 client group collapse | 1 | BUILT — pins RUN PENDING(gate) |
 | 5 | VX-401 Activity stamps recompute (rider) | 1 | BUILT — pin RUN PENDING(gate) |
 | 6 | VX-900 the icon twins' one rule + dimmed state | 2 | NOT-STARTED |
 | 7 | VX-901 Index ⋯ carries the note-title set | 3 | NOT-STARTED |
