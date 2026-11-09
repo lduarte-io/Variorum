@@ -23,6 +23,7 @@ Coordinator: nov7. **This is the wave's LAST umbrella before her pause** (her wo
 - **R-940-2 (the wave + pause):** VX-849 "does belong to this wave" as its own umbrella; code pauses after this wave INCLUDING this run; her her-hands pass follows.
 - **R-940-3 (VX-939's substance, verbatim):** "i'm fine renaming the readme that ships within variorum as a note for users to 'letter' within the repo, so the code element of doing that you can ticket."
 - **R-940-4 (VX-917's cadence, verbatim, from VX-912's sitting):** "I think it should be a check every major version switch or something, it's too onerous for every run."
+- **A-940-1 (the orchestrator, on W1's P-940-W1-5):** the LETTER.md drift pin BUILDS — a headless core/app test comparing `LETTER.md`'s paragraphs with `read-me.txt`'s (and thereby the seeder literals through the existing pin), so the three-copies sync is mechanical rather than comments-kept-by-hand. Her standing basis ("do it right, won't regret in 3 years") decides it; test-only, no product behavior. W2 carries it as a rider. P-940-W1-1..4 stay bundled for her pass (the words are hers to judge). W1's BIP-39 "recovery phrase" role-line observation goes to VX-936 (her wording pass) with the CastleRules note — not changed here.
 
 ## 4. Batches (one acceptance unit each; a fresh opus-implementer per batch; §7 = the VX-926 record's §7 by reference, which binds the VX-912 record's §7)
 
