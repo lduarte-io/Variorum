@@ -1229,6 +1229,13 @@ rebase). **Built (one piece):**
 - *The posture, unchanged:* session memory only, the same keep and the same drops on both platforms (CastleRules rule 9 is
   the device's disk and keychain — D-544's posture paragraph); the phone's held secret now has its consumer.
 
+**WINDOW FIX (leg A, 2026-11-09):** `TypedUnlockRetryOccasionTests` ran red, all five, each "Issue recorded at Date.swift:37:17"
+(swift-dependencies' `\.date` getter): the suite built `AppServices` with no overrides, `AppSession.init` snapshots `\.date` at
+construction (`AppSession.swift:856`; `SyncScheduler.swift:106` is a later, post-round site), and the real Mac bundle records an
+unoverridden read — the scratch harness never detected test context and masked it (no product bug). Fix, test file only: each
+test runs under `withWorld` (`SyncBeforeRoundTests`' `withDependencies` set — the services' own db, uuid, a constant date, a seeded
+generator; owner identity left signed-out), services built inside; no pin reads those. Re-verification: the window's leg-A re-run.
+
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
 "ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post

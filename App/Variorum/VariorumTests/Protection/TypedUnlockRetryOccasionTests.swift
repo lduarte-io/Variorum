@@ -14,6 +14,7 @@
 //  deleted; the keys-present clear deleted; the sign-out's let-go deleted).
 //
 
+import Dependencies
 import Foundation
 import Testing
 
@@ -74,12 +75,31 @@ private final class ScriptedRoads {
 @Suite("VX-544 — the round occasion retries the typed unlock's pending load, gated (scripted roads)", .serialized)
 @MainActor
 struct TypedUnlockRetryOccasionTests {
+    /// The world every pin runs in — `SyncBeforeRoundTests.withWorld`'s override set (the owner identity left at its
+    /// signed-out default, so the sign-in world is the one these pins were written against). The services are BUILT inside
+    /// the scope: `AppSession.init` snapshots `\.date` at construction, and in the real Mac test bundle an unoverridden
+    /// read records an issue (the batch-2 window's leg A finding — the record's BATCH 2 AMENDMENT, WINDOW FIX).
+    private static func withWorld(_ body: @MainActor (AppDatabase) async throws -> Void) async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 544))
+        } operation: { @MainActor in
+            try await body(db)
+            // A retired chain's cancelled tasks hold `db` in their task locals (`FirstRoundRoadTests.withWorld`'s reason).
+            try? await Task.sleep(for: .milliseconds(200))
+        }
+    }
+
     private static func services(
-        _ provider: CountingKeyProvider, variant: AppDatabase.StoreVariant = .dev, auth: AuthSession? = nil
-    ) throws -> AppServices {
+        _ provider: CountingKeyProvider, in db: AppDatabase, variant: AppDatabase.StoreVariant = .dev,
+        auth: AuthSession? = nil
+    ) -> AppServices {
         let auth = auth ?? Self.auth()
         return AppServices(
-            session: AppSession(database: try AppDatabase.inMemory()), storeVariant: variant, backupEnabled: false,
+            session: AppSession(database: db), storeVariant: variant, backupEnabled: false,
             auth: auth, makeSyncTransport: { _ in FirstRoundServer() }, makeSyncKeyProvider: { provider },
             legacyCleanup: {})
     }
@@ -93,71 +113,82 @@ struct TypedUnlockRetryOccasionTests {
     /// **A PENDING LOAD AND NO KEYS ⇒ THE RETRY**, inside the one occasion: the pending checked, one provider read, the retry
     /// run (and awaited) — nothing cleared.
     @Test func whileThereAreNoKeysTheOccasionRetriesThePendingLoad() async throws {
-        let provider = CountingKeyProvider(hasKeys: false)
-        let services = try Self.services(provider)
-        let scripted = ScriptedRoads(pending: true)
-        services.typedUnlockSyncKeys = scripted.roads
-        let occasion = try #require(services.sync.beforeRound, "the composition wires the occasion")
-        await occasion()
-        #expect(scripted.log == ["isPending", "retry"], "\(scripted.log)")
-        #expect(provider.reads == 1, "ONE currentKeys() try")
-        services.stop()
+        try await Self.withWorld { db in
+            let provider = CountingKeyProvider(hasKeys: false)
+            let services = Self.services(provider, in: db)
+            let scripted = ScriptedRoads(pending: true)
+            services.typedUnlockSyncKeys = scripted.roads
+            let occasion = try #require(services.sync.beforeRound, "the composition wires the occasion")
+            await occasion()
+            #expect(scripted.log == ["isPending", "retry"], "\(scripted.log)")
+            #expect(provider.reads == 1, "ONE currentKeys() try")
+            services.stop()
+        }
     }
 
     /// **NOTHING PENDING ⇒ NOTHING AT ALL** — the cost of every other round (an unlocked session, Standard, no account) is
     /// one memory read: the provider is never read (it may touch the keychain), nothing retried.
     @Test func withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing() async throws {
-        let provider = CountingKeyProvider(hasKeys: false)
-        let services = try Self.services(provider)
-        let scripted = ScriptedRoads(pending: false)
-        services.typedUnlockSyncKeys = scripted.roads
-        await services.retryTypedUnlockSyncKeysWhileLocked()
-        let occasion = try #require(services.sync.beforeRound)
-        await occasion()
-        #expect(scripted.log == ["isPending", "isPending"], "\(scripted.log)")
-        #expect(provider.reads == 0, "the provider is never read without a pending load")
+        try await Self.withWorld { db in
+            let provider = CountingKeyProvider(hasKeys: false)
+            let services = Self.services(provider, in: db)
+            let scripted = ScriptedRoads(pending: false)
+            services.typedUnlockSyncKeys = scripted.roads
+            await services.retryTypedUnlockSyncKeysWhileLocked()
+            let occasion = try #require(services.sync.beforeRound)
+            await occasion()
+            #expect(scripted.log == ["isPending", "isPending"], "\(scripted.log)")
+            #expect(provider.reads == 0, "the provider is never read without a pending load")
+        }
     }
 
     /// **THE KEYS ALREADY THERE** (an act or an unlock loaded them since the typed unlock): the pending is done — cleared —
     /// and nothing is retried.
     @Test func withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing() async throws {
-        let provider = CountingKeyProvider(hasKeys: true)
-        let services = try Self.services(provider)
-        let scripted = ScriptedRoads(pending: true)
-        services.typedUnlockSyncKeys = scripted.roads
-        await services.retryTypedUnlockSyncKeysWhileLocked()
-        #expect(scripted.log == ["isPending", "clear"], "\(scripted.log)")
-        #expect(provider.reads == 1)
-        await services.retryTypedUnlockSyncKeysWhileLocked()
-        #expect(scripted.log == ["isPending", "clear", "isPending"], "cleared: the next occasion reads nothing")
-        #expect(provider.reads == 1)
+        try await Self.withWorld { db in
+            let provider = CountingKeyProvider(hasKeys: true)
+            let services = Self.services(provider, in: db)
+            let scripted = ScriptedRoads(pending: true)
+            services.typedUnlockSyncKeys = scripted.roads
+            await services.retryTypedUnlockSyncKeysWhileLocked()
+            #expect(scripted.log == ["isPending", "clear"], "\(scripted.log)")
+            #expect(provider.reads == 1)
+            await services.retryTypedUnlockSyncKeysWhileLocked()
+            #expect(scripted.log == ["isPending", "clear", "isPending"], "cleared: the next occasion reads nothing")
+            #expect(provider.reads == 1)
+        }
     }
 
     /// GUARD — no roads (a test's composition, an unattached services): the occasion is inert for the load.
     @Test func noRoadsIsInert() async throws {
-        let provider = CountingKeyProvider(hasKeys: false)
-        let services = try Self.services(provider)
-        #expect(services.typedUnlockSyncKeys == nil)
-        await services.retryTypedUnlockSyncKeysWhileLocked()
-        #expect(provider.reads == 0)
+        try await Self.withWorld { db in
+            let provider = CountingKeyProvider(hasKeys: false)
+            let services = Self.services(provider, in: db)
+            #expect(services.typedUnlockSyncKeys == nil)
+            await services.retryTypedUnlockSyncKeysWhileLocked()
+            #expect(provider.reads == 0)
+        }
     }
 
     /// **A SIGN-OUT LETS THE PENDING GO** (her R-849-1: "dropped at lock/sign-out"): the services' sign-in observation — the
     /// one every sign-out road reaches (the Account sheet, sign out everywhere, the account's deletion) — lets go of it.
     @Test func aSignOutLetsGoOfThePendingLoad() async throws {
-        let provider = CountingKeyProvider(hasKeys: false)
-        let auth = Self.auth()
-        await auth.adopt(AuthTokens(
-            accessToken: "a", refreshToken: "r", expiresAt: Date().addingTimeInterval(3600), userID: "acct-a", email: nil))
-        let services = try Self.services(provider, auth: auth)
-        let scripted = ScriptedRoads(pending: true)
-        services.typedUnlockSyncKeys = scripted.roads
-        await services.start()
-        #expect(!scripted.log.contains("letGo"), "signed in: nothing let go")
-        await services.signOutVariorum()
-        await FirstRoundWorld.settle(seconds: 5) { scripted.log.contains("letGo") }
-        #expect(scripted.log.contains("letGo"), "\(scripted.log)")
-        #expect(!scripted.pending)
-        services.stop()
+        try await Self.withWorld { db in
+            let provider = CountingKeyProvider(hasKeys: false)
+            let auth = Self.auth()
+            await auth.adopt(AuthTokens(
+                accessToken: "a", refreshToken: "r", expiresAt: Date().addingTimeInterval(3600), userID: "acct-a",
+                email: nil))
+            let services = Self.services(provider, in: db, auth: auth)
+            let scripted = ScriptedRoads(pending: true)
+            services.typedUnlockSyncKeys = scripted.roads
+            await services.start()
+            #expect(!scripted.log.contains("letGo"), "signed in: nothing let go")
+            await services.signOutVariorum()
+            await FirstRoundWorld.settle(seconds: 5) { scripted.log.contains("letGo") }
+            #expect(scripted.log.contains("letGo"), "\(scripted.log)")
+            #expect(!scripted.pending)
+            services.stop()
+        }
     }
 }
