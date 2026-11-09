@@ -1793,7 +1793,7 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record | DONE (this commit) |
-| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | IN-PROGRESS — 1a the behavior pins on the PRE-FIX tree (this commit — the red-on-old SHA): core `StaleEnvelopeSweepScenarios` run here, **3 RED exactly as named / 4 green** (below); Mac `StaleEnvelopeSweepRoadTests` compiled (`build-for-testing` green), its runs PENDING (stage); 1b the fix next |
+| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | IN-PROGRESS — 1a the behavior pins on the PRE-FIX tree (`9118b0355` — the red-on-old SHA): core **3 RED exactly as named / 4 green**; 1b the fix + the compile-red pins (this commit): core 16/16 green, Mac `build-for-testing` green, Mac runs PENDING (stage); the core reverts R-443a…d run next at this tip |
 | 2 | VX-152 — the lock's reentrancy, investigate-first | NOT STARTED — the trace below is read; the verdict lands with its piece |
 | 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | NOT STARTED |
 | 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | NOT STARTED |
@@ -1880,6 +1880,59 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
   stranger's fingerprint, the legacy name, a `.stale-` set-aside, two near misses), `theReadOnlyRoadSweepsNothing`,
   `withNoKeyFileOfThisDesignThePreDesignFaceStandsAndNothingIsSwept`. Mac `build-for-testing` at this tree →
   `** TEST BUILD SUCCEEDED **`. Their RUNS are the stage's (PENDING).
+
+**VX-443 piece 1b — the fix, as built (PROVISIONAL P-849-4):**
+- *Core, decided:* `Repair.deleteOlderKeyFile(name:)` (`Assess/Assessment.swift`); `AssessRules.olderKeyFileSweep`
+  (`Assess/Assess.swift`) — owed BY NAME for each container-root foreign entry whose name is an older
+  FINGERPRINT-named key file (`CatalogNames.preDesignKeyFileFingerprint`, the detector's one rule, never restated)
+  and whose fingerprint `live` holds (`live` = the live key file of the OPENED key — `repairs`' own value; current or
+  history), never mid-act; appended LAST to the repairs (a file the disk will not let go stops no other repair).
+- *Core, written:* `ProtectionExecutor.run(.deleteOlderKeyFile)` (`Executor/ExecutorRepairs.swift`) verifies with the
+  key in hand whatever assess said — the name's form (else `.forbidden`, no leaf reached), the live file present and the
+  opened key's, the fingerprint the current key's or one the live history OPENS to under it (`historyKey`; else
+  `.preconditionDoesNotVerify`) — then `leaves.keyFiles.deleteOlderKeyFile(named:)` (false ⇒ `.nothingThere`). The
+  repair's log name carries the file NAME (`deleteOlderKeyFile(<name>)`), so `runRepairs`' one "done" line says it once,
+  names only. The leaf contract (`Executor/Leaves.swift`): by name, the library's own folder's root, a regular file,
+  never read, an older fingerprint-named key file's name only.
+- *App, the production leaf:* `FileKeyFileStoreLeaf.deleteOlderKeyFile(named:)` — the name-shape belt, `lstat` (the
+  entry only — a regular file; a directory or a link of that name stays), `unlink`; `ENOENT` ⇒ false; any other errno
+  throws `couldNotDeleteOlderKeyFile` (the open's `repairPasses` logs it and goes on; the next open retries). Nothing
+  in `ProtectionOpenRoad` changed: the open, the creation and rule 21's use-offer already run `assess`'s repairs on the
+  live slot (writing roads only).
+- *Fakes:* the scenario world's leaf (by name at the container root, through `world.deleting` — her roads re-checked
+  after the delete) and `ExecutorWorld` (`besideTheLibrary`, a `WorldWrite.olderKeyFileDelete`). Two exhaustive
+  switches extended (`AssessTests`' guard sweep, `RestoredCopyJoinWordsMomentTests.kinds`).
+- *Pins, compile-red on old (they name the new case or door):* core `Tests/VariorumCoreTests/Protection/
+  OlderKeyFileSweepTests.swift` — assess: `theNameIsReadForItsFingerprintAndNothingElse`,
+  `theEnvelopeOfTheOpenedKeyIsOwedInBothPostures`, `theEnvelopeOfAKeyTheHistoryHoldsIsOwed`,
+  `noNameTheLiveFileDoesNotVouchForIsOwed` (a stranger's fingerprint, the legacy name, a set-aside, a near miss, below
+  the root, the far folder), `nothingIsOwedUnlessTheOpenedKeysLiveFileVouches` (locked; a live file of another key);
+  executor: `aVerifiedEnvelopeIsDeletedByNameAndSaidOnce` (one log line names it; idempotent),
+  `thePreCrossingKeysEnvelopeIsVerifiedThroughTheHistory` (Use Castle, then the old key's stub),
+  `anUnvouchedNameIsRefusedAndNothingIsTouched` (a stranger's name; no live file), `everyOtherNameIsForbidden` (this
+  design's key file and store, the legacy name, a set-aside, a `../` name). Mac:
+  `StaleEnvelopeSweepRoadTests.theLeafDeletesAnOlderNameAtTheSlotsRootOnly` (root only; a directory and a symlink of
+  that name stay with what the link points at; this design's names never reach the disk).
+- *Evidence, headless at this commit:* `swift build` → `Build complete!`; `swift test --filter
+  'OlderKeyFileSweep|StaleEnvelopeSweep'` → `✔ Test run with 16 tests in 3 suites passed` (the 1a scenario suite
+  7/7 — red 3 → green). Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **` (no warning in a touched file).
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip; core ones mine, headless, each on
+  the one file then `git checkout --` and the suites re-run green):* **R-443a** `AssessRules.olderKeyFileSweep`'s body →
+  `return []` (assess never owes the sweep — the pre-fix decision) ⇒ expected RED the scenario world's three sweep pins
+  and the assess pins `theEnvelopeOfTheOpenedKeyIsOwedInBothPostures`, `theEnvelopeOfAKeyTheHistoryHoldsIsOwed`; GREEN
+  every guard, the name pin and the four executor pins (they hand the repair in directly). **R-443b** the ADDED FENCE
+  dropped — `, held.contains(fingerprint)` removed from the sweep's guard ⇒ expected RED
+  `noNameTheLiveFileDoesNotVouchForIsOwed` ONLY (the stranger's name is owed); the scenario guard
+  `anOlderNameWhoseKeyThisLibraryNeverHadStays` stays GREEN — the executor's own verification refuses the forged repair
+  (two layers, recorded). **R-443c** the executor's verification guard (`guard let live … historyKey …`) deleted ⇒
+  expected RED `anUnvouchedNameIsRefusedAndNothingIsTouched` (both arms) ONLY (assess still never owes those names).
+  **R-443d** the root fence — `entry.place == .container, entry.folders.isEmpty,` removed from the sweep's guard ⇒
+  expected RED `noNameTheLiveFileDoesNotVouchForIsOwed` ONLY (below-root and far entries owed); the scenario's
+  `theSameNameBelowTheRootStays` stays GREEN — the leaf names the root only, and nothing of that name stands there.
+  For the STAGE (Mac): **R-443M1** `FileKeyFileStoreLeaf.deleteOlderKeyFile`'s body → `return false` ⇒ RED
+  `theEnvelopeBesideAReopenedLibraryIsGone`, `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace`,
+  `theLeafDeletesAnOlderNameAtTheSlotsRootOnly`; GREEN the three guards. **R-443M2** (= R-443a on the Mac — the
+  decision gone, the leaf intact) ⇒ RED the two Mac sweep pins only.
 
 **VX-152 — the trace read before the batch's code (the verdict lands as piece 2):** the lock road today is VX-445's
 (`AppBootstrap.lock()` → `lockOnNewRoad()` → `awaitTheLockSeam()` holding `ProtectionRoadSession.beginAct()`); sleep and

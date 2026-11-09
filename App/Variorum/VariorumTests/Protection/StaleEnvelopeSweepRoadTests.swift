@@ -10,7 +10,8 @@
 //
 //  RED ON OLD (committed on the pre-fix tree — they name only pre-fix API): `theEnvelopeBesideAReopenedLibraryIsGone` (the
 //  stub survives the open) and `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace` (the route lands in
-//  the lobby with her pre-design face). GREEN ON BOTH SIDES (the fences — the false-positive class): every other pin here.
+//  the lobby with her pre-design face). COMPILE-RED ON OLD (it names the leaf's new door — added with the fix):
+//  `theLeafDeletesAnOlderNameAtTheSlotsRootOnly`. GREEN ON BOTH SIDES (the fences — the false-positive class): the rest.
 //
 
 import Foundation
@@ -124,6 +125,45 @@ struct StaleEnvelopeSweepRoadTests {
             return
         }
         #expect(Self.exists(stub))
+    }
+
+    /// THE PRODUCTION LEAF (`FileKeyFileStoreLeaf.deleteOlderKeyFile` — it names the new door, so COMPILE-red on the
+    /// pre-fix tree; its behavioral revert is the record's R-443M1): by name, the slot's own folder's root only, a regular
+    /// file only — a directory or a link of that name stays, this design's names never reach the disk, a name planted
+    /// below the root is not the root's.
+    @Test func theLeafDeletesAnOlderNameAtTheSlotsRootOnly() throws {
+        let slot = TempSlot()
+        let leaf = FileKeyFileStoreLeaf(places: slot.places)
+        let fingerprint = KeyFingerprint.of(StoreKey.mint())
+        let name = Self.envelopeName(fingerprint)
+        let atRoot = slot.url(name)
+        try Self.plant(atRoot, fingerprint: fingerprint)
+        #expect(try leaf.deleteOlderKeyFile(named: name))
+        #expect(!Self.exists(atRoot))
+        #expect(try !leaf.deleteOlderKeyFile(named: name), "nothing there now")
+
+        let below = slot.url("Previous Libraries/2026-01-02-030405/\(name)")
+        try Self.plant(below, fingerprint: fingerprint)
+        #expect(try !leaf.deleteOlderKeyFile(named: name))
+        #expect(Self.exists(below), "below the root is not the slot's")
+
+        try FileManager.default.createDirectory(at: atRoot, withIntermediateDirectories: false)
+        #expect(try !leaf.deleteOlderKeyFile(named: name))
+        #expect(Self.exists(atRoot), "a directory of that name stays")
+        try FileManager.default.removeItem(at: atRoot)
+
+        let target = slot.url("hers.txt")
+        try Data("hers".utf8).write(to: target)
+        try FileManager.default.createSymbolicLink(at: atRoot, withDestinationURL: target)
+        #expect(try !leaf.deleteOlderKeyFile(named: name))
+        #expect((try? FileManager.default.destinationOfSymbolicLink(atPath: atRoot.path)) != nil && Self.exists(target),
+                "a link of that name stays, and what it points at")
+
+        for other in [ProtectionNames.keyFilename, CatalogNames.libraryFilename, "variorum-keys.json"] {
+            try Data("x".utf8).write(to: slot.url(other))
+            #expect(try !leaf.deleteOlderKeyFile(named: other), "\(other)")
+            #expect(Self.exists(slot.url(other)), "\(other) never reaches the disk")
+        }
     }
 
     /// A STORE FROM BEFORE THIS DESIGN IS NEVER REACHED: with no key file of this design beside the store, the older name

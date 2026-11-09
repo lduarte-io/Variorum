@@ -43,6 +43,8 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case sendPair(String)
     case copiesDelete
     case plaintextExport
+    /// VX-443: an older Variorum's key-file NAME deleted beside the library.
+    case olderKeyFileDelete(String)
 
     var description: String {
         switch self {
@@ -68,6 +70,7 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .sendPair(let fp): return "send \(fp)"
         case .copiesDelete: return "copies-"
         case .plaintextExport: return "export"
+        case .olderKeyFileDelete(let name): return "older-keyfile- \(name)"
         }
     }
 }
@@ -169,6 +172,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     var asideKeyFiles: [KeyFile?] = []
     var copies: [String: LibraryFile] = [:]
     var liveKeyFile: KeyFile?
+    /// VX-443: the opaque files beside the library by NAME (never read) — an older Variorum's key-file names planted.
+    var besideTheLibrary: Set<String> = []
     var memories: [String: Sealed<DeviceMemory>] = [:]
     var plan: Sealed<ProtectionPlan>?
     var paused = false
@@ -407,6 +412,15 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     func writeLiveKeyFile(_ file: KeyFile) throws {
         liveKeyFile = file
         try wrote(.keyFile(f8(file.fingerprint)))
+    }
+
+    /// VX-443: the production leaf's contract — by name, the library's own folder only, an older fingerprint-named key
+    /// file's name only.
+    func deleteOlderKeyFile(named name: String) throws -> Bool {
+        guard CatalogNames.preDesignKeyFileFingerprint(name) != nil, besideTheLibrary.contains(name) else { return false }
+        besideTheLibrary.remove(name)
+        try wrote(.olderKeyFileDelete(name))
+        return true
     }
 
     // MARK: - Memory, plans

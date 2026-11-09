@@ -302,7 +302,9 @@ public enum AssessRules {
                 faults.append(.noKeyFileAnywhere(NoKeyFileAnywhere(accountRoad: record.account != nil)))
             }
         }
-        guard let current = mode.mode else { return (repairs, faults) }
+        // ALWAYS, and LAST (a file the disk refuses to let go stops no other repair): the store-id envelope (VX-443).
+        let sweep = olderKeyFileSweep(facts, unlocked, live: live)
+        guard let current = mode.mode else { return (repairs + sweep, faults) }
         // §3.10: a choice of Touch ID with no item behind it records Always
         // ask quietly — NEVER a repair that makes an item (only a press does).
         if current == .castle, unlocked.thisMac.settings.gateStyle == .touchID,
@@ -318,7 +320,29 @@ public enum AssessRules {
             standardRepairs(facts, unlocked, live: live, account: account, guards: guards,
                             repairs: &repairs, faults: &faults)
         }
-        return (repairs, faults)
+        return (repairs + sweep, faults)
+    }
+
+    /// VX-443 (PROVISIONAL P-849-4) — THE STORE-ID ENVELOPE a pre-switch Debug open left beside the library
+    /// (`AppBootstrap.ensureStoreIdentity`, VX-306 U1b → VX-329: `variorum-keys-<fp16>.json`, the store id and the open's
+    /// key's fingerprint, no wraps; nothing reads it since VX-329). Its NAME is the pre-design detector's
+    /// (`preDesignStore`), so a library that lost this design's key file while it stood would read as a store from before
+    /// this design — her face, no road tried, rule 1's mirror never written back. Owed BY NAME (never read) for each older
+    /// FINGERPRINT-named file at the container's root whose fingerprint `live` — the live key file of the OPENED key —
+    /// holds (its current key or its history: rule 4, so the file can concern only a key the live file already reaches
+    /// under the current secrets — nothing openable is lost). Never a name the live file does not vouch for (another
+    /// library's leftover — rule 26's), never the fixed legacy name (it names no key), never below the root (Previous
+    /// Libraries, the backups, the far folder), never mid-act (the act's plan owns the state). The executor verifies again
+    /// with the key in hand.
+    static func olderKeyFileSweep(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts, live: KeyFile?) -> [Repair] {
+        guard let live, unlocked.thisMac.actInFlight == nil else { return [] }
+        let held = Set(live.heldFingerprints)
+        return facts.catalog.foreign.compactMap { entry in
+            guard entry.place == .container, entry.folders.isEmpty,
+                  let fingerprint = CatalogNames.preDesignKeyFileFingerprint(entry.name), held.contains(fingerprint)
+            else { return nil }
+            return .deleteOlderKeyFile(name: entry.name)
+        }
     }
 
     /// The precondition under which a key's copy may go: the current key's

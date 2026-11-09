@@ -389,6 +389,7 @@ struct RestoredCopyProofFieldsTests {
             case .sendPair: return "send"
             case .copiesDelete: return "copies-"
             case .plaintextExport: return "export"
+            case .olderKeyFileDelete: return "older-keyfile-"
             }
         }
     }
