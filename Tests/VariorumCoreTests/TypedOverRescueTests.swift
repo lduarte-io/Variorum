@@ -281,3 +281,106 @@ struct TypedOverRescueConvergenceTests {
         }
     }
 }
+
+/// **VX-683 A — THE FLUSH BEFORE THE ROUND, END TO END** (the composition the
+/// app's `SyncSession.beforeRound` occasion produces: her pending typing is
+/// written through the guarded autosave BEFORE the round's pull, so the row is
+/// DIRTY when the pull meets it and the EXISTING §5/§6 machinery does the
+/// rest). These pin the COMPOSITION with the standing S5 road — green on both
+/// sides of the engine by design (no `Sync/` line changed); the occasion's own
+/// red-on-old lives at the app's `SyncSession` pins.
+@Suite("The flush before the round converges (VX-683 A)")
+struct FlushBeforeTheRoundConvergenceTests {
+    private func pair() throws -> (mac: SyncClient, phone: SyncClient, server: FakeSyncServer) {
+        let server = FakeSyncServer()
+        let mac = try SyncClient(name: "Mac", prefix: "AA", transport: server)
+        let phone = try SyncClient(name: "Phone", prefix: "BB", transport: server, clockOffset: 977, seed: 2)
+        return (mac, phone, server)
+    }
+
+    private func seed(_ mac: SyncClient, _ phone: SyncClient, _ server: FakeSyncServer)
+        async throws -> (block: String, take: String)
+    {
+        let made: (String, String) = try mac.with { ops, _ in
+            let post = try ops.createPost(title: "p", profile: .journal)
+            let made = try ops.newBlock(in: post.id, text: "The shared base.", at: .end)
+            return (made.block.id, made.variant.id)
+        }
+        try await productionQuiescence(mac, phone, server: server)
+        try phone.with { ops, _ in try ops.autosave(made.1, text: "The phone's rewrite.", charDelta: 12) }
+        _ = try await productionRound(phone)
+        return made
+    }
+
+    private func texts(_ client: SyncClient, block: String) async throws -> Set<String> {
+        try await client.db.read { db in
+            Set(try String.fetchAll(
+                db, sql: "SELECT working_text FROM variant WHERE block_id = ? AND deleted_at IS NULL",
+                arguments: [block]))
+        }
+    }
+
+    /// THE PIN (the brief's shape): a pull INTO a simulated debounce window
+    /// with the occasion in front of it. The round ends with the SERVER text
+    /// on the row and HER text as the `'conflict'` take — the standing S5
+    /// card — and its push carries the card: both texts on the server, then
+    /// on both devices.
+    @Test func herPendingTypingFlushedBeforeTheRoundBecomesTheStandingS5Card() async throws {
+        let (mac, phone, server) = try pair()
+        let (block, take) = try await seed(mac, phone, server)
+        let herBuffer = "The shared base. Her next sentence."
+
+        // The occasion: typing is pending, so it is flushed through the
+        // guarded autosave first (the row still holds what she saw).
+        try mac.with { ops, _ in
+            try ops.autosave(take, text: herBuffer, charDelta: 19, expectedText: "The shared base.")
+        }
+        #expect(try mac.outboxContains("variant", take), "the flush made the row dirty")
+        _ = try await productionRound(mac)
+
+        #expect(try mac.db.fetchString("SELECT working_text FROM variant WHERE id = ?", [take])
+                == "The phone's rewrite.", "S5: the server text wins the row")
+        #expect(try mac.db.fetchInt(
+            "SELECT COUNT(*) FROM variant WHERE block_id = ? AND label = 'conflict' AND working_text = ?",
+            [block, herBuffer]) == 1, "her flushed text is the conflict card")
+        #expect(try mac.outboxCount() == 0, "the round's push carried the card")
+
+        try await productionQuiescence(mac, phone, server: server)
+        #expect(try mac.syncedDump() == phone.syncedDump())
+        for client in [mac, phone] {
+            #expect(try await texts(client, block: block) == [herBuffer, "The phone's rewrite."],
+                    "\(client.name) lost a text")
+        }
+    }
+
+    /// THE MILLISECOND STRAGGLERS (the memo's composition note): the occasion
+    /// flushed her text and the round turned it into the S5 card — but she
+    /// typed on before the editor adopted the round's result, so her buffer
+    /// (built on her own flushed text) autosaves over a row that now holds the
+    /// server's words. The guarded autosave rescues (R-683-1): her newest
+    /// words keep the row, the server's land as a second card. Every text
+    /// survives on every device.
+    @Test func typingBetweenTheFlushAndTheApplyIsRescuedByTheGuard() async throws {
+        let (mac, phone, server) = try pair()
+        let (block, take) = try await seed(mac, phone, server)
+        let flushed = "The shared base. Her next"
+        let straggler = "The shared base. Her next sentence."
+
+        try mac.with { ops, _ in
+            try ops.autosave(take, text: flushed, charDelta: 9, expectedText: "The shared base.")
+        }
+        _ = try await productionRound(mac)
+        try mac.with { ops, _ in
+            try ops.autosave(take, text: straggler, charDelta: 10, expectedText: flushed)
+        }
+
+        try await productionQuiescence(mac, phone, server: server)
+        #expect(try mac.syncedDump() == phone.syncedDump())
+        for client in [mac, phone] {
+            #expect(try await texts(client, block: block) == [straggler, flushed, "The phone's rewrite."],
+                    "\(client.name) lost a text")
+            #expect(try client.db.fetchString("SELECT working_text FROM variant WHERE id = ?", [take])
+                    == straggler, "\(client.name): her newest words keep the row")
+        }
+    }
+}

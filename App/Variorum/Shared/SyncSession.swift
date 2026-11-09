@@ -191,11 +191,46 @@ final class SyncSession {
         })
     }
 
+    /// **VX-683 A — THE OCCASION BEFORE EVERY ROUND** (the VX-849 run, batch 1 —
+    /// `notes/plans/fixes/vx-849-typed-over-rescue.md`; the memo
+    /// `notes/plans/fixes/vx-683-sync-into-debounce.md`, option A as ruled; D-544
+    /// build step 3a's seam, minted here — VX-544's typed-unlock retry is batch 2's
+    /// occasion on the same hook). Run to its END before every round this
+    /// session's own roads start — `triggerSync()` (every trigger funnels through
+    /// it: the settle observation, became-active, Sync now), `flush()` and
+    /// `roundNow()` — behind the restore hold (a held store runs neither the
+    /// occasion nor a round); the gate and the chain are read AGAIN once it ran,
+    /// so a round goes to the chain that stands then and a retired chain is never
+    /// revived. nil = inert, the exact pre-hook road (the `keyProvider` pattern):
+    /// every existing composition is unchanged, and the engine never learns
+    /// editors exist — the composition root hands in what to run (the Mac's: her
+    /// pending typing lands first, `AppServices`). Rounds the SCHEDULER starts on
+    /// its own (a coalesced follow-up, the orphan heal's, the one-writer belt's)
+    /// run no occasion: what they meet is the guarded autosave's to rescue
+    /// (VX-683 B). Pinned: `SyncBeforeRoundTests`.
+    var beforeRound: (@MainActor () async -> Void)?
+
     /// One sync round, serialized/coalesced by the scheduler (A3).
     func triggerSync() {
         guard roundsHeld?() != true else { return }
         guard let scheduler else { return }
-        Task { await scheduler.trigger() }
+        guard let beforeRound else {
+            Task { await scheduler.trigger() }
+            return
+        }
+        Task { [weak self] in
+            await beforeRound()
+            guard let chain = self?.chainAfterOccasion() else { return }
+            await chain.trigger()
+        }
+    }
+
+    /// After the occasion ran: the chain a round may start on NOW — nil when the
+    /// hold came down meanwhile or the chain is gone (stopped, or mid-replacement:
+    /// `configure` clears it before it drains).
+    private func chainAfterOccasion() -> SyncScheduler? {
+        guard roundsHeld?() != true else { return nil }
+        return scheduler
     }
 
     /// **VX-510 D-A1 — ONE ROUND, RUN TO ITS END, AND WHAT IT CAME TO** (an account act's first round — VX-498/VX-507).
@@ -207,7 +242,15 @@ final class SyncSession {
     /// Nothing here cancels a round: a caller that stops waiting leaves it running.
     func roundNow() async -> FirstRoundOutcome {
         guard roundsHeld?() != true else { return .held }
-        guard let scheduler else { return .notConfigured }
+        guard var scheduler else { return .notConfigured }
+        if let beforeRound {
+            // VX-683 A: the occasion first, then the gate and the chain as they
+            // stand after it.
+            await beforeRound()
+            guard roundsHeld?() != true else { return .held }
+            guard let chain = self.scheduler else { return .notConfigured }
+            scheduler = chain
+        }
         return .ran(await Self.runRound(on: scheduler))
     }
 
@@ -236,7 +279,14 @@ final class SyncSession {
     /// a restored library pushes nothing before Resume.
     func flush() async {
         guard roundsHeld?() != true else { return }
-        guard let scheduler else { return }
+        guard var scheduler else { return }
+        if let beforeRound {
+            // VX-683 A: the occasion first (the iOS background transition's
+            // round then pushes what she typed), then the chain as it stands.
+            await beforeRound()
+            guard let chain = chainAfterOccasion() else { return }
+            scheduler = chain
+        }
         await scheduler.trigger()
         await scheduler.awaitIdle()
     }

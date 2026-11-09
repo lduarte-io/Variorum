@@ -216,8 +216,8 @@ folder of the core test target, run, then deleted — never in the PR) so its re
 | # | Piece | Status |
 |---|---|---|
 | 1 | VX-402 — the honest flush | DONE (this commit) — instrument red 3/3 → green 3/3; Mac `build-for-testing` green; the Mac pins' RUNS **PENDING** (stage) |
-| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | DONE — 2a the op + core pins (`e7ec1227f`; 9/9; revert-proven); 2b the coordinator + the eleven record sites + the Mac pins (`169a51898`; instrument reverts R1/R2 bite); the phone pins (the commit after it); Mac + phone builds green; Mac/simulator runs PENDING (stage) |
-| 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | DONE (this commit) — core 11/11; Mac + phone `build-for-testing` green; Mac runs PENDING (stage) |
+| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | DONE — 2a the op + core pins (`e7ec1227f`; 9/9; revert-proven); 2b the coordinator + the eleven record sites + the Mac pins (`169a51898`; instrument reverts R1/R2 bite); the phone pins (`3779bdea9`); Mac + phone builds green; Mac/simulator runs PENDING (stage) |
+| 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | DONE (the commit after `3779bdea9`, which flipped this row one commit early) — core 11/11; Mac + phone `build-for-testing` green; Mac runs PENDING (stage) |
 | 4 | Close — builds, suites, self-assessment, STAGE REQUEST | NOT STARTED |
 
 **Piece 1 — VX-402, the honest flush (FIXED).**

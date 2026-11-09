@@ -210,6 +210,17 @@ final class AppServices {
         // 13j ladder B (B3): the purge doors' receipts and the local purge
         // road both read this — one truth, the sync session's own.
         session.syncConfigured = { [weak sync = sync] in sync?.isConfigured ?? false }
+        #if os(macOS)
+        // VX-683 A (the VX-849 run, batch 1; R-683-3) — THE MAC'S OCCASION
+        // BEFORE EVERY ROUND: her pending typing lands first, and only when
+        // typing IS pending (`AppSession.flushPendingTypingBeforeRound`). The
+        // Mac composition per the run's brief; the phone's coordinator carries
+        // the guarded autosave (VX-683 B) whatever this wires. VX-544 (batch 2)
+        // composes its typed-unlock retry beside this occasion.
+        sync.beforeRound = { [weak session] in
+            await session?.flushPendingTypingBeforeRound()
+        }
+        #endif
         // VX-423: REQUIRED — the composition root hands the bootstrap's one
         // authority (its Keychain item scoped by store variant, pre-13x 2c's
         // corner 47); a default mint here was the second refresher.
