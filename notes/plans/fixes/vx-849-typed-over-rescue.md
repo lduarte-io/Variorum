@@ -2711,6 +2711,29 @@ bytes, so every device holding the same rows stands the same claim; VX-921, `not
 BATCH 6)", landing as P-849-6 survives her sitting (§3's "§7's seq-ranked repairs read it" stays true — I2 and the
 two I10 arms still do). AppSpecRecord: the dated entry. VX-919: no canon line until its deploy (corner 4).
 
+### BATCH 6 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first; the last build batch)
+
+**Verification first-hand:** six commits (`438ed249d`…`aa4b5b9f8`), pushed, tree clean, HEAD = origin; the swap
+live at `Repairs.swift` :984–:1079 (`OwnedClaim` + `ownedClaimOutranks`, the `sync_row_seq` join gone from the
+OWNED repair while the :795/:812 sibling joins stand, as scoped); the script + paired rollback present with the
+DEPLOY-HELD header; LIVE STATUS row 6 BUILT.
+
+**Dispositions:**
+1. **VX-921 → ACCEPTED as built** (the B2 shape: `created_at` then `id`, never-accepted-last retired with the
+   seq join; both repair arms byte-unchanged; red-on-old watched at `d58707b70`, R-921a/b bit exactly as named).
+   The justified fixture edit (a hand stamp contradicting its own test's filing order, watched red→green) and the
+   comment-only doc alignment of the revival pass's local twin are both accepted.
+2. **The sibling seq-rank gaps (I2 move/move; the two I10 arms) → ONE ticket at the closeout,** as the
+   implementer proposes: SyncSpec §7 RULES their seq rank, so changing them is a spec question, not this run's
+   fix; the ticket records the gap class and points at P-849-6's outcome.
+3. **VX-919 → ACCEPTED as authored;** never executed, deploy HELD (row 9 — hers, with the VERIFY reads and the
+   optional rolled-back probe, which only her window can run since the fake harness reaches no trigger). The
+   containment arm (a cap failure can never abort a pull) and the definer-DELETE grant pin are the right fences.
+4. **P-849-6 and P-849-7 stand PROVISIONAL for the merge's QUESTIONS entry** — P-849-6 flagged plainly as
+   changing the measure in #167's ratified (a) text (an offline earlier act now outranks an online later one);
+   the proposed SyncSpec §7 OWNED line lands only as it survives her sitting.
+5. **No new window legs; nothing for the b34 claim.** The whole core package stays PENDING to row 8.
+
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
 "ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post
