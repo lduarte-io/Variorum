@@ -2411,7 +2411,7 @@ over them.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record (the trace, the siblings, the designs) | DONE (this commit) |
-| 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | NEXT |
+| 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | 1a the pins on the PRE-FIX tree (this commit — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines (below); 1b the swap — NEXT |
 | 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | — |
 | 3 | Close — `swift build`, the targeted core suites, the self-assessment | — |
 
@@ -2441,6 +2441,24 @@ over them.
   unpushed claim created EARLIER than A's pushed filing. If B pulls before it pushes, the hybrid ranks B's own row last
   (demoting it); A, pulling B's row later (now accepted), ranks by `created_at` and demotes its own — both demoted, the
   determinism gap reborn through round order. Pure `created_at` has no per-device term at all.
+
+#### VX-921 piece 1a — the pins on the PRE-FIX tree (pre-fix API only — two clients, the fake server, production rounds)
+
+`Tests/VariorumCoreTests/OwnedExclusivityRankConvergenceTests.swift`, suite "VX-921 — the OWNED claimant rank is
+converged bytes":
+- **`aPlainFilingAndALaterOwnedClaimStandTheEarlierFilingWhateverEachDevicesSeqPicture`** — the traced worst case
+  above (Y plain on A first; X owned on B second; B repairs; A pins N in Y, pulls X's claim, repairs).
+- **`twoOwnedClaimsStandTheEarlierClaimWhateverEachDevicesSeqPicture`** — the owned-vs-owned twin (#167's "competing
+  owned books: first claim wins"; the repair's demote-a-later-owned arm on both devices).
+- Each asserts its PREMISE (green on both trees by design): B's picture ranks the earlier filing first
+  (`seqB(first) < seqB(later)`), A's picture the OTHER way after the pin (`seqA(first) > seqA(later)`), and the
+  earlier filing's `created_at` is the smaller — so the pin exercises the gap, not a coincidence.
+- **Watched at this commit's tree (`swift test --filter OwnedExclusivityRankConvergenceTests`): `✘ Test run with 2
+  tests in 1 suite failed … with 15 issues`** — exactly A's repair lines (the earlier filing/claim not standing, the
+  later one not belled, no repair write in A's outbox — A tombstoned Y's filing / belled X1's claim instead) and the
+  converged lines (the earlier filing not a live member; the note membered ZERO times on both devices — "a member of
+  NOTHING"); green on old, as they must be: every premise, B's own decision, the byte-identical dump (both devices
+  converge — on the wrong state), the later claim's arrival lines (B's demotion reached both).
 
 #### VX-921 — the sibling seq-rank repairs, RECORDED (never widened — the brief's scope rule)
 
