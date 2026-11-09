@@ -25,14 +25,14 @@ import VariorumMCPSocket
 /// nothing of this connection waits on the writer: written here at once, in
 /// steps the socket is known to take without waiting (`writeWithoutWaiting`)
 /// — the old timing, for a client that reads. Only what the socket will not
-/// take NOW (a stalled client's
-/// frame) goes to the connection's own serial writer (`writer`), handed over
-/// in this actor's order before it suspends, the caller waiting suspended. So
-/// the bytes, their order, the errors, the timing of a reading client's frames
-/// and the session's lifetime are as before: a `disconnect` still runs only
-/// after every write handed over before it has ended (`drained`), as it did
-/// when those writes held this actor; and a frame whose rest waits on the
-/// writer counts as mid-write for the close line (`frameGate`).
+/// take NOW (a stalled client's frame) goes to the connection's own serial
+/// writer (`writer`), handed over in this actor's order before it suspends,
+/// the caller waiting suspended. So the bytes, their order, the errors, the
+/// timing of a reading client's frames and the session's lifetime are as
+/// before: a `disconnect` still runs only after every write handed over
+/// before it has ended (`drained`), as it did when those writes held this
+/// actor; and a frame whose rest waits on the writer counts as mid-write for
+/// the close line (`frameGate`).
 actor MCPSocketTransport: Transport {
     /// The longest line accepted (a message bigger than this ends the
     /// connection). Generous for any document the read tools return in
@@ -61,7 +61,9 @@ actor MCPSocketTransport: Transport {
     /// targets the overcommit root queue, never the cooperative pool's width),
     /// so a client that stops reading parks this queue's thread, never a pool
     /// thread, and the writes keep the order this actor handed them over in.
-    /// One per connection: one stalled client never delays another's writes.
+    /// One per connection: one stalled client never delays another
+    /// connection's writes. (The host's announce loops, which await each
+    /// session in turn, are their own seam — VX-944.)
     private nonisolated let writer = DispatchQueue(label: "variorum.mcp.writer")
     /// **VX-933: a frame is MID-WRITE while its rest waits on the writer** —
     /// its first bytes went on the fast road and the write lock was let go.
@@ -328,7 +330,7 @@ actor MCPSocketTransport: Transport {
         let rest = data.subdata(in: now.written..<data.count)
         return await withCheckedContinuation { finished in
             let writer = Thread { finished.resume(returning: writeAll(fd, rest)) }
-            writer.name = "variorum.mcp.writer"
+            writer.name = "variorum.mcp.opening-writer"
             writer.start()
         }
     }

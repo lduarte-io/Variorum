@@ -26,7 +26,8 @@ import Testing
 // a new wire field (PROVISIONAL P-940-W4-1 — the record).
 //
 // RED ON THE PRE-FIX TREE by assertion (pre-fix API only): every stored version
-// read "2.1", "2.2", "0.1", "3" — the bytes before the first NUL.
+// read only the bytes before its first NUL — "2.1" (the minted row, and the
+// admission's own client), "2.2", the waiting setup's "2.1.299", "3".
 
 @Suite("VX-925 — a declared version holding U+0000 is stored stripped")
 struct MCPClientVersionNullTests {
