@@ -402,6 +402,22 @@ struct MCPUnlinkVersionsServerTests {
         }
     }
 
+    /// **The refusal-wording walk (VX-362: no raw Swift case on the wire):** every case the act
+    /// can throw is worded by the tool's ONE map — never its case name, never "Refused:", never
+    /// the error's bare description; the not-shared case is the door's one sentence, byte for byte.
+    @Test func everyRefusalOfTheActIsWorded() {
+        let cases: [Operations.MCPVersionUnlinkRefusal] = [.noSuchLink, .savedVersion, .alreadyUnlinked]
+        for refusal in cases {
+            let words = MCPWriteTools.words(refusal)
+            #expect(!words.hasPrefix("Refused:") && !words.contains("\(refusal)") && words != "\(refusal)",
+                    "\(refusal) speaks a raw case: \(words)")
+            #expect(words.hasSuffix("."), "\(refusal) is a sentence: \(words)")
+        }
+        #expect(MCPWriteTools.words(.noSuchLink) == Self.notShared, "the one shape, byte for byte")
+        #expect(MCPWriteTools.words(.savedVersion) == MCPWriteTools.savedVersionLinkWords)
+        #expect(MCPWriteTools.words(.alreadyUnlinked) == MCPWriteTools.linkAlreadyGoneWords)
+    }
+
     // MARK: - The door's rules
 
     /// VX-396: an `edge_id` holding U+0000 refuses at the call door naming its path; VX-606: an
