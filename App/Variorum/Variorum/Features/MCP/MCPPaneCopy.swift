@@ -1825,11 +1825,16 @@ nonisolated enum MCPReceiptCopy {
             return n == 1
                 ? "linked \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail)) as versions"
                 : "linked \(n) pairs of notes as versions"
-        // VX-943 — one link taken back (PROVISIONAL words, her copy pass).
+        // VX-943 — one link taken back (PROVISIONAL words, her copy pass). A
+        // link inside ONE note (her moveBlock re-homed an end) arrives with no
+        // far side (`detail` nil — the tool carries the note once), and says so
+        // rather than "between “A” and “A”" (the VX-915 ladder's F-7;
+        // PROVISIONAL words, her bundle).
         case .versionUnlink:
-            return n == 1
-                ? "removed the version link between \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail))"
-                : "removed \(n) version links"
+            guard n == 1 else { return "removed \(n) version links" }
+            return receipts[0].detail.map {
+                "removed the version link between \(quoted(receipts[0].targetTitle)) and \(quoted($0))"
+            } ?? "removed a version link inside \(quoted(receipts[0].targetTitle))"
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
         // P-U4-WORDS — her copy pass).
         case .commentEdit: return n == 1 ? "edited a comment" : "edited \(n) comments"

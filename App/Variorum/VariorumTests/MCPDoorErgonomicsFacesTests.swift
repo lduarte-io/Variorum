@@ -98,6 +98,12 @@ struct MCPDoorErgonomicsFacesTests {
         #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: "one", detail: "two"),
                                      receipt(.versionUnlink, title: "one", detail: "two")])
                 == "claude-code removed 2 version links" + undoes)
+        // A JUSTIFIED EDIT (the VX-915 ladder's F-7 — appended): a link inside ONE
+        // note arrives with the note once (no far side — `detail` nil, the wire
+        // pin `MCPUnlinkVersionsServerTests.aLinkInsideOneNoteCarriesTheNoteOnceOnItsReceipt`)
+        // and says so, never "between “one” and “one”" (PROVISIONAL words, her bundle).
+        #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: "one", detail: nil)])
+                == "claude-code removed a version link inside \u{201C}one\u{201D}" + undoes)
         #expect(Operations.MCPWriteAct.versionUnlink.undoLabel(client: "claude-code")
                 == "claude-code's version link removal")
         #expect(Operations.MCPWriteAct.versionUnlink.isUndoable, "one undo for her puts the link back")

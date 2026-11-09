@@ -124,13 +124,18 @@ extension MCPWriteTools {
             // Her receipt's Open › opens the two in Compare — link_versions'
             // own landing, so she sees them apart (a link inside one note
             // opens the note at the link's first block).
-            let show: MCPShowTarget = notes[0] == notes[1]
+            let oneNote = notes[0] == notes[1]
+            let show: MCPShowTarget = oneNote
                 ? .note(noteID: notes[0], blockID: unlink.ends.blockIDs[0], select: nil)
                 : .compare(noteID: notes[0], peerIDs: [notes[1]])
+            // The receipt names the far note as `detail` — and, for a link inside
+            // one note, carries the note ONCE (`detail` nil), so her line says
+            // "inside “A”", never "between “A” and “A”" (the VX-915 ladder's F-7).
             return (["edge_id": edgeID, "note_ids": notes, "block_ids": unlink.ends.blockIDs, "unlinked": true,
                      "still_versions": unlink.stillVersions],
                     MCPWriteReceipt(clientName: clientName, act: .versionUnlink, targetID: notes[0],
-                                    targetTitle: titles[notes[0]], detail: titles[notes[1]], show: show))
+                                    targetTitle: titles[notes[0]], detail: oneNote ? nil : titles[notes[1]],
+                                    show: show))
         }
     }
 
