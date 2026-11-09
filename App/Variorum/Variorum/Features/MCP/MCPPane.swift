@@ -95,7 +95,8 @@ nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
     /// setup); "client"/"clients" find the Clients tab's own row and open it
     /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)). nil: the row sits
     /// above the tabs (the server switch, the show dial, VX-903's trail dial
-    /// under it, Waiting), or the finding is the pane itself.
+    /// under it, Waiting), or at the foot under every tab (VX-934's AI-pair
+    /// switch), or the finding is the pane itself.
     static func holding(findingLead lead: String) -> MCPPaneTab? {
         switch lead {
         case SettingsCatalog.title("mcpConnect"): .connect
@@ -194,6 +195,18 @@ struct MCPPane: View {
     /// line to flip — recorded for her bundle.)
     nonisolated static func drawsTrailDial(_ snapshot: MCPDoor.Snapshot) -> Bool {
         snapshot.approvedCount > 0
+    }
+
+    /// **VX-934 — the AI pair's switch draws at the pane's foot once the
+    /// library has ever had a client** (PROVISIONAL F-934-A): the sharing
+    /// face's own fact (`showsSharingFace` — VX-590, and the Private row's,
+    /// VX-641), since the switch names exactly the sharing face's two marks —
+    /// "shared" said to a library that never had a client is what VX-590
+    /// keeps out. A pane that never had a client (the fresh pane VX-281's
+    /// oracle measures) draws no foot section at all; the Settings search
+    /// follows it (`SettingsSearch.isSharingFaceRow`). Pure, pinned.
+    nonisolated static func drawsAIMarksSwitch(_ snapshot: MCPDoor.Snapshot) -> Bool {
+        showsSharingFace(snapshot)
     }
 
     /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
@@ -363,7 +376,7 @@ struct MCPPane: View {
             case .shared: sharedTab
             case .activity: activityTab
             }
-            badgesSection
+            aiMarksSection
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
@@ -525,25 +538,29 @@ struct MCPPane: View {
         }
     }
 
-    // MARK: - The badge family's switch (VX-905)
+    // MARK: - The AI pair's switch (VX-934)
 
-    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
-    /// ownership badges' into the mcp part of settings - it makes more sense
-    /// there"; PROVISIONAL F-905 (1))**: the badge family's ONE switch
-    /// (`ownership_badges`, synced) — its own untitled section at the pane's
-    /// FOOT, under whichever tab shows. Every library keeps it (the owned-by
-    /// chips exist with no client at all, so it never waits for one), and
-    /// nothing above the tabs grows (VX-281's fresh-open geometry). The toggle,
-    /// its one line and the whole text behind its (i). Rendered only where the
-    /// window hands the pane its theme (a bare mount has no store to write —
-    /// P-2's dead door).
-    @ViewBuilder private var badgesSection: some View {
-        if let themeStore {
+    /// **VX-934 (her ruling, the VX-914 handoff sitting, #269 — "lets have one
+    /// setting for 'show shared with AI and private from AI' badges … and that
+    /// setting should be in MCP")**: the shared icon's and the Private eye's
+    /// ONE switch (`ai_marks`, synced) — its own untitled section at the
+    /// pane's FOOT, under whichever tab shows: the slot VX-905's badge row
+    /// left when the book marks went back to Settings ▸ Editor. Drawn once the
+    /// library has ever had a client (`drawsAIMarksSwitch` — the sharing
+    /// face's fact, PROVISIONAL F-934-A), so the fresh pane VX-281's oracle
+    /// measures draws no foot section, and nothing above the tabs grows
+    /// (`MCPPaneTabsTests` — the contract's named arm). The toggle, its one
+    /// line and the whole text behind its (i). Rendered only where the window
+    /// hands the pane its theme (a bare mount has no store to write — P-2's
+    /// dead door).
+    @ViewBuilder private var aiMarksSection: some View {
+        if let themeStore, Self.drawsAIMarksSwitch(door.snapshot) {
             Section {
-                Toggle(SettingsCatalog.title("ownershipBadges"), isOn: Binding(
-                    get: { themeStore.settings.ownershipBadges },
-                    set: { themeStore.setOwnershipBadges($0) }))
-                ExplainerLine(line: OwnershipSettingsCopy.badgesSummary, detail: OwnershipSettingsCopy.badgesHelp)
+                Toggle(SettingsCatalog.title("mcpAIMarks"), isOn: Binding(
+                    get: { themeStore.settings.aiMarks },
+                    set: { themeStore.setAIMarks($0) }))
+                .mcpPaneProbe(.aiMarks)
+                ExplainerLine(line: MCPPaneCopy.aiMarksSummary, detail: MCPPaneCopy.aiMarksDetail)
             }
         }
     }
@@ -1259,13 +1276,16 @@ struct MCPFullListSheet: View {
 // MARK: - The pane's geometry oracle (the VX-914 run, batch 1 — its gate round)
 
 /// **The marks a pin reads in Settings ▸ MCP** — the two dials, the show
-/// dial's line, the tab row and the form itself. On macOS 27.1 the grouped
+/// dial's line, the tab row and the form itself, and (VX-934) the AI pair's
+/// switch at the pane's foot. On macOS 27.1 the grouped
 /// form draws its `Picker`s natively (no `NSPopUpButton`, no vended
 /// accessibility element without a client — the gate round's measured
 /// mechanism), so a pin cannot find a dial in AppKit's tree; the pane reports
 /// each mark's frame instead, in SwiftUI's own (global, y-down) space.
 nonisolated enum MCPPaneMark: String, CaseIterable, Sendable {
     case form, showDial, showDialLine, trailDial, tabRow
+    /// VX-934: the AI pair's switch (drawn once the library has had a client).
+    case aiMarks
 }
 
 extension View {
@@ -1288,14 +1308,32 @@ extension View {
 /// the pin's own session): a mark DRAWN reports its frame; a mark that leaves
 /// (or was never drawn — the trail dial with no approved client) has none, so
 /// a pin that finds the show dial and not the trail dial discriminates.
+///
+/// **OWNER-AWARE since VX-934's GATE12 follow-up (the VX-915 run):** each
+/// probe INSTANCE records its frame with its own owner token, and its
+/// disappear clears the mark only while the stored entry is still its own —
+/// the `PrivateMarkProbe` / `OwnershipBadgeProbe` compare-before-clear posture.
+/// The mechanism it closes, measured (an offscreen replica, the run record's
+/// BATCH 1 FOLLOW-UP): a CLOSED pane's `onDisappear` fires late, during the
+/// next mount's settle and AFTER that pane recorded — so an unconditional
+/// forget erased a live pane's frame (the foot arm's GATE12 red). A mark a
+/// live pane stops drawing is still forgotten by that pane's own probe.
 enum MCPPaneGeometry {
-    private static var worlds: [String: [MCPPaneMark: CGRect]] = [:]
-
-    static func record(_ mark: MCPPaneMark, _ frame: CGRect, in scope: String) {
-        worlds[scope, default: [:]][mark] = frame
+    private struct Entry {
+        let frame: CGRect
+        let owner: UUID
     }
 
-    static func forget(_ mark: MCPPaneMark, in scope: String) {
+    private static var worlds: [String: [MCPPaneMark: Entry]] = [:]
+
+    static func record(_ mark: MCPPaneMark, _ frame: CGRect, owner: UUID, in scope: String) {
+        worlds[scope, default: [:]][mark] = Entry(frame: frame, owner: owner)
+    }
+
+    /// Clears `mark` only while `owner`'s record is the one standing — a probe
+    /// that left never erases a frame another, live probe wrote since.
+    static func forget(_ mark: MCPPaneMark, owner: UUID, in scope: String) {
+        guard worlds[scope]?[mark]?.owner == owner else { return }
         worlds[scope]?[mark] = nil
     }
 
@@ -1307,20 +1345,23 @@ enum MCPPaneGeometry {
 
     /// The frame `mark` last reported under `scope` — nil while not drawn.
     static func frame(_ mark: MCPPaneMark, in scope: String) -> CGRect? {
-        worlds[scope]?[mark]
+        worlds[scope]?[mark]?.frame
     }
 }
 
 private struct MCPPaneProbe: ViewModifier {
     let mark: MCPPaneMark
     @Environment(\.debugProbeScope) private var scope
+    /// This probe instance's own token (stable for its view's life): what its
+    /// disappear may clear is only what it recorded.
+    @State private var owner = UUID()
 
     func body(content: Content) -> some View {
         content
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                MCPPaneGeometry.record(mark, frame, in: scope)
+                MCPPaneGeometry.record(mark, frame, owner: owner, in: scope)
             }
-            .onDisappear { MCPPaneGeometry.forget(mark, in: scope) }
+            .onDisappear { MCPPaneGeometry.forget(mark, owner: owner, in: scope) }
     }
 }
 #endif

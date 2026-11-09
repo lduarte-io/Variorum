@@ -402,7 +402,8 @@ public enum Tour {
 
     /// The end card's three choices (mockup v5's fork).
     public enum EndChoice: Equatable, Sendable {
-        /// "Keep going: two more minutes on stars, tags, books and snippets".
+        /// "Keep going: two more minutes on stars, tags, books, snippets and
+        /// settings" (VX-843).
         case keepGoing
         /// "Open the field guide, every feature as a lesson".
         case fieldGuide

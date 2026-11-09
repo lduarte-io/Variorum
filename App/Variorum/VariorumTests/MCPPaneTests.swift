@@ -136,10 +136,12 @@ struct MCPPaneTests {
         // VX-903 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1): it
         // moves under the show dial, above the tabs, drawn while a client is
         // approved. VX-905 (A JUSTIFIED EDIT, the ritual): the badge switch
-        // joins, at the pane's foot.
+        // joins, at the pane's foot. VX-934 (A JUSTIFIED EDIT, the ritual — her
+        // ruling, #269): the badge switch goes back to Editor and the AI pair's
+        // switch takes the foot.
         #expect(AppSettingsView.rowIDsRendered[.mcp]
                     == ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients",
-                        "mcpOpenBook", "ownershipBadges"],
+                        "mcpOpenBook", "mcpAIMarks"],
                 "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
         #expect(SettingsCatalog.title("mcpServer") == "Enable the MCP server")
         for word in ["mcp", "claude", "claude code", "open book"] {

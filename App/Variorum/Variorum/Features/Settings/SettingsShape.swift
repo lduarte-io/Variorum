@@ -284,8 +284,16 @@ nonisolated enum SettingsCatalog {
                 + "and Read, fading in about a second. On by default; synced.",
             keywords: ["flash", "highlight", "cursor", "caret", "mode", "switch", "find my place",
                        "blink", "pulse", "where am i"]),
-        // 13i-c U4 (the sitting record §6): the hide-owned default (its twin,
-        // the badge switch, moved to Settings ▸ MCP — VX-905, below).
+        // 13i-c U4 (the sitting record §6): the two ownership settings.
+        // VX-934 (her ruling, #269 — "move it out of MCP back to where it
+        // was"): the badge switch is Editor's again, governing the BOOK marks
+        // only — its blurb and keywords exactly as before VX-905 (the Private
+        // eye left the family for Settings ▸ MCP's own switch, `mcpAIMarks`).
+        SettingsRow(
+            id: "ownershipBadges", pane: .editor, title: OwnershipSettingsCopy.badgesTitle,
+            blurb: "Marks on notes that live in several books, and \u{201C}owned by\u{201D} on notes "
+                + "an owned book holds. On by default; synced.",
+            keywords: ["badge", "owned", "owner", "shared", "mark", "book", "membership"]),
         SettingsRow(
             id: "hideOwnedDefault", pane: .editor, title: OwnershipSettingsCopy.hideOwnedTitle,
             blurb: "Leave notes an owned book holds out of gatherings and tag listings. Off by "
@@ -429,17 +437,23 @@ nonisolated enum SettingsCatalog {
             blurb: "The open book: every approved MCP client may read everything, always, and propose "
                 + "notes to books \u{2014} your daily Journal and anything Private still ask every time.",
             keywords: ["open book", "mcp", "ai", "read everything", "share all", "always"]),
-        // 13i-c U4 (the sitting record §6): the badge family's ONE switch.
-        // VX-905 (the VX-914 run, batch 1 — her #264 word: "it makes more sense
-        // there"): Settings ▸ MCP, its own section at the pane's FOOT under
-        // whichever tab shows, so a finding lands on no tab
-        // (`MCPPaneTab.holding` → nil) and every library keeps it. The blurb
-        // names what it governs today (the Private eye joined at VX-831).
+        // VX-934 (her ruling, #269 — "lets have one setting for 'show shared
+        // with AI and private from AI' badges … and that setting should be in
+        // MCP"): THE AI PAIR'S SWITCH — the shared icon and the Private eye —
+        // its own section at the pane's FOOT under whichever tab shows (the
+        // slot VX-905's badge row left), so a finding lands on no tab
+        // (`MCPPaneTab.holding` → nil); drawn once the library has ever had a
+        // client (the sharing face's fact — VX-590/VX-641; PROVISIONAL
+        // F-934-A), and the search names it only then (`settingsEntries`). The
+        // keywords are search words, never copy ("ai" and her own "badge"
+        // among them); no "client" or "open" (the Clients tab and the open book
+        // keep those words' first findings).
         SettingsRow(
-            id: "ownershipBadges", pane: .mcp, title: OwnershipSettingsCopy.badgesTitle,
-            blurb: "Marks on notes that live in several books, \u{201C}owned by\u{201D} on notes an "
-                + "owned book holds, and the closed eye on Private ones. On by default; synced.",
-            keywords: ["badge", "owned", "owner", "shared", "mark", "book", "membership", "private", "eye"]),
+            id: "mcpAIMarks", pane: .mcp, title: MCPPaneCopy.aiMarksTitle,
+            blurb: "The shared icon on what a client can reach and the closed eye on Private notes and "
+                + "books \u{2014} on by default; synced.",
+            keywords: ["badge", "badges", "mark", "icon", "shared", "shared with ai", "private", "eye",
+                       "closed eye", "hide", "ai", "mcp"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",
             blurb: "The passphrase, when the library locks, escrow and the recovery key.",
@@ -561,12 +575,16 @@ nonisolated enum SettingsSearch {
     /// VX-903 (the VX-914 run, batch 1): `mcpTrailDial` false — the pane draws
     /// no trail dial (no client is approved, `MCPPane.drawsTrailDial`) — leaves
     /// the dial's row out, by the same promise. Default true.
+    ///
+    /// VX-934: the AI pair's switch at the pane's foot is a sharing-face row
+    /// too (`isSharingFaceRow`) — drawn on the same has-ever-had-a-client fact,
+    /// so `mcpSharingFace` false leaves it out with the open book.
     static func settingsEntries(
         accountSection: Bool, mcpSharingFace: Bool = true, mcpTrailDial: Bool = true
     ) -> [Entry] {
         let rows = SettingsCatalog.rows.filter { row in
             (accountSection || row.id != SettingsCatalog.accountRow.id)
-                && (mcpSharingFace || MCPPaneTab.holding(findingLead: row.title) != .shared)
+                && (mcpSharingFace || !isSharingFaceRow(row))
                 && (mcpTrailDial || row.id != "mcpTrailDial")
         }
         return rows.map { row in
@@ -575,6 +593,15 @@ nonisolated enum SettingsSearch {
                     kind: .setting, pane: row.pane, lead: row.title, detail: row.blurb),
                 keywords: row.keywords + [row.pane.title])
         }
+    }
+
+    /// **The rows Settings ▸ MCP's SHARING FACE holds** (VX-590 — her words: "I
+    /// don't want someone who doesn't use AI to see that & get scared that
+    /// their work is shared"): the Shared with AI tab's (the open book — the
+    /// rows whose finding lands there) and, since VX-934, the AI pair's switch
+    /// at the pane's foot (`MCPPane.drawsAIMarksSwitch` — the same fact). Pure.
+    static func isSharingFaceRow(_ row: SettingsRow) -> Bool {
+        MCPPaneTab.holding(findingLead: row.title) == .shared || row.id == "mcpAIMarks"
     }
 }
 

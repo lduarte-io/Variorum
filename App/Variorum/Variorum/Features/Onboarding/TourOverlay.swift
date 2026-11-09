@@ -446,7 +446,7 @@ struct TourEndCard: View {
             Text(door.words)
                 // **F-U2-W-1 (the U2 walk): the end card's doors WRAP, never
                 // truncate.** They are sentences ("Keep going: two more
-                // minutes on stars, tags, books and snippets"), and the
+                // minutes on stars, tags, books, snippets and settings"), and the
                 // voiced word-button's one-line rule (`VoicedButtonStyle`,
                 // N15) cut both long ones to an ellipsis in the Terminal
                 // voice's monospace — door text never truncates. The same

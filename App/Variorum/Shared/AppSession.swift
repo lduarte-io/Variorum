@@ -969,6 +969,11 @@ final class QuickNotePark {
         /// The sentence the refusal spoke — re-spoken if a quit is declined
         /// with no pad on screen to carry it.
         var message: String
+        /// **VX-841 — where this capture was aimed** ('' = Home, the pad's
+        /// default): her decision about the capture rides the park with her
+        /// words and her decision about its name, so the next summon restores
+        /// all three (PROVISIONAL P-915-B3-1).
+        var landingWingID: String = ""
     }
 
     private(set) var held: Held?
@@ -984,7 +989,7 @@ final class QuickNotePark {
     init() {}
 
     /// A refusal that reached a road with no pad left.
-    func park(text: String, titleFromFirstWords: Bool, message: String) {
+    func park(text: String, titleFromFirstWords: Bool, message: String, landingWingID: String = "") {
         // The one call site (`take()`'s `.refused` arm) fires only after
         // `QuickNoteMint.mints` passed, so a blank capture cannot arrive
         // here — and the silent early-out that used to stand on this line
@@ -1005,7 +1010,9 @@ final class QuickNotePark {
         // resolved and later re-arising re-arms" holds byte-exactly — and
         // the newest text still wins the park either way.
         if held == nil { declineSpent = false }
-        held = Held(text: text, titleFromFirstWords: titleFromFirstWords, message: message)
+        held = Held(
+            text: text, titleFromFirstWords: titleFromFirstWords, message: message,
+            landingWingID: landingWingID)
     }
 
     /// The next summon takes it — and the park lets go in the same breath

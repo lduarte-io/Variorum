@@ -35,6 +35,11 @@
 //  the dimmed face and its hover appends "The MCP server is off."
 //  (`MCPServerOffFace`, beside the road) — exactly as the Private eye does.
 //
+//  VX-934 — SWITCHABLE FOR THE FIRST TIME (her ruling, #269): it draws only
+//  while her AI-pair switch is ON (`MCPAIMarksSwitch`, the road's
+//  `aiMarksOn`) — the eye's twin rule, an AND on top of the reach gate; its
+//  hosts' reach reads are untouched (nothing new is read).
+//
 
 import AppKit
 import SwiftUI
@@ -84,8 +89,9 @@ struct MCPSharedIcon: View {
         // VX-268: the calm state is NO view (the ask glyph's own rule) — a
         // place no approved client reaches gains neither width nor spacing,
         // so every host writes the icon once, unguarded, and a row nobody
-        // reaches measures exactly what it did.
-        if !reaches.isEmpty {
+        // reaches measures exactly what it did. VX-934: her AI-pair switch
+        // OFF is the calm state too (`MCPAIMarksSwitch` — the eye's one rule).
+        if !reaches.isEmpty, MCPAIMarksSwitch.drawn(aiMarksOn: road?.aiMarksOn) {
             // VX-900 — the icon twins' one rule: drawn wherever an approved
             // client reaches the place (the gated read every host holds);
             // while the server's switch is OFF, the dimmed face and the hover

@@ -2776,7 +2776,9 @@ final class TakesViewModel {
     /// routed target, byte-for-byte.
     func requestComments(blockID: String? = nil) {
         guard let target = blockID ?? commandTargetSlot?.blockID else {
-            refuse("Click into a block first — comments live on the block you're in.")
+            // VX-793: the act's declared refusal (the same words as before,
+            // now one home for every board's door — P-1).
+            refuse(CapabilityRegistry.capability(.blockComments).unavailableNote)
             return
         }
         commentsRequest = CommentsRequest(blockID: target)

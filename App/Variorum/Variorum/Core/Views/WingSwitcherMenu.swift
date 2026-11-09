@@ -95,6 +95,9 @@ struct WingSwitcherMenu: View {
     }
 
     @Environment(\.mcpAskBoard) private var asks
+    /// VX-934: the window's road — only for her AI-pair switch (a menu row's
+    /// shared image is the shared icon's, so it follows the one rule).
+    @Environment(\.mcpShareRoad) private var road
     @State private var newPresented = false
     @State private var renamePresented = false
     @State private var deletePresented = false
@@ -207,10 +210,14 @@ struct WingSwitcherMenu: View {
                     // wing an approved client reaches wears the shared icon
                     // the same way — a MARK only (a menu row hosts no
                     // popover; ⌘L's row is the icon's door). One image per
-                    // row: a waiting ask outranks it (P-VX281-U2-1).
+                    // row: a waiting ask outranks it (P-VX281-U2-1). VX-934:
+                    // the image is the shared icon's, so it draws only while
+                    // her AI-pair switch is on (`MCPAIMarksSwitch` — the
+                    // faces' one rule); the pending glyph is no part of the pair.
                     if let mark = Self.rowMark(
                         asking: !asks.asks(.wing(row.id)).isEmpty,
-                        shared: !(wings.reach[row.id] ?? []).isEmpty) {
+                        shared: MCPAIMarksSwitch.drawn(aiMarksOn: road?.aiMarksOn)
+                            && !(wings.reach[row.id] ?? []).isEmpty) {
                         Label(row.name, systemImage: mark).tag(row.id)
                     } else {
                         Text(row.name).tag(row.id)

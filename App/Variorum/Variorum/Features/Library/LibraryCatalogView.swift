@@ -1265,17 +1265,16 @@ struct LibraryCatalogView: View {
     }
 
     /// VX-831: a listed note's Private mark (the closed eye) — its row's OWN
-    /// slice's fact, under the badge family's switch; nil draws nothing.
+    /// slice's fact; nil draws nothing. (VX-934: the AI pair's switch is the
+    /// face's own read, off the road — never the badge family's.)
     private func privateMarkDoor(_ extras: LibraryNoteRowExtras, noteID: String) -> PrivateMarkDoor? {
-        PrivateMarkFace.note(extras.privateMark, badgesOn: themeStore?.settings.ownershipBadges ?? true)
+        PrivateMarkFace.note(extras.privateMark)
             .map { PrivateMarkDoor(mark: $0, subjectID: noteID, session: session) }
     }
 
     /// VX-831: a listed BOOK's own Private mark (a gathering never wears it).
     private func privateBookDoor(_ hit: Queries.CatalogHit) -> PrivateMarkDoor? {
-        PrivateMarkFace.book(
-            marked: model.privateBookIDs.contains(hit.id),
-            badgesOn: themeStore?.settings.ownershipBadges ?? true)
+        PrivateMarkFace.book(marked: model.privateBookIDs.contains(hit.id))
             .map { PrivateMarkDoor(mark: $0, subjectID: hit.id, subjectName: hit.title, session: session) }
     }
 

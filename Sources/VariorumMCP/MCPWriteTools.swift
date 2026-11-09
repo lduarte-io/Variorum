@@ -126,6 +126,9 @@ struct MCPWriteTools: Sendable {
         case removeTag(noteID: String, path: String)
         /// VX-184 U3 (VX-187): two notes linked as versions (`MCPWriteTools+LinkVersions`).
         case linkVersions(noteA: String, noteB: String, pairs: [Operations.MCPVersionPair])
+        /// VX-943 (the VX-915 run, batch 6): one version link taken back by its
+        /// edge id (`MCPWriteTools+UnlinkVersions`).
+        case unlinkVersions(edgeID: String)
         /// VX-184 U4 (VX-195): edit parity inside a note (`MCPWriteTools+NoteEdits`).
         case noteEdit(NoteEditJob)
         /// VX-184 U5 (VX-196): edit parity across the library (`MCPWriteTools+LibraryEdits`).
@@ -167,6 +170,7 @@ struct MCPWriteTools: Sendable {
             case .deleteComment: "delete_comment"
             case .removeTag: "remove_tag"
             case .linkVersions: "link_versions"
+            case .unlinkVersions: MCPToolCatalog.unlinkVersions.name
             case .addTake: "add_take"
             case .addComment: "add_comment"
             case .saveLens: "save_lens"
@@ -212,6 +216,10 @@ struct MCPWriteTools: Sendable {
             // VX-769: a gathering is a rule — no take's text read, rewritten,
             // copied, frozen or tombstoned.
             case .createGathering:
+                false
+            // VX-943: an edge row tombstoned — no take's text read, rewritten,
+            // copied, frozen or tombstoned (link_versions' answer, mirrored).
+            case .unlinkVersions:
                 false
             // VX-255 (the run record's D8): new blocks, and no take's text
             // read, rewritten, copied, frozen or tombstoned. Her caret's block
@@ -381,6 +389,9 @@ struct MCPWriteTools: Sendable {
             if name == MCPToolCatalog.removeTag.name { return try parseRemoveTag(args) }
             if name == MCPToolCatalog.replaceTag.name { return try parseReplaceTag(args) }
             if name == MCPToolCatalog.linkVersions.name { return try parseLinkVersions(args) }
+            if name == MCPToolCatalog.unlinkVersions.name {
+                return .unlinkVersions(edgeID: try requiredString(args, "edge_id"))
+            }
             if let job = try parseNoteEdit(name, args) { return .noteEdit(job) }
             if let job = try parseLibraryEdit(name, args) { return .libraryEdit(job) }
             throw ArgumentFailure(message: "Unknown tool: \(name).")
@@ -735,6 +746,8 @@ struct MCPWriteTools: Sendable {
         case .linkVersions(let noteA, let noteB, let pairs):
             return try performLinkVersions(
                 noteA: noteA, noteB: noteB, pairs: pairs, job: job, ops: ops, clientName: clientName)
+        case .unlinkVersions(let edgeID):
+            return try performUnlinkVersions(edgeID: edgeID, job: job, ops: ops, clientName: clientName)
         case .noteEdit(let edit):
             return try performNoteEdit(edit, job: job, ops: ops, clientName: clientName)
         case .libraryEdit(let edit):

@@ -89,6 +89,15 @@ struct TourScriptTests {
         from: "readme, a short welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one.",
         to: "readme, a welcome note, is waiting in your Library. And \u{2318}J opens today's journal entry, whenever you want one.")
 
+    /// **The fork's keep-going door — VX-843, her ruled sentence (2026-11-04,
+    /// the VX-736 audit's row 22):** the door names the leg's fifth stop,
+    /// Settings (present since VX-292 U3). The mockup's four-stop door stays
+    /// the approved record's text (its pin reads `from`); `to` is hers,
+    /// verbatim. A JUSTIFIED EDIT of the end card's verbatim pin.
+    static let keepGoingDeparture = (
+        from: "Keep going: two more minutes on stars, tags, books and snippets",
+        to: "Keep going: two more minutes on stars, tags, books, snippets and settings")
+
     /// The one TITLE departure (VX-292 U1, R-292-1): step 2 names the book
     /// the launch seeds now.
     static let titleDepartures: [String: (from: String, to: String)] = [
@@ -177,7 +186,12 @@ struct TourScriptTests {
                 "the aside names the note the seed mints, by its title")
         #expect(Self.endAsideDeparture.from.replacingOccurrences(
             of: "a short welcome note", with: "a welcome note") == TourScript.endAside)
-        #expect(TourScript.keepGoing == "Keep going: two more minutes on stars, tags, books and snippets")
+        // VX-843 — A JUSTIFIED EDIT: her ruled door, verbatim (RED ON OLD by
+        // construction: the old door named four stops), the departure from
+        // the mockup's door recorded once (`keepGoingDeparture`).
+        #expect(TourScript.keepGoing == "Keep going: two more minutes on stars, tags, books, snippets and settings")
+        #expect(TourScript.keepGoing == Self.keepGoingDeparture.to)
+        #expect(Tour.legStopCount == 5, "the door names five stops: the leg's five")
         #expect(TourScript.openFieldGuide == "Open the field guide, every feature as a lesson")
         #expect(TourScript.done == "Done, go write")
     }
@@ -355,8 +369,10 @@ struct TourScriptTests {
             #expect(html.contains("\"\(words.0)\""), "\(step)'s title is the mockup's")
             #expect(html.contains("`\(words.1)`"), "\(step)'s body is the mockup's")
         }
+        // VX-843 — A JUSTIFIED EDIT: the keep-going door departs from the
+        // mockup (her ruled sentence), so the mockup is read for its `from`.
         for words in [TourScript.endTitle, TourScript.endBody, Self.endAsideDeparture.from,
-                      TourScript.keepGoing, TourScript.openFieldGuide, TourScript.done] {
+                      Self.keepGoingDeparture.from, TourScript.openFieldGuide, TourScript.done] {
             #expect(html.contains(words), "the end card's \"\(words)\" is the mockup's")
         }
     }

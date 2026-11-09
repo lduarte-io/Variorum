@@ -72,6 +72,18 @@ nonisolated enum CommitsFaceCopy {
     static let archivedGroup = "archived takes"
     static let plainWash = "plain"
     static let againstNowWash = "against now"
+    /// **VX-927 (the VX-915 run, batch 2 — N-927, PROVISIONAL, her wording
+    /// bundle).** VX-898's grammar carried to the wash chip: on an unplaced
+    /// lineage member the moment is washed against the take AS KEPT, never
+    /// "now" (its living prose is its successor's).
+    static let againstKeptWash = "against as kept"
+
+    /// The wash chip's words — one Bool, the same one `nowName` reads (pure,
+    /// pinned): "against as kept" exactly where the take's "now" is "the take
+    /// as kept".
+    static func washAgainst(asKept: Bool) -> String {
+        asKept ? againstKeptWash : againstNowWash
+    }
     static let compareVerb = "Compare"
     static let compareHelp =
         "This moment beside another, side by side, the changed words washed"
@@ -113,11 +125,21 @@ nonisolated enum CommitsFaceCopy {
     }
 
     /// "4 changes since" — what changed between the moment and its take now.
-    static func changesSince(_ count: Int) -> String {
+    /// **VX-927:** where that take's "now" is "the take as kept" (`asKept` —
+    /// the one Bool `nowName` and the chip read), the count names what it
+    /// counts to: "4 changes to the take as kept" (N-927, PROVISIONAL).
+    static func changesSince(_ count: Int, asKept: Bool = false) -> String {
+        guard asKept else {
+            switch count {
+            case 0: return "no changes since"
+            case 1: return "1 change since"
+            default: return "\(count) changes since"
+            }
+        }
         switch count {
-        case 0: return "no changes since"
-        case 1: return "1 change since"
-        default: return "\(count) changes since"
+        case 0: return "no changes to \(theTakeAsKept)"
+        case 1: return "1 change to \(theTakeAsKept)"
+        default: return "\(count) changes to \(theTakeAsKept)"
         }
     }
 }
@@ -159,13 +181,26 @@ final class CommitsFaceModel {
 
     /// The name of THIS block's rail-top moment (`CommitsFaceCopy.nowName`).
     var nowName: String {
-        CommitsFaceCopy.nowName(unplacedRelative: isRelative && relativeStandsUnplaced)
+        CommitsFaceCopy.nowName(unplacedRelative: standsAsKept)
+    }
+
+    /// **THE ONE PLACE QUESTION (VX-898's rule, named once — VX-927 reads it
+    /// too):** this face is an unplaced lineage member's, so its own takes'
+    /// "now" is the take as kept. Never true on the home face.
+    private var standsAsKept: Bool { isRelative && relativeStandsUnplaced }
+
+    /// Does `takeID`'s "now" speak the kept grammar? This block's takes on an
+    /// unplaced member's face; never the block you came from's (it lives).
+    /// The headline, the swapper, the rail's now-row, the wash chip and the
+    /// count line all ask it — one rule, no copy.
+    func speaksAsKept(_ takeID: String?) -> Bool {
+        standsAsKept && !isHomeTake(takeID)
     }
 
     /// A "now" moment's name: the block you came from's takes are always
     /// "the take now" (it lives); this block's are `nowName`.
     func nowName(of takeID: String) -> String {
-        isHomeTake(takeID) ? CommitsFaceCopy.theTakeNow : nowName
+        CommitsFaceCopy.nowName(unplacedRelative: speaksAsKept(takeID))
     }
 
     /// What the face reads, together: the block's whole time and the take
@@ -396,12 +431,20 @@ final class CommitsFaceModel {
     }
 
     /// "4 changes since" — always the count, whichever wash shows (the toggle
-    /// changes what the text looks like, not what is true).
+    /// changes what the text looks like, not what is true). VX-927: "…to the
+    /// take as kept" where that take's "now" is the take as kept.
     var changesSince: String? {
         guard let selection, case .commit = selection,
               let takeID = takeID(of: selection),
               let compared = comparison(selection, .now(takeID: takeID)) else { return nil }
-        return CommitsFaceCopy.changesSince(compared.changeCount)
+        return CommitsFaceCopy.changesSince(compared.changeCount, asKept: speaksAsKept(takeID))
+    }
+
+    /// **The wash chip's words (VX-927)** — "against now", or "against as
+    /// kept" where the selected moment's take speaks the kept grammar (read
+    /// live: a Put back flips it with the headline).
+    var washAgainstWord: String {
+        CommitsFaceCopy.washAgainst(asKept: speaksAsKept(takeID(of: selection)))
     }
 
     /// Two moments compared (`TextCompare`), through the cache.

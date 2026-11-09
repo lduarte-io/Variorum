@@ -645,9 +645,7 @@ struct ShelfView: View {
                         // VX-831: the book's own Private mark — its press
                         // un-privates it (Book Settings' Private row's op).
                         PrivateMarkView(
-                            door: PrivateMarkFace.book(
-                                marked: model.privateBookIDs.contains(reading.id),
-                                badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                            door: PrivateMarkFace.book(marked: model.privateBookIDs.contains(reading.id))
                                 .map {
                                     PrivateMarkDoor(
                                         mark: $0, subjectID: reading.id, subjectName: reading.name,

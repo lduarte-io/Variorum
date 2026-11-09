@@ -34,10 +34,16 @@
 //
 //  Write pads a callout only as far as leaves base background between it and
 //  its neighbours (`BlockDecor.verticalPad`, minimum 6). Here the article's
-//  `LazyVStack` already spaces rows by 6 and the frame pads by 5, so two
-//  adjacent framed blocks keep a 6pt lane of surface between them and the
-//  colour can never look like it spreads into the next block — the same
+//  `LazyVStack` already spaces rows by 6 and the frame pads by 5 VERTICALLY,
+//  so two adjacent framed blocks keep a 6pt lane of surface between them and
+//  the colour can never look like it spreads into the next block — the same
 //  promise, obtained from the layout instead of from arithmetic.
+//
+//  ── The one law, sideways (VX-782) ─────────────────────────────────────
+//
+//  Horizontally the frame is BLEED, never layout: its colour reaches `pad`
+//  past the row on each side, so the prose's measure and left edge are a
+//  plain row's (pinned — `TakesCalloutOneLawTests`).
 //
 
 import SwiftUI
@@ -50,6 +56,8 @@ struct TakesCalloutFrame: ViewModifier {
     let presentation: BlockPresentation?
     let tokens: VoiceTokens
     let dark: Bool
+    /// The block the frame belongs to — the DEBUG frame probe's key (VX-782).
+    let blockID: String
 
     /// The pad inside the frame, and the corner — Write's callout card's
     /// own numbers (`BlockDecor.calloutRect`'s ideal pad of 5, radius 8).
@@ -63,23 +71,88 @@ struct TakesCalloutFrame: ViewModifier {
     func body(content: Content) -> some View {
         if let presentation {
             content
-                .padding(Self.pad)
-                .background(
-                    Color(CalloutPalette.color(presentation.color, dark: dark)),
-                    in: RoundedRectangle(cornerRadius: Self.cornerRadius))
+                // R17's white gap: the frame's VERTICAL air stays layout (the
+                // rows are 6 apart, the pad 5 — the header's promise).
+                .padding(.vertical, Self.pad)
+                // **VX-782 — the one law: the frame's HORIZONTAL air is BLEED,
+                // never layout.** The colour reaches `pad` past the row on
+                // each side (`ProseGutter.bleed`'s idiom), so the frame wraps
+                // the prose exactly as it always looked while the row keeps the
+                // plain row's measure and left edge — a decoration never moves
+                // the prose (SurfaceContracts › The note; Write's wash is a
+                // background for the same reason, `BlockDecor.calloutRect`).
+                // The pre-fix `.padding(pad)` inset the row on all four sides,
+                // so a callout block's prose started 5 pt right of a plain
+                // block's and measured 10 pt narrower (R-B2-1).
+                .background {
+                    RoundedRectangle(cornerRadius: Self.cornerRadius)
+                        .fill(Color(CalloutPalette.color(presentation.color, dark: dark)))
+                        // VX-782's oracle (DEBUG): the frame's visible rectangle.
+                        .takesCalloutFrameProbe(blockID: blockID)
+                        .padding(.horizontal, -Self.pad)
+                }
                 // The emoji rides the frame's leading edge, the way Write's
                 // sits in the block's left margin — a mark on the block, not
-                // on any one take.
+                // on any one take. `emojiOffset` is from the FRAME's corner,
+                // which now stands `pad` left of this view's own edge.
                 .overlay(alignment: .topLeading) {
                     if let emoji = presentation.emoji, !emoji.isEmpty {
                         Text(emoji)
                             .font(tokens.small)
-                            .offset(x: Self.emojiOffset.width, y: Self.emojiOffset.height)
+                            .offset(x: -Self.pad + Self.emojiOffset.width, y: Self.emojiOffset.height)
                             .accessibilityHidden(true)
                     }
                 }
         } else {
             content
         }
+    }
+}
+
+#if DEBUG
+/// **VX-782's oracle — a callout frame's visible rectangle, in the window.**
+/// The one-law pin reads it beside the prose column the frame surrounds: the
+/// frame must still be DRAWN around the prose (its colour on both sides),
+/// while the prose's left edge and measure are a plain row's. Scoped by the
+/// mounting session like `TakeRailGeometry` (parallel suites never read each
+/// other's), keyed by the block, last report wins (a block has one frame).
+@MainActor
+enum TakesCalloutFrameGeometry {
+    private static var worlds: [String: [String: CGRect]] = [:]
+
+    static func record(blockID: String, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: [:]][blockID] = frame
+    }
+
+    static func frame(blockID: String, in scope: String) -> CGRect? {
+        worlds[scope]?[blockID]
+    }
+
+    /// A pin resets ITS OWN scope before its mount, and no other.
+    static func reset(_ scope: String) { worlds[scope] = nil }
+}
+
+private struct TakesCalloutFrameProbe: ViewModifier {
+    let blockID: String
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+            TakesCalloutFrameGeometry.record(blockID: blockID, $0, in: scope)
+        }
+    }
+}
+#endif
+
+extension View {
+    /// VX-782's oracle write: this view's frame is the callout frame's
+    /// visible rectangle (a no-op outside DEBUG).
+    @ViewBuilder
+    func takesCalloutFrameProbe(blockID: String) -> some View {
+        #if DEBUG
+        self.modifier(TakesCalloutFrameProbe(blockID: blockID))
+        #else
+        self
+        #endif
     }
 }

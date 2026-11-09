@@ -473,4 +473,77 @@ struct LineageFaceModelTests {
             #expect(home.takeTitle(w.mergedTake) == "this take")
         }
     }
+
+    // MARK: - VX-927 — the wash chip and the count line, named the same way (N-927, PROVISIONAL)
+
+    /// The words, pure: the home grammar is byte-unchanged, the kept grammar
+    /// names what the count counts to — and both read the ONE Bool `nowName`
+    /// reads.
+    @Test func theChipAndTheCountSpeakTheKeptGrammarExactlyWhereTheNowNameDoes() {
+        #expect(CommitsFaceCopy.washAgainst(asKept: false) == "against now")
+        #expect(CommitsFaceCopy.washAgainst(asKept: true) == "against as kept")
+        #expect(CommitsFaceCopy.againstNowWash == "against now", "the home chip, byte-unchanged")
+        #expect(CommitsFaceCopy.changesSince(0) == "no changes since")
+        #expect(CommitsFaceCopy.changesSince(1) == "1 change since")
+        #expect(CommitsFaceCopy.changesSince(4) == "4 changes since")
+        #expect(CommitsFaceCopy.changesSince(4, asKept: false) == "4 changes since")
+        #expect(CommitsFaceCopy.changesSince(0, asKept: true) == "no changes to the take as kept")
+        #expect(CommitsFaceCopy.changesSince(1, asKept: true) == "1 change to the take as kept")
+        #expect(CommitsFaceCopy.changesSince(4, asKept: true) == "4 changes to the take as kept")
+        for asKept in [false, true] {
+            #expect(CommitsFaceCopy.washAgainst(asKept: asKept).hasSuffix(asKept ? "as kept" : "now"))
+            #expect(CommitsFaceCopy.nowName(unplacedRelative: asKept).hasSuffix(asKept ? "as kept" : "now"),
+                    "the chip and the header name the same thing")
+        }
+    }
+
+    /// **The ticket's case, pinned — RED ON OLD by evaluation** (the old chip
+    /// was the constant "against now" and the old count "… since" whatever the
+    /// place): a merge's source kept as lineage, its named moment selected —
+    /// the chip says "against as kept" and the count "no changes to the take as
+    /// kept"; Put back places it and, on the family's next read (the same pane,
+    /// nothing re-selected), both say "now" again.
+    @Test func aKeptSourcesChipAndCountSpeakAsKeptAndPutBackFlipsThem() async throws {
+        try await withWorld { w in
+            let face = face(w, select: w.left)
+            try await refresh(face, w)
+            try await refreshNode(face, w)
+            let node = try #require(face.node)
+            #expect(node.blockID == w.left && node.relativeStandsUnplaced, "fixture: a kept source")
+            let named = try #require(node.history.savepoints[w.leftTake]?.first,
+                                     "fixture: the source's named moment")
+            node.select(.commit(commitID: named.id))
+            #expect(node.speaksAsKept(w.leftTake))
+            #expect(node.washAgainstWord == "against as kept")
+            #expect(node.changesSince == "no changes to the take as kept",
+                    "the moment is the take as it was kept (got \(node.changesSince ?? "nil"))")
+            #expect(!node.speaksAsKept(w.mergedTake),
+                    "the block she came from lives — its take is never \u{201C}as kept\u{201D}")
+
+            await face.putBack()
+            try await refresh(face, w)
+            #expect(face.node === node, "the same pane — nothing re-selected")
+            #expect(!node.relativeStandsUnplaced, "placed now")
+            #expect(node.washAgainstWord == "against now")
+            #expect(node.changesSince == "no changes since")
+        }
+    }
+
+    /// The HOME face's chip and count are byte-unchanged even with the fact
+    /// set — the one question reads the role first.
+    @Test func theHomeFacesChipAndCountKeepNow() async throws {
+        try await withWorld { w in
+            let moment = try w.session.operations.commit(w.mergedTake, message: "after the merge")
+            let home = CommitsFaceModel(session: w.session, request: BlockHistoryRequest(
+                postID: w.postID, blockID: w.merged, focusedVariantID: w.mergedTake))
+            home.adopt(try await w.session.database.read { [blockID = w.merged, now = w.session.now] db in
+                try CommitsFaceModel.read(db, blockID: blockID, now: now)
+            })
+            home.relativeStandsUnplaced = true  // never read on the home face
+            home.select(.commit(commitID: moment.id))
+            #expect(!home.speaksAsKept(w.mergedTake))
+            #expect(home.washAgainstWord == "against now")
+            #expect(home.changesSince == "no changes since")
+        }
+    }
 }

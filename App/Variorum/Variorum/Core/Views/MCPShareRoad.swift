@@ -19,7 +19,10 @@
 //  (her ruling, the #264 sitting): the shared icon and the Private eye both
 //  draw while a client is approved, and while the server's switch is OFF both
 //  wear the DIMMED face with the hover saying so (`serverOn`,
-//  `MCPServerOffFace`).
+//  `MCPServerOffFace`). **VX-934 — THE AI PAIR'S OWN SWITCH** (her ruling,
+//  the VX-914 handoff sitting, #269): the same two marks draw only while her
+//  synced `ai_marks` switch is ON (`aiMarksOn`, `MCPAIMarksSwitch`) — an AND on
+//  top of their own gates, read off this road by both faces.
 //
 
 import SwiftUI
@@ -127,7 +130,8 @@ struct MCPGrantOpening: Identifiable, Equatable {
 
 /// **The faces' one road to the MCP door** (built per window).
 ///
-/// EQUATABLE ON ITS TWO GATES ONLY: a window rebuilds the road on every pass of
+/// EQUATABLE ON ITS GATES ONLY (VX-934: three — the approved client, the
+/// server's switch, the AI pair's switch): a window rebuilds the road on every pass of
 /// its body, and an environment value SwiftUI cannot compare reads as CHANGED
 /// every time — which would re-render every surface reading it (the Library,
 /// the Bookcase, each pane's bar) on each of the window's own re-renders. The
@@ -146,6 +150,13 @@ struct MCPShareRoad: Equatable {
     /// that stopped by itself with the switch ON reads ON here (the pane's
     /// status line says that stop).
     let serverOn: Bool
+    /// **VX-934 — her AI-pair switch is ON** (the synced `ai_marks`,
+    /// `Queries.ThemeSettings.aiMarks`, handed by the window from its own
+    /// `ThemeStore`). It gates the two marks' DRAWING only — the shared icon
+    /// and the Private eye (`MCPAIMarksSwitch`) — on top of their own gates;
+    /// it opens no door, reads nothing, and leaves every other share face
+    /// (the menus' Share with AI…, Book Settings' row, the asks) as it is.
+    let aiMarksOn: Bool
     /// The server ON and at least one approved client (VX-164) — since VX-900
     /// only the in-note indicator's pending-ask leg (an ask lives only while
     /// its client is connected).
@@ -189,7 +200,29 @@ struct MCPShareRoad: Equatable {
     }
 
     nonisolated static func == (lhs: MCPShareRoad, rhs: MCPShareRoad) -> Bool {
-        lhs.canShare == rhs.canShare && lhs.serverOn == rhs.serverOn
+        lhs.canShare == rhs.canShare && lhs.serverOn == rhs.serverOn && lhs.aiMarksOn == rhs.aiMarksOn
+    }
+}
+
+/// **VX-934 — THE AI PAIR'S SWITCH, the ONE rule both marks read** (her
+/// ruling, the VX-914 handoff sitting, #269 — *"let's split the 'book' related
+/// badges setting and if they're shown up completely from the AI one … and lets
+/// have one setting for 'show shared with AI and private from AI' badges … and
+/// that setting should be in MCP"*). The shared icon (`MCPSharedIcon`) and the
+/// Private eye (`PrivateMarkView`) — and the ⌘L ▾ menu's image of the shared
+/// icon (`WingSwitcherMenu.rowMark`) — draw only while this says so, read off
+/// the window's road: an AND on top of their own gates (a client approved —
+/// R-878-K3 / VX-272 — and the rows drawn, P1). It reads nothing itself, so
+/// switching it off stops no read the hosts hold; it only keeps the marks
+/// from drawing. With no road (a harness mount, a host no window built one
+/// for) the marks draw as before — the switch's own default, ON. The
+/// server-off face (`MCPServerOffFace`, VX-900) rides the drawn marks
+/// unchanged. The book-structure marks (the also-in-other-books mark, the
+/// "owned by" chip) keep `ownership_badges` alone (`OwnershipBadgeFace`).
+nonisolated enum MCPAIMarksSwitch {
+    /// Whether the pair draws: the road's switch read ON, or no road.
+    static func drawn(aiMarksOn: Bool?) -> Bool {
+        aiMarksOn != false
     }
 }
 

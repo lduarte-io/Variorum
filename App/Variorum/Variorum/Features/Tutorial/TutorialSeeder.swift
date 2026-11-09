@@ -767,10 +767,15 @@ enum TutorialSeeder {
             // places since the post-13l polish round added ARCHIVED
             // (`SidebarView.areas`), and the Library's views are List · Cards
             // · Timeline (17y (d)'s word). Words functional, 13s re-voices.
+            // VX-929 (1): the box's second filing (VX-911 — `.fileWithoutOpening`,
+            // its alternate chord), in the ⌘/ helper's phrasing; the pin reads
+            // the chord from the registry's declaration.
             "The sidebar has five places. Bookcase is home: your books, and a "
             + "dashed box that reads \u{201C}new note \u{2014} just start "
             + "typing\u{201D}. Type a first line there and \u{23CE} mints a note "
-            + "and opens it. Library is everything, searchable, with List, Cards "
+            + "and opens it; \u{2318}\u{23CE} files what you have written without "
+            + "opening it, and the box clears for the next note. Library is "
+            + "everything, searchable, with List, Cards "
             + "and Timeline views. Pool holds notes that belong to no book yet. "
             + "Snippets holds loose scraps, pieces of text that aren't notes at "
             + "all. Archived keeps the notes and books you set aside: forever, no "
@@ -2533,9 +2538,14 @@ enum TutorialSeeder {
             + "the book's right-click and in its Book Settings\u{2026}: Finish "
             + "and Seal\u{2026}, and Reopen and Unseal take them back.",
 
+            // VX-929 (2): the aside follows VX-45's honest split — the
+            // book-only confirm and its receipt say an archived member "stays
+            // archived" and is never said to be in the Pool
+            // (`BookStateCopy.bookOnlyShare` / `deletedBookOnly`'s grammar).
             "Deleting a plain book never touches a note. Deleting an owned book "
-            + "asks: keep the notes (they go to the Pool) or take them too. The "
-            + "Trash gives back whatever went in together, together.",
+            + "asks: keep the notes (they go back to the Pool, and archived ones "
+            + "stay archived) or take them too. The Trash gives back whatever went "
+            + "in together, together.",
         ])
 
         // Lesson 7 + ritual R5 (its drags are hers; every drag has a menu
@@ -2643,7 +2653,10 @@ enum TutorialSeeder {
             ProtectionCopy.keystoneAccountPassword, ProtectionWords.guideOpenMeansReadable,
         ]
         _ = try lesson(privacy, ProtectionWords.guideKeyLessonTitle, keyLesson)
-        _ = try lesson(privacy, ProtectionWords.guidePosturesLessonTitle, ProtectionWords.guidePosturesLesson)
+        // VX-916 (PROVISIONAL P-915-B4-1): lesson 2 gains R-529-6's line and
+        // the compromise-recovery recipe after its own six paragraphs
+        // (`TutorialProtectionPassages.swift`).
+        _ = try lesson(privacy, ProtectionWords.guidePosturesLessonTitle, posturesLessonParagraphs)
         _ = try lesson(privacy, ProtectionWords.guideCopiesLessonTitle, ProtectionWords.guideCopiesLesson)
 
         // ————————————————————————— AI & the MCP door ——————————————————————
@@ -2801,13 +2814,15 @@ enum TutorialSeeder {
             // copy pass): the truth-pass rule (VX-197) for this run's and
             // VX-771's write-new acts — a gathering minted on a wing
             // (create_gathering, VX-769) and a note born wearing its tags
-            // (create_note's tags, VX-814).
+            // (create_note's tags, VX-814). VX-943 (the VX-915 run, batch 6 —
+            // the truth-pass rule again; PROVISIONAL words, her bundle): the
+            // link's opposite, unlink_versions, taught where link_versions is.
             "Write new: it can also make new notes, books, gatherings, chapters and "
             + "tags, file notes into books and chapters, and give a book a rule that "
             + "collects notes by tag. A note it makes can wear its tags from the "
             + "start. It can add blocks at the end of a note, duplicate a "
             + "note to work on a copy, and link two notes as versions by naming "
-            + "which paragraphs match.",
+            + "which paragraphs match, or remove a link it made.",
 
             // VX-168 U2: Edit's step named the deliberate acts — choosing a
             // take, committing one (VX-169), making a lens the note (VX-174,
