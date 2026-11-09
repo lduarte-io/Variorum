@@ -1,4 +1,22 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "c=$(jq -r '.tool_input.command // \"\"'); case \"$c\" in *\"git commit\"*|*\"gh pr\"*) printf '%s' \"$c\" | grep -qE 'Co-Authored-By|Claude-Session|Generated with .{0,2}Claude Code' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Variorum commits and PR bodies carry no attribution trailer (CLAUDE.md). Remove the Co-Authored-By / Claude-Session / Generated-with line and retry.\"}}' ;; esac; true"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(cd *)",
