@@ -317,6 +317,69 @@ table; first line = what you did NOT do. **Not yours:** the stage; VX-443/VX-152
 files; `Sync/`. **ENVIRONMENT TRAPS and STAGE & COORDINATION above bind verbatim.** No subagents; foreground
 waits only.
 
+## BATCH 4 BRIEF — the custody smalls: VX-443 (the stale envelope) + VX-152 (investigate-first) + VX-545 (rule 7's sentence)
+
+**Who you are.** The implementer for batch 4, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`.
+CUSTODY/KEYCHAIN CLASS — `notes/CastleRules.md` is read WHOLE before any line; Fable cold-reviews. ZERO lines
+under `Sources/VariorumCore/Sync/`.
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole · `notes/CastleRules.md` WHOLE ·
+`notes/SurfaceContracts.md` §"Doors to the outside" (the protection bullet — the pre-design face's detection
+sentence especially) · `notes/plans/vx-307-castle-crossings.md` §6's F-5 finding + U2a ARBITRATION (the envelope's
+provenance: `variorum-keys-<storeID>.json`, `ensureStoreIdentity`, today's-road backups copied it) ·
+`notes/plans/fixes/vx-912-b0-security-verify.md` flag 1 (why VX-443 is High) · the code:
+`Sources/VariorumCore/Persistence/LibraryClassifier.swift` (`olderFingerprintKeyFilePrefix` — the pre-design
+detector keys on exactly this name class), `Sources/VariorumCore/Protection/Assess/CatalogNames.swift`, the
+new-road open's landing (where a successful open of the live library settles — the rule-8 re-makes moment), and
+for VX-152: `AppBootstrap` (`lock()`, the sleep/screen-lock monitors) · for VX-545: the ticket's five named touch
+points (its description lists exact files and lines; the ticket body is in Linear — the five points are also
+quoted below).
+
+**The pieces (commit per piece, `Part of VX-<member>`; push each):**
+
+1. **VX-443 — sweep the stale envelope (direction: DELETE, gated; PROVISIONAL P-849-4 for her bundle).**
+   `ensureStoreIdentity` died with today's road (zero production hits — verified at this brief's writing), so the
+   13p-era store-identity envelope beside the slot is pure dead weight holding the pre-crossing key under locks a
+   crossing retired — the exact stale-key class she just cleared server-side (VX-508), and its NAME is the very
+   pattern the pre-design classifier detects, so it is also a latent ambiguity (lose this design's key file and
+   the leftover makes a new-road store read pre-design). The sweep: at a SUCCESSFUL new-road open of the LIVE
+   library (the rule-8 re-makes moment — the open itself is rule 22's verification that the current pair works),
+   delete a today's-road envelope beside the slot that matches the old pattern for names-only reasons (NEVER read
+   its contents). Fences, each pinned: fires only on the live slot (never Previous Libraries, never backups, never
+   a Look-inside copy, never a picked folder); fires only when THIS design's key file is present and just opened
+   the library; a PRE-DESIGN store (an old-name file and NONE of this design's) is never reached (the face shows
+   instead — pin the detector unchanged); the deletion is said once in the log, names only. Red-on-old: a planted
+   old-name envelope beside an opened new-road library survives the open on the old tree, is gone on the new.
+   Record the delete-vs-keep alternative honestly (rule 4 already carries every earlier key in the current file,
+   so nothing openable is lost — that is WHY delete is safe; the alternative, set-aside, mints a new place keys
+   live, which CastleRules' shape avoids).
+2. **VX-152 — the lock reentrancy, INVESTIGATE-FIRST (her condition, verbatim in this file's KICKOFF: "since
+   it's suspected, you can investigate it, but if it seems like it's going to add a lot of work to this run, add
+   the extra info to the ticket and leave it out").** Trace `AppBootstrap.lock()` under sleep + screen lock
+   arriving together: can it double-flush / mount two lock screens? If the trace lands and the fix is a cheap
+   guard (a reentrancy flag on the lock road) with a red-on-old pin — build it. If it balloons (a redesign of the
+   teardown ordering, overlap with VX-855's territory) — write the traced facts INTO THE TICKET (hand the text to
+   the orchestrator for Linear) and leave it out of this run. Say which way it went as your record's first line
+   for this piece.
+3. **VX-545 — rule 7's ratified sentence, five touch points in ONE commit:** CastleRules rule 7's adoption
+   sentence ending becomes "the old ones still open backups made with them" (her ratification, QUESTIONS #241) +
+   a status-banner line naming this landing; `App/Variorum/Shared/Protection/ProtectionWords.swift:727` (the
+   shown-words arm); the doc comments at `RoadAccountModel.swift:58` and
+   `Sources/VariorumCore/Protection/Executor/PlanRunner.swift:33`; the lifecycle fixture
+   (`Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/LifecycleFixture.swift:877`) — then REGENERATE
+   `notes/plans/vx-266/castle-lifecycle.html` from the fixture (NEVER hand-edit it). The byte-pin
+   (`RoadAccountWordsTests.rule7sSentencesAreHersVerbatim`) moves by JUSTIFIED EDIT to the ratified text. Verify
+   the 13u-era label fence still holds (the app says "commit"; this sentence is protection copy, not commit
+   vocabulary — nothing else reworded).
+4. **Close:** `swift build` · headless `swift test` over every touched core suite (the lifecycle/scenario suites
+   run headless) · both `build-for-testing`s. NO `xcodebuild test`, NO stage — list the Mac suites (type names)
+   and any named reverts for the orchestrator's window at your record's end.
+
+**Your record:** `### BATCH 4 RECORD` under UNIT RECORDS; LIVE STATUS row 4 flipped in your commits; first line =
+what you did NOT do. **Not yours:** the stage; batches 3/5/6's files; `Sync/`. **ENVIRONMENT TRAPS and STAGE &
+COORDINATION above bind verbatim.** No subagents; foreground waits only.
+
 ## UNIT RECORDS
 
 *(appended per batch)*
