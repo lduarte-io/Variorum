@@ -760,3 +760,13 @@ symlink with an edited copy of the committed file, runs, and restores the symlin
   deleted ⇒ RED THE ROAD PIN and `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. **R-3g (simulator — the stage's)** the
   phone's `#else` closure deleted ⇒ RED `thePhonesOccasionLandsPendingTypingAndRunsNoRetry`.
 
+- *Piece 3a's reverts, run at `88eb36506` (the harness), and one named BEFORE its run here:* **R-3a** → `✘ 9 tests, 3
+  failed`: `whileThereAreNoKeysTheOccasionRetriesThePendingLoad`, THE ROAD PIN (the round refused for keys — "Sync paused:
+  this device's encryption keys are locked or not enrolled…"), and ONE MORE THAN NAMED — `withNothingPending…`'s occasion leg
+  (it asserts the occasion consulted the gate: `["isPending", "isPending"]`; with the call deleted only the direct call's
+  read is logged). The named set was incomplete, not the pin hollow. **R-3b** (the condition deleted outright) → `✘ 5 tests,
+  3 failed` — the named `withNothingPending…` (`provider.reads == 0` broken) and the two other gate pins, whose logs record
+  the `isPending` consult the deletion removed: a revert too blunt to isolate. **R-3b′ (named here, BEFORE it runs, at
+  `88eb36506`):** `roads.isPending()` → `(roads.isPending() || true)` (consulted, ignored) ⇒ expected RED
+  `withNothingPending…` (the provider read, the retry run) and `withTheKeysThere…`'s second-occasion leg (the cleared pending
+  read again); GREEN `whileThereAreNoKeys…`. **R-3c** → `✘` exactly `withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing`.
