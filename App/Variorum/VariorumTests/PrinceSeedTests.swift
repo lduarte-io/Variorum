@@ -317,6 +317,22 @@ struct PrinceSeedTests {
         }, "one block per paragraph, none blank or padded")
     }
 
+    /// **VX-843 — her corrected promise, verbatim** (her wording ruling,
+    /// 2026-11-04 — the VX-736 audit's row 29; held since VX-292 A-292-1 /
+    /// R-292-17): the tour mends deletions and never resets her edits, so the
+    /// front note's LAST sentence says exactly that, and the old "default
+    /// state" promise is gone. RED ON OLD by construction (the old note ended
+    /// "Restarting the tutorial will restore this book to its default state
+    /// as well.").
+    @Test("The front note ends on her ruled restart sentence")
+    func theFrontNoteEndsOnHerRuledRestartSentence() throws {
+        let last = try #require(PB.aboutThisText.components(separatedBy: "\n").last)
+        #expect(last.hasSuffix(". Restarting the tutorial restores any deleted parts of this book."),
+                "her sentence closes the note: \(last.suffix(90))")
+        #expect(!PB.aboutThisText.contains("default state"), "the old promise is gone")
+        #expect(PB.aboutThisText.components(separatedBy: "Restarting the tutorial").count == 2, "said once")
+    }
+
     // MARK: - The seed
 
     /// **THE SEED SHAPE.** A fresh seed of the Prince, block by block.
@@ -642,6 +658,95 @@ struct PrinceSeedTests {
                 #expect(try Queries.readingSections(db, readingID: bookID).count == 6,
                         "no part doubled — the front matter's, the Dedication's (R-633-17), the four parts")
             }
+        }
+    }
+
+    /// **VX-843's trap, answered — A GUARD, green on both trees BY DESIGN**
+    /// (the vx-915 record's BATCH 4 trace; not a red-on-old pin). Her
+    /// corrected sentence is SEEDED text: a store seeded before it keeps the
+    /// earlier build's words, and no road may read that as her edit, re-seed
+    /// over it or mint a twin beside it. Every Prince road is title-keyed —
+    /// discovery (`SampleLibrarySeeder.discover`), the seed's skeleton turn
+    /// (the front note mints only when its TITLE is absent), the restore door,
+    /// the tour's mend facts (`TourEngine.launchBookFacts` /
+    /// `roadOnlyUndoesDeletions`) — and the book stays out of the pristine
+    /// dedupe (`theLaunchSeedsThePrinceAndEveryDoorStays`), so a front note
+    /// holding an earlier build's words is simply PRESENT: the restore door
+    /// answers already whole and the tour's mend is not asked; and when a
+    /// deletion DOES break the tour's props, the mend mints back only what
+    /// was deleted, the front note still the one note of its title, its
+    /// words untouched. Red only if a road someday starts comparing bytes.
+    @Test("A front note seeded with an earlier build's words is present, untouched and never doubled")
+    func aFrontNoteWithAnEarlierBuildsWordsIsPresentAndUntouched() async throws {
+        try await withPrinceWorld { session, db in
+            let mark = PrinceMark()
+            guard case .seeded(let bookID, _) = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: prince, loadMark: mark.load, saveMark: mark.save)
+            else {
+                Issue.record("expected a seed")
+                return
+            }
+            // The earlier build's last paragraph — what a store seeded before
+            // VX-843 carries — written into the store's front note.
+            let current = try #require(PB.aboutThisText.components(separatedBy: "\n").last)
+            let earlier = current.replacingOccurrences(
+                of: "Restarting the tutorial restores any deleted parts of this book.",
+                with: "Restarting the tutorial will restore this book to its default state as well.")
+            #expect(earlier != current, "the store's bytes differ from this build's seed")
+            let front = try await db.read { db in
+                try #require(try Queries.assembleReading(db, readingID: bookID)
+                    .first { $0.title == PB.frontMatterTitle }?.postID)
+            }
+            let lastTake = try await db.read { db in
+                try #require(try Self.blocks(db, noteID: front, title: PB.frontMatterTitle).last?.takes.first)
+            }
+            try session.operations.autosave(lastTake.id, text: earlier, charDelta: 0)
+
+            func frontNotes() async throws -> [String] {
+                try await db.read { db in
+                    try Queries.assembleReading(db, readingID: bookID)
+                        .filter { $0.title == PB.frontMatterTitle }.map(\.postID)
+                }
+            }
+            func frontText() async throws -> String {
+                try await db.read { db in try Queries.renderedText(db, containerID: front) }
+            }
+
+            // (a) The props stand: the restore door is already whole, the
+            // tour's mend is not asked, the words are the store's own.
+            let door = try await SeededBookRestore.restore(session: session, book: prince)
+            #expect(door == .alreadyWhole(readingID: bookID), "present by its title — nothing to restore")
+            let whole = await TourEngine.landmarks(session: session)
+            #expect(!whole.seededBookPropsBroken)
+            let wholeFacts = await TourEngine.launchBookFacts(session: session, landmarks: whole)
+            #expect(!TourEngine.restoresLaunchBook(landmarks: whole, wingID: "", store: wholeFacts),
+                    "the tour's start asks no mend")
+            #expect(try await frontNotes() == [front], "one front note")
+            #expect(try await frontText().hasSuffix(earlier), "its words untouched")
+
+            // (b) A deletion breaks the props (the toured chapter, XVII): the
+            // tour's start mends through its own road — XVII alone comes back,
+            // and the front note is neither re-seeded nor doubled.
+            let toured = try await db.read { db in
+                try #require(try Queries.assembleReading(db, readingID: bookID)
+                    .first { $0.title == PB.lovedOrFearedChapterTitle }?.postID)
+            }
+            try session.operations.deleteContainer(toured)
+            let broken = await TourEngine.landmarks(session: session)
+            #expect(broken.seededBookPropsBroken)
+            let brokenFacts = await TourEngine.launchBookFacts(session: session, landmarks: broken)
+            #expect(TourEngine.restoresLaunchBook(landmarks: broken, wingID: "", store: brokenFacts),
+                    "the mend is asked — everything it would do is undoing a deletion")
+            await ShellActions(session: session, shell: ShellRouter())
+                .restoreSeededBook(.launchBook, opening: false).value
+            try await db.read { db in
+                let entries = try Queries.assembleReading(db, readingID: bookID)
+                #expect(entries.compactMap(\.title).count == 28, "the book whole again")
+                let back = try #require(entries.first { $0.title == PB.lovedOrFearedChapterTitle }?.postID)
+                #expect(back != toured, "the deleted chapter minted fresh")
+            }
+            #expect(try await frontNotes() == [front], "still one front note — no twin")
+            #expect(try await frontText().hasSuffix(earlier), "…and never re-seeded over the store's words")
         }
     }
 

@@ -320,7 +320,11 @@ enum TourScript {
     /// second sentence minus its connective. The full aside returns the
     /// moment a readme exists (a fresh store, or VX-105's landing).
     static let endAsideJournalAlone = "\u{2318}J opens today's journal entry, whenever you want one."
-    static let keepGoing = "Keep going: two more minutes on stars, tags, books and snippets"
+    /// VX-843 (her wording ruling, 2026-11-04 — the VX-736 audit's row 22):
+    /// the door names the leg's fifth stop, Settings (present since VX-292
+    /// U3). Her sentence verbatim; the mockup's four-stop door is the one
+    /// recorded departure on the fork (`TourTests.keepGoingDeparture`).
+    static let keepGoing = "Keep going: two more minutes on stars, tags, books, snippets and settings"
     static let openFieldGuide = "Open the field guide, every feature as a lesson"
     static let done = "Done, go write"
     // swiftlint:enable line_length
