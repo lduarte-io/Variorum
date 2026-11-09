@@ -145,6 +145,11 @@ struct MCPUnlinkVersionsServerTests {
             let receipt = try #require(h.receipts.value.last)
             #expect(receipt.act == .versionUnlink && receipt.targetID == stored.noteIDs[0])
             #expect(showCompareParts(receipt.show) == stored.noteIDs, "Open › opens the two in Compare")
+            // A GUARD (the VX-915 ladder's R2-3 — green on both sides by design): a two-note
+            // link's receipt names the far note as `detail`; nil there is the one-note form's
+            // signal (F-7), so a nil-everywhere regression would say "inside" for every pair.
+            #expect(receipt.detail == (stored.noteIDs[1] == w.a.id ? "draft one" : "draft two"),
+                    "the far note named: \(receipt.detail ?? "nil")")
 
             #expect(try h.undoStack.undoReporting(with: h.writeOperations)
                     == UndoStack.Outcome(label: "claude-code's version link removal", changed: true))
