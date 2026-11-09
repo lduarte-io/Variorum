@@ -988,6 +988,30 @@ struct CapabilityRegistryTests {
         #expect(!CapabilityRegistry.isEnabled(.callout, in: CapabilityContext(mode: .canvas)))
     }
 
+    /// **VX-793 (PROVISIONAL P-915-B2-2) — the comments door reaches Compare.**
+    /// Red on the old registry by construction: `.blockComments` declared
+    /// `takeFamily`, which answers `.unavailable` for `mode == .compare`, so
+    /// Comments… and ⌘⇧' were grey there for every block. Now the callout's
+    /// named rule — the four surfaces whose panes carry a live block — and the
+    /// act's one refusal for a door that finds no block in reach.
+    @Test func theCommentsDoorReachesCompareAndNowhereNew() {
+        for mode in [PostMode.takes, .lenses, .compare] {
+            #expect(CapabilityRegistry.availability(
+                .blockComments, in: CapabilityContext(mode: mode)) == .act,
+                "\(mode): Comments… opens the target block's panel")
+        }
+        #expect(CapabilityRegistry.availability(
+            .blockComments, in: CapabilityContext(mode: .write, writeEditorAttached: true)) == .act)
+        for mode in [PostMode.read, .blocks, .canvas] {
+            #expect(!CapabilityRegistry.isEnabled(.blockComments, in: CapabilityContext(mode: mode)),
+                    "\(mode): unchanged — honestly grey")
+        }
+        #expect(!CapabilityRegistry.isEnabled(.blockComments, in: CapabilityContext(mode: nil)))
+        #expect(CapabilityRegistry.capability(.blockComments).unavailableNote
+                == "Click into a block first — comments live on the block you're in.",
+                "the one refusal every board's door speaks with no block in reach")
+    }
+
     @Test func theCalloutDoorHasItsShortcut() {
         #expect(CapabilityRegistry.capability(.callout).shortcutLabel == "⌥⌘C",
                 "A13(a)'s second half")

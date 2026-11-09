@@ -114,9 +114,33 @@ enum BoardCommentFaceOracle {
             return boards.values.max { $0.stamp < $1.stamp }?.face
         }
 
+        /// **VX-793 — is this block's comments panel OPEN on its gutter face?**
+        /// (written by the face host while it can present the panel; erased
+        /// when it leaves.) nil board: any of the session's boards.
+        func panelOpen(_ blockID: String) -> Bool {
+            guard let boards = BoardCommentFaceOracle.panels[scope]?[blockID] else { return false }
+            if let mount { return boards[mount] == true }
+            return boards.values.contains(true)
+        }
+
         /// Clears this scope only (the 18d ladder's MINOR-2 lesson) — every
         /// board's records in it.
-        func reset() { BoardCommentFaceOracle.worlds[scope] = nil }
+        func reset() {
+            BoardCommentFaceOracle.worlds[scope] = nil
+            BoardCommentFaceOracle.panels[scope] = nil
+        }
+    }
+
+    /// scope → blockID → board → whether the face host shows the panel (VX-793).
+    private static var panels: [String: [String: [String: Bool]]] = [:]
+
+    static func recordPanel(open: Bool, blockID: String, mount: String, in scope: String) {
+        panels[scope, default: [:]][blockID, default: [:]][mount] = open
+    }
+
+    static func forgetPanel(blockID: String, mount: String, in scope: String) {
+        panels[scope]?[blockID]?[mount] = nil
+        if panels[scope]?[blockID]?.isEmpty == true { panels[scope]?[blockID] = nil }
     }
 
     static func reader(_ scope: String) -> Reader { Reader(scope: scope, mount: nil) }
@@ -162,6 +186,28 @@ private struct BoardCommentFaceRecord: ViewModifier {
             }
     }
 }
+
+/// VX-793's record: whether the face host shows the block's panel — written
+/// on appear and on every change, erased on disappear.
+private struct BoardCommentPanelRecord: ViewModifier {
+    let blockID: String
+    let open: Bool
+    @Environment(\.debugProbeScope) private var scope
+    @Environment(\.boardCommentFaceMount) private var mount
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear {
+                BoardCommentFaceOracle.recordPanel(open: open, blockID: blockID, mount: mount, in: scope)
+            }
+            .onChange(of: open) { _, now in
+                BoardCommentFaceOracle.recordPanel(open: now, blockID: blockID, mount: mount, in: scope)
+            }
+            .onDisappear {
+                BoardCommentFaceOracle.forgetPanel(blockID: blockID, mount: mount, in: scope)
+            }
+    }
+}
 #endif
 
 extension View {
@@ -171,6 +217,17 @@ extension View {
     func recordsBoardCommentFace(blockID: String, _ face: BoardCommentFace) -> some View {
         #if DEBUG
         self.modifier(BoardCommentFaceRecord(blockID: blockID, face: face))
+        #else
+        self
+        #endif
+    }
+
+    /// VX-793's DEBUG write: this view hosts `blockID`'s comments panel, open
+    /// or not. A no-op outside DEBUG.
+    @ViewBuilder
+    func recordsBoardCommentPanel(blockID: String, open: Bool) -> some View {
+        #if DEBUG
+        self.modifier(BoardCommentPanelRecord(blockID: blockID, open: open))
         #else
         self
         #endif

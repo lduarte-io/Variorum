@@ -700,6 +700,107 @@ struct CompareCommentGutterTests {
                     "…showing what it showed when she opened the panel")
         }
     }
+
+    /// **VX-793 (PROVISIONAL P-915-B2-2) — Compare can give a block its FIRST
+    /// comment.** Comments… and ⌘⇧' were grey in Compare for every block (the
+    /// take family's rule, which never named Compare), and an uncommented block
+    /// draws no face to press — no door at all. Now the door is enabled, and
+    /// the routed act opens the comments panel on the FOCUSED pane's block, on
+    /// its gutter face — the SAME popover her press opens (the orchestrator's
+    /// direction (1): one presentation). The panel then holds its seat through
+    /// her first comment arriving (the face appears beneath it) and leaving
+    /// again (F1). Red on old by construction: the old registry answered
+    /// `.unavailable` in Compare and the board consumed no `.comments`.
+    @Test func theCommentsDoorOpensAnUncommentedBlocksPanelOnItsFace() async throws {
+        await HostLaunchSettle.wait()
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        try await withCompareCommentWorld(comments: []) { world in
+            _ = world.session.commandRouter.registerDetail(
+                postID: world.anchor, mode: .compare, applyMode: { _ in })
+            #expect(world.session.commandRouter.isEnabled(.blockComments),
+                    "Comments… and ⌘⇧' are enabled in Compare")
+            let model = CompareViewModel(session: world.session, anchorPostID: world.anchor)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptCompare(model, world, peers: [world.twin])
+            BoardCommentFaceOracle.reader(world.session.debugProbeScope).reset()
+            let board = BoardCommentFaceOracle.reader(world.session.debugProbeScope, board: model)
+            let (window, hosting) = mountCompare(model, world, width: 1100)
+            defer {
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, until: {
+                pane("compare", variant: world.tall.chosen, in: hosting) != nil
+            })
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            #expect(board.face(world.tall.block) == nil, "fixture: the block has no comment, so no face")
+            #expect(!board.panelOpen(world.tall.block), "fixture: no panel open yet")
+
+            // Her ring is in the block; she presses ⌘⇧' (the menu's routed act).
+            model.focus(PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.anchor)", blockID: world.tall.block,
+                variantID: world.tall.chosen, context: world.anchor))
+            #expect(world.session.commandRouter.dispatch(.comments),
+                    "the Compare board consumes the comments door")
+            await settle(window, hosting, until: { board.panelOpen(world.tall.block) })
+            #expect(board.panelOpen(world.tall.block),
+                    "the comments panel opens on the focused block's gutter face")
+            #expect(model.commentsRequest == nil, "the face took the ask")
+            #expect(board.face(world.tall.block) == nil,
+                    "…and draws no face of its own while the block has no comment")
+            #expect(!board.panelOpen(world.other.block), "only the focused block's panel")
+
+            // Her first comment, added as the panel's Add does: the face appears
+            // beneath the panel, which keeps its seat.
+            let first = try world.session.operations.addBlockComment(
+                to: world.tall.block, text: shortComment)
+            try await adoptCompare(model, world, peers: [world.twin])
+            await settle(window, hosting, until: { board.face(world.tall.block) != nil })
+            #expect(board.face(world.tall.block) != nil, "the first comment's face is drawn")
+            #expect(board.panelOpen(world.tall.block), "the panel stayed open through the first comment")
+
+            // …and deleted again (F1, composed): the panel still keeps its seat.
+            try world.session.operations.deleteBlockComment(first.id)
+            try await adoptCompare(model, world, peers: [world.twin])
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+            #expect(board.panelOpen(world.tall.block),
+                    "the panel keeps its seat when that comment leaves (the VX-770 ladder's F1)")
+        }
+    }
+
+    /// **VX-793 — with no pane holding the ring, the door SPEAKS the act's
+    /// declared refusal** (the orchestrator's direction (2): the registry
+    /// carries the words — P-1) and opens nothing.
+    @Test func theCommentsDoorWithNoFocusedBlockSpeaksTheDeclaredRefusal() async throws {
+        await HostLaunchSettle.wait()
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        try await withCompareCommentWorld(comments: []) { world in
+            let model = CompareViewModel(session: world.session, anchorPostID: world.anchor)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptCompare(model, world, peers: [world.twin])
+            BoardCommentFaceOracle.reader(world.session.debugProbeScope).reset()
+            let board = BoardCommentFaceOracle.reader(world.session.debugProbeScope, board: model)
+            let (window, hosting) = mountCompare(model, world, width: 1100)
+            defer {
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, until: {
+                pane("compare", variant: world.tall.chosen, in: hosting) != nil
+            })
+            #expect(model.authority.livePane == nil, "fixture: no pane holds the ring")
+            #expect(world.session.commandRouter.dispatch(.comments), "the board answers the door")
+            #expect(model.statusMessage == CapabilityRegistry.capability(.blockComments).unavailableNote,
+                    "it speaks the act's declared refusal (\(model.statusMessage ?? "nil"))")
+            #expect(model.commentsRequest == nil, "and asks no face to open anything")
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            #expect(!board.panelOpen(world.tall.block) && !board.panelOpen(world.other.block))
+        }
+    }
 }
 
 // MARK: - The shared rules (pure — no mount)

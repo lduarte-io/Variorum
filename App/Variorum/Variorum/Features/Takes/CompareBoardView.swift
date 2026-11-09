@@ -549,6 +549,8 @@ final class CompareViewModel {
         observation?.cancel()
         // VX-298 (R2-1): the board going ends a landing's round, unapplied.
         landingPostureFor = nil
+        // VX-793: an ask no face took dies with the board.
+        commentsRequest = nil
         for (postID, token) in coordinatorTokens {
             coordinators[postID]?.stopObserving(token)
         }
@@ -636,6 +638,10 @@ final class CompareViewModel {
         case .unchanged:
             return
         case .migrated(let leaving):
+            // VX-793: the ring moved to another block — an ask its old block's
+            // face never took (its row scrolled out of the realized rows) must
+            // not open a panel there later.
+            if let asked = commentsRequest, asked != pane.blockID { commentsRequest = nil }
             // The leaving pane's text lands through ITS OWN post's
             // coordinator (the cross-context contract's handback).
             if let leaving, !leaving.context.isEmpty {
@@ -1165,6 +1171,30 @@ final class CompareViewModel {
     /// transform. Compare's panes have carried a live block since 4C, and
     /// a pane knows its own post — so the frame lands on the block she is
     /// looking at, whichever column it lives in.
+    // MARK: The comments door (VX-793 — PROVISIONAL P-915-B2-2)
+
+    /// **A pending ask to open this block's comments panel**, set by the door
+    /// (Comments…, ⌘⇧') and taken by that block's gutter face, which opens the
+    /// SAME popover its own press opens (`CommentGutterFace.openRequest`) —
+    /// one presentation, never a second beside it. nil while no door asks.
+    private(set) var commentsRequest: String?
+
+    /// The door: the FOCUSED pane's block (the callout door's own target —
+    /// `applyCallout`), or the act's declared refusal where no pane holds the
+    /// ring (P-1: the words are the registry's).
+    func requestComments() {
+        guard let pane = authority.livePane else {
+            statusMessage = CapabilityRegistry.capability(.blockComments).unavailableNote
+            return
+        }
+        commentsRequest = pane.blockID
+    }
+
+    /// The face took the ask (its panel is opening).
+    func commentsRequestTaken(_ blockID: String) {
+        if commentsRequest == blockID { commentsRequest = nil }
+    }
+
     func applyCallout(_ edit: CalloutEdit) async {
         guard let pane = authority.livePane else {
             statusMessage = "Click into a pane first — the frame goes on that block."
@@ -1308,6 +1338,12 @@ struct CompareBoardView: View {
                     // through — compare's editing is direct manipulation
                     // (the recorded 4C reading stands).
                     Task { await model.applyCallout(edit) }
+                    return true
+                case .comments:
+                    // VX-793 (PROVISIONAL P-915-B2-2): Comments… and ⌘⇧' open
+                    // the focused pane's block's comments panel on its gutter
+                    // face — an uncommented block's first comment included.
+                    model.requestComments()
                     return true
                 default:
                     return false
@@ -2142,15 +2178,26 @@ private struct CompareCellView: View {
                 // her open panel, tearing the panel down mid-act (the VX-770
                 // ladder, round 1 F1). With no entries the host draws and
                 // records nothing.
+                //
+                // VX-793: built in EVERY cell, a zero lane included (where the
+                // ladder yields and nothing is drawn), because the face is also
+                // where the comments DOOR (Comments…, ⌘⇧') opens the panel on
+                // the focused pane's block — the same popover her press opens,
+                // so an uncommented block can be given its first comment.
                 .overlay(alignment: .topLeading) {
-                    if lane > 0 {
-                        let entries = model.face(for: postID)?.comments[slot.blockID] ?? []
-                        GeometryReader { proxy in
-                            CommentGutterFace(
-                                session: session, blockID: slot.blockID,
-                                entries: entries, tokens: tokens,
-                                geometry: Self.gutter(lane: lane, cellHeight: proxy.size.height))
-                        }
+                    let entries = model.face(for: postID)?.comments[slot.blockID] ?? []
+                    GeometryReader { proxy in
+                        CommentGutterFace(
+                            session: session, blockID: slot.blockID,
+                            entries: entries, tokens: tokens,
+                            geometry: Self.gutter(lane: lane, cellHeight: proxy.size.height),
+                            openRequest: CommentGutterFace.OpenRequest(
+                                pending: { [blockID = slot.blockID] in
+                                    model.commentsRequest == blockID
+                                },
+                                taken: { [blockID = slot.blockID] in
+                                    model.commentsRequestTaken(blockID)
+                                }))
                     }
                 }
             }
