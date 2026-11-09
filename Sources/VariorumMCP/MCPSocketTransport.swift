@@ -382,8 +382,8 @@ actor MCPSocketTransport: Transport {
     }
 
     /// Sets the socket's send low-water mark (VX-933, `sayClosing`'s one
-    /// write): true when it took. XNU refuses zero, a negative mark, and any
-    /// option once the socket is shut both ways (`EINVAL`).
+    /// write): true when it took. It refuses (`EINVAL`, probed) zero, a
+    /// negative mark, and any mark once the socket is shut both ways.
     static func setSendLowWater(_ fd: Int32, _ bytes: Int) -> Bool {
         var mark = Int32(clamping: bytes)
         return setsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &mark, socklen_t(MemoryLayout<Int32>.size)) == 0
