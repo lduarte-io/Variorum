@@ -75,8 +75,10 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
                             .onAppear { Task { await model.loadMoreSearchGroups() } }
                         }
                     } header: {
-                        LibraryListHeader(title: tokens.chromeLabel(
-                            LibrarySearchCopy.groupsHeader(state.scope)))
+                        let title = tokens.chromeLabel(LibrarySearchCopy.groupsHeader(state.scope))
+                        LibraryListHeader(title: title)
+                            // VX-895: what the header DREW (the DEBUG oracle).
+                            .librarySearchDrawn(.groupsHeader, title)
                     }
                 }
                 if state.books.isEmpty, state.groups.isEmpty {

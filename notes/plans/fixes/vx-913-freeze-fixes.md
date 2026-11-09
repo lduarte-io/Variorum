@@ -113,7 +113,7 @@ Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate b
 | # | Piece | Status |
 |---|---|---|
 | 0 | This record + the traced mechanism, BEFORE any fix | DONE (this commit) |
-| 1 | The pin: DEBUG drawn-words oracle + `VX895SearchFacetHeaderTests` (A mounted header · B model mechanism · C mounted counts guard) | NOT-STARTED — design below |
+| 1 | The pin: DEBUG drawn-words oracle + `VX895SearchFacetHeaderTests` (A mounted header · B model mechanism · C mounted counts guard) | IN-PROGRESS — written (`Features/Library/LibrarySearchDrawnOracle.swift`, the two recorders, `.debugProbeScope(session)` on the band and the sheet, `VariorumTests/VX895SearchFacetHeaderTests.swift`); the compile (`build-for-testing`, a cold DerivedData for this worktree) is PENDING |
 | 2 | Red-on-old: the pin run on the pre-fix tree (behavioral revert = the fix line only) | PENDING behind the stage |
 | 3 | The fix (`LibrarySearchModel.scope` observed) | NOT-STARTED — design below |
 | 4 | Rider VX-890 — the group-facts projection folded into one template | NOT-STARTED — design below |
