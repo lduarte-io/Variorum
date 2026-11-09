@@ -198,9 +198,16 @@ public struct MCPHostHooks: Sendable {
     public var beforeWrite: (@Sendable (_ tool: String) async -> Void)?
     /// **VX-775 — a landed act's Activity line could not be written**: the
     /// call answered its client the act's own answer, and THIS tells her
-    /// (`MCPActivityLogFailure`). Called by `MCPWriteTools.call` once per call,
-    /// after the call's receipts (`onWrite`). Nil = no app around the host.
-    public var onActivityLogFailure: (@Sendable (MCPActivityLogFailure) -> Void)?
+    /// (`MCPActivityLogFailure`). Called by `MCPWriteTools.call` once per call.
+    /// **It carries the call's receipts too** (the VX-913 ladder round 1, F1 —
+    /// the reviewer's final call): when it is set and the call's line failed,
+    /// the call's receipts ride THIS hook and never also `onWrite`, so the app
+    /// lands them and then the failure in ONE hop — her status seam holds one
+    /// message, and a receipt landing after the failure would erase it. A call
+    /// whose lines landed, and a host without this hook, send their receipts
+    /// through `onWrite` exactly as before. A no-op landing hands `[]`. Nil = no
+    /// app around the host.
+    public var onActivityLogFailure: (@Sendable (MCPActivityLogFailure, _ receipts: [MCPWriteReceipt]) -> Void)?
 
     public init(
         refusalWords: @escaping @Sendable (Error) -> String? = { _ in nil },
@@ -211,7 +218,7 @@ public struct MCPHostHooks: Sendable {
         wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil,
         beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil,
         bookMoveFrozenWords: (@Sendable (_ bookName: String, _ noteTitle: String, _ frozenBook: String) -> String)? = nil,
-        onActivityLogFailure: (@Sendable (MCPActivityLogFailure) -> Void)? = nil
+        onActivityLogFailure: (@Sendable (MCPActivityLogFailure, _ receipts: [MCPWriteReceipt]) -> Void)? = nil
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk

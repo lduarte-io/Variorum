@@ -63,12 +63,18 @@ struct MCPWriteTools: Sendable {
             }
             switch result {
             case .success(let landed):
-                // VX-812 (A-809-19): a list form's landed items each send their
-                // receipt (one call-scoped run key — one line at the app).
-                for receipt in landed.receipts { hooks.onWrite?(receipt) }
-                // VX-775: and, after them, the Activity line the store refused —
-                // to her, once per call; the answer is the act's own.
-                if let failure = landed.activityLogFailure { hooks.onActivityLogFailure?(failure) }
+                // VX-775: a call whose Activity line the store refused tells her
+                // ONCE — its receipts and then the failure through ONE hook, so
+                // the app lands them in one hop and the failure is the last word
+                // on her seam (the ladder round 1, F1); the answer is the act's
+                // own either way.
+                if let failure = landed.activityLogFailure, let tail = hooks.onActivityLogFailure {
+                    tail(failure, landed.receipts)
+                } else {
+                    // VX-812 (A-809-19): a list form's landed items each send
+                    // their receipt (one call-scoped run key — one line at the app).
+                    for receipt in landed.receipts { hooks.onWrite?(receipt) }
+                }
                 return Outcome(text: landed.answer, isError: false)
             case .failure(let refused):
                 return refused.outcome

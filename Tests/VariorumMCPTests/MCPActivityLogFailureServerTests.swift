@@ -109,6 +109,9 @@ struct MCPActivityLogFailureServerTests {
             ])
             #expect(answer.isError != true, "the control lands: \(text(answer))")
             #expect(try activityLines(control, "add_comment") == ["allowed"], "non-vacuity: its line lands")
+            #expect(control.onWriteReceipts.value.map(\.act) == [.comment] && control.tailReceipts.value.isEmpty
+                    && control.activityLogFailures.value.isEmpty,
+                    "F1: a call whose line landed sends its receipt through onWrite, never the tail")
             await control.hangUp(w.connection)
             return text(answer)
         }
@@ -128,6 +131,8 @@ struct MCPActivityLogFailureServerTests {
             #expect(try liveComments(h, w.block) == 1, "the act landed (on both sides)")
             #expect(h.undoStack.depth == 1, "its client-named ⌥⌘Z entry stands")
             #expect(h.receipts.value.map(\.act) == [.comment], "RED ON OLD: her receipt is sent")
+            #expect(h.onWriteReceipts.value.isEmpty && h.tailReceipts.value.map(\.act) == [.comment],
+                    "F1: a failing call's receipt rides the ONE tail hook with the failure, never onWrite")
             #expect(h.activityLogFailures.value == [
                 MCPActivityLogFailure(clientName: "claude-code", tool: "add_comment", unrecorded: 1, storeWords: storeWords),
             ], "RED ON OLD: the app is told — once, naming the client, the tool and the store's words")
@@ -159,6 +164,7 @@ struct MCPActivityLogFailureServerTests {
                     "RED ON OLD: no refused line for an act that landed")
             #expect(try liveComments(h, w.block) == 1)
             #expect(h.activityLogFailures.value.map(\.unrecorded) == [1])
+            #expect(h.onWriteReceipts.value.isEmpty && h.tailReceipts.value.map(\.act) == [.comment], "F1")
             await h.hangUp(w.connection)
         }
     }
@@ -192,6 +198,9 @@ struct MCPActivityLogFailureServerTests {
             let results = try #require(answer["results"] as? [[String: Any]])
             #expect(results.map { $0["changed"] as? Bool } == [true, true] && results.allSatisfy { $0["refused"] == nil })
             #expect(h.receipts.value.map(\.act) == [.tag, .tag], "RED ON OLD: each landed item's receipt")
+            #expect(h.onWriteReceipts.value.isEmpty && h.tailReceipts.value.map(\.act) == [.tag, .tag]
+                    && Set(h.tailReceipts.value.map(\.runKey)).count == 1 && h.tailReceipts.value[0].runKey != nil,
+                    "F1: the list call's receipts — one run key — ride the tail together, never onWrite")
             #expect(h.activityLogFailures.value == [
                 MCPActivityLogFailure(clientName: "claude-code", tool: "apply_tag", unrecorded: 2, storeWords: storeWords),
             ], "RED ON OLD: one line for the call, counting its items")
@@ -228,6 +237,8 @@ struct MCPActivityLogFailureServerTests {
             #expect(answer["replaced"] as? [String] == notes.map(\.id) && answer["refused_count"] as? Int == 0,
                     "RED ON OLD: both notes replaced and listed so")
             #expect(h.receipts.value.map(\.act) == [.tagReplace, .tagReplace], "RED ON OLD")
+            #expect(h.onWriteReceipts.value.isEmpty && h.tailReceipts.value.map(\.act) == [.tagReplace, .tagReplace],
+                    "F1: the swap's receipts ride the tail, never onWrite")
             #expect(h.activityLogFailures.value == [
                 MCPActivityLogFailure(clientName: "claude-code", tool: "replace_tag", unrecorded: 2, storeWords: storeWords),
             ], "RED ON OLD: one line for the call, counting its notes")
@@ -268,7 +279,36 @@ struct MCPActivityLogFailureServerTests {
             } != nil, "the once grant is spent")
             #expect(h.undoStack.depth == 1)
             #expect(h.activityLogFailures.value.map(\.tool) == ["edit_take"])
+            #expect(h.onWriteReceipts.value.isEmpty && h.tailReceipts.value.count == 1, "F1")
             await h.hangUp(w.connection)
+        }
+    }
+
+    /// **F1 (the ladder round 1 — the reviewer's final call; no red-on-old owed:
+    /// it hardens this run's new ordering, not an old wrong output).** A NO-OP
+    /// landing (`apply_tag` on a tag the note already wears — `changed: false`, no
+    /// receipt, yet a landed Activity line) whose line fails: the answer is the
+    /// no-op's own, and the tail hook carries the failure with NO receipts —
+    /// nothing reaches `onWrite`.
+    @Test func aNoOpLandingWhoseLogFailsHandsTheTailNoReceipts() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let note = try h.operations.createPost(title: "worn")
+            let tag = try h.operations.createTag(name: "listed")
+            _ = try h.operations.applyTag(tag.id, toPost: note.id)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .note, note.id))
+            try await h.database.write { db in try db.execute(sql: everyLineFails) }
+            let answer = try await call(connection, "apply_tag", ["note_id": .string(note.id), "tag": .string("listed")])
+            try await h.database.write { db in try db.execute(sql: dropTrigger) }
+
+            #expect(answer.isError != true, "\(text(answer))")
+            #expect((try? json(answer))?["changed"] as? Bool == false, "the no-op's own answer")
+            #expect(h.activityLogFailures.value.map(\.tool) == ["apply_tag"])
+            #expect(h.tailReceipts.value.isEmpty && h.onWriteReceipts.value.isEmpty && h.receipts.value.isEmpty,
+                    "the tail carried the failure with no receipts; nothing reached onWrite")
+            await h.hangUp(connection)
         }
     }
 
