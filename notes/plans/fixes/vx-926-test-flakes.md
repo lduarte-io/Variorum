@@ -368,11 +368,11 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 | Piece | What | Status |
 |---|---|---|
 | P0 | This record opened; ledger row U3 → IN PROGRESS | DONE (this commit) |
-| P1 | TRACE — what starves under full-parallel core load (the observation's scheduler · the reader pool · the AsyncValueObservation's buffering · the runner's queue), instrumented headless under deliberate load | NOT-STARTED |
+| P1 | TRACE — what starves under full-parallel core load (the observation's scheduler · the reader pool · the AsyncValueObservation's buffering · the runner's queue), instrumented headless under deliberate load | IN-PROGRESS — the working hypothesis (PENDING the in-target runs): Swift Testing 6.4's default parallelization width is UNBOUNDED (`defaultParallelizationWidth = .max`, no Serializer installed), so every test case is a child task enqueued at once; a held observation's value reaches the test through TWO cooperative-pool hops (GRDB's `.task` scheduler Task, then the test's `next()` continuation), each enqueued FIFO behind the whole not-yet-started backlog. Scratch proof (`scratchpad/u3/backlog/`, no Variorum code): one resumption waited **5.015 s** behind 1,500 × 40 ms test cases on 12 threads (= the backlog exactly); with `SWT_EXPERIMENTAL_MAXIMUM_PARALLELIZATION_WIDTH=12` **0.000 s**, same total wall (5.06 s). The in-target instrument (S pool-queue sampler · H the pin's chain hop by hop · G a GCD-only control) is built and smoke-run; the idle and loaded full core runs are next |
 | P2 | The fix at its home (test-side or the shared harness seam; STOP if product-side) + the class sweep (every core test holding a ValueObservation the same way, verdict FIXED / SAFE) | NOT-STARTED |
 | P3 | Pins — a forced-starvation arm red-on-old (behavioural revert) | NOT-STARTED |
 | P4 | The rider VX-932 — `MCPAcceptLoopServerTests.aFatalAcceptFailureStopsTheListenerAndSaysSo` waits for the signal and the removal (F-U1-1's shape) + its descheduled-thread pin | NOT-STARTED |
 | P5 | Counts — the suites alone + under a deliberately loaded full-parallel core run | NOT-STARTED |
 | P6 | Dispositions, PROVISIONALs, self-assessment | NOT-STARTED |
 
-**Load generators alive:** none. **Reverts in flight:** none. **Throwaway instruments in the tree:** none.
+**Load generators alive:** none. **Reverts in flight:** none. **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` — UNTRACKED, env-gated (`VX926_U3_PROBE=1`), NEVER committed; a successor deletes it unless this line says it is gone.
