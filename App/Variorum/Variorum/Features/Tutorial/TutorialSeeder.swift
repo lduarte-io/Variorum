@@ -2653,7 +2653,10 @@ enum TutorialSeeder {
             ProtectionCopy.keystoneAccountPassword, ProtectionWords.guideOpenMeansReadable,
         ]
         _ = try lesson(privacy, ProtectionWords.guideKeyLessonTitle, keyLesson)
-        _ = try lesson(privacy, ProtectionWords.guidePosturesLessonTitle, ProtectionWords.guidePosturesLesson)
+        // VX-916 (PROVISIONAL P-915-B4-1): lesson 2 gains R-529-6's line and
+        // the compromise-recovery recipe after its own six paragraphs
+        // (`TutorialProtectionPassages.swift`).
+        _ = try lesson(privacy, ProtectionWords.guidePosturesLessonTitle, posturesLessonParagraphs)
         _ = try lesson(privacy, ProtectionWords.guideCopiesLessonTitle, ProtectionWords.guideCopiesLesson)
 
         // ————————————————————————— AI & the MCP door ——————————————————————
