@@ -85,6 +85,11 @@ extension Operations {
         case untag = "tag removal"
         // VX-184 U3 — VX-187's named-pair version link ("Undo claude-code's version link").
         case versionLink = "version link"
+        // VX-943 (the VX-915 run, batch 6) — `unlink_versions`, its opposite:
+        // ONE link taken back by the id link_versions answered ("Undo
+        // claude-code's version link removal" — `untag`'s "tag removal"
+        // family). PROVISIONAL words, her copy pass.
+        case versionUnlink = "version link removal"
         // VX-184 U4 — VX-195's edit parity inside a note (R-VX184-1): every act
         // ONE client-named entry (P-13nb-U2-4; the record's call 1). A block's
         // LAST take deleted rides `.delete` — `delete_block`'s own entry and
