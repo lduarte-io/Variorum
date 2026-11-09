@@ -2139,6 +2139,35 @@ takes TYPE names, as a zsh array; the tree verified clean before, between and af
   join):* the join's words moment saying the ratified sentence, both voices, on the prod test road's first-run walk.
   VX-443's sweep and VX-152's guard have no face (the sweep is silent; the lock lands the same lobby).
 
+### BATCH 4 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 5 spawns)
+
+**Verification first-hand:** all seven commits present and pushed (`b59d2f16d`…`d815dc445`), tree clean, HEAD =
+origin; the sweep lives in `Protection/Assess` + the executor + the leaf as reported; rule 7's ratified sentence at
+`CastleRules.md:23/:84` and `ProtectionWords.swift:730`; `castle-lifecycle.html` regenerated (exactly one line in
+the commit's diff); LIVE STATUS row 4 BUILT.
+
+**Dispositions:**
+1. **VX-152 → DISMISSED AS ALREADY FIXED (VX-445's one-act seam), the guard pin kept.** Her condition is met on
+   its third branch: the investigation found no live bug, so nothing is folded in and nothing balloons. The
+   implementer's ticket text goes onto VX-152 now (the orchestrator's Linear act); the ticket closes at the merge
+   as "already fixed + regression guard", not as this run's fix.
+2. **VX-443 → ACCEPTED as built; P-849-4 stands PROVISIONAL with the options (a) delete-with-fences (built) /
+   (b) set-aside / (c) leave.** The fence ADDED beyond the brief — delete only a name whose fingerprint the live
+   key file holds (current or history) — is adopted and flagged FOR HER EYE in the bundle: it turns rule 4's
+   "nothing openable is lost" from an argument into a check, and it is what keeps a rule-26 store's leftover
+   (another design's key file) untouched.
+3. **VX-545 → ACCEPTED** (five points, one commit, the page regenerated never hand-edited, the byte-pin moved by
+   justified edit, the commit-vocabulary fence re-checked).
+4. **The optional B4 walk row → SKIPPED, recorded:** the changed sentence is byte-pinned
+   (`rule7sSentencesAreHersVerbatim`) and the lifecycle page regenerates from the asserted fixture — stronger
+   than a screenshot; no Opus walk session is spent on it. B3's walk rows (no lock screen) remain mine.
+5. **The stage legs:** A (25/4) and B (R-443M1 · R-443M2 · R-152 · R-545) join the vx-849-b34-tests claim with
+   batch 3's legs; A0 skipped (same reasoning as batch 3 — the reverts prove liveness); leg C folds into row 8's
+   closing sweep; leg D's two phone suites ride the one sim boot (MobileLockTeardownTests deduped — already in
+   batch 3's list).
+6. **Canon delta → queued:** SurfaceContracts' protection bullet gains the sweep's line beside "the rule-8
+   re-makes at every open", landing as P-849-4 survives her sitting.
+
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
 "ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post
