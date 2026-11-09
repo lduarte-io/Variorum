@@ -120,6 +120,15 @@
 - **The out-of-scope note — RECORDED:** `MCPAcceptLoopServerTests.swift:93/115/117`'s 10 s bounds around real-server connects (VX-612-era, pre-run) are the same FIFO exposure as F-R1-2 — joined to the A-926-3 / P-926-U3-1 bundle; the soak's MCP leg reads them with that lens.
 - **Execution:** one narrow fresh implementer builds F-R2-1 + F-R2-2; as a FINAL round's fixes they get the orchestrator's LINE-BY-LINE check against each finding (CLAUDE.md's rule), then the ladder record closes.
 
+## THE ORCHESTRATOR'S LINE-BY-LINE CHECK (the final round's fixes — 2026-11-09)
+
+Diff read whole (`0dfaaf0b6..651191fdf`), each hunk against its finding:
+- **F-R2-1 — CHECKED, holds.** `ObservationLaneTests.swift`'s changed hunk is `///` lines only (zero assertion lines in the diff); the new text states E3/E4's measured facts and the "reds it, as it should" clause per A-926-5. The U3 self-assessment (i) re-word carries the supersession marker and points at round 2, which quotes the replaced sentence; round 1's F-R1-6 entry gains a clearly-marked correction bullet with the originals left standing. The U4 facts line's count now matches the writers table (2,622 of 2,731). Nothing beyond the named spots moved (`ObservationLane.swift:20–24` deliberately left — the reviewer's optional).
+- **F-R2-2 — CHECKED, holds.** `holdsTakesCalls(under:needing:refusing:)` with `refused = []` keeps the app root's check byte-equivalent; the test root refuses `appDomainSpellings`; the offender predicate is OR-shaped as called; the message names both cases. Red-on-old: the probe matrix (P0–P3 + after) reproduces the hole on the pre-fix fence (GREEN 4/4 on a `defaults: .standard` line) and the fixed fence reds NAMING the line; the pre-existing green set re-verified. The stated limits (`defaults:.standard` unspaced escapes; `.standardSuite` false-reds named) are the fence's standing token-match class, recorded.
+- Guards re-run by the orchestrator: `git diff 0dfaaf0b6..HEAD -- Sources` EMPTY, `-- App` EMPTY; the four suites 19/19 through the gate per the sweep's log.
+
+**THE LADDER IS CLOSED — two rounds, 0 BLOCKER / 1 MAJOR fixed and verified / 6 MINOR (5 fixed, 1 recorded×2) / 3 NIT (2 fixed, 1 fence-widened), every finding with a written disposition.**
+
 ## FINAL SWEEP (F-R2-1 + F-R2-2)
 
 **Implementer:** one narrow fresh `opus-implementer`, the two items A-926-5 accepts and nothing else; headless, no stage. Base `0dfaaf0b6`.
