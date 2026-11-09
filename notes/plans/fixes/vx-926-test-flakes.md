@@ -218,9 +218,38 @@ All eight close on ONE mechanism (the harness rides the test process's pool), wi
 | Piece | What | Status |
 |---|---|---|
 | P0 | This record opened; ledger row U2 → IN PROGRESS | DONE (this commit) |
-| P1 | PHASE 1 — characterize: the on-disk .ips corpus read (shape, thread, depth, recursion origin); can either shape be reproduced at will headlessly? | NOT-STARTED |
+| P1 | PHASE 1 — characterize: the on-disk .ips corpus read (shape, thread, depth, recursion origin); can either shape be reproduced at will headlessly? | IN-PROGRESS — the corpus read DONE (this commit, below: ONE mechanism, VX-604's trigger); remaining: the headless reproducer attempt (a scratch SwiftPM package OUTSIDE the repo) |
 | P2 | PHASE 2 — the mitigation menu (i) ABI stream knobs · (ii) our issue payloads · (iii) fewer suites per invocation · (iv) exit ordering — each with evidence or "unreachable" | NOT-STARTED |
 | P3 | PHASE 3 — land the safest effective mitigation with its evidence, OR record-only; the Apple Feedback draft (a deliverable either way) | NOT-STARTED |
 | P4 | Dispositions (VX-661, VX-690), PROVISIONALs, self-assessment | NOT-STARTED |
 
 **Throwaway instruments alive:** none yet. **Reverts in flight:** none.
+
+### PHASE 1 — the corpus (every Variorum crash report still on this Mac, read whole)
+
+Read with a throwaway reader (`scratchpad/u2/ips_scan.py`, `ips_summary.py`, `ips_origin.py`, `ips_full.py` — never in the tree) over `~/Library/Logs/DiagnosticReports/{,Retired/}Variorum-*.ips`: **34 reports, 2026-11-02 → 2026-11-08 06:34:56** (the 10-28 / 10-29 reports the tickets cite have aged out of the folder). Three classes, by the faulting thread:
+
+| Class | Count | Faulting thread | Reads as |
+|---|---|---|---|
+| **The encoder shape (VX-661 / VX-690)** | **24** | thread 0, the main thread; `EXC_BAD_ACCESS (SIGSEGV) KERN_PROTECTION_FAILURE` at the main thread's **Stack Guard** region ("Could not determine thread index for stack guard region") | this unit — below |
+| GRDB reader `KERN_INVALID_ADDRESS` (`Statement.step`/`forEachStep` on `GRDB.DatabasePool.read`) | 4 | a reader thread | VX-855 / VX-657's teardown class — named, not chased |
+| `TypedReturnKeyTests.aReturnInsideAFannedOneWordBlock…` | 6 (11-05 01:56–01:57, one build) | main thread, a test's own closure | a test-body trap on one revert build — not this class |
+
+**The 24 encoder reports are ONE stack, byte-for-byte in shape** (the reports' own `recursionInfoArray`): `originalLength` **12,155–12,166 frames**, a recursion of **depth 931** whose key frame is XCTestCore's `Interop.Handler.defaultHandler`, the 8 MB main stack exhausted. The report keeps the hottest ~60 and coldest ~80 frames; `full-063448.txt` is one printed whole. The cycle (13 frames, callee first):
+
+```
+Testing        JSON.withEncoding ×2 → ABI.Version.eventHandler(encodeAsJSONLines:forwardingTo:) closure #2
+               → ABI.Version.eventHandler(forwardingTo:) closure ×2 → Event._post(in:configuration:)
+               → Event.post(_:for:instant:configuration:) → Issue.record(configuration:) → static Issue.record(comments:severity:sourceContext:)
+libXCTestSwiftSupport  SwiftTestingInteropRecordHandler.handleIssueRecorded(_:) → handleRecord(_:)
+XCTestCore     closure #1 in static Interop.Handler.defaultHandler
+Testing        closure #1 in closure #1 in static Event._postToFallbackEventHandler  → JSON.withEncoding … (again)
+```
+
+and its entry, at the bottom of EVERY one of the 24: `AppBootstrap.beginOpening` closure → `AppBootstrap.finish(_:)` → `AppSession.init(database:storeVariant:)` → **`getter of date #1 in AppSession.init`** → `Dependency.wrappedValue.getter` → `DependencyValues.date.getter` → `DateGeneratorKey.testValue` → `_DefaultReporter.reportIssue` → `_XCTFail` → XCTest `XCTFail` → `_XCTPreformattedFailureHandlerWithIssueBlock` → `XCTFallbackIssueHandler.handle` → `XCTFallbackIssueHandlerSwiftSupport.passToFallbackHandler(issue:)` → the cycle.
+
+**What this settles:**
+1. **It is not an encoder bug, not load, not payload size.** It is an UNBOUNDED MUTUAL RECURSION between XCTest's interop record handler and Swift Testing's fallback event handler: an issue recorded with NO current test in either framework is handed by each to the other, forever — and each hand-off JSON-encodes the event, so the frame that touches the guard page is usually inside the encoder. The two tickets' "shapes" are two instants of one loop: VX-661's top frame (the generic-metadata cache under `Dictionary.reserveCapacity` under `__JSONEncoder.container`, 20 of 24 here) and VX-690's (`__JSONEncoder.wrapGeneric` → `ABI.Record.encode`, frames 11–20 of the same cycle; 4 of 24 here fault there — the 11-04 01:40:54 and 11-05 03:07/03:08 reports). VX-690's own report (10-28 18:22:45) has aged out; its "Thread stack size exceeded due to excessive recursion" + those top frames + "~5 s after launch, after TEST SUCCEEDED" is this loop (inferred from the ticket's text — that report cannot be re-read).
+2. **"Zero Variorum frames" was a top-of-stack reading.** The Variorum frames are at the bottom of every report, and they are VX-604's: the production bootstrap's `@Dependency(\.date)` read in `AppSession.init` OUTSIDE every test's scope (the VX-912 B1 trace, `notes/plans/fixes/vx-912-open-source-gating.md` "The mechanism"). B1's own words were "the report recurses XCTest fallback ↔ Swift Testing interop to the stack guard" — the same stack, first seen as a launch crash.
+3. **Every pattern the tickets ledgered is timing of that one async read** against the Swift Testing run's lifetime: the host's `beginOpening` → `finish` lands seconds after launch; when it lands while no test is current anywhere, the report has no test to attach to and the loop forms; when it lands mid-run it attaches elsewhere (B1's face 3 — the "Issues recorded without an associated test or suite" pseudo-node). Hence "small selections crash at exit, 42-suite runs don't" (VX-819's comment: a short run has ended before the open finishes), "fires on green single-test runs of rebuilt binaries" (10-29; a rebuilt binary's cold launch shifts the open's timing), "build-layout-sensitive" (VX-677's claim C), and the "red-rich" correlation (the revert windows were small targeted selections).
+4. **The deterministic lever already exists, and it is VX-604's revert:** VX-912 B1 leg A (the R-604-H build — the production init with its inert arm disabled) crashed the host on **3 of 4** tests — the 06:34:48 / :53 / :56 reports, which are three of the 24 here, the same 931-deep loop. The fixed build's legs B–E ran without one, and **no Variorum crash report exists on this Mac after 06:34:56**, through VX-914's whole-target + phone merge gate on the post-B1 tree (the inert host `fae643a05` reached main at `f22ac20ee`, 16:05).
