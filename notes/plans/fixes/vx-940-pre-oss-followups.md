@@ -58,7 +58,7 @@ The whole Mac target + the phone target if `Shared/` changed (VX-920 is Mac app 
 | 0 | Kickoff: mint (VX-940), 7 members seated, worktree, in-flight row, her rulings | DONE (this commit) |
 | W1 | VX-939 + VX-923 | **BUILT + PINNED, headless** — "## W1 record" (end of file): VX-939 `LETTER.md` landed (two files, sync noted — the seed reads compiled literals; `read-me.txt` is the pins' oracle, untouched); VX-923 the four Point-Free siblings + Sparkle credited (verbatim, generated and checked IDENTICAL), BIP-39 → MIT in both places; the pin red 19 on old / green 4/4 headless; **in-target runs PENDING the gate (Mac AND phone targets)**; authored sentences + P-940-W1-1..5 listed for her pass |
 | W2 | VX-920 (+ the A-940-1 rider: the LETTER drift pin, Part of VX-939) | **BUILT + PINNED, headless** — "## W2 record" (end of file): VX-920 the lineage face names Home `WingWords.home` (the switcher's one Home name) on the member's line AND its go-to button, through `Queries.effectiveWingID` over the read's live wing names; the pin red 3 on old / green / R-920-A red exactly 5 (headless harness); **its in-target run PENDING the gate (Mac target; no `Shared/` line changed)**. The rider: `LetterDriftTests` (core, headless) green, red under two scratch mutations, the three sync notes corrected to name it; P-940-W2-1..3 listed for her pass |
-| W3 | VX-917 | NOT STARTED |
+| W3 | VX-917 | **IN PROGRESS** — "## W3 record" (end of file) |
 | W4 | VX-922 + VX-925 + VX-933 | NOT STARTED |
 | L | The ladder (opus-reviewer) | NOT STARTED |
 | G | The gate (whole targets via nov7) | NOT STARTED |
@@ -300,3 +300,18 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 - **(iv) The live-wing clause on the read is unpinnable by construction** (the tree already projects effective wings in the same transaction). If the reviewer reads it as unrequested scope, it can go; the face's rule then leans on the tree's projection for "live", which is today's truth.
 - **(v) The drift pin's comment rule is "one leading comment, closed at the first `\n-->\n`, no `<!--` after it".** A future editor who adds a second comment, or puts the comment anywhere but the top, reds the pin by design, with a message saying why.
 - **(vi) The LETTER.md comment edit touches a file of her letter** (the comment only; the body byte-identical by `cmp` and sha). A reviewer who reads any LETTER.md edit as her words' territory should flag it; P-940-W2-3 offers the lighter road.
+
+## W3 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild` of any kind, no stage, no Debug launch, no walk or capture (the brief: headless only); no live run of the workflow (none is possible before the flip — the repository is private and the job is inert there by design); the two existing workflows untouched; `notes/QUESTIONS.md` untouched (the merging session files the PROVISIONALs, the W1/W2 precedent); VX-937's checklist NOT edited (the closeout appends the flip-day line named below).
+
+*Machinery: Opus implementer, fresh session, briefed by this file's §2 (R-940-4)/§4 W3/§7 (+ the VX-926 §7 and the VX-912 §7 it binds), the resiliency protocol, the VX-917 ticket, BUILDING.md, the VX-912 B3 record's P2/P3 (the two workflows' posture; the cold-clone road and its two gaps), the two existing workflows. No revert is in flight.*
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record + the ledger row | DONE (this commit) |
+| P1 | The cadence pin (a core repo-file test reading the workflow's `on:` block), red with the workflow absent | NOT-STARTED |
+| P2 | `.github/workflows/cold-build-check.yml` — release published + workflow_dispatch only; full anonymous clone; the toolchain printed first and the skew verdict computed; `swift build`, `swift test`, the unsigned Mac app build, each informational on a mismatched Xcode major; the pin green; the YAML parsed | NOT-STARTED |
+| P3 | Close: headless build + the pin + the nearest repo-file suites, dispositions, the flip-day line, PROVISIONALs, self-assessment | NOT-STARTED |
