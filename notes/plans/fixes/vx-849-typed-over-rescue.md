@@ -2411,8 +2411,8 @@ over them.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record (the trace, the siblings, the designs) | DONE (this commit) |
-| 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | 1a the pins on the PRE-FIX tree (`d58707b70` — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines (below); 1b the swap + the pure rank pin + one justified fixture edit (this commit): the suite 3/3 green, the neighbours 394/76 + 14/4 green; R-921a/R-921b named below, run NEXT at this tip |
-| 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | — |
+| 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | DONE — 1a the pins on the PRE-FIX tree (`d58707b70` — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines; 1b the swap + the pure rank pin + one justified fixture edit (`797dfe8a7`): the suite 3/3, the neighbours 394/76 + 14/4 green; R-921a and R-921b bit exactly their named sets (this commit records them) |
+| 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | NEXT |
 | 3 | Close — `swift build`, the targeted core suites, the self-assessment | — |
 
 #### VX-921 — the mechanism (traced at `6e16362e1`, before any line)
@@ -2495,6 +2495,14 @@ converged bytes":
   claim is accepted first too). **R-921b — the tiebreak flipped:** `ownedClaimOutranks`' `lhs.id < rhs.id` → `lhs.id >
   rhs.id` ⇒ expected RED the pure pin's order line and its tie line only (a flipped tiebreak is still a strict order, so
   the antisymmetry loop stays green; no convergence pin has a stamp tie).
+- *The reverts, run at `797dfe8a7` (headless; `Repairs.swift` alone — `git diff --stat` showed exactly that one file
+  each time; restored by `git checkout --`, `git diff --stat` empty after):* **R-921a** → **`✘ Test run with 13 tests in
+  2 suites failed … with 15 issues`** — exactly piece 1a's set: the plain-vs-owned pin (8 — A's four repair lines, the
+  two converged lines on both devices) and the owned-vs-owned pin (7 — A's three repair lines, the two converged lines
+  on both devices); GREEN `theClaimRankIsEarliestFiledThenID` and all ten `Phase13iRepairTests`. **R-921b** → **`✘ …
+  with 2 issues`** — exactly `theClaimRankIsEarliestFiledThenID`'s order line and tie line; the antisymmetry loop and
+  every convergence pin green. Restored → **`✔ 13 tests in 2 suites passed`**. Every named revert bit exactly its named
+  set.
 
 #### VX-921 — the sibling seq-rank repairs, RECORDED (never widened — the brief's scope rule)
 
