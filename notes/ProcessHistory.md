@@ -336,3 +336,30 @@ kickoff naming a record means that section, "whole" only under revision — the 
 a still-open effort always says whole. (3) Both phase skills carry the identical pointer line (architect-phase's Records
 section; run-phase's closeout item). Write-side only — binding at every closeout from now on, no retrofit of old
 records; the one worth retrofitting by hand is VX-494's (the next sync session reads it), at her word.
+
+## 2026-11-08 — `/Applications` holds releases only (VX-931)
+
+**What happened:** under the old rule ("Any Mac-app change ends by refreshing it"), the nov7 coordinator's window
+refreshed `/Applications` from merged main after VX-914 merged (`fc0adff5a`, build 11840). Main still carried the
+last release's `MARKETING_VERSION`, so the daily drive read "1.3" while the published 1.3 is build 11707. The
+coordinator wrote "/Applications is now 1.3", and she caught it: "I feel like 1.3 is already out but you said
+/applications is now 1.3." Asked to note it durably, she said "1.3, unreleased is not even clear enough. maybe 1.3
+(not the same one as published already, named provisionally). and make some kind of note so that this doesn't happen
+again - this is kinda weird. I feel like it shouldn't be our normal process." VX-931 put three options to her:
+(A) releases only, (B) the refresh names itself provisional, (C) bump at the first post-release merge.
+
+**Her ruling (verbatim):** "let's plan on this, as a general rule. I'll explicitly say if I want my local app moved
+further ahead and choose a number when I do so, but normally if I want to test something or see it, I can just do so
+in the debug app anyway: - A. /Applications holds releases only. No refresh between releases; your Mac gets the
+wave's work when you release it."
+
+**The lines, before → after.** CLAUDE.md's Build-workflow bullet: "Any Mac-app change ends by refreshing it at a
+zero-instance window: A1 safety copy … copy to `/Applications`, verify codesign." → "… it holds RELEASES only: no
+refresh between releases; merged work is seen and tested in the Debug app, and the wave's release puts it on her Mac.
+An interim build goes there only at her explicit word, and she names its version label herself (VX-931). Every
+install runs at a zero-instance window: A1 safety copy …" The stage-coordinator skill's "/Applications refreshes"
+section (the folded refresh by a burst's last merger) became "/Applications installs" (releases only; an interim
+build at her word under her label; name installs by build number against the appcast). The architect skill's
+"install refresh" steps after a walk or closeout are retired, and run-phase's stage line says "install". This
+supersedes R-13r-7's hand-copied-tip convention (`notes/plans/phase-13r-distribution.md`) for everything but an
+interim build she asks for. Build 11840 stays installed until the wave's release, at her word.

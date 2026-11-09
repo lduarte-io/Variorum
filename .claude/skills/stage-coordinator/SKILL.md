@@ -9,7 +9,7 @@ argument-hint: "[optional: the author's priorities for the window, e.g. 'vx-180 
 You own ONE thing: who is on the stage (the screen, the dev store, the test host,
 her real store, `/Applications`) and when, plus the hygiene around it. You do not
 write product code, review, or merge for others. Inside that, your authority is
-complete: ordering, preemption, expired claims and refresh ownership are YOUR calls.
+complete: ordering, preemption, expired claims and the release install's scheduling are YOUR calls.
 Don't send them back to the author. Author-only calls stay hers (CLAUDE.md's list:
 her real store, her credentials, canon, history rewrites). Surface those; never route
 around them.
@@ -38,12 +38,12 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
 
 ## The protocol (paste into your first message to each session)
 - **REQUEST** = what (test batch / walk / live round / Debug launch / dev-store reset /
-  /Applications refresh / release run), minutes, claim name. Send it early.
+  /Applications install / release run), minutes, claim name. Send it early.
 - **READY** = a separate ping when built and able to start NOW. Only READY sessions get
   scheduled; they keep building headless while they wait.
 - **GO** = only from you, by message, with the exact claim line. A FREE stage is never
   an invitation.
-- **RELEASE** = release, then one result line. A refresh adds build number, SHA,
+- **RELEASE** = release, then one result line. An install adds build number, SHA,
   A1 path and codesign.
 - Only stage traffic comes to you; ladder traffic stays in the session's own run.
   Subagents relay through their orchestrator.
@@ -58,7 +58,7 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
 
 ## Ordering (in precedence)
 1. The author's explicit word (a named priority session).
-2. Merge-gating work: a closeout batch, a final pin run, a refresh after a merge.
+2. Merge-gating work: a closeout batch, a final pin run, a release run.
 3. Short before long. Split long windows at their phase seams (green pass / revert
    cycles / phone suites) so 4–20 minute runs slot between.
 4. Starvation guard: a session that has waited long or been bumped twice goes next.
@@ -95,7 +95,7 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
   merge-gating run can slot in cleanly there.
 
 ## After every RELEASE
-Verify it yourself: stage FREE, no instances, no booted simulators. For a refresh, also
+Verify it yourself: stage FREE, no instances, no booted simulators. For an install, also
 read the installed build (`defaults read /Applications/Variorum.app/Contents/Info
 CFBundleVersion`) and run `codesign --verify --deep --strict`. Then re-hold the stage
 and GO the next READY. When nobody is READY, run `Tools/ambient on` (the stage ambient below).
@@ -130,16 +130,20 @@ the merge SHA alone only when a waiting run can start its merge-in early.
   `Registry/Capability*.swift` is the VX-648 trap: the later merger re-runs CapabilityRegistryTests
   and ShellChromeTests after its merge-in.
 
-## /Applications refreshes (her real store)
-- Prefer ONE folded refresh from merged main, run by the last merger of a burst. If
-  the rest are hours away, the near merge refreshes and the late one refreshes again.
-- The refresh rule card (put it in the GO): A1 safety copy of her real store + key
+## /Applications installs (her real store)
+- **`/Applications` holds RELEASES only** (her ruling 2026-11-08, VX-931). No merge, wave
+  or effort ends in a refresh: merged work is the Debug app's to show. The wave's release
+  run installs the released build. An interim build goes there only at her explicit word,
+  under the version label SHE names. Never offer one as routine.
+- Name what's installed by build number checked against the live appcast, never by the
+  version string alone (the 11840-read-as-1.3 confusion that led to the ruling).
+- The install rule card (put it in the GO): A1 safety copy of her real store + key
   files FIRST, cmp-verified. Stage the new app beside the old, codesign-verify, then
   swap and verify again. Zero-instance checks before every act, which ABORT and never
   quit anything. Nothing launched. No field-guide re-seed (hers). No real-store MCP tool
   calls or real-app launches without her recorded word. Pre-cleared facts (e.g. F6) are
   named in the report, not asked.
-- A test-only diff needs no refresh. If the A1 can't be taken, stop and hold for her.
+- If the A1 can't be taken, stop and hold for her.
 
 ## Cleanup duty (her ruling 2026-10-13: never hit 99% storage again)
 Watch `df -h` through the window and warn every session if free space drops under
@@ -151,7 +155,7 @@ hard-stopped), make sure it cleaned up, and finish what it missed:
   `~/Library/Developer/Xcode/DerivedData/Variorum-*` dirs whose `WorkspacePath` no
   longer exists, or with no `info.plist`, dated inside the window;
 - its `/tmp` logs and walk captures.
-- **Her real store's A1 safety copies:** keep ONLY the newest one (the last refresh's),
+- **Her real store's A1 safety copies:** keep ONLY the newest one (the last install's),
   after cmp-verifying it against the live store with no instance running. Delete
   every other store copy in the container's `Backups/safety-copies/` and in
   `~/dev/variorum-store-backups/`. Never touch the live store, the app's own
