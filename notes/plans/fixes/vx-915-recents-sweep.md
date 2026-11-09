@@ -448,6 +448,19 @@ Rules 2 (the words shown only on ask), 13 (a Castle-era backup's protection), 9 
 
 #### BATCH 5 — LIVE STATUS
 
+*Implementer: opus-implementer, seated 2026-11-09. Every claim is PENDING until its run is named. No revert is in flight.*
+
+**NOT DONE BY THE IMPLEMENTER (first, by the contract):** PENDING the batch's end.
+
+**The reading (done before code, none delegated):** CLAUDE.md + canon · this file's Kickoff / constitution / ENVIRONMENT & TRAPS / BATCH 5 · SurfaceContracts "The Library" (the search bullet — the counts law: a picked facet's band counts what it lists, All the whole question) · `vx-819-search.md` batch 1 (the re-trace, the facet pins, "Observed, pre-existing") · `vx-781-lockfile-pins.md` §THE release.sh WIRING + the VX-853 supersession · `notes/SessionResiliencyProtocol.md`.
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | This LIVE STATUS | DONE (this commit) |
+| 2 | VX-888 — the trace + the band-vs-sheet repro pin, run on the CURRENT tree (red → fix; green → hollow, record, no fix) | IN-PROGRESS |
+| 3 | VX-852 — the source-walk pin (red on today's release.sh), then the two hooks + the retention, exactly as vx-781 proposed | NOT-STARTED |
+| 4 | Evidence: `bash -n`/`zsh -n` on release.sh · `Tools/verify-pins` dry runs (no argument; a DerivedData tree) · core suites on the touched area · self-assessment | NOT-STARTED |
+
 ### BATCH 6 — the wire's unlink (VX-943)
 
 **Required reading:** `notes/MCPSpec.md` IN FULL (binding — a new wire tool) · the VX-943 ticket (her relay verbatim) · the link_versions implementation and its R-VX187-1 record · AppSpec §9 (edges; the undo conventions).
