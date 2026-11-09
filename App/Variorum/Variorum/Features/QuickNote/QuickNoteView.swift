@@ -693,14 +693,15 @@ nonisolated enum QuickNoteCopy {
     /// The receipt for a capture filed in another wing: tagged there, and no
     /// Quicknotes gathering grows there (the furniture is Home's) — so where it
     /// is, is whatever BOOK the tag seated it in, else that wing's Pool
-    /// (`books` empty, the default: "Filed in the Pool of “W” — tagged
-    /// #quicknote.", byte-unchanged). **VX-915 ladder round 1, F-1:** the
-    /// place is `CaptureLanding`'s one rule (the band's File Without Opening
-    /// reads it too): one book named, several counted. Nil — the landing could
-    /// not be read — says only that it filed (the band's own posture). The
-    /// book and unread forms are PROVISIONAL words (her bundle, beside
-    /// P-915-B3-1).
-    static func filedInWing(_ wingName: String, books: [String]? = []) -> String {
+    /// (`books` empty: "Filed in the Pool of “W” — tagged #quicknote.",
+    /// byte-unchanged). **VX-915 ladder round 1, F-1:** the place is
+    /// `CaptureLanding`'s one rule (the band's File Without Opening reads it
+    /// too): one book named, several counted. Nil — the landing could not be
+    /// read — says only that it filed (the band's own posture). `books` has NO
+    /// default (ladder round 2, R2-4): a caller that read nothing must not get
+    /// the Pool line F-1 closed. The book and unread forms are PROVISIONAL
+    /// words (her bundle, beside P-915-B3-1).
+    static func filedInWing(_ wingName: String, books: [String]?) -> String {
         guard let books else { return "Filed \u{2014} tagged #quicknote." }
         let place = CaptureLanding.place(
             books: books, pool: "the Pool of \u{201C}\(wingName)\u{201D}")
