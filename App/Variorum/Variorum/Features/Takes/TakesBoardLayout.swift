@@ -210,7 +210,7 @@ final class TakesBoardLayout {
     private var slotDragOffsets: [String: CGFloat] = [:]
 
     @ObservationIgnored private var postID: String?
-    @ObservationIgnored private var defaults: UserDefaults = .standard
+    @ObservationIgnored private var defaults: UserDefaults = NoteMemoryDefaults.store
 
     /// **THE ARTICLE COLUMN'S SCROLL BRAIN** (13u2 UNIT E — KnownIssues row
     /// 51, the split owed three times): the landing, the reveals, the scroll
@@ -224,7 +224,7 @@ final class TakesBoardLayout {
     @ObservationIgnored let article: TakesArticleScroll
 
     init(
-        postID: String? = nil, defaults: UserDefaults = .standard,
+        postID: String? = nil, defaults: UserDefaults = NoteMemoryDefaults.store,
         lastCurrentRow: String? = nil
     ) {
         self.postID = postID

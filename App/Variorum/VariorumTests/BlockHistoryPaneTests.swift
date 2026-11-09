@@ -603,10 +603,12 @@ struct BlockHistoryPaneTests {
                 blocks.append(try session.operations.newBlock(in: post.id, text: text).block.id)
             }
             // Every world mints the SAME post id (`.incrementing` from zero)
-            // and `CurrentBlockMemory` persists per note into
-            // `UserDefaults.standard` — so one suite's caret can arrive as the
-            // next suite's remembered fact (the recorded order-dependence, the
-            // Act 10 correction round's batch-G note). Enter and leave clean.
+            // and `CurrentBlockMemory` persists per note into the note-memory
+            // domain (`NoteMemoryDefaults.store` — the test host's own suite
+            // since VX-926 U4: emptied per run, shared by the run's suites) —
+            // so one suite's caret can arrive as the next suite's remembered
+            // fact (the recorded order-dependence, the Act 10 correction
+            // round's batch-G note). Enter and leave clean.
             session.commandRouter.forgetCurrentBlock(for: post.id)
             defer { session.commandRouter.forgetCurrentBlock(for: post.id) }
             try await body(session, post.id, blocks)
@@ -646,7 +648,7 @@ struct BlockHistoryPaneTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
             }
             let hosting = NSHostingView(
                 rootView: PostDetailView(session: session, postID: post.id)

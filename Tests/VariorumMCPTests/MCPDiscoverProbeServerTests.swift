@@ -43,8 +43,10 @@ struct RawSocket {
     let fd: Int32
 
     /// Connect, with a bounded receive (a deferred answer must fail a pin,
-    /// never hang the suite — the VX-132 class).
-    init(_ h: ServerHarness, timeout seconds: Int = 5) throws {
+    /// never hang the suite — the VX-132 class). VX-850: the bound defaults to
+    /// the harness's one bound (`HarnessWait.receiveSeconds` — O-7's rule), never
+    /// a hand-picked 5 s a congested pool's answer outruns.
+    init(_ h: ServerHarness, timeout seconds: Int = HarnessWait.receiveSeconds) throws {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
             throw HarnessFailure("could not connect")
         }
@@ -62,27 +64,32 @@ struct RawSocket {
     }
 
     /// The next line the server wrote, as JSON; nil at EOF, timeout, or a
-    /// line that is not a JSON object.
-    func next() -> [String: Any]? {
-        let line = MCPShim.readFirstLine(fd, limit: 1 << 20)
+    /// line that is not a JSON object. VX-850: every wait for the server runs
+    /// off the pool (`HarnessWait`) — the server answering it needs a pool thread.
+    func next() async -> [String: Any]? {
+        let fd = self.fd
+        let line = await HarnessWait.offPool { MCPShim.readFirstLine(fd, limit: 1 << 20) }
         guard !line.isEmpty else { return nil }
         return try? JSONSerialization.jsonObject(with: line) as? [String: Any]
     }
 
     /// The next RESPONSE (a line carrying an id) — the server's own
     /// notifications (`tools/list_changed` after a grant moves) are skipped.
-    func nextResponse() -> [String: Any]? {
+    func nextResponse() async -> [String: Any]? {
         for _ in 0..<16 {
-            guard let object = next() else { return nil }
+            guard let object = await next() else { return nil }
             if object["id"] != nil { return object }
         }
         return nil
     }
 
     /// After the server's answers: EOF within the receive timeout.
-    func isHungUp() -> Bool {
-        var byte: UInt8 = 0
-        return read(fd, &byte, 1) == 0
+    func isHungUp() async -> Bool {
+        let fd = self.fd
+        return await HarnessWait.offPool {
+            var byte: UInt8 = 0
+            return read(fd, &byte, 1) == 0
+        }
     }
 
     func close() { Darwin.close(fd) }
@@ -128,13 +135,13 @@ struct MCPDiscoverProbeServerTests {
             socket.send(preamble: try h.setupKey(for: "claude-code"),
                         CapturedClaudeCode.probe, CapturedClaudeCode.initialize)
 
-            let probeAnswer = socket.next()
+            let probeAnswer = await socket.next()
             #expect(probeAnswer?["id"] as? String == CapturedClaudeCode.probeID,
                     "the probe answered on its own id, a string echoed as a string: \(String(describing: probeAnswer))")
             #expect(errorOf(probeAnswer).code == -32601, "Method not found — never the setup-key refusal")
             #expect(probeAnswer?["result"] == nil)
 
-            let initialized = try #require(socket.nextResponse(), "the pipelined initialize is read and answered")
+            let initialized = try #require(await socket.nextResponse(), "the pipelined initialize is read and answered")
             #expect(initialized["id"] as? Int == 0)
             let result = try #require(initialized["result"] as? [String: Any], "admitted: \(initialized)")
             #expect((result["serverInfo"] as? [String: Any])?["name"] as? String == VariorumMCP.serverName)
@@ -142,14 +149,14 @@ struct MCPDiscoverProbeServerTests {
 
             socket.send(#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#,
                         #"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#)
-            let listed = try #require(socket.nextResponse())
+            let listed = try #require(await socket.nextResponse())
             #expect(listed["id"] as? Int == 1)
             let tools = ((listed["result"] as? [String: Any])?["tools"] as? [[String: Any]])?
                 .compactMap { $0["name"] as? String } ?? []
             #expect(tools.contains("read_note"), "tools/list works: \(tools)")
 
             socket.send(#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"read_note","arguments":{"note_id":"\#(note.id)"}}}"#)
-            let read = try #require(socket.nextResponse())
+            let read = try #require(await socket.nextResponse())
             #expect(read["id"] as? Int == 2)
             #expect((read["result"] as? [String: Any])?["isError"] as? Bool != true, "the note is read: \(read)")
 
@@ -174,13 +181,13 @@ struct MCPDiscoverProbeServerTests {
         defer { socket.close() }
         socket.send(preamble: key, CapturedClaudeCode.probe)
 
-        let probeAnswer = socket.next()   // bounded: 5 s
+        let probeAnswer = await socket.next()   // bounded: the harness's one bound
         #expect(probeAnswer?["id"] as? String == CapturedClaudeCode.probeID,
                 "answered while the client waits: \(String(describing: probeAnswer))")
         #expect(errorOf(probeAnswer).code == -32601)
 
         socket.send(CapturedClaudeCode.initialize)
-        let initialized = socket.nextResponse()
+        let initialized = await socket.nextResponse()
         #expect(initialized?["id"] as? Int == 0)
         #expect(initialized?["result"] != nil, "admitted as a connection request: \(String(describing: initialized))")
         let client = try await h.database.read { try Queries.mcpClient($0, name: "claude-code") }
@@ -202,7 +209,7 @@ struct MCPDiscoverProbeServerTests {
         socket.send(preamble: key,
                     #"{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":"server-discover-probe-1","reason":"timeout"}}"#,
                     CapturedClaudeCode.initialize)
-        let first = socket.next()
+        let first = await socket.next()
         #expect(first?["id"] as? Int == 0, "the first answer is the initialize's: \(String(describing: first))")
         #expect(first?["result"] != nil)
     }
@@ -221,10 +228,10 @@ struct MCPDiscoverProbeServerTests {
         let socket = try RawSocket(h)
         defer { socket.close() }
         socket.send(preamble: key, #"{"jsonrpc":"2.0","id":41,"method":"ping"}"#, CapturedClaudeCode.initialize)
-        let pong = socket.next()
+        let pong = await socket.next()
         #expect(pong?["id"] as? Int == 41, "\(String(describing: pong))")
         #expect((pong?["result"] as? [String: Any])?.isEmpty == true && pong?["error"] == nil)
-        let initialized = socket.nextResponse()
+        let initialized = await socket.nextResponse()
         #expect(initialized?["id"] as? Int == 0 && initialized?["result"] != nil)
     }
 
@@ -241,7 +248,7 @@ struct MCPDiscoverProbeServerTests {
         var held: [Int32] = []
         defer { for fd in held { close(fd) } }
         for index in 0..<MCPServerHost.sessionCap {
-            let (fd, answer) = try h.rawOpen(as: "held-\(index)", presenting: try h.setupKey(for: "held-\(index)"))
+            let (fd, answer) = try await h.rawOpen(as: "held-\(index)", presenting: try h.setupKey(for: "held-\(index)"))
             held.append(fd)
             #expect(answer["result"] != nil, "connection \(index) serves")
         }
@@ -250,13 +257,13 @@ struct MCPDiscoverProbeServerTests {
         let socket = try RawSocket(h)
         defer { socket.close() }
         socket.send(preamble: try h.setupKey(for: "claude-code"), CapturedClaudeCode.probe, CapturedClaudeCode.initialize)
-        let probeAnswer = socket.next()
+        let probeAnswer = await socket.next()
         #expect(probeAnswer?["id"] as? String == CapturedClaudeCode.probeID)
         #expect(errorOf(probeAnswer).code == -32601, "\(String(describing: probeAnswer))")
-        let capped = socket.next()
+        let capped = await socket.next()
         #expect(capped?["id"] as? Int == 0, "the cap answers the initialize: \(String(describing: capped))")
         #expect(errorOf(capped).code == MCPShim.refusalCode)
         #expect(errorOf(capped).message == MCPServerHost.overCapMessage)
-        #expect(socket.isHungUp())
+        #expect(await socket.isHungUp())
     }
 }

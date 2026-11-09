@@ -318,7 +318,7 @@ struct DebugOracleTwoWindowTests: DebugOracleWindowRig {
             ReadModeView.remember(.edit, postID: theNote.postID)
             let storage = try scrubbedStorage("read-frames")
             defer {
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(theNote.postID))
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(theNote.postID))
                 session.commandRouter.forgetCurrentBlock(for: theNote.postID)
             }
             let post = theNote.postID
@@ -465,8 +465,8 @@ struct DebugOracleTwoWindowTests: DebugOracleWindowRig {
             let session = AppSession(database: db)
             let theNote = try note(session, "one note, two shells", blocks: 2)
             let post = theNote.postID
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post)")
-            defer { UserDefaults.standard.removeObject(forKey: "postMode.\(post)") }
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post)")
+            defer { NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post)") }
             let routerOne = ShellRouter()
             let one = mount(shell(session, routerOne), width: 1200, height: 900)
             defer { close(one.window) }

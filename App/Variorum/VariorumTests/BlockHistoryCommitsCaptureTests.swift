@@ -373,7 +373,7 @@ struct BlockHistoryCommitsCaptureTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(crowded.postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(crowded.postID)")
             }
             let hosting = NSHostingView(
                 rootView: PostDetailView(session: session, postID: crowded.postID)

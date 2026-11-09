@@ -202,8 +202,8 @@ struct ShellLandingMountTests {
                 window.close()
                 session.commandRouter.forgetCurrentBlock(for: noteX.id)
                 session.commandRouter.forgetCurrentBlock(for: noteY.id)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(noteX.id)")
-                UserDefaults.standard.removeObject(forKey: "postMode.\(noteY.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(noteX.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(noteY.id)")
             }
             _ = await Self.settle(window, hosting) {
                 router.workspace.history().current != nil
@@ -307,7 +307,7 @@ struct ShellLandingMountTests {
                 window.orderOut(nil)
                 window.close()
                 session.commandRouter.forgetCurrentBlock(for: noteX.id)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(noteX.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(noteX.id)")
             }
             _ = await Self.settle(window, hosting) {
                 router.workspace.history().current != nil
@@ -412,7 +412,7 @@ struct ShellLandingDoorTests {
                 window.close()
                 ShellRouter.forgetBlockNamingDoors()
                 session.commandRouter.forgetCurrentBlock(for: note.id)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(note.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(note.id)")
             }
             _ = await ShellLandingMountTests.settle(window, hosting) {
                 ShellRouter.blockNamingDoor != nil

@@ -92,7 +92,7 @@ struct BlockHistoryHostTests {
                     _ = try session.operations.commit(minted.variant.id, kind: .manual)
                 }
             }
-            UserDefaults.standard.set(mode.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(mode.rawValue, forKey: "postMode.\(post.id)")
             session.commandRouter.forgetCurrentBlock(for: post.id)
             if currentBlock {
                 // The remembered current block (row 39's memory) — the
@@ -113,7 +113,7 @@ struct BlockHistoryHostTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
                 session.commandRouter.forgetCurrentBlock(for: post.id)
             }
             let hosting = NSHostingView(

@@ -1673,7 +1673,7 @@ struct RootView: View {
     /// from, so the three can never disagree.
     @ViewBuilder
     private func readCheapNote(_ containerID: String, pane: PaneID) -> some View {
-        if ReadTakesView.holdsTakes(postID: containerID) {
+        if ReadTakesView.holdsTakes(postID: containerID, defaults: NoteMemoryDefaults.store) {
             ReadTakesView(session: session, postID: containerID)
                 .id("pane-takes-\(containerID)")
         } else {

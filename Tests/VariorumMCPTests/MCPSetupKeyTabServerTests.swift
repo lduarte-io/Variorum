@@ -78,7 +78,7 @@ struct MCPSetupKeyTabServerTests {
             #expect(served.isError != true && text(served).contains("the harbour at dawn"), "\(text(served))")
             #expect(try await h.eventually { h.host.connectedClientNames == ["claude-code"] })
 
-            let (fd, replaced) = try h.rawOpen(as: "claude-code", presenting: ownKey, id: 4)
+            let (fd, replaced) = try await h.rawOpen(as: "claude-code", presenting: ownKey, id: 4)
             close(fd)
             #expect(message(replaced) == MCPHandshake.replacedRefusal, "the key she replaced: its own sentence")
             await h.hangUp(waiting)
@@ -97,7 +97,7 @@ struct MCPSetupKeyTabServerTests {
             let request = try #require(try await h.database.read { try Queries.mcpRebindRequests($0) }.first)
             _ = try h.operations.declineMCPRebind(request.id)
             #expect(try await waiting.client.listTools().tools.isEmpty, "still nothing")
-            let (fd, again) = try h.rawOpen(as: "claude-code", presenting: anyKey, id: 5)
+            let (fd, again) = try await h.rawOpen(as: "claude-code", presenting: anyKey, id: 5)
             close(fd)
             #expect(message(again) == MCPHandshake.refusal, "its next connection: the one sentence")
             let served = try await real.client.callTool(name: "read_note", arguments: ["note_id": .string(page.id)])

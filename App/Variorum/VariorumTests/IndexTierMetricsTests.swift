@@ -419,7 +419,7 @@ struct IndexTierMetricsTests {
                     .environment(theme))
             defer {
                 rig.close()
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(note.postID))
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(note.postID))
                 session.commandRouter.forgetCurrentBlock(for: note.postID)
             }
             #if DEBUG

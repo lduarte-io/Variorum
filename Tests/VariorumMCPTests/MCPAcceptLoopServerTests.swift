@@ -65,9 +65,19 @@ struct MCPAcceptLoopServerTests {
         return faults
     }
 
-    private func signals(_ h: ServerHarness) -> LockIsolated<Int> {
+    /// Counts the door's signal. `landingAfter` holds the signal on the
+    /// thread that sends it before it is counted — VX-932's pin: the dying
+    /// listener flips `state` under the host's lock and only AFTERWARDS removes
+    /// its socket and signals (`MCPServerHost.listenerDied`), on the accept
+    /// thread, which load can deschedule in between; a late signal is that
+    /// descheduled thread made deterministic.
+    private func signals(_ h: ServerHarness, landingAfter delay: Duration = .zero) -> LockIsolated<Int> {
         let count = LockIsolated(0)
-        h.host.onStateChanged = { count.withValue { $0 += 1 } }
+        let micros = UInt32(delay.components.seconds * 1_000_000 + delay.components.attoseconds / 1_000_000_000_000)
+        h.host.onStateChanged = {
+            if micros > 0 { usleep(micros) }
+            count.withValue { $0 += 1 }
+        }
         return count
     }
 
@@ -116,11 +126,23 @@ struct MCPAcceptLoopServerTests {
     /// left in a dead backlog), and the connection already served is still
     /// served until a stop ends it.
     @Test func aFatalAcceptFailureStopsTheListenerAndSaysSo() async throws {
+        try await fatalAcceptRoad(signalLandingAfter: .zero)
+    }
+
+    /// VX-932 — the same road with the door's signal landing 300 ms after the
+    /// state flips (the descheduled accept thread, deterministic): the signal
+    /// and the socket's removal are WAITED FOR, never read at the flip, and
+    /// the signal is still heard exactly once. Red on old (the immediate reads).
+    @Test func aSignalLandingLateAfterTheFlipIsStillHeardOnce() async throws {
+        try await fatalAcceptRoad(signalLandingAfter: .milliseconds(300))
+    }
+
+    private func fatalAcceptRoad(signalLandingAfter delay: Duration) async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
             let faults = faulted(h)
-            let heard = signals(h)
+            let heard = signals(h, landingAfter: delay)
             let served = try await h.connect(as: "claude-code")
             _ = try h.approve("claude-code", spec())
             faults.queue(.accept, [EBADF])
@@ -131,8 +153,10 @@ struct MCPAcceptLoopServerTests {
             defer { close(doomed) }
             #expect(try await h.eventually { h.host.state != .running })
             #expect(h.host.state == .stoppedByItself("accept: \(String(cString: strerror(EBADF)))"), "\(h.host.state)")
-            #expect(heard.value == 1, "the door is signalled once")
-            #expect(!socketExists(h.directory), "the dead listener's socket is removed")
+            // VX-932: the state flips under the lock FIRST; the socket's
+            // removal and the signal follow on the accept thread.
+            #expect(try await h.eventually { heard.value >= 1 }, "the door is signalled")
+            #expect(try await h.eventually { !socketExists(h.directory) }, "the dead listener's socket is removed")
             guard case .failure = MCPSocketRoad.connect(directory: h.directory) else {
                 Issue.record("a new client still reached a socket")
                 return
@@ -140,6 +164,7 @@ struct MCPAcceptLoopServerTests {
             #expect(try await served.client.callTool(name: "list_books", arguments: [:]).isError != true,
                     "the connection already served keeps being served")
             #expect(h.host.connectedClientNames == ["claude-code"])
+            #expect(heard.value == 1, "the door is signalled ONCE")
             h.host.stop(ending: .serverOff)
             #expect(h.host.state == .stopped)
         }
@@ -160,9 +185,11 @@ struct MCPAcceptLoopServerTests {
             if case .success(let nudge) = MCPSocketRoad.connect(directory: h.directory) { close(nudge) }
             #expect(try await h.eventually { h.host.state != .running })
             #expect(h.host.state == .stoppedByItself("poll: \(String(cString: strerror(EINVAL)))"), "\(h.host.state)")
-            #expect(heard.value == 1 && !socketExists(h.directory))
+            // VX-932: the removal and the signal follow the flip — wait for them.
+            #expect(try await h.eventually { heard.value >= 1 && !socketExists(h.directory) })
             #expect(try await served.client.callTool(name: "list_books", arguments: [:]).isError != true,
                     "the connection already served keeps being served")
+            #expect(heard.value == 1, "the door is signalled once")
             await h.hangUp(served)
         }
     }
@@ -201,6 +228,7 @@ struct MCPAcceptLoopServerTests {
         defer { h.tearDown() }
         try await h.within {
             let faults = faulted(h)
+            let heard = signals(h)
             faults.queue(.accept, [EINVAL])
             guard case .success(let doomed) = MCPSocketRoad.connect(directory: h.directory) else {
                 Issue.record("no connect")
@@ -208,6 +236,9 @@ struct MCPAcceptLoopServerTests {
             }
             close(doomed)
             #expect(try await h.eventually { h.host.state != .running })
+            // VX-932: the dead listener removes its socket AFTER the flip; a
+            // fresh host binds only once the death is said (the door's road).
+            #expect(try await h.eventually { heard.value == 1 })
             let fresh = MCPServerHost(
                 database: h.database, operations: h.operations, directory: h.directory, version: "test",
                 executor: SeededExecutor(operations: h.writeOperations))

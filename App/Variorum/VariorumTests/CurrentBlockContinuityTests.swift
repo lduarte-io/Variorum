@@ -132,7 +132,7 @@ struct CurrentBlockContinuityTests {
             }
             let router = session.commandRouter
             router.forgetCurrentBlock(for: post.id)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             #if DEBUG
             ReadModeOracle.reset()
             // Row 50: this pin's OWN workbench, named by its own session.
@@ -152,8 +152,8 @@ struct CurrentBlockContinuityTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(post.id))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(post.id))
                 router.forgetCurrentBlock(for: post.id)
             }
             let hosting = NSHostingView(
@@ -267,7 +267,7 @@ struct CurrentBlockContinuityTests {
             }
             let router = session.commandRouter
             router.forgetCurrentBlock(for: post.id)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             #if DEBUG
             ReadModeOracle.reset()
             // Row 50: this pin's OWN workbench, named by its own session.
@@ -288,8 +288,8 @@ struct CurrentBlockContinuityTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(post.id))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(post.id))
                 router.forgetCurrentBlock(for: post.id)
             }
             // The JUMP door: `initialBlockID` runs `jump(to:)` on appear —
@@ -414,7 +414,7 @@ struct CurrentBlockContinuityTests {
             }
             let router = session.commandRouter
             router.forgetCurrentBlock(for: post.id)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             #if DEBUG
             ReadModeOracle.reset()
             // Row 50: this pin's OWN workbench, named by its own session.
@@ -434,8 +434,8 @@ struct CurrentBlockContinuityTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(post.id))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(post.id))
                 router.forgetCurrentBlock(for: post.id)
             }
             let hosting = NSHostingView(

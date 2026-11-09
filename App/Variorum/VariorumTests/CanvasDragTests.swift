@@ -77,8 +77,8 @@ struct CanvasDragRig {
     ) async -> CanvasDragRig {
         // Defaults hygiene (the 4G rule): deterministic ids recur across
         // runs — clear the view-memory keys the view would read.
-        UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(containerID)")
-        UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(containerID)")
+        NoteMemoryDefaults.store.removeObject(forKey: "canvasViewMemory.\(containerID)")
+        NoteMemoryDefaults.store.removeObject(forKey: "canvasSizeMemory.\(containerID)")
         let model = CanvasViewModel(session: session, containerID: containerID)
         let window = NSPanel(
             contentRect: NSRect(x: 120, y: 120, width: 900, height: 700),

@@ -133,7 +133,7 @@ struct PostDetailRoutingTests {
             // Write now, so this test seeds a REMEMBERED Takes mode — the
             // takes-mounted → write-request transition it exercises is
             // unchanged, and the seeding doubles as a memory-stands pin.
-            UserDefaults.standard.set(PostMode.takes.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.takes.rawValue, forKey: "postMode.\(post.id)")
 
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
@@ -142,7 +142,7 @@ struct PostDetailRoutingTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
             }
             let hosting = NSHostingView(
                 rootView: PostDetailView(session: session, postID: post.id)
