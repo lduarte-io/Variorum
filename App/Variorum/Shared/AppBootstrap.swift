@@ -1202,8 +1202,8 @@ final class AppBootstrap {
                 return await fresh.runFirstRound()
             })
         // VX-544 (the VX-849 run, batch 2 — D-544; her R-849-1): the typed unlock's pending sync-keys load on the CURRENT road
-        // session (each closure reads it at its call — a reopen's fresh session is the one reached): the Mac services' round
-        // occasion retries it while the engine has no keys; a sign-out lets it go (both platforms).
+        // session (each closure reads it at its call — a reopen's fresh session is the one reached): the services' round
+        // occasion retries it while the engine has no keys, and a sign-out lets it go — both platforms (P-849-3).
         services.typedUnlockSyncKeys = TypedUnlockSyncKeysRoads(
             isPending: { [weak self] in self?.roadSession?.pendingSyncKeyLoad != nil },
             retry: { [weak self] in await self?.retryTypedUnlockSyncKeyLoad() },

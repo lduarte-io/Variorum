@@ -48,6 +48,16 @@ struct SyncReachabilityTriggerTests {
     /// Comfortably past the debounce (the round's own hops included).
     static let pastTheDebounce: Duration = .milliseconds(500)
 
+    /// Waits (at most 3 s — a loaded parallel run can hold the main actor past the debounce) until `rounds` reaches `count`,
+    /// then a moment more, so a count PAST it would show too.
+    static func reach(_ rounds: LockIsolated<Int>, _ count: Int) async throws {
+        let deadline = ContinuousClock.now + .seconds(3)
+        while rounds.value < count, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        try await Task.sleep(for: .milliseconds(200))
+    }
+
     /// A configured session watching `path`, every round it starts counted by its occasion.
     static func watching(
         _ path: PlantedNetworkPath, held: Bool = false, _ body: @MainActor (SyncSession, LockIsolated<Int>) async throws -> Void
@@ -60,7 +70,10 @@ struct SyncReachabilityTriggerTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 544))
             $0.ownerIdentity = OwnerIdentity { "owner-544" }
         } operation: { @MainActor in
-            let session = SyncSession(database: db, allowsSync: true, path: path, reachabilityDebounce: Self.debounce)
+            // The settle observation's own trigger held off (a fresh store's outbox is not empty): only the path's rounds count.
+            let session = SyncSession(
+                database: db, allowsSync: true, settleDebounce: .seconds(60), path: path,
+                reachabilityDebounce: Self.debounce)
             if held { session.roundsHeld = { true } }
             let rounds = LockIsolated(0)
             await session.configure(transport: FirstRoundServer(), keyProvider: AppTestKeyProvider())
@@ -80,7 +93,7 @@ struct SyncReachabilityTriggerTests {
             path.send(false)
             path.send(true)
             #expect(rounds.value == 0, "debounced: nothing at once")
-            try await Task.sleep(for: Self.pastTheDebounce)
+            try await Self.reach(rounds, 1)
             #expect(rounds.value == 1, "one round after the debounce")
         }
     }
@@ -104,7 +117,7 @@ struct SyncReachabilityTriggerTests {
         try await Self.watching(path) { _, rounds in
             path.send(false)
             path.send(true)
-            try await Task.sleep(for: Self.pastTheDebounce)
+            try await Self.reach(rounds, 1)
             #expect(rounds.value == 1)
             path.send(true)
             path.send(true)
@@ -126,7 +139,7 @@ struct SyncReachabilityTriggerTests {
             path.send(true)
             path.send(false)
             path.send(true)
-            try await Task.sleep(for: Self.pastTheDebounce)
+            try await Self.reach(rounds, 1)
             #expect(rounds.value == 1, "settled: one round")
         }
     }
@@ -137,10 +150,11 @@ struct SyncReachabilityTriggerTests {
         try await Self.watching(path) { _, rounds in
             path.send(false)
             path.send(true)
-            try await Task.sleep(for: Self.pastTheDebounce)
+            try await Self.reach(rounds, 1)
+            #expect(rounds.value == 1)
             path.send(false)
             path.send(true)
-            try await Task.sleep(for: Self.pastTheDebounce)
+            try await Self.reach(rounds, 2)
             #expect(rounds.value == 2)
         }
     }

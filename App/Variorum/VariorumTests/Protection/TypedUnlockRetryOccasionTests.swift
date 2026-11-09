@@ -1,7 +1,7 @@
 //
 //  TypedUnlockRetryOccasionTests.swift
 //  VariorumTests — VX-544 (the VX-849 run, batch 2 — D-544 (3a); her R-849-1; the record
-//  `notes/plans/fixes/vx-849-typed-over-rescue.md`, BATCH 2 RECORD). THE OCCASION: the Mac composition runs the typed
+//  `notes/plans/fixes/vx-849-typed-over-rescue.md`, BATCH 2 RECORD). THE OCCASION: the composition (both platforms — P-849-3) runs the typed
 //  unlock's retry FIRST inside the one `beforeRound` closure (batch 1's hook — no second hook), gated: nothing at all
 //  without a pending load (a memory read is the whole cost), then ONE `currentKeys()` try off the main actor — keys there
 //  end the pending, none ⇒ the retry. A sign-out lets the pending go (her R-849-1: "dropped at lock/sign-out"). Over the
@@ -71,7 +71,7 @@ private final class ScriptedRoads {
     }
 }
 
-@Suite("VX-544 — the Mac's round occasion retries the typed unlock's pending load, gated (scripted roads)", .serialized)
+@Suite("VX-544 — the round occasion retries the typed unlock's pending load, gated (scripted roads)", .serialized)
 @MainActor
 struct TypedUnlockRetryOccasionTests {
     private static func services(
@@ -97,7 +97,7 @@ struct TypedUnlockRetryOccasionTests {
         let services = try Self.services(provider)
         let scripted = ScriptedRoads(pending: true)
         services.typedUnlockSyncKeys = scripted.roads
-        let occasion = try #require(services.sync.beforeRound, "the Mac composes the occasion")
+        let occasion = try #require(services.sync.beforeRound, "the composition wires the occasion")
         await occasion()
         #expect(scripted.log == ["isPending", "retry"], "\(scripted.log)")
         #expect(provider.reads == 1, "ONE currentKeys() try")

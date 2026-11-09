@@ -858,8 +858,8 @@ nonisolated enum ProtectionOpenRoad {
     /// authorized at the lobby finishes once the vault answers, with nothing typed again. Idempotent: nothing pending ⇒
     /// nothing (no read); a retry asked while one is out JOINS it (one read — `retryingSyncKeyLoad`); a hold that lands ends
     /// the pending, a second failure keeps it, every other exit ends it. `signIn`: who is signed in NOW (the caller's read,
-    /// off the main actor). The occasion is the Mac composition's (`AppServices`' one `beforeRound` closure, only while the
-    /// engine's provider cannot produce keys); the phone's stays unwired.
+    /// off the main actor). The occasion is the composition's (`AppServices`' one `beforeRound` closure, only while the
+    /// engine's provider cannot produce keys) — on both platforms (PROVISIONAL P-849-3).
     static func retryPendingSyncKeyLoad(
         _ session: ProtectionRoadSession, signIn: SessionFact, within bound: Duration = typedUnlockVaultBound
     ) async {

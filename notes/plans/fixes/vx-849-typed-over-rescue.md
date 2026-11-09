@@ -726,6 +726,8 @@ symlink with an edited copy of the committed file, runs, and restores the symlin
   minus the retry: `#else sync.beforeRound = { [weak session] in await session?.flushPendingTypingBeforeRound() }`. Its roads:
   `.active`'s `triggerSync`, the background transition's `flush()` (after its own `flushAll` — the occasion's cheap check then
   finds nothing pending), the settle observation. The phone's RETRY stays unwired (override 5): its closure has no retry call.
+  **[AMENDED at the BATCH 2 ADJUDICATION — P-849-3 RULED (c), below:]** the phone now composes BOTH occasions — the one
+  closure is shared by both platforms (the `#if`/`#else` arms collapsed: retry first, then the typing flush).
 - *Pins:* **THE ROAD PIN** `OfflineTypedUnlockRetryRoadTests.herOfflineTypedUnlockSyncsAtTheNextRoundOnceTheVaultAnswers` —
   her steps 8–9 end to end over what ships (the bootstrap over the planted road, the real `AppServices`/`SyncSession`
   attached through `attach(services:)`, a fake server): ARM 3's Castle-under-Always-ask set-up, the LOCK, the typed unlock
@@ -889,6 +891,8 @@ Protection door keeps its road. No user-facing sentence was added or changed; th
    before. Posture-consistent per D-544 (memory, the session's lifetime) but purposeless on the phone today. Options: (a) as
    built; (b) `#if os(macOS)` around the keep (the phone byte-for-byte today's); (c) wire the phone's retry — one line, the
    retry call in the phone's closure arm. The orchestrator's/her call; nothing filed (no product behavior differs).
+   **RULED (c) — wire the phone's retry** (the BATCH 2 ADJUDICATION below, PROVISIONAL P-849-3; built in the amendment
+   commit — see "AMENDMENT — P-849-3").
 2. **The occasion can delay a round by up to the vault bound (10 s)** while a pending exists, the keys are missing and the
    vault read hangs (a black-holed endpoint — offline reads fail at once); that round would refuse for keys anyway. Joined
    retries share the one read.
@@ -899,12 +903,14 @@ Protection door keeps its road. No user-facing sentence was added or changed; th
 5. **Keys that vanish without a relock after the gate cleared the pending** (an act's rollback dropping its own hold —
    `PlanRunner` :589) leave sync locked until the next unlock — the pre-VX-544 behavior in that corner.
 6. **The doc line in D-544 "no typed-unlock pending on the phone's road today" is stale** (VM-8 brought VX-501 to the phone);
-   corner 1 is its consequence.
+   corner 1 is its consequence (now ruled — P-849-3).
 
-**MOBILE PARITY (for the closeout line):** the phone now composes batch 1's typing occasion (P-849-2 — WIRED, the one line)
-and the reachability trigger (the shared `SyncSession`, production's path watch through the shared `AppServices`); VX-544's
-retry is the Mac's only — the phone keeps the derived secret on an offline typed unlock and drops it at lock/sign-out/reopen,
-never retrying (corner 1).
+**MOBILE PARITY (for the closeout line — AMENDED for P-849-3):** the phone composes the SAME round occasion as the Mac —
+VX-544's typed-unlock retry first, then batch 1's typing flush (P-849-2 and PROVISIONAL P-849-3, one shared closure) — and
+the reachability trigger (the shared `SyncSession`, production's path watch through the shared `AppServices`). So the phone
+heals the offline typed unlock exactly as the Mac does: the derived secret kept in session memory, retried before each round
+while the keys are missing, dropped at lock/sign-out/reopen. D-544's "the phone's retry hook is unwired there" is the
+recorded deviation (the BATCH 2 ADJUDICATION).
 
 **Canon deltas owed at the closeout (the orchestrator's, two-file shape):** SurfaceContracts' protection bullet — VX-501's
 typed-unlock sentence ("one bounded vault read … never hostage (offline, or a secret that opens the library but not the vault,
@@ -939,8 +945,12 @@ TYPE names):**
 - *Leg D — the phone (simulator, by id):* `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS
   Simulator,id=<the run's simulator>' -only-testing:VariorumMobileTests/MobileRoundOccasionTests
   -only-testing:VariorumMobileTests/MobileTypedUnlockSyncKeysTests -only-testing:VariorumMobileTests/MobileLockTeardownTests
-  -only-testing:VariorumMobileTests/MobileTypedOverRescueTests`; then **R-3g** — `AppServices.swift`'s `#else` arm's
-  `sync.beforeRound = { … }` deleted ⇒ RED `thePhonesOccasionLandsPendingTypingAndRunsNoRetry`; restore, re-run green.
+  -only-testing:VariorumMobileTests/MobileTypedOverRescueTests`; then **R-3g (AMENDED for P-849-3)** — the phone composing
+  no occasion: `AppServices.swift`'s one shared `sync.beforeRound = { … }` assignment wrapped in `#if os(macOS)` … `#endif`
+  (there is no `#else` arm any more — the closure is both platforms') ⇒ RED
+  `MobileRoundOccasionTests/thePhonesOccasionRetriesThePendingLoadThenLandsHerTyping` — the phone's one occasion pin, whose
+  `#require(beforeRound)` fails, so BOTH its legs (the retry ran first; her typing landed) go with it; nothing else in leg D
+  reads the occasion. Restore (`git checkout --` the one file), re-run green.
 - *OWED, never claimed:* her drill — the two-Mac test's steps 8–9 on her Air (LIVE STATUS row 9).
 
 
@@ -961,3 +971,37 @@ at P-849-2; the deviation is recorded here, PROVISIONAL for her bundle. The pin
 `thePhonesOccasionLandsPendingTypingAndRunsNoRetry` flips by a JUSTIFIED EDIT to assert the retry DOES run (and
 the leg-D revert R-3g's expected red moves with it). The posture is unchanged: session memory only, same drops
 (CastleRules rule 9 binds the DEVICE's disk and keychain, not session memory — D-544's ruled paragraph).
+
+### BATCH 2 — AMENDMENT: P-849-3 (the phone's retry wired — RULED (c) at the BATCH 2 ADJUDICATION, `c74b4fc19`)
+
+**Pulled first** (`git pull`, a fast-forward to the orchestrator's `c74b4fc19` — main `009982a3c` folded at the seam; no
+rebase). **Built (one piece):**
+- *The one line, as one closure:* `AppServices.init`'s round occasion is now ONE `sync.beforeRound` closure for both
+  platforms — `await self?.retryTypedUnlockSyncKeysWhileLocked()` then `await session?.flushPendingTypingBeforeRound()` — the
+  Mac arm's exact shape and the same gate; the `#if os(macOS)`/`#else` arms collapsed because they became identical (the
+  retry road was platform-shared already: the roads are wired in the shared `AppBootstrap.attach(services:)`, the gate and
+  `retryPendingSyncKeyLoad` in shared files). Doc comments in `AppServices`, `AppBootstrap.attach(services:)`,
+  `ProtectionOpenRoad.retryPendingSyncKeyLoad` and `TypedUnlockRetryOccasionTests`' header/suite name now say "both platforms
+  (P-849-3)" where they said the Mac's.
+- *The phone pin, by JUSTIFIED EDIT (the ruling flips its claim):* `thePhonesOccasionLandsPendingTypingAndRunsNoRetry` →
+  `thePhonesOccasionRetriesThePendingLoadThenLandsHerTyping` (`App/Variorum/VariorumMobileTests/MobileRoundOccasionTests.swift`)
+  — it now asserts the phone's occasion runs the retry FIRST (its log reads `["retry: typing pending"]` — the provider has no
+  keys; her typing still pending when the retry runs), THEN her typing lands. Behavior-red on old still by its
+  `#require(beforeRound)`; R-3g moved with it (leg D above).
+- *A pin-robustness fix found on the way (same commit, recorded honestly):* one full-set harness run went `✘` on
+  `SyncReachabilityTriggerTests.aTransitionToSatisfiedRunsOneRoundAfterTheDebounce` ("rounds == 1" read too early under the
+  12-suite parallel load — its fixed 500 ms window). The positive waits now poll to the count with a 3 s deadline
+  (`reach`), and re-checking R-4a over that edit EXPOSED a second hole: a fresh in-memory store's outbox is not empty, so the
+  SETTLE observation's own trigger (3 s) could land inside a 3 s window and count as the path's round — R-4a then left three
+  of its four pins green (only `eachSatisfied…`'s second count red). The suite's sessions now hold the settle trigger off
+  (`settleDebounce: .seconds(60)`): only the path's rounds count. Re-checked: **R-4a → `✘` exactly its four named suite
+  pins** (THE PIN, staying-satisfied, drops-again, each-transition); restored → the suite green three runs in a row. The
+  earlier R-4a result (500 ms windows) stands valid — a 3 s settle could not land in it.
+- *Evidence, headless:* harness — every touched planted suite, twice → `✔ Test run with 91 tests in 12 suites passed`; Mac
+  `build-for-testing` → `** TEST BUILD SUCCEEDED **`; phone `build-for-testing` (generic iOS Simulator) → `** TEST BUILD
+  SUCCEEDED **`; no warning in a touched file. Leg A's count is unchanged (41); leg B's R-3a now also removes the phone's
+  retry (one closure) — leg B runs the Mac only; leg D carries the phone's pin and R-3g (amended above). The simulator run
+  stays PENDING the stage window.
+- *The posture, unchanged:* session memory only, the same keep and the same drops on both platforms (CastleRules rule 9 is
+  the device's disk and keychain — D-544's posture paragraph); the phone's held secret now has its consumer.
+

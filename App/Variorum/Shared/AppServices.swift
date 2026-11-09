@@ -253,31 +253,28 @@ final class AppServices {
         } else {
             backup = nil
         }
-        // THE OCCASION BEFORE EVERY ROUND — ONE closure (`SyncSession.beforeRound`; the VX-849 run). On the Mac, FIRST the
-        // typed unlock's pending sync-keys load is retried while the engine's provider has no keys (VX-544, batch 2 —
-        // `retryTypedUnlockSyncKeysWhileLocked`; her R-849-1), so the round runs with them; THEN her pending typing lands,
-        // only when typing IS pending (VX-683 A, batch 1 — R-683-3, `AppSession.flushPendingTypingBeforeRound`). The typing
-        // occasion is BOTH platforms' (P-849-2: the phone's page, takes browser and quick note record into the same
-        // registry — the same line serves it); the retry stays the Mac's (D-544's phone posture — its retry unwired).
-        #if os(macOS)
+        // THE OCCASION BEFORE EVERY ROUND — ONE closure (`SyncSession.beforeRound`; the VX-849 run), the SAME on both
+        // platforms: FIRST the typed unlock's pending sync-keys load is retried while the engine's provider has no keys
+        // (VX-544, batch 2 — `retryTypedUnlockSyncKeysWhileLocked`; her R-849-1), so the round runs with them; THEN her
+        // pending typing lands, only when typing IS pending (VX-683 A, batch 1 — R-683-3,
+        // `AppSession.flushPendingTypingBeforeRound`). The phone composes both (P-849-2: its page, takes browser and quick
+        // note record into the same registry; PROVISIONAL P-849-3: the shared load keeps the derived secret on the phone
+        // too, so the phone's retry is wired — the held secret's consumer).
         sync.beforeRound = { [weak self, weak session] in
             await self?.retryTypedUnlockSyncKeysWhileLocked()
             await session?.flushPendingTypingBeforeRound()
         }
-        #else
-        sync.beforeRound = { [weak session] in
-            await session?.flushPendingTypingBeforeRound()
-        }
-        #endif
     }
 
     /// **VX-544 (the VX-849 run, batch 2 — D-544 (3a); her R-849-1, "Retain + quiet retry") — THE OPEN ROAD SESSION'S PENDING
     /// SYNC-KEYS LOAD**, as the composition root hands it (`AppBootstrap.attach(services:)` — every root): a typed unlock that
-    /// opened while the vault was out of reach kept its load pending; the Mac's occasion retries it, a sign-out lets it go.
+    /// opened while the vault was out of reach kept its load pending; the round occasion retries it (both platforms —
+    /// P-849-3), a sign-out lets it go.
     /// nil: a test's composition — nothing to retry or let go.
     var typedUnlockSyncKeys: TypedUnlockSyncKeysRoads?
 
-    /// **VX-544 — THE MAC'S RETRY OCCASION**, run first inside the one `beforeRound` closure: a typed unlock that opened
+    /// **VX-544 — THE RETRY OCCASION** (both platforms — PROVISIONAL P-849-3), run first inside the one `beforeRound`
+    /// closure: a typed unlock that opened
     /// offline left its sync-keys load pending, and this finishes it before the round, so the round runs with the keys —
     /// her step 9 ("Wi-Fi back on, a minute's wait") heals by the next round's start. ONLY while the engine's provider cannot
     /// produce keys, and nothing at all without a pending load: one memory read is the whole cost of every other round (an
