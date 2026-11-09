@@ -736,8 +736,12 @@ final class CommitsFaceModel {
         status = nil
         await session.flushExistingAutosave(forPost: postID)
         do {
+            // P-849-1 (PROVISIONAL — the VX-849 run, batch 3): her typing
+            // flushed above, the restore keeps ONE quiet savepoint of the words
+            // it is about to replace — whatever she typed since her last
+            // savepoint stays reachable (OverallModel §3's insurance).
             try await session.runner.run { ops in
-                try ops.restoreCommit(variantID, commitID: commit.id)
+                try ops.restoreCommit(variantID, commitID: commit.id, insuringBuffer: true)
             }
             status = .receipt(BlockHistoryCopy.restoredSavepoint)
             // VX-431's landing parcel, as the panel posts it: a SIGNAL each

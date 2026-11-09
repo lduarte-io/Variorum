@@ -3186,8 +3186,20 @@ final class TakesViewModel {
         stepPage(key, by: delta, limit: limit)
     }
 
+    /// The board's own restore (no production caller today — the History &
+    /// Lineage surface's Commits face is the Mac's restore door). **P-849-1
+    /// (PROVISIONAL — the VX-849 run, batch 3):** her restore doors flush her
+    /// pending typing FIRST and insure what they replace — this door ran on the
+    /// bare runner, so a restore under her pending typing was answered by her
+    /// own late autosave, which found the row changed and rescued the RESTORED
+    /// words as a `'conflict'` card (her own act undone by her keystrokes). The
+    /// board's flush contract (`flushPendingText`, the structural doors'),
+    /// then the insured restore; the ring-end (VX-664) makes a live pane adopt.
     func restoreCommit(_ commit: CommitPoint) async {
-        await run { ops in try ops.restoreCommit(commit.variantId, commitID: commit.id) }
+        guard await flushPendingText() else { return }
+        await run { ops in
+            try ops.restoreCommit(commit.variantId, commitID: commit.id, insuringBuffer: true)
+        }
         if status == nil {
             setReceipt(
                 "Restored — the commit's text is back in the take's buffer. Nothing was lost: commits are append-only."

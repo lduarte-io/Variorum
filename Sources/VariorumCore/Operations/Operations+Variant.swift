@@ -197,8 +197,39 @@ extension Operations {
     /// 3's divide/extract, a commit predating the split still holds the full
     /// pre-split text and restoring it resurrects both halves into this
     /// buffer — coherent under "coarse, not forensic"; the editor warns.
-    public func restoreCommit(_ variantID: String, commitID: String) throws {
-        try database.write { db in _ = try restoreCommitRows(db, variantID, commitID: commitID) }
+    ///
+    /// **`insuringBuffer` — HER restore, insured** (PROVISIONAL P-849-1, the
+    /// VX-849 run, batch 3; the record `notes/plans/fixes/
+    /// vx-849-typed-over-rescue.md`). Her doors flush her pending typing first,
+    /// so the take's buffer holds what she last typed — and a restore then
+    /// overwrites it: whatever she typed since her latest savepoint becomes
+    /// unreachable (no ⌘Z road crosses an operation). With `true`, inside this
+    /// ONE transaction and after the take's guards (a locked take, a sealed
+    /// post, an archived or dead take refuse first and mint nothing), when the
+    /// restore will change the take's text AND its buffer differs from its
+    /// latest savepoint (`isDirty`, the insurance family's one dedupe), ONE quiet
+    /// `kind='auto'` savepoint of the buffer lands first — unnamed, her road's
+    /// quiet kind (the MCP door's bracket names its own pair and is untouched: it
+    /// calls `restoreCommitRows` inside its own insurance). The insurance
+    /// doctrine of OverallModel §3 — insure exactly what an act is about to make
+    /// unreachable. Default `false`: the restore exactly as before. Touch and
+    /// churn are the restore's own (an auto savepoint writes neither); no undo
+    /// entry (the restore registers none). Pinned: `RestoreInsuranceTests`.
+    public func restoreCommit(
+        _ variantID: String, commitID: String, insuringBuffer: Bool = false
+    ) throws {
+        try database.write { db in
+            if insuringBuffer {
+                let variant = try editableVariant(db, variantID)
+                if let commitPoint = try CommitPoint.fetchOne(db, key: commitID),
+                   commitPoint.variantId == variantID,
+                   variant.workingText != commitPoint.text,
+                   try isDirty(db, variant) {
+                    _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: date.now)
+                }
+            }
+            _ = try restoreCommitRows(db, variantID, commitID: commitID)
+        }
     }
 
     /// `restoreCommit`'s row work inside the caller's transaction (VX-184 U4
