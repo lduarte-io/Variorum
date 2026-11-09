@@ -1466,6 +1466,22 @@ savepoint plus aligning the dead door.
   `aCanvasKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver` (Canvas, same). GUARD (green both sides):
   `readEditsOwnSuccessiveRunsNeverMintACardNorEndTheRing`.
 
+- *Piece 3 (P-849-1, PROVISIONAL, isolated):* `Operations.restoreCommit(_:commitID:insuringBuffer: Bool = false)` —
+  inside the restore's ONE transaction, when the restore will change the take's text AND its buffer differs from its
+  latest savepoint (`isDirty`), ONE `kind='auto'` savepoint (unnamed — her road's quiet kind; the MCP bracket's named
+  pair stays the wire's) of the buffer first; default `false` keeps every other caller byte-unchanged (the MCP road
+  calls `restoreCommitRows` inside its own bracket and is untouched). The flip is one argument at each door:
+  `CommitsFaceModel.restore` (after its honest flush) and `TakesViewModel.restoreCommit` (which gains the flush first).
+  No undo entry (the op registers none, as before); touch/churn unchanged (the savepoint writes none).
+- *Piece 4 (R-683-4 + G2):* mounted face pins on THE Takes board — the rescue under her live pane (stack, fan closed and
+  fan open), the flush-first round under her live pane — plus G2's model-level pin; **G2's PROVISIONAL P-849-5 build:
+  (a) an adoption under which slot split replaces the ring's article cell ENDS the ring by the flushed blur** (VX-222's
+  outside-change shape; VX-577's style rule) — the smallest, precedent-backed answer that never strands a ring; the
+  recorded alternatives for her: **(b)** carry the ring onto the fan card that renders the same take, the caret where it
+  was (she keeps typing; the most R-683-1-faithful, new choreography); **(c)** hold the slot-split bloom of the block
+  her ring is in until the ring leaves (the presentation waits for her). QUESTIONS at the merge.
+
+
 #### Piece 2b — the fix, as built (Mac files; zero `Sync/`, zero core)
 - *`AutosaveCoordinator` (shared):* `inFlight` (the batch's takes, each leaving as its own write's runner turn ends — a
   refused one is back in `pending` first, so it never reads landed) and `isUnlanded(_:)` (pending OR in flight). Purely
@@ -1504,20 +1520,56 @@ savepoint plus aligning the dead door.
   **R-G3i** → `✘` exactly `shownTextIsWhatTheLivePaneHolds` at "the live pane's holding, never the projection" (its
   only red line, as named); the in-flight pin green. Each copy restored byte-identical to the committed file (`cmp`) →
   `✔ 2 tests passed`; the scratch folder deleted, `git status` clean.
-- *Piece 3 (P-849-1, PROVISIONAL, isolated):* `Operations.restoreCommit(_:commitID:insuringBuffer: Bool = false)` —
-  inside the restore's ONE transaction, when the restore will change the take's text AND its buffer differs from its
-  latest savepoint (`isDirty`), ONE `kind='auto'` savepoint (unnamed — her road's quiet kind; the MCP bracket's named
-  pair stays the wire's) of the buffer first; default `false` keeps every other caller byte-unchanged (the MCP road
-  calls `restoreCommitRows` inside its own bracket and is untouched). The flip is one argument at each door:
-  `CommitsFaceModel.restore` (after its honest flush) and `TakesViewModel.restoreCommit` (which gains the flush first).
-  No undo entry (the op registers none, as before); touch/churn unchanged (the savepoint writes none).
-- *Piece 4 (R-683-4 + G2):* mounted face pins on THE Takes board — the rescue under her live pane (stack, fan closed and
-  fan open), the flush-first round under her live pane — plus G2's model-level pin; **G2's PROVISIONAL P-849-5 build:
-  (a) an adoption under which slot split replaces the ring's article cell ENDS the ring by the flushed blur** (VX-222's
-  outside-change shape; VX-577's style rule) — the smallest, precedent-backed answer that never strands a ring; the
-  recorded alternatives for her: **(b)** carry the ring onto the fan card that renders the same take, the caret where it
-  was (she keeps typing; the most R-683-1-faithful, new choreography); **(c)** hold the slot-split bloom of the block
-  her ring is in until the ring leaves (the presentation waits for her). QUESTIONS at the merge.
+
+#### Piece 3 — P-849-1, as built (PROVISIONAL; isolated — the flip is one argument per door)
+*(Recorded one commit after its code — `078835c3b` landed the op, the pins and the doors while this section's edit
+missed its anchor; the reverts below were NOT run before this record named them.)*
+- *The trace, verdicted on the code (the sweep's door enumeration above):* the batch-1 corner's race ("a board door
+  that rewrites the take her live pane is typing in leaves a `'conflict'` card") has NO production door: the Mac's one
+  production restore (`CommitsFaceModel.restore`) always flushed first, and its hosts are a sheet (modal) or the full
+  pane (the board unmounted); the only non-flushing restore door is `TakesViewModel.restoreCommit`, which nothing in
+  production calls. So P-849-1's live content is (i) the INSURANCE — her restore overwrote whatever she typed since her
+  last savepoint with no road back (no ⌘Z crosses an operation), the class OverallModel §3's insurance doctrine exists
+  for; and (ii) aligning the dead door so no future caller inherits the race.
+- *The op (`Operations+Variant.swift`, core):* `restoreCommit(_:commitID:insuringBuffer: Bool = false)` — with `true`,
+  inside the ONE transaction, after the take's guards (`editableVariant`: a locked / archived / dead take or a sealed
+  post refuses first — the rollback takes the insurance with it), when the restore will change the text AND the buffer
+  differs from the latest savepoint (`isDirty`), ONE `kind='auto'`, unnamed savepoint of the buffer, then
+  `restoreCommitRows` as before. Default `false` = byte-for-byte today's restore; the MCP road (`restoreCommitForClient`
+  → `restoreCommitRows` inside its own bracket) and the phone's door untouched.
+- *The doors (Mac):* `CommitsFaceModel.restore` passes `insuringBuffer: true` after its existing honest flush;
+  `TakesViewModel.restoreCommit` gains the board's flush contract first (`flushPendingText` — refuses in the board's
+  standing words when a write is refused) and passes `true`.
+- *Pins, core (`Tests/VariorumCoreTests/RestoreInsuranceTests.swift` — they name the new parameter: COMPILE-red on the
+  pre-fix op, watched: "extra argument 'insuringBuffer' in call"):* THE PIN
+  `anInsuredRestoreKeepsTheWordsItReplacesInAQuietSavepointFirst`; `theInsuranceIsQuietAndTheRestoreIsTheRestoreItAlwaysWas`
+  (twin notes: the same churn, baseline and major-revision answer insured or not — corrected once on the way: its first
+  form asserted no major revision at all, which the restore's OWN churn crossing the threshold falsified; the pin now
+  compares against the uninsured twin); GUARDS `aBufferItsLastSavepointHoldsIsNotInsuredAgain`,
+  `aRestoreThatChangesNothingInsuresNothing`, `aRefusedRestoreMintsNoInsurance` (locked; sealed),
+  `theUninsuredRestoreKeepsNoSavepoint`. Green: **6/6**. Neighbours (every core suite that restores —
+  `InvariantSweepTests`, `SpanToTakeTests`, `BlockVariantOperationsTests`, `StructuralDivideTests`,
+  `SearchSavepointCaptureTests` — plus `TypedOverRescue*` and the MCP note-edit suites): **104 tests in 10 suites
+  passed** (+ 5 in 2).
+- *Pins, Mac (`RestoreFlushFirstInsuranceTests`, committed on the PRE-FIX tree `762dde907` — pre-fix API only, so
+  BEHAVIOR-red there):* `theCommitsFaceKeepsWhatHerRestoreReplacesInAQuietSavepoint` (red line: no quiet savepoint holds
+  the words she typed since the moment), `theBoardsRestoreDoorFlushesHerTypingFirstAndMintsNoCard` (red lines: her late
+  autosave landed over the restore; the restored words became a `'conflict'` card); GUARD
+  `aRestoreOverWordsHerLastSavepointHoldsMintsNoInsurance` (green both sides).
+- *Builds at `078835c3b`:* Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`; phone (generic iOS Simulator) →
+  `** TEST BUILD SUCCEEDED **`; no warning in a touched line.
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip):* **R-P1c (core, headless — mine,
+  next)** the op's insurance `if` → `if false` ⇒ expected RED `anInsuredRestoreKeeps…` and `theInsuranceIsQuiet…` (its
+  `kind == auto` line — no insurance, the last commit is the manual moment); the four guards green. For the STAGE:
+  **R-P1a** `CommitsFaceModel.restore` passes `insuringBuffer: false` ⇒ RED
+  `theCommitsFaceKeepsWhatHerRestoreReplacesInAQuietSavepoint` only; **R-P1b** `TakesViewModel.restoreCommit`'s `guard
+  await flushPendingText() else { return }` deleted ⇒ RED `theBoardsRestoreDoorFlushesHerTypingFirstAndMintsNoCard`
+  (the row, the card) only.
+- *P-849-1's alternatives, recorded for her bundle:* keep the rescue card on her own doors (no flush-first) — rejected
+  as the default because R-683-2's retelling says a deliberate act of hers never mints the card; and NO insurance (the
+  restore overwrites unsaved typing, as before).
+- *MOBILE PARITY:* the phone's `MobileBlockHistory.restore` already flushes and refuses while dirty; it keeps no
+  insurance — one argument away (`insuringBuffer: true`), left for the orchestrator's call (the VM board's surface).
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
