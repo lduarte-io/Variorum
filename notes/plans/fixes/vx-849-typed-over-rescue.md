@@ -943,3 +943,21 @@ TYPE names):**
   `sync.beforeRound = { … }` deleted ⇒ RED `thePhonesOccasionLandsPendingTypingAndRunsNoRetry`; restore, re-run green.
 - *OWED, never claimed:* her drill — the two-Mac test's steps 8–9 on her Air (LIVE STATUS row 9).
 
+
+### BATCH 2 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before the fix resumes)
+
+**Verification:** all eight commits present and pushed as reported; worktree clean; main `009982a3c` folded at
+this seam (the pending fold-in list is empty). The 91-test headless result is the implementer's scratch-harness
+claim — the evidence of record for the app-target pins is the STAGE WINDOW (legs A–D), run after the ruling below
+lands.
+
+**The phone call (the implementer's "for your call") — RULED (c), wire the phone's retry. PROVISIONAL P-849-3.**
+The keep runs in shared code, so a phone typed unlock now mints a pending load; option (a) leaves a held secret
+with NO consumer on the phone (minimal-exposure says don't hold what nothing uses), and (b) splits shared custody
+code by platform. (c) gives the held secret its consumer, heals the same bug on the phone (whose reachability
+trigger and flush occasion are already wired), and matches her mobile canon (a complete companion app). D-544's
+"the phone's retry hook is unwired there" was written when the phone had NO wired hook at all — that premise moved
+at P-849-2; the deviation is recorded here, PROVISIONAL for her bundle. The pin
+`thePhonesOccasionLandsPendingTypingAndRunsNoRetry` flips by a JUSTIFIED EDIT to assert the retry DOES run (and
+the leg-D revert R-3g's expected red moves with it). The posture is unchanged: session memory only, same drops
+(CastleRules rule 9 binds the DEVICE's disk and keychain, not session memory — D-544's ruled paragraph).
