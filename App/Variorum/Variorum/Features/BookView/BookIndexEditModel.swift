@@ -230,7 +230,8 @@ final class BookIndexEditModel {
         // VX-303: her edit ends any placement still pending (an empty take's
         // placement can report nothing) — what she types is hers.
         if arrivalPlacement?.variantID == variantID { arrivalPlacement = nil }
-        let old = authority.text(variantID: variantID, storeText: oldText)
+        // VX-849 batch 3 (G3): built on what the pane SHOWS (`shownText`).
+        let old = authority.shownText(variantID: variantID, storeText: oldText)
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
         authority.bufferEdited(variantID: variantID, text: newText)
@@ -243,7 +244,7 @@ final class BookIndexEditModel {
     func settle() {
         let pending = coordinators.values
         authority.settle(isPending: { variantID in
-            pending.contains { $0.pending[variantID] != nil }
+            pending.contains { $0.isUnlanded(variantID) }
         })
     }
 
@@ -267,7 +268,7 @@ final class BookIndexEditModel {
     }
 
     private func isPending(_ variantID: String) -> Bool {
-        coordinators.values.contains { $0.pending[variantID] != nil }
+        coordinators.values.contains { $0.isUnlanded(variantID) }
     }
 
     // MARK: - The landing (row 38)

@@ -611,7 +611,7 @@ final class CompareViewModel {
     /// A buffer stays authoritative while pending in ANY of this board's
     /// post pipelines — the settle's own union, named once.
     private func isPending(_ variantID: String) -> Bool {
-        mountedPostIDs.contains { coordinator(for: $0).pending[variantID] != nil }
+        mountedPostIDs.contains { coordinator(for: $0).isUnlanded(variantID) }
     }
 
     /// **VX-664 — the ring's own take was written from OUTSIDE** (A-677-1):
@@ -657,7 +657,8 @@ final class CompareViewModel {
     /// lands in exactly that take's working_text, through exactly that
     /// POST's autosave pipeline.
     func paneEdited(postID: String, variantID: String, newText: String) {
-        let old = authority.text(
+        // VX-849 batch 3 (G3): built on what the pane SHOWS (`shownText`).
+        let old = authority.shownText(
             variantID: variantID,
             storeText: storeText(postID: postID, variantID: variantID) ?? "")
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)

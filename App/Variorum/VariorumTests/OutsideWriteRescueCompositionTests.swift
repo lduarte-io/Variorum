@@ -313,4 +313,51 @@ struct OutsideWriteRescueCompositionTests {
             #expect(await Self.stays { model.liveBlockID == block })
         }
     }
+
+    // MARK: - The two primitives the fix adds (they name new API — compile-red
+    // on the pre-fix tree; their behavioral red is the record's named reverts)
+
+    /// G1's primitive: a take's words are UNLANDED while pending AND while its
+    /// write flies — and landed once the write's turn ends.
+    @Test func isUnlandedAnswersPendingAndInFlightAndLandedOnlyAfterTheWrite() async throws {
+        try await Self.withPoolWorld { session, db, postID, _, take in
+            let coordinator = session.autosave(forPost: postID)
+            defer { session.releaseAutosave(forPost: postID) }
+            #expect(!coordinator.isUnlanded(take), "nothing typed: nothing unlanded")
+            coordinator.record(variantID: take, text: Self.hers, charDelta: 13, basedOn: Self.base)
+            #expect(coordinator.isUnlanded(take), "pending in the debounce")
+            let hold = WriterHold()
+            hold.hold(db)
+            let flight = Task { await coordinator.flushNow() }
+            try await AutosaveCoordinatorTests.waitUntil { coordinator.pending.isEmpty && coordinator.isDirty }
+            let whileFlying = coordinator.isUnlanded(take)
+            hold.release()
+            await flight.value
+            #expect(whileFlying, "the write in flight is not landed (`pending` is already empty)")
+            #expect(!coordinator.isUnlanded(take), "landed once the write's turn ended")
+            #expect(try Self.stored(db, take) == Self.hers)
+        }
+    }
+
+    /// G3's primitive: the text an edit is built on — the LIVE pane's holding
+    /// for its take, the buffer overlay everywhere else.
+    @Test func shownTextIsWhatTheLivePaneHolds() {
+        var authority = PaneTextAuthority()
+        let live = PaneTextAuthority.PaneKey(columnID: "c", blockID: "b", variantID: "v")
+        #expect(authority.shownText(variantID: "v", storeText: "stored") == "stored", "nothing live: the store")
+        authority.focus(live, showing: "what she sees")
+        #expect(authority.shownText(variantID: "v", storeText: "an outside write") == "what she sees",
+                "the live pane's holding, never the projection an outside write moved")
+        #expect(authority.shownText(variantID: "other", storeText: "other stored") == "other stored",
+                "another take: the overlay")
+        authority.bufferEdited(variantID: "v", text: "what she sees, typed on")
+        #expect(authority.shownText(variantID: "v", storeText: "an outside write") == "what she sees, typed on")
+        authority.blur()
+        #expect(authority.shownText(variantID: "v", storeText: "stored") == "what she sees, typed on",
+                "a blurred pane: the overlay (its unsettled buffer)")
+        var unknown = PaneTextAuthority()
+        unknown.focus(live)
+        #expect(unknown.shownText(variantID: "v", storeText: "stored") == "stored",
+                "a live pane whose holding is not known: the overlay, as before")
+    }
 }

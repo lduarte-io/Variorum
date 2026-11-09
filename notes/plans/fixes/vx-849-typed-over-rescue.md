@@ -1299,7 +1299,7 @@ what apply writes, never edited). The pin suites read whole: `OutsideWriteRingEn
 | # | Piece | Status |
 |---|---|---|
 | 1 | THE SWEEP TABLE (below — before any fix) | DONE (this commit) |
-| 2 | The ONE seam verified + the batch-1 composition stated + the found gaps G1 (the unlanded guard) and G3 (the gap keystroke's snapshot) fixed with their pins | IN-PROGRESS — 2a the pins on the PRE-FIX tree DONE (this commit — the red-on-old SHA; Mac `build-for-testing` green; runs PENDING the stage); 2b the fix next |
+| 2 | The ONE seam verified + the batch-1 composition stated + the found gaps G1 (the unlanded guard) and G3 (the gap keystroke's snapshot) fixed with their pins | DONE — 2a the pins on the PRE-FIX tree (`d1a2b028e` — the red-on-old SHA); 2b the fix + the two primitives' pins (this commit); Mac + phone `build-for-testing` green; the instrument green 2/2 (its named reverts run next, at this tip); every Mac run PENDING the stage |
 | 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | NOT STARTED — design settled below |
 | 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | NOT STARTED — design settled below |
 | 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | NOT STARTED |
@@ -1465,6 +1465,40 @@ savepoint plus aligning the dead door.
   adopt, her keystroke in the same turn — red line: no `'conflict'` card holds the AI's words),
   `aCanvasKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver` (Canvas, same). GUARD (green both sides):
   `readEditsOwnSuccessiveRunsNeverMintACardNorEndTheRing`.
+
+#### Piece 2b — the fix, as built (Mac files; zero `Sync/`, zero core)
+- *`AutosaveCoordinator` (shared):* `inFlight` (the batch's takes, each leaving as its own write's runner turn ends — a
+  refused one is back in `pending` first, so it never reads landed) and `isUnlanded(_:)` (pending OR in flight). Purely
+  additive: `pending`, `isDirty`, the honest flush's order and the keep-pending posture are byte-unchanged.
+- *`PaneTextAuthority`:* `shownText(variantID:storeText:)` — the live take → `liveHeld`, else the overlay; `settle`'s
+  doc states that "pending" means unlanded.
+- *The five ring owners* (`TakesViewModel` — Takes, Lenses, Write's take panel — `CompareViewModel`, `CanvasViewModel`,
+  `BlockTOCViewModel` — Read ▸ edit, the Blocks workbench — `BookIndexEditModel`): every `isPending` closure handed to
+  `settle(isPending:liveIncoming:)`, to `OutsideWriteConfirmation.endRing` and to the Index's old `settle()` reads
+  `isUnlanded` (ten closures — the grep of `.pending[` in production is now empty); every `paneEdited` builds the edit's
+  `old` (snapshot AND churn cost) from `shownText`. The deferring owners' adoption is unchanged by construction (they
+  adopt only with the coordinator clean); the TOC model and the Index keep her buffer through a flight.
+- *The primitives' pins (same suite; they NAME new API — compile-red on the pre-fix tree):*
+  `isUnlandedAnswersPendingAndInFlightAndLandedOnlyAfterTheWrite` (the held writer), `shownTextIsWhatTheLivePaneHolds`
+  (the pure truth table: nothing live → store; live → its holding, never the moved projection; another take → overlay;
+  her keystroke → her text; blurred → overlay; a live pane with no known holding → overlay).
+- *Evidence, headless at this commit:* Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **` (no warning in a touched
+  line — `CompareBoardView.swift:1988`'s is pre-existing); phone `build-for-testing` (generic iOS Simulator) →
+  `** TEST BUILD SUCCEEDED **`. THE INSTRUMENT (batch 1's method — byte copies of the committed `PaneTextAuthority`,
+  `AutosaveCoordinator` and `OperationsRunner` in an UNTRACKED scratch folder of the core test target, the two
+  primitives' pins ported; never committed, deleted after): `swift test --filter ScratchPrimitives` → `✔ 2 tests
+  passed`.
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip):* on the INSTRUMENT's copies —
+  **R-G1i** `isUnlanded`'s body → `pending[variantID] != nil` (the in-flight half gone) ⇒ expected RED: the isUnlanded
+  pin's in-flight line only; **R-G3i** `shownText`'s live arm deleted (always the overlay) ⇒ expected RED: the truth
+  table's "the live pane's holding, never the projection" line only (after her keystroke the overlay holds her buffer,
+  so that line stays green). For the STAGE (Mac, each alone at the tip, then `git checkout --` of the one file):
+  **R-G1** `AutosaveCoordinator.isUnlanded` → `pending[variantID] != nil` ⇒ RED
+  `aPullConsumedWhileHerRescueWriteFliesLeavesReadEditsRing` (both its red lines), `…LeavesTheIndexRing`,
+  `isUnlandedAnswersPendingAndInFlight…`; **R-G3** `PaneTextAuthority.shownText` → `text(variantID:storeText:)` ⇒ RED
+  `aKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver`, `aCanvasKeystrokeInTheConfirmationGap…`,
+  `shownTextIsWhatTheLivePaneHolds`. And the red-on-old run: the four behavioral pins at `d1a2b028e` (the pre-fix
+  tree) ⇒ RED each on its named lines; the guard green.
 - *Piece 3 (P-849-1, PROVISIONAL, isolated):* `Operations.restoreCommit(_:commitID:insuringBuffer: Bool = false)` —
   inside the restore's ONE transaction, when the restore will change the take's text AND its buffer differs from its
   latest savepoint (`isDirty`), ONE `kind='auto'` savepoint (unnamed — her road's quiet kind; the MCP bracket's named

@@ -159,6 +159,14 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
     /// every buffer with NO pending autosave record has fully landed —
     /// drop it so external edits reach the display. Buffers still pending
     /// stay authoritative (the dirty half).
+    ///
+    /// **"Pending" means UNLANDED** (the VX-849 run, batch 3 — G1): her words
+    /// in the debounce OR in the write in flight. A flush takes its batch out
+    /// of the coordinator's `pending` before the write lands, so every owner
+    /// hands this (and the outside-write rule below) the coordinator's
+    /// `isUnlanded` — an owner that adopts a delivery while her write flies
+    /// keeps her buffer until the echo, and never reads that delivery as
+    /// somebody else's write.
     mutating func settle(isPending: (String) -> Bool) {
         for variantID in buffers.keys where !isPending(variantID) {
             catchUp(variantID: variantID)
@@ -233,6 +241,27 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
     /// text than the buffer.
     func text(variantID: String, storeText: String) -> String {
         buffers[variantID] ?? storeText
+    }
+
+    /// **The text a pane's NEXT EDIT is built on — what the pane SHOWS right
+    /// now** (VX-664 × VX-683 B — the VX-849 run, batch 3, G3; the record
+    /// `notes/plans/fixes/vx-849-typed-over-rescue.md`). For the LIVE pane's
+    /// take it is what that pane HOLDS (`liveHeld`): a live pane never adopts
+    /// projection text (the invariant above), so between a delivery that carried
+    /// an outside write and the ring-end its confirmation runs, the owner's
+    /// projection — and so `text(variantID:storeText:)`, the settle having
+    /// dropped the buffer — already reads the OUTSIDE words while the pane still
+    /// shows hers. An edit there built on the projection would hand the guarded
+    /// autosave a snapshot the row still holds, and her pre-write words would
+    /// land over the outside words unseen. Built on THIS, the row changed under
+    /// the edit's snapshot and the autosave rescues: her words keep the row, the
+    /// outside words become the `'conflict'` take. The same fact the ring-end
+    /// rule judges by, so the two can never disagree about what the pane holds.
+    /// Anything else — a read pane, a live pane whose holding is not known — is
+    /// the overlay, exactly as before.
+    func shownText(variantID: String, storeText: String) -> String {
+        if livePane?.variantID == variantID, let liveHeld { return liveHeld }
+        return text(variantID: variantID, storeText: storeText)
     }
 
     // MARK: - Slot resolution (the takes family's fall-through)

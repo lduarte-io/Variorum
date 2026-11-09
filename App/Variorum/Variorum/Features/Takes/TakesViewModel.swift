@@ -568,7 +568,7 @@ final class TakesViewModel {
         // (VX-222's shape, beside it below: the pane goes read and adopts).
         let liveIncoming = authority.livePane.flatMap { Self.storedText(of: $0.variantID, in: new) }
         let suspect = authority.settle(
-            isPending: { autosave.pending[$0] != nil }, liveIncoming: liveIncoming)
+            isPending: { autosave.isUnlanded($0) }, liveIncoming: liveIncoming)
         endRingIfWrittenFromOutside(suspect)
         // VX-222: a ring whose article cell changed take under it ends here —
         // BEFORE the landings below may ring the fresh projection. VX-227
@@ -1169,7 +1169,10 @@ final class TakesViewModel {
     /// the edit lands in exactly THAT take's working_text (visible-not-
     /// chosen is real and editable — durable, synced).
     func paneEdited(variantID: String, newText: String) {
-        let old = authority.text(
+        // VX-849 batch 3 (G3): built on what the pane SHOWS — for the live
+        // pane, what it holds, never the projection an outside write already
+        // moved (`PaneTextAuthority.shownText`).
+        let old = authority.shownText(
             variantID: variantID,
             storeText: currentStoreText(variantID: variantID) ?? "")
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
@@ -1218,7 +1221,7 @@ final class TakesViewModel {
         OutsideWriteConfirmation.endRing(
             ifConfirmed: suspect, in: session.database,
             authority: { [weak self] in self?.authority },
-            isPending: { [weak self] in self?.autosave.pending[$0] != nil },
+            isPending: { [weak self] in self?.autosave.isUnlanded($0) ?? false },
             endRing: { [weak self] in self?.blur() })
     }
 

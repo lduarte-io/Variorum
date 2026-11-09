@@ -47,6 +47,11 @@ final class AutosaveCoordinator {
     /// waits here for it (`flushNow`).
     private var writing = false
     private var writeWaiters: [CheckedContinuation<Void, Never>] = []
+    /// VX-664 × VX-402 (the VX-849 run, batch 3 — G1): the takes whose words are
+    /// in the batch being written right now, each leaving the set as its own
+    /// write's runner turn ends. `flushNow` takes its batch OUT of `pending`
+    /// before the write lands, so `pending` alone never answered "landed".
+    private(set) var inFlight: Set<String> = []
     /// Non-empty flushes performed (observable coalescing, for tests).
     private(set) var flushCount = 0
 
@@ -103,6 +108,19 @@ final class AutosaveCoordinator {
 
     /// True while any edit is unpersisted (pending or mid-write).
     var isDirty: Bool { !pending.isEmpty || writing }
+
+    /// **Has `variantID` words of hers that have not LANDED?** — pending in the
+    /// debounce, OR in the batch being written (VX-664 × VX-683 B — the VX-849
+    /// run, batch 3, G1; the record `notes/plans/fixes/
+    /// vx-849-typed-over-rescue.md`). The ring owners' "nothing of hers pending"
+    /// (`PaneTextAuthority.settle(isPending:liveIncoming:)` and the outside-write
+    /// confirmation) asks THIS: a delivery consumed while her write flies is a
+    /// photograph of the row from before her words — never an outside write to
+    /// end her ring on — and her buffer stays the truth until the echo. The
+    /// per-take form of `isDirty`.
+    func isUnlanded(_ variantID: String) -> Bool {
+        pending[variantID] != nil || inFlight.contains(variantID)
+    }
 
     init(
         runner: OperationsRunner,
@@ -194,9 +212,13 @@ final class AutosaveCoordinator {
             return
         }
         writing = true
+        // G1: every take of the batch is in flight until its own turn ends (a
+        // refused one goes back into `pending` below, unlanded still).
+        inFlight = Set(batch.keys)
         flushCount += 1
         var firstError: Error?
         for (variantID, entry) in batch.sorted(by: { $0.key < $1.key }) {
+            defer { inFlight.remove(variantID) }
             do {
                 try await runner.run { ops in
                     try ops.autosave(
