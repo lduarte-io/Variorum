@@ -209,7 +209,7 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 |---|---|---|
 | P0 | This record + the ledger row | DONE (this commit) |
 | P1 | VX-920 — the pin (`LineageFaceModelTests`, a pure arm over `.otherWing(wingID: "")`), red on the pre-fix tree by assertion | DONE (this commit) — `aHomeMemberSeenFromAnotherWingIsNamedHome`; compiles on old (calls only `LineageFaceCopy.place`); **RED on the pre-fix tree, 3 issues** (Home ×2, the dead wing), the live-wing arm green — headless harness (P1 section); in-target run PENDING the gate |
-| P2 | VX-920 — the fix: one name resolution (`Queries.effectiveWingID` over the read's LIVE wing names; Home = `WingWords.home`, the switcher's one Home name) for the member's line AND its go-to button | NOT-STARTED |
+| P2 | VX-920 — the fix: one name resolution (`Queries.effectiveWingID` over the read's LIVE wing names; Home = `WingWords.home`, the switcher's one Home name) for the member's line AND its go-to button | DONE (this commit) — the pin GREEN on the fix (1 test, 7 expectations, EXIT 0, headless harness); **the behavioral revert R-920-A is NEXT** (named in the P2 section; the fix is committed first, so `git checkout --` of the face file is the safe restore); in-target run PENDING the gate |
 | P3 | The rider (A-940-1, Part of VX-939) — the LETTER drift pin, a core test (`Tests/VariorumCoreTests`), green; a scratch mutation of `LETTER.md` turns it red; restored | NOT-STARTED |
 | P4 | Close: headless build + the nearest suites, row dispositions, self-assessment | NOT-STARTED |
 
@@ -226,3 +226,18 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 **How it runs headless (a throwaway instrument, never in the PR).** The suite is Mac app-target code; an in-target run is the stage's. `scratchpad/w2-vx940/run-pin.zsh <face file> <tests file> <label>` builds a scratch SwiftPM package that depends on THIS worktree's real VariorumCore (path dependency, the worktree's `Package.resolved` copied in) with the app target's settings (Swift 6, default MainActor isolation, approachable concurrency, member-import visibility). It compiles, extracted by `awk` from the given files: the face's copy code (`LineageFaceModel.swift` from the `LineageFaceCopy` doc comment to the line before `@MainActor`, i.e. `LineageFaceCopy` + the `WingCopy.lineageElsewhere` extension), the `WingCopy` enum (`WingsModel.swift`), `WingWords.swift` whole, and three collaborator lines grepped from their files (`CommitsFaceCopy.thisBlock`, `.commitsCount`, `BookArchiveCopy.word`); and the pin's function text from the given tests file, wrapped in one `@Suite`. The only added lines are imports and the wrapper. No diagnostic in the extracted sources.
 
 **RED on the pre-fix tree** (the face file byte-equal to HEAD `181d65b44`, `git diff --quiet`; the pin from the working tree): `Test run with 1 test in 1 suite failed … with 3 issues`, EXIT 1 — the old line printed `"in another library — the wing “”"` for `""` AND for `"gone"`; the live-wing arm passed.
+
+### P2 — VX-920: the fix
+
+**Built (`App/Variorum/Variorum/Features/History/LineageFaceModel.swift`, app code only):**
+- `LineageFaceCopy.wingName(_:wingNames:)` — the ONE name a member's wing speaks: `Queries.effectiveWingID(wingID, liveWingIDs: Set(wingNames.keys))`, then `WingWords.home` for `''`, else the live wing's name. The B2 shape (`wingID.isEmpty ? WingWords.home : …`) with the readers' rule named rather than re-spelled.
+- `LineageFaceCopy.place`'s `.otherWing` line speaks it (`WingCopy.lineageElsewhere(wingName(…))`); the model's `wingName(_:)` — the row's go-to button, `WingCopy.goTo(model.wingName(wingID))` — delegates to it, so the line and the button can never name Home differently.
+- The read's name query gains `deleted_at IS NULL`, so `wingNames` is exactly the LIVE wings' names the rule's `liveWingIDs` means. **A belt, not a behavior change:** the tree already projects every home's wing through `effectiveWingSQL` in the same read transaction, so every non-empty id that reaches this query is a live wing's today; the clause keeps the face's own rule honest if that projection ever moves. Not pinnable (no reachable state differs) — recorded, not claimed as a fix.
+- `Read.wingNames`' doc comment says the above.
+- `LineageFaceView.swift` is untouched (it already calls `model.place` and `model.wingName`).
+
+**The pin extended** with the go-to button's name: `LineageFaceCopy.wingName("")` and `("gone")` → `WingWords.home`, `("studio")` → `"Studio"`. The function is new, so this arm's red-on-old is shown by the behavioral revert below (it would not compile on the old tree; the place arm, which does, was red in P1).
+
+**GREEN on the fix:** `run-pin.zsh` on the fixed face file → `Test run with 1 test in 1 suite passed`, EXIT 0, the extracted test carrying all 7 expectations; no diagnostic in the extracted sources.
+
+**The named behavioral revert R-920-A (NEXT — not yet applied at this commit):** in the working tree only, `LineageFaceCopy.wingName`'s body becomes the old expression `wingNames[wingID] ?? ""` (one line); run `run-pin.zsh`; expected RED on the Home and dead-wing arms of BOTH the line and the go-to name (5 issues), the live-wing arms green; restore by `git checkout -- App/Variorum/Variorum/Features/History/LineageFaceModel.swift` from this commit and verify by sha256.

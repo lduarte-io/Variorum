@@ -308,6 +308,11 @@ struct LineageFaceModelTests {
             == WingCopy.lineageElsewhere(WingWords.home), "a wing no live row carries reads as Home")
         #expect(LineageFaceCopy.place(across("studio"), wingNames: live)
             == WingCopy.lineageElsewhere("Studio"), "a live wing keeps its own name")
+        // The row's go-to button (`WingCopy.goTo(model.wingName(_:))`) speaks
+        // the same name — it read "go to  ›" for Home.
+        #expect(LineageFaceCopy.wingName("", wingNames: live) == WingWords.home)
+        #expect(LineageFaceCopy.wingName("gone", wingNames: live) == WingWords.home)
+        #expect(LineageFaceCopy.wingName("studio", wingNames: live) == "Studio")
     }
 
     // MARK: - Ladder R1-F1 — a relative's pending typing lands first
