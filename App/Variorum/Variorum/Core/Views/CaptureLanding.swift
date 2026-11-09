@@ -3,14 +3,17 @@
 //  Variorum (Mac) — Core/Views (the shared home: two features read it — the
 //  Bookcase/Library band's File Without Opening and the quick-note pad)
 //
-//  **WHERE A JUST-FILED CAPTURE LANDED, said once** (the VX-915 run's ladder
-//  round 1, F-1). VX-911's band receipt read the note's BOOK rows after the
-//  filing and named them ("Filed in …"); the pad's filing in another wing
-//  (VX-841) spoke "the Pool of “W”" without reading anything — so a capture a
-//  living book in W SEATED (the quicknote tag lands through the one
-//  application road) was told it sat in a Pool it had already left. The read
-//  and the naming rule move here so both capture doors say a landing the same
-//  way, and the rule exists once.
+//  **WHERE A JUST-FILED CAPTURE LANDED, said once for the two capture doors**
+//  (the VX-915 run's ladder round 1, F-1). VX-911's band receipt read the
+//  note's BOOK rows after the filing and named them ("Filed in …"); the pad's
+//  filing in another wing (VX-841) spoke "the Pool of “W”" without reading
+//  anything — so a capture a living book in W SEATED (the quicknote tag lands
+//  through the one application road) was told it sat in a Pool it had already
+//  left. The read and the naming rule move here so both capture doors say a
+//  landing the same way, and the two doors share one rule. (Not the app's only
+//  copy: the note duplicate's receipt, `NoteDuplicate` + `DuplicateCopy.landed`,
+//  keeps its own older read and count switch with its own words — ladder round
+//  2, R2-5, recorded and left as shipped.)
 //
 
 import GRDB
