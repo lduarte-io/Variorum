@@ -1,0 +1,138 @@
+name: Cold build check
+
+# Builds Variorum the way BUILDING.md tells anyone to: a fresh clone of this
+# repository with its full history, no account, no signing identity, no
+# secrets and nothing cached, on one of GitHub's Macs. It checks that the
+# steps on that page still work for someone who isn't me.
+#
+# When it runs: when a release is published here, and when it's started by
+# hand (Actions, then "Cold build check", then "Run workflow"). Never on a
+# push or a pull request. A full cold build is too heavy for every change; as
+# I put it when I set this up, "I think it should be a check every major
+# version switch or something, it's too onerous for every run." Every release
+# is a version switch, and starting it by hand covers any other time.
+#
+# How to read a result. Variorum is built and tested with one Xcode
+# (BUILDING.md names it; PRIMARY_XCODE_MAJOR below is its major version). A
+# result counts only when the runner's Xcode has that same major version.
+# GitHub's Mac images change on their own schedule and can carry a different
+# Xcode than mine, and a failure on a different toolchain is information
+# about that toolchain, not a broken build. So the first step prints the
+# runner's Xcode and says whether it matches. On a match, a failed step fails
+# the run. On a mismatch, every step still runs and reports, and the run
+# itself passes. (This is the toolchain-skew rule in notes/AppSpec.md, §15,
+# item 6.)
+#
+# A few of the MCP server's tests open real local sockets and are sensitive
+# to timing on a busy machine (BUILDING.md). If one of them is the only
+# failure, run it again on its own before reading it as a break.
+#
+# What this never does:
+# - run while the repository is private (the job's condition reads the
+#   event's own `repository.private`, so it starts acting only once the
+#   repository is public);
+# - use a token, a secret or a third-party action: the clone is anonymous,
+#   the same as anyone's;
+# - place any text from the event, such as a release's name or notes, into
+#   the shell.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  # The major version of the Xcode that Variorum is built and tested with
+  # (BUILDING.md). Tests/VariorumCoreTests/ColdBuildCadenceTests.swift keeps
+  # this, the runner below and BUILDING.md in step.
+  PRIMARY_XCODE_MAJOR: "27"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  cold-build:
+    if: github.event.repository.private == false
+    # GitHub's Xcode 27 image (macOS 27, Apple silicon). It's a standard
+    # runner, so it costs nothing on a public repository.
+    runs-on: xcode-27
+    timeout-minutes: 120
+    steps:
+      - name: Toolchain
+        id: toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          sw_vers
+          major="$(xcodebuild -version | awk 'NR == 1 { split($2, v, "."); print v[1] }')"
+          if [ "$major" = "$PRIMARY_XCODE_MAJOR" ]; then
+            echo "counts=true" >> "$GITHUB_OUTPUT"
+            verdict="This runner has Xcode $major, the major version Variorum is built and tested with, so this run's results count."
+          else
+            echo "counts=false" >> "$GITHUB_OUTPUT"
+            [ -n "$major" ] || major="(unreadable)"
+            verdict="This runner has Xcode $major, but Variorum is built and tested with Xcode $PRIMARY_XCODE_MAJOR. A failure below is information about this toolchain, not a broken build."
+            echo "::warning title=Toolchain::$verdict"
+          fi
+          echo "$verdict"
+          echo "$verdict" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clone, with the full history
+        id: clone
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          git clone --quiet "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" variorum
+          cd variorum
+          git -c advice.detachedHead=false checkout --quiet "$GITHUB_SHA"
+          echo "Commit $(git rev-parse HEAD), $(git rev-list --count HEAD) commits, shallow: $(git rev-parse --is-shallow-repository)."
+
+      - name: Core package, swift build
+        id: build
+        if: ${{ !cancelled() && steps.clone.outcome == 'success' }}
+        continue-on-error: ${{ steps.toolchain.outputs.counts != 'true' }}
+        working-directory: variorum
+        run: swift build
+
+      - name: Core package, swift test
+        id: test
+        if: ${{ !cancelled() && steps.clone.outcome == 'success' }}
+        continue-on-error: ${{ steps.toolchain.outputs.counts != 'true' }}
+        working-directory: variorum
+        run: swift test
+
+      - name: Mac app, unsigned build
+        id: app
+        if: ${{ !cancelled() && steps.clone.outcome == 'success' }}
+        continue-on-error: ${{ steps.toolchain.outputs.counts != 'true' }}
+        working-directory: variorum/App/Variorum
+        run: xcodebuild -scheme Variorum -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
+
+      - name: Summary
+        if: ${{ !cancelled() }}
+        env:
+          COUNTS: ${{ steps.toolchain.outputs.counts }}
+          CLONE: ${{ steps.clone.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          TEST: ${{ steps.test.outcome }}
+          APP: ${{ steps.app.outcome }}
+        run: |
+          if [ "$COUNTS" = "true" ]; then
+            reading="A failure here is a broken build."
+          else
+            reading="A failure here is information about this runner's toolchain, not a broken build."
+          fi
+          {
+            echo ""
+            echo "| Step | Outcome |"
+            echo "|---|---|"
+            echo "| Clone, with the full history | $CLONE |"
+            echo "| Core package, swift build | $BUILD |"
+            echo "| Core package, swift test | $TEST |"
+            echo "| Mac app, unsigned build | $APP |"
+            echo ""
+            echo "$reading"
+          } >> "$GITHUB_STEP_SUMMARY"

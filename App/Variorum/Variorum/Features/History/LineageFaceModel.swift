@@ -88,8 +88,18 @@ nonisolated enum LineageFaceCopy {
         case .setAside: return setAside
         case .inTrash: return inTrash
         case .otherWing(let wingID):
-            return WingCopy.lineageElsewhere(wingNames[wingID] ?? "")
+            return WingCopy.lineageElsewhere(wingName(wingID, wingNames: wingNames))
         }
+    }
+
+    /// **A member's wing, named as the wing switcher names it** (VX-920): the
+    /// id read by the dangling-wing rule over the read's LIVE wing names
+    /// (`Queries.effectiveWingID` — an id no live wing row carries is Home's),
+    /// and Home by its one name (`WingWords.home`), never the empty "the wing
+    /// “”". The member's line and its go-to button both speak it.
+    static func wingName(_ wingID: String, wingNames: [String: String]) -> String {
+        let wing = Queries.effectiveWingID(wingID, liveWingIDs: Set(wingNames.keys))
+        return wing.isEmpty ? WingWords.home : wingNames[wing, default: WingWords.home]
     }
 
     /// **VX-898 — does the member stand UNPLACED?** Kept as lineage or set
@@ -137,8 +147,9 @@ final class LineageFaceModel {
     nonisolated struct Read: Equatable, Sendable {
         var tree: Queries.LineageTree?
         var counts: [String: LineageFamily.Counts] = [:]
-        /// The names of the wings any member lives in (another wing's
-        /// members are named with theirs).
+        /// The names of the LIVE wings any member lives in (another wing's
+        /// members are named with theirs; an id missing here — Home's `''`, a
+        /// dead wing — is named Home, `LineageFaceCopy.wingName`).
         var wingNames: [String: String] = [:]
     }
 
@@ -170,7 +181,8 @@ final class LineageFaceModel {
         if !wings.isEmpty {
             let json = String(decoding: try JSONEncoder().encode(wings.sorted()), as: UTF8.self)
             for row in try Row.fetchAll(
-                db, sql: "SELECT id, name FROM wing WHERE id IN (SELECT value FROM json_each(?))",
+                db, sql: "SELECT id, name FROM wing WHERE deleted_at IS NULL "
+                    + "AND id IN (SELECT value FROM json_each(?))",
                 arguments: [json]) {
                 names[row["id"]] = row["name"]
             }
@@ -232,7 +244,7 @@ final class LineageFaceModel {
         LineageFaceCopy.place(member, wingNames: wingNames)
     }
 
-    func wingName(_ id: String) -> String { wingNames[id] ?? "" }
+    func wingName(_ id: String) -> String { LineageFaceCopy.wingName(id, wingNames: wingNames) }
 
     // MARK: - Selecting
 
