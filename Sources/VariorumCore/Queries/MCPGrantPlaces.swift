@@ -28,7 +28,7 @@ public struct MCPGrantPlaces: Equatable, Sendable {
     }
 
     /// A wing's name — "Home" for the virtual Home wing and for a dangling id
-    /// (`mcpResolvedWing`'s reading).
+    /// (`Queries.effectiveWingSQL`'s reading).
     public func wingName(_ id: String) -> String {
         guard !id.isEmpty, let wing = wings.first(where: { $0.id == id }) else {
             return Queries.mcpHomeWingName

@@ -80,10 +80,21 @@ extension Operations {
     ///   knows the name it holds to a request's face;
     /// - refuse: NOTHING about the client changes (an impostor never touches
     ///   the row it claims) — the refusal is logged in words for her.
+    ///
+    /// **The declared version is stored with every U+0000 removed** (VX-925 —
+    /// the VX-940 run W4; VX-357's rule, `StoredText`): it is display text the
+    /// pane shows her (the Clients row; Waiting's "New setup for ‹name›", where
+    /// it tells a stranger from the client she knows), never an identifier —
+    /// unlike the name (VX-396 refuses a NUL there, at naming), nothing keys on
+    /// it — so it takes the prose class's strip, quietly: no answer carries
+    /// the admission's writes (PROVISIONAL P-940-W4-1). Stripped once here, for
+    /// both rows it reaches (the client row and a waiting setup's), and again at
+    /// the client row's one write (`recordMCPContact`).
     public func admitMCPConnection(
         name: String, version: String?, presentedKey: String?
     ) throws -> MCPConnectionAdmission {
-        try database.write { db in
+        let version = StoredText.stripped(version)
+        return try database.write { db in
             let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
             let presentedHash = presentedKey.map(MCPSetupKeyRule.hash)
             let existing = try Queries.mcpClient(db, name: trimmed)

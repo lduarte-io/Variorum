@@ -42,10 +42,10 @@ extension Queries {
     /// wing row carries it, else Home (`''`): a dead wing, or an id no wing
     /// row carries at all (a row that landed ahead of its wing's). `wingScope`
     /// is the same rule as a WHERE fragment, `effectiveWingSQL` as a
-    /// projection, `effectiveWing(ofPost:)` / `(ofReading:)` per row. (The MCP
-    /// door's facts spell the projection twice more — `mcpResolvedWing`,
-    /// `MCPReadTools.resolvedWing` — byte-equivalent; folding them onto this
-    /// one is the door's own change, recorded in the B2 record.)
+    /// projection, `effectiveWing(ofPost:)` / `(ofReading:)` per row. The MCP
+    /// door's facts read the projection through this one too (VX-922 — the
+    /// VX-940 run W4 folded the door's two copies onto it; the projection is the
+    /// door's reach facts, so it has ONE text).
     public static func effectiveWingID(_ stored: String, liveWingIDs: Set<String>) -> String {
         liveWingIDs.contains(stored) ? stored : ""
     }
