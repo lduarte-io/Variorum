@@ -179,6 +179,63 @@ struct AcknowledgmentsCopyTests {
         // The shared list (the phone's) never names the Mac-only family.
         #expect(!AcknowledgmentsCopy.shared.map(\.name).contains("MCP Swift SDK"))
     }
+
+    /// **VX-923 — every library the binary links is credited, and BIP-39 reads
+    /// as the BIP reads** (F-B3-1 / F-B3-2, the VX-912 B3 dependency check —
+    /// `notes/plans/fixes/vx-912-open-source-gating.md`, "## B3 record"). The
+    /// five Point-Free libraries ride BOTH platforms' notices (VariorumCore links
+    /// swift-dependencies, whose default traits link the other four), each its
+    /// own MIT text under its own copyright line; Sparkle rides the MAC's alone
+    /// (the Xcode project links it to the Mac app target only), its whole
+    /// LICENSE — the MIT grant and the four external licenses it reproduces;
+    /// BIP-39 is MIT at the pinned commit, in the BIP's own words. Notices are
+    /// looked up BY NAME, so the pin compiles on the tree it reds on.
+    @Test func everyLinkedLibraryIsCreditedAndBIP39ReadsMIT() {
+        func notice(_ name: String, in list: [AcknowledgmentsCopy.Notice] = AcknowledgmentsCopy.all)
+            -> AcknowledgmentsCopy.Notice? {
+            list.first { $0.name == name }
+        }
+        let pointFree: [(name: String, copyright: String)] = [
+            ("swift-dependencies", "Copyright (c) 2022 Point-Free, Inc."),
+            ("xctest-dynamic-overlay", "Copyright (c) 2021 Point-Free, Inc."),
+            ("swift-concurrency-extras", "Copyright (c) 2023 Point-Free"),
+            ("combine-schedulers", "Copyright (c) 2020 Point-Free, Inc."),
+            ("swift-clocks", "Copyright (c) 2022 Point-Free"),
+        ]
+        for library in pointFree {
+            let shared = notice(library.name, in: AcknowledgmentsCopy.shared)
+            #expect(shared != nil, "\(library.name) rides both platforms' notices")
+            // The line ends at the newline: "Point-Free" never passes for "Point-Free, Inc.".
+            #expect(shared?.text.hasPrefix("MIT License\n\n\(library.copyright)\n") == true,
+                    "\(library.name): its own MIT text under its own copyright line")
+        }
+
+        let sparkle = notice("Sparkle")
+        #expect(sparkle != nil, "Sparkle rides the Mac's notices")
+        #expect(notice("Sparkle", in: AcknowledgmentsCopy.shared) == nil,
+                "…and never the phone's: only the Mac app links it")
+        for line in [
+            "Copyright (c) 2006-2013 Andy Matuschak.",                    // the MIT grant
+            "Copyright (c) 2011-2014 Kornel Lesi\u{144}ski.",
+            "EXTERNAL LICENSES",
+            "Copyright 2003-2005 Colin Percival",                         // bsdiff 4.3 — BSD-2
+            "Copyright (c) 2008-2010 Yuta Mori All Rights Reserved.",     // sais-lite — MIT
+            "Copyright (c) 2015 Orson Peters <orsonpeters@gmail.com>",    // ed25519 — zlib
+            "Copyright (c) 2011 Mark Hamlin.",                            // SUSignatureVerifier — BSD-2
+        ] {
+            #expect(sparkle?.text.contains(line) == true, "Sparkle's LICENSE carries \(line)")
+        }
+
+        let bip39 = AcknowledgmentsCopy.bip39.text
+        #expect(bip39.contains("MIT License"), "BIP-39 is MIT at the pinned commit")
+        #expect(bip39.contains("\"This BIP falls under the MIT License.\""), "…in the BIP's own words")
+        #expect(!bip39.contains("BSD") && !bip39.contains("PD/") && !bip39.contains("public-domain"),
+                "the old PD/BSD-2-Clause statement is gone")
+
+        // The pane's ForEach is keyed by name: a new entry may never collide.
+        let names = AcknowledgmentsCopy.all.map(\.name)
+        #expect(Set(names).count == names.count, "every notice's name is unique")
+    }
 }
 
 // MARK: - Batch 2 additions (the owed Batch-1 items)

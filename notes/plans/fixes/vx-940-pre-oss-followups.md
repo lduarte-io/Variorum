@@ -79,7 +79,7 @@ The VX-926 record's §7 binds by reference (which binds the VX-912 record's §7)
 |---|---|---|
 | P0 | This record + the ledger row | DONE (this commit) |
 | P1 | VX-939 — `LETTER.md` at the repo root (her text, header stripped, byte-faithful); the README pointer moves to it; the one-file-or-two verdict | DONE (this commit) — TWO files, sync noted (verdict below); body byte-identical to `read-me.txt`'s, and equal to `ReadmeSeeder.paragraphs` (17/17) by a scratch compile of the literals; `read-me.txt` and the seeder's code untouched |
-| P2 | VX-923 — the pin (red on the current tree) | NOT STARTED |
+| P2 | VX-923 — the pin (red on the current tree) | DONE (this commit) — `AcknowledgmentsCopyTests.everyLinkedLibraryIsCreditedAndBIP39ReadsMIT` (Mac app target, `Phase13pSubstrateTests.swift`); **RED on the unfixed source, 19 issues, the three old tests green** (headless harness below); in-target run PENDING the gate |
 | P3 | VX-923 — the credits (Sparkle + the Point-Free siblings) and the BIP-39 line (pane + `Vendor/BIP39/README.md`) | NOT STARTED |
 | P4 | Close: headless build + the copy tests + the seeder pins (PENDING the gate where in-target), authored sentences listed, PROVISIONALs | NOT STARTED |
 
@@ -105,3 +105,17 @@ So there are three representations, all byte-equal today: the literals (what see
 - The seeder pins run IN-TARGET only at the gate (app suite → stage): PENDING there, unmodified. Nothing they read changed: `read-me.txt` and the literals are byte-untouched.
 
 **Offered, not built (the orchestrator's call):** a headless DRIFT PIN, a core-package test that reads `LETTER.md` and `read-me.txt` by `#filePath` and asserts equal paragraphs. With the app pin, that would make the three-way sync mechanical rather than by hand. Not built because the brief named header comments and §4 says VX-939 is repo files only.
+
+### P2 — VX-923: the pin, before the fix
+
+**The pin:** `AcknowledgmentsCopyTests.everyLinkedLibraryIsCreditedAndBIP39ReadsMIT`, in the pane's own copy suite (`App/Variorum/VariorumTests/Phase13pSubstrateTests.swift`, the Mac app target). It asserts:
+- the five Point-Free libraries, by the B3 table's package names, are in `shared` (both platforms). Each text starts `MIT License\n\n<its own copyright line>\n`, and the newline ends the line, so "Point-Free" never passes for "Point-Free, Inc.";
+- Sparkle is in `all` on the Mac and absent from `shared`, and its text carries the MIT grant's first copyright line, the non-ASCII Lesiński line, `EXTERNAL LICENSES`, and the copyright line of each of the four external parts (bsdiff BSD-2, sais-lite MIT, ed25519 zlib, SUSignatureVerifier BSD-2);
+- BIP-39's text says `MIT License` and quotes the BIP (`"This BIP falls under the MIT License."`), with no `BSD`, `PD/` or `public-domain` left;
+- every name in `all` is unique (the pane's `ForEach` is keyed by name).
+
+Notices are looked up BY NAME, so the pin compiles on the old tree and reds there by assertion, not by a missing symbol.
+
+**How it runs headless (a throwaway instrument, never in the PR).** The suite is app-target code, and an in-target run is an `xcodebuild test` (the stage), which this batch may not do. So `scratchpad/w1-ackpin/run-pin.zsh` builds a scratch SwiftPM package. It copies a given edition of `AcknowledgmentsCopy.swift` in as a library, and the suite's text, `awk`-extracted from the given `Phase13pSubstrateTests.swift` from its `@Suite` line to its closing brace, in as the test target. The only lines it adds are `import Foundation` / `import Testing` / `@testable import AckCopy`. Then it runs `swift test`.
+
+**Red on the unfixed source** (this commit's `AcknowledgmentsCopy.swift`, unchanged since `b637dc457`): `Test run with 4 tests in 1 suite failed … with 19 issues`, EXIT 1. The three existing tests pass. The new one carries exactly the expected 19: the four siblings × (missing + text), Sparkle missing + its seven lines, and BIP-39's three lines. swift-dependencies' row, Sparkle's not-in-shared row and the unique-names row pass on old, as they should.
