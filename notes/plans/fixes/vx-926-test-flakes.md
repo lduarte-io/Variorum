@@ -116,7 +116,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | P4 | The family alone + under a deliberately loaded parallel run (counts) | NOT STARTED |
 | P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | NOT STARTED |
 
-**Load generators alive:** none (P4's first generator — 36 × `yes`, pids 44890–44925 — killed by pid after the first loaded runs; restarted for the final counts and named here then). **Reverts in flight:** none — R-A, R-B1, R-B2, R-C each applied, run and restored clean (`git diff` empty after each; table below). **The Phase 1 instrument:** deleted from the tree (never committed; its last source kept at `scratchpad/u1/ZZVX926ProbeInstrument.swift.copy`).
+**Load generators alive:** ONE — 36 × `/usr/bin/yes > /dev/null`, pids 48392–48427 (P4's final loaded counts; killed by pid at their end). **Reverts in flight:** none — R-A, R-B1, R-B2, R-C each applied, run and restored clean (`git diff` empty after each; table below). **The Phase 1 instrument:** deleted from the tree (never committed; its last source kept at `scratchpad/u1/ZZVX926ProbeInstrument.swift.copy`).
 
 ### PHASE 1 — VX-850's answer (the evidence, either way)
 
