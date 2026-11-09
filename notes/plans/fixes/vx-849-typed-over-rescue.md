@@ -127,6 +127,38 @@ lesson). No subagents for implementers. No store, no server contact. **This run'
 nov7's queue — ask before every claim; this run holds the SYNC SLOT, so no other Sync/-or-custody effort runs
 beside it.**
 
+## STAGE & COORDINATION (nov7's grants and mains moves, 2026-11-09 — binding on every session of this run)
+
+- **The Sync/-custody slot is GRANTED to VX-849 in writing** (nov7, per her word; verified: vx-926/vx-940/vx-915
+  touch zero Sync|Protection/keychain/custody files; vx-913 has no code yet). The slot releases only on this
+  orchestrator's "nothing further owed" at the hard stop.
+- **Watch item:** vx-913's VX-81 (SwiftUI crash on the re-key reopen) is trace-first elsewhere; if its trace
+  reaches Protection/custody code, nov7 stops it and routes to her. If a batch here meets VX-81's neighborhood,
+  tell nov7 at once.
+- **Merges serialize through nov7;** the second merger merges main in and re-proves on the merged tree — for this
+  run that includes re-proving convergence over the beforeRound hook × VX-912 straggle-belt seam (the belt was
+  already in this branch's base, bd163ea54; the batch-1 convergence pins ran against it).
+- **Stage protocol (every window):** REQUEST (what/minutes/claim name, sent EARLY) → READY (able NOW) → GO only
+  from nov7 with the exact claim line → RELEASE with Executed counts and EVERY failing test by name (faulting
+  thread read for any crash). `-only-testing` takes TYPE names as a zsh array. Instance checks: `pgrep -lx
+  Variorum`, `pgrep -lf "MacOS/Variorum$"`. A window over an hour pings SEAM.
+- **Dev-store windows** (VX-855's teardown repro, the batch-3 walk) serialize against vx-913's VX-81 re-key
+  repro. Each window leaves the dev store's posture as found: MCP ON, variorum-de approved, never Resume Sync,
+  Castle values only from `~/.variorum/dev-castle.env`, restored or reported at RELEASE.
+- **Fable safeguard (her memory rule):** any walk that meets the lock screen or a passphrase is handed to an
+  OPUS session; Fable reviews the code, never drives the walk.
+- **The custody drill's steps 8–9** need HER Air and hands — held and bundled as an ask, never routed around.
+- **Lockstep:** nothing in this run is a §12 event (confirmed at kickoff); if that changes, the migration/marker
+  is reserved with nov7 FIRST and the mirror deploy runs only on her explicit go.
+- **Mains folded in at the batch-1 seam (merge `1f8f25a37`; the batch-1 core pins re-run green on the merged
+  tree, 11/11):** 66d6f33cf (VX-931, docs only) · 159e12ac0 (board snapshot) · 744ca5301 (vx-913's no-trailer
+  guard: attribution off + a PreToolUse hook DENYING any git commit / gh pr command whose TEXT carries an
+  attribution trailer — keep those words out of commit messages entirely; nov7 scans for trailer lines at each
+  merge GO).
+- **HER RULING AT VX-931, binding on this run's closeout: /Applications holds RELEASES only.** No /Applications
+  refresh at this run's merge or closeout — merged work is tested in the DEBUG app, and the wave's release
+  installs it. An interim build goes there only at her explicit word, under the label she names.
+
 ## LIVE STATUS (the orchestrator flips rows; implementers flip their batch rows in their own commits)
 
 | # | Piece | Status |
@@ -442,3 +474,37 @@ nothing here needed a product decision the rulings had not made (corner 1 is a r
   and `aQuickCaptureTypedOverAPullRescuesThePullsWords`.
 - *Not mine to claim and not claimed:* the live look (one real two-Mac round with typing in flight — her eyes, the
   memo's third evidence shape; can ride batch 2's held window).
+
+### BATCH 1 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 2 spawns)
+
+**Verification:** all seven commits present and pushed as reported; the core pins re-run FIRST-HAND on the merged
+tree (after the fold-in, merge `1f8f25a37`): `swift test --filter TypedOverRescue` → **11/11 in 3 suites green**.
+The Mac/simulator legs are claimed as a stage window (legs A + B + D now; leg C FOLDS into the run's closing Mac
+runs, LIVE STATUS row 8, where those suites must run anyway over every changed source — one sweep, not two).
+
+**The implementer's decisions, dispositioned:**
+1. **The Takes board's non-flushing doors (its `restoreCommit` among them) → FOLDED INTO BATCH 3 as a named item,
+   PROVISIONAL P-849-1.** The finding is real: a board door that rewrites the take her live pane is typing in now
+   leaves a `'conflict'` card, against R-683-2's premise ("a deliberate act of hers never mints this card"). The
+   spec-defensible build (the PROVISIONAL rule): those doors FLUSH PENDING TYPING FIRST — the MCP door's own
+   precedent, and the same world batch 3's ring-ending composes with (the door then acts on flushed text, the ring
+   ends on the pane's own take per her VX-664 option-(a) ruling, the pane adopts, no card). The alternative (keep
+   the rescue card on her own doors) is recorded here; QUESTIONS at the merge.
+2. **`roundNow` runs the occasion → ACCEPTED, not provisional.** An account act's first round applies rows like
+   any round; the flush-before-apply rationale is road-independent (mechanism, not product).
+3. **The phone gets B but not A → batch 2's seam call, PROVISIONAL P-849-2.** Batch 2 wires beforeRound occasions
+   anyway (the retry); it wires the phone's FLUSH occasion too if the phone composition offers the same one-line
+   seam, else records it for the MOBILE PARITY line. (D-544's phone posture — the retry hook unwired there — is
+   unchanged either way.)
+4. **The deliberately unguarded sites (the list-exit retraction inside `runStructural`, the seeders, the perf
+   fixtures) → ACCEPTED as recorded.** None is her typing racing an outside writer; the structural compound keeps
+   `insureTakes` as its own insurance.
+5. **Canon deltas → queued for the closeout list:** AppSpec §9's `expectedText` convention line gains the
+   autosave exception (rescues, never refuses); the `autosave` line gains `expectedText` and the rescue; a
+   SyncSpec §6 pointer if the ladder agrees it belongs.
+
+**Also recorded:** the MCP whole-target socket timeouts (6→4→2, all green alone, no MCP line changed) are the
+known VX-850 load-flake class — vx-926's territory; the closing run compares against main's tip before any claim.
+The two batch-1 convergence pins passing on both sides is BY DESIGN (they pin the composition with the standing
+S5 machinery), recorded so nobody reads them as a hollow red-on-old — the batch's red-on-old lives in the core
+rescue pins (revert-proven headless) and the named Mac reverts (leg B).
