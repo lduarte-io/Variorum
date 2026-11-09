@@ -101,8 +101,11 @@ struct MCPReaderAfterCloseTests {
         let running = Task.detached { await session.run() }
 
         // The opening; the initialize answered ⇒ the transport's reader runs.
+        // VX-850: the wait for it runs off the pool — the session answering it
+        // is a pool task (the premise's "1 not" was this wait holding a thread).
         _ = MCPShim.writeAll(client, MCPPreamble.line(key: key) + Data((initialize + "\n" + initialized + "\n").utf8))
-        guard let opened = readLine(client), String(decoding: opened, as: UTF8.self).contains("\"id\":1") else {
+        guard let opened = await HarnessWait.offPool({ readLine(client) }),
+              String(decoding: opened, as: UTF8.self).contains("\"id\":1") else {
             close(client)
             session.hangUp()
             await running.value

@@ -106,25 +106,25 @@ struct MCPConnectionEndServerTests {
 
     /// A message past the session's cap is answered and closed (VX-184 U1) —
     /// and its end says so.
-    @Test func aMessageOverTheCapEndsTheConnectionAndSaysSo() throws {
+    @Test func aMessageOverTheCapEndsTheConnectionAndSaysSo() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let socket = try RawSocket(h, timeout: 30)
         defer { socket.close() }
         socket.send(preamble: try h.setupKey(for: "big-sender"), initialize("big-sender"))
-        _ = try #require(socket.nextResponse(), "initialized")
+        _ = try #require(await socket.nextResponse(), "initialized")
         socket.send(#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#)
         let pad = String(repeating: "a", count: MCPSocketTransport.lineCap + 1)
         let bytes = Data((#"{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"list_books","arguments":{"pad":""#
             + pad + #""}}}"# + "\n").utf8)
         Thread { _ = MCPShim.writeAll(socket.fd, bytes) }.start()
-        _ = socket.nextResponse()
-        #expect(socket.isHungUp())
+        _ = await socket.nextResponse()
+        #expect(await socket.isHungUp())
         var logged: [(String, String)] = []
         for _ in 0..<200 {
             logged = try ends(h)
             if !logged.isEmpty { break }
-            Thread.sleep(forTimeInterval: 0.01)
+            try await Task.sleep(for: .milliseconds(10))   // VX-850: suspended — the session writing the line needs a pool thread
         }
         #expect(logged.map(\.0) == ["big-sender"] && logged.map(\.1) == [MCPConnectionEnd.overLimit.act], "\(logged)")
     }
@@ -158,7 +158,9 @@ struct MCPConnectionEndServerTests {
         var opening = MCPPreamble.line(key: try h.setupKey(for: "claude-code"))
         opening.append(Data((initialize("claude-code") + "\n").utf8))
         _ = MCPShim.writeAll(fd, opening)
-        #expect(!MCPShim.readFirstLine(fd, limit: 1 << 20).isEmpty, "initialized — the connection named itself")
+        // VX-850: off the pool — the session answering it needs a pool thread.
+        let initialized = await HarnessWait.offPool { MCPShim.readFirstLine(fd, limit: 1 << 20) }
+        #expect(!initialized.isEmpty, "initialized — the connection named itself")
         #expect(host?.connectedClientNames == ["claude-code"])
 
         // The door's own two lines: stop with the reason, then let go.
@@ -183,7 +185,7 @@ struct MCPConnectionEndServerTests {
     @Test func aConnectionThatNeverNamedItselfLeavesNoEndLine() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let (bare, _) = try h.rawOpen(as: "no-key", presenting: nil)
+        let (bare, _) = try await h.rawOpen(as: "no-key", presenting: nil)
         close(bare)
         let silent = try RawSocket(h)
         silent.close()

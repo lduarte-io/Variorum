@@ -199,8 +199,9 @@ final class ServerHarness: @unchecked Sendable {
     /// `initialize` naming `name` with request id `id` — and the server's
     /// first answer as JSON. The caller closes the descriptor. VX-132: the
     /// read is bounded by the harness's limit (an answer that never comes
-    /// fails "no JSON answer", never a stalled run).
-    func rawOpen(as name: String, presenting key: String?, id: Int = 1) throws -> (fd: Int32, answer: [String: Any]) {
+    /// fails "no JSON answer", never a stalled run). VX-850: the read runs off
+    /// the pool (`HarnessWait`) — the server answering it needs a pool thread.
+    func rawOpen(as name: String, presenting key: String?, id: Int = 1) async throws -> (fd: Int32, answer: [String: Any]) {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
             throw HarnessFailure("could not connect as \(name)")
         }
@@ -212,7 +213,7 @@ final class ServerHarness: @unchecked Sendable {
             "capabilities":{},"clientInfo":{"name":"\(name)","version":"1"}}}
             """
         _ = MCPShim.writeAll(fd, Data((line + "\n").utf8))
-        let answer = MCPShim.readFirstLine(fd, limit: 1 << 20)
+        let answer = await HarnessWait.offPool { MCPShim.readFirstLine(fd, limit: 1 << 20) }
         guard let object = try JSONSerialization.jsonObject(with: answer) as? [String: Any] else {
             close(fd)
             throw HarnessFailure("\(name) got no JSON answer")
@@ -283,7 +284,13 @@ struct HarnessSeededGenerator: RandomNumberGenerator, Sendable {
 
 struct HarnessFailure: Error, CustomStringConvertible {
     let description: String
-    init(_ description: String) { self.description = description }
+    /// VX-850: set only by `HarnessDeadline`'s expiry — how long after arming
+    /// its timer fired, on the timer's own thread (nil: not the deadline's).
+    let firedAfter: Duration?
+    init(_ description: String, firedAfter: Duration? = nil) {
+        self.description = description
+        self.firedAfter = firedAfter
+    }
 }
 
 func text(_ result: (content: [Tool.Content], isError: Bool?)) -> String {
@@ -802,13 +809,13 @@ struct MCPServerTests {
         // VX-168 (A JUSTIFIED EDIT, the ritual): every connection presents
         // its own setup key now — a bare one would be refused at the door
         // and never hold a slot.
-        func rawInitialize(_ name: String) throws -> (fd: Int32, answer: [String: Any]) {
-            try h.rawOpen(as: name, presenting: try h.setupKey(for: name))
+        func rawInitialize(_ name: String) async throws -> (fd: Int32, answer: [String: Any]) {
+            try await h.rawOpen(as: name, presenting: try h.setupKey(for: name))
         }
         var held: [Int32] = []
         defer { for fd in held { close(fd) } }
         for index in 0..<16 {
-            let (fd, answer) = try rawInitialize("flood-\(index)")
+            let (fd, answer) = try await rawInitialize("flood-\(index)")
             held.append(fd)
             #expect(answer["result"] != nil, "connection \(index) serves")
         }
@@ -817,7 +824,7 @@ struct MCPServerTests {
         // The seventeenth is refused with ONE honest JSON-RPC error — its
         // id echoed — then closed; a bare close would leave the client
         // saying only "failed".
-        let (overFD, refusal) = try rawInitialize("flood-over")
+        let (overFD, refusal) = try await rawInitialize("flood-over")
         close(overFD)
         let error = refusal["error"] as? [String: Any]
         #expect(error?["code"] as? Int == MCPShim.refusalCode, "\(refusal)")
@@ -827,7 +834,7 @@ struct MCPServerTests {
         // A closed connection frees its slot.
         close(held.removeFirst())
         #expect(try await h.eventually { h.host.connectedClientNames.count == 15 })
-        let (freshFD, answer) = try rawInitialize("after-the-drop")
+        let (freshFD, answer) = try await rawInitialize("after-the-drop")
         held.append(freshFD)
         #expect(answer["result"] != nil, "the freed slot serves again")
     }

@@ -132,7 +132,9 @@ struct MCPPreInitializeWindowTests {
         setReceiveTimeout(client, milliseconds: 3_000)
         _ = MCPShim.writeAll(client, lines(CapturedClaudeCode.probe))
         async let opened = MCPHandshake.opening(fd: server)
-        let answer = MCPShim.readFirstLine(client, limit: 1 << 16)   // blocks until the window answers
+        // VX-850: off the pool — the `async let` above needs a pool thread to
+        // start the handshake's reader, so this wait must not hold one.
+        let answer = await HarnessWait.offPool { MCPShim.readFirstLine(client, limit: 1 << 16) }   // until the window answers
         #expect(answer == MCPHandshake.windowAnswer(toRequest: frame(CapturedClaudeCode.probe)).dropLast(),
                 "answered while the opening read waits for the next frame")
         _ = MCPShim.writeAll(client, lines(CapturedClaudeCode.initialize))
@@ -196,17 +198,17 @@ struct MCPPreInitializeWindowTests {
         _ = MCPShim.writeAll(socket.fd, bytes)
 
         for window in 0..<MCPHandshake.preInitializeLimit {
-            let answer = socket.next()
+            let answer = await socket.next()
             #expect(answer?["id"] as? Int == 100 + window)
             #expect((answer?["error"] as? [String: Any])?["code"] as? Int == -32601)
         }
-        let refused = try #require(socket.next(), "past the window, the refusal")
+        let refused = try #require(await socket.next(), "past the window, the refusal")
         #expect(refused["id"] as? Int == 99 && refused["result"] == nil)
         #expect((refused["error"] as? [String: Any])?["code"] as? Int == MCPShim.refusalCode)
         #expect((refused["error"] as? [String: Any])?["message"] as? String == MCPHandshake.refusal)
-        #expect(socket.isHungUp(), "then the connection closes")
+        #expect(await socket.isHungUp(), "then the connection closes")
 
-        let (bareFD, bare) = try h.rawOpen(as: "stray", presenting: nil, id: 99)
+        let (bareFD, bare) = try await h.rawOpen(as: "stray", presenting: nil, id: 99)
         close(bareFD)
         #expect(try JSONSerialization.data(withJSONObject: refused, options: [.sortedKeys])
                 == JSONSerialization.data(withJSONObject: bare, options: [.sortedKeys]),
@@ -228,9 +230,9 @@ struct MCPPreInitializeWindowTests {
         let socket = try RawSocket(h)
         defer { socket.close() }
         socket.send(preamble: try h.operations.mintMCPSetupKey(), #"{"jsonrpc":"2.0","id":5,"result":{}}"#)
-        let refused = try #require(socket.next())
-        #expect(socket.isHungUp())
-        let (bareFD, bare) = try h.rawOpen(as: "stray", presenting: nil, id: 5)
+        let refused = try #require(await socket.next())
+        #expect(await socket.isHungUp())
+        let (bareFD, bare) = try await h.rawOpen(as: "stray", presenting: nil, id: 5)
         close(bareFD)
         #expect(try JSONSerialization.data(withJSONObject: refused, options: [.sortedKeys])
                 == JSONSerialization.data(withJSONObject: bare, options: [.sortedKeys]))

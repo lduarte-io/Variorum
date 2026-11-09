@@ -57,19 +57,19 @@ private func errorOf(_ answer: [String: Any]?) -> (code: Int?, message: String?)
 struct MCPSizeCapTests {
     // MARK: - The opening's cap (1 MiB)
 
-    @Test func anInitializeExactlyAtTheOpeningCapIsAdmittedAndServed() throws {
+    @Test func anInitializeExactlyAtTheOpeningCapIsAdmittedAndServed() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let socket = try RawSocket(h, timeout: 30)
         defer { socket.close() }
         let frame = line(exactly: MCPHandshake.lineLimit) { initialize("at-the-cap", pad: $0) }
         sendInBackground(socket.fd, MCPPreamble.line(key: try h.setupKey(for: "at-the-cap")) + Data((frame + "\n").utf8))
-        let answer = try #require(socket.next(), "the initialize at exactly 1 MiB is answered")
+        let answer = try #require(await socket.next(), "the initialize at exactly 1 MiB is answered")
         #expect(answer["id"] as? Int == 1 && answer["result"] != nil, "\(answer)")
         #expect(try h.client("at-the-cap").state == .pending, "admitted: a connection request, as any first contact")
     }
 
-    @Test func anInitializeOneByteOverTheOpeningCapIsAnsweredThenClosed() throws {
+    @Test func anInitializeOneByteOverTheOpeningCapIsAnsweredThenClosed() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let key = try h.setupKey(for: "over-the-cap")
@@ -77,33 +77,33 @@ struct MCPSizeCapTests {
         defer { socket.close() }
         let frame = line(exactly: MCPHandshake.lineLimit + 1) { initialize("over-the-cap", pad: $0) }
         sendInBackground(socket.fd, MCPPreamble.line(key: key) + Data((frame + "\n").utf8))
-        let answer = socket.next()
+        let answer = await socket.next()
         #expect(answer?["id"] is NSNull, "the overrun line's id cannot be read: \(String(describing: answer))")
         #expect(errorOf(answer).code == MCPShim.refusalCode)
         #expect(errorOf(answer).message?.contains("1 MiB") == true, "\(String(describing: errorOf(answer).message))")
-        #expect(socket.isHungUp(), "then the connection closes")
+        #expect(await socket.isHungUp(), "then the connection closes")
         // Nothing was decided: no client, no key claimed, nothing logged.
-        #expect(try h.database.read { try Queries.mcpClient($0, name: "over-the-cap") } == nil)
-        #expect(try h.database.read { try Queries.mcpSetupKeyStanding($0, hash: MCPSetupKeyRule.hash(key)) }
+        #expect(try await h.database.read { try Queries.mcpClient($0, name: "over-the-cap") } == nil)
+        #expect(try await h.database.read { try Queries.mcpSetupKeyStanding($0, hash: MCPSetupKeyRule.hash(key)) }
                 == .unclaimed)
-        #expect(try h.database.read { try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM mcp_activity") } == 0)
+        #expect(try await h.database.read { try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM mcp_activity") } == 0)
     }
 
-    @Test func aPreambleOverTheOpeningCapIsAnsweredThenClosed() throws {
+    @Test func aPreambleOverTheOpeningCapIsAnsweredThenClosed() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let socket = try RawSocket(h, timeout: 30)
         defer { socket.close() }
         let preamble = line(exactly: MCPHandshake.lineLimit + 1) { "variorum-mcp-key vmk1_\($0)" }
         sendInBackground(socket.fd, Data((preamble + "\n" + initialize("long-key") + "\n").utf8))
-        let answer = socket.next()
+        let answer = await socket.next()
         #expect(answer?["id"] is NSNull && errorOf(answer).code == MCPShim.refusalCode, "\(String(describing: answer))")
-        #expect(socket.isHungUp())
+        #expect(await socket.isHungUp())
     }
 
     /// A pre-initialize request exactly at the cap is still the window's
     /// (answered -32601), and the initialize after it opens.
-    @Test func aProbeExactlyAtTheOpeningCapIsAnsweredAndTheInitializeOpens() throws {
+    @Test func aProbeExactlyAtTheOpeningCapIsAnsweredAndTheInitializeOpens() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let socket = try RawSocket(h, timeout: 30)
@@ -113,49 +113,49 @@ struct MCPSizeCapTests {
         }
         sendInBackground(socket.fd, MCPPreamble.line(key: try h.setupKey(for: "after-a-big-probe"))
                          + Data((probe + "\n" + initialize("after-a-big-probe") + "\n").utf8))
-        let answered = socket.next()
+        let answered = await socket.next()
         #expect(answered?["id"] as? String == "probe" && errorOf(answered).code == -32601, "\(String(describing: answered))")
-        let opened = socket.next()
+        let opened = await socket.next()
         #expect(opened?["id"] as? Int == 1 && opened?["result"] != nil, "\(String(describing: opened))")
     }
 
     // MARK: - The session's cap (16 MiB)
 
     /// A raw, admitted, approved session with a read grant on Home.
-    private func admittedSession(_ h: ServerHarness, _ name: String) throws -> RawSocket {
+    private func admittedSession(_ h: ServerHarness, _ name: String) async throws -> RawSocket {
         let socket = try RawSocket(h, timeout: 30)
         socket.send(preamble: try h.setupKey(for: name), initialize(name))
-        _ = try #require(socket.nextResponse(), "initialized")
+        _ = try #require(await socket.nextResponse(), "initialized")
         socket.send(#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#)
         _ = try h.approve(name, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
         return socket
     }
 
-    @Test func aMessageExactlyAtTheSessionCapIsServed() throws {
+    @Test func aMessageExactlyAtTheSessionCapIsServed() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let socket = try admittedSession(h, "at-the-session-cap")
+        let socket = try await admittedSession(h, "at-the-session-cap")
         defer { socket.close() }
         let call = line(exactly: MCPSocketTransport.lineCap) { listBooks(id: 7, pad: $0) }
         sendInBackground(socket.fd, Data((call + "\n").utf8))
-        let answer = try #require(socket.nextResponse(), "the 16 MiB call is answered")
+        let answer = try #require(await socket.nextResponse(), "the 16 MiB call is answered")
         #expect(answer["id"] as? Int == 7, "\(answer)")
         let result = try #require(answer["result"] as? [String: Any], "\(answer)")
         #expect(result["isError"] as? Bool != true, "served: \(result)")
     }
 
-    @Test func aMessageOneByteOverTheSessionCapIsAnsweredThenClosed() throws {
+    @Test func aMessageOneByteOverTheSessionCapIsAnsweredThenClosed() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let socket = try admittedSession(h, "over-the-session-cap")
+        let socket = try await admittedSession(h, "over-the-session-cap")
         defer { socket.close() }
         let call = line(exactly: MCPSocketTransport.lineCap + 1) { listBooks(id: 8, pad: $0) }
         sendInBackground(socket.fd, Data((call + "\n").utf8))
-        let answer = socket.nextResponse()
+        let answer = await socket.nextResponse()
         #expect(answer?["id"] is NSNull, "the overrun message's id cannot be read: \(String(describing: answer))")
         #expect(errorOf(answer).code == MCPShim.refusalCode)
         #expect(errorOf(answer).message?.contains("16 MiB") == true, "\(String(describing: errorOf(answer).message))")
-        #expect(socket.isHungUp(), "then the connection closes")
+        #expect(await socket.isHungUp(), "then the connection closes")
     }
 
     /// The cap is EXACT whatever the chunking: a line one byte over is over

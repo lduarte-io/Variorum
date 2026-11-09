@@ -57,4 +57,33 @@ struct MCPHarnessPoolTests {
         #expect(answered == waiters,
                 "\(waiters - answered) of \(waiters) openings unanswered inside the 10 s bound (\(ContinuousClock.now - started)) — a wait held the pool the server needed")
     }
+
+    /// The deadline's bound is read on ITS OWN clock — at its limit even while
+    /// the whole pool is held (the family's own pattern: blocking waits inside
+    /// async bodies), when a clock read after the awaiting test resumes reads the
+    /// hold instead (the 15 s belt's 16–73.8 s). RED under the behavioural revert
+    /// that reads `firedAfter` on the awaiting task (the pre-fix belt's place).
+    /// The hold is short (0.8 s) so this pin never starves the run it sits in.
+    @Test func theDeadlinesBoundIsReadOnItsOwnClockWhileThePoolIsHeld() async throws {
+        let width = ProcessInfo.processInfo.activeProcessorCount
+        let started = ContinuousClock.now
+        let failure = await HarnessDeadline.$seconds.withValue(0.1) {
+            await #expect(throws: HarnessFailure.self) {
+                _ = try await HarnessDeadline.run("an act the pool starves") {
+                    // Every pool thread held for 0.8 s — past the 0.1 s limit, so
+                    // the awaiting test cannot resume until they let go.
+                    for _ in 0..<width { Task.detached { usleep(800_000) } }
+                    try await Task.sleep(for: .seconds(60))
+                    return 0
+                }
+            }
+        }
+        // The hold delays the test's own resumption (wall ≥ 0.8 s) whenever the
+        // blockers take every thread first — always when this pin runs alone,
+        // which is where its red-on-old is read; in a full run another suite may
+        // hold a thread past them, and the deadline's own reading is pinned the same.
+        let wall = ContinuousClock.now - started
+        #expect(failure?.firedAfter.map { $0 < .milliseconds(500) } == true,
+                "the bound read on the deadline's own clock, not the pool's: \(String(describing: failure?.firedAfter)) (the test's own wall clock read \(wall))")
+    }
 }

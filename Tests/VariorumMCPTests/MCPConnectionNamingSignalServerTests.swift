@@ -126,7 +126,7 @@ struct MCPConnectionNamingSignalServerTests {
         defer { h.tearDown() }
         let door = DoorReads()
         door.listen(to: h.host)
-        let (fd, _) = try h.rawOpen(as: "claude-code", presenting: nil)
+        let (fd, _) = try await h.rawOpen(as: "claude-code", presenting: nil)
         close(fd)
         #expect(try await h.eventually { door.all.count >= 2 }, "registered, then ended: \(door.all)")
         let reads = door.all

@@ -26,11 +26,20 @@ private func tempDirectory(_ prefix: String) -> URL {
 /// A raw client on `directory`'s socket that NAMES ITSELF (its setup key's
 /// preamble, then an `initialize` as `name`, the answer read under a receive
 /// bound — `HarnessDeadline.seconds`, the harness's own, O-7). The caller closes the descriptor.
-private func namedClient(_ directory: URL, key: String, as name: String) throws -> Int32 {
+/// VX-850: the read runs off the pool (`HarnessWait`); the task-local bound is
+/// read here, before the hop (a plain thread sees none).
+private func namedClient(_ directory: URL, key: String, as name: String) async throws -> Int32 {
+    let seconds = Int(HarnessDeadline.seconds.rounded(.up))
+    return try await HarnessWait.offPoolThrowing {
+        try namedClientBlocking(directory, key: key, as: name, receiveSeconds: seconds)
+    }
+}
+
+private func namedClientBlocking(_ directory: URL, key: String, as name: String, receiveSeconds: Int) throws -> Int32 {
     guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
         throw HarnessFailure("could not connect as \(name)")
     }
-    var timeout = timeval(tv_sec: Int(HarnessDeadline.seconds.rounded(.up)), tv_usec: 0)
+    var timeout = timeval(tv_sec: receiveSeconds, tv_usec: 0)
     _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
     var opening = MCPPreamble.line(key: key)
     let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
@@ -44,12 +53,14 @@ private func namedClient(_ directory: URL, key: String, as name: String) throws 
 }
 
 /// The server hung this connection up: reading reaches EOF within the receive bound.
-private func reachesEOF(_ fd: Int32) -> Bool {
-    var buffer = [UInt8](repeating: 0, count: 4096)
-    while true {
-        let count = read(fd, &buffer, buffer.count)
-        if count == 0 { return true }
-        if count < 0 { return false }
+private func reachesEOF(_ fd: Int32) async -> Bool {
+    await HarnessWait.offPool {   // VX-850: off the pool
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while true {
+            let count = read(fd, &buffer, buffer.count)
+            if count == 0 { return true }
+            if count < 0 { return false }
+        }
     }
 }
 
@@ -109,7 +120,7 @@ struct MCPStopEndsConnectionGrantsServerTests {
             executor: SeededExecutor(operations: h.writeOperations))
         weak var released = host
         try host?.start()
-        let fd = try namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let fd = try await namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(fd) }
         let clientID = try h.client("claude-code").id
         let (first, second) = try await h.within {
@@ -131,7 +142,7 @@ struct MCPStopEndsConnectionGrantsServerTests {
         host = nil
         let hostGone = released == nil
         #expect(hostGone, "the host is gone before its session finishes ending — the door's road")
-        let ended = reachesEOF(fd)
+        let ended = await reachesEOF(fd)
         #expect(ended, "the connection ends with the server")
 
         let dead = try await becomesRevoked(h, whileConnected)
@@ -150,12 +161,12 @@ struct MCPStopEndsConnectionGrantsServerTests {
     @Test func aStopWhoseHostIsStillHeldEndsThemToo() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let fd = try namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let fd = try await namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(fd) }
         let whileConnected = try #require(try h.approve(
             "claude-code", .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .connection)))
         h.host.stop(ending: .serverOff)
-        let ended = reachesEOF(fd)
+        let ended = await reachesEOF(fd)
         #expect(ended)
         let dead = try await becomesRevoked(h, whileConnected)
         #expect(dead, "the live-host arm ends the client's until-disconnect grants at its last connection")
@@ -168,7 +179,7 @@ struct MCPStopEndsConnectionGrantsServerTests {
     @Test func aConnectionThatNeverNamedItselfEndsNoGrants() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let named = try namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let named = try await namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(named) }
         _ = try h.approve("claude-code", nil)
         let directory = tempDirectory("vx400")
@@ -180,11 +191,11 @@ struct MCPStopEndsConnectionGrantsServerTests {
         let whileConnected = try h.operations.grantMCPAccess(
             try h.client("claude-code").id,
             .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .connection))
-        let bare = try bareClient(directory, declaring: "claude-code")
+        let bare = try await bareClient(directory, declaring: "claude-code")
         defer { close(bare) }
         host?.stop(ending: .serverOff)
         host = nil
-        let bareEnded = reachesEOF(bare)
+        let bareEnded = await reachesEOF(bare)
         #expect(bareEnded)
         try await Task.sleep(for: .milliseconds(400))
         let stands = try revokedAt(h, whileConnected) == nil
@@ -194,7 +205,7 @@ struct MCPStopEndsConnectionGrantsServerTests {
 
 /// A BARE shim's connection (no setup key) declaring `name`: refused at the key,
 /// its refusal read. The caller closes the descriptor.
-private func bareClient(_ directory: URL, declaring name: String) throws -> Int32 {
+private func bareClient(_ directory: URL, declaring name: String) async throws -> Int32 {
     guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
         throw HarnessFailure("could not connect")
     }
@@ -202,6 +213,6 @@ private func bareClient(_ directory: URL, declaring name: String) throws -> Int3
     _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
     let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
     _ = MCPShim.writeAll(fd, Data((initialize + "\n").utf8))
-    _ = MCPShim.readFirstLine(fd, limit: 1 << 20)
+    _ = await HarnessWait.offPool { MCPShim.readFirstLine(fd, limit: 1 << 20) }   // VX-850: off the pool
     return fd
 }
