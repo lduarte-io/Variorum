@@ -216,8 +216,8 @@ folder of the core test target, run, then deleted — never in the PR) so its re
 | # | Piece | Status |
 |---|---|---|
 | 1 | VX-402 — the honest flush | DONE (this commit) — instrument red 3/3 → green 3/3; Mac `build-for-testing` green; the Mac pins' RUNS **PENDING** (stage) |
-| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | IN PROGRESS — 2a the op + core pins DONE (`e7ec1227f`; 9/9; revert-proven); 2b the coordinator + the eleven record sites + the Mac pins DONE (this commit; Mac + phone `build-for-testing` green; Mac runs PENDING); NEXT: the phone pins, then piece 3 |
-| 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | NOT STARTED |
+| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | DONE — 2a the op + core pins (`e7ec1227f`; 9/9; revert-proven); 2b the coordinator + the eleven record sites + the Mac pins (`169a51898`; instrument reverts R1/R2 bite); the phone pins (the commit after it); Mac + phone builds green; Mac/simulator runs PENDING (stage) |
+| 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | DONE (this commit) — core 11/11; Mac + phone `build-for-testing` green; Mac runs PENDING (stage) |
 | 4 | Close — builds, suites, self-assessment, STAGE REQUEST | NOT STARTED |
 
 **Piece 1 — VX-402, the honest flush (FIXED).**
@@ -303,3 +303,45 @@ folder of the core test target, run, then deleted — never in the PR) so its re
   `recordTakeEdit` without the snapshot — the parameter now defaults to nil like the coordinator's own `record`).
   **Every Mac run PENDING** (the STAGE REQUEST). The instrument's behavioral reverts of the two coordinator lines run
   next, at this commit's tip.
+- *The instrument's named reverts (run at `169a51898`, on the throwaway copy of the committed coordinator):* **R1** —
+  the flush passes `expectedText: nil` → `aRunCarriesItsFirstSnapshotAcrossCoalescedKeystrokes` RED, the refused-write
+  pin green; **R2** — the hand-over line `newer.expectedText = entry.expectedText` removed →
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun` RED (the spurious card), the first-snapshot pin green. Restored →
+  4/4 green. Each revert bites exactly its own pin.
+- *The phone's pins (a follow-up commit, `MobileTypedOverRescueTests`):* RED ON OLD BY BEHAVIOR —
+  `thePageTypingOverASyncPullRescuesThePullsWords`, `aQuickCaptureTypedOverAPullRescuesThePullsWords`; GUARDS —
+  `thePageHerOwnSuccessiveRunsNeverMintACard`, `aQuickCapturesOwnTypingAfterItsMintNeverMintsACard` (a one-block and a
+  pasted two-paragraph capture — the quick note's `recordBase`). Phone `build-for-testing` green; simulator runs
+  PENDING the stage.
+
+**Piece 3 — VX-683 A, the occasion before every round (BUILT; Mac runs PENDING the stage).**
+- *The seam (`SyncSession.beforeRound: (@MainActor () async -> Void)?`, minted here — D-544 build step 3a's shape; batch 2
+  wires VX-544's retry onto it):* run to its END before every round the session's own roads start — `triggerSync()`
+  (every trigger funnels through it), `flush()` AND `roundNow()`; behind the restore hold (a held store runs neither the
+  occasion nor a round); the gate and the chain are read AGAIN after the occasion, so the round goes to the chain that
+  stands then (a chain stopped or mid-replacement meanwhile runs nothing — `configure` clears it before it drains, so a
+  retired chain is never revived). **nil = inert, byte-for-byte the pre-hook road** (the `keyProvider` pattern). Zero
+  `Sources/VariorumCore/Sync/` lines: the engine never learns editors exist. *`roundNow` is included beyond the brief's
+  two names* — an account act's first round is the same road class, and "every round this session's roads start" is
+  only true with it; flagged for the orchestrator (one `if let` to drop if ruled out).
+- *The occasion (`AppSession.flushPendingTypingBeforeRound`, shared):* R-683-3's one cheap check (`hasPendingAutosave`,
+  bounded by the notes open — P1), then ONLY the dirty coordinators flush, through the honest flush (piece 1 — a write
+  already in flight lands first too). After it the row is dirty and the standing §5/§6 machinery does the rest.
+- *The composition:* `AppServices.init`, `#if os(macOS)` — "the Mac composition wires it" (the brief). **MOBILE PARITY:**
+  the phone carries B on every phone record site (the page, the takes browser, the quick note) but NOT A's occasion —
+  its sync roads (foreground trigger, the background `flush`) run no flush-before-apply, so a pull landing in its
+  debounce window takes B's (i)-shaped rescue rather than A's S5 card. Nothing is lost either way; wiring the phone is
+  one line beside the Mac's (the orchestrator's call).
+- *Pins:* Mac `SyncBeforeRoundTests` — `triggerSyncRunsTheOccasionToItsEndBeforeTheRound`,
+  `flushRunsTheOccasionToItsEndBeforeItsRound`, `roundNowRunsTheOccasionToItsEndBeforeItsRound` (an order-logging
+  transport: the occasion's start and end both precede the round's first transport call),
+  `aHeldStoreRunsNeitherTheOccasionNorARound`, the guard `noOccasionIsInert`; and the composition
+  `theMacsOccasionLandsPendingTypingBeforeTheRound`, `theMacsOccasionTouchesNothingWhenNoTypingIsPending` (no flush,
+  no settle on a clean coordinator — R-683-3). All name `beforeRound` → **COMPILE-red** on the pre-fix tree; their
+  behavioral red is the named Mac reverts in the STAGE REQUEST. Core `FlushBeforeTheRoundConvergenceTests` (two
+  clients, the fake server, production rounds) — `herPendingTypingFlushedBeforeTheRoundBecomesTheStandingS5Card` (THE
+  brief's pin: the round ends with the server text on the row, her text the `'conflict'` take, the Mac's outbox empty —
+  its push carried the card; both devices end with both texts) and `typingBetweenTheFlushAndTheApplyIsRescuedByTheGuard`
+  (the memo's millisecond stragglers: three texts, none lost). These pin the COMPOSITION with the standing S5 road —
+  green on both sides of the engine by design (no `Sync/` line changed); **11/11** with B's suites.
+- *Builds:* Mac `build-for-testing` green and phone `build-for-testing` green (0 errors, no warning in a touched file).
