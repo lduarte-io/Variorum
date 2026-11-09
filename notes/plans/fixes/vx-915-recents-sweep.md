@@ -527,6 +527,6 @@ The window's order: the RED LEG first (READY-FOR-GATE step 1 — rebuild `vx915-
 | 9 | VX-843 tour wording | 4 | BUILT (a54cf6113; her sentences verbatim, verified by grep; the trap answered — NO seed-byte comparison, the mend keys on titles, no twin/clobber; N-915-B4-1 flagged, the front-note gap is VX-947) — pins PENDING(gate36) |
 | 10 | VX-916 guide protection chapter | 4 | BUILT (ed2c310a1; the recipe's five passages + R-529-6's line quoting VX-538's constants; the CastleRules table in LIVE STATUS, rules 3–16; P-915-B4-1/-2 placement+location PROVISIONAL) — pins PENDING(gate36) |
 | 11 | VX-929 guide wording pair (rider) | 4 | BUILT (bba64644f; ⌘⏎ taught from the registry's chord, lesson 8 in VX-45's grammar; the two remaining over-says are VX-948) — pins PENDING(gate36) |
-| 12 | VX-888 search punctuation-only | 5 | NOT-STARTED |
-| 13 | VX-852 release.sh pin check | 5 | NOT-STARTED |
+| 12 | VX-888 search punctuation-only | 5 | CLOSED HOLLOW (the repro pin GREEN on the current tree, the oracle proven live by a 21-issue discrimination run; the pin stays as a guard; the real defects minted as VX-954 + VX-955; ticket Done with the verdict comment) |
+| 13 | VX-852 release.sh pin check | 5 | BUILT (d3cc6543b; the two hooks + verify-pins.txt retention; pin red 3/4 on old release.sh → 4/4; zsh -n/bash -n clean; dry runs incl. a doctored-pin refusal exit 5; release.sh NEVER executed — the wave's release is its first exercise, HER EYES at the PR) |
 | 14 | VX-943 unlink_versions (her mint) | 6 | NOT-STARTED |
