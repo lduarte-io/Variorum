@@ -61,3 +61,68 @@ Same class as VX-889 one door over: during a switch's lag (the pane still listin
 - **F1:** agree/dispute the ordering hazard; if agreed, the one-hop funnel is a small, behavior-preserving change this run can land with the existing pin as its guard.
 - **F2/F3:** agree they are the recorded residual's family; fold into the promised closeout ticket with the inode belt named. No code owed this round unless the belt is wanted now.
 - **F4/F5:** orchestrator/closeout items; no implementer action.
+
+---
+
+## ROUND 1 — THE IMPLEMENTER'S DISPOSITIONS (B3's implementer, F1–F3; F4/F5 left to the orchestrator)
+
+*Written after reading this file in full at fa0527993. Nothing built this pass; no source file touched. One throwaway headless probe, described under F2, lives in the session scratchpad and is not in the tree.*
+
+### F1 — AGREE
+
+The mechanism is right, and it is my record's risk (1), where I named the hazard but gave no structural answer:
+- the receipt and the failure each hop to the main actor in their own unstructured `Task`;
+- `StatusCenter.deliver` holds one message, and a `.receipt` clears `current`;
+- so this call's receipt landing after this call's failure erases the one line her ruling demands.
+
+That the order holds today is scheduler behaviour, not a guarantee. A list call widens the exposure to N+1 tasks.
+
+**The fix shape I would build (on the reviewer's confirm):** one hop for a failing call's whole app-side tail. Since `onActivityLogFailure` is new in this run and has never shipped, its signature is free to reshape.
+1. **`MCPHostHooks.onActivityLogFailure` carries the call's receipts too:** `(@Sendable (MCPActivityLogFailure, _ receipts: [MCPWriteReceipt]) -> Void)?`. Doc rule: when the hook is set and the call's log failed, the call's receipts ride THIS hook and never also `onWrite`, so the app lands them and then the failure in one hop.
+2. **`MCPWriteTools.call`, success arm:**
+   - `if let failure = landed.activityLogFailure, let tail = hooks.onActivityLogFailure { tail(failure, landed.receipts) }`
+   - `else { for receipt in landed.receipts { hooks.onWrite?(receipt) } }`
+   - A call whose log landed is byte-unchanged (receipts via `onWrite`, exactly as before this run). A host with no tail hook (headless) keeps the receipts on `onWrite`.
+3. **`MCPDoor`:** the hook becomes `{ [weak self] failure, receipts in Task { @MainActor in self?.landWireCall(receipts, failing: failure) } }`, where `landWireCall` is one synchronous main-actor function: `for receipt in receipts { landWireWrite(receipt) }; landActivityLogFailure(failure)`. The order is then the order of two statements, not of two scheduled tasks. `landWireWrite` is the same road the receipts take today (`notesLeftDead`'s post, `landReceipt`), so nothing in the receipt's handling changes.
+4. **The harness** captures both: the tail's receipts append to `receipts`, and the failure to `activityLogFailures`. Pins A/C/D keep their assertions unchanged, and one assertion is added: a failing call sent nothing through `onWrite`, and everything through the tail (a separate capture). That is the structural pin on the host side.
+5. **App:** the face pin calls `landWireCall` directly and asserts that, under quiet, toast and off, the toast ends as the refusal and `lastShow` names the landed change. This replaces the face pin's two separate calls. The real-door pin stays the end-to-end oracle.
+
+As the reviewer says, no red-on-old exists for this: it hardens an ordering assumption in new code, not a pre-existing wrong output. The pins guard the new structure.
+
+What the shape does NOT change, said for the reviewer's final call: ordering ACROSS calls. An earlier call's receipt hopping late could still replace a later call's refusal toast. That is the seam's general "the latest message wins" posture and the same scheduling every MCP receipt rides today; it is outside this finding. The alternative that would also cover it is a door-held serial queue (one `AsyncStream` consumer on the main actor, fed in order by every MCP hook). I judge that heavier than this finding warrants, and it reaches the asks and the show road too.
+
+### F2 — AGREE on the mechanism and the fold · DISPUTE the belt's suggested shape · the belt is the ticket's, not this run's
+
+**Mechanism: agreed.** The publish-fail cleanup's `MCPSocketRoad.unlink(directory:)` removes by NAME. If a fresh host's `listen` probe lands in the stale start's bind→listen gap, it gets ECONNREFUSED, unlinks the stale host's path, and binds its own. The stale cleanup then removes the fresh host's file.
+
+One sharpening of "the first by-name unlink reintroduced outside that guard": `halt`'s own unlink (VX-548 2b) is also by name. Its guard is "this host bound a listener (`fd >= 0`)", resting on "while its listener holds the path, no other host can bind it". The same `listen` TOCTOU (residual (f)) falsifies that premise for `halt` too, and for `listenerDied`'s unlink. My cleanup meets exactly `halt`'s precondition: its `listen()` has returned, so it holds a listening fd. So F2 is not a new class. It is the concrete consequence of (f) for all THREE by-name unlinks: `halt`, `listenerDied`, and the publish-fail cleanup.
+
+**The suggested belt does not work as written.** I measured this headless with a throwaway C probe in the scratchpad: bind a unix socket at a short path, then compare `fstat(fd)` with `stat(path)`. On this Mac (macOS 27.0.1):
+- `fstat(fd)` returned `dev=-1 ino=273660 mode=140666`, the SOCKET OBJECT's own identity;
+- `stat(path)` returned `dev=16777234 ino=215461359 mode=140755`, the path's vnode;
+- they never match, and after another socket stole the path, `fstat(fd)` still read 273660.
+
+A belt written as `fstat(fd)` vs `stat(path)` would therefore refuse EVERY unlink. Every cleanup and every stop would leave its socket file behind. That is not fatal, because the next `listen` probe gets ECONNREFUSED and unlinks it, but it would be a regression in `halt`'s honesty.
+
+The working belt captures the path's `(st_dev, st_ino)` by `stat` right after `bind` inside `MCPSocketRoad.listen` and returns it with the fd. Before every by-name unlink, it re-`stat`s and compares, and unlinks only on a match. A compare→unlink window of microseconds remains, because macOS has no atomic "unlink if inode".
+
+**Why it belongs in the ticket, not this run:**
+1. It must cover all three unlinks to close the class. Belting only my cleanup would leave `halt` and `listenerDied` exposed to the identical steal.
+2. It changes `MCPSocketRoad.listen`'s return in `VariorumMCPSocket`, the module the shim shares. That is a new surface for this batch, with its own pin: the existing `.bound` gate plus a replaced file, as the reviewer sketches.
+3. The recorded alternative, per-directory serialization of probe → bind → publish across hosts, closes the in-process family wholesale and may make the belt moot. The ticket should choose between them once, not land half of one now.
+
+**Proposed ticket content** (for the orchestrator's closeout ticket pass: Bug · Suspected · MCP · Low), "the socket path's identity across hosts":
+- residual (e): a fresh probe meeting a stale listener between its bind and its publish re-check;
+- residual (f): `listen`'s probe→unlink→bind TOCTOU;
+- F2: the by-name unlink steal, at three sites;
+- F3: the double-start label flicker.
+
+First piece: the bind-time `(st_dev, st_ino)` belt on every by-name unlink (NOT `fstat`, measured above), or the per-directory serialization instead. Pin: the `.bound` gate with the path replaced under it. Every one of these is a microsecond window behind the stop-mid-start premise, which this run's generation token already shrank from the whole start to the syscall gap.
+
+### F3 — AGREE · fold into the same ticket · no action this run
+
+Traced the same way, and it is my residual (e)'s remnant on the double-start road. The first start's catch sees `startStillOwed` true while the second is between its bind and its publish, so it writes `.failed` and throws, and the two door completions race. The reviewer's second point also holds: a quiet-returned redundant start's completion reads `fresh.state` and sets "running" a beat early. That is transient, self-correcting at the next snapshot, and reachable only through a double start the door fix (8db317e14) makes unreachable from the door. I would name both in the ticket above; no code.
+
+### F4 / F5
+
+Not mine (the orchestrator's closeout items), left as written.
