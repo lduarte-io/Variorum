@@ -368,6 +368,80 @@ struct MCPStalledReaderPoolTests {
         close(pair[0])
     }
 
+    /// The close line goes WHENEVER the socket can take it whole without
+    /// waiting (VX-762's contract; the VX-940 ladder's F-R1-1): to a client
+    /// that stopped reading after whole frames, leaving room for the line but
+    /// less than the socket's 2,048-byte low-water mark — the mark the frames
+    /// step by, below which the socket polls not writable — the line is still
+    /// written at once and whole, outside every frame, and the mark is the
+    /// same afterwards. A poll at that mark would drop it there (the shim then
+    /// says its own sentence instead of the app's words), where a send of the
+    /// line goes without waiting.
+    @Test func aCloseLineGoesWholeWheneverTheSocketHasRoomForIt() async throws {
+        var pair: [Int32] = [-1, -1]
+        try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+        noSigPipe(pair[0])
+        let client = pair[1]
+        let transport = MCPSocketTransport(fd: pair[0])
+        try await transport.connect()
+        let closeLine = try #require(MCPCloseWords.line(for: .serverOff))  // her switch's line
+        let capacity = try #require(Self.option(pair[0], SO_SNDBUF))
+        let mark = try #require(Self.option(pair[0], SO_SNDLOWAT))
+        // A whole frame the client never reads, leaving ~1,200 bytes free: room
+        // for the line, less room than the mark.
+        let room = 1_200
+        try #require(closeLine.count <= room && room < mark && room < capacity - 1)
+        let filler = Data(repeating: UInt8(ascii: "f"), count: capacity - 1 - room)
+        try await transport.send(filler)
+        #expect(Self.option(client, SO_NREAD) == filler.count + 1,
+                "premise: the frame went whole — nothing mid-write, nothing waiting on the writer")
+        #expect(!Self.writable(pair[0]), "premise: at its own mark (\(mark) bytes) the socket polls not writable")
+        let outcome = await Self.sayClosingBounded(transport, closeLine, client: client)
+        #expect(outcome != nil, "the close line returned at once — it never waited")
+        #expect(outcome == true,
+                "a socket with room for the whole line (\(room) bytes free, the line \(closeLine.count)) takes it (\(String(describing: outcome)))")
+        #expect(Self.option(pair[0], SO_SNDLOWAT) == mark, "the low-water mark the fast road steps by is as before")
+        _ = shutdown(pair[0], SHUT_RDWR)  // the hang-up's order: the line, then the shutdown
+        let received = await Self.read(client, count: Int.max, after: 0).value
+        #expect(received == filler + Data("\n".utf8) + closeLine,
+                "the client read the frame, then the whole close line outside it, then the end (\(received.count) of \(filler.count + 1 + closeLine.count) bytes)")
+        close(client)
+        for try await _ in await transport.receive() {}
+        await transport.disconnect()
+        close(pair[0])
+    }
+
+    /// `sayClosing` from a thread of its own, bounded 5 s off the pool (the
+    /// never-waits pin's shape): nil when it did not return in time — the
+    /// client then reads once, so the stuck caller is let go and the pin
+    /// reports rather than hangs.
+    private static func sayClosingBounded(_ transport: MCPSocketTransport, _ line: Data, client: Int32) async -> Bool? {
+        await withCheckedContinuation { continuation in
+            let said = LockIsolated<Bool?>(nil)
+            let returned = DispatchSemaphore(value: 0)
+            Thread {
+                said.setValue(transport.sayClosing(line))
+                returned.signal()
+            }.start()
+            Thread {
+                let inTime = returned.wait(timeout: .now() + 5) == .success
+                if !inTime {
+                    var sink = [UInt8](repeating: 0, count: 64 * 1024)
+                    _ = Darwin.read(client, &sink, sink.count)
+                    _ = returned.wait(timeout: .now() + 5)
+                }
+                continuation.resume(returning: inTime ? said.value : nil)
+            }.start()
+        }
+    }
+
+    /// A `SOL_SOCKET` option's value at `fd`, nil when it cannot be read.
+    private static func option(_ fd: Int32, _ name: Int32) -> Int? {
+        var value: Int32 = 0
+        var size = socklen_t(MemoryLayout<Int32>.size)
+        return getsockopt(fd, SOL_SOCKET, name, &value, &size) == 0 ? Int(value) : nil
+    }
+
     /// Whether `fd` polls writable now (a zero-timeout poll).
     private static func writable(_ fd: Int32) -> Bool {
         var ready = pollfd(fd: fd, events: Int16(POLLOUT), revents: 0)

@@ -588,8 +588,8 @@ Round 2 (a fresh reviewer) re-reviews F1's diff.
 
 | Piece | What | Status |
 |---|---|---|
-| P0 | This record + the premise probes (below) | DONE (this commit) |
-| P1 | F-R1-1 — the pin (`MCPStalledReaderPoolTests`, the delivering band: free space between the line's length and the 2,048-byte mark), red on the current tree | NOT-STARTED — design below |
+| P0 | This record + the premise probes (below) | DONE (`63bedb602`) |
+| P1 | F-R1-1 — the pin (`MCPStalledReaderPoolTests`, the delivering band: free space between the line's length and the 2,048-byte mark), red on the current tree | DONE (this commit) — `aCloseLineGoesWholeWheneverTheSocketHasRoomForIt` (+ two private helpers, `sayClosingBounded`, `option`; no existing test touched); **RED on the pre-F1 door** (transport sha256 `70faba4f…`, byte-equal to HEAD): `Test run with 7 tests in 1 suite failed … with 2 issues`, EXIT 1 — `outcome == true` → `false` (returned at once, so `outcome != nil` held: the line DROPPED at 1,200 bytes free, the line 112 bytes) and `received` 6,992 of 7,104 bytes (the frame, no line); every premise held; the six existing tests green; no skipped line (`scratchpad/f1-vx940/p1-red-on-old.log`). This commit's tree is the reproducible red until P2 |
 | P2 | F-R1-1 — the fix: `sayClosing` sets `SO_SNDLOWAT` to the line's length for its one poll-gated write, restored on every path before the lock is let go; a mark it cannot set leaves the step-gated write; the doc comment to match | NOT-STARTED — design below |
 | P3 | The behavioural reverts on the committed fix (working tree only, `git show … > …`): R-F1-PRE (the pre-F1 transport) and R-F1-R (the restore removed) | NOT-STARTED |
 | P4 | F-R1-2's doc clause + F-R1-4 (a) the test header's "0.1", (b) the opening writer's thread name, (c) the type doc's line break | NOT-STARTED |
