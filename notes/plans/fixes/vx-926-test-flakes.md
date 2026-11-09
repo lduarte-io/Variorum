@@ -91,7 +91,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | 0 | Kickoff: mint (VX-926), 15 members seated, 4 duplicates marked, worktree, in-flight row, her rulings R-926-1..4, the disposition A-926-1 | DONE (this commit) |
 | U1 | the socket clock | **BUILT + PINNED, headless** — "## U1 record" (end of file): VX-850 ANSWERED (test timing — the harness rides the test process's cooperative pool; the door answers in ms at load 40 with the pool free); ONE mechanism fixed at its three faces in `Tests/VariorumMCPTests` only (waits off the pool · the deadline on its own queue and clock · every raw wait on the harness's one bound, O-7's rule carried); pins P-A/P-B/P-C red on old or under their named reverts, each revert red on exactly its pin; final counts all GREEN (family alone 2/2, MCP target idle 2/2, loaded 3/3, whole package loaded 1/1); all eight members FIXED (VX-477's StarContext sighting returned to VX-625); findings F-U1-1/-2 for the orchestrator |
 | U2 | the encoder mitigation (timeboxed) | **CHARACTERIZED — RECORD-ONLY, headless** — "## U2 record" (end of file): ONE mechanism for both tickets — an unbounded XCTest ↔ Swift Testing interop recursion (931 cycles, 24 of 24 reports on disk) entered from VX-604's out-of-scope `AppSession.init` read, so **already fixed at its cause by VX-604** (`fae643a05`; R-604-H red 3 of 4 at this loop; zero crash reports since); headless `swift test` cannot form it (31 runs, two processes); the menu: stream knobs ineffective, payload caps hollow, split runs inverted, exit ordering subsumed, the `SWIFT_TESTING_XCTEST_INTEROP_MODE` belt not taken (P-926-U2-2); VX-661/VX-690 FIXED-BY VX-604 pending the S soak (P-926-U2-1); the Apple Feedback DRAFTED for her |
-| U3 | StarContext starvation | NOT STARTED |
+| U3 | StarContext starvation (+ the late rider VX-932) | **IN PROGRESS** — "## U3 record" (end of file) |
 | U4 | hermetic defaults + the dissolve check | NOT STARTED |
 | R | VX-665 verify-close (orchestrator) | NOT STARTED |
 | L | The ladder (opus-reviewer — her cast ruling) | NOT STARTED |
@@ -358,3 +358,21 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 - **(v) Nothing landed:** U2's commits touch only this record (`git diff --stat` per commit). The one Sonnet lookup ran read-only and returned; no subagent is alive.
 
 **P-926-U2-1 RULED at her sitting (2026-11-09, the dialog): "Close at the soak"** — VX-661 and VX-690 close as fixed-by-VX-604 once the S soak runs with ZERO crash reports (any one reopens both); VX-690 closes as VX-661's duplicate at that moment; the Apple Feedback filing stays on VX-661's comment for her hands (attachments preserved at `~/.variorum/vx661-feedback-ips/`). P-926-U2-2 (the interop belt) stays NOT TAKEN.
+
+## U3 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** everything below is PENDING — the record opened at the first commit (the checkpoint protocol). Headless only by the brief (no `xcodebuild test`, no Debug launch, no stage).
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record opened; ledger row U3 → IN PROGRESS | DONE (this commit) |
+| P1 | TRACE — what starves under full-parallel core load (the observation's scheduler · the reader pool · the AsyncValueObservation's buffering · the runner's queue), instrumented headless under deliberate load | NOT-STARTED |
+| P2 | The fix at its home (test-side or the shared harness seam; STOP if product-side) + the class sweep (every core test holding a ValueObservation the same way, verdict FIXED / SAFE) | NOT-STARTED |
+| P3 | Pins — a forced-starvation arm red-on-old (behavioural revert) | NOT-STARTED |
+| P4 | The rider VX-932 — `MCPAcceptLoopServerTests.aFatalAcceptFailureStopsTheListenerAndSaysSo` waits for the signal and the removal (F-U1-1's shape) + its descheduled-thread pin | NOT-STARTED |
+| P5 | Counts — the suites alone + under a deliberately loaded full-parallel core run | NOT-STARTED |
+| P6 | Dispositions, PROVISIONALs, self-assessment | NOT-STARTED |
+
+**Load generators alive:** none. **Reverts in flight:** none. **Throwaway instruments in the tree:** none.
