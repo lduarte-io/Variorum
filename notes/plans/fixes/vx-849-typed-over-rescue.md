@@ -174,7 +174,7 @@ beside it.**
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
-| 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
+| 3 | Batch 3 — VX-664 (the outside-change ring-ending) | IN-PROGRESS — piece 1 (the sweep table) DONE; pieces 2–5 per the BATCH 3 RECORD |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
@@ -1263,6 +1263,191 @@ generator; owner identity left signed-out), services built inside; no pin reads 
 - **Evidence standing:** batch 2's Mac/simulator pins now have their RUNS; the behavioral reverts R-3a and R-3g
   each bit exactly their named pins first-hand. Leg C (the standing suites over the touched seams) deliberately
   folds into LIVE STATUS row 8's closing sweep — one sweep over the merged tree, not two.
+
+### BATCH 3 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+Debug-app launch, no walk, no store or server contact — every Mac run below is **PENDING** the orchestrator's window
+(the suites and named reverts at this record's end); zero lines under `Sources/VariorumCore/Sync/`; no
+whole-package or whole-target headless run (nov7's heavy-headless rule — another session's window was live at
+spawn; the heavy closes are listed PENDING at the end). Nothing of VX-443/VX-152/VX-545/VX-855/VX-921/VX-919.
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole (STATUS,
+KICKOFF, ROSTER, CONSTITUTION, ENVIRONMENT TRAPS, STAGE & COORDINATION, LIVE STATUS, every brief, both batch records,
+both adjudications, the amendment, both window records, the mandate, the cutover state); `.claude/agents/
+opus-implementer.md`; `notes/TEXTKIT2_NOTES.md` WHOLE; `notes/SurfaceContracts.md` §"The note"; the vx-440 record's
+WALK FIXES whole (W-1's trace, WF-2, the general class, the VX-248 relationship); the vx-827 record's FOR A LATER
+READER; `notes/plans/fixes/vx-683-sync-into-debounce.md` whole; `notes/SessionResiliencyProtocol.md` §implementer;
+and — the fact the brief did not have — **the vx-677 record's VX-664 sections whole** (the design fork, A-677-1/2/3,
+the S1–S21 sweep table, "as built", the window verdicts): VX-664's ONE seam was BUILT at VX-677 (`8bea570e3`,
+merged), so piece 2 verifies and composes it rather than minting it. The code: `PaneTextAuthority`,
+`OutsideWriteConfirmation`, `PaneSurface` (the representable's read/live arms, `rebindIfTakeChanged`), every ring
+owner's delivery seam and focus door (`TakesViewModel.adopt`/`applyProjection`/`focus`/`blur`/`paneEdited`/
+`consumeRestoreLanding`/`run`/`restoreCommit`/`expandAllFans`/`stableCellTake`/the open-fan memory,
+`CompareViewModel`, `CanvasViewModel`, `BlockTOCViewModel`, `BookIndexEditModel` + `BookIndexView`'s observation),
+`TakesBoardView.articleRow`/`washedCell`/`fanBadge`/`slotSplitBloom`, `TakesBoardLayout.isBloomed`,
+`AutosaveCoordinator` (batch 1's), `AppSession`'s flush family + `flushPendingTypingBeforeRound`, the History &
+Lineage surface's acts (`CommitsFaceModel.restore`/`bringBackSelected`/`bringBackFromLineage`) and its four hosts
+(`PostDetailView`'s full pane, `WriteTakesPanel`/`TakesBottomBar`/`CommitBar`'s sheets), the phone's
+`MobileBlockHistory.restore`, `ShellActions.structuralUndo`, the MCP door's flush (`MCPDoor+HerEditor`), and every
+core writer of an existing take's `working_text` (`Operations.autosave`, `restoreCommitRows`,
+`restoreCommitForClient`, `editTakeUnderInsurance`, `editTakesAtomically`, `extract`, `divide`,
+`splitBlockAtNewlines`, `moveSpanToNewTake` + its inverses, the structural undo/redo inverses; `Sync/` read for
+what apply writes, never edited). The pin suites read whole: `OutsideWriteRingEndTests`,
+`OutsideWriteLivePaneTests`, `TypedOverRescueSurfaceTests`.
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | THE SWEEP TABLE (below — before any fix) | DONE (this commit) |
+| 2 | The ONE seam verified + the batch-1 composition stated + the found gap G1 (the unlanded guard) fixed with its pin | NOT STARTED — design settled below (G1) |
+| 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | NOT STARTED — design settled below |
+| 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | NOT STARTED — design settled below |
+| 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | NOT STARTED |
+
+#### Piece 1 — THE SWEEP TABLE (every road that rewrites a take's `working_text` from outside a live pane bound to that take, × every host a live pane can sit on)
+
+**How the class is closed, so the table reads right.** VX-664's mechanism is CONSUMER-side, not per road (A-677-1,
+the vx-677 record): every ring owner's delivery seam calls `PaneTextAuthority.settle(isPending:liveIncoming:)` —
+"the delivered stored words for the live pane's take differ from what it HOLDS, with nothing of hers pending" — and
+`OutsideWriteConfirmation.endRing` confirms on a fresh one-row read, then the owner's own `blur()` ends the ring
+(VX-222/VX-440's shape; the pane goes read and adopts through the representable's read arm; P-3 unbent). So a road
+is covered on EVERY host the moment its write reaches the store, and the table's two axes verdict separately:
+(a) each HOST's seam (is it wired, pinned, unchanged since VX-677?) and (b) each ROAD (does it write an EXISTING
+take's text from outside the pane — and if so, which host's pin exercises it?). Re-verified at `80d97cb6e`:
+`PaneTextAuthority.swift`, `OutsideWriteConfirmation.swift`, `PaneSurface.swift` carry ZERO commits since
+`8bea570e3`; the five owners' seams are byte-for-byte VX-677's except batch 1's `basedOn:` on `paneEdited`; the
+pane hosts are exactly the eight `PaneSurfaceView` hosts VX-677 counted (no new pane host since — the History &
+Lineage surface's reading pane owns no authority and is never live); the core writers of an existing take's text
+are exactly VX-677's set (grep of every `workingText =` / `working_text` write under `Sources/`, `Sync/` read-only)
+plus batch 1's guarded-autosave arm.
+
+**(a) The hosts — each seam, verdicted (pins are the standing VX-677 suites unless marked NEW).**
+
+| Host | Owner · seam | Defers while dirty? | Verdict |
+|---|---|---|---|
+| H1 Takes | `TakesViewModel.adopt` (via `deliver` → `EditorProjectionPolicy`; a fresh read settles a held value) | YES (`autosave.isDirty` = pending OR writing) | COVERED — `OutsideWriteRingEndTests.takesRingEndsWhenAnAIEditsItsTake` (+ Split, Divide, Undo, Another-window) · mounted `OutsideWriteLivePaneTests.aLiveTakesArticleShowsAnAIsEditToItsOwnTake` |
+| H2 Lenses | the same model, `host = .lenses` (+ VX-440's parcel blur on `LensesBoardView`) | YES | COVERED — `lensesRingEndsWhenASyncPullWritesItsTake` |
+| H3 Write's take panel | the same model, `writePanelBlockID` set (its History is a SHEET over the panel — the panel's pane stays mounted beneath) | YES | COVERED — `writePanelRingEndsWhenBlockHistoryRestoresItsTake` (VX-827's justified edit: drives `CommitsFaceModel.restore`) |
+| H4 Compare | `CompareViewModel.adopt` | YES (`anyDirty` over its coordinators) | COVERED — `compareRingEndsWhenBlockHistoryRestoresItsTake` |
+| H5 Canvas | `CanvasViewModel.adopt(face:)` | YES | COVERED — `canvasRingEndsWhenASpanMovesOutOfItsTake`, `…WhenAnExtractCutsItsTake`; guard `aStalePhotographNeverEndsHerRing` |
+| H6 Read's edit face (Read ▸ edit) | `BlockTOCViewModel.adopt(rows:)` | **NO — adopts every delivery** | COVERED for a landed write — `readEditRingEndsWhenAnAIRestoresACommitIntoItsTake`; **GAP G1 below** for a delivery consumed while her own write is in flight |
+| H7 Blocks workbench (panel pane) | `BlockTOCViewModel.adopt(facts:)` | **NO** | COVERED for a landed write — `workbenchRingEndsWhenWriteReplacesInEveryTake`; **G1** |
+| H8 book Index | `BookIndexEditModel.settle(postID:rows:)` from `BookIndexView`'s per-note observation | **NO** | COVERED for a landed write — `bookIndexRingEndsWhenAnotherWindowTypesItsTake`; **G1** |
+| H9 a second window | every window's OWN owner (one `AppSession`, one coordinator per post; the store write reaches each window's observation) | — | COVERED — `takesRingEndsWhenAnotherWindowTypesItsTake` (two models on one session; the typing window's ring stays) |
+| (H10 Write's full-document editor) | not a pane: `EditorViewModel`'s projection policy re-renders a clean block differentially, defers while dirty | — | N/A to the ring (VX-677's S20); the pending case is batch 1's B (pinned there) |
+
+**(b) The roads — every writer of an existing take's text, from the core outward (S-numbers are VX-677's; N- rows are
+born since VX-677 and verdicted here first).**
+
+| # | Writer (core) · doors | Outside write on an existing take? | Verdict (pin) |
+|---|---|---|---|
+| S1 | `restoreCommit` · **the History & Lineage surface's Commits face Restore** (`CommitsFaceModel.restore`, VX-827 — the Block History panel RETIRED): full pane in the note's detail (the mode's surface UNMOUNTS; its teardown flushes), or a sheet over Write's take panel / the Takes bar (book spread's Takes sheet) / Write's inline editors (`CommitBar`); another window's face on the same note | YES (her deliberate act; flush-first at the door — `flushExistingAutosave(forPost:)`, honest since VX-402, one coordinator per post across windows) | COVERED on every host by the seam — `writePanelRingEndsWhenBlockHistoryRestoresItsTake`, `compareRingEndsWhenBlockHistoryRestoresItsTake`; the full-pane host has NO mounted surface during the act (the returning board re-rings with the restored words as `showing:`); VX-440's `RestoreLandingTests` W-1 pins stand (the parcel blur — redundant by construction, KEPT: it ends the ring before the restore landing can re-ring the same key). **P-849-1's insurance (piece 3)** |
+| S2 | `restoreCommitForClient` · MCP `restore_commit` (bracketed; the door flushes `flushEveryOpenPost` first) | YES | COVERED — `readEditRingEndsWhenAnAIRestoresACommitIntoItsTake` |
+| S3 | `editTakeUnderInsurance` · MCP `edit_take` | YES | COVERED — `takesRingEndsWhenAnAIEditsItsTake` + mounted `aLiveTakesArticleShowsAnAIsEditToItsOwnTake` |
+| S4 | `editTakesAtomically` · Write's Replace / Delete in Every Take, Make Block's edge checks, the cross-block compound | YES (takes Write does not show, live in a panel/another window) | COVERED — `workbenchRingEndsWhenWriteReplacesInEveryTake` |
+| S5 | `extract` (the source keeps the remainder) | YES | COVERED — `canvasRingEndsWhenAnExtractCutsItsTake` |
+| S6 | `divide` (single take in place) · Write ⌘D / the typed Return (VX-806), MCP `divide_block`; the board's own divide parks its ring on C | YES (from outside the pane) | COVERED — `takesRingEndsWhenADivideCutsItsTake` |
+| S7 | `splitBlockAtNewlines` · the board's three split doors (flush-first via `flushPendingText`), Write's note ▾ | YES (the ring's own block keeps its first paragraph) | COVERED — `takesRingEndsWhenTheBoardSplitsItsBlockAtNewlines` |
+| S8 | `moveSpanToNewTake` (source = remainder) + its undo/redo | YES | COVERED — `canvasRingEndsWhenASpanMovesOutOfItsTake` |
+| S9 | the structural undo/redo text restores (`UndoInverses`, `SpanToTake`'s inverses) · ⌥⌘Z / ⇧⌥⌘Z from any window | YES | COVERED — `takesRingEndsWhenAStructuralUndoRestoresItsTake`. **Corner C2 below: the undo/redo DOOR does not flush pending typing first** |
+| S10 | `autosave` from another surface · another window's live pane; Write's editor on a take a panel holds | YES | COVERED — `takesRingEndsWhenAnotherWindowTypesItsTake`, `bookIndexRingEndsWhenAnotherWindowTypesItsTake` |
+| S11 | the sync pull's apply (`Sync/`, read only): clean row → the server text on the row; dirty row → server wins the row, the local text a `'conflict'` take (S5) | YES | COVERED UI-side from the store's own delivery, zero `Sync/` lines — `lensesRingEndsWhenASyncPullWritesItsTake`; the dirty-row arm is the composition N2 pins (NEW, piece 4) |
+| N1 | **batch 1's guarded `autosave` rescue** (VX-683 B): her text on the row + the displaced words as a NEW `'conflict'` take | for the TYPING pane: NO (its own words — the echo equals `liveHeld`); for any OTHER pane live on the take: YES = S10's road | the typing pane: COVERED as her own echo — `herOwnTypingNeverEndsTheRing` + batch 1's guards; the ring DELIBERATELY stays (composition below; NEW mounted face pin, piece 4); another pane: S10's pins. **G1 is the one hole in this row** |
+| N2 | **batch 1's flush-first occasion** (VX-683 A) then S11's DIRTY-row arm | the flush: NO (her own typing landing); the apply: YES | COVERED by the seam (the ring ends, the pane adopts the server's words, her flushed words are the `'conflict'` card) — NEW composition pins (piece 4), green on both sides BY DESIGN (A-677-1 already ends it) |
+| S12 | the MCP door's other tools (`add_take(s)`, `insert_blocks`, `duplicate_note`, `import_document`, `merge_blocks`, `delete_take`/`archive_take`, `choose_take`, labels/locks/lenses/comments, VX-808's `propose_notes_to_book`, VX-827's reads) | NO (new rows, membership, metadata, or S18) | N/A — mechanism per tool (VX-677's S12; the born-since tools write no existing take's text) |
+| S13 | sync repairs (`Repairs.swift`: status / resurrection / labels) | NO (never a live take's text) | N/A |
+| S14 | `resolveSyncConflict` | NO (mints a NEW take) | N/A |
+| S15 | `restoreNoteVersion` (Note ▸ Versions) | NO (the outgoing blocks leave; their cells unmount) | N/A |
+| S16 | `TakesViewModel.restoreCommit` | — (no production caller; `TutorialWalkTests` only) | N/A today; ALIGNED by P-849-1 (piece 3) so no future caller inherits a non-flushing restore |
+| S17/N3 | new rows: branch / blank / `bringBackCommitAsTake` (VX-440) / **`bringBackFromLineage` (VX-827)** / duplicate / import / crystallization / `poolDragCopy` / the ceremonies' mints | NO | N/A |
+| S18 | the live take deleted / archived / released / chosen away from outside | NO (not a text write) | N/A — VX-222/VX-227's end-rules or the cell leaves |
+| S19 | a lock from outside | NO | out of class (r2) |
+| N4 | **the Lineage face's acts (VX-827)**: Put back (`placeBlock`), Bring back as a take (mints), Compare with now (reads) | NO | N/A |
+| S21 | the go-live render (a delivery sharing her click's turn) | — | COVERED — `PaneGoLiveAdoptionTests.aPaneTurnedLiveInTheRenderThatChangesItsTextShowsTheNewText` (A-677-2, B2-i ratified) |
+
+**What the sweep FOUND (each fixed or recorded below; the fixes route through the ONE seam — no per-road patch):**
+- **G1 — the pending guard's in-flight hole (a real composition gap with batch 1; FIX in piece 2).** The seam's "nothing
+  of hers pending" reads `autosave.pending[take] != nil`, but `AutosaveCoordinator.flushNow` takes the batch and
+  CLEARS `pending` BEFORE its write lands (`pending = [:]`, then `writing = true`, then the awaited runner turn). Three
+  owners adopt deliveries while a write flies (H6/H7/H8 — no dirty defer), and every owner's CONFIRMATION runs after an
+  off-main read, i.e. possibly while a write flies. Traced on batch 1's straggler road (the brief's own case): she types
+  "AB" (pending, built on "A") → a pull lands "S" on the clean row → her debounce fires (pending cleared, the rescue
+  write in flight) → Read ▸ edit consumes the pull's delivery: `isPending` false, "S" ≠ held "AB" → suspect → the fresh
+  read runs on a reader while her write is still in the writer → "S" → CONFIRMED → `blur()`: her ring ends MID-TYPING
+  (the live-only pane unmounts) although her write then lands her words on the row and rescues "S" as the card — the
+  case where the brief says "the ring deliberately does NOT end". And `settle` drops her buffer in the same window, so
+  any read-side mirror of the take (the authority's overlay) reads the pull's text until the echo. No words are lost
+  (the write lands); the ring and the mirror are wrong. FIX: the coordinator answers `isUnlanded(take)` (pending OR in the batch in flight) and every
+  owner's settle and confirmation ask that — "nothing of hers UNLANDED". The deferring owners (H1–H5) adopt only clean,
+  so their adoption is byte-unchanged; their confirmation gains the in-flight decline. Pinned red-on-old by behavior on
+  Read ▸ edit with a HELD writer (deterministic — `WriterHold`, batch 1's rig).
+- **G2 — the post-rescue face in SLOT SPLIT (R-683-4's one face defect; PROVISIONAL P-849-5, piece 4).** A slot-split
+  bloom REPLACES the block's article cell with its fan cards (`TakesBoardView.articleRow`: `bloomed && .slotSplit &&
+  hasFan`). A block that is BLOOMED while it holds one take (her first-take door open — R72's growth doors — or
+  follow-the-scroll on with the row visible) becomes `hasFan` the moment the rescue's `'conflict'` card arrives, so the
+  cell holding her LIVE pane is replaced under her caret: the ring stands on a `takes-main` key no surface renders (the
+  R112 class), her keyboard dead until she clicks a card. Her words are safe (the rescue landed them); the face is
+  wrong. Not rescue-specific: any take arriving from outside on her ring's block in that state (an AI's `add_take`, a
+  sync's new take). VX-577's expand-all arm is the same shape for HER act (blur); VX-222 is the shape for an outside
+  change that re-resolves the ring's cell (blur). Every other style keeps the article cell (the stack/carousel blooms
+  render beside it; the margin grid's rail engages around it), so nothing moves there but the rail (below).
+- **C1 — margin grid + follow-the-scroll (an observation, no fix):** the first fan a note ever holds engages the margin
+  rail, re-centring the article column (`railEngaged` → `articleMeasure`) — the presentation rule's own consequence
+  (D2/AD-6), on any first take arriving, rescue or not. Recorded for the walk; not a ring defect.
+- **C2 — the structural undo/redo door does not flush pending typing (P-849-1's sibling; RECORDED, not widened):**
+  `ShellActions.structuralUndo`/`structuralRedo` run the inverse with her typing still in the debounce; the inverse
+  rewrites the take, her pending autosave then lands built on the pre-undo text → batch 1's guard rescues: her text
+  keeps the row and the undo's restored words become a `'conflict'` card (pre-VX-683: her typing silently overwrote the
+  undo). A deliberate act of hers minting the card — R-683-2's premise — the same class P-849-1 closes for restores.
+  The flush-first doctrine would close it (the door's warn→act latch is the place); outside P-849-1's named scope (the
+  restore doors) — the orchestrator's to adjudicate or ticket.
+- **C3 — the confirmation hole is not only G1's owners:** even a deferring owner's suspicion (raised at a clean adopt)
+  is confirmed after an off-main read; a flush-first door firing in that window (the sync occasion, a mode switch)
+  puts her write in flight → old: confirmed → ring ends; G1's fix declines it too (one closure per owner).
+
+**P-849-1's door enumeration (the doors that REWRITE the typing take's text by HER act):** `CommitsFaceModel.restore`
+(the Mac's one production restore door — flushes first, honest; NO insurance savepoint) · `TakesViewModel.restoreCommit`
+(no production caller; `run` with NO flush — the batch-1 corner's door) · the phone's `MobileBlockHistory.restore`
+(flushes, refuses while dirty; no insurance — MOBILE PARITY, recorded; the VM board's surface) · the board's split /
+divide doors (flush-first ✓, structural — not restores) · Write's every-take edits (`runStructural`'s flush over the
+post's ONE coordinator ✓) · the undo/redo door (C2 — no flush). Every other board `run` door (choose · pick · lens
+doors · fan style · archive/unarchive/label/lock/delete take · commit · seal · entry date · newlines chip · word target ·
+reorder) writes no take's text. **So the "conflict card on her own restore" race has NO production door today** (the
+Mac's restore flushes, and its hosts are modal or replace the board); P-849-1's live content is the insurance
+savepoint plus aligning the dead door.
+
+**The composition with batch 1, stated (piece 2's brief line, verdicted on the code):**
+- *A's road (the flush-first occasion):* her pending typing lands before the round (her own echo — no ring-end);
+  the round's pull then meets a DIRTY row: S5's arm puts the server's words on the row and her flushed words in a
+  `'conflict'` take; the next delivery (clean — nothing pending) carries stored words that differ from what her pane
+  holds → suspect → confirmed → the ring ENDS and the pane, read, adopts the server's words; her words sit on the card
+  (the memo's "(ii)-shaped" apply, made concrete by VX-664's ring-end — the memo's "she then keeps typing into a buffer
+  whose base is now stale" holds only while she is mid-keystroke at the apply, which is B's road below).
+- *B's road (the millisecond stragglers, and every round with no occasion):* her typing is pending (or, after G1, in
+  flight) when the pull's write lands → no suspicion (the guard) → her autosave fires on the snapshot its run was built
+  on, finds the row changed, RESCUES: her words keep the row, the pull's words become the card → the echo equals what
+  her pane holds → the ring DELIBERATELY stays; the card appears in the fan; the badge reads ⑂2. Nothing moved under her
+  caret (R-683-1) — except G2's slot-split corner.
+- *Nothing in either road needs a `Sync/` line* — the apply's write is consumed from the store's own delivery.
+
+**The settled designs for pieces 2–4 (recorded before code; PROVISIONAL marks where the rulings do not decide):**
+- *Piece 2 (G1):* `AutosaveCoordinator.isUnlanded(_:)` (pending, or a member of the batch being written —
+  `inFlight`, set with `writing`, emptied with it); the five owners' settle + confirmation closures read it. The
+  authority's doc line "every buffer with no pending autosave record has fully landed" gains the in-flight half.
+- *Piece 3 (P-849-1, PROVISIONAL, isolated):* `Operations.restoreCommit(_:commitID:insuringBuffer: Bool = false)` —
+  inside the restore's ONE transaction, when the restore will change the take's text AND its buffer differs from its
+  latest savepoint (`isDirty`), ONE `kind='auto'` savepoint (unnamed — her road's quiet kind; the MCP bracket's named
+  pair stays the wire's) of the buffer first; default `false` keeps every other caller byte-unchanged (the MCP road
+  calls `restoreCommitRows` inside its own bracket and is untouched). The flip is one argument at each door:
+  `CommitsFaceModel.restore` (after its honest flush) and `TakesViewModel.restoreCommit` (which gains the flush first).
+  No undo entry (the op registers none, as before); touch/churn unchanged (the savepoint writes none).
+- *Piece 4 (R-683-4 + G2):* mounted face pins on THE Takes board — the rescue under her live pane (stack, fan closed and
+  fan open), the flush-first round under her live pane — plus G2's model-level pin; **G2's PROVISIONAL P-849-5 build:
+  (a) an adoption under which slot split replaces the ring's article cell ENDS the ring by the flushed blur** (VX-222's
+  outside-change shape; VX-577's style rule) — the smallest, precedent-backed answer that never strands a ring; the
+  recorded alternatives for her: **(b)** carry the ring onto the fan card that renders the same take, the caret where it
+  was (she keeps typing; the most R-683-1-faithful, new choreography); **(c)** hold the slot-split bloom of the block
+  her ring is in until the ring leaves (the presentation waits for her). QUESTIONS at the merge.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
