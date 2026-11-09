@@ -504,14 +504,14 @@ The test for membership: **a bound measured in wall time on a wait whose answer 
 |---|---|---|
 | P0 | This record opened; ledger row U4 → IN PROGRESS | DONE (this commit) |
 | P1 | ENUMERATE the writers — every per-entity memory key the Mac app keeps in a defaults domain, read against the preserved 10-28 plist and a read-only snapshot of today's domain | DONE (this commit) — "The writers" below: eight homes, ten key families |
-| P2 | THE SEAM — one defaults domain for every per-note memory, at the access home; the app's own behaviour byte-unchanged | NOT STARTED — design settled ("The seam" below) |
-| P3 | The test migration — every test that PLANTS or READS a per-note memory in `UserDefaults.standard` moves to the seam | NOT STARTED |
-| P4 | Pins — the headless source pin (core target, `swift test`) + the app pins (built headless, run at the stage) + a headless behavioural demonstration on scratch domains | NOT STARTED |
+| P2 | THE SEAM — one defaults domain for every per-note memory, at the access home; the app's own behaviour byte-unchanged | DONE (`8d4b885b5`) — `Core/Views/NoteMemoryDefaults.swift` + the nine home files and `RootView`'s one call ("The seam" below); Mac `build-for-testing` GREEN |
+| P3 | The test migration — every test that PLANTS or READS a per-note memory in `UserDefaults.standard` moves to the seam | DONE (`d44782695`) — 122 lines in 35 suites (112 by a throwaway line script, 10 multi-line by hand), two comments corrected; Mac `build-for-testing` GREEN |
+| P4 | Pins — the headless source pin (core target, `swift test`) + the app pins (built headless, run at the stage) + a headless behavioural demonstration on scratch domains | IN PROGRESS — both pin files committed (`d44782695`); the source pin GREEN 4/4 on the fixed tree (`scratchpad/u4/logs/source-pin-1.log`); **R-U4-S STARTING** (below): `git checkout 1ff75d356 -- <the nine homes, RootView, the 35 migrated suites>` on the COMMITTED tree, run, restore with `git checkout HEAD -- <the same>`; a `git diff` that is not empty means it is still applied |
 | P5 | `xcodebuild build-for-testing` GREEN headless (Mac; the phone untouched by the diff) — the fixed tree and the pre-fix tree, both built for the stage | NOT STARTED |
 | P6 | STAGE-READY: (1) VX-695's two-direction reproduction, one command per step, nov7's export/diff bracket embedded; (2) the dissolve check's read sheet | NOT STARTED |
 | P7 | Dispositions, PROVISIONALs, findings, self-assessment | NOT STARTED |
 
-**Throwaway instruments alive:** none. **Reverts in flight:** none. **The real Debug domain:** READ only (`defaults export` to the scratchpad, at zero instances — `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both empty); nothing written, imported or deleted.
+**Throwaway instruments alive:** none. **Reverts in flight:** R-U4-S (see P4) — until this line says otherwise, `git diff` against HEAD shows exactly what is reverted. **The real Debug domain:** READ only (`defaults export` to the scratchpad, at zero instances — `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both empty); nothing written, imported or deleted.
 
 ### The writers (P1 — every per-entity memory key in a defaults domain, Mac app)
 
