@@ -174,6 +174,9 @@ final class AppServices {
         boundAccountRead: (@Sendable () async -> String?)? = nil,
         makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil,
         furnitureFacts: SeededFurnitureDedupeFacts? = nil,
+        // VX-544 (the VX-849 run, batch 2; her R-849-2): the reachability trigger's path watch — production's
+        // `NWPathMonitor` by default; a pin plants its own (nil: no watch).
+        networkPath: (any NetworkPathWatching)? = SystemNetworkPath(),
         legacyCleanup: @escaping @Sendable () -> Void
     ) {
         self.session = session
@@ -217,9 +220,10 @@ final class AppServices {
         sync = SyncSession(
             database: session.database,
             allowsSync: Self.allowsSync(
-                storeVariant: storeVariant, walkLift: launchFence.walkLift, prodTestRoad: launchFence.prodTestRoad))
+                storeVariant: storeVariant, walkLift: launchFence.walkLift, prodTestRoad: launchFence.prodTestRoad),
+            path: networkPath)
         #else
-        sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
+        sync = SyncSession(database: session.database, allowsSync: storeVariant == .real, path: networkPath)
         #endif
         // 13j ladder B (B3): the purge doors' receipts and the local purge
         // road both read this — one truth, the sync session's own.

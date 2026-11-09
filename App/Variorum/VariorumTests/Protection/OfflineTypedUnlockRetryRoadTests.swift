@@ -101,6 +101,38 @@ struct OfflineTypedUnlockRetryRoadTests {
         }
     }
 
+    /// **HER STEP 9 BY ITSELF — "Wi-Fi back on, a minute's wait"** (her R-849-2): no press, no write, no app switch — the
+    /// network path coming back (a planted path standing in for `NWPathMonitor`) runs ONE round, its occasion retries the
+    /// typed unlock's load first, and the round runs with the keys: "Synced". Before the path comes back, a full settle window
+    /// passes with the vault still out of reach (any trigger already owed — the settle observation's — runs and fails then),
+    /// so the heal is the path's. COMPILE-red on old (the planted path); behavior-red by the record's reverts R-4a (no round
+    /// follows the path) and R-3a (no retry in the occasion).
+    @Test func herStep9TheNetworkComingBackHealsItByItself() async throws {
+        try await FirstRoundWorld.run { world in
+            let path = PlantedNetworkPath()
+            world.networkPath = { path }
+            try await Self.castleAlwaysAskSynced(world)
+            let services = try await Self.lockThenUnlockOffline(world)
+            #expect(path.isWatched, "the unlock's fresh chain watches the path")
+            path.send(false)  // offline, as this Mac sees it
+            try await Task.sleep(for: .milliseconds(3500))
+            #expect(Drill.row(world, services).kind == .keysLocked, "still offline: Sync locked")
+            let rounds = services.sync.status.roundsCompleted
+
+            world.vault.reachable = true  // the network back: the vault answers again
+            path.send(true)
+            await FirstRoundWorld.settle(seconds: 10) {
+                services.sync.status.roundsCompleted > rounds && !services.sync.status.isSyncing
+                    && services.sync.status.lastError == nil
+            }
+            #expect(services.sync.status.roundsCompleted > rounds, "the path coming back ran a round")
+            #expect(Drill.row(world, services).kind == .idle,
+                    "the row says Synced — \(Drill.row(world, services).kind) \(String(describing: services.sync.status.lastError))")
+            #expect(world.keys.sessionSyncKeys(accountID: Account.account) != nil, "the retry loaded the keys")
+            #expect(world.keys.items.isEmpty, "nothing written to the keychain")
+        }
+    }
+
     /// **THE LOCK LETS GO OF IT** through the bootstrap's own lock: the session the offline unlock opened carries the pending
     /// load; the lock's drop ends it (and the keys stay unloaded).
     @Test func theLockLetsGoOfTheOfflineUnlocksPendingLoad() async throws {

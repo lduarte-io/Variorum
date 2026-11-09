@@ -594,8 +594,8 @@ the shared load's retention runs on the phone; only its retry stays unwired (ove
 | 0 | Preflight + this record | DONE (this commit) |
 | 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | DONE (`b11fb8d39`) — compile-red on old watched; R-1a/R-1b bit exactly as named; harness green; Mac runs PENDING (stage) |
 | 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | DONE (`4152e782a`) — R-2a…R-2d bit exactly as named; harness green; Mac runs PENDING (stage) |
-| 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | DONE (this commit) — THE ROAD PIN behavior-red on the pre-fix tree (watched); harness 81/81 (11 suites); Mac + phone `build-for-testing` green; reverts R-3a…R-3f run next at this tip; Mac/simulator runs PENDING (stage) |
-| 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | NOT STARTED |
+| 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | DONE (`88eb36506`) — THE ROAD PIN behavior-red on the pre-fix tree (watched); R-3a…R-3f run (R-3a one red beyond the named set; R-3b′ in place of the too-blunt R-3b); R-3g PENDING (simulator); Mac/simulator runs PENDING (stage) |
+| 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | DONE (this commit) — harness 91/91 (12 suites), the trigger suite 3 runs stable; Mac + phone `build-for-testing` green; reverts R-4a…R-4e run next at this tip; Mac runs PENDING (stage) |
 | 4 | The words (no new sentence) | NOT STARTED |
 | 5 | Close: builds, headless runs, self-assessment, the stage suite list | NOT STARTED |
 
@@ -770,3 +770,56 @@ symlink with an edited copy of the committed file, runs, and restores the symlin
   `88eb36506`):** `roads.isPending()` → `(roads.isPending() || true)` (consulted, ignored) ⇒ expected RED
   `withNothingPending…` (the provider read, the retry run) and `withTheKeysThere…`'s second-occasion leg (the cleared pending
   read again); GREEN `whileThereAreNoKeys…`. **R-3c** → `✘` exactly `withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing`.
+- *Run at `3f0412931` (product files identical to `88eb36506`):* **R-3b′** → `✘` exactly `withNothingPending…` (the provider
+  read, the retry run) and `withTheKeysThere…`'s second-occasion leg; `whileThereAreNoKeys…` green — as named. **R-3d** →
+  `✘` exactly `aSignOutLetsGoOfThePendingLoad` and `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. **R-3e** → `✘` exactly
+  `aReopenLetsGoOfTheOutgoingSessionsPendingLoad`. **R-3f** → `✘` exactly THE ROAD PIN (the round refused for keys) and
+  `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. Restored → `✔ 23 tests in 3 suites passed`. **R-3g** (the phone's) is the
+  stage window's (simulator).
+
+**Piece 3b — the reachability trigger (BUILT; her R-849-2).**
+- *Build (`SyncSession.swift`, shared — both platforms):* `import Network`; `NetworkPathWatching` (start with an in-order
+  main-actor reading callback; stop) and its production `SystemNetworkPath` (`NWPathMonitor`, its handler on the MAIN queue —
+  the readings in order, on the main actor, the handler's work one comparison). `SyncSession.init` gains `path:` (nil = no
+  watch — the pre-trigger session exactly) and `reachabilityDebounce:` (2 s, D-544's). The watch RIDES THE CHAIN: `configure`
+  starts it (its first reading the baseline), `stopObservations` — every teardown: `stop()`, `quiesceForExit()`, a
+  reconfigure's drain — stops it and cancels a round scheduled inside the debounce. THE RULE (`pathReading`): not satisfied ⇒
+  cancel a scheduled round; satisfied after a not-satisfied reading ⇒ ONE `triggerSync()` after the debounce (so the
+  occasion runs first — the Mac's retry, then her typing — and the restore hold gates it); satisfied after satisfied, or as
+  the first reading, ⇒ nothing. **DECIDED AND RECORDED (the brief's "decide and record"): the first reading is never a
+  trigger alone** — a chain just composed runs its own round (the sign-in's `triggerSync`), and a launch offline waits for the
+  path to come up; a path that drops again inside the debounce cancels (a flapping network earns one round once it settles).
+  `AppServices.init` gains `networkPath:` (production's `SystemNetworkPath()` by default; both platforms — the phone gets the
+  trigger by sharing the file, as D-544 says) and hands it to the chain. `FirstRoundWorld` (test support) gains a
+  `networkPath` the composed services take (production's by default) so the end-to-end world can plant one.
+- *Pins (`SyncReachabilityTriggerTests`, a new suite, planted path + fake server; each round counted by its occasion):* THE
+  PIN `aTransitionToSatisfiedRunsOneRoundAfterTheDebounce` (nothing at once, one round after), `theFirstReadingAloneRunsNothing`
+  (satisfied or not), `aPathStayingSatisfiedRunsNothingMore`, `aPathThatDropsAgainInsideTheDebounceRunsOnlyOnceItSettles`,
+  `eachSatisfiedTransitionRunsItsOwnRound`, `theWatchRidesTheChain` (a stop ends it and cancels the scheduled round; a
+  reconfigure's fresh watch starts at a baseline), `aHeldStoreRunsNothingWhenThePathComesBack`, the guard `noPathIsInert`, and
+  the composition `theServicesHandTheirPathToTheChain` (watched once the signed-in start composes the chain, released at the
+  stop). End to end: `OfflineTypedUnlockRetryRoadTests.herStep9TheNetworkComingBackHealsItByItself` — her step 9 with NO
+  press: after the offline unlock a full settle window passes with the vault out of reach (any owed trigger runs and fails),
+  then the vault answers and the planted path comes up → one round, the retry first, "Synced", the keys in session memory,
+  the keychain empty. All COMPILE-red on old (the path seam).
+- *Evidence, headless at this commit:* Mac and phone `build-for-testing` → `** TEST BUILD SUCCEEDED **` both (one
+  "no calls to throwing functions occur within 'try'" warning in the new suite, fixed); the harness, every touched planted
+  suite (TypedUnlockRetry · TypedUnlockRetryOccasion · OfflineTypedUnlockRetryRoad · SyncReachabilityTrigger ·
+  TypedUnlockSyncKeys · TouchIDUnlockSyncKeys · RoadLock · LobbyVaultRoad · SecretCheckRoad · FirstRoundAfterTheAct ·
+  FirstRoundAfterTheReopen · FirstRunDrill) → `✔ Test run with 91 tests in 12 suites passed`; the trigger suite three runs
+  in a row → `✔ 9 tests passed` each.
+- *MACHINERY NOTE (honesty):* one foreground command running the Mac and phone builds back to back was moved to the
+  background by the harness after 180 s; it was waited on synchronously (blocking on its output file) and its result read
+  before anything else ran; the leftover `tail -f` was stopped. Builds run one per command from here.
+- *THE NAMED BEHAVIORAL REVERTS (named BEFORE they run, at this commit's tip; the harness, one file each, then restored):*
+  **R-4a** `pathReading`'s `guard previous == false else { return }` → `return` (no round ever follows the path) ⇒ expected RED
+  THE PIN, `aPathThatDropsAgain…`, `eachSatisfiedTransition…`, `aPathStayingSatisfied…` (its first leg) and
+  `herStep9TheNetworkComingBackHealsItByItself`; GREEN the nothing-runs pins. **R-4b** that guard → `guard previous != true`
+  (a first reading counted as a transition) ⇒ expected RED `theFirstReadingAloneRunsNothing` (its satisfied leg) and
+  `theWatchRidesTheChain` (the reconfigure's baseline leg). **R-4c** the not-satisfied arm's `reachabilityTask?.cancel()`
+  removed ⇒ expected RED `aPathThatDropsAgainInsideTheDebounceRunsOnlyOnceItSettles`. **R-4d** `stopObservations`' path
+  stop + cancel removed ⇒ expected RED `theWatchRidesTheChain` (still watched; the scheduled round runs after the stop — no:
+  no chain then, `triggerSync` finds none — so the watch leg) and `theServicesHandTheirPathToTheChain` (not released).
+  **R-4e** `AppServices.init` hands `path: nil` (both arms) ⇒ expected RED `theServicesHandTheirPathToTheChain` and
+  `herStep9TheNetworkComingBackHealsItByItself`.
+
