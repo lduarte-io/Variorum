@@ -116,4 +116,4 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | P4 | The family alone + under a deliberately loaded parallel run (counts) | NOT STARTED |
 | P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | NOT STARTED |
 
-**Load generators alive:** none. **Reverts in flight:** none.
+**Load generators alive:** ONE — 36 × `/usr/bin/yes > /dev/null`, pids 35165–35200 (started 18:10 for Phase 1's C1 condition; killed by pid at its end). **Reverts in flight:** none.
