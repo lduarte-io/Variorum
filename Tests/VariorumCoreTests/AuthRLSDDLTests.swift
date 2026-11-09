@@ -1241,6 +1241,67 @@ struct AuthRLSDDLTests {
                 "the trigger itself is an asserted sweep fact — its loss is a MISMATCH, never silence (F-4)")
     }
 
+    /// VX-919 (the VX-849 run, batch 6 — `notes/plans/fixes/vx-849-typed-over-rescue.md`, "### BATCH 6 RECORD"): the
+    /// device_cursor CAP BELT — at most 64 device rows per account, the oldest `seen_at` evicted at the mint
+    /// (`sync_challenge`'s pattern, 12 §5e), as an AFTER INSERT row trigger so `sync_pull` stays byte-untouched. AUTHORED
+    /// ONLY: the deploy is HELD for her window, so these pins are the artifact's letter (the ladder reviews it; the live
+    /// proof is the file's optional rolled-back probe). The shape: idempotent, guarded, an INVOKER function (it runs as
+    /// `variorum_definer` inside the definer pull, under FORCE RLS) with the definer's DELETE granted, the eviction order
+    /// deterministic and never the caller's own row, a failure contained so the cap can never abort a pull, no marker
+    /// write, no RPC touched, the footgun revoke — and the paired rollback undoing exactly that, and the standing sweep
+    /// expecting the function only while it exists.
+    @Test func deviceCursorCapBeltIsGuardedContainedPairedAndTouchesNoRPC() throws {
+        let raw = try Self.sqlFile("maintenance/vx919-device-cursor-cap.sql")
+        let sql = Self.strippingComments(raw)
+        #expect(raw.contains("DEPLOY: HELD FOR HER WINDOW"), "the header says the deploy is hers")
+        #expect(sql.contains("begin;") && sql.contains("\ncommit;"), "one transaction")
+        #expect(sql.contains("VARIORUM_VX919_NEEDS_14") && sql.contains("to_regclass('public.device_cursor')")
+                && sql.contains("rolname = 'variorum_definer'"), "the guard refuses a mirror without its dependencies")
+        #expect(sql.contains("grant delete on device_cursor to variorum_definer;"),
+                "the eviction runs as the definer inside sync_pull — it needs DELETE (10 granted none)")
+        #expect(sql.contains("create or replace function device_cursor_cap() returns trigger"))
+        let body = try #require(sql.components(separatedBy: "create or replace function device_cursor_cap()").last?
+            .components(separatedBy: "$$;").first)
+        #expect(!body.contains("security definer") && !body.contains("set search_path"),
+                "an INVOKER trigger function — the stamp_server_seq posture: it runs as its caller under FORCE RLS")
+        #expect(body.contains("cap  constant int := 64;"), "the cap is 64 (B0's N)")
+        #expect(body.contains("from public.device_cursor d") && body.contains("delete from public.device_cursor t"),
+                "every relation in the body is schema-qualified (no SET clause, so nothing resolves through a path)")
+        #expect(body.contains("order by d.seen_at asc, d.device_id asc"),
+                "oldest seen_at first, ties by device id — a deterministic eviction")
+        #expect(body.contains("and d.device_id <> new.device_id"), "the row just minted is never its own victim")
+        #expect(body.contains("limit live - cap"), "the trim takes count − cap, so a concurrency overshoot heals")
+        #expect(body.contains("exception when others then") && body.contains("raise warning"),
+                "a cap failure is contained and logged — it can never abort the pull (signup-auto-entitle's F-2)")
+        #expect(sql.contains("revoke execute on function device_cursor_cap() from public, anon, authenticated, service_role;"),
+                "the footgun revoke — no RPC-shaped door")
+        #expect(sql.contains("drop trigger if exists device_cursor_cap on device_cursor;")
+                && sql.contains("after insert on device_cursor")
+                && sql.contains("for each row execute function device_cursor_cap();"),
+                "an idempotent AFTER INSERT row trigger — the mint, and only the mint")
+        #expect(!sql.contains("sync_meta (") && !sql.contains("update sync_meta"),
+                "no marker move — a maintenance artifact never writes sync_meta")
+        #expect(!sql.contains("function sync_pull") && !sql.contains("owner to"),
+                "no RPC touched, no re-own (so no 10/14c CREATE bracket owed)")
+        #expect(!Self.postChainFunctionArtifacts.contains("maintenance/vx919-device-cursor-cap.sql"),
+                "it defines no RPC — finalBody's deployed truth stays vx495's")
+
+        let rollback = Self.strippingComments(try Self.sqlFile("maintenance/vx919-rollback.sql"))
+        #expect(rollback.contains("VARIORUM_VX919_NEEDS_14"))
+        #expect(rollback.contains("drop trigger if exists device_cursor_cap on device_cursor;")
+                && rollback.contains("drop function if exists device_cursor_cap();")
+                && rollback.contains("revoke delete on device_cursor from variorum_definer;"),
+                "the paired rollback undoes exactly what the cap added")
+        #expect(!rollback.contains("create ") && !rollback.contains("sync_meta ("),
+                "the rollback creates nothing and moves no marker")
+
+        let sweep = Self.strippingComments(try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql"))
+        #expect(sweep.contains("('device_cursor_cap()',"),
+                "the sweep's registry carries the cap's trigger function as an INFO row")
+        #expect(sweep.contains("or to_regprocedure('public.device_cursor_cap()') is not null"),
+                "expected only while it exists — a pre-deploy or post-rollback sweep reads exactly as before")
+    }
+
     /// THE POST-DEPLOY GRANT SWEEP (I-3's other half; live-probe
     /// obligation 11): a committed, READ-ONLY verification query that
     /// prints the FINAL posture — every function's per-role EXECUTE and

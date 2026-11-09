@@ -30,7 +30,12 @@
 -- `has_schema_privilege` rows (the 10/14c idiom opens CREATE for an ownership
 -- acquisition and closes it in the same transaction; RUN 1 refused because an
 -- artifact re-owned a new function without it; the CREATE row's expectation
--- is PROVISIONAL P-500-9 in the VX-500 record).
+-- is PROVISIONAL P-500-9 in the VX-500 record). EXTENDED at VX-919 (the
+-- VX-849 run, batch 6 — `maintenance/vx919-device-cursor-cap.sql`, its deploy
+-- HELD for her window): the cap's trigger function as an INFO row, EXPECTED
+-- ONLY WHILE IT EXISTS (`to_regprocedure`, the VX-308 R-2 marker-aware
+-- precedent), so a sweep before that deploy, or after its paired rollback,
+-- reads exactly as it did before.
 --
 -- WHAT IT IS: one READ-ONLY query, run IMMEDIATELY AFTER a lockstep deploy
 -- (09 at the 14c gate; 10 at the 13j window; 11 at the pre-13x window),
@@ -152,10 +157,17 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     -- RLS on new public tables — never in a repo artifact, benign and
     -- protective. RETURNS event_trigger, so it is uncallable via RPC by
     -- Postgres rule; its broad EXECUTE acl is moot. INFO by design.
-    ('rls_auto_enable()',                                              null,  null,  null)
+    ('rls_auto_enable()',                                              null,  null,  null),
+    -- VX-919 (maintenance/vx919-device-cursor-cap.sql — the device_cursor cap
+    -- belt, deploy HELD for her window): the cap's trigger function — RETURNS
+    -- trigger, uncallable via RPC by Postgres rule; INFO by design. Expected
+    -- only while it exists (the second filter below).
+    ('device_cursor_cap()',                                            null,  null,  null)
   ) as v(signature, exp_anon, exp_authenticated, exp_service_role)
-  where v.signature <> 'sync_reencrypt(jsonb,text,text,text)'
-     or coalesce((select value::int from sync_meta where key = 'lockstep_version'), 1) < 14
+  where (v.signature <> 'sync_reencrypt(jsonb,text,text,text)'
+     or coalesce((select value::int from sync_meta where key = 'lockstep_version'), 1) < 14)
+    and (v.signature <> 'device_cursor_cap()'
+     or to_regprocedure('public.device_cursor_cap()') is not null)
 ),
 observed_functions as (
   select

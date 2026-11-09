@@ -2412,7 +2412,7 @@ over them.
 |---|---|---|
 | 0 | Preflight + this record (the trace, the siblings, the designs) | DONE (this commit) |
 | 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | DONE — 1a the pins on the PRE-FIX tree (`d58707b70` — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines; 1b the swap + the pure rank pin + one justified fixture edit (`797dfe8a7`): the suite 3/3, the neighbours 394/76 + 14/4 green; R-921a and R-921b bit exactly their named sets (this commit records them) |
-| 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | NEXT |
+| 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | BUILT (this commit) — the artifact, the rollback, the sweep's one presence-aware INFO row, the DDL pin; `AuthRLSDDLTests` + `MultiTenantSyncAttackerTests` 88/2 green; NEVER EXECUTED; R-919a named below, run NEXT at this tip |
 | 3 | Close — `swift build`, the targeted core suites, the self-assessment | — |
 
 #### VX-921 — the mechanism (traced at `6e16362e1`, before any line)
@@ -2554,6 +2554,49 @@ Every `sync_row_seq` / `knownSeq` read under `Sources/VariorumCore/` (grep, at `
 - *The standing sweep:* `14c-post-deploy-grant-sweep.sql` reads any function its registry lacks as UNEXPECTED, so it
   gains ONE INFO row for the trigger function, kept only while the function exists (`to_regprocedure`) — VX-308 R-2's
   marker-aware precedent — so every sweep run before the deploy, or after a rollback, reads exactly as today.
+
+#### VX-919 piece 2 — as authored (NEVER EXECUTED anywhere; the deploy HELD for her window)
+
+- **`Server/supabase/maintenance/vx919-device-cursor-cap.sql`** — the header (the DEPLOY-HELD line first; the corner;
+  the shape and why not a `sync_pull` rewrite; the cap; who runs it; the containment arm; what it does not change; the
+  horizon interplay; idempotency and the guard), then ONE transaction: the guard (`VARIORUM_VX919_NEEDS_14` below marker
+  14; the table and the definer role present), `grant delete on device_cursor to variorum_definer`, the INVOKER
+  trigger function `device_cursor_cap()` (64 as a named constant; count the owner's rows; above the cap delete the
+  `count − 64` oldest by `seen_at, device_id`, never `new.device_id`; every relation schema-qualified; the containment
+  arm `exception when others → raise warning`, the pull proceeds uncapped), the footgun revoke (public, anon,
+  authenticated, service_role), `drop trigger if exists` + `create trigger … after insert … for each row`, commit. Then
+  the VERIFY: a read-only BEFORE read (accounts over the cap; the most rows on one account), the AFTER reads (the
+  trigger present and enabled; the function an invoker with no SET clause, owned by the deployer; the definer's DELETE
+  privilege; `sync_pull`'s body still vx495's SHAPE B; the BEFORE read unchanged — no trim at deploy), the standing
+  sweep, and an OPTIONAL rolled-back behavioral probe through the DEFINER's road (`set local role variorum_definer`
+  under a synthetic owner's JWT claim: 64 rows → none evicted; a 65th → exactly the oldest goes, the new row stays, no
+  WARNING; `rollback`) — the fake harness cannot reach a PL/pgSQL trigger, so that probe is the live proof, hers.
+- **`Server/supabase/maintenance/vx919-rollback.sql`** — the paired road back (the vx495 precedent): the same guard; drop
+  the trigger, drop the function, revoke the definer's DELETE — exactly what the cap added; idempotent; the cap
+  re-runnable after it. Stated: rows the cap evicted while live stay gone (content-free; a real device re-mints its row
+  at its next pull).
+- **`maintenance/14c-post-deploy-grant-sweep.sql`** — the header's EXTENDED line, and ONE `expected_functions` row
+  `('device_cursor_cap()', null, null, null)` (INFO — a trigger function) behind a second filter, `or
+  to_regprocedure('public.device_cursor_cap()') is not null`, beside the existing marker-aware one (now parenthesized —
+  its truth table unchanged). Before the deploy and after the rollback the row is absent from both sides of the full
+  join, so the sweep reads exactly as today; after the deploy it reads INFO, never UNEXPECTED. **Deliberately NOT
+  added: a trigger FACT row** (signup-auto-entitle's F-4 made its trigger a fact because that trigger is LOAD-BEARING
+  for every signup; the cap is a belt — a lost cap trigger returns the b0 "acceptable as stands" posture, and the
+  artifact's own VERIFY reads the trigger). Recorded for the ladder's eye.
+- **The DDL pin (`AuthRLSDDLTests.deviceCursorCapBeltIsGuardedContainedPairedAndTouchesNoRPC`)** — the artifact's
+  letter: the deploy-held header; one transaction; the guard's three refusals; the definer's DELETE; an invoker body
+  (no `security definer`, no `set search_path`) with the 64, the schema-qualified relations, the deterministic order,
+  the self-exclusion, `limit live - cap`, the containment arm; the footgun revoke; the idempotent AFTER INSERT row
+  trigger; no `sync_meta` write; no RPC touched and no re-own; not a post-chain function artifact (`finalBody`'s
+  `sync_pull` stays vx495's). The rollback's three undo lines, no create, no marker. The sweep's row and its presence
+  filter. It is a LETTER pin (an Improvement, authored only — not a bug-class red-on-old); its liveness is R-919a.
+- *Evidence, headless at this commit:* `swift test --filter 'AuthRLSDDLTests|MultiTenantSyncAttackerTests'` → **`✔ Test
+  run with 88 tests in 2 suites passed`** (the new pin, the sweep's read-only and coverage pins, the pg_temp drift pins —
+  the trigger function is outside the belt's scope by construction — and the attacker suite's deployed-function scan,
+  which reads only the numbered chain plus the post-chain list).
+- *THE NAMED REVERT (named here BEFORE it runs, at this commit's tip; headless; the artifact alone in the working tree,
+  then `git checkout --`):* **R-919a — the 13i-a class put back:** delete the artifact's `grant delete on device_cursor
+  to variorum_definer;` line ⇒ expected RED exactly the pin's DELETE-grant line; every other line and test green.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
