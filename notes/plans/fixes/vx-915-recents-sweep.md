@@ -495,7 +495,7 @@ Rules 2 (the words shown only on ask), 13 (a Castle-era backup's protection), 9 
 
 #### BATCH 6 — LIVE STATUS
 
-*Implementer: opus-implementer, seated 2026-11-09. Every claim is PENDING until its run is named. No revert is in flight.*
+*Implementer: opus-implementer, seated 2026-11-09. Every claim is PENDING until its run is named.* **A DISCRIMINATION CHECK IS IN FLIGHT (announced before it starts):** step 2 (the READ-first loop) of `performUnlinkVersions` is temporarily removed from `Sources/VariorumMCP/MCPWriteTools+UnlinkVersions.swift` for one run of `MCPUnlinkVersionsServerTests` — restore = `git checkout -- Sources/VariorumMCP/MCPWriteTools+UnlinkVersions.swift` (the file is committed at `907e3fb79`; nothing else is touched).
 
 **The reading (done before code, none delegated):** CLAUDE.md + canon · `notes/MCPSpec.md` IN FULL · this file's Kickoff / constitution / ENVIRONMENT & TRAPS / BATCH 6 · `notes/SessionResiliencyProtocol.md` · the link_versions code (`MCPWriteTools+LinkVersions.swift`, `Operations+MCPVersionLinks.swift`, `MCPToolCatalog.linkVersions`) and its pins (`MCPLinkVersionsServerTests`) · Compare's unmark (`CompareBoardView.swift` `unmarkVersions` / `promoteSavedVersion`, `Operations+Versions.swift` `unmarkPostsAsVersions` / `removeVersionOf`) · the saved-version classifier (`Queries/NoteVersions.swift`) · the door's shared machinery (`MCPWriteTools.swift`, `MCPGrantAuthority.swift`, `MCPOwnActivity.swift`, `MCPNullIdentifiers.swift`, `MCPSession.instructions`) · the two-store catalog (`MCPTwoStoreCatalog{ServerTests,Arms}.swift`) · `MCPPaneCopy.swift`'s receipt and Activity words.
 
