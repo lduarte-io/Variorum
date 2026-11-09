@@ -59,11 +59,11 @@ One ladder over the run's combined diff (fresh Fable reviewer — the run holds 
 
 | # | Item | Status |
 |---|---|---|
-| 1 | VX-895 — search group header follows the picked facet | NOT STARTED |
+| 1 | VX-895 — search group header follows the picked facet | BUILT (B1, 61b6f8778 — the unobserved `scope`; counts half expected hollow) — pin runs + gate + walk PENDING the stage window |
 | 2 | VX-889 — Settings ▸ Tags' gathering mints in the shown wing | NOT STARTED |
 | 3 | VX-775 — landed-act truth to the client; log failure to her | NOT STARTED |
 | 4 | VX-81 — the re-key reopen crash: repro, trace, fix-or-documented-defer | NOT STARTED |
-| 5 | Rider VX-890 — wornGroupFacts folded into the one template (B1) | NOT STARTED |
+| 5 | Rider VX-890 — wornGroupFacts folded into the one template (B1) | DONE headless (93f76a0e2 — statements byte-identical/whitespace-only, 154 search tests green unedited); Mac `LibrarySearchOrderTests` rides the B1 window |
 | 6 | Rider VX-343 — What's New wrapped-bullet join (B2) | NOT STARTED |
 | 7 | Rider VX-613 — the stale-start races, probe first (B3) | NOT STARTED |
 | 8 | The ladder | NOT STARTED |
@@ -102,6 +102,14 @@ Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate b
 - The trailer forensics (her question "why is every wave writing about the guard / I thought the edit would catch MORE"): (1) tonight's in-flight commit a3d2d31bd is CLEAN — `%B` is one line; the orchestrator's slip confession was wrong and is retracted with evidence. (2) The narrowing at 0721c6b57 removed only prose false positives; every real trailer form still denies, and 2b1759521 (her word) drops the colon's space requirement so an oddly spaced trailer denies too. (3) HISTORY: main holds 2,130 trailer-bearing commits of 11,856 (Co-Authored-By 2,130-matching grep; Claude-Session 1,412) — 675 in 2026-07, 1,198 in 2026-08, 252 in 2026-09 (her no-trailer rule landed 09-04), 5 in 2026-10, 0 in 2026-11. Pushed history is never rewritten without her word; the published-history question is VX-748/VX-749's (her pre-oss tickets).
 - Kickoff sitting CLOSED (the SITTING RECORD above): cast standard + one Fable ladder; B4 history-first; VX-775 = refusal toast; riders VX-890/343/613 seated (VX-928 is VX-915's). The no-trailer guard landed on main 744ca5301 and fired live. nov7's protocol + windows recorded (ledger foot). B1 brief written; B1 implementer SPAWNED (running).
 - The guard's false-positive class (nov7's report, reproduced here twice): the hook matches bare words in command text, so a commit MESSAGE that merely names the trailer words is denied. A narrowed pattern is tested (trailer FORMS only: `(Co-Authored-By|Claude-Session): ` colon-anchored · `noreply@anthropic\.com` · `Generated with \[Claude Code\]` · `claude\.com/claude-code` — real trailers DENY, prose mentions pass, five cases proven) but the edit to `.claude/settings.json` was HELD: the permission classifier denies a session re-editing its own hook config (self-modification), rightly. The one-line swap waits on her word; until then the friction is a rephrase, never a lost commit.
+
+## B2 BRIEF (VX-889 + rider VX-343) — the implementer's whole brief; the B1 BRIEF's Workspace paragraph binds B2 verbatim (same worktree, same rules, same stage posture)
+
+**VX-889 — Settings ▸ Tags' Make a Gathering mints in Home even when the pane shows another wing (Medium, Confirmed).** The call site is named in `notes/plans/fixes/vx-878-book-doors-faces.md` (BATCH 3 RECORD): `PromoteTagsSheet` passes no wing to `createReading`, so a gathering minted while the pane shows another wing lands in HOME and its rule's tag paths resolve against Home's vocabulary (dead terms in the shown wing). Settings ▸ Tags itself follows the app's wing live ("Tags — in ‹wing›", R-828-2 — SurfaceContracts, The app). The fix: the mint takes the PANE'S SHOWN WING — the gathering row lands in that wing, its rule's tags adopt-or-mint by path IN that wing (the one application road), and the name guard consults that same wing (`assertBookNameIsFree(_:inWing:)` — VX-816 already scopes it per wing; verify the sheet now hands the same wing to both the guard and the mint so they can never disagree). Red-on-old pin verified by behavioral revert: minted-from-Settings-▸-Tags in wing W ⇒ the reading's `wing_id` is W and its rule's tag ids are W's vocabulary; minted in Home ⇒ unchanged. Check the sheet's save against a wing deleted mid-flight (a dangling wing reads as Home's — the standing rule) and say in the record which way it lands. Trace first; if the sheet turns out to have OTHER wing-blind writes (outflow? starring?), enumerate them in the record and fix only what the ticket names unless trivially the same line.
+
+**VX-343 (rider, Low, Bug) — the What's New sheet splits a wrapped bullet into loose paragraphs.** `ReleaseNotes.blocks` (`App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes.swift`) turns a wrapped bullet's indented continuation line into its own unbulleted paragraph (0.9.5's notes showed stray fragments; the ticket carries the proof). The fix: the parser joins an indented continuation line onto the bullet above it (Markdown's own rule), pinned with 0.9.5's actual notes file as the fixture (red-on-old). Sparkle's feed rendering is untouched.
+
+**Gate:** headless where possible; the Mac suites for the touched types (grep the tests for `PromoteTagsSheet`, `ReleaseNotes`, the Settings ▸ Tags suites) COMPILED via `build-for-testing`, their RUN listed as type names for the orchestrator's stage window. Self-assessment at the close; PROVISIONAL anything ambiguous; stop-and-report anything that gates.
 
 ## B1 RECORD (VX-895 + rider VX-890) — the implementer's record
 
