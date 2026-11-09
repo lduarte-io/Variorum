@@ -48,12 +48,12 @@ The standing law that binds this run hardest: **messages carry a kind on the one
 
 | Batch | Member(s) | Implementer | Cold review | Notes |
 |---|---|---|---|---|
-| B1 | VX-895 (+ rider VX-890 if taken) | opus-implementer | the run ladder (see below) | Trace the header/counts staleness first; re-check VX-408's hollow disposition against it. Her walkthrough screenshots exist. |
-| B2 | VX-889 (+ settings-area riders if taken) | opus-implementer | ladder | The mint takes the pane's shown wing; VX-816's guard follows by construction. Red-on-old: a gathering minted from Settings ▸ Tags in wing W lands in W with W's tag vocabulary. |
-| B3 | VX-775 (+ MCP riders if taken) | opus-implementer | **Fable** (wire) | The ruled split: the act's answer speaks the landed truth; the log failure surfaces to her. Surfacing shape per the sitting. |
-| B4 | VX-81 | trace session first (cast per sitting) | **Fable** (crash/protection-adjacent) | Repro on the Pro at 27.0.1 (the 27.0 control is gone); stage claim via nov7; dev store + vxtest roads. Fix only with a traced mechanism; a custody-code fix STOPS to her. |
+| B1 | VX-895 + rider VX-890 | opus-implementer | the run ladder | Trace the header/counts staleness first; re-check VX-408's hollow disposition against it. Her walkthrough screenshots exist. VX-890 folds `wornGroupFacts` into `groupPage`'s one template — the same file the trace opens. |
+| B2 | VX-889 + rider VX-343 | opus-implementer | ladder | The mint takes the pane's shown wing (`PromoteTagsSheet` → `createReading`); VX-816's guard follows by construction. Red-on-old: a gathering minted from Settings ▸ Tags in wing W lands in W with W's tag vocabulary. VX-343: `ReleaseNotes.blocks` joins an indented continuation line onto its bullet, 0.9.5's file the fixture. |
+| B3 | VX-775 + rider VX-613 | opus-implementer | **Fable** (wire) | RULED: the act's answer speaks the landed truth; the log failure reaches her as a refusal-kind toast on the one status seam (client + the store's own words; wording drafted for her trim). VX-613: PROBE the two stale-start races first (the flag reorder + the bind); fix only what traces, with a start-timing seam for the pin. |
+| B4 | VX-81 — **history-first** (her ruling) | opus-implementer (research unit) | **Fable** on any code | (1) The history memo: VX-80's fix, VX-329's road deletion, VX-529's rebuilt follow — does the crash-prone shape (root teardown/reopen with chrome up) exist on TODAY's road at all? (2) A bounded repro attempt on 27.0.1 only if it does (stage via nov7; dev-castle.env values only; an Opus session drives any live Castle walk — the Fable [cyber] safeguard). (3) Report → likely close-as-stale with evidence, her call at the bundle. A fix wanting custody/keychain code STOPS to her (vx-849 holds the slot). |
 
-One ladder over the run's combined diff (fresh Fable reviewer — the run holds a wire member and the crash trace); pin-before-fix PER MEMBER; dispositions repo-first.
+One ladder over the run's combined diff (fresh Fable reviewer — the run holds a wire member and protection-adjacent work; her sitting pick); pin-before-fix PER MEMBER; dispositions repo-first.
 
 ## LEDGER (every row owned; flipped as work lands)
 
@@ -63,9 +63,13 @@ One ladder over the run's combined diff (fresh Fable reviewer — the run holds 
 | 2 | VX-889 — Settings ▸ Tags' gathering mints in the shown wing | NOT STARTED |
 | 3 | VX-775 — landed-act truth to the client; log failure to her | NOT STARTED |
 | 4 | VX-81 — the re-key reopen crash: repro, trace, fix-or-documented-defer | NOT STARTED |
-| 5 | Riders (her kickoff picks) | PENDING THE SITTING |
-| 6 | The ladder | NOT STARTED |
-| 7 | Closeout (canon deltas · AppSpecRecord · QUESTIONS bundle · board · handoff) | NOT STARTED |
+| 5 | Rider VX-890 — wornGroupFacts folded into the one template (B1) | NOT STARTED |
+| 6 | Rider VX-343 — What's New wrapped-bullet join (B2) | NOT STARTED |
+| 7 | Rider VX-613 — the stale-start races, probe first (B3) | NOT STARTED |
+| 8 | The ladder | NOT STARTED |
+| 9 | Closeout (canon deltas · AppSpecRecord · QUESTIONS bundle · board · handoff) | NOT STARTED |
+
+**Peers' windows (nov7, at kickoff):** VX-849 holds the Sync/custody slot (her word); my dev-store windows serialize with vx-849's VX-855 repro; merge-gating first, short before long. Main moved under us: 66d6f33cf (VX-931 docs: /Applications holds RELEASES only — no refresh at this run's merge or closeout) and 744ca5301 (the no-trailer guard) — both fold in at our merge-in. Stage protocol: REQUEST → READY → GO (exact claim line) → RELEASE with Executed counts + every failing test by name; known false reds to name, not chase: VX-850 socket timing, VX-661/690, VX-665 warnings, VX-701, the phone caret red.
 
 ## Environment traps (carried verbatim into every batch brief)
 
@@ -73,8 +77,26 @@ Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate b
 
 ## SITTING RECORD
 
-*(Appended verbatim-faithful as rulings land.)*
+**The kickoff sitting, 2026-11-08/09 (night) — her four answers:**
+
+1. **Cast — RULED:** "Standard, one Fable ladder" (her pick of the recommended option): Opus implements all four batches; ONE review ladder over the run's combined diff with a fresh fable-reviewer per round.
+2. **VX-81 — her words, verbatim:** "ok I will say that this crash was before some major castle updates & I'm genuienly not sure how big of an issue it even is. It seemed very unlikely to me os related to me at the time. a lot of info about this ticket might be stale - I guess we can try reproducing it to see if it's an issue but it was already fixed a long time ago, the actual issue. so maybe look into that history more." **Read as binding:** B4 is HISTORY-FIRST — establish what "the actual issue" was and where it was fixed (VX-80, the stranding fix, closed 2026-10-08 with 13x PR #136; then VX-329 deleted the old protection road WHOLE, 2026-10-22; VX-529 rebuilt the follow/pair catch-up, 2026-10-25; VX-818/P-809-13 reshaped the re-keying reopen), check whether today's reopen road even has the crash-prone shape, and only then a BOUNDED repro attempt on 27.0.1 if the path still exists. The likely end is close-as-stale/fixed with evidence, her call at the bundle. OS-relatedness was unlikely in her read at the time.
+3. **VX-775's surfacing — RULED:** "Refusal toast on the status seam" — one refusal-kind line naming the client and the store's own words; the wording drafted for her trim at the bundle.
+4. **Riders — her picks:** VX-890 (Search) · VX-343 (What's New bullets) · VX-613 (MCP stale start, probe first) — all three seated as sub-issues. **VX-928 declined with her note:** "pretty sure someone else started vx-928, look at it again in linear for any details. or ask the coordinator nov7." — checked: VX-928 is already a sub-issue of VX-915 (the recents sweep). Her hunch confirmed; not ours.
+
+**The no-trailer guard (her mid-sitting ask: "shouldn't this have been caught by the hook?"):** no hook existed — the rule lived only in CLAUDE.md prose. Landed on main at 744ca5301: `.claude/settings.json` gains (a) `attribution: {commit: "", pr: "", sessionUrl: false}` — the harness no longer instructs any trailer at the source — and (b) a PreToolUse Bash hook DENYING any `git commit` / `gh pr` command carrying Co-Authored-By / Claude-Session / "Generated with Claude Code". Proven live in-session: the hook fired on its own landing commit (whose message named the trigger strings) before the reworded commit passed. Caveat: peer sessions running since before the change, and worktree checkouts whose branches haven't folded main in, aren't covered until they reload/fold — relayed to nov7.
+
+## B1 BRIEF (VX-895 + rider VX-890) — the implementer's whole brief; read with SurfaceContracts §The Library and the vx-819 record's FOR A LATER READER (`notes/plans/fixes/vx-819-search.md`)
+
+**Workspace:** `~/dev/variorum-vx-913` (branch `vx-913-freeze-fixes`, upstream set). Commit per piece, push after every commit, LIVE STATUS in the B1 RECORD section below from the first commit; `notes/SessionResiliencyProtocol.md` binds (foreground waits only; poll logs with a grep loop, never `tail -f | grep -m1`). Headless `swift build` / `swift test` run freely; ANY `xcodebuild test` needs a stage claim — report to the orchestrator and WAIT, never claim yourself. `xcodebuild build-for-testing` (compile-only) is fine without the stage. No attribution trailers on commits (hook-enforced).
+
+**VX-895 — the search results group header doesn't follow the picked facet (Medium, Confirmed).** Her Nov 7 walkthrough, main 516ebc093; her words: "clicking books resets it, depends on which one you just clicked on… feels a bit random which one is up." The group header over the results ("Notes, with their passages" / "Blocks & scraps") doesn't track the picked facet in either direction, and the band's counts may share the staleness (she saw "7 notes · 7 passages" while Blocks was picked). **Mechanism open — trace, don't assume.** Starting points: `LibrarySearchModel` (the facet pick and the band counts — the facet-scoped counts landed at VX-734, `Queries.searchCounts(_:query:facet:scope:calendar:)`), the answer-sheet face that renders the group headers (`LibrarySearchFace` et al.), `SearchComposer.groupPage`. Suspect class: the header text derived from a STALE answer generation while the facet pick is live state (the VX-408 family — its overtaking-refresh edge was fixed by a question token in `LibraryCatalogModel.read`, and its feared stale-paint half was recorded HOLLOW at vx-819; A-819-B2 says re-check that disposition against this sighting — if this sighting proves that recorded-hollow mechanism real after all, SAY SO in the record). Deliverables: the traced mechanism written in the B1 RECORD before the fix; a red-on-old pin verified by behavioral revert (the pin exercises facet clicks against the header and the band counts); the fix; the controls-row law untouched (no line-count change; stable widths). The Library section of SurfaceContracts carries the band-counts contract (R-819-1: under a picked facet the band counts what that facet lists; All keeps the whole question's counts).
+
+**VX-890 (rider, Low, Debt) — `SearchComposer.wornGroupFacts` (≈:636–642) restates the group-facts columns beside `groupPage`'s one shared template (≈:536–541)** — the drift class the vx-819 ladder's F6 closed for the grouped pages. Fold it into the one template. Zero behavior change — the proof is the existing `SearchOrderTests` / `SearchFacetTests` / `LibrarySearchOrderTests` green with no test edits (the 3C parity pattern); if any pin needs an edit, the fold is wrong.
+
+**Gate (orchestrator runs or sanctions it):** headless core suites for the touched files + the Mac search suites (`SearchFacetTests`, `SearchOrderTests`, `LibrarySearchOrderTests`, `LibraryControlsFlowTests`, and whatever suites exercise the changed sources — grep the tests for the changed types) at a stage window. Self-assessment written at the close; PROVISIONAL-marked anything ambiguous (QUESTIONS-bound), stop-and-report anything that gates.
 
 ## LIVE STATUS
 
-- 2026-11-08/09 (night): kickoff. Preflight complete; worktree seated; in-flight row pushed (its commit carries a stray attribution trailer — the one-off noted above); VX-913 In Progress; roster resolved by the sub-issue listing (the description is stale — VX-891/VX-855/VX-661 live elsewhere, VX-81 seated). Next: nov7 contact, the kickoff sitting (cast · VX-81's road · riders · VX-775's surfacing shape · the pre-OSS code list she asked for).
+- 2026-11-08/09 (night): kickoff. Preflight complete; worktree seated; in-flight row pushed (its commit carries a stray attribution trailer — the one-off noted above); VX-913 In Progress; roster resolved by the sub-issue listing (the description was stale; nov7 refreshed it at her ask — VX-891/VX-855/VX-661 live elsewhere, VX-81 seated).
+- Kickoff sitting CLOSED (the SITTING RECORD above): cast standard + one Fable ladder; B4 history-first; VX-775 = refusal toast; riders VX-890/343/613 seated (VX-928 is VX-915's). The no-trailer guard landed on main 744ca5301 and fired live. nov7's protocol + windows recorded (ledger foot). B1 brief written; B1 implementer next.
