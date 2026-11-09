@@ -174,8 +174,8 @@ beside it.**
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
-| 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
-| 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | BUILT — `b59d2f16d`…(this commit): VX-443's sweep (PROVISIONAL P-849-4; red-on-old SHA `9118b0355`, the fix `80979d6f0`, reverts R-443a…d bit as named); VX-152 traced — closed before this run by VX-445, a guard pin only; VX-545's five points in one commit (`6cd218082`, the page regenerated); core protection set 551/123 green; Mac + phone `build-for-testing` green; EVERY Mac/simulator run PENDING the stage (the BATCH 4 RECORD's STAGE REQUEST) |
+| 3 | Batch 3 — VX-664 (the outside-change ring-ending) | DONE — built `3d9d36cdd`…`81fc15583` + adjudicated; the b34 windows ran: leg A 15/3 green and the six reverts exact at `bd65aa5a1` (the b34-tests section), leg D 87/7 at `39488a513`, the walk's three rows RIGHT in both voices (THE B34-WALK WINDOW); leg C folds into row 8 |
+| 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | DONE — built `b59d2f16d`…`d815dc445` + adjudicated; the b34-tests window ran leg A 25/4 green and the four reverts exact at `bd65aa5a1`; leg D's two phone types rode the 87/7 run; the optional walk row skipped for the byte-pin (the adjudication); leg C folds into row 8 |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | DONE — RECORD-ONLY (`718701ac8`…(this commit)): traced; the confirm `PurgeSweepTeardownTests` GREEN 2/2 ×3 (the lock's close waits for the held read); R-855a bit exactly its two lines; NO FIX (dismissed as already fixed by VX-604 + VX-657; the ticket text in the BATCH 5 RECORD); no Mac suites new; whole core package PENDING (row 8); the in-app recipe OPTIONAL for the orchestrator's window |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | BUILT — `438ed249d`…(this commit): VX-921 FIXED (red-on-old `d58707b70`, the swap `797dfe8a7`, R-921a/b bit exactly as named); VX-919 AUTHORED ONLY (`1db9b06c8` — never executed; deploy HELD, row 9; R-919a bit as named); the siblings recorded; core targeted 480/76 + 14/4 green; Mac + phone `build-for-testing` green; NO Mac suites new; whole core package PENDING (row 8); PROVISIONALs P-849-6/-7 for the merge's QUESTIONS |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | CLOSED AT ROUND 1 — 0B/0M/3MIN/2NIT (`68e17ae51`; dispositions in THE LADDER section; the row-8 evidence gate adopted) |
@@ -2759,8 +2759,41 @@ finding below resolves by ticket, closeout act, or the already-planned evidence 
   dispositions) match the adjudications above — nothing new owed.
 
 **Born tickets (minted now, triaged per the labeling rule; final pass at the closeout):** C2 (the undo doors'
-flush-first), C1 (the margin-grid recentre), the R1 face-only confirmation residual, and the sibling seq-ranked
-§7 repairs (one Debt ticket riding P-849-6's outcome).
+flush-first) = VX-966 · C1 (the margin-grid recentre) = VX-967 · the R1 face-only confirmation residual = VX-968 ·
+the sibling seq-ranked §7 repairs (one Debt ticket riding P-849-6's outcome) = VX-969.
+
+## THE B34-WALK WINDOW (claim vx-849-b34-walk, 2026-11-09, at 39488a513 — leg D the orchestrator's hands; the walk an OPUS walker under the claim, per the Fable safeguard)
+
+*[removed for publication]*
+  seven types present and counted by their suite-pass lines (MobileTypedOverRescue · MobileQuickNote ·
+  MobileTakesBrowser · MobileBlockHistory · MobileRoundOccasion · MobileProtectionAccountSection ·
+  MobileLockTeardown); none dropped.
+- **The walk — ALL THREE ROWS RIGHT; row (i) in BOTH voices** (130 shots + transcript + wire logs in the session
+  scratchpad `vx849-walk/`; the walker's full report held by the orchestrator):
+  (i) ring + typing, then the wire's `edit_take` → the ring ends untouched-by-her, the AI's words read, a
+  click-back-in types onto the AI's words never her pre-edit ones — Study and Terminal both (the W-664-1
+  acceptance re-shot over this run);
+  (ii) typing then a restore of a pre-edit moment → the take shows the moment, the rail gains EXACTLY ONE quiet
+  ◦ auto moment holding what she had typed, NO `'conflict'` card (P-849-1's acceptance live; a wire `read_note`
+  confirmed no conflict take);
+  (iii) slot split, the first-take door open, the ring in it, the wire's `add_take` → the ring ends and the cell
+  shows its two fan cards (P-849-5 (a) live). A first mis-set attempt (door closed) matched the code's intended
+  behavior (badge ⑂2, ring stays) — not a finding.
+- **Two deviations from the walk script, both sound:** (1) the walker did NOT walk under `variorum-de` — the
+  vx-620-era "pane-copied key silently rebinds the approved name" precedent is STALE: this build raises the
+  designed rebind ASK (`mcp_rebind_request`), and allowing it would have moved variorum-de's grants to the walk
+  key; the walker refused it and walked under a fresh `vx849-walk` client, denied at the end. (2) Row (ii)'s
+  scripted route ("the History face's sheet OVER Write's take panel") is unreachable as worded — in Write the
+  detail view owns history as a full-page swap and the sheet is only an unmounted-fallback; the nearest route
+  walked, verdict unaffected. The row's wording is corrected here, not a defect.
+- **ONE FIND, ticketed (P-2's class): Write's take panel's bottom-bar "history" button does nothing while the
+  panel is open** — a rendered door that neither acts nor refuses. VX-971.
+- **Posture:** end-state matches as-found (MCP ON, variorum-de approved · nothing shared, voice Study, signed
+  out, no Resume Sync, appearance untouched; the Takes style restored to stack); prefs re-export diffed to
+  launch churn only; clipboard cleared; the key file deleted; zero instances, zero shims, no Problem Reporter,
+  no new .ips. Residue, named: the walk note in the Trash (two wire takes + five moments), the denied
+  `vx849-walk` client row, the declined variorum-de rebind request (key forgotten), two copied setup-key rows,
+  three revoked grant tombstones, ~10 Activity rows, one dev-store backup, the re-stamped Debug binary.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
