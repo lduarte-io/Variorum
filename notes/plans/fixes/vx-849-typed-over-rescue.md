@@ -1,6 +1,10 @@
 # VX-849 — Run: the typed-over rescue and the offline unlock retry (the sync-custody run)
 
-**STATUS: OPEN — kicked off 2026-11-09 (`/architect-phase vx-849`). Branch `vx-849-typed-over-rescue`, worktree
+**STATUS: CLOSED 2026-11-09 — merged via nov7 (the PR and merge SHA are filled by the post-merge commit); the
+wave's LAST merger, the 1.4 release STAGED (built, never published — her morning word ships it).** The kickoff
+banner, kept as history:
+
+**OPEN — kicked off 2026-11-09 (`/architect-phase vx-849`). Branch `vx-849-typed-over-rescue`, worktree
 `~/dev/variorum-vx-849`, the Pro. THIS RUN HOLDS THE ONE SYNC/-CUSTODY SLOT (her kickoff word). The stage
 coordinator is nov7 — every stage need goes through them; this orchestrator never claims directly without
 checking the queue. CAST (her ruling at this kickoff, verbatim: "opus should implement, fable review"):
@@ -11,8 +15,53 @@ before the OSS repo flip.**
 
 ## FOR A LATER READER
 
-*Written at closeout. Until then: the kickoff, roster and batches below are the plan; UNIT RECORDS at the
-bottom are the night's working record.*
+**What this run was.** The sync-custody run (THE one Sync/-custody slot): ten members under VX-849, six batches,
+2026-11-09, closed overnight under her compaction-sitting mandate (verbatim in HER OVERNIGHT MANDATE below). The
+wave's LAST merger — this run staged the 1.4 release (built, never published).
+
+**The mechanisms, as settled, one pointer each:**
+- **VX-683 + VX-402 (batch 1):** a pull applied into the autosave debounce window was blind-overwritten. Fixed
+  twice over: the honest flush (`AutosaveCoordinator.flushNow` waits for the write in flight; one serial write
+  lock) and the guarded autosave (`Operations.autosave(…, expectedText:)` — a stale snapshot RESCUES: her buffer
+  keeps the row, the displaced words become a `'conflict'` take, both push; R-683-1…4). The flush-before-round
+  occasion rides `SyncSession.beforeRound` (composition-injected, nil = inert).
+- **VX-544 (batch 2):** the offline typed unlock retains DERIVED material in session memory only
+  (`PendingSyncKeyLoad`; dropped at lock/sign-out/replacing reopen), retried before each round, healed by the
+  `NWPathMonitor` reachability trigger (2 s debounce, first-reading-never). Both platforms (P-849-2/-3). Her
+  R-849-1/-2 ruled the shape; her Air drill (steps 8–9) runs POST-RELEASE via Sparkle.
+- **VX-664 (batch 3):** the one ring-ending seam predated this run (A-677-1); this run verified it, swept 9
+  hosts × 23 roads, and closed two real holes: G1 (`AutosaveCoordinator.isUnlanded` — the ring must not end
+  while her words are unlanded) and G3 (`PaneTextAuthority.shownText` — a keystroke in the confirmation gap
+  snapshots what the pane SHOWS, so it rescues instead of overwriting the outside words; this corrected batch
+  1's self-assessment). P-849-1: `restoreCommit(…, insuringBuffer:)` + flush-first doors. P-849-5 (a): the
+  slot-split bloom ends the ring by the flushed blur.
+- **VX-443 + VX-152 + VX-545 (batch 4):** the stale `variorum-keys-<fp16>` envelope is DELETED at a successful
+  live-slot open, names-only, with the vouched-fingerprint fence (P-849-4). VX-152 was already fixed (VX-445's
+  one-act seam) — dismissed with a guard pin. VX-545's ratified rule-7 sentence landed at five points, the
+  lifecycle page regenerated.
+- **VX-855 (batch 5): RECORD-ONLY** — the .ips was the test host's runner-exit race (SQLCipher's atexit under
+  the launch sweep), closed before this run by VX-604 + VX-657; the lock road provably closes behind GRDB's
+  reader barrier (`PurgeSweepTeardownTests`, the guard kept). VX-691 is the same face.
+- **VX-921 + VX-919 (batch 6):** the OWNED exclusivity repair ranks by `created_at`/id (converged bytes —
+  P-849-6 changes #167's ratified measure; the sibling seq repairs are VX-969). VX-919's device-cursor cap
+  script authored + rollback, NEVER run — the deploy is hers.
+- **The closing sweep's find:** batch 1's Compare `paneEdited` handed a fabricated `""` snapshot on an
+  unprojected face → spurious rescue → the leaving pins' extra savepoint. Fixed by
+  `PaneTextAuthority.shownTextIfKnown` (nil = no snapshot); read cold by a fresh Fable (0B/0M); the Takes/Canvas
+  siblings are VX-972.
+
+**Her rulings by id:** R-849-1 (retain + quiet retry), R-849-2 (the reachability trigger), R-849-3 (the riders;
+VX-152's investigate-first condition verbatim in KICKOFF). PROVISIONALS P-849-1…7 in QUESTIONS #274.
+
+**The evidence lines that matter:** every member's red-on-old pin revert-proven (ten reverts re-proven live in
+the b34-tests window; the rest headless, watched); the ladder closed at round 1 (0B/0M) + a supplementary Fable
+cold read of the sweep fix (0B/0M); the walk's three rows right in both voices; the closing sweep on the release
+tree — whole Mac 6,366/1,101 then re-verified 6,367/1,101 at the final tip (13 knowns + the VX-701 flake
+green-alone), whole phone 857/141 at the named baseline, core 4,070/563 + MCP 703/130 wholly green + workbook
+32/4 headless.
+
+**Open items:** her Air drill (post-release, VX-544); VX-919's deploy window (script + VERIFY + rollback ready);
+QUESTIONS #274's seven provisionals; the born tickets VX-966…969, VX-971, VX-972.
 
 ## KICKOFF (2026-11-09, author-attended — her rulings verbatim)
 
@@ -179,7 +228,7 @@ beside it.**
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | DONE — RECORD-ONLY (`718701ac8`…(this commit)): traced; the confirm `PurgeSweepTeardownTests` GREEN 2/2 ×3 (the lock's close waits for the held read); R-855a bit exactly its two lines; NO FIX (dismissed as already fixed by VX-604 + VX-657; the ticket text in the BATCH 5 RECORD); no Mac suites new; whole core package PENDING (row 8); the in-app recipe OPTIONAL for the orchestrator's window |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | BUILT — `438ed249d`…(this commit): VX-921 FIXED (red-on-old `d58707b70`, the swap `797dfe8a7`, R-921a/b bit exactly as named); VX-919 AUTHORED ONLY (`1db9b06c8` — never executed; deploy HELD, row 9; R-919a bit as named); the siblings recorded; core targeted 480/76 + 14/4 green; Mac + phone `build-for-testing` green; NO Mac suites new; whole core package PENDING (row 8); PROVISIONALs P-849-6/-7 for the merge's QUESTIONS |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | CLOSED AT ROUND 1 — 0B/0M/3MIN/2NIT (`68e17ae51`; dispositions in THE LADDER section; the row-8 evidence gate adopted) |
-| 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | NOT STARTED |
+| 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | DONE — the closing sweep at `861767f4d` (whole Mac 6366/1101; whole phone 857/141 baseline; core 4070/563; MCP 703/130 wholly green) found ONE real regression, fixed at `7bc24b730` (THE SWEEP FIX) with a supplementary Fable cold read (0B/0M); the re-verify at `7c3d7300a`: targeted 126/15 green, whole Mac 6367/1101 (13 knowns + VX-701 green-alone, both runs named); ledgers + canon landed; FOR A LATER READER written |
 | 9 | Her drill: the two-Mac test's steps 8–9 on the Air — runs AFTER the release reaches the Air via Sparkle (her word, 2026-11-09) · VX-919's deploy window (HELD) | OWED |
 
 ## BATCH 1 BRIEF — the typed-over rescue (VX-683, R-683-1…4) + the honest flush (VX-402)
