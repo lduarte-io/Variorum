@@ -47,7 +47,7 @@ The QUESTIONS bundle entry (**#273**) carries the P-915 family with one-line pla
 
 ## Evidence and state (⏳ final numbers at closeout)
 
-- Branch `vx-915-recents-sweep`, worktree `~/dev/variorum-vx-915`; PR `VX-915: …` ⏳ (filled at the merge); merge commit ⏳; **canon-size 140,013 of 150,000 (headroom 9,987 — no crossing)**.
+- Branch `vx-915-recents-sweep`, worktree `~/dev/variorum-vx-915`; PR **#240**; merge commit ⏳ (the coordinator serializes it); **canon-size 140,013 of 150,000 (headroom 9,987 — no crossing)**.
 - The run record (everything, verbatim): `notes/plans/fixes/vx-915-recents-sweep.md` — its FOR A LATER READER section is the settled summary.
 - Gates: gate12 + gate12b (batches 1–2, green; one rig fixed owner-aware, never weakened), gate36 (73 types, 456 tests, zero skips; both red legs watched; two first-run reds traced and fixed), gate36b (31/4, all green), the whole-Mac + phone merge gate on the folded tree ⏳ (runs at the coordinator's GO).
 - The ladder: round 1 (0 B / 0 M / 4 MINOR / 8 NIT) + fixes verified; round 2 (0 B / 0 M / 2 MINOR / 5 NIT) — CLOSED, no round 3 earned.
