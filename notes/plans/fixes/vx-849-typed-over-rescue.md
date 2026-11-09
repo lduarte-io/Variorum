@@ -1299,7 +1299,7 @@ what apply writes, never edited). The pin suites read whole: `OutsideWriteRingEn
 | # | Piece | Status |
 |---|---|---|
 | 1 | THE SWEEP TABLE (below — before any fix) | DONE (this commit) |
-| 2 | The ONE seam verified + the batch-1 composition stated + the found gap G1 (the unlanded guard) fixed with its pin | NOT STARTED — design settled below (G1) |
+| 2 | The ONE seam verified + the batch-1 composition stated + the found gaps G1 (the unlanded guard) and G3 (the gap keystroke's snapshot) fixed with their pins | IN-PROGRESS — 2a the pins on the PRE-FIX tree DONE (this commit — the red-on-old SHA; Mac `build-for-testing` green; runs PENDING the stage); 2b the fix next |
 | 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | NOT STARTED — design settled below |
 | 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | NOT STARTED — design settled below |
 | 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | NOT STARTED |
@@ -1404,6 +1404,27 @@ born since VX-677 and verdicted here first).**
 - **C3 — the confirmation hole is not only G1's owners:** even a deferring owner's suspicion (raised at a clean adopt)
   is confirmed after an off-main read; a flush-first door firing in that window (the sync occasion, a mode switch)
   puts her write in flight → old: confirmed → ring ends; G1's fix declines it too (one closure per owner).
+- **G3 — the gap keystroke's snapshot (found writing G1's pins; a data-loss hole; FIX in piece 2).** A live pane never
+  adopts projection text (P-3), so between a delivery that carried an outside write and the ring-end its confirmation
+  runs (one fresh read + a main-actor hop), the owner's PROJECTION already holds the outside words while the pane still
+  shows hers. Every pane owner's `paneEdited` computes the edit's `old` — batch 1's snapshot AND the churn cost — as
+  `authority.text(variantID:storeText: <the projection's text>)`; the settle just dropped the buffer, so `old` is the
+  OUTSIDE text. A keystroke in that gap: `record(basedOn: <outside words>)` → the confirmation declines (her typing is
+  pending — correctly) → the ring stays → her autosave lands her pre-write words with `expectedText` = the outside
+  words → the row "still holds the snapshot" → NO rescue → the outside words are overwritten unseen (an AI's edit
+  survives only in its "after" savepoint; a phone's words survive NOWHERE — its push CAS-accepted). VX-664's own
+  write-back class re-entering through the confirmation's gap, and batch 1's B, as built, cannot see it (batch 1's
+  self-assessment claimed this road rescued — true only while the owner's projection has not yet adopted the write).
+  Traced on all five owners (Takes/Lenses/Write's panel, Compare, Canvas, the TOC model, the book Index — the same
+  `old` line). FIX: `PaneTextAuthority.shownText(variantID:storeText:)` — for the LIVE pane's take, what the pane HOLDS
+  (`liveHeld` — the very fact the ring-end rule judges by), else the buffer overlay; the five `paneEdited`s read it for
+  the snapshot and the cost. Then a gap keystroke is built on the words she saw, the row changed under it, and the
+  rescue keeps both. Pinned red-on-old by behavior on Takes and Canvas.
+- **R1 — a residual, face-only (recorded, not built):** a confirmation whose fresh read ran while her write flew and
+  which resumes AFTER that write landed reads a pre-write row with nothing unlanded → it can still end her ring
+  spuriously (the pane then adopts her own landed words — no loss, by G3). Closing it needs a per-take landing mark
+  read before and after the confirmation's read (five owners' closures); the window is one read wide AND needs a flush
+  door to start and land a write inside it. For the ladder's eye.
 
 **P-849-1's door enumeration (the doors that REWRITE the typing take's text by HER act):** `CommitsFaceModel.restore`
 (the Mac's one production restore door — flushes first, honest; NO insurance savepoint) · `TakesViewModel.restoreCommit`
@@ -1431,9 +1452,19 @@ savepoint plus aligning the dead door.
 - *Nothing in either road needs a `Sync/` line* — the apply's write is consumed from the store's own delivery.
 
 **The settled designs for pieces 2–4 (recorded before code; PROVISIONAL marks where the rulings do not decide):**
-- *Piece 2 (G1):* `AutosaveCoordinator.isUnlanded(_:)` (pending, or a member of the batch being written —
-  `inFlight`, set with `writing`, emptied with it); the five owners' settle + confirmation closures read it. The
-  authority's doc line "every buffer with no pending autosave record has fully landed" gains the in-flight half.
+- *Piece 2 (G1 + G3):* `AutosaveCoordinator.isUnlanded(_:)` (pending, or a member of the batch being written —
+  `inFlight`, each take leaving it as its own write's turn ends); the five owners' settle + confirmation closures read
+  it. The authority's doc line "every buffer with no pending autosave record has fully landed" gains the in-flight
+  half. `PaneTextAuthority.shownText(variantID:storeText:)` (the live take → `liveHeld`, else the overlay); the five
+  `paneEdited`s build the edit's `old` from it.
+- *Piece 2's pins (`OutsideWriteRescueCompositionTests`, Mac; all drive PRE-FIX API, so behavior-red at the 2a SHA):*
+  G1 — `aPullConsumedWhileHerRescueWriteFliesLeavesReadEditsRing` (Read ▸ edit; the writer HELD so the write is
+  provably in flight and the confirmation's reader provably sees the pre-write row — deterministic; red lines: the
+  ring ended; her buffer dropped), `aPullConsumedWhileHerRescueWriteFliesLeavesTheIndexRing` (the book Index, same
+  staging). G3 — `aKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver` (Takes; the AI's `edit_take`, the board's
+  adopt, her keystroke in the same turn — red line: no `'conflict'` card holds the AI's words),
+  `aCanvasKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver` (Canvas, same). GUARD (green both sides):
+  `readEditsOwnSuccessiveRunsNeverMintACardNorEndTheRing`.
 - *Piece 3 (P-849-1, PROVISIONAL, isolated):* `Operations.restoreCommit(_:commitID:insuringBuffer: Bool = false)` —
   inside the restore's ONE transaction, when the restore will change the take's text AND its buffer differs from its
   latest savepoint (`isDirty`), ONE `kind='auto'` savepoint (unnamed — her road's quiet kind; the MCP bracket's named
