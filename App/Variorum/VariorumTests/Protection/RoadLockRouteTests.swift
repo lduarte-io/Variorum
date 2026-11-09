@@ -191,6 +191,42 @@ struct RoadLockRouteTests {
         }
     }
 
+    /// VX-152 (the VX-849 run, batch 4 — a GUARD, not a fix: the row was closed before this run by VX-445's one-act seam,
+    /// `awaitTheLockSeam` holding `ProtectionRoadSession.beginAct`): SLEEP AND SCREEN LOCK ARRIVING TOGETHER — both monitors'
+    /// road (`relockIfPolicySays` → `performLock`) asked at once — tear the library down ONCE and land ONE lobby: the second
+    /// ask waits out the first's act, then finds nothing open to lock. The unlock then stays unlocked (no straggling second
+    /// lock closes it again). Green on both sides of this run; live by the record's named revert R-152 (the act's hold
+    /// ignored — two teardowns).
+    @Test func sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby() async throws {
+        try await withRoadDependencies {
+            let road = PlantedRoad()
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
+            var teardowns = 0
+            // The teardown SUSPENDS, as production's does (`macLockTeardown` awaits the editor's finalize, every note's
+            // leaving savepoint, the MCP door) — so the second ask arrives while the first holds the act with the library
+            // still ready: the interleaving sleep + screen lock make.
+            bootstrap.onWillLock = {
+                teardowns += 1
+                try? await Task.sleep(for: .milliseconds(250))
+            }
+            let protection = bootstrap.protection
+            // Exactly as the two observers enqueue them (`startRelockMonitors`): two main-actor tasks, one per notification.
+            let sleep = Task { @MainActor in await protection.relockIfPolicySays() }
+            let screenLock = Task { @MainActor in await protection.relockIfPolicySays() }
+            await sleep.value
+            await screenLock.value
+            _ = try LockWorld.lobby(bootstrap)
+            #expect(teardowns == 1, "the composition root's teardown, once — never a double flush")
+            try await LockWorld.unlock(bootstrap)
+            try await Task.sleep(for: .milliseconds(400))
+            guard case .ready = bootstrap.state else {
+                Issue.record("a straggling second lock closed the library again: \(bootstrap.state)")
+                return
+            }
+            #expect(teardowns == 1, "nothing tore the reopened library down")
+        }
+    }
+
     /// THE EXISTING MONITORS on the new road (R-U4-3): the idle tick locks a Castle library after THIS MAC'S SEALED idle
     /// minutes (10 by default; 30 once the setting says so; never when it says never), sleep and screen lock lock it at
     /// once; a Standard library is never locked by either.

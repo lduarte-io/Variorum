@@ -1794,7 +1794,7 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
 |---|---|---|
 | 0 | Preflight + this record | DONE (this commit) |
 | 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | DONE — 1a the behavior pins on the PRE-FIX tree (`9118b0355` — the red-on-old SHA): core **3 RED exactly as named / 4 green**; 1b the fix + the compile-red pins (`80979d6f0`): core 16/16 green; R-443a…d each bit exactly its named set (this commit records them); the protection set 551/123 green; Mac `build-for-testing` green; Mac runs PENDING (stage — R-443M1/M2 named) |
-| 2 | VX-152 — the lock's reentrancy, investigate-first | NOT STARTED — the trace below is read; the verdict lands with its piece |
+| 2 | VX-152 — the lock's reentrancy, investigate-first | DONE (this commit) — traced: CLOSED BEFORE THIS RUN by VX-445's one-act seam (dismissed as hollow; no fix); one regression guard pin (Mac, compiled; its run + revert R-152 PENDING the stage); the ticket text below for the orchestrator |
 | 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | NOT STARTED |
 | 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | NOT STARTED |
 
@@ -1945,10 +1945,48 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
   generated and mutation suites, the lifecycle) + `LibraryClassifierTests`, by type-name filter → **`Test run with 551
   tests in 123 suites passed` (5 known issues — the standing ones)**.
 
-**VX-152 — the trace read before the batch's code (the verdict lands as piece 2):** the lock road today is VX-445's
-(`AppBootstrap.lock()` → `lockOnNewRoad()` → `awaitTheLockSeam()` holding `ProtectionRoadSession.beginAct()`); sleep and
-screen lock both reach it through `ProtectionController.relockIfPolicySays()` → `performLock`. To be verdicted against
-the ticket's premise (written against the pre-VX-445 lock) in piece 2.
+**VX-152 — WHICH WAY IT WENT (her R-849-3 condition): INVESTIGATED; NO FIX — the row was CLOSED BEFORE THIS RUN by
+VX-445's one-act lock seam. DISMISSED AS HOLLOW on today's tree; one cheap regression GUARD pin added (green on both
+sides of this run, live by a named revert); nothing ballooned, nothing touches VX-855's teardown.**
+- *The trace (every road, file:line at `5dd04cc7c`):* the Mac's two triggers are `ProtectionController
+  .startRelockMonitors` (`Shared/ProtectionController.swift:80`) — `NSWorkspace.willSleepNotification` (:84) and
+  `com.apple.screenIsLocked` (:89) — each ENQUEUING its own main-actor `Task { await self?.relockIfPolicySays() }`.
+  `relockIfPolicySays` (:126) reads the open library's policy (`roadRelock` → `AppBootstrap.roadRelockPolicy`, :1448 —
+  `.ready`, bound, a road session in Castle) and awaits `performLock` → `AppBootstrap.lock()` (:1455) →
+  `lockOnNewRoad()` (:1471), whose FIRST act is `awaitTheLockSeam()` (:1498): while an open is in flight (`.opening`)
+  it waits; with nothing in Castle open (`roadRelockPolicy` nil) it returns nil — no lock; else it takes the session's
+  ONE-ACT hold (`ProtectionRoadSession.beginAct()`) or sleeps 100 ms and reads again. The phone's lock roads end at the
+  same `AppBootstrap.lock()` (`VariorumMobileApp.swift:277`, `MobileRelock.swift:32`).
+- *Sleep + screen lock together:* ask 1 takes the hold and runs the teardown (`runWillLock(.lock)` :153 →
+  `onWillLock` = `macLockTeardown` — it SUSPENDS: the editor's finalize, every note's leaving savepoint, the MCP door);
+  ask 2, arriving meanwhile with the library still `.ready`, finds the hold taken and sleeps. Ask 1 then sets
+  `.opening` (:1479), drops session memory, lets the session go, closes the pool off the main actor, and — in ONE
+  main-actor turn, no `await` between — `session.endAct()` (:1490) and `finish(.roadLobby…)` (:1492): ask 2 can never
+  observe the hold released while the library is ready. Ask 2 wakes into `.opening` (waits) or the lobby
+  (`roadRelockPolicy` nil ⇒ returns nil). ONE teardown (one flush), ONE `finish`, ONE lobby. Lock Now (⌃⌘L, the File
+  menu) and the idle tick meet the same seam.
+- *Why the ticket said otherwise:* its premise ("`AppBootstrap.lock()` has no reentrancy guard") described the
+  pre-VX-445 `lock()` — today's road's, deleted whole at VX-329. VX-445's new-road lock (VX-308 U4, R-U4-2 — "one act at
+  a time", PROVISIONAL P-VX308-U4-2, `notes/plans/vx-308-accounts-key-doors.md`) built the guard; its pin
+  `RoadLockRouteTests.aLockAskedWhileAnActRunsWaitsForTheActThenLocks` covers act-vs-lock, not lock-vs-lock.
+- *The guard pin (Mac, `RoadLockRouteTests.sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby`):* a Castle library
+  through the bootstrap (`LockWorld`), the teardown stubbed to COUNT and to SUSPEND 250 ms (as production's does — without
+  the suspension the second ask would arrive after `.opening` and never reach the seam, so a revert could not bite), the
+  two asks enqueued exactly as the observers enqueue them, then: one teardown, a lobby; the unlock; 400 ms later still
+  `.ready` and still one teardown (no straggling second lock). Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`.
+  **THE NAMED REVERT (the stage's, named here BEFORE it runs): R-152** `AppBootstrap.awaitTheLockSeam`'s
+  `if session.beginAct() { return session }` → `if session.beginAct() || true { return session }` (the hold ignored) ⇒
+  RED `sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` (`teardowns == 1` — two teardowns) and, by the same
+  mechanism, `aLockAskedWhileAnActRunsWaitsForTheActThenLocks`.
+- *THE TICKET TEXT (for the orchestrator to put on VX-152 — implementers have no Linear):* "Investigated in the VX-849
+  run (batch 4). Closed before that run by VX-445 (VX-308 U4, R-U4-2 'one act at a time'): every lock road — sleep,
+  screen lock, the idle tick, Lock Now, the phone's — ends at `AppBootstrap.lock()` → `lockOnNewRoad()`, whose first step
+  `awaitTheLockSeam()` takes the open session's one-act hold (`ProtectionRoadSession.beginAct()`). A second ask while the
+  first holds it sleeps and re-reads; the first releases the hold and lands the lobby in one main-actor turn, so the
+  second wakes to a locked library and does nothing. One teardown, one lobby. This ticket's premise described the
+  pre-VX-445 lock (today's road, deleted at VX-329). Regression guard added:
+  `RoadLockRouteTests.sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` (live by reverting the hold — two
+  teardowns). Recommend: close as already fixed."
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
