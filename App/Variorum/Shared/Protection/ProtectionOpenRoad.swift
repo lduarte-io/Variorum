@@ -853,6 +853,24 @@ nonisolated enum ProtectionOpenRoad {
         log("road: the typed unlock loaded the account's sync keys for the session (sync key \(keys.rowKeyID.prefix(8)))")
     }
 
+    /// **VX-544 (D-544 (2); her R-849-1) — THE RETRY**: the typed unlock's load run again with the secret it kept
+    /// (`ProtectionRoadSession.pendingSyncKeyLoad`) — the SAME function, the same bound, the same log lines — so the load she
+    /// authorized at the lobby finishes once the vault answers, with nothing typed again. Idempotent: nothing pending ⇒
+    /// nothing (no read); a retry asked while one is out JOINS it (one read — `retryingSyncKeyLoad`); a hold that lands ends
+    /// the pending, a second failure keeps it, every other exit ends it. `signIn`: who is signed in NOW (the caller's read,
+    /// off the main actor). The occasion is the Mac composition's (`AppServices`' one `beforeRound` closure, only while the
+    /// engine's provider cannot produce keys); the phone's stays unwired.
+    static func retryPendingSyncKeyLoad(
+        _ session: ProtectionRoadSession, signIn: SessionFact, within bound: Duration = typedUnlockVaultBound
+    ) async {
+        guard session.pendingSyncKeyLoad != nil else { return }
+        await session.retryingSyncKeyLoad {
+            guard let pending = session.pendingSyncKeyLoad else { return }
+            log("road: the typed unlock's pending sync-keys load runs again (VX-544)")
+            await loadSyncKeysAfterTypedUnlock(session, signIn: signIn, typed: pending.secret, within: bound)
+        }
+    }
+
     /// VX-544 — the failure exit's keep: the typed secret's DERIVED form as the session's pending load (refused once the
     /// session let go). true: kept, for the retry.
     private static func keepForTheRetry(

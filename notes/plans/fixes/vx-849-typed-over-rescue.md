@@ -592,8 +592,8 @@ the shared load's retention runs on the phone; only its retry stays unwired (ove
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record | DONE (this commit) |
-| 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | DONE (this commit) — harness 45/45 green (6 suites); Mac `build-for-testing` green; the named reverts R-1a/R-1b run next at this tip; Mac runs PENDING (stage) |
-| 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | NOT STARTED |
+| 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | DONE (`b11fb8d39`) — compile-red on old watched; R-1a/R-1b bit exactly as named; harness green; Mac runs PENDING (stage) |
+| 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | DONE (this commit) — harness 53/53 green (6 suites), the retry suite 5 runs stable; the named reverts R-2a…R-2d run next at this tip; Mac runs PENDING (stage) |
 | 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | NOT STARTED |
 | 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | NOT STARTED |
 | 4 | The words (no new sentence) | NOT STARTED |
@@ -655,4 +655,43 @@ symlink with an edited copy of the committed file, runs, and restores the symlin
   behavior) ⇒ expected RED: the three keep pins and `theRelockLetsGoOfThePendingLoad` (its precondition); the two guards
   green. **R-1b** `dropSessionMemory`'s `session.letGoOfSyncKeyLoad()` line deleted ⇒ expected RED:
   `theRelockLetsGoOfThePendingLoad` only.
+- *Piece 1's evidence, run at `b11fb8d39` (the harness):* **compile-red on old** — the pre-fix `ProtectionOpenRoad.swift` and
+  `ProtectionRoadLock.swift` (`git show 93c2e3149:…`) in place of the two symlinks: the test build fails exactly on the new
+  seam (`TypedUnlockRetryTests.swift`: "value of type 'ProtectionRoadSession' has no member 'pendingSyncKeyLoad'", "cannot
+  find 'PendingSyncKeyLoad' in scope", "…no member 'retainPendingSyncKeyLoad'"), symlinks restored. **R-1a** → `✘ 6 tests,
+  4 failed` — exactly `anOfflineTypedUnlockLeavesItsLoadPendingWithTheKeysUnloaded`, `anOfflineWordsUnlockKeepsTheWords…`,
+  `aTimedOutVaultReadLeavesTheLoadPendingToo`, `theRelockLetsGoOfThePendingLoad` (its precondition); both guards green.
+  **R-1b** → `✘` exactly `theRelockLetsGoOfThePendingLoad` (3 issues: the pending stood past the drop, a keep after it was
+  accepted). Restored → `✔ 6 tests passed`.
+
+**Piece 2 — the retry (BUILT).**
+- *Build (`ProtectionOpenRoad.retryPendingSyncKeyLoad(_:signIn:within:)`):* nothing pending ⇒ return at once (no read); else
+  ONE FLIGHT through `ProtectionRoadSession.retryingSyncKeyLoad` (a retry asked while one is out awaits that flight's end —
+  never a second read; the flight's record is written under the session's lock before the flight can clear it), which
+  re-reads the pending and calls `loadSyncKeysAfterTypedUnlock` with its kept secret — the same function, the same 10 s
+  bound, the same log lines (plus one line naming the retry). The load's own exits decide: a hold that lands ends the
+  pending; a second failure keeps it (re-kept, the same content — refused once the session let go); every other exit ends
+  it. `signIn` is the caller's read of who is signed in NOW.
+- *Pins (`TypedUnlockRetryTests`, the retry section):* THE PIN `anOfflineUnlockThenTheVaultReachableTheRetryLoadsTheKeys`
+  (one more read, the account's keys in session memory, the engine's seam reads them, the pending ended, nothing written),
+  `theRetryFinishesAWordsUnlockToo`, `aSecondFailureKeepsThePendingAndNothingPendingReadsNothing` (offline again: one more
+  read, still pending; after the hold, no read; on a session that let go, no read and nothing held),
+  `aRetryAnsweredAfterTheLockHoldsNothing` (the read out when the lock lets go — its answer holds nothing),
+  `aRetryNeverOverwritesAHoldThatLandedMeanwhile` (an act's hold while the read is out stands; the pending ends),
+  `retriesAskedTogetherShareOneRead` (three at once: one read), `aRetryThatFindsTheSecretNoLongerTheVaultsEndsThePending`
+  (the passphrase changed elsewhere meanwhile), `aRetrySignedOutReadsNothingAndEndsThePending` (signed out; another account).
+  All name `retryPendingSyncKeyLoad` ⇒ COMPILE-red on the pre-fix tree; THE PIN is BEHAVIOR-red by R-2a (the old tree's
+  behavior: nothing kept, so nothing can load the keys after the failed read).
+- *Evidence, headless at this commit:* the harness (the six suites) → `✔ Test run with 53 tests in 6 suites passed`;
+  `TypedUnlockRetryTests` alone five runs in a row → `✔ 14 tests passed` each (the two timing pins' windows — 200 ms into a
+  600 ms read — hold).
+- *THE NAMED BEHAVIORAL REVERTS (named BEFORE they run, at this commit's tip; the harness, one file each, then restored):*
+  **R-2a** `keepForTheRetry` → `return false` ⇒ expected RED: THE PIN, `theRetryFinishesAWordsUnlockToo`,
+  `aSecondFailureKeepsThePending…`, `aRetryAnsweredAfterTheLockHoldsNothing` (no read was made), `retriesAskedTogether…`
+  (no read), and piece 1's four; GREEN: the overwrite pin, the two end-the-pending pins, piece 1's two guards (nothing pending
+  is their state either way). **R-2b** `holdLoadedSyncKeys`' `!syncKeyLoadLetGo,` condition removed ⇒ expected RED:
+  `aRetryAnsweredAfterTheLockHoldsNothing` only. **R-2c** `holdLoadedSyncKeys`' compare (`sessionSyncKeys == before`) removed
+  ⇒ expected RED: `aRetryNeverOverwritesAHoldThatLandedMeanwhile` only. **R-2d** `retryingSyncKeyLoad`'s flight bypassed
+  (`await body()` directly) ⇒ expected RED: `retriesAskedTogetherShareOneRead` only (three reads; the second and third holds
+  refused by the compare, so the keys still land).
 

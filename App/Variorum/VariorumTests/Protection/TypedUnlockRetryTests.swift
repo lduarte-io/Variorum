@@ -176,6 +176,145 @@ struct TypedUnlockRetryTests {
         #expect(opened.pendingSyncKeyLoad == nil)
     }
 
+    // MARK: - Piece 2 — the retry
+
+    static func retry(_ world: World, _ opened: ProtectionRoadSession) async {
+        await ProtectionOpenRoad.retryPendingSyncKeyLoad(opened, signIn: world.road.session)
+    }
+
+    /// **THE PIN — OFFLINE, THEN THE VAULT REACHABLE, THEN THE KEYS**: the retry runs the typed unlock's load again with the
+    /// secret it kept — one more vault read, the account's keys in session memory, the engine's seam reads them (the round
+    /// runs), the pending ended, nothing written, nothing typed again. RED on the pre-fix tree for a BEHAVIORAL reason once
+    /// the entry point exists (revert R-1a: nothing kept ⇒ nothing can load the keys after the failed read).
+    @Test func anOfflineUnlockThenTheVaultReachableTheRetryLoadsTheKeys() async throws {
+        let (world, opened) = try await Self.offlineUnlock()
+        let keys = try Load.accountsKeys(world)
+        world.vault.reachable = true
+        let before = Load.fetches(world)
+        await Self.retry(world, opened)
+        #expect(Load.fetches(world) == before + 1, "one vault read")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == keys, "the retry loaded the account's keys")
+        #expect(Load.engineKeyID(opened) == keys.rowKeyID, "the engine's seam reads them — the round runs")
+        #expect(opened.pendingSyncKeyLoad == nil, "the pending ended with the hold")
+        #expect(world.keys.items.isEmpty, "nothing written to the keychain — session memory only")
+    }
+
+    /// The twelve words typed offline: the retry finishes with the words' kept DERIVED key.
+    @Test func theRetryFinishesAWordsUnlockToo() async throws {
+        let (world, opened) = try await Self.offlineUnlock { .words($0.words) }
+        let keys = try Load.accountsKeys(world)
+        world.vault.reachable = true
+        await Self.retry(world, opened)
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == keys, "the words' kept key reached the vault")
+        #expect(opened.pendingSyncKeyLoad == nil)
+    }
+
+    /// A SECOND FAILURE KEEPS IT (still offline: one more read, still pending); NOTHING PENDING ⇒ NOTHING (after the hold
+    /// landed, and on a session that let go, the retry reads nothing — idempotent).
+    @Test func aSecondFailureKeepsThePendingAndNothingPendingReadsNothing() async throws {
+        let (world, opened) = try await Self.offlineUnlock()
+        var before = Load.fetches(world)
+        await Self.retry(world, opened)
+        #expect(Load.fetches(world) == before + 1, "the retry read the vault")
+        #expect(opened.pendingSyncKeyLoad?.account == Account.account, "a second failure keeps the pending")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil)
+
+        world.vault.reachable = true
+        await Self.retry(world, opened)
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) != nil && opened.pendingSyncKeyLoad == nil)
+        before = Load.fetches(world)
+        await Self.retry(world, opened)
+        #expect(Load.fetches(world) == before, "nothing pending: no read")
+
+        let (other, locked) = try await Self.offlineUnlock()
+        ProtectionRoadLock.dropSessionMemory(locked)
+        other.vault.reachable = true
+        before = Load.fetches(other)
+        await Self.retry(other, locked)
+        #expect(Load.fetches(other) == before, "a session that let go: no read")
+        #expect(other.keys.sessionSyncKeys(accountID: Account.account) == nil, "and nothing held")
+    }
+
+    /// **A RETRY ANSWERED AFTER THE LOCK HOLDS NOTHING** (her R-849-1: the derived material and the keys are gone at a
+    /// relock): the retry's read is out when the lock lets the session go; its answer arrives — and lands nothing. The keys
+    /// never outlive the lock. RED by revert R-2b (the hold's let-go check removed: the late answer would hold the keys past
+    /// the relock).
+    @Test func aRetryAnsweredAfterTheLockHoldsNothing() async throws {
+        let (world, opened) = try await Self.offlineUnlock()
+        world.vault.reachable = true
+        world.vault.fetchDelay = .milliseconds(600)
+        let before = Load.fetches(world)
+        let signIn = Account.signedIn
+        let retrying = Task.detached { await ProtectionOpenRoad.retryPendingSyncKeyLoad(opened, signIn: signIn) }
+        try await Task.sleep(for: .milliseconds(200))
+        ProtectionRoadLock.dropSessionMemory(opened)  // the lock, while the read is out
+        await retrying.value
+        #expect(Load.fetches(world) == before + 1, "the read was out when the lock came")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil, "its answer held nothing past the relock")
+        #expect(opened.pendingSyncKeyLoad == nil)
+    }
+
+    /// **A RETRY NEVER OVERWRITES A HOLD THAT LANDED MEANWHILE** (an act's — a key door or a follow holds the account's keys
+    /// on this session): the retry's answer leaves the act's hold standing and ends the pending. RED by revert R-2c (the
+    /// hold's compare removed).
+    @Test func aRetryNeverOverwritesAHoldThatLandedMeanwhile() async throws {
+        let (world, opened) = try await Self.offlineUnlock()
+        let rowKeyID = try #require(opened.library.record?.accountRowKeyID)
+        let actsHold = AccountKeys(
+            master: Data(repeating: 7, count: 32), rowKeyID: rowKeyID, rowKey: Data(repeating: 8, count: 32))
+        world.vault.reachable = true
+        world.vault.fetchDelay = .milliseconds(600)
+        let signIn = Account.signedIn
+        let retrying = Task.detached { await ProtectionOpenRoad.retryPendingSyncKeyLoad(opened, signIn: signIn) }
+        try await Task.sleep(for: .milliseconds(200))
+        world.keys.holdInSession(actsHold, accountID: Account.account)  // an act's hold, while the read is out
+        await retrying.value
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == actsHold, "the act's hold stands")
+        #expect(opened.pendingSyncKeyLoad == nil, "the keys are held: the pending is done")
+    }
+
+    /// **RETRIES ASKED TOGETHER SHARE ONE READ** (a burst of triggers — the settle, became-active, Sync now): one flight,
+    /// one vault read, every asker returning with the keys loaded. RED by revert R-2d (the flight bypassed: a read each).
+    @Test func retriesAskedTogetherShareOneRead() async throws {
+        let (world, opened) = try await Self.offlineUnlock()
+        let keys = try Load.accountsKeys(world)
+        world.vault.reachable = true
+        world.vault.fetchDelay = .milliseconds(300)
+        let before = Load.fetches(world)
+        let signIn = Account.signedIn
+        async let first: Void = ProtectionOpenRoad.retryPendingSyncKeyLoad(opened, signIn: signIn)
+        async let second: Void = ProtectionOpenRoad.retryPendingSyncKeyLoad(opened, signIn: signIn)
+        async let third: Void = ProtectionOpenRoad.retryPendingSyncKeyLoad(opened, signIn: signIn)
+        _ = await (first, second, third)
+        #expect(Load.fetches(world) == before + 1, "one read for the three")
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == keys)
+        #expect(opened.pendingSyncKeyLoad == nil)
+    }
+
+    /// A retry that finds the account's passphrase CHANGED ELSEWHERE meanwhile (the kept secret opens the library, not the
+    /// vault any more) loads nothing and ENDS the pending — a follow or a key door loads them; no read is wasted again.
+    @Test func aRetryThatFindsTheSecretNoLongerTheVaultsEndsThePending() async throws {
+        let (world, opened) = try await Self.offlineUnlock()
+        try Self.changePassphraseElsewhere(world)
+        world.vault.reachable = true
+        await Self.retry(world, opened)
+        #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil, "nothing loaded")
+        #expect(opened.pendingSyncKeyLoad == nil, "the pending ended")
+    }
+
+    /// A retry SIGNED OUT (or into another account) reads nothing and ends the pending (the vault is the account's).
+    @Test func aRetrySignedOutReadsNothingAndEndsThePending() async throws {
+        for signIn in [SessionFact.signedOut, .signedIn(accountID: Account.other, email: "someone@example.test")] {
+            let (world, opened) = try await Self.offlineUnlock()
+            world.vault.reachable = true
+            let before = Load.fetches(world)
+            await ProtectionOpenRoad.retryPendingSyncKeyLoad(opened, signIn: signIn)
+            #expect(Load.fetches(world) == before, "\(signIn): nothing read")
+            #expect(world.keys.sessionSyncKeys(accountID: Account.account) == nil)
+            #expect(opened.pendingSyncKeyLoad == nil, "\(signIn): the pending ended")
+        }
+    }
+
     // MARK: - World changes made elsewhere
 
     /// The account's passphrase changed on another Mac (this library's lock still the old one).
