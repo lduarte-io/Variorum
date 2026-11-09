@@ -144,6 +144,30 @@ struct OwnedExclusivityRankConvergenceTests {
                     "\(client.name): the later claim waits, visibly, at X2's door")
         }
     }
+
+    /// The pure rank (`SyncEngine.ownedClaimOutranks`): earliest-filed → id, and NOTHING else — whether a row is
+    /// owned never ranks it (the repair's arms read `owned` AFTER the rank), and no per-device fact exists to read.
+    /// A strict total order over distinct rows. Names the new rank, so COMPILE-red on the pre-fix tree; its behavioral
+    /// twin is R-921a (the record).
+    @Test func theClaimRankIsEarliestFiledThenID() {
+        func claim(_ id: String, owned: Bool = false, filed: String) -> SyncEngine.OwnedClaim {
+            SyncEngine.OwnedClaim(id: id, owned: owned, createdAt: filed)
+        }
+        let plainEarly = claim("p1", filed: "2026-11-01T00:00:05.000Z")
+        let ownedLate = claim("o1", owned: true, filed: "2026-11-01T00:00:09.000Z")
+        let plainTwin = claim("a0", filed: "2026-11-01T00:00:09.000Z")   // o1's stamp: by id
+        let ownedEarlier = claim("z9", owned: true, filed: "2026-11-01T00:00:01.000Z")
+        let all = [ownedLate, plainTwin, plainEarly, ownedEarlier]
+        #expect(all.sorted(by: SyncEngine.ownedClaimOutranks).map(\.id) == ["z9", "p1", "a0", "o1"])
+        #expect(SyncEngine.ownedClaimOutranks(plainTwin, ownedLate), "a created_at tie breaks by id")
+        #expect(SyncEngine.ownedClaimOutranks(plainEarly, ownedLate), "an earlier PLAIN filing outranks a later claim")
+        for x in all {
+            #expect(!SyncEngine.ownedClaimOutranks(x, x))
+            for y in all where x.id != y.id {
+                #expect(SyncEngine.ownedClaimOutranks(x, y) != SyncEngine.ownedClaimOutranks(y, x))
+            }
+        }
+    }
 }
 
 /// A note's live MEMBER rows (arrivals are no membership).

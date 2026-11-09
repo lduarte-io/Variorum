@@ -2411,7 +2411,7 @@ over them.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record (the trace, the siblings, the designs) | DONE (this commit) |
-| 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | 1a the pins on the PRE-FIX tree (this commit — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines (below); 1b the swap — NEXT |
+| 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | 1a the pins on the PRE-FIX tree (`d58707b70` — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines (below); 1b the swap + the pure rank pin + one justified fixture edit (this commit): the suite 3/3 green, the neighbours 394/76 + 14/4 green; R-921a/R-921b named below, run NEXT at this tip |
 | 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | — |
 | 3 | Close — `swift build`, the targeted core suites, the self-assessment | — |
 
@@ -2459,6 +2459,42 @@ converged bytes":
   converged lines (the earlier filing not a live member; the note membered ZERO times on both devices — "a member of
   NOTHING"); green on old, as they must be: every premise, B's own decision, the byte-identical dump (both devices
   converge — on the wrong state), the later claim's arrival lines (B's demotion reached both).
+
+#### VX-921 piece 1b — the swap, as built
+
+- *`Repairs.swift`, `repairOwnedExclusivity`:* the members query reads `rp.created_at` (the `sync_row_seq` LEFT JOIN
+  leaves it) into `SyncEngine.OwnedClaim` (`id`, `owned`, `createdAt`); the sort is `SyncEngine.ownedClaimOutranks` —
+  `created_at` ascending, then id, NOTHING else (the B2 shape: `BookWingMend.outranks`' tier 3 + its tiebreak). The
+  scope query, both arms (demote an owned row to an arrival stamped `owned_elsewhere`; tombstone a plain row beside a
+  standing owned claim), the stamps and the explicit outbox writes are byte-unchanged. The doc comment's "EARLIEST-
+  ACCEPTED … never-accepted LAST" becomes "EARLIEST … earliest-filed, ties by id", with the why and the §9 line
+  (`created_at` ranks converged bytes, never orders — `server_seq` stays the ordering authority).
+- *The pure rank pin (same suite, names the new rank — COMPILE-red on old):* `theClaimRankIsEarliestFiledThenID` — the
+  order over mixed owned/plain rows (ownership never ranks), a `created_at` tie broken by id, an earlier PLAIN filing
+  outranking a later claim, and a strict total order over distinct rows.
+- *ONE JUSTIFIED FIXTURE EDIT (`Phase13iRepairTests.aLaterPlainAddBesideAStandingOwnedClaimTombstones`):* its claim,
+  FILED FIRST in the test's own story, was hand-stamped `2026-09-30T00:00:01.000Z` — inert under the seq rank, and on
+  the filing rank AFTER B's add (the harness clock runs from 2026-07-01, B's 1000 s ahead), so the swap read it red
+  (the plain add standing — the stamp's story, not the test's). The stamp moves to `2026-07-01T00:00:01.000Z` (A's
+  epoch); the subject, the assertions and the other two OWNED pins untouched (theirs already tell a filing order that
+  matches their acceptance order). Watched: red on the swap before the edit (`✘ 4 issues`, its two converged lines on
+  both devices), green after.
+- *Evidence, headless at this commit:* `swift build` → `Build complete!`; `swift test --filter
+  'OwnedExclusivityRankConvergenceTests|Phase13iRepairTests'` → **`✔ 13 tests in 2 suites passed`**; the repair's
+  neighbours (`OwnedExclusivityRankConvergence|Phase13iRepair|BookWing|Ownership|Arrival|DailyJournalRulings|
+  ProductionRoundShapeSweep|JournalWingConvergence|FurnitureConvergenceRepair|SyncConvergence|WireIntakeNeverFences|
+  BookArchive|MembershipPin|SampleLibraryDedupeRepair|SyncMerge|SyncPull|SyncPush`) → **`✔ 394 tests in 76 suites
+  passed`** (VariorumCoreTests) + **`✔ 14 tests in 4 suites passed`** (the filter's matches in the MCP target).
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip; headless; `Repairs.swift` alone in the
+  working tree, then `git checkout --` of it and `git diff --stat` empty):* **R-921a — the seq rank back through the new
+  path:** the members query's `rp.created_at AS created_at` → `printf('%020d', COALESCE(NULLIF(s.server_seq, 0),
+  9223372036854775807)) AS created_at` with the pre-fix `LEFT JOIN sync_row_seq s ON s.table_name = 'reading_post' AND
+  s.row_id = rp.id` restored (each device's latest-known seq, never-accepted LAST, ties by id — the pre-fix key exactly)
+  ⇒ expected RED exactly piece 1a's set — both convergence pins, 15 issues, on A's repair lines and the converged lines;
+  GREEN the pure rank pin (it reads the function, not the query) and all ten `Phase13iRepairTests` (the edited fixture's
+  claim is accepted first too). **R-921b — the tiebreak flipped:** `ownedClaimOutranks`' `lhs.id < rhs.id` → `lhs.id >
+  rhs.id` ⇒ expected RED the pure pin's order line and its tie line only (a flipped tiebreak is still a strict order, so
+  the antisymmetry loop stays green; no convergence pin has a stamp tie).
 
 #### VX-921 — the sibling seq-rank repairs, RECORDED (never widened — the brief's scope rule)
 

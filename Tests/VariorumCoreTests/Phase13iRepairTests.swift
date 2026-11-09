@@ -286,6 +286,14 @@ struct Phase13iRepairTests {
     /// refuses at the door by design (`noteOwnedElsewhere` — the 13i-c plan
     /// §4 row 1). The race this pins is B adding WITHOUT having seen the
     /// claim, so B pulls the note before A claims it and never pulls again.
+    ///
+    /// VX-921 (the VX-849 run, batch 6) — a JUSTIFIED EDIT of the fixture's one
+    /// hand stamp, the subject untouched: the repair now ranks by the
+    /// membership's `created_at` (converged bytes), so the claim — filed FIRST
+    /// in this story — must carry a creation stamp on A's clock (the harness's
+    /// 2026-07-01 epoch), before B's add (B's clock runs 1000 s ahead). The old
+    /// stamp (2026-09-30) was inert under the seq rank and told the opposite
+    /// story under the filing rank.
     @Test func aLaterPlainAddBesideAStandingOwnedClaimTombstones() async throws {
         let (a, b, server) = try furniturePair()
         let postID: String = try a.with { ops, _ in
@@ -304,7 +312,7 @@ struct Phase13iRepairTests {
                         INSERT INTO reading_post (id, reading_id, post_id, position, status, created_at)
                         VALUES ('AA000000-0000-4000-8000-0000000CLAIM', ?, ?, 'a1', 'member', ?)
                         """,
-                    arguments: [owned.id, post.id, "2026-09-30T00:00:01.000Z"])
+                    arguments: [owned.id, post.id, "2026-07-01T00:00:01.000Z"])
             }
             return owned.id
         }
