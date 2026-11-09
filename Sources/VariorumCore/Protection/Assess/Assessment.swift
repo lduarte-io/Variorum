@@ -223,6 +223,17 @@ public enum Repair: Hashable, Sendable {
     /// §3.10: this device's choice says Touch ID and no item exists — Always
     /// ask is recorded quietly (a settings write; never an item).
     case recordAlwaysAskQuietly
+    /// Always (VX-443, PROVISIONAL P-849-4): the STORE-ID ENVELOPE a
+    /// pre-switch Debug open left beside the library
+    /// (`variorum-keys-<fp16>.json` — the store id and the open's key's
+    /// fingerprint, no wraps; nothing has read it since VX-329) — deleted BY
+    /// NAME, never read. Owed only for a name at the container's root whose
+    /// fingerprint THIS design's live key file holds — its current key or its
+    /// history (rule 4: nothing openable is lost) — while that file is the
+    /// opened key's. Its name is the pre-design detector's: the day this
+    /// design's key file went missing, the library would read as a store from
+    /// before this design and rule 1's mirror would never be written back.
+    case deleteOlderKeyFile(name: String)
     /// DEBUG mutation pins only — the bug `noRepairMakesTouchID` closes.
     case makeTouchIDItem(fingerprint: String)
     /// DEBUG mutation pins only — the bug `standardRecordNoDestructiveRepair`

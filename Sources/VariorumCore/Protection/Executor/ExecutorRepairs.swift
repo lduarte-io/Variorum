@@ -18,7 +18,9 @@ public enum RepairSkip: Equatable, Sendable {
     /// Its precondition did not verify (a delete would remove a road).
     case preconditionDoesNotVerify
     /// The guards forbid it: a Touch ID item made by a repair, or a delete on
-    /// a Standard record's word alone.
+    /// a Standard record's word alone — or (VX-443) a delete by a name no
+    /// older Variorum's fingerprint-named key file has (this design's own
+    /// names above all; no leaf is reached).
     case forbidden
     /// Decision 35: a synced library writes nothing Apple-reachable without a
     /// fresh vault read for its account.
@@ -73,6 +75,9 @@ extension ProtectionExecutor {
         case .restoreKeyFileFromMirror: return "restoreKeyFileFromMirror"
         case .retireOwnAppleKeys: return "retireOwnAppleKeys"
         case .recordAlwaysAskQuietly: return "recordAlwaysAskQuietly"
+        // The one repair whose log line names its object: a file NAME (non-secret — a key's public fingerprint at most),
+        // said once, at the open that deletes it (VX-443: "the deletion is said once in the log, names only").
+        case .deleteOlderKeyFile(let name): return "deleteOlderKeyFile(\(name))"
         case .makeTouchIDItem: return "makeTouchIDItem"
         case .deleteTouchIDItem: return "deleteTouchIDItem"
         }
@@ -204,6 +209,18 @@ extension ProtectionExecutor {
             settings.gateStyle = .alwaysAsk
             try writeFacts(&library, section: library.section.withSettings(settings))
             return nil
+
+        case .deleteOlderKeyFile(let name):
+            // VX-443 (PROVISIONAL P-849-4): the store-id envelope beside the library, BY NAME — never read. Verified
+            // here with the key in hand, whatever `assess` said: the name is an older fingerprint-named key file's, the
+            // live key file is THIS design's and names the key that opened the library, and its fingerprint is that key
+            // or one the live history OPENS to under it (rule 4 — so the file can concern only a key the live file
+            // already reaches; nothing openable is lost, and rule 22's replacement is the verified file itself).
+            guard let fingerprint = CatalogNames.preDesignKeyFileFingerprint(name) else { return .forbidden }
+            guard let live = library.keyFile, live.fingerprint == library.fingerprint,
+                  fingerprint == library.fingerprint || (try? live.historyKey(fingerprint, currentKey: library.key)) != nil
+            else { return .preconditionDoesNotVerify }
+            return try leaves.keyFiles.deleteOlderKeyFile(named: name) ? nil : .nothingThere
 
         case .makeTouchIDItem:
             // No repair ever makes a Touch ID item — only a press (§3.10).

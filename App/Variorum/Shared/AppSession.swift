@@ -610,6 +610,29 @@ final class AppSession {
         }
     }
 
+    /// **VX-683 A — THE SYNC ROUND'S FLUSH-BEFORE-APPLY OCCASION** (the VX-849
+    /// run, batch 1 — `notes/plans/fixes/vx-849-typed-over-rescue.md`; the memo
+    /// `notes/plans/fixes/vx-683-sync-into-debounce.md`, R-683-3). The composition
+    /// root hands this to `SyncSession.beforeRound`: her pending typing lands
+    /// BEFORE the round's pull, so the pull meets a DIRTY row and the standing
+    /// S5 road (SyncSpec §5/§6) keeps both texts — the server's on the row, hers
+    /// as the `'conflict'` take — instead of applying on the locally-clean path
+    /// under a buffer that would then autosave over it. The MCP door's own
+    /// "her typing lands first" precedent, on the sync road.
+    ///
+    /// **R-683-3 — only when typing is pending:** one cheap check
+    /// (`hasPendingAutosave`, bounded by the notes open — P1), so a quiet round
+    /// touches no coordinator; then only the DIRTY coordinators flush, through
+    /// the honest flush (VX-402 — a write already in flight lands first too).
+    /// What lands between this and the apply (her next keystrokes, a long
+    /// catch-up's download) is the guarded autosave's to rescue (VX-683 B).
+    func flushPendingTypingBeforeRound() async {
+        guard hasPendingAutosave else { return }
+        for hold in postAutosaves.values where hold.coordinator.isDirty {
+            await hold.coordinator.flushNow()
+        }
+    }
+
     /// **THE SAVEPOINT-ON-LEAVING ENTRY (13j J11 — her sitting-round-1
     /// cadence ruling).** A note has stopped being an open one: flush what
     /// is pending, then leave one quiet savepoint per take that changed.

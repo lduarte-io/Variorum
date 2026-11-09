@@ -129,6 +129,9 @@ final class FirstRoundWorld {
     /// VX-510 unit B1 (D-B1 — the drill's account-gate arm): the account the SERVICES' session is signed in to (the road's
     /// sign-in is the planted account's, always). Production reads one session for both; the gate arm sets them apart.
     var servicesSignIn = Account.account
+    /// VX-544 (the VX-849 run, batch 2): the path watch each composed services' chain gets — production's by default; the
+    /// reachability pins plant one (`PlantedNetworkPath`) to drive "Wi-Fi back on".
+    var networkPath: @MainActor () -> (any NetworkPathWatching)? = { SystemNetworkPath() }
 
     /// VX-510 unit B1 (D-B1): the reopened ready arm's services compose settled (nothing in flight after a reopen).
     func awaitReadyCompose() async {
@@ -216,6 +219,7 @@ final class FirstRoundWorld {
             makeSyncTransport: { _ in server },
             makeSyncKeyProvider: { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys },
             boundAccountRead: { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys.boundAccount },
+            networkPath: networkPath(),
             legacyCleanup: {})
         self.services = services
         composedCount += 1

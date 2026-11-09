@@ -71,7 +71,9 @@ struct SyncWalkFenceTests {
     /// from the launch's ONE decision; its Release arm is the line as it always was — the store variant alone, no walk
     /// machinery reachable. (VX-510 unit B1, D-B3 — UPDATED DELIBERATELY: the DEBUG arm now reads the launch's TWO
     /// exceptions as one value — the walk's lift and the prod test road, `DevSyncFence` — through its dependency, whose
-    /// live value is `ProjectConfig`'s two decisions, each made once; the Release arm's line is untouched.)
+    /// live value is `ProjectConfig`'s two decisions, each made once; the Release arm's line is untouched.) (VX-544, the
+    /// VX-849 run — UPDATED DELIBERATELY again: both arms gained `path: networkPath`, the reachability trigger's path,
+    /// as a further argument; the fence's decision in each arm is unchanged, so the pinned spellings moved with it.)
     @Test func theDerivationReadsTheLaunchsLiftOnlyInDebug() throws {
         let services = try Self.source("Shared/AppServices.swift")
         let assignment = try #require(services.range(of: "sync = SyncSession("))
@@ -85,14 +87,15 @@ struct SyncWalkFenceTests {
         #expect(debugArm.contains("@Dependency(\\.devSyncFence) var launchFence"), "the launch's fence, one value")
         #expect(debugArm.contains("allowsSync: Self.allowsSync(")
                     && debugArm.contains(
-                        "storeVariant: storeVariant, walkLift: launchFence.walkLift, prodTestRoad: launchFence.prodTestRoad))"),
+                        "storeVariant: storeVariant, walkLift: launchFence.walkLift, prodTestRoad: launchFence.prodTestRoad),"),
                 "the derivation reads both exceptions from the launch's fence — never a second parse")
         #expect(services.contains(
             "DevSyncFence(walkLift: ProjectConfig.walkSyncFenceLift, prodTestRoad: ProjectConfig.prodTestRoad)"),
                 "the fence's live value is ProjectConfig's two once-made decisions")
         #expect(!debugArm.contains("allowsSync: storeVariant == .real"), "the DEBUG arm reads the lift")
-        #expect(releaseArm.contains("sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)"),
-                "Release: the fence absolute, the line byte-unchanged")
+        #expect(releaseArm.contains(
+            "sync = SyncSession(database: session.database, allowsSync: storeVariant == .real, path: networkPath)"),
+                "Release: the fence absolute — the store variant alone")
         #expect(!releaseArm.contains("walk") && !releaseArm.contains("ProtectionWalkSwitch"))
         #expect(!services.contains("ProcessInfo"), "AppServices reads no environment of its own")
     }

@@ -337,7 +337,8 @@ final class TailCrystallizer {
         text = String(text.dropFirst(run))
         let newText = knownText + String(repeating: "\n", count: run)
         host.recordSurfaceText(variantID: variantID, text: newText)
-        host.autosave.record(variantID: variantID, text: newText, charDelta: run)
+        // VX-683 B: built on the surface's known text — the autosave's snapshot.
+        host.autosave.record(variantID: variantID, text: newText, charDelta: run, basedOn: knownText)
         return true
     }
 
@@ -436,7 +437,10 @@ final class TailCrystallizer {
             host.autosave.record(
                 variantID: correction.variantID,
                 text: correction.text,
-                charDelta: correction.text.utf16.count)
+                charDelta: correction.text.utf16.count,
+                // VX-683 B: the correction is built on what THIS mint wrote
+                // into the take — the autosave's snapshot.
+                basedOn: minted.first { $0.variantID == correction.variantID }?.text)
         }
         if !outcome.corrections.isEmpty {
             Task { [host] in await host.autosave.flushNow() }

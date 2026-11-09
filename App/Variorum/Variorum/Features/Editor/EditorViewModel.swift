@@ -1551,6 +1551,11 @@ final class EditorViewModel {
             return
         }
         let text = viewText(entryRange)
+        // VX-683 B: what this edit was built on — the ledger's text for the
+        // take BEFORE it records the edit (the last adopted projection, or her
+        // own text already handed to the coordinator). Rides the autosave as
+        // its snapshot, so a row changed under her since is rescued.
+        let basedOn = ledger.textByVariant[variantID]
         // The edited block's surface truth, for echo detection (Step 1):
         // this extraction is O(the edited block) and already paid for the
         // autosave itself.
@@ -1558,7 +1563,8 @@ final class EditorViewModel {
         let oldLength = editedRange.length - delta
         autosave.record(
             variantID: variantID, text: text,
-            charDelta: exactCost ?? (oldLength + editedRange.length))
+            charDelta: exactCost ?? (oldLength + editedRange.length),
+            basedOn: basedOn)
     }
 
     // MARK: - The DEBUG identity audit (13l L-a — the phone's oracle, hoisted)

@@ -20,7 +20,9 @@ import Foundation
 // and the folder key files left with the legacy readers (VX-378 U1). Their two
 // key-file NAMES are still recognised — as names, never as files this design
 // reads — so the slot can say it holds a store from before this design (rule
-// 26's fact, `isPreDesignKeyFileName`; VX-329 U4). Pure: names in, values out —
+// 26's fact, `isPreDesignKeyFileName`; VX-329 U4), and so the open can sweep
+// the store-id envelope a pre-switch Debug open left beside a library of THIS
+// design (VX-443, `preDesignKeyFileFingerprint`). Pure: names in, values out —
 // nothing here reads a disk.
 
 public enum CatalogNames {
@@ -99,6 +101,16 @@ public enum CatalogNames {
     /// picked-copy classifier's (`LibraryClassifier`, R-U1-2), never restated.
     public static func isPreDesignKeyFileName(_ name: String) -> Bool {
         name == LibraryClassifier.olderKeyFilename || LibraryClassifier.isOlderFingerprintKeyFileName(name)
+    }
+
+    /// VX-443 — the key fingerprint an older Variorum's FINGERPRINT-named key file carries in its NAME
+    /// (`variorum-keys-<fp16>.json` → `<fp16>`, the `KeyFingerprint` form); nil for every other name, the fixed
+    /// `variorum-keys.json` included (it names no key). Names only — the open's sweep of the store-id envelope a Debug
+    /// build's pre-switch open left beside the slot reads it (`Repair.deleteOlderKeyFile`); one rule with the
+    /// detector's (`isPreDesignKeyFileName`), never restated.
+    public static func preDesignKeyFileFingerprint(_ name: String) -> String? {
+        guard LibraryClassifier.isOlderFingerprintKeyFileName(name) else { return nil }
+        return String(name.dropFirst(LibraryClassifier.olderFingerprintKeyFilePrefix.count).dropLast(".json".count))
     }
 
     /// An older Variorum's SET-ASIDE of one of those key files: `<name>.stale-<epoch>.json` (today's controller and

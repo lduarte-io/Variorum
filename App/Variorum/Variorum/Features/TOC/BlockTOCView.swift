@@ -197,7 +197,7 @@ final class BlockTOCViewModel {
             facts.first { $0.variantID == live.variantID }?.text
         }
         let suspect = authority.settle(
-            isPending: { autosave.pending[$0] != nil }, liveIncoming: liveIncoming)
+            isPending: { autosave.isUnlanded($0) }, liveIncoming: liveIncoming)
         endRingIfWrittenFromOutside(suspect)
     }
 
@@ -236,7 +236,7 @@ final class BlockTOCViewModel {
             rows.first { $0.variantID == live.variantID }?.text
         }
         let suspect = authority.settle(
-            isPending: { autosave.pending[$0] != nil }, liveIncoming: liveIncoming)
+            isPending: { autosave.isUnlanded($0) }, liveIncoming: liveIncoming)
         endRingIfWrittenFromOutside(suspect)
     }
 
@@ -249,7 +249,7 @@ final class BlockTOCViewModel {
         OutsideWriteConfirmation.endRing(
             ifConfirmed: suspect, in: session.database,
             authority: { [weak self] in self?.authority },
-            isPending: { [weak self] in self?.autosave.pending[$0] != nil },
+            isPending: { [weak self] in self?.autosave.isUnlanded($0) ?? false },
             endRing: { [weak self] in self?.blur() })
     }
 
@@ -356,11 +356,13 @@ final class BlockTOCViewModel {
     }
 
     func paneEdited(variantID: String, oldText: String, newText: String) {
-        let old = authority.text(variantID: variantID, storeText: oldText)
+        // VX-849 batch 3 (G3): built on what the pane SHOWS (`shownText`).
+        let old = authority.shownText(variantID: variantID, storeText: oldText)
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
         authority.bufferEdited(variantID: variantID, text: newText)
-        autosave.record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: `old` (what the pane showed) is the autosave's snapshot.
+        autosave.record(variantID: variantID, text: newText, charDelta: cost, basedOn: old)
     }
 
     // MARK: - Naming (setBlockName's face)

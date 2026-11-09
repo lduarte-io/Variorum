@@ -432,7 +432,8 @@ final class MobileTakesBrowserController {
             if let shown, shown != take.workingText {
                 model.recordTakeEdit(
                     variantID: take.id, text: shown,
-                    charDelta: abs(shown.utf16.count - take.workingText.utf16.count))
+                    charDelta: abs(shown.utf16.count - take.workingText.utf16.count),
+                    basedOn: take.workingText)  // VX-683 B: what the mint wrote
             }
             await model.refreshTakesFromStore()
             beginEditing(variantID: take.id)
@@ -538,8 +539,11 @@ final class MobileTakesBrowserController {
         let cost = pendingCardCost
             ?? abs(text.utf16.count - (lastRecordedCardText?.utf16.count ?? 0))
         pendingCardCost = nil
+        // VX-683 B: the card's text before this edit (seeded at
+        // `beginEditing` from what the card showed) — the autosave's snapshot.
+        let basedOn = lastRecordedCardText
         lastRecordedCardText = text
-        model.recordTakeEdit(variantID: variantID, text: text, charDelta: cost)
+        model.recordTakeEdit(variantID: variantID, text: text, charDelta: cost, basedOn: basedOn)
     }
 
     // MARK: - Fan ORDER (PL-10(a) — the phone's face on `reorderTake`)

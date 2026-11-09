@@ -41,10 +41,17 @@ struct RoadAccountWordsTests {
     }
 
     /// Rule 7: "A device holds one pair of secrets at a time." and the join's sentence, italic in the rule.
+    /// VX-545 (the VX-849 run, batch 4) — MOVED BY JUSTIFIED EDIT to her ratified text (QUESTIONS #241: the sentence ends
+    /// "the old ones still open backups made with them", rule 5's floor, in place of "…you made before today"): the rule and
+    /// the app's arm changed together in one commit, so the relational line above could not tell; the byte line pins the
+    /// ratified words themselves, and that the superseded ending is gone from both.
     @Test func rule7sSentencesAreHersVerbatim() throws {
         let rules = try Self.rules()
         #expect(rules.contains("7. \(ProtectionWords.onePairAtATime)"))
         #expect(rules.contains("*\(Self.lowercasingFirst(String(ProtectionWords.joinWordsSentence.dropLast())))*"))
+        #expect(ProtectionWords.joinWordsSentence == "Your library's twelve words are now your account's twelve words; "
+            + "here they are; the old ones still open backups made with them.")
+        #expect(!rules.contains("backups you made before today") && !ProtectionWords.joinWordsSentence.contains("before today"))
     }
 
     /// The turning-on lead is the lifecycle page's stage 12 ("Turning sync on first"), byte-equal to the rendered page.

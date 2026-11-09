@@ -973,16 +973,20 @@ extension SyncEngine {
 
     /// Two devices racing acts that OWNED forbids from co-existing (a note
     /// membered in an owned book AND anywhere else) converge by the rule
-    /// intake itself uses (sitting record §6): the EARLIEST-ACCEPTED act
-    /// stands, and the later conflicting act repairs to what its door would
-    /// have done knowing the truth —
+    /// intake itself uses (sitting record §6): the EARLIEST act stands, and
+    /// the later conflicting act repairs to what its door would have done
+    /// knowing the truth —
     ///   * the later act is the OWNED-side membership → it DEMOTES to an
     ///     ARRIVAL (the bell: "lives elsewhere — claim / copy in / leave");
     ///   * the later act is a PLAIN-side membership beside a standing owned
     ///     one → it is TOMBSTONED (the ownership promise defended at the
     ///     door; the row is an ordinary recoverable tombstone).
-    /// Rank: a never-accepted row carries no authority (`sync_row_seq` = 0,
-    /// §3's rule — it ranks LAST), then ascending `server_seq`, then id.
+    /// Rank: `ownedClaimOutranks` — the EARLIEST-FILED membership
+    /// (`reading_post.created_at`), ties by id (VX-921, the VX-849 run — the
+    /// VX-893 (3) worked pattern: converged bytes; the seq rank it replaces
+    /// read each device's own latest-known `sync_row_seq`, so an innocuous
+    /// later edit of one membership let two mid-convergence devices stand
+    /// different claimants and leave the note a member of nothing).
     /// Deterministic on every device; idempotent (the repaired state has no
     /// violation); every write enqueues explicitly.
     private func repairOwnedExclusivity(_ db: Database, touched: TouchedRows) throws -> Int {
@@ -1010,28 +1014,22 @@ extension SyncEngine {
             let members = try Row.fetchAll(
                 db,
                 sql: """
-                    SELECT rp.id, r.owned AS owned,
-                           COALESCE(s.server_seq, 0) AS seq
+                    SELECT rp.id AS id, r.owned AS owned, rp.created_at AS created_at
                     FROM reading_post rp
                     JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
-                    LEFT JOIN sync_row_seq s
-                      ON s.table_name = 'reading_post' AND s.row_id = rp.id
                     WHERE rp.post_id = ? AND rp.deleted_at IS NULL
                       AND rp.status = 'member'
                     """,
-                arguments: [postID])
-            guard members.contains(where: { $0["owned"] as Int64 == 1 }),
-                  members.count > 1 else { continue }
-            let ranked = members.sorted { lhs, rhs in
-                let (ls, rs) = (lhs["seq"] as Int64, rhs["seq"] as Int64)
-                let (lRank, rRank) = (ls == 0 ? Int64.max : ls, rs == 0 ? Int64.max : rs)
-                if lRank != rRank { return lRank < rRank }
-                return (lhs["id"] as String) < (rhs["id"] as String)
+                arguments: [postID]
+            ).map { row in
+                OwnedClaim(id: row["id"], owned: (row["owned"] as Int64) == 1, createdAt: row["created_at"])
             }
-            let earliestIsOwned = (ranked[0]["owned"] as Int64) == 1
+            guard members.contains(where: \.owned), members.count > 1 else { continue }
+            let ranked = members.sorted(by: Self.ownedClaimOutranks)
+            let earliestIsOwned = ranked[0].owned
             for (index, member) in ranked.enumerated() {
-                let membershipID: String = member["id"]
-                let owned = (member["owned"] as Int64) == 1
+                let membershipID = member.id
+                let owned = member.owned
                 if earliestIsOwned {
                     if index == 0 { continue }  // the standing claim
                     if owned {
@@ -1057,6 +1055,30 @@ extension SyncEngine {
             }
         }
         return repairs
+    }
+
+    /// One live MEMBER row of a note, with the OWNED rank's facts.
+    struct OwnedClaim {
+        let id: String
+        /// The row's book is OWNED (`reading.owned = 1`).
+        let owned: Bool
+        /// The row's `created_at` — immutable, the same bytes on every device
+        /// holding the row (VX-921).
+        let createdAt: String
+    }
+
+    /// The OWNED repair's rank (VX-921): earliest-filed (`created_at`
+    /// ascending) → id. True when `lhs` outranks `rhs` (the standing claim is
+    /// the minimum). A pure function of the rows — no per-device term (the
+    /// retired seq rank's "never-accepted last" was one: a device's own unpushed
+    /// row ranked by whether IT had pushed yet) — so every device holding the
+    /// same rows stands the same claim.
+    /// `created_at` is a wall clock used here only to RANK converged bytes,
+    /// never as ordering authority (SyncSpec §9's `server_seq` stays that);
+    /// skew changes WHICH filing stands, never whether every device agrees.
+    static func ownedClaimOutranks(_ lhs: OwnedClaim, _ rhs: OwnedClaim) -> Bool {
+        if lhs.createdAt != rhs.createdAt { return lhs.createdAt < rhs.createdAt }
+        return lhs.id < rhs.id
     }
 
     // MARK: - 13i-a: the Welcome-shelf keeper (R5)

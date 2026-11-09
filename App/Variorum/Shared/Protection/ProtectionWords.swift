@@ -727,7 +727,7 @@ nonisolated enum ProtectionWords {
     static let onePairAtATime = "A device holds one pair of secrets at a time."
     /// RULE 7 — her join sentence, verbatim (U2's words moment says it; kept here beside its rule).
     static let joinWordsSentence = "Your library's twelve words are now your account's twelve words; here they are; the "
-        + "old ones still open backups you made before today."
+        + "old ones still open backups made with them."
 
     /// The section (Settings ▸ Protection on the new road).
     static let accountSectionTitle = "Sync"

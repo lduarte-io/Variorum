@@ -146,6 +146,12 @@ public protocol KeyFileStoreLeaf: AnyObject {
     /// its backup's history reaches the library's earlier keys (the gate's
     /// seed 3, VX-378 U4).
     func catalogedKeyFiles(ofLibrary libraryID: String) throws -> [KeyFile]
+    /// VX-443: delete the file called `name` in the live library's OWN folder — its root, never below it — BY NAME:
+    /// never read, a regular file only. Answers whether a file was deleted (false: none there). The leaf refuses
+    /// (false, nothing touched) any name an older Variorum's fingerprint-named key file could not be
+    /// (`CatalogNames.preDesignKeyFileFingerprint`) — this design's own names among them; WHICH name may go is the
+    /// executor's to decide (`Repair.deleteOlderKeyFile`).
+    func deleteOlderKeyFile(named name: String) throws -> Bool
 }
 
 /// What this Mac remembers — one sealed non-secret item per library ID.

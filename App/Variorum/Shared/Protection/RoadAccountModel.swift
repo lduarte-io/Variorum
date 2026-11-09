@@ -56,7 +56,7 @@ struct RoadAccountRoads {
 }
 
 /// VX-308 U2 — THE WORDS MOMENT after a join (rule 7: "your library's twelve words are now your account's twelve words;
-/// here they are; the old ones still open backups you made before today").
+/// here they are; the old ones still open backups made with them").
 @MainActor
 enum RoadJoinWordsMoment {
     /// The words were typed at the join: shown once, over the one look idiom, under rule 7's sentence.

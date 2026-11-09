@@ -24,6 +24,15 @@ final class AutosaveCoordinator {
     struct Pending: Equatable {
         var text: String
         var charDelta: Int
+        /// **VX-683 B — the text this pending run was BUILT ON**: what the
+        /// surface showed for the take right before the run's FIRST edit (its
+        /// last-adopted snapshot, or its own text a write already landed),
+        /// captured once and kept while later keystrokes coalesce. It rides the
+        /// write as `Operations.autosave`'s `expectedText`, so a row changed
+        /// under the run since (a sync pull in the debounce window, the MCP
+        /// door, a second window) is RESCUED, never blind-written. nil = the
+        /// caller gave none (the unguarded write).
+        var expectedText: String? = nil
     }
 
     private let runner: OperationsRunner
@@ -33,7 +42,16 @@ final class AutosaveCoordinator {
 
     private(set) var pending: [String: Pending] = [:]
     private var flushTask: Task<Void, Never>?
-    private var flushesInFlight = 0
+    /// VX-402: true while ONE flush's batch is being written. Writes are
+    /// serialized — at most one batch is in flight — and every other flush
+    /// waits here for it (`flushNow`).
+    private var writing = false
+    private var writeWaiters: [CheckedContinuation<Void, Never>] = []
+    /// VX-664 × VX-402 (the VX-849 run, batch 3 — G1): the takes whose words are
+    /// in the batch being written right now, each leaving the set as its own
+    /// write's runner turn ends. `flushNow` takes its batch OUT of `pending`
+    /// before the write lands, so `pending` alone never answered "landed".
+    private(set) var inFlight: Set<String> = []
     /// Non-empty flushes performed (observable coalescing, for tests).
     private(set) var flushCount = 0
 
@@ -89,7 +107,20 @@ final class AutosaveCoordinator {
     }
 
     /// True while any edit is unpersisted (pending or mid-write).
-    var isDirty: Bool { !pending.isEmpty || flushesInFlight > 0 }
+    var isDirty: Bool { !pending.isEmpty || writing }
+
+    /// **Has `variantID` words of hers that have not LANDED?** — pending in the
+    /// debounce, OR in the batch being written (VX-664 × VX-683 B — the VX-849
+    /// run, batch 3, G1; the record `notes/plans/fixes/
+    /// vx-849-typed-over-rescue.md`). The ring owners' "nothing of hers pending"
+    /// (`PaneTextAuthority.settle(isPending:liveIncoming:)` and the outside-write
+    /// confirmation) asks THIS: a delivery consumed while her write flies is a
+    /// photograph of the row from before her words — never an outside write to
+    /// end her ring on — and her buffer stays the truth until the echo. The
+    /// per-take form of `isDirty`.
+    func isUnlanded(_ variantID: String) -> Bool {
+        pending[variantID] != nil || inFlight.contains(variantID)
+    }
 
     init(
         runner: OperationsRunner,
@@ -103,12 +134,18 @@ final class AutosaveCoordinator {
 
     /// Records the latest text for a variant plus this edit's cost;
     /// keystroke bursts coalesce into the newest text and the summed cost.
-    func record(variantID: String, text: String, charDelta: Int) {
+    ///
+    /// `basedOn` (VX-683 B): the text the surface held for this take right
+    /// BEFORE this edit — what the edit was built on. Only the FIRST edit of a
+    /// pending run sets the run's snapshot (`Pending.expectedText`); the
+    /// coalesced keystrokes after it were built on her own pending text, not
+    /// on the store. Every production surface passes it; nil = unguarded.
+    func record(variantID: String, text: String, charDelta: Int, basedOn: String? = nil) {
         if !firstEditFired {
             firstEditFired = true
             onFirstEdit?()
         }
-        var entry = pending[variantID] ?? Pending(text: "", charDelta: 0)
+        var entry = pending[variantID] ?? Pending(text: "", charDelta: 0, expectedText: basedOn)
         entry.text = text
         entry.charDelta += charDelta
         pending[variantID] = entry
@@ -139,26 +176,63 @@ final class AutosaveCoordinator {
     /// acts. If newer typing superseded the failed entry meanwhile, the
     /// newer text wins (the text is always the whole buffer) and only the
     /// churn cost merges.
+    ///
+    /// **VX-402 — THE HONEST FLUSH: it returns only once every write already
+    /// in flight has landed** (the vx-382 ladder's R1-3, ticketed then; the
+    /// helper class under every flush-first door — `flushExistingAutosave`,
+    /// the copy family, the leaving savepoint, the book's Takes sheet, Write's
+    /// open-in-Write, Copy for AI, the note deletions, the block history, and
+    /// the sync round's flush-before-apply, VX-683). A flush used to take the
+    /// batch and clear `pending` BEFORE awaiting its writes, so a second flush
+    /// arriving meanwhile found nothing pending and returned at once: the door
+    /// then read the store before her last keystrokes landed, and
+    /// `flushExistingAutosave` answered `false` — an answer its callers
+    /// discard. Now the batch is written under ONE serial lock: a flush first
+    /// waits for the write in flight, THEN takes everything pending at that
+    /// moment (what she typed meanwhile included). The same lock closes the
+    /// order hole beside it (found tracing this): a two-take batch writes one
+    /// runner turn at a time, so a flush started between its turns used to
+    /// write its NEWER text for the second take first, and the older batch's
+    /// text then landed on top. Writes now land in the order they were
+    /// recorded. Pinned: `AutosaveCoordinatorTests` (the VX-402 section).
+    ///
+    /// The wait is bounded by the one batch in flight (milliseconds of store
+    /// writes); a refused entry it puts back is NOT retried by the waiter —
+    /// the keep-pending posture above stands, and the door reads `isDirty`.
     func flushNow() async {
         flushTask?.cancel()
         flushTask = nil
+        while writing {
+            await withCheckedContinuation { writeWaiters.append($0) }
+        }
         let batch = pending
         pending = [:]
         guard !batch.isEmpty else {
             notifySettled()
             return
         }
-        flushesInFlight += 1
+        writing = true
+        // G1: every take of the batch is in flight until its own turn ends (a
+        // refused one goes back into `pending` below, unlanded still).
+        inFlight = Set(batch.keys)
         flushCount += 1
         var firstError: Error?
         for (variantID, entry) in batch.sorted(by: { $0.key < $1.key }) {
+            defer { inFlight.remove(variantID) }
             do {
                 try await runner.run { ops in
-                    try ops.autosave(variantID, text: entry.text, charDelta: entry.charDelta)
+                    try ops.autosave(
+                        variantID, text: entry.text, charDelta: entry.charDelta,
+                        expectedText: entry.expectedText)
                 }
             } catch {
                 if var newer = pending[variantID] {
                     newer.charDelta += entry.charDelta
+                    // VX-683 B: the refused text never landed, so the newer
+                    // run (built on it) still stands on the OLDER snapshot —
+                    // carrying its own would read the untouched row as
+                    // changed and mint a spurious card on the retry.
+                    newer.expectedText = entry.expectedText
                     pending[variantID] = newer
                 } else {
                     pending[variantID] = entry
@@ -169,7 +243,12 @@ final class AutosaveCoordinator {
         if let firstError {
             notifyError(firstError)
         }
-        flushesInFlight -= 1
+        writing = false
+        // Every waiter re-checks the lock when it runs; the first to run takes
+        // it before the others can (main-actor turns never interleave).
+        let waiters = writeWaiters
+        writeWaiters.removeAll()
+        for waiter in waiters { waiter.resume() }
         notifySettled()
     }
 }

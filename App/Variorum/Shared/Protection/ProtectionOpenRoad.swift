@@ -175,6 +175,120 @@ nonisolated final class ProtectionRoadSession: @unchecked Sendable {
     }
 
     func endAct() { lock.withLock { acting = false } }
+
+    // MARK: - VX-544: the typed unlock's pending sync-keys load (D-544; her R-849-1)
+
+    private var pendingLoad: PendingSyncKeyLoad?
+    private var syncKeyLoadLetGo = false
+    private var retryFlight: (id: UUID, task: Task<Void, Never>)?
+
+    /// **VX-544 (D-544 (1); her R-849-1 — "Retain + quiet retry") — THE TYPED UNLOCK'S PENDING SYNC-KEYS LOAD**: what the
+    /// typed unlock's load (`ProtectionOpenRoad.loadSyncKeysAfterTypedUnlock`) keeps when the vault's one bounded read failed
+    /// or timed out — the account and the typed secret's DERIVED material, in this session's memory only (never disk, never
+    /// the keychain), for the retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`). nil: nothing pending — every other exit
+    /// of the load, a hold that landed, and every let-go road (`letGoOfSyncKeyLoad`).
+    var pendingSyncKeyLoad: PendingSyncKeyLoad? { lock.withLock { pendingLoad } }
+
+    /// The load's failure exit keeps the secret for the retry — never once this session has let go of its sync-keys load
+    /// (a relock, a sign-out, a replacing reopen): nothing is kept past those. false: nothing kept.
+    @discardableResult
+    func retainPendingSyncKeyLoad(_ pending: PendingSyncKeyLoad) -> Bool {
+        lock.withLock {
+            guard !syncKeyLoadLetGo else { return false }
+            pendingLoad = pending
+            return true
+        }
+    }
+
+    /// The pending is done: every non-failure exit of the load (no vault, signed out or into another account, a secret
+    /// that opens the library but not the vault, a moved account, the keys already held, a hold refused), and keys an act
+    /// or an unlock loaded meanwhile (the occasion's gate).
+    func clearPendingSyncKeyLoad() { lock.withLock { pendingLoad = nil } }
+
+    /// **The session lets go of its sync-keys load**: the pending dropped, and no load still in flight on this session — a
+    /// retry whose read is out — may hold what it reads (`holdLoadedSyncKeys` refuses from now on). The relock's
+    /// (`ProtectionRoadLock.dropSessionMemory`, BEFORE it drops the keys), Make this my library's outgoing session's (the
+    /// same drop), a sign-out's (her R-849-1: "dropped at lock/sign-out"), and an outgoing session's at the reopen that
+    /// replaces it. Final for this session.
+    func letGoOfSyncKeyLoad() {
+        lock.withLock {
+            syncKeyLoadLetGo = true
+            pendingLoad = nil
+        }
+    }
+
+    /// **The load's HOLD, decided under this session's one lock.** The keys a typed unlock's load reached land in session
+    /// memory only while: this session has not let go (a relock between the read and its answer lands NOTHING — the drop
+    /// lets go under this same lock before it clears the leaf, so the keys never outlive the lock); session memory still
+    /// holds exactly what the load saw at its start (an act's hold, or another load's, landed meanwhile is never
+    /// overwritten); and the library AS IT STANDS NOW still follows those keys in Castle (an act on this session since the
+    /// read began may have moved it). A hold that lands ends the pending. false: nothing held.
+    func holdLoadedSyncKeys(_ keys: AccountKeys, accountID: String, unchangedFrom before: AccountKeys?) -> Bool {
+        lock.withLock {
+            guard !syncKeyLoadLetGo,
+                  held.record?.account == accountID, held.record?.mode == .castle,
+                  held.record?.accountRowKeyID == keys.rowKeyID
+            else { return false }
+            let leaf = system.leaves.syncKeys
+            guard leaf.sessionSyncKeys(accountID: accountID) == before else { return false }
+            leaf.holdInSession(keys, accountID: accountID)
+            pendingLoad = nil
+            return true
+        }
+    }
+
+    /// **The retry's ONE flight**: a retry asked while one is out JOINS it (waits for its end) — never a second vault read
+    /// — so every round waiting on the occasion starts with whatever that one read loaded.
+    func retryingSyncKeyLoad(_ body: @escaping @Sendable () async -> Void) async {
+        let flight: Task<Void, Never> = lock.withLock {
+            if let running = retryFlight { return running.task }
+            let id = UUID()
+            // The flight ends itself under this lock — which this creation holds until the flight is recorded, so an end
+            // can never run before the record it clears.
+            let task = Task { [weak self] in
+                await body()
+                self?.endRetryFlight(id)
+            }
+            retryFlight = (id, task)
+            return task
+        }
+        await flight.value
+    }
+
+    private func endRetryFlight(_ id: UUID) {
+        lock.withLock { if retryFlight?.id == id { retryFlight = nil } }
+    }
+}
+
+/// **VX-544 (D-544 (1); her R-849-1) — A TYPED UNLOCK'S SYNC-KEYS LOAD, PENDING**: the vault's one bounded read did not
+/// answer (offline, a slow server), so the load the typed secret authorized is kept for a retry. It holds the account and
+/// the secret's DERIVED material only — the passphrase's derived keys (the open's own Argon2id, never paid twice) or the
+/// twelve words' derived wrap key (never the words themselves, never the passphrase's text). Session memory only
+/// (`ProtectionRoadSession.pendingSyncKeyLoad`); not `Codable`, never logged (redacted).
+nonisolated struct PendingSyncKeyLoad: Sendable, CustomStringConvertible {
+    let account: String
+    /// `.passphrase` (the derived keys) or `.wordsKey` — never `.words`, never `.nothing` (the init's guarantee).
+    let secret: ProtectionOpenRoad.TypedUnlockSecret
+
+    /// nil: the typed secret leaves nothing to retry with.
+    init?(account: String, typed: ProtectionOpenRoad.TypedUnlockSecret) {
+        switch typed {
+        case .passphrase(let keys):
+            guard !keys.isEmpty else { return nil }
+            secret = typed
+        case .words(let words):
+            // The words' wrap key, derived once, here: the words themselves are never kept.
+            guard let key = try? WordsKey.derive(words) else { return nil }
+            secret = .wordsKey(key)
+        case .wordsKey:
+            secret = typed
+        case .nothing:
+            return nil
+        }
+        self.account = account
+    }
+
+    var description: String { "PendingSyncKeyLoad(redacted)" }
 }
 
 /// The lobby's facts — before unlock, roads only.
@@ -620,10 +734,13 @@ nonisolated enum ProtectionOpenRoad {
     }
 
     /// What a typed unlock's secret leaves in hand for the sync-keys load: the passphrase's DERIVED keys (one per descriptor
-    /// the open derived under — the Argon2id already paid, never paid twice), or the words. Never stored; gone with the call.
+    /// the open derived under — the Argon2id already paid, never paid twice), or the words. Never stored; gone with the call
+    /// — except, VX-544, as a pending load's DERIVED form (`PendingSyncKeyLoad`: the passphrase's keys, or `.wordsKey`).
     enum TypedUnlockSecret: Sendable, CustomStringConvertible {
         case passphrase([PassphraseKey])
         case words([String])
+        /// VX-544 — the twelve words' derived wrap key: what a pending load keeps in place of the words.
+        case wordsKey(WordsKey)
         case nothing
 
         var description: String { "TypedUnlockSecret(redacted)" }
@@ -651,14 +768,26 @@ nonisolated enum ProtectionOpenRoad {
     /// (a hosted test run) reads nothing. No Touch ID item is read (a prompt), nothing is written to disk.
     /// VX-529 unit 2 — `vault`: a read the caller holds from this same press (the lobby's vault road — its one bounded read);
     /// nil: as before.
+    /// **VX-544 (D-544 (1); her R-849-1 — "Retain + quiet retry")**: when the ONE bounded read fails or times out, the typed
+    /// secret's DERIVED material is kept in the session's memory as its pending load (`PendingSyncKeyLoad` — never the
+    /// passphrase's text, never the words, never disk or the keychain) for the retry (`retryPendingSyncKeyLoad` — this same
+    /// function with the kept secret); every other exit ends the pending (no vault, signed out or into another account, a
+    /// secret that opens the library but not the vault, a moved account, the keys already held, not Castle), and the hold
+    /// lands only through `ProtectionRoadSession.holdLoadedSyncKeys` (never after the session let go — a relock; never over a
+    /// hold that landed meanwhile; only while the library still follows the keys), which ends it too.
     static func loadSyncKeysAfterTypedUnlock(
         _ session: ProtectionRoadSession, signIn: SessionFact, typed: TypedUnlockSecret,
         within bound: Duration = typedUnlockVaultBound, vault given: VaultSnapshot? = nil
     ) async {
+        // VX-544: the pending load ends at every exit but the vault read's failure (kept there, for the retry).
+        var keepsPending = false
+        defer { if !keepsPending { session.clearPendingSyncKeyLoad() } }
         guard session.writes, let record = session.library.record, let account = record.account else { return }
         guard record.mode == .castle else { return }
         let leaf = session.system.leaves.syncKeys
-        if let held = leaf.sessionSyncKeys(accountID: account)
+        // VX-544: what session memory holds as the load begins — the hold lands only over exactly this.
+        let before = leaf.sessionSyncKeys(accountID: account)
+        if let held = before
             ?? ((try? leaf.readSyncKeys(accountID: account, itemClass: .silent)) ?? nil),
            held.rowKeyID == record.accountRowKeyID {
             log("road: the typed unlock found the account's sync keys already loaded — nothing read")
@@ -682,10 +811,12 @@ nonisolated enum ProtectionOpenRoad {
             case .failed(let error):
                 log("road: the typed unlock's vault read failed — \(String(describing: error)); the library opens, its "
                     + "sync keys stay unloaded")
+                keepsPending = keepForTheRetry(session, account: account, typed: typed)
                 return
             case .timedOut:
                 log("road: the typed unlock's vault read took longer than \(bound) — the library opens, its sync keys stay "
                     + "unloaded (a later answer is discarded)")
+                keepsPending = keepForTheRetry(session, account: account, typed: typed)
                 return
             }
         }
@@ -696,6 +827,8 @@ nonisolated enum ProtectionOpenRoad {
                 .flatMap { snapshot.vault.master(passphrase: $0, words: nil) }
         case .words(let words):
             master = (try? WordsKey.derive(words)).flatMap { snapshot.vault.master(passphrase: nil, words: $0) }
+        case .wordsKey(let wordsKey):
+            master = snapshot.vault.master(passphrase: nil, words: wordsKey)
         case .nothing:
             master = nil
         }
@@ -712,8 +845,42 @@ nonisolated enum ProtectionOpenRoad {
             log("road: the account's sync key moved since this library followed — nothing loaded; the follow loads them")
             return
         }
-        leaf.holdInSession(keys, accountID: account)
+        guard session.holdLoadedSyncKeys(keys, accountID: account, unchangedFrom: before) else {
+            log("road: the typed unlock's sync keys arrived after the session let go of them (a lock, a sign-out, a reopen), "
+                + "after another hold, or after the library moved — nothing held")
+            return
+        }
         log("road: the typed unlock loaded the account's sync keys for the session (sync key \(keys.rowKeyID.prefix(8)))")
+    }
+
+    /// **VX-544 (D-544 (2); her R-849-1) — THE RETRY**: the typed unlock's load run again with the secret it kept
+    /// (`ProtectionRoadSession.pendingSyncKeyLoad`) — the SAME function, the same bound, the same log lines — so the load she
+    /// authorized at the lobby finishes once the vault answers, with nothing typed again. Idempotent: nothing pending ⇒
+    /// nothing (no read); a retry asked while one is out JOINS it (one read — `retryingSyncKeyLoad`); a hold that lands ends
+    /// the pending, a second failure keeps it, every other exit ends it. `signIn`: who is signed in NOW (the caller's read,
+    /// off the main actor). The occasion is the composition's (`AppServices`' one `beforeRound` closure, only while the
+    /// engine's provider cannot produce keys) — on both platforms (PROVISIONAL P-849-3).
+    static func retryPendingSyncKeyLoad(
+        _ session: ProtectionRoadSession, signIn: SessionFact, within bound: Duration = typedUnlockVaultBound
+    ) async {
+        guard session.pendingSyncKeyLoad != nil else { return }
+        await session.retryingSyncKeyLoad {
+            guard let pending = session.pendingSyncKeyLoad else { return }
+            log("road: the typed unlock's pending sync-keys load runs again (VX-544)")
+            await loadSyncKeysAfterTypedUnlock(session, signIn: signIn, typed: pending.secret, within: bound)
+        }
+    }
+
+    /// VX-544 — the failure exit's keep: the typed secret's DERIVED form as the session's pending load (refused once the
+    /// session let go). true: kept, for the retry.
+    private static func keepForTheRetry(
+        _ session: ProtectionRoadSession, account: String, typed: TypedUnlockSecret
+    ) -> Bool {
+        guard let pending = PendingSyncKeyLoad(account: account, typed: typed),
+              session.retainPendingSyncKeyLoad(pending) else { return false }
+        log("road: the typed secret's derived keys are kept in session memory for a quiet retry (never written) — the "
+            + "load runs again before a round while the keys are missing")
+        return true
     }
 
     /// One vault read, answered within `bound` or not at all: the first of the read and the timer wins; the loser is

@@ -1,0 +1,3001 @@
+# VX-849 — Run: the typed-over rescue and the offline unlock retry (the sync-custody run)
+
+**STATUS: CLOSED 2026-11-09 — merged via nov7 (the PR and merge SHA are filled by the post-merge commit); the
+wave's LAST merger, the 1.4 release STAGED (built, never published — her morning word ships it).** The kickoff
+banner, kept as history:
+
+**OPEN — kicked off 2026-11-09 (`/architect-phase vx-849`). Branch `vx-849-typed-over-rescue`, worktree
+`~/dev/variorum-vx-849`, the Pro. THIS RUN HOLDS THE ONE SYNC/-CUSTODY SLOT (her kickoff word). The stage
+coordinator is nov7 — every stage need goes through them; this orchestrator never claims directly without
+checking the queue. CAST (her ruling at this kickoff, verbatim: "opus should implement, fable review"):
+Fable orchestrates; a fresh `opus-implementer` per batch at xhigh; a fresh `fable-reviewer` per ladder round
+(the Sync/-and-custody class — mandatory). Pin-before-fix PER MEMBER; the cold review covers the whole run's
+diff. Commits say `Part of VX-<member>`; no trailers. QUESTIONS #268 records the standing gate: VX-849 lands
+before the OSS repo flip.**
+
+## FOR A LATER READER
+
+**What this run was.** The sync-custody run (THE one Sync/-custody slot): ten members under VX-849, six batches,
+2026-11-09, closed overnight under her compaction-sitting mandate (verbatim in HER OVERNIGHT MANDATE below). The
+wave's LAST merger — this run staged the 1.4 release (built, never published).
+
+**The mechanisms, as settled, one pointer each:**
+- **VX-683 + VX-402 (batch 1):** a pull applied into the autosave debounce window was blind-overwritten. Fixed
+  twice over: the honest flush (`AutosaveCoordinator.flushNow` waits for the write in flight; one serial write
+  lock) and the guarded autosave (`Operations.autosave(…, expectedText:)` — a stale snapshot RESCUES: her buffer
+  keeps the row, the displaced words become a `'conflict'` take, both push; R-683-1…4). The flush-before-round
+  occasion rides `SyncSession.beforeRound` (composition-injected, nil = inert).
+- **VX-544 (batch 2):** the offline typed unlock retains DERIVED material in session memory only
+  (`PendingSyncKeyLoad`; dropped at lock/sign-out/replacing reopen), retried before each round, healed by the
+  `NWPathMonitor` reachability trigger (2 s debounce, first-reading-never). Both platforms (P-849-2/-3). Her
+  R-849-1/-2 ruled the shape; her Air drill (steps 8–9) runs POST-RELEASE via Sparkle.
+- **VX-664 (batch 3):** the one ring-ending seam predated this run (A-677-1); this run verified it, swept 9
+  hosts × 23 roads, and closed two real holes: G1 (`AutosaveCoordinator.isUnlanded` — the ring must not end
+  while her words are unlanded) and G3 (`PaneTextAuthority.shownText` — a keystroke in the confirmation gap
+  snapshots what the pane SHOWS, so it rescues instead of overwriting the outside words; this corrected batch
+  1's self-assessment). P-849-1: `restoreCommit(…, insuringBuffer:)` + flush-first doors. P-849-5 (a): the
+  slot-split bloom ends the ring by the flushed blur.
+- **VX-443 + VX-152 + VX-545 (batch 4):** the stale `variorum-keys-<fp16>` envelope is DELETED at a successful
+  live-slot open, names-only, with the vouched-fingerprint fence (P-849-4). VX-152 was already fixed (VX-445's
+  one-act seam) — dismissed with a guard pin. VX-545's ratified rule-7 sentence landed at five points, the
+  lifecycle page regenerated.
+- **VX-855 (batch 5): RECORD-ONLY** — the .ips was the test host's runner-exit race (SQLCipher's atexit under
+  the launch sweep), closed before this run by VX-604 + VX-657; the lock road provably closes behind GRDB's
+  reader barrier (`PurgeSweepTeardownTests`, the guard kept). VX-691 is the same face.
+- **VX-921 + VX-919 (batch 6):** the OWNED exclusivity repair ranks by `created_at`/id (converged bytes —
+  P-849-6 changes #167's ratified measure; the sibling seq repairs are VX-969). VX-919's device-cursor cap
+  script authored + rollback, NEVER run — the deploy is hers.
+- **The closing sweep's find:** batch 1's Compare `paneEdited` handed a fabricated `""` snapshot on an
+  unprojected face → spurious rescue → the leaving pins' extra savepoint. Fixed by
+  `PaneTextAuthority.shownTextIfKnown` (nil = no snapshot); read cold by a fresh Fable (0B/0M); the Takes/Canvas
+  siblings are VX-972.
+
+**Her rulings by id:** R-849-1 (retain + quiet retry), R-849-2 (the reachability trigger), R-849-3 (the riders;
+VX-152's investigate-first condition verbatim in KICKOFF). PROVISIONALS P-849-1…7 in QUESTIONS #274.
+
+**The evidence lines that matter:** every member's red-on-old pin revert-proven (ten reverts re-proven live in
+the b34-tests window; the rest headless, watched); the ladder closed at round 1 (0B/0M) + a supplementary Fable
+cold read of the sweep fix (0B/0M); the walk's three rows right in both voices; the closing sweep on the release
+tree — whole Mac 6,366/1,101 then re-verified 6,367/1,101 at the final tip (13 knowns + the VX-701 flake
+green-alone), whole phone 857/141 at the named baseline, core 4,070/563 + MCP 703/130 wholly green + workbook
+32/4 headless.
+
+**Open items:** her Air drill (post-release, VX-544); VX-919's deploy window (script + VERIFY + rollback ready);
+QUESTIONS #274's seven provisionals; the born tickets VX-966…969, VX-971, VX-972.
+
+## KICKOFF (2026-11-09, author-attended — her rulings verbatim)
+
+- **The cast (her mid-kickoff word):** "opus should implement, fable review" — Opus implements every batch,
+  Fable cold-reviews (the Sync/ class requires the Fable review regardless; her call resolves the
+  implementer side the umbrella left open).
+- **R-849-1 (resolves P-544-1, was VX-500's P-500-4):** the retained derived-secret shape — "Retain + quiet
+  retry". The typed unlock's DERIVED material is held in session memory only (never disk, never keychain,
+  dropped at lock/sign-out), and the vault read retries quietly. The one-press "Unlock sync" door
+  alternative is retired.
+- **R-849-2 (resolves P-544-2, was P-500-5):** the reachability trigger IS built — `NWPathMonitor` in the
+  shared `SyncSession`, a transition to connected runs one debounced round. The trigger-only road is
+  retired.
+- **R-849-3 (the riders, her picks at the kickoff check):** VX-402, VX-152 and VX-545 ride. On VX-152 her
+  condition, verbatim: "for vx-152 - since it's suspected, you can investigate it, but if it seems like it's
+  going to add a lot of work to this run, add the extra info to the ticket and leave it out."
+- **Sequencing inherited from the umbrella (her word 2026-11-04 + the VX-912 kickoff sitting 2026-11-08):**
+  VX-683 FIRST (the data-loss class); this run is SYNC EFFORT 2, started now that VX-912 released the slot;
+  VX-443 joined as a member at the VX-912 sitting (the B0 flag pass promoted it High — the stale-key class
+  she just closed server-side).
+
+## THE ROSTER (the sub-issue listing at kickoff — the VX-548 rule — plus her seated riders; re-list before the ladder)
+
+| # | Ticket | What | The ruled design / pointer |
+|---|---|---|---|
+| 1 | **VX-683** (Med · Bug · Suspected) | a pull applied into the autosave debounce window is overwritten — the remote words survive nowhere | RULED R-683-1…4, `notes/plans/fixes/vx-683-sync-into-debounce.md` (option C = flush-first A + guarded autosave B; rescue direction (i); the rescued take wears `'conflict'`; flush only when typing pending) |
+| 2 | **VX-402** (Med · Bug · Suspected, RIDER) | `AutosaveCoordinator.flushNow` returns early while a write is in flight — flush-first doors can act on pre-keystroke text | fix shape per the ticket: the helper awaits the in-flight write, not only the pending batch; trace `notes/plans/fixes/vx-382-ladder-round-1.md` R1-3. Load-bearing for batch 1's flush occasion |
+| 3 | **VX-544** (Med · Bug · Confirmed) | the offline typed unlock leaves sync locked all session | D-544, `notes/plans/fixes/vx-544-offline-typed-unlock.md` (the plan + THE BRIEF are there, carried whole); P-544-1/-2 now RULED (R-849-1/-2 above) |
+| 4 | **VX-664** (High · Bug · Confirmed) | a live pane whose take changes from OUTSIDE keeps the old words and writes them back | HER RULING 2026-10-28 (on the ticket): option (a) scoped — the ring ends ONLY when an outside write lands on the live pane's OWN take; every outside-change road gets the ring-ending shape (VX-222/VX-440's); P-3 never bent; no clean-buffer adoption. R-683-4 folds its remaining half here (the pane's face right after a rescue, walked) |
+| 5 | **VX-443** (High · Debt · Confirmed) | today's store-id envelope (`variorum-keys-<storeID>.json`) beside the slot keeps the pre-crossing key — unread on the new road | `notes/plans/vx-307-castle-crossings.md` §6 U2a F-5; the B0 flag pass (`notes/plans/fixes/vx-912-b0-security-verify.md` flag 1): sweep or re-mint, the VX-508 class client-side |
+| 6 | **VX-152** (Med · Bug · Suspected, RIDER) | `AppBootstrap.lock()` has no reentrancy guard — sleep + screen lock together can double-flush and mount two lock screens | investigate-first at her R-849-3 condition; custody machinery proper (the lock/flush road) |
+| 7 | **VX-855** (High · Bug · Suspected) | purge sweep's pool reader races pool teardown — SIGSEGV in the SQLCipher codec at quit/teardown | the .ips trace on the ticket (`PurgeJanitor.collectRoots ← LocalPurge.sweep ← AppDatabase.read` under `DatabasePool.reader` at teardown). TRACE FIRST — reproduce (launch-then-quit with purgeable tombstones), pin as the confirm; the fix likely where teardown orders the pool close against in-flight background reads |
+| 8 | **VX-545** (Low · Wording · Confirmed, RIDER) | rule 7's ratified sentence family ("…the old ones still open backups made with them") | the ticket lists the five touch points: CastleRules rule 7 + banner line · `ProtectionWords.swift:727` · two doc comments · the lifecycle fixture + regenerate the html (never hand-edit) |
+| 9 | **VX-921** (Low · Debt · Confirmed) | the OWNED exclusivity repair still ranks by `sync_row_seq` — the determinism gap tier 3 just left | the created_at swap on the B2 worked pattern (`notes/plans/fixes/vx-912-open-source-gating.md` B2 record, P3) with its own red-on-old convergence pin: two devices ranking DIFFERENT claimants under seq, the SAME under created_at |
+| 10 | **VX-919** (Low · Improvement · Confirmed) | device_cursor cap belt — bound live device rows per account at 64, oldest `seen_at` evicted (the `sync_challenge` pattern) | `notes/plans/fixes/vx-912-b0-security-verify.md` (the recorded corner). A SERVER maintenance script, NOT a lockstep (no client schema); AUTHORED in this run, the production deploy HELD for her window — a server act runs only at her word |
+
+## THE BATCHES (one fresh Opus implementer each; order = the build order)
+
+| Batch | Members | Unit + evidence |
+|---|---|---|
+| 1 | VX-683 + VX-402 | the guarded autosave (B) + the `beforeRound` hook seam + the flush-before-apply occasion (A) + the honest flush. Evidence: B's red-on-old state-transition pin; A's two-client convergence pin (a pull into a simulated debounce window; the round ends with the server text on the row, her text the `'conflict'` take, both pushing); VX-402's own pin (a flush awaits the in-flight write) |
+| 2 | VX-544 | D-544 whole (the pending load · the retry · the hook occasion · the reachability trigger) per the vx-544 plan's BRIEF, P-544-1/-2 read as RULED (R-849-1/-2). Evidence: the planted-road pins (compile-red vs behavior-red said plainly); the live confirmation is HER HANDS (the two-Mac test's steps 8–9 on her Air) — recorded as OWED, never claimed |
+| 3 | VX-664 | the ring-ending shape on every outside-change road (her option (a) scoped), composed with batch 1's rescue so the pane's face right after a rescue is right (R-683-4). Evidence: red-on-old pins per road (the vx-440 `RestoreLandingTests` shape extended); the orchestrator's hands-on walk |
+| 4 | VX-443 + VX-152 + VX-545 | the custody smalls: the envelope sweep/re-mint; the reentrancy guard (investigate-first, her condition); rule 7's five touch points + the lifecycle regeneration. Evidence: a pin per member (VX-152's only if confirmed); the words byte-pinned |
+| 5 | VX-855 | TRACE FIRST (Suspected): reproduce the teardown race, pin as the confirm (red confirms, green = record-only), then the ordering fix. Evidence: the repro pin red-on-old by behavioral revert |
+| 6 | VX-921 + VX-919 | the rank swap + convergence pin; the cap-belt script authored (deploy HELD). Evidence: the convergence pin red on the seq rank; the script reviewed in the ladder, never run against production |
+
+Then: the LADDER over the whole run's diff (a fresh `fable-reviewer` per round, `notes/REVIEW_PROMPT.md`
+verbatim, rounds per CLAUDE.md); the closing Mac runs over every changed source; the closeout ritual.
+
+**Stage needs (through nov7):** every `xcodebuild test` run; batch 3's walk; any dev-store launch for
+VX-855's repro. Headless `swift build`/`swift test` run freely in the worktree.
+
+**SyncSpec §12 check:** NOTHING in this run is a lockstep event — no client schema change, no marker bump.
+VX-919's script is server maintenance (the VX-495 class), deploy at her window only.
+
+## THE CONSTITUTION (P-1…P-9, carried byte-verbatim per the architect shape; binding)
+
+- **P-1 — One capability registry.** Every user-facing act is declared exactly once: verb, scope
+  (block/take/post/book), per-mode availability rule, its doors (menu / context / bar / shortcut / palette),
+  and its refusal copy. Surfaces render their doors FROM the registry; gating is data, never per-view
+  if-statements. A registry-walk test asserts every declared door exists and every rendered door is
+  declared. This kills the D3/D4 class structurally — the capability matrix stays green by construction
+  instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act — including any mode-switch
+  choreography, done visibly for the user — or delivers the operations layer's real refusal. A door that can
+  never act in its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface component (live + read modes; one
+  measurement brain — the width-gated remeasure; the shared canary) that every pane composes; the live
+  editor core's identity machinery (`BlockRangeIndex`, crystallization) becomes its live mode, not a sibling
+  implementation. "What text does this pane show, and is it live" is answered by ONE pure, unit-tested
+  authority (`PaneTextAuthority`); views never re-derive it. Its invariants stated as code: exactly one live
+  pane; the live pane is buffer-authoritative; read panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter may announce that something
+  happened (mode changed, post opened); no listener derives business state or availability from a broadcast,
+  and no flow's correctness depends on broadcast ordering. Cross-feature flows route through composition.
+  (Stage 0's survey enumerates today's notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule marks an under-architected
+  feature. The response is never another patch: write the feature's DESIGN MEMO — intended behavior whole,
+  edge cases enumerated on paper, refusal wordings, undo story — get the author's rulings on the
+  product-flavored edges, then build to the memo. Happy path ships first, but the edges are *decided at
+  design time*, not discovered by the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial flow is the contract for every
+  happy path. It stays green — automated where the harness allows, screenshot-walked otherwise — and any
+  change that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive harness: the ops-layer soaks (exist),
+  the board/view-model invariant soak (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind the rebuilt layer exactly as they
+  bind the substrate (invalidation ∝ realized rows; one live editor; virtualized long views). Overlays,
+  never rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit` (the b6dae25 class).
+  `Theme/VoiceControls.swift` is THE chrome vocabulary. Complexity lives in the store; restraint lives in
+  the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing board layout, text authority, and
+  gesture routing splits by concern (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+## ENVIRONMENT TRAPS (carried verbatim from VX-500's plan; binding on every session of this run)
+
+Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test host matches
+mid-run); inside a command that names the app's path use `pgrep -x Variorum`. Real-store instances are treated
+by STORE, never quit or killed; no Release build or `/Applications` refresh while one lives. Headless
+`swift build`/`swift test` need no stage; EVERY `xcodebuild test` needs a HELD `Tools/stage` claim
+(`--minutes` up to 240); Mac tests from `App/Variorum/` with suite-level `-only-testing`, confirm the "Test
+run with N tests" line; never a custom build configuration. Swift Testing's count includes skipped tests. The
+core suite's known load-flakes: `MCPHarnessTimeLimitTests.aPeerThatNever…` (named), VX-722, VX-723
+(Suspected). Commit per piece, push after every commit, LIVE STATUS flipped in the same commit, PENDING on
+every unverified claim; foreground waits only; never `git checkout` over uncommitted work; a behavioral revert
+is named in the record BEFORE it runs, at a committed tip. The orchestrator writes nothing in the worktree
+while an implementer or reviewer is live there (drafts in the scratchpad; pathspec adds only — the VX-500
+lesson). No subagents for implementers. No store, no server contact. **This run's addition: the stage is
+nov7's queue — ask before every claim; this run holds the SYNC SLOT, so no other Sync/-or-custody effort runs
+beside it.**
+
+## STAGE & COORDINATION (nov7's grants and mains moves, 2026-11-09 — binding on every session of this run)
+
+- **The Sync/-custody slot is GRANTED to VX-849 in writing** (nov7, per her word; verified: vx-926/vx-940/vx-915
+  touch zero Sync|Protection/keychain/custody files; vx-913 has no code yet). The slot releases only on this
+  orchestrator's "nothing further owed" at the hard stop.
+- **Watch item:** vx-913's VX-81 (SwiftUI crash on the re-key reopen) is trace-first elsewhere; if its trace
+  reaches Protection/custody code, nov7 stops it and routes to her. If a batch here meets VX-81's neighborhood,
+  tell nov7 at once.
+- **Merges serialize through nov7;** the second merger merges main in and re-proves on the merged tree — for this
+  run that includes re-proving convergence over the beforeRound hook × VX-912 straggle-belt seam (the belt was
+  already in this branch's base, bd163ea54; the batch-1 convergence pins ran against it).
+- **The vx-915 overlap (nov7, 2026-11-09):** vx-915's batch 3 (VX-841) changes `AppSession.swift` (+9/−2, a
+  macOS-only block); the shared files between the two runs are now AppSession.swift · CompareBoardView.swift ·
+  TakesViewModel.swift; the trial merge is textually CLEAN. WHICHEVER RUN MERGES SECOND runs the WHOLE Mac +
+  phone suites on the MERGED tree AND eye-reads AppSession's merged body — carried into this run's closing sweep
+  (LIVE STATUS row 8) and the closeout checklist.
+- **Stage protocol (every window):** REQUEST (what/minutes/claim name, sent EARLY) → READY (able NOW) → GO only
+  from nov7 with the exact claim line → RELEASE with Executed counts and EVERY failing test by name (faulting
+  thread read for any crash). `-only-testing` takes TYPE names as a zsh array. Instance checks: `pgrep -lx
+  Variorum`, `pgrep -lf "MacOS/Variorum$"`. A window over an hour pings SEAM. **NO HEAVY HEADLESS WORK while
+  another session's stage window is live** (nov7's rule, 2026-11-09: no whole-package/whole-target `swift test`,
+  no whole MCP target, no full or cold `build-for-testing`; small targeted runs are fine; heavy closes are held
+  for a gap or the orchestrator's own window — an implementer marks them PENDING and lists them).
+- **Dev-store windows** (VX-855's teardown repro, the batch-3 walk) serialize against vx-913's VX-81 re-key
+  repro. Each window leaves the dev store's posture as found: MCP ON, variorum-de approved, never Resume Sync,
+  Castle values only from `~/.variorum/dev-castle.env`, restored or reported at RELEASE.
+- **Fable safeguard (her memory rule):** any walk that meets the lock screen or a passphrase is handed to an
+  OPUS session; Fable reviews the code, never drives the walk.
+- **The custody drill's steps 8–9** need HER Air and hands — held and bundled as an ask, never routed around.
+- **Lockstep:** nothing in this run is a §12 event (confirmed at kickoff); if that changes, the migration/marker
+  is reserved with nov7 FIRST and the mirror deploy runs only on her explicit go.
+- **Mains folded in at the batch-1 seam (merge `1f8f25a37`; the batch-1 core pins re-run green on the merged
+  tree, 11/11):** 66d6f33cf (VX-931, docs only) · 159e12ac0 (board snapshot) · 744ca5301 (vx-913's no-trailer
+  guard: attribution off + a PreToolUse hook DENYING any git commit / gh pr command whose TEXT carries an
+  attribution trailer — keep those words out of commit messages entirely; nov7 scans for trailer lines at each
+  merge GO).
+- **HER RULING AT VX-931, binding on this run's closeout: /Applications holds RELEASES only.** No /Applications
+  refresh at this run's merge or closeout — merged work is tested in the DEBUG app, and the wave's release
+  installs it. An interim build goes there only at her explicit word, under the label she names.
+
+## LIVE STATUS (the orchestrator flips rows; implementers flip their batch rows in their own commits)
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
+| 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
+| 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
+| 3 | Batch 3 — VX-664 (the outside-change ring-ending) | DONE — built `3d9d36cdd`…`81fc15583` + adjudicated; the b34 windows ran: leg A 15/3 green and the six reverts exact at `bd65aa5a1` (the b34-tests section), leg D 87/7 at `39488a513`, the walk's three rows RIGHT in both voices (THE B34-WALK WINDOW); leg C folds into row 8 |
+| 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | DONE — built `b59d2f16d`…`d815dc445` + adjudicated; the b34-tests window ran leg A 25/4 green and the four reverts exact at `bd65aa5a1`; leg D's two phone types rode the 87/7 run; the optional walk row skipped for the byte-pin (the adjudication); leg C folds into row 8 |
+| 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | DONE — RECORD-ONLY (`718701ac8`…(this commit)): traced; the confirm `PurgeSweepTeardownTests` GREEN 2/2 ×3 (the lock's close waits for the held read); R-855a bit exactly its two lines; NO FIX (dismissed as already fixed by VX-604 + VX-657; the ticket text in the BATCH 5 RECORD); no Mac suites new; whole core package PENDING (row 8); the in-app recipe OPTIONAL for the orchestrator's window |
+| 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | BUILT — `438ed249d`…(this commit): VX-921 FIXED (red-on-old `d58707b70`, the swap `797dfe8a7`, R-921a/b bit exactly as named); VX-919 AUTHORED ONLY (`1db9b06c8` — never executed; deploy HELD, row 9; R-919a bit as named); the siblings recorded; core targeted 480/76 + 14/4 green; Mac + phone `build-for-testing` green; NO Mac suites new; whole core package PENDING (row 8); PROVISIONALs P-849-6/-7 for the merge's QUESTIONS |
+| 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | CLOSED AT ROUND 1 — 0B/0M/3MIN/2NIT (`68e17ae51`; dispositions in THE LADDER section; the row-8 evidence gate adopted) |
+| 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | DONE — the closing sweep at `861767f4d` (whole Mac 6366/1101; whole phone 857/141 baseline; core 4070/563; MCP 703/130 wholly green) found ONE real regression, fixed at `7bc24b730` (THE SWEEP FIX) with a supplementary Fable cold read (0B/0M); the re-verify at `7c3d7300a`: targeted 126/15 green, whole Mac 6367/1101 (13 knowns + VX-701 green-alone, both runs named); ledgers + canon landed; FOR A LATER READER written |
+| 9 | Her drill: the two-Mac test's steps 8–9 on the Air — runs AFTER the release reaches the Air via Sparkle (her word, 2026-11-09) · VX-919's deploy window (HELD) | OWED |
+
+## BATCH 1 BRIEF — the typed-over rescue (VX-683, R-683-1…4) + the honest flush (VX-402)
+
+**Who you are.** The implementer for batch 1, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you point for point. Worktree `<home>/dev/variorum-vx-849`, branch
+`vx-849-typed-over-rescue`. This batch TOUCHES `Sources/VariorumCore/Sync/`'s seams and `Operations` —
+SyncSpec is read IN FULL before any line. Fable cold-reviews the run; your self-assessment closes the batch.
+
+**Read first, in full:** `CLAUDE.md` + its canon (auto) · THIS FILE whole · `notes/plans/fixes/vx-683-sync-into-debounce.md`
+WHOLE (the memo: the mechanism, options A/B/C as ruled, R-683-1…4, the evidence shapes) ·
+`notes/SyncSpec.md` IN FULL (§4–§6 are your seams: the apply's locally-clean path, the merge matrix, S5) ·
+`notes/plans/fixes/vx-544-offline-typed-unlock.md` §THE DESIGN build step 3a only (the `beforeRound` hook's
+shape — YOU mint the hook; batch 2 wires its retry occasion onto it) · `notes/SessionResiliencyProtocol.md`
+§implementer · the code: `Sources/VariorumCore/Operations/` (autosave; the `bufferChangedSinceGesture`
+precondition family), `Sources/VariorumCore/Sync/` (the apply road; `resolveSyncConflict`),
+`App/Variorum/Shared/SyncSession.swift` (`triggerSync` ~:195, `flush` ~:237), the autosave coordinator
+(`AppSession.autosave(forPost:)` / `AutosaveCoordinator` — grep `flushNow`), the two-client fake-server
+harness (grep `FakeSyncServer` under `Tests/`), and the vx-382 ladder's R1-3 trace
+(`notes/plans/fixes/vx-382-ladder-round-1.md`) for VX-402.
+
+**The pieces, in order (commit per piece, `Part of VX-683` / `Part of VX-402`; push each):**
+
+1. **VX-402 — the honest flush.** `flushNow` (and any flush-first helper the doors share) awaits the
+   in-flight write, not only the pending batch. Pin red-on-old: a flush called while a debounced write is in
+   flight returns only after that write landed (old: returns at once; drive it with a scripted/slow write).
+   This piece is FIRST because piece 3's occasion stands on it.
+2. **VX-683 B — the guarded autosave.** `Operations.autosave` gains the expected-text precondition (the
+   editor seam's last-adopted snapshot rides the call). A stale autosave — the row changed under it — does
+   not blind-write; it RESCUES per R-683-1: HER BUFFER KEEPS THE ROW; the displaced words become a new take
+   on the same block, label `'conflict'` (R-683-2), same parent, fan's end — exactly where an S5 card lands.
+   Both texts survive; both push; no new schema, no §7 repair, no savepoint occasion (the memo's
+   "deliberately does not do" list binds). Pin red-on-old (the memo's shape): autosave with a stale expected
+   text on a row a fake apply just rewrote — old overwrites, new rescues both texts; revert-proven. Exact
+   state-transition tests for the operation.
+3. **VX-683 A — the flush-before-apply occasion.** `SyncSession.triggerSync()`/`flush()` gain the optional
+   `beforeRound: (@MainActor () async -> Void)?` hook (nil = inert — the `keyProvider` pattern; injected at
+   composition, zero engine knowledge of editors). The Mac composition wires it to flush every live editor's
+   pending buffer through the (now honest) flush — ONLY when typing is pending (R-683-3: one cheap check;
+   quiet rounds stay zero-cost on the main thread). After the flush the row is dirty and the EXISTING §5/§6
+   machinery does the rest (server text wins the row, her flushed text becomes the conflict take, the pane
+   adopts). Pin: the convergence suite's shape — the two-client fake-server harness drives a pull INTO a
+   simulated debounce window (the hook seam lets the test inject "pending buffer exists"): the round ends
+   with the server text on the row, her text as a conflict take, the outbox pushing both. A sync change
+   without a convergence test is unreviewed (AppSpec §15.3).
+4. **Close.** `swift build`; `swift test` over every touched suite (headless — no stage needed); the
+   self-assessment: say exactly which window remains open (the milliseconds between flush and apply — B
+   covers it) and every road the guarded autosave now rescues (sync, MCP mid-window, a second window).
+
+**Your record:** `### BATCH 1 RECORD` under UNIT RECORDS below; LIVE STATUS row 1 flipped in your commits;
+compile-red vs behavior-red said plainly; first line = what you did NOT do. **Not yours:** VX-664's ring
+work (batch 3 — do not touch `PaneSurface`/`PaneTextAuthority` beyond reading); VX-544's retry (batch 2);
+the ladder; the PR. **ENVIRONMENT TRAPS above, binding verbatim.** No subagents. Foreground waits only.
+
+## BATCH 2 BRIEF — the offline typed-unlock retry (VX-544, D-544; R-849-1/-2 RULED)
+
+**The binding brief is `notes/plans/fixes/vx-544-offline-typed-unlock.md`'s "THE BRIEF" section, read WHOLE with
+its PREFLIGHT FACTS and D-544 — with these OVERRIDES, which win where they differ:**
+1. **Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`** (the run's one
+   branch; the vx-544 plan's own worktree/branch lines are superseded by the bundling).
+2. **You are an OPUS implementer** (her cast ruling at this run's kickoff: "opus should implement, fable
+   review"); `.claude/agents/opus-implementer.md` binds you.
+3. **P-544-1 and P-544-2 are RULED, not provisional** (this file's KICKOFF: R-849-1 retain + quiet retry;
+   R-849-2 the reachability trigger IS built). Build both; log nothing to QUESTIONS for them.
+4. **The `beforeRound` hook EXISTS** (batch 1, `bdb70dc3d`): D-544 build step 3a's hook half is DONE. Your
+   occasion (a) is a SECOND composition-level use: in `AppServices`' Mac composition, run the retry BEFORE the
+   existing flush occasion inside the one wired closure — gated by "only while the provider cannot produce keys"
+   (one cheap `currentKeys()` try, so an unlocked session pays nothing). Do not add a second hook property.
+5. **P-849-2 rides with you (same files):** check whether the PHONE composition offers the same one-line seam for
+   batch 1's FLUSH occasion; wire it only if it is truly that one line (the guarded autosave B already protects
+   the phone either way), else record the fact plainly for the MOBILE PARITY line. The phone's RETRY stays
+   unwired (D-544's posture, unchanged).
+6. **Commits say `Part of VX-544`** (drop the vx-544 plan's older `VX-500 U3:` prefix); record `### BATCH 2
+   RECORD` under UNIT RECORDS here; flip LIVE STATUS row 2 in the same commits.
+7. **The stage is NOT yours to claim or check:** this batch builds and pins headless (`swift build`, core
+   `swift test`, `xcodebuild build-for-testing`); every `xcodebuild test` run is the ORCHESTRATOR'S, after your
+   close, through nov7's queue. List the suites to run (type names) at the end of your record.
+8. **Her drill (the two-Mac test's steps 8–9 on her Air) stays OWED** — record it as owed, never claimed
+   (LIVE STATUS row 9). The live confirmation is hers.
+9. **THE STAGE & COORDINATION section above and ENVIRONMENT TRAPS bind you**; this file's CONSTITUTION too.
+   CastleRules is read WHOLE before any line (custody-adjacent: the derived secret lives in session memory only).
+
+## BATCH 3 BRIEF — the outside-change ring-ending (VX-664, her option-(a) ruling) + the post-rescue face (R-683-4) + P-849-1
+
+**Who you are.** The implementer for batch 3, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`. THE EDITOR
+SEAM: `PaneSurface`, `PaneTextAuthority`, `TakesViewModel` and their kin — Fable cold-reviews this class, and
+`notes/TEXTKIT2_NOTES.md` is read WHOLE before any line. ZERO lines under `Sources/VariorumCore/Sync/` — if the
+ring work seems to need a seam there, STOP and record (the orchestrator adjudicates).
+
+**Her ruling, the one you build to (2026-10-28, on ticket VX-664, verbatim-faithful):** option (a), SCOPED — the
+ring ends ONLY when an outside write lands on the live pane's OWN take; every outside-change road gets the
+ring-ending shape (VX-222/VX-440's); P-3's live-pane buffer authority is never bent; NO clean-buffer adoption,
+now or later — her words: "I agree it would be bizarre to have an AI live editing the same exact take as you …
+variorum is not a 'we're all editing the same text at the same time' kind of editor like google docs."
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole (the KICKOFF rulings; batch 1's record — the
+rescue you compose with; both adjudications; STAGE & COORDINATION; ENVIRONMENT TRAPS; CONSTITUTION, P-3
+especially) · `notes/TEXTKIT2_NOTES.md` WHOLE · `notes/SurfaceContracts.md` §"The note" · the W-1 sections of
+`notes/plans/fixes/vx-440-sheets-history-clarity.md` (the TRACED mechanism ~line 805, the general class, the
+narrow fix WF-2 `TakesViewModel.consumeRestoreLanding`) · VX-248's landed shape (grep `rebindIfTakeChanged`) ·
+the History surface's restore roads (`notes/plans/fixes/vx-827-lineage.md` FOR A LATER READER only) · the code:
+`PaneTextAuthority`, `PaneSurface`/`PaneSurfaceRepresentable`, `TakesViewModel` (the ring, `run`, the restore
+landing), the Lenses board's twin, Compare's columns, Canvas, Write's take panel, `AppSession`'s apply/adoption
+road for sync writes, and `Operations.restoreCommitRows` (the insurance gap P-849-1 names).
+
+**The pieces, in order (commit per piece, `Part of VX-664`; push each):**
+
+1. **THE SWEEP TABLE FIRST (the class-completeness discipline):** enumerate every road that rewrites a take's
+   `working_text` from OUTSIDE a live pane bound to that take, × every host surface a live pane can sit on
+   (Takes · Lenses · Compare · Canvas · Write's take panel · Read's edit face · a second window). Known roads
+   from the W-1 record: the History/Commits-face restore (fixed on Takes+Lenses at vx-440 — verify, then
+   generalize), the same restore beside Compare/Canvas/Write's panel, another window's restore, a sync apply of
+   `working_text`, the MCP door's `edit_take`/`restore_commit`, the Lineage face's acts that write the SAME take
+   (most mint new takes — verdict those N/A with the mechanism said). The table lands in your record BEFORE the
+   fix: instance × host, each cell FIXED-with-named-pin or provably N/A.
+2. **ONE ring-ending seam, not per-road patches:** generalize the vx-440 shape (the landing ends the ring over
+   the written take) into one declared mechanism beside the liveness authority — "an outside write landed on the
+   live pane's own take ⇒ the ring ends there" — that every road in the table routes through. P-3 untouched: the
+   pane stays buffer-authoritative while live; ending the ring is what makes it a read pane that adopts. The
+   sync-apply road composes with batch 1: a flush-first round means her typing already landed (no rescue), and
+   the apply's write then ends the ring so the pane shows the applied text; the millisecond stragglers rescue as
+   batch 1 built (her buffer keeps the row) — in THAT case the ring deliberately does NOT end (nothing landed on
+   the row from outside; the displaced words went to a new take). State this composition in your record.
+3. **P-849-1 (PROVISIONAL — her re-cut may land mid-run; keep this piece isolated and cheap to flip):** the
+   board's own restore doors (Takes' `restoreCommit` road and its Lenses/History-surface twins — the doors that
+   REWRITE the typing take's text; enumerate them in the sweep) flush pending typing FIRST through the honest
+   flush, keep ONE quiet `kind='auto'` insurance savepoint of the flushed words when the act is about to replace
+   them (`restoreCommitRows` has no insurance of its own — verified at the batch-2 era; the MCP bracket is the
+   precedent), then act; the ring-end (piece 2) makes the pane adopt the result. A deliberate act of hers then
+   never meets a stale buffer and never mints a `'conflict'` card.
+4. **R-683-4 — the post-rescue face:** stage the sync-road rescue (batch 1's) under a mounted live pane and pin
+   the face: the pane keeps her words, the `'conflict'` take appears in the fan, the corner badge and the open-fan
+   memory behave, the board's comments/geometry hold. Fix what the pins reveal; anything product-flavored goes to
+   the record as PROVISIONAL, never invented.
+5. **Pins:** red-on-old per fixed cell (the `RestoreLandingTests` shape extended; name each pin beside its table
+   cell); `swift build` + both `build-for-testing`s; headless core where touched. NO `xcodebuild test`, NO stage —
+   list the Mac/sim suites (type names) and the named reverts for the orchestrator's window at your record's end.
+   The orchestrator WALKS this batch (UI-kind) after the window.
+
+**Your record:** `### BATCH 3 RECORD` under UNIT RECORDS; LIVE STATUS row 3 flipped in your commits; the sweep
+table; first line = what you did NOT do. **Not yours:** the stage; VX-443/VX-152/VX-545/VX-855/VX-921/VX-919's
+files; `Sync/`. **ENVIRONMENT TRAPS and STAGE & COORDINATION above bind verbatim.** No subagents; foreground
+waits only.
+
+## BATCH 4 BRIEF — the custody smalls: VX-443 (the stale envelope) + VX-152 (investigate-first) + VX-545 (rule 7's sentence)
+
+**Who you are.** The implementer for batch 4, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`.
+CUSTODY/KEYCHAIN CLASS — `notes/CastleRules.md` is read WHOLE before any line; Fable cold-reviews. ZERO lines
+under `Sources/VariorumCore/Sync/`.
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole · `notes/CastleRules.md` WHOLE ·
+`notes/SurfaceContracts.md` §"Doors to the outside" (the protection bullet — the pre-design face's detection
+sentence especially) · `notes/plans/vx-307-castle-crossings.md` §6's F-5 finding + U2a ARBITRATION (the envelope's
+provenance: `variorum-keys-<storeID>.json`, `ensureStoreIdentity`, today's-road backups copied it) ·
+`notes/plans/fixes/vx-912-b0-security-verify.md` flag 1 (why VX-443 is High) · the code:
+`Sources/VariorumCore/Persistence/LibraryClassifier.swift` (`olderFingerprintKeyFilePrefix` — the pre-design
+detector keys on exactly this name class), `Sources/VariorumCore/Protection/Assess/CatalogNames.swift`, the
+new-road open's landing (where a successful open of the live library settles — the rule-8 re-makes moment), and
+for VX-152: `AppBootstrap` (`lock()`, the sleep/screen-lock monitors) · for VX-545: the ticket's five named touch
+points (its description lists exact files and lines; the ticket body is in Linear — the five points are also
+quoted below).
+
+**The pieces (commit per piece, `Part of VX-<member>`; push each):**
+
+1. **VX-443 — sweep the stale envelope (direction: DELETE, gated; PROVISIONAL P-849-4 for her bundle).**
+   `ensureStoreIdentity` died with today's road (zero production hits — verified at this brief's writing), so the
+   13p-era store-identity envelope beside the slot is pure dead weight holding the pre-crossing key under locks a
+   crossing retired — the exact stale-key class she just cleared server-side (VX-508), and its NAME is the very
+   pattern the pre-design classifier detects, so it is also a latent ambiguity (lose this design's key file and
+   the leftover makes a new-road store read pre-design). The sweep: at a SUCCESSFUL new-road open of the LIVE
+   library (the rule-8 re-makes moment — the open itself is rule 22's verification that the current pair works),
+   delete a today's-road envelope beside the slot that matches the old pattern for names-only reasons (NEVER read
+   its contents). Fences, each pinned: fires only on the live slot (never Previous Libraries, never backups, never
+   a Look-inside copy, never a picked folder); fires only when THIS design's key file is present and just opened
+   the library; a PRE-DESIGN store (an old-name file and NONE of this design's) is never reached (the face shows
+   instead — pin the detector unchanged); the deletion is said once in the log, names only. Red-on-old: a planted
+   old-name envelope beside an opened new-road library survives the open on the old tree, is gone on the new.
+   Record the delete-vs-keep alternative honestly (rule 4 already carries every earlier key in the current file,
+   so nothing openable is lost — that is WHY delete is safe; the alternative, set-aside, mints a new place keys
+   live, which CastleRules' shape avoids).
+2. **VX-152 — the lock reentrancy, INVESTIGATE-FIRST (her condition, verbatim in this file's KICKOFF: "since
+   it's suspected, you can investigate it, but if it seems like it's going to add a lot of work to this run, add
+   the extra info to the ticket and leave it out").** Trace `AppBootstrap.lock()` under sleep + screen lock
+   arriving together: can it double-flush / mount two lock screens? If the trace lands and the fix is a cheap
+   guard (a reentrancy flag on the lock road) with a red-on-old pin — build it. If it balloons (a redesign of the
+   teardown ordering, overlap with VX-855's territory) — write the traced facts INTO THE TICKET (hand the text to
+   the orchestrator for Linear) and leave it out of this run. Say which way it went as your record's first line
+   for this piece.
+3. **VX-545 — rule 7's ratified sentence, five touch points in ONE commit:** CastleRules rule 7's adoption
+   sentence ending becomes "the old ones still open backups made with them" (her ratification, QUESTIONS #241) +
+   a status-banner line naming this landing; `App/Variorum/Shared/Protection/ProtectionWords.swift:727` (the
+   shown-words arm); the doc comments at `RoadAccountModel.swift:58` and
+   `Sources/VariorumCore/Protection/Executor/PlanRunner.swift:33`; the lifecycle fixture
+   (`Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/LifecycleFixture.swift:877`) — then REGENERATE
+   `notes/plans/vx-266/castle-lifecycle.html` from the fixture (NEVER hand-edit it). The byte-pin
+   (`RoadAccountWordsTests.rule7sSentencesAreHersVerbatim`) moves by JUSTIFIED EDIT to the ratified text. Verify
+   the 13u-era label fence still holds (the app says "commit"; this sentence is protection copy, not commit
+   vocabulary — nothing else reworded).
+4. **Close:** `swift build` · headless `swift test` over every touched core suite (the lifecycle/scenario suites
+   run headless) · both `build-for-testing`s. NO `xcodebuild test`, NO stage — list the Mac suites (type names)
+   and any named reverts for the orchestrator's window at your record's end.
+
+**Your record:** `### BATCH 4 RECORD` under UNIT RECORDS; LIVE STATUS row 4 flipped in your commits; first line =
+what you did NOT do. **Not yours:** the stage; batches 3/5/6's files; `Sync/`. **ENVIRONMENT TRAPS and STAGE &
+COORDINATION above bind verbatim.** No subagents; foreground waits only.
+
+## BATCH 5 BRIEF — the purge-sweep/pool-teardown SIGSEGV (VX-855, TRACE-FIRST — Suspected)
+
+**Who you are.** The implementer for batch 5, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`. SYNC/-CLASS
+(`PurgeJanitor` lives in `Sources/VariorumCore/Sync/`) — `notes/SyncSpec.md` is read IN FULL before any line;
+Fable cold-reviews. VX-855 is SUSPECTED: the pin is the CONFIRM — red confirms and the fix proceeds; green means
+RECORD-ONLY (the traced findings into your record for the orchestrator to put on the ticket; no fix on a trace
+that never bit).
+
+**The evidence (the ticket's one .ips, quoted here because implementers have no Linear):** the Debug TEST HOST
+(build 11051, 2026-11-05), crashed 4.4 s after launch, AFTER its test bundle had already passed — teardown, not a
+test; no VariorumTests frame on any thread. EXC_BAD_ACCESS / KERN_INVALID_ADDRESS (possible ptrauth failure) on
+thread `GRDB.DatabasePool.reader.1`: `sqlcipher_memset ← sqlite3Codec ← readDbPage … sqlite3_step ← fetchAll ←
+PurgeJanitor.collectRoots(tombstoneRoots) ← LocalPurge.sweep(afterFamily:) ← AppDatabase.read`. Suspected
+mechanism (UNCONFIRMED): the launch-time background purge sweep holds an in-flight POOL READER while the pool (or
+its codec key context) is torn down — quit, test-host termination, plausibly the Castle lock's teardown — a
+use-after-free in the codec context. Data-safe (a read), but a "Variorum quit unexpectedly" class reachable by
+quitting (or locking?) within seconds of a launch that has tombstones to sweep. Adjacent: VX-818's MacWillLock
+teardown ordering landed in the same neighborhood — read its landed shape before concluding anything about the
+lock road.
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole · `notes/SyncSpec.md` IN FULL · the purge
+design's sweep/horizon sections (`notes/plans/phase-13j-purge-memo.md`) · the code:
+`Sources/VariorumCore/Sync/PurgeJanitor.swift` (`collectRoots`), `Operations+Purge.swift` (`LocalPurge.sweep`),
+the pool's close road (`Sources/VariorumCore/Persistence/` — where the pool closes at quit/lock), the app
+teardown (`AppBootstrap`'s lock and quit roads; grep `QuitPurgeQuiesceTests` — the standing quiesce pin suite,
+your closest precedent), and every `LocalPurge.sweep` caller (the launch road that starts the background sweep).
+
+**The pieces, in order (commit per piece, `Part of VX-855`; push each):**
+
+1. **THE TRACE + THE REPRO PIN (the confirm).** Trace the teardown order in code first: who closes the pool /
+   drops the codec context, and what (if anything) waits for the sweep's in-flight reader. Then the repro,
+   HEADLESS-FIRST: a core-level Swift Testing pin that drives the sweep's read on a pool while the store tears
+   down (close/key-drop) mid-read — DETERMINISTICALLY (hold the read open with a plant, then tear down), never a
+   timing lottery. RED confirms the class. If the class only reproduces in-app at quit, say so plainly and record
+   the dev-store repro recipe for the ORCHESTRATOR'S window (launch, store with purgeable tombstones, quit within
+   seconds) — never launch the app yourself (stage).
+2. **THE FIX (only on a red confirm):** order teardown against in-flight background reads — the sweep's reader
+   awaited (or the sweep cancelled and joined) BEFORE the pool/codec teardown; the `QuitPurgeQuiesceTests` shape
+   is the precedent. No new product behavior; pure ordering. If the fix wants to grow into a lock-road redesign,
+   STOP and record (VX-152's adjacency — the orchestrator adjudicates).
+3. **Pins:** the repro pin red-on-old by behavioral revert (named BEFORE it runs, at a committed tip); the
+   ordering pinned.
+4. **Close:** `swift build` · headless `swift test` over every touched suite · both `build-for-testing`s; list
+   any Mac suites (TYPE names) + named reverts for the orchestrator's window at your record's end.
+
+**Your record:** `### BATCH 5 RECORD` under UNIT RECORDS; LIVE STATUS row 5 flipped in your commits; first line =
+what you did NOT do; a green confirm said plainly as RECORD-ONLY. **Not yours:** the stage; any Debug-app launch;
+batches 3/4/6's files. **ENVIRONMENT TRAPS and STAGE & COORDINATION above bind verbatim.** No subagents;
+foreground waits only.
+
+## BATCH 6 BRIEF — the OWNED repair's rank swap (VX-921) + the device_cursor cap script (VX-919, AUTHORED ONLY)
+
+**Who you are.** The implementer for batch 6, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`. SYNC/-CLASS
+(`Repairs.swift`) — `notes/SyncSpec.md` IN FULL before any line; Fable cold-reviews. **ZERO server contact:
+VX-919's script is AUTHORED and self-assessed only — never run against production, the mirror or any live
+Supabase; the deploy is HELD for her window (a server act runs only at her word).**
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole · `notes/SyncSpec.md` IN FULL (§7's repair
+doctrine especially) · `notes/plans/fixes/vx-912-open-source-gating.md`'s B2 record (the worked pattern — the
+created_at rank swap, P3: your exact shape) · `notes/plans/fixes/vx-912-b0-security-verify.md`'s device_cursor
+corner (why VX-919 exists) · the code: `Sources/VariorumCore/Sync/Repairs.swift` — the OWNED exclusivity repair
+(~:975–1050; the rank comment ~:984, the `sync_row_seq` join ~:1017) · `Server/supabase/` — grep `sync_challenge`
+for the cap/eviction pattern; `Server/supabase/maintenance/` for the script conventions (`vx495-pull-keyset.sql`
++ `vx495-rollback.sql` are the paired-rollback precedent).
+
+**The pieces, in order (commit per piece, `Part of VX-<member>`; push each):**
+
+1. **VX-921 — the rank swap.** The OWNED exclusivity repair's claimant rank moves from `sync_row_seq` to
+   `created_at` (the B2 worked pattern decides the exact key and tiebreak — follow it; an id tiebreak keeps
+   determinism when stamps tie). SCOPE: this repair only — if you find sibling repairs with the same seq-rank gap
+   (the ~:795/:812 joins belong to a different repair), RECORD them for the orchestrator, never widen silently.
+   The pin, red-on-old by behavioral revert: the convergence shape — two devices whose `sync_row_seq`
+   bookkeeping ranks DIFFERENT claimants (seq is per-device) converge on the SAME claimant under created_at; on
+   the seq rank the pin is RED (the devices disagree). The repair's demotion/arrival arms unchanged (the standing
+   suites stay green).
+2. **VX-919 — the cap script, authored.** `Server/supabase/maintenance/vx919-device-cursor-cap.sql`: bound LIVE
+   device rows per account at 64, evicting oldest `seen_at` first (the `sync_challenge` pattern); idempotent and
+   safe to re-run; a header comment stating what it does, the DEPLOY-HELD-FOR-HER-WINDOW line, and the
+   verification query to run after deploy; a paired rollback script/note per the maintenance conventions if the
+   pattern calls for one. NEVER executed anywhere by you — its review is the ladder's.
+3. **Close:** `swift build` · headless `swift test` over the repair's suites (the convergence suites run
+   headless in the core) · both `build-for-testing`s; list any Mac suites (TYPE names — likely none) and confirm
+   every named revert ran headless.
+
+**Your record:** `### BATCH 6 RECORD` under UNIT RECORDS; LIVE STATUS row 6 flipped in your commits; first line =
+what you did NOT do. **Not yours:** the stage; the deploy; batches 3/4/5's files. **ENVIRONMENT TRAPS and STAGE &
+COORDINATION above bind verbatim.** No subagents; foreground waits only.
+
+## UNIT RECORDS
+
+*(appended per batch)*
+
+### BATCH 1 RECORD (the implementer — Opus, xhigh; opened 2026-11-08)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind and no Debug-app
+launch (the brief's headless rule — no stage claim). Every Mac-suite claim below is **PENDING** the STAGE REQUEST
+at the end of this record. Nothing touched `PaneSurface`/`PaneTextAuthority` (batch 3), VX-544's retry (batch 2),
+the ladder or the PR.
+
+**The headless reading of an app-target batch (recorded at the start):** the honest flush (`AutosaveCoordinator`)
+and the `beforeRound` hook (`SyncSession`) live in the APP target (`App/Variorum/Shared/`), so their pins are Mac
+suites (`VariorumTests`), which need the stage. Headless here means: `swift build`/`swift test` for the core;
+`xcodebuild build-for-testing` (Mac + phone) to COMPILE the app pins — the VX-912 plan's binding line: "Headless
+`swift build`/`swift test` and `xcodebuild build`/`build-for-testing` never need the stage"; and, for the
+coordinator's behavior, a THROWAWAY instrument (the coordinator + runner source copied uncommitted into a scratch
+folder of the core test target, run, then deleted — never in the PR) so its red-on-old is watched, not assumed.
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | VX-402 — the honest flush | DONE (this commit) — instrument red 3/3 → green 3/3; Mac `build-for-testing` green; the Mac pins' RUNS **PENDING** (stage) |
+| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | DONE — 2a the op + core pins (`e7ec1227f`; 9/9; revert-proven); 2b the coordinator + the eleven record sites + the Mac pins (`169a51898`; instrument reverts R1/R2 bite); the phone pins (`3779bdea9`); Mac + phone builds green; Mac/simulator runs PENDING (stage) |
+| 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | DONE (the commit after `3779bdea9`, which flipped this row one commit early) — core 11/11; Mac + phone `build-for-testing` green; Mac runs PENDING (stage) |
+| 4 | Close — builds, suites, self-assessment, STAGE REQUEST | DONE (this commit) — core 4019 green; MCP socket load-flakes recorded (all green alone); every Mac/simulator run PENDING the STAGE REQUEST |
+
+**Piece 1 — VX-402, the honest flush (FIXED).**
+- *Mechanism (traced, `AutosaveCoordinator.flushNow`):* a flush took the batch and cleared `pending` BEFORE awaiting its
+  writes, so a second `flushNow` arriving while a write flew (the 500-ms debounce's, a door's detached flush) found
+  nothing pending and returned at once — the door read the pre-keystroke store, and `flushExistingAutosave` answered
+  `false` (`isDirty` counted the flight), an answer every caller discards. **The order hole beside it (found tracing,
+  same class):** a two-take batch writes one runner turn at a time; a flush started between its turns wrote its NEWER
+  text for the second take first, then the older batch's text landed on top — her last keystrokes overwritten by her
+  own earlier ones, until her next keystroke rewrote the whole buffer (a ⌘Q in between savepoints the older text).
+- *Fix:* one serial write lock — a flush waits for the batch in flight, THEN takes everything pending at that moment;
+  `isDirty` = pending or writing. A refused entry the waited-on write puts back is not retried by the waiter (the
+  keep-pending posture stands). The two vx-382 doc comments that named the open window (`BookIndexEditModel
+  .releaseForTakesSheet`, `BookView.openInWrite`) now say it is closed — comment-only.
+- *Pins (Mac, `AutosaveCoordinatorTests`, the VX-402 section — all three use only pre-fix API, so their red is
+  BEHAVIORAL):* `aFlushArrivingWhileAWriteIsInFlightReturnsOnlyAfterThatWriteLanded` (an on-disk pool store, the
+  writer held from a background thread so the write is provably in flight; the door's read beside it) ·
+  `aNewerFlushNeverLandsUnderAnOlderInFlightOne` (reads only after the coordinator is quiet, so the red is the ORDER) ·
+  `anIdleFlushReturnsAtOnceAndStillSettles` (guard, green both sides).
+- *Evidence, headless (the instrument):* on the PRE-FIX coordinator the two pins were red 3/3 for the traced reasons —
+  the door read `"before"` with `isDirty == true`; the order pin read `"late older"`. On the fix: green 3/3. Mac
+  `xcodebuild build-for-testing` green (0 errors, no warning in a touched file). **The Mac runs themselves are
+  PENDING** (the STAGE REQUEST below — red at the pre-fix parent, green at the tip).
+
+**Piece 2a — VX-683 B, the operation (FIXED; core, headless).**
+- *Mechanism (the memo's, re-traced in code):* her typing sits in the debounce window, so the take's row is CLEAN (not
+  in `sync_outbox`); a pull applies the server's `working_text` on SyncSpec §5's locally-clean path; then the debounced
+  `Operations.autosave(variantID, text:, charDelta:)` writes her buffer — built on the OLD text — over it blind
+  (`Operations+Variant.swift`, the pre-fix body: `variant.workingText = text; update`). Its push carries the applied
+  `sync_version`, so the server ACCEPTS it: the remote words survive nowhere.
+- *Fix:* `autosave(…, expectedText: String? = nil)`. Inside the one transaction, after the take's guards (unchanged,
+  so a locked take / sealed post / archived or dead take still refuses first and mints nothing): her text is written as
+  before (touch and churn as before); when the snapshot is given and the row no longer holds it, the displaced text is
+  inserted as a new take through `Operations.insertConflictVariant` — the S5 core `resolveSyncConflict` and the engine
+  share — same block, the edited take's own parent, label `'conflict'`, the fan's end, never chosen. Compared as the
+  store keeps text (`StoredText`); nothing displaced ⇒ no card; a dead block ⇒ no card (the engine's guard); `nil` ⇒
+  today's blind write. The ordinary triggers enqueue both rows (never apply mode), so both push.
+- *Pins (`Tests/VariorumCoreTests/TypedOverRescueTests.swift`):* suite "The typed-over rescue (VX-683 B — the guarded
+  autosave)" — THE PIN `aStaleAutosaveKeepsHerBufferOnTheRowAndRescuesTheDisplacedWords`, the S5-shape pin
+  `theRescuedCardLandsWhereAnS5CardLands`, and six guards (`anAutosaveOnTheTextItSawWritesAsBefore`,
+  `anUnguardedAutosaveIsTheBlindWriteItAlwaysWas`, `whenTheRowAlreadyHoldsHerWordsNoCardIsMinted`,
+  `aLockedTakeOrASealedPostRefusesBeforeAnyRescue`, `theSnapshotIsComparedAsTheStoreKeepsText`,
+  `theRescueTouchesAndChurnsExactlyAsTheWriteItIs`); suite "The typed-over rescue converges (VX-683 B)" —
+  `aPullIntoTheDebounceWindowThenHerAutosaveConvergesWithBothTexts` (two clients, the fake server, production rounds:
+  dumps equal, outboxes empty, both texts on both devices, her words on the row).
+- *Red-on-old, said plainly:* every pin names the new parameter, so on the pre-fix tree the suite is **COMPILE-red**
+  (watched: `extra argument 'expectedText' in call`). The BEHAVIORAL red is the named revert below. Green on the fix:
+  **9/9** (`swift test --filter TypedOverRescue`).
+- *THE NAMED BEHAVIORAL REVERT (named here BEFORE it runs, at the committed tip of this commit):* in
+  `Operations.autosave`, the rescue's `if` is guarded off (`if false, let expectedText, …`) — the parameter accepted
+  and ignored, i.e. the pre-fix blind write. Expected: THE PIN, the S5-shape pin and the convergence pin RED (the
+  displaced words survive nowhere); the six guards green. Then `git checkout --` the one file (nothing else
+  uncommitted in it) and the suite re-run green. **Result (run at `e7ec1227f`): exactly as named** — RED:
+  `aStaleAutosaveKeepsHerBufferOnTheRowAndRescuesTheDisplacedWords` (2 issues), `theRescuedCardLandsWhereAnS5CardLands`
+  (4), `aPullIntoTheDebounceWindowThenHerAutosaveConvergesWithBothTexts` (4); the six guards GREEN; restored by
+  `git checkout --` of the one file (diff clean) → **9/9 green**.
+
+**Piece 2b — VX-683 B, the snapshot rides every surface's call (FIXED; Mac pins PENDING the stage).**
+- *The coordinator (`AutosaveCoordinator`):* `Pending.expectedText` — the text the pending RUN was built on, set by the
+  run's FIRST `record(…, basedOn:)` and kept while later keystrokes coalesce (they were built on her own pending text,
+  never on the store); the flush passes it as the op's `expectedText`. A REFUSED write hands its older snapshot to a
+  newer run recorded while it flew (the refused text never landed, so the newer run still stands on the older row —
+  carrying its own would read the untouched row as changed and mint a spurious card at the retry).
+- *The eleven production record sites, each passing what the surface showed BEFORE the edit:* Write
+  (`EditorViewModel.recordAutosave` — the ledger's text before `recordEdit`); the crystallizer's leading-run attach
+  (`knownText`) and its corrections (what THIS mint wrote into the take); the Takes board, Compare, Canvas, the book
+  Index and the block TOC (each pane's `old` = `PaneTextAuthority.text`, computed before `bufferEdited`); the phone's
+  page (its ledger), its takes-browser card (`lastRecordedCardText`, seeded at `beginEditing` from what the card
+  showed), its branch-carries-the-shown-text road (the minted take's text), and the phone's quick note (a new
+  `recordBase`: the owned block's STORED text at adoption — the box's own tail can differ from it by the import's
+  normalization — then each tail handed off).
+- *Deliberately unguarded (recorded corner):* the list exit's retraction write inside `runStructural`
+  (`EditorSurfaceController.insertEmptyBlock`) — a structural flight's op body, written right after the flight's own
+  flush in the same serialized runner; the seeders and the perf fixtures (not surfaces).
+- *Pins (Mac, `TypedOverRescueSurfaceTests` — a new suite):* RED ON OLD BY BEHAVIOR (they drive only pre-fix API —
+  the real typing road, a pull's row write, the flush): `writeTypingOverASyncPullRescuesThePullsWords`,
+  `takesPaneTypingOverASyncPullRescuesThePullsWords`. Guards (green both sides — the false-positive class):
+  `writeHerOwnSuccessiveRunsNeverMintACard`, `takesPaneHerOwnSuccessiveRunsNeverMintACard`. Coordinator pins
+  (compile-red on old — they name `basedOn:`): `aRunCarriesItsFirstSnapshotAcrossCoalescedKeystrokes`,
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun`.
+- *Evidence, headless:* the two coordinator pins, ported into the instrument over the new coordinator: green. Mac
+  `build-for-testing` green (0 errors). Phone `build-for-testing` green (generic iOS Simulator; one phone suite called
+  `recordTakeEdit` without the snapshot — the parameter now defaults to nil like the coordinator's own `record`).
+  **Every Mac run PENDING** (the STAGE REQUEST). The instrument's behavioral reverts of the two coordinator lines run
+  next, at this commit's tip.
+- *The instrument's named reverts (run at `169a51898`, on the throwaway copy of the committed coordinator):* **R1** —
+  the flush passes `expectedText: nil` → `aRunCarriesItsFirstSnapshotAcrossCoalescedKeystrokes` RED, the refused-write
+  pin green; **R2** — the hand-over line `newer.expectedText = entry.expectedText` removed →
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun` RED (the spurious card), the first-snapshot pin green. Restored →
+  4/4 green. Each revert bites exactly its own pin.
+- *The phone's pins (a follow-up commit, `MobileTypedOverRescueTests`):* RED ON OLD BY BEHAVIOR —
+  `thePageTypingOverASyncPullRescuesThePullsWords`, `aQuickCaptureTypedOverAPullRescuesThePullsWords`; GUARDS —
+  `thePageHerOwnSuccessiveRunsNeverMintACard`, `aQuickCapturesOwnTypingAfterItsMintNeverMintsACard` (a one-block and a
+  pasted two-paragraph capture — the quick note's `recordBase`). Phone `build-for-testing` green; simulator runs
+  PENDING the stage.
+
+**Piece 3 — VX-683 A, the occasion before every round (BUILT; Mac runs PENDING the stage).**
+- *The seam (`SyncSession.beforeRound: (@MainActor () async -> Void)?`, minted here — D-544 build step 3a's shape; batch 2
+  wires VX-544's retry onto it):* run to its END before every round the session's own roads start — `triggerSync()`
+  (every trigger funnels through it), `flush()` AND `roundNow()`; behind the restore hold (a held store runs neither the
+  occasion nor a round); the gate and the chain are read AGAIN after the occasion, so the round goes to the chain that
+  stands then (a chain stopped or mid-replacement meanwhile runs nothing — `configure` clears it before it drains, so a
+  retired chain is never revived). **nil = inert, byte-for-byte the pre-hook road** (the `keyProvider` pattern). Zero
+  `Sources/VariorumCore/Sync/` lines: the engine never learns editors exist. *`roundNow` is included beyond the brief's
+  two names* — an account act's first round is the same road class, and "every round this session's roads start" is
+  only true with it; flagged for the orchestrator (one `if let` to drop if ruled out).
+- *The occasion (`AppSession.flushPendingTypingBeforeRound`, shared):* R-683-3's one cheap check (`hasPendingAutosave`,
+  bounded by the notes open — P1), then ONLY the dirty coordinators flush, through the honest flush (piece 1 — a write
+  already in flight lands first too). After it the row is dirty and the standing §5/§6 machinery does the rest.
+- *The composition:* `AppServices.init`, `#if os(macOS)` — "the Mac composition wires it" (the brief). **MOBILE PARITY:**
+  the phone carries B on every phone record site (the page, the takes browser, the quick note) but NOT A's occasion —
+  its sync roads (foreground trigger, the background `flush`) run no flush-before-apply, so a pull landing in its
+  debounce window takes B's (i)-shaped rescue rather than A's S5 card. Nothing is lost either way; wiring the phone is
+  one line beside the Mac's (the orchestrator's call).
+- *Pins:* Mac `SyncBeforeRoundTests` — `triggerSyncRunsTheOccasionToItsEndBeforeTheRound`,
+  `flushRunsTheOccasionToItsEndBeforeItsRound`, `roundNowRunsTheOccasionToItsEndBeforeItsRound` (an order-logging
+  transport: the occasion's start and end both precede the round's first transport call),
+  `aHeldStoreRunsNeitherTheOccasionNorARound`, the guard `noOccasionIsInert`; and the composition
+  `theMacsOccasionLandsPendingTypingBeforeTheRound`, `theMacsOccasionTouchesNothingWhenNoTypingIsPending` (no flush,
+  no settle on a clean coordinator — R-683-3). All name `beforeRound` → **COMPILE-red** on the pre-fix tree; their
+  behavioral red is the named Mac reverts in the STAGE REQUEST. Core `FlushBeforeTheRoundConvergenceTests` (two
+  clients, the fake server, production rounds) — `herPendingTypingFlushedBeforeTheRoundBecomesTheStandingS5Card` (THE
+  brief's pin: the round ends with the server text on the row, her text the `'conflict'` take, the Mac's outbox empty —
+  its push carried the card; both devices end with both texts) and `typingBetweenTheFlushAndTheApplyIsRescuedByTheGuard`
+  (the memo's millisecond stragglers: three texts, none lost). These pin the COMPOSITION with the standing S5 road —
+  green on both sides of the engine by design (no `Sync/` line changed); **11/11** with B's suites.
+- *Builds:* Mac `build-for-testing` green and phone `build-for-testing` green (0 errors, no warning in a touched file).
+
+**Piece 4 — Close.**
+- *Headless, at `bdb70dc3d` (the instrument deleted first — the tree clean, nothing of it ever committed):* `swift build`
+  green. The WHOLE package suite (`swift test`; `Operations.autosave` is called across many suites, so the touched set
+  is effectively the target): **VariorumCoreTests 4019 tests in 549 suites PASSED (5 known issues)** · StringsWorkbook
+  32 passed · **VariorumMCPTests 669 tests: load-sensitive socket failures, a VARYING set** — 6 in the full run (load
+  average 16–23 on the Pro), then 4, then 2 in two runs of the MCP target alone (`aQuitSaysNothingForAConnectionItEnds`,
+  `claudeCodesPipelinedProbeIsAnsweredAndItsInitializeServes`, `aBareOpeningIsAnsweredBeforeTheReadBlocks`,
+  `eachStopSaysItsWordsAsTheConnectionsLastLine`, `aDoorStopThatLetsGoOfItsHostEndsTheClientsUntilDisconnectGrants`,
+  `aReusedNumberKeepsItsBytesAfterTheSessionEnds`, and the ENVIRONMENT TRAPS' named flake
+  `aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`); every one of the seven is an initialize/handshake
+  that got no answer in time, and **all seven PASS run on their own** (two filtered runs, 7/7). No line of
+  `VariorumMCP`/`VariorumMCPSocket` changed and neither reaches `autosave`; whether the MCP target goes wholly green in
+  one quiet run is left to the closing run (a comparison against main's tip there would settle it beyond doubt).
+  Mac + phone `build-for-testing` green at every piece.
+
+**SELF-ASSESSMENT (the brief's two questions, answered exactly).**
+- *The window that remains open after A — and B covers all of it:* A's occasion runs when the session's road starts the
+  round (the trigger), so what stays open is everything between the occasion's last write and the apply transaction's
+  begin: **milliseconds** for an ordinary round (the scheduler's hop, the lockstep check, a small pull); **the whole
+  download** for a long catch-up (VX-494's staged windows — minutes on a from-zero round, during which she can type);
+  **a trigger coalesced behind a running round** (its occasion runs at the trigger, its round only after the running one
+  ends); **the rounds the scheduler starts on its own** (the coalesced follow-up, the orphan heal's, the one-writer
+  belt's) — no occasion at all; and **the phone**, which composes no occasion (MOBILE PARITY above). In every one of
+  these the row is clean when the pull applies, so the apply lands the server's words; the next autosave of her pending
+  run carries the snapshot the run was built on, finds the row changed, and RESCUES (R-683-1/-2). Nothing in the window
+  is lost; the only difference from A's road is which text keeps the row (hers, under B; the server's, under A).
+- *Every road the guarded autosave now rescues* (any writer that changes a take's row under a pending run, the run's
+  snapshot predating it): **a sync pull** on SyncSpec §5's locally-clean path inside the debounce window (the memo's
+  mechanism — pinned core, Mac, phone); **the MCP door mid-window** (the door flushes her typing first, then acts; a
+  keystroke after that flush starts a run whose snapshot predates the AI's write — rescued as the card, the AI's words
+  kept); **a second window or a second surface** on the same take whose stale buffer would write back (VX-664's
+  write-back class: the stale surface's next edit is built on words the row no longer holds — rescued, both kept;
+  batch 3 still ends the ring so the face adopts); **a structural undo / redo, a Block History restore, a lens promote,
+  a Replace-in-every-take** landing on a take with a pending run (the flush-first doors land her run first; a keystroke
+  racing them is rescued); **the Takes board's own non-flushing doors** (the recorded corner below).
+- *What B does NOT guard:* a caller that passes no snapshot — the seeders and perf fixtures (not surfaces), the list
+  exit's retraction inside `runStructural` (a structural flight's op body, right after the flight's own flush), and the
+  phone's `recordTakeEdit` when a test calls it bare (both production callers pass it). A surface whose bookkeeping
+  lagged the store would show a spurious card; the false-positive guards (Write, a Takes pane, the page, the quick note —
+  her own successive runs never mint a card) pin that none of the eleven roads does.
+
+**RECORDED CORNERS (for the orchestrator; none fixed here — each is outside this unit):**
+1. **The Takes board's `run` road does not flush first** (`TakesViewModel.run` — its `restoreCommit` among others). A
+   board door that rewrites the take her live pane has pending typing in, racing that pending autosave, now leaves a
+   `'conflict'` card holding the door's result; pre-fix her typing silently overwrote the door's result (a pre-existing
+   loss). R-683-2's retelling says "a deliberate act of hers never mints this card" — this race is the one place that
+   sentence does not hold as shipped. The spec-defensible fix is the flush-first doctrine on those doors (a ticket, not
+   a product question — the rulings reconciliation item for the closeout).
+2. **An empty displaced text mints an (empty) card** — the S5 card's own rule (the engine rescues whenever the texts
+   differ), mirrored with no special case: no product invention either way.
+3. **A dead block takes no card** (the engine's rescue guard); a live take under a dead block exists only inside an
+   apply transaction, so no autosave can meet it.
+4. **The face right after a rescue or after A's S5 adoption** is batch 3's (R-683-4, VX-664's composition).
+5. **`roundNow` runs the occasion too** (beyond the brief's two named roads — same road class); one `if let` to drop.
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** AppSpec §9's convention line ("An
+`expectedText` precondition that no longer matches refuses as `bufferChangedSinceGesture`") gains the autosave's
+exception (it rescues instead of refusing); AppSpec §9's `autosave(variant, text, charDelta)` line gains `expectedText`
+and the rescue (her buffer keeps the row; the displaced words a `'conflict'` take — R-683-1/-2); SyncSpec §6's
+`working_text` row may want one pointer to the autosave-layer rescue (a local rescue, no §7 entry). No QUESTIONS filed:
+nothing here needed a product decision the rulings had not made (corner 1 is a rulings-reconciliation item, flagged).
+
+**STAGE REQUEST (every Mac and simulator run of this batch; the orchestrator's claim through nov7):**
+- *Leg A — the batch's own Mac suites, at the tip (green expected):* `cd App/Variorum && xcodebuild test -scheme
+  Variorum -destination 'platform=macOS' -only-testing:VariorumTests/AutosaveCoordinatorTests
+  -only-testing:VariorumTests/TypedOverRescueSurfaceTests -only-testing:VariorumTests/SyncBeforeRoundTests` — confirm
+  the "Test run with N tests" line (AutosaveCoordinatorTests 9 · TypedOverRescueSurfaceTests 6 · SyncBeforeRoundTests 7
+  = 22).
+- *Leg B — the named Mac behavioral reverts, each applied ALONE at the committed tip, its pins run, then `git checkout
+  --` of the one file (diff clean) and the pins re-run green:*
+  **R-402** `AutosaveCoordinator.flushNow`: delete the `while writing { … }` wait → RED
+  `aFlushArrivingWhileAWriteIsInFlightReturnsOnlyAfterThatWriteLanded`, `aNewerFlushNeverLandsUnderAnOlderInFlightOne`.
+  **R-B1** the flush's `expectedText: entry.expectedText` → `expectedText: nil` → RED
+  `writeTypingOverASyncPullRescuesThePullsWords`, `takesPaneTypingOverASyncPullRescuesThePullsWords`,
+  `aRunCarriesItsFirstSnapshotAcrossCoalescedKeystrokes` (the two surface pins are also behavior-red against the
+  pre-fix source — they drive only pre-fix API). **R-B2** delete `newer.expectedText = entry.expectedText` → RED
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun`. **R-A1** `SyncSession`: in `triggerSync`, `flush` and `roundNow`
+  read `nil` where they read `beforeRound` (the hook stored, never run) → RED the three
+  `…RunsTheOccasionToItsEndBefore…` pins. **R-A2** `AppServices.init`: delete the `#if os(macOS)` `sync.beforeRound`
+  block → RED `theMacsOccasionLandsPendingTypingBeforeTheRound`, `theMacsOccasionTouchesNothingWhenNoTypingIsPending`.
+  **R-A3** `AppSession.flushPendingTypingBeforeRound`'s body → `await flushEveryOpenPost()` → RED
+  `theMacsOccasionTouchesNothingWhenNoTypingIsPending` (R-683-3: a clean coordinator flushed).
+- *Leg C — the touched surfaces' standing Mac suites* (or simply the whole `VariorumTests` target, LIVE STATUS row 8):
+  the suites over the coordinator, the eleven record sites, `SyncSession`/`AppServices` — among them
+  `OutsideWriteRingEndTests`, `OutsideWriteLivePaneTests`, `TakePaneDurabilityTests`, `AutosaveConsolidationTests`,
+  `AutosaveRegistryLifecycleTests`, `AutosaveRegistryReleaseTests`, `CopyDoorFlushTests`, `EditorSessionTests`,
+  `BookIndexEditingTests`, `CompareBoardTests`, `CanvasAndPoolTests`, `TakesBoardTests`, `BlockHistoryPaneTests`,
+  `NoteDeletionDoorsTests`, `MCPHerEditorDoorTests`, `ReturnKeyTraceTests`, `FirstRoundRoadTests`, the
+  `Phase8ServicesTests` file's suites, `SyncWalkFenceTests`, `Phase9cAuthWiringTests`, `QuitPurgeQuiesceTests`.
+- *Leg D — the phone (simulator):* `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS
+  Simulator,name=<the run's simulator>' -only-testing:VariorumMobileTests/MobileTypedOverRescueTests` (4 tests) plus
+  the touched phone suites (`MobileQuickNoteTests`, `MobileEditorTests`, `MobileTakesBrowserTests`,
+  `MobileBlockHistoryTests`, `MobileLivenessTests`); R-B1 again bites `thePageTypingOverASyncPullRescuesThePullsWords`
+  and `aQuickCaptureTypedOverAPullRescuesThePullsWords`.
+- *Not mine to claim and not claimed:* the live look (one real two-Mac round with typing in flight — her eyes, the
+  memo's third evidence shape; can ride batch 2's held window).
+
+### BATCH 1 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 2 spawns)
+
+**Verification:** all seven commits present and pushed as reported; the core pins re-run FIRST-HAND on the merged
+tree (after the fold-in, merge `1f8f25a37`): `swift test --filter TypedOverRescue` → **11/11 in 3 suites green**.
+The Mac/simulator legs are claimed as a stage window (legs A + B + D now; leg C FOLDS into the run's closing Mac
+runs, LIVE STATUS row 8, where those suites must run anyway over every changed source — one sweep, not two).
+
+**The implementer's decisions, dispositioned:**
+1. **The Takes board's non-flushing doors (its `restoreCommit` among them) → FOLDED INTO BATCH 3 as a named item,
+   PROVISIONAL P-849-1.** The finding is real: a board door that rewrites the take her live pane is typing in now
+   leaves a `'conflict'` card, against R-683-2's premise ("a deliberate act of hers never mints this card"). The
+   spec-defensible build (the PROVISIONAL rule): those doors FLUSH PENDING TYPING FIRST — the MCP door's own
+   precedent, and the same world batch 3's ring-ending composes with (the door then acts on flushed text, the ring
+   ends on the pane's own take per her VX-664 option-(a) ruling, the pane adopts, no card). The alternative (keep
+   the rescue card on her own doors) is recorded here; QUESTIONS at the merge.
+2. **`roundNow` runs the occasion → ACCEPTED, not provisional.** An account act's first round applies rows like
+   any round; the flush-before-apply rationale is road-independent (mechanism, not product).
+3. **The phone gets B but not A → batch 2's seam call, PROVISIONAL P-849-2.** Batch 2 wires beforeRound occasions
+   anyway (the retry); it wires the phone's FLUSH occasion too if the phone composition offers the same one-line
+   seam, else records it for the MOBILE PARITY line. (D-544's phone posture — the retry hook unwired there — is
+   unchanged either way.)
+4. **The deliberately unguarded sites (the list-exit retraction inside `runStructural`, the seeders, the perf
+   fixtures) → ACCEPTED as recorded.** None is her typing racing an outside writer; the structural compound keeps
+   `insureTakes` as its own insurance.
+5. **Canon deltas → queued for the closeout list:** AppSpec §9's `expectedText` convention line gains the
+   autosave exception (rescues, never refuses); the `autosave` line gains `expectedText` and the rescue; a
+   SyncSpec §6 pointer if the ladder agrees it belongs.
+
+**THE STAGE WINDOW (claim vx-849-batch1, 2026-11-09, the orchestrator's hands; worktree verified at tip
+`cd3c51ce6` before, between and after every cycle):**
+- **Leg A:** "Test run with 22 tests in 3 suites passed" (AutosaveCoordinatorTests 9 · TypedOverRescueSurfaceTests 6
+  · SyncBeforeRoundTests 7).
+- **Leg B, six reverts, each applied alone, restored and `git diff --stat`-verified clean before the next, each
+  restore's suites re-run green:** R-402 red on `aFlushArrivingWhileAWriteIsInFlightReturnsOnlyAfterThatWriteLanded`
+  (2 issues, the traced expectations); R-B1 red on exactly its three named pins; R-B2 red on
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun` (2 issues); R-A1 red on exactly the three
+  `…RunsTheOccasionToItsEnd…` pins; R-A2 red on both its named pins; R-A3 red on exactly
+  `theMacsOccasionTouchesNothingWhenNoTypingIsPending`. Final clean-tip proof: the leg-A trio 22/22 green.
+- **The R-402 overlap, adjudicated live (a finding, not a hollow pin):**
+  `aNewerFlushNeverLandsUnderAnOlderInFlightOne` stays GREEN under R-402 alone — with the lock deleted, VX-683 B's
+  guard independently covers that interleaving (her own superseded run is dropped without a card), so the row still
+  ends right. One deliberate STACKED probe (R-402 + R-B1, both belts off) turned it RED on the exact expected line
+  ("an older in-flight write landed over her newer text") — first-hand proof the pin is live. The defense-in-depth
+  overlap is the memo's own design ("B is the belt that makes the class impossible whatever the timing"); recorded
+  so no later reader mistakes the single-revert green for hollowness.
+- **Two spec corrections to the leg as written:** R-B2's pin lives in `TypedOverRescueSurfaceTests` (the first red
+  run targeted only the coordinator suite and read green — a suite-targeting miss, corrected); and the leg-D list's
+  `MobileEditorTests` is NOT a type (nov7's trap check) — the real editor types are the five `MobileEditor*Tests`
+  suites, all run.
+- **Leg D (iPhone 17 Pro sim by id, fresh boot, `simctl shutdown all` after):** "Test run with 116 tests in 10
+  suites passed" — MobileTypedOverRescueTests (the batch's 4) + MobileQuickNoteTests · MobileTakesBrowserTests ·
+  MobileBlockHistoryTests · MobileLivenessTests + the five MobileEditor* suites. A first attempt exited 70 on an
+  unresolved `name=iPhone 17 Pro` destination (no test ran); the rerun pins the device BY ID.
+
+**Also recorded:** the MCP whole-target socket timeouts (6→4→2, all green alone, no MCP line changed) are the
+known VX-850 load-flake class — vx-926's territory; the closing run compares against main's tip before any claim.
+The two batch-1 convergence pins passing on both sides is BY DESIGN (they pin the composition with the standing
+S5 machinery), recorded so nobody reads them as a hollow red-on-old — the batch's red-on-old lives in the core
+rescue pins (revert-proven headless) and the named Mac reverts (leg B).
+
+### BATCH 2 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+Debug-app launch, no store or server contact (override 7 — every Mac and simulator run is the orchestrator's, through
+nov7's queue; the suites are listed at the end). Her drill — the two-Mac test's steps 8–9 on her Air — is OWED, never
+claimed (override 8; LIVE STATUS row 9). Nothing under `Sources/VariorumCore/Sync/` or `Protection/`'s headless core.
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole (STATUS, KICKOFF,
+STAGE & COORDINATION, CONSTITUTION, ENVIRONMENT TRAPS, the batch 1 record + adjudication, this batch's nine overrides);
+`notes/plans/fixes/vx-544-offline-typed-unlock.md` whole (D-544, PREFLIGHT FACTS, THE BRIEF) and VX-500's D-544 section;
+`notes/CastleRules.md` WHOLE; `notes/SurfaceContracts.md` §"Doors to the outside" (the protection bullet — VX-501's
+typed-unlock load, VX-486/487's locked row); `notes/SyncSpec.md` §2–§6 (§3's keys-absent refusal grammar);
+`notes/SessionResiliencyProtocol.md` §implementer; `.claude/agents/opus-implementer.md`.
+
+**PREFLIGHT FACTS re-verified at `93c2e3149`:** `ProtectionOpenRoad.swift` — `TypedUnlockSecret` :624 (redacted),
+`loadSyncKeysAfterTypedUnlock` :654 (its exits: not writing/unbound :658, not Castle :659, keys already held :661, signed
+out/another account :667, the vault read's `.read(nil)` :679 / `.failed` :682 / `.timedOut` :686, a secret not the vault's
+:702, a master not the vault's :707, a moved account :711, the hold :715), `openTyped`'s call :395 and the vault road's
+catch-up's call :529; `ProtectionRoadLock.dropSessionMemory` :56 (callers: the lock `AppBootstrap.swift:1456`, Make this my
+library's outgoing session `ProtectionCopyDoors.swift:538`); `SyncSession.triggerSync` now :214 and `flush` :280 (batch 1
+moved them; `roundNow` :243; the `beforeRound` hook :211, batch 1's); the one wired closure `AppServices.swift:220`
+(`#if os(macOS)`); NO `NWPathMonitor` / `import Network` anywhere in `App/` or `Sources/`; the locked line
+`SyncStatusViews.swift:767` untouched. **Fact the old plan did not have:** the PHONE reaches the shared typed load too
+(VM-8 unit 1 — `MobileTypedUnlockSyncKeysTests`), so D-544's "no typed-unlock pending on the phone's road today" is stale:
+the shared load's retention runs on the phone; only its retry stays unwired (override 5).
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Preflight + this record | DONE (this commit) |
+| 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | DONE (`b11fb8d39`) — compile-red on old watched; R-1a/R-1b bit exactly as named; harness green; Mac runs PENDING (stage) |
+| 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | DONE (`4152e782a`) — R-2a…R-2d bit exactly as named; harness green; Mac runs PENDING (stage) |
+| 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | DONE (`88eb36506`) — THE ROAD PIN behavior-red on the pre-fix tree (watched); R-3a…R-3f run (R-3a one red beyond the named set; R-3b′ in place of the too-blunt R-3b); R-3g PENDING (simulator); Mac/simulator runs PENDING (stage) |
+| 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | DONE (`5ce6becf0`) — R-4a…R-4e bit exactly as named; harness green; Mac runs PENDING (stage) |
+| 4 | The words (no new sentence) | DONE (`36b709512`) — no user-facing sentence added or changed |
+| 5 | Close: builds, headless runs, self-assessment, the stage suite list | DONE (`36b709512`) — every Mac/simulator run PENDING the STAGE REQUEST |
+
+**The headless reading (recorded at the start of piece 1).** Every pin of this batch is a Mac-target (or phone-target) suite,
+so its RUN needs the stage. Headless here: `xcodebuild build-for-testing` (Mac + phone) COMPILES them; and THE HARNESS — a
+throwaway SwiftPM package in this session's scratchpad (`vx544-harness`, never committed; the vx-529 U2 recipe rebuilt): tools
+6.2, macOS 26, the app target's settings on `Variorum` (Swift 6, default `MainActor`, `NonisolatedNonsendingByDefault`,
+`InferIsolatedConformances`, `MemberImportVisibility`, `DEBUG`), the test target without default `MainActor`; the worktree's
+core by path, swift-dependencies 1.14.1, the sqlcipher GRDB fork. `Variorum` SYMLINKS every `Shared/Protection/*.swift`,
+`Theme/*`, `SampleLibrary/*` minus `SeededBookRestore`, and `Shared/`'s `AppBootstrap`, `AppServices`, `SyncSession`,
+`SyncStatusViews`, `ProtectionController`, `AuthSession`, `AuthViews`, `KeychainCustody`, `LibraryOpenCopy`, `WordsCopyDoor`,
+`ProjectConfig`, `TierViews`, `ErrorPresentation`, `IdleCommitScheduler`, `StoreBackup`, `OperationsRunner`, `DeviceName`,
+`BackupDestination`, `BackupLog`, `MarkdownInsurance`, `BookNameCopy`, `ExportWriter`, `StoreLocation`, `LibraryHandOff`,
+`RestoreHoldModel`, `WingState`, `PeekableSecretField`, `TravellingDotsIndicator`, the Mac's `WhatsNewLedger`, and ONE stub
+file (a slim `AppSession` + `StatusCenter`, a one-line `CopyForAI.put`). The tests symlink `VariorumTests/Protection/*.swift`
+minus the recipe's Mac-view suites (plus `ProtectionPaneRoadRowTests`, a Mac pane), with a TRUNCATED copy of
+`TouchIDUnlockSyncKeysTests` (its trailing `SessionHoldBringInTests` suite needs the copy-door plants — the helpers above it
+are byte-identical) and one stub of byte copies (`AppTestKeyProvider`, `SeededGenerator`). Only planted suites are ever run
+there (`--filter`) — never the recipe's keychain-writing `…Route` suites. A behavioral revert in the harness replaces ONE
+symlink with an edited copy of the committed file, runs, and restores the symlink: the worktree is never touched.
+
+**Piece 1 — the retained pending load (BUILT).**
+- *Mechanism (D-544's, re-traced at `93c2e3149`):* `openTyped` → `loadSyncKeysAfterTypedUnlock` (:395, and the vault road's
+  catch-up :529). Offline, `boundedVaultRead` answers `.failed` (the leaf throws — `PlantedVaultLeaf.reachable = false`) or
+  `.timedOut` (past the 10 s bound), the arm logs and RETURNS; the typed secret (`TypedUnlockSecret` — the derived
+  `PassphraseKey`s or the words) dies with the call. Nothing anywhere holds it, so no later code CAN load the keys: the
+  provider (`NewRoadSyncKeyProvider.currentKeys` — session memory, then the silent item; Castle keeps none) throws
+  `notEnrolled` → the engine refuses `encryptionKeysUnavailable` → the row says "Sync locked" until another online typed
+  unlock or a Touch ID unlock.
+- *Fix (`ProtectionOpenRoad.swift`, `ProtectionRoadLock.swift`):* `PendingSyncKeyLoad` (the account + the secret's DERIVED
+  form only — the passphrase's derived keys, or the words' `WordsKey` derived once at the keep; never the text, never the
+  words; redacted; not `Codable`), held by `ProtectionRoadSession` under its one lock (`pendingSyncKeyLoad`). The load KEEPS
+  it only in the read's `.failed`/`.timedOut` arms (`keepForTheRetry`); a `defer` ends it at EVERY other exit (unbound / not
+  Castle / read-only, keys already held, signed out or into another account, no vault, a secret not the vault's, a master
+  not the vault's, a moved account). `TypedUnlockSecret` gains `.wordsKey(WordsKey)` (the kept form; the load's switch reads
+  it; the secret check's `default` arm is untouched). THE HOLD moves into the session (`holdLoadedSyncKeys`, under the
+  session's lock): it lands only if the session has not let go, session memory still holds exactly what the load saw at its
+  start (never over an act's or another load's hold), and the library AS IT STANDS still follows the keys in Castle; a hold
+  that lands ends the pending. THE LET-GO (`letGoOfSyncKeyLoad`, final): the pending dropped and every later hold refused;
+  `ProtectionRoadLock.dropSessionMemory` runs it FIRST, before the leaf drop — the relock and Make this my library's
+  outgoing session (`ProtectionCopyDoors.swift:538`) both reach it. (The sign-out's and the replacing reopen's let-go are
+  piece 3a's wiring.) The retry's one-flight member (`retryingSyncKeyLoad`) rides this commit unused — piece 2 calls it.
+- *Pins (`App/Variorum/VariorumTests/Protection/TypedUnlockRetryTests.swift`, a new suite; planted, no keychain):*
+  `anOfflineTypedUnlockLeavesItsLoadPendingWithTheKeysUnloaded` (the derived keys kept, redacted, nothing written),
+  `anOfflineWordsUnlockKeepsTheWordsDerivedKeyNeverTheWords`, `aTimedOutVaultReadLeavesTheLoadPendingToo`,
+  `theRelockLetsGoOfThePendingLoad`; GUARDS (green on both sides by design): `aSuccessfulFirstLoadLeavesNothingPending`,
+  `everyOtherExitLeavesNothingPending` (signed out, another account, no vault, the passphrase changed elsewhere, a moved
+  account, keys already held, a read-only road). **All six name the new seam ⇒ COMPILE-red on the pre-fix tree** (to be
+  watched in the harness over the pre-fix product files). Their BEHAVIORAL red is the named reverts below. The standing
+  VX-501 suites stay green over the moved hold, including `theTypedLoadNeverDerivesThePassphrase` (the source pin over the
+  load's region — the keep's helper lives inside it and names no derivation).
+- *Evidence, headless at this commit:* Mac `xcodebuild build-for-testing` → `** TEST BUILD SUCCEEDED **`; the harness
+  (`--filter` TypedUnlockRetryTests · TypedUnlockSyncKeysTests · TouchIDUnlockSyncKeysTests · RoadLockTests ·
+  LobbyVaultRoadTests · SecretCheckRoadTests) → `✔ Test run with 45 tests in 6 suites passed`.
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip; each in the harness on a copy of the one
+  file, then the symlink restored):* **R-1a** `keepForTheRetry`'s body → `return false` (nothing ever kept — the pre-fix
+  behavior) ⇒ expected RED: the three keep pins and `theRelockLetsGoOfThePendingLoad` (its precondition); the two guards
+  green. **R-1b** `dropSessionMemory`'s `session.letGoOfSyncKeyLoad()` line deleted ⇒ expected RED:
+  `theRelockLetsGoOfThePendingLoad` only.
+- *Piece 1's evidence, run at `b11fb8d39` (the harness):* **compile-red on old** — the pre-fix `ProtectionOpenRoad.swift` and
+  `ProtectionRoadLock.swift` (`git show 93c2e3149:…`) in place of the two symlinks: the test build fails exactly on the new
+  seam (`TypedUnlockRetryTests.swift`: "value of type 'ProtectionRoadSession' has no member 'pendingSyncKeyLoad'", "cannot
+  find 'PendingSyncKeyLoad' in scope", "…no member 'retainPendingSyncKeyLoad'"), symlinks restored. **R-1a** → `✘ 6 tests,
+  4 failed` — exactly `anOfflineTypedUnlockLeavesItsLoadPendingWithTheKeysUnloaded`, `anOfflineWordsUnlockKeepsTheWords…`,
+  `aTimedOutVaultReadLeavesTheLoadPendingToo`, `theRelockLetsGoOfThePendingLoad` (its precondition); both guards green.
+  **R-1b** → `✘` exactly `theRelockLetsGoOfThePendingLoad` (3 issues: the pending stood past the drop, a keep after it was
+  accepted). Restored → `✔ 6 tests passed`.
+
+**Piece 2 — the retry (BUILT).**
+- *Build (`ProtectionOpenRoad.retryPendingSyncKeyLoad(_:signIn:within:)`):* nothing pending ⇒ return at once (no read); else
+  ONE FLIGHT through `ProtectionRoadSession.retryingSyncKeyLoad` (a retry asked while one is out awaits that flight's end —
+  never a second read; the flight's record is written under the session's lock before the flight can clear it), which
+  re-reads the pending and calls `loadSyncKeysAfterTypedUnlock` with its kept secret — the same function, the same 10 s
+  bound, the same log lines (plus one line naming the retry). The load's own exits decide: a hold that lands ends the
+  pending; a second failure keeps it (re-kept, the same content — refused once the session let go); every other exit ends
+  it. `signIn` is the caller's read of who is signed in NOW.
+- *Pins (`TypedUnlockRetryTests`, the retry section):* THE PIN `anOfflineUnlockThenTheVaultReachableTheRetryLoadsTheKeys`
+  (one more read, the account's keys in session memory, the engine's seam reads them, the pending ended, nothing written),
+  `theRetryFinishesAWordsUnlockToo`, `aSecondFailureKeepsThePendingAndNothingPendingReadsNothing` (offline again: one more
+  read, still pending; after the hold, no read; on a session that let go, no read and nothing held),
+  `aRetryAnsweredAfterTheLockHoldsNothing` (the read out when the lock lets go — its answer holds nothing),
+  `aRetryNeverOverwritesAHoldThatLandedMeanwhile` (an act's hold while the read is out stands; the pending ends),
+  `retriesAskedTogetherShareOneRead` (three at once: one read), `aRetryThatFindsTheSecretNoLongerTheVaultsEndsThePending`
+  (the passphrase changed elsewhere meanwhile), `aRetrySignedOutReadsNothingAndEndsThePending` (signed out; another account).
+  All name `retryPendingSyncKeyLoad` ⇒ COMPILE-red on the pre-fix tree; THE PIN is BEHAVIOR-red by R-2a (the old tree's
+  behavior: nothing kept, so nothing can load the keys after the failed read).
+- *Evidence, headless at this commit:* the harness (the six suites) → `✔ Test run with 53 tests in 6 suites passed`;
+  `TypedUnlockRetryTests` alone five runs in a row → `✔ 14 tests passed` each (the two timing pins' windows — 200 ms into a
+  600 ms read — hold).
+- *THE NAMED BEHAVIORAL REVERTS (named BEFORE they run, at this commit's tip; the harness, one file each, then restored):*
+  **R-2a** `keepForTheRetry` → `return false` ⇒ expected RED: THE PIN, `theRetryFinishesAWordsUnlockToo`,
+  `aSecondFailureKeepsThePending…`, `aRetryAnsweredAfterTheLockHoldsNothing` (no read was made), `retriesAskedTogether…`
+  (no read), and piece 1's four; GREEN: the overwrite pin, the two end-the-pending pins, piece 1's two guards (nothing pending
+  is their state either way). **R-2b** `holdLoadedSyncKeys`' `!syncKeyLoadLetGo,` condition removed ⇒ expected RED:
+  `aRetryAnsweredAfterTheLockHoldsNothing` only. **R-2c** `holdLoadedSyncKeys`' compare (`sessionSyncKeys == before`) removed
+  ⇒ expected RED: `aRetryNeverOverwritesAHoldThatLandedMeanwhile` only. **R-2d** `retryingSyncKeyLoad`'s flight bypassed
+  (`await body()` directly) ⇒ expected RED: `retriesAskedTogetherShareOneRead` only (three reads; the second and third holds
+  refused by the compare, so the keys still land).
+- *Piece 2's evidence, run at `4152e782a` (the harness):* **R-2a** → `✘ 14 tests, 9 failed` — exactly the five named retry
+  pins (THE PIN — "Load.fetches == before + 1", the keys, the engine's seam; the words retry; the second failure; after the
+  lock — no read was made; one read) and piece 1's four; GREEN: the overwrite pin, the two end-the-pending pins, the two
+  guards. **R-2b** → `✘` exactly `aRetryAnsweredAfterTheLockHoldsNothing` ("sessionSyncKeys == nil" — the late answer held
+  the keys past the relock). **R-2c** → `✘` exactly `aRetryNeverOverwritesAHoldThatLandedMeanwhile` (the act's hold
+  overwritten). **R-2d** → `✘` exactly `retriesAskedTogetherShareOneRead` ("fetches == before + 1" — three reads). Each
+  restored; the suite green after.
+
+**Piece 3a — the occasion (BUILT).**
+- *The Mac's occasion (`AppServices.swift`):* batch 1's ONE wired closure, moved to the end of `init` (it captures `self`):
+  on the Mac `await self?.retryTypedUnlockSyncKeysWhileLocked()` FIRST, then batch 1's
+  `session?.flushPendingTypingBeforeRound()` — no second hook property (override 4). THE GATE
+  (`retryTypedUnlockSyncKeysWhileLocked`): no roads, or nothing pending (`roads.isPending()` — a memory read, never the
+  keychain) ⇒ return at once — the whole cost of every round of an unlocked session, Standard, an unbound library; with a
+  pending: ONE `currentKeys()` try OFF the main actor (`Task.detached` — it may read the silent keychain item, never on the
+  main thread, the 13e class); keys there ⇒ `roads.clear()` (an act or an unlock loaded them — "cleared by any act that loads
+  the keys"); none ⇒ `await roads.retry()` (bounded by the vault read's 10 s; a retry already out is joined).
+- *The roads (`TypedUnlockSyncKeysRoads` in `AppServices.swift`; wired in `AppBootstrap.attach(services:)`, both platforms):*
+  four closures over the bootstrap's CURRENT `roadSession` (a reopen's fresh session is the one reached; the services never
+  hold a road session) — `isPending`, `retry` (`AppBootstrap.retryTypedUnlockSyncKeyLoad`: ready on a writing road, then
+  `Task.detached` with `signInNow()` — the press's own off-main pattern — into `retryPendingSyncKeyLoad`), `clear`, `letGo`.
+- *The let-go roads completed:* **sign-out** — `AppServices.variorumSignInChanged(nil)` (the one observation every sign-out
+  road reaches: the Account sheet, sign out everywhere, the account's deletion) calls `typedUnlockSyncKeys?.letGo()` (her
+  R-849-1: "dropped at lock/sign-out"); **a replacing reopen** — `AppBootstrap.finish(.ready)` lets go of the OUTGOING session
+  (`outgoing !== road`) before it takes the new one (a re-keying act's reopen, a copy door's landing): the derived secret
+  never crosses a reopen and a retry of the old session still out holds nothing.
+- *P-849-2 — the phone's FLUSH occasion: WIRED (it IS the one line).* The phone's page, takes browser and quick note record
+  into the same `AppSession` autosave registry `flushPendingTypingBeforeRound` walks (`MobileEditorViewModel` —
+  `session.autosave(forPost:)`; batch 1's B on every phone record site), so the phone's composition is the same closure
+  minus the retry: `#else sync.beforeRound = { [weak session] in await session?.flushPendingTypingBeforeRound() }`. Its roads:
+  `.active`'s `triggerSync`, the background transition's `flush()` (after its own `flushAll` — the occasion's cheap check then
+  finds nothing pending), the settle observation. The phone's RETRY stays unwired (override 5): its closure has no retry call.
+  **[AMENDED at the BATCH 2 ADJUDICATION — P-849-3 RULED (c), below:]** the phone now composes BOTH occasions — the one
+  closure is shared by both platforms (the `#if`/`#else` arms collapsed: retry first, then the typing flush).
+- *Pins:* **THE ROAD PIN** `OfflineTypedUnlockRetryRoadTests.herOfflineTypedUnlockSyncsAtTheNextRoundOnceTheVaultAnswers` —
+  her steps 8–9 end to end over what ships (the bootstrap over the planted road, the real `AppServices`/`SyncSession`
+  attached through `attach(services:)`, a fake server): ARM 3's Castle-under-Always-ask set-up, the LOCK, the typed unlock
+  with the vault unreachable ("Sync locked"), the vault reachable again, the next round (`roundNow`) clean, "Synced", the keys
+  in session memory, nothing in the keychain. It names ONLY pre-fix API ⇒ **BEHAVIOR-red on the pre-fix tree, WATCHED**: the
+  harness over the pre-fix `ProtectionOpenRoad`/`ProtectionRoadLock`/`AppServices`/`AppBootstrap` (`git show 93c2e3149:…`),
+  the pin alone (its siblings, which name the seam, stripped from a harness-only copy) → `✘ 1 test, 3 issues`: the round's
+  `lastError` = "Sync paused: this device's encryption keys are locked or not enrolled…", the row `.keysLocked`, no keys
+  held — the traced mechanism exactly; symlinks restored. Its three siblings (compile-red — they name the seam):
+  `theLockLetsGoOfTheOfflineUnlocksPendingLoad`, `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`,
+  `aReopenLetsGoOfTheOutgoingSessionsPendingLoad` (Use Standard through the crossing's reopen; the chain stopped first so no
+  round retries before it). The composition suite `TypedUnlockRetryOccasionTests` (scripted roads, a counting provider):
+  `whileThereAreNoKeysTheOccasionRetriesThePendingLoad`, `withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing`,
+  `withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing`, `aSignOutLetsGoOfThePendingLoad`, the guard `noRoadsIsInert`.
+  Mac-only (it needs the real `AppSession`'s coordinators): `SyncBeforeRoundTests.theMacsOccasionRetriesTheTypedUnlocksLoad
+  BeforeHerTypingLands` (the retry runs while her typing is still pending, then her typing lands). Phone:
+  `MobileRoundOccasionTests.thePhonesOccasionLandsPendingTypingAndRunsNoRetry` (the occasion lands her typing; the retry
+  closure never called) — BEHAVIOR-red on old by its `#require(beforeRound)` (nil on the phone pre-fix), compile-red as a file.
+- *Evidence, headless at this commit:* Mac `build-for-testing` `** TEST BUILD SUCCEEDED **` (one Sendable-capture error in
+  the new SyncBeforeRound pin fixed on the way); phone `build-for-testing` (generic iOS Simulator) `** TEST BUILD SUCCEEDED
+  **`; the harness (TypedUnlockRetry · TypedUnlockRetryOccasion · OfflineTypedUnlockRetryRoad · TypedUnlockSyncKeys ·
+  TouchIDUnlockSyncKeys · RoadLock · LobbyVaultRoad · SecretCheckRoad · FirstRoundAfterTheAct · FirstRoundAfterTheReopen ·
+  FirstRunDrill) → `✔ Test run with 81 tests in 11 suites passed`.
+- *THE NAMED BEHAVIORAL REVERTS (named BEFORE they run, at this commit's tip; the harness unless marked Mac):* **R-3a** the
+  Mac closure's `await self?.retryTypedUnlockSyncKeysWhileLocked()` deleted ⇒ RED `whileThereAreNoKeysTheOccasionRetries…`
+  and THE ROAD PIN (and, Mac, `theMacsOccasionRetriesTheTypedUnlocksLoadBeforeHerTypingLands`). **R-3b** the gate's
+  `roads.isPending()` condition deleted ⇒ RED `withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing`. **R-3c** the
+  keys-present `roads.clear()` deleted ⇒ RED `withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing`. **R-3d** the
+  sign-out's `typedUnlockSyncKeys?.letGo()` deleted ⇒ RED `aSignOutLetsGoOfThePendingLoad` and
+  `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. **R-3e** `finish`'s outgoing `letGoOfSyncKeyLoad()` deleted ⇒ RED
+  `aReopenLetsGoOfTheOutgoingSessionsPendingLoad`. **R-3f** `attach(services:)`'s `services.typedUnlockSyncKeys = …`
+  deleted ⇒ RED THE ROAD PIN and `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. **R-3g (simulator — the stage's)** the
+  phone's `#else` closure deleted ⇒ RED `thePhonesOccasionLandsPendingTypingAndRunsNoRetry`.
+
+- *Piece 3a's reverts, run at `88eb36506` (the harness), and one named BEFORE its run here:* **R-3a** → `✘ 9 tests, 3
+  failed`: `whileThereAreNoKeysTheOccasionRetriesThePendingLoad`, THE ROAD PIN (the round refused for keys — "Sync paused:
+  this device's encryption keys are locked or not enrolled…"), and ONE MORE THAN NAMED — `withNothingPending…`'s occasion leg
+  (it asserts the occasion consulted the gate: `["isPending", "isPending"]`; with the call deleted only the direct call's
+  read is logged). The named set was incomplete, not the pin hollow. **R-3b** (the condition deleted outright) → `✘ 5 tests,
+  3 failed` — the named `withNothingPending…` (`provider.reads == 0` broken) and the two other gate pins, whose logs record
+  the `isPending` consult the deletion removed: a revert too blunt to isolate. **R-3b′ (named here, BEFORE it runs, at
+  `88eb36506`):** `roads.isPending()` → `(roads.isPending() || true)` (consulted, ignored) ⇒ expected RED
+  `withNothingPending…` (the provider read, the retry run) and `withTheKeysThere…`'s second-occasion leg (the cleared pending
+  read again); GREEN `whileThereAreNoKeys…`. **R-3c** → `✘` exactly `withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing`.
+- *Run at `3f0412931` (product files identical to `88eb36506`):* **R-3b′** → `✘` exactly `withNothingPending…` (the provider
+  read, the retry run) and `withTheKeysThere…`'s second-occasion leg; `whileThereAreNoKeys…` green — as named. **R-3d** →
+  `✘` exactly `aSignOutLetsGoOfThePendingLoad` and `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. **R-3e** → `✘` exactly
+  `aReopenLetsGoOfTheOutgoingSessionsPendingLoad`. **R-3f** → `✘` exactly THE ROAD PIN (the round refused for keys) and
+  `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. Restored → `✔ 23 tests in 3 suites passed`. **R-3g** (the phone's) is the
+  stage window's (simulator).
+
+**Piece 3b — the reachability trigger (BUILT; her R-849-2).**
+- *Build (`SyncSession.swift`, shared — both platforms):* `import Network`; `NetworkPathWatching` (start with an in-order
+  main-actor reading callback; stop) and its production `SystemNetworkPath` (`NWPathMonitor`, its handler on the MAIN queue —
+  the readings in order, on the main actor, the handler's work one comparison). `SyncSession.init` gains `path:` (nil = no
+  watch — the pre-trigger session exactly) and `reachabilityDebounce:` (2 s, D-544's). The watch RIDES THE CHAIN: `configure`
+  starts it (its first reading the baseline), `stopObservations` — every teardown: `stop()`, `quiesceForExit()`, a
+  reconfigure's drain — stops it and cancels a round scheduled inside the debounce. THE RULE (`pathReading`): not satisfied ⇒
+  cancel a scheduled round; satisfied after a not-satisfied reading ⇒ ONE `triggerSync()` after the debounce (so the
+  occasion runs first — the Mac's retry, then her typing — and the restore hold gates it); satisfied after satisfied, or as
+  the first reading, ⇒ nothing. **DECIDED AND RECORDED (the brief's "decide and record"): the first reading is never a
+  trigger alone** — a chain just composed runs its own round (the sign-in's `triggerSync`), and a launch offline waits for the
+  path to come up; a path that drops again inside the debounce cancels (a flapping network earns one round once it settles).
+  `AppServices.init` gains `networkPath:` (production's `SystemNetworkPath()` by default; both platforms — the phone gets the
+  trigger by sharing the file, as D-544 says) and hands it to the chain. `FirstRoundWorld` (test support) gains a
+  `networkPath` the composed services take (production's by default) so the end-to-end world can plant one.
+- *Pins (`SyncReachabilityTriggerTests`, a new suite, planted path + fake server; each round counted by its occasion):* THE
+  PIN `aTransitionToSatisfiedRunsOneRoundAfterTheDebounce` (nothing at once, one round after), `theFirstReadingAloneRunsNothing`
+  (satisfied or not), `aPathStayingSatisfiedRunsNothingMore`, `aPathThatDropsAgainInsideTheDebounceRunsOnlyOnceItSettles`,
+  `eachSatisfiedTransitionRunsItsOwnRound`, `theWatchRidesTheChain` (a stop ends it and cancels the scheduled round; a
+  reconfigure's fresh watch starts at a baseline), `aHeldStoreRunsNothingWhenThePathComesBack`, the guard `noPathIsInert`, and
+  the composition `theServicesHandTheirPathToTheChain` (watched once the signed-in start composes the chain, released at the
+  stop). End to end: `OfflineTypedUnlockRetryRoadTests.herStep9TheNetworkComingBackHealsItByItself` — her step 9 with NO
+  press: after the offline unlock a full settle window passes with the vault out of reach (any owed trigger runs and fails),
+  then the vault answers and the planted path comes up → one round, the retry first, "Synced", the keys in session memory,
+  the keychain empty. All COMPILE-red on old (the path seam).
+- *Evidence, headless at this commit:* Mac and phone `build-for-testing` → `** TEST BUILD SUCCEEDED **` both (one
+  "no calls to throwing functions occur within 'try'" warning in the new suite, fixed); the harness, every touched planted
+  suite (TypedUnlockRetry · TypedUnlockRetryOccasion · OfflineTypedUnlockRetryRoad · SyncReachabilityTrigger ·
+  TypedUnlockSyncKeys · TouchIDUnlockSyncKeys · RoadLock · LobbyVaultRoad · SecretCheckRoad · FirstRoundAfterTheAct ·
+  FirstRoundAfterTheReopen · FirstRunDrill) → `✔ Test run with 91 tests in 12 suites passed`; the trigger suite three runs
+  in a row → `✔ 9 tests passed` each.
+- *MACHINERY NOTE (honesty):* one foreground command running the Mac and phone builds back to back was moved to the
+  background by the harness after 180 s; it was waited on synchronously (blocking on its output file) and its result read
+  before anything else ran; the leftover `tail -f` was stopped. Builds run one per command from here.
+- *THE NAMED BEHAVIORAL REVERTS (named BEFORE they run, at this commit's tip; the harness, one file each, then restored):*
+  **R-4a** `pathReading`'s `guard previous == false else { return }` → `return` (no round ever follows the path) ⇒ expected RED
+  THE PIN, `aPathThatDropsAgain…`, `eachSatisfiedTransition…`, `aPathStayingSatisfied…` (its first leg) and
+  `herStep9TheNetworkComingBackHealsItByItself`; GREEN the nothing-runs pins. **R-4b** that guard → `guard previous != true`
+  (a first reading counted as a transition) ⇒ expected RED `theFirstReadingAloneRunsNothing` (its satisfied leg) and
+  `theWatchRidesTheChain` (the reconfigure's baseline leg). **R-4c** the not-satisfied arm's `reachabilityTask?.cancel()`
+  removed ⇒ expected RED `aPathThatDropsAgainInsideTheDebounceRunsOnlyOnceItSettles`. **R-4d** `stopObservations`' path
+  stop + cancel removed ⇒ expected RED `theWatchRidesTheChain` (still watched; the scheduled round runs after the stop — no:
+  no chain then, `triggerSync` finds none — so the watch leg) and `theServicesHandTheirPathToTheChain` (not released).
+  **R-4e** `AppServices.init` hands `path: nil` (both arms) ⇒ expected RED `theServicesHandTheirPathToTheChain` and
+  `herStep9TheNetworkComingBackHealsItByItself`.
+- *Piece 3b's evidence, run at `5ce6becf0` (the harness; the revert runner now refuses to run tests over a failed patched
+  build — R-4a's first patch did not compile, `return // R-4a` swallowing the next line as its value, and its "green" over the
+  stale binary is VOID; rerun as `if true { return }`):* **R-4a** → `✘ 10 tests, 5 failed` — exactly THE PIN,
+  `aPathStayingSatisfied…` (its first leg), `aPathThatDropsAgain…`, `eachSatisfiedTransition…`, and
+  `herStep9TheNetworkComingBackHealsItByItself` ("roundsCompleted > rounds" — no round followed the path); the nothing-runs
+  pins green. **R-4b** → `✘` exactly `theFirstReadingAloneRunsNothing` (its satisfied leg) and `theWatchRidesTheChain` (the
+  reconfigure's baseline). **R-4c** → `✘` exactly `aPathThatDropsAgainInsideTheDebounce…` (both legs). **R-4d** → `✘` exactly
+  `theWatchRidesTheChain` (still watched after the stop) and `theServicesHandTheirPathToTheChain` (not released). **R-4e** →
+  `✘` exactly `theServicesHandTheirPathToTheChain` and the step-9 pin. And the step-9 pin's own claim checked: under **R-3a**
+  it is `✘` (the path's round ran — "roundsCompleted > rounds" held — but no retry: the row `.keysLocked`, no keys). Every
+  revert restored; the harness sources are all symlinks again but the one stub file.
+
+**Piece 4 — the words (NO CHANGE).** The row keeps VX-486's "Sync locked — this Mac hasn't unlocked your account's sync
+keys" until the keys load (`SyncStatusViews.swift:767`, byte-unchanged — nothing in this batch touches the row); "Sync now"
+keeps its road (`SyncStatusViews.swift:744` → `triggerSync()` — which now runs the occasion, so a press retries too) and the
+Protection door keeps its road. No user-facing sentence was added or changed; the only new strings are protection-log lines
+(diagnostics, `ProtectionOpenRoad.log` — act names and outcomes, never key material). No QUESTIONS filed.
+
+**Piece 5 — Close.**
+- *Headless at the close:* `swift build` (the core) → `Build complete!`; the core has ZERO changed lines in this batch
+  (`git diff 93c2e3149..HEAD -- Sources Tests Server` is empty), so the core suite was not re-run — the batch-1 baseline
+  stands unchanged by construction. Mac `build-for-testing` green at pieces 1, 3a, 3b; phone `build-for-testing` green at 3a
+  and 3b. The harness, every touched planted suite: `✔ Test run with 91 tests in 12 suites passed`.
+- *The pins, said plainly (compile-red vs behavior-red):* BEHAVIOR-red on the pre-fix tree, watched: THE ROAD PIN
+  (`herOfflineTypedUnlockSyncsAtTheNextRoundOnceTheVaultAnswers` — pre-fix API only; over the four pre-fix product files the
+  round still refused for keys). BEHAVIOR-red on old by inspection (pre-fix API until its `#require`): the phone's
+  `thePhonesOccasionLandsPendingTypingAndRunsNoRetry` (`beforeRound` nil on the phone pre-fix — the simulator run owed).
+  COMPILE-red on old (they name the new seam), each with a named behavioral revert that bit: every other pin of the five new
+  Mac suites. GUARDS (green both sides by design): `aSuccessfulFirstLoadLeavesNothingPending`,
+  `everyOtherExitLeavesNothingPending`, `noRoadsIsInert`, `noPathIsInert`, and the nothing-runs reachability pins.
+
+**SELF-ASSESSMENT — where the derived secret lives, how long, and every road that clears it (the brief's three).**
+- *WHERE:* in ONE place — `ProtectionRoadSession`'s private `pendingLoad`, read and written only under that session's
+  `NSLock` — as a `PendingSyncKeyLoad`: the library's account id and `TypedUnlockSecret.passphrase([PassphraseKey])` (the
+  passphrase keys the open's own Argon2id derived — `SymmetricKey`s with their descriptors) or `.wordsKey(WordsKey)` (the
+  twelve words' BIP-39 → HKDF wrap key, derived ONCE at the keep). Never the passphrase's text; never the words (the typed
+  `[String]` dies with the open's call exactly as before VX-544). Transient copies: the retry's one flight reads the pending
+  into its stack and hands it to the load for the length of ONE bounded vault read (≤ 10 s) and the master's unwrap, then
+  lets it go. Not `Codable`; every description redacted (`PendingSyncKeyLoad(redacted)`, `TypedUnlockSecret(redacted)`,
+  `PassphraseKey(redacted)`, `WordsKey(redacted)` — pinned); never logged; NO write to disk or the keychain on any road
+  (no keychain or file call exists on the path; the planted leaves' `items` stay empty in every pin).
+- *HOW LONG:* from the typed unlock's vault read FAILING or TIMING OUT (the only keep) until the first of: the retry's hold
+  landing; any other exit of a retry; a let-go road; the process ending. Never longer than the open road session it lives
+  in — and the keys it can produce are held under exactly the lifetime session memory already had (VX-501's).
+- *EVERY ROAD THAT CLEARS IT:* (1) **the hold landing** (`holdLoadedSyncKeys` — the retry's success); (2) **every
+  non-failure exit of the load** (its `defer`): not writing / unbound / not Castle, the keys already held, signed out or into
+  another account, no vault, a secret that opens the library but not the vault, a master not the vault's, a moved account, a
+  hold refused (the session let go, another hold landed meanwhile, the library moved); (3) **the occasion's gate finding keys
+  present** (an act or an unlock loaded them — `roads.clear()`); (4) **the let-go, final for the session**
+  (`letGoOfSyncKeyLoad` — the pending dropped AND every later hold refused): the RELOCK (`ProtectionRoadLock.dropSessionMemory`,
+  BEFORE the keys drop — Lock Now, sleep, screen lock, idle), Make this my library's OUTGOING session (the same drop,
+  `ProtectionCopyDoors.swift:538`), a SIGN-OUT (`AppServices.variorumSignInChanged(nil)` — the Account sheet, sign out
+  everywhere, the account's deletion), and a REOPEN that replaces the session (`AppBootstrap.finish(.ready)` — a re-keying
+  act's reopen, a copy door's landing); (5) **the process ending** (memory only). NOT cleared by a second failure (kept —
+  the same content re-kept; refused once let go).
+- *The keys it loads never outlive the lock:* the hold is decided under the session's lock and the drop lets go under that
+  same lock before it clears the leaf, so a retry whose read answers after the lock holds nothing (pinned:
+  `aRetryAnsweredAfterTheLockHoldsNothing`, R-2b). A retry in flight at a sign-out keeps its stack copy for at most the bound,
+  and its hold is refused.
+
+**RECORDED CORNERS (for the orchestrator; none fixed here):**
+1. **The phone keeps but never retries** (MOBILE PARITY): the keep is the SHARED load's, so an offline typed unlock on the
+   phone now holds the derived secret in session memory — dropped at the lock, a sign-out, a replacing reopen — but nothing
+   retries it there (override 5: the phone's retry unwired), so the phone stays "Sync locked" until its next typed unlock, as
+   before. Posture-consistent per D-544 (memory, the session's lifetime) but purposeless on the phone today. Options: (a) as
+   built; (b) `#if os(macOS)` around the keep (the phone byte-for-byte today's); (c) wire the phone's retry — one line, the
+   retry call in the phone's closure arm. The orchestrator's/her call; nothing filed (no product behavior differs).
+   **RULED (c) — wire the phone's retry** (the BATCH 2 ADJUDICATION below, PROVISIONAL P-849-3; built in the amendment
+   commit — see "AMENDMENT — P-849-3").
+2. **The occasion can delay a round by up to the vault bound (10 s)** while a pending exists, the keys are missing and the
+   vault read hangs (a black-holed endpoint — offline reads fail at once); that round would refuse for keys anyway. Joined
+   retries share the one read.
+3. **Rounds the scheduler starts on its own** (the coalesced follow-up, the belt's) run no occasion — the trigger whose
+   round they follow ran it.
+4. **The reachability trigger runs one round for EVERY library on reconnect** (Standard and signed-in-unsynced included —
+   R-849-2's ruled shape), and its first reading is never a trigger alone (decided here, recorded above).
+5. **Keys that vanish without a relock after the gate cleared the pending** (an act's rollback dropping its own hold —
+   `PlanRunner` :589) leave sync locked until the next unlock — the pre-VX-544 behavior in that corner.
+6. **The doc line in D-544 "no typed-unlock pending on the phone's road today" is stale** (VM-8 brought VX-501 to the phone);
+   corner 1 is its consequence (now ruled — P-849-3).
+
+**MOBILE PARITY (for the closeout line — AMENDED for P-849-3):** the phone composes the SAME round occasion as the Mac —
+VX-544's typed-unlock retry first, then batch 1's typing flush (P-849-2 and PROVISIONAL P-849-3, one shared closure) — and
+the reachability trigger (the shared `SyncSession`, production's path watch through the shared `AppServices`). So the phone
+heals the offline typed unlock exactly as the Mac does: the derived secret kept in session memory, retried before each round
+while the keys are missing, dropped at lock/sign-out/reopen. D-544's "the phone's retry hook is unwired there" is the
+recorded deviation (the BATCH 2 ADJUDICATION).
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** SurfaceContracts' protection bullet — VX-501's
+typed-unlock sentence ("one bounded vault read … never hostage (offline, or a secret that opens the library but not the vault,
+opens the library all the same)") gains VX-544's: offline or a slow server, the typed secret's DERIVED material is kept in
+session memory only and the load runs again before each round while the keys are missing — the next round after the vault
+answers syncs, nothing typed again; dropped at a lock, a sign-out, a replacing reopen (R-849-1). The round triggers — the
+network path coming back runs one debounced round (R-849-2) — where canon names the rounds' triggers (no canon line lists
+them today; `SyncSession.swift`'s header does; the orchestrator's call: AppSpec §11's summary or the sync row's contract).
+CastleRules unchanged (rule 9 is the device's — D-544's posture paragraph). AppSpec §12's VX-501 mention unchanged in
+substance.
+
+**STAGE REQUEST (every Mac and simulator run of this batch — the orchestrator's claim through nov7; `-only-testing` takes
+TYPE names):**
+- *Leg A — the batch's own Mac suites at the tip (green expected):* `cd App/Variorum && xcodebuild test -scheme Variorum
+  -destination 'platform=macOS' -only-testing:VariorumTests/TypedUnlockRetryTests
+  -only-testing:VariorumTests/TypedUnlockRetryOccasionTests -only-testing:VariorumTests/OfflineTypedUnlockRetryRoadTests
+  -only-testing:VariorumTests/SyncReachabilityTriggerTests -only-testing:VariorumTests/SyncBeforeRoundTests` — "Test run with
+  41 tests in 5 suites" (14 + 5 + 5 + 9 + 8).
+- *Leg B — the one Mac-only pin's revert (every other revert ran headless, above):* **R-3a** — `AppServices.swift`'s Mac closure
+  line `await self?.retryTypedUnlockSyncKeysWhileLocked()` deleted, at the tip, alone ⇒ RED
+  `SyncBeforeRoundTests/theMacsOccasionRetriesTheTypedUnlocksLoadBeforeHerTypingLands` (and the harness-proven
+  `whileThereAreNoKeys…`, `withNothingPending…`, the road pin, the step-9 pin); `git checkout --` the one file, re-run green.
+- *Leg C — the standing suites over the touched seams (or fold into LIVE STATUS row 8's closing sweep):*
+  `TypedUnlockSyncKeysTests` · `TouchIDUnlockSyncKeysTests` · `SessionHoldBringInTests` · `RoadLockTests` ·
+  `RoadLockRouteTests` · `LobbyVaultRoadTests` · `SecretCheckRoadTests` · `SecretCheckModelTests` · `SecretCheckBootstrapTests`
+  · `MakeMineProofFieldsRoadTests` · `OneSyncKeysLeafCompositionTests` · `OneSyncKeysLeafRoadTests` · `FirstRoundRoadTests` ·
+  `FirstRoundAfterTheActTests` · `FirstRoundAfterTheReopenTests` · `FirstRunDrillTests` · `WordsCardAfterAccountActTests` ·
+  `PairFollowFacesTests` · `PairFollowDoneDurableTests` · `ProdTestRoadTests` · `SyncSessionFenceTests` ·
+  `IdleCommitSchedulerTests` · `Phase9cAuthWiringTests` · `SyncLockedRowTests` · `SyncWalkFenceTests` ·
+  `QuitPurgeQuiesceTests` · `SettingsLockCloseTests` · `AppBootstrapOffMainTests` · `ProtectionCrossingRouteTests` ·
+  `RoadJoinFollowSurfaceTests` (type names verified by grep at the close).
+- *Leg D — the phone (simulator, by id):* `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS
+  Simulator,id=<the run's simulator>' -only-testing:VariorumMobileTests/MobileRoundOccasionTests
+  -only-testing:VariorumMobileTests/MobileTypedUnlockSyncKeysTests -only-testing:VariorumMobileTests/MobileLockTeardownTests
+  -only-testing:VariorumMobileTests/MobileTypedOverRescueTests`; then **R-3g (AMENDED for P-849-3)** — the phone composing
+  no occasion: `AppServices.swift`'s one shared `sync.beforeRound = { … }` assignment wrapped in `#if os(macOS)` … `#endif`
+  (there is no `#else` arm any more — the closure is both platforms') ⇒ RED
+  `MobileRoundOccasionTests/thePhonesOccasionRetriesThePendingLoadThenLandsHerTyping` — the phone's one occasion pin, whose
+  `#require(beforeRound)` fails, so BOTH its legs (the retry ran first; her typing landed) go with it; nothing else in leg D
+  reads the occasion. Restore (`git checkout --` the one file), re-run green.
+- *OWED, never claimed:* her drill — the two-Mac test's steps 8–9 on her Air (LIVE STATUS row 9).
+
+
+### BATCH 2 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before the fix resumes)
+
+**Verification:** all eight commits present and pushed as reported; worktree clean; main `009982a3c` folded at
+this seam (the pending fold-in list is empty). The 91-test headless result is the implementer's scratch-harness
+claim — the evidence of record for the app-target pins is the STAGE WINDOW (legs A–D), run after the ruling below
+lands.
+
+**The phone call (the implementer's "for your call") — RULED (c), wire the phone's retry. PROVISIONAL P-849-3.**
+The keep runs in shared code, so a phone typed unlock now mints a pending load; option (a) leaves a held secret
+with NO consumer on the phone (minimal-exposure says don't hold what nothing uses), and (b) splits shared custody
+code by platform. (c) gives the held secret its consumer, heals the same bug on the phone (whose reachability
+trigger and flush occasion are already wired), and matches her mobile canon (a complete companion app). D-544's
+"the phone's retry hook is unwired there" was written when the phone had NO wired hook at all — that premise moved
+at P-849-2; the deviation is recorded here, PROVISIONAL for her bundle. The pin
+`thePhonesOccasionLandsPendingTypingAndRunsNoRetry` flips by a JUSTIFIED EDIT to assert the retry DOES run (and
+the leg-D revert R-3g's expected red moves with it). The posture is unchanged: session memory only, same drops
+(CastleRules rule 9 binds the DEVICE's disk and keychain, not session memory — D-544's ruled paragraph).
+
+### BATCH 2 — AMENDMENT: P-849-3 (the phone's retry wired — RULED (c) at the BATCH 2 ADJUDICATION, `c74b4fc19`)
+
+**Pulled first** (`git pull`, a fast-forward to the orchestrator's `c74b4fc19` — main `009982a3c` folded at the seam; no
+rebase). **Built (one piece):**
+- *The one line, as one closure:* `AppServices.init`'s round occasion is now ONE `sync.beforeRound` closure for both
+  platforms — `await self?.retryTypedUnlockSyncKeysWhileLocked()` then `await session?.flushPendingTypingBeforeRound()` — the
+  Mac arm's exact shape and the same gate; the `#if os(macOS)`/`#else` arms collapsed because they became identical (the
+  retry road was platform-shared already: the roads are wired in the shared `AppBootstrap.attach(services:)`, the gate and
+  `retryPendingSyncKeyLoad` in shared files). Doc comments in `AppServices`, `AppBootstrap.attach(services:)`,
+  `ProtectionOpenRoad.retryPendingSyncKeyLoad` and `TypedUnlockRetryOccasionTests`' header/suite name now say "both platforms
+  (P-849-3)" where they said the Mac's.
+- *The phone pin, by JUSTIFIED EDIT (the ruling flips its claim):* `thePhonesOccasionLandsPendingTypingAndRunsNoRetry` →
+  `thePhonesOccasionRetriesThePendingLoadThenLandsHerTyping` (`App/Variorum/VariorumMobileTests/MobileRoundOccasionTests.swift`)
+  — it now asserts the phone's occasion runs the retry FIRST (its log reads `["retry: typing pending"]` — the provider has no
+  keys; her typing still pending when the retry runs), THEN her typing lands. Behavior-red on old still by its
+  `#require(beforeRound)`; R-3g moved with it (leg D above).
+- *A pin-robustness fix found on the way (same commit, recorded honestly):* one full-set harness run went `✘` on
+  `SyncReachabilityTriggerTests.aTransitionToSatisfiedRunsOneRoundAfterTheDebounce` ("rounds == 1" read too early under the
+  12-suite parallel load — its fixed 500 ms window). The positive waits now poll to the count with a 3 s deadline
+  (`reach`), and re-checking R-4a over that edit EXPOSED a second hole: a fresh in-memory store's outbox is not empty, so the
+  SETTLE observation's own trigger (3 s) could land inside a 3 s window and count as the path's round — R-4a then left three
+  of its four pins green (only `eachSatisfied…`'s second count red). The suite's sessions now hold the settle trigger off
+  (`settleDebounce: .seconds(60)`): only the path's rounds count. Re-checked: **R-4a → `✘` exactly its four named suite
+  pins** (THE PIN, staying-satisfied, drops-again, each-transition); restored → the suite green three runs in a row. The
+  earlier R-4a result (500 ms windows) stands valid — a 3 s settle could not land in it.
+- *Evidence, headless:* harness — every touched planted suite, twice → `✔ Test run with 91 tests in 12 suites passed`; Mac
+  `build-for-testing` → `** TEST BUILD SUCCEEDED **`; phone `build-for-testing` (generic iOS Simulator) → `** TEST BUILD
+  SUCCEEDED **`; no warning in a touched file. Leg A's count is unchanged (41); leg B's R-3a now also removes the phone's
+  retry (one closure) — leg B runs the Mac only; leg D carries the phone's pin and R-3g (amended above). The simulator run
+  stays PENDING the stage window.
+- *The posture, unchanged:* session memory only, the same keep and the same drops on both platforms (CastleRules rule 9 is
+  the device's disk and keychain — D-544's posture paragraph); the phone's held secret now has its consumer.
+
+**WINDOW FIX (leg A, 2026-11-09):** `TypedUnlockRetryOccasionTests` ran red, all five, each "Issue recorded at Date.swift:37:17"
+(swift-dependencies' `\.date` getter): the suite built `AppServices` with no overrides, `AppSession.init` snapshots `\.date` at
+construction (`AppSession.swift:856`; `SyncScheduler.swift:106` is a later, post-round site), and the real Mac bundle records an
+unoverridden read — the scratch harness never detected test context and masked it (no product bug). Fix, test file only: each
+test runs under `withWorld` (`SyncBeforeRoundTests`' `withDependencies` set — the services' own db, uuid, a constant date, a seeded
+generator; owner identity left signed-out), services built inside; no pin reads those. Re-verification: the window's leg-A re-run.
+
+### BATCH 2 — THE STAGE WINDOW (claim vx-849-batch2, 2026-11-09, the orchestrator's hands; GO slotted EARLY by nov7 at 04:41 — vx-913's gate had released and its merge needed no stage)
+
+- **Tips:** first red run at `f4a323c5a`; the test-only fix `f500f94f3`; legs A (re-run), B and D all at `f500f94f3`,
+  the tree verified clean before, between and after every cycle. nov7 approved holding the claim through the fix
+  (the implementer edited/committed/pushed only — no builds or runs; the re-run was the compile proof).
+- **Leg A at `f4a323c5a`:** "Test run with 41 tests in 5 suites failed … with 5 issues" — all five of
+  `TypedUnlockRetryOccasionTests`, each at swift-dependencies `Date.swift:37:17` (the WINDOW FIX paragraph above:
+  an unoverridden live `\.date` read the scratch harness masked — no product bug). **Leg A re-run at
+  `f500f94f3`: "Test run with 41 tests in 5 suites passed"** (TypedUnlockRetry 14 · TypedUnlockRetryOccasion 5 ·
+  OfflineTypedUnlockRetryRoad 5 · SyncReachabilityTrigger 9 · SyncBeforeRound 8).
+- **Leg B — R-3a** (the one closure's retry line deleted; one-line diff verified): "18 tests in 3 suites, 9
+  issues" — RED exactly the five named: `herOfflineTypedUnlockSyncsAtTheNextRoundOnceTheVaultAnswers` (3 issues) ·
+  `herStep9TheNetworkComingBackHealsItByItself` (2) · `theMacsOccasionRetriesTheTypedUnlocksLoadBeforeHerTypingLands`
+  (the order log) · `whileThereAreNoKeysTheOccasionRetriesThePendingLoad` (2 — the scripted log and the provider
+  count) · `withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing` (the occasion leg, as the harness predicted);
+  13 green. Restored by `git checkout --` of the one file (diff clean at `f500f94f3`), re-run **18/18 green**.
+*[removed for publication]*
+  tests in 4 suites passed" — all four types present, none dropped (MobileRoundOccasion 1 · MobileTypedUnlockSyncKeys
+  1 · MobileLockTeardown 1 · MobileTypedOverRescue 4). **R-3g** (`#if os(macOS)` around the one shared
+  `sync.beforeRound` assignment; two-line diff verified): RED exactly
+  `thePhonesOccasionRetriesThePendingLoadThenLandsHerTyping` (its `#require(beforeRound)`); restored, re-run
+  **7/7 green**.
+- **Posture:** no dev-store, Castle or server contact; zero app instances before and after; stage released at the
+  end with this accounting (nov7 holds the RELEASE message verbatim).
+- **Evidence standing:** batch 2's Mac/simulator pins now have their RUNS; the behavioral reverts R-3a and R-3g
+  each bit exactly their named pins first-hand. Leg C (the standing suites over the touched seams) deliberately
+  folds into LIVE STATUS row 8's closing sweep — one sweep over the merged tree, not two.
+
+### BATCH 3 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+Debug-app launch, no walk, no store or server contact — every Mac and simulator run is **PENDING** the orchestrator's
+window (the STAGE REQUEST at this record's end: 15 new pins, six named Mac reverts, the standing suites); zero lines
+under `Sources/VariorumCore/Sync/`; no whole-package or whole-target headless run (nov7's heavy-headless rule — the
+whole core package is PENDING at the end); C2 (the undo door's flush), R1 and the phone's restore insurance recorded,
+not built; no QUESTIONS filed (P-849-1 and P-849-5 are the merge's). Nothing of VX-443/VX-152/VX-545/VX-855/VX-921/VX-919.
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole (STATUS,
+KICKOFF, ROSTER, CONSTITUTION, ENVIRONMENT TRAPS, STAGE & COORDINATION, LIVE STATUS, every brief, both batch records,
+both adjudications, the amendment, both window records, the mandate, the cutover state); `.claude/agents/
+opus-implementer.md`; `notes/TEXTKIT2_NOTES.md` WHOLE; `notes/SurfaceContracts.md` §"The note"; the vx-440 record's
+WALK FIXES whole (W-1's trace, WF-2, the general class, the VX-248 relationship); the vx-827 record's FOR A LATER
+READER; `notes/plans/fixes/vx-683-sync-into-debounce.md` whole; `notes/SessionResiliencyProtocol.md` §implementer;
+and — the fact the brief did not have — **the vx-677 record's VX-664 sections whole** (the design fork, A-677-1/2/3,
+the S1–S21 sweep table, "as built", the window verdicts): VX-664's ONE seam was BUILT at VX-677 (`8bea570e3`,
+merged), so piece 2 verifies and composes it rather than minting it. The code: `PaneTextAuthority`,
+`OutsideWriteConfirmation`, `PaneSurface` (the representable's read/live arms, `rebindIfTakeChanged`), every ring
+owner's delivery seam and focus door (`TakesViewModel.adopt`/`applyProjection`/`focus`/`blur`/`paneEdited`/
+`consumeRestoreLanding`/`run`/`restoreCommit`/`expandAllFans`/`stableCellTake`/the open-fan memory,
+`CompareViewModel`, `CanvasViewModel`, `BlockTOCViewModel`, `BookIndexEditModel` + `BookIndexView`'s observation),
+`TakesBoardView.articleRow`/`washedCell`/`fanBadge`/`slotSplitBloom`, `TakesBoardLayout.isBloomed`,
+`AutosaveCoordinator` (batch 1's), `AppSession`'s flush family + `flushPendingTypingBeforeRound`, the History &
+Lineage surface's acts (`CommitsFaceModel.restore`/`bringBackSelected`/`bringBackFromLineage`) and its four hosts
+(`PostDetailView`'s full pane, `WriteTakesPanel`/`TakesBottomBar`/`CommitBar`'s sheets), the phone's
+`MobileBlockHistory.restore`, `ShellActions.structuralUndo`, the MCP door's flush (`MCPDoor+HerEditor`), and every
+core writer of an existing take's `working_text` (`Operations.autosave`, `restoreCommitRows`,
+`restoreCommitForClient`, `editTakeUnderInsurance`, `editTakesAtomically`, `extract`, `divide`,
+`splitBlockAtNewlines`, `moveSpanToNewTake` + its inverses, the structural undo/redo inverses; `Sync/` read for
+what apply writes, never edited). The pin suites read whole: `OutsideWriteRingEndTests`,
+`OutsideWriteLivePaneTests`, `TypedOverRescueSurfaceTests`.
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | THE SWEEP TABLE (below — before any fix) | DONE (this commit) |
+| 2 | The ONE seam verified + the batch-1 composition stated + the found gaps G1 (the unlanded guard) and G3 (the gap keystroke's snapshot) fixed with their pins | DONE — 2a the pins on the PRE-FIX tree (`d1a2b028e` — the red-on-old SHA); 2b the fix + the two primitives' pins (this commit); Mac + phone `build-for-testing` green; the instrument green 2/2 (its named reverts run next, at this tip); every Mac run PENDING the stage |
+| 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | DONE — 3a the door pins on the PRE-FIX tree (`762dde907` — the red-on-old SHA); 3b the op + core pins + the two doors (this commit) — core compile-red watched, then 6/6 green, the restore neighbours 104/10 green; Mac + phone `build-for-testing` green; the core revert R-P1c runs next at this tip; Mac runs PENDING the stage |
+| 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | DONE — 4a the face pins on the PRE-FIX tree (`ea58914cc` — G2's red-on-old SHA); 4b G2's arm (this commit); Mac `build-for-testing` green; every run PENDING the stage |
+| 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | DONE (this commit) — `swift build` green; core targeted 6/6 + neighbours 104/10; Mac + phone `build-for-testing` green at the tip; every Mac/simulator run PENDING the STAGE REQUEST below |
+
+#### Piece 1 — THE SWEEP TABLE (every road that rewrites a take's `working_text` from outside a live pane bound to that take, × every host a live pane can sit on)
+
+**How the class is closed, so the table reads right.** VX-664's mechanism is CONSUMER-side, not per road (A-677-1,
+the vx-677 record): every ring owner's delivery seam calls `PaneTextAuthority.settle(isPending:liveIncoming:)` —
+"the delivered stored words for the live pane's take differ from what it HOLDS, with nothing of hers pending" — and
+`OutsideWriteConfirmation.endRing` confirms on a fresh one-row read, then the owner's own `blur()` ends the ring
+(VX-222/VX-440's shape; the pane goes read and adopts through the representable's read arm; P-3 unbent). So a road
+is covered on EVERY host the moment its write reaches the store, and the table's two axes verdict separately:
+(a) each HOST's seam (is it wired, pinned, unchanged since VX-677?) and (b) each ROAD (does it write an EXISTING
+take's text from outside the pane — and if so, which host's pin exercises it?). Re-verified at `80d97cb6e`:
+`PaneTextAuthority.swift`, `OutsideWriteConfirmation.swift`, `PaneSurface.swift` carry ZERO commits since
+`8bea570e3`; the five owners' seams are byte-for-byte VX-677's except batch 1's `basedOn:` on `paneEdited`; the
+pane hosts are exactly the eight `PaneSurfaceView` hosts VX-677 counted (no new pane host since — the History &
+Lineage surface's reading pane owns no authority and is never live); the core writers of an existing take's text
+are exactly VX-677's set (grep of every `workingText =` / `working_text` write under `Sources/`, `Sync/` read-only)
+plus batch 1's guarded-autosave arm.
+
+**(a) The hosts — each seam, verdicted (pins are the standing VX-677 suites unless marked NEW).**
+
+| Host | Owner · seam | Defers while dirty? | Verdict |
+|---|---|---|---|
+| H1 Takes | `TakesViewModel.adopt` (via `deliver` → `EditorProjectionPolicy`; a fresh read settles a held value) | YES (`autosave.isDirty` = pending OR writing) | COVERED — `OutsideWriteRingEndTests.takesRingEndsWhenAnAIEditsItsTake` (+ Split, Divide, Undo, Another-window) · mounted `OutsideWriteLivePaneTests.aLiveTakesArticleShowsAnAIsEditToItsOwnTake` |
+| H2 Lenses | the same model, `host = .lenses` (+ VX-440's parcel blur on `LensesBoardView`) | YES | COVERED — `lensesRingEndsWhenASyncPullWritesItsTake` |
+| H3 Write's take panel | the same model, `writePanelBlockID` set (its History is a SHEET over the panel — the panel's pane stays mounted beneath) | YES | COVERED — `writePanelRingEndsWhenBlockHistoryRestoresItsTake` (VX-827's justified edit: drives `CommitsFaceModel.restore`) |
+| H4 Compare | `CompareViewModel.adopt` | YES (`anyDirty` over its coordinators) | COVERED — `compareRingEndsWhenBlockHistoryRestoresItsTake` |
+| H5 Canvas | `CanvasViewModel.adopt(face:)` | YES | COVERED — `canvasRingEndsWhenASpanMovesOutOfItsTake`, `…WhenAnExtractCutsItsTake`; guard `aStalePhotographNeverEndsHerRing` |
+| H6 Read's edit face (Read ▸ edit) | `BlockTOCViewModel.adopt(rows:)` | **NO — adopts every delivery** | COVERED for a landed write — `readEditRingEndsWhenAnAIRestoresACommitIntoItsTake`; **GAP G1 below** for a delivery consumed while her own write is in flight |
+| H7 Blocks workbench (panel pane) | `BlockTOCViewModel.adopt(facts:)` | **NO** | COVERED for a landed write — `workbenchRingEndsWhenWriteReplacesInEveryTake`; **G1** |
+| H8 book Index | `BookIndexEditModel.settle(postID:rows:)` from `BookIndexView`'s per-note observation | **NO** | COVERED for a landed write — `bookIndexRingEndsWhenAnotherWindowTypesItsTake`; **G1** |
+| H9 a second window | every window's OWN owner (one `AppSession`, one coordinator per post; the store write reaches each window's observation) | — | COVERED — `takesRingEndsWhenAnotherWindowTypesItsTake` (two models on one session; the typing window's ring stays) |
+| (H10 Write's full-document editor) | not a pane: `EditorViewModel`'s projection policy re-renders a clean block differentially, defers while dirty | — | N/A to the ring (VX-677's S20); the pending case is batch 1's B (pinned there) |
+
+**(b) The roads — every writer of an existing take's text, from the core outward (S-numbers are VX-677's; N- rows are
+born since VX-677 and verdicted here first).**
+
+| # | Writer (core) · doors | Outside write on an existing take? | Verdict (pin) |
+|---|---|---|---|
+| S1 | `restoreCommit` · **the History & Lineage surface's Commits face Restore** (`CommitsFaceModel.restore`, VX-827 — the Block History panel RETIRED): full pane in the note's detail (the mode's surface UNMOUNTS; its teardown flushes), or a sheet over Write's take panel / the Takes bar (book spread's Takes sheet) / Write's inline editors (`CommitBar`); another window's face on the same note | YES (her deliberate act; flush-first at the door — `flushExistingAutosave(forPost:)`, honest since VX-402, one coordinator per post across windows) | COVERED on every host by the seam — `writePanelRingEndsWhenBlockHistoryRestoresItsTake`, `compareRingEndsWhenBlockHistoryRestoresItsTake`; the full-pane host has NO mounted surface during the act (the returning board re-rings with the restored words as `showing:`); VX-440's `RestoreLandingTests` W-1 pins stand (the parcel blur — redundant by construction, KEPT: it ends the ring before the restore landing can re-ring the same key). **P-849-1's insurance (piece 3)** |
+| S2 | `restoreCommitForClient` · MCP `restore_commit` (bracketed; the door flushes `flushEveryOpenPost` first) | YES | COVERED — `readEditRingEndsWhenAnAIRestoresACommitIntoItsTake` |
+| S3 | `editTakeUnderInsurance` · MCP `edit_take` | YES | COVERED — `takesRingEndsWhenAnAIEditsItsTake` + mounted `aLiveTakesArticleShowsAnAIsEditToItsOwnTake` |
+| S4 | `editTakesAtomically` · Write's Replace / Delete in Every Take, Make Block's edge checks, the cross-block compound | YES (takes Write does not show, live in a panel/another window) | COVERED — `workbenchRingEndsWhenWriteReplacesInEveryTake` |
+| S5 | `extract` (the source keeps the remainder) | YES | COVERED — `canvasRingEndsWhenAnExtractCutsItsTake` |
+| S6 | `divide` (single take in place) · Write ⌘D / the typed Return (VX-806), MCP `divide_block`; the board's own divide parks its ring on C | YES (from outside the pane) | COVERED — `takesRingEndsWhenADivideCutsItsTake` |
+| S7 | `splitBlockAtNewlines` · the board's three split doors (flush-first via `flushPendingText`), Write's note ▾ | YES (the ring's own block keeps its first paragraph) | COVERED — `takesRingEndsWhenTheBoardSplitsItsBlockAtNewlines` |
+| S8 | `moveSpanToNewTake` (source = remainder) + its undo/redo | YES | COVERED — `canvasRingEndsWhenASpanMovesOutOfItsTake` |
+| S9 | the structural undo/redo text restores (`UndoInverses`, `SpanToTake`'s inverses) · ⌥⌘Z / ⇧⌥⌘Z from any window | YES | COVERED — `takesRingEndsWhenAStructuralUndoRestoresItsTake`. **Corner C2 below: the undo/redo DOOR does not flush pending typing first** |
+| S10 | `autosave` from another surface · another window's live pane; Write's editor on a take a panel holds | YES | COVERED — `takesRingEndsWhenAnotherWindowTypesItsTake`, `bookIndexRingEndsWhenAnotherWindowTypesItsTake` |
+| S11 | the sync pull's apply (`Sync/`, read only): clean row → the server text on the row; dirty row → server wins the row, the local text a `'conflict'` take (S5) | YES | COVERED UI-side from the store's own delivery, zero `Sync/` lines — `lensesRingEndsWhenASyncPullWritesItsTake`; the dirty-row arm is the composition N2 pins (NEW, piece 4) |
+| N1 | **batch 1's guarded `autosave` rescue** (VX-683 B): her text on the row + the displaced words as a NEW `'conflict'` take | for the TYPING pane: NO (its own words — the echo equals `liveHeld`); for any OTHER pane live on the take: YES = S10's road | the typing pane: COVERED as her own echo — `herOwnTypingNeverEndsTheRing` + batch 1's guards; the ring DELIBERATELY stays (composition below; NEW mounted face pin, piece 4); another pane: S10's pins. **G1 is the one hole in this row** |
+| N2 | **batch 1's flush-first occasion** (VX-683 A) then S11's DIRTY-row arm | the flush: NO (her own typing landing); the apply: YES | COVERED by the seam (the ring ends, the pane adopts the server's words, her flushed words are the `'conflict'` card) — NEW composition pins (piece 4), green on both sides BY DESIGN (A-677-1 already ends it) |
+| S12 | the MCP door's other tools (`add_take(s)`, `insert_blocks`, `duplicate_note`, `import_document`, `merge_blocks`, `delete_take`/`archive_take`, `choose_take`, labels/locks/lenses/comments, VX-808's `propose_notes_to_book`, VX-827's reads) | NO (new rows, membership, metadata, or S18) | N/A — mechanism per tool (VX-677's S12; the born-since tools write no existing take's text) |
+| S13 | sync repairs (`Repairs.swift`: status / resurrection / labels) | NO (never a live take's text) | N/A |
+| S14 | `resolveSyncConflict` | NO (mints a NEW take) | N/A |
+| S15 | `restoreNoteVersion` (Note ▸ Versions) | NO (the outgoing blocks leave; their cells unmount) | N/A |
+| S16 | `TakesViewModel.restoreCommit` | — (no production caller; `TutorialWalkTests` only) | N/A today; ALIGNED by P-849-1 (piece 3) so no future caller inherits a non-flushing restore |
+| S17/N3 | new rows: branch / blank / `bringBackCommitAsTake` (VX-440) / **`bringBackFromLineage` (VX-827)** / duplicate / import / crystallization / `poolDragCopy` / the ceremonies' mints | NO | N/A |
+| S18 | the live take deleted / archived / released / chosen away from outside | NO (not a text write) | N/A — VX-222/VX-227's end-rules or the cell leaves |
+| S19 | a lock from outside | NO | out of class (r2) |
+| N4 | **the Lineage face's acts (VX-827)**: Put back (`placeBlock`), Bring back as a take (mints), Compare with now (reads) | NO | N/A |
+| S21 | the go-live render (a delivery sharing her click's turn) | — | COVERED — `PaneGoLiveAdoptionTests.aPaneTurnedLiveInTheRenderThatChangesItsTextShowsTheNewText` (A-677-2, B2-i ratified) |
+
+**What the sweep FOUND (each fixed or recorded below; the fixes route through the ONE seam — no per-road patch):**
+- **G1 — the pending guard's in-flight hole (a real composition gap with batch 1; FIX in piece 2).** The seam's "nothing
+  of hers pending" reads `autosave.pending[take] != nil`, but `AutosaveCoordinator.flushNow` takes the batch and
+  CLEARS `pending` BEFORE its write lands (`pending = [:]`, then `writing = true`, then the awaited runner turn). Three
+  owners adopt deliveries while a write flies (H6/H7/H8 — no dirty defer), and every owner's CONFIRMATION runs after an
+  off-main read, i.e. possibly while a write flies. Traced on batch 1's straggler road (the brief's own case): she types
+  "AB" (pending, built on "A") → a pull lands "S" on the clean row → her debounce fires (pending cleared, the rescue
+  write in flight) → Read ▸ edit consumes the pull's delivery: `isPending` false, "S" ≠ held "AB" → suspect → the fresh
+  read runs on a reader while her write is still in the writer → "S" → CONFIRMED → `blur()`: her ring ends MID-TYPING
+  (the live-only pane unmounts) although her write then lands her words on the row and rescues "S" as the card — the
+  case where the brief says "the ring deliberately does NOT end". And `settle` drops her buffer in the same window, so
+  any read-side mirror of the take (the authority's overlay) reads the pull's text until the echo. No words are lost
+  (the write lands); the ring and the mirror are wrong. FIX: the coordinator answers `isUnlanded(take)` (pending OR in the batch in flight) and every
+  owner's settle and confirmation ask that — "nothing of hers UNLANDED". The deferring owners (H1–H5) adopt only clean,
+  so their adoption is byte-unchanged; their confirmation gains the in-flight decline. Pinned red-on-old by behavior on
+  Read ▸ edit with a HELD writer (deterministic — `WriterHold`, batch 1's rig).
+- **G2 — the post-rescue face in SLOT SPLIT (R-683-4's one face defect; PROVISIONAL P-849-5, piece 4).** A slot-split
+  bloom REPLACES the block's article cell with its fan cards (`TakesBoardView.articleRow`: `bloomed && .slotSplit &&
+  hasFan`). A block that is BLOOMED while it holds one take (her first-take door open — R72's growth doors — or
+  follow-the-scroll on with the row visible) becomes `hasFan` the moment the rescue's `'conflict'` card arrives, so the
+  cell holding her LIVE pane is replaced under her caret: the ring stands on a `takes-main` key no surface renders (the
+  R112 class), her keyboard dead until she clicks a card. Her words are safe (the rescue landed them); the face is
+  wrong. Not rescue-specific: any take arriving from outside on her ring's block in that state (an AI's `add_take`, a
+  sync's new take). VX-577's expand-all arm is the same shape for HER act (blur); VX-222 is the shape for an outside
+  change that re-resolves the ring's cell (blur). Every other style keeps the article cell (the stack/carousel blooms
+  render beside it; the margin grid's rail engages around it), so nothing moves there but the rail (below).
+- **C1 — margin grid + follow-the-scroll (an observation, no fix):** the first fan a note ever holds engages the margin
+  rail, re-centring the article column (`railEngaged` → `articleMeasure`) — the presentation rule's own consequence
+  (D2/AD-6), on any first take arriving, rescue or not. Recorded for the walk; not a ring defect.
+- **C2 — the structural undo/redo door does not flush pending typing (P-849-1's sibling; RECORDED, not widened):**
+  `ShellActions.structuralUndo`/`structuralRedo` run the inverse with her typing still in the debounce; the inverse
+  rewrites the take, her pending autosave then lands built on the pre-undo text → batch 1's guard rescues: her text
+  keeps the row and the undo's restored words become a `'conflict'` card (pre-VX-683: her typing silently overwrote the
+  undo). A deliberate act of hers minting the card — R-683-2's premise — the same class P-849-1 closes for restores.
+  The flush-first doctrine would close it (the door's warn→act latch is the place); outside P-849-1's named scope (the
+  restore doors) — the orchestrator's to adjudicate or ticket.
+- **C3 — the confirmation hole is not only G1's owners:** even a deferring owner's suspicion (raised at a clean adopt)
+  is confirmed after an off-main read; a flush-first door firing in that window (the sync occasion, a mode switch)
+  puts her write in flight → old: confirmed → ring ends; G1's fix declines it too (one closure per owner).
+- **G3 — the gap keystroke's snapshot (found writing G1's pins; a data-loss hole; FIX in piece 2).** A live pane never
+  adopts projection text (P-3), so between a delivery that carried an outside write and the ring-end its confirmation
+  runs (one fresh read + a main-actor hop), the owner's PROJECTION already holds the outside words while the pane still
+  shows hers. Every pane owner's `paneEdited` computes the edit's `old` — batch 1's snapshot AND the churn cost — as
+  `authority.text(variantID:storeText: <the projection's text>)`; the settle just dropped the buffer, so `old` is the
+  OUTSIDE text. A keystroke in that gap: `record(basedOn: <outside words>)` → the confirmation declines (her typing is
+  pending — correctly) → the ring stays → her autosave lands her pre-write words with `expectedText` = the outside
+  words → the row "still holds the snapshot" → NO rescue → the outside words are overwritten unseen (an AI's edit
+  survives only in its "after" savepoint; a phone's words survive NOWHERE — its push CAS-accepted). VX-664's own
+  write-back class re-entering through the confirmation's gap, and batch 1's B, as built, cannot see it (batch 1's
+  self-assessment claimed this road rescued — true only while the owner's projection has not yet adopted the write).
+  Traced on all five owners (Takes/Lenses/Write's panel, Compare, Canvas, the TOC model, the book Index — the same
+  `old` line). FIX: `PaneTextAuthority.shownText(variantID:storeText:)` — for the LIVE pane's take, what the pane HOLDS
+  (`liveHeld` — the very fact the ring-end rule judges by), else the buffer overlay; the five `paneEdited`s read it for
+  the snapshot and the cost. Then a gap keystroke is built on the words she saw, the row changed under it, and the
+  rescue keeps both. Pinned red-on-old by behavior on Takes and Canvas.
+- **R1 — a residual, face-only (recorded, not built):** a confirmation whose fresh read ran while her write flew and
+  which resumes AFTER that write landed reads a pre-write row with nothing unlanded → it can still end her ring
+  spuriously (the pane then adopts her own landed words — no loss, by G3). Closing it needs a per-take landing mark
+  read before and after the confirmation's read (five owners' closures); the window is one read wide AND needs a flush
+  door to start and land a write inside it. For the ladder's eye.
+
+**P-849-1's door enumeration (the doors that REWRITE the typing take's text by HER act):** `CommitsFaceModel.restore`
+(the Mac's one production restore door — flushes first, honest; NO insurance savepoint) · `TakesViewModel.restoreCommit`
+(no production caller; `run` with NO flush — the batch-1 corner's door) · the phone's `MobileBlockHistory.restore`
+(flushes, refuses while dirty; no insurance — MOBILE PARITY, recorded; the VM board's surface) · the board's split /
+divide doors (flush-first ✓, structural — not restores) · Write's every-take edits (`runStructural`'s flush over the
+post's ONE coordinator ✓) · the undo/redo door (C2 — no flush). Every other board `run` door (choose · pick · lens
+doors · fan style · archive/unarchive/label/lock/delete take · commit · seal · entry date · newlines chip · word target ·
+reorder) writes no take's text. **So the "conflict card on her own restore" race has NO production door today** (the
+Mac's restore flushes, and its hosts are modal or replace the board); P-849-1's live content is the insurance
+savepoint plus aligning the dead door.
+
+**The composition with batch 1, stated (piece 2's brief line, verdicted on the code):**
+- *A's road (the flush-first occasion):* her pending typing lands before the round (her own echo — no ring-end);
+  the round's pull then meets a DIRTY row: S5's arm puts the server's words on the row and her flushed words in a
+  `'conflict'` take; the next delivery (clean — nothing pending) carries stored words that differ from what her pane
+  holds → suspect → confirmed → the ring ENDS and the pane, read, adopts the server's words; her words sit on the card
+  (the memo's "(ii)-shaped" apply, made concrete by VX-664's ring-end — the memo's "she then keeps typing into a buffer
+  whose base is now stale" holds only while she is mid-keystroke at the apply, which is B's road below).
+- *B's road (the millisecond stragglers, and every round with no occasion):* her typing is pending (or, after G1, in
+  flight) when the pull's write lands → no suspicion (the guard) → her autosave fires on the snapshot its run was built
+  on, finds the row changed, RESCUES: her words keep the row, the pull's words become the card → the echo equals what
+  her pane holds → the ring DELIBERATELY stays; the card appears in the fan; the badge reads ⑂2. Nothing moved under her
+  caret (R-683-1) — except G2's slot-split corner.
+- *Nothing in either road needs a `Sync/` line* — the apply's write is consumed from the store's own delivery.
+
+**The settled designs for pieces 2–4 (recorded before code; PROVISIONAL marks where the rulings do not decide):**
+- *Piece 2 (G1 + G3):* `AutosaveCoordinator.isUnlanded(_:)` (pending, or a member of the batch being written —
+  `inFlight`, each take leaving it as its own write's turn ends); the five owners' settle + confirmation closures read
+  it. The authority's doc line "every buffer with no pending autosave record has fully landed" gains the in-flight
+  half. `PaneTextAuthority.shownText(variantID:storeText:)` (the live take → `liveHeld`, else the overlay); the five
+  `paneEdited`s build the edit's `old` from it.
+- *Piece 2's pins (`OutsideWriteRescueCompositionTests`, Mac; all drive PRE-FIX API, so behavior-red at the 2a SHA):*
+  G1 — `aPullConsumedWhileHerRescueWriteFliesLeavesReadEditsRing` (Read ▸ edit; the writer HELD so the write is
+  provably in flight and the confirmation's reader provably sees the pre-write row — deterministic; red lines: the
+  ring ended; her buffer dropped), `aPullConsumedWhileHerRescueWriteFliesLeavesTheIndexRing` (the book Index, same
+  staging). G3 — `aKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver` (Takes; the AI's `edit_take`, the board's
+  adopt, her keystroke in the same turn — red line: no `'conflict'` card holds the AI's words),
+  `aCanvasKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver` (Canvas, same). GUARD (green both sides):
+  `readEditsOwnSuccessiveRunsNeverMintACardNorEndTheRing`.
+
+- *Piece 3 (P-849-1, PROVISIONAL, isolated):* `Operations.restoreCommit(_:commitID:insuringBuffer: Bool = false)` —
+  inside the restore's ONE transaction, when the restore will change the take's text AND its buffer differs from its
+  latest savepoint (`isDirty`), ONE `kind='auto'` savepoint (unnamed — her road's quiet kind; the MCP bracket's named
+  pair stays the wire's) of the buffer first; default `false` keeps every other caller byte-unchanged (the MCP road
+  calls `restoreCommitRows` inside its own bracket and is untouched). The flip is one argument at each door:
+  `CommitsFaceModel.restore` (after its honest flush) and `TakesViewModel.restoreCommit` (which gains the flush first).
+  No undo entry (the op registers none, as before); touch/churn unchanged (the savepoint writes none).
+- *Piece 4 (R-683-4 + G2):* mounted face pins on THE Takes board — the rescue under her live pane (stack, fan closed and
+  fan open), the flush-first round under her live pane — plus G2's model-level pin; **G2's PROVISIONAL P-849-5 build:
+  (a) an adoption under which slot split replaces the ring's article cell ENDS the ring by the flushed blur** (VX-222's
+  outside-change shape; VX-577's style rule) — the smallest, precedent-backed answer that never strands a ring; the
+  recorded alternatives for her: **(b)** carry the ring onto the fan card that renders the same take, the caret where it
+  was (she keeps typing; the most R-683-1-faithful, new choreography); **(c)** hold the slot-split bloom of the block
+  her ring is in until the ring leaves (the presentation waits for her). QUESTIONS at the merge.
+
+
+#### Piece 2b — the fix, as built (Mac files; zero `Sync/`, zero core)
+- *`AutosaveCoordinator` (shared):* `inFlight` (the batch's takes, each leaving as its own write's runner turn ends — a
+  refused one is back in `pending` first, so it never reads landed) and `isUnlanded(_:)` (pending OR in flight). Purely
+  additive: `pending`, `isDirty`, the honest flush's order and the keep-pending posture are byte-unchanged.
+- *`PaneTextAuthority`:* `shownText(variantID:storeText:)` — the live take → `liveHeld`, else the overlay; `settle`'s
+  doc states that "pending" means unlanded.
+- *The five ring owners* (`TakesViewModel` — Takes, Lenses, Write's take panel — `CompareViewModel`, `CanvasViewModel`,
+  `BlockTOCViewModel` — Read ▸ edit, the Blocks workbench — `BookIndexEditModel`): every `isPending` closure handed to
+  `settle(isPending:liveIncoming:)`, to `OutsideWriteConfirmation.endRing` and to the Index's old `settle()` reads
+  `isUnlanded` (ten closures — the grep of `.pending[` in production is now empty); every `paneEdited` builds the edit's
+  `old` (snapshot AND churn cost) from `shownText`. The deferring owners' adoption is unchanged by construction (they
+  adopt only with the coordinator clean); the TOC model and the Index keep her buffer through a flight.
+- *The primitives' pins (same suite; they NAME new API — compile-red on the pre-fix tree):*
+  `isUnlandedAnswersPendingAndInFlightAndLandedOnlyAfterTheWrite` (the held writer), `shownTextIsWhatTheLivePaneHolds`
+  (the pure truth table: nothing live → store; live → its holding, never the moved projection; another take → overlay;
+  her keystroke → her text; blurred → overlay; a live pane with no known holding → overlay).
+- *Evidence, headless at this commit:* Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **` (no warning in a touched
+  line — `CompareBoardView.swift:1988`'s is pre-existing); phone `build-for-testing` (generic iOS Simulator) →
+  `** TEST BUILD SUCCEEDED **`. THE INSTRUMENT (batch 1's method — byte copies of the committed `PaneTextAuthority`,
+  `AutosaveCoordinator` and `OperationsRunner` in an UNTRACKED scratch folder of the core test target, the two
+  primitives' pins ported; never committed, deleted after): `swift test --filter ScratchPrimitives` → `✔ 2 tests
+  passed`.
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip):* on the INSTRUMENT's copies —
+  **R-G1i** `isUnlanded`'s body → `pending[variantID] != nil` (the in-flight half gone) ⇒ expected RED: the isUnlanded
+  pin's in-flight line only; **R-G3i** `shownText`'s live arm deleted (always the overlay) ⇒ expected RED: the truth
+  table's "the live pane's holding, never the projection" line only (after her keystroke the overlay holds her buffer,
+  so that line stays green). For the STAGE (Mac, each alone at the tip, then `git checkout --` of the one file):
+  **R-G1** `AutosaveCoordinator.isUnlanded` → `pending[variantID] != nil` ⇒ RED
+  `aPullConsumedWhileHerRescueWriteFliesLeavesReadEditsRing` (both its red lines), `…LeavesTheIndexRing`,
+  `isUnlandedAnswersPendingAndInFlight…`; **R-G3** `PaneTextAuthority.shownText` → `text(variantID:storeText:)` ⇒ RED
+  `aKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver`, `aCanvasKeystrokeInTheConfirmationGap…`,
+  `shownTextIsWhatTheLivePaneHolds`. And the red-on-old run: the four behavioral pins at `d1a2b028e` (the pre-fix
+  tree) ⇒ RED each on its named lines; the guard green.
+- *The instrument's reverts, run at `06856b011` (on the untracked copies; the worktree never touched):* **R-G1i** → `✘ 2
+  tests, 1 failed` — exactly `isUnlandedAnswersPendingAndInFlight…` at its `whileFlying` line; the truth table green.
+  **R-G3i** → `✘` exactly `shownTextIsWhatTheLivePaneHolds` at "the live pane's holding, never the projection" (its
+  only red line, as named); the in-flight pin green. Each copy restored byte-identical to the committed file (`cmp`) →
+  `✔ 2 tests passed`; the scratch folder deleted, `git status` clean.
+
+#### Piece 3 — P-849-1, as built (PROVISIONAL; isolated — the flip is one argument per door)
+*(Recorded one commit after its code — `078835c3b` landed the op, the pins and the doors while this section's edit
+missed its anchor; the reverts below were NOT run before this record named them.)*
+- *The trace, verdicted on the code (the sweep's door enumeration above):* the batch-1 corner's race ("a board door
+  that rewrites the take her live pane is typing in leaves a `'conflict'` card") has NO production door: the Mac's one
+  production restore (`CommitsFaceModel.restore`) always flushed first, and its hosts are a sheet (modal) or the full
+  pane (the board unmounted); the only non-flushing restore door is `TakesViewModel.restoreCommit`, which nothing in
+  production calls. So P-849-1's live content is (i) the INSURANCE — her restore overwrote whatever she typed since her
+  last savepoint with no road back (no ⌘Z crosses an operation), the class OverallModel §3's insurance doctrine exists
+  for; and (ii) aligning the dead door so no future caller inherits the race.
+- *The op (`Operations+Variant.swift`, core):* `restoreCommit(_:commitID:insuringBuffer: Bool = false)` — with `true`,
+  inside the ONE transaction, after the take's guards (`editableVariant`: a locked / archived / dead take or a sealed
+  post refuses first — the rollback takes the insurance with it), when the restore will change the text AND the buffer
+  differs from the latest savepoint (`isDirty`), ONE `kind='auto'`, unnamed savepoint of the buffer, then
+  `restoreCommitRows` as before. Default `false` = byte-for-byte today's restore; the MCP road (`restoreCommitForClient`
+  → `restoreCommitRows` inside its own bracket) and the phone's door untouched.
+- *The doors (Mac):* `CommitsFaceModel.restore` passes `insuringBuffer: true` after its existing honest flush;
+  `TakesViewModel.restoreCommit` gains the board's flush contract first (`flushPendingText` — refuses in the board's
+  standing words when a write is refused) and passes `true`.
+- *Pins, core (`Tests/VariorumCoreTests/RestoreInsuranceTests.swift` — they name the new parameter: COMPILE-red on the
+  pre-fix op, watched: "extra argument 'insuringBuffer' in call"):* THE PIN
+  `anInsuredRestoreKeepsTheWordsItReplacesInAQuietSavepointFirst`; `theInsuranceIsQuietAndTheRestoreIsTheRestoreItAlwaysWas`
+  (twin notes: the same churn, baseline and major-revision answer insured or not — corrected once on the way: its first
+  form asserted no major revision at all, which the restore's OWN churn crossing the threshold falsified; the pin now
+  compares against the uninsured twin); GUARDS `aBufferItsLastSavepointHoldsIsNotInsuredAgain`,
+  `aRestoreThatChangesNothingInsuresNothing`, `aRefusedRestoreMintsNoInsurance` (locked; sealed),
+  `theUninsuredRestoreKeepsNoSavepoint`. Green: **6/6**. Neighbours (every core suite that restores —
+  `InvariantSweepTests`, `SpanToTakeTests`, `BlockVariantOperationsTests`, `StructuralDivideTests`,
+  `SearchSavepointCaptureTests` — plus `TypedOverRescue*` and the MCP note-edit suites): **104 tests in 10 suites
+  passed** (+ 5 in 2).
+- *Pins, Mac (`RestoreFlushFirstInsuranceTests`, committed on the PRE-FIX tree `762dde907` — pre-fix API only, so
+  BEHAVIOR-red there):* `theCommitsFaceKeepsWhatHerRestoreReplacesInAQuietSavepoint` (red line: no quiet savepoint holds
+  the words she typed since the moment), `theBoardsRestoreDoorFlushesHerTypingFirstAndMintsNoCard` (red lines: her late
+  autosave landed over the restore; the restored words became a `'conflict'` card); GUARD
+  `aRestoreOverWordsHerLastSavepointHoldsMintsNoInsurance` (green both sides).
+- *Builds at `078835c3b`:* Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`; phone (generic iOS Simulator) →
+  `** TEST BUILD SUCCEEDED **`; no warning in a touched line.
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip):* **R-P1c (core, headless — mine,
+  next)** the op's insurance `if` → `if false` ⇒ expected RED `anInsuredRestoreKeeps…` and `theInsuranceIsQuiet…` (its
+  `kind == auto` line — no insurance, the last commit is the manual moment); the four guards green. For the STAGE:
+  **R-P1a** `CommitsFaceModel.restore` passes `insuringBuffer: false` ⇒ RED
+  `theCommitsFaceKeepsWhatHerRestoreReplacesInAQuietSavepoint` only; **R-P1b** `TakesViewModel.restoreCommit`'s `guard
+  await flushPendingText() else { return }` deleted ⇒ RED `theBoardsRestoreDoorFlushesHerTypingFirstAndMintsNoCard`
+  (the row, the card) only.
+- *P-849-1's alternatives, recorded for her bundle:* keep the rescue card on her own doors (no flush-first) — rejected
+  as the default because R-683-2's retelling says a deliberate act of hers never mints the card; and NO insurance (the
+  restore overwrites unsaved typing, as before).
+- *MOBILE PARITY:* the phone's `MobileBlockHistory.restore` already flushes and refuses while dirty; it keeps no
+  insurance — one argument away (`insuringBuffer: true`), left for the orchestrator's call (the VM board's surface).
+- *R-P1c, run at `944769820` (core, headless):* `✘ 6 tests, 2 failed` — exactly
+  `anInsuredRestoreKeepsTheWordsItReplacesInAQuietSavepointFirst` (4 issues: one commit, not two; the last is the manual
+  moment) and `theInsuranceIsQuietAndTheRestoreIsTheRestoreItAlwaysWas` (its `kind == auto` line); the four guards green.
+  Restored by `git checkout --` of the one file (diff clean) → `✔ 6 tests passed`.
+
+#### Piece 4 — R-683-4, the post-rescue face (and G2), as built
+- *What the face IS, traced on the code before any pin (the default posture — stack, follow-the-scroll off):* B's
+  rescue under her live article pane: the pull's delivery is DEFERRED (the board's policy: busy while dirty), her
+  autosave rescues, the settle's fresh read adopts a projection whose take equals what her pane holds → no
+  suspicion, VX-222's arm unmoved (the chosen take unchanged), the ring STAYS; the pane is buffer-authoritative and
+  never re-made (the article cell's stable identity, 13b 3F); the block becomes fanned → the corner badge `⑂+` →
+  `⑂2` (an overlay — zero layout footprint); a closed fan stays closed (no rule opens a fan for an arriving take; VX-733
+  only closes a COLLAPSED one); a first-take door already open blooms the card into its stack beside the article; the
+  comment rides the ROW (`CommentMarginNote`), so it holds in every style. A's road: the ring ends on the server's words
+  (A-677-1), her words on the card. So in the default posture the face is RIGHT — the pins below are composition pins.
+- *The one face defect — G2 (PROVISIONAL P-849-5 (a), built):* `TakesViewModel.endRingIfSlotSplitReplacedItsCell()`,
+  called in `adopt` after the bloom inputs know the projection (VX-733's collapse rule, the `show ▾` filter's fresh
+  shapes) and before the landings: the ring on a `takes-main` key whose block a slot-split bloom now replaces ends by
+  the flushed `blur()`. Takes host only (the Lenses host and Write's take panel never key `takes-main`); a landing in
+  that state already rings the fan card (`paneRenderingArticleTake`), so nothing legitimate stands on the replaced key.
+  The arm generalizes VX-577's expand-all arm (her act) to an adoption (an outside arrival). The alternatives (b)/(c)
+  are in the design paragraph above and on the arm's doc; QUESTIONS at the merge.
+- *Observed, not fixed (recorded for the orchestrator):* her OWN badge click (`toggleExpanded`) on her ring's fanned
+  block in slot split replaces the cell under the ring the same way — VX-577's arm covers expand-all, not the single
+  toggle (pre-existing; her act; outside R-683-4's "after a rescue"). And C1 (margin grid + follow-the-scroll: a note's
+  first fan engages the rail and re-centres the column) stands as recorded.
+- *Pins (`App/Variorum/VariorumTests/PostRescueFaceTests.swift`, committed on the PRE-FIX tree `ea58914cc`):*
+  MOUNTED composition pins (green on both sides of this batch BY DESIGN — their liveness is batch 1's R-B1, which takes
+  the card away, and VX-677's rev664, which keeps A's ring): `aRescueUnderHerLivePaneKeepsHerWordsAndShowsTheCardBehindTheBadge`
+  (typed through the pane's own `insertText` road; asserts the SAME pane object, editable, her words; the store row;
+  the `'conflict'` card; `hasFan` + `activeVariantCount == 2` — the badge's ⑂2; `expandedBlocks` empty; the block's
+  comment in the feed; the pane's window origin within 0.5 pt), `aRescueOnAnOpenStackFanAddsTheCardAndLeavesHerRing`
+  (the first-take door open; the card in `bloomTakes`; the block still open; the same live pane),
+  `aFlushFirstRoundEndsHerRingOnTheServersWordsAndKeepsHersOnTheCard` (A's occasion — `flushPendingTypingBeforeRound`
+  — then the S5 merge staged as its two writes: the cell read showing the server's words, her words on the card, ⑂2,
+  the fan closed, the comment held). MODEL-level: **`aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur`**
+  — G2's pin, pre-fix API only ⇒ BEHAVIOR-red at `ea58914cc` (red line: the ring still on `takes-main`); GUARD
+  `theSameArrivalOnAnOpenStackFanLeavesTheRing` (green both sides).
+- *THE NAMED REVERTS (named BEFORE they run — all the STAGE's, Mac):* **R-G2** the `endRingIfSlotSplitReplacedItsCell()`
+  call in `adopt` deleted ⇒ RED `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur` only; **R-B1 (batch
+  1's, re-used as the face pins' liveness proof)** `AutosaveCoordinator.flushNow`'s `expectedText: entry.expectedText` →
+  `nil` ⇒ RED `aRescueUnderHerLivePane…` and `aRescueOnAnOpenStackFan…` (no card — the pull's words survive nowhere) and
+  ALSO, by design, piece 2's four G1/G3 pins (their cards) and G2's pin at its FIXTURE line (no card, so no fan to
+  slot-split); A's pin green (no rescue on its road).
+
+#### Piece 5 — Close
+- *Headless at the tip:* `swift build` → `Build complete!`; core `swift test --filter` — `RestoreInsuranceTests` 6/6, the
+  restore neighbours **104 tests in 10 suites passed** (+5 in 2); the instrument (deleted, never committed) 2/2 with
+  R-G1i/R-G3i biting exactly as named; R-P1c biting exactly as named. Mac `build-for-testing` → `** TEST BUILD SUCCEEDED
+  **` at every piece and at the tip; phone `build-for-testing` (generic iOS Simulator) → `** TEST BUILD SUCCEEDED **` at
+  2b, 3b and the tip. No warning on a touched line.
+- *HEAVY HEADLESS — PENDING for the orchestrator's window (nov7's rule; another session's window was live at spawn):* the
+  WHOLE core package `swift test` (the one core change — `restoreCommit`'s defaulted `insuringBuffer` — is called across
+  suites; the targeted run covered every suite that names `restoreCommit`); the whole Mac target and the whole phone
+  target fold into LIVE STATUS row 8's closing sweep.
+
+**The pins, said plainly (compile-red vs behavior-red):**
+- BEHAVIOR-red on the pre-fix tree (they drive only pre-fix API — each committed BEFORE its fix, at the SHA named):
+  `OutsideWriteRescueCompositionTests` — the two G1 pins and the two G3 pins at `d1a2b028e`;
+  `RestoreFlushFirstInsuranceTests` — the two door pins at `762dde907`; `PostRescueFaceTests` —
+  `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur` at `ea58914cc`. NOT WATCHED by me (Mac — the stage);
+  each has its named revert at the tip.
+- COMPILE-red on the pre-fix tree (they name new API), each with a behavioral revert that bit headless: the core
+  `RestoreInsuranceTests` (R-P1c, watched); the two primitives' pins in `OutsideWriteRescueCompositionTests` (R-G1i /
+  R-G3i on the instrument, watched).
+- GREEN on both sides BY DESIGN (composition / guards — recorded so nobody reads them as hollow): the three mounted
+  face pins in `PostRescueFaceTests` (their liveness: R-B1 and VX-677's rev664), the stack guard, the Read ▸ edit
+  successive-runs guard, the dedupe guard, the core guards.
+
+**SELF-ASSESSMENT.**
+- *The brief's piece 2 premise was stale, and the record says so first:* VX-664's ONE ring-ending seam already EXISTED
+  (VX-677's A-677-1, merged) — the brief's "generalize the vx-440 shape into one declared mechanism" was done; the
+  batch verified it road by road and host by host (piece 1), stated the batch-1 composition, and found where the two
+  MET badly: **G1** (the seam's "pending" was not "unlanded" — a ring could end mid-typing on the three direct-adopting
+  owners, exactly in the case the brief says it must not) and **G3** (a data-loss hole: a keystroke in the
+  confirmation's gap was snapshotted on the outside words, so the guarded autosave wrote over them unseen — batch 1's B
+  could not see it, and batch 1's self-assessment claimed that road rescued). Both fixed through the seam itself — one
+  coordinator answer, one authority rule — with no per-road patch, no `Sync/` line, no `PaneSurface`/`BlockRangeIndex`/
+  `EditorTextView` line (P-3 unbent: the live pane still never adopts; the fix only makes the snapshot and the ring
+  rule read the SAME fact about what the pane holds).
+- *The composition, final:* A's road ends the ring on the server's words (her words on the card); B's road keeps the
+  ring and her words (the pull's words on the card) — now also when the pull's delivery is consumed while her write
+  flies (G1) and when she types in the confirmation's gap (G3). Residual R1 (face-only, data-safe) recorded.
+- *P-849-1:* the batch-1 corner's race had no production door; what P-849-1 truly adds is the insurance savepoint on
+  her restore (her typed-since words were unreachable after a restore) and the dead door's alignment. PROVISIONAL —
+  her bundle (one argument per door to flip).
+- *R-683-4:* the default posture's face is right on the code (pinned as composition); the one face defect is G2 (slot
+  split), fixed PROVISIONAL (a) with (b)/(c) recorded.
+- *What I could not verify:* every Mac pin's RUN (red at its SHA, green at the tip) — the stage's; the walk — the
+  orchestrator's (UI-kind evidence). Where a mounted pin's staging could misbehave in the host, the likeliest spots are
+  `PostRescueFaceTests`' window-origin comparison (a 0.5-pt tolerance) and the mounted `insertText` road (the
+  `TakesChooseRingTests` idiom).
+
+**RECORDED CORNERS (for the orchestrator; none built here):** C1 (margin grid + follow-the-scroll re-centres on a
+note's first fan) · C2 (the structural undo/redo door does not flush pending typing — a deliberate act of hers can mint
+the card; the flush-first doctrine would close it) · R1 (the confirmation's photograph after a landing — face only) ·
+her own badge click in slot split on her ring's fanned block replaces the cell under the ring (VX-577 covers expand-all,
+not the single toggle) · MOBILE PARITY: the phone's restore door flushes but keeps no insurance (one argument); the phone
+has no `PaneTextAuthority` (its liveness authority is its own), so G1/G3/G2 are Mac-only by construction — the shared
+coordinator's `isUnlanded` is additive and the phone does not read it.
+
+**QUESTIONS owed at the merge (the orchestrator files them, latest main):** **P-849-1** (as built: flush-first on her
+restore doors + one quiet unnamed savepoint of the words a changing restore replaces; alternatives: no insurance; the
+card kept on her doors) · **P-849-5** (G2: (a) end the ring by the flushed blur — built; (b) carry the ring onto the fan
+card that renders her take, the caret where it was; (c) hold the slot-split bloom of her ring's block until the ring
+leaves).
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** AppSpec §9's quiet-auto-commit list (the
+insurance occasions) gains HER RESTORE's insurance (P-849-1, PROVISIONAL) — and OverallModel §3's insurance list names
+the occasions too, the author's file: the orchestrator's call how the PROVISIONAL lands there; AppSpec §9's
+`restoreCommit` line gains `insuringBuffer` (her doors insure; the default does not). SurfaceContracts §"The note"
+(Takes): the slot-split ring-end on an arriving take (P-849-5, PROVISIONAL). No canon line for G1/G3 (mechanism, not
+contract — the `PaneTextAuthority` invariants carry them in code).
+
+**STAGE REQUEST (every Mac and simulator run of this batch — the orchestrator's claim through nov7; `-only-testing`
+takes TYPE names, as a zsh array; the tree verified clean before, between and after each cycle):**
+- *Leg A — the batch's own Mac suites at the tip (green expected):* `T=(OutsideWriteRescueCompositionTests
+  RestoreFlushFirstInsuranceTests PostRescueFaceTests)` — "Test run with 15 tests in 3 suites" (7 + 3 + 5).
+- *Leg B — the named reverts, each ALONE at the tip, its suite run, then `git checkout --` of the one file (diff clean)
+  and the suite re-run green:* **R-G1** `App/Variorum/Shared/AutosaveCoordinator.swift` — `isUnlanded`'s body →
+  `pending[variantID] != nil` ⇒ RED `aPullConsumedWhileHerRescueWriteFliesLeavesReadEditsRing` (ring + buffer lines),
+  `aPullConsumedWhileHerRescueWriteFliesLeavesTheIndexRing`, `isUnlandedAnswersPendingAndInFlightAndLandedOnlyAfterTheWrite`.
+  **R-G3** `Surface/PaneTextAuthority.swift` — `shownText`'s first line deleted ⇒ RED
+  `aKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver`, `aCanvasKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver`,
+  `shownTextIsWhatTheLivePaneHolds`. **R-P1a** `Features/History/CommitsFaceModel.swift` — `insuringBuffer: true` →
+  `false` ⇒ RED `theCommitsFaceKeepsWhatHerRestoreReplacesInAQuietSavepoint` only. **R-P1b**
+  `Features/Takes/TakesViewModel.swift` — `restoreCommit`'s `guard await flushPendingText() else { return }` deleted ⇒
+  RED `theBoardsRestoreDoorFlushesHerTypingFirstAndMintsNoCard` only. **R-G2** `Features/Takes/TakesViewModel.swift` —
+  the `endRingIfSlotSplitReplacedItsCell()` call in `adopt` deleted ⇒ RED
+  `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur` only. **R-B1 (the face pins' liveness)**
+  `AutosaveCoordinator.flushNow`'s `expectedText: entry.expectedText` → `nil` ⇒ RED the two B face pins, the four G1/G3
+  pins (their card lines) and G2's fixture line; A's pin and the P-849-1 pins green.
+- *Leg A0 (optional — the red-on-old SHAs, if the orchestrator prefers them to the reverts):* at `d1a2b028e`
+  `T=(OutsideWriteRescueCompositionTests)` ⇒ 5 tests, RED the four G1/G3 pins, the guard green; at `762dde907`
+  `T=(RestoreFlushFirstInsuranceTests)` ⇒ 3 tests, RED the two door pins; at `ea58914cc` `T=(PostRescueFaceTests)` ⇒
+  5 tests, RED exactly `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur`.
+- *Leg C — the standing suites over the touched seams (or fold into LIVE STATUS row 8's closing sweep):*
+  `OutsideWriteRingEndTests` · `OutsideWriteLivePaneTests` · `PaneOutsideWriteRuleTests` · `PaneGoLiveAdoptionTests` ·
+  `PaneTextAuthorityTests` · `RestoreLandingTests` · `RestoreLandingRewriteHopTests` · `TakesEntryBandTests` ·
+  `TakesBoardTests` · `TakesExpansionMemoryTests` · `TakesBoardSoakTests` · `TakesChooseRingTests` ·
+  `TakesStepFollowTests` · `TakesStepFollowModelTests` · `TakesParkedFollowTests` · `TakesBufferConvergenceTests` ·
+  `BoardDeliveryPolicyTests` · `TakesLensFilterTests` · `TakesSlotDragTests` · `TakesCardHeightTests` ·
+  `TakesCommentFeedLivenessTests` · `TakesCollapsedFanWashTests` · `TakesCommentGutterTests` ·
+  `CompareCommentGutterTests` · `CompareViewModelTests` · `CanvasAndPoolTests` · `CanvasTakesSwitcherTests` ·
+  `BlockTOCTests` · `BlocksWorkbenchTests` · `ReadModeTests` · `BookIndexEditingTests` · `WriteTakesPanelChooseTests` ·
+  `WriteTakesPanelKeysTests` · `CommitsFaceModelTests` · `CommitsFaceDoorsTests` · `BlockHistoryPaneTests` ·
+  `CommitFlowTests` · `TutorialTakesActsTests` · `TypedOverRescueSurfaceTests` · `AutosaveCoordinatorTests` ·
+  `SyncBeforeRoundTests` · `MCPHerEditorDoorTests` (type names verified by grep at the close).
+- *Leg D — the phone (simulator, by id):* `MobileTypedOverRescueTests` · `MobileQuickNoteTests` ·
+  `MobileTakesBrowserTests` · `MobileBlockHistoryTests` · `MobileRoundOccasionTests` (the shared coordinator's additive
+  change; no phone file touched).
+- *The orchestrator's WALK (UI-kind evidence, both voices, the DEV-STORE Debug build):* Takes, the ring in a block,
+  type, and (i) let an AI `edit_take` that take (the ring ends, the AI's words read) — the VX-677 W-664-1 row re-shot over
+  this batch; (ii) restore a moment from the History face's sheet over Write's take panel after typing — the take shows
+  the moment, the rail gains one quiet ◦ moment holding what she had typed, no `'conflict'` card; (iii) in slot split
+  with a block's first-take door open and the ring in it, give the block a second take from outside (the wire's
+  `add_take`) — the ring ends, the block shows its two fan cards. The sync-road face (B/A) needs a second device —
+  her two-Mac test, or a staged pull; the mounted pins carry it otherwise.
+
+### BATCH 3 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 4 spawns)
+
+**Verification first-hand:** all nine commits present and pushed (`3d9d36cdd`…`81fc15583`), tree clean, HEAD =
+origin; the stale premise CHECKED — `8bea570e3` ("a live pane whose own take is written from outside stops being
+live, A-677-1/-2") exists and the seam files are unchanged since it; `AutosaveCoordinator.isUnlanded` (:121),
+`PaneTextAuthority.shownText` (:262, `App/Variorum/Variorum/Surface/`) and `restoreCommit`'s `insuringBuffer`
+(`Operations+Variant.swift` :219) all present as reported; LIVE STATUS row 3 BUILT.
+
+**Dispositions:**
+1. **The premise shift → ACCEPTED.** VX-664's one ring-ending mechanism predates this run (A-677-1); the batch's
+   verify-and-compose is the right shape, and the sweep table (9 hosts, 23 roads, each verdicted) is the
+   class-completeness evidence her option-(a) ruling asked for.
+2. **G1 (`isUnlanded`) → ACCEPTED as built.** The pending guard's in-flight hole was real: a flush empties
+   `pending` before its write lands, so three hosts ended her ring mid-rescue. Deterministic pin (writer held).
+3. **G3 (`shownText`) → ACCEPTED as built, and the record CORRECTS BATCH 1's SELF-ASSESSMENT:** the
+   "second window or second surface" road was NOT rescued inside the confirmation gap — a keystroke there built
+   its snapshot on the projection's outside words, so the guarded autosave wrote her old words over them with no
+   card. Real data loss, now pinned behavior-red at `d1a2b028e`; the window verifies first-hand.
+4. **G2 → built as PROVISIONAL P-849-5 (a) (the flushed blur ends the ring at a slot-split bloom);** (b) move
+   the ring onto the fan card and (c) hold the bloom go to her bundle as the alternatives.
+5. **P-849-1 → stands PROVISIONAL, shape amended by the trace:** no production door carries batch 1's race (the
+   Commits face always flushed first; the board's `restoreCommit` door has no production caller) — so the built
+   shape is the INSURED RESTORE (`insuringBuffer`, one quiet deduped auto savepoint inside the transaction),
+   passed true by the Commits face and the flushed dead door. The phone's restore flushes but does not yet
+   insure — one argument, recorded for MOBILE PARITY and her bundle.
+6. **C2 (the ⌥⌘Z/⇧⌥⌘Z door does not flush pending typing, so her own undo can mint a `'conflict'` card) →
+   BORN TICKET at the closeout, not folded in:** the undo road already insures the buffer it overwrites (the
+   standing occasion), so nothing is lost — the card is additive noise, P-849-1's sibling outside this run's
+   scope. C1 (the margin-grid recentre) and R1 (the face-only confirmation race) → low tickets at the closeout;
+   the badge-click slot-split corner rides P-849-5's QUESTIONS entry as its sibling.
+7. **The stage legs, adjudicated:** leg A (15/3) and leg B (the six named reverts) run in this run's next window
+   with batch 4's legs; leg A0 (pre-fix-SHA runs) SKIPPED — the reverts prove the same liveness without cycling
+   the worktree through old SHAs mid-window; leg C (the ~42 standing suites) FOLDS into row 8's closing sweep
+   as before — one sweep over the merged tree; leg D rides the same window's sim boot. The walk is the
+   orchestrator's, after the window (no lock screen on its rows — Fable may drive).
+8. **Canon deltas → queued for the closeout list** as the batch names them (AppSpec §9's insurance list + the
+   `restoreCommit` line; OverallModel §3's occasion list; SurfaceContracts §"The note"'s slot-split ring-end),
+   each landing only as its PROVISIONAL survives her sitting.
+
+### BATCH 4 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+Debug-app launch, no walk, no store or server contact — every Mac run is **PENDING** the orchestrator's window (the
+STAGE REQUEST at this record's end); zero lines under `Sources/VariorumCore/Sync/`; no whole-package or whole-target
+headless run and no cold build (the live constraint — other sessions hold the stage); no pull, merge or rebase; no
+QUESTIONS filed (P-849-4's entry is the merge's).
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole; `.claude/agents/
+opus-implementer.md`; `notes/CastleRules.md` WHOLE; `notes/SurfaceContracts.md` §"Doors to the outside" (the protection
+bullet — the pre-design face's detection sentence); `notes/plans/vx-307-castle-crossings.md` §6's F-5 + the U2a
+ARBITRATION; `notes/plans/fixes/vx-912-b0-security-verify.md` whole (flag 1); `notes/SessionResiliencyProtocol.md`
+§implementer; QUESTIONS #241 and the vx-529 record's rule-7 drafting lines. The code: `LibraryClassifier`,
+`CatalogNames`, `Catalog.build`, `Assess.swift` (`launch`, `preDesignStore`, `repairs`), `Assessment.swift`'s `Repair`,
+`ExecutorRepairs.swift`, `Leaves.swift`, `FileKeyFileStoreLeaf`, `PreDesignSetAside`, `ProtectionOpenRoad` (`route`,
+`create`, `open`, `repairPasses`), `ProtectionRoadActs.useOffer`, the deleted envelope's code read from history
+(`StoreIdentity.swift`, `StoreKeyEnvelope.swift` at `c3d939c9e~1`; `AppBootstrap.ensureStoreIdentity` at `f2306a535~1`),
+the scenario world (`World.swift`, `Fakes.swift`), `AWorld`, `ExecutorWorld`; for VX-152 `AppBootstrap.lock()` /
+`lockOnNewRoad` / `awaitTheLockSeam`, `ProtectionController`'s monitors, `RoadLockRouteTests`; for VX-545 the five touch
+points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Preflight + this record | DONE (this commit) |
+| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | DONE — 1a the behavior pins on the PRE-FIX tree (`9118b0355` — the red-on-old SHA): core **3 RED exactly as named / 4 green**; 1b the fix + the compile-red pins (`80979d6f0`): core 16/16 green; R-443a…d each bit exactly its named set (this commit records them); the protection set 551/123 green; Mac `build-for-testing` green; Mac runs PENDING (stage — R-443M1/M2 named) |
+| 2 | VX-152 — the lock's reentrancy, investigate-first | DONE (this commit) — traced: CLOSED BEFORE THIS RUN by VX-445's one-act seam (dismissed as hollow; no fix); one regression guard pin (Mac, compiled; its run + revert R-152 PENDING the stage); the ticket text below for the orchestrator |
+| 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | DONE (this commit) — the five points + the page regenerated from the fixture (one sentence moved) + the byte pin's justified edit; `swift test --filter Lifecycle` 14/5 green; Mac `build-for-testing` green; the Mac pins' runs + R-545 PENDING the stage |
+| 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | DONE (this commit) — core build green; the protection set 551/123 green; Mac + phone `build-for-testing` green; every Mac/simulator run PENDING the STAGE REQUEST; the whole core package PENDING (heavy headless) |
+
+**VX-443 — the traced facts, before code (what the file IS, from the deleted code):**
+- *Who wrote it:* `AppBootstrap.ensureStoreIdentity` (the new road's open, VX-306 U1b → VX-329; `f2306a535~1`
+  :572) called `StoreIdentity.establish(besideStore:key:)` (`c3d939c9e~1`, `Persistence/StoreIdentity.swift`) with the
+  open's key in hand — on a creation and a Make this my library (`fresh: true`, any envelope there set aside first as
+  `.stale-<epoch>.json`) and on any later open that found none. `establish` writes the envelope at its
+  `preferredURL` — **`variorum-keys-<fp16>.json`, fp16 = `KeyFingerprint.of(key)`** (the first eight bytes of SHA-256 of
+  the key, sixteen lowercase hex — the algorithm relocated byte-for-byte at VX-329 U1) — holding the store id, that
+  fingerprint and the format version, **no wraps** ("store id + the minted key's fingerprint, no wraps"). F-5's
+  `variorum-keys-<storeID>.json` is a loose spelling: the id lives INSIDE; the NAME is the fingerprint's.
+- *What it carries:* a stale key's FINGERPRINT (non-secret by `KeyFingerprint`'s own doc), not the key — after a
+  crossing, the fingerprint of the pre-crossing key. One wraps-bearing edge exists in `establish` (a fingerprint-less
+  legacy `variorum-keys.json` "belongs" to any key, so its wraps were re-written under the new key's fingerprint name,
+  the legacy original left in place); unprovable without reading, never read.
+- *Why it is a live defect and not only dead weight (the latent ambiguity, traced):* its NAME is exactly
+  `CatalogNames.isPreDesignKeyFileName`'s fingerprint form, and `AssessRules.preDesignStore` reads "a store, NO key
+  file of this design, an older name at the container root". So the day this design's key file goes missing, a
+  new-road library carrying the stub reads as a PRE-DESIGN store: her "older version" face, where no key is tried and
+  no keychain item read — rule 1's own redundancy (the sealed mirror `restoreKeyFileFromMirror` writes back, the
+  catalogued backups' key files the typed roads and rule 21's offer read) never gets its turn. Without the stub the same
+  loss is the lobby, whose quiet roads open the library and whose repair writes the key file back.
+- *Who still has one:* only libraries the new road opened between VX-306 U1b and VX-329 (the dev store, the VX-306 →
+  VX-329 testers); nothing has written one since VX-329.
+
+**VX-443 — the settled design (PROVISIONAL P-849-4, built before her bundle):**
+- *Decided by `assess`, written by the executor* — the protection core's one shape (assess "THE ONLY DECISION CODE";
+  "the executor is the one thing that writes"), at the open's repairs — the rule-8 re-makes moment: a new `Repair`
+  `.deleteOlderKeyFile(name:)`, owed for each name at the container's root (place `.container`, no folders — the
+  pre-design fact's own predicate) that is an older Variorum's FINGERPRINT-named key file whose fingerprint THIS
+  design's live key file holds — its current key or its history (`KeyFile.heldFingerprints`) — while the live file is
+  the current key's (the key that just opened the library). The executor VERIFIES with the key in hand (the
+  fingerprint is the current key's, or the live history opens under the current key to exactly it) and deletes BY NAME
+  through the key-file store leaf (`deleteOlderKeyFile(named:)` — the slot's own folder, a regular file only, never a
+  byte read). One log line names the file. Idempotent (a re-run finds nothing there).
+- *The fences, each pinned:* the live slot only (the repairs run only on the live slot's open, its create and rule
+  21's use-offer; the leaf names only the container's root — never Previous Libraries, a backup folder, the far folder,
+  a Look-inside copy or a picked folder); only after the open verified THIS design's key file (no repair runs before
+  unlock; the live file must name the opened key); the read-only road writes nothing (`ctx.writes` — the hosted test
+  run); a PRE-DESIGN store is never reached (no format-3 file ⇒ the launch verdict is `.preDesignStore` before any
+  open; the detector byte-unchanged); one log line per file, names only.
+- *THE ADDED FENCE — the fingerprint must be one this library's key file holds (beyond the brief's list; a narrowing,
+  recorded):* the brief's safety argument is rule 4 ("the key file carries every earlier key … so nothing openable is
+  lost"). That argument is true only of a key THIS library has had. An older name whose fingerprint the live key file
+  does not hold — a store from before this design moved out by hand, its key file left in the container, then a fresh
+  library made here — is somebody else's recovery leg and rule 26's ("we don't handle them"). The name carries its
+  fingerprint, the live key file carries its own in plaintext ("every byte is non-secret"), so the match is names-only
+  and makes rule 4's argument CHECKED rather than argued: every file the sweep can delete provably concerns a key the
+  current key file already reaches. It sweeps exactly what `ensureStoreIdentity` wrote (its fingerprint was always the
+  library's own key at that open — the current one, or one rule 4 carried into the history).
+- *Deliberately NOT swept (recorded corners):* the fixed legacy name `variorum-keys.json` (no fingerprint in the name —
+  ownership unprovable by name; `establish` never wrote it — a leftover from before this design, rule 26's); the
+  set-asides `<name>.stale-<epoch>.json` (not part of the pre-design fact, so no ambiguity; set aside by today's road
+  precisely BECAUSE they carried another key's wraps — "somebody's recovery legs"); anything below the container's
+  root. Each still sits as dead weight; none is read.
+- *Delete vs keep (the brief's ask, honestly):* KEEP-AND-SET-ASIDE would mint a new place keys live (a `.stale-` name
+  or a folder of them), the shape CastleRules avoids (rule 1 names the homes of a key file; a set-aside is none of
+  them) and the same name class the detector would still have to learn to skip; and it keeps the stale fingerprint on
+  disk for nobody. DELETE is safe because of rule 4 (and here, checked by the added fence): the current key file
+  carries every key the swept name can concern, under the current secrets — and the stub itself carries no lock at
+  all. Rule 22 ("a key is deleted only after its replacement has been verified") holds a fortiori: the stub is not a
+  key, and the deletion runs only after the open verified the key file that replaces it.
+
+**VX-443 piece 1a — the pins on the PRE-FIX tree (pre-fix API only — a file planted, the open, the verdict read):**
+- *Core, `Tests/VariorumCoreTests/Protection/Scenario/StaleEnvelopeSweepScenarios.swift` (the scenario world, whose
+  launch runs `assess`'s repairs):* THE PIN `theEnvelopeOfTheLibrarysOwnKeyIsGoneAfterTheNextOpen`;
+  `theEnvelopeOfThePreCrossingKeyIsGoneAfterTheNextOpen` (VX-912 B0's flag exactly — Use Castle's new key, the stub of
+  the old one, which rule 4 carried into the history); `aLostKeyFileAfterTheSweepIsTheLobbysToHealNeverAPreDesignStore`
+  (WHY: the key file lost while closed — the verdict must be `.lobby`, then the mirror written back). GUARDS:
+  `anOlderNameWhoseKeyThisLibraryNeverHadStays`, `theLegacyNameASetAsideAndANearMissStay`, `theSameNameBelowTheRootStays`
+  (Previous Libraries, this Mac's backup folder), `aStoreWithNoKeyFileOfThisDesignStillReadsAsPreDesign` (the detector).
+  **Run at this commit's tree (`swift test --filter StaleEnvelopeSweepScenarios`): `✘ 7 tests, 3 issues` — exactly the
+  three sweep pins at their named lines (the stub survives both opens; the lost-key-file verdict reads
+  `.preDesignStore`, value printed: `launch → .preDesignStore`); the four guards green.** (A first draft drove the key
+  file's loss through the world's `.tamper` step, which RELAUNCHES at once — the verdict then read an open library; the
+  loss is now made by hand while closed, as the plant is.)
+- *Mac, `App/Variorum/VariorumTests/Protection/StaleEnvelopeSweepRoadTests.swift` (the new road over planted leaves, a
+  temp slot with the real file leaves):* RED ON OLD BY BEHAVIOR — `theEnvelopeBesideAReopenedLibraryIsGone`,
+  `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace` (old: the route lands in the lobby with her
+  pre-design face). GUARDS — `everyNameTheSweepDoesNotOwnStays` (the same name in Previous Libraries, this Mac's backup
+  folder, the far folder's root and its `Variorum/Backups/`, a picked folder outside the app's places; beside the slot a
+  stranger's fingerprint, the legacy name, a `.stale-` set-aside, two near misses), `theReadOnlyRoadSweepsNothing`,
+  `withNoKeyFileOfThisDesignThePreDesignFaceStandsAndNothingIsSwept`. Mac `build-for-testing` at this tree →
+  `** TEST BUILD SUCCEEDED **`. Their RUNS are the stage's (PENDING).
+
+**VX-443 piece 1b — the fix, as built (PROVISIONAL P-849-4):**
+- *Core, decided:* `Repair.deleteOlderKeyFile(name:)` (`Assess/Assessment.swift`); `AssessRules.olderKeyFileSweep`
+  (`Assess/Assess.swift`) — owed BY NAME for each container-root foreign entry whose name is an older
+  FINGERPRINT-named key file (`CatalogNames.preDesignKeyFileFingerprint`, the detector's one rule, never restated)
+  and whose fingerprint `live` holds (`live` = the live key file of the OPENED key — `repairs`' own value; current or
+  history), never mid-act; appended LAST to the repairs (a file the disk will not let go stops no other repair).
+- *Core, written:* `ProtectionExecutor.run(.deleteOlderKeyFile)` (`Executor/ExecutorRepairs.swift`) verifies with the
+  key in hand whatever assess said — the name's form (else `.forbidden`, no leaf reached), the live file present and the
+  opened key's, the fingerprint the current key's or one the live history OPENS to under it (`historyKey`; else
+  `.preconditionDoesNotVerify`) — then `leaves.keyFiles.deleteOlderKeyFile(named:)` (false ⇒ `.nothingThere`). The
+  repair's log name carries the file NAME (`deleteOlderKeyFile(<name>)`), so `runRepairs`' one "done" line says it once,
+  names only. The leaf contract (`Executor/Leaves.swift`): by name, the library's own folder's root, a regular file,
+  never read, an older fingerprint-named key file's name only.
+- *App, the production leaf:* `FileKeyFileStoreLeaf.deleteOlderKeyFile(named:)` — the name-shape belt, `lstat` (the
+  entry only — a regular file; a directory or a link of that name stays), `unlink`; `ENOENT` ⇒ false; any other errno
+  throws `couldNotDeleteOlderKeyFile` (the open's `repairPasses` logs it and goes on; the next open retries). Nothing
+  in `ProtectionOpenRoad` changed: the open, the creation and rule 21's use-offer already run `assess`'s repairs on the
+  live slot (writing roads only).
+- *Fakes:* the scenario world's leaf (by name at the container root, through `world.deleting` — her roads re-checked
+  after the delete) and `ExecutorWorld` (`besideTheLibrary`, a `WorldWrite.olderKeyFileDelete`). Two exhaustive
+  switches extended (`AssessTests`' guard sweep, `RestoredCopyJoinWordsMomentTests.kinds`).
+- *Pins, compile-red on old (they name the new case or door):* core `Tests/VariorumCoreTests/Protection/
+  OlderKeyFileSweepTests.swift` — assess: `theNameIsReadForItsFingerprintAndNothingElse`,
+  `theEnvelopeOfTheOpenedKeyIsOwedInBothPostures`, `theEnvelopeOfAKeyTheHistoryHoldsIsOwed`,
+  `noNameTheLiveFileDoesNotVouchForIsOwed` (a stranger's fingerprint, the legacy name, a set-aside, a near miss, below
+  the root, the far folder), `nothingIsOwedUnlessTheOpenedKeysLiveFileVouches` (locked; a live file of another key);
+  executor: `aVerifiedEnvelopeIsDeletedByNameAndSaidOnce` (one log line names it; idempotent),
+  `thePreCrossingKeysEnvelopeIsVerifiedThroughTheHistory` (Use Castle, then the old key's stub),
+  `anUnvouchedNameIsRefusedAndNothingIsTouched` (a stranger's name; no live file), `everyOtherNameIsForbidden` (this
+  design's key file and store, the legacy name, a set-aside, a `../` name). Mac:
+  `StaleEnvelopeSweepRoadTests.theLeafDeletesAnOlderNameAtTheSlotsRootOnly` (root only; a directory and a symlink of
+  that name stay with what the link points at; this design's names never reach the disk).
+- *Evidence, headless at this commit:* `swift build` → `Build complete!`; `swift test --filter
+  'OlderKeyFileSweep|StaleEnvelopeSweep'` → `✔ Test run with 16 tests in 3 suites passed` (the 1a scenario suite
+  7/7 — red 3 → green). Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **` (no warning in a touched file).
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip; core ones mine, headless, each on
+  the one file then `git checkout --` and the suites re-run green):* **R-443a** `AssessRules.olderKeyFileSweep`'s body →
+  `return []` (assess never owes the sweep — the pre-fix decision) ⇒ expected RED the scenario world's three sweep pins
+  and the assess pins `theEnvelopeOfTheOpenedKeyIsOwedInBothPostures`, `theEnvelopeOfAKeyTheHistoryHoldsIsOwed`; GREEN
+  every guard, the name pin and the four executor pins (they hand the repair in directly). **R-443b** the ADDED FENCE
+  dropped — `, held.contains(fingerprint)` removed from the sweep's guard ⇒ expected RED
+  `noNameTheLiveFileDoesNotVouchForIsOwed` ONLY (the stranger's name is owed); the scenario guard
+  `anOlderNameWhoseKeyThisLibraryNeverHadStays` stays GREEN — the executor's own verification refuses the forged repair
+  (two layers, recorded). **R-443c** the executor's verification guard (`guard let live … historyKey …`) deleted ⇒
+  expected RED `anUnvouchedNameIsRefusedAndNothingIsTouched` (both arms) ONLY (assess still never owes those names).
+  **R-443d** the root fence — `entry.place == .container, entry.folders.isEmpty,` removed from the sweep's guard ⇒
+  expected RED `noNameTheLiveFileDoesNotVouchForIsOwed` ONLY (below-root and far entries owed); the scenario's
+  `theSameNameBelowTheRootStays` stays GREEN — the leaf names the root only, and nothing of that name stands there.
+  For the STAGE (Mac): **R-443M1** `FileKeyFileStoreLeaf.deleteOlderKeyFile`'s body → `return false` ⇒ RED
+  `theEnvelopeBesideAReopenedLibraryIsGone`, `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace`,
+  `theLeafDeletesAnOlderNameAtTheSlotsRootOnly`; GREEN the three guards. **R-443M2** (= R-443a on the Mac — the
+  decision gone, the leaf intact) ⇒ RED the two Mac sweep pins only.
+- *The core reverts, run at `80979d6f0` (each on the one file, `git checkout --`, `git diff --stat` empty after):*
+  **R-443a** → `✘ 16 tests, 6 issues` — exactly the five named (the three scenario sweep pins; the two assess
+  decision pins, the both-postures one with its two legs); the guards, the name pin and the four executor pins green.
+  **R-443b** → `✘` exactly `noNameTheLiveFileDoesNotVouchForIsOwed`; the scenario guard green (the executor refused
+  the forged repair — the second layer bites). **R-443c** → `✘` exactly `anUnvouchedNameIsRefusedAndNothingIsTouched`
+  (4 issues — both arms deleted their file). **R-443d** → `✘` exactly `noNameTheLiveFileDoesNotVouchForIsOwed`; the
+  scenario's below-the-root guard green (the leaf names the root only). Every revert bit exactly its named set.
+- *The neighbours, headless at the restored tip:* every `@Suite` type under `Tests/VariorumCoreTests/Protection/`
+  (assess, the executor's suites, the catalogue, the pre-design fact and set-aside, the scenario world's fixed,
+  generated and mutation suites, the lifecycle) + `LibraryClassifierTests`, by type-name filter → **`Test run with 551
+  tests in 123 suites passed` (5 known issues — the standing ones)**.
+
+**VX-152 — WHICH WAY IT WENT (her R-849-3 condition): INVESTIGATED; NO FIX — the row was CLOSED BEFORE THIS RUN by
+VX-445's one-act lock seam. DISMISSED AS HOLLOW on today's tree; one cheap regression GUARD pin added (green on both
+sides of this run, live by a named revert); nothing ballooned, nothing touches VX-855's teardown.**
+- *The trace (every road, file:line at `5dd04cc7c`):* the Mac's two triggers are `ProtectionController
+  .startRelockMonitors` (`Shared/ProtectionController.swift:80`) — `NSWorkspace.willSleepNotification` (:84) and
+  `com.apple.screenIsLocked` (:89) — each ENQUEUING its own main-actor `Task { await self?.relockIfPolicySays() }`.
+  `relockIfPolicySays` (:126) reads the open library's policy (`roadRelock` → `AppBootstrap.roadRelockPolicy`, :1448 —
+  `.ready`, bound, a road session in Castle) and awaits `performLock` → `AppBootstrap.lock()` (:1455) →
+  `lockOnNewRoad()` (:1471), whose FIRST act is `awaitTheLockSeam()` (:1498): while an open is in flight (`.opening`)
+  it waits; with nothing in Castle open (`roadRelockPolicy` nil) it returns nil — no lock; else it takes the session's
+  ONE-ACT hold (`ProtectionRoadSession.beginAct()`) or sleeps 100 ms and reads again. The phone's lock roads end at the
+  same `AppBootstrap.lock()` (`VariorumMobileApp.swift:277`, `MobileRelock.swift:32`).
+- *Sleep + screen lock together:* ask 1 takes the hold and runs the teardown (`runWillLock(.lock)` :153 →
+  `onWillLock` = `macLockTeardown` — it SUSPENDS: the editor's finalize, every note's leaving savepoint, the MCP door);
+  ask 2, arriving meanwhile with the library still `.ready`, finds the hold taken and sleeps. Ask 1 then sets
+  `.opening` (:1479), drops session memory, lets the session go, closes the pool off the main actor, and — in ONE
+  main-actor turn, no `await` between — `session.endAct()` (:1490) and `finish(.roadLobby…)` (:1492): ask 2 can never
+  observe the hold released while the library is ready. Ask 2 wakes into `.opening` (waits) or the lobby
+  (`roadRelockPolicy` nil ⇒ returns nil). ONE teardown (one flush), ONE `finish`, ONE lobby. Lock Now (⌃⌘L, the File
+  menu) and the idle tick meet the same seam.
+- *Why the ticket said otherwise:* its premise ("`AppBootstrap.lock()` has no reentrancy guard") described the
+  pre-VX-445 `lock()` — today's road's, deleted whole at VX-329. VX-445's new-road lock (VX-308 U4, R-U4-2 — "one act at
+  a time", PROVISIONAL P-VX308-U4-2, `notes/plans/vx-308-accounts-key-doors.md`) built the guard; its pin
+  `RoadLockRouteTests.aLockAskedWhileAnActRunsWaitsForTheActThenLocks` covers act-vs-lock, not lock-vs-lock.
+- *The guard pin (Mac, `RoadLockRouteTests.sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby`):* a Castle library
+  through the bootstrap (`LockWorld`), the teardown stubbed to COUNT and to SUSPEND 250 ms (as production's does — without
+  the suspension the second ask would arrive after `.opening` and never reach the seam, so a revert could not bite), the
+  two asks enqueued exactly as the observers enqueue them, then: one teardown, a lobby; the unlock; 400 ms later still
+  `.ready` and still one teardown (no straggling second lock). Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`.
+  **THE NAMED REVERT (the stage's, named here BEFORE it runs): R-152** `AppBootstrap.awaitTheLockSeam`'s
+  `if session.beginAct() { return session }` → `if session.beginAct() || true { return session }` (the hold ignored) ⇒
+  RED `sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` (`teardowns == 1` — two teardowns) and, by the same
+  mechanism, `aLockAskedWhileAnActRunsWaitsForTheActThenLocks`.
+- *THE TICKET TEXT (for the orchestrator to put on VX-152 — implementers have no Linear):* "Investigated in the VX-849
+  run (batch 4). Closed before that run by VX-445 (VX-308 U4, R-U4-2 'one act at a time'): every lock road — sleep,
+  screen lock, the idle tick, Lock Now, the phone's — ends at `AppBootstrap.lock()` → `lockOnNewRoad()`, whose first step
+  `awaitTheLockSeam()` takes the open session's one-act hold (`ProtectionRoadSession.beginAct()`). A second ask while the
+  first holds it sleeps and re-reads; the first releases the hold and lands the lobby in one main-actor turn, so the
+  second wakes to a locked library and does nothing. One teardown, one lobby. This ticket's premise described the
+  pre-VX-445 lock (today's road, deleted at VX-329). Regression guard added:
+  `RoadLockRouteTests.sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` (live by reverting the hold — two
+  teardowns). Recommend: close as already fixed."
+
+**VX-545 — rule 7's ratified sentence (her ratification of VX-529's drafted clause, QUESTIONS #241), the five touch
+points in ONE commit (this one):**
+1. *`notes/CastleRules.md`* — rule 7's italic adoption sentence now ends "*…the old ones still open backups made with
+   them*" (was "…you made before today" — rule 5's floor in rule 7's voice); the status banner's "RATIFIED but not yet
+   written here" sentence becomes the landing's: "Her ratified rule-7 change (VX-529's drafted clause, QUESTIONS #241)
+   is written here at VX-545 (the VX-849 run, 2026-11-09): … landed together with the app's sentence, because a test pins
+   the app's words to this rule's text." Nothing else in the rules moved.
+2. *`App/Variorum/Shared/Protection/ProtectionWords.swift`* — `joinWordsSentence` (the shown-words arm both platforms
+   say): "Your library's twelve words are now your account's twelve words; here they are; the old ones still open backups
+   made with them."
+3. *`App/Variorum/Shared/Protection/RoadAccountModel.swift`* — `RoadJoinWordsMoment`'s doc comment quotes the new ending.
+4. *`Sources/VariorumCore/Protection/Executor/PlanRunner.swift`* — `ActNotice.wordsReplacedByAccount`'s doc comment
+   likewise.
+5. *`Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/LifecycleFixture.swift`* — the stage's row prose AND the
+   fact entry's quote (one sentence, two places: the quote must stay a substring of the row) — then
+   **`notes/plans/vx-266/castle-lifecycle.html` REGENERATED from the fixture, never hand-edited**:
+   `CASTLE_LIFECYCLE_PAGE_OUT=<scratch>/castle-lifecycle.rendered.html swift test --filter LifecyclePageTests` (red, as
+   the drift pin must be, writing the render) → the render differs from the committed page in EXACTLY line 125, that one
+   sentence (`diff | wc -l` = 4) → copied over → `swift test --filter Lifecycle` → `✔ 14 tests in 5 suites passed`.
+- *The byte pin, MOVED BY JUSTIFIED EDIT* (`RoadAccountWordsTests.rule7sSentencesAreHersVerbatim`): its relational line
+  (the app's sentence is the rule's italic) could not tell a rule and an arm that changed together, so it gains the
+  ratified words byte-for-byte and the superseded ending's absence from both. RED on the pre-fix tree by its literal (the
+  app said "…before today"); its run is the stage's. The relational twins `RoadJoinFollowWordsTests
+  .herSentencesTheseFacesSayAreHersVerbatim` and the phone's `MobileProtectionScreenTests` (the label is the constant)
+  follow the constant unchanged.
+- *The 13u label fence holds:* the sentence is protection copy, not commit vocabulary — it carries no "savepoint"
+  (`DeadVocabularyTests` / `CommitVocabularyTests` fence that word); no other sentence was reworded (`git diff` touches
+  the one constant, two doc comments, the fixture's one sentence, the rule and its banner).
+- *Builds:* Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`; `swift test --filter Lifecycle` 14/5 green.
+- *THE NAMED REVERT (the stage's, named here BEFORE it runs): R-545* `ProtectionWords.joinWordsSentence`'s second line
+  back to `"old ones still open backups you made before today."` ⇒ RED `rule7sSentencesAreHersVerbatim` (its relational
+  line — the rule no longer says it — and both new lines) and
+  `RoadJoinFollowWordsTests.herSentencesTheseFacesSayAreHersVerbatim` (its rule-7 line).
+
+#### Piece 4 — Close
+- *Headless at the tip:* `swift build` → `Build complete!`; the protection core set (every `@Suite` type under
+  `Tests/VariorumCoreTests/Protection/` + `LibraryClassifierTests`, by type-name filter — targeted, never the whole
+  package) at `6cd218082` → **`Test run with 551 tests in 123 suites passed` (5 known issues, the standing ones)**; the
+  sweep's suites again after the close's one doc-comment edit (`RepairSkip.forbidden` names its new use) → 16/3 green.
+  Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **` at pieces 1a, 1b, 2 and 3 (the tip's tree but this record and
+  that comment); phone `build-for-testing` (generic iOS Simulator) at `6cd218082` → `** TEST BUILD SUCCEEDED **`. No
+  warning in a touched file. Every build incremental (this worktree's warm DerivedData), never cold.
+- *HEAVY HEADLESS — PENDING (nov7's rule; other sessions held the stage throughout):* the WHOLE core package
+  `swift test` (the core changes reach only the protection set, which ran whole by name; the whole package folds into
+  LIVE STATUS row 8's closing sweep).
+
+**The pins, said plainly (compile-red vs behavior-red):**
+- BEHAVIOR-red on the pre-fix tree, committed before the fix at `9118b0355`: core `StaleEnvelopeSweepScenarios`' three
+  sweep pins (WATCHED red here, then green); Mac `StaleEnvelopeSweepRoadTests.theEnvelopeBesideAReopenedLibraryIsGone`
+  and `…aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace` (pre-fix API only — NOT watched by me:
+  the stage's; R-443M1/M2 are their reverts at the tip).
+- COMPILE-red on old, each with a behavioral revert that bit (headless, watched): the nine core
+  `OlderKeyFileSweepTests` pins (R-443a…d). The Mac leaf pin (R-443M1 — the stage's).
+- RED on old by its literal (a wording pin, moved by justified edit): `RoadAccountWordsTests.rule7sSentencesAreHersVerbatim`.
+- GREEN on both sides BY DESIGN (guards — recorded so nobody reads them as hollow): the four scenario fences, the three
+  Mac fences, and VX-152's `sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` (its row was closed before this run;
+  live by R-152).
+
+**SELF-ASSESSMENT.**
+- *VX-443 — what is deleted, exactly:* only a file whose NAME is `variorum-keys-<fp16>.json`, at the live slot's
+  folder's root, a regular file, whose fp16 is the opened key's or a key the live key file's history OPENS to under it —
+  i.e. exactly what `ensureStoreIdentity` wrote, after this design's key file just opened the library. Decided by
+  `assess` (pure, names and plaintext fingerprints only), verified by the executor with the key in hand, unlinked by the
+  leaf; no byte of it is ever read; one log line names it (the repair's own name carries the file name — `runRepairs`'
+  "done" line; the open's summary line lists the repair once more as it lists every repair done). Where the repairs run:
+  only `ProtectionOpenRoad.open`, `.create` and `ProtectionRoadActs.useOffer`, all over `ctx.system.places` — the live
+  slot (grep of `runRepairs`/`repairPasses` callers); Look inside (`ProtectionCopyPeek`, a private byte copy), a picked
+  folder, Previous Libraries and the backups never meet a repair; a hosted test run's road repairs nothing; a store with
+  no key file of this design never opens on this road (the launch verdict is `.preDesignStore` first). At a creation no
+  older name can match (a fresh random key); at rule 21's use-offer the newly placed key file is the one that vouches.
+- *VX-443 — why the delete is safe:* the swept name can only concern a key this library's current key file already
+  reaches under the current secrets (rule 4, CHECKED by the fingerprint fence, not argued), and the stub itself carries
+  no lock; rule 22 holds a fortiori (it is not a key; its replacement — this design's key file — was verified by the
+  open). Delete-vs-set-aside recorded in the settled design above; the alternative is in P-849-4's options below.
+- *VX-443 — what it fixes beyond dead weight:* the latent misreading is real and pinned — on the pre-fix tree a
+  library of this design that lost its key file while the stub stood read `.preDesignStore` (`launch → .preDesignStore`,
+  the scenario world, watched) and on the Mac the route lands in her pre-design face where rule 1's mirror is never
+  written back (the stage's to watch). After one open of the fixed build the stub is gone and the same loss heals.
+- *VX-152:* no hazard on today's tree — traced to VX-445's seam; a guard pin pins the exact interleaving (the
+  teardown suspends). Her condition honored: investigated, nothing added to the run but the guard and the ticket text.
+- *VX-545:* exactly the ratified ending, in the rule and in the app; the page regenerated, one sentence moved.
+- *What I could not verify:* every Mac and simulator RUN (the stage); the whole core package (heavy headless, held).
+  The likeliest Mac snag: `everyNameTheSweepDoesNotOwnStays` plants into the far folder (`PlantedRoad(farFolder:
+  true)`) — a backup due at the creation may write there too (harmless: the planted names are asserted to survive, not
+  the folder's listing).
+
+**RECORDED CORNERS (for the orchestrator; none built here):**
+1. *Left on disk, never read, by design:* the fixed legacy `variorum-keys.json` (ownership unprovable by name — and it
+   still reads as a pre-design name if this design's key file is lost; `establish` never wrote it, so only a pre-1a
+   leftover beside a new-road slot carries it), the `.stale-<epoch>.json` set-asides (another key's wraps by
+   construction), anything below the slot's root (today's flat `Backups/` copies — rule 26's).
+2. *An older name whose key this library never had stays* — the added fence's purpose; it too would read as pre-design
+   if the key file were lost. A store from before this design moved out by hand is the only known source.
+3. *The scenario world does not model the pre-design face at launch* (its `launch` opens through custody whatever the
+   verdict) — the pins read the verdict itself; the Mac pins carry the face.
+4. *VX-152's guard pin needs a suspending teardown stub* to exercise the hazard's interleaving — recorded in its doc so
+   a later edit never "simplifies" it into a pin that cannot bite.
+
+**QUESTIONS owed at the merge (the orchestrator files them, latest main):** **P-849-4 — the stale store-id envelope**
+(as built: (a) DELETE by name at the open, gated — the live slot only, after this design's key file opened the
+library, only a fingerprint-named file whose fingerprint the live key file holds, never read, one log line; recorded
+alternatives: (b) SET IT ASIDE instead (a `.stale-` name or a folder) — mints a new place keys could be said to live,
+the shape CastleRules avoids, and keeps a stale fingerprint for nobody; (c) LEAVE IT (dead weight; the latent
+pre-design misreading after a lost key file stands). The added fingerprint fence (beyond the brief's list) is part of
+(a) for her eye: without it the sweep would also delete an older name of a key this library never had — rule 26's).
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** SurfaceContracts §"Doors to the outside",
+the protection bullet — beside "the rule-8 re-makes at every open": the store-id envelope an earlier Debug build left
+beside the slot (`variorum-keys-<fp16>.json`, of a key this library's key file holds) is deleted by name at the open,
+never read (VX-443, PROVISIONAL P-849-4). CastleRules: no rule moves for VX-443 (rule 26 untouched — the sweep handles
+only this design's own leftover, never a store from before this design); VX-545's rule-7 change landed IN this batch
+(her ratified words; the banner names the landing). AppSpecRecord: VX-545's landing under the protection narrative.
+
+**MOBILE PARITY:** the sweep is the shared core's decision and the shared leaf's act (`Shared/Protection/
+FileKeyFileStoreLeaf.swift`), so the phone's open sweeps exactly as the Mac's (the phone's pre-switch opens wrote the
+same stub through the shared `AppBootstrap`); the phone shows the same rule-7 constant (`MobileProtectionScreen`); the
+phone's lock roads end at the same `AppBootstrap.lock()` seam.
+
+**STAGE REQUEST (every Mac and simulator run of this batch — the orchestrator's claim through nov7; `-only-testing`
+takes TYPE names, as a zsh array; the tree verified clean before, between and after each cycle):**
+- *Leg A — the batch's own Mac suites at the tip (green expected):* `T=(StaleEnvelopeSweepRoadTests RoadLockRouteTests
+  RoadAccountWordsTests RoadJoinFollowWordsTests)` — "Test run with 25 tests in 4 suites" (6 + 5 + 8 + 6).
+- *Leg B — the named reverts, each ALONE at the tip, its suite run, then `git checkout --` of the one file (diff clean)
+  and the suite re-run green:* **R-443M1** `App/Variorum/Shared/Protection/FileKeyFileStoreLeaf.swift` —
+  `deleteOlderKeyFile`'s body → `return false` ⇒ RED `theEnvelopeBesideAReopenedLibraryIsGone`,
+  `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace`, `theLeafDeletesAnOlderNameAtTheSlotsRootOnly`;
+  the three fences green. **R-443M2** `Sources/VariorumCore/Protection/Assess/Assess.swift` — `olderKeyFileSweep`'s first
+  line preceded by `if true { return [] }` ⇒ RED the two Mac sweep pins only (the leaf pin green). **R-152**
+  `App/Variorum/Shared/AppBootstrap.swift` — `awaitTheLockSeam`'s `if session.beginAct() { return session }` →
+  `if session.beginAct() || true { return session }` ⇒ RED `sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` and
+  `aLockAskedWhileAnActRunsWaitsForTheActThenLocks` (both in `RoadLockRouteTests`). **R-545**
+  `App/Variorum/Shared/Protection/ProtectionWords.swift` — `joinWordsSentence`'s second line back to `"old ones still open
+  backups you made before today."` ⇒ RED `RoadAccountWordsTests/rule7sSentencesAreHersVerbatim`,
+  `RoadJoinFollowWordsTests/herSentencesTheseFacesSayAreHersVerbatim`.
+- *Leg A0 (optional — the red-on-old SHA, if preferred to R-443M1/M2):* at `9118b0355` `T=(StaleEnvelopeSweepRoadTests)`
+  ⇒ 5 tests, RED exactly the two sweep pins, the three fences green.
+- *Leg C — the standing suites over the touched seams (or fold into LIVE STATUS row 8's closing sweep):* every suite
+  that drives the open road or reads the rules/the words: `PreDesignStoreRefusalTests` · `PreDesignLandingsRouteTests` ·
+  `PreDesignStartFreshRouteTests` · `ProtectionOpenRoadPlantedTests` · `ProtectionFileLeavesTests` ·
+  `ProtectionRestoreReceiptTests` · `ProtectionRule27FaceTests` · `NoKeyFileDoorTests` · `ProtectionNoticeFaceTests` ·
+  `ProtectionOfferFaceTests` · `MakeMineRoadTests` · `EmptySlotLandingRoadTests` · `PreviousLibrariesArcTests` ·
+  `LookInsideRoadTests` · `PickedCopyRoadTests` · `ProtectionCrossingRoadTests` · `ProtectionCrossingRouteTests` ·
+  `ProtectionJoinFollowRoadTests` · `RoadKeyDoorRoadTests` · `RoadLockTests` · `RoadIdleDialRouteTests` ·
+  `SettingsLockCloseTests` · `MCPWillLockRoadRouteTests` · `JoinSheetWordsTests` · `RoadJoinFollowSurfaceTests` ·
+  `RoadAccountSurfaceTests` · `RoadCrossingFacesTests` · `WordsBandTests` · `DeadVocabularyTests` ·
+  `CommitVocabularyTests` (type names verified by grep at the close).
+- *Leg D — the phone (simulator, by id):* `MobileProtectionAccountSectionTests` (rule 7's label pin, :336 —
+  CORRECTED by the orchestrator at nov7's name check: the FILE is `MobileProtectionScreenTests.swift` but it
+  declares four other TYPES and none wears the file's name; `-only-testing` would have dropped the phantom
+  silently — the batch-1 `MobileEditorTests` trap's class) · `MobileLockTeardownTests`.
+- *The walk (UI-kind, optional — the orchestrator's call; an OPUS session per the Fable safeguard, since it meets a
+  join):* the join's words moment saying the ratified sentence, both voices, on the prod test road's first-run walk.
+  VX-443's sweep and VX-152's guard have no face (the sweep is silent; the lock lands the same lobby).
+
+### BATCH 4 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 5 spawns)
+
+**Verification first-hand:** all seven commits present and pushed (`b59d2f16d`…`d815dc445`), tree clean, HEAD =
+origin; the sweep lives in `Protection/Assess` + the executor + the leaf as reported; rule 7's ratified sentence at
+`CastleRules.md:23/:84` and `ProtectionWords.swift:730`; `castle-lifecycle.html` regenerated (exactly one line in
+the commit's diff); LIVE STATUS row 4 BUILT.
+
+**Dispositions:**
+1. **VX-152 → DISMISSED AS ALREADY FIXED (VX-445's one-act seam), the guard pin kept.** Her condition is met on
+   its third branch: the investigation found no live bug, so nothing is folded in and nothing balloons. The
+   implementer's ticket text goes onto VX-152 now (the orchestrator's Linear act); the ticket closes at the merge
+   as "already fixed + regression guard", not as this run's fix.
+2. **VX-443 → ACCEPTED as built; P-849-4 stands PROVISIONAL with the options (a) delete-with-fences (built) /
+   (b) set-aside / (c) leave.** The fence ADDED beyond the brief — delete only a name whose fingerprint the live
+   key file holds (current or history) — is adopted and flagged FOR HER EYE in the bundle: it turns rule 4's
+   "nothing openable is lost" from an argument into a check, and it is what keeps a rule-26 store's leftover
+   (another design's key file) untouched.
+3. **VX-545 → ACCEPTED** (five points, one commit, the page regenerated never hand-edited, the byte-pin moved by
+   justified edit, the commit-vocabulary fence re-checked).
+4. **The optional B4 walk row → SKIPPED, recorded:** the changed sentence is byte-pinned
+   (`rule7sSentencesAreHersVerbatim`) and the lifecycle page regenerates from the asserted fixture — stronger
+   than a screenshot; no Opus walk session is spent on it. B3's walk rows (no lock screen) remain mine.
+5. **The stage legs:** A (25/4) and B (R-443M1 · R-443M2 · R-152 · R-545) join the vx-849-b34-tests claim with
+   batch 3's legs; A0 skipped (same reasoning as batch 3 — the reverts prove liveness); leg C folds into row 8's
+   closing sweep; leg D's two phone suites ride the one sim boot (MobileLockTeardownTests deduped — already in
+   batch 3's list).
+6. **Canon delta → queued:** SurfaceContracts' protection bullet gains the sweep's line beside "the rule-8
+   re-makes at every open", landing as P-849-4 survives her sitting.
+
+### BATCH 5 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** NO FIX BUILT — the confirm is GREEN, so VX-855 is
+RECORD-ONLY (no fix on a trace that never bit); no `xcodebuild test` and no `xcodebuild build-for-testing` (no file
+compiled into either app changed — the batch's diff is one core test file and this record); no stage contact, no
+Debug-app launch, no walk, no store or server contact; no pull, merge or rebase; no whole-package or whole-target
+headless run and no cold build (other sessions hold the stage — the whole core package is PENDING, row 8); ZERO lines
+under `Sources/` in any commit (the R-855a revert touched `StoreBinding.swift` in the working tree only, restored
+byte-clean); no QUESTIONS filed, nothing PROVISIONAL. Nothing of batches 3/4/6's files.
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole; `.claude/agents/
+opus-implementer.md`; `notes/SyncSpec.md` IN FULL; `notes/plans/phase-13j-purge-memo.md` §2 (the horizon), §4a–§4f,
+§6b, §6c (the local road B3, the staleness rule B1); the vx-678 record's VX-657 lines (the quit guard as built, and
+its line-78 incident → VX-691). The code: `PurgeJanitor.collectRoots` (`Sync/PurgeJanitor.swift:360`, the
+`tombstoneRoots` nested reads the .ips names), `LocalPurge.sweep(afterFamily:)` (:981), `AppSession.sweepLocalPurge` /
+`quiesceLocalPurgeForExit` / `cancelLocalPurgeSweeps` (`Shared/AppSession.swift:158–211`), `AppServices.start` /
+`stop` / `quiesceForExit` (`Shared/AppServices.swift:298–365`), `VariorumAppDelegate.applicationShouldTerminate`
+(:155), `AppBootstrap`'s `Launch` / `State.hostingTests` (`Shared/AppBootstrap.swift:96–243`, VX-604),
+`StoreBinding.lock` (`Persistence/StoreBinding.swift:89`), GRDB 7.11.1's `DatabasePool.close` (`Core/DatabasePool.swift:268`)
+and `Pool.barrier` / `Pool.get` (`Utils/Pool.swift:95–215`), `QuitPurgeQuiesceTests`, `FirstRoundAfterTheActTests`'
+world-end quiesce (:282–291), `StoreBindingTests`.
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Preflight + this record + the trace | DONE (this commit) |
+| 1 | The repro pin (the confirm) — headless, deterministic | DONE (`c0f713690`) — `PurgeSweepTeardownTests` **GREEN 2/2, three runs in a row**: the confirm does NOT reproduce the class on this tree ⇒ RECORD-ONLY; R-855a (run at `c0f713690`) bit exactly its two named lines |
+| 2 | The fix — ONLY on a red confirm | NOT BUILT — the confirm is green (RECORD-ONLY; no fix on a trace that never bit) |
+| 3 | Close | DONE (this commit) — `swift build` green; the pin + neighbours 36/3 green; the ticket text, the window recipe, the corners below; whole core package PENDING (row 8) |
+
+**THE TRACE — the teardown order, every road (file:line at `80ca15989`):**
+- *Who starts the sweep:* `AppServices.start()` (:298) arms the hourly clock `localPurgeTask` (:329), whose FIRST
+  iteration runs at once — `AppSession.sweepLocalPurge()` (:158) → a HELD `Task` (VX-657) → `LocalPurge(database:
+  session.database).sweep()` → `sweep(afterFamily: nil)` (:981) → `database.read { PurgeJanitor.collectRoots(…) }`
+  (:984) — the .ips's exact chain, on a `DatabasePool` reader (`AppDatabase.onDisk` is a pool; `inMemory()` is a
+  queue, so a pool reader means an on-disk store). Every other caller (the purge doors in `RecoveryActs`, the comments
+  panel) goes through the same held `sweepLocalPurge`.
+- *Teardown 1 — the LOCK (Castle's relock, Lock Now):* the Mac teardown runs `AppServices.stop()` (:337) — it CANCELS
+  the held sweeps without awaiting (`cancelLocalPurgeSweeps`, ladder R1 MINOR-3); then `lockOnNewRoad` closes the pool
+  off the main actor through `StoreBinding.lock()`, which swaps the binding to locked FIRST (new accesses throw the
+  typed `StoreLockedError`) and then calls GRDB's `DatabasePool.close()`. GRDB's close runs inside
+  `readerPool.barrier`, and `Pool.barrier` does `itemsGroup.wait()` before its body — every `get()` enters that group
+  and only the element's release leaves it. So **the close cannot run while a reader is in use: an in-flight
+  `collectRoots` read finishes on a live connection, and only then are the connections (and their codec contexts)
+  closed.** The sweep's next access — its family `write` — meets the locked binding and throws `StoreLockedError`.
+  Nothing on the lock road frees a codec context under a read. (The pin below drives exactly this, mid-read.)
+- *Teardown 2 — ⌘Q (the quit door):* `applicationShouldTerminate`'s PROCEED path (:173–199) awaits
+  `AppServices.quiesceForExit()` (:360) — the clock cancelled, every held sweep cancelled AND awaited
+  (`quiesceLocalPurgeForExit`, new sweeps refused), the sync chain retired and awaited (the transported janitor) —
+  before it replies. The process exits only after no sweep read is in flight (VX-657, `QuitPurgeQuiesceTests`).
+- *Teardown 3 — PROCESS EXIT WITHOUT THE QUIT DOOR (the .ips):* a process that ends by `exit()` without passing the
+  delegate — a test runner ending its host after the bundle passed — runs the exit-time handlers while background
+  threads still run. The shipped SQLCipher 4.18.0 framework registers its own exit-time shutdown (its
+  `sqlcipher_atexit` → `sqlcipher_extra_shutdown` symbols and log string, present in the framework the package
+  resolves), which releases SQLCipher's private-heap allocations that the open connections' codec state lives in. A
+  reader mid-`sqlite3_step` at that moment decrypts its next page over released codec state:
+  `sqlcipher_memset ← sqlite3Codec ← readDbPage …`, the .ips's frames. **This repo already recorded this exact race
+  once**, in a different harness: `FirstRoundAfterTheActTests.swift:285` — "a test process exiting under a task still
+  releasing that pool crashes SQLCipher's shutdown (seen once … `sqlcipher_extra_shutdown` racing
+  `DatabasePool.deinit`)" — and the vx-678 record's window (its line 78) saw "the test host over an in-flight dev-store
+  sweep at runner exit, VX-657's residual face", filed as **VX-691**. VX-855 (build 11051, 2026-11-05) is that face
+  again: before VX-604 the test host's own launch opened the DEV store and composed the whole ready shell
+  (`AppServices.start()` included), so its launch sweep could be mid-`collectRoots` when the runner ended the host —
+  and that road never meets `applicationShouldTerminate`, so VX-657's quiesce could not reach it.
+- *Today's tree, that road:* **VX-604 (`fae643a05`, 2026-11-08 — after build 11051) made the production bootstrap
+  INERT under a test runner** (`AppBootstrap.init`, :231–242: `launch == .hostingTests` ⇒ no road, no store, no session,
+  no services — `State.hostingTests`, "never left"). An inert host composes no `AppServices`, so no launch sweep exists
+  in it to race the runner's exit. The .ips's road is closed by construction on this tree; the ⌘Q road is closed by
+  VX-657's quiesce.
+- *What a core pin can and cannot drive:* the brief's in-process teardown (close / key drop mid-read) is Teardown 1 —
+  pinnable headless and deterministically (piece 1). Teardown 3 is process exit: a core pin cannot end its own process,
+  and once a process is exiting no ordering inside our code governs it — the fix there is the one VX-657 and VX-604
+  already built (never reach exit with a read in flight: quiesce on the quit door; open nothing in a test host).
+
+**Piece 1 — THE REPRO PIN (the confirm), as built: `Tests/VariorumCoreTests/PurgeSweepTeardownTests.swift` (core,
+headless; no product file touched).**
+- *The world:* a KEYED on-disk store (`AppDatabase.onDisk(url:key: .mint())` — a `DatabasePool`, SQLCipher-keyed, as
+  production's) holding one never-synced deleted note (two blocks) with a Delete Now intent — the local road's eligible
+  family, `QuitPurgeQuiesceTests`' shape core-side — wrapped rebindable (`asRebindable()`) exactly as the composition
+  root wraps the app's store; the production `LocalPurge(database: view).sweep()` started as a task.
+- *The plant (deterministic, no timing lottery):* a SQLite progress handler installed on the pool's one reader
+  connection by a first read; armed, it parks the reader's thread INSIDE `sqlite3_step` on the sweep's first
+  `collectRoots` statement (the .ips's own frame) and signals; the test proceeds only after that signal, so the read is
+  PROVABLY in flight before the teardown starts, and released only by the test.
+- *The teardown:* the lock road's own call, `StoreBinding.lock()` (the swap to locked, the checkpoint, GRDB's close, the
+  key dropped), on a background thread.
+- *The pins:* **`aLockLandingMidSweepClosesOnlyAfterTheHeldReadEnds`** — while the read is held, a new access refuses at
+  once with the typed `StoreLockedError`; after a 500 ms window the read is released; the lock returned only AFTER the
+  release (the close waited for the read); the close is clean; the sweep ended at its NEXT access with
+  `StoreLockedError` — its read finished on a live connection, never a database error from a connection closed under
+  it; reopened with its key, the family stands whole (the note, its two blocks, its live intent — nothing half-done);
+  control: a sweep over the reopened store purges it (the family WAS eligible — the world is real).
+  **`theLockRoadsCancelThenCloseMidReadEndsTheSweepWithNothingHalfDone`** — the lock road's own ORDER
+  (`AppServices.stop()` cancels the held sweep without awaiting, THEN the pool closes): cancel while parked, lock,
+  release; the lock returned after the release, clean; nothing purged; the family whole.
+- *Result at this commit's tree (`swift test --filter PurgeSweepTeardownTests`):* **`✔ Test run with 2 tests in 1 suite
+  passed` — three runs in a row (1.21–1.23 s each).** One test-shape correction on the way, recorded: the first run's
+  "family stands whole" line counted the note's blocks by `last_container_id`, which a note's delete cascade does not
+  stamp (the printed facts read `container: 1, blocks: 0, intents: 1` — the note and intent standing, the query blind);
+  the count now reaches the blocks through the note's placements (`PurgeConvergenceTests.familyRowCount`'s form). Every
+  order line was green in that first run too.
+- **THE VERDICT: GREEN = RECORD-ONLY.** The in-process teardown the ticket suspected (the pool or its key torn down
+  under the sweep's in-flight reader) does not reach a read in flight: GRDB's close waits at the reader pool's barrier,
+  and our lock returns only after it. The .ips's teardown was PROCESS EXIT (Teardown 3 above), whose two product faces
+  are closed on this tree — ⌘Q by VX-657's quiesce, the test host by VX-604's inert launch. No fix is built (piece 2).
+- *THE NAMED LIVENESS REVERT (named here BEFORE it runs, at this commit's tip; headless, the one file, then
+  `git checkout --`):* **R-855a** `Sources/VariorumCore/Persistence/StoreBinding.swift` — `lock()`'s `try
+  outgoing.close()` dispatched to a background queue and `lock()` returning `(true, nil)` at once (a lock that does not
+  wait for its close) ⇒ expected RED exactly the two `lock.returnedAfterRelease` lines (one per pin — the lock returns
+  inside the held window); every other line GREEN (the binding still swaps first, so the sweep's next access still
+  refuses typed; GRDB's barrier still holds the close until the read ends, so nothing is half-done). What the pin
+  CANNOT bite, said plainly: the barrier itself is GRDB's (`Pool.barrier`), not a line of ours — our part is the order
+  (swap first, the close awaited, the lock returning after it), and R-855a is that part.
+- *R-855a, run at `c0f713690` (headless, `StoreBinding.swift` alone; `git diff --stat` showed exactly that one file,
+  2+/6−):* **`✘ Test run with 2 tests in 1 suite failed … with 2 issues`** — exactly
+  `aLockLandingMidSweepClosesOnlyAfterTheHeldReadEnds` at `lock.returnedAfterRelease` and
+  `theLockRoadsCancelThenCloseMidReadEndsTheSweepWithNothingHalfDone` at `lock.returnedAfterRelease`; every other line
+  green in both (the typed refusal while held, the clean outcome, the sweep's typed end, the family whole, the control
+  purge) — as named. Restored by `git checkout --` of the one file (`git diff --stat` empty) → the pin with its
+  neighbours `swift test --filter 'PurgeSweepTeardownTests|StoreBindingTests|PurgeConvergenceTests'` → **`✔ Test run
+  with 36 tests in 3 suites passed`** (the VX-657 boundary pins among them).
+
+#### Piece 3 — Close
+- *Headless at the tip:* `swift build` → `Build complete!` (incremental); the pin 2/2 ×3 and with its neighbours 36/3,
+  above. `xcodebuild build-for-testing` (Mac, phone) NOT RUN, deliberately: the batch's whole diff
+  (`git diff --stat 80ca15989..HEAD`) is `Tests/VariorumCoreTests/PurgeSweepTeardownTests.swift` and this record — no
+  file either app compiles changed, so batch 4's green tip stands for both; nothing to compile there.
+- *HEAVY HEADLESS — PENDING (the live constraint; other sessions hold the stage):* the WHOLE core package `swift test`
+  (the batch adds one self-contained suite and changes no source, so the targeted runs cover it; the whole package
+  folds into LIVE STATUS row 8's closing sweep as every batch's has).
+- *Mac/simulator suites for the orchestrator's window:* NONE new and NO named Mac reverts (the pin is core; R-855a ran
+  headless). The VX-657 standing suite `QuitPurgeQuiesceTests` is already in batch 1's and batch 2's leg-C lists (row 8).
+
+**THE VERDICT, plainly: VX-855 DOES NOT REPRODUCE ON THIS TREE — RECORD-ONLY. DISMISSED AS ALREADY FIXED (VX-604's
+inert test host for the .ips's own road; VX-657's quit-door quiesce for ⌘Q), with one regression guard
+(`PurgeSweepTeardownTests`, live by R-855a).** The ticket's suspected mechanism ("the pool or its codec key context torn
+down under an in-flight reader") does not happen in-process: the lock road's close waits for in-flight reads (GRDB's
+barrier; our lock returns after it — pinned mid-read). The .ips's real teardown was process exit — a test runner ending
+its host while the host's own launch sweep was mid-read, a road that never met the quit door — and since VX-604 a test
+host opens no store and starts no sweep.
+
+**THE TICKET TEXT (for the orchestrator to put on VX-855 — implementers have no Linear):** "Traced in the VX-849 run
+(batch 5). The .ips is the test host at its runner's exit: before VX-604 the host's own launch opened the dev store and
+composed the ready shell, so its launch purge sweep (`AppServices.start` → `sweepLocalPurge` → `LocalPurge.sweep` →
+`collectRoots` on a pool reader) could still be reading when the runner ended the process; process exit runs SQLCipher's
+own exit-time shutdown under that read — the crash. That road never passes `applicationShouldTerminate`, so VX-657's
+quiesce could not reach it (VX-691 recorded the same face on 2026-10-28). Closed on today's tree: VX-604 (`fae643a05`,
+2026-11-08 — after build 11051) makes a test host inert (no store, no services, no sweep); ⌘Q quiesces the sweeps and
+the sync chain before exiting (VX-657). The in-process half the ticket suspected does not exist: a pin parks the
+sweep's read inside `sqlite3_step` on a keyed on-disk pool and locks the store under it — the close waits for the read,
+new accesses refuse typed, nothing half-done (`PurgeSweepTeardownTests`, green; live by reverting the lock's awaited
+close). Recommend: close as already fixed (VX-604 + VX-657), regression guard added; VX-691 is the same face — close it
+with this, or re-scope it to the test-leaked-read residual below."
+
+**THE DEV-STORE CONFIRMATION RECIPE (the orchestrator's window — OPTIONAL, since the confirm is green; never run by
+me):** the class lives only at PROCESS EXIT, so in-app is the only place its two faces can be watched.
+- *Before:* a held stage claim; `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` zero; note the newest
+  `~/Library/Logs/DiagnosticReports/Variorum*.ips` time (the baseline).
+- *(a) The test-host face — rides any Mac test window at no extra cost:* after the window's last `xcodebuild test`
+  leg, list `~/Library/Logs/DiagnosticReports/Variorum*.ips` newer than the baseline. Expected: none (the inert host —
+  VX-604). A new one whose crashed thread is `GRDB.DatabasePool.reader.*` under `LocalPurge`/`collectRoots` would mean
+  a test leaked a running sweep (corner 1 below), not the host's launch.
+- *(b) The ⌘Q face:* the dev store (`io.lduarte.Variorum.debug`) given work for the launch sweep — several notes
+  deleted (tombstones; a few with Delete Now confirmed while signed out so intents exist) — then, five times: launch
+  the Debug app, wait for the first paint of the library, ⌘Q within one to two seconds. Expected: each quit prompt and
+  clean, no Problem Reporter, no new `.ips`. **If the dev store is in Castle, the launch meets its lock screen: per the
+  Fable safeguard that walk is an OPUS session's**, with the values from `~/.variorum/dev-castle.env` only. Posture
+  restored at RELEASE (MCP on, variorum-de approved, never Resume Sync).
+
+**RECORDED CORNERS (for the orchestrator; none built here):**
+1. *A read a TEST leaves running at its runner's exit* can still meet the same exit-time shutdown — a test-composed
+   `AppServices.start()` over an on-disk pool whose background read outlives the test (the class
+   `FirstRoundAfterTheActTests`' world-end quiesce works around with its 200 ms settle, :282–291). Test-only, never a
+   product road; VX-691's natural residual scope if it is kept open.
+2. *VX-657's quit quiesce covers the purge sweeps and the sync chain only;* other background reads in flight at ⌘Q
+   (an observation's fetch, a search query) would meet the same exit-time shutdown in principle. No field evidence (the
+   one .ips is the test host's sweep). Not widened — the orchestrator's to ticket or not.
+3. *A quit while locked* (`applicationShouldTerminate`'s `guard let services` → `.terminateNow`) has no sweep to await:
+   the lock road's close returned only after any in-flight read ended (this batch's pin), so no read is in flight on the
+   closed pool by the time the lobby stands.
+
+**SELF-ASSESSMENT.** The pin is deterministic in its staging (the read is proven parked before the teardown; the test
+alone releases it) and fails loudly rather than hollowly if its premise breaks (a sweep that took another reader never
+parks — the `#require` fails). Its one timed element is the 500 ms window a non-waiting lock would return in: a lock
+that returned LATER than that while a read was held would read green — the window can only miss, never false-red.
+What it cannot reach is process exit itself; the trace, not a pin, carries Teardown 3, with the repo's own earlier
+sighting (`FirstRoundAfterTheActTests.swift:285`) and VX-691's as corroboration.
+
+**MOBILE PARITY:** nothing mobile-visible. The lock road's `StoreBinding.lock()` is the shared core's, so the pin covers
+the phone's lock teardown too; the phone has no quit door (the system suspends or ends the app), and the inert test
+host is the shared bootstrap's (VX-604 — both platforms).
+
+**Canon deltas owed at the closeout:** none (no contract changed; the verdict is the ticket's). **QUESTIONS:** none.
+
+### BATCH 5 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 6 spawns)
+
+**Verification first-hand:** three commits (`718701ac8`…`419f2ab88`), pushed, tree clean, HEAD = origin; the whole
+diff is ONE core test file + this record (zero `Sources/` lines — checked by name list); LIVE STATUS row 5 DONE.
+
+**Dispositions:**
+1. **RECORD-ONLY → ACCEPTED.** The hallucination guard worked as designed: the confirm ran green (2/2, three
+   runs), so no fix was built; the trace (the runner-exit race, closed by VX-604's inert host + VX-657's quiesce;
+   the lock road's close behind GRDB's reader barrier) is corroborated in-repo and the two ordering pins stay as
+   regression guards, R-855a revert-proven headless.
+2. **Tickets:** the implementer's text is ON VX-855 (comment `f1c0e9a2`), recommending close-as-already-fixed; a
+   cross-reference is ON VX-691 (comment `017827fc`) — its final call (close with VX-855, or re-scope to the
+   test-leaked-read residual) lands at the closeout's ticket pass.
+3. **The in-app recipe, decided:** (a) the DiagnosticReports .ips check is ADOPTED into the b34 window's RELEASE
+   accounting (free); (b) the five launch-quit cycles are SKIPPED unless the walk window has spare time AND the
+   dev store sits outside the lock screen — the structural trace plus the pins carry it; recorded here so the
+   skip is deliberate.
+4. **No new window legs;** the whole core package stays PENDING to row 8's closing sweep, as the batch marked it.
+
+### BATCH 6 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** VX-919's script was NEVER EXECUTED — not on production, not
+on the mirror, not on any local or throwaway database (its review is the ladder's; its deploy is HELD for her window);
+no server or store contact of any kind; no `xcodebuild test`, no stage contact, no Debug-app launch, no walk; no pull,
+merge or rebase; no whole-package or whole-target headless run and no cold build (other sessions hold the stage — the
+whole core package stays PENDING, row 8); no `notes/QUESTIONS.md` edit (the PROVISIONALs below are the merge's); no
+canon edited (the SyncSpec §7 line is PROPOSED below); the sibling seq-rank repairs are RECORDED, never widened.
+Nothing of batches 3/4/5's files.
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole; `.claude/agents/
+opus-implementer.md`; `notes/SyncSpec.md` IN FULL (§3's `sync_row_seq` and seq-0 rule, §7's repair doctrine — the
+OWNED paragraph and the repair order, §9's ordering authority, §12's maintenance-vs-lockstep line); the vx-912 record's
+B2 section whole (the worked pattern: the mechanisms, P3's design, R-893-R, PROVISIONAL P-912-B2-2, self-assessment
+(v)/(viii)); `notes/plans/fixes/vx-912-b0-security-verify.md` whole (the device_cursor corner); QUESTIONS #167 (the
+OWNED shape, RATIFIED (a)) and #268 + its addendum (P-912-B2-2 stands as built); the code — `Repairs.swift`
+(`runPostApplyRepairs`' repair order, `repairOwnedExclusivity`, the `TouchedRows` firing scope, every `sync_row_seq`
+read), `BookWingMend.swift` (`Membership`, `outranks`, `liveMemberships`), the harness (`SyncClient`, `BookWingCorner`,
+`furniturePair`), `Phase13iRepairTests` (the three OWNED pins) and `BookWingAnchorRankConvergenceTests` (T3); the
+server — `10_phase13j_purge.sql` (device_cursor's DDL, policy, grants), `12_phase13y_tenant_seq.sql` (`sync_challenge`'s
+cap, §5b/§5e), `maintenance/vx495-pull-keyset.sql` + `vx495-rollback.sql` (the deployed `sync_pull` and the paired
+rollback), `maintenance/beta-signup-auto-entitle.sql` (the trigger-function maintenance precedent),
+`maintenance/14c-post-deploy-grant-sweep.sql`, `maintenance/vx213-pg-temp-search-path.sql`, and `AuthRLSDDLTests`' pins
+over them.
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Preflight + this record (the trace, the siblings, the designs) | DONE (this commit) |
+| 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | DONE — 1a the pins on the PRE-FIX tree (`d58707b70` — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines; 1b the swap + the pure rank pin + one justified fixture edit (`797dfe8a7`): the suite 3/3, the neighbours 394/76 + 14/4 green; R-921a and R-921b bit exactly their named sets (this commit records them) |
+| 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | DONE — `1db9b06c8`: the artifact, the rollback, the sweep's one presence-aware INFO row, the DDL pin; `AuthRLSDDLTests` + `MultiTenantSyncAttackerTests` 88/2 green; NEVER EXECUTED; R-919a bit exactly its one line |
+| 3 | Close — `swift build`, the targeted core suites, both `build-for-testing`s, the self-assessment | DONE (this commit) — below |
+
+#### VX-921 — the mechanism (traced at `6e16362e1`, before any line)
+
+- *The rank today* (`Repairs.swift`, `repairOwnedExclusivity`): a note's live `'member'` rows in live readings, at least
+  one in an owned book, are ranked by `COALESCE(sync_row_seq.server_seq, 0)` — 0 (never accepted) ranking LAST — then
+  id; the earliest stands. Earliest OWNED ⇒ every later owned row DEMOTES to an arrival (`owned_elsewhere`) and every
+  later plain row is TOMBSTONED; earliest PLAIN ⇒ every owned row demotes. Fired post-apply by a membership or a reading
+  landing (`TouchedRows.membershipPostIDs` / `.readingIDs`).
+- *The gap (the class VX-893 (3) closed for the wing mend):* `sync_row_seq` is each device's own LATEST-KNOWN seq for a
+  row. An innocuous later edit of one membership — a pin (`setMembershipPinned`), a reorder, a chapter move — raises that
+  row's seq on the devices that have seen the edit and not on those that have not. So two devices repairing the same
+  note mid-convergence can rank DIFFERENT claimants first and each act on its own picture. The traced worst case
+  (pinned below): note N filed into plain book Y on A (accepted first), claimed into owned book X on B (accepted
+  second); B ranks Y first and DEMOTES X's claim; A pins N in Y (Y's row re-accepted above X's) and, pulling X's claim,
+  ranks X first and TOMBSTONES Y's filing. Converged, N is a member of NOTHING: X's claim a visible arrival, Y's
+  filing a tombstone — and the tombstone is SILENT (no arrival, no card; the filing is simply gone from Y). The
+  owned-vs-owned twin (two claims) ends with both claims demoted.
+- *The fix (the B2 worked pattern, P3 — followed exactly):* the rank becomes `reading_post.created_at` ascending, ties by
+  id — immutable converged bytes, the same on every device holding the row — and the `sync_row_seq` join leaves the
+  query. "Never-accepted last" retires with the seq (it was a property of the seq key; an unpushed row ranks by its own
+  creation stamp, the same bytes every device sees once it travels). A device deciding on a SUBSET of a note's
+  memberships only ever acts against rows that are non-standing in the whole set too (no term of an unchanged row ever
+  moves), so the repairs are monotone. The demotion and tombstone arms are byte-unchanged.
+- *Why "never-accepted last" cannot be kept beside `created_at` (a hybrid considered and rejected — traced):* B holds an
+  unpushed claim created EARLIER than A's pushed filing. If B pulls before it pushes, the hybrid ranks B's own row last
+  (demoting it); A, pulling B's row later (now accepted), ranks by `created_at` and demotes its own — both demoted, the
+  determinism gap reborn through round order. Pure `created_at` has no per-device term at all.
+
+#### VX-921 piece 1a — the pins on the PRE-FIX tree (pre-fix API only — two clients, the fake server, production rounds)
+
+`Tests/VariorumCoreTests/OwnedExclusivityRankConvergenceTests.swift`, suite "VX-921 — the OWNED claimant rank is
+converged bytes":
+- **`aPlainFilingAndALaterOwnedClaimStandTheEarlierFilingWhateverEachDevicesSeqPicture`** — the traced worst case
+  above (Y plain on A first; X owned on B second; B repairs; A pins N in Y, pulls X's claim, repairs).
+- **`twoOwnedClaimsStandTheEarlierClaimWhateverEachDevicesSeqPicture`** — the owned-vs-owned twin (#167's "competing
+  owned books: first claim wins"; the repair's demote-a-later-owned arm on both devices).
+- Each asserts its PREMISE (green on both trees by design): B's picture ranks the earlier filing first
+  (`seqB(first) < seqB(later)`), A's picture the OTHER way after the pin (`seqA(first) > seqA(later)`), and the
+  earlier filing's `created_at` is the smaller — so the pin exercises the gap, not a coincidence.
+- **Watched at this commit's tree (`swift test --filter OwnedExclusivityRankConvergenceTests`): `✘ Test run with 2
+  tests in 1 suite failed … with 15 issues`** — exactly A's repair lines (the earlier filing/claim not standing, the
+  later one not belled, no repair write in A's outbox — A tombstoned Y's filing / belled X1's claim instead) and the
+  converged lines (the earlier filing not a live member; the note membered ZERO times on both devices — "a member of
+  NOTHING"); green on old, as they must be: every premise, B's own decision, the byte-identical dump (both devices
+  converge — on the wrong state), the later claim's arrival lines (B's demotion reached both).
+
+#### VX-921 piece 1b — the swap, as built
+
+- *`Repairs.swift`, `repairOwnedExclusivity`:* the members query reads `rp.created_at` (the `sync_row_seq` LEFT JOIN
+  leaves it) into `SyncEngine.OwnedClaim` (`id`, `owned`, `createdAt`); the sort is `SyncEngine.ownedClaimOutranks` —
+  `created_at` ascending, then id, NOTHING else (the B2 shape: `BookWingMend.outranks`' tier 3 + its tiebreak). The
+  scope query, both arms (demote an owned row to an arrival stamped `owned_elsewhere`; tombstone a plain row beside a
+  standing owned claim), the stamps and the explicit outbox writes are byte-unchanged. The doc comment's "EARLIEST-
+  ACCEPTED … never-accepted LAST" becomes "EARLIEST … earliest-filed, ties by id", with the why and the §9 line
+  (`created_at` ranks converged bytes, never orders — `server_seq` stays the ordering authority).
+- *The pure rank pin (same suite, names the new rank — COMPILE-red on old):* `theClaimRankIsEarliestFiledThenID` — the
+  order over mixed owned/plain rows (ownership never ranks), a `created_at` tie broken by id, an earlier PLAIN filing
+  outranking a later claim, and a strict total order over distinct rows.
+- *ONE JUSTIFIED FIXTURE EDIT (`Phase13iRepairTests.aLaterPlainAddBesideAStandingOwnedClaimTombstones`):* its claim,
+  FILED FIRST in the test's own story, was hand-stamped `2026-09-30T00:00:01.000Z` — inert under the seq rank, and on
+  the filing rank AFTER B's add (the harness clock runs from 2026-07-01, B's 1000 s ahead), so the swap read it red
+  (the plain add standing — the stamp's story, not the test's). The stamp moves to `2026-07-01T00:00:01.000Z` (A's
+  epoch); the subject, the assertions and the other two OWNED pins untouched (theirs already tell a filing order that
+  matches their acceptance order). Watched: red on the swap before the edit (`✘ 4 issues`, its two converged lines on
+  both devices), green after.
+- *Evidence, headless at this commit:* `swift build` → `Build complete!`; `swift test --filter
+  'OwnedExclusivityRankConvergenceTests|Phase13iRepairTests'` → **`✔ 13 tests in 2 suites passed`**; the repair's
+  neighbours (`OwnedExclusivityRankConvergence|Phase13iRepair|BookWing|Ownership|Arrival|DailyJournalRulings|
+  ProductionRoundShapeSweep|JournalWingConvergence|FurnitureConvergenceRepair|SyncConvergence|WireIntakeNeverFences|
+  BookArchive|MembershipPin|SampleLibraryDedupeRepair|SyncMerge|SyncPull|SyncPush`) → **`✔ 394 tests in 76 suites
+  passed`** (VariorumCoreTests) + **`✔ 14 tests in 4 suites passed`** (the filter's matches in the MCP target).
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip; headless; `Repairs.swift` alone in the
+  working tree, then `git checkout --` of it and `git diff --stat` empty):* **R-921a — the seq rank back through the new
+  path:** the members query's `rp.created_at AS created_at` → `printf('%020d', COALESCE(NULLIF(s.server_seq, 0),
+  9223372036854775807)) AS created_at` with the pre-fix `LEFT JOIN sync_row_seq s ON s.table_name = 'reading_post' AND
+  s.row_id = rp.id` restored (each device's latest-known seq, never-accepted LAST, ties by id — the pre-fix key exactly)
+  ⇒ expected RED exactly piece 1a's set — both convergence pins, 15 issues, on A's repair lines and the converged lines;
+  GREEN the pure rank pin (it reads the function, not the query) and all ten `Phase13iRepairTests` (the edited fixture's
+  claim is accepted first too). **R-921b — the tiebreak flipped:** `ownedClaimOutranks`' `lhs.id < rhs.id` → `lhs.id >
+  rhs.id` ⇒ expected RED the pure pin's order line and its tie line only (a flipped tiebreak is still a strict order, so
+  the antisymmetry loop stays green; no convergence pin has a stamp tie).
+- *The reverts, run at `797dfe8a7` (headless; `Repairs.swift` alone — `git diff --stat` showed exactly that one file
+  each time; restored by `git checkout --`, `git diff --stat` empty after):* **R-921a** → **`✘ Test run with 13 tests in
+  2 suites failed … with 15 issues`** — exactly piece 1a's set: the plain-vs-owned pin (8 — A's four repair lines, the
+  two converged lines on both devices) and the owned-vs-owned pin (7 — A's three repair lines, the two converged lines
+  on both devices); GREEN `theClaimRankIsEarliestFiledThenID` and all ten `Phase13iRepairTests`. **R-921b** → **`✘ …
+  with 2 issues`** — exactly `theClaimRankIsEarliestFiledThenID`'s order line and tie line; the antisymmetry loop and
+  every convergence pin green. Restored → **`✔ 13 tests in 2 suites passed`**. Every named revert bit exactly its named
+  set.
+
+#### VX-921 — the sibling seq-rank repairs, RECORDED (never widened — the brief's scope rule)
+
+Every `sync_row_seq` / `knownSeq` read under `Sources/VariorumCore/` (grep, at `6e16362e1`):
+
+| Site | What ranks by seq | Same gap? | Disposition |
+|---|---|---|---|
+| `Repairs.swift` `repairPlacementCollision` (~:561, `knownSeq` :578) | I2 move/move race: the higher seq placement wins ("later intent"), the rival tombstoned | YES in principle — the incoming row's seq vs the rival's LOCAL latest-known seq; an innocuous later edit of one placement (a reorder, a chosen-take change) re-accepts it higher on the devices that saw it; its doc comment's "deterministic because seq is global" holds only for converged pictures | RECORDED for the orchestrator — a born-ticket candidate; SyncSpec §7 RULES this rank ("the higher `server_seq` wins (later intent)"), so a swap is a spec change, never this batch's |
+| `Repairs.swift` I10 double-tombstone resurrection (~:791, the :795 join) | the tombstoned variant with the HIGHEST seq resurrects | YES in principle — a later metadata edit of one variant (a label) raises its seq per device | RECORDED — SyncSpec §7 rules "highest `server_seq`"; the same born-ticket candidate (the I10 pair) |
+| `Repairs.swift` I10 archive/archive rescue (~:808, the :812 join) | the archived variant with the HIGHEST seq un-archives | YES in principle — as above | RECORDED — as above (§7's ratified archive/archive line) |
+| `SampleLibraryDedupe.swift` :398/:400 | `knownSeq == 0` / `> 0` — "never accepted" vs "accepted" | NO — a presence test, not a rank between two rows | N/A (no ordering between devices' pictures) |
+| `PurgeJanitor.swift` :372 / :494 / :567 | `server_seq <= horizon`, seq presence | NO — the horizon gate and presence, not a rank | N/A |
+
+#### VX-919 — the design (decided before any line; the script is AUTHORED ONLY)
+
+- *The corner (b0's):* `sync_pull`'s device-cursor upsert mints one `device_cursor` row per distinct `for_device`, no
+  per-account cap — self-scoped growth outside the write quota. The belt (her optional call, now in the run): ≤ 64 rows
+  per account, oldest `seen_at` evicted — `sync_challenge`'s pattern (cap N, oldest out, enforced AT THE MINT).
+- *The shape — an AFTER INSERT row trigger on `device_cursor`, NOT a `sync_pull` rewrite:* the mint is the upsert's
+  INSERT path, and a row trigger there is exactly the mint. A trigger leaves `sync_pull` (vx495's SHAPE B, the deployed
+  truth `AuthRLSDDLTests.finalBody` reads) byte-untouched: no RPC body copied a fourth time, no wire, no 42702 class (a
+  PL/pgSQL name clash is caught only live), and the rollback is exact (drop the trigger and the function, revoke the
+  one grant). Postgres fires a row-level AFTER INSERT trigger only for a row actually inserted — an existing device's
+  ON CONFLICT DO UPDATE takes the UPDATE path — so only a NEW device pays the count; correctness does not depend on it
+  (a count ≤ 64 deletes nothing).
+- *The cap:* count the owner's rows; above 64, delete the `count − 64` oldest by `seen_at`, ties by `device_id` (a
+  tiebreak `sync_challenge` lacks — determinism), NEVER the row just inserted. ALL of the owner's rows count (the table
+  has no tombstone; a device unseen for 60 days is already outside the horizon), so stale rows go first by the order and
+  the table is bounded at 64 × accounts. Concurrency slack, stated: two first pulls in flight together each count
+  without the other's uncommitted row, so an account can briefly hold 64 + k; the next new device trims it back (the
+  delete takes `count − 64`, not one) — `sync_challenge`'s own property. No deploy-time trim (a blanket DML over
+  production at deploy; the read-only VERIFY reports any account over the cap, and a trim, if ever wanted, is her
+  deliberate act — signup-auto-entitle's F-1 lesson).
+- *Who runs it:* `sync_pull` is SECURITY DEFINER owned by `variorum_definer` (14c's non-bypass role), so the trigger (an
+  INVOKER function — `stamp_server_seq`'s and `key_vault_require_proof_hash`'s posture: no SET clause, outside the
+  pg_temp belt's scope, every relation schema-qualified) runs as `variorum_definer` under FORCE RLS: `device_cursor_owner_all`
+  admits exactly the caller's rows, beside the body's own `owner_id = new.owner_id` — two layers. `variorum_definer`
+  holds SELECT/INSERT/UPDATE on `device_cursor` today (10:717) and NO DELETE, so the artifact grants DELETE — the
+  13i-a live finding's class (a missing definer grant surfaced only by a live round), named and closed in the file.
+- *The containment arm (signup-auto-entitle's F-2 precedent):* an AFTER INSERT error would abort the upsert and with it
+  the whole pull — every NEW device's first round. So a cap failure is caught, raised as a WARNING, and the pull
+  proceeds uncapped (the b0 "acceptable as stands" posture), never a sync outage. The VERIFY section's read-only
+  checks (function, trigger, the DELETE privilege) plus an OPTIONAL rollback-wrapped behavioral probe for her window keep
+  the arm from hiding a dead cap at deploy.
+- *Not a lockstep event:* no marker move, no client change, no mirror data column; the disclosure envelope unchanged
+  (device_cursor is server-only and content-free — eviction removes timing rows, never adds any). The horizon interplay,
+  stated: evicting a row seen within 60 days is that device dropping out early — the 13j design's returner road (the
+  purged-ids ledger fences it; its next pull re-mints its row). Reachable only past 64 devices on one account.
+- *The standing sweep:* `14c-post-deploy-grant-sweep.sql` reads any function its registry lacks as UNEXPECTED, so it
+  gains ONE INFO row for the trigger function, kept only while the function exists (`to_regprocedure`) — VX-308 R-2's
+  marker-aware precedent — so every sweep run before the deploy, or after a rollback, reads exactly as today.
+
+#### VX-919 piece 2 — as authored (NEVER EXECUTED anywhere; the deploy HELD for her window)
+
+- **`Server/supabase/maintenance/vx919-device-cursor-cap.sql`** — the header (the DEPLOY-HELD line first; the corner;
+  the shape and why not a `sync_pull` rewrite; the cap; who runs it; the containment arm; what it does not change; the
+  horizon interplay; idempotency and the guard), then ONE transaction: the guard (`VARIORUM_VX919_NEEDS_14` below marker
+  14; the table and the definer role present), `grant delete on device_cursor to variorum_definer`, the INVOKER
+  trigger function `device_cursor_cap()` (64 as a named constant; count the owner's rows; above the cap delete the
+  `count − 64` oldest by `seen_at, device_id`, never `new.device_id`; every relation schema-qualified; the containment
+  arm `exception when others → raise warning`, the pull proceeds uncapped), the footgun revoke (public, anon,
+  authenticated, service_role), `drop trigger if exists` + `create trigger … after insert … for each row`, commit. Then
+  the VERIFY: a read-only BEFORE read (accounts over the cap; the most rows on one account), the AFTER reads (the
+  trigger present and enabled; the function an invoker with no SET clause, owned by the deployer; the definer's DELETE
+  privilege; `sync_pull`'s body still vx495's SHAPE B; the BEFORE read unchanged — no trim at deploy), the standing
+  sweep, and an OPTIONAL rolled-back behavioral probe through the DEFINER's road (`set local role variorum_definer`
+  under a synthetic owner's JWT claim: 64 rows → none evicted; a 65th → exactly the oldest goes, the new row stays, no
+  WARNING; `rollback`) — the fake harness cannot reach a PL/pgSQL trigger, so that probe is the live proof, hers.
+- **`Server/supabase/maintenance/vx919-rollback.sql`** — the paired road back (the vx495 precedent): the same guard; drop
+  the trigger, drop the function, revoke the definer's DELETE — exactly what the cap added; idempotent; the cap
+  re-runnable after it. Stated: rows the cap evicted while live stay gone (content-free; a real device re-mints its row
+  at its next pull).
+- **`maintenance/14c-post-deploy-grant-sweep.sql`** — the header's EXTENDED line, and ONE `expected_functions` row
+  `('device_cursor_cap()', null, null, null)` (INFO — a trigger function) behind a second filter, `or
+  to_regprocedure('public.device_cursor_cap()') is not null`, beside the existing marker-aware one (now parenthesized —
+  its truth table unchanged). Before the deploy and after the rollback the row is absent from both sides of the full
+  join, so the sweep reads exactly as today; after the deploy it reads INFO, never UNEXPECTED. **Deliberately NOT
+  added: a trigger FACT row** (signup-auto-entitle's F-4 made its trigger a fact because that trigger is LOAD-BEARING
+  for every signup; the cap is a belt — a lost cap trigger returns the b0 "acceptable as stands" posture, and the
+  artifact's own VERIFY reads the trigger). Recorded for the ladder's eye.
+- **The DDL pin (`AuthRLSDDLTests.deviceCursorCapBeltIsGuardedContainedPairedAndTouchesNoRPC`)** — the artifact's
+  letter: the deploy-held header; one transaction; the guard's three refusals; the definer's DELETE; an invoker body
+  (no `security definer`, no `set search_path`) with the 64, the schema-qualified relations, the deterministic order,
+  the self-exclusion, `limit live - cap`, the containment arm; the footgun revoke; the idempotent AFTER INSERT row
+  trigger; no `sync_meta` write; no RPC touched and no re-own; not a post-chain function artifact (`finalBody`'s
+  `sync_pull` stays vx495's). The rollback's three undo lines, no create, no marker. The sweep's row and its presence
+  filter. It is a LETTER pin (an Improvement, authored only — not a bug-class red-on-old); its liveness is R-919a.
+- *Evidence, headless at this commit:* `swift test --filter 'AuthRLSDDLTests|MultiTenantSyncAttackerTests'` → **`✔ Test
+  run with 88 tests in 2 suites passed`** (the new pin, the sweep's read-only and coverage pins, the pg_temp drift pins —
+  the trigger function is outside the belt's scope by construction — and the attacker suite's deployed-function scan,
+  which reads only the numbered chain plus the post-chain list).
+- *THE NAMED REVERT (named here BEFORE it runs, at this commit's tip; headless; the artifact alone in the working tree,
+  then `git checkout --`):* **R-919a — the 13i-a class put back:** delete the artifact's `grant delete on device_cursor
+  to variorum_definer;` line ⇒ expected RED exactly the pin's DELETE-grant line; every other line and test green.
+- *R-919a, run at `1db9b06c8` (the artifact alone; `git diff --stat` 1 file, 1 deletion):* **`✘ Test run with 88 tests
+  in 2 suites failed … with 1 issue`** — exactly `deviceCursorCapBeltIsGuardedContainedPairedAndTouchesNoRPC` at its
+  DELETE-grant line. Restored by `git checkout --` (`git diff --stat` empty).
+
+#### Piece 3 — Close
+
+- *Headless at the tip:* `swift build` → `Build complete!` (incremental; the only warnings the manifest's standing
+  unused-dependency lines). The batch's targeted set over every touched seam — `OwnedExclusivityRankConvergence ·
+  Phase13iRepair · BookWing* · Ownership* · Arrival* · DailyJournalRulings · ProductionRoundShapeSweep ·
+  JournalWingConvergence · FurnitureConvergenceRepair · SyncConvergence · WireIntakeNeverFences · BookArchive ·
+  MembershipPin · SampleLibraryDedupeRepair · SyncMerge · SyncPull · SyncPush · AuthRLSDDL · MultiTenantSyncAttacker`
+  → **`✔ Test run with 480 tests in 76 suites passed`** (VariorumCoreTests) + **`✔ 14 tests in 4 suites passed`** (the
+  filter's MCP-target matches). Every named revert ran headless (R-921a, R-921b, R-919a) and bit exactly its set.
+- *Builds (incremental — this worktree's warm DerivedData, never cold):* Mac `xcodebuild build-for-testing -scheme
+  Variorum` → `** TEST BUILD SUCCEEDED **` (exit 0; the first, `-quiet` invocation printed three "failed with exit code 0
+  but produced no further output" lines from its script phases — `-quiet`'s known quirk; the re-run without it read
+  SUCCEEDED, exit 0); phone `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator'` → `** TEST BUILD
+  SUCCEEDED **` (exit 0). The core change is internal to `VariorumCore` (no app file names it). Both builds ran on
+  `1db9b06c8`'s tree; the close's one later source edit is a doc comment (`Operations+Ownership.swift`, the alignment
+  below) — `swift build` green after it and the OWNED suites with the ownership-operations neighbours 37/4 green.
+- *HEAVY HEADLESS — PENDING (the live constraint; other sessions hold the stage):* the WHOLE core package `swift test`
+  (the repair runs inside every pull, so the targeted set above covers the suites that drive it; the whole package folds
+  into LIVE STATUS row 8's closing sweep, as every batch's has).
+- *Mac/simulator suites for the orchestrator's window:* **NONE new, and NO named Mac reverts** — every pin of this
+  batch is core and ran headless. (The app reads the `owned_elsewhere` provenance kind for display only —
+  `MembershipChoiceTests`, `BookArrivalsReviewTests` — unchanged semantics; they ride row 8's whole-target sweep.)
+
+**ROW DISPOSITIONS.**
+
+| Row | Disposition |
+|---|---|
+| VX-921 — the OWNED exclusivity repair's seq-rank determinism gap | **FIXED** — the claimant rank on `reading_post.created_at`, ties by id (`797dfe8a7`); pins `OwnedExclusivityRankConvergenceTests` (two convergence pins red-on-old at `d58707b70`, R-921a; the pure rank pin, R-921b) |
+| VX-921 — sibling seq-rank repairs (I2 move/move · I10 resurrection · I10 archive/archive) | **RECORDED, not widened** (the table above) — SyncSpec §7 RULES their seq rank; a swap is a spec change → a born-ticket candidate for the orchestrator |
+| VX-919 — the device_cursor cap belt | **AUTHORED ONLY** (`1db9b06c8`) — the artifact + its paired rollback + the sweep's presence-aware row + the DDL pin (R-919a); NEVER EXECUTED; **the deploy DEFERRED to her window** (owner: her — LIVE STATUS row 9) |
+
+**PROVISIONALs (bundled for the merge's QUESTIONS entry — the orchestrator files on latest main; `notes/QUESTIONS.md`
+untouched here):**
+- **P-849-6 — the OWNED claimant rank on `created_at`, "never-accepted last" retired** (VX-921; the mirror of
+  P-912-B2-2, which #268's addendum left standing as built). It amends #167's RATIFIED (a) text in its MEASURE only —
+  (a)'s shape ("the earliest act stands and the later act becomes what its door would have done") is untouched; the
+  "earliest" is now the earliest FILED (her act's moment) rather than the earliest ACCEPTED, and "a never-pushed row
+  carries no authority" retires: an offline device's earlier act now outranks an online device's later one. Built:
+  (a) `created_at` then id. Alternatives: (b) keep the seq rank — the recorded gap (pinned: two devices, a member of
+  nothing); (c) `created_at` with never-accepted-last KEPT — rejected as nondeterministic (traced above: round order
+  alone re-opens the gap). The §9 line, for her eye: `created_at` is a wall clock used only to RANK converged bytes;
+  a skewed clock changes which filing stands, never whether every device agrees. For (a): it is the key the repair's
+  LOCAL twin (the revival pass, P-13ic-9) already used, so one act is "earlier" by one rule on both roads; against
+  (a): a seated arrival ranks by its bell's birth (corner 5).
+- **P-849-7 — the cap's two operational choices** (VX-919; nothing deploys without her, so these are hers at the
+  window): (i) the cap counts EVERY device row of the account (stale ones evicted first by the order) — alternative: count
+  only devices seen within the 60-day horizon (leaves stale rows uncapped); (ii) NO deploy-time trim — an account
+  already over 64 trims at its next new device; alternative: a deliberate one-time trim in the window (her act, the
+  BEFORE read sizes it). The cap's N = 64 and the oldest-`seen_at` eviction are B0's own offer, not provisional.
+
+**RECORDED CORNERS (for the orchestrator; none built here):**
+1. *The partial-picture corner (PRE-EXISTING, key-independent):* a device repairing on a SUBSET of a note's memberships
+   that lacks the earliest PLAIN filing — and whose subset's earliest is OWNED — tombstones a later plain filing the
+   whole set would have kept (beside a standing plain filing, plain rows never act); when the earliest filing then
+   lands, the owned claim demotes and the tombstoned plain filing stays dead (silent, recoverable). Reachable when the
+   earliest filing reaches that device last (its row re-accepted beyond the device's window by a later edit, or still
+   unpushed on its own device). It is the repair's SHAPE (two arms keyed on the standing row's kind), present under the
+   seq rank and the filing rank alike; VX-921 does not touch it. A born-ticket candidate (Low).
+2. *The siblings* — the table above (I2 · I10 ×2), seq ranks SyncSpec §7 rules: one born-ticket candidate.
+3. *VX-919's live proof is hers:* the fake harness cannot reach a PL/pgSQL trigger (the recorded 13j class), so the
+   artifact's letter is pinned and its behavior is the optional rolled-back probe at her window; the containment arm
+   means a dead cap reads only as a WARNING in the logs — the VERIFY's privilege read and the probe are what catch it.
+4. *VX-919's records at the deploy (the deploying session's, not this batch's):* SyncSpec §12's running record gains a
+   "VX-919 (MAINTENANCE — NOT a marker event)" line; the b0 doc's recorded corner flips to belted; the sweep's expected
+   count moves by one INFO row.
+5. *A SEATED ARRIVAL ranks by its bell's birth, not its seat (found closing — inherent to the key, shared with B2's
+   tier 3):* `seatArrival` flips `status` in place, so a membership born as an arrival at 9:00 and seated at 11:00
+   ranks as filed at 9:00, where the seq rank (the seat re-accepted the row) read it as the later act. A race needs a
+   seat on one device against a filing elsewhere on another, both before either sees the other. No converged byte holds
+   the seat's moment (`reading_post` carries no `updated_at`; the provenance's `at` is the bell's), so a seat-aware rank
+   is a schema event (§12), never this batch's. Rides P-849-6 for her eye; the B2 mend carries the same property.
+
+**ALIGNMENT FOUND CLOSING (comment only, recorded):** the LOCAL twin of this repair — `Operations
+.enforceOwnershipAfterRevival`, the revival pass after `restoreContainer`/`restoreReading`/the diverge replays — ALREADY
+ranked by `created_at, id` (PROVISIONAL P-13ic-9, "the local 'earlier act'"), its doc noting that R2 ranked by
+`server_seq` instead. After VX-921 the sync repair and its local mirror stand the same row by one key; that doc line
+(`Operations+Ownership.swift`, the only edit outside `Sync/`) now says so — no code moved there.
+
+**SELF-ASSESSMENT (how I would attack this diff — for the cold Fable reviewer).**
+- *Is the swap truly deterministic?* The rank reads only `id`, `owned` (read after the rank, by the arms) and
+  `created_at` — all converged, immutable bytes (`reading_post` has no `updated_at`, and no road rewrites `created_at`).
+  The demotion stamp's `at` differs per device, but two devices' identical demotions of one row converge by the
+  standing metadata CAS (pinned: the converged dumps are byte-identical in both pins). `created_at` text is the one
+  `DateFormatter.variorumISO8601` format store-wide, so the string compare is chronological; a malformed stamp (only a
+  hand-built row could carry one) still sorts deterministically.
+- *What else moved:* nothing in the repair's scope, arms, stamps or outbox writes — the diff of `repairOwnedExclusivity`
+  is the members query (the join out, `created_at` in), the typed `OwnedClaim` and the sort. The one existing pin whose
+  fixture moved was a HAND STAMP contradicting its own story (recorded); the other two OWNED pins and every neighbour
+  are untouched and green.
+- *The behavior change she should know:* an offline device's EARLIER act now beats an online device's later accepted
+  act (P-849-6) — e.g. a claim made offline at 9:00 and pushed at 10:00 outranks a plain filing made and pushed at
+  9:30. Under the seq rank the 9:30 filing stood. The new answer is the one #167's sentence ("the earliest act stands")
+  reads as; flagged rather than assumed.
+- *VX-919's attack surface:* a trigger error aborting a pull (contained); the definer lacking DELETE (granted, pinned,
+  R-919a, VERIFY read); RLS hiding rows from the eviction (the policy admits exactly the caller's rows, which is the
+  cap's own scope); the new row evicting itself (excluded, pinned); a bulk insert (only the probe does one — written as
+  64 then 1 so NEW is the newest); the sweep reading the function as UNEXPECTED (the presence-aware row) or MISSING
+  before the deploy (the same filter); the pg_temp belt (an invoker with no SET clause and schema-qualified relations is
+  outside its scope by construction — the drift pins stay green). What I could not do by design: execute one line of it.
+
+**MOBILE PARITY:** nothing mobile-visible. The OWNED repair is the shared core's (`Repairs.swift`), so the phone
+converges exactly as the Mac does; the cap is server-side and reads no client.
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape — PROPOSED, not applied here):** SyncSpec §7's
+OWNED paragraph — replace "the EARLIEST-ACCEPTED membership stands (never-accepted rows rank last per §3's seq-0 rule;
+ties by id)" with "the EARLIEST-FILED membership stands (`reading_post.created_at` ascending, ties by id — converged
+bytes, so every device holding the same rows stands the same claim; VX-921, `notes/plans/fixes/vx-849-typed-over-rescue.md`
+BATCH 6)", landing as P-849-6 survives her sitting (§3's "§7's seq-ranked repairs read it" stays true — I2 and the
+two I10 arms still do). AppSpecRecord: the dated entry. VX-919: no canon line until its deploy (corner 4).
+
+### BATCH 6 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first; the last build batch)
+
+**Verification first-hand:** six commits (`438ed249d`…`aa4b5b9f8`), pushed, tree clean, HEAD = origin; the swap
+live at `Repairs.swift` :984–:1079 (`OwnedClaim` + `ownedClaimOutranks`, the `sync_row_seq` join gone from the
+OWNED repair while the :795/:812 sibling joins stand, as scoped); the script + paired rollback present with the
+DEPLOY-HELD header; LIVE STATUS row 6 BUILT.
+
+**Dispositions:**
+1. **VX-921 → ACCEPTED as built** (the B2 shape: `created_at` then `id`, never-accepted-last retired with the
+   seq join; both repair arms byte-unchanged; red-on-old watched at `d58707b70`, R-921a/b bit exactly as named).
+   The justified fixture edit (a hand stamp contradicting its own test's filing order, watched red→green) and the
+   comment-only doc alignment of the revival pass's local twin are both accepted.
+2. **The sibling seq-rank gaps (I2 move/move; the two I10 arms) → ONE ticket at the closeout,** as the
+   implementer proposes: SyncSpec §7 RULES their seq rank, so changing them is a spec question, not this run's
+   fix; the ticket records the gap class and points at P-849-6's outcome.
+3. **VX-919 → ACCEPTED as authored;** never executed, deploy HELD (row 9 — hers, with the VERIFY reads and the
+   optional rolled-back probe, which only her window can run since the fake harness reaches no trigger). The
+   containment arm (a cap failure can never abort a pull) and the definer-DELETE grant pin are the right fences.
+4. **P-849-6 and P-849-7 stand PROVISIONAL for the merge's QUESTIONS entry** — P-849-6 flagged plainly as
+   changing the measure in #167's ratified (a) text (an offline earlier act now outranks an online later one);
+   the proposed SyncSpec §7 OWNED line lands only as it survives her sitting.
+5. **No new window legs; nothing for the b34 claim.** The whole core package stays PENDING to row 8.
+
+## THE LADDER (round 1, 2026-11-09 — a fresh `fable-reviewer`, REVIEW_PROMPT.md verbatim, the whole diff 75a5222ad...bd65aa5a1; findings `notes/plans/fixes/vx-849-ladder-round1.md`, commit `68e17ae51`)
+
+**Result: 0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT; no FINDER-FIXES; no finding on `Sync/` lines. THE LADDER CLOSES
+AT ROUND 1** — there are no code fixes for a round 2 to re-review (the cap's rounds exist to re-check fixes; every
+finding below resolves by ticket, closeout act, or the already-planned evidence gate). Dispositions, each written:
+
+- **R1-M1 (the structural undo/redo doors don't flush → her own ⌥⌘Z under typing can mint a `'conflict'` card)
+  → TICKET AT THE CLOSEOUT, as the batch-3 adjudication already ruled (C2); the reviewer CONFIRMS that
+  disposition and the ladder's requirement is that the ticket lands — it does (the born-tickets list below). Fix
+  shape recorded on the ticket: flush-first at the door's warn→act latch; the proving pin named in the round file.**
+- **R1-M2 (SyncSpec §7's OWNED paragraph still states the retired seq rank; the merge precedes her P-849-6
+  sitting) → ACCEPTED: the closeout lands §7's OWNED line in the standing PROVISIONAL idiom** (the new
+  created_at/id sentence marked PROVISIONAL with the P-849-6/QUESTIONS pointer) rather than leaving a falsified
+  sentence on main; her sitting then ratifies or reverts the wording (doc-only — the code is pinned).
+- **R1-M3 (batches 3/4's Mac/sim pins had not yet EXECUTED when the diff was read) → OVERTAKEN IN PART, GATE
+  KEPT:** the b34-tests window ran DURING this round — legs A green (15/3, 25/4), all ten reverts red exactly as
+  named, clean tip 40/7 (the window section above); leg D + the walk and row 8's closing sweep remain, and the
+  ladder's stated gate (no merge before row 8 runs red/green as named) is adopted into the closeout checklist.
+- **The two NITs (flushNow's doc line overstates the cross-take axis; a joined retry discards the joiner's
+  fresher signIn — one delayed round, self-healing) → RECORDED, no action this run**; the doc line moves whenever
+  that file is next touched.
+- **The round's concurrences** (the closeout ticket set; the six PROVISIONALs to QUESTIONS; VX-855/VX-691's
+  dispositions) match the adjudications above — nothing new owed.
+
+**Born tickets (minted now, triaged per the labeling rule; final pass at the closeout):** C2 (the undo doors'
+flush-first) = VX-966 · C1 (the margin-grid recentre) = VX-967 · the R1 face-only confirmation residual = VX-968 ·
+the sibling seq-ranked §7 repairs (one Debt ticket riding P-849-6's outcome) = VX-969.
+
+## THE B34-WALK WINDOW (claim vx-849-b34-walk, 2026-11-09, at 39488a513 — leg D the orchestrator's hands; the walk an OPUS walker under the claim, per the Fable safeguard)
+
+*[removed for publication]*
+  seven types present and counted by their suite-pass lines (MobileTypedOverRescue · MobileQuickNote ·
+  MobileTakesBrowser · MobileBlockHistory · MobileRoundOccasion · MobileProtectionAccountSection ·
+  MobileLockTeardown); none dropped.
+- **The walk — ALL THREE ROWS RIGHT; row (i) in BOTH voices** (130 shots + transcript + wire logs in the session
+  scratchpad `vx849-walk/`; the walker's full report held by the orchestrator):
+  (i) ring + typing, then the wire's `edit_take` → the ring ends untouched-by-her, the AI's words read, a
+  click-back-in types onto the AI's words never her pre-edit ones — Study and Terminal both (the W-664-1
+  acceptance re-shot over this run);
+  (ii) typing then a restore of a pre-edit moment → the take shows the moment, the rail gains EXACTLY ONE quiet
+  ◦ auto moment holding what she had typed, NO `'conflict'` card (P-849-1's acceptance live; a wire `read_note`
+  confirmed no conflict take);
+  (iii) slot split, the first-take door open, the ring in it, the wire's `add_take` → the ring ends and the cell
+  shows its two fan cards (P-849-5 (a) live). A first mis-set attempt (door closed) matched the code's intended
+  behavior (badge ⑂2, ring stays) — not a finding.
+- **Two deviations from the walk script, both sound:** (1) the walker did NOT walk under `variorum-de` — the
+  vx-620-era "pane-copied key silently rebinds the approved name" precedent is STALE: this build raises the
+  designed rebind ASK (`mcp_rebind_request`), and allowing it would have moved variorum-de's grants to the walk
+  key; the walker refused it and walked under a fresh `vx849-walk` client, denied at the end. (2) Row (ii)'s
+  scripted route ("the History face's sheet OVER Write's take panel") is unreachable as worded — in Write the
+  detail view owns history as a full-page swap and the sheet is only an unmounted-fallback; the nearest route
+  walked, verdict unaffected. The row's wording is corrected here, not a defect.
+- **ONE FIND, ticketed (P-2's class): Write's take panel's bottom-bar "history" button does nothing while the
+  panel is open** — a rendered door that neither acts nor refuses. VX-971.
+- **Posture:** end-state matches as-found (MCP ON, variorum-de approved · nothing shared, voice Study, signed
+  out, no Resume Sync, appearance untouched; the Takes style restored to stack); prefs re-export diffed to
+  launch churn only; clipboard cleared; the key file deleted; zero instances, zero shims, no Problem Reporter,
+  no new .ips. Residue, named: the walk note in the Trash (two wire takes + five moments), the denied
+  `vx849-walk` client row, the declined variorum-de rebind request (key forgotten), two copied setup-key rows,
+  three revoked grant tombstones, ~10 Activity rows, one dev-store backup, the re-stamped Debug binary.
+
+### THE SWEEP FIX (a fresh Opus implementer, 2026-11-09 — the closing sweep's one regression + its two source pins)
+
+**NOT DONE HERE (first line):** no `xcodebuild test` of any kind and no stage contact — every Mac RUN below is
+**PENDING the orchestrator's re-verify window**; no phone build (no phone-visible file is touched); the Takes and
+Canvas siblings RECORDED, not widened (below); no pull, merge or rebase; LIVE STATUS untouched.
+
+- **The traced mechanism (the reds were NOT a missing savepoint — an extra one).** `CompareLeavingSavepointTests`
+  drives `setPeer` then `paneEdited` in the same main-actor turn. `setPeer`'s `peerSlots.didSet` restarts the
+  board's observation, so the projection carries no face for the new peer until the next delivery →
+  `storeText(postID:variantID:)` is nil → `?? ""` → the edit's `old` is `""`. Since `169a51898` (batch 1, VX-683 B
+  surfaces) `old` is also the autosave's snapshot (`basedOn:`), so the flush's guarded autosave finds the row ≠ `""`
+  and RESCUES: her words keep the row, the stored words become a `'conflict'` take on the same block, never
+  savepointed → the peer's leaving (`closeAutoCommit` — every live unlocked take, deduped by `isDirty`) savepoints
+  BOTH → the pin reads two rows where it asserts one. Batch 3's `shownText` is neutral here (no pane is live, so it
+  answers exactly `text(variantID:storeText:)`, the pre-batch-3 value); `isUnlanded` is not on this road; the
+  leaving road (`savepointOnLeaving` → `flushExistingAutosave` → `closeAutoCommit`) has zero lines changed in this
+  run. Main passed because it lacks batch 1's `basedOn:`.
+- **Reproduced headless first (the instrument — batch 3's method: an untracked scratch folder in the core test
+  target, a byte copy of the fixed `PaneTextAuthority`, the real core ops; never committed, deleted after):**
+  replaying the PRE-FIX snapshot (`shownText(storeText: nil ?? "")` → `autosave(expectedText:)` →
+  `closeAutoCommit`) fails at the Mac pin's own line with the recorded value `["Paragraph 0 of note 1, revised in
+  the peer column.", "Paragraph 0 of note 1, long enough to read like real prose."]`; the FIXED snapshot → one row,
+  her text, one live take; a KNOWN snapshot (a live pane's holding over a moved row) still rescues; the G3 truth
+  table (`shownTextIsWhatTheLivePaneHolds`, ported verbatim) green. **R-SFi** (named before it ran, on the copy):
+  `shownTextIfKnown`'s last line → `?? storeText ?? ""` ⇒ RED exactly the primitive's three nil lines and the
+  fixed-snapshot replay (its nil, savepoint and card-count lines); the G3 table and the known-snapshot rescue green.
+  The copy restored (`cmp` identical) → 4 green + the deliberate old-snapshot red; the folder deleted, tree clean.
+- **The fix (Mac only):** `PaneTextAuthority.shownTextIfKnown(variantID:storeText: String?) -> String?` — the
+  live pane's holding, else an unsettled buffer, else the stored text, NIL only when none knows; `shownText` now
+  delegates to it (byte-equivalent for every non-nil store text). `CompareViewModel.paneEdited` hands that answer
+  as `basedOn:` — nil when the board knows nothing of the take (the coordinator's "the caller gave none", the
+  unguarded write) — and builds the cost from `shown ?? ""`, exactly the old `old`. Why the code and not the pin:
+  the snapshot's own contract (`AutosaveCoordinator.Pending.expectedText`, `Operations.autosave`'s doc) says nil
+  is "no snapshot"; `""` was a fabricated base claiming the take was empty. Not PROVISIONAL — no product behavior
+  is decided, the coordinator's stated contract is restored. Production reach: a Compare pane renders only from a
+  projected face and a swapped-out column's live pane is released first, so a keystroke on an unprojected take has
+  no production door today; the pin's direct `paneEdited` after `setPeer` is that state.
+- **What stays guarded:** G1 untouched (`isUnlanded`, every closure); G3 untouched for every known snapshot — an
+  owner holding a stored text or a live holding hands exactly what it handed before (`OutsideWriteRescueCompositionTests`
+  must stay green in the window). New primitive pin beside G3's: `shownTextIfKnownIsNilOnlyWhenNothingIsKnown`
+  (names new API — compile-red on the old tree; its behavioral revert is R-SFi above).
+- **Siblings, RECORDED not widened:** `TakesViewModel.paneEdited` (`currentStoreText ?? ""`) and
+  `CanvasViewModel.paneEdited` (`storeText ?? ""`) carry the same fabricated-empty fallback, production-unreachable
+  the same way (their panes render from the projection); each is a one-line adoption of `shownTextIfKnown` — the
+  orchestrator's to ticket or fold. The TOC model and the book Index take `oldText` from the pane itself (always
+  known): N/A.
+- **The two justified edits (test-only, `Part of VX-544`):** `ProdTestRoadTests.aReleaseBuildCompilesNothingOfTheRoad`
+  (:316) and `SyncWalkFenceTests.theDerivationReadsTheLaunchsLiftOnlyInDebug` (:88, :94) pinned the composition's
+  pre-batch-2 spelling; batch 2 (`5ce6becf0`) gave both arms `path: networkPath`. The literals now read today's exact
+  spelling (Release: `…allowsSync: storeVariant == .real, path: networkPath)`; Debug: `…prodTestRoad:
+  launchFence.prodTestRoad),`); every fence assertion stands (Release = the store variant alone, no walk/road name;
+  Debug = the launch fence's lift read, never `storeVariant == .real`). Checked against the source by exact-string
+  grep (each literal present once; the old Debug literal absent).
+- **Builds:** the instrument headless as above; Mac incremental `build-for-testing` → `** TEST BUILD SUCCEEDED **`
+  (the one warning in a touched file is the pre-existing `boardSpace` Sendable warning, far from these lines).
+- **THE RE-VERIFY WINDOW (Mac, type names, all PENDING):** the reds `CompareLeavingSavepointTests` (2 — expected
+  green) · their file's neighbours `BookLeavingSavepointTests` `BookLeavingRegistryTests` · the seam
+  `OutsideWriteRescueCompositionTests` (now 8) `PaneTextAuthorityTests` `PaneOutsideWriteRuleTests`
+  `TypedOverRescueSurfaceTests` · Compare's other `paneEdited` drivers `CompareViewModelTests`
+  `CompareCommentGutterTests` `OutsideWriteRingEndTests` `AutosaveRegistryLifecycleTests`
+  `VX347AskedTakeFilingTests` · the leaving road `SavepointOnLeaveTests` · the justified edits `ProdTestRoadTests`
+  `SyncWalkFenceTests`. The phone target need not re-run for this fix (Mac-only files).
+- **Commits:** `7bc24b730` (the fix + the primitive pin + this record) · `290a0b51d` (the two justified edits) ·
+  this commit (the range). Pushed after each.
+
+## THE FINAL FOLD + RELEASE PREP PART 1 (2026-11-09, on nov7's release-prep GO — this run is the wave's LAST merger)
+
+- **Main folded at `b7cb67407`** (vx-915 merged as `961790b13`, PR #240 — all three sibling runs now in). Clean,
+  zero conflicts. **The four eye-reads, done:** `AppSession` — the quick-note park gains `landingWingID`
+  (VX-841), disjoint from our flush/registry regions; `CommitsFaceModel` — the VX-927 "as kept" grammar (copy +
+  one pure Bool), never touching the restore call (our `insuringBuffer: true` intact at :787 of the merged body);
+  `CompareBoardView` — the VX-793 comments door, disjoint from the ring seam; `TakesViewModel` — one refusal line
+  moved to the capability registry. Incremental Mac `build-for-testing` on the folded tree: green.
+- **The 1.4 bump:** `MARKETING_VERSION = 1.4` on BOTH Mac-app configurations (the pbxproj's two 1.3 lines, only);
+  `Tools/Release/version-guard.sh` → PASS ("every configuration of the Mac app target reads MARKETING_VERSION =
+  1.4"). Provisional per nov7 (1.3 is taken); her morning word rules the number.
+- **`ReleaseNotes-1.4.md` DRAFTED as public copy** (everything user-visible since the published 1.3, build 11707:
+  the merged VX-912/914/940/913/926/915 runs + this one; sourced from each run's handoff). The notes guard's own
+  predicate (`notes_carry_process_text`) reads it CLEAN — no ticket id, no draft marker, no process line; one
+  line per bullet. **HER APPROVAL OWED in the morning; any edit means a rebuild** (the handoff says so).
+- **Part 2 (held for nov7's GO after the merge):** every on-main closeout commit lands BEFORE `release.sh`; step
+  0 = `FirstRunDrillTests` + `Tools/WalkKit/first-run-walk.sh` both arms, handed to an OPUS session with the
+  README's step-0 environment traps applied; `release.sh --version 1.4` stopping at its HANDOFF. NO publish, NO
+  site, NO appcast copy, NO /Applications (VX-931; the mandate).
+
+## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
+
+"ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post
+compaction kickoff prompt. when you give me your handoff in the morning, explain all the most important items in
+plain english for a reader with no context (me) to be able to understand. include that in the instructions. I'm
+going to compact you, send you the kickoff prompt, and then you will be running everything provisionally overnight
+and bundling it, merging everything. don't put a release onto stargazing.tech, but it should be *ready* to release
+when I say the word - already built. I'll handle that release in the morning after going through all handoffs."
+
+**Applied, with nov7's same-night wave rule (relayed to all live efforts):** every call that would normally wait
+for her runs PROVISIONAL-and-continue and joins the morning bundle; the run finishes its batches, ladder and
+closeout and MERGES to main (serialized through nov7); release prep belongs to the wave's LAST MERGER ONLY, on
+nov7's GO — the 1.4 bump commit, ReleaseNotes-1.4.md drafted as PUBLIC COPY for her approval (never a ticket id or
+process line — the VX-708 rule), the step-0 drill + first-run walk under stage claims, and `Tools/Release/release.sh
+--version 1.4` STOPPING AT ITS HANDOFF. Nobody else touches MARKETING_VERSION, ReleaseNotes-*.md or release.sh. NO
+site upload, NO appcast copy, NO deploy, NO /Applications install — hers in the morning. If this run ends up the
+last merger AND this orchestrator is Fable: the first-run WALK legs are handed to an OPUS session (the Fable
+safeguard — live Castle walks trip [cyber]); Fable drives the rest. HARD STOPS that survive the mandate: her Air
+drill (post-release via Sparkle), VX-919's production deploy, anything needing her accounts/hands.
+
+## CUTOVER STATE (written at the compaction seam, 2026-11-09 ~04:4x — the resumed orchestrator verifies, never trusts)
+
+- **Tip `f876c8661`** on `vx-849-typed-over-rescue`, clean, pushed; main folded through `38e8f7e31` (vx-913's and
+  vx-926's merges will move main again — fold at every seam; vx-913 shares ZERO files with us, trial clean).
+- **Batch 1 (VX-683+VX-402): CLOSED** — window record in BATCH 1 ADJUDICATION. **Batch 2 (VX-544+P-849-3):
+  BUILT**, awaiting claim `vx-849-batch2` (GO ~05:05 from nov7; legs A/B/D + expected counts in the BATCH 2
+  RECORD's STAGE REQUEST; leg C folds into the closing sweep). The window is THE ORCHESTRATOR'S OWN HANDS —
+  foreground the legs, SEAM pings per leg, RELEASE with Executed counts and every failure by name.
+- **Batches 3 and 4: briefs STAGED above, spawn AFTER the batch-2 window** (batch 3 edits TakesViewModel, which
+  leg A's suites mount — never contaminate the window). **Batch 5 (VX-855): brief unwritten** — trace-first, the
+  repro may need a dev-store window (serialize vs vx-913's VX-81 repro; posture rules in STAGE & COORDINATION).
+  **Batch 6 (VX-921+VX-919): brief unwritten** — the B2 worked pattern is in this file's roster row; VX-919's
+  script is authored only, deploy HELD.
+- **Then:** the LADDER (fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, whole diff; rounds per
+  CLAUDE.md; cross-model flow — the reviewer finals, the implementer applies, FINDER-FIXES/Sync/ lines the
+  reviewer's own); the ORCHESTRATOR'S WALK of batches 3's and 4's faces (UI-kind evidence; dev store, stage,
+  posture restored); the closing sweep: WHOLE Mac + phone on the MERGED tree + the eye-read of AppSession's merged
+  body (the vx-915 overlap terms, three shared files); the full closeout ritual (canon deltas queued in both batch
+  adjudications; the two-file rule; canon-size reported; tickets closed and FILED ones triaged; the rulings
+  reconciled; MOBILE PARITY — the phone heals as the Mac does, batch 2; worktree removed, branch deleted after
+  merge; NO /Applications refresh — VX-931).
+- **The morning bundle (hers):** P-849-1 (the board doors' flush-first — explained plainly to her this sitting,
+  unanswered), P-849-2 (the phone flush occasion), P-849-3 (the phone retry), P-849-4 (the envelope delete), plus
+  whatever the night births; the QUESTIONS entry files AT THE MERGE on latest main. Her Air drill and VX-919's
+  deploy stay OWED. The author handoff (`notes/handoffs/vx-849-handoff.md`): HER CHECKLIST AT THE TOP, and per her
+  mandate the most important items EXPLAINED IN PLAIN ENGLISH FOR A READER WITH NO CONTEXT — write it like the
+  batch explanations she accepted at this sitting (the P-849-1 explanation's register), not like this file. The
+  session's VERY LAST chat message: the filed tickets again, her checkbox format, by priority.
+- **Machinery:** memory file `vx-849-run-state` current; nov7 holds the queue (REQUEST/READY/GO/RELEASE verbatim;
+  no heavy headless while another window is live); the no-trailer hook denies trailer forms in commit text; both
+  implementer agents are DONE (batch 1, batch 2 — resumable by SendMessage only if their batches reopen).
+
+## THE POST-COMPACTION KICKOFF PROMPT (paste-ready; the mandate above travels with it)
+
+/architect-phase vx-849 — POST-COMPACTION RESUME, the overnight leg. You are the standing orchestrator of the
+VX-849 run (the sync-custody run), mid-flight at the batch-2 stage window. FIRST: read
+`~/dev/variorum-vx-849/notes/plans/fixes/vx-849-typed-over-rescue.md` IN FULL — it is the one running record and
+it is current: the STATUS banner, KICKOFF (her rulings verbatim), STAGE & COORDINATION, LIVE STATUS, the batch
+briefs, both batch records with their adjudications, HER OVERNIGHT MANDATE (verbatim — it governs the night) and
+the CUTOVER STATE, which is your task list. Verify before trusting: `git -C ~/dev/variorum-vx-849 log --oneline
+-12` against LIVE STATUS. Then the standard preflight ONLY as the briefs demand it per batch (SyncSpec whole is
+already honored for Sync/ work; CastleRules whole for batch 4; TEXTKIT2_NOTES whole for batch 3). The cast is her
+ruling: Opus implements, Fable cold-reviews. nov7 coordinates the stage — announce yourself, confirm the
+vx-849-batch2 claim's tip, and run the window's legs with your own hands when the GO comes. Everything
+author-flavored runs PROVISIONAL-and-continue into the morning bundle; the hard stops (her Air drill, VX-919's
+deploy, release PUBLISHING) stay held. End state by morning: the run merged (serialized through nov7), release
+prep done ONLY if this run is the wave's last merger and only on nov7's GO (the mandate section's exact scope —
+built, never published; Fable hands the first-run walk to Opus), the author handoff written with its plain-English
+explanations per the mandate, and the filed tickets repeated as the very last chat message in her checkbox format.
+

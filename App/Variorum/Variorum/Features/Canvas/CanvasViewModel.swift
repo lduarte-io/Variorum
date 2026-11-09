@@ -201,7 +201,7 @@ final class CanvasViewModel {
             storeText(blockID: $0.blockID, variantID: $0.variantID)
         }
         let suspect = authority.settle(
-            isPending: { [coordinator] in coordinator.pending[$0] != nil },
+            isPending: { [coordinator] in coordinator.isUnlanded($0) },
             liveIncoming: liveIncoming)
         endRingIfWrittenFromOutside(suspect)
         recomputeSpreadDefaults()
@@ -736,7 +736,7 @@ final class CanvasViewModel {
         OutsideWriteConfirmation.endRing(
             ifConfirmed: suspect, in: session.database,
             authority: { [weak self] in self?.authority },
-            isPending: { [weak self] in self?.coordinator.pending[$0] != nil },
+            isPending: { [weak self] in self?.coordinator.isUnlanded($0) ?? false },
             endRing: { [weak self] in self?.blur() })
     }
 
@@ -745,11 +745,13 @@ final class CanvasViewModel {
     /// pick), through the per-post autosave.
     func paneEdited(blockID: String, variantID: String, newText: String) {
         let store = storeText(blockID: blockID, variantID: variantID) ?? ""
-        let old = authority.text(variantID: variantID, storeText: store)
+        // VX-849 batch 3 (G3): built on what the pane SHOWS (`shownText`).
+        let old = authority.shownText(variantID: variantID, storeText: store)
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
         authority.bufferEdited(variantID: variantID, text: newText)
-        coordinator.record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: `old` (what the card showed) is the autosave's snapshot.
+        coordinator.record(variantID: variantID, text: newText, charDelta: cost, basedOn: old)
     }
 
     private func storeText(blockID: String, variantID: String) -> String? {

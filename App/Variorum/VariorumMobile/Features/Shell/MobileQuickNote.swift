@@ -278,6 +278,11 @@ final class MobileQuickNoteModel {
     /// The tail as last handed to the autosave coordinator (the charDelta
     /// baseline).
     @ObservationIgnored private var lastRecordedTail = ""
+    /// VX-683 B: the text the box's next edit is built on, as the STORE holds
+    /// it — the owned block's stored text at adoption (the box's own tail can
+    /// differ from it by the import's normalization), then each tail handed to
+    /// the coordinator. The autosave's snapshot.
+    @ObservationIgnored private var recordBase = ""
     @ObservationIgnored private var autosave: AutosaveCoordinator?
     @ObservationIgnored private var settleToken: UUID?
     @ObservationIgnored private var clockTask: Task<Void, Never>?
@@ -661,7 +666,12 @@ final class MobileQuickNoteModel {
         guard tail != lastRecordedTail else { return }
         let delta = MobileQuickNoteModel.charDelta(from: lastRecordedTail, to: tail)
         lastRecordedTail = tail
-        autosave.record(variantID: variantID, text: tail, charDelta: delta)
+        // VX-683 B: what this edit was built on — the owned take's STORED text
+        // at adoption, then her own tail as last handed off — the autosave's
+        // snapshot (`AutosaveCoordinator.record`).
+        let basedOn = recordBase
+        recordBase = tail
+        autosave.record(variantID: variantID, text: tail, charDelta: delta, basedOn: basedOn)
         saveState = .saving
     }
 
@@ -804,6 +814,7 @@ final class MobileQuickNoteModel {
         variantID = ownedVariant
         frozenPrefix = prefix
         lastRecordedTail = String(snapshot.dropFirst(prefix.count))
+        recordBase = owned.text ?? ""
 
         let coordinator = session.autosave(
             forPost: containerID, debounce: autosaveDebounce,
@@ -1091,6 +1102,7 @@ final class MobileQuickNoteModel {
         postID = nil
         frozenPrefix = ""
         lastRecordedTail = ""
+        recordBase = ""
         lastError = nil
         boundaryNote = nil
         saveState = .idle

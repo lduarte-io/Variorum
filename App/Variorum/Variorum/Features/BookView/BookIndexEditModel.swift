@@ -201,17 +201,14 @@ final class BookIndexEditModel {
     /// `blur()`'s detached flush, because the sheet's own model reads the
     /// store the moment it starts.
     ///
-    /// **The window this does NOT close** (the VX-382 ladder's R1-3, recorded
-    /// honestly): `flushNow` takes its batch and clears `pending` BEFORE it
-    /// awaits the write, so when a write is ALREADY in flight — the
-    /// coordinator's own 500-ms debounce, or another door's detached flush
-    /// that took the batch first — the awaited flush here finds nothing
-    /// pending and returns at once, while that write is still landing (the
-    /// helper's `false` — `isDirty` counts flights — is not consulted). For
-    /// those few milliseconds the sheet can read the pre-write store. The
-    /// class is the shared helper's (`AppSession.flushExistingAutosave` under
-    /// every flush-first door) and is ticketed at the run's closeout — a
-    /// helper that waits for its coordinator to settle — not closed here.
+    /// **A write already in flight lands first too** (the VX-382 ladder's
+    /// R1-3, CLOSED by VX-402 in the shared helper): when the coordinator's
+    /// own 500-ms debounce, or another door's detached flush, has already
+    /// taken the batch, the awaited flush here waits for that write before it
+    /// returns (`AutosaveCoordinator.flushNow`), so the sheet never reads the
+    /// pre-write store. A REFUSED write (a seal or lock that landed mid-typing)
+    /// still leaves its bytes pending — the helper's `false`, not consulted
+    /// here, as before.
     func releaseForTakesSheet(on postID: String) async {
         let leaving = authority.livePane
         authority.blur()
@@ -233,11 +230,13 @@ final class BookIndexEditModel {
         // VX-303: her edit ends any placement still pending (an empty take's
         // placement can report nothing) — what she types is hers.
         if arrivalPlacement?.variantID == variantID { arrivalPlacement = nil }
-        let old = authority.text(variantID: variantID, storeText: oldText)
+        // VX-849 batch 3 (G3): built on what the pane SHOWS (`shownText`).
+        let old = authority.shownText(variantID: variantID, storeText: oldText)
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
         authority.bufferEdited(variantID: variantID, text: newText)
-        coordinator(for: postID).record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: `old` (what the pane showed) is the autosave's snapshot.
+        coordinator(for: postID).record(variantID: variantID, text: newText, charDelta: cost, basedOn: old)
     }
 
     /// Settle-time convergence on a projection delivery: buffers with no
@@ -245,7 +244,7 @@ final class BookIndexEditModel {
     func settle() {
         let pending = coordinators.values
         authority.settle(isPending: { variantID in
-            pending.contains { $0.pending[variantID] != nil }
+            pending.contains { $0.isUnlanded(variantID) }
         })
     }
 
@@ -269,7 +268,7 @@ final class BookIndexEditModel {
     }
 
     private func isPending(_ variantID: String) -> Bool {
-        coordinators.values.contains { $0.pending[variantID] != nil }
+        coordinators.values.contains { $0.isUnlanded(variantID) }
     }
 
     // MARK: - The landing (row 38)

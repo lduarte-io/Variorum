@@ -568,7 +568,7 @@ final class TakesViewModel {
         // (VX-222's shape, beside it below: the pane goes read and adopts).
         let liveIncoming = authority.livePane.flatMap { Self.storedText(of: $0.variantID, in: new) }
         let suspect = authority.settle(
-            isPending: { autosave.pending[$0] != nil }, liveIncoming: liveIncoming)
+            isPending: { autosave.isUnlanded($0) }, liveIncoming: liveIncoming)
         endRingIfWrittenFromOutside(suspect)
         // VX-222: a ring whose article cell changed take under it ends here —
         // BEFORE the landings below may ring the fresh projection. VX-227
@@ -595,6 +595,13 @@ final class TakesViewModel {
         // landings below resolve against it (a landing onto a pane the filter
         // hides opens its block — the filter must already know the shapes).
         lensFilter.projectionAdopted()
+        // VX-849 batch 3, G2 (PROVISIONAL P-849-5 (a)): an adoption under which
+        // a slot-split bloom now REPLACES the article cell the ring is in ends
+        // the ring by the flushed blur — VX-222's arm's reason (the ring's cell
+        // stopped rendering its take under her), asked once the bloom inputs
+        // (the collapse rule above, the filter's fresh shapes) know this
+        // projection, and before the landings below may ring it.
+        endRingIfSlotSplitReplacedItsCell()
         // Columns referencing lenses that died drop back to scratch with
         // the lens's last-known picks LOST deliberately (the lens was the
         // durable home; a deleted lens's thread is gone — its takes remain
@@ -940,6 +947,35 @@ final class TakesViewModel {
         blur()
     }
 
+    /// **G2 — a slot-split bloom that REPLACES the ring's article cell ends the
+    /// ring** (the VX-849 run, batch 3 — R-683-4's one face defect; PROVISIONAL
+    /// P-849-5 (a); the record `notes/plans/fixes/vx-849-typed-over-rescue.md`).
+    /// In slot split a BLOOMED fanned block renders its fan's cards in the
+    /// article cell's place (`slotSplitReplacesArticleCell`). A block that was
+    /// bloomed while it held ONE take — her first-take door open, or
+    /// follow-the-scroll over a visible row — becomes fanned the moment a take
+    /// arrives from outside (the guarded autosave's own `'conflict'` card, an
+    /// AI's `add_take`, a sync's new take), and the cell holding her LIVE pane is
+    /// replaced under her caret: the ring would stand on a `takes-main` key no
+    /// surface renders (the R112 class — her keyboard dead until she clicks a
+    /// card). So the adoption that does it ends the ring by the FLUSHED blur
+    /// (no keystroke dies with it): VX-222's shape for an outside change that
+    /// re-resolves the ring's cell, and VX-577's arm in `expandAllFans` for the
+    /// same reshaping done by her own hand. Every other style keeps the article
+    /// cell through a bloom, so nothing moves there; the Lenses host and Write's
+    /// take panel never key a ring `takes-main`. The recorded alternatives (her
+    /// bundle): (b) carry the ring onto the fan card that renders the same take,
+    /// the caret where it was; (c) hold the slot-split bloom of the block her ring
+    /// is in until the ring leaves.
+    private func endRingIfSlotSplitReplacedItsCell() {
+        guard host == .takes, let live = authority.livePane,
+              live.columnID == Self.takesMainColumnID,
+              let slot = projection.slots.first(where: { $0.blockID == live.blockID }),
+              slotSplitReplacesArticleCell(slot)
+        else { return }
+        blur()
+    }
+
     // MARK: - 13f W7 — the takes room's landing
 
     /// The variant whose pane should take the caret at the END of its text,
@@ -1169,7 +1205,10 @@ final class TakesViewModel {
     /// the edit lands in exactly THAT take's working_text (visible-not-
     /// chosen is real and editable — durable, synced).
     func paneEdited(variantID: String, newText: String) {
-        let old = authority.text(
+        // VX-849 batch 3 (G3): built on what the pane SHOWS — for the live
+        // pane, what it holds, never the projection an outside write already
+        // moved (`PaneTextAuthority.shownText`).
+        let old = authority.shownText(
             variantID: variantID,
             storeText: currentStoreText(variantID: variantID) ?? "")
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
@@ -1177,7 +1216,9 @@ final class TakesViewModel {
         // Her hand: an edit ends a pending article landing (17p batch a, J1).
         board.clearArticleLanding()
         authority.bufferEdited(variantID: variantID, text: newText)
-        autosave.record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: `old` is what the pane showed before the keystroke — the
+        // autosave's snapshot (a row changed under it since is rescued).
+        autosave.record(variantID: variantID, text: newText, charDelta: cost, basedOn: old)
     }
 
     private func currentStoreText(variantID: String) -> String? {
@@ -1216,7 +1257,7 @@ final class TakesViewModel {
         OutsideWriteConfirmation.endRing(
             ifConfirmed: suspect, in: session.database,
             authority: { [weak self] in self?.authority },
-            isPending: { [weak self] in self?.autosave.pending[$0] != nil },
+            isPending: { [weak self] in self?.autosave.isUnlanded($0) ?? false },
             endRing: { [weak self] in self?.blur() })
     }
 
@@ -3183,8 +3224,20 @@ final class TakesViewModel {
         stepPage(key, by: delta, limit: limit)
     }
 
+    /// The board's own restore (no production caller today — the History &
+    /// Lineage surface's Commits face is the Mac's restore door). **P-849-1
+    /// (PROVISIONAL — the VX-849 run, batch 3):** her restore doors flush her
+    /// pending typing FIRST and insure what they replace — this door ran on the
+    /// bare runner, so a restore under her pending typing was answered by her
+    /// own late autosave, which found the row changed and rescued the RESTORED
+    /// words as a `'conflict'` card (her own act undone by her keystrokes). The
+    /// board's flush contract (`flushPendingText`, the structural doors'),
+    /// then the insured restore; the ring-end (VX-664) makes a live pane adopt.
     func restoreCommit(_ commit: CommitPoint) async {
-        await run { ops in try ops.restoreCommit(commit.variantId, commitID: commit.id) }
+        guard await flushPendingText() else { return }
+        await run { ops in
+            try ops.restoreCommit(commit.variantId, commitID: commit.id, insuringBuffer: true)
+        }
         if status == nil {
             setReceipt(
                 "Restored — the commit's text is back in the take's buffer. Nothing was lost: commits are append-only."

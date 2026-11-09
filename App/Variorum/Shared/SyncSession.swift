@@ -30,12 +30,15 @@
 //  while a listed test account is signed in. Release: absolute.)
 //
 //  Triggers wired HERE (both platforms): after local writes settle (the
-//  outbox observation, debounced). Platform files add their own: foreground/
-//  became-active, launch, and the iOS background transition.
+//  outbox observation, debounced) and — VX-544, her R-849-2 — when the network
+//  path comes back (a transition to satisfied, debounced; `path`). Platform
+//  files add their own: foreground/became-active, launch, and the iOS
+//  background transition.
 //
 
 import Foundation
 import GRDB // AsyncValueObservation iteration (member import visibility)
+import Network // VX-544: the reachability trigger's path monitor
 import Observation
 import VariorumCore
 
@@ -61,6 +64,39 @@ nonisolated protocol FirstRoundScheduling: Actor {
 }
 
 extension SyncScheduler: FirstRoundScheduling {}
+
+/// **VX-544 (the VX-849 run, batch 2 — D-544 (3b); her R-849-2: "the reachability trigger IS built") — WHAT THE
+/// REACHABILITY TRIGGER WATCHES**: the network path's readings — `true` satisfied, `false` not — delivered in order on the
+/// main actor, the first being the path as it stands when the watch starts. Production: `SystemNetworkPath` (Network's
+/// `NWPathMonitor`); a pin plants its own.
+@MainActor
+protocol NetworkPathWatching: AnyObject {
+    func start(_ reading: @escaping @MainActor (Bool) -> Void)
+    func stop()
+}
+
+/// The production path watch: `NWPathMonitor` (Network framework, both platforms), its handler on the MAIN queue — readings
+/// arrive in order, on the main actor, and the handler's whole work is one comparison.
+@MainActor
+final class SystemNetworkPath: NetworkPathWatching {
+    private var monitor: NWPathMonitor?
+
+    func start(_ reading: @escaping @MainActor (Bool) -> Void) {
+        stop()
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { path in
+            let satisfied = path.status == .satisfied
+            MainActor.assumeIsolated { reading(satisfied) }
+        }
+        monitor.start(queue: .main)
+        self.monitor = monitor
+    }
+
+    func stop() {
+        monitor?.cancel()
+        monitor = nil
+    }
+}
 
 @MainActor
 @Observable
@@ -88,15 +124,29 @@ final class SyncSession {
     private var scheduler: SyncScheduler?
     private var observationTasks: [Task<Void, Never>] = []
     private var settleTask: Task<Void, Never>?
+    /// **VX-544 (D-544 (3b); her R-849-2) — THE REACHABILITY TRIGGER**: the network path, watched while a chain stands
+    /// (`configure` starts it, every teardown stops it). A transition to SATISFIED from not-satisfied runs ONE round through
+    /// `triggerSync` — so the occasion before it runs too (the typed unlock's retry, her typing) — after
+    /// `reachabilityDebounce`; a path that drops again inside the debounce cancels it (a flapping network earns one round,
+    /// once it settles). The FIRST reading is the path as it stands — never a trigger alone (a chain just composed runs its
+    /// own round; a launch offline waits for the path to come up). nil: no watch (a test's composition that names none).
+    private let path: (any NetworkPathWatching)?
+    private let reachabilityDebounce: Duration
+    private var lastPathSatisfied: Bool?
+    private var reachabilityTask: Task<Void, Never>?
 
     init(
         database: AppDatabase,
         allowsSync: Bool = true,
-        settleDebounce: Duration = .seconds(3)
+        settleDebounce: Duration = .seconds(3),
+        path: (any NetworkPathWatching)? = nil,
+        reachabilityDebounce: Duration = .seconds(2)
     ) {
         self.database = database
         self.allowsSync = allowsSync
         self.settleDebounce = settleDebounce
+        self.path = path
+        self.reachabilityDebounce = reachabilityDebounce
     }
 
     /// Builds the transport → engine → scheduler chain and starts the
@@ -189,13 +239,71 @@ final class SyncSession {
                 // foreground events still run rounds.
             }
         })
+        // VX-544 (R-849-2): the path watch rides the chain — its first reading the baseline.
+        lastPathSatisfied = nil
+        path?.start { [weak self] satisfied in self?.pathReading(satisfied) }
     }
+
+    /// **VX-544 — ONE READING OF THE PATH** (the reachability trigger's whole rule): not satisfied ⇒ a round scheduled by an
+    /// earlier transition is cancelled; satisfied after a not-satisfied reading ⇒ ONE round after the debounce; satisfied
+    /// after satisfied (an interface change on a live path), or as the first reading, ⇒ nothing.
+    private func pathReading(_ satisfied: Bool) {
+        let previous = lastPathSatisfied
+        lastPathSatisfied = satisfied
+        guard satisfied else {
+            reachabilityTask?.cancel()
+            reachabilityTask = nil
+            return
+        }
+        guard previous == false else { return }
+        reachabilityTask?.cancel()
+        reachabilityTask = Task { [weak self, reachabilityDebounce] in
+            guard (try? await Task.sleep(for: reachabilityDebounce)) != nil, !Task.isCancelled else { return }
+            self?.reachabilityTask = nil
+            self?.triggerSync()
+        }
+    }
+
+    /// **VX-683 A — THE OCCASION BEFORE EVERY ROUND** (the VX-849 run, batch 1 —
+    /// `notes/plans/fixes/vx-849-typed-over-rescue.md`; the memo
+    /// `notes/plans/fixes/vx-683-sync-into-debounce.md`, option A as ruled; D-544
+    /// build step 3a's seam, minted here — VX-544's typed-unlock retry is batch 2's
+    /// occasion on the same hook). Run to its END before every round this
+    /// session's own roads start — `triggerSync()` (every trigger funnels through
+    /// it: the settle observation, became-active, Sync now), `flush()` and
+    /// `roundNow()` — behind the restore hold (a held store runs neither the
+    /// occasion nor a round); the gate and the chain are read AGAIN once it ran,
+    /// so a round goes to the chain that stands then and a retired chain is never
+    /// revived. nil = inert, the exact pre-hook road (the `keyProvider` pattern):
+    /// every existing composition is unchanged, and the engine never learns
+    /// editors exist — the composition root hands in what to run (the Mac's: her
+    /// pending typing lands first, `AppServices`). Rounds the SCHEDULER starts on
+    /// its own (a coalesced follow-up, the orphan heal's, the one-writer belt's)
+    /// run no occasion: what they meet is the guarded autosave's to rescue
+    /// (VX-683 B). Pinned: `SyncBeforeRoundTests`.
+    var beforeRound: (@MainActor () async -> Void)?
 
     /// One sync round, serialized/coalesced by the scheduler (A3).
     func triggerSync() {
         guard roundsHeld?() != true else { return }
         guard let scheduler else { return }
-        Task { await scheduler.trigger() }
+        guard let beforeRound else {
+            Task { await scheduler.trigger() }
+            return
+        }
+        Task { [weak self] in
+            await beforeRound()
+            guard let chain = self?.chainAfterOccasion() else { return }
+            await chain.trigger()
+        }
+    }
+
+    /// After the occasion ran: the chain a round may start on NOW — nil when the
+    /// hold came down meanwhile or the chain is gone (stopped, or mid-replacement:
+    /// `configure` clears it before it drains).
+    private func chainAfterOccasion() -> SyncScheduler? {
+        guard roundsHeld?() != true else { return nil }
+        return scheduler
     }
 
     /// **VX-510 D-A1 — ONE ROUND, RUN TO ITS END, AND WHAT IT CAME TO** (an account act's first round — VX-498/VX-507).
@@ -207,7 +315,15 @@ final class SyncSession {
     /// Nothing here cancels a round: a caller that stops waiting leaves it running.
     func roundNow() async -> FirstRoundOutcome {
         guard roundsHeld?() != true else { return .held }
-        guard let scheduler else { return .notConfigured }
+        guard var scheduler else { return .notConfigured }
+        if let beforeRound {
+            // VX-683 A: the occasion first, then the gate and the chain as they
+            // stand after it.
+            await beforeRound()
+            guard roundsHeld?() != true else { return .held }
+            guard let chain = self.scheduler else { return .notConfigured }
+            scheduler = chain
+        }
         return .ran(await Self.runRound(on: scheduler))
     }
 
@@ -236,7 +352,14 @@ final class SyncSession {
     /// a restored library pushes nothing before Resume.
     func flush() async {
         guard roundsHeld?() != true else { return }
-        guard let scheduler else { return }
+        guard var scheduler else { return }
+        if let beforeRound {
+            // VX-683 A: the occasion first (the iOS background transition's
+            // round then pushes what she typed), then the chain as it stands.
+            await beforeRound()
+            guard let chain = chainAfterOccasion() else { return }
+            scheduler = chain
+        }
         await scheduler.trigger()
         await scheduler.awaitIdle()
     }
@@ -283,6 +406,11 @@ final class SyncSession {
         observationTasks.removeAll()
         settleTask?.cancel()
         settleTask = nil
+        // VX-544: the path watch ends with the chain (a reconfigure starts a fresh one, its first reading the baseline).
+        path?.stop()
+        reachabilityTask?.cancel()
+        reachabilityTask = nil
+        lastPathSatisfied = nil
     }
 
     private func scheduleSettleTrigger() {

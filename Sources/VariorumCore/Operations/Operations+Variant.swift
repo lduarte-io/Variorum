@@ -17,14 +17,62 @@ extension Operations {
     /// VX-357: any U+0000 in `text` is removed before it is stored
     /// (`StoredText.stripped` — the store cannot hold one; a bind stopped at
     /// it and lost the rest of the take). Quiet: nothing she can see changes.
-    public func autosave(_ variantID: String, text: String, charDelta: Int) throws {
+    ///
+    /// **VX-683 B — `expectedText`, THE GUARDED AUTOSAVE: an autosave never
+    /// overwrites words it has not seen** (the memo
+    /// `notes/plans/fixes/vx-683-sync-into-debounce.md`, her rulings R-683-1…4;
+    /// the run record `notes/plans/fixes/vx-849-typed-over-rescue.md`). The
+    /// editor's buffer was built on the text it last ADOPTED; that snapshot
+    /// rides the call. When the row no longer holds it — a sync pull applied
+    /// on the locally-clean path inside the debounce window (SyncSpec §5: the
+    /// row was clean, so S5 never ran), the MCP door mid-window, a second
+    /// window — a blind write would leave the displaced words nowhere (its
+    /// push is even CAS-accepted: the base is the applied version). So the
+    /// write RESCUES instead of clobbering, inside its one transaction:
+    /// - **her buffer keeps the row** (R-683-1 — nothing ever moves under her
+    ///   caret; the write lands exactly as an unguarded one would, touch and
+    ///   churn included);
+    /// - **the displaced words become a new take on the same block**, label
+    ///   `'conflict'` (R-683-2 — one vocabulary, one face), branched from the
+    ///   edited take's own parent, at the fan's end, never chosen, never
+    ///   locked — exactly where an S5 card lands (`insertConflictVariant`,
+    ///   `resolveSyncConflict`'s and the engine's shared core).
+    ///
+    /// Both rows reach the outbox through the ordinary triggers (this is never
+    /// apply mode), so both push and every device converges with both texts —
+    /// a LOCAL rescue, not a cross-device repair: no §7 entry, no schema, no
+    /// savepoint occasion (nothing becomes unreachable — both texts live as
+    /// takes). The take's guards refuse FIRST (a locked take, a sealed post, an
+    /// archived or dead take — as before), so a refused autosave mints nothing
+    /// and the coordinator's keep-pending posture holds the bytes. The
+    /// comparison is made as the store keeps text (`StoredText`). Nothing
+    /// displaced (the other writer landed exactly her words) mints no card.
+    /// `nil` is today's blind write — the shape for callers with no snapshot.
+    /// A dead block takes no card (the engine's own rescue guard — a live take
+    /// under a dead block exists only mid-apply, never to a later transaction).
+    /// Pinned: `TypedOverRescueTests`.
+    public func autosave(
+        _ variantID: String, text: String, charDelta: Int, expectedText: String? = nil
+    ) throws {
         let text = StoredText.stripped(text)
+        let expectedText = StoredText.stripped(expectedText)
         try database.write { db in
             var variant = try editableVariant(db, variantID)
+            let displaced = variant.workingText
             let now = date.now
             variant.workingText = text
             variant.updatedAt = now
             try variant.update(db)
+            if let expectedText, displaced != expectedText, displaced != text,
+               try Block.fetchOne(db, key: variant.blockId).map({ $0.deletedAt == nil }) ?? false {
+                try Operations.insertConflictVariant(
+                    db,
+                    blockID: variant.blockId,
+                    parentVariantID: variant.parentVariantId,
+                    losingText: displaced,
+                    id: newID(),
+                    now: now)
+            }
             try registerTextChange(
                 db, blockID: variant.blockId, charDelta: charDelta,
                 forceMajorRevision: false, now: now)
@@ -149,8 +197,39 @@ extension Operations {
     /// 3's divide/extract, a commit predating the split still holds the full
     /// pre-split text and restoring it resurrects both halves into this
     /// buffer — coherent under "coarse, not forensic"; the editor warns.
-    public func restoreCommit(_ variantID: String, commitID: String) throws {
-        try database.write { db in _ = try restoreCommitRows(db, variantID, commitID: commitID) }
+    ///
+    /// **`insuringBuffer` — HER restore, insured** (PROVISIONAL P-849-1, the
+    /// VX-849 run, batch 3; the record `notes/plans/fixes/
+    /// vx-849-typed-over-rescue.md`). Her doors flush her pending typing first,
+    /// so the take's buffer holds what she last typed — and a restore then
+    /// overwrites it: whatever she typed since her latest savepoint becomes
+    /// unreachable (no ⌘Z road crosses an operation). With `true`, inside this
+    /// ONE transaction and after the take's guards (a locked take, a sealed
+    /// post, an archived or dead take refuse first and mint nothing), when the
+    /// restore will change the take's text AND its buffer differs from its
+    /// latest savepoint (`isDirty`, the insurance family's one dedupe), ONE quiet
+    /// `kind='auto'` savepoint of the buffer lands first — unnamed, her road's
+    /// quiet kind (the MCP door's bracket names its own pair and is untouched: it
+    /// calls `restoreCommitRows` inside its own insurance). The insurance
+    /// doctrine of OverallModel §3 — insure exactly what an act is about to make
+    /// unreachable. Default `false`: the restore exactly as before. Touch and
+    /// churn are the restore's own (an auto savepoint writes neither); no undo
+    /// entry (the restore registers none). Pinned: `RestoreInsuranceTests`.
+    public func restoreCommit(
+        _ variantID: String, commitID: String, insuringBuffer: Bool = false
+    ) throws {
+        try database.write { db in
+            if insuringBuffer {
+                let variant = try editableVariant(db, variantID)
+                if let commitPoint = try CommitPoint.fetchOne(db, key: commitID),
+                   commitPoint.variantId == variantID,
+                   variant.workingText != commitPoint.text,
+                   try isDirty(db, variant) {
+                    _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: date.now)
+                }
+            }
+            _ = try restoreCommitRows(db, variantID, commitID: commitID)
+        }
     }
 
     /// `restoreCommit`'s row work inside the caller's transaction (VX-184 U4

@@ -1181,6 +1181,15 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("keyfile \(f8(file.fingerprint))")
     }
 
+    /// VX-443: the production leaf's contract — by NAME at the container's root only (never below it), an older
+    /// fingerprint-named key file's name only; the world never reads the file, as the app never does.
+    func deleteOlderKeyFile(named name: String) throws -> Bool {
+        guard CatalogNames.preDesignKeyFileFingerprint(name) != nil, device.container.files[name] != nil else { return false }
+        try world.deleting(device, "older key file \(name)") { device.container.files[name] = nil }
+        try wrote("older-keyfile- \(name)")
+        return true
+    }
+
 
     // MARK: Memory, plans
 

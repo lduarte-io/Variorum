@@ -613,7 +613,7 @@ final class CompareViewModel {
     /// A buffer stays authoritative while pending in ANY of this board's
     /// post pipelines — the settle's own union, named once.
     private func isPending(_ variantID: String) -> Bool {
-        mountedPostIDs.contains { coordinator(for: $0).pending[variantID] != nil }
+        mountedPostIDs.contains { coordinator(for: $0).isUnlanded(variantID) }
     }
 
     /// **VX-664 — the ring's own take was written from OUTSIDE** (A-677-1):
@@ -663,13 +663,22 @@ final class CompareViewModel {
     /// lands in exactly that take's working_text, through exactly that
     /// POST's autosave pipeline.
     func paneEdited(postID: String, variantID: String, newText: String) {
-        let old = authority.text(
-            variantID: variantID,
-            storeText: storeText(postID: postID, variantID: variantID) ?? "")
+        // VX-849 batch 3 (G3): built on what the pane SHOWS (`shownText`) — nil
+        // when the board knows nothing of the take (a column whose face its
+        // observation has not delivered yet: `setPeer` restarts it).
+        let shown = authority.shownTextIfKnown(
+            variantID: variantID, storeText: storeText(postID: postID, variantID: variantID))
+        let old = shown ?? ""
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
         authority.bufferEdited(variantID: variantID, text: newText)
-        coordinator(for: postID).record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: what the pane showed is the autosave's snapshot. A take the
+        // board knows nothing of hands NONE (the unguarded write) — never a
+        // fabricated empty one, which the guard reads as the row changed under
+        // her and answers with a spurious `'conflict'` take of the very words
+        // the edit replaced (the VX-849 run's sweep fix).
+        coordinator(for: postID).record(
+            variantID: variantID, text: newText, charDelta: cost, basedOn: shown)
     }
 
     // MARK: Composition (the pure brain, fed)
