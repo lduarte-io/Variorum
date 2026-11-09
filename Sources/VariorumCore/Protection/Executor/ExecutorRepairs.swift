@@ -18,7 +18,9 @@ public enum RepairSkip: Equatable, Sendable {
     /// Its precondition did not verify (a delete would remove a road).
     case preconditionDoesNotVerify
     /// The guards forbid it: a Touch ID item made by a repair, or a delete on
-    /// a Standard record's word alone.
+    /// a Standard record's word alone — or (VX-443) a delete by a name no
+    /// older Variorum's fingerprint-named key file has (this design's own
+    /// names above all; no leaf is reached).
     case forbidden
     /// Decision 35: a synced library writes nothing Apple-reachable without a
     /// fresh vault read for its account.

@@ -175,7 +175,7 @@ beside it.**
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
-| 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | IN-PROGRESS — the BATCH 4 RECORD opened (preflight whole; VX-443's traced facts and settled design written before code); pieces 1–4 next |
+| 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | BUILT — `b59d2f16d`…(this commit): VX-443's sweep (PROVISIONAL P-849-4; red-on-old SHA `9118b0355`, the fix `80979d6f0`, reverts R-443a…d bit as named); VX-152 traced — closed before this run by VX-445, a guard pin only; VX-545's five points in one commit (`6cd218082`, the page regenerated); core protection set 551/123 green; Mac + phone `build-for-testing` green; EVERY Mac/simulator run PENDING the stage (the BATCH 4 RECORD's STAGE REQUEST) |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
@@ -1796,7 +1796,7 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
 | 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | DONE — 1a the behavior pins on the PRE-FIX tree (`9118b0355` — the red-on-old SHA): core **3 RED exactly as named / 4 green**; 1b the fix + the compile-red pins (`80979d6f0`): core 16/16 green; R-443a…d each bit exactly its named set (this commit records them); the protection set 551/123 green; Mac `build-for-testing` green; Mac runs PENDING (stage — R-443M1/M2 named) |
 | 2 | VX-152 — the lock's reentrancy, investigate-first | DONE (this commit) — traced: CLOSED BEFORE THIS RUN by VX-445's one-act seam (dismissed as hollow; no fix); one regression guard pin (Mac, compiled; its run + revert R-152 PENDING the stage); the ticket text below for the orchestrator |
 | 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | DONE (this commit) — the five points + the page regenerated from the fixture (one sentence moved) + the byte pin's justified edit; `swift test --filter Lifecycle` 14/5 green; Mac `build-for-testing` green; the Mac pins' runs + R-545 PENDING the stage |
-| 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | NOT STARTED |
+| 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | DONE (this commit) — core build green; the protection set 551/123 green; Mac + phone `build-for-testing` green; every Mac/simulator run PENDING the STAGE REQUEST; the whole core package PENDING (heavy headless) |
 
 **VX-443 — the traced facts, before code (what the file IS, from the deleted code):**
 - *Who wrote it:* `AppBootstrap.ensureStoreIdentity` (the new road's open, VX-306 U1b → VX-329; `f2306a535~1`
@@ -2021,6 +2021,123 @@ points in ONE commit (this one):**
   back to `"old ones still open backups you made before today."` ⇒ RED `rule7sSentencesAreHersVerbatim` (its relational
   line — the rule no longer says it — and both new lines) and
   `RoadJoinFollowWordsTests.herSentencesTheseFacesSayAreHersVerbatim` (its rule-7 line).
+
+#### Piece 4 — Close
+- *Headless at the tip:* `swift build` → `Build complete!`; the protection core set (every `@Suite` type under
+  `Tests/VariorumCoreTests/Protection/` + `LibraryClassifierTests`, by type-name filter — targeted, never the whole
+  package) at `6cd218082` → **`Test run with 551 tests in 123 suites passed` (5 known issues, the standing ones)**; the
+  sweep's suites again after the close's one doc-comment edit (`RepairSkip.forbidden` names its new use) → 16/3 green.
+  Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **` at pieces 1a, 1b, 2 and 3 (the tip's tree but this record and
+  that comment); phone `build-for-testing` (generic iOS Simulator) at `6cd218082` → `** TEST BUILD SUCCEEDED **`. No
+  warning in a touched file. Every build incremental (this worktree's warm DerivedData), never cold.
+- *HEAVY HEADLESS — PENDING (nov7's rule; other sessions held the stage throughout):* the WHOLE core package
+  `swift test` (the core changes reach only the protection set, which ran whole by name; the whole package folds into
+  LIVE STATUS row 8's closing sweep).
+
+**The pins, said plainly (compile-red vs behavior-red):**
+- BEHAVIOR-red on the pre-fix tree, committed before the fix at `9118b0355`: core `StaleEnvelopeSweepScenarios`' three
+  sweep pins (WATCHED red here, then green); Mac `StaleEnvelopeSweepRoadTests.theEnvelopeBesideAReopenedLibraryIsGone`
+  and `…aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace` (pre-fix API only — NOT watched by me:
+  the stage's; R-443M1/M2 are their reverts at the tip).
+- COMPILE-red on old, each with a behavioral revert that bit (headless, watched): the nine core
+  `OlderKeyFileSweepTests` pins (R-443a…d). The Mac leaf pin (R-443M1 — the stage's).
+- RED on old by its literal (a wording pin, moved by justified edit): `RoadAccountWordsTests.rule7sSentencesAreHersVerbatim`.
+- GREEN on both sides BY DESIGN (guards — recorded so nobody reads them as hollow): the four scenario fences, the three
+  Mac fences, and VX-152's `sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` (its row was closed before this run;
+  live by R-152).
+
+**SELF-ASSESSMENT.**
+- *VX-443 — what is deleted, exactly:* only a file whose NAME is `variorum-keys-<fp16>.json`, at the live slot's
+  folder's root, a regular file, whose fp16 is the opened key's or a key the live key file's history OPENS to under it —
+  i.e. exactly what `ensureStoreIdentity` wrote, after this design's key file just opened the library. Decided by
+  `assess` (pure, names and plaintext fingerprints only), verified by the executor with the key in hand, unlinked by the
+  leaf; no byte of it is ever read; one log line names it (the repair's own name carries the file name — `runRepairs`'
+  "done" line; the open's summary line lists the repair once more as it lists every repair done). Where the repairs run:
+  only `ProtectionOpenRoad.open`, `.create` and `ProtectionRoadActs.useOffer`, all over `ctx.system.places` — the live
+  slot (grep of `runRepairs`/`repairPasses` callers); Look inside (`ProtectionCopyPeek`, a private byte copy), a picked
+  folder, Previous Libraries and the backups never meet a repair; a hosted test run's road repairs nothing; a store with
+  no key file of this design never opens on this road (the launch verdict is `.preDesignStore` first). At a creation no
+  older name can match (a fresh random key); at rule 21's use-offer the newly placed key file is the one that vouches.
+- *VX-443 — why the delete is safe:* the swept name can only concern a key this library's current key file already
+  reaches under the current secrets (rule 4, CHECKED by the fingerprint fence, not argued), and the stub itself carries
+  no lock; rule 22 holds a fortiori (it is not a key; its replacement — this design's key file — was verified by the
+  open). Delete-vs-set-aside recorded in the settled design above; the alternative is in P-849-4's options below.
+- *VX-443 — what it fixes beyond dead weight:* the latent misreading is real and pinned — on the pre-fix tree a
+  library of this design that lost its key file while the stub stood read `.preDesignStore` (`launch → .preDesignStore`,
+  the scenario world, watched) and on the Mac the route lands in her pre-design face where rule 1's mirror is never
+  written back (the stage's to watch). After one open of the fixed build the stub is gone and the same loss heals.
+- *VX-152:* no hazard on today's tree — traced to VX-445's seam; a guard pin pins the exact interleaving (the
+  teardown suspends). Her condition honored: investigated, nothing added to the run but the guard and the ticket text.
+- *VX-545:* exactly the ratified ending, in the rule and in the app; the page regenerated, one sentence moved.
+- *What I could not verify:* every Mac and simulator RUN (the stage); the whole core package (heavy headless, held).
+  The likeliest Mac snag: `everyNameTheSweepDoesNotOwnStays` plants into the far folder (`PlantedRoad(farFolder:
+  true)`) — a backup due at the creation may write there too (harmless: the planted names are asserted to survive, not
+  the folder's listing).
+
+**RECORDED CORNERS (for the orchestrator; none built here):**
+1. *Left on disk, never read, by design:* the fixed legacy `variorum-keys.json` (ownership unprovable by name — and it
+   still reads as a pre-design name if this design's key file is lost; `establish` never wrote it, so only a pre-1a
+   leftover beside a new-road slot carries it), the `.stale-<epoch>.json` set-asides (another key's wraps by
+   construction), anything below the slot's root (today's flat `Backups/` copies — rule 26's).
+2. *An older name whose key this library never had stays* — the added fence's purpose; it too would read as pre-design
+   if the key file were lost. A store from before this design moved out by hand is the only known source.
+3. *The scenario world does not model the pre-design face at launch* (its `launch` opens through custody whatever the
+   verdict) — the pins read the verdict itself; the Mac pins carry the face.
+4. *VX-152's guard pin needs a suspending teardown stub* to exercise the hazard's interleaving — recorded in its doc so
+   a later edit never "simplifies" it into a pin that cannot bite.
+
+**QUESTIONS owed at the merge (the orchestrator files them, latest main):** **P-849-4 — the stale store-id envelope**
+(as built: (a) DELETE by name at the open, gated — the live slot only, after this design's key file opened the
+library, only a fingerprint-named file whose fingerprint the live key file holds, never read, one log line; recorded
+alternatives: (b) SET IT ASIDE instead (a `.stale-` name or a folder) — mints a new place keys could be said to live,
+the shape CastleRules avoids, and keeps a stale fingerprint for nobody; (c) LEAVE IT (dead weight; the latent
+pre-design misreading after a lost key file stands). The added fingerprint fence (beyond the brief's list) is part of
+(a) for her eye: without it the sweep would also delete an older name of a key this library never had — rule 26's).
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** SurfaceContracts §"Doors to the outside",
+the protection bullet — beside "the rule-8 re-makes at every open": the store-id envelope an earlier Debug build left
+beside the slot (`variorum-keys-<fp16>.json`, of a key this library's key file holds) is deleted by name at the open,
+never read (VX-443, PROVISIONAL P-849-4). CastleRules: no rule moves for VX-443 (rule 26 untouched — the sweep handles
+only this design's own leftover, never a store from before this design); VX-545's rule-7 change landed IN this batch
+(her ratified words; the banner names the landing). AppSpecRecord: VX-545's landing under the protection narrative.
+
+**MOBILE PARITY:** the sweep is the shared core's decision and the shared leaf's act (`Shared/Protection/
+FileKeyFileStoreLeaf.swift`), so the phone's open sweeps exactly as the Mac's (the phone's pre-switch opens wrote the
+same stub through the shared `AppBootstrap`); the phone shows the same rule-7 constant (`MobileProtectionScreen`); the
+phone's lock roads end at the same `AppBootstrap.lock()` seam.
+
+**STAGE REQUEST (every Mac and simulator run of this batch — the orchestrator's claim through nov7; `-only-testing`
+takes TYPE names, as a zsh array; the tree verified clean before, between and after each cycle):**
+- *Leg A — the batch's own Mac suites at the tip (green expected):* `T=(StaleEnvelopeSweepRoadTests RoadLockRouteTests
+  RoadAccountWordsTests RoadJoinFollowWordsTests)` — "Test run with 25 tests in 4 suites" (6 + 5 + 8 + 6).
+- *Leg B — the named reverts, each ALONE at the tip, its suite run, then `git checkout --` of the one file (diff clean)
+  and the suite re-run green:* **R-443M1** `App/Variorum/Shared/Protection/FileKeyFileStoreLeaf.swift` —
+  `deleteOlderKeyFile`'s body → `return false` ⇒ RED `theEnvelopeBesideAReopenedLibraryIsGone`,
+  `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace`, `theLeafDeletesAnOlderNameAtTheSlotsRootOnly`;
+  the three fences green. **R-443M2** `Sources/VariorumCore/Protection/Assess/Assess.swift` — `olderKeyFileSweep`'s first
+  line preceded by `if true { return [] }` ⇒ RED the two Mac sweep pins only (the leaf pin green). **R-152**
+  `App/Variorum/Shared/AppBootstrap.swift` — `awaitTheLockSeam`'s `if session.beginAct() { return session }` →
+  `if session.beginAct() || true { return session }` ⇒ RED `sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` and
+  `aLockAskedWhileAnActRunsWaitsForTheActThenLocks` (both in `RoadLockRouteTests`). **R-545**
+  `App/Variorum/Shared/Protection/ProtectionWords.swift` — `joinWordsSentence`'s second line back to `"old ones still open
+  backups you made before today."` ⇒ RED `RoadAccountWordsTests/rule7sSentencesAreHersVerbatim`,
+  `RoadJoinFollowWordsTests/herSentencesTheseFacesSayAreHersVerbatim`.
+- *Leg A0 (optional — the red-on-old SHA, if preferred to R-443M1/M2):* at `9118b0355` `T=(StaleEnvelopeSweepRoadTests)`
+  ⇒ 5 tests, RED exactly the two sweep pins, the three fences green.
+- *Leg C — the standing suites over the touched seams (or fold into LIVE STATUS row 8's closing sweep):* every suite
+  that drives the open road or reads the rules/the words: `PreDesignStoreRefusalTests` · `PreDesignLandingsRouteTests` ·
+  `PreDesignStartFreshRouteTests` · `ProtectionOpenRoadPlantedTests` · `ProtectionFileLeavesTests` ·
+  `ProtectionRestoreReceiptTests` · `ProtectionRule27FaceTests` · `NoKeyFileDoorTests` · `ProtectionNoticeFaceTests` ·
+  `ProtectionOfferFaceTests` · `MakeMineRoadTests` · `EmptySlotLandingRoadTests` · `PreviousLibrariesArcTests` ·
+  `LookInsideRoadTests` · `PickedCopyRoadTests` · `ProtectionCrossingRoadTests` · `ProtectionCrossingRouteTests` ·
+  `ProtectionJoinFollowRoadTests` · `RoadKeyDoorRoadTests` · `RoadLockTests` · `RoadIdleDialRouteTests` ·
+  `SettingsLockCloseTests` · `MCPWillLockRoadRouteTests` · `JoinSheetWordsTests` · `RoadJoinFollowSurfaceTests` ·
+  `RoadAccountSurfaceTests` · `RoadCrossingFacesTests` · `WordsBandTests` · `DeadVocabularyTests` ·
+  `CommitVocabularyTests` (type names verified by grep at the close).
+- *Leg D — the phone (simulator, by id):* `MobileProtectionScreenTests` (rule 7's label) · `MobileLockTeardownTests`.
+- *The walk (UI-kind, optional — the orchestrator's call; an OPUS session per the Fable safeguard, since it meets a
+  join):* the join's words moment saying the ratified sentence, both voices, on the prod test road's first-run walk.
+  VX-443's sweep and VX-152's guard have no face (the sweep is silent; the lock lands the same lobby).
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
