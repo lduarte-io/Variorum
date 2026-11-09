@@ -3,7 +3,7 @@
 **Reviewer:** a fresh `opus-reviewer` session, zero implementation context, `notes/REVIEW_PROMPT.md` verbatim.
 **Diff under review:** `git diff 37ff716bfaddd667353a80a4ab721e91e7cc7c40..HEAD` on `vx-940-pre-oss-followups` (the run's whole diff: W1–W4 + the records).
 **STOP-rule re-check (the reviewer's own, by path):** no line in `Sources/VariorumCore/Sync/`, `Sources/VariorumCore/Protection/`, custody/keychain code, or the editor seam (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, the read tier). No default's meaning changes. This round stays `opus-reviewer`'s.
-**Status:** IN PROGRESS — findings land here incrementally, severity-ranked at the end.
+**Status:** COMPLETE. 0 BLOCKER · 0 MAJOR · 2 MINOR (F-R1-1, F-R1-2) · 2 NIT (F-R1-3, F-R1-4). The summary and the clean bill are at the end.
 
 ---
 
@@ -51,3 +51,30 @@
 - `Sources/VariorumMCP/MCPSocketTransport.swift:27-29`: a stray mid-sentence line break ("take NOW (a stalled client's" / "frame)") in the type's doc. Reflow it.
 - The W4 record's P4/P5 mechanism paragraph says "an `AF_UNIX` stream pair holds 8 KiB each way … so any answer larger than ~16 KiB waits on the CLIENT reading". The same record's P5b probe, and my own probe (`SO_SNDBUF` 8,192), fill the pair at 8,192 bytes on the sending side. The pins don't depend on it (64 KiB ids, 1 MiB frames), but the record's number should agree with its probe.
 
+
+---
+
+## Severity-ranked summary
+
+| # | Severity | Where | One line |
+|---|---|---|---|
+| F-R1-1 | MINOR | `MCPSocketTransport.sayClosing` | The poll gate drops the close line whenever the free space is below the 2 KiB low-water mark, including the band (free ≥ the line's length) where the old send delivered it without waiting. The record and the proposed MCPSpec sentence don't name this. Fix: lower `SO_SNDLOWAT` to the line's length under the lock (probed), or record the consequence. |
+| F-R1-2 | MINOR (pre-existing) | `MCPServerHost` `:409`, `:715` | Each session's announce is awaited in series, so one stalled client stops `list_changed` for every session after it, and stops the unlock's `resume` from returning. Not caused by VX-933, but "one stalled client never delays another's writes" overstates. Born-ticket candidate. |
+| F-R1-3 | NIT (conditional) | `LetterDriftTests` | The core `swift test` now reads `notes/plans/…/read-me.txt`; a publish filter that drops it reds a stranger's first `swift test`. Add one line to the excision checklist. |
+| F-R1-4 | NIT | various | A stale "0.1" in a test header; a writer-thread name collision; a doc line break; the record's ~16 KiB vs its probe's 8 KiB. |
+
+## Clean bill (checked by the reviewer and found solid)
+
+- **The STOP rule over the whole diff** (by path): nothing in `Sync/`, `Protection/`, custody/keychain or the editor seam. `opus-reviewer` was the right cast.
+- **VX-933's pins are red on the pre-fix door. Re-proven here, not taken from the record.** A scratch export of `d98cd14aa` (the pre-fix door, byte-checked) ran HEAD's pin file, minus the one test that needs the post-fix DEBUG seam. Results: the frames arm and both refusal arms RED, each `begun → 12` of 16 (this Mac's pool width) and `poolRan → false`; `aCloseLineToAClientThatStoppedReadingNeverWaits` RED (the old line blocked past its 5 s bound); both guards GREEN. 5 tests, 8 issues, 186 s. On HEAD the suite is GREEN 6/6 in 2.4 s.
+- **VX-933's design traced line by line, with no ordering or lifetime hole found.** Same-actor `await handOver` runs before any other actor job, so a frame's fast-road start and its rest's hand-over can't be split by another frame. `handedOver > 0` sends every later write behind the writer (FIFO). `midFrame` is set and cleared only under `writeLock`. Every write path takes the lock (the fast road by `try`, the writer by `withLock`, the close line by `try`). `disconnect` sets `isConnected = false` and then enqueues `drained()` with no suspension between, so no write can queue after the drain, and `closeConnection`'s `close(fd)` (VX-279's order) can never run under a pending writer job. A request task finishing after `run()` hits `ENOTCONN`, never the freed number.
+- **`MSG_DONTWAIT` blocking on a Unix-domain stream socket** (the record's P5b platform fact) was independently reproduced: with 8 or 40 bytes free, a 60-byte `MSG_DONTWAIT` send does not return within 2 s. So `sayClosing`'s main-thread block was real, and the fix closes it (the never-waits pin is red on old, as above).
+- **F-W4-1's premises hold in code.** `declaredName` is set in the SDK's `initialize` hook (`MCPSession.swift:555`), before the result is sent. `announceToolsChanged` gates only on `declaredName != nil` (`:661`). Returning it unbuilt is right: it's a wire-order change.
+- **The incident repair is exact.** `git diff 1304014c4 114db59d7 -- Sources` is empty. `MCPSession.swift` at HEAD equals `1304014c4`'s (sha `fb47671d…`), and `MCPSocketTransport.swift` at HEAD is `70faba4f…`, as recorded. No history was rewritten, and no commit on the branch carries an attribution trailer.
+- **The VX-922 fold changes no behaviour.** `MCPReadTools.resolvedWing` was byte-identical to `effectiveWingSQL`, and `mcpResolvedWing` differed only in SQL whitespace. All seven call sites interpolate `Queries.effectiveWingSQL`. The parity commit touches no `Tests/` or `App/` file.
+- **VX-925 covers every writer.** The only rows that store a declared version are `mcp_client.version` (the one `recordMCPContact` write) and `mcp_rebind_request.version` (the `awaitRebind` insert); both get stripped text. `StoredText.stripped(String?)` keeps nil as nil. The pin is GREEN here (2/2).
+- **VX-920 reads by the one rule and names Home by its one word.** `LineageFaceCopy.wingName` goes through `Queries.effectiveWingID` and `WingWords.home`, which is `nonisolated`, so it's legal from the `nonisolated` copy enum. The model's go-to name delegates to it, so the line and the button can't disagree. The live-wing clause is a belt over a projection that is already effective.
+- **VX-923's texts are verbatim.** A scratch extractor compared each new literal with its license file: xctest-dynamic-overlay, swift-concurrency-extras, combine-schedulers and swift-clocks are IDENTICAL to `.build/checkouts/*/LICENSE`. Sparkle is identical modulo line-end whitespace (the recorded one space) to the 2.10.0 checkout, and the Xcode project pins `exactVersion 2.10.0`. The set matches the VX-912 B3 table (swift-nio, collections and atomics are fetched but not linked; swift-syntax is compile-time only). **BIP-39 is MIT at the pinned commit:** an independent lookup fetched `bip-0039.mediawiki` at `e7263a4c…`, which reads `License: MIT` and "==Copyright== This BIP falls under the MIT License.", with no other license sentence. The wordlists README carries none.
+- **The VX-917 workflow's external premises check out** (an independent lookup, primary sources). `runs-on: xcode-27` is a listed standard label (docs.github.com's standard-runner table; the runner-images README row still marks it "[preview]", with possible queueing). Its default is Xcode 27.1 (27A9275). Step-level `continue-on-error` may read `steps`. `github.event.repository.private` is a required boolean in the `workflow_dispatch` payload schema. A failed `continue-on-error` step reads `outcome: failure`, which the summary rightly reports. An unmatched hosted label isn't documented to fail fast, as the record's self-assessment (i) already says. The cadence pin is GREEN, and BUILDING.md states "Xcode 27.1" once.
+- **The LETTER drift pin is right.** It reads both files by the answer key's own split rule and is GREEN. LETTER.md's body after its comment is her text; the record's `cmp` and sha claims are consistent with the pin passing.
+- **The canon two-file rule is honoured.** No loaded canon file or SurfaceContracts is edited in the diff. The MCPSpec lines are only PROPOSED, for the closeout (but see F-R1-1 on the second one's wording).
