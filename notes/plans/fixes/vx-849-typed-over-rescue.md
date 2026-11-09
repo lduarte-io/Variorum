@@ -132,7 +132,7 @@ beside it.**
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
-| 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | NOT STARTED |
+| 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | IN PROGRESS — the implementer's BATCH 1 RECORD below carries the per-piece lines |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | NOT STARTED |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
@@ -197,3 +197,25 @@ the ladder; the PR. **ENVIRONMENT TRAPS above, binding verbatim.** No subagents.
 ## UNIT RECORDS
 
 *(appended per batch)*
+
+### BATCH 1 RECORD (the implementer — Opus, xhigh; opened 2026-11-08)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind and no Debug-app
+launch (the brief's headless rule — no stage claim). Every Mac-suite claim below is **PENDING** the STAGE REQUEST
+at the end of this record. Nothing touched `PaneSurface`/`PaneTextAuthority` (batch 3), VX-544's retry (batch 2),
+the ladder or the PR.
+
+**The headless reading of an app-target batch (recorded at the start):** the honest flush (`AutosaveCoordinator`)
+and the `beforeRound` hook (`SyncSession`) live in the APP target (`App/Variorum/Shared/`), so their pins are Mac
+suites (`VariorumTests`), which need the stage. Headless here means: `swift build`/`swift test` for the core;
+`xcodebuild build-for-testing` (Mac + phone) to COMPILE the app pins — the VX-912 plan's binding line: "Headless
+`swift build`/`swift test` and `xcodebuild build`/`build-for-testing` never need the stage"; and, for the
+coordinator's behavior, a THROWAWAY instrument (the coordinator + runner source copied uncommitted into a scratch
+folder of the core test target, run, then deleted — never in the PR) so its red-on-old is watched, not assumed.
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | VX-402 — the honest flush | NOT STARTED |
+| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | NOT STARTED |
+| 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | NOT STARTED |
+| 4 | Close — builds, suites, self-assessment, STAGE REQUEST | NOT STARTED |
