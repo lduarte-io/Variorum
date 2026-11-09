@@ -356,3 +356,5 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 - **(iii) Unverified, stated:** that `none` breaks the loop on this toolchain; that the Feedback's minimal steps crash as written (both need `xcodebuild test`); the scratch package's single-process behaviour under Xcode.
 - **(iv) The residual is real and only gauged:** any out-of-test report in the hosted process re-forms the loop; nothing structural forbids a future one. The gauges are the gate's exit 3 (loud) and the rider R's VX-665 read (the same report landing safely).
 - **(v) Nothing landed:** U2's commits touch only this record (`git diff --stat` per commit). The one Sonnet lookup ran read-only and returned; no subagent is alive.
+
+**P-926-U2-1 RULED at her sitting (2026-11-09, the dialog): "Close at the soak"** — VX-661 and VX-690 close as fixed-by-VX-604 once the S soak runs with ZERO crash reports (any one reopens both); VX-690 closes as VX-661's duplicate at that moment; the Apple Feedback filing stays on VX-661's comment for her hands (attachments preserved at `~/.variorum/vx661-feedback-ips/`). P-926-U2-2 (the interop belt) stays NOT TAKEN.
