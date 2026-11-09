@@ -132,7 +132,7 @@ beside it.**
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
-| 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | IN PROGRESS — the implementer's BATCH 1 RECORD below carries the per-piece lines |
+| 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | BUILT (the implementer, `03d1fed00`…`bdb70dc3d` + the record's close) — headless evidence green; every Mac/simulator run PENDING the record's STAGE REQUEST |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | NOT STARTED |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
@@ -218,7 +218,7 @@ folder of the core test target, run, then deleted — never in the PR) so its re
 | 1 | VX-402 — the honest flush | DONE (this commit) — instrument red 3/3 → green 3/3; Mac `build-for-testing` green; the Mac pins' RUNS **PENDING** (stage) |
 | 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | DONE — 2a the op + core pins (`e7ec1227f`; 9/9; revert-proven); 2b the coordinator + the eleven record sites + the Mac pins (`169a51898`; instrument reverts R1/R2 bite); the phone pins (`3779bdea9`); Mac + phone builds green; Mac/simulator runs PENDING (stage) |
 | 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | DONE (the commit after `3779bdea9`, which flipped this row one commit early) — core 11/11; Mac + phone `build-for-testing` green; Mac runs PENDING (stage) |
-| 4 | Close — builds, suites, self-assessment, STAGE REQUEST | NOT STARTED |
+| 4 | Close — builds, suites, self-assessment, STAGE REQUEST | DONE (this commit) — core 4019 green; MCP socket load-flakes recorded (all green alone); every Mac/simulator run PENDING the STAGE REQUEST |
 
 **Piece 1 — VX-402, the honest flush (FIXED).**
 - *Mechanism (traced, `AutosaveCoordinator.flushNow`):* a flush took the batch and cleared `pending` BEFORE awaiting its
@@ -345,3 +345,100 @@ folder of the core test target, run, then deleted — never in the PR) so its re
   (the memo's millisecond stragglers: three texts, none lost). These pin the COMPOSITION with the standing S5 road —
   green on both sides of the engine by design (no `Sync/` line changed); **11/11** with B's suites.
 - *Builds:* Mac `build-for-testing` green and phone `build-for-testing` green (0 errors, no warning in a touched file).
+
+**Piece 4 — Close.**
+- *Headless, at `bdb70dc3d` (the instrument deleted first — the tree clean, nothing of it ever committed):* `swift build`
+  green. The WHOLE package suite (`swift test`; `Operations.autosave` is called across many suites, so the touched set
+  is effectively the target): **VariorumCoreTests 4019 tests in 549 suites PASSED (5 known issues)** · StringsWorkbook
+  32 passed · **VariorumMCPTests 669 tests: load-sensitive socket failures, a VARYING set** — 6 in the full run (load
+  average 16–23 on the Pro), then 4, then 2 in two runs of the MCP target alone (`aQuitSaysNothingForAConnectionItEnds`,
+  `claudeCodesPipelinedProbeIsAnsweredAndItsInitializeServes`, `aBareOpeningIsAnsweredBeforeTheReadBlocks`,
+  `eachStopSaysItsWordsAsTheConnectionsLastLine`, `aDoorStopThatLetsGoOfItsHostEndsTheClientsUntilDisconnectGrants`,
+  `aReusedNumberKeepsItsBytesAfterTheSessionEnds`, and the ENVIRONMENT TRAPS' named flake
+  `aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`); every one of the seven is an initialize/handshake
+  that got no answer in time, and **all seven PASS run on their own** (two filtered runs, 7/7). No line of
+  `VariorumMCP`/`VariorumMCPSocket` changed and neither reaches `autosave`; whether the MCP target goes wholly green in
+  one quiet run is left to the closing run (a comparison against main's tip there would settle it beyond doubt).
+  Mac + phone `build-for-testing` green at every piece.
+
+**SELF-ASSESSMENT (the brief's two questions, answered exactly).**
+- *The window that remains open after A — and B covers all of it:* A's occasion runs when the session's road starts the
+  round (the trigger), so what stays open is everything between the occasion's last write and the apply transaction's
+  begin: **milliseconds** for an ordinary round (the scheduler's hop, the lockstep check, a small pull); **the whole
+  download** for a long catch-up (VX-494's staged windows — minutes on a from-zero round, during which she can type);
+  **a trigger coalesced behind a running round** (its occasion runs at the trigger, its round only after the running one
+  ends); **the rounds the scheduler starts on its own** (the coalesced follow-up, the orphan heal's, the one-writer
+  belt's) — no occasion at all; and **the phone**, which composes no occasion (MOBILE PARITY above). In every one of
+  these the row is clean when the pull applies, so the apply lands the server's words; the next autosave of her pending
+  run carries the snapshot the run was built on, finds the row changed, and RESCUES (R-683-1/-2). Nothing in the window
+  is lost; the only difference from A's road is which text keeps the row (hers, under B; the server's, under A).
+- *Every road the guarded autosave now rescues* (any writer that changes a take's row under a pending run, the run's
+  snapshot predating it): **a sync pull** on SyncSpec §5's locally-clean path inside the debounce window (the memo's
+  mechanism — pinned core, Mac, phone); **the MCP door mid-window** (the door flushes her typing first, then acts; a
+  keystroke after that flush starts a run whose snapshot predates the AI's write — rescued as the card, the AI's words
+  kept); **a second window or a second surface** on the same take whose stale buffer would write back (VX-664's
+  write-back class: the stale surface's next edit is built on words the row no longer holds — rescued, both kept;
+  batch 3 still ends the ring so the face adopts); **a structural undo / redo, a Block History restore, a lens promote,
+  a Replace-in-every-take** landing on a take with a pending run (the flush-first doors land her run first; a keystroke
+  racing them is rescued); **the Takes board's own non-flushing doors** (the recorded corner below).
+- *What B does NOT guard:* a caller that passes no snapshot — the seeders and perf fixtures (not surfaces), the list
+  exit's retraction inside `runStructural` (a structural flight's op body, right after the flight's own flush), and the
+  phone's `recordTakeEdit` when a test calls it bare (both production callers pass it). A surface whose bookkeeping
+  lagged the store would show a spurious card; the false-positive guards (Write, a Takes pane, the page, the quick note —
+  her own successive runs never mint a card) pin that none of the eleven roads does.
+
+**RECORDED CORNERS (for the orchestrator; none fixed here — each is outside this unit):**
+1. **The Takes board's `run` road does not flush first** (`TakesViewModel.run` — its `restoreCommit` among others). A
+   board door that rewrites the take her live pane has pending typing in, racing that pending autosave, now leaves a
+   `'conflict'` card holding the door's result; pre-fix her typing silently overwrote the door's result (a pre-existing
+   loss). R-683-2's retelling says "a deliberate act of hers never mints this card" — this race is the one place that
+   sentence does not hold as shipped. The spec-defensible fix is the flush-first doctrine on those doors (a ticket, not
+   a product question — the rulings reconciliation item for the closeout).
+2. **An empty displaced text mints an (empty) card** — the S5 card's own rule (the engine rescues whenever the texts
+   differ), mirrored with no special case: no product invention either way.
+3. **A dead block takes no card** (the engine's rescue guard); a live take under a dead block exists only inside an
+   apply transaction, so no autosave can meet it.
+4. **The face right after a rescue or after A's S5 adoption** is batch 3's (R-683-4, VX-664's composition).
+5. **`roundNow` runs the occasion too** (beyond the brief's two named roads — same road class); one `if let` to drop.
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** AppSpec §9's convention line ("An
+`expectedText` precondition that no longer matches refuses as `bufferChangedSinceGesture`") gains the autosave's
+exception (it rescues instead of refusing); AppSpec §9's `autosave(variant, text, charDelta)` line gains `expectedText`
+and the rescue (her buffer keeps the row; the displaced words a `'conflict'` take — R-683-1/-2); SyncSpec §6's
+`working_text` row may want one pointer to the autosave-layer rescue (a local rescue, no §7 entry). No QUESTIONS filed:
+nothing here needed a product decision the rulings had not made (corner 1 is a rulings-reconciliation item, flagged).
+
+**STAGE REQUEST (every Mac and simulator run of this batch; the orchestrator's claim through nov7):**
+- *Leg A — the batch's own Mac suites, at the tip (green expected):* `cd App/Variorum && xcodebuild test -scheme
+  Variorum -destination 'platform=macOS' -only-testing:VariorumTests/AutosaveCoordinatorTests
+  -only-testing:VariorumTests/TypedOverRescueSurfaceTests -only-testing:VariorumTests/SyncBeforeRoundTests` — confirm
+  the "Test run with N tests" line (AutosaveCoordinatorTests 9 · TypedOverRescueSurfaceTests 6 · SyncBeforeRoundTests 7
+  = 22).
+- *Leg B — the named Mac behavioral reverts, each applied ALONE at the committed tip, its pins run, then `git checkout
+  --` of the one file (diff clean) and the pins re-run green:*
+  **R-402** `AutosaveCoordinator.flushNow`: delete the `while writing { … }` wait → RED
+  `aFlushArrivingWhileAWriteIsInFlightReturnsOnlyAfterThatWriteLanded`, `aNewerFlushNeverLandsUnderAnOlderInFlightOne`.
+  **R-B1** the flush's `expectedText: entry.expectedText` → `expectedText: nil` → RED
+  `writeTypingOverASyncPullRescuesThePullsWords`, `takesPaneTypingOverASyncPullRescuesThePullsWords`,
+  `aRunCarriesItsFirstSnapshotAcrossCoalescedKeystrokes` (the two surface pins are also behavior-red against the
+  pre-fix source — they drive only pre-fix API). **R-B2** delete `newer.expectedText = entry.expectedText` → RED
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun`. **R-A1** `SyncSession`: in `triggerSync`, `flush` and `roundNow`
+  read `nil` where they read `beforeRound` (the hook stored, never run) → RED the three
+  `…RunsTheOccasionToItsEndBefore…` pins. **R-A2** `AppServices.init`: delete the `#if os(macOS)` `sync.beforeRound`
+  block → RED `theMacsOccasionLandsPendingTypingBeforeTheRound`, `theMacsOccasionTouchesNothingWhenNoTypingIsPending`.
+  **R-A3** `AppSession.flushPendingTypingBeforeRound`'s body → `await flushEveryOpenPost()` → RED
+  `theMacsOccasionTouchesNothingWhenNoTypingIsPending` (R-683-3: a clean coordinator flushed).
+- *Leg C — the touched surfaces' standing Mac suites* (or simply the whole `VariorumTests` target, LIVE STATUS row 8):
+  the suites over the coordinator, the eleven record sites, `SyncSession`/`AppServices` — among them
+  `OutsideWriteRingEndTests`, `OutsideWriteLivePaneTests`, `TakePaneDurabilityTests`, `AutosaveConsolidationTests`,
+  `AutosaveRegistryLifecycleTests`, `AutosaveRegistryReleaseTests`, `CopyDoorFlushTests`, `EditorSessionTests`,
+  `BookIndexEditingTests`, `CompareBoardTests`, `CanvasAndPoolTests`, `TakesBoardTests`, `BlockHistoryPaneTests`,
+  `NoteDeletionDoorsTests`, `MCPHerEditorDoorTests`, `ReturnKeyTraceTests`, `FirstRoundRoadTests`, the
+  `Phase8ServicesTests` file's suites, `SyncWalkFenceTests`, `Phase9cAuthWiringTests`, `QuitPurgeQuiesceTests`.
+- *Leg D — the phone (simulator):* `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS
+  Simulator,name=<the run's simulator>' -only-testing:VariorumMobileTests/MobileTypedOverRescueTests` (4 tests) plus
+  the touched phone suites (`MobileQuickNoteTests`, `MobileEditorTests`, `MobileTakesBrowserTests`,
+  `MobileBlockHistoryTests`, `MobileLivenessTests`); R-B1 again bites `thePageTypingOverASyncPullRescuesThePullsWords`
+  and `aQuickCaptureTypedOverAPullRescuesThePullsWords`.
+- *Not mine to claim and not claimed:* the live look (one real two-Mac round with typing in flight — her eyes, the
+  memo's third evidence shape; can ride batch 2's held window).
