@@ -191,3 +191,60 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 **What I did not do.** Run any Mac test or walk (no stage claim — by the brief). Fold `wornGroupFacts`' `scored` CTE wrapper (`SELECT h.*, … AS score FROM hits h`) into the template too: the ticket names the group-facts columns; the score itself is already one function (`scoreSQL`), and the two statements materialize at different CTEs on purpose (bm25's context) — left as is, said here. Touch the book's own answer sheet (`BookSearchModel` ignores only `session` and `generation`, neither read by a view — no twin of this bug there).
 
 **Risks a reviewer should look at.** (a) Pin A's red-on-old depends on nothing ELSE invalidating the sheet after a land in the harness; if the revert run comes back green on A, the mechanism still stands on B (deterministic) and the harness needs a second look before A is trusted. (b) The recorder's `onChange(of: words)` records only on a re-run with CHANGED words — by design (that is what the screen shows), but it means the oracle cannot distinguish "re-ran with the same words" from "never re-ran"; the pins only ever assert a change.
+
+## B2 RECORD (VX-889 + rider VX-343) — the implementer's record
+
+**NOT DONE (kept current; the first line by rule):** everything below row 0 — the record and both traced mechanisms are written; no code has landed yet. (Kept current as pieces land.)
+
+**Session note:** head at start 7ca38963a, tree clean. Required reading done in this session, nothing delegated: this record (B2 BRIEF, B1 BRIEF's Workspace paragraph, Environment traps, the binding principles) · the vx-878 record's BATCH 3 RECORD (the VX-889 residual, VX-816's design and citer list) · SurfaceContracts "The app" and "The Bookcase and books" · `notes/SessionResiliencyProtocol.md`. No `Sync/`, custody, editor seam, schema or canon is touched by this batch; SyncSpec/TEXTKIT2 therefore not binding reading. Commit messages avoid the guard's trigger words; commits are pathspec-limited (the orchestrator may commit record lines in this worktree).
+
+### B2 LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | This record + both traced mechanisms, BEFORE any code | DONE (this commit) |
+| 1 | VX-889 seam (pre-fix behaviour kept) + the pin `VX889GatheringMintWingTests` | NOT STARTED — design below |
+| 2 | VX-889 red-on-old: the pin run on the seam commit | PENDING behind the stage (compile-only here) |
+| 3 | VX-889 fix | NOT STARTED — design below |
+| 4 | VX-343 pin (0.9.5's file the fixture) on the pre-fix parser, then the fix | NOT STARTED — design below |
+| 5 | Gate: `build-for-testing`; the Mac suites listed as TYPE names for the stage window | NOT STARTED |
+| 6 | Walk (dev-store Debug build; both voices) | PENDING behind the stage |
+| 7 | Self-assessment | NOT STARTED |
+
+### VX-889 — the traced mechanism (written before the fix)
+
+Inputs → wrong state, every link read in code at 7ca38963a:
+
+1. **The pane lists the SHOWN wing's vocabulary.** `TagManagerPane` (`App/Variorum/Variorum/Features/Settings/AppSettingsView.swift:1108`) lists `tags.tags`, read by `TagsViewModel.start()` (`Features/Tags/TagsViewModel.swift:55`) for `session.wing.currentID` and adopted with that wing as `shownWing` in ONE read (VX-838, R-828-2 — the header "Tags — in ‹wing›"). The checkboxes store PATHS in the pane's `@State promoteTags: Set<String>` (`AppSettingsView.swift:1125`, toggled at `:1170–1174`).
+2. **The door hands the sheet paths only.** "Make a Gathering…" (`:1242`) presents `PromoteTagsSheet(session:, tagPaths: promoteTags.sorted())` (`:1334`) — no wing.
+3. **The mint names no wing, so it is Home's.** `PromoteTagsSheet.promote()` (`:1443–1469`) runs `ops.assertBookNameIsFree(bookName, inWing: "")` (VX-816 named Home there on purpose, "where `createReading` below puts it") then `ops.createReading(name:kind: .gathering, querySpec: <v1 draft of the paths>)` with `wingId` defaulted to `""` (`Sources/VariorumCore/Operations/Operations+Reading.swift:19`).
+4. **The rule resolves against Home's vocabulary.** `insertReading` → `normalizedRuleSpec(db, querySpec, wingID: "")` (`Operations+Reading.swift:118–141`) converts the v1 draft through `RuleGrammar.fromLegacy`, resolving each path `WHERE path = ? AND wing_id = ''` — Home's live tag of that path, else its smallest-id tombstone, else the deliberate dead term `""` (matches nothing, forever).
+5. **So, with the pane showing wing W:** the gathering row lands with `wing_id = ''` (on Home's Bookcase, not W's); each checked path becomes Home's same-path twin's id where Home has one (the gathering collects HOME's notes) or a dead term where it has none (the gathering collects nothing); and the name guard checks Home's books, so a name free in W but worn in Home refuses, while a name worn in W passes (the guard and the mint agree with each other — both Home — and both disagree with the pane).
+6. **The selection's own wing-blindness (the same surface, found on the trace).** `promoteTags` is keyed by path and is never cleared on a wing switch (the pane's `.onChange(of: session.wing.currentID)` at `:1264` resets only the VX-840 sweep's state). After a switch the new wing's same-path twins show CHECKED (she never checked them here) and the other wing's paths ride invisibly into the sheet's "#…" line; and a sheet left up across a switch (Settings is its own window; ⌘L/⌘1–9 switch from the main one) keeps minting for the wing it opened over. Once the mint takes the shown wing, the carried paths would resolve against the new wing — dead terms in the shown wing, the ticket's own symptom by another road. So the fix must pair the paths with the wing they were checked in.
+7. **Other writes of the sheet:** none. It mints ONE row — no outflow (a gathering has none: `insertReading` refuses outflow and intake seating on a non-book), no star, no shelf (nil → unshelved), no tag application (R37: "the tags stay on the notes"). The only wing-blind write is the mint itself (links 3–4).
+
+### VX-889 — the fix, settled design (no product decision)
+
+- **One value names the wing for the guard and the mint.** `TagsViewModel.GatheringRequest` — the checked paths and `shownWing.id` (the wing the list IS) — SNAPSHOTTED at the door's press (`TagsViewModel.gatheringRequest()`); the sheet is presented by it (`.sheet(item:)`) and its mint (`PromoteTagsSheet.mint(_:request:name:joinAll:)`, the old `promote()` body hoisted so a pin can reach it) reads `request.wingID` ONCE for `assertBookNameIsFree(_:inWing:)` AND `createReading(…, wingId:)`. The rule's paths then resolve in that wing (`normalizedRuleSpec` — the op's standing rule, untouched: live first, else the tombstone, else the dead term; it adopts, it never mints a tag — every checked path is the shown wing's own live vocabulary, so in practice each adopts its own id).
+- **The checks belong to the listed wing.** The checked paths move from the pane's `@State` into `TagsViewModel` beside the list (`gatheringChecks`), and the adopt that lists ANOTHER wing clears them in the same assignment that moves `shownWing` — a re-list of the SAME wing (a new tag, a rename) keeps them. The pane's existing switch reset (the VX-840 sweep's two lines, "a switch takes the sheet's snapshot (another wing's tags) … with it") gains the Make a Gathering sheet's dismissal — so the sheet never outlives the wing it was opened over. Both are the same surface and the same act's soundness (link 6), the sweep's own precedent in the same pane; recorded here so the reviewer can weigh them as part of VX-889 rather than a separate unit.
+- **A wing deleted mid-flight** (only reachable by sync — Delete Wing refuses while the wing holds a live tag, R-13id-2, and the sheet only opens with a checked tag): the window's `WingsModel.adopt` revalidates the app home (`session.wing.revalidate`), so the pane re-lists Home and the switch reset dismisses the sheet. A press in the race's tail names the dead wing: `requireLiveWing` refuses `wingNotFound` ("That library isn't there any more — nothing changed.") — it lands NOWHERE, the Bookcase's New Gathering's own posture (`ReadingsViewModel.create` passes the same dead wing to the same op). The read-time rule "a dangling wing reads as Home's" governs STORED pointers; a mint's target is the op's live-wing rule ("a book is born in a LIVE wing"), so the sheet never silently re-targets Home under a vocabulary she did not check from.
+- **Home is unchanged:** `shownWing.id` is `""` there — the same guard, the same row, the same rule ids as before.
+
+### VX-889 — the pin, design
+
+`App/Variorum/VariorumTests/VX889GatheringMintWingTests.swift`, through the real read (`TagsViewModel.start()` in wing W) → the pane's request → the sheet's mint:
+- **A — RED ON OLD:** in Garden (Home holds a same-path twin "stars"), checking "stars" and "moon" mints a gathering whose `wing_id` is Garden and whose rule's tag ids are exactly Garden's two (old: `''` and Home's "stars" + a dead term).
+- **B — RED ON OLD:** the guard asks the mint's wing: a name worn only in Home MINTS from Garden (old: refused); a name worn in Garden REFUSES `duplicateBookName` and nothing lands in either wing (old: minted in Home).
+- **C — GREEN ON BOTH (the control):** in Home the row, its rule ids and the guard are as before.
+- **D — RED ON OLD:** a listing of another wing clears the checks (the request is nil), a re-list of the same wing keeps them.
+- **E — RED ON OLD:** a request whose wing died under the sheet refuses `wingNotFound` and lands nowhere (old: landed in Home).
+- The behavioural revert for red-on-old is the fix commit's code (restore its two source files from its parent); the seam commit keeps the pre-fix behaviour exactly (the hoisted mint names Home, the adopt never clears), so the pin compiles and runs RED there.
+
+### VX-343 — the traced mechanism (written before the fix)
+
+`ReleaseNotes.blocks(from:)` (`App/Variorum/Variorum/Features/WhatsNew/ReleaseNotes.swift:54–77`) TRIMS every raw line first (`:63`), so an indented continuation line under a bullet ("  first.") loses its indentation — the only signal that it continues the bullet — and falls to the last arm: `paragraph.append(line)`. The open paragraph is flushed as its own `.paragraph` at the next bullet, blank line or end of file. In 0.9.5's file that yields five stray blocks: "first." · "label and lock takes; … restore comments." · "versions so Compare pairs them, and remove tags." · "Private, Seal and Own stay yours alone." · "support@stargazing.tech." (the last one also in 0.9.2, 0.9.3 and 0.9.4 — the Feedback bullet; scanned: every continuation line in every notes file is INDENTED, none lazy). Sparkle's renderer (Markdown) keeps them inside their bullets, so the two readers of the one source disagree exactly there.
+
+### VX-343 — the fix and pin, settled design
+
+- **The rule:** a non-empty line that is INDENTED in the raw text (leading space or tab), directly under a bullet or under a line that continued one, with no blank line between, joins that bullet's text with one space — Markdown's own continuation rule. A trimmed line that is itself a heading or a bullet keeps its meaning first (a nested "  - sub" stays a bullet, as today). A blank line, a heading, a new bullet or an unindented line ends the bullet. NOT adopted: Markdown's LAZY continuation (an UNindented line right under a bullet) — no notes file uses it and the brief names the indented rule; it stays a paragraph, as today. The grammar comment says the rule.
+- **The pin (in `WhatsNewTests`, App target):** 0.9.5's actual file read from the tree (`#filePath`, the VX-708 pin's road) parses to its 13 blocks — three bold-lead paragraphs, six bullets, two paragraphs, the Feedback heading and its one bullet — with each wrapped bullet carrying its continuation exactly; RED on the pre-fix parser (18 blocks, the five strays). Plus the synthetic grammar arms (one and several continuation lines; a blank line ends the bullet; a nested bullet stays a bullet) and a sweep over every notes file: no indented continuation of a bullet lands outside it.
