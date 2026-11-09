@@ -112,7 +112,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | P0 | This record opened; ledger row U1 → IN PROGRESS | DONE (this commit) |
 | P1 | PHASE 1 — VX-850's question answered with evidence (instrumented connect/initialize road, idle vs external CPU load vs in-process pool pressure) | DONE (this commit) — **TEST TIMING, not door latency** (below, "PHASE 1 — VX-850's answer"): the door answers `initialize` in single-digit ms at load 40 with the pool free; the family's reds are the test process's cooperative pool held by the harness's own blocking waits |
 | P2 | PHASE 2 — one mechanism fix, chosen on the trace | NOT STARTED |
-| P3 | Pins: the mechanism made deterministic, red on old by behavioural revert, green with the fix | NOT STARTED |
+| P3 | Pins: the mechanism made deterministic, red on old by behavioural revert, green with the fix | IN PROGRESS — P-A `MCPHarnessPoolTests.moreOpeningsAtOnceThanThePoolHasThreadsAreAllAnswered` written against the PRE-FIX harness and **RED ON OLD 3 of 3** (`scratchpad/u1/pA-red-on-old{,-2,-3}.log`): "12 of 16 openings unanswered inside the 10 s bound" every run — exactly the pool's width (12), the second wave of 4 answered; this commit's tree is the reproducible red until P2. P-B (the belt read on the deadline's own clock) needs the fix's seam, so it is verified by behavioural revert only |
 | P4 | The family alone + under a deliberately loaded parallel run (counts) | NOT STARTED |
 | P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | NOT STARTED |
 
