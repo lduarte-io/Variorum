@@ -122,8 +122,10 @@ enum ReadmeSeeder {
     /// against the in-repo file, and the manifest's interior fidelity.
     ///
     /// **The repo's face of the same text is `LETTER.md`** (VX-939, R-940-3):
-    /// her paragraphs again, header line stripped, kept in step BY HAND (no
-    /// pin reads it). A change to her text changes these literals,
+    /// her paragraphs again, header line stripped, pinned against
+    /// `read-me.txt` paragraph for paragraph by the core suite
+    /// `LetterDriftTests` (A-940-1), as these literals are by
+    /// `LaunchFurnitureTests`. A change to her text changes these literals,
     /// `read-me.txt` and `LETTER.md` in one commit.
     ///
     /// Minted block by block through `newBlock` (every byte stored as given),

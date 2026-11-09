@@ -3,11 +3,12 @@ This is the letter Variorum opens with: the first note in every new library,
 titled "readme". The words are Lillian's, byte for byte. Never edit, reword or
 re-punctuate them here.
 
-It is kept in step by hand. The app seeds its own copy of the same paragraphs
-(ReadmeSeeder.paragraphs, App/Variorum/Variorum/Features/Onboarding/
-BirthFurnitureSeeders.swift), and the app's tests pin that copy against
-notes/plans/vx-105-letter-content/read-me.txt. A change to her text changes all
-three in one commit.
+It is one of three copies kept in step. The app seeds its own copy of the same
+paragraphs (ReadmeSeeder.paragraphs, App/Variorum/Variorum/Features/Onboarding/
+BirthFurnitureSeeders.swift); the app's tests pin that copy against
+notes/plans/vx-105-letter-content/read-me.txt, and
+Tests/VariorumCoreTests/LetterDriftTests.swift pins this file against the same.
+A change to her text changes all three in one commit.
 -->
 
 Variorum was built by one person and thousands of AI agents over the course of four months. I'm Lillian, the human behind this project. I want to take the chance to introduce myself and share a bit about the app, technology, and what it all means to me.
