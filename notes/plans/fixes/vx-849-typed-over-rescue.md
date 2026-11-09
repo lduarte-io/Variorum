@@ -165,7 +165,7 @@ beside it.**
 |---|---|---|
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
-| 2 | Batch 2 — VX-544 (the offline unlock retry) | IN-PROGRESS — the Opus implementer opened 2026-11-09; the BATCH 2 RECORD below carries the per-piece status |
+| 2 | Batch 2 — VX-544 (the offline unlock retry) | BUILT, headless-verified — `b11fb8d39`…(the close commit); every Mac/simulator run PENDING the stage window (the BATCH 2 RECORD's STAGE REQUEST); her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
@@ -595,9 +595,9 @@ the shared load's retention runs on the phone; only its retry stays unwired (ove
 | 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | DONE (`b11fb8d39`) — compile-red on old watched; R-1a/R-1b bit exactly as named; harness green; Mac runs PENDING (stage) |
 | 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | DONE (`4152e782a`) — R-2a…R-2d bit exactly as named; harness green; Mac runs PENDING (stage) |
 | 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | DONE (`88eb36506`) — THE ROAD PIN behavior-red on the pre-fix tree (watched); R-3a…R-3f run (R-3a one red beyond the named set; R-3b′ in place of the too-blunt R-3b); R-3g PENDING (simulator); Mac/simulator runs PENDING (stage) |
-| 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | DONE (this commit) — harness 91/91 (12 suites), the trigger suite 3 runs stable; Mac + phone `build-for-testing` green; reverts R-4a…R-4e run next at this tip; Mac runs PENDING (stage) |
-| 4 | The words (no new sentence) | NOT STARTED |
-| 5 | Close: builds, headless runs, self-assessment, the stage suite list | NOT STARTED |
+| 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | DONE (`5ce6becf0`) — R-4a…R-4e bit exactly as named; harness green; Mac runs PENDING (stage) |
+| 4 | The words (no new sentence) | DONE (the close commit) — no user-facing sentence added or changed |
+| 5 | Close: builds, headless runs, self-assessment, the stage suite list | DONE (the close commit) — every Mac/simulator run PENDING the STAGE REQUEST |
 
 **The headless reading (recorded at the start of piece 1).** Every pin of this batch is a Mac-target (or phone-target) suite,
 so its RUN needs the stage. Headless here: `xcodebuild build-for-testing` (Mac + phone) COMPILES them; and THE HARNESS — a
@@ -822,4 +822,124 @@ symlink with an edited copy of the committed file, runs, and restores the symlin
   no chain then, `triggerSync` finds none — so the watch leg) and `theServicesHandTheirPathToTheChain` (not released).
   **R-4e** `AppServices.init` hands `path: nil` (both arms) ⇒ expected RED `theServicesHandTheirPathToTheChain` and
   `herStep9TheNetworkComingBackHealsItByItself`.
+- *Piece 3b's evidence, run at `5ce6becf0` (the harness; the revert runner now refuses to run tests over a failed patched
+  build — R-4a's first patch did not compile, `return // R-4a` swallowing the next line as its value, and its "green" over the
+  stale binary is VOID; rerun as `if true { return }`):* **R-4a** → `✘ 10 tests, 5 failed` — exactly THE PIN,
+  `aPathStayingSatisfied…` (its first leg), `aPathThatDropsAgain…`, `eachSatisfiedTransition…`, and
+  `herStep9TheNetworkComingBackHealsItByItself` ("roundsCompleted > rounds" — no round followed the path); the nothing-runs
+  pins green. **R-4b** → `✘` exactly `theFirstReadingAloneRunsNothing` (its satisfied leg) and `theWatchRidesTheChain` (the
+  reconfigure's baseline). **R-4c** → `✘` exactly `aPathThatDropsAgainInsideTheDebounce…` (both legs). **R-4d** → `✘` exactly
+  `theWatchRidesTheChain` (still watched after the stop) and `theServicesHandTheirPathToTheChain` (not released). **R-4e** →
+  `✘` exactly `theServicesHandTheirPathToTheChain` and the step-9 pin. And the step-9 pin's own claim checked: under **R-3a**
+  it is `✘` (the path's round ran — "roundsCompleted > rounds" held — but no retry: the row `.keysLocked`, no keys). Every
+  revert restored; the harness sources are all symlinks again but the one stub file.
+
+**Piece 4 — the words (NO CHANGE).** The row keeps VX-486's "Sync locked — this Mac hasn't unlocked your account's sync
+keys" until the keys load (`SyncStatusViews.swift:767`, byte-unchanged — nothing in this batch touches the row); "Sync now"
+keeps its road (`SyncStatusViews.swift:744` → `triggerSync()` — which now runs the occasion, so a press retries too) and the
+Protection door keeps its road. No user-facing sentence was added or changed; the only new strings are protection-log lines
+(diagnostics, `ProtectionOpenRoad.log` — act names and outcomes, never key material). No QUESTIONS filed.
+
+**Piece 5 — Close.**
+- *Headless at the close:* `swift build` (the core) → `Build complete!`; the core has ZERO changed lines in this batch
+  (`git diff 93c2e3149..HEAD -- Sources Tests Server` is empty), so the core suite was not re-run — the batch-1 baseline
+  stands unchanged by construction. Mac `build-for-testing` green at pieces 1, 3a, 3b; phone `build-for-testing` green at 3a
+  and 3b. The harness, every touched planted suite: `✔ Test run with 91 tests in 12 suites passed`.
+- *The pins, said plainly (compile-red vs behavior-red):* BEHAVIOR-red on the pre-fix tree, watched: THE ROAD PIN
+  (`herOfflineTypedUnlockSyncsAtTheNextRoundOnceTheVaultAnswers` — pre-fix API only; over the four pre-fix product files the
+  round still refused for keys). BEHAVIOR-red on old by inspection (pre-fix API until its `#require`): the phone's
+  `thePhonesOccasionLandsPendingTypingAndRunsNoRetry` (`beforeRound` nil on the phone pre-fix — the simulator run owed).
+  COMPILE-red on old (they name the new seam), each with a named behavioral revert that bit: every other pin of the five new
+  Mac suites. GUARDS (green both sides by design): `aSuccessfulFirstLoadLeavesNothingPending`,
+  `everyOtherExitLeavesNothingPending`, `noRoadsIsInert`, `noPathIsInert`, and the nothing-runs reachability pins.
+
+**SELF-ASSESSMENT — where the derived secret lives, how long, and every road that clears it (the brief's three).**
+- *WHERE:* in ONE place — `ProtectionRoadSession`'s private `pendingLoad`, read and written only under that session's
+  `NSLock` — as a `PendingSyncKeyLoad`: the library's account id and `TypedUnlockSecret.passphrase([PassphraseKey])` (the
+  passphrase keys the open's own Argon2id derived — `SymmetricKey`s with their descriptors) or `.wordsKey(WordsKey)` (the
+  twelve words' BIP-39 → HKDF wrap key, derived ONCE at the keep). Never the passphrase's text; never the words (the typed
+  `[String]` dies with the open's call exactly as before VX-544). Transient copies: the retry's one flight reads the pending
+  into its stack and hands it to the load for the length of ONE bounded vault read (≤ 10 s) and the master's unwrap, then
+  lets it go. Not `Codable`; every description redacted (`PendingSyncKeyLoad(redacted)`, `TypedUnlockSecret(redacted)`,
+  `PassphraseKey(redacted)`, `WordsKey(redacted)` — pinned); never logged; NO write to disk or the keychain on any road
+  (no keychain or file call exists on the path; the planted leaves' `items` stay empty in every pin).
+- *HOW LONG:* from the typed unlock's vault read FAILING or TIMING OUT (the only keep) until the first of: the retry's hold
+  landing; any other exit of a retry; a let-go road; the process ending. Never longer than the open road session it lives
+  in — and the keys it can produce are held under exactly the lifetime session memory already had (VX-501's).
+- *EVERY ROAD THAT CLEARS IT:* (1) **the hold landing** (`holdLoadedSyncKeys` — the retry's success); (2) **every
+  non-failure exit of the load** (its `defer`): not writing / unbound / not Castle, the keys already held, signed out or into
+  another account, no vault, a secret that opens the library but not the vault, a master not the vault's, a moved account, a
+  hold refused (the session let go, another hold landed meanwhile, the library moved); (3) **the occasion's gate finding keys
+  present** (an act or an unlock loaded them — `roads.clear()`); (4) **the let-go, final for the session**
+  (`letGoOfSyncKeyLoad` — the pending dropped AND every later hold refused): the RELOCK (`ProtectionRoadLock.dropSessionMemory`,
+  BEFORE the keys drop — Lock Now, sleep, screen lock, idle), Make this my library's OUTGOING session (the same drop,
+  `ProtectionCopyDoors.swift:538`), a SIGN-OUT (`AppServices.variorumSignInChanged(nil)` — the Account sheet, sign out
+  everywhere, the account's deletion), and a REOPEN that replaces the session (`AppBootstrap.finish(.ready)` — a re-keying
+  act's reopen, a copy door's landing); (5) **the process ending** (memory only). NOT cleared by a second failure (kept —
+  the same content re-kept; refused once let go).
+- *The keys it loads never outlive the lock:* the hold is decided under the session's lock and the drop lets go under that
+  same lock before it clears the leaf, so a retry whose read answers after the lock holds nothing (pinned:
+  `aRetryAnsweredAfterTheLockHoldsNothing`, R-2b). A retry in flight at a sign-out keeps its stack copy for at most the bound,
+  and its hold is refused.
+
+**RECORDED CORNERS (for the orchestrator; none fixed here):**
+1. **The phone keeps but never retries** (MOBILE PARITY): the keep is the SHARED load's, so an offline typed unlock on the
+   phone now holds the derived secret in session memory — dropped at the lock, a sign-out, a replacing reopen — but nothing
+   retries it there (override 5: the phone's retry unwired), so the phone stays "Sync locked" until its next typed unlock, as
+   before. Posture-consistent per D-544 (memory, the session's lifetime) but purposeless on the phone today. Options: (a) as
+   built; (b) `#if os(macOS)` around the keep (the phone byte-for-byte today's); (c) wire the phone's retry — one line, the
+   retry call in the phone's closure arm. The orchestrator's/her call; nothing filed (no product behavior differs).
+2. **The occasion can delay a round by up to the vault bound (10 s)** while a pending exists, the keys are missing and the
+   vault read hangs (a black-holed endpoint — offline reads fail at once); that round would refuse for keys anyway. Joined
+   retries share the one read.
+3. **Rounds the scheduler starts on its own** (the coalesced follow-up, the belt's) run no occasion — the trigger whose
+   round they follow ran it.
+4. **The reachability trigger runs one round for EVERY library on reconnect** (Standard and signed-in-unsynced included —
+   R-849-2's ruled shape), and its first reading is never a trigger alone (decided here, recorded above).
+5. **Keys that vanish without a relock after the gate cleared the pending** (an act's rollback dropping its own hold —
+   `PlanRunner` :589) leave sync locked until the next unlock — the pre-VX-544 behavior in that corner.
+6. **The doc line in D-544 "no typed-unlock pending on the phone's road today" is stale** (VM-8 brought VX-501 to the phone);
+   corner 1 is its consequence.
+
+**MOBILE PARITY (for the closeout line):** the phone now composes batch 1's typing occasion (P-849-2 — WIRED, the one line)
+and the reachability trigger (the shared `SyncSession`, production's path watch through the shared `AppServices`); VX-544's
+retry is the Mac's only — the phone keeps the derived secret on an offline typed unlock and drops it at lock/sign-out/reopen,
+never retrying (corner 1).
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** SurfaceContracts' protection bullet — VX-501's
+typed-unlock sentence ("one bounded vault read … never hostage (offline, or a secret that opens the library but not the vault,
+opens the library all the same)") gains VX-544's: offline or a slow server, the typed secret's DERIVED material is kept in
+session memory only and the load runs again before each round while the keys are missing — the next round after the vault
+answers syncs, nothing typed again; dropped at a lock, a sign-out, a replacing reopen (R-849-1). The round triggers — the
+network path coming back runs one debounced round (R-849-2) — where canon names the rounds' triggers (no canon line lists
+them today; `SyncSession.swift`'s header does; the orchestrator's call: AppSpec §11's summary or the sync row's contract).
+CastleRules unchanged (rule 9 is the device's — D-544's posture paragraph). AppSpec §12's VX-501 mention unchanged in
+substance.
+
+**STAGE REQUEST (every Mac and simulator run of this batch — the orchestrator's claim through nov7; `-only-testing` takes
+TYPE names):**
+- *Leg A — the batch's own Mac suites at the tip (green expected):* `cd App/Variorum && xcodebuild test -scheme Variorum
+  -destination 'platform=macOS' -only-testing:VariorumTests/TypedUnlockRetryTests
+  -only-testing:VariorumTests/TypedUnlockRetryOccasionTests -only-testing:VariorumTests/OfflineTypedUnlockRetryRoadTests
+  -only-testing:VariorumTests/SyncReachabilityTriggerTests -only-testing:VariorumTests/SyncBeforeRoundTests` — "Test run with
+  41 tests in 5 suites" (14 + 5 + 5 + 9 + 8).
+- *Leg B — the one Mac-only pin's revert (every other revert ran headless, above):* **R-3a** — `AppServices.swift`'s Mac closure
+  line `await self?.retryTypedUnlockSyncKeysWhileLocked()` deleted, at the tip, alone ⇒ RED
+  `SyncBeforeRoundTests/theMacsOccasionRetriesTheTypedUnlocksLoadBeforeHerTypingLands` (and the harness-proven
+  `whileThereAreNoKeys…`, `withNothingPending…`, the road pin, the step-9 pin); `git checkout --` the one file, re-run green.
+- *Leg C — the standing suites over the touched seams (or fold into LIVE STATUS row 8's closing sweep):*
+  `TypedUnlockSyncKeysTests` · `TouchIDUnlockSyncKeysTests` · `SessionHoldBringInTests` · `RoadLockTests` ·
+  `RoadLockRouteTests` · `LobbyVaultRoadTests` · `SecretCheckRoadTests` · `SecretCheckModelTests` · `SecretCheckBootstrapTests`
+  · `MakeMineProofFieldsRoadTests` · `OneSyncKeysLeafCompositionTests` · `OneSyncKeysLeafRoadTests` · `FirstRoundRoadTests` ·
+  `FirstRoundAfterTheActTests` · `FirstRoundAfterTheReopenTests` · `FirstRunDrillTests` · `WordsCardAfterAccountActTests` ·
+  `PairFollowFacesTests` · `PairFollowDoneDurableTests` · `ProdTestRoadTests` · `SyncSessionFenceTests` ·
+  `IdleCommitSchedulerTests` · `Phase9cAuthWiringTests` · `SyncLockedRowTests` · `SyncWalkFenceTests` ·
+  `QuitPurgeQuiesceTests` · `SettingsLockCloseTests` · `AppBootstrapOffMainTests` · `ProtectionCrossingRouteTests` ·
+  `RoadJoinFollowSurfaceTests` (type names verified by grep at the close).
+- *Leg D — the phone (simulator, by id):* `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS
+  Simulator,id=<the run's simulator>' -only-testing:VariorumMobileTests/MobileRoundOccasionTests
+  -only-testing:VariorumMobileTests/MobileTypedUnlockSyncKeysTests -only-testing:VariorumMobileTests/MobileLockTeardownTests
+  -only-testing:VariorumMobileTests/MobileTypedOverRescueTests`; then **R-3g** — `AppServices.swift`'s `#else` arm's
+  `sync.beforeRound = { … }` deleted ⇒ RED `thePhonesOccasionLandsPendingTypingAndRunsNoRetry`; restore, re-run green.
+- *OWED, never claimed:* her drill — the two-Mac test's steps 8–9 on her Air (LIVE STATUS row 9).
 
