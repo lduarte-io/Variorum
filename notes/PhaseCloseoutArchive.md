@@ -1679,3 +1679,29 @@ with pointers; QUESTIONS #268; the AppSpecRecord entry. Born: VX-917–VX-925 (t
 NO lockstep event, no marker, no refresh owed (the wave's folded refresh is vx-914's). The night survived one Opus
 and one Fable budget death with zero commits lost. Handoff `notes/handoffs/vx-912-handoff.md`. **Her morning
 bundle: #268 + the B2 BIG-corner shapes + the B3 drafts' editorial pass + the GRDB-fork her-hands rows.**
+
+**→ VX-914 CLOSED 2026-11-08 — UMBRELLA: THE WALKTHROUGH FOLLOWUPS (the record `notes/plans/fixes/vx-914-walkthrough-followups.md`,
+FOR A LATER READER at its top; wave 3's slot-free run beside VX-912, /architect-phase, nov7 coordinating; PR #235,
+merge cc6c8f188).** Fifteen members in four batches — her Nov 7–8 walkthrough and bundle rulings built, plus the
+kickoff riders she seated (VX-401/45/667; VX-872 ruled OUT of the wave, "we don't need to do it"): the MCP pane
+reunited (the trail dial under the show dial, the VX-281 geometry contract grown by a named arm; the badges row at
+the pane's foot; trail headings by the setup label else "MCP"; groups fold; the three stamps tick), the icon twins'
+ONE rule (both drawn while a client is approved, DIMMED while the server is off — VX-900; `MCPShareRoad.serverOn` +
+`MCPServerOffFace` the shared seam), the Index ⋯ derived from the one note-title table (`.surface` on eight
+declarations), the masthead dial counted at the face it SHOWS (257→240 Study / 304→276 Terminal; the row waits for
+the book's row), the confirm commas, `deleteReading`'s honest archive split in confirm AND receipt, the ascent
+kind-words, `.fileWithoutOpening` (the band's File ⌘⏎, focus-scoped), the Library masthead's in-place wing cycle,
+"the take as kept" on lineage members, and the sync-pause pair said once (one `Shared/` source, Mac + phone). The
+ladder closed at ROUND 2 (round 1: one MAJOR — a bare `fixedSize` on the standing ChromeLineLimitTests pin's
+measured red-on-old, fixed by a one-line adjudication; the 119-site exact-set door-pin sweep re-pinned six). Gates:
+four batch windows green (208/21→32/4 · 155/14 · 424/71→81/7 · folded); the MERGE GATE on the merged tree
+c2f21d856 — the WHOLE Mac target 6231/1078 (13 in-suite knowns + VX-701's standing flake proven green alone) and
+the WHOLE phone target 852/139. The closing WALK green, every row use-shaped (the icon dim PIXEL-MEASURED; the
+⌘⏎ succession filing; the staged owned-book confirm→delete→receipt chain), dev-store posture restored and
+confirmed. Canon: SurfaceContracts ×12 + MCPSpec ×2 + AppSpec §12's keyboard line, in place with pointers;
+QUESTIONS #269; the AppSpecRecord entry. Born: VX-927–VX-930 (triaged; the handoff lists them) + a VX-39 note.
+NO lockstep event, no marker; the WAVE'S FOLDED /APPLICATIONS REFRESH is this run's, behind A1 at nov7's GO.
+MOBILE PARITY: VX-909's pair is phone-visible from the one `Shared/` source (pinned both platforms); the rest
+Mac-only. The run met two Opus budget deaths with zero commits lost. Handoff `notes/handoffs/vx-914-handoff.md`.
+**Her morning bundle: #269 + VX-930's bind-time-provenance call + the lesson-7 guide staleness riding the owed
+re-seed.**

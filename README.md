@@ -6,7 +6,7 @@ Start here: `CLAUDE.md` → `notes/CoreDescription.md` (vision) → `notes/Overa
 
 ## A letter from Lillian
 
-Variorum opens with a letter: why I built it, what it's for, and what I hope it does. It's the first note in every new library (and comes back from the Help menu if you delete it), and its text lives in this repository at [`notes/plans/vx-105-letter-content/read-me.txt`](notes/plans/vx-105-letter-content/read-me.txt).
+Variorum opens with a letter: why I built it, what it's for, and what I hope it does. It's the first note in every new library (and comes back from the Help menu if you delete it), and its text lives in this repository at [`LETTER.md`](LETTER.md).
 
 ## Open source, closed contribution
 
