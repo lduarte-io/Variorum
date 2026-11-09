@@ -2857,6 +2857,8 @@ Canvas siblings RECORDED, not widened (below); no pull, merge or rebase; LIVE ST
   `CompareCommentGutterTests` `OutsideWriteRingEndTests` `AutosaveRegistryLifecycleTests`
   `VX347AskedTakeFilingTests` · the leaving road `SavepointOnLeaveTests` · the justified edits `ProdTestRoadTests`
   `SyncWalkFenceTests`. The phone target need not re-run for this fix (Mac-only files).
+- **Commits:** `7bc24b730` (the fix + the primitive pin + this record) · `290a0b51d` (the two justified edits) ·
+  this commit (the range). Pushed after each.
 
 ## THE FINAL FOLD + RELEASE PREP PART 1 (2026-11-09, on nov7's release-prep GO — this run is the wave's LAST merger)
 
