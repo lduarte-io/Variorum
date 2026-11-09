@@ -586,8 +586,8 @@ struct LandingOffsetTests {
             session.editorRouter.scrollAnchors[postID] = anchor
             let token = session.commandRouter.registerDetail(postID: postID, mode: .write) { _ in }
             // The cap's R3-3: the teardown on a `defer`, so a `#require`
-            // throwing inside a body cannot leak this post's memory into
-            // `UserDefaults.standard` (the R1-7 class). It captures only the
+            // throwing inside a body cannot leak this post's memory into the
+            // note-memory domain (the R1-7 class). It captures only the
             // router and the id — a main-actor class and a String — which is
             // the shape the R1-4 pin's own `defer` already uses; the
             // dictionary-free form is what the `SendNonSendable` crash asked

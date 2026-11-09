@@ -274,7 +274,7 @@ struct VersionDoorsTests {
                 "postMode.\(moment.id)", ReadModeView.faceKey(moment.id),
                 CurrentBlockMemory.key(moment.id),
             ]
-            for key in memoryKeys { UserDefaults.standard.removeObject(forKey: key) }
+            for key in memoryKeys { NoteMemoryDefaults.store.removeObject(forKey: key) }
             #expect(session.commandRouter.currentBlock(for: moment.id) == nil,
                     "the slate is clean before the mount")
             let window = NSWindow(
@@ -284,7 +284,7 @@ struct VersionDoorsTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                for key in memoryKeys { UserDefaults.standard.removeObject(forKey: key) }
+                for key in memoryKeys { NoteMemoryDefaults.store.removeObject(forKey: key) }
             }
             var backs = 0
             let hosting = NSHostingView(
@@ -303,12 +303,12 @@ struct VersionDoorsTests {
             #expect(router.activeMode == nil)
             #expect(!router.isEnabled(.saveNoteVersion), "⌘⇧S has nothing to act on here")
             #expect(!router.isEnabled(.switchMode), "nor do the mode keys")
-            #expect(UserDefaults.standard.object(forKey: "postMode.\(moment.id)") == nil,
+            #expect(NoteMemoryDefaults.store.object(forKey: "postMode.\(moment.id)") == nil,
                     "no mode memory")
-            #expect(UserDefaults.standard.object(forKey: ReadModeView.faceKey(moment.id)) == nil,
+            #expect(NoteMemoryDefaults.store.object(forKey: ReadModeView.faceKey(moment.id)) == nil,
                     "no Read face memory")
             #expect(router.currentBlock(for: moment.id) == nil, "no place memory")
-            #expect(UserDefaults.standard.object(forKey: CurrentBlockMemory.key(moment.id)) == nil,
+            #expect(NoteMemoryDefaults.store.object(forKey: CurrentBlockMemory.key(moment.id)) == nil,
                     "…persisted nowhere either")
             #expect(backs == 0)
 
@@ -350,7 +350,7 @@ struct VersionDoorsTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
             }
             let hosting = NSHostingView(
                 rootView: PostDetailView(session: session, postID: post.id)

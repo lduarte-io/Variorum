@@ -565,7 +565,7 @@ struct TrayPanelMoveTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
             }
             let hosting = NSHostingView(
                 rootView: PostDetailView(session: session, postID: post.id)

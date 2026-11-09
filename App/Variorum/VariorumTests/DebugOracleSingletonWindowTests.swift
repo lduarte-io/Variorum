@@ -77,11 +77,11 @@ struct DebugOracleSingletonWindowTests: DebugOracleWindowRig {
             let beta = try s2.operations.createPost(title: "beta, the window that goes")
             _ = try s2.operations.newBlock(in: beta.id, text: "a block, so the mode can host.")
             for post in [alpha.id, beta.id] {
-                UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post)")
+                NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post)")
             }
             defer {
                 for post in [alpha.id, beta.id] {
-                    UserDefaults.standard.removeObject(forKey: "postMode.\(post)")
+                    NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post)")
                 }
             }
             let oneMasthead = MastheadGeometry.reader(s1.debugProbeScope)
@@ -199,7 +199,7 @@ struct DebugOracleSingletonWindowTests: DebugOracleWindowRig {
             let storage = try scrubbedStorage("read-faces")
             defer {
                 for (s, n) in [(s1, alpha.postID), (s2, beta.postID)] {
-                    UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(n))
+                    NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(n))
                     s.commandRouter.forgetCurrentBlock(for: n)
                 }
             }

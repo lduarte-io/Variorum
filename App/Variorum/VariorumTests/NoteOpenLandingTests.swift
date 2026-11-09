@@ -133,8 +133,8 @@ struct NoteOpenLandingTests {
             session.commandRouter.forgetCurrentBlock(for: postID)
             defer {
                 session.commandRouter.forgetCurrentBlock(for: postID)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(postID))
             }
             let slots = try await db.read { db in try Queries.renderPost(db, containerID: postID) }
             try await body(World(
@@ -147,7 +147,7 @@ struct NoteOpenLandingTests {
     /// session wrote (its format, `blockID|variantID|utf16Offset`), in place
     /// before this session's router reads anything.
     private func rememberFromAnEarlierRun(_ w: World, entry: Int, offset: Int) {
-        UserDefaults.standard.set(
+        NoteMemoryDefaults.store.set(
             "\(w.blocks[entry])|\(w.variants[entry])|\(offset)",
             forKey: CurrentBlockMemory.key(w.postID))
     }
@@ -273,7 +273,7 @@ struct NoteOpenLandingTests {
                 rememberFromAnEarlierRun(w, entry: last, offset: w.index.range(ofEntryAt: last).length)
             case .middle: rememberFromAnEarlierRun(w, entry: 34, offset: 5)
             }
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
@@ -292,7 +292,7 @@ struct NoteOpenLandingTests {
     @Test func takesOpensAtTheStart() async throws {
         try await withWorld(emptyLastBlock: true, rng: 4) { w in
             rememberFromAnEarlierRun(w, entry: w.blocks.count - 1, offset: 0)
-            UserDefaults.standard.set(PostMode.takes.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.takes.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
@@ -321,7 +321,7 @@ struct NoteOpenLandingTests {
     @Test func aModeSwitchRightAfterAFirstOpenStaysAtTheStart() async throws {
         try await withWorld(emptyLastBlock: true, rng: 12) { w in
             rememberFromAnEarlierRun(w, entry: w.blocks.count - 1, offset: 0)
-            UserDefaults.standard.set(PostMode.takes.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.takes.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
@@ -345,8 +345,8 @@ struct NoteOpenLandingTests {
     @Test func readOpensAtTheStart() async throws {
         try await withWorld(emptyLastBlock: true, rng: 5) { w in
             rememberFromAnEarlierRun(w, entry: w.blocks.count - 1, offset: 0)
-            UserDefaults.standard.set(PostMode.read.rawValue, forKey: "postMode.\(w.postID)")
-            UserDefaults.standard.set(ReadModeView.Face.edit.rawValue, forKey: ReadModeView.faceKey(w.postID))
+            NoteMemoryDefaults.store.set(PostMode.read.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(ReadModeView.Face.edit.rawValue, forKey: ReadModeView.faceKey(w.postID))
             #if DEBUG
             ReadModeOracle.reset()
             #endif
@@ -388,7 +388,7 @@ struct NoteOpenLandingTests {
     /// air eaten. Red on the pre-fix tree: 24.0.
     @Test func aReopenOfANoteLeftAtItsTopKeepsTheTopAir() async throws {
         try await withWorld(rng: 6) { w in
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let first = try await writeArrived(w, window, open(w, in: window))
@@ -410,7 +410,7 @@ struct NoteOpenLandingTests {
     /// end line at the viewport top.
     @Test func aReopenAfterScrollingAwayFromTheCaretComesBackToThePageSheLeft() async throws {
         try await withWorld(emptyLastBlock: true, rng: 7) { w in
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
@@ -443,7 +443,7 @@ struct NoteOpenLandingTests {
     /// then hauled the page to the note's start.
     @Test func aReopenMidNoteComesBackToThePageExactly() async throws {
         try await withWorld(rng: 8) { w in
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
@@ -476,7 +476,7 @@ struct NoteOpenLandingTests {
     /// with the room's place thrown away (R-room): the page at 0.
     @Test func aReopenOfANoteLeftRestingBelowItsLastLineComesBackThere() async throws {
         try await withWorld(rng: 11) { w in
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
@@ -504,7 +504,7 @@ struct NoteOpenLandingTests {
     /// re-open's no-reveal never leaks into a mode switch.
     @Test func aModeRoundTripAfterAReopenStillRevealsTheCaret() async throws {
         try await withWorld(emptyLastBlock: true, rng: 9) { w in
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let first = try await writeArrived(w, window, open(w, in: window))
@@ -540,7 +540,7 @@ struct NoteOpenLandingTests {
     @Test func aDeepLinkOnAFirstOpenStillLandsAtItsTarget() async throws {
         try await withWorld(emptyLastBlock: true, rng: 10) { w in
             rememberFromAnEarlierRun(w, entry: w.blocks.count - 1, offset: 0)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let target = w.index.range(ofEntryAt: 40).location

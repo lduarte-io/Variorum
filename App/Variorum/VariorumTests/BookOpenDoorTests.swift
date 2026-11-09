@@ -347,7 +347,7 @@ private func withOpenDoorBook<T>(
         defer {
             for id in postIDs {
                 session.commandRouter.forgetCurrentBlock(for: id)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(id)")
             }
         }
         // Row-36 hygiene: the current-block memory PERSISTS per note.
@@ -591,7 +591,7 @@ struct BookOpenDoorShellTests {
                 tail: nil).documentLength
             let inside = 9
             // Her screenshot's mode: the note was last left in Lenses.
-            UserDefaults.standard.set(PostMode.lenses.rawValue, forKey: "postMode.\(x)")
+            NoteMemoryDefaults.store.set(PostMode.lenses.rawValue, forKey: "postMode.\(x)")
 
             let (router, window, hosting) = try await shellOnBook(session, book)
             defer {
@@ -656,7 +656,7 @@ struct BookOpenDoorShellTests {
     @Test func theNothingLiveDoorOpensInWriteAtThePlainOpensPlace() async throws {
         try await withOpenDoorBook { session, db, book in
             let y = book.postIDs[1]
-            UserDefaults.standard.set(PostMode.lenses.rawValue, forKey: "postMode.\(y)")
+            NoteMemoryDefaults.store.set(PostMode.lenses.rawValue, forKey: "postMode.\(y)")
             let documentLength = BlockRangeIndex(
                 slots: try await db.read { try Queries.renderPost($0, containerID: y) },
                 tail: nil).documentLength

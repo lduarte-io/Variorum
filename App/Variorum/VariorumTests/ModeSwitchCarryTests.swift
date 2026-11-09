@@ -170,11 +170,11 @@ struct ModeSwitchCarryTests {
             let postID = post.id
             let router = session.commandRouter
             router.forgetCurrentBlock(for: postID)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
             ReadModeOracle.reset()
             defer {
-                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(postID))
                 router.forgetCurrentBlock(for: postID)
             }
             let slots = try await db.read { [id = postID] db in
@@ -267,11 +267,11 @@ extension ModeSwitchCarryTests {
             let postID = post.id
             let router = session.commandRouter
             router.forgetCurrentBlock(for: postID)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
             ReadModeOracle.reset()
             defer {
-                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(postID))
                 router.forgetCurrentBlock(for: postID)
             }
             let slots = try await db.read { [id = postID] db in
@@ -375,11 +375,11 @@ extension ModeSwitchCarryTests {
             let postID = post.id
             let router = session.commandRouter
             router.forgetCurrentBlock(for: postID)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
             ReadModeOracle.reset()
             defer {
-                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(postID))
                 router.forgetCurrentBlock(for: postID)
             }
             let slots = try await db.read { [id = postID] db in
