@@ -77,11 +77,11 @@ The VX-926 record's §7 binds by reference (which binds the VX-912 record's §7)
 
 | Piece | What | Status |
 |---|---|---|
-| P0 | This record + the ledger row | DONE (this commit) |
-| P1 | VX-939 — `LETTER.md` at the repo root (her text, header stripped, byte-faithful); the README pointer moves to it; the one-file-or-two verdict | DONE (this commit) — TWO files, sync noted (verdict below); body byte-identical to `read-me.txt`'s, and equal to `ReadmeSeeder.paragraphs` (17/17) by a scratch compile of the literals; `read-me.txt` and the seeder's code untouched |
-| P2 | VX-923 — the pin (red on the current tree) | DONE (this commit) — `AcknowledgmentsCopyTests.everyLinkedLibraryIsCreditedAndBIP39ReadsMIT` (Mac app target, `Phase13pSubstrateTests.swift`); **RED on the unfixed source, 19 issues, the three old tests green** (headless harness below); in-target run PENDING the gate |
-| P3 | VX-923 — the credits (Sparkle + the Point-Free siblings) and the BIP-39 line (pane + `Vendor/BIP39/README.md`) | DONE (this commit) — the pin GREEN 4/4 on the fixed source; every new license text IDENTICAL to its file; the phone sweep's exemption proven byte-exact (green fixed, red both ways) — all headless; in-target runs PENDING the gate |
-| P4 | Close: headless build + the copy tests + the seeder pins (PENDING the gate where in-target), authored sentences listed, PROVISIONALs | DONE (this commit) — `swift build` EXIT 0 on the final tree; StringsWorkbook 32/4 + RecoveryPhrase 13/1 green, none skipped; the in-target runs PENDING the gate (first line) |
+| P0 | This record + the ledger row | DONE (`6d2cc46db`) |
+| P1 | VX-939 — `LETTER.md` at the repo root (her text, header stripped, byte-faithful); the README pointer moves to it; the one-file-or-two verdict | DONE (`ca0527736`) — TWO files, sync noted (verdict below); body byte-identical to `read-me.txt`'s, and equal to `ReadmeSeeder.paragraphs` (17/17) by a scratch compile of the literals; `read-me.txt` and the seeder's code untouched |
+| P2 | VX-923 — the pin (red on the current tree) | DONE (`ef6918454`) — `AcknowledgmentsCopyTests.everyLinkedLibraryIsCreditedAndBIP39ReadsMIT` (Mac app target, `Phase13pSubstrateTests.swift`); **RED on the unfixed source, 19 issues, the three old tests green** (headless harness below); in-target run PENDING the gate |
+| P3 | VX-923 — the credits (Sparkle + the Point-Free siblings) and the BIP-39 line (pane + `Vendor/BIP39/README.md`) | DONE (`f2bf3d002`) — the pin GREEN 4/4 on the fixed source; every new license text IDENTICAL to its file; the phone sweep's exemption proven byte-exact (green fixed, red both ways) — all headless; in-target runs PENDING the gate |
+| P4 | Close: headless build + the copy tests + the seeder pins (PENDING the gate where in-target), authored sentences listed, PROVISIONALs | DONE (`c3fef7e62`) — `swift build` EXIT 0 on the final tree; StringsWorkbook 32/4 + RecoveryPhrase 13/1 green, none skipped; the in-target runs PENDING the gate (first line) |
 
 ### P1 — VX-939: `LETTER.md` (repo files only)
 
