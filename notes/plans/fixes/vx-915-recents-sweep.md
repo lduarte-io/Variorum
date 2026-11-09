@@ -180,7 +180,7 @@ Her Nov 8 composition ("there's lots of quick follow ups"): the recently-minted 
 
 | # | Member | Batch | Status |
 |---|---|---|---|
-| 1 | VX-934 badge-family split | 1 | NOT-STARTED |
+| 1 | VX-934 badge-family split | 1 | BUILT (a23305aa6; orchestrator spot-check passed — the seam, the synced key, the eye's switch move, fences, no trailers) — Mac pins PENDING(gate) |
 | 2 | VX-782 Takes callout one-law | 2 | NOT-STARTED |
 | 3 | VX-848 Compare lane default | 2 | NOT-STARTED |
 | 4 | VX-793 Compare first comment (rider) | 2 | NOT-STARTED |
