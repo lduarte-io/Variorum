@@ -116,6 +116,7 @@ extension MCPWriteTools {
         let runKey = "\(tool)·\(UUID().uuidString)"
         var results: [Any] = []
         var receipts: [MCPWriteReceipt] = []
+        var unlogged: MCPActivityLogFailure?
         var landed = 0
         for item in items {
             let outcome: Result<Landed, Refused>
@@ -137,6 +138,9 @@ extension MCPWriteTools {
                     stamped.runKey = runKey
                     return stamped
                 }
+                // VX-775: a landed item whose Activity line failed stays LANDED;
+                // the call tells her once, counting them.
+                unlogged = .coalescing(unlogged, one.activityLogFailure, tool: tool)
             case .failure(let refused):
                 results.append(["note_id": item.noteID, "refused": refused.outcome.text] as [String: Any])
             }
@@ -152,6 +156,6 @@ extension MCPWriteTools {
         guard landed > 0 else {
             return .failure(Refused(outcome: Outcome(text: try encode(answer), isError: true)))
         }
-        return .success(Landed(answer: try encode(answer), receipts: receipts))
+        return .success(Landed(answer: try encode(answer), receipts: receipts, activityLogFailure: unlogged))
     }
 }
