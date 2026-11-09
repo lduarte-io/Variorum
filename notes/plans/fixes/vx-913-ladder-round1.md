@@ -126,3 +126,37 @@ Traced the same way, and it is my residual (e)'s remnant on the double-start roa
 ### F4 / F5
 
 Not mine (the orchestrator's closeout items), left as written.
+
+---
+
+## ROUND 1 — THE REVIEWER'S FINAL CALLS
+
+*Written by the round-1 reviewer after reading the implementer's dispositions above in full (c92ef9597). Nothing built by me; the implementer applies what is confirmed below, and round 2's fresh reviewer re-checks.*
+
+### F1 — CONFIRMED, with the implementer's amended fix shape ADOPTED as the final call
+
+The amendment is better than my sketch, and I adopt it verbatim as the shape to build:
+
+- **Mechanism of the fix:** `MCPHostHooks.onActivityLogFailure` (unshipped, free to reshape) becomes `(@Sendable (MCPActivityLogFailure, _ receipts: [MCPWriteReceipt]) -> Void)?`; `MCPWriteTools.call`'s success arm routes a failing call's receipts ONLY through it (else-branch: receipts via `onWrite` byte-unchanged — so a call whose log landed, and any host without the tail hook, are untouched); the door's hook body is one `Task { @MainActor }` running one SYNCHRONOUS `landWireCall(receipts, failing:)` = `for receipt { landWireWrite(receipt) }; landActivityLogFailure(failure)`. The receipt→refusal order becomes two statements in one hop; `landWireWrite` is today's exact receipt road, so `notesLeftDead`'s post, the run-key coalescing (VX-812's one line per list call), the trail and `lastChange` all land before the refusal takes the seam. I checked each of those consequences against the code and they hold; the no-op-landing edge (failure with zero receipts) falls out mechanically as `tail(failure, [])`.
+- **The pins (the final call's required set):** (i) host — a failing call sends NOTHING through `onWrite` and everything through the tail (a separate harness capture; pins A/C/D keep their assertions over the aggregated capture); (ii) door face — `landWireCall` under quiet, toast AND off ends with the refusal as the toast and the landed change still behind ⌥⌘O (`lastChange`); (iii) the real-door pin unchanged as the end-to-end oracle. **No red-on-old is owed** — this hardens an ordering assumption in code new in this run, not a pre-existing wrong output (architectural class; the justification is F1's trace).
+- **The cross-CALL ordering non-goal is accepted as stated:** an earlier call's receipt replacing a later call's toast is the seam's standing latest-wins posture, pre-existing for every MCP receipt; the door-held serial queue is heavier than this finding warrants and reaches the asks and show roads. Out of this finding; nobody re-opens it in round 2 without a new trace.
+
+### F2 — CONFIRMED as a finding · the DISPUTE on the belt's shape is UPHELD (measured, and re-measured by me) · fix DEFERRED to the one residual ticket
+
+- **The refutation is correct and I verified it independently** (a fresh C probe, this session, macOS 27.0.1): `fstat` on a bound AF_UNIX listening fd returns the socket object's own identity (`dev=-1`), never the bind-created vnode; `stat(path)` returns the vnode. They can never match, so my suggested `fstat(fd)`-vs-`stat(path)` belt would refuse EVERY unlink — wrong as written, withdrawn. The working shape is the implementer's: capture the path's `(st_dev, st_ino)` by `stat` right after `bind` inside `MCPSocketRoad.listen`, carry it with the fd, re-`stat` and compare before each by-name unlink (a microsecond compare→unlink residue remains; macOS has no conditional unlink).
+- **The widening to THREE sites is accepted and is the sharper statement of the class:** `halt`'s and `listenerDied`'s unlinks are also by name, guarded only by the premise "a bound listener owns its path", which residual (f)'s TOCTOU falsifies for all three alike. My round-1 wording "the first by-name unlink reintroduced outside that guard" was imprecise and is corrected to: F2 is residual (f)'s concrete consequence at all three by-name unlink sites, the publish-fail cleanup merely the newest.
+- **Deferral confirmed.** The three reasons hold (the class needs all three sites; `MCPSocketRoad.listen`'s return shape is a new surface in the shim-shared module, outside this batch's honest scope; the per-directory-serialization alternative may moot the belt and the choice should be made once). **The ticket as proposed is the disposition:** one ticket (Bug · Suspected · MCP · Low, "the socket path's identity across hosts") bundling residuals (e) + (f) + F2's three sites + F3, its first-piece choice (bind-time stat identity — NEVER fstat, both measurements recorded — vs per-directory serialization) made there, pinned behind the `.bound` gate with the path replaced under it. The orchestrator mints it at the closeout tickets pass and the run record points at it.
+
+### F3 — CONFIRMED · folded into F2's ticket · no code this run
+
+As dispositioned: the door road is closed by 8db317e14; what remains is the microsecond bind→publish remnant plus the transient optimistic "running", both self-correcting and reachable only through a double start the door fix makes unreachable from the door. Named in the ticket; nothing built.
+
+### F4 — STANDS (orchestrator, closeout)
+
+The MCPSpec contract line for VX-775 lands at closeout exactly as F4 words it, plus the `show_in_app` sibling's ticket (P-913-B3-4). Ledger row 9's duty; this is its named content.
+
+### F5 — STANDS (orchestrator, closeout tickets pass)
+
+`TagsViewModel.createTag`'s wing read is ticketed as the B2 record already queues it (Bug · Suspected · Low); no code this run.
+
+**Summary for the orchestrator:** one fix is owed this round — F1's one-hop funnel, implementer's shape, pins (i)–(iii), no red-on-old. F2/F3 are the one residual ticket (content fixed above). F4/F5 are closeout items. Round 2's fresh reviewer re-checks the F1 change.
