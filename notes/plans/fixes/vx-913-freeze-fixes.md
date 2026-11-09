@@ -107,17 +107,17 @@ Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate b
 
 **NOT DONE (kept current; the first line by rule):** nothing is fixed yet; no Mac test has RUN (every `xcodebuild test` is behind the stage — the orchestrator's window); no walk captured yet.
 
-**Session note:** HEAD moved once before my first edit — the orchestrator's record-only commit 9e0e3d654 (LIVE STATUS + the guard's false-positive note); adopted, no code touched by anyone else. Commit messages here avoid the guard's trigger words.
+**Session note:** HEAD moved twice under me, both the orchestrator's record-only commits in this shared worktree, pathspec-limited: 9e0e3d654 (before my first edit) and 0dcc343c4 (the Environment-traps paragraph, seen uncommitted for a moment mid-batch, then committed by its author); my uncommitted SearchComposer edit was untouched both times. Adopted — no code touched by anyone else; my commits stay pathspec-limited. Commit messages here avoid the guard's trigger words.
 
 ### B1 LIVE STATUS
 
 | # | Piece | Status |
 |---|---|---|
 | 0 | This record + the traced mechanism, BEFORE any fix | DONE (this commit) |
-| 1 | The pin: DEBUG drawn-words oracle + `VX895SearchFacetHeaderTests` (A mounted header · B model mechanism · C mounted counts guard) | IN-PROGRESS — written (`Features/Library/LibrarySearchDrawnOracle.swift`, the two recorders, `.debugProbeScope(session)` on the band and the sheet, `VariorumTests/VX895SearchFacetHeaderTests.swift`); the compile (`build-for-testing`, a cold DerivedData for this worktree) is PENDING |
+| 1 | The pin: DEBUG drawn-words oracle + `VX895SearchFacetHeaderTests` (A mounted header · B model mechanism · C mounted counts guard) | DONE (d4b01ad0a) — `Features/Library/LibrarySearchDrawnOracle.swift`, the two recorders, `.debugProbeScope(session)` on the band and the sheet, `VariorumTests/VX895SearchFacetHeaderTests.swift`; compiles against the PRE-FIX app (`build-for-testing` → TEST BUILD SUCCEEDED); its RUN is row 2 |
 | 2 | Red-on-old: the pin run on the pre-fix tree (behavioral revert = the fix line only) | PENDING behind the stage |
 | 3 | The fix (`LibrarySearchModel.scope` observed) | NOT-STARTED — design below |
-| 4 | Rider VX-890 — the group-facts projection folded into one template | NOT-STARTED — design below |
+| 4 | Rider VX-890 — the group-facts projection folded into one template | DONE (this commit) — `SearchComposer.groupFacts(keyed:)`, read by `groupPage`'s `grouped` CTE and by `wornGroupFacts`. Zero-change proof: a throwaway dump (scratchpad, never in the tree) of every `groups` and `wornGroupFacts` statement over 4 questions × commits on/off × both visibilities × the four facets × library/note/book scope (× the 11 orders × cursor/no cursor × perGroup 0/3 for `groups`) — **12,672 `groups` statements byte-identical before/after; 288 `wornGroupFacts` statements whitespace-only different** (arguments identical). Headless `swift test --filter Search`: **154 tests in 26 suites passed**, no test edits — `SearchFacetTests`, `SearchOrderTests`, `SearchGroupsTests`, `SearchSavepointFacetTests`, `SearchP1Tests` among them (the two gated measurement suites skipped, as always). `LibrarySearchOrderTests` (Mac) PENDING behind the stage |
 | 5 | Gate: headless core suites (touched files) + the Mac search suites | PENDING (core: runs headless here; Mac: behind the stage) |
 | 6 | Walk: facet clicks on the dev-store Debug build, both voices, one capture per row | PENDING behind the stage |
 | 7 | Self-assessment | NOT-STARTED |
