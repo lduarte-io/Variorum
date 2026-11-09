@@ -252,6 +252,7 @@ struct MCPSetupKeyServerTests {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
             throw HarnessFailure("could not connect")
         }
+        HarnessWait.bound(fd, seconds: HarnessWait.receiveSeconds)   // VX-850: the harness's one bound (O-7's rule) — a silent door fails the reads below named, never hangs them
         _ = MCPShim.writeAll(fd, MCPPreamble.line(key: try h.operations.mintMCPSetupKey()))
         for window in 0..<MCPHandshake.preInitializeLimit {
             _ = MCPShim.writeAll(fd, Data((#"{"jsonrpc":"2.0","id":\#(100 + window),"method":"tools/list"}"# + "\n").utf8))
