@@ -597,6 +597,24 @@ The window's order: VX-928's RED RUN first (the prepared clone `vx915-b3-rev-src
 
 **The fix round:** F-1 (pin first) + F-3's description + F-5/6/7/8 (+ F-9 if mechanical) go to a FRESH implementer; round 2's fresh reviewer re-checks the fixes.
 
+#### ROUND 1 FIXES — LIVE STATUS (implementer: opus-implementer, fresh, session started 2026-11-09)
+
+*The confirmed findings only, no design latitude beyond the dispositions above. Code + headless verification only: NO `xcodebuild test` (every Mac pin's RUN, and the red leg of a Mac-only pin, lands PENDING(gate36)); small targeted `swift test --filter` runs only (nov7's load rule); at most ONE `build-for-testing` at the end, run only if no stage window is live. Zero `Sources/VariorumCore/Sync/`, custody, `Protection/` or editor-seam lines. F-2, F-10, F-11, F-12 are the orchestrator's (record-only) — untouched here. `Tools/stage status` at session start: "STAGE HELD by 'vx-926-soak-m1' — VX-926 soak M1: WHOLE Mac target … (~27 min left)" — so no build-for-testing then.*
+
+**NOT DONE (first line, kept current):** every piece below is NOT-STARTED unless flipped.
+
+| Piece | Finding | Status |
+|---|---|---|
+| 1 | F-1 pin (Part of VX-841) — `QuickNoteWingLandingTests.aCaptureABookInThatWingSeatsNamesTheBookNotThePool`, committed BEFORE the fix | IN-PROGRESS (this commit) |
+| 2 | F-1 fix — the W arm names the landing from the band's one membership read | NOT-STARTED |
+| 3 | F-3 code half (Part of VX-943) — `unlink_versions`' description stops claiming own-only; the "her words" misattributions in code comments/pin messages struck | NOT-STARTED |
+| 4 | F-5 (Part of VX-793) — the VX-793 block moved above `applyCallout`'s doc comment | NOT-STARTED |
+| 5 | F-6 (Part of VX-793) — `takeFamilyPlusCompare: @Sendable` | NOT-STARTED |
+| 6 | F-7 (Part of VX-943) — the one-note unlink receipt | NOT-STARTED |
+| 7 | F-8 (Part of VX-841) — `Queries.liveWing` in `QuickNoteMint.file` | NOT-STARTED |
+| 8 | F-9 (Part of VX-841) — FIX IF MECHANICAL, else traced-and-stopped | NOT-STARTED |
+| 9 | Headless verification + the one build-for-testing (if the stage is free) + the gate36 additions | NOT-STARTED |
+
 ## THE LEDGER (every row owned; updated point-by-point as batches close)
 
 | # | Member | Batch | Status |

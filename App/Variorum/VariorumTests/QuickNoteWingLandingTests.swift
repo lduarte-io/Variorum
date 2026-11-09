@@ -123,6 +123,43 @@ struct QuickNoteWingLandingTests {
         }
     }
 
+    /// **VX-915 ladder round 1, F-1 (RED ON OLD — pinned before the fix):** the
+    /// filing applies W's own `quicknote` tag through the one application road,
+    /// so a living BOOK in W whose rule is that tag SEATS the capture (the core
+    /// guard `QuicknoteWingTests.aLivingBookInThatWingHearsTheCapture`). The
+    /// note is then a book member, not a Pool note — so the receipt must name
+    /// the book, never "the Pool of “W”". ON THE OLD TREE: `fileAsQuicknote`
+    /// answers `.taggedOnly` for every non-Home wing and the receipt's W arm
+    /// spoke `filedInWing(W)` — "Filed in the Pool of “Work” — tagged
+    /// #quicknote." — whatever seated it, so the last two expectations fail
+    /// (the premise lines above them hold on both trees).
+    @Test func aCaptureABookInThatWingSeatsNamesTheBookNotThePool() async throws {
+        try await withLandingWorld(seed: 845) { session, db, work in
+            let tag = try await session.runner.run {
+                try $0.createTag(name: Operations.quicknoteTagPath, wingID: work.id)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.createReading(
+                    name: "jots", kind: .book, querySpec: try RuleGrammar.encode(.tag(tag.id)),
+                    wingId: work.id)
+            }
+            let pad = QuickNotePad(session: session)
+            pad.landingWingID = work.id
+            pad.text = "Seated."
+            let postID = try #require(await pad.fileExplicitly().postID)
+            let there = try await landing(db, postID)
+            // The premise (green on both trees): it landed in W, wearing W's
+            // tag, and W's book seated it.
+            #expect(there.wing == work.id)
+            #expect(there.tags == [Operations.quicknoteTagPath: work.id], "W's own tag, adopted")
+            #expect(there.books == ["jots"], "the applying act seated it in W's book")
+            // The receipt (RED ON OLD): it names the book, and never the Pool.
+            let said = session.status.spoken?.text ?? ""
+            #expect(!said.contains("Pool"), "a seated capture is no Pool note: \(said)")
+            #expect(said.contains("\u{201C}jots\u{201D}"), "the receipt names the book that holds it: \(said)")
+        }
+    }
+
     /// A REFUSAL keeps her decision about where it lands (like her words and
     /// her name); a refused close PARKS the pick with the words, and the next
     /// summon restores both.
