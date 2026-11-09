@@ -24,6 +24,20 @@
 //  lane (option C) or zero (with a strip badge, option A); the faces are
 //  unchanged either way.
 //
+//  **VX-848 (her ruling 2026-11-04, amending P-770-3's default — the VX-915
+//  run, batch 2; the threshold PROVISIONAL P-915-B2-1):** the lane's
+//  EXISTENCE stays a pure function of the column's width, but the FORM tier
+//  flips — the 38-pt badge lane is the wide-column default, and the card
+//  lane is kept for genuinely wide layouts: a column that keeps WRITE'S WHOLE
+//  MEASURE beside the card lane (`readingMeasure` = `EditorTypography.
+//  maxColumnWidth`, 680 — a column ≥ 866 pt). That is Write's own condition
+//  for a card (its prose capped at 680, a card only where ≥ 150 of gutter is
+//  left over — `gutterFitsCards`), applied per column: a card never costs the
+//  prose its measure. The default window's two 499-pt columns now carry the
+//  badge lane (≈425 pt of prose, was ≈313); the recorded alternative is a
+//  425-pt floor (cards wherever they leave no less than the default badge
+//  lane does).
+//
 
 import CoreGraphics
 
@@ -47,8 +61,12 @@ nonisolated enum CompareGutter {
     static let cellChrome: CGFloat = 36
 
     /// The narrowest prose a column keeps while it carries the CARD lane —
-    /// the two-column default window (499-pt columns) keeps ~315 pt.
-    static let readingMeasure: CGFloat = 300
+    /// VX-848 (PROVISIONAL P-915-B2-1): Write's whole measure, by reference
+    /// (the two can never drift), so cards stand only beside a column that
+    /// reads as wide as Write — a column ≥ 866 pt (680 + 150 + 36). Was 300,
+    /// which gave the two-column default window (499-pt columns) cards and
+    /// ~313 pt of prose.
+    static let readingMeasure: CGFloat = EditorTypography.maxColumnWidth
 
     /// The narrowest prose a column keeps while it carries the BADGE lane —
     /// below it the column's prose wins and the comments yield (Write's
