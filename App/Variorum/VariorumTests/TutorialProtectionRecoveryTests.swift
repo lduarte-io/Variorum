@@ -212,7 +212,7 @@ struct TutorialProtectionRecoveryTests {
             ProtectionWords.guideCopiesLessonTitle,
         ], "still three lessons")
         try await withGuide(variant: variant) { db, guideID in
-            let text = try await db.read { db -> String in
+            let (text, blocks) = try await db.read { db -> (String, [String?]) in
                 let id = try #require(try String.fetchOne(
                     db,
                     sql: """
@@ -221,10 +221,21 @@ struct TutorialProtectionRecoveryTests {
                         WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND c.title = ?
                         """,
                     arguments: [guideID, ProtectionWords.guidePosturesLessonTitle]))
-                return try Queries.renderedText(db, containerID: id)
+                return (try Queries.renderedText(db, containerID: id),
+                        try Queries.renderPost(db, containerID: id).map(\.text))
             }
-            #expect(text == TutorialSeeder.posturesLessonParagraphs.joined(separator: "\n"),
-                    "one block per paragraph, in order: the lesson's six, the line, the recipe")
+            // A JUSTIFIED EDIT, STRENGTHENED (the VX-915 gate36 disposition — a RIG red,
+            // both variants): this line joined the expected paragraphs with "\n", but
+            // `renderedText` joins blocks through `Queries.joinRenderedTexts`
+            // (`blockJoinSeparator`, "\n\n"). The expectation is now THE app's join, BY
+            // NAME, so the two can never drift…
+            #expect(text == Queries.joinRenderedTexts(TutorialSeeder.posturesLessonParagraphs),
+                    "the lesson renders the paragraphs through the app's own join, in order")
+            // …and, row by row, what a joined string alone cannot prove: the lesson's live
+            // blocks in position order are EXACTLY the paragraphs — one block per
+            // paragraph, none merged, none extra, none empty.
+            #expect(blocks == TutorialSeeder.posturesLessonParagraphs.map { Optional($0) },
+                    "one live block per paragraph, in position order: the lesson's six, the line, the recipe")
         }
     }
 }
