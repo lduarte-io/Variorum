@@ -226,6 +226,34 @@ compile-red vs behavior-red said plainly; first line = what you did NOT do. **No
 work (batch 3 — do not touch `PaneSurface`/`PaneTextAuthority` beyond reading); VX-544's retry (batch 2);
 the ladder; the PR. **ENVIRONMENT TRAPS above, binding verbatim.** No subagents. Foreground waits only.
 
+## BATCH 2 BRIEF — the offline typed-unlock retry (VX-544, D-544; R-849-1/-2 RULED)
+
+**The binding brief is `notes/plans/fixes/vx-544-offline-typed-unlock.md`'s "THE BRIEF" section, read WHOLE with
+its PREFLIGHT FACTS and D-544 — with these OVERRIDES, which win where they differ:**
+1. **Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`** (the run's one
+   branch; the vx-544 plan's own worktree/branch lines are superseded by the bundling).
+2. **You are an OPUS implementer** (her cast ruling at this run's kickoff: "opus should implement, fable
+   review"); `.claude/agents/opus-implementer.md` binds you.
+3. **P-544-1 and P-544-2 are RULED, not provisional** (this file's KICKOFF: R-849-1 retain + quiet retry;
+   R-849-2 the reachability trigger IS built). Build both; log nothing to QUESTIONS for them.
+4. **The `beforeRound` hook EXISTS** (batch 1, `bdb70dc3d`): D-544 build step 3a's hook half is DONE. Your
+   occasion (a) is a SECOND composition-level use: in `AppServices`' Mac composition, run the retry BEFORE the
+   existing flush occasion inside the one wired closure — gated by "only while the provider cannot produce keys"
+   (one cheap `currentKeys()` try, so an unlocked session pays nothing). Do not add a second hook property.
+5. **P-849-2 rides with you (same files):** check whether the PHONE composition offers the same one-line seam for
+   batch 1's FLUSH occasion; wire it only if it is truly that one line (the guarded autosave B already protects
+   the phone either way), else record the fact plainly for the MOBILE PARITY line. The phone's RETRY stays
+   unwired (D-544's posture, unchanged).
+6. **Commits say `Part of VX-544`** (drop the vx-544 plan's older `VX-500 U3:` prefix); record `### BATCH 2
+   RECORD` under UNIT RECORDS here; flip LIVE STATUS row 2 in the same commits.
+7. **The stage is NOT yours to claim or check:** this batch builds and pins headless (`swift build`, core
+   `swift test`, `xcodebuild build-for-testing`); every `xcodebuild test` run is the ORCHESTRATOR'S, after your
+   close, through nov7's queue. List the suites to run (type names) at the end of your record.
+8. **Her drill (the two-Mac test's steps 8–9 on her Air) stays OWED** — record it as owed, never claimed
+   (LIVE STATUS row 9). The live confirmation is hers.
+9. **THE STAGE & COORDINATION section above and ENVIRONMENT TRAPS bind you**; this file's CONSTITUTION too.
+   CastleRules is read WHOLE before any line (custody-adjacent: the derived secret lives in session memory only).
+
 ## UNIT RECORDS
 
 *(appended per batch)*
