@@ -138,6 +138,11 @@ beside it.**
 - **Merges serialize through nov7;** the second merger merges main in and re-proves on the merged tree — for this
   run that includes re-proving convergence over the beforeRound hook × VX-912 straggle-belt seam (the belt was
   already in this branch's base, bd163ea54; the batch-1 convergence pins ran against it).
+- **The vx-915 overlap (nov7, 2026-11-09):** vx-915's batch 3 (VX-841) changes `AppSession.swift` (+9/−2, a
+  macOS-only block); the shared files between the two runs are now AppSession.swift · CompareBoardView.swift ·
+  TakesViewModel.swift; the trial merge is textually CLEAN. WHICHEVER RUN MERGES SECOND runs the WHOLE Mac +
+  phone suites on the MERGED tree AND eye-reads AppSession's merged body — carried into this run's closing sweep
+  (LIVE STATUS row 8) and the closeout checklist.
 - **Stage protocol (every window):** REQUEST (what/minutes/claim name, sent EARLY) → READY (able NOW) → GO only
   from nov7 with the exact claim line → RELEASE with Executed counts and EVERY failing test by name (faulting
   thread read for any crash). `-only-testing` takes TYPE names as a zsh array. Instance checks: `pgrep -lx
@@ -175,7 +180,7 @@ beside it.**
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
 | 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | NOT STARTED |
-| 9 | Her drill: the two-Mac test's steps 8–9 on the Air (OWED) · VX-919's deploy window (HELD) | OWED |
+| 9 | Her drill: the two-Mac test's steps 8–9 on the Air — runs AFTER the release reaches the Air via Sparkle (her word, 2026-11-09) · VX-919's deploy window (HELD) | OWED |
 
 ## BATCH 1 BRIEF — the typed-over rescue (VX-683, R-683-1…4) + the honest flush (VX-402)
 
@@ -381,6 +386,96 @@ quoted below).
 
 **Your record:** `### BATCH 4 RECORD` under UNIT RECORDS; LIVE STATUS row 4 flipped in your commits; first line =
 what you did NOT do. **Not yours:** the stage; batches 3/5/6's files; `Sync/`. **ENVIRONMENT TRAPS and STAGE &
+COORDINATION above bind verbatim.** No subagents; foreground waits only.
+
+## BATCH 5 BRIEF — the purge-sweep/pool-teardown SIGSEGV (VX-855, TRACE-FIRST — Suspected)
+
+**Who you are.** The implementer for batch 5, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`. SYNC/-CLASS
+(`PurgeJanitor` lives in `Sources/VariorumCore/Sync/`) — `notes/SyncSpec.md` is read IN FULL before any line;
+Fable cold-reviews. VX-855 is SUSPECTED: the pin is the CONFIRM — red confirms and the fix proceeds; green means
+RECORD-ONLY (the traced findings into your record for the orchestrator to put on the ticket; no fix on a trace
+that never bit).
+
+**The evidence (the ticket's one .ips, quoted here because implementers have no Linear):** the Debug TEST HOST
+(build 11051, 2026-11-05), crashed 4.4 s after launch, AFTER its test bundle had already passed — teardown, not a
+test; no VariorumTests frame on any thread. EXC_BAD_ACCESS / KERN_INVALID_ADDRESS (possible ptrauth failure) on
+thread `GRDB.DatabasePool.reader.1`: `sqlcipher_memset ← sqlite3Codec ← readDbPage … sqlite3_step ← fetchAll ←
+PurgeJanitor.collectRoots(tombstoneRoots) ← LocalPurge.sweep(afterFamily:) ← AppDatabase.read`. Suspected
+mechanism (UNCONFIRMED): the launch-time background purge sweep holds an in-flight POOL READER while the pool (or
+its codec key context) is torn down — quit, test-host termination, plausibly the Castle lock's teardown — a
+use-after-free in the codec context. Data-safe (a read), but a "Variorum quit unexpectedly" class reachable by
+quitting (or locking?) within seconds of a launch that has tombstones to sweep. Adjacent: VX-818's MacWillLock
+teardown ordering landed in the same neighborhood — read its landed shape before concluding anything about the
+lock road.
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole · `notes/SyncSpec.md` IN FULL · the purge
+design's sweep/horizon sections (`notes/plans/phase-13j-purge-memo.md`) · the code:
+`Sources/VariorumCore/Sync/PurgeJanitor.swift` (`collectRoots`), `Operations+Purge.swift` (`LocalPurge.sweep`),
+the pool's close road (`Sources/VariorumCore/Persistence/` — where the pool closes at quit/lock), the app
+teardown (`AppBootstrap`'s lock and quit roads; grep `QuitPurgeQuiesceTests` — the standing quiesce pin suite,
+your closest precedent), and every `LocalPurge.sweep` caller (the launch road that starts the background sweep).
+
+**The pieces, in order (commit per piece, `Part of VX-855`; push each):**
+
+1. **THE TRACE + THE REPRO PIN (the confirm).** Trace the teardown order in code first: who closes the pool /
+   drops the codec context, and what (if anything) waits for the sweep's in-flight reader. Then the repro,
+   HEADLESS-FIRST: a core-level Swift Testing pin that drives the sweep's read on a pool while the store tears
+   down (close/key-drop) mid-read — DETERMINISTICALLY (hold the read open with a plant, then tear down), never a
+   timing lottery. RED confirms the class. If the class only reproduces in-app at quit, say so plainly and record
+   the dev-store repro recipe for the ORCHESTRATOR'S window (launch, store with purgeable tombstones, quit within
+   seconds) — never launch the app yourself (stage).
+2. **THE FIX (only on a red confirm):** order teardown against in-flight background reads — the sweep's reader
+   awaited (or the sweep cancelled and joined) BEFORE the pool/codec teardown; the `QuitPurgeQuiesceTests` shape
+   is the precedent. No new product behavior; pure ordering. If the fix wants to grow into a lock-road redesign,
+   STOP and record (VX-152's adjacency — the orchestrator adjudicates).
+3. **Pins:** the repro pin red-on-old by behavioral revert (named BEFORE it runs, at a committed tip); the
+   ordering pinned.
+4. **Close:** `swift build` · headless `swift test` over every touched suite · both `build-for-testing`s; list
+   any Mac suites (TYPE names) + named reverts for the orchestrator's window at your record's end.
+
+**Your record:** `### BATCH 5 RECORD` under UNIT RECORDS; LIVE STATUS row 5 flipped in your commits; first line =
+what you did NOT do; a green confirm said plainly as RECORD-ONLY. **Not yours:** the stage; any Debug-app launch;
+batches 3/4/6's files. **ENVIRONMENT TRAPS and STAGE & COORDINATION above bind verbatim.** No subagents;
+foreground waits only.
+
+## BATCH 6 BRIEF — the OWNED repair's rank swap (VX-921) + the device_cursor cap script (VX-919, AUTHORED ONLY)
+
+**Who you are.** The implementer for batch 6, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`. SYNC/-CLASS
+(`Repairs.swift`) — `notes/SyncSpec.md` IN FULL before any line; Fable cold-reviews. **ZERO server contact:
+VX-919's script is AUTHORED and self-assessed only — never run against production, the mirror or any live
+Supabase; the deploy is HELD for her window (a server act runs only at her word).**
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole · `notes/SyncSpec.md` IN FULL (§7's repair
+doctrine especially) · `notes/plans/fixes/vx-912-open-source-gating.md`'s B2 record (the worked pattern — the
+created_at rank swap, P3: your exact shape) · `notes/plans/fixes/vx-912-b0-security-verify.md`'s device_cursor
+corner (why VX-919 exists) · the code: `Sources/VariorumCore/Sync/Repairs.swift` — the OWNED exclusivity repair
+(~:975–1050; the rank comment ~:984, the `sync_row_seq` join ~:1017) · `Server/supabase/` — grep `sync_challenge`
+for the cap/eviction pattern; `Server/supabase/maintenance/` for the script conventions (`vx495-pull-keyset.sql`
++ `vx495-rollback.sql` are the paired-rollback precedent).
+
+**The pieces, in order (commit per piece, `Part of VX-<member>`; push each):**
+
+1. **VX-921 — the rank swap.** The OWNED exclusivity repair's claimant rank moves from `sync_row_seq` to
+   `created_at` (the B2 worked pattern decides the exact key and tiebreak — follow it; an id tiebreak keeps
+   determinism when stamps tie). SCOPE: this repair only — if you find sibling repairs with the same seq-rank gap
+   (the ~:795/:812 joins belong to a different repair), RECORD them for the orchestrator, never widen silently.
+   The pin, red-on-old by behavioral revert: the convergence shape — two devices whose `sync_row_seq`
+   bookkeeping ranks DIFFERENT claimants (seq is per-device) converge on the SAME claimant under created_at; on
+   the seq rank the pin is RED (the devices disagree). The repair's demotion/arrival arms unchanged (the standing
+   suites stay green).
+2. **VX-919 — the cap script, authored.** `Server/supabase/maintenance/vx919-device-cursor-cap.sql`: bound LIVE
+   device rows per account at 64, evicting oldest `seen_at` first (the `sync_challenge` pattern); idempotent and
+   safe to re-run; a header comment stating what it does, the DEPLOY-HELD-FOR-HER-WINDOW line, and the
+   verification query to run after deploy; a paired rollback script/note per the maintenance conventions if the
+   pattern calls for one. NEVER executed anywhere by you — its review is the ladder's.
+3. **Close:** `swift build` · headless `swift test` over the repair's suites (the convergence suites run
+   headless in the core) · both `build-for-testing`s; list any Mac suites (TYPE names — likely none) and confirm
+   every named revert ran headless.
+
+**Your record:** `### BATCH 6 RECORD` under UNIT RECORDS; LIVE STATUS row 6 flipped in your commits; first line =
+what you did NOT do. **Not yours:** the stage; the deploy; batches 3/4/5's files. **ENVIRONMENT TRAPS and STAGE &
 COORDINATION above bind verbatim.** No subagents; foreground waits only.
 
 ## UNIT RECORDS
