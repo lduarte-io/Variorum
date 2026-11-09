@@ -397,12 +397,12 @@ struct MCPReadTools: Sendable {
                 db,
                 sql: """
                     SELECT r.id, r.name, r.kind, r.archived_at IS NOT NULL AS archived,
-                           \(Self.resolvedWing("r.wing_id")) AS wing
+                           \(Queries.effectiveWingSQL("r.wing_id")) AS wing
                     FROM reading r
                     WHERE r.deleted_at IS NULL AND r.kind IN ('book', 'gathering')
                       AND (:archived OR r.archived_at IS NULL)
                       AND (:all OR r.id IN (SELECT value FROM json_each(:books))
-                           OR \(Self.resolvedWing("r.wing_id")) IN (SELECT value FROM json_each(:wings)))
+                           OR \(Queries.effectiveWingSQL("r.wing_id")) IN (SELECT value FROM json_each(:wings)))
                     ORDER BY r.name COLLATE NOCASE, r.id
                     """,
                 arguments: ["all": standing.openBook, "books": try json(bookIDs), "wings": try json(wingIDs),
@@ -633,7 +633,7 @@ struct MCPReadTools: Sendable {
             sql: """
                 SELECT r.id, r.kind FROM reading r
                 WHERE r.deleted_at IS NULL AND r.kind IN ('book', 'gathering') AND r.archived_at IS NULL
-                  AND \(Self.resolvedWing("r.wing_id")) = ?
+                  AND \(Queries.effectiveWingSQL("r.wing_id")) = ?
                 """,
             arguments: [wingID]) {
             let id: String = row["id"]
@@ -1350,11 +1350,6 @@ struct MCPReadTools: Sendable {
     private func displayTitle(_ row: Row) -> String {
         DisplayTitle.note(
             title: row["title"], entryDate: row["entry_date"], createdAt: row["created_at"], calendar: calendar)
-    }
-
-    static func resolvedWing(_ column: String) -> String {
-        "CASE WHEN \(column) = '' OR \(column) NOT IN (SELECT w.id FROM wing w WHERE w.deleted_at IS NULL) "
-            + "THEN '' ELSE \(column) END"
     }
 
     private func json(_ values: [String]) throws -> String {
