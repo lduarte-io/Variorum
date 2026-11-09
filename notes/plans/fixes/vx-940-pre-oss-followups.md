@@ -57,7 +57,7 @@ The whole Mac target + the phone target if `Shared/` changed (VX-920 is Mac app 
 |---|---|---|
 | 0 | Kickoff: mint (VX-940), 7 members seated, worktree, in-flight row, her rulings | DONE (this commit) |
 | W1 | VX-939 + VX-923 | **BUILT + PINNED, headless** — "## W1 record" (end of file): VX-939 `LETTER.md` landed (two files, sync noted — the seed reads compiled literals; `read-me.txt` is the pins' oracle, untouched); VX-923 the four Point-Free siblings + Sparkle credited (verbatim, generated and checked IDENTICAL), BIP-39 → MIT in both places; the pin red 19 on old / green 4/4 headless; **in-target runs PENDING the gate (Mac AND phone targets)**; authored sentences + P-940-W1-1..5 listed for her pass |
-| W2 | VX-920 | NOT STARTED |
+| W2 | VX-920 (+ the A-940-1 rider: the LETTER drift pin, Part of VX-939) | **IN PROGRESS** — "## W2 record" (end of file) |
 | W3 | VX-917 | NOT STARTED |
 | W4 | VX-922 + VX-925 + VX-933 | NOT STARTED |
 | L | The ladder (opus-reviewer) | NOT STARTED |
@@ -196,3 +196,19 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 - **(iii) Sparkle's text is the LICENSE file only.** Sparkle's other bundled pieces (`Vendor/` in its checkout) aren't separately enumerated. The LICENSE's EXTERNAL LICENSES section is upstream's own statement of what it owes, and B3 judged the four parts from it.
 - **(iv) LETTER.md's comment block is not her words but sits in her letter's file.** It's an HTML comment, so GitHub's rendered page shows only her text, but the raw file shows it. If she'd rather the file hold nothing but her words, the sync note can live only in the two other places.
 - **(v) The BIP-39 notice is a sentence beside a Castle face** (the twelve words' wordlist). I changed only its license statement, which is provenance, not behavior, and left the role untouched. A reviewer who reads the license line as a CastleRules sentence should flag it.
+
+## W2 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild` of any kind, no stage, no Debug launch, no walk or capture (the brief: headless only — `swift build`/`swift test` plus throwaway scratch instruments). So the in-target run of the VX-920 pin (`LineageFaceModelTests`, Mac app target) is **PENDING the run's gate**; it is proven headless in substance through a scratch harness (below). The visual confirm of the lineage face rides the merge-gate window (§4 W2).
+
+*Machinery: Opus implementer, fresh session, briefed by this file's §2 (A-940-1)/§4 W2/§7 (+ the VX-926 §7 and the VX-912 §7 it binds — read on `origin/vx-926-test-flakes` and this branch), the resiliency protocol, the VX-912 B2 record's (vii) + the ladder round 1's F-R1-1, SurfaceContracts' History & lineage line, the ticket. No revert is in flight.*
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record + the ledger row | DONE (this commit) |
+| P1 | VX-920 — the pin (`LineageFaceModelTests`, a pure arm over `.otherWing(wingID: "")`), red on the pre-fix tree by assertion | NOT-STARTED — compiles on old (calls only `LineageFaceCopy.place`); proven red through a headless scratch harness compiling the face's copy code from the tree against the real VariorumCore |
+| P2 | VX-920 — the fix: one name resolution (`Queries.effectiveWingID` over the read's LIVE wing names; Home = `WingWords.home`, the switcher's one Home name) for the member's line AND its go-to button | NOT-STARTED |
+| P3 | The rider (A-940-1, Part of VX-939) — the LETTER drift pin, a core test (`Tests/VariorumCoreTests`), green; a scratch mutation of `LETTER.md` turns it red; restored | NOT-STARTED |
+| P4 | Close: headless build + the nearest suites, row dispositions, self-assessment | NOT-STARTED |
