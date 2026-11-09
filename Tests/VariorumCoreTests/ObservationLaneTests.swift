@@ -23,13 +23,17 @@ import Testing
 /// priority reverted to the tests' own `.medium`): the observation's
 /// scheduler Task and its consumer are enqueued AFTER the probe, so the probe
 /// starts first — deterministically, with no wall clock in the verdict.
-/// (Ladder round 1, F-R1-6: the pin used to bound both values by 0.75 s of
-/// wall, which a full run's long synchronous test segments could outlast — a
-/// `.high` job still waits for a thread to finish what it is running; they
-/// delay the probe, 480 slices behind, at least as much, so ORDER cannot red
-/// on them.) `HeldValues`' own 30 s bound stays as the hang-ender. The
-/// premise is asserted too — the probe waited longer than `premiseFloor`, so
-/// the backlog was real and the order means the lane jumped it.
+/// (Ladder round 1, F-R1-6, then round 2: the verdict is ORDER rather than a
+/// 0.75 s wall bound — clock-free. A `.medium` backlog, however long its
+/// segments, never delays the lane: the pool admits `.high` jobs on threads of
+/// their own beside a full `.medium` band — one started in 16 µs–10 ms with
+/// every pool thread inside a 2 s `.medium` segment (round 2's E3/E4,
+/// `notes/plans/fixes/vx-926-ladder-round2.md`). What delays the lane is work
+/// in its own band: the wall bound tolerated that only to 0.75 s, ORDER until
+/// it outlasts the probe's drain — and a `.high` hold that long reds it, as it
+/// should.) `HeldValues`' own 30 s bound stays as the hang-ender. The premise
+/// is asserted too — the probe waited longer than `premiseFloor`, so the
+/// backlog was real and the order means the lane jumped it.
 @Suite("VX-926 U3 — the held-observation lane jumps the run's backlog (VX-625)", .serialized)
 struct ObservationLaneTests {
     /// How long the forced backlog holds the pool.

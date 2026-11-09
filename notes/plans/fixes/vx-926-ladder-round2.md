@@ -119,3 +119,15 @@
 - **F-R2-2 — ACCEPTED, FIX (taken, not optional):** the run's whole point is hermetic tests; a fence that accepts `defaults: .standard` on a test call line is a hole in exactly that fence. The fence refuses `appDomainSpellings` on the test root's call lines; the reviewer's probe line is the red-on-old.
 - **The out-of-scope note — RECORDED:** `MCPAcceptLoopServerTests.swift:93/115/117`'s 10 s bounds around real-server connects (VX-612-era, pre-run) are the same FIFO exposure as F-R1-2 — joined to the A-926-3 / P-926-U3-1 bundle; the soak's MCP leg reads them with that lens.
 - **Execution:** one narrow fresh implementer builds F-R2-1 + F-R2-2; as a FINAL round's fixes they get the orchestrator's LINE-BY-LINE check against each finding (CLAUDE.md's rule), then the ladder record closes.
+
+## FINAL SWEEP (F-R2-1 + F-R2-2)
+
+**Implementer:** one narrow fresh `opus-implementer`, the two items A-926-5 accepts and nothing else; headless, no stage. Base `0dfaaf0b6`.
+
+**LIVE STATUS**
+
+| Piece | What | State |
+|---|---|---|
+| S1 | F-R2-1 — wording only: `ObservationLaneTests.swift`'s parenthesis, the U3 self-assessment (i) sentence, round 1's F-R1-6 fix notes + its (iv), and the run record's U4 facts count (2,622 per-note of 2,731) | DONE (this commit) — `swift build` + the lane suites run at S3 |
+| S2 | F-R2-2 — the test-root fence refuses `appDomainSpellings`; red-on-old by a working-tree-only probe (never committed): the pre-fix fence GREEN on a `defaults: .standard` call line (the hole), the fixed fence RED naming it, probe removed, GREEN | NEXT |
+| S3 | Verification: `NoteMemorySeamSourcePinTests` + `ObservationLaneTests` + `StarContextTests` + `TrashObservationP2Tests` through `Tools/assert-tests-ran`; `swift build`; `git diff -- Sources` empty | — |
