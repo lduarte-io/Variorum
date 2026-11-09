@@ -29,7 +29,7 @@ Here is each item, in plain words:
 
 **The walk, in plain words.** I drove the app myself at the end: the pad's wing pick works exactly as ruled in both voices (and the receipt honestly says "the Pool of “Walk Wing”"), double-Return files once, the dialogs' Cancel keys work, and your agent's unlink round ran LIVE over the wire — a client linked two notes, removed the link with the id it got back, your receipt named both notes, the Open door landed in Compare showing "there is no relationship here", and ⌥⌘Z put the link back. The door's key fence even refused my hand-made key first, which is exactly what it should do.
 
-**The merge and the release, in plain words.** ⏳ The run merges through the coordinator after the closing walk (main's other merged work — vx-913 — was already folded in and re-checked). `/Applications` was NOT touched (your VX-931 rule: releases only). ⏳ If this run is the wave's last merger, release prep runs at the coordinator's GO: version 1.4 built and stopped at the release script's HANDOFF — **nothing uploaded, nothing published, no appcast** — so saying the word in the morning is all that remains.
+**The merge and the release, in plain words.** The run is MERGED: pull request #240, merge commit 961790b13, after a full test gate on the final tree — every Mac test (6,294) plus the iPhone target's 852, the only reds two long-known flaky tests, each verified green alone (one is VX-701, reopened with the new datapoint). Both of tonight's other merged runs (vx-913, vx-926) were folded in and re-checked first. `/Applications` was NOT touched (your VX-931 rule: releases only). Release prep is NOT this run's: vx-849 merges last tonight, so the coordinator hands IT the 1.4 build — built and stopped at the release script's HANDOFF, **nothing uploaded, nothing published, no appcast** — and saying the word in the morning is all that remains for you.
 
 ---
 
@@ -38,7 +38,7 @@ Here is each item, in plain words:
 - [ ] Read the QUESTIONS bundle (**#273** — the P-915 family) and rule the open choices (the biggest: the unlink rung P-915-B6-1; the ai_marks carry-over P-915-L1-1; the Compare card threshold P-915-B2-1).
 - [ ] ⏳ Wording passes: the AI-marks switch's words (F-934-B) · the quicknote landing receipts · the unlink receipt family · N-927's "as kept" grammar · the lesson-3 clause · the recovery recipe's order note (F-10).
 - [ ] ⏳ The real-store guide RE-SEED (grown again this run: "getting around", "owned, finished, sealed", "Standard and Castle", lesson 3's clause — yours, behind A1, via Help ▸ Restore Field Guide…).
-- [ ] ⏳ Release 1.4 at your word (the build is ready at release.sh's HANDOFF stop; VX-852's new pin-check lines will appear in its transcript — their first exercise).
+- [ ] Release 1.4 at your word (vx-849, the wave's last merger, runs the release prep at the coordinator's GO — the build will be waiting at release.sh's HANDOFF stop; VX-852's new pin-check lines appear in its transcript, their first exercise).
 - [ ] ⏳ The filed-tickets pass (the checkbox list at the bottom).
 
 ## Decisions waiting on you (each explained where it's bundled)
@@ -47,9 +47,9 @@ The QUESTIONS bundle entry (**#273**) carries the P-915 family with one-line pla
 
 ## Evidence and state (⏳ final numbers at closeout)
 
-- Branch `vx-915-recents-sweep`, worktree `~/dev/variorum-vx-915`; PR **#240**; merge commit ⏳ (the coordinator serializes it); **canon-size 140,013 of 150,000 (headroom 9,987 — no crossing)**.
+- Branch `vx-915-recents-sweep`, worktree `~/dev/variorum-vx-915`; PR **#240**; merge commit **961790b13**; **canon-size 140,013 of 150,000 (headroom 9,987 — no crossing)**.
 - The run record (everything, verbatim): `notes/plans/fixes/vx-915-recents-sweep.md` — its FOR A LATER READER section is the settled summary.
-- Gates: gate12 + gate12b (batches 1–2, green; one rig fixed owner-aware, never weakened), gate36 (73 types, 456 tests, zero skips; both red legs watched; two first-run reds traced and fixed), gate36b (31/4, all green), the whole-Mac + phone merge gate on the folded tree ⏳ (runs at the coordinator's GO).
+- Gates: gate12 + gate12b (batches 1–2, green; one rig fixed owner-aware, never weakened), gate36 (73 types, 456 tests, zero skips; both red legs watched; two first-run reds traced and fixed), gate36b (31/4, all green), the whole-Mac + phone merge gate on the folded tree: Mac 6,294 tests / 1,091 suites (one green-alone load flake → VX-701 reopened), phone 852 / 139 (only the standing caret red).
 - The ladder: round 1 (0 B / 0 M / 4 MINOR / 8 NIT) + fixes verified; round 2 (0 B / 0 M / 2 MINOR / 5 NIT) — CLOSED, no round 3 earned.
 - The closing walk: ALL GREEN (W-841 whole in both voices · W-928 both arms · W-869's S1/S2 · VX-943's live wire round end-to-end; the record's THE CLOSING WALK RAN section).
 
@@ -62,5 +62,6 @@ The QUESTIONS bundle entry (**#273**) carries the P-915 family with one-line pla
 - [ ] **VX-949** (Low · Wording · Castle & sync) — the backup folders' RESTORE.md runbook still advises "Replace All Keys" where the guide's new recovery recipe advises Use Castle; align or record why they differ.
 - [ ] **VX-950** (Low · Bug · Settings) — the guide says "Account…, at the bottom of the sidebar" but the sync row's offline state shows no Account… door.
 - [ ] **VX-954** (Low · Bug · Search) — a punctuation word beside a tag answers less than the tag alone.
+- [ ] **VX-701** (Low · REOPENED) — the TakesFindBoard Esc-boundary flake recurred at this run's merge gate, its first recurrence after vx-926's close; the datapoint is on the ticket (VX-970 was minted for the sighting, then cancelled as its duplicate).
 - [ ] **VX-957** (Low · Bug · App shell) — the pad's wing word is blank for an instant after a park restore (face late, outcome right).
 - [ ] **VX-958** (Low · Bug · App shell) — Home capture receipts can still over-claim "the Pool" when a Home book seats the note (the fixed class's one remaining arm).
