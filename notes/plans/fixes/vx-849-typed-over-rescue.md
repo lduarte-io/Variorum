@@ -216,7 +216,7 @@ folder of the core test target, run, then deleted — never in the PR) so its re
 | # | Piece | Status |
 |---|---|---|
 | 1 | VX-402 — the honest flush | DONE (this commit) — instrument red 3/3 → green 3/3; Mac `build-for-testing` green; the Mac pins' RUNS **PENDING** (stage) |
-| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | IN PROGRESS — 2a the op + core pins DONE (this commit; 9/9 green; the behavioral revert named below runs NEXT at this tip); 2b the coordinator carries the snapshot + the eleven record sites pass it — NEXT |
+| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | IN PROGRESS — 2a the op + core pins DONE (`e7ec1227f`; 9/9; revert-proven); 2b the coordinator + the eleven record sites + the Mac pins DONE (this commit; Mac + phone `build-for-testing` green; Mac runs PENDING); NEXT: the phone pins, then piece 3 |
 | 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | NOT STARTED |
 | 4 | Close — builds, suites, self-assessment, STAGE REQUEST | NOT STARTED |
 
@@ -270,4 +270,36 @@ folder of the core test target, run, then deleted — never in the PR) so its re
   `Operations.autosave`, the rescue's `if` is guarded off (`if false, let expectedText, …`) — the parameter accepted
   and ignored, i.e. the pre-fix blind write. Expected: THE PIN, the S5-shape pin and the convergence pin RED (the
   displaced words survive nowhere); the six guards green. Then `git checkout --` the one file (nothing else
-  uncommitted in it) and the suite re-run green. Result: PENDING (next line of this record).
+  uncommitted in it) and the suite re-run green. **Result (run at `e7ec1227f`): exactly as named** — RED:
+  `aStaleAutosaveKeepsHerBufferOnTheRowAndRescuesTheDisplacedWords` (2 issues), `theRescuedCardLandsWhereAnS5CardLands`
+  (4), `aPullIntoTheDebounceWindowThenHerAutosaveConvergesWithBothTexts` (4); the six guards GREEN; restored by
+  `git checkout --` of the one file (diff clean) → **9/9 green**.
+
+**Piece 2b — VX-683 B, the snapshot rides every surface's call (FIXED; Mac pins PENDING the stage).**
+- *The coordinator (`AutosaveCoordinator`):* `Pending.expectedText` — the text the pending RUN was built on, set by the
+  run's FIRST `record(…, basedOn:)` and kept while later keystrokes coalesce (they were built on her own pending text,
+  never on the store); the flush passes it as the op's `expectedText`. A REFUSED write hands its older snapshot to a
+  newer run recorded while it flew (the refused text never landed, so the newer run still stands on the older row —
+  carrying its own would read the untouched row as changed and mint a spurious card at the retry).
+- *The eleven production record sites, each passing what the surface showed BEFORE the edit:* Write
+  (`EditorViewModel.recordAutosave` — the ledger's text before `recordEdit`); the crystallizer's leading-run attach
+  (`knownText`) and its corrections (what THIS mint wrote into the take); the Takes board, Compare, Canvas, the book
+  Index and the block TOC (each pane's `old` = `PaneTextAuthority.text`, computed before `bufferEdited`); the phone's
+  page (its ledger), its takes-browser card (`lastRecordedCardText`, seeded at `beginEditing` from what the card
+  showed), its branch-carries-the-shown-text road (the minted take's text), and the phone's quick note (a new
+  `recordBase`: the owned block's STORED text at adoption — the box's own tail can differ from it by the import's
+  normalization — then each tail handed off).
+- *Deliberately unguarded (recorded corner):* the list exit's retraction write inside `runStructural`
+  (`EditorSurfaceController.insertEmptyBlock`) — a structural flight's op body, written right after the flight's own
+  flush in the same serialized runner; the seeders and the perf fixtures (not surfaces).
+- *Pins (Mac, `TypedOverRescueSurfaceTests` — a new suite):* RED ON OLD BY BEHAVIOR (they drive only pre-fix API —
+  the real typing road, a pull's row write, the flush): `writeTypingOverASyncPullRescuesThePullsWords`,
+  `takesPaneTypingOverASyncPullRescuesThePullsWords`. Guards (green both sides — the false-positive class):
+  `writeHerOwnSuccessiveRunsNeverMintACard`, `takesPaneHerOwnSuccessiveRunsNeverMintACard`. Coordinator pins
+  (compile-red on old — they name `basedOn:`): `aRunCarriesItsFirstSnapshotAcrossCoalescedKeystrokes`,
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun`.
+- *Evidence, headless:* the two coordinator pins, ported into the instrument over the new coordinator: green. Mac
+  `build-for-testing` green (0 errors). Phone `build-for-testing` green (generic iOS Simulator; one phone suite called
+  `recordTakeEdit` without the snapshot — the parameter now defaults to nil like the coordinator's own `record`).
+  **Every Mac run PENDING** (the STAGE REQUEST). The instrument's behavioral reverts of the two coordinator lines run
+  next, at this commit's tip.

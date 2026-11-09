@@ -360,7 +360,8 @@ final class BlockTOCViewModel {
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
         authority.bufferEdited(variantID: variantID, text: newText)
-        autosave.record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: `old` (what the pane showed) is the autosave's snapshot.
+        autosave.record(variantID: variantID, text: newText, charDelta: cost, basedOn: old)
     }
 
     // MARK: - Naming (setBlockName's face)

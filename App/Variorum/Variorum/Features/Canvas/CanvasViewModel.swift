@@ -749,7 +749,8 @@ final class CanvasViewModel {
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
         authority.bufferEdited(variantID: variantID, text: newText)
-        coordinator.record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: `old` (what the card showed) is the autosave's snapshot.
+        coordinator.record(variantID: variantID, text: newText, charDelta: cost, basedOn: old)
     }
 
     private func storeText(blockID: String, variantID: String) -> String? {

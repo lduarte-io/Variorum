@@ -1445,9 +1445,13 @@ final class MobileEditorViewModel {
     /// A browser-card edit lands in the ONE ledger + autosave the page
     /// uses (batch 1's variant-routed pattern) — the sheet and the page
     /// can never disagree about a take's bytes.
-    func recordTakeEdit(variantID: String, text: String, charDelta: Int) {
+    ///
+    /// `basedOn` (VX-683 B): the text the card showed right before this edit
+    /// — the autosave's snapshot (`AutosaveCoordinator.record`; both production
+    /// callers pass it, nil = unguarded, the coordinator's own default).
+    func recordTakeEdit(variantID: String, text: String, charDelta: Int, basedOn: String? = nil) {
         ledger.recordEdit(variantID: variantID, text: text)
-        autosave.record(variantID: variantID, text: text, charDelta: charDelta)
+        autosave.record(variantID: variantID, text: text, charDelta: charDelta, basedOn: basedOn)
     }
 
     /// THE TARGETED DISPLAY APPLY (the flip's surface half): swap ONE
@@ -1966,6 +1970,9 @@ final class MobileEditorViewModel {
             return
         }
         let text = viewText(index.range(ofEntryAt: entryIndex))
+        // VX-683 B: the take's text BEFORE this edit (the Mac's shape) — the
+        // autosave's snapshot, so a row changed under her since is rescued.
+        let basedOn = ledger.textByVariant[variantID]
         ledger.recordEdit(variantID: variantID, text: text)
         // Block-scoped edit cost (AppSpec §10): old + new lengths of the
         // exact changed edit, UTF-16 — the Mac's shape, retiring the
@@ -1975,7 +1982,8 @@ final class MobileEditorViewModel {
         let oldLength = editedRange.length - delta
         autosave.record(
             variantID: variantID, text: text,
-            charDelta: exactCost ?? (oldLength + editedRange.length))
+            charDelta: exactCost ?? (oldLength + editedRange.length),
+            basedOn: basedOn)
     }
 
     /// The recovery road taken from INSIDE `storageDidEdit`, where a

@@ -24,6 +24,15 @@ final class AutosaveCoordinator {
     struct Pending: Equatable {
         var text: String
         var charDelta: Int
+        /// **VX-683 B — the text this pending run was BUILT ON**: what the
+        /// surface showed for the take right before the run's FIRST edit (its
+        /// last-adopted snapshot, or its own text a write already landed),
+        /// captured once and kept while later keystrokes coalesce. It rides the
+        /// write as `Operations.autosave`'s `expectedText`, so a row changed
+        /// under the run since (a sync pull in the debounce window, the MCP
+        /// door, a second window) is RESCUED, never blind-written. nil = the
+        /// caller gave none (the unguarded write).
+        var expectedText: String? = nil
     }
 
     private let runner: OperationsRunner
@@ -107,12 +116,18 @@ final class AutosaveCoordinator {
 
     /// Records the latest text for a variant plus this edit's cost;
     /// keystroke bursts coalesce into the newest text and the summed cost.
-    func record(variantID: String, text: String, charDelta: Int) {
+    ///
+    /// `basedOn` (VX-683 B): the text the surface held for this take right
+    /// BEFORE this edit — what the edit was built on. Only the FIRST edit of a
+    /// pending run sets the run's snapshot (`Pending.expectedText`); the
+    /// coalesced keystrokes after it were built on her own pending text, not
+    /// on the store. Every production surface passes it; nil = unguarded.
+    func record(variantID: String, text: String, charDelta: Int, basedOn: String? = nil) {
         if !firstEditFired {
             firstEditFired = true
             onFirstEdit?()
         }
-        var entry = pending[variantID] ?? Pending(text: "", charDelta: 0)
+        var entry = pending[variantID] ?? Pending(text: "", charDelta: 0, expectedText: basedOn)
         entry.text = text
         entry.charDelta += charDelta
         pending[variantID] = entry
@@ -184,11 +199,18 @@ final class AutosaveCoordinator {
         for (variantID, entry) in batch.sorted(by: { $0.key < $1.key }) {
             do {
                 try await runner.run { ops in
-                    try ops.autosave(variantID, text: entry.text, charDelta: entry.charDelta)
+                    try ops.autosave(
+                        variantID, text: entry.text, charDelta: entry.charDelta,
+                        expectedText: entry.expectedText)
                 }
             } catch {
                 if var newer = pending[variantID] {
                     newer.charDelta += entry.charDelta
+                    // VX-683 B: the refused text never landed, so the newer
+                    // run (built on it) still stands on the OLDER snapshot —
+                    // carrying its own would read the untouched row as
+                    // changed and mint a spurious card on the retry.
+                    newer.expectedText = entry.expectedText
                     pending[variantID] = newer
                 } else {
                     pending[variantID] = entry

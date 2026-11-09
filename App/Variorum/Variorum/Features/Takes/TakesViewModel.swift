@@ -1177,7 +1177,9 @@ final class TakesViewModel {
         // Her hand: an edit ends a pending article landing (17p batch a, J1).
         board.clearArticleLanding()
         authority.bufferEdited(variantID: variantID, text: newText)
-        autosave.record(variantID: variantID, text: newText, charDelta: cost)
+        // VX-683 B: `old` is what the pane showed before the keystroke — the
+        // autosave's snapshot (a row changed under it since is rescued).
+        autosave.record(variantID: variantID, text: newText, charDelta: cost, basedOn: old)
     }
 
     private func currentStoreText(variantID: String) -> String? {
