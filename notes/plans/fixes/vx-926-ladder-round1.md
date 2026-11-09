@@ -104,3 +104,23 @@
 
 **The fix batch:** a fresh `opus-implementer` executes the ACCEPTED FIX rows (F-R1-1, -4, -5, -6, -7, -8's fence) and appends its ROUND 1 FIXES section below; round 2 (a FRESH reviewer) re-reviews the fixes — the MAJOR's rule.
 
+
+## ROUND 1 FIXES
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** the rows A-926-4 marks RECORD (F-R1-2 — already recorded by the orchestrator; F-R1-3 — the closeout's) and F-R1-8's TICKET (the closeout's triage) are not this batch's; `Features/ReadTier/` and its `.standard` default are NOT touched (the editor-seam class); no stage work of any kind (headless only — no `xcodebuild test`, no Debug launch, no write to the real `io.lduarte.Variorum.debug` domain); nothing filed on Linear or in `notes/QUESTIONS.md`.
+
+**Implementer:** a fresh `opus-implementer`, from `ba0e9348c`. Scope exactly A-926-4's FIX rows: F-R1-1, F-R1-4, F-R1-5, F-R1-6, F-R1-7, F-R1-8's fence.
+
+### LIVE STATUS
+
+| Piece | Finding | What | Status |
+|---|---|---|---|
+| F0 | — | This section opened | DONE (this commit) |
+| F1 | F-R1-5 (MAJOR) | P-A on the harness's 30 s bound; the throwaway > 10 s default-priority backlog arm red on the pre-fix pin, green after, then deleted; R-A re-verified red once at the new bound | NOT STARTED |
+| F2 | F-R1-6 | the lane pin asserts ORDER (both values before the backlog's default-priority probe starts), the 30 s bound the hang-ender; R-L re-verified red 2 of 2 | NOT STARTED |
+| F3 | F-R1-1 | the harness's bound after `everyRefusalIsTheSameSentence`'s last connect; the U1 record's face (3) sentence amended | NOT STARTED |
+| F4 | F-R1-4 + F-R1-7 | comment-only: the three VX-695 headers conditioned to PENDING, the count 2,622 of 2,731; DiscoverProbe's stale "bounded: 5 s" | NOT STARTED |
+| F5 | F-R1-8 (fence only) | fence (3) of the source pin walks `App/Variorum/VariorumTests` too | NOT STARTED |
+| F6 | — | Verification: the touched suites green through `Tools/assert-tests-ran`; `swift build`; `git diff -- Sources` empty; App/ comments only; self-assessment | NOT STARTED |
+
+**Throwaway instruments in the tree:** none yet. **Reverts in flight:** none.
