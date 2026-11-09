@@ -165,7 +165,7 @@ beside it.**
 |---|---|---|
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
-| 2 | Batch 2 — VX-544 (the offline unlock retry) | BUILT, headless-verified — `b11fb8d39`…(the close commit); every Mac/simulator run PENDING the stage window (the BATCH 2 RECORD's STAGE REQUEST); her drill OWED (row 9) |
+| 2 | Batch 2 — VX-544 (the offline unlock retry) | BUILT, headless-verified — `b11fb8d39`…`36b709512`; every Mac/simulator run PENDING the stage window (the BATCH 2 RECORD's STAGE REQUEST); her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
@@ -596,8 +596,8 @@ the shared load's retention runs on the phone; only its retry stays unwired (ove
 | 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | DONE (`4152e782a`) — R-2a…R-2d bit exactly as named; harness green; Mac runs PENDING (stage) |
 | 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | DONE (`88eb36506`) — THE ROAD PIN behavior-red on the pre-fix tree (watched); R-3a…R-3f run (R-3a one red beyond the named set; R-3b′ in place of the too-blunt R-3b); R-3g PENDING (simulator); Mac/simulator runs PENDING (stage) |
 | 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | DONE (`5ce6becf0`) — R-4a…R-4e bit exactly as named; harness green; Mac runs PENDING (stage) |
-| 4 | The words (no new sentence) | DONE (the close commit) — no user-facing sentence added or changed |
-| 5 | Close: builds, headless runs, self-assessment, the stage suite list | DONE (the close commit) — every Mac/simulator run PENDING the STAGE REQUEST |
+| 4 | The words (no new sentence) | DONE (`36b709512`) — no user-facing sentence added or changed |
+| 5 | Close: builds, headless runs, self-assessment, the stage suite list | DONE (`36b709512`) — every Mac/simulator run PENDING the STAGE REQUEST |
 
 **The headless reading (recorded at the start of piece 1).** Every pin of this batch is a Mac-target (or phone-target) suite,
 so its RUN needs the stage. Headless here: `xcodebuild build-for-testing` (Mac + phone) COMPILES them; and THE HARNESS — a
