@@ -50,6 +50,8 @@ struct TakesCalloutFrame: ViewModifier {
     let presentation: BlockPresentation?
     let tokens: VoiceTokens
     let dark: Bool
+    /// The block the frame belongs to — the DEBUG frame probe's key (VX-782).
+    let blockID: String
 
     /// The pad inside the frame, and the corner — Write's callout card's
     /// own numbers (`BlockDecor.calloutRect`'s ideal pad of 5, radius 8).
@@ -64,6 +66,8 @@ struct TakesCalloutFrame: ViewModifier {
         if let presentation {
             content
                 .padding(Self.pad)
+                // VX-782's oracle (DEBUG): the frame's visible rectangle.
+                .takesCalloutFrameProbe(blockID: blockID)
                 .background(
                     Color(CalloutPalette.color(presentation.color, dark: dark)),
                     in: RoundedRectangle(cornerRadius: Self.cornerRadius))
@@ -81,5 +85,53 @@ struct TakesCalloutFrame: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+#if DEBUG
+/// **VX-782's oracle — a callout frame's visible rectangle, in the window.**
+/// The one-law pin reads it beside the prose column the frame surrounds: the
+/// frame must still be DRAWN around the prose (its colour on both sides),
+/// while the prose's left edge and measure are a plain row's. Scoped by the
+/// mounting session like `TakeRailGeometry` (parallel suites never read each
+/// other's), keyed by the block, last report wins (a block has one frame).
+@MainActor
+enum TakesCalloutFrameGeometry {
+    private static var worlds: [String: [String: CGRect]] = [:]
+
+    static func record(blockID: String, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: [:]][blockID] = frame
+    }
+
+    static func frame(blockID: String, in scope: String) -> CGRect? {
+        worlds[scope]?[blockID]
+    }
+
+    /// A pin resets ITS OWN scope before its mount, and no other.
+    static func reset(_ scope: String) { worlds[scope] = nil }
+}
+
+private struct TakesCalloutFrameProbe: ViewModifier {
+    let blockID: String
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+            TakesCalloutFrameGeometry.record(blockID: blockID, $0, in: scope)
+        }
+    }
+}
+#endif
+
+extension View {
+    /// VX-782's oracle write: this view's frame is the callout frame's
+    /// visible rectangle (a no-op outside DEBUG).
+    @ViewBuilder
+    func takesCalloutFrameProbe(blockID: String) -> some View {
+        #if DEBUG
+        self.modifier(TakesCalloutFrameProbe(blockID: blockID))
+        #else
+        self
+        #endif
     }
 }

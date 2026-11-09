@@ -1165,7 +1165,7 @@ struct TakesBoardView: View {
         }
         .modifier(TakesCalloutFrame(
             presentation: model.calloutFrame(slot.blockID),
-            tokens: tokens, dark: scheme == .dark))
+            tokens: tokens, dark: scheme == .dark, blockID: slot.blockID))
     }
 
     /// **VX-170 (R-VX170-2) — a block the `show ▾` filter does not name, as ONE
