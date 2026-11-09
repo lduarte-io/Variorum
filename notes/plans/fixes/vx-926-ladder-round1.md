@@ -50,3 +50,13 @@
 - **The pin / a better discriminator (clock-free, keeps R-L red):** the claim is "the lane jumps the backlog", and the Backlog already posts a default-priority probe BEHIND its 480 slices. Assert ORDER instead of a wall bound: both values arrive while the probe has not yet started (`started.value == nil` at the moment `value(2)` returns), with `HeldValues`' 30 s bound left as the hang-ender. Under R-L the observation's scheduler Task and consumer are enqueued at `.medium` AFTER the probe (`Backlog.init` runs first), so the probe starts first — RED, deterministically; with the lane they jump it — GREEN; long synchronous segments delay the probe (480 slices ahead of it) at least as much as the lane, so they can no longer red the pin.
 - **Proposed fix:** the order assertion above in place of `within: Self.bound` on lines 49/53 (keep the premise check at :59).
 
+### F-R1-7 · NIT · `Tests/VariorumMCPTests/MCPDiscoverProbeServerTests.swift:184` — a stale bound in a comment
+
+`let probeAnswer = await socket.next()   // bounded: 5 s` — `RawSocket(h)` (`:180`) now defaults to `HarnessWait.receiveSeconds` (30 s; this run's own change at `:49`). Proposed: "bounded: the harness's one bound". Comment-only; no pin.
+
+### F-R1-8 · NIT (a two-defaults trap, fenced on one side only) · `App/Variorum/Variorum/Features/ReadTier/ReadTakesView.swift:45` + `Tests/VariorumCoreTests/NoteMemorySeamSourcePinTests.swift:132–148`
+
+- **What:** the read tier's `holdsTakes(postID:defaults: = .standard)` keeps its `.standard` default (deliberately — `Features/ReadTier/` is the editor-seam class and this cast may not touch it; the record says so, self-assessment (vi)) while every sibling home now defaults to the seam. In the app the two are the same object, so nothing product-side can differ. In the TEST HOST they differ: a future test calling `ReadTakesView.holdsTakes(postID: id)` bare reads the real domain while `PostDetailView` writes the hosted suite — a test that silently disagrees with the product. Fence (3) walks only `App/Variorum/Variorum` (`:135`), and fence (4) fires only on a literal `UserDefaults.standard` beside a token — a bare `holdsTakes(` call in a test trips neither.
+- **Evidence:** traced by reading the two fences; today's only test callers (`MorningListTests.swift:158–165`, `NoteMemoryDefaultsTests.swift:168`) pass `defaults:` explicitly, so nothing reds today — hence NIT, no pin owed.
+- **Proposed fix:** widen fence (3)'s walk to `App/Variorum/VariorumTests` (a call there must pass SOME `defaults:` — the seam or a scratch suite); and file a Low Debt ticket to align the read tier's default to the seam at the next Fable-reviewed touch of `Features/ReadTier/`.
+
