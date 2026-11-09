@@ -303,7 +303,7 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 
 ## B4 RECORD (VX-81 — HISTORY-FIRST research unit) — the implementer's record
 
-**NOT DONE (kept current; the first line by rule):** this is a RESEARCH unit — NO code written, NO stage, NO GUI, NO walk, NO `xcodebuild test` (the brief's fence). The crash report `Variorum-2026-10-07-121811.ips` lives on the AIR (`~/Library/Logs/DiagnosticReports/`), not this Mac — NOT read; the memo works from the ticket's stack summary (the roster row above + the VX-80 record's incident timeline). The memo, verdict and self-assessment are IN PROGRESS (LIVE STATUS below).
+**NOT DONE (kept current; the first line by rule):** this is a RESEARCH unit — NO code written, NO stage, NO GUI, NO walk, NO `xcodebuild test` (the brief's fence); the OPTIONAL confirmation walk in Q3 is a PLAN, never run. The crash report `Variorum-2026-10-07-121811.ips` lives on the AIR (`~/Library/Logs/DiagnosticReports/`), not this Mac — NOT read; the memo works from the ticket's stack summary (the roster row above + the VX-80 record's incident timeline). Linear VX-81 was READ only (no state, label or comment change); `notes/QUESTIONS.md` untouched (the options in Q3 are the orchestrator's to bundle). The memo, the verdict proposal and the self-assessment are DONE.
 
 **Session note:** head at start 17841199d (the branch, tree clean). Required reading done in this session, nothing delegated: this record (B4 BRIEF, SITTING RECORD, B1 BRIEF's Workspace paragraph, Environment traps) · `notes/CastleRules.md` IN FULL · `notes/SyncSpec.md` IN FULL · `notes/plans/fixes/vx-80-castle-follow-recovery-door.md` WHOLE · `notes/plans/vx-329-release-switch.md` (its top §1–§5, the U1 RECORD's deletion sweep table, §9 CLOSEOUT — the file carries no section titled FOR A LATER READER) · `notes/plans/fixes/vx-529-pair-catchup.md` (its top: status, mandate, the state, THE DESIGN, THE RULINGS, ACCEPTANCE — likewise no FOR A LATER READER section by that title). Commits pathspec-limited to this record file.
 
@@ -312,10 +312,10 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 | # | Piece | Status |
 |---|---|---|
 | 0 | This record skeleton + the required reading | DONE (18ab4e1cc) |
-| 1 | Q1 — the 0.9.2 road the crash names: the code at build 5178 (git archaeology), and where each piece went | DONE (this commit) — THE HISTORY MEMO, Q1 below |
-| 2 | Q2 — today's re-keying reopen road: does the crash-prone shape survive? (code reading at the branch head) | DONE (this commit) — Q2 below |
-| 3 | Q3 — the verdict proposal (close-as-stale chain, OR a bounded repro plan) | NOT STARTED |
-| 4 | Self-assessment | NOT STARTED |
+| 1 | Q1 — the 0.9.2 road the crash names: the code at build 5178 (git archaeology), and where each piece went | DONE (5a9d43d14) — THE HISTORY MEMO, Q1 below |
+| 2 | Q2 — today's re-keying reopen road: does the crash-prone shape survive? (code reading at the branch head) | DONE (5a9d43d14) — Q2 below |
+| 3 | Q3 — the verdict proposal (close-as-stale chain, OR a bounded repro plan) | DONE (this commit) — Q3 below: CLOSE AS STALE recommended (PROVISIONAL, hers at the bundle); no repro is owed by the brief's condition; an OPTIONAL two-row confirmation walk drafted for the orchestrator's window if she wants one |
+| 4 | Self-assessment | DONE (this commit) — below |
 
 ### THE HISTORY MEMO
 
@@ -357,3 +357,58 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 - **This Mac's retained crash reports** (`~/Library/Logs/DiagnosticReports/Retired/`, 34 Variorum reports, 2026-11-02 → 11-08, every one the Debug test host on 27.0.1): zero carry a `BarAppearance` frame (a read-only grep). The retention window starts at 11-02, so this proves only that recent weeks are clean.
 
 **Q2's answer: NO — not "the way 0.9.2 did".** The follow no longer churns a dialog on the window whose root and toolbar rebuild: the root+toolbar rebuild stays on the main window (as it does at every Castle unlock), and the dialog's teardown and re-present moved to the toolbar-less Settings window. Both halves have run on 27.0.1 on today's road with no crash on record. The only one-window meeting of a presented sheet and a toolbar rebuild left is Make this my library from File ▸ Open Library… (point 3) — not the follow, and not the shape 0.9.2 crashed in.
+
+#### Q3 — the verdict proposal (hers to ratify at the bundle)
+
+**By the brief's condition, no repro is owed:** a repro plan was to be written "if (and only if) today's road still rebuilds the root under live chrome the way 0.9.2 did", and Q2 found it does not on the follow. The verdict below is therefore close-as-stale; the two-row walk under option (b) is offered as belt-and-braces only, for the one residual Q2 named.
+
+**The chain, for the ticket's closing comment (each link a commit on main):**
+1. 2026-10-07 — the crash (0.9.2 build 5178 = `da321730d`, the Air, macOS 27.0.1) in the root rebuild of the follow's re-key reopen; its consequence, the stranding, ticketed VX-80.
+2. 2026-10-08 — VX-80 fixed the stranding: the wrong-key open earns the typed-secrets lobby, whose unlock let the resume finish (`f88e51a55`; merged with 13x, `2d88dd49d`, PR #136). The same night the follow ran clean on the Pro at 27.0 (`08d0e369f`).
+3. 2026-10-22 — VX-329 deleted the road the crash ran on whole: the posture-switch runner, the export-and-swap re-key, the in-store marker, the main window's notice bar and its controller-held follow sheet, and VX-80's arm with them (`f2306a535`; merged `0aab72c39`, PR #183). Today's road re-keys by prepare-then-commit on a sealed plan, so a crash at any point leaves a road that opens the file (rule 20; `CommonSteps.swift:4–23`). The stranding cannot recur.
+4. 2026-10-25 — VX-529 took the pair-changed follow off the reopen entirely (`44c63afd1`, PR #187).
+5. Today — the posture follows, the crossings and Make this my library still reopen (inherent: the store file is re-encrypted). But the follow's dialog now lives in Settings, a window with no SwiftUI toolbar, and the main window's root+toolbar rebuild is the same one every Castle unlock makes. The re-keying join into Castle ran clean on 27.0.1 on the Pro (VX-502's walk, 2026-10-27, leg 3, with Make this my library at leg 7), and on the Air, the machine that crashed (its 0.10 crossing, 2026-10-23, "Synced"). No second `BarAppearanceBridge` report exists in any record or in this Mac's retained crash reports.
+
+**The options, for the orchestrator's bundle (PROVISIONAL — the recommendation is mine; the call is hers):**
+- **(a) RECOMMENDED — close VX-81 as obsolete.** The road it crashed on is deleted, its consequence is structurally closed, and today's nearest shape has run on 27.0.1 with no crash. Linear: Canceled ("obsolete — the road it crashed on was deleted at VX-329; see the vx-913 record § B4"), or Done if she prefers to read the deletion as the fix. Her own read at the sitting points this way: "it was already fixed a long time ago, the actual issue". The ticket body's "hold the Pro at 27.0" instruction is stale either way, since both Macs are on 27.0.1.
+- **(b) Close after a bounded confirmation walk** (below), only if she wants live evidence on today's build first. It costs one stage window and an Opus driver.
+- **(c) Park it** with the reason "unreproduced since 2026-10-07; the road it names is deleted; reopen only if a new `.ips` names `BarAppearanceBridge`". This keeps the ticket for a recurrence and does nothing else.
+
+**Option (b)'s plan — for the orchestrator's stage window, NOT run here.** Two rows, each attempted at most twice, then STOP.
+- **Preconditions:**
+  - A HELD stage claim, through nov7. An **Opus** session drives: a live Castle walk is never Fable's (the VX-529 lesson, the [cyber] safeguard).
+  - The DEV-STORE Debug build (`io.lduarte.Variorum.debug`) built from this branch's head. Never `/Applications`.
+  - `Tools/WalkKit/guard.sh --author` first, and the strict instance checks.
+  - The dev Castle pair is typed ONLY by `~/.variorum/bin/type-dev-castle-secret`, the `castle-walk-lib.zsh` plain-launch lane. Never invent or record values.
+  - Read the dev store's posture first. The records disagree: VX-771's 2026-11-04 walk logged both "a Castle library" and "the dev store is STANDARD". Restore that posture at the end (the walks-restore-dev-store-posture rule).
+  - The baseline: `ls ~/Library/Logs/DiagnosticReports{,/Retired} | grep Variorum` before the first row and after the last.
+  - Captures are window-scoped and go to a gitignored folder.
+- **R1 — the follow's own seam, from Settings, with the main window up.** Have a note open in the main window, toolbar visible. Then Settings ▸ Protection → the crossing that moves the posture AWAY from the found one (Use Castle… or Use Standard…) → type the pair → confirm. Watch both windows through the reopen: the main window goes StoreOpeningView → RootView; Settings goes "Opening your library…" → the pane, with the sheet's done state back. Then the inverse crossing restores the posture. That is two reopens through `reopenAround`, the same seam every posture follow takes. (A true second-device follow needs the prod test road and a second library, so a crossing is the bounded stand-in for the same seam.)
+- **R2 — the one residual shape, on the main window.** File ▸ Open Library… → this Mac's newest dev-store backup pair (or the Restore list) → Make this my library → its typed confirm. The copy-doors sheet stays up on the MAIN window while RootView and its toolbar rebuild beneath it. Then confirm the landing: the previous library goes into Previous Libraries, HELD. Never press Resume Sync. The dev store's content is replaceable, so leave the landed library as the slot's, or hand it back by the same door. Either way, say which.
+- **Pass:** every reopen lands, the app keeps running, and no new Variorum `.ips` appears.
+- **Fail:** a crash. Then copy the new `.ips` path, STOP, and record the frames under VX-81. That would be a live repro on today's code. It would be a quality item, not a custody one: rule 20 holds, and the next launch opens the file.
+
+### Self-assessment (B4)
+
+**What I did.**
+- Read every source the brief names myself, in full where the brief says so (session note).
+- Archaeology at build 5178's exact tree (`da321730d`, identified by commit count) and at today's head.
+- Read the follow's whole 0.9.2 road, from the notice bar to the swap to the custody step, and today's reopening seam with every caller and both windows' hosts.
+- Traced the ticket's history through its four Linear comments and every `notes/` record that names VX-81 or `BarAppearance`.
+- Gathered today's 27.0.1 evidence from the walk records and a read-only grep of this Mac's crash reports.
+- Wrote no code and changed no ticket.
+
+**Judgment calls (each marked PROVISIONAL in place):**
+1. The 0.9.2 mechanism reading: toolbar churn and a presented sheet's host torn down on one window. It is consistent with the ticket's summary and the code, but unprovable without the `.ips`.
+2. That her press came from the main window's notice bar rather than Settings. The VX-80 record says the notice fired "at open"; the pane bound the same model, so either is possible.
+3. That the Air's 0.10 crossing was a re-keying join. The switch-day script plus the code say so; no app-log line in the records says it.
+4. The lock/unlock claim. The code says every unlock takes the toolbar-less → toolbar transition; no count of her relocks exists.
+5. The recommendation (a) over (b) and (c).
+
+**Risks a reviewer should look at.**
+- **(i) The absence claims rest on grep.** "No re-check landed at VX-307" and "no second BarAppearanceBridge report" are greps over `notes/` and Linear's comments. A record that described it in other words would be missed.
+- **(ii) This Mac's crash-report evidence is shallow.** Retention starts 2026-11-02, and all 34 reports are the Debug test host.
+- **(iii) The Air is the crash machine, and its own logs were not read.** Its DiagnosticReports may hold more history. If she ferries the 2026-10-07 `.ips` (or any later Variorum `.ips` from the Air), the triggered thread's frames would settle judgment call 1. For a close-as-stale verdict that is optional, not blocking.
+- **(iv) Q2 point 3 (Make this my library from the main window) is a real one-window shape** that I could not find walked on 27.0.1. Option (b)'s R2 is exactly that row.
+
+**No fix is proposed.** Nothing in this trace calls for code in `Protection/`, custody, `Sync/` or the shell. Had it, it would have stopped here under the run's fence, since VX-849 holds the custody slot.
