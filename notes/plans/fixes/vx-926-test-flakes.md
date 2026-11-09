@@ -100,3 +100,20 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 
 - Everything in the VX-912 record's §7 binds here verbatim (`notes/plans/fixes/vx-912-open-source-gating.md` §7): strict pgrep forms, TYPE-name -only-testing as zsh arrays, "Executed 0" is no verdict, no custom build configurations, zsh pipestatus, foreground waits with grep-poll loops, commit-per-piece + push, A1 rail, never checkout over uncommitted work.
 - **Plus this run's own:** every xcodebuild-test and every Debug launch waits for the stage AFTER vx-914's merge (REQUEST through the orchestrator → nov7); headless `swift build`/`swift test` free now. `Tools/assert-tests-ran` (VX-604's gate) wraps every suite run — zero-executed and host crashes never read green. A deliberate LOAD GENERATOR for load-testing is a legal throwaway instrument — never leave one running past the test (name its pid in the record while alive). The Debug defaults domain is live product state: planting the pre-scrub plist happens at zero instances and is restored after (the plant and restore both recorded); her 2026-10-28 scrub precedent authorized cleaning TEST-minted keys, not product prefs. **nov7's window rules (2026-11-08, binding):** (1) BEFORE any plant, `defaults export io.lduarte.Variorum.debug` to `~/.variorum/` as the pre-window copy; at the end restore, then RE-EXPORT AND DIFF against the pre-window copy — `defaults import` MERGES rather than replaces (two 10-14 walks left a key behind that way); zero instances throughout; the diff's result goes in the RELEASE line. (2) U4 touches app-side per-note memory code — tell the orchestrator the moment U4 lands so nov7 can trial-merge this branch against vx-914's tip; after vx-914 merges, main merges IN here and the soak runs on the merged tree. (3) The soak's tested tree = the tree of the LAST whole-target window; nothing outside notes/ may land after it, or the merge GO waits. The dev store's MCP server stays ON with variorum-de approved; never press Resume Sync.
+
+## U1 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no stage work of any kind (the brief: headless only — no `xcodebuild test`, no Debug launch, no walk; the family has no face, so its acceptance evidence is the socket road itself driven headlessly, alone and under deliberate load); nothing filed on Linear or in `notes/QUESTIONS.md` (PROVISIONALs and findings are listed here for the merge).
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record opened; ledger row U1 → IN PROGRESS | DONE (this commit) |
+| P1 | PHASE 1 — VX-850's question answered with evidence (instrumented connect/initialize road, idle vs external CPU load vs in-process pool pressure) | IN PROGRESS — reading done (brief §4/§5/§7, MCPSpec in full, the VX-781 MCP A/B, the VX-912 B4 suite notes, the resiliency protocol, the eight tickets); the instrument is next |
+| P2 | PHASE 2 — one mechanism fix, chosen on the trace | NOT STARTED |
+| P3 | Pins: the mechanism made deterministic, red on old by behavioural revert, green with the fix | NOT STARTED |
+| P4 | The family alone + under a deliberately loaded parallel run (counts) | NOT STARTED |
+| P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | NOT STARTED |
+
+**Load generators alive:** none. **Reverts in flight:** none.
