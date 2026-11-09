@@ -1,6 +1,6 @@
 # VX-849 — Run: the typed-over rescue and the offline unlock retry (the sync-custody run)
 
-**STATUS: CLOSED 2026-11-09 — merged via nov7 (the PR and merge SHA are filled by the post-merge commit); the
+**STATUS: CLOSED 2026-11-09 — merged via nov7 (PR #241, merge `70f88a926`); the
 wave's LAST merger, the 1.4 release STAGED (built, never published — her morning word ships it).** The kickoff
 banner, kept as history:
 

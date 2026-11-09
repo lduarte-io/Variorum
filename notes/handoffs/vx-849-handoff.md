@@ -1,6 +1,6 @@
 # VX-849 — your morning handoff (the sync-custody run: the typed-over rescue and the offline unlock retry)
 
-**CLOSED overnight under your mandate — the PR and merge SHA are filled by the post-merge commit. The record (FOR A LATER READER at its top): `notes/plans/fixes/vx-849-typed-over-rescue.md`. The wave is now WHOLE: vx-913, vx-926, vx-915 and this run are all on main, and this run (the last merger) staged the 1.4 release — BUILT AND READY, NOTHING PUBLISHED. Your word releases it.**
+**CLOSED overnight under your mandate — PR #241, merge `70f88a926`. The record (FOR A LATER READER at its top): `notes/plans/fixes/vx-849-typed-over-rescue.md`. The wave is now WHOLE: vx-913, vx-926, vx-915 and this run are all on main, and this run (the last merger) staged the 1.4 release — BUILT AND READY, NOTHING PUBLISHED. Your word releases it.**
 
 ## Your checklist
 
