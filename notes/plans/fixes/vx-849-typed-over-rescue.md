@@ -176,7 +176,7 @@ beside it.**
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | BUILT — `b59d2f16d`…(this commit): VX-443's sweep (PROVISIONAL P-849-4; red-on-old SHA `9118b0355`, the fix `80979d6f0`, reverts R-443a…d bit as named); VX-152 traced — closed before this run by VX-445, a guard pin only; VX-545's five points in one commit (`6cd218082`, the page regenerated); core protection set 551/123 green; Mac + phone `build-for-testing` green; EVERY Mac/simulator run PENDING the stage (the BATCH 4 RECORD's STAGE REQUEST) |
-| 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | IN PROGRESS — the trace recorded (the BATCH 5 RECORD); the repro pin next |
+| 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | IN PROGRESS — trace recorded; the repro pin `PurgeSweepTeardownTests` GREEN 2/2 ×3 ⇒ RECORD-ONLY (no fix); R-855a next, then the close |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
 | 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | NOT STARTED |
@@ -2193,9 +2193,9 @@ world-end quiesce (:282–291), `StoreBindingTests`.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record + the trace | DONE (this commit) |
-| 1 | The repro pin (the confirm) — headless, deterministic | NEXT |
-| 2 | The fix — ONLY on a red confirm | — |
-| 3 | Close | — |
+| 1 | The repro pin (the confirm) — headless, deterministic | DONE (this commit) — `PurgeSweepTeardownTests` **GREEN 2/2, three runs in a row**: the confirm does NOT reproduce the class on this tree ⇒ RECORD-ONLY; the liveness revert R-855a is named below and runs next at this tip |
+| 2 | The fix — ONLY on a red confirm | NOT BUILT — the confirm is green (RECORD-ONLY; no fix on a trace that never bit) |
+| 3 | Close | NEXT |
 
 **THE TRACE — the teardown order, every road (file:line at `80ca15989`):**
 - *Who starts the sweep:* `AppServices.start()` (:298) arms the hourly clock `localPurgeTask` (:329), whose FIRST
@@ -2240,6 +2240,46 @@ world-end quiesce (:282–291), `StoreBindingTests`.
   pinnable headless and deterministically (piece 1). Teardown 3 is process exit: a core pin cannot end its own process,
   and once a process is exiting no ordering inside our code governs it — the fix there is the one VX-657 and VX-604
   already built (never reach exit with a read in flight: quiesce on the quit door; open nothing in a test host).
+
+**Piece 1 — THE REPRO PIN (the confirm), as built: `Tests/VariorumCoreTests/PurgeSweepTeardownTests.swift` (core,
+headless; no product file touched).**
+- *The world:* a KEYED on-disk store (`AppDatabase.onDisk(url:key: .mint())` — a `DatabasePool`, SQLCipher-keyed, as
+  production's) holding one never-synced deleted note (two blocks) with a Delete Now intent — the local road's eligible
+  family, `QuitPurgeQuiesceTests`' shape core-side — wrapped rebindable (`asRebindable()`) exactly as the composition
+  root wraps the app's store; the production `LocalPurge(database: view).sweep()` started as a task.
+- *The plant (deterministic, no timing lottery):* a SQLite progress handler installed on the pool's one reader
+  connection by a first read; armed, it parks the reader's thread INSIDE `sqlite3_step` on the sweep's first
+  `collectRoots` statement (the .ips's own frame) and signals; the test proceeds only after that signal, so the read is
+  PROVABLY in flight before the teardown starts, and released only by the test.
+- *The teardown:* the lock road's own call, `StoreBinding.lock()` (the swap to locked, the checkpoint, GRDB's close, the
+  key dropped), on a background thread.
+- *The pins:* **`aLockLandingMidSweepClosesOnlyAfterTheHeldReadEnds`** — while the read is held, a new access refuses at
+  once with the typed `StoreLockedError`; after a 500 ms window the read is released; the lock returned only AFTER the
+  release (the close waited for the read); the close is clean; the sweep ended at its NEXT access with
+  `StoreLockedError` — its read finished on a live connection, never a database error from a connection closed under
+  it; reopened with its key, the family stands whole (the note, its two blocks, its live intent — nothing half-done);
+  control: a sweep over the reopened store purges it (the family WAS eligible — the world is real).
+  **`theLockRoadsCancelThenCloseMidReadEndsTheSweepWithNothingHalfDone`** — the lock road's own ORDER
+  (`AppServices.stop()` cancels the held sweep without awaiting, THEN the pool closes): cancel while parked, lock,
+  release; the lock returned after the release, clean; nothing purged; the family whole.
+- *Result at this commit's tree (`swift test --filter PurgeSweepTeardownTests`):* **`✔ Test run with 2 tests in 1 suite
+  passed` — three runs in a row (1.21–1.23 s each).** One test-shape correction on the way, recorded: the first run's
+  "family stands whole" line counted the note's blocks by `last_container_id`, which a note's delete cascade does not
+  stamp (the printed facts read `container: 1, blocks: 0, intents: 1` — the note and intent standing, the query blind);
+  the count now reaches the blocks through the note's placements (`PurgeConvergenceTests.familyRowCount`'s form). Every
+  order line was green in that first run too.
+- **THE VERDICT: GREEN = RECORD-ONLY.** The in-process teardown the ticket suspected (the pool or its key torn down
+  under the sweep's in-flight reader) does not reach a read in flight: GRDB's close waits at the reader pool's barrier,
+  and our lock returns only after it. The .ips's teardown was PROCESS EXIT (Teardown 3 above), whose two product faces
+  are closed on this tree — ⌘Q by VX-657's quiesce, the test host by VX-604's inert launch. No fix is built (piece 2).
+- *THE NAMED LIVENESS REVERT (named here BEFORE it runs, at this commit's tip; headless, the one file, then
+  `git checkout --`):* **R-855a** `Sources/VariorumCore/Persistence/StoreBinding.swift` — `lock()`'s `try
+  outgoing.close()` dispatched to a background queue and `lock()` returning `(true, nil)` at once (a lock that does not
+  wait for its close) ⇒ expected RED exactly the two `lock.returnedAfterRelease` lines (one per pin — the lock returns
+  inside the held window); every other line GREEN (the binding still swaps first, so the sweep's next access still
+  refuses typed; GRDB's barrier still holds the close until the read ends, so nothing is half-done). What the pin
+  CANNOT bite, said plainly: the barrier itself is GRDB's (`Pool.barrier`), not a line of ours — our part is the order
+  (swap first, the close awaited, the lock returning after it), and R-855a is that part.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
