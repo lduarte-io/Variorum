@@ -176,7 +176,7 @@ beside it.**
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | BUILT — `b59d2f16d`…(this commit): VX-443's sweep (PROVISIONAL P-849-4; red-on-old SHA `9118b0355`, the fix `80979d6f0`, reverts R-443a…d bit as named); VX-152 traced — closed before this run by VX-445, a guard pin only; VX-545's five points in one commit (`6cd218082`, the page regenerated); core protection set 551/123 green; Mac + phone `build-for-testing` green; EVERY Mac/simulator run PENDING the stage (the BATCH 4 RECORD's STAGE REQUEST) |
-| 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
+| 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | IN PROGRESS — the trace recorded (the BATCH 5 RECORD); the repro pin next |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
 | 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | NOT STARTED |
@@ -2170,6 +2170,76 @@ the commit's diff); LIVE STATUS row 4 BUILT.
    batch 3's list).
 6. **Canon delta → queued:** SurfaceContracts' protection bullet gains the sweep's line beside "the rule-8
    re-makes at every open", landing as P-849-4 survives her sitting.
+
+### BATCH 5 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+Debug-app launch, no walk, no store or server contact; no pull, merge or rebase; no whole-package or whole-target
+headless run and no cold build (other sessions hold the stage); ZERO lines under `Sources/VariorumCore/Sync/` (and
+zero under `Sources/` at all so far); no QUESTIONS filed. Nothing of batches 3/4/6's files.
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole; `.claude/agents/
+opus-implementer.md`; `notes/SyncSpec.md` IN FULL; `notes/plans/phase-13j-purge-memo.md` §2 (the horizon), §4a–§4f,
+§6b, §6c (the local road B3, the staleness rule B1); the vx-678 record's VX-657 lines (the quit guard as built, and
+its line-78 incident → VX-691). The code: `PurgeJanitor.collectRoots` (`Sync/PurgeJanitor.swift:360`, the
+`tombstoneRoots` nested reads the .ips names), `LocalPurge.sweep(afterFamily:)` (:981), `AppSession.sweepLocalPurge` /
+`quiesceLocalPurgeForExit` / `cancelLocalPurgeSweeps` (`Shared/AppSession.swift:158–211`), `AppServices.start` /
+`stop` / `quiesceForExit` (`Shared/AppServices.swift:298–365`), `VariorumAppDelegate.applicationShouldTerminate`
+(:155), `AppBootstrap`'s `Launch` / `State.hostingTests` (`Shared/AppBootstrap.swift:96–243`, VX-604),
+`StoreBinding.lock` (`Persistence/StoreBinding.swift:89`), GRDB 7.11.1's `DatabasePool.close` (`Core/DatabasePool.swift:268`)
+and `Pool.barrier` / `Pool.get` (`Utils/Pool.swift:95–215`), `QuitPurgeQuiesceTests`, `FirstRoundAfterTheActTests`'
+world-end quiesce (:282–291), `StoreBindingTests`.
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Preflight + this record + the trace | DONE (this commit) |
+| 1 | The repro pin (the confirm) — headless, deterministic | NEXT |
+| 2 | The fix — ONLY on a red confirm | — |
+| 3 | Close | — |
+
+**THE TRACE — the teardown order, every road (file:line at `80ca15989`):**
+- *Who starts the sweep:* `AppServices.start()` (:298) arms the hourly clock `localPurgeTask` (:329), whose FIRST
+  iteration runs at once — `AppSession.sweepLocalPurge()` (:158) → a HELD `Task` (VX-657) → `LocalPurge(database:
+  session.database).sweep()` → `sweep(afterFamily: nil)` (:981) → `database.read { PurgeJanitor.collectRoots(…) }`
+  (:984) — the .ips's exact chain, on a `DatabasePool` reader (`AppDatabase.onDisk` is a pool; `inMemory()` is a
+  queue, so a pool reader means an on-disk store). Every other caller (the purge doors in `RecoveryActs`, the comments
+  panel) goes through the same held `sweepLocalPurge`.
+- *Teardown 1 — the LOCK (Castle's relock, Lock Now):* the Mac teardown runs `AppServices.stop()` (:337) — it CANCELS
+  the held sweeps without awaiting (`cancelLocalPurgeSweeps`, ladder R1 MINOR-3); then `lockOnNewRoad` closes the pool
+  off the main actor through `StoreBinding.lock()`, which swaps the binding to locked FIRST (new accesses throw the
+  typed `StoreLockedError`) and then calls GRDB's `DatabasePool.close()`. GRDB's close runs inside
+  `readerPool.barrier`, and `Pool.barrier` does `itemsGroup.wait()` before its body — every `get()` enters that group
+  and only the element's release leaves it. So **the close cannot run while a reader is in use: an in-flight
+  `collectRoots` read finishes on a live connection, and only then are the connections (and their codec contexts)
+  closed.** The sweep's next access — its family `write` — meets the locked binding and throws `StoreLockedError`.
+  Nothing on the lock road frees a codec context under a read. (The pin below drives exactly this, mid-read.)
+- *Teardown 2 — ⌘Q (the quit door):* `applicationShouldTerminate`'s PROCEED path (:173–199) awaits
+  `AppServices.quiesceForExit()` (:360) — the clock cancelled, every held sweep cancelled AND awaited
+  (`quiesceLocalPurgeForExit`, new sweeps refused), the sync chain retired and awaited (the transported janitor) —
+  before it replies. The process exits only after no sweep read is in flight (VX-657, `QuitPurgeQuiesceTests`).
+- *Teardown 3 — PROCESS EXIT WITHOUT THE QUIT DOOR (the .ips):* a process that ends by `exit()` without passing the
+  delegate — a test runner ending its host after the bundle passed — runs the exit-time handlers while background
+  threads still run. The shipped SQLCipher 4.18.0 framework registers its own exit-time shutdown (its
+  `sqlcipher_atexit` → `sqlcipher_extra_shutdown` symbols and log string, present in the framework the package
+  resolves), which releases SQLCipher's private-heap allocations that the open connections' codec state lives in. A
+  reader mid-`sqlite3_step` at that moment decrypts its next page over released codec state:
+  `sqlcipher_memset ← sqlite3Codec ← readDbPage …`, the .ips's frames. **This repo already recorded this exact race
+  once**, in a different harness: `FirstRoundAfterTheActTests.swift:285` — "a test process exiting under a task still
+  releasing that pool crashes SQLCipher's shutdown (seen once … `sqlcipher_extra_shutdown` racing
+  `DatabasePool.deinit`)" — and the vx-678 record's window (its line 78) saw "the test host over an in-flight dev-store
+  sweep at runner exit, VX-657's residual face", filed as **VX-691**. VX-855 (build 11051, 2026-11-05) is that face
+  again: before VX-604 the test host's own launch opened the DEV store and composed the whole ready shell
+  (`AppServices.start()` included), so its launch sweep could be mid-`collectRoots` when the runner ended the host —
+  and that road never meets `applicationShouldTerminate`, so VX-657's quiesce could not reach it.
+- *Today's tree, that road:* **VX-604 (`fae643a05`, 2026-11-08 — after build 11051) made the production bootstrap
+  INERT under a test runner** (`AppBootstrap.init`, :231–242: `launch == .hostingTests` ⇒ no road, no store, no session,
+  no services — `State.hostingTests`, "never left"). An inert host composes no `AppServices`, so no launch sweep exists
+  in it to race the runner's exit. The .ips's road is closed by construction on this tree; the ⌘Q road is closed by
+  VX-657's quiesce.
+- *What a core pin can and cannot drive:* the brief's in-process teardown (close / key drop mid-read) is Teardown 1 —
+  pinnable headless and deterministically (piece 1). Teardown 3 is process exit: a core pin cannot end its own process,
+  and once a process is exiting no ordering inside our code governs it — the fix there is the one VX-657 and VX-604
+  already built (never reach exit with a read in flight: quiesce on the quit door; open nothing in a test host).
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
