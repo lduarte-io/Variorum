@@ -577,3 +577,34 @@ Findings file: `notes/plans/fixes/vx-940-ladder-round1.md` (written incrementall
 - **F-R1-4 ACCEPTED — the four accuracy items ride F1:** the stale "0.1" result in `MCPClientVersionNullTests.swift`'s header; `writeAllOffPool`'s one-off thread renamed apart from the writer queue's label; the stray line break in the transport's type doc comment; the W4 record's "~16 KiB" sentence reconciled to what the probe actually showed (a fill at 8,192 bytes).
 
 Round 2 (a fresh reviewer) re-reviews F1's diff.
+
+## F1 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild` of any kind, no stage, no Debug launch, no walk or capture (the brief: headless only — `swift build`/`swift test` plus throwaway scratch instruments; the door is wire-only); F-R1-2's FIX not built (it is ticket VX-944 — only the `writer` doc clause here); `notes/QUESTIONS.md`, canon, Linear and tickets untouched; F-R1-3 not touched (the orchestrator's closeout line). **PENDING (flipped as each lands):** the pin, the fix, the behavioural revert, the doc items, the record's one 3(d) sentence, the final suites.
+
+*Machinery: Opus implementer, fresh session, briefed by this file's §2/§4 W4/§7 (+ the VX-926 record's §7 read on `origin/vx-926-test-flakes`, which binds the VX-912 record's §7), the "## W4 record" (P5b, the MACHINERY INCIDENT), "## The ladder" (round 1's dispositions), `notes/plans/fixes/vx-940-ladder-round1.md` (F-R1-1, F-R1-2, F-R1-4 in full), `notes/MCPSpec.md` IN FULL, the resiliency protocol (all addenda). Scope = exactly the dispositions' F1: F-R1-1 (the fix + its red-on-old pin), F-R1-2 (the `writer` doc clause only), F-R1-4 (the four accuracy items). Instruments live in the session scratchpad under `f1-vx940/`, never in the PR. **No revert is in flight.***
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record + the premise probes (below) | DONE (this commit) |
+| P1 | F-R1-1 — the pin (`MCPStalledReaderPoolTests`, the delivering band: free space between the line's length and the 2,048-byte mark), red on the current tree | NOT-STARTED — design below |
+| P2 | F-R1-1 — the fix: `sayClosing` sets `SO_SNDLOWAT` to the line's length for its one poll-gated write, restored on every path before the lock is let go; a mark it cannot set leaves the step-gated write; the doc comment to match | NOT-STARTED — design below |
+| P3 | The behavioural reverts on the committed fix (working tree only, `git show … > …`): R-F1-PRE (the pre-F1 transport) and R-F1-R (the restore removed) | NOT-STARTED |
+| P4 | F-R1-2's doc clause + F-R1-4 (a) the test header's "0.1", (b) the opening writer's thread name, (c) the type doc's line break | NOT-STARTED |
+| P5 | F-R1-4 (d): the W4 record's "~16 KiB" sentence → the probed fill (8,192) | NOT-STARTED |
+| P6 | Close: `swift build`, the whole `MCPStalledReaderPoolTests`, `MCPClientVersionNullTests`, counts, sentences, self-assessment | NOT-STARTED |
+
+### The premise probes (P0 — throwaway, `scratchpad/f1-vx940/lowat-restore.swift`, `lowat-shut.swift`; this Mac, macOS 27.0.1)
+
+The fix shape rests on what XNU does with the send low-water mark on a Unix-domain stream pair, so it was probed before any line (the reviewer's `probe/lowat.swift` read, not reused as evidence):
+
+- **Setting it never clamps here, and the restore always takes.** A pair filled by poll-gated 2,048-byte steps (whole frames, the fast road's own shape) to `free` ∈ {8, 33, 34, 35, 114, 115, 116, 600, 1,200, 2,000, 2,047, 2,048, 2,100, 4,000}, for lines of 34 and 115 bytes: `setsockopt(SO_SNDLOWAT, L)` returned 0 and read back exactly `L` every time (even at 8 bytes free — the sender's `SO_SNDBUF` reads 8,192 throughout, so the clamp's high-water mark is not the shrunk one); restoring 2,048 returned 0 and read back 2,048 every time.
+- **Poll at the line's mark is exactly "can take it whole".** Writable iff `free ≥ L` (34: free 33 not writable, 34 writable; 115: free 114 not, 115 writable). Every writable case sent all `L` bytes at once (a 2 s bounded thread); at the default mark the same states poll NOT writable for every free < 2,048 — the band F-R1-1 names, where today's `sayClosing` drops.
+- **When the mark cannot be set.** On a socket shut both ways — our own `shutdown(SHUT_RDWR)`, or the client having closed its end — `setsockopt` fails `EINVAL` (22) and a lowered mark STAYS; but that socket polls `POLLHUP` and every send fails at once with `EPIPE`, never waiting. So a restore that fails can only leave the mark on a socket that takes no further write: the fast road's no-wait rule (which caches the 2,048 step) is never met by a lowered mark on a live socket. After `SHUT_WR` alone the set still takes and the send fails `EPIPE` at once. A zero or negative mark is `EINVAL` (a close line is never empty: `MCPCloseLine.line` refuses empty words).
+- `net.local.stream.sendspace` = `recvspace` = 8,192 here (P5's sentence).
+
+**The pin's design (P1).** A new case in `MCPStalledReaderPoolTests`: a whole frame (on the fast road; nothing mid-write, nothing handed over) leaves ~1,200 bytes free; premises asserted — the client holds exactly the frame (`SO_NREAD`), the socket polls NOT writable at its own mark, and the free space is at least the line's length and below the mark; then her switch's close line (`MCPCloseWords.line(for: .serverOff)`) through `sayClosing` on a thread bounded 5 s off the pool (the existing pin's watcher shape); it must return at once and `true`; the mark must read back as before; then the hang-up's own order (`shutdown(SHUT_RDWR)`), and the client, draining to EOF, must read exactly the frame, its newline, then the whole close line. Red on the current tree by assertion (the line dropped: `false`, and the client reads the frame then EOF).
+
+**The fix's design (P2).** Inside `sayClosing`, under the tried write lock and the mid-frame guard (both kept) and the `line.count ≤ step` guard (kept — so the lowered mark is always at most the original and never clamps): read the current mark, set it to the line's length, and register its restore (a `defer` declared after the lock's, so it runs BEFORE the unlock — no other write ever meets the lowered mark); then the one poll-gated step write of the whole line at that mark. The send then waits only while free < min(length, mark) = the line's length, and the poll gates on the same mark, so the line goes exactly when the socket takes it whole and never waits. A mark that cannot be read or set leaves today's step-gated write (the mark untouched) — never a wait. `step` (the fast road's cached value) never changes.
