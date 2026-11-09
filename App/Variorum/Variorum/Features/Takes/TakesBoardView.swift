@@ -1070,21 +1070,23 @@ struct TakesBoardView: View {
     /// **THE ROW'S GUTTER (VX-770 batch 2, T3)** — Write's ladder's inputs for
     /// this row's comment face, in the board's coordinates: the whitespace the
     /// centring leaves (`commentRoom`) up to the prose's container edge, with
-    /// a callout frame's pad (the frame insets the row's content) and its
-    /// emoji (the face stacks UNDER it, R-13u3-3) accounted for. Geometry
-    /// only: nothing here reads whether the block has comments, so the row's
-    /// layout cannot depend on them.
+    /// a callout frame's emoji (the face stacks UNDER it, R-13u3-3) accounted
+    /// for. A frame insets nothing sideways (VX-782 — its horizontal air is
+    /// bleed), so a framed row's content starts where a plain row's does.
+    /// Geometry only: nothing here reads whether the block has comments, so
+    /// the row's layout cannot depend on them.
     private func commentGutter(
         slot: Queries.RenderedBlock, commentRoom: CGFloat
     ) -> TakesCommentGutter {
         let frame = model.calloutFrame(slot.blockID)
         let pad = frame == nil ? 0 : TakesCalloutFrame.pad
-        let rowLeading = commentRoom + pad
+        let rowLeading = commentRoom
         let inset = Self.articleTextTopInset
         var top = inset
         if let emoji = frame?.emoji, !emoji.isEmpty {
             // The frame's emoji, in the row content's coordinates: the frame's
-            // top-leading corner sits `pad` up and left of the content.
+            // top-leading corner sits `pad` up (its vertical pad) and `pad`
+            // left (its bleed) of the content.
             top = BlockDecor.commentFaceTop(
                 blockTop: inset,
                 glyph: CGRect(
