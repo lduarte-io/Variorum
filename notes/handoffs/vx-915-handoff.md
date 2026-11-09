@@ -57,8 +57,8 @@ Here is each item, in plain words:
 - [ ] **VX-945** (Low · Debt · Tests) — the unconditional-forget DEBUG-oracle sweep (gate12's rig class, other oracles).
 - [ ] **VX-947** (Low) — the Prince front note deleted alone has no restore road (the mend never counts front matter).
 - [ ] **VX-948** (Low · Wording) — two remaining guide over-says of the VX-929 class (lesson 5, ritual R4).
-- [ ] **VX-949** (Low) — ⏳ (batch 4's find; see the ticket).
-- [ ] **VX-950** (Low) — ⏳ (batch 4's find; see the ticket).
+- [ ] **VX-949** (Low · Wording · Castle & sync) — the backup folders' RESTORE.md runbook still advises "Replace All Keys" where the guide's new recovery recipe advises Use Castle; align or record why they differ.
+- [ ] **VX-950** (Low · Bug · Settings) — the guide says "Account…, at the bottom of the sidebar" but the sync row's offline state shows no Account… door.
 - [ ] **VX-954** (Low · Bug · Search) — a punctuation word beside a tag answers less than the tag alone.
 - [ ] **VX-957** (Low · Bug · App shell) — the pad's wing word is blank for an instant after a park restore (face late, outcome right).
 - [ ] **VX-958** (Low · Bug · App shell) — Home capture receipts can still over-claim "the Pool" when a Home book seats the note (the fixed class's one remaining arm).
