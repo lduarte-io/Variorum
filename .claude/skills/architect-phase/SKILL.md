@@ -240,7 +240,7 @@ build → soak + pins → the phase's acceptance spine rides every run
 (TutorialWalkTests since 13b — a broken tutorial step is a regression
 by definition) → screenshot-verify where the environment allows (else
 record and fold into the next drive) → point-by-point ledger update →
-commit(s) → install refresh only at sanctioned zero-instance windows.
+commit(s). No `/Applications` install: it holds releases only (VX-931).
 
 - **The hallucination guard (CLAUDE.md's, applied hard):** no fix
   without a self-traced concrete mechanism; every bug-class fix lands
@@ -278,7 +278,7 @@ commit(s) → install refresh only at sanctioned zero-instance windows.
 - The acceptance gate is USE-shaped for the kind (the correction
   round's C-2/C-3, promoted): the orchestrator walks each batch
   hands-on — or runs its drill / live round — before its record
-  closes; the install refresh follows the walk. An implementer's
+  closes. An implementer's
   "done" is a claim; the walk is the verification.
 
 ## The review ladder (identical to /run-phase's rules 3–4; summarized)
@@ -304,7 +304,7 @@ section verbatim. The invariant core: instance checks use
 `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH
 (the test host matches mid-run since 4G); treat real-store instances
 by STORE, not path — NEVER quit/kill one; no Release builds or
-/Applications refreshes while one lives; `xcodebuild build-for-testing`
+/Applications installs while one lives; `xcodebuild build-for-testing`
 compiles without the runner; Mac tests from `App/Variorum/`,
 suite-level `-only-testing` only, confirm the "Test run with N tests"
 line; zsh `pipestatus`; NEVER add a custom build configuration (Xcode
@@ -350,7 +350,8 @@ just-in-time; the build-debris tidy — delete this phase's
 Two deploy-adjacent rules proven in 13b (added 2026-07-22): schema/
 mirror changes are SyncSpec §12 lockstep events whose MIRROR DEPLOY
 executes only on the author's explicit go-ahead (the R53 precedent) —
-and any install refresh that would put her daily-drive build's
+and any `/Applications` install (a release's, or an interim build at
+her word) that would put her daily-drive build's
 `lockstepVersion` ahead of the deployed marker is HELD until the
 deploy lands (a mismatched client visibly refuses to sync by design;
 don't strand her build in that state). Lesson/tutorial content edits
