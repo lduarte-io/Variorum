@@ -642,12 +642,17 @@ final class MCPDoor {
         Task { @MainActor [weak self] in
             let outcome: Result<Void, Error> = await Task.detached { Result { try fresh.start() } }.value
             guard let self else { return }
-            self.starting = false
             guard self.host === fresh else {
                 // Stopped (toggle OFF, lock, quit) while it was starting.
+                // VX-613 (the flag half — the vx-548 record's MB-13 (ii)): the
+                // flag is not this start's to clear — the stop cleared it when
+                // it let this host go, and a fresh start may hold it now. Cleared
+                // here, it let any snapshot change start the fresh host a SECOND
+                // time while its first start ran.
                 fresh.stop()
                 return
             }
+            self.starting = false
             switch outcome {
             // VX-612: read the host — its listener may already have died in the
             // hop back here (its own signal then lands first, and is kept).
