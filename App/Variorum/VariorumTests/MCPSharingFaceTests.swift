@@ -145,10 +145,13 @@ struct MCPSharingFaceTests {
             let landings = mcpFindings(word, sharing: false).map { MCPPaneTab.holding(findingLead: $0.lead) }
             #expect(!landings.contains(MCPPaneTab.shared), "“\(word)” never lands on the hidden tab: \(landings)")
         }
-        // Exactly the hidden tab's rows leave — the rows whose finding lands there.
+        // Exactly the sharing face's rows leave — the rows whose finding lands on
+        // the hidden tab, and (VX-934 — A JUSTIFIED EDIT, the ritual) the AI
+        // pair's switch at the pane's foot, drawn on the same has-ever-had-a-
+        // client fact (`MCPPane.drawsAIMarksSwitch`, PROVISIONAL F-934-A).
         let all = Set(SettingsSearch.settingsEntries(accountSection: true).map(\.finding.lead))
         let hidden = Set(SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: false).map(\.finding.lead))
-        #expect(all.subtracting(hidden) == [SettingsCatalog.title("mcpOpenBook")])
+        #expect(all.subtracting(hidden) == [SettingsCatalog.title("mcpOpenBook"), SettingsCatalog.title("mcpAIMarks")])
         // The Connect road and the rest of the pane stay findable.
         for word in ["mcp", "codex", "setup", "client"] {
             #expect(!mcpFindings(word, sharing: false).isEmpty, "“\(word)” still finds the pane")

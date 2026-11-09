@@ -239,9 +239,11 @@ struct MCPPaneTabsTests {
         // moves under the show dial, above the tabs, drawn while a client is
         // approved (the fresh-pane geometry row below grew an arm for it). VX-905
         // (A JUSTIFIED EDIT, the ritual): the badge switch joins, at the pane's foot.
+        // VX-934 (A JUSTIFIED EDIT, the ritual — her ruling, #269): the badge
+        // switch goes back to Editor; the AI pair's switch takes the foot.
         #expect(AppSettingsView.rowIDsRendered[.mcp]
                     == ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients",
-                        "mcpOpenBook", "ownershipBadges"],
+                        "mcpOpenBook", "mcpAIMarks"],
                 "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil,
                 "VX-903: the trail dial sits above the tabs")
@@ -323,7 +325,10 @@ struct MCPPaneTabsTests {
             // batch 1): the trail dial's line (now beside the show dial's) and
             // the badge switch's (now at the pane's foot).
             (MCPPaneCopy.trailDialSummary, MCPPaneCopy.trailDialDetail),
-            (OwnershipSettingsCopy.badgesSummary, OwnershipSettingsCopy.badgesHelp),
+            // VX-934 (A JUSTIFIED EDIT, the ritual — her ruling, #269): the
+            // badge switch left the pane (back to Editor's caption form), and
+            // the AI pair's switch at the foot carries the pane's one line.
+            (MCPPaneCopy.aiMarksSummary, MCPPaneCopy.aiMarksDetail),
         ]
         for client in MCPSetupClient.allCases { pairs.append((client.summary, client.sentence)) }
         for (line, whole) in pairs {
@@ -546,64 +551,153 @@ struct MCPPaneTabsTests {
             let scope = session.debugProbeScope
             #expect(MCPPaneGeometry.frame(.showDial, in: scope) != nil, "\(voice): the show dial is drawn (non-vacuity)")
             #expect(MCPPaneGeometry.frame(.trailDial, in: scope) == nil, "\(voice): a fresh pane draws no trail dial")
+            // VX-934 (THE CONTRACT GROWN DELIBERATELY — the VX-915 run, batch 1;
+            // PROVISIONAL F-934-A (1)): the pane's FOOT section changed — VX-905's
+            // badge row left for Settings ▸ Editor and the AI pair's switch took
+            // its slot, drawn only once the library has had a client — so a
+            // fresh pane draws NO foot section at all, and everything above is
+            // VX-281's geometry unchanged. The probe's discrimination (it does
+            // report a drawn switch) is the named arm's,
+            // `theAIMarksSwitchSitsAtThePanesFootUnderEveryTabOnceTheLibraryHasHadAClient`.
+            #expect(MCPPaneGeometry.frame(.aiMarks, in: scope) == nil, "\(voice): a fresh pane draws no AI-pair switch")
             #endif
         }
     }
 
-    // MARK: - VX-905 — "Show ownership badges" moves to Settings ▸ MCP
+    // MARK: - VX-934 — the AI pair's switch takes the foot; the badge switch goes home
 
-    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
-    /// ownership badges' into the mcp part of settings - it makes more sense
-    /// there"; PROVISIONAL F-905 (1)).** The badge family's one switch is
-    /// Settings ▸ MCP's row now — its own untitled section at the pane's FOOT,
-    /// under whichever tab shows, so EVERY library keeps it (a library that
-    /// never had a client still switches its owned-by chips) and nothing above
-    /// the tabs grows; Settings ▸ Editor no longer renders it (its "Books"
-    /// section keeps the hide-owned default); the search follows the move and
-    /// lands on the pane with no tab to pick. Its line names exactly what it
-    /// governs today — the other-books mark, the owned-by chip, the Private eye
-    /// (never the shared icon, which draws without it).
-    @Test func theBadgeSwitchIsSettingsMCPsRowAtThePanesFoot() throws {
-        let row = try #require(SettingsCatalog.rows.first { $0.id == "ownershipBadges" })
-        #expect(row.pane == .mcp && row.title == OwnershipSettingsCopy.badgesTitle, "the catalog row moved")
-        #expect(AppSettingsView.rowIDsRendered[.mcp]?.last == "ownershipBadges", "the pane's foot")
-        #expect(AppSettingsView.rowIDsRendered[.editor]?.contains("ownershipBadges") == false, "no longer Editor's")
-        #expect(AppSettingsView.rowIDsRendered[.editor]?.contains("hideOwnedDefault") == true, "its neighbour stays")
+    /// **VX-934 (her ruling, the VX-914 handoff sitting, #269 — "let's split
+    /// the 'book' related badges setting … and move it out of MCP back to where
+    /// it was. and lets have one setting for 'show shared with AI and private
+    /// from AI' badges … and that setting should be in MCP"; PROVISIONAL F-934-A
+    /// (1) + the words F-934-B).** REPLACES VX-905's pin
+    /// (`theBadgeSwitchIsSettingsMCPsRowAtThePanesFoot` — its row left the
+    /// pane). Settings ▸ MCP's foot — its own untitled section after whichever
+    /// tab shows, the slot VX-905's row left — holds the AI pair's ONE switch
+    /// (the shared icon and the Private eye, `ai_marks`), drawn once the library
+    /// has ever had a client (the sharing face's fact), found by the search only
+    /// then, landing on no tab; "Show ownership badges" is Settings ▸ Editor's
+    /// again and the pane draws no badge switch.
+    @Test func theAIMarksSwitchIsSettingsMCPsRowAtThePanesFootAndTheBadgeSwitchIsBackInEditor() throws {
+        let row = try #require(SettingsCatalog.rows.first { $0.id == "mcpAIMarks" })
+        #expect(row.pane == .mcp && row.title == MCPPaneCopy.aiMarksTitle)
+        #expect(AppSettingsView.rowIDsRendered[.mcp]?.last == "mcpAIMarks", "the pane's foot")
+        #expect(AppSettingsView.rowIDsRendered[.mcp]?.contains("ownershipBadges") == false, "the badge row left")
+        #expect(AppSettingsView.rowIDsRendered[.editor]?.contains("ownershipBadges") == true, "back in Editor")
         #expect(MCPPaneTab.holding(findingLead: row.title) == nil, "every tab shows it — a finding picks none")
-        for word in ["ownership badges", "badge", "badges", "owned by"] {
+        for word in ["private", "eye", "shared with ai"] {
             let found = SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
                 .first { $0.kind == .setting && $0.lead == row.title }
             #expect(found?.pane == .mcp, "“\(word)” lands on Settings ▸ MCP")
         }
-        // A library that never had a client: the row is still searchable (its
-        // sharing face hidden, its trail dial undrawn — the row is neither).
-        let fresh = SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: false, mcpTrailDial: false)
-        #expect(fresh.contains { $0.finding.lead == row.title && $0.finding.pane == .mcp }, "every library keeps it")
 
-        // The line: what it governs today, nothing more.
-        let line = OwnershipSettingsCopy.badgesSummary
-        #expect(line == "One switch for the marks on notes in other books, owned notes and Private ones.")
-        #expect(!line.localizedCaseInsensitiveContains("shared"), "the shared icon draws without this switch")
-        #expect(OwnershipSettingsCopy.badgesHelp.contains("Off: no marks anywhere; nothing else changes."),
-                "the whole text behind its (i), unchanged")
+        // The gate, pure: the sharing face's fact — no client row at all draws
+        // none (the fresh pane VX-281's oracle measures); a client row, waiting
+        // or decided, draws it.
+        var snapshot = MCPDoor.Snapshot()
+        #expect(!MCPPane.drawsAIMarksSwitch(snapshot), "never had a client — no switch")
+        snapshot.pendingCount = 1
+        #expect(MCPPane.drawsAIMarksSwitch(snapshot) == MCPPane.showsSharingFace(snapshot))
+        #expect(MCPPane.drawsAIMarksSwitch(snapshot), "a first client row — the sharing face, and the switch with it")
+        let fresh = SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: false, mcpTrailDial: false)
+        #expect(!fresh.contains { $0.finding.lead == row.title }, "the search names it only where the pane draws it")
+
+        // The line: exactly what it governs — the two marks — and no "AI" in it
+        // (the one-line pin above holds its width and its words).
+        #expect(MCPPaneCopy.aiMarksSummary.contains("shared icon") && MCPPaneCopy.aiMarksSummary.contains("closed eye"))
+        #expect(MCPPaneCopy.aiMarksDetail.contains("Off: neither mark shows, and nothing else changes"))
+        #expect(MCPPaneCopy.aiMarksDetail.contains("greyed out"), "VX-900's dimmed face, said")
 
         // The face, from source: after the shown tab, inside the one form —
-        // never in the top section; Editor's pane no longer draws it.
+        // never in the top section; the pane draws no badge switch, Editor does.
         let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
         let pane = try String(
             contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPPane.swift"), encoding: .utf8)
         let tabs = try #require(pane.range(of: "case .activity: activityTab\n            }"))
-        let foot = try #require(pane.range(of: "badgesSection\n        }\n        .formStyle(.grouped)"))
+        let foot = try #require(pane.range(of: "aiMarksSection\n        }\n        .formStyle(.grouped)"))
         #expect(tabs.upperBound <= foot.lowerBound, "the section follows whichever tab shows")
-        let body = try #require(pane.range(of: "@ViewBuilder private var badgesSection: some View {"))
-        let section = String(pane[body.upperBound...].prefix(600))
-        #expect(section.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"))
-        #expect(section.contains("themeStore.setOwnershipBadges($0)"), "the one synced setting's own act")
+        let body = try #require(pane.range(of: "@ViewBuilder private var aiMarksSection: some View {"))
+        let section = String(pane[body.upperBound...].prefix(700))
+        #expect(section.contains("if let themeStore, Self.drawsAIMarksSwitch(door.snapshot) {"))
+        #expect(section.contains("Toggle(SettingsCatalog.title(\"mcpAIMarks\")"))
+        #expect(section.contains("themeStore.setAIMarks($0)"), "the one synced setting's own act")
         #expect(section.contains(
-            "ExplainerLine(line: OwnershipSettingsCopy.badgesSummary, detail: OwnershipSettingsCopy.badgesHelp)"))
+            "ExplainerLine(line: MCPPaneCopy.aiMarksSummary, detail: MCPPaneCopy.aiMarksDetail)"))
+        #expect(!pane.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"), "the pane draws no badge switch")
         let settings = try String(
             contentsOf: app.appendingPathComponent("Variorum/Features/Settings/AppSettingsView.swift"), encoding: .utf8)
-        #expect(!settings.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"), "Editor's pane draws none")
+        #expect(settings.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"), "Editor's pane draws it again")
+        #expect(settings.contains("set: { theme.setOwnershipBadges($0) }"))
+    }
+
+    // MARK: - VX-934 — the geometry contract's grown arm (the foot section)
+
+    /// **VX-934 — THE CONTRACT GROWN BY THIS NAMED ARM** (the VX-903 lesson:
+    /// "grow it deliberately, never silently"). The pane's FOOT section changed
+    /// — VX-905's badge row left and the AI pair's switch took its slot, drawn
+    /// once the library has had a client — so the contract states the new foot
+    /// whole: a library that never had a client draws NO foot switch (the
+    /// fresh arm above adds the same line at the 748 × 520 Settings content),
+    /// and once a client has been approved the switch is drawn UNDER the tab
+    /// row on EVERY tab (Connect · Clients · Shared with AI · Activity) — the
+    /// foot, never the top section, which keeps the two dials as the approved
+    /// arm measures them. Mounted as the pane alone in a tall host (the
+    /// `MCPSharingFaceTests` precedent) so the whole form is realized and the
+    /// foot can report; the pane's scoped DEBUG oracle (`MCPPaneGeometry`, the
+    /// VX-914 gate round's road — y-DOWN global space) gives the frames. Its
+    /// first mount is the discrimination control: the tab row reports while
+    /// the switch does not.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func theAIMarksSwitchSitsAtThePanesFootUnderEveryTabOnceTheLibraryHasHadAClient(voice: ThemeVoice) async throws {
+        try await withPaneWorld { session, _ in
+            #if DEBUG
+            try session.operations.setThemeVoice(voice)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            let theme = ThemeStore(session: session)
+            let scope = session.debugProbeScope
+            let size = NSSize(width: AppSettingsView.detailWidth, height: 1600)
+
+            // Never had a client: the tab row reports, the switch never draws.
+            #expect(!MCPPane.drawsAIMarksSwitch(door.snapshot), "\(voice): fixture — no client row at all")
+            MCPPaneGeometry.reset(scope)
+            do {
+                let (window, host) = mount(MCPPane(door: door).environment(theme).debugProbeScope(session), size: size)
+                defer { unmount(window) }
+                await settle(host, until: { MCPPaneGeometry.frame(.tabRow, in: scope) != nil })
+                await settle(host, until: { false }, turns: 15)
+                #expect(MCPPaneGeometry.frame(.tabRow, in: scope) != nil, "\(voice): the oracle sees the pane (non-vacuity)")
+                #expect(MCPPaneGeometry.frame(.aiMarks, in: scope) == nil, "\(voice): never had a client — no foot switch")
+            }
+
+            // A client approved: on every tab, the switch sits under the tab row.
+            let client = try session.operations.recordMCPContact(name: "claude-code", version: "2")
+            _ = try session.operations.approveMCPClient(client.id, granting: nil)
+            for _ in 0..<200 where door.snapshot.approvedCount == 0 {
+                pump()
+                await Task.yield()
+            }
+            #expect(MCPPane.drawsAIMarksSwitch(door.snapshot), "\(voice): fixture — the library has had a client")
+            for tab in MCPPaneTab.offered(sharing: true) {
+                door.paneTab = tab
+                MCPPaneGeometry.reset(scope)
+                let (window, host) = mount(MCPPane(door: door).environment(theme).debugProbeScope(session), size: size)
+                defer { unmount(window) }
+                await settle(host, until: {
+                    MCPPaneGeometry.frame(.tabRow, in: scope) != nil && MCPPaneGeometry.frame(.aiMarks, in: scope) != nil
+                })
+                await settle(host, until: { false }, turns: 10)
+                let tabRow = try #require(MCPPaneGeometry.frame(.tabRow, in: scope), "\(voice) \(tab): the tab row reports")
+                let marks = try #require(MCPPaneGeometry.frame(.aiMarks, in: scope), "\(voice) \(tab): the switch is drawn")
+                let trail = try #require(MCPPaneGeometry.frame(.trailDial, in: scope), "\(voice) \(tab): the trail dial")
+                // SwiftUI's global space grows DOWNWARD: under = a larger y.
+                #expect(trail.maxY <= tabRow.minY, "\(voice) \(tab): the top section keeps the dials above the tabs")
+                #expect(tabRow.maxY <= marks.minY,
+                        "\(voice) \(tab): the switch sits under the tab row — the foot (\(tabRow) · \(marks))")
+            }
+            #endif
+        }
     }
 
     // MARK: - VX-903 — the geometry contract's grown arm (both dials seated together)

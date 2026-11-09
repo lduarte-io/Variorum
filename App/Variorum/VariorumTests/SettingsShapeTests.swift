@@ -18,6 +18,7 @@
 //  fold is a thing you see — and it is in the unit record.
 //
 
+import Foundation
 import Testing
 @testable import Variorum
 
@@ -156,6 +157,58 @@ struct SettingsShapeTests {
     @Test func rowIDsAreUnique() {
         let ids = SettingsCatalog.rows.map(\.id)
         #expect(Set(ids).count == ids.count)
+    }
+
+    // MARK: - VX-934 — the badge family split across two panes
+
+    /// **VX-934 (her ruling, #269 — "split the 'book' related badges setting
+    /// … move it out of MCP back to where it was … one setting for 'show shared
+    /// with AI and private from AI' badges … in MCP").** Two rows, two homes,
+    /// and the search follows each: "Show ownership badges" is Settings ▸
+    /// Editor's again (beside the hide-owned default, as before VX-905); the AI
+    /// pair's switch is Settings ▸ MCP's, at the pane's foot under every tab
+    /// (a finding picks no tab), named by the search only where the pane draws
+    /// it — once the library has had a client (the sharing face's fact,
+    /// PROVISIONAL F-934-A).
+    @Test func theBadgeFamilySplitsAcrossTwoPanesAndTheSearchFollowsEachRow() throws {
+        let badges = try #require(SettingsCatalog.rows.first { $0.id == "ownershipBadges" })
+        let pair = try #require(SettingsCatalog.rows.first { $0.id == "mcpAIMarks" })
+        #expect(badges.pane == .editor && badges.title == OwnershipSettingsCopy.badgesTitle)
+        #expect(pair.pane == .mcp && pair.title == MCPPaneCopy.aiMarksTitle)
+        #expect(AppSettingsView.rowIDsRendered[.mcp]?.last == "mcpAIMarks", "the MCP pane's foot")
+        #expect(AppSettingsView.rowIDsRendered[.mcp]?.contains("ownershipBadges") == false)
+        #expect(MCPPaneTab.holding(findingLead: pair.title) == nil, "under every tab — a finding picks none")
+
+        func firstSetting(_ word: String) -> SettingsFinding? {
+            findings(word).first { $0.kind == .setting }
+        }
+        // The book marks' words land on Editor's row.
+        for word in ["ownership badges", "ownership", "badge", "badges", "owned by", "membership"] {
+            #expect(firstSetting(word)?.lead == badges.title, "“\(word)” names the book marks' switch first")
+            #expect(firstSetting(word)?.pane == .editor, "“\(word)” lands on Settings ▸ Editor")
+        }
+        // The AI pair's words land on the MCP row.
+        for word in ["shared and private marks", "private", "eye", "closed eye", "shared with ai", "icon"] {
+            #expect(firstSetting(word)?.lead == pair.title, "“\(word)” names the AI pair's switch first")
+            #expect(firstSetting(word)?.pane == .mcp, "“\(word)” lands on Settings ▸ MCP")
+        }
+        // Each row's words stay its own: the book row claims no AI mark and the
+        // AI row no book mark.
+        #expect(!badges.blurb.localizedCaseInsensitiveContains("eye")
+                && !badges.blurb.localizedCaseInsensitiveContains("private"))
+        #expect(!pair.blurb.localizedCaseInsensitiveContains("owned by"))
+
+        // A library that never had a client: the MCP pane draws no foot
+        // section, so the search names no AI-pair row — and the book marks'
+        // row is every library's, found as ever.
+        let fresh = SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: false, mcpTrailDial: false)
+        #expect(!fresh.contains { $0.finding.lead == pair.title }, "never had a client: no AI-pair row")
+        #expect(fresh.contains { $0.finding.lead == badges.title && $0.finding.pane == .editor })
+        let had = SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: true, mcpTrailDial: false)
+        #expect(had.contains { $0.finding.lead == pair.title && $0.finding.pane == .mcp },
+                "a library that has had a client: the row is found (its trail dial need not be drawn)")
+        #expect(SettingsSearch.isSharingFaceRow(pair) && !SettingsSearch.isSharingFaceRow(badges))
+        #expect(MCPPane.drawsAIMarksSwitch(MCPDoor.Snapshot()) == false, "the pane's own gate: no client, no row")
     }
 
     // MARK: - KnownIssues row 59 (the fold), structurally

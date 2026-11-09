@@ -154,6 +154,11 @@ struct MCPIconTwinsTests {
         #expect(road(serverOn: true) == road(serverOn: true))
         #expect(road(serverOn: true) != road(serverOn: false), "a flip of the switch re-renders the faces")
         #expect(road(serverOn: true, canShare: true) != road(serverOn: true, canShare: false))
+        // VX-934 (A JUSTIFIED EDIT — the road gained the AI pair's switch): a
+        // flip of HER switch is a change of the road too, and it never moves
+        // the ask leg's gate (the pending glyph is no part of the pair).
+        #expect(road(serverOn: true, aiMarksOn: false) != road(serverOn: true), "her AI switch re-renders the faces")
+        #expect(road(serverOn: true, aiMarksOn: false).indicatorOn, "the ask leg ignores the AI switch")
     }
 
     /// Every host draws both marks through the two faces, so the one rule
@@ -186,7 +191,14 @@ struct MCPIconTwinsTests {
             #expect(text.contains("MCPServerOffFace.dimmed(serverOn: road?.serverOn)"), "\(face) reads the switch")
             #expect(text.contains("MCPServerOffFace.help("), "\(face) speaks the one hover")
             #expect(text.contains("MCPServerOffFace.ink("), "\(face) wears the one ink")
+            // VX-934 (A JUSTIFIED EDIT): and both faces draw only under her AI
+            // pair's switch, read off the same road through the ONE rule.
+            #expect(text.contains("MCPAIMarksSwitch.drawn(aiMarksOn: road?.aiMarksOn)"),
+                    "\(face) draws only while her AI-pair switch is on")
         }
+        // VX-934: the ⌘L ▾ menu's image of the shared icon follows that rule too.
+        #expect(try source("Core/Views/WingSwitcherMenu.swift")
+            .contains("shared: MCPAIMarksSwitch.drawn(aiMarksOn: road?.aiMarksOn)"))
         // The masthead: the shared icon's gate is the rows' (a client
         // approved), no longer the server-and-client `indicatorOn`; its reach
         // rides the rows' gated batched read.
