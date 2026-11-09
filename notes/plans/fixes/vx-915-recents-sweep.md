@@ -64,9 +64,22 @@ Her Nov 8 composition ("there's lots of quick follow ups"): the recently-minted 
 
 **Evidence:** `OwnershipBadgeTests` + `PrivateMarkFaceTests` + `MCPIconTwinsTests` + `SettingsShapeTests` pins follow the split (justified edits named per pin); a NEW pin for the AI switch's AND (switch off ⇒ neither AI mark draws while the owned-by chip still does, and the reverse); the geometry contract grown by a named arm; settings-search pins both rows. Mac pins land PENDING(gate) headless; the batch gate runs them under a stage claim.
 
-#### BATCH 1 — LIVE STATUS
+#### BATCH 1 — LIVE STATUS (implementer: opus-implementer, session started 2026-11-09)
 
-*(the implementer writes this from its first commit)*
+*Code + headless verification only (the brief: no `xcodebuild test`, no stage — every Mac pin lands PENDING(gate); `swift test` on the core package and `xcodebuild build`/`build-for-testing` run freely). Zero `Sources/VariorumCore/Sync/`, custody or editor-seam lines.*
+
+**What the trace found (inputs → today's state), recorded before any code:**
+- **The switch today** (`ownership_badges`, `Queries.ThemeSettings.ownershipBadges`, default ON at read, "0" = off) governs THREE marks: the in-book also-in-other-books mark and the "owned by" chip (`OwnershipBadgeFace.badge(_:placement:badgesOn:)`, hosts: BookView, FolderView, Library, Pool…) and the Private eye (`PrivateMarkFace.note/book(_:badgesOn:)`, every host passing `themeStore?.settings.ownershipBadges ?? true` — the Library ×3, Book Panel ×2, Pool, Shelf, Timeline, the masthead `MCPNoteIndicator`). The **shared icon** (`MCPSharedIcon`) reads NO switch — it draws wherever its gated reach read answers (VX-272's approved-client gate inside `Queries.mcpNoteReaches`/…). The **navigator's sealed chip** (`BookStateCopy.navigatorChip`) reads no switch either — "stays on ownership_badges" therefore means no change (read-as-settled below).
+- **The row today** sits at Settings ▸ MCP's foot (`MCPPane.badgesSection`, VX-905), one line `OwnershipSettingsCopy.badgesSummary` + (i) `badgesHelp`; before VX-905 it was Settings ▸ Editor's "Books" section, a Toggle + the caption `badgesHelp` (commit `b585918f6`'s diff is the exact "where it was").
+- **The one shared seam** both faces already read is the window's road (`MCPShareRoad`, built by `RootView` and `NoteWindowView`, `serverOn` + `MCPServerOffFace` since VX-900). The windows own their `ThemeStore`, so the road can carry the new synced switch the same way it carries the server's.
+
+| Piece | Item | Status |
+|---|---|---|
+| 1 | Core: the synced enum-class key `ai_marks` ("1"/"0", default ON at READ — no seed, no migration, zero schema) — `ThemeSettings.aiMarks`, `Operations.setAIMarks`; headless pin (round trip, unrecognized ⇒ her default, independent of `ownership_badges`) | NOT-STARTED |
+| 2 | The ONE seam: `MCPShareRoad.aiMarksOn` (both windows hand `theme.settings.aiMarks`) + the pure rule both faces read; `MCPSharedIcon` and `PrivateMarkView` gate on it (an AND on top of the approved-client gate and the rows-drawn reads — nothing new read); the eye LEAVES the badge family (`PrivateMarkFace.note/book` lose `badgesOn`; every host drops the badges read); the ⌘L ▾ menu's shared image follows the same rule; `ThemeStore.setAIMarks` | NOT-STARTED |
+| 3 | Settings: "Show ownership badges" BACK in Settings ▸ Editor's "Books" section (its pre-VX-905 Toggle + caption, help without the eye); the MCP pane's foot section holds the NEW AI-marks switch instead (PROVISIONAL seat/gate F-934-A, wording F-934-B — below); catalog rows ×2 + `paneRowIDs` ×2; the search follows both rows | NOT-STARTED |
+| 4 | Pins: justified edits (`OwnershipBadgeTests`, `PrivateMarkFaceTests`, `MCPIconTwinsTests`, `SettingsShapeTests`, `MCPPaneTabsTests`, `MCPPaneTests`, the road rigs); NEW split pin; the geometry contract grown by a NAMED arm; settings-search pins for both homes | NOT-STARTED |
+| 5 | `swift build` + headless suites; `xcodebuild build-for-testing`; self-assessment + the exact PENDING(gate) `-only-testing` list | NOT-STARTED |
 
 ### BATCH 2 — Takes & Compare (VX-782 · VX-848 · riders VX-793 · VX-927)
 
