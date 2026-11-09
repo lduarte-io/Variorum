@@ -2364,6 +2364,25 @@ host is the shared bootstrap's (VX-604 — both platforms).
 
 **Canon deltas owed at the closeout:** none (no contract changed; the verdict is the ticket's). **QUESTIONS:** none.
 
+### BATCH 5 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 6 spawns)
+
+**Verification first-hand:** three commits (`718701ac8`…`419f2ab88`), pushed, tree clean, HEAD = origin; the whole
+diff is ONE core test file + this record (zero `Sources/` lines — checked by name list); LIVE STATUS row 5 DONE.
+
+**Dispositions:**
+1. **RECORD-ONLY → ACCEPTED.** The hallucination guard worked as designed: the confirm ran green (2/2, three
+   runs), so no fix was built; the trace (the runner-exit race, closed by VX-604's inert host + VX-657's quiesce;
+   the lock road's close behind GRDB's reader barrier) is corroborated in-repo and the two ordering pins stay as
+   regression guards, R-855a revert-proven headless.
+2. **Tickets:** the implementer's text is ON VX-855 (comment `f1c0e9a2`), recommending close-as-already-fixed; a
+   cross-reference is ON VX-691 (comment `017827fc`) — its final call (close with VX-855, or re-scope to the
+   test-leaked-read residual) lands at the closeout's ticket pass.
+3. **The in-app recipe, decided:** (a) the DiagnosticReports .ips check is ADOPTED into the b34 window's RELEASE
+   accounting (free); (b) the five launch-quit cycles are SKIPPED unless the walk window has spare time AND the
+   dev store sits outside the lock screen — the structural trace plus the pins carry it; recorded here so the
+   skip is deliberate.
+4. **No new window legs;** the whole core package stays PENDING to row 8's closing sweep, as the batch marked it.
+
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
 "ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post
