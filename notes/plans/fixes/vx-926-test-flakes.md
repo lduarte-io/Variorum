@@ -375,7 +375,7 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 | P5 | Counts — the suites alone + under a deliberately loaded full-parallel core run | IN-PROGRESS — on the final tree (`7ca9d5341`, instruments deleted): PENDING |
 | P6 | Dispositions, PROVISIONALs, self-assessment | NOT-STARTED |
 
-**Load generators alive:** none (P1's 36 × `yes`, pids 70254–70289, killed by pid after loaded run 2; `pgrep -x yes` = 0). **Reverts in flight:** none — R-L (red 2 of 2) and R-932 (red 3 of 3) each applied, run and restored by `git checkout` (diff empty after each; green after each). **Throwaway instruments in the tree:** none — both (`ZZVX926U3ProbeInstrument.swift`, `ZZVX926U3StarveArm.swift`) deleted, never committed; their last sources kept at `scratchpad/u3/instrument-copies/` (gitignored).
+**Load generators alive:** 36 × `yes`, pids 88029–88064 (`scratchpad/u3/final/yes.pids`) — P5's loaded counts; killed by pid at their end (a successor kills them if this line still names them). (P1's, pids 70254–70289, killed.) **Reverts in flight:** none — R-L (red 2 of 2) and R-932 (red 3 of 3) each applied, run and restored by `git checkout` (diff empty after each; green after each). **Throwaway instruments in the tree:** none — both (`ZZVX926U3ProbeInstrument.swift`, `ZZVX926U3StarveArm.swift`) deleted, never committed; their last sources kept at `scratchpad/u3/instrument-copies/` (gitignored).
 
 ### PHASE 1 — the trace (what starves, with the evidence)
 
