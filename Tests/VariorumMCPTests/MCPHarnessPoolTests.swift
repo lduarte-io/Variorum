@@ -21,8 +21,70 @@ import Testing
 // roads, with no load and no timing luck — each answer takes milliseconds when the
 // waits hold no thread, and never comes inside the bound when they do.
 
+/// A stand-in for the server on the harness's socket path (the real host stopped)
+/// that answers each connection's `initialize` only after `delay` — a server the
+/// test process's congested pool has slowed, made deterministic on a plain thread.
+private final class LatePeer: @unchecked Sendable {
+    private let listener: Int32
+    private let directory: URL
+
+    init(_ h: ServerHarness, answersAfter delay: Double) throws {
+        h.host.stop()
+        directory = h.directory
+        let listener = try MCPSocketRoad.listen(directory: h.directory)
+        self.listener = listener
+        Thread {
+            while true {
+                let fd = accept(listener, nil, nil)
+                guard fd >= 0 else { return }
+                MCPSocketRoad.suppressSIGPIPE(fd)
+                Thread {
+                    defer { close(fd) }
+                    while true {
+                        let line = MCPShim.readFirstLine(fd, limit: 1 << 20)
+                        guard !line.isEmpty else { return }
+                        guard let object = try? JSONSerialization.jsonObject(with: line) as? [String: Any],
+                              object["method"] as? String == "initialize", let id = object["id"]
+                        else { continue }   // the preamble
+                        usleep(UInt32(delay * 1_000_000))
+                        let answer: [String: Any] = ["jsonrpc": "2.0", "id": id, "result": [String: Any]()]
+                        guard let bytes = try? JSONSerialization.data(withJSONObject: answer) else { return }
+                        _ = MCPShim.writeAll(fd, bytes + Data("\n".utf8))
+                    }
+                }.start()
+            }
+        }.start()
+    }
+
+    func stop() {
+        close(listener)
+        MCPSocketRoad.unlink(directory: directory)
+    }
+}
+
 @Suite("VX-850 — the harness's waits never hold the pool the server needs", .serialized)
 struct MCPHarnessPoolTests {
+    /// A server that answers LATER than a hand-picked bound but inside the
+    /// harness's own is HEARD: every raw wait for the server under test is
+    /// bounded by `HarnessDeadline.seconds` — O-7's rule (the VX-771 run), which
+    /// gave four raw helpers the harness's bound and "took them out of the
+    /// family", carried to every raw wait. RED ON THE PRE-FIX HARNESS:
+    /// `RawSocket`'s 5 s default gave up first (a congested pool answers that
+    /// late — Phase 1/P4: 8.9 s in a full-target run).
+    @Test func anAnswerLaterThanAHandPickedBoundButInsideTheHarnesssIsHeard() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        let peer = try LatePeer(h, answersAfter: 6)
+        defer { peer.stop() }
+        try await HarnessDeadline.$seconds.withValue(10) {
+            let socket = try RawSocket(h)
+            defer { socket.close() }
+            socket.send(#"{"jsonrpc":"2.0","id":7,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"late","version":"1"}}}"#)
+            let answer = await socket.next()
+            #expect(answer?["id"] as? Int == 7, "a raw wait heard a 6 s answer inside the harness's 10 s bound: \(String(describing: answer))")
+        }
+    }
+
     /// More concurrent raw openings than the pool has threads — every one is
     /// answered. RED ON THE PRE-FIX HARNESS: `rawOpen` read its answer on the
     /// calling pool thread, so the first `activeProcessorCount` openings held
