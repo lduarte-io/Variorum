@@ -1793,7 +1793,7 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record | DONE (this commit) |
-| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | IN-PROGRESS — 1a the behavior pins on the PRE-FIX tree (`9118b0355` — the red-on-old SHA): core **3 RED exactly as named / 4 green**; 1b the fix + the compile-red pins (this commit): core 16/16 green, Mac `build-for-testing` green, Mac runs PENDING (stage); the core reverts R-443a…d run next at this tip |
+| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | DONE — 1a the behavior pins on the PRE-FIX tree (`9118b0355` — the red-on-old SHA): core **3 RED exactly as named / 4 green**; 1b the fix + the compile-red pins (`80979d6f0`): core 16/16 green; R-443a…d each bit exactly its named set (this commit records them); the protection set 551/123 green; Mac `build-for-testing` green; Mac runs PENDING (stage — R-443M1/M2 named) |
 | 2 | VX-152 — the lock's reentrancy, investigate-first | NOT STARTED — the trace below is read; the verdict lands with its piece |
 | 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | NOT STARTED |
 | 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | NOT STARTED |
@@ -1933,6 +1933,17 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
   `theEnvelopeBesideAReopenedLibraryIsGone`, `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace`,
   `theLeafDeletesAnOlderNameAtTheSlotsRootOnly`; GREEN the three guards. **R-443M2** (= R-443a on the Mac — the
   decision gone, the leaf intact) ⇒ RED the two Mac sweep pins only.
+- *The core reverts, run at `80979d6f0` (each on the one file, `git checkout --`, `git diff --stat` empty after):*
+  **R-443a** → `✘ 16 tests, 6 issues` — exactly the five named (the three scenario sweep pins; the two assess
+  decision pins, the both-postures one with its two legs); the guards, the name pin and the four executor pins green.
+  **R-443b** → `✘` exactly `noNameTheLiveFileDoesNotVouchForIsOwed`; the scenario guard green (the executor refused
+  the forged repair — the second layer bites). **R-443c** → `✘` exactly `anUnvouchedNameIsRefusedAndNothingIsTouched`
+  (4 issues — both arms deleted their file). **R-443d** → `✘` exactly `noNameTheLiveFileDoesNotVouchForIsOwed`; the
+  scenario's below-the-root guard green (the leaf names the root only). Every revert bit exactly its named set.
+- *The neighbours, headless at the restored tip:* every `@Suite` type under `Tests/VariorumCoreTests/Protection/`
+  (assess, the executor's suites, the catalogue, the pre-design fact and set-aside, the scenario world's fixed,
+  generated and mutation suites, the lifecycle) + `LibraryClassifierTests`, by type-name filter → **`Test run with 551
+  tests in 123 suites passed` (5 known issues — the standing ones)**.
 
 **VX-152 — the trace read before the batch's code (the verdict lands as piece 2):** the lock road today is VX-445's
 (`AppBootstrap.lock()` → `lockOnNewRoad()` → `awaitTheLockSeam()` holding `ProtectionRoadSession.beginAct()`); sleep and
