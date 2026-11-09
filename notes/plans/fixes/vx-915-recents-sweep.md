@@ -457,7 +457,7 @@ Rules 2 (the words shown only on ask), 13 (a Castle-era backup's protection), 9 
 | # | Piece | Status |
 |---|---|---|
 | 1 | This LIVE STATUS | DONE (this commit) |
-| 2 | VX-888 — the trace + the band-vs-sheet repro pin, run on the CURRENT tree (red → fix; green → hollow, record, no fix) | IN-PROGRESS |
+| 2 | VX-888 — the trace + the band-vs-sheet repro pin, run on the CURRENT tree (red → fix; green → hollow, record, no fix) | IN-PROGRESS — the repro `SearchPunctuationOnlyTests` (new) RAN GREEN on the current tree (`swift test --filter SearchPunctuationOnlyTests`, 2026-11-09: "2 tests in 1 suite passed", 6 + 3 cases) → the band/sheet disagreement does NOT reproduce. Next: the oracle's discrimination check (a temporary facet-blind band, announced below, restored by `git checkout` of the committed file), then the HOLLOW verdict written up |
 | 3 | VX-852 — the source-walk pin (red on today's release.sh), then the two hooks + the retention, exactly as vx-781 proposed | NOT-STARTED |
 | 4 | Evidence: `bash -n`/`zsh -n` on release.sh · `Tools/verify-pins` dry runs (no argument; a DerivedData tree) · core suites on the touched area · self-assessment | NOT-STARTED |
 
