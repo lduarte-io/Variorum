@@ -273,6 +273,8 @@ The window's order: the RED LEG first (READY-FOR-GATE step 1 — rebuild `vx915-
 **GATE12 RAN (2026-11-09, the orchestrator's window, claim `vx915-gate12`; logs `DerivedData/logs/vx915-gate12-{rev-build,red,green-build,green}.log` until the debris tidy; nov7 verified the release clean).**
 - **RED LEG: CONFIRMED.** On the rev tree (9d5de2c3b + the two files at de75a1118): "Test run with 1 test in 1 suite failed … with 10 issues" — all four arms red at exactly the recorded lines (3× left+width law pairs at :219/:224; the threshold arm those plus :254 gap and :269 card-beside-badge), every guard green. VX-782's red-on-old is WATCHED, verified by revert. Phrasing delta vs the recipe: Swift Testing counts the parameterized pin as "1 test with 4 test cases", never "4 tests". Rev tree, prerevert and the scratchpad clone deleted in-window.
 - **GREEN (on 2ff557dc0): "Test run with 807 tests in 111 suites failed after 518.182 seconds with 12 issues (including 10 known issues)"** — the 10 are the standing in-suite `withKnownIssue` class; 8 skipped lines are the env-gated capture class; VX-782's one-law pin GREEN on the fixed tree. **TWO REAL REDS, one test both voices: `MCPPaneTabsTests.theAIMarksSwitchSitsAtThePanesFootUnderEveryTabOnceTheLibraryHasHadAClient` (.terminal, .study) at its own `#require` (:691)** — in the approved-client per-tab loop, the remounted pane never geometry-reports `.tabRow` (the never-had-a-client mount DOES report; the batch-1 self-assessment's recorded weak spot — the bespoke 523×1600 mount host). Everything else green.
+**GATE12B RAN (2026-11-09, claim `vx915-gate12b`, ~11 min, released at the verdict): "Test run with 41 tests in 5 suites passed after 9.198 seconds" — ZERO reds, zero known issues, zero skips.** The rig fix held: the foot arm green in both voices under the owner-aware oracle (990926121 + ae0579cfd), the new pure pin (c4705f105) green, the other geometry arms and the four guard suites green. Batches 1 and 2 are FULLY GATED. The residual sweep is VX-945.
+
 - **Disposition: routed back to the BATCH-1 IMPLEMENTER to trace — rig or product; nov7's line binds: if rig, FIX THE RIG, never weaken the pin.** A short gate12b (~15–20 min: build-for-testing + MCPPaneTabsTests + whatever the fix touches) slots at vx-926's SEAM or between its soak legs; READY when the fix lands.
 
 ## THE LADDER
@@ -283,11 +285,11 @@ The window's order: the RED LEG first (READY-FOR-GATE step 1 — rebuild `vx915-
 
 | # | Member | Batch | Status |
 |---|---|---|---|
-| 1 | VX-934 badge-family split | 1 | BUILT (a23305aa6; orchestrator spot-check passed — the seam, the synced key, the eye's switch move, fences, no trailers) — Mac pins PENDING(gate) |
-| 2 | VX-782 Takes callout one-law | 2 | BUILT (a8c932ef0 + pin 9d5de2c3b; mechanism probe-measured 215/670→210/680) — red leg + green PENDING(gate12) |
-| 3 | VX-848 Compare lane default | 2 | BUILT to the option-1 ruling (f253ed8aa; P-915-B2-1) — pins PENDING(gate12) |
-| 4 | VX-793 Compare first comment (rider) | 2 | BUILT to both directions (5b7452877; P-915-B2-2) — pins PENDING(gate12) |
-| 5 | VX-927 lineage "now" wording (rider) | 2 | BUILT (e8cf1059c; one rule, speaksAsKept; N-927 words PROVISIONAL) — pins PENDING(gate12) |
+| 1 | VX-934 badge-family split | 1 | GATED (gate12 + the follow-up rig fix d90c2b250 + gate12b 41/5 green) |
+| 2 | VX-782 Takes callout one-law | 2 | GATED — red-on-old WATCHED by revert at gate12 (4 arms, recorded pattern) + green on the fixed tree |
+| 3 | VX-848 Compare lane default | 2 | GATED (gate12 green; P-915-B2-1 to her bundle; her eye at the walk) |
+| 4 | VX-793 Compare first comment (rider) | 2 | GATED (gate12 green; P-915-B2-2 to her bundle) |
+| 5 | VX-927 lineage "now" wording (rider) | 2 | GATED (gate12 green; N-927 words to her bundle) |
 | 6 | VX-869 alert-Cancel sweep | 3 | NOT-STARTED |
 | 7 | VX-841 quick-note wing pick | 3 | NOT-STARTED |
 | 8 | VX-928 ⏎ in-flight guard (rider) | 3 | NOT-STARTED |
