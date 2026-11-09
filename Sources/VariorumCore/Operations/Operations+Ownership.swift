@@ -468,8 +468,10 @@ extension Operations {
     ///
     /// for every note with MORE THAN ONE live member row in live books where
     /// ANY is owned, the EARLIEST-CREATED membership stands (`created_at,
-    /// id` — the local "earlier act"; R2 ranks by `server_seq` for the same
-    /// reason — PROVISIONAL P-13ic-9). If the standing row is OWNED, every
+    /// id` — the local "earlier act", PROVISIONAL P-13ic-9; since VX-921 R2
+    /// ranks by the same key — `SyncEngine.ownedClaimOutranks`, the VX-849
+    /// run's batch 6 — so the local pass and the sync repair stand the same
+    /// row). If the standing row is OWNED, every
     /// later owned-side row DEMOTES to an ARRIVAL (the bell: claim / copy in /
     /// leave) and every later PLAIN-side row is TOMBSTONED (member-class,
     /// recoverable). If the standing row is PLAIN, every owned-side row bells

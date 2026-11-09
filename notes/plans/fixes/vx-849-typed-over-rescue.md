@@ -177,7 +177,7 @@ beside it.**
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | BUILT — `b59d2f16d`…(this commit): VX-443's sweep (PROVISIONAL P-849-4; red-on-old SHA `9118b0355`, the fix `80979d6f0`, reverts R-443a…d bit as named); VX-152 traced — closed before this run by VX-445, a guard pin only; VX-545's five points in one commit (`6cd218082`, the page regenerated); core protection set 551/123 green; Mac + phone `build-for-testing` green; EVERY Mac/simulator run PENDING the stage (the BATCH 4 RECORD's STAGE REQUEST) |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | DONE — RECORD-ONLY (`718701ac8`…(this commit)): traced; the confirm `PurgeSweepTeardownTests` GREEN 2/2 ×3 (the lock's close waits for the held read); R-855a bit exactly its two lines; NO FIX (dismissed as already fixed by VX-604 + VX-657; the ticket text in the BATCH 5 RECORD); no Mac suites new; whole core package PENDING (row 8); the in-app recipe OPTIONAL for the orchestrator's window |
-| 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | IN PROGRESS — the BATCH 6 RECORD opened (this commit); the trace + the siblings recorded before any line |
+| 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | BUILT — `438ed249d`…(this commit): VX-921 FIXED (red-on-old `d58707b70`, the swap `797dfe8a7`, R-921a/b bit exactly as named); VX-919 AUTHORED ONLY (`1db9b06c8` — never executed; deploy HELD, row 9; R-919a bit as named); the siblings recorded; core targeted 480/76 + 14/4 green; Mac + phone `build-for-testing` green; NO Mac suites new; whole core package PENDING (row 8); PROVISIONALs P-849-6/-7 for the merge's QUESTIONS |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
 | 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | NOT STARTED |
 | 9 | Her drill: the two-Mac test's steps 8–9 on the Air — runs AFTER the release reaches the Air via Sparkle (her word, 2026-11-09) · VX-919's deploy window (HELD) | OWED |
@@ -2412,8 +2412,8 @@ over them.
 |---|---|---|
 | 0 | Preflight + this record (the trace, the siblings, the designs) | DONE (this commit) |
 | 1 | VX-921 — the convergence pins on the PRE-FIX tree, watched red; the rank swap; R-921a | DONE — 1a the pins on the PRE-FIX tree (`d58707b70` — the red-on-old SHA): **`✘ 2 tests, 15 issues`** exactly on the named lines; 1b the swap + the pure rank pin + one justified fixture edit (`797dfe8a7`): the suite 3/3, the neighbours 394/76 + 14/4 green; R-921a and R-921b bit exactly their named sets (this commit records them) |
-| 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | BUILT (this commit) — the artifact, the rollback, the sweep's one presence-aware INFO row, the DDL pin; `AuthRLSDDLTests` + `MultiTenantSyncAttackerTests` 88/2 green; NEVER EXECUTED; R-919a named below, run NEXT at this tip |
-| 3 | Close — `swift build`, the targeted core suites, the self-assessment | — |
+| 2 | VX-919 — the cap script + its paired rollback, AUTHORED ONLY; the sweep's row; the DDL pin | DONE — `1db9b06c8`: the artifact, the rollback, the sweep's one presence-aware INFO row, the DDL pin; `AuthRLSDDLTests` + `MultiTenantSyncAttackerTests` 88/2 green; NEVER EXECUTED; R-919a bit exactly its one line |
+| 3 | Close — `swift build`, the targeted core suites, both `build-for-testing`s, the self-assessment | DONE (this commit) — below |
 
 #### VX-921 — the mechanism (traced at `6e16362e1`, before any line)
 
@@ -2597,6 +2597,119 @@ Every `sync_row_seq` / `knownSeq` read under `Sources/VariorumCore/` (grep, at `
 - *THE NAMED REVERT (named here BEFORE it runs, at this commit's tip; headless; the artifact alone in the working tree,
   then `git checkout --`):* **R-919a — the 13i-a class put back:** delete the artifact's `grant delete on device_cursor
   to variorum_definer;` line ⇒ expected RED exactly the pin's DELETE-grant line; every other line and test green.
+- *R-919a, run at `1db9b06c8` (the artifact alone; `git diff --stat` 1 file, 1 deletion):* **`✘ Test run with 88 tests
+  in 2 suites failed … with 1 issue`** — exactly `deviceCursorCapBeltIsGuardedContainedPairedAndTouchesNoRPC` at its
+  DELETE-grant line. Restored by `git checkout --` (`git diff --stat` empty).
+
+#### Piece 3 — Close
+
+- *Headless at the tip:* `swift build` → `Build complete!` (incremental; the only warnings the manifest's standing
+  unused-dependency lines). The batch's targeted set over every touched seam — `OwnedExclusivityRankConvergence ·
+  Phase13iRepair · BookWing* · Ownership* · Arrival* · DailyJournalRulings · ProductionRoundShapeSweep ·
+  JournalWingConvergence · FurnitureConvergenceRepair · SyncConvergence · WireIntakeNeverFences · BookArchive ·
+  MembershipPin · SampleLibraryDedupeRepair · SyncMerge · SyncPull · SyncPush · AuthRLSDDL · MultiTenantSyncAttacker`
+  → **`✔ Test run with 480 tests in 76 suites passed`** (VariorumCoreTests) + **`✔ 14 tests in 4 suites passed`** (the
+  filter's MCP-target matches). Every named revert ran headless (R-921a, R-921b, R-919a) and bit exactly its set.
+- *Builds (incremental — this worktree's warm DerivedData, never cold):* Mac `xcodebuild build-for-testing -scheme
+  Variorum` → `** TEST BUILD SUCCEEDED **` (exit 0; the first, `-quiet` invocation printed three "failed with exit code 0
+  but produced no further output" lines from its script phases — `-quiet`'s known quirk; the re-run without it read
+  SUCCEEDED, exit 0); phone `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator'` → `** TEST BUILD
+  SUCCEEDED **` (exit 0). The core change is internal to `VariorumCore` (no app file names it). Both builds ran on
+  `1db9b06c8`'s tree; the close's one later source edit is a doc comment (`Operations+Ownership.swift`, the alignment
+  below) — `swift build` green after it and the OWNED suites with the ownership-operations neighbours 37/4 green.
+- *HEAVY HEADLESS — PENDING (the live constraint; other sessions hold the stage):* the WHOLE core package `swift test`
+  (the repair runs inside every pull, so the targeted set above covers the suites that drive it; the whole package folds
+  into LIVE STATUS row 8's closing sweep, as every batch's has).
+- *Mac/simulator suites for the orchestrator's window:* **NONE new, and NO named Mac reverts** — every pin of this
+  batch is core and ran headless. (The app reads the `owned_elsewhere` provenance kind for display only —
+  `MembershipChoiceTests`, `BookArrivalsReviewTests` — unchanged semantics; they ride row 8's whole-target sweep.)
+
+**ROW DISPOSITIONS.**
+
+| Row | Disposition |
+|---|---|
+| VX-921 — the OWNED exclusivity repair's seq-rank determinism gap | **FIXED** — the claimant rank on `reading_post.created_at`, ties by id (`797dfe8a7`); pins `OwnedExclusivityRankConvergenceTests` (two convergence pins red-on-old at `d58707b70`, R-921a; the pure rank pin, R-921b) |
+| VX-921 — sibling seq-rank repairs (I2 move/move · I10 resurrection · I10 archive/archive) | **RECORDED, not widened** (the table above) — SyncSpec §7 RULES their seq rank; a swap is a spec change → a born-ticket candidate for the orchestrator |
+| VX-919 — the device_cursor cap belt | **AUTHORED ONLY** (`1db9b06c8`) — the artifact + its paired rollback + the sweep's presence-aware row + the DDL pin (R-919a); NEVER EXECUTED; **the deploy DEFERRED to her window** (owner: her — LIVE STATUS row 9) |
+
+**PROVISIONALs (bundled for the merge's QUESTIONS entry — the orchestrator files on latest main; `notes/QUESTIONS.md`
+untouched here):**
+- **P-849-6 — the OWNED claimant rank on `created_at`, "never-accepted last" retired** (VX-921; the mirror of
+  P-912-B2-2, which #268's addendum left standing as built). It amends #167's RATIFIED (a) text in its MEASURE only —
+  (a)'s shape ("the earliest act stands and the later act becomes what its door would have done") is untouched; the
+  "earliest" is now the earliest FILED (her act's moment) rather than the earliest ACCEPTED, and "a never-pushed row
+  carries no authority" retires: an offline device's earlier act now outranks an online device's later one. Built:
+  (a) `created_at` then id. Alternatives: (b) keep the seq rank — the recorded gap (pinned: two devices, a member of
+  nothing); (c) `created_at` with never-accepted-last KEPT — rejected as nondeterministic (traced above: round order
+  alone re-opens the gap). The §9 line, for her eye: `created_at` is a wall clock used only to RANK converged bytes;
+  a skewed clock changes which filing stands, never whether every device agrees. For (a): it is the key the repair's
+  LOCAL twin (the revival pass, P-13ic-9) already used, so one act is "earlier" by one rule on both roads; against
+  (a): a seated arrival ranks by its bell's birth (corner 5).
+- **P-849-7 — the cap's two operational choices** (VX-919; nothing deploys without her, so these are hers at the
+  window): (i) the cap counts EVERY device row of the account (stale ones evicted first by the order) — alternative: count
+  only devices seen within the 60-day horizon (leaves stale rows uncapped); (ii) NO deploy-time trim — an account
+  already over 64 trims at its next new device; alternative: a deliberate one-time trim in the window (her act, the
+  BEFORE read sizes it). The cap's N = 64 and the oldest-`seen_at` eviction are B0's own offer, not provisional.
+
+**RECORDED CORNERS (for the orchestrator; none built here):**
+1. *The partial-picture corner (PRE-EXISTING, key-independent):* a device repairing on a SUBSET of a note's memberships
+   that lacks the earliest PLAIN filing — and whose subset's earliest is OWNED — tombstones a later plain filing the
+   whole set would have kept (beside a standing plain filing, plain rows never act); when the earliest filing then
+   lands, the owned claim demotes and the tombstoned plain filing stays dead (silent, recoverable). Reachable when the
+   earliest filing reaches that device last (its row re-accepted beyond the device's window by a later edit, or still
+   unpushed on its own device). It is the repair's SHAPE (two arms keyed on the standing row's kind), present under the
+   seq rank and the filing rank alike; VX-921 does not touch it. A born-ticket candidate (Low).
+2. *The siblings* — the table above (I2 · I10 ×2), seq ranks SyncSpec §7 rules: one born-ticket candidate.
+3. *VX-919's live proof is hers:* the fake harness cannot reach a PL/pgSQL trigger (the recorded 13j class), so the
+   artifact's letter is pinned and its behavior is the optional rolled-back probe at her window; the containment arm
+   means a dead cap reads only as a WARNING in the logs — the VERIFY's privilege read and the probe are what catch it.
+4. *VX-919's records at the deploy (the deploying session's, not this batch's):* SyncSpec §12's running record gains a
+   "VX-919 (MAINTENANCE — NOT a marker event)" line; the b0 doc's recorded corner flips to belted; the sweep's expected
+   count moves by one INFO row.
+5. *A SEATED ARRIVAL ranks by its bell's birth, not its seat (found closing — inherent to the key, shared with B2's
+   tier 3):* `seatArrival` flips `status` in place, so a membership born as an arrival at 9:00 and seated at 11:00
+   ranks as filed at 9:00, where the seq rank (the seat re-accepted the row) read it as the later act. A race needs a
+   seat on one device against a filing elsewhere on another, both before either sees the other. No converged byte holds
+   the seat's moment (`reading_post` carries no `updated_at`; the provenance's `at` is the bell's), so a seat-aware rank
+   is a schema event (§12), never this batch's. Rides P-849-6 for her eye; the B2 mend carries the same property.
+
+**ALIGNMENT FOUND CLOSING (comment only, recorded):** the LOCAL twin of this repair — `Operations
+.enforceOwnershipAfterRevival`, the revival pass after `restoreContainer`/`restoreReading`/the diverge replays — ALREADY
+ranked by `created_at, id` (PROVISIONAL P-13ic-9, "the local 'earlier act'"), its doc noting that R2 ranked by
+`server_seq` instead. After VX-921 the sync repair and its local mirror stand the same row by one key; that doc line
+(`Operations+Ownership.swift`, the only edit outside `Sync/`) now says so — no code moved there.
+
+**SELF-ASSESSMENT (how I would attack this diff — for the cold Fable reviewer).**
+- *Is the swap truly deterministic?* The rank reads only `id`, `owned` (read after the rank, by the arms) and
+  `created_at` — all converged, immutable bytes (`reading_post` has no `updated_at`, and no road rewrites `created_at`).
+  The demotion stamp's `at` differs per device, but two devices' identical demotions of one row converge by the
+  standing metadata CAS (pinned: the converged dumps are byte-identical in both pins). `created_at` text is the one
+  `DateFormatter.variorumISO8601` format store-wide, so the string compare is chronological; a malformed stamp (only a
+  hand-built row could carry one) still sorts deterministically.
+- *What else moved:* nothing in the repair's scope, arms, stamps or outbox writes — the diff of `repairOwnedExclusivity`
+  is the members query (the join out, `created_at` in), the typed `OwnedClaim` and the sort. The one existing pin whose
+  fixture moved was a HAND STAMP contradicting its own story (recorded); the other two OWNED pins and every neighbour
+  are untouched and green.
+- *The behavior change she should know:* an offline device's EARLIER act now beats an online device's later accepted
+  act (P-849-6) — e.g. a claim made offline at 9:00 and pushed at 10:00 outranks a plain filing made and pushed at
+  9:30. Under the seq rank the 9:30 filing stood. The new answer is the one #167's sentence ("the earliest act stands")
+  reads as; flagged rather than assumed.
+- *VX-919's attack surface:* a trigger error aborting a pull (contained); the definer lacking DELETE (granted, pinned,
+  R-919a, VERIFY read); RLS hiding rows from the eviction (the policy admits exactly the caller's rows, which is the
+  cap's own scope); the new row evicting itself (excluded, pinned); a bulk insert (only the probe does one — written as
+  64 then 1 so NEW is the newest); the sweep reading the function as UNEXPECTED (the presence-aware row) or MISSING
+  before the deploy (the same filter); the pg_temp belt (an invoker with no SET clause and schema-qualified relations is
+  outside its scope by construction — the drift pins stay green). What I could not do by design: execute one line of it.
+
+**MOBILE PARITY:** nothing mobile-visible. The OWNED repair is the shared core's (`Repairs.swift`), so the phone
+converges exactly as the Mac does; the cap is server-side and reads no client.
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape — PROPOSED, not applied here):** SyncSpec §7's
+OWNED paragraph — replace "the EARLIEST-ACCEPTED membership stands (never-accepted rows rank last per §3's seq-0 rule;
+ties by id)" with "the EARLIEST-FILED membership stands (`reading_post.created_at` ascending, ties by id — converged
+bytes, so every device holding the same rows stands the same claim; VX-921, `notes/plans/fixes/vx-849-typed-over-rescue.md`
+BATCH 6)", landing as P-849-6 survives her sitting (§3's "§7's seq-ranked repairs read it" stays true — I2 and the
+two I10 arms still do). AppSpecRecord: the dated entry. VX-919: no canon line until its deploy (corner 4).
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
