@@ -692,6 +692,12 @@ The window's order: THE RED RUNS first — FIRST ATTEMPT one combined rev tree s
 
 ## THE SECOND FOLD (merge e9ed85ccf, 2026-11-09 post-walk): origin/main 75a5222ad (vx-926's merge 598866e4a, PR #239, + two notes-only commits) merged in — a merge-in, never a rebase — textually clean. The 926∩915 overlap files EYE-READ on the merged tree per nov7's rule: `TakesViewModel.swift` (main: the init's defaults parameter → `NoteMemoryDefaults.store`, vx-926's hermetic-defaults work — my VX-793 region untouched) · `RootView.swift` (main: `ReadTakesView.holdsTakes(defaults:)` one line at :1669 — my `mcpRoad` region untouched) · `TourTests.swift` (main: three TourEntryTests timing hunks — my TourScriptTests departures untouched) · `MCPServerTests.swift` (main: the ServerHarness made async + rawInitialize async at :821 — my unlink catalog-walk additions untouched). The branch now carries ALL of main (nov7: main STOPPED at 75a5222ad until vx-849). The merge gate (WHOLE Mac + PHONE by device id, one claim) runs on this tree.
 
+## THE MERGE GATE RAN (2026-11-09 08:16–09:15, claim `vx915-merge-gate` + the pre-approved +20 renew; TESTED TREE 675c31453 — notes-only on 486aa92e3, which carries main 75a5222ad; logs `DerivedData/logs/vx915-mg-{build,mac,alone,phone}.log`)
+
+- **MAC, the WHOLE target:** "Test run with 6294 tests in 1091 suites … with 15 issues (including 13 known issues)" — the 13 the standing `withKnownIssue` class, 46 skips the env-gated capture class. ONE real red, `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` — a `withKnownIssue` test whose documented Esc boundary did NOT reproduce under whole-target load ("Known issue was not recorded"); ALONE 7/1 suite GREEN with the known issue recorded. Green at gate12 on this code; the known-issue-NOT-recorded load class — named, not chased; **VX-970** minted with the datapoint.
+*[removed for publication]*
+- **Verdict: GREEN by the gate's law** (every non-known red re-run alone and named). PR #240 asked to merge; nov7 serializes.
+
 ## CLOSEOUT DRAFTS (assembled in the gate gap; APPLIED at the merge moment on latest main — nothing here is live canon yet)
 
 **A. The QUESTIONS bundle entry (ONE entry; its number taken from notes/QUESTIONS.md at the merge):**
