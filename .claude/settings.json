@@ -11,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "c=$(jq -r '.tool_input.command // \"\"'); case \"$c\" in *\"git commit\"*|*\"gh pr\"*) printf '%s' \"$c\" | grep -qE '(Co-Authored-By|Claude-Session): |noreply@anthropic\\.com|Generated with \\[Claude Code\\]|claude\\.com/claude-code' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Variorum commits and PR bodies carry no attribution trailer (CLAUDE.md). Remove the Co-Authored-By / Claude-Session / Generated-with line and retry.\"}}' ;; esac; true"
+            "command": "c=$(jq -r '.tool_input.command // \"\"'); case \"$c\" in *\"git commit\"*|*\"gh pr\"*) printf '%s' \"$c\" | grep -qE '(Co-Authored-By|Claude-Session):|noreply@anthropic\\.com|Generated with \\[Claude Code\\]|claude\\.com/claude-code' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Variorum commits and PR bodies carry no attribution trailer (CLAUDE.md). Remove the Co-Authored-By / Claude-Session / Generated-with line and retry.\"}}' ;; esac; true"
           }
         ]
       }
