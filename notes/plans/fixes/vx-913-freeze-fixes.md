@@ -314,8 +314,8 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 | 0 | This record skeleton + the required reading | DONE (18ab4e1cc) |
 | 1 | Q1 — the 0.9.2 road the crash names: the code at build 5178 (git archaeology), and where each piece went | DONE (5a9d43d14) — THE HISTORY MEMO, Q1 below |
 | 2 | Q2 — today's re-keying reopen road: does the crash-prone shape survive? (code reading at the branch head) | DONE (5a9d43d14) — Q2 below |
-| 3 | Q3 — the verdict proposal (close-as-stale chain, OR a bounded repro plan) | DONE (this commit) — Q3 below: CLOSE AS STALE recommended (PROVISIONAL, hers at the bundle); no repro is owed by the brief's condition; an OPTIONAL two-row confirmation walk drafted for the orchestrator's window if she wants one |
-| 4 | Self-assessment | DONE (this commit) — below |
+| 3 | Q3 — the verdict proposal (close-as-stale chain, OR a bounded repro plan) | DONE (40f6de5ca) — Q3 below: CLOSE AS STALE recommended (PROVISIONAL, hers at the bundle); no repro is owed by the brief's condition; an OPTIONAL two-row confirmation walk drafted for the orchestrator's window if she wants one |
+| 4 | Self-assessment | DONE (40f6de5ca) — below |
 
 ### THE HISTORY MEMO
 
