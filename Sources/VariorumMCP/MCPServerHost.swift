@@ -107,13 +107,28 @@ public final class MCPServerHost: @unchecked Sendable {
     // MARK: - Start / stop
 
     public func start() throws {
-        lock.lock()
         // VX-818: a suspended host is not restarted — its connections survive,
-        // and `start` would sweep their while-connected grants.
-        guard _state != .running, _state != .suspended else { lock.unlock(); return }
-        lock.unlock()
+        // and `start` would sweep their while-connected grants. VX-613: the
+        // stop count this start begins under is its generation token
+        // (`startStillOwed`).
+        let begun: Int? = lock.withLock {
+            guard _state != .running, _state != .suspended else { return nil }
+            return stopCount
+        }
+        guard let begun else { return }
         do {
             try operations.sweepMCPConnectionGrants()
+            #if DEBUG
+            startStepProbe?(.swept)
+            #endif
+            // VX-613 (the bind half — the vx-548 record's MB-13 (ii)): the sweep
+            // is the step that WAITS (a write, queued behind hers), so a stop can
+            // land during it — her switch's OFF → ON, the lock, the library
+            // closing. A start the host no longer owes binds nothing and writes
+            // no state: it used to bind the path and publish `.running` anyway —
+            // a host the door had let go, serving — and the fresh host's bind
+            // probe then met it ("another Variorum is already serving mcp.sock").
+            guard lock.withLock({ startStillOwed(since: begun) }) else { return }
             let fd = try MCPSocketRoad.listen(directory: directory)
             var pipeFDs: [Int32] = [-1, -1]
             guard pipe(&pipeFDs) == 0 else {
@@ -121,12 +136,29 @@ public final class MCPServerHost: @unchecked Sendable {
                 MCPSocketRoad.unlink(directory: directory)
                 throw MCPSocketRoad.ListenError(kind: .failed(step: "pipe", errno: errno))
             }
+            #if DEBUG
+            startStepProbe?(.bound)
+            #endif
             let done = DispatchSemaphore(value: 0)
-            lock.withLock {
+            // VX-613: published only while the start is still owed. A stop that
+            // landed since the check above found no listener to end (none was
+            // published yet), so this start lets its own go — the socket removed
+            // while its listener still holds the path (the file is its own —
+            // `halt`'s rule), then the listener and the wake pipe closed.
+            let published: Bool = lock.withLock {
+                guard startStillOwed(since: begun) else { return false }
                 listenFD = fd
                 wakePipe = (pipeFDs[0], pipeFDs[1])
                 acceptDone = done
                 _state = .running
+                return true
+            }
+            guard published else {
+                MCPSocketRoad.unlink(directory: directory)
+                close(fd)
+                close(pipeFDs[0])
+                close(pipeFDs[1])
+                return
             }
             let wakeRead = pipeFDs[0]
             let thread = Thread { [weak self] in
@@ -142,10 +174,31 @@ public final class MCPServerHost: @unchecked Sendable {
             thread.start()
             startObservingGrants()
         } catch {
-            lock.withLock { _state = .failed(String(describing: error)) }
-            throw error
+            // VX-613: a failure is the host's state only while the start is still
+            // owed. A start stopped since, or one whose host another start of it
+            // already serves (its bind probe met that live listener), ends
+            // quietly — it used to write `.failed("another Variorum is already
+            // serving mcp.sock")` over the host that served.
+            let owed: Bool = lock.withLock {
+                guard startStillOwed(since: begun) else { return false }
+                _state = .failed(String(describing: error))
+                return true
+            }
+            if owed { throw error }
         }
     }
+
+    /// **VX-613 — is a start begun under `begun` still this host's to finish?**
+    /// No stop has landed since it began (`stopCount` — `halt` bumps it), and no
+    /// other start of this host already serves (the door's flag half could start
+    /// a held host twice). Read under `lock`.
+    private func startStillOwed(since begun: Int) -> Bool {
+        stopCount == begun && _state != .running && _state != .suspended
+    }
+
+    /// VX-613: how many stops this host has taken (`halt`) — a start's
+    /// generation token.
+    private var stopCount = 0
 
     /// Stop: close the listener, unlink its socket, hang up every session (`halt`).
     /// **VX-394 (VX-348 U5): `reason` is why** — each connection this stop ends
@@ -227,6 +280,8 @@ public final class MCPServerHost: @unchecked Sendable {
                 acceptDone = nil
                 observation = nil
                 _state = .stopped
+                // VX-613: every start in flight is no longer owed.
+                stopCount += 1
                 return snapshot
             }
         #if DEBUG
@@ -274,6 +329,14 @@ public final class MCPServerHost: @unchecked Sendable {
     /// writes only — the VX-369 sweep's row 19). Read through the host at each
     /// read, so a probe set after a connection opened still reaches it.
     var handlerReadProbe: (() throws -> Void)?
+
+    /// TEST-ONLY (VX-613 — the VX-913 run, B3): THE START'S LATE STEPS, where a
+    /// pin holds a start the way a busy writer holds its sweep — `.swept` once
+    /// the while-connected sweep has run and before the bind, `.bound` once the
+    /// listener is bound and before it is published. Runs on the starting
+    /// thread; set before `start()`.
+    var startStepProbe: ((StartStep) -> Void)?
+    enum StartStep: Equatable, Sendable { case swept, bound }
     #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**

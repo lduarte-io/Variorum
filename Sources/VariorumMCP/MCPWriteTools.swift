@@ -63,9 +63,18 @@ struct MCPWriteTools: Sendable {
             }
             switch result {
             case .success(let landed):
-                // VX-812 (A-809-19): a list form's landed items each send their
-                // receipt (one call-scoped run key — one line at the app).
-                for receipt in landed.receipts { hooks.onWrite?(receipt) }
+                // VX-775: a call whose Activity line the store refused tells her
+                // ONCE — its receipts and then the failure through ONE hook, so
+                // the app lands them in one hop and the failure is the last word
+                // on her seam (the ladder round 1, F1); the answer is the act's
+                // own either way.
+                if let failure = landed.activityLogFailure, let tail = hooks.onActivityLogFailure {
+                    tail(failure, landed.receipts)
+                } else {
+                    // VX-812 (A-809-19): a list form's landed items each send
+                    // their receipt (one call-scoped run key — one line at the app).
+                    for receipt in landed.receipts { hooks.onWrite?(receipt) }
+                }
                 return Outcome(text: landed.answer, isError: false)
             case .failure(let refused):
                 return refused.outcome
@@ -266,15 +275,21 @@ struct MCPWriteTools: Sendable {
         /// landed worth claiming), or — VX-812's list forms — one per landed
         /// item, on one run key.
         let receipts: [MCPWriteReceipt]
+        /// VX-775: the call's landed acts whose Activity line could not be
+        /// written — for her, never the wire (nil: every line landed). A list
+        /// call's items coalesce into one value (`MCPActivityLogFailure.coalescing`).
+        let activityLogFailure: MCPActivityLogFailure?
 
-        init(answer: String, receipt: MCPWriteReceipt?) {
+        init(answer: String, receipt: MCPWriteReceipt?, activityLogFailure: MCPActivityLogFailure? = nil) {
             self.answer = answer
             receipts = receipt.map { [$0] } ?? []
+            self.activityLogFailure = activityLogFailure
         }
 
-        init(answer: String, receipts: [MCPWriteReceipt]) {
+        init(answer: String, receipts: [MCPWriteReceipt], activityLogFailure: MCPActivityLogFailure? = nil) {
             self.answer = answer
             self.receipts = receipts
+            self.activityLogFailure = activityLogFailure
         }
 
         var receipt: MCPWriteReceipt? { receipts.first }
@@ -988,14 +1003,22 @@ struct MCPWriteTools: Sendable {
             // something other than the logged target (a wing move's receipt
             // names its DESTINATION, the sweep's coalescing key) logs its own.
             let logged = logsReceiptTitle ? landed.receipt?.targetTitle ?? title : title
-            try log(clientName, job.tool, kind, id, logged, allowed: true)
+            // VX-775 (her ruling: "the error goes to her, the truth goes to
+            // the client"): the act has LANDED — its own transaction committed —
+            // so a failure writing its Activity line is never this act's
+            // refusal. It is caught HERE, carried out for her
+            // (`MCPHostHooks.onActivityLogFailure`), and the act answers exactly
+            // as when the line lands (R-825). It used to fall into the catch-all
+            // below: a second, refused line and an `isError` answer for a write
+            // in her store, with no receipt.
+            let unlogged = recordLanded(clientName, job.tool, kind, id, logged)
             // VX-357 — THE DOOR SAYS IT, in its one place: a landed write whose
             // text held U+0000 names how many the store's rule removed
             // (`MCPNullCharacters`); a write with none answers byte-unchanged.
             var answer = landed.answer
             let removed = job.nullCharactersWritten
             if removed > 0 { answer[MCPNullCharacters.answerKey] = removed }
-            return .success(Landed(answer: try encode(answer), receipt: landed.receipt))
+            return .success(Landed(answer: try encode(answer), receipt: landed.receipt, activityLogFailure: unlogged))
         } catch let refused as Refused {
             try log(clientName, job.tool, kind, id, title, allowed: false)
             return .failure(refused)
@@ -1006,6 +1029,24 @@ struct MCPWriteTools: Sendable {
             try log(clientName, job.tool, kind, id, title, allowed: false)
             let words = MCPWireRefusalCopy.spoken(error, appWords: hooks.refusalWords)
             return .failure(Refused(outcome: Outcome(text: words, isError: true)))
+        }
+    }
+
+    /// **VX-775 — a LANDED act's Activity line**: written as ever, its failure
+    /// returned as a value instead of thrown. One attempt, no retry: GRDB's
+    /// busy timeout already retries lock contention inside the write, and the
+    /// failures left (a full disk, a read-only volume, an I/O error, a key that
+    /// will not open, the lock) do not clear inside one call. Nothing is
+    /// synthesized — `list_my_activity` simply lacks the line.
+    private func recordLanded(
+        _ clientName: String, _ tool: String, _ kind: String, _ id: String, _ title: String?
+    ) -> MCPActivityLogFailure? {
+        do {
+            try log(clientName, tool, kind, id, title, allowed: true)
+            return nil
+        } catch {
+            return MCPActivityLogFailure(
+                clientName: clientName, tool: tool, unrecorded: 1, storeWords: MCPStoreFailure(error)?.detail)
         }
     }
 
@@ -1212,5 +1253,24 @@ struct MCPWriteTools: Sendable {
             guard let string = item.stringValue else { throw ArgumentFailure(message: "\(key) must hold strings.") }
             return string
         }
+    }
+}
+
+extension MCPActivityLogFailure {
+    /// **VX-775 — a multi-act call's items, told to her ONCE** (the list forms,
+    /// `replace_tag`): each landed item whose Activity line failed adds its
+    /// count; the first failure's store words and the call's tool stand for the
+    /// call. nil while no item's line has failed.
+    static func coalescing(
+        _ earlier: MCPActivityLogFailure?, _ item: MCPActivityLogFailure?, tool: String
+    ) -> MCPActivityLogFailure? {
+        guard let item else { return earlier }
+        guard let earlier else {
+            return MCPActivityLogFailure(
+                clientName: item.clientName, tool: tool, unrecorded: item.unrecorded, storeWords: item.storeWords)
+        }
+        return MCPActivityLogFailure(
+            clientName: earlier.clientName, tool: earlier.tool, unrecorded: earlier.unrecorded + item.unrecorded,
+            storeWords: earlier.storeWords)
     }
 }

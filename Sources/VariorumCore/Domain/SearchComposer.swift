@@ -534,10 +534,7 @@ public enum SearchComposer {
               FROM hits h
             ),
             grouped AS (
-              SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
-                     SUM(s.kind <> 'title') AS g_lines\(keyed ? ", MIN(s.home_key) AS g_key" : "")
-              FROM scored s
-              GROUP BY s.home_id
+              \(groupFacts(keyed: keyed))
             ),
             gpage AS (
               SELECT g.* FROM grouped g
@@ -563,6 +560,23 @@ public enum SearchComposer {
         let arguments = hits.arguments + cursorArguments
             + [.integer(Int64(limit)), .integer(Int64(max(1, perGroup))), .text(hits.match)]
         return Statement(sql: sql, arguments: arguments)
+    }
+
+    /// **The group facts, in ONE home** (VX-890 — the drift class the VX-819
+    /// ladder's F6 closed for the grouped pages): per home over the `scored`
+    /// CTE (alias `s`), its best score, every hit, its non-title hits (the
+    /// "all N ›" count) and — under a home order (`keyed`) — its key. The
+    /// group page's `grouped` CTE and `wornGroupFacts` both read THIS text, so
+    /// what a lead worn group says can never drift from what the page's own
+    /// groups say. The continuation lines carry the group page's CTE-body
+    /// indent, so that statement stays the shipped text, byte for byte.
+    private static func groupFacts(keyed: Bool) -> String {
+        """
+        SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
+                 SUM(s.kind <> 'title') AS g_lines\(keyed ? ", MIN(s.home_key) AS g_key" : "")
+          FROM scored s
+          GROUP BY s.home_id
+        """
     }
 
     /// **The group page under a HOME order** (VX-820) — `groups`' own
@@ -614,7 +628,9 @@ public enum SearchComposer {
     /// the notes a worn day names that did not rank onto the group page,
     /// what their groups would have said — `(g_home, g_best, g_hits,
     /// g_lines)` — in ONE counts-style statement over the SAME hits builder
-    /// (the dispositions' adopted shape: never per-note queries). The lead
+    /// and the page's own group facts (`groupFacts`, VX-890 — never a
+    /// restatement beside them); the dispositions' adopted shape, never
+    /// per-note queries. The lead
     /// groups then carry a real "all N ›" road instead of a fabricated
     /// 1/0 stub (R-13o-9), and the page's keyset cursor stays untouched.
     /// nil when the text half cannot match anything (a worn-only question —
@@ -638,10 +654,7 @@ public enum SearchComposer {
               SELECT h.*, \(scoreSQL(query)) AS score
               FROM hits h
             )
-            SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits,
-                   SUM(s.kind <> 'title') AS g_lines
-            FROM scored s
-            GROUP BY s.home_id
+            \(groupFacts(keyed: false))
             """
         return Statement(sql: sql, arguments: hits.arguments + [.text(homeIDsJSON)])
     }
