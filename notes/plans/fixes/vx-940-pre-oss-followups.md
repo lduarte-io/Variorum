@@ -59,7 +59,7 @@ The whole Mac target + the phone target if `Shared/` changed (VX-920 is Mac app 
 | W1 | VX-939 + VX-923 | **BUILT + PINNED, headless** — "## W1 record" (end of file): VX-939 `LETTER.md` landed (two files, sync noted — the seed reads compiled literals; `read-me.txt` is the pins' oracle, untouched); VX-923 the four Point-Free siblings + Sparkle credited (verbatim, generated and checked IDENTICAL), BIP-39 → MIT in both places; the pin red 19 on old / green 4/4 headless; **in-target runs PENDING the gate (Mac AND phone targets)**; authored sentences + P-940-W1-1..5 listed for her pass |
 | W2 | VX-920 (+ the A-940-1 rider: the LETTER drift pin, Part of VX-939) | **BUILT + PINNED, headless** — "## W2 record" (end of file): VX-920 the lineage face names Home `WingWords.home` (the switcher's one Home name) on the member's line AND its go-to button, through `Queries.effectiveWingID` over the read's live wing names; the pin red 3 on old / green / R-920-A red exactly 5 (headless harness); **its in-target run PENDING the gate (Mac target; no `Shared/` line changed)**. The rider: `LetterDriftTests` (core, headless) green, red under two scratch mutations, the three sync notes corrected to name it; P-940-W2-1..3 listed for her pass |
 | W3 | VX-917 | **BUILT + PINNED, headless** — "## W3 record" (end of file): `.github/workflows/cold-build-check.yml` runs on a published release or a hand dispatch only (R-940-4), inert while private, an anonymous FULL clone, BUILDING.md's three commands on GitHub's `xcode-27` image graded against `PRIMARY_XCODE_MAJOR` (AppSpec §15.6: a mismatch reports and passes); `ColdBuildCadenceTests` (core, headless) red with the workflow absent, green, M-917-A..E red; **the first live run is owed at the flip** (the record's VX-937 line, for the closeout); the release road publishes no GitHub Release today (P-940-W3-1); P-940-W3-1..6 listed for her pass |
-| W4 | VX-922 + VX-925 + VX-933 | NOT STARTED |
+| W4 | VX-922 + VX-925 + VX-933 | **IN PROGRESS** — "## W4 record" (end of file) |
 | L | The ladder (opus-reviewer) | NOT STARTED |
 | G | The gate (whole targets via nov7) | NOT STARTED |
 | C | Closeout | NOT STARTED |
@@ -409,3 +409,21 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 - **(v) The pin is a strict text read, not a YAML parser.** YAML features it doesn't model (anchors and merge keys inside `on:`, a second document in the file) are read as keys or not at all; every case I could build reds rather than passes (M-917-B, -E). A reviewer who finds a spelling of a push trigger the read passes has found a real hole.
 - **(vi) `PRIMARY_XCODE_MAJOR` and `runs-on: xcode-27` repeat one number** because `runs-on` cannot read `env`; the pin ties both to BUILDING.md.
 - **(vii) `timeout-minutes: 120` is a margin, not a measurement:** the B3 cold road took about a minute to build the core and 2.5 minutes for the app on her M3; a 3-core runner is slower, and `swift test` is the long pole.
+
+## W4 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild` of any kind, no stage, no Debug launch, no walk or capture (the brief: headless only — `swift build`/`swift test` plus throwaway scratch instruments; the door is wire-only, so its use-shaped evidence is the wire itself driven headlessly — the two-store catalog and the MCP target); `notes/QUESTIONS.md` untouched (the PROVISIONALs below are for the merging session, the W1–W3 precedent); nothing on Linear changed.
+
+*Machinery: Opus implementer, fresh session, briefed by this file's §4 W4/§7 (+ the VX-926 record's §7 read on `origin/vx-926-test-flakes`, and the VX-912 §7 it binds), `notes/MCPSpec.md` IN FULL, the resiliency protocol, the VX-912 B2 record (`effectiveWingID`; its finding (ix)) and B4 record (the NUL seams; F-B4-2), the VX-926 U1 record (read on `origin/vx-926-test-flakes` — the pool trace, `HarnessWait.offPool`, F-U1-2), the three tickets (no comments on any). The harness in THIS tree is the PRE-U1 harness (vx-926 is not merged to main). No revert is in flight.*
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record + the ledger row | DONE (this commit) |
+| P1 | VX-922 — `Queries.mcpResolvedWing` + `MCPReadTools.resolvedWing` folded onto `Queries.effectiveWingSQL`; the parity proof (every existing pin UNMODIFIED, green) | NOT-STARTED — design: both call sites name `Queries.effectiveWingSQL` directly; nothing outside their files names either (no forward needed); the doc lines that named the copies corrected |
+| P2 | VX-925 — the pin, red on the pre-fix tree | NOT-STARTED |
+| P3 | VX-925 — `clientInfo.version` through `StoredText.stripped` at the admission's writes; the behavioural revert | NOT-STARTED |
+| P4 | VX-933 — the pins (a stalled reader cannot pin the cooperative pool), red on the pre-fix tree | NOT-STARTED |
+| P5 | VX-933 — the fix (the shape that changes no wire-observable behaviour, or the STOP); the behavioural reverts | NOT-STARTED |
+| P6 | Close: the two-store catalog whole + the MCP target + the nearest core suites, dispositions, PROVISIONALs, U1-overlap list, self-assessment | NOT-STARTED |
