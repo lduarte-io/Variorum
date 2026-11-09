@@ -31,7 +31,15 @@ final class ServerHarness: @unchecked Sendable {
     let host: MCPServerHost
     /// U2: what the app would have been told (AF-6's asks; the receipts).
     let asks = LockIsolated<[MCPAsk]>([])
+    /// Every receipt the app was handed, whichever hook carried it.
     let receipts = LockIsolated<[MCPWriteReceipt]>([])
+    /// VX-775 (the ladder round 1, F1): the receipts by their road — `onWrite`,
+    /// or the failing call's one tail hook (`onActivityLogFailure`).
+    let onWriteReceipts = LockIsolated<[MCPWriteReceipt]>([])
+    let tailReceipts = LockIsolated<[MCPWriteReceipt]>([])
+    /// VX-775: what the app would have been told of a landed act whose
+    /// Activity line could not be written.
+    let activityLogFailures = LockIsolated<[MCPActivityLogFailure]>([])
 
     /// VX-825 (the VX-809 run — the two-store catalog): with a `seed`, the
     /// position jitter is DETERMINISTIC — one seeded generator, shared by the
@@ -86,13 +94,24 @@ final class ServerHarness: @unchecked Sendable {
             executor: SeededExecutor(operations: writeOperations, rng: rng))
         let asks = self.asks
         let receipts = self.receipts
+        let onWriteReceipts = self.onWriteReceipts
+        let tailReceipts = self.tailReceipts
+        let activityLogFailures = self.activityLogFailures
         host.hooks = MCPHostHooks(
             refusalWords: { error in "Refused: \(error)" },
             onAsk: { ask in asks.withValue { $0.append(ask) } },
-            onWrite: { receipt in receipts.withValue { $0.append(receipt) } },
+            onWrite: { receipt in
+                receipts.withValue { $0.append(receipt) }
+                onWriteReceipts.withValue { $0.append(receipt) }
+            },
             // U4: the tray's 30-day window reads the WORLD's clock (fixtures
             // are stamped from 2026-07-01, an hour in).
-            now: { ServerHarness.worldNow })
+            now: { ServerHarness.worldNow },
+            onActivityLogFailure: { failure, carried in
+                receipts.withValue { $0.append(contentsOf: carried) }
+                tailReceipts.withValue { $0.append(contentsOf: carried) }
+                activityLogFailures.withValue { $0.append(failure) }
+            })
         try host.start()
     }
 

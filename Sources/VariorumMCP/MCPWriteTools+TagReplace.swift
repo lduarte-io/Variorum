@@ -72,6 +72,7 @@ extension MCPWriteTools {
         var replaced: [String] = []
         var refused: [[String: Any]] = []
         var receipts: [MCPWriteReceipt] = []
+        var unlogged: MCPActivityLogFailure?
         var toPath = to
         var toTagID: String?
         for noteID in swept {
@@ -109,6 +110,9 @@ extension MCPWriteTools {
                     stamped.runKey = runKey
                     return stamped
                 }
+                // VX-775: a replaced note whose Activity line failed stays
+                // REPLACED; the call tells her once, counting them.
+                unlogged = .coalescing(unlogged, one.activityLogFailure, tool: job.tool)
             case .failure(let refusal):
                 refused.append(["note_id": noteID, "refused": refusal.outcome.text])
             }
@@ -126,7 +130,7 @@ extension MCPWriteTools {
         guard !replaced.isEmpty || refused.isEmpty else {
             return .failure(Refused(outcome: Outcome(text: text, isError: true)))
         }
-        return .success(Landed(answer: text, receipts: receipts))
+        return .success(Landed(answer: text, receipts: receipts, activityLogFailure: unlogged))
     }
 
     /// **The wearers of exactly `tagID` this client may EDIT**, in creation

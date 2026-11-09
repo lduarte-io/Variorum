@@ -252,9 +252,18 @@ final class LibrarySearchModel {
         var loading = false
     }
 
-    /// The scope and wing the listed answer was read under (the paging and
-    /// the expansions ask the same question).
-    @ObservationIgnored private(set) var scope: LibraryCatalogModel.Scope = .all
+    /// **The scope the listed answer was read under** — the paging and the
+    /// expansions ask the same question, and the sheet's groups header names
+    /// it (`LibrarySearchCopy.groupsHeader`). OBSERVED since VX-895: it was
+    /// `@ObservationIgnored`, and the `@Observable` setters are equality-
+    /// gated, so a facet pick whose answer listed the same groups with the
+    /// same counts (a search answered by note bodies — All, Notes and Blocks
+    /// list alike) re-ran nothing, and the header kept naming the last facet
+    /// that had changed the groups. The land that moves it now tells the
+    /// header (`VX895SearchFacetHeaderTests`).
+    private(set) var scope: LibraryCatalogModel.Scope = .all
+    /// The wing the listed answer was read under (the paging and the
+    /// expansions ask in it; no view reads it).
     @ObservationIgnored private(set) var wing = ""
     /// The order the listed groups were read in (VX-820 — the next page
     /// continues the SAME order's keyset).

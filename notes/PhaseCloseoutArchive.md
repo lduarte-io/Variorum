@@ -1679,3 +1679,31 @@ with pointers; QUESTIONS #268; the AppSpecRecord entry. Born: VX-917–VX-925 (t
 NO lockstep event, no marker, no refresh owed (the wave's folded refresh is vx-914's). The night survived one Opus
 and one Fable budget death with zero commits lost. Handoff `notes/handoffs/vx-912-handoff.md`. **Her morning
 bundle: #268 + the B2 BIG-corner shapes + the B3 drafts' editorial pass + the GRDB-fork her-hands rows.**
+
+**→ VX-914 CLOSED 2026-11-08 — UMBRELLA: THE WALKTHROUGH FOLLOWUPS (the record `notes/plans/fixes/vx-914-walkthrough-followups.md`,
+FOR A LATER READER at its top; wave 3's slot-free run beside VX-912, /architect-phase, nov7 coordinating; PR #235,
+merge cc6c8f188).** Fifteen members in four batches — her Nov 7–8 walkthrough and bundle rulings built, plus the
+kickoff riders she seated (VX-401/45/667; VX-872 ruled OUT of the wave, "we don't need to do it"): the MCP pane
+reunited (the trail dial under the show dial, the VX-281 geometry contract grown by a named arm; the badges row at
+the pane's foot; trail headings by the setup label else "MCP"; groups fold; the three stamps tick), the icon twins'
+ONE rule (both drawn while a client is approved, DIMMED while the server is off — VX-900; `MCPShareRoad.serverOn` +
+`MCPServerOffFace` the shared seam), the Index ⋯ derived from the one note-title table (`.surface` on eight
+declarations), the masthead dial counted at the face it SHOWS (257→240 Study / 304→276 Terminal; the row waits for
+the book's row), the confirm commas, `deleteReading`'s honest archive split in confirm AND receipt, the ascent
+kind-words, `.fileWithoutOpening` (the band's File ⌘⏎, focus-scoped), the Library masthead's in-place wing cycle,
+"the take as kept" on lineage members, and the sync-pause pair said once (one `Shared/` source, Mac + phone). The
+ladder closed at ROUND 2 (round 1: one MAJOR — a bare `fixedSize` on the standing ChromeLineLimitTests pin's
+measured red-on-old, fixed by a one-line adjudication; the 119-site exact-set door-pin sweep re-pinned six). Gates:
+four batch windows green (208/21→32/4 · 155/14 · 424/71→81/7 · folded); the MERGE GATE on the merged tree
+c2f21d856 — the WHOLE Mac target 6231/1078 (13 in-suite knowns + VX-701's standing flake proven green alone) and
+the WHOLE phone target 852/139. The closing WALK green, every row use-shaped (the icon dim PIXEL-MEASURED; the
+⌘⏎ succession filing; the staged owned-book confirm→delete→receipt chain), dev-store posture restored and
+confirmed. Canon: SurfaceContracts ×12 + MCPSpec ×2 + AppSpec §12's keyboard line, in place with pointers;
+QUESTIONS #269; the AppSpecRecord entry. Born: VX-927–VX-930 (triaged; the handoff lists them) + a VX-39 note.
+NO lockstep event, no marker; the WAVE'S FOLDED /APPLICATIONS REFRESH is this run's, behind A1 at nov7's GO.
+MOBILE PARITY: VX-909's pair is phone-visible from the one `Shared/` source (pinned both platforms); the rest
+Mac-only. The run met two Opus budget deaths with zero commits lost. Handoff `notes/handoffs/vx-914-handoff.md`.
+**Her morning bundle: #269 + VX-930's bind-time-provenance call + the lesson-7 guide staleness riding the owed
+re-seed.**
+
+**→ VX-940 CLOSED 2026-11-09 — RUN: PRE-OSS CODE FOLLOW-UPS (the record `notes/plans/fixes/vx-940-pre-oss-followups.md`, FOR A LATER READER at its top; the wave's LAST umbrella before her code pause; /architect-phase with a mid-run ORCHESTRATOR CUTOVER at the W4 seam — the role handoff `notes/plans/vx-940-orchestrator-handoff.md`; her cast "opus implements, opus reviews"; nov7 coordinated; PR #237, merge `e6b88acb1`).** Seven members, four batches + one ladder fix batch: LETTER.md at the repo root, her words byte-faithful, the three copies held by two pins (VX-939 + A-940-1's drift pin); the Acknowledgments credits — the four Point-Free siblings and Sparkle's whole LICENSE — and BIP-39 corrected to MIT (VX-923); the lineage face names Home on the member's line and its go-to button (VX-920); the cold-build CI check at her cadence — a published release or a hand dispatch, never per-push, inert while private, graded per AppSpec §15.6 — its first live run owed at the flip on VX-937's checklist (VX-917); and the MCP unit (VX-922 one wing projection, parity-proven · VX-925 the declared version NUL-stripped quietly · VX-933 no door write waits on the cooperative pool — the per-connection writer + the poll-gated fast road keeping a reading client's timing, the close line delivered exactly when the socket takes it whole, made contract-exact at the ladder). Ladder round 1 0/0/2/2 → F1 → round 2 0/0/0/3, every fix confirmed. Gates, all bundle-read through `Tools/assert-tests-ran`: headless core 4,013/549 + third 32/4 + MCP 676/126 (only the known VX-353/VX-772 pair, green alone); staged Mac 6,203 executed (two non-list fails green alone under disclosed external load → VX-953) and phone 852 (the standing caret red only); the VX-920 visual confirm skipped per its brief's fallback — the pin carries it. Canon: MCPSpec ×3 in place with pointers; QUESTIONS #270; the AppSpecRecord entry. Born: VX-944 · VX-951 (F-W4-1, the wire-order announce race, Needs Lillian) · VX-952 · VX-953 (all triaged; the handoff lists them). NO lockstep event, no marker, NO /Applications refresh (VX-931 — the wave's release carries it). The staged-revert incident (`ac2cf6a36` → repaired `114db59d7`) is recorded as process lore in the record and the role handoff. MOBILE PARITY: PL-72 (the phone's Acknowledgments sheet gains the shared credits; the rest platform-neutral or Mac-only). Handoff `notes/handoffs/vx-940-handoff.md`. **Her morning bundle: #270 + VX-951's wire-order call + VX-937's grown flip-day checklist.**
