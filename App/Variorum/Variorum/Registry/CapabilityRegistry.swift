@@ -101,7 +101,7 @@ nonisolated enum CapabilityRegistry {
     /// handler if she wants it (recorded for the Design & UI review row).
     /// VX-793 (PROVISIONAL P-915-B2-2): the comments door shares it — the
     /// same four surfaces, the same reason (a pane carries a live block).
-    private static let takeFamilyPlusCompare:@Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+    private static let takeFamilyPlusCompare: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
         if ctx.mode == .compare { return .act }
         return takeFamily(ctx)
     }
