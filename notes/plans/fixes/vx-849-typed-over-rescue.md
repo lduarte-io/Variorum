@@ -1300,7 +1300,7 @@ what apply writes, never edited). The pin suites read whole: `OutsideWriteRingEn
 |---|---|---|
 | 1 | THE SWEEP TABLE (below — before any fix) | DONE (this commit) |
 | 2 | The ONE seam verified + the batch-1 composition stated + the found gaps G1 (the unlanded guard) and G3 (the gap keystroke's snapshot) fixed with their pins | DONE — 2a the pins on the PRE-FIX tree (`d1a2b028e` — the red-on-old SHA); 2b the fix + the two primitives' pins (this commit); Mac + phone `build-for-testing` green; the instrument green 2/2 (its named reverts run next, at this tip); every Mac run PENDING the stage |
-| 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | NOT STARTED — design settled below |
+| 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | IN-PROGRESS — 3a the door pins on the PRE-FIX tree DONE (this commit — the red-on-old SHA; `RestoreFlushFirstInsuranceTests`, Mac `build-for-testing` green; runs PENDING the stage); 3b the op + core pins + the two doors next |
 | 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | NOT STARTED — design settled below |
 | 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | NOT STARTED |
 
@@ -1499,6 +1499,11 @@ savepoint plus aligning the dead door.
   `aKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver`, `aCanvasKeystrokeInTheConfirmationGap…`,
   `shownTextIsWhatTheLivePaneHolds`. And the red-on-old run: the four behavioral pins at `d1a2b028e` (the pre-fix
   tree) ⇒ RED each on its named lines; the guard green.
+- *The instrument's reverts, run at `06856b011` (on the untracked copies; the worktree never touched):* **R-G1i** → `✘ 2
+  tests, 1 failed` — exactly `isUnlandedAnswersPendingAndInFlight…` at its `whileFlying` line; the truth table green.
+  **R-G3i** → `✘` exactly `shownTextIsWhatTheLivePaneHolds` at "the live pane's holding, never the projection" (its
+  only red line, as named); the in-flight pin green. Each copy restored byte-identical to the committed file (`cmp`) →
+  `✔ 2 tests passed`; the scratch folder deleted, `git status` clean.
 - *Piece 3 (P-849-1, PROVISIONAL, isolated):* `Operations.restoreCommit(_:commitID:insuringBuffer: Bool = false)` —
   inside the restore's ONE transaction, when the restore will change the take's text AND its buffer differs from its
   latest savepoint (`isDirty`), ONE `kind='auto'` savepoint (unnamed — her road's quiet kind; the MCP bracket's named
