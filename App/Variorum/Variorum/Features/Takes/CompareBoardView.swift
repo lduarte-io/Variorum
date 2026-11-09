@@ -1166,11 +1166,6 @@ final class CompareViewModel {
         }
     }
 
-    /// 13c Stage 1 ladder, R2-2 (her A13(a) named Compare explicitly): the
-    /// callout door on the FOCUSED pane's block, through the one shared
-    /// transform. Compare's panes have carried a live block since 4C, and
-    /// a pane knows its own post — so the frame lands on the block she is
-    /// looking at, whichever column it lives in.
     // MARK: The comments door (VX-793 — PROVISIONAL P-915-B2-2)
 
     /// **A pending ask to open this block's comments panel**, set by the door
@@ -1195,6 +1190,11 @@ final class CompareViewModel {
         if commentsRequest == blockID { commentsRequest = nil }
     }
 
+    /// 13c Stage 1 ladder, R2-2 (her A13(a) named Compare explicitly): the
+    /// callout door on the FOCUSED pane's block, through the one shared
+    /// transform. Compare's panes have carried a live block since 4C, and
+    /// a pane knows its own post — so the frame lands on the block she is
+    /// looking at, whichever column it lives in.
     func applyCallout(_ edit: CalloutEdit) async {
         guard let pane = authority.livePane else {
             statusMessage = "Click into a pane first — the frame goes on that block."
