@@ -410,9 +410,9 @@ The window's order: the RED LEG first (READY-FOR-GATE step 1 — rebuild `vx915-
 | 3 | VX-848 Compare lane default | 2 | GATED (gate12 green; P-915-B2-1 to her bundle; her eye at the walk) |
 | 4 | VX-793 Compare first comment (rider) | 2 | GATED (gate12 green; P-915-B2-2 to her bundle) |
 | 5 | VX-927 lineage "now" wording (rider) | 2 | GATED (gate12 green; N-927 words to her bundle) |
-| 6 | VX-869 alert-Cancel sweep | 3 | NOT-STARTED |
-| 7 | VX-841 quick-note wing pick | 3 | NOT-STARTED |
-| 8 | VX-928 ⏎ in-flight guard (rider) | 3 | NOT-STARTED |
+| 6 | VX-869 alert-Cancel sweep | 3 | BUILT — CLEAN SWEEP (45 sites classified, zero bug-shape instances; AlertCancelSweepTests guard, red shown on the pre-VX-561 file by scanner evaluation) — guard suite PENDING(gate34) |
+| 7 | VX-841 quick-note wing pick | 3 | BUILT to P-915-B3-1 (core red WATCHED headless 4/6→6/6; the wing-blind lookup fixed; Shared/ park line ⇒ phone in the merge gate) — face pins PENDING(gate34), W-841 at the closing walk |
+| 8 | VX-928 ⏎ in-flight guard (rider) | 3 | BUILT (one oneFilingInFlight guard, both roads) — RED RUN + green PENDING(gate34); rev source prepared, recipe in READY-FOR-GATE |
 | 9 | VX-843 tour wording | 4 | NOT-STARTED |
 | 10 | VX-916 guide protection chapter | 4 | NOT-STARTED |
 | 11 | VX-929 guide wording pair (rider) | 4 | NOT-STARTED |
