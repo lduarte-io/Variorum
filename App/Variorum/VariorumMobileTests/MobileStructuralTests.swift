@@ -1113,6 +1113,8 @@ struct MobileNoRedirectSweepTests {
         let macOSArm = "the `#if os(macOS)` arm of `ProtectionCopy.deviceName` — the phone compiles \"iPhone\""
         let mcpFamily = "the MCP SDK family's notices: `AcknowledgmentsCopy.all` lists `mcpFamily` only in its "
             + "`#if os(macOS)` arm, and the phone's sheet reads `all` (`shared` there) — VX-114's"
+        let sparkleNotice = "Sparkle's notice: `AcknowledgmentsCopy.all` lists `sparkle` only in its `#if os(macOS)` "
+            + "arm (only the Mac app links it), and the phone's sheet reads `all` (`shared` there) — VX-923's"
         let sendLibrary = "Send Library to Another Mac: read only by the Mac target (the capability registry, "
             + "`LibraryOpenDoor`, `DataSafetyPane`) — and it means a Mac — VX-114's"
         let macCopyDoors = "the copies list, Look inside and the copies' delete confirm render only in the Mac's "
@@ -1132,6 +1134,7 @@ struct MobileNoRedirectSweepTests {
              literal: "Apple's system-call interfaces, which the MCP SDK builds on (Mac only).", why: mcpFamily),
             (file: "AcknowledgmentsCopy.swift",
              literal: "A server-sent-events parser the MCP SDK carries (Mac only).", why: mcpFamily),
+            (file: "AcknowledgmentsCopy.swift", literal: "its new versions (Mac only).", why: sparkleNotice),
             (file: "LibraryOpenCopy.swift", literal: "Send Library to Another Mac…", why: sendLibrary),
             (file: "LibraryOpenCopy.swift", literal: "Send Library to Another Mac", why: sendLibrary),
             (file: "LibraryOpenCopy.swift", literal: "Moving to another Mac", why: sendLibrary),
