@@ -216,7 +216,7 @@ folder of the core test target, run, then deleted — never in the PR) so its re
 | # | Piece | Status |
 |---|---|---|
 | 1 | VX-402 — the honest flush | DONE (this commit) — instrument red 3/3 → green 3/3; Mac `build-for-testing` green; the Mac pins' RUNS **PENDING** (stage) |
-| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | NOT STARTED |
+| 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | IN PROGRESS — 2a the op + core pins DONE (this commit; 9/9 green; the behavioral revert named below runs NEXT at this tip); 2b the coordinator carries the snapshot + the eleven record sites pass it — NEXT |
 | 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | NOT STARTED |
 | 4 | Close — builds, suites, self-assessment, STAGE REQUEST | NOT STARTED |
 
@@ -241,3 +241,33 @@ folder of the core test target, run, then deleted — never in the PR) so its re
   the door read `"before"` with `isDirty == true`; the order pin read `"late older"`. On the fix: green 3/3. Mac
   `xcodebuild build-for-testing` green (0 errors, no warning in a touched file). **The Mac runs themselves are
   PENDING** (the STAGE REQUEST below — red at the pre-fix parent, green at the tip).
+
+**Piece 2a — VX-683 B, the operation (FIXED; core, headless).**
+- *Mechanism (the memo's, re-traced in code):* her typing sits in the debounce window, so the take's row is CLEAN (not
+  in `sync_outbox`); a pull applies the server's `working_text` on SyncSpec §5's locally-clean path; then the debounced
+  `Operations.autosave(variantID, text:, charDelta:)` writes her buffer — built on the OLD text — over it blind
+  (`Operations+Variant.swift`, the pre-fix body: `variant.workingText = text; update`). Its push carries the applied
+  `sync_version`, so the server ACCEPTS it: the remote words survive nowhere.
+- *Fix:* `autosave(…, expectedText: String? = nil)`. Inside the one transaction, after the take's guards (unchanged,
+  so a locked take / sealed post / archived or dead take still refuses first and mints nothing): her text is written as
+  before (touch and churn as before); when the snapshot is given and the row no longer holds it, the displaced text is
+  inserted as a new take through `Operations.insertConflictVariant` — the S5 core `resolveSyncConflict` and the engine
+  share — same block, the edited take's own parent, label `'conflict'`, the fan's end, never chosen. Compared as the
+  store keeps text (`StoredText`); nothing displaced ⇒ no card; a dead block ⇒ no card (the engine's guard); `nil` ⇒
+  today's blind write. The ordinary triggers enqueue both rows (never apply mode), so both push.
+- *Pins (`Tests/VariorumCoreTests/TypedOverRescueTests.swift`):* suite "The typed-over rescue (VX-683 B — the guarded
+  autosave)" — THE PIN `aStaleAutosaveKeepsHerBufferOnTheRowAndRescuesTheDisplacedWords`, the S5-shape pin
+  `theRescuedCardLandsWhereAnS5CardLands`, and six guards (`anAutosaveOnTheTextItSawWritesAsBefore`,
+  `anUnguardedAutosaveIsTheBlindWriteItAlwaysWas`, `whenTheRowAlreadyHoldsHerWordsNoCardIsMinted`,
+  `aLockedTakeOrASealedPostRefusesBeforeAnyRescue`, `theSnapshotIsComparedAsTheStoreKeepsText`,
+  `theRescueTouchesAndChurnsExactlyAsTheWriteItIs`); suite "The typed-over rescue converges (VX-683 B)" —
+  `aPullIntoTheDebounceWindowThenHerAutosaveConvergesWithBothTexts` (two clients, the fake server, production rounds:
+  dumps equal, outboxes empty, both texts on both devices, her words on the row).
+- *Red-on-old, said plainly:* every pin names the new parameter, so on the pre-fix tree the suite is **COMPILE-red**
+  (watched: `extra argument 'expectedText' in call`). The BEHAVIORAL red is the named revert below. Green on the fix:
+  **9/9** (`swift test --filter TypedOverRescue`).
+- *THE NAMED BEHAVIORAL REVERT (named here BEFORE it runs, at the committed tip of this commit):* in
+  `Operations.autosave`, the rescue's `if` is guarded off (`if false, let expectedText, …`) — the parameter accepted
+  and ignored, i.e. the pre-fix blind write. Expected: THE PIN, the S5-shape pin and the convergence pin RED (the
+  displaced words survive nowhere); the six guards green. Then `git checkout --` the one file (nothing else
+  uncommitted in it) and the suite re-run green. Result: PENDING (next line of this record).
