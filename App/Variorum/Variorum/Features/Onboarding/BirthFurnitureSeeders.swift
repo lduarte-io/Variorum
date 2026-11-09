@@ -121,6 +121,13 @@ enum ReadmeSeeder {
     /// its manifest value. `LaunchFurnitureTests` pins both: byte equality
     /// against the in-repo file, and the manifest's interior fidelity.
     ///
+    /// **The repo's face of the same text is `LETTER.md`** (VX-939, R-940-3):
+    /// her paragraphs again, header line stripped, pinned against
+    /// `read-me.txt` paragraph for paragraph by the core suite
+    /// `LetterDriftTests` (A-940-1), as these literals are by
+    /// `LaunchFurnitureTests`. A change to her text changes these literals,
+    /// `read-me.txt` and `LETTER.md` in one commit.
+    ///
     /// Minted block by block through `newBlock` (every byte stored as given),
     /// AFTER the note's own mint: the split stamp (`writtenAt`) needs the note
     /// created apart from its words, which `importPost`'s one clock cannot
