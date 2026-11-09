@@ -82,6 +82,18 @@ final class QuickNotePad {
     /// The words the chip offers — one brain with the Library's cards.
     var suggestedTitle: String? { NoteCardFace.suggestedTitle(forTypedText: text) }
 
+    /// **VX-841 — the wing this capture lands in** (her ask: *"in quicknote it
+    /// would be nice to optionally be able to select what wing your quicknote
+    /// lands in"*; the seat and face ruled at the VX-915 batch-3 fork,
+    /// PROVISIONAL P-915-B3-1). `''` = Home — the pad's default, untouched:
+    /// Home holds quick notes and their gathering, and the fast path (summon ·
+    /// type · ⏎) never presses anything else. The header's quiet word redirects
+    /// ONE capture: it lives on this pad (one summon, one note, one pick), a
+    /// successful filing returns it to Home with the words (the title chip's
+    /// own rule), a refusal keeps it, the park carries it, and a wing that has
+    /// died since reads and files as Home (R-13ia-2).
+    var landingWingID = ""
+
     /// **13u3 UNIT C — the refusal, where she can see it.** The quick-entry
     /// bar's shape (13l L-b): her text lives NOWHERE but this pad until a
     /// note exists, so the sentence that says it is still here has to be on
@@ -113,6 +125,7 @@ final class QuickNotePad {
         guard let held = session.quickNotePark.restore() else { return }
         text = held.text
         titleFromFirstWords = held.titleFromFirstWords
+        landingWingID = held.landingWingID
         restoredNote = QuickNoteCopy.restoredCapture
     }
 
@@ -199,6 +212,8 @@ final class QuickNotePad {
             if text == submitted {
                 text = ""
                 titleFromFirstWords = false
+                // VX-841: the pick was this capture's — the next one is Home's.
+                landingWingID = ""
             }
             // 17b row 65 (binding 2): filed — the park holds nothing.
             session.quickNotePark.clear()
@@ -215,7 +230,7 @@ final class QuickNotePad {
             // discipline `submitted` already carries).
             session.quickNotePark.park(
                 text: submitted, titleFromFirstWords: titleFromFirstWords,
-                message: message)
+                message: message, landingWingID: landingWingID)
         case .nothingToFile:
             break
         }
@@ -224,7 +239,8 @@ final class QuickNotePad {
 
     private func mintNow(_ submitted: String, title: String?) async -> QuickNoteMint.Outcome {
         if let mint { return await mint(submitted, title) }
-        return await QuickNoteMint.file(submitted, title: title, session: session)
+        return await QuickNoteMint.file(
+            submitted, title: title, wingID: landingWingID, session: session)
     }
 }
 
@@ -238,6 +254,9 @@ struct QuickNoteView: View {
     @State private var windowID = UUID()
     @State private var theme: ThemeStore
     @State private var pad: QuickNotePad
+    /// VX-841: the live wings, for the header's landing word — this surface's
+    /// own model (the shared home's rule: each surface owns one).
+    @State private var wings: WingsModel
     /// The capture box's counted focus ask: 1 when the pad opens (the caret
     /// lands in the words), bumped when the title chip hands it back (13u3
     /// ladder round 1, R1-6).
@@ -266,14 +285,28 @@ struct QuickNoteView: View {
         self.windows = windows
         _theme = State(initialValue: ThemeStore(session: session))
         _pad = State(initialValue: QuickNotePad(session: session))
+        _wings = State(initialValue: WingsModel(session: session))
+    }
+
+    /// The pick as the store reads it: a wing that has died is Home's
+    /// (R-13ia-2 — `Queries.effectiveWingID`, the one rule).
+    private var landing: String {
+        Queries.effectiveWingID(pad.landingWingID, liveWingIDs: Set(wings.wings.map(\.id)))
     }
 
     var body: some View {
         let tokens = theme.tokens(for: scheme)
         VStack(alignment: .leading, spacing: 8) {
-            Text(tokens.chromeLabel(QuickNoteCopy.header))
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(tokens.chromeLabel(QuickNoteCopy.header))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                // VX-841 (P-915-B3-1): the quiet landing word — drawn only while
+                // a second wing exists (P-2: with one there is nothing to pick).
+                if wings.rows.count > 1 { landingWord(tokens) }
+            }
             // 13u3 UNIT C — THE ONE CAPTURE BOX (R-13u-4): ⏎ files it, ⇧⏎
             // makes a paragraph, and the shelf's quick-entry bar answers the
             // same two keys through this same component.
@@ -296,7 +329,9 @@ struct QuickNoteView: View {
                         // VX-179 U3 (F-U3-1 Q-2): derived from the box's own
                         // first-line origin + the pad's padding — the same
                         // (6, 6) it always drew at, now said once.
-                        Text(tokens.chromeLabel(QuickNoteCopy.placeholder))
+                        Text(tokens.chromeLabel(landing.isEmpty
+                            ? QuickNoteCopy.placeholder
+                            : QuickNoteCopy.placeholder(landingIn: wings.name(of: landing))))
                             .font(tokens.body)
                             .foregroundStyle(tokens.faint)
                             .padding(.leading, Self.placeholderOrigin.x)
@@ -368,6 +403,9 @@ struct QuickNoteView: View {
                 onKey: { windows.noteKey(windowID) })
         }
         .task { await theme.start() }
+        // VX-841: the wing table alone (a handful of rows) — the landing word's
+        // list, and the dangling-reads-as-Home rule's live set.
+        .task { await wings.track() }
         .onAppear {
             // Registered like every other window (the gate's ruling): while
             // the sticky is key the app has ZERO live surfaces, so ⌘S and
@@ -409,6 +447,43 @@ struct QuickNoteView: View {
                 }
             }
         }
+    }
+
+    // MARK: - VX-841 — the landing word (P-915-B3-1, RULED PROVISIONAL)
+
+    /// **Where this quick note lands** — the chrome vocabulary's quiet word
+    /// with its own ▾ (`VoicedMenu`), at the header's trailing end: the landing
+    /// wing's name, in the muted ink at rest (Home — the default), in the
+    /// accent once redirected, so a capture aimed elsewhere visibly differs.
+    /// Its list is the switcher's (Home first, then the wings in order). Never
+    /// a key-view stop and no key of its own: the box keeps the keyboard, and
+    /// a pick hands the caret straight back to the words (the title chip's
+    /// road). Not a registry act — nothing is written until the filing, which
+    /// is `.quickNote`'s own (the title chip's class; P-915-B3-1).
+    private func landingWord(_ tokens: VoiceTokens) -> some View {
+        VoicedMenu(
+            tokens: tokens, label: wings.name(of: landing),
+            role: QuickNoteLandingFace.role(landing: landing)
+        ) {
+            Picker(selection: Binding(
+                get: { landing },
+                set: { picked in
+                    pad.landingWingID = picked
+                    focusRequest += 1
+                })
+            ) {
+                ForEach(wings.rows) { row in
+                    Text(row.name).tag(row.id)
+                }
+            } label: {
+                EmptyView()
+            }
+            .pickerStyle(.inline)
+        }
+        .focusable(false)
+        .focusEffectDisabled()
+        .help(QuickNoteCopy.landingHelp)
+        .accessibilityLabel(QuickNoteCopy.landingAccessibility(wings.name(of: landing)))
     }
 
     private func fileAndClose() {
@@ -477,11 +552,24 @@ enum QuickNoteMint {
     /// **`title` is her own adoption** (13u3 UNIT B): nil unless she clicked
     /// the offered name, which keeps "untitled" the pad's default exactly as
     /// this doc says it is.
+    ///
+    /// **`wingID` (VX-841, P-915-B3-1):** the pad's landing pick, `''` = Home
+    /// (every existing caller, and the pad's default). Read as the store reads
+    /// it — a wing that has died is Home's (R-13ia-2) — then the note mints IN
+    /// that wing (`importPost`'s own parameter, the band's road) and the filing
+    /// is wing-aware in the operation: another wing's own `quicknote` tag,
+    /// adopted or minted by path, and no gathering (`.taggedOnly`) — so the
+    /// receipt names the wing's Pool.
     @discardableResult
     static func file(
-        _ text: String, title: String? = nil, session: AppSession
+        _ text: String, title: String? = nil, wingID: String = "", session: AppSession
     ) async -> Outcome {
         guard mints(text) else { return .nothingToFile }
+        // The landing as the store reads it: a live wing's name, else Home.
+        let landingName: String? = wingID.isEmpty ? nil : (try? await session.database.read { db in
+            try Queries.wings(db).first { $0.id == wingID }?.name
+        }) ?? nil
+        let landing = landingName == nil ? "" : wingID
         do {
             // 13g batch 7 (her R6-4): the mint and the FILING ride ONE runner
             // turn, so nothing can interleave between the note existing and
@@ -491,7 +579,8 @@ enum QuickNoteMint {
             // the shelf's bookkeeping.
             let (result, filing) = try await session.runner.run { ops in
                 let result = try ops.importPost(
-                    title: title, text: text, undoLabel: QuickNoteCopy.undoLabel)
+                    title: title, text: text, undoLabel: QuickNoteCopy.undoLabel,
+                    wingId: landing)
                 return (result, ops.fileAsQuicknote(result.container.id))
             }
             // Her round-14.3: STAY QUIET. One line naming where it went —
@@ -501,14 +590,19 @@ enum QuickNoteMint {
             // the note is minted and safe, wears no tag, and the Pool
             // lists it — so the toast must not claim the Quicknotes
             // landing that exactly did not happen.
-            switch filing {
-            case .filed, .alreadyTagged:
+            switch (filing, landingName) {
+            case (.taggedOnly, let wing?), (.alreadyTagged, let wing?):
+                // VX-841: filed in another wing — tagged there, collected by
+                // nothing (no gathering grows there), so that wing's Pool lists
+                // it; the line names the wing.
+                session.status.receipt(QuickNoteCopy.filedInWing(wing))
+            case (.filed, _), (.alreadyTagged, nil):
                 session.status.receipt(QuickNoteCopy.filedNote)  // 18i: it landed
-            case .taggedOnly:
+            case (.taggedOnly, nil):
                 // 13i-b U4: tagged, and no Quicknotes gathering shows it (she
                 // deleted it) — so the line names where it IS.
                 session.status.receipt(QuickNoteCopy.filedTaggedOnly)
-            case .refused(let reason):
+            case (.refused(let reason), _):
                 session.status.refuse(QuickNoteCopy.refusedFilingLine(reason))
             }
             return .filed(result.container.id)
@@ -520,6 +614,17 @@ enum QuickNoteMint {
             // status seam themselves.
             return .refused(QuickNoteCopy.refusal(for: error))
         }
+    }
+}
+
+// MARK: - VX-841 — the landing word's ink (P-915-B3-1)
+
+/// The landing word's one rule, pure so a pin reads it: Home (the default) in
+/// the quiet ink, any other wing in the accent — a redirected capture visibly
+/// differs, and both inks come from the token layer (`VoicedMenu`'s roles).
+enum QuickNoteLandingFace {
+    static func role(landing: String) -> VoicedButtonStyle.Role {
+        landing.isEmpty ? .quiet : .primary
     }
 }
 
@@ -560,6 +665,26 @@ nonisolated enum QuickNoteCopy {
     // they read its one constant — the fresh default is lowercase now, and
     // copy must never mix casings with the board it describes.
     static let placeholder = "jot it down — it lands in \(Operations.defaultQuicknoteBookName)"
+    /// **VX-841 (P-915-B3-1, wording PROVISIONAL — her bundle):** the empty
+    /// pad's line once the capture is aimed at another wing — Home's line
+    /// above is byte-unchanged.
+    static func placeholder(landingIn wingName: String) -> String {
+        "jot it down — it lands in \(wingName)"
+    }
+    /// The landing word's hover — what it decides.
+    static let landingHelp =
+        "Where this quick note lands \u{2014} Home files it in \(Operations.defaultQuicknoteBookName); "
+        + "another wing files it in that wing\u{2019}s Pool"
+    /// The landing word's accessibility name.
+    static func landingAccessibility(_ wingName: String) -> String {
+        "Quick note lands in \(wingName)"
+    }
+    /// The receipt for a capture filed in another wing: tagged there and
+    /// collected by nothing, so that wing's Pool lists it (no Quicknotes
+    /// gathering grows there — the furniture is Home's).
+    static func filedInWing(_ wingName: String) -> String {
+        "Filed in the Pool of \u{201C}\(wingName)\u{201D} \u{2014} tagged #quicknote."
+    }
     /// **R-13u-4's two keys, in her own order** (13u3 UNIT C — this line
     /// used to read "⏎ new line · ⌘⏎ files it · closing files it too", which
     /// is the model her ruling replaced). The paragraph key comes second
