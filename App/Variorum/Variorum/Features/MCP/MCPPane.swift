@@ -1308,14 +1308,32 @@ extension View {
 /// the pin's own session): a mark DRAWN reports its frame; a mark that leaves
 /// (or was never drawn — the trail dial with no approved client) has none, so
 /// a pin that finds the show dial and not the trail dial discriminates.
+///
+/// **OWNER-AWARE since VX-934's GATE12 follow-up (the VX-915 run):** each
+/// probe INSTANCE records its frame with its own owner token, and its
+/// disappear clears the mark only while the stored entry is still its own —
+/// the `PrivateMarkProbe` / `OwnershipBadgeProbe` compare-before-clear posture.
+/// The mechanism it closes, measured (an offscreen replica, the run record's
+/// BATCH 1 FOLLOW-UP): a CLOSED pane's `onDisappear` fires late, during the
+/// next mount's settle and AFTER that pane recorded — so an unconditional
+/// forget erased a live pane's frame (the foot arm's GATE12 red). A mark a
+/// live pane stops drawing is still forgotten by that pane's own probe.
 enum MCPPaneGeometry {
-    private static var worlds: [String: [MCPPaneMark: CGRect]] = [:]
-
-    static func record(_ mark: MCPPaneMark, _ frame: CGRect, in scope: String) {
-        worlds[scope, default: [:]][mark] = frame
+    private struct Entry {
+        let frame: CGRect
+        let owner: UUID
     }
 
-    static func forget(_ mark: MCPPaneMark, in scope: String) {
+    private static var worlds: [String: [MCPPaneMark: Entry]] = [:]
+
+    static func record(_ mark: MCPPaneMark, _ frame: CGRect, owner: UUID, in scope: String) {
+        worlds[scope, default: [:]][mark] = Entry(frame: frame, owner: owner)
+    }
+
+    /// Clears `mark` only while `owner`'s record is the one standing — a probe
+    /// that left never erases a frame another, live probe wrote since.
+    static func forget(_ mark: MCPPaneMark, owner: UUID, in scope: String) {
+        guard worlds[scope]?[mark]?.owner == owner else { return }
         worlds[scope]?[mark] = nil
     }
 
@@ -1327,20 +1345,23 @@ enum MCPPaneGeometry {
 
     /// The frame `mark` last reported under `scope` — nil while not drawn.
     static func frame(_ mark: MCPPaneMark, in scope: String) -> CGRect? {
-        worlds[scope]?[mark]
+        worlds[scope]?[mark]?.frame
     }
 }
 
 private struct MCPPaneProbe: ViewModifier {
     let mark: MCPPaneMark
     @Environment(\.debugProbeScope) private var scope
+    /// This probe instance's own token (stable for its view's life): what its
+    /// disappear may clear is only what it recorded.
+    @State private var owner = UUID()
 
     func body(content: Content) -> some View {
         content
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                MCPPaneGeometry.record(mark, frame, in: scope)
+                MCPPaneGeometry.record(mark, frame, owner: owner, in: scope)
             }
-            .onDisappear { MCPPaneGeometry.forget(mark, in: scope) }
+            .onDisappear { MCPPaneGeometry.forget(mark, owner: owner, in: scope) }
     }
 }
 #endif
