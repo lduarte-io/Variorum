@@ -16,6 +16,16 @@ import VariorumMCPSocket
 /// VX-168: the session's handshake has already read the connection's opening
 /// (the preamble and the first frame — `MCPHandshake`); that frame is REPLAYED
 /// as the stream's first line, so the SDK reads the connection whole.
+///
+/// **VX-933 (the VX-940 run, W4): every write runs OFF the cooperative pool**,
+/// on the connection's own serial writer (`writer`). A write blocks until the
+/// client reads; on this actor it held a pool thread for as long, so clients
+/// that stopped reading (more of them than the Mac has cores — the host serves
+/// sixteen) stopped every task in the app. Now the actor hands each write over
+/// IN ITS OWN ORDER — before it suspends — and waits suspended, so the bytes,
+/// their order, the errors and the session's lifetime are exactly as before:
+/// a `disconnect` still runs only after every write handed over before it has
+/// ended (`drained`), as it did when those writes held this actor.
 actor MCPSocketTransport: Transport {
     /// The longest line accepted (a message bigger than this ends the
     /// connection). Generous for any document the read tools return in
@@ -40,6 +50,12 @@ actor MCPSocketTransport: Transport {
     /// line (`sayClosing`) — so no line is ever written into the middle of a
     /// frame. Uncontended except at a stop.
     nonisolated let writeLock = NSLock()
+    /// **VX-933: the connection's writer** — a SERIAL queue of its own (it
+    /// targets the overcommit root queue, never the cooperative pool's width),
+    /// so a client that stops reading parks this queue's thread, never a pool
+    /// thread, and the writes keep the order this actor handed them over in.
+    /// One per connection: one stalled client never delays another's writes.
+    private nonisolated let writer = DispatchQueue(label: "variorum.mcp.writer")
 
     init(fd: Int32, replay: [Data] = []) {
         self.fd = fd
@@ -82,6 +98,10 @@ actor MCPSocketTransport: Transport {
     func disconnect() async {
         guard isConnected else { return }
         isConnected = false
+        // VX-933: every write handed over before this disconnect ends first —
+        // exactly as when those writes ran on this actor and the disconnect
+        // waited behind them (a session's end never cuts a frame it had sent).
+        await drained()
         // Unblock the reader; the session closes the fd once the loop ends.
         shutdown(fd, SHUT_RDWR)
         continuation.finish()
@@ -91,10 +111,32 @@ actor MCPSocketTransport: Transport {
         guard isConnected else { throw MCPError.transportError(POSIXError(.ENOTCONN)) }
         var framed = data
         framed.append(UInt8(ascii: "\n"))
-        let fd = self.fd
-        guard writeLock.withLock({ MCPSocketTransport.writeAll(fd, framed) }) else {
-            throw MCPError.transportError(POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO))
+        if let failure = await written(framed) {
+            throw MCPError.transportError(POSIXError(POSIXErrorCode(rawValue: failure) ?? .EIO))
         }
+    }
+
+    /// **VX-933 — one write, off the pool.** `bytes` is handed to the writer
+    /// BEFORE this actor suspends (the continuation's body runs at once), so
+    /// writes go out in the order this actor took them — the order they went
+    /// out in when they ran here; the caller then waits SUSPENDED, holding no
+    /// thread. nil when every byte was written, else the write's `errno` (read
+    /// on the writing thread, where it was set).
+    private func written(_ bytes: Data) async -> Int32? {
+        let fd = self.fd
+        let lock = writeLock
+        return await withCheckedContinuation { finished in
+            writer.async {
+                let failure: Int32? = lock.withLock { Self.writeAll(fd, bytes) ? nil : errno }
+                finished.resume(returning: failure)
+            }
+        }
+    }
+
+    /// Every write handed over so far has ended (the serial writer reached
+    /// this point).
+    private func drained() async {
+        await withCheckedContinuation { reached in writer.async { reached.resume() } }
     }
 
     func receive() -> AsyncThrowingStream<Data, Swift.Error> { stream }
@@ -102,12 +144,12 @@ actor MCPSocketTransport: Transport {
     /// The over-cap answer (VX-184 U1 — the record's "Over-cap answers"): the
     /// overrun message's id cannot be read, so it rides `id: null`, in the
     /// door's refusal shape, naming the cap.
-    private func answerOverLimit() {
+    private func answerOverLimit() async {
         endedOverLimit = true
         guard isConnected else { return }
         let sentence = MCPHandshake.overLimitRefusal(limit: Self.lineCap, beforeInitialize: false)
-        let fd = self.fd
-        _ = writeLock.withLock { Self.writeAll(fd, MCPShim.refusalResponse(toFirstLine: Data(), message: sentence)) }
+        // VX-933: through the writer, behind any frame already handed over.
+        _ = await written(MCPShim.refusalResponse(toFirstLine: Data(), message: sentence))
     }
 
     /// **The close line, as the connection ends** (VX-762 — B2 part two,
@@ -163,6 +205,20 @@ actor MCPSocketTransport: Transport {
             }
             pending.append(contentsOf: buffer[start..<count])
             if pending.count > cap { return .overLimit }
+        }
+    }
+
+    /// **VX-933 — a one-off write before the transport exists** (the opening's
+    /// refusals, `MCPSession.run`): `writeAll` on a thread of its own — the
+    /// handshake's idiom (`MCPHandshake.openingOutcome`) — the caller waiting
+    /// suspended, so a client that stopped reading holds that thread, never a
+    /// cooperative-pool one. A refusal echoes the `initialize`'s id, so it can
+    /// be as long as the opening's line. Same bytes, same verdict.
+    static func writeAllOffPool(_ fd: Int32, _ data: Data) async -> Bool {
+        await withCheckedContinuation { finished in
+            let writer = Thread { finished.resume(returning: writeAll(fd, data)) }
+            writer.name = "variorum.mcp.writer"
+            writer.start()
         }
     }
 

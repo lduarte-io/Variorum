@@ -156,7 +156,9 @@ struct MCPStalledReaderPoolTests {
             $0.date = DateGenerator { Date() }
             $0.uuid = UUIDGenerator { UUID() }
         } operation: { Operations() }
-        let id = String(repeating: "i", count: 900_000)  // under the opening's 1 MiB line
+        // Four times the socket pair's two 8 KiB buffers, so every refusal stalls
+        // (the opening reads a byte at a time — a longer id only slows the test).
+        let id = String(repeating: "i", count: 64 * 1024)
         var sessions: [MCPSession] = []
         var runs: [Task<Void, Never>] = []
         var clients: [Int32] = []
@@ -237,6 +239,39 @@ struct MCPStalledReaderPoolTests {
         for try await _ in await transport.receive() {}
         await transport.disconnect()
         close(pair[0])
+    }
+
+    /// The lifetime guard (green on both sides): a session's end never cuts a
+    /// frame it had already sent. A `disconnect` (the SDK's, at `server.stop()`)
+    /// that arrives while a frame is stuck on a client that stopped reading
+    /// waits for that frame — as it did when the write held the transport's
+    /// actor — so the client, reading again, gets the frame WHOLE, then the end.
+    /// A disconnect that did not wait would shut the socket mid-frame (a torn
+    /// line, then EOF).
+    @Test func aDisconnectWaitsForAFrameAlreadySent() async throws {
+        var pair: [Int32] = [-1, -1]
+        try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+        noSigPipe(pair[0])
+        let transport = MCPSocketTransport(fd: pair[0])
+        try await transport.connect()
+        let frame = Self.frame(1_000)
+        let sending = Task.detached { () -> Bool in
+            do { try await transport.send(frame); return true } catch { return false }
+        }
+        // The frame is being written (the client holds its first bytes) …
+        let client = pair[1]
+        for _ in 0..<2_000 where !holdsUnreadBytes(client) { try await Task.sleep(for: .milliseconds(1)) }
+        #expect(holdsUnreadBytes(client), "premise: the frame's write has begun")
+        // … when the session's end arrives; the client reads again only later.
+        let ending = Task.detached { await transport.disconnect() }
+        let everything = Self.read(client, count: Int.max, after: 0.3)
+        let received = await everything.value
+        await ending.value
+        #expect(await sending.value, "the frame already sent landed")
+        #expect(received == frame + Data("\n".utf8),
+                "the client read the whole frame, then the end (\(received.count) of \(frame.count + 1) bytes)")
+        close(pair[0])
+        close(pair[1])
     }
 
     /// A frame the size of a big answer, distinct per index.
