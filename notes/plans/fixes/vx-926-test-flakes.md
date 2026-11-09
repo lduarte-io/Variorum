@@ -92,7 +92,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | U1 | the socket clock | **BUILT + PINNED, headless** — "## U1 record" (end of file): VX-850 ANSWERED (test timing — the harness rides the test process's cooperative pool; the door answers in ms at load 40 with the pool free); ONE mechanism fixed at its three faces in `Tests/VariorumMCPTests` only (waits off the pool · the deadline on its own queue and clock · every raw wait on the harness's one bound, O-7's rule carried); pins P-A/P-B/P-C red on old or under their named reverts, each revert red on exactly its pin; final counts all GREEN (family alone 2/2, MCP target idle 2/2, loaded 3/3, whole package loaded 1/1); all eight members FIXED (VX-477's StarContext sighting returned to VX-625); findings F-U1-1/-2 for the orchestrator |
 | U2 | the encoder mitigation (timeboxed) | **CHARACTERIZED — RECORD-ONLY, headless** — "## U2 record" (end of file): ONE mechanism for both tickets — an unbounded XCTest ↔ Swift Testing interop recursion (931 cycles, 24 of 24 reports on disk) entered from VX-604's out-of-scope `AppSession.init` read, so **already fixed at its cause by VX-604** (`fae643a05`; R-604-H red 3 of 4 at this loop; zero crash reports since); headless `swift test` cannot form it (31 runs, two processes); the menu: stream knobs ineffective, payload caps hollow, split runs inverted, exit ordering subsumed, the `SWIFT_TESTING_XCTEST_INTEROP_MODE` belt not taken (P-926-U2-2); VX-661/VX-690 FIXED-BY VX-604 pending the S soak (P-926-U2-1); the Apple Feedback DRAFTED for her |
 | U3 | StarContext starvation (+ the late rider VX-932) | **BUILT + PINNED, headless** — "## U3 record" (end of file): the trace — Swift Testing 6.4's unbounded default width enqueues the whole target at once, and a held observation's two cooperative-pool hops queue FIFO behind it (idle: a 5 ms emission reached its test after 272.6 s; GRDB's side never over 112 ms; not product-side); ONE shared harness seam (`Support/ObservationLane.swift` — the lane at `.high` + `HeldValues`' 30 s bound), StarContext (`.timeLimit` removed) and TrashObservationP2 (its 300 s ceiling redded naturally under load) on it; the class table 2 FIXED / 18 SAFE; pins: `ObservationLaneTests` (R-L red 2/2), VX-625's forced arm ("Time limit was exceeded" 2/2 on the old body, green 2/2 fixed); counts: alone 23/4 × 2, loaded core × 2 (the family green; one unrelated PerfBenchmark ratio red, isolated green), loaded MCP 673/126; VX-625 (+ VX-723/924, VX-477's sighting) FIXED. **VX-932 (rider): FIXED** — three accept-loop death tests wait for the signal / the removal; pin red 3/3 under R-932. P-926-U3-1 (the runner's width) + F-U3-1..3 for the orchestrator |
-| U4 | hermetic defaults + the dissolve check | NOT STARTED |
+| U4 | hermetic defaults + the dissolve check | **IN PROGRESS, headless** — "## U4 record" (end of file) |
 | R | VX-665 verify-close (orchestrator) | NOT STARTED |
 | L | The ladder (opus-reviewer — her cast ruling) | NOT STARTED |
 | S | The acceptance soak (stage, after vx-914 merges, alone) | NOT STARTED |
@@ -493,3 +493,46 @@ The test for membership: **a bound measured in wall time on a wait whose answer 
 - **(ix) `git diff -- Sources App` is empty;** U3 touches `Tests/` and this record only. The one Sonnet lookup ran read-only and returned; no subagent is alive; no instrument or load generator is left.
 
 **A-926-3 (the orchestrator, on P-926-U3-1):** option (a) STANDS for this run — the lane covers the class, and (b)'s `SWT_EXPERIMENTAL_MAXIMUM_PARALLELIZATION_WIDTH` is an EXPERIMENTAL SPI changing scheduling across every run; adopting it as convention is bundled for her sitting (the 0.232 s measurement recorded beside its cost), not taken silently. F-U3-2 (the runner-width mechanism likely reaching the Mac app's hosted suites — 80 files with wall-clock waits) feeds U4's dissolve check as a read lens and, if the soak confirms the pattern, becomes the ticket then; F-U3-1 and F-U3-3 are minted now (VX-941, VX-942).
+
+## U4 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no stage work of any kind (the brief: headless only — no `xcodebuild test`, no Debug launch, no `defaults import`/`delete` on the real domain): the app pins, VX-695's two-direction reproduction and the dissolve check are WRITTEN and BUILT here and RUN at the run's stage windows (the orchestrator drives them — the command sequences below). Everything else is in the LIVE STATUS.
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record opened; ledger row U4 → IN PROGRESS | DONE (this commit) |
+| P1 | ENUMERATE the writers — every per-entity memory key the Mac app keeps in a defaults domain, read against the preserved 10-28 plist and a read-only snapshot of today's domain | DONE (this commit) — "The writers" below: eight homes, ten key families |
+| P2 | THE SEAM — one defaults domain for every per-note memory, at the access home; the app's own behaviour byte-unchanged | NOT STARTED — design settled ("The seam" below) |
+| P3 | The test migration — every test that PLANTS or READS a per-note memory in `UserDefaults.standard` moves to the seam | NOT STARTED |
+| P4 | Pins — the headless source pin (core target, `swift test`) + the app pins (built headless, run at the stage) + a headless behavioural demonstration on scratch domains | NOT STARTED |
+| P5 | `xcodebuild build-for-testing` GREEN headless (Mac; the phone untouched by the diff) — the fixed tree and the pre-fix tree, both built for the stage | NOT STARTED |
+| P6 | STAGE-READY: (1) VX-695's two-direction reproduction, one command per step, nov7's export/diff bracket embedded; (2) the dissolve check's read sheet | NOT STARTED |
+| P7 | Dispositions, PROVISIONALs, findings, self-assessment | NOT STARTED |
+
+**Throwaway instruments alive:** none. **Reverts in flight:** none. **The real Debug domain:** READ only (`defaults export` to the scratchpad, at zero instances — `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both empty); nothing written, imported or deleted.
+
+### The writers (P1 — every per-entity memory key in a defaults domain, Mac app)
+
+Read from the code (`grep` of `App/Variorum/{Variorum,Shared}` for `UserDefaults`, every interpolated or `+ id` key, every `@AppStorage` key — all 26 `@AppStorage` keys are constants), then checked against the two domains: the preserved pre-scrub plist (`~/.variorum/debug-prefs-pre-scrub-2026-10-28T2147.plist`, 2,731 keys) and a read-only `defaults export` of today's (1,262 keys — the domain re-accumulating, as nov7 watched).
+
+| # | Key family | Home | How the home reached the domain (pre-fix) | 10-28 · today |
+|---|---|---|---|---|
+| 1 | `surfaceSize.outline.<postID>`, `surfaceSize.flow.<postID>` | `Core/Views/SurfaceSizeMemory.swift` (VX-97's named store) | `init(_:defaults: = .standard, …)`, `forgetPersisted(_:defaults: = .standard)`; callers `BookViewModel` ×2 and `CommandRouter.forgetCurrentBlock` take the default | 1,208 + 95 · 528 + 223 |
+| 2 | `currentBlock.<postID>` | `Registry/CurrentBlockMemory.swift` | `current` / `remember` / `persist` / `forget` `defaults: = .standard`; the router's one instance takes the default | 1,202 · 423 |
+| 3 | `postMode.<postID>` | `Features/Takes/PostDetailView.swift` | `rememberedMode(postID:defaults: = .standard)` + two BARE `UserDefaults.standard.set` writes (the mount's named mode, `onChange(of: mode)`); readers `PaneHost` and `ReadTakesView.holdsTakes` (via `RootView`) | 102 · 12 |
+| 4 | `readFace.<postID>` | `Features/ReadMode/ReadModeView.swift` | `rememberedFace` / `remember` `defaults: = .standard` | 9 · 0 |
+| 5 | `takesViewMemory.<postID>` | `Features/Takes/TakesModels.swift` (`TakesViewMemory.load`/`save`) | `= .standard`; through `TakesViewModel(…, defaults: = .standard)` — the board, the Lenses board and Write's take panel build it without one | 5 · 1 |
+| 6 | `takesSlotHeights.<postID>` | `Features/Takes/TakesBoardLayout.swift` | `init(postID:defaults: = .standard, …)` (and its stored default); built by `TakesViewModel` with the model's | 0 · 0 |
+| 7 | `canvasViewMemory.<id>`, `canvasSizeMemory.<id>`, `canvasBankOpen.<id>` | `Features/Canvas/CanvasViewModel.swift` | `private let defaults: UserDefaults = .standard` — not injectable at all | 0 + 0 + 1 · 0 |
+| 8 | `bookIndex.grouping.<readingID>` (per BOOK, the same class — a test-minted id) | `Features/BookView/BookIndexGrouping.swift` | `BookIndexGroupingModel(readingID:defaults: = .standard)`; `BookView` builds it without one | 0 · 0 |
+
+The 10-28 scrub deleted EXACTLY rows 1–5 and 7's keys (1,208 + 1,202 + 102 + 95 + 9 + 5 + 1 = 2,622 — the scrub's own count) and kept everything else, and VX-695's band test went from red machine-wide to green: the two-direction proof's subtraction is this table. 55 of today's keys carry `.incrementing` fixture ids (`00000000-0000-0000-0000-0000000000xx` — 48 `surfaceSize.*`, 7 `currentBlock.*`; 57 on 10-28): VX-666's cross-suite shape, readable by any later suite that mints the same id.
+
+**Enumerated and NOT routed (each with its reason):**
+- **Per-LIBRARY keys** (`variorum.calmAsks.passphrase.<libraryID>.*`, `….words.<libraryID>.*`, `….followDone.…`, `….exportOffNotice.…`, `variorum.protection.Variorum-dev.<id>…` — 27 + 15 + 2 + 1 + 15 on 10-28; 3 + 2 + 15 today): `Shared/Protection/` and its ledgers — the custody fence (the brief's STOP line), and the inert host already keeps its ledger in `PassphraseReminderLedger.testSuiteName`. Not per-note view memory.
+- **Per-WING** `bookcase.defaultShelf.<wingID>` (`BookcasePrefs`, injected through `ShelfViewModel(defaults: = .standard)`): a preference, not a memory; zero keys in either domain.
+- **Global single keys** (`takesGridRows`/`Cols`, `takesBeneathCount`, `ParagraphGap`, `SpellcheckLevel`, the column widths, `readModeOutlineShown`, `contextBarTagsFolded`, `openNotes.remembered.*`, `wing.current`, `bookcase.*`, the `@AppStorage` keys): one key each, no accumulation; the tests that set them save and restore. Out of this class — named in the dissolve sheet, because parallel suites can still RACE on them inside one run.
+- **`ReadTakesView.holdsTakes(postID:defaults: = .standard)`** — a READER of row 3 in `Features/ReadTier/`, the read tier (the editor-seam class, CLAUDE.md): its default argument is NOT touched; its one product caller (`RootView`) passes the seam.
+- **The phone** (`VariorumMobile`): its test host is a simulator app with its own container; out of the brief.
