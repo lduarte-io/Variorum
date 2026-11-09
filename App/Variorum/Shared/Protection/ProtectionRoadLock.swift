@@ -53,7 +53,12 @@ nonisolated enum IdleLockClock {
 nonisolated enum ProtectionRoadLock {
     /// The account's sync keys held in session memory for the library the lock closes — dropped (the leaf's contract:
     /// "gone at a relock"). A library bound to no account holds none.
+    /// VX-544 (her R-849-1 — "dropped at lock/sign-out"): FIRST the session lets go of its sync-keys load — the typed
+    /// unlock's pending load (its derived secret) dropped, and a retry still waiting on the vault holds nothing when its
+    /// answer comes (`ProtectionRoadSession.holdLoadedSyncKeys` reads the same lock) — THEN the keys go, so no hold can land
+    /// after this drop.
     static func dropSessionMemory(_ session: ProtectionRoadSession) {
+        session.letGoOfSyncKeyLoad()
         guard let account = session.library.record?.account else { return }
         session.system.leaves.syncKeys.holdInSession(nil, accountID: account)
     }

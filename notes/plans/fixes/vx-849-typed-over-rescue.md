@@ -592,9 +592,67 @@ the shared load's retention runs on the phone; only its retry stays unwired (ove
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record | DONE (this commit) |
-| 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | NOT STARTED |
+| 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | DONE (this commit) — harness 45/45 green (6 suites); Mac `build-for-testing` green; the named reverts R-1a/R-1b run next at this tip; Mac runs PENDING (stage) |
 | 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | NOT STARTED |
 | 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | NOT STARTED |
 | 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | NOT STARTED |
 | 4 | The words (no new sentence) | NOT STARTED |
 | 5 | Close: builds, headless runs, self-assessment, the stage suite list | NOT STARTED |
+
+**The headless reading (recorded at the start of piece 1).** Every pin of this batch is a Mac-target (or phone-target) suite,
+so its RUN needs the stage. Headless here: `xcodebuild build-for-testing` (Mac + phone) COMPILES them; and THE HARNESS — a
+throwaway SwiftPM package in this session's scratchpad (`vx544-harness`, never committed; the vx-529 U2 recipe rebuilt): tools
+6.2, macOS 26, the app target's settings on `Variorum` (Swift 6, default `MainActor`, `NonisolatedNonsendingByDefault`,
+`InferIsolatedConformances`, `MemberImportVisibility`, `DEBUG`), the test target without default `MainActor`; the worktree's
+core by path, swift-dependencies 1.14.1, the sqlcipher GRDB fork. `Variorum` SYMLINKS every `Shared/Protection/*.swift`,
+`Theme/*`, `SampleLibrary/*` minus `SeededBookRestore`, and `Shared/`'s `AppBootstrap`, `AppServices`, `SyncSession`,
+`SyncStatusViews`, `ProtectionController`, `AuthSession`, `AuthViews`, `KeychainCustody`, `LibraryOpenCopy`, `WordsCopyDoor`,
+`ProjectConfig`, `TierViews`, `ErrorPresentation`, `IdleCommitScheduler`, `StoreBackup`, `OperationsRunner`, `DeviceName`,
+`BackupDestination`, `BackupLog`, `MarkdownInsurance`, `BookNameCopy`, `ExportWriter`, `StoreLocation`, `LibraryHandOff`,
+`RestoreHoldModel`, `WingState`, `PeekableSecretField`, `TravellingDotsIndicator`, the Mac's `WhatsNewLedger`, and ONE stub
+file (a slim `AppSession` + `StatusCenter`, a one-line `CopyForAI.put`). The tests symlink `VariorumTests/Protection/*.swift`
+minus the recipe's Mac-view suites (plus `ProtectionPaneRoadRowTests`, a Mac pane), with a TRUNCATED copy of
+`TouchIDUnlockSyncKeysTests` (its trailing `SessionHoldBringInTests` suite needs the copy-door plants — the helpers above it
+are byte-identical) and one stub of byte copies (`AppTestKeyProvider`, `SeededGenerator`). Only planted suites are ever run
+there (`--filter`) — never the recipe's keychain-writing `…Route` suites. A behavioral revert in the harness replaces ONE
+symlink with an edited copy of the committed file, runs, and restores the symlink: the worktree is never touched.
+
+**Piece 1 — the retained pending load (BUILT).**
+- *Mechanism (D-544's, re-traced at `93c2e3149`):* `openTyped` → `loadSyncKeysAfterTypedUnlock` (:395, and the vault road's
+  catch-up :529). Offline, `boundedVaultRead` answers `.failed` (the leaf throws — `PlantedVaultLeaf.reachable = false`) or
+  `.timedOut` (past the 10 s bound), the arm logs and RETURNS; the typed secret (`TypedUnlockSecret` — the derived
+  `PassphraseKey`s or the words) dies with the call. Nothing anywhere holds it, so no later code CAN load the keys: the
+  provider (`NewRoadSyncKeyProvider.currentKeys` — session memory, then the silent item; Castle keeps none) throws
+  `notEnrolled` → the engine refuses `encryptionKeysUnavailable` → the row says "Sync locked" until another online typed
+  unlock or a Touch ID unlock.
+- *Fix (`ProtectionOpenRoad.swift`, `ProtectionRoadLock.swift`):* `PendingSyncKeyLoad` (the account + the secret's DERIVED
+  form only — the passphrase's derived keys, or the words' `WordsKey` derived once at the keep; never the text, never the
+  words; redacted; not `Codable`), held by `ProtectionRoadSession` under its one lock (`pendingSyncKeyLoad`). The load KEEPS
+  it only in the read's `.failed`/`.timedOut` arms (`keepForTheRetry`); a `defer` ends it at EVERY other exit (unbound / not
+  Castle / read-only, keys already held, signed out or into another account, no vault, a secret not the vault's, a master
+  not the vault's, a moved account). `TypedUnlockSecret` gains `.wordsKey(WordsKey)` (the kept form; the load's switch reads
+  it; the secret check's `default` arm is untouched). THE HOLD moves into the session (`holdLoadedSyncKeys`, under the
+  session's lock): it lands only if the session has not let go, session memory still holds exactly what the load saw at its
+  start (never over an act's or another load's hold), and the library AS IT STANDS still follows the keys in Castle; a hold
+  that lands ends the pending. THE LET-GO (`letGoOfSyncKeyLoad`, final): the pending dropped and every later hold refused;
+  `ProtectionRoadLock.dropSessionMemory` runs it FIRST, before the leaf drop — the relock and Make this my library's
+  outgoing session (`ProtectionCopyDoors.swift:538`) both reach it. (The sign-out's and the replacing reopen's let-go are
+  piece 3a's wiring.) The retry's one-flight member (`retryingSyncKeyLoad`) rides this commit unused — piece 2 calls it.
+- *Pins (`App/Variorum/VariorumTests/Protection/TypedUnlockRetryTests.swift`, a new suite; planted, no keychain):*
+  `anOfflineTypedUnlockLeavesItsLoadPendingWithTheKeysUnloaded` (the derived keys kept, redacted, nothing written),
+  `anOfflineWordsUnlockKeepsTheWordsDerivedKeyNeverTheWords`, `aTimedOutVaultReadLeavesTheLoadPendingToo`,
+  `theRelockLetsGoOfThePendingLoad`; GUARDS (green on both sides by design): `aSuccessfulFirstLoadLeavesNothingPending`,
+  `everyOtherExitLeavesNothingPending` (signed out, another account, no vault, the passphrase changed elsewhere, a moved
+  account, keys already held, a read-only road). **All six name the new seam ⇒ COMPILE-red on the pre-fix tree** (to be
+  watched in the harness over the pre-fix product files). Their BEHAVIORAL red is the named reverts below. The standing
+  VX-501 suites stay green over the moved hold, including `theTypedLoadNeverDerivesThePassphrase` (the source pin over the
+  load's region — the keep's helper lives inside it and names no derivation).
+- *Evidence, headless at this commit:* Mac `xcodebuild build-for-testing` → `** TEST BUILD SUCCEEDED **`; the harness
+  (`--filter` TypedUnlockRetryTests · TypedUnlockSyncKeysTests · TouchIDUnlockSyncKeysTests · RoadLockTests ·
+  LobbyVaultRoadTests · SecretCheckRoadTests) → `✔ Test run with 45 tests in 6 suites passed`.
+- *THE NAMED BEHAVIORAL REVERTS (named here BEFORE they run, at this commit's tip; each in the harness on a copy of the one
+  file, then the symlink restored):* **R-1a** `keepForTheRetry`'s body → `return false` (nothing ever kept — the pre-fix
+  behavior) ⇒ expected RED: the three keep pins and `theRelockLetsGoOfThePendingLoad` (its precondition); the two guards
+  green. **R-1b** `dropSessionMemory`'s `session.letGoOfSyncKeyLoad()` line deleted ⇒ expected RED:
+  `theRelockLetsGoOfThePendingLoad` only.
+
