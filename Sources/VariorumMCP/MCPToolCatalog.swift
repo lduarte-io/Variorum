@@ -1280,16 +1280,20 @@ enum MCPToolCatalog {
 
     // MARK: - VX-943 (the VX-915 run, batch 6) — unlink_versions
 
-    /// VX-943 (her relay: "an unlink_versions that takes the ID link_versions
-    /// already returns, at the same permission level"): ONE link taken back by
-    /// its `edge_id`; write new on both notes, as making it needs (R-VX187-1's
-    /// rung — PROVISIONAL P-915-B6-1); a saved version's link refused in words
-    /// (P-915-B6-2), a gone link too (P-915-B6-3).
+    /// VX-943 (her relay of her agent's ask: "an unlink_versions that takes the
+    /// ID link_versions already returns, at the same permission level"): ONE
+    /// link taken back by its `edge_id`; write new on both notes, as making it
+    /// needs (R-VX187-1's rung — the agent's relayed ask, an OPEN choice for
+    /// her: PROVISIONAL P-915-B6-1); a saved version's link refused in words
+    /// (P-915-B6-2), a gone link too (P-915-B6-3). The VX-915 ladder's F-3: the
+    /// act takes ANY live version link by its id (no authorship fence — the ids
+    /// reach the wire only from link_versions' answers), so the description
+    /// says where the ids come from and claims no "that link_versions made".
     static let unlinkVersions = MCPToolDeclaration(
         name: "unlink_versions", rung: .writeNew, title: "Unlink a version link",
         description: """
-            Remove one version link that link_versions made, by the edge_id it answered for that \
-            pair (each pair a link_versions call named is its own link, with its own edge_id). Needs \
+            Remove one version link by its edge_id — the ids come from link_versions' answers \
+            (each pair a link_versions call named is its own link, with its own edge_id). Needs \
             write new on both notes the link joins, the same as making it. Both notes stay exactly as \
             they are; only the link goes. When the answer's still_versions is true, another link still \
             makes the two notes versions, so Compare still offers each beside the other — unlink its \

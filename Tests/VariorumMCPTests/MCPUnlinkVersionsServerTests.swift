@@ -225,7 +225,8 @@ struct MCPUnlinkVersionsServerTests {
 
     // MARK: - The grant matrix
 
-    /// WRITE NEW on BOTH notes (her words — link_versions' rung): a side the client may only
+    /// WRITE NEW on BOTH notes (link_versions' rung — the agent's ask she relayed, an OPEN choice
+    /// for her, PROVISIONAL P-915-B6-1; the VX-915 ladder's F-3): a side the client may only
     /// read hears the rung's refusal, naming nothing else, with ITS ask; once grants on both
     /// sides are spent together by the one act.
     @Test func writeNewOnBothNotesTheShortSideSpeaksAndOnceGrantsSpendTogether() async throws {
@@ -416,6 +417,23 @@ struct MCPUnlinkVersionsServerTests {
         #expect(MCPWriteTools.words(.noSuchLink) == Self.notShared, "the one shape, byte for byte")
         #expect(MCPWriteTools.words(.savedVersion) == MCPWriteTools.savedVersionLinkWords)
         #expect(MCPWriteTools.words(.alreadyUnlinked) == MCPWriteTools.linkAlreadyGoneWords)
+    }
+
+    /// **The description claims no authorship the act does not enforce** (the VX-915 ladder's
+    /// F-3, its code half): the act takes ANY live `version_of` link by its id — the author's own
+    /// Compare mark included (`unlinkVersionForClient` has no authorship fence; the ids reach the
+    /// wire only from link_versions' answers) — so the description says where ids come from and
+    /// never that the link must be one "link_versions made". It still says the rung and the saved
+    /// version's refusal. RED ON OLD: the description read "Remove one version link that
+    /// link_versions made, …".
+    @Test func theDescriptionSaysWhereIDsComeFromAndClaimsNoAuthorship() throws {
+        let text = try #require(MCPToolCatalog.declaration(named: "unlink_versions")).description
+        #expect(!text.contains("link_versions made"), "no own-only claim the act does not enforce: \(text)")
+        #expect(text.hasPrefix("Remove one version link by its edge_id"), "the link, by its id: \(text)")
+        #expect(text.contains("the ids come from link_versions' answers"), "where the ids come from: \(text)")
+        #expect(text.contains("Needs write new on both notes the link joins"), "the rung, still said: \(text)")
+        #expect(text.contains("A link that ties a note to one of its saved versions is refused"),
+                "the saved version's refusal, still said: \(text)")
     }
 
     // MARK: - The door's rules

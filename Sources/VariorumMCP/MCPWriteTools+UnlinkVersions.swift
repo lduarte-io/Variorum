@@ -29,8 +29,9 @@ import VariorumCore
 ///    wire never bare-unlinks one, which would declassify the version), and a
 ///    link already gone refuses in words (P-915-B6-3 — `remove_tag`'s not-worn
 ///    precedent);
-/// 4. **WRITE NEW on both notes** (her words — R-VX187-1's rung, PROVISIONAL
-///    P-915-B6-1), in the link's stored order: the first short side speaks
+/// 4. **WRITE NEW on both notes** (the agent's ask she relayed — R-VX187-1's
+///    rung, an OPEN choice for her: PROVISIONAL P-915-B6-1; the VX-915
+///    ladder's F-3), in the link's stored order: the first short side speaks
 ///    `rungTooLow` + the asked sentence and raises ITS ask;
 /// 5. the act, behind a guard that decides both notes again at write new on
 ///    ONE standing read inside its own transaction and spends their once

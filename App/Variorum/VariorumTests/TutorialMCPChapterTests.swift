@@ -513,8 +513,14 @@ struct TutorialMCPChapterTests {
                          "unlink_versions", "create_gathering"] {
                 #expect(MCPToolFacts.rung(of: name) == .writeNew, "\(name) is a write-new act")
             }
-            #expect(try tool("unlink_versions").description.contains("by the edge_id it answered"),
-                    "the link's opposite takes the id link_versions answered (VX-943)")
+            // A JUSTIFIED EDIT (the VX-915 ladder's F-3): the description no longer
+            // claims the link must be one "link_versions made" — the act takes any
+            // live version link by its id — so the truth it pins is the id and
+            // where the ids come from (the wire pin: MCPUnlinkVersionsServerTests).
+            #expect(try tool("unlink_versions").description.contains("by its edge_id"),
+                    "the link's opposite takes the link by its id (VX-943)")
+            #expect(try tool("unlink_versions").description.contains("the ids come from link_versions' answers"),
+                    "…the id link_versions answered (VX-943)")
             #expect(try tool("create_note").description.contains("tags the note as it is born"),
                     "a note it makes can wear its tags from the start (VX-814)")
             #expect(try tool("insert_blocks").description.contains("they go at the note's END — write new on the note "

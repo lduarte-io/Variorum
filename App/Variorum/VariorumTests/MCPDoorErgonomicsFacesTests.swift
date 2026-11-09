@@ -107,6 +107,7 @@ struct MCPDoorErgonomicsFacesTests {
         #expect(line("unlink_versions", allowed: false)
                 == "a-client was refused removing a version link from \u{201C}a letter\u{201D}")
         #expect(MCPToolFacts.rung(of: "unlink_versions") == .writeNew,
-                "her words: at the same permission level as link_versions")
+                "the agent's ask she relayed: at the same permission level as link_versions "
+                + "(PROVISIONAL P-915-B6-1, an open choice for her — the VX-915 ladder's F-3)")
     }
 }
