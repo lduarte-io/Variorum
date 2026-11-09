@@ -186,10 +186,10 @@ final class QuickEntryModel {
     func fileWithoutOpening(open: @escaping @MainActor (String) -> Void) async -> String? {
         await oneFilingInFlight {
             guard let postID = await self.fileTypedText() else { return nil }
+            // The one landing read — the pad's filing in another wing reads
+            // the same (`CaptureLanding`, the VX-915 ladder's F-1).
             let books = try? await self.session.database.read { db in
-                try Queries.readingsContaining(db, postID: postID)
-                    .filter { $0.kind == .book }
-                    .map(\.name)
+                try CaptureLanding.books(db, postID: postID)
             }
             self.session.status.deliver(
                 QuickEntryFileCopy.landed(books: books), kind: .receipt,
@@ -277,13 +277,11 @@ nonisolated enum QuickEntryFileCopy {
     /// duplicate's book read: no book holds it → the Pool (bookless is the
     /// Pool's definition); a book a `{#tag}` seated it in → named; several →
     /// counted. Nil — the landing could not be read — says only that it filed.
+    /// The place is `CaptureLanding`'s one rule (the pad names its landing
+    /// through it too — the VX-915 ladder's F-1); these words are unchanged.
     static func landed(books: [String]?) -> String {
         guard let books else { return "Filed." }
-        switch books.count {
-        case 0: return "Filed in the Pool."
-        case 1: return "Filed in \u{201C}\(books[0])\u{201D}."
-        default: return "Filed in \(books.count) books."
-        }
+        return "Filed in \(CaptureLanding.place(books: books, pool: "the Pool"))."
     }
 }
 

@@ -559,7 +559,8 @@ enum QuickNoteMint {
     /// that wing (`importPost`'s own parameter, the band's road) and the filing
     /// is wing-aware in the operation: another wing's own `quicknote` tag,
     /// adopted or minted by path, and no gathering (`.taggedOnly`) — so the
-    /// receipt names the wing's Pool.
+    /// receipt names the book that tag seated it in, else the wing's Pool
+    /// (the VX-915 ladder's F-1: the band's landing read).
     @discardableResult
     static func file(
         _ text: String, title: String? = nil, wingID: String = "", session: AppSession
@@ -592,10 +593,18 @@ enum QuickNoteMint {
             // landing that exactly did not happen.
             switch (filing, landingName) {
             case (.taggedOnly, let wing?), (.alreadyTagged, let wing?):
-                // VX-841: filed in another wing — tagged there, collected by
-                // nothing (no gathering grows there), so that wing's Pool lists
-                // it; the line names the wing.
-                session.status.receipt(QuickNoteCopy.filedInWing(wing))
+                // VX-841: filed in another wing — tagged there, and no
+                // gathering grows there. But the tag landed through the one
+                // application road, so a living BOOK in that wing whose rule
+                // hears it has SEATED the note — and a seated note is no Pool
+                // note. VX-915 ladder F-1: the line names the landing from the
+                // band's own read (`CaptureLanding` — one rule, both capture
+                // doors): the book(s) that hold it, else that wing's Pool.
+                let postID = result.container.id
+                let books = try? await session.database.read { db in
+                    try CaptureLanding.books(db, postID: postID)
+                }
+                session.status.receipt(QuickNoteCopy.filedInWing(wing, books: books))
             case (.filed, _), (.alreadyTagged, nil):
                 session.status.receipt(QuickNoteCopy.filedNote)  // 18i: it landed
             case (.taggedOnly, nil):
@@ -679,11 +688,21 @@ nonisolated enum QuickNoteCopy {
     static func landingAccessibility(_ wingName: String) -> String {
         "Quick note lands in \(wingName)"
     }
-    /// The receipt for a capture filed in another wing: tagged there and
-    /// collected by nothing, so that wing's Pool lists it (no Quicknotes
-    /// gathering grows there — the furniture is Home's).
-    static func filedInWing(_ wingName: String) -> String {
-        "Filed in the Pool of \u{201C}\(wingName)\u{201D} \u{2014} tagged #quicknote."
+    /// The receipt for a capture filed in another wing: tagged there, and no
+    /// Quicknotes gathering grows there (the furniture is Home's) — so where it
+    /// is, is whatever BOOK the tag seated it in, else that wing's Pool
+    /// (`books` empty, the default: "Filed in the Pool of “W” — tagged
+    /// #quicknote.", byte-unchanged). **VX-915 ladder round 1, F-1:** the
+    /// place is `CaptureLanding`'s one rule (the band's File Without Opening
+    /// reads it too): one book named, several counted. Nil — the landing could
+    /// not be read — says only that it filed (the band's own posture). The
+    /// book and unread forms are PROVISIONAL words (her bundle, beside
+    /// P-915-B3-1).
+    static func filedInWing(_ wingName: String, books: [String]? = []) -> String {
+        guard let books else { return "Filed \u{2014} tagged #quicknote." }
+        let place = CaptureLanding.place(
+            books: books, pool: "the Pool of \u{201C}\(wingName)\u{201D}")
+        return "Filed in \(place) \u{2014} tagged #quicknote."
     }
     /// **R-13u-4's two keys, in her own order** (13u3 UNIT C — this line
     /// used to read "⏎ new line · ⌘⏎ files it · closing files it too", which

@@ -203,6 +203,15 @@ struct QuickNoteWingLandingTests {
         #expect(QuickNoteCopy.placeholder == "jot it down — it lands in \(Operations.defaultQuicknoteBookName)")
         #expect(QuickNoteCopy.placeholder(landingIn: "Work") == "jot it down — it lands in Work")
         #expect(QuickNoteCopy.filedInWing("Work") == "Filed in the Pool of \u{201C}Work\u{201D} \u{2014} tagged #quicknote.")
+        // VX-915 ladder round 1, F-1: the landing named from the band's read
+        // (`CaptureLanding.place` — one rule): no book is the wing's Pool
+        // (byte-unchanged), a book is named, several are counted, an unread
+        // landing says only that it filed (PROVISIONAL words, her bundle).
+        #expect(QuickNoteCopy.filedInWing("Work", books: []) == QuickNoteCopy.filedInWing("Work"))
+        #expect(QuickNoteCopy.filedInWing("Work", books: ["jots"])
+                == "Filed in \u{201C}jots\u{201D} \u{2014} tagged #quicknote.")
+        #expect(QuickNoteCopy.filedInWing("Work", books: ["a", "b"]) == "Filed in 2 books \u{2014} tagged #quicknote.")
+        #expect(QuickNoteCopy.filedInWing("Work", books: nil) == "Filed \u{2014} tagged #quicknote.")
         #expect(QuickNoteCopy.landingHelp.hasPrefix("Where this quick note lands"))
         #expect(QuickNoteCopy.landingAccessibility("Home") == "Quick note lands in Home")
         #expect(QuickNoteLandingFace.role(landing: "") == .quiet)
