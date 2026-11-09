@@ -647,6 +647,17 @@ struct MCPPaneTabsTests {
     /// VX-914 gate round's road — y-DOWN global space) gives the frames. Its
     /// first mount is the discrimination control: the tab row reports while
     /// the switch does not.
+    ///
+    /// **THE GATE12 RIG FIX (the run record's BATCH 1 FOLLOW-UP — never a
+    /// weakened assertion):** this is the one pane-geometry pin that mounts
+    /// several panes in one session, and a CLOSED pane's `onDisappear` fires
+    /// late — during the next mount's settle, after that pane recorded
+    /// (measured by an offscreen replica) — so the oracle's old unconditional
+    /// forget erased the live pane's `.tabRow`. Two belts: the oracle is now
+    /// owner-aware (a probe clears only its own record —
+    /// `theOraclesForgetClearsOnlyTheRecordItsOwnProbeWrote`), and each mount
+    /// here reports under its OWN probe scope, so nothing a closed pane does —
+    /// a late forget or a late record — can reach the mount being read.
     @Test(arguments: [ThemeVoice.terminal, .study])
     func theAIMarksSwitchSitsAtThePanesFootUnderEveryTabOnceTheLibraryHasHadAClient(voice: ThemeVoice) async throws {
         try await withPaneWorld { session, _ in
@@ -656,14 +667,17 @@ struct MCPPaneTabsTests {
             door.attach(session: session)
             defer { door.detach() }
             let theme = ThemeStore(session: session)
-            let scope = session.debugProbeScope
             let size = NSSize(width: AppSettingsView.detailWidth, height: 1600)
+            /// One probe scope PER MOUNT, inside this session's own (the GATE12
+            /// rig fix): a closed pane's late disappear lands in its own scope.
+            func mountScope(_ mount: String) -> String { "\(session.debugProbeScope)-vx934-foot-\(mount)" }
 
             // Never had a client: the tab row reports, the switch never draws.
             #expect(!MCPPane.drawsAIMarksSwitch(door.snapshot), "\(voice): fixture — no client row at all")
-            MCPPaneGeometry.reset(scope)
             do {
-                let (window, host) = mount(MCPPane(door: door).environment(theme).debugProbeScope(session), size: size)
+                let scope = mountScope("never-had-a-client")
+                MCPPaneGeometry.reset(scope)
+                let (window, host) = mount(MCPPane(door: door).environment(theme).debugProbeScope(scope), size: size)
                 defer { unmount(window) }
                 await settle(host, until: { MCPPaneGeometry.frame(.tabRow, in: scope) != nil })
                 await settle(host, until: { false }, turns: 15)
@@ -681,8 +695,9 @@ struct MCPPaneTabsTests {
             #expect(MCPPane.drawsAIMarksSwitch(door.snapshot), "\(voice): fixture — the library has had a client")
             for tab in MCPPaneTab.offered(sharing: true) {
                 door.paneTab = tab
+                let scope = mountScope("approved-\(tab.rawValue)")
                 MCPPaneGeometry.reset(scope)
-                let (window, host) = mount(MCPPane(door: door).environment(theme).debugProbeScope(session), size: size)
+                let (window, host) = mount(MCPPane(door: door).environment(theme).debugProbeScope(scope), size: size)
                 defer { unmount(window) }
                 await settle(host, until: {
                     MCPPaneGeometry.frame(.tabRow, in: scope) != nil && MCPPaneGeometry.frame(.aiMarks, in: scope) != nil
