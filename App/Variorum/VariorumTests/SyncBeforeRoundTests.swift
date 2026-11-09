@@ -219,6 +219,43 @@ struct SyncBeforeRoundTests {
         }
     }
 
+    /// **VX-544 (the VX-849 run, batch 2) — THE ONE CLOSURE'S ORDER ON THE MAC:** the typed unlock's pending sync-keys load
+    /// is retried FIRST (her typing still pending when it runs — the engine's provider has no keys), THEN her typing lands —
+    /// one closure on batch 1's hook, no second hook. COMPILE-red on the pre-fix tree (it names `typedUnlockSyncKeys`); the
+    /// behavioral red is the record's revert of the occasion's retry call.
+    @Test func theMacsOccasionRetriesTheTypedUnlocksLoadBeforeHerTypingLands() async throws {
+        try await Self.withWorld { db in
+            let auth = AuthSession(
+                configuration: AuthConfiguration(projectURL: URL(string: "https://vx544.invalid")!, apiKey: "k"),
+                store: .inMemory(), http: { _ in throw AuthSessionError.malformedResponse("no network") })
+            let services = AppServices(
+                session: AppSession(database: db), storeVariant: .real, backupEnabled: false, auth: auth,
+                makeSyncKeyProvider: { UnenrolledKeyProvider() }, legacyCleanup: {})
+            let session = services.session
+            let post = try session.operations.createPost(title: "typing while locked")
+            let made = try session.operations.newBlock(in: post.id, text: "Base.", registeringUndo: false)
+            let coordinator = session.autosave(forPost: post.id, sleep: { _ in throw CancellationError() })
+            coordinator.record(variantID: made.variant.id, text: "Base. Typed.", charDelta: 7, basedOn: "Base.")
+            let log = LockIsolated<[String]>([])
+            services.typedUnlockSyncKeys = TypedUnlockSyncKeysRoads(
+                isPending: { true },
+                retry: {
+                    let typing = coordinator.isDirty ? "retry: typing pending" : "retry: typing landed"
+                    log.withValue { $0.append(typing) }
+                },
+                clear: { log.withValue { $0.append("clear") } },
+                letGo: { log.withValue { $0.append("letGo") } })
+
+            let occasion = try #require(services.sync.beforeRound, "the Mac composes the occasion")
+            await occasion()
+
+            #expect(log.value == ["retry: typing pending"], "\(log.value)")
+            #expect(!coordinator.isDirty, "then her typing landed")
+            #expect(try Self.stored(db, made.variant.id) == "Base. Typed.")
+            services.stop()
+        }
+    }
+
     /// **R-683-3 — ONLY when typing is pending:** with every coordinator clean
     /// the occasion touches none of them — no flush runs, no settle is
     /// announced (a flush always announces one), so a quiet round costs the

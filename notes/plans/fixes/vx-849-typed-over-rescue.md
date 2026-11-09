@@ -593,8 +593,8 @@ the shared load's retention runs on the phone; only its retry stays unwired (ove
 |---|---|---|
 | 0 | Preflight + this record | DONE (this commit) |
 | 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | DONE (`b11fb8d39`) — compile-red on old watched; R-1a/R-1b bit exactly as named; harness green; Mac runs PENDING (stage) |
-| 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | DONE (this commit) — harness 53/53 green (6 suites), the retry suite 5 runs stable; the named reverts R-2a…R-2d run next at this tip; Mac runs PENDING (stage) |
-| 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | NOT STARTED |
+| 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | DONE (`4152e782a`) — R-2a…R-2d bit exactly as named; harness green; Mac runs PENDING (stage) |
+| 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | DONE (this commit) — THE ROAD PIN behavior-red on the pre-fix tree (watched); harness 81/81 (11 suites); Mac + phone `build-for-testing` green; reverts R-3a…R-3f run next at this tip; Mac/simulator runs PENDING (stage) |
 | 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | NOT STARTED |
 | 4 | The words (no new sentence) | NOT STARTED |
 | 5 | Close: builds, headless runs, self-assessment, the stage suite list | NOT STARTED |
@@ -694,4 +694,69 @@ symlink with an edited copy of the committed file, runs, and restores the symlin
   ⇒ expected RED: `aRetryNeverOverwritesAHoldThatLandedMeanwhile` only. **R-2d** `retryingSyncKeyLoad`'s flight bypassed
   (`await body()` directly) ⇒ expected RED: `retriesAskedTogetherShareOneRead` only (three reads; the second and third holds
   refused by the compare, so the keys still land).
+- *Piece 2's evidence, run at `4152e782a` (the harness):* **R-2a** → `✘ 14 tests, 9 failed` — exactly the five named retry
+  pins (THE PIN — "Load.fetches == before + 1", the keys, the engine's seam; the words retry; the second failure; after the
+  lock — no read was made; one read) and piece 1's four; GREEN: the overwrite pin, the two end-the-pending pins, the two
+  guards. **R-2b** → `✘` exactly `aRetryAnsweredAfterTheLockHoldsNothing` ("sessionSyncKeys == nil" — the late answer held
+  the keys past the relock). **R-2c** → `✘` exactly `aRetryNeverOverwritesAHoldThatLandedMeanwhile` (the act's hold
+  overwritten). **R-2d** → `✘` exactly `retriesAskedTogetherShareOneRead` ("fetches == before + 1" — three reads). Each
+  restored; the suite green after.
+
+**Piece 3a — the occasion (BUILT).**
+- *The Mac's occasion (`AppServices.swift`):* batch 1's ONE wired closure, moved to the end of `init` (it captures `self`):
+  on the Mac `await self?.retryTypedUnlockSyncKeysWhileLocked()` FIRST, then batch 1's
+  `session?.flushPendingTypingBeforeRound()` — no second hook property (override 4). THE GATE
+  (`retryTypedUnlockSyncKeysWhileLocked`): no roads, or nothing pending (`roads.isPending()` — a memory read, never the
+  keychain) ⇒ return at once — the whole cost of every round of an unlocked session, Standard, an unbound library; with a
+  pending: ONE `currentKeys()` try OFF the main actor (`Task.detached` — it may read the silent keychain item, never on the
+  main thread, the 13e class); keys there ⇒ `roads.clear()` (an act or an unlock loaded them — "cleared by any act that loads
+  the keys"); none ⇒ `await roads.retry()` (bounded by the vault read's 10 s; a retry already out is joined).
+- *The roads (`TypedUnlockSyncKeysRoads` in `AppServices.swift`; wired in `AppBootstrap.attach(services:)`, both platforms):*
+  four closures over the bootstrap's CURRENT `roadSession` (a reopen's fresh session is the one reached; the services never
+  hold a road session) — `isPending`, `retry` (`AppBootstrap.retryTypedUnlockSyncKeyLoad`: ready on a writing road, then
+  `Task.detached` with `signInNow()` — the press's own off-main pattern — into `retryPendingSyncKeyLoad`), `clear`, `letGo`.
+- *The let-go roads completed:* **sign-out** — `AppServices.variorumSignInChanged(nil)` (the one observation every sign-out
+  road reaches: the Account sheet, sign out everywhere, the account's deletion) calls `typedUnlockSyncKeys?.letGo()` (her
+  R-849-1: "dropped at lock/sign-out"); **a replacing reopen** — `AppBootstrap.finish(.ready)` lets go of the OUTGOING session
+  (`outgoing !== road`) before it takes the new one (a re-keying act's reopen, a copy door's landing): the derived secret
+  never crosses a reopen and a retry of the old session still out holds nothing.
+- *P-849-2 — the phone's FLUSH occasion: WIRED (it IS the one line).* The phone's page, takes browser and quick note record
+  into the same `AppSession` autosave registry `flushPendingTypingBeforeRound` walks (`MobileEditorViewModel` —
+  `session.autosave(forPost:)`; batch 1's B on every phone record site), so the phone's composition is the same closure
+  minus the retry: `#else sync.beforeRound = { [weak session] in await session?.flushPendingTypingBeforeRound() }`. Its roads:
+  `.active`'s `triggerSync`, the background transition's `flush()` (after its own `flushAll` — the occasion's cheap check then
+  finds nothing pending), the settle observation. The phone's RETRY stays unwired (override 5): its closure has no retry call.
+- *Pins:* **THE ROAD PIN** `OfflineTypedUnlockRetryRoadTests.herOfflineTypedUnlockSyncsAtTheNextRoundOnceTheVaultAnswers` —
+  her steps 8–9 end to end over what ships (the bootstrap over the planted road, the real `AppServices`/`SyncSession`
+  attached through `attach(services:)`, a fake server): ARM 3's Castle-under-Always-ask set-up, the LOCK, the typed unlock
+  with the vault unreachable ("Sync locked"), the vault reachable again, the next round (`roundNow`) clean, "Synced", the keys
+  in session memory, nothing in the keychain. It names ONLY pre-fix API ⇒ **BEHAVIOR-red on the pre-fix tree, WATCHED**: the
+  harness over the pre-fix `ProtectionOpenRoad`/`ProtectionRoadLock`/`AppServices`/`AppBootstrap` (`git show 93c2e3149:…`),
+  the pin alone (its siblings, which name the seam, stripped from a harness-only copy) → `✘ 1 test, 3 issues`: the round's
+  `lastError` = "Sync paused: this device's encryption keys are locked or not enrolled…", the row `.keysLocked`, no keys
+  held — the traced mechanism exactly; symlinks restored. Its three siblings (compile-red — they name the seam):
+  `theLockLetsGoOfTheOfflineUnlocksPendingLoad`, `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`,
+  `aReopenLetsGoOfTheOutgoingSessionsPendingLoad` (Use Standard through the crossing's reopen; the chain stopped first so no
+  round retries before it). The composition suite `TypedUnlockRetryOccasionTests` (scripted roads, a counting provider):
+  `whileThereAreNoKeysTheOccasionRetriesThePendingLoad`, `withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing`,
+  `withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing`, `aSignOutLetsGoOfThePendingLoad`, the guard `noRoadsIsInert`.
+  Mac-only (it needs the real `AppSession`'s coordinators): `SyncBeforeRoundTests.theMacsOccasionRetriesTheTypedUnlocksLoad
+  BeforeHerTypingLands` (the retry runs while her typing is still pending, then her typing lands). Phone:
+  `MobileRoundOccasionTests.thePhonesOccasionLandsPendingTypingAndRunsNoRetry` (the occasion lands her typing; the retry
+  closure never called) — BEHAVIOR-red on old by its `#require(beforeRound)` (nil on the phone pre-fix), compile-red as a file.
+- *Evidence, headless at this commit:* Mac `build-for-testing` `** TEST BUILD SUCCEEDED **` (one Sendable-capture error in
+  the new SyncBeforeRound pin fixed on the way); phone `build-for-testing` (generic iOS Simulator) `** TEST BUILD SUCCEEDED
+  **`; the harness (TypedUnlockRetry · TypedUnlockRetryOccasion · OfflineTypedUnlockRetryRoad · TypedUnlockSyncKeys ·
+  TouchIDUnlockSyncKeys · RoadLock · LobbyVaultRoad · SecretCheckRoad · FirstRoundAfterTheAct · FirstRoundAfterTheReopen ·
+  FirstRunDrill) → `✔ Test run with 81 tests in 11 suites passed`.
+- *THE NAMED BEHAVIORAL REVERTS (named BEFORE they run, at this commit's tip; the harness unless marked Mac):* **R-3a** the
+  Mac closure's `await self?.retryTypedUnlockSyncKeysWhileLocked()` deleted ⇒ RED `whileThereAreNoKeysTheOccasionRetries…`
+  and THE ROAD PIN (and, Mac, `theMacsOccasionRetriesTheTypedUnlocksLoadBeforeHerTypingLands`). **R-3b** the gate's
+  `roads.isPending()` condition deleted ⇒ RED `withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing`. **R-3c** the
+  keys-present `roads.clear()` deleted ⇒ RED `withTheKeysThereTheOccasionEndsThePendingAndRetriesNothing`. **R-3d** the
+  sign-out's `typedUnlockSyncKeys?.letGo()` deleted ⇒ RED `aSignOutLetsGoOfThePendingLoad` and
+  `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. **R-3e** `finish`'s outgoing `letGoOfSyncKeyLoad()` deleted ⇒ RED
+  `aReopenLetsGoOfTheOutgoingSessionsPendingLoad`. **R-3f** `attach(services:)`'s `services.typedUnlockSyncKeys = …`
+  deleted ⇒ RED THE ROAD PIN and `aSignOutLetsGoOfTheOfflineUnlocksPendingLoad`. **R-3g (simulator — the stage's)** the
+  phone's `#else` closure deleted ⇒ RED `thePhonesOccasionLandsPendingTypingAndRunsNoRetry`.
 

@@ -413,6 +413,10 @@ final class AppBootstrap {
         }
         switch outcome {
         case .ready(let database, _, let road):
+            // VX-544 (the VX-849 run, batch 2; her R-849-1): a session this open REPLACES — a re-keying act's reopen, a copy
+            // door's landing — lets go of its typed unlock's pending sync-keys load (the derived secret never crosses a
+            // reopen, and a retry of the old session still out holds nothing); the lock's drop already let go of its own.
+            if let outgoing = roadSession, outgoing !== road { outgoing.letGoOfSyncKeyLoad() }
             // VX-306 U1b: the library open on the road.
             roadSession = road
             // VX-307 U1: the engine's key seam follows the open (nil detaches).
@@ -1197,6 +1201,14 @@ final class AppBootstrap {
                 guard let fresh = await self?.awaitAttachedServices(newerThan: generation) else { return .notConfigured }
                 return await fresh.runFirstRound()
             })
+        // VX-544 (the VX-849 run, batch 2 — D-544; her R-849-1): the typed unlock's pending sync-keys load on the CURRENT road
+        // session (each closure reads it at its call — a reopen's fresh session is the one reached): the Mac services' round
+        // occasion retries it while the engine has no keys; a sign-out lets it go (both platforms).
+        services.typedUnlockSyncKeys = TypedUnlockSyncKeysRoads(
+            isPending: { [weak self] in self?.roadSession?.pendingSyncKeyLoad != nil },
+            retry: { [weak self] in await self?.retryTypedUnlockSyncKeyLoad() },
+            clear: { [weak self] in self?.roadSession?.clearPendingSyncKeyLoad() },
+            letGo: { [weak self] in self?.roadSession?.letGoOfSyncKeyLoad() })
         servicesGeneration += 1
         attachedServices = services
         for (id, waiter) in attachWaiters where servicesGeneration > waiter.newerThan {
@@ -1204,6 +1216,18 @@ final class AppBootstrap {
             waiter.timeout.cancel()
             waiter.continuation.resume(returning: services)
         }
+    }
+
+    /// **VX-544 (the VX-849 run, batch 2 — D-544 (2); her R-849-1) — THE RETRY ON THE OPEN ROAD SESSION**, as the services'
+    /// round occasion asks it (`AppServices.retryTypedUnlockSyncKeysWhileLocked`): ready on a writing road, off the main actor
+    /// with who is signed in NOW (`signInNow` — a keychain read), the way every press runs. Nothing open, or a read-only road:
+    /// nothing.
+    func retryTypedUnlockSyncKeyLoad() async {
+        guard case .ready = state, let session = roadSession, session.writes else { return }
+        let signInNow = signInNow
+        await Task.detached(priority: .utility) {
+            await ProtectionOpenRoad.retryPendingSyncKeyLoad(session, signIn: signInNow())
+        }.value
     }
 
     /// **VX-510 D-B0 — THE SERVICES GENERATION** (F-6 (A), ruled by the architect: unit A's Piece 6 trace). A re-keying
