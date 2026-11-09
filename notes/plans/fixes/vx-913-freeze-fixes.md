@@ -2,7 +2,7 @@
 
 **STATUS: CLOSED — 2026-11-09 (the overnight run; merge gate GREEN on 333e87508 at 04:37).**
 Ticket: VX-913 · Project-less umbrella (sub-issues are the roster) · Branch: `vx-913-freeze-fixes` ·
-Worktree: `~/dev/variorum-vx-913` (the Pro) · PR: #TBD (filled at merge).
+Worktree: `~/dev/variorum-vx-913` (the Pro) · PR: #238.
 Shape: `/architect-phase vx-913` — the architect/orchestrator shape; stage coordinator this window: **nov7**.
 Wave: the last wave of pre-OSS code, beside VX-849 · VX-940 · VX-915 · VX-926 (her kickoff words).
 
