@@ -384,7 +384,7 @@ final class MCPSession: @unchecked Sendable {
             // opening's cap is ANSWERED — one error on `id: null`, the same
             // for every connection (nothing was decided) — then the host
             // closes. No admission runs: no client, no key, nothing logged.
-            _ = await MCPSocketTransport.writeAllOffPool(fd, MCPHandshake.overLimitResponse)  // VX-933
+            _ = MCPSocketTransport.writeAll(fd, MCPHandshake.overLimitResponse)
             return
         }
         let declared = MCPHandshake.initialize(opening.firstFrame)
@@ -396,7 +396,7 @@ final class MCPSession: @unchecked Sendable {
         // its own bytes needs no store, locked or not) and before the
         // admission — nothing read, written or logged; it names no one.
         if let refusal = MCPNullIdentifier.clientName(declared?.name) {
-            _ = await MCPSocketTransport.writeAllOffPool(  // VX-933: off the pool
+            _ = MCPSocketTransport.writeAll(
                 fd,
                 MCPShim.refusalResponse(
                     toFirstLine: opening.firstFrame,
@@ -427,7 +427,7 @@ final class MCPSession: @unchecked Sendable {
                     // refusal the one.
                     let reason: MCPSetupKeyRule.Refusal? =
                         if case .refuse(let reason) = admission.decision { reason } else { nil }
-                    _ = await MCPSocketTransport.writeAllOffPool(  // VX-933
+                    _ = MCPSocketTransport.writeAll(
                         fd, MCPHandshake.refusalResponse(toFirstFrame: opening.firstFrame, reason: reason))
                     return
                 }
@@ -443,7 +443,7 @@ final class MCPSession: @unchecked Sendable {
                 // nothing — the store refused before any access): HOLD it.
                 holding = true
             } catch {
-                _ = await MCPSocketTransport.writeAllOffPool(  // VX-933
+                _ = MCPSocketTransport.writeAll(
                     fd,
                     MCPShim.refusalResponse(
                         toFirstLine: opening.firstFrame, message: MCPHandshake.storeErrorRefusal))
