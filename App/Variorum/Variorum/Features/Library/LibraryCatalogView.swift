@@ -484,6 +484,9 @@ struct LibraryCatalogView: View {
                 model.toggleSavepointsFacet()
                 Task { await model.search() }
             })
+            // VX-895: the band's drawn words are this session's (the DEBUG
+            // oracle's scope — a no-op outside DEBUG).
+            .debugProbeScope(session)
     }
 
     private var searchSheet: some View {
@@ -516,6 +519,9 @@ struct LibraryCatalogView: View {
                     rowBackground(picked: false, subject: isSubject(hit.id))
                 }
             })
+            // VX-895: the sheet's drawn words are this session's (the DEBUG
+            // oracle's scope — a no-op outside DEBUG).
+            .debugProbeScope(session)
     }
 
     /// **The row wearing the SUBJECT face** — the info panel's subject, and

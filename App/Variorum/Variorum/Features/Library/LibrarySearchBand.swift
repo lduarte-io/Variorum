@@ -87,6 +87,8 @@ struct LibrarySearchBand: View {
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
                     .layoutPriority(1)
+                    // VX-895: what the counts line DREW (the DEBUG oracle).
+                    .librarySearchDrawn(.countsLine, tokens.chromeLabel(line))
             }
             LibrarySearchChip(tokens: tokens, label: tokens.chromeLabel(
                 LibrarySearchCopy.wingChip(wingName)))
