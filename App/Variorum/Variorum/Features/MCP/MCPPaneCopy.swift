@@ -99,6 +99,30 @@ nonisolated enum MCPPaneCopy {
         + "left off. Fully off hides the list. This changes only the list \u{2014} an ask to show you "
         + "something still lands the way \u{201C}\(showDialTitle)\u{201D} says."
 
+    // MARK: - The AI pair's switch (VX-934 — her ruling, #269; PROVISIONAL words
+    // F-934-B, flagged for her wording bundle — NOT her quoted words, as she
+    // asked; sentence case; settings-class wording: "client", never "AI"
+    // (VX-272); no provider (O-4))
+
+    /// The switch's row title — the catalog's (`mcpAIMarks`) and the toggle's.
+    /// "Private" is the mark's own name (the Private row, the Private mark),
+    /// never an emphasis.
+    static let aiMarksTitle = "Show the shared and Private marks"
+    /// The switch's one line (its whole text: `aiMarksDetail`).
+    static let aiMarksSummary =
+        "The shared icon on what a client can reach, and the closed eye on what\u{2019}s Private."
+    /// The switch's whole text, behind its (i). It names exactly what the
+    /// switch governs (the shared icon, the closed eye — never the pending-ask
+    /// glyph or any door), when they show (a client approved; greyed while the
+    /// server is off — VX-900), that off changes nothing else, and where the
+    /// books' own marks now live (VX-934's split).
+    static let aiMarksDetail =
+        "While a client is approved, the notes, books, gatherings and wings it can reach wear the "
+        + "shared icon (hover it to see who and how far, click it to change or revoke), and a Private "
+        + "note or book wears a closed eye (hover it to see why). While the MCP server is off, both "
+        + "still show, greyed out. Off: neither mark shows, and nothing else changes \u{2014} the "
+        + "books\u{2019} own marks keep their switch in Settings \u{25B8} Editor. Synced."
+
     // MARK: - The one-line explainers (VX-281 U1 — R-VX184-6)
     //
     // Her ruling: "every explainer cut to one line with the full text behind

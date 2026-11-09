@@ -144,9 +144,10 @@ struct AppSettingsView: View {
         // VX-589: + "hideStarredFromOpen", the Open notes section's second toggle.
         .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "hideStarredFromOpen",
                    "updates"],
-        // VX-905 (the VX-914 run, batch 1): "ownershipBadges" moved to Settings ▸ MCP.
+        // VX-934 (her ruling, #269 — "move it out of MCP back to where it was"):
+        // "ownershipBadges" is back in its pre-VX-905 place, beside its twin.
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
-                  "arrivalFlash", "hideOwnedDefault",
+                  "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
                   "hoverHandles", "spellcheck", "longBlocks"],
         .takes: ["fanStyle", "followScroll"],
         .writing: ["segmentation", "cadence", "pruning"],
@@ -161,11 +162,12 @@ struct AppSettingsView: View {
         // VX-676: the show dial sits above the tabs, beside the server switch.
         // VX-903 (the VX-914 run, batch 1): VX-874's trail dial directly under the
         // show dial, above the tabs (drawn while a client is approved).
-        // VX-905 (the VX-914 run, batch 1): the badge family's switch at the
-        // pane's FOOT, under whichever tab shows (every library — owned-by chips
-        // exist without AI; nothing above the tabs grows).
+        // VX-934 (her ruling, #269): the AI pair's switch (the shared icon and
+        // the Private eye) at the pane's FOOT, under whichever tab shows, where
+        // VX-905's badge row stood — drawn once the library has ever had a
+        // client (the sharing face's fact; nothing above the tabs grows).
         .mcp: ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook",
-               "ownershipBadges"],
+               "mcpAIMarks"],
         .protection: ["protection"],
         .dataSafety: ["backups"],
         .diagnostics: ["crashReports"],
@@ -385,7 +387,8 @@ struct AppSettingsView: View {
                     tokens: tokens, query: query,
                     // VX-309 U2 — VX-453: the account section's row only where the Protection pane renders that section.
                     accountSection: roadStanding?.account != nil,
-                    // VX-590: the MCP pane's Shared with AI tab only once the library has had a client.
+                    // VX-590: the MCP pane's Shared with AI tab only once the library has had a client
+                    // (VX-934: and the AI pair's switch at its foot, on the same fact).
                     mcpSharingFace: mcp.map { MCPPane.showsSharingFace($0.snapshot) } ?? true,
                     // VX-903: the MCP pane's trail dial only while a client is approved.
                     mcpTrailDial: mcp.map { MCPPane.drawsTrailDial($0.snapshot) } ?? true,
@@ -497,7 +500,8 @@ private struct SettingsResultsPane: View {
     let query: String
     /// VX-309 U2 — VX-453: whether the Protection pane renders the account section.
     let accountSection: Bool
-    /// VX-590: whether Settings ▸ MCP shows its sharing face (Shared with AI and the open book inside it).
+    /// VX-590: whether Settings ▸ MCP shows its sharing face (Shared with AI and the open book inside it;
+    /// VX-934: and the AI pair's switch at the pane's foot).
     let mcpSharingFace: Bool
     /// VX-903: whether Settings ▸ MCP draws its trail dial (a client is approved).
     let mcpTrailDial: Bool
@@ -770,10 +774,21 @@ private struct EditorSettingsPane: View {
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            // 13i-c U4 (the sitting record §6): the hide-owned global default —
-            // synced, like the flash. (VX-905, the VX-914 run: the badge
-            // family's one switch moved to Settings ▸ MCP's foot — `MCPPane`.)
+            // 13i-c U4 (the sitting record §6): the badge family's one switch
+            // and the hide-owned global default — synced, like the flash.
+            // VX-934 (her ruling, #269 — "move it out of MCP back to where it
+            // was"): the badge switch is back here as it stood before VX-905,
+            // governing the BOOK marks only (the Private eye and the shared
+            // icon have their own switch at Settings ▸ MCP's foot — `MCPPane`).
             Section(OwnershipSettingsCopy.section) {
+                Toggle(SettingsCatalog.title("ownershipBadges"), isOn: Binding(
+                    get: { theme.settings.ownershipBadges },
+                    set: { theme.setOwnershipBadges($0) }))
+                Text(OwnershipSettingsCopy.badgesHelp)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
                 Toggle(SettingsCatalog.title("hideOwnedDefault"), isOn: Binding(
                     get: { theme.settings.hideOwnedByDefault },
                     set: { theme.setHideOwnedDefault($0) }))
