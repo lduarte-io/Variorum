@@ -87,7 +87,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | Row | What | Status |
 |---|---|---|
 | 0 | Kickoff: mint (VX-926), 15 members seated, 4 duplicates marked, worktree, in-flight row, her rulings R-926-1..4, the disposition A-926-1 | DONE (this commit) |
-| U1 | the socket clock | IN PROGRESS — "## U1 record" (end of file) |
+| U1 | the socket clock | **BUILT + PINNED, headless** — "## U1 record" (end of file): VX-850 ANSWERED (test timing — the harness rides the test process's cooperative pool; the door answers in ms at load 40 with the pool free); ONE mechanism fixed at its three faces in `Tests/VariorumMCPTests` only (waits off the pool · the deadline on its own queue and clock · every raw wait on the harness's one bound, O-7's rule carried); pins P-A/P-B/P-C red on old or under their named reverts, each revert red on exactly its pin; final counts all GREEN (family alone 2/2, MCP target idle 2/2, loaded 3/3, whole package loaded 1/1); all eight members FIXED (VX-477's StarContext sighting returned to VX-625); findings F-U1-1/-2 for the orchestrator |
 | U2 | the encoder mitigation (timeboxed) | NOT STARTED |
 | U3 | StarContext starvation | NOT STARTED |
 | U4 | hermetic defaults + the dissolve check | NOT STARTED |
@@ -103,7 +103,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 
 ## U1 record
 
-**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no stage work of any kind (the brief: headless only — no `xcodebuild test`, no Debug launch, no walk; the family has no face, so its acceptance evidence is the socket road itself driven headlessly, alone and under deliberate load); nothing filed on Linear or in `notes/QUESTIONS.md` (PROVISIONALs and findings are listed here for the merge).
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no stage work of any kind (the brief: headless only — no `xcodebuild test`, no Debug launch, no walk; the family has no face, so its acceptance evidence is the socket road itself driven headlessly, alone and under deliberate load); nothing filed on Linear or in `notes/QUESTIONS.md` (the findings below are for the merge; there is no PROVISIONAL — nothing here is product behaviour); the two findings F-U1-1 (an AcceptLoop ordering race) and F-U1-2 (a product write that can hold a pool thread) are traced, NOT built; StarContext (U3's VX-625) is not touched and U1's fix cannot reach it (another process's pool).
 
 ### LIVE STATUS
 
@@ -113,10 +113,10 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | P1 | PHASE 1 — VX-850's question answered with evidence (instrumented connect/initialize road, idle vs external CPU load vs in-process pool pressure) | DONE (this commit) — **TEST TIMING, not door latency** (below, "PHASE 1 — VX-850's answer"): the door answers `initialize` in single-digit ms at load 40 with the pool free; the family's reds are the test process's cooperative pool held by the harness's own blocking waits |
 | P2 | PHASE 2 — one mechanism fix, chosen on the trace | DONE (this commit; its WIP half `895914da7`) — the mechanism is ONE: the harness rides the test process's cooperative pool, and the fix takes it off at the three places it rode it ("PHASE 2 — the fix" below): (1) every wait for the server under test runs OFF THE POOL (`HarnessWait.offPool`); (2) the deadline's timer on its OWN overcommit queue, its expiry read there (`firedAfter`); (3) every raw wait for the server bounded by THE HARNESS's ONE BOUND (`HarnessDeadline.seconds` — O-7's rule, carried from four helpers to all; the three files' private raw-client copies consolidated into `MCPHarnessWait.swift`). No product line (`git diff -- Sources` empty); no wire change. The family alone 74 / 14 GREEN (`family-alone-fixed.log`, gate GREEN) |
 | P3 | Pins: the mechanism made deterministic, red on old by behavioural revert, green with the fix | DONE (this commit) — three pins in `MCPHarnessPoolTests` ("PHASE 2 — the pins and their reverts" below): P-A the circular wait (RED on the pre-fix harness 3 of 3, and under R-A), P-B the deadline's own clock (RED under R-B1 and R-B2, 2 of 2 each), P-C the harness's one bound (RED on the hand-picked 5 s 2 of 2, and under R-C on both its arms); each revert reds exactly its own pin; all three GREEN on the fixed tree 4 of 4 |
-| P4 | The family alone + under a deliberately loaded parallel run (counts) | NOT STARTED |
-| P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | NOT STARTED |
+| P4 | The family alone + under a deliberately loaded parallel run (counts) | DONE (this commit) — on the final tree `be8ffc76a` (instrument deleted), every log through `Tools/assert-tests-ran`: the family alone **2 of 2 GREEN** (74 / 14); the whole MCP target idle **2 of 2 GREEN** (672 / 126); the whole MCP target under 36 × `yes` (load avg 16–60) **3 of 3 GREEN**; the whole package under the same load (avg 50–54) **GREEN** — MCP 672 / 126, core 4,008 / 546 with its 5 pre-existing known issues, the third target 32 / 4; the gate 4,670 executed, 0 failed (table below) |
+| P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | DONE (this commit) — below |
 
-**Load generators alive:** ONE — 36 × `/usr/bin/yes > /dev/null`, pids 48392–48427 (P4's final loaded counts; killed by pid at their end). **Reverts in flight:** none — R-A, R-B1, R-B2, R-C each applied, run and restored clean (`git diff` empty after each; table below). **The Phase 1 instrument:** deleted from the tree (never committed; its last source kept at `scratchpad/u1/ZZVX926ProbeInstrument.swift.copy`).
+**Load generators alive:** none — every generator killed by pid at its end (Phase 1: pids 35165–35200; P4's first: 44890–44925; the final counts': 48392–48427); `pgrep -x yes` = 0. **Reverts in flight:** none — R-A, R-B1, R-B2, R-C each applied, run and restored clean (`git diff` empty after each; table below). **The Phase 1 instrument:** deleted from the tree (never committed; its last source kept at `scratchpad/u1/ZZVX926ProbeInstrument.swift.copy`).
 
 ### PHASE 1 — VX-850's answer (the evidence, either way)
 
@@ -149,7 +149,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 **The three suggestions, one sentence each:**
 - **(a) event-driven waits — TAKEN** as (1): the waits suspend until the socket answers on its own thread, which is what removes the circular wait (P-A); the wall-clock receive bound stays only as the never-answers backstop.
 - **(b) bounds measured on the harness's own clock/seam (VX-353's) — TAKEN for the one belt that times the harness itself** as (2): the deadline's expiry is read on its own timer thread, on a queue the pool cannot starve; no other test measures the harness's time.
-- **(c) a serialized/isolated trait (VX-686's) — NOT TAKEN:** `.serialized` orders tests only within a suite, while the starvation came from ~126 suites (and, in a whole-package run, the core target) sharing one process's pool; serializing the family would still leave every other suite's CPU work in the queue and would slow the target, without removing the circular wait.
+- **(c) a serialized/isolated trait (VX-686's) — NOT TAKEN:** `.serialized` orders tests only within a suite, while the starvation came from ~126 suites sharing the MCP target's one process's pool (each test target is its own process — `VariorumMCPTests.xctest`; a whole-package run adds the core target's CPU load from beside it, never its pool); serializing the family would still leave every other suite's CPU work in the queue and would slow the target, without removing the circular wait.
 - **(d) load-scaled bounds — NOT TAKEN as scaling:** a larger bound only lengthens a circular wait (rawOpen's 30 s bound still read 0 bytes in the B4 window); (3) is not a scale but the harness's existing one bound, applied where hand-picked 5 s bounds had been left.
 
 ### PHASE 2 — the pins and their reverts
@@ -163,3 +163,46 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | **P-C** `anAnswerLaterThanAHandPickedBoundButInsideTheHarnesssIsHeard` — a thread peer on the harness's path answers `initialize` after 6 s; the harness bound shortened to 10 s | the one bound — `RawSocket` and the shared `namedClient` at once | **the pre-change tree 2 of 2** (`0ffe2c033`): `nil` at 5.05 s; **R-C** (`receiveSeconds` = 5): both arms red, exactly this pin | both heard at 6.04 s |
 
 Logs: `scratchpad/u1/pA-red-on-old*.log`, `pC-red-on-old-*.log`, `reverts/run-R-{A,B1-1,B1-2,B2-1,B2-2,C}.log`, `pins-abc-{1..4}.log`.
+
+### P4 — the counts (the final tree `be8ffc76a`; logs `scratchpad/u1/final/`)
+
+| Run | Condition | Result | Gate |
+|---|---|---|---|
+| The family alone (14 suites: the pins, TimeLimit, ReaderAfterClose, StopRoads, PreInitializeWindow, DiscoverProbe, SizeCap, SetupKeyServer, StopEndsConnectionGrants, NullIdentifierServer, Hygiene, CloseReasonServer, ShimCloseReason, ConnectionEnd) × 2 | idle | 74 / 14 passed, 13.0 s · 12.2 s | GREEN · GREEN |
+| The whole MCP target × 2 | idle (≈0.3–2 of 12 cores busy before) | 672 / 126 passed, 59.8 s · 60.0 s | GREEN (663 executed by name) × 2 |
+| The whole MCP target × 3 | 36 × `yes`, load avg 16 → 45 → 60 | 672 / 126 passed, 71.6 s · 74.7 s · 72.6 s | GREEN × 3 |
+| The whole package (`swift test`) × 1 | the same load, avg 50–54 | MCP 672 / 126 passed (73.7 s) · core 4,008 / 546 passed with 5 known issues (445 s — the pre-existing Castle `withKnownIssue` pins) · third 32 / 4 passed | GREEN — 4,670 executed, 0 failed |
+
+**Against the same conditions before:** the pre-fix tree, the whole MCP target at load 50: 5 family reds (C3); idle: 4 (C4). The tree with faces (1)+(2) only, under the same 36-process load: 3 of 3 runs red (`aQuitSaysNothing…` 3 of 3, ReaderAfterClose's premise 1, AcceptLoop's F-U1-1 1). A soak is evidence, never proof: these are counts, and the pins above are the proof.
+
+### Per-member dispositions
+
+| Member | Disposition |
+|---|---|
+| **VX-850** (canonical) — slowdown: test timing or real pre-initialize latency? (+ MCPPreInitializeWindowTests, MCPDiscoverProbeServerTests) | **ANSWERED: test timing** (Phase 1 — the door answers in single-digit ms at load 40 with the pool free; the reds are the harness's pool coupling; the ConcurrencyExtras 1.4.1 lever changes no runtime path). **FIXED** — the bare opening and the pipelined probe by faces (1)+(3), the pins P-A/P-C; both suites green in every final run |
+| **VX-477** — the MCP suites' wall-clock flakes under full-suite load (TimeLimit's 15 s; one sighting each SizeCap / SetupKeyServer / StarContext) | **FIXED for its MCP sightings** — TimeLimit's belt by face (2) (P-B), SizeCap's and SetupKeyServer's raw waits by (1)+(3) (P-A/P-C). **Its StarContextTests sighting is NOT this mechanism** — a core-target test in another process (another pool); returned to U3 / VX-625, which already owns it |
+| **VX-353** — the never-answers-initialize pin overruns 15 s under load | **FIXED** by face (2) — P-B (red under R-B1 and R-B2). Its "check the red-on-old meaning first": the belt's red-on-old was never the wall clock — on the pre-VX-132 harness the connect HUNG and the test never returned (the VX-132 record); "bounded by the limit, not by the run" is now read on the deadline's own clock, its meaning kept and the pool's time taken out |
+| **VX-607** — ReaderAfterClose's premise under full-parallel load | **FIXED** — the initialize wait off the pool (1) and on the harness's bound (3) (P-A, P-C) |
+| **VX-685** — the 15 s connect bound under concurrent targets (+ the folded ReaderAfterClose sighting) | **FIXED** — face (2) for the bound (P-B), (1)+(3) for the folded premise; the whole-package loaded run green |
+| **VX-686** — two socket-harness wall-clock tests under load 20–37 (TimeLimit, StopRoads' quit; the ReaderAfterClose third sighting) | **FIXED** — (2) for TimeLimit, (1)+(3) for the quit pin and ReaderAfterClose (StopRoads' `namedClient` was the last 5 s raw client O-7 left) |
+| **VX-722** — ReaderAfterClose under the full core suite ("evidence owed: a reproduction under load or a trace of the socket premise") | **FIXED** — the evidence: reproduced (C3, C4) and traced (the premise's wait held a pool thread its session needed, then read a hand-picked 5 s bound); (1)+(3) |
+| **VX-772** — StopRoads' quit-says-nothing under the full MCP suite | **FIXED** — (1)+(3): the raw client off the pool on the harness's bound; red 3 of 3 loaded on the (1)+(2)-only tree, green 3 of 3 loaded on the final |
+
+All eight close on ONE mechanism (the harness rides the test process's pool), with VX-477's StarContext sighting returned to VX-625 (distinct: another process). No member proved to need a product change.
+
+### Findings for the orchestrator (born-ticket candidates; none built)
+
+- **F-U1-1 (Tests & tooling · Low · Bug, seen once):** `MCPAcceptLoopServerTests.aFatalAcceptFailureStopsTheListenerAndSaysSo` — red once under load ("heard.value == 1", on the (1)+(2) tree; green in every final run). Traced by reading: the test waits `eventually { h.host.state != .running }` and then reads the door signal at once, but `MCPServerHost.listenerDied` flips `_state` under the host lock and only AFTERWARDS unlinks the socket, closes the listener and calls `onStateChanged` — on the accept thread, which load can deschedule in between (the test's next `!socketExists` read has the same race). A thread-ordering race on a signal, not the socket clock and not a family member; fix shape (test-side): wait for the signal and the removal (`eventually { heard.value == 1 }`, `eventually { !socketExists(...) }`).
+- **F-U1-2 (MCP · Low · Suspected — product, the post-initialize road):** `MCPSocketTransport.send` (the SDK's write path) is a BLOCKING `write` on a cooperative-pool thread, with no send timeout. Seen in the Phase 2 stall sample (`Server.handleRequest → MCPSocketTransport.send` holding a pool thread while the in-process SDK client, which drains by a 10 ms `Task.sleep` poll on the same pool, had not read). In the app the client is the shim — another process draining on its own thread — so a send costs microseconds; but a client that STOPS reading (a paused or wedged process) with an answer larger than the socket buffer would hold one app pool thread per such send until it reads, and the 16-session cap exceeds an 8-core Mac's pool width. Not reproduced, not built; the shape for its own ticket: the write on the transport's own thread (its reader's idiom) or under `SO_SNDTIMEO`. Out of this unit (product code, MCPSpec's door) — named so the orchestrator can rule.
+
+### Self-assessment (how I'd attack this diff — for the cold reviewer)
+
+- **(i) The classification is by reading.** Every blocking call in the MCP test target was inventoried (`grep` over `readFirstLine`, `read(`, `.wait(`, `usleep`, `Thread.sleep`, `accept(`) and each site sorted: a wait whose answer depends on the server under test → off the pool on the harness's bound; a read on a socket pair or pipe the test fed itself, a thread-only fake peer, or bytes already written → left inline. A future test that reads a server's socket inline would re-open the class; nothing structural forbids it (the compiler does forbid the semaphore form in an async body).
+- **(ii) One thread per wait.** `offPool` spawns a `Thread` per wait (P-A: 16 at once). Cheap at the target's scale; a long-lived wait parks only its own thread.
+- **(iii) Unbounded waits stay unbounded.** The shim pumps' pipe reads (`MCPShimTests`, `MCPShimAppClosedLineTests`, `MCPCloseReasonTests.pumped`) never had a receive bound; off the pool, a server that never answered would now park the test task instead of a pool thread — the same hang it always was, now without starving anyone else.
+- **(iv) Failing cases are slower.** A raw wait that times out now waits the harness's 30 s (not 5 s) before it fails — only when the server truly never answers; every SDK act already did.
+- **(v) P-B stalls its own run on purpose** — every pool thread held 0.8 s, once per MCP-target run; every raw bound is now ≥ the harness's 30 s, and its premise is informational (asserted only through the deadline's own reading).
+- **(vi) `firedAfter` counts from `run`'s arming**, not from the test's own start (a connect's `onDrained` actor hop precedes it): the belt bounds the ACT, which is what VX-132's deadline bounds.
+- **(vii) The timer queue is serial** — every deadline's expiry block runs on it in turn; each is O(1) (resume, a `Task` spawn, a cancel).
+- **(viii) Task-locals are read before every hop** (`HarnessWait.receiveSeconds` in the task; `RawSocket`'s default argument at its call site; the stop-window probe's bound captured in the test body) — a plain thread sees no task-local.
+- **(ix) `git diff -- Sources` is empty;** every pin's subject and every other pin's bytes are unchanged — the converted call sites only gained `await` (and three sync tests became `async`).
