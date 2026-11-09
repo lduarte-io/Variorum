@@ -31,6 +31,7 @@ Your test suite had flaky tests — tests that fail sometimes for reasons that h
 - Ladder: two rounds, 0 blockers; 1 major (a test bound that would have mis-blamed the fix) fixed and re-verified.
 - The soak on the final merged tree: M1 whole-Mac 6,207/0 · c1 core-under-load 4,018/0 · c2 4,018/0 · mcp 691/0 · M2 6,222 with the one VX-953 red (green alone) · M3 6,222/0.
 - Crash watch across every leg: zero crash reports, zero restarts, the DiagnosticReports folder empty all night — the coordinator's independent reads agreed after every Mac leg.
+- Merge: PR #239, merge commit `598866e4a`. Canon-size at the close: 139,814 of 150,000 (headroom 10,186; no loaded-canon line changed by this run).
 
 ## Reference (ids, for when you want the trail)
 

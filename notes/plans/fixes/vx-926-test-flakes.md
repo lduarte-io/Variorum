@@ -1,6 +1,6 @@
 # VX-926 — Run: the test flakes (the stage's interrupters)
 
-**STATUS: CLOSED 2026-11-09 — PR #239 (merge commit, the wave's second merger; the merge SHA in the trailing on-main commit).** Kicked off 2026-11-08 (/architect-phase, the Pro; orchestrator variorum-91 → the post-compaction continuation "vx-926").
+**STATUS: CLOSED 2026-11-09 — PR #239, merge `598866e4a` (merge commit, the wave's second merger).** Kicked off 2026-11-08 (/architect-phase, the Pro; orchestrator variorum-91 → the post-compaction continuation "vx-926").
 Ticket: VX-926 · Branch: `vx-926-test-flakes` · Worktree: `~/dev/variorum-vx-926` · PR: `VX-926: …` (merge commit, never squash).
 Coordinator: nov7. **Stage posture: headless building NOW; every stage window (the soaks, the gate) waits until vx-914 MERGES — her word: "I just think it's good to try to take care of this once that's in when you're alone on the stage." A flake run's stage evidence is long windows split at the targets (the coordinator's sizing note).**
 
