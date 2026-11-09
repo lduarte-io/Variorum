@@ -155,25 +155,50 @@ struct VX775ActivityLogFailureDoorTests {
                 == "claude-code's change landed, but the activity log couldn't record it.")
     }
 
-    /// The face: the receipt lands first (⌥⌘O's last change kept — the write is
-    /// in her store), then the failure takes the seam as a REFUSAL — the toast,
-    /// under her quiet receipt style (and under off).
-    @Test func theFailureIsARefusalToastAfterTheReceiptLanded() async throws {
+    /// **F1 (the VX-913 ladder round 1 — the reviewer's final call, pin (ii); no
+    /// red-on-old owed: it hardens this run's new ordering).** The face, through
+    /// the door's ONE hop for a failing call (`landWireCall`): its receipts take
+    /// today's road first (the run's one line, ⌥⌘O's last change), then the
+    /// failure takes the seam as a REFUSAL — and holds it, under every receipt
+    /// style: quiet (a receipt would clear the toast), toast (a receipt would
+    /// replace it) and off. A list call's receipts (one run key) and a no-op's
+    /// none land the same way.
+    @Test func aFailingCallsReceiptsThenItsRefusalLandInOneHopUnderEveryStyle() async throws {
         try await withDoorWorld { (session: AppSession, _: AppDatabase) async throws in
             let door = MCPDoor(serverAllowed: false)
             door.attach(session: session)
             defer { door.detach() }
-            for style in [ReceiptStyle.quiet, .off] {
+            let shown = MCPShowTarget.note(noteID: "n1", blockID: nil, select: nil)
+            for style in [ReceiptStyle.quiet, .toast, .off] {
                 session.status.receiptStyle = style
-                door.landReceipt(MCPWriteReceipt(
-                    clientName: "claude-code", act: .comment, targetID: "n1", targetTitle: "ch 1",
-                    show: .note(noteID: "n1", blockID: nil, select: nil)))
-                door.landActivityLogFailure(fullDisk)
-                #expect(session.status.current?.kind == .refusal, "\(style): always the toast")
-                #expect(session.status.current?.text == MCPReceiptCopy.activityLogFailed(fullDisk))
-                #expect(door.lastShow == .note(noteID: "n1", blockID: nil, select: nil),
-                        "\(style): the landed change is still ⌥⌘O's")
+                door.landWireCall([MCPWriteReceipt(
+                    clientName: "claude-code", act: .comment, targetID: "n1", targetTitle: "ch 1", show: shown)],
+                    failing: fullDisk)
+                #expect(session.status.current?.kind == .refusal, "\(style): the failure holds the toast")
+                #expect(session.status.current?.text == MCPReceiptCopy.activityLogFailed(fullDisk), "\(style)")
+                #expect(session.status.quietLine == nil, "\(style): one message — the refusal, not the receipt")
+                #expect(door.lastShow == shown, "\(style): the landed change is behind ⌥⌘O")
             }
+
+            // A list call: two receipts on one run key, then the counted failure.
+            session.status.receiptStyle = .quiet
+            let listed = (1...2).map { index -> MCPWriteReceipt in
+                var receipt = MCPWriteReceipt(
+                    clientName: "claude-code", act: .tag, targetID: "n\(index + 1)", targetTitle: "ch \(index + 1)",
+                    detail: "listed", show: .note(noteID: "n\(index + 1)", blockID: nil, select: nil))
+                receipt.runKey = "apply_tag·run"
+                return receipt
+            }
+            let counted = MCPActivityLogFailure(
+                clientName: "claude-code", tool: "apply_tag", unrecorded: 2, storeWords: "SQLite error 13: database or disk is full")
+            door.landWireCall(listed, failing: counted)
+            #expect(session.status.current?.text == MCPReceiptCopy.activityLogFailed(counted))
+            #expect(door.lastShow == .note(noteID: "n3", blockID: nil, select: nil), "the run's newest landing")
+
+            // A no-op landing: no receipt — the refusal alone; ⌥⌘O keeps what it had.
+            door.landWireCall([], failing: fullDisk)
+            #expect(session.status.current?.text == MCPReceiptCopy.activityLogFailed(fullDisk))
+            #expect(door.lastShow == .note(noteID: "n3", blockID: nil, select: nil))
         }
     }
 
