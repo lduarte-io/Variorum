@@ -19,8 +19,18 @@
 //  and its Books section; a `#tag` alone gets the catalog's narrowed listing —
 //  the tagged notes, the tagged blocks under Blocks, the associated books.
 //
-//  The verdict is recorded in `notes/plans/fixes/vx-915-recents-sweep.md`,
-//  BATCH 5 — LIVE STATUS.
+//  THE VERDICT (2026-11-09): HOLLOW. Green on the tree the ticket was filed
+//  against — the band and the Library agree for every punctuation-only shape
+//  here, under All and every facet — so nothing was fixed (the hallucination
+//  guard). The oracle is LIVE: against a temporary facet-blind band (every
+//  facet answering the whole question, the pre-VX-734 band) the same pins go
+//  red with 21 issues, and the punctuation cases fail in exactly the
+//  observation's shape ("1 book" in the band under Notes and Blocks over a
+//  Library that shows nothing). These pins stay as the hollow record and as
+//  the counts law's guard for such questions. The record, and the two real
+//  neighbours the trace found (a dash beside a tag answers LESS than the tag
+//  alone; a symbol word beside real words empties the answer), are in
+//  `notes/plans/fixes/vx-915-recents-sweep.md`, BATCH 5 — LIVE STATUS.
 //
 
 import Foundation
