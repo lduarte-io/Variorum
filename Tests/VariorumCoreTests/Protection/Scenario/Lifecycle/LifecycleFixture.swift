@@ -855,7 +855,7 @@ enum Lifecycle {
             road: "this Mac turns sync on first; a second device makes its own library, backs it up, and joins typing the account's passphrase; the second device enters Castle, this Mac lags, then follows typing one secret; this Mac leaves Castle and the second device follows out quietly; the second device leaves the account and signs back in",
             rows: [
                 LRow(term: #"Turning sync on first"#, content: .text(#"Your library's passphrase and twelve words become the account's. Nothing is replaced [7]."#)),
-                LRow(term: #"Joining from another device"#, content: .text(#"You type the account's passphrase or words once. Your library's own pair is <b>replaced</b> by the account's, and the app tells you so and shows the words: write them down; the old ones still open backups you made before today (same key, old locks) [7, 14]. For anyone who never wrote their words down, this is the reminder, while they still have access."#)),
+                LRow(term: #"Joining from another device"#, content: .text(#"You type the account's passphrase or words once. Your library's own pair is <b>replaced</b> by the account's, and the app tells you so and shows the words: write them down; the old ones still open backups made with them (same key, old locks) [7, 14]. For anyone who never wrote their words down, this is the reminder, while they still have access."#)),
                 LRow(term: #"Castle, account-wide"#, content: .text(#"When one device enters Castle, each other device types a secret once at its next sync to follow; until then it reads only what it already has, through its own quiet road [10]. The account keeps every sync key it has had, so a device joining later reads everything [15]."#)),
                 LRow(term: #"Leaving the account"#, content: .text(#"Changes none of your keys or secrets; your library just stops syncing. The server keeps what you pushed. Signing back in is a join [16]."#)),
             ],
@@ -874,7 +874,7 @@ enum Lifecycle {
                     status: .notAModelFact("the face (VX-308) — P-VX378-U2-3 (a), binding for U3: the words are shown when they were typed")),
                 LFactEntry(
                     fact: .oldWordsStillOpenOlderBackups,
-                    quote: "the old ones still open backups you made before today (same key, old locks) [7, 14].", rules: [5, 7]),
+                    quote: "the old ones still open backups made with them (same key, old locks) [7, 14].", rules: [5, 7]),
                 LFactEntry(
                     fact: .notTypedHere,
                     quote: "For anyone who never wrote their words down, this is the reminder, while they still have access.", rules: [14],

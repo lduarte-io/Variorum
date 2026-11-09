@@ -1795,7 +1795,7 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
 | 0 | Preflight + this record | DONE (this commit) |
 | 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | DONE — 1a the behavior pins on the PRE-FIX tree (`9118b0355` — the red-on-old SHA): core **3 RED exactly as named / 4 green**; 1b the fix + the compile-red pins (`80979d6f0`): core 16/16 green; R-443a…d each bit exactly its named set (this commit records them); the protection set 551/123 green; Mac `build-for-testing` green; Mac runs PENDING (stage — R-443M1/M2 named) |
 | 2 | VX-152 — the lock's reentrancy, investigate-first | DONE (this commit) — traced: CLOSED BEFORE THIS RUN by VX-445's one-act seam (dismissed as hollow; no fix); one regression guard pin (Mac, compiled; its run + revert R-152 PENDING the stage); the ticket text below for the orchestrator |
-| 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | NOT STARTED |
+| 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | DONE (this commit) — the five points + the page regenerated from the fixture (one sentence moved) + the byte pin's justified edit; `swift test --filter Lifecycle` 14/5 green; Mac `build-for-testing` green; the Mac pins' runs + R-545 PENDING the stage |
 | 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | NOT STARTED |
 
 **VX-443 — the traced facts, before code (what the file IS, from the deleted code):**
@@ -1987,6 +1987,40 @@ sides of this run, live by a named revert); nothing ballooned, nothing touches V
   pre-VX-445 lock (today's road, deleted at VX-329). Regression guard added:
   `RoadLockRouteTests.sleepAndScreenLockTogetherTearDownOnceAndLandOneLobby` (live by reverting the hold — two
   teardowns). Recommend: close as already fixed."
+
+**VX-545 — rule 7's ratified sentence (her ratification of VX-529's drafted clause, QUESTIONS #241), the five touch
+points in ONE commit (this one):**
+1. *`notes/CastleRules.md`* — rule 7's italic adoption sentence now ends "*…the old ones still open backups made with
+   them*" (was "…you made before today" — rule 5's floor in rule 7's voice); the status banner's "RATIFIED but not yet
+   written here" sentence becomes the landing's: "Her ratified rule-7 change (VX-529's drafted clause, QUESTIONS #241)
+   is written here at VX-545 (the VX-849 run, 2026-11-09): … landed together with the app's sentence, because a test pins
+   the app's words to this rule's text." Nothing else in the rules moved.
+2. *`App/Variorum/Shared/Protection/ProtectionWords.swift`* — `joinWordsSentence` (the shown-words arm both platforms
+   say): "Your library's twelve words are now your account's twelve words; here they are; the old ones still open backups
+   made with them."
+3. *`App/Variorum/Shared/Protection/RoadAccountModel.swift`* — `RoadJoinWordsMoment`'s doc comment quotes the new ending.
+4. *`Sources/VariorumCore/Protection/Executor/PlanRunner.swift`* — `ActNotice.wordsReplacedByAccount`'s doc comment
+   likewise.
+5. *`Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/LifecycleFixture.swift`* — the stage's row prose AND the
+   fact entry's quote (one sentence, two places: the quote must stay a substring of the row) — then
+   **`notes/plans/vx-266/castle-lifecycle.html` REGENERATED from the fixture, never hand-edited**:
+   `CASTLE_LIFECYCLE_PAGE_OUT=<scratch>/castle-lifecycle.rendered.html swift test --filter LifecyclePageTests` (red, as
+   the drift pin must be, writing the render) → the render differs from the committed page in EXACTLY line 125, that one
+   sentence (`diff | wc -l` = 4) → copied over → `swift test --filter Lifecycle` → `✔ 14 tests in 5 suites passed`.
+- *The byte pin, MOVED BY JUSTIFIED EDIT* (`RoadAccountWordsTests.rule7sSentencesAreHersVerbatim`): its relational line
+  (the app's sentence is the rule's italic) could not tell a rule and an arm that changed together, so it gains the
+  ratified words byte-for-byte and the superseded ending's absence from both. RED on the pre-fix tree by its literal (the
+  app said "…before today"); its run is the stage's. The relational twins `RoadJoinFollowWordsTests
+  .herSentencesTheseFacesSayAreHersVerbatim` and the phone's `MobileProtectionScreenTests` (the label is the constant)
+  follow the constant unchanged.
+- *The 13u label fence holds:* the sentence is protection copy, not commit vocabulary — it carries no "savepoint"
+  (`DeadVocabularyTests` / `CommitVocabularyTests` fence that word); no other sentence was reworded (`git diff` touches
+  the one constant, two doc comments, the fixture's one sentence, the rule and its banner).
+- *Builds:* Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`; `swift test --filter Lifecycle` 14/5 green.
+- *THE NAMED REVERT (the stage's, named here BEFORE it runs): R-545* `ProtectionWords.joinWordsSentence`'s second line
+  back to `"old ones still open backups you made before today."` ⇒ RED `rule7sSentencesAreHersVerbatim` (its relational
+  line — the rule no longer says it — and both new lines) and
+  `RoadJoinFollowWordsTests.herSentencesTheseFacesSayAreHersVerbatim` (its rule-7 line).
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 

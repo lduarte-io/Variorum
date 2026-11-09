@@ -18,10 +18,10 @@ the lifecycle page regenerates from its fixture.) Amended at her cutover sitting
 retirement — a landed account act — by rule 7's pair adoption, never as a recording (a passphrase join adopts words it
 never shows; built at VX-511). Amended at her answers to VX-529's bundle (2026-10-25, "I agree" on both drafted clauses —
 QUESTIONS #241, the record `notes/plans/fixes/vx-529-pair-catchup.md`): rule 3 names a synced library whose account
-passphrase was never typed here, told in the same card until it is (built at VX-538). Her rule-7 change is RATIFIED but
-not yet written here: rule 7's adoption sentence will end "the old ones still open backups made with them" (rule 5's
-floor, in place of "before today"), and it lands at VX-545 together with the app's sentence, because a test pins the
-app's words to this rule's text.**
+passphrase was never typed here, told in the same card until it is (built at VX-538). Her ratified rule-7 change
+(VX-529's drafted clause, QUESTIONS #241) is written here at VX-545 (the VX-849 run, 2026-11-09): rule 7's adoption
+sentence ends "the old ones still open backups made with them" (rule 5's floor, in place of "before today"), landed
+together with the app's sentence, because a test pins the app's words to this rule's text.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -81,7 +81,7 @@ open it. Everything else is a convenience.**
 7. **A device holds one pair of secrets at a time.** Alone, the library's own. Synced, the account's: the first device
    to turn on sync hands its library's pair up to become the account's; a device that joins an account later adopts the
    account's pair, and is told plainly — *your library's twelve words are now your account's twelve words; here they
-   are; the old ones still open backups you made before today*. Joining re-locks the key under the new pair; it never
+   are; the old ones still open backups made with them*. Joining re-locks the key under the new pair; it never
    changes the key. The key doors change the library's and the account's locks together. Make-this-my-library (rule 17)
    keeps your current pair. Fresh words appear only at a library's own first look (rule 2) or its new-words door (rule 6);
    joining shows the account's.

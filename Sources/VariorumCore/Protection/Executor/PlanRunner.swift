@@ -30,7 +30,7 @@ public enum ActNotice: Equatable, Sendable {
     case scheduledExportTurnedOff
     /// RULE 7: joining an account replaced the library's twelve words with the
     /// account's — "your library's twelve words are now your account's twelve
-    /// words … the old ones still open backups you made before today". Not said
+    /// words … the old ones still open backups made with them". Not said
     /// when the words typed at the join were already the library's.
     case wordsReplacedByAccount
     /// RULE 12: the account left Castle elsewhere and this device followed it
