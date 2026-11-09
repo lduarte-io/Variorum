@@ -1,12 +1,12 @@
 # VX-915 — the recents sweep: your morning handoff
 
-**STATUS: DRAFT IN PROGRESS (the overnight run is still moving — gate36b, ladder round 2 and the closing walk fill the placeholders marked ⏳). Final at closeout.**
+**STATUS: FINAL (closed 2026-11-09 — PR #240, merge commit 961790b13; everything below is settled).**
 
 ---
 
 ## What happened tonight, in plain words
 
-You asked for the recents sweep to run overnight: fourteen small follow-ups from the November waves, built, reviewed, tested and merged — with the release BUILT and ready, but **nothing published**. That is what happened (⏳ merge pending). Everything that needed your judgment was held and bundled rather than decided; the list of those is below under "Decisions waiting on you."
+You asked for the recents sweep to run overnight: fourteen small follow-ups from the November waves, built, reviewed, tested and merged — with the release BUILT and ready, but **nothing published**. That is what happened. Everything that needed your judgment was held and bundled rather than decided; the list of those is below under "Decisions waiting on you."
 
 Here is each item, in plain words:
 
@@ -33,19 +33,19 @@ Here is each item, in plain words:
 
 ---
 
-## Your checklist (⏳ finalized at closeout)
+## Your checklist
 
 - [ ] Read the QUESTIONS bundle (**#273** — the P-915 family) and rule the open choices (the biggest: the unlink rung P-915-B6-1; the ai_marks carry-over P-915-L1-1; the Compare card threshold P-915-B2-1).
-- [ ] ⏳ Wording passes: the AI-marks switch's words (F-934-B) · the quicknote landing receipts · the unlink receipt family · N-927's "as kept" grammar · the lesson-3 clause · the recovery recipe's order note (F-10).
-- [ ] ⏳ The real-store guide RE-SEED (grown again this run: "getting around", "owned, finished, sealed", "Standard and Castle", lesson 3's clause — yours, behind A1, via Help ▸ Restore Field Guide…).
+- [ ] Wording passes: the AI-marks switch's words (F-934-B) · the quicknote landing receipts · the unlink receipt family · N-927's "as kept" grammar · the lesson-3 clause · the recovery recipe's order note (F-10).
+- [ ] The real-store guide RE-SEED (grown again this run: "getting around", "owned, finished, sealed", "Standard and Castle", lesson 3's clause — yours, behind A1, via Help ▸ Restore Field Guide…).
 - [ ] Release 1.4 at your word (vx-849, the wave's last merger, runs the release prep at the coordinator's GO — the build will be waiting at release.sh's HANDOFF stop; VX-852's new pin-check lines appear in its transcript, their first exercise).
-- [ ] ⏳ The filed-tickets pass (the checkbox list at the bottom).
+- [ ] The filed-tickets pass (the checkbox list at the bottom).
 
 ## Decisions waiting on you (each explained where it's bundled)
 
 The QUESTIONS bundle entry (**#273**) carries the P-915 family with one-line plain explanations per item: P-915-B2-1 (Compare's card threshold), P-915-B2-2 (the comments door's reach), P-915-B3-1 (the pad's wing word — seat, face, words), P-915-B4-1/-2 (where the recovery recipe sits; where its words live), P-915-B6-1 (the unlink rung — OPEN, the agent's ask not your words), P-915-B6-2/3/4 (the saved-version refusal words; already-gone; still_versions), P-915-L1-1 (what a stored ownership_badges="0" means now), N-915-B4-1 (the restart sentence promises slightly more than the mend does), N-927's words, F-934-A/B, F-10 (the recipe's step order — true as built; a stronger order exists), F-12 (the not-shared noun for an edge id), plus the receipt-words family from the ladder fixes.
 
-## Evidence and state (⏳ final numbers at closeout)
+## Evidence and state
 
 - Branch `vx-915-recents-sweep`, worktree `~/dev/variorum-vx-915`; PR **#240**; merge commit **961790b13**; **canon-size 140,013 of 150,000 (headroom 9,987 — no crossing)**.
 - The run record (everything, verbatim): `notes/plans/fixes/vx-915-recents-sweep.md` — its FOR A LATER READER section is the settled summary.
@@ -53,7 +53,7 @@ The QUESTIONS bundle entry (**#273**) carries the P-915 family with one-line pla
 - The ladder: round 1 (0 B / 0 M / 4 MINOR / 8 NIT) + fixes verified; round 2 (0 B / 0 M / 2 MINOR / 5 NIT) — CLOSED, no round 3 earned.
 - The closing walk: ALL GREEN (W-841 whole in both voices · W-928 both arms · W-869's S1/S2 · VX-943's live wire round end-to-end; the record's THE CLOSING WALK RAN section).
 
-## Filed tickets (⏳ re-stated as the session's last chat message, by priority)
+## Filed tickets (also the session's last chat message, by priority)
 
 - [ ] **VX-955** (Medium · Bug · Search) — a symbol word beside real words empties the whole search answer.
 - [ ] **VX-945** (Low · Debt · Tests) — the unconditional-forget DEBUG-oracle sweep (gate12's rig class, other oracles).
