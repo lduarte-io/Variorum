@@ -165,7 +165,7 @@ beside it.**
 |---|---|---|
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
-| 2 | Batch 2 — VX-544 (the offline unlock retry) | NOT STARTED |
+| 2 | Batch 2 — VX-544 (the offline unlock retry) | IN-PROGRESS — the Opus implementer opened 2026-11-09; the BATCH 2 RECORD below carries the per-piece status |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
@@ -562,3 +562,39 @@ known VX-850 load-flake class — vx-926's territory; the closing run compares a
 The two batch-1 convergence pins passing on both sides is BY DESIGN (they pin the composition with the standing
 S5 machinery), recorded so nobody reads them as a hollow red-on-old — the batch's red-on-old lives in the core
 rescue pins (revert-proven headless) and the named Mac reverts (leg B).
+
+### BATCH 2 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+Debug-app launch, no store or server contact (override 7 — every Mac and simulator run is the orchestrator's, through
+nov7's queue; the suites are listed at the end). Her drill — the two-Mac test's steps 8–9 on her Air — is OWED, never
+claimed (override 8; LIVE STATUS row 9). Nothing under `Sources/VariorumCore/Sync/` or `Protection/`'s headless core.
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole (STATUS, KICKOFF,
+STAGE & COORDINATION, CONSTITUTION, ENVIRONMENT TRAPS, the batch 1 record + adjudication, this batch's nine overrides);
+`notes/plans/fixes/vx-544-offline-typed-unlock.md` whole (D-544, PREFLIGHT FACTS, THE BRIEF) and VX-500's D-544 section;
+`notes/CastleRules.md` WHOLE; `notes/SurfaceContracts.md` §"Doors to the outside" (the protection bullet — VX-501's
+typed-unlock load, VX-486/487's locked row); `notes/SyncSpec.md` §2–§6 (§3's keys-absent refusal grammar);
+`notes/SessionResiliencyProtocol.md` §implementer; `.claude/agents/opus-implementer.md`.
+
+**PREFLIGHT FACTS re-verified at `93c2e3149`:** `ProtectionOpenRoad.swift` — `TypedUnlockSecret` :624 (redacted),
+`loadSyncKeysAfterTypedUnlock` :654 (its exits: not writing/unbound :658, not Castle :659, keys already held :661, signed
+out/another account :667, the vault read's `.read(nil)` :679 / `.failed` :682 / `.timedOut` :686, a secret not the vault's
+:702, a master not the vault's :707, a moved account :711, the hold :715), `openTyped`'s call :395 and the vault road's
+catch-up's call :529; `ProtectionRoadLock.dropSessionMemory` :56 (callers: the lock `AppBootstrap.swift:1456`, Make this my
+library's outgoing session `ProtectionCopyDoors.swift:538`); `SyncSession.triggerSync` now :214 and `flush` :280 (batch 1
+moved them; `roundNow` :243; the `beforeRound` hook :211, batch 1's); the one wired closure `AppServices.swift:220`
+(`#if os(macOS)`); NO `NWPathMonitor` / `import Network` anywhere in `App/` or `Sources/`; the locked line
+`SyncStatusViews.swift:767` untouched. **Fact the old plan did not have:** the PHONE reaches the shared typed load too
+(VM-8 unit 1 — `MobileTypedUnlockSyncKeysTests`), so D-544's "no typed-unlock pending on the phone's road today" is stale:
+the shared load's retention runs on the phone; only its retry stays unwired (override 5).
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Preflight + this record | DONE (this commit) |
+| 1 | The retained pending load (`PendingSyncKeyLoad` on `ProtectionRoadSession`; set only on the read's failure/timeout; every let-go road) + pins | NOT STARTED |
+| 2 | The retry (`ProtectionOpenRoad.retryPendingSyncKeyLoad`, single-flight) + pins | NOT STARTED |
+| 3a | The occasion: the Mac's retry inside the one wired `beforeRound` closure, gated; the bootstrap's roads; sign-out's drop; P-849-2 (the phone's flush occasion) + pins | NOT STARTED |
+| 3b | The reachability trigger (`NWPathMonitor` in the shared `SyncSession`) + pins | NOT STARTED |
+| 4 | The words (no new sentence) | NOT STARTED |
+| 5 | Close: builds, headless runs, self-assessment, the stage suite list | NOT STARTED |
