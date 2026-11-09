@@ -88,7 +88,9 @@ struct BookDeleteAndDuplicateTests {
             .alternateLabel == nil)
 
         // The receipts.
-        #expect(BookStateCopy.deletedBookOnly("Mine", released: 2)
+        // VX-45 (A JUSTIFIED EDIT — the receipt reads the act's split now;
+        // the all-unarchived sentence byte-for-byte the shipped one).
+        #expect(BookStateCopy.deletedBookOnly("Mine", released: .init(unarchived: 2, archived: 0))
                 == "Deleted \u{201C}Mine\u{201D} \u{2014} it\u{2019}s in the Trash; its 2 notes are "
                 + "in the Pool now.")
         #expect(BookStateCopy.deletedWithNotes("Mine", notes: 2).hasPrefix(
@@ -165,7 +167,11 @@ struct BookDeleteAndDuplicateTests {
             #expect(try await isLive(db, a.id))
             #expect(try await db.read { try Queries.notePoolListing($0, window: 10) }.loose
                 .map(\.postID) == [a.id], "its note went back to the Pool")
-            #expect(session.status.spoken?.text == BookStateCopy.deletedBookOnly("Mine", released: 1))
+            // VX-45 (A JUSTIFIED EDIT — the split, same words).
+            #expect(session.status.spoken?.text
+                    == BookStateCopy.deletedBookOnly("Mine", released: .init(unarchived: 1, archived: 0)))
+            #expect(session.status.spoken?.text
+                    == "Deleted \u{201C}Mine\u{201D} \u{2014} it\u{2019}s in the Trash; its 1 note is in the Pool now.")
         }
     }
 

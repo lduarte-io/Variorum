@@ -251,18 +251,26 @@ struct ContextBar: View {
         }
         .buttonStyle(.plain)
         .disabled(!bookEnabled)
-        .help(WorkspaceNaming.ascentHelp(topBook: books.first?.name, count: books.count))
+        .help(WorkspaceNaming.ascentHelp(
+            topBook: books.first?.name, bookCount: memberBookCount, gatheringCount: gatheringCount))
         // 13s-b U2: step 9's climb, and step 10's way back up.
         .tourAnchor(.contextBarBook, cornerRadius: 5)
         .popover(isPresented: $listingBooks, arrowEdge: .bottom) { bookList }
     }
+
+    /// VX-667: the icon's places BY KIND (the membership chip's own split —
+    /// `MembershipChip`'s `kind == .book` / `.gathering`), so its help and its
+    /// list's headline never call a gathering a book.
+    private var memberBookCount: Int { books.filter { $0.kind == .book }.count }
+    private var gatheringCount: Int { books.filter { $0.kind == .gathering }.count }
 
     /// The dropdown — the same rows the membership chip offers, minus its
     /// editing doors: this is a navigation door, and adding/removing books
     /// stays where it has always been (the masthead's chip).
     private var bookList: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(WorkspaceNaming.ascentListHeader(count: books.count))
+            Text(WorkspaceNaming.ascentListHeader(
+                bookCount: memberBookCount, gatheringCount: gatheringCount))
                 .font(.callout.weight(.semibold))
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)

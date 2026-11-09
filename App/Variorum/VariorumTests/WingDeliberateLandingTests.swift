@@ -23,6 +23,13 @@
 //  the other switches (New Wing…, Delete Wing, revalidation, Compare's go-to,
 //  MCP) never land.
 //
+//  VX-870 (the VX-914 run, batch 4 — her word: *"it would be nice if clicking
+//  it in library didn't move you either"*): ONE door is carved out — the
+//  LIBRARY masthead's cycling word switches in place (said, never landed);
+//  the Bookcase masthead's cycle, the ▾ list, ⌘L and ⌘1–⌘9 still land. The
+//  carve-out's arms are named below (an Improvement: they pin the new
+//  contract; the Library's press called the landing `cycle()` before).
+//
 //  RED ON OLD: on the pre-fix tree there is no landing at all — the revert
 //  recipe (R-B2, the record) removes the one `landInBookcase()` call in
 //  `WingsModel.goTo`, and every "lands" expectation here goes red while the
@@ -103,6 +110,11 @@ struct WingDeliberateLandingTests {
 
     /// The masthead word's cycle — the fourth door — lands too (Q-B2 (a): no
     /// door carved out; the re-aim cost is recorded for her morning).
+    /// VX-870 (the VX-914 run, batch 4 — A JUSTIFIED EDIT, the carve-out named):
+    /// this is the BOOKCASE masthead's cycle now — it still lands, where she
+    /// already stands. The LIBRARY masthead's cycle is the one door carved out
+    /// (`theLibraryMastheadCycleSwitchesInPlace`, below). Every assertion kept;
+    /// the host's dispatch added.
     @Test func theMastheadCycleLands() async throws {
         try await withWingWorld { session, wings, router in
             let studio = try session.operations.createWing(name: "studio")
@@ -110,7 +122,68 @@ struct WingDeliberateLandingTests {
             wings.cycle()
             #expect(session.wing.currentID == studio.id, "the next wing")
             #expect(router.pendingSelection == .shelf, "the cycle lands on the Bookcase")
+
+            router.pendingSelection = nil
+            WingSwitcherMenu.cycle(wings, from: .bookcase)
+            #expect(session.wing.currentID == "", "the Bookcase masthead's press: the next wing (wraps to Home)")
+            #expect(router.pendingSelection == .shelf, "…and it lands, as VX-833 rules")
         }
+    }
+
+    /// **VX-870 — THE CARVE-OUT** (her word at the VX-828 bundle sitting, Q-B2:
+    /// *"it would be nice if clicking it in library didn't move you either"*):
+    /// the LIBRARY masthead's cycling word switches the wing and says so, and
+    /// asks for NO landing — she stays in the Library, which re-scopes under
+    /// her. Then every other deliberate door still lands, in the same window:
+    /// the ▾ list, ⌘L's commit and the ⌘digit chord.
+    @Test func theLibraryMastheadCycleSwitchesInPlace() async throws {
+        try await withWingWorld { session, wings, router in
+            let studio = try session.operations.createWing(name: "studio")
+            let letters = try session.operations.createWing(name: "letters")
+            await wings.load()
+
+            WingSwitcherMenu.cycle(wings, from: .library)
+            let first = session.wing.currentID
+            #expect(first == wings.switcherRows[1].id, "the next wing after Home")
+            #expect(session.status.spoken?.text == "Now in \u{201C}\(wings.name(of: first))\u{201D}.",
+                    "said — a cycle is blind until it is said")
+            #expect(router.pendingSelection == nil, "no landing: she stays in the Library")
+
+            wings.cycleInPlace()
+            #expect(session.wing.currentID == wings.switcherRows[2].id, "clicking again keeps cycling, in place")
+            #expect(router.pendingSelection == nil)
+            #expect(Set([first, session.wing.currentID]) == [studio.id, letters.id])
+
+            // Every OTHER deliberate door still lands on the wing's Bookcase.
+            wings.goTo("", saying: false)
+            #expect(router.pendingSelection == .shelf, "the ▾ list's pick lands")
+            router.pendingSelection = nil
+            #expect(WingSwitcherModel(wings: wings).apply(.commit(studio.id)))
+            #expect(router.pendingSelection == .shelf, "⌘L's commit lands")
+            router.pendingSelection = nil
+            #expect(wings.answer(.goTo(letters.id)))
+            #expect(router.pendingSelection == .shelf, "the ⌘digit chord lands")
+        }
+    }
+
+    /// The hosts by source: the Library hands its masthead `.library`, the
+    /// Bookcase hands nothing (the default — VX-833's road), and the word's
+    /// press goes through the one dispatch.
+    @Test func theLibraryHandsItsMastheadItsHostAndTheWordDispatchesByIt() throws {
+        let views = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Variorum")
+        func code(_ path: String) throws -> String {
+            try String(contentsOf: views.appendingPathComponent(path), encoding: .utf8)
+        }
+        #expect(try code("Features/Library/LibraryCatalogView.swift")
+            .contains("WingSwitcherMenu(tokens: tokens, wings: wings, host: .library)"))
+        let shelf = try code("Features/Shelf/ShelfView.swift")
+        #expect(shelf.contains("WingSwitcherMenu(tokens: tokens, wings: wings)\n"), "the Bookcase keeps the default")
+        let menu = try code("Core/Views/WingSwitcherMenu.swift")
+        #expect(menu.contains("Button {\n                    Self.cycle(wings, from: host)\n"),
+                "the word's press goes through the one dispatch")
+        #expect(menu.contains("var host: Host = .bookcase"), "the default host is the Bookcase")
     }
 
     /// ⌘L's sheet: a commit — the CURRENT wing's included (P-828-1 (ii)(a)) —

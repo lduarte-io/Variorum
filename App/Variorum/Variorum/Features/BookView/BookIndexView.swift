@@ -258,13 +258,13 @@ nonisolated struct BookIndexWashReport: Equatable, Sendable {
 #endif
 
 nonisolated enum BookIndexColumn {
-    /// 13i-c U4: the Index note row's ⋯ menu renders the remove/release door
-    /// (§20) — its `.surface` declaration lives with the column it rides.
-    static let surfaceCapabilities: [CapabilityID] = [.removeFromBook]
-        // VX-803 (A-808-12 (h)): the row's ⋯ menu carries Pin to Top / Unpin.
-        + [.pinNoteInBook]
-        // 13i-d U3 (F-U2-3): the row ⋯'s "Move to Chapter ▸".
-        + [.fileNoteInChapter]
+    /// The Index note row's ⋯ menu's `.surface` declaration, living with the
+    /// column it rides. 13i-c U4 seated the remove/release door (§20), VX-803
+    /// Pin to Top / Unpin, 13i-d U3 "Move to Chapter ▸" — and since VX-901 (the
+    /// VX-914 run, batch 3) the row's ⋯ IS the note-title table's DERIVED
+    /// face, so its declaration is that face's acts, read from the table
+    /// (never a hand list that could drift from what it draws).
+    static let surfaceCapabilities: [CapabilityID] = BookNoteTitleMenuTable.capabilities(.indexRow)
 
     /// **The ONE trailing column both row kinds end in** (17o batch d,
     /// ledger row 21; her punchlist 5, image 7). The chapter row's count was
@@ -464,6 +464,11 @@ struct BookIndexView<Masthead: View>: View {
     /// VX-303: the row menu's "Open in the full editor" — the book's ONE open
     /// door (`BookView.openInWrite`), which carries her place in that note.
     let onOpenInWrite: (String) -> Void
+    /// VX-901: the row ⋯'s note-title doors — the asks the BOOK hosts
+    /// (`.bookNoteTitleAsks` on `BookView`'s body, which covers Index) and the
+    /// composition's roads (a harness mount passes none; those doors don't draw).
+    let noteDoors: BookNoteTitleDoors
+    let noteRoads: BookNoteRoads
     /// 13i-d U3 — the GROUPED-BY control's state (the masthead renders the
     /// control; this view regroups by it). nil — a host with no control, every
     /// pre-U3 pin — is the shipped look, exactly.
@@ -561,9 +566,13 @@ struct BookIndexView<Masthead: View>: View {
         hostsQuietReceipt: Bool = true,
         searchAnswer: AnyView? = nil,
         onEditInOutline: @escaping (String) -> Void,
-        onOpenInWrite: @escaping (String) -> Void = { _ in }
+        onOpenInWrite: @escaping (String) -> Void = { _ in },
+        noteDoors: BookNoteTitleDoors,
+        noteRoads: BookNoteRoads = BookNoteRoads()
     ) {
         self.onOpenInWrite = onOpenInWrite
+        self.noteDoors = noteDoors
+        self.noteRoads = noteRoads
         self.hostsQuietReceipt = hostsQuietReceipt
         self.searchAnswer = searchAnswer
         self.session = session
@@ -1051,57 +1060,26 @@ struct BookIndexView<Masthead: View>: View {
                 if let live = edit.livePostID, live != entry.postID { edit.blur() }
                 select(entry.postID, scrollPane: true)
             },
-            menu: { AnyView(chapterFilingMenu(entry.postID)) })
+            menu: { AnyView(noteMenu(entry)) })
             // 13s-b U2: step 9 points at the note she climbed with, selected
             // here. Inside the column's own scroll: the ring sits on its edge.
             .tourAnchor(.indexNoteRow(entry.postID), cornerRadius: 6, outset: 0)
             .id("bix-\(entry.postID)")
     }
 
-    /// The row menu — a navigation to Outline, the full editor, and the
-    /// chapter-filing doors the outline rows carry (curated books only;
-    /// QUESTIONS #25(a)).
-    @ViewBuilder
-    private func chapterFilingMenu(_ postID: String) -> some View {
-        Button("Show in Outline") { onEditInOutline(postID) }
-        // VX-303: the book's ONE open door (`BookView.openInWrite`).
-        Button("Open in the full editor") { onOpenInWrite(postID) }
-        if structure.reading?.kind == .book {
-            Divider()
-            // 13i-d U3 (F-U2-3): "Move to Chapter ▸" / "No Chapter" — the
-            // Book Panel's act and words, from the registry.
-            Menu(CapabilityRegistry.capability(.fileNoteInChapter).verb) {
-                ForEach(structure.sections, id: \.id) { section in
-                    Button(section.name) {
-                        Task { await structure.assign(postID, to: section.id) }
-                    }
-                }
-                Divider()
-                Button(BookPanelCopy.noChapter) {
-                    Task { await structure.assign(postID, to: nil) }
-                }
-            }
-            // 13i-c U4 (the sitting record §20): the remove/release door —
-            // one act, its word the book's (owned ⇒ Release). Books only: a
-            // gathering holds no membership (its honest door is the chip's).
-            if let book = structure.reading {
-                // VX-803 (A-808-12 (h)): the pin — the row's own entry's state.
-                let pinned = model.entries.first { $0.postID == postID }?.pinned ?? false
-                Button(PinNoteCopy.verb(pinned: pinned)) {
-                    Task {
-                        await PinNoteDoor.setPinned(
-                            session: session, postID: postID, book: book, pinned: !pinned)
-                    }
-                }
-                Divider()
-                Button(RemoveFromBookCopy.verb(owned: book.owned)) {
-                    Task {
-                        await RemoveFromBookDoor.remove(
-                            session: session, postID: postID, book: book)
-                    }
-                }
-            }
-        }
+    /// **The row's ⋯ (VX-901 — her "the index ... line should get the same
+    /// options")**: the note-title table's DERIVED Index face, drawn by the ONE
+    /// renderer — the Index's own pair (Show in Outline · Open in the full
+    /// editor) leading, then every note-title door (the note's own doors on a
+    /// book's notes and a gathering's; Move to Chapter ▸ · Pin to Top / Unpin ·
+    /// Remove / Release on a book's only — a gathering's membership row stays
+    /// none, no "remove #tag", her ruling as built).
+    private func noteMenu(_ entry: Queries.ReadingEntry) -> some View {
+        BookNoteTitleMenu(
+            structure: structure, postID: entry.postID, title: entry.displayTitle,
+            pinned: entry.pinned, doors: noteDoors, roads: noteRoads, face: .indexRow,
+            indexActs: BookNoteIndexActs(
+                showInOutline: onEditInOutline, openInFullEditor: onOpenInWrite))
     }
 
     private var columnFooter: some View {

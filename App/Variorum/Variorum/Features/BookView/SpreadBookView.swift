@@ -96,7 +96,9 @@ struct SpreadBookView: View {
             }
             if model.spreadEntries.isEmpty {
                 Spacer()
-                Text("This book has no notes yet.")
+                // VX-45: the one empty-state home (an archived or live gathering
+                // speaks its own kind).
+                Text(BookEmptyStateCopy.line(for: structure.reading))
                     .foregroundStyle(tokens.muted)
                 Spacer()
             } else {

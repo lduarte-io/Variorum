@@ -92,6 +92,17 @@ nonisolated enum LineageFaceCopy {
         }
     }
 
+    /// **VX-898 — does the member stand UNPLACED?** Kept as lineage or set
+    /// aside: it has no living "now" (its pane names its take "the take as
+    /// kept" — `CommitsFaceCopy.nowName`). Placed members, this block, the
+    /// Trash and another wing's are not (the last two are never opened).
+    static func standsUnplaced(_ place: LineageFamily.Place) -> Bool {
+        switch place {
+        case .keptAsLineage, .setAside: return true
+        case .thisBlock, .placed, .inTrash, .otherWing: return false
+        }
+    }
+
     static func counts(_ counts: LineageFamily.Counts) -> String {
         "\(counts.takes) take\(counts.takes == 1 ? "" : "s") \u{B7} "
             + CommitsFaceCopy.commitsCount(counts.commits)
@@ -194,7 +205,17 @@ final class LineageFaceModel {
                 select(opening)
             }
         }
+        tellNodeWhereItStands()
         loaded = true
+    }
+
+    /// **VX-898** — the selected member's pane names its take by where the
+    /// member stands, read from THIS family read every time it re-runs, so a
+    /// Put back (kept → placed) flips "the take as kept" to "the take now" live.
+    private func tellNodeWhereItStands() {
+        guard let node, let member = selected else { return }
+        let unplaced = LineageFaceCopy.standsUnplaced(member.place)
+        if node.relativeStandsUnplaced != unplaced { node.relativeStandsUnplaced = unplaced }
     }
 
     // MARK: - Projections
@@ -226,6 +247,7 @@ final class LineageFaceModel {
             ? CommitsFaceModel(session: session, request: request)
             : CommitsFaceModel(
                 session: session, relative: blockID, shownTakeID: member.shownTakeID, of: request)
+        tellNodeWhereItStands()
     }
 
     // MARK: - The header's acts

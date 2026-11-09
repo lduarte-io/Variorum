@@ -631,6 +631,13 @@ struct CapabilityRegistryTests {
             .union(MembershipChoiceSheet.surfaceCapabilities)
             // 13i-c U4 (the same class): the remove/release door's `.surface`
             // rows beyond the chip — the Index row's ⋯ menu and Manage Notes….
+            // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT, the same
+            // class: a new renderer is a new line): the Index row's ⋯ is the
+            // note-title table's DERIVED face, so this line now carries its
+            // every act (`BookNoteTitleMenuTable.capabilities(.indexRow)`) —
+            // eight of them newly doored `.surface` (openBeside ·
+            // openInNewWindow · toggleStar · renameNote · moveNoteToWing ·
+            // copyNoteToWing · exportNote · archiveNote).
             .union(BookIndexColumn.surfaceCapabilities)
             .union(ManageReadingPostsSheet.surfaceCapabilities)
             // 13i-c U4: the owned-by badge is the book ascent's third renderer.
@@ -675,6 +682,12 @@ struct CapabilityRegistryTests {
             // new line): the BOOKCASE's file drop renders the import door
             // (`.importFiles` — a folder becomes a book).
             .union(ShelfView.surfaceCapabilities)
+            // VX-911 (the VX-914 run, batch 4 — A JUSTIFIED EDIT, the same
+            // class: a new renderer is a new line): the new-note band renders
+            // File Without Opening (its button; ⌘⏎ is the box's own key). The
+            // declaration lives with the BUILDER (`QuickEntryBar`), so the
+            // Bookcase's band and the Library's are covered by construction.
+            .union(QuickEntryBar.surfaceCapabilities)
             // 13n-b U1 (A JUSTIFIED EDIT, the same class — a new renderer is
             // a new line): Settings ▸ MCP renders the door's seven acts and
             // is their ONLY renderer (the grant sheet's confirm included).

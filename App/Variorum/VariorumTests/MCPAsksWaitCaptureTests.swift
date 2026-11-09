@@ -147,7 +147,7 @@ struct MCPAsksWaitCaptureTests {
 
     private func road(_ door: MCPDoor, theme: ThemeStore) -> MCPShareRoad {
         MCPShareRoad(
-            canShare: true, indicatorOn: true, open: { _ in },
+            canShare: true, serverOn: true, open: { _ in },  // VX-900: the label renamed (was indicatorOn: true — the same state)
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: door, opening: opening, done: done).environment(theme))
             },

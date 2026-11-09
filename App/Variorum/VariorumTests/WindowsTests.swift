@@ -220,7 +220,12 @@ struct NoteOnlyWindowTests {
     @Test func theOpenInNewWindowDoorIsDeclaredOnTheNoteRowFamily() {
         let capability = CapabilityRegistry.capability(.openInNewWindow)
         #expect(!capability.verb.isEmpty)
-        #expect(capability.doors == [.contextMenu])
+        // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT): + `.surface` —
+        // the book Index row's ⋯ now draws Open in New Window as part of the
+        // note-title table's DERIVED face (`BookNoteTitleMenuTable
+        // .capabilities(.indexRow)`) — still a note row's door (its target
+        // always exists), still no File item.
+        #expect(capability.doors == [.contextMenu, .surface])
         #expect(capability.scope == .app, "a window act, never an editing one")
         #expect(SidebarView.contextMenuCapabilities.contains(.openInNewWindow),
                 "the note rows render what the registry declares")

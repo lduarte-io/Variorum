@@ -342,7 +342,10 @@ struct BookView: View {
                         structure.mode = .outline
                     },
                     // VX-303: the row menu's "Open in the full editor".
-                    onOpenInWrite: { openInWrite($0) })
+                    onOpenInWrite: { openInWrite($0) },
+                    // VX-901: the row ⋯ carries the note-title set — the
+                    // book's hosted asks and the composition's roads.
+                    noteDoors: noteDoors, noteRoads: noteRoads)
             case .outline:
                 // 13i-d U4: the archived line atop the content (zero height
                 // when nothing is set aside). 17y B3 (h): the Arrivals line
@@ -764,20 +767,39 @@ struct BookView: View {
         // and wraps below the modes only when the width class says so. ONE
         // Layout over these same two views (`BookMastheadModeRow`), decided at
         // whole points from STABLE widths — the tabs at their widest active
-        // state, the dial at its widest form — never `ViewThatFits`, so a
-        // pick, a rename, a mode switch or a resize back and forth never moves
-        // the line count off the width's own answer.
-        let stable = BookMastheadStableWidths.row(tokens: tokens, in: fontContext)
-        BookMastheadModeRow(tabsWidth: stable.tabs, dialWidest: stable.dial, probeKey: readingID) {
-            HStack(spacing: BookMastheadModeRowRule.tabSpacing) {
-                // Outline · Index · Book · Read — Index sits beside the
-                // writing surface, mirroring the note row's Write · Takes ·
-                // Index · Read shape (her cohesion mandate, W8-2).
-                ForEach(Self.tabOrder, id: \.self) { mode in
-                    modeTab(Self.tabLabel(mode), mode)
+        // state, the dial at the stable width of the face it SHOWS (VX-896,
+        // PROVISIONAL F-896 (1): "as soon as it would have standard spacing")
+        // — never `ViewThatFits`, so a rename, a mode switch or a resize back
+        // and forth never moves the line count off the width's own answer; a
+        // look whose face needs more room than standard spacing leaves can.
+        //
+        // VX-914 ladder F1 — THE ROW WAITS FOR THE BOOK'S ROW. The dial is
+        // counted at the face it shows, and before the book's row lands that
+        // face is the placeholder "book's order ▾" — so a row drawn then
+        // decided its line count from a placeholder and could flip it when the
+        // real face landed (one line to two, or two to one, in a width band).
+        // The tabs and the dial are ONE layout and ONE decision, so the whole
+        // row draws only once the row it counts is here: its first paint is at
+        // the book's real face, and no placeholder is ever counted. (A book
+        // tombstoned while open reads as the same nil, so the row retires with
+        // it — R2-N1, accepted.)
+        if let reading = structure.reading {
+            let stable = BookMastheadStableWidths.row(
+                tokens: tokens, in: fontContext,
+                face: BookOrderDial.face(tokens, order: BookOrderDial.shownOrder(
+                    stored: BookOrderChoices.storedLabel(for: reading),
+                    viewOrder: model.viewOrder)))
+            BookMastheadModeRow(tabsWidth: stable.tabs, dialCounted: stable.dial, probeKey: readingID) {
+                HStack(spacing: BookMastheadModeRowRule.tabSpacing) {
+                    // Outline · Index · Book · Read — Index sits beside the
+                    // writing surface, mirroring the note row's Write · Takes ·
+                    // Index · Read shape (her cohesion mandate, W8-2).
+                    ForEach(Self.tabOrder, id: \.self) { mode in
+                        modeTab(Self.tabLabel(mode), mode)
+                    }
                 }
+                orderControl
             }
-            orderControl
         }
         // 13c 2C: READ's pair of faces (her direction — "the
         // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
@@ -2318,7 +2340,9 @@ struct BookView: View {
                     }
                     .padding(.bottom, 22)
                     if model.entries.isEmpty {
-                        Text("This book has no notes yet.")
+                        // VX-45: the one empty-state home (an archived or live gathering
+                        // speaks its own kind).
+                        Text(BookEmptyStateCopy.line(for: structure.reading))
                             .foregroundStyle(tokens.muted)
                     }
                     // ONE flat ForEach whose identities ARE the landing

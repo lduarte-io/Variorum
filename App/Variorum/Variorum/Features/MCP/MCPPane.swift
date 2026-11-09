@@ -93,16 +93,14 @@ nonisolated enum MCPPaneTab: String, CaseIterable, Identifiable, Sendable {
     /// row the pane does not show); the setup's words find Connect's own row
     /// and open it there (VX-281 ladder R1-4 — where R-VX184-6 put the
     /// setup); "client"/"clients" find the Clients tab's own row and open it
-    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)); VX-874's trail dial
-    /// lives under the Activity tab's log, so finding it opens Activity (a tab
-    /// every library offers). nil: the row sits above the tabs (the server
-    /// switch, the show dial, Waiting) or the finding is the pane itself.
+    /// there (ladder R2-3 — PROVISIONAL P-VX281-R2-1 (b)). nil: the row sits
+    /// above the tabs (the server switch, the show dial, VX-903's trail dial
+    /// under it, Waiting), or the finding is the pane itself.
     static func holding(findingLead lead: String) -> MCPPaneTab? {
         switch lead {
         case SettingsCatalog.title("mcpConnect"): .connect
         case SettingsCatalog.title("mcpClients"): .clients
         case SettingsCatalog.title("mcpOpenBook"): .shared
-        case SettingsCatalog.title("mcpTrailDial"): .activity
         default: nil
         }
     }
@@ -185,6 +183,19 @@ struct MCPPane: View {
         !saysClientsBelongToTheLibrary(snapshot)
     }
 
+    /// **VX-903 — the trail dial draws in the top section, under the show
+    /// dial, while a client is APPROVED** (PROVISIONAL F-903 (1); VX-272's
+    /// gate, the shared icon's and the Private mark's): the sidebar's AI
+    /// section only ever holds an approved client's acts, and every pane that
+    /// opens on Connect by its rule has none — so VX-281's fresh-open geometry
+    /// is untouched by construction. The Settings search follows it
+    /// (`SettingsSearch.settingsEntries`'s `mcpTrailDial`). Pure, pinned. (The
+    /// alternative, always seated beside the always-shown show dial, is one
+    /// line to flip — recorded for her bundle.)
+    nonisolated static func drawsTrailDial(_ snapshot: MCPDoor.Snapshot) -> Bool {
+        snapshot.approvedCount > 0
+    }
+
     /// 13n-c U4 — where ⌥⌘, lands the pane when an ask waits.
     static let waitingAnchor = "mcp-waiting"
 
@@ -205,6 +216,7 @@ struct MCPPane: View {
     var body: some View {
         ScrollViewReader { proxy in
             form
+                .mcpPaneProbe(.form)
                 .onAppear { landAtWaiting(proxy) }
                 .onChange(of: door.settingsRequest) { _, _ in landAtWaiting(proxy) }
                 // UXR1-6: Waiting's caption leaves with the pane — it never
@@ -267,10 +279,37 @@ struct MCPPane: View {
                     }
                 }
                 .lineLimit(1)
+                .mcpPaneProbe(.showDial)
                 ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)
-                // (VX-874's trail dial lives on the ACTIVITY tab — `activityTab`
-                // — never here: a row above the tabs pushes a fresh pane's
-                // Connect code block out of sight, VX-281's geometry row.)
+                    .mcpPaneProbe(.showDialLine)
+                // VX-903 (the VX-914 run, batch 1 — her #264 word: "I also don't
+                // think it should be in activity, i think it should be right
+                // under 'when a client shows you something'"; PROVISIONAL F-903
+                // (1)): THE TRAIL DIAL (VX-874) — what the sidebar's AI section
+                // draws (everything on · notices off · fully off), seated
+                // directly under the show dial, drawn only while a client is
+                // APPROVED (`drawsTrailDial` — VX-272's gate: the trail only
+                // ever holds an approved client's acts). THE VX-281 TRAP, solved
+                // rather than repeated: the pane opens on Connect exactly while
+                // no client is approved (`MCPPaneTab.opening`), so every pane
+                // that opens on Connect by its rule draws this section
+                // byte-identical to before and the fresh-open geometry oracle
+                // stands; the contract GREW by one named arm (an approved
+                // client's pane: both dials seated, the tab row in sight —
+                // `MCPPaneTabsTests`). One picker, its line, the whole text
+                // behind its (i).
+                if Self.drawsTrailDial(door.snapshot) {
+                    Picker(SettingsCatalog.title("mcpTrailDial"), selection: Binding(
+                        get: { door.snapshot.trailDial },
+                        set: { door.setTrailDial($0) })) {
+                        ForEach(MCPTrailDial.allCases, id: \.self) { dial in
+                            Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
+                        }
+                    }
+                    .lineLimit(1)
+                    .mcpPaneProbe(.trailDial)
+                    ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
+                }
                 // A refusal from any act lands where she is looking first
                 // (the walk's second finding: a caption at the form's foot
                 // sat below the fold).
@@ -324,6 +363,7 @@ struct MCPPane: View {
             case .shared: sharedTab
             case .activity: activityTab
             }
+            badgesSection
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
@@ -392,6 +432,7 @@ struct MCPPane: View {
             Spacer(minLength: 0)
         }
         .padding(.bottom, 4)
+        .mcpPaneProbe(.tabRow)
     }
 
     /// CONNECT — the setup first (her "you wouldn't know without scrolling
@@ -469,8 +510,8 @@ struct MCPPane: View {
         }
     }
 
-    /// ACTIVITY — the coarse log's newest lines and its "all N ›", then
-    /// (VX-874) the trail dial.
+    /// ACTIVITY — the coarse log's newest lines and its "all N ›". (VX-874's
+    /// trail dial lived under it until VX-903 seated it under the show dial.)
     @ViewBuilder private var activityTab: some View {
         Section {
             if door.snapshot.activity.isEmpty {
@@ -482,25 +523,28 @@ struct MCPPane: View {
         } header: {
             tabRow
         }
-        // VX-874 (her ruling (4) — "TWO off switches … ONE control with three
-        // states", home Settings ▸ MCP, her word): THE TRAIL DIAL — what the
-        // sidebar's AI section draws (everything on · notices off · fully
-        // off), beside the log of the activity it governs. Its own section
-        // under the tab's list, the Shared tab's open-book precedent — never
-        // above the tabs, where a row pushes a fresh pane's Connect code block
-        // out of sight (VX-281's geometry row; the closing window's red). A
-        // search finding opens this tab (`MCPPaneTab.holding`). One picker,
-        // its line, the whole text behind its (i).
-        Section {
-            Picker(SettingsCatalog.title("mcpTrailDial"), selection: Binding(
-                get: { door.snapshot.trailDial },
-                set: { door.setTrailDial($0) })) {
-                ForEach(MCPTrailDial.allCases, id: \.self) { dial in
-                    Text(MCPPaneCopy.trailDialChoice(dial)).tag(dial)
-                }
+    }
+
+    // MARK: - The badge family's switch (VX-905)
+
+    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
+    /// ownership badges' into the mcp part of settings - it makes more sense
+    /// there"; PROVISIONAL F-905 (1))**: the badge family's ONE switch
+    /// (`ownership_badges`, synced) — its own untitled section at the pane's
+    /// FOOT, under whichever tab shows. Every library keeps it (the owned-by
+    /// chips exist with no client at all, so it never waits for one), and
+    /// nothing above the tabs grows (VX-281's fresh-open geometry). The toggle,
+    /// its one line and the whole text behind its (i). Rendered only where the
+    /// window hands the pane its theme (a bare mount has no store to write —
+    /// P-2's dead door).
+    @ViewBuilder private var badgesSection: some View {
+        if let themeStore {
+            Section {
+                Toggle(SettingsCatalog.title("ownershipBadges"), isOn: Binding(
+                    get: { themeStore.settings.ownershipBadges },
+                    set: { themeStore.setOwnershipBadges($0) }))
+                ExplainerLine(line: OwnershipSettingsCopy.badgesSummary, detail: OwnershipSettingsCopy.badgesHelp)
             }
-            .lineLimit(1)
-            ExplainerLine(line: MCPPaneCopy.trailDialSummary, detail: MCPPaneCopy.trailDialDetail)
         }
     }
 
@@ -542,7 +586,11 @@ struct MCPPane: View {
             Text(MCPPaneCopy.requestTitle(request.name))
                 .font(.callout.weight(.semibold))
                 .lineLimit(1)
-            quiet(MCPPaneCopy.requestDetail(firstSeen: Self.relative(request.firstSeenAt)))
+            // VX-401 (the VX-914 run, batch 1): the age reads live — every
+            // half-minute, never per frame — as Waiting's row does.
+            SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                quiet(MCPPaneCopy.requestDetail(firstSeen: Self.relative(request.firstSeenAt, now: context.date)))
+            }
             HStack(spacing: 10) {
                 Button(Self.verb(.mcpApproveClient)) {
                     granting = MCPGrantOpening(client: request, approving: true)
@@ -622,10 +670,11 @@ struct MCPPane: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// "a minute ago", "yesterday", … from a stored ISO stamp.
-    static func relative(_ stamp: String) -> String {
+    /// "a minute ago", "yesterday", … from a stored ISO stamp — against `now`
+    /// (VX-401: a `TimelineView`'s tick, so a shown stamp keeps reading true).
+    static func relative(_ stamp: String, now: Date = Date()) -> String {
         guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return stamp }
-        return relative(date)
+        return relative(date, now: now)
     }
 
     /// 13n-c U4 — the same words from a date (Waiting's age).
@@ -739,10 +788,11 @@ struct MCPClientRow: View {
     /// its "all N ›" sheet render this one row).
     @State private var confirmingDeny = false
 
-    private var detail: String {
+    /// VX-401: against `now` — the row's `TimelineView` tick.
+    private func detail(now: Date) -> String {
         var parts: [String] = []
         parts.append(connected ? MCPPaneCopy.connectedNow
-                     : MCPPaneCopy.lastSeen(MCPPane.relative(row.client.lastSeenAt)))
+                     : MCPPaneCopy.lastSeen(MCPPane.relative(row.client.lastSeenAt, now: now)))
         switch row.client.state {
         case .denied: parts.append(MCPPaneCopy.deniedState)
         case .approved:
@@ -761,10 +811,14 @@ struct MCPClientRow: View {
                 Text(row.client.name)
                     .font(.callout.weight(.semibold))
                     .lineLimit(1)
-                Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                // VX-401 (the VX-914 run, batch 1): "last seen …" reads live —
+                // every half-minute, never per frame — as Waiting's row does.
+                SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                    Text(detail(now: context.date))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
             Spacer(minLength: 0)
             if row.client.state == .approved {
@@ -1053,12 +1107,17 @@ struct MCPActivityRowView: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 8)
-            Text(MCPPane.relative(line.at))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                // VX-351: the act's whole fact on hover (the line names the act).
-                .stampHelp(MCPPane.whole(line.at))
+            // VX-401 (the VX-914 run, batch 1): the stamp reads live — every
+            // half-minute, never per frame — as Waiting's row does ("39
+            // seconds ago" stuck until the next line landed).
+            SwiftUI.TimelineView(.periodic(from: .now, by: 30)) { context in
+                Text(MCPPane.relative(line.at, now: context.date))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            // VX-351: the act's whole fact on hover (the line names the act).
+            .stampHelp(MCPPane.whole(line.at))
         }
     }
 }
@@ -1196,3 +1255,72 @@ struct MCPFullListSheet: View {
         }
     }
 }
+
+// MARK: - The pane's geometry oracle (the VX-914 run, batch 1 — its gate round)
+
+/// **The marks a pin reads in Settings ▸ MCP** — the two dials, the show
+/// dial's line, the tab row and the form itself. On macOS 27.1 the grouped
+/// form draws its `Picker`s natively (no `NSPopUpButton`, no vended
+/// accessibility element without a client — the gate round's measured
+/// mechanism), so a pin cannot find a dial in AppKit's tree; the pane reports
+/// each mark's frame instead, in SwiftUI's own (global, y-down) space.
+nonisolated enum MCPPaneMark: String, CaseIterable, Sendable {
+    case form, showDial, showDialLine, trailDial, tabRow
+}
+
+extension View {
+    /// Report this view's frame as `mark` under the surface's probe scope
+    /// (`DebugProbeScope` — a surface that forgets its scope reports under
+    /// `unscoped`, which no pin reads: loud, never silent). A no-op outside
+    /// DEBUG, so nothing ships.
+    @ViewBuilder
+    func mcpPaneProbe(_ mark: MCPPaneMark) -> some View {
+        #if DEBUG
+        modifier(MCPPaneProbe(mark: mark))
+        #else
+        self
+        #endif
+    }
+}
+
+#if DEBUG
+/// **THE DIALS' ORACLE** (DEBUG only; the `SidebarGeometry` precedent, scoped by
+/// the pin's own session): a mark DRAWN reports its frame; a mark that leaves
+/// (or was never drawn — the trail dial with no approved client) has none, so
+/// a pin that finds the show dial and not the trail dial discriminates.
+enum MCPPaneGeometry {
+    private static var worlds: [String: [MCPPaneMark: CGRect]] = [:]
+
+    static func record(_ mark: MCPPaneMark, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: [:]][mark] = frame
+    }
+
+    static func forget(_ mark: MCPPaneMark, in scope: String) {
+        worlds[scope]?[mark] = nil
+    }
+
+    /// A pin clears its OWN scope before it mounts (a freed session's address
+    /// can be reused by the next).
+    static func reset(_ scope: String) {
+        worlds[scope] = nil
+    }
+
+    /// The frame `mark` last reported under `scope` — nil while not drawn.
+    static func frame(_ mark: MCPPaneMark, in scope: String) -> CGRect? {
+        worlds[scope]?[mark]
+    }
+}
+
+private struct MCPPaneProbe: ViewModifier {
+    let mark: MCPPaneMark
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                MCPPaneGeometry.record(mark, frame, in: scope)
+            }
+            .onDisappear { MCPPaneGeometry.forget(mark, in: scope) }
+    }
+}
+#endif

@@ -1315,7 +1315,16 @@ struct TutorialMCPChapterTests {
                     "a chapter sharing a row with its one note wears that note's icon")
             #expect(text.contains("(through the Home wing grant, say)"))
             #expect(text.contains("with \(MCPShareCopy.change) and \(MCPShareCopy.revoke)"))
-            #expect(text.contains("the right end of the context bar above the page, or a lock when the note is Private"))
+            // VX-900 (A JUSTIFIED EDIT — F-900-D, PROVISIONAL wording): the
+            // masthead no longer waits for the server ("while the door is
+            // open" is gone), the lock is the closed eye since VX-831, and the
+            // server-off face is taught whole; no em dash (R-13s-22, the
+            // chapter's own sweep above).
+            #expect(text.contains("Inside a note, the same icon sits at the right end of the context bar above the "
+                                  + "page, or a closed eye when the note is Private. While the server is off, both "
+                                  + "still show, greyed out."))
+            #expect(!text.contains("while the door is open"), "the masthead's icon no longer waits for the server")
+            #expect(!text.contains("or a lock when the note is Private"), "the lock retired into the eye (VX-831)")
             // Stage B R1 B10: Activity is coarse and capped (the store keeps the
             // newest `mcpActivityCap` lines), so the lesson says "recently",
             // never "every call".
@@ -1364,10 +1373,27 @@ struct TutorialMCPChapterTests {
             // row's two doors (text: go there; the icon: what it asked or did). THE
             // TRUTH is the section's own copy and declarations (its acts are
             // `MCPTrailTests`').
-            #expect(text.contains("Near the bottom of the sidebar, a list headed From \(placeholderName) keeps each "
-                                  + "place a client showed you or changed this session: click a row to go there, or "
-                                  + "the icon at its end to see what it asked or did."))
-            #expect(MCPTrailCopy.header(client: placeholderName, count: 2).hasPrefix("From \(placeholderName)"))
+            // VX-902 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1; her #264
+            // word, PROVISIONAL F-902): the heading drops "From ‹client-name›" — the
+            // setup menu's label where its table names the client, else MCP — so the
+            // card says so, provider-neutral (O-4: no provider outside the setup).
+            // (The VX-914 gate round: its own sentence, no em dash — R-13s-22's rule above.)
+            // The VX-914 ladder's N1 (A JUSTIFIED EDIT — the card's literal follows
+            // its one honest word swap): the heading shows the setup menu's LABEL,
+            // never the client's own name, so the card says "the setup menu's label".
+            #expect(text.contains("Near the bottom of the sidebar, a list for each client keeps each place that "
+                                  + "client showed you or changed this session: click a row to go there, or the "
+                                  + "icon at its end to see what it asked or did. Each list is headed MCP, or From "
+                                  + "and the setup menu's label where the setup menu names it."))
+            #expect(!text.contains("From and the client's name"), "the card never calls the label the client's name")
+            #expect(MCPTrailCopy.header(client: placeholderName, count: 2) == "MCP \u{00B7} 2",
+                    "a client the setup menu does not name reads MCP")
+            for setup in MCPSetupClient.allCases {
+                guard let name = setup.expectedName else { continue }
+                #expect(MCPTrailCopy.header(client: name, count: 2) == "From \(setup.label) \u{00B7} 2",
+                        "“From and the setup menu's label where the setup menu names it”")
+                #expect(setup.label != name, "the heading's word is the label, not the client's own name")
+            }
             #expect(MCPTrailSection.surfaceCapabilities == [.mcpOpenTrailPlace, .mcpShowTrailDetails],
                     "the row's text and its icon are its two doors")
             #expect(SidebarLayout.aiSectionWindow == 3, "near the bottom, about three rows")

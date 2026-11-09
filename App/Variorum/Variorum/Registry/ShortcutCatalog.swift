@@ -327,12 +327,15 @@ nonisolated enum ShortcutCatalog {
         Row(group: .navigation, keys: .chords([.todaysEntry]),
             words: "today's journal entry"),
         // 13n-c U4 — VX-157 (her ratified chord); VX-644: the label's door.
+        // VX-870 (the VX-914 run, batch 4): the Library masthead's step stays
+        // in the Library — the one switch that does not land on the Bookcase.
         Row(group: .navigation, keys: .chords([.switchWing]),
             words: "switch wing \u{2014} type a few letters and \u{23CE}, or hold \u{2318} "
                 + "and tap L to step, release to go; clicking the wing's name in the "
                 + "Bookcase or Library masthead steps to the next one"
                 + ", and clicking \u{201C}in \u{2039}wing\u{203A}\u{201D} at the top of the sidebar "
-                + "opens this switcher; every switch lands on that wing's Bookcase"),
+                + "opens this switcher; every switch lands on that wing's Bookcase, except "
+                + "the Library masthead's step, which keeps you in the Library"),
         // VX-824 (the VX-828 run, batch B): the per-wing chord — the
         // registry's alternate (no menu item: the mode row owns ⌘1–⌘7 inside a
         // note), shown here so it is findable (13g L1).
@@ -399,6 +402,13 @@ nonisolated enum ShortcutCatalog {
                 + "closes; the new-note box on the Bookcase files it and opens it. "
                 + "\u{21E7}\u{23CE} adds another paragraph instead, so a capture can be "
                 + "as long as the thought is"),
+        // VX-911 (the VX-914 run, batch 4): the band's second filing — the
+        // registry's alternate (no menu item: inside a note ⌘⏎ is Choose This
+        // Take), shown here so it is findable (13g L1).
+        Row(group: .windows, keys: .alternates([.fileWithoutOpening]),
+            words: "in the new-note box on the Bookcase or in the Library: file what you have written "
+                + "without opening it \u{2014} the box clears for the next note (the File button "
+                + "in the box does the same)"),
         Row(group: .windows, keys: .menu("View", .openBeside),
             words: "put a second note beside this one (right-click a "
                 + "note row for that note; the menu takes the most recent other one)"),

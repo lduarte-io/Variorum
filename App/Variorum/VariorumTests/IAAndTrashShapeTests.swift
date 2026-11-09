@@ -582,7 +582,11 @@ struct IAAndTrashShapeTests {
         let capability = CapabilityRegistry.capability(.archiveNote)
         #expect(capability.verb == "Archive")
         #expect(capability.scope == .post)
-        #expect(capability.doors == [.contextMenu])
+        // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT): + `.surface` —
+        // the book Index row's ⋯ now draws Archive as part of the note-title
+        // table's DERIVED face (`BookNoteTitleMenuTable.capabilities(.indexRow)`,
+        // the walk line `BookIndexColumn.surfaceCapabilities`).
+        #expect(capability.doors == [.contextMenu, .surface])
         #expect(SidebarView.contextMenuCapabilities.contains(.archiveNote))
         // Its honest note names the room the note goes to, and its promise.
         #expect(capability.unavailableNote.contains(RecoveryPath.archivedSurface))

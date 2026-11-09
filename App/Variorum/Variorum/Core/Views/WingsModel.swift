@@ -171,14 +171,20 @@ final class WingsModel {
     /// cross-wing follow (`WingFollow`), New Wing…'s switch-in, Delete Wing's
     /// return to Home, a dead wing's revalidation, Compare's lineage "go to
     /// ‹wing› ›" and the MCP door's wing landing.
-    func goTo(_ id: String, saying: Bool) {
+    ///
+    /// **VX-870 — the ONE carve-out** (her word at the VX-828 bundle sitting,
+    /// Q-B2: *"it would be nice if clicking it in library didn't move you
+    /// either"*): `landing: false` is the LIBRARY masthead's cycle only
+    /// (`cycleInPlace`) — the wing switches and is said, and she stays in the
+    /// Library, which re-scopes under her. Every other door still lands.
+    func goTo(_ id: String, saying: Bool, landing: Bool = true) {
         if id != currentID {
             switchTo(id)
             if saying {
                 session.status.receipt(WingFollow.nowIn(name(of: id), isHome: id.isEmpty))
             }
         }
-        landInBookcase()
+        if landing { landInBookcase() }
     }
 
     /// **VX-824 — the ⌘digit chord's answer** (`WingNumberKeys`' decision): a
@@ -210,6 +216,20 @@ final class WingsModel {
     /// (VX-833) landed on its Bookcase, like every deliberate switch.
     func cycle() {
         if let nextWing { switchSaying(nextWing.id) }
+    }
+
+    /// **VX-870 (the VX-914 run, batch 4) — the LIBRARY masthead's cycle
+    /// switches IN PLACE**: the next wing, said ("Now in …" — a cycle is blind
+    /// until it is said), and NO landing — she stays in the Library and it
+    /// re-scopes to the new wing under her (its listing re-asks on the wing:
+    /// `LibraryCatalogView`'s `.task(id: session.wing.currentID)`), so clicking
+    /// again keeps cycling where her pointer already is. The deliberate carve-
+    /// out from VX-833's one road (the vx-828 record's Q-B2 (b) shape, the
+    /// Library only): the Bookcase's cycle (`cycle`, which lands where she
+    /// already stands), ⌘L, the ▾ list and ⌘1–⌘9 all still land on the wing's
+    /// Bookcase.
+    func cycleInPlace() {
+        if let nextWing { goTo(nextWing.id, saying: true, landing: false) }
     }
 
     /// New Wing… — named at birth (the door guard refuses Home's name and a

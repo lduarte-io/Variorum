@@ -79,8 +79,13 @@ struct BrowserNavKeysTests {
         // VX-824 (the VX-828 run, batch B — A JUSTIFIED EDIT, VX-563's class):
         // the wing chord joins them — ⌘1–9, the same monitor-door shape (no
         // menu key: inside a note the mode row owns ⌘1–⌘7), shown by the helper.
+        // VX-911 (the VX-914 run, batch 4 — A JUSTIFIED EDIT, VX-563's class):
+        // File Without Opening's ⌘⏎ joins them — the capture box's own
+        // focus-scoped key (no menu key: inside a note ⌘⏎ is Choose This Take),
+        // shown by the helper.
         #expect(Set(alternates) == [
             "\u{2318}\u{2190}", "\u{2318}\u{2192}", "\u{2318}\u{2191}", "\u{2318}\u{2193}", "\u{2318}1\u{2013}9",
+            "\u{2318}\u{23CE}",
         ], "the only alternates: \(alternates)")
         #expect(HelperView.shortcutKeysShown.isSuperset(of: Set(alternates)), "the helper (⌘/) shows them")
     }

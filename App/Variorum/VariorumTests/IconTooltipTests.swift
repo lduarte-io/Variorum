@@ -101,7 +101,9 @@ struct IconTooltipTests {
     @Test func theDoorsThatAlreadyNamedThemselvesStillDo() {
         #expect(WorkspaceNaming.backHelp(origin: "Field Notes").hasPrefix("Back to"))
         #expect(WorkspaceNaming.forwardHelp(destination: "Orbit").hasPrefix("Forward to"))
-        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", count: 1).hasPrefix("Open \u{201C}Orbit\u{201D}"))
+        // VX-667 (A JUSTIFIED EDIT — the counts arrive by kind; same words).
+        #expect(WorkspaceNaming.ascentHelp(topBook: "Orbit", bookCount: 1, gatheringCount: 0)
+            .hasPrefix("Open \u{201C}Orbit\u{201D}"))
         #expect(WorkspaceNaming.tagFieldHelp(open: false).hasPrefix("Tag this note"))
         // VX-831 (A JUSTIFIED EDIT — the lock retired into the Private mark):
         // the mark's every hover leads with its name.

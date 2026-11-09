@@ -14,7 +14,12 @@
 //
 //  VX-272: every share face renders ONLY when at least one APPROVED client
 //  exists (`canShare`) — with none, no door; the zero-state lives in Settings ▸
-//  MCP. VX-164: the in-note indicator also needs the server ON (`indicatorOn`).
+//  MCP. VX-164's `indicatorOn` (the server ON as well) now gates only the
+//  in-note indicator's pending-ask leg. **VX-900 — THE ICON TWINS' ONE RULE**
+//  (her ruling, the #264 sitting): the shared icon and the Private eye both
+//  draw while a client is approved, and while the server's switch is OFF both
+//  wear the DIMMED face with the hover saying so (`serverOn`,
+//  `MCPServerOffFace`).
 //
 
 import SwiftUI
@@ -130,11 +135,21 @@ struct MCPGrantOpening: Identifiable, Equatable {
 /// with the same gates ARE the same road.
 @MainActor
 struct MCPShareRoad: Equatable {
-    /// At least one APPROVED client (VX-272) — every share face's gate.
+    /// At least one APPROVED client (VX-272) — every share face's gate, and
+    /// since VX-900 the in-note indicator's shared icon's too (the rows'
+    /// exact gate).
     let canShare: Bool
-    /// The server ON and at least one approved client (VX-164) — the in-note
-    /// indicator's gate.
-    let indicatorOn: Bool
+    /// **VX-900 — the MCP server's SWITCH is ON** (`MCPDoor.serverOn`, her
+    /// "flip the server to on"). It gates no mark: while it is OFF every mark
+    /// an approved client's world draws wears the dimmed face
+    /// (`MCPServerOffFace`). PROVISIONAL, flagged for her bundle: a listener
+    /// that stopped by itself with the switch ON reads ON here (the pane's
+    /// status line says that stop).
+    let serverOn: Bool
+    /// The server ON and at least one approved client (VX-164) — since VX-900
+    /// only the in-note indicator's pending-ask leg (an ask lives only while
+    /// its client is connected).
+    var indicatorOn: Bool { canShare && serverOn }
     /// Open THE grant sheet in this window, pre-filled. (A `var` since VX-268:
     /// a host already in a sheet — ⌘L's switcher — keeps it HERE, the
     /// `answeringAsks` shape: `openingHere`.)
@@ -174,7 +189,51 @@ struct MCPShareRoad: Equatable {
     }
 
     nonisolated static func == (lhs: MCPShareRoad, rhs: MCPShareRoad) -> Bool {
-        lhs.canShare == rhs.canShare && lhs.indicatorOn == rhs.indicatorOn
+        lhs.canShare == rhs.canShare && lhs.serverOn == rhs.serverOn
+    }
+}
+
+/// **VX-900 — THE ICON TWINS' SERVER-OFF FACE, the ONE rule both marks read**
+/// (her ruling, the #264 sitting: "it's weird for private and shared to go by
+/// different rules. I do think they should show, but maybe they should be a
+/// bit greyed out or something when the server is off (and hovering it could
+/// say the server is off). they should both be standardized though."). The
+/// shared icon (`MCPSharedIcon`) and the Private eye (`PrivateMarkView`) DRAW
+/// by their own gated reads — a client approved, reach or the mark's fact
+/// for the rows drawn (P1) — and this rule only decides their FACE: while the
+/// window's road says the server's switch is OFF, the glyph wears the app's
+/// one disabled ink and its hover (its accessibility label too) appends one
+/// sentence. With the switch ON, or no road (a harness mount, a host no
+/// window built one for), the face is byte-identical to before. The dimmed
+/// state therefore exists only where a mark is drawn — the approved-client
+/// world (R-878-K3's gate, the shared icon's VX-272). A via-book eye dims
+/// exactly as an own mark does (its "full strength" is its relation to the
+/// own mark, kept in both states). PROVISIONAL F-900-A/B (the orchestrator's
+/// rulings, her bundle).
+nonisolated enum MCPServerOffFace {
+    /// F-900-B — the one appended sentence: the fact, never a reordering of
+    /// the existing saying.
+    static let sentence = "The MCP server is off."
+
+    /// Whether a drawn mark wears the dimmed face — the road's switch read
+    /// OFF. No road ⇒ never (today's face).
+    static func dimmed(serverOn: Bool?) -> Bool {
+        serverOn == false
+    }
+
+    /// The hover (and accessibility label): today's saying, then — dimmed —
+    /// the sentence after it.
+    static func help(_ saying: String, dimmed: Bool) -> String {
+        guard dimmed else { return saying }
+        return saying + (saying.hasSuffix(".") ? " " : ". ") + sentence
+    }
+
+    /// F-900-A — the glyph's ink: its own token, or — dimmed — `faint`, the
+    /// app's ONE disabled ink (`CalmButtonStyle`'s disabled face, VX-194). No
+    /// new token, no literal colour.
+    @MainActor
+    static func ink(_ own: Color, _ tokens: VoiceTokens, dimmed: Bool) -> Color {
+        dimmed ? tokens.faint : own
     }
 }
 

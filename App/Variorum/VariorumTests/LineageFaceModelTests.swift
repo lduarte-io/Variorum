@@ -356,4 +356,89 @@ struct LineageFaceModelTests {
         #expect(LineageFaceCopy.putBackReceipt(RecoveryCopy.putBackBeside, home: home, faceNoteID: "other")
             == RecoveryCopy.putBackBeside, "this note: the road's own words")
     }
+
+    // MARK: - VX-898 — a lineage member's take, named honestly (N-898 (1), RULED PROVISIONAL)
+
+    /// The rule, pure: an unplaced member (kept as lineage, set aside) names
+    /// its rail-top moment "the take as kept"; everything else "the take now".
+    @Test func theNowNameIsTheTakeAsKeptExactlyWhereTheMemberStandsUnplaced() {
+        #expect(CommitsFaceCopy.nowName(unplacedRelative: true) == "the take as kept")
+        #expect(CommitsFaceCopy.nowName(unplacedRelative: false) == "the take now")
+        #expect(CommitsFaceCopy.itsOnlyTake == "its only take")
+        #expect(LineageFaceCopy.standsUnplaced(.keptAsLineage(home: nil)))
+        #expect(LineageFaceCopy.standsUnplaced(.setAside(home: nil)))
+        #expect(!LineageFaceCopy.standsUnplaced(.thisBlock))
+        #expect(!LineageFaceCopy.standsUnplaced(.inTrash(home: nil)))
+        #expect(!LineageFaceCopy.standsUnplaced(.otherWing(wingID: "w")))
+        let home = Queries.LineageHome(
+            containerID: "n", kind: .post, title: "t", wingID: "", isDeleted: false, isSavedVersion: false)
+        #expect(!LineageFaceCopy.standsUnplaced(.placed(home: home, sameNote: true)))
+    }
+
+    /// **HER FLAG, pinned** (the Nov 7 walkthrough: the header read "the take
+    /// now / this take" on a kept-as-lineage block). A merge's source is kept
+    /// as lineage: its rail-top moment is "the take as kept" — headline, the
+    /// Compare swapper's line — and its unlabeled one take "its only take";
+    /// a two-take source keeps its ordinals; the block she came from's take,
+    /// offered in a relative's Compare, is still "the take now". RED ON OLD by
+    /// evaluation: the old `headline(.now)` and `menuLine(.now)` returned
+    /// "the take now" for every block and `takeTitle` "this take".
+    @Test func aKeptSourcesTakeIsTheTakeAsKeptAndItsOnlyTakeIsItsOwn() async throws {
+        try await withWorld { w in
+            let face = face(w, select: w.right)
+            try await refresh(face, w)
+            try await refreshNode(face, w)
+            let node = try #require(face.node)
+            #expect(node.blockID == w.right && node.isRelative)
+            #expect(node.relativeStandsUnplaced, "a merge's source stands kept as lineage")
+            let rightTake = try #require(try await takes(w, w.right).first?.id)
+            #expect(node.nowName == CommitsFaceCopy.theTakeAsKept)
+            #expect(node.headline(.now(takeID: rightTake)) == "the take as kept")
+            #expect(node.menuLine(.now(takeID: rightTake)) == "the take as kept")
+            #expect(node.takeTitle(rightTake) == "its only take", "never \u{201C}this take\u{201D} here")
+            #expect(node.meta(.now(takeID: rightTake)).first?.hasPrefix("its only take") == true)
+            #expect(node.menuLine(.now(takeID: w.mergedTake)) == CommitsFaceCopy.theTakeNow,
+                    "the block she came from lives: its take is the take now")
+
+            face.select(w.left)
+            try await refreshNode(face, w)
+            let left = try #require(face.node)
+            #expect(left.relativeStandsUnplaced)
+            #expect(left.headline(.now(takeID: w.leftTake)) == "the take as kept")
+            #expect(left.takeTitle(w.leftTake) == "take 1 of 2", "a fanned source keeps its ordinals")
+        }
+    }
+
+    /// Put back places the source: its pane reads "the take now" again on the
+    /// family's next read (live — no re-select).
+    @Test func aPutBackSourceReadsTheTakeNowAgain() async throws {
+        try await withWorld { w in
+            let face = face(w, select: w.left)
+            try await refresh(face, w)
+            let node = try #require(face.node)
+            #expect(node.nowName == CommitsFaceCopy.theTakeAsKept)
+            await face.putBack()
+            try await refresh(face, w)
+            #expect(face.node === node, "the same pane — nothing re-selected")
+            #expect(!node.relativeStandsUnplaced, "placed now")
+            #expect(node.nowName == CommitsFaceCopy.theTakeNow)
+            #expect(node.headline(.now(takeID: w.leftTake)) == "the take now")
+        }
+    }
+
+    /// The HOME face is byte-unchanged: "the take now" and "this take".
+    @Test func theHomeFaceKeepsTheTakeNowAndThisTake() async throws {
+        try await withWorld { w in
+            let home = CommitsFaceModel(session: w.session, request: BlockHistoryRequest(
+                postID: w.postID, blockID: w.merged, focusedVariantID: w.mergedTake))
+            home.adopt(try await w.session.database.read { [blockID = w.merged, now = w.session.now] db in
+                try CommitsFaceModel.read(db, blockID: blockID, now: now)
+            })
+            home.relativeStandsUnplaced = true  // never read on the home face
+            #expect(!home.isRelative)
+            #expect(home.nowName == "the take now")
+            #expect(home.headline(.now(takeID: w.mergedTake)) == "the take now")
+            #expect(home.takeTitle(w.mergedTake) == "this take")
+        }
+    }
 }

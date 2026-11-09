@@ -236,7 +236,8 @@ struct RootView: View {
         let theme = theme
         return MCPShareRoad(
             canShare: mcp.hasApprovedClient,
-            indicatorOn: mcp.hasApprovedClient && mcp.serverOn,
+            // VX-900: the switch itself — it dims the marks, gates none.
+            serverOn: mcp.serverOn,
             open: { router.mcpGrantRequest = $0 },
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))

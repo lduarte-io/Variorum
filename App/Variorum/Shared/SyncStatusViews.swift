@@ -359,13 +359,24 @@ nonisolated struct SyncRowFace: Equatable {
     #endif
 
     /// The row's line (calm: the quiet caption, never the error red).
-    static let appOutOfDateLabel = "Sync paused \u{2014} this version of Variorum needs an update"
+    ///
+    /// **VX-909 (the VX-914 run, batch 4; S-909 (1), RULED PROVISIONAL — her
+    /// wording bundle): ONE fact, ONE line.** The title and the sentence under
+    /// it both told her the update fact. The TITLE keeps it (status first, the
+    /// row's own "Sync paused — …" / "Sync locked — …" grammar, the em dash
+    /// the row's own — VX-897's comma ruling governed two book confirm lines,
+    /// never this copy) because the account act's first-round sheet says the
+    /// title ALONE ("Sync hasn't run yet: ‹title›.", both platforms); the
+    /// sentence under it earns its place with the WHY and the reassurance. The
+    /// same pair on the Mac's sidebar row and the phone's Settings ▸ Sync row.
+    static let appOutOfDateLabel = "Sync paused \u{2014} Variorum needs an update"
 
-    /// The sentence under it — her R-13r-13 letter: older than the
-    /// account's sync format; update to continue; nothing lost meanwhile.
+    /// The sentence under it — her R-13r-13 letter, now carrying only what the
+    /// title does not: why (the account's sync format is newer than this
+    /// version reads) and that nothing is lost meanwhile.
     static let appOutOfDateDetail =
-        "This version of Variorum is older than your account\u{2019}s sync format. "
-        + "Update Variorum to continue syncing \u{2014} nothing is lost while sync is paused."
+        "Your account syncs in a newer format than this version reads. "
+        + "Nothing is lost while sync is paused."
 }
 
 /// R-13r-13 (13r U3-A): the update channel's act, handed to the sync row

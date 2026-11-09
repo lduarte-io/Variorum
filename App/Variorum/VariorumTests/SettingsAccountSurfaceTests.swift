@@ -50,7 +50,12 @@ struct SettingsAccountSurfaceTests {
         // VX-590 (A JUSTIFIED EDIT, the ritual — the VX-620 run, batch 2): the index takes a second
         // window question, the MCP pane's sharing face, beside this one; the account question is
         // asked exactly as before (the second question's own pin: `MCPSharingFaceTests`).
-        #expect(view.contains("SettingsSearch.wholeIndex(accountSection: accountSection, mcpSharingFace: mcpSharingFace)"))
+        // VX-903 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1): a THIRD window question
+        // joins, whether the MCP pane draws its trail dial (a client approved); the account question
+        // is still asked exactly as before (the third's own pin: `MCPTrailHandDoorTests
+        // .theTrailDialIsSettingsMCPsRowUnderTheShowDial`).
+        #expect(view.contains("in: SettingsSearch.wholeIndex(\n                accountSection: accountSection, "
+                              + "mcpSharingFace: mcpSharingFace, mcpTrailDial: mcpTrailDial))"))
         #expect(view.contains("accountSection: roadStanding?.account != nil"))
         let section = try String(contentsOf: features.appendingPathComponent("Protection/RoadAccountSheet.swift"),
                                  encoding: .utf8)

@@ -142,13 +142,18 @@ struct BookNoteTitleMenuTests {
         #expect(starOnly.first == .star)
     }
 
-    // MARK: - The four sites (grep form — a context menu is not evaluated by the test host)
+    // MARK: - The five sites (grep form — a menu is not evaluated by the test host)
 
     /// ONE builder, its four right-click sites (Outline's header and card, the
     /// navigator's note rows, the collapsed one-note chapter row); the old
     /// builder is gone; the book hosts the asks; the composition hands the
-    /// roads; the Index row's ⋯ stays as shipped (A-878-1's sub-choice 3).
-    @Test func theOneBuilderDrawsAtItsFourSitesAndTheIndexStaysAsShipped() throws {
+    /// roads. **VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT):** this
+    /// pin held A-878-1's sub-choice 3, "the Index row's ⋯ stays as shipped",
+    /// which her walkthrough ruling supersedes ("the index ... line should get
+    /// the same options") — so the Index row's ⋯ is now the builder's FIFTH
+    /// site, drawing the DERIVED face with the book's own asks and roads, and
+    /// its hand-built copy of the structure doors is gone.
+    @Test func theOneBuilderDrawsAtItsFourSitesAndTheIndexDrawsItsDerivedFace() throws {
         let appRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent()
         func source(_ path: String) throws -> String {
@@ -158,10 +163,125 @@ struct BookNoteTitleMenuTests {
         #expect(book.components(separatedBy: "BookNoteTitleMenu(").count - 1 == 4, "four sites")
         #expect(!book.contains("outlineChapterMenu("), "the old builder is gone")
         #expect(book.contains(".bookNoteTitleAsks(noteDoors, session: session, wings: wings)"))
+        #expect(book.contains("noteDoors: noteDoors, noteRoads: noteRoads)"),
+                "the book hands the Index its hosted asks and the composition's roads")
         let root = try source("RootView.swift")
         #expect(root.contains("noteRoads: BookNoteRoads("), "the composition hands the roads")
         let index = try source("Features/BookView/BookIndexView.swift")
-        #expect(!index.contains("BookNoteTitleMenu("), "the Index row's ⋯ is unchanged")
+        #expect(index.components(separatedBy: "BookNoteTitleMenu(").count - 1 == 1,
+                "the Index row's ⋯ is the builder's fifth site")
+        #expect(index.contains("face: .indexRow"), "… drawing the derived face")
+        #expect(!index.contains("chapterFilingMenu"), "the Index's own hand-built menu is gone")
+        #expect(!index.contains("RemoveFromBookDoor.remove(") && !index.contains("PinNoteDoor.setPinned("),
+                "no structure door is hand-copied in the Index any more")
+    }
+
+    // MARK: - VX-901: the Index face, DERIVED (the VX-829 two-faces precedent)
+
+    private static func facts(
+        _ kind: ReadingKind?, beside: Bool, window: Bool, star: Bool
+    ) -> BookNoteTitleFacts {
+        BookNoteTitleFacts(
+            bookKind: kind, canOpenBeside: beside, canOpenInNewWindow: window, canStar: star)
+    }
+
+    /// **The derivation over every fact**: on every book kind (book,
+    /// gathering, not read yet) × every subset of the composition's roads,
+    /// the Index face is EXACTLY the title menu's groups with the Index's own
+    /// pair at the head of the first (opening) group — or, where no opening
+    /// door drew, as a group of its own above the rest. So a door added to the
+    /// note-title menu reaches the Index by construction.
+    @Test func theIndexFaceIsTheTitleMenuWithItsOwnPairLeadingOverEveryFact() {
+        let pair: [BookNoteTitleDoor] = [.showInOutline, .openInFullEditor]
+        #expect(BookNoteTitleMenuTable.indexLocalDoors == pair)
+        var checked = 0
+        for kind: ReadingKind? in [.book, .gathering, nil] {
+            for mask in 0..<8 {
+                let facts = Self.facts(kind, beside: mask & 1 != 0, window: mask & 2 != 0, star: mask & 4 != 0)
+                let title = BookNoteTitleMenuTable.groups(facts)
+                let index = BookNoteTitleMenuTable.groups(facts, face: .indexRow)
+                let opening = facts.canOpenBeside || facts.canOpenInNewWindow || facts.canStar
+                let expected = opening
+                    ? [pair + title[0]] + Array(title.dropFirst())
+                    : [pair] + title
+                #expect(index == expected, "\(String(describing: kind)) mask \(mask): \(index)")
+                #expect(BookNoteTitleMenuTable.doors(facts, face: .indexRow)
+                        == pair + BookNoteTitleMenuTable.doors(facts), "flat, the same derivation")
+                #expect(BookNoteTitleMenuTable.doors(facts, face: .titleMenu)
+                        == BookNoteTitleMenuTable.doors(facts), "the source face is the default")
+                checked += 1
+            }
+        }
+        #expect(checked == 24)
+    }
+
+    /// The face her ruling asked for, spelled out on a BOOK's note with every
+    /// road: the Index's pair, then the note-title menu's whole set — Move to
+    /// Chapter ▸ and Pin to Top kept, Remove / Release kept, Archive · Delete
+    /// set apart last.
+    @Test func aBooksIndexRowCarriesTheNoteTitleSetBehindItsOwnPair() {
+        #expect(BookNoteTitleMenuTable.groups(Self.allRoads, face: .indexRow) == [
+            [.showInOutline, .openInFullEditor, .openBeside, .openInNewWindow, .star],
+            [.rename, .wingDoors, .export],
+            [.moveToChapter, .pin],
+            [.removeFromBook],
+            [.archive, .delete],
+        ])
+        #expect(BookNoteTitleMenuTable.doors(Self.allRoads, face: .indexRow).last == .delete)
+    }
+
+    /// A GATHERING's Index rows: the note's own doors, NO membership row — no
+    /// Move to Chapter, no Pin, no Remove and no "remove #tag" (her ruling, as
+    /// built: "which tag?").
+    @Test func aGatheringsIndexRowCarriesTheNoteOwnDoorsAndNoMembershipRow() {
+        var facts = Self.allRoads
+        facts.bookKind = .gathering
+        #expect(BookNoteTitleMenuTable.groups(facts, face: .indexRow) == [
+            [.showInOutline, .openInFullEditor, .openBeside, .openInNewWindow, .star],
+            [.rename, .wingDoors, .export],
+            [.archive, .delete],
+        ])
+        let acts = Set(BookNoteTitleMenuTable.doors(facts, face: .indexRow).flatMap(\.capabilities))
+        #expect(!acts.contains(.removeRuleTag) && !acts.contains(.removeFromBook)
+                && !acts.contains(.fileNoteInChapter) && !acts.contains(.pinNoteInBook))
+    }
+
+    /// The Index's own pair keeps its shipped words — local navigation, never
+    /// a registry act (it carries no capability).
+    @Test func theIndexsOwnPairKeepsItsWordsAndIsNoRegistryAct() {
+        #expect(BookNoteIndexActs.showInOutlineWord == "Show in Outline")
+        #expect(BookNoteIndexActs.openInFullEditorWord == "Open in the full editor")
+        #expect(BookNoteTitleDoor.showInOutline.capabilities.isEmpty)
+        #expect(BookNoteTitleDoor.openInFullEditor.capabilities.isEmpty)
+    }
+
+    /// **P-1's walk line for the new face** (the registry change): the Index
+    /// column's `.surface` declaration IS the derived face's acts (read from
+    /// the table, never a hand list), the same acts the title menu draws; each
+    /// is doored `.surface` (the walk's equality,
+    /// `CapabilityRegistryTests.theSurfacesRenderExactlyTheDeclaredSurfaceActs`,
+    /// unions this line) and keeps its `.contextMenu` door; and the eight
+    /// declarations VX-901 grew are named.
+    @Test func theIndexRowsDeclarationIsTheDerivedFacesActsDooredSurface() {
+        #expect(BookIndexColumn.surfaceCapabilities == BookNoteTitleMenuTable.capabilities(.indexRow))
+        #expect(Set(BookNoteTitleMenuTable.capabilities(.indexRow))
+                == Set(BookNoteTitleMenuTable.capabilities(.titleMenu)))
+        let surface = CapabilityRegistry.doored(.surface)
+        for act in BookIndexColumn.surfaceCapabilities {
+            #expect(surface.contains(act), "\(act) is doored .surface (the Index row's ⋯)")
+            #expect(CapabilityRegistry.capability(act).doors.contains(.contextMenu),
+                    "\(act) keeps its right-click door")
+        }
+        for act: CapabilityID in [
+            .openBeside, .openInNewWindow, .toggleStar, .renameNote, .moveNoteToWing,
+            .copyNoteToWing, .exportNote, .archiveNote,
+        ] {
+            #expect(CapabilityRegistry.capability(act).doors.contains(.surface), "VX-901 grew \(act)")
+        }
+        // The structure doors the Index ⋯ always declared are still there.
+        for act: CapabilityID in [.removeFromBook, .pinNoteInBook, .fileNoteInChapter, .deleteNote] {
+            #expect(BookIndexColumn.surfaceCapabilities.contains(act), "\(act)")
+        }
     }
 
     // MARK: - The asks' acts (the shared roads)

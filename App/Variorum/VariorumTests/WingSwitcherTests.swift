@@ -242,8 +242,12 @@ struct WingSwitcherTests {
         // focused note (`ShellActions.paletteActs`; the walk's palette line).
         // VX-632 (A JUSTIFIED EDIT, the same class — a new door on the same
         // acts): + `.menuBar` — ⌥⌘L / ⇧⌥⌘L, the View menu's chord items.
+        // VX-901 (the VX-914 run, batch 3 — A JUSTIFIED EDIT, the same class):
+        // + `.surface` — the book Index row's ⋯ now draws Move to Wing ▸ /
+        // Copy to Wing ▸ as part of the note-title table's DERIVED face
+        // (`BookNoteTitleMenuTable.capabilities(.indexRow)`).
         for id in [CapabilityID.moveNoteToWing, .copyNoteToWing] {
-            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu, .bottomBar, .palette, .menuBar])
+            #expect(CapabilityRegistry.capability(id).doors == [.contextMenu, .bottomBar, .palette, .menuBar, .surface])
             #expect(ShellActions.paletteActs.contains(id))
             #expect(CommitBar.renderedCapabilities.contains(id))
             #expect(TakesBottomBar.renderedCapabilities.contains(id))

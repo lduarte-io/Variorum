@@ -1658,3 +1658,24 @@ review-area contract, the pin bullet, the propose line) + MCPSpec (the rung sent
 (the general mend), in place with pointers. Bundle QUESTIONS #267; handoff `notes/handoffs/vx-808-handoff.md`.
 Born: VX-891 (the gathering-cursor asymmetry, Low) · VX-893 (the wing-mend recorded corners, Low). **Her deploy
 window + the release FINISH the stage — each at her explicit go.**
+
+**→ VX-912 CLOSED 2026-11-08 — UMBRELLA: OPEN-SOURCE GATING (the record `notes/plans/fixes/vx-912-open-source-gating.md`,
+FOR A LATER READER at its top; wave 3's Sync/-custody-slot run, /architect-phase, nov7 coordinating; PR #234, merge
+f22ac20ee).** The pre-OSS code gates, one day: VX-508 closed AT the kickoff sitting (her word — the dormant
+Apple-wrapped master copy DELETED in production; zero Apple-wrap rows remain); VX-751 TRIMMED at her ruling and run
+as the orchestrator's B0 (the 13y abuse-guard numbers verified EXACT in the deployed sync_push; every authenticated
+RPC door quota'd or exempt-with-reason; the exploit-text flag pass — VX-443 promoted into VX-849, VX-212/VX-475
+closed stale); VX-604 (the inert test host + Tools/assert-tests-ran, six stage legs incl. the crash reproduced
+red-on-old AT the stage); VX-893/VX-892 (the wing corners: the straggle belt as local-only one-shot state, the
+tier-3 anchor rank moved to earliest-filed `created_at`, the one dangling-wing rule — two corners sized BIG and
+returned to her unbuilt); VX-752 + the LICENSE rider (AGPLv3; 19 dependencies, NO incompatibility; the cold-clone
+build road PROVEN; README/CONTRIBUTING/SECURITY/BUILDING all PROVISIONAL for her pass; Issues ON at her word); the
+riders VX-891/VX-396 (the gathering-cursor fence rule; the U+0000 identifier guard at three seams). Her standing
+basis R-912-7a: "do it right, in a way that we won't regret 3 years from now, everywhere." The ladder: ONE round, 0
+BLOCKER/MAJOR (3 MINOR/2 NIT, all dispositions confirmed; zero fixes landed, so one round closed it). The gates:
+Mac WHOLE target 6139 executed / 0 failures / no pseudo-test node; phone 852/139 with only the standing caret red.
+Canon: SyncSpec §7 (the belt + the earliest-filed rank) + MCPSpec (the gathering cursor + the NUL guard) in place
+with pointers; QUESTIONS #268; the AppSpecRecord entry. Born: VX-917–VX-925 (triaged; the handoff lists them).
+NO lockstep event, no marker, no refresh owed (the wave's folded refresh is vx-914's). The night survived one Opus
+and one Fable budget death with zero commits lost. Handoff `notes/handoffs/vx-912-handoff.md`. **Her morning
+bundle: #268 + the B2 BIG-corner shapes + the B3 drafts' editorial pass + the GRDB-fork her-hands rows.**

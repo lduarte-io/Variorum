@@ -245,9 +245,14 @@ struct WingChordsAndLabelDoorTests {
         #expect(CapabilityRegistry.capability(.switchWing).doors.contains(.surface))
         #expect(RootView.surfaceCapabilities.contains(.switchWing), "the toolbar's label")
         // VX-738 (her R-736-7): the quick-entry bars' label is gone — the bar
-        // declares (and renders) no `.surface` door of its own any more.
-        #expect(!(try source("Features/Shelf/QuickEntryBar.swift")).contains("static let surfaceCapabilities"),
-                "the bars render no door of their own")
+        // declares (and renders) no WING door any more.
+        // VX-911 (the VX-914 run, batch 4 — A JUSTIFIED EDIT): the bar declares
+        // ONE `.surface` door again, its own File Without Opening button, so
+        // the source-absence check gives way to the declaration's exact set —
+        // which still holds no wing act.
+        #expect(QuickEntryBar.surfaceCapabilities == [.fileWithoutOpening],
+                "the bars render their own filing door and no wing door")
+        #expect(!QuickEntryBar.surfaceCapabilities.contains(.switchWing))
     }
 
     /// The press is ⌘L's own act in its window: the switcher's request (the
