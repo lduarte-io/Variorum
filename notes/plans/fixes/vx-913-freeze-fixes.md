@@ -194,7 +194,7 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 
 ## B2 RECORD (VX-889 + rider VX-343) — the implementer's record
 
-**NOT DONE (kept current; the first line by rule):** everything below row 0 — the record and both traced mechanisms are written; no code has landed yet. (Kept current as pieces land.)
+**NOT DONE (kept current; the first line by rule):** no Mac test has RUN (no stage claim — every App pin is compile-only, its runs PENDING); the VX-889 fix, VX-343, the gate list, the walk and the self-assessment are not yet written. Done: the record, both traced mechanisms, the VX-889 seam + pin (compiled). (Kept current as pieces land.)
 
 **Session note:** head at start 7ca38963a, tree clean. Required reading done in this session, nothing delegated: this record (B2 BRIEF, B1 BRIEF's Workspace paragraph, Environment traps, the binding principles) · the vx-878 record's BATCH 3 RECORD (the VX-889 residual, VX-816's design and citer list) · SurfaceContracts "The app" and "The Bookcase and books" · `notes/SessionResiliencyProtocol.md`. No `Sync/`, custody, editor seam, schema or canon is touched by this batch; SyncSpec/TEXTKIT2 therefore not binding reading. Commit messages avoid the guard's trigger words; commits are pathspec-limited (the orchestrator may commit record lines in this worktree).
 
@@ -203,7 +203,7 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 | # | Piece | Status |
 |---|---|---|
 | 0 | This record + both traced mechanisms, BEFORE any code | DONE (this commit) |
-| 1 | VX-889 seam (pre-fix behaviour kept) + the pin `VX889GatheringMintWingTests` | NOT STARTED — design below |
+| 1 | VX-889 seam (pre-fix behaviour kept) + the pin `VX889GatheringMintWingTests` | DONE (this commit) — the checked paths moved from the pane's `@State` to `TagsViewModel.gatheringChecks` (+ `setGatheringCheck`, `GatheringRequest`, `gatheringRequest()`); the door snapshots the request and presents the sheet by it (`.sheet(item:)`); `PromoteTagsSheet.mint(_:request:name:joinAll:)` is the old `promote()` body VERBATIM (it still names Home and ignores `request.wingID`; the adopt still never clears) — so the pin runs RED here. The pin: five arms A–E (design below). `build-for-testing` (own `-derivedDataPath DerivedData/vx913-b2`, niced) → ** TEST BUILD SUCCEEDED **; the one warning in the touched files (`spec(paths:joinAll:)` called from the runner's nonisolated closure) PRE-EXISTS on the old tree at the same call (old :1459, read from the B1 build's log) |
 | 2 | VX-889 red-on-old: the pin run on the seam commit | PENDING behind the stage (compile-only here) |
 | 3 | VX-889 fix | NOT STARTED — design below |
 | 4 | VX-343 pin (0.9.5's file the fixture) on the pre-fix parser, then the fix | NOT STARTED — design below |

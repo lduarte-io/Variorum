@@ -98,6 +98,36 @@ final class TagsViewModel {
         await run { ops in try ops.deleteTag(id) }
     }
 
+    // MARK: - VX-889 — Make a Gathering… (the VX-913 run, B2)
+
+    /// **The boxes checked for Make a Gathering…** — PATHS of the vocabulary
+    /// listed (`tags`, the shown wing's). Held here beside the list and its
+    /// wing, so the request below can pair them with the wing they were
+    /// checked in.
+    private(set) var gatheringChecks: Set<String> = []
+
+    func setGatheringCheck(_ path: String, _ on: Bool) {
+        if on { gatheringChecks.insert(path) } else { gatheringChecks.remove(path) }
+    }
+
+    /// **What the pane's door hands the sheet, SNAPSHOTTED at the press**:
+    /// the checked paths and the wing whose vocabulary they are (`shownWing`
+    /// — the wing the list IS). ONE value names the wing for the sheet's name
+    /// guard and its mint (`PromoteTagsSheet.mint`).
+    nonisolated struct GatheringRequest: Identifiable, Equatable, Sendable {
+        let wingID: String
+        let paths: [String]
+        var id: String { ([wingID] + paths).joined(separator: "\n") }
+    }
+
+    /// The request at the door's press — nil while nothing is checked (the
+    /// door is greyed then).
+    func gatheringRequest() -> GatheringRequest? {
+        gatheringChecks.isEmpty
+            ? nil
+            : GatheringRequest(wingID: shownWing.id, paths: gatheringChecks.sorted())
+    }
+
     // MARK: - VX-840 — the unused-tags sweep (the VX-828 run, batch E)
 
     /// **The shown wing's UNUSED tags, live** — every tag of the wing vx-809's

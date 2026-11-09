@@ -1122,8 +1122,10 @@ struct TagManagerPane: View {
     /// from its button (`TagDeletion` names the consequence).
     @State private var deleteTarget: Tag?
     @State private var nameField = ""
-    @State private var promoteTags: Set<String> = []
-    @State private var promoteSheet = false
+    /// VX-889: the Make a Gathering sheet's request — the checked paths and
+    /// the wing they were checked in, snapshotted at the door's press (the
+    /// checks themselves live on the model, beside the list they belong to).
+    @State private var promote: TagsViewModel.GatheringRequest?
     /// VX-840: the sweep sheet's boxes — a SNAPSHOT of the wing's unused tags
     /// taken at the door's press (the act re-checks every one inside its
     /// write, so the list need not move under her while she decides); nil
@@ -1168,10 +1170,8 @@ struct TagManagerPane: View {
                 ForEach(tags.tags, id: \.id) { tag in
                     HStack {
                         Toggle("", isOn: Binding(
-                            get: { promoteTags.contains(tag.path) },
-                            set: { on in
-                                if on { promoteTags.insert(tag.path) } else { promoteTags.remove(tag.path) }
-                            }))
+                            get: { tags.gatheringChecks.contains(tag.path) },
+                            set: { on in tags.setGatheringCheck(tag.path, on) }))
                         .labelsHidden()
                         .toggleStyle(.checkbox)
                         Text(String(repeating: "    ", count: tags.depth(of: tag)) + tag.name)
@@ -1239,8 +1239,8 @@ struct TagManagerPane: View {
                 // AND-joined or OR-joined; the tags stay on the posts. 13i-d
                 // U6 (a): the door names what it mints (it was "Promote to
                 // Book…", minting a gathering — "smart" retired, §1/§14).
-                Button("Make a Gathering…") { promoteSheet = true }
-                    .disabled(promoteTags.isEmpty)
+                Button("Make a Gathering…") { promote = tags.gatheringRequest() }
+                    .disabled(tags.gatheringChecks.isEmpty)
             }
             if let error = tags.lastError {
                 Text(error).font(.caption).alarmVoice()
@@ -1330,8 +1330,8 @@ struct TagManagerPane: View {
                 name: tag.name,
                 subtreeCount: TagDeletion.subtreeCount(of: tag, in: tags.tags)))
         }
-        .sheet(isPresented: $promoteSheet) {
-            PromoteTagsSheet(session: session, tagPaths: promoteTags.sorted())
+        .sheet(item: $promote) { request in
+            PromoteTagsSheet(session: session, request: request)
         }
     }
 }
@@ -1394,7 +1394,10 @@ struct UnusedTagsSheet: View {
 /// posts (R37 — trivially: nothing here touches applications).
 struct PromoteTagsSheet: View {
     let session: AppSession
-    let tagPaths: [String]
+    /// VX-889: the checked paths AND the wing they were checked in — the
+    /// pane's shown wing at the door's press.
+    let request: TagsViewModel.GatheringRequest
+    private var tagPaths: [String] { request.paths }
     @State private var name = ""
     @State private var joinAll = false
     @State private var error: String?
@@ -1440,24 +1443,35 @@ struct PromoteTagsSheet: View {
             : Queries.SmartQuerySpec(tags: paths)
     }
 
+    /// **The sheet's mint** (VX-889: hoisted from `promote()` so a pin reaches
+    /// the door's real body).
+    @discardableResult
+    static func mint(
+        _ session: AppSession, request: TagsViewModel.GatheringRequest,
+        name bookName: String, joinAll all: Bool
+    ) async throws -> Reading {
+        let paths = request.paths
+        return try await session.runner.run { ops in
+            // 13e E13 — this is a book-CREATING door with a free-text
+            // name, so it carries the same guard the shelf's does
+            // (her round-3 ruling). Inside the runner closure with
+            // the mint, for that guard's own reason.
+            // VX-816: of the wing the mint lands in — Home, where
+            // `createReading` below puts it (no wing passed).
+            try ops.assertBookNameIsFree(bookName, inWing: "")
+            return try ops.createReading(
+                name: bookName, kind: .gathering,
+                querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())
+        }
+    }
+
     private func promote() {
         let bookName = name.trimmingCharacters(in: .whitespaces)
-        let paths = tagPaths
+        let request = request
         let all = joinAll
         Task {
             do {
-                _ = try await session.runner.run { ops in
-                    // 13e E13 — this is a book-CREATING door with a free-text
-                    // name, so it carries the same guard the shelf's does
-                    // (her round-3 ruling). Inside the runner closure with
-                    // the mint, for that guard's own reason.
-                    // VX-816: of the wing the mint lands in — Home, where
-                    // `createReading` below puts it (no wing passed).
-                    try ops.assertBookNameIsFree(bookName, inWing: "")
-                    return try ops.createReading(
-                        name: bookName, kind: .gathering,
-                        querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())
-                }
+                try await Self.mint(session, request: request, name: bookName, joinAll: all)
                 dismiss()
             } catch {
                 // …and speaks the ops layer's refusal in the app's words
