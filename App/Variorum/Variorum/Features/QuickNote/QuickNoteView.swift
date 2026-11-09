@@ -566,9 +566,11 @@ enum QuickNoteMint {
         _ text: String, title: String? = nil, wingID: String = "", session: AppSession
     ) async -> Outcome {
         guard mints(text) else { return .nothingToFile }
-        // The landing as the store reads it: a live wing's name, else Home.
+        // The landing as the store reads it: a live wing's name, else Home —
+        // the keyed read (`Queries.liveWing`), not the whole wing table (the
+        // VX-915 ladder's F-8); no read at all on the Home fast path.
         let landingName: String? = wingID.isEmpty ? nil : (try? await session.database.read { db in
-            try Queries.wings(db).first { $0.id == wingID }?.name
+            try Queries.liveWing(db, id: wingID)?.name
         }) ?? nil
         let landing = landingName == nil ? "" : wingID
         do {
