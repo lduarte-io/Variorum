@@ -240,7 +240,7 @@ actor MCPSocketTransport: Transport {
     /// from whatever thread stops the server — so it NEVER WAITS: the write
     /// lock is only TRIED (a frame mid-write keeps it, and the line is skipped),
     /// and the line goes only when the socket takes it WHOLE without waiting
-    /// (else it is dropped — a client that stopped reading has a full buffer).
+    /// (else it is dropped — a client that stopped reading left it no room).
     /// The shim honours only a COMPLETE close line, so a miss falls back to its
     /// own sentence. True when the whole line was written.
     ///
@@ -248,14 +248,30 @@ actor MCPSocketTransport: Transport {
     /// socket from waiting on this macOS (probed: a send to a full buffer
     /// blocks with it set), so the line once BLOCKED its caller — the stop's
     /// thread, the main thread at her switch — until a stalled client read.
-    /// The send now goes only after the socket polls writable, and only a line
-    /// no longer than the step it then takes without waiting (`step`); a frame
-    /// whose rest waits on the writer is mid-write too.
+    /// So for its one write the socket's send low-water mark is set to the
+    /// line's length (never above the mark it had: the line is no longer than
+    /// `step`). XNU's send waits only while the free space is below both the
+    /// write's length and the mark — here both the line's length — and the
+    /// socket polls writable only while that space is at least the mark; so
+    /// the line goes exactly when the socket can take it whole, however much
+    /// less room that is than the 2,048 bytes a frame's step needs (the VX-940
+    /// ladder's F-R1-1), and it never waits. The mark is restored on every
+    /// path BEFORE the lock is let go, so no other write ever meets it, and
+    /// `step` (the fast road's cached value) never changes; a restore fails
+    /// only on a socket shut both ways, which fails every send at once
+    /// (probed). A mark that cannot be read or set leaves the step-gated
+    /// write: the line goes only while the socket polls writable at its own
+    /// mark. A frame whose rest waits on the writer is mid-write too.
     nonisolated func sayClosing(_ line: Data) -> Bool {
         guard writeLock.try() else { return false }
         defer { writeLock.unlock() }
         guard !frameGate.midFrame, line.count <= step else { return false }
-        let now = Self.writeWithoutWaiting(fd, line, step: step)
+        guard let mark = Self.sendLowWater(fd), Self.setSendLowWater(fd, line.count) else {
+            let now = Self.writeWithoutWaiting(fd, line, step: step)
+            return now.failure == nil && now.written == line.count
+        }
+        defer { _ = Self.setSendLowWater(fd, mark) }  // declared after the unlock's, so it runs first
+        let now = Self.writeWithoutWaiting(fd, line, step: line.count)
         return now.failure == nil && now.written == line.count
     }
 
@@ -351,10 +367,24 @@ actor MCPSocketTransport: Transport {
     /// The step `writeWithoutWaiting` may send once the socket polls writable:
     /// its send low-water mark (2,048 bytes by default), at least one byte.
     static func writeStep(_ fd: Int32) -> Int {
+        guard let mark = sendLowWater(fd), mark > 0 else { return 1 }
+        return mark
+    }
+
+    /// The socket's send low-water mark now, nil when it cannot be read.
+    static func sendLowWater(_ fd: Int32) -> Int? {
         var mark: Int32 = 0
         var size = socklen_t(MemoryLayout<Int32>.size)
-        guard getsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &mark, &size) == 0, mark > 0 else { return 1 }
+        guard getsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &mark, &size) == 0 else { return nil }
         return Int(mark)
+    }
+
+    /// Sets the socket's send low-water mark (VX-933, `sayClosing`'s one
+    /// write): true when it took. XNU refuses zero, a negative mark, and any
+    /// option once the socket is shut both ways (`EINVAL`).
+    static func setSendLowWater(_ fd: Int32, _ bytes: Int) -> Bool {
+        var mark = Int32(clamping: bytes)
+        return setsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &mark, socklen_t(MemoryLayout<Int32>.size)) == 0
     }
 
     static func writeAll(_ fd: Int32, _ data: Data) -> Bool {
