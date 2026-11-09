@@ -114,6 +114,9 @@ public final class MCPServerHost: @unchecked Sendable {
         lock.unlock()
         do {
             try operations.sweepMCPConnectionGrants()
+            #if DEBUG
+            startStepProbe?(.swept)
+            #endif
             let fd = try MCPSocketRoad.listen(directory: directory)
             var pipeFDs: [Int32] = [-1, -1]
             guard pipe(&pipeFDs) == 0 else {
@@ -121,6 +124,9 @@ public final class MCPServerHost: @unchecked Sendable {
                 MCPSocketRoad.unlink(directory: directory)
                 throw MCPSocketRoad.ListenError(kind: .failed(step: "pipe", errno: errno))
             }
+            #if DEBUG
+            startStepProbe?(.bound)
+            #endif
             let done = DispatchSemaphore(value: 0)
             lock.withLock {
                 listenFD = fd
@@ -274,6 +280,14 @@ public final class MCPServerHost: @unchecked Sendable {
     /// writes only — the VX-369 sweep's row 19). Read through the host at each
     /// read, so a probe set after a connection opened still reaches it.
     var handlerReadProbe: (() throws -> Void)?
+
+    /// TEST-ONLY (VX-613 — the VX-913 run, B3): THE START'S LATE STEPS, where a
+    /// pin holds a start the way a busy writer holds its sweep — `.swept` once
+    /// the while-connected sweep has run and before the bind, `.bound` once the
+    /// listener is bound and before it is published. Runs on the starting
+    /// thread; set before `start()`.
+    var startStepProbe: ((StartStep) -> Void)?
+    enum StartStep: Equatable, Sendable { case swept, bound }
     #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
