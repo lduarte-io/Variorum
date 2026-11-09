@@ -375,7 +375,7 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 | P5 | Counts — the suites alone + under a deliberately loaded full-parallel core run | NOT-STARTED |
 | P6 | Dispositions, PROVISIONALs, self-assessment | NOT-STARTED |
 
-**Load generators alive:** none (P1's 36 × `yes`, pids 70254–70289, killed by pid after loaded run 2; `pgrep -x yes` = 0). **Reverts in flight:** R-L STARTING — `observationLanePriority` = `.medium` in `Tests/VariorumCoreTests/Support/ObservationLane.swift` (the pre-revert state is committed `2896c9c31`; restore = `git checkout -- Tests/VariorumCoreTests/Support/ObservationLane.swift`). **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` — UNTRACKED, env-gated (`VX926_U3_PROBE=1`), NEVER committed; a successor deletes it unless this line says it is gone.
+**Load generators alive:** none (P1's 36 × `yes`, pids 70254–70289, killed by pid after loaded run 2; `pgrep -x yes` = 0). **Reverts in flight:** none — R-L applied, run (red 2 of 2) and restored by `git checkout` (diff empty; the pin green 3 of 3 after). **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` (env `VX926_U3_PROBE=1`) and `Tests/VariorumCoreTests/ZZVX926U3StarveArm.swift` (env `VX926_U3_STARVE=1`) — UNTRACKED, env-gated, NEVER committed; a successor deletes it unless this line says it is gone.
 
 ### PHASE 1 — the trace (what starves, with the evidence)
 
