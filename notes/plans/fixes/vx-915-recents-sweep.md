@@ -578,6 +578,8 @@ The window's order: THE RED RUNS first — FIRST ATTEMPT one combined rev tree s
 
 **nov7's ACK (2026-11-09, post-amendment):** the 73-type READY accepted at HEAD 69b9cbcae (nov7 independently verified the array — 73 names, no duplicates, each a declared TYPE at HEAD); window ~35–45 min, slot unchanged (after vx-926-fold → vx-849-batch2 → vx-926 c1/c2/mcp → M2, ~06:xx–07:xx), the watcher armed before the GO. The orchestrator's gap pre-build offer DECLINED with a load-rule clarification worth keeping: **a full build-for-testing counts as heavy headless even in a gap** — tonight's gaps are minutes wide, so the rev tree and the real tree build IN-WINDOW as recorded. VX-957/958 noted by nov7 for the bundle.
 
+**Main folded in BEFORE gate36 (merge 795bb7148, 2026-11-09):** origin/main 00c244f3f (vx-913's merge 22dc8b28f, PR #238, + two notes-only commits) merged in — a merge-in, never a rebase — textually clean. The 913∩915 overlap files EYE-READ on the merged tree per nov7's rule: `LibraryCatalogView.swift` — main added two VX-895 `.debugProbeScope(session)` modifiers (DEBUG-only), nowhere near this run's host edits; `AppSettingsView.swift` — main's hunks all sit in `TagManagerPane`/`UnusedTagsSheet`/`PromoteTagsSheet`, this run's `EditorSettingsPane` region untouched. The 73 gate names RE-CHECKED on the merged tree: each declared exactly once. gate36 runs on this tip; the closeout merge gate (whole Mac + phone) re-proves everything on the final merged tree as ever.
+
 ## THE LADDER
 
 *(One ladder over the run's whole diff at the batches' close; fresh cold reviewer per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings land here repo-first before any fix session sees them; reviewer choice per the cast line above.)*
