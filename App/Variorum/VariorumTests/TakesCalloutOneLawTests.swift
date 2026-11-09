@@ -22,9 +22,11 @@
 //  commit — the pre-fix frame reports it too), so both trees answer the same
 //  questions. RED ON OLD is verified by the behavioural revert (the fix's
 //  production files restored to the pin commit, this file at HEAD): the
-//  position lines fail there by 5 pt and 10 pt; the frame lines are the
-//  guard (green on both — the visible frame is kept, only the prose stops
-//  moving).
+//  position lines fail there by 5 pt and 10 pt in every arm, and at the
+//  card-threshold arm the comment face's rung (the gutter's width — the fix's
+//  second reader, `TakesBoardView.commentGutter`) fails too; the frame lines
+//  are the guard (green on both — the visible frame is kept, only the prose
+//  stops moving).
 //
 
 import AppKit
@@ -102,11 +104,19 @@ private func prose(_ pane: PaneTextView) -> (left: CGFloat, right: CGFloat, widt
 struct TakesCalloutOneLawTests {
     /// The arms: the frame wraps the row in every style, so the closed row,
     /// an open stack fan (its cards below the article cell) and an open margin
-    /// grid (the engaged rail inside the frame) are each asked.
+    /// grid (the engaged rail inside the frame) are each asked — at 1600 pt,
+    /// room for an engaged rail beside the 680 column, so both rows keep the
+    /// full column and the only difference between them is the frame. The
+    /// fourth arm sits the board AT THE CARD THRESHOLD (958 pt: the gutter's
+    /// `textLeft` is 147 — three points under Write's 150-pt card rung), where
+    /// a gutter that still counted the old 5-pt pad would seat a CARD on the
+    /// framed row and a badge on the plain one: the comment face's rung is the
+    /// second reader's discriminator (`TakesBoardView.commentGutter`).
     enum Arm: String, CaseIterable, Sendable, CustomTestStringConvertible {
-        case stackClosed, stackOpen, marginGridOpen
+        case stackClosed, stackOpen, marginGridOpen, stackClosedAtTheCardThreshold
         var style: FanStyle { self == .marginGridOpen ? .marginGrid : .stack }
-        var open: Bool { self != .stackClosed }
+        var open: Bool { self == .stackOpen || self == .marginGridOpen }
+        var boardWidth: CGFloat { self == .stackClosedAtTheCardThreshold ? 958 : 1600 }
         var testDescription: String { rawValue }
     }
 
@@ -151,6 +161,10 @@ struct TakesCalloutOneLawTests {
             _ = try ops.addBlockComment(to: framed.block.id, text: "Keep the frame, move nothing.")
             // Block 2 — PLAIN, the same shape of prose.
             let plain = try ops.newBlock(in: post.id, text: calloutProse("The plain block"))
+            // …commented too: its card is the second reader's measuring stick
+            // (both rows' cards are placed from one board width, so a legacy
+            // scroller's offset moves both alike).
+            _ = try ops.addBlockComment(to: plain.block.id, text: "The plain block's note.")
             _ = try ops.newBlock(in: post.id, text: "A short closing line.")
 
             let model = TakesViewModel(session: session, postID: post.id, defaults: defaults)
@@ -163,11 +177,7 @@ struct TakesCalloutOneLawTests {
 
             let scope = session.debugProbeScope
             TakesCalloutFrameGeometry.reset(scope)
-            // 1600 pt: room for an engaged margin rail beside the 680 column
-            // (the grid arm's composition widens by the rail), so both rows
-            // keep the full 680-pt column and the only difference between
-            // them is the frame.
-            let width: CGFloat = 1600
+            let width = arm.boardWidth
             let window = NSWindow(
                 contentRect: NSRect(x: 60, y: 60, width: width, height: 900),
                 styleMask: [.titled], backing: .buffered, defer: false)
@@ -192,6 +202,7 @@ struct TakesCalloutOneLawTests {
             await calloutSettle(window, hosting, until: {
                 articlePane(variant: framed.variant.id, in: hosting) != nil
                     && calloutCards(in: hosting).contains { $0.identity == framed.block.id }
+                    && calloutCards(in: hosting).contains { $0.identity == plain.block.id }
                     && articlePane(variant: plain.variant.id, in: hosting) != nil
                     && TakesCalloutFrameGeometry.frame(blockID: framed.block.id, in: scope) != nil
             })
@@ -226,19 +237,44 @@ struct TakesCalloutOneLawTests {
             #expect(TakesCalloutFrameGeometry.frame(blockID: plain.block.id, in: scope) == nil,
                     "\(arm): a plain block wears no frame")
 
-            // THE SECOND READER (green on both trees; red only if the board's
-            // gutter kept adding a pad the frame no longer insets): the framed
-            // row's comment card stands exactly its handle-lane clearance short
-            // of the prose — Write's ladder placed from the row's true edge.
-            let card = try #require(
+            // THE SECOND READER. (a) A guard: the framed row's comment face
+            // stands exactly as far short of ITS prose as the plain row's does
+            // of its own — green on both trees wherever both rows take the
+            // same rung (the 1600-pt arms: a face is placed relative to its
+            // row, so the gutter's width input does not move it there); at the
+            // threshold arm the pre-fix tree's rungs differ, so it reds there.
+            let framedCard = try #require(
                 calloutCards(in: hosting).first { $0.identity == framed.block.id },
                 "\(arm): the framed block's comment face is drawn")
-            let cardRight = card.convert(card.bounds, to: nil).maxX
-            #expect(abs(cardRight - (withFrame.left - BlockDecor.leftCardLane)) < 0.5,
+            let plainCard = try #require(
+                calloutCards(in: hosting).first { $0.identity == plain.block.id },
+                "\(arm): the plain block's comment face is drawn")
+            let framedGap = withFrame.left - framedCard.convert(framedCard.bounds, to: nil).maxX
+            let plainGap = without.left - plainCard.convert(plainCard.bounds, to: nil).maxX
+            #expect(abs(framedGap - plainGap) < 0.5,
                     """
-                    \(arm): the comment card ends its lane clearance short of the prose \
-                    (\(cardRight) vs \(withFrame.left - BlockDecor.leftCardLane))
+                    \(arm): the framed row's comment card stands as far from its prose as the \
+                    plain row's does (\(framedGap) vs \(plainGap))
                     """)
+            #expect(framedGap > 0, "\(arm): …left of the prose, in the gutter (\(framedGap))")
+            // (b) The discriminator: the gutter's WIDTH — the ladder's input —
+            // is a plain row's, so the two rows' faces take the same rung.
+            // Red on the pre-fix tree at the threshold arm (the framed row's
+            // content really sat 5 pt right, its gutter 5 pt wider: a card
+            // beside the plain row's badge), and red on a fix that moved the
+            // content but left `commentGutter` adding the pad.
+            let faces = BoardCommentFaceOracle.reader(scope, board: model)
+            let framedKind = faces.face(framed.block.id)?.kind
+            let plainKind = faces.face(plain.block.id)?.kind
+            #expect(framedKind != nil && framedKind == plainKind,
+                    """
+                    \(arm): a framed row's comment face takes the plain row's rung \
+                    (framed \(framedKind.map { "\($0)" } ?? "none"), plain \(plainKind.map { "\($0)" } ?? "none"))
+                    """)
+            if arm == .stackClosedAtTheCardThreshold {
+                #expect(plainKind == .badge,
+                        "fixture: the board sits under the card rung (the plain row's gutter seats the badge)")
+            }
         }
     }
 }
