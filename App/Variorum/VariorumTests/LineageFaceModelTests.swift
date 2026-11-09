@@ -283,6 +283,33 @@ struct LineageFaceModelTests {
         }
     }
 
+    /// **VX-920 (RED ON OLD — the VX-912 ladder's F-R1-1).** A member whose
+    /// note lives in Home, seen from a note in another wing, crosses the fence
+    /// as `.otherWing(wingID: "")` — and since VX-892 so does a member whose
+    /// note names a DEAD wing (the tree reads it as Home's `''`). Its line names
+    /// Home as the wing switcher names it (`WingWords.home`), never the empty
+    /// "the wing “”"; an id no live wing carries reads as Home too (the
+    /// dangling-wing rule, `Queries.effectiveWingID`); a live wing keeps its
+    /// own name.
+    @Test func aHomeMemberSeenFromAnotherWingIsNamedHome() {
+        func across(_ wingID: String) -> LineageFamily.Member {
+            LineageFamily.Member(
+                blockID: "b", direction: .descendant, depth: 1, generation: 1, originOp: "extract",
+                edgeType: .derivedFrom, place: .otherWing(wingID: wingID), shownTakeID: nil,
+                text: nil, counts: nil, acts: [.goToWing(wingID)], selectable: false)
+        }
+        let live = ["studio": "Studio"]
+        #expect(LineageFaceCopy.place(across(""), wingNames: live)
+            == WingCopy.lineageElsewhere(WingWords.home))
+        #expect(LineageFaceCopy.place(across(""), wingNames: live)
+            == "in another library \u{2014} the wing \u{201C}Home\u{201D}",
+            "RED ON OLD: \u{201C}the wing \u{201C}\u{201D}\u{201D} \u{2014} Home was never in the names")
+        #expect(LineageFaceCopy.place(across("gone"), wingNames: live)
+            == WingCopy.lineageElsewhere(WingWords.home), "a wing no live row carries reads as Home")
+        #expect(LineageFaceCopy.place(across("studio"), wingNames: live)
+            == WingCopy.lineageElsewhere("Studio"), "a live wing keeps its own name")
+    }
+
     // MARK: - Ladder R1-F1 — a relative's pending typing lands first
 
     /// A relative placed in ANOTHER note, open with typing the debounce has
