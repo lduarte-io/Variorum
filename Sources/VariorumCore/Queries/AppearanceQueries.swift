@@ -67,8 +67,23 @@ extension Queries {
         /// 13i-c U2 (§6 — "toggleable as a set; silence the common case"):
         /// the ownership BADGE family on or off as one switch. ON by default
         /// (PROVISIONAL P-13ic-10 — a synced setting, the `arrival_flash`
-        /// class); anything but "0" reads ON.
+        /// class); anything but "0" reads ON. **VX-934** (her ruling, the
+        /// VX-914 handoff sitting, #269): the BOOK-structure marks only — the
+        /// also-in-other-books mark and the "owned by" chip; the Private eye
+        /// left the family for `aiMarks` below.
         public var ownershipBadges = true
+        /// **VX-934 — the AI pair's own switch** (her ruling, the VX-914
+        /// handoff sitting, #269 — *"lets have one setting for 'show shared
+        /// with AI and private from AI' badges … and that setting should be in
+        /// MCP"*): the shared-with-AI icon AND the Private eye, on or off as
+        /// one switch, seated in Settings ▸ MCP. An AND on top of the marks'
+        /// own gates (an approved client; the rows drawn) — it reads nothing
+        /// itself. The `ownership_badges` precedent exactly: ON by default,
+        /// resolved here at READ time (no seed row, no migration); stored
+        /// "1"/"0" — a token, never prose, so `setting.value`'s PLAIN
+        /// classification holds; anything but "0" reads ON, so an
+        /// unrecognized value is her default, never a silent OFF.
+        public var aiMarks = true
 
         /// **THE VOICE A STORE READS WHEN IT CARRIES NONE: STUDY** (13s-b
         /// U1a — her ruling 2026-10-05, verbatim: *"default mode study is an
@@ -123,7 +138,7 @@ extension Queries {
                               'inline_comments', 'follow_the_scroll', 'fan_style',
                               'receipt_style', 'theme_palette', 'theme_tint',
                               'theme_accent_tint', 'arrival_flash',
-                              'hide_owned_default', 'ownership_badges')
+                              'hide_owned_default', 'ownership_badges', 'ai_marks')
                 """)
         var settings = ThemeSettings()
         // 13s-b U1a: the store's own default (no row, or an unreadable one).
@@ -167,6 +182,8 @@ extension Queries {
                 settings.hideOwnedByDefault = value == "1"
             case "ownership_badges":
                 settings.ownershipBadges = value != "0"
+            case "ai_marks":
+                settings.aiMarks = value != "0"
             default:
                 break
             }

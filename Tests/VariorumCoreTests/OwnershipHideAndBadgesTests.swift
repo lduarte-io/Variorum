@@ -109,6 +109,41 @@ struct OwnershipHideAndBadgesTests {
         }
     }
 
+    /// **VX-934 — the AI pair's own switch** (her ruling, #269: the badge
+    /// family SPLIT — the book marks keep `ownership_badges`, the shared icon
+    /// and the Private eye get one switch of their own, in Settings ▸ MCP). A
+    /// synced setting of the enum class: ON by default at READ (no seed row),
+    /// "1"/"0" stored, an unrecognized value reads her default, and the two
+    /// switches never move each other. An Improvement — the pin states the
+    /// new contract.
+    @Test func theAIMarksSwitchResolvesAtReadRoundTripsAndStandsApartFromTheBadges() throws {
+        try withOperations { ops, db in
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM setting WHERE key = 'ai_marks'") == 0,
+                    "no seed row — the default is the read's")
+            var settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.aiMarks == true && settings.ownershipBadges == true, "both ON by default")
+
+            try db.clearOutbox()
+            try ops.setAIMarks(false)
+            #expect(try db.outboxContains("setting", "ai_marks"), "synced — it rides the outbox")
+            #expect(try db.read { try String.fetchOne($0, sql: "SELECT value FROM setting WHERE key = 'ai_marks'") }
+                    == "0", "a token, never prose (the PLAIN promise)")
+            settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.aiMarks == false)
+            #expect(settings.ownershipBadges == true, "the AI switch leaves the book marks alone")
+
+            try ops.setOwnershipBadges(false)
+            try ops.setAIMarks(true)
+            settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.aiMarks == true && settings.ownershipBadges == false,
+                    "the book marks' switch leaves the AI pair alone")
+
+            // An unrecognized value is her default, never a silent OFF.
+            try db.write { try $0.execute(sql: "UPDATE setting SET value = 'x' WHERE key = 'ai_marks'") }
+            #expect(try db.read { try Queries.themeSettings($0) }.aiMarks == true)
+        }
+    }
+
     @Test func theBadgeFactsNameTheOwnerAndTheOtherBooksAndSaySilenceForFreeNotes() throws {
         try withOperations { ops, db in
             let w = try world(ops)
