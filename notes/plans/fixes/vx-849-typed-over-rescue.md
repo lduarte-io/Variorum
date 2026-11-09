@@ -1793,7 +1793,7 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record | DONE (this commit) |
-| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | NOT STARTED — the settled design below |
+| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | IN-PROGRESS — 1a the behavior pins on the PRE-FIX tree (this commit — the red-on-old SHA): core `StaleEnvelopeSweepScenarios` run here, **3 RED exactly as named / 4 green** (below); Mac `StaleEnvelopeSweepRoadTests` compiled (`build-for-testing` green), its runs PENDING (stage); 1b the fix next |
 | 2 | VX-152 — the lock's reentrancy, investigate-first | NOT STARTED — the trace below is read; the verdict lands with its piece |
 | 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | NOT STARTED |
 | 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | NOT STARTED |
@@ -1858,6 +1858,28 @@ points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
   carries every key the swept name can concern, under the current secrets — and the stub itself carries no lock at
   all. Rule 22 ("a key is deleted only after its replacement has been verified") holds a fortiori: the stub is not a
   key, and the deletion runs only after the open verified the key file that replaces it.
+
+**VX-443 piece 1a — the pins on the PRE-FIX tree (pre-fix API only — a file planted, the open, the verdict read):**
+- *Core, `Tests/VariorumCoreTests/Protection/Scenario/StaleEnvelopeSweepScenarios.swift` (the scenario world, whose
+  launch runs `assess`'s repairs):* THE PIN `theEnvelopeOfTheLibrarysOwnKeyIsGoneAfterTheNextOpen`;
+  `theEnvelopeOfThePreCrossingKeyIsGoneAfterTheNextOpen` (VX-912 B0's flag exactly — Use Castle's new key, the stub of
+  the old one, which rule 4 carried into the history); `aLostKeyFileAfterTheSweepIsTheLobbysToHealNeverAPreDesignStore`
+  (WHY: the key file lost while closed — the verdict must be `.lobby`, then the mirror written back). GUARDS:
+  `anOlderNameWhoseKeyThisLibraryNeverHadStays`, `theLegacyNameASetAsideAndANearMissStay`, `theSameNameBelowTheRootStays`
+  (Previous Libraries, this Mac's backup folder), `aStoreWithNoKeyFileOfThisDesignStillReadsAsPreDesign` (the detector).
+  **Run at this commit's tree (`swift test --filter StaleEnvelopeSweepScenarios`): `✘ 7 tests, 3 issues` — exactly the
+  three sweep pins at their named lines (the stub survives both opens; the lost-key-file verdict reads
+  `.preDesignStore`, value printed: `launch → .preDesignStore`); the four guards green.** (A first draft drove the key
+  file's loss through the world's `.tamper` step, which RELAUNCHES at once — the verdict then read an open library; the
+  loss is now made by hand while closed, as the plant is.)
+- *Mac, `App/Variorum/VariorumTests/Protection/StaleEnvelopeSweepRoadTests.swift` (the new road over planted leaves, a
+  temp slot with the real file leaves):* RED ON OLD BY BEHAVIOR — `theEnvelopeBesideAReopenedLibraryIsGone`,
+  `aLostKeyFileAfterTheSweepOpensThroughTheMirrorNeverThePreDesignFace` (old: the route lands in the lobby with her
+  pre-design face). GUARDS — `everyNameTheSweepDoesNotOwnStays` (the same name in Previous Libraries, this Mac's backup
+  folder, the far folder's root and its `Variorum/Backups/`, a picked folder outside the app's places; beside the slot a
+  stranger's fingerprint, the legacy name, a `.stale-` set-aside, two near misses), `theReadOnlyRoadSweepsNothing`,
+  `withNoKeyFileOfThisDesignThePreDesignFaceStandsAndNothingIsSwept`. Mac `build-for-testing` at this tree →
+  `** TEST BUILD SUCCEEDED **`. Their RUNS are the stage's (PENDING).
 
 **VX-152 — the trace read before the batch's code (the verdict lands as piece 2):** the lock road today is VX-445's
 (`AppBootstrap.lock()` → `lockOnNewRoad()` → `awaitTheLockSeam()` holding `ProtectionRoadSession.beginAct()`); sleep and
