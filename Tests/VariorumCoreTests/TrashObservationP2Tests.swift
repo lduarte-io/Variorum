@@ -62,42 +62,14 @@ private func countWriter(_ db: AppDatabase) throws -> () throws -> Int {
     }
 }
 
-/// A held observation's deliveries.
-private final class Held: @unchecked Sendable {
-    private let state = LockIsolated<[[Queries.TrashItem]]>([])
-
-    func deliver(_ value: [Queries.TrashItem]) { state.withValue { $0.append(value) } }
-    var count: Int { state.value.count }
-
-    /// Waits (polling) until a delivered value satisfies `accepts`.
-    ///
-    /// The ceiling is GENEROUS on purpose: this waits for an EVENT, it never
-    /// bounds a time. Values are delivered on the cooperative pool, which the
-    /// whole-package run saturates with blocking tests (the VX-685 class):
-    /// the first whole-package run of this suite saw a 30 s ceiling expire
-    /// before a held listing's first value arrived (the test took 288 s; green
-    /// in isolation in 1.3 s). A healthy delivery returns at once.
-    func value(
-        where accepts: ([Queries.TrashItem]) -> Bool, timeout: Duration = .seconds(300)
-    ) async throws -> [Queries.TrashItem]? {
-        let deadline = ContinuousClock.now + timeout
-        while ContinuousClock.now < deadline {
-            if let last = state.value.last, accepts(last) { return last }
-            try await Task.sleep(for: .milliseconds(2))
-        }
-        return nil
-    }
-}
-
-private func hold(
-    _ observation: AsyncValueObservation<[Queries.TrashItem]>, into held: Held
-) -> Task<Void, Never> {
-    Task {
-        do {
-            for try await value in observation { held.deliver(value) }
-        } catch {}
-    }
-}
+// The held listings ride `HeldValues` ON THE OBSERVATION LANE
+// (`Support/ObservationLane.swift`, VX-926 U3 — VX-625). Until then this file
+// held them on a private poll with a 300 s ceiling, raised from 30 s after the
+// first whole-package run saw the ceiling expire before a held listing's
+// first value arrived (the test took 288 s; green in isolation in 1.3 s): the
+// value was waiting on the cooperative pool's queue behind every test not yet
+// started, which a ceiling cannot outlast. On the lane the delivery is
+// milliseconds and the harness's one 30 s bound is ample.
 
 /// The kinds the Mac's Trash lists (`TrashScope.listedKinds`, app-side).
 private let listedKinds: Set<Queries.TrashItem.Kind> = [
@@ -162,28 +134,28 @@ struct TrashObservationP2Tests {
     /// observation inside the autosave's commit.
     @Test func aWriteWhileTheTrashIsOpenNeverPaysForItsListing() async throws {
         func writerWork(trashOpen: Bool, rounds: Int) async throws -> Int {
-            try await withOnDiskOperations { ops, db in
-                try seamNoteDeleted(ops, rounds: rounds)
-                let elsewhere = try ops.createPost(title: "elsewhere")
-                let typed = try ops.seedBlock(in: elsewhere.id, text: "alpha beta")
-                let now = Date(timeIntervalSince1970: 1_782_864_000 + 86_400)
-                var held: [Task<Void, Never>] = []
-                if trashOpen {
-                    let listing = Held(), total = Held()
-                    held = [
-                        hold(db.observeTrash(now: now, kinds: listedKinds, oldestFirst: false,
-                                             limit: 501, wingID: ""), into: listing),
-                        hold(db.observeTrash(now: now, kinds: listedKinds, oldestFirst: false,
-                                             limit: 1, wingID: ""), into: total),
-                    ]
-                    #expect(try await listing.value(where: { $0.contains { $0.kind == .preservedOriginal } }) != nil)
-                    #expect(try await total.value(where: { $0.count == 1 }) != nil)
+            try await onTheObservationLane {
+                try await withOnDiskOperations { ops, db in
+                    try seamNoteDeleted(ops, rounds: rounds)
+                    let elsewhere = try ops.createPost(title: "elsewhere")
+                    let typed = try ops.seedBlock(in: elsewhere.id, text: "alpha beta")
+                    let now = Date(timeIntervalSince1970: 1_782_864_000 + 86_400)
+                    var held: [HeldValues<[Queries.TrashItem]>] = []
+                    if trashOpen {
+                        let listing = HeldValues(db.observeTrash(
+                            now: now, kinds: listedKinds, oldestFirst: false, limit: 501, wingID: ""))
+                        let total = HeldValues(db.observeTrash(
+                            now: now, kinds: listedKinds, oldestFirst: false, limit: 1, wingID: ""))
+                        held = [listing, total]
+                        #expect(try await listing.latest(where: { $0.contains { $0.kind == .preservedOriginal } }) != nil)
+                        #expect(try await total.latest(where: { $0.count == 1 }) != nil)
+                    }
+                    let stop = try countWriter(db)
+                    try ops.autosave(typed.variant.id, text: "alpha gamma", charDelta: 5)
+                    let work = try stop()
+                    held.forEach { $0.cancel() }
+                    return work
                 }
-                let stop = try countWriter(db)
-                try ops.autosave(typed.variant.id, text: "alpha gamma", charDelta: 5)
-                let work = try stop()
-                held.forEach { $0.cancel() }
-                return work
             }
         }
         var added: [Int] = []
@@ -269,38 +241,39 @@ struct TrashObservationP2Tests {
     /// put back, a block deleted, a purge intent, a book deleted, a stranded
     /// original appearing.
     @Test func theOpenTrashFollowsEveryActStill() async throws {
-        try await withOnDiskOperations { ops, db in
-            let note = try ops.createPost(title: "a note")
-            _ = try ops.seedBlock(in: note.id, text: "Its words.")
-            let home = try ops.createPost(title: "home")
-            let block = try ops.seedBlock(in: home.id, text: "A block to delete.")
-            let book = try ops.createReading(name: "a book", kind: .book)
-            let now = Date(timeIntervalSince1970: 1_782_864_000 + 86_400)
-            let listing = Held()
-            let task = hold(db.observeTrash(
-                now: now, kinds: listedKinds, oldestFirst: false, limit: 501, wingID: ""), into: listing)
-            defer { task.cancel() }
-            func listed(_ id: String) -> ([Queries.TrashItem]) -> Bool { { $0.contains { $0.id == id } } }
-            func unlisted(_ id: String) -> ([Queries.TrashItem]) -> Bool { { !$0.contains { $0.id == id } } }
+        try await onTheObservationLane {
+            try await withOnDiskOperations { ops, db in
+                let note = try ops.createPost(title: "a note")
+                _ = try ops.seedBlock(in: note.id, text: "Its words.")
+                let home = try ops.createPost(title: "home")
+                let block = try ops.seedBlock(in: home.id, text: "A block to delete.")
+                let book = try ops.createReading(name: "a book", kind: .book)
+                let now = Date(timeIntervalSince1970: 1_782_864_000 + 86_400)
+                let listing = HeldValues(db.observeTrash(
+                    now: now, kinds: listedKinds, oldestFirst: false, limit: 501, wingID: ""))
+                defer { listing.cancel() }
+                func listed(_ id: String) -> ([Queries.TrashItem]) -> Bool { { $0.contains { $0.id == id } } }
+                func unlisted(_ id: String) -> ([Queries.TrashItem]) -> Bool { { !$0.contains { $0.id == id } } }
 
-            #expect(try await listing.value(where: { $0.isEmpty }) != nil, "an empty Trash first")
-            try ops.deleteContainer(note.id)
-            #expect(try await listing.value(where: listed(note.id)) != nil, "a deleted note lists")
-            try ops.restoreContainer(note.id)
-            #expect(try await listing.value(where: unlisted(note.id)) != nil, "put back, it leaves")
-            try ops.deleteBlock(block.block.id)
-            #expect(try await listing.value(where: listed(block.block.id)) != nil, "a deleted block lists")
-            _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: block.block.id)])
-            #expect(try await listing.value(where: unlisted(block.block.id)) != nil, "an intent fences it")
-            try ops.deleteReading(book.id)
-            #expect(try await listing.value(where: listed(book.id)) != nil, "a deleted book lists")
-            let fanned = try ops.seedBlock(in: home.id, text: "Alpha one. Beta one.")
-            let take2 = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
-            let w = try ops.divideW(fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
-            try ops.deleteBlock(w.first.block.id)
-            try ops.deleteBlock(w.second.block.id)
-            #expect(try await listing.value(where: listed(fanned.block.id)) != nil,
-                    "a stranded original lists when its family's last block goes")
+                #expect(try await listing.latest(where: { $0.isEmpty }) != nil, "an empty Trash first")
+                try ops.deleteContainer(note.id)
+                #expect(try await listing.latest(where: listed(note.id)) != nil, "a deleted note lists")
+                try ops.restoreContainer(note.id)
+                #expect(try await listing.latest(where: unlisted(note.id)) != nil, "put back, it leaves")
+                try ops.deleteBlock(block.block.id)
+                #expect(try await listing.latest(where: listed(block.block.id)) != nil, "a deleted block lists")
+                _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: block.block.id)])
+                #expect(try await listing.latest(where: unlisted(block.block.id)) != nil, "an intent fences it")
+                try ops.deleteReading(book.id)
+                #expect(try await listing.latest(where: listed(book.id)) != nil, "a deleted book lists")
+                let fanned = try ops.seedBlock(in: home.id, text: "Alpha one. Beta one.")
+                let take2 = try ops.branchVariant(fanned.block.id, from: fanned.variant.id)
+                let w = try ops.divideW(fanned.block.id, cuts: [fanned.variant.id: 10, take2.id: 10])
+                try ops.deleteBlock(w.first.block.id)
+                try ops.deleteBlock(w.second.block.id)
+                #expect(try await listing.latest(where: listed(fanned.block.id)) != nil,
+                        "a stranded original lists when its family's last block goes")
+            }
         }
     }
 }

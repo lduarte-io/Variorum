@@ -127,7 +127,7 @@ struct ReadModeTests {
         func close() {
             window.orderOut(nil)
             window.close()
-            UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+            NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(postID))
             // Batch G (row 82's revert run surfaced it): every world mints
             // the SAME post id (`.incrementing` from zero), and Read reports
             // its selection into `CurrentBlockMemory`, which PERSISTS under

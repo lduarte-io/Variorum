@@ -675,8 +675,8 @@ struct CanvasSwitcherRebindTests {
             }
             // Defaults hygiene (the 4G rule): deterministic ids recur across
             // runs — clear the view-memory keys the view would read.
-            UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(world.post)")
-            UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(world.post)")
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasViewMemory.\(world.post)")
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasSizeMemory.\(world.post)")
             let model = CanvasViewModel(session: session, containerID: world.post)
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 900, height: 700),

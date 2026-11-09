@@ -482,7 +482,7 @@ struct MastheadLayoutTests {
                 let tag = try session.operations.createTag(name: name)
                 _ = try session.operations.applyTag(tag.id, toPost: post.id)
             }
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
 
             // The voice: the live store, switched through its own setter.
             // …started and RESTORED by the one helper (round 2's NIT-2): the
@@ -509,7 +509,7 @@ struct MastheadLayoutTests {
                 defer {
                     window.orderOut(nil)
                     window.close()
-                    UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                    NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
                 }
                 let hosting = NSHostingView(
                     rootView: PostDetailView(session: session, postID: post.id)
@@ -763,7 +763,7 @@ struct MastheadLayoutTests {
                 let tag = try session.operations.createTag(name: name)
                 _ = try session.operations.applyTag(tag.id, toPost: post.id)
             }
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             // The voice: the live store, switched through its own setter
             // (the rows-58 rig's road).
             // …started and RESTORED by the one helper (round 2's NIT-2): the
@@ -791,7 +791,7 @@ struct MastheadLayoutTests {
                 defer {
                     window.orderOut(nil)
                     window.close()
-                    UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                    NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
                 }
                 let hosting = NSHostingView(
                     rootView: PostDetailView(session: session, postID: post.id)

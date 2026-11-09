@@ -140,14 +140,14 @@ final class SurfaceSizeMemory {
     /// A session-only memory (batch H's original).
     init() {
         self.namespace = nil
-        self.defaults = .standard
+        self.defaults = NoteMemoryDefaults.store
         self.fingerprint = { "" }
     }
 
     /// A memory that outlives the launch.
     init(
         _ namespace: Namespace,
-        defaults: UserDefaults = .standard,
+        defaults: UserDefaults = NoteMemoryDefaults.store,
         fingerprint: @escaping () -> String?
     ) {
         self.namespace = namespace
@@ -244,7 +244,7 @@ final class SurfaceSizeMemory {
     /// exists is asked for by nobody and dies with the model, while a
     /// `surfaceSize.*` key would otherwise sit in `UserDefaults` forever
     /// (18d ladder round 1, NIT-3).
-    static func forgetPersisted(_ surface: String, defaults: UserDefaults = .standard) {
+    static func forgetPersisted(_ surface: String, defaults: UserDefaults = NoteMemoryDefaults.store) {
         for namespace in Namespace.allCases {
             defaults.removeObject(forKey: key(namespace, surface))
         }

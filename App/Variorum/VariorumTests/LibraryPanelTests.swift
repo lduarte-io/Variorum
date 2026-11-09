@@ -464,9 +464,9 @@ struct LibraryPanelHostTests {
             }
             let router = session.commandRouter
             router.forgetCurrentBlock(for: post.id)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             defer {
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
                 router.forgetCurrentBlock(for: post.id)
             }
             // She was in block 2 and closed the note (the detail unmounted).

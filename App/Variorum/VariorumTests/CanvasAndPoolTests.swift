@@ -623,8 +623,8 @@ struct CanvasRealizationTests {
                 return (pool.id, block.id)
             }
             let memoryKey = "canvasSizeMemory.\(poolID)"
-            UserDefaults.standard.removeObject(forKey: memoryKey)
-            defer { UserDefaults.standard.removeObject(forKey: memoryKey) }
+            NoteMemoryDefaults.store.removeObject(forKey: memoryKey)
+            defer { NoteMemoryDefaults.store.removeObject(forKey: memoryKey) }
 
             let model = CanvasViewModel(session: session, containerID: poolID)
             model.adopt(try await db.read { try Queries.canvasProjection($0, container: poolID) })
@@ -637,7 +637,7 @@ struct CanvasRealizationTests {
                 height: CanvasBoardGeometry.defaultCardSize.height + 60))
 
             // Local memory has it; the store does NOT.
-            #expect(UserDefaults.standard.dictionary(forKey: memoryKey) != nil,
+            #expect(NoteMemoryDefaults.store.dictionary(forKey: memoryKey) != nil,
                     "size persists in the view-memory class (the ruling's (b))")
             #expect(try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM canvas_layout")
@@ -761,8 +761,8 @@ struct CanvasHostedRealizationTests {
             // Defaults hygiene (the 4G rule): this world's deterministic
             // IDs recur across runs — clean the view-memory keys the
             // view's loadViewMemory would read.
-            UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(postID)")
-            UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(postID)")
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasViewMemory.\(postID)")
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasSizeMemory.\(postID)")
 
             let model = CanvasViewModel(session: session, containerID: postID)
             CanvasCardMaterialization.count = 0

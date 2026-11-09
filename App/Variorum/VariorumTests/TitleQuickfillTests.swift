@@ -185,8 +185,8 @@ struct TitleQuickfillTests {
         try await withWorld { session, _ in
             let post = try session.operations.createPost()
             _ = try session.operations.newBlock(in: post.id, text: firstBlock)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
-            defer { UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)") }
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            defer { NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)") }
             try await withAdoptedTheme(session: session) { store in
                 let window = NSWindow(
                     contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),

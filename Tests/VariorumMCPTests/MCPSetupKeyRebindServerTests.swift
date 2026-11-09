@@ -48,7 +48,7 @@ struct MCPSetupKeyRebindServerTests {
             // served until it ends; the NEXT connection with that key refuses.
             let stillOpen = try await old.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
             #expect(stillOpen.isError != true, "a connection is decided once")
-            let (replacedFD, replaced) = try h.rawOpen(as: "claude-code", presenting: first, id: 4)
+            let (replacedFD, replaced) = try await h.rawOpen(as: "claude-code", presenting: first, id: 4)
             close(replacedFD)
             #expect(replaced["id"] as? Int == 4 && replaced["result"] == nil)
             #expect(message(replaced)?.contains("a newer setup replaced this one") == true,
@@ -57,7 +57,7 @@ struct MCPSetupKeyRebindServerTests {
             // Every other key road under the name still hears the ONE sentence.
             for (key, why) in [("vmk1_neverminted", "a key never issued"), (nil, "no key"),
                                (try h.setupKey(for: "codex"), "another name's key")] as [(String?, String)] {
-                let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: key, id: 5)
+                let (fd, answer) = try await h.rawOpen(as: "claude-code", presenting: key, id: 5)
                 close(fd)
                 #expect(message(answer) == MCPHandshake.refusal, "\(why): the one sentence")
                 #expect(message(answer)?.contains("newer setup") != true, "\(why): never the replaced sentence")

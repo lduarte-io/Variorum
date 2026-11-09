@@ -1533,9 +1533,9 @@ struct TourEntryTests {
             try ops.addPostToReading(chapter.id, to: prince.id)
             _ = try ops.createReading(name: TutorialSeeder.bookName, kind: .book)
             let memoryKey = "postMode.\(chapter.id)"
-            UserDefaults.standard.set(PostMode.takes.rawValue, forKey: memoryKey)
+            NoteMemoryDefaults.store.set(PostMode.takes.rawValue, forKey: memoryKey)
             defer {
-                UserDefaults.standard.removeObject(forKey: memoryKey)
+                NoteMemoryDefaults.store.removeObject(forKey: memoryKey)
                 session.commandRouter.forgetCurrentBlock(for: chapter.id)
             }
             let offer = TourOfferModel(defaults: defaults)
@@ -1576,7 +1576,7 @@ struct TourEntryTests {
             #expect(session.commandRouter.activeMode == .write,
                     "the tutorial won: Takes was driven to Write (\(String(describing: session.commandRouter.activeMode)))")
             #expect(engine.state.step == .write, "step 4 waits for her click, as designed")
-            #expect(UserDefaults.standard.string(forKey: memoryKey) == PostMode.write.rawValue,
+            #expect(NoteMemoryDefaults.store.string(forKey: memoryKey) == PostMode.write.rawValue,
                     "the only write is the switch's own memory, as any mode switch writes it")
             #expect(session.status.current == nil,
                     "nothing refused (\(String(describing: session.status.current?.text)))")
@@ -1629,7 +1629,7 @@ struct TourEntryTests {
                 "postMode.\(chapter.id)", TakesViewMemory.defaultsKeyPrefix + chapter.id,
             ]
             defer {
-                for key in memoryKeys { UserDefaults.standard.removeObject(forKey: key) }
+                for key in memoryKeys { NoteMemoryDefaults.store.removeObject(forKey: key) }
                 session.commandRouter.forgetCurrentBlock(for: chapter.id)
             }
             let offer = TourOfferModel(defaults: defaults)

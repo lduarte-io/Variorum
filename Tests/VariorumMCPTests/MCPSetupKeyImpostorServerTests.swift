@@ -52,7 +52,7 @@ struct MCPSetupKeyImpostorServerTests {
             // The real client: its open session served, its key still admitted.
             let served = try await real.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
             #expect(served.isError != true && text(served).contains("the harbour at dawn"), "\(text(served))")
-            let (fd, again) = try h.rawOpen(as: "claude-code", presenting: first, id: 7)
+            let (fd, again) = try await h.rawOpen(as: "claude-code", presenting: first, id: 7)
             close(fd)
             #expect(again["id"] as? Int == 7 && again["result"] != nil,
                     "the real key keeps connecting: \(String(describing: message(again)))")

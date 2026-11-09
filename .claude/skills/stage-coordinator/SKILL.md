@@ -176,10 +176,15 @@ hard-stopped), make sure it cleaned up, and finish what it missed:
   "none". Run `pgrep -fl "Problem Reporter"` yourself and read every new
   `~/Library/Logs/DiagnosticReports/Variorum-*.ips`; close a leftover dialog with
   `osascript -e 'tell application "Problem Reporter" to quit'`.
-- **Read the crash's faulting thread before accepting a session's label.** SIGSEGV at a stack
-  guard page inside `ABI.EncodedEvent.encode` → `JSONEncoder` → `Dictionary.reserveCapacity` is
-  swift-testing's own event encoder (VX-661's class). It is not product code. It trips when failing
-  tests emit large issue payloads, so the cure is to split the run, not to fix product code.
+- **Read the crash's faulting thread AND its bottom frames before accepting a session's label.**
+  A main-thread SIGSEGV at a stack guard page whose top sits in swift-testing's JSON encoding
+  (`ABI.EncodedEvent.encode` / `ABI.Record.encode` → `JSONEncoder` → the generic-metadata cache)
+  is not an encoder bug: it is the XCTest ↔ Swift Testing interop loop (VX-661/VX-690;
+  `notes/plans/fixes/vx-926-test-flakes.md`, U2) — an issue recorded while no test was running,
+  handed back and forth until the stack ran out (the report's recursion depth reads ~931). Its
+  BOTTOM frames name who recorded the issue (until VX-604, always the host's own launch).
+  Splitting the run does not cure it — short selections make it likelier; the cure is removing
+  the out-of-test report.
 - **Times run fast,** the sessions' and your own. Stamp memory lines with `$(date +%H:%M)` and
   correct release lines to `stage.log`. `Tools/stage renew` RESETS the clock to now+N; it doesn't
   add. Sessions forget a pre-approved renew and the claim lapses mid-run, so pre-approve it at T−10

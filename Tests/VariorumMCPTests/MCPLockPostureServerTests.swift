@@ -38,23 +38,26 @@ private func revokedAt(_ h: ServerHarness, _ grantID: String) throws -> String? 
 
 /// Every line the server writes to `fd` until it hangs up (each without its
 /// newline), read under the descriptor's receive bound.
-private func linesUntilEOF(_ fd: Int32) -> [Data] {
-    var lines: [Data] = []
-    var line = Data()
-    var byte: UInt8 = 0
-    while true {
-        let count = read(fd, &byte, 1)
-        if count < 0, errno == EINTR { continue }
-        guard count == 1 else { break }
-        if byte == UInt8(ascii: "\n") {
-            lines.append(line)
-            line = Data()
-        } else {
-            line.append(byte)
+/// VX-850: off the pool — the server writing them runs on the pool.
+private func linesUntilEOF(_ fd: Int32) async -> [Data] {
+    await HarnessWait.offPool {
+        var lines: [Data] = []
+        var line = Data()
+        var byte: UInt8 = 0
+        while true {
+            let count = read(fd, &byte, 1)
+            if count < 0, errno == EINTR { continue }
+            guard count == 1 else { break }
+            if byte == UInt8(ascii: "\n") {
+                lines.append(line)
+                line = Data()
+            } else {
+                line.append(byte)
+            }
         }
+        if !line.isEmpty { lines.append(line) }
+        return lines
     }
-    if !line.isEmpty { lines.append(line) }
-    return lines
 }
 
 /// The close line among `lines` (the 0x1E-led line VX-762's road writes), as words.
@@ -224,12 +227,12 @@ struct MCPLockPostureServerTests {
         defer { h.tearDown() }
         #expect(h.host.suspend())
         try h.lockStore()
-        let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: nil)
+        let (fd, answer) = try await h.rawOpen(as: "claude-code", presenting: nil)
         defer { close(fd) }
         #expect(answer["result"] != nil, "a bare shim's initialize is answered while held: \(answer)")
         try h.unlockStore()
         #expect(await h.host.resume(executor: SeededExecutor(operations: h.writeOperations)) == .resumed)
-        let lines = linesUntilEOF(fd)
+        let lines = await linesUntilEOF(fd)
         #expect(closeWords(lines) == MCPHandshake.refusal, "\(lines.map { String(decoding: $0, as: UTF8.self) })")
         #expect(h.host.connectedClientNames.isEmpty)
         #expect(try activity(h).first?.hasPrefix("claude-code ") == true, "the refusal is logged in words for her")
@@ -244,7 +247,7 @@ struct MCPLockPostureServerTests {
         let h = try ServerHarness(lockable: true)
         defer { h.tearDown() }
         try await h.within {
-            let (fd, _) = try h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"))
+            let (fd, _) = try await h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"))
             defer { close(fd) }
             _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .connection))
             #expect(try await h.eventually { h.host.connectedClientNames == ["claude-code"] })
@@ -256,7 +259,7 @@ struct MCPLockPostureServerTests {
                 for suffix in ["", "-wal", "-shm"] { try? FileManager.default.removeItem(atPath: other.path + suffix) }
             }
             #expect(await h.host.resume(executor: SeededExecutor(operations: h.writeOperations)) == .abandoned)
-            let lines = linesUntilEOF(fd)
+            let lines = await linesUntilEOF(fd)
             #expect(closeWords(lines) == MCPCloseWords.libraryClosed)
             try await Task.sleep(for: .milliseconds(300))
             #expect(try activity(h).isEmpty, "nothing written to the library now open")
@@ -303,7 +306,7 @@ struct MCPLockPostureServerTests {
     @Test func theQuitWhileLockedAndTheEdgesOfTheTwoRoads() async throws {
         let h = try ServerHarness(lockable: true)
         defer { h.tearDown() }
-        let (fd, _) = try h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"))
+        let (fd, _) = try await h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"))
         defer { close(fd) }
         #expect(try await h.eventually { h.host.connectedClientNames == ["claude-code"] })
         let logged = try activity(h)
@@ -314,7 +317,7 @@ struct MCPLockPostureServerTests {
                 "a resume before the store is open keeps the host suspended")
         #expect(h.host.state == .suspended)
         h.host.stopWithTheProcess()
-        #expect(closeWords(linesUntilEOF(fd)) == MCPCloseWords.quit)
+        #expect(closeWords(await linesUntilEOF(fd)) == MCPCloseWords.quit)
         try h.unlockStore()
         try await Task.sleep(for: .milliseconds(200))
         #expect(try activity(h) == logged, "a quit says nothing, locked or not")

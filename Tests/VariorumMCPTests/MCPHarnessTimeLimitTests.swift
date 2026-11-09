@@ -77,52 +77,58 @@ private final class FakePeer: @unchecked Sendable {
 struct MCPHarnessTimeLimitTests {
     /// A peer that never answers `initialize`: the harness's connect fails
     /// NAMED, inside its (shortened) limit — never a stalled run.
+    /// VX-850 (VX-353's suggestion): the bound is read on the deadline's OWN
+    /// clock (`firedAfter`, taken on its timer thread). The wall clock this
+    /// belt read before was taken after the test resumed — which needs a
+    /// cooperative-pool thread — so under a full pool it measured the pool
+    /// (16–73.8 s observed against this 1 s limit), never the harness.
     @Test func aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let peer = try FakePeer(h, .silent)
         defer { peer.stop() }
-        let started = ContinuousClock.now
         let failure = await HarnessDeadline.$seconds.withValue(1) {
             await #expect(throws: HarnessFailure.self) { _ = try await h.connect(as: "never-answered") }
         }
         #expect(failure?.description.contains("connect") == true, "\(String(describing: failure))")
-        #expect(ContinuousClock.now - started < .seconds(15), "bounded by the limit, not by the run")
+        #expect(failure?.firedAfter.map { $0 < .seconds(15) } == true,
+                "bounded by the limit, not by the run — on the deadline's own clock: \(String(describing: failure?.firedAfter))")
     }
 
     /// A peer that answers `initialize` and then nothing: the call fails
-    /// NAMED, inside its limit.
+    /// NAMED, inside its limit (VX-850: read on the deadline's own clock).
     @Test func aPeerThatNeverAnswersACallFailsTheCallNamedAndBounded() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let peer = try FakePeer(h, .answersInitializeOnly)
         defer { peer.stop() }
         let connection = try await h.connect(as: "never-called-back")
-        let started = ContinuousClock.now
         let failure = await HarnessDeadline.$seconds.withValue(1) {
             await #expect(throws: HarnessFailure.self) {
                 _ = text(try await connection.client.callTool(name: "list_books"))
             }
         }
         #expect(failure?.description.contains("list_books") == true, "\(String(describing: failure))")
-        #expect(ContinuousClock.now - started < .seconds(15), "bounded by the limit, not by the run")
+        #expect(failure?.firedAfter.map { $0 < .seconds(15) } == true,
+                "bounded by the limit, not by the run — on the deadline's own clock: \(String(describing: failure?.firedAfter))")
     }
 
     /// The SDK's own gap: a server that HANGS UP while a call is pending
     /// left that call waiting forever (nothing fails a pending request at
     /// EOF). The harness ends the client when its stream ends, so the call
     /// fails AT ONCE — well inside the default limit, so it is the hang-up,
-    /// not the deadline, that answers it.
+    /// not the deadline, that answers it. VX-850: said by WHAT answered (no
+    /// deadline expiry), not by a wall clock the pool's availability moves.
     @Test func aServerThatHangsUpMidCallFailsTheCallAtOnce() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let peer = try FakePeer(h, .hangsUpOnTheFirstCall)
         defer { peer.stop() }
         let connection = try await h.connect(as: "hung-up-on")
-        let started = ContinuousClock.now
-        await #expect(throws: (any Error).self) {
+        let thrown = await #expect(throws: (any Error).self) {
             _ = text(try await connection.client.callTool(name: "list_books"))
         }
-        #expect(ContinuousClock.now - started < .seconds(10), "the hang-up answers the call, never the deadline")
+        #expect((thrown as? HarnessFailure)?.firedAfter == nil,
+                "the hang-up answers the call, never the deadline: \(String(describing: thrown))")
     }
 }

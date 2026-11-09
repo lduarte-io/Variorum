@@ -37,7 +37,7 @@ final class TakesViewModel {
     /// Internal so the handoff tests can await deterministic flushes.
     @ObservationIgnored let autosave: AutosaveCoordinator
 
-    init(session: AppSession, postID: String, defaults: UserDefaults = .standard) {
+    init(session: AppSession, postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) {
         self.session = session
         self.postID = postID
         self.defaults = defaults

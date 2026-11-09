@@ -43,53 +43,6 @@ private func tempDirectory(_ prefix: String) -> URL {
         .appendingPathComponent("\(prefix)-\(UUID().uuidString.prefix(8))", isDirectory: true)
 }
 
-/// A raw client on `directory`'s socket that NAMES ITSELF: its setup key's
-/// preamble, then an `initialize` as `name`, the server's answer read (a bounded
-/// receive — 5 s). The caller closes the descriptor.
-private func namedClient(_ directory: URL, key: String, as name: String) throws -> Int32 {
-    guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
-        throw HarnessFailure("could not connect as \(name)")
-    }
-    var timeout = timeval(tv_sec: 5, tv_usec: 0)
-    _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-    var opening = MCPPreamble.line(key: key)
-    let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
-    opening.append(Data((initialize + "\n").utf8))
-    _ = MCPShim.writeAll(fd, opening)
-    guard !MCPShim.readFirstLine(fd, limit: 1 << 20).isEmpty else {
-        close(fd)
-        throw HarnessFailure("\(name) got no answer to its initialize")
-    }
-    return fd
-}
-
-/// The server hung this connection up: reading reaches EOF (anything the server
-/// still had to say is read past) within the 5 s receive bound — false on a
-/// timeout, i.e. a connection still open.
-private func reachesEOF(_ fd: Int32) -> Bool {
-    var buffer = [UInt8](repeating: 0, count: 4096)
-    while true {
-        let count = read(fd, &buffer, buffer.count)
-        if count == 0 { return true }
-        if count < 0 { return false }
-    }
-}
-
-/// Every byte until EOF (nil on a timeout — the connection still open). VX-777.
-private func everyByteUntilEOF(_ fd: Int32) -> Data? {
-    var all = Data()
-    var buffer = [UInt8](repeating: 0, count: 4096)
-    while true {
-        let count = read(fd, &buffer, buffer.count)
-        if count == 0 { return all }
-        if count < 0 {
-            if errno == EINTR { continue }
-            return nil
-        }
-        all.append(contentsOf: buffer[0..<count])
-    }
-}
-
 private func eventually(_ condition: () throws -> Bool) async throws -> Bool {
     for _ in 0..<300 {
         if try condition() { return true }
@@ -115,7 +68,7 @@ struct MCPStopRoadsServerTests {
             executor: SeededExecutor(operations: h.writeOperations))
         weak var released = host
         try host?.start()
-        let fd = try namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let fd = try await namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(fd) }
         #expect(host?.connectedClientNames == ["claude-code"], "the connection named itself")
 
@@ -123,7 +76,7 @@ struct MCPStopRoadsServerTests {
         host?.stopWithTheProcess()
         host = nil
         #expect(released == nil, "the host is gone before its session finishes ending — the door's road")
-        #expect(reachesEOF(fd), "the connection ends with the server")
+        #expect(await reachesEOF(fd), "the connection ends with the server")
         try await Task.sleep(for: .milliseconds(400))
         let logged = try ends(h.database)
         #expect(logged.isEmpty, "a quit says nothing (P-VX394-5): \(logged)")
@@ -140,7 +93,7 @@ struct MCPStopRoadsServerTests {
             database: h.database, operations: h.operations, directory: directory, version: "test",
             executor: SeededExecutor(operations: h.writeOperations))
         try host.start()
-        let fd = try namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let fd = try await namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         close(fd)
         #expect(try await eventually { try ends(h.database).count == 1 }, "the client's close is said")
         host.stopWithTheProcess()
@@ -213,17 +166,21 @@ struct MCPStopRoadsServerTests {
         let key = try h.setupKey(for: "latecomer")
         let late = LockIsolated<Int32>(-1)
         let probed = LockIsolated(false)
+        let seconds = HarnessWait.receiveSeconds   // read in the task: the probe runs on the stop's thread
         h.host.stopWindowProbe = { [directory = h.directory] in
             guard !probed.value else { return }
             probed.setValue(true)
-            late.setValue((try? namedClient(directory, key: key, as: "latecomer")) ?? -1)
+            late.setValue((try? namedClientBlocking(directory, key: key, as: "latecomer", receiveSeconds: seconds)) ?? -1)
         }
-        h.host.stop(ending: .serverOff)
+        // VX-850: the probe's wait runs inside this stop, on the thread that
+        // calls it — so the stop is made off the pool (the latecomer's session
+        // needs a pool thread to answer it).
+        await HarnessWait.offPool { h.host.stop(ending: .serverOff) }
         let fd = late.value
         #expect(fd >= 0, "the latecomer was accepted and named itself while the server stopped")
         guard fd >= 0 else { return }
         defer { close(fd) }
-        #expect(reachesEOF(fd), "the stop hangs up every connection it served — the latecomer included")
+        #expect(await reachesEOF(fd), "the stop hangs up every connection it served — the latecomer included")
         #expect(try await eventually { try ends(h.database).count == 1 }, "its end is said")
         let logged = try ends(h.database)
         #expect(logged.map(\.client) == ["latecomer"] && logged.map(\.act) == [MCPConnectionEnd.serverOff.act],
@@ -255,12 +212,12 @@ struct MCPStopRoadsServerTests {
         try road.stop(fresh)
         // …and the start completes anyway: the host binds and accepts a client.
         try fresh.start()
-        let fd = try namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let fd = try await namedClient(directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(fd) }
         #expect(fresh.connectedClientNames == ["claude-code"], "the client was served in the host's moments of life")
         // The completion arm, byte for byte: `fresh.stop()`.
         fresh.stop()
-        let bytes = everyByteUntilEOF(fd) ?? Data()
+        let bytes = await everyByteUntilEOF(fd) ?? Data()
         let expected = MCPCloseLine.line(road.words)!
         #expect(bytes.suffix(expected.count) == expected,
                 "\(road): the close line says the road that let the host go: \(String(decoding: bytes.suffix(200), as: UTF8.self))")
@@ -289,11 +246,11 @@ struct MCPStopRoadsServerTests {
         var held: [Int32] = []
         defer { held.forEach { close($0) } }
         for index in 0..<MCPServerHost.sessionCap {
-            held.append(try namedClient(h.directory, key: try h.setupKey(for: "c\(index)"), as: "c\(index)"))
+            held.append(try await namedClient(h.directory, key: try h.setupKey(for: "c\(index)"), as: "c\(index)"))
         }
         #expect(try await eventually { h.host.connectedClientNames.count == MCPServerHost.sessionCap })
-        let capped = try namedClient(h.directory, key: try h.setupKey(for: "capped"), as: "capped")
-        #expect(reachesEOF(capped), "answered with the cap's sentence, then closed")
+        let capped = try await namedClient(h.directory, key: try h.setupKey(for: "capped"), as: "capped")
+        #expect(await reachesEOF(capped), "answered with the cap's sentence, then closed")
         close(capped)
         try await Task.sleep(for: .milliseconds(300))
         #expect(try ends(h.database).isEmpty, "nothing said for a connection the cap refused")

@@ -62,7 +62,7 @@ struct ReadArrivalMeasureTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(post.id))
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(post.id))
                 session.commandRouter.forgetCurrentBlock(for: post.id)
             }
             let hosting = NSHostingView(rootView: AnyView(

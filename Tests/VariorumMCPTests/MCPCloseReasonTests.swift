@@ -144,40 +144,6 @@ private func tempDirectory(_ prefix: String) -> URL {
         .appendingPathComponent("\(prefix)-\(UUID().uuidString.prefix(8))", isDirectory: true)
 }
 
-/// A raw client on `directory`'s socket that names itself (its key's preamble, an
-/// `initialize`, the answer read under the harness's receive bound — `HarnessDeadline.seconds`, O-7).
-private func namedClient(_ directory: URL, key: String, as name: String) throws -> Int32 {
-    guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
-        throw HarnessFailure("could not connect as \(name)")
-    }
-    var timeout = timeval(tv_sec: Int(HarnessDeadline.seconds.rounded(.up)), tv_usec: 0)
-    _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-    var opening = MCPPreamble.line(key: key)
-    let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
-    opening.append(Data((initialize + "\n").utf8))
-    _ = MCPShim.writeAll(fd, opening)
-    guard !MCPShim.readFirstLine(fd, limit: 1 << 20).isEmpty else {
-        close(fd)
-        throw HarnessFailure("\(name) got no answer to its initialize")
-    }
-    return fd
-}
-
-/// Every byte until EOF (nil on a timeout — the connection still open).
-private func readToEOF(_ fd: Int32) -> Data? {
-    var all = Data()
-    var buffer = [UInt8](repeating: 0, count: 4096)
-    while true {
-        let count = read(fd, &buffer, buffer.count)
-        if count == 0 { return all }
-        if count < 0 {
-            if errno == EINTR { continue }
-            return nil
-        }
-        all.append(contentsOf: buffer[0..<count])
-    }
-}
-
 /// The connection-end rows, oldest first, as (client, act).
 private func ends(_ database: AppDatabase) throws -> [(client: String, act: String)] {
     let acts = Set(MCPConnectionEnd.allCases.map(\.act))
@@ -216,13 +182,13 @@ struct MCPCloseReasonServerTests {
     /// **RED ON OLD** (behavioural revert): each stop with a reason writes ONE
     /// close line, the connection's last bytes before EOF, carrying its words.
     @Test(arguments: StopWithAReason.allCases)
-    func eachStopSaysItsWordsAsTheConnectionsLastLine(_ road: StopWithAReason) throws {
+    func eachStopSaysItsWordsAsTheConnectionsLastLine(_ road: StopWithAReason) async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let fd = try namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let fd = try await namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(fd) }
         try road.stop(h.host)
-        let stream = readToEOF(fd)
+        let stream = await everyByteUntilEOF(fd)
         #expect(stream != nil, "\(road): the stop ends the connection")
         let bytes = stream ?? Data()
         let expected = MCPCloseLine.line(road.words)!
@@ -233,7 +199,7 @@ struct MCPCloseReasonServerTests {
 
     /// A connection still in its handshake (its opening not yet read — no
     /// transport) is told nothing: it has not named itself.
-    @Test func aConnectionStillInItsHandshakeIsToldNothing() throws {
+    @Test func aConnectionStillInItsHandshakeIsToldNothing() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
@@ -244,19 +210,19 @@ struct MCPCloseReasonServerTests {
         _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         let nobodyNamed = h.host.connectedClientNames.isEmpty
         #expect(nobodyNamed, "nothing named itself")
-        Thread.sleep(forTimeInterval: 0.1)  // the session is reading its opening
+        try await Task.sleep(for: .milliseconds(100))  // the session is reading its opening (VX-850: suspended, not holding a pool thread the session needs)
         h.host.stop(ending: .libraryClosed)
-        let bytes = readToEOF(fd) ?? Data()
+        let bytes = await everyByteUntilEOF(fd) ?? Data()
         #expect(!bytes.contains(MCPCloseLine.marker), "no close line before a name: \(bytes.count) bytes")
     }
 
     /// **A-771-3 (2) — the try()-lock skip road:** a frame mid-write holds the
     /// transport's write lock as the server stops; the close line is SKIPPED,
     /// the stop never waits on it, and the connection still ends.
-    @Test func aContendedWriteLockSkipsTheLineAndNeverBlocksTheStop() throws {
+    @Test func aContendedWriteLockSkipsTheLineAndNeverBlocksTheStop() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let fd = try namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
+        let fd = try await namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(fd) }
         let holder = LockHolder()
         h.host.hangUpProbe = { session in
@@ -270,7 +236,7 @@ struct MCPCloseReasonServerTests {
         #expect(took < 1.0, "the stop never waits on the write lock: \(took) s")
         let held = holder.wasHeld
         #expect(held, "the lock was held as the server stopped")
-        let bytes = readToEOF(fd)
+        let bytes = await everyByteUntilEOF(fd)
         holder.release()
         #expect(bytes != nil, "the connection still ends")
         #expect(!(bytes ?? Data()).contains(MCPCloseLine.marker), "the line was skipped, never written mid-frame")
@@ -286,10 +252,10 @@ struct MCPCloseReasonServerTests {
 
         let quitting = try ServerHarness()
         defer { quitting.tearDown() }
-        let quitFD = try namedClient(quitting.directory, key: try quitting.setupKey(for: "claude-code"), as: "claude-code")
+        let quitFD = try await namedClient(quitting.directory, key: try quitting.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(quitFD) }
         quitting.host.stopWithTheProcess()
-        let quitBytes = readToEOF(quitFD) ?? Data()
+        let quitBytes = await everyByteUntilEOF(quitFD) ?? Data()
         #expect(quitBytes.contains(MCPCloseLine.marker), "the quit now says why on the wire")
         try await Task.sleep(for: .milliseconds(400))
         let quitLogged = try ends(quitting.database)
@@ -297,11 +263,11 @@ struct MCPCloseReasonServerTests {
 
         let locking = try ServerHarness()
         defer { locking.tearDown() }
-        let lockFD = try namedClient(locking.directory, key: try locking.setupKey(for: "claude-code"), as: "claude-code")
+        let lockFD = try await namedClient(locking.directory, key: try locking.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(lockFD) }
         try locking.host.recordConnectionEnds(.libraryClosed)
         locking.host.stop(ending: .libraryClosed)
-        _ = readToEOF(lockFD)
+        _ = await everyByteUntilEOF(lockFD)
         try await Task.sleep(for: .milliseconds(400))
         let lockLogged = try ends(locking.database)
         #expect(lockLogged.map(\.client) == ["claude-code"]
@@ -349,7 +315,7 @@ struct MCPShimCloseReasonTests {
     /// and returns (stdout bytes after the initialize answer, stderr).
     private func pumped(
         _ h: ServerHarness, stop: (MCPServerHost) throws -> Void
-    ) throws -> (answer: Data, stdout: Data, stderr: String) {
+    ) async throws -> (answer: Data, stdout: Data, stderr: String) {
         guard case .success(let socket) = MCPSocketRoad.connect(directory: h.directory) else {
             throw HarnessFailure("could not connect")
         }
@@ -369,11 +335,15 @@ struct MCPShimCloseReasonTests {
         pump.start()
         let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"shim-test","version":"1"}}}"#
         _ = MCPShim.writeAll(input[1], Data((initialize + "\n").utf8))
-        let answer = MCPShim.readFirstLine(output[0], limit: 1 << 20)
+        let clientReads = output[0]
+        // VX-850: off the pool — the session answering through the pump needs a pool thread.
+        let answer = await HarnessWait.offPool { MCPShim.readFirstLine(clientReads, limit: 1 << 20) }
         try stop(h.host)
-        _ = served.wait(timeout: .now() + 10)
+        // Bounded waits on the pump's own thread — awaited off the pool (a
+        // semaphore can't be waited on from an async context).
+        _ = await HarnessWait.offPool { served.wait(timeout: .now() + 10) == .success }
         close(input[1])
-        _ = upstreamEnded.wait(timeout: .now() + 10)
+        _ = await HarnessWait.offPool { upstreamEnded.wait(timeout: .now() + 10) == .success }
         close(socket)
         close(output[1])
         close(errors[1])
@@ -398,10 +368,10 @@ struct MCPShimCloseReasonTests {
     /// **RED ON OLD** (behavioural revert): the library locks under a live session
     /// pumped by the shim — its stderr is ONE line, the lock road's words; its
     /// stdout carried the answer and nothing of the close line.
-    @Test func theLockRoadsWordsReachTheClientsStderr() throws {
+    @Test func theLockRoadsWordsReachTheClientsStderr() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let out = try pumped(h) { host in
+        let out = try await pumped(h) { host in
             try host.recordConnectionEnds(.libraryClosed)
             host.stop(ending: .libraryClosed)
         }
@@ -412,7 +382,7 @@ struct MCPShimCloseReasonTests {
 
     /// A-771-3 (2): the contended lock's skip road, seen by the client — no line
     /// came, so the shim says its own generic sentence.
-    @Test func aSkippedCloseLineLeavesTheGenericSentence() throws {
+    @Test func aSkippedCloseLineLeavesTheGenericSentence() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         let holder = LockHolder()
@@ -420,7 +390,7 @@ struct MCPShimCloseReasonTests {
             guard let lock = session.transportWriteLockForTesting else { return }
             holder.hold(lock)
         }
-        let out = try pumped(h) { host in host.stop(ending: .serverOff) }
+        let out = try await pumped(h) { host in host.stop(ending: .serverOff) }
         h.host.hangUpProbe = nil
         let held = holder.wasHeld
         holder.release()
