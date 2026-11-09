@@ -18,9 +18,11 @@
 //  memories are keyed by note id while the fixtures mint ids `.incrementing` from zero — so
 //  every mounted suite used to persist its notes' memories into the dev app's REAL domain
 //  (`io.lduarte.Variorum.debug`), where a later suite (in this run or any later one) minting
-//  the same id read them back: the domain held 2,731 such keys by 2026-10-28, and VX-695's
-//  band test went red machine-wide on them and green the moment they were scrubbed (the
-//  two-direction proof). The decision is the inert host's (VX-604): `AppBootstrap.Launch` —
+//  the same id could read them back: by 2026-10-28 the domain held 2,622 such keys (of its
+//  2,731). VX-695's band test went red machine-wide on that accumulated domain and green
+//  after the 10-28 scrub removed exactly these families — a cause shown by subtraction only;
+//  the road inside the test is NOT yet traced (VX-695 is PENDING its discriminating legs
+//  A/A′/B — the U4 record). The decision is the inert host's (VX-604): `AppBootstrap.Launch` —
 //  IssueReporting's `isTesting`, decided once per process. A run therefore starts with no
 //  memory at all and never reads an earlier run's; the dev app's domain is never written by a
 //  test host; and a pin that plants a memory plants it HERE (`store`), the domain the product

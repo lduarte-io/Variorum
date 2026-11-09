@@ -181,7 +181,7 @@ struct MCPDiscoverProbeServerTests {
         defer { socket.close() }
         socket.send(preamble: key, CapturedClaudeCode.probe)
 
-        let probeAnswer = await socket.next()   // bounded: 5 s
+        let probeAnswer = await socket.next()   // bounded: the harness's one bound
         #expect(probeAnswer?["id"] as? String == CapturedClaudeCode.probeID,
                 "answered while the client waits: \(String(describing: probeAnswer))")
         #expect(errorOf(probeAnswer).code == -32601)

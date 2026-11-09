@@ -5,8 +5,10 @@
 //  **VX-926 U4 — the per-note memories' ONE defaults domain** (VX-97 · VX-666 · VX-695;
 //  `notes/plans/fixes/vx-926-test-flakes.md`, "## U4 record"). The test host IS the dev app,
 //  and every per-note view memory used to persist into its REAL domain
-//  (`io.lduarte.Variorum.debug`) under fixture ids that repeat — 2,731 keys by 2026-10-28,
-//  and VX-695's band test red machine-wide on them. `NoteMemoryDefaults` is the one seam:
+//  (`io.lduarte.Variorum.debug`) under fixture ids that repeat — 2,622 such keys (of the
+//  domain's 2,731) by 2026-10-28, and VX-695's band test red machine-wide on that domain (its
+//  cause shown by subtraction only, its road not yet traced — VX-695 is PENDING its legs
+//  A/A′/B). `NoteMemoryDefaults` is the one seam:
 //  the app's own domain in the app, a suite of the host's own, emptied at the ask, under a
 //  test runner. What these hold:
 //

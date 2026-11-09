@@ -8,8 +8,10 @@ import Testing
 /// sizes, the current block, the mode, Read's face, the Takes board's columns and slot
 /// heights, the Canvas's view memory, the book Index's grouping). Its test host IS the dev
 /// app, so every one of them used to persist test fixtures' memories into the dev app's REAL
-/// domain, where later suites read them back (VX-695: red machine-wide on 2,731 such keys,
-/// green the moment they were scrubbed). The fix is ONE seam, `NoteMemoryDefaults.store`
+/// domain, where later suites could read them back (VX-695's band test went red machine-wide
+/// on the accumulated domain — 2,622 such keys of its 2,731 — and green after the 10-28 scrub
+/// removed exactly them: a cause shown by subtraction only, its road inside the test not yet
+/// traced, VX-695 PENDING its legs A/A′/B). The fix is ONE seam, `NoteMemoryDefaults.store`
 /// (`App/Variorum/Variorum/Core/Views/NoteMemoryDefaults.swift`): the app's own domain in the
 /// app, a suite of the host's own under a test runner. Its behaviour is pinned in the app
 /// target (`NoteMemoryDefaultsTests`, run at the stage); THIS file is the headless fence that
