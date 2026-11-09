@@ -147,6 +147,29 @@ struct TutorialCurrencyTests {
         }
     }
 
+    /// **VX-929 (1) — the new-note box's second filing is taught.** VX-911
+    /// gave the box a file-WITHOUT-opening act (`.fileWithoutOpening`, its
+    /// one key the declaration's alternate chord); the ⌘/ helper teaches it,
+    /// and "getting around" — the lesson that teaches the box's ⏎ — now
+    /// says it in the helper's phrasing, the chord read from the registry so
+    /// a re-key turns the lesson red. RED ON OLD by construction: the lesson
+    /// taught ⏎ alone.
+    @Test func gettingAroundTeachesTheBoxsFileWithoutOpening() async throws {
+        try await withGuide { _, db, guideID in
+            let text = try await prose(db, guideID, "getting around")
+            let chord = try #require(CapabilityRegistry.capability(.fileWithoutOpening).alternateShortcutLabel)
+            #expect(text.contains("\u{23CE} mints a note and opens it; \(chord) files what you have written "
+                                  + "without opening it, and the box clears for the next note."),
+                    "the box's two filings, side by side")
+            let helper = try #require(ShortcutCatalog.rows.first { row in
+                if case .alternates(let acts) = row.keys { return acts == [.fileWithoutOpening] }
+                return false
+            }, "the helper's row is the phrasing's reference")
+            #expect(helper.words.contains("file what you have written without opening it"))
+            #expect(helper.words.contains("the box clears for the next note"))
+        }
+    }
+
     /// **F-3 — back and forward are ⌥⌘[ / ⌥⌘].** 13u4 UNIT S1 moved the
     /// chords (PROVISIONAL #130 — Apple Notes' own pair) and gave ⌘[ / ⌘] to
     /// Outdent / Indent; "the workspace" went on teaching "⌘[ and ⌘] walk back

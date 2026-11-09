@@ -692,13 +692,25 @@ struct TutorialBooksLessonTests {
     }
 
     /// **Lesson 8 — deleting.** "Deleting a plain book never touches a note.
-    /// Deleting an owned book asks: keep the notes (they go to the Pool) or
-    /// take them too. The Trash gives back whatever went in together,
-    /// together."
+    /// Deleting an owned book asks: keep the notes (they go back to the Pool,
+    /// and archived ones stay archived) or take them too. The Trash gives
+    /// back whatever went in together, together."
+    ///
+    /// **VX-929 (2) — A JUSTIFIED EDIT:** the aside said "(they go to the
+    /// Pool)", which over-says since VX-45 made the book-only confirm and its
+    /// receipt honest about archived members (an archived member "stays
+    /// archived" — the Pool is every live, UN-archived bookless note). The
+    /// sentence now speaks that split in the confirm's own grammar, and the
+    /// archived half is EXECUTED below. RED ON OLD by construction (the old
+    /// sentence had no archived half).
     @Test func lessonEightDeleting() async throws {
         try await withChapterWorld { session, db, guideID in
             let text = try await prose(db, guideID, "owned, finished, sealed")
-            #expect(text.contains("Deleting a plain book never touches a note. Deleting an owned book asks: keep the notes (they go to the Pool) or take them too. The Trash gives back whatever went in together, together."))
+            #expect(text.contains("Deleting a plain book never touches a note. Deleting an owned book asks: keep the notes (they go back to the Pool, and archived ones stay archived) or take them too. The Trash gives back whatever went in together, together."))
+            #expect(!text.contains("(they go to the Pool)"), "the over-saying aside is gone")
+            // The confirm says the same split, in the same words.
+            #expect(BookStateCopy.bookOnlyShare(notes: 2, archived: 0).contains("go back to the Pool"))
+            #expect(BookStateCopy.bookOnlyShare(notes: 2, archived: 2).contains("stay archived"))
             let membership = try await prose(db, guideID, "membership, not ownership")
             #expect(membership.contains(BookStateCopy.deleteVerb), "the door, by its own verb")
             #expect(BookStateCopy.deleteOwnedBook(readingID: "r", name: "o", notes: 2).lines
@@ -717,6 +729,23 @@ struct TutorialBooksLessonTests {
             try ops.deleteReading(keep.id)
             let pool = try await db.read { try Queries.notePoolListing($0, window: 50) }
             #expect((pool.loose + pool.tucked).map(\.postID).contains(k), "book only: the notes go to the Pool")
+
+            // VX-929 (2): "…and archived ones stay archived" — an ARCHIVED
+            // member of an owned book, deleted book-only, keeps its archive and
+            // is never listed in the Pool; the act's own split says so.
+            let mixed = try ops.createReading(name: "mixed", kind: .book)
+            _ = try ops.setReadingOwned(mixed.id, owned: true)
+            let live = try note(session, "a live member", in: mixed.id)
+            let kept = try note(session, "an archived member", in: mixed.id)
+            try ops.archiveContainer(kept)
+            let split = try ops.deleteReading(mixed.id)
+            #expect(split == Queries.MemberNoteSplit(unarchived: 1, archived: 1), "the act's own split")
+            let after = try await db.read { try Queries.notePoolListing($0, window: 50) }
+            let pooled = (after.loose + after.tucked).map(\.postID)
+            #expect(pooled.contains(live), "the live member goes back to the Pool")
+            #expect(!pooled.contains(kept), "the archived member is never in the Pool")
+            let keptRow = try await db.read { try Container.fetchOne($0, key: kept) }
+            #expect(keptRow?.archivedAt != nil && keptRow?.deletedAt == nil, "it stays archived, and stays")
 
             let take = try ops.createReading(name: "take", kind: .book)
             _ = try ops.setReadingOwned(take.id, owned: true)

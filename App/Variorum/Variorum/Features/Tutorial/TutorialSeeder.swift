@@ -767,10 +767,15 @@ enum TutorialSeeder {
             // places since the post-13l polish round added ARCHIVED
             // (`SidebarView.areas`), and the Library's views are List · Cards
             // · Timeline (17y (d)'s word). Words functional, 13s re-voices.
+            // VX-929 (1): the box's second filing (VX-911 — `.fileWithoutOpening`,
+            // its alternate chord), in the ⌘/ helper's phrasing; the pin reads
+            // the chord from the registry's declaration.
             "The sidebar has five places. Bookcase is home: your books, and a "
             + "dashed box that reads \u{201C}new note \u{2014} just start "
             + "typing\u{201D}. Type a first line there and \u{23CE} mints a note "
-            + "and opens it. Library is everything, searchable, with List, Cards "
+            + "and opens it; \u{2318}\u{23CE} files what you have written without "
+            + "opening it, and the box clears for the next note. Library is "
+            + "everything, searchable, with List, Cards "
             + "and Timeline views. Pool holds notes that belong to no book yet. "
             + "Snippets holds loose scraps, pieces of text that aren't notes at "
             + "all. Archived keeps the notes and books you set aside: forever, no "
@@ -2533,9 +2538,14 @@ enum TutorialSeeder {
             + "the book's right-click and in its Book Settings\u{2026}: Finish "
             + "and Seal\u{2026}, and Reopen and Unseal take them back.",
 
+            // VX-929 (2): the aside follows VX-45's honest split — the
+            // book-only confirm and its receipt say an archived member "stays
+            // archived" and is never said to be in the Pool
+            // (`BookStateCopy.bookOnlyShare` / `deletedBookOnly`'s grammar).
             "Deleting a plain book never touches a note. Deleting an owned book "
-            + "asks: keep the notes (they go to the Pool) or take them too. The "
-            + "Trash gives back whatever went in together, together.",
+            + "asks: keep the notes (they go back to the Pool, and archived ones "
+            + "stay archived) or take them too. The Trash gives back whatever went "
+            + "in together, together.",
         ])
 
         // Lesson 7 + ritual R5 (its drags are hers; every drag has a menu
