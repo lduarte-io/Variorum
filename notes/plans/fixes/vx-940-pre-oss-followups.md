@@ -57,7 +57,7 @@ The whole Mac target + the phone target if `Shared/` changed (VX-920 is Mac app 
 |---|---|---|
 | 0 | Kickoff: mint (VX-940), 7 members seated, worktree, in-flight row, her rulings | DONE (this commit) |
 | W1 | VX-939 + VX-923 | **BUILT + PINNED, headless** — "## W1 record" (end of file): VX-939 `LETTER.md` landed (two files, sync noted — the seed reads compiled literals; `read-me.txt` is the pins' oracle, untouched); VX-923 the four Point-Free siblings + Sparkle credited (verbatim, generated and checked IDENTICAL), BIP-39 → MIT in both places; the pin red 19 on old / green 4/4 headless; **in-target runs PENDING the gate (Mac AND phone targets)**; authored sentences + P-940-W1-1..5 listed for her pass |
-| W2 | VX-920 (+ the A-940-1 rider: the LETTER drift pin, Part of VX-939) | **IN PROGRESS** — "## W2 record" (end of file) |
+| W2 | VX-920 (+ the A-940-1 rider: the LETTER drift pin, Part of VX-939) | **BUILT + PINNED, headless** — "## W2 record" (end of file): VX-920 the lineage face names Home `WingWords.home` (the switcher's one Home name) on the member's line AND its go-to button, through `Queries.effectiveWingID` over the read's live wing names; the pin red 3 on old / green / R-920-A red exactly 5 (headless harness); **its in-target run PENDING the gate (Mac target; no `Shared/` line changed)**. The rider: `LetterDriftTests` (core, headless) green, red under two scratch mutations, the three sync notes corrected to name it; P-940-W2-1..3 listed for her pass |
 | W3 | VX-917 | NOT STARTED |
 | W4 | VX-922 + VX-925 + VX-933 | NOT STARTED |
 | L | The ladder (opus-reviewer) | NOT STARTED |
@@ -199,7 +199,7 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 
 ## W2 record
 
-**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild` of any kind, no stage, no Debug launch, no walk or capture (the brief: headless only — `swift build`/`swift test` plus throwaway scratch instruments). So the in-target run of the VX-920 pin (`LineageFaceModelTests`, Mac app target) is **PENDING the run's gate**; it is proven headless in substance through a scratch harness (below). The visual confirm of the lineage face rides the merge-gate window (§4 W2).
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild` of any kind, no stage, no Debug launch, no walk or capture (the brief: headless only — `swift build`/`swift test` plus throwaway scratch instruments); `notes/QUESTIONS.md` untouched (P-940-W2-1..3 for the merging session). So the in-target run of the VX-920 pin (`LineageFaceModelTests`, Mac app target) is **PENDING the run's gate**; it is proven headless in substance through a scratch harness (below). The visual confirm of the lineage face rides the merge-gate window (§4 W2).
 
 *Machinery: Opus implementer, fresh session, briefed by this file's §2 (A-940-1)/§4 W2/§7 (+ the VX-926 §7 and the VX-912 §7 it binds — read on `origin/vx-926-test-flakes` and this branch), the resiliency protocol, the VX-912 B2 record's (vii) + the ladder round 1's F-R1-1, SurfaceContracts' History & lineage line, the ticket. No revert is in flight.*
 
@@ -207,11 +207,11 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 
 | Piece | What | Status |
 |---|---|---|
-| P0 | This record + the ledger row | DONE (this commit) |
-| P1 | VX-920 — the pin (`LineageFaceModelTests`, a pure arm over `.otherWing(wingID: "")`), red on the pre-fix tree by assertion | DONE (this commit) — `aHomeMemberSeenFromAnotherWingIsNamedHome`; compiles on old (calls only `LineageFaceCopy.place`); **RED on the pre-fix tree, 3 issues** (Home ×2, the dead wing), the live-wing arm green — headless harness (P1 section); in-target run PENDING the gate |
-| P2 | VX-920 — the fix: one name resolution (`Queries.effectiveWingID` over the read's LIVE wing names; Home = `WingWords.home`, the switcher's one Home name) for the member's line AND its go-to button | DONE (`0b54188f4`; the revert's record this commit) — the pin GREEN on the fix (1 test, 7 expectations, EXIT 0, headless harness); **R-920-A RED, exactly the named 5 issues**, restored byte-identical (sha `797642aa…`), green again; in-target run PENDING the gate |
-| P3 | The rider (A-940-1, Part of VX-939) — the LETTER drift pin, a core test (`Tests/VariorumCoreTests`), green; a scratch mutation of `LETTER.md` turns it red; restored | DONE (this commit) — `LetterDriftTests` GREEN headless (`swift test`, 1 test, EXIT 0); the three "by hand / nothing reads it" sync notes corrected to name the pin (comment lines only; her words byte-identical, sha `77eee52c…`); the scratch mutations (record this commit): **M-939-A RED** (2 issues — the two paragraphs the mutation touched, named), **M-939-B RED** (the count, 18 vs 17); LETTER.md restored byte-identical (sha `f201b198…`), green again |
-| P4 | Close: headless build + the nearest suites, row dispositions, self-assessment | NOT-STARTED |
+| P0 | This record + the ledger row | DONE (`181d65b44`) |
+| P1 | VX-920 — the pin (`LineageFaceModelTests`, a pure arm over `.otherWing(wingID: "")`), red on the pre-fix tree by assertion | DONE (`6c4f5afcd`) — `aHomeMemberSeenFromAnotherWingIsNamedHome`; compiles on old (calls only `LineageFaceCopy.place`); **RED on the pre-fix tree, 3 issues** (Home ×2, the dead wing), the live-wing arm green — headless harness (P1 section); in-target run PENDING the gate |
+| P2 | VX-920 — the fix: one name resolution (`Queries.effectiveWingID` over the read's LIVE wing names; Home = `WingWords.home`, the switcher's one Home name) for the member's line AND its go-to button | DONE (`0b54188f4`; the revert's record `1443eef2e`) — the pin GREEN on the fix (1 test, 7 expectations, EXIT 0, headless harness); **R-920-A RED, exactly the named 5 issues**, restored byte-identical (sha `797642aa…`), green again; in-target run PENDING the gate |
+| P3 | The rider (A-940-1, Part of VX-939) — the LETTER drift pin, a core test (`Tests/VariorumCoreTests`), green; a scratch mutation of `LETTER.md` turns it red; restored | DONE (`ba5f89d38`) — `LetterDriftTests` GREEN headless (`swift test`, 1 test, EXIT 0); the three "by hand / nothing reads it" sync notes corrected to name the pin (comment lines only; her words byte-identical, sha `77eee52c…`); the scratch mutations (record `518ec9696`): **M-939-A RED** (2 issues — the two paragraphs the mutation touched, named), **M-939-B RED** (the count, 18 vs 17); LETTER.md restored byte-identical (sha `f201b198…`), green again |
+| P4 | Close: headless build + the nearest suites, row dispositions, self-assessment | DONE (this commit) — `swift build` EXIT 0 on the final tree; the nearest core suites 44 tests / 9 suites green, no skipped line; the VX-920 pin's in-target run PENDING the gate (first line) |
 
 ### P1 — VX-920: the mechanism and the pin, before the fix
 
@@ -255,3 +255,48 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 **The named scratch mutations — RUN AND RESTORED (working tree only, never committed; no mutation in flight).** Each restored by `git checkout -- LETTER.md` from `ba5f89d38`; LETTER.md's sha256 `f201b198…b3f` before and after each; `git status` clean; the pin GREEN again after both (EXIT 0).
 - **M-939-A:** `sed 's/four months/four weeks/'` on LETTER.md → **RED, 2 issues, EXIT 1**: "paragraph 1 … differs" and "paragraph 12 … differs". My expectation said paragraph 1 alone; the phrase occurs in paragraphs 1 AND 12, and `sed` replaces the first match per line (each paragraph is one line), so the mutation touched exactly those two, and the pin named exactly those two (`git diff --stat`: 2 lines changed). The pin's report was right; the prediction was imprecise.
 - **M-939-B:** one paragraph appended (`printf '\nA paragraph that is not hers.\n' >>`) → **RED, 1 issue, EXIT 1**: `face.count == answerKey.count` → `18` vs `17`.
+
+### P4 — close
+
+**The suites, at the END, on the final tree (`518ec9696` + this record):**
+- `swift build`: EXIT 0.
+- `swift test --filter 'LetterDriftTests|LineageFamilyTests|LineageTreeTests|LineageBringBackTests|DanglingWingRuleTests|DanglingWingReadersTests|PinBeltTests|UndoLabelVocabularyTests'`: EXIT 0, **44 tests / 9 suites passed**, no skipped line — the drift pin; the lineage family, tree and bring-back suites (the fence and projection the face reads); the VX-892 dangling-wing rule and readers (the rule the face now calls); the two sibling repo-file readers.
+- **The VX-920 pin in-target** (`LineageFaceModelTests`, Mac app target): PENDING the gate. Proven headless: P1 red 3 on old, P2 green 7 expectations, R-920-A red exactly 5, green after restore — the face file and the pin byte-unchanged since `0b54188f4`, so that last green run is on the final bytes. No other test reads the changed name (`git grep` over both app test targets and `Tests/`: `lineageElsewhere`/`.wingName(`/`goTo(` only in this suite; the existing `anotherWingsMemberIsNamedAndGoesToItsWing` keeps its live-wing expectation, unchanged behavior).
+- **The gate's targets for W2:** the Mac target. No `Shared/` line changed in W2 (`WingWords` is only read), and `BirthFurnitureSeeders.swift` changed in comment lines only.
+- **The batch diff** (`ba31b292a..HEAD`): 7 files, +184/−16. **The STOP rule:** no line in `Sync/`, custody/keychain, Protection or the editor seam (`LineageFaceModel` is a face — "P3: nothing here is an editor").
+- **Captures: none.** The brief made the batch headless; the visual confirm of the lineage face's Home line rides the merge-gate window (§4 W2: "one capture if cheap, else the pin carries it"). The state to stage for it: a note in a non-Home wing with a lineage relative in a Home note (extract a sentence, move the extracted block to a Home note) — the family's row should read "in another library — the wing “Home”" with "go to Home ›".
+
+**Row dispositions:**
+
+| Row | Disposition |
+|---|---|
+| VX-920 — the lineage face names Home as “” (the VX-912 ladder's F-R1-1; B2's (vii)) | **FIXED with its pin** (`6c4f5afcd` pin, `0b54188f4` fix, `1443eef2e` the revert's record): `LineageFaceCopy.wingName` — `Queries.effectiveWingID` over the read's live wing names, Home = `WingWords.home` — speaks the member's line and its go-to button; red 3 on old → green → R-920-A red 5 → green (headless harness); in-target PENDING the gate. The read's live-wing clause is a belt with no reachable differing state (recorded in P2, not claimed as a fix) |
+| The rider (A-940-1, Part of VX-939) — the LETTER drift pin | **BUILT** (`ba5f89d38`; mutations `518ec9696`): `Tests/VariorumCoreTests/LetterDriftTests.swift`, headless; green; M-939-A and M-939-B red, restored byte-identical. Test-only, no product behavior. The existing pins UNMODIFIED. The three sync notes corrected to name it (they had become false) |
+
+**Every sentence I authored or changed in rendering, for her pass.** Her letter's words are untouched (LETTER.md's body sha `77eee52c…`, W1's).
+*App copy (renders on the Mac's lineage face):*
+1. No new sentence. The existing PROVISIONAL (#264) lines now carry Home's name where they carried nothing: "in another library — the wing “Home”" (the member's line, its header and its hover) and "go to Home ›" (its button). The Compare board's twin already reads "a version of this note lives in another library — the wing “Home”" for Home.
+
+*Repo text a stranger reads after the flip:*
+
+2. `LETTER.md`'s comment block, its second paragraph (hidden on GitHub's render, visible in the raw file; supersedes the W1 list's item 8 for that paragraph): "It is one of three copies kept in step. The app seeds its own copy of the same paragraphs (ReadmeSeeder.paragraphs, App/Variorum/Variorum/Features/Onboarding/BirthFurnitureSeeders.swift); the app's tests pin that copy against notes/plans/vx-105-letter-content/read-me.txt, and Tests/VariorumCoreTests/LetterDriftTests.swift pins this file against the same. A change to her text changes all three in one commit."
+3. The content package README's LETTER.md paragraph, its last two sentences: "Kept in step by two pins against THIS file: `LaunchFurnitureTests` pins `ReadmeSeeder.paragraphs` (the app suite), and `LetterDriftTests` pins `LETTER.md`'s paragraphs (the core suite — A-940-1, the W2 record). A change to her text changes this file, the seeder's literals and `LETTER.md` in one commit."
+
+*Internal, listed for completeness:* `ReadmeSeeder.paragraphs`' doc-comment sentence (names the drift pin); `LineageFaceCopy.wingName`'s and `Read.wingNames`' doc comments; the two new tests' doc comments and messages.
+
+**PROVISIONAL bundle (nothing here gates the core; the merging session files them into `notes/QUESTIONS.md`, the W1 precedent):**
+- **P-940-W2-1: Home's words on the lineage face.** (a) BUILT: the standing sentence with Home's one name — "in another library — the wing “Home”" / "go to Home ›" — the Compare board twin's exact shape and the switcher's word. (b) A Home-specific line without the quotes ("in another library — Home"). (c) "in the Home wing" (dropping "another library" for Home). (b) and (c) would part the face from its Compare twin.
+- **P-940-W2-2: the drift pin's home.** (a) BUILT: the core target (headless, runs on every `swift test` and in W3's cold-build workflow). (b) The app target beside `LaunchFurnitureTests` (one suite holds all three copies' checks, but it runs only under the stage).
+- **P-940-W2-3: LETTER.md's comment names the pin** (words in item 2). Alternative: the comment says only "kept in step; see notes/plans/vx-105-letter-content/README.md", keeping the mechanism out of her letter's file (W1's self-assessment (iv) asked the same question about the comment block as a whole).
+
+**For the orchestrator (observations, not built):**
+- `Read.wingNames`' read and `Queries.wingName(db, id:, home:)` are two spellings of "a wing's display name" (the Compare board, Tags, WingFollow use the latter). Folding the face's read onto `Queries.wingName` would make one spelling; it changes no output today. Not done: outside a one-line fix, and the face's batch read (one query over the family's wings) is the cheaper shape. A ticket candidate if wanted.
+- The go-to act for Home switches to `''` (`session.wing.switchTo("")`), already the switcher's road; untouched.
+
+**Self-assessment (how I'd attack this diff, for the cold reviewer):**
+- **(i) The headless harness is a transcription in two respects:** it adds imports and a wrapping `@Suite`, and it grep-extracts three collaborator lines (`CommitsFaceCopy.thisBlock`, `.commitsCount`, `BookArchiveCopy.word`) into stub enums. Everything else is the tree's own text, extracted at run time, compiled against the real VariorumCore with the app target's isolation settings. The in-target run is the gate's; `@testable import Variorum`'s build settings are the one thing the harness approximates (mirrored, not inherited).
+- **(ii) The go-to button is pinned through `LineageFaceCopy.wingName`, not through the model's `wingName(_:)`** (constructing a model needs an `AppSession`, which the harness cannot compile). The model method is a one-line delegation (`LineageFaceModel.swift`), read by eye.
+- **(iii) `wingNames[wing, default: WingWords.home]` has an unreachable default** — `effectiveWingID` returns a non-empty id only when the id IS a key. It keeps the function total without a force-unwrap; a reviewer may prefer `!`.
+- **(iv) The live-wing clause on the read is unpinnable by construction** (the tree already projects effective wings in the same transaction). If the reviewer reads it as unrequested scope, it can go; the face's rule then leans on the tree's projection for "live", which is today's truth.
+- **(v) The drift pin's comment rule is "one leading comment, closed at the first `\n-->\n`, no `<!--` after it".** A future editor who adds a second comment, or puts the comment anywhere but the top, reds the pin by design, with a message saying why.
+- **(vi) The LETTER.md comment edit touches a file of her letter** (the comment only; the body byte-identical by `cmp` and sha). A reviewer who reads any LETTER.md edit as her words' territory should flag it; P-940-W2-3 offers the lighter road.
