@@ -4,7 +4,7 @@
 **Scope:** the ROUND 1 FIX DIFF — `git diff ba0e9348c..affa24410` in `~/dev/variorum-vx-926` (branch `vx-926-test-flakes`, review tip `5db4f09ea`). The later commits (`1cd20bfd7` the merge of main `744ca5301`, `5db4f09ea` the ledger row) checked for code and left.
 **Anchor:** `notes/plans/fixes/vx-926-ladder-round1.md` — its findings, FINAL CALLS, A-926-4, and "## ROUND 1 FIXES" (the implementer's claims, reverts, self-assessment).
 
-**Status:** IN PROGRESS — findings appended as settled.
+**Status:** COMPLETE — round 2 closed; FINAL CALLS at the end.
 
 ## Seam check (first)
 
@@ -75,3 +75,39 @@
 - **What:** the same probe's second line, `ReadTakesView.holdsTakes(postID: "probe-standard", defaults: .standard)`, passed **every** fence (1 issue in the run, the bare line's only): fence (3)'s test root asks only that the line name `defaults:`, and fence (4) (`appDomainBesideAFamily`) matches the literal `UserDefaults.standard`, not the `.standard` shorthand. The fence's own doc (`:153–158`) promises "SOME `defaults:` (the seam or a scratch suite)" — `.standard` is neither: in the test host it is the dev app's real domain, the silent disagreement F-R1-8 exists to stop, spelled explicitly instead of by default.
 - **Evidence:** traced by reading the two checks and demonstrated by the probe above (`e-fence-probe.log`: only `:2` named). Nothing reds today (the four real test calls pass a scratch suite — `MorningListTests.swift:158/161/165` — or the seam — `NoteMemoryDefaultsTests.swift:170`) — hence NIT. The file already holds the right list: `appDomainSpellings` (`:64`) includes `"defaults: .standard"`.
 - **Proposed fix (optional, for the closeout's polish or a rider):** the test root's condition becomes "names `defaults:` and none of `appDomainSpellings`". The probe's line 3 is its red-on-old (green on today's fence, red with the fix).
+
+## Outside this round's scope — noted, not a finding
+
+- **The same FIFO face, pre-existing, on SDK acts:** `MCPAcceptLoopServerTests.swift:93`, `:115`, `:117` shorten `HarnessDeadline.seconds` to 10 s around `h.connect(as:)` against the REAL server (VX-612, 2026-10-28, on main before this run; the run's own change to that file is VX-932's, elsewhere). By F-R1-2's traced mechanism their sessions are `.medium` hops behind the target's backlog exactly like P-A's. Not in the fix diff, not in the run's diff at those lines — so for the soak's MCP leg to read with F-R1-2 in mind, and for A-926-3's bundle (the runner width removes it with the rest), not for a fix here.
+- **Machinery honesty:** my first two E4/E3 runs each (`c-e4-{1,2}.log`, `c-e3-{1,2}.log`) were INVALID instruments — the test task itself waited on the saturated `.medium` band before posting, so the segments were ending by the time it posted (their own counters say so: "running when posted 11/8", "at the lane's start 0"). Fixed by posting from the plain thread and polling from the lane; only runs 3–5 and s1–s2 are cited above. The scratch copy (2 GB) was deleted after the runs; the logs and the three arm sources stay in this session's scratchpad (`…/scratchpad/r2/*.log`, `…/scratchpad/r2/arms/`), never in the repo.
+
+## Clean bill (load-bearing things checked and found solid)
+
+1. **The seam class:** the fix diff touches tests and `//` lines only; no `Sources/`, `Sync/`, custody, keychain or editor-seam file; the main merge carried no code. The `opus-reviewer` cast holds.
+2. **The touched suites:** 37 / 37 GREEN through `Tools/assert-tests-ran`, run by me on the tip — the implementer's count stands.
+3. **F-R1-5's red-on-old and its proof:** R-A's "12 of 16 at 30.0 s" read from its log and re-traced; the implementer's backlog arm reproduced independently (red 16/16 at 10.0 s on the pre-fix body, green at 16.8 s on the fix); the round-1 literal shape shown hollow (green at 16.96 s on the 10 s body).
+4. **F-R1-6's pin mechanics:** the probe read sits immediately after each `value(n)`; R-L's two reds land exactly on the two order assertions; under R-L the red is FIFO-deterministic; the premise still asserts a real queue.
+5. **F-R1-1's bound:** read in the task, set before the first write, covers both off-pool reads; the frame-bounded window cannot be cut short by it; my sweep of the 21 raw connect sites agrees with the implementer's.
+6. **F-R1-4's numbers** match the U4 record to the key (2,622 = rows 1–5 and 7; 109 kept of 2,731); the posture matches F-U4-2's PENDING.
+7. **F-R1-8's fence** fails closed on a missing root, keeps the app root's non-vacuity, and catches a bare test call (my probe, red naming the line).
+8. **Process:** every revert and arm of the batch was working-tree only and restored sha-identical (the record's sha256s; `git status` clean at the tip); no trailer on any commit in `ba0e9348c..affa24410`; the record is repo-first and honest about the hollow arm. Nothing tracks word-level change, copies text across entities, or scales with corpus size.
+
+## FINAL CALLS
+
+| Round-1 finding | Fix | Call |
+|---|---|---|
+| F-R1-1 (MINOR) — the last unbounded raw wait | the bound after the connect; face (3) amended | **VERIFIED** |
+| F-R1-4 (MINOR) — VX-695's cause stated as fact; 2,731 | three headers conditioned; 2,622 of 2,731 | **VERIFIED** (the record's `:56` facts line joins the S row's owed re-word — a pointer, not a finding) |
+| F-R1-5 (MAJOR) — P-A's 10 s bound inside the FIFO face | `withValue(10)` dropped; R-A re-red at 30 s; the arm red/green | **VERIFIED.** Departure (a) **SUSTAINED** — the literal shape is hollow (my run: green on the 10 s body), the `.high`-caller arm reproduces red/green and isolates exactly the server's hops |
+| F-R1-6 (MINOR) — the lane pin's 0.75 s wall bound | ORDER in place of the wall bound; R-L re-red 2/2 | **VERIFIED as built; KEEP recommended.** Departure (b): the HOLLOW verdict **SUSTAINED**, its explanation **REFUTED** — E3/E4 reach the named coincidence and the old pin is green: `.medium` segments never delay a `.high` lane hop, so F-R1-6 was hollow on a false premise. The ORDER form stands on its own measured merit (more tolerant of the lane's own band), not on F-R1-6's mechanism |
+| F-R1-7 (NIT) — the stale "5 s" | comment | **VERIFIED** |
+| F-R1-8 (NIT) — fence (3)'s walk | widened to the test target | **VERIFIED** (one gap: F-R2-2) |
+
+| New finding | Severity | Proposed |
+|---|---|---|
+| **F-R2-1** — `ObservationLaneTests.swift:26–30` (and the U3 record's self-assessment (i), round 1's F-R1-6 fix notes) state the falsified non-preemption mechanism as fact; "ORDER cannot red on them" overclaims (a 3 s `.high` hold reds it) | **MINOR** | Comment + record re-worded to the measured fact (E3/E4, the hold arms); no code, no pin owed |
+| **F-R2-2** — the test-root fence accepts `defaults: .standard` (demonstrated: the probe line passed every fence) | **NIT** | Optional: refuse `appDomainSpellings` on the test root's call lines; the probe is its red-on-old |
+
+**Tally:** 0 BLOCKER · 0 MAJOR · 1 MINOR · 1 NIT new. **No new BLOCKER or MAJOR — the ladder closes at this round** (CLAUDE.md's hard rule: round 3 only for a new BLOCKER/MAJOR). F-R2-1's comment/record fix and F-R2-2 (if taken) are a final round's fixes, so they get the orchestrator's line-by-line check against each finding, as CLAUDE.md says.
+
+**Status:** ROUND 2 COMPLETE — 2026-11-09.
