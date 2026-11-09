@@ -48,7 +48,9 @@ extension Operations {
     /// PENDING connection request with NO access (R-13n-4: approved in the
     /// pane, never by a popup); a known one has its last-seen stamp and
     /// declared version refreshed — its state is untouched (a denied client
-    /// stays denied). Returns the row as it now stands.
+    /// stays denied). Returns the row as it now stands. The version is stored
+    /// with every U+0000 removed (VX-925 — VX-357's rule at the row's one write;
+    /// the admission strips it first too).
     @discardableResult
     public func recordMCPContact(name: String, version: String?) throws -> MCPClient {
         try database.write { db in try recordMCPContact(db, name: name, version: version) }
@@ -58,6 +60,7 @@ extension Operations {
     public func recordMCPContact(_ db: Database, name: String, version: String?) throws -> MCPClient {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw OperationError.mcpInvalidClientName(name: name) }
+        let version = StoredText.stripped(version)  // VX-925
         let now = DateFormatter.variorumISO8601.string(from: date.now)
         if let existing = try Queries.mcpClient(db, name: trimmed) {
             try db.execute(
