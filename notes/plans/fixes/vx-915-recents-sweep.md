@@ -242,6 +242,12 @@ One constant either way (`readingMeasure` → the chosen floor; the function's s
 
 #### BATCH 6 — LIVE STATUS
 
+### GATE12 — the merged batch 1+2 array (111 types, deduped; the orchestrator's window)
+
+`only=(-only-testing:VariorumTests/{BadgeFamilySplitTests,PrivateMarkFaceTests,OwnershipBadgeTests,MCPIconTwinsTests,SettingsShapeTests,MCPPaneTabsTests,MCPPaneTests,MCPSharingFaceTests,BookPanelMCPMarksTests,MCPShareFacesTests,MCPSharedIconClickTests,MCPSharedRowsTests,MCPSharedRowsRulesTests,MCPGatheringIconTests,MCPTrailHandDoorTests,MCPShowOfferFacesTests,MCPAsksWaitTests,MCPPaneStampsTickTests,VX351SpeakerHoverCompositionTests,SettingsAccountSurfaceTests,SettingsAccountSearchTests,WingChordsAndLabelDoorTests,WingSwitcherChordTests,LibrarySearchWiringTests,ChromeLineLimitTests,ShellChromeTests,CapabilityRegistryTests,TakesCalloutOneLawTests,TakesCommentGutterTests,CompareCommentGutterTests,BoardCommentGutterRuleTests,LineageFaceModelTests,TakesCommentFeedLivenessTests,TakesCollapsedFanWashTests,TakesCollapsedFanRoadsTests,TakesOpenFanRuleTests,CommentPanelHostSuites,CommentPanelReleaseTests,CommentPanelHostLeavingTests,CommentPanelLeaveTests,DebugOracleSingletonWindowTests,FormattingSurfacesTests,TakesBoardSoakTests,TakesArticleRenderTests,TakesArticleScrollTests,TakesArticleWatchTests,TakesCardHeightTests,TakesRoomTests,TakesMarginGridAlignmentTests,TakesRailPagingTests,TakesEmptyStateTests,TakesEmptyBlockFaceTests,TakesEntryBandTests,TakesFindBoardTests,TakesChooseRingTests,TakesSlotDragTests,TakesStepFollowTests,TakesStepFollowModelTests,TakesExpansionMemoryTests,TakesExpansionRemountTests,TakesSeededEntryLandingTests,TakesLateRemeasureReaimTests,TakesSlotSplitExpandAllTests,TakesExpansionCostTests,TakeCardDoorTests,TakePaneMeasureTests,TakePaneDurabilityTests,PaneRenderRestoreClipTests,OutsideWriteLivePaneTests,RestoreLandingTests,CompareCompositionTests,CompareViewModelTests,CompareToggleIdentityTests,CompareAnchorWholeTests,CompareOnePlacementTests,CompareLensesAlignmentTests,CompareOutlineMintColumnTests,CompareVersionsTests,MCPCompareLandingTests,CompareLeavingSavepointTests,BookLeavingSavepointTests,BookLeavingRegistryTests,OutsideWriteRingEndTests,AutosaveRegistryLifecycleTests,AutosaveRegistryReleaseGuardTests,CommandRouterTests,StatusCenterTests,TakesLandingTests,MoveAndExecuteTests,SealDoorTests,BlockHistoryPaletteDoorTests,BookViewTests,ShortcutCatalogTests,WriteTakesPanelRoutedCommandTests,CommitsFaceModelTests,CommitsFaceDoorsTests,LineageFaceDoorsTests,BlockHistoryPaneTests,BlockHistoryHostTests,BlockHistoryClarityTests,TutorialBookShapeTests,TutorialDoorTests,TutorialWritingActsTests,TutorialTakesActsTests,TutorialStructureActsTests,TutorialLookingActsTests,TutorialLibraryActsTests,TutorialDeletionActsTests,TutorialWherePlacesActsTests,TutorialPrivacyChapterTests,TutorialFannedMatrixTests})`
+
+The window's order: the RED LEG first (READY-FOR-GATE step 1 — rebuild `vx915-b2-rev` by the git-only recipe, run TakesCalloutOneLawTests, expect 4 reds in the stated pattern, then delete the rev tree), then build-for-testing on the real tree, then the merged array.
+
 ## THE LADDER
 
 *(One ladder over the run's whole diff at the batches' close; fresh cold reviewer per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings land here repo-first before any fix session sees them; reviewer choice per the cast line above.)*
@@ -251,10 +257,10 @@ One constant either way (`readingMeasure` → the chosen floor; the function's s
 | # | Member | Batch | Status |
 |---|---|---|---|
 | 1 | VX-934 badge-family split | 1 | BUILT (a23305aa6; orchestrator spot-check passed — the seam, the synced key, the eye's switch move, fences, no trailers) — Mac pins PENDING(gate) |
-| 2 | VX-782 Takes callout one-law | 2 | NOT-STARTED |
-| 3 | VX-848 Compare lane default | 2 | NOT-STARTED |
-| 4 | VX-793 Compare first comment (rider) | 2 | NOT-STARTED |
-| 5 | VX-927 lineage "now" wording (rider) | 2 | NOT-STARTED |
+| 2 | VX-782 Takes callout one-law | 2 | BUILT (a8c932ef0 + pin 9d5de2c3b; mechanism probe-measured 215/670→210/680) — red leg + green PENDING(gate12) |
+| 3 | VX-848 Compare lane default | 2 | BUILT to the option-1 ruling (f253ed8aa; P-915-B2-1) — pins PENDING(gate12) |
+| 4 | VX-793 Compare first comment (rider) | 2 | BUILT to both directions (5b7452877; P-915-B2-2) — pins PENDING(gate12) |
+| 5 | VX-927 lineage "now" wording (rider) | 2 | BUILT (e8cf1059c; one rule, speaksAsKept; N-927 words PROVISIONAL) — pins PENDING(gate12) |
 | 6 | VX-869 alert-Cancel sweep | 3 | NOT-STARTED |
 | 7 | VX-841 quick-note wing pick | 3 | NOT-STARTED |
 | 8 | VX-928 ⏎ in-flight guard (rider) | 3 | NOT-STARTED |
