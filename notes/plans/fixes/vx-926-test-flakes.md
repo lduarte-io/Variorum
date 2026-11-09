@@ -116,7 +116,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | P4 | The family alone + under a deliberately loaded parallel run (counts) | NOT STARTED |
 | P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | NOT STARTED |
 
-**Load generators alive:** none (P4's first generator — 36 × `yes`, pids 44890–44925 — killed by pid after the first loaded runs; restarted for the final counts and named here then). **Reverts in flight:** none.
+**Load generators alive:** none (P4's first generator — 36 × `yes`, pids 44890–44925 — killed by pid after the first loaded runs; restarted for the final counts and named here then). **Reverts in flight:** STARTING on the committed tree `1c35b3eb6`, one at a time, each restored with `git checkout -- <file>` before the next — R-A (`HarnessWait.offPool` runs its body inline, on the calling pool thread), R-B1 (the deadline's timer back on `DispatchQueue.global()`), R-B2 (`firedAfter` read on the awaiting task after it resumes — the pre-fix belt's place), R-C (`HarnessWait.receiveSeconds` back to a hand-picked 5). `git diff` shows what is reverted at any instant.
 
 ### PHASE 1 — VX-850's answer (the evidence, either way)
 
