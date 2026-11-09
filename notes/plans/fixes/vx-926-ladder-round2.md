@@ -128,6 +128,50 @@
 
 | Piece | What | State |
 |---|---|---|
-| S1 | F-R2-1 — wording only: `ObservationLaneTests.swift`'s parenthesis, the U3 self-assessment (i) sentence, round 1's F-R1-6 fix notes + its (iv), and the run record's U4 facts count (2,622 per-note of 2,731) | DONE (this commit) — `swift build` + the lane suites run at S3 |
-| S2 | F-R2-2 — the test-root fence refuses `appDomainSpellings`; red-on-old by a working-tree-only probe (never committed): the pre-fix fence GREEN on a `defaults: .standard` call line (the hole), the fixed fence RED naming it, probe removed, GREEN | NEXT |
-| S3 | Verification: `NoteMemorySeamSourcePinTests` + `ObservationLaneTests` + `StarContextTests` + `TrashObservationP2Tests` through `Tools/assert-tests-ran`; `swift build`; `git diff -- Sources` empty | — |
+| S1 | F-R2-1 — wording only: `ObservationLaneTests.swift`'s parenthesis, the U3 self-assessment (i) sentence, round 1's F-R1-6 fix notes + its (iv), and the run record's U4 facts count (2,622 per-note of 2,731) | DONE (`88ded9826`) |
+| S2 | F-R2-2 — the test-root fence refuses `appDomainSpellings`; red-on-old by a working-tree-only probe (never committed): the pre-fix fence GREEN on a `defaults: .standard` call line (the hole), the fixed fence RED naming it, probe removed, GREEN | DONE (this commit) |
+| S3 | Verification: `NoteMemorySeamSourcePinTests` + `ObservationLaneTests` + `StarContextTests` + `TrashObservationP2Tests` through `Tools/assert-tests-ran`; `swift build`; `git diff -- Sources` empty | DONE (this commit) — GREEN 19 / 4 suites |
+
+**Not done (stated first):** `Tests/VariorumCoreTests/Support/ObservationLane.swift:20–24`'s comment did NOT take the stronger fact (the reviewer's "optional, it is not wrong"; outside A-926-5's three named spots). The run record's `:56` "steer later suites machine-wide (VX-695's two-direction proof …)" clause is untouched — only its count was A-926-5's; the re-word stays owed to the S row with F-R1-4's three sentences. No other spot moved.
+
+### F-R2-1 (MINOR) — the wording, re-worded to the measured fact · comments and records only
+
+- **What changed:** the lane pin's doc-comment parenthesis now says what round 2 measured — the verdict is ORDER, clock-free; a `.medium` backlog of any segment length never delays the lane (the pool admits `.high` jobs on threads of their own beside a full `.medium` band: 16 µs–10 ms with every thread inside a 2 s `.medium` segment, E3/E4); what delays the lane is its own band, where the wall bound tolerated 0.75 s and ORDER tolerates up to the probe's drain, and a `.high` hold that long reds ORDER, as it should. The reviewer's proposed text, with the measured start time and the "reds, as it should" clause A-926-5 names. The U3 self-assessment (i)'s false sentence is replaced (marked as re-worded, pointing here — this file quotes the sentence it replaces, F-R2-1 "What's wrong"); round 1's F-R1-6 entry gains one correction bullet and its (iv) a one-line pointer (both name F-R1-6 HOLLOW, its premise falsified, the ORDER form KEPT on its own merits; the original text left in place above them, so the night's record stays verbatim); the U4 facts count reads 2,622 per-note keys of the domain's 2,731.
+- **Behaviour byte-unchanged:** `git diff -U0 0dfaaf0b6 -- Tests ':!Tests/VariorumCoreTests/NoteMemorySeamSourcePinTests.swift'` holds no `+`/`-` line that is not a `///` or `//` comment (grep: none). No assertion edited. `ObservationLaneTests` green in the S3 run.
+- **The line-by-line list:**
+  - `Tests/VariorumCoreTests/ObservationLaneTests.swift:26–34` — the new parenthesis (`:34–36` the unchanged hang-ender/premise sentences, re-flowed only).
+  - `notes/plans/fixes/vx-926-test-flakes.md:487` — U3 self-assessment (i): the sentence after "…reds if a toolchain stops doing so." (the first two sentences untouched).
+  - `notes/plans/fixes/vx-926-test-flakes.md:56` — the U4 facts line: "2,731 keys by 2026-10-28" → "2,622 per-note keys of the domain's 2,731 by 2026-10-28 — the U4 record's count".
+  - `notes/plans/fixes/vx-926-ladder-round1.md:144` — the new "Corrected at ladder round 2" bullet closing the "### F-R1-6" entry.
+  - `notes/plans/fixes/vx-926-ladder-round1.md:178` — self-assessment (iv): the appended italic pointer at its end.
+
+### F-R2-2 (NIT, taken) — the test-root fence refuses the app's domain · `Tests/VariorumCoreTests/NoteMemorySeamSourcePinTests.swift`
+
+- **The mechanism (traced, the reviewer's):** the test root's condition was only `line.contains("defaults:")`, and fence (4) matches the literal `UserDefaults.standard` — so `holdsTakes(postID: …, defaults: .standard)` on a test line named the real domain and passed every fence.
+- **The fix:** `holdsTakesCalls(under:needing:refusing:)` — a call line is an OFFENDER when it does not name `needed` OR names one of `refused` (default `[]`, so the app root's check is the same expression as before); the test root passes `refusing: Self.appDomainSpellings` (the file's existing list: `UserDefaults.standard`, `UserDefaults = .standard`, `defaults: .standard`). The tuple's `missing` is renamed `offenders` (it now holds refused lines too); both messages read it; the test-root message names both faces ("the read tier's bare default or the app's own domain"). The test's doc and the header's third bullet say so.
+- **Red-on-old — the probe, working tree only, never committed** (`App/Variorum/VariorumTests/ZZVX926FinalFenceProbe.swift`, read as text; no app build ran while it existed; logs in this session's scratchpad `…/scratchpad/final-sweep/`, every run through `Tools/assert-tests-ran`, `swift test --skip-build --filter NoteMemorySeamSourcePinTests`):
+
+  | Run | Fence | Probe | Result |
+  |---|---|---|---|
+  | P0 | pre-fix (`88ded9826`) | the reviewer's shape — `:2` bare, `:3` `defaults: .standard` | RED (1) — names ONLY `…ZZVX926FinalFenceProbe.swift:2`; `:3` passed every fence (the hole, reproduced) — `P0-prefix-reviewers-probe.log` |
+  | P1 | pre-fix | `:2` `defaults: .standard` only | **GREEN** 4 / 4 — blind to it (the red-on-old's "old" side) — `P1-prefix-standard-only.log` |
+  | P2 | fixed | `:2` `defaults: .standard` only | **RED** (1) — `theReadTiersTakesFirstQuestionIsAskedWithTheSeam`, `tests.offenders` = `["…ZZVX926FinalFenceProbe.swift:2"]` — `P2-fixed-standard-only.log` |
+  | P3 | fixed | the reviewer's shape | RED (1) — names `:2` AND `:3` — `P3-fixed-reviewers-probe.log` |
+  | after | fixed | probe deleted (`test ! -e`; `git status` shows only the pin file) | GREEN — in the S3 run below |
+
+- **The green set unchanged:** today's four test calls (`MorningListTests.swift:158/161/165` pass a scratch suite, `NoteMemoryDefaultsTests.swift:170` the seam) name `defaults:` and none of the spellings; the app root's one call (`RootView.swift:1672`) unchanged. 4 / 4 green on the clean tree.
+- **Limits, stated (the token-fence class, U4's (v) and round 1's (vii)):** line-based — a call splitting `defaults:` onto the next line reds falsely (named); `defaults:.standard` (no space) or `defaults: UserDefaults .standard` would escape this check (the literal `UserDefaults.standard` is still caught here and by fence (4)); a scratch suite whose name begins `.standard…` (`defaults: .standardSuite`) would red falsely, named.
+- **The line-by-line list:**
+  - `Tests/VariorumCoreTests/NoteMemorySeamSourcePinTests.swift:24–25` — the header's third bullet ("other than the app's domain"; `:23` unchanged).
+  - `:132–136` — the helper's doc and signature (`refusing refused: [String] = []`, the tuple label `offenders`).
+  - `:141`, `:148–150`, `:153` — `var offenders`; the condition `!line.contains(needed) || refused.contains(where: { line.contains($0) })`; the return.
+  - `:159–163` — the test's doc (never one of `appDomainSpellings`; F-R2-2; `:156–158` unchanged).
+  - `:168` — the app root's assertion reads `app.offenders` (same check).
+  - `:169–172` — the test root passes `refusing: Self.appDomainSpellings`; its assertion and message.
+
+### S3 — verification (the final tree)
+
+- `swift test --skip-build --filter 'NoteMemorySeamSourcePinTests|ObservationLaneTests|StarContextTests|TrashObservationP2Tests'` after `swift build --build-tests`: **19 / 4 suites passed — `Tools/assert-tests-ran` GREEN, 19 executed, 0 failed** (`final-suites.log`, load avg 17–49).
+- `swift build` GREEN (`final-swift-build.log`).
+- `git diff 0dfaaf0b6 -- Sources` and `git diff origin/main...HEAD -- Sources` EMPTY; `git diff 0dfaaf0b6 -- App` EMPTY; the only non-comment lines changed are in `NoteMemorySeamSourcePinTests.swift`.
+- Process: `git diff --cached --stat` empty before each commit; both commits pathspec-limited on the commit; the probe was the only plant, working tree only, deleted; no revert of a committed file was needed (the "old" side is `88ded9826`'s fence, run before the fix was typed); no trailer.

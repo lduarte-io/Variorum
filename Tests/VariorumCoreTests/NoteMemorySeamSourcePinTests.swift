@@ -21,8 +21,8 @@ import Testing
 ///   stored default or a bare write);
 /// - no app line reads or writes one of the families on `UserDefaults.standard` directly;
 /// - the read tier's takes-first question is always ASKED with the seam in the app, and with
-///   SOME `defaults:` in a test (its own default is the read tier's — the editor-seam class —
-///   and stays untouched);
+///   SOME `defaults:` other than the app's domain in a test (its own default is the read
+///   tier's — the editor-seam class — and stays untouched);
 /// - no test plants, reads or clears one of the families on `UserDefaults.standard` (a plant
 ///   there would no longer be read, and every write there is the dev app's real domain).
 ///
@@ -129,41 +129,47 @@ struct NoteMemorySeamSourcePinTests {
         #expect(found.isEmpty, "a per-note memory on UserDefaults.standard: \(found)")
     }
 
-    /// Every non-comment call of `ReadTakesView.holdsTakes` under `root`, and those whose line
-    /// does not name `needed`.
-    private static func holdsTakesCalls(under root: String, needing needed: String) throws
-        -> (calls: [String], missing: [String]) {
+    /// Every non-comment call of `ReadTakesView.holdsTakes` under `root`, and the offenders:
+    /// those whose line does not name `needed`, or names one of `refused`.
+    private static func holdsTakesCalls(under root: String, needing needed: String,
+                                        refusing refused: [String] = []) throws
+        -> (calls: [String], offenders: [String]) {
         let base = repoRoot.appendingPathComponent(root)
         guard let walker = FileManager.default.enumerator(at: base, includingPropertiesForKeys: nil)
         else { return ([], ["(no such directory: \(root))"]) }
         var calls: [String] = []
-        var missing: [String] = []
+        var offenders: [String] = []
         for case let file as URL in walker where file.pathExtension == "swift" {
             let relative = file.path.replacingOccurrences(of: repoRoot.path + "/", with: "")
             for (index, line) in try source(relative).enumerated()
             where !isComment(line) && line.contains("holdsTakes(")
                 && !line.contains("static func holdsTakes(") {
                 calls.append("\(relative):\(index + 1)")
-                if !line.contains(needed) { missing.append("\(relative):\(index + 1)") }
+                if !line.contains(needed) || refused.contains(where: { line.contains($0) }) {
+                    offenders.append("\(relative):\(index + 1)")
+                }
             }
         }
-        return (calls, missing)
+        return (calls, offenders)
     }
 
     /// **The read tier's takes-first question is always asked WITH the seam.** Its declared
     /// default stays the read tier's own (`Features/ReadTier/` is the editor-seam class), so
     /// every app call site hands the seam in — and every TEST call site hands in SOME
-    /// `defaults:` (the seam or a scratch suite): in the test host the read tier's bare
-    /// default is the real domain while the product writes the hosted suite, so a bare call
-    /// there would silently disagree with the product (ladder round 1, F-R1-8).
+    /// `defaults:` (the seam or a scratch suite), never one of `appDomainSpellings`: in the
+    /// test host the read tier's bare default is the real domain while the product writes the
+    /// hosted suite, so a bare call there would silently disagree with the product (ladder
+    /// round 1, F-R1-8) — and `defaults: .standard` is that same real domain spelled out
+    /// (ladder round 2, F-R2-2).
     @Test func theReadTiersTakesFirstQuestionIsAskedWithTheSeam() throws {
         let app = try Self.holdsTakesCalls(
             under: "App/Variorum/Variorum", needing: "defaults: NoteMemoryDefaults.store")
         #expect(!app.calls.isEmpty, "non-vacuity: the app asks the question somewhere")
-        #expect(app.missing.isEmpty, "asked without the seam (it would read the app's domain): \(app.missing)")
-        let tests = try Self.holdsTakesCalls(under: "App/Variorum/VariorumTests", needing: "defaults:")
-        #expect(tests.missing.isEmpty,
-                "a test asks the question on the read tier's bare default — the real domain, not the seam the product writes: \(tests.missing)")
+        #expect(app.offenders.isEmpty, "asked without the seam (it would read the app's domain): \(app.offenders)")
+        let tests = try Self.holdsTakesCalls(
+            under: "App/Variorum/VariorumTests", needing: "defaults:", refusing: Self.appDomainSpellings)
+        #expect(tests.offenders.isEmpty,
+                "a test asks the question on the read tier's bare default or on the app's own domain — the real domain, not the seam the product writes: \(tests.offenders)")
     }
 
     /// **No test plants, reads or clears a family on the app's domain** — the product reads
