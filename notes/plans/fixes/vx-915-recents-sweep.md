@@ -448,7 +448,7 @@ Rules 2 (the words shown only on ask), 13 (a Castle-era backup's protection), 9 
 
 #### BATCH 5 — LIVE STATUS
 
-*Implementer: opus-implementer, seated 2026-11-09. Every claim is PENDING until its run is named. No revert is in flight.*
+*Implementer: opus-implementer, seated 2026-11-09. Every claim is PENDING until its run is named.* **REVERT IN FLIGHT (the discrimination check, announced before it starts):** a TEMPORARY facet-blind body for `Queries.searchCounts(_:query:facet:scope:calendar:)` in `Sources/VariorumCore/Queries/SearchQueries.swift` (every facet answers the whole question — the pre-VX-734 band); the file is committed at `501f8a4cb`, so the restore is `git checkout -- Sources/VariorumCore/Queries/SearchQueries.swift`, and `git diff` against HEAD is the honest "what is reverted right now".
 
 **NOT DONE BY THE IMPLEMENTER (first, by the contract):** PENDING the batch's end.
 
