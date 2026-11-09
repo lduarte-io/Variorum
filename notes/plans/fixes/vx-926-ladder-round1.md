@@ -116,11 +116,11 @@
 | Piece | Finding | What | Status |
 |---|---|---|---|
 | F0 | — | This section opened | DONE (`e8f653d92`) |
-| F1 | F-R1-5 (MAJOR) | P-A on the harness's 30 s bound; the throwaway > 10 s default-priority backlog arm red on the pre-fix pin, green after, then deleted; R-A re-verified red once at the new bound | NOT STARTED |
+| F1 | F-R1-5 (MAJOR) | P-A on the harness's 30 s bound; the throwaway > 10 s default-priority backlog arm red on the pre-fix pin, green after, then deleted; R-A re-verified red once at the new bound | IN PROGRESS — the fix + the arm DONE (this commit: arm RED on the pre-fix pin 1/1, GREEN on the fixed pin 2/2, deleted); NEXT: R-A at the new bound (announced below) |
 | F2 | F-R1-6 | the lane pin asserts ORDER (both values before the backlog's default-priority probe starts), the 30 s bound the hang-ender; R-L re-verified red 2 of 2 | NOT STARTED |
 | F3 | F-R1-1 | the harness's bound after `everyRefusalIsTheSameSentence`'s last connect; the U1 record's face (3) sentence amended | NOT STARTED |
 | F4 | F-R1-4 + F-R1-7 | comment-only: the three VX-695 headers conditioned to PENDING, the count 2,622 of 2,731; DiscoverProbe's stale "bounded: 5 s" | NOT STARTED |
 | F5 | F-R1-8 (fence only) | fence (3) of the source pin walks `App/Variorum/VariorumTests` too | NOT STARTED |
 | F6 | — | Verification: the touched suites green through `Tools/assert-tests-ran`; `swift build`; `git diff -- Sources` empty; App/ comments only; self-assessment | NOT STARTED |
 
-**Throwaway instruments in the tree:** `Tests/VariorumMCPTests/ZZVX926R1BacklogArm.swift` (F-R1-5's proof arm — UNCOMMITTED, env-gated `VX926_R1_ARM=1`; source copy `scratchpad/ladder-r1/ZZVX926R1BacklogArm.swift.copy`) — a successor deletes it if this line still names it. **Reverts in flight:** none.
+**Throwaway instruments in the tree:** none — F-R1-5's arm deleted after its runs (never committed; its source `scratchpad/ladder-r1/ZZVX926R1BacklogArm.swift.copy`). **Reverts in flight:** R-A ANNOUNCED, NOT YET APPLIED — `HarnessWait.offPool` made to run its body INLINE on the calling pool thread (U1's R-A, the pre-fix wait), working tree only in `Tests/VariorumMCPTests/MCPHarnessWait.swift`; restore = `git show HEAD:Tests/VariorumMCPTests/MCPHarnessWait.swift > Tests/VariorumMCPTests/MCPHarnessWait.swift`, then sha256 against HEAD's blob. A successor finding this line unflipped restores first.

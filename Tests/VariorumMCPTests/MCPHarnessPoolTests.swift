@@ -95,6 +95,14 @@ struct MCPHarnessPoolTests {
     /// calling pool thread, so the first `activeProcessorCount` openings held
     /// every thread while the sessions that would answer them waited for one —
     /// each read ran out its bound unanswered ("got no JSON answer").
+    ///
+    /// On the harness's ONE bound (`HarnessDeadline.seconds`, 30 s), like every
+    /// raw wait for the server (rule 2 of `HarnessWait`) — never a shorter
+    /// hand-picked one: the sessions answering it are default-priority pool
+    /// jobs, so in a full MCP-target run they queue FIFO behind the run's
+    /// backlog and answer seconds late with nothing wrong (8.9 s seen once; the
+    /// ladder's F-R1-5 — a 10 s bound here redded under a 15 s default-priority
+    /// backlog, the 30 s one did not).
     @Test func moreOpeningsAtOnceThanThePoolHasThreadsAreAllAnswered() async throws {
         let waiters = ProcessInfo.processInfo.activeProcessorCount + 4
         let perHost = 8   // well inside a host's session cap (16)
@@ -104,25 +112,24 @@ struct MCPHarnessPoolTests {
             (harness: harnesses[index / perHost], name: "waiter-\(index)",
              key: try harnesses[index / perHost].setupKey(for: "waiter-\(index)"))
         }
+        let bound = HarnessDeadline.seconds
         let started = ContinuousClock.now
-        let answered: Int = await HarnessDeadline.$seconds.withValue(10) {
-            await withTaskGroup(of: Bool.self) { group in
-                for opening in openings {
-                    group.addTask {
-                        guard let (fd, answer) = try? await opening.harness.rawOpen(
-                            as: opening.name, presenting: opening.key)
-                        else { return false }
-                        close(fd)
-                        return answer["result"] != nil
-                    }
+        let answered: Int = await withTaskGroup(of: Bool.self) { group in
+            for opening in openings {
+                group.addTask {
+                    guard let (fd, answer) = try? await opening.harness.rawOpen(
+                        as: opening.name, presenting: opening.key)
+                    else { return false }
+                    close(fd)
+                    return answer["result"] != nil
                 }
-                var count = 0
-                for await served in group where served { count += 1 }
-                return count
             }
+            var count = 0
+            for await served in group where served { count += 1 }
+            return count
         }
         #expect(answered == waiters,
-                "\(waiters - answered) of \(waiters) openings unanswered inside the 10 s bound (\(ContinuousClock.now - started)) — a wait held the pool the server needed")
+                "\(waiters - answered) of \(waiters) openings unanswered inside the harness's \(bound) s bound (\(ContinuousClock.now - started)) — a wait held the pool the server needed, or (past the bound) the pool's queue held the sessions behind its backlog (the ladder's F-R1-2)")
     }
 
     /// The deadline's bound is read on ITS OWN clock — at its limit even while
