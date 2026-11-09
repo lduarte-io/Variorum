@@ -55,7 +55,7 @@ The whole Mac target + the phone target if `Shared/` changed (VX-920 is Mac app 
 | Row | What | Status |
 |---|---|---|
 | 0 | Kickoff: mint (VX-940), 7 members seated, worktree, in-flight row, her rulings | DONE (this commit) |
-| W1 | VX-939 + VX-923 | IN PROGRESS — "## W1 record" (end of file) |
+| W1 | VX-939 + VX-923 | **BUILT + PINNED, headless** — "## W1 record" (end of file): VX-939 `LETTER.md` landed (two files, sync noted — the seed reads compiled literals; `read-me.txt` is the pins' oracle, untouched); VX-923 the four Point-Free siblings + Sparkle credited (verbatim, generated and checked IDENTICAL), BIP-39 → MIT in both places; the pin red 19 on old / green 4/4 headless; **in-target runs PENDING the gate (Mac AND phone targets)**; authored sentences + P-940-W1-1..5 listed for her pass |
 | W2 | VX-920 | NOT STARTED |
 | W3 | VX-917 | NOT STARTED |
 | W4 | VX-922 + VX-925 + VX-933 | NOT STARTED |
@@ -69,7 +69,7 @@ The VX-926 record's §7 binds by reference (which binds the VX-912 record's §7)
 
 ## W1 record
 
-**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test`, no stage, no Debug launch (the brief: headless only) — so the in-target runs of the Mac copy suite and the phone sweep are PENDING the run's gate; nothing published; her letter's words untouched.
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild` of any kind, no stage, no Debug launch, no walk or capture (the brief: headless only — `swift build`/`swift test` plus throwaway `swift`/`swiftc` instruments). So these in-target runs are **PENDING the run's gate**: the Mac copy suite (`AcknowledgmentsCopyTests`, the new pin included), the seeder pins (`LaunchFurnitureTests`, unmodified), and the phone sweep (`MobileNoRedirectSweepTests`, one exemption added). Each was proven headless in substance (below). **The gate must include the PHONE target:** `AcknowledgmentsCopy.swift` is `Shared/` and the phone test target changed. Also not done: nothing published; `notes/QUESTIONS.md` untouched (the merging session files the PROVISIONALs, the VX-912 B3 precedent); the offered drift pin not built; the BIP-39 notice's ROLE line ("…your recovery phrase…", a Castle-adjacent sentence) not touched, and CastleRules not read.
 
 *Machinery: Opus implementer, fresh session, briefed by this file's §2/§4 W1/§7 (+ the VX-926 §7 and VX-912 §7 it binds), the resiliency protocol, the VX-912 B3 record (the dependency table, F-B3-1/F-B3-2, P4's options), the two tickets. No revert is in flight.*
 
@@ -81,7 +81,7 @@ The VX-926 record's §7 binds by reference (which binds the VX-912 record's §7)
 | P1 | VX-939 — `LETTER.md` at the repo root (her text, header stripped, byte-faithful); the README pointer moves to it; the one-file-or-two verdict | DONE (this commit) — TWO files, sync noted (verdict below); body byte-identical to `read-me.txt`'s, and equal to `ReadmeSeeder.paragraphs` (17/17) by a scratch compile of the literals; `read-me.txt` and the seeder's code untouched |
 | P2 | VX-923 — the pin (red on the current tree) | DONE (this commit) — `AcknowledgmentsCopyTests.everyLinkedLibraryIsCreditedAndBIP39ReadsMIT` (Mac app target, `Phase13pSubstrateTests.swift`); **RED on the unfixed source, 19 issues, the three old tests green** (headless harness below); in-target run PENDING the gate |
 | P3 | VX-923 — the credits (Sparkle + the Point-Free siblings) and the BIP-39 line (pane + `Vendor/BIP39/README.md`) | DONE (this commit) — the pin GREEN 4/4 on the fixed source; every new license text IDENTICAL to its file; the phone sweep's exemption proven byte-exact (green fixed, red both ways) — all headless; in-target runs PENDING the gate |
-| P4 | Close: headless build + the copy tests + the seeder pins (PENDING the gate where in-target), authored sentences listed, PROVISIONALs | NOT STARTED |
+| P4 | Close: headless build + the copy tests + the seeder pins (PENDING the gate where in-target), authored sentences listed, PROVISIONALs | DONE (this commit) — `swift build` EXIT 0 on the final tree; StringsWorkbook 32/4 + RecoveryPhrase 13/1 green, none skipped; the in-target runs PENDING the gate (first line) |
 
 ### P1 — VX-939: `LETTER.md` (repo files only)
 
@@ -141,3 +141,57 @@ Notices are looked up BY NAME, so the pin compiles on the old tree and reds ther
 - **Verbatim:** `swiftc -swift-version 6` compiles the REAL `AcknowledgmentsCopy.swift` with a checker that compares each notice's `text` to its license file (the trailing newline dropped). Results: swift-dependencies (sanity) · xctest-dynamic-overlay · swift-concurrency-extras · combine-schedulers · swift-clocks · Sparkle (line-end spaces stripped), **all IDENTICAL**. Sparkle against the raw file differs only by that one space. The file compiles with no warning. Mac list: 16 names (was 11). Phone list (`shared`): 10 (was 6).
 - **The phone sweep, its own suite text** (`run-sweep.zsh`): the `MobileNoRedirectSweepTests` suite text, extracted, walks a scratch COPY of `App/Variorum/{VariorumMobile,Shared}`; only `#filePath` is re-pointed, one substitution. **(a)** the fixed copy with the new exemption: passed, EXIT 0. **(b)** the fixed copy with the OLD test text (no exemption): failed, `offenders.isEmpty`, naming exactly `AcknowledgmentsCopy.swift: "its new versions (Mac only)."`. **(c)** the OLD copy with the new exemption: failed, `misfits.isEmpty`, the entry "matched 0". So the exemption is necessary, byte-exact, and covers exactly one literal.
 - No other walker reaches the new strings. `CopyRegisterPinTests` and its phone twin walk named Protection files, not this one. The other `Shared/` walkers police colours, refresh authority, the refusal table and doors, not copy words. No contract line (SurfaceContracts, AppSpec) or guide text enumerates the pane. The 2026-10-04 strings inventory (`notes/copy-pass/`) is a dated snapshot that StringsWorkbook pins byte for byte, and is left alone.
+
+### P4 — close
+
+**The suites, at the END, on the final tree (`f2bf3d002` + this record):**
+- `swift build`: EXIT 0. The core package is unchanged by this batch; the run's first build gave the checkouts.
+- `swift test --filter 'StringsWorkbookTests|RecoveryPhraseTests'`: EXIT 0, **32 tests / 4 suites** and **13 tests / 1 suite** passed, no skipped line. These are the two core suites nearest the touched files: the inventory pin and the BIP-39 resource pin.
+- **The named in-target suites:** PENDING the gate, each proven headless above. `AcknowledgmentsCopyTests` (P2 red 19 → P3 green 4/4). `LaunchFurnitureTests`' seeder pins: UNMODIFIED, every file they read byte-untouched since kickoff, and their core assertion (`ReadmeSeeder.paragraphs == read-me.txt`'s paragraphs) reproduced true by the P1 scratch compile. The phone sweep: (a) green, (b)/(c) red.
+- Untouched since kickoff (`git diff --quiet b637dc457`): `LaunchFurnitureTests.swift`, `read-me.txt`, `notes/copy-pass/all-user-facing-strings.md`. Zero non-comment lines changed in `BirthFurnitureSeeders.swift`.
+- **The batch diff:** 9 files, +482/−13. **Captures: none.** The brief named no screens folder and made the batch headless; the pane's face is the gate window's to see if the orchestrator wants a look.
+- **The STOP rule:** no line in `Sync/`, custody/keychain or the editor seam.
+
+**Row dispositions:**
+
+| Row | Disposition |
+|---|---|
+| VX-939 — LETTER.md | **DONE** (`ca0527736`): `LETTER.md` at the root, her words byte-identical to `read-me.txt`'s (header stripped) and equal to the seeder's literals; the README's pointer moved (its link target only). **One file or two: TWO**, with the evidence in P1. The seed reads compiled literals; `read-me.txt` is the pins' oracle and can't carry a note. The sync is noted in LETTER.md, the seeder's doc comment and the content package README. Repo files only; no pin applies (a doc move, not a bug class); the drift pin offered |
+| VX-923 — the missing credits (F-B3-2) | **FIXED with its pin** (`ef6918454` pin, `f2bf3d002` fix): the four Point-Free siblings in `shared`, Sparkle's whole LICENSE in the Mac arm; red 19 on old → green 4/4 (headless harness); in-target PENDING the gate |
+| VX-923 — BIP-39's license (F-B3-1) | **FIXED with its pin** (same commits): MIT in the pane and in `Vendor/BIP39/README.md`, in the BIP's own words at the pinned commit; the pin's three BIP-39 lines red on old, green on the fix |
+
+**Every sentence I authored (not hers, not a license's), for her pass.** Her letter's words are not on this list: none was touched.
+*App copy (renders in Settings ▸ Acknowledgments; the four Point-Free roles render on the phone's sheet too):*
+1. xctest-dynamic-overlay's role: "Point-Free's issue-reporting library (IssueReporting and XCTestDynamicOverlay), which swift-dependencies builds on."
+2. swift-concurrency-extras' role: "Point-Free's Swift concurrency helpers, which swift-dependencies builds on."
+3. combine-schedulers' role: "Point-Free's schedulers for Combine, which swift-dependencies builds on."
+4. swift-clocks' role: "Point-Free's clocks for Swift concurrency, which swift-dependencies builds on."
+5. Sparkle's role (Mac only): "The software update framework — how the app checks for and installs its new versions (Mac only)."
+6. BIP-39's notice text: "From the Bitcoin Improvement Proposals repository (BIP-0039), under the MIT License: "This BIP falls under the MIT License."" The opening clause is carried over from the old text, the quoted sentence is the BIP's, and "under the MIT License:" is mine. "Upstream: …" is unchanged.
+
+*Repo text a stranger reads after the flip:*
+
+7. `Vendor/BIP39/README.md`'s license bullet: "MIT. The BIP-0039 document at the pinned commit says so twice: its header reads `License: MIT`, and its Copyright section reads "This BIP falls under the MIT License." The wordlist is part of that BIP. (VX-923 corrected an earlier line here that said PD/BSD-2-Clause, which the document at this commit does not say.)"
+8. `LETTER.md`'s comment block (hidden on GitHub's render, visible in the raw file): "This is the letter Variorum opens with: the first note in every new library, titled "readme". The words are Lillian's, byte for byte. Never edit, reword or re-punctuate them here." · "It is kept in step by hand. The app seeds its own copy of the same paragraphs (ReadmeSeeder.paragraphs, App/Variorum/Variorum/Features/Onboarding/BirthFurnitureSeeders.swift), and the app's tests pin that copy against notes/plans/vx-105-letter-content/read-me.txt. A change to her text changes all three in one commit."
+9. `README.md`: no new sentence. Only the link target changed.
+
+*Internal, listed for completeness:* the content package README's new paragraph; `ReadmeSeeder.paragraphs`' new doc-comment paragraph; `AcknowledgmentsCopy`'s comments (sources line, `all`/`shared` docs, the two MARK blurbs); the phone sweep's `sparkleNotice` why string; the new test's doc comment and messages.
+
+**PROVISIONAL bundle (nothing here gates the core; filed into `notes/QUESTIONS.md` by the merging session):**
+- **P-940-W1-1: BIP-39's notice carries the BIP's license STATEMENT, not a full MIT text.** (a) BUILT: the statement, quoted verbatim. The BIP names no copyright holder and carries no MIT text of its own, and the pane's rule is "copied VERBATIM … never from memory". (b) Append the standard MIT permission text. That's "the MIT text" F-B3-1's shape named, but it would come from a template, not from the source. (c) Additionally point "Upstream:" at the pinned commit rather than `master`.
+- **P-940-W1-2: Sparkle's role says "(Mac only)"**, the MCP family's shape (four of its five roles). The cost is one exact-literal exemption in the phone's sweep, since the phone never renders it. Alternative: drop "(Mac only)", and no exemption is needed.
+- **P-940-W1-3: the order.** The Point-Free siblings follow swift-dependencies; Sparkle sits between the shared notices and the MCP family, and the Apache text stays last. Alternative: alphabetical within each group, or Sparkle last.
+- **P-940-W1-4: Sparkle's one line-end space dropped**, since the file carries no line-end whitespace and Xcode's trim-on-save would strip it anyway. Alternative: keep the byte, as `\u{20}` in a non-raw literal.
+- **P-940-W1-5: VX-939's two files with hand sync.** Alternative: the offered headless drift pin, a core test reading `LETTER.md` and `read-me.txt`.
+
+**For the orchestrator (observations, not built):**
+- **The gate needs the PHONE target.** §4's "VX-923's copy may be shared — check" is answered: it is `Shared/`, and the phone test target changed.
+- BIP-39's role line says "recovery phrase". The VX-912 B3 record found that canon's word is "twelve words". The line is untouched here: a Castle-adjacent sentence, CastleRules unread, outside this seam. It's a ticket candidate for her vocabulary call if wanted.
+- The 2026-10-04 strings inventory stays a dated snapshot. The new strings are not in it, by design.
+
+**Self-assessment (how I'd attack this diff, for the cold reviewer):**
+- **(i) The headless harnesses are transcriptions in one respect:** each adds import lines, and the sweep's re-points `#filePath`. Everything else is the suites' own text, extracted by `awk` at run time from the files in the tree. The real in-target runs are the gate's. A difference in the app target's isolation defaults (`@testable import Variorum` under its build settings) is the one thing the harness can't see. The suite needs no actor: `AcknowledgmentsCopy` is `nonisolated` and the existing three tests in the suite share the shape.
+- **(ii) "Both platforms" for the four siblings is read from manifests, not from a built iOS binary.** No iOS link was inspected (B3's symbol counts came from the Mac Debug build). The manifest chain has no platform condition, so the reading is safe, but it is a reading.
+- **(iii) Sparkle's text is the LICENSE file only.** Sparkle's other bundled pieces (`Vendor/` in its checkout) aren't separately enumerated. The LICENSE's EXTERNAL LICENSES section is upstream's own statement of what it owes, and B3 judged the four parts from it.
+- **(iv) LETTER.md's comment block is not her words but sits in her letter's file.** It's an HTML comment, so GitHub's rendered page shows only her text, but the raw file shows it. If she'd rather the file hold nothing but her words, the sync note can live only in the two other places.
+- **(v) The BIP-39 notice is a sentence beside a Castle face** (the twelve words' wordlist). I changed only its license statement, which is provenance, not behavior, and left the role untouched. A reviewer who reads the license line as a CastleRules sentence should flag it.
