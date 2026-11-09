@@ -115,7 +115,7 @@
 
 | Piece | Finding | What | Status |
 |---|---|---|---|
-| F0 | — | This section opened | DONE (this commit) |
+| F0 | — | This section opened | DONE (`e8f653d92`) |
 | F1 | F-R1-5 (MAJOR) | P-A on the harness's 30 s bound; the throwaway > 10 s default-priority backlog arm red on the pre-fix pin, green after, then deleted; R-A re-verified red once at the new bound | NOT STARTED |
 | F2 | F-R1-6 | the lane pin asserts ORDER (both values before the backlog's default-priority probe starts), the 30 s bound the hang-ender; R-L re-verified red 2 of 2 | NOT STARTED |
 | F3 | F-R1-1 | the harness's bound after `everyRefusalIsTheSameSentence`'s last connect; the U1 record's face (3) sentence amended | NOT STARTED |
@@ -123,4 +123,4 @@
 | F5 | F-R1-8 (fence only) | fence (3) of the source pin walks `App/Variorum/VariorumTests` too | NOT STARTED |
 | F6 | — | Verification: the touched suites green through `Tools/assert-tests-ran`; `swift build`; `git diff -- Sources` empty; App/ comments only; self-assessment | NOT STARTED |
 
-**Throwaway instruments in the tree:** none yet. **Reverts in flight:** none.
+**Throwaway instruments in the tree:** `Tests/VariorumMCPTests/ZZVX926R1BacklogArm.swift` (F-R1-5's proof arm — UNCOMMITTED, env-gated `VX926_R1_ARM=1`; source copy `scratchpad/ladder-r1/ZZVX926R1BacklogArm.swift.copy`) — a successor deletes it if this line still names it. **Reverts in flight:** none.
