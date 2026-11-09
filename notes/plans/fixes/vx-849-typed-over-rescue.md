@@ -1134,3 +1134,73 @@ rebase). **Built (one piece):**
 - *The posture, unchanged:* session memory only, the same keep and the same drops on both platforms (CastleRules rule 9 is
   the device's disk and keychain — D-544's posture paragraph); the phone's held secret now has its consumer.
 
+## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
+
+"ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post
+compaction kickoff prompt. when you give me your handoff in the morning, explain all the most important items in
+plain english for a reader with no context (me) to be able to understand. include that in the instructions. I'm
+going to compact you, send you the kickoff prompt, and then you will be running everything provisionally overnight
+and bundling it, merging everything. don't put a release onto stargazing.tech, but it should be *ready* to release
+when I say the word - already built. I'll handle that release in the morning after going through all handoffs."
+
+**Applied, with nov7's same-night wave rule (relayed to all live efforts):** every call that would normally wait
+for her runs PROVISIONAL-and-continue and joins the morning bundle; the run finishes its batches, ladder and
+closeout and MERGES to main (serialized through nov7); release prep belongs to the wave's LAST MERGER ONLY, on
+nov7's GO — the 1.4 bump commit, ReleaseNotes-1.4.md drafted as PUBLIC COPY for her approval (never a ticket id or
+process line — the VX-708 rule), the step-0 drill + first-run walk under stage claims, and `Tools/Release/release.sh
+--version 1.4` STOPPING AT ITS HANDOFF. Nobody else touches MARKETING_VERSION, ReleaseNotes-*.md or release.sh. NO
+site upload, NO appcast copy, NO deploy, NO /Applications install — hers in the morning. If this run ends up the
+last merger AND this orchestrator is Fable: the first-run WALK legs are handed to an OPUS session (the Fable
+safeguard — live Castle walks trip [cyber]); Fable drives the rest. HARD STOPS that survive the mandate: her Air
+drill (post-release via Sparkle), VX-919's production deploy, anything needing her accounts/hands.
+
+## CUTOVER STATE (written at the compaction seam, 2026-11-09 ~04:4x — the resumed orchestrator verifies, never trusts)
+
+- **Tip `f876c8661`** on `vx-849-typed-over-rescue`, clean, pushed; main folded through `38e8f7e31` (vx-913's and
+  vx-926's merges will move main again — fold at every seam; vx-913 shares ZERO files with us, trial clean).
+- **Batch 1 (VX-683+VX-402): CLOSED** — window record in BATCH 1 ADJUDICATION. **Batch 2 (VX-544+P-849-3):
+  BUILT**, awaiting claim `vx-849-batch2` (GO ~05:05 from nov7; legs A/B/D + expected counts in the BATCH 2
+  RECORD's STAGE REQUEST; leg C folds into the closing sweep). The window is THE ORCHESTRATOR'S OWN HANDS —
+  foreground the legs, SEAM pings per leg, RELEASE with Executed counts and every failure by name.
+- **Batches 3 and 4: briefs STAGED above, spawn AFTER the batch-2 window** (batch 3 edits TakesViewModel, which
+  leg A's suites mount — never contaminate the window). **Batch 5 (VX-855): brief unwritten** — trace-first, the
+  repro may need a dev-store window (serialize vs vx-913's VX-81 repro; posture rules in STAGE & COORDINATION).
+  **Batch 6 (VX-921+VX-919): brief unwritten** — the B2 worked pattern is in this file's roster row; VX-919's
+  script is authored only, deploy HELD.
+- **Then:** the LADDER (fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, whole diff; rounds per
+  CLAUDE.md; cross-model flow — the reviewer finals, the implementer applies, FINDER-FIXES/Sync/ lines the
+  reviewer's own); the ORCHESTRATOR'S WALK of batches 3's and 4's faces (UI-kind evidence; dev store, stage,
+  posture restored); the closing sweep: WHOLE Mac + phone on the MERGED tree + the eye-read of AppSession's merged
+  body (the vx-915 overlap terms, three shared files); the full closeout ritual (canon deltas queued in both batch
+  adjudications; the two-file rule; canon-size reported; tickets closed and FILED ones triaged; the rulings
+  reconciled; MOBILE PARITY — the phone heals as the Mac does, batch 2; worktree removed, branch deleted after
+  merge; NO /Applications refresh — VX-931).
+- **The morning bundle (hers):** P-849-1 (the board doors' flush-first — explained plainly to her this sitting,
+  unanswered), P-849-2 (the phone flush occasion), P-849-3 (the phone retry), P-849-4 (the envelope delete), plus
+  whatever the night births; the QUESTIONS entry files AT THE MERGE on latest main. Her Air drill and VX-919's
+  deploy stay OWED. The author handoff (`notes/handoffs/vx-849-handoff.md`): HER CHECKLIST AT THE TOP, and per her
+  mandate the most important items EXPLAINED IN PLAIN ENGLISH FOR A READER WITH NO CONTEXT — write it like the
+  batch explanations she accepted at this sitting (the P-849-1 explanation's register), not like this file. The
+  session's VERY LAST chat message: the filed tickets again, her checkbox format, by priority.
+- **Machinery:** memory file `vx-849-run-state` current; nov7 holds the queue (REQUEST/READY/GO/RELEASE verbatim;
+  no heavy headless while another window is live); the no-trailer hook denies trailer forms in commit text; both
+  implementer agents are DONE (batch 1, batch 2 — resumable by SendMessage only if their batches reopen).
+
+## THE POST-COMPACTION KICKOFF PROMPT (paste-ready; the mandate above travels with it)
+
+/architect-phase vx-849 — POST-COMPACTION RESUME, the overnight leg. You are the standing orchestrator of the
+VX-849 run (the sync-custody run), mid-flight at the batch-2 stage window. FIRST: read
+`~/dev/variorum-vx-849/notes/plans/fixes/vx-849-typed-over-rescue.md` IN FULL — it is the one running record and
+it is current: the STATUS banner, KICKOFF (her rulings verbatim), STAGE & COORDINATION, LIVE STATUS, the batch
+briefs, both batch records with their adjudications, HER OVERNIGHT MANDATE (verbatim — it governs the night) and
+the CUTOVER STATE, which is your task list. Verify before trusting: `git -C ~/dev/variorum-vx-849 log --oneline
+-12` against LIVE STATUS. Then the standard preflight ONLY as the briefs demand it per batch (SyncSpec whole is
+already honored for Sync/ work; CastleRules whole for batch 4; TEXTKIT2_NOTES whole for batch 3). The cast is her
+ruling: Opus implements, Fable cold-reviews. nov7 coordinates the stage — announce yourself, confirm the
+vx-849-batch2 claim's tip, and run the window's legs with your own hands when the GO comes. Everything
+author-flavored runs PROVISIONAL-and-continue into the morning bundle; the hard stops (her Air drill, VX-919's
+deploy, release PUBLISHING) stay held. End state by morning: the run merged (serialized through nov7), release
+prep done ONLY if this run is the wave's last merger and only on nov7's GO (the mandate section's exact scope —
+built, never published; Fable hands the first-run walk to Opus), the author handoff written with its plain-English
+explanations per the mandate, and the filed tickets repeated as the very last chat message in her checkbox format.
+
