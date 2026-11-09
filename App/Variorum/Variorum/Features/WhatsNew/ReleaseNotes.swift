@@ -21,8 +21,9 @@
 //      plainly (`WhatsNewCopy.noNotes`).
 //
 //  THE GRAMMAR (deliberately small — both renderers must agree on it):
-//  `#`/`##`/`###` headings, `- ` or `* ` bullets, blank-line-separated
-//  paragraphs (consecutive lines join with a space), inline **bold**,
+//  `#`/`##`/`###` headings, `- ` or `* ` bullets (an INDENTED line right
+//  under a bullet continues it, joined with a space — VX-343), blank-line-
+//  separated paragraphs (consecutive lines join with a space), inline **bold**,
 //  *italic*, `code` and [links](url). Nothing else is promised.
 //
 
@@ -51,9 +52,18 @@ nonisolated enum ReleaseNotes {
     }
 
     /// The grammar's parse — pure, so the sheet's structure is pinnable.
+    ///
+    /// VX-343 — a wrapped bullet's CONTINUATION: a line INDENTED in the raw
+    /// text, right under a bullet (or under a line that continued one) with no
+    /// blank line between, joins that bullet with one space — Markdown's own
+    /// rule, so the sheet agrees with Sparkle's renderer. A line that is itself
+    /// a heading or a bullet keeps that meaning first.
     static func blocks(from markdown: String) -> [Block] {
         var blocks: [Block] = []
         var paragraph: [String] = []
+        /// The open bullet's index in `blocks` — set by a bullet line, kept by
+        /// its continuations, ended by anything else.
+        var openBullet: Int?
         func flush() {
             if !paragraph.isEmpty {
                 blocks.append(.paragraph(paragraph.joined(separator: " ")))
@@ -62,16 +72,23 @@ nonisolated enum ReleaseNotes {
         }
         for raw in markdown.components(separatedBy: .newlines) {
             let line = raw.trimmingCharacters(in: .whitespaces)
+            let indented = raw.first.map { $0 == " " || $0 == "\t" } ?? false
             if line.isEmpty {
                 flush()
+                openBullet = nil
             } else if let heading = Self.heading(in: line) {
                 flush()
                 blocks.append(.heading(heading))
+                openBullet = nil
             } else if line.hasPrefix("- ") || line.hasPrefix("* ") {
                 flush()
                 blocks.append(.bullet(String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces)))
+                openBullet = blocks.count - 1
+            } else if indented, let open = openBullet, case .bullet(let text) = blocks[open] {
+                blocks[open] = .bullet(text + " " + line)
             } else {
                 paragraph.append(line)
+                openBullet = nil
             }
         }
         flush()

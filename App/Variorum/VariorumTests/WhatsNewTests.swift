@@ -147,6 +147,129 @@ struct WhatsNewTests {
         ])
     }
 
+    // MARK: - VX-343 — a wrapped bullet keeps its continuation (the VX-913 run, B2)
+
+    /// The notes folder in the source tree (the VX-708 pin's road).
+    private static var notesFolder: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Variorum/Features/WhatsNew")
+    }
+
+    private enum Kind: Equatable { case heading, bullet, paragraph }
+
+    private static func kind(_ block: ReleaseNotes.Block) -> Kind {
+        switch block {
+        case .heading: .heading
+        case .bullet: .bullet
+        case .paragraph: .paragraph
+        }
+    }
+
+    /// THE FIXTURE — 0.9.5's actual notes, whose wrapped bullets showed as
+    /// stray fragments in the sheet. RED ON OLD: the pre-fix parser trimmed
+    /// each line first, so an indented continuation fell through to a loose
+    /// paragraph — 18 blocks, five of them strays ("first.", "label and lock
+    /// takes; …", "versions so …", "Private, Seal and Own …",
+    /// "support@stargazing.tech.").
+    @Test func zeroNineFivesWrappedBulletsKeepTheirContinuations() throws {
+        let text = try String(
+            contentsOf: Self.notesFolder.appendingPathComponent("ReleaseNotes-0.9.5.md"), encoding: .utf8)
+        let blocks = ReleaseNotes.blocks(from: text)
+        #expect(blocks.map(Self.kind) == [
+            .paragraph, .paragraph, .paragraph,
+            .bullet, .bullet, .bullet, .bullet, .bullet, .bullet,
+            .paragraph, .paragraph,
+            .heading, .bullet,
+        ], "RED ON OLD: 18 blocks, the five continuations loose paragraphs")
+        let bullets = blocks.compactMap { block -> String? in
+            if case .bullet(let text) = block { text } else { nil }
+        }
+        #expect(bullets == [
+            "With Variorum closed, a connecting client now hears \"Variorum must be open\" instead of "
+                + "\"connection closed\".",
+            "Running a client's setup again simply replaces the old setup and keeps everything you shared "
+                + "\u{2014} no need to deny it first.",
+            "At the edit level, an AI can now do nearly everything you can at the keyboard on what you "
+                + "shared: delete, archive, label and lock takes; restore and rename commits; rename notes; "
+                + "rename, finish, archive and delete books and chapters; reorder notes and chapters; take "
+                + "notes out of books; delete and archive notes; and edit, delete or restore comments.",
+            "At the lower levels it can add many takes or comments in one go, delete comments it left "
+                + "itself, link two notes as versions so Compare pairs them, and remove tags.",
+            "Every change is still one \u{2325}\u{2318}Z, named after the client, and undoing never "
+                + "overwrites a change you made since. Private, Seal and Own stay yours alone.",
+            "Gatherings show the shared-with-AI icon when a wing share reaches them.",
+            "Anything odd, anything you love: **Help \u{25B8} Send Feedback\u{2026}**, or write to "
+                + "support@stargazing.tech.",
+        ])
+        #expect(blocks.last == .bullet(bullets.last ?? ""), "the Feedback bullet ends the notes — no stray after it")
+    }
+
+    /// The rule, synthetic: an INDENTED line right under a bullet (or under a
+    /// line that continued one) joins it with one space — spaces or a tab; a
+    /// blank line ends the bullet; a line that is itself a bullet stays one
+    /// (a nested bullet flattens, as before); a paragraph's own indented line
+    /// still joins the paragraph. RED ON OLD at the joined bullets.
+    @Test func anIndentedLineUnderABulletContinuesIt() {
+        let blocks = ReleaseNotes.blocks(from: """
+            - one
+              two
+              three
+            - four
+            \tfive
+
+              six
+            - seven
+              - nested
+            para
+              joined
+            """)
+        #expect(blocks == [
+            .bullet("one two three"),
+            .bullet("four five"),
+            .paragraph("six"),
+            .bullet("seven"),
+            .bullet("nested"),
+            .paragraph("para joined"),
+        ])
+    }
+
+    /// Every notes file: a bullet's indented continuation lands IN its bullet,
+    /// never as (or inside) a paragraph. RED ON OLD for 0.9.2–0.9.5.
+    @Test func noNotesFileLeavesABulletsContinuationLoose() throws {
+        let files = try FileManager.default
+            .contentsOfDirectory(at: Self.notesFolder, includingPropertiesForKeys: nil)
+            .filter { $0.lastPathComponent.hasPrefix("ReleaseNotes-") && $0.pathExtension == "md" }
+        #expect(files.count >= 16)
+        var continuations = 0
+        for file in files.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            let blocks = ReleaseNotes.blocks(from: text)
+            // The raw lines that continue a bullet (the file's own shape).
+            var underBullet = false
+            for raw in text.components(separatedBy: .newlines) {
+                let line = raw.trimmingCharacters(in: .whitespaces)
+                let isBullet = line.hasPrefix("- ") || line.hasPrefix("* ")
+                let indented = raw.first == " " || raw.first == "\t"
+                if line.isEmpty || line.hasPrefix("#") {
+                    underBullet = false
+                } else if isBullet {
+                    underBullet = true
+                } else if indented && underBullet {
+                    continuations += 1
+                    #expect(blocks.contains { if case .bullet(let b) = $0 { b.hasSuffix(line) || b.contains(line + " ") } else { false } },
+                            "\(file.lastPathComponent): \u{201C}\(line)\u{201D} continues a bullet")
+                    #expect(!blocks.contains { if case .paragraph(let p) = $0 { p.hasPrefix(line) } else { false } },
+                            "\(file.lastPathComponent): \u{201C}\(line)\u{201D} is loose — RED ON OLD")
+                } else {
+                    underBullet = false
+                }
+            }
+        }
+        #expect(continuations >= 9, "the four files that wrap their bullets are still read")
+    }
+
     /// The Help door: rendered in the Help group, a request the window adopts.
     @Test func theHelpMenuCarriesTheWhatsNewDoor() throws {
         let url = URL(fileURLWithPath: #filePath)

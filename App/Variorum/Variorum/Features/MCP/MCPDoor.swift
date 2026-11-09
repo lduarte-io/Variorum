@@ -628,7 +628,15 @@ final class MCPDoor {
             // VX-807 (the VX-809 run, batch 2): her Move to Wing door's own
             // sentence for a BOOK whose note a finished or sealed book holds
             // (the server speaks it where the client can read both).
-            bookMoveFrozenWords: Self.bookMoveFrozenWords)
+            bookMoveFrozenWords: Self.bookMoveFrozenWords,
+            // VX-775: a landed write whose Activity line failed — the client
+            // was answered the act's truth; she hears the failure. The call's
+            // receipts ride this hook with it (never `onWrite` too), and land
+            // with it in ONE hop — the receipts first, the failure last (the
+            // ladder round 1, F1).
+            onActivityLogFailure: { [weak self] failure, receipts in
+                Task { @MainActor in self?.landWireCall(receipts, failing: failure) }
+            })
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —
@@ -636,12 +644,17 @@ final class MCPDoor {
         Task { @MainActor [weak self] in
             let outcome: Result<Void, Error> = await Task.detached { Result { try fresh.start() } }.value
             guard let self else { return }
-            self.starting = false
             guard self.host === fresh else {
                 // Stopped (toggle OFF, lock, quit) while it was starting.
+                // VX-613 (the flag half — the vx-548 record's MB-13 (ii)): the
+                // flag is not this start's to clear — the stop cleared it when
+                // it let this host go, and a fresh start may hold it now. Cleared
+                // here, it let any snapshot change start the fresh host a SECOND
+                // time while its first start ran.
                 fresh.stop()
                 return
             }
+            self.starting = false
             switch outcome {
             // VX-612: read the host — its listener may already have died in the
             // hop back here (its own signal then lands first, and is kept).
@@ -1168,6 +1181,31 @@ final class MCPDoor {
             StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(change) }
         }
         session.status.deliver(MCPReceiptCopy.line(receiptRun), kind: .receipt, action: door)
+    }
+
+    /// **VX-775 — a client's call LANDED and its Activity line could not be
+    /// written: its receipts, then the failure, in ONE synchronous turn** (the
+    /// VX-913 ladder round 1, F1 — the reviewer's final call). Her status seam
+    /// holds one message and a receipt clears the toast, so the order must be
+    /// structural: each receipt takes today's exact road (`landWireWrite` — the
+    /// navigate-away post, the run's one coalesced line, the trail, ⌥⌘O's last
+    /// change), and only then does the failure take the seam. A no-op landing
+    /// brings no receipts.
+    func landWireCall(_ receipts: [MCPWriteReceipt], failing failure: MCPActivityLogFailure) {
+        for receipt in receipts { landWireWrite(receipt) }
+        landActivityLogFailure(failure)
+    }
+
+    /// **VX-775 — a client's write LANDED and its Activity line could not be
+    /// written** (her ruling: "the error goes to her, the truth goes to the
+    /// client"; the kickoff's: a REFUSAL-kind line on the one status seam). The
+    /// receipt has already landed (⌥⌘O's last change, the AI-section row — the
+    /// write is in her store; `landWireCall` orders them); this says the log's
+    /// failure, always as the toast whatever her receipt style (a refusal-class
+    /// message). It changes nothing else: no retry, no row synthesized.
+    func landActivityLogFailure(_ failure: MCPActivityLogFailure) {
+        guard let session else { return }
+        session.status.refuse(MCPReceiptCopy.activityLogFailed(failure))
     }
 
     /// 13n-c U6 — `move_note_to_wing`'s refusal for a note held by a finished
