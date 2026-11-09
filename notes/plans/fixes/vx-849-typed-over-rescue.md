@@ -254,6 +254,69 @@ its PREFLIGHT FACTS and D-544 — with these OVERRIDES, which win where they dif
 9. **THE STAGE & COORDINATION section above and ENVIRONMENT TRAPS bind you**; this file's CONSTITUTION too.
    CastleRules is read WHOLE before any line (custody-adjacent: the derived secret lives in session memory only).
 
+## BATCH 3 BRIEF — the outside-change ring-ending (VX-664, her option-(a) ruling) + the post-rescue face (R-683-4) + P-849-1
+
+**Who you are.** The implementer for batch 3, an Opus subagent at xhigh; `.claude/agents/opus-implementer.md`
+binds you. Worktree `<home>/dev/variorum-vx-849`, branch `vx-849-typed-over-rescue`. THE EDITOR
+SEAM: `PaneSurface`, `PaneTextAuthority`, `TakesViewModel` and their kin — Fable cold-reviews this class, and
+`notes/TEXTKIT2_NOTES.md` is read WHOLE before any line. ZERO lines under `Sources/VariorumCore/Sync/` — if the
+ring work seems to need a seam there, STOP and record (the orchestrator adjudicates).
+
+**Her ruling, the one you build to (2026-10-28, on ticket VX-664, verbatim-faithful):** option (a), SCOPED — the
+ring ends ONLY when an outside write lands on the live pane's OWN take; every outside-change road gets the
+ring-ending shape (VX-222/VX-440's); P-3's live-pane buffer authority is never bent; NO clean-buffer adoption,
+now or later — her words: "I agree it would be bizarre to have an AI live editing the same exact take as you …
+variorum is not a 'we're all editing the same text at the same time' kind of editor like google docs."
+
+**Read first, in full:** CLAUDE.md + canon (auto) · THIS FILE whole (the KICKOFF rulings; batch 1's record — the
+rescue you compose with; both adjudications; STAGE & COORDINATION; ENVIRONMENT TRAPS; CONSTITUTION, P-3
+especially) · `notes/TEXTKIT2_NOTES.md` WHOLE · `notes/SurfaceContracts.md` §"The note" · the W-1 sections of
+`notes/plans/fixes/vx-440-sheets-history-clarity.md` (the TRACED mechanism ~line 805, the general class, the
+narrow fix WF-2 `TakesViewModel.consumeRestoreLanding`) · VX-248's landed shape (grep `rebindIfTakeChanged`) ·
+the History surface's restore roads (`notes/plans/fixes/vx-827-lineage.md` FOR A LATER READER only) · the code:
+`PaneTextAuthority`, `PaneSurface`/`PaneSurfaceRepresentable`, `TakesViewModel` (the ring, `run`, the restore
+landing), the Lenses board's twin, Compare's columns, Canvas, Write's take panel, `AppSession`'s apply/adoption
+road for sync writes, and `Operations.restoreCommitRows` (the insurance gap P-849-1 names).
+
+**The pieces, in order (commit per piece, `Part of VX-664`; push each):**
+
+1. **THE SWEEP TABLE FIRST (the class-completeness discipline):** enumerate every road that rewrites a take's
+   `working_text` from OUTSIDE a live pane bound to that take, × every host surface a live pane can sit on
+   (Takes · Lenses · Compare · Canvas · Write's take panel · Read's edit face · a second window). Known roads
+   from the W-1 record: the History/Commits-face restore (fixed on Takes+Lenses at vx-440 — verify, then
+   generalize), the same restore beside Compare/Canvas/Write's panel, another window's restore, a sync apply of
+   `working_text`, the MCP door's `edit_take`/`restore_commit`, the Lineage face's acts that write the SAME take
+   (most mint new takes — verdict those N/A with the mechanism said). The table lands in your record BEFORE the
+   fix: instance × host, each cell FIXED-with-named-pin or provably N/A.
+2. **ONE ring-ending seam, not per-road patches:** generalize the vx-440 shape (the landing ends the ring over
+   the written take) into one declared mechanism beside the liveness authority — "an outside write landed on the
+   live pane's own take ⇒ the ring ends there" — that every road in the table routes through. P-3 untouched: the
+   pane stays buffer-authoritative while live; ending the ring is what makes it a read pane that adopts. The
+   sync-apply road composes with batch 1: a flush-first round means her typing already landed (no rescue), and
+   the apply's write then ends the ring so the pane shows the applied text; the millisecond stragglers rescue as
+   batch 1 built (her buffer keeps the row) — in THAT case the ring deliberately does NOT end (nothing landed on
+   the row from outside; the displaced words went to a new take). State this composition in your record.
+3. **P-849-1 (PROVISIONAL — her re-cut may land mid-run; keep this piece isolated and cheap to flip):** the
+   board's own restore doors (Takes' `restoreCommit` road and its Lenses/History-surface twins — the doors that
+   REWRITE the typing take's text; enumerate them in the sweep) flush pending typing FIRST through the honest
+   flush, keep ONE quiet `kind='auto'` insurance savepoint of the flushed words when the act is about to replace
+   them (`restoreCommitRows` has no insurance of its own — verified at the batch-2 era; the MCP bracket is the
+   precedent), then act; the ring-end (piece 2) makes the pane adopt the result. A deliberate act of hers then
+   never meets a stale buffer and never mints a `'conflict'` card.
+4. **R-683-4 — the post-rescue face:** stage the sync-road rescue (batch 1's) under a mounted live pane and pin
+   the face: the pane keeps her words, the `'conflict'` take appears in the fan, the corner badge and the open-fan
+   memory behave, the board's comments/geometry hold. Fix what the pins reveal; anything product-flavored goes to
+   the record as PROVISIONAL, never invented.
+5. **Pins:** red-on-old per fixed cell (the `RestoreLandingTests` shape extended; name each pin beside its table
+   cell); `swift build` + both `build-for-testing`s; headless core where touched. NO `xcodebuild test`, NO stage —
+   list the Mac/sim suites (type names) and the named reverts for the orchestrator's window at your record's end.
+   The orchestrator WALKS this batch (UI-kind) after the window.
+
+**Your record:** `### BATCH 3 RECORD` under UNIT RECORDS; LIVE STATUS row 3 flipped in your commits; the sweep
+table; first line = what you did NOT do. **Not yours:** the stage; VX-443/VX-152/VX-545/VX-855/VX-921/VX-919's
+files; `Sync/`. **ENVIRONMENT TRAPS and STAGE & COORDINATION above bind verbatim.** No subagents; foreground
+waits only.
+
 ## UNIT RECORDS
 
 *(appended per batch)*
