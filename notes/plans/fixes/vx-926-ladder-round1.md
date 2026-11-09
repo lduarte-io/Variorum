@@ -89,3 +89,18 @@
 
 **Status:** ROUND 1 COMPLETE — 2026-11-09.
 
+## A-926-4 — the orchestrator's dispositions (same-model flow: arbitrated against the spec)
+
+| Finding | Disposition |
+|---|---|
+| F-R1-1 | **ACCEPTED — FIX as called.** The bound after the connect; the U1 record's face (3) sentence amended to match; no pin (a hang-belt, per U1's own (iii) posture). |
+| F-R1-2 | **ACCEPTED — RECORD, no code.** The residual stated in U1's findings (done, this commit) and joined to A-926-3 / P-926-U3-1's bundle for her sitting: the runner width is the only removal, and the MCP target is a beneficiary too. The soak's MCP leg reads with it. |
+| F-R1-3 | **ACCEPTED — RECORD at closeout.** VX-97/VX-666 close scoped "FIXED (cross-run accumulation)" with a residual ticket minted at the C row carrying P-926-U4-1's options + F-U4-3 (the within-run sharing). Feeds R-926-5's tagging duty. |
+| F-R1-4 | **ACCEPTED — FIX.** Comment-only: the three headers conditioned to the record's PENDING posture; the count corrected (2,622 per-note of 2,731 total). |
+| F-R1-5 | **ACCEPTED — FIX exactly as called.** `withValue(10)` dropped (the harness's 30 s); R-A re-verified red ONCE at the new bound; the throwaway >10 s default-priority backlog arm run as the proof (red on the current pin, green after) and then deleted. |
+| F-R1-6 | **ACCEPTED — FIX.** The pin asserts ORDER (both values before the backlog's default-priority probe starts); the 30 s bound stays as the hang-ender; R-L re-verified red (2 of 2). |
+| F-R1-7 | **ACCEPTED — FIX** (the comment). |
+| F-R1-8 | **ACCEPTED — fence (3) widened to walk `App/Variorum/VariorumTests`; the read tier's `.standard` default NOT touched** (editor-seam class — exactly the reviewer's own call); the ticket (Low · Debt) minted at the closeout's triage. |
+
+**The fix batch:** a fresh `opus-implementer` executes the ACCEPTED FIX rows (F-R1-1, -4, -5, -6, -7, -8's fence) and appends its ROUND 1 FIXES section below; round 2 (a FRESH reviewer) re-reviews the fixes — the MAJOR's rule.
+
