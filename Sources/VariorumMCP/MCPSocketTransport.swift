@@ -259,8 +259,8 @@ actor MCPSocketTransport: Transport {
     /// less room that is than the 2,048 bytes a frame's step needs (the VX-940
     /// ladder's F-R1-1), and it never waits. The mark is restored on every
     /// path BEFORE the lock is let go, so no other write ever meets it, and
-    /// `step` (the fast road's cached value) never changes; a restore fails
-    /// only on a socket shut both ways, which fails every send at once
+    /// `step` (the fast road's cached value) never changes; a restore was seen
+    /// to fail only on a socket shut both ways, which fails every send at once
     /// (probed). A mark that cannot be read or set leaves the step-gated
     /// write: the line goes only while the socket polls writable at its own
     /// mark. A frame whose rest waits on the writer is mid-write too.
