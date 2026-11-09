@@ -478,9 +478,7 @@ struct PoolPostsView: View {
                         MCPSharedIcon(reaches: model.reach[item.postID] ?? [], tokens: tokens)
                         // VX-831: the Private mark (nothing when not Private).
                         PrivateMarkView(
-                            door: PrivateMarkFace.note(
-                                model.privateMarks[item.postID],
-                                badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                            door: PrivateMarkFace.note(model.privateMarks[item.postID])
                                 .map { PrivateMarkDoor(mark: $0, subjectID: item.postID, session: session) },
                             tokens: tokens)
                         // 13n-c U4: an ask waiting on this note.

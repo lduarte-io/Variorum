@@ -228,7 +228,8 @@ struct RootView: View {
     /// **13n-c U3 — this window's road to the MCP door** (`MCPShareRoad`):
     /// the two gates read off the door's NARROW observables (so this body
     /// re-runs only when a client is first approved / last un-approved, or
-    /// the server switch flips), `open` through the window's own request,
+    /// the server switch flips) — and, since VX-934, the AI pair's synced
+    /// switch off this window's theme store — `open` through the window's own request,
     /// and the sheet a nested host presents itself (Book Settings, T-U3-7).
     private var mcpRoad: MCPShareRoad? {
         guard let mcp else { return nil }
@@ -238,6 +239,9 @@ struct RootView: View {
             canShare: mcp.hasApprovedClient,
             // VX-900: the switch itself — it dims the marks, gates none.
             serverOn: mcp.serverOn,
+            // VX-934: her AI-pair switch (synced, this window's theme store) —
+            // the shared icon and the Private eye draw only while it is ON.
+            aiMarksOn: theme.settings.aiMarks,
             open: { router.mcpGrantRequest = $0 },
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))

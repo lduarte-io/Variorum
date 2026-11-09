@@ -120,10 +120,18 @@ final class ThemeStore {
     }
 
     /// 13i-c U4 (the sitting record §6; P-13ic-10): the badge family's one
-    /// switch. A setter and nothing more — every badge reads the landed
-    /// value from `settings`.
+    /// switch — since VX-934 the BOOK marks only. A setter and nothing more —
+    /// every badge reads the landed value from `settings`.
     func setOwnershipBadges(_ on: Bool) {
         run { try $0.setOwnershipBadges(on) }
+    }
+
+    /// VX-934 (her ruling, #269): the AI pair's own switch — the shared icon
+    /// and the Private eye. A setter and nothing more — every window hands the
+    /// landed value to its road (`MCPShareRoad.aiMarksOn`), the one read both
+    /// faces consult.
+    func setAIMarks(_ on: Bool) {
+        run { try $0.setAIMarks(on) }
     }
 
     /// 13i-c U4: the hide-owned GLOBAL default (each gathering may override).

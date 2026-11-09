@@ -83,11 +83,13 @@ private func wingReach() -> MCPPlaceReach {
         throughTitle: "Home")
 }
 
-/// A window's road with the two gates set (no sheet — the pins read faces).
+/// A window's road with the gates set (no sheet — the pins read faces).
+/// VX-934 (A JUSTIFIED EDIT): the road carries her AI-pair switch; every arm
+/// here keeps it ON — her default, today's state — unless it says otherwise.
 @MainActor
-private func road(serverOn: Bool, canShare: Bool = true) -> MCPShareRoad {
+private func road(serverOn: Bool, canShare: Bool = true, aiMarksOn: Bool = true) -> MCPShareRoad {
     MCPShareRoad(
-        canShare: canShare, serverOn: serverOn, open: { _ in },
+        canShare: canShare, serverOn: serverOn, aiMarksOn: aiMarksOn, open: { _ in },
         sheet: { _, _ in AnyView(EmptyView()) }, revoke: { _ in })
 }
 
