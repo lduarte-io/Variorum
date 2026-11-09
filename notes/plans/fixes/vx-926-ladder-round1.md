@@ -117,13 +117,13 @@
 |---|---|---|---|
 | F0 | — | This section opened | DONE (`e8f653d92`) |
 | F1 | F-R1-5 (MAJOR) | P-A on the harness's 30 s bound; the throwaway > 10 s default-priority backlog arm red on the pre-fix pin, green after, then deleted; R-A re-verified red once at the new bound | DONE (`f5acab5cc` the fix + the arm; this commit R-A) — arm RED on the pre-fix pin 1/1, GREEN on the fix 2/2, deleted; R-A RED 1/1 at 30 s ("12 of 16"), restored sha-identical, the pool pins GREEN 3/3 after |
-| F2 | F-R1-6 | the lane pin asserts ORDER (both values before the backlog's default-priority probe starts), the 30 s bound the hang-ender; R-L re-verified red 2 of 2 | NOT STARTED |
+| F2 | F-R1-6 | the lane pin asserts ORDER (both values before the backlog's default-priority probe starts), the 30 s bound the hang-ender; R-L re-verified red 2 of 2 | IN PROGRESS — the changed pin committed (this commit; GREEN 2/2 alone); NEXT: R-L (announced below) |
 | F3 | F-R1-1 | the harness's bound after `everyRefusalIsTheSameSentence`'s last connect; the U1 record's face (3) sentence amended | NOT STARTED |
 | F4 | F-R1-4 + F-R1-7 | comment-only: the three VX-695 headers conditioned to PENDING, the count 2,622 of 2,731; DiscoverProbe's stale "bounded: 5 s" | NOT STARTED |
 | F5 | F-R1-8 (fence only) | fence (3) of the source pin walks `App/Variorum/VariorumTests` too | NOT STARTED |
 | F6 | — | Verification: the touched suites green through `Tools/assert-tests-ran`; `swift build`; `git diff -- Sources` empty; App/ comments only; self-assessment | NOT STARTED |
 
-**Throwaway instruments in the tree:** none — F-R1-5's arm deleted after its runs (never committed; its source `scratchpad/ladder-r1/ZZVX926R1BacklogArm.swift.copy`). **Reverts in flight:** none — R-A applied, run, restored (`git show HEAD:… >`, sha256 `ec3f9df6…` = HEAD's blob, `git diff` empty).
+**Throwaway instruments in the tree:** none — F-R1-5's arm deleted after its runs (never committed; its source `scratchpad/ladder-r1/ZZVX926R1BacklogArm.swift.copy`). **Reverts in flight:** R-L ANNOUNCED, NOT YET APPLIED — `observationLanePriority` set to `.medium` (U3's R-L), working tree only in `Tests/VariorumCoreTests/Support/ObservationLane.swift`; restore = `git show HEAD:Tests/VariorumCoreTests/Support/ObservationLane.swift > Tests/VariorumCoreTests/Support/ObservationLane.swift`, then sha256 against HEAD's blob. A successor finding this line unflipped restores first. (R-A: applied, run, restored earlier — sha256 `ec3f9df6…` = HEAD's blob.)
 
 ### F-R1-5 (MAJOR) — P-A on the harness's one bound
 

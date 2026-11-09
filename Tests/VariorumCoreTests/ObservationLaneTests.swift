@@ -16,19 +16,27 @@ import Testing
 /// 5 ms waited 272.6 s on an idle machine).
 ///
 /// The pin makes that deterministic: it queues a BACKLOG of default-priority
-/// work longer than the bound — every pool thread held in 50 ms slices —
-/// before the observation exists, then holds the product's own observation
-/// (`observeReading`) on the lane and asks for both values inside the bound.
-/// Red on old (the lane's priority reverted to the tests' own `.medium`): the
-/// observation's scheduler Task, its consumer and the wait all queue behind
-/// the backlog and the bound expires. The premise is asserted too — a
-/// default-priority job posted with the backlog waited longer than the bound,
-/// so the bound could never have covered a delivery that queued.
+/// work — every pool thread held in 50 ms slices — and a default-priority
+/// PROBE behind it, before the observation exists, then holds the product's
+/// own observation (`observeReading`) on the lane and asserts ORDER: both
+/// values arrive while the probe has not yet started. Red on old (the lane's
+/// priority reverted to the tests' own `.medium`): the observation's
+/// scheduler Task and its consumer are enqueued AFTER the probe, so the probe
+/// starts first — deterministically, with no wall clock in the verdict.
+/// (Ladder round 1, F-R1-6: the pin used to bound both values by 0.75 s of
+/// wall, which a full run's long synchronous test segments could outlast — a
+/// `.high` job still waits for a thread to finish what it is running; they
+/// delay the probe, 480 slices behind, at least as much, so ORDER cannot red
+/// on them.) `HeldValues`' own 30 s bound stays as the hang-ender. The
+/// premise is asserted too — the probe waited longer than `premiseFloor`, so
+/// the backlog was real and the order means the lane jumped it.
 @Suite("VX-926 U3 — the held-observation lane jumps the run's backlog (VX-625)", .serialized)
 struct ObservationLaneTests {
-    /// How long the forced backlog holds the pool, and the bound it beats.
+    /// How long the forced backlog holds the pool.
     private static let backlogSeconds = 2.0
-    private static let bound: Duration = .milliseconds(750)
+    /// The premise's floor: the probe waited at least this long behind the
+    /// backlog — so values that beat it beat a real queue, not a near-empty one.
+    private static let premiseFloor: Duration = .milliseconds(750)
 
     @Test func aHeldObservationOnTheLaneIsHeardWhileThePoolsQueueHoldsABacklog() async throws {
         try await withOperationsAsync { ops, db in
@@ -42,22 +50,27 @@ struct ObservationLaneTests {
                 name: "the gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
 
             try await onTheObservationLane {
-                // THE BACKLOG first, so everything the observation makes
-                // below is enqueued behind it unless it rides the lane.
+                // THE BACKLOG and its probe first, so everything the
+                // observation makes below is enqueued behind both unless it
+                // rides the lane.
                 let backlog = Backlog(seconds: Self.backlogSeconds)
                 let held = HeldValues(db.observeReading(gathering.id))
-                let initial = try await held.value(1, within: Self.bound)
-                #expect(initial?.map(\.postID) == [a.id, b.id],
-                        "the held observation's first value inside \(Self.bound) despite the backlog")
+                let initial = try await held.value(1)   // HeldValues' 30 s bound: the hang-ender
+                let probeBeforeInitial = backlog.probeHasStarted   // read at the return, before anything else
+                #expect(initial?.map(\.postID) == [a.id, b.id], "the held observation's first value")
+                #expect(!probeBeforeInitial,
+                        "the first value arrived BEFORE the default-priority probe posted behind the backlog started")
                 try ops.setStarred(.post(b.id), starred: false)
-                let afterUnstar = try await held.value(2, within: Self.bound)
-                #expect(afterUnstar?.map(\.postID) == [a.id],
-                        "the un-star's value inside \(Self.bound) despite the backlog")
+                let afterUnstar = try await held.value(2)
+                let probeBeforeUnstar = backlog.probeHasStarted
+                #expect(afterUnstar?.map(\.postID) == [a.id], "the un-star's value")
+                #expect(!probeBeforeUnstar,
+                        "the un-star's value arrived BEFORE the default-priority probe posted behind the backlog started")
                 held.cancel()
-                // The premise: the backlog was real and longer than the bound.
+                // The premise: the backlog was real — the probe queued behind it.
                 let queued = try await backlog.probeWait()
-                #expect(queued > Self.bound,
-                        "a default-priority job posted with the backlog waited \(queued) — longer than the bound")
+                #expect(queued > Self.premiseFloor,
+                        "the default-priority probe posted behind the backlog waited \(queued) — longer than \(Self.premiseFloor)")
             }
         }
     }
@@ -81,6 +94,10 @@ private final class Backlog: Sendable {
         let started = started
         Task.detached(priority: .medium) { started.setValue(ContinuousClock.now - posted) }
     }
+
+    /// Whether the probe, posted behind every slice, has started yet (a read,
+    /// never a wait).
+    var probeHasStarted: Bool { started.value != nil }
 
     /// How long the probe, posted behind every slice, waited to start —
     /// POLLED, never awaited: awaiting its task from the lane would escalate
