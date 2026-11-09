@@ -371,11 +371,11 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 | P1 | TRACE — what starves under full-parallel core load, instrumented headless under deliberate load | **DONE** — the runner's FIFO backlog (no circular wait, no GRDB delay, not product-side): "PHASE 1 — the trace" below |
 | P2 | The fix at its home + the class sweep | IN-PROGRESS — BUILT `2896c9c31`: the shared harness seam (`Support/ObservationLane.swift`: `onTheObservationLane` + `HeldValues`), StarContext and TrashObservationP2 on it; the three suites alone GREEN 15 / 3 (`scratchpad/u3/fixed/alone-1.log`, the gate GREEN); the sweep table PENDING |
 | P3 | Pins — a forced-starvation arm red-on-old (behavioural revert) | NOT-STARTED |
-| P4 | The rider VX-932 — `MCPAcceptLoopServerTests.aFatalAcceptFailureStopsTheListenerAndSaysSo` waits for the signal and the removal (F-U1-1's shape) + its descheduled-thread pin | NOT-STARTED |
+| P4 | The rider VX-932 | IN-PROGRESS — BUILT `414f77809` (three tests of the class, the pin `aSignalLandingLateAfterTheFlipIsStillHeardOnce`); the suite alone GREEN 8 / 1 × 3; R-932 (red-on-old) running |
 | P5 | Counts — the suites alone + under a deliberately loaded full-parallel core run | NOT-STARTED |
 | P6 | Dispositions, PROVISIONALs, self-assessment | NOT-STARTED |
 
-**Load generators alive:** none (P1's 36 × `yes`, pids 70254–70289, killed by pid after loaded run 2; `pgrep -x yes` = 0). **Reverts in flight:** none — R-L applied, run (red 2 of 2) and restored by `git checkout` (diff empty; the pin green 3 of 3 after). **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` (env `VX926_U3_PROBE=1`) and `Tests/VariorumCoreTests/ZZVX926U3StarveArm.swift` (env `VX926_U3_STARVE=1`) — UNTRACKED, env-gated, NEVER committed; a successor deletes it unless this line says it is gone.
+**Load generators alive:** none (P1's 36 × `yes`, pids 70254–70289, killed by pid after loaded run 2; `pgrep -x yes` = 0). **Reverts in flight:** R-932 STARTING — `fatalAcceptRoad`'s two waits back to the old immediate reads in `Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift` (pre-revert committed `414f77809`; restore = `git checkout -- Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift`). R-L done (red 2 of 2, restored). **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` (env `VX926_U3_PROBE=1`) and `Tests/VariorumCoreTests/ZZVX926U3StarveArm.swift` (env `VX926_U3_STARVE=1`) — UNTRACKED, env-gated, NEVER committed; a successor deletes it unless this line says it is gone.
 
 ### PHASE 1 — the trace (what starves, with the evidence)
 
