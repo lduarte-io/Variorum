@@ -2814,13 +2814,15 @@ enum TutorialSeeder {
             // copy pass): the truth-pass rule (VX-197) for this run's and
             // VX-771's write-new acts — a gathering minted on a wing
             // (create_gathering, VX-769) and a note born wearing its tags
-            // (create_note's tags, VX-814).
+            // (create_note's tags, VX-814). VX-943 (the VX-915 run, batch 6 —
+            // the truth-pass rule again; PROVISIONAL words, her bundle): the
+            // link's opposite, unlink_versions, taught where link_versions is.
             "Write new: it can also make new notes, books, gatherings, chapters and "
             + "tags, file notes into books and chapters, and give a book a rule that "
             + "collects notes by tag. A note it makes can wear its tags from the "
             + "start. It can add blocks at the end of a note, duplicate a "
             + "note to work on a copy, and link two notes as versions by naming "
-            + "which paragraphs match.",
+            + "which paragraphs match, or remove a link it made.",
 
             // VX-168 U2: Edit's step named the deliberate acts — choosing a
             // take, committing one (VX-169), making a lens the note (VX-174,

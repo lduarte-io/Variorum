@@ -587,6 +587,9 @@ nonisolated enum MCPPaneCopy {
         case "replace_tag": return "replacing a tag on \(at)"
         // VX-187 — two notes linked as versions (the log names one side).
         case "link_versions": return "linking \(at) and another note as versions"
+        // VX-943 — its opposite (the log names the note that refused, else the
+        // link's first; PROVISIONAL words, her copy pass).
+        case "unlink_versions": return "removing a version link from \(at)"
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
         // P-U4-WORDS — her copy pass).
         case "edit_comment": return "editing a comment in \(at)"
@@ -733,6 +736,9 @@ nonisolated enum MCPPaneCopy {
         case "remove_tag": return "removed a tag from \(at)" + times
         case "replace_tag": return "replaced a tag on \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times
+        // VX-943 — logged on the link's first note (PROVISIONAL words).
+        case "unlink_versions":
+            return n == 1 ? "removed a version link from \(at)" : "removed \(n) version links from \(at)"
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
         // P-U4-WORDS). A block's LAST take deleted is logged on the BLOCK
         // (R-VX184-1 — the block went), so the line says so.
@@ -1819,6 +1825,11 @@ nonisolated enum MCPReceiptCopy {
             return n == 1
                 ? "linked \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail)) as versions"
                 : "linked \(n) pairs of notes as versions"
+        // VX-943 — one link taken back (PROVISIONAL words, her copy pass).
+        case .versionUnlink:
+            return n == 1
+                ? "removed the version link between \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail))"
+                : "removed \(n) version links"
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
         // P-U4-WORDS — her copy pass).
         case .commentEdit: return n == 1 ? "edited a comment" : "edited \(n) comments"

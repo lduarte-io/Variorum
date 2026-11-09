@@ -83,4 +83,30 @@ struct MCPDoorErgonomicsFacesTests {
         #expect(MCPToolFacts.rung(of: "remove_tag") == .edit)
         #expect(MCPToolFacts.rung(of: "link_versions") == .writeNew, "R-VX187-1: write new on both notes")
     }
+
+    // MARK: - VX-943 (the VX-915 run, batch 6 — APPENDED; nothing above modified)
+
+    /// `unlink_versions`, the link's opposite, in the app's voice (PROVISIONAL
+    /// words, her copy pass): ONE client-named undo entry — so its receipt says
+    /// "⌥⌘Z undoes" — the receipt naming both notes, and Activity in words for
+    /// the landed, the counted and the refused row. Red on old by absence (the
+    /// act, the tool and the words did not exist).
+    @Test func theUnlinkSaysWhatLandedAndIsOneUndoAtWriteNew() {
+        #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: "one", detail: "two")])
+                == "claude-code removed the version link between \u{201C}one\u{201D} and \u{201C}two\u{201D}"
+                + undoes)
+        #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: "one", detail: "two"),
+                                     receipt(.versionUnlink, title: "one", detail: "two")])
+                == "claude-code removed 2 version links" + undoes)
+        #expect(Operations.MCPWriteAct.versionUnlink.undoLabel(client: "claude-code")
+                == "claude-code's version link removal")
+        #expect(Operations.MCPWriteAct.versionUnlink.isUndoable, "one undo for her puts the link back")
+        #expect(line("unlink_versions", allowed: true) == "a-client removed a version link from \u{201C}a letter\u{201D}")
+        #expect(line("unlink_versions", allowed: true, count: 3)
+                == "a-client removed 3 version links from \u{201C}a letter\u{201D}")
+        #expect(line("unlink_versions", allowed: false)
+                == "a-client was refused removing a version link from \u{201C}a letter\u{201D}")
+        #expect(MCPToolFacts.rung(of: "unlink_versions") == .writeNew,
+                "her words: at the same permission level as link_versions")
+    }
 }
