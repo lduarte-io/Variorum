@@ -90,7 +90,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 |---|---|---|
 | 0 | Kickoff: mint (VX-926), 15 members seated, 4 duplicates marked, worktree, in-flight row, her rulings R-926-1..4, the disposition A-926-1 | DONE (this commit) |
 | U1 | the socket clock | **BUILT + PINNED, headless** — "## U1 record" (end of file): VX-850 ANSWERED (test timing — the harness rides the test process's cooperative pool; the door answers in ms at load 40 with the pool free); ONE mechanism fixed at its three faces in `Tests/VariorumMCPTests` only (waits off the pool · the deadline on its own queue and clock · every raw wait on the harness's one bound, O-7's rule carried); pins P-A/P-B/P-C red on old or under their named reverts, each revert red on exactly its pin; final counts all GREEN (family alone 2/2, MCP target idle 2/2, loaded 3/3, whole package loaded 1/1); all eight members FIXED (VX-477's StarContext sighting returned to VX-625); findings F-U1-1/-2 for the orchestrator |
-| U2 | the encoder mitigation (timeboxed) | NOT STARTED |
+| U2 | the encoder mitigation (timeboxed) | **IN PROGRESS** — "## U2 record" (end of file) |
 | U3 | StarContext starvation | NOT STARTED |
 | U4 | hermetic defaults + the dissolve check | NOT STARTED |
 | R | VX-665 verify-close (orchestrator) | NOT STARTED |
@@ -208,3 +208,19 @@ All eight close on ONE mechanism (the harness rides the test process's pool), wi
 - **(vii) The timer queue is serial** — every deadline's expiry block runs on it in turn; each is O(1) (resume, a `Task` spawn, a cancel).
 - **(viii) Task-locals are read before every hop** (`HarnessWait.receiveSeconds` in the task; `RawSocket`'s default argument at its call site; the stop-window probe's bound captured in the test body) — a plain thread sees no task-local.
 - **(ix) `git diff -- Sources` is empty;** every pin's subject and every other pin's bytes are unchanged — the converted call sites only gained `await` (and three sync tests became `async`).
+
+## U2 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no stage work of any kind (the brief: headless only — `swift build`/`swift test`; no `xcodebuild test`, no Debug launch); the session is TIMEBOXED (one session, no extensions). Everything below that needs the Xcode-hosted road is marked PENDING-STAGE.
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record opened; ledger row U2 → IN PROGRESS | DONE (this commit) |
+| P1 | PHASE 1 — characterize: the on-disk .ips corpus read (shape, thread, depth, recursion origin); can either shape be reproduced at will headlessly? | NOT-STARTED |
+| P2 | PHASE 2 — the mitigation menu (i) ABI stream knobs · (ii) our issue payloads · (iii) fewer suites per invocation · (iv) exit ordering — each with evidence or "unreachable" | NOT-STARTED |
+| P3 | PHASE 3 — land the safest effective mitigation with its evidence, OR record-only; the Apple Feedback draft (a deliverable either way) | NOT-STARTED |
+| P4 | Dispositions (VX-661, VX-690), PROVISIONALs, self-assessment | NOT-STARTED |
+
+**Throwaway instruments alive:** none yet. **Reverts in flight:** none.
