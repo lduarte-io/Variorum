@@ -175,7 +175,7 @@ beside it.**
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
-| 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
+| 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | IN-PROGRESS — the BATCH 4 RECORD opened (preflight whole; VX-443's traced facts and settled design written before code); pieces 1–4 next |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
@@ -1768,6 +1768,101 @@ live, A-677-1/-2") exists and the seam files are unchanged since it; `AutosaveCo
 8. **Canon deltas → queued for the closeout list** as the batch names them (AppSpec §9's insurance list + the
    `restoreCommit` line; OverallModel §3's occasion list; SurfaceContracts §"The note"'s slot-split ring-end),
    each landing only as its PROVISIONAL survives her sitting.
+
+### BATCH 4 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+Debug-app launch, no walk, no store or server contact — every Mac run is **PENDING** the orchestrator's window (the
+STAGE REQUEST at this record's end); zero lines under `Sources/VariorumCore/Sync/`; no whole-package or whole-target
+headless run and no cold build (the live constraint — other sessions hold the stage); no pull, merge or rebase; no
+QUESTIONS filed (P-849-4's entry is the merge's).
+
+**Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole; `.claude/agents/
+opus-implementer.md`; `notes/CastleRules.md` WHOLE; `notes/SurfaceContracts.md` §"Doors to the outside" (the protection
+bullet — the pre-design face's detection sentence); `notes/plans/vx-307-castle-crossings.md` §6's F-5 + the U2a
+ARBITRATION; `notes/plans/fixes/vx-912-b0-security-verify.md` whole (flag 1); `notes/SessionResiliencyProtocol.md`
+§implementer; QUESTIONS #241 and the vx-529 record's rule-7 drafting lines. The code: `LibraryClassifier`,
+`CatalogNames`, `Catalog.build`, `Assess.swift` (`launch`, `preDesignStore`, `repairs`), `Assessment.swift`'s `Repair`,
+`ExecutorRepairs.swift`, `Leaves.swift`, `FileKeyFileStoreLeaf`, `PreDesignSetAside`, `ProtectionOpenRoad` (`route`,
+`create`, `open`, `repairPasses`), `ProtectionRoadActs.useOffer`, the deleted envelope's code read from history
+(`StoreIdentity.swift`, `StoreKeyEnvelope.swift` at `c3d939c9e~1`; `AppBootstrap.ensureStoreIdentity` at `f2306a535~1`),
+the scenario world (`World.swift`, `Fakes.swift`), `AWorld`, `ExecutorWorld`; for VX-152 `AppBootstrap.lock()` /
+`lockOnNewRoad` / `awaitTheLockSeam`, `ProtectionController`'s monitors, `RoadLockRouteTests`; for VX-545 the five touch
+points, `RoadAccountWordsTests`, `LifecyclePage(Tests)`.
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Preflight + this record | DONE (this commit) |
+| 1 | VX-443 — the stale envelope's sweep (a repair at the open, names only, fenced) + pins | NOT STARTED — the settled design below |
+| 2 | VX-152 — the lock's reentrancy, investigate-first | NOT STARTED — the trace below is read; the verdict lands with its piece |
+| 3 | VX-545 — rule 7's ratified sentence, five touch points in ONE commit + the page regenerated | NOT STARTED |
+| 4 | Close — `swift build`, targeted core `swift test`, both incremental `build-for-testing`s, the STAGE REQUEST | NOT STARTED |
+
+**VX-443 — the traced facts, before code (what the file IS, from the deleted code):**
+- *Who wrote it:* `AppBootstrap.ensureStoreIdentity` (the new road's open, VX-306 U1b → VX-329; `f2306a535~1`
+  :572) called `StoreIdentity.establish(besideStore:key:)` (`c3d939c9e~1`, `Persistence/StoreIdentity.swift`) with the
+  open's key in hand — on a creation and a Make this my library (`fresh: true`, any envelope there set aside first as
+  `.stale-<epoch>.json`) and on any later open that found none. `establish` writes the envelope at its
+  `preferredURL` — **`variorum-keys-<fp16>.json`, fp16 = `KeyFingerprint.of(key)`** (the first eight bytes of SHA-256 of
+  the key, sixteen lowercase hex — the algorithm relocated byte-for-byte at VX-329 U1) — holding the store id, that
+  fingerprint and the format version, **no wraps** ("store id + the minted key's fingerprint, no wraps"). F-5's
+  `variorum-keys-<storeID>.json` is a loose spelling: the id lives INSIDE; the NAME is the fingerprint's.
+- *What it carries:* a stale key's FINGERPRINT (non-secret by `KeyFingerprint`'s own doc), not the key — after a
+  crossing, the fingerprint of the pre-crossing key. One wraps-bearing edge exists in `establish` (a fingerprint-less
+  legacy `variorum-keys.json` "belongs" to any key, so its wraps were re-written under the new key's fingerprint name,
+  the legacy original left in place); unprovable without reading, never read.
+- *Why it is a live defect and not only dead weight (the latent ambiguity, traced):* its NAME is exactly
+  `CatalogNames.isPreDesignKeyFileName`'s fingerprint form, and `AssessRules.preDesignStore` reads "a store, NO key
+  file of this design, an older name at the container root". So the day this design's key file goes missing, a
+  new-road library carrying the stub reads as a PRE-DESIGN store: her "older version" face, where no key is tried and
+  no keychain item read — rule 1's own redundancy (the sealed mirror `restoreKeyFileFromMirror` writes back, the
+  catalogued backups' key files the typed roads and rule 21's offer read) never gets its turn. Without the stub the same
+  loss is the lobby, whose quiet roads open the library and whose repair writes the key file back.
+- *Who still has one:* only libraries the new road opened between VX-306 U1b and VX-329 (the dev store, the VX-306 →
+  VX-329 testers); nothing has written one since VX-329.
+
+**VX-443 — the settled design (PROVISIONAL P-849-4, built before her bundle):**
+- *Decided by `assess`, written by the executor* — the protection core's one shape (assess "THE ONLY DECISION CODE";
+  "the executor is the one thing that writes"), at the open's repairs — the rule-8 re-makes moment: a new `Repair`
+  `.deleteOlderKeyFile(name:)`, owed for each name at the container's root (place `.container`, no folders — the
+  pre-design fact's own predicate) that is an older Variorum's FINGERPRINT-named key file whose fingerprint THIS
+  design's live key file holds — its current key or its history (`KeyFile.heldFingerprints`) — while the live file is
+  the current key's (the key that just opened the library). The executor VERIFIES with the key in hand (the
+  fingerprint is the current key's, or the live history opens under the current key to exactly it) and deletes BY NAME
+  through the key-file store leaf (`deleteOlderKeyFile(named:)` — the slot's own folder, a regular file only, never a
+  byte read). One log line names the file. Idempotent (a re-run finds nothing there).
+- *The fences, each pinned:* the live slot only (the repairs run only on the live slot's open, its create and rule
+  21's use-offer; the leaf names only the container's root — never Previous Libraries, a backup folder, the far folder,
+  a Look-inside copy or a picked folder); only after the open verified THIS design's key file (no repair runs before
+  unlock; the live file must name the opened key); the read-only road writes nothing (`ctx.writes` — the hosted test
+  run); a PRE-DESIGN store is never reached (no format-3 file ⇒ the launch verdict is `.preDesignStore` before any
+  open; the detector byte-unchanged); one log line per file, names only.
+- *THE ADDED FENCE — the fingerprint must be one this library's key file holds (beyond the brief's list; a narrowing,
+  recorded):* the brief's safety argument is rule 4 ("the key file carries every earlier key … so nothing openable is
+  lost"). That argument is true only of a key THIS library has had. An older name whose fingerprint the live key file
+  does not hold — a store from before this design moved out by hand, its key file left in the container, then a fresh
+  library made here — is somebody else's recovery leg and rule 26's ("we don't handle them"). The name carries its
+  fingerprint, the live key file carries its own in plaintext ("every byte is non-secret"), so the match is names-only
+  and makes rule 4's argument CHECKED rather than argued: every file the sweep can delete provably concerns a key the
+  current key file already reaches. It sweeps exactly what `ensureStoreIdentity` wrote (its fingerprint was always the
+  library's own key at that open — the current one, or one rule 4 carried into the history).
+- *Deliberately NOT swept (recorded corners):* the fixed legacy name `variorum-keys.json` (no fingerprint in the name —
+  ownership unprovable by name; `establish` never wrote it — a leftover from before this design, rule 26's); the
+  set-asides `<name>.stale-<epoch>.json` (not part of the pre-design fact, so no ambiguity; set aside by today's road
+  precisely BECAUSE they carried another key's wraps — "somebody's recovery legs"); anything below the container's
+  root. Each still sits as dead weight; none is read.
+- *Delete vs keep (the brief's ask, honestly):* KEEP-AND-SET-ASIDE would mint a new place keys live (a `.stale-` name
+  or a folder of them), the shape CastleRules avoids (rule 1 names the homes of a key file; a set-aside is none of
+  them) and the same name class the detector would still have to learn to skip; and it keeps the stale fingerprint on
+  disk for nobody. DELETE is safe because of rule 4 (and here, checked by the added fence): the current key file
+  carries every key the swept name can concern, under the current secrets — and the stub itself carries no lock at
+  all. Rule 22 ("a key is deleted only after its replacement has been verified") holds a fortiori: the stub is not a
+  key, and the deletion runs only after the open verified the key file that replaces it.
+
+**VX-152 — the trace read before the batch's code (the verdict lands as piece 2):** the lock road today is VX-445's
+(`AppBootstrap.lock()` → `lockOnNewRoad()` → `awaitTheLockSeam()` holding `ProtectionRoadSession.beginAct()`); sleep and
+screen lock both reach it through `ProtectionController.relockIfPolicySays()` → `performLock`. To be verdicted against
+the ticket's premise (written against the pre-VX-445 lock) in piece 2.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
