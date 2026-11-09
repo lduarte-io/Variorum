@@ -71,9 +71,17 @@ final class TagsViewModel {
 
     /// Internal so tests drive the listing deterministically. `wing` nil keeps
     /// the shown wing (the older pins' road).
+    ///
+    /// VX-889: a listing of ANOTHER wing clears the gathering checks in the
+    /// same adopt that moves `shownWing` — a check is never carried onto
+    /// another wing's same-path twin. A re-list of the SAME wing (a new tag,
+    /// the wing renamed) keeps them.
     func adopt(_ new: [Tag], wing: ShownWing? = nil) {
         tags = new
-        if let wing, wing != shownWing { shownWing = wing }
+        if let wing, wing != shownWing {
+            if wing.id != shownWing.id { gatheringChecks = [] }
+            shownWing = wing
+        }
     }
 
     /// Indent depth for the tree presentation (path components below root).

@@ -1260,10 +1260,14 @@ struct TagManagerPane: View {
         // like the list, restarted on a wing switch (the read is per wing).
         .task(id: session.wing.currentID) { await tags.startUnused() }
         // A switch takes the sheet's snapshot (another wing's tags) and the
-        // last sweep's words with it.
+        // last sweep's words with it — and (VX-889) the Make a Gathering
+        // sheet, whose request is the wing it was opened over: it never
+        // outlives that wing's showing. (The checks themselves clear when the
+        // new wing's listing lands — `TagsViewModel.adopt`.)
         .onChange(of: session.wing.currentID) { _, _ in
             sweep = nil
             sweepLine = nil
+            promote = nil
         }
         // …and the vocabulary GROWING retires the words too: an ⌥⌘Z that
         // brought the swept tags back (or a new tag) makes "Deleted 3 unused
@@ -1444,24 +1448,30 @@ struct PromoteTagsSheet: View {
     }
 
     /// **The sheet's mint** (VX-889: hoisted from `promote()` so a pin reaches
-    /// the door's real body).
+    /// the door's real body). It mints IN THE WING THE PANE SHOWED at the
+    /// door's press (`request.wingID`, the list's own `shownWing`) — the row
+    /// lands on that wing's Bookcase and the rule's paths resolve against that
+    /// wing's vocabulary (`createReading`'s v1-draft normalization). ONE value
+    /// names the wing for the name guard AND the mint, so they can never
+    /// disagree. A wing that died under the sheet refuses `wingNotFound`
+    /// (a book is born in a live wing) — it lands nowhere, never silently in
+    /// Home.
     @discardableResult
     static func mint(
         _ session: AppSession, request: TagsViewModel.GatheringRequest,
         name bookName: String, joinAll all: Bool
     ) async throws -> Reading {
-        let paths = request.paths
+        let wing = request.wingID
+        let querySpec = try spec(paths: request.paths, joinAll: all).encodedJSON()
         return try await session.runner.run { ops in
             // 13e E13 — this is a book-CREATING door with a free-text
             // name, so it carries the same guard the shelf's does
             // (her round-3 ruling). Inside the runner closure with
             // the mint, for that guard's own reason.
-            // VX-816: of the wing the mint lands in — Home, where
-            // `createReading` below puts it (no wing passed).
-            try ops.assertBookNameIsFree(bookName, inWing: "")
+            // VX-816: of the wing the mint lands in — the same `wing`.
+            try ops.assertBookNameIsFree(bookName, inWing: wing)
             return try ops.createReading(
-                name: bookName, kind: .gathering,
-                querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())
+                name: bookName, kind: .gathering, querySpec: querySpec, wingId: wing)
         }
     }
 
