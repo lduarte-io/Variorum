@@ -313,7 +313,8 @@ struct ProdTestRoadTests {
         }
         // The stripper's own teeth: it keeps what Release compiles.
         let services = Self.releaseText(try Self.source("Shared/AppServices.swift"))
-        #expect(services.contains("sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)"))
+        #expect(services.contains(
+            "sync = SyncSession(database: session.database, allowsSync: storeVariant == .real, path: networkPath)"))
         #expect(Self.releaseText(try Self.source("Shared/SyncStatusViews.swift")).contains("return SyncRowFace.face("))
     }
 }
