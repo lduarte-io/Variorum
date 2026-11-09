@@ -153,8 +153,7 @@ struct MCPConnectionEndServerTests {
             throw HarnessFailure("could not connect")
         }
         defer { close(fd) }
-        var timeout = timeval(tv_sec: 5, tv_usec: 0)
-        _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        HarnessWait.bound(fd, seconds: HarnessWait.receiveSeconds)   // VX-850: the harness's one bound (O-7's rule)
         var opening = MCPPreamble.line(key: try h.setupKey(for: "claude-code"))
         opening.append(Data((initialize("claude-code") + "\n").utf8))
         _ = MCPShim.writeAll(fd, opening)

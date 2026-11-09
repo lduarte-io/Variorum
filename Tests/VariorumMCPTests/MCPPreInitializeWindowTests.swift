@@ -129,7 +129,7 @@ struct MCPPreInitializeWindowTests {
     @Test func aBareOpeningIsAnsweredBeforeTheReadBlocks() async throws {
         let (server, client) = try socketPair()
         defer { close(server); close(client) }
-        setReceiveTimeout(client, milliseconds: 3_000)
+        setReceiveTimeout(client, milliseconds: HarnessWait.receiveSeconds * 1_000)   // VX-850: the harness's one bound
         _ = MCPShim.writeAll(client, lines(CapturedClaudeCode.probe))
         async let opened = MCPHandshake.opening(fd: server)
         // VX-850: off the pool — the `async let` above needs a pool thread to

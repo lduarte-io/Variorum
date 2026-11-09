@@ -33,8 +33,7 @@ struct MCPSetupKeyServerTests {
     /// After its one answer, a refused connection is CLOSED (EOF), and it
     /// never holds a session slot.
     private func expectClosed(_ fd: Int32) async {
-        var timeout = timeval(tv_sec: 2, tv_usec: 0)
-        _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        HarnessWait.bound(fd, seconds: HarnessWait.receiveSeconds)   // VX-850: the harness's one bound (O-7's rule)
         // VX-850: off the pool — the host that hangs it up does so from a pool task.
         let eof = await HarnessWait.offPool {
             var byte: UInt8 = 0

@@ -77,11 +77,16 @@ struct MCPHarnessPoolTests {
         let peer = try LatePeer(h, answersAfter: 6)
         defer { peer.stop() }
         try await HarnessDeadline.$seconds.withValue(10) {
+            // The one raw client every stop-road suite shares, at the same time.
+            async let named: Int32? = try? await namedClient(h.directory, key: "vmk1_late", as: "late-named")
             let socket = try RawSocket(h)
             defer { socket.close() }
             socket.send(#"{"jsonrpc":"2.0","id":7,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"late","version":"1"}}}"#)
             let answer = await socket.next()
             #expect(answer?["id"] as? Int == 7, "a raw wait heard a 6 s answer inside the harness's 10 s bound: \(String(describing: answer))")
+            let namedFD = await named
+            #expect(namedFD != nil, "the shared raw client heard it too")
+            if let namedFD { close(namedFD) }
         }
     }
 

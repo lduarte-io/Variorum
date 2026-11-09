@@ -23,47 +23,6 @@ private func tempDirectory(_ prefix: String) -> URL {
         .appendingPathComponent("\(prefix)-\(UUID().uuidString.prefix(8))", isDirectory: true)
 }
 
-/// A raw client on `directory`'s socket that NAMES ITSELF (its setup key's
-/// preamble, then an `initialize` as `name`, the answer read under a receive
-/// bound — `HarnessDeadline.seconds`, the harness's own, O-7). The caller closes the descriptor.
-/// VX-850: the read runs off the pool (`HarnessWait`); the task-local bound is
-/// read here, before the hop (a plain thread sees none).
-private func namedClient(_ directory: URL, key: String, as name: String) async throws -> Int32 {
-    let seconds = Int(HarnessDeadline.seconds.rounded(.up))
-    return try await HarnessWait.offPoolThrowing {
-        try namedClientBlocking(directory, key: key, as: name, receiveSeconds: seconds)
-    }
-}
-
-private func namedClientBlocking(_ directory: URL, key: String, as name: String, receiveSeconds: Int) throws -> Int32 {
-    guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
-        throw HarnessFailure("could not connect as \(name)")
-    }
-    var timeout = timeval(tv_sec: receiveSeconds, tv_usec: 0)
-    _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-    var opening = MCPPreamble.line(key: key)
-    let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
-    opening.append(Data((initialize + "\n").utf8))
-    _ = MCPShim.writeAll(fd, opening)
-    guard !MCPShim.readFirstLine(fd, limit: 1 << 20).isEmpty else {
-        close(fd)
-        throw HarnessFailure("\(name) got no answer to its initialize")
-    }
-    return fd
-}
-
-/// The server hung this connection up: reading reaches EOF within the receive bound.
-private func reachesEOF(_ fd: Int32) async -> Bool {
-    await HarnessWait.offPool {   // VX-850: off the pool
-        var buffer = [UInt8](repeating: 0, count: 4096)
-        while true {
-            let count = read(fd, &buffer, buffer.count)
-            if count == 0 { return true }
-            if count < 0 { return false }
-        }
-    }
-}
-
 /// The grant's revocation stamp, read fresh (nil = still live).
 private func revokedAt(_ h: ServerHarness, _ grantID: String) throws -> String? {
     try h.database.read { try Queries.mcpGrant($0, id: grantID) }?.revokedAt

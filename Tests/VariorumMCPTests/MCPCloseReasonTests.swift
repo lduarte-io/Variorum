@@ -144,52 +144,6 @@ private func tempDirectory(_ prefix: String) -> URL {
         .appendingPathComponent("\(prefix)-\(UUID().uuidString.prefix(8))", isDirectory: true)
 }
 
-/// A raw client on `directory`'s socket that names itself (its key's preamble, an
-/// `initialize`, the answer read under the harness's receive bound — `HarnessDeadline.seconds`, O-7).
-/// VX-850: the read runs off the pool (`HarnessWait`); the task-local bound is
-/// read here, before the hop (a plain thread sees none).
-private func namedClient(_ directory: URL, key: String, as name: String) async throws -> Int32 {
-    let seconds = Int(HarnessDeadline.seconds.rounded(.up))
-    return try await HarnessWait.offPoolThrowing {
-        try namedClientBlocking(directory, key: key, as: name, receiveSeconds: seconds)
-    }
-}
-
-private func namedClientBlocking(_ directory: URL, key: String, as name: String, receiveSeconds: Int) throws -> Int32 {
-    guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
-        throw HarnessFailure("could not connect as \(name)")
-    }
-    var timeout = timeval(tv_sec: receiveSeconds, tv_usec: 0)
-    _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-    var opening = MCPPreamble.line(key: key)
-    let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
-    opening.append(Data((initialize + "\n").utf8))
-    _ = MCPShim.writeAll(fd, opening)
-    guard !MCPShim.readFirstLine(fd, limit: 1 << 20).isEmpty else {
-        close(fd)
-        throw HarnessFailure("\(name) got no answer to its initialize")
-    }
-    return fd
-}
-
-/// Every byte until EOF (nil on a timeout — the connection still open).
-/// VX-850: off the pool.
-private func readToEOF(_ fd: Int32) async -> Data? {
-    await HarnessWait.offPool {
-        var all = Data()
-        var buffer = [UInt8](repeating: 0, count: 4096)
-        while true {
-            let count = read(fd, &buffer, buffer.count)
-            if count == 0 { return all }
-            if count < 0 {
-                if errno == EINTR { continue }
-                return nil
-            }
-            all.append(contentsOf: buffer[0..<count])
-        }
-    }
-}
-
 /// The connection-end rows, oldest first, as (client, act).
 private func ends(_ database: AppDatabase) throws -> [(client: String, act: String)] {
     let acts = Set(MCPConnectionEnd.allCases.map(\.act))
@@ -234,7 +188,7 @@ struct MCPCloseReasonServerTests {
         let fd = try await namedClient(h.directory, key: try h.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(fd) }
         try road.stop(h.host)
-        let stream = await readToEOF(fd)
+        let stream = await everyByteUntilEOF(fd)
         #expect(stream != nil, "\(road): the stop ends the connection")
         let bytes = stream ?? Data()
         let expected = MCPCloseLine.line(road.words)!
@@ -258,7 +212,7 @@ struct MCPCloseReasonServerTests {
         #expect(nobodyNamed, "nothing named itself")
         try await Task.sleep(for: .milliseconds(100))  // the session is reading its opening (VX-850: suspended, not holding a pool thread the session needs)
         h.host.stop(ending: .libraryClosed)
-        let bytes = await readToEOF(fd) ?? Data()
+        let bytes = await everyByteUntilEOF(fd) ?? Data()
         #expect(!bytes.contains(MCPCloseLine.marker), "no close line before a name: \(bytes.count) bytes")
     }
 
@@ -282,7 +236,7 @@ struct MCPCloseReasonServerTests {
         #expect(took < 1.0, "the stop never waits on the write lock: \(took) s")
         let held = holder.wasHeld
         #expect(held, "the lock was held as the server stopped")
-        let bytes = await readToEOF(fd)
+        let bytes = await everyByteUntilEOF(fd)
         holder.release()
         #expect(bytes != nil, "the connection still ends")
         #expect(!(bytes ?? Data()).contains(MCPCloseLine.marker), "the line was skipped, never written mid-frame")
@@ -301,7 +255,7 @@ struct MCPCloseReasonServerTests {
         let quitFD = try await namedClient(quitting.directory, key: try quitting.setupKey(for: "claude-code"), as: "claude-code")
         defer { close(quitFD) }
         quitting.host.stopWithTheProcess()
-        let quitBytes = await readToEOF(quitFD) ?? Data()
+        let quitBytes = await everyByteUntilEOF(quitFD) ?? Data()
         #expect(quitBytes.contains(MCPCloseLine.marker), "the quit now says why on the wire")
         try await Task.sleep(for: .milliseconds(400))
         let quitLogged = try ends(quitting.database)
@@ -313,7 +267,7 @@ struct MCPCloseReasonServerTests {
         defer { close(lockFD) }
         try locking.host.recordConnectionEnds(.libraryClosed)
         locking.host.stop(ending: .libraryClosed)
-        _ = await readToEOF(lockFD)
+        _ = await everyByteUntilEOF(lockFD)
         try await Task.sleep(for: .milliseconds(400))
         let lockLogged = try ends(locking.database)
         #expect(lockLogged.map(\.client) == ["claude-code"]

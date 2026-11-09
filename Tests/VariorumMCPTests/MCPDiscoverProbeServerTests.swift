@@ -43,8 +43,10 @@ struct RawSocket {
     let fd: Int32
 
     /// Connect, with a bounded receive (a deferred answer must fail a pin,
-    /// never hang the suite — the VX-132 class).
-    init(_ h: ServerHarness, timeout seconds: Int = 5) throws {
+    /// never hang the suite — the VX-132 class). VX-850: the bound defaults to
+    /// the harness's one bound (`HarnessWait.receiveSeconds` — O-7's rule), never
+    /// a hand-picked 5 s a congested pool's answer outruns.
+    init(_ h: ServerHarness, timeout seconds: Int = HarnessWait.receiveSeconds) throws {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
             throw HarnessFailure("could not connect")
         }

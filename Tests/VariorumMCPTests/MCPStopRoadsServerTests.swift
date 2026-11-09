@@ -43,65 +43,6 @@ private func tempDirectory(_ prefix: String) -> URL {
         .appendingPathComponent("\(prefix)-\(UUID().uuidString.prefix(8))", isDirectory: true)
 }
 
-/// A raw client on `directory`'s socket that NAMES ITSELF: its setup key's
-/// preamble, then an `initialize` as `name`, the server's answer read (a bounded
-/// receive — 5 s). The caller closes the descriptor. VX-850: its wait runs off the
-/// pool (`HarnessWait`) — the server answering it needs a pool thread.
-private func namedClient(_ directory: URL, key: String, as name: String) async throws -> Int32 {
-    try await HarnessWait.offPoolThrowing { try namedClientBlocking(directory, key: key, as: name) }
-}
-
-/// The same, BLOCKING — only for a caller already off the pool (a probe the host
-/// runs inside a stop the test made on its own thread).
-private func namedClientBlocking(_ directory: URL, key: String, as name: String) throws -> Int32 {
-    guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
-        throw HarnessFailure("could not connect as \(name)")
-    }
-    var timeout = timeval(tv_sec: 5, tv_usec: 0)
-    _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-    var opening = MCPPreamble.line(key: key)
-    let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"\#(name)","version":"1"}}}"#
-    opening.append(Data((initialize + "\n").utf8))
-    _ = MCPShim.writeAll(fd, opening)
-    guard !MCPShim.readFirstLine(fd, limit: 1 << 20).isEmpty else {
-        close(fd)
-        throw HarnessFailure("\(name) got no answer to its initialize")
-    }
-    return fd
-}
-
-/// The server hung this connection up: reading reaches EOF (anything the server
-/// still had to say is read past) within the 5 s receive bound — false on a
-/// timeout, i.e. a connection still open. VX-850: off the pool.
-private func reachesEOF(_ fd: Int32) async -> Bool {
-    await HarnessWait.offPool {
-        var buffer = [UInt8](repeating: 0, count: 4096)
-        while true {
-            let count = read(fd, &buffer, buffer.count)
-            if count == 0 { return true }
-            if count < 0 { return false }
-        }
-    }
-}
-
-/// Every byte until EOF (nil on a timeout — the connection still open). VX-777.
-/// VX-850: off the pool.
-private func everyByteUntilEOF(_ fd: Int32) async -> Data? {
-    await HarnessWait.offPool {
-        var all = Data()
-        var buffer = [UInt8](repeating: 0, count: 4096)
-        while true {
-            let count = read(fd, &buffer, buffer.count)
-            if count == 0 { return all }
-            if count < 0 {
-                if errno == EINTR { continue }
-                return nil
-            }
-            all.append(contentsOf: buffer[0..<count])
-        }
-    }
-}
-
 private func eventually(_ condition: () throws -> Bool) async throws -> Bool {
     for _ in 0..<300 {
         if try condition() { return true }
@@ -225,10 +166,11 @@ struct MCPStopRoadsServerTests {
         let key = try h.setupKey(for: "latecomer")
         let late = LockIsolated<Int32>(-1)
         let probed = LockIsolated(false)
+        let seconds = HarnessWait.receiveSeconds   // read in the task: the probe runs on the stop's thread
         h.host.stopWindowProbe = { [directory = h.directory] in
             guard !probed.value else { return }
             probed.setValue(true)
-            late.setValue((try? namedClientBlocking(directory, key: key, as: "latecomer")) ?? -1)
+            late.setValue((try? namedClientBlocking(directory, key: key, as: "latecomer", receiveSeconds: seconds)) ?? -1)
         }
         // VX-850: the probe's wait runs inside this stop, on the thread that
         // calls it — so the stop is made off the pool (the latecomer's session

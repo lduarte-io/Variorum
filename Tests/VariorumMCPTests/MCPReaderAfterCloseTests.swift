@@ -93,7 +93,7 @@ struct MCPReaderAfterCloseTests {
         let number = pair[0]
         let client = pair[1]
         prepare(number, receiveTimeout: 0)
-        prepare(client, receiveTimeout: 5)
+        prepare(client, receiveTimeout: HarnessWait.receiveSeconds)   // VX-850: the harness's one bound (O-7's rule)
         let key = try w.operations.mintMCPSetupKey(copiedFor: "vx318-probe")
         let session = MCPSession(
             fd: number, database: w.database, operations: w.operations, version: "test",
