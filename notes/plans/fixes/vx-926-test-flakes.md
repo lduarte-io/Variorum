@@ -369,13 +369,13 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 |---|---|---|
 | P0 | This record opened; ledger row U3 → IN PROGRESS | DONE (this commit) |
 | P1 | TRACE — what starves under full-parallel core load, instrumented headless under deliberate load | **DONE** — the runner's FIFO backlog (no circular wait, no GRDB delay, not product-side): "PHASE 1 — the trace" below |
-| P2 | The fix at its home + the class sweep | IN-PROGRESS — the shared harness seam built (`Support/ObservationLane.swift`: `onTheObservationLane` + `HeldValues`), StarContext and TrashObservationP2 moved onto it (UNBUILT, PENDING the build and the pins); the sweep table below |
+| P2 | The fix at its home + the class sweep | IN-PROGRESS — BUILT `2896c9c31`: the shared harness seam (`Support/ObservationLane.swift`: `onTheObservationLane` + `HeldValues`), StarContext and TrashObservationP2 on it; the three suites alone GREEN 15 / 3 (`scratchpad/u3/fixed/alone-1.log`, the gate GREEN); the sweep table PENDING |
 | P3 | Pins — a forced-starvation arm red-on-old (behavioural revert) | NOT-STARTED |
 | P4 | The rider VX-932 — `MCPAcceptLoopServerTests.aFatalAcceptFailureStopsTheListenerAndSaysSo` waits for the signal and the removal (F-U1-1's shape) + its descheduled-thread pin | NOT-STARTED |
 | P5 | Counts — the suites alone + under a deliberately loaded full-parallel core run | NOT-STARTED |
 | P6 | Dispositions, PROVISIONALs, self-assessment | NOT-STARTED |
 
-**Load generators alive:** none (P1's 36 × `yes`, pids 70254–70289, killed by pid after loaded run 2; `pgrep -x yes` = 0). **Reverts in flight:** none. **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` — UNTRACKED, env-gated (`VX926_U3_PROBE=1`), NEVER committed; a successor deletes it unless this line says it is gone.
+**Load generators alive:** none (P1's 36 × `yes`, pids 70254–70289, killed by pid after loaded run 2; `pgrep -x yes` = 0). **Reverts in flight:** R-L STARTING — `observationLanePriority` = `.medium` in `Tests/VariorumCoreTests/Support/ObservationLane.swift` (the pre-revert state is committed `2896c9c31`; restore = `git checkout -- Tests/VariorumCoreTests/Support/ObservationLane.swift`). **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` — UNTRACKED, env-gated (`VX926_U3_PROBE=1`), NEVER committed; a successor deletes it unless this line says it is gone.
 
 ### PHASE 1 — the trace (what starves, with the evidence)
 
