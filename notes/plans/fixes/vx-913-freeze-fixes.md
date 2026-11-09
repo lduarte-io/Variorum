@@ -101,3 +101,49 @@ Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate b
 - 2026-11-08/09 (night): kickoff. Preflight complete; worktree seated; in-flight row pushed (its commit carries a stray attribution trailer — the one-off noted above); VX-913 In Progress; roster resolved by the sub-issue listing (the description was stale; nov7 refreshed it at her ask — VX-891/VX-855/VX-661 live elsewhere, VX-81 seated).
 - Kickoff sitting CLOSED (the SITTING RECORD above): cast standard + one Fable ladder; B4 history-first; VX-775 = refusal toast; riders VX-890/343/613 seated (VX-928 is VX-915's). The no-trailer guard landed on main 744ca5301 and fired live. nov7's protocol + windows recorded (ledger foot). B1 brief written; B1 implementer SPAWNED (running).
 - The guard's false-positive class (nov7's report, reproduced here twice): the hook matches bare words in command text, so a commit MESSAGE that merely names the trailer words is denied. A narrowed pattern is tested (trailer FORMS only: `(Co-Authored-By|Claude-Session): ` colon-anchored · `noreply@anthropic\.com` · `Generated with \[Claude Code\]` · `claude\.com/claude-code` — real trailers DENY, prose mentions pass, five cases proven) but the edit to `.claude/settings.json` was HELD: the permission classifier denies a session re-editing its own hook config (self-modification), rightly. The one-line swap waits on her word; until then the friction is a rephrase, never a lost commit.
+
+## B1 RECORD (VX-895 + rider VX-890) — the implementer's record
+
+**NOT DONE (kept current; the first line by rule):** nothing is fixed yet; no Mac test has RUN (every `xcodebuild test` is behind the stage — the orchestrator's window); no walk captured yet.
+
+**Session note:** HEAD moved once before my first edit — the orchestrator's record-only commit 9e0e3d654 (LIVE STATUS + the guard's false-positive note); adopted, no code touched by anyone else. Commit messages here avoid the guard's trigger words.
+
+### B1 LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | This record + the traced mechanism, BEFORE any fix | DONE (this commit) |
+| 1 | The pin: DEBUG drawn-words oracle + `VX895SearchFacetHeaderTests` (A mounted header · B model mechanism · C mounted counts guard) | NOT-STARTED — design below |
+| 2 | Red-on-old: the pin run on the pre-fix tree (behavioral revert = the fix line only) | PENDING behind the stage |
+| 3 | The fix (`LibrarySearchModel.scope` observed) | NOT-STARTED — design below |
+| 4 | Rider VX-890 — the group-facts projection folded into one template | NOT-STARTED — design below |
+| 5 | Gate: headless core suites (touched files) + the Mac search suites | PENDING (core: runs headless here; Mac: behind the stage) |
+| 6 | Walk: facet clicks on the dev-store Debug build, both voices, one capture per row | PENDING behind the stage |
+| 7 | Self-assessment | NOT-STARTED |
+
+### The traced mechanism (VX-895) — written before the fix
+
+Inputs → wrong output, every link read in code (main 516ebc093's code is this branch's for these files):
+
+1. **The header's one source is unobserved.** The sheet's groups header draws `LibrarySearchCopy.groupsHeader(state.scope)` (`LibrarySearchSheet.swift:78–79`); `state.scope` is `LibrarySearchModel.scope`, declared `@ObservationIgnored` (`LibrarySearchModel.swift:257`, "the scope and wing the listed answer was read under (the paging and the expansions ask the same question)" — written as paging bookkeeping, then read by a view). Reading it registers no dependency; `land` writing it (`:345`) tells nobody.
+2. **A facet pick's land changes nothing the sheet observes in the everyday case.** The picker writes the catalog's own `scope` and spawns `search()` (`LibraryCatalogView.swift:760`); any render for the click runs before the read lands and reads the OLD listed scope. The read lands through `LibrarySearchModel.land` (`:337–369`), which re-assigns every observed property — and on this toolchain (Swift 6.4, Xcode 27.1) the `@Observable` setter is equality-gated (`shouldNotifyObservers`, named in the SDK's Observation interface): an EQUAL value notifies nobody. **Measured** with a throwaway probe (scratchpad, not in the PR): equal-valued assignment to an observed Equatable property → no `onChange`; an `@ObservationIgnored` property's change → no `onChange`; an observed property's real change → fires.
+3. **So the sheet re-renders after a land only when something it observes changes VALUE** — `groups`, `books`, `counts` (read by `archivedFootPlaces`), `expansions`, `next`, `loadingMore`, `visibility`. When the matches are block-level passages inside notes (body text — no title, book or scrap hit: the everyday search), All, Notes and Blocks list the SAME groups with the SAME counts (`SearchFacet`: a take hit is in `.notes`'s family and in `.blocks`'s doc kinds alike), nothing the sheet observes changes, its body never re-runs, and the header keeps the words of whichever facet last CHANGED the groups.
+4. **Her tells, each explained.** "clicking books resets it": Books lists no groups (`LibrarySearchModel.listing` skips them under `.books`, `:490`), so the NEXT pick changes `groups` from empty to listed, the body re-runs and reads the then-current scope — correct for that one pick. "depends on which one you just clicked … feels a bit random which one is up": the header shows the facet of the last pick whose groups differed from the one before it.
+5. **The band's counts are NOT stale (expected HOLLOW).** The counts line reads `state.counts` — observed — in the catalog view's own body (`LibraryCatalogView.swift:448`), from the core's facet-scoped numbers (`Queries.searchCounts(_:query:facet:scope:calendar:)`). Under body-only matches All, Notes and Blocks count the same thing, so "7 notes · 7 passages" under Blocks was that facet's own honest answer (R-819-1: it lists 7 note groups holding 7 block-level passages); it only LOOKED stale beside a header naming another facet. Pin C (a fixture whose facets count differently) is expected green on both trees and will be recorded so.
+6. **VX-408's disposition, re-checked (A-819-B2).** VX-408's feared stale paint was an ORDER race in the model — an older read's answer landing over a newer question's — guarded by the read generation and recorded HOLLOW at vx-819 (pin A green on both trees). It stays hollow: in VX-895 the newest read lands CORRECT state (`searchState.scope` IS the picked facet after the land; every generation guard holds). What goes stale is the VIEW, because the one property the header reads is unobserved. A different mechanism — observation, not ordering; this sighting does not make VX-408's recorded-hollow mechanism real.
+
+### The fix — settled design (no product decision)
+
+Drop `@ObservationIgnored` from `LibrarySearchModel.scope` (comment says why): the listed answer's scope becomes observed, so the land that changes it invalidates the header's reader. The header keeps following the LISTED answer's scope, exactly as written — it names the groups listed, so during a read's flight the old groups and their header stand together ("the header never disagrees with the body", `Queries.searchCounts(…facet:…)`'s own sentence). No other ignored property is read by a view (`wing`, `listedOrder`, `generation`, `groupIndex` — checked by grep across the app). The controls row is untouched (the header lives in the sheet, under the band).
+
+### The pin — design
+
+`App/Variorum/VariorumTests/VX895SearchFacetHeaderTests.swift`, reading a DEBUG drawn-words oracle (`LibrarySearchDrawnOracle` — `CatalogStampOracle`'s pattern: what the face DREW, recorded on appear and on a changed value, so a body that never re-runs keeps its stale words exactly as the screen does; owner-keyed per 18k C4; session-scoped per 13u2 UNIT E, `.debugProbeScope(session)` on the band and the sheet only):
+- **A — mounted, the drawn header:** body-only matches; All → Blocks → Books → Blocks → Notes, each pick RENDERED before its read lands (as a click is); the drawn header is the picked facet's at every step. RED-ON-OLD expected at All→Blocks and Blocks→Notes; Books→Blocks is her "books resets it" tell (green on both).
+- **B — model, the mechanism:** a facet pick's land invalidates the listed scope's readers (`withObservationTracking`). RED-ON-OLD expected.
+- **C — mounted, the counts guard:** a fixture whose facets count differently (a book named by the word); the drawn counts line is the picked facet's own core numbers at every pick. Expected GREEN ON BOTH → the counts half recorded HOLLOW.
+- The behavioral revert for red-on-old restores `@ObservationIgnored` on `scope` ONLY (the oracle stays — it is the instrument, and it records under both trees).
+
+### VX-890 — settled design
+
+One home for the group-facts projection — `SELECT s.home_id AS g_home, MIN(s.score) AS g_best, COUNT(*) AS g_hits, SUM(s.kind <> 'title') AS g_lines` (+ `MIN(s.home_key) AS g_key` when keyed) `FROM scored s GROUP BY s.home_id` — read by `groupPage`'s `grouped` CTE and by `wornGroupFacts`. Proof of zero behavior change: the `groups` statements' SQL byte-identical before/after (a throwaway dump over both orders), `wornGroupFacts`' whitespace-only, and `SearchOrderTests` / `SearchFacetTests` / `SearchGroupsTests` / `SearchSavepointFacetTests` green with no test edits (headless); `LibrarySearchOrderTests` behind the stage.
