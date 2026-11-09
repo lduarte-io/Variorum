@@ -62,12 +62,12 @@ struct TakesViewMemory: Equatable, Codable {
 
     static let defaultsKeyPrefix = "takesViewMemory."
 
-    static func load(postID: String, defaults: UserDefaults = .standard) -> TakesViewMemory? {
+    static func load(postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) -> TakesViewMemory? {
         guard let data = defaults.data(forKey: defaultsKeyPrefix + postID) else { return nil }
         return try? JSONDecoder().decode(TakesViewMemory.self, from: data)
     }
 
-    func save(postID: String, defaults: UserDefaults = .standard) {
+    func save(postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) {
         guard let data = try? JSONEncoder().encode(self) else { return }
         defaults.set(data, forKey: Self.defaultsKeyPrefix + postID)
     }

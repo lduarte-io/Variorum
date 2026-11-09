@@ -59,11 +59,11 @@ struct ReadModeView: View {
     /// Thereafter the face is remembered per note (the per-post mode
     /// memory's class — local, never synced; the architect's refinement,
     /// recorded PROVISIONAL for her walk).
-    static func rememberedFace(postID: String, defaults: UserDefaults = .standard) -> Face {
+    static func rememberedFace(postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) -> Face {
         defaults.string(forKey: faceKey(postID)).flatMap(Face.init(rawValue:)) ?? .edit
     }
 
-    static func remember(_ face: Face, postID: String, defaults: UserDefaults = .standard) {
+    static func remember(_ face: Face, postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) {
         defaults.set(face.rawValue, forKey: faceKey(postID))
     }
 

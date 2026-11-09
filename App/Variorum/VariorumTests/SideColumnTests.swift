@@ -99,7 +99,7 @@ struct SideColumnTests {
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "a note with a tray")
             _ = try session.operations.newBlock(in: post.id, text: "a block, so the mode can host.")
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             UserDefaults.standard.removeObject(forKey: PostDetailView.sideColumnWidthKey)
 
             let width: CGFloat = 1100
@@ -111,7 +111,7 @@ struct SideColumnTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)")
             }
             let root = PostDetailView(session: session, postID: post.id)
             #if DEBUG

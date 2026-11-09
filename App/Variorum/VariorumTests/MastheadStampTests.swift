@@ -339,8 +339,8 @@ struct MastheadStampTests {
                 let tag = try session.operations.createTag(name: name)
                 _ = try session.operations.applyTag(tag.id, toPost: post.id)
             }
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
-            defer { UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)") }
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            defer { NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(post.id)") }
             // 13u4 UNIT S2: the stamp's remembered face is read through
             // `@AppStorage`, whose default store is the DEV-STORE app's own
             // `.standard` (KnownIssues row 42 — the test host IS

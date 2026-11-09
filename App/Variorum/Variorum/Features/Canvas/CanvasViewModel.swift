@@ -550,7 +550,7 @@ final class CanvasViewModel {
     /// the post's chosen — R88). Persisted locally per container (the
     /// view-memory class; loaded at init, saved on change).
     private(set) var viewPicks: [String: String] = [:]
-    @ObservationIgnored private let defaults: UserDefaults = .standard
+    @ObservationIgnored private let defaults: UserDefaults = NoteMemoryDefaults.store
     private var memoryKey: String { "canvasViewMemory.\(containerID)" }
 
     func loadViewMemory() {

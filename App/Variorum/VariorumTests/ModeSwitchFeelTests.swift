@@ -109,12 +109,12 @@ struct ModeSwitchFeelTests {
             if !flashOn { try session.operations.setArrivalFlash(false) }
             let postID = post.id
             session.commandRouter.forgetCurrentBlock(for: postID)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
-            UserDefaults.standard.set(ReadModeView.Face.edit.rawValue, forKey: ReadModeView.faceKey(postID))
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
+            NoteMemoryDefaults.store.set(ReadModeView.Face.edit.rawValue, forKey: ReadModeView.faceKey(postID))
             defer {
                 session.commandRouter.forgetCurrentBlock(for: postID)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
-                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: ReadModeView.faceKey(postID))
             }
             // 13s-b U1a (A JUSTIFIED EDIT): this rig was measured in the world
             // a voiceless store used to read — Terminal. A store with no voice

@@ -95,7 +95,7 @@ private func withTakesBook<T>(
         defer {
             for id in postIDs {
                 session.commandRouter.forgetCurrentBlock(for: id)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(id)")
             }
         }
         // Row-36 hygiene: the current-block memory PERSISTS per note.
@@ -1027,7 +1027,7 @@ private func withLongNoteBook<T>(
         defer {
             for id in postIDs {
                 session.commandRouter.forgetCurrentBlock(for: id)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(id)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(id)")
             }
         }
         for id in postIDs { session.commandRouter.forgetCurrentBlock(for: id) }

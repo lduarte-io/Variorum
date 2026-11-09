@@ -134,10 +134,10 @@ struct RestoreLandingRewriteHopTests {
             try session.operations.setArrivalFlash(false)
             let postID = post.id
             session.commandRouter.forgetCurrentBlock(for: postID)
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
+            NoteMemoryDefaults.store.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
             defer {
                 session.commandRouter.forgetCurrentBlock(for: postID)
-                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: "postMode.\(postID)")
             }
             try session.operations.setThemeVoice(.study)
             try await body(World(session: session, postID: postID, blocks: blocks))

@@ -93,26 +93,32 @@ struct StarContextTests {
         }
     }
 
-    /// Bounded by a ONE-MINUTE time limit on purpose: on the pre-U4 tree the
-    /// assembly never read the 'starred' setting, so an un-star re-emitted
-    /// NOTHING and the second `next()` would wait forever — the limit turns
-    /// that into a failure. Awaiting the observation's own `next()` (the
-    /// `ObservationQueryTests` shape) rather than polling a deadline keeps the
-    /// pin honest under a full suite's parallel load (a 5 s poll starved there
-    /// once — the first emission arrived late, not never).
-    @Test(.timeLimit(.minutes(1)))
-    func aHeldObservationOfAStarGatheringHearsTheUnstar() async throws {
+    /// Bounded on purpose: on the pre-U4 tree the assembly never read the
+    /// 'starred' setting, so an un-star re-emitted NOTHING and the second
+    /// value would never come — the held observation's own bound
+    /// (`HeldValues`, 30 s) turns that into a failure.
+    ///
+    /// The bound lives ON THE OBSERVATION LANE, and the test carries no
+    /// `.timeLimit` (VX-926 U3 — VX-625): a held observation's value reaches
+    /// its test through two cooperative-pool hops, and in a full-parallel run
+    /// each hop queues behind every test not yet started, so the old
+    /// one-minute limit read 205 s three times for a value GRDB had ready in
+    /// milliseconds (the trace: `notes/plans/fixes/vx-926-test-flakes.md`,
+    /// the U3 record; the lane's own pin: `ObservationLaneTests`).
+    @Test func aHeldObservationOfAStarGatheringHearsTheUnstar() async throws {
         try await withOperationsAsync { ops, db in
             let w = try world(ops) { _ in .star }
-            var values = db.observeReading(w.gathering.id).makeAsyncIterator()
-            let initial = try await values.next()
-            #expect(initial?.map(\.postID) == [w.starredTagged.id, w.starredOnly.id])
-            // The assembly READ the 'starred' setting, so the observation
-            // tracks it: un-starring re-emits without any other write.
-            try ops.setStarred(.post(w.starredOnly.id), starred: false)
-            let afterUnstar = try await values.next()
-            #expect(afterUnstar?.map(\.postID) == [w.starredTagged.id],
-                    "un-starring alone re-emitted the gathering")
+            try await onTheObservationLane {
+                let held = HeldValues(db.observeReading(w.gathering.id))
+                let initial = try await held.value(1)
+                #expect(initial?.map(\.postID) == [w.starredTagged.id, w.starredOnly.id])
+                // The assembly READ the 'starred' setting, so the observation
+                // tracks it: un-starring re-emits without any other write.
+                try ops.setStarred(.post(w.starredOnly.id), starred: false)
+                let afterUnstar = try await held.value(2)
+                #expect(afterUnstar?.map(\.postID) == [w.starredTagged.id],
+                        "un-starring alone re-emitted the gathering")
+            }
         }
     }
 

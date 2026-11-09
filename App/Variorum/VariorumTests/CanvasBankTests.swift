@@ -59,9 +59,9 @@ private func withBankWorld<T>(
 private func freshModel(
     session: AppSession, containerID: String, db: AppDatabase
 ) async throws -> CanvasViewModel {
-    UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(containerID)")
-    UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(containerID)")
-    UserDefaults.standard.removeObject(forKey: "canvasBankOpen.\(containerID)")
+    NoteMemoryDefaults.store.removeObject(forKey: "canvasViewMemory.\(containerID)")
+    NoteMemoryDefaults.store.removeObject(forKey: "canvasSizeMemory.\(containerID)")
+    NoteMemoryDefaults.store.removeObject(forKey: "canvasBankOpen.\(containerID)")
     let model = CanvasViewModel(session: session, containerID: containerID)
     model.loadViewMemory()
     model.adopt(try await db.read { try Queries.canvasProjection($0, container: containerID) })
@@ -273,10 +273,10 @@ struct CanvasBankHostedTests {
                 }
                 return post.id
             }
-            UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(postID)")
-            UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(postID)")
-            UserDefaults.standard.set(true, forKey: "canvasBankOpen.\(postID)")
-            defer { UserDefaults.standard.removeObject(forKey: "canvasBankOpen.\(postID)") }
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasViewMemory.\(postID)")
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasSizeMemory.\(postID)")
+            NoteMemoryDefaults.store.set(true, forKey: "canvasBankOpen.\(postID)")
+            defer { NoteMemoryDefaults.store.removeObject(forKey: "canvasBankOpen.\(postID)") }
 
             CanvasCardMaterialization.count = 0
             CanvasBankChipMaterialization.count = 0
@@ -303,8 +303,8 @@ struct CanvasBankHostedTests {
                 let block = try ops.newBlock(in: pool.id, text: "waiting card", at: .end).block
                 return (pool.id, block.id)
             }
-            UserDefaults.standard.set(true, forKey: "canvasBankOpen.\(poolID)")
-            defer { UserDefaults.standard.removeObject(forKey: "canvasBankOpen.\(poolID)") }
+            NoteMemoryDefaults.store.set(true, forKey: "canvasBankOpen.\(poolID)")
+            defer { NoteMemoryDefaults.store.removeObject(forKey: "canvasBankOpen.\(poolID)") }
             let rig = await CanvasDragRig.mount(session: session, containerID: poolID, cards: 1)
             defer { rig.close() }
             #expect(rig.model.bankOpen)
@@ -362,8 +362,8 @@ struct CanvasBankHostedTests {
                 _ = try ops.setCanvasPosition(container: pool.id, block: block.id, x: 40, y: 40)
                 return (pool.id, block.id)
             }
-            UserDefaults.standard.set(true, forKey: "canvasBankOpen.\(poolID)")
-            defer { UserDefaults.standard.removeObject(forKey: "canvasBankOpen.\(poolID)") }
+            NoteMemoryDefaults.store.set(true, forKey: "canvasBankOpen.\(poolID)")
+            defer { NoteMemoryDefaults.store.removeObject(forKey: "canvasBankOpen.\(poolID)") }
             let rig = await CanvasDragRig.mount(session: session, containerID: poolID, cards: 1)
             defer { rig.close() }
             #expect(rig.model.bankCards.isEmpty, "it starts placed")

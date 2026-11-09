@@ -533,17 +533,17 @@ struct SurfaceSizeMemoryTests {
             outline.persist(postID)
             flow.remember(postID, CGSize(width: 600, height: 20071))
             flow.persist(postID)
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: SurfaceSizeMemory.key(.outline, postID)) != nil)
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: SurfaceSizeMemory.key(.flow, postID)) != nil)
 
             session.commandRouter.forgetCurrentBlock(for: postID)
 
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: SurfaceSizeMemory.key(.outline, postID)) == nil,
                     "the Outline's record went with the note")
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: SurfaceSizeMemory.key(.flow, postID)) == nil,
                     "…and the flow's")
         }
@@ -789,7 +789,7 @@ struct SurfaceSizeMemoryTests {
             outline.persist(postID)
             flow.remember(postID, CGSize(width: 600, height: 20071))
             flow.persist(postID)
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: SurfaceSizeMemory.key(.outline, postID)) != nil)
 
             // The note goes to the Trash, and then for good.
@@ -805,12 +805,12 @@ struct SurfaceSizeMemoryTests {
             await model.confirmPendingPurge(try #require(model.pendingConfirm))
             #expect(model.lastError == nil, "the purge went through: \(String(describing: model.lastError))")
 
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: SurfaceSizeMemory.key(.outline, postID)) == nil,
                     "the Outline's record went with the note")
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: SurfaceSizeMemory.key(.flow, postID)) == nil, "…and the flow's")
-            #expect(UserDefaults.standard.string(
+            #expect(NoteMemoryDefaults.store.string(
                 forKey: CurrentBlockMemory.key(postID)) == nil,
                     "…and the current block, through the same one door")
         }

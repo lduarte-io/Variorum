@@ -211,7 +211,9 @@ struct MCPShimTests {
         pump.start()
         let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"pump-test","version":"1"}}}"#
         _ = MCPShim.writeAll(input[1], Data(initialize.utf8) + Data("\n".utf8))
-        let line = MCPShim.readFirstLine(output[0], limit: 1 << 20)
+        let clientReads = output[0]
+        // VX-850: off the pool — the session answering through the pump needs a pool thread.
+        let line = await HarnessWait.offPool { MCPShim.readFirstLine(clientReads, limit: 1 << 20) }
         let object = try #require(try JSONSerialization.jsonObject(with: line) as? [String: Any])
         #expect(object["id"] as? Int == 1)
         let result = try #require(object["result"] as? [String: Any])

@@ -152,7 +152,7 @@ struct MCPShimAppClosedLineTests {
     /// **RED ON OLD** (the same revert): end to end — a real server stops (her
     /// switch OFF) under a live session pumped by the shim; the client's stderr
     /// says the app ended it.
-    @Test func aRealServerStopUnderALiveSessionIsSaidOnStderr() throws {
+    @Test func aRealServerStopUnderALiveSessionIsSaidOnStderr() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         guard case .success(let socket) = MCPSocketRoad.connect(directory: h.directory) else {
@@ -177,14 +177,18 @@ struct MCPShimAppClosedLineTests {
         pump.start()
         let initialize = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"stderr-test","version":"1"}}}"#
         _ = MCPShim.writeAll(input[1], Data((initialize + "\n").utf8))
-        let answer = MCPShim.readFirstLine(output[0], limit: 1 << 20)
+        let clientReads = output[0]
+        // VX-850: off the pool — the session answering through the pump needs a pool thread.
+        let answer = await HarnessWait.offPool { MCPShim.readFirstLine(clientReads, limit: 1 << 20) }
         #expect(!answer.isEmpty, "the session answered through the shim")
 
         h.host.stop(ending: .serverOff)
-        let ended = served.wait(timeout: .now() + 10) == .success
+        // Bounded waits on the pump's own thread — awaited off the pool (a
+        // semaphore can't be waited on from an async context).
+        let ended = await HarnessWait.offPool { served.wait(timeout: .now() + 10) == .success }
         #expect(ended, "the shim ends with the server")
         close(input[1])
-        _ = upstreamEnded.wait(timeout: .now() + 10)
+        _ = await HarnessWait.offPool { upstreamEnded.wait(timeout: .now() + 10) == .success }
         close(socket)
         close(errors[1])
         var said = Data()

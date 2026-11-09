@@ -640,7 +640,7 @@ struct PaneHeldModeTests {
     /// worse than none.
     @MainActor
     @Test func theLineAgreesWithWhatTheDetailWillRestore() {
-        let defaults = UserDefaults.standard
+        let defaults = NoteMemoryDefaults.store
         let postID = "pane-mode-\(UUID().uuidString)"
         let key = "postMode.\(postID)"
         defer { defaults.removeObject(forKey: key) }

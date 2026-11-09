@@ -628,11 +628,11 @@ struct TakesBoardSoakTests {
                 }
                 return post.id
             }()
-            UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(postID)")
-            UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(postID)")
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasViewMemory.\(postID)")
+            NoteMemoryDefaults.store.removeObject(forKey: "canvasSizeMemory.\(postID)")
             defer {
-                UserDefaults.standard.removeObject(forKey: "canvasViewMemory.\(postID)")
-                UserDefaults.standard.removeObject(forKey: "canvasSizeMemory.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: "canvasViewMemory.\(postID)")
+                NoteMemoryDefaults.store.removeObject(forKey: "canvasSizeMemory.\(postID)")
             }
 
             var model = CanvasViewModel(session: session, containerID: postID)

@@ -32,11 +32,14 @@ struct MCPSetupKeyServerTests {
 
     /// After its one answer, a refused connection is CLOSED (EOF), and it
     /// never holds a session slot.
-    private func expectClosed(_ fd: Int32) {
-        var timeout = timeval(tv_sec: 2, tv_usec: 0)
-        _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-        var byte: UInt8 = 0
-        #expect(read(fd, &byte, 1) == 0, "the refused connection is hung up after its answer")
+    private func expectClosed(_ fd: Int32) async {
+        HarnessWait.bound(fd, seconds: HarnessWait.receiveSeconds)   // VX-850: the harness's one bound (O-7's rule)
+        // VX-850: off the pool — the host that hangs it up does so from a pool task.
+        let eof = await HarnessWait.offPool {
+            var byte: UInt8 = 0
+            return read(fd, &byte, 1) == 0
+        }
+        #expect(eof, "the refused connection is hung up after its answer")
         close(fd)
     }
 
@@ -114,7 +117,7 @@ struct MCPSetupKeyServerTests {
             // (`MCPSetupKeyImpostorServerTests`, `MCPSetupKeyTabServerTests`).
             let newer = try h.operations.mintMCPSetupKey(copiedFor: "claude-code")
             let endsBefore = try closedEnds(h)
-            let (newerFD, rebound) = try h.rawOpen(as: "claude-code", presenting: newer, id: 6)
+            let (newerFD, rebound) = try await h.rawOpen(as: "claude-code", presenting: newer, id: 6)
             #expect(rebound["id"] as? Int == 6 && rebound["result"] != nil, "the newest setup is admitted: \(rebound)")
             close(newerFD)
             // VX-626 (a JUSTIFIED EDIT, the ritual — the VX-648 run, batch 2):
@@ -127,19 +130,19 @@ struct MCPSetupKeyServerTests {
             #expect(before.state == .approved && before.isSetupBound, "approval kept, the name bound to the newer key")
 
             // The key it replaced: its own sentence. Every other road: the one.
-            let (oldFD, old) = try h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"), id: 7)
+            let (oldFD, old) = try await h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"), id: 7)
             #expect(old["result"] == nil && old["id"] as? Int == 7)
             #expect((old["error"] as? [String: Any])?["message"] as? String == MCPHandshake.replacedRefusal)
-            expectClosed(oldFD)
-            let (bareFD, bare) = try h.rawOpen(as: "claude-code", presenting: nil, id: 8)
+            await expectClosed(oldFD)
+            let (bareFD, bare) = try await h.rawOpen(as: "claude-code", presenting: nil, id: 8)
             expectRefusal(bare, id: 8, "no key under a bound name")
-            expectClosed(bareFD)
-            let (forgedFD, forged) = try h.rawOpen(as: "claude-code", presenting: "vmk1_neverminted", id: 9)
+            await expectClosed(bareFD)
+            let (forgedFD, forged) = try await h.rawOpen(as: "claude-code", presenting: "vmk1_neverminted", id: 9)
             expectRefusal(forged, id: 9, "a key never issued under a bound name")
-            expectClosed(forgedFD)
-            let (foreignFD, foreign) = try h.rawOpen(as: "claude-code", presenting: codexKey, id: 10)
+            await expectClosed(forgedFD)
+            let (foreignFD, foreign) = try await h.rawOpen(as: "claude-code", presenting: codexKey, id: 10)
             expectRefusal(foreign, id: 10, "another name's key under a bound name")
-            expectClosed(foreignFD)
+            await expectClosed(foreignFD)
 
             #expect(try h.client("claude-code") == before, "no refusal touched the row it claimed")
             #expect(try await real.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
@@ -164,9 +167,9 @@ struct MCPSetupKeyServerTests {
     @Test func aBareShimIsRefusedUnderAnyName() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let (fd, answer) = try h.rawOpen(as: "stray", presenting: nil, id: 3)
+        let (fd, answer) = try await h.rawOpen(as: "stray", presenting: nil, id: 3)
         expectRefusal(answer, id: 3, "a bare new name")
-        expectClosed(fd)
+        await expectClosed(fd)
         #expect(try await h.database.read { try Queries.mcpClient($0, name: "stray") } == nil,
                 "a bare arrival never enters the waiting room")
         // The SDK's own client hears it as an initialize error.
@@ -190,9 +193,9 @@ struct MCPSetupKeyServerTests {
             _ = try h.approve("claude-code", .init(rung: .read, scopeKind: .note, scopeID: note.id, duration: .always))
             #expect(try h.client("claude-code").isSetupBound == false)
 
-            let (bareFD, bare) = try h.rawOpen(as: "claude-code", presenting: nil, id: 1)
+            let (bareFD, bare) = try await h.rawOpen(as: "claude-code", presenting: nil, id: 1)
             expectRefusal(bare, id: 1, "unbound, a bare arrival still refuses")
-            expectClosed(bareFD)
+            await expectClosed(bareFD)
 
             // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds with zero clicks only the name its setup was copied FOR): she
             // re-runs Claude Code's OWN setup, so its key carries the name (an
@@ -205,9 +208,9 @@ struct MCPSetupKeyServerTests {
             #expect(try await bound.client.callTool(name: "read_note", arguments: ["note_id": .string(note.id)])
                 .isError != true, "her grants serve the bound tool")
 
-            let (afterFD, after) = try h.rawOpen(as: "claude-code", presenting: nil, id: 2)
+            let (afterFD, after) = try await h.rawOpen(as: "claude-code", presenting: nil, id: 2)
             expectRefusal(after, id: 2, "bound now, bare refuses")
-            expectClosed(afterFD)
+            await expectClosed(afterFD)
             let again = try await h.connect(as: "claude-code", presenting: rerun)
             #expect(try await again.client.listTools().tools.contains { $0.name == "read_note" })
             #expect(try activity(h) == [
@@ -233,7 +236,7 @@ struct MCPSetupKeyServerTests {
         var answers: [Data] = []
         for (name, key) in [("forger", "vmk1_neverminted"), ("codex", owned), ("claude-code", "vmk1_other"),
                             ("stray", nil), ("", try h.operations.mintMCPSetupKey())] as [(String, String?)] {
-            let (fd, answer) = try h.rawOpen(as: name, presenting: key, id: 5)
+            let (fd, answer) = try await h.rawOpen(as: name, presenting: key, id: 5)
             expectRefusal(answer, id: 5, "\(name)")
             answers.append(try JSONSerialization.data(withJSONObject: answer, options: [.sortedKeys]))
             close(fd)
@@ -249,13 +252,16 @@ struct MCPSetupKeyServerTests {
         guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
             throw HarnessFailure("could not connect")
         }
+        HarnessWait.bound(fd, seconds: HarnessWait.receiveSeconds)   // VX-850: the harness's one bound (O-7's rule) — a silent door fails the reads below named, never hangs them
         _ = MCPShim.writeAll(fd, MCPPreamble.line(key: try h.operations.mintMCPSetupKey()))
         for window in 0..<MCPHandshake.preInitializeLimit {
             _ = MCPShim.writeAll(fd, Data((#"{"jsonrpc":"2.0","id":\#(100 + window),"method":"tools/list"}"# + "\n").utf8))
-            #expect(MCPShim.readFirstLine(fd, limit: 1 << 20).range(of: Data("-32601".utf8)) != nil, "inside the window")
+            // VX-850: off the pool — the session's handshake answers it.
+            let answer = await HarnessWait.offPool { MCPShim.readFirstLine(fd, limit: 1 << 20) }
+            #expect(answer.range(of: Data("-32601".utf8)) != nil, "inside the window")
         }
         _ = MCPShim.writeAll(fd, Data((#"{"jsonrpc":"2.0","id":5,"method":"tools/list"}"# + "\n").utf8))
-        let line = MCPShim.readFirstLine(fd, limit: 1 << 20)
+        let line = await HarnessWait.offPool { MCPShim.readFirstLine(fd, limit: 1 << 20) }   // VX-850
         let notInitialize = try #require(try JSONSerialization.jsonObject(with: line) as? [String: Any])
         expectRefusal(notInitialize, id: 5, "a connection that never opens with initialize")
         answers.append(try JSONSerialization.data(withJSONObject: notInitialize, options: [.sortedKeys]))
@@ -306,9 +312,9 @@ struct MCPSetupKeyServerTests {
             try h.operations.denyMCPClient(clientID)
             #expect(try h.client("claude-code").isSetupBound == false)
             #expect(try h.client("claude-code").state == .denied)
-            let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: fresh, id: 6)
+            let (fd, answer) = try await h.rawOpen(as: "claude-code", presenting: fresh, id: 6)
             expectRefusal(answer, id: 6, "the released key is gone")
-            expectClosed(fd)
+            await expectClosed(fd)
 
             // …while the STANDING connection stays decided (the handshake
             // decides once; the release gates the next connection, whose road
@@ -330,9 +336,9 @@ struct MCPSetupKeyServerTests {
     @Test func anEmptyKeyPreambleIsBare() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
-        let (fd, answer) = try h.rawOpen(as: "stray", presenting: "", id: 9)
+        let (fd, answer) = try await h.rawOpen(as: "stray", presenting: "", id: 9)
         expectRefusal(answer, id: 9, "a tag-only preamble")
-        expectClosed(fd)
+        await expectClosed(fd)
         #expect(try activity(h) == ["stray connect_bare refused"])
     }
 
@@ -350,7 +356,7 @@ struct MCPSetupKeyServerTests {
         let key = try h.operations.mintMCPSetupKey()
         // Poison the admission's own read: the standing query has no table.
         try await h.database.write { try $0.execute(sql: "DROP TABLE mcp_setup_key") }
-        let (fd, answer) = try h.rawOpen(as: "claude-code", presenting: key, id: 4)
+        let (fd, answer) = try await h.rawOpen(as: "claude-code", presenting: key, id: 4)
         #expect(answer["result"] == nil && answer["id"] as? Int == 4)
         let error = answer["error"] as? [String: Any]
         #expect(error?["code"] as? Int == MCPShim.refusalCode)
@@ -358,7 +364,7 @@ struct MCPSetupKeyServerTests {
                 "\(String(describing: error?["message"]))")
         #expect(error?["message"] as? String != MCPHandshake.refusal,
                 "never key advice for a store failure — following it would rotate a good key for nothing")
-        expectClosed(fd)
+        await expectClosed(fd)
     }
 
     // MARK: - The opening read (pure over a descriptor)

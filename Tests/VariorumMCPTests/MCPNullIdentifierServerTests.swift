@@ -64,9 +64,11 @@ private func message(_ answer: [String: Any]) -> String? {
 }
 
 /// Read until the server closes (or the harness's receive timeout passes).
-private func drain(_ fd: Int32) {
-    var buffer = [UInt8](repeating: 0, count: 4096)
-    while read(fd, &buffer, buffer.count) > 0 {}
+private func drain(_ fd: Int32) async {
+    await HarnessWait.offPool {   // VX-850: off the pool — the server that closes it runs on the pool
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while read(fd, &buffer, buffer.count) > 0 {}
+    }
 }
 
 /// `claude-code` approved and bound to its own key, its connection closed.
@@ -90,13 +92,13 @@ struct MCPNullIdentifierServerTests {
         try await h.within {
             try await approvedClaudeCode(h)
             let before = try counts(h)
-            let (fd, answer) = try h.rawOpen(as: "claude-code\(jsonNull)x", presenting: nil, id: 3)
-            drain(fd)
+            let (fd, answer) = try await h.rawOpen(as: "claude-code\(jsonNull)x", presenting: nil, id: 3)
+            await drain(fd)
             close(fd)
             #expect(answer["id"] as? Int == 3 && message(answer) == nameWords, "\(answer)")
             #expect(try counts(h) == before, "nothing read into, written or logged under the prefix")
             // The real client is untouched: its own key still connects.
-            let (realFD, real) = try h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"), id: 4)
+            let (realFD, real) = try await h.rawOpen(as: "claude-code", presenting: try h.setupKey(for: "claude-code"), id: 4)
             close(realFD)
             #expect(real["id"] as? Int == 4 && real["result"] != nil, "\(real)")
         }
@@ -113,8 +115,8 @@ struct MCPNullIdentifierServerTests {
             try await approvedClaudeCode(h)
             let fresh = try h.operations.mintMCPSetupKey()
             let before = try counts(h)
-            let (fd, answer) = try h.rawOpen(as: "claude-code\(jsonNull)x", presenting: fresh, id: 5)
-            drain(fd)
+            let (fd, answer) = try await h.rawOpen(as: "claude-code\(jsonNull)x", presenting: fresh, id: 5)
+            await drain(fd)
             close(fd)
             #expect(message(answer) == nameWords, "\(answer)")
             #expect(try counts(h) == before, "no waiting setup, the key unclaimed, nothing logged")
@@ -129,8 +131,8 @@ struct MCPNullIdentifierServerTests {
         try await h.within {
             let fresh = try h.operations.mintMCPSetupKey()
             let before = try counts(h)
-            let (fd, answer) = try h.rawOpen(as: jsonNull, presenting: fresh, id: 6)
-            drain(fd)
+            let (fd, answer) = try await h.rawOpen(as: jsonNull, presenting: fresh, id: 6)
+            await drain(fd)
             close(fd)
             #expect(message(answer) == nameWords, "\(answer)")
             #expect(try counts(h) == before, "no client row named '' (or anything)")
@@ -148,11 +150,11 @@ struct MCPNullIdentifierServerTests {
         let before = try counts(h)
         #expect(h.host.suspend())
         try h.lockStore()
-        let (fd, answer) = try h.rawOpen(as: "claude-code\(jsonNull)x", presenting: nil, id: 7)
+        let (fd, answer) = try await h.rawOpen(as: "claude-code\(jsonNull)x", presenting: nil, id: 7)
         #expect(message(answer) == nameWords, "refused at once, never held: \(answer)")
         try h.unlockStore()
         #expect(await h.host.resume(executor: SeededExecutor(operations: h.writeOperations)) == .resumed)
-        drain(fd)
+        await drain(fd)
         close(fd)
         #expect(try counts(h) == before, "nothing landed at the unlock")
     }
