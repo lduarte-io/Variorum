@@ -8,7 +8,28 @@ Wave: the last wave of pre-OSS code, beside VX-849 · VX-940 · VX-915 · VX-926
 
 ## FOR A LATER READER
 
-*(Written at closeout. Until then, the LIVE sections below are the record.)*
+**The run (VX-913, 2026-11-08/09, one night — four members + three riders, four batches, one B4 research memo, two stage windows, the ladder closed at round 2).** The freeze wave's app-fix umbrella: every member a confirmed bug or ruled behavior change, built with red-on-old pins verified by behavioral revert.
+
+**The mechanisms as settled, one pointer each.**
+- **VX-895** — the Library search group header read an `@ObservationIgnored` `scope`, so no facet pick ever redrew it (equal-valued `@Observable` lands notify nobody — measured); the fix observes it (61b6f8778). The band's counts half was DISMISSED AS HOLLOW by pin C green-on-old (the band always showed the picked facet's honest numbers). VX-408's recorded-hollow disposition STANDS (different mechanism).
+- **VX-889** — Settings ▸ Tags' Make a Gathering passed no wing, so the mint, its rule's tag resolution and the name guard all read Home whatever the pane showed; the fix snapshots the SHOWN wing into the sheet's request — one value feeds guard and mint (f9ffffe39); the checks clear on a wing switch and the sheet dismisses; a dead wing refuses (`wingNotFound`, the Bookcase mint's posture).
+- **VX-775** — `MCPWriteTools.land` committed the act then answered `isError` when the Activity line failed (plus a false "refused" row on transients). HER RULING built: the client hears the act's own answer byte-identical (R-825); the failure reaches her as a refusal-kind toast (P-913-B3-1, wording hers to trim); list forms and `replace_tag` coalesce; the ladder's F1 then made the refusal LAST-ON-SEAM by construction (one synchronous `landWireCall`; the tail hook carries a failing call's receipts — 88b176d1b/ba5463fb8).
+- **VX-613** — both stale-start races confirmed and fixed: a generation token (`stopCount`) re-checked before the bind and at the publish (7d8fa6f72); the door clears `starting` only for its own host (8db317e14).
+- **VX-81 — CLOSED AS OBSOLETE, her ruling verbatim: "I choose a - close as obsolete."** The B4 history memo is the evidence (`## B4 RECORD`): the 0.9.2 crash path was deleted whole (VX-80 → VX-329 → VX-529 chain).
+- **Riders:** VX-890 (the group-facts SQL in one template; byte-identical proof), VX-343 (the What's New parser joins indented continuations; 0.9.5 the fixture), and VX-613 above.
+- **VX-608 diagnostic (not a member):** `DestructiveUndoWarningTests` 7/7 GREEN ALONE on this tree ⇒ the load/order flake family, not a product bug.
+
+**Her rulings by id:** the kickoff sitting's four (cast · B4 history-first · the VX-775 toast · riders), VX-81's close, "off everyone" attribution, the narrowed-then-strengthened no-trailer guard (744ca5301 → 0721c6b57 → 2b1759521 on main). PROVISIONALs: P-913-B3-1…4 (QUESTIONS bundle at closeout).
+
+**The evidence lines that matter.** vx913-b1 window: pin 3/3 · revert-red exact (counts half hollow) · gate 262/48 · Study walk W1–W5 exact (Terminal withheld, VX-658/741). vx913-b2b3 window: head gate 538/78 · four revert-reds exact · capture pair · VX-608 alone 7/7. Ladder round 1 (0/0/2/4 with a clean bill) → one fix → round 2 clean, closed. MERGE GATE: PENDING(the whole-Mac run + headless core at the GO; `VX775ActivityLogFailureDoorTests` must execute — round 2's carry).
+
+**Open items at close:** the QUESTIONS bundle; the minted tickets (the socket-identity residual ticket (e/f/three-unlink-sites/flicker) · `createTag`'s wing read · `show_in_app`'s landed-then-log sibling · the B4 main-window walk residue · the sheet-dismissal visual residue if she wants it walked); the VX-608 relabel; the guide/MCPSpec F4 line (applied at closeout, see CANON DRAFT).
+
+## CANON DRAFT (applied at the closeout merge moment, exactly as ruled — the two-file rule)
+
+- **MCPSpec (one contract line, after the store-failure/VX-369 sentence):** "A landed write whose Activity line cannot be recorded answers the client the act's own answer byte for byte — the failure is hers alone: one refusal-kind line on the status seam naming the client and the store's words (VX-775; the ruled split 'the error goes to her, the truth goes to the client'); `list_my_activity` simply lacks the row; a failing call's receipts and its failure land through one door road, the refusal last (the vx-913 ladder's F1)."
+- **SurfaceContracts, The app (the Settings ▸ Tags sentence gains one clause):** "…its Make a Gathering mints in the wing the pane SHOWS — one snapshot names the wing for the name guard, the mint and the rule's tag vocabulary; the checked paths clear on a wing switch and the open sheet dismisses (VX-889)."
+- **AppSpecRecord:** the dated entry (the narrative, her words verbatim, the ladder, the cast, the born tickets, the PR) — drafted at the closeout from this record's sections.
 
 ## The roster (the sub-issue listing, resolved at kickoff 2026-11-08 — the VX-548 rule)
 
