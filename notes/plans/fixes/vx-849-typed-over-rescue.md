@@ -2134,7 +2134,10 @@ takes TYPE names, as a zsh array; the tree verified clean before, between and af
   `SettingsLockCloseTests` · `MCPWillLockRoadRouteTests` · `JoinSheetWordsTests` · `RoadJoinFollowSurfaceTests` ·
   `RoadAccountSurfaceTests` · `RoadCrossingFacesTests` · `WordsBandTests` · `DeadVocabularyTests` ·
   `CommitVocabularyTests` (type names verified by grep at the close).
-- *Leg D — the phone (simulator, by id):* `MobileProtectionScreenTests` (rule 7's label) · `MobileLockTeardownTests`.
+- *Leg D — the phone (simulator, by id):* `MobileProtectionAccountSectionTests` (rule 7's label pin, :336 —
+  CORRECTED by the orchestrator at nov7's name check: the FILE is `MobileProtectionScreenTests.swift` but it
+  declares four other TYPES and none wears the file's name; `-only-testing` would have dropped the phantom
+  silently — the batch-1 `MobileEditorTests` trap's class) · `MobileLockTeardownTests`.
 - *The walk (UI-kind, optional — the orchestrator's call; an OPUS session per the Fable safeguard, since it meets a
   join):* the join's words moment saying the ratified sentence, both voices, on the prod test road's first-run walk.
   VX-443's sweep and VX-152's guard have no face (the sweep is silent; the lock lands the same lobby).
