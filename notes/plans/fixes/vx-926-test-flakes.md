@@ -87,7 +87,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | Row | What | Status |
 |---|---|---|
 | 0 | Kickoff: mint (VX-926), 15 members seated, 4 duplicates marked, worktree, in-flight row, her rulings R-926-1..4, the disposition A-926-1 | DONE (this commit) |
-| U1 | the socket clock | NOT STARTED |
+| U1 | the socket clock | IN PROGRESS — "## U1 record" (end of file) |
 | U2 | the encoder mitigation (timeboxed) | NOT STARTED |
 | U3 | StarContext starvation | NOT STARTED |
 | U4 | hermetic defaults + the dissolve check | NOT STARTED |
