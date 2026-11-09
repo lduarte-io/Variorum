@@ -628,7 +628,13 @@ final class MCPDoor {
             // VX-807 (the VX-809 run, batch 2): her Move to Wing door's own
             // sentence for a BOOK whose note a finished or sealed book holds
             // (the server speaks it where the client can read both).
-            bookMoveFrozenWords: Self.bookMoveFrozenWords)
+            bookMoveFrozenWords: Self.bookMoveFrozenWords,
+            // VX-775: a landed write whose Activity line failed — the client
+            // was answered the act's truth; she hears the failure (after the
+            // call's receipt, which the host sends first).
+            onActivityLogFailure: { [weak self] failure in
+                Task { @MainActor in self?.landActivityLogFailure(failure) }
+            })
         host = fresh
         starting = true
         // The start sweeps the while-connected grants (a write) and binds —
@@ -1168,6 +1174,18 @@ final class MCPDoor {
             StatusCenter.Item.Action(label: MCPReceiptCopy.openDoor) { [weak self] in self?.openShow(change) }
         }
         session.status.deliver(MCPReceiptCopy.line(receiptRun), kind: .receipt, action: door)
+    }
+
+    /// **VX-775 — a client's write LANDED and its Activity line could not be
+    /// written** (her ruling: "the error goes to her, the truth goes to the
+    /// client"; the kickoff's: a REFUSAL-kind line on the one status seam). The
+    /// receipt has already landed (⌥⌘O's last change, the AI-section row — the
+    /// write is in her store); this says the log's failure, always as the toast
+    /// whatever her receipt style (a refusal-class message). It changes nothing
+    /// else: no retry, no row synthesized.
+    func landActivityLogFailure(_ failure: MCPActivityLogFailure) {
+        guard let session else { return }
+        session.status.refuse(MCPReceiptCopy.activityLogFailed(failure))
     }
 
     /// 13n-c U6 — `move_note_to_wing`'s refusal for a note held by a finished

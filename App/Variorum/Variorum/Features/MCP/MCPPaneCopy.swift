@@ -1610,6 +1610,19 @@ nonisolated enum MCPReceiptCopy {
         "\(MCPShowOfferCopy.place(target, title: title)) opened, but the rest of \(client)'s change didn't land."
     }
 
+    /// **VX-775 — a client's change landed and its Activity line could not be
+    /// written** (her rulings: "the error goes to her, the truth goes to the
+    /// client"; a refusal-kind line on the status seam naming the client and the
+    /// store's own words — VX-369's form, SQLite's code and message, never the
+    /// SQL). PROVISIONAL — drafted for her trim (the B3 RECORD; the known edge: a
+    /// no-op landing whose log fails also reads "change landed").
+    static func activityLogFailed(_ failure: MCPActivityLogFailure) -> String {
+        let landed = failure.unrecorded > 1
+            ? "\(failure.clientName)'s \(failure.unrecorded) changes landed, but the activity log couldn't record them"
+            : "\(failure.clientName)'s change landed, but the activity log couldn't record it"
+        return landed + (failure.storeWords.map { " \u{2014} \($0)." } ?? ".")
+    }
+
     static func line(_ run: [MCPWriteReceipt]) -> String {
         guard let first = run.first else { return "" }
         var order: [Operations.MCPWriteAct] = []

@@ -120,6 +120,34 @@ public struct MCPWriteReceipt: Sendable, Equatable {
     }
 }
 
+/// **VX-775 — a landed act whose Activity line could not be written** (her
+/// ruling at the #267 sitting: "the error goes to her, the truth goes to the
+/// client"; this run's kickoff: a REFUSAL-kind line on her status seam). The
+/// act is in her store and its client was answered the act's own answer; only
+/// the log's write failed — this value says so to the APP, never on the wire
+/// (R-825: an answer is a pure function of the client's reachable state). A
+/// SIGNAL (P-4); the app composes her words from it.
+public struct MCPActivityLogFailure: Sendable, Equatable {
+    public let clientName: String
+    /// The tool the client called (a list call's tool, once).
+    public let tool: String
+    /// How many of the call's landed acts lack their Activity line — one for a
+    /// single act; a list call's items coalesce into one value.
+    public let unrecorded: Int
+    /// The store's own words in VX-369's form — SQLite's code and its message
+    /// ("SQLite error 13: database or disk is full"), never the executed SQL;
+    /// "the library is locked" for the lock; nil where the store says nothing
+    /// safe to show (a keyed connection's redacted error).
+    public let storeWords: String?
+
+    public init(clientName: String, tool: String, unrecorded: Int, storeWords: String?) {
+        self.clientName = clientName
+        self.tool = tool
+        self.unrecorded = unrecorded
+        self.storeWords = storeWords
+    }
+}
+
 /// The host's seams to the app around it — set before `start()`.
 public struct MCPHostHooks: Sendable {
     /// The operations layer's refusal in the app's own words (the Mac's
@@ -168,6 +196,11 @@ public struct MCPHostHooks: Sendable {
     /// and the act lands after it. `tool` is the act's tool name. Nil = no
     /// app around the host (a headless host has no editor to flush).
     public var beforeWrite: (@Sendable (_ tool: String) async -> Void)?
+    /// **VX-775 — a landed act's Activity line could not be written**: the
+    /// call answered its client the act's own answer, and THIS tells her
+    /// (`MCPActivityLogFailure`). Called by `MCPWriteTools.call` once per call,
+    /// after the call's receipts (`onWrite`). Nil = no app around the host.
+    public var onActivityLogFailure: (@Sendable (MCPActivityLogFailure) -> Void)?
 
     public init(
         refusalWords: @escaping @Sendable (Error) -> String? = { _ in nil },
@@ -177,7 +210,8 @@ public struct MCPHostHooks: Sendable {
         show: (@Sendable (MCPShowRequest) async -> MCPShowRule.Verdict)? = nil,
         wingMoveFrozenWords: (@Sendable (_ noteTitle: String, _ bookName: String) -> String)? = nil,
         beforeWrite: (@Sendable (_ tool: String) async -> Void)? = nil,
-        bookMoveFrozenWords: (@Sendable (_ bookName: String, _ noteTitle: String, _ frozenBook: String) -> String)? = nil
+        bookMoveFrozenWords: (@Sendable (_ bookName: String, _ noteTitle: String, _ frozenBook: String) -> String)? = nil,
+        onActivityLogFailure: (@Sendable (MCPActivityLogFailure) -> Void)? = nil
     ) {
         self.refusalWords = refusalWords
         self.onAsk = onAsk
@@ -187,6 +221,33 @@ public struct MCPHostHooks: Sendable {
         self.wingMoveFrozenWords = wingMoveFrozenWords
         self.beforeWrite = beforeWrite
         self.bookMoveFrozenWords = bookMoveFrozenWords
+        self.onActivityLogFailure = onActivityLogFailure
+    }
+}
+
+/// **A STORE FAILURE's own words, named once** (VX-369's three store types —
+/// the VX-771 run's SWEEP TABLE, rows 1, 3 and 4's lock road): SQLite's code
+/// and its message for GRDB's `DatabaseError` (never the executed SQL its
+/// description carries); nothing for a keyed connection's redacted error; the
+/// lock's detail for a call the lock overtook. The wire's chain words them
+/// (`MCPWireRefusalCopy.words`); VX-775's signal to her carries the same
+/// detail (`MCPActivityLogFailure.storeWords`). No value for any error that is
+/// not a store failure.
+struct MCPStoreFailure: Equatable {
+    let detail: String?
+
+    init?(_ error: Error) {
+        if let failure = error as? DatabaseError {
+            detail = "SQLite error \(failure.resultCode.rawValue)" + (failure.message.map { ": \($0)" } ?? "")
+        } else if error is RedactedKeyedStatementError {
+            detail = nil
+        } else if error is StoreLockedError {
+            // VX-818 (A-809-20): an act may have landed before a later write of
+            // the same call — never "ask again".
+            detail = MCPLockedLibrary.overtakenDetail
+        } else {
+            return nil
+        }
     }
 }
 
@@ -253,17 +314,14 @@ enum MCPWireRefusalCopy {
         if let null = error as? MCPNullIdentifier { return null.words }
         // VX-369: a store failure (GRDB's `DatabaseError`; a keyed store's
         // sanitized connection error) — the one non-`OperationError` class the
-        // sweep found reachable on the wire.
-        if let failure = error as? DatabaseError {
-            let message = failure.message.map { ": \($0)" } ?? ""
-            return storeFailureWords("SQLite error \(failure.resultCode.rawValue)\(message)")
-        }
-        if error is RedactedKeyedStatementError { return storeFailureWords(nil) }
-        // VX-818 (the VX-809 run, A-809-20): a call the LOCK overtook — past the
-        // call door when the store shut, so a read or write met the typed
-        // refusal. The store-failure sentence's honest form, never "ask again":
-        // an act may have landed before a later write of the same call.
-        if error is StoreLockedError { return storeFailureWords(MCPLockedLibrary.overtakenDetail) }
+        // sweep found reachable on the wire — and VX-818 (the VX-809 run,
+        // A-809-20): a call the LOCK overtook — past the call door when the
+        // store shut, so a read or write met the typed refusal. The
+        // store-failure sentence's honest form for all three, never "ask
+        // again": an act may have landed before a later write of the same
+        // call. Their words are named once (`MCPStoreFailure` — VX-775 reads
+        // the same detail for her).
+        if let store = MCPStoreFailure(error) { return storeFailureWords(store.detail) }
         // VX-760 (the VX-771 run, batch 2): edit_take's mismatch, said as the
         // fact pattern its door PROVED from the sent and stored texts — the
         // door's richer answer, first in the chain (the app's table would read
