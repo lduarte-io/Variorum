@@ -17,15 +17,22 @@ import VariorumMCPSocket
 /// (the preamble and the first frame — `MCPHandshake`); that frame is REPLAYED
 /// as the stream's first line, so the SDK reads the connection whole.
 ///
-/// **VX-933 (the VX-940 run, W4): every write runs OFF the cooperative pool**,
-/// on the connection's own serial writer (`writer`). A write blocks until the
-/// client reads; on this actor it held a pool thread for as long, so clients
-/// that stopped reading (more of them than the Mac has cores — the host serves
-/// sixteen) stopped every task in the app. Now the actor hands each write over
-/// IN ITS OWN ORDER — before it suspends — and waits suspended, so the bytes,
-/// their order, the errors and the session's lifetime are exactly as before:
-/// a `disconnect` still runs only after every write handed over before it has
-/// ended (`drained`), as it did when those writes held this actor.
+/// **VX-933 (the VX-940 run, W4): no write ever WAITS on the cooperative
+/// pool.** A blocking write returns only once the client has read enough; on
+/// this actor it held a pool thread for as long, so clients that stopped
+/// reading (more of them than the Mac has cores — the host serves sixteen)
+/// stopped every task in the app. Now a frame takes THE FAST ROAD while
+/// nothing of this connection waits on the writer: written here at once, in
+/// steps the socket is known to take without waiting (`writeWithoutWaiting`)
+/// — the old timing, for a client that reads. Only what the socket will not
+/// take NOW (a stalled client's
+/// frame) goes to the connection's own serial writer (`writer`), handed over
+/// in this actor's order before it suspends, the caller waiting suspended. So
+/// the bytes, their order, the errors, the timing of a reading client's frames
+/// and the session's lifetime are as before: a `disconnect` still runs only
+/// after every write handed over before it has ended (`drained`), as it did
+/// when those writes held this actor; and a frame whose rest waits on the
+/// writer counts as mid-write for the close line (`frameGate`).
 actor MCPSocketTransport: Transport {
     /// The longest line accepted (a message bigger than this ends the
     /// connection). Generous for any document the read tools return in
@@ -56,10 +63,34 @@ actor MCPSocketTransport: Transport {
     /// thread, and the writes keep the order this actor handed them over in.
     /// One per connection: one stalled client never delays another's writes.
     private nonisolated let writer = DispatchQueue(label: "variorum.mcp.writer")
+    /// **VX-933: a frame is MID-WRITE while its rest waits on the writer** —
+    /// its first bytes went on the fast road and the write lock was let go.
+    /// Read and written only under `writeLock`: the close line skips such a
+    /// frame exactly as it skips one holding the lock (VX-762's invariant — no
+    /// line inside a frame).
+    private nonisolated let frameGate = FrameGate()
+    /// VX-933: the largest write the socket takes without waiting once it
+    /// polls writable — its send low-water mark (`writeStep`).
+    private nonisolated let step: Int
+    final class FrameGate: @unchecked Sendable {
+        /// Guarded by the transport's `writeLock`.
+        var midFrame = false
+    }
+    /// VX-933: writes handed to the writer and not yet ended. While any is,
+    /// every write goes behind it (never the fast road), so the order holds.
+    private var handedOver = 0
+    #if DEBUG
+    /// TEST-ONLY (VX-933): run in the gap between a frame's first bytes (the
+    /// fast road) and its rest's hand-over — the write lock free, the stream
+    /// mid-frame — so a pin can try the close line exactly there.
+    private var midFrameProbe: (@Sendable () -> Void)?
+    func setMidFrameProbeForTesting(_ probe: (@Sendable () -> Void)?) { midFrameProbe = probe }
+    #endif
 
     init(fd: Int32, replay: [Data] = []) {
         self.fd = fd
         self.replay = replay
+        self.step = Self.writeStep(fd)
         self.logger = Logger(label: "variorum.mcp.socket", factory: { _ in SwiftLogNoOpLogHandler() })
         var made: AsyncThrowingStream<Data, Swift.Error>.Continuation!
         self.stream = AsyncThrowingStream { made = $0 }
@@ -111,23 +142,75 @@ actor MCPSocketTransport: Transport {
         guard isConnected else { throw MCPError.transportError(POSIXError(.ENOTCONN)) }
         var framed = data
         framed.append(UInt8(ascii: "\n"))
-        if let failure = await written(framed) {
+        if let failure = await deliver(framed) {
             throw MCPError.transportError(POSIXError(POSIXErrorCode(rawValue: failure) ?? .EIO))
         }
     }
 
-    /// **VX-933 — one write, off the pool.** `bytes` is handed to the writer
-    /// BEFORE this actor suspends (the continuation's body runs at once), so
-    /// writes go out in the order this actor took them — the order they went
-    /// out in when they ran here; the caller then waits SUSPENDED, holding no
-    /// thread. nil when every byte was written, else the write's `errno` (read
-    /// on the writing thread, where it was set).
-    private func written(_ bytes: Data) async -> Int32? {
+    /// **VX-933 — every write's one road.** While nothing of this connection
+    /// waits on the writer and the write lock is free, THE FAST ROAD: as much
+    /// as the socket takes now, written here without waiting — for a client
+    /// that reads, the whole frame, at the old timing. What the socket will not
+    /// take now goes to the writer (`handOver`), the frame marked mid-write
+    /// until its rest is written. nil when every byte was written, else the
+    /// failing write's `errno`.
+    private func deliver(_ bytes: Data) async -> Int32? {
+        var rest = bytes
+        if handedOver == 0, let road = fastRoad(bytes) {
+            switch road {
+            case .finished(let failure):
+                return failure
+            case .rest(let remainder):
+                #if DEBUG
+                midFrameProbe?()
+                #endif
+                rest = remainder
+            }
+        }
+        return await handOver(rest)
+    }
+
+    /// How the fast road ended: the frame finished there (nil, or the failing
+    /// send's `errno`), or its REST still has to be written.
+    private enum FastRoad {
+        case finished(Int32?)
+        case rest(Data)
+    }
+
+    /// The fast road itself, synchronous (the lock is held only inside it):
+    /// nil when the write lock is not free (a close line, or a pin holding it)
+    /// — the writer's road then waits for it, off the pool. A frame that went
+    /// out only in part is marked mid-write before the lock is let go.
+    private nonisolated func fastRoad(_ bytes: Data) -> FastRoad? {
+        guard writeLock.try() else { return nil }
+        defer { writeLock.unlock() }
+        let now = Self.writeWithoutWaiting(fd, bytes, step: step)
+        if now.failure != nil || now.written == bytes.count { return .finished(now.failure) }
+        frameGate.midFrame = now.written > 0
+        return .rest(bytes.subdata(in: now.written..<bytes.count))
+    }
+
+    /// **VX-933 — the writer's road, off the pool.** `bytes` is handed to the
+    /// writer BEFORE this actor suspends (the continuation's body runs at
+    /// once), so writes go out in the order this actor took them; the caller
+    /// then waits SUSPENDED, holding no thread. The writer writes under the
+    /// lock and ends any mid-write mark (the writes are FIFO, so a frame's rest
+    /// is the first thing behind its fast-road start). nil when every byte was
+    /// written, else the write's `errno` (read on the writing thread, where it
+    /// was set).
+    private func handOver(_ bytes: Data) async -> Int32? {
+        handedOver += 1
+        defer { handedOver -= 1 }
         let fd = self.fd
         let lock = writeLock
+        let gate = frameGate
         return await withCheckedContinuation { finished in
             writer.async {
-                let failure: Int32? = lock.withLock { Self.writeAll(fd, bytes) ? nil : errno }
+                let failure: Int32? = lock.withLock {
+                    let failure = Self.writeAll(fd, bytes) ? nil : errno
+                    gate.midFrame = false
+                    return failure
+                }
                 finished.resume(returning: failure)
             }
         }
@@ -148,25 +231,32 @@ actor MCPSocketTransport: Transport {
         endedOverLimit = true
         guard isConnected else { return }
         let sentence = MCPHandshake.overLimitRefusal(limit: Self.lineCap, beforeInitialize: false)
-        // VX-933: through the writer, behind any frame already handed over.
-        _ = await written(MCPShim.refusalResponse(toFirstLine: Data(), message: sentence))
+        // VX-933: the one write road, behind any frame already handed over.
+        _ = await deliver(MCPShim.refusalResponse(toFirstLine: Data(), message: sentence))
     }
 
     /// **The close line, as the connection ends** (VX-762 — B2 part two,
     /// A-771-3): written by the session's hang-up just before its shutdown,
     /// from whatever thread stops the server — so it NEVER WAITS: the write
     /// lock is only TRIED (a frame mid-write keeps it, and the line is skipped),
-    /// and the line goes in ONE non-blocking send (a socket buffer that can't
-    /// take it whole tears or drops it). The shim honours only a COMPLETE close
-    /// line, so either miss falls back to its own sentence. True when the whole
-    /// line was written.
+    /// and the line goes only when the socket takes it WHOLE without waiting
+    /// (else it is dropped — a client that stopped reading has a full buffer).
+    /// The shim honours only a COMPLETE close line, so a miss falls back to its
+    /// own sentence. True when the whole line was written.
+    ///
+    /// VX-933: `MSG_DONTWAIT` does NOT keep a send on a Unix-domain stream
+    /// socket from waiting on this macOS (probed: a send to a full buffer
+    /// blocks with it set), so the line once BLOCKED its caller — the stop's
+    /// thread, the main thread at her switch — until a stalled client read.
+    /// The send now goes only after the socket polls writable, and only a line
+    /// no longer than the step it then takes without waiting (`step`); a frame
+    /// whose rest waits on the writer is mid-write too.
     nonisolated func sayClosing(_ line: Data) -> Bool {
         guard writeLock.try() else { return false }
         defer { writeLock.unlock() }
-        let written = line.withUnsafeBytes { raw in
-            Darwin.send(fd, raw.baseAddress, raw.count, MSG_DONTWAIT)
-        }
-        return written == line.count
+        guard !frameGate.midFrame, line.count <= step else { return false }
+        let now = Self.writeWithoutWaiting(fd, line, step: step)
+        return now.failure == nil && now.written == line.count
     }
 
     // MARK: - The blocking halves (pure over a descriptor — pinned headless)
@@ -215,11 +305,56 @@ actor MCPSocketTransport: Transport {
     /// cooperative-pool one. A refusal echoes the `initialize`'s id, so it can
     /// be as long as the opening's line. Same bytes, same verdict.
     static func writeAllOffPool(_ fd: Int32, _ data: Data) async -> Bool {
-        await withCheckedContinuation { finished in
-            let writer = Thread { finished.resume(returning: writeAll(fd, data)) }
+        // The fast road first: a client that reads takes it all at once.
+        let now = writeWithoutWaiting(fd, data, step: writeStep(fd))
+        if now.failure != nil { return false }
+        if now.written == data.count { return true }
+        let rest = data.subdata(in: now.written..<data.count)
+        return await withCheckedContinuation { finished in
+            let writer = Thread { finished.resume(returning: writeAll(fd, rest)) }
             writer.name = "variorum.mcp.writer"
             writer.start()
         }
+    }
+
+    /// **VX-933 — the fast road's write:** as much of `data` as the socket
+    /// takes NOW, never waiting. A blocking send of `n` bytes waits only while
+    /// the socket's free space is below BOTH `n` and its send low-water mark,
+    /// and the socket polls writable only while that space is at least the
+    /// mark — so each step polls (`poll`, timeout 0) and, writable, sends at
+    /// most `step` (the mark) bytes; not writable, it stops. Only writes made
+    /// under the write lock reach this socket meanwhile, and a client's reads
+    /// only add space. (`MSG_DONTWAIT` is no such guarantee on a Unix-domain
+    /// stream socket here — `sayClosing`'s doc.) Answers how many bytes went
+    /// and, when a send FAILED, its `errno` — nil when it wrote everything or
+    /// stopped only because the socket would wait.
+    static func writeWithoutWaiting(_ fd: Int32, _ data: Data, step: Int) -> (written: Int, failure: Int32?) {
+        data.withUnsafeBytes { raw in
+            var offset = 0
+            while offset < raw.count {
+                var ready = pollfd(fd: fd, events: Int16(POLLOUT), revents: 0)
+                let polled = poll(&ready, 1, 0)
+                if polled < 0, errno == EINTR { continue }
+                guard polled > 0, ready.revents & Int16(POLLOUT | POLLHUP | POLLERR) != 0 else { return (offset, nil) }
+                let sent = Darwin.send(fd, raw.baseAddress! + offset, min(step, raw.count - offset), 0)
+                if sent > 0 {
+                    offset += sent
+                    continue
+                }
+                if sent < 0, errno == EINTR { continue }
+                return (offset, sent < 0 ? errno : EIO)
+            }
+            return (offset, nil)
+        }
+    }
+
+    /// The step `writeWithoutWaiting` may send once the socket polls writable:
+    /// its send low-water mark (2,048 bytes by default), at least one byte.
+    static func writeStep(_ fd: Int32) -> Int {
+        var mark: Int32 = 0
+        var size = socklen_t(MemoryLayout<Int32>.size)
+        guard getsockopt(fd, SOL_SOCKET, SO_SNDLOWAT, &mark, &size) == 0, mark > 0 else { return 1 }
+        return Int(mark)
     }
 
     static func writeAll(_ fd: Int32, _ data: Data) -> Bool {

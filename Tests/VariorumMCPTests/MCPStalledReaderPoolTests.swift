@@ -49,10 +49,10 @@ private func noSigPipe(_ fd: Int32) {
 }
 
 /// Whether bytes wait unread at `fd` (the stalled client's end) — i.e. the
-/// write toward it has begun. Never blocks.
+/// write toward it has begun. Never blocks (a zero-timeout poll).
 private func holdsUnreadBytes(_ fd: Int32) -> Bool {
-    var byte: UInt8 = 0
-    return recv(fd, &byte, 1, MSG_PEEK | MSG_DONTWAIT) == 1
+    var ready = pollfd(fd: fd, events: Int16(POLLIN), revents: 0)
+    return poll(&ready, 1, 0) == 1 && ready.revents & Int16(POLLIN) != 0
 }
 
 /// What the watcher saw while every write was stalled.
@@ -272,6 +272,95 @@ struct MCPStalledReaderPoolTests {
                 "the client read the whole frame, then the end (\(received.count) of \(frame.count + 1) bytes)")
         close(pair[0])
         close(pair[1])
+    }
+
+    /// The close line never lands INSIDE a frame (VX-762's invariant, kept by
+    /// the fast road): a frame to a client that stopped reading goes out in
+    /// part at once, and its rest waits on the writer — the write lock is free
+    /// in between, but the stream is mid-frame. A stop's close line tried
+    /// exactly there (the DEBUG probe; the client having read a little, so the
+    /// line WOULD fit) is skipped, and the client reads the frame whole with no
+    /// line inside it. A line written there would tear the frame.
+    @Test func aCloseLineNeverLandsInsideAFrameWhoseRestWaitsOnTheWriter() async throws {
+        var pair: [Int32] = [-1, -1]
+        try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+        noSigPipe(pair[0])
+        let client = pair[1]
+        let transport = MCPSocketTransport(fd: pair[0])
+        try await transport.connect()
+        let closeLine = try #require(MCPCloseLine.line("Variorum closed this connection."))
+        let early = LockIsolated(Data())
+        let said = LockIsolated<Bool?>(nil)
+        await transport.setMidFrameProbeForTesting {
+            // The client reads a little (room for the line), then the stop
+            // tries its close line — in the gap.
+            var buffer = [UInt8](repeating: 0, count: 4_096)
+            let n = recv(client, &buffer, buffer.count, MSG_DONTWAIT)
+            let read = n > 0 ? Data(buffer[0..<n]) : Data()
+            early.withValue { $0.append(read) }
+            said.setValue(transport.sayClosing(closeLine))
+        }
+        let frame = Self.frame(2_000)
+        let sending = Task.detached { () -> Bool in
+            do { try await transport.send(frame); return true } catch { return false }
+        }
+        let rest = await Self.read(client, count: frame.count + 1 - 4_096, after: 0.3).value
+        #expect(await sending.value, "the frame landed")
+        #expect(said.value == false, "the close line was skipped in the mid-frame gap (\(String(describing: said.value)))")
+        #expect(early.value.count == 4_096, "premise: the client read 4,096 bytes before the line was tried")
+        #expect(early.value + rest == frame + Data("\n".utf8),
+                "the client read the frame whole, nothing inside it (\(early.value.count + rest.count) of \(frame.count + 1) bytes)")
+        await transport.setMidFrameProbeForTesting(nil)
+        close(client)
+        for try await _ in await transport.receive() {}
+        await transport.disconnect()
+        close(pair[0])
+    }
+
+    /// The close line NEVER WAITS (VX-762's contract; VX-933's face of it): a
+    /// stop says it from the stopping thread — the main thread at her switch —
+    /// so to a client that stopped reading after whole frames (its buffer
+    /// nearly full, no frame mid-write, the lock free) the line is dropped at
+    /// once, never sent into a buffer that cannot take it. `MSG_DONTWAIT` does
+    /// not stop such a send from waiting on a Unix-domain socket here, so the
+    /// old line blocked its caller until the client read.
+    @Test func aCloseLineToAClientThatStoppedReadingNeverWaits() async throws {
+        var pair: [Int32] = [-1, -1]
+        try #require(socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0)
+        noSigPipe(pair[0])
+        let client = pair[1]
+        let transport = MCPSocketTransport(fd: pair[0])
+        try await transport.connect()
+        // Whole frames the client never reads: the buffer left with less room
+        // than the line needs to go without waiting.
+        let filler = Data(repeating: UInt8(ascii: "f"), count: 7_000)
+        try await transport.send(filler)
+        let closeLine = try #require(MCPCloseLine.line("Variorum closed this connection."))
+        let outcome: Bool? = await withCheckedContinuation { continuation in
+            let said = LockIsolated<Bool?>(nil)
+            let returned = DispatchSemaphore(value: 0)
+            Thread {
+                said.setValue(transport.sayClosing(closeLine))
+                returned.signal()
+            }.start()
+            Thread {
+                let inTime = returned.wait(timeout: .now() + 5) == .success
+                if !inTime {
+                    // The line is stuck in a send: let the client read, so the
+                    // stuck caller is let go (and this pin reports, not hangs).
+                    var sink = [UInt8](repeating: 0, count: 64 * 1024)
+                    _ = Darwin.read(client, &sink, sink.count)
+                    _ = returned.wait(timeout: .now() + 5)
+                }
+                continuation.resume(returning: inTime ? said.value : nil)
+            }.start()
+        }
+        #expect(outcome != nil, "the close line returned at once — it never waited on a client that stopped reading")
+        #expect(outcome == false, "a buffer that cannot take the line whole drops it (\(String(describing: outcome)))")
+        close(client)
+        for try await _ in await transport.receive() {}
+        await transport.disconnect()
+        close(pair[0])
     }
 
     /// A frame the size of a big answer, distinct per index.
