@@ -667,6 +667,8 @@ The window's order: THE RED RUNS first — FIRST ATTEMPT one combined rev tree s
 
 **The round-2 fix list (routed to the RESUMED fix-round implementer):** R2-3 (guard line) · R2-4 (default dropped + two call sites) · R2-5 (header narrowed). All three mechanical, fully specified above; the orchestrator line-by-line checks them (the final round's rule) and gate36b / the merge gate carry the compiled proof.
 
+**THE ROUND-2 FIXES VERIFIED (the orchestrator's line-by-line check, the final round's rule; commits `df29c77d6` · `97f15af16` · `1cea00903` · `12a3ef70b`, pushed, zero trailers, four code files + this record):** R2-3's guard line read in the diff exactly as specified; the suite re-run by the orchestrator's own hand — "✔ Test run with 12 tests in 1 suite passed". R2-4: the default gone, `:116`/`:205` explicit, and a THIRD defaulted site the reviewer missed (`:210`'s default-equals-empty line) correctly REMOVED as a tautology (its exact no-book string stays pinned at `:205` — subsumed, not weakened); the one product caller already passed its read. R2-5 confirmed COMMENT-ONLY by diff (every changed line a `//` line). gate36b grows to FOUR types (+`QuickNoteWingLandingTests`, R2-4's edited suite — already in the 73).
+
 ## THE LEDGER (every row owned; updated point-by-point as batches close)
 
 | # | Member | Batch | Status |
