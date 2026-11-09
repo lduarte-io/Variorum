@@ -1301,7 +1301,7 @@ what apply writes, never edited). The pin suites read whole: `OutsideWriteRingEn
 | 1 | THE SWEEP TABLE (below — before any fix) | DONE (this commit) |
 | 2 | The ONE seam verified + the batch-1 composition stated + the found gaps G1 (the unlanded guard) and G3 (the gap keystroke's snapshot) fixed with their pins | DONE — 2a the pins on the PRE-FIX tree (`d1a2b028e` — the red-on-old SHA); 2b the fix + the two primitives' pins (this commit); Mac + phone `build-for-testing` green; the instrument green 2/2 (its named reverts run next, at this tip); every Mac run PENDING the stage |
 | 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | DONE — 3a the door pins on the PRE-FIX tree (`762dde907` — the red-on-old SHA); 3b the op + core pins + the two doors (this commit) — core compile-red watched, then 6/6 green, the restore neighbours 104/10 green; Mac + phone `build-for-testing` green; the core revert R-P1c runs next at this tip; Mac runs PENDING the stage |
-| 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | NOT STARTED — design settled below |
+| 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | DONE — 4a the face pins on the PRE-FIX tree (`ea58914cc` — G2's red-on-old SHA); 4b G2's arm (this commit); Mac `build-for-testing` green; every run PENDING the stage |
 | 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | NOT STARTED |
 
 #### Piece 1 — THE SWEEP TABLE (every road that rewrites a take's `working_text` from outside a live pane bound to that take, × every host a live pane can sit on)
@@ -1570,6 +1570,49 @@ missed its anchor; the reverts below were NOT run before this record named them.
   restore overwrites unsaved typing, as before).
 - *MOBILE PARITY:* the phone's `MobileBlockHistory.restore` already flushes and refuses while dirty; it keeps no
   insurance — one argument away (`insuringBuffer: true`), left for the orchestrator's call (the VM board's surface).
+- *R-P1c, run at `944769820` (core, headless):* `✘ 6 tests, 2 failed` — exactly
+  `anInsuredRestoreKeepsTheWordsItReplacesInAQuietSavepointFirst` (4 issues: one commit, not two; the last is the manual
+  moment) and `theInsuranceIsQuietAndTheRestoreIsTheRestoreItAlwaysWas` (its `kind == auto` line); the four guards green.
+  Restored by `git checkout --` of the one file (diff clean) → `✔ 6 tests passed`.
+
+#### Piece 4 — R-683-4, the post-rescue face (and G2), as built
+- *What the face IS, traced on the code before any pin (the default posture — stack, follow-the-scroll off):* B's
+  rescue under her live article pane: the pull's delivery is DEFERRED (the board's policy: busy while dirty), her
+  autosave rescues, the settle's fresh read adopts a projection whose take equals what her pane holds → no
+  suspicion, VX-222's arm unmoved (the chosen take unchanged), the ring STAYS; the pane is buffer-authoritative and
+  never re-made (the article cell's stable identity, 13b 3F); the block becomes fanned → the corner badge `⑂+` →
+  `⑂2` (an overlay — zero layout footprint); a closed fan stays closed (no rule opens a fan for an arriving take; VX-733
+  only closes a COLLAPSED one); a first-take door already open blooms the card into its stack beside the article; the
+  comment rides the ROW (`CommentMarginNote`), so it holds in every style. A's road: the ring ends on the server's words
+  (A-677-1), her words on the card. So in the default posture the face is RIGHT — the pins below are composition pins.
+- *The one face defect — G2 (PROVISIONAL P-849-5 (a), built):* `TakesViewModel.endRingIfSlotSplitReplacedItsCell()`,
+  called in `adopt` after the bloom inputs know the projection (VX-733's collapse rule, the `show ▾` filter's fresh
+  shapes) and before the landings: the ring on a `takes-main` key whose block a slot-split bloom now replaces ends by
+  the flushed `blur()`. Takes host only (the Lenses host and Write's take panel never key `takes-main`); a landing in
+  that state already rings the fan card (`paneRenderingArticleTake`), so nothing legitimate stands on the replaced key.
+  The arm generalizes VX-577's expand-all arm (her act) to an adoption (an outside arrival). The alternatives (b)/(c)
+  are in the design paragraph above and on the arm's doc; QUESTIONS at the merge.
+- *Observed, not fixed (recorded for the orchestrator):* her OWN badge click (`toggleExpanded`) on her ring's fanned
+  block in slot split replaces the cell under the ring the same way — VX-577's arm covers expand-all, not the single
+  toggle (pre-existing; her act; outside R-683-4's "after a rescue"). And C1 (margin grid + follow-the-scroll: a note's
+  first fan engages the rail and re-centres the column) stands as recorded.
+- *Pins (`App/Variorum/VariorumTests/PostRescueFaceTests.swift`, committed on the PRE-FIX tree `ea58914cc`):*
+  MOUNTED composition pins (green on both sides of this batch BY DESIGN — their liveness is batch 1's R-B1, which takes
+  the card away, and VX-677's rev664, which keeps A's ring): `aRescueUnderHerLivePaneKeepsHerWordsAndShowsTheCardBehindTheBadge`
+  (typed through the pane's own `insertText` road; asserts the SAME pane object, editable, her words; the store row;
+  the `'conflict'` card; `hasFan` + `activeVariantCount == 2` — the badge's ⑂2; `expandedBlocks` empty; the block's
+  comment in the feed; the pane's window origin within 0.5 pt), `aRescueOnAnOpenStackFanAddsTheCardAndLeavesHerRing`
+  (the first-take door open; the card in `bloomTakes`; the block still open; the same live pane),
+  `aFlushFirstRoundEndsHerRingOnTheServersWordsAndKeepsHersOnTheCard` (A's occasion — `flushPendingTypingBeforeRound`
+  — then the S5 merge staged as its two writes: the cell read showing the server's words, her words on the card, ⑂2,
+  the fan closed, the comment held). MODEL-level: **`aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur`**
+  — G2's pin, pre-fix API only ⇒ BEHAVIOR-red at `ea58914cc` (red line: the ring still on `takes-main`); GUARD
+  `theSameArrivalOnAnOpenStackFanLeavesTheRing` (green both sides).
+- *THE NAMED REVERTS (named BEFORE they run — all the STAGE's, Mac):* **R-G2** the `endRingIfSlotSplitReplacedItsCell()`
+  call in `adopt` deleted ⇒ RED `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur` only; **R-B1 (batch
+  1's, re-used as the face pins' liveness proof)** `AutosaveCoordinator.flushNow`'s `expectedText: entry.expectedText` →
+  `nil` ⇒ RED `aRescueUnderHerLivePane…` and `aRescueOnAnOpenStackFan…` (no card — the pull's words survive nowhere) and
+  ALSO, by design, piece 2's four G1/G3 pins (their cards); A's pin green (no rescue on its road).
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 

@@ -595,6 +595,13 @@ final class TakesViewModel {
         // landings below resolve against it (a landing onto a pane the filter
         // hides opens its block — the filter must already know the shapes).
         lensFilter.projectionAdopted()
+        // VX-849 batch 3, G2 (PROVISIONAL P-849-5 (a)): an adoption under which
+        // a slot-split bloom now REPLACES the article cell the ring is in ends
+        // the ring by the flushed blur — VX-222's arm's reason (the ring's cell
+        // stopped rendering its take under her), asked once the bloom inputs
+        // (the collapse rule above, the filter's fresh shapes) know this
+        // projection, and before the landings below may ring it.
+        endRingIfSlotSplitReplacedItsCell()
         // Columns referencing lenses that died drop back to scratch with
         // the lens's last-known picks LOST deliberately (the lens was the
         // durable home; a deleted lens's thread is gone — its takes remain
@@ -936,6 +943,35 @@ final class TakesViewModel {
     /// parked follow is judged by `dropParkedFollowIfMovedElsewhere` instead.
     private func endRingIfItsTakeChanged(from before: String?) {
         guard let before, let after = takeUnderRing(in: projection), after != before
+        else { return }
+        blur()
+    }
+
+    /// **G2 — a slot-split bloom that REPLACES the ring's article cell ends the
+    /// ring** (the VX-849 run, batch 3 — R-683-4's one face defect; PROVISIONAL
+    /// P-849-5 (a); the record `notes/plans/fixes/vx-849-typed-over-rescue.md`).
+    /// In slot split a BLOOMED fanned block renders its fan's cards in the
+    /// article cell's place (`slotSplitReplacesArticleCell`). A block that was
+    /// bloomed while it held ONE take — her first-take door open, or
+    /// follow-the-scroll over a visible row — becomes fanned the moment a take
+    /// arrives from outside (the guarded autosave's own `'conflict'` card, an
+    /// AI's `add_take`, a sync's new take), and the cell holding her LIVE pane is
+    /// replaced under her caret: the ring would stand on a `takes-main` key no
+    /// surface renders (the R112 class — her keyboard dead until she clicks a
+    /// card). So the adoption that does it ends the ring by the FLUSHED blur
+    /// (no keystroke dies with it): VX-222's shape for an outside change that
+    /// re-resolves the ring's cell, and VX-577's arm in `expandAllFans` for the
+    /// same reshaping done by her own hand. Every other style keeps the article
+    /// cell through a bloom, so nothing moves there; the Lenses host and Write's
+    /// take panel never key a ring `takes-main`. The recorded alternatives (her
+    /// bundle): (b) carry the ring onto the fan card that renders the same take,
+    /// the caret where it was; (c) hold the slot-split bloom of the block her ring
+    /// is in until the ring leaves.
+    private func endRingIfSlotSplitReplacedItsCell() {
+        guard host == .takes, let live = authority.livePane,
+              live.columnID == Self.takesMainColumnID,
+              let slot = projection.slots.first(where: { $0.blockID == live.blockID }),
+              slotSplitReplacesArticleCell(slot)
         else { return }
         blur()
     }
