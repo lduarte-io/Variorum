@@ -11,6 +11,12 @@ no alternates to ride along. The file's header line carries the WORKING title an
 
 **R-13s-28 binds:** her text is never edited, reworded, re-punctuated or "cleaned up" — not
 even capitalization. The build copies from this file byte-exact, or re-reads the note itself.
+
+**The repo's face: `LETTER.md`** (VX-939, R-940-3; `notes/plans/fixes/vx-940-pre-oss-followups.md`
+W1). The same seventeen paragraphs with this file's header line stripped, at the repo root, for a
+stranger's first click. Kept in step BY HAND: `LaunchFurnitureTests` pins `ReadmeSeeder.paragraphs`
+against THIS file, and nothing reads `LETTER.md`. A change to her text changes this file, the
+seeder's literals and `LETTER.md` in one commit.
 **Verification:** the manifest below is each block's chosen take's SHA-256 (of the stored
 text, UTF-8 bytes, lowercase hex), read from the store. If this file and the manifest ever
 disagree, the manifest and the note in her library win — re-fetch rather than trust the file.

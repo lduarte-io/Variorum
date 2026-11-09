@@ -78,7 +78,30 @@ The VX-926 record's §7 binds by reference (which binds the VX-912 record's §7)
 | Piece | What | Status |
 |---|---|---|
 | P0 | This record + the ledger row | DONE (this commit) |
-| P1 | VX-939 — `LETTER.md` at the repo root (her text, header stripped, byte-faithful); the README pointer moves to it; the one-file-or-two verdict | NOT STARTED |
+| P1 | VX-939 — `LETTER.md` at the repo root (her text, header stripped, byte-faithful); the README pointer moves to it; the one-file-or-two verdict | DONE (this commit) — TWO files, sync noted (verdict below); body byte-identical to `read-me.txt`'s, and equal to `ReadmeSeeder.paragraphs` (17/17) by a scratch compile of the literals; `read-me.txt` and the seeder's code untouched |
 | P2 | VX-923 — the pin (red on the current tree) | NOT STARTED |
 | P3 | VX-923 — the credits (Sparkle + the Point-Free siblings) and the BIP-39 line (pane + `Vendor/BIP39/README.md`) | NOT STARTED |
 | P4 | Close: headless build + the copy tests + the seeder pins (PENDING the gate where in-target), authored sentences listed, PROVISIONALs | NOT STARTED |
+
+### P1 — VX-939: `LETTER.md` (repo files only)
+
+**What the seed road reads (the premise check).** The brief asked whether the in-app seed road reads `read-me.txt`. **It does not.** `ReadmeSeeder` mints from compiled Swift literals, `ReadmeSeeder.paragraphs` (`App/Variorum/Variorum/Features/Onboarding/BirthFurnitureSeeders.swift`, 17 strings). Nothing in the app opens a file. `read-me.txt` is the **test oracle**: `LaunchFurnitureTests.herReadmeFileParagraphs()` opens it by `#filePath`, asserts its first line starts `{t:"readmev5"}`, drops that line and splits the rest at blank lines. Then `aFreshLaunchSeedsHerReadmeByteForByteOneTakePerBlock` asserts `ReadmeSeeder.paragraphs == file` and the seeded blocks byte for byte, and two door pins reuse the same reader.
+
+**Verdict: TWO files, not one. The sync obligation is noted on both sides.** Neither one-file road is honest here:
+- *LETTER.md as the oracle* (retire `read-me.txt`) means editing the seeder's pins: the hard-coded path, plus the header assertion that LETTER.md can't satisfy, since its whole point is a stripped header. The brief requires those pins to pass UNMODIFIED.
+- *LETTER.md as the seed source* (the app reads it at runtime) means bundling it as a resource and replacing the literals with a file read at birth. That adds a new failure mode at a fresh store's first launch and changes the seed road, which §4 W1 says to leave untouched. It also wouldn't make one file: the oracle would still be `read-me.txt`.
+
+So there are three representations, all byte-equal today: the literals (what seeds), `read-me.txt` (what the pins check the literals against: her capture artifact, left untouched), and `LETTER.md` (the repo's face, which nothing reads).
+
+**Built:**
+- `LETTER.md` at the root: an HTML comment block (invisible on GitHub's render: what the file is, that the words are hers, and the three-way sync), then her text. The text is `tail -n +3` of `read-me.txt`, i.e. the header line `{t:"readmev5"} {#readme}` and its blank line dropped. It's a byte-level transform, never retyped. **No Markdown formatting was needed:** the file already has one paragraph per line with blank lines between, and its only Markdown-active bytes are `*and*` (block 3), her emphasis, which the app's markdown face renders the same way. Nothing is escaped, and there is no heading (a heading would be words that aren't hers).
+- `README.md`: the letter section's link target only, `notes/plans/vx-105-letter-content/read-me.txt` → `LETTER.md`. Every other byte is unchanged.
+- The sync notes: (1) `LETTER.md`'s comment block; (2) `ReadmeSeeder.paragraphs`' doc comment (one comment paragraph; `git diff` shows only `///` lines added, so the seeder's code is untouched); (3) the content package's `README.md` beside `read-me.txt`, one paragraph. **`read-me.txt` itself carries no note:** any added line becomes a paragraph to the oracle and reds the pins. That is the evidence it must stay byte-untouched.
+
+**Evidence (headless):**
+- `cmp` of LETTER.md's body (after its comment block) against `tail -n +3 read-me.txt`: **identical**, sha256 `77eee52c…cc46` on both sides.
+- A scratch compile of the seeder's literal array: lines 129–283, sed-extracted from the source and run under `swift` beside both files with the test's own split rule. Results: `LETTER.md == ReadmeSeeder.paragraphs` **true**, 17/17. `read-me.txt == ReadmeSeeder.paragraphs` **true** (the app pin's own assertion, reproduced headlessly). The body starts on her first words.
+- `git grep` over every test root (`Tests/`, both app test targets, `Tools/*/Tests`, `Sources/`): no test reads `README.md`, `LETTER.md` or the package README. The one reader of the package is `LaunchFurnitureTests:162` (`read-me.txt`).
+- The seeder pins run IN-TARGET only at the gate (app suite → stage): PENDING there, unmodified. Nothing they read changed: `read-me.txt` and the literals are byte-untouched.
+
+**Offered, not built (the orchestrator's call):** a headless DRIFT PIN, a core-package test that reads `LETTER.md` and `read-me.txt` by `#filePath` and asserts equal paragraphs. With the app pin, that would make the three-way sync mechanical rather than by hand. Not built because the brief named header comments and §4 says VX-939 is repo files only.
