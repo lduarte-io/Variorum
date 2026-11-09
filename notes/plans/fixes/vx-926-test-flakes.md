@@ -116,7 +116,7 @@ On the final tree: **3× the whole Mac target + 2× the full core `swift test` u
 | P4 | The family alone + under a deliberately loaded parallel run (counts) | NOT STARTED |
 | P5 | Per-member dispositions, the three suggestions' sentences, PROVISIONALs, self-assessment | NOT STARTED |
 
-**Load generators alive:** none (Phase 1’s generator — 36 × `yes`, pids 35165–35200, 18:10–18:13 — killed by pid; `pgrep -x yes` = 0). **Reverts in flight:** none.
+**Load generators alive:** ONE — 36 × `/usr/bin/yes > /dev/null`, pids 44890–44925 (P4's loaded runs; killed by pid at their end). **Reverts in flight:** none.
 
 ### PHASE 1 — VX-850's answer (the evidence, either way)
 
