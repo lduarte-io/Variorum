@@ -173,7 +173,7 @@ beside it.**
 |---|---|---|
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
-| 2 | Batch 2 — VX-544 (the offline unlock retry) | BUILT, headless-verified — `b11fb8d39`…`36b709512`; every Mac/simulator run PENDING the stage window (the BATCH 2 RECORD's STAGE REQUEST); her drill OWED (row 9) |
+| 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
@@ -1235,6 +1235,34 @@ construction (`AppSession.swift:856`; `SyncScheduler.swift:106` is a later, post
 unoverridden read — the scratch harness never detected test context and masked it (no product bug). Fix, test file only: each
 test runs under `withWorld` (`SyncBeforeRoundTests`' `withDependencies` set — the services' own db, uuid, a constant date, a seeded
 generator; owner identity left signed-out), services built inside; no pin reads those. Re-verification: the window's leg-A re-run.
+
+### BATCH 2 — THE STAGE WINDOW (claim vx-849-batch2, 2026-11-09, the orchestrator's hands; GO slotted EARLY by nov7 at 04:41 — vx-913's gate had released and its merge needed no stage)
+
+- **Tips:** first red run at `f4a323c5a`; the test-only fix `f500f94f3`; legs A (re-run), B and D all at `f500f94f3`,
+  the tree verified clean before, between and after every cycle. nov7 approved holding the claim through the fix
+  (the implementer edited/committed/pushed only — no builds or runs; the re-run was the compile proof).
+- **Leg A at `f4a323c5a`:** "Test run with 41 tests in 5 suites failed … with 5 issues" — all five of
+  `TypedUnlockRetryOccasionTests`, each at swift-dependencies `Date.swift:37:17` (the WINDOW FIX paragraph above:
+  an unoverridden live `\.date` read the scratch harness masked — no product bug). **Leg A re-run at
+  `f500f94f3`: "Test run with 41 tests in 5 suites passed"** (TypedUnlockRetry 14 · TypedUnlockRetryOccasion 5 ·
+  OfflineTypedUnlockRetryRoad 5 · SyncReachabilityTrigger 9 · SyncBeforeRound 8).
+- **Leg B — R-3a** (the one closure's retry line deleted; one-line diff verified): "18 tests in 3 suites, 9
+  issues" — RED exactly the five named: `herOfflineTypedUnlockSyncsAtTheNextRoundOnceTheVaultAnswers` (3 issues) ·
+  `herStep9TheNetworkComingBackHealsItByItself` (2) · `theMacsOccasionRetriesTheTypedUnlocksLoadBeforeHerTypingLands`
+  (the order log) · `whileThereAreNoKeysTheOccasionRetriesThePendingLoad` (2 — the scripted log and the provider
+  count) · `withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing` (the occasion leg, as the harness predicted);
+  13 green. Restored by `git checkout --` of the one file (diff clean at `f500f94f3`), re-run **18/18 green**.
+*[removed for publication]*
+  tests in 4 suites passed" — all four types present, none dropped (MobileRoundOccasion 1 · MobileTypedUnlockSyncKeys
+  1 · MobileLockTeardown 1 · MobileTypedOverRescue 4). **R-3g** (`#if os(macOS)` around the one shared
+  `sync.beforeRound` assignment; two-line diff verified): RED exactly
+  `thePhonesOccasionRetriesThePendingLoadThenLandsHerTyping` (its `#require(beforeRound)`); restored, re-run
+  **7/7 green**.
+- **Posture:** no dev-store, Castle or server contact; zero app instances before and after; stage released at the
+  end with this accounting (nov7 holds the RELEASE message verbatim).
+- **Evidence standing:** batch 2's Mac/simulator pins now have their RUNS; the behavioral reverts R-3a and R-3g
+  each bit exactly their named pins first-hand. Leg C (the standing suites over the touched seams) deliberately
+  folds into LIVE STATUS row 8's closing sweep — one sweep over the merged tree, not two.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
