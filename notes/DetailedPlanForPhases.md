@@ -13,31 +13,35 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-926 — Run: the test flakes** (the stage's interrupters — U1 the MCP socket clock (VX-850+7) · U2 the swift-testing encoder mitigation (VX-661/690, timeboxed) · U3 StarContext starvation (VX-625) · U4 hermetic test defaults (VX-97/666/695) + the family-4 dissolve check · rider VX-665; `/architect-phase`, kicked off 2026-11-08 at her word; HER CAST RULING: "opus implements, opus reviews. run ruling things provisionally." Headless now; STAGE SOAKS AFTER vx-914 merges, alone on the stage. Zero `Sync/`/custody/editor-seam expected — any line reaching one STOPS the run back to her). Record: `notes/plans/fixes/vx-926-test-flakes.md` | VX-926 · `vx-926-test-flakes` | `~/dev/variorum-vx-926` · the Pro | OPEN |
-| **VX-914 — Umbrella: the walkthrough followups** (her Nov 7–8 walkthrough + bundle rulings, built: VX-900/901/902/903/904/905/911/870 + wording riders VX-896/897/898/909; `/architect-phase`, kicked off 2026-11-08). Surfaces: Settings ▸ MCP pane, the sidebar AI section, the icon twins, book Index/masthead/confirm faces, the quick-entry band, the Library masthead, the sync row's wording (app-side `Shared/SyncStatusViews.swift` — zero `Sync/`, zero custody; opus-reviewer eligible). Record: `notes/plans/fixes/vx-914-walkthrough-followups.md` | VX-914 · `vx-914-walkthrough-followups` | `~/dev/variorum-vx-914` · the Pro | OPEN |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
 
-**→ VX-912 CLOSED 2026-11-08 — UMBRELLA: OPEN-SOURCE GATING (the record `notes/plans/fixes/vx-912-open-source-gating.md`,
-FOR A LATER READER at its top; wave 3's Sync/-custody-slot run, /architect-phase, nov7 coordinating; PR #234, merge
-f22ac20ee).** The pre-OSS code gates, one day: VX-508 closed AT the kickoff sitting (her word — the dormant
-Apple-wrapped master copy DELETED in production; zero Apple-wrap rows remain); VX-751 TRIMMED at her ruling and run
-as the orchestrator's B0 (the 13y abuse-guard numbers verified EXACT in the deployed sync_push; every authenticated
-RPC door quota'd or exempt-with-reason; the exploit-text flag pass — VX-443 promoted into VX-849, VX-212/VX-475
-closed stale); VX-604 (the inert test host + Tools/assert-tests-ran, six stage legs incl. the crash reproduced
-red-on-old AT the stage); VX-893/VX-892 (the wing corners: the straggle belt as local-only one-shot state, the
-tier-3 anchor rank moved to earliest-filed `created_at`, the one dangling-wing rule — two corners sized BIG and
-returned to her unbuilt); VX-752 + the LICENSE rider (AGPLv3; 19 dependencies, NO incompatibility; the cold-clone
-build road PROVEN; README/CONTRIBUTING/SECURITY/BUILDING all PROVISIONAL for her pass; Issues ON at her word); the
-riders VX-891/VX-396 (the gathering-cursor fence rule; the U+0000 identifier guard at three seams). Her standing
-basis R-912-7a: "do it right, in a way that we won't regret 3 years from now, everywhere." The ladder: ONE round, 0
-BLOCKER/MAJOR (3 MINOR/2 NIT, all dispositions confirmed; zero fixes landed, so one round closed it). The gates:
-Mac WHOLE target 6139 executed / 0 failures / no pseudo-test node; phone 852/139 with only the standing caret red.
-Canon: SyncSpec §7 (the belt + the earliest-filed rank) + MCPSpec (the gathering cursor + the NUL guard) in place
-with pointers; QUESTIONS #268; the AppSpecRecord entry. Born: VX-917–VX-925 (triaged; the handoff lists them).
-NO lockstep event, no marker, no refresh owed (the wave's folded refresh is vx-914's). The night survived one Opus
-and one Fable budget death with zero commits lost. Handoff `notes/handoffs/vx-912-handoff.md`. **Her morning
-bundle: #268 + the B2 BIG-corner shapes + the B3 drafts' editorial pass + the GRDB-fork her-hands rows.**
+**→ VX-914 CLOSED 2026-11-08 — UMBRELLA: THE WALKTHROUGH FOLLOWUPS (the record `notes/plans/fixes/vx-914-walkthrough-followups.md`,
+FOR A LATER READER at its top; wave 3's slot-free run beside VX-912, /architect-phase, nov7 coordinating; PR #235,
+merge cc6c8f188).** Fifteen members in four batches — her Nov 7–8 walkthrough and bundle rulings built, plus the
+kickoff riders she seated (VX-401/45/667; VX-872 ruled OUT of the wave, "we don't need to do it"): the MCP pane
+reunited (the trail dial under the show dial, the VX-281 geometry contract grown by a named arm; the badges row at
+the pane's foot; trail headings by the setup label else "MCP"; groups fold; the three stamps tick), the icon twins'
+ONE rule (both drawn while a client is approved, DIMMED while the server is off — VX-900; `MCPShareRoad.serverOn` +
+`MCPServerOffFace` the shared seam), the Index ⋯ derived from the one note-title table (`.surface` on eight
+declarations), the masthead dial counted at the face it SHOWS (257→240 Study / 304→276 Terminal; the row waits for
+the book's row), the confirm commas, `deleteReading`'s honest archive split in confirm AND receipt, the ascent
+kind-words, `.fileWithoutOpening` (the band's File ⌘⏎, focus-scoped), the Library masthead's in-place wing cycle,
+"the take as kept" on lineage members, and the sync-pause pair said once (one `Shared/` source, Mac + phone). The
+ladder closed at ROUND 2 (round 1: one MAJOR — a bare `fixedSize` on the standing ChromeLineLimitTests pin's
+measured red-on-old, fixed by a one-line adjudication; the 119-site exact-set door-pin sweep re-pinned six). Gates:
+four batch windows green (208/21→32/4 · 155/14 · 424/71→81/7 · folded); the MERGE GATE on the merged tree
+c2f21d856 — the WHOLE Mac target 6231/1078 (13 in-suite knowns + VX-701's standing flake proven green alone) and
+the WHOLE phone target 852/139. The closing WALK green, every row use-shaped (the icon dim PIXEL-MEASURED; the
+⌘⏎ succession filing; the staged owned-book confirm→delete→receipt chain), dev-store posture restored and
+confirmed. Canon: SurfaceContracts ×12 + MCPSpec ×2 + AppSpec §12's keyboard line, in place with pointers;
+QUESTIONS #269; the AppSpecRecord entry. Born: VX-927–VX-930 (triaged; the handoff lists them) + a VX-39 note.
+NO lockstep event, no marker; the WAVE'S FOLDED /APPLICATIONS REFRESH is this run's, behind A1 at nov7's GO.
+MOBILE PARITY: VX-909's pair is phone-visible from the one `Shared/` source (pinned both platforms); the rest
+Mac-only. The run met two Opus budget deaths with zero commits lost. Handoff `notes/handoffs/vx-914-handoff.md`.
+**Her morning bundle: #269 + VX-930's bind-time-provenance call + the lesson-7 guide staleness riding the owed
+re-seed.**
 
 ## THE RUNNING ORDER (written 2026-08-23 at her ask — *"there's so many different plan files and things going on that I'm wondering if I'm missing anything"*)
 
