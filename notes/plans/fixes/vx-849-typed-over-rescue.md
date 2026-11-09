@@ -215,7 +215,29 @@ folder of the core test target, run, then deleted — never in the PR) so its re
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | VX-402 — the honest flush | NOT STARTED |
+| 1 | VX-402 — the honest flush | DONE (this commit) — instrument red 3/3 → green 3/3; Mac `build-for-testing` green; the Mac pins' RUNS **PENDING** (stage) |
 | 2 | VX-683 B — the guarded autosave (the op + the coordinator + the record sites) | NOT STARTED |
 | 3 | VX-683 A — the `beforeRound` hook + the flush-before-apply occasion | NOT STARTED |
 | 4 | Close — builds, suites, self-assessment, STAGE REQUEST | NOT STARTED |
+
+**Piece 1 — VX-402, the honest flush (FIXED).**
+- *Mechanism (traced, `AutosaveCoordinator.flushNow`):* a flush took the batch and cleared `pending` BEFORE awaiting its
+  writes, so a second `flushNow` arriving while a write flew (the 500-ms debounce's, a door's detached flush) found
+  nothing pending and returned at once — the door read the pre-keystroke store, and `flushExistingAutosave` answered
+  `false` (`isDirty` counted the flight), an answer every caller discards. **The order hole beside it (found tracing,
+  same class):** a two-take batch writes one runner turn at a time; a flush started between its turns wrote its NEWER
+  text for the second take first, then the older batch's text landed on top — her last keystrokes overwritten by her
+  own earlier ones, until her next keystroke rewrote the whole buffer (a ⌘Q in between savepoints the older text).
+- *Fix:* one serial write lock — a flush waits for the batch in flight, THEN takes everything pending at that moment;
+  `isDirty` = pending or writing. A refused entry the waited-on write puts back is not retried by the waiter (the
+  keep-pending posture stands). The two vx-382 doc comments that named the open window (`BookIndexEditModel
+  .releaseForTakesSheet`, `BookView.openInWrite`) now say it is closed — comment-only.
+- *Pins (Mac, `AutosaveCoordinatorTests`, the VX-402 section — all three use only pre-fix API, so their red is
+  BEHAVIORAL):* `aFlushArrivingWhileAWriteIsInFlightReturnsOnlyAfterThatWriteLanded` (an on-disk pool store, the
+  writer held from a background thread so the write is provably in flight; the door's read beside it) ·
+  `aNewerFlushNeverLandsUnderAnOlderInFlightOne` (reads only after the coordinator is quiet, so the red is the ORDER) ·
+  `anIdleFlushReturnsAtOnceAndStillSettles` (guard, green both sides).
+- *Evidence, headless (the instrument):* on the PRE-FIX coordinator the two pins were red 3/3 for the traced reasons —
+  the door read `"before"` with `isDirty == true`; the order pin read `"late older"`. On the fix: green 3/3. Mac
+  `xcodebuild build-for-testing` green (0 errors, no warning in a touched file). **The Mac runs themselves are
+  PENDING** (the STAGE REQUEST below — red at the pre-fix parent, green at the tip).

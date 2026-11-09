@@ -33,7 +33,11 @@ final class AutosaveCoordinator {
 
     private(set) var pending: [String: Pending] = [:]
     private var flushTask: Task<Void, Never>?
-    private var flushesInFlight = 0
+    /// VX-402: true while ONE flush's batch is being written. Writes are
+    /// serialized — at most one batch is in flight — and every other flush
+    /// waits here for it (`flushNow`).
+    private var writing = false
+    private var writeWaiters: [CheckedContinuation<Void, Never>] = []
     /// Non-empty flushes performed (observable coalescing, for tests).
     private(set) var flushCount = 0
 
@@ -89,7 +93,7 @@ final class AutosaveCoordinator {
     }
 
     /// True while any edit is unpersisted (pending or mid-write).
-    var isDirty: Bool { !pending.isEmpty || flushesInFlight > 0 }
+    var isDirty: Bool { !pending.isEmpty || writing }
 
     init(
         runner: OperationsRunner,
@@ -139,16 +143,42 @@ final class AutosaveCoordinator {
     /// acts. If newer typing superseded the failed entry meanwhile, the
     /// newer text wins (the text is always the whole buffer) and only the
     /// churn cost merges.
+    ///
+    /// **VX-402 — THE HONEST FLUSH: it returns only once every write already
+    /// in flight has landed** (the vx-382 ladder's R1-3, ticketed then; the
+    /// helper class under every flush-first door — `flushExistingAutosave`,
+    /// the copy family, the leaving savepoint, the book's Takes sheet, Write's
+    /// open-in-Write, Copy for AI, the note deletions, the block history, and
+    /// the sync round's flush-before-apply, VX-683). A flush used to take the
+    /// batch and clear `pending` BEFORE awaiting its writes, so a second flush
+    /// arriving meanwhile found nothing pending and returned at once: the door
+    /// then read the store before her last keystrokes landed, and
+    /// `flushExistingAutosave` answered `false` — an answer its callers
+    /// discard. Now the batch is written under ONE serial lock: a flush first
+    /// waits for the write in flight, THEN takes everything pending at that
+    /// moment (what she typed meanwhile included). The same lock closes the
+    /// order hole beside it (found tracing this): a two-take batch writes one
+    /// runner turn at a time, so a flush started between its turns used to
+    /// write its NEWER text for the second take first, and the older batch's
+    /// text then landed on top. Writes now land in the order they were
+    /// recorded. Pinned: `AutosaveCoordinatorTests` (the VX-402 section).
+    ///
+    /// The wait is bounded by the one batch in flight (milliseconds of store
+    /// writes); a refused entry it puts back is NOT retried by the waiter —
+    /// the keep-pending posture above stands, and the door reads `isDirty`.
     func flushNow() async {
         flushTask?.cancel()
         flushTask = nil
+        while writing {
+            await withCheckedContinuation { writeWaiters.append($0) }
+        }
         let batch = pending
         pending = [:]
         guard !batch.isEmpty else {
             notifySettled()
             return
         }
-        flushesInFlight += 1
+        writing = true
         flushCount += 1
         var firstError: Error?
         for (variantID, entry) in batch.sorted(by: { $0.key < $1.key }) {
@@ -169,7 +199,12 @@ final class AutosaveCoordinator {
         if let firstError {
             notifyError(firstError)
         }
-        flushesInFlight -= 1
+        writing = false
+        // Every waiter re-checks the lock when it runs; the first to run takes
+        // it before the others can (main-actor turns never interleave).
+        let waiters = writeWaiters
+        writeWaiters.removeAll()
+        for waiter in waiters { waiter.resume() }
         notifySettled()
     }
 }
