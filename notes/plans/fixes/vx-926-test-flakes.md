@@ -375,4 +375,4 @@ The settled mechanism decides the menu: the crash is an UNBOUNDED recursion with
 | P5 | Counts — the suites alone + under a deliberately loaded full-parallel core run | NOT-STARTED |
 | P6 | Dispositions, PROVISIONALs, self-assessment | NOT-STARTED |
 
-**Load generators alive:** none. **Reverts in flight:** none. **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` — UNTRACKED, env-gated (`VX926_U3_PROBE=1`), NEVER committed; a successor deletes it unless this line says it is gone.
+**Load generators alive:** 36 × `yes`, pids 70254–70289 (`scratchpad/u3/loaded1/yes.pids`) — for the loaded P1 run; killed by pid at its end (a successor kills them if this line still names them). **Reverts in flight:** none. **Throwaway instruments in the tree:** `Tests/VariorumCoreTests/ZZVX926U3ProbeInstrument.swift` — UNTRACKED, env-gated (`VX926_U3_PROBE=1`), NEVER committed; a successor deletes it unless this line says it is gone.
