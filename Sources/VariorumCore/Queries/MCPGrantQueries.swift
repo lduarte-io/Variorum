@@ -486,14 +486,9 @@ extension Queries {
 
     // MARK: - THE FACTS THE RULE DECIDES ON (A-7 — current, per call)
 
-    /// The wing a `wing_id` column reads as: a DANGLING pointer reads as Home
-    /// (`Queries.wingScope`'s rule, P-13id-U5-2).
-    static func mcpResolvedWing(column: String) -> String {
-        """
-        CASE WHEN \(column) = '' OR \(column) NOT IN (SELECT w.id FROM wing w WHERE w.deleted_at IS NULL)
-             THEN '' ELSE \(column) END
-        """
-    }
+    // The wing a `wing_id` column reads as — a DANGLING pointer reads as Home
+    // (P-13id-U5-2) — is the ONE rule's projection, `Queries.effectiveWingSQL`
+    // (VX-892; VX-922 folded this file's own copy onto it, the VX-940 run W4).
 
     /// **THE FENCE's legs — the ONE derivation site** (R-13nb-1 ratified the
     /// journal predicate; R-13nb-4 adds the Private mark; 13n-c's VX-163
@@ -531,7 +526,7 @@ extension Queries {
             db,
             sql: """
                 SELECT c.id,
-                       \(mcpResolvedWing(column: "c.wing_id")) AS wing,
+                       \(effectiveWingSQL("c.wing_id")) AS wing,
                        (c.profile = 'journal') AS own_journal,
                        EXISTS (SELECT 1 FROM reading_post rp JOIN reading r ON r.id = rp.reading_id
                                WHERE rp.post_id = c.id AND rp.deleted_at IS NULL AND rp.status = 'member'
@@ -659,7 +654,7 @@ extension Queries {
         guard let row = try Row.fetchOne(
             db,
             sql: """
-                SELECT r.id, \(mcpResolvedWing(column: "r.wing_id")) AS wing,
+                SELECT r.id, \(effectiveWingSQL("r.wing_id")) AS wing,
                        \(dailyJournalLegForBook) AS journal,
                        \(privateLegForBook) AS private_mark
                 FROM reading r
@@ -754,7 +749,7 @@ extension Queries {
     /// The offered-books statement (split out so the P1 pin reads the shipped
     /// text). No placeholders.
     static let mcpGrantableBooksSQL = """
-        SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing, r.shelf_id,
+        SELECT r.id, r.name, \(effectiveWingSQL("r.wing_id")) AS wing, r.shelf_id,
                r.locked, r.owned, r.sealed_at, r.archived_at, r.created_at,
                \(livingBookSQL(alias: "r")) AS living,
                (SELECT COUNT(*) FROM reading_post rp \(shownMemberNoteJoinSQL)
@@ -853,7 +848,7 @@ extension Queries {
         return try Row.fetchAll(
             db,
             sql: """
-                SELECT r.id, r.name, \(mcpResolvedWing(column: "r.wing_id")) AS wing, r.shelf_id,
+                SELECT r.id, r.name, \(effectiveWingSQL("r.wing_id")) AS wing, r.shelf_id,
                        r.archived_at, r.query_spec, r.created_at
                 FROM reading r
                 WHERE r.deleted_at IS NULL AND r.kind = 'gathering'

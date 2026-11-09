@@ -19,9 +19,11 @@ resource (`Bundle.module`), so this README records its provenance from the
   — matches the canonical published hash of the BIP-39 English wordlist.
 - **Shape:** 2048 words, one per line, LF-terminated, lowercase ASCII,
   alphabetically sorted; first word `abandon`, last word `zoo`.
-- **License:** the BIP-0039 document is licensed PD/BSD-2-Clause per its
-  preamble; the wordlist is treated as public-domain reference data across
-  every BIP-39 implementation.
+- **License:** MIT. The BIP-0039 document at the pinned commit says so twice:
+  its header reads `License: MIT`, and its Copyright section reads "This BIP
+  falls under the MIT License." The wordlist is part of that BIP. (VX-923
+  corrected an earlier line here that said PD/BSD-2-Clause, which the document
+  at this commit does not say.)
 
 ## Verification
 
