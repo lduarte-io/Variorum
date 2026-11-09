@@ -2795,6 +2795,26 @@ the sibling seq-ranked §7 repairs (one Debt ticket riding P-849-6's outcome) = 
   `vx849-walk` client row, the declined variorum-de rebind request (key forgotten), two copied setup-key rows,
   three revoked grant tombstones, ~10 Activity rows, one dev-store backup, the re-stamped Debug binary.
 
+## THE FINAL FOLD + RELEASE PREP PART 1 (2026-11-09, on nov7's release-prep GO — this run is the wave's LAST merger)
+
+- **Main folded at `b7cb67407`** (vx-915 merged as `961790b13`, PR #240 — all three sibling runs now in). Clean,
+  zero conflicts. **The four eye-reads, done:** `AppSession` — the quick-note park gains `landingWingID`
+  (VX-841), disjoint from our flush/registry regions; `CommitsFaceModel` — the VX-927 "as kept" grammar (copy +
+  one pure Bool), never touching the restore call (our `insuringBuffer: true` intact at :787 of the merged body);
+  `CompareBoardView` — the VX-793 comments door, disjoint from the ring seam; `TakesViewModel` — one refusal line
+  moved to the capability registry. Incremental Mac `build-for-testing` on the folded tree: green.
+- **The 1.4 bump:** `MARKETING_VERSION = 1.4` on BOTH Mac-app configurations (the pbxproj's two 1.3 lines, only);
+  `Tools/Release/version-guard.sh` → PASS ("every configuration of the Mac app target reads MARKETING_VERSION =
+  1.4"). Provisional per nov7 (1.3 is taken); her morning word rules the number.
+- **`ReleaseNotes-1.4.md` DRAFTED as public copy** (everything user-visible since the published 1.3, build 11707:
+  the merged VX-912/914/940/913/926/915 runs + this one; sourced from each run's handoff). The notes guard's own
+  predicate (`notes_carry_process_text`) reads it CLEAN — no ticket id, no draft marker, no process line; one
+  line per bullet. **HER APPROVAL OWED in the morning; any edit means a rebuild** (the handoff says so).
+- **Part 2 (held for nov7's GO after the merge):** every on-main closeout commit lands BEFORE `release.sh`; step
+  0 = `FirstRunDrillTests` + `Tools/WalkKit/first-run-walk.sh` both arms, handed to an OPUS session with the
+  README's step-0 environment traps applied; `release.sh --version 1.4` stopping at its HANDOFF. NO publish, NO
+  site, NO appcast copy, NO /Applications (VX-931; the mandate).
+
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
 "ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post
