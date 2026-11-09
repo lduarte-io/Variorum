@@ -248,6 +248,44 @@ extension Queries {
             arguments: [readingID]) ?? 0
     }
 
+    /// **VX-45 — the book's live member notes, SPLIT by archive** (the
+    /// `liveMemberNoteCount` set exactly, counted in two): what a book-only
+    /// delete leaves where. An unarchived member of an OWNED book lands in the
+    /// Pool once the book is gone (ownership is exclusive — it is in no other
+    /// book; the Pool is every live, UN-archived bookless note), while an
+    /// archived member stays under Archived — so the receipt must not say it
+    /// is in the Pool (13i-c round 1's NIT; the remove doors' twin is 13i-d
+    /// U4's "It stays archived."). ∝ the book's own rows.
+    public struct MemberNoteSplit: Equatable, Sendable {
+        /// Live member notes not archived.
+        public let unarchived: Int
+        /// Live member notes archived (`container.archived_at` set).
+        public let archived: Int
+
+        public init(unarchived: Int, archived: Int) {
+            self.unarchived = unarchived
+            self.archived = archived
+        }
+
+        public var total: Int { unarchived + archived }
+        public static let none = MemberNoteSplit(unarchived: 0, archived: 0)
+    }
+
+    public static func memberNoteSplit(_ db: Database, readingID: String) throws -> MemberNoteSplit {
+        let row = try Row.fetchOne(
+            db,
+            sql: """
+                SELECT COALESCE(SUM(c.archived_at IS NULL), 0) AS unarchived,
+                       COALESCE(SUM(c.archived_at IS NOT NULL), 0) AS archived
+                FROM (SELECT DISTINCT rp.post_id AS post_id FROM reading_post rp
+                      WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member') m
+                JOIN container c ON c.id = m.post_id AND c.deleted_at IS NULL AND c.kind = 'post'
+                """,
+            arguments: [readingID])
+        return MemberNoteSplit(
+            unarchived: row?["unarchived"] ?? 0, archived: row?["archived"] ?? 0)
+    }
+
     /// **"Seal…" — the confirm's facts** (the 13i-c plan §5): the members
     /// that WILL fork (named, with where else they live — the confirm LISTS
     /// them, ruled) and how many arrivals the seal's finish will dismiss

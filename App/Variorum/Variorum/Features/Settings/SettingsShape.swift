@@ -284,12 +284,8 @@ nonisolated enum SettingsCatalog {
                 + "and Read, fading in about a second. On by default; synced.",
             keywords: ["flash", "highlight", "cursor", "caret", "mode", "switch", "find my place",
                        "blink", "pulse", "where am i"]),
-        // 13i-c U4 (the sitting record §6): the two ownership settings.
-        SettingsRow(
-            id: "ownershipBadges", pane: .editor, title: OwnershipSettingsCopy.badgesTitle,
-            blurb: "Marks on notes that live in several books, and \u{201C}owned by\u{201D} on notes "
-                + "an owned book holds. On by default; synced.",
-            keywords: ["badge", "owned", "owner", "shared", "mark", "book", "membership"]),
+        // 13i-c U4 (the sitting record §6): the hide-owned default (its twin,
+        // the badge switch, moved to Settings ▸ MCP — VX-905, below).
         SettingsRow(
             id: "hideOwnedDefault", pane: .editor, title: OwnershipSettingsCopy.hideOwnedTitle,
             blurb: "Leave notes an owned book holds out of gatherings and tag listings. Off by "
@@ -403,11 +399,13 @@ nonisolated enum SettingsCatalog {
             keywords: ["show", "show in app", "navigate", "move", "jump", "offer", "never", "mcp", "ai"]),
         // VX-874 (her ruling (4) — "TWO off switches … ONE control with three
         // states", home Settings ▸ MCP): THE TRAIL DIAL — what the sidebar's AI
-        // section draws; its row sits under the Activity tab's log (never above
-        // the tabs — VX-281's fresh-pane geometry), so a finding opens Activity
-        // (`MCPPaneTab.holding`). Blurb and keywords are search words; no
-        // "activity" (the Activity tab keeps that word's first finding), no
-        // "ask", "open" or "client" (the show dial's rule).
+        // section draws. VX-903 (the VX-914 run, batch 1): its row sits directly
+        // under the show dial, above the tabs, drawn while a client is approved
+        // (`MCPPane.drawsTrailDial`), so a finding lands on no tab and the
+        // search leaves it out while the pane draws none (`settingsEntries`).
+        // Blurb and keywords are search words; no "activity" (the Activity tab
+        // keeps that word's first finding), no "ask", "open" or "client" (the
+        // show dial's rule).
         SettingsRow(
             id: "mcpTrailDial", pane: .mcp, title: MCPPaneCopy.trailDialTitle,
             blurb: "What the sidebar lists of what a client showed you or changed this session: "
@@ -431,6 +429,17 @@ nonisolated enum SettingsCatalog {
             blurb: "The open book: every approved MCP client may read everything, always, and propose "
                 + "notes to books \u{2014} your daily Journal and anything Private still ask every time.",
             keywords: ["open book", "mcp", "ai", "read everything", "share all", "always"]),
+        // 13i-c U4 (the sitting record §6): the badge family's ONE switch.
+        // VX-905 (the VX-914 run, batch 1 — her #264 word: "it makes more sense
+        // there"): Settings ▸ MCP, its own section at the pane's FOOT under
+        // whichever tab shows, so a finding lands on no tab
+        // (`MCPPaneTab.holding` → nil) and every library keeps it. The blurb
+        // names what it governs today (the Private eye joined at VX-831).
+        SettingsRow(
+            id: "ownershipBadges", pane: .mcp, title: OwnershipSettingsCopy.badgesTitle,
+            blurb: "Marks on notes that live in several books, \u{201C}owned by\u{201D} on notes an "
+                + "owned book holds, and the closed eye on Private ones. On by default; synced.",
+            keywords: ["badge", "owned", "owner", "shared", "mark", "book", "membership", "private", "eye"]),
         SettingsRow(
             id: "protection", pane: .protection, title: "Protection",
             blurb: "The passphrase, when the library locks, escrow and the recovery key.",
@@ -548,10 +557,17 @@ nonisolated enum SettingsSearch {
     /// rows whose finding lands there, `MCPPaneTab.holding` — the open book),
     /// so the search never names a row the pane does not show. Default true:
     /// every row, as before.
-    static func settingsEntries(accountSection: Bool, mcpSharingFace: Bool = true) -> [Entry] {
+    ///
+    /// VX-903 (the VX-914 run, batch 1): `mcpTrailDial` false — the pane draws
+    /// no trail dial (no client is approved, `MCPPane.drawsTrailDial`) — leaves
+    /// the dial's row out, by the same promise. Default true.
+    static func settingsEntries(
+        accountSection: Bool, mcpSharingFace: Bool = true, mcpTrailDial: Bool = true
+    ) -> [Entry] {
         let rows = SettingsCatalog.rows.filter { row in
             (accountSection || row.id != SettingsCatalog.accountRow.id)
                 && (mcpSharingFace || MCPPaneTab.holding(findingLead: row.title) != .shared)
+                && (mcpTrailDial || row.id != "mcpTrailDial")
         }
         return rows.map { row in
             Entry(
@@ -583,8 +599,11 @@ extension SettingsSearch {
     /// asks with the account section's presence, so a search never names the
     /// section where the pane does not render it.
     /// VX-590: and with the MCP pane's sharing face (`settingsEntries`).
-    @MainActor static func wholeIndex(accountSection: Bool, mcpSharingFace: Bool = true) -> [Entry] {
-        settingsEntries(accountSection: accountSection, mcpSharingFace: mcpSharingFace)
+    /// VX-903: and with whether the pane draws its trail dial.
+    @MainActor static func wholeIndex(
+        accountSection: Bool, mcpSharingFace: Bool = true, mcpTrailDial: Bool = true
+    ) -> [Entry] {
+        settingsEntries(accountSection: accountSection, mcpSharingFace: mcpSharingFace, mcpTrailDial: mcpTrailDial)
             + shortcutEntries + dictionaryEntries
     }
 

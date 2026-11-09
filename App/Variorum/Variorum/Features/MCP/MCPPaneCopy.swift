@@ -1919,8 +1919,30 @@ nonisolated enum MCPReceiptCopy {
 /// (P-809-14, her copy pass — VX-234's family): the row's names for a place,
 /// its time, the two doors' verbs and helps, the details popover's lines.
 nonisolated enum MCPTrailCopy {
-    /// Her header (R-679): "From ‹client› · N" — N the places listed.
-    static func header(client: String, count: Int) -> String { "From \(client) \u{00B7} \(count)" }
+    /// **The group's heading — VX-902** (the VX-914 run, batch 1; her #264
+    /// sitting word, superseding R-679/P-874-1's "From ‹client› · N": "we
+    /// should make it the provider's name like 'from claude' or 'from codex',
+    /// if possible. or just mcp… I don't like the From random name"):
+    /// "From ‹provider› · N" where the setup menu's own table names the client
+    /// (`provider(of:)`), else "MCP · N" — N the places listed. The client's
+    /// own name stays where it always was: the header's hover, the row's
+    /// helps, its details popover, the pane (PROVISIONAL F-902 (a)+(w1)+(i)).
+    static func header(client: String, count: Int) -> String {
+        guard let provider = provider(of: client) else { return "MCP \u{00B7} \(count)" }
+        return "From \(provider) \u{00B7} \(count)"
+    }
+
+    /// **The provider a heading may name — the setup menu's OWN table**
+    /// (`MCPSetupClient`): a client whose declared name is exactly a named
+    /// setup's expected name reads as that setup's label; every other client —
+    /// one set up through "Any MCP client", whatever it calls itself — names
+    /// none. No provider brand rides the wire and the library keeps a bound
+    /// key only by its hash, so this is the name's fact, never proof of the
+    /// program (the record's F-902 investigation); it reads the fenced labels,
+    /// so no provider is typed outside the setup copy (O-4).
+    static func provider(of client: String) -> String? {
+        MCPSetupClient.allCases.first { $0.expectedName == client }?.label
+    }
 
     /// Her three words (R-679).
     static func kind(_ kind: MCPTrail.Kind) -> String { kind.rawValue }
@@ -1982,6 +2004,19 @@ nonisolated enum MCPTrailCopy {
     /// What the dial's right-click twin is called on a header
     /// (`.mcpSetTrailDial`) — the pane's own title.
     static var dialVerb: String { MCPPaneCopy.trailDialTitle }
+
+    // MARK: - VX-904 — a whole client group folds (PROVISIONAL, her bundle)
+
+    /// The header's fold glyph — the Shortcuts tab's pair (▾ open, ▸ folded),
+    /// the app's one fold idiom.
+    static func foldGlyph(folded: Bool) -> String { folded ? "\u{25B8}" : "\u{25BE}" }
+
+    /// The header's hover — the Shortcuts tab's "Fold ‹X›" / "Show ‹X›"
+    /// grammar, naming the CLIENT (F-902 (i): two groups may share a heading,
+    /// so the hover tells them apart).
+    static func foldHelp(client: String, folded: Bool) -> String {
+        folded ? "Show \(client)\u{2019}s rows" : "Fold \(client)\u{2019}s rows"
+    }
 
     // MARK: - The details popover (her refinement: the client · when it came in · the kind of act ·
     // what it targeted)

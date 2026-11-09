@@ -84,17 +84,23 @@ enum BookOrderChoices {
     /// (AppSpec §7; pinned against them).
     static let everyField: [SortField] = [.manual, .entryDate, .createdAt, .lastTouched, .lastMajorRevision]
 
-    /// The stored order's name before the book's row has landed.
+    /// The stored order's name before the book's row has landed (the book's
+    /// masthead never shows it — its mode row waits for the row, ladder F1).
     static let unloadedName = "book's order"
     /// A gathering's `manual` — it has no hand order (below).
     static let asCollectedName = "as collected"
 
-    /// **Every name the order dial can show** (VX-887): every field ×
-    /// direction (the view order is always one of them; a stored order may be
-    /// any), plus the gathering's "as collected" and the not-yet-loaded
-    /// "book's order" — the set the mode row counts the dial's WIDEST form
-    /// over, so no pick, load or stored order can move the masthead's line
-    /// count.
+    /// **Every name `label(for:)` and `storedLabel(for:)` can produce**
+    /// (VX-887): every field × direction (the view order is always one of
+    /// them; a stored order may be any), plus the gathering's "as collected"
+    /// and the not-yet-loaded "book's order" — the set the dial's pins sweep
+    /// (each face counted at its own width, "order" said once). Nothing counts
+    /// the masthead over this set any more: since VX-896 the mode row counts
+    /// the dial at the face it SHOWS, so a look picked, or the book's own
+    /// stored order changed (saved here, or arriving by sync), can move the
+    /// masthead's line count; and since the VX-914 ladder's F1 the row draws
+    /// only once the book's row has landed, so the masthead never draws or
+    /// counts "book's order".
     static var everyName: [String] {
         var names: [String] = []
         for field in everyField {

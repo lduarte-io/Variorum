@@ -152,8 +152,58 @@ struct MCPTrailModelTests {
         #expect(groups.map(\.clientName) == ["claude-code", "codex"])
         #expect(groups.first?.entries.map(\.place) == ["note:n2", "note:n1"])
         #expect(groups.last?.entries.map(\.place) == ["note:n1"], "another client's row of the same place")
-        #expect(MCPTrailCopy.header(client: "claude-code", count: 2) == "From claude-code \u{00B7} 2",
-                "her header, her words")
+        // VX-902 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1): her #264
+        // word supersedes R-679's "From ‹client› · N" — the setup menu's label for
+        // a client its table names ("claude-code" is Claude Code's tab's name).
+        #expect(MCPTrailCopy.header(client: "claude-code", count: 2)
+                    == "From \(MCPSetupClient.claudeCode.label) \u{00B7} 2",
+                "her header, her words (VX-902)")
+    }
+
+    /// **VX-902 — the heading never says the client's raw name** (her #264
+    /// word: "I don't like the From random name"; PROVISIONAL F-902 (a)+(w1)+(i)):
+    /// "From ‹provider› · N" where the setup menu's OWN table names the client
+    /// (the fenced labels, read — never a new literal, O-4), else "MCP · N".
+    /// The client's own name stays everywhere it was: the row's helps, the
+    /// details popover (its first line), the header's hover; two clients that
+    /// both read MCP keep two groups (per client underneath — VX-904 folds a
+    /// client's), told apart by the hover.
+    @Test func theHeadingNamesTheProviderWhereTheSetupMenuDoesElseMCP() throws {
+        // Her own example, verbatim in shape: "from claude" / "from codex".
+        #expect(MCPTrailCopy.header(client: "claude-code", count: 3) == "From Claude Code \u{00B7} 3")
+        #expect(MCPTrailCopy.header(client: "codex-mcp-client", count: 1) == "From Codex \u{00B7} 1")
+        #expect(MCPTrailCopy.provider(of: "claude-code") == MCPSetupClient.claudeCode.label)
+        #expect(MCPTrailCopy.provider(of: "codex-mcp-client") == MCPSetupClient.codex.label)
+        // "or just mcp": her dev client that night, and any other name.
+        for name in ["variorum-de", "cursor", "Claude-Code", "claude-code ", "", "codex"] {
+            let heading = MCPTrailCopy.header(client: name, count: 2)
+            #expect(heading == "MCP \u{00B7} 2", "“\(name)” names no setup — MCP (got “\(heading)”)")
+            if !name.isEmpty { #expect(!heading.contains(name), "never the raw name: \(heading)") }
+        }
+        #expect(MCPTrailCopy.provider(of: "anything") == nil)
+        #expect(MCPSetupClient.anyClient.expectedName == nil, "“Any MCP client” names nobody")
+
+        // Two clients that both read MCP: two groups, one per client, both "MCP · N".
+        var trail = MCPTrail()
+        trail.record(write: receipt(client: "variorum-de", note: "n1"), at: at)
+        trail.record(write: receipt(client: "cursor", note: "n2"), at: at.addingTimeInterval(1))
+        let groups = trail.groups(showing: .everything)
+        #expect(groups.map(\.clientName) == ["cursor", "variorum-de"], "groups stay per client underneath")
+        #expect(groups.map { MCPTrailCopy.header(client: $0.clientName, count: $0.entries.count) }
+                    == ["MCP \u{00B7} 1", "MCP \u{00B7} 1"])
+        let hovers = groups.map { MCPTrailCopy.foldHelp(client: $0.clientName, folded: false) }
+        #expect(hovers == ["Fold cursor\u{2019}s rows", "Fold variorum-de\u{2019}s rows"],
+                "the header's hover tells two MCP groups apart")
+
+        // The client's own name stays where it was (UNCHANGED by VX-902).
+        let row = try #require(trail.entries.first { $0.clientName == "variorum-de" })
+        #expect(MCPTrailCopy.openHelp(row).contains("variorum-de"))
+        #expect(MCPTrailCopy.detailsHelp(row) == "What variorum-de asked or did here")
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let section = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPTrailSection.swift"), encoding: .utf8)
+        let details = try #require(section.range(of: "struct MCPTrailDetails: View {"))
+        #expect(section[details.upperBound...].contains("Text(entry.clientName)"), "the popover names the real client")
     }
 
     /// Bounded memory: past the cap the OLDEST place falls off.
@@ -770,32 +820,204 @@ struct MCPTrailHandDoorTests {
         }
     }
 
-    /// Settings ▸ MCP: the dial's row sits under the ACTIVITY tab's log — never
-    /// above the tabs, where a row pushes a fresh pane's Connect code block out
-    /// of sight (VX-281's geometry row, `MCPPaneTabsTests.aFreshPaneOpensOnConnect…`
-    /// — the closing window's red, fixed by this placement); a search finding
-    /// opens that tab; her three words in her order, the line and its whole text.
-    @Test func theTrailDialIsSettingsMCPsRowOnTheActivityTab() throws {
+    /// **VX-903 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1; her
+    /// #264 word: "I also don't think it should be in activity, i think it
+    /// should be right under 'when a client shows you something'"; PROVISIONAL
+    /// F-903 (1)).** Settings ▸ MCP: the dial's row sits DIRECTLY under the
+    /// show dial in the pane's top section, above the tabs, drawn only while a
+    /// client is approved (`MCPPane.drawsTrailDial`) — every pane that opens on
+    /// Connect by its rule has none, so VX-281's fresh-open geometry stands
+    /// (`MCPPaneTabsTests` — its fresh arm and the grown approved arm); a
+    /// search finding lands on no tab, and the search leaves the row out while
+    /// the pane draws none; her three words in her order, the line and its
+    /// whole text. (Was: the row under the ACTIVITY tab's log — VX-874's window
+    /// fix, now superseded.)
+    @Test func theTrailDialIsSettingsMCPsRowUnderTheShowDial() throws {
         #expect(SettingsCatalog.title("mcpTrailDial") == MCPPaneCopy.trailDialTitle)
         let rendered = AppSettingsView.rowIDsRendered[.mcp] ?? []
-        #expect(rendered.last == "mcpTrailDial", "the last tab's row")
-        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == .activity,
-                "a finding opens the Activity tab")
-        #expect(MCPPaneTab.offered(sharing: false).contains(.activity), "a tab every library offers")
+        let show = try #require(rendered.firstIndex(of: "mcpShowDial"))
+        #expect(rendered.firstIndex(of: "mcpTrailDial") == show + 1, "right under the show dial")
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil, "above the tabs")
+
+        // The gate, pure: an approved client draws it; none approved draws none.
+        var snapshot = MCPDoor.Snapshot()
+        #expect(!MCPPane.drawsTrailDial(snapshot), "no client approved — no dial (the fresh pane's geometry)")
+        snapshot.approvedCount = 1
+        #expect(MCPPane.drawsTrailDial(snapshot))
+        #expect(MCPPaneTab.opening(remembered: nil, approvedCount: 0) == .connect,
+                "the gate's ground: the pane opens on Connect exactly while none is approved")
+
+        // The face, read from source: under the show dial's line, behind the gate,
+        // above the tabs — and no longer on the Activity tab.
         let pane = try String(
             contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
                 .appendingPathComponent("Variorum/Features/MCP/MCPPane.swift"), encoding: .utf8)
         let picker = "Picker(SettingsCatalog.title(\"mcpTrailDial\")"
-        let activity = try #require(pane.range(of: "@ViewBuilder private var activityTab: some View {"))
+        let showLine = try #require(pane.range(
+            of: "ExplainerLine(line: MCPPaneCopy.showDialSummary, detail: MCPPaneCopy.showDialDetail)"))
+        let gate = try #require(pane.range(of: "if Self.drawsTrailDial(door.snapshot) {"))
+        let seat = try #require(pane.range(of: picker))
         let tabs = try #require(pane.range(of: "switch shownTab {"))
-        #expect(pane[activity.upperBound...].contains(picker), "the picker is the Activity tab's")
-        #expect(!pane[..<tabs.lowerBound].contains(picker), "never in the sections above the tabs")
+        #expect(showLine.upperBound <= gate.lowerBound && gate.upperBound <= seat.lowerBound
+                    && seat.upperBound <= tabs.lowerBound,
+                "the show dial's line, then the gate, then the picker — all above the tabs")
+        let between = pane[showLine.upperBound..<gate.lowerBound]
+        #expect(!between.contains("Picker(") && !between.contains("Toggle(") && !between.contains("ExplainerLine("),
+                "nothing seated between the show dial and the trail dial")
+        let activity = try #require(pane.range(of: "@ViewBuilder private var activityTab: some View {"))
+        #expect(!pane[activity.upperBound...].contains(picker), "no longer on the Activity tab")
+        #expect(pane.components(separatedBy: picker).count == 2, "drawn once")
+
+        // The search follows the face (VX-590's road).
+        let shown = SettingsSearch.settingsEntries(accountSection: true, mcpTrailDial: true)
+        let hidden = SettingsSearch.settingsEntries(accountSection: true, mcpTrailDial: false)
+        #expect(SettingsSearch.findings(matching: "notices", in: shown).contains { $0.pane == .mcp },
+                "“notices” finds the row while it is drawn")
+        #expect(!SettingsSearch.findings(matching: "notices", in: hidden).contains { $0.pane == .mcp },
+                "…and names no row the pane does not draw")
+        #expect(hidden.count == shown.count - 1, "only the dial's row leaves")
+
         #expect(MCPTrailDial.allCases.map(MCPPaneCopy.trailDialChoice) == ["Everything on", "Notices off", "Fully off"])
         #expect(!MCPPaneCopy.trailDialTitle.contains("AI"), "settings-class wording: client, never AI (VX-272)")
         #expect(MCPPaneCopy.trailDialDetail.contains(MCPPaneCopy.showDialTitle),
                 "the whole text points at the show dial's own road")
-        let found = SettingsSearch.findings(matching: "notices", in: SettingsSearch.settingsEntries)
-            .contains { $0.pane == .mcp }
-        #expect(found, "“notices” finds the row")
+    }
+}
+
+// MARK: - VX-904 — a whole client group folds (the VX-914 run, batch 1)
+
+/// **VX-904 — her word at the #264 sitting: "asks floating within each client
+/// group - fine, maybe add ability to collapse a whole client group."** An
+/// Improvement on the as-built ordering (which stands): state pins on the pure
+/// trail, the door's press, the session's end, and the face read from source.
+/// PROVISIONAL edges (the record's BATCH 1 block): a fold lives as long as its
+/// group; a new act or ask lands in a folded group FOLDED; Clear All and the
+/// session's end forget every fold.
+@MainActor
+@Suite("VX-904 — a whole client group folds, its count honest, the ordering as built")
+struct MCPTrailFoldTests {
+    /// The fold: the group keeps EVERY row the dial lets it draw (the header's
+    /// honest count) while drawing none; the fit test counts the drawn rows
+    /// only; the header stays — so the section stays.
+    @Test func aFoldedGroupDrawsItsHeaderAloneWithAnHonestCount() {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(write: receipt(note: "n2"), at: at.addingTimeInterval(1))
+        trail.record(write: receipt(client: "codex", note: "x1"), at: at.addingTimeInterval(2))
+        #expect(trail.drawnRowCount(showing: .everything) == 3)
+
+        trail.toggleFold("claude-code")
+        #expect(trail.folded == ["claude-code"])
+        let groups = trail.groups(showing: .everything)
+        let folded = groups.first { $0.clientName == "claude-code" }
+        #expect(folded?.folded == true && folded?.entries.count == 2, "the count stays honest")
+        #expect(folded?.drawnEntries.isEmpty == true, "a folded group draws no row")
+        #expect(groups.first { $0.clientName == "codex" }?.folded == false, "only THAT client's group folds")
+        #expect(trail.drawnRowCount(showing: .everything) == 1, "the fit counts the drawn rows")
+        #expect(groups.count == 2, "both headers still draw — the section stays")
+        #expect(MCPTrailCopy.header(client: "claude-code", count: folded?.entries.count ?? 0)
+                    == MCPTrailCopy.header(client: "claude-code", count: 2), "the header says every row")
+
+        trail.toggleFold("claude-code")
+        #expect(trail.folded.isEmpty && trail.drawnRowCount(showing: .everything) == 3, "her press opens it again")
+        trail.toggleFold("nobody")
+        #expect(trail.folded.isEmpty, "a client with no row has no group to fold")
+    }
+
+    /// The ordering stands AS BUILT (her ruling): a fold changes what a group
+    /// draws, never where it stands — an ask-holding folded group still LEADS;
+    /// a new ask landing in a folded group leaves it folded (PROVISIONAL), its
+    /// count growing.
+    @Test func aFoldedAskHoldingGroupStillLeadsAndANewAskLeavesItFolded() {
+        var trail = MCPTrail()
+        trail.record(write: receipt(note: "n1"), at: at)
+        trail.record(show: ask("a1", client: "codex"), opened: false, at: at.addingTimeInterval(1))
+        trail.record(write: receipt(note: "n2"), at: at.addingTimeInterval(2))
+        trail.toggleFold("codex")
+        let groups = trail.groups(showing: .everything)
+        #expect(groups.map(\.clientName) == ["codex", "claude-code"], "the ask-holding group leads, folded or not")
+        #expect(groups.first?.folded == true)
+
+        trail.record(show: ask("a2", client: "codex"), opened: false, at: at.addingTimeInterval(3))
+        let after = trail.groups(showing: .everything).first
+        #expect(after?.clientName == "codex" && after?.folded == true, "her fold stands")
+        #expect(after?.entries.map(\.place) == ["note:a2", "note:a1"], "the count grows honestly")
+
+        // Notices off: a folded group's asks still count; the fold is kept.
+        #expect(trail.groups(showing: .asksOnly).first?.entries.count == 2)
+        #expect(trail.groups(showing: .asksOnly).first?.folded == true)
+    }
+
+    /// A fold lives as long as its group (and the session): Clear All forgets
+    /// every fold; a folded client's last row going — dismissed, or its place
+    /// gone — lets its fold go, so a later act lands an OPEN group.
+    @Test func aFoldLivesAsLongAsItsGroup() throws {
+        var trail = MCPTrail()
+        trail.record(write: receipt(client: "codex", note: "x1"), at: at)
+        trail.toggleFold("codex")
+        let only = try #require(trail.entries.first?.id)
+        trail.dismiss(only)
+        #expect(trail.folded.isEmpty, "its last row dismissed — no group, no fold")
+        trail.record(write: receipt(client: "codex", note: "x2"), at: at.addingTimeInterval(1))
+        #expect(trail.groups(showing: .everything).first?.folded == false, "a later act lands an open group")
+
+        trail.toggleFold("codex")
+        trail.forget(placeOf: noteTarget("x2"))
+        #expect(trail.folded.isEmpty, "its place gone — the fold with it")
+
+        trail.record(write: receipt(note: "n1"), at: at.addingTimeInterval(2))
+        trail.toggleFold("claude-code")
+        trail.clear()
+        #expect(trail.folded.isEmpty && trail.isEmpty, "Clear All forgets every fold")
+    }
+
+    /// Her press goes through the door (view state in the trail's session
+    /// memory — no act, no store); the session's end forgets the fold with the
+    /// rows (`letGoOfTheSession`).
+    @Test func herPressFoldsThroughTheDoorAndTheSessionsEndForgetsIt() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "draft")
+            let rig = Rig(session)
+            rig.door.landReceipt(receipt(note: post.id, title: "draft"))
+            rig.door.toggleTrailFold("claude-code")
+            #expect(rig.door.trail.trail.folded == ["claude-code"])
+            #expect(rig.door.trail.trail.drawnRowCount(showing: rig.door.trailDial) == 0)
+            #expect(rig.door.trail.trail.groups(showing: rig.door.trailDial).count == 1, "the header stays")
+            rig.door.detach()
+            #expect(rig.door.trail.trail.folded.isEmpty && rig.door.trail.trail.isEmpty, "gone with the session")
+        }
+    }
+
+    /// The face, read from its source: the whole header is the press, its
+    /// glyph the app's fold pair at the trailing end, its hover naming the
+    /// client; the section draws a group's DRAWN rows and fits by them; the
+    /// header's right-click is unchanged; the sidebar keeps the section while
+    /// any header draws (a folded group's header alone).
+    @Test func theHeaderIsTheFoldsPressAndTheSidebarKeepsAFoldedSection() throws {
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let section = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPTrailSection.swift"), encoding: .utf8)
+        let header = try #require(section.range(of: "private func header(_ group: MCPTrail.Group)"))
+        let rowStart = try #require(section.range(of: "private struct MCPTrailRow"))
+        let headerBody = String(section[header.upperBound..<rowStart.lowerBound])
+        #expect(headerBody.contains("door.toggleTrailFold(group.clientName)"), "the header's press folds")
+        #expect(headerBody.contains("MCPTrailCopy.foldGlyph(folded: group.folded)"))
+        #expect(headerBody.contains(".help(MCPTrailCopy.foldHelp(client: group.clientName, folded: group.folded))"))
+        #expect(headerBody.contains("count: group.entries.count"), "the header counts every row, folded or not")
+        #expect(headerBody.contains("CapabilityRegistry.capability(.mcpClearTrail).verb")
+                    && headerBody.contains("CapabilityRegistry.capability(.mcpSetTrailDial).verb"),
+                "the right-click is unchanged")
+        #expect(section.contains("ForEach(group.drawnEntries)"), "a folded group draws no row")
+        #expect(section.contains("$0 + $1.drawnEntries.count"), "the section fits by its drawn rows")
+        #expect(MCPTrailCopy.foldGlyph(folded: false) == "\u{25BE}" && MCPTrailCopy.foldGlyph(folded: true) == "\u{25B8}",
+                "the Shortcuts tab's pair")
+        #expect(MCPTrailCopy.foldHelp(client: "variorum-de", folded: false) == "Fold variorum-de\u{2019}s rows")
+        #expect(MCPTrailCopy.foldHelp(client: "variorum-de", folded: true) == "Show variorum-de\u{2019}s rows")
+
+        let sidebar = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/Library/SidebarView.swift"), encoding: .utf8)
+        #expect(sidebar.contains("private var footerShows: Bool { (footerSection?.headers() ?? 0) > 0 }"))
+        #expect(sidebar.contains("if let footerSection, footerShows {"), "a folded section still draws")
+        #expect(!sidebar.contains("footerRows > 0"), "presence is no longer the drawn-row count")
     }
 }

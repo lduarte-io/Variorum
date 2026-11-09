@@ -546,7 +546,7 @@ enum TutorialSeeder {
             try? ops.deleteContainer(poolID)
         }
         for readingID in existing.readingIDs {
-            try? ops.deleteReading(readingID)
+            _ = try? ops.deleteReading(readingID)  // VX-45: the op returns its split now
         }
     }
 
@@ -3052,7 +3052,11 @@ enum TutorialSeeder {
             // VX-197 U8b: "a book or a gathering" (VX-184 U2's carry, VX-185)
             // and the icon's rows as built — the Library (VX-268, VX-281), the
             // Pool, the book panel with its one-note chapter rows (VX-330), the
-            // ⌘L sheet's wings.
+            // ⌘L sheet's wings. VX-900 (F-900-D, PROVISIONAL wording, her
+            // bundle; no em dash — R-13s-22): the masthead draws while a client
+            // is approved, the server on or off (it no longer waits for "the
+            // door is open"), the lock is the closed eye since VX-831, and the
+            // server-off face is taught whole.
             "On the Bookcase, a small icon beside a book or a gathering means a "
             + "client can reach it. The same icon shows on notes, books and "
             + "gatherings in the Library, on notes in the Pool, on the notes listed "
@@ -3060,9 +3064,10 @@ enum TutorialSeeder {
             + "that \u{2318}L opens. In that panel, a chapter that shares a row with "
             + "its only note wears the note's icon. Point at the icon to see who and how "
             + "far; click it for the details, including why (through the Home wing "
-            + "grant, say), with Change\u{2026} and Revoke. Inside a note, while "
-            + "the door is open, the same icon sits at the right end of the context "
-            + "bar above the page, or a lock when the note is Private.",
+            + "grant, say), with Change\u{2026} and Revoke. Inside a note, the same "
+            + "icon sits at the right end of the context bar above the page, or a "
+            + "closed eye when the note is Private. While the server is off, both "
+            + "still show, greyed out.",
 
             // VX-197 U8b — VX-261: a client's own recent acts, and the line
             // Activity says for them (P-VX261-2).
@@ -3092,10 +3097,17 @@ enum TutorialSeeder {
             + "menu) takes you there later, even after the line fades. "
             // VX-846 (the VX-809 run, batch 5 — PROVISIONAL P-809-6): the list
             // behind ⌥⌘O (VX-679 — her R-679's section and its two doors).
-            + "Near the bottom of the sidebar, a list headed From \u{2039}name\u{203A} "
-            + "keeps each place a client showed you or changed this session: click "
-            + "a row to go there, or the icon at its end to see what it asked or "
-            + "did. "
+            // VX-902 (the VX-914 run, batch 1 — PROVISIONAL F-902): the heading
+            // names the client's setup where the menu names it, else MCP — said
+            // in its own sentence, no em dash (R-13s-22's chapter rule). The
+            // VX-914 ladder's N1: the heading shows the setup menu's LABEL
+            // ("From Claude Code"), not the client's own name (the row's
+            // popover and Activity keep that), so the card says the label.
+            + "Near the bottom of the sidebar, a list for each client keeps each "
+            + "place that client showed you or changed this session: click a row "
+            + "to go there, or the icon at its end to see what it asked or did. "
+            + "Each list is headed MCP, or From and the setup menu's label where the "
+            + "setup menu names it. "
             + "\u{2325}\u{2318}Z takes a client's act back, one act at a time, and "
             + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take. "
             // VX-846 — the list forms (VX-812, A-809-18/19): one call, an act per

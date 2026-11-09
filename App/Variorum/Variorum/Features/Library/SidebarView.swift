@@ -318,6 +318,10 @@ struct SidebarView: View {
 
     /// VX-679: the footer section's rows this pass (0 with none composed).
     private var footerRows: Int { footerSection?.rows() ?? 0 }
+    /// VX-904: whether the footer section draws at all — any group header. A
+    /// FOLDED group draws its header alone, so the section can show with no
+    /// row drawn; with no header it is gone (separator and all), as before.
+    private var footerShows: Bool { (footerSection?.headers() ?? 0) > 0 }
 
     private var tokens: VoiceTokens { theme.tokens(for: scheme) }
 
@@ -357,7 +361,7 @@ struct SidebarView: View {
     /// section is one more while it shows.
     private var headedGroupCount: Int {
         (stars.items.isEmpty ? 0 : 1) + (railEquivalentRows == 0 ? 0 : 1)
-            + (openListRows.isEmpty ? 0 : 1) + (footerRows == 0 ? 0 : 1)
+            + (openListRows.isEmpty ? 0 : 1) + (footerShows ? 1 : 0)
     }
 
     private var rowHeight: CGFloat {
@@ -449,8 +453,9 @@ struct SidebarView: View {
             #endif
             // VX-679 (her R-679): the AI section, near the column's BOTTOM —
             // outside the outer scroll, so the Open list stops above it; GONE
-            // (separator and all) while it has no row.
-            if let footerSection, footerRows > 0 {
+            // (separator and all) while it has no row — VX-904: no group header (a
+            // folded group draws its header alone).
+            if let footerSection, footerShows {
                 VStack(alignment: .leading, spacing: 0) {
                     separator
                     footerSection.content(rowHeight)

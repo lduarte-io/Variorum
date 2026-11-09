@@ -45,6 +45,24 @@ nonisolated enum CommitsFaceCopy {
     static let compareCrumb = "compare"
     static let backToHistory = "\u{2039} history"
     static let theTakeNow = "the take now"
+    /// **VX-898 (the VX-914 run, batch 4; N-898 (1) RULED, PROVISIONAL — her
+    /// wording bundle).** On the Lineage face, a member that stands UNPLACED —
+    /// kept as lineage (a merge's sources, a divide-W's original) or set aside —
+    /// has no living "now": its take is the text as it was kept, and the living
+    /// prose is its successor's. So its rail-top moment is named for what it
+    /// is; a PLACED member keeps "the take now" (it does live now), and the
+    /// home face is untouched.
+    static let theTakeAsKept = "the take as kept"
+    /// …and on every lineage member an unlabeled one-take heading is "its
+    /// only take", never "this take" — on this face "this" names the block
+    /// you came from ("this block · …").
+    static let itsOnlyTake = "its only take"
+
+    /// The rail-top moment's name: "the take as kept" for an unplaced lineage
+    /// member, else "the take now" (pure, pinned).
+    static func nowName(unplacedRelative: Bool) -> String {
+        unplacedRelative ? theTakeAsKept : theTakeNow
+    }
     static let allTakes = "all takes"
     static let historyAll = "history \u{B7} all takes"
     static let historyThisTake = "history \u{B7} this take"
@@ -131,6 +149,23 @@ final class CommitsFaceModel {
     var homeBlockID: String {
         if case .relative(let home, _) = role { return home }
         return blockID
+    }
+
+    /// **VX-898 — a relative that stands UNPLACED** (kept as lineage or set
+    /// aside), told by the Lineage face from its own family read and refreshed
+    /// as that read re-runs (a Put back flips it live). Meaningless on the home
+    /// face, which never reads it.
+    var relativeStandsUnplaced = false
+
+    /// The name of THIS block's rail-top moment (`CommitsFaceCopy.nowName`).
+    var nowName: String {
+        CommitsFaceCopy.nowName(unplacedRelative: isRelative && relativeStandsUnplaced)
+    }
+
+    /// A "now" moment's name: the block you came from's takes are always
+    /// "the take now" (it lives); this block's are `nowName`.
+    func nowName(of takeID: String) -> String {
+        isHomeTake(takeID) ? CommitsFaceCopy.theTakeNow : nowName
     }
 
     /// What the face reads, together: the block's whole time and the take
@@ -411,15 +446,21 @@ final class CommitsFaceModel {
         }
         if take.status == .archived { return BlockPastCopy.rowLabel(take) }
         let active = history.activeTakes
+        // VX-898: a lineage member's unlabeled one take is "its only take" —
+        // "this take" would read as the block she came from's.
+        if isRelative, (take.label ?? "").isEmpty, active.count <= 1 {
+            return CommitsFaceCopy.itsOnlyTake
+        }
         let ordinal = (active.firstIndex { $0.id == id } ?? 0) + 1
         return BlockHistoryPath.takeHeading(take, ordinal: ordinal, of: active.count)
     }
 
     /// A moment's headline: the name she gave it, else its first words; a
-    /// "now" is "the take now".
+    /// "now" is "the take now" (VX-898: "the take as kept" on an unplaced
+    /// lineage member — `nowName(of:)`).
     func headline(_ moment: CommitRail.Moment?) -> String {
         switch moment {
-        case .now?: return CommitsFaceCopy.theTakeNow
+        case .now(let takeID)?: return nowName(of: takeID)
         case .commit(let id)?:
             guard let commit = commit(id)?.commit else { return "" }
             return SavepointRowFace.name(commit) ?? CommitRowFace.restingPreview(commit.text)
@@ -663,11 +704,12 @@ final class CommitsFaceModel {
             : [])
     }
 
-    /// A moment's line in a swapper menu or a box header: "the take now", or
+    /// A moment's line in a swapper menu or a box header: "the take now" (on
+    /// an unplaced lineage member's own takes "the take as kept" — VX-898), or
     /// the name / first words · when.
     func menuLine(_ moment: CommitRail.Moment) -> String {
         switch moment {
-        case .now: return CommitsFaceCopy.theTakeNow
+        case .now(let takeID): return nowName(of: takeID)
         case .commit(let id):
             guard let commit = commit(id)?.commit else { return "" }
             return headline(moment) + " \u{B7} "

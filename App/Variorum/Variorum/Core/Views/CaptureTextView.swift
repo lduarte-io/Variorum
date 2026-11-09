@@ -97,6 +97,19 @@ nonisolated enum CaptureKeys {
         default: return nil
         }
     }
+
+    /// **⌘⏎ — file WITHOUT opening** (VX-911, the VX-914 run's batch 4; the
+    /// registry's `.fileWithoutOpening`, its alternate). A KEY EQUIVALENT, not
+    /// one of the two typing keys above, so it is its own question and `act`
+    /// still answers nil for it (⌘⏎ is nobody's in `keyDown`'s terms): the box
+    /// claims it only where its host handed the act and only while it holds
+    /// the keyboard (`CaptureNSTextView.performKeyEquivalent`). The same
+    /// four-modifier mask — caps lock and the keypad are not meaning here
+    /// either; ⇧⌘⏎, ⌥⌘⏎ and ⌃⌘⏎ are not this key.
+    static func filesWithoutOpening(_ event: NSEvent) -> Bool {
+        guard event.type == .keyDown, isReturnKey(event) else { return false }
+        return event.modifierFlags.intersection(meaningful) == [.command]
+    }
 }
 
 // MARK: - The opening ask (VX-326 — the ONE rule the box's opening ask obeys)
@@ -217,6 +230,10 @@ struct CaptureTextView: NSViewRepresentable {
     var onFocusChange: ((Bool) -> Void)?
     /// Plain ⏎ — the host decides what filing means.
     let onFile: () -> Void
+    /// **⌘⏎ — file without opening** (VX-911): handed by a host that has
+    /// such an act (the new-note band); nil — the pad, whose own File It
+    /// button keeps ⌘⏎ — and the box never claims the key.
+    var onFileWithoutOpening: (() -> Void)? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
@@ -255,6 +272,7 @@ struct CaptureTextView: NSViewRepresentable {
         view.onFile = { [weak coordinator = context.coordinator] in
             coordinator?.parent.onFile()
         }
+        context.coordinator.wireFileWithoutOpening(into: view)
         view.isRichText = false
         view.allowsUndo = true
         view.isVerticallyResizable = true
@@ -327,6 +345,7 @@ struct CaptureTextView: NSViewRepresentable {
     func updateNSView(_ scroll: NSScrollView, context: Context) {
         guard let view = context.coordinator.view else { return }
         context.coordinator.parent = self
+        context.coordinator.wireFileWithoutOpening(into: view)
         if view.string != text {
             context.coordinator.adopt(text, into: view)
         }
@@ -433,6 +452,23 @@ struct CaptureTextView: NSViewRepresentable {
             undoObservers.removeAll()
         }
 
+        /// VX-911: the box holds ⌘⏎'s act exactly while its host hands one —
+        /// a closure that reads the CURRENT host's act at press time (the
+        /// `onFile` shape), present only while there is one, so the pad's box
+        /// never claims the key. A plain stored-closure write on the subclass
+        /// (no text-view property), guarded, so re-asserting it per update is
+        /// free.
+        func wireFileWithoutOpening(into view: CaptureNSTextView) {
+            guard parent.onFileWithoutOpening != nil else {
+                view.onFileWithoutOpening = nil
+                return
+            }
+            guard view.onFileWithoutOpening == nil else { return }
+            view.onFileWithoutOpening = { [weak self] in
+                self?.parent.onFileWithoutOpening?()
+            }
+        }
+
         func undoManager(for view: NSTextView) -> UndoManager? {
             view === self.view ? undoHistory : nil
         }
@@ -502,6 +538,8 @@ struct CaptureTextView: NSViewRepresentable {
 final class CaptureNSTextView: NSTextView {
     /// Plain ⏎ — what filing means belongs to the host.
     var onFile: (() -> Void)?
+    /// ⌘⏎ — file WITHOUT opening (VX-911); nil where the host has no such act.
+    var onFileWithoutOpening: (() -> Void)?
 
     /// The caret lands here when the box reaches a window (the pad's open —
     /// a box made with its request already raised). Asked ONCE, on the first
@@ -630,7 +668,30 @@ final class CaptureNSTextView: NSTextView {
         }
     }
 
+    /// **VX-911 — ⌘⏎, focus-scoped.** A ⌘-chord reaches the key window's
+    /// views as a key EQUIVALENT before the menu bar sees it (`EditorTextView`'s
+    /// ⌘S precedent), and every view in the window is asked — so the box
+    /// answers only while IT holds the keyboard and only where its host handed
+    /// the act. Anywhere else the key goes on its way untouched: inside a note
+    /// ⌘⏎ stays Choose This Take, and the pad's box (no act) leaves it to the
+    /// pad's File It. (A view with no window is a harness's, and it is by
+    /// definition the one being driven — the editor's rule.)
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if let onFileWithoutOpening, CaptureKeys.filesWithoutOpening(event),
+           window == nil || window?.firstResponder === self {
+            onFileWithoutOpening()
+            return true
+        }
+        return super.performKeyEquivalent(with: event)
+    }
+
     override func keyDown(with event: NSEvent) {
+        // VX-911's belt: a ⌘⏎ that came as a plain key event (nothing claimed
+        // it as an equivalent) is still this host's act — never a typed key.
+        if let onFileWithoutOpening, CaptureKeys.filesWithoutOpening(event) {
+            onFileWithoutOpening()
+            return
+        }
         switch CaptureKeys.act(for: event) {
         case .file:
             onFile?()

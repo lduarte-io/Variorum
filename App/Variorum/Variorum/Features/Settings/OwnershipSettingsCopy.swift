@@ -21,6 +21,16 @@ nonisolated enum OwnershipSettingsCopy {
 
     static let badgesTitle = "Show ownership badges"
 
+    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
+    /// ownership badges' into the mcp part of settings - it makes more sense
+    /// there")**: the row's ONE line in Settings ▸ MCP, its whole text
+    /// (`badgesHelp`, unchanged) behind the (i) — the pane's idiom
+    /// (`ExplainerLine`). It names exactly what the switch governs today: the
+    /// in-book "also in other books" mark, the "owned by" chip and the Private
+    /// eye — NOT the shared icon, which draws without it. PROVISIONAL F-905,
+    /// flagged for her wording bundle.
+    static let badgesSummary = "One switch for the marks on notes in other books, owned notes and Private ones."
+
     static let badgesHelp =
         "In a book, a small mark on a note that also lives in other books (hover names them "
         + "\u{2014} editing it there edits it here). In gatherings, tag listings and the "

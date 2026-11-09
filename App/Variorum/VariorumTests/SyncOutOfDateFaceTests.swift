@@ -79,11 +79,54 @@ struct SyncOutOfDateFaceTests {
     /// The words: calm and plain (her letter), and the door's label is the
     /// menu door's own (`Shared/` cannot see the Mac channel, so this holds
     /// the two equal).
+    ///
+    /// VX-909 (the VX-914 run, batch 4 — A JUSTIFIED EDIT; S-909 (1), RULED
+    /// PROVISIONAL): the detail no longer restates the update fact, so its
+    /// "older than your account's sync format" clause is gone by design — the
+    /// WHY is said as "a newer format than this version reads", and the
+    /// reassurance survives as its own sentence. The exact pair is pinned in
+    /// `theUpdateFactIsSaidOnceTheTitleKeepsItTheBodyExplains` below.
     @Test func theWordsAreCalmAndTheDoorIsTheMenusOwn() {
         #expect(SyncRowFace.checkForUpdatesLabel == UpdateChannel.checkForUpdatesTitle)
-        #expect(SyncRowFace.appOutOfDateDetail.contains("older than your account\u{2019}s sync format"))
-        #expect(SyncRowFace.appOutOfDateDetail.contains("nothing is lost while sync is paused"))
+        #expect(SyncRowFace.appOutOfDateDetail.contains("a newer format than this version reads"))
+        #expect(SyncRowFace.appOutOfDateDetail.contains("Nothing is lost while sync is paused."))
         #expect(!SyncRowFace.appOutOfDateLabel.contains("error"))
+    }
+
+    /// **VX-909 — her find (Nov 8, a 1.2 build before its update): the title
+    /// and the sentence under it said the update fact twice.** ONE line keeps
+    /// the fact — the TITLE, because the account act's first-round sheet says
+    /// the title alone — and the body earns its place with the why and the
+    /// reassurance. One pair in `Shared/`, so the Mac's sidebar row and the
+    /// phone's Settings ▸ Sync row say the same words (both arms render the
+    /// body), and the sheet's composed sentence carries the fact on both
+    /// platforms. RED ON OLD: the old pair said "update" in both lines.
+    @Test func theUpdateFactIsSaidOnceTheTitleKeepsItTheBodyExplains() throws {
+        #expect(SyncRowFace.appOutOfDateLabel == "Sync paused \u{2014} Variorum needs an update")
+        #expect(SyncRowFace.appOutOfDateDetail
+            == "Your account syncs in a newer format than this version reads. "
+            + "Nothing is lost while sync is paused.")
+        // One fact, one line: the title says the update, the body never does.
+        #expect(SyncRowFace.appOutOfDateLabel.localizedCaseInsensitiveContains("update"))
+        #expect(!SyncRowFace.appOutOfDateDetail.localizedCaseInsensitiveContains("update"),
+                "the body explains — it does not tell the fact again")
+        #expect(SyncStatusRow.line(for: .appOutOfDate, lastSuccessAt: nil) == SyncRowFace.appOutOfDateLabel,
+                "the row's one presentation source")
+        // The first-round sheet (Mac and phone) says the title alone, so the fact rides it.
+        #expect(ProtectionWords.firstRoundBlocked(SyncStatusRow.line(for: .appOutOfDate, lastSuccessAt: nil))
+            == "Sync hasn't run yet: Sync paused \u{2014} Variorum needs an update.")
+        // Both arms of the row — the Mac's (nil style) and the phone's (styled) —
+        // render the body under the title.
+        let views = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Shared/SyncStatusViews.swift"),
+            encoding: .utf8)
+        let rendered = views.components(separatedBy: "if face.kind == .appOutOfDate {\n").dropFirst()
+        #expect(rendered.count == 2, "both arms draw the out-of-date body")
+        for arm in rendered {
+            #expect(arm.prefix(120).contains("Text(SyncRowFace.appOutOfDateDetail)"))
+        }
     }
 
     /// The Mac's injection: an inert channel (every Debug build) hands out

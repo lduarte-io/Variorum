@@ -43,6 +43,26 @@ import VariorumCore
 struct WingSwitcherMenu: View {
     let tokens: VoiceTokens
     let wings: WingsModel
+    /// **VX-870 — which masthead draws the menu** (the cycle's one
+    /// host-dependent fact; composition, never a broadcast): the Bookcase by
+    /// default, the Library where `LibraryCatalogView` says so.
+    var host: Host = .bookcase
+
+    enum Host: Equatable, Sendable { case bookcase, library }
+
+    /// **The cycling word's press, by host** (VX-870, the VX-914 run's batch 4
+    /// — her word: *"it would be nice if clicking it in library didn't move you
+    /// either"*). The Library's cycle switches the wing IN PLACE
+    /// (`WingsModel.cycleInPlace` — said, never landed: she stays in the
+    /// Library and it re-scopes under her); the Bookcase's keeps VX-833's road
+    /// (`cycle` — it lands on the wing's Bookcase, where she already stands).
+    /// The ▾ list beside it lands from BOTH mastheads, as ⌘L and ⌘1–⌘9 do.
+    static func cycle(_ wings: WingsModel, from host: Host) {
+        switch host {
+        case .bookcase: wings.cycle()
+        case .library: wings.cycleInPlace()
+        }
+    }
 
     /// P-1: the switcher's acts (the in-menu PICK stays a view choice —
     /// undeclared, the Library `sort ▾` precedent — while the word's cycling
@@ -92,7 +112,7 @@ struct WingSwitcherMenu: View {
                     .font(tokens.heading)
                     .foregroundStyle(tokens.faint)
                 Button {
-                    wings.cycle()
+                    Self.cycle(wings, from: host)
                 } label: {
                     Text(tokens.chromeLabel(name))
                         .font(tokens.heading)

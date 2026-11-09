@@ -234,13 +234,17 @@ struct MCPPaneTabsTests {
         #expect(MCPPaneTab.holding(findingLead: found.lead) == .shared, "the finding's own lead lands the tab")
         // VX-281 ladder R1-4 (A JUSTIFIED EDIT, the ritual): Connect's row joins.
         // Ladder R2-3 (A JUSTIFIED EDIT, the ritual): the Clients tab's row joins.
-        // VX-874 (A JUSTIFIED EDIT, the ritual): the trail dial's row joins,
-        // under the Activity tab's log — the last tab (never above the tabs:
-        // the fresh-pane geometry row below).
+        // VX-874 (A JUSTIFIED EDIT, the ritual): the trail dial's row joins.
+        // VX-903 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1): it
+        // moves under the show dial, above the tabs, drawn while a client is
+        // approved (the fresh-pane geometry row below grew an arm for it). VX-905
+        // (A JUSTIFIED EDIT, the ritual): the badge switch joins, at the pane's foot.
         #expect(AppSettingsView.rowIDsRendered[.mcp]
-                    == ["mcpServer", "mcpShowDial", "mcpWaiting", "mcpConnect", "mcpClients", "mcpOpenBook",
-                        "mcpTrailDial"],
+                    == ["mcpServer", "mcpShowDial", "mcpTrailDial", "mcpWaiting", "mcpConnect", "mcpClients",
+                        "mcpOpenBook", "ownershipBadges"],
                 "VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's row joins, beside the switch")
+        #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpTrailDial")) == nil,
+                "VX-903: the trail dial sits above the tabs")
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpConnect")) == .connect)
         #expect(MCPPaneTab.holding(findingLead: SettingsCatalog.title("mcpClients")) == .clients)
         #expect(SettingsCatalog.title("mcpClients") == MCPPaneTab.clients.label,
@@ -315,6 +319,11 @@ struct MCPPaneTabsTests {
             (MCPPaneCopy.stdioSummary, MCPPaneCopy.stdioLine),
             // VX-676 (A JUSTIFIED EDIT, the ritual): the show dial's line.
             (MCPPaneCopy.showDialSummary, MCPPaneCopy.showDialDetail),
+            // VX-903 / VX-905 (A JUSTIFIED EDIT, the ritual — the VX-914 run,
+            // batch 1): the trail dial's line (now beside the show dial's) and
+            // the badge switch's (now at the pane's foot).
+            (MCPPaneCopy.trailDialSummary, MCPPaneCopy.trailDialDetail),
+            (OwnershipSettingsCopy.badgesSummary, OwnershipSettingsCopy.badgesHelp),
         ]
         for client in MCPSetupClient.allCases { pairs.append((client.summary, client.sentence)) }
         for (line, whole) in pairs {
@@ -485,6 +494,10 @@ struct MCPPaneTabsTests {
             door.attach(session: session)
             defer { door.detach() }
             door.requestSettings()  // ⌥⌘, — the window opens AT the MCP pane
+            #if DEBUG
+            // The VX-914 gate round: this pin's OWN oracle rows, cleared first.
+            MCPPaneGeometry.reset(session.debugProbeScope)
+            #endif
 
             let size = AppSettingsView.contentSize
             let (window, host) = mount(AppSettingsView(session: session, mcp: door), size: size)
@@ -517,6 +530,156 @@ struct MCPPaneTabsTests {
             // block's padding are in sight below the menu, unscrolled.
             #expect(menuFrame.minY - visible.minY >= 56,
                     "\(voice): the setup's first lines are in sight below the menu (\(menuFrame.minY - visible.minY) pt)")
+
+            // VX-903 (THE CONTRACT GROWN DELIBERATELY — the VX-914 run, batch 1;
+            // PROVISIONAL F-903 (1)): the trail dial now sits under the show dial
+            // in the top section, drawn only while a client is APPROVED — so a
+            // fresh pane draws NONE, and everything above is VX-281's geometry
+            // unchanged. Non-vacuity: the show dial's picker IS found, so the
+            // search for pickers sees this section.
+            // THE GATE ROUND'S FINDER (the record's GATE ROUND): 27.1 draws a
+            // grouped form's Picker natively — no NSPopUpButton exists — so the
+            // dials are found through the pane's scoped DEBUG oracle
+            // (`MCPPaneGeometry`): a drawn mark reports its frame, an undrawn
+            // one has none. Both assertions unchanged in meaning.
+            #if DEBUG
+            let scope = session.debugProbeScope
+            #expect(MCPPaneGeometry.frame(.showDial, in: scope) != nil, "\(voice): the show dial is drawn (non-vacuity)")
+            #expect(MCPPaneGeometry.frame(.trailDial, in: scope) == nil, "\(voice): a fresh pane draws no trail dial")
+            #endif
+        }
+    }
+
+    // MARK: - VX-905 — "Show ownership badges" moves to Settings ▸ MCP
+
+    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
+    /// ownership badges' into the mcp part of settings - it makes more sense
+    /// there"; PROVISIONAL F-905 (1)).** The badge family's one switch is
+    /// Settings ▸ MCP's row now — its own untitled section at the pane's FOOT,
+    /// under whichever tab shows, so EVERY library keeps it (a library that
+    /// never had a client still switches its owned-by chips) and nothing above
+    /// the tabs grows; Settings ▸ Editor no longer renders it (its "Books"
+    /// section keeps the hide-owned default); the search follows the move and
+    /// lands on the pane with no tab to pick. Its line names exactly what it
+    /// governs today — the other-books mark, the owned-by chip, the Private eye
+    /// (never the shared icon, which draws without it).
+    @Test func theBadgeSwitchIsSettingsMCPsRowAtThePanesFoot() throws {
+        let row = try #require(SettingsCatalog.rows.first { $0.id == "ownershipBadges" })
+        #expect(row.pane == .mcp && row.title == OwnershipSettingsCopy.badgesTitle, "the catalog row moved")
+        #expect(AppSettingsView.rowIDsRendered[.mcp]?.last == "ownershipBadges", "the pane's foot")
+        #expect(AppSettingsView.rowIDsRendered[.editor]?.contains("ownershipBadges") == false, "no longer Editor's")
+        #expect(AppSettingsView.rowIDsRendered[.editor]?.contains("hideOwnedDefault") == true, "its neighbour stays")
+        #expect(MCPPaneTab.holding(findingLead: row.title) == nil, "every tab shows it — a finding picks none")
+        for word in ["ownership badges", "badge", "badges", "owned by"] {
+            let found = SettingsSearch.findings(matching: word, in: SettingsSearch.settingsEntries)
+                .first { $0.kind == .setting && $0.lead == row.title }
+            #expect(found?.pane == .mcp, "“\(word)” lands on Settings ▸ MCP")
+        }
+        // A library that never had a client: the row is still searchable (its
+        // sharing face hidden, its trail dial undrawn — the row is neither).
+        let fresh = SettingsSearch.settingsEntries(accountSection: true, mcpSharingFace: false, mcpTrailDial: false)
+        #expect(fresh.contains { $0.finding.lead == row.title && $0.finding.pane == .mcp }, "every library keeps it")
+
+        // The line: what it governs today, nothing more.
+        let line = OwnershipSettingsCopy.badgesSummary
+        #expect(line == "One switch for the marks on notes in other books, owned notes and Private ones.")
+        #expect(!line.localizedCaseInsensitiveContains("shared"), "the shared icon draws without this switch")
+        #expect(OwnershipSettingsCopy.badgesHelp.contains("Off: no marks anywhere; nothing else changes."),
+                "the whole text behind its (i), unchanged")
+
+        // The face, from source: after the shown tab, inside the one form —
+        // never in the top section; Editor's pane no longer draws it.
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let pane = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/MCP/MCPPane.swift"), encoding: .utf8)
+        let tabs = try #require(pane.range(of: "case .activity: activityTab\n            }"))
+        let foot = try #require(pane.range(of: "badgesSection\n        }\n        .formStyle(.grouped)"))
+        #expect(tabs.upperBound <= foot.lowerBound, "the section follows whichever tab shows")
+        let body = try #require(pane.range(of: "@ViewBuilder private var badgesSection: some View {"))
+        let section = String(pane[body.upperBound...].prefix(600))
+        #expect(section.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"))
+        #expect(section.contains("themeStore.setOwnershipBadges($0)"), "the one synced setting's own act")
+        #expect(section.contains(
+            "ExplainerLine(line: OwnershipSettingsCopy.badgesSummary, detail: OwnershipSettingsCopy.badgesHelp)"))
+        let settings = try String(
+            contentsOf: app.appendingPathComponent("Variorum/Features/Settings/AppSettingsView.swift"), encoding: .utf8)
+        #expect(!settings.contains("Toggle(SettingsCatalog.title(\"ownershipBadges\")"), "Editor's pane draws none")
+    }
+
+    // MARK: - VX-903 — the geometry contract's grown arm (both dials seated together)
+
+    /// **VX-903 — her #264 word: "right under 'when a client shows you
+    /// something'".** With a client APPROVED the pane opens on Clients
+    /// (VX-281's rule) and its top section seats BOTH dials together — the
+    /// trail dial the very next row under the show dial's line — with the tab
+    /// row whole and in sight, unscrolled, inside VX-214's 748 × 520, both
+    /// voices. This is the arm the contract GREW by (the record's BATCH 1 LIVE
+    /// STATUS names it); the fresh arm above is VX-281's own, unweakened.
+    ///
+    /// **The finder (the VX-914 gate round):** 27.1 draws a grouped form's
+    /// `Picker` natively — no `NSPopUpButton`, no accessibility element vended
+    /// without a client (measured by the round's offscreen probe) — so the
+    /// dials, the show dial's line, the tab row and the form report their
+    /// frames through the pane's scoped DEBUG oracle (`MCPPaneGeometry`), in
+    /// SwiftUI's global, y-DOWN space; the AppKit tab-row checks stand as they
+    /// were. Every assertion below says what it said before.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func anApprovedClientsPaneSeatsBothDialsTogetherWithItsTabRowInSight(voice: ThemeVoice) async throws {
+        try await withPaneWorld { session, _ in
+            try session.operations.setThemeVoice(voice)
+            let client = try session.operations.recordMCPContact(name: "claude-code", version: "2")
+            _ = try session.operations.approveMCPClient(client.id, granting: nil)
+            let door = MCPDoor(serverAllowed: false)
+            door.attach(session: session)
+            defer { door.detach() }
+            for _ in 0..<200 where door.snapshot.approvedCount == 0 {
+                pump()
+                await Task.yield()
+            }
+            #expect(door.snapshot.approvedCount == 1, "\(voice): fixture — one client approved")
+            #expect(MCPPane.drawsTrailDial(door.snapshot), "\(voice): the gate opens with an approved client")
+            door.requestSettings()  // ⌥⌘, — the window opens AT the MCP pane
+            #if DEBUG
+            let scope = session.debugProbeScope
+            MCPPaneGeometry.reset(scope)  // this pin's OWN oracle rows, cleared first
+            #endif
+
+            let size = AppSettingsView.contentSize
+            let (window, host) = mount(AppSettingsView(session: session, mcp: door), size: size)
+            defer { unmount(window) }
+            #if DEBUG
+            await settle(host, until: { tabRow(in: host) != nil && MCPPaneGeometry.frame(.trailDial, in: scope) != nil })
+            #else
+            await settle(host, until: { tabRow(in: host) != nil })
+            #endif
+            await settle(host, until: { false }, turns: 15)
+
+            let tabs = try #require(tabRow(in: host), "\(voice): the pane renders her four tabs")
+            #expect(tabs.selectedSegment == 1, "\(voice): a client approved — the pane opens on Clients")
+            let tabFrame = tabs.convert(tabs.bounds, to: nil)
+            let clip = tabs.enclosingScrollView?.contentView ?? host
+            let visible = clip.convert(clip.bounds, to: nil)
+            #expect(visible.contains(tabFrame), "\(voice): the tab row is whole and in sight, unscrolled (\(tabFrame) in \(visible))")
+
+            #if DEBUG
+            let form = try #require(MCPPaneGeometry.frame(.form, in: scope), "\(voice): the pane's form reports its frame")
+            let show = try #require(MCPPaneGeometry.frame(.showDial, in: scope), "\(voice): the show dial is drawn")
+            let line = try #require(MCPPaneGeometry.frame(.showDialLine, in: scope), "\(voice): the show dial's line is drawn")
+            let trail = try #require(MCPPaneGeometry.frame(.trailDial, in: scope), "\(voice): the trail dial is drawn")
+            let tabRowFrame = try #require(MCPPaneGeometry.frame(.tabRow, in: scope), "\(voice): the tab row reports its frame")
+            #expect(form.contains(show) && form.contains(trail), "\(voice): both dials in sight (\(show), \(trail) in \(form))")
+            // SwiftUI's global space grows DOWNWARD: under = a larger y.
+            #expect(show.maxY <= line.minY && line.maxY <= trail.minY,
+                    "\(voice): the trail dial sits under the show dial (\(show) · its line \(line) · \(trail))")
+            #expect(trail.maxY <= tabRowFrame.minY, "\(voice): both sit above the tabs, in the top section (\(tabRowFrame))")
+            // Nothing seated between the two dials but the show dial's line: the
+            // gap from that line to the trail dial is the form's own row gap (the
+            // show dial's to its line, measured here) — never room for a row more.
+            let rowGap = line.minY - show.maxY
+            let gap = trail.minY - line.maxY
+            #expect(gap < rowGap + min(line.height, trail.height),
+                    "\(voice): nothing seated between the two dials but the show dial's line (gap \(gap) pt, row gap \(rowGap) pt)")
+            #endif
         }
     }
 }

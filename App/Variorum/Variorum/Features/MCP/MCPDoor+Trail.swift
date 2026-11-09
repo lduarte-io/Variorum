@@ -57,6 +57,14 @@ extension MCPDoor {
         trail.update { $0.clear() }
     }
 
+    /// **VX-904 — her press on a group's header** (her word: "maybe add ability
+    /// to collapse a whole client group"): fold or open THAT client's group.
+    /// View state in the trail's session memory — no act, no store, nothing
+    /// read (the registry's standing note: a header's collapse is not an act).
+    func toggleTrailFold(_ clientName: String) {
+        trail.update { $0.toggleFold(clientName) }
+    }
+
     /// **A hand drag's landing** (ruling (3) — rail (a), PROVISIONAL P-874-3):
     /// the row moves among its own stratum (`MCPTrail.reordered` — a drop that
     /// would not act moves nothing). Returns whether anything moved.
