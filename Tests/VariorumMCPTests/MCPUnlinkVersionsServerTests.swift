@@ -185,9 +185,9 @@ struct MCPUnlinkVersionsServerTests {
     /// **A link inside ONE note** (the VX-915 ladder's F-7): her `moveBlock` re-homing one end
     /// leaves both blocks in one note. The unlink lands, its Open › opens that note at the link's
     /// first block, and its receipt carries the note ONCE — the far side's `detail` nil, which is
-    /// what her receipt line reads to say "inside “A”" instead of "between “A” and “A”". RED ON
-    /// OLD: the receipt's `detail` was the far note's title — the same note's — so the line read
-    /// "removed the version link between “draft one” and “draft one”".
+    /// what her receipt line reads to say "inside “A”" instead of naming “A” twice. RED ON OLD:
+    /// the receipt's `detail` was the far note's title — the same note's — so the receipt's
+    /// phrase composed "removed the version link between “draft one” and “draft one”".
     @Test func aLinkInsideOneNoteCarriesTheNoteOnceOnItsReceipt() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }

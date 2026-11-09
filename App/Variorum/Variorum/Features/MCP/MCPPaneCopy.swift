@@ -1838,15 +1838,20 @@ nonisolated enum MCPReceiptCopy {
             return n == 1
                 ? "linked \(quoted(receipts[0].targetTitle)) and \(quoted(receipts[0].detail)) as versions"
                 : "linked \(n) pairs of notes as versions"
-        // VX-943 — one link taken back (PROVISIONAL words, her copy pass). A
-        // link inside ONE note (her moveBlock re-homed an end) arrives with no
-        // far side (`detail` nil — the tool carries the note once), and says so
-        // rather than "between “A” and “A”" (the VX-915 ladder's F-7;
-        // PROVISIONAL words, her bundle).
+        // VX-943 — one link taken back (PROVISIONAL words, her copy pass): the
+        // two-note line is `.versionLink`'s MIRROR ("unlinked “A” and “B” as
+        // versions") — the VX-915 gate36 disposition: the first wording,
+        // "removed the version link between “A” and “B”", overran `budget`
+        // even at three-letter titles, so the count fallback always spoke; the
+        // mirror shares the link's own long-title fallback class. A link inside
+        // ONE note (her moveBlock re-homed an end) arrives with no far side
+        // (`detail` nil — the tool carries the note once), and says so rather
+        // than "… “A” and “A” …" (the VX-915 ladder's F-7; PROVISIONAL words,
+        // her bundle).
         case .versionUnlink:
             guard n == 1 else { return "removed \(n) version links" }
             return receipts[0].detail.map {
-                "removed the version link between \(quoted(receipts[0].targetTitle)) and \(quoted($0))"
+                "unlinked \(quoted(receipts[0].targetTitle)) and \(quoted($0)) as versions"
             } ?? "removed a version link inside \(quoted(receipts[0].targetTitle))"
         // VX-184 U4 — VX-195's edit parity inside a note (PROVISIONAL words,
         // P-U4-WORDS — her copy pass).

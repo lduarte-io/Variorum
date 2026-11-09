@@ -92,9 +92,13 @@ struct MCPDoorErgonomicsFacesTests {
     /// the landed, the counted and the refused row. Red on old by absence (the
     /// act, the tool and the words did not exist).
     @Test func theUnlinkSaysWhatLandedAndIsOneUndoAtWriteNew() {
+        // A JUSTIFIED EDIT (the VX-915 gate36 disposition): the first words, "removed
+        // the version link between “one” and “two”", made a 73-character line against
+        // `MCPReceiptCopy.budget` (72), so `line()` always spoke its count fallback
+        // ("made a change") — red here at gate36's first run. The two-note line is now
+        // the link's mirror, 61 characters at these titles (PROVISIONAL words, her bundle).
         #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: "one", detail: "two")])
-                == "claude-code removed the version link between \u{201C}one\u{201D} and \u{201C}two\u{201D}"
-                + undoes)
+                == "claude-code unlinked \u{201C}one\u{201D} and \u{201C}two\u{201D} as versions" + undoes)
         #expect(MCPReceiptCopy.line([receipt(.versionUnlink, title: "one", detail: "two"),
                                      receipt(.versionUnlink, title: "one", detail: "two")])
                 == "claude-code removed 2 version links" + undoes)
