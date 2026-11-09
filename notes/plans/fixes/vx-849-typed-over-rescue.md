@@ -178,7 +178,7 @@ beside it.**
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | BUILT — `b59d2f16d`…(this commit): VX-443's sweep (PROVISIONAL P-849-4; red-on-old SHA `9118b0355`, the fix `80979d6f0`, reverts R-443a…d bit as named); VX-152 traced — closed before this run by VX-445, a guard pin only; VX-545's five points in one commit (`6cd218082`, the page regenerated); core protection set 551/123 green; Mac + phone `build-for-testing` green; EVERY Mac/simulator run PENDING the stage (the BATCH 4 RECORD's STAGE REQUEST) |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | DONE — RECORD-ONLY (`718701ac8`…(this commit)): traced; the confirm `PurgeSweepTeardownTests` GREEN 2/2 ×3 (the lock's close waits for the held read); R-855a bit exactly its two lines; NO FIX (dismissed as already fixed by VX-604 + VX-657; the ticket text in the BATCH 5 RECORD); no Mac suites new; whole core package PENDING (row 8); the in-app recipe OPTIONAL for the orchestrator's window |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | BUILT — `438ed249d`…(this commit): VX-921 FIXED (red-on-old `d58707b70`, the swap `797dfe8a7`, R-921a/b bit exactly as named); VX-919 AUTHORED ONLY (`1db9b06c8` — never executed; deploy HELD, row 9; R-919a bit as named); the siblings recorded; core targeted 480/76 + 14/4 green; Mac + phone `build-for-testing` green; NO Mac suites new; whole core package PENDING (row 8); PROVISIONALs P-849-6/-7 for the merge's QUESTIONS |
-| 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
+| 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | CLOSED AT ROUND 1 — 0B/0M/3MIN/2NIT (`68e17ae51`; dispositions in THE LADDER section; the row-8 evidence gate adopted) |
 | 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | NOT STARTED |
 | 9 | Her drill: the two-Mac test's steps 8–9 on the Air — runs AFTER the release reaches the Air via Sparkle (her word, 2026-11-09) · VX-919's deploy window (HELD) | OWED |
 
@@ -2733,6 +2733,34 @@ DEPLOY-HELD header; LIVE STATUS row 6 BUILT.
    changing the measure in #167's ratified (a) text (an offline earlier act now outranks an online later one);
    the proposed SyncSpec §7 OWNED line lands only as it survives her sitting.
 5. **No new window legs; nothing for the b34 claim.** The whole core package stays PENDING to row 8.
+
+## THE LADDER (round 1, 2026-11-09 — a fresh `fable-reviewer`, REVIEW_PROMPT.md verbatim, the whole diff 75a5222ad...bd65aa5a1; findings `notes/plans/fixes/vx-849-ladder-round1.md`, commit `68e17ae51`)
+
+**Result: 0 BLOCKER · 0 MAJOR · 3 MINOR · 2 NIT; no FINDER-FIXES; no finding on `Sync/` lines. THE LADDER CLOSES
+AT ROUND 1** — there are no code fixes for a round 2 to re-review (the cap's rounds exist to re-check fixes; every
+finding below resolves by ticket, closeout act, or the already-planned evidence gate). Dispositions, each written:
+
+- **R1-M1 (the structural undo/redo doors don't flush → her own ⌥⌘Z under typing can mint a `'conflict'` card)
+  → TICKET AT THE CLOSEOUT, as the batch-3 adjudication already ruled (C2); the reviewer CONFIRMS that
+  disposition and the ladder's requirement is that the ticket lands — it does (the born-tickets list below). Fix
+  shape recorded on the ticket: flush-first at the door's warn→act latch; the proving pin named in the round file.**
+- **R1-M2 (SyncSpec §7's OWNED paragraph still states the retired seq rank; the merge precedes her P-849-6
+  sitting) → ACCEPTED: the closeout lands §7's OWNED line in the standing PROVISIONAL idiom** (the new
+  created_at/id sentence marked PROVISIONAL with the P-849-6/QUESTIONS pointer) rather than leaving a falsified
+  sentence on main; her sitting then ratifies or reverts the wording (doc-only — the code is pinned).
+- **R1-M3 (batches 3/4's Mac/sim pins had not yet EXECUTED when the diff was read) → OVERTAKEN IN PART, GATE
+  KEPT:** the b34-tests window ran DURING this round — legs A green (15/3, 25/4), all ten reverts red exactly as
+  named, clean tip 40/7 (the window section above); leg D + the walk and row 8's closing sweep remain, and the
+  ladder's stated gate (no merge before row 8 runs red/green as named) is adopted into the closeout checklist.
+- **The two NITs (flushNow's doc line overstates the cross-take axis; a joined retry discards the joiner's
+  fresher signIn — one delayed round, self-healing) → RECORDED, no action this run**; the doc line moves whenever
+  that file is next touched.
+- **The round's concurrences** (the closeout ticket set; the six PROVISIONALs to QUESTIONS; VX-855/VX-691's
+  dispositions) match the adjudications above — nothing new owed.
+
+**Born tickets (minted now, triaged per the labeling rule; final pass at the closeout):** C2 (the undo doors'
+flush-first), C1 (the margin-grid recentre), the R1 face-only confirmation residual, and the sibling seq-ranked
+§7 repairs (one Debt ticket riding P-849-6's outcome).
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
