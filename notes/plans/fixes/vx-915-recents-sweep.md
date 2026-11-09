@@ -487,9 +487,9 @@ The window's order: the RED LEG first (READY-FOR-GATE step 1 — rebuild `vx915-
 | 6 | VX-869 alert-Cancel sweep | 3 | BUILT — CLEAN SWEEP (45 sites classified, zero bug-shape instances; AlertCancelSweepTests guard, red shown on the pre-VX-561 file by scanner evaluation) — guard suite PENDING(gate34) |
 | 7 | VX-841 quick-note wing pick | 3 | BUILT to P-915-B3-1 (core red WATCHED headless 4/6→6/6; the wing-blind lookup fixed; Shared/ park line ⇒ phone in the merge gate) — face pins PENDING(gate34), W-841 at the closing walk |
 | 8 | VX-928 ⏎ in-flight guard (rider) | 3 | BUILT (one oneFilingInFlight guard, both roads) — RED RUN + green PENDING(gate34); rev source prepared, recipe in READY-FOR-GATE |
-| 9 | VX-843 tour wording | 4 | NOT-STARTED |
-| 10 | VX-916 guide protection chapter | 4 | NOT-STARTED |
-| 11 | VX-929 guide wording pair (rider) | 4 | NOT-STARTED |
+| 9 | VX-843 tour wording | 4 | BUILT (a54cf6113; her sentences verbatim, verified by grep; the trap answered — NO seed-byte comparison, the mend keys on titles, no twin/clobber; N-915-B4-1 flagged, the front-note gap is VX-947) — pins PENDING(gate36) |
+| 10 | VX-916 guide protection chapter | 4 | BUILT (ed2c310a1; the recipe's five passages + R-529-6's line quoting VX-538's constants; the CastleRules table in LIVE STATUS, rules 3–16; P-915-B4-1/-2 placement+location PROVISIONAL) — pins PENDING(gate36) |
+| 11 | VX-929 guide wording pair (rider) | 4 | BUILT (bba64644f; ⌘⏎ taught from the registry's chord, lesson 8 in VX-45's grammar; the two remaining over-says are VX-948) — pins PENDING(gate36) |
 | 12 | VX-888 search punctuation-only | 5 | NOT-STARTED |
 | 13 | VX-852 release.sh pin check | 5 | NOT-STARTED |
 | 14 | VX-943 unlink_versions (her mint) | 6 | NOT-STARTED |
