@@ -164,7 +164,7 @@ beside it.**
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
-| 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | BUILT (the implementer, `03d1fed00`…`bdb70dc3d` + the record's close) — headless evidence green; every Mac/simulator run PENDING the record's STAGE REQUEST |
+| 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | NOT STARTED |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | NOT STARTED |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
@@ -502,6 +502,32 @@ runs, LIVE STATUS row 8, where those suites must run anyway over every changed s
 5. **Canon deltas → queued for the closeout list:** AppSpec §9's `expectedText` convention line gains the
    autosave exception (rescues, never refuses); the `autosave` line gains `expectedText` and the rescue; a
    SyncSpec §6 pointer if the ladder agrees it belongs.
+
+**THE STAGE WINDOW (claim vx-849-batch1, 2026-11-09, the orchestrator's hands; worktree verified at tip
+`cd3c51ce6` before, between and after every cycle):**
+- **Leg A:** "Test run with 22 tests in 3 suites passed" (AutosaveCoordinatorTests 9 · TypedOverRescueSurfaceTests 6
+  · SyncBeforeRoundTests 7).
+- **Leg B, six reverts, each applied alone, restored and `git diff --stat`-verified clean before the next, each
+  restore's suites re-run green:** R-402 red on `aFlushArrivingWhileAWriteIsInFlightReturnsOnlyAfterThatWriteLanded`
+  (2 issues, the traced expectations); R-B1 red on exactly its three named pins; R-B2 red on
+  `aRefusedWriteHandsItsOlderSnapshotToTheNewerRun` (2 issues); R-A1 red on exactly the three
+  `…RunsTheOccasionToItsEnd…` pins; R-A2 red on both its named pins; R-A3 red on exactly
+  `theMacsOccasionTouchesNothingWhenNoTypingIsPending`. Final clean-tip proof: the leg-A trio 22/22 green.
+- **The R-402 overlap, adjudicated live (a finding, not a hollow pin):**
+  `aNewerFlushNeverLandsUnderAnOlderInFlightOne` stays GREEN under R-402 alone — with the lock deleted, VX-683 B's
+  guard independently covers that interleaving (her own superseded run is dropped without a card), so the row still
+  ends right. One deliberate STACKED probe (R-402 + R-B1, both belts off) turned it RED on the exact expected line
+  ("an older in-flight write landed over her newer text") — first-hand proof the pin is live. The defense-in-depth
+  overlap is the memo's own design ("B is the belt that makes the class impossible whatever the timing"); recorded
+  so no later reader mistakes the single-revert green for hollowness.
+- **Two spec corrections to the leg as written:** R-B2's pin lives in `TypedOverRescueSurfaceTests` (the first red
+  run targeted only the coordinator suite and read green — a suite-targeting miss, corrected); and the leg-D list's
+  `MobileEditorTests` is NOT a type (nov7's trap check) — the real editor types are the five `MobileEditor*Tests`
+  suites, all run.
+- **Leg D (iPhone 17 Pro sim by id, fresh boot, `simctl shutdown all` after):** "Test run with 116 tests in 10
+  suites passed" — MobileTypedOverRescueTests (the batch's 4) + MobileQuickNoteTests · MobileTakesBrowserTests ·
+  MobileBlockHistoryTests · MobileLivenessTests + the five MobileEditor* suites. A first attempt exited 70 on an
+  unresolved `name=iPhone 17 Pro` destination (no test ran); the rerun pins the device BY ID.
 
 **Also recorded:** the MCP whole-target socket timeouts (6→4→2, all green alone, no MCP line changed) are the
 known VX-850 load-flake class — vx-926's territory; the closing run compares against main's tip before any claim.
