@@ -141,7 +141,10 @@ beside it.**
 - **Stage protocol (every window):** REQUEST (what/minutes/claim name, sent EARLY) → READY (able NOW) → GO only
   from nov7 with the exact claim line → RELEASE with Executed counts and EVERY failing test by name (faulting
   thread read for any crash). `-only-testing` takes TYPE names as a zsh array. Instance checks: `pgrep -lx
-  Variorum`, `pgrep -lf "MacOS/Variorum$"`. A window over an hour pings SEAM.
+  Variorum`, `pgrep -lf "MacOS/Variorum$"`. A window over an hour pings SEAM. **NO HEAVY HEADLESS WORK while
+  another session's stage window is live** (nov7's rule, 2026-11-09: no whole-package/whole-target `swift test`,
+  no whole MCP target, no full or cold `build-for-testing`; small targeted runs are fine; heavy closes are held
+  for a gap or the orchestrator's own window — an implementer marks them PENDING and lists them).
 - **Dev-store windows** (VX-855's teardown repro, the batch-3 walk) serialize against vx-913's VX-81 re-key
   repro. Each window leaves the dev store's posture as found: MCP ON, variorum-de approved, never Resume Sync,
   Castle values only from `~/.variorum/dev-castle.env`, restored or reported at RELEASE.
