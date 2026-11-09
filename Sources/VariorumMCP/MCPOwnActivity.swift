@@ -27,6 +27,10 @@ import VariorumCore
 ///   from a missing one — so EVERY refused row of those acts answers no target,
 ///   and hidden and missing read byte-identical. Their ALLOWED rows keep the
 ///   target: the act's answer told the client that id (`book_id`, `block_id`).
+/// - **VX-943 (the VX-915 run, batch 6 — the same class):** `unlink_versions`
+///   logs the NOTE the link's id resolves to (the side that refused, else the
+///   link's first note) — so every refused row answers no target; a landed
+///   row keeps it (the answer's `note_ids` told the client that note).
 ///
 /// A future act that logs a resolved id must join this table (the Hard rules:
 /// no field may tell hidden from missing).
@@ -56,7 +60,8 @@ enum MCPOwnActivity {
         switch row.act {
         case MCPToolCatalog.duplicateNote.name: return row.targetKind == "wing"
         case MCPToolCatalog.renameChapter.name, MCPToolCatalog.deleteChapter.name,
-             MCPToolCatalog.moveChapter.name, MCPToolCatalog.deleteTake.name:
+             MCPToolCatalog.moveChapter.name, MCPToolCatalog.deleteTake.name,
+             MCPToolCatalog.unlinkVersions.name:
             return true
         default: return false
         }

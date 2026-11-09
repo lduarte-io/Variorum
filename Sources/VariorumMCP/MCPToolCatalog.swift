@@ -128,6 +128,9 @@ enum MCPToolCatalog {
         saveVersion, fileNoteInChapter, setBookRule,
         // VX-184 U3 — VX-187: two notes linked as versions by named pairs (R-VX187-1).
         linkVersions,
+        // VX-943 (the VX-915 run, batch 6): its opposite — one link taken back
+        // by the edge_id link_versions answered (write new on both notes).
+        unlinkVersions,
         // VX-336 U5b — VX-255: blocks added to a note (write new at its end,
         // edit anywhere — the call's rung read from its arguments).
         insertBlocks,
@@ -1249,7 +1252,8 @@ enum MCPToolCatalog {
             write new on both notes, which must be in the same wing. One call carries at most 200 \
             pairs. All or nothing: a pair that names the wrong note, repeats, or is already linked \
             is refused, named. One undo for the author removes every pair. The author's receipt for \
-            it opens the two side by side in Compare. Returns JSON.
+            it opens the two side by side in Compare. Returns JSON with note_a, note_b and links: per \
+            pair its block_a, block_b and edge_id — the id unlink_versions takes to remove that one link.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1270,6 +1274,40 @@ enum MCPToolCatalog {
                 ]),
             ]),
             "required": .array(["note_a", "note_b", "pairs"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-943 (the VX-915 run, batch 6) — unlink_versions
+
+    /// VX-943 (her relay: "an unlink_versions that takes the ID link_versions
+    /// already returns, at the same permission level"): ONE link taken back by
+    /// its `edge_id`; write new on both notes, as making it needs (R-VX187-1's
+    /// rung — PROVISIONAL P-915-B6-1); a saved version's link refused in words
+    /// (P-915-B6-2), a gone link too (P-915-B6-3).
+    static let unlinkVersions = MCPToolDeclaration(
+        name: "unlink_versions", rung: .writeNew, title: "Unlink a version link",
+        description: """
+            Remove one version link that link_versions made, by the edge_id it answered for that \
+            pair (each pair a link_versions call named is its own link, with its own edge_id). Needs \
+            write new on both notes the link joins, the same as making it. Both notes stay exactly as \
+            they are; only the link goes. When the answer's still_versions is true, another link still \
+            makes the two notes versions, so Compare still offers each beside the other — unlink its \
+            edge_id too if they should part. A link that ties a note to one of its saved versions is \
+            refused: only the author removes that, in Compare, where unmarking a saved version promotes \
+            it to a regular note. A link already gone is refused, said. One undo for the author puts \
+            the link back. Returns JSON with the edge_id, note_ids and block_ids (the link's two ends, \
+            in the same order), unlinked: true, and still_versions.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "edge_id": .object([
+                    "type": "string",
+                    "description": "The link to remove: an edge_id link_versions answered in its links.",
+                ]),
+            ]),
+            "required": .array(["edge_id"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)

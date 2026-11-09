@@ -87,7 +87,7 @@ struct MCPNullIdentifier: Error, Equatable, Sendable {
     static let identifierKeys: Set<String> = [
         "after_block_id", "after_note_id", "after_section_id", "before_block_id", "before_note_id",
         "before_section_id", "block_a", "block_b", "block_id", "book_id", "comment_id", "commit_id",
-        "commit_ids", "first_block_id", "lens_id", "note_a", "note_b", "note_id", "note_ids", "peer_ids",
+        "commit_ids", "edge_id", "first_block_id", "lens_id", "note_a", "note_b", "note_id", "note_ids", "peer_ids",
         "second_block_id", "section_id", "take_id", "take_ids", "version_id", "wing_id",
     ]
 
