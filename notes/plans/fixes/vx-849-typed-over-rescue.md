@@ -1730,6 +1730,45 @@ takes TYPE names, as a zsh array; the tree verified clean before, between and af
   `add_take`) — the ring ends, the block shows its two fan cards. The sync-road face (B/A) needs a second device —
   her two-Mac test, or a staged pull; the mounted pins carry it otherwise.
 
+### BATCH 3 ADJUDICATION (the orchestrator, 2026-11-09 — repo-first before batch 4 spawns)
+
+**Verification first-hand:** all nine commits present and pushed (`3d9d36cdd`…`81fc15583`), tree clean, HEAD =
+origin; the stale premise CHECKED — `8bea570e3` ("a live pane whose own take is written from outside stops being
+live, A-677-1/-2") exists and the seam files are unchanged since it; `AutosaveCoordinator.isUnlanded` (:121),
+`PaneTextAuthority.shownText` (:262, `App/Variorum/Variorum/Surface/`) and `restoreCommit`'s `insuringBuffer`
+(`Operations+Variant.swift` :219) all present as reported; LIVE STATUS row 3 BUILT.
+
+**Dispositions:**
+1. **The premise shift → ACCEPTED.** VX-664's one ring-ending mechanism predates this run (A-677-1); the batch's
+   verify-and-compose is the right shape, and the sweep table (9 hosts, 23 roads, each verdicted) is the
+   class-completeness evidence her option-(a) ruling asked for.
+2. **G1 (`isUnlanded`) → ACCEPTED as built.** The pending guard's in-flight hole was real: a flush empties
+   `pending` before its write lands, so three hosts ended her ring mid-rescue. Deterministic pin (writer held).
+3. **G3 (`shownText`) → ACCEPTED as built, and the record CORRECTS BATCH 1's SELF-ASSESSMENT:** the
+   "second window or second surface" road was NOT rescued inside the confirmation gap — a keystroke there built
+   its snapshot on the projection's outside words, so the guarded autosave wrote her old words over them with no
+   card. Real data loss, now pinned behavior-red at `d1a2b028e`; the window verifies first-hand.
+4. **G2 → built as PROVISIONAL P-849-5 (a) (the flushed blur ends the ring at a slot-split bloom);** (b) move
+   the ring onto the fan card and (c) hold the bloom go to her bundle as the alternatives.
+5. **P-849-1 → stands PROVISIONAL, shape amended by the trace:** no production door carries batch 1's race (the
+   Commits face always flushed first; the board's `restoreCommit` door has no production caller) — so the built
+   shape is the INSURED RESTORE (`insuringBuffer`, one quiet deduped auto savepoint inside the transaction),
+   passed true by the Commits face and the flushed dead door. The phone's restore flushes but does not yet
+   insure — one argument, recorded for MOBILE PARITY and her bundle.
+6. **C2 (the ⌥⌘Z/⇧⌥⌘Z door does not flush pending typing, so her own undo can mint a `'conflict'` card) →
+   BORN TICKET at the closeout, not folded in:** the undo road already insures the buffer it overwrites (the
+   standing occasion), so nothing is lost — the card is additive noise, P-849-1's sibling outside this run's
+   scope. C1 (the margin-grid recentre) and R1 (the face-only confirmation race) → low tickets at the closeout;
+   the badge-click slot-split corner rides P-849-5's QUESTIONS entry as its sibling.
+7. **The stage legs, adjudicated:** leg A (15/3) and leg B (the six named reverts) run in this run's next window
+   with batch 4's legs; leg A0 (pre-fix-SHA runs) SKIPPED — the reverts prove the same liveness without cycling
+   the worktree through old SHAs mid-window; leg C (the ~42 standing suites) FOLDS into row 8's closing sweep
+   as before — one sweep over the merged tree; leg D rides the same window's sim boot. The walk is the
+   orchestrator's, after the window (no lock screen on its rows — Fable may drive).
+8. **Canon deltas → queued for the closeout list** as the batch names them (AppSpec §9's insurance list + the
+   `restoreCommit` line; OverallModel §3's occasion list; SurfaceContracts §"The note"'s slot-split ring-end),
+   each landing only as its PROVISIONAL survives her sitting.
+
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
 "ok - this seems like a good moment to prepare for compaction. update all your docs as needed, give me a post
