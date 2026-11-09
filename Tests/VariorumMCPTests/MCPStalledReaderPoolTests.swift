@@ -331,11 +331,16 @@ struct MCPStalledReaderPoolTests {
         let client = pair[1]
         let transport = MCPSocketTransport(fd: pair[0])
         try await transport.connect()
-        // Whole frames the client never reads: the buffer left with less room
-        // than the line needs to go without waiting.
-        let filler = Data(repeating: UInt8(ascii: "f"), count: 7_000)
-        try await transport.send(filler)
+        // A whole frame the client never reads, leaving the buffer FEWER free
+        // bytes than the line holds (a send of the line then waits — the
+        // socket also polls not-writable: less room than its low-water mark).
+        var capacity: Int32 = 0
+        var size = socklen_t(MemoryLayout<Int32>.size)
+        try #require(getsockopt(pair[0], SOL_SOCKET, SO_SNDBUF, &capacity, &size) == 0 && capacity > 64)
         let closeLine = try #require(MCPCloseLine.line("Variorum closed this connection."))
+        let filler = Data(repeating: UInt8(ascii: "f"), count: Int(capacity) - 1 - 8)  // 8 bytes left free
+        try await transport.send(filler)
+        #expect(!Self.writable(pair[0]), "premise: the client's buffer holds less room than a write needs to go at once")
         let outcome: Bool? = await withCheckedContinuation { continuation in
             let said = LockIsolated<Bool?>(nil)
             let returned = DispatchSemaphore(value: 0)
@@ -361,6 +366,12 @@ struct MCPStalledReaderPoolTests {
         for try await _ in await transport.receive() {}
         await transport.disconnect()
         close(pair[0])
+    }
+
+    /// Whether `fd` polls writable now (a zero-timeout poll).
+    private static func writable(_ fd: Int32) -> Bool {
+        var ready = pollfd(fd: fd, events: Int16(POLLOUT), revents: 0)
+        return poll(&ready, 1, 0) == 1 && ready.revents & Int16(POLLOUT) != 0
     }
 
     /// A frame the size of a big answer, distinct per index.
