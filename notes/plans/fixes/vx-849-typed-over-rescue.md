@@ -174,7 +174,7 @@ beside it.**
 | 0 | Kickoff: preflight whole · worktree + branch · her rulings repo-first · the in-flight row · Linear flips (run In Progress; riders seated as sub-issues) · nov7 announced | DONE (this commit) |
 | 1 | Batch 1 — VX-683 + VX-402 (the rescue + the honest flush) | DONE — built `03d1fed00`…`bdb70dc3d`; the stage window ran 2026-11-09 (claim vx-849-batch1): leg A 22/22 · leg B six reverts proven (the adjudication's window record) · leg D 116/10 green on the sim; worktree clean at tip throughout |
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
-| 3 | Batch 3 — VX-664 (the outside-change ring-ending) | IN-PROGRESS — piece 1 (the sweep table) DONE; pieces 2–5 per the BATCH 3 RECORD |
+| 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | NOT STARTED |
 | 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | NOT STARTED |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
@@ -1267,10 +1267,11 @@ generator; owner identity left signed-out), services built inside; no pin reads 
 ### BATCH 3 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
 
 **NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
-Debug-app launch, no walk, no store or server contact — every Mac run below is **PENDING** the orchestrator's window
-(the suites and named reverts at this record's end); zero lines under `Sources/VariorumCore/Sync/`; no
-whole-package or whole-target headless run (nov7's heavy-headless rule — another session's window was live at
-spawn; the heavy closes are listed PENDING at the end). Nothing of VX-443/VX-152/VX-545/VX-855/VX-921/VX-919.
+Debug-app launch, no walk, no store or server contact — every Mac and simulator run is **PENDING** the orchestrator's
+window (the STAGE REQUEST at this record's end: 15 new pins, six named Mac reverts, the standing suites); zero lines
+under `Sources/VariorumCore/Sync/`; no whole-package or whole-target headless run (nov7's heavy-headless rule — the
+whole core package is PENDING at the end); C2 (the undo door's flush), R1 and the phone's restore insurance recorded,
+not built; no QUESTIONS filed (P-849-1 and P-849-5 are the merge's). Nothing of VX-443/VX-152/VX-545/VX-855/VX-921/VX-919.
 
 **Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole (STATUS,
 KICKOFF, ROSTER, CONSTITUTION, ENVIRONMENT TRAPS, STAGE & COORDINATION, LIVE STATUS, every brief, both batch records,
@@ -1302,7 +1303,7 @@ what apply writes, never edited). The pin suites read whole: `OutsideWriteRingEn
 | 2 | The ONE seam verified + the batch-1 composition stated + the found gaps G1 (the unlanded guard) and G3 (the gap keystroke's snapshot) fixed with their pins | DONE — 2a the pins on the PRE-FIX tree (`d1a2b028e` — the red-on-old SHA); 2b the fix + the two primitives' pins (this commit); Mac + phone `build-for-testing` green; the instrument green 2/2 (its named reverts run next, at this tip); every Mac run PENDING the stage |
 | 3 | P-849-1 — the restore doors: flush-first verified, ONE quiet insurance savepoint (`restoreCommit(…, insuringBuffer:)`), the dead board door aligned | DONE — 3a the door pins on the PRE-FIX tree (`762dde907` — the red-on-old SHA); 3b the op + core pins + the two doors (this commit) — core compile-red watched, then 6/6 green, the restore neighbours 104/10 green; Mac + phone `build-for-testing` green; the core revert R-P1c runs next at this tip; Mac runs PENDING the stage |
 | 4 | R-683-4 — the post-rescue face pinned (mounted Takes board, both roads) + the slot-split corner (G2, PROVISIONAL P-849-5) | DONE — 4a the face pins on the PRE-FIX tree (`ea58914cc` — G2's red-on-old SHA); 4b G2's arm (this commit); Mac `build-for-testing` green; every run PENDING the stage |
-| 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | NOT STARTED |
+| 5 | Pins compiled (`swift build`, targeted core `swift test`, both `build-for-testing`s) + the stage list + the self-assessment | DONE (this commit) — `swift build` green; core targeted 6/6 + neighbours 104/10; Mac + phone `build-for-testing` green at the tip; every Mac/simulator run PENDING the STAGE REQUEST below |
 
 #### Piece 1 — THE SWEEP TABLE (every road that rewrites a take's `working_text` from outside a live pane bound to that take, × every host a live pane can sit on)
 
@@ -1612,7 +1613,122 @@ missed its anchor; the reverts below were NOT run before this record named them.
   call in `adopt` deleted ⇒ RED `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur` only; **R-B1 (batch
   1's, re-used as the face pins' liveness proof)** `AutosaveCoordinator.flushNow`'s `expectedText: entry.expectedText` →
   `nil` ⇒ RED `aRescueUnderHerLivePane…` and `aRescueOnAnOpenStackFan…` (no card — the pull's words survive nowhere) and
-  ALSO, by design, piece 2's four G1/G3 pins (their cards); A's pin green (no rescue on its road).
+  ALSO, by design, piece 2's four G1/G3 pins (their cards) and G2's pin at its FIXTURE line (no card, so no fan to
+  slot-split); A's pin green (no rescue on its road).
+
+#### Piece 5 — Close
+- *Headless at the tip:* `swift build` → `Build complete!`; core `swift test --filter` — `RestoreInsuranceTests` 6/6, the
+  restore neighbours **104 tests in 10 suites passed** (+5 in 2); the instrument (deleted, never committed) 2/2 with
+  R-G1i/R-G3i biting exactly as named; R-P1c biting exactly as named. Mac `build-for-testing` → `** TEST BUILD SUCCEEDED
+  **` at every piece and at the tip; phone `build-for-testing` (generic iOS Simulator) → `** TEST BUILD SUCCEEDED **` at
+  2b, 3b and the tip. No warning on a touched line.
+- *HEAVY HEADLESS — PENDING for the orchestrator's window (nov7's rule; another session's window was live at spawn):* the
+  WHOLE core package `swift test` (the one core change — `restoreCommit`'s defaulted `insuringBuffer` — is called across
+  suites; the targeted run covered every suite that names `restoreCommit`); the whole Mac target and the whole phone
+  target fold into LIVE STATUS row 8's closing sweep.
+
+**The pins, said plainly (compile-red vs behavior-red):**
+- BEHAVIOR-red on the pre-fix tree (they drive only pre-fix API — each committed BEFORE its fix, at the SHA named):
+  `OutsideWriteRescueCompositionTests` — the two G1 pins and the two G3 pins at `d1a2b028e`;
+  `RestoreFlushFirstInsuranceTests` — the two door pins at `762dde907`; `PostRescueFaceTests` —
+  `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur` at `ea58914cc`. NOT WATCHED by me (Mac — the stage);
+  each has its named revert at the tip.
+- COMPILE-red on the pre-fix tree (they name new API), each with a behavioral revert that bit headless: the core
+  `RestoreInsuranceTests` (R-P1c, watched); the two primitives' pins in `OutsideWriteRescueCompositionTests` (R-G1i /
+  R-G3i on the instrument, watched).
+- GREEN on both sides BY DESIGN (composition / guards — recorded so nobody reads them as hollow): the three mounted
+  face pins in `PostRescueFaceTests` (their liveness: R-B1 and VX-677's rev664), the stack guard, the Read ▸ edit
+  successive-runs guard, the dedupe guard, the core guards.
+
+**SELF-ASSESSMENT.**
+- *The brief's piece 2 premise was stale, and the record says so first:* VX-664's ONE ring-ending seam already EXISTED
+  (VX-677's A-677-1, merged) — the brief's "generalize the vx-440 shape into one declared mechanism" was done; the
+  batch verified it road by road and host by host (piece 1), stated the batch-1 composition, and found where the two
+  MET badly: **G1** (the seam's "pending" was not "unlanded" — a ring could end mid-typing on the three direct-adopting
+  owners, exactly in the case the brief says it must not) and **G3** (a data-loss hole: a keystroke in the
+  confirmation's gap was snapshotted on the outside words, so the guarded autosave wrote over them unseen — batch 1's B
+  could not see it, and batch 1's self-assessment claimed that road rescued). Both fixed through the seam itself — one
+  coordinator answer, one authority rule — with no per-road patch, no `Sync/` line, no `PaneSurface`/`BlockRangeIndex`/
+  `EditorTextView` line (P-3 unbent: the live pane still never adopts; the fix only makes the snapshot and the ring
+  rule read the SAME fact about what the pane holds).
+- *The composition, final:* A's road ends the ring on the server's words (her words on the card); B's road keeps the
+  ring and her words (the pull's words on the card) — now also when the pull's delivery is consumed while her write
+  flies (G1) and when she types in the confirmation's gap (G3). Residual R1 (face-only, data-safe) recorded.
+- *P-849-1:* the batch-1 corner's race had no production door; what P-849-1 truly adds is the insurance savepoint on
+  her restore (her typed-since words were unreachable after a restore) and the dead door's alignment. PROVISIONAL —
+  her bundle (one argument per door to flip).
+- *R-683-4:* the default posture's face is right on the code (pinned as composition); the one face defect is G2 (slot
+  split), fixed PROVISIONAL (a) with (b)/(c) recorded.
+- *What I could not verify:* every Mac pin's RUN (red at its SHA, green at the tip) — the stage's; the walk — the
+  orchestrator's (UI-kind evidence). Where a mounted pin's staging could misbehave in the host, the likeliest spots are
+  `PostRescueFaceTests`' window-origin comparison (a 0.5-pt tolerance) and the mounted `insertText` road (the
+  `TakesChooseRingTests` idiom).
+
+**RECORDED CORNERS (for the orchestrator; none built here):** C1 (margin grid + follow-the-scroll re-centres on a
+note's first fan) · C2 (the structural undo/redo door does not flush pending typing — a deliberate act of hers can mint
+the card; the flush-first doctrine would close it) · R1 (the confirmation's photograph after a landing — face only) ·
+her own badge click in slot split on her ring's fanned block replaces the cell under the ring (VX-577 covers expand-all,
+not the single toggle) · MOBILE PARITY: the phone's restore door flushes but keeps no insurance (one argument); the phone
+has no `PaneTextAuthority` (its liveness authority is its own), so G1/G3/G2 are Mac-only by construction — the shared
+coordinator's `isUnlanded` is additive and the phone does not read it.
+
+**QUESTIONS owed at the merge (the orchestrator files them, latest main):** **P-849-1** (as built: flush-first on her
+restore doors + one quiet unnamed savepoint of the words a changing restore replaces; alternatives: no insurance; the
+card kept on her doors) · **P-849-5** (G2: (a) end the ring by the flushed blur — built; (b) carry the ring onto the fan
+card that renders her take, the caret where it was; (c) hold the slot-split bloom of her ring's block until the ring
+leaves).
+
+**Canon deltas owed at the closeout (the orchestrator's, two-file shape):** AppSpec §9's quiet-auto-commit list (the
+insurance occasions) gains HER RESTORE's insurance (P-849-1, PROVISIONAL) — and OverallModel §3's insurance list names
+the occasions too, the author's file: the orchestrator's call how the PROVISIONAL lands there; AppSpec §9's
+`restoreCommit` line gains `insuringBuffer` (her doors insure; the default does not). SurfaceContracts §"The note"
+(Takes): the slot-split ring-end on an arriving take (P-849-5, PROVISIONAL). No canon line for G1/G3 (mechanism, not
+contract — the `PaneTextAuthority` invariants carry them in code).
+
+**STAGE REQUEST (every Mac and simulator run of this batch — the orchestrator's claim through nov7; `-only-testing`
+takes TYPE names, as a zsh array; the tree verified clean before, between and after each cycle):**
+- *Leg A — the batch's own Mac suites at the tip (green expected):* `T=(OutsideWriteRescueCompositionTests
+  RestoreFlushFirstInsuranceTests PostRescueFaceTests)` — "Test run with 15 tests in 3 suites" (7 + 3 + 5).
+- *Leg B — the named reverts, each ALONE at the tip, its suite run, then `git checkout --` of the one file (diff clean)
+  and the suite re-run green:* **R-G1** `App/Variorum/Shared/AutosaveCoordinator.swift` — `isUnlanded`'s body →
+  `pending[variantID] != nil` ⇒ RED `aPullConsumedWhileHerRescueWriteFliesLeavesReadEditsRing` (ring + buffer lines),
+  `aPullConsumedWhileHerRescueWriteFliesLeavesTheIndexRing`, `isUnlandedAnswersPendingAndInFlightAndLandedOnlyAfterTheWrite`.
+  **R-G3** `Surface/PaneTextAuthority.swift` — `shownText`'s first line deleted ⇒ RED
+  `aKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver`, `aCanvasKeystrokeInTheConfirmationGapIsRescuedNeverWrittenOver`,
+  `shownTextIsWhatTheLivePaneHolds`. **R-P1a** `Features/History/CommitsFaceModel.swift` — `insuringBuffer: true` →
+  `false` ⇒ RED `theCommitsFaceKeepsWhatHerRestoreReplacesInAQuietSavepoint` only. **R-P1b**
+  `Features/Takes/TakesViewModel.swift` — `restoreCommit`'s `guard await flushPendingText() else { return }` deleted ⇒
+  RED `theBoardsRestoreDoorFlushesHerTypingFirstAndMintsNoCard` only. **R-G2** `Features/Takes/TakesViewModel.swift` —
+  the `endRingIfSlotSplitReplacedItsCell()` call in `adopt` deleted ⇒ RED
+  `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur` only. **R-B1 (the face pins' liveness)**
+  `AutosaveCoordinator.flushNow`'s `expectedText: entry.expectedText` → `nil` ⇒ RED the two B face pins, the four G1/G3
+  pins (their card lines) and G2's fixture line; A's pin and the P-849-1 pins green.
+- *Leg A0 (optional — the red-on-old SHAs, if the orchestrator prefers them to the reverts):* at `d1a2b028e`
+  `T=(OutsideWriteRescueCompositionTests)` ⇒ 5 tests, RED the four G1/G3 pins, the guard green; at `762dde907`
+  `T=(RestoreFlushFirstInsuranceTests)` ⇒ 3 tests, RED the two door pins; at `ea58914cc` `T=(PostRescueFaceTests)` ⇒
+  5 tests, RED exactly `aRescuedCardThatSlotSplitsHerBlockEndsTheRingByTheFlushedBlur`.
+- *Leg C — the standing suites over the touched seams (or fold into LIVE STATUS row 8's closing sweep):*
+  `OutsideWriteRingEndTests` · `OutsideWriteLivePaneTests` · `PaneOutsideWriteRuleTests` · `PaneGoLiveAdoptionTests` ·
+  `PaneTextAuthorityTests` · `RestoreLandingTests` · `RestoreLandingRewriteHopTests` · `TakesEntryBandTests` ·
+  `TakesBoardTests` · `TakesExpansionMemoryTests` · `TakesBoardSoakTests` · `TakesChooseRingTests` ·
+  `TakesStepFollowTests` · `TakesStepFollowModelTests` · `TakesParkedFollowTests` · `TakesBufferConvergenceTests` ·
+  `BoardDeliveryPolicyTests` · `TakesLensFilterTests` · `TakesSlotDragTests` · `TakesCardHeightTests` ·
+  `TakesCommentFeedLivenessTests` · `TakesCollapsedFanWashTests` · `TakesCommentGutterTests` ·
+  `CompareCommentGutterTests` · `CompareViewModelTests` · `CanvasAndPoolTests` · `CanvasTakesSwitcherTests` ·
+  `BlockTOCTests` · `BlocksWorkbenchTests` · `ReadModeTests` · `BookIndexEditingTests` · `WriteTakesPanelChooseTests` ·
+  `WriteTakesPanelKeysTests` · `CommitsFaceModelTests` · `CommitsFaceDoorsTests` · `BlockHistoryPaneTests` ·
+  `CommitFlowTests` · `TutorialTakesActsTests` · `TypedOverRescueSurfaceTests` · `AutosaveCoordinatorTests` ·
+  `SyncBeforeRoundTests` · `MCPHerEditorDoorTests` (type names verified by grep at the close).
+- *Leg D — the phone (simulator, by id):* `MobileTypedOverRescueTests` · `MobileQuickNoteTests` ·
+  `MobileTakesBrowserTests` · `MobileBlockHistoryTests` · `MobileRoundOccasionTests` (the shared coordinator's additive
+  change; no phone file touched).
+- *The orchestrator's WALK (UI-kind evidence, both voices, the DEV-STORE Debug build):* Takes, the ring in a block,
+  type, and (i) let an AI `edit_take` that take (the ring ends, the AI's words read) — the VX-677 W-664-1 row re-shot over
+  this batch; (ii) restore a moment from the History face's sheet over Write's take panel after typing — the take shows
+  the moment, the rail gains one quiet ◦ moment holding what she had typed, no `'conflict'` card; (iii) in slot split
+  with a block's first-take door open and the ring in it, give the block a second take from outside (the wire's
+  `add_take`) — the ring ends, the block shows its two fan cards. The sync-road face (B/A) needs a second device —
+  her two-Mac test, or a staged pull; the mounted pins carry it otherwise.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
