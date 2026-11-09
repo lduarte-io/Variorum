@@ -715,6 +715,47 @@ struct MCPPaneTabsTests {
         }
     }
 
+    /// **The oracle's rule, pure — the GATE12 rig fix's pin** (the run record's
+    /// BATCH 1 FOLLOW-UP). No window, no geometry: the mechanism the foot arm
+    /// met, replayed on the oracle itself — a pane records, the pin resets for
+    /// its next mount, the next pane records, and the CLOSED pane's late
+    /// disappear arrives. The live record stands; the live probe's own forget
+    /// still clears (a mark no longer drawn reads absent — the "is NOT drawn"
+    /// arms' ground); marks and scopes never touch each other; a reset clears
+    /// its scope whole. RED ON OLD by construction: the old `forget(_:in:)`
+    /// took no owner and cleared whatever record stood (the measured erase).
+    @Test func theOraclesForgetClearsOnlyTheRecordItsOwnProbeWrote() {
+        #if DEBUG
+        let scope = "vx934-oracle-\(UUID().uuidString)"
+        let closed = UUID()
+        let live = UUID()
+        let before = CGRect(x: 0, y: 10, width: 100, height: 20)
+        let now = CGRect(x: 0, y: 40, width: 100, height: 20)
+        let moved = CGRect(x: 0, y: 44, width: 100, height: 20)
+
+        MCPPaneGeometry.reset(scope)
+        MCPPaneGeometry.record(.tabRow, before, owner: closed, in: scope)  // the first pane
+        MCPPaneGeometry.reset(scope)                                       // the pin, before its next mount
+        MCPPaneGeometry.record(.tabRow, now, owner: live, in: scope)       // the next pane
+        MCPPaneGeometry.forget(.tabRow, owner: closed, in: scope)          // the closed pane's LATE disappear
+        #expect(MCPPaneGeometry.frame(.tabRow, in: scope) == now,
+                "a closed probe's late forget leaves the live pane's record standing")
+
+        MCPPaneGeometry.record(.tabRow, moved, owner: live, in: scope)     // the live probe re-reports
+        #expect(MCPPaneGeometry.frame(.tabRow, in: scope) == moved, "its own probe's new frame replaces its old one")
+        MCPPaneGeometry.forget(.tabRow, owner: live, in: scope)            // the live probe leaves
+        #expect(MCPPaneGeometry.frame(.tabRow, in: scope) == nil,
+                "its own probe's forget clears it — a mark no longer drawn reads absent")
+
+        MCPPaneGeometry.record(.aiMarks, now, owner: live, in: scope)
+        MCPPaneGeometry.forget(.tabRow, owner: live, in: scope)
+        #expect(MCPPaneGeometry.frame(.aiMarks, in: scope) == now, "a forget of one mark never touches another")
+        #expect(MCPPaneGeometry.frame(.aiMarks, in: scope + "-another-mount") == nil, "scopes never meet")
+        MCPPaneGeometry.reset(scope)
+        #expect(MCPPaneGeometry.frame(.aiMarks, in: scope) == nil, "a reset clears its scope whole")
+        #endif
+    }
+
     // MARK: - VX-903 — the geometry contract's grown arm (both dials seated together)
 
     /// **VX-903 — her #264 word: "right under 'when a client shows you
