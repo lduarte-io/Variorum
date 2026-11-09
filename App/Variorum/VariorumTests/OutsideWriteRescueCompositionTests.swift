@@ -360,4 +360,35 @@ struct OutsideWriteRescueCompositionTests {
         #expect(unknown.shownText(variantID: "v", storeText: "stored") == "stored",
                 "a live pane whose holding is not known: the overlay, as before")
     }
+
+    /// THE SWEEP FIX's primitive (the run record's THE SWEEP FIX): the same
+    /// truth as `shownText` wherever anything is known, and NIL only when
+    /// nothing is — the snapshot a board hands the guarded autosave for a take
+    /// its projection does not carry (nil = the unguarded write, never a
+    /// fabricated empty base that would mint a spurious `'conflict'` take).
+    @Test func shownTextIfKnownIsNilOnlyWhenNothingIsKnown() {
+        var authority = PaneTextAuthority()
+        let live = PaneTextAuthority.PaneKey(columnID: "c", blockID: "b", variantID: "v")
+        #expect(authority.shownTextIfKnown(variantID: "v", storeText: nil) == nil,
+                "nothing live, no buffer, nothing stored: unknown")
+        #expect(authority.shownTextIfKnown(variantID: "v", storeText: "stored") == "stored",
+                "the stored text, as `shownText`")
+        authority.focus(live, showing: "what she sees")
+        #expect(authority.shownTextIfKnown(variantID: "v", storeText: nil) == "what she sees",
+                "the live pane's holding is known with nothing stored")
+        #expect(authority.shownTextIfKnown(variantID: "v", storeText: "an outside write") == "what she sees",
+                "…and wins over the projection, as `shownText`")
+        #expect(authority.shownTextIfKnown(variantID: "other", storeText: nil) == nil,
+                "another take, nothing known of it: unknown")
+        authority.bufferEdited(variantID: "v", text: "typed on")
+        authority.blur()
+        #expect(authority.shownTextIfKnown(variantID: "v", storeText: nil) == "typed on",
+                "a blurred pane's unsettled buffer is known")
+        var unknown = PaneTextAuthority()
+        unknown.focus(live)
+        #expect(unknown.shownTextIfKnown(variantID: "v", storeText: nil) == nil,
+                "a live pane whose holding is not known, nothing stored: unknown")
+        #expect(unknown.shownText(variantID: "v", storeText: "stored") == "stored",
+                "`shownText` is the known answer with the store as its floor")
+    }
 }

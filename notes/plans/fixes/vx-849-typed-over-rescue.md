@@ -2795,6 +2795,69 @@ the sibling seq-ranked §7 repairs (one Debt ticket riding P-849-6's outcome) = 
   `vx849-walk` client row, the declined variorum-de rebind request (key forgotten), two copied setup-key rows,
   three revoked grant tombstones, ~10 Activity rows, one dev-store backup, the re-stamped Debug binary.
 
+### THE SWEEP FIX (a fresh Opus implementer, 2026-11-09 — the closing sweep's one regression + its two source pins)
+
+**NOT DONE HERE (first line):** no `xcodebuild test` of any kind and no stage contact — every Mac RUN below is
+**PENDING the orchestrator's re-verify window**; no phone build (no phone-visible file is touched); the Takes and
+Canvas siblings RECORDED, not widened (below); no pull, merge or rebase; LIVE STATUS untouched.
+
+- **The traced mechanism (the reds were NOT a missing savepoint — an extra one).** `CompareLeavingSavepointTests`
+  drives `setPeer` then `paneEdited` in the same main-actor turn. `setPeer`'s `peerSlots.didSet` restarts the
+  board's observation, so the projection carries no face for the new peer until the next delivery →
+  `storeText(postID:variantID:)` is nil → `?? ""` → the edit's `old` is `""`. Since `169a51898` (batch 1, VX-683 B
+  surfaces) `old` is also the autosave's snapshot (`basedOn:`), so the flush's guarded autosave finds the row ≠ `""`
+  and RESCUES: her words keep the row, the stored words become a `'conflict'` take on the same block, never
+  savepointed → the peer's leaving (`closeAutoCommit` — every live unlocked take, deduped by `isDirty`) savepoints
+  BOTH → the pin reads two rows where it asserts one. Batch 3's `shownText` is neutral here (no pane is live, so it
+  answers exactly `text(variantID:storeText:)`, the pre-batch-3 value); `isUnlanded` is not on this road; the
+  leaving road (`savepointOnLeaving` → `flushExistingAutosave` → `closeAutoCommit`) has zero lines changed in this
+  run. Main passed because it lacks batch 1's `basedOn:`.
+- **Reproduced headless first (the instrument — batch 3's method: an untracked scratch folder in the core test
+  target, a byte copy of the fixed `PaneTextAuthority`, the real core ops; never committed, deleted after):**
+  replaying the PRE-FIX snapshot (`shownText(storeText: nil ?? "")` → `autosave(expectedText:)` →
+  `closeAutoCommit`) fails at the Mac pin's own line with the recorded value `["Paragraph 0 of note 1, revised in
+  the peer column.", "Paragraph 0 of note 1, long enough to read like real prose."]`; the FIXED snapshot → one row,
+  her text, one live take; a KNOWN snapshot (a live pane's holding over a moved row) still rescues; the G3 truth
+  table (`shownTextIsWhatTheLivePaneHolds`, ported verbatim) green. **R-SFi** (named before it ran, on the copy):
+  `shownTextIfKnown`'s last line → `?? storeText ?? ""` ⇒ RED exactly the primitive's three nil lines and the
+  fixed-snapshot replay (its nil, savepoint and card-count lines); the G3 table and the known-snapshot rescue green.
+  The copy restored (`cmp` identical) → 4 green + the deliberate old-snapshot red; the folder deleted, tree clean.
+- **The fix (Mac only):** `PaneTextAuthority.shownTextIfKnown(variantID:storeText: String?) -> String?` — the
+  live pane's holding, else an unsettled buffer, else the stored text, NIL only when none knows; `shownText` now
+  delegates to it (byte-equivalent for every non-nil store text). `CompareViewModel.paneEdited` hands that answer
+  as `basedOn:` — nil when the board knows nothing of the take (the coordinator's "the caller gave none", the
+  unguarded write) — and builds the cost from `shown ?? ""`, exactly the old `old`. Why the code and not the pin:
+  the snapshot's own contract (`AutosaveCoordinator.Pending.expectedText`, `Operations.autosave`'s doc) says nil
+  is "no snapshot"; `""` was a fabricated base claiming the take was empty. Not PROVISIONAL — no product behavior
+  is decided, the coordinator's stated contract is restored. Production reach: a Compare pane renders only from a
+  projected face and a swapped-out column's live pane is released first, so a keystroke on an unprojected take has
+  no production door today; the pin's direct `paneEdited` after `setPeer` is that state.
+- **What stays guarded:** G1 untouched (`isUnlanded`, every closure); G3 untouched for every known snapshot — an
+  owner holding a stored text or a live holding hands exactly what it handed before (`OutsideWriteRescueCompositionTests`
+  must stay green in the window). New primitive pin beside G3's: `shownTextIfKnownIsNilOnlyWhenNothingIsKnown`
+  (names new API — compile-red on the old tree; its behavioral revert is R-SFi above).
+- **Siblings, RECORDED not widened:** `TakesViewModel.paneEdited` (`currentStoreText ?? ""`) and
+  `CanvasViewModel.paneEdited` (`storeText ?? ""`) carry the same fabricated-empty fallback, production-unreachable
+  the same way (their panes render from the projection); each is a one-line adoption of `shownTextIfKnown` — the
+  orchestrator's to ticket or fold. The TOC model and the book Index take `oldText` from the pane itself (always
+  known): N/A.
+- **The two justified edits (test-only, `Part of VX-544`):** `ProdTestRoadTests.aReleaseBuildCompilesNothingOfTheRoad`
+  (:316) and `SyncWalkFenceTests.theDerivationReadsTheLaunchsLiftOnlyInDebug` (:88, :94) pinned the composition's
+  pre-batch-2 spelling; batch 2 (`5ce6becf0`) gave both arms `path: networkPath`. The literals now read today's exact
+  spelling (Release: `…allowsSync: storeVariant == .real, path: networkPath)`; Debug: `…prodTestRoad:
+  launchFence.prodTestRoad),`); every fence assertion stands (Release = the store variant alone, no walk/road name;
+  Debug = the launch fence's lift read, never `storeVariant == .real`). Checked against the source by exact-string
+  grep (each literal present once; the old Debug literal absent).
+- **Builds:** the instrument headless as above; Mac incremental `build-for-testing` → `** TEST BUILD SUCCEEDED **`
+  (the one warning in a touched file is the pre-existing `boardSpace` Sendable warning, far from these lines).
+- **THE RE-VERIFY WINDOW (Mac, type names, all PENDING):** the reds `CompareLeavingSavepointTests` (2 — expected
+  green) · their file's neighbours `BookLeavingSavepointTests` `BookLeavingRegistryTests` · the seam
+  `OutsideWriteRescueCompositionTests` (now 8) `PaneTextAuthorityTests` `PaneOutsideWriteRuleTests`
+  `TypedOverRescueSurfaceTests` · Compare's other `paneEdited` drivers `CompareViewModelTests`
+  `CompareCommentGutterTests` `OutsideWriteRingEndTests` `AutosaveRegistryLifecycleTests`
+  `VX347AskedTakeFilingTests` · the leaving road `SavepointOnLeaveTests` · the justified edits `ProdTestRoadTests`
+  `SyncWalkFenceTests`. The phone target need not re-run for this fix (Mac-only files).
+
 ## THE FINAL FOLD + RELEASE PREP PART 1 (2026-11-09, on nov7's release-prep GO — this run is the wave's LAST merger)
 
 - **Main folded at `b7cb67407`** (vx-915 merged as `961790b13`, PR #240 — all three sibling runs now in). Clean,

@@ -260,8 +260,22 @@ nonisolated struct PaneTextAuthority: Equatable, Sendable {
     /// Anything else — a read pane, a live pane whose holding is not known — is
     /// the overlay, exactly as before.
     func shownText(variantID: String, storeText: String) -> String {
+        shownTextIfKnown(variantID: variantID, storeText: storeText) ?? storeText
+    }
+
+    /// **`shownText`, honest when nothing is known** (the VX-849 run's closing
+    /// sweep — THE SWEEP FIX in `notes/plans/fixes/vx-849-typed-over-rescue.md`).
+    /// The same answer — the live pane's holding, else an unsettled buffer, else
+    /// the owner's stored text — or NIL when none of the three knows what the pane
+    /// shows for this take: an owner whose projection does not (yet) carry it
+    /// (`storeText` nil). The guarded autosave's snapshot is THIS answer, never a
+    /// fabricated empty text: nil is the coordinator's "the caller gave none" (the
+    /// unguarded write, `AutosaveCoordinator.record(…, basedOn:)`), while an empty
+    /// snapshot over a row holding words reads as "the row changed under her" and
+    /// mints a spurious `'conflict'` take for words she was looking at.
+    func shownTextIfKnown(variantID: String, storeText: String?) -> String? {
         if livePane?.variantID == variantID, let liveHeld { return liveHeld }
-        return text(variantID: variantID, storeText: storeText)
+        return buffers[variantID] ?? storeText
     }
 
     // MARK: - Slot resolution (the takes family's fall-through)
