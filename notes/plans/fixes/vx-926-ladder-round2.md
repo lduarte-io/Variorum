@@ -111,3 +111,11 @@
 **Tally:** 0 BLOCKER · 0 MAJOR · 1 MINOR · 1 NIT new. **No new BLOCKER or MAJOR — the ladder closes at this round** (CLAUDE.md's hard rule: round 3 only for a new BLOCKER/MAJOR). F-R2-1's comment/record fix and F-R2-2 (if taken) are a final round's fixes, so they get the orchestrator's line-by-line check against each finding, as CLAUDE.md says.
 
 **Status:** ROUND 2 COMPLETE — 2026-11-09.
+
+## A-926-5 — the orchestrator's dispositions (round 2; the ladder CLOSES at this round)
+
+- **All six round-1 fixes: VERIFIED stands.** Departure (a) SUSTAINED with the reviewer's own runs; departure (b)'s hollow verdict SUSTAINED with the implementer's explanation REFUTED — the ORDER form of the lane pin is **KEPT, re-justified on the measured ground** (the reviewer's E3/E4: a `.high`-band hold is what delays the lane — a 1.5 s hold reds the old 0.75 s pin 1 of 2 while the ORDER pin stays green 2 of 2; the non-preemption premise is false on this OS, a `.high` job starts in 16 µs–10 ms under a full `.medium` pool).
+- **F-R2-1 — ACCEPTED, FIX:** the wording in `ObservationLaneTests.swift:26–30`, the U3 self-assessment (i) sentence, and round 1's F-R1-6 fix notes re-worded to the measured fact, using the replacement text proposed above; the "ORDER cannot red" overclaim corrected (a sustained `.high` hold can red it — and should). Plus the stale count at the run record's U4 facts line ("2,731 per-note keys" → 2,622 per-note of the domain's 2,731) — same mechanical class, folded in.
+- **F-R2-2 — ACCEPTED, FIX (taken, not optional):** the run's whole point is hermetic tests; a fence that accepts `defaults: .standard` on a test call line is a hole in exactly that fence. The fence refuses `appDomainSpellings` on the test root's call lines; the reviewer's probe line is the red-on-old.
+- **The out-of-scope note — RECORDED:** `MCPAcceptLoopServerTests.swift:93/115/117`'s 10 s bounds around real-server connects (VX-612-era, pre-run) are the same FIFO exposure as F-R1-2 — joined to the A-926-3 / P-926-U3-1 bundle; the soak's MCP leg reads them with that lens.
+- **Execution:** one narrow fresh implementer builds F-R2-1 + F-R2-2; as a FINAL round's fixes they get the orchestrator's LINE-BY-LINE check against each finding (CLAUDE.md's rule), then the ladder record closes.
