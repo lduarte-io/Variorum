@@ -346,10 +346,12 @@ struct MCPServerTests {
         // copy_note_to_wing (read on the note, write new on ANOTHER wing).
         // VX-769 (the VX-771 run, batch 3 — justified edit, the ritual): and
         // create_gathering (write new on the wing, create_book's decision).
+        // VX-943 (the VX-915 run, batch 6 — justified edit, the ritual): and
+        // unlink_versions (link_versions' opposite, write new on both notes).
         #expect(Set(MCPToolCatalog.writeNew.map(\.name))
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
-                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions", "insert_blocks",
-                    "duplicate_note", "copy_note_to_wing", "create_gathering"])
+                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions", "unlink_versions",
+                    "insert_blocks", "duplicate_note", "copy_note_to_wing", "create_gathering"])
         // 13n-c U6 (justified edit, the ritual): edit gains the per-item
         // note move across wings (VX-160). VX-168 U2 (justified
         // edit, the ritual): and the deliberate acts — VX-169's save_commit,
