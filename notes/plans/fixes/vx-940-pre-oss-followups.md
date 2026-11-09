@@ -55,7 +55,7 @@ The whole Mac target + the phone target if `Shared/` changed (VX-920 is Mac app 
 | Row | What | Status |
 |---|---|---|
 | 0 | Kickoff: mint (VX-940), 7 members seated, worktree, in-flight row, her rulings | DONE (this commit) |
-| W1 | VX-939 + VX-923 | NOT STARTED |
+| W1 | VX-939 + VX-923 | IN PROGRESS — "## W1 record" (end of file) |
 | W2 | VX-920 | NOT STARTED |
 | W3 | VX-917 | NOT STARTED |
 | W4 | VX-922 + VX-925 + VX-933 | NOT STARTED |
@@ -66,3 +66,19 @@ The whole Mac target + the phone target if `Shared/` changed (VX-920 is Mac app 
 ## 7. Environment traps
 
 The VX-926 record's §7 binds by reference (which binds the VX-912 record's §7). This run adds: never two implementers in one worktree (this run and VX-926 run beside each other under the two-Opus allowance — each stays in its own worktree); the letter's words are hers byte-faithful; all public copy sentence-case, PROVISIONAL posture per the standing rulings.
+
+## W1 record
+
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test`, no stage, no Debug launch (the brief: headless only) — so the in-target runs of the Mac copy suite and the phone sweep are PENDING the run's gate; nothing published; her letter's words untouched.
+
+*Machinery: Opus implementer, fresh session, briefed by this file's §2/§4 W1/§7 (+ the VX-926 §7 and VX-912 §7 it binds), the resiliency protocol, the VX-912 B3 record (the dependency table, F-B3-1/F-B3-2, P4's options), the two tickets. No revert is in flight.*
+
+### LIVE STATUS
+
+| Piece | What | Status |
+|---|---|---|
+| P0 | This record + the ledger row | DONE (this commit) |
+| P1 | VX-939 — `LETTER.md` at the repo root (her text, header stripped, byte-faithful); the README pointer moves to it; the one-file-or-two verdict | NOT STARTED |
+| P2 | VX-923 — the pin (red on the current tree) | NOT STARTED |
+| P3 | VX-923 — the credits (Sparkle + the Point-Free siblings) and the BIP-39 line (pane + `Vendor/BIP39/README.md`) | NOT STARTED |
+| P4 | Close: headless build + the copy tests + the seeder pins (PENDING the gate where in-target), authored sentences listed, PROVISIONALs | NOT STARTED |
