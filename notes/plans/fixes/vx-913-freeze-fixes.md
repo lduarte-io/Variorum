@@ -300,3 +300,19 @@ Preconditions (WalkKit README): a HELD stage claim; `Tools/WalkKit/guard.sh --au
 **What I did not do.** Run any revert-red App run, the gate's other suites, the walk or the capture harness (no stage claim — by the brief). Touch the master LEDGER rows (the orchestrator's). Make `TagsViewModel.createTag` read `shownWing` instead of `session.wing.currentID` — a root tag minted during a switch's lag could land in the new wing while the old list shows; outside this ticket, noted for a later look. Re-voice anything: no copy changed.
 
 **Risks a reviewer should look at.** (1) The request is snapshotted at the door's press; a re-render can't change it, but SwiftUI's `.sheet(item:)` re-presents if the item's `id` changes — it can't while the sheet is up (the checks can't move under a window-modal sheet). (2) Pin E builds the dead-wing case through the ops' own road (tags deleted, then the wing); a sync-applied death takes a different road to the same row state. (3) The VX-343 sweep re-states the rule to find continuation lines in the files (an oracle over the raw text); a future file with a genuinely nested paragraph under a bullet would need the sweep to learn it.
+
+## B4 RECORD (VX-81 — HISTORY-FIRST research unit) — the implementer's record
+
+**NOT DONE (kept current; the first line by rule):** this is a RESEARCH unit — NO code written, NO stage, NO GUI, NO walk, NO `xcodebuild test` (the brief's fence). The crash report `Variorum-2026-10-07-121811.ips` lives on the AIR (`~/Library/Logs/DiagnosticReports/`), not this Mac — NOT read; the memo works from the ticket's stack summary (the roster row above + the VX-80 record's incident timeline). The memo, verdict and self-assessment are IN PROGRESS (LIVE STATUS below).
+
+**Session note:** head at start 17841199d (the branch, tree clean). Required reading done in this session, nothing delegated: this record (B4 BRIEF, SITTING RECORD, B1 BRIEF's Workspace paragraph, Environment traps) · `notes/CastleRules.md` IN FULL · `notes/SyncSpec.md` IN FULL · `notes/plans/fixes/vx-80-castle-follow-recovery-door.md` WHOLE · `notes/plans/vx-329-release-switch.md` (its top §1–§5, the U1 RECORD's deletion sweep table, §9 CLOSEOUT — the file carries no section titled FOR A LATER READER) · `notes/plans/fixes/vx-529-pair-catchup.md` (its top: status, mandate, the state, THE DESIGN, THE RULINGS, ACCEPTANCE — likewise no FOR A LATER READER section by that title). Commits pathspec-limited to this record file.
+
+### B4 LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | This record skeleton + the required reading | DONE (this commit) |
+| 1 | Q1 — the 0.9.2 road the crash names: the code at build 5178 (git archaeology), and where each piece went | IN PROGRESS |
+| 2 | Q2 — today's re-keying reopen road: does the crash-prone shape survive? (code reading at the branch head) | NOT STARTED |
+| 3 | Q3 — the verdict proposal (close-as-stale chain, OR a bounded repro plan) | NOT STARTED |
+| 4 | Self-assessment | NOT STARTED |
