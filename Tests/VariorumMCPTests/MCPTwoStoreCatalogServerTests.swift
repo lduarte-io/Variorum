@@ -72,6 +72,10 @@ struct CatalogWorld: Sendable {
     // rule #interleave; in A the hidden half tags a Private Studio note it
     // gathers (`privateGathered`, hidden), and the readable two after it.
     var interleavedGathering = "", interleaveTag = "", privateGathered = ""
+    // VX-943 (the VX-915 run, batch 6): two of kin's hidden version links —
+    // to a Private member and to the daily Journal's entry — whose edge ids
+    // unlink_versions names (A only; B and C pass strings naming nothing).
+    var privateLink = "", journalLink = ""
 }
 
 /// One call of the walk.
@@ -357,7 +361,10 @@ struct MCPTwoStoreCatalogServerTests {
             // and a copy are minted; no reachable row changes.
             _ = try ops.duplicateAsVersion(w.kin, tags: .none)
             for relative in [w.privateShared, w.atticNote, w.journalEntry] {
-                _ = try ops.markPostsAsVersions(w.kin, relative)
+                let link = try ops.markPostsAsVersions(w.kin, relative)
+                // VX-943 (batch 6): the edge ids unlink_versions' hidden arms name.
+                if relative == w.privateShared { w.privateLink = link.id }
+                if relative == w.journalEntry { w.journalLink = link.id }
             }
             // VX-827 U2 (VX-810): hidden WEARERS of tags the client can name — the
             // shared book's Private member wears #board, the hidden secret note's
@@ -562,5 +569,6 @@ extension CatalogWorld {
         privateStudio = a.privateStudio; hiddenChapter = a.hiddenChapter
         journalBook = a.journalBook; locket = a.locket
         privateGathered = a.privateGathered
+        privateLink = a.privateLink; journalLink = a.journalLink
     }
 }

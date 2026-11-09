@@ -499,16 +499,28 @@ struct TutorialMCPChapterTests {
             // P-809-6): the truth-pass rule for VX-771's and this run's write-new acts —
             // a gathering minted on a wing (create_gathering joins the loop) and a note
             // born wearing its tags (create_note's tags). RED ON OLD by absence.
+            // VX-943 (the VX-915 run, batch 6 — A JUSTIFIED EDIT, the ritual; PROVISIONAL
+            // words, her bundle): the link's opposite joins the sentence ("…which
+            // paragraphs match, or remove a link it made.") and unlink_versions joins
+            // the truth loop. RED ON OLD by absence.
             #expect(text.contains("Write new: it can also make new notes, books, gatherings, chapters and tags, file "
                                   + "notes into books and chapters, and give a book a rule that collects notes by tag. "
                                   + "A note it makes can wear its tags from the start. It can add blocks at the end of "
                                   + "a note, duplicate a note to work on a copy, and link two notes as versions by "
-                                  + "naming which paragraphs match."))
+                                  + "naming which paragraphs match, or remove a link it made."))
             for name in ["create_note", "create_book", "create_section", "apply_tag", "add_note_to_book",
                          "file_note_in_chapter", "set_book_rule", "insert_blocks", "duplicate_note", "link_versions",
-                         "create_gathering"] {
+                         "unlink_versions", "create_gathering"] {
                 #expect(MCPToolFacts.rung(of: name) == .writeNew, "\(name) is a write-new act")
             }
+            // A JUSTIFIED EDIT (the VX-915 ladder's F-3): the description no longer
+            // claims the link must be one "link_versions made" — the act takes any
+            // live version link by its id — so the truth it pins is the id and
+            // where the ids come from (the wire pin: MCPUnlinkVersionsServerTests).
+            #expect(try tool("unlink_versions").description.contains("by its edge_id"),
+                    "the link's opposite takes the link by its id (VX-943)")
+            #expect(try tool("unlink_versions").description.contains("the ids come from link_versions' answers"),
+                    "…the id link_versions answered (VX-943)")
             #expect(try tool("create_note").description.contains("tags the note as it is born"),
                     "a note it makes can wear its tags from the start (VX-814)")
             #expect(try tool("insert_blocks").description.contains("they go at the note's END — write new on the note "

@@ -109,8 +109,9 @@ extension MCPWriteTools.Job {
         // A membership, a deletion, a tag taken off by its path (a lookup),
         // a version link, a copy of stored text, a star (VX-596), a copy into
         // another wing (VX-765): no text written.
-        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .duplicateNote, .setStarred,
-             .copyNoteToWing: 0
+        // VX-943: an unlink writes no text either.
+        case .addNoteToBook, .deleteComment, .removeTag, .linkVersions, .unlinkVersions, .duplicateNote,
+             .setStarred, .copyNoteToWing: 0
         }
     }
 }

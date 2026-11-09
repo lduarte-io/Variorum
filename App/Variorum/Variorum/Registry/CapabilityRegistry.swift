@@ -99,6 +99,8 @@ nonisolated enum CapabilityRegistry {
     /// out — it is not in her ask, and P-2 says a door that can't act in a
     /// context isn't rendered enabled there; adding it is one line plus a
     /// handler if she wants it (recorded for the Design & UI review row).
+    /// VX-793 (PROVISIONAL P-915-B2-2): the comments door shares it — the
+    /// same four surfaces, the same reason (a pane carries a live block).
     private static let takeFamilyPlusCompare: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
         if ctx.mode == .compare { return .act }
         return takeFamily(ctx)
@@ -1303,9 +1305,18 @@ nonisolated enum CapabilityRegistry {
             id: .blockComments, verb: "Comments…", scope: .block,
             doors: [.menuBar, .bottomBar],
             shortcutLabel: "⌘⇧'", takesAccess: .native,
-            unavailableNote: "Comments live on a block — open a note first.",
-            // The bars' block menus carry the door in Write/Takes/Lenses.
-            availability: takeFamily),  // NIT-3: the one named rule, not a copy
+            // VX-793 (P-915-B2-2): the act's ONE refusal — spoken by every
+            // board whose door finds no block in reach (the Takes board's
+            // `requestComments`, Compare's with no pane holding the ring).
+            unavailableNote: "Click into a block first — comments live on the block you're in.",
+            // The bars' block menus carry the door in Write/Takes/Lenses;
+            // VX-793 (PROVISIONAL P-915-B2-2 — superseding the 13b 4C
+            // reading's grey for this act): COMPARE too, whose cells draw the
+            // block's comments in their lane since VX-728 — Comments… and ⌘⇧'
+            // open the focused pane's block's panel there, a first comment
+            // included. The callout's named rule: the four surfaces whose
+            // panes carry a live block.
+            availability: takeFamilyPlusCompare),  // NIT-3: the one named rule, not a copy
         // VX-183 (the VX-282 run, U5 — VX-179 U1's O-2): THE PANEL'S OWN SIX
         // DOORS. `.surface` acts — each sits on the row whose comment it acts
         // on (the `.restoreTake` / `.deleteNow` shape), so no menu, bar or

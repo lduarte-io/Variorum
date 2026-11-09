@@ -242,12 +242,31 @@ extension MCPTwoStoreCatalogServerTests {
         CatalogArm(label: "create_book · with an order", tool: "create_book") { w, _ in
             ["name": s("Ordered"), "wing_id": s(w.studio),
              "order": .object(["sort_field": s("entry_date"), "sort_dir": s("desc")])] },
-        CatalogArm(label: "link_versions · card and second", tool: "link_versions") { w, _ in
-            ["note_a": s(w.card), "note_b": s(w.work),
-             "pairs": .array([.object(["block_a": s(w.cardBlock), "block_b": s(w.workBlock2)])])] },
+        // VX-943 (the VX-915 run, batch 6 — justified edit): the link's edge_id
+        // is captured for unlink_versions' arms (the answer is unchanged).
+        CatalogArm(label: "link_versions · card and second", tool: "link_versions",
+                   args: { w, _ in
+                       ["note_a": s(w.card), "note_b": s(w.work),
+                        "pairs": .array([.object(["block_a": s(w.cardBlock), "block_b": s(w.workBlock2)])])] },
+                   capture: { answer in
+                       let links = answer["links"] as? [[String: Any]] ?? []
+                       return ["cardWorkLink": links.first?["edge_id"] as? String ?? ""]
+                   }),
         CatalogArm(label: "link_versions · with a hidden note", tool: "link_versions") { w, _ in
             ["note_a": s(w.card), "note_b": s(w.secretNote),
              "pairs": .array([.object(["block_a": s(w.cardBlock), "block_b": s(w.secretBlock)])])] },
+        // VX-943 (the VX-915 run, batch 6): unlink_versions — the link just made
+        // (landed), the same id again (gone, in words), and two of kin's links to
+        // a HIDDEN note (a Private member, the daily Journal's entry) — in A real
+        // edges with a readable end, in B and C ids naming nothing: one shape.
+        CatalogArm(label: "unlink_versions · the card and work link just made", tool: "unlink_versions") { _, c in
+            ["edge_id": s(c["cardWorkLink"] ?? "")] },
+        CatalogArm(label: "unlink_versions · the same link again (already gone)", tool: "unlink_versions") { _, c in
+            ["edge_id": s(c["cardWorkLink"] ?? "")] },
+        CatalogArm(label: "unlink_versions · kin's link to a Private member", tool: "unlink_versions") { w, _ in
+            ["edge_id": s(w.privateLink)] },
+        CatalogArm(label: "unlink_versions · kin's link to the daily Journal's entry", tool: "unlink_versions") { w, _ in
+            ["edge_id": s(w.journalLink)] },
         CatalogArm(label: "insert_blocks · card's end", tool: "insert_blocks") { w, _ in
             ["note_id": s(w.card), "blocks": .array([.object(["text": s("Inserted.")])])] },
         CatalogArm(label: "insert_blocks · after a hidden block", tool: "insert_blocks") { w, _ in

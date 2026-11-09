@@ -67,7 +67,36 @@ final class QuickEntryModel {
         self.session = session
     }
 
-    /// Returns the note to open, or nil when nothing was minted.
+    /// **⏎ — file it** (the bar then opens it). Returns the note to open, or
+    /// nil when nothing was minted — including a press made while a filing of
+    /// EITHER road is already in the air (VX-928: it lands on that filing).
+    @discardableResult
+    func submit() async -> String? {
+        await oneFilingInFlight { await self.fileTypedText() }
+    }
+
+    // MARK: - VX-928 — ONE FILING PER FLIGHT, BOTH ROADS
+
+    /// A filing is in flight — on ⏎'s road or ⌘⏎'s (VX-911's guard, renamed
+    /// from `filingWithoutOpening` and moved to where the two roads meet). The
+    /// box clears only when the mint returns, so a second press inside the
+    /// flight would read the SAME words and mint them again: two notes from one
+    /// capture (VX-928 — her ⏎ had no guard; VX-911's guarded only its own
+    /// road).
+    private(set) var filing = false
+
+    /// **THE ONE GUARD** both roads enter (`submit`, `fileWithoutOpening`): a
+    /// press on either road while either road's filing is in the air lands on
+    /// that filing — nothing is minted twice. A flight, never a latch: it lifts
+    /// the moment the filing returns, refused or not.
+    private func oneFilingInFlight(_ body: () async -> String?) async -> String? {
+        guard !filing else { return nil }
+        filing = true
+        defer { filing = false }
+        return await body()
+    }
+
+    /// The filing itself — the box's words made a note (both roads' body).
     ///
     /// **13u4 UNIT C1 — THE CAPTURE MICROSYNTAX PARSES HERE** (her ruling
     /// R-13u4-1), at the HAND-OFF and nowhere else: the box holds exactly
@@ -75,8 +104,7 @@ final class QuickEntryModel {
     /// `{t:"title"}` stop being text. Filing NEVER blocks on a token — the
     /// note is minted first and the tags are applied to it after, so nothing
     /// a token can do costs her the capture.
-    @discardableResult
-    func submit() async -> String? {
+    private func fileTypedText() async -> String? {
         let submitted = text
         let capture = CaptureMicrosyntax.parse(submitted)
         guard !capture.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -113,8 +141,9 @@ final class QuickEntryModel {
             // **Only what was actually minted is cleared.** Keystrokes that
             // landed during the flight are not in that note — the mint read
             // `submitted` — so clearing them wholesale would lose them for
-            // the sake of tidiness. She sees them still there, and a second
-            // ⏎ makes them a second note.
+            // the sake of tidiness. She sees them still there, and a ⏎ after
+            // the flight makes them a second note (VX-928: a ⏎ INSIDE it
+            // lands on this filing).
             if text == submitted {
                 text = ""
                 titleFromFirstWords = false
@@ -134,16 +163,12 @@ final class QuickEntryModel {
     /// **Is there something to file?** The submit road's own test — the
     /// capture with its tokens taken out, trimmed — so the button is grey
     /// exactly where ⏎ would file nothing (an empty box, a capture of nothing
-    /// but tokens, #127(f)), and while a staying filing is in flight.
+    /// but tokens, #127(f)), and while a filing of either road is in flight
+    /// (VX-928 — the one guard's flag).
     var canFile: Bool {
-        !filingWithoutOpening && !CaptureMicrosyntax.parse(text).text
+        !filing && !CaptureMicrosyntax.parse(text).text
             .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
-
-    /// A staying filing is in flight: a second press (a double click on the
-    /// button, ⌘⏎ held into a repeat) lands on THAT filing rather than minting
-    /// the same words twice — the box clears only when the mint returns.
-    private(set) var filingWithoutOpening = false
 
     /// **⌘⏎ and the band's button** (`.fileWithoutOpening`): the note is made
     /// through the SAME road as ⏎ (`submit` — the microsyntax at the hand-off,
@@ -154,24 +179,25 @@ final class QuickEntryModel {
     /// waiting at a book's Arrivals is still in the Pool), carrying a one-press
     /// door to the note through `open` (the host's own road, never a
     /// broadcast). Returns the note, or nil when nothing was filed (an empty
-    /// box says nothing, exactly as ⏎ does).
+    /// box says nothing, exactly as ⏎ does). The one guard covers the whole
+    /// staying filing — the mint, the landing read and the receipt — as it
+    /// always has; a press of either road inside it lands on it (VX-928).
     @discardableResult
     func fileWithoutOpening(open: @escaping @MainActor (String) -> Void) async -> String? {
-        guard !filingWithoutOpening else { return nil }
-        filingWithoutOpening = true
-        defer { filingWithoutOpening = false }
-        guard let postID = await submit() else { return nil }
-        let books = try? await session.database.read { db in
-            try Queries.readingsContaining(db, postID: postID)
-                .filter { $0.kind == .book }
-                .map(\.name)
+        await oneFilingInFlight {
+            guard let postID = await self.fileTypedText() else { return nil }
+            // The one landing read — the pad's filing in another wing reads
+            // the same (`CaptureLanding`, the VX-915 ladder's F-1).
+            let books = try? await self.session.database.read { db in
+                try CaptureLanding.books(db, postID: postID)
+            }
+            self.session.status.deliver(
+                QuickEntryFileCopy.landed(books: books), kind: .receipt,
+                action: StatusCenter.Item.Action(label: QuickEntryFileCopy.openNote) {
+                    open(postID)
+                })
+            return postID
         }
-        session.status.deliver(
-            QuickEntryFileCopy.landed(books: books), kind: .receipt,
-            action: StatusCenter.Item.Action(label: QuickEntryFileCopy.openNote) {
-                open(postID)
-            })
-        return postID
     }
 
     private func mintNow(_ submitted: String, title: String?) async throws -> String {
@@ -251,13 +277,11 @@ nonisolated enum QuickEntryFileCopy {
     /// duplicate's book read: no book holds it → the Pool (bookless is the
     /// Pool's definition); a book a `{#tag}` seated it in → named; several →
     /// counted. Nil — the landing could not be read — says only that it filed.
+    /// The place is `CaptureLanding`'s one rule (the pad names its landing
+    /// through it too — the VX-915 ladder's F-1); these words are unchanged.
     static func landed(books: [String]?) -> String {
         guard let books else { return "Filed." }
-        switch books.count {
-        case 0: return "Filed in the Pool."
-        case 1: return "Filed in \u{201C}\(books[0])\u{201D}."
-        default: return "Filed in \(books.count) books."
-        }
+        return "Filed in \(CaptureLanding.place(books: books, pool: "the Pool"))."
     }
 }
 

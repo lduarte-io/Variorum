@@ -77,6 +77,8 @@ struct NoteWindowView: View {
             canShare: mcp.hasApprovedClient,
             // VX-900: the switch itself — it dims the marks, gates none.
             serverOn: mcp.serverOn,
+            // VX-934: her AI-pair switch (synced, this window's theme store).
+            aiMarksOn: theme.settings.aiMarks,
             open: { router.mcpGrantRequest = $0 },
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: mcp, opening: opening, done: done).environment(theme))

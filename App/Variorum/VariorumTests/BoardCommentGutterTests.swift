@@ -53,8 +53,10 @@ nonisolated private let shortComment = "Second note: keep the last line as it is
 
 /// One tall paragraph (≈ 1,200 characters — a dozen lines at the article's
 /// 680-pt measure), so Write's card beside it has room for both comments.
-nonisolated private func tallProse(_ tag: String) -> String {
-    (1...9).map { i in
+/// VX-848: `sentences` lets a Compare arm at a genuinely wide board (prose ≥
+/// 680 beside the card lane) keep the block as tall as the 1100-pt arm's was.
+nonisolated private func tallProse(_ tag: String, sentences: Int = 9) -> String {
+    (1...sentences).map { i in
         "\(tag), sentence \(i): honest prose on the measured line, long enough "
             + "that the paragraph wraps"
     }.joined(separator: " ") + "."
@@ -460,7 +462,8 @@ private struct CompareCommentWorld {
 
 @MainActor
 private func withCompareCommentWorld(
-    comments: [String], _ body: @MainActor (CompareCommentWorld) async throws -> Void
+    comments: [String], tallSentences: Int = 9,
+    _ body: @MainActor (CompareCommentWorld) async throws -> Void
 ) async throws {
     let db = try AppDatabase.inMemory()
     let start = Date(timeIntervalSince1970: 1_782_864_000)
@@ -480,7 +483,8 @@ private func withCompareCommentWorld(
         let session = AppSession(database: db)
         let ops = session.operations
         let anchor = try ops.createPost(title: "the revised piece")
-        let tall = try ops.newBlock(in: anchor.id, text: tallProse("The revised opening"))
+        let tall = try ops.newBlock(
+            in: anchor.id, text: tallProse("The revised opening", sentences: tallSentences))
         let other = try ops.newBlock(in: anchor.id, text: "Second block of the piece.")
         let twin = try ops.duplicateAsVersion(anchor.id)
         let stranger = try ops.createPost(title: "unrelated")
@@ -521,20 +525,28 @@ private func mountCompare(
 @Suite("VX-728 — Compare shows block comments in its gutter (R-770-2, P-770-3)", .serialized)
 struct CompareCommentGutterTests {
     /// **RED ON OLD — nothing on the Compare board read comments.** Two
-    /// columns at 1100 pt: Write's card, every comment whole, in the cell's
-    /// lane — left of the cell's chrome and its prose.
+    /// columns at a GENUINELY WIDE board: Write's card, every comment whole, in
+    /// the cell's lane — left of the cell's chrome and its prose.
+    ///
+    /// **VX-848 (JUSTIFIED EDIT — her ruling; P-915-B2-1):** this arm mounted
+    /// at 1100 pt, where two 534-pt columns carried the card lane; the card
+    /// lane is now kept for columns that keep Write's whole measure beside it
+    /// (≥ 866 pt), so the arm mounts at 1800 (two 884-pt columns) with the
+    /// block twice as long (the prose is twice as wide — the same tall block
+    /// the 1100-pt arm saw). Every assertion is the original's; the default
+    /// window's badge lane is `aDefaultWindowsTwoColumnsSeatTheBadgeLane`.
     @Test func aCommentedBlockShowsItsCommentsInItsColumn() async throws {
         await HostLaunchSettle.wait()
         let pin = TerminalMetricsPin()
         defer { pin.restore() }
         let comments = [longComment, shortComment]
-        try await withCompareCommentWorld(comments: comments) { world in
+        try await withCompareCommentWorld(comments: comments, tallSentences: 18) { world in
             let oracle = BoardCommentFaceOracle.reader(world.session.debugProbeScope)
             oracle.reset()
             let model = CompareViewModel(session: world.session, anchorPostID: world.anchor)
             model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
             try await adoptCompare(model, world, peers: [world.twin])
-            let (window, hosting) = mountCompare(model, world, width: 1100)
+            let (window, hosting) = mountCompare(model, world, width: 1800)
             defer {
                 model.teardown()
                 window.orderOut(nil)
@@ -545,7 +557,7 @@ struct CompareCommentGutterTests {
 
             let face = oracle.face(world.tall.block)
             #expect(face != nil, "the commented block has a comment face in its Compare column")
-            #expect(face?.kind == .card, "a two-column board's lane seats Write's card")
+            #expect(face?.kind == .card, "a genuinely wide two-column board's lane seats Write's card")
             #expect(face?.entries == comments, "every comment, each its own entry, whole")
             #expect(face?.lineCap == nil, "no line cap")
             #expect(oracle.face(world.other.block) == nil, "an uncommented block draws no face")
@@ -683,8 +695,14 @@ struct CompareCommentGutterTests {
             }
             let card = { cards(in: hosting).first { $0.identity == world.tall.block } }
             await settle(window, hosting, until: { card() != nil })
-            try #require(board.face(world.tall.block)?.entries == [shortComment],
-                         "fixture: the two-column board's lane seats the comment's face")
+            // VX-848 (JUSTIFIED EDIT): the default window's two columns carry
+            // the BADGE lane now, whose record carries the count, not the
+            // entries — so the pin asks for exactly the face she opened the
+            // panel on, whichever rung the lane seats (the seat is the host's,
+            // lane-independent).
+            let opened = try #require(board.face(world.tall.block),
+                                      "fixture: the two-column board's lane seats the comment's face")
+            #expect(opened.kind == .badge, "fixture: the default window's lane is the badge lane (VX-848)")
             let door = try #require(card()?.onClick, "fixture: the Compare face is a door")
             door()  // her press: the comments panel opens on the face
             await settle(window, hosting, until: { false }, maxTurns: 6)
@@ -696,8 +714,145 @@ struct CompareCommentGutterTests {
             await settle(window, hosting, until: { false }, maxTurns: 12)
             #expect(card() != nil,
                     "the Compare face stays seated under her open panel when its last comment leaves")
-            #expect(board.face(world.tall.block)?.entries == [shortComment],
+            #expect(board.face(world.tall.block) == opened,
                     "…showing what it showed when she opened the panel")
+        }
+    }
+
+    /// **VX-848 (her ruling; the threshold PROVISIONAL P-915-B2-1) — the
+    /// default window's two columns seat the BADGE lane.** Two 534-pt columns
+    /// at 1100 pt carried the card lane before (P-770-3's shipped default);
+    /// now cards wait for a column that keeps Write's whole measure, so the
+    /// commented block shows Write's count badge in its column, left of the
+    /// cell's pane. Red on old: the old lane seated a card here.
+    @Test func aDefaultWindowsTwoColumnsSeatTheBadgeLane() async throws {
+        await HostLaunchSettle.wait()
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        try await withCompareCommentWorld(comments: [longComment, shortComment]) { world in
+            let oracle = BoardCommentFaceOracle.reader(world.session.debugProbeScope)
+            oracle.reset()
+            let model = CompareViewModel(session: world.session, anchorPostID: world.anchor)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptCompare(model, world, peers: [world.twin])
+            let (window, hosting) = mountCompare(model, world, width: 1100)
+            defer {
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, until: { oracle.face(world.tall.block) != nil })
+            await settle(window, hosting, until: { false }, maxTurns: 8)
+            let face = oracle.face(world.tall.block)
+            #expect(face?.kind == .badge,
+                    "two columns at the default window seat the badge (drew \(face.map { "\($0.kind)" } ?? "nothing"))")
+            #expect(face?.label == CommentCardView.badgeText(count: 2), "…carrying the count")
+            if let badge = cards(in: hosting).first(where: { $0.identity == world.tall.block }),
+               let prose = pane("compare", variant: world.tall.chosen, in: hosting) {
+                #expect(windowFrame(badge).maxX < windowFrame(prose).minX,
+                        "the badge stands in the lane, left of the cell's pane")
+            }
+        }
+    }
+
+    /// **VX-793 (PROVISIONAL P-915-B2-2) — Compare can give a block its FIRST
+    /// comment.** Comments… and ⌘⇧' were grey in Compare for every block (the
+    /// take family's rule, which never named Compare), and an uncommented block
+    /// draws no face to press — no door at all. Now the door is enabled, and
+    /// the routed act opens the comments panel on the FOCUSED pane's block, on
+    /// its gutter face — the SAME popover her press opens (the orchestrator's
+    /// direction (1): one presentation). The panel then holds its seat through
+    /// her first comment arriving (the face appears beneath it) and leaving
+    /// again (F1). Red on old by construction: the old registry answered
+    /// `.unavailable` in Compare and the board consumed no `.comments`.
+    @Test func theCommentsDoorOpensAnUncommentedBlocksPanelOnItsFace() async throws {
+        await HostLaunchSettle.wait()
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        try await withCompareCommentWorld(comments: []) { world in
+            _ = world.session.commandRouter.registerDetail(
+                postID: world.anchor, mode: .compare, applyMode: { _ in })
+            #expect(world.session.commandRouter.isEnabled(.blockComments),
+                    "Comments… and ⌘⇧' are enabled in Compare")
+            let model = CompareViewModel(session: world.session, anchorPostID: world.anchor)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptCompare(model, world, peers: [world.twin])
+            BoardCommentFaceOracle.reader(world.session.debugProbeScope).reset()
+            let board = BoardCommentFaceOracle.reader(world.session.debugProbeScope, board: model)
+            let (window, hosting) = mountCompare(model, world, width: 1100)
+            defer {
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, until: {
+                pane("compare", variant: world.tall.chosen, in: hosting) != nil
+            })
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            #expect(board.face(world.tall.block) == nil, "fixture: the block has no comment, so no face")
+            #expect(!board.panelOpen(world.tall.block), "fixture: no panel open yet")
+
+            // Her ring is in the block; she presses ⌘⇧' (the menu's routed act).
+            model.focus(PaneTextAuthority.PaneKey(
+                columnID: "compare-\(world.anchor)", blockID: world.tall.block,
+                variantID: world.tall.chosen, context: world.anchor))
+            #expect(world.session.commandRouter.dispatch(.comments),
+                    "the Compare board consumes the comments door")
+            await settle(window, hosting, until: { board.panelOpen(world.tall.block) })
+            #expect(board.panelOpen(world.tall.block),
+                    "the comments panel opens on the focused block's gutter face")
+            #expect(model.commentsRequest == nil, "the face took the ask")
+            #expect(board.face(world.tall.block) == nil,
+                    "…and draws no face of its own while the block has no comment")
+            #expect(!board.panelOpen(world.other.block), "only the focused block's panel")
+
+            // Her first comment, added as the panel's Add does: the face appears
+            // beneath the panel, which keeps its seat.
+            let first = try world.session.operations.addBlockComment(
+                to: world.tall.block, text: shortComment)
+            try await adoptCompare(model, world, peers: [world.twin])
+            await settle(window, hosting, until: { board.face(world.tall.block) != nil })
+            #expect(board.face(world.tall.block) != nil, "the first comment's face is drawn")
+            #expect(board.panelOpen(world.tall.block), "the panel stayed open through the first comment")
+
+            // …and deleted again (F1, composed): the panel still keeps its seat.
+            try world.session.operations.deleteBlockComment(first.id)
+            try await adoptCompare(model, world, peers: [world.twin])
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+            #expect(board.panelOpen(world.tall.block),
+                    "the panel keeps its seat when that comment leaves (the VX-770 ladder's F1)")
+        }
+    }
+
+    /// **VX-793 — with no pane holding the ring, the door SPEAKS the act's
+    /// declared refusal** (the orchestrator's direction (2): the registry
+    /// carries the words — P-1) and opens nothing.
+    @Test func theCommentsDoorWithNoFocusedBlockSpeaksTheDeclaredRefusal() async throws {
+        await HostLaunchSettle.wait()
+        let pin = TerminalMetricsPin()
+        defer { pin.restore() }
+        try await withCompareCommentWorld(comments: []) { world in
+            let model = CompareViewModel(session: world.session, anchorPostID: world.anchor)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptCompare(model, world, peers: [world.twin])
+            BoardCommentFaceOracle.reader(world.session.debugProbeScope).reset()
+            let board = BoardCommentFaceOracle.reader(world.session.debugProbeScope, board: model)
+            let (window, hosting) = mountCompare(model, world, width: 1100)
+            defer {
+                model.teardown()
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, until: {
+                pane("compare", variant: world.tall.chosen, in: hosting) != nil
+            })
+            #expect(model.authority.livePane == nil, "fixture: no pane holds the ring")
+            #expect(world.session.commandRouter.dispatch(.comments), "the board answers the door")
+            #expect(model.statusMessage == CapabilityRegistry.capability(.blockComments).unavailableNote,
+                    "it speaks the act's declared refusal (\(model.statusMessage ?? "nil"))")
+            #expect(model.commentsRequest == nil, "and asks no face to open anything")
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            #expect(!board.panelOpen(world.tall.block) && !board.panelOpen(world.other.block))
         }
     }
 }
@@ -747,11 +902,27 @@ struct BoardCommentGutterRuleTests {
         #expect(BlockDecor.gutterFitsCards(width: CompareGutter.cardLane))
         #expect(!BlockDecor.gutterFitsCards(width: CompareGutter.cardLane - 1))
         // The default window's 2 / 3 / 4 columns, and a column too narrow to spare one.
-        #expect(CompareGutter.lane(columnWidth: 499) == CompareGutter.cardLane)
+        // VX-848 (JUSTIFIED EDIT — her ruling; P-915-B2-1): the default
+        // window's two 499-pt columns carried the card lane under P-770-3's
+        // shipped default; the badge lane is the wide-column default now.
+        #expect(CompareGutter.lane(columnWidth: 499) == CompareGutter.badgeLane)
         #expect(CompareGutter.lane(columnWidth: 330) == CompareGutter.badgeLane)
         #expect(CompareGutter.lane(columnWidth: 245) == CompareGutter.badgeLane)
         #expect(CompareGutter.lane(columnWidth: 200) == 0)
         #expect(CompareGutter.columnWidth(boardWidth: 1030, columns: 2, inset: 12, spacing: 8) == 499)
+        // VX-848 — THE THRESHOLD, both sides: the card lane only where the
+        // column keeps Write's whole measure beside it (680 + 150 + 36 = 866).
+        #expect(CompareGutter.readingMeasure == EditorTypography.maxColumnWidth,
+                "named by reference — Write's measure, never a second number")
+        let threshold = CompareGutter.readingMeasure + CompareGutter.cardLane + CompareGutter.cellChrome
+        #expect(threshold == 866)
+        #expect(CompareGutter.lane(columnWidth: threshold) == CompareGutter.cardLane)
+        #expect(CompareGutter.lane(columnWidth: threshold - 0.5) == CompareGutter.badgeLane)
+        #expect(CompareGutter.lane(columnWidth: 884) == CompareGutter.cardLane,
+                "two columns at an 1,800-pt board")
+        // The badge arm's floor is untouched (160 pt of prose beside it).
+        #expect(CompareGutter.lane(columnWidth: 234) == CompareGutter.badgeLane)
+        #expect(CompareGutter.lane(columnWidth: 233.5) == 0)
 
         let card = BlockDecor.commentFace(textLeft: CompareGutter.cardLane, top: 6, blockHeight: 200, roomBelow: nil)
         guard case .card(let cardRect) = card else {

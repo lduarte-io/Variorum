@@ -207,20 +207,27 @@ struct OwnershipBadgeTests {
         #expect(BookStateCopy.navigatorChip(finished: true, sealed: true) == "\u{2713} sealed")
     }
 
-    /// VX-905 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1; her #264
-    /// word: "ticket moving 'show ownership badges' into the mcp part of
-    /// settings"): the badge switch is Settings ▸ MCP's row now (its pin:
-    /// `MCPPaneTabsTests.theBadgeSwitchIsSettingsMCPsRowAtThePanesFoot`); the
-    /// hide-owned default stays the Editor pane's.
+    /// VX-905 (A JUSTIFIED EDIT, the ritual — the VX-914 run, batch 1) moved the
+    /// badge switch to Settings ▸ MCP; **VX-934 (A JUSTIFIED EDIT, the ritual —
+    /// her ruling, #269: "move it out of MCP back to where it was")** brings it
+    /// back: both ownership settings are the Editor pane's again, the badge
+    /// switch beside its twin as before VX-905, governing the BOOK marks only
+    /// (the AI pair's own switch is Settings ▸ MCP's — `BadgeFamilySplitTests`,
+    /// `SettingsShapeTests.theBadgeFamilySplitsAcrossTwoPanesAndTheSearchFollowsEachRow`).
     @Test func theTwoSettingsRowsAreWhereTheirPanesRenderThem() {
         #expect(SettingsCatalog.title("ownershipBadges") == OwnershipSettingsCopy.badgesTitle)
         #expect(SettingsCatalog.title("hideOwnedDefault") == OwnershipSettingsCopy.hideOwnedTitle)
         let editor = AppSettingsView.rowIDsRendered[.editor] ?? []
         let mcp = AppSettingsView.rowIDsRendered[.mcp] ?? []
-        #expect(mcp.contains("ownershipBadges") && !editor.contains("ownershipBadges"))
+        #expect(editor.contains("ownershipBadges") && !mcp.contains("ownershipBadges"))
         #expect(editor.contains("hideOwnedDefault"))
-        // The truths the help must not overclaim.
+        let badges = editor.firstIndex(of: "ownershipBadges")
+        #expect(badges.map { editor.indices.contains($0 + 1) && editor[$0 + 1] == "hideOwnedDefault" } == true,
+                "beside its twin, as it stood before VX-905")
+        // The truths the help must not overclaim — and, since the split, it
+        // claims no AI mark.
         #expect(OwnershipSettingsCopy.hideOwnedHelp.contains("The Library always shows everything"))
         #expect(OwnershipSettingsCopy.badgesHelp.contains("nothing else changes"))
+        #expect(!OwnershipSettingsCopy.badgesHelp.contains("eye") && !OwnershipSettingsCopy.badgesHelp.contains("AI"))
     }
 }

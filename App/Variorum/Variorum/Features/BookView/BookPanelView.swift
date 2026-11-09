@@ -391,8 +391,7 @@ struct BookPanelView: View {
         if let noteID = BookPanelBrain.markedNote(line) {
             MCPSharedIcon(reaches: model.reach[noteID] ?? [], tokens: tokens)
             PrivateMarkView(
-                door: PrivateMarkFace.note(
-                    model.privateMarks[noteID], badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                door: PrivateMarkFace.note(model.privateMarks[noteID])
                     .map { PrivateMarkDoor(mark: $0, subjectID: noteID, session: session) },
                 tokens: tokens)
             MCPAskGlyph(.note(noteID), tokens: tokens)
@@ -416,9 +415,7 @@ struct BookPanelView: View {
     private func readingMarks(_ reading: Reading) -> some View {
         MCPSharedIcon(reaches: model.readingReach[reading.id] ?? [], tokens: tokens)
         PrivateMarkView(
-            door: PrivateMarkFace.book(
-                marked: model.privateReadingIDs.contains(reading.id),
-                badgesOn: themeStore?.settings.ownershipBadges ?? true)
+            door: PrivateMarkFace.book(marked: model.privateReadingIDs.contains(reading.id))
                 .map { PrivateMarkDoor(mark: $0, subjectID: reading.id, subjectName: reading.name, session: session) },
             tokens: tokens)
         MCPAskGlyph(.book(reading.id), tokens: tokens)

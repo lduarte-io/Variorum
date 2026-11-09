@@ -12,7 +12,8 @@
 #                  MARKETING_VERSION = --version (VX-779, version-guard.sh's one check: R-13r-6's bump
 #                  commit comes first, so a plain build from main wears the release's number; step 1's
 #                  override alone once hid five skipped bumps) · clean tree (a release is ONE commit's
-#                  build) · ZERO Variorum instances (pgrep, by PATH)
+#                  build) · the package pins agree with the committed set (Tools/verify-pins, VX-852)
+#                  · ZERO Variorum instances (pgrep, by PATH)
 #                  · the Sparkle tools verified by digest · the notary credential answers · this host may
 #                  script Finder (the DMG window's layout — U3-A) · the version's RELEASE NOTES exist
 #                  (U3-A: release mode REFUSES without them; a walk build may lack them) and carry NO
@@ -24,7 +25,9 @@
 #                  Mac target's own "Stamp Build Number" phase writes the SAME count into every build's
 #                  CFBundleVersion; the override stays because the xcarchive's metadata reads the setting.
 #   2. archive + export   archive-and-export.sh: U1's developer-id road, CLEAN by construction; its
-#                  verify-export.sh run must PASS with the stamp proven (pre-notarization reading)
+#                  verify-export.sh run must PASS with the stamp proven (pre-notarization reading); then
+#                  Tools/verify-pins over the archive's OWN DerivedData must say every resolved package is
+#                  a committed pin (VX-852 — the report kept as verify-pins.txt), before anything is notarized
 #   3. notarize + staple the APP (zipped; Keychain profile VariorumNotary), then verify-export.sh
 #                  --require-notarized → Gatekeeper ACCEPTED + the ticket stapled
 #   4. DMG         make-dmg.sh (U3-A — R-13r-10, the SELF-EXPLAINING window): plain `hdiutil` + Finder's
@@ -39,7 +42,8 @@
 #                  window's layout back out of its .DS_Store (make-dmg.sh --verify-layout)
 #   8. dSYMs retained: copied out of the archive with their UUIDs proven equal to the shipped binary's.
 #                  Release mode also files them DURABLY under ~/Library/Developer/Variorum/Releases/<version>/
-#                  with the build's records (never in DerivedData, which gets swept)
+#                  with the build's records, verify-pins.txt beside RELEASE-INFO.txt (never in DerivedData,
+#                  which gets swept)
 #   9. appcast     make-appcast.sh (it reads HER Keychain; the first run asks her), handed the version's
 #                  RELEASE NOTES (U3-A — the ONE source the in-app What's New reads), which it embeds in
 #                  the item as Markdown
@@ -102,6 +106,9 @@ else
 fi
 DIRTY="$(git -C "$REPO" status --porcelain | wc -l | tr -d ' ')"
 [ "$DIRTY" = "0" ] || refuse "the working tree has ${DIRTY} uncommitted change(s): a ${MODE} build is ONE commit's build (commit first)"
+# VX-781: the pins guard over the lockfiles a build is about to read (the workspace file is already
+# covered by the clean-tree refusal; this also proves the root lockfile agrees with it).
+"${REPO}/Tools/verify-pins" > /dev/null || refuse "the package pins drift from the committed set — run Tools/verify-pins (VX-781)"
 HEAD_SHA="$(git -C "$REPO" rev-parse HEAD)"
 BUILD="$(git -C "$REPO" rev-list --count HEAD)"
 say "commit ${HEAD_SHA} · build number ${BUILD} (git rev-list --count HEAD — R-13r-6)"
@@ -169,6 +176,10 @@ set -e
 BUILD_DIR="${OUT}/build.noindex"
 APPX="${BUILD_DIR}/export/Variorum.app"
 [ "$AE" -eq 0 ] || { echo "archive-and-export.sh exited ${AE} (${BUILD_DIR})" >&2; exit 5; }
+# VX-781: the archive's RESOLVED graph is the committed one — read from its own SourcePackages,
+# before anything is notarized; the result rides beside RELEASE-INFO.txt.
+"${REPO}/Tools/verify-pins" "${BUILD_DIR}/DerivedData" > "${BUILD_DIR}/verify-pins.txt" \
+  || { cat "${BUILD_DIR}/verify-pins.txt" >&2; echo "REFUSED: the archive resolved packages other than the committed pins (VX-781)" >&2; exit 5; }
 say "export ${APPX}: the pre-notarization drill PASSED with the stamp proven (${BUILD_DIR}/verify.txt)"
 
 notarize() {   # notarize <file> <label> — submit, wait, keep the JSON result and Apple's log
@@ -287,7 +298,7 @@ if [ "$MODE" = release ]; then
   RECORD="${RELEASES}/${VERSION}"
   mkdir -p "$RECORD"
   ditto "${OUT}/dSYMs" "${RECORD}/dSYMs"
-  cp -p "${OUT}/RELEASE-INFO.txt" "${OUT}"/notary-*.json "${OUT}/verify-stapled.txt" "${OUT}/verify-dmg.txt" "$RECORD/"
+  cp -p "${OUT}/RELEASE-INFO.txt" "${BUILD_DIR}/verify-pins.txt" "${OUT}"/notary-*.json "${OUT}/verify-stapled.txt" "${OUT}/verify-dmg.txt" "$RECORD/"
   cp -p "${BUILD_DIR}/verify.txt" "${RECORD}/verify-pre-notarization.txt"
   say "DURABLE record (dSYMs + the build's records): ${RECORD}"
 fi

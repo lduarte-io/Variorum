@@ -104,6 +104,20 @@ extension Operations {
         }
     }
 
+    /// **VX-934 — the AI pair's own switch** (her ruling, #269: the
+    /// shared-with-AI icon and the Private eye as one switch, in Settings ▸
+    /// MCP — split out of the badge family above). The `ownership_badges`
+    /// precedent exactly: synced document semantics (upsert-only, never
+    /// tombstoned — the same switch on every device), the default — ON —
+    /// resolved at READ time (`ThemeSettings.aiMarks`, no seed), a token
+    /// value ("1"/"0") so `setting.value`'s PLAIN classification holds. Zero
+    /// schema, so no SyncSpec §12 lockstep event: the marker stays where it is.
+    public func setAIMarks(_ on: Bool) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "ai_marks", value: on ? "1" : "0")
+        }
+    }
+
     // MARK: - The colour palette (18g — her R-Q6 · R-Q11 · R-Q13)
 
     /// **The palette layered UNDER the voice** (`ThemePalette` carries the

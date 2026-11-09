@@ -31,7 +31,8 @@
 //  masthead face of the mark every shared-icon host draws (`PrivateMarkView`,
 //  the closed eye): shown on a Private note only while a client is approved
 //  (her R-878-K3 — the shared icon's exact gate, superseding N-2), under the
-//  badge family's one switch (D-831-3); its own mark's press un-privates, a Private book's says
+//  AI pair's own switch since VX-934 (D-831-3's badge-family switch
+//  superseded); its own mark's press un-privates, a Private book's says
 //  so and offers the book. Nothing true ⇒ NOTHING (calm — "an empty state that
 //  says nothing").
 //
@@ -97,7 +98,6 @@ struct MCPNoteIndicator: View {
     let postID: String
     let tokens: VoiceTokens
     @Environment(\.mcpShareRoad) private var road
-    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @State private var state: MCPNoteIndicatorState?
 
     /// The pending-ask leg's gate (VX-164): the server on and a client
@@ -112,10 +112,11 @@ struct MCPNoteIndicator: View {
     var body: some View {
         let state = MCPNoteIndicatorState.matching(state, postID: postID)
         // VX-831: the masthead's mark — drawn on anything marked while a
-        // client is approved (R-878-K3 — the gate rides the read), under the
-        // badge family's one switch (D-831-3). VX-900: dimmed while the
-        // server's switch is off (`PrivateMarkView` reads the road).
-        let mark = PrivateMarkFace.note(state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true)
+        // client is approved (R-878-K3 — the gate rides the read). VX-900:
+        // dimmed while the server's switch is off; VX-934: drawn only while
+        // her AI-pair switch is on — both read off the road by the faces
+        // (`PrivateMarkView`, `MCPSharedIcon`), never here.
+        let mark = PrivateMarkFace.note(state?.mark)
         // Always present, even empty: it carries the held read (`.task` below) — a conditional here strands the server-off mark's read (R-878-K3; VX-878 ladder F3).
         HStack(spacing: 4) {
             if drawsReach, let state, !state.reach.isEmpty {

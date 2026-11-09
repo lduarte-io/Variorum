@@ -149,6 +149,9 @@ struct MCPWriteServerTests {
             let otherNote = try h.operations.createPost(title: "hers too")
             _ = try h.operations.addPostToReading(otherNote.id, to: book.id)
             let otherBlock = try h.operations.newBlock(in: otherNote.id, text: "her other note", registeringUndo: false)
+            // VX-943 (the VX-915 run, batch 6 — justified edit, the ritual): a
+            // version link of HERS between the two, for unlink_versions to aim at.
+            let hersLink = try h.operations.markVersionOf(one.block.id, otherBlock.block.id)
             func snapshot() throws -> [String] {
                 try h.database.read { db in
                     let takes = try Row.fetchAll(
@@ -241,6 +244,11 @@ struct MCPWriteServerTests {
             calls.append(("link_versions", ["note_a": .string(note.id), "note_b": .string(otherNote.id),
                                             "pairs": .array([.object(["block_a": .string(one.block.id),
                                                                       "block_b": .string(otherBlock.block.id)])])]))
+            // VX-943 (the VX-915 run, batch 6 — justified edit, the ritual: the
+            // proof's completeness grows with the catalog): unlink_versions, aimed
+            // at HER link — refusing at the rung (write new on both notes), her
+            // edge intact (the snapshot reads every edge).
+            calls.append(("unlink_versions", ["edge_id": .string(hersLink.id)]))
             // The lens picks her NON-chosen take (mutation check 2 of the unit
             // record: picking only chosen takes could not see a lens that
             // moved the chosen pointer — the first draft of this pin did).

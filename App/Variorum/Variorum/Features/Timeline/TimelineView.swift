@@ -331,9 +331,7 @@ struct TimelineView: View {
             MCPSharedIcon(reaches: model.reach[item.postID] ?? [], tokens: tokens)
             // VX-831: the Private mark (nothing when the note is not Private).
             PrivateMarkView(
-                door: PrivateMarkFace.note(
-                    model.privateMarks[item.postID],
-                    badgesOn: themeStore?.settings.ownershipBadges ?? true)
+                door: PrivateMarkFace.note(model.privateMarks[item.postID])
                     .map { PrivateMarkDoor(mark: $0, subjectID: item.postID, session: session) },
                 tokens: tokens)
             // R3-2's rule, applied by hand because this row holds one hit

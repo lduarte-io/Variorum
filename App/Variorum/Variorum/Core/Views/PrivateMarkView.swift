@@ -17,7 +17,12 @@
 //  - shown wherever the shared icon shows, on note rows, book rows, the note's
 //    masthead and the Book Panel — never a gathering (gatherings refuse the
 //    mark), never a wing (not markable);
-//  - it joins the badge family's one switch (`ownership_badges`);
+//  - it joined the badge family's one switch (`ownership_badges`) — and,
+//    VX-934 (her ruling, #269 — "split the 'book' related badges setting …
+//    from the AI one"), LEFT it: the eye and the shared icon now draw under
+//    their own synced switch (`ai_marks`, seated in Settings ▸ MCP), read off
+//    the window's road by both faces (`MCPAIMarksSwitch`) — superseding
+//    D-831-3's "no badges is no badges";
 //  - a note private VIA ITS BOOK wears it at FULL strength — no muting — with
 //    the hover saying why ("Private — via ‹book›", the VX-426 family);
 //  - THE MARK IS A DOOR: its OWN mark clicked un-privates (the op her Private
@@ -74,23 +79,25 @@ nonisolated enum PrivateMarkFace {
         case sayVia([Queries.BookRef])
     }
 
-    /// **A note row's mark** — the fact, under the badge family's switch.
-    static func note(_ fact: Queries.PrivateMark?, badgesOn: Bool) -> Mark? {
-        guard badgesOn, let fact, fact.isPrivate else { return nil }
+    /// **A note row's mark** — the fact alone. (VX-934: the badge family's
+    /// switch no longer reaches it; the AI pair's switch is the FACE's —
+    /// `PrivateMarkView` reads it off the road, as the shared icon does.)
+    static func note(_ fact: Queries.PrivateMark?) -> Mark? {
+        guard let fact, fact.isPrivate else { return nil }
         return fact.own ? .ownNote(alsoVia: fact.viaBooks) : .viaBooks(fact.viaBooks)
     }
 
     /// **A book row's mark** — its own stamp (the facts never name a
-    /// gathering), under the switch.
-    static func book(marked: Bool, badgesOn: Bool) -> Mark? {
-        badgesOn && marked ? .ownBook : nil
+    /// gathering).
+    static func book(marked: Bool) -> Mark? {
+        marked ? .ownBook : nil
     }
 
-    // (The note's masthead — the in-note indicator — reads `note(_:badgesOn:)`
-    // exactly as a row does: ONE switch governs the mark everywhere, the
-    // ruling's letter, so the switch's own "Off: no marks anywhere" stays
-    // true. The lock the mark replaced showed whenever the indicator did;
-    // with badges off that sign is now gone too — PROVISIONAL D-831-3.)
+    // (The note's masthead — the in-note indicator — reads `note(_:)` exactly
+    // as a row does, and its face is the same `PrivateMarkView`: ONE switch —
+    // since VX-934 the AI pair's, read off the road — governs the mark
+    // everywhere. D-831-3's "no badges is no badges" is superseded: the book
+    // marks' switch no longer hides the eye.)
 
     /// The hover, and the accessibility label.
     static func help(_ mark: Mark) -> String {
@@ -233,11 +240,16 @@ struct PrivateMarkView: View {
 
     let door: PrivateMarkDoor?
     let tokens: VoiceTokens
-    /// VX-900: the window's road — only for the server's switch (the face).
+    /// VX-900: the window's road — for the server's switch (the face); VX-934:
+    /// and her AI-pair switch (whether it draws at all).
     @Environment(\.mcpShareRoad) private var road
 
     var body: some View {
-        if let door {
+        // VX-934 — the AI pair's one rule (`MCPAIMarksSwitch`, the shared
+        // icon's twin): her switch OFF is the calm state — no view, so a host
+        // measures exactly what an unmarked row does. An AND on top of the
+        // mark's own gate (the gated fact a host hands in as `door`).
+        if let door, MCPAIMarksSwitch.drawn(aiMarksOn: road?.aiMarksOn) {
             // VX-900 — the icon twins' one rule (the shared icon's twin face):
             // while the server's switch is OFF the eye wears the dimmed ink
             // and its hover appends the server-off sentence; ON, or no road,

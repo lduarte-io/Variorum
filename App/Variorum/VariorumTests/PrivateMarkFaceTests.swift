@@ -3,8 +3,10 @@
 //  VariorumTests
 //
 //  VX-831 — THE VISIBLE PRIVATE MARK (the closed eye with lashes, option A —
-//  hers): the rule's three states (own · via a book · none), the badge
-//  family's switch, the words (the via-book hover is hers: "Private — via
+//  hers): the rule's three states (own · via a book · none), the switch (the
+//  badge family's until VX-934 split it; the AI pair's own since — the
+//  rule's `badgesOn` parameter went, a JUSTIFIED edit at every call below),
+//  the words (the via-book hover is hers: "Private — via
 //  ‹book›"), the door's two arms through the real operations (own: un-private,
 //  no confirm, the Private rows' receipts; via-book: nothing acts, the ruled
 //  sentence speaks with ONE door to the book), the gate (her R-878-K3: the
@@ -55,43 +57,53 @@ struct PrivateMarkFaceTests {
     // MARK: - The rule
 
     @Test func theThreeStatesOwnViaABookAndNone() {
-        #expect(PrivateMarkFace.note(nil, badgesOn: true) == nil, "not Private: no mark")
-        #expect(PrivateMarkFace.note(.init(own: false, viaBooks: []), badgesOn: true) == nil)
-        #expect(PrivateMarkFace.note(.init(own: true, viaBooks: []), badgesOn: true) == .ownNote(alsoVia: []))
-        #expect(PrivateMarkFace.note(.init(own: false, viaBooks: [vault]), badgesOn: true) == .viaBooks([vault]),
+        #expect(PrivateMarkFace.note(nil) == nil, "not Private: no mark")
+        #expect(PrivateMarkFace.note(.init(own: false, viaBooks: [])) == nil)
+        #expect(PrivateMarkFace.note(.init(own: true, viaBooks: [])) == .ownNote(alsoVia: []))
+        #expect(PrivateMarkFace.note(.init(own: false, viaBooks: [vault])) == .viaBooks([vault]),
                 "via its book: the mark at FULL strength — the same glyph, no muted twin")
-        #expect(PrivateMarkFace.note(.init(own: true, viaBooks: [vault]), badgesOn: true)
+        #expect(PrivateMarkFace.note(.init(own: true, viaBooks: [vault]))
                 == .ownNote(alsoVia: [vault]), "its own mark is the door; the book is remembered for the receipt")
-        #expect(PrivateMarkFace.book(marked: true, badgesOn: true) == .ownBook)
-        #expect(PrivateMarkFace.book(marked: false, badgesOn: true) == nil)
+        #expect(PrivateMarkFace.book(marked: true) == .ownBook)
+        #expect(PrivateMarkFace.book(marked: false) == nil)
     }
 
-    @Test func theBadgeFamilysOneSwitchGovernsTheMarkEverywhereTheMastheadIncluded() throws {
+    /// **VX-934 (A FLIPPED PIN — it read "the badge family's one switch
+    /// governs the mark everywhere", D-831-3; her ruling, #269, split the
+    /// family):** the eye LEFT `ownership_badges`. The rule takes no switch —
+    /// a fact is the mark — and the switch that governs it now is the AI
+    /// pair's own (`ai_marks`), read by the FACE off the window's road, the
+    /// masthead included (it reads the row's own rule over the row's own GATED
+    /// fact — R-878-K3, `theMarkDrawsOnlyWhileAClientIsApproved` pins the
+    /// gate). The badge switch's words no longer claim the eye; the AI pair's
+    /// switch says it governs it, and when. (The mounted both-ways pin is
+    /// `BadgeFamilySplitTests`.)
+    @Test func theEyeLeftTheBadgeFamilyForTheAIPairsOwnSwitchTheMastheadIncluded() throws {
         let fact = Queries.PrivateMark(own: true, viaBooks: [])
-        #expect(PrivateMarkFace.note(fact, badgesOn: false) == nil, "ownership_badges off: no mark on a row")
-        #expect(PrivateMarkFace.book(marked: true, badgesOn: false) == nil)
-        // The masthead reads the row's own rule over the row's own GATED fact
-        // (R-878-K3 — `theMarkDrawsOnlyWhileAClientIsApproved` pins the gate),
-        // silenced with the family (D-831-3 — so the switch's "Off: no marks
-        // anywhere" stays true).
-        let indicator = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent().deletingLastPathComponent()
-                .appendingPathComponent("Variorum/Core/Views/MCPNoteIndicator.swift"),
-            encoding: .utf8)
-        #expect(indicator.contains(
-            "PrivateMarkFace.note(state?.mark, badgesOn: themeStore?.settings.ownershipBadges ?? true)"))
-        // The switch says it governs the eye, and still that off changes
-        // nothing else.
-        // R-878-K3: and it says when (it no longer claims the eye with no client).
-        #expect(OwnershipSettingsCopy.badgesHelp.contains(
-            "While an AI client is approved, a Private note or book wears a closed eye"))
-        #expect(OwnershipSettingsCopy.badgesHelp.contains("Off: no marks anywhere; nothing else changes."))
+        #expect(PrivateMarkFace.note(fact) == .ownNote(alsoVia: []), "the fact is the mark — no badge switch")
+        #expect(PrivateMarkFace.book(marked: true) == .ownBook)
+        let views = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Variorum/Core/Views")
+        let indicator = try String(contentsOf: views.appendingPathComponent("MCPNoteIndicator.swift"), encoding: .utf8)
+        #expect(indicator.contains("let mark = PrivateMarkFace.note(state?.mark)"))
+        #expect(!indicator.contains("ownershipBadges"), "the masthead reads no badge switch for the eye")
+        let face = try String(contentsOf: views.appendingPathComponent("PrivateMarkView.swift"), encoding: .utf8)
+        #expect(face.contains("if let door, MCPAIMarksSwitch.drawn(aiMarksOn: road?.aiMarksOn) {"),
+                "the face reads the AI pair's switch off the road — on every host, the masthead included")
+        // The badge switch's words: the book marks only, and its "Off" no
+        // longer claims every mark in the app.
+        #expect(!OwnershipSettingsCopy.badgesHelp.contains("closed eye"))
+        #expect(!OwnershipSettingsCopy.badgesHelp.contains("Private"))
+        #expect(OwnershipSettingsCopy.badgesHelp.contains("Off: neither mark shows anywhere; nothing else changes."))
+        // The AI pair's switch says it governs the eye — and when (R-878-K3).
+        #expect(MCPPaneCopy.aiMarksDetail.contains("While a client is approved"))
+        #expect(MCPPaneCopy.aiMarksDetail.contains("a Private note or book wears a closed eye"))
     }
 
     /// **R-878-K3 — the gate arm** (her pick, "While a client is approved" —
-    /// the shared icon's exact gate, superseding N-2): a thing marked Private,
-    /// with the badges ON, draws NO mark while no client is approved — the
+    /// the shared icon's exact gate, superseding N-2): a thing marked Private
+    /// draws NO mark while no client is approved — the
     /// gated read every host holds answers nothing — and draws it once one is;
     /// the note menu's Private row keeps VX-641 throughout (always shown on a
     /// marked thing), so the un-private road survives while the mark is hidden.
@@ -107,11 +119,11 @@ struct PrivateMarkFaceTests {
                     (try Queries.privateMarksDrawn(db, noteIDs: [note.id]),
                      try Queries.privateBookMarksDrawn(db, readingIDs: [book.id]))
                 }
-                return (PrivateMarkFace.note(notes[note.id], badgesOn: true),
-                        PrivateMarkFace.book(marked: books.contains(book.id), badgesOn: true))
+                return (PrivateMarkFace.note(notes[note.id]),
+                        PrivateMarkFace.book(marked: books.contains(book.id)))
             }
             let none = try await drawn()
-            #expect(none.note == nil && none.book == nil, "marked + badges on + NO approved client ⇒ no mark")
+            #expect(none.note == nil && none.book == nil, "marked + NO approved client ⇒ no mark")
             #expect(try await db.read { try NotePrivacyState.read($0, postID: note.id) }.showsPrivateRow,
                     "VX-641 unchanged: the Private row still shows on a marked note — the un-private road")
             let client = try ops.recordMCPContact(name: "claude-code", version: "2")
@@ -183,7 +195,7 @@ struct PrivateMarkFaceTests {
             try ops.setBookPrivate(book.id, true)
             try ops.setNotePrivate(note.id, true)
             let fact = try #require(try await db.read { try Queries.privateMarks($0, noteIDs: [note.id]) }[note.id])
-            let mark = try #require(PrivateMarkFace.note(fact, badgesOn: true))
+            let mark = try #require(PrivateMarkFace.note(fact))
             await PrivateMarkAct.perform(
                 PrivateMarkFace.press(mark), subjectID: note.id, subjectName: nil, session: session)
             let after = try await db.read { try Queries.privateMarks($0, noteIDs: [note.id]) }[note.id]
@@ -191,7 +203,7 @@ struct PrivateMarkFaceTests {
                     "its own mark is off; the book still holds it private")
             #expect(session.status.spoken?.text == PrivateMarkCopy.clearedNoteStillVia(["the vault"]))
             // …and the row now wears the via-book mark at full strength.
-            #expect(PrivateMarkFace.note(after, badgesOn: true) == .viaBooks([.init(id: book.id, name: "the vault")]))
+            #expect(PrivateMarkFace.note(after) == .viaBooks([.init(id: book.id, name: "the vault")]))
         }
     }
 

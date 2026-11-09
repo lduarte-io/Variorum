@@ -241,7 +241,9 @@ struct CommitsFaceBody: View {
                     .lineLimit(1)
                     .fixedSize()
                     VoicedChip(
-                        tokens: tokens, text: CommitsFaceCopy.againstNowWash,
+                        // VX-927: "against as kept" on an unplaced member —
+                        // the model's one place question, never a copy here.
+                        tokens: tokens, text: model.washAgainstWord,
                         on: model.wash == .againstNow
                     ) { model.setWash(.againstNow) }
                     .lineLimit(1)

@@ -195,7 +195,14 @@ nonisolated enum SampleLibraryPrinceBook {
     // Jekyll book's design call 4). The easter-egg paragraph's claims are
     // fact-checked (the plan's fact-check round: the Testina's dates, the
     // XVIII omissions collated in our own sources); the tutorial-restore
-    // sentence is her knowing forward-promise on VX-292 (the plan's U3). The
+    // sentence was her knowing forward-promise on VX-292 (the plan's U3) —
+    // VX-843 (her wording ruling, 2026-11-04) corrected it to what the tour
+    // does (it mends deletions, never resets her edits; A-292-1/R-292-17),
+    // her sentence verbatim. Seeded text only: no road compares these bytes
+    // (discovery, the seed's skeleton turn, the tour's mend and the restore
+    // door are all title-keyed, and the Prince stays out of the pristine
+    // dedupe), so an existing store keeps its old sentence untouched and is
+    // never read as edited — the vx-915 record's BATCH 4 trace. The
     // two-copies paragraph is ruled OUT (R-633-18).
     static let aboutThisText = """
         This book is \u{201C}The Prince\u{201D} by Niccol\u{F2} Machiavelli, seeded here as an \
@@ -231,7 +238,7 @@ nonisolated enum SampleLibraryPrinceBook {
         the public domain, with headers and license matter removed and the line wrapping edited \
         so each paragraph is one block. If you delete the book and want it back, it can always \
         be restored via the top bar\u{2019}s Help \u{25B8} Restore \u{201C}\(name)\u{201D}. \
-        Restarting the tutorial will restore this book to its default state as well.
+        Restarting the tutorial restores any deleted parts of this book.
         """
 
     // MARK: - The seeded comments (her ruling at the edit-pass sitting,

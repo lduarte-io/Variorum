@@ -163,7 +163,9 @@ struct MCPShareFacesCaptureTests {
 
     private func road(_ door: MCPDoor, theme: ThemeStore) -> MCPShareRoad {
         MCPShareRoad(
-            canShare: true, serverOn: true, open: { _ in },  // VX-900: the label renamed (was indicatorOn: true — the same state)
+            canShare: true, serverOn: true,  // VX-900: the label renamed (was indicatorOn: true — the same state)
+            // VX-934 (A JUSTIFIED EDIT): the road carries the AI-pair switch — ON, her default, the same state.
+            aiMarksOn: true, open: { _ in },
             sheet: { opening, done in
                 AnyView(MCPGrantSheet(door: door, opening: opening, done: done).environment(theme))
             },

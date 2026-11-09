@@ -13,6 +13,16 @@
 //  reaches gatherings and tag listings only — the Library always shows
 //  everything (R32), and each gathering may choose for itself.
 //
+//  **VX-934 (her ruling, the VX-914 handoff sitting, #269 — "let's split the
+//  'book' related badges setting and if they're shown up completely from the
+//  AI one, and move it out of MCP back to where it was")**: the badge switch
+//  governs the BOOK marks again — the also-in-other-books mark and the "owned
+//  by" chip — and its row is back in Settings ▸ Editor's "Books" section, as
+//  it stood before VX-905 (a Toggle and its caption). The Private eye left the
+//  family: it and the shared icon have their own switch in Settings ▸ MCP
+//  (`MCPPaneCopy.aiMarksTitle`). VX-905's one-line summary for the MCP pane
+//  went with the row.
+//
 
 import Foundation
 
@@ -21,27 +31,15 @@ nonisolated enum OwnershipSettingsCopy {
 
     static let badgesTitle = "Show ownership badges"
 
-    /// **VX-905 (the VX-914 run, batch 1 — her #264 word: "ticket moving 'show
-    /// ownership badges' into the mcp part of settings - it makes more sense
-    /// there")**: the row's ONE line in Settings ▸ MCP, its whole text
-    /// (`badgesHelp`, unchanged) behind the (i) — the pane's idiom
-    /// (`ExplainerLine`). It names exactly what the switch governs today: the
-    /// in-book "also in other books" mark, the "owned by" chip and the Private
-    /// eye — NOT the shared icon, which draws without it. PROVISIONAL F-905,
-    /// flagged for her wording bundle.
-    static let badgesSummary = "One switch for the marks on notes in other books, owned notes and Private ones."
-
+    /// VX-934: the eye's sentence (VX-831 / R-878-K3) left with the eye, and
+    /// "Off" says what it hides now — these two marks, never every mark in
+    /// the app (the AI pair keeps its own switch). PROVISIONAL wording, her
+    /// bundle (F-934-B).
     static let badgesHelp =
         "In a book, a small mark on a note that also lives in other books (hover names them "
         + "\u{2014} editing it there edits it here). In gatherings, tag listings and the "
         + "Library, \u{201C}owned by\u{201D} on a note an owned book holds \u{2014} click it to "
-        + "open that book at the note. "
-        // VX-831 (PROVISIONAL wording, her bundle): the Private mark joins the
-        // family's one switch, so the switch says it governs it — and, since
-        // her R-878-K3, WHEN it shows (only while a client is approved).
-        + "While an AI client is approved, a Private note or book wears a closed eye "
-        + "\u{2014} hover it to see why. "
-        + "Off: no marks anywhere; nothing else changes. Synced."
+        + "open that book at the note. Off: neither mark shows anywhere; nothing else changes. Synced."
 
     static let hideOwnedTitle = "Hide notes an owned book holds, in gatherings and tag listings"
 

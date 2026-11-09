@@ -43,7 +43,9 @@ extension Operations {
         /// The note wears the tag and NO Quicknotes gathering shows it —
         /// she deleted the one this store was given (13i-b U4, §20: her
         /// deletion is her word; the note still lands, tagged, and the
-        /// tag's own listing and the Pool find it).
+        /// tag's own listing and the Pool find it) — or the note lives in
+        /// ANOTHER wing, whose vocabulary carries the tag and which grows no
+        /// gathering (VX-841: that furniture is Home's).
         case taggedOnly(tagID: String)
         /// The note already wore the tag (a re-file, or her own hand).
         case alreadyTagged(tagID: String)
@@ -78,11 +80,28 @@ extension Operations {
     /// books; what is not covered is the sub-millisecond window in which she
     /// deletes the tag between the ensure and the apply, which reports as a
     /// refusal rather than corrupting anything.
+    ///
+    /// **VX-841 — THE NOTE'S OWN WING** (the VX-915 run, batch 3; her ask: the
+    /// quick note optionally lands in another wing — the fork ruled at the
+    /// batch, PROVISIONAL P-915-B3-1). The tag resolves BY PATH IN THE NOTE'S
+    /// EFFECTIVE WING (R-13ia-1 — the vocabulary is per wing; the cross-wing
+    /// move's own `adoptPath`, adopt else mint), on both arms: a Home note
+    /// wears Home's tag and Home's gathering collects it, exactly as before; a
+    /// note in another wing W wears W's own `quicknote` tag and W grows NO
+    /// gathering (`.taggedOnly`). The lookup used to be wing-blind, so once
+    /// another wing held a live `quicknote` tag a Home capture whose wing held
+    /// none resolved THAT tag and the cross-wing application refused — the
+    /// Home filing failed forever (the latent this pins red-on-old).
     @discardableResult
     public func fileAsQuicknote(_ postID: String) -> QuicknoteFiling {
         do {
-            let tagID = try ensureQuicknoteTag()
-            let readingID = try ensureQuicknotesBook()
+            // A note that is not there reads as Home's (nil): the road it always
+            // took, which then refuses at the application, in words.
+            let wing = try database.read { try Queries.effectiveWing($0, ofPost: postID) } ?? ""
+            let tagID = try ensureQuicknoteTag(inWing: wing)
+            // The Quicknotes gathering is HOME's furniture (VX-841's ruled
+            // wrinkle): a capture in another wing never mints or reads it.
+            let readingID = wing.isEmpty ? try ensureQuicknotesBook() : nil
             do {
                 _ = try applyTag(tagID, toPost: postID)
                 guard let readingID else { return .taggedOnly(tagID: tagID) }
@@ -95,23 +114,25 @@ extension Operations {
         }
     }
 
-    /// The `quicknote` tag, minted if it is not there. Re-read inside the
-    /// writer so two doors racing the first quick note cannot mint two tags
-    /// (the `shelvingPlan` shape).
-    func ensureQuicknoteTag() throws -> String {
+    /// The `quicknote` tag IN `wing`'s vocabulary ('' = Home), minted there if
+    /// it is not there. Re-read inside the writer so two doors racing the first
+    /// quick note cannot mint two tags (the `shelvingPlan` shape) — the
+    /// re-read and the mint are the cross-wing move's own adopt-else-mint by
+    /// path (`adoptPath`, R-13ia-1's one rule, VX-841), never a second copy.
+    func ensureQuicknoteTag(inWing wing: String = "") throws -> String {
         let path = Self.quicknoteTagPath
         if let existing = try database.read({ db in
-            try Self.liveTagID(db, path: path)
+            try Self.liveTagID(db, path: path, wing: wing)
         }) {
             return existing
         }
         return try database.write { db in
-            if let raced = try Self.liveTagID(db, path: path) { return raced }
-            let now = date.now
-            let tag = Tag(
-                id: newID(), ownerId: currentOwnerID(), parentId: nil,
-                name: path, path: path, createdAt: now, updatedAt: now)
-            try tag.insert(db)
+            var adoption = TagAdoption(wing: wing)
+            // A one-segment path always resolves (nil is only a path with no
+            // segment).
+            guard let tag = try adoptPath(db, path, &adoption) else {
+                throw OperationError.invalidTagName(name: path)
+            }
             return tag.id
         }
     }
@@ -146,7 +167,9 @@ extension Operations {
             // door's own ensure; a caller reaching this mint first must
             // not store a dead term).
             let tagID: String
-            if let existing = try Self.liveTagID(db, path: Self.quicknoteTagPath) {
+            // VX-841: HOME's tag — the gathering is Home's, and its rule must
+            // name Home's vocabulary, never another wing's same-path twin.
+            if let existing = try Self.liveTagID(db, path: Self.quicknoteTagPath, wing: "") {
                 tagID = existing
             } else {
                 let tag = Tag(
@@ -169,11 +192,13 @@ extension Operations {
         }
     }
 
-    private static func liveTagID(_ db: Database, path: String) throws -> String? {
+    /// The live tag at `path` in ONE wing's vocabulary (VX-841: the lookup was
+    /// store-wide, so another wing's same-path twin could answer for Home's).
+    private static func liveTagID(_ db: Database, path: String, wing: String) throws -> String? {
         try String.fetchOne(
             db,
-            sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL",
-            arguments: [path])
+            sql: "SELECT id FROM tag WHERE path = ? AND wing_id = ? AND deleted_at IS NULL",
+            arguments: [path, wing])
     }
 
     /// The residual bucket's wording (`residualReason`'s twin — raw
