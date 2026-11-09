@@ -71,8 +71,8 @@ nonisolated enum BookIndexGrouping: Equatable, Hashable, Sendable {
     }
 }
 
-/// The per-book memory. `UserDefaults` INJECTED (the app passes `.standard`,
-/// every pin a scratch suite).
+/// The per-book memory. `UserDefaults` INJECTED (the app passes the note-memory
+/// domain, `NoteMemoryDefaults.store` — VX-926 U4; every pin a scratch suite).
 struct BookIndexGroupingPrefs {
     let defaults: UserDefaults
 
@@ -251,7 +251,7 @@ final class BookIndexGroupingModel {
     private(set) var sections: [String: String] = [:]
     private(set) var sectionsRoot: String?
 
-    init(readingID: String, defaults: UserDefaults = .standard) {
+    init(readingID: String, defaults: UserDefaults = NoteMemoryDefaults.store) {
         self.readingID = readingID
         self.prefs = BookIndexGroupingPrefs(defaults: defaults)
         self.choice = prefs.choice(for: readingID)

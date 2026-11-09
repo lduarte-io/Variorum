@@ -50,7 +50,7 @@ struct CurrentBlockMemory {
     /// written before 17o batch b carries two fields; it reads back with an
     /// UNKNOWN offset, which every landing spells "the block's start" — the
     /// behaviour it had when it was written.
-    func current(for postID: String, defaults: UserDefaults = .standard) -> FocusedBlock? {
+    func current(for postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) -> FocusedBlock? {
         if let fact = facts[postID] { return fact }
         guard let stored = defaults.string(forKey: Self.key(postID)) else { return nil }
         let parts = stored.split(separator: "|", maxSplits: 2, omittingEmptySubsequences: false)
@@ -83,7 +83,7 @@ struct CurrentBlockMemory {
     /// nil offset for the SAME block keeps what is known, and a report for
     /// ANOTHER block resets it (an offset inside block one means nothing
     /// inside block two).
-    mutating func remember(_ fact: FocusedBlock, defaults: UserDefaults = .standard) {
+    mutating func remember(_ fact: FocusedBlock, defaults: UserDefaults = NoteMemoryDefaults.store) {
         var fact = fact
         if fact.utf16Offset == nil,
            let known = current(for: fact.postID, defaults: defaults),
@@ -106,7 +106,7 @@ struct CurrentBlockMemory {
     }
 
     /// The note is leaving the screen — write what the session dict holds.
-    mutating func persist(postID: String, defaults: UserDefaults = .standard) {
+    mutating func persist(postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) {
         guard let fact = facts[postID] else { return }
         write(fact, defaults)
     }
@@ -118,7 +118,7 @@ struct CurrentBlockMemory {
     }
 
     /// A note's memory is dropped (the note was deleted, or a pin resets).
-    mutating func forget(postID: String, defaults: UserDefaults = .standard) {
+    mutating func forget(postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) {
         facts[postID] = nil
         defaults.removeObject(forKey: Self.key(postID))
     }

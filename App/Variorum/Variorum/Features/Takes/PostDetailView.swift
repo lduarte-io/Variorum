@@ -138,7 +138,7 @@ struct PostDetailView: View {
     /// scroll-position class — local, never synced). 13b 4C: stored
     /// values decode through `PostMode.fromStored`, so a post left in the
     /// retired Outline tab reopens in Compare — no stored value strands.
-    static func rememberedMode(postID: String, defaults: UserDefaults = .standard) -> Mode {
+    static func rememberedMode(postID: String, defaults: UserDefaults = NoteMemoryDefaults.store) -> Mode {
         defaults.string(forKey: "postMode.\(postID)").flatMap { Mode.fromStored($0) } ?? .write
     }
 
@@ -552,7 +552,7 @@ struct PostDetailView: View {
             // into Write over a note left in Lenses would leave "Lenses" as
             // the note's last used mode after she had worked in Write.
             if let initialMode, initialMode != remembered {
-                UserDefaults.standard.set(initialMode.rawValue, forKey: "postMode.\(postID)")
+                NoteMemoryDefaults.store.set(initialMode.rawValue, forKey: "postMode.\(postID)")
             }
             if let initialBlockID {
                 jump(to: initialBlockID, offsetInBlock: initialOffsetInBlock, find: initialFind)
@@ -685,7 +685,7 @@ struct PostDetailView: View {
             #endif
         }
         .onChange(of: mode) { _, new in
-            UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
+            NoteMemoryDefaults.store.set(new.rawValue, forKey: "postMode.\(postID)")
             session.commandRouter.noteMode(new)
             // 17o batch b's ladder, R1-1 (BLOCKER): the caret seed is
             // ONE-SHOT. `jump(to:)` set `pendingCaret` and nothing cleared
