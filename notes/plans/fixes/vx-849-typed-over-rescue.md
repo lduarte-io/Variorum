@@ -176,7 +176,7 @@ beside it.**
 | 2 | Batch 2 — VX-544 (the offline unlock retry) | DONE — built `b11fb8d39`…`36b709512` + the window fix `f500f94f3`; the stage window ran 2026-11-09 (claim vx-849-batch2): leg A 41/41 at `f500f94f3` after one test-only fix (the WINDOW record below) · leg B R-3a red on exactly its five named pins, restored 18/18 · leg D 7/7, R-3g red on exactly its one pin, restored 7/7; leg C folds into row 8's closing sweep; her drill OWED (row 9) |
 | 3 | Batch 3 — VX-664 (the outside-change ring-ending) | BUILT — `3d9d36cdd`…(this commit): the sweep table; G1+G3 (the seam composed with the rescue); P-849-1 (the insured restore); R-683-4's face + G2 (PROVISIONAL P-849-5); core headless green; Mac + phone `build-for-testing` green; EVERY Mac run PENDING the stage (the BATCH 3 RECORD's STAGE REQUEST); the orchestrator's walk owed |
 | 4 | Batch 4 — VX-443 + VX-152 + VX-545 (the custody smalls) | BUILT — `b59d2f16d`…(this commit): VX-443's sweep (PROVISIONAL P-849-4; red-on-old SHA `9118b0355`, the fix `80979d6f0`, reverts R-443a…d bit as named); VX-152 traced — closed before this run by VX-445, a guard pin only; VX-545's five points in one commit (`6cd218082`, the page regenerated); core protection set 551/123 green; Mac + phone `build-for-testing` green; EVERY Mac/simulator run PENDING the stage (the BATCH 4 RECORD's STAGE REQUEST) |
-| 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | IN PROGRESS — trace recorded; the repro pin `PurgeSweepTeardownTests` GREEN 2/2 ×3 ⇒ RECORD-ONLY (no fix); R-855a next, then the close |
+| 5 | Batch 5 — VX-855 (the teardown SIGSEGV, trace-first) | DONE — RECORD-ONLY (`718701ac8`…(this commit)): traced; the confirm `PurgeSweepTeardownTests` GREEN 2/2 ×3 (the lock's close waits for the held read); R-855a bit exactly its two lines; NO FIX (dismissed as already fixed by VX-604 + VX-657; the ticket text in the BATCH 5 RECORD); no Mac suites new; whole core package PENDING (row 8); the in-app recipe OPTIONAL for the orchestrator's window |
 | 6 | Batch 6 — VX-921 + VX-919 (the rank swap + the cap script) | NOT STARTED |
 | 7 | The ladder (fresh `fable-reviewer`; rounds per CLAUDE.md) | NOT STARTED |
 | 8 | Closing Mac runs over every changed source · PR · closeout ritual · FOR A LATER READER | NOT STARTED |
@@ -2173,10 +2173,13 @@ the commit's diff); LIVE STATUS row 4 BUILT.
 
 ### BATCH 5 RECORD (the implementer — Opus, xhigh; opened 2026-11-09)
 
-**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** no `xcodebuild test` of any kind, no stage contact, no
+**NOT DONE BY THIS IMPLEMENTER (first line, kept current):** NO FIX BUILT — the confirm is GREEN, so VX-855 is
+RECORD-ONLY (no fix on a trace that never bit); no `xcodebuild test` and no `xcodebuild build-for-testing` (no file
+compiled into either app changed — the batch's diff is one core test file and this record); no stage contact, no
 Debug-app launch, no walk, no store or server contact; no pull, merge or rebase; no whole-package or whole-target
-headless run and no cold build (other sessions hold the stage); ZERO lines under `Sources/VariorumCore/Sync/` (and
-zero under `Sources/` at all so far); no QUESTIONS filed. Nothing of batches 3/4/6's files.
+headless run and no cold build (other sessions hold the stage — the whole core package is PENDING, row 8); ZERO lines
+under `Sources/` in any commit (the R-855a revert touched `StoreBinding.swift` in the working tree only, restored
+byte-clean); no QUESTIONS filed, nothing PROVISIONAL. Nothing of batches 3/4/6's files.
 
 **Preflight, read in this session (never delegated):** CLAUDE.md + the loaded canon; this file whole; `.claude/agents/
 opus-implementer.md`; `notes/SyncSpec.md` IN FULL; `notes/plans/phase-13j-purge-memo.md` §2 (the horizon), §4a–§4f,
@@ -2193,9 +2196,9 @@ world-end quiesce (:282–291), `StoreBindingTests`.
 | # | Piece | Status |
 |---|---|---|
 | 0 | Preflight + this record + the trace | DONE (this commit) |
-| 1 | The repro pin (the confirm) — headless, deterministic | DONE (this commit) — `PurgeSweepTeardownTests` **GREEN 2/2, three runs in a row**: the confirm does NOT reproduce the class on this tree ⇒ RECORD-ONLY; the liveness revert R-855a is named below and runs next at this tip |
+| 1 | The repro pin (the confirm) — headless, deterministic | DONE (`c0f713690`) — `PurgeSweepTeardownTests` **GREEN 2/2, three runs in a row**: the confirm does NOT reproduce the class on this tree ⇒ RECORD-ONLY; R-855a (run at `c0f713690`) bit exactly its two named lines |
 | 2 | The fix — ONLY on a red confirm | NOT BUILT — the confirm is green (RECORD-ONLY; no fix on a trace that never bit) |
-| 3 | Close | NEXT |
+| 3 | Close | DONE (this commit) — `swift build` green; the pin + neighbours 36/3 green; the ticket text, the window recipe, the corners below; whole core package PENDING (row 8) |
 
 **THE TRACE — the teardown order, every road (file:line at `80ca15989`):**
 - *Who starts the sweep:* `AppServices.start()` (:298) arms the hourly clock `localPurgeTask` (:329), whose FIRST
@@ -2280,6 +2283,86 @@ headless; no product file touched).**
   refuses typed; GRDB's barrier still holds the close until the read ends, so nothing is half-done). What the pin
   CANNOT bite, said plainly: the barrier itself is GRDB's (`Pool.barrier`), not a line of ours — our part is the order
   (swap first, the close awaited, the lock returning after it), and R-855a is that part.
+- *R-855a, run at `c0f713690` (headless, `StoreBinding.swift` alone; `git diff --stat` showed exactly that one file,
+  2+/6−):* **`✘ Test run with 2 tests in 1 suite failed … with 2 issues`** — exactly
+  `aLockLandingMidSweepClosesOnlyAfterTheHeldReadEnds` at `lock.returnedAfterRelease` and
+  `theLockRoadsCancelThenCloseMidReadEndsTheSweepWithNothingHalfDone` at `lock.returnedAfterRelease`; every other line
+  green in both (the typed refusal while held, the clean outcome, the sweep's typed end, the family whole, the control
+  purge) — as named. Restored by `git checkout --` of the one file (`git diff --stat` empty) → the pin with its
+  neighbours `swift test --filter 'PurgeSweepTeardownTests|StoreBindingTests|PurgeConvergenceTests'` → **`✔ Test run
+  with 36 tests in 3 suites passed`** (the VX-657 boundary pins among them).
+
+#### Piece 3 — Close
+- *Headless at the tip:* `swift build` → `Build complete!` (incremental); the pin 2/2 ×3 and with its neighbours 36/3,
+  above. `xcodebuild build-for-testing` (Mac, phone) NOT RUN, deliberately: the batch's whole diff
+  (`git diff --stat 80ca15989..HEAD`) is `Tests/VariorumCoreTests/PurgeSweepTeardownTests.swift` and this record — no
+  file either app compiles changed, so batch 4's green tip stands for both; nothing to compile there.
+- *HEAVY HEADLESS — PENDING (the live constraint; other sessions hold the stage):* the WHOLE core package `swift test`
+  (the batch adds one self-contained suite and changes no source, so the targeted runs cover it; the whole package
+  folds into LIVE STATUS row 8's closing sweep as every batch's has).
+- *Mac/simulator suites for the orchestrator's window:* NONE new and NO named Mac reverts (the pin is core; R-855a ran
+  headless). The VX-657 standing suite `QuitPurgeQuiesceTests` is already in batch 1's and batch 2's leg-C lists (row 8).
+
+**THE VERDICT, plainly: VX-855 DOES NOT REPRODUCE ON THIS TREE — RECORD-ONLY. DISMISSED AS ALREADY FIXED (VX-604's
+inert test host for the .ips's own road; VX-657's quit-door quiesce for ⌘Q), with one regression guard
+(`PurgeSweepTeardownTests`, live by R-855a).** The ticket's suspected mechanism ("the pool or its codec key context torn
+down under an in-flight reader") does not happen in-process: the lock road's close waits for in-flight reads (GRDB's
+barrier; our lock returns after it — pinned mid-read). The .ips's real teardown was process exit — a test runner ending
+its host while the host's own launch sweep was mid-read, a road that never met the quit door — and since VX-604 a test
+host opens no store and starts no sweep.
+
+**THE TICKET TEXT (for the orchestrator to put on VX-855 — implementers have no Linear):** "Traced in the VX-849 run
+(batch 5). The .ips is the test host at its runner's exit: before VX-604 the host's own launch opened the dev store and
+composed the ready shell, so its launch purge sweep (`AppServices.start` → `sweepLocalPurge` → `LocalPurge.sweep` →
+`collectRoots` on a pool reader) could still be reading when the runner ended the process; process exit runs SQLCipher's
+own exit-time shutdown under that read — the crash. That road never passes `applicationShouldTerminate`, so VX-657's
+quiesce could not reach it (VX-691 recorded the same face on 2026-10-28). Closed on today's tree: VX-604 (`fae643a05`,
+2026-11-08 — after build 11051) makes a test host inert (no store, no services, no sweep); ⌘Q quiesces the sweeps and
+the sync chain before exiting (VX-657). The in-process half the ticket suspected does not exist: a pin parks the
+sweep's read inside `sqlite3_step` on a keyed on-disk pool and locks the store under it — the close waits for the read,
+new accesses refuse typed, nothing half-done (`PurgeSweepTeardownTests`, green; live by reverting the lock's awaited
+close). Recommend: close as already fixed (VX-604 + VX-657), regression guard added; VX-691 is the same face — close it
+with this, or re-scope it to the test-leaked-read residual below."
+
+**THE DEV-STORE CONFIRMATION RECIPE (the orchestrator's window — OPTIONAL, since the confirm is green; never run by
+me):** the class lives only at PROCESS EXIT, so in-app is the only place its two faces can be watched.
+- *Before:* a held stage claim; `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` zero; note the newest
+  `~/Library/Logs/DiagnosticReports/Variorum*.ips` time (the baseline).
+- *(a) The test-host face — rides any Mac test window at no extra cost:* after the window's last `xcodebuild test`
+  leg, list `~/Library/Logs/DiagnosticReports/Variorum*.ips` newer than the baseline. Expected: none (the inert host —
+  VX-604). A new one whose crashed thread is `GRDB.DatabasePool.reader.*` under `LocalPurge`/`collectRoots` would mean
+  a test leaked a running sweep (corner 1 below), not the host's launch.
+- *(b) The ⌘Q face:* the dev store (`io.lduarte.Variorum.debug`) given work for the launch sweep — several notes
+  deleted (tombstones; a few with Delete Now confirmed while signed out so intents exist) — then, five times: launch
+  the Debug app, wait for the first paint of the library, ⌘Q within one to two seconds. Expected: each quit prompt and
+  clean, no Problem Reporter, no new `.ips`. **If the dev store is in Castle, the launch meets its lock screen: per the
+  Fable safeguard that walk is an OPUS session's**, with the values from `~/.variorum/dev-castle.env` only. Posture
+  restored at RELEASE (MCP on, variorum-de approved, never Resume Sync).
+
+**RECORDED CORNERS (for the orchestrator; none built here):**
+1. *A read a TEST leaves running at its runner's exit* can still meet the same exit-time shutdown — a test-composed
+   `AppServices.start()` over an on-disk pool whose background read outlives the test (the class
+   `FirstRoundAfterTheActTests`' world-end quiesce works around with its 200 ms settle, :282–291). Test-only, never a
+   product road; VX-691's natural residual scope if it is kept open.
+2. *VX-657's quit quiesce covers the purge sweeps and the sync chain only;* other background reads in flight at ⌘Q
+   (an observation's fetch, a search query) would meet the same exit-time shutdown in principle. No field evidence (the
+   one .ips is the test host's sweep). Not widened — the orchestrator's to ticket or not.
+3. *A quit while locked* (`applicationShouldTerminate`'s `guard let services` → `.terminateNow`) has no sweep to await:
+   the lock road's close returned only after any in-flight read ended (this batch's pin), so no read is in flight on the
+   closed pool by the time the lobby stands.
+
+**SELF-ASSESSMENT.** The pin is deterministic in its staging (the read is proven parked before the teardown; the test
+alone releases it) and fails loudly rather than hollowly if its premise breaks (a sweep that took another reader never
+parks — the `#require` fails). Its one timed element is the 500 ms window a non-waiting lock would return in: a lock
+that returned LATER than that while a read was held would read green — the window can only miss, never false-red.
+What it cannot reach is process exit itself; the trace, not a pin, carries Teardown 3, with the repo's own earlier
+sighting (`FirstRoundAfterTheActTests.swift:285`) and VX-691's as corroboration.
+
+**MOBILE PARITY:** nothing mobile-visible. The lock road's `StoreBinding.lock()` is the shared core's, so the pin covers
+the phone's lock teardown too; the phone has no quit door (the system suspends or ends the app), and the inert test
+host is the shared bootstrap's (VX-604 — both platforms).
+
+**Canon deltas owed at the closeout:** none (no contract changed; the verdict is the ticket's). **QUESTIONS:** none.
 
 ## HER OVERNIGHT MANDATE (2026-11-09, the compaction sitting — her words verbatim; binding on the resumed orchestrator)
 
