@@ -12,6 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
+| **VX-956** — delete the cold-build CI check (her 2026-11-09 ruling, QUESTIONS #270 addendum; her 11-10 word: its own PR now, not riding 1.4) | VX-956 · `vx-956-delete-cold-build-check` | `~/dev/variorum-vx-956` · Pro | OPEN 2026-11-10 (the VX-973 sitting). Surfaces: `.github/workflows/` + the core test target only — no app surface, no stage. |
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
 
 ### Latest closeout
