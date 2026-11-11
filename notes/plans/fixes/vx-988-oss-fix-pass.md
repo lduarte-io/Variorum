@@ -6,8 +6,7 @@ no history rewritten, no commit message touched.
 
 ## FOR A LATER READER
 
-**Not done, first:** the OSS plan's motives line (§1, line 7) is untouched — it waits on her word; three commit messages
-on this branch name a removed class (`c952778e6`, `0715f81ee`, `707684cd2`) and need VX-749 `--replace-message` rules
+**Not done, first:** three commit messages on this branch name a removed class (`c952778e6`, `0715f81ee`, `707684cd2`) and need VX-749 `--replace-message` rules
 (history is never rewritten here); the commit-author metadata (the mailmap row) is VX-749's; the pile-B verify rows
 (the security-as-roadmap row in `notes/TICKETS.md`, home and scratch paths) are VX-751's; and the regenerated
 `notes/TICKETS.md` still owes one check (open item 5). Everything else she ruled is applied below.
@@ -104,7 +103,7 @@ batch** (one commit per piece; every cut or rewritten passage copied verbatim to
 - **m-4** — (a) `cba065288`: the vault's two corpus key ids and two proof-hash prefixes → `<corpus-key-id>`,
   `<key-proof-hash-prefix>` (`-2` for the second), four notes; (b) `84f27c226`: four notarization submission ids →
   `<notary-submission-id>`; (c) `53c34da4b`: the ruled descriptive wording cut from three lines of the OSS plan (six
-  markers), its motives line untouched; (d) `d4d3d99e4`: five unpublished launch drafts under `notes/brand/posts/` and
+  markers), its motives line untouched here (trimmed later at her word, R-oss-41); (d) `d4d3d99e4`: five unpublished launch drafts under `notes/brand/posts/` and
   `notes/brand/site/` relocated whole (the private repo's `relocated/brand/`), their references in four notes annotated,
   and `220ebc285`: one FAQ answer slot in the product-page reference and one phrase in `LAUNCH-CONTENT-NOTES.md` cut with
   markers — the rest of `notes/brand/` (the logo, PROCESS, the shipped copy) stays; (e) `f426a653b`: the remote-workflow
@@ -134,7 +133,9 @@ guards), after every round. The app-target test files changed only by a string l
 
 **Open items:**
 
-1. **The OSS plan's motives line (§1, line 7)** — her word decides it; untouched.
+1. **The OSS plan's motives line (§1, line 7) — CLOSED** at her word (R-oss-41): one phrase trimmed from the motives
+   ranking, the rest of the line unchanged (`8f7f16ff7`; the original verbatim in the private repo first, its commit
+   `ebfda2f`).
 2. **Three commit messages name a removed class** (`c952778e6`, `0715f81ee`, `707684cd2`) — no value quoted. History is
    never rewritten here: VX-749 needs a `--replace-message` rule for each. (The reviewer's scope note for VX-749 stands:
    the rewrite must cover every prose cut and relocation of all three rounds in every parent blob, not tokens alone.)
@@ -198,4 +199,6 @@ guards), after every round. The app-target test files changed only by a string l
 | micro-batch 2 (the owed-list word) | done (the private repo's commit `14bcd53` first) | `188ac98f5` |
 | micro-batch 3 (the rest of the triage list) | closed as keep, recorded (open item 7) | this commit |
 | micro-batch 4 (`notes/TICKETS.md`) | verify row added (open item 5); the file not hand-edited | this commit |
-| record | micro-batch closed (this text) | this commit |
+| record | micro-batch closed | `e6eb220f8` |
+| R-oss-41 (the motives line) | done (the private repo's commit `ebfda2f` first) | `8f7f16ff7` |
+| record | R-oss-41 closed; open = the three message rules, the mailmap row, the snapshot verify, the VX-751 rows (this text) | this commit |
