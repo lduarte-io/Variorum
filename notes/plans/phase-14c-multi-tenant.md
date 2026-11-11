@@ -288,14 +288,11 @@ control the email address <her-email> for use making a
 second account. I can look at cloudflare for whatever you need for the
 domain step. if this is just for users having an account / logging in
 at stargazing.tech I think account makes more sense? or is it for
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+something else? […] how
+easy is it to change the SMTP […] choice later? I
 wasn't sure how much of this is direct code changes - I'm contemplating
 moving the SMTP into the same 14d phase as fragments due to this
-*[removed for publication]*
-*[removed for publication]*
+phase's already significant size. […] I also think that you can do the signup flip
 and you can drive the live probes and the deploy. i can type my
 passphrase into the runner as needed. let me know on what remains in
 this phase and what we should do"*
@@ -336,8 +333,7 @@ this phase and what we should do"*
   into the runner as needed.
 - *[removed for publication]*
 
-*[removed for publication]*
-*[removed for publication]*
+### Round 8 — domain permanence and the passphrase-step timing (2026-08-05; verbatim)
 
 *[removed for publication]*
 

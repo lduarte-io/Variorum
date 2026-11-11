@@ -115,9 +115,7 @@ abuse limits, streaming UI) *[removed for publication]*.
   element after."*
 - **The chat LEAN, recorded (a lean, not final):** *"I could also
   potentially still offer a chat interface in the app but with BYOK
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  as an option - I'm leaning towards yes […]"* Her posture riders, verbatim-faithful: the chat
   stays *"fully removable, off by default, and not the hero shot"*,
   and *"positioning it as editing rather than writing is key."* The
   chat remains its own later phase, decided after the MCP launch
