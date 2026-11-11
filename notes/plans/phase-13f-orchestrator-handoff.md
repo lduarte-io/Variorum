@@ -25,7 +25,7 @@ amended, cutover state to VERIFY-not-trust, and machinery lessons.
 ## The role as amended (beyond the skill's text)
 
 - The author's parallel RELEASE-STRATEGY session commits to `notes/`
-  *[removed for publication]*
+  at any moment (`release-and-v1-strategy.md` (relocated to the private planning repo), master plan, KnownIssues
   — its commits: f3b5251 · 11a8a0e · 32f1933 · b347e7a incl. the
   PHASE 14 SPLIT into 14a–14d). ALWAYS stage by explicit path; never
   commit/touch her files; 13f is a V1 GATE per her strategy file.

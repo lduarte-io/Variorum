@@ -42,7 +42,7 @@ it; (3) `notes/plans/phase-14b-suite-e2ee.md`'s THE DESIGN + the CF
 ledger + "HER ACCEPTANCE" sections (what the vault, seam, and flows
 ARE); (4) `notes/handoffs/phase-14b-handoff.md` (standing facts, never
 re-derive); (5) `notes/fragments-bridge-contract.md`'s EXECUTION MODEL
-*[removed for publication]*
++ all three touchpoints; (6) `release-and-v1-strategy.md` §1/§4 (relocated to the private planning repo);
 (7) `notes/sync-postmortem-fragments.md` before ANY
 `Sources/VariorumCore/Sync/` line. STANDING: the mirror is LIVE
 production (announced changes only, committed artifacts, her explicit
@@ -2514,7 +2514,7 @@ price-agnostic: she names the number at launch.)*
 
 - **What is sold:** the suite's ONE hosted-sync plan. One payment
   covers Variorum AND Fragments (the author's suite ruling —
-  *[removed for publication]*
+  `release-and-v1-strategy.md` §1 (relocated to the private planning repo)); the entitlement lives on the
   ONE suite account and both apps check it (Fragments' check lands in
   its own later batch — the page may promise suite coverage; the apps'
   in-app copy deliberately claims only their own behavior until then).

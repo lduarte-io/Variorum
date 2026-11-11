@@ -11,7 +11,7 @@ the three units is expected to be), `opus-implementer` builds, both xhigh.
 The binding rulings: `notes/plans/phase-13n-sitting-record-2026-10-09.md`
 (R-13n-1…11) + the approved mockups
 `notes/plans/13n-sitting-mockups/mcp-door-mockups.html` + the carried canon
-*[removed for publication]*
+(`phase-13n-mcp-door-note.md`, `release-and-v1-strategy.md` §9 (relocated to the private planning repo)).
 
 ## KICKOFF MESSAGE (for a fresh orchestrator session)
 
@@ -21,7 +21,7 @@ under a grant she set. Every design question is ALREADY RULED: the binding
 record is `notes/plans/phase-13n-sitting-record-2026-10-09.md` (R-13n-1…11)
 with the approved mockups `notes/plans/13n-sitting-mockups/mcp-door-mockups.html`
 and the standing canon they carry forward (`notes/plans/phase-13n-mcp-door-note.md`
-*[removed for publication]*
+— her dream vision verbatim; `release-and-v1-strategy.md` §9 (relocated to the private planning repo) — the
 guardrails). 13n-a (Level 0) is CLOSED and merged — the format and import
 ops it built (`Domain/VariorumDocument`, `importDocument`/`importBook`,
 `Queries.variorumDocumentText`) are this phase's substrate: `read_note`
@@ -931,7 +931,7 @@ constraints, the ARCHITECT SEAM RULINGS A-1…A-10, the environment traps);
 `notes/plans/phase-13n-sitting-record-2026-10-09.md` (the rulings);
 `notes/plans/13n-sitting-mockups/mcp-door-mockups.html` (§1–§4, §9, §10 —
 the approved reference; render it or read the source); CLAUDE.md +
-*[removed for publication]*
+its auto-loaded canon; `release-and-v1-strategy.md` §9 (relocated to the private planning repo). For the
 substrate: `Sources/VariorumCore/Domain/VariorumDocument.swift`,
 `Queries/Export.swift` (`variorumDocumentText`), `Queries/SearchQueries.swift`
 (`searchPassages`/`searchGroups`), `Queries/PostRender.swift`

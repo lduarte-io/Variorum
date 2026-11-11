@@ -8,7 +8,7 @@ sitting, awaiting her rulings. Ticket VX-116 · branch `vx-116-13n-sitting`.
 The standing canon this builds on, read in full for this prep:
 `notes/plans/phase-13n-mcp-door-note.md` (her dream vision + use cases,
 verbatim; the chat question; the candidate shape) and
-*[removed for publication]*
+`release-and-v1-strategy.md` §9 (relocated to the private planning repo) (the 2026-07-30 inclination — ops-shaped
 door, insure-first writes, consent-scoped reads, journals gated, local LLMs
 first-class, the open-book switch, the honest boundary). The mockups:
 `notes/plans/13n-sitting-mockups/mcp-door-mockups.html`.

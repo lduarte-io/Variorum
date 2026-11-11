@@ -211,5 +211,5 @@ paragraph. 13o scope + settled inputs (client-side by architecture, wing
 isolation, facets, results-cap defect): `notes/FuturePhases.md` 13o row +
 `notes/plans/phase-13i-sitting-record-2026-09-30.md` §12/§21. Release
 *[removed for publication]*
-*[removed for publication]*
+birth): `release-and-v1-strategy.md` (relocated to the private planning repo). Everything consumer-visible:
 CoreDescription / OverallModel / AppSpec §12.

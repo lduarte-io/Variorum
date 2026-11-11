@@ -190,7 +190,7 @@ is the ordinary English word — leave.
 - **C3** · `notes/fragments-postures-brief-2026-09-01.md` + `notes/fragments-enrollment-brief-2026-08-31.md` — a
   dated banner under each title: the bridge is retired on the Variorum side (the §5 carry item is the authoritative
   word); the enrollment/ceremony spec stands on Fragments' OWN merits (build or not); nothing bridge-motivated is owed.
-*[removed for publication]*
+- **C4** · `release-and-v1-strategy.md` (relocated to the private planning repo) — §1's SUITE-ruling bullet (~line 35: "the Fragments bridge is PUBLIC
   at launch") and §4's rider (~line 186: "KEPT and PROMOTED — public at launch, never retiring") → dated
   SUPERSESSION notes: superseded by the pre-13x ruling 16 (2026-09-03/04, `pre-13x-postures-design.md` §1); the
   ONE account and the ONE sync payment covering both apps are UNCHANGED; revival shape = shared rows in a

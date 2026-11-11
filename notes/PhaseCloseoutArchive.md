@@ -957,7 +957,7 @@ the row's standing items. She launches it at her word.**
 > uncovered latent Mac bugs. **13l and 13u carry mobile's Mac and
 > `Shared/` backlog** (13l's L-a…L-d; 13u's item 8) **so that mobile
 > returns with phone work only.** The full record is
-*[removed for publication]*
+> `release-and-v1-strategy.md` (relocated to the private planning repo) §10's amendment.
 
 **→ PHASE 13J CLOSED 2026-08-19 — Deletion, the Trash & the recovery
 story is DONE, and the PURGE IS LIVE: the author-attended sittings ran
@@ -1076,7 +1076,7 @@ the one file that governs it, so nothing needs hunting. **Rows marked
 | **20** | 🟣 💻 **13o** | **Search** — full-corpus body text, filters, scoped. A **V1 GATE**. Its index must never contain what protection hides | 13o's row | |
 | **21** | 🟣 💻 **13i** | Smart-book identity (the hybrid) | 13i's row | |
 | **22** | 🟣 💻 **13r · 13s** | Distribution mechanics (Sparkle, notarized DMG, crash reporting, accessibility) · the voice & polish pass (**her copy, written outside the phase**) + the design review | their rows | |
-*[removed for publication]*
+| **→** | | **v1** | `release-and-v1-strategy.md` §10 (relocated to the private planning repo) | |
 
 **Two things that are NOT in this order and are hers to slot:** 13e's
 residuals and the unslotted rows (EPUB, Apple Notes import, grammar,

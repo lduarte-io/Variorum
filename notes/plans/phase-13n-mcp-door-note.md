@@ -4,7 +4,7 @@
 conversation that created the master-plan row.** This is the 13h
 design-note pattern applied to 13n: her verbatim vision and use cases,
 preserved for the kickoff sitting, binding nothing beyond the words
-*[removed for publication]*
+themselves. The row's standing references: `release-and-v1-strategy.md` (relocated to the private planning repo)
 §9 (the 2026-07-30 inclination — MCP server projected from the capability
 registry, insure-first writes, consent-scoped reads, local LLMs
 first-class) and the master plan's 13n row.

@@ -16,7 +16,7 @@ binds). The phase opens with the AUTHOR-ATTENDED design sitting this file
 stages. READ FIRST, in order: (1) this file in full — the agenda, what binds,
 and the one-way-door list; (2) `notes/plans/phase-14a-suite-identity.md`'s
 RULED STATE banner + the ladder record, and `notes/handoffs/phase-14a-handoff.md`
-*[removed for publication]*
+— what 14a left you; (3) `release-and-v1-strategy.md` §4 (relocated to the private planning repo) (the E2EE
 direction + the dated wrap-secret addendum); (4) the master plan's 14b/14c
 rows; (5) `notes/fragments-bridge-contract.md`'s READ-THIS-FIRST pointer,
 EXECUTION MODEL, and TOUCHPOINT #2 block; (6) `notes/sync-postmortem-fragments.md`

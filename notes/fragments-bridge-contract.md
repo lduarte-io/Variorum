@@ -389,7 +389,7 @@ baseline, final.**
 **Why this section exists:** the author is finishing Fragments for TestFlight and asked
 what the suite-identity (Phase 14a) questions are, so tonight's build doesn't foreclose
 them. The recorded rulings this rests on (Variorum master plan rows 14a–14c +
-*[removed for publication]*
+`release-and-v1-strategy.md` (relocated to the private planning repo)): the suite gets a **neutral OIDC issuer** — one login
 for both apps, brand PROVISIONALLY stargazing; the Fragments-side conversation formally
 opens AT 14a; Fragments' E2EE is **journal-class ONLY** (14b, under the shared key — the
 rest of Fragments stays server-readable by design, its insights being the product); ONE
