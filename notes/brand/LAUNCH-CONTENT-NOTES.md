@@ -147,7 +147,7 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
 ## Owed / next natural steps
 
 - Her rewrite of the blog post (in Variorum), then a fact-only pass on it.
-*[removed for publication]*
+- *[removed for publication]* CTAs and the open-format-guarantee wording (release strategy
   wants the guarantee LOUD; it has two bracket slots on the product page).
 - One real performance measurement captured before the HN thread.
 - Re-verify the Apple Notes ~10k observation on current macOS.
