@@ -65,9 +65,9 @@ struct WriteTopAirTests {
     *[removed for publication]*
     *[removed for publication]*
     private let herNote = [
-        *[removed for publication]*
+        "There’s so much to pack for the trip that the hallway is buried in gear",
         "",
-        "Ok for starters:",
+        "First, the tent:",
         "",
     ]
 
