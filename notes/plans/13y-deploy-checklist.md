@@ -173,8 +173,8 @@ green finals.
 
 **The pre-deploy snapshot (read-only, the PAT query road):** marker **8**; rows container
 **229** · block **4,462** · variant **4,636** · commit_point **4,647** · key_vault **1**
-*[removed for publication]*
-*[removed for publication]*
+(revision **5**, `corpus_key_id <corpus-key-id>`, `key_proof_hash`
+64-hex, prefix `<key-proof-hash-prefix>` — the v1 value, pre-enroll). **The floor facts (ONE owner,
 hers, `<account-uuid>`):** data-max **76,147** (the 12 initializer's
 own 19-table list, verbatim); `device_cursor` rows `3D4D5F8A…` → **76,143** and `53536eb5…`
 → **75,919**; `purged_row` max **76,149** — ABOVE data-max, the F-S1 purge-outruns-data case
@@ -219,7 +219,7 @@ on `max_rows`/`for_device` — NIT-4's reorder exact) · ownership `variorum_def
 throughout, `account_purge` stays postgres, `next_tenant_seq` stays the deployer
 (deliberate) · definer-role probes live (`extensions.hmac` ✓, `gen_random_bytes` ✓ —
 the F-R2 road proven AS the definer) · the Vault road probe: `create_secret` returned a
-*[removed for publication]*
+uuid, probe row deleted, 0 remaining · `key_proof_hash` prefix `<key-proof-hash-prefix>` UNCHANGED
 (pre-enroll, as it must be) · the two new tables + `sync_tenant_seq` all FORCE RLS with
 owner policies. **THE GRANT SWEEP run 1: 63 rows — 60 OK · 3 INFO · ZERO failures**
 (the INFOs are the three standing RETURNS-trigger rows; the NEW schema-usage facts both
@@ -237,7 +237,7 @@ lagging mobile-branch core — recorded so no future window builds the phone fro
 
 **THE FIRST ROUNDS (the acceptance evidence, all verified live):** her Mac's first round
 ENROLLED then RAN — `vault.secrets` gained the ONE `kp:<account-uuid>` row, `key_proof_hash`
-*[removed for publication]*
+swapped `<key-proof-hash-prefix>` → `<key-proof-hash-prefix-2>` (= SHA-256(kp2)), the round completed idle; **the Mac's
 cursor advanced 76,143 → 76,147 with NO reset** (the carry-over proven). **The window's
 one surprise, benign and load-bearing:** seqs 76,150–76,182 were minted NOT by pushes
 (data-max stayed 76,147; `sync_write_budget` empty — no `sync_push` had run) but by the

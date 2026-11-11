@@ -103,7 +103,7 @@ orchestrator."*
   WAL 1,048,576 B; shm 32,768 B; the format-1 key file 519 B). Integrity is the app's own next backup run's to
   assert (an encrypted store cannot be `PRAGMA`-checked from the CLI without the gated key).
 - **The pre-deploy snapshot — DONE (read-only, through the PAT's query road; the classifier allowed it this time):**
-  *[removed for publication]*
+  marker **7**; ONE vault row, **revision 3**, `corpus_key_id <corpus-key-id>` (= the id the
   phone's dev build recorded — corner 47 confirmed by DATA: the dev build read HER vault); **18** vault columns (25
   after 11); rows: 208 containers · 4,226 blocks · 4,388 variants · 3,909 commits; the function set: the SIX old
   signatures present (`sync_push(jsonb,text)`, `sync_pull(bigint,text,integer,text)`, `sync_horizon(text)`,
