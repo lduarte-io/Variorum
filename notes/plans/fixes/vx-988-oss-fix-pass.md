@@ -1,24 +1,26 @@
 # VX-988 — the OSS fix pass (HEAD edits from the sweep rulings)
 
-**STATUS: IMPLEMENTED (first pass + her follow-up batch) — branch `vx-988-oss-fix-pass` pushed, NO PR opened (the
-orchestrator's call).** Worktree `~/dev/variorum-vx-988`, off `main` at `fd021908c`. HEAD-only: no history rewritten, no
-commit message touched.
+**STATUS: IMPLEMENTED (first pass + her follow-up batch + the cold-review fixes batch) — branch `vx-988-oss-fix-pass`
+pushed, NO PR opened (the orchestrator's call).** Worktree `~/dev/variorum-vx-988`, off `main` at `fd021908c`. HEAD-only:
+no history rewritten, no commit message touched.
 
 ## FOR A LATER READER
 
-**Not done, first:** the other pile-B rows no ruling put in this pass (e.g. the security-as-roadmap row in
-`notes/TICKETS.md`, home and scratch paths) are untouched; a few money mentions outside the files her follow-up named
-remain (open item 3); and one first-pass commit message names a removed rider by its class — a message-rewrite rule for
-the flip (open item 1). Everything else she ruled is applied below.
+**Not done, first:** the OSS plan's motives line (§1, line 7) is untouched — it waits on her word; three commit messages
+on this branch name a removed class (`c952778e6`, `0715f81ee`, `707684cd2`) and need VX-749 `--replace-message` rules
+(history is never rewritten here); the commit-author metadata (the mailmap row) is VX-749's; and the pile-B verify rows
+(the security-as-roadmap row in `notes/TICKETS.md`, home and scratch paths) are VX-751's. Everything else she ruled is
+applied below.
 
 **The mechanism.** The open-source sweep (VX-754 — piles A/B/C/P read by agent eyes) flagged sensitive content across the
 history and the tree at HEAD; the author ruled every flag (rulings R-oss-N, held on the PRIVATE verdict ledger outside
 this repo — the ledger never enters the repo, and this record carries ruling ids, classes and counts only, never a removed
-value). This pass is the edit of the working tree at HEAD that applies those rulings, in two rounds: the first pass (items
-A–F), then her rulings on its survivors (the follow-up, items 1–5). The later filter-repo rewrite (VX-749) handles every
-older version of every file; commit messages, the prompt record and transcripts belong to that rewrite and to the
-packaging work, not here. Removed text that had a home to go to went to the private planning repo FIRST (the OSS plan's
-"excision is a relocation" rule): the two relocated files, and every passage the follow-up cut.
+value). This pass is the edit of the working tree at HEAD that applies those rulings, in three rounds: the first pass
+(items A–F), her rulings on its survivors (the follow-up, items 1–5), then the confirmed findings of a fresh Opus cold
+review plus her R-oss-39 cuts (the cold-review fixes batch). The later filter-repo rewrite (VX-749) handles every older
+version of every file; commit messages, the prompt record and transcripts belong to that rewrite and to the packaging
+work, not here. Removed text that had a home to go to went to the private planning repo FIRST (the OSS plan's "excision is
+a relocation" rule): the relocated files, and every passage a round cut or rewrote.
 
 **The first pass, by work item** (one commit per piece; every commit message describes the edit mechanically):
 
@@ -68,34 +70,75 @@ packaging work, not here. Removed text that had a home to go to went to the priv
   sections — it says they were removed for publication and the 13c ledger remains the record.
 - **5 · R-oss-23 — the ruled passages in other files** (`b44f3649b`, 34 cuts in 8 notes, each a one-line
   `*[removed for publication]*` marker): the FuturePhases 13t row (the row kept, its cells emptied to the marker); the
-  14a record's spend deliberations (two field-note rounds whole, five sub-bullets or clauses, one figure); the 14c record's
-  *[removed for publication]*
-  purchase ruling, three embedded figures) and the same in the 14c handoff and gate handoff; the 13n door note's chat
-  *[removed for publication]*
-  `notes/AppSpecDeltaArchive.md`'s 14C delta (two passages — **a frozen canon archive, edited at her explicit word;
-  passages cut only, nothing restructured**; the 14D delta carried none). The removed text is verbatim in the private repo
-  (`relocated/oss-fix-pass-removed-passages-2026-11-11.md`, its commit `d6c2a1d`).
+  14a record (two field-note rounds whole, five sub-bullets or clauses, one figure — that figure's marker was missing
+  until the NITs below); the 14c record (passages in Rounds 7–8, the contract block and the gate, three embedded figures)
+  and the same in the 14c handoff and gate handoff; two passages in the 13n door note; two passages in the master plan's
+  14c row and one paragraph; `notes/AppSpecDeltaArchive.md`'s 14C delta (two passages — **a frozen canon archive, edited at
+  her explicit word; passages cut only, nothing restructured**; the 14D delta carried none). The removed text is verbatim in
+  the private repo (`relocated/oss-fix-pass-removed-passages-2026-11-11.md`, its commit `d6c2a1d`).
 
-**Evidence.** Grep at HEAD after both rounds: every tester token, every scrubbed address, every R-oss-27 token, the
-replaced prose and the straggler strings — zero outside the load-bearing files (follow-up item 2). `swift test --filter
-AccountVaultWireTests` 13/13 green and `Tools/WalkKit/first-run-walk.sh --self-test` exit 0 (72 guards), after each
-round. The app-target test files changed only by a string literal or a comment (not run: an `xcodebuild test` needs a
-stage claim).
+**The cold review (fresh Opus, whole branch + commit messages + this record + a leak check): NOT MERGE-READY** — 1
+BLOCKER, 4 MAJOR, 4 MINOR, NITs; every finding confirmed and dispositioned on the private ledger. **The cold-review fixes
+batch** (one commit per piece; every cut or rewritten passage copied verbatim to the private repo first — its commits
+`87c6aa0` `ba2b7ed` `c1bb6b7` `9d9e308` `4974253`, appended to the same passages file under a dated batch heading):
+
+- **B-1 · R-oss-11** (`b15fed578`): one tester name survived inside her verbatim quote as an all-caps possessive (a
+  word-bounded grep cannot see it) — bracketed `[TESTER B]'S`, the record's in-quote style. The unbounded,
+  case-insensitive re-grep of every tester-name family is now zero (the only substring hits are ordinary words, camelCase
+  test names and the public-domain *Prince*'s "Switzers").
+- **M-1 · R-oss-27** (`02e74d1f4`): two more OAuth client ids (full and truncated forms, 8 sites), a fourth library UUID
+  (2 sites), one production test-account id (full and its 8-hex walk-log form) → `<oauth-client-id>` · `<library-uuid>` ·
+  `<account-uuid>`.
+- **M-2 · R-oss-22/26** (`4eb7b7a88`): a parenthetical pointer in the vx-912 record's her-items list, dropped.
+- **M-3 · R-oss-25** (`24da5a4a1`): one personal paragraph inside the intake's kept section, removed (the file's one
+  marker already explains the trim; the cut does not read broken).
+- **M-4 · the standing class rule** (`ee6da94d9`): a phrase and a sentence in the mobile plan's gate-close paragraph, cut
+  with markers.
+- **m-1** (`ffe0bf923`): the 29 relocation annotations and this record say "private planning repo"; item C's line above no
+  longer describes the asides; this record's class-naming wordings neutralized (this commit).
+- **m-2** (`0269abdda` + `401d2ede9`): a 13r capture filename carried the test account's display name → `<test-account>`
+  (12 lines, two notes); the open-items line that called it "ruled kept" is corrected — no ruling ever covered it.
+- **m-3** (`e9c5e72fd`): the three DMARC passages (14d handoff and batch record) keep only the technical point (a TXT
+  record on the sending domain; a report address on another domain needs that domain's verification TXT) — the address
+  placeholder and the destination domain beside it dropped.
+- **m-4** — (a) `cba065288`: the vault's two corpus key ids and two proof-hash prefixes → `<corpus-key-id>`,
+  `<key-proof-hash-prefix>` (`-2` for the second), four notes; (b) `84f27c226`: four notarization submission ids →
+  `<notary-submission-id>`; (c) `53c34da4b`: the ruled descriptive wording cut from three lines of the OSS plan (six
+  markers), its motives line untouched; (d) `d4d3d99e4`: five unpublished launch drafts under `notes/brand/posts/` and
+  `notes/brand/site/` relocated whole (the private repo's `relocated/brand/`), their references in four notes annotated,
+  and `220ebc285`: one FAQ answer slot in the product-page reference and one phrase in `LAUNCH-CONTENT-NOTES.md` cut with
+  markers — the rest of `notes/brand/` (the logo, PROCESS, the shipped copy) stays; (e) `f426a653b`: the remote-workflow
+  cheatsheet's home-infrastructure details → `<server>`, `<user>`, `<vpn-node>`; (f) `9dc9f0a8f`: a hosted-artifact URL →
+  "(an internal design link, removed)".
+- **R-oss-39 — her "cut them all"** (`1c6ace58c`, `7600b5213`): the four residual figures (the master plan's 14d row, the
+  closeout archive, the bridge contract, the 14d batch record — plus one parenthetical beside the archive's), five
+  markers; the 14a record's two road labels reworded to "no-cost"; the 14c Round 8 heading reworded neutrally; three
+  sentences and one clause elided with […] inside her Round 7 quote, and one clause inside the 13n note's chat-lean quote.
+- **NITs** (`9d7b1d14f`): the 14a record's one unmarked cut carries its marker; `WriteTopAirTests.swift`'s fixture doc
+  comment describes a fixture (comment only); the FuturePhases 13t row carries its pointer again ("material relocated to
+  the private planning repo — the 13t kickoff asks the author", as the OSS plan promises). The two 8-hex stragglers the
+  review named stay (the ruled walk-log class).
+
+**Evidence.** The first two rounds' "zero tester tokens" claim was FALSE — the B-1 survivor was missed by a word-bounded
+grep; after this batch, unbounded case-insensitive greps at HEAD find zero for every tester-name family, every value this
+batch placeholdered (full and truncated forms), the capture filename, the residual figures and the old road labels;
+every earlier round's scrubbed address and R-oss-27 token stays zero outside the load-bearing files (follow-up item 2).
+`swift test --filter AccountVaultWireTests` 13/13 green and `Tools/WalkKit/first-run-walk.sh --self-test` exit 0 (72
+guards), after every round. The app-target test files changed only by a string literal or a comment (not run: an
+`xcodebuild test` needs a stage claim).
 
 **Open items:**
 
-1. **A first-pass commit message names a removed rider by its class** (item D's, `c952778e6`) — no value quoted, but it
-   names the class. History is never rewritten here: VX-749 needs a `--replace-message` rule for it.
-2. **Kept on purpose, all ruled:** the load-bearing values (follow-up 2); the 8-hex library/key ids (follow-up 3); her
+1. **The OSS plan's motives line (§1, line 7)** — her word decides it; untouched.
+2. **Three commit messages name a removed class** (`c952778e6`, `0715f81ee`, `707684cd2`) — no value quoted. History is
+   never rewritten here: VX-749 needs a `--replace-message` rule for each. (The reviewer's scope note for VX-749 stands:
+   the rewrite must cover every prose cut and relocation of all three rounds in every parent blob, not tokens alone.)
+3. **The mailmap row** — the commit-author metadata is VX-749's, her call on the target address.
+4. **The pile-B verify rows** — the security-as-roadmap row in `notes/TICKETS.md` (a generated snapshot; the fix belongs
+   on the board), home and scratch paths: VX-751's verify list.
+5. **Kept on purpose, all ruled:** the load-bearing values (follow-up 2); the 8-hex library/key ids (follow-up 3); her
    published letter's own name (`LETTER.md`, its read-me copy, the seeder literal pinned byte-equal). (An earlier edition
-   of this line listed a 13r capture filename as kept too; no ruling covered it — the cold-review fixes batch
-   neutralized it, m-2.)
-3. **Money mentions outside the follow-up's named passages** (found while cutting; nothing ruled on them): a figure in the
-   master plan's 14d row; a few in `notes/PhaseCloseoutArchive.md`, `notes/fragments-bridge-contract.md` and
-   `notes/plans/phase-14d-fragments-batch.md`; the 14a record's "$0 road" labels on an engineering variant; the 14c record's
-   *[removed for publication]*
-   messaging. One more decision if she wants them gone.
-4. Other pile-B H rows outside this pass (e.g. the security-as-roadmap row in `notes/TICKETS.md`, home and scratch paths).
+   of this line listed a 13r capture filename as kept too; no ruling covered it — m-2 neutralized it.)
 
 ---
 
@@ -132,4 +175,8 @@ stage claim).
 | fix m-4(e) | done | `f426a653b` |
 | fix m-4(f) | done | `9dc9f0a8f` |
 | fix m-4(c) | done (the private repo's commit `c1bb6b7` first) | `53c34da4b` |
-| fixes m-4(d), R-oss-39, NITs | in progress (next: m-4(d)) | — |
+| fix m-4(d) | done — the relocation, then the two line cuts (the private repo's commit `9d9e308` first) | `d4d3d99e4` · `220ebc285` |
+| R-oss-39 | done in two commits (the private repo's commit `4974253` first) | `1c6ace58c` · `7600b5213` |
+| NITs | done | `9d7b1d14f` |
+| final checks | AccountVaultWireTests 13/13 · walk self-test exit 0 (72 guards) · every unbounded re-grep zero | — |
+| record | cold-review fixes batch closed (this text) | this commit |
