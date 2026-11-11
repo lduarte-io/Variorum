@@ -87,8 +87,9 @@ stage claim).
 1. **A first-pass commit message names a removed rider by its class** (item D's, `c952778e6`) — no value quoted, but it
    names the class. History is never rewritten here: VX-749 needs a `--replace-message` rule for it.
 2. **Kept on purpose, all ruled:** the load-bearing values (follow-up 2); the 8-hex library/key ids (follow-up 3); her
-   published letter's own name (`LETTER.md`, its read-me copy, the seeder literal pinned byte-equal); a capture filename in
-   the 13r record that carries the walk account's display name (renaming it points at nothing).
+   published letter's own name (`LETTER.md`, its read-me copy, the seeder literal pinned byte-equal). (An earlier edition
+   of this line listed a 13r capture filename as kept too; no ruling covered it — the cold-review fixes batch
+   neutralized it, m-2.)
 3. **Money mentions outside the follow-up's named passages** (found while cutting; nothing ruled on them): a figure in the
    master plan's 14d row; a few in `notes/PhaseCloseoutArchive.md`, `notes/fragments-bridge-contract.md` and
    `notes/plans/phase-14d-fragments-batch.md`; the 14a record's "$0 road" labels on an engineering variant; the 14c record's
@@ -123,4 +124,6 @@ stage claim).
 | fix M-2 | done | `4eb7b7a88` |
 | fix M-3 | done (the private repo's commit `87c6aa0` first) | `24da5a4a1` |
 | fix M-4 | done (same private commit) | `ee6da94d9` |
-| fixes m-1 … m-4, R-oss-39, NITs | in progress (next: m-1 wording) | — |
+| fix m-1 | done | `ffe0bf923` |
+| fix m-2 | done (the two notes; this record's line in the next commit) | `0269abdda` |
+| fixes m-3, m-4, R-oss-39, NITs | in progress (next: m-3) | — |
