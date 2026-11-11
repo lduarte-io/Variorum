@@ -122,7 +122,7 @@ contract file's state, the parity line, the handoff note).
   domain was DECLINED at the 14c gate** (her ruling): a lookup confirmed
   branded auth-email links come FREE via a rewritten email template
   (`{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=…`) + a
-  *[removed for publication]*
+  `/auth/confirm` `verifyOtp` handler on stargazing.tech, so the *[removed for publication]*
   Custom Domain add-on (which rebrands only user-invisible surfaces — the
   API hostname, OAuth callbacks, and per a community report maybe not
   even the `iss`) buys nothing her users see. **14d writes Fragments'

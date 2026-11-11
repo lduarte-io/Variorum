@@ -331,7 +331,7 @@ does not gate the spike (project refs are random; display names rename freely).
     sign-in would share one project; a mistake in the most delicate upcoming work
     risks every app's login. (3) AUTO-PAUSE on free tier applies to the suite's
     LOGIN (mitigated by her daily sync activity; real on absences).
-  *[removed for publication]*
+  - **The honest no-cost road exists** (variant ii of the ruling question): issuer rides
     the Variorum project, suite signups STAY OFF until 14c (the provisioning
     deliverable slips there; Fragments keeps native signups for its testers and
     runs dual sign-in meanwhile; her one account still proves the one-login goal).
@@ -538,7 +538,7 @@ does not gate the spike (project refs are random; display names rename freely).
     sign-ins — existing native sessions refresh project-locally (the 9c
     provider-tokens-ride-the-initial-exchange-only fact), so free-tier pause is
     even softer than round 0c framed it.
-  *[removed for publication]*
+  - **THE UPDATED RECOMMENDATION: the no-cost in-Variorum road, with four guardrails:**
     (a) the RPC author-allowlist lands NOW regardless (config mistakes become
     non-fatal); (b) Variorum-project signups stay OFF until 14c's isolation is
     built and tested — already her ruling; (c) a custom domain fronts the issuer

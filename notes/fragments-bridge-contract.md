@@ -728,7 +728,7 @@ handoff):**
    `auth.stargazing.tech` custom domain was DECLINED — a lookup
    confirmed branded auth-email links come FREE via a rewritten email
    template pointing at stargazing.tech + a `/auth/confirm` `verifyOtp`
-   *[removed for publication]*
+   handler, so the *[removed for publication]* Supabase Custom Domain add-on (which rebrands
    only user-invisible surfaces — the API hostname, OAuth callbacks, and
    per a community report maybe not even the `iss`) buys nothing users
    see. **Write your provider config against
