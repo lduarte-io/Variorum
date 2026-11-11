@@ -179,7 +179,7 @@ ssh <user>@<server>              # the homelab server (key auth lives on the Pro
 ```
 
 - **Screen Sharing** (GUI road, for Xcode etc.): the app has two saved Pro entries —
-  *[removed for publication]*
+  `<mac-pro>` (Tailscale, works **anywhere**) and `<mac-pro>.local` (home Wi-Fi only).
   Expect some lag away from home; terminal road is primary for a reason.
 - **Exit node** (privacy on office/public Wi-Fi): Tailscale menu bar → Exit Node → **<vpn-node>**
   (Pro is the approved fallback). Keep "Allow local network access" ticked.

@@ -421,7 +421,7 @@ The brief names the root `README.md` as her letter (VX-105). **It is not.** The 
 
 ### P5 — the ship-as-is-vs-trimmed inventory (`.claude/`, `Tools/`, `Server/`) — an INVENTORY for her call; nothing was deleted or moved
 
-*[removed for publication]*
+How it was read: `git ls-files` per folder; every top-level `Tools/` script's header read; each subfolder's README (or file list where none exists); every tracked file scanned for home paths, `~/.variorum`, Supabase hosts, email-shaped strings and host names (<server>, tailnet, `lduarte`). **No secret VALUE was found anywhere in the three folders** (the prod roads read their token and project ref from local env files at run time; `.claude/settings.json` holds no path). The framing: readiness §1 (open source the app, core AND server), §2's IN list (the skills, agents and method ship), §2's pass-rule classes (no `~/.variorum` machinery, test-account roads or prod operational detail in curated excerpts), and §4.8 (the repo already carries the method). Whether those excerpt classes bind the WHOLE tree is VX-754's sweep and VX-748's verdict list, not this table's — where an item sits in such a class, the row says so and names the trade-off.
 
 | Item | What it is | Recommendation | Why / the trade-off |
 |---|---|---|---|
