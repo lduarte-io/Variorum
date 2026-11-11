@@ -2043,7 +2043,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      the export under **Developer ID + hardened runtime + timestamp**. The keychain groups are
      byte-identical to her `/Applications` build. `Installer.xpc` is unsandboxed. The
      `-spks/-spki` pair is EXACT.
-   *[removed for publication]*
+   - **Notarize + staple the APP:** submission `<notary-submission-id>` came back
      **Accepted**. Apple's log reads "Ready for distribution" with `issues: None`. **It sat "In
      Progress" ~32 minutes: the team's FIRST submission.** The DMG's submission took ~1 minute. Then
      `verify-export.sh --require-notarized` → **`PASS  Gatekeeper ACCEPTS (source=Notarized
@@ -2051,7 +2051,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      "rejected / Unnotarized Developer ID" to ACCEPTED, now measured.
    - **DMG:** `Variorum-0.0.1.dmg` (UDZO, the app + an `/Applications` link). Signed `Developer ID
      Application: Lillian Duarte (<apple-team-id>)` with a timestamp. Notarized
-     *[removed for publication]*
+     (`<notary-submission-id>`, Accepted, `issues: None`), stapled + validated.
      `spctl -a -t open --context context:primary-signature` → **accepted, source=Notarized
      Developer ID**.
    - **The SHIPPED bytes:** the app INSIDE the final DMG passed **57/57**. The DMG is **24,173,366
@@ -2079,9 +2079,9 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    window):** `RELEASE-EXIT=0` in ~6 minutes (13:34:35Z → 13:40:28Z), because both notarizations now
    return in about a minute.
    - The export drill passed 56/56.
-   *[removed for publication]*
+   - The app: `<notary-submission-id>` Accepted, `issues: None`, stapled, then
      **57/57 with Gatekeeper ACCEPTED**.
-   *[removed for publication]*
+   - The DMG: `<notary-submission-id>` Accepted, stapled, `spctl -t open` accepted.
    - **The shipped bytes passed 57/57.** `Variorum-0.0.2.dmg` is **24,173,312 bytes**, sha256
      `115b2c9def7d97be53daa432dc30e161053a00afe025539c6314f41dfd73d90e`.
    - dSYM UUIDs match (`27E03119-DAFF-3A0B-A667-E64A32F914F1`, `F21F8EE3-8930-3457-9E6A-4116EA221EB4`).
