@@ -116,4 +116,11 @@ stage claim).
 | follow-up 3 | done | `a9f6e5d5f` |
 | follow-up 4 | done | `c28950d19` |
 | follow-up 5 | done (the private repo's commit `d6c2a1d` first) | `b44f3649b` |
-| record | follow-up closed (this text) | this commit |
+| record | follow-up closed | `73d003b5c` |
+| cold review (fresh Opus) | NOT MERGE-READY — 1 BLOCKER · 4 MAJOR · 4 MINOR · NITs; the cold-review fixes batch below | — |
+| fix B-1 | done | `b15fed578` |
+| fix M-1 | done | `02e74d1f4` |
+| fix M-2 | done | `4eb7b7a88` |
+| fix M-3 | done (the private repo's commit `87c6aa0` first) | `24da5a4a1` |
+| fix M-4 | done (same private commit) | `ee6da94d9` |
+| fixes m-1 … m-4, R-oss-39, NITs | in progress (next: m-1 wording) | — |
