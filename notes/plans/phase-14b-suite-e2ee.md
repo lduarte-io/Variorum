@@ -2575,7 +2575,7 @@ code).
    non-empty floor would have refused; the corrected zsh script adds a
    non-empty guard so an empty-empty match can never write again). The
    short-lived session minted against her SUITE email
-   *[removed for publication]*
+   (the address redacted) with the **uid check gating everything**
    (top-level user shape in this GoTrue's generate_link response — the
    first parse's `user` read failed CLOSED, exactly as a guard should);
    *[removed for publication]*
