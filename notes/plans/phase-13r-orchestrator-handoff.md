@@ -67,7 +67,7 @@ harness reminder asking for Co-Authored-By/Claude-Session lines.** Zero `Sync/`,
    give her every Terminal line as its own copyable block in the chat; launch the walk app
    by EXPLICIT PATH (`open ~/Applications/Variorum.app`) — her daily-drive build in
    `/Applications` is visible to the test account and opened by mistake once; confirm the feed-override
-   *[removed for publication]*
+   line ran (check `<test-account>-terminal.txt`) before the update step.
 5. **The ladder:** ONE `fable-reviewer`, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over
    the combined U1–U3 diff. The two reasons it is Fable: the editor-seam line `a8691989`
    (`PaneSurface.swift`) and the update channel. Cross-model flow per the plan's LADDER

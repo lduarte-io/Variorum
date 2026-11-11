@@ -2174,8 +2174,8 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      ```sh
      mkdir -p ~/Applications
      defaults write com.apple.screencapture location /Users/Shared/VariorumWalk/captures
-     *[removed for publication]*
-     *[removed for publication]*
+     curl -s http://localhost:8765/appcast.xml | grep -c '<item>' | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+     xattr -p com.apple.quarantine /Users/Shared/VariorumWalk/Variorum-0.0.1.dmg | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
      ```
      Expect `1` (the test account reaches HER session's feed), then the `0083;…` quarantine line. From here on,
      ⌘⇧3 screenshots land in the shared captures folder. If the location does not take, use
@@ -2196,8 +2196,8 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      - Eject the DMG.
      - Then, in the test account's Terminal:
        ```sh
-       *[removed for publication]*
-       *[removed for publication]*
+       xattr -p com.apple.quarantine ~/Applications/Variorum.app | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+       spctl -a -vv ~/Applications/Variorum.app 2>&1 | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
        ```
        Expect the quarantine INHERITED, then **accepted / source=Notarized Developer ID**. This is
        the plan's literal `spctl -a -vv` acceptance.
@@ -2224,7 +2224,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      plain bundle-id form writes where the app never looks):
      ```sh
      defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum SUFeedURL http://localhost:8765/appcast.xml
-     *[removed for publication]*
+     defaults read ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum SUFeedURL | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
      ```
      Expect `http://localhost:8765/appcast.xml`. Sparkle reads a defaults `SUFeedURL` before the
      Info.plist one, and logs a warning that names "a defaults write command for testing purposes"
@@ -2252,9 +2252,9 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      - The library from W-5 is still there: the store survived the update. **CAPTURE W10.**
      - Then, in the test account's Terminal:
        ```sh
-       *[removed for publication]*
-       *[removed for publication]*
-       *[removed for publication]*
+       /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' ~/Applications/Variorum.app/Contents/Info.plist | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+       spctl -a -vv ~/Applications/Variorum.app 2>&1 | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+       codesign --verify --deep --strict ~/Applications/Variorum.app && echo "seal valid" | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
        ```
        Expect `0.0.2`, **accepted / Notarized Developer ID**, and `seal valid`.
      - **⌘Q Variorum, then Apple menu ▸ Log Out <test-account>…** This is the road back; it ends ONLY the test account's
@@ -2268,7 +2268,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        Expect `GET /appcast.xml` and `GET /Variorum-0.0.2.dmg` 200 lines: the update's download,
        seen from the server's side.
      - **(b) The captures.** Copy `/Users/Shared/VariorumWalk/captures/*` into
-       *[removed for publication]*
+       `notes/plans/13r-screens/u2-walk/` (gitignored), list them, and read `<test-account>-terminal.txt`.
      - **(c) The logs** (optional, read-only; `log` is a zsh builtin, so call `/usr/bin/log`):
        `/usr/bin/log show --start "<W-0(f)'s START>" --predicate 'subsystem == "org.sparkle-project.Sparkle" OR process == "Installer" OR process == "Autoupdate" OR process == "Updater"' --style compact | tail -80`.
      - **(d) [HER]** Reopen `/Applications/Variorum.app` as always. Expect it undisturbed: the walk
@@ -2301,7 +2301,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
 
 **THE U2 WALK VERDICT (the orchestrator, 2026-10-04, the walk sitting — W-10(e)): PASS, every
 arm. U2 IS CLOSED.** Walk START 18:50:07Z (W-0(f)); her legs in the test account 12:53–13:32 local; the
-*[removed for publication]*
+captures (20 screenshots + `<test-account>-terminal.txt`) filed in the gitignored
 `notes/plans/13r-screens/u2-walk/`.
 - **W-0 (her session, the orchestrator):** zero instances; both walk DMGs stapler-validated +
   Gatekeeper ACCEPTED with their recorded sha256s; **W-0(c) the walk appcast — `VERDICT: PASS`,
@@ -2324,7 +2324,7 @@ arm. U2 IS CLOSED.** Walk START 18:50:07Z (W-0(f)); her legs in the test account
   (13:31:02) and `GET /Variorum-0.0.2.dmg` (13:31:12); no password asked.
 - **W9–W10 relaunched as 0.0.2 with the library intact, `spctl` accepted, seal valid:** ✔ —
   About reads **0.0.2 (4830)** over the test account's unchanged bookcase (captured 13:31:26, fourteen
-  *[removed for publication]*
+  seconds after the download); `<test-account>-terminal.txt` records `0.0.2`, `accepted / Notarized
   Developer ID`, `seal valid`.
 - **W-10(d) her return leg:** ✔ — her words: *"my variorum opened just fine."* The walk touched
   neither `/Applications` (read-only use by the test account, never written) nor her real store nor the
