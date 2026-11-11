@@ -10,5 +10,11 @@ take with its English take labeled "english" beside it, and one unlabeled
 take with internal line breaks (`01 abertura.md`, third block). One ⌥⌘Z
 removes the whole book; ⇧⌥⌘Z brings it back.
 
-The prose is ORIGINAL sample text written for this fixture (two opening
-lines echo the sitting mockups' §8 sample); it is not the novel's text.
+No file here quotes the novel. The opening note's three blocks
+(`01 abertura.md`) are invented fixture prose — a made-up story, written for
+this fixture when the lines it first carried were swapped out (VX-990,
+R-oss-49; its opening sentence is the sitting mockups' §8 sample's, swapped
+in the same pass). The other notes are the reading project's own short study
+lines. The words are incidental: the folder exists to exercise the format —
+chapters by folder, chosen takes in place, labeled and numbered takes in the
+Alternates sections, header tags, a take with internal line breaks.
