@@ -33,10 +33,10 @@ file, and commit messages, the prompt record and transcripts belong to that rewr
 
 | Item | State | Commit |
 |---|---|---|
-| record | started | — |
-| A | next | — |
-| B | — | — |
-| C | — | — |
-| D | — | — |
-| E | — | — |
-| F | — | — |
+| record | opened | `d8765d4a8` |
+| A | done | `c2c9da936` |
+| B | done | `a71e41bac` |
+| C | done (four commits: mockup prose · the two screenshots · the intake trim · the two redactions) | `1bdee090e` · `ebd18d17f` · `667d481b7` · `0715f81ee` |
+| D | done | `c952778e6` |
+| E | done (the private repo's own commit first) | `707684cd2` |
+| F | next — the identifier pass | — |
