@@ -169,7 +169,7 @@ struct FixedSessions: UserSessionProviding {
 }
 
 @Suite struct AccountVaultWireTests {
-    *[removed for publication]*
+    static let account = "a0000000-0000-4000-8000-000000000001"
 
     static func client(_ server: FakeVaultHTTPServer) -> AccountVaultClient {
         AccountVaultClient(

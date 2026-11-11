@@ -91,7 +91,7 @@ the one allowed red, confirmed by identity) · mobile **175/26** · spine
   re-key (new vault) strands other devices' custody — which now speaks
   (CF-16) instead of failing silently.
 - Admin `generate_link` BYPASSES signups-off and will mint a user for
-  *[removed for publication]*
+  an unknown address — always uid-check against `<account-uuid>` (or, at
   14c, the intended user) before trusting a minted session.
 - The bridge is paused STRUCTURALLY (no real journal-bridge key
   provider is wired); resumption is the 14c-end Fragments batch's act.

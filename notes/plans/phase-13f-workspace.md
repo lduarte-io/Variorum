@@ -4814,7 +4814,7 @@ by path); WAL-safe backup
 `variorum-backup-2026-07-31-100302.sqlite` (`sqlite3 .backup`;
 `integrity_check` ok); Release built from HEAD (all work
 adjudicated + reviewed); installed to `/Applications`; signature
-*[removed for publication]*
+verified (`io.lduarte.Variorum` / `<apple-team-id>`); the installed
 Release carries NO display-name override — "Variorum Dev" is
 Debug-only, exactly as W25 ruled.
 

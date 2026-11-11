@@ -79,7 +79,7 @@ walk. Announce each gate step to her before running it.
    (`generate_link` — it BYPASSES signups-off by recorded fact; that
    is the deliberate tool here). **UID-CHECK DISCIPLINE (the 14b
    near-miss): verify the minted session's uid is the NEW account —
-   *[removed for publication]*
+   and never her `<account-uuid>` — before ANY act under it.** Grant it the
    `hosted_sync` entitlement via `entitlement_set` (the batch-1 hold:
    enforcement-from-birth would otherwise refuse at the tier gate, not
    the isolation boundary). Then: the stranger-sees-zero probe through

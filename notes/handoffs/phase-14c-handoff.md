@@ -106,7 +106,7 @@ right before anyone else could ever sign up — are done and proven.
   adjudicated-sweep fixes + the BYPASSRLS repair); no app/core feature
   code, engine inland zero-diff all phase.
 - **The mirror:** lockstep marker 6; your corpus live and multi-tenant;
-  *[removed for publication]*
+  your account (`<account-uuid>`) seeded entitled (`hosted_sync`,
   non-expiring). Signups OFF.
 - **Live artifacts executed at the gate** (all committed, registry-clean):
   `09_phase14c_multitenant.sql` (the rebuild) ·

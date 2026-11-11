@@ -114,7 +114,7 @@ multi-tenant): ✅ closed · PL-7 (13h): future · PL-9 (bridge door judgment): 
   closes: a Release build of the closed tree (`xcodebuild -scheme VariorumMobile -configuration
   Release -destination 'generic/platform=iOS' -allowProvisioningUpdates build`, the parity round's
   recorded road) installed via `xcrun devicectl device install app --device
-  *[removed for publication]*
+  <device-udid> …/Release-iphoneos/VariorumMobile.app` — her iPhone 17 Pro
   reads **available (paired)** at this write; the phone must be UNLOCKED at the install moment for
   the bundle to mount (the 2026-08-11 precedent). Marker 7 on both sides — no lockstep risk.
   **First launch note:** whichever build her phone runs today, this one carries 13p — the phone's

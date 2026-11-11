@@ -2532,7 +2532,7 @@ price-agnostic: she names the number at launch.)*
   → uuid.
 - **The issuer hostname:** `auth.stargazing.tech` fronts the auth
   service once attached at the 14c gate (until then the raw
-  *[removed for publication]*
+  `https://<supabase-project-ref>.supabase.co`). The sign-in/consent
   pages and the checkout itself are ordinary stargazing.tech content —
   no special domain work (the Round-7 ruling).
 - **The entitlement write (the ONE server integration):** on payment
@@ -2752,7 +2752,7 @@ cursor (echo applies, seq-recorded).
 **Gate step 6 — the live probes: DONE (2026-08-11, architect-driven).**
 *[removed for publication]*
 `admin/generate_link` (BYPASSES signups-off — the deliberate tool);
-*[removed for publication]*
+**UID `<account-uuid>` — uid-checked NOT hers before any act** (and again
 on its minted session). Its magic-link OTP expired before verify (a
 recorded latitude — the admin generate_link road's link is short-lived
 and I minted then acted a beat late), so the session came via
@@ -2818,7 +2818,7 @@ Supabase-documented).
 - **WHAT THE CUSTOM DOMAIN BUYS (her question answered):** it fronts the
   AUTH SERVICE (GoTrue issuer) with `auth.stargazing.tech`, so (a) the
   links in auth emails — confirm/reset — show her brand instead of the
-  *[removed for publication]*
+  raw `<supabase-project-ref>.supabase.co`, and (b) the token issuer `iss`
   + OAuth discovery + the apps'/Fragments' auth configs point at a stable
   branded hostname. It is BRANDING + CONFIG-STABILITY only — zero effect
   on isolation, security, or E2EE (users are exactly as safe with or
@@ -2857,7 +2857,7 @@ Supabase-documented).
   served by the free template road, which RIDES 14d's SMTP + the
   stargazing.tech site handler (site-agent work), so the gate's
   "domain-attach" sub-step DISSOLVES into 14d and the issuer can stay
-  *[removed for publication]*
+  `<supabase-project-ref>.supabase.co`. **The catch:** the branded-link
   payoff can't be realized until the template rewrite + Site-URL config
   + the site handler exist — all 14d — so nothing about it blocks
   finishing the isolation gate now. (Recorded for her ruling; the
@@ -2891,7 +2891,7 @@ SMTP + site work that makes the stranger email flow real will exist:
   custom domain nor branded emails; ARM (a) is moot until then).
 
 **Gate step 10 — the deletion-door live test: DONE (2026-08-11).** The
-*[removed for publication]*
+probe account (`<account-uuid>`) called `account_purge` under its OWN
 session — the door's real server mechanism. Report:
 `data_rows 0, vault_rows 1, entitlement_rows 1, auth_user_removed true`.
 Post-state: admin auth-user lookup **404 User not found**; its vault and
@@ -2979,7 +2979,7 @@ recorded-resolved note; her phone is a first-class synced device again).
   record): core 1158/124 · Mac 1218/213 (the tripwire) · mobile 175/26
   · spine 51/7.
 - Sessions never touch `~/dev/fragments` or the Fragments project
-  *[removed for publication]*
+  (`<supabase-project-ref>`); asks ride the contract file, carried by
   her. The stargazing.tech site has its OWN agent she tasks — this
   repo delivers contract facts, never site code.
 - Implementer sessions WAIT SYNCHRONOUSLY on their own builds/tests

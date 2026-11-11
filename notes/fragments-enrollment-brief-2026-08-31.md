@@ -34,7 +34,7 @@ parameters and formats are public-by-design; credentials are not, and none are i
 
 **Layer 1 — sign-up + tokens: ALREADY POSSIBLE without Variorum.** There is ONE stargazing
 account. Its home and OAuth 2.1 issuer is the Variorum Supabase project —
-*[removed for publication]*
+`https://<supabase-project-ref>.supabase.co` (`App/Variorum/Shared/ProjectConfig.swift:43`; the 14a
 ruling made the project itself the issuer, and 14d retired every Fragments-side password door —
 SyncSpec §2's dated record). Signups are **OPEN** since 14d, with custom SMTP and branded
 auth-email links live. Fragments signs in DELEGATED through the suite issuer's browser flow

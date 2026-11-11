@@ -350,8 +350,8 @@ sys.stdout.buffer.write(plistlib.dumps({k: "60 144 1240 940 0 0 1728 1084" for k
   # D-2 / D-3 (VX-622, VX-537): the arms, the provenance of the walk's own library, the join's evidence.
   sure "D-3 --arm takes setup, join, both" 'arm_valid setup && arm_valid join && arm_valid both'
   sure "D-3 --arm refuses anything else" '! arm_valid Both && ! arm_valid all && ! arm_valid "" && ! arm_valid "both "'
-  *[removed for publication]*
-*[removed for publication]*
+  print -r -- "[x] road: turnOnSync — library 11111111 now names account <account-uuid>, standard under dfe542ab
+[x] road: turnOnSync — library 6C51F3D0 now names account <account-uuid>, standard under 895bf4eb
 [x] road: stopSyncingHere — library 22222222 now names no account" > $T/app.log
   print -r -- "[x] road: deleteAccountHere — library 2aa0214f now names no account" > $T/none.log
   sure "D-3 the set-up's library is the app log's LAST turnOnSync line, lowercased" '[[ $(turnon_library $T/app.log) == 6c51f3d0 ]]'

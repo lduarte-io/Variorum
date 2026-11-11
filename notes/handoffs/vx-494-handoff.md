@@ -96,7 +96,7 @@ says so.
   relaunch — Bug, Suspected, Low) · **VX-499** (a masthead layout test fails under the full Mac suite but passes alone
   — Test-only, Low).
 
-*[removed for publication]*
+**Cleanups that are yours, after the window:** delete the throwaway Supabase project (`<supabase-project-ref>`) when
 you're done with it; with it, delete `~/.variorum/bin/type-throwaway-passphrase`,
 `~/.variorum/dev-vault-throwaway-passphrase` and `~/.variorum/dev-vault-throwaway-words`, and remove the five allow
 rules this night added to `.claude/settings.local.json` (the helper, `cliclick`, and the three WalkKit scripts).

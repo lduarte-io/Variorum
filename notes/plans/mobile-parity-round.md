@@ -294,9 +294,9 @@ build refuses marker 5 by design."*
   when the new item is built … you have my blessing to install it
   directly if you wake up at 7, complete the phase, and have a new
   build ready for me." Install via `xcrun devicectl device install
-  *[removed for publication]*
+  app --device <device-udid> <DerivedData>/
   Build/Products/Release-iphoneos/VariorumMobile.app` (scheme
-  *[removed for publication]*
+  `VariorumMobile`, automatic signing under her team <apple-team-id>; add
   `-allowProvisioningUpdates` to the build). She acknowledged a
   locked phone may refuse the install — on failure, report BUILD
   READY + install pending and retry at her word; never loop retries.

@@ -164,12 +164,12 @@ selections recorded; recommended options are marked where she took them)
 - **Machine facts:** ENABLE_APP_SANDBOX=YES, ENABLE_HARDENED_RUNTIME=YES, GENERATE_INFOPLIST_FILE=YES
   (Sparkle keys ride the existing partial-Info.plist road — the 17o row-10 precedent),
   CODE_SIGN_STYLE=Automatic (stays; the Developer ID export uses its own exportOptions), bundle ids
-  *[removed for publication]*
+  `io.lduarte.Variorum` / `.debug`, team `<apple-team-id>`, and **only an "Apple Development" certificate
   exists on this Mac today** — the Developer ID cert is minted in U1.
 
 ## HER HANDS (the author steps, in order; each PAUSES the phase for her)
 
-*[removed for publication]*
+1. **U1 opens with her:** confirm team `<apple-team-id>` is on the paid Apple Developer Program; mint the
    **Developer ID Application certificate**; create the **Developer ID provisioning profile** for
    `io.lduarte.Variorum` (portal: Certificates, Identifiers & Profiles ▸ Profiles ▸ + ▸ Developer
    ID, against the App ID with Keychain Sharing) and hand the file to the session.
@@ -191,7 +191,7 @@ reachable. **Build:** the archive/export road (`Tools/Release/` gains `archive-a
 exportOptions.plist with method developer-id + the profile; the scheme's Run config stays Debug —
 CLAUDE.md's fence); notarytool credential stored (her step 2). **The drill (the acceptance):**
 (a) STATIC — `codesign -d --entitlements -` on the export shows **BOTH** groups
-*[removed for publication]*
+(`<apple-team-id>.io.lduarte.Variorum` AND `<apple-team-id>.io.lduarte.Variorum.shared` — the entitlements
 file's own comment names both; the KnownIssues row named one) plus the sandbox + hardened runtime;
 `security cms -D -i embedded.provisionprofile` shows the profile authorizes them; (b) LIVE — behind
 the **A1 rail** (byte backup of the closed store + all key files first, zero-instance window), SHE
@@ -535,7 +535,7 @@ opened; the working tree was left clean.
   window), so this plan's "marker stays 9" closes as "marker UNCHANGED (12 at resume)" — the
   intent (zero schema, zero `Sync/`) binds as written.**
 - **Machine facts RE-VERIFIED at resume (unchanged from the sitting):** exactly ONE codesigning
-  *[removed for publication]*
+  identity on the Mac ("Apple Development: <signing-email>", team cert chain <apple-team-id>) and the
   one macOS profile is "Mac Team Provisioning Profile: *" (exp 2027-08-30) — NO Developer ID
   cert, NO Developer ID profile. HER HANDS steps 1–2 are genuinely still owed and open U1.
 - **Step 3 ANSWERED by her at the resume sitting (2026-10-04, the question tool), then
@@ -608,10 +608,10 @@ opened; the working tree was left clean.
    environment traps.
 
 - **HER HANDS PROGRESS (2026-10-04, the resume sitting):** step 1's CERTIFICATE done and
-  *[removed for publication]*
-  *[removed for publication]*
+  verified (`security find-identity`: `Developer ID Application: Lillian Duarte (<apple-team-id>)`,
+  id `<signing-cert-sha1>`, minted via Xcode 27's Manage Certificates);
   **step 2 DONE** — the notarytool credential `VariorumNotary` validated and saved to her
-  *[removed for publication]*
+  Keychain (an App Store Connect Team Key, Developer role, Key ID `<notary-key-id>`; the `.p8` is
   hers to move out of ~/Downloads — never into the repo). **STEP 1 COMPLETE (2026-10-04): the
   Developer ID provisioning profile is minted, installed and ORCHESTRATOR-VERIFIED.** Her road,
   recorded: no explicit App ID existed (the Mac app had only ever signed against the
@@ -621,10 +621,10 @@ opened; the working tree was left clean.
   the orchestrator's call, and the call is proven right below. Profile "Variorum Developer
   ID", downloaded to `~/Downloads/Variorum_Developer_ID.provisionprofile` and
   double-click-installed (Device Management shows it). **Decoded facts (`security cms -D`):**
-  *[removed for publication]*
+  Entitlements `keychain-access-groups` = **`<apple-team-id>.*`** — the team wildcard, authorizing
   BOTH groups exactly as the sitting's external-facts bullet predicted;
-  *[removed for publication]*
-  *[removed for publication]*
+  `com.apple.application-identifier` = `<apple-team-id>.io.lduarte.Variorum`; the ONE embedded
+  certificate's SHA-1 = `<signing-cert-sha1>` = the Keychain identity
   byte-exact; `ProvisionsAllDevices` = true; expires 2044-09-29. The U1 drill's static leg
   re-checks all of it ON THE EXPORT.
 - **HER HANDS steps 1–2 COMPLETE. Step 3 (EdDSA minting) waits for U2's start; the mailbox
@@ -1415,7 +1415,7 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
        `verify.txt`.
    - `ExportOptions.plist`: `method developer-id`, `signingStyle manual`, `signingCertificate`
      *[removed for publication]*
-     *[removed for publication]*
+     `teamID <apple-team-id>`. The method name was confirmed against Xcode 27's own `xcodebuild -help`.
    - `Variorum_Developer_ID.provisionprofile`: her profile, versioned (`cmp`-identical to
      `~/Downloads`; sha256 `f661fdea…eec5c97`). It is not a secret: it ships in every bundle as
      `embedded.provisionprofile`.
@@ -1464,33 +1464,33 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      - `** ARCHIVE SUCCEEDED **` → `** EXPORT SUCCEEDED **` → **`VERDICT: PASS — 35 of 35 checks`**.
    - **The brief's literal commands, on that export (outputs abridged to the load-bearing lines):**
      - `codesign -d --entitlements - export/Variorum.app` →
-       *[removed for publication]*
-       *[removed for publication]*
+       - `com.apple.application-identifier` = `<apple-team-id>.io.lduarte.Variorum`
+       - `com.apple.developer.team-identifier` = `<apple-team-id>`
        - `com.apple.security.app-sandbox` = **true**
        - `files.bookmarks.app-scope` = true, `files.user-selected.read-write` = true,
          `network.client` = true
-       *[removed for publication]*
-         *[removed for publication]*
+       - **`keychain-access-groups` = [`<apple-team-id>.io.lduarte.Variorum`,
+         `<apple-team-id>.io.lduarte.Variorum.shared`]** (BOTH, the default first)
        - NO `get-task-allow`.
      - `codesign -dv` → `CodeDirectory v=20500 … flags=0x10000(runtime)` (**HARDENED RUNTIME**);
-       *[removed for publication]*
+       `-dvvv` → `Authority=Developer ID Application: Lillian Duarte (<apple-team-id>)` → `Developer ID
        Certification Authority` → `Apple Root CA`, `Timestamp=Oct 4, 2026 at 4:07:36 AM` (secure
-       *[removed for publication]*
+       timestamp), `TeamIdentifier=<apple-team-id>`, `Runtime Version=27.0.0`, universal (x86_64 arm64).
      - `security cms -D -i export/Variorum.app/Contents/embedded.provisionprofile` → `Name = Variorum
        *[removed for publication]*
-       *[removed for publication]*
-       *[removed for publication]*
-       *[removed for publication]*
+       Entitlements: `keychain-access-groups = [<apple-team-id>.*]` (**authorizes BOTH signed groups**),
+       `com.apple.application-identifier = <apple-team-id>.io.lduarte.Variorum`, `team-identifier =
+       <apple-team-id>`. It is byte-identical to the versioned copy. Its one certificate is the signing
        *[removed for publication]*
      - `codesign --verify --deep --strict --verbose=2` → `valid on disk` + `satisfies its Designated
        Requirement`, exit 0. The nested `SQLCipher.framework` was re-signed under Developer ID with
        runtime and a timestamp.
      - `spctl --assess --type execute -vv` → `rejected` / **`source=Unnotarized Developer ID`** /
-       *[removed for publication]*
+       `origin=Developer ID Application: Lillian Duarte (<apple-team-id>)`. That is the expected
        notarization-ready state, confirmed by the external-facts lookup (Apple DTS threads 124614,
        822378). U2's notarize + staple turns it to `accepted`.
      - `--compare-with /Applications/Variorum.app` (her daily drive, signed Apple Development
-       *[removed for publication]*
+       `<apple-cert-id>`; a READ-ONLY signature read): **the keychain groups are BYTE-IDENTICAL, same
        order; the app-id matches**. The ONLY entitlement difference is `get-task-allow => true` on
        hers (development signing injects it), absent on the export. That is exactly what
        notarization requires.
@@ -1528,7 +1528,7 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      `security dump-keychain` lists no Variorum service. So the old-signature access-list password
      prompt CANNOT occur.
    - **Container:** the ownership metadata reads `Owners =
-     *[removed for publication]*
+     [{"teamIdentifier":"<apple-team-id>","validationCategory":"development","signingIdentifier":"io.lduarte.Variorum"}]`.
      The export carries the same team and identifier. Predicted SILENT: WWDC23 10053 says "All apps
      signed with your Team ID can access data in your other app's containers by default, without a
      permission prompt"; DTS thread 741479 says Team ID, not the designated requirement. This exact
@@ -2050,7 +2050,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      Developer ID)`** + **`stapler validate`** → **57/57**. This is U1's predicted turn from
      "rejected / Unnotarized Developer ID" to ACCEPTED, now measured.
    - **DMG:** `Variorum-0.0.1.dmg` (UDZO, the app + an `/Applications` link). Signed `Developer ID
-     *[removed for publication]*
+     Application: Lillian Duarte (<apple-team-id>)` with a timestamp. Notarized
      *[removed for publication]*
      `spctl -a -t open --context context:primary-signature` → **accepted, source=Notarized
      Developer ID**.
@@ -2312,7 +2312,7 @@ arm. U2 IS CLOSED.** Walk START 18:50:07Z (W-0(f)); her legs in the test account
 - **W1 the quarantined DMG opened clean:** ✔ (verified, no block). The test account reached her session's
   feed across the user switch (`1` item) and the quarantine read back byte-identical.
 - **W-4 `spctl` accepted the installed app:** ✔ — `~/Applications/Variorum.app: accepted /
-  *[removed for publication]*
+  source=Notarized Developer ID / origin=Developer ID Application: Lillian Duarte (<apple-team-id>)`,
   quarantine inherited (0183 after her approval).
 - **W2 the notarized first-open question, not a block:** ✔ — the OS's one-time "downloaded from
   the Internet" question, on the DMG copy and again on the `~/Applications` copy (each newly

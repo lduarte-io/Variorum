@@ -75,7 +75,7 @@ Batch 2 implementer (Opus, 2026-10-10, on the Air) — **BATCH 2 CLOSED by the i
 
 **Commits:** `7c26a583` (pins + the VX-141 DEBUG oracle + `FlowPostView` visibility, before any fix) · `0deda5b4` VX-135 · `754dd131` VX-140 · `346d311e` VX-141 · `40865c94` VX-142 · `96be236e` VX-136 · `99aba942`/`fb542f3d` record.
 
-*[removed for publication]*
+**Runs** (logs in `App/Variorum/DerivedData/`, gitignored; built with the Air's signing flags `-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=<apple-team-id>` — the shared memory's air-local-builds note): `vx143-red1` (pre-fix + pins: the four bug pins RED, the capture taken) · `vx143-green1` (fixed: 15/6 green) · `vx143-rev1`, `vx143-rev2` (behavioural reverts, see LIVE STATUS) · `vx143-full` (the whole VariorumTests target — PENDING below).
 
 ### VX-135 — ⌘⏎ in Write's take panel · FIXED
 - **Mechanism:** the trace above — the panel registered no routed handler, so ⌘⏎'s `.takes(.choose)` reached Write's handler beneath the sheet, whose `.choose` arm re-opens the (already open) caret panel and consumes it.

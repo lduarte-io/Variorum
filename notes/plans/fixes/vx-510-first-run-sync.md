@@ -264,7 +264,7 @@ the DEBUG container (`~/Library/Containers/io.lduarte.Variorum.debug/Data/Librar
 Variorum-dev/`). The dev slot's files go aside by `mv`, ALL top-level files; restore whole before release;
 sign the walk session OUT before restoring (O-B2). cliclick cannot press Touch ID; SwiftUI onSubmit needs System
 Events `key code 36`. **Production is read-only except at her hand:** `Tools/prod-read.sh` for SELECTs
-*[removed for publication]*
+(ref-pinned `<supabase-project-ref>`); anything mutating is her `!` road at her explicit word. The dev store's
 Debug app NEVER signs into her real account. Implementers: no subagents, no stage, no Debug launches, no
 dev-store touch; headless + `build-for-testing` only; checkpoint commits per piece, push each, LIVE STATUS flips
 in the same commit, PENDING on every unverified claim; foreground waits only (poll, never `tail -f`, never end a
@@ -2466,7 +2466,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
 - **S2 (20:40)** — the Account sheet's Create an account…: the email and the password twice typed by
   `type-prod-test-secret std` (the form's own "At least 12 characters"); Create Account → **"Check your email for a
   confirmation link, then sign in here…"** (the confirmation road, as designed).
-*[removed for publication]*
+- **S3 (20:41)** — prod read: `<test-account-email>` = auth user **`<account-uuid>`**,
   unconfirmed; `Tools/prod-confirm-test-user.sh` (run from the branch worktree, the gitignored `.env.supabase.local`
   linked from main) → `email_confirmed_at` 02:41:54Z.
 - **S4 (20:42)** — Back to sign in → email + password by the helper → **signed in**; the Account sheet: "Hosted sync is
@@ -2481,7 +2481,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   doesn't sync." · Turn on sync… → the SET-UP arm ("Your library's passphrase and twelve words become the account's. Nothing
   is replaced. … Your account starts in Standard, like this library. This library has no passphrase yet. Choose one…") → a
   new passphrase twice + the words, all three by the helper (concealed — VX-463's eye) → Turn on sync → log
-  *[removed for publication]*
+  `road: turnOnSync — library 6fa0c827 now names account <account-uuid>, standard under 1aad910b` (20:46:19) → **WITHIN 4 s, NO
   RELAUNCH, THE SHEET: "Synced. Your library is on your account now." with Done** (VX-498 + VX-507 LIVE ON PRODUCTION).
 - **S7 (20:47)** — **prod reads by the uid:** `key_vault` mode **standard**, created 02:46:19Z (the press), proof hash set;
   **`kp:` secret 1** (the first round's key-proof enrollment — the step tester A's account never reached); **device cursors
@@ -2527,7 +2527,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
 - **S15 (20:58:14) — A JOIN from the restored library:** Protection ▸ Sync: "This library doesn't sync." · **"Sync this
   library…"** (VX-506's join-arm door, LIVE) → the join sheet (its title still "Turn on sync" — P-VX510-A4): "Your account
   already syncs. Type its passphrase or its twelve words once…" → the account's passphrase by the helper → `enroll: begun #6
-  *[removed for publication]*
+  … enroll: done #6 under 2e677513 · road: turnOnSync — library dfe2ad68 now names account <account-uuid>` (20:58:15) — **NO
   system Touch ID prompt** (VX-503 did not reproduce on this Mac's Standard join) → the words notice (passphrase typed):
   *[removed for publication]*
   made before today…" → OK → **the sheet: "Synced. Your account's writing is in this library now."** — no relaunch.
@@ -2542,7 +2542,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   library **`413fb3bd`** (key `725fafc4`, device `7d96b569`), still signed in as std (the dev scope's session) → **the row:
   "Sync isn't on for this library yet" with Protection…** — the exact moment both testers met "Sync locked" on 0.10 →
   Protection ▸ "Sync this library…" → the account's passphrase by the helper → `enroll: done #1 under 725fafc4 · road:
-  *[removed for publication]*
+  turnOnSync — library 413fb3bd now names account <account-uuid>` (21:01:52) — no system prompt → the words notice (true here:
   the fresh library's words were replaced) → OK → **"Synced. Your account's writing is in this library now."** — NO
   relaunch → Done → **the Library shows "VX-510 S8 written on the std test account · edited today 8:48 PM" — the first
   library's note, downloaded into the fresh one**; the row "Synced 9:01 PM". **prod: device cursors 3 · live containers
@@ -2575,7 +2575,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   detached checkout; `** BUILD SUCCEEDED **`); the stage renewed (240 min); the deleted account's library `2aa0214f` aside
   (`…-aside-vx510-walkL3/`); relaunched (pid 71389, the road ARMED) → a fresh library **`159caa3f`** (key `a2c73b2c`,
   device `3a62193d`), signed out.
-*[removed for publication]*
+- **C1 (21:12–21:16) — a CASTLE account from scratch:** sign-up (`castle`) → prod **`<account-uuid>`**
   → the PAT script confirms (03:13:06Z) → signed in → the words look blind (Copy + stash, twelve-word check) → Protection ▸
   **Use Castle…** — its sheet ("Castle is one promise: no quiet road through Apple, ever, on any device of the account… The
   libraries in Previous Libraries keep their own quiet roads on this Mac — Castle protects the library you have open…") on
@@ -2583,7 +2583,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   **Always ask** chosen ("No copy of the key stays on this Mac; you type every time.") → `enter_castle: swapped … retired 1
   own Apple key(s) … done #2 under 5638db0a · road: useCastle — library 159caa3f now castle` (21:15:20) → Turn on sync… →
   the set-up arm IN CASTLE ("Your account starts in Castle, like this library.") → passphrase + words → `road: turnOnSync —
-  *[removed for publication]*
+  library 159caa3f now names account <account-uuid>, castle under 5638db0a` (21:16:25) → **"Synced. Your library is on your
   account now."** — the THIRD fresh account, the Castle posture, no relaunch. **prod: vault mode castle, revision 1 · `kp:`
   1 · cursor 1 · rows 3.** The row "Synced 9:16 PM".
 - **C2 (21:17–21:18) — VX-501 LIVE: a TYPED Castle unlock keeps syncing.** A note filed ("VX-510 C2 castle note before the
@@ -2626,7 +2626,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   Type its passphrase or its twelve words once — your library's own passphrase and twelve words are replaced by your
   account's. … Your account is in Castle, so this library goes into Castle too." + the Castle promise text + On this Mac)
   → **Always ask** + the account's CURRENT passphrase → `enroll: done #1 under 508a5859 · road: turnOnSync — library
-  *[removed for publication]*
+  223c4e7e now names account <account-uuid>, castle under 508a5859` (21:32:14; a NEW key — the re-keying join) → the reopen
   *[removed for publication]*
   twelve words. Your previous twelve words still open backups you made before today. …") → OK → **`road: an account act
   landed — the library holds the account's words; the words card's offer retires (VX-511)`** → the F-6 sheet waited for the
@@ -3098,14 +3098,14 @@ the independent re-walk.**
 **Done, with evidence (the walk evidence folder: `~/dev/variorum-vx-510-stage/App/Variorum/DerivedData/first-run-walk/`):**
 - **The pre-step:** the deleted `del` account RE-MINTED through the app's own Create Account sheet on the prod test road
   (fresh library `6c51f3d0`; the sheet driven by AX presses + the typing helper; the confirmation notice shown), then
-  *[removed for publication]*
+  confirmed by the HARDENED `Tools/prod-confirm-test-user.sh` — its first live green (auth id `<account-uuid>`).
 - **VX-509's scripted walk, FIRST LIVE RUN (`run-20261024T105945Z-del`):** P1–P6 ran clean after two committed tool
   fixes (`389312534` — vis-ax matches `AXPlaceholderValue`; P4's landing probe is the sheet's own "Sign out").
   **P7 stopped, correctly, and the stop found a real walk-tool bug:** `focus "Your twelve words"` matched a HEADING
   whose text equals the field's placeholder — the click landed on prose, the words landed in the still-focused Again
   field, and the confirm's disabled button answered AXPress as a no-op. Recovered BY HAND (the Again field cleared and
   retyped; the words field focused BY ROLE — her live hint: "this is the same sheet that needed the accessibility click
-  *[removed for publication]*
+  before"), then the button pressed: **`road: turnOnSync — library 6c51f3d0 now names account <account-uuid>` (05:10:00);
   the VX-511 mark fired; THE SHEET CONFIRMED "Synced. Your library is on your account now."; the row "Synced ‹time›";
   SAME PID (no relaunch). Server, read by the successor: vault standard rev 1 · `kp:` 1 · 1 cursor · 3 settings —
   VX-498 + VX-507 + VX-511 + the key-proof enrollment LIVE ON THE FINAL BUILD.** The script then gained the role-filter
@@ -3195,7 +3195,7 @@ scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-sc
   like this library.") → the account's passphrase by the helper → Turn on sync (the first press REFUSED by the author
   check — her brief click, said in-session; HID idle then read 24 s and climbing, her app absent; retried once at her
   "you can keep going") → `enroll: done #1 under dfe542ab · road: turnOnSync — library edf04751 now names account
-  *[removed for publication]*
+  <account-uuid>, standard under dfe542ab` → `road: an account act landed — … the words card's offer retires (VX-511)` → the
   *[removed for publication]*
   account's writing is in this library now."** → Done → the row **"Synced 6:08 AM"**, SAME PID 49433 (started 05:11).
   prod: cursors 6 → 7, vault rev 15 unchanged (a same-posture join changes no account lock).

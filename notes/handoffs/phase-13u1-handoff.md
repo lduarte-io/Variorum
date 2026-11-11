@@ -24,8 +24,8 @@ the standing rails. **Your store was never opened and the app was never launched
 | **Built from** | commit `f4264bff`, in a clean throwaway worktree (`~/dev/variorum-13u1-release`, since removed), `-configuration Release` |
 | **Old binary SHA-256** | `490285e03af15e4df98b663050737ae2941d7004ff66a7ccafb7a740e4719a2d` |
 | **New binary SHA-256** | `ffe42c8817e324ce9484fd2fa3b5248363ae8ca37508fb595aeb032f26c9f65c` |
-*[removed for publication]*
-*[removed for publication]*
+| **Signature** | `codesign --verify --deep --strict` OK before AND after the copy · `Identifier=io.lduarte.Variorum` · `TeamIdentifier=<apple-team-id>` · `Apple Development: <signing-email> (<apple-cert-id>)` |
+| **Keychain access groups** | `<apple-team-id>.io.lduarte.Variorum` **and** `<apple-team-id>.io.lduarte.Variorum.shared` — both present (the KnownIssues Developer-ID row's standing check) |
 | **Zero instances** | verified before the backup, before the copy, and after |
 
 ### 2. The walk — the cross-block gesture matrix, in the order you would hit it

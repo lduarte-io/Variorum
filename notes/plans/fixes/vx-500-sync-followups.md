@@ -428,7 +428,7 @@ only (SyncSpec §12's procedure for a function body: the mirror first; no client
 changes); the checklist is in THE DEPLOY section below.
 
 #### D-495 EVIDENCE — her `EXPLAIN ANALYZE` probes on production (2026-11-01, her `!` road; read-only; her tenant
-*[removed for publication]*
+`<account-uuid>`, since = 0, page 2,000; the probe files in the session scratchpad `vx495-probe/`)
 
 - **THE OLD SHAPE (13's body):** `Execution Time: 3398.374 ms`. Parallel Append of Seq Scans on every large table
   (`block` 21,963 rows · `variant` 17,113 × 2 workers · `commit_point` 29,680 · `container_block` 21,957 · `lens_choice`

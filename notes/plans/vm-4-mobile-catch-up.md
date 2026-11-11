@@ -247,7 +247,7 @@ mobile→main merges reproduce exactly this reconciliation forever. Rejected on 
   (`git commit -- <paths>`) wherever two sessions could share a tree.
 - **Runtime inventory TODAY (Xcode 27): iOS 26.2 and 27.0 simulators exist;** deployment target is
   iOS 26 — re-derive valid devices per session (the old iPhone-16-series/18.3 trap generalizes:
-  *[removed for publication]*
+  check, don't remember). Her device: iPhone 17 Pro `<device-udid>`;
   unlocked at install moments; `devicectl` is the proven road.
 - **Accepted cost, named:** VM simulator suites serialize with VX Mac-app suites behind the ONE
   stage. That is the ruled single-arbiter shape; it surfaces to her only if it becomes the real

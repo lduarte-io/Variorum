@@ -132,7 +132,7 @@ All items are `kSecClassGenericPassword`. "DP" = `kSecUseDataProtectionKeychain 
 | L gated probe (transient) | same / `…-biometric-probe` | same ACL, dummy data | no | `.biometryCurrentSet` | yes | GatedSaveChoreography |
 | sync custody plain (identity; + M/C material only in Standard) | `io.lduarte.Variorum.e2ee-keys` / `<scope>-<storeID>-sync` | WhenUnlockedThisDeviceOnly | no | none | yes | EncryptionKeychain.swift:590-603 |
 | sync custody gated (M/C material in Castle + Touch ID) | same / `<scope>-<storeID>-sync-biometric` | WhenUnlockedThisDeviceOnly | no | `.biometryCurrentSet` | yes | EncryptionKeychain.swift:637-664 |
-*[removed for publication]*
+| iCloud key A | `io.lduarte.Variorum.apple-key` / `<scope>-apple-key`, group `<apple-team-id>.io.lduarte.Variorum.shared` | AfterFirstUnlock | **yes** | none | yes | AppleKeyCustody.swift `readOrMint` |
 | session tokens | `io.lduarte.Variorum.auth` / `<scope>-session-bound` | WhenUnlockedThisDeviceOnly | no | none | yes | AuthSession.swift `KeychainAuthStorage.add` |
 | LEGACY (read/delete only): store key `scope` (file-based), `<scope>-bound` (DP), `<scope>-biometric` (DP); E2EE `device-keys` (file-based), `device-keys-biometric` (DP); escrow `io.lduarte.Variorum.store-key-escrow`/`<storeID>` (sync) | — | — | escrow only | — | per row | migration roads |
 

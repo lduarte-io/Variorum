@@ -1076,7 +1076,7 @@ A listener bound `~/Library/Containers/io.lduarte.Variorum.debug/Data/probe-a.so
 - from this Claude shell (inherits the terminal's grants): CONNECT OK.
 - as a **launchd job** (`launchctl bootstrap gui/$UID`, ppid 1 — its own
   TCC-responsible process, inheriting NO terminal grants), ad-hoc signed:
-  *[removed for publication]*
+  CONNECT OK; the same, team-signed (<apple-team-id>): CONNECT OK; repeated
   5× in one job: **5/5 CONNECT OK**.
 - **The control that makes this mean something:** the SAME launchd vantage
   opening a plain FILE in that container

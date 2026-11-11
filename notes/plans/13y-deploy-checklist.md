@@ -175,7 +175,7 @@ green finals.
 **229** · block **4,462** · variant **4,636** · commit_point **4,647** · key_vault **1**
 *[removed for publication]*
 *[removed for publication]*
-*[removed for publication]*
+hers, `<account-uuid>`):** data-max **76,147** (the 12 initializer's
 own 19-table list, verbatim); `device_cursor` rows `3D4D5F8A…` → **76,143** and `53536eb5…`
 → **75,919**; `purged_row` max **76,149** — ABOVE data-max, the F-S1 purge-outruns-data case
 LIVE in her own mirror, so the wide floor is load-bearing on day one; no rotation seq. **The
@@ -233,10 +233,10 @@ binary sha256 `9e15f8bfd825aa4f…` = the fresh product. Phone — built from th
 lagging mobile-branch core — recorded so no future window builds the phone from there),
 `generic/platform=iOS` destination (xcodebuild could not see the paired device;
 `devicectl` could), installed to her iPhone 17 Pro via
-*[removed for publication]*
+`xcrun devicectl device install app` (`io.lduarte.VariorumMobile`, Team `<apple-team-id>`).
 
 **THE FIRST ROUNDS (the acceptance evidence, all verified live):** her Mac's first round
-*[removed for publication]*
+ENROLLED then RAN — `vault.secrets` gained the ONE `kp:<account-uuid>` row, `key_proof_hash`
 *[removed for publication]*
 cursor advanced 76,143 → 76,147 with NO reset** (the carry-over proven). **The window's
 one surprise, benign and load-bearing:** seqs 76,150–76,182 were minted NOT by pushes

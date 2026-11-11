@@ -14,7 +14,7 @@ a store, never a `Sync/` line, never a Release build).
 
 | Q | Question | Verdict |
 |---|---|---|
-*[removed for publication]*
+| **Q1** | Does the shared group compile, sign and build on BOTH targets? | **YES, with NO signing step for her.** Both team provisioning profiles carry the `<apple-team-id>.*` wildcard; the signed Mac and iOS products each carry `[own group, ….Variorum.shared]` in that order. |
 | **Q2** | Does a synchronizable item written under the shared group read back on the Mac? | **YES.** add `0` → read `0` (landed in `…Variorum.shared`, `synchronizable=true`) → delete `0` → gone `-25300`. |
 | **Q3** | Does it cross to the phone? | **PENDING-HER-SITTING.** Both apps carry a DEBUG door over one brain; the five-minute procedure is below. |
 | **Q4** | The pre-unlock network floor to the project host | **Median 0.051 s, max 0.314 s** over five cold GETs (fresh TLS each); a warm keep-alive request 0.015 s. A fraction of one Argon2id derivation. |
@@ -40,7 +40,7 @@ one A.
   `xctrace` but deliberately NOT installed to — the brief's prepare-only rule.
 *[removed for publication]*
   "Mac Team Provisioning Profile: *" and "iOS Team Provisioning Profile: *" — both
-  *[removed for publication]*
+  carrying `keychain-access-groups = ["<apple-team-id>.*"]` (read from the profiles
   themselves, `security cms -D`).
 - **Network (Q4):** her home network, 00:14 local; the project host resolves to a
   Cloudflare edge (`172.64.149.246`); the gateway answers `401
@@ -68,14 +68,14 @@ configurations. Commit `a37f9cd`.
 
 | target | `application-identifier` | `keychain-access-groups` (in order) | profile |
 |---|---|---|---|
-*[removed for publication]*
-*[removed for publication]*
+| Mac, Debug | `<apple-team-id>.io.lduarte.Variorum.debug` | `<apple-team-id>.io.lduarte.Variorum.debug` · `<apple-team-id>.io.lduarte.Variorum.shared` | Mac Team Provisioning Profile: * |
+| iOS, Debug (generic device) | `<apple-team-id>.io.lduarte.VariorumMobile` | `<apple-team-id>.io.lduarte.VariorumMobile` · `<apple-team-id>.io.lduarte.Variorum.shared` | iOS Team Provisioning Profile: * |
 
 The first entry resolves to each target's OWN bundle id, as the brief required — so
 nothing already written strands. The runtime half of that promise was then measured
 on the Mac (Q2's first line): an item written with NO group named lands in
-*[removed for publication]*
-*[removed for publication]*
+`<apple-team-id>.io.lduarte.Variorum.debug`, the first entry. The Mac Release configuration
+resolves the first entry to `<apple-team-id>.io.lduarte.Variorum` (its bundle id) and the
 second to the same shared string — the shared group is deliberately
 config-independent.
 
@@ -107,7 +107,7 @@ warnings and the iOS log 7 — none new, none in the touched files.
 **What was done.** `App/Variorum/Shared/SharedKeychainGroupProbe.swift` (DEBUG-only,
 both targets) — one brain: the escrow query's shape (`kSecClassGenericPassword`,
 `kSecAttrSynchronizable = true`, `kSecUseDataProtectionKeychain = true`,
-*[removed for publication]*
+`AfterFirstUnlock`, **no ACL**) with `kSecAttrAccessGroup = <apple-team-id>.io.lduarte.Variorum.shared`
 named explicitly, under a THROWAWAY service (`io.lduarte.Variorum.pre13x-shared-group-probe`)
 and a timestamped account, deleted at the end. Driven by
 `VariorumTests/SharedKeychainGroupProbeTests`, **DISABLED BY DEFAULT** — the suite is
@@ -121,11 +121,11 @@ untouched — the probe never reaches a fixed-account custody leaf.
 `PRE13X-PROBE|` lines):
 
 ```
-*[removed for publication]*
-*[removed for publication]*
+Q1 entitled keychain-access-groups: ["<apple-team-id>.io.lduarte.Variorum.debug", "<apple-team-id>.io.lduarte.Variorum.shared"]
+Q1 an item written with NO group landed in: <apple-team-id>.io.lduarte.Variorum.debug (add 0)
  ok  Q2 add (shared group · synchronizable · AfterFirstUnlock · no ACL): 0 (No error.)
  ok  Q2 read (shared group named · synchronizable=true): 0 (No error.) payload="Lillian’s MacBook Pro @ 2026-09-04T06:22:11Z"
-         *[removed for publication]*
+         group=<apple-team-id>.io.lduarte.Variorum.shared synchronizable=true
  ok  Q5 delete (shared group · synchronizable=true) — MUST match: 0 (No error.)
  ok  Q5 read after the flagged delete — gone: -25300 (The specified item could not be found in the keychain.)
 ```
@@ -183,10 +183,10 @@ opened by either.
 3. **Phone — read.** Open the app's Settings sheet ▸ scroll to the bottom ▸ **Keychain
    probe (pre-13x)**. Expected within seconds to a few minutes:
    `read cross-device: 0 (No error.) payload="Lillian’s MacBook Pro @ …"
-   *[removed for publication]*
+   group=<apple-team-id>.io.lduarte.Variorum.shared synchronizable=true`. If it reads
    `-25300`, tap **Read the other device's item** every ~20 s for up to five minutes.
    **Record the time from step 2 to first visibility.** Also note the phone's own first
-   *[removed for publication]*
+   line: `this app's own (first) group: <apple-team-id>.io.lduarte.VariorumMobile — 0` (the
    "nothing strands" fact on the phone).
 4. **Phone — the reverse.** Tap **Write from this iPhone** (expected `0`). On the Mac tap
    **Read again** until the payload reads `Lillian’s iPhone @ …`. **Record the time.**
@@ -214,7 +214,7 @@ are the kind of fact this leg exists to surface.
 
 ### VERDICT: **median 0.051 s, max 0.314 s** (cold connection each time); **0.015 s warm.**
 
-*[removed for publication]*
+**What was done.** Five unauthenticated `GET https://<supabase-project-ref>.supabase.co/rest/v1/key_vault`
 (`ProjectConfig.variorumProjectURL`'s host), each on a FRESH connection (`--no-keepalive`),
 no credentials sent or held; then one keep-alive pair to show the warm second request.
 The gateway answers `401` with `sb-error-code: UNAUTHORIZED_MISSING_API_KEY` — before

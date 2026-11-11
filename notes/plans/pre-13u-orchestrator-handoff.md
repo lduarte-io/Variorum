@@ -37,7 +37,7 @@ this handoff, plus CLAUDE.md. The P-1…P-9 constitution binds by reference to
   instrument. Counts: core 1457/154 · Mac 1871/317 ALL PASSED · iOS builds · mobile 582/93 ·
   tutorial spine green · zero `Sync/` · zero schema.
 - **`/Applications` refreshed** from the accepted tip: hash-matched, `io.lduarte.Variorum`, team
-  *[removed for publication]*
+  `<apple-team-id>`, `keychain-access-groups` verified on the installed binary. **A1 backup FIRST** at
   `~/dev/variorum-store-backups/pre-act9-refresh-<UTC>/` (ciphertext-verified header).
 - **ESCROW = PASS on first-launch evidence** (recorded in the batch record's slot, KnownIssues row
   retired): `escrow reconcile: dial ON · item read back == current key: Optional(true) · wrote this

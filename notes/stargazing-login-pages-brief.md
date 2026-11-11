@@ -23,7 +23,7 @@ traps that cost 9c live failures.
 
 ## Shared plumbing (all pages)
 
-*[removed for publication]*
+- **Backend:** the suite account project, `https://<supabase-project-ref>.supabase.co`,
   using its **publishable API key** (public by design):
   `sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp`. Every REST call carries the
   `apikey` header; authenticated calls add `Authorization: Bearer <access token>`.

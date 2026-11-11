@@ -4,7 +4,7 @@
 
 ## Your checklist (in this order)
 
-*[removed for publication]*
+1. **Launch `/Applications/Variorum.app`** — REFRESHED 2026-09-14 from the final commit `72c97442` (code tree `eb8a6a3e`; the Release product from the clean worktree; `codesign --verify --deep --strict` OK, identity `io.lduarte.Variorum` / team `<apple-team-id>`, the keychain access group unchanged; the binary `8e58878c…` → `490285e0…`). The A1 backup was taken FIRST at `~/dev/variorum-store-backups/use-report-2-refresh-20260914T011008Z/` — sqlite and wal byte-identical, the header ciphertext.
 2. **The walk — the round's rows, in the order you hit them:**
    - **Takes (17p a → 17q):** a long note, scroll a block to mid-page, ⌘1, ⌘2 → the page byte-where-it-was; click a DIFFERENT block in Write, ⌘2 → that block revealed minimally at the nearer edge, never the top; an empty block is an empty line; the ＋ door on the prose's edge.
    - **Chrome (17p b):** the tray's block rows' Delete Now; the Callout Emoji field; the comment badge and callout emoji in the book Outline's left lane.

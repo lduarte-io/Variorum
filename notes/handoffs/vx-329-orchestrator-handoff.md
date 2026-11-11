@@ -143,7 +143,7 @@ IN FLIGHT AT CUTOVER:
   binary — DISPOSABLE throwaway fixtures); `…/scratchpad/scrollwheel` (CGEvent wheel: `scrollwheel x y ticks` —
   cliclick cannot scroll); the logs vx329-mac-suite*.log, vx329-ios-suite*.log.
 - **Env files:** `~/.variorum/dev-vault-throwaway.env` (the throwaway's URL/anon/PAT/users A+B — the ref guard
-  *[removed for publication]*
+  `<supabase-project-ref>` in EVERY SQL apply; the Management API `POST /v1/projects/<ref>/database/query`,
   Bearer PAT); `~/.variorum/dev-castle.env` (the DEV pair — never type into anything driven, never echo).
 - **The dev slot is in the DEBUG container:** `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/
   Application Support/Variorum-dev/` (the `io.lduarte.Variorum/Variorum-dev` path is a STALE decoy). Aside =

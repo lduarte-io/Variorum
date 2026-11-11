@@ -57,7 +57,7 @@ connected; otherwise install it whenever convenient (Xcode ▸ your usual run-to
 - `/Applications/Variorum.app`: **REFRESHED** — old `d22dc18e…` (= RUN A's recorded install
   hash, custody chain clean) → new
   `1ab2765238c906e23d8fe3ec88ed5810b227350db642e22b9b946984a50cd493`; installed copy verified
-  *[removed for publication]*
+  identical; codesign OK; both keychain access groups present (`<apple-team-id>.io.lduarte.Variorum`
   + `….shared`). Built from `4afaed63`'s tree (code-identical to the last code commit
   `c28d0096`) in a clean throwaway worktree, cleaned after.
 - Phone build/install: **NOT completed overnight — the device (iPhone 17 Pro, paired,
@@ -65,8 +65,8 @@ connected; otherwise install it whenever convenient (Xcode ▸ your usual run-to
   build is VALID for the round (THE MARKER FACT above). Morning road, if wanted: unlock the
   phone near the Mac, then either her usual Xcode ▸ Run, or:
   `cd ~/dev/variorum/App/Variorum && xcodebuild -scheme VariorumMobile -destination
-  *[removed for publication]*
-  *[removed for publication]*
+  'platform=iOS,id=<device-udid>' -derivedDataPath /tmp/runb-phone-dd build` then
+  `xcrun devicectl device install app --device <device-udid>
   <the built .app>`. (Two overnight attempts recorded: a destination-identifier miss, then the
   mount refusal; her installed app untouched throughout.)
 - Git head at handoff: **the RUN B closeout commits on `main`, all pushed** (the run plan's

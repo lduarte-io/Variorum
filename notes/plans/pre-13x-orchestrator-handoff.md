@@ -129,7 +129,7 @@ orchestrator."*
   53 rows — 50 OK, 3 INFO (the three trigger functions' public EXECUTE, the standing INFO class), ZERO mismatches.** **The proof-required probe is DEFERRED until her first round lands the hash** — a probe with a wrong
   proof as her session BEFORE that would be the NULL-hash arm's FIRST proof and would land the wrong hash on her vault.
 - **The Mac — the install DONE 2026-09-06T01:13:40Z:** Release built from the clean worktree `~/dev/variorum-window`
-  *[removed for publication]*
+  at `c7555c2b` (BUILD SUCCEEDED; `io.lduarte.Variorum` 1.0, Apple Development, team <apple-team-id>);
   `/Applications/Variorum.app` replaced at a zero-instance window (her app quit by her; `pgrep` empty) behind the A1
   copy above — SHA-256 `fbd3f4a774d92230…` → `683eb304abbf0f8d…`, `codesign --verify --deep --strict` ok. **Her first ready — DONE (2026-09-05 19:20 local):** the migration ran on the real store (`854b8c49…`) under
   biometric, six legs at notice level: `sync custody re-scoped → done (identity from sync_state)` · `no legacy iCloud
@@ -145,7 +145,7 @@ orchestrator."*
   `sync_key_proof_check` via `sync_key_gate`); her landed hash unchanged (`bbc279ed…`, revision 3). The mirror side
   of the window is COMPLETE.
 - **The phone — the install DONE 2026-09-06 (after the Mac's refresh):** Release built from the same clean worktree
-  *[removed for publication]*
+  (`Release-iphoneos/VariorumMobile.app`, `<apple-team-id>.io.lduarte.VariorumMobile` + the shared group, BUILD SUCCEEDED),
   installed by `xcrun devicectl device install app` OVER the dev build (same bundle id); the container listed after the
   install — the real store's `Variorum/` folder + `variorum-keys.json` (79 B, format 1) exactly as before, and the dev
   build's `Variorum-dev/` folder still present (its deletion is NOT possible by `devicectl` — it has no delete verb, and an uninstall would take the whole container with her real store; the folder LINGERS, inert — the Release build never reads the dev scope and the dev key file holds only wrapped copies — recorded here and in the checklist; a future dev launch on the phone meets it under 2c's fence and starts signed out). **Her
@@ -313,7 +313,7 @@ batch's ORCHESTRATOR ADJUDICATION block in §19 with its reasoning; the list:
    *confirm your passphrase* → her first round lands the proof hash (the NULL-hash arm, once) → the twelve-words sanity
    check (the 1b defect's definitive check); (e) the phone: build the Release configuration from the same tree
    (`generic/platform=iOS`, a separate DerivedData), install with `xcrun devicectl device install app --device
-   *[removed for publication]*
+   <device-udid> <app>` (the phone unlocked), delete the dev folder from the container
    (`devicectl device copy`/`delete` on `Library/Application Support/Variorum-dev`), her first ready → the migration →
    sign in → the real store re-enrolls by passphrase (corner 47's consequence — expected) → her phone moves to Castle
    (Face ID with the passphrase fallback — say so to her); (f) the real-store legs of the drills: the switch's timing on

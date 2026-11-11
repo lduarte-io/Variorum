@@ -496,7 +496,7 @@ scale; A's write budget 11 of its 500k first-load pool before it).
 - **OBSERVATION O-1 (her call; a ticket candidate):** the Standard join raised a SYSTEM Touch ID prompt —
   "Variorum Dev is trying to Unlock your Variorum library. Touch ID to continue with Variorum Dev." — and waited on it
   (~2 min; no network, low CPU). Cancelled by the session (no finger, never her password): the join then COMPLETED
-  *[removed for publication]*
+  (`enroll: done #1 under 7736e51a` · `turnOnSync — library 35067e12 now names account <account-uuid>, standard`, 04:58:14).
   What the cancelled prompt skipped is unverified (suspected: the on-device quiet road's re-lock under the new pair);
   the relaunch below opened quietly regardless (`custody silent 16`).
 - **THE DOWNLOAD (D1 live):** the first catch-up began at once after the join (04:58:2x) — **56 data windows, 16.9 MB,

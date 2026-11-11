@@ -528,7 +528,7 @@ default — `RoadAccountSheet.swift:311-339`); no capture was taken while the wo
 - **LEG 2 (18:57–18:58) — dry-runs under the held claim.** The helper's first run: `prod-reset-test-account REFUSES:
   R2 — Tools/prod-read.sh or .env.supabase.local is missing` (exit 5) → the link above → re-run, exit 0, verbatim:
   ```
-  *[removed for publication]*
+  [00:58:00Z] prod-reset std: account id <account-uuid> (one auth user, its email the allowlist's entry)
   [00:58:01Z] prod-reset std: BEFORE: vault 1 (mode standard, rev 1) · kp 1 · cursors 1 · purged 0 · seq 1 · challenges 35 · budget 1 · data 3 (setting 3) · entitlement 1 · auth user 1
   [00:58:01Z] prod-reset std: DRY RUN — every guard holds. The plan (nothing written): ONE statement deleting this account's 21 data tables, device_cursor, purged_row, sync_tenant_seq, key_proof_challenge, sync_write_budget, its kp: proof secret and its key_vault row — never its auth user or entitlement — then the after-read. It holds 43 family row(s): a real run resets them.
   ```
@@ -546,7 +546,7 @@ default — `RoadAccountSheet.swift:311-339`); no capture was taken while the wo
     ```
   - **The set-up arm (P1–P8) — PASS:** P2 `PROD TEST ROAD (VX-510): ARMED`; the frame guard deleted
     `NSWindow Frame variorum-main-AppWindow-1` and the window `60 33 1240 940` held the footer row; P3 `account id
-    *[removed for publication]*
+    <account-uuid> (confirmed)`; sign-in, the words stashed (never printed), Turn on sync →
     the sheet **"Synced. Your library is on your account now."** (19:00:18, 4 s after the press) → Done → the row
     Synced, same pid. P8: `key_vault: [{"mode":"standard","revision":1,"proof":true}]` · `kp secret: [{"n":1}]` ·
     `device cursors: [{"n":1}]` · `data rows (setting + container): [{"n":3}]`.
@@ -569,7 +569,7 @@ default — `RoadAccountSheet.swift:311-339`); no capture was taken while the wo
     ```
 - **LEG 4 (19:02) — std's end state, read.** The helper's dry run, exit 0, verbatim:
   ```
-  *[removed for publication]*
+  [01:02:06Z] prod-reset std: account id <account-uuid> (one auth user, its email the allowlist's entry)
   [01:02:07Z] prod-reset std: BEFORE: vault 0 (mode -, rev -) · kp 0 · cursors 0 · purged 0 · seq 0 · challenges 0 · budget 0 · data 0 · entitlement 1 · auth user 1
   [01:02:07Z] prod-reset std: DRY RUN — every guard holds. The plan (nothing written): … It is ALREADY AT REST: a real run writes nothing.
   ```

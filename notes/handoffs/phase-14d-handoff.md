@@ -68,7 +68,7 @@
   retired password: your ruling ("there should not be some kind of
   session dependency") made it this phase's build.
 - **The Fragments batch (you carried it) — closed:** uid preserved
-  *[removed for publication]*
+  (`<account-uuid>`, dual-verified), password retired, old issuer off,
   journal E2EE live both ends, entitlement quiet. ONE STARGAZING
   ACCOUNT — the docs say so everywhere now (SyncSpec §2's completion
   clause; the contract file's closing addendum; the account sheet's

@@ -2257,7 +2257,7 @@ Compiled: Mac TEST BUILD SUCCEEDED · VariorumMobile BUILD SUCCEEDED.
    the pre-W-1 close behavior this phase fixes; harmless, the next open replays it) → Release
    build from **0787f028** → the old app (0.9.2 build 5441) moved aside, not deleted → the new
    app ditto'd in: **0.9.2 (5544)**, `codesign --verify --deep --strict` OK (io.lduarte.Variorum,
-   *[removed for publication]*
+   team <apple-team-id>). Stage RELEASED; the coordinator told the installed SHA.
 6. **Next: her Air leg** — the code under test is exactly 0787f028 (every later branch commit is
    record-only); then closeout + the PR.
 
@@ -2317,7 +2317,7 @@ Pro**; `Previous Libraries/2026-10-08-072743/` present (4 entries). Her ruling a
 doubled Sherlock/Quicknotes rows are the seed-dedupe residual class — faithful transport, NOT a
 finding. **Signing deviation (permanent fix, recorded):** the Air had no signing identity and the
 Pro's build would not launch there; an Apple Development cert was minted on the Air, the Air
-*[removed for publication]*
+registered in the developer account (UDID <device-udid>), and the Release rebuild at
 0787f028 used `-allowProvisioningUpdates` — the profile now licenses both Macs.
 
 **WALK FINDING W-4 (the Air leg's banner — found by her hands):** the Air (signed in) showed the

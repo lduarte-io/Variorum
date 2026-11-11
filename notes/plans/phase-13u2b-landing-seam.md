@@ -1373,8 +1373,8 @@ hers to overrule · the carried bundle #110(c) · #111 · #112(a)/(c) · #113 ·
 | Built from | commit `86b874ba` (closeout (d)), clean throwaway worktree `~/dev/variorum-13u2b-release` (since removed), standard `-configuration Release`, DerivedData in `/tmp` (removed) |
 | Old binary SHA-256 | `185c6cf1ed872a8892669229456ba0ff6d8936ceb35dc4fb43b748b496cd9d5f` (= 13u2's recorded new hash — chain of custody clean) |
 | New binary SHA-256 | `a5ea943e4f6d3073af1b9987af3bc1348732e5447c89a7d99af809d009ee2350` (installed copy HASH IDENTICAL) |
-*[removed for publication]*
-*[removed for publication]*
+| Signature | `codesign --verify --deep --strict` OK on the product AND the installed copy · `io.lduarte.Variorum` · Team `<apple-team-id>` |
+| Keychain access groups | `<apple-team-id>.io.lduarte.Variorum` AND `…Variorum.shared` — both present |
 | Zero instances | verified before the backup, before the copy, and after; her store never opened, the app never launched |
 | One machinery note | the first build attempt was KILLED by system memory pressure (~58 MB free; eight SourceKitService residents cleared, simulators shut down); the retry ran foreground at `-jobs 4` and succeeded — recorded for future overnight refreshes on a loaded box |
 

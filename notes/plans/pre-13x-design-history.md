@@ -812,17 +812,17 @@ at start:** her live real-store app running (`/Applications/Variorum.app`, PID 7
 build, no `/Applications` refresh, no store touch, no `Sync/` line, no production Keychain item, anywhere in this
 batch. Builds use a gitignored `App/Variorum/DerivedData/pre13x-b0` inside the worktree. **No revert is in flight.**
 **Facts read before any change (read-only):** the Mac Team Provisioning Profile embedded in her install and the iOS
-*[removed for publication]*
+Team Provisioning Profile on this Mac BOTH carry `keychain-access-groups = ["<apple-team-id>.*"]` (the team wildcard),
 so the Q1 hypothesis is "signing accepts the shared group without an App-ID change" — to be proven by building.
 
 **LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified):**
 - **Q1 (shared group on both targets)** — DONE (this commit). `Variorum.entitlements` carries the second entry;
   `App/Variorum/VariorumMobile.entitlements` CREATED (two entries, default first) and wired by `CODE_SIGN_ENTITLEMENTS`
   on both VariorumMobile configs. **Both builds succeeded with NO signing change and NO App-ID step** — the team
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  provisioning profiles' `keychain-access-groups = ["<apple-team-id>.*"]` wildcard admits the shared group on both
+  platforms. Signed products (`codesign -d --entitlements`): Mac Debug → `["<apple-team-id>.io.lduarte.Variorum.debug",
+  "<apple-team-id>.io.lduarte.Variorum.shared"]` under "Mac Team Provisioning Profile: *"; iOS Debug (generic device) →
+  `["<apple-team-id>.io.lduarte.VariorumMobile", "<apple-team-id>.io.lduarte.Variorum.shared"]` under "iOS Team Provisioning
   Profile: *". The first entry resolves to each target's own bundle id, as required. Nothing for the author here.
   (The Mac `EntitlementsTests` pin for the shared group rides the PROBES commit, beside the other tests.)
 - **Q2 (Mac synchronizable round trip under the shared group)** — DONE (`e29ebe3`; this line flipped one commit
@@ -831,7 +831,7 @@ so the Q1 hypothesis is "signing accepts the shared group without an App-ID chan
   `io.lduarte.Variorum.pre13x-shared-group-probe`; timestamped account, deleted at the end) +
   `VariorumTests/SharedKeychainGroupProbeTests` gated `.enabled(if:)` on `VARIORUM_SHARED_GROUP_PROBE=1`. **Run
   2026-09-04T06:22:11Z in the signed host:** add `0` → read (shared group named, synchronizable=true) `0`, landed in
-  *[removed for publication]*
+  `<apple-team-id>.io.lduarte.Variorum.shared`, `synchronizable=true`, payload intact → delete (flagged) `0` → read
   `-25300`. The tripwire stayed armed and never fired (its own suite ran green beside it). **Verified DISABLED BY
   DEFAULT:** the same suite without the variable → both tests `skipped: "writes one synchronizable throwaway item (it
   rides into iCloud Keychain and is deleted) — run deliberately with TEST_RUNNER_VARIORUM_SHARED_GROUP_PROBE=1"`,
@@ -1352,15 +1352,15 @@ AFTER sync_state.device_id = nil · legacy dial keys: retired · alwaysAsk=false
   Read: leg 1 re-scoped the sync custody from the legacy plain item into the per-store pair under the SILENT shape the route used (the identity taken from `sync_state`, the row deleted after); leg 2 removed the legacy escrow item because it held THIS store's key; leg 3 retired the scope-wide dial keys into the store's own (the idle 15 carried, `alwaysAsk` false); leg 4 aligned custody `auto → biometric` — the store key AND the sync record moved to their gated items in one transition (both `-biometric` items PRESENT after, both bound items absent); leg 5 wrote the key file's master-wrapped copy of the library key + the corpus key id + the vault's descriptor from the held material; leg 6 left the one-time confirm pending. The AFTER inventory shows exactly the per-store custody of the design and NONE of the 13p-era items. Pollution: none — every item under `drill-<uuid>` accounts and the throwaway service, deleted at the end of the test.
 - **The A round trip (`AppleKeyRoundTripTests`, opt-in `TEST_RUNNER_VARIORUM_APPLE_KEY_ROUND_TRIP=1`, run once 2026-09-05 — the REAL family under a throwaway account):**
 ```
-*[removed for publication]*
+attributes: 0 (No error.) group=<apple-team-id>.io.lduarte.Variorum.shared synchronizable=Optional(true)
 flagged delete: released true — gone: true
 flagless delete: -25300 (The specified item could not be found in the keychain.) — item still there: true
 read: id 465c1764-b772-4f48-a6b5-5b5e6ebc4883 — equal: true
 readOrMint (again): equal to the first: true
 readOrMint (mint): id 465c1764-b772-4f48-a6b5-5b5e6ebc4883, 32 bytes: true
-*[removed for publication]*
+service io.lduarte.Variorum.apple-key · account throwaway-330f0140-apple-key · group <apple-team-id>.io.lduarte.Variorum.shared
 ```
-  *[removed for publication]*
+  Read: mint → read back equal → `readOrMint` idempotent → the item landed in the shared group `<apple-team-id>.io.lduarte.Variorum.shared` with `synchronizable = true` → the flagless delete is a no-op (`-25300`, the item still there — production's never-delete law holds at the query level) → the flagged delete releases. The same-Mac half of the A road is thereby proven; Q3 (the item crossing to the phone) is her sitting's.
 - **Pollution to state (the test host boots the DEV store):** the reconcile's Apple arm ran for real in the host at 2a.1's first run — ONE `Variorum-dev-apple-key` item under `io.lduarte.Variorum.apple-key` in the shared group, synchronizable, in her iCloud Keychain, never deleted by production (the dev scope's own A; harmless, dev-only, recorded so no one mistakes it for a stray).
 
 #### SUITE COUNTS

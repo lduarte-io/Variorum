@@ -34,7 +34,7 @@ Custom Domain add-on was DECLINED). None of B is needed until real
 strangers/TestFlight, so sequence it around A per her word. READ
 FIRST: (1) this file in full (esp. the "ABSORBED FROM 14c" section +
 the completed FILL-AT-GATE fields — the issuer is the RAW project URL
-*[removed for publication]*
+`https://<supabase-project-ref>.supabase.co`, NO custom domain); (2) the
 master plan's 14d row; (3) `notes/fragments-bridge-contract.md` — the
 EXECUTION MODEL + its 2026-08-04 amendment + ALL THREE touchpoint
 blocks WITH their concrete-facts additions (the brief SHE carries;
@@ -65,7 +65,7 @@ to its default (adjust per the runbook's rate-limits section).
 **Step 1 — the one-batch Fragments conversation (SHE carries it).**
 The contract file's three touchpoints, in order, one conversation with
 the Fragments agent: #1 the provider swap + her uid link (the
-*[removed for publication]*
+FIRST-SIGN-IN RULE is load-bearing: her Fragments uid `<account-uuid>`
 must survive — verify before proceeding) + password retirement + the
 *[removed for publication]*
 retired (safe since 14a shipped the direct sign-in) · #2 the
@@ -117,7 +117,7 @@ contract file's state, the parity line, the handoff note).
 
 ## FILL-AT-GATE fields — COMPLETED at the 14c close (2026-08-11)
 
-*[removed for publication]*
+- [x] **The CONFIRMED issuer URL:** `https://<supabase-project-ref>.supabase.co`
   — the RAW Supabase project URL. **The `auth.stargazing.tech` custom
   domain was DECLINED at the 14c gate** (her ruling): a lookup confirmed
   branded auth-email links come FREE via a rewritten email template
@@ -134,8 +134,8 @@ contract file's state, the parity line, the handoff note).
 - [x] **The deployed entitlement state:** `entitlement_set` is LIVE
   (service_role-only, verified). Her account's seed row is present and
   confirmed (`hosted_sync`, non-expiring, source `14c-deploy-seed`,
-  *[removed for publication]*
-  *[removed for publication]*
+  uid `<account-uuid>`). The probe account (`<her-email>`,
+  uid `<account-uuid>`) was granted `hosted_sync` for the live probes and
   then FULLY PURGED by the deletion-door test — no probe residue remains
   (auth user, vault, entitlement all gone; verified).
 - [x] **The signups toggle's post-gate state:** STILL OFF — the signup
@@ -224,7 +224,7 @@ contract file's state, the parity line, the handoff note).
   order: handler live first, flip second.
 - **The end-to-end probe — LIVE:** a stranger-shaped signup
   *[removed for publication]*
-  *[removed for publication]*
+  endpoint) returned 200 confirmation-required (user `<account-uuid>`,
   no session) — the open door + the branded confirmation email
   dispatched via Resend in one act. **Closeout owes: purge this
   probe user** (admin delete; or her click-then-ignore is harmless —
@@ -235,10 +235,10 @@ contract file's state, the parity line, the handoff note).
 ## reason discharged)
 
 Their verified outcomes, verbatim-faithful: **(a) uid — verified the
-*[removed for publication]*
-*[removed for publication]*
+clean way:** her delegated sign-in minted `<account-uuid>`
+DIRECTLY — one user total, no duplicate ever created,
 no link step needed (verified-email auto-link matched); the identity
-*[removed for publication]*
+row reads `custom:stargazing` / suite sub `<account-uuid>` — the
 contract's coordinates exactly. **(b)** old issuer OFF + old client
 *[removed for publication]*
 opened the real vault (pure-Swift Argon2id + KeyWrap chain
@@ -337,7 +337,7 @@ hygiene; the counts re-run live by the reviewer: 85/9 core bridge,
   traced face, "…(Variorum.SignInFlow.FlowError error 0.)", then
   green).
 - **MINOR 5 (closeout obligations at risk)** — AGREED; each landed:
-  *[removed for publication]*
+  (a) the probe user `<account-uuid>` WAS purged mid-review (DELETE 200;
   the auth table verified to hold exactly her account) — the
   reviewer's read predated the act; (b) the master-plan row's
   verification cell amended to her residual/discharged rulings;
@@ -503,7 +503,7 @@ round under the ladder's own purpose.
   `mailer_autoconfirm` false, `disable_signup` still true (the door
   stays shut until the deliberate flip).
 - **Delivery probe fired:** throwaway auth user
-  *[removed for publication]*
+  `<her-email>` (id `<account-uuid>`) admin-created
   (bypasses signups-off by design), `/auth/v1/recover` → 200 through
   the new SMTP. Non-team address ⇒ delivery at all proves custom SMTP
   live (the built-in mailer refuses such addresses). AWAITING her
@@ -512,7 +512,7 @@ round under the ladder's own purpose.
   not survive into the stranger-validation walk).
 - **Step 0 COMPLETE (2026-08-16, same sitting):** she confirmed the
   probe email ARRIVED ("i got the stargazing email in my email! so
-  *[removed for publication]*
+  confirmed"); the throwaway user (`<account-uuid>`) PURGED (DELETE 200 —
   nothing survives into the stranger-validation walk). **Templates
   PASTED (PATCH 200, read-back verified) with HER RATIFIED COPY** —
   her own confirm-signup rewrite verbatim (typo fixed), reset kept
@@ -691,7 +691,7 @@ agent's report, relayed 2026-08-16):**
   yet the rule's verification.** The FIRST-SIGN-IN RULE wants an
   explicit uid check, and two roads close it: (a) the Fragments
   agent's one-line confirmation that the delegated sign-in's user is
-  *[removed for publication]*
+  uid `<account-uuid>` (carrying the stargazing identity); (b) the
   Variorum drill itself is an empirical instrument — with a WRONG
   (new) uid, RLS starves the bridge: `user_settings.local_user_id`
   has no row for it, so the fail-closed gate holds all pushes with
@@ -719,16 +719,16 @@ mid-batch breakage is fine (the author's standing latitude), finish
 states matter. **Touchpoint #1 — provider swap + identity:** (1) add
 the suite issuer as a trusted OIDC provider and route ALL sign-in
 through the delegated PKCE flow. Issuer:
-*[removed for publication]*
+`https://<supabase-project-ref>.supabase.co/auth/v1` — the RAW Variorum
 project URL; a custom domain was DECLINED at the 14c gate; write every
 config against this URL. client_id
 *[removed for publication]*
 `client_secret_post`, registered redirect
-*[removed for publication]*
+`https://<supabase-project-ref>.supabase.co/auth/v1/callback`; the
 client_secret the author supplies by hand — never commit it, never
 echo it. (2) THE FIRST-SIGN-IN RULE (load-bearing): on her first
 delegated sign-in, VERIFY the minted session's uid equals her existing
-*[removed for publication]*
+Fragments uid `<account-uuid>`. If a NEW uid appears, STOP — do not use
 that account — and link deliberately via the admin API before
 proceeding: every `journal_entries` row keys on the old uid. (3) Then
 retire her email+password identity (single sign-in; no Fragments
@@ -785,7 +785,7 @@ anything that needs a contract change — through her, never silently.
 
 Build the auth-email landing flow on stargazing.tech for the
 Stargazing suite (the Variorum/Fragments account system). The suite's
-*[removed for publication]*
+Supabase project is `https://<supabase-project-ref>.supabase.co` (use
 its PUBLISHABLE key, public by design:
 `sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp`). The
 auth emails will link to
@@ -814,7 +814,7 @@ before the email templates flip to the token_hash form.
 **The verification letter, met in full:** a journal entry created in
 either app lands in the other, encrypted in flight and at rest on the
 satellite (her live check, both directions); her Fragments uid
-*[removed for publication]*
+preserved (`<account-uuid>` — their explicit confirmation + the
 fail-closed gate's empirical proof); the one-payment entitlement reads
 the same answer from both apps (Variorum "Hosted sync is active";
 Fragments' gate live and quiet). PLUS the absorbed operationalia:

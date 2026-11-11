@@ -10,7 +10,7 @@ until the client half ships with the held PR. The pre-deploy gate: the SERVER-HA
 
 ## Preflight (read-only; DONE 2026-11-01 ~16:55 MDT by the orchestrator through `Tools/prod-read.sh`, from `~/dev/variorum`)
 
-*[removed for publication]*
+- [x] Her tenant `<account-uuid>` head `sync_tenant_seq.last_seq` = **355,236**. Device cursors: `15bc2885…` 355,234 (seen
       2026-11-01 23:27 UTC — the active Mac), `e62f18b8…` 354,397 (2026-10-30), **`7e7609fa…` 245,728 (seen 2026-10-25
       09:30 UTC — the Pro, a week behind; the VX-494 record names this id as her Pro's)**.
 - [x] **Rows past the Pro's cursor: 22,905** (container 156 · block 6,474 · variant 6,810 · commit_point 831 · edge 1,034

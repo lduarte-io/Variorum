@@ -123,7 +123,7 @@ recovery-phrase restore drill (phone enrolled in the drill).
 ## What 14a left in place (verified facts, never re-derive)
 
 - Her suite account stands on its own: direct email+password on user
-  *[removed for publication]*
+  `<account-uuid>` against the Variorum project (the suite issuer); the app's
   sign-in is the direct form (Mac + mobile, one shared seam);
   `custom:fragments` retired (identity + provider — see the 14a gate record).
 - P-ii verified live (round 0r): vault-shaped RLS'd tables on the project
@@ -1496,7 +1496,7 @@ window remain the wipe's precondition).**
   side-report (Always Allow not sticking across prompts — the known macOS
   dev-signing behavior) recorded with GM-1's family.
 - **Pre-wipe vault state read (the architect):** one `key_vault` row on
-  *[removed for publication]*
+  `<account-uuid>`, format 1, revision 4 (setup + generate + her regenerate —
   the CAS token moving as designed), `has_recovery_wrap` TRUE, KDF 65536
   KiB / t=3. Her Mac is ENROLLED; the setup half of the gate is DONE.
 - **CF-11 — RULED IN (post-repush): a "Forget encryption keys on this
@@ -1969,7 +1969,7 @@ items" boundary exists to prevent.
 - **The near-miss the dry-run caught (recorded so the class is known):**
   the runner's first minted session belonged to a STRAY user — the
   architect minted the admin link against her GIT email
-  *[removed for publication]*
+  (<her-email>); her suite account is `<account-uuid>` under a
   DIFFERENT address (the 9c-era identity), and admin `generate_link`
   CREATED a user for the unknown address despite signups-off (admin
   bypasses the toggle — worth knowing for 14c). The dry-run surfaced it
@@ -2550,7 +2550,7 @@ code).
 2. **The phone build:** the mobile session's Release install cut from
    final `main` (its morning merge already held the cold-pass tip;
    verified empty diff). Mobile suite 175/26 at its push (`9674395`).
-*[removed for publication]*
+3. **The vault delete:** before-read one row (`<account-uuid>`, format 1,
    **revision 5** — setup + generate + her regenerate + the phrase-drill
    passphrase change), DELETE with RETURNING confirming exactly that row,
    after-read ZERO rows.
@@ -2578,7 +2578,7 @@ code).
    (the address redacted) with the **uid check gating everything**
    (top-level user shape in this GoTrue's generate_link response — the
    first parse's `user` read failed CLOSED, exactly as a guard should);
-   *[removed for publication]*
+   her real 9c-era account (`<account-uuid>`, created 2026-07-10) confirmed,
    no stray. Dry-run clean (unwrap arm, 7,274 rows, writes nothing).
    The real run: KDF 0.596 s → `resyncReinitialize` (7,274 enqueued) →
    **drained in 16 rounds with GM-3's transient-drop absorption live**
@@ -2667,7 +2667,7 @@ Her live Face ID/Touch ID try is welcome any day; nothing waits on it.
 - Baselines (never re-run at session start — 14a's closeout is the record):
   core 1039/114 · Mac 1196/208 (the tripwire) · mobile 172/24 · spine 51/7.
 - Sessions never touch `~/dev/fragments` or the Fragments project
-  *[removed for publication]*
+  (`<supabase-project-ref>`); asks ride the contract file, carried by her.
 - Implementer sessions WAIT SYNCHRONOUSLY on their own builds/tests (the 14a
   background-wait death), and write repo-first records BEFORE long
   verification runs with claims marked PENDING.

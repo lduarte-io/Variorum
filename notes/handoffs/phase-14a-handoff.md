@@ -44,7 +44,7 @@ talk to the Variorum project's API; a custom domain fronts the issuer
 before any stranger ever signs up (pinned on the 14c row, refined to
 before-the-Fragments-handoff so provider configs are written once).
 
-*[removed for publication]*
+**Your account stands on its own.** Your user `<account-uuid>` — the owner_id
 on every row of your corpus, untouched by construction — now signs in with
 a direct email+password. The `custom:fragments` proof is retired
 END-TO-END: out of the app's code (batch 1), your identity row deleted, the

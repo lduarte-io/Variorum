@@ -27,8 +27,8 @@ backup, before the copy, and after.**
 | **Built from** | commit `348ef8aa` (the final commit), clean throwaway worktree (`~/dev/variorum-13u2-release`, since removed), `-configuration Release`, DerivedData in `/tmp` (removed) |
 | **Old binary SHA-256** | `ffe42c8817e324ce9484fd2fa3b5248363ae8ca37508fb595aeb032f26c9f65c` (= 13u1's recorded new hash — chain of custody clean) |
 | **New binary SHA-256** | `185c6cf1ed872a8892669229456ba0ff6d8936ceb35dc4fb43b748b496cd9d5f` (identical installed) |
-*[removed for publication]*
-*[removed for publication]*
+| **Signature** | `codesign --verify --deep --strict` OK before AND after the copy · `io.lduarte.Variorum` · Team `<apple-team-id>` |
+| **Keychain access groups** | `<apple-team-id>.io.lduarte.Variorum` **and** `…Variorum.shared` — both present |
 
 ### 2. THE WALK — items 1 and 18 close only in YOUR hands (everything below was walked with captures overnight; this is the field acceptance)
 

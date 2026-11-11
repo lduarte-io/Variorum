@@ -70,7 +70,7 @@ struct AuthSessionTests {
     ) -> AuthTokens {
         AuthTokens(
             accessToken: access, refreshToken: refresh, expiresAt: expiresAt,
-            *[removed for publication]*
+            userID: "a0000000-0000-4000-8000-000000000001", email: "author@example.com")
     }
 
     // MARK: The password grant — THE sign-in door (Phase 14a: direct)
@@ -79,7 +79,7 @@ struct AuthSessionTests {
         let endpoint = ScriptedEndpoint([(200, """
             {"access_token": "v-access", "refresh_token": "v-refresh",
              "expires_in": 3600, "token_type": "bearer",
-             *[removed for publication]*
+             "user": {"id": "a0000000-0000-4000-8000-000000000001",
                       "email": "author@example.com"}}
             """)])
         let store = AuthTokensStore.inMemory()
@@ -104,7 +104,7 @@ struct AuthSessionTests {
         let saved = try #require(store.load())
         #expect(saved.accessToken == "v-access")
         #expect(saved.refreshToken == "v-refresh")
-        *[removed for publication]*
+        #expect(saved.userID == "a0000000-0000-4000-8000-000000000001")
         #expect(saved.email == "author@example.com")
         #expect(saved.expiresAt == epoch.addingTimeInterval(3600))
         #expect(await session.isSignedIn)
@@ -223,7 +223,7 @@ struct AuthSessionTests {
         let endpoint = ScriptedEndpoint([(200, """
             {"access_token": "v-access-2", "refresh_token": "v-refresh-2",
              "expires_in": 3600,
-             *[removed for publication]*
+             "user": {"id": "a0000000-0000-4000-8000-000000000001"}}
             """)])
         let soon = Date().addingTimeInterval(30)  // inside the 60 s margin
         let store = AuthTokensStore.inMemory(initial: Self.tokens(expiresAt: soon))
@@ -232,7 +232,7 @@ struct AuthSessionTests {
 
         let userSession = try await session.currentSession()
         #expect(userSession.accessToken == "v-access-2")
-        *[removed for publication]*
+        #expect(userSession.userID == "a0000000-0000-4000-8000-000000000001")
 
         // The refresh request shape.
         let request = endpoint.requests[0]
@@ -263,7 +263,7 @@ struct AuthSessionTests {
         let endpoint = ScriptedEndpoint([(200, """
             {"access_token": "v-access-2", "refresh_token": "v-refresh-2",
              "expires_in": 3600,
-             *[removed for publication]*
+             "user": {"id": "a0000000-0000-4000-8000-000000000001"}}
             """)])
         endpoint.delay = .milliseconds(80)
         let store = AuthTokensStore.inMemory(
@@ -300,7 +300,7 @@ struct AuthSessionTests {
         let endpoint = ScriptedEndpoint([(200, """
             {"access_token": "v-access-2", "refresh_token": "v-refresh-2",
              "expires_in": 3600,
-             *[removed for publication]*
+             "user": {"id": "a0000000-0000-4000-8000-000000000001"}}
             """)])
         let store = AuthTokensStore.inMemory(
             initial: Self.tokens(expiresAt: Date().addingTimeInterval(3000)))
@@ -327,7 +327,7 @@ struct AuthSessionTests {
                 return (Data("""
                     {"access_token": "v-access-2", "refresh_token": "v-refresh-2",
                      "expires_in": 3600,
-                     *[removed for publication]*
+                     "user": {"id": "a0000000-0000-4000-8000-000000000001"}}
                     """.utf8),
                     HTTPURLResponse(url: request.url!, statusCode: 200,
                                     httpVersion: nil, headerFields: nil)!)
@@ -387,7 +387,7 @@ struct AuthSessionTests {
         let endpoint = ScriptedEndpoint([
             (200, """
                 {"access_token": "fresh-access", "refresh_token": "fresh-refresh", "expires_in": 3600,
-                 *[removed for publication]*
+                 "user": {"id": "a0000000-0000-4000-8000-000000000001", "email": "author@example.com"}}
                 """),
             (204, ""),
             (400, #"{"error":"invalid_grant","error_description":"Invalid login credentials"}"#),
@@ -428,7 +428,7 @@ struct AuthSessionTests {
             configuration: Self.configuration, store: store,
             http: ScriptedEndpoint([]).loader())
         #expect(await second.isSignedIn)
-        *[removed for publication]*
+        #expect(await second.currentUserID == "a0000000-0000-4000-8000-000000000001")
         #expect(await second.currentEmail == "author@example.com")
     }
 
