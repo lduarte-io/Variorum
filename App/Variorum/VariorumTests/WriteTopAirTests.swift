@@ -62,8 +62,8 @@ struct WriteTopAirTests {
         EditorSurfaceChrome(voice: voice, dark: false, inlineComments: false)
     }
 
-    *[removed for publication]*
-    *[removed for publication]*
+    /// A note fixture: the first line, a blank block, the line being typed
+    /// under, and the empty block the caret sat in.
     private let herNote = [
         "There’s so much to pack for the trip that the hallway is buried in gear",
         "",

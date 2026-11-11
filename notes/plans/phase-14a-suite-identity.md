@@ -26,7 +26,7 @@
 ## rounds below are the record, and they SUPERSEDE earlier sections where they differ)
 
 - **Account home: the VARIORUM PROJECT ITSELF** (round 0h — supersedes batch-1 R2's
-  "new neutral project" and round 0c's ruling). Its OAuth 2.1 Server is the suite
+  "new neutral project" and round 0c's *[removed for publication]* ruling). Its OAuth 2.1 Server is the suite
   issuer; "stargazing" is the BRAND and the pages' front (planetlillian a live
   candidate); an eventual custom domain fronts the issuer. **No new org, no Pro
   purchase now** (her free-tier posture; upgrade at her word).
