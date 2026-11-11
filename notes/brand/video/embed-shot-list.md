@@ -34,7 +34,7 @@ candidate list on purpose: shoot wide, she picks.
 
 ## Tier 1 — the blog post set (shoot all five; the post uses at most three)
 
-*[removed for publication]*
+Blog guidance (in `../posts/blog-launch-post.md`, relocated to the private planning repo): max ~3 inline loops, each
 at the paragraph that describes it. Recommended three: **V1 + V2 + V5**, with
 V3/V4 as swap candidates.
 
