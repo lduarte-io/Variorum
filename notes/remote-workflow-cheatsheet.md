@@ -61,7 +61,7 @@ ssh home 'osascript -e "tell application id \"io.lduarte.Variorum\" to quit"'
 1. Tailscale menu → Exit Node → **None** (fail-closed: nothing flows until you do this)
 2. `open http://captive.apple.com` — forces the portal login page into your browser
    (plain-HTTP trick; `http://neverssl.com` is the backup)
-*[removed for publication]*
+3. Sign in, then Exit Node → **<vpn-node>** again
 
 ---
 
@@ -175,13 +175,13 @@ Sitting at the Pro itself: same commands without the `ssh home` / `ssh -t home` 
 ## Other machines & roads
 
 ```zsh
-*[removed for publication]*
+ssh <user>@<server>              # the homelab server (key auth lives on the Pro)
 ```
 
 - **Screen Sharing** (GUI road, for Xcode etc.): the app has two saved Pro entries —
   *[removed for publication]*
   Expect some lag away from home; terminal road is primary for a reason.
-*[removed for publication]*
+- **Exit node** (privacy on office/public Wi-Fi): Tailscale menu bar → Exit Node → **<vpn-node>**
   (Pro is the approved fallback). Keep "Allow local network access" ticked.
   Turn OFF for captive portals (hotel/café login pages). Off = Exit Node → None.
 - **Ghostty config changes** don't apply to the running app: press **⌘⇧,** to reload (or restart Ghostty).
