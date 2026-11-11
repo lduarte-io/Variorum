@@ -95,14 +95,14 @@ struct SampleBookDrillTests {
             // one blank line between a paragraph and its section is the
             // separator, never stored text — the block is the sentence alone.
             #expect(ptText == [
-                "Eu não pedi para herdar o observatório.",
+                "Eu não pedi para herdar o farol.",
                 "Fica numa ilha sem ponte, e a balsa só passa quando a maré deixa.",
-                "Cuidar de um observatório dá trabalho. Quase toda noite, ninguém agradece.",
+                "Cuidar de um farol dá trabalho. Quase toda noite, ninguém agradece.",
             ])
             #expect(enText == [
-                "I never asked to inherit the observatory.",
+                "I never asked to inherit the lighthouse.",
                 "It stands on an island with no bridge, and the ferry only runs when the tide allows.",
-                "Running an observatory is hard work. Most nights, nobody says thank you.",
+                "Keeping a lighthouse is hard work. Most nights, nobody says thank you.",
             ])
 
             // ⌥⌘Z once — the whole book gone (its notes and their lenses
