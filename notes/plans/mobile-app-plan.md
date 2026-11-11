@@ -5966,14 +5966,11 @@ no-redirect principle.**
 document's landing):** **STAGE E created at her directive** (the
 Fragments-precedent shape): Dynamic Type + VoiceOver move there from
 D, joined by the privacy policy, store screenshots/listing, privacy
-manifest + encryption-export declaration, external-TestFlight setup,
-*[removed for publication]*
+manifest + encryption-export declaration, external-TestFlight setup, *[removed for publication]*.
+**Her TestFlight plan recorded:** internal
 TestFlight (*"super basic… for just me and whoever I add"*) right
 after Stage D completes; Stage E carries what broader exposure needs.
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+*[removed for publication]* **The parity-ledger direction ruled by
 discussion:** Mac phases RECORD (context-hot, one line), mobile
 phases ACT (kickoff reads the ledger + sweeps closeouts; judgment
 lives with the soul document), cross-platform phases DESIGN TOGETHER
