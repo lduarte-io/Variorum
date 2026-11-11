@@ -495,7 +495,7 @@ The brief names the root `README.md` as her letter (VX-105). **It is not.** The 
 1. **The GRDB fork's README** (`lduarte-io/GRDB.swift`): today it is upstream's verbatim, with groue's contact and issue lines and no word that it is a fork. Owed: a short notice at its top (a fork of GRDB.swift with the README-documented SQLCipher setup applied, for Variorum; report GRDB issues upstream). A README commit never moves the tag. Needs her push rights on the fork.
 2. **Tag immutability on the fork:** a ruleset on `lduarte-io/GRDB.swift` forbidding update and deletion of `v*+sqlcipher.*` tags. Today a moved tag would fail a lockfile resolution loudly (the revision is pinned), but a pin-free resolution would follow it. Her account's settings.
 3. **At the flip:** Issues ON (R-912-9); Actions on; the workflows' first live check (one issue + one fork PR from a throwaway account → exactly one greeting, one comment + close; her own same-repo PR untouched); optionally GitHub's private vulnerability reporting (P-912-B3-3 (c)).
-*[removed for publication]*
+4. Already hers on VX-750: the trademark filing.
 
 **PROVISIONAL bundle (nothing here gates the core; `notes/QUESTIONS.md` untouched — the merging session files them):**
 - **P-912-B3-1 — AGPL "version 3 only" vs "or any later version".** Drafted: only (README's notice says "version 3"). Why: it's the reversible choice. As sole owner she can broaden to or-later at any time, but copies released under or-later can never be narrowed back, and or-later hands future terms to the FSF. Alternative: or-later (the FSF's recommended form). The LICENSE file is the same either way.
