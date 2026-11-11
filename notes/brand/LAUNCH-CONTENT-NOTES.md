@@ -210,6 +210,6 @@ text-bearing columns; plain skeleton): SyncSpec, the wire-is-ciphertext
 paragraph. 13o scope + settled inputs (client-side by architecture, wing
 isolation, facets, results-cap defect): `notes/FuturePhases.md` 13o row +
 `notes/plans/phase-13i-sitting-record-2026-09-30.md` §12/§21. Release
-*[removed for publication]*
+direction (free v1, *[removed for publication]*, open-format loud, E2EE from
 birth): `release-and-v1-strategy.md` (relocated to the private planning repo). Everything consumer-visible:
 CoreDescription / OverallModel / AppSpec §12.

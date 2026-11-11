@@ -390,7 +390,6 @@ Markdown export for everything, anytime. `[open-format guarantee line]`
 
 **What does it cost?**
 *[removed for publication]*
-*[removed for publication]*
 
 **Why "Variorum"?**
 Because the dictionary wrote the pitch: *an edition of a text that preserves
