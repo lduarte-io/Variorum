@@ -126,4 +126,10 @@ stage claim).
 | fix M-4 | done (same private commit) | `ee6da94d9` |
 | fix m-1 | done | `ffe0bf923` |
 | fix m-2 | done (the two notes; this record's line in the next commit) | `0269abdda` |
-| fixes m-3, m-4, R-oss-39, NITs | in progress (next: m-3) | — |
+| fix m-3 | done (the private repo's commit `ba2b7ed` first) | `e9c5e72fd` |
+| fix m-4(a) | done | `cba065288` |
+| fix m-4(b) | done | `84f27c226` |
+| fix m-4(e) | done | `f426a653b` |
+| fix m-4(f) | done | `9dc9f0a8f` |
+| fix m-4(c) | done (the private repo's commit `c1bb6b7` first) | `53c34da4b` |
+| fixes m-4(d), R-oss-39, NITs | in progress (next: m-4(d)) | — |
