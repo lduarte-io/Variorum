@@ -825,7 +825,7 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   no Supabase retention number — the docs name none for sign-in events).
 - **R-494-11 (2026-10-23, the sitting's escalation — her words verbatim):** "I have two people who signed up for sync
   and NEITHER of them had sync work properly. is this a release delaying kind of event? do we need other types of
-  *[removed for publication]*
+  testing? this is completely unacceptable. We also STILL DO NOT KNOW WHY [TESTER B]'S ORIGINAL ACCOUNT ISNT SYNCED. like
   what the fuck happened there? he HAD a passphrase for the old account in castle. he DID sign up for sync. why is
   NOTHING pushed?" — her correction minutes later, superseding this entry's castle reading: "it wasn't a castle
   passphrase on the old account. he set up sync, which forces you to set up a passphrase. he also CLICKED start fresh
