@@ -72,7 +72,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   second library joins, back up, restore a backup, change keys (passphrase, new words; the Castle crossings),
   open the older backup again with the new secrets (rule 4/5's floor), every leg verified in the app AND server-side.
 - **R-510-10 — the address shape, delegated: "you can pick the address shape."** → PICKED: plus-addresses on her
-  *[removed for publication]*
+  own Gmail — `<test-account-email>`, `+vxtest-castle`, `+vxtest-del`. Why: sign-up sends a
   confirmation email; a made-up or reserved domain bounces at her auth mail provider, and at her low send volume a
   few bounces are a high bounce RATE (providers pause senders on it) — her real users' confirmation emails would
   pay. These deliver harmlessly to her inbox (plainly-test, filterable), and `Tools/prod-confirm-test-user.sh`
@@ -2529,7 +2529,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   already syncs. Type its passphrase or its twelve words once…" → the account's passphrase by the helper → `enroll: begun #6
   … enroll: done #6 under 2e677513 · road: turnOnSync — library dfe2ad68 now names account <account-uuid>` (20:58:15) — **NO
   system Touch ID prompt** (VX-503 did not reproduce on this Mac's Standard join) → the words notice (passphrase typed):
-  *[removed for publication]*
+  "Your twelve words are <test-account-email>'s twelve words. Your previous twelve words still open backups you
   made before today…" → OK → **the sheet: "Synced. Your account's writing is in this library now."** — no relaunch.
   **prod: device cursors 2 · live containers 1 (no duplicate — the copy's rows merged by id) · live blocks 1 · rows 8 ·
   vault revision 3 (a same-posture join changes no account lock).** OBSERVATION W-6 (ticketed at the close): the words
@@ -2627,7 +2627,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   account's. … Your account is in Castle, so this library goes into Castle too." + the Castle promise text + On this Mac)
   → **Always ask** + the account's CURRENT passphrase → `enroll: done #1 under 508a5859 · road: turnOnSync — library
   223c4e7e now names account <account-uuid>, castle under 508a5859` (21:32:14; a NEW key — the re-keying join) → the reopen
-  *[removed for publication]*
+  (`road: opened … key 508a5859`, 21:32:15) → the words notice ("Your twelve words are <test-account-email>'s
   twelve words. Your previous twelve words still open backups you made before today. …") → OK → **`road: an account act
   landed — the library holds the account's words; the words card's offer retires (VX-511)`** → the F-6 sheet waited for the
   reopened services and said **"Synced. Your account's writing is in this library now."** → prod **2 cursors**; the Library
@@ -3196,7 +3196,7 @@ scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-sc
   check — her brief click, said in-session; HID idle then read 24 s and climbing, her app absent; retried once at her
   "you can keep going") → `enroll: done #1 under dfe542ab · road: turnOnSync — library edf04751 now names account
   <account-uuid>, standard under dfe542ab` → `road: an account act landed — … the words card's offer retires (VX-511)` → the
-  *[removed for publication]*
+  words notice ("Your twelve words are <test-account-email>'s twelve words…") → OK → **"Synced. Your
   account's writing is in this library now."** → Done → the row **"Synced 6:08 AM"**, SAME PID 49433 (started 05:11).
   prod: cursors 6 → 7, vault rev 15 unchanged (a same-posture join changes no account lock).
 - **USE CASTLE (06:09) — PASS.** Always ask chosen; passphrase + words by the helper → `enter_castle: … the account

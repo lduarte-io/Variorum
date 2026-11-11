@@ -880,7 +880,7 @@ does not gate the spike (project refs are random; display names rename freely).
   fetched into a shell variable and never printed): admin
   `PUT /auth/v1/admin/users/<account-uuid>` → ok; then the proof —
   **password-grant sign-in VERIFIED, session minted** for uid `<account-uuid>`
-  *[removed for publication]*
+  (email `<oauth-account-email>`), no Fragments anywhere in the path.
   `custom:fragments` is now REDUNDANT for her sign-in (retirement still waits
   for the app's direct sign-in code, as ordered). The password is
   transcript-known BY HER CHOICE — treated as bootstrap; she changes it at

@@ -38,7 +38,7 @@ one A.
 - **OS / toolchain:** macOS **26.5.2** (25F84), Xcode **26.3** (17C519). iOS target built
   for `generic/platform=iOS` (deployment 26.0); her phone (iOS 26.6) listed by
   `xctrace` but deliberately NOT installed to — the brief's prepare-only rule.
-*[removed for publication]*
+- **Signing at run time:** "Apple Development: <signing-email>", automatic signing,
   "Mac Team Provisioning Profile: *" and "iOS Team Provisioning Profile: *" — both
   carrying `keychain-access-groups = ["<apple-team-id>.*"]` (read from the profiles
   themselves, `security cms -D`).

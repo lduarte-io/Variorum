@@ -287,7 +287,7 @@ Her message, verbatim: *"hi, you can go ahead and continue your work.
 you may have to restart a new implementer session - i hit my 5 hour
 limit and the implemeneter might just be gone completely or it might
 be recoverable. i'm also ready to do the deploy step whenever and I
-*[removed for publication]*
+control the email address <her-email> for use making a
 second account. I can look at cloudflare for whatever you need for the
 domain step. if this is just for users having an account / logging in
 at stargazing.tech I think account makes more sense? or is it for
@@ -305,7 +305,7 @@ this phase and what we should do"*
 
 **Recorded and ruled:**
 
-*[removed for publication]*
+- **The probe account's email: `<her-email>`** (hers) —
   joins the gate runbook (L13); admin-provisioned, uid-checked,
   entitlement-granted per the batch-1 hold.
 - **DNS is Cloudflare** — exact records handed to her at the domain
@@ -1326,7 +1326,7 @@ Fragments coverage is a product-voice call (the implementer's arm is
 the defensible one: never promise in-app what is not live until 14d;
 the suite promise rides the site page). **THE MAILER-ARM DECISION
 (the runbook §1 fork, the architect's call, vetoable at the gate):
-*[removed for publication]*
+ARM (a)** — `<her-email>` joins the org team for the
 validation window and is removed after. Reasons: it exercises the
 FULL real stranger road (signup → confirmation email → confirm →
 vault setup) including the template copy she ratifies (the CF-10
@@ -2750,7 +2750,7 @@ window is closed; its next round pulls to head over the reinitialized
 cursor (echo applies, seq-recorded).
 
 **Gate step 6 — the live probes: DONE (2026-08-11, architect-driven).**
-*[removed for publication]*
+Probe account `<her-email>` provisioned via
 `admin/generate_link` (BYPASSES signups-off — the deliberate tool);
 **UID `<account-uuid>` — uid-checked NOT hers before any act** (and again
 on its minted session). Its magic-link OTP expired before verify (a

@@ -75,7 +75,7 @@ walk. Announce each gate step to her before running it.
 5. **The `/Applications` refresh** at a verified zero-instance window
    (Release; AFTER the deploy — the lockstep-strand rule).
 6. **The live probes (you drive, announced):** provision the second
-   *[removed for publication]*
+   account on **`<her-email>`** via the admin door
    (`generate_link` — it BYPASSES signups-off by recorded fact; that
    is the deliberate tool here). **UID-CHECK DISCIPLINE (the 14b
    near-miss): verify the minted session's uid is the NEW account —
@@ -103,7 +103,7 @@ walk. Announce each gate step to her before running it.
    the "Allow new users to sign up" toggle ON. Preconditions all green
    first: probes passed, domain live, entitlement machinery live.
 9. **Stranger-onboarding validation (her walk):** ARM (a) first —
-   *[removed for publication]*
+   `<her-email>` joins the org team for the window (the
    built-in mailer delivers only to team addresses; ARM (a) is
    adjudicated, vetoable by her) — then her walk: in-app sign-UP as a
    fresh user (the door's real road: confirmation email received —

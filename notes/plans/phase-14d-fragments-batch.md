@@ -223,7 +223,7 @@ contract file's state, the parity line, the handoff note).
   The don't-flip-before-the-handler-lives rule was satisfied in
   order: handler live first, flip second.
 - **The end-to-end probe — LIVE:** a stranger-shaped signup
-  *[removed for publication]*
+  (`<her-email>`, publishable key, the public
   endpoint) returned 200 confirmation-required (user `<account-uuid>`,
   no session) — the open door + the branded confirmation email
   dispatched via Resend in one act. **Closeout owes: purge this
@@ -375,7 +375,7 @@ round under the ladder's own purpose.
   her request: *DMARC is entirely fine to add later (it's
   deliverability/anti-spoofing hygiene on top of SPF+DKIM, not
   *[removed for publication]*
-  *[removed for publication]*
+  `rua=` at `<her-email>` means the reports cross
   *[removed for publication]*
   *[removed for publication]*
   *[removed for publication]*
@@ -484,7 +484,7 @@ round under the ladder's own purpose.
   `resend._domainkey`, SPF TXT + feedback MX on `send`); domain
   **VERIFIED** at Resend; the API key staged in `.env.smtp.local`.
   *[removed for publication]*
-  *[removed for publication]*
+  reports at `<her-email>` later; recorded note: a
   *[removed for publication]*
   *[removed for publication]*
   *[removed for publication]*

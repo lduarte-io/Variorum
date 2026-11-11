@@ -567,12 +567,12 @@ opened; the working tree was left clean.
   runs over the combined U1–U3 diff; the phase CLOSES AT U3. The U4 brief stays intact in this
   file as the post-🚀 unit's brief; KnownIssues row 67 carries the decision.
 - **TWO AUTHOR REPORTS AT THE RESUME SITTING (2026-10-04, verbatim-faithful; recorded before
-  *[removed for publication]*
-  *[removed for publication]*
+  acting):** (1) *"my apple development account changed from <signing-email> to
+  <her-email> — I changed that within my apple ID and I'm sure that it has been
   reflected, but if it looks stale on this computer I'll have to fix and update that somehow…
   let me know if I need to log out and in somehow to update this stale email before I do this
   developer app identity issue."* The local Apple Development cert indeed still reads
-  *[removed for publication]*
+  `<signing-email>` (CN frozen at issuance — cosmetic, not a staleness of the ACCOUNT; the
   orchestrator's guidance: check Xcode ▸ Settings ▸ Accounts refresh, sign out/in only if it
   errors; certs/profiles/keychain survive a sign-out; the Developer ID cert carries the TEAM
   name, not the email; the Apple ACCOUNT behind iCloud-Keychain custody is the same account

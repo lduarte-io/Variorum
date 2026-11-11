@@ -81,7 +81,7 @@ verify. Commits carry NO trailers of any kind.
 - **The stage is FREE; the dev store is BACK** (`e11e5233`; inodes matched; signed out; "Sync off (dev store)"). The walk
   checkout `~/dev/variorum-vx-510-stage` is removed. Make your own for the stage batch and the re-walk: a detached
   `git worktree add` at the tip, building into a non-standard DerivedData path.
-*[removed for publication]*
+- **Production test accounts** (her R-510-6…8, R-510-10; the address shape `<test-account-email>`):
   - `std`: Standard; passphrase = its PASSPHRASE2 after the S-leg change; the words from S13.
   - `castle`: Standard, vault revision 15, passphrase = its PASSPHRASE, the words from C3.
   - `del`: deleted.

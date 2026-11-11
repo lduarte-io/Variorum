@@ -31,7 +31,7 @@
      rotate at dashboard → Settings → API keys, then update
      `.env.supabase.local`, or decline.
    *[removed for publication]*
-     *[removed for publication]*
+     to `<her-email>`, planetlillian.com needs one
      *[removed for publication]*
      *[removed for publication]*
    - **"Bridge now" relabel** — say the word ("Sync journal now" or
