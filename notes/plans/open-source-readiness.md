@@ -4,7 +4,7 @@
 
 ## 1. The decision state (2026-11-03)
 
-*[removed for publication]*
+- **Direction:** open source the app, core and server — her lean, not yet final. Motives ranked: online presence (the story and the trust open source buys) > occupying the "open-source Variorum" niche before someone else builds it > app desirability to the open-source-only crowd. Revenue is deliberately NOT the #1 goal.
 - **Her constraints:** no maintainer burden (open source, closed contribution — the SQLite stance); she does not want others monetizing it (rules out MIT/Apache); she wants real open source, not source-available (rules out FSL/PolyForm — she asked why they aren't open source: they fail the OSD's no-commercial-restriction floor, and the 2-year conversion doesn't cure today's license).
 - **The copyright caveat, planned for:** the code is AI-written under her direction; US protection for it is untested. The plan assumes ZERO copyright protection and builds the moats that need none: a REGISTERED trademark on "Variorum" + the logo (file before the code drops), the server side (entitlements/sync/AI proxy are never forkable), her person + velocity + the record. The license (AGPL lean) is the fence on top, respected by anyone with a lawyer even if its teeth are untested.
 - **Sequencing:** story/curated record FIRST (publishable now, independent of the code decision) → readiness audit (the real gate) → *[removed for publication]* → open the code + full record as the second launch moment. *[removed for publication]* Show HN is held until the open-source version ("when I do, it'll be the open source version").
