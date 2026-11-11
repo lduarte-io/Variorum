@@ -109,7 +109,7 @@ time and overlay refreshes trigger on every input axis.)
 - **VX-431 (her 2026-10-18 + 2026-10-27):** the screen is cluttered and wordy "in the same way that the books
   and gathering menus are"; a long commit can't be read in full; restoring a long one — "it's unclear which part
   came back (briefly highlight at least where it starts)"; offer "bring back as a take" so a commit can be read
-  *[removed for publication]*
+  in the regular editor. The tester's move-the-history-button suggestion **DECLINED**: "I don't want to move the
   history button - I like having no words at the top and I want it to stay that way."
 - **VX-616 (RULED 2026-10-28):** "agree with removing the button." Remove the gathering navigator foot's
   "+ new chapter" (BookView ~:942–975 — the door ACTS today via `openBindOffer(followUp: .createChapter)`, but
@@ -648,7 +648,7 @@ Pieces (flipped per commit):
   place, Read in full (the sheet), explainers behind (i) with header counts, restore lands and washes
   (Write + Takes), Bring back as a take (a new named core op). Her ruled structure untouched (every
   take sectioned with the focused one open, the four regions, Restore per row, no purge door, the
-  *[removed for publication]*
+  history door where it is — the tester's move DECLINED stands).
 
 **PROVISIONALs this unit adds (for the closeout's QUESTIONS bundle; P-440-3/-4 are the plan's own, built as written):**
 - **P-440-3 (built):** the brought-back take's label = the commit's name, else none (through the take

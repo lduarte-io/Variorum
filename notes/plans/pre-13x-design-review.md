@@ -381,10 +381,10 @@ switch closes the pool first, runs off-main, and the iCloud items are deleted LA
 ### P8 — The Mac and the iPhone must share a keychain access group, or Standard's cross-device story does not exist.
 
 **Trace (measured this review).** The Mac carries `keychain-access-groups =
-*[removed for publication]*
+$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)` → `<apple-team-id>.io.lduarte.Variorum`
 (`App/Variorum/Variorum.entitlements`). The iOS target (`io.lduarte.VariorumMobile`) has NO entitlements
 file (`find App -name '*.entitlements'` → one file), so its default group is
-*[removed for publication]*
+`<apple-team-id>.io.lduarte.VariorumMobile`. An iCloud-synchronizable item written by the Mac lives in the Mac's
 group; the phone cannot query it. Every Standard row in §2's table that says "a new device: nothing typed"
 across the two apps is false until this is fixed — and it was never measured, because the escrow item's
 round-trip was verified on ONE machine.

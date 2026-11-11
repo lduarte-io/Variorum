@@ -138,7 +138,7 @@ shows the raw block id shows "block i/N" (position among the note's blocks). Fin
 that speaks the raw id; one wording brain, not scattered strings. Pin on the label; walk shot.
 
 ### VX-594 — branch directly from a not-chosen take (IMPROVEMENT · PROBE-FIRST)
-*[removed for publication]*
+The tester: *"I'd love for there to be a way to branch off a not-chosen take (eg if the […] button had
 a 'create branched take' option, or so long as your cursor is in the take, it would automatically
 duplicate that one)."* `branchVariant` already takes ANY take as parent — so this is likely a
 missing DOOR, not a missing operation. Probe what the […] (take-card) menu offers today and what
@@ -174,7 +174,7 @@ re-bind adoption itself (red-on-old: the stale words survive a forced re-key on 
 record of the F2(b) ruling: `notes/plans/fixes/vx-214-settings-launch-polish.md`.
 
 ### VX-592 — dragging a selection out of the live editor doesn't work (BUG · Suspected · PROBE-FIRST · seated R-601-6)
-*[removed for publication]*
+The tester: *"when I try to drag a highlight from where my cursor is currently typing, it doesn't
 work."* Probe: dragging a selection from the FOCUSED LIVE pane vs the read-tier panes (where it
 works). Same binding order as VX-429: instrumented trace first, pin as the confirm, fix only on
 red, record-only on green/other.
@@ -869,7 +869,7 @@ Quit by bundle id `io.lduarte.Variorum.debug`; guards `pgrep -lx Variorum` / `pg
 walk note (`canvasViewMemory.` / `currentBlock.` / `postMode.` / `takesViewMemory.`
 `398495C7-ADA3-415B-A971-8CA8953D5DCA`) — all four DELETED; CHANGED bookkeeping left as is:
 `IdleCommitSweepMark.Variorum-dev` (stamp), `variorum.backup.log` (the per-launch dev-store backup
-*[removed for publication]*
+entry), `variorum.calmAsks.passphrase.<library-uuid>.launches` 29 → 30 (one launch). Final export vs
 before: nothing added, nothing removed.
 
 ## ORCHESTRATOR ADDENDUM — batch A acceptance + the walk's tails (2026-10-27 ~21:05)
@@ -919,7 +919,7 @@ window launches the app, the coordinator folds it into a short window of its own
 runs `xcodebuild test`, never launches the app, never claims the stage) — **every red and green
 claim below is a PREDICTION, PENDING that window**; the USE walk (rows A1–A6 below, an Opus walker
 under the orchestrator's claim — the A2 gate is use, not the pins); the cold ladder. VX-592 rides
-*[removed for publication]*
+on a READING of the tester's words (Q-A2-1, for her at #245). No behavioural revert is in flight — all
 four builds are done and the source is HEAD (`git diff` empty; no `VX601A2-REVERT` marker).
 
 **LIVE STATUS**
@@ -982,7 +982,7 @@ a CGEvent, never the real pointer; every drag door intercepted, no pasteboard wr
    **TK1 never does it** (same probe, `usingTextLayoutManager: false`: every case selects). Editable
    or not, key window or not, as a scroll view's document or not: the same.
 4. So **VX-429's symptom exactly**: a drag starting at the caret's own position (on its right side,
-   *[removed for publication]*
+   where she sees it) does nothing; anywhere else works. And **VX-592's words exactly** — the tester's
    *"when I try to drag a highlight from where my cursor is currently typing, it doesn't work"*: a
    drag-to-highlight STARTING AT THE CURSOR, in the live editor; the read panes "work" because they
    show no caret, so nobody presses on one (a read pane keeps a settled invisible selection —
@@ -1118,7 +1118,7 @@ the same REQUEST.
   allows: nothing selects, the caret stays.)
 - **A2 — VX-429, the landed caret:** ⌘1 then ⌘2 (or re-open the note in Takes) so the pane lands
   its caret by itself; press on that caret, hold, drag → selects.
-*[removed for publication]*
+- **A3 — VX-592, the tester's words (Write ⌘1):** type a word at a sentence's end; without moving,
   press on the caret, hold, drag → selects. Then in a Takes take card (a bloomed fan): type a word,
   the same → selects.
 - **A4 — no regression:** (a) a held CLICK on the caret, no move → the caret stays, nothing else
@@ -1165,7 +1165,7 @@ the same REQUEST.
   unmeasured (R-A2-2).
 
 **PROVISIONAL / FOR #245 (the orchestrator's bundle — I do not touch QUESTIONS.md):**
-*[removed for publication]*
+- **Q-A2-1 — which gesture did the tester mean (VX-592)?** Her words fit a drag-to-HIGHLIGHT starting
   at the cursor (FIXED here, both surfaces). If she meant drag-AND-DROP of an already-selected span
   out of the live pane: no source-side mechanism exists (the AppKit source road is identical live
   and read — probe 12), and the one live/read asymmetry is the destination — a READ pane accepts no
@@ -1285,7 +1285,7 @@ empty before launch and after quit.
 per-note keys for the walk note — `currentBlock.` / `postMode.` `C2C2D07F-F967-45AB-AA1D-B1A8D278F734`
 — both DELETED. CHANGED bookkeeping left as is for the orchestrator: `IdleCommitSweepMark.Variorum-dev`
 (02:04:19Z → 02:17:33Z), `variorum.backup.log` (the per-launch dev-store backup entry),
-*[removed for publication]*
+`variorum.calmAsks.passphrase.<library-uuid>.launches` 29 → 30 (one launch).
 Final export (`/tmp/vx601a2-prefs-final.plist`) vs before: nothing added, nothing removed.
 
 **Deletion duty, second leg (same claim, 22:34–22:37 MDT; the coordinator's corrected naming: batch
@@ -1306,7 +1306,7 @@ present, Resume Sync never pressed; "Sync off (dev store)"; Study + app Dark
 (`leg2-trash-after2-w0.png`). Observation O-A2W-3 (pre-existing, not this batch): that receipt line
 draws over the bottom-most visible Trash row's text. Quit by bundle id (22:36); both strict guards
 empty. **Prefs after the leg:** nothing added or removed vs `/tmp/vx601a2-prefs-before.plist`; the
-*[removed for publication]*
+launch counter `variorum.calmAsks.passphrase.<library-uuid>.launches` read 31
 and was restored by its exact key to **29** (`defaults write -int 29`, read back 29, an int as
 before; every other library's counter unchanged against the before-export); remaining CHANGED =
 bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`). Final export
@@ -1823,7 +1823,7 @@ empty before launch and after quit.
 
 **Prefs (`io.lduarte.Variorum.debug`, `/tmp/vx601b-prefs-before.plist` → after):** ADDED two per-note
 keys for the walk note — `currentBlock.` / `postMode.` `F8F0338C-070B-4013-A101-034E471EA7B2` — both
-*[removed for publication]*
+DELETED. The launch counter `variorum.calmAsks.passphrase.<library-uuid>.launches`
 read 30 and was restored to **29** (`defaults write -int 29`, read back 29, "Type is integer"); every
 other counter unchanged. Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`,
 `variorum.backup.log`). Final export `/tmp/vx601b-prefs-final.plist` vs before: nothing added, nothing
@@ -2321,7 +2321,7 @@ before launch and after quit. The stage claim was not released (the orchestrator
 **Prefs (`io.lduarte.Variorum.debug`, `/tmp/vx601c-prefs-before.plist` → after):** ADDED three
 per-note keys for the walk note — `currentBlock.` / `postMode.` / `takesViewMemory.`
 `4BAF819B-04EE-42F5-8A98-AAD71355DDDA` — all DELETED. The launch counter
-*[removed for publication]*
+`variorum.calmAsks.passphrase.<library-uuid>.launches` read 30 and was restored
 to **29** (`defaults write -int 29`, read back 29, "Type is integer"); no other counter touched.
 Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`).
 Final export `/tmp/vx601c-prefs-final.plist` vs before: nothing added, nothing removed.

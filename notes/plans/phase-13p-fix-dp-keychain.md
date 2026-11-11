@@ -311,8 +311,8 @@ rather than papered over.
 sweep the gated items the broken window left on her Mac. It cannot be
 done from a test, and the reason is the dev fence working exactly as
 designed: **the data-protection keychain partitions by ACCESS GROUP**,
-*[removed for publication]*
-*[removed for publication]*
+the Debug test host signs as `<apple-team-id>.io.lduarte.Variorum.debug`, and
+her Release app's items live under `<apple-team-id>.io.lduarte.Variorum`. The
 inventory returned empty from the test host for that reason alone — it is
 structurally blind to them, which is precisely the isolation the
 per-config group was chosen for at the signing change.
@@ -505,7 +505,7 @@ named in the ladder records.
 real store `lsof`-verified closed, a fresh ciphertext backup taken first
 (`pre-13pfix-install-backup-20260831T010328Z`, sha256-matched), installed
 binary hash-matched to the build product, `keychain-access-groups =
-*[removed for publication]*
+<apple-team-id>.io.lduarte.Variorum` confirmed in the signature, and the new
 `wroteButUnreadable` copy confirmed present in the shipped binary. **Her
 daily-drive build now carries the fix**, so the E2EE re-enrollment she
 owes lands on the guarded build rather than needing to be done twice.

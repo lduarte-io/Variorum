@@ -24,7 +24,7 @@ layout brain, the starter journal, the app entry's lifecycle wiring, and
 the surface-driver test fabric. Cross-face sweeps: the seal vocabulary
 across every `.lockedPost` arm; `archived_at`/star-cap model-fact comments;
 P-2 dead-door checks; P1 windows on every held listing. Targeted suites
-*[removed for publication]*
+re-run on the brief's simulator (<simulator-udid>, `/tmp/dd-vm5-review`):
 `MobileEmptyStoreTests` + `MobileFilterTests` + `MobileNoRedirectSweepTests`
 — `✔ Test run with 18 tests in 3 suites passed` (TEST SUCCEEDED).
 
@@ -552,7 +552,7 @@ MINOR 3 FIXED (pins `theQuickNotesSealArmSpeaksThePhonesOwnDoorWords` +
    *"marked complete"*), both under #159 (a).
 
 **End runs:** full mobile `Test run with 808 tests in 126 suites passed …
-*[removed for publication]*
+with 4 known issues` (simulator <simulator-udid>, `/tmp/dd-vm5-wave2`); Mac targeted
 `71 tests in 6 suites passed` (`NoteVersionsPaneTests` +
 `TutorialWherePlacesActsTests` + `ConfirmationsSettingTests` +
 `IAAndTrashShapeTests` + `RefusalTableConvergenceTests` +

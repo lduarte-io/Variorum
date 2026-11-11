@@ -164,12 +164,12 @@ selections recorded; recommended options are marked where she took them)
 - **Machine facts:** ENABLE_APP_SANDBOX=YES, ENABLE_HARDENED_RUNTIME=YES, GENERATE_INFOPLIST_FILE=YES
   (Sparkle keys ride the existing partial-Info.plist road — the 17o row-10 precedent),
   CODE_SIGN_STYLE=Automatic (stays; the Developer ID export uses its own exportOptions), bundle ids
-  *[removed for publication]*
+  `io.lduarte.Variorum` / `.debug`, team `<apple-team-id>`, and **only an "Apple Development" certificate
   exists on this Mac today** — the Developer ID cert is minted in U1.
 
 ## HER HANDS (the author steps, in order; each PAUSES the phase for her)
 
-*[removed for publication]*
+1. **U1 opens with her:** confirm team `<apple-team-id>` is on the paid Apple Developer Program; mint the
    **Developer ID Application certificate**; create the **Developer ID provisioning profile** for
    `io.lduarte.Variorum` (portal: Certificates, Identifiers & Profiles ▸ Profiles ▸ + ▸ Developer
    ID, against the App ID with Keychain Sharing) and hand the file to the session.
@@ -191,7 +191,7 @@ reachable. **Build:** the archive/export road (`Tools/Release/` gains `archive-a
 exportOptions.plist with method developer-id + the profile; the scheme's Run config stays Debug —
 CLAUDE.md's fence); notarytool credential stored (her step 2). **The drill (the acceptance):**
 (a) STATIC — `codesign -d --entitlements -` on the export shows **BOTH** groups
-*[removed for publication]*
+(`<apple-team-id>.io.lduarte.Variorum` AND `<apple-team-id>.io.lduarte.Variorum.shared` — the entitlements
 file's own comment names both; the KnownIssues row named one) plus the sandbox + hardened runtime;
 `security cms -D -i embedded.provisionprofile` shows the profile authorizes them; (b) LIVE — behind
 the **A1 rail** (byte backup of the closed store + all key files first, zero-instance window), SHE
@@ -322,7 +322,7 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   quiet generic face: no friend can reach it (the §12 choreography deploys the mirror before any
   release ships). **Zero `Sync/` expected: the classification lands in the face, never the
   engine; the engine's error text stands. Any `Sync/` line stops for the rider.** Pinned by a
-  *[removed for publication]*
+  face test (the mismatch error string → the calm face + the update door), not the walk (the test account's
   walk installs never sign into sync).
 - **R-13r-14 — THE FIELD GUIDE'S BACKUPS COVERAGE GAINS THE CHOOSE-A-BACKUP-FOLDER DOOR (her
   refinement at the U3 kickoff, 2026-10-04, verbatim: *"And if the user guide needs an updated
@@ -337,7 +337,7 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   to propose in its record; the lesson-plan contract and `TutorialWalkTests` move with it (P-6).
   **Closeout consequence (the standing rule):** lesson content edits stale the REAL store's
   seeded field guide — the closeout re-seeds it via the product door behind the A1 rail.
-*[removed for publication]*
+- **THE U3 ACCEPTANCE WALK (amended — use-shaped, in the test account again, staged by the implementer
   and run at HER sitting; the U2 walk sheet is the template):** two fresh walk builds through
   the pipeline (0.0.3 → 0.0.4, the stamping build phase now live). Arms: (a) the DMG window
   opens with the drag layout visible (capture); (b) the drag-install, then the FIRST open
@@ -347,19 +347,19 @@ STATUS's walk-sitting bullet carries her words verbatim):**
   0.0.4 with the library intact; (e) THE CALM-ASKS CADENCE: on the first day of use NEITHER
   ask appears; with the walk build's local day counter set (container-path `defaults write`,
   walk build only) to day 3 the update ask appears at a calm moment, never at launch; set to
-  *[removed for publication]*
+  day 5 with a note of the test account's own written, the backup OFFER toast appears (never on the update
   ask's day), Set Up… opens the three-door sheet, Not Now retires it; Settings ▸ General's
   "Check for updates automatically" answers the update ask; (f) Help ▸ Send Feedback… opens a
   pre-filled draft (NOT sent). **W-5 launches by explicit path** (`open ~/Applications/Variorum.app`) —
-  *[removed for publication]*
+  the U2 walk found that `/Applications` (her daily drive) is visible to the test account. The test account's container
   still holds U2's `SUFeedURL` localhost override; the U3 walk reuses it.
 - **R-13r-16 — THE COMBINED PUBLIC-ROAD WALK (her ruling, 2026-10-04, superseding the walk's
   VENUE AND ROAD above; her words verbatim: *"note that I will test out my walk AND the
   download from stargazing.tech at the same time - upload the appropriate build there & I'll
   download it from stargazing.tech on a new computer to see how everything works for a new
   user. I'll let you know if there are any issues"*).** Consequences, recorded:
-  *[removed for publication]*
-    *[removed for publication]*
+  - **The walk runs on HER NEW COMPUTER against the REAL site** — the test-account/localhost staging
+    above stands down to the fallback template (the test account, the override note and the
     walk-feed mechanics stay recorded for future walks; nothing is cleaned early). This is
     R-13r-8's honestly-recorded gap ("the friends' first installs are the true second-machine
     evidence") made REAL before the first friend.
@@ -535,7 +535,7 @@ opened; the working tree was left clean.
   window), so this plan's "marker stays 9" closes as "marker UNCHANGED (12 at resume)" — the
   intent (zero schema, zero `Sync/`) binds as written.**
 - **Machine facts RE-VERIFIED at resume (unchanged from the sitting):** exactly ONE codesigning
-  *[removed for publication]*
+  identity on the Mac ("Apple Development: <signing-email>", team cert chain <apple-team-id>) and the
   one macOS profile is "Mac Team Provisioning Profile: *" (exp 2027-08-30) — NO Developer ID
   cert, NO Developer ID profile. HER HANDS steps 1–2 are genuinely still owed and open U1.
 - **Step 3 ANSWERED by her at the resume sitting (2026-10-04, the question tool), then
@@ -567,12 +567,12 @@ opened; the working tree was left clean.
   runs over the combined U1–U3 diff; the phase CLOSES AT U3. The U4 brief stays intact in this
   file as the post-🚀 unit's brief; KnownIssues row 67 carries the decision.
 - **TWO AUTHOR REPORTS AT THE RESUME SITTING (2026-10-04, verbatim-faithful; recorded before
-  *[removed for publication]*
-  *[removed for publication]*
+  acting):** (1) *"my apple development account changed from <signing-email> to
+  <her-email> — I changed that within my apple ID and I'm sure that it has been
   reflected, but if it looks stale on this computer I'll have to fix and update that somehow…
   let me know if I need to log out and in somehow to update this stale email before I do this
   developer app identity issue."* The local Apple Development cert indeed still reads
-  *[removed for publication]*
+  `<signing-email>` (CN frozen at issuance — cosmetic, not a staleness of the ACCOUNT; the
   orchestrator's guidance: check Xcode ▸ Settings ▸ Accounts refresh, sign out/in only if it
   errors; certs/profiles/keychain survive a sign-out; the Developer ID cert carries the TEAM
   name, not the email; the Apple ACCOUNT behind iCloud-Keychain custody is the same account
@@ -608,10 +608,10 @@ opened; the working tree was left clean.
    environment traps.
 
 - **HER HANDS PROGRESS (2026-10-04, the resume sitting):** step 1's CERTIFICATE done and
-  *[removed for publication]*
-  *[removed for publication]*
+  verified (`security find-identity`: `Developer ID Application: Lillian Duarte (<apple-team-id>)`,
+  id `<signing-cert-sha1>`, minted via Xcode 27's Manage Certificates);
   **step 2 DONE** — the notarytool credential `VariorumNotary` validated and saved to her
-  *[removed for publication]*
+  Keychain (an App Store Connect Team Key, Developer role, Key ID `<notary-key-id>`; the `.p8` is
   hers to move out of ~/Downloads — never into the repo). **STEP 1 COMPLETE (2026-10-04): the
   Developer ID provisioning profile is minted, installed and ORCHESTRATOR-VERIFIED.** Her road,
   recorded: no explicit App ID existed (the Mac app had only ever signed against the
@@ -621,10 +621,10 @@ opened; the working tree was left clean.
   the orchestrator's call, and the call is proven right below. Profile "Variorum Developer
   ID", downloaded to `~/Downloads/Variorum_Developer_ID.provisionprofile` and
   double-click-installed (Device Management shows it). **Decoded facts (`security cms -D`):**
-  *[removed for publication]*
+  Entitlements `keychain-access-groups` = **`<apple-team-id>.*`** — the team wildcard, authorizing
   BOTH groups exactly as the sitting's external-facts bullet predicted;
-  *[removed for publication]*
-  *[removed for publication]*
+  `com.apple.application-identifier` = `<apple-team-id>.io.lduarte.Variorum`; the ONE embedded
+  certificate's SHA-1 = `<signing-cert-sha1>` = the Keychain identity
   byte-exact; `ProvisionsAllDevices` = true; expires 2044-09-29. The U1 drill's static leg
   re-checks all of it ON THE EXPORT.
 - **HER HANDS steps 1–2 COMPLETE. Step 3 (EdDSA minting) waits for U2's start; the mailbox
@@ -756,11 +756,11 @@ opened; the working tree was left clean.
   WALK (R-13r-8) is AUTHOR-GATED: staged by the session, never run by it. **WALK-PREP opened
   this sitting, her hands:** the fresh macOS user account (Standard, NO Apple ID sign-in,
   fast user switching in the Menu Bar) — steps given. **DONE (her report, same sitting): the
-  *[removed for publication]*
+  walk account is `<test-account>`, Standard, created and first-logged-in;
   its password is hers alone and stays out of the repo.** One wrinkle she hit, resolved: the
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  menu-bar switcher is a PER-USER setting so the test account's session lacked it and she could not switch
+  back — the roads given: Apple menu ▸ Log Out <test-account> (ends only the test account's session; hers keeps
+  running) or the lock screen's user switch; the test account's own Control Center ▸ Fast User Switching
   toggle to be enabled on the next visit (per-user, no admin expected). The walk checklist
   assumes the log-out road works everywhere.
 - **HER WORD AT THE POST-COMPACTION RESUME (2026-10-04, verbatim-faithful; the orchestrator
@@ -832,8 +832,8 @@ opened; the working tree was left clean.
   landed correctly (`~/Applications/Variorum.app` reads 0.0.1/4829; `spctl` accepted, quarantine
   inherited), but the app she then OPENED was `/Applications/Variorum.app` — HER daily-drive
   build (1.0 (1), pre-Sparkle, no update door), visible to every account because `/Applications`
-  *[removed for publication]*
-  *[removed for publication]*
+  is machine-wide (process check: user `<test-account>`, path `/Applications/Variorum.app`).
+  Harmless: it ran in the TEST ACCOUNT's container (a fresh seeded store), never her real store. A
   this-Mac-only hazard (a friend's Mac has no dev build there), but the walk sheet's W-5 must
   launch by explicit path (`open ~/Applications/Variorum.app`) — the resumed walk does.
   **(4) TWO AUTHOR RULINGS AT THE WALK SITTING (2026-10-04, verbatim-faithful) — both ride
@@ -864,7 +864,7 @@ opened; the working tree was left clean.
   the walk continues on Opus 5.5 (her call), the rest of the phase returns to a Fable
   orchestrator via her next kickoff.
 - **U2 — CLOSED (2026-10-04, the walk sitting): the walk PASSED every arm** (the VERDICT at the
-  *[removed for publication]*
+  U2 RECORD's tail; the update installed 0.0.1 → 0.0.2 over the XPC road in the test account,
   her return leg clean). Her two walk rulings (R-13r-10, R-13r-11) are written into the U3
   section as the unit's amendment.
 - **THE SEAT HANDS BACK TO FABLE:** the walk was finished on Opus 5.5 at her call (the Fable
@@ -1414,8 +1414,8 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      - runs `verify-export.sh` (with `--compare-with /Applications/Variorum.app` when present) into
        `verify.txt`.
    - `ExportOptions.plist`: `method developer-id`, `signingStyle manual`, `signingCertificate`
-     *[removed for publication]*
-     *[removed for publication]*
+     `<signing-cert-sha1>`, `provisioningProfiles {io.lduarte.Variorum: <provisioning-profile-uuid>}`,
+     `teamID <apple-team-id>`. The method name was confirmed against Xcode 27's own `xcodebuild -help`.
    - `Variorum_Developer_ID.provisionprofile`: her profile, versioned (`cmp`-identical to
      `~/Downloads`; sha256 `f661fdea…eec5c97`). It is not a secret: it ships in every bundle as
      `embedded.provisionprofile`.
@@ -1464,33 +1464,33 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      - `** ARCHIVE SUCCEEDED **` → `** EXPORT SUCCEEDED **` → **`VERDICT: PASS — 35 of 35 checks`**.
    - **The brief's literal commands, on that export (outputs abridged to the load-bearing lines):**
      - `codesign -d --entitlements - export/Variorum.app` →
-       *[removed for publication]*
-       *[removed for publication]*
+       - `com.apple.application-identifier` = `<apple-team-id>.io.lduarte.Variorum`
+       - `com.apple.developer.team-identifier` = `<apple-team-id>`
        - `com.apple.security.app-sandbox` = **true**
        - `files.bookmarks.app-scope` = true, `files.user-selected.read-write` = true,
          `network.client` = true
-       *[removed for publication]*
-         *[removed for publication]*
+       - **`keychain-access-groups` = [`<apple-team-id>.io.lduarte.Variorum`,
+         `<apple-team-id>.io.lduarte.Variorum.shared`]** (BOTH, the default first)
        - NO `get-task-allow`.
      - `codesign -dv` → `CodeDirectory v=20500 … flags=0x10000(runtime)` (**HARDENED RUNTIME**);
-       *[removed for publication]*
+       `-dvvv` → `Authority=Developer ID Application: Lillian Duarte (<apple-team-id>)` → `Developer ID
        Certification Authority` → `Apple Root CA`, `Timestamp=Oct 4, 2026 at 4:07:36 AM` (secure
-       *[removed for publication]*
+       timestamp), `TeamIdentifier=<apple-team-id>`, `Runtime Version=27.0.0`, universal (x86_64 arm64).
      - `security cms -D -i export/Variorum.app/Contents/embedded.provisionprofile` → `Name = Variorum
-       *[removed for publication]*
-       *[removed for publication]*
-       *[removed for publication]*
-       *[removed for publication]*
-       *[removed for publication]*
+       Developer ID`, `UUID = <provisioning-profile-uuid>`, `ProvisionsAllDevices = true`,
+       Entitlements: `keychain-access-groups = [<apple-team-id>.*]` (**authorizes BOTH signed groups**),
+       `com.apple.application-identifier = <apple-team-id>.io.lduarte.Variorum`, `team-identifier =
+       <apple-team-id>`. It is byte-identical to the versioned copy. Its one certificate is the signing
+       leaf (SHA-1 `<signing-cert-sha1>`).
      - `codesign --verify --deep --strict --verbose=2` → `valid on disk` + `satisfies its Designated
        Requirement`, exit 0. The nested `SQLCipher.framework` was re-signed under Developer ID with
        runtime and a timestamp.
      - `spctl --assess --type execute -vv` → `rejected` / **`source=Unnotarized Developer ID`** /
-       *[removed for publication]*
+       `origin=Developer ID Application: Lillian Duarte (<apple-team-id>)`. That is the expected
        notarization-ready state, confirmed by the external-facts lookup (Apple DTS threads 124614,
        822378). U2's notarize + staple turns it to `accepted`.
      - `--compare-with /Applications/Variorum.app` (her daily drive, signed Apple Development
-       *[removed for publication]*
+       `<apple-cert-id>`; a READ-ONLY signature read): **the keychain groups are BYTE-IDENTICAL, same
        order; the app-id matches**. The ONLY entitlement difference is `get-task-allow => true` on
        hers (development signing injects it), absent on the export. That is exactly what
        notarization requires.
@@ -1528,7 +1528,7 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      `security dump-keychain` lists no Variorum service. So the old-signature access-list password
      prompt CANNOT occur.
    - **Container:** the ownership metadata reads `Owners =
-     *[removed for publication]*
+     [{"teamIdentifier":"<apple-team-id>","validationCategory":"development","signingIdentifier":"io.lduarte.Variorum"}]`.
      The export carries the same team and identifier. Predicted SILENT: WWDC23 10053 says "All apps
      signed with your Team ID can access data in your other app's containers by default, without a
      permission prompt"; DTS thread 741479 says Team ID, not the designated requirement. This exact
@@ -2043,15 +2043,15 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
      the export under **Developer ID + hardened runtime + timestamp**. The keychain groups are
      byte-identical to her `/Applications` build. `Installer.xpc` is unsandboxed. The
      `-spks/-spki` pair is EXACT.
-   *[removed for publication]*
+   - **Notarize + staple the APP:** submission `<notary-submission-id>` came back
      **Accepted**. Apple's log reads "Ready for distribution" with `issues: None`. **It sat "In
      Progress" ~32 minutes: the team's FIRST submission.** The DMG's submission took ~1 minute. Then
      `verify-export.sh --require-notarized` → **`PASS  Gatekeeper ACCEPTS (source=Notarized
      Developer ID)`** + **`stapler validate`** → **57/57**. This is U1's predicted turn from
      "rejected / Unnotarized Developer ID" to ACCEPTED, now measured.
    - **DMG:** `Variorum-0.0.1.dmg` (UDZO, the app + an `/Applications` link). Signed `Developer ID
-     *[removed for publication]*
-     *[removed for publication]*
+     Application: Lillian Duarte (<apple-team-id>)` with a timestamp. Notarized
+     (`<notary-submission-id>`, Accepted, `issues: None`), stapled + validated.
      `spctl -a -t open --context context:primary-signature` → **accepted, source=Notarized
      Developer ID**.
    - **The SHIPPED bytes:** the app INSIDE the final DMG passed **57/57**. The DMG is **24,173,366
@@ -2079,9 +2079,9 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    window):** `RELEASE-EXIT=0` in ~6 minutes (13:34:35Z → 13:40:28Z), because both notarizations now
    return in about a minute.
    - The export drill passed 56/56.
-   *[removed for publication]*
+   - The app: `<notary-submission-id>` Accepted, `issues: None`, stapled, then
      **57/57 with Gatekeeper ACCEPTED**.
-   *[removed for publication]*
+   - The DMG: `<notary-submission-id>` Accepted, stapled, `spctl -t open` accepted.
    - **The shipped bytes passed 57/57.** `Variorum-0.0.2.dmg` is **24,173,312 bytes**, sha256
      `115b2c9def7d97be53daa432dc30e161053a00afe025539c6314f41dfd73d90e`.
    - dSYM UUIDs match (`27E03119-DAFF-3A0B-A667-E64A32F914F1`, `F21F8EE3-8930-3457-9E6A-4116EA221EB4`).
@@ -2112,24 +2112,24 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
    - **Who does what:** `[O]` = the orchestrator, in HER session (shell). `[HER]` = her hands.
    - **The `!`-road lesson binds:** every command block run in her session sets its own values
      inline. No variable carries between commands.
-   *[removed for publication]*
-   *[removed for publication]*
-     *[removed for publication]*
+   - **In the TEST ACCOUNT's session she types into the test account's own Terminal** (Applications ▸ Utilities ▸ Terminal).
+   - **The walk account:** `<test-account>`, Standard, no Apple ID, home
+     `/Users/<test-account>`. The road back is the log-out road.
    - **The artifacts (built and verified above):**
      - walk A `App/Variorum/DerivedData/13r-u2/walk-a.noindex/Variorum-0.0.1.dmg` (the version she
        installs);
      - walk B `App/Variorum/DerivedData/13r-u2/walk-b.noindex/Variorum-0.0.2.dmg` (the update);
      - the walk feed `App/Variorum/DerivedData/walk-feed/`, served at `http://localhost:8765/`.
-       *[removed for publication]*
+       Loopback is machine-wide, so the test account's session reaches HER session's server, and ATS allows
        plain-HTTP loopback (measured, piece 5).
    - **The walk builds ARE the shipping configuration:** the same Info.plist (the LOCKED public feed
      baked in), the same entitlements. The ONLY walk-specific thing is a user default written into
-     *[removed for publication]*
+     the TEST ACCOUNT's container (W-6). Update testing never touches `/Applications`, her real store or the
      public feed (R-13r-7/8).
 
    - **W-0. Preconditions** (her session, before she switches).
      - **(a) [HER]** quits her Variorum. **[O]** `pgrep -fl 'Variorum.app/Contents/MacOS'` → NO
-       *[removed for publication]*
+       output. The walk runs the SAME bundle id in the test account's session, and two instances of one id
        confuse the discipline even across stores (ENVIRONMENT TRAPS).
      - **(b) [O]** Both walk DMGs still verify:
        ```sh
@@ -2156,7 +2156,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        curl -sI http://localhost:8765/Variorum-0.0.2.dmg | head -1
        ```
        Expect `1` and `HTTP/1.0 200 OK`.
-     *[removed for publication]*
+     - **(e) [O]** Stage walk A for the test account in the shared folder, QUARANTINED so Gatekeeper is
        exercised exactly as on a friend's machine:
        ```sh
        mkdir -p /Users/Shared/VariorumWalk/captures && chmod 1777 /Users/Shared/VariorumWalk/captures
@@ -2167,17 +2167,17 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        Expect a `0083;…;Safari;…` line, then "accepted / source=Notarized Developer ID".
      - **(f) [O]** `date -u +'%Y-%m-%d %H:%M:%S'`. Record it as the walk's START (for W-10's log read).
 
-   *[removed for publication]*
+   - **W-1. [HER] Switch to the test account:** her menu bar's Fast User Switching menu ▸ <test-account>, then log in. Her
      session keeps running, and the feed server with it.
 
-   *[removed for publication]*
+   - **W-2. [HER] The test account's Terminal, one line at a time:**
      ```sh
      mkdir -p ~/Applications
      defaults write com.apple.screencapture location /Users/Shared/VariorumWalk/captures
-     *[removed for publication]*
-     *[removed for publication]*
+     curl -s http://localhost:8765/appcast.xml | grep -c '<item>' | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+     xattr -p com.apple.quarantine /Users/Shared/VariorumWalk/Variorum-0.0.1.dmg | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
      ```
-     *[removed for publication]*
+     Expect `1` (the test account reaches HER session's feed), then the `0083;…` quarantine line. From here on,
      ⌘⇧3 screenshots land in the shared captures folder. If the location does not take, use
      ⌘⇧5 ▸ Options ▸ Other Location.
 
@@ -2187,17 +2187,17 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        `Applications` link. No warning blocks it.
      - **CAPTURE W1.**
 
-   *[removed for publication]*
+   - **W-4. [HER] Install into the test account's `~/Applications`:**
      - Open a second Finder window at Go ▸ Home ▸ Applications (the folder W-2 made). Drag
        `Variorum.app` from the DMG window INTO it.
-     *[removed for publication]*
+     - NOT onto the DMG's Applications link: the test account is Standard and cannot write `/Applications`.
        That is expected, not a defect. A Finder DRAG also clears App Translocation. Sparkle refuses
        an app run from a read-only or temporary location (read from its source).
      - Eject the DMG.
-     *[removed for publication]*
+     - Then, in the test account's Terminal:
        ```sh
-       *[removed for publication]*
-       *[removed for publication]*
+       xattr -p com.apple.quarantine ~/Applications/Variorum.app | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+       spctl -a -vv ~/Applications/Variorum.app 2>&1 | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
        ```
        Expect the quarantine INHERITED, then **accepted / source=Notarized Developer ID**. This is
        the plan's literal `spctl -a -vv` acceptance.
@@ -2208,7 +2208,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        checked-for-malicious-software line). Press **Open**. **CAPTURE W2.**
      - **A BLOCK dialog = STOP:** "cannot be opened because Apple cannot check it…", "is damaged",
        "unidentified developer".
-     *[removed for publication]*
+     - **The first run.** EXPECT a FRESH container store: the test account's own new library, with whatever
        first-run defaults appear. Sign in to NOTHING. **CAPTURE W3.** (The iCloud-Keychain waiting
        lobby cannot appear: it is only for an EXISTING encrypted store whose key is missing,
        `AppBootstrap` read at staging.)
@@ -2219,12 +2219,12 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        (the menu open). Do not press it yet.
      - **⌘Q.**
 
-   *[removed for publication]*
+   - **W-6. [HER] THE SCRATCH-ONLY FEED OVERRIDE,** in the test account's Terminal. The container exists now,
      and the CONTAINER-PATH form is the ONLY one a sandboxed app reads (measured in piece 5: the
      plain bundle-id form writes where the app never looks):
      ```sh
      defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum SUFeedURL http://localhost:8765/appcast.xml
-     *[removed for publication]*
+     defaults read ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum SUFeedURL | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
      ```
      Expect `http://localhost:8765/appcast.xml`. Sparkle reads a defaults `SUFeedURL` before the
      Info.plist one, and logs a warning that names "a defaults write command for testing purposes"
@@ -2244,20 +2244,20 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        **Install and Relaunch**. **CAPTURE W8.**
      - **The XPC installer road.** Variorum quits. Sparkle's installer, launched over XPC OUTSIDE
        the sandbox, replaces `~/Applications/Variorum.app`, and Variorum relaunches.
-     *[removed for publication]*
+     - **An unexpected dialog.** No password should be asked: the app is the test account's own, in the test account's own
        folder. If any dialog appears, capture it and note it.
 
    - **W-9. [HER] AFTER THE RELAUNCH:**
      - Variorum ▸ About reads **0.0.2 (4830)**. **CAPTURE W9.**
      - The library from W-5 is still there: the store survived the update. **CAPTURE W10.**
-     *[removed for publication]*
+     - Then, in the test account's Terminal:
        ```sh
-       *[removed for publication]*
-       *[removed for publication]*
-       *[removed for publication]*
+       /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' ~/Applications/Variorum.app/Contents/Info.plist | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+       spctl -a -vv ~/Applications/Variorum.app 2>&1 | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
+       codesign --verify --deep --strict ~/Applications/Variorum.app && echo "seal valid" | tee -a /Users/Shared/VariorumWalk/captures/<test-account>-terminal.txt
        ```
        Expect `0.0.2`, **accepted / Notarized Developer ID**, and `seal valid`.
-     *[removed for publication]*
+     - **⌘Q Variorum, then Apple menu ▸ Log Out <test-account>…** This is the road back; it ends ONLY the test account's
        session.
 
    - **W-10. [O] Back in her session:**
@@ -2268,11 +2268,11 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        Expect `GET /appcast.xml` and `GET /Variorum-0.0.2.dmg` 200 lines: the update's download,
        seen from the server's side.
      - **(b) The captures.** Copy `/Users/Shared/VariorumWalk/captures/*` into
-       *[removed for publication]*
+       `notes/plans/13r-screens/u2-walk/` (gitignored), list them, and read `<test-account>-terminal.txt`.
      - **(c) The logs** (optional, read-only; `log` is a zsh builtin, so call `/usr/bin/log`):
        `/usr/bin/log show --start "<W-0(f)'s START>" --predicate 'subsystem == "org.sparkle-project.Sparkle" OR process == "Installer" OR process == "Autoupdate" OR process == "Updater"' --style compact | tail -80`.
      - **(d) [HER]** Reopen `/Applications/Variorum.app` as always. Expect it undisturbed: the walk
-       *[removed for publication]*
+       ran in the test account, against the localhost feed.
      - **(e) THE VERDICT, into this record.** **PASS** = all of the following:
        - W1: the quarantined DMG opened clean;
        - W-4: `spctl` accepted the installed app;
@@ -2280,7 +2280,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
        - W3: the first run on a fresh container store;
        - W6: consent was ASKED, with no profile option;
        - W7–W8: 0.0.2 was found and the XPC install landed;
-       *[removed for publication]*
+       - W9–W10: Variorum relaunched as 0.0.2 with the test account's library intact, `spctl` accepted, seal
          valid.
 
    - **STOP RULES, any step:**
@@ -2291,17 +2291,17 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
 
      **The walk never touches `/Applications`, her real store, or the public feed.**
    - **Left for later, NOT cleaned now:**
-     *[removed for publication]*
+     - **The test account** stays, for U3's walk.
      - **`/Users/Shared/VariorumWalk/`, the walk builds and the walk feed** go at the closeout's
        debris sweep. The builds sit under `.noindex` with zero live LaunchServices registrations;
        the feed sits under DerivedData, gitignored.
-   *[removed for publication]*
-     *[removed for publication]*
+   - **A note for later walks:** the test account's container keeps the `SUFeedURL` override until it is
+     deleted (`defaults delete <that container path> SUFeedURL`), or until the test account's container itself
      is removed.
 
 **THE U2 WALK VERDICT (the orchestrator, 2026-10-04, the walk sitting — W-10(e)): PASS, every
-*[removed for publication]*
-*[removed for publication]*
+arm. U2 IS CLOSED.** Walk START 18:50:07Z (W-0(f)); her legs in the test account 12:53–13:32 local; the
+captures (20 screenshots + `<test-account>-terminal.txt`) filed in the gitignored
 `notes/plans/13r-screens/u2-walk/`.
 - **W-0 (her session, the orchestrator):** zero instances; both walk DMGs stapler-validated +
   Gatekeeper ACCEPTED with their recorded sha256s; **W-0(c) the walk appcast — `VERDICT: PASS`,
@@ -2309,34 +2309,34 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
   that her login Keychain's private key is the shipped public key's twin** (no Keychain prompt
   surfaced on this run); the feed served detached on `localhost:8765`; walk A staged
   quarantined in `/Users/Shared/VariorumWalk/`.
-*[removed for publication]*
+- **W1 the quarantined DMG opened clean:** ✔ (verified, no block). The test account reached her session's
   feed across the user switch (`1` item) and the quarantine read back byte-identical.
 - **W-4 `spctl` accepted the installed app:** ✔ — `~/Applications/Variorum.app: accepted /
-  *[removed for publication]*
+  source=Notarized Developer ID / origin=Developer ID Application: Lillian Duarte (<apple-team-id>)`,
   quarantine inherited (0183 after her approval).
 - **W2 the notarized first-open question, not a block:** ✔ — the OS's one-time "downloaded from
   the Internet" question, on the DMG copy and again on the `~/Applications` copy (each newly
   quarantined copy asks once).
-*[removed for publication]*
+- **W3 a fresh container store:** ✔ — the test account's own library, seeded content, signed out, Standard.
 - **W6 consent ASKED, no profile option:** ✔ — and her RULING R-13r-11 changes its timing in U3.
 - **W7–W8 0.0.2 found and the XPC install landed:** ✔ — "Variorum 0.0.2 is now available—you
   have 0.0.1" (captured 13:31:03); the server log shows the app's own `GET /appcast.xml`
   (13:31:02) and `GET /Variorum-0.0.2.dmg` (13:31:12); no password asked.
 - **W9–W10 relaunched as 0.0.2 with the library intact, `spctl` accepted, seal valid:** ✔ —
-  *[removed for publication]*
-  *[removed for publication]*
+  About reads **0.0.2 (4830)** over the test account's unchanged bookcase (captured 13:31:26, fourteen
+  seconds after the download); `<test-account>-terminal.txt` records `0.0.2`, `accepted / Notarized
   Developer ID`, `seal valid`.
 - **W-10(d) her return leg:** ✔ — her words: *"my variorum opened just fine."* The walk touched
-  *[removed for publication]*
+  neither `/Applications` (read-only use by the test account, never written) nor her real store nor the
   public feed. The server is stopped.
 - **Findings the walk produced (all recorded in the LIVE STATUS's walk-sitting bullet):** the
   art-less DMG's Applications link went unseen and she launched from the mounted DMG →
   **R-13r-10** (the self-explaining DMG window, U3); the consent prompt greeting an early launch
-  *[removed for publication]*
+  → **R-13r-11** (deferred until after use, U3); her daily-drive build is visible to the test account via
   `/Applications` → U3's walk launches by explicit path; the first "Update Error" was the
   unwritten feed override (the baked public feed correctly 404s pre-release) — not a defect;
   her 13s onboarding note (the backups popup on open).
-*[removed for publication]*
+- **Left in place for U3's walk:** the test account and container (with its `SUFeedURL`
   localhost override), `/Users/Shared/VariorumWalk/`, the walk builds and the walk feed — swept
   at the closeout.
 
@@ -2356,7 +2356,7 @@ start: matches the pinned pair** — macOS 27.0 (26A428) · Xcode 27.0 (27A266a)
   update ask (Sparkle's own window from day 3), Settings ▸ General's "Check for updates
   automatically", and the calm sync face's Check for Updates… door. They are pinned; their USE is
   the U3 walk's arms (b) and (e). The calm sync face cannot be reached on any build here (the dev
-  *[removed for publication]*
+  store never syncs; the test account never signs in) — pinned only, as R-13r-13 itself says.
 - **The field guide's new passage was not seen on screen:** Help ▸ Restore Tutorial… is a
   wholesale replace of the dev store's guide, which this session declined to do to the dev store;
   the passage is pinned headless (`TutorialWalkTests`), and the closeout's real-store re-seed is
@@ -2617,7 +2617,7 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
      (a)–(f) the cadence is silent on + the 0.9.0 notes draft. **THE WALK'S DAY-COUNTER RECIPE
      (container-path `defaults write`, walk build only, app QUIT first):** to make the next launch
      day N, write `variorum.calmAsks.daysOfUse` = N−1 and `variorum.calmAsks.lastUseDay` = a past
-     *[removed for publication]*
+     day, e.g. for the test account: `defaults write ~/Library/Containers/io.lduarte.Variorum/Data/Library/Preferences/io.lduarte.Variorum variorum.calmAsks.daysOfUse -int 2`
      and `… variorum.calmAsks.lastUseDay -string 2000-01-01` → the next launch is day 3 (the
      update ask after 2 minutes); `-int 4` → day 5 (the backup offer, once a note of hers holds
      words, and not on a day an ask already appeared — `variorum.calmAsks.lastAskDay` records it).
@@ -2739,7 +2739,7 @@ re-read from the 2.10.0 checkout (`SPUUpdater.m startUpdateCycle`, `SPUUpdaterDe
 - **The full Mac and core suites were not run** (the brief names the touched families; the ladder's
   "suite green" is the phase's). The one red in the families run is the PRE-EXISTING runbook drift
   already queued as **19e** (`DataSafetyRunbookTests.theShippedRunbookAndTheRepoCopyAreOneDocument`).
-*[removed for publication]*
+- `/Applications`, her real store and the test account were never touched; zero `Sources/VariorumCore/Sync/`,
   zero schema, zero `Shared/`, zero mobile-target files (the scope check below) — so the mobile
   target is untouched by construction and was not rebuilt.
 - **For the ladder (flagged, not decided):** Help ▸ Send Feedback… is UNDECLARED in the capability
@@ -3202,7 +3202,7 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
      **The walk publishes nothing beyond N-0's two releases, never touches the M3's `/Applications`
      or real store, and uses NO feed override anywhere (R-13r-16).**
    - **Left in place, not cleaned:** the new computer's install (it is hers — it will self-update
-     *[removed for publication]*
+     to any ladder-driven 0.9.x, R-13r-16's "further live proof"); the test account and the U2 walk
      debris on the M3 stay for the closeout's sweep, as the U2 record says.
 7. Finals — **DONE (this commit).**
    - **MUTATION RUN IN FLIGHT (named before it starts, per the protocol's addendum 2; the committed
@@ -3327,7 +3327,7 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
 
 ## PHASE 13r — CLOSEOUT (2026-10-04, the orchestrator; the LIVE STATUS and unit records above are the evidence)
 
-*[removed for publication]*
+**WHAT SHIPPED.** U1 — the Developer ID identity + the export road (`Tools/Release/archive-and-export.sh`, the 35/56/57-check drills) + the keychain drill: static 35/35 twice, HER LIVE drill PASS all five arms (zero −34018, Owners byte-unchanged, bookmark survival confirmed). U2 — Sparkle 2.10.0 (Mac target only, exact-pinned), the XPC installer road, the notarized DMG, the full pipeline (`release.sh`, `make-appcast.sh`, `verify-appcast.swift`, `verify-published.sh`); her test-account walk PASS every arm. U3-A — the stamping build phase + MARKETING_VERSION 0.9.x, the ONE release-notes source feeding What's New AND the appcast, R-13r-10's self-explaining DMG window (her arrow fix landed at her eyes), THE CALM-ASKS CADENCE (the deferred update ask, the backup-folder offer toast, Settings ▸ General's checkbox), R-13r-13's calm out-of-date sync face, R-13r-14's field-guide backups passage. U3-B — the MetricKit opt-in (LOCAL, default OFF, provably — the registration seam pinned), the Diagnostics tenth pane (payloads verbatim, per-report Send), Help ▸ Send Feedback…; the placement fork ruled Option A in-batch. **U4 deferred post-launch at her word.**
 
 **THE RELEASES ARE LIVE: 0.9.0 (build 4911) and 0.9.1 (build 4913)** — notarized + stapled (4 Accepted submissions, 0 issues), byte-identical on `dl.stargazing.tech`, the two-entry appcast live with her notes verbatim and the edSignature verifying under the baked key, the no-cache header verified live for the first time, the page at 0.9.1; dSYMs durable per version. **THE FIRST EXTERNAL USER EXISTS** — her walk ran the whole road on a friend's computer (download → install → calm first open → the public-feed update), her verdict verbatim in the LIVE STATUS; the cadence day-counter arms declined at her word (their evidence: the U3-A dev-store walk + 15 CalmAsks pins + the 30-day simulated run).
 
@@ -3335,4 +3335,4 @@ PROPOSAL and a STOP for the architect's ruling, then the faces):**
 
 **DEFERRED/CARRIED:** U4 (post-🚀, the brief intact); 19e (the runbook doc drift, queued — the ledger UN-PARKS at this close); the §12 calm-asks contract line PROPOSED in the handoff (lands only at her word); QUESTIONS #180/#181 her ratify bundle; the site runbook's bucket-side preflight proposal; the field-guide re-seed press (hers, one click, in the handoff); N2's back-to-back HEAD comparison at the next release; N3's message fold at the 1.0.0 scheme event. **MOBILE PARITY:** the calm out-of-date sync sentence REACHES THE PHONE (the face is `Shared/`; no door — its updates are the App Store's); the phone's crash-report opt-in face and the phone's What's New (the App Store road) are named candidate rows — all three carried to `notes/MobileSoul.md`'s ledger. **The author handoff is `notes/handoffs/phase-13r-handoff.md` — her checklist IS the friends-beta checklist.** 17y runs next at her kickoff (its message at the 17y entry's tail); the 19 ledger is active again.
 
-*[removed for publication]*
+**THE CLOSEOUT'S SYSTEM TAIL (2026-10-04, the orchestrator, in her authorized away window — "my app is quit and ready for refresh… run tests at your leisure"):** the A1 rail down clean (six `ok` lines — store, -wal, -shm, three key files — into `Backups/safety-copies/13r-closeout-20261005T000851Z/`); **the `/Applications` refresh DONE at a verified zero-instance window:** Release build (fresh `13r-refresh` DerivedData) → `/Applications/Variorum.app`, `codesign --verify --deep --strict` → **seal valid**, Apple Development `<apple-cert-id>` / team `<apple-team-id>`, **0.9.1 (build 4932)** — above every published entry, so Sparkle runs and offers nothing (R-13r-7 proven by construction on her own build); her field-guide RE-SEED is deliberately HER press (Help ▸ Restore Tutorial… — the handoff's item 3; the walk tooling is dev-store-only by standing rule, so the real-store press is never scripted). **The debris sweep DONE:** 13r-u1/-u2/-u3a/-u3b/-rel, 19a–d + review folders, walk-feed and `/Users/Shared/VariorumWalk/` removed (~42 GB → 1.3 GB) with 2,423 small evidence files harvested to `DerivedData/13r-evidence/` (accidental `.app`-shaped shells purged after the LaunchServices check caught them); the refresh build's real-store-id bundle unregistered and removed (the U1 hazard class — her `/Applications` copy is the only resolvable Variorum); `13ic-phone` left (another phase's); the test account + container override LEFT at her word (the handoff carries the question). The 17y kickoff stands at its entry's tail; the 19 ledger is ACTIVE (19e queued). **THE PHASE ENDS HERE — hard stop; the author kicks off what's next.**

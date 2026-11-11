@@ -981,12 +981,12 @@ $ security find-generic-password -s "io.lduarte.Variorum.store-key-escrow"
 security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.   (exit 44)
 
 $ security find-generic-password -s "io.lduarte.Variorum.store-key-escrow" \
-      *[removed for publication]*
+      -a "<library-uuid>"
 security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.   (exit 44)
 
 $ defaults read io.lduarte.Variorum | grep migrat
-    *[removed for publication]*
-    *[removed for publication]*
+    "variorum.protection.Variorum.<library-uuid>.migrated2a" = 1;
+    "variorum.protection.Variorum.<library-uuid>.migration2aConfirmPending" = 0;
 ```
 
 **What that is worth, said exactly.** The third answer is the strong one: her REAL store
@@ -1808,7 +1808,7 @@ facts.
 | **A1 backup (taken FIRST, zero instances)** | `~/dev/variorum-store-backups/run-a-refresh-20260922T004359Z/` — the whole real-store folder, **149 files, `diff -rq` byte-verified** |
 | **Built from** | `aa468390` (the finals commit), clean throwaway worktree at `/tmp/run-a-release`, standard Release (worktree + DerivedData removed after) |
 | **Old → new binary SHA-256** | `1548f68a…` (= 13u4's recorded install hash — custody chain clean) → `d22dc18e9c5acabdb6e1ade619fb7dd82daa2c50510dd79cc9d57caa60eec79e` (installed copy verified IDENTICAL) |
-*[removed for publication]*
+| **Signature / groups** | codesign OK on the build AND the installed copy; both keychain access groups present and identical (`<apple-team-id>.io.lduarte.Variorum` + `….shared`) |
 | **Instances** | zero at every step; her store never opened by any session (the backup is a closed-store file copy) |
 
 **THE RUN IS CLOSED.** Hard stop per the kickoff: RUN B is a fresh invocation at her word.

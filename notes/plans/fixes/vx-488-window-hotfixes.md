@@ -118,7 +118,7 @@ rehearsal's round must actually land against the throwaway, in the app.
 session NEVER configures sync"); the row face's own guard is `SyncStatusViews.swift:112` ("Sync off (dev store)").
 **THE FIX, scoped TIGHT:** Debug-only. The fence lifts ONLY when the walk-switch env (`VARIORUM_WALK_PROJECT_URL`,
 `ProtectionWalkSwitch.projectURLKey` — the VX-308 U1 piece-0 road, `ProjectConfig.swift:46–55`) is present AND the
-*[removed for publication]*
+URL's ref is NOT production — REFUSE `<supabase-project-ref>` by ref, fail-loud (a refused lift keeps the fence and
 says why; it must never silently run against production). The existing walk switch already refuses the production
 host (`projectOverrideForThisLaunch(productionHost:)`) — reuse its read, never a second env parse. Release builds:
 byte-unchanged, the fence absolute.
@@ -165,7 +165,7 @@ test` run and anything touching the screen or a shared store holds a `Tools/stag
 session claims directly, renew-per-row on long walks). Headless `swift build`/`swift test` is stage-free. Backups
 WAL-safe, UTC names, into `Backups/safety-copies/` (A1). The dev Castle pair is `~/.variorum/dev-castle.env`, the
 throwaway's users `~/.variorum/dev-vault-throwaway.env` — values never echoed, never committed, NEVER typed into
-*[removed for publication]*
+driven UI; every throwaway SQL apply carries the in-command ref guard (`<supabase-project-ref>`). The walk's Debug
 build lives at `App/Variorum/DerivedData/vx488` (NEVER the standard path — the stale-build lesson). The REAL dev
 slot is the DEBUG container (`~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/
 Variorum-dev/`); the `io.lduarte.Variorum/Variorum-dev` path is a stale decoy. The dev slot's files go aside by
@@ -187,7 +187,7 @@ slot whole (mv back, same inodes; rule 21's notice once at the next plain launch
 
 ## THE REHEARSAL RECORD (the orchestrator + HER HANDS, 2026-10-22 23:15 → 10-23 02:35 MDT; stage claim `vx-488`
 held per row and released; captures `~/vx488-walk/`, deleted at closeout; every typed secret the throwaway's or the
-*[removed for publication]*
+walk library's own, disposable by design; the ref guard `<supabase-project-ref>` on every SQL apply, every one run
 read-verified or by HER hand)
 
 **THE PROOF LANDED — Castle + Touch ID syncs, both halves of VX-487 live on real wire.**
@@ -197,7 +197,7 @@ read-verified or by HER hand)
   MIS-LAUNCH first: the throwaway env file's keys are `VARIORUM_THROWAWAY_*`, not the walk switch's
   `VARIORUM_WALK_*` — the app launched UNSWITCHED, was killed before any credential (its fresh mint + its Backups
   subfolder removed), and relaunched with the names MAPPED; the walk switch then verified in-process (`ps eww`: both
-  *[removed for publication]*
+  vars, ref `<supabase-project-ref>`, never production) before anything else. Machinery note for the next walk: MAP
   THE NAMES.
 - **M2/VX-486 VERIFIED LIVE (pre-binding):** the fresh walk library's keysLocked row wore the NEW line ("Sync
   locked — this Mac hasn't unlocked your account's sync keys") and its one door **Protection…** opened Settings AT

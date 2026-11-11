@@ -335,7 +335,7 @@ but say so in your report if you add to it, so the architect can fence
 later waves.
 
 ### Environment
-*[removed for publication]*
+Simulator **iPhone 17, UDID `<simulator-udid>`**;
 DerivedData
 `/private/tmp/claude-501/-<home>-dev-variorum-mobile/42e1bf39-6409-49be-8c11-95e77e7feb86/scratchpad/dd-45a`.
 **Both are yours alone** — target the simulator by UDID, never `booted`;
@@ -565,7 +565,7 @@ side**, `Variorum/Features/Library/RecoveryView.swift` ·
 `MobileSurfaceDriver.swift`, and the Mac twins for anything you hoist.
 
 ### Environment
-*[removed for publication]*
+Simulator **iPhone Air, UDID `<simulator-udid>`**;
 DerivedData `…/scratchpad/dd-45b` (mobile) and `…/scratchpad/dd-45b-mac`
 (Mac). **Yours alone**; target by UDID, never `booted`.
 **Her Mac app is currently QUIT** (she quit it at the architect's
@@ -844,7 +844,7 @@ road, not merge-then-edit's · the second copy slip.
 4.5d's — stop and report if you need either.
 
 ### Environment
-*[removed for publication]*
+Simulator **iPhone 17 Pro, UDID `<simulator-udid>`**;
 DerivedData `…/scratchpad/dd-45c` (mobile), `…/scratchpad/dd-45c-mac`
 (Mac). **Yours alone**; by UDID, never `booted`.
 **You touch `Shared/` and Mac code — M-B binds: core + Mac + both spines
@@ -935,7 +935,7 @@ dedicated `MobileKeyboardBarGeometryTests.swift` for your new geometry
 pins, which removes the contention entirely.
 
 ### Environment
-*[removed for publication]*
+Simulator **iPhone 16e, UDID `<simulator-udid>`**
 (and note it is a small-width device, which is useful to you) plus a
 **320 pt-width configuration** for the defect itself; DerivedData
 `…/scratchpad/dd-45d`. **Yours alone**; by UDID, never `booted`.
@@ -1111,7 +1111,7 @@ is in it, and stop and report if one is.
 ### Environment
 **You are ALONE in the tree in wave 3** — these two files are compiled
 against by every target, which is exactly why. Simulator **iPhone 17 Pro,
-*[removed for publication]*
+UDID `<simulator-udid>`**; DerivedData
 `…/scratchpad/dd-45e` and `…/scratchpad/dd-45e-mac`.
 **Every item here is a `Shared/` change, so M-B binds without exception:**
 core + Mac + both spines + mobile, all five reported, **and every

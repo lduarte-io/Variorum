@@ -26,12 +26,12 @@
 ## rounds below are the record, and they SUPERSEDE earlier sections where they differ)
 
 - **Account home: the VARIORUM PROJECT ITSELF** (round 0h — supersedes batch-1 R2's
-  *[removed for publication]*
+  "new neutral project" and round 0c's *[removed for publication]* ruling). Its OAuth 2.1 Server is the suite
   issuer; "stargazing" is the BRAND and the pages' front (planetlillian a live
   candidate); an eventual custom domain fronts the issuer. **No new org, no Pro
   purchase now** (her free-tier posture; upgrade at her word).
 - **14a creates NO table** — `auth.users` already holds her. Her migration = add a
-  *[removed for publication]*
+  direct email+password to user `<account-uuid>` (owner_id untouched by construction),
   then retire `custom:fragments`. Variorum + mobile sign in DIRECT to the project;
   other apps (Fragments, future) ride the delegated OAuth flow.
 - **Single sign-in absolute** (0f/0i): the Fragments email+password identity retires;
@@ -91,7 +91,7 @@ scope).
   preclude neither.
 - Verification line from the row: both apps sign in against the neutral account; the
   bare key still grants nothing; **her existing data untouched** (owner_id
-  *[removed for publication]*
+  `<account-uuid>` is stamped on every row of her corpus — it
   must survive this phase byte-identical, or a deliberate mapping must exist; silent
   re-keying is forbidden).
 - **SyncSpec §12 governs ANY mirror/schema change**; a mirror deploy executes only on
@@ -108,15 +108,15 @@ scope).
 ## 9c plan's Step 0 memo + closeout, the Step 6 runbook, `Server/supabase/04–07`)
 
 - **Route A proven LIVE (2026-07-10):** one Supabase project (Fragments,
-  *[removed for publication]*
-  *[removed for publication]*
+  `<supabase-project-ref>`) acting as OAuth 2.1 Server issuer; another (Variorum,
+  `<supabase-project-ref>`) trusting it as custom OIDC provider (`custom:fragments`);
   delegated sign-in mints Variorum-NATIVE sessions (RLS on plain `auth.uid()`, no
   claim gymnastics); `provider_token` + `provider_refresh_token` ride the INITIAL
   exchange only — Supabase never persists or re-delivers them. The
   Supabase-to-Supabase pairing is undocumented but empirically confirmed, including
   the dynamic-registration toggle's semantics (gates only the register handler).
-*[removed for publication]*
-  *[removed for publication]*
+- **Her identities:** Variorum `auth.uid()` = `<account-uuid>`
+  (THE `owner_id`/RLS value); Fragments uid `<account-uuid>`
   (the `journal_entries.user_id` class). One email underlies both.
 - **The client layer (reused, not rebuilt):** `App/Variorum/Shared/AuthSession.swift`
   (plain-REST GoTrue, PKCE code flow, Keychain persistence, single-flight refresh with
@@ -293,7 +293,7 @@ does not gate the spike (project refs are random; display names rename freely).
   the plan exactly; re-adding any such pairing later is a dashboard configuration
   (the 9c-proven pattern), never a rebuild. Once Variorum's provider is deleted, the
   Fragments project's OAuth 2.1 Server (as issuer) and the registered client
-  *[removed for publication]*
+  `<oauth-client-id>` can be switched off/abandoned — one less moving part. **(b)** The
   BRIDGE (the journal co-writer pushing/pulling `journal_entries`) does NOT ride the
   pairing: its session is shape (c) — her Fragments email+password, direct (ratified
   #16) — so retiring the pairing leaves the bridge running untouched. Nothing in 14a
@@ -304,69 +304,14 @@ does not gate the spike (project refs are random; display names rename freely).
 
 **Field notes (the spike record — appended live, the 9c Step-0 form):**
 
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 - **Round 0c (same sitting) — her challenge to the third project itself** ("how big
   of a benefit is having the separate org rather than just a distinct table within
   one of the existing ones? … i'd probably put the home in variorum though instead
   of fragmnets and just not show users that it's within variorum. i'm a little
   conflicted"). The architect's analysis, presented before her ruling (this would
   AMEND R2 if taken):
-  *[removed for publication]*
-    *[removed for publication]*
+  - *[removed for publication]*
   - **Branding: conceded, not an argument** — the project ref is an opaque random
     string; nobody can see "variorum" in the issuer URL, and a custom domain
     (auth.stargazing.tech) can front it later either way.
@@ -386,17 +331,13 @@ does not gate the spike (project refs are random; display names rename freely).
     sign-in would share one project; a mistake in the most delicate upcoming work
     risks every app's login. (3) AUTO-PAUSE on free tier applies to the suite's
     LOGIN (mitigated by her daily sync activity; real on absences).
-  *[removed for publication]*
+  - **The honest no-cost road exists** (variant ii of the ruling question): issuer rides
     the Variorum project, suite signups STAY OFF until 14c (the provisioning
     deliverable slips there; Fragments keeps native signups for its testers and
     runs dual sign-in meanwhile; her one account still proves the one-login goal).
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
+  - *[removed for publication]*
+  - **RULING (2026-08-03): SEPARATE PROJECT — R2 STANDS UNAMENDED.** She
+    took the recommended shape A *[removed for publication]*. The in-Variorum variants stand down: variant ii
     (issuer-in-Variorum, signups deferred) recorded as the road NOT taken; variant
     iii (hardening + signups on) recommended against and not taken. Consequences:
     the 9c corpus guard survives byte-untouched; 14b's surgery and the suite's
@@ -406,23 +347,9 @@ does not gate the spike (project refs are random; display names rename freely).
 - **Round 0d (same sitting, a fresh session — her return with rulings after a
   requested re-litigation):** she asked for the absolute pros/cons of
   home-inside-Variorum once more ("ignore the flag that this shouldn't be
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  relitigated") and the architect re-presented round 0c *[removed for publication]*. Her next message then ruled, verbatim
   anchors kept:
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
+  - *[removed for publication]*
   - **RULED — NO Fragments-native tester accounts** ("I don't want to have
     fragments native accounts"). SUPERSEDES the contract file's 14a-horizon
     frame (ship TestFlight on native auth, re-link later): TestFlight now WAITS
@@ -535,7 +462,7 @@ does not gate the spike (project refs are random; display names rename freely).
   - **RULED — single sign-in with NO surviving Fragments password.** The 9c
     inheritance line ("the Fragments-project password identity stays") is
     SUPERSEDED (annotated in place above): her Fragments USER survives — same uid
-    *[removed for publication]*
+    `<account-uuid>`, every `journal_entries` row untouched — but its PROOF changes:
     the stargazing identity links on, the email+password identity unlinks. One
     identity everywhere (14b's encryption passphrase stays its own separate
     secret by the standing wrap-secret ruling — it is not a second LOGIN).
@@ -585,18 +512,13 @@ does not gate the spike (project refs are random; display names rename freely).
   suite identity to something else later? … it seems like that is a manageable
   issue. I guess I'm back to not being that convinced on anything other than
   defense in depth or vibes that the login truly belongs separate from variorum …
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  it truly seems more like a nicety from my perspective than a true need" *[removed for publication]*
   - **Why the flip is reasoned, not capitulation — five facts are NEW since the
     round-0c ruling:** (1) her sequencing ruling (NOBODY logs in before the whole
     14 family, 14c's isolation included) eliminates every interim security window
     the separate project guarded — by the time any stranger holds an account,
     parent-join isolation is built and tested; (2) TestFlight waits, so there is
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
+    no this-week provisioning need; (3) *[removed for publication]*; (4) the extraction mechanics, looked at squarely,
     are weaker than the round-0c framing: `auth.users`/`auth.identities` are
     ordinary Postgres rows in a schema she owns — dumpable between projects with
     uids AND password hashes intact; sessions invalidate (everyone signs in
@@ -604,7 +526,7 @@ does not gate the spike (project refs are random; display names rename freely).
     the first stranger signs up makes even the issuer URL portable (verify the
     OAuth-server iss-claim behavior at adoption time — flagged, not asserted);
     (5) in-Variorum-as-issuer REMOVES her own migration entirely: her existing
-    *[removed for publication]*
+    Variorum uid `<account-uuid>` simply IS the suite account — `owner_id` survives
     byte-identical by construction, and the R3 re-map machinery stands down.
   - **What honestly remains for the separate project, stated as what it is:**
     the 14b vault-separation depth (real, but the vault is NEW data at 14b —
@@ -616,7 +538,7 @@ does not gate the spike (project refs are random; display names rename freely).
     sign-ins — existing native sessions refresh project-locally (the 9c
     provider-tokens-ride-the-initial-exchange-only fact), so free-tier pause is
     even softer than round 0c framed it.
-  *[removed for publication]*
+  - **THE UPDATED RECOMMENDATION: the no-cost in-Variorum road, with four guardrails:**
     (a) the RPC author-allowlist lands NOW regardless (config mistakes become
     non-fatal); (b) Variorum-project signups stay OFF until 14c's isolation is
     built and tested — already her ruling; (c) a custom domain fronts the issuer
@@ -636,8 +558,7 @@ does not gate the spike (project refs are random; display names rename freely).
 
 - **Round 0h (same sitting) — RULED: THE FLIP IS TAKEN.** Her words: "I like the
   idea of variorum being the home for users better than fragments being the home
-  *[removed for publication]*
-  *[removed for publication]*
+  for users *[removed for publication]*" Round 0c is
   SUPERSEDED (recorded, never erased); R2's shape (A) AMENDS: **the VARIORUM
   project is the suite's account home and OAuth 2.1 issuer** — "stargazing"
   survives as the BRAND and the pages' front (plus the eventual custom domain),
@@ -646,12 +567,12 @@ does not gate the spike (project refs are random; display names rename freely).
   signups OFF until 14c's isolation · custom domain fronts the issuer before the
   first non-author signup · the re-decide checkpoint before the first non-author
   account is minted. Consequences: her migration collapses to adding a DIRECT
-  *[removed for publication]*
+  sign-in (email+password) to her existing user `<account-uuid>` (owner_id untouched
   by construction; custom:fragments then retires); Variorum-the-app and mobile
   sign in DIRECTLY to their own project (no OAuth hop — the 9c AuthSession
   password grant, re-aimed); only OTHER apps (Fragments, future) ride the OAuth
   flow. The issuer URL is therefore KNOWN TODAY
-  *[removed for publication]*
+  (`https://<supabase-project-ref>.supabase.co/auth/v1`) and the contract file's
   ask list went concrete in this round's commit. **Her table question answered
   for the record: 14a creates NO new table** — `auth.users` already exists in
   the Variorum project and already holds her; the family's new tables are 14b's
@@ -804,7 +725,7 @@ does not gate the spike (project refs are random; display names rename freely).
     `custom:fragments` retirement, the ProjectConfig/AuthSession seam) so she
     can sign in from her phone. Master-plan 14a row carries the clause.
   - **Registration: the dynamic door WORKED on the first curl** — the spike
-    *[removed for publication]*
+    client is `<oauth-client-id>` (public, PKCE,
     `http://localhost:3000/callback.html`), which also PROVES her
     dynamic-toggle save landed (no "no add application section" ambiguity —
     the dashboard has no manual UI, the 9c finding re-confirmed). She toggles
@@ -863,7 +784,7 @@ does not gate the spike (project refs are random; display names rename freely).
   built-in email service is itself rate-limited (a few sends/hour) — not her
   user, not the setup. Two roads handed over, the admin one recommended:
   **(1) the admin door (deterministic, no email):** she runs
-  *[removed for publication]*
+  `PUT /auth/v1/admin/users/<account-uuid>` herself with the service_role key and
   her chosen password — password and service key never leave her machine;
   **(2) the magic-link door as fallback:** the catcher now accepts
   `type=magiclink` fragments too (its own OTP type — separate cooldown and a
@@ -878,9 +799,9 @@ does not gate the spike (project refs are random; display names rename freely).
   and then I'll change my password later?"). Executed via the STORED-PAT
   arrangement (the 9c precedent, `.env.supabase.local`; the service key
   fetched into a shell variable and never printed): admin
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  `PUT /auth/v1/admin/users/<account-uuid>` → ok; then the proof —
+  **password-grant sign-in VERIFIED, session minted** for uid `<account-uuid>`
+  (email `<oauth-account-email>`), no Fragments anywhere in the path.
   `custom:fragments` is now REDUNDANT for her sign-in (retirement still waits
   for the app's direct sign-in code, as ordered). The password is
   transcript-known BY HER CHOICE — treated as bootstrap; she changes it at
@@ -915,7 +836,7 @@ does not gate the spike (project refs are random; display names rename freely).
 
 - **Round 0r (same sitting) — THE SPIKE COMPLETES: every load-bearing unknown
   answered, all in the good direction.** Her run, end to end: the consent
-  *[removed for publication]*
+  details fetch (client `<oauth-client-id>`/SuiteAccountSpike; the `redirect_uri`
   trap-field present and correctly NOT navigated — the 9c traps held), her
   password sign-in, approve, PKCE code exchange **ok** — `iss` = the suite
   issuer on the Variorum project, `sub` = her uid, refresh + id tokens
@@ -964,17 +885,17 @@ does not gate the spike (project refs are random; display names rename freely).
     through the PRODUCTION pages (the spike client's localhost callback makes
     this legal) → then her bootstrap-password change at `/oauth/reset`.
   - **Fragments' OAuth client REGISTERED via the admin door** (no open
-    *[removed for publication]*
+    window): `client_id <oauth-client-id>`,
     `client_secret_post`, redirect = Fragments' GoTrue callback; the secret
     written ONLY to her untracked `.env.fragments-oauth.local`. The contract's
     touchpoint #1 now carries the full coordinates plus **THE FIRST-SIGN-IN
-    *[removed for publication]*
+    RULE** (verify the minted uid equals `<account-uuid>`; a new uid = STOP and
     link deliberately — the journals key on the old uid) and the
     Fragments-signups-toggle interaction check. **She can carry touchpoint #1
     to the Fragments agent NOW.**
   - **Her custom:fragments identity — answered with EVIDENCE, removal
     DEFERRED:** the admin read shows her user's ONLY identity row is
-    *[removed for publication]*
+    `custom:fragments` (<auth-identity-id>, 2026-07-10) — **setting the password did NOT
     mint an email identity.** Removing it tonight would leave a
     zero-identity user on the account that owns her whole corpus — an
     unverified GoTrue state gambled on production auth for zero functional
@@ -1446,7 +1367,7 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
   note for the record: this GoTrue's admin API has NO per-identity DELETE
   route (404 — attempted first, identity untouched); the executed road was
   SQL via the Management API. Before-read: exactly one identity
-  *[removed for publication]*
+  (`<auth-identity-id>`, `custom:fragments`, 2026-07-10 —
   matching the 0s read). The DELETE's RETURNING confirmed that single row;
   `raw_app_meta_data` recomputed to the password-user convention
   (`provider: "email"` — mirroring what GoTrue's own unlink recomputes,
@@ -1465,14 +1386,14 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
   as odd, moot on deletion, not investigated further. After-read: **0
   custom provider rows.** The 9c trust arrow now exists in NEITHER
   direction.
-*[removed for publication]*
+- **Step 5 — the spike client + both spike dirs: DONE.** Client `<oauth-client-id>`
   deleted by her hand via the admin door (HTTP 204; soft-deleted per the
-  *[removed for publication]*
+  clients table; **Fragments' client `<oauth-client-id>` live and untouched** —
   touchpoint #1's real coordinates). `Spikes/SuiteAccountSpike/` AND
   `Spikes/AuthPairingSpike/` (her word: "we don't need that dead
   machinery") removed — commit `cb70b61`.
 - **Step 6 — the Fragments project: UNTOUCHED, phase-wide.** Zero reads or
-  *[removed for publication]*
+  writes against `<supabase-project-ref>` from any session this phase; its
   old issuer stays ON until the one-batch handoff (the contract's item-5
   guard — now moot for the APP since direct sign-in shipped, but the
   shutdown remains the Fragments batch's act).
@@ -1486,7 +1407,7 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
 |---|------|--------|
 | L1 | OAuth 2.1 Server ON — the Variorum project IS the suite issuer (0h) | done (0l; save verified; consent path live) |
 | L2 | The spike: P-ii (OAuth token = authenticated PostgREST user) + the signup-refusal re-probe | done (0r, both in the good direction; re-proven end-to-end through the PRODUCTION pages at 0u) |
-*[removed for publication]*
+| L3 | Her direct suite password on user `<account-uuid>` | done (0p bootstrap; live acceptance at the gate; her own change at `/oauth/reset` rides the handoff checklist) |
 | L4 | The stargazing.tech pages (sign-in+consent · sign-up built-and-wired · `/oauth/reset`) | done (the site agent, from `notes/stargazing-login-pages-brief.md`; 0s green-light; 0u production run — "it looks so cute!!") |
 | L5 | The three-value dashboard flip (Site URL · Authorization Path · Redirect URLs) | done (0t her hand; 0u verified on reload) |
 | L6 | Fragments' OAuth client registered; touchpoint #1 fully concrete in the contract | done (0s; secret in her untracked `.env.fragments-oauth.local`; carried at the ONE batch, 14c's end) |

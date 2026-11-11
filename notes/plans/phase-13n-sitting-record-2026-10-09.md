@@ -3,7 +3,7 @@
 **Status: BINDING — the 13n promoted design sitting's rulings.** Ticket
 VX-116 · branch `vx-116-13n-sitting`. Supersedes nothing; builds on
 `notes/plans/phase-13n-mcp-door-note.md` (her dream vision, verbatim) and
-*[removed for publication]*
+`release-and-v1-strategy.md` §9 (relocated to the private planning repo) (the standing guardrails — all
 carried). The prep that framed the questions:
 `notes/plans/phase-13n-sitting-prep-2026-10-09.md`. The approved mockups
 (updated to these rulings): `notes/plans/13n-sitting-mockups/mcp-door-mockups.html`.

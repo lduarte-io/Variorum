@@ -97,7 +97,7 @@ struct Phase13pKeychainFactTests {
     /// (per-config, so the dev fence survives), this Mac was registered
     /// in her developer account, and automatic signing now embeds a Mac
     /// Development profile — the signed app carries
-    *[removed for publication]*
+    /// `<apple-team-id>.io.lduarte.Variorum[.debug]` in both
     /// `application-identifier` and `keychain-access-groups`.
     ///
     /// THE PIN IS THEREFORE TIGHTENED to assert the write LANDS: this is

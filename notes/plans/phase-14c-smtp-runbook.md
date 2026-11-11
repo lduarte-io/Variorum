@@ -267,7 +267,7 @@ drafting copy for doors that don't exist would go stale unratified.
 6. Paste HER RATIFIED template copy (§6 — ratify happens before or at
    the 14d sitting).
 7. Test: trigger a recovery email to a non-team address she controls
-   *[removed for publication]*
+   (`<her-email>` is on hand from the probe setup); check
    delivery + `spf=pass`/`dkim=pass` headers.
 8. Record the act in the 14d plan (provider, sender, records added,
    limits confirmed).

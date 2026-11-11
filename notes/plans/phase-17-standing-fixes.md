@@ -1661,7 +1661,7 @@ in the app's container (6 files — the store, its `-wal`/`-shm`, three key file
 to the live file) · Release built from `92615e6b` · the product bundle carries NO endpaper resource ·
 `/Applications` binary `79c7688b…` (18k's) → **`7f7ff281b4a566ef…`** · `codesign --verify --deep
 --strict` OK on the product AND the installed copy · both keychain access groups present
-*[removed for publication]*
+(`<apple-team-id>.io.lduarte.Variorum` · `…Variorum.shared`). The throwaway DerivedData folders removed.
 
 **HER VERDICT + THE ONE TWEAK (2026-09-26):** *"I really like it. and yeah, we don't need an Opus cold
 review on this purely cosmetic change. Can you make it just a little bit darker for me + reinstall?"*

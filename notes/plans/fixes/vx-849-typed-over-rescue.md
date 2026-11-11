@@ -1301,7 +1301,7 @@ generator; owner identity left signed-out), services built inside; no pin reads 
   (the order log) · `whileThereAreNoKeysTheOccasionRetriesThePendingLoad` (2 — the scripted log and the provider
   count) · `withNothingPendingTheOccasionReadsNoKeysAndRetriesNothing` (the occasion leg, as the harness predicted);
   13 green. Restored by `git checkout --` of the one file (diff clean at `f500f94f3`), re-run **18/18 green**.
-*[removed for publication]*
+- **Leg D (iPhone sim by id `<simulator-udid>`, booted for the run, `simctl shutdown all` after):** "Test run with 7
   tests in 4 suites passed" — all four types present, none dropped (MobileRoundOccasion 1 · MobileTypedUnlockSyncKeys
   1 · MobileLockTeardown 1 · MobileTypedOverRescue 4). **R-3g** (`#if os(macOS)` around the one shared
   `sync.beforeRound` assignment; two-line diff verified): RED exactly
@@ -2813,7 +2813,7 @@ the sibling seq-ranked §7 repairs (one Debt ticket riding P-849-6's outcome) = 
 
 ## THE B34-WALK WINDOW (claim vx-849-b34-walk, 2026-11-09, at 39488a513 — leg D the orchestrator's hands; the walk an OPUS walker under the claim, per the Fable safeguard)
 
-*[removed for publication]*
+- **Leg D (sim by id `<simulator-udid>`, one boot, shut down after): "Test run with 87 tests in 7 suites passed"** — all
   seven types present and counted by their suite-pass lines (MobileTypedOverRescue · MobileQuickNote ·
   MobileTakesBrowser · MobileBlockHistory · MobileRoundOccasion · MobileProtectionAccountSection ·
   MobileLockTeardown); none dropped.

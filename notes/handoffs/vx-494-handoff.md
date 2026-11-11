@@ -60,9 +60,9 @@ says so.
 
 - **Urgent:** VX-510 (Run: the first-run sync failures — NEXT, a fresh orchestrator; members VX-498 · VX-506 ·
   VX-507 · VX-509).
-*[removed for publication]*
+- **High:** VX-498 (raised from Low; Suspected, the live suspect for the tester's case), VX-501 (typed unlock holds sync
   keys — Pre-launch), VX-507 (the act confirms its first round — Pre-launch), VX-508 (the dormant Apple-wrapped
-  *[removed for publication]*
+  master; the one-statement act at her word after the tester's join), VX-509 (the first-run drill), VX-500 (the follow-up
   umbrella: VX-495/496/497/502/503/504/505/508).
 - **Medium:** VX-502 (exports across local-only migrations — Pre-launch), VX-503 (the Standard join's Touch ID
   prompt), VX-506 (the pre-join wording; raised from Low on field evidence).
@@ -96,7 +96,7 @@ says so.
   relaunch — Bug, Suspected, Low) · **VX-499** (a masthead layout test fails under the full Mac suite but passes alone
   — Test-only, Low).
 
-*[removed for publication]*
+**Cleanups that are yours, after the window:** delete the throwaway Supabase project (`<supabase-project-ref>`) when
 you're done with it; with it, delete `~/.variorum/bin/type-throwaway-passphrase`,
 `~/.variorum/dev-vault-throwaway-passphrase` and `~/.variorum/dev-vault-throwaway-words`, and remove the five allow
 rules this night added to `.claude/settings.local.json` (the helper, `cliclick`, and the three WalkKit scripts).

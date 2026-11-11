@@ -184,7 +184,7 @@ func answeredNoVault(_ read: Result<VaultSnapshot?, any Error>) -> Bool {
 /// transport and account doors ride exactly this), and the vault leaf AS PRODUCTION COMPOSES IT, handed that authority
 /// (`WireVaultLeaf.live`, the vault endpoint scripted).
 struct RaceWorld {
-    *[removed for publication]*
+    static let user = "a0000000-0000-4000-8000-000000000001"
     static let configuration = AuthConfiguration(
         projectURL: URL(string: "https://vx423-pin.invalid")!, apiKey: "pin-publishable")
 

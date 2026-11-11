@@ -528,7 +528,7 @@ An Opus walker ran under the orchestrator's `vx-562-walk4` claim (17:02:58), fro
 **Residue I did not remove (named):**
 - (1) The 14 new Trash rows. Put back returns the notes WITHOUT their two tags, because the tags are deleted.
 - (2) Tombstones for the Welcome shelf and the two tags (S2).
-*[removed for publication]*
+- (3) Two app-written prefs keys keyed by Blue Carbuncle: `currentBlock.5A838E1F…` and `surfaceSize.outline.5A838E1F…`. Also the launch bookkeeping: `IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`, and `variorum.calmAsks.passphrase.<library-uuid>.launches`. The diff is `w4/prefs-before4-copy.plist` (a COPY) against `w4/prefs-after-w4.plist`. `prefs-before4.plist` itself was only read, and I wrote nothing to the domain.
 
 **Banner at the end: STANDS.** "This is your library as of October 20, 2026. This library doesn't sync, so Resume changes nothing in it." with Resume Sync, never pressed (`end-banner-s.png`). The sidebar foot reads "Sync off (dev store)". **Instances at the end: zero.** I killed pid 91663 (`kill -TERM`, path verified with `ps`). At 17:16:10 `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both returned nothing.
 
@@ -578,7 +578,7 @@ An Opus walker ran under the orchestrator's `vx-562-trace` claim (17:22:31, 15 m
 - Appearance: `dark`, matches.
 - Trash: grew by the book and its 13 notes, as by design; not counted.
 
-*[removed for publication]*
+**Prefs:** `w5/prefs-after-w5.plist` (an export) against `prefs-before5.plist` (read only, never written) shows **no added and no removed keys**. Three changed keys are launch bookkeeping: `IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`, and `variorum.calmAsks.passphrase.<library-uuid>.launches`. I never clicked into a note, so there are no `currentBlock.`/`surfaceSize.` keys this time.
 
 **Residue I did not remove (named):**
 - (1) The 14 new Trash rows. Put back returns the notes without their tags, because the tags are deleted.
@@ -637,7 +637,7 @@ An Opus walker ran under the orchestrator's `vx-562-confirm` claim, from 17:41 t
 - Appearance: `dark`, matches (`defaults read`).
 - Trash: grew by the book and its 13 notes, by design; I did not count it.
 
-*[removed for publication]*
+**Prefs:** `w6/prefs-after-w6.plist` against `w6/prefs-before6.plist` (both exports; I wrote nothing to the domain). **No added and no removed keys.** The changed keys are the three launch-bookkeeping ones: `IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log` and `variorum.calmAsks.passphrase.<library-uuid>.launches`. I never clicked into a note, so there are no `currentBlock.`/`surfaceSize.` keys.
 
 **Residue I did not remove (named):**
 - (1) The 14 new Trash rows. Put back returns the notes without their tags, because the tags are deleted.

@@ -551,7 +551,7 @@ that were promised a home and never got one):
 > steadier base."* **Read §5 with that in mind: the entangled half of
 > 4.5c should be SETTLED by 13u before you touch it, and several items
 > below may come back already built.** The full record is
-*[removed for publication]*
+> `release-and-v1-strategy.md` (relocated to the private planning repo) §10's 2026-08-23 amendment.
 
 **Her instructions that shaped this document** (2026-08-23):
 *"let's do the merge, then I'll run 13l"* · *"I'll only resume variorum
@@ -1469,7 +1469,7 @@ that are not real.
 **Also: every iPhone 16-series simulator on this machine is iOS 18.3,
 below the iOS 26 deployment target, and is not a valid destination.** The
 valid iOS 26.2 devices are the iPhone 17 family, iPhone Air, and one
-*[removed for publication]*
+iPhone 16e (`<simulator-udid>`). I assigned three invalid ones at dispatch; both
 implementers found it before my correction reached them.
 
 ## 11.5 WAITING ON HER

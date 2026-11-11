@@ -58,7 +58,7 @@ restore-hold marker beside the slot (63 B) so the Resume Sync banner shows — N
 SIGNED OUT; `appearanceChoice` dark; `variorum.backup.markdownInsurance.enabled = 1`; newest safety copy
 `Backups/safety-copies/variorum-vx308-walk-2026-10-19T165332Z`; any synced arm uses the THROWAWAY project through
 VX-308's walk switch (`~/.variorum/dev-vault-throwaway.env`), never production — every launch asserts the ref is
-*[removed for publication]*
+not `<supabase-project-ref>`. **The eight standing walk terms** (echoed at every posture-changing READY): (1) zero
 instances, then a cmp-verified safety copy of EVERY slot file, listed without an extension filter (the lived-here
 marker is extensionless); (2) throwaway libraries outside the slot, removed or listed; (3) pre-export
 `io.lduarte.Variorum.debug` and an end-diff against it — `defaults import` merges, so delete added keys and restore

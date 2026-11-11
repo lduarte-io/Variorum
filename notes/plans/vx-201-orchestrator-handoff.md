@@ -26,7 +26,7 @@ checklist at top; launch-blockers HIGH PRIORITY explicit (NONE found so far).
 
 ## State at cutover (verify by git)
 - **U1 (VX-202): COMPLETE AND VERIFIED.** Fix + 10 pins green (window A: 305/38 Mac, sim 1/1 by UDID
-  *[removed for publication]*
+  <simulator-udid>, iPhone 17 Pro iOS 26.2 — shut down after use); all six revert cycles
   red-as-named (window B record). Drills: migration green; posture drill red PRE-EXISTING (bisect-proven) = VX-233.
 - **U2 (VX-110): BUILT + ADJUDICATED, suites PENDING window C.** Two doors + the F-U2-1 consent guard (accepted,
   diff read) + item 7 (CeremonyAct on the banners). 9 pins `VX110SignedOutCastleTests`, 7 revert patches in

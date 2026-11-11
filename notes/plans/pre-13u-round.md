@@ -3233,7 +3233,7 @@ running (`pgrep` by the `/Applications` path empty throughout); no Release build
 |---|---|---|
 | **Core** (`swift test`) | **1504 / 163 GREEN** in 54.5 s | 1503/163 **+1/+0** — exactly `theBatchedPeerLookupChunksItsParameterList` (m1) |
 | **Mac, FULL** (`-scheme Variorum -destination 'platform=macOS'`) | **1983 / 343 GREEN** in 297.7 s | 1980/343 **+3/+0** — M1, m5, m6, all three inside the existing `SampleLibraryTests` suite |
-*[removed for publication]*
+| **Mobile, FULL** (`-destination 'platform=iOS Simulator,id=<simulator-udid>'`) | **605 / 97 passed, the 2 standing known issues** in 141.4 s | 602/97+2 **+3/+0** — m2's three, inside the existing `MobileEmptyStoreTests` suite; the known pair unchanged (`anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`) |
 | **Tutorial spine** | **all ten `Tutorial …` suites green** inside the Mac run | unchanged |
 
 **The latency pin passed IN-SUITE this run** (`EditorWindowSmokeTests.rewriteStrategyLatencies`),
@@ -3244,7 +3244,7 @@ datapoint for that row rather than as a claim about the fixes.
 `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2` died at
 *"Failed to install or launch the test runner (Mach error -308 — server died)"* with **zero
 compile errors**. Shutting every simulator down and booting the target device explicitly
-*[removed for publication]*
+(`xcrun simctl shutdown all` → `boot <simulator-udid>`), then addressing it
 **by id** rather than by name/OS, cleared it and every run since. Same class as residual 2's
 "the bare scheme resolves to Designed for iPad" — the destination has to be stated exactly.
 
@@ -3335,7 +3335,7 @@ in the harness's order can fail in production's), NOT run this round.
 
 **The F1 mechanism, restated for §7:** (1) a candidate-shaped reading landing DEAD while another live candidate stands — whether the reading is live locally or absent and arriving already dead — first moves its live local memberships and chapters to the keeper (dedupe against the keeper's), enqueued explicitly; (2) a live membership/chapter arriving under a DEAD candidate-shaped reading while a live keeper stands re-points to the keeper (dedupes) instead of joining the orphan cascade; (3) `merge` now compares the row that actually LANDED against the server row before clearing the outbox entry, so an inline repair's explicit enqueue is honored on the merge path too (this was silently undone for every inline repair class — collision tombstones, orphan stamps — since Phase 5; convergence had survived by per-device re-derivation). Production runs exactly one round shape, pull → push; leg (2) is the belt for API-legal push-only sequences and for a fresh store's first pull.
 
-*[removed for publication]*
+**Counts at close (all three suites, foreground, in order):** core **1515 tests / 164 suites GREEN** (baseline 1504/163 + 11 pins + `NotePickerShapeTests`) · Mac **1984 / 343 GREEN** in 291 s (baseline 1983/343 + the F10 pin; the latency pin passed in-suite — no adjudication needed; the tutorial spine inside the run) · mobile **607 / 97 GREEN + exactly the 2 standing known issues** (baseline 605/97 + 2 — F9's and F12's pins) on the iPhone 17 Pro simulator by id (`<simulator-udid>`). **ZERO schema, ZERO `Server/` lines, marker 7; `Sync/` touched only by F6/F1/F5/F2/F3 (+ F4's comment-only correction), every repair write enqueued explicitly; no Release build, no `/Applications` refresh; the author's app never launched.**
 
 **Recorded, not fixed — for the architect:** (a) the sample dedupe's STRAGGLER-class deferral (a member's post not yet arrived) still re-evaluates only when a later batch touches a reading — pre-existing, outside F2's letter; a bounded re-check for that class is a design item (the marker approach would loop forever on the purged-evidence corner); (b) the F2 heuristic narrows the window from "between two chunks of one push" to "an outage spanning the puller's next round" — the reviewer's accepted shape, not a closure; a reserved-tag completeness check (no live/dead `post_tag` for a member ⇒ in flight) would close the `reading_post|post_tag` split evidence-based and is one line if wanted; (c) the F2 commit message says "1513" where the run read 1514 — a message typo, the pushed history left unrewritten (author-only). (d) **A stray, foreign, UNCOMMITTED line in `notes/KnownIssuesAndTechDebt.md`** appeared in the working tree during the close verification — a new row "The daily Journal has no first-class identity, and it can be hard-deleted", citing F6 and "the author's own scenario the same night"; it is not this session's, was left untouched and out of every commit (explicit paths), and is the architect's to land.
 
@@ -3385,7 +3385,7 @@ in the harness's order can fail in production's), NOT run this round.
 
 **Observations for the architect, not fixed (outside every finding's letter; each traced):** (a) the tag-collision repair re-points only applications ALREADY local when the duplicate dies; an application of the duplicate ARRIVING later — in the same batch after the tag row, or in a later push — meets the orphan repair instead and is stamped dead (the reading_post direction-2 class, for tags): in every two-seed convergence here the later-arriving copy's stories lose their reserved-tag applications on both devices (the pins pass because the guard accepts dead rows and `discover` is only consulted by the restore door); (b) the double-retirement race above; (c) the pull-path echo makes every device's OWN reading rows "arrive" at its next pull, so a two-copy meeting always costs one extra round before the pass classifies — pre-existing, harmless, noted because the R2-6 pin's "empty pull" turned out to be the echo pull in this harness exactly as in production.
 
-*[removed for publication]*
+**Counts at close (all three suites, foreground, in order):** core **1524 tests / 165 suites GREEN** in 55.7 s (baseline 1515/164 + the 9 pins + `TheDrainOrderTests`) · Mac **1985 / 343 GREEN** in 302.6 s (baseline 1984/343 + `theShippedSeedSatisfiesTheDedupesPristineContract`; the latency pin `rewriteStrategyLatencies` PASSED in-suite — no paired adjudication needed; the tutorial spine's suites green inside the run) · mobile **607 / 97 PASSED + exactly the 2 standing known issues** (`anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`) in 141.8 s on `-destination id=<simulator-udid>` (shut down all, booted by id first — the wave-2c note). ZERO schema, ZERO `Server/` lines, marker 7; `Sync/` touched by R2-1/R2-2/R2-3/R2-4/R2-5/R2-7 only (`Repairs.swift`, `SampleLibraryDedupe.swift`, `SyncEngine.swift`), every repair write enqueued explicitly; test support: `FakeSyncServer.currentSeq`; no Release build, no `/Applications` refresh; the author's app never launched.
 
 # LADDER ROUND 3 RECORD (2026-09-01 — the CAP; a fresh Fable reviewer's full pass over the round-2
 # fixes. Verdict: all seven R2 fixes HOLD; 0 BLOCKER · 0 MAJOR · 4 MINOR · 1 NIT; foci clean;

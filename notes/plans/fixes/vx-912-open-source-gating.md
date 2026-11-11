@@ -421,7 +421,7 @@ The brief names the root `README.md` as her letter (VX-105). **It is not.** The 
 
 ### P5 — the ship-as-is-vs-trimmed inventory (`.claude/`, `Tools/`, `Server/`) — an INVENTORY for her call; nothing was deleted or moved
 
-*[removed for publication]*
+How it was read: `git ls-files` per folder; every top-level `Tools/` script's header read; each subfolder's README (or file list where none exists); every tracked file scanned for home paths, `~/.variorum`, Supabase hosts, email-shaped strings and host names (<server>, tailnet, `lduarte`). **No secret VALUE was found anywhere in the three folders** (the prod roads read their token and project ref from local env files at run time; `.claude/settings.json` holds no path). The framing: readiness §1 (open source the app, core AND server), §2's IN list (the skills, agents and method ship), §2's pass-rule classes (no `~/.variorum` machinery, test-account roads or prod operational detail in curated excerpts), and §4.8 (the repo already carries the method). Whether those excerpt classes bind the WHOLE tree is VX-754's sweep and VX-748's verdict list, not this table's — where an item sits in such a class, the row says so and names the trade-off.
 
 | Item | What it is | Recommendation | Why / the trade-off |
 |---|---|---|---|
@@ -495,7 +495,7 @@ The brief names the root `README.md` as her letter (VX-105). **It is not.** The 
 1. **The GRDB fork's README** (`lduarte-io/GRDB.swift`): today it is upstream's verbatim, with groue's contact and issue lines and no word that it is a fork. Owed: a short notice at its top (a fork of GRDB.swift with the README-documented SQLCipher setup applied, for Variorum; report GRDB issues upstream). A README commit never moves the tag. Needs her push rights on the fork.
 2. **Tag immutability on the fork:** a ruleset on `lduarte-io/GRDB.swift` forbidding update and deletion of `v*+sqlcipher.*` tags. Today a moved tag would fail a lockfile resolution loudly (the revision is pinned), but a pin-free resolution would follow it. Her account's settings.
 3. **At the flip:** Issues ON (R-912-9); Actions on; the workflows' first live check (one issue + one fork PR from a throwaway account → exactly one greeting, one comment + close; her own same-repo PR untouched); optionally GitHub's private vulnerability reporting (P-912-B3-3 (c)).
-*[removed for publication]*
+4. Already hers on VX-750: the trademark filing.
 
 **PROVISIONAL bundle (nothing here gates the core; `notes/QUESTIONS.md` untouched — the merging session files them):**
 - **P-912-B3-1 — AGPL "version 3 only" vs "or any later version".** Drafted: only (README's notice says "version 3"). Why: it's the reversible choice. As sole owner she can broaden to or-later at any time, but copies released under or-later can never be narrowed back, and or-later hands future terms to the FSF. Alternative: or-later (the FSF's recommended form). The LICENSE file is the same either way.

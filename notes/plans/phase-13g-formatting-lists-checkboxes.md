@@ -14,7 +14,7 @@ note; do not close 13g without it).
 > fork is design-heavy and wants sittings). Read IN FULL first:
 > `CLAUDE.md` + the canon it loads (AppSpec §14's 13f delta is the
 > latest state), this plan, `notes/handoffs/phase-13f-handoff.md`,
-*[removed for publication]*
+> `release-and-v1-strategy.md` §8 (relocated to the private planning repo) (her recorded markdown
 > inclination), `notes/TEXTKIT2_NOTES.md` (§1's
 > `includesTextListMarkers` note and §3's broken-`NSTextList`
 > warning are this phase's terrain), and the 13c plan's
@@ -48,7 +48,7 @@ TK2's least reliable neighborhoods). This is an architectural fork
 and hers.
 
 **Her recorded inclination (2026-07-30, ahead of the sitting —
-*[removed for publication]*
+`release-and-v1-strategy.md` §8 (relocated to the private planning repo), an inclination, NOT a
 pre-decision):** markdown **DUAL-MODE** — one storage format
 (markdown-as-content), two input faces (raw syntax, or
 native-looking tools/buttons that insert it), export emitting proper

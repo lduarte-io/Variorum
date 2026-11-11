@@ -496,7 +496,7 @@ condition for running it is unmet; the round's 14/4 stands.
 refresh.** Her app was not running at any point (`pgrep` checked at
 open; the discipline held throughout). Two pre-existing uncommitted
 author files (`notes/DetailedPlanForPhases.md`,
-*[removed for publication]*
+`release-and-v1-strategy.md` (relocated to the private planning repo)) were left untouched — every commit
 was staged by explicit path.
 
 #### W12 — the scrap drag into a post (BUG; traced, then measured)
@@ -879,7 +879,7 @@ match-or-beat: core 903/102 · Mac 939/152 · mobile 14/4.** Append
 your batch record under "Batch records"; commit per convention with
 the standing trailer, staging by EXPLICIT PATH ONLY (two author
 files sit uncommitted in the tree — `notes/DetailedPlanForPhases.md`
-*[removed for publication]*
+and `release-and-v1-strategy.md` (relocated to the private planning repo) — touch neither). Never
 `/Applications`, never `Sources/VariorumCore/Sync/`, never push,
 never `git checkout` over uncommitted work, no schema. STOP and
 propose if any item exceeds its ruling's shape.
@@ -4814,7 +4814,7 @@ by path); WAL-safe backup
 `variorum-backup-2026-07-31-100302.sqlite` (`sqlite3 .backup`;
 `integrity_check` ok); Release built from HEAD (all work
 adjudicated + reviewed); installed to `/Applications`; signature
-*[removed for publication]*
+verified (`io.lduarte.Variorum` / `<apple-team-id>`); the installed
 Release carries NO display-name override — "Variorum Dev" is
 Debug-only, exactly as W25 ruled.
 

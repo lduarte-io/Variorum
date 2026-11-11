@@ -47,7 +47,7 @@ branch's marker-13 builds were safe throughout the phase.
    Her relaunch is HER morning act; her first open runs `v1_24` + `v1_25`
    (additive; the grants store is LOCAL-ONLY and mints fresh).
 6. **The phone:** `xcrun devicectl device install app` to her iPhone 17 Pro
-   *[removed for publication]*
+   (device id `<device-udid>`, paired over wifi — probed
    available at the window's prep) from the merged tree's `VariorumMobile`
    scheme (the 13y/13i-e road). If the phone is unreachable overnight, her
    recorded fallback stands: she installs tomorrow, and the marker-12 phone

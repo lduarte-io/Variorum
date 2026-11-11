@@ -7,7 +7,7 @@ Written 2026-08-30 at her explicit authorization, as the design session
 **The mockups:** `proposal.html` in this directory — one self-contained
 page, no external requests, theme-aware.
 **Published for her to view:**
-*[removed for publication]*
+(an internal design link, removed)
 (private until she shares it; republishing the same file path updates that
 same URL).
 

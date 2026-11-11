@@ -48,7 +48,7 @@ byte-identical; verify the header is NOT `SQLite format 3` (ciphertext) — NO h
 (SQLCipher; the key is in her Keychain custody; the app's own backups run it). Then build Release in a CLEAN
 worktree (`git worktree add ~/dev/variorum-final <final hash>`; `xcodebuild -scheme Variorum -configuration
 Release build` with its own DerivedData), copy the product to `/Applications/Variorum.app`,
-*[removed for publication]*
+`codesign --verify --deep --strict`, confirm the identity `io.lduarte.Variorum` / team `<apple-team-id>` and the
 keychain access groups unchanged (`codesign -d --entitlements -`), record the binary hashes before/after,
 remove the worktree and its DerivedData. The precedent with every command: the last round's LIVE STATUS
 (`notes/plans/use-report-round-2026-09-06.md`, the finish's entry) and its handoff item 1.

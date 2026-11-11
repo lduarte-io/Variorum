@@ -79,7 +79,7 @@ named directory, `45c-prerevert/`**, and every restore below was verified with
 | what | value |
 |---|---|
 | simulator | `V45cPhone-17-26` — iPhone 17, **iOS 26.2 (23C54)**, created fresh for this batch |
-*[removed for publication]*
+| UDID | `<simulator-udid>` |
 | accessibility | `ApplicationAccessibilityEnabled` written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/dd` |
 | teardown | DONE — deleted at the batch's close (§9) |
@@ -605,7 +605,7 @@ line, which the item-1 red-on-old run had shown this harness does print when it
 happens.
 
 **Simulator teardown: DONE** — `V45cPhone-17-26`
-*[removed for publication]*
+(`<simulator-udid>`) deleted at the batch's close. The stray
 `Variorum-batch6a` simulator from an older batch was left alone.
 
 ---

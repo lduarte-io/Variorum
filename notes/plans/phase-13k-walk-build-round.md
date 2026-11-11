@@ -1957,7 +1957,7 @@ touched files live under `App/Variorum/`. Zero schema; zero
   instances verified before backup, build and copy; fresh WAL-safe
   A1 backup `variorum-backup-2026-08-02-224558.sqlite`
   (`integrity_check` ok); Release built from HEAD `8014f15`;
-  *[removed for publication]*
+  signature confirmed (`io.lduarte.Variorum` / `<apple-team-id>`). NO
   schema all phase ⇒ no lockstep-marker concern.
 - **Handoff:** `notes/handoffs/phase-13k-handoff.md` (her checklist
   at top). **13e next, at her word** — its plan updated to point at

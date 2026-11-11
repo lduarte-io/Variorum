@@ -75,11 +75,11 @@ walk. Announce each gate step to her before running it.
 5. **The `/Applications` refresh** at a verified zero-instance window
    (Release; AFTER the deploy — the lockstep-strand rule).
 6. **The live probes (you drive, announced):** provision the second
-   *[removed for publication]*
+   account on **`<her-email>`** via the admin door
    (`generate_link` — it BYPASSES signups-off by recorded fact; that
    is the deliberate tool here). **UID-CHECK DISCIPLINE (the 14b
    near-miss): verify the minted session's uid is the NEW account —
-   *[removed for publication]*
+   and never her `<account-uuid>` — before ANY act under it.** Grant it the
    `hosted_sync` entitlement via `entitlement_set` (the batch-1 hold:
    enforcement-from-birth would otherwise refuse at the tier gate, not
    the isolation boundary). Then: the stranger-sees-zero probe through
@@ -103,7 +103,7 @@ walk. Announce each gate step to her before running it.
    the "Allow new users to sign up" toggle ON. Preconditions all green
    first: probes passed, domain live, entitlement machinery live.
 9. **Stranger-onboarding validation (her walk):** ARM (a) first —
-   *[removed for publication]*
+   `<her-email>` joins the org team for the window (the
    built-in mailer delivers only to team addresses; ARM (a) is
    adjudicated, vetoable by her) — then her walk: in-app sign-UP as a
    fresh user (the door's real road: confirmation email received —
@@ -223,11 +223,6 @@ walk. Announce each gate step to her before running it.
 - **The AppSpec §7 `sync_state` comment delta** (the third key,
   `rekey_in_progress`) — flagged twice in the ladder records; it is a
   closeout edit, easy to miss.
-*[removed for publication]*
-  *[removed for publication]*
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-*[removed for publication]*
+- *[removed for publication]*
 - Her pause's end-state at closeout (Round 1 held it through 14c).
 - 14d's opening at her word.

@@ -10,7 +10,7 @@ of that work" — the bootstrap exception; everything after bootstrap follows th
 ## 1. Her rulings (2026-10-06)
 
 1. **Tracker: Linear** (the proposal's Plan A), free tier first — *"i can buy the 10 dollar plan if
-   *[removed for publication]*
+   needed."* Plane noted as runnable on **<server>** (her server machine) later if ever wanted;
    declined for now — *"i'd like to start with the UI polish"*; bug-title privacy accepted
    (*"i'm not that worried about bug name privacy and the ui is a plus"*).
 2. **Prefix: VX.** VR retires (it was two days old — minted 2026-10-05 at the librarywalkpolish

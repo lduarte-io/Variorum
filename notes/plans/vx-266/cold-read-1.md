@@ -221,7 +221,7 @@ against her stated attacker.**
 - *Evidence.* The gated items are created with `.biometryCurrentSet` (`StoreKeyGuard.swift:289-298`), which the
   settled design records as a feature: "adding a fingerprint invalidates it (P recovers)" (pre-13x §3.2, line 247);
   Apple: "The item is invalidated if fingers are added or removed for Touch ID" (the lookup, CONFIRMED).
-  *[removed for publication]*
+  Her threat model, quoted in code: "a lot of people have […] someone who knows their computer
   password but might not know their passphrase" (`StoreProtection.swift:166-170`); pre-13x §2: Castle stops "your
   Mac's login password: yes".
 - *Mechanism.* Someone with the Mac's login password enrolls their own finger (macOS asks for that password) ⇒ the

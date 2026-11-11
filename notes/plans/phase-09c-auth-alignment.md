@@ -131,9 +131,9 @@ gate, plus the Phase 8 device rounds the author deferred until "9b AND 9c are do
   changed by rotating to a standby key and then revoking it"). Consequence, per lookup
   fact 3: **fallback B's legacy shared-HS256 form is DEAD**; only the modernized form
   (importing the same asymmetric key into both projects) remains as B.
-*[removed for publication]*
+- **Fragments project (`<supabase-project-ref>`): the OAuth 2.1 Server EXISTS and the
   author ENABLED it.** Published endpoints (dashboard + confirmed by the coordinator's
-  *[removed for publication]*
+  curl of the PUBLIC discovery document): issuer `https://<supabase-project-ref>.supabase.co/auth/v1`,
   authorize `…/auth/v1/oauth/authorize`, token `…/auth/v1/oauth/token`, JWKS
   `…/auth/v1/.well-known/jwks.json`, discovery `…/auth/v1/.well-known/openid-configuration`.
   Discovery says: `response_types=[code]`, PKCE S256, grant types authorization_code +
@@ -161,14 +161,14 @@ gate, plus the Phase 8 device rounds the author deferred until "9b AND 9c are do
   already points there? what would production need permanently?) — this is the
   make-or-break question for the pairing, and a real route-A cost to weigh against
   fallback B if it demands a permanently-hosted page.
-*[removed for publication]*
+- **Variorum project (`<supabase-project-ref>`): the Custom Providers page EXISTS** —
   "Create Custom Auth Provider": provider identifier slug (`custom:<name>`), display
   name, auto-discovery (recommended) from an Issuer URL or manual endpoints, client
   ID + client secret fields, scopes (default suggestion `openid, email, profile`),
   "allow users without email" toggle, and the fixed callback URL
-  *[removed for publication]*
+  `https://<supabase-project-ref>.supabase.co/auth/v1/callback`. **No provider created
   yet** — blocked on client registration above. When created, the Issuer URL is exactly
-  *[removed for publication]*
+  `https://<supabase-project-ref>.supabase.co/auth/v1` (standard discovery path — leave
   Discovery URL empty).
 - **Author actions remaining (blocked on the implementer's registration + consent
   findings):** register the Variorum client on the Fragments OAuth server, create the
@@ -193,7 +193,7 @@ the author copies them into the Variorum provider form from there.
 
 **Round 3 (same day — the spike RAN; ROUTE A CONFIRMED by the author):** registration
 succeeded through the dynamic door once the toggle actually saved (client_id
-*[removed for publication]*
+`<oauth-client-id>`, confidential, `client_secret_post`; secret in
 the untracked `.env.fragments-oauth.local`); the custom provider was created (slug
 `fragments`, auto-discovery, the pinned issuer). TWO dashboard didn't-save incidents
 (first the toggle, then the Authorization Path — the OAuth Server page's save step is
@@ -203,11 +203,11 @@ PKCE + state + callback correct; hop 2 still redirecting to the old `/oauth/cons
 After the re-save, the full delegated sign-in succeeded END TO END: consent page
 (email+password against the Fragments project) → approve → callback with the REDACTED
 summary. **The evidence (the Step 0 memo's substance):** a Variorum-minted session —
-*[removed for publication]*
+`sub <account-uuid>` (the exact value class `owner_id`/RLS key
 on), `iss` = Variorum `/auth/v1`, `role`/`aud` authenticated, `amr` oauth, provider
 `custom:fragments` — and **`provider_token` + `provider_refresh_token` BOTH PRESENT**,
 the provider token being a genuine Fragments-project user JWT (`sub
-*[removed for publication]*
+<account-uuid>` = the `journal_entries.user_id` class, `iss` =
 Fragments `/auth/v1`, `role` authenticated, exp 3600 s). The inner V↔F token exchange —
 the chain's flagged biggest unknown — ran live with her real account. Observed flow
 `implicit-fragment` (the harness's redirect_to shape; the real Step 1 sign-in uses the
@@ -625,24 +625,24 @@ projects can actually complete the OAuth 2.1 Server ↔ Custom-OIDC-Provider pai
 was answered by RUNNING it: one delegated sign-in with the author's real Fragments
 account succeeded end to end on 2026-07-10.
 
-*[removed for publication]*
+- **The pairing, as deployed:** Fragments project (`<supabase-project-ref>`) OAuth 2.1
   Server enabled; Variorum registered as a client via the dynamic RFC 7591 door
-  *[removed for publication]*
+  (client_id `<oauth-client-id>`, confidential,
   `client_secret_post`; secret in the untracked `.env.fragments-oauth.local`);
-  *[removed for publication]*
+  Variorum project (`<supabase-project-ref>`) custom provider slug **`fragments`**
   (`custom:fragments`), auto-discovery from issuer
-  *[removed for publication]*
+  `https://<supabase-project-ref>.supabase.co/auth/v1`, scopes `openid, email,
   profile`. Consent UI: Supabase hosts none (verified); the spike served the
   throwaway `Spikes/AuthPairingSpike/consent.html` at the Fragments Site URL
   (`localhost:3000`, Authorization Path `/consent.html`); the production page lands
   on the author's stargazing.tech (spec: `notes/fragments-consent-page-spec.md`).
 - **The evidence (redacted spike summary, verbatim values):** a Variorum-minted
-  *[removed for publication]*
+  session — `sub <account-uuid>` (THE `owner_id`/RLS value for
   the author's rows; the Step 4 keying decision collects on it), `iss` = Variorum
   `/auth/v1`, role/aud `authenticated`, amr `oauth`, provider `custom:fragments`,
   `expires_in` 3600, refresh token present — **plus `provider_token` AND
   `provider_refresh_token` both riding the initial response**, the provider token a
-  *[removed for publication]*
+  genuine Fragments-project user JWT (`sub <account-uuid>` =
   the `journal_entries.user_id` class, `iss` = Fragments `/auth/v1`, role
   `authenticated`). The one-account goal is DEMONSTRATED, not asserted: she signed
   in once, with her Fragments identity, and Variorum minted her Variorum session.
@@ -656,7 +656,7 @@ account succeeded end to end on 2026-07-10.
 - **Still open, with owners:** (i) ~~toggle-OFF survival of the registered client~~ —
   **RESOLVED 2026-07-10 (field notes Round 4): empirically CONFIRMED** — with the
   toggle off, registration 403s (`oauth_dynamic_client_registration_disabled`) while
-  *[removed for publication]*
+  the full authorize chain still works for client `<oauth-client-id>` (spike's localhost
   redirect-URL cleanup deferred to phase-end in case the harness serves Steps 1/5).
   (ii) Fragments' PostgREST accepting the provider token for RLS —
   claims look exactly right; verified only at Step 6(iv)'s real-Fragments pass.
@@ -911,7 +911,7 @@ sessions refresh it after Mac-app changes).
 **Gate 2 (Mac sign-in + backfill):** PASSED — after the sitting's findings 1–3
 below were fixed (the first real end-to-end `SignInFlow` run was THIS sitting,
 exactly as the thin-face convention predicted). Adoption stamped everything;
-*[removed for publication]*
+totality five zeros local AND mirror; spot-check = her uid (`<account-uuid>`).
 Wrinkle observed working as designed: the two Phase 5 integration fixtures
 ("from the Mac/phone DD380EAF") pulled down unowned AFTER sign-in's adoption
 pass; the every-signed-in-launch idempotent adoption stamped them at relaunch —

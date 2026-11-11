@@ -2945,7 +2945,7 @@ zero instances verified before the backup, before the copy and after.
 | built from | `348ef8aa`, clean throwaway worktree `~/dev/variorum-13u2-release` (removed), Release, DerivedData in `/tmp` (removed) |
 | old binary SHA-256 | `ffe42c8817e324ce9484fd2fa3b5248363ae8ca37508fb595aeb032f26c9f65c` (= 13u1's recorded hash) |
 | new binary SHA-256 | `185c6cf1ed872a8892669229456ba0ff6d8936ceb35dc4fb43b748b496cd9d5f` (identical installed) |
-*[removed for publication]*
+| signature | `codesign --verify --deep --strict` OK before AND after · `io.lduarte.Variorum` · Team `<apple-team-id>` · both keychain groups present |
 
 **THE AUTHOR HANDOFF, written LAST:** `notes/handoffs/phase-13u2-handoff.md` — her checklist at
 the top (the refresh evidence, the seven-row walk with items 1/18 hers to accept, the ratify

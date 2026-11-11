@@ -147,4 +147,4 @@ The A1 backup pattern (Phase 8 amendments; exercised at every
 `notes/DetailedPlanForPhases.md` Phase 12 row + the
 v1-release-readiness row ("a right-sized Phase 12 — data-safety subset
 as a release gate": this phase IS most of that subset, pulled forward)
-*[removed for publication]*
+· `release-and-v1-strategy.md` §2 (relocated to the private planning repo).

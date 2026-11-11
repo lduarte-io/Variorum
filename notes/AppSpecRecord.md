@@ -790,8 +790,8 @@ her ~8-minute crossing; RELEASE 0.10 (build 9172) published (the DMG byte-verifi
 to the published build; the release toolchain's X.Y.Z-only checks swept to accept X.Y); the site's
 `/variorum/privacy` + `/variorum/support` drafted and deployed at her word, every served HTML comment stripped at her
 ruling ("if it's just on the internet… it's getting scraped and saved. so remove that"); her #239 answers (a)–(i)
-*[removed for publication]*
-*[removed for publication]*
+landed; both beta testers' first-run sync failures traced live (tester A: enrolled pre-deploy, zero rounds ever, tenant
+empty — VX-498's class suspected; tester B: no vault ever landed, the deleted-account story killed by his answers, the old
 road's enrollment act chartered for git-history archaeology); **VX-508** found (a pre-0.10 vault keeps a dormant
 Apple-wrapped master as artifact 17's left-unread history — one account; cleared at her word after its 0.10 join);
 **her re-ruling closing the window: "forget about mobile, figuring out this exact issue will be the next thing that we
@@ -815,9 +815,9 @@ including just releasing the change") walked the Castle leg, restored the dev st
 **What was true.** On 0.10 no account act started a sync round: VX-329 U1 (`f2306a535`) deleted the old road's
 post-enrollment round hook and never rewired it, so a Standard set-up sat at "Sync locked" until the user typed,
 switched apps, pressed Sync now or relaunched — joins and Castle set-ups only seemed fine because a system Touch ID
-*[removed for publication]*
+prompt bounced focus. The archaeology: tester B's 0.9.4 enrollment set the passphrase at its second screen and wrote the
 vault only after the twelve-word re-entry, so closing the sheet left a passphrase and no vault (his "I don't think I
-*[removed for publication]*
+have 12 words saved anywhere" fits exactly); tester A's zero rounds are 0.9.8-era (she never upgraded — her correction).
 
 **What shipped (SurfaceContracts' protection bullet and CLAUDE.md's Environment — the contract lines in place):**
 the first round after every account act that changes sync's standing, the re-keying ones on the reopen's fresh
@@ -1142,7 +1142,7 @@ to NOT show up in compare?? that seems like exactly what you would want from com
 allowed to stop counting it as a version but i think that should mean that it is automatically promoted." — confirmed
 "i like it. sounds good on both." (§9/§12: versions never filtered from auto-fill; unmark promotes after a confirm).
 VX-616 — "agree with removing the button." (the gathering foot's "+ new chapter" removed; Bind into a Book… stays the
-*[removed for publication]*
+row menu's). VX-431 — tester A's history-button move DECLINED: "I don't want to move the history button - I like having
 no words at the top and I want it to stay that way". VX-189's repurpose — "gatherings should have shared with doors —
 you can file a ticket for this or repurpose VX-189 for it."
 

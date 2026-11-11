@@ -38,7 +38,7 @@ I like your mockups, I approve of them. the only comment I have is that if you'r
 | `greenchosenlinedoesntgoallthewaydown.png` | Takes, stack style: a long chosen take whose 3-pt green leading bar stops partway down the card | 14 (D2) |
 | `misalignednumberofnotesandmenuinindex.png` | The book Index column: per-chapter counts ("1") at the far right, the note rows' "··· ⌄" menu inboard of them | 24 (E6) |
 | `ithink13uishandlingthisbutsuperannoyingcantdeleteselectedtext.png` | Write: a selection spanning a block boundary, the refusal "This selection crosses a block boundary and covers one of the blocks only in part…" | 29 — NOT this round's (13u1 item 5) |
-*[removed for publication]*
+| `name doesnt match sidebar tab name.png` | Takes, slot-split: the masthead reads "(a note title)" while the Open strip's tab still reads "2026-09-06" | 25 (F1) |
 | `thisblockmenuneedsstobemovedintotheleftbar.png` | The Journal book in Outline with 2026-09-02 focused: the note's bar floating at the right ("open tail · block ▾ · Takes · commit ⌘S · history · note ▾ · comments · Aa · 0w in note"); the sidebar shows no "this note" rail | 30 (18d-1) |
 | `datechangedoesntchangeautodisplayname.png` | A journal note's masthead still titled 2026-09-02 under the toast "Entry date set to 2026-09-01." | 26 (F2) |
 | `contentsinnotereadmodeistoonarrow.png` | Note Read mode: the "contents" column at a fixed width with every line truncated mid-word | 33 (18d-5) |

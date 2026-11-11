@@ -86,7 +86,7 @@ closeout duty), the reviewer's fix pass, R2 **0/0/0/0** — the family's cleanes
 | **A1 backup (taken FIRST, zero instances)** | `~/dev/variorum-store-backups/13u4-refresh-20260921T133135Z/` — the whole real-store folder, 149 files, `diff -rq` byte-verified |
 | **Built from** | `d369c839` (the closeout head), clean throwaway worktree, standard Release (worktree + DerivedData removed) |
 | **Old → new binary SHA-256** | `0c9ebcb4…` (= 13u3's recorded hash — custody clean) → `1548f68afe3281268da10cfdcab387ba1047dc59739fba9d7a721fcebb5d1d1b` (installed copy verified identical) |
-*[removed for publication]*
+| **Signature / groups** | codesign OK; both keychain access groups present and IDENTICAL to the outgoing binary's (`…Variorum` + `…Variorum.shared`, team `<apple-team-id>`) |
 | **Instances** | zero at every step; your store never opened by any session |
 
 ## Judgment calls made for you to see

@@ -189,7 +189,7 @@ leg) which **only her phone can give**.
    hands them convincing evidence for findings that are not real.**
 4. **Every iPhone 16-series simulator here is iOS 18.3**, below the iOS
    26 deployment target, and is **not a valid destination**. Valid:
-   *[removed for publication]*
+   the iPhone 17 family, iPhone Air, and one iPhone 16e (`<simulator-udid>`).
 5. **Arm `ApplicationAccessibilityEnabled` on every simulator used** —
    without it sixteen real pins fail as phantoms reading `labels were []`.
 6. **The hallucination guard:** no finding fixed without tracing its

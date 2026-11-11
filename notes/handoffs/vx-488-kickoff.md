@@ -6,7 +6,7 @@ context ceiling; HER WINDOW IS OPEN AND PAUSED ON THIS RUN)
 - **VX-329 is MERGED** (PR #183, merge `0aab72c39`) and its closeout is complete (the plan's §9; the handoff
   `notes/handoffs/vx-329-handoff.md`). The in-flight row for THIS run is on main.
 - **THE MARKER-14 DEPLOY IS DONE AND VERIFIED on production** (2026-10-22, her explicit go, the stored PAT road —
-  *[removed for publication]*
+  `.env.supabase.local` at the repo root, ref `<supabase-project-ref>` guarded in every query): artifact 17 `[]`
   first run; the pg_temp belt 19/19; marker 14; her vault row backfilled `mode='castle'`, the one beta tester's
   `'standard'`; the grant sweep **62 OK · 4 INFO · 0 fail**. The vx307 checklist flip + SyncSpec §12's HELD entry
   gain the window's result at THIS run's close (on main).
@@ -60,7 +60,7 @@ trivial).
 Her call (2026-10-22, in session): the fix must be provable LIVE before her Mac gets the rebuilt app. Scope it
 TIGHT: Debug-only; the A4 fence (find it: the dev store's `SyncSession` never configures — "Sync off (dev
 store)") lifts ONLY when the walk-switch env (`VARIORUM_WALK_PROJECT_URL`) is present AND the URL's ref is NOT
-*[removed for publication]*
+production — REFUSE `<supabase-project-ref>` by ref, fail-loud. Pin: the fence holds with no env; lifts with the
 throwaway env; refuses the production ref.
 
 ### The ladder
@@ -74,7 +74,7 @@ files aside by `mv` (ALL top-level files, no extension filter — the real slot 
 `io.lduarte.Variorum/Variorum-dev` path is a stale decoy); launch with the throwaway env
 (`~/.variorum/dev-castle.env` NEVER typed into driven UI; `~/.variorum/dev-vault-throwaway.env` is disposable by
 design; VERIFY the walk switch in-process via `ps eww <pid>` BEFORE any credential; the ref guard
-*[removed for publication]*
+`<supabase-project-ref>` in EVERY throwaway SQL apply). The arc: fresh library on the dev slot → sign in as the
 throwaway's user A → Use Castle (Touch ID gate — HER FINGER does the presses; she is present and willing; mark
 her-hands rows) → quit → relaunch → the lobby's Touch ID unlock → **THE PROOF: the engine's first round runs**
 (the status row leaves "Sync locked"; with member 3's opt-in the round actually lands against the throwaway) —

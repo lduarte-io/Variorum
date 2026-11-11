@@ -28,14 +28,14 @@ correctness discipline is unchanged.
 
 | | Variorum | Fragments |
 |---|---|---|
-*[removed for publication]*
+| Ref | `<supabase-project-ref>` | `<supabase-project-ref>` |
 | Role here | the mirror + the sign-in issuer of record | the OIDC identity + the journal bridge's backend |
 | Key state | JWT signing keys (ECC P-256) | same |
 
 **Deployed auth topology (Step 0, 2026-07-10):** Variorum has custom provider
-*[removed for publication]*
+`custom:fragments` (auto-discovery from `https://<supabase-project-ref>.supabase.co/auth/v1`);
 Variorum is a registered confidential OAuth client of Fragments' OAuth 2.1 Server
-*[removed for publication]*
+(client_id `<oauth-client-id>`; secret in the author's untracked
 `.env.fragments-oauth.local`); the login/consent page serves at Fragments' Site URL +
 Authorization Path (the spike used `localhost:3000` + `/consent.html`; production is
 the stargazing.tech page — spec in `notes/fragments-consent-page-spec.md`).
@@ -111,7 +111,7 @@ sqlite3 ~/Desktop/variorum-pre-9c-cutover.sqlite "PRAGMA integrity_check;"
 3. **What just happened automatically:** the owner-adoption backfill ran BEFORE
    the first push (every NULL `owner_id` row — live and tombstoned — stamped with
    her Variorum `auth.uid()`, expected value
-   *[removed for publication]*
+   `<account-uuid>`), then the sync chain composed and a
    round pushed the adopted rows.
 4. **Verify locally** (app can stay open; reads are safe):
 
@@ -124,7 +124,7 @@ done
 
 **Expected:** five zeros. Also spot-check the value:
 `sqlite3 "$STORE" "SELECT DISTINCT owner_id FROM container;"` → exactly
-*[removed for publication]*
+`<account-uuid>`.
 
 5. **Wait for the round to finish** (status row shows "Synced HH:MM", 0 pending),
    then **verify the mirror** (SQL editor, or the coordinator via PAT):
@@ -334,7 +334,7 @@ sqlite3 "$STORE" "SELECT c.entry_date, v.working_text FROM container c
 | `callbackWithoutCode` error after browser sheet | Consent denied/cancelled, or redirect URL not allow-listed | Gate 0.2; retry |
 | Sync error `permission denied for function` post-cutover with HER session | Grants drifted — should be impossible if 04 ran verbatim | Rollback path, Gate 4 |
 | Sync error `owner_id mismatch` | A row escaped the backfill | Relaunch signed-in (idempotent re-adoption), sync, re-probe |
-*[removed for publication]*
+| Sync error `not yet backfilled — complete the owner adoption` | A STORED **mirror** row escaped the backfill (the §12 refuse-until-backfilled case) | **Server-side repair only** (review round 2 — post-cutover, re-running the local adoption cannot help: it stamps LOCAL rows, the pull's owner filter hides the NULL mirror row, and every push touching it RAISEs). Via PAT/SQL editor: `update <table> set owner_id = '<account-uuid>' where id = '<row-id>';` — table and id ride the error text verbatim. If widespread, enumerate with the Gate 2 mirror totality query, or take the Gate 4 full rollback and redo the choreography from Gate 2 |
 | Signup probe returns a session instead of 403 | "Allow new users to sign up" is still ON (the dashboard save trap) | Delete the probe user, re-save the toggle, re-probe (Gate 4.2) |
 | Bridge note "canonical user … has not synced" | Fragments `user_settings` empty — fail-closed gate | Open the Fragments app, let it sync, retry |
 | Bridge pauses a day, "two live entries" | The designed duplicate-day pause | Hand-merge/delete/re-date the extra entry |

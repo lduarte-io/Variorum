@@ -55,7 +55,7 @@ exercises is `notes/CastleRules.md` (rules 4–7, 10–12, 16, 17, 21). The driv
   Castle's idle lock during a wait (the lobby answers the current passphrase); a quit declined while a sheet is up (the
   sheet dismissed, one more quit — never SIGTERM while the as-found library is open); quiet receipts fading in ~6 s.
 
-*[removed for publication]*
+## The account: `castle` (`<test-account-email>`, auth id `<account-uuid>` per VX-510 C1 — re-read at W0)
 
 **Why `castle`:** her standing lifecycle pair is std = the Standard account and castle = the Castle account (R-510-23).
 The last recorded state (VX-529's D7, 2026-10-24 23:16 MDT): **Castle, vault revision 23, current passphrase = the env's
@@ -216,7 +216,7 @@ and would push the as-found's content into the account.
   "Sync this library": its posture sentence read and captured WITH VX-469's line ("The libraries in Previous Libraries keep
   their own quiet roads on this Mac — Castle protects the library you have open") → **"Always ask"** pressed (no Touch ID —
   her finger is never needed) → focus "Your account's passphrase" → `wk_prod_secret passphrase` (P1) → the sheet's button →
-  *[removed for publication]*
+  expected: `enroll: … done … under <k1>` · `road: turnOnSync — library <L1> now names account <account-uuid>, castle under <k1>`
   (the re-keying join through the reopen) → the words moment (the passphrase arm names the account and shows NO words —
   rule 7) → OK → **"Synced. Your account's writing is in this library now."** → Done → the row "Synced ‹time›" → the cards
   band EMPTY (VX-511's retirement) → capture. Branches per "What each posture means" above.

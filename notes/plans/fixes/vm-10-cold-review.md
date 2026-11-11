@@ -4,7 +4,7 @@
 (`vm-10-the-write-scroll-authority.md`), QUESTIONS #200, the four production files read in
 context, the test file, the walk's captures (viewed: 01, 02c, 04a, 07c, 08b, 09a), and the
 unit's two suites re-run by this reviewer on a fresh derived-data path
-*[removed for publication]*
+(`/tmp/dd-vm10-review`, simulator <simulator-udid>, accessibility flag read 1): **10/10 green**,
 readings byte-matching the record (end-⏎ 1721.7 → 1754.3, first visible 1922 · short note
 0 → 0, first visible 1 · memory re-entry 881.3 @ char 970). The FULL mobile suite was NOT
 re-run here; the record's 818/128 line stands as the implementer's.

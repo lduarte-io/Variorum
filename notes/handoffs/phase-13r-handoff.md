@@ -35,7 +35,7 @@ disputes, all fixed; round 2 (fresh reviewer) — 0/0/0/3 record-only, every fix
    (deferred at your word, unchanged) · the `/variorum` page's intro copy — rides **13s**
    (her word: she'll write it within that phase; her site's visual update runs alongside;
    **13s is SPLIT at the same sitting into 13s-a rewording / 13s-b onboarding — the ruling
-   *[removed for publication]*
+   verbatim on the FuturePhases 13s row**) · ✅ **the test account KEPT for future walks** · ✅ **the
    site runbook's cache-busted preflight APPLIED at her word** (their `notes/
    variorum-releases.md`, commit `5649cf6` — wrangler has no `r2 object head`, so the
    verified busted-probe shape landed) · the Restore Tutorial press — noted, hers, and the

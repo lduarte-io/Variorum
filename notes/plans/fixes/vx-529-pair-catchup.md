@@ -2119,7 +2119,7 @@ the closing stage batch, the live proof, and HER TWO-MAC TEST.**
     premise needed it). The sync-keys custody suites — the leaves VX-530's fix DOES touch — ran (not in the skip
     list).
   - The 4 expected failures are the recorded known-issue rows. The ticketed MCP wall-clock flake did not fire.
-  *[removed for publication]*
+  - **The earlier tester check, recorded (her ask):** his production account went from the T-3 baseline's all-zeros to
     vault standard rev 1 · `kp:` ENROLLED · 1 device cursor · 3 containers / 16 blocks / 16 variants, newest write
     2026-10-24 21:02Z — the first-run fix working in the field; one release stands (0.10.1, build 9311, 2026-10-24).
 - **The phone suites** (`VariorumMobile`, iPhone 17 Pro simulator OS 26.2, DerivedData `vx529-phone`): **808 tests
@@ -2189,7 +2189,7 @@ transcript.
   (191598614–191598620, 195574778/195574779) and **re-verified identical at the cutover**.
 - `Tools/WalkKit/first-run-walk.sh castle` (the build path symlinked to this run's `vx529-walk`; the worktree given
   the `.env.supabase.local` symlink G8 needs): G1–G8 passed; P1 launch on the road (pid 39373), P2 the road ARMED,
-  *[removed for publication]*
+  P3 the account confirmed (`<account-uuid>`), P4 signed in, P5 the twelve words' look copied and stashed, **P6 STOPPED
   correctly** — the account already holds a vault, so the door reads "Sync this library…" (the join arm), not the
   script's set-up arm "Turn on sync…" (the script is the set-up road's; recorded, not a defect).
 - **L_A = library `5f9da1cc` JOINED by hand:** Protection… → "Sync this library…" → the sheet titled **"Sync this
@@ -2197,7 +2197,7 @@ transcript.
   twelve words are ‹the account›'s twelve words. Your previous twelve words still open backups made with them. If you
   don't have your account's words written down, you can make new ones at any time."* (**VX-526's new middle sentence
   LIVE**) → OK. The log: `enroll: done #2 under c7e1a4bf` · `road: turnOnSync — library 5f9da1cc now names account
-  *[removed for publication]*
+  <account-uuid>, standard under c7e1a4bf` · VX-511's card retirement riding it. Server: device cursors 7 → 8, vault rev
   18 → 18 (the join writes no vault row — correct).
 - **The road's evidence channel is the run's `app.log`** (the launcher's `--stderr`), not the unified log (`log show`
   read empty — the walk build's lines go to stderr). Every later leg reads `app.log`.
@@ -2247,7 +2247,7 @@ walk-tool fix for this run's closeout.
 
 **D0 SECOND HALF — L_B JOINED (22:42):** L_B's instance (40395) was already signed in (the dev scope's session);
 "Sync this library…" → `passphrase2` → `enroll: done #1 under 96046712` · `road: turnOnSync — library 1a1e7a0d now
-*[removed for publication]*
+names account <account-uuid>` · VX-511's retirement · the sheet confirmed **"Synced. Your account's writing is in this
 library now."** (P-VX510-1 live).
 
 **D1w — THE QUIET WORDS-ONLY CATCH-UP (R-529-2) — PASS (22:43–22:48):**
@@ -2361,7 +2361,7 @@ library now."** (P-VX510-1 live).
   the join's two proof fields (VX-523: the pair proven the account's)`** · `swapped` · `done #2` · `road: made a
   copy this Mac's library — library ac57d5c2 …; the previous one in Previous Libraries; held`.
 - Protection ▸ "Sync this library…" → the account's passphrase → `enroll: done #3` · `road: turnOnSync — library
-  *[removed for publication]*
+  ac57d5c2 now names account <account-uuid>, castle` → **the sheet went STRAIGHT to the round's line — NO words-replaced
   moment** (D0's join of L_A stopped on that moment until OK; here the proof let the join see the words already
   match). The round's line, honest about the hold: *"Sync hasn't run yet: Sync is waiting since the restore —
   press Resume Sync in the main window's banner."* (P-VX510-A1's wording live).
@@ -2450,7 +2450,7 @@ anything unexpected:
 2. Build Release locally (the Pro's build won't run here — its profile licenses only the Pro):
    cd App/Variorum && xcodebuild -scheme Variorum -configuration Release -destination 'platform=macOS'
    -derivedDataPath DerivedData/vx529-release -allowProvisioningUpdates CODE_SIGN_STYLE=Automatic
-   *[removed for publication]*
+   DEVELOPMENT_TEAM=<apple-team-id> build   (expect 0.10.1; confirm the build number it reports).
 3. Ask her to quit Variorum on the Air. NEVER quit or kill it yourself. Confirm with `pgrep -x Variorum` printing
    nothing (use exactly this check — a grep for the app's path can match your own shell).
 4. A1 safety copy of the Air's real store: from ~/Library/Containers/io.lduarte.Variorum/Data/Library/Application

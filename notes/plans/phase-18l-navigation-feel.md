@@ -395,7 +395,7 @@ editor-seam by definition → a FABLE cold review follows; your self-assessment 
 
 You are the `opus-implementer` for **18l UNIT U0b**. One acceptance unit: her report — *"when I am
 in write and remove a newline, the editor's height adjusts removing the whitespace between the
-*[removed for publication]*
+topmost line in the editor and the line at the top of the editor."* Captures (since removed for publication):
 `notes/plans/18l-inputs/2026-09-25-write-{before,after}-removing-newline.png` — block 4/4 (caret
 on an empty last block, first line ~40 pt below the masthead's divider) → one backspace → block
 3/3, the first line ~14 pt below it; the page's top air GONE. KnownIssues row 87.
@@ -988,7 +988,7 @@ to Terminal and read back `1, 0`).
 
 | Voice | Row | Before → after (the first line's / reference rows' ink, pt below the hairline) | Verdict |
 |---|---|---|---|
-*[removed for publication]*
+| Terminal | **her sequence** (a short note typed through quick entry: her line · blank · "First, the tent:"; click the last line's end, ⏎ → the empty last block, ⌫ → carved, receipt + tray ⌫) | first line **27.5 → 27.5 → 27.5** (pre-fix build: 27.5 → **3.5**) | **PASS** (`walk/t-her-0*`; pre `pre/t-her-0*`) |
 | Study | her sequence (same) | **29.5 → 29.5 → 29.5** (pre-fix: 29.5 → **5.5**) | **PASS** (`walk/s-her-0*`; pre `pre/s-her-0*`) |
 | Study → Terminal | **a voice switch at the page top** (the re-font sibling) | Terminal's resting 27.5 kept (the fix's pin reads 24.0 red-on-old) | **PASS** (`walk/t-refont-at-top`) |
 | Terminal | **long note mid-note** (*A Scandal in Bohemia*, 262 blocks; wheel-scrolled so the edge cuts a line; click a blank line mid-page → ⏎ → ⌫) | every row above the act identical across ⏎ and ⌫ (the edge's sliver 0.5–4.0 included); rows below +24 on ⏎ (the act's own block), back on ⌫ | **PASS** (`walk/t-mid-0*`) |
@@ -1055,8 +1055,8 @@ the existing single-fragment `.ensuresLayout` idiom).
 2. **B6** — U0c's session: the note-open end landing reproduced; the Int session anchor.
 3. **The carve's caret** lands at the NEXT block's start mid-note (`caretLandingAfterRemoving`), not back
    at the end of the block above — the carve's ruled landing (13c 1B), unchanged; noted only.
-*[removed for publication]*
-   *[removed for publication]*
+4. **Walk residue in the dev store:** two Pool notes titled *2026-09-26* (her sentence + "First, the
+   tent:", one per build), and the walk's carved EMPTY blocks in those notes' trays (two per short
    note, ten on *A Scandal in Bohemia*, which is back at 262 blocks). Nothing else changed; the voice restored to Terminal.
 5. **Walker fact for `Tools/WalkKit/README.md`** (the orchestrator's): the dev window's bottom-right
    corner sits on the screen's bottom edge at 1440×1000 @ (0,117) on this 1728×1117 screen, so a corner
@@ -1101,7 +1101,7 @@ pin file exists, LIVE STATUS flipped with hashes and red counts (6 tests / 14 is
 two targeted reverts R-full / R-top red in their own shapes; the hollow width-reflow row
 dismissed and kept as a labelled guard — the guard discipline working as written).
 **The walk, on a fresh Debug build of `5241d8d4`** (dev store, zero other instances, per-step
-*[removed for publication]*
+guard): her EXACT sequence on the implementer's replica note ("There's so much to pack…", her
 captures' shape) — open in Write (block 2/2) → ⏎ (3/3, empty tail, caret on it) → ⌫ (2/2, the
 quiet "Empty block deleted — ⌥⌘Z undoes it" receipt): **the first line's y is IDENTICAL in all
 three captures; the top air never moves.** Acceptance captures beside the unit's:

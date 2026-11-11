@@ -4,7 +4,7 @@
 conversation that created the master-plan row.** This is the 13h
 design-note pattern applied to 13n: her verbatim vision and use cases,
 preserved for the kickoff sitting, binding nothing beyond the words
-*[removed for publication]*
+themselves. The row's standing references: `release-and-v1-strategy.md` (relocated to the private planning repo)
 §9 (the 2026-07-30 inclination — MCP server projected from the capability
 registry, insure-first writes, consent-scoped reads, local LLMs
 first-class) and the master plan's 13n row.
@@ -86,19 +86,7 @@ ordinary operations"), but their design conversations are separate and
 
 ## The chat question (author, 2026-08-25, the launch-strategy conversation — OPEN, nothing decided)
 
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+*[removed for publication]* And the positioning thread from the same message: *"it might be
 interesting to explore the angle of positioning it as an AI *editing*
 app instead of an AI writing app - your words stay yours"* — with her
 option idea: takes may be AI-edited by permission, **with a commit
@@ -117,10 +105,8 @@ gate 13n and can be made after watching how the MCP launch lands; and
 it makes the only 13n-time obligation a cheap one: don't build
 anything that assumes the client is external (auth/token flow an
 embedded client could also use). If a chat is later ruled in, it is
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-undecided.
+its own phase (provider account, token metering,
+abuse limits, streaming UI) *[removed for publication]*.
 
 ## Her second round (2026-08-25, same sitting — leans and scope)
 
@@ -129,9 +115,7 @@ undecided.
   element after."*
 - **The chat LEAN, recorded (a lean, not final):** *"I could also
   potentially still offer a chat interface in the app but with BYOK
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  as an option - I'm leaning towards yes […]"* Her posture riders, verbatim-faithful: the chat
   stays *"fully removable, off by default, and not the hero shot"*,
   and *"positioning it as editing rather than writing is key."* The
   chat remains its own later phase, decided after the MCP launch

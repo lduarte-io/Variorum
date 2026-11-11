@@ -3,7 +3,7 @@
 **Diff reviewed:** `ddf6f824..b9492ced` (the whole effort to date: kickoff → U1 closed → live round).
 **Anchor:** `notes/plans/phase-13n-b-mcp-door.md` (read whole, incl. the U1 unit record and live round), the
 13n sitting record (R-13n-1…11), the approved mockups, `phase-13n-mcp-door-note.md`,
-*[removed for publication]*
+`release-and-v1-strategy.md` §9 (relocated to the private planning repo), SyncSpec in full (the diff adds a migration), CLAUDE.md + auto-loaded canon.
 **Verified myself:** every new source and test file read in this session; `swift build` green;
 `swift test --filter 'MCPGrantRuleTests|MCPGrantOperationsTests|MCPGrantSchemaTests|SyncSchemaTests|MigrationTests'`
 → 74/74; `swift test --filter VariorumMCPTests` → 19/19 (matches the unit record's counts). No stage claim

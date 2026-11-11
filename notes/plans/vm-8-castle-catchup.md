@@ -332,7 +332,7 @@ one implementer session, acceptance = the doors walked on the pinned simulator +
 ## UNIT 1 BRIEF FACTS (checked at kickoff, 2026-10-25)
 
 - The stage read FREE at kickoff; claim it for every simulator run anyway (other sessions may wake).
-*[removed for publication]*
+- **The simulator pin: iPhone 17 Pro, iOS 26.2, device id `<simulator-udid>`** (her phone is an
   iPhone 17 Pro; deployment target iOS 26; the id, never the name, in every destination).
 - The throwaway road's credentials still stand on the Pro (`~/.variorum/dev-vault-throwaway.env`,
   `dev-vault-throwaway-passphrase`, `dev-vault-throwaway-words`) — the ~110k-row corpus for VX-494's test user A is
@@ -359,7 +359,7 @@ signed out.**
   the vx-329 phone flags (F-PH-1/2, F-U4-2/3); the code seams the brief names. DONE (this commit).
 - **Ground check (read-only, 2026-10-25):** the throwaway project ANSWERS and test user A's corpus STANDS — 1,200
   containers · 36,000 blocks · 36,000 placements · 1 vault (the VX-494 plant, ~110k rows). The prod test accounts file
-  *[removed for publication]*
+  stands (std · castle · del). The pinned simulator `<simulator-udid>` (iPhone 17 Pro, iOS 26.2)
   exists. Stage FREE.
 - **THE FORKS (traced in code before building; proposals ASKED of the orchestrator, one message, this commit):**
   - **F-U1-1 — STOP-AND-FLAG (F-PH-2 reached):** the shared account faces put HER rule-12 leave sentence
@@ -414,7 +414,7 @@ signed out.**
   - **F-U1-4 → APPROVED, with the constraints binding:** `~/.variorum/bin/type-sim-secret` in the R-510 helper shape —
     mode 700, never committed, values never printed, echoed or logged (read from the `~/.variorum` files directly);
     HARD guards exactly as proposed (Simulator frontmost; the booted device IS the pin
-    *[removed for publication]*
+    `<simulator-udid>`; the phone DEBUG app's host process carries the road's launch env — the
     throwaway ref with no production ref, or `VARIORUM_PROD_TEST_ROAD=1` with no walk project and a listed,
     `vxtest`-marked account); the throwaway road reads only the throwaway files, the prod road only the allowlist (her
     own account can never pass — the standing fence); a `--check` dry-run that verifies every guard and types nothing;
@@ -612,7 +612,7 @@ signed out.**
   - **The local helper (F-U1-4 — hers to keep or delete at closeout):** `~/.variorum/bin/type-sim-secret` (mode 700,
     never committed; `--check` types nothing). Guards: the source file exists at mode 600; the frontmost app is the
     simulator's host (Simulator, or Xcode 27's Device Hub — there is no Simulator.app in Xcode 27); exactly ONE booted
-    *[removed for publication]*
+    simulator and it IS the pin `<simulator-udid>`; the phone app runs on it; the throwaway road
     needs the throwaway ref in that process's environment and NO production ref (reads only the throwaway files); the
     prod road needs `VARIORUM_PROD_TEST_ROAD=1`, NO walk project, and the account's email on the allowlist with `vxtest`
     (reads only the allowlist file and the stashed words). Values never printed.
@@ -936,7 +936,7 @@ signed in by then on every re-keying road walked, so *Sign in…* is not offered
 in flight; the stage is released; the pinned simulator is shut down.**
 
 *Implementer L1 — Opus 5.5, xhigh. Pre-fix tree = `2243a26aa` (round 1's dispositions folded in). Stage claims as `vm8-l1`;
-*[removed for publication]*
+the pinned simulator `<simulator-udid>`. Read myself: `notes/plans/vm-8-ladder-round1.md` whole, this
 record whole, `notes/SessionResiliencyProtocol.md`, `notes/CastleRules.md` whole (a Castle face changes), the code named.*
 
 **THE PLAN (pieces; flipped per commit):**

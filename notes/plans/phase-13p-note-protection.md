@@ -92,7 +92,7 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   releases the key silently), **Biometric** (`.biometryCurrentSet`-gated
   Keychain item — the login password can NOT release it; fallback is the
   PASSPHRASE, never the device password), **Passphrase-every-open**. Her
-  *[removed for publication]*
+  threat model, verbatim: *"a lot of people have […]
   someone who knows their computer password but might not know their
   passphrase"* — so the login password is NEVER in the privacy modes'
   chain. Her biometric-reliability worry (*"sometimes faceid and touchid
@@ -1398,7 +1398,7 @@ done.
   known windowless-after-unclean-exit residual is documented in the
   runbook and File ▸ New Window is its cure if ever met.)
 - **The phone install landed** on her iPhone 17 Pro (paired,
-  *[removed for publication]*
+  `<device-udid>`) — Release build from the same worktree, installed via
   devicectl. The phone's store migrates at HER first open, on the
   same drilled shared road.
 - The install worktree (`~/dev/scratch-13p-spike/install-worktree`)
@@ -2688,7 +2688,7 @@ it cost to learn:
   This is the concrete reason CLAUDE.md keeps signing with the author:
   not ceremony, a capability the CLI does not have.
 - **Proven, not assumed.** Both configurations' signed products carry
-  *[removed for publication]*
+  `<apple-team-id>.io.lduarte.Variorum[.debug]` in BOTH
   `application-identifier` and `keychain-access-groups`;
   `Phase13pKeychainFactTests`' ACL probe was TIGHTENED from
   either-outcome to `errSecSuccess` and passed — so the gated write

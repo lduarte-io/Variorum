@@ -83,7 +83,7 @@ first, revert-round second.**
   and the B2/B3/B-DEDUPE reviewers are spent (resumable by SendMessage if a record question
   arises, but their work is closed repo-first).
 - **iOS simulator:** no stock devices on the 26.x runtimes — one was MINTED:
-  *[removed for publication]*
+  `17y-test-iPhone`, device id `<simulator-udid>` (iOS 26.2). Mobile
   suite: `-only-testing:VariorumMobileTests/MobileFirstWriteFurnitureTests` on that id.
 - **Walks:** WalkKit's README carries the recipe + this run's F-B2-4 fact (post a second
   `du` on a stuck drag; `sample <pid> | grep _dragUntilMouseUp`). Window capture at 2×:

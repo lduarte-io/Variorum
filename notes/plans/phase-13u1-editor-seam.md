@@ -1383,8 +1383,8 @@ launched**; zero instances verified before the backup, before the copy and after
 | built from | `f4264bff`, clean throwaway worktree `~/dev/variorum-13u1-release` (removed after), `-configuration Release`, DerivedData in `/tmp` (removed after) |
 | old binary SHA-256 | `490285e03af15e4df98b663050737ae2941d7004ff66a7ccafb7a740e4719a2d` |
 | new binary SHA-256 | `ffe42c8817e324ce9484fd2fa3b5248363ae8ca37508fb595aeb032f26c9f65c` |
-*[removed for publication]*
-*[removed for publication]*
+| signature | `codesign --verify --deep --strict` OK before AND after the copy · `io.lduarte.Variorum` · Team `<apple-team-id>` · Apple Development: <signing-email> (<apple-cert-id>) |
+| keychain groups | `<apple-team-id>.io.lduarte.Variorum` **and** `…Variorum.shared` — both present (the standing Developer-ID row's check) |
 
 **THE AUTHOR HANDOFF, written LAST:** `notes/handoffs/phase-13u1-handoff.md` — her checklist at the
 top (the refresh's evidence, the nine-row walk in the order she would hit it, the two ratify items,

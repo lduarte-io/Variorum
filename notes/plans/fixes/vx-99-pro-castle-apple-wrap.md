@@ -62,7 +62,7 @@ post-follow file (id fields only), the pre-13x ledger row 51.
   devices mapped to Castle; the `8e15…` file is the same library key re-written as format 2 with the
   master-wrapped copy and NO `apple` copy. Castle-correct.
 - **Sep 7 02:15 local = 08:15Z = her REPLACE ALL KEYS on the real account** (pre-13x ledger 51, the
-  *[removed for publication]*
+  acceptance walk: 18,238 rows re-encrypted, vault revision 3→5, new corpus key `<corpus-key-id>`, "still
   Castle", `updated_by_device` her MacBook Pro). That act re-keyed the library (8e15→1827) and wrote the
   `182738de` file **with an `apple` copy**. The vault stayed Castle (no Apple-held master copy) — only the
   Pro's local key file was wrong. That is why no Castle-only key file existed beside the library.

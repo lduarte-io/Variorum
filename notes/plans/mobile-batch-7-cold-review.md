@@ -15,7 +15,7 @@ a findings file on disk survives a session death where a final message does not)
 | what | value |
 |---|---|
 | simulator | `cold-review-b7` — **iPhone 17, iOS 26.2 (23C54)**, created fresh for this review |
-*[removed for publication]*
+| UDID | `<simulator-udid>` |
 | accessibility | `ApplicationAccessibilityEnabled` written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/cr-b7-dd` |
 | pre-revert dir | **`<scratchpad>/cr-b7-prerevert/`** — uniquely named, because the shared scratchpad holds STALE `45c-prerevert/`, `45c-wave-prerevert/`, `45c-wave2-prerevert/`, `45c-round2-prerevert/` and the implementer's own `b7-*` dirs |
@@ -799,7 +799,7 @@ message that never gets sent.
 | what | value |
 |---|---|
 | simulator | `fixwave-b7` — **iPhone 17, iOS 26.2 (23C54)**, created fresh for this wave |
-*[removed for publication]*
+| UDID | `<simulator-udid>` |
 | accessibility | `ApplicationAccessibilityEnabled` written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/fw-b7-dd` |
 | pre-revert dir | **`<scratchpad>/b7-wave-prerevert/`** — uniquely named; the shared scratchpad holds NINE stale prerevert dirs from other batches (`prerevert/`, `b7-prerevert/`, `cr-b7-prerevert/`, `fixwave-prerevert/`, the four `45c-*`), and restoring from one of those would clobber this wave |

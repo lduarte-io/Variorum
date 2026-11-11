@@ -2,7 +2,7 @@
 
 **Reviewer:** cold session, zero implementation context, `notes/REVIEW_PROMPT.md` run verbatim.
 **Diff:** `git diff 16ba929^..16ba929` — 20 files, +2030 / −706. Parent is `e495ce8`.
-*[removed for publication]*
+**Environment:** simulator `<simulator-udid>` (iPhone 17 Pro, iOS 26.2, accessibility armed and left armed);
 private DerivedData `…/scratchpad/dd-6a`. Every number below marked MEASURED was produced in this
 session on that pair.
 

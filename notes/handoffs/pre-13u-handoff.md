@@ -62,7 +62,7 @@ the daily Journal's identity (the memo, 13y); the sync probes (17i). **Round 3 (
 
 ## The install
 
-*[removed for publication]*
+**Refreshed 2026-09-01 ~00:00 MDT from commit `8566cad`** (the accepted tree at the ladder's cap; the closeout's record commits that follow change no code). Release build → `/Applications/Variorum.app`, the installed binary's sha256 `03b50ce16805f7c810ca1dc6a91f92843301f7cc0582ff0832fee0ac7ffd4687` matching the build product exactly; `io.lduarte.Variorum`, team `<apple-team-id>`, `keychain-access-groups` = `<apple-team-id>.io.lduarte.Variorum` verified on the installed binary. Zero instances verified before both the backup and the copy (you had quit the app at ~04:00 and it stayed quit). **The A1 backup first:** `~/dev/variorum-store-backups/pre-closeout-refresh-20260901T055604Z/` — the whole store folder (sqlite + shm + wal + `variorum-keys.json` + `Backups/`), the WAL already checkpointed to zero bytes (a quiescent store), the header verified CIPHERTEXT.
 
 ## Counts at close
 

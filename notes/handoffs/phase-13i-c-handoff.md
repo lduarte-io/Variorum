@@ -9,7 +9,7 @@
       the sync status says — the window's record is PENDING that one line.
 - [x] **The phone's marker-11 build** — INSTALLED by the orchestrator at your ask (2026-10-02,
       `xcrun devicectl device install app` to your iPhone 17 Pro, bundle `io.lduarte.VariorumMobile`,
-      *[removed for publication]*
+      Team <apple-team-id>, from `main`'s tip). Open it once and sync; its first round converges on its own.
 - [ ] **Ratify #169** (QUESTIONS) — the 13i-c bundle. Thirty-nine PROVISIONALs built as stated,
       each one line to overturn; the two genuinely open calls: (a) should FINISHING a book SPARE
       the arrivals of archived notes (today it dismisses every waiting arrival, and the confirm's N

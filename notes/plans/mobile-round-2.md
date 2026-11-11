@@ -4091,12 +4091,12 @@ because it contradicted his own verified-green baseline:
 
 | simulator | flag | result |
 |---|---|---|
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+| iPhone 17 Pro `<simulator-udid>` — **the architect's baseline run** | **`1`** | **449/75 PASSED** |
+| iPhone 17 Pro Max `<simulator-udid>` — **the reviewer's** | **key absent** | **16 failures, `labels were []`** |
+| iPhone 17 `<simulator-udid>` — assigned to 4.5a | `0` | would have failed |
 
 Then proved it both ways on ONE simulator, ONE suite, ONE tree:
-*[removed for publication]*
+`MobileTrashTests` on the clean `<simulator-udid>` → `labels were []` throughout;
 `defaults write … -bool true` → **10/10 passed**.
 
 **So the architect's own §52.0 "mobile 449/75 re-run green" was true and
@@ -5738,7 +5738,7 @@ and pinned in the same test.
 > **⚠️ ENVIRONMENT FINDING — TWO SESSIONS SHARING ONE SIMULATOR SILENTLY SWAP
 > EACH OTHER'S TEST BUNDLES, AND THE COUNTS LIE.**
 >
-*[removed for publication]*
+> Four full mobile runs on the shared `<simulator-udid>` (iPhone 17 Pro) reported
 > **560–564 tests** and a rotating cast of failures — including whole suites
 > (*"Shelf layout — the rendered surface"*, *"Starter Journal … (R27b)"*,
 > *"Shelf — Today's Entry as a badge (R26)"*) whose test names **exist
@@ -5758,7 +5758,7 @@ and pinned in the same test.
 > AND its own `-derivedDataPath`**. This batch's real numbers come from a
 > private device (`Variorum-batch6a`, iPhone 17 Pro / iOS 26.2, created and
 > armed with `ApplicationAccessibilityEnabled`) and a private DerivedData.
-*[removed for publication]*
+> Nothing was un-armed; the brief's `<simulator-udid>` is an **iOS 18.3** device and
 > is not a valid destination for an iOS-26 deployment target at all.
 >
 > Two further load artifacts, both re-run isolated and green, both recorded

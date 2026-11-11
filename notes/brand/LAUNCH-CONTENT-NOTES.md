@@ -11,7 +11,7 @@ on these posts without the original chat. Keep this file current when any of
 it changes.
 
 **2026-10-27 — LAUNCH WEEK IS LIVE.** The beta ships this week (launch build
-Wednesday evening). The execution plan is **`site/launch-plan-2026-10-27.md`**
+Wednesday evening). The execution plan is **`site/launch-plan-2026-10-27.md`** (relocated to the private planning repo)
 — the artifact map (product page + readme/essay + Show HN are the launch set;
 the blog posts moved to post-launch sustain), the Obsidian-grammar page
 architecture, the embedded interactive-demo plan, and VX-633 (the seed build:
@@ -32,11 +32,11 @@ stargazing.tech repo by authorized sessions.
 - **`why-variorum-stands-out.md`** — the ranked positioning list all copy
   draws from (13 entries, most-differentiating first, each with an on-camera
   hint).
-*[removed for publication]*
+- **`posts/show-hn.md`** (relocated to the private planning repo) — Show HN title options, post text, a prepared
   technical first comment, the comment-section crib sheet, tactics. **Gated:**
   ships only with a downloadable beta (HN's try-it rule); the blog post may go
   to HN earlier as a regular submission without burning the Show HN slot.
-*[removed for publication]*
+- **`posts/blog-launch-post.md`** (relocated to the private planning repo) — "Ten thousand notes apps," with an
   alternate colder opening (Variant B) and video-embedding guidance at the
   tail. **She is rewriting this herself, in Variorum, in her own voice — the
   draft is fact-source material, not the text.** Future passes on her rewrite
@@ -147,12 +147,12 @@ Conventions across all of them: `[brackets]` = hers to fill or confirm;
 ## Owed / next natural steps
 
 - Her rewrite of the blog post (in Variorum), then a fact-only pass on it.
-*[removed for publication]*
+- *[removed for publication]* CTAs and the open-format-guarantee wording (release strategy
   wants the guarantee LOUD; it has two bracket slots on the product page).
 - One real performance measurement captured before the HN thread.
 - Re-verify the Apple Notes ~10k observation on current macOS.
 - ~~After the 13o sitting: flip or delete the bracketed search claims in
-  show-hn.md, blog-launch-post.md, and the product page §8.~~ DONE 2026-10-08
+  show-hn.md, blog-launch-post.md, and the product page §8.~~ DONE 2026-10-08 (the two posts since relocated to the private planning repo)
   (VX-83's closeout pass — flipped to the built truth with fact fences
   beside each; the FAQ brief gained its SEARCH section the same pass; all
   DRAFT, presented in the VX-83 handoff for her approval before the site
@@ -210,6 +210,6 @@ text-bearing columns; plain skeleton): SyncSpec, the wire-is-ciphertext
 paragraph. 13o scope + settled inputs (client-side by architecture, wing
 isolation, facets, results-cap defect): `notes/FuturePhases.md` 13o row +
 `notes/plans/phase-13i-sitting-record-2026-09-30.md` §12/§21. Release
-*[removed for publication]*
-*[removed for publication]*
+direction (free v1, *[removed for publication]*, open-format loud, E2EE from
+birth): `release-and-v1-strategy.md` (relocated to the private planning repo). Everything consumer-visible:
 CoreDescription / OverallModel / AppSpec §12.

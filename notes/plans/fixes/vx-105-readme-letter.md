@@ -605,7 +605,7 @@ keys.
   `currentBlock.ED91AED7-3DD1-4A62-A31B-F191C1A72E84` (per-note caret memory for the walk library's birth readme, its
   restored readme and "start here"); `postMode.3E34F4F7-…`, `postMode.ED91AED7-…` (per-note mode memory);
   `surfaceSize.outline.ED91AED7-…` (the Outline's measured surface); `mastheadStampFace` = created (the walker's
-  *[removed for publication]*
+  stamp flips); `variorum.calmAsks.passphrase.<library-uuid>.launches` = 1 (the walk library's
   calm-ask counter, keyed by its library id).
 - CHANGED (4): `IdleCommitSweepMark.Variorum-dev` (08:58:13Z → 09:06:05Z, the walk library's launch sweep);
   `openNotes.remembered.ids` / `openNotes.remembered.recency` (the Open list now named walk-library notes);

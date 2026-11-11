@@ -1984,7 +1984,7 @@ unadjudicated shipped. Preconditions honored: fresh WAL-safe backup
 first (`variorum-backup-2026-07-27-171216.sqlite`, `integrity_check`
 ok — the A1 rail), zero instances verified at build AND immediately
 before the copy, signature verified after
-*[removed for publication]*
+(`io.lduarte.Variorum`, team `<apple-team-id>`), no schema change so no §12
 concern (marker 4). The K6 end-of-phase refresh still happens after the
 Fable cold review closes — it is what carries Stage 2. Worktree note
 for future refreshes of this shape: the app project's local-package
@@ -2456,7 +2456,7 @@ it is a one-second ordinary edit in the app.
 Release built from `f285c84` (fix landed, suites green, both reverts
 red-verified); zero instances at build start AND immediately before
 the copy; installed via `ditto`; signature verified
-*[removed for publication]*
+(`io.lduarte.Variorum` / `<apple-team-id>`). Her next launch runs the 1G
 build against the restored store.
 
 #### Red-on-old evidence — by behavioral revert, checksum-restored (`shasum -c` OK after each)
@@ -2928,7 +2928,7 @@ by the reviewer and verified by the architect, K6f/K7 record-only.
 **THE END-OF-PHASE REFRESH EXECUTED (2026-07-27, 15:04 local):**
 `/Applications/Variorum.app` rebuilt Release from HEAD (all work
 adjudicated + reviewed), installed at a verified zero-instance window,
-*[removed for publication]*
+signature confirmed (`io.lduarte.Variorum` / `<apple-team-id>`), behind a
 fresh WAL-safe A1 backup (`variorum-backup-2026-07-27-210243.sqlite`,
 `integrity_check` ok). No schema change ⇒ no marker concern.
 

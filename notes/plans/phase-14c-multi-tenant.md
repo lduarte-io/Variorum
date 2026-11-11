@@ -42,7 +42,7 @@ it; (3) `notes/plans/phase-14b-suite-e2ee.md`'s THE DESIGN + the CF
 ledger + "HER ACCEPTANCE" sections (what the vault, seam, and flows
 ARE); (4) `notes/handoffs/phase-14b-handoff.md` (standing facts, never
 re-derive); (5) `notes/fragments-bridge-contract.md`'s EXECUTION MODEL
-*[removed for publication]*
++ all three touchpoints; (6) `release-and-v1-strategy.md` §1/§4 (relocated to the private planning repo);
 (7) `notes/sync-postmortem-fragments.md` before ANY
 `Sources/VariorumCore/Sync/` line. STANDING: the mirror is LIVE
 production (announced changes only, committed artifacts, her explicit
@@ -101,10 +101,7 @@ the rules are their provenance; the rules are general and BINDING here.
   multiplatform-services pattern). IAP addable later without rework.
   Current steering/external-link rules get verified at build time by a
   lookup agent, per the recorded caveat.
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 
 ### Round 2 — the isolation core (three ruled; one became Rounds 3–4)
 
@@ -287,25 +284,22 @@ Her message, verbatim: *"hi, you can go ahead and continue your work.
 you may have to restart a new implementer session - i hit my 5 hour
 limit and the implemeneter might just be gone completely or it might
 be recoverable. i'm also ready to do the deploy step whenever and I
-*[removed for publication]*
+control the email address <her-email> for use making a
 second account. I can look at cloudflare for whatever you need for the
 domain step. if this is just for users having an account / logging in
 at stargazing.tech I think account makes more sense? or is it for
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+something else? […] how
+easy is it to change the SMTP […] choice later? I
 wasn't sure how much of this is direct code changes - I'm contemplating
 moving the SMTP into the same 14d phase as fragments due to this
-*[removed for publication]*
-*[removed for publication]*
+phase's already significant size. […] I also think that you can do the signup flip
 and you can drive the live probes and the deploy. i can type my
 passphrase into the runner as needed. let me know on what remains in
 this phase and what we should do"*
 
 **Recorded and ruled:**
 
-*[removed for publication]*
+- **The probe account's email: `<her-email>`** (hers) —
   joins the gate runbook (L13); admin-provisioned, uid-checked,
   entitlement-granted per the batch-1 hold.
 - **DNS is Cloudflare** — exact records handed to her at the domain
@@ -337,28 +331,10 @@ this phase and what we should do"*
   deserves its review first — her "ready whenever" recorded as
   standing readiness, not a resequencing). She types her passphrase
   into the runner as needed.
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  time by lookup).
+- *[removed for publication]*
 
-*[removed for publication]*
-*[removed for publication]*
+### Round 8 — domain permanence and the passphrase-step timing (2026-08-05; verbatim)
 
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
 *[removed for publication]*
 
 **Recorded and ruled:**
@@ -369,22 +345,7 @@ this phase and what we should do"*
   written knowing a future coordinated issuer move is a live
   possibility (config-only, no data migration — the Round-7 answer
   stands either way).
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 - **The passphrase step WAITS FOR THE GATE:** it is the repush half
   of the deploy — nothing passphrase-shaped exists to run before 09
   deploys (running the runner now would push against the CURRENT
@@ -1326,7 +1287,7 @@ Fragments coverage is a product-voice call (the implementer's arm is
 the defensible one: never promise in-app what is not live until 14d;
 the suite promise rides the site page). **THE MAILER-ARM DECISION
 (the runbook §1 fork, the architect's call, vetoable at the gate):
-*[removed for publication]*
+ARM (a)** — `<her-email>` joins the org team for the
 validation window and is removed after. Reasons: it exercises the
 FULL real stranger road (signup → confirmation email → confirm →
 vault setup) including the template copy she ratifies (the CF-10
@@ -2514,7 +2475,7 @@ price-agnostic: she names the number at launch.)*
 
 - **What is sold:** the suite's ONE hosted-sync plan. One payment
   covers Variorum AND Fragments (the author's suite ruling —
-  *[removed for publication]*
+  `release-and-v1-strategy.md` §1 (relocated to the private planning repo)); the entitlement lives on the
   ONE suite account and both apps check it (Fragments' check lands in
   its own later batch — the page may promise suite coverage; the apps'
   in-app copy deliberately claims only their own behavior until then).
@@ -2532,7 +2493,7 @@ price-agnostic: she names the number at launch.)*
   → uuid.
 - **The issuer hostname:** `auth.stargazing.tech` fronts the auth
   service once attached at the 14c gate (until then the raw
-  *[removed for publication]*
+  `https://<supabase-project-ref>.supabase.co`). The sign-in/consent
   pages and the checkout itself are ordinary stargazing.tech content —
   no special domain work (the Round-7 ruling).
 - **The entitlement write (the ONE server integration):** on payment
@@ -2559,13 +2520,7 @@ price-agnostic: she names the number at launch.)*
 - **Processor choice:** hers, decided when she tasks the site agent
   (Round 7's record: easy to change before real subscribers — this
   function is processor-agnostic by design; sticky after, because
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  recurring subscriptions live IN the processor). *[removed for publication]*
 
 ## Ledger (running; every row owned)
 
@@ -2750,9 +2705,9 @@ window is closed; its next round pulls to head over the reinitialized
 cursor (echo applies, seq-recorded).
 
 **Gate step 6 — the live probes: DONE (2026-08-11, architect-driven).**
-*[removed for publication]*
+Probe account `<her-email>` provisioned via
 `admin/generate_link` (BYPASSES signups-off — the deliberate tool);
-*[removed for publication]*
+**UID `<account-uuid>` — uid-checked NOT hers before any act** (and again
 on its minted session). Its magic-link OTP expired before verify (a
 recorded latitude — the admin generate_link road's link is short-lived
 and I minted then acted a beat late), so the session came via
@@ -2797,10 +2752,7 @@ step-10 deletion-door live test (its own `account_purge` is the natural
 verification).
 
 **Gate step 7 — the domain: HER DECISIONS RECORDED (2026-08-11), attach
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+act pending.** *[removed for publication]* The one flagged
 technical caveat: Supabase's docs confirm the auth ENDPOINT switches to
 the custom hostname but never explicitly document the JWT `iss` rewrite —
 so `iss` + the OpenID discovery doc get verified empirically at
@@ -2808,17 +2760,11 @@ activation (already the standing guardrail). DNS: a CNAME +
 `_acme-challenge` TXT, Cloudflare grey-cloud (community consensus, not
 Supabase-documented).
 
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 - **WHAT THE CUSTOM DOMAIN BUYS (her question answered):** it fronts the
   AUTH SERVICE (GoTrue issuer) with `auth.stargazing.tech`, so (a) the
   links in auth emails — confirm/reset — show her brand instead of the
-  *[removed for publication]*
+  raw `<supabase-project-ref>.supabase.co`, and (b) the token issuer `iss`
   + OAuth discovery + the apps'/Fragments' auth configs point at a stable
   branded hostname. It is BRANDING + CONFIG-STABILITY only — zero effect
   on isolation, security, or E2EE (users are exactly as safe with or
@@ -2835,7 +2781,7 @@ Supabase-documented).
   into the pre-strangers run-up (14d-adjacent, where SMTP also lands).
   Recorded for her call; not decided by the architect.
 - **HER FOLLOW-UP (2026-08-11) + THE SECOND LOOKUP — branded email links
-  *[removed for publication]*
+  WITHOUT the *[removed for publication]* add-on: CONFIRMED YES (primary-source verified).**
   Custom SMTP alone changes only the sender/FROM, not the link
   hostname; but Supabase's OFFICIALLY DOCUMENTED server-side PKCE
   pattern rewrites the email TEMPLATE so the link points at her own
@@ -2845,7 +2791,7 @@ Supabase-documented).
   recipient SEES is then on stargazing.tech, sender too. Works for
   confirm/reset/magic-link/email-change. Requirements: Site URL set to
   the brand domain, the handler routes on the Redirect-URLs allowlist,
-  *[removed for publication]*
+  and PKCE flow (autoconfirm OFF). **What the *[removed for publication]* add-on uniquely
   buys — all invisible to users:** the raw `/auth/v1/*` API hostname,
   OAuth callback URLs, SAML EntityID; and per a community report
   (GitHub Discussion #44373) it may NOT even rebrand the JWT `iss`
@@ -2857,7 +2803,7 @@ Supabase-documented).
   served by the free template road, which RIDES 14d's SMTP + the
   stargazing.tech site handler (site-agent work), so the gate's
   "domain-attach" sub-step DISSOLVES into 14d and the issuer can stay
-  *[removed for publication]*
+  `<supabase-project-ref>.supabase.co`. **The catch:** the branded-link
   payoff can't be realized until the template rewrite + Site-URL config
   + the site handler exist — all 14d — so nothing about it blocks
   finishing the isolation gate now. (Recorded for her ruling; the
@@ -2884,14 +2830,13 @@ SMTP + site work that makes the stranger email flow real will exist:
   until the phone is re-onboarded, don't rely on phone↔Mac sync — phone
   writing stays local-safe but may not propagate.**
 - **(7) domain** — DISSOLVED (the branded-email template road serves it
-  *[removed for publication]*
-  *[removed for publication]*
+  for free at 14d; *[removed for publication]*).
 - **(8) signup flip** + **(9) stranger validation** — land at 14d on
   whichever issuer/SMTP posture she rules there (they need neither a
   custom domain nor branded emails; ARM (a) is moot until then).
 
 **Gate step 10 — the deletion-door live test: DONE (2026-08-11).** The
-*[removed for publication]*
+probe account (`<account-uuid>`) called `account_purge` under its OWN
 session — the door's real server mechanism. Report:
 `data_rows 0, vault_rows 1, entitlement_rows 1, auth_user_removed true`.
 Post-state: admin auth-user lookup **404 User not found**; its vault and
@@ -2979,7 +2924,7 @@ recorded-resolved note; her phone is a first-class synced device again).
   record): core 1158/124 · Mac 1218/213 (the tripwire) · mobile 175/26
   · spine 51/7.
 - Sessions never touch `~/dev/fragments` or the Fragments project
-  *[removed for publication]*
+  (`<supabase-project-ref>`); asks ride the contract file, carried by
   her. The stargazing.tech site has its OWN agent she tasks — this
   repo delivers contract facts, never site code.
 - Implementer sessions WAIT SYNCHRONOUSLY on their own builds/tests

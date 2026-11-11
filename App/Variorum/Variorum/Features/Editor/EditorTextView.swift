@@ -754,7 +754,7 @@ final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface 
                 return
             }
         }
-        *[removed for publication]*
+        // VX-592 (the tester: *"when I try to drag a highlight from where my cursor
         // is currently typing, it doesn't work"*): the panes' VX-429 mechanism,
         // on this surface too — overriding `mouseDown` puts the editor on
         // AppKit's classic road, where a settled caret covers the character

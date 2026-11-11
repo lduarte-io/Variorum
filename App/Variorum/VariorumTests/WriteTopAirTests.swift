@@ -6,7 +6,7 @@
 //  *"when I am in write and remove a newline, the editor's height adjusts
 //  removing the whitespace between the topmost line in the editor and the line
 //  at the top of the editor."* Her captures
-*[removed for publication]*
+//  (`notes/plans/18l-inputs/2026-09-25-write-{before,after}-removing-newline.png`, since removed for publication):
 //  block 4/4, the caret on an EMPTY last block, the first line resting in the
 //  page's top air → one backspace → block 3/3 (the tray count 6 → 7: the empty
 //  block went to the tray) and the first line jumped UP against the masthead's
@@ -62,12 +62,12 @@ struct WriteTopAirTests {
         EditorSurfaceChrome(voice: voice, dark: false, inlineComments: false)
     }
 
-    *[removed for publication]*
-    *[removed for publication]*
+    /// A note fixture: the first line, a blank block, the line being typed
+    /// under, and the empty block the caret sat in.
     private let herNote = [
-        *[removed for publication]*
+        "There’s so much to pack for the trip that the hallway is buried in gear",
         "",
-        "Ok for starters:",
+        "First, the tent:",
         "",
     ]
 

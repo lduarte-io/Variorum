@@ -30,10 +30,10 @@
      local transcript during the phase (recorded honestly in the plan);
      rotate at dashboard → Settings → API keys, then update
      `.env.supabase.local`, or decline.
-   *[removed for publication]*
-     *[removed for publication]*
-     *[removed for publication]*
-     *[removed for publication]*
+   - **DMARC on stargazing.tech** — whenever: a TXT record on the sending
+     domain. If the reports should go to an address on another domain,
+     that domain needs one verification TXT too, or receivers ignore the
+     address.
    - **"Bridge now" relabel** — say the word ("Sync journal now" or
      fold into one button) and it's a one-liner.
    - **The bridge auto-connect** — your "why log in twice" question,
@@ -68,7 +68,7 @@
   retired password: your ruling ("there should not be some kind of
   session dependency") made it this phase's build.
 - **The Fragments batch (you carried it) — closed:** uid preserved
-  *[removed for publication]*
+  (`<account-uuid>`, dual-verified), password retired, old issuer off,
   journal E2EE live both ends, entitlement quiet. ONE STARGAZING
   ACCOUNT — the docs say so everywhere now (SyncSpec §2's completion
   clause; the contract file's closing addendum; the account sheet's

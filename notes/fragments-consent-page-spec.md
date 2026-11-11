@@ -22,7 +22,7 @@ is the same logic, hosted and styled.
   it just has to match what's configured). Query parameter on arrival:
   `?authorization_id=<uuid>`.
 - **Backend it talks to:** the FRAGMENTS Supabase project,
-  *[removed for publication]*
+  `https://<supabase-project-ref>.supabase.co`, using its **publishable (anon) API
   key** only (a public value; never a secret key, never a PAT).
 - **Flow (all plain `fetch`, or supabase-js if that repo prefers):**
   1. Read `authorization_id` from the query. Missing → render an error.

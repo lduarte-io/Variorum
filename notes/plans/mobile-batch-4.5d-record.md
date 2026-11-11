@@ -165,7 +165,7 @@ one failure is the documented intermittent latency pin (§3).
 
 ## 3. TESTS
 
-*[removed for publication]*
+**Simulator: iPhone 16e, iOS 26.2, `<simulator-udid>`**
 (accessibility flag verified `= 1` before any run, and left armed).
 The UDID in the brief could not run the app at all — see §4 item 1.
 
@@ -200,7 +200,7 @@ Not mine; my diff contains zero editor lines.
 ## 4. THINGS I FOUND THAT ARE NOT MINE
 
 1. **🔴 THE ORCHESTRATOR'S SIMULATOR CANNOT RUN THE APP.** The prompt
-   *[removed for publication]*
+   named iPhone 16, UDID `<simulator-udid>`, as
    booted and armed. It is an **iOS 18.3** device; the deployment target
    is iOS 26, so `xcodebuild` refuses the destination outright
    (*"Unable to find a destination matching the provided destination

@@ -15,7 +15,7 @@ worktree.
 
 | act | result |
 |---|---|
-*[removed for publication]*
+| Fresh simulator `V45cColdReview-17-26` (iPhone 17, **iOS 26.2 (23C54)** — the newest runtime on this machine; the 16-series sims are iOS 18.3 and invalid) | `<simulator-udid>`; **deleted at the review's close** |
 | `ApplicationAccessibilityEnabled` | written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/dd-coldreview` |
 | **FULL MOBILE SUITE** (from `App/Variorum/`) | `✘ Test run with 675 tests in 99 suites passed after 322.032 seconds with 2 known issues.` / `** TEST SUCCEEDED **` |
@@ -497,7 +497,7 @@ old `String(describing:)` becomes `DeletionRefusal.fallback`'s
 
 Diffed `df97677`'s record against the final one. All five PENDING marks are
 resolved rather than dropped: the teardown (**verified — `V45cPhone-17-26` /
-*[removed for publication]*
+`<simulator-udid>` is not in `simctl list devices`; the stray `Variorum-batch6a` was
 indeed left alone**), item 4's red-on-old (run and quoted), the full suite (run
 and quoted), and the two narrative ones. Counts re-derived per file against the
 base: liveness 10→14, deletion 12→13, takes 16→19 = **+8**, matching the record's
@@ -611,7 +611,7 @@ notes files.
 | what | value |
 |---|---|
 | simulator | `V45cFixWave-17-26` — iPhone 17, **iOS 26.2 (23C54)**, created fresh for this wave (the 16-series sims are iOS 18.3 and invalid) |
-*[removed for publication]*
+| UDID | `<simulator-udid>` — **deleted at the wave's close** |
 | accessibility | `ApplicationAccessibilityEnabled` written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/dd-wave` |
 | pre-revert copies | `<scratchpad>/45c-wave-prerevert/` — a UNIQUELY named directory. The scratchpad already held FOUR stale copy dirs from other batches (`prerevert/`, `45c-prerevert/`, `45c-coldreview/`, `fixwave-prerevert/`); none was read or written. Every restore was verified by `diff` **and** by sha256 against the copy this wave made. |
@@ -875,7 +875,7 @@ both logs). The one revert that took the runner down in the original batch
 assertions rather than trapping.
 
 **Simulator teardown: DONE** — `V45cFixWave-17-26`
-*[removed for publication]*
+(`<simulator-udid>`) deleted at the wave's close. The stray
 simulators from older batches were left alone.
 
 ## Fences
@@ -906,7 +906,7 @@ clean bills stand; this pass is the FIXES and what they touched.
 
 | act | result |
 |---|---|
-*[removed for publication]*
+| Fresh simulator `V45cRound2-17-26` (iPhone 17, **iOS 26.2 (23C54)** — the newest runtime here; the 16-series sims are iOS 18.3 and invalid) | `<simulator-udid>`; **deleted at this review's close** |
 | `ApplicationAccessibilityEnabled` | written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/dd-round2` |
 | **FULL MOBILE SUITE** (from `App/Variorum/`), on the pristine final tree BEFORE any revert | `✘ Test run with 678 tests in 99 suites passed after 321.406 seconds with 2 known issues.` / `** TEST SUCCEEDED **` |
@@ -1423,7 +1423,7 @@ nothing beyond them was touched.
 
 | act | result |
 |---|---|
-*[removed for publication]*
+| Fresh simulator `V45cWave2-17-26` (iPhone 17, **iOS 26.2 (23C54)** — the newest runtime here; the 16-series sims are iOS 18.3 and invalid) | `<simulator-udid>`; **deleted at this session's close** |
 | `ApplicationAccessibilityEnabled` | written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/dd-wave2` |
 | **FULL MOBILE SUITE** (from `App/Variorum/`), on the final tree | `✘ Test run with 678 tests in 99 suites passed after 309.041 seconds with 2 known issues.` / `** TEST SUCCEEDED **` |

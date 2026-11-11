@@ -56,7 +56,7 @@ only then the held release tail. Variorum is QUIT on both Macs; the stage is FRE
 1. **Reproduce at scale on the THROWAWAY first** — never on her store. The §8 fixture pattern (the vx-329 plan)
    + M3's walk opt-in: a scratchpad tool against the core plants a LARGE corpus for throwaway user B (tens of
    thousands of rows through the real serializer; B's vault state is VX-308-era Standard — plant/reset per the
-   *[removed for publication]*
+   §8 precedent, every SQL ref-guarded to `<supabase-project-ref>`), then the Debug walk build (a FRESH
    DerivedData tag, never the standard path) with the walk env, a fresh library, sign in as B, turn on sync,
    and watch the first catch-up. Expect the hang; if it does NOT reproduce, say so loudly — the trace then
    needs her corpus's specific shape (purged ledger mass is the differentiator to try next: plant purge
@@ -81,7 +81,7 @@ them herself or runs your command via the `!` road)
   SQL writes, and occasionally plain clicks/captures. Plan for HER to do: all typed secrets (sign-ins,
   passphrase sheets, crossing secrets), Touch ID/Face ID presses, and any blocked SQL via `!`. Keep driving
   everything non-secret yourself; hand off cleanly when blocked, never work around.
-*[removed for publication]*
+- `~/.variorum/dev-vault-throwaway.env` — the THROWAWAY project (ref `<supabase-project-ref>`, disposable by
   design; hers to delete after the window): `VARIORUM_THROWAWAY_PROJECT_URL`, `_ANON_KEY`, `_PAT`,
   `_USER_A/_PASS_A/_UID_A`, `_USER_B/_PASS_B/_UID_B`. **The walk switch wants DIFFERENT names — MAP THEM:**
   `VARIORUM_WALK_PROJECT_URL="$VARIORUM_THROWAWAY_PROJECT_URL"`, same for `_ANON_KEY`; verify in-process via
@@ -91,7 +91,7 @@ them herself or runs your command via the `!` road)
 - `~/.variorum/dev-castle.env` — the DEV store's real pair. NEVER typed into driven UI; the dev library sits
   restored with its October-20 hold, untouched by this bug's work if you stay on throwaway users.
 - `.env.supabase.local` at the repo root — the PRODUCTION PAT road (`SUPABASE_ACCESS_TOKEN`,
-  *[removed for publication]*
+  `VARIORUM_SUPABASE_URL`; ref `<supabase-project-ref>` GUARDED in every query). READ-ONLY probes only (the
   device_cursor/data_max reads in the crossing record are the worked examples); any production WRITE is hers
   alone, explicitly, which this bug should never need.
 - Her REAL credentials (account passphrase, words, sign-in): NEVER handled, typed, or echoed by a session.

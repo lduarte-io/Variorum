@@ -389,7 +389,7 @@ baseline, final.**
 **Why this section exists:** the author is finishing Fragments for TestFlight and asked
 what the suite-identity (Phase 14a) questions are, so tonight's build doesn't foreclose
 them. The recorded rulings this rests on (Variorum master plan rows 14a–14c +
-*[removed for publication]*
+`release-and-v1-strategy.md` (relocated to the private planning repo)): the suite gets a **neutral OIDC issuer** — one login
 for both apps, brand PROVISIONALLY stargazing; the Fragments-side conversation formally
 opens AT 14a; Fragments' E2EE is **journal-class ONLY** (14b, under the shared key — the
 rest of Fragments stays server-readable by design, its insights being the product); ONE
@@ -457,7 +457,7 @@ section; the sitting record is `notes/plans/phase-14a-suite-identity.md`):**
 line above):** the suite account home is the **VARIORUM PROJECT itself** (her
 ruling; "stargazing" stays the brand and the pages' front — plus an eventual
 custom domain — never a separate project). Consequence: **the issuer URL is known
-*[removed for publication]*
+today** — `https://<supabase-project-ref>.supabase.co/auth/v1`, to be fronted by a
 custom domain before any non-author signup. The Fragments-side asks, STAGED
 by touchpoint (what belongs to what — her request that each stage be unambiguous):
 
@@ -493,8 +493,8 @@ with them):
 1. Add the suite issuer as a trusted OIDC provider (`custom:stargazing`) and route
    sign-in through the delegated PKCE flow (the same 9c-proven pairing, pointed
    the other way).
-*[removed for publication]*
-   *[removed for publication]*
+2. Link her Fragments user to her suite identity (suite sub `<account-uuid>` → the
+   SAME Fragments uid `<account-uuid>`; every `journal_entries` row untouched), then
    unlink/retire her email+password identity — single sign-in, no Fragments
    password surviving.
 3. Retire the native signup surface: accounts are created at the suite from now
@@ -502,7 +502,7 @@ with them):
    (nobody-before-the-family, her sequencing ruling).
 4. `journal_entries` shape/keys stay frozen (standing ask #3, unchanged).
 5. **Switch OFF Fragments' own OAuth 2.1 Server** (its 9c role as Variorum's
-   *[removed for publication]*
+   issuer) and delete/abandon the old registered client `<oauth-client-id>` — safe by
    this point (Variorum's 14a code batch will long since have shipped the
    direct sign-in; until that batch, the old issuer must STAY ON — it is the
    Variorum app's only sign-in road).
@@ -518,12 +518,12 @@ with them):
 
 **Coordinates DELIVERED (2026-08-04Z — the registration ran through the admin
 door; nothing further is needed from the Variorum side for this touchpoint):**
-*[removed for publication]*
+- **Issuer:** `https://<supabase-project-ref>.supabase.co/auth/v1` (auto-discovery
   works; endpoints live under it: `/oauth/authorize`, `/oauth/token`,
   `/.well-known/jwks.json`).
-*[removed for publication]*
+- **client_id:** `<oauth-client-id>` · auth method
   `client_secret_post` · registered redirect
-  *[removed for publication]*
+  `https://<supabase-project-ref>.supabase.co/auth/v1/callback` (Fragments'
   GoTrue callback).
 - **client_secret:** in the author's untracked
   `~/dev/variorum/.env.fragments-oauth.local` (`SUITE_FRAGMENTS_CLIENT_*`) —
@@ -531,7 +531,7 @@ door; nothing further is needed from the Variorum side for this touchpoint):**
   repo and no chat.
 - **THE FIRST-SIGN-IN RULE (load-bearing):** on her FIRST delegated sign-in
   into Fragments via the new provider, VERIFY the minted session's uid equals
-  *[removed for publication]*
+  her existing Fragments uid `<account-uuid>` (GoTrue links a matching VERIFIED
   email to the existing user when it can). If a NEW uid appears instead, STOP —
   do not use that account — and link deliberately via the admin API before
   proceeding: every `journal_entries` row keys on the old uid. Also check the
@@ -661,15 +661,15 @@ All three touchpoints verified done. The standing facts, superseding
 any pending-tense wording above:
 
 - **ONE STARGAZING ACCOUNT — the end state is REAL.** Her delegated
-  *[removed for publication]*
-  *[removed for publication]*
+  sign-in minted her existing Fragments uid
+  `<account-uuid>` directly (verified-email auto-link; one user total, no
   duplicate ever created); the identity row reads `custom:stargazing` /
-  *[removed for publication]*
+  suite sub `<account-uuid>`. **The Fragments password identity is fully
   retired:** email provider off, the password grant 422s, the stored
   hash blanked. Any Variorum-only or Fragments-native account framing
   is DEPRECATED (the author's instruction).
 - **The old issuer era is over:** Fragments' own OAuth 2.1 server is
-  *[removed for publication]*
+  OFF and the old registered client `<oauth-client-id>` is deleted.
 - **Journal-class E2EE is LIVE on both ends:** their client's
   enrollment opened the real vault (pure-Swift Argon2id + AES-KeyWrap
   interoperates; their tolerant `kdf_*` decode matched the live row),
@@ -724,15 +724,15 @@ handoff):**
    in-app until both ends are live.
 5. **The issuer/domain coordinate — RESOLVED AT THE 14c GATE
    (2026-08-11): the confirmed issuer URL is the RAW project URL
-   *[removed for publication]*
+   `https://<supabase-project-ref>.supabase.co`.** The
    `auth.stargazing.tech` custom domain was DECLINED — a lookup
    confirmed branded auth-email links come FREE via a rewritten email
    template pointing at stargazing.tech + a `/auth/confirm` `verifyOtp`
-   *[removed for publication]*
+   handler, so the *[removed for publication]* Supabase Custom Domain add-on (which rebrands
    only user-invisible surfaces — the API hostname, OAuth callbacks, and
    per a community report maybe not even the `iss`) buys nothing users
    see. **Write your provider config against
-   *[removed for publication]*
+   `https://<supabase-project-ref>.supabase.co`.** (If she ever attaches a
    custom domain later, it is a coordinated config-only update on both
    apps + your provider entry — never data; nothing forces it.)
 6. **One interplay note for the batch's bridge half (informational —

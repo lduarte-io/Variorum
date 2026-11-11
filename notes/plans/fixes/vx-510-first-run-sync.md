@@ -7,7 +7,7 @@ The charter is `notes/handoffs/vx-510-kickoff.md` (read whole); the window's tra
 `notes/plans/fixes/vx-494-catchup-hang.md` (R-494-4…13); the sync-keys seam beside this one is
 `notes/plans/fixes/vx-488-window-hotfixes.md`. Members: VX-498 (the set-up act's silent no-round — the mechanism) ·
 VX-507 (the act confirms its first round) · VX-506 (the pre-join wording, riding) · VX-509 (the standing first-run
-*[removed for publication]*
+drill, the run's evidence vehicle); rider VX-503 if the window is open; the VX-508 watch (tester A's join — her
 one-statement act surfaced to her the moment it lands). Cast (R-510-5): Opus orchestrates (the session moved off
 Fable at her word), Opus implements, one at a time; the ladder tries a fresh `fable-reviewer` first and runs on
 `opus-reviewer`s if it stalls on safeguards. Three units (R-510-9): A the fixes, B the drill + the prod road, C the
@@ -72,7 +72,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   second library joins, back up, restore a backup, change keys (passphrase, new words; the Castle crossings),
   open the older backup again with the new secrets (rule 4/5's floor), every leg verified in the app AND server-side.
 - **R-510-10 — the address shape, delegated: "you can pick the address shape."** → PICKED: plus-addresses on her
-  *[removed for publication]*
+  own Gmail — `<test-account-email>`, `+vxtest-castle`, `+vxtest-del`. Why: sign-up sends a
   confirmation email; a made-up or reserved domain bounces at her auth mail provider, and at her low send volume a
   few bounces are a high bounce RATE (providers pause senders on it) — her real users' confirmation emails would
   pay. These deliver harmlessly to her inbox (plainly-test, filterable), and `Tools/prod-confirm-test-user.sh`
@@ -97,7 +97,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
   do touchid at any moment to help?"** → the orchestrator AGREED (the remainder of VX-503's class; rule 16 untrue for the
   Touch ID class; the run holds the custody slot and the Fable review) → IN THIS RUN as **unit B4** (D-B8 below), parented
   under VX-510; her Touch ID for the live proof at a window she picks (signalled by the ambient, R-510-18).
-*[removed for publication]*
+- **R-510-17 — tester A: "I doubt [tester A] will join tonight. You can note in that ticket that I'll handle it later, when
   she's available. It might not be during a run."** → noted on VX-508; the run's VX-508 watch ENDS.
 - **VX-521, her thoughts: "if you show them, how can the account coexist with those two? someone who clicks replace and
   writes down the 12 words but closes the app before confirming theyve written them down might be quite confused.
@@ -211,8 +211,8 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 1. **THE TRACE, first and whole** — (a) the CURRENT 0.10 set-up/join acts end-to-end: the act → `SyncSession`/
    scheduler seam (does the Standard set-up act trigger the first round? does anything re-evaluate the row's last
    refusal after the act?), AND the act's own failure modes (can the vault write fail or be cancelled while the UI
-   *[removed for publication]*
-   *[removed for publication]*
+   reads as success? — tester B's story (a)); (b) THE ARCHAEOLOGY: the OLD road's enrollment act (deleted whole at
+   VX-329, readable in git history) — the exact code tester B ran on Oct 13, hunting the silent window. The
    archaeology explains; only the current code gets fixed. Findings land HERE before any fix session sees them.
 2. **The fixes, pin-before-fix per member:** VX-498 (red-on-old by behavioral revert), VX-507 (the act confirms
    its first round in its own sheet, or says what blocks it), VX-506 (the pre-join wording — her line: "sync
@@ -224,7 +224,7 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
    plainly-test emails, are recorded here, and their cleanup (the account-deletion road — itself worth exercising
    once) is part of the run.
 4. **Riders and neighbors:** VX-503 (the Standard join's Touch ID prompt — same seam, trace it if the window is
-   *[removed for publication]*
+   open); VX-502/504/505 stay with VX-500. **VX-508 is the run's WATCH:** check for tester A's 0.10 join with
    `Tools/prod-read.sh` at natural moments; the moment it lands, surface the one-statement act for her `!` hand.
 
 ## LIVE STATUS (flip per piece, same commit; unverified claims marked PENDING)
@@ -232,8 +232,8 @@ Pin-before-fix PER MEMBER; commits say `Part of VX-nnn`; NO trailers.**
 | # | Piece | Status |
 |---|---|---|
 | 0 | Kickoff: preflight read whole (the kickoff file, vx-494 WHOLE, vx-488, CLAUDE.md + canon, SyncSpec WHOLE, CastleRules WHOLE, SurfaceContracts, the resiliency protocol, the master plan, TICKETS, QUESTIONS tail); worktree + branch; in-flight row on main; VX-510 In Progress with members parented; this record with her kickoff rulings | DONE (this commit) |
-*[removed for publication]*
-*[removed for publication]*
+| 1 | THE TRACE (a) — the current set-up/join acts end-to-end (the act→scheduler seam; the act's own failure modes) | DONE (this commit) — T-1: VX-498's mechanism CONFIRMED in code, a regression from VX-329 U1 (`f2306a535` deleted the old road's post-enrollment round hook, never rewired); T-2 F-1…F-6; T-3 the production facts (tester A: no `kp:` secret — no round ever reached the proof step) |
+| 2 | THE TRACE (b) — the archaeology: the old road's enrollment act as tester B ran it on Oct 13 | DONE (this commit) — tester B's 0.9.4 silent window FOUND (the passphrase landed at Screen 2, the vault only after the twelve-word re-entry; the locked row then said "enter your encryption passphrase"); tester A's 0.9.8 stories A1–A3 (unseparable by the server) |
 | 3 | The kickoff sitting bundle answered (D-ROAD shape; lifecycle drill in-run or chartered; the acceptance's account set) | DONE — R-510-6…9 (env flag + allowlist; the PAT confirmation script; the typing helper over a generated file; the lifecycle drill IN this run as unit C) |
 | 4 | The fixes: VX-498 + VX-507 + VX-506 (+ VX-503 if open), pins red-on-old per member | UNIT A DONE (`33c169f76`…`92bd0740a`; harness 449/79 green; 14 reverts red as named; Mac + iOS build-for-testing green; re-run by the orchestrator 37/6 green); F-6 RULED (A) → unit B1; **the stage batch at `92bd0740a`** (a detached clean checkout `~/dev/variorum-vx-510-stage`, stage claim `vx-510`, the WHOLE Mac target): `✔ Test run with 5141 tests in 902 suites passed after 2188.113 seconds with 14 known issues`, `** TEST SUCCEEDED **` (VX-494's closing 5118/898 + unit A's 23 tests in 4 suites, exactly); stage released |
 | 5 | VX-509 — the standing first-run drill (state-transition pins at the act→scheduler seam + the scripted walk on the release checklist) | UNIT B1 DONE (`2576629c7`…`31b8e2636`; `FirstRunDrillTests` every arm + the negatives; `Tools/WalkKit/first-run-walk.sh` + release.sh's step-0 gate row; harness 477/82 green; 18 reverts red as named; re-run by the orchestrator 48/6 green); the Mac stage batch PENDING (the closing run) |
@@ -264,7 +264,7 @@ the DEBUG container (`~/Library/Containers/io.lduarte.Variorum.debug/Data/Librar
 Variorum-dev/`). The dev slot's files go aside by `mv`, ALL top-level files; restore whole before release;
 sign the walk session OUT before restoring (O-B2). cliclick cannot press Touch ID; SwiftUI onSubmit needs System
 Events `key code 36`. **Production is read-only except at her hand:** `Tools/prod-read.sh` for SELECTs
-*[removed for publication]*
+(ref-pinned `<supabase-project-ref>`); anything mutating is her `!` road at her explicit word. The dev store's
 Debug app NEVER signs into her real account. Implementers: no subagents, no stage, no Debug launches, no
 dev-store touch; headless + `build-for-testing` only; checkpoint commits per piece, push each, LIVE STATUS flips
 in the same commit, PENDING on every unverified claim; foreground waits only (poll, never `tail -f`, never end a
@@ -306,7 +306,7 @@ turn waiting).
 round, through the ordinary trigger" — `git show 58515fe9c:App/Variorum/Shared/AppServices.swift`, ~line 247).
 **VX-329 U1 (`f2306a535`, 2026-10-22) deleted the encryption session with today's road and never rewired an
 equivalent on the new road's account acts.** So every 0.10 user's Standard set-up sits locked until they type,
-*[removed for publication]*
+switch apps, press Sync now, or relaunch — the exact field report (VX-498, and tester B's/tester A's 0.10 moments).
 
 **Why the JOIN and the Castle set-up APPEARED to work (SUSPECTED, recorded — not load-bearing for the fix):** both
 observed cases raised a SYSTEM authentication prompt mid-act — the Standard join's Touch ID prompt (VX-503, the
@@ -329,7 +329,7 @@ so no accidental become-active and no round. The fix below makes the round deter
   not exist) — the line asserts a lock where there is only a not-yet; and Settings' door reads "Turn on sync" over
   the JOIN arm for an account that already syncs. Her words: "should that not be sign into sync instead of turn on?";
   "sync shouldn't seem like you're restarting it."
-*[removed for publication]*
+- **F-4 (the refusal walk-away — tester B's 0.10 moment):** a refused act leaves the sheet up with its sentence; closing
   it writes nothing and nothing afterward says sync is not on except the row (F-3's words). The fix for the
   walk-away class is F-3's honest row plus VX-507's sheet: the row must say "not on yet" (with its door) until a
   round has actually landed.
@@ -346,16 +346,16 @@ so no accidental become-active and no round. The fix below makes the round deter
 ### T-3 — the production facts (read-only, `Tools/prod-read.sh`, 2026-10-23)
 
 Per-account footprint (vault · key-proof enrollment secret `kp:<uid>` · challenges · write-budget · tenant-seq ·
-*[removed for publication]*
-*[removed for publication]*
+device cursors · containers): **hers** 1 · 1 · 28 · 1 · 1 · 7 · 864 (castle) · **tester B** (created 2026-10-13
+23:21 UTC, last password sign-in 2026-10-14 01:06) 0 · 0 · 0 · 0 · 0 · 0 · 0 · **tester A** (created
 2026-10-22 20:31, last password sign-in 20:32:58, vault 20:39:21 standard, proof hash set) 1 · **0** · 0 · 0 · 0 · 0
-*[removed for publication]*
-*[removed for publication]*
+· 0. **Tester A's account carries no `kp:` secret: no engine round EVER reached the key-proof enrollment step after
+her vault existed** (the first round of every account enrolls the proof before any pull or push). Tester B's account has
 never held anything.
 
 ## THE ARCHAEOLOGY (piece 2 — the deleted code as the testers ran it; it explains, only the current code is fixed)
 
-*[removed for publication]*
+**Tester B — 0.9.4 (`ba8db32f9`, the 0.9.4 bump; his sign-in 2026-10-13/14):** the old enrollment sheet
 (`SyncEnrollmentModel` + `SyncEnrollmentView`, deleted at VX-329 U1) ran FOUR screens: Screen 1 explain → **Screen 2
 the passphrase, which SET the library's passphrase on the spot** (`submitPassphrase` → `tie.setPassphrase(typed)`,
 a local key-file write) → Screen 3 the twelve words through `WordsCeremony` (shown, "written down", then CONFIRMED
@@ -371,7 +371,7 @@ later "That passphrase doesn't open this library" (the library DID have a passph
 logs survive) — it is the one story the code and the server both allow without a failure nobody saw. The current
 road has no such split: the set-up types both secrets on one sheet and the act is one plan (rule 20).
 
-*[removed for publication]*
+**Tester A — 0.9.8 (`58515fe9c`, the 0.9.8 bump; her set-up 2026-10-22 20:39 UTC, before the marker-14 deploy):** the
 old road's set-up DID wire an immediate round (`adoptEnrolledMaterial` → `onKeysChanged` → `triggerSync`), and
 0.9.8's `connectSyncIfAllowed` composed the chain at sign-in without waiting for enrollment. Yet no round reached
 the key-proof step (T-3). The stories the code still allows: (A1) the chain never composed at her sign-in (F-5's
@@ -383,16 +383,16 @@ is a JOIN (her vault exists) — under T-1 a same-posture join on 0.10 also land
 bounces focus. **Either way, VX-507 is the cure for the class:** the act's sheet confirms the first round or says
 what blocks it, so silence becomes impossible on every build from this one.
 
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+**HER CORRECTIONS AT THE CUTOVER (2026-10-24, her words to the successor — the archaeology amended):** (1) tester A has
+NOT tried 0.10: "she hasn't tried the 0.10 release … [tester A] started sync at 2:15pm. 4 hours before the deploy, and
+hasn't upgraded since"; "only [tester B] logged back in and his had failed." (The server stamps agree: sign-in 20:31–20:32Z
 = 14:31 MDT, the vault 20:39Z = 14:39 MDT; the deploy that evening.) So her zero-rounds state is WHOLLY the 0.9.8-era
 question (A1–A3 above), and the T-1 mechanism matters for her FORWARD road only: her eventual 0.10 upgrade is a join
-*[removed for publication]*
+over her existing vault, which pre-fix would also have landed with no round. (2) tester B's own words CORROBORATE the
 Screen-2 window: "Should I just set the passphrase to the same I used before? I don't think I have 12 words saved
 anywhere" — a COMPLETED 0.9.4 enrollment walked him through the words ceremony with exact re-entry, so holding a
 passphrase while never having seen twelve words is precisely the closed-after-Screen-2 state; her reading: "that
-*[removed for publication]*
+makes a lot of sense on [tester B] - he said that he had never had 12 words, so that matches perfectly." The one-story
 reading above is now independently supported, not merely unexcluded.
 
 ## THE FIX DESIGN — UNIT A (VX-498 · VX-507 · VX-506; the architect's design, built by implementer session A)
@@ -2466,7 +2466,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
 - **S2 (20:40)** — the Account sheet's Create an account…: the email and the password twice typed by
   `type-prod-test-secret std` (the form's own "At least 12 characters"); Create Account → **"Check your email for a
   confirmation link, then sign in here…"** (the confirmation road, as designed).
-*[removed for publication]*
+- **S3 (20:41)** — prod read: `<test-account-email>` = auth user **`<account-uuid>`**,
   unconfirmed; `Tools/prod-confirm-test-user.sh` (run from the branch worktree, the gitignored `.env.supabase.local`
   linked from main) → `email_confirmed_at` 02:41:54Z.
 - **S4 (20:42)** — Back to sign in → email + password by the helper → **signed in**; the Account sheet: "Hosted sync is
@@ -2481,10 +2481,10 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   doesn't sync." · Turn on sync… → the SET-UP arm ("Your library's passphrase and twelve words become the account's. Nothing
   is replaced. … Your account starts in Standard, like this library. This library has no passphrase yet. Choose one…") → a
   new passphrase twice + the words, all three by the helper (concealed — VX-463's eye) → Turn on sync → log
-  *[removed for publication]*
+  `road: turnOnSync — library 6fa0c827 now names account <account-uuid>, standard under 1aad910b` (20:46:19) → **WITHIN 4 s, NO
   RELAUNCH, THE SHEET: "Synced. Your library is on your account now." with Done** (VX-498 + VX-507 LIVE ON PRODUCTION).
 - **S7 (20:47)** — **prod reads by the uid:** `key_vault` mode **standard**, created 02:46:19Z (the press), proof hash set;
-  *[removed for publication]*
+  **`kp:` secret 1** (the first round's key-proof enrollment — the step tester A's account never reached); **device cursors
   1** (last_seq 0 — the round's start, the 13j rule); **rows pushed 3** (the three `setting` rows; `sync_write_budget`
   lifetime 3); containers 0 (W-1). Done → **the main window's row: "Synced 8:46 PM"** — no relaunch. OBSERVATION W-2 (chrome,
   cosmetic): at the dev window's sidebar width the row's two buttons truncate to "Sync…" and "Accou…".
@@ -2527,22 +2527,22 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
 - **S15 (20:58:14) — A JOIN from the restored library:** Protection ▸ Sync: "This library doesn't sync." · **"Sync this
   library…"** (VX-506's join-arm door, LIVE) → the join sheet (its title still "Turn on sync" — P-VX510-A4): "Your account
   already syncs. Type its passphrase or its twelve words once…" → the account's passphrase by the helper → `enroll: begun #6
-  *[removed for publication]*
+  … enroll: done #6 under 2e677513 · road: turnOnSync — library dfe2ad68 now names account <account-uuid>` (20:58:15) — **NO
   system Touch ID prompt** (VX-503 did not reproduce on this Mac's Standard join) → the words notice (passphrase typed):
-  *[removed for publication]*
+  "Your twelve words are <test-account-email>'s twelve words. Your previous twelve words still open backups you
   made before today…" → OK → **the sheet: "Synced. Your account's writing is in this library now."** — no relaunch.
   **prod: device cursors 2 · live containers 1 (no duplicate — the copy's rows merged by id) · live blocks 1 · rows 8 ·
   vault revision 3 (a same-posture join changes no account lock).** OBSERVATION W-6 (ticketed at the close): the words
   notice SPOKE although the restored library's words already were the account's (the copy was made under the current pair
   — VX-456/VX-462's quiet arm missed for a restored copy, probably because the fresh key's lock is compared rather than
   the words), so "your previous twelve words" is untrue here.
-*[removed for publication]*
+- **S16 (21:00–21:02) — THE TESTERS' ROAD: a FRESH library JOINS the account** (tester A's 0.10 road: Start fresh → join by
   passphrase). The walk instance quit (its round sheet's Done first — a sheet up held ⌘Q); the walk library `dfe2ad68`'s 5
   slot files aside into `Variorum-dev-aside-vx510-walkL1/`; relaunched on the road (pid 65130, the road ARMED) → a fresh
   library **`413fb3bd`** (key `725fafc4`, device `7d96b569`), still signed in as std (the dev scope's session) → **the row:
   "Sync isn't on for this library yet" with Protection…** — the exact moment both testers met "Sync locked" on 0.10 →
   Protection ▸ "Sync this library…" → the account's passphrase by the helper → `enroll: done #1 under 725fafc4 · road:
-  *[removed for publication]*
+  turnOnSync — library 413fb3bd now names account <account-uuid>` (21:01:52) — no system prompt → the words notice (true here:
   the fresh library's words were replaced) → OK → **"Synced. Your account's writing is in this library now."** — NO
   relaunch → Done → **the Library shows "VX-510 S8 written on the std test account · edited today 8:48 PM" — the first
   library's note, downloaded into the fresh one**; the row "Synced 9:01 PM". **prod: device cursors 3 · live containers
@@ -2557,11 +2557,11 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   relaunched (pid 66160, the road ARMED) → a fresh library **`2aa0214f`** (key `895bf4eb`, device `dd81f8f0`); Settings ▸
   Protection ▸ Sign out… ("Sign out of this Mac? This Mac stays signed out of sync until you sign in again…") → Sign Out →
   "Sign in to turn on sync." · Sign in… → the Account sheet over Settings → Create an account… → `del`'s email + password
-  *[removed for publication]*
+  twice → the confirmation notice → prod: **`<account-uuid>`** unconfirmed → the PAT script confirms
   (03:06:42Z) → signed in as del → the words look blind (Copy + stash, the helper's twelve-word check) → I've written them
   down → Close → Protection ▸ **"Turn on sync…"** (the SET-UP arm — distinct from the join's "Sync this library…", correct
   for an account with no vault) → del's passphrase twice + words → `road: turnOnSync — library 2aa0214f now names account
-  *[removed for publication]*
+  <account-uuid>` (21:08:56) → **"Synced. Your library is on your account now."** — the SECOND fresh account, same result. prod
   before: vault 1 · `kp:` 1 · cursor 1 · settings 3 · budget 1 · auth user 1. → the main window's Account… → Delete
   Account… — the form: "Your account, its sync copy on our server, and its keys are deleted. Nothing on this Mac or your
   other devices is touched…", the password + "DELETE MY ACCOUNT" → Delete Account (21:10:00) → log `road: deleteAccountHere
@@ -2575,7 +2575,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   detached checkout; `** BUILD SUCCEEDED **`); the stage renewed (240 min); the deleted account's library `2aa0214f` aside
   (`…-aside-vx510-walkL3/`); relaunched (pid 71389, the road ARMED) → a fresh library **`159caa3f`** (key `a2c73b2c`,
   device `3a62193d`), signed out.
-*[removed for publication]*
+- **C1 (21:12–21:16) — a CASTLE account from scratch:** sign-up (`castle`) → prod **`<account-uuid>`**
   → the PAT script confirms (03:13:06Z) → signed in → the words look blind (Copy + stash, twelve-word check) → Protection ▸
   **Use Castle…** — its sheet ("Castle is one promise: no quiet road through Apple, ever, on any device of the account… The
   libraries in Previous Libraries keep their own quiet roads on this Mac — Castle protects the library you have open…") on
@@ -2583,7 +2583,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   **Always ask** chosen ("No copy of the key stays on this Mac; you type every time.") → `enter_castle: swapped … retired 1
   own Apple key(s) … done #2 under 5638db0a · road: useCastle — library 159caa3f now castle` (21:15:20) → Turn on sync… →
   the set-up arm IN CASTLE ("Your account starts in Castle, like this library.") → passphrase + words → `road: turnOnSync —
-  *[removed for publication]*
+  library 159caa3f now names account <account-uuid>, castle under 5638db0a` (21:16:25) → **"Synced. Your library is on your
   account now."** — the THIRD fresh account, the Castle posture, no relaunch. **prod: vault mode castle, revision 1 · `kp:`
   1 · cursor 1 · rows 3.** The row "Synced 9:16 PM".
 - **C2 (21:17–21:18) — VX-501 LIVE: a TYPED Castle unlock keeps syncing.** A note filed ("VX-510 C2 castle note before the
@@ -2626,8 +2626,8 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   Type its passphrase or its twelve words once — your library's own passphrase and twelve words are replaced by your
   account's. … Your account is in Castle, so this library goes into Castle too." + the Castle promise text + On this Mac)
   → **Always ask** + the account's CURRENT passphrase → `enroll: done #1 under 508a5859 · road: turnOnSync — library
-  *[removed for publication]*
-  *[removed for publication]*
+  223c4e7e now names account <account-uuid>, castle under 508a5859` (21:32:14; a NEW key — the re-keying join) → the reopen
+  (`road: opened … key 508a5859`, 21:32:15) → the words notice ("Your twelve words are <test-account-email>'s
   twelve words. Your previous twelve words still open backups you made before today. …") → OK → **`road: an account act
   landed — the library holds the account's words; the words card's offer retires (VX-511)`** → the F-6 sheet waited for the
   reopened services and said **"Synced. Your account's writing is in this library now."** → prod **2 cursors**; the Library
@@ -2665,7 +2665,7 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
 - **Machinery (shared worktree):** B3 and the orchestrator shared `~/dev/variorum-vx-510`; the harness caught two Edit
   races on this file and the orchestrator held its record edits in its scratchpad until B3 closed — nothing lost. Rule from
   here: the orchestrator edits this file only with `git status` clean, and commits at once.
-*[removed for publication]*
+- **VX-508 watch, last read 21:40:** tester A `<account-uuid>` vault 1, cursors 0, `kp:` 0; tester B `<account-uuid>` nothing — then ENDED
   at her word (R-510-17).
 - **VX-513'S WALK (22:19–22:35; the walk build REBUILT at B3's tip `2e3d335d8`; stage renewed 240 min; pid 93437 on
   `223c4e7e` — synced to `castle`, Standard; prod vault rev 4):**
@@ -2759,7 +2759,7 @@ this section is the charter-vs-execution judgment.
 ## Charter vs. delivered
 1. THE TRACE — delivered and sound. T-1's mechanism (VX-329 U1 deleted the old road's post-enrollment round hook) is
    the right level of trace: by commit, with the exhaustive trigger-roads enumeration that makes "the act is none of
-   *[removed for publication]*
+   them" a checkable claim. The archaeology (tester B's 0.9.4 four-screen enrollment; the Screen-2 passphrase landing
    before the vault write) is honest about what cannot be proven ("no logs survive — it is the one story the code and
    the server both allow").
 2. THE FIXES — all four members built, each with revert-verified red-on-old pins; the fix DESIGNS match the code as
@@ -3098,14 +3098,14 @@ the independent re-walk.**
 **Done, with evidence (the walk evidence folder: `~/dev/variorum-vx-510-stage/App/Variorum/DerivedData/first-run-walk/`):**
 - **The pre-step:** the deleted `del` account RE-MINTED through the app's own Create Account sheet on the prod test road
   (fresh library `6c51f3d0`; the sheet driven by AX presses + the typing helper; the confirmation notice shown), then
-  *[removed for publication]*
+  confirmed by the HARDENED `Tools/prod-confirm-test-user.sh` — its first live green (auth id `<account-uuid>`).
 - **VX-509's scripted walk, FIRST LIVE RUN (`run-20261024T105945Z-del`):** P1–P6 ran clean after two committed tool
   fixes (`389312534` — vis-ax matches `AXPlaceholderValue`; P4's landing probe is the sheet's own "Sign out").
   **P7 stopped, correctly, and the stop found a real walk-tool bug:** `focus "Your twelve words"` matched a HEADING
   whose text equals the field's placeholder — the click landed on prose, the words landed in the still-focused Again
   field, and the confirm's disabled button answered AXPress as a no-op. Recovered BY HAND (the Again field cleared and
   retyped; the words field focused BY ROLE — her live hint: "this is the same sheet that needed the accessibility click
-  *[removed for publication]*
+  before"), then the button pressed: **`road: turnOnSync — library 6c51f3d0 now names account <account-uuid>` (05:10:00);
   the VX-511 mark fired; THE SHEET CONFIRMED "Synced. Your library is on your account now."; the row "Synced ‹time›";
   SAME PID (no relaunch). Server, read by the successor: vault standard rev 1 · `kp:` 1 · 1 cursor · 3 settings —
   VX-498 + VX-507 + VX-511 + the key-proof enrollment LIVE ON THE FINAL BUILD.** The script then gained the role-filter
@@ -3195,8 +3195,8 @@ scratch AX dumper (text labels only) and the repo's `capture-windows` (WINDOW-sc
   like this library.") → the account's passphrase by the helper → Turn on sync (the first press REFUSED by the author
   check — her brief click, said in-session; HID idle then read 24 s and climbing, her app absent; retried once at her
   "you can keep going") → `enroll: done #1 under dfe542ab · road: turnOnSync — library edf04751 now names account
-  *[removed for publication]*
-  *[removed for publication]*
+  <account-uuid>, standard under dfe542ab` → `road: an account act landed — … the words card's offer retires (VX-511)` → the
+  words notice ("Your twelve words are <test-account-email>'s twelve words…") → OK → **"Synced. Your
   account's writing is in this library now."** → Done → the row **"Synced 6:08 AM"**, SAME PID 49433 (started 05:11).
   prod: cursors 6 → 7, vault rev 15 unchanged (a same-posture join changes no account lock).
 - **USE CASTLE (06:09) — PASS.** Always ask chosen; passphrase + words by the helper → `enter_castle: … the account

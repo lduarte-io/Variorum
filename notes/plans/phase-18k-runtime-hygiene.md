@@ -4306,7 +4306,7 @@ Release built from `11e7614f` in a clean throwaway worktree (removed after, Deri
 `/Applications` binary `9e15f8bf…` (= 13y's recorded install — custody chain clean) →
 **`79c7688b9625f61df64c7af0ef42d90464ab0cdad5ff0ede6f6c37ebaa7ee203`** · `codesign --verify --deep
 --strict` OK on the product AND the installed copy · both keychain access groups present and identical
-*[removed for publication]*
+(`<apple-team-id>.io.lduarte.Variorum` · `…Variorum.shared`).
 
 **MOBILE PARITY:** the phone owes its own autosave-registry release (the Mac's C1 shape — KnownIssues,
 the mobile row); the ⌥⌘Z refusal sentence lives in `StructuralUndoCopy` and the phone forwards it

@@ -126,8 +126,7 @@ legible (a backup-destination chooser that says what iCloud placement means). Al
 posture-switching semantics. **No owner slotted — at her word, 13x-adjacent by nature.** Nothing
 that exists changes meanwhile.
 
-*[removed for publication]*
-*[removed for publication]*
+### §8a — the deferred item, NAMED AND SCOPED (2026-08-31, at her ask; explicitly NOT built now)
 
 **Name: APPLE-HELD RECOVERY (Shape 3).** The declared profile where recovery requires only the
 user's Apple identity — no passphrase memorized, no phrase on paper: *"keep iCloud on and you can't

@@ -4074,7 +4074,7 @@ output in-conversation). Results, in the checklist's order:
 sync by design (outbox intact) until its refresh — the window's
 device half proceeds immediately: the Mac Release build is
 running; the phone (iPhone 17 Pro, paired over the tunnel,
-*[removed for publication]*
+`<device-udid>`) follows via the parity-round road (`devicectl
 device install app`; her standing install blessing on record at
 `mobile-parity-round.md:291`, re-affirmed by her staged-window
 readiness this sitting).
@@ -4088,7 +4088,7 @@ readiness this sitting).
   as sequenced.
 - **Phone:** `VariorumMobile` Release (generic/platform=iOS,
   `-allowProvisioningUpdates`, her team) built clean; installed
-  *[removed for publication]*
+  over the tunnel to her paired iPhone 17 Pro (`<device-udid>`) via
   the documented `devicectl` road — install returned the bundle
   URL cleanly, no locked-device refusal.
 - **Remaining window verification:** the first live rounds — she

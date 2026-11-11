@@ -82,7 +82,7 @@ private func recordingAuthStore(
 }
 
 private func authTokens(
-    *[removed for publication]*
+    userID: String = "a0000000-0000-4000-8000-000000000001",
     access: String = "access-1", refresh: String = "refresh-1"
 ) -> AuthTokens {
     AuthTokens(

@@ -115,11 +115,11 @@ file's rounds 0d–0y ARE the record (the repo-first discipline held all night).
    binds all fixes. Cap three rounds.
 3. **The GATE (dashboard/server acts — announce each, her go, stored-PAT
    arrangement where applicable):** delete the `custom:fragments` IDENTITY on
-   *[removed for publication]*
+   her user (uid `<account-uuid>`, identity `<auth-identity-id>`) — ONLY after verifying
    the new direct sign-in works on the installed build (she has only that one
    identity; see round 0s's zero-identity caution — verify state before/
    after); delete the `custom:fragments` PROVIDER config on the Variorum
-   *[removed for publication]*
+   project; delete the SPIKE OAuth client (`<oauth-client-id>`) + tear down
    `Spikes/SuiteAccountSpike/` (throwaway by design; evidence lives in the
    plan file); **do NOT touch Fragments' project** (its old issuer stays ON
    until the one-batch handoff — contract item 5's guard is now moot for the

@@ -2783,7 +2783,7 @@ PRE-APPROVED evidence-gated for any future phase.
 `/Applications/Variorum.app` rebuilt Release from HEAD `eb22765` (all
 work adjudicated + reviewed), installed at a VERIFIED zero-instance
 window (her app closed, her word at the sitting), signature confirmed
-*[removed for publication]*
+(`io.lduarte.Variorum` / `<apple-team-id>`), behind a fresh WAL-safe A1
 backup (`variorum-backup-2026-07-28-083305.sqlite`,
 `integrity_check` ok). No schema change ⇒ no marker concern. The
 field-guide re-seed stays HER product-door act (handoff item 2).
