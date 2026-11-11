@@ -101,10 +101,7 @@ the rules are their provenance; the rules are general and BINDING here.
   multiplatform-services pattern). IAP addable later without rework.
   Current steering/external-link rules get verified at build time by a
   lookup agent, per the recorded caveat.
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 
 ### Round 2 — the isolation core (three ruled; one became Rounds 3–4)
 
@@ -337,28 +334,11 @@ this phase and what we should do"*
   deserves its review first — her "ready whenever" recorded as
   standing readiness, not a resequencing). She types her passphrase
   into the runner as needed.
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  time by lookup).
+- *[removed for publication]*
 
 *[removed for publication]*
 *[removed for publication]*
 
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
 *[removed for publication]*
 
 **Recorded and ruled:**
@@ -369,22 +349,7 @@ this phase and what we should do"*
   written knowing a future coordinated issuer move is a live
   possibility (config-only, no data migration — the Round-7 answer
   stands either way).
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 - **The passphrase step WAITS FOR THE GATE:** it is the repush half
   of the deploy — nothing passphrase-shaped exists to run before 09
   deploys (running the runner now would push against the CURRENT
@@ -2559,13 +2524,7 @@ price-agnostic: she names the number at launch.)*
 - **Processor choice:** hers, decided when she tasks the site agent
   (Round 7's record: easy to change before real subscribers — this
   function is processor-agnostic by design; sticky after, because
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  recurring subscriptions live IN the processor). *[removed for publication]*
 
 ## Ledger (running; every row owned)
 
@@ -2797,10 +2756,7 @@ step-10 deletion-door live test (its own `account_purge` is the natural
 verification).
 
 **Gate step 7 — the domain: HER DECISIONS RECORDED (2026-08-11), attach
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+act pending.** *[removed for publication]* The one flagged
 technical caveat: Supabase's docs confirm the auth ENDPOINT switches to
 the custom hostname but never explicitly document the JWT `iss` rewrite —
 so `iss` + the OpenID discovery doc get verified empirically at
@@ -2808,13 +2764,7 @@ activation (already the standing guardrail). DNS: a CNAME +
 `_acme-challenge` TXT, Cloudflare grey-cloud (community consensus, not
 Supabase-documented).
 
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 - **WHAT THE CUSTOM DOMAIN BUYS (her question answered):** it fronts the
   AUTH SERVICE (GoTrue issuer) with `auth.stargazing.tech`, so (a) the
   links in auth emails — confirm/reset — show her brand instead of the
@@ -2835,7 +2785,7 @@ Supabase-documented).
   into the pre-strangers run-up (14d-adjacent, where SMTP also lands).
   Recorded for her call; not decided by the architect.
 - **HER FOLLOW-UP (2026-08-11) + THE SECOND LOOKUP — branded email links
-  *[removed for publication]*
+  WITHOUT the *[removed for publication]* add-on: CONFIRMED YES (primary-source verified).**
   Custom SMTP alone changes only the sender/FROM, not the link
   hostname; but Supabase's OFFICIALLY DOCUMENTED server-side PKCE
   pattern rewrites the email TEMPLATE so the link points at her own
@@ -2845,7 +2795,7 @@ Supabase-documented).
   recipient SEES is then on stargazing.tech, sender too. Works for
   confirm/reset/magic-link/email-change. Requirements: Site URL set to
   the brand domain, the handler routes on the Redirect-URLs allowlist,
-  *[removed for publication]*
+  and PKCE flow (autoconfirm OFF). **What the *[removed for publication]* add-on uniquely
   buys — all invisible to users:** the raw `/auth/v1/*` API hostname,
   OAuth callback URLs, SAML EntityID; and per a community report
   (GitHub Discussion #44373) it may NOT even rebrand the JWT `iss`
@@ -2884,8 +2834,7 @@ SMTP + site work that makes the stranger email flow real will exist:
   until the phone is re-onboarded, don't rely on phone↔Mac sync — phone
   writing stays local-safe but may not propagate.**
 - **(7) domain** — DISSOLVED (the branded-email template road serves it
-  *[removed for publication]*
-  *[removed for publication]*
+  for free at 14d; *[removed for publication]*).
 - **(8) signup flip** + **(9) stranger validation** — land at 14d on
   whichever issuer/SMTP posture she rules there (they need neither a
   custom domain nor branded emails; ARM (a) is moot until then).

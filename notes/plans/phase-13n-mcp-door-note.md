@@ -86,19 +86,7 @@ ordinary operations"), but their design conversations are separate and
 
 ## The chat question (author, 2026-08-25, the launch-strategy conversation — OPEN, nothing decided)
 
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
+*[removed for publication]* And the positioning thread from the same message: *"it might be
 interesting to explore the angle of positioning it as an AI *editing*
 app instead of an AI writing app - your words stay yours"* — with her
 option idea: takes may be AI-edited by permission, **with a commit
@@ -117,10 +105,8 @@ gate 13n and can be made after watching how the MCP launch lands; and
 it makes the only 13n-time obligation a cheap one: don't build
 anything that assumes the client is external (auth/token flow an
 embedded client could also use). If a chat is later ruled in, it is
-*[removed for publication]*
-*[removed for publication]*
-*[removed for publication]*
-undecided.
+its own phase (provider account, token metering,
+abuse limits, streaming UI) *[removed for publication]*.
 
 ## Her second round (2026-08-25, same sitting — leans and scope)
 

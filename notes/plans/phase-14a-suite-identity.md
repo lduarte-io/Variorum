@@ -26,7 +26,7 @@
 ## rounds below are the record, and they SUPERSEDE earlier sections where they differ)
 
 - **Account home: the VARIORUM PROJECT ITSELF** (round 0h — supersedes batch-1 R2's
-  *[removed for publication]*
+  "new neutral project" and round 0c's ruling). Its OAuth 2.1 Server is the suite
   issuer; "stargazing" is the BRAND and the pages' front (planetlillian a live
   candidate); an eventual custom domain fronts the issuer. **No new org, no Pro
   purchase now** (her free-tier posture; upgrade at her word).
@@ -304,69 +304,14 @@ does not gate the spike (project refs are random; display names rename freely).
 
 **Field notes (the spike record — appended live, the 9c Step-0 form):**
 
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+- *[removed for publication]*
 - **Round 0c (same sitting) — her challenge to the third project itself** ("how big
   of a benefit is having the separate org rather than just a distinct table within
   one of the existing ones? … i'd probably put the home in variorum though instead
   of fragmnets and just not show users that it's within variorum. i'm a little
   conflicted"). The architect's analysis, presented before her ruling (this would
   AMEND R2 if taken):
-  *[removed for publication]*
-    *[removed for publication]*
+  - *[removed for publication]*
   - **Branding: conceded, not an argument** — the project ref is an opaque random
     string; nobody can see "variorum" in the issuer URL, and a custom domain
     (auth.stargazing.tech) can front it later either way.
@@ -390,13 +335,9 @@ does not gate the spike (project refs are random; display names rename freely).
     the Variorum project, suite signups STAY OFF until 14c (the provisioning
     deliverable slips there; Fragments keeps native signups for its testers and
     runs dual sign-in meanwhile; her one account still proves the one-login goal).
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
+  - *[removed for publication]*
+  - **RULING (2026-08-03): SEPARATE PROJECT — R2 STANDS UNAMENDED.** She
+    took the recommended shape A *[removed for publication]*. The in-Variorum variants stand down: variant ii
     (issuer-in-Variorum, signups deferred) recorded as the road NOT taken; variant
     iii (hardening + signups on) recommended against and not taken. Consequences:
     the 9c corpus guard survives byte-untouched; 14b's surgery and the suite's
@@ -406,23 +347,9 @@ does not gate the spike (project refs are random; display names rename freely).
 - **Round 0d (same sitting, a fresh session — her return with rulings after a
   requested re-litigation):** she asked for the absolute pros/cons of
   home-inside-Variorum once more ("ignore the flag that this shouldn't be
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  relitigated") and the architect re-presented round 0c *[removed for publication]*. Her next message then ruled, verbatim
   anchors kept:
-  *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
+  - *[removed for publication]*
   - **RULED — NO Fragments-native tester accounts** ("I don't want to have
     fragments native accounts"). SUPERSEDES the contract file's 14a-horizon
     frame (ship TestFlight on native auth, re-link later): TestFlight now WAITS
@@ -585,18 +512,13 @@ does not gate the spike (project refs are random; display names rename freely).
   suite identity to something else later? … it seems like that is a manageable
   issue. I guess I'm back to not being that convinced on anything other than
   defense in depth or vibes that the login truly belongs separate from variorum …
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  it truly seems more like a nicety from my perspective than a true need" *[removed for publication]*
   - **Why the flip is reasoned, not capitulation — five facts are NEW since the
     round-0c ruling:** (1) her sequencing ruling (NOBODY logs in before the whole
     14 family, 14c's isolation included) eliminates every interim security window
     the separate project guarded — by the time any stranger holds an account,
     parent-join isolation is built and tested; (2) TestFlight waits, so there is
-    *[removed for publication]*
-    *[removed for publication]*
-    *[removed for publication]*
+    no this-week provisioning need; (3) *[removed for publication]*; (4) the extraction mechanics, looked at squarely,
     are weaker than the round-0c framing: `auth.users`/`auth.identities` are
     ordinary Postgres rows in a schema she owns — dumpable between projects with
     uids AND password hashes intact; sessions invalidate (everyone signs in
@@ -636,8 +558,7 @@ does not gate the spike (project refs are random; display names rename freely).
 
 - **Round 0h (same sitting) — RULED: THE FLIP IS TAKEN.** Her words: "I like the
   idea of variorum being the home for users better than fragments being the home
-  *[removed for publication]*
-  *[removed for publication]*
+  for users *[removed for publication]*" Round 0c is
   SUPERSEDED (recorded, never erased); R2's shape (A) AMENDS: **the VARIORUM
   project is the suite's account home and OAuth 2.1 issuer** — "stargazing"
   survives as the BRAND and the pages' front (plus the eventual custom domain),

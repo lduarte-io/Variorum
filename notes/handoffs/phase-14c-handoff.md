@@ -19,12 +19,7 @@
    setup** (via the free template road — see item 4). Its
    FILL-AT-GATE fields are all completed; the confirmed issuer URL is
    the raw project URL (no custom domain — see item 4).
-*[removed for publication]*
-   *[removed for publication]*
-   *[removed for publication]*
-   `<supabase-org-id>` (the one holding your live Variorum mirror);
-   *[removed for publication]*
-   *[removed for publication]*
+2. *[removed for publication]*
 3. **Re-onboard your PHONE against the reborn mirror before relying on
    phone↔Mac sync.** Today's rebuild reset the mirror (new tables, the
    changefeed counter restarted), so your phone's saved sync position is
@@ -39,13 +34,12 @@
    **Until the phone is re-onboarded, don't rely on phone↔Mac sync** —
    your phone's writing stays safe *on the phone* but may not propagate.
    This pairs with the mobile/TestFlight run-up and is a 14d act.
-*[removed for publication]*
-   *[removed for publication]*
+4. **The custom domain was DECLINED — on purpose *[removed for publication]*.** You asked whether custom SMTP could brand the links in your
    auth emails without the separate add-on. It can: a rewritten email
    template pointing the link at `stargazing.tech` + a small
    `/auth/confirm` handler on your site (the stargazing.tech agent
    builds it) gives every link your users SEE your brand, for free. The
-   *[removed for publication]*
+   *[removed for publication]* Supabase Custom Domain add-on only rebrands surfaces users
    never see (the API hostname, OAuth callbacks — and maybe not even the
    token issuer). So the branded-email work rides 14d's SMTP step via
    the free road, and the issuer just stays the raw Supabase project URL.
@@ -59,13 +53,7 @@
    through 14c (Round 1). Your corpus now syncs multi-tenant and
    E2EE under your keys; nothing technical waits on the pause either way
    — but note item 3 about the phone.
-*[removed for publication]*
-   *[removed for publication]*
-   *[removed for publication]*
-   *[removed for publication]*
-   *[removed for publication]*
-   *[removed for publication]*
-   either.
+7. *[removed for publication]*
 
 ## What shipped, in one breath
 

@@ -223,11 +223,6 @@ walk. Announce each gate step to her before running it.
 - **The AppSpec §7 `sync_state` comment delta** (the third key,
   `rekey_in_progress`) — flagged twice in the ladder records; it is a
   closeout edit, easy to miss.
-*[removed for publication]*
-  *[removed for publication]*
-*[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-*[removed for publication]*
+- *[removed for publication]*
 - Her pause's end-state at closeout (Round 1 held it through 14c).
 - 14d's opening at her word.
