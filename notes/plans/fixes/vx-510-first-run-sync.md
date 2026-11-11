@@ -2557,11 +2557,11 @@ accounts"); `del` is deleted by LEG D. Hers to confirm at the closeout.
   relaunched (pid 66160, the road ARMED) → a fresh library **`2aa0214f`** (key `895bf4eb`, device `dd81f8f0`); Settings ▸
   Protection ▸ Sign out… ("Sign out of this Mac? This Mac stays signed out of sync until you sign in again…") → Sign Out →
   "Sign in to turn on sync." · Sign in… → the Account sheet over Settings → Create an account… → `del`'s email + password
-  *[removed for publication]*
+  twice → the confirmation notice → prod: **`<account-uuid>`** unconfirmed → the PAT script confirms
   (03:06:42Z) → signed in as del → the words look blind (Copy + stash, the helper's twelve-word check) → I've written them
   down → Close → Protection ▸ **"Turn on sync…"** (the SET-UP arm — distinct from the join's "Sync this library…", correct
   for an account with no vault) → del's passphrase twice + words → `road: turnOnSync — library 2aa0214f now names account
-  *[removed for publication]*
+  <account-uuid>` (21:08:56) → **"Synced. Your library is on your account now."** — the SECOND fresh account, same result. prod
   before: vault 1 · `kp:` 1 · cursor 1 · settings 3 · budget 1 · auth user 1. → the main window's Account… → Delete
   Account… — the form: "Your account, its sync copy on our server, and its keys are deleted. Nothing on this Mac or your
   other devices is touched…", the password + "DELETE MY ACCOUNT" → Delete Account (21:10:00) → log `road: deleteAccountHere

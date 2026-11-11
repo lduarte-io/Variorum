@@ -725,7 +725,7 @@ does not gate the spike (project refs are random; display names rename freely).
     `custom:fragments` retirement, the ProjectConfig/AuthSession seam) so she
     can sign in from her phone. Master-plan 14a row carries the clause.
   - **Registration: the dynamic door WORKED on the first curl** — the spike
-    *[removed for publication]*
+    client is `<oauth-client-id>` (public, PKCE,
     `http://localhost:3000/callback.html`), which also PROVES her
     dynamic-toggle save landed (no "no add application section" ambiguity —
     the dashboard has no manual UI, the 9c finding re-confirmed). She toggles
@@ -836,7 +836,7 @@ does not gate the spike (project refs are random; display names rename freely).
 
 - **Round 0r (same sitting) — THE SPIKE COMPLETES: every load-bearing unknown
   answered, all in the good direction.** Her run, end to end: the consent
-  *[removed for publication]*
+  details fetch (client `<oauth-client-id>`/SuiteAccountSpike; the `redirect_uri`
   trap-field present and correctly NOT navigated — the 9c traps held), her
   password sign-in, approve, PKCE code exchange **ok** — `iss` = the suite
   issuer on the Variorum project, `sub` = her uid, refresh + id tokens
@@ -885,7 +885,7 @@ does not gate the spike (project refs are random; display names rename freely).
     through the PRODUCTION pages (the spike client's localhost callback makes
     this legal) → then her bootstrap-password change at `/oauth/reset`.
   - **Fragments' OAuth client REGISTERED via the admin door** (no open
-    *[removed for publication]*
+    window): `client_id <oauth-client-id>`,
     `client_secret_post`, redirect = Fragments' GoTrue callback; the secret
     written ONLY to her untracked `.env.fragments-oauth.local`. The contract's
     touchpoint #1 now carries the full coordinates plus **THE FIRST-SIGN-IN
@@ -1386,9 +1386,9 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
   as odd, moot on deletion, not investigated further. After-read: **0
   custom provider rows.** The 9c trust arrow now exists in NEITHER
   direction.
-*[removed for publication]*
+- **Step 5 — the spike client + both spike dirs: DONE.** Client `<oauth-client-id>`
   deleted by her hand via the admin door (HTTP 204; soft-deleted per the
-  *[removed for publication]*
+  clients table; **Fragments' client `<oauth-client-id>` live and untouched** —
   touchpoint #1's real coordinates). `Spikes/SuiteAccountSpike/` AND
   `Spikes/AuthPairingSpike/` (her word: "we don't need that dead
   machinery") removed — commit `cb70b61`.

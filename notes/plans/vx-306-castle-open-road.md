@@ -2353,7 +2353,7 @@ folded; the product from `DerivedData/vx306-u3`):**
   read as a library.* at the confirm — C's content lived in its 1.3 MB WAL (a fresh store's main file is 12 KiB); the honest
   refusal of an incomplete copy; the filed artifact deleted by hand; the W-9 lesson again (a library moves with its sidecars).
 
-*[removed for publication]*
+**Posture after the window:** the dev library is **<library-uuid>** — Standard, a fresh key, under the
 SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing (dev sync off; Resume Sync never pressed);
 818912e0 whole in `Previous Libraries/2026-10-18-173517/`; B under `~/vx306-walk/B`, C under `~/vx306-walk/C` and
 `~/Downloads/vx306-airdrop` (deleted at closeout); instances 0; the simulator shut down; stage released 11:40.

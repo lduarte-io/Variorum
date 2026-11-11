@@ -521,7 +521,7 @@ door; nothing further is needed from the Variorum side for this touchpoint):**
 - **Issuer:** `https://<supabase-project-ref>.supabase.co/auth/v1` (auto-discovery
   works; endpoints live under it: `/oauth/authorize`, `/oauth/token`,
   `/.well-known/jwks.json`).
-*[removed for publication]*
+- **client_id:** `<oauth-client-id>` · auth method
   `client_secret_post` · registered redirect
   `https://<supabase-project-ref>.supabase.co/auth/v1/callback` (Fragments'
   GoTrue callback).

@@ -119,7 +119,7 @@ file's rounds 0d–0y ARE the record (the repo-first discipline held all night).
    the new direct sign-in works on the installed build (she has only that one
    identity; see round 0s's zero-identity caution — verify state before/
    after); delete the `custom:fragments` PROVIDER config on the Variorum
-   *[removed for publication]*
+   project; delete the SPIKE OAuth client (`<oauth-client-id>`) + tear down
    `Spikes/SuiteAccountSpike/` (throwaway by design; evidence lives in the
    plan file); **do NOT touch Fragments' project** (its old issuer stays ON
    until the one-batch handoff — contract item 5's guard is now moot for the

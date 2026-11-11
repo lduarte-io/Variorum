@@ -722,7 +722,7 @@ through the delegated PKCE flow. Issuer:
 `https://<supabase-project-ref>.supabase.co/auth/v1` — the RAW Variorum
 project URL; a custom domain was DECLINED at the 14c gate; write every
 config against this URL. client_id
-*[removed for publication]*
+`<oauth-client-id>`, auth method
 `client_secret_post`, registered redirect
 `https://<supabase-project-ref>.supabase.co/auth/v1/callback`; the
 client_secret the author supplies by hand — never commit it, never
