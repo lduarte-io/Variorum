@@ -19,8 +19,9 @@ such as "1 o semideus") stay.
 **The mechanism of the swap.** One ordered table of literal replacements (most specific literal
 first, so a short literal never eats part of a longer one), applied to the named files, then the
 hand-shaped places (mockup paragraphs that wrap, one record line that described a screenshot).
-The invented text is one small made-up story — someone who never asked to inherit a lighthouse on
-an island with a tide-bound ferry — kept in both languages, same block count, same sentence count
+The invented text is one small made-up story — someone who never asked to inherit an observatory
+on an island with a tide-bound ferry (not a lighthouse: "lighthouse" is already the repo's search
+fixture word, and a swap must not seed new hits for it) — kept in both languages, same block count, same sentence count
 per block, same line structure (the three-line unlabeled take stays three lines; the
 two-line english take keeps its internal newline). Every assertion that names the text was swapped in
 the same table, so the tests assert the same shapes over new words.

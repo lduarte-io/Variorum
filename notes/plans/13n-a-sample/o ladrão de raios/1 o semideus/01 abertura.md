@@ -1,12 +1,12 @@
 {t:"abertura"} {#percy/pt-en}
 
-Eu não pedi para herdar o farol.
+Eu não pedi para herdar o observatório.
 
 --- Alternates for this block ---
 
 take: "english"
 
-I never asked to inherit the lighthouse.
+I never asked to inherit the observatory.
 
 --- end alternates ---
 
@@ -20,17 +20,17 @@ It stands on an island with no bridge, and the ferry only runs when the tide all
 
 --- end alternates ---
 
-Cuidar de um farol dá trabalho. Quase toda noite, ninguém agradece.
+Cuidar de um observatório dá trabalho. Quase toda noite, ninguém agradece.
 
 --- Alternates for this block ---
 
 take: "english"
 
-Keeping a lighthouse is hard work. Most nights, nobody says thank you.
+Running an observatory is hard work. Most nights, nobody says thank you.
 
 take: 2
 
-Keeping a lighthouse is a chore,
+Running an observatory is a chore,
 and most nights
 a lonely one.
 
