@@ -374,12 +374,10 @@ round under the ladder's own purpose.
   will come back to it later.** The note to carry back, recorded at
   her request: *DMARC is entirely fine to add later (it's
   deliverability/anti-spoofing hygiene on top of SPF+DKIM, not
-  *[removed for publication]*
-  `rua=` at `<her-email>` means the reports cross
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  whenever you like.*
+  required for them to pass). When you do, it is a TXT record on the
+  sending domain; reports pointed at an address on another domain
+  need one extra verification TXT on that domain, or receivers ignore
+  the address — a two-minute act, whenever you like.*
 - **The secret-key rotation** (the Step 0 incident note above) —
   recommended, hers to take or decline.
 - **THE STRANGER-VALIDATION WALK — RULED A RESIDUAL (her 2026-08-16
@@ -483,12 +481,10 @@ round under the ladder's own purpose.
   the Cloudflare records placed (Resend's shape: DKIM TXT on
   `resend._domainkey`, SPF TXT + feedback MX on `send`); domain
   **VERIFIED** at Resend; the API key staged in `.env.smtp.local`.
-  *[removed for publication]*
-  reports at `<her-email>` later; recorded note: a
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  pass without it.
+  **DMARC deliberately skipped for now** — later at her word: a TXT
+  record on the sending domain (a report address on another domain
+  needs a verification TXT on that domain too, or receivers ignore
+  it). SPF+DKIM pass without it.
 - **Hygiene fix (committed `d360530`):** `.env.smtp.local` arrived
   untracked but NOT gitignored (the other secret files are ignored by
   name) — added it plus the `.env.*.local` glob before touching

@@ -30,10 +30,10 @@
      local transcript during the phase (recorded honestly in the plan);
      rotate at dashboard → Settings → API keys, then update
      `.env.supabase.local`, or decline.
-   *[removed for publication]*
-     to `<her-email>`, planetlillian.com needs one
-     *[removed for publication]*
-     *[removed for publication]*
+   - **DMARC on stargazing.tech** — whenever: a TXT record on the sending
+     domain. If the reports should go to an address on another domain,
+     that domain needs one verification TXT too, or receivers ignore the
+     address.
    - **"Bridge now" relabel** — say the word ("Sync journal now" or
      fold into one button) and it's a one-liner.
    - **The bridge auto-connect** — your "why log in twice" question,
