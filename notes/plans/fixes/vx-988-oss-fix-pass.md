@@ -31,7 +31,7 @@ packaging work, not here. Removed text that had a home to go to went to the priv
   step in `notes/plans/phase-14b-suite-e2ee.md` carried the address — redacted.
 - **C · R-oss-25 — the personal class** (`1bdee090e` mockup take text → invented prose; `ebd18d17f` the two 18l
   screenshots removed, their three references annotated; `667d481b7` the 2026-07-25 intake trimmed to its Variorum
-  sections with a marker line; `0715f81ee` a family aside and a relationship clause redacted, the latter in three copies).
+  sections with a marker line; `0715f81ee` two personal asides redacted (R-oss-25)).
 - **D · R-oss-26 — the OSS plan's own riders** (`c952778e6`). The ruled rider sentences in
   `notes/plans/open-source-readiness.md` removed; the rest unchanged.
 - **E · R-oss-23 — two files relocated** (`707684cd2`). `notes/release-and-v1-strategy.md` and
