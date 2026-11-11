@@ -395,7 +395,7 @@ editor-seam by definition → a FABLE cold review follows; your self-assessment 
 
 You are the `opus-implementer` for **18l UNIT U0b**. One acceptance unit: her report — *"when I am
 in write and remove a newline, the editor's height adjusts removing the whitespace between the
-*[removed for publication]*
+topmost line in the editor and the line at the top of the editor."* Captures (since removed for publication):
 `notes/plans/18l-inputs/2026-09-25-write-{before,after}-removing-newline.png` — block 4/4 (caret
 on an empty last block, first line ~40 pt below the masthead's divider) → one backspace → block
 3/3, the first line ~14 pt below it; the page's top air GONE. KnownIssues row 87.

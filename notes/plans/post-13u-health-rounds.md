@@ -250,7 +250,7 @@ their diffs drift onto the seam.** Sequential, one agent at a time.
      these two. Each finding: reproduced, traced, pinned red-on-old, fixed or owned.
 - **U0b — WRITE: removing a newline collapses the top padding** (her report, 2026-09-25, verbatim:
   *"when I am in write and remove a newline, the editor's height adjusts removing the whitespace between
-  *[removed for publication]*
+  the topmost line in the editor and the line at the top of the editor."*). Her captures (both since removed for publication):
   **`notes/plans/18l-inputs/2026-09-25-write-before-removing-newline.png`** (block 4/4, the caret on an
   empty last block; the first line sits ~40 pt below the masthead's divider) and
   **`…-write-after-removing-newline.png`** (one backspace later — block 3/3: the first line has jumped UP
