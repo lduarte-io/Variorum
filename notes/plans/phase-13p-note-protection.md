@@ -92,7 +92,7 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   releases the key silently), **Biometric** (`.biometryCurrentSet`-gated
   Keychain item — the login password can NOT release it; fallback is the
   PASSPHRASE, never the device password), **Passphrase-every-open**. Her
-  *[removed for publication]*
+  threat model, verbatim: *"a lot of people have […]
   someone who knows their computer password but might not know their
   passphrase"* — so the login password is NEVER in the privacy modes'
   chain. Her biometric-reliability worry (*"sometimes faceid and touchid
