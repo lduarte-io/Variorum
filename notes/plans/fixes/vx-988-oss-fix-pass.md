@@ -8,9 +8,9 @@ no history rewritten, no commit message touched.
 
 **Not done, first:** the OSS plan's motives line (§1, line 7) is untouched — it waits on her word; three commit messages
 on this branch name a removed class (`c952778e6`, `0715f81ee`, `707684cd2`) and need VX-749 `--replace-message` rules
-(history is never rewritten here); the commit-author metadata (the mailmap row) is VX-749's; and the pile-B verify rows
-(the security-as-roadmap row in `notes/TICKETS.md`, home and scratch paths) are VX-751's. Everything else she ruled is
-applied below.
+(history is never rewritten here); the commit-author metadata (the mailmap row) is VX-749's; the pile-B verify rows
+(the security-as-roadmap row in `notes/TICKETS.md`, home and scratch paths) are VX-751's; and the regenerated
+`notes/TICKETS.md` still owes one check (open item 5). Everything else she ruled is applied below.
 
 **The mechanism.** The open-source sweep (VX-754 — piles A/B/C/P read by agent eyes) flagged sensitive content across the
 history and the tree at HEAD; the author ruled every flag (rulings R-oss-N, held on the PRIVATE verdict ledger outside
@@ -118,6 +118,11 @@ batch** (one commit per piece; every cut or rewritten passage copied verbatim to
   comment describes a fixture (comment only); the FuturePhases 13t row carries its pointer again ("material relocated to
   the private planning repo — the 13t kickoff asks the author", as the OSS plan promises). The two 8-hex stragglers the
   review named stay (the ruled walk-log class).
+- **The micro-batch** (the orchestrator's dispositions on the batch's triage list, same day): `7f8758a71` — the home
+  server's hostname → `<server>` at its five remaining notes sites (tree-wide 0; no tool embeds it), and the cheatsheet's
+  two saved Screen Sharing hostnames, both the Pro's, → `<mac-pro>` / `<mac-pro>.local`; `188ac98f5` — one word cut from
+  `LAUNCH-CONTENT-NOTES.md`'s owed list (line 150; the line's other two slots stay), line 145 kept (a canon-process
+  sentence); the private repo's commit `14bcd53` first. The rest of the list closed as keep (open item 7).
 
 **Evidence.** The first two rounds' "zero tester tokens" claim was FALSE — the B-1 survivor was missed by a word-bounded
 grep; after this batch, unbounded case-insensitive greps at HEAD find zero for every tester-name family, every value this
@@ -136,9 +141,18 @@ guards), after every round. The app-target test files changed only by a string l
 3. **The mailmap row** — the commit-author metadata is VX-749's, her call on the target address.
 4. **The pile-B verify rows** — the security-as-roadmap row in `notes/TICKETS.md` (a generated snapshot; the fix belongs
    on the board), home and scratch paths: VX-751's verify list.
-5. **Kept on purpose, all ruled:** the load-bearing values (follow-up 2); the 8-hex library/key ids (follow-up 3); her
+5. **VERIFY — `notes/TICKETS.md` regenerates on main at the next bout:** confirm the VX-910 title is neutral before the
+   flip (the orchestrator retitled the ticket on the board; the generated file is never hand-edited).
+6. **Kept on purpose, all ruled:** the load-bearing values (follow-up 2); the 8-hex library/key ids (follow-up 3); her
    published letter's own name (`LETTER.md`, its read-me copy, the seeder literal pinned byte-equal). (An earlier edition
    of this line listed a 13r capture filename as kept too; no ruling covered it — m-2 neutralized it.)
+7. **CLOSED AS KEEP — the triage residuals** (the orchestrator's dispositions under her refinement: only the ruled class
+   goes; engineering and product truth stay): the master plan's launch row (`notes/DetailedPlanForPhases.md:48`); the 14c
+   record's Round 7 ruling (two phrases: the issuer-is-not-for-that clarification and the checkout-architecture mention)
+   and its Round 8 body (the domain's description); `notes/AppSpecDeltaArchive.md:105`'s checkout-architecture clause;
+   the 14c SMTP runbook's vendor table (a vendor's public rates, an ops reference); `notes/brand/README.md:136` (the
+   logo's generation rights); the 14a ruled state's hosting-posture clause (`phase-14a-suite-identity.md:30-31`);
+   `notes/brand/LAUNCH-CONTENT-NOTES.md:145` (a canon-process sentence).
 
 ---
 
@@ -179,4 +193,9 @@ guards), after every round. The app-target test files changed only by a string l
 | R-oss-39 | done in two commits (the private repo's commit `4974253` first) | `1c6ace58c` · `7600b5213` |
 | NITs | done | `9d7b1d14f` |
 | final checks | AccountVaultWireTests 13/13 · walk self-test exit 0 (72 guards) · every unbounded re-grep zero | — |
-| record | cold-review fixes batch closed (this text) | this commit |
+| record | cold-review fixes batch closed | `1fb26bbc5` |
+| micro-batch 1 (hostnames) | done | `7f8758a71` |
+| micro-batch 2 (the owed-list word) | done (the private repo's commit `14bcd53` first) | `188ac98f5` |
+| micro-batch 3 (the rest of the triage list) | closed as keep, recorded (open item 7) | this commit |
+| micro-batch 4 (`notes/TICKETS.md`) | verify row added (open item 5); the file not hand-edited | this commit |
+| record | micro-batch closed (this text) | this commit |
