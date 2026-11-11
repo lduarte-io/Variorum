@@ -67,7 +67,7 @@ The contract file's three touchpoints, in order, one conversation with
 the Fragments agent: #1 the provider swap + her uid link (the
 FIRST-SIGN-IN RULE is load-bearing: her Fragments uid `<account-uuid>`
 must survive — verify before proceeding) + password retirement + the
-*[removed for publication]*
+old Fragments-side issuer switched OFF and client `<oauth-client-id>`
 retired (safe since 14a shipped the direct sign-in) · #2 the
 journal-class E2EE client work (the concrete format facts block; the
 trim + empty-body relocations; point 9's stale-key honesty) · #3 the
@@ -240,7 +240,7 @@ DIRECTLY — one user total, no duplicate ever created,
 no link step needed (verified-email auto-link matched); the identity
 row reads `custom:stargazing` / suite sub `<account-uuid>` — the
 contract's coordinates exactly. **(b)** old issuer OFF + old client
-*[removed for publication]*
+`<oauth-client-id>` deleted. **(c) E2EE verified LIVE:** their enrollment
 opened the real vault (pure-Swift Argon2id + KeyWrap chain
 interoperates; their tolerant `kdf_*` decode matched the live row),
 and her journal rows re-pushed as `e1:` within a minute of enrolling
@@ -736,7 +736,7 @@ password survives) and the native signup SURFACE — while the project's
 global "allow new users to sign up" toggle stays ON (a first delegated
 sign-in rides the create-account path). (4) Switch OFF Fragments' own
 OAuth 2.1 Server (its old role as Variorum's issuer) and retire the
-*[removed for publication]*
+old registered client `<oauth-client-id>` — safe: Variorum's direct sign-in
 shipped at 14a and nothing depends on the old issuer. (5) Config
 hygiene: remove any stargazing.tech URLs from Fragments' own auth
 configuration — none belong there. (6) THE BRIDGE'S DELEGATED ROAD

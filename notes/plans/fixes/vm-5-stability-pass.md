@@ -11,7 +11,7 @@ phone's liveness seam. **It owns M27** — verdict below, measured.
 
 **Method note.** Three measurement probes were run in a SCRATCH test file
 (`ZZVM5ReviewScratchProbes.swift`, suite `VM5StabilityReviewProbes`),
-*[removed for publication]*
+driven on the brief's simulator (UDID `<simulator-udid>`, `/tmp/dd-vm5-review`),
 then deleted — `git status` clean after. Probe outputs are quoted at the
 findings; each asserts CURRENT behaviour to measure it (a finding's pin is
 the inverted, red-on-old form). The round's own §46 correction — a
@@ -326,7 +326,7 @@ Mac consumer's binding, line for line, so the hole is both platforms'.
 
 **Pin (mobile):** `MobileEditRoutingBindingTests.aStaleOpenTailArmingNeverBindsAGateLessCharacter`
 (`App/Variorum/VariorumMobileTests/MobileEditRoutingTests.swift`).
-*[removed for publication]*
+**RED on the pre-fix tree** (sim <simulator-udid>, `/tmp/dd-vm5-wave`,
 `-only-testing:VariorumMobileTests/MobileEditRoutingBindingTests`):
 
 ```
@@ -532,7 +532,7 @@ PlainPasteRuleTests · PlainPasteDoorTests).
 | MINOR 4 | **FIXED (doctrine class — no red-on-old exists, none claimed)** — refuse-`Bool` conversion; refusals take `desyncRecovery` on both platforms via `recoverFromRefusedIndexMutation`; contract pins `BlockRangeIndexTests.theLeadingRunTransferRefusesInsteadOfTrapping` / `.crystallizeRefusesInsteadOfTrapping` |
 | NIT 5 | **SHIELD NAMED (the disposition's second option, by trace)** — passing the real fact would land a type-over on `.surfaceNotSettled`'s false road; guard pin `EditorEditRouteTableTests.aLoneSeparatorTypedOverNeverReachesTheDiagnosis` (green both sides, by design) |
 
-*[removed for publication]*
+**End-of-wave runs (all on this tree; sim UDID <simulator-udid>, `/tmp/dd-vm5-wave`;
 the stage held by the effort):**
 
 - Mobile editor-brain suites by struct name (24 named, 24 ran):

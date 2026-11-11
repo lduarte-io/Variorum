@@ -193,7 +193,7 @@ the author copies them into the Variorum provider form from there.
 
 **Round 3 (same day — the spike RAN; ROUTE A CONFIRMED by the author):** registration
 succeeded through the dynamic door once the toggle actually saved (client_id
-*[removed for publication]*
+`<oauth-client-id>`, confidential, `client_secret_post`; secret in
 the untracked `.env.fragments-oauth.local`); the custom provider was created (slug
 `fragments`, auto-discovery, the pinned issuer). TWO dashboard didn't-save incidents
 (first the toggle, then the Authorization Path — the OAuth Server page's save step is
@@ -627,7 +627,7 @@ account succeeded end to end on 2026-07-10.
 
 - **The pairing, as deployed:** Fragments project (`<supabase-project-ref>`) OAuth 2.1
   Server enabled; Variorum registered as a client via the dynamic RFC 7591 door
-  *[removed for publication]*
+  (client_id `<oauth-client-id>`, confidential,
   `client_secret_post`; secret in the untracked `.env.fragments-oauth.local`);
   Variorum project (`<supabase-project-ref>`) custom provider slug **`fragments`**
   (`custom:fragments`), auto-discovery from issuer
@@ -656,7 +656,7 @@ account succeeded end to end on 2026-07-10.
 - **Still open, with owners:** (i) ~~toggle-OFF survival of the registered client~~ —
   **RESOLVED 2026-07-10 (field notes Round 4): empirically CONFIRMED** — with the
   toggle off, registration 403s (`oauth_dynamic_client_registration_disabled`) while
-  *[removed for publication]*
+  the full authorize chain still works for client `<oauth-client-id>` (spike's localhost
   redirect-URL cleanup deferred to phase-end in case the harness serves Steps 1/5).
   (ii) Fragments' PostgREST accepting the provider token for RLS —
   claims look exactly right; verified only at Step 6(iv)'s real-Fragments pass.

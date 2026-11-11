@@ -15,7 +15,7 @@ queries the three deliverables ride (`newPostInReading`,
 `notes/author-reports/2026-08-23-device-walk-and-product-asks.md`.*
 
 **Environment:** own fresh simulator `b10-review` — **iPhone 17 Pro /
-*[removed for publication]*
+iOS 26.2**, UDID `<simulator-udid>` (the newest
 runtime; the 18.3 runtime is the INVALID 16-series one),
 `ApplicationAccessibilityEnabled` armed and **read back `1`**, private
 `-derivedDataPath` at `DerivedData/b10-review` (gitignored, inside the
@@ -817,7 +817,7 @@ file (incrementally) before the final message.
 the whole scope: seven numbered items, nothing beyond them.*
 
 **Environment:** own fresh simulator `b10-fix` — **iPhone 17 Pro /
-*[removed for publication]*
+iOS 26.2**, UDID `<simulator-udid>` (the newest
 runtime; the 18.3 runtime is the INVALID 16-series one),
 `ApplicationAccessibilityEnabled` armed and **read back `1`**, private
 `-derivedDataPath` in the session scratchpad. Simulator deleted at the

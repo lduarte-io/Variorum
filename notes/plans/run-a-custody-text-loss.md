@@ -981,12 +981,12 @@ $ security find-generic-password -s "io.lduarte.Variorum.store-key-escrow"
 security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.   (exit 44)
 
 $ security find-generic-password -s "io.lduarte.Variorum.store-key-escrow" \
-      *[removed for publication]*
+      -a "<library-uuid>"
 security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.   (exit 44)
 
 $ defaults read io.lduarte.Variorum | grep migrat
-    *[removed for publication]*
-    *[removed for publication]*
+    "variorum.protection.Variorum.<library-uuid>.migrated2a" = 1;
+    "variorum.protection.Variorum.<library-uuid>.migration2aConfirmPending" = 0;
 ```
 
 **What that is worth, said exactly.** The third answer is the strong one: her REAL store

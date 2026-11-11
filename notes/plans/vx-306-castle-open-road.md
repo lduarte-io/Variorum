@@ -2024,7 +2024,7 @@ main window's sheets) and the source pins over the edited files. Read the `skipp
 
 **THE PHONE'S SUITES (the simulator — under the stage, CoreSimulator is shared state; PENDING):**
 ```
-*[removed for publication]*
+xcodebuild -scheme VariorumMobile -destination 'platform=iOS Simulator,id=<simulator-udid>' \
   -configuration Debug -derivedDataPath DerivedData/vx306-u3 test \
   -only-testing:VariorumMobileTests/MobileProtectionRoadTests \
   -only-testing:VariorumMobileTests/MobileProtectionTests \
@@ -2033,7 +2033,7 @@ main window's sheets) and the source pins over the edited files. Read the `skipp
   -only-testing:VariorumMobileTests/MobileLobbyVaultRoadTests \
   -only-testing:VariorumMobileTests/MobileEmptyStoreTests
 ```
-*[removed for publication]*
+(`<simulator-udid>` is the Pro's iPhone 16 Pro simulator as `simctl list` showed it today; any iPhone simulator serves.)
 `MobileProtectionRoadTests` (6) is new. NOTE for the run: the phone's TEST HOST now takes the new road in its Debug build
 (read-only in a hosted run — the tripwire is armed — so over an empty simulator dev store it lands `.failed` with
 *A test run never creates a library.*, exactly as the Mac's test host has since U1b); the suites above build their own
@@ -2093,7 +2093,7 @@ face changed — the sheets are system chrome on the Mac, so a light and a dark 
    shows *Start a New Library* and *Restore from Backup…* and NO *Open Library…* (P-VX306-U3-7). Put the slot back.
 7. **The simulator's open (the phone):**
    ```
-   *[removed for publication]*
+   UDID=<simulator-udid>      # the Pro's iPhone 16 Pro simulator (any iPhone serves)
    xcrun simctl boot $UDID 2>/dev/null; open -a Simulator
    xcrun simctl install $UDID App/Variorum/DerivedData/vx306-u3/Build/Products/Debug-iphonesimulator/VariorumMobile.app
    DATA=$(xcrun simctl get_app_container $UDID io.lduarte.VariorumMobile data)
@@ -2313,8 +2313,8 @@ accepted, truth over verbatim. The fold of main at this seam renumbered U1a's mi
 **U3 BATCH + WALK RECORD (the orchestrator, 2026-10-18 11:21–11:40 MDT, claim `vx-306-u3`; tree 15e06bc16 — main at d63b27561
 folded; the product from `DerivedData/vx306-u3`):**
 - **The batches:** Mac → `━ Test run with 290 tests in 44 suites passed after 48.500 seconds with 3 known issues.` (VX-310's
-  *[removed for publication]*
-  *[removed for publication]*
+  witnesses; 0 skipped). Phone → the record's UDID (`<simulator-udid>`, an iPhone 16 Pro) runs iOS 18.3.1 and refused the iOS 26 app;
+  re-run on the iOS 26.2 iPhone 17 Pro simulator `<simulator-udid>` (VX-381's road) → `✔ Test run with 20
   tests in 5 suites passed after 6.606 seconds.` (the five Swift Testing suites incl. the new "VX-306 U3 — the phone opens on
   the new road"; `MobileProtectionTests` contributed no suite line of its own). The Mac test host now OPENS the dev library
   fully (the predesign lobby is gone), so the slot's sqlite changed during the batch — the ordinary open ran `v1_31`.
@@ -2337,7 +2337,7 @@ folded; the product from `DerivedData/vx306-u3`):**
   2026. Sync is waiting — Resume…* · *Resume Sync*); on disk: `Previous Libraries/2026-10-18-173517/` holds 818912e0's
   `variorum.sqlite` + its key file (all three locks), the new live key file has A's pair and an EMPTY history, the marker
   `variorum-restore-hold.json` {asOf, heldAt} beside the slot, a fresh store-id stub (the old one renamed `.stale-…` by
-  *[removed for publication]*
+  today's mint). **The simulator leg** (<simulator-udid>; `Simulator.app` is not at Xcode's usual path — the device booted
   headless and `simctl io` screenshots served): the sim's pre-design store set aside under its own
   `Backups/safety-copies/variorum-vx306-sim-predesign-<stamp>/`; launch → `road: created — library 23e652ae … Apple keys
   readable [1c5706a8]` (the Apple key minted into the shared group — F-U3-5's risk did not bite) and THE WORDS CARD on the
@@ -2665,7 +2665,7 @@ red) — each one line, restored by `git checkout`.
 bootstrap, the doors' and the look's brains, the open faces), so U3's six: `-only-testing:VariorumMobileTests/
 MobileProtectionRoadTests` · `MobileProtectionTests` · `MobileProtectionSurfaceTests` · `MobileTravellingDotsTests` ·
 `MobileLobbyVaultRoadTests` · `MobileEmptyStoreTests`, on the iOS 26.2 simulator U3's batch used
-*[removed for publication]*
+(`<simulator-udid>`).
 
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents. **A machinery fact, found at the close:** the
 orchestrator's words-pass commit `07249a9a4` (12:16:46 — `BirthFurnitureSeeders.swift`, `ReadmeStartHerePlanTests`,
@@ -2916,7 +2916,7 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -
    both roads → `LaunchFurnitureTests/aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone` red (nine blocks) and
    `ReadmeStartHerePlanTests` red (the rule's false arm and the source pin's join line).
 4. **The phone** (the simulator, under the stage): U3's six on the iOS 26.2 iPhone 17 Pro simulator
-   *[removed for publication]*
+   `<simulator-udid>` — `-only-testing:VariorumMobileTests/MobileProtectionRoadTests` ·
    `MobileProtectionTests` · `MobileProtectionSurfaceTests` · `MobileTravellingDotsTests` · `MobileLobbyVaultRoadTests` ·
    `MobileEmptyStoreTests` (round 1's batch: `✔ 20 tests in 5 suites`).
 

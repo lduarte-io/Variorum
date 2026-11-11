@@ -6,7 +6,7 @@ description of the work: everything below is derived from the diff and the
 repository.
 
 **Verification I ran myself** (isolated DerivedData `dd-b5`, simulator
-*[removed for publication]*
+`<simulator-udid>` / iPhone 17 Pro Max / iOS 26.2):
 
 - Full mobile suite: **568 tests in 92 suites passed, 123.7 s, TEST
   SUCCEEDED** — exactly the stated baseline.

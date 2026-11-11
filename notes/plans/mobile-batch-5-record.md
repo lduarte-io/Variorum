@@ -29,7 +29,7 @@ it."*
 | **§53 row 6, measured** | in a keyboard-sized room (596 pt) the writing region holds **254 pt (42.6%)** and the BOOKS shrink 378 → 254 |
 
 **Simulator note, and it is a correction to the brief.** The brief named
-*[removed for publication]*
+iPhone 16 Pro Max `<simulator-udid>`. That device is
 on **iOS 18.3**, below this app's iOS 26 deployment target, so `xcodebuild`
 does not list it as a destination for the `VariorumMobile` scheme at all —
 nothing can run there. **Every iPhone 16-series simulator on this machine
@@ -37,11 +37,11 @@ is 18.3 and therefore invalid for this project.** The 18.3 device was left
 booted and armed, untouched.
 
 **All FINAL results here were produced on iPhone 17
-*[removed for publication]*
-*[removed for publication]*
+`<simulator-udid>`, iOS 26.2**, accessibility verified
+`= 1`. The first pass ran on iPhone 17 Pro `<simulator-udid>`; the coordinator
 then reassigned this batch off that device because **two agents sharing one
 simulator contaminate each other invisibly — same bundle id, last installer
-*[removed for publication]*
+wins.** Everything in §7 was re-run on `<simulator-udid>`, and the whole suite with
 it, so no result in this file depends on the shared device.
 
 *(Geometry pins host the surface at an explicit 430 × 932 — iPhone 16 Pro
@@ -202,7 +202,7 @@ deliverable, as §53 said.**
 
 ### The suite
 
-*[removed for publication]*
+`xcodebuild test … -destination 'platform=iOS Simulator,id=<simulator-udid>'`
 → **`Test run with 545 tests in 91 suites passed after 129.462 seconds
 with 2 known issues`**, exit 0.
 
@@ -211,7 +211,7 @@ The 2 known issues are the pre-existing deliberate `withKnownIssue` in
 new.
 
 **⚠️ Flakiness seen, and the diagnosis CORRECTED — read this before
-*[removed for publication]*
+blaming a test.** Two runs on the shared `<simulator-udid>` device died with
 *"Simulator device failed to launch"* and *"Restarting after unexpected
 exit, crash, or test timeout"* at six unrelated tests, and one reported a
 nonsense total (87 tests). I first attributed this to machine load — the

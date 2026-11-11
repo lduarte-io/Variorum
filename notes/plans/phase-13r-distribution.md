@@ -1414,7 +1414,7 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      - runs `verify-export.sh` (with `--compare-with /Applications/Variorum.app` when present) into
        `verify.txt`.
    - `ExportOptions.plist`: `method developer-id`, `signingStyle manual`, `signingCertificate`
-     *[removed for publication]*
+     `<signing-cert-sha1>`, `provisioningProfiles {io.lduarte.Variorum: <provisioning-profile-uuid>}`,
      `teamID <apple-team-id>`. The method name was confirmed against Xcode 27's own `xcodebuild -help`.
    - `Variorum_Developer_ID.provisionprofile`: her profile, versioned (`cmp`-identical to
      `~/Downloads`; sha256 `f661fdea…eec5c97`). It is not a secret: it ships in every bundle as
@@ -1477,11 +1477,11 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
        Certification Authority` → `Apple Root CA`, `Timestamp=Oct 4, 2026 at 4:07:36 AM` (secure
        timestamp), `TeamIdentifier=<apple-team-id>`, `Runtime Version=27.0.0`, universal (x86_64 arm64).
      - `security cms -D -i export/Variorum.app/Contents/embedded.provisionprofile` → `Name = Variorum
-       *[removed for publication]*
+       Developer ID`, `UUID = <provisioning-profile-uuid>`, `ProvisionsAllDevices = true`,
        Entitlements: `keychain-access-groups = [<apple-team-id>.*]` (**authorizes BOTH signed groups**),
        `com.apple.application-identifier = <apple-team-id>.io.lduarte.Variorum`, `team-identifier =
        <apple-team-id>`. It is byte-identical to the versioned copy. Its one certificate is the signing
-       *[removed for publication]*
+       leaf (SHA-1 `<signing-cert-sha1>`).
      - `codesign --verify --deep --strict --verbose=2` → `valid on disk` + `satisfies its Designated
        Requirement`, exit 0. The nested `SQLCipher.framework` was re-signed under Developer ID with
        runtime and a timestamp.

@@ -115,7 +115,7 @@ file's rounds 0d–0y ARE the record (the repo-first discipline held all night).
    binds all fixes. Cap three rounds.
 3. **The GATE (dashboard/server acts — announce each, her go, stored-PAT
    arrangement where applicable):** delete the `custom:fragments` IDENTITY on
-   her user (uid `<account-uuid>`, identity `<auth-identity-id>…`) — ONLY after verifying
+   her user (uid `<account-uuid>`, identity `<auth-identity-id>`) — ONLY after verifying
    the new direct sign-in works on the installed build (she has only that one
    identity; see round 0s's zero-identity caution — verify state before/
    after); delete the `custom:fragments` PROVIDER config on the Variorum

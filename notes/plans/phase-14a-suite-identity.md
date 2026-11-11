@@ -293,7 +293,7 @@ does not gate the spike (project refs are random; display names rename freely).
   the plan exactly; re-adding any such pairing later is a dashboard configuration
   (the 9c-proven pattern), never a rebuild. Once Variorum's provider is deleted, the
   Fragments project's OAuth 2.1 Server (as issuer) and the registered client
-  *[removed for publication]*
+  `<oauth-client-id>` can be switched off/abandoned — one less moving part. **(b)** The
   BRIDGE (the journal co-writer pushing/pulling `journal_entries`) does NOT ride the
   pairing: its session is shape (c) — her Fragments email+password, direct (ratified
   #16) — so retiring the pairing leaves the bridge running untouched. Nothing in 14a
@@ -974,7 +974,7 @@ does not gate the spike (project refs are random; display names rename freely).
     to the Fragments agent NOW.**
   - **Her custom:fragments identity — answered with EVIDENCE, removal
     DEFERRED:** the admin read shows her user's ONLY identity row is
-    *[removed for publication]*
+    `custom:fragments` (<auth-identity-id>, 2026-07-10) — **setting the password did NOT
     mint an email identity.** Removing it tonight would leave a
     zero-identity user on the account that owns her whole corpus — an
     unverified GoTrue state gambled on production auth for zero functional
@@ -1446,7 +1446,7 @@ Post-cap residuals (the 13k precedent — fixed post-cap, recorded here):
   note for the record: this GoTrue's admin API has NO per-identity DELETE
   route (404 — attempted first, identity untouched); the executed road was
   SQL via the Management API. Before-read: exactly one identity
-  *[removed for publication]*
+  (`<auth-identity-id>`, `custom:fragments`, 2026-07-10 —
   matching the 0s read). The DELETE's RETURNING confirmed that single row;
   `raw_app_meta_data` recomputed to the password-user convention
   (`provider: "email"` — mirroring what GoTrue's own unlink recomputes,

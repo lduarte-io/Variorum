@@ -20,7 +20,7 @@ in three phone files: `MobileProtectionDoors.swift`, `MobileProtectionScreen.swi
 re-spawn as `fable-reviewer` is owed.
 
 **What I ran.** The stage claim was `vm8-r2`, now released. I used the pinned simulator
-*[removed for publication]*
+`<simulator-udid>` and left it shut down. Everything ran in a `git archive` copy of the tip in my
 scratchpad, with its own DerivedData. I never touched the worktree and committed nothing but this file.
 1. **Build:** `build-for-testing` of the copy gave `** TEST BUILD SUCCEEDED **`.
 2. **L1's sixteen suites at the tip** (RUN B's set) gave `✔ Test run with 47 tests in 16 suites passed after 66.011

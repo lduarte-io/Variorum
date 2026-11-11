@@ -695,7 +695,7 @@ The window's order: THE RED RUNS first — FIRST ATTEMPT one combined rev tree s
 ## THE MERGE GATE RAN (2026-11-09 08:16–09:15, claim `vx915-merge-gate` + the pre-approved +20 renew; TESTED TREE 675c31453 — notes-only on 486aa92e3, which carries main 75a5222ad; logs `DerivedData/logs/vx915-mg-{build,mac,alone,phone}.log`)
 
 - **MAC, the WHOLE target:** "Test run with 6294 tests in 1091 suites … with 15 issues (including 13 known issues)" — the 13 the standing `withKnownIssue` class, 46 skips the env-gated capture class. ONE real red, `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` — a `withKnownIssue` test whose documented Esc boundary did NOT reproduce under whole-target load ("Known issue was not recorded"); ALONE 7/1 suite GREEN with the known issue recorded. Green at gate12 on this code; the known-issue-NOT-recorded load class — named, not chased; **VX-970** minted with the datapoint.
-*[removed for publication]*
+- **PHONE** (VariorumMobile, sim <simulator-udid>, booted and shut in-window): "Test run with 852 tests in 139 suites … with 6 issues (including 4 known issues)" — the only real red the STANDING `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` (the named family).
 - **Verdict: GREEN by the gate's law** (every non-known red re-run alone and named). PR #240 asked to merge; nov7 serializes.
 
 ## CLOSEOUT DRAFTS (assembled in the gate gap; APPLIED at the merge moment on latest main — nothing here is live canon yet)

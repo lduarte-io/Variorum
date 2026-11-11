@@ -1469,7 +1469,7 @@ that are not real.
 **Also: every iPhone 16-series simulator on this machine is iOS 18.3,
 below the iOS 26 deployment target, and is not a valid destination.** The
 valid iOS 26.2 devices are the iPhone 17 family, iPhone Air, and one
-*[removed for publication]*
+iPhone 16e (`<simulator-udid>`). I assigned three invalid ones at dispatch; both
 implementers found it before my correction reached them.
 
 ## 11.5 WAITING ON HER

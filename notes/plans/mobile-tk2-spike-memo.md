@@ -7,7 +7,7 @@ flag goes to the author").
 **Environment (per-point-release scope — all numbers below are void on any
 other OS/SDK until re-verified, per TEXTKIT2_NOTES §5):** iOS **26.2
 (23C54)** on the **iPhone 17 Pro simulator** (`iPhone18,1`, runtime 26.2,
-*[removed for publication]*
+UDID <simulator-udid>) · Xcode **26.3 (17C519)** · iphonesimulator SDK **26.2** ·
 Swift 6.2.4 · host macOS 26.5.2 (25F84), the author's M3 · Debug build
 (unoptimized — release only improves). Corpus: deterministic seeded
 generator (the Mac spike's shape): **50,058 words / 823 blocks / 329,309

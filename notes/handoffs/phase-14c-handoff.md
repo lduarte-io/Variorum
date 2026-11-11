@@ -22,7 +22,7 @@
 *[removed for publication]*
    *[removed for publication]*
    *[removed for publication]*
-   *[removed for publication]*
+   `<supabase-org-id>` (the one holding your live Variorum mirror);
    *[removed for publication]*
    *[removed for publication]*
 3. **Re-onboard your PHONE against the reborn mirror before relying on

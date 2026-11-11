@@ -132,7 +132,7 @@ carried-across empty-state comment says the widened guard matters "under `.books
    `MobileLivenessTests` union arithmetic is exact — base 7 + main's 1 (P26) + mobile's 10
    (4.5c) = 18 `@Test`s at HEAD, and **all 18 ran green by suite name in this review's own
    targeted run** (with `MobileNoRedirectSweepTests` and `MobileStarsTests`: 23 tests /
-   *[removed for publication]*
+   3 suites, TEST SUCCEEDED, simulator <simulator-udid>, own DerivedData).
 8. **The QUESTIONS renumber** — verified collision-free end to end (finding NIT 1 covers the
    one residue). **The obligations table** — #3 (ledger flips present as claimed), #10
    (renumber), #13 (zero Mac-reaching files) spot-verified true.

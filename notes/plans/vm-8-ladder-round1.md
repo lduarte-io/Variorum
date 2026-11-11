@@ -10,7 +10,7 @@ no editor seam, no custody or keychain code (the four `Shared/Protection/` files
 sentence, `RoadKeyDoorFaces.pairGate`), and changes no default's meaning. Her kickoff names an Opus reviewer for this
 run. No re-spawn as `fable-reviewer` is owed.
 
-*[removed for publication]*
+**What I ran (stage claim `vm8-r1`, released; the pinned simulator `<simulator-udid>`, left shut
 down):** the tip's phone target built from the worktree (`build-for-testing` EXIT 0), then the run's ten new suites plus
 `MobileNoRedirectSweepTests` and `MobileCopyRegisterSweepTests`: `✔ Test run with 35 tests in 12 suites passed after
 60.129 seconds` (0 skipped; `MobileProtectionRoadTests` not re-run). And ONE scratch probe — a copy of the tip made by

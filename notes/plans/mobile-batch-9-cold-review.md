@@ -596,7 +596,7 @@ edits or shares a build with).
 
 ## Environment
 
-*[removed for publication]*
+- **Own fresh simulator** `Variorum-b9-fixwave` (UDID `<simulator-udid>`),
   **iPhone 17 Pro, iOS 26.2** — the only iOS-26 runtime on this machine; every
   16-series sim here is iOS 18.3 and is not a valid destination.
   `ApplicationAccessibilityEnabled` armed and **read back `1`**. Private

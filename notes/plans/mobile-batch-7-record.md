@@ -749,10 +749,10 @@ had to fork for the same reason.
 | what | value |
 |---|---|
 | simulator | `VB7-17-26` — iPhone 17, **iOS 26.2 (23C54)**, created fresh for this batch |
-*[removed for publication]*
+| UDID | `<simulator-udid>` |
 | accessibility | `ApplicationAccessibilityEnabled` written and **read back `1`** |
 | derived data | private `-derivedDataPath` at `<scratchpad>/b7-dd` |
-*[removed for publication]*
+| teardown | **DONE** — `<simulator-udid>` deleted at the batch's close; no `VB7` simulator remains |
 
 *(The 16-series simulators on this machine carry iOS 18.3 only and are
 INVALID for this app.)*

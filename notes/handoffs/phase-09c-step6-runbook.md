@@ -35,7 +35,7 @@ correctness discipline is unchanged.
 **Deployed auth topology (Step 0, 2026-07-10):** Variorum has custom provider
 `custom:fragments` (auto-discovery from `https://<supabase-project-ref>.supabase.co/auth/v1`);
 Variorum is a registered confidential OAuth client of Fragments' OAuth 2.1 Server
-*[removed for publication]*
+(client_id `<oauth-client-id>`; secret in the author's untracked
 `.env.fragments-oauth.local`); the login/consent page serves at Fragments' Site URL +
 Authorization Path (the spike used `localhost:3000` + `/consent.html`; production is
 the stargazing.tech page — spec in `notes/fragments-consent-page-spec.md`).

@@ -62,7 +62,7 @@ Phone-local ONLY: `MobileWriteView` / `MobileEditorViewModel` (the arrival + scr
 `MobileEditorTextView` (the inset). NOTHING in `App/Variorum/Shared/` (the brain's routing is not
 the scroll), nothing in `Sources/`, no schema, zero `Sync/`. The typewriter room's EXISTENCE
 stays (her ruled shape (c)) — only its FORCING goes. One simulator by UDID
-*[removed for publication]*
+(<simulator-udid>), accessibility armed, own `-derivedDataPath /tmp/dd-vm10`;
 suites by struct NAME; pathspec-limited commits; push after each; no trailers; the stage is
 claimed by the effort at 13o's slot — never claim/release inside the implementer session.
 PROVISIONAL rule binds: a decision the ruled shape doesn't make → `notes/QUESTIONS.md` at the
@@ -81,7 +81,7 @@ PL-22's arrival half flipped, VM-10 → Done, a second phone install OFFERED on 
 - 2026-10-07 early: brief staged pre-go; worktree ready at `0f0624e7`; awaiting 13o's stage slot.
 - 2026-10-07 (implementer, Opus 5.5): reading done (this brief · CLAUDE.md · handoff §12.2/§12.2a/§10.4–§11.4 ·
   mobile-round-2 §17–§20 · SessionResiliencyProtocol implementer half · TEXTKIT2 §3 iOS findings · the three
-  *[removed for publication]*
+  Write files). Simulator <simulator-udid> armed (flag = 1, hardware keyboard OFF so the software keyboard rises).
   `notes/plans/vm-10-screens/` gitignored.
   - TRACE HARNESS (temporary probe `VariorumMobileTests/MobileWriteScrollTraceProbe.swift`, deleted at close):
     the REAL `MobileWriteScreen` (and, for the shell road, the real `MobileShellView` → Library → row push) in

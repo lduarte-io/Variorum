@@ -502,7 +502,7 @@ with them):
    (nobody-before-the-family, her sequencing ruling).
 4. `journal_entries` shape/keys stay frozen (standing ask #3, unchanged).
 5. **Switch OFF Fragments' own OAuth 2.1 Server** (its 9c role as Variorum's
-   *[removed for publication]*
+   issuer) and delete/abandon the old registered client `<oauth-client-id>` — safe by
    this point (Variorum's 14a code batch will long since have shipped the
    direct sign-in; until that batch, the old issuer must STAY ON — it is the
    Variorum app's only sign-in road).
@@ -669,7 +669,7 @@ any pending-tense wording above:
   hash blanked. Any Variorum-only or Fragments-native account framing
   is DEPRECATED (the author's instruction).
 - **The old issuer era is over:** Fragments' own OAuth 2.1 server is
-  *[removed for publication]*
+  OFF and the old registered client `<oauth-client-id>` is deleted.
 - **Journal-class E2EE is LIVE on both ends:** their client's
   enrollment opened the real vault (pure-Swift Argon2id + AES-KeyWrap
   interoperates; their tolerant `kdf_*` decode matched the live row),

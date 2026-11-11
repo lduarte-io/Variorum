@@ -588,7 +588,7 @@ default — `RoadAccountSheet.swift:311-339`); no capture was taken while the wo
   its `-wal`/`-shm` changed (any open/quit does that; still 11 items). Zero instances by all three forms (19:04:45); no
   booted sims. **Prefs:** `appearanceChoice` still **dark**; the diff (2,439 → 2,443 keys) is walk state only —
   `NSWindow Frame variorum-main-AppWindow-1` `60 144 1240 940 …` → `244 122 1240 840 …` (D-4, restore nothing),
-  *[removed for publication]*
+  `IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`, `variorum.calmAsks.passphrase.<library-uuid>.launches` 28 → 29,
   and four ADDED `variorum.calmAsks.{passphrase….launches, words….recorded}` keys for 3f3d9fb8 and 918e9672.
 - **Stage:** `2026-10-27 18:53:47 CLAIMED who=vx-623-walk … minutes=90`; still HELD at the record's commit (~79 min
   left at 19:05); not released by the walker.

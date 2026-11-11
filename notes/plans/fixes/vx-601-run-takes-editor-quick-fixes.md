@@ -869,7 +869,7 @@ Quit by bundle id `io.lduarte.Variorum.debug`; guards `pgrep -lx Variorum` / `pg
 walk note (`canvasViewMemory.` / `currentBlock.` / `postMode.` / `takesViewMemory.`
 `398495C7-ADA3-415B-A971-8CA8953D5DCA`) — all four DELETED; CHANGED bookkeeping left as is:
 `IdleCommitSweepMark.Variorum-dev` (stamp), `variorum.backup.log` (the per-launch dev-store backup
-*[removed for publication]*
+entry), `variorum.calmAsks.passphrase.<library-uuid>.launches` 29 → 30 (one launch). Final export vs
 before: nothing added, nothing removed.
 
 ## ORCHESTRATOR ADDENDUM — batch A acceptance + the walk's tails (2026-10-27 ~21:05)
@@ -1285,7 +1285,7 @@ empty before launch and after quit.
 per-note keys for the walk note — `currentBlock.` / `postMode.` `C2C2D07F-F967-45AB-AA1D-B1A8D278F734`
 — both DELETED. CHANGED bookkeeping left as is for the orchestrator: `IdleCommitSweepMark.Variorum-dev`
 (02:04:19Z → 02:17:33Z), `variorum.backup.log` (the per-launch dev-store backup entry),
-*[removed for publication]*
+`variorum.calmAsks.passphrase.<library-uuid>.launches` 29 → 30 (one launch).
 Final export (`/tmp/vx601a2-prefs-final.plist`) vs before: nothing added, nothing removed.
 
 **Deletion duty, second leg (same claim, 22:34–22:37 MDT; the coordinator's corrected naming: batch
@@ -1306,7 +1306,7 @@ present, Resume Sync never pressed; "Sync off (dev store)"; Study + app Dark
 (`leg2-trash-after2-w0.png`). Observation O-A2W-3 (pre-existing, not this batch): that receipt line
 draws over the bottom-most visible Trash row's text. Quit by bundle id (22:36); both strict guards
 empty. **Prefs after the leg:** nothing added or removed vs `/tmp/vx601a2-prefs-before.plist`; the
-*[removed for publication]*
+launch counter `variorum.calmAsks.passphrase.<library-uuid>.launches` read 31
 and was restored by its exact key to **29** (`defaults write -int 29`, read back 29, an int as
 before; every other library's counter unchanged against the before-export); remaining CHANGED =
 bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`). Final export
@@ -1823,7 +1823,7 @@ empty before launch and after quit.
 
 **Prefs (`io.lduarte.Variorum.debug`, `/tmp/vx601b-prefs-before.plist` → after):** ADDED two per-note
 keys for the walk note — `currentBlock.` / `postMode.` `F8F0338C-070B-4013-A101-034E471EA7B2` — both
-*[removed for publication]*
+DELETED. The launch counter `variorum.calmAsks.passphrase.<library-uuid>.launches`
 read 30 and was restored to **29** (`defaults write -int 29`, read back 29, "Type is integer"); every
 other counter unchanged. Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`,
 `variorum.backup.log`). Final export `/tmp/vx601b-prefs-final.plist` vs before: nothing added, nothing
@@ -2321,7 +2321,7 @@ before launch and after quit. The stage claim was not released (the orchestrator
 **Prefs (`io.lduarte.Variorum.debug`, `/tmp/vx601c-prefs-before.plist` → after):** ADDED three
 per-note keys for the walk note — `currentBlock.` / `postMode.` / `takesViewMemory.`
 `4BAF819B-04EE-42F5-8A98-AAD71355DDDA` — all DELETED. The launch counter
-*[removed for publication]*
+`variorum.calmAsks.passphrase.<library-uuid>.launches` read 30 and was restored
 to **29** (`defaults write -int 29`, read back 29, "Type is integer"); no other counter touched.
 Remaining CHANGED = bookkeeping only (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`).
 Final export `/tmp/vx601c-prefs-final.plist` vs before: nothing added, nothing removed.

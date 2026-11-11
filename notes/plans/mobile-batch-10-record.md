@@ -80,7 +80,7 @@ commit, foreground waits only.
 
 **Environment (rebuilt after the restart):** simulator `b10-nav` —
 **iPhone 17 Pro / iOS 26.2**, UDID
-*[removed for publication]*
+`<simulator-udid>` (the newest runtime installed;
 the 18.3 runtime is the INVALID 16-series one the brief fences),
 `ApplicationAccessibilityEnabled` armed and **read back `1`**, private
 `-derivedDataPath` at `<scratch>/b10-dd`. Pre-revert copies go in
