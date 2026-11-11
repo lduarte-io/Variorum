@@ -22,11 +22,11 @@ acceptance is SEVERAL fresh accounts proven end-to-end with server-side verifica
 
 ## WHAT IS KNOWN (traced at the window sitting; verify, never trust — the record has the evidence)
 
-*[removed for publication]*
+- **Tester A:** enrolled on 0.9.8 on 2026-10-22 20:39 UTC, BEFORE the marker-14 deploy (proven: the
   `mode` column has no default; only the backfill set it; her row reads `standard`). Her vault exists; her tenant
   holds ZERO rows and ZERO device cursors — **not one round ever ran**, despite hours of pre-deploy runway. The live
   suspect is VX-498's class (the set-up act triggers no round until a relaunch that never came) or an immediate quit.
-*[removed for publication]*
+- **Tester B:** account created 2026-10-13 (his FIRST sign-up — his answers killed the deleted-account story),
   NO vault ever landed, zero rows, zero cursors — though he typed an enrollment passphrase on the 0.9.3/0.9.4-era
   build. Surviving stories: the old act failed its server write while the UI read as success, or a refusal he walked
   away from with nothing loud afterward. (We watched him live the same moment on 0.10: typed into the sheet, refused,
@@ -46,7 +46,7 @@ acceptance is SEVERAL fresh accounts proven end-to-end with server-side verifica
    set-up act trigger the first round? does anything re-evaluate the row's last refusal after the act?), AND the
    act's own failure modes (can the vault write fail or be cancelled while the UI reads as success?);
    (b) **the archaeology:** the OLD road's enrollment act (deleted whole at VX-329, readable forever in git history —
-   *[removed for publication]*
+   `git log --diff-filter=D` under the old protection paths) — read the exact code tester B ran on Oct 13 and hunt the
    silent window. The archaeology explains; only the current code gets fixed.
 2. **The fixes, pin-before-fix per member:** VX-498 (the mechanism, red-on-old by behavioral revert), VX-507 (the
    act confirms its first round in its own sheet, or says what blocks it — her words drove it: "it said sync is set
@@ -58,7 +58,7 @@ acceptance is SEVERAL fresh accounts proven end-to-end with server-side verifica
    relaunch — each verified SERVER-SIDE by read-only queries (the vault row, the data rows, the device cursor).
    **The prod-read road exists:** `Tools/prod-read.sh '<one SELECT>'` (SELECT-only by its own guard; the allow rule
    in `.claude/settings.local.json` names the script). **A fork to put to her at kickoff:** live accounts on
-   *[removed for publication]*
+   PRODUCTION (signups are open; tester A/tester B failed on prod; she wants prod verification — but VX-483's walk fence
    deliberately REFUSES the production ref for driven walks, so a prod walk needs her ruling on the road: the
    Release app on an aside slot, a deliberate fence exception, or her own hands) versus the drill on the THROWAWAY
    (fence-legal, same marker-14 shape) plus one production account verified by prod reads. Present both; she rules.
@@ -66,7 +66,7 @@ acceptance is SEVERAL fresh accounts proven end-to-end with server-side verifica
    road — itself worth exercising once) is part of the run.
 4. **Riders and neighbors:** VX-503 (the Standard join's Touch ID prompt — same seam, trace it if the window is
    open); VX-502/504/505 stay with VX-500. **VX-508 is NOT this run's build work, but it IS this run's watch:** the
-   *[removed for publication]*
+   moment tester A's account completes its 0.10 join (her typed passphrase proving the vault's passphrase/words wraps),
    SURFACE VX-508's one-statement act to her for her word — `update key_vault set master_wrapped_by_apple_held =
    null, apple_key_id = null where user_id = <hers>` is the whole act, run by her `!` hand, rule 22 satisfied by the
    join itself. Check for her join with `Tools/prod-read.sh` at natural moments; don't let it pass unnoticed.

@@ -133,7 +133,7 @@ red-on-old SHAs `34c21e938` · `c9d0b3c66` · `7715a4a3d` · `0d963ce22`).
   the `.restore` flash bypassing the mode-switch setting is PROVISIONAL P-440-8 with her options
   recorded.
 - **Block History clarity:** her ruled structure intact (four regions, every take sectioned, Restore
-  *[removed for publication]*
+  per row at the line's end, no purge door, the history button unmoved — the tester's move stays
   DECLINED); the sheet is one read-cheap selectable `Text`, never an editor; the pre-split warning
   asked inside the sheet (an alert cannot present over it); both foot doors dismiss first;
   `expandedPreview` keeps paragraphs, drops leading blanks, appends no ellipsis (pinned, the VX-144

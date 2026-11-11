@@ -9,13 +9,13 @@ considerations) · branch `vx-500-sync-followups` · worktree `~/dev/variorum-vx
 (`/architect-phase VX-500`); the cast is CLAUDE.md's standing default — **Fable orchestrates, writes every `Sync/`
 and server line, and cold-reviews (`fable-reviewer`); Opus implements the faces, the tests and the custody road under
 Fable's review.** Her kickoff word binds TWO departures from the ritual: **the PR is HELD OPEN at the end — no merge
-*[removed for publication]*
+(the launch code freeze)**, and **VX-508 stays HELD** (it waits on the tester's 0.10 join). Pin-before-fix PER MEMBER;
 commits say `Part of VX-<member>`; NO trailers of any kind (CLAUDE.md's Environment rule overrides the harness).
 
 **Her words at kickoff (2026-11-01, verbatim):** "hello Fable! I have some extra tokens and we're very close to my weekly
 reset, so I want you to get some work done but I don't want to plan on immediately merging the PR once it's ready -
 we're in a code freeze for launch right now. However, I think this is now a good moment to work on /architect-phase
-*[removed for publication]*
+VX-500 which is the sync followups. VX-508 is still not possible to do because we're waiting on [the tester] to cross over,
 but the other elements should be allowed. Question: should the phone's VM ticket on fixing the duplicated sherlock
 wait til this is in master to work? is it in the same area? right now I have no coordinator and you can freely claim
 the stage, I will let you know if I do start a coordinator session. go ahead and make your branch and work through
@@ -41,7 +41,7 @@ scale, stays open at her word; its measured mechanism became VX-720), the deferr
 is v1_36; the 109k-row apply 330 s → 89 s, 3.7–3.9×), the retention tests' clock (VX-539/VX-546 — injected; the
 "real miscount" reading falsified twice independently), the leaf constraint (VX-490), and the deploy's bracket
 (VX-721 — the 10/14c idiom, proven live by deploy run 2; the sweep expects 65 OK · 4 INFO · 0 fail). VX-504 is the
-*[removed for publication]*
+compaction memo (D-504, for her sitting); VX-508 stays HELD (the tester's join); VX-544 was lifted out (R-500-10);
 VX-76 is proposed as VX-496's duplicate (her call, a comment on the ticket).
 
 **How it closed.** Three Fable orchestrators in sequence (the breach cutover, the deploy cutover, the closing
@@ -252,7 +252,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 
 - ~~**The merge** (the freeze) — at her explicit word.~~ GIVEN 2026-11-04 (R-500-12): the completed PR merges, serialized
   through the coordinator; a RELEASE stays withheld. ~~The server deploy~~ DONE 2026-11-02 00:41 UTC (R-500-8/-11).
-*[removed for publication]*
+- **VX-508** — the one-statement act after the tester's 0.10 join verifies her typed wraps.
 - **The words:** P-500-1 the progress lines (her example leads), P-500-2 the sheet's count, P-500-3 the belt's line
   (her draft), the locked row unchanged. P-500-6 (the count's shape) RULED — R-500-1.
 - **The directions:** P-500-4 (the retained derived secret over a door), P-500-5 (the reachability trigger), D-497's
@@ -285,7 +285,7 @@ record `notes/plans/fixes/vx-502-export-across-migrations.md`: an export from a 
 | ~~VX-544~~ | an offline TYPED unlock in Castle leaves sync locked for the session | Bug · Confirmed · Castle & sync · Medium | **LIFTED OUT (R-500-10)** → its own run, `notes/plans/fixes/vx-544-offline-typed-unlock.md` |
 | VX-539 | ProtectionPairRetentionTests flakes at a week boundary — the tests read `Date()` | Bug · Test-only · Tests & tooling · Low | **U2** — the pair road and the suite on the injected clock |
 | VX-504 | a first catch-up leaves free pages about the library's size — design the compaction | Improvement · Confirmed · Performance · Low | **the architect's DESIGN MEMO** (below), no build — "its own small design sitting" |
-*[removed for publication]*
+| VX-508 | a pre-0.10 vault keeps a dormant Apple-wrapped master copy | Bug · Confirmed · Castle & sync · High | **HELD** at her word (the tester's 0.10 join first; the one-statement act at her hand) |
 | VX-503 | the Standard join's Touch ID prompt | — | Done before this run; nothing here |
 | **VX-721** (minted at the deploy) | the VX-495 artifacts omitted the 10/14c re-own bracket — run 1 refused 42501 | Bug · Confirmed · Castle & sync · High | FIXED in the deploy-fix session; proven live by run 2; closes at the merge |
 | **VX-722 · VX-723** (minted at her word) | two load-shaped core-suite flakes seen once each at U1a's broad runs | Bug · Suspected · Tests & tooling · Low | not this run's; the traps name them |

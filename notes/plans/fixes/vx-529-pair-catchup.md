@@ -2119,7 +2119,7 @@ the closing stage batch, the live proof, and HER TWO-MAC TEST.**
     premise needed it). The sync-keys custody suites — the leaves VX-530's fix DOES touch — ran (not in the skip
     list).
   - The 4 expected failures are the recorded known-issue rows. The ticketed MCP wall-clock flake did not fire.
-  *[removed for publication]*
+  - **The earlier tester check, recorded (her ask):** his production account went from the T-3 baseline's all-zeros to
     vault standard rev 1 · `kp:` ENROLLED · 1 device cursor · 3 containers / 16 blocks / 16 variants, newest write
     2026-10-24 21:02Z — the first-run fix working in the field; one release stands (0.10.1, build 9311, 2026-10-24).
 - **The phone suites** (`VariorumMobile`, iPhone 17 Pro simulator OS 26.2, DerivedData `vx529-phone`): **808 tests

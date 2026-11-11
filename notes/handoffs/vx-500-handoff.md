@@ -15,7 +15,7 @@
 - [ ] **The palette follows the account** (your Pro flipped to sea glass at the catch-up — the synced `theme_palette`,
       by design): per-device instead? a ticket at your word.
 - [ ] **VX-76** — proposed CLOSED AS DUPLICATE of VX-496 (the progress line is built); a comment on the ticket awaits
-      *[removed for publication]*
+      your call. **VX-508** stays held (the tester's join). **The memos** for a sitting: compaction (D-504) and chunking
       (trued with U1b's numbers — chunking buys none of the measured time and adds an un-committable edge).
 - [ ] **Next runs:** VX-683 first (the data-loss class — a `Sync/` design memo + sitting before any build; your
       priority raise), then VX-544 (its plan file is ready: `notes/plans/fixes/vx-544-offline-typed-unlock.md`).

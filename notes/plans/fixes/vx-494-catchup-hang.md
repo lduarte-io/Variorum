@@ -54,8 +54,8 @@ un-importable) · keep the 13j device rule · O-2's disk slack accepted for 0.10
 (Done) · VX-492/VX-493 closed as resolved here · VX-495/VX-496 Pre-launch · VX-497 (the all-or-nothing save) deferred,
 "don't close it" · VX-505 (the belt's words) + the umbrella **VX-500** · the shield stays · VX-498 stands; M1 (c): a typed
 unlock holds the sync keys in session → VX-501 (built at VX-510) · R-494-6 VX-506 (the pre-join locked line's wording) ·
-*[removed for publication]*
-*[removed for publication]*
+R-494-7…13 the tester reports (tester B, tester A): the set-up arm behaved per design; every tester tenant empty; VX-507 (the
+act confirms its first round) Pre-launch; VX-508 (tester A's dormant Apple-wrapped master copy — held for her one-statement
 act); VM-8 deferred behind the first-run sync run (VX-510); QUESTIONS #239 holds the bundle.
 
 **The evidence lines that matter.** THE LIVE PROOF on the throwaway at her corpus's scale (~110k rows): 56 data windows,
@@ -71,7 +71,7 @@ RV-R3a red). Closing runs on the final tree `ae6d1bf90`: core debug 3326/434, re
 506 · 507 · 508 — most since closed by VX-510/VX-529; the sync follow-ups run `notes/plans/fixes/vx-500-sync-followups.md`
 carries 495/496/497/505/504/508) · the stage's disk slack (79 → 150 MB after a first catch-up; VX-504's compaction memo)
 · R2-3 (a device that only ever resumes never refreshes `seen_at` — accepted, R-494-4 (b)) · FB-5 of the Fable review
-*[removed for publication]*
+rides the next MobileSoul touch · the tester B enrollment mystery closed as unknowable server-side (R-494-13); the class cured
 by VX-507.
 
 ## LIVE STATUS (flip per piece, same commit; unverified claims marked PENDING)
@@ -764,12 +764,12 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   via Sparkle).
 - **R-494-8 (2026-10-23, the tester trace — her words verbatim, the server's facts beside them):** her first word:
   "yes! this is the one tester that had set up sync"; her correction minutes later: "no, you're not right: the one
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  user that had set up sync is [tester B's email] I know that for a fact." Her probe (the `!` road, read-only,
+  production): THREE auth users — hers (2026-07-10), tester B's (created 2026-10-13, last password
+  sign-in 2026-10-14), tester A's (created 2026-10-22 20:31 UTC) — and TWO vault rows: hers
+  (castle, 2026-08-04) and tester A's (standard, 2026-10-22 20:39 UTC — eight minutes after that account's birth,
+  on 0.9.8, hours before the marker-14 deploy; the "one beta tester's 'standard'" backfill row). **Tester B has NO
+  vault row.** The open fork (her next probe decides): tester B's tenant's DATA row count — zero means his set-up never
   completed enrollment (the old world pushes nothing un-enrolled), so the set-up arm he met today is HONEST and
   safe to proceed; nonzero means rows sealed under a key no vault wraps — a serious finding, stop. The tester was
   told to Cancel; `createVault` refuses over an existing row (409 `vaultExists`), so no road from the sheet can
@@ -777,46 +777,46 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   them to be up right now" — the two site pages drafted new at her word. Her note: the tester is in Standard, so
   the ⌃⌘L typed-unlock test doesn't apply (the lock door rides Castle's gate row; Standard's quiet road would
   reopen silently) — the reveal-eye check and the words-road passphrase reset are the Standard-side tools.
-  *[removed for publication]*
-  *[removed for publication]*
+  **RESOLVED by her second probe (same sitting): every tester tenant is EMPTY** — tester B and tester A both read 0
+  containers · 0 blocks · 0 variants · 0 device cursors (hers 864 · 20,848 · 32,800 · 7). So tester B never enrolled
   AND never pushed: the set-up arm he met is HONEST (truly his first enrollment), nothing of his exists on the
   server to lose, and NO product finding stands — the arm, the vault read, and `createVault`'s 409 guard all
   behaved per design. The remaining item is tester-local (what his Set-a-passphrase door saved vs. what he types);
-  *[removed for publication]*
-  *[removed for publication]*
-  *[removed for publication]*
+  the road given: reveal-eye check, else the twelve words reset the passphrase through the key doors. Tester A
+  IS her friend (her words: "she signed up for sync yesterday because I told her to before the update
+  happened") — and tester A's tenant is EMPTY (0 rows ever pushed), so the testers' message's "everything already
   synced comes back when you sign in" holds VACUOUSLY for her: she enrolled the vault on 0.9.8 but no round ever
   pushed her rows (why is unknown — an empty library, or no round before marker 14 cut 0.9.8 off). The heads-up
-  *[removed for publication]*
+  given: if tester A has real writing on 0.9.8, it lives only in her old library — copy it out on the old build
   (Copy full text) before or after Start fresh (the aside in Previous Libraries stays whole); signing in brings
   back nothing for her.
-*[removed for publication]*
+- **R-494-9 (2026-10-23, the sitting continued — her escalation and the tester B reconstruction):** her words: "yes, this
   OBVIOUSLY has to be pre launch… how did that get exposed via testing and not considered a bug / traced / fixed? …
-  *[removed for publication]*
+  His account even says he has sync keys in this image." Acts: VX-507 Pre-launch at her word; VX-498 Low → High (tester A's
   case proves the class can silently cost a whole first sync; Pre-launch pending her word); VX-506 Low → Medium with the
   field evidence (the pre-join locked line asserts "your account's sync keys" for a VAULTLESS account — it misled her
-  *[removed for publication]*
+  own diagnosis). THE TESTER B RECONSTRUCTION (from his screenshots + the code): his 4:15 refusal "That passphrase doesn't
   open this library" is the PASSPHRASE leg against the library (`wordsDoNotOpen` is a separate sentence), so his library
   THEN had a passphrase; his 4:35 sheet reads "This library has no passphrase yet" — unreachable for the same library —
   so he pressed START FRESH AGAIN in between, and the twelve words saved in his 1Password belong to the DEAD library.
   The road given (one sitting, no gaps): the words card → record THOSE words → Turn on sync → new passphrase twice →
   those words → done; a refusal on that exact sequence is a real bug. Server certainty stands: no vault ever landed for
-  *[removed for publication]*
+  tester B (no delete road leaves an account standing), whatever he typed locally. TESTER A'S 0.9.8 QUESTION answered: no
   road — the marker-14 server refuses every 0.9.8 round whole (the §12 grammar); her writing comes out by Copy full
   text / the scheduled Markdown export, then update → Start fresh → JOIN (her vault exists — she gets the join arm,
   with yesterday's passphrase). THE SITE PAGES drafted and committed locally (the agent's d317b52 — /variorum/privacy +
   /variorum/support, the App Store brief's load-bearing paths; /variorum/help 301s): the orchestrator's review + deploy
   pending; ONE fact flag — pre-0.10 vaults may hold a dormant Apple-held master copy (17 leaves the column unread, not
-  *[removed for publication]*
-*[removed for publication]*
-  *[removed for publication]*
+  nulled), so the draft's "never Apple-wrapped" line may be too strong for tester A's account; her probe answers it.
+- **R-494-10 (2026-10-23, the sitting's tail — the artifact settles tester A, and STEP 5 SHIPS):** her probe read
+  tester A's vault `created_at == updated_at`; artifact 17 shows `mode` has NO default and only the backfill ever set
   it, so her `'standard'` proves the row EXISTED at the deploy — **she enrolled BEFORE the marker flipped**, had
   hours where 0.9.8 rounds could have run, and none did: the marker didn't stop her; VX-498's class (or an immediate
   quit) did — the VX-498 comment carries it. The SAME read found artifact 17 deliberately LEFT
   `master_wrapped_by_apple_held` + `apple_key_id` in place ("LEFT UNREAD … pre-event history") and
-  *[removed for publication]*
+  `key_vault_update` never touches them — so tester A's row still holds an Apple-wrapped master copy: **VX-508**
   (Bug, Confirmed, Castle & sync, High, under VX-500; Pre-launch her call) — the fix shape honors rule 22 (null the
-  *[removed for publication]*
+  two columns at her word only AFTER tester A's 0.10 join verifies the passphrase/words wraps). **STEP 5 SHIPPED:**
   `/variorum/privacy` + `/variorum/support` live (noindex drafts at her word, placeholder-marked; `/variorum/help`
   301s; the App Store brief's load-bearing paths), the agent's commit `d317b52` + the orchestrator's review fix
   `543ebd4` (the policy's account-keys Apple sentence scoped to the truth, with VX-508's comment beside it); every
@@ -829,10 +829,10 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   what the fuck happened there? he HAD a passphrase for the old account in castle. he DID sign up for sync. why is
   NOTHING pushed?" — her correction minutes later, superseding this entry's castle reading: "it wasn't a castle
   passphrase on the old account. he set up sync, which forces you to set up a passphrase. he also CLICKED start fresh
-  *[removed for publication]*
+  on the NEW update." (So: tester B enrolled with the old world's encryption passphrase, posture unknown; and he did
   Start fresh on 0.10 — consistent with the two-libraries reconstruction.) Her ruling on the pages: questions for her live "as a comment or in the docs somewhere… if it's just on
   the internet… it's getting scraped and saved. so remove that" — DONE (every HTML comment moved to never-rendered
-  *[removed for publication]*
+  frontmatter, 0 served, site `524a442`). The tester B hypotheses as they stand (none pinned): (b) his account was
   DELETED AND RE-CREATED — the only story fitting both his memory (castle passphrase, synced) and the server (his
   login's created_at is 2026-10-13; deletion removes vault + rows + login together, so everything he remembers would
   have died with the predecessor) — discriminators: when he FIRST signed up (before Oct 13 ⇒ proven) and whether he
@@ -845,10 +845,10 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   that, so this is obviously the biggest issue right now." — The window's step 7 changes at her word: the VM-8
   kickoff stays written in the handoff for later; the next effort is a RUN on the first-run sync seam — the trace
   FIRST (the whole path: the set-up act's own failure modes incl. a vault write that fails while the UI reads
-  *[removed for publication]*
+  success (tester B's story (a)), the act→scheduler seam (VX-498's mechanism), the row's state), then the fixes with
   pins: VX-498 + VX-507, VX-509 as the evidence vehicle, VX-506 riding. Her phone stays down until VM-8 runs after —
   her accepted cost, her call.
-*[removed for publication]*
+- **R-494-13 (2026-10-23, tester B's answers — hypothesis (b) DEAD):** her words: "he first signed up on Oct 13th, he
   never dleeted his account or started over. We have no idea why it didn't work." So his Oct-13 account is the
   ORIGINAL, and the surviving stories are only: (a) the old build's enrollment act failed its server write while the
   UI read as success, or (e) the act was refused/never completed and nothing afterward was loud enough to say so —
@@ -856,7 +856,7 @@ BYTE-IDENTICAL, so §5–§7's semantics do not move.
   done). The server can no longer distinguish them (no vault, auth logs expired); the two roads that still can:
   (i) VX-510's trace of the CURRENT act — can 0.10's set-up fail to land the vault while reading as success?
   (ii) THE ARCHAEOLOGY — the old road's enrollment act was deleted at VX-329 but lives in git history: the trace
-  *[removed for publication]*
+  reads the exact code tester B ran on Oct 13 and looks for the silent window. Either way VX-507 is the cure for the
   class (the act confirms its first round or says what blocks it — silence becomes impossible).
 - **R-494-5 (2026-10-23, the window sitting) — the post-merge Fable cold review:** at her kickoff word ("it might be
   worth trying to have you launch one Fable cold review over everything that Opus did") and her go, one fresh

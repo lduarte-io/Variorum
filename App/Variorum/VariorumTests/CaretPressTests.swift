@@ -3,7 +3,7 @@
 //  VariorumTests
 //
 //  VX-601 batch A2 — VX-429 (in Takes, a drag that starts exactly at the
-*[removed for publication]*
+//  caret's own position does nothing) and VX-592 (the tester: *"when I try to
 //  drag a highlight from where my cursor is currently typing, it doesn't
 //  work"*). ONE traced mechanism (the run record's BATCH A2 RECORD, `notes/
 //  plans/fixes/vx-601-run-takes-editor-quick-fixes.md`, and `Surface/
@@ -427,7 +427,7 @@ struct EditorCaretPressTests {
         return window
     }
 
-    *[removed for publication]*
+    /// **RED ON OLD — the tester's gesture, in Write.** The caret where she is
     /// typing; a press on it, held, dragged — nothing on the old tree.
     @Test func aHeldDragFromTheCaretSelectsInWrite() async throws {
         await HostLaunchSettle.wait()  // never pump into the host's launch

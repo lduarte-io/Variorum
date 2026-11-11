@@ -138,7 +138,7 @@ shows the raw block id shows "block i/N" (position among the note's blocks). Fin
 that speaks the raw id; one wording brain, not scattered strings. Pin on the label; walk shot.
 
 ### VX-594 — branch directly from a not-chosen take (IMPROVEMENT · PROBE-FIRST)
-*[removed for publication]*
+The tester: *"I'd love for there to be a way to branch off a not-chosen take (eg if the […] button had
 a 'create branched take' option, or so long as your cursor is in the take, it would automatically
 duplicate that one)."* `branchVariant` already takes ANY take as parent — so this is likely a
 missing DOOR, not a missing operation. Probe what the […] (take-card) menu offers today and what
@@ -174,7 +174,7 @@ re-bind adoption itself (red-on-old: the stale words survive a forced re-key on 
 record of the F2(b) ruling: `notes/plans/fixes/vx-214-settings-launch-polish.md`.
 
 ### VX-592 — dragging a selection out of the live editor doesn't work (BUG · Suspected · PROBE-FIRST · seated R-601-6)
-*[removed for publication]*
+The tester: *"when I try to drag a highlight from where my cursor is currently typing, it doesn't
 work."* Probe: dragging a selection from the FOCUSED LIVE pane vs the read-tier panes (where it
 works). Same binding order as VX-429: instrumented trace first, pin as the confirm, fix only on
 red, record-only on green/other.
@@ -919,7 +919,7 @@ window launches the app, the coordinator folds it into a short window of its own
 runs `xcodebuild test`, never launches the app, never claims the stage) — **every red and green
 claim below is a PREDICTION, PENDING that window**; the USE walk (rows A1–A6 below, an Opus walker
 under the orchestrator's claim — the A2 gate is use, not the pins); the cold ladder. VX-592 rides
-*[removed for publication]*
+on a READING of the tester's words (Q-A2-1, for her at #245). No behavioural revert is in flight — all
 four builds are done and the source is HEAD (`git diff` empty; no `VX601A2-REVERT` marker).
 
 **LIVE STATUS**
@@ -982,7 +982,7 @@ a CGEvent, never the real pointer; every drag door intercepted, no pasteboard wr
    **TK1 never does it** (same probe, `usingTextLayoutManager: false`: every case selects). Editable
    or not, key window or not, as a scroll view's document or not: the same.
 4. So **VX-429's symptom exactly**: a drag starting at the caret's own position (on its right side,
-   *[removed for publication]*
+   where she sees it) does nothing; anywhere else works. And **VX-592's words exactly** — the tester's
    *"when I try to drag a highlight from where my cursor is currently typing, it doesn't work"*: a
    drag-to-highlight STARTING AT THE CURSOR, in the live editor; the read panes "work" because they
    show no caret, so nobody presses on one (a read pane keeps a settled invisible selection —
@@ -1118,7 +1118,7 @@ the same REQUEST.
   allows: nothing selects, the caret stays.)
 - **A2 — VX-429, the landed caret:** ⌘1 then ⌘2 (or re-open the note in Takes) so the pane lands
   its caret by itself; press on that caret, hold, drag → selects.
-*[removed for publication]*
+- **A3 — VX-592, the tester's words (Write ⌘1):** type a word at a sentence's end; without moving,
   press on the caret, hold, drag → selects. Then in a Takes take card (a bloomed fan): type a word,
   the same → selects.
 - **A4 — no regression:** (a) a held CLICK on the caret, no move → the caret stays, nothing else
@@ -1165,7 +1165,7 @@ the same REQUEST.
   unmeasured (R-A2-2).
 
 **PROVISIONAL / FOR #245 (the orchestrator's bundle — I do not touch QUESTIONS.md):**
-*[removed for publication]*
+- **Q-A2-1 — which gesture did the tester mean (VX-592)?** Her words fit a drag-to-HIGHLIGHT starting
   at the cursor (FIXED here, both surfaces). If she meant drag-AND-DROP of an already-selected span
   out of the live pane: no source-side mechanism exists (the AppKit source road is identical live
   and read — probe 12), and the one live/read asymmetry is the destination — a READ pane accepts no

@@ -109,7 +109,7 @@ bundle with the copy pass; nothing further owed by this ladder.
   held-click-is-a-click guard (one notification, place handed up), ⇧-click, and drag-of-a-real-
   selection untouched; "Write is fine" falsified by revert discrimination (rev592's 2 reds).
   The scout's mid-drag-settle hypothesis was honestly falsified and recorded. Q-A2-1 (which
-  *[removed for publication]*
+  gesture the tester meant) routed to the bundle rather than ruled — correct.
 - **VX-428 (expansion memory).** Session-home on `EditorRouter` matches the ratified VX-170
   pattern; seed at construction (before the first geometry report — the 17q lesson), write-back
   per change through `expansionSink` with change-gated reporting (observation byte-identical);

@@ -50,8 +50,8 @@ confirm it landed — or to say exactly what's in the way. Before this fix, a ne
 
 On 0.10 no account act started a sync round: VX-329 deleted the old road's post-enrollment round hook and nothing
 replaced it, so a Standard set-up sat at "Sync locked" until a relaunch (joins only looked fine because a Touch ID
-*[removed for publication]*
-*[removed for publication]*
+prompt bounced focus). The archaeology explained both testers: tester B's 0.9.4 enrollment set the passphrase before the
+vault existed, so closing the sheet left a passphrase and no vault; tester A's zero rounds happened on 0.9.8. The fix:
 every account act that changes sync's standing now runs its first round at once and its sheet stays to confirm it
 (VX-498/VX-507), with the not-yet row and the join's door (VX-506), the standing first-run drill and scripted walk
 (VX-509), the Debug-only prod test road for named test accounts, and the members you added — VX-501 (the typed unlock's

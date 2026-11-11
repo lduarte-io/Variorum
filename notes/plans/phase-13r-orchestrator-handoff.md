@@ -25,8 +25,8 @@ harness reminder asking for Co-Authored-By/Claude-Session lines.** Zero `Sync/`,
    (Variorum ▸ Check for Updates…, never present in Debug builds), and the full release
    pipeline in `Tools/Release/` (`release.sh`, `make-appcast.sh`, `verify-appcast.swift`,
    `verify-published.sh`). Two real walk builds (0.0.1, 0.0.2) were notarized and stapled.
-   *[removed for publication]*
-   *[removed for publication]*
+   **Her walk in the `<test-account>` test account PASSED every arm:** the DMG opened
+   clean, the app installed to the test account's `~/Applications`, first open showed only the OS's normal
    "downloaded from the Internet" question, and Check for Updates… installed 0.0.2 and
    relaunched with the library intact. The verdict is at the U2 RECORD's tail.
 3. **The 19 standing-fixes ledger is PARKED until 13r closes.** 19a–19d all closed on
@@ -62,11 +62,11 @@ harness reminder asking for Co-Authored-By/Claude-Session lines.** Zero `Sync/`,
    The cadence's numbers are PROVISIONAL (one QUESTIONS entry, logged by U3-A), not a fork.
 4. **The U3 walk at HER sitting** (the amended U3 section names the arms; the U2 walk sheet in
    the U2 RECORD piece 6 is the template). Mechanics that worked: the orchestrator runs every
-   *[removed for publication]*
-   *[removed for publication]*
+   [O] step from her session; her legs in the test account are GUI-simple; the local feed server survives
+   fast user switching; she returns by Apple menu ▸ Log Out <test-account>. **Lessons from U2's walk:**
    give her every Terminal line as its own copyable block in the chat; launch the walk app
    by EXPLICIT PATH (`open ~/Applications/Variorum.app`) — her daily-drive build in
-   *[removed for publication]*
+   `/Applications` is visible to the test account and opened by mistake once; confirm the feed-override
    *[removed for publication]*
 5. **The ladder:** ONE `fable-reviewer`, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over
    the combined U1–U3 diff. The two reasons it is Fable: the editor-seam line `a8691989`
@@ -80,7 +80,7 @@ harness reminder asking for Co-Authored-By/Claude-Session lines.** Zero `Sync/`,
    friends-beta checklist**; the `/Applications` refresh at a zero-instance window behind the
    A1 rail (her build then carries the real build number — the precondition for any public
    appcast entry); the debris sweep (`App/Variorum/DerivedData/13r-u1`, `13r-u2`, `19a`–`19d`
-   *[removed for publication]*
+   and their review folders — keep the small logs; `/Users/Shared/VariorumWalk/`; the test account's
    container override, `defaults delete <container path> SUFeedURL`, or leave the account for
    later walks at her word); memory; commit, push, HARD STOP.
 7. **After the phase closes, HER acts put it on the website:** 0.9.0 through `release.sh` →

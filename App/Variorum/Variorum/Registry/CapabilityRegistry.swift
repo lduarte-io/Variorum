@@ -409,7 +409,7 @@ nonisolated enum CapabilityRegistry {
                 if ctx.mode == .lenses { return .actElsewhere(.takes) }  // blooms live in Takes — GO there
                 return takeFamily(ctx)
             }),
-        *[removed for publication]*
+        // VX-594 (her R-601-4 — the tester's *"a way to branch off a not-chosen
         // take (eg if the […] button had a 'create branched take' option…)"*):
         // the `.surface` door is the take CARD's ⌄ menu — "New branched take",
         // acting on the card's own take, the `.archiveTake` shape (one act,

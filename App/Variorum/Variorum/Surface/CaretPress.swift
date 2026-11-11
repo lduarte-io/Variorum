@@ -5,7 +5,7 @@
 //  **VX-429 + VX-592 — A PRESS ON THE CARET STARTS A SELECTION, AS ANYWHERE
 //  ELSE.** Her report (VX-429): in Takes, a drag that starts exactly at the
 //  caret's own position does nothing, while a drag started anywhere else
-*[removed for publication]*
+//  selects. The tester's (VX-592): *"when I try to drag a highlight from where my
 //  cursor is currently typing, it doesn't work."* One mechanism, measured.
 //
 //  **THE MECHANISM (macOS 27.0.1, TextKit 2 — the run record's BATCH A2

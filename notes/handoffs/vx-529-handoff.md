@@ -15,7 +15,7 @@
    ID unlock or a relaunch) and **VX-542** (the follow pane repeats its sentences — worse on your real Air).
 5. **Next run:** the mobile catch-up (VM-8). The phone's context is the mobile handoff plus MobileSoul PL-58 and PL-59.
 
-*[removed for publication]*
+Already settled: the two-Mac test passed (both directions); the tester's account holds 3 notes and 16 blocks (his
 `last_sign_in_at` is Oct 14 because his app kept refreshing the session rather than signing in fresh — not a
 problem); VX-510's picked-folder leftovers are deleted at your word.
 
