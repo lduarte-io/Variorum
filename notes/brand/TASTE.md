@@ -164,6 +164,13 @@ sitting: the wordmark in real type · the red-as-token question · the macOS 26 
 treatment (the two-reference chrome play) · favicon/menu-bar derivations from the
 one-color master.
 
+## Superseded (2026-11-12): the sea-glass cards are the logo
+
+Her word, 2026-11-12 (VX-993): *"make it clear that the seaglass card IS the brand logo
+from now on, everywhere."* The cards fan on sea-glass #C2DDD3, the app's icon since VX-192
+(2026-10-12), is now the brand logo too: the site, link previews, her profiles and the app.
+The striped V's ratification above is history. The V stays in the family as supporting cast.
+
 ## What this document is not
 
 Not binding, not a design system, not a decision record. The sitting rules; the author
