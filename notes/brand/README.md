@@ -1,8 +1,16 @@
 # Variorum — brand mark finalists
 
-Fourteen production-clean vector marks. **THE LOGO IS CHOSEN: the striped V — ratified by
-the author 2026-08-25 ("yeah, that's going to be the logo").** The rest of the family
-stands as supporting cast (secondary marks, ornament, icon concepts), per TASTE.md.
+Fourteen production-clean vector marks. **THE LOGO IS THE SEA-GLASS CARDS
+(`variorum-cards-sea-glass.svg`, the fan of cards on #C2DDD3), everywhere, from 2026-11-12
+(her word: "make it clear that the seaglass card IS the brand logo from now on,
+everywhere"; VX-993).** It is the app icon (VX-192), the About and offer-line mark, the
+site's link-preview image and the logo on her profiles. Use the app icon's own
+composition (`App/Variorum/Variorum/AppIcon.icon/Assets/cards.svg` on the #C2DDD3 ground),
+so every copy reads as the Dock icon. *History: the striped V was ratified as the logo on
+2026-08-25 ("yeah, that's going to be the logo"); the cards replaced it as the app's art on
+2026-10-12 (VX-177, then sea-glass at VX-192); this ruling makes the cards the brand logo too.
+The striped V stays in the family as supporting cast.* The rest of the family stands as
+supporting cast (secondary marks, ornament, icon concepts), per TASTE.md.
 The choosing surface is **`variorum-family-sheet.svg`** (per mark: light ground over dark
 ground; `.png` twins of the sheets are pre-rendered copies for apps that balk at SVG).
 The pipeline that produced everything here is documented in **`PROCESS.md`** — new options
@@ -45,8 +53,8 @@ exactly what she picked.
 
 | mark | files | structure |
 |---|---|---|
-| **the striped V** — **THE LOGO (ratified 2026-08-25)** | `variorum-v-*` | true one-color compound path (`-master` = transparent); slits are real holes |
-| **the cards** | `variorum-cards-*` | inherently two-tone (layered black + white paint); no transparent master by design. In `-white`, the dot flips to ink so it survives |
+| **the striped V** — the logo 2026-08-25 → 2026-11-12, superseded by the sea-glass cards | `variorum-v-*` | true one-color compound path (`-master` = transparent); slits are real holes |
+| **the cards** — **THE LOGO (the sea-glass edition, 2026-11-12)** | `variorum-cards-*` | inherently two-tone (layered black + white paint); no transparent master by design. In `-white`, the dot flips to ink so it survives |
 | **the book** | `variorum-book-*` | inherently two-tone, same class as the cards |
 | **the flourish** | `variorum-flourish-*` | true one-color compound path |
 | **the thin flourish** | `variorum-flourish-thin-*` | true one-color compound path |

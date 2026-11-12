@@ -65,7 +65,8 @@ nonisolated enum TourOfferCopy {
     static var helpRoad: String {
         "This can always be started from Help \u{25B8} \(CapabilityRegistry.capability(.takeTour).verb)."
     }
-    /// The small V's image asset — the ONE mark About draws too (13s-b U1a
+    /// The small mark's image asset — the sea-glass cards (VX-177/VX-192; the
+    /// brand logo since VX-993), the ONE mark About draws too (13s-b U1a
     /// piece 4; `notes/brand/tools/appicon.py` writes it; `AppMarkTests` pins it).
     static let markAssetName = "VariorumMark"
 }
@@ -175,8 +176,8 @@ struct TourOfferCard: View {
         }
     }
 
-    /// The small V's size beside the card's two lines (the line drew it at
-    /// 16 pt beside one).
+    /// The small cards mark's size beside the card's two lines (the line drew
+    /// it at 16 pt beside one).
     static let markSize: CGFloat = 20
 
     let model: TourOfferModel
@@ -286,7 +287,8 @@ struct TourOfferCard: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// The small V — the app's one mark, the asset About draws too
+    /// The small cards mark — the app's one mark (the sea-glass cards,
+    /// VX-177/VX-192; the brand logo since VX-993), the asset About draws too
     /// (`TourOfferCopy.markAssetName`; `AppMarkTests` holds the two
     /// placements to one asset).
     private var mark: some View {

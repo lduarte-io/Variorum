@@ -2,9 +2,11 @@
 //  AboutView.swift
 //  Variorum
 //
-//  13s-b U1a, piece 4 — THE ABOUT WINDOW wears the logo (her rulings
-//  R-13s-24/25: the faithful two-tone striped V; Q19 closed — "the app icon
-//  + About + the welcome-line mark, nothing more").
+//  13s-b U1a, piece 4 — THE ABOUT WINDOW wears the logo: the sea-glass cards
+//  mark (VX-177's cards, VX-192's sea-glass edition; the brand logo
+//  everywhere since VX-993). The cards replaced R-13s-24/25's striped V as
+//  the art; every placement those rulings named stands (Q19 closed — "the
+//  app icon + About + the welcome-line mark, nothing more").
 //
 //  The system's standard About panel cannot carry the wordmark: it sets the
 //  app's name in the system's bold face, and TASTE.md's recorded lean is
