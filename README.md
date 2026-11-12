@@ -12,7 +12,7 @@ Variorum opens with its own readme: why I built it, what it's for, and what I ho
 
 AI wrote the code. I directed everything — every product decision, every spec line, roughly a quarter million typed words of direction over four months. The entire build record ships in this repo: the specs and the mental model in `notes/`, several hundred plan and fix files with their review ladders, and the process constitution every session ran under (`CLAUDE.md`).
 
-This isn't a cleaned-up history. The record keeps the failures, the corrections, and the arguments, because the record is the proof: it shows who decided what, when, and why. If you want to understand how a person and AI actually build something ambitious together, start with the letter (in the app, and on the site), then `notes/README.md` — the map of the record: the layout, the canon files, the house dialect, and the reading paths. A post about what building it was like is coming; a link will land here.
+This isn't a cleaned-up history. The record keeps the failures, the corrections, and the arguments, because the record is the proof: it shows who decided what, when, and why. If you want to understand how a person and AI actually build something ambitious together, start with the letter (in the app, and on the site), then `notes/README.md` — the map of the record: the layout, the canon files, the house dialect, and the reading paths. I wrote about what building it was like: [open source, open process](https://stargazing.tech/blog/open-source-open-process).
 
 (VX-nnn ids throughout refer to a private tracker; the repo-first records for each live in `notes/plans/fixes/`.)
 
