@@ -13,7 +13,8 @@ set -uo pipefail
 
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 T="$(mktemp -d "${TMPDIR:-/tmp}/vx996-guard.XXXXXX")"
-trap 'rm -rf "$T"' EXIT
+# Only the top-level shell cleans up: a subshell (a pipeline stage) dying must not delete the fixture.
+trap '[ "${BASH_SUBSHELL:-0}" -eq 0 ] && rm -rf "$T"' EXIT
 
 # Isolation: nothing of the author's own git config, hooks or private list is read.
 export HOME="$T/home"
@@ -29,32 +30,35 @@ git config --global commit.gpgsign false
 git config --global tag.gpgsign false
 git config --global advice.detachedHead false
 
-TOKEN="quokka-velvet-7731"          # the test list's literal (not a real value of anyone's)
+SAMPLE="quokka-velvet-7731"          # the test list's literal (not a real value of anyone's)
 REGEX_HIT="zx-4821-qq"              # matches the test list's regex
 LIST="$HOME/.variorum/private-tokens.txt"
 write_list() {
   cat >"$LIST" <<EOF
 # the test list
-test-token lit:$TOKEN
+test-token lit:$SAMPLE
 test-regex re:zx-[0-9]{4}-qq
 keep test-token kept/*.txt
 EOF
 }
 write_list
 
-PASS=0; FAIL=0; FAILED=""
-ok()  { PASS=$((PASS + 1)); printf '  ok    %s\n' "$1"; }
-bad() { FAIL=$((FAIL + 1)); FAILED="$FAILED\n  - $1"; printf '  FAIL  %s — %s\n' "$1" "$2"; }
+PASS=0; FAIL=0; FAILED=""; OUT=""; RC=0
+VERBOSE="${VERBOSE:-0}"   # VERBOSE=1 Tools/test-githooks prints what the guard said in every case
+show() { [ "$VERBOSE" = 1 ] && printf '%s\n' "$OUT" | grep -E '^(pre-push guard|  )' | sed 's/^/          | /'; return 0; }
+ok()  { PASS=$((PASS + 1)); printf '  ok    %s\n' "$1"; show; }
+bad() { FAIL=$((FAIL + 1)); FAILED="$FAILED\n  - $1"; printf '  FAIL  %s — %s\n' "$1" "$2"; show; }
 
 # push <args…>: runs git push from the current directory, capturing OUT and RC.
 push() { OUT="$(git push "$@" 2>&1)"; RC=$?; }
 expect_pass() {
   if [ "$RC" -eq 0 ]; then ok "$1"; else bad "$1" "the push was refused (rc=$RC): $(printf '%s' "$OUT" | grep -v '^error: failed to push' | tail -4 | tr '\n' ' ')"; fi
 }
-# expect_refuse <case> <value-that-must-not-print|-> <needle>…
+# expect_refuse <case> <value-that-must-not-print|-> <needle>…  (always: the guard's own REFUSED line)
 expect_refuse() {
   local name="$1" value="$2"; shift 2
   if [ "$RC" -eq 0 ]; then bad "$name" "the push went through"; return; fi
+  case "$OUT" in *"pre-push guard: REFUSED"*) ;; *) bad "$name" "refused, but not by the guard"; return ;; esac
   local n
   for n in "$@"; do
     case "$OUT" in *"$n"*) ;; *) bad "$name" "the refusal does not say: $n"; return ;; esac
@@ -109,25 +113,25 @@ push origin main; expect_pass "a clean update push to main (the board-snapshot s
 branch_from_main token-line
 commit_file notes/clean2.md "first line"
 push -u origin token-line; expect_pass "setup: token-line pushed clean"
-printf 'one\ntwo\nthe value %s sits here\n' "$TOKEN" >notes/leak.md; git add notes/leak.md; git commit -q -m "a leaky note"
+printf 'one\ntwo\nthe value %s sits here\n' "$SAMPLE" >notes/leak.md; git add notes/leak.md; git commit -q -m "a leaky note"
 sha="$(git rev-parse --short=10 HEAD)"
-push origin token-line; expect_refuse "a token on an added line refuses (update push)" "$TOKEN" "$sha" "notes/leak.md:3" "[test-token]"
+push origin token-line; expect_refuse "a token on an added line refuses (update push)" "$SAMPLE" "$sha" "notes/leak.md:3" "[test-token]"
 
 # 4. A token in a commit message refuses.
 branch_from_main token-message
-commit_file notes/fine.md "nothing private here" "a message that mentions $TOKEN in passing"
-push -u origin token-message; expect_refuse "a token in a commit message refuses" "$TOKEN" "commit message" "[test-token]"
+commit_file notes/fine.md "nothing private here" "a message that mentions $SAMPLE in passing"
+push -u origin token-message; expect_refuse "a token in a commit message refuses" "$SAMPLE" "commit message" "[test-token]"
 
 # 5. A new branch is scanned (its commits are not on the remote).
 branch_from_main token-new
 commit_file notes/a.md "alpha"
-commit_file notes/b.md "beta $TOKEN beta"
-push -u origin token-new; expect_refuse "a new-branch push is scanned" "$TOKEN" "notes/b.md:1" "[test-token]"
+commit_file notes/b.md "beta $SAMPLE beta"
+push -u origin token-new; expect_refuse "a new-branch push is scanned" "$SAMPLE" "notes/b.md:1" "[test-token]"
 
 # 6. ...but never what the remote already holds: a token published earlier (here by --no-verify,
 #    the author's bypass) does not refuse a new branch built on it.
 branch_from_main published
-commit_file notes/old.md "an old $TOKEN line"
+commit_file notes/old.md "an old $SAMPLE line"
 push --no-verify -u origin published; expect_pass "setup: --no-verify bypasses the guard (the author's call)"
 git checkout -q -b built-on-published
 commit_file notes/new.md "a clean line on top"
@@ -140,20 +144,20 @@ push -u origin regex-hit; expect_refuse "a regex entry refuses" "$REGEX_HIT" "sr
 
 # 8. A keep line exempts its class inside the kept paths only.
 branch_from_main kept
-commit_file kept/config.txt "load-bearing $TOKEN"
+commit_file kept/config.txt "load-bearing $SAMPLE"
 push -u origin kept; expect_pass "a keep line exempts its class in the kept path"
 
 # 9. A new file's PATH carrying a token refuses (paths publish too) — and the path prints masked.
 branch_from_main token-path
-commit_file "captures/shot-$TOKEN.txt" "a clean body"
-push -u origin token-path; expect_refuse "a token in an added file's path refuses" "$TOKEN" "file path" "[test-token]"
+commit_file "captures/shot-$SAMPLE.txt" "a clean body"
+push -u origin token-path; expect_refuse "a token in an added file's path refuses" "$SAMPLE" "file path" "[test-token]"
 
 # 10. A ref name carrying a token refuses.
-branch_from_main "topic-$TOKEN"
+branch_from_main "topic-$SAMPLE"
 commit_file notes/c.md "a clean line"
-push -u origin "topic-$TOKEN"
+push -u origin "topic-$SAMPLE"
 hook_out="$(printf '%s\n' "$OUT" | grep -iv '^error: failed to push')"
-if [ "$RC" -ne 0 ] && printf '%s' "$OUT" | grep -qF "[test-token]" && ! printf '%s' "$hook_out" | grep -qiF -- "$TOKEN"; then
+if [ "$RC" -ne 0 ] && printf '%s' "$OUT" | grep -qF "[test-token]" && ! printf '%s' "$hook_out" | grep -qiF -- "$SAMPLE"; then
   ok "a token in a pushed ref name refuses"
 else
   bad "a token in a pushed ref name refuses" "rc=$RC"
@@ -162,19 +166,19 @@ fi
 # 11. A token in the commit identity refuses (author and committer publish with the commit).
 branch_from_main token-identity
 mkdir -p notes; printf 'clean\n' >notes/id.md; git add notes/id.md
-git -c user.email="$TOKEN@example.com" commit -q -m "a clean message"
-push -u origin token-identity; expect_refuse "a token in the commit identity refuses" "$TOKEN" "author" "[test-token]"
+git -c user.email="$SAMPLE@example.com" commit -q -m "a clean message"
+push -u origin token-identity; expect_refuse "a token in the commit identity refuses" "$SAMPLE" "author" "[test-token]"
 
 # 12. A binary file never blocks.
 branch_from_main binary
-printf 'PNG\000\001\002 %s \000\377' "$TOKEN" >img.bin; git add img.bin; git commit -q -m "a binary"
+printf 'PNG\000\001\002 %s \000\377' "$SAMPLE" >img.bin; git add img.bin; git commit -q -m "a binary"
 push -u origin binary; expect_pass "a binary file never blocks"
 
 # 13. A push from a second worktree runs the same guard.
 git worktree add -q -b from-worktree "$T/wt" origin/main 2>/dev/null
-( cd "$T/wt" && commit_file notes/wt.md "worktree line $TOKEN" && OUT="$(git push -u origin from-worktree 2>&1)"; echo "rc=$?"; printf '%s\n' "$OUT" ) >"$T/wt.out" 2>&1
+( cd "$T/wt" && commit_file notes/wt.md "worktree line $SAMPLE" && OUT="$(git push -u origin from-worktree 2>&1)"; echo "rc=$?"; printf '%s\n' "$OUT" ) >"$T/wt.out" 2>&1
 RC=$(sed -n 's/^rc=//p' "$T/wt.out" | head -1); OUT="$(cat "$T/wt.out")"
-expect_refuse "a push from another worktree is guarded" "$TOKEN" "notes/wt.md:1" "[test-token]"
+expect_refuse "a push from another worktree is guarded" "$SAMPLE" "notes/wt.md:1" "[test-token]"
 
 # 14. A merge's own lines (beyond both parents) are scanned.
 branch_from_main merge-side
@@ -183,15 +187,15 @@ push -u origin merge-side; expect_pass "setup: merge-side pushed clean"
 branch_from_main merge-main
 commit_file notes/n.md "main line"
 git merge -q --no-ff --no-commit merge-side >/dev/null 2>&1
-printf 'side line\nan evil-merge line %s\n' "$TOKEN" >notes/m.md; git add notes/m.md
+printf 'side line\nan evil-merge line %s\n' "$SAMPLE" >notes/m.md; git add notes/m.md
 git commit -q -m "merge merge-side"
 msha="$(git rev-parse --short=10 HEAD)"
-push -u origin merge-main; expect_refuse "a merge's own added lines are scanned" "$TOKEN" "$msha" "notes/m.md:2" "[test-token]"
+push -u origin merge-main; expect_refuse "a merge's own added lines are scanned" "$SAMPLE" "$msha" "notes/m.md:2" "[test-token]"
 
 # 15. An annotated tag's message is scanned.
 git checkout -q main
-git tag -a "v0-test" -m "a tag message naming $TOKEN" >/dev/null
-push origin v0-test; expect_refuse "an annotated tag's message is scanned" "$TOKEN" "tag message" "[test-token]"
+git tag -a "v0-test" -m "a tag message naming $SAMPLE" >/dev/null
+push origin v0-test; expect_refuse "an annotated tag's message is scanned" "$SAMPLE" "tag message" "[test-token]"
 git tag -d v0-test >/dev/null
 
 # 16. A deletion publishes nothing and passes.
@@ -222,7 +226,7 @@ push -u origin no-list; expect_refuse "a missing private list refuses" - "privat
 mv "$LIST.away" "$LIST"
 
 # 19. A malformed list refuses, naming the line and never printing it.
-printf 'test-token lit:%s\nnot-a-valid-entry\n' "$TOKEN" >"$LIST"
+printf 'test-token lit:%s\nnot-a-valid-entry\n' "$SAMPLE" >"$LIST"
 push -u origin no-list; expect_refuse "a malformed list refuses, naming the line" "not-a-valid-entry" "line 2"
 printf 'empty-match re:x*\n' >"$LIST"
 push -u origin no-list; expect_refuse "a list regex that matches the empty string refuses" - "line 1"

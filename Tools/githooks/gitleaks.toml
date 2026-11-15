@@ -1,0 +1,23 @@
+# gitleaks config for Variorum's pre-push guard (VX-996): gitleaks's default rules, plus the
+# values the open-source sweep ruled PUBLIC, so a commit that re-adds one of their lines is not refused.
+# The guard reads main's copy of this file (core.hooksPath is the main worktree's Tools/githooks), so a
+# branch cannot widen its own allowlist; a new entry is reviewed like any other change.
+title = "variorum pre-push guard"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Supabase publishable keys: public by design (the app ships them; App/Variorum/Shared/ProjectConfig.swift)"
+regexTarget = "secret"
+regexes = ['''^sb_publishable_[A-Za-z0-9_-]+$''']
+
+[[allowlists]]
+description = "the update feed's PUBLIC EdDSA key (SUPublicEDKey, shipped in every bundle's Info.plist; pinned by UpdateChannelTests)"
+regexTarget = "secret"
+regexes = ['''^tn/IQUaJMGk8Q\+T8iE3ph2t\+xpdzlUDGxg7\+k/5xMhA=$''']
+
+[[allowlists]]
+description = "a known false positive: a ladder note's residual measurement (notes/plans/18l-u1-ladder-round2.md)"
+regexTarget = "secret"
+regexes = ['''^residual=-?[0-9]+$''']

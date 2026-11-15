@@ -1,5 +1,14 @@
 #!/bin/sh
-# pre-push — Variorum's pre-push guard (VX-996). PIN STATE: the scanner lands in the next commit;
-# until then this stub accepts every push, so the guard's tests (Tools/test-githooks) show red first.
-cat >/dev/null
-exit 0
+# pre-push — Variorum's pre-push guard (VX-996). Git runs it before every push from a clone whose
+# core.hooksPath points here (Tools/install-githooks); the scanner is prepush_guard.py beside it,
+# which reads git's arguments and the push's ref lines on stdin. `git push --no-verify` skips it —
+# that is the author's call only.
+here="$(cd "$(dirname "$0")" && pwd)"
+for py in /usr/bin/python3 "$(command -v python3 2>/dev/null)"; do
+  if [ -n "$py" ] && [ -x "$py" ]; then
+    exec "$py" -I "$here/prepush_guard.py" "$@"
+  fi
+done
+echo "pre-push guard: REFUSED — no python3 on this Mac to run the guard (VX-996)." >&2
+echo "\`git push --no-verify\` skips this guard — that is the author's call only, never a session's." >&2
+exit 1
