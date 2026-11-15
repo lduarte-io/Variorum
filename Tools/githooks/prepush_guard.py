@@ -12,9 +12,11 @@ execs this file with git's arguments (the remote's name and URL) and the push's 
   ref       the pushed ref names
 
 "Outgoing" is every commit reachable from a pushed sha and from no ref of the remote being pushed to:
-`git rev-list <pushed shas> --not --remotes=<remote> <the remote's old shas>`. A push by URL excludes
-the refs of the remotes whose URL is that URL and no others, so another remote's history (a private
-archive) is never treated as published; a URL no remote answers to excludes only the old ids. A new
+`git rev-list <pushed shas> --not --remotes=<remote> <the remote's old shas>`. A remote-tracking ref
+records what was fetched, so it speaks only for the fetch URL: a named remote that pushes somewhere
+else excludes only the old ids, and a push by URL excludes the refs of the remotes whose FETCH URL is
+that URL and no others, so another remote's history (a private archive) is never treated as
+published; a URL no remote fetches from excludes only the old ids. A new
 branch scans only what the remote does not already hold; a deletion publishes nothing. Cost follows the outgoing set: a few commits take well
 under a second, 2,728 real commits took about six; only a first push to an empty remote reads it all.
 
@@ -221,27 +223,36 @@ def object_type(sha):
     return git("cat-file", "-t", sha, check=False).strip()
 
 
-def remote_urls(name):
-    """Every URL a remote answers to: its configured url and pushurl, and the same after insteadOf."""
+def _urls(*commands):
     urls = set()
-    for args in (("config", "--get-all", "remote.%s.url" % name),
-                 ("config", "--get-all", "remote.%s.pushurl" % name),
-                 ("remote", "get-url", "--all", name),
-                 ("remote", "get-url", "--push", "--all", name)):
+    for args in commands:
         urls.update(u.strip().rstrip("/") for u in git(*args, check=False).split("\n") if u.strip())
     return urls
 
 
+def fetch_urls(name):
+    """Where a remote FETCHES from — the only place its remote-tracking refs say anything about:
+    its configured url, and the same after insteadOf."""
+    return _urls(("config", "--get-all", "remote.%s.url" % name), ("remote", "get-url", "--all", name))
+
+
+def push_urls(name):
+    """Where a remote PUSHES to: its pushurl, else its url, after pushInsteadOf/insteadOf."""
+    return _urls(("remote", "get-url", "--push", "--all", name))
+
+
 def published_exclusion(remote, url):
-    """The refs whose history the push target already holds. A NAMED remote: its own
-    remote-tracking refs. A push by URL: the refs of every remote whose URL is that URL, and none
-    other — another remote's history (a private archive, say) is never treated as published, so a
-    URL nothing here answers to excludes only the old ids git passes in (outgoing_revs)."""
+    """The refs whose history the push target already holds. A remote-tracking ref records what was
+    FETCHED, so it speaks only for the fetch URL. A NAMED remote: its own refs, but only when it
+    pushes where it fetches (a remote that fetches from one repo and pushes to another excludes
+    nothing). A push by URL: the refs of every remote whose FETCH URL is that URL, and none other —
+    another remote's history (a private archive, say) is never treated as published. Nothing
+    matching leaves only the old ids git passes in (outgoing_revs)."""
     remotes = git("remote").split()
     if remote in remotes:
-        return ["--remotes=%s" % remote]
+        return ["--remotes=%s" % remote] if push_urls(remote) == fetch_urls(remote) else []
     target = (url or remote).strip().rstrip("/")
-    return ["--remotes=%s" % name for name in remotes if target in remote_urls(name)]
+    return ["--remotes=%s" % name for name in remotes if target in fetch_urls(name)]
 
 
 def outgoing_revs(remote, url, updates):
