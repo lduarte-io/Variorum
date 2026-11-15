@@ -1,0 +1,93 @@
+#!/bin/bash
+# install-githooks — turn on Variorum's pre-push guard (VX-996) for this clone, every worktree included.
+#
+#   Tools/install-githooks           point core.hooksPath at the guard (idempotent)
+#   Tools/install-githooks --check   say whether the guard is on and ready; exit 1 when it is not
+#
+# The hooks path is the MAIN worktree's Tools/githooks, as an absolute path in the clone's shared
+# config, so every worktree of the clone — whatever branch it holds — runs main's reviewed copy of
+# the guard, never a branch's own edit of it. Run it once per clone, on each Mac. It never touches
+# the global config, the commit identity or another clone.
+set -euo pipefail
+
+say() { printf 'install-githooks: %s\n' "$*"; }
+die() { say "$*" >&2; exit 1; }
+
+mode=install
+case "${1:-}" in
+  "") ;;
+  --check) mode=check ;;
+  *) die "usage: Tools/install-githooks [--check]" ;;
+esac
+
+git rev-parse --git-dir >/dev/null 2>&1 || die "not inside a git clone."
+main_wt="$(git worktree list --porcelain | awk '/^worktree /{ print substr($0, 10); exit }')"
+[ -n "$main_wt" ] || die "could not find this clone's main worktree."
+hooks="$main_wt/Tools/githooks"
+common="$(git rev-parse --path-format=absolute --git-common-dir)"
+current="$(git config --local --get core.hooksPath || true)"
+list="$HOME/.variorum/private-tokens.txt"
+
+have_gitleaks() {
+  command -v gitleaks >/dev/null 2>&1 || [ -x /opt/homebrew/bin/gitleaks ] || [ -x /usr/local/bin/gitleaks ]
+}
+
+# The readiness lines, shared by both modes: what the guard needs beyond the hooks path.
+readiness() {
+  local ready=0
+  if [ -f "$list" ]; then
+    if grep -qx '!starter' "$list"; then
+      say "the private list ($list) is still the starter — fill it from the private ledger, then delete its !starter line."
+    else
+      say "the private list is present ($list)."
+    fi
+  else
+    say "MISSING: the private list ($list) — every push is refused until it exists. Start it from Tools/githooks/private-tokens.example."
+    ready=1
+  fi
+  if have_gitleaks; then
+    say "gitleaks is installed."
+  else
+    say "MISSING: gitleaks — every push is refused until it is installed (installing software is the author's call)."
+    ready=1
+  fi
+  local email
+  email="$(git config --get user.email || true)"
+  case "$email" in
+    *@users.noreply.github.com) ;;
+    *) say "NOTE: this clone's user.email is not a GitHub noreply address; if the private list keeps its public-identity entry, pushes of commits made under it are refused." ;;
+  esac
+  return "$ready"
+}
+
+if [ "$mode" = check ]; then
+  if [ "$current" != "$hooks" ]; then
+    die "the guard is OFF in this clone (core.hooksPath is '${current:-unset}', want '$hooks') — run Tools/install-githooks."
+  fi
+  [ -x "$hooks/pre-push" ] || die "core.hooksPath points at '$hooks' but no executable pre-push is there — pull main in $main_wt."
+  if readiness; then say "the guard is ON for every worktree of this clone ($hooks)."; exit 0; fi
+  exit 1
+fi
+
+[ -x "$hooks/pre-push" ] || die "the main worktree ($main_wt) has no executable Tools/githooks/pre-push — the guard must be on its main branch first (merge it, then pull there)."
+
+# A hooks path silently retires every hook in .git/hooks: refuse rather than switch someone's off.
+others=""
+for h in "$common/hooks"/*; do
+  [ -f "$h" ] || continue
+  case "$h" in *.sample) continue ;; esac
+  others="$others $(basename "$h")"
+done
+[ -z "$others" ] || die "this clone already has hooks in $common/hooks ($others ) — a hooks path would switch them off; move them first."
+
+if [ -n "$current" ] && [ "$current" != "$hooks" ]; then
+  die "core.hooksPath is already set to '$current' — unset it first if the guard should replace it (git config --local --unset core.hooksPath)."
+fi
+
+if [ "$current" = "$hooks" ]; then
+  say "already on: core.hooksPath = $hooks"
+else
+  git config --local core.hooksPath "$hooks"
+  say "on: core.hooksPath = $hooks (every worktree of this clone)"
+fi
+readiness || true

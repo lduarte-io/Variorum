@@ -1,0 +1,5 @@
+#!/bin/sh
+# pre-push — Variorum's pre-push guard (VX-996). PIN STATE: the scanner lands in the next commit;
+# until then this stub accepts every push, so the guard's tests (Tools/test-githooks) show red first.
+cat >/dev/null
+exit 0
