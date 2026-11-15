@@ -117,3 +117,7 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - The commit identity, settled: "if it won't remove the address from github, it's honestly fine … this email is not like a secret, so it's not a big issue." History is left alone; new commits carry the noreply address.
 - The home-folder path in two walk scripts: "not that worried about this, but we might as well fix it going forward."
 - Usage: "we hit the weekly limit but now we have more. so if you need two subagents at a time that's fine. the fable designers doing the revision pass is fine."
+- Takes and history mockup (`mockups/takes-and-history.html`):
+  - "i like the takes badge. i also like being able to click on it to swipe between them at the bottom a lot, if that's what the mockup is showing. that's a way easier way to work with your existing takes than the current multi click menu and I love how fast that makes it."
+  - History's doors (a row in the block menu beside Commit, and a History button on each take card, one sheet): "i think that makes sense for history - though there is a lineage element that isn't from any one particular take, not sure if you just access that from history."
+  - The conflict take's signal: "seems fine as is."
