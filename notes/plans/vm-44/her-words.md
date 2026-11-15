@@ -105,3 +105,8 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - Shelf management: "Full, behind a ⋯".
   - A book's word target and note limit: "Show and edit both".
   - The Journal's new entry: "Foot of the Journal" (the Today button keeps opening the day's first entry).
+- Note-write mockup (`mockups/note-write.html`):
+  - Which acts show a line: "Only removals and refusals" — nothing for ordinary acts; a short line with Undo when something leaves the page, and for refusals.
+  - The ⋯ quick row: "Undo and Redo, Comment", and on Commit: "will commits be easy to see on the phone? depends on how we do lineage, but i lean towards the commit / lineage being easily accessible as a core feature. but if lineage is hard to access, not sure if commit needs to be easy. thoughts? and how would the commit box show up and let you write in it?"
+  - The masthead: "Yes, but no place readout" — title and chips scroll away; a slim bar with the title stays; the jump menu opens from it; no "block 3 of 4".
+  - A Read mode for a single note in v1: "Not in v1".
