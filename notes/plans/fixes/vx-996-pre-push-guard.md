@@ -1,6 +1,6 @@
 # VX-996 — the pre-push guard (record)
 
-**STATUS: ladder round 1's fixes DONE — round 2 (a fresh reviewer) next.** Branch `vx-996-pre-push-guard`, PR #4,
+**STATUS: ladder round 2 (the final round) IN — 4 MINOR, 3 NIT; its fixes IN PROGRESS.** Branch `vx-996-pre-push-guard`, PR #4,
 worktree `~/dev/variorum-vx-996`. Not merged; not activated in any real clone.
 
 ## FOR A LATER READER
@@ -83,7 +83,9 @@ missing gitleaks, malformed entry or failing scanner refuses too.
 | F7 | DOCUMENTED — the author's call; test 12 renamed in the pins commit | `265938dd9` |
 | F8: this record + PR description | DONE | (this commit) |
 | final suite | ALL 57 CASES HELD | (this commit) |
-| round 2 | PENDING — a fresh reviewer | — |
+| round 2 (cold review, Opus — the final round) | IN — 4 MINOR, 3 NIT, no MAJOR; every round-1 fix held; `vx-996-ladder-round2.md` beside this file | (this commit) |
+| round-2 pins | NOT STARTED | — |
+| R2-1 … R2-7 fixes | NOT STARTED | — |
 
 ## Round 1 — findings and dispositions
 
