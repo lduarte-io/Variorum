@@ -89,3 +89,8 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - Opening a note from another wing: "Follow the note" (the Mac's rule).
   - The capture marks: "Keep the helper keys".
   - The bottom bar on pushed screens: "Roots and lists, not notes".
+- Library and search mockup (`mockups/library-and-search.html`):
+  - Room names: "Pool and Snippets".
+  - Snippets on the phone in v1: "View, add, edit, delete" (dragging a snippet into a note stays Mac-only).
+  - Search scope: "i think there's already a ticket made potentially for being able to search through all wings on the mac. look for if there is. either way, it should be current wing with a switch to all. if there's not one for mac, mint it"
+  - Note actions in v1: "Duplicate (both kinds), Multi-select, Undo on archive, Move / copy to wing" — all four.
