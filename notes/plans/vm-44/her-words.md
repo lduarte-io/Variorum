@@ -83,3 +83,9 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - RULED, LS-1 (`sketches/LS-1-note-rows.html`): "List, one preview line (middle)" — title; the time and one line of the note's words; where it lives.
 - RULED, journal rows: "Day first" — the entry's day is its name; the line under carries the time and first words (the Mac's rule).
 - RULED, BK-1 (`sketches/BK-1-bookcase.html`): "Chip row above the list".
+- Home, wings and capture mockup (`mockups/home-wings-capture.html`):
+  - Wing management on the phone: "#9 seemed like a fine approach - it can be hidden behind 3 dots but some people will only use the phone app, and being able to create but not delete wings would make it awful"
+    - Orchestrator's note: so the phone manages wings in full (make, rename, delete, move contents — whatever the Mac does), tucked behind a ⋯; frame 9 is the approach.
+  - Opening a note from another wing: "Follow the note" (the Mac's rule).
+  - The capture marks: "Keep the helper keys".
+  - The bottom bar on pushed screens: "Roots and lists, not notes".
