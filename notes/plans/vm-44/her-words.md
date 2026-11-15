@@ -94,3 +94,4 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - Snippets on the phone in v1: "View, add, edit, delete" (dragging a snippet into a note stays Mac-only).
   - Search scope: "i think there's already a ticket made potentially for being able to search through all wings on the mac. look for if there is. either way, it should be current wing with a switch to all. if there's not one for mac, mint it"
   - Note actions in v1: "Duplicate (both kinds), Multi-select, Undo on archive, Move / copy to wing" — all four.
+    - Orchestrator's note: the Mac ticket exists — VX-987 (\"A wing blind search — search across all wings, not just the current one\", Backlog). Nothing minted; the phone and Mac switch share that ruling.
