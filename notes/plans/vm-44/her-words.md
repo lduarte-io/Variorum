@@ -121,3 +121,8 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - "i like the takes badge. i also like being able to click on it to swipe between them at the bottom a lot, if that's what the mockup is showing. that's a way easier way to work with your existing takes than the current multi click menu and I love how fast that makes it."
   - History's doors (a row in the block menu beside Commit, and a History button on each take card, one sheet): "i think that makes sense for history - though there is a lineage element that isn't from any one particular take, not sure if you just access that from history."
   - The conflict take's signal: "seems fine as is."
+- Comments and callouts mockup (`mockups/comments-and-callouts.html`):
+  - Where the marks sit: "i'd keep the designer mergin - One cluster at the block's trailing foot; the glyph in the gutter. (the one that has a green pill)."
+  - A half-typed comment: "yes, any way of closign keeps it as an unsent draft."
+- The guard and binary files (VX-996's open question): "i don't think we need to scan binary files like screenshots necessarily? i'm open to changing my mind, but generally I think that I'm working now knowing that my direct feedback to you is going to be in the public record and that screenshots might not be too. so I am adjusting my own habits for work in public (very minimally honestly)."
+- The Air: "i haven't been running any tests on the air or doing any direct development there, it's normally website changes and planning sessions at most." (So its newer Xcode is fine.)
