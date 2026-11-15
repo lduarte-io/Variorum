@@ -12,8 +12,10 @@ and the push's ref lines on stdin. What the push would PUBLISH is scanned, and n
   ref       the pushed ref names
 
 "Outgoing" is every commit reachable from a pushed sha and from no ref of the remote being pushed to:
-`git rev-list <pushed shas> --not --remotes=<remote> <the remote's old shas>`. A new branch scans only
-what the remote does not already hold; a deletion publishes nothing.
+`git rev-list <pushed shas> --not --remotes=<remote> <the remote's old shas>` (every remote-tracking ref
+when the push names a URL rather than a remote). A new branch scans only what the remote does not
+already hold; a deletion publishes nothing. Cost follows the outgoing set: a few commits take well
+under a second, 2,728 real commits took about six; only a first push to an empty remote reads it all.
 
 Two scanners read that set. gitleaks runs its generic secret rules (with gitleaks.toml's ruled public
 values allowed): `gitleaks git` over the outgoing non-merge patches, `gitleaks stdin` over everything
