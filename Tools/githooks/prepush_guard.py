@@ -18,8 +18,11 @@ archive) is never treated as published; a URL no remote answers to excludes only
 branch scans only what the remote does not already hold; a deletion publishes nothing. Cost follows the outgoing set: a few commits take well
 under a second, 2,728 real commits took about six; only a first push to an empty remote reads it all.
 
-What is read never depends on the clone's attributes or its diff and log settings. git's settings are
-pinned (GIT_PINS). A file git shows as binary because of an attribute (a committed .gitattributes,
+What is read never depends on the clone's attributes, its diff and log settings, a `-c` on the push or
+its replace refs. git's settings are pinned (GIT_PINS), the push's GIT_CONFIG_PARAMETERS is dropped and
+replace objects are off (pinned_env). Behind those, a read-back check refuses unless both logs read
+exactly the commits `git rev-list` names, so a setting nobody has found yet cannot pass a push the guard
+never read (collect_items). A file git shows as binary because of an attribute (a committed .gitattributes,
 $GIT_DIR/info/attributes, a global attributes file) is read when its blob is text by git's own content
 rule, and a file an attribute forces to text is dropped when its blob is binary by that rule. True
 binaries (a NUL byte in the blob's first 8000 bytes) are not read: an open question for the author.
@@ -32,8 +35,9 @@ enter the repo (format: private-tokens.example). A match refuses the push, namin
 place and the class; a matched value is never printed, and printed paths and ref names are masked.
 A missing list, a missing gitleaks, a malformed list entry or a failing scanner refuses too: a guard
 that silently passes is worse than none. `git push --no-verify` skips the guard; that is the author's
-call only. The one test seam can only make the guard stricter (VARIORUM_GUARD_TEST_NO_GITLEAKS=1 acts
-as if gitleaks were absent). Python 3.9+ (macOS's /usr/bin/python3); standard library only.
+call only. The two test seams can only make the guard refuse (VARIORUM_GUARD_TEST_NO_GITLEAKS=1 acts as
+if gitleaks were absent; VARIORUM_GUARD_TEST_DROP_RECORD=1 drops one parsed record, so the read-back
+check refuses). Python 3.9+ (macOS's /usr/bin/python3); standard library only.
 """
 
 import fnmatch
@@ -73,6 +77,7 @@ GIT_PINS = (
     ("diff.mnemonicPrefix", "false"),
     ("log.showSignature", "false"),
     ("log.showRoot", "true"),   # a root commit's patch (an orphan branch, a first push) is read too
+    ("i18n.logOutputEncoding", "UTF-8"),   # any other encoding re-encodes the record markers too
     ("color.ui", "false"),
 )
 
@@ -87,6 +92,12 @@ def say(line=""):
 
 def pinned_env():
     env = dict(os.environ)
+    # A `git -c k=v push` hands the hook GIT_CONFIG_PARAMETERS, which git reads AFTER the
+    # GIT_CONFIG_COUNT entries below, so it would beat every pin; the guard's read-only git needs
+    # nothing from the push's -c, so it is dropped. Replace refs would let git log read a stand-in
+    # for an object the push still sends, so they are switched off.
+    env.pop("GIT_CONFIG_PARAMETERS", None)
+    env["GIT_NO_REPLACE_OBJECTS"] = "1"
     base = int(env.get("GIT_CONFIG_COUNT", "0") or 0)
     for i, (key, value) in enumerate(GIT_PINS):
         env["GIT_CONFIG_KEY_%d" % (base + i)] = key
@@ -482,28 +493,41 @@ def collect_items(revs, updates):
     # sequence can forge a record boundary (a NUL can sit in a message, or in a file an attribute
     # forces to text).
     mark = "VXGUARD%s " % secrets.token_hex(16)
+    outgoing = git("rev-list", *revs).split()
     meta = git("log", "--no-color", "--format=" + mark + "%H%x1f%an <%ae>%x1f%cn <%ce>%x1f%B", *revs)
-    commits = 0
-    for rec in meta.split(mark)[1:]:
+    meta_records = meta.split(mark)[1:]
+    if os.environ.get("VARIORUM_GUARD_TEST_DROP_RECORD") == "1":
+        meta_records = meta_records[:-1]   # the test seam: a read that misses a commit (it can only refuse)
+    meta_shas = []
+    for rec in meta_records:
         fields = rec.split("\x1f", 3)
         if len(fields) != 4:
-            raise Refusal("the commit log could not be read field by field")
+            raise Refusal("the guard could not read every outgoing commit (a log record would not split "
+                          "into its fields) — the push cannot be checked.")
         sha, author, committer, body = fields
-        commits += 1
+        meta_shas.append(sha)
         items.append(Item("identity", sha, "author identity", author))
         items.append(Item("identity", sha, "committer identity", committer))
         for n, ml in enumerate(body.rstrip("\n").split("\n"), 1):
             items.append(Item("message", sha, "commit message, line %d" % n, ml))
     patches = git("log", "--no-color", "--no-ext-diff", "--no-textconv", "--full-index", "--src-prefix=a/",
                   "--dst-prefix=b/", "-U0", "-p", "--cc", "--format=" + mark + "%H", *revs)
-    binaries = []
+    binaries, patch_shas = [], []
     for rec in patches.split(mark)[1:]:
         sha, _, patch = rec.partition("\n")
+        patch_shas.append(sha.strip())
         found, shown_binary = parse_patch(sha.strip(), patch)
         items.extend(found)
         binaries.extend(shown_binary)
+    # The read-back check: both logs must have read exactly the commits rev-list names, one record
+    # each. Any setting, present or future, that reshapes git's output so the records cannot be
+    # found fails here rather than passing a push it never read.
+    if not (len(meta_shas) == len(patch_shas) == len(outgoing)
+            and set(meta_shas) == set(patch_shas) == set(outgoing)):
+        raise Refusal("the guard could not read every outgoing commit (it read %d and %d of %d) — the "
+                      "push cannot be checked." % (len(meta_shas), len(patch_shas), len(outgoing)))
     items.extend(recover_binary_shown(binaries))
-    return items, commits
+    return items, len(outgoing)
 
 
 # ---------------------------------------------------------------------------------------------
