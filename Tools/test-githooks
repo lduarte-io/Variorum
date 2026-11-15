@@ -293,6 +293,14 @@ printf '*.md -diff\n' >"$T/attrs"; git config --global core.attributesFile "$T/a
 commit_file notes/global.md "global $SAMPLE"
 push -u origin attrs-global; expect_refuse "a global attributes file cannot hide an added line (F2)" "$SAMPLE" "notes/global.md:1" "[test-token]"
 git config --global --unset core.attributesFile
+branch_from_main attrs-forced-text
+commit_file .gitattributes "*.bin diff"
+printf 'PNG\000\001\002 %s \000\377' "$SAMPLE" >forced.bin; git add forced.bin; git commit -q -m "a binary forced to text"
+push -u origin attrs-forced-text; expect_pass "an attribute forcing a true binary to text does not make it read (F2; F7 as built)"
+branch_from_main nul-window
+{ head -c 8100 /dev/zero | tr '\000' 'a'; printf '\000 tail\nthe value %s sits here\n' "$SAMPLE"; } >notes/late-nul.txt
+git add notes/late-nul.txt; git commit -q -m "text by git's rule, with a NUL past its window"
+push -u origin nul-window; expect_refuse "a NUL past git's binary window cannot break the guard's record boundaries (F2)" "$SAMPLE" "notes/late-nul.txt:2" "[test-token]"
 
 # 24 (F3). A planted .gitleaksignore — untracked at the root, or committed — cannot silence gitleaks.
 if [ "$have_gl" = 1 ]; then

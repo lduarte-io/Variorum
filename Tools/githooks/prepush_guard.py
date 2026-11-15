@@ -5,7 +5,7 @@ Git runs Tools/githooks/pre-push before every push from a clone whose core.hooks
 (Tools/install-githooks); the shim execs this file with git's arguments (the remote's name and URL)
 and the push's ref lines on stdin. What the push would PUBLISH is scanned, and nothing else:
 
-  content   every line the outgoing commits add (a merge: the lines it adds beyond its parents, --cc)
+  content   every line the outgoing commits add (a merge: the lines new against all its parents, --cc)
   message   each outgoing commit's message, and an annotated tag's message
   identity  each outgoing commit's author and committer, and a tag's tagger
   path      the paths of files the outgoing commits add, rename or copy
@@ -17,9 +17,16 @@ when the push names a URL rather than a remote). A new branch scans only what th
 already hold; a deletion publishes nothing. Cost follows the outgoing set: a few commits take well
 under a second, 2,728 real commits took about six; only a first push to an empty remote reads it all.
 
-Two scanners read that set. gitleaks runs its generic secret rules (with gitleaks.toml's ruled public
-values allowed): `gitleaks git` over the outgoing non-merge patches, `gitleaks stdin` over everything
-else. The PRIVATE TOKEN LIST, ~/.variorum/private-tokens.txt, holds literals and regexes that never
+What is read never depends on the clone's attributes or its diff and log settings. git's settings are
+pinned (GIT_PINS). A file git shows as binary because of an attribute (a committed .gitattributes,
+$GIT_DIR/info/attributes, a global attributes file) is read when its blob is text by git's own content
+rule, and a file an attribute forces to text is dropped when its blob is binary by that rule. True
+binaries (a NUL byte in the blob's first 8000 bytes) are not read: an open question for the author.
+
+Two scanners read that same set of items. gitleaks runs its generic secret rules (with gitleaks.toml's
+ruled public values allowed) as one `gitleaks stdin` call over every item, from an empty private
+directory, so no .gitleaksignore in the clone is ever read; inline gitleaks:allow comments are
+ignored. The PRIVATE TOKEN LIST, ~/.variorum/private-tokens.txt, holds literals and regexes that never
 enter the repo (format: private-tokens.example). A match refuses the push, naming the commit, the
 place and the class; a matched value is never printed, and printed paths and ref names are masked.
 A missing list, a missing gitleaks, a malformed list entry or a failing scanner refuses too: a guard
@@ -32,6 +39,7 @@ import fnmatch
 import json
 import os
 import re
+import secrets
 import shutil
 import subprocess
 import sys
@@ -257,29 +265,58 @@ def header_path(rest):
     return a if a == b and rest.startswith("a/") and rest[2 + n:2 + n + 3] == " b/" else None
 
 
+INDEX_LINE = re.compile(r"^index ([0-9a-f]+(?:,[0-9a-f]+)*)\.\.([0-9a-f]+)")
+BINARY_HEAD = 8000   # git's own content test: a NUL byte in a blob's first 8000 bytes means binary
+
+
+class Section:
+    """One file of one commit's patch, while it is parsed."""
+    __slots__ = ("header_path", "path", "new_file", "binary", "nul", "old_ids", "new_id", "items")
+
+    def __init__(self, header_path):
+        self.header_path, self.path, self.new_file = header_path, None, False
+        self.binary, self.nul, self.old_ids, self.new_id, self.items = False, False, [], None, []
+
+
 def parse_patch(commit, patch):
-    """Content and path items from one commit's patch (-U0; --cc for merges)."""
-    items, paths = [], []
-    path = None
-    header_candidate = None
-    new_file = False
+    """Content items, path items and the binary-shown sections of one commit's patch (-U0; --cc for
+    merges). A section git printed as "Binary files … differ" carries no lines here: collect_items
+    decides from the blob itself whether it is truly binary, attributes ignored."""
+    items, paths, binaries = [], [], []
+    sec = None
     line_no = None   # None: in a file header; else the next result line's number
     cols = 1
     merge = False
 
-    def close_section():
-        if new_file and header_candidate and header_candidate not in paths:
-            paths.append(header_candidate)
+    def add_path(p):
+        if p and p not in paths:
+            paths.append(p)
+
+    def close():
+        if sec is None:
+            return
+        where = sec.path or sec.header_path
+        if sec.new_file:
+            add_path(where)
+        if sec.binary:
+            binaries.append((commit, where, sec.old_ids, sec.new_id, merge, None))
+        elif sec.nul and sec.new_id:
+            # printed as text yet holding a NUL: an attribute forced it; its blob decides
+            binaries.append((commit, where, None, sec.new_id, merge, sec.items))
+        else:
+            items.extend(sec.items)
 
     for line in patch.split("\n"):
         if line.startswith("diff --git ") or line.startswith("diff --cc ") or line.startswith("diff --combined "):
-            close_section()
-            path, line_no, cols, new_file = None, None, 1, False
+            close()
+            line_no, cols = None, 1
             if line.startswith("diff --git "):
-                header_candidate = header_path(line[len("diff --git "):])
+                sec = Section(header_path(line[len("diff --git "):]))
             else:
                 merge = True
-                header_candidate = unquote(line.split(" ", 2)[2])
+                sec = Section(unquote(line.split(" ", 2)[2]))
+            continue
+        if sec is None:
             continue
         if line_no is None:
             if line.startswith("+++ "):
@@ -288,27 +325,27 @@ def parse_patch(commit, patch):
                 if p.endswith("\t"):
                     p = p[:-1]
                 if p != "/dev/null":
-                    path = strip_prefix(unquote(p), "b/")
+                    sec.path = strip_prefix(unquote(p), "b/")
             elif line.startswith("new file mode"):
-                new_file = True
+                sec.new_file = True
+            elif line.startswith("index "):
+                m = INDEX_LINE.match(line)
+                if m:
+                    sec.old_ids, sec.new_id = m.group(1).split(","), m.group(2)
             elif line.startswith("rename to ") or line.startswith("copy to "):
-                p = unquote(line.split(" ", 2)[2])
-                if p not in paths:
-                    paths.append(p)
+                sec.path = unquote(line.split(" ", 2)[2])
+                add_path(sec.path)
             elif line.startswith("Binary files "):
+                sec.binary = True
                 m = re.match(r"^Binary files (.*) and (.*) differ$", line)
                 if m and m.group(2) != "/dev/null":
-                    p = strip_prefix(unquote(m.group(2)), "b/")
-                    if new_file and p not in paths:
-                        paths.append(p)
+                    sec.path = sec.path or strip_prefix(unquote(m.group(2)), "b/")
             if line.startswith("@@"):
                 m = HUNK.match(line)
                 if m:
                     cols, line_no = len(m.group(1)) - 1, int(m.group(2))
-                    if path is None:
-                        path = header_candidate
-                    if new_file and path and path not in paths:
-                        paths.append(path)
+                    if sec.path is None:
+                        sec.path = sec.header_path
             continue
         if line.startswith("@@"):
             m = HUNK.match(line)
@@ -317,6 +354,8 @@ def parse_patch(commit, patch):
             continue
         if line.startswith("\\"):
             continue  # "\ No newline at end of file"
+        if "\0" in line:
+            sec.nul = True
         prefix = line[:cols]
         if "-" in prefix:
             continue  # a removed line is not in the result
@@ -324,12 +363,72 @@ def parse_patch(commit, patch):
         # merge's combined diff a ' +' / '+ ' line already sits in one parent, which is either an
         # outgoing commit (scanned there) or history the remote holds (never re-judged).
         if prefix == "+" * cols:
-            where = "%s:%d" % (path or "?", line_no)
-            items.append(Item("content", commit, where, line[cols:], path=path, merge=merge))
+            where = "%s:%d" % (sec.path or "?", line_no)
+            sec.items.append(Item("content", commit, where, line[cols:], path=sec.path, merge=merge))
         line_no += 1
-    close_section()
+    close()
     for p in paths:
         items.append(Item("path", commit, "file path " + p, p, path=p))
+    return items, binaries
+
+
+def blob_head(blob_id):
+    """The first bytes of a blob — enough for git's binary test, never the whole of a large file."""
+    proc = subprocess.Popen(["git", "cat-file", "blob", blob_id], stdout=subprocess.PIPE,
+                            stderr=subprocess.DEVNULL, env=ENV)
+    head = proc.stdout.read(BINARY_HEAD)
+    proc.stdout.close()
+    proc.wait()
+    return head
+
+
+def added_from_blobs(old_id, new_id):
+    """(line number, text) for each line new_id adds over old_id — a blob-to-blob diff, which has no
+    path and therefore no attributes; a missing old blob means every line is added."""
+    if old_id is None or ZERO_SHA.match(old_id):
+        text = git("cat-file", "blob", new_id)
+        lines = text.split("\n")
+        if lines and lines[-1] == "":
+            lines.pop()
+        return list(enumerate(lines, 1))
+    out = git("diff", "--no-color", "--no-ext-diff", "--no-textconv", "--text", "-U0", old_id, new_id)
+    added, line_no = [], None
+    for line in out.split("\n"):
+        if line.startswith("@@"):
+            m = HUNK.match(line)
+            line_no = int(m.group(2)) if m else None
+            continue
+        if line_no is None or line.startswith("\\"):
+            continue
+        if line.startswith("+"):
+            added.append((line_no, line[1:]))
+            line_no += 1
+        elif not line.startswith("-"):
+            line_no += 1
+    return added
+
+
+def recover_binary_shown(binaries):
+    """Attributes never decide what is read. A section git showed as binary (a -diff or binary
+    attribute from a committed .gitattributes, $GIT_DIR/info/attributes or a global attributes
+    file) is read when its blob is text by git's own content rule; a section an attribute forced to
+    text is dropped when its blob is binary by that rule. True binaries are not read (F7: binary
+    blobs are an open question for the author)."""
+    items = []
+    for commit, path, old_ids, new_id, merge, shown_as_text in binaries:
+        if not new_id or ZERO_SHA.match(new_id):
+            continue
+        is_binary = b"\0" in blob_head(new_id)
+        if shown_as_text is not None:   # an attribute forced it to text: keep it unless binary
+            if not is_binary:
+                items.extend(shown_as_text)
+            continue
+        if is_binary:
+            continue
+        # Shown as binary, text by content. A merge reads its whole result (stricter than its own lines).
+        old = old_ids[0] if (old_ids and not merge and len(old_ids) == 1) else None
+        for n, text in added_from_blobs(old, new_id):
+            items.append(Item("content", commit, "%s:%d" % (path or "?", n), text, path=path, merge=merge))
     return items
 
 
@@ -352,26 +451,31 @@ def collect_items(revs, updates):
             items.append(Item("message", local_sha, "tag message, line %d" % n, ml))
     if revs is None:
         return items, 0
-    meta = git("log", "-z", "--no-color", "--format=%H%x1f%an <%ae>%x1f%cn <%ce>%x1f%B", *revs)
+    # Each record starts with a marker carrying a fresh random nonce: no message or blob byte
+    # sequence can forge a record boundary (a NUL can sit in a message, or in a file an attribute
+    # forces to text).
+    mark = "VXGUARD%s " % secrets.token_hex(16)
+    meta = git("log", "--no-color", "--format=" + mark + "%H%x1f%an <%ae>%x1f%cn <%ce>%x1f%B", *revs)
     commits = 0
-    for rec in meta.split("\0"):
-        rec = rec.lstrip("\n")
-        if not rec:
-            continue
+    for rec in meta.split(mark)[1:]:
         fields = rec.split("\x1f", 3)
         if len(fields) != 4:
-            continue
+            raise Refusal("the commit log could not be read field by field")
         sha, author, committer, body = fields
         commits += 1
         items.append(Item("identity", sha, "author identity", author))
         items.append(Item("identity", sha, "committer identity", committer))
-        for n, ml in enumerate(body.splitlines(), 1):
+        for n, ml in enumerate(body.rstrip("\n").split("\n"), 1):
             items.append(Item("message", sha, "commit message, line %d" % n, ml))
-    patches = git("log", "--no-color", "--no-ext-diff", "--no-textconv", "--src-prefix=a/",
-                  "--dst-prefix=b/", "-U0", "-p", "--cc", "--format=%x00%H%x00", *revs)
-    parts = patches.split("\0")
-    for i in range(1, len(parts) - 1, 2):
-        items.extend(parse_patch(parts[i].strip(), parts[i + 1]))
+    patches = git("log", "--no-color", "--no-ext-diff", "--no-textconv", "--full-index", "--src-prefix=a/",
+                  "--dst-prefix=b/", "-U0", "-p", "--cc", "--format=" + mark + "%H", *revs)
+    binaries = []
+    for rec in patches.split(mark)[1:]:
+        sha, _, patch = rec.partition("\n")
+        found, shown_binary = parse_patch(sha.strip(), patch)
+        items.extend(found)
+        binaries.extend(shown_binary)
+    items.extend(recover_binary_shown(binaries))
     return items, commits
 
 
