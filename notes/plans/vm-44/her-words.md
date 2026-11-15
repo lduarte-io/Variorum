@@ -95,3 +95,8 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - Search scope: "i think there's already a ticket made potentially for being able to search through all wings on the mac. look for if there is. either way, it should be current wing with a switch to all. if there's not one for mac, mint it"
   - Note actions in v1: "Duplicate (both kinds), Multi-select, Undo on archive, Move / copy to wing" — all four.
     - Orchestrator's note: the Mac ticket exists — VX-987 (\"A wing blind search — search across all wings, not just the current one\", Backlog). Nothing minted; the phone and Mac switch share that ruling.
+- A book and Arrivals mockups (`mockups/a-book.html`, `mockups/arrivals.html`):
+  - The book strip on a note opened from a book ("3 of 12 · Chapter", ‹ ›): "At the foot".
+  - The rule editor: "Simple editor" — any/all of tags, starred, not-tag; a nested rule shows as a locked row.
+  - The "Open Arrivals first" button on the Finish confirm: "Keep it".
+  - Arrivals: "Full-screen review".
