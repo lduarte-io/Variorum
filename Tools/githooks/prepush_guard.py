@@ -35,6 +35,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LIST_PATH = os.path.join(os.path.expanduser("~"), ".variorum", "private-tokens.txt")
@@ -389,7 +390,7 @@ def private_findings(items, entries, keeps):
             if it.scope == "content" and kept(e.cls, it.path, keeps):
                 continue
             col = (" col %d" % (m.start() + 1)) if it.scope in ("content", "message") else ""
-            found.append((it.commit, it.where + col, e.cls, len(m.group(0))))
+            found.append((it.commit, it.where + col, e.cls, len(m.group(0)), it.scope))
     return found
 
 
@@ -405,57 +406,59 @@ def find_gitleaks():
     return None
 
 
-def gitleaks_flags():
+def gitleaks_flags(ignore_dir):
     # --exit-code 0: findings come back in the JSON report; a non-zero exit is a failed scan.
-    # --gitleaks-ignore-path HERE and --ignore-gitleaks-allow: a branch cannot excuse its own
-    # findings with a planted .gitleaksignore or an inline gitleaks:allow; the reviewed allowlist
-    # is gitleaks.toml beside this file, read from main's copy.
+    # --ignore-gitleaks-allow: an inline gitleaks:allow comment excuses nothing. The ignore path is
+    # the caller's empty private dir, so no .gitleaksignore is read (see gitleaks_findings).
     return ["--no-banner", "--redact", "--no-color", "--report-format", "json", "--report-path", "-",
-            "--config", GITLEAKS_CONFIG, "--gitleaks-ignore-path", HERE, "--ignore-gitleaks-allow",
+            "--config", GITLEAKS_CONFIG, "--gitleaks-ignore-path", ignore_dir, "--ignore-gitleaks-allow",
             "--exit-code", "0", "--log-level", "error"]
 
 
-def run_gitleaks(argv, stdin_text=None):
-    proc = subprocess.run(argv, input=(stdin_text.encode("utf-8") if stdin_text is not None else None),
-                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=ENV)
+def run_gitleaks(argv, stdin_text, cwd):
+    proc = subprocess.run(argv, input=stdin_text.encode("utf-8"), stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, env=ENV, cwd=cwd)
     if proc.returncode != 0:
-        raise Refusal("gitleaks failed (exit %d) — the push cannot be checked." % proc.returncode)
+        raise Refusal("gitleaks failed (exit %d) \u2014 the push cannot be checked." % proc.returncode)
     out = proc.stdout.decode("utf-8", "replace").strip()
     if not out:
         return []
     try:
         report = json.loads(out)
     except ValueError:
-        raise Refusal("gitleaks gave a report this guard cannot read — the push cannot be checked.")
+        raise Refusal("gitleaks gave a report this guard cannot read \u2014 the push cannot be checked.")
     return report if isinstance(report, list) else []
 
 
-def gitleaks_findings(gl, revs, commits, items, toplevel):
+def gitleaks_findings(gl, items):
     """Returns (findings, flagged) — flagged: path and ref-name strings gitleaks matched, which the
-    report must never print."""
+    report must never print.
+
+    gitleaks reads exactly what the private list reads — every item, one stdin line each — and never
+    the clone itself: it runs `gitleaks stdin` from a fresh empty private directory that is also its
+    ignore path. So no .gitleaksignore (untracked at the worktree root, committed, or anywhere else),
+    no attribute and no log setting of the pushing clone reaches it, and every finding maps back to
+    its commit and place by StartLine. (gitleaks rules keyed on a file's own name, such as a .p12
+    file, need a path; stdin carries none, so those rules do not fire — the guard's private list and
+    its path scope are the road for names.)"""
     found, flagged = [], set()
-    if revs is not None and commits:
-        # gitleaks runs `git log -p -U0 <log-opts>`: the pins ride ENV, the flags ride the options.
-        opts = " ".join(["--no-ext-diff", "--no-textconv", "--no-color"] + revs)
-        for f in run_gitleaks([gl, "git", *gitleaks_flags(), "--log-opts", opts, toplevel]):
-            found.append((f.get("Commit") or None, "%s:%s" % (f.get("File", "?"), f.get("StartLine", "?")),
-                          "gitleaks:%s" % f.get("RuleID", "?"), None))
-    # Everything `gitleaks git` does not read: messages, identities, paths, ref names, and a merge's
-    # own lines (git log -p shows a merge no patch). One line per item; StartLine maps back.
-    rest = [it for it in items if it.scope != "content" or it.merge]
-    if rest:
-        # One stdin line per item, always: a newline inside an item (a path git quoted with \n)
-        # would shift every later finding onto the wrong item.
-        text = "\n".join(it.text.replace("\r", " ").replace("\n", " ") for it in rest) + "\n"
-        for f in run_gitleaks([gl, "stdin", *gitleaks_flags()], stdin_text=text):
-            try:
-                it = rest[int(f.get("StartLine", 0)) - 1]
-            except (ValueError, IndexError):
-                found.append((None, "(scanned metadata)", "gitleaks:%s" % f.get("RuleID", "?"), None))
-                continue
-            if it.scope in ("path", "ref"):
-                flagged.add(it.text)
-            found.append((it.commit, it.where, "gitleaks:%s" % f.get("RuleID", "?"), None))
+    if not items:
+        return found, flagged
+    # One stdin line per item, always: a newline inside an item (a path git quoted with \n) would
+    # shift every later finding onto the wrong item.
+    text = "\n".join(it.text.replace("\r", " ").replace("\n", " ") for it in items) + "\n"
+    with tempfile.TemporaryDirectory(prefix="vx996-gitleaks-") as empty:
+        report = run_gitleaks([gl, "stdin", *gitleaks_flags(empty)], text, empty)
+    for f in report:
+        rule = "gitleaks:%s" % f.get("RuleID", "?")
+        try:
+            it = items[int(f.get("StartLine", 0)) - 1]
+        except (ValueError, IndexError):
+            found.append((None, "(scanned text)", rule, None, None))
+            continue
+        if it.scope in ("path", "ref"):
+            flagged.add(it.text)
+        found.append((it.commit, it.where, rule, None, it.scope))
     return found, flagged
 
 
@@ -489,8 +492,7 @@ def main(argv):
             raise Refusal("the guard's gitleaks config is missing (%s)." % GITLEAKS_CONFIG)
         revs = outgoing_revs(remote, updates)
         items, commits = collect_items(revs, updates)
-        toplevel = git("rev-parse", "--show-toplevel").strip()
-        leaks, flagged = gitleaks_findings(gl, revs, commits, items, toplevel)
+        leaks, flagged = gitleaks_findings(gl, items)
         found = private_findings(items, entries, keeps) + leaks
     except Refusal as why:
         say("%s: REFUSED — %s" % (TAG, why))
@@ -500,7 +502,7 @@ def main(argv):
     mask = masker(entries, flagged)
     if found:
         seen, rows = set(), []
-        for commit, where, cls, length in found:
+        for commit, where, cls, length, _scope in found:
             key = (commit, where, cls)
             if key in seen:
                 continue
