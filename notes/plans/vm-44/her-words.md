@@ -112,3 +112,8 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - A Read mode for a single note in v1: "Not in v1".
 - Commit identity (2026-11-15): the commits made since the flip carried a personal email as author. Her word: "maybe we should just change my personal email address being the commit? … go ahead and rewrite that and force push main. and what do we need to change so it's not an issue going forawrd?" (The address itself is not written here.)
   - Orchestrator's note: the repo-local commit email is now the GitHub noreply address on both Macs; the rewrite of `main` is held for one confirmation because GitHub's pull-request refs keep the original commits (see the session's report).
+- The ⋯ quick row: Commit joins it — "commit in the quick row - yes." (Undo, Redo, Comment, Commit, then the full menu.)
+- Merge the record PR at the end of this sitting: "yes, that's fine."
+- The commit identity, settled: "if it won't remove the address from github, it's honestly fine … this email is not like a secret, so it's not a big issue." History is left alone; new commits carry the noreply address.
+- The home-folder path in two walk scripts: "not that worried about this, but we might as well fix it going forward."
+- Usage: "we hit the weekly limit but now we have more. so if you need two subagents at a time that's fine. the fable designers doing the revision pass is fine."
