@@ -52,13 +52,14 @@ TAG = "pre-push guard"
 BYPASS = ("`git push --no-verify` skips this guard — that is the author's call only, "
           "never a session's.")
 
-# Config pinned for every git this guard runs (its own and gitleaks's), so a user's diff/log
-# settings can neither reshape the patch it parses nor inject text into it.
+# Config pinned for every git this guard runs, so a user's diff/log settings can neither reshape the
+# patch it parses nor inject text into it (attributes are a separate road: collect_items).
 GIT_PINS = (
     ("core.quotePath", "false"),
     ("diff.noprefix", "false"),
     ("diff.mnemonicPrefix", "false"),
     ("log.showSignature", "false"),
+    ("log.showRoot", "true"),   # a root commit's patch (an orphan branch, a first push) is read too
     ("color.ui", "false"),
 )
 
