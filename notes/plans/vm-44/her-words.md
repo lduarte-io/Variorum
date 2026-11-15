@@ -69,3 +69,14 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - RULED, SW-4: "New line; File and Open buttons" — Return in the capture box is only ever a new line; File saves and clears, Open saves and opens.
 - RULED, LK-5: "Words on a chip" — the bottom bar is three words at 17 pt, the current one on a chip, 56 pt targets.
 - RULED, the Today button beside the capture box (the designer's addition): "Keep it".
+
+## 2026-11-15, the sitting resumes (after the account switchover; she closed the computer for a few days)
+
+- VM-45: "sync is confirmed working between my phone & computer."
+- The record moves into the repo: "it's time to stop hiding all of this from the repo … I committed to being open source and building in public. people seeing that there were other mockups and then what I went with isn't bad, if we normally commit mockups anyway. and I don't want to do this weird halfway in halfway out thing - for business cases I'll specifically tell sessions to go to that other repo".
+- On this file: "her-words.md is fine - I'm not publishing all of my prompts moving into the future, but I'm also keeping in mind that what I say is stored in the record and the record is public. it's not a problem, this is what I signed up for with building in public and having all of my notes and AI notes public."
+- Screenshots: "i thought we normally already kept heavy screenshots out of git anyway?" (Yes: the `*-screens` folders are gitignored; this record follows it.)
+- How efforts merge: "normally when a session completes its work under the overnight mandate I have it just merge its PR, for example, and take care of the handoffs after but before release. so not everything is going to be a draft PR I personally approve - that's not how I've worked in the past either."
+- The guard: "should we make a pre-push guard for private identifiers? … if we do need that, you can start a subagent for it." (VX-996, started.)
+- "you can start the export and share and compare concept for after v1 on subagents." (Started.)
+- "help guide me through the remaining mockup files and then you can make the full plan, the linear tickets, etc."
