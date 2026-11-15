@@ -59,6 +59,9 @@ HUNK = re.compile(r"^(@{2,}) (?:-\S+ )+\+(\d+)(?:,\d+)? @{2,}")
 MASK = "‹masked›"
 MAX_SHOWN = 40
 TAG = "pre-push guard"
+# The public commit identity (the GitHub noreply address every public commit carries since the flip);
+# a refusal on an identity names it so a session knows exactly what to run.
+PUBLIC_EMAIL = "168489314+lduarte-io@users.noreply.github.com"
 BYPASS = ("`git push --no-verify` skips this guard — that is the author's call only, "
           "never a session's.")
 
@@ -647,6 +650,12 @@ def main(argv):
         say("Rewrite the outgoing commits locally so the value never publishes (amend the commit, or "
             "reset and recommit), then push again. A ruled load-bearing value gets a keep line in %s."
             % LIST_SHOWN)
+        if any(scope == "identity" for _c, _w, _cls, _len, scope in found):
+            say("A commit identity above is not the public one. Run `git config user.email %s` in this "
+                "clone, then re-make the refused commits under it: the last one with `git commit --amend "
+                "--reset-author --no-edit`; several with `git rebase --exec 'git commit --amend "
+                "--reset-author --no-edit' <the remote branch they sit on>`. Only outgoing commits are "
+                "judged \u2014 history the remote already holds never is." % PUBLIC_EMAIL)
         say(BYPASS)
         return 1
     note = ""

@@ -31,11 +31,14 @@
 
 # --- class shapes: patterns derivable from the classes alone (no real values) ----------------------
 
-# A Mac home directory, in path form and in the dashed form Claude's project folders use.
-home-path re:/Users/(?!Shared\b)[A-Za-z0-9._-]{4,}
-home-path re:-Users-[A-Za-z0-9._]+-
-# A session scratchpad path (it carries the home folder's name).
-scratch-path re:/tmp/claude-[0-9]+/
+# A Mac home directory, in path form and in the dashed form Claude's project and scratchpad folders
+# use (a scratchpad path carries the home folder dashed, so this shape covers it; a placeholdered
+# "-<home>-" form never matches). Spared: macOS's Shared folder and "someone", the fictional home
+# the test fixtures use.
+home-path re:/Users/(?!Shared\b|someone\b)[A-Za-z0-9._-]{4,}
+home-path re:-Users-(?!someone-)[A-Za-z0-9._]+-
+# A full MCP setup key (the prefix and 43 base64url characters); the tests' short fixtures never match.
+mcp-setup-key re:\bvmk[12]_[A-Za-z0-9_-]{40,}
 # A newer Apple device identifier (8 hex, dash, 16 hex).
 device-udid re:\b[0-9A-F]{8}-[0-9A-F]{16}\b
 # A Supabase project URL. The production one is a ruled load-bearing value in the app's config.
@@ -44,8 +47,9 @@ keep supabase-project-ref App/Variorum/Shared/ProjectConfig.swift
 keep supabase-project-ref Tools/prod-*.sh
 # A Tailscale machine name.
 tailnet-host re:\b[a-z0-9-]+\.[a-z0-9-]+\.ts\.net\b
-# PROVISIONAL (VX-996): the public commit identity is the GitHub noreply address, so an outgoing
-# commit whose author or committer email is anything else is refused. Delete this entry to allow it.
+# The public commit identity is the GitHub noreply address (the author's ruling, VX-996): an OUTGOING
+# commit whose author or committer email is anything else is refused, and the refusal names the
+# exact git config command. History the remote already holds is never judged.
 public-identity@identity re:<(?![^<>]*@users\.noreply\.github\.com>)(?!noreply@github\.com>)[^<>]*>
 
 # --- literal classes: fill from the private ledger (one line per value; the placeholder vocabulary
@@ -56,6 +60,7 @@ public-identity@identity re:<(?![^<>]*@users\.noreply\.github\.com>)(?!noreply@g
 # oauth-account-email lit:…
 # test-account-email lit:…
 # tester-name lit:…              (each name and handle on its own line; names scan UNBOUNDED)
+# test-account lit:…             (the test macOS account's handle and display name)
 # home-path lit:/Users/…         (the real home folder, if the shape above is too loose for you)
 # apple-team-id lit:…
 # keep apple-team-id App/Variorum/Variorum.xcodeproj/project.pbxproj
@@ -67,11 +72,16 @@ public-identity@identity re:<(?![^<>]*@users\.noreply\.github\.com>)(?!noreply@g
 # apple-cert-id lit:…
 # signing-cert-sha1 lit:…
 # notary-key-id lit:…
+# notary-submission-id lit:…
+# provisioning-profile-uuid lit:…
+# simulator-udid lit:…           (UUID-shaped, so literals only: a shape would catch every fixture id)
 # oauth-client-id lit:…
 # account-uuid lit:…
 # auth-identity-id lit:…
 # library-uuid lit:…
 # corpus-key-id lit:…
+# key-proof-hash-prefix lit:…
+# dev-key-prefix lit:vmk1_…      (a truncated setup-key prefix; the full-key shape above covers whole keys)
 # server lit:…                   (home-infrastructure hostnames, users, VPN node names)
 # mac-pro lit:…
 # business re:…                  (business, money and job-search terms the ledger ruled out)
