@@ -282,7 +282,10 @@ def parse_patch(commit, patch):
             continue
         if line_no is None:
             if line.startswith("+++ "):
+                # git appends a TAB to a ---/+++ name that holds a space (and leaves it unquoted)
                 p = line[4:]
+                if p.endswith("\t"):
+                    p = p[:-1]
                 if p != "/dev/null":
                     path = strip_prefix(unquote(p), "b/")
             elif line.startswith("new file mode"):
@@ -316,7 +319,10 @@ def parse_patch(commit, patch):
         prefix = line[:cols]
         if "-" in prefix:
             continue  # a removed line is not in the result
-        if "+" in prefix:
+        # A line counts as ADDED only when it is new against every parent: one '+' per column. In a
+        # merge's combined diff a ' +' / '+ ' line already sits in one parent, which is either an
+        # outgoing commit (scanned there) or history the remote holds (never re-judged).
+        if prefix == "+" * cols:
             where = "%s:%d" % (path or "?", line_no)
             items.append(Item("content", commit, where, line[cols:], path=path, merge=merge))
         line_no += 1
@@ -438,7 +444,9 @@ def gitleaks_findings(gl, revs, commits, items, toplevel):
     # own lines (git log -p shows a merge no patch). One line per item; StartLine maps back.
     rest = [it for it in items if it.scope != "content" or it.merge]
     if rest:
-        text = "\n".join(it.text.replace("\r", " ") for it in rest) + "\n"
+        # One stdin line per item, always: a newline inside an item (a path git quoted with \n)
+        # would shift every later finding onto the wrong item.
+        text = "\n".join(it.text.replace("\r", " ").replace("\n", " ") for it in rest) + "\n"
         for f in run_gitleaks([gl, "stdin", *gitleaks_flags()], stdin_text=text):
             try:
                 it = rest[int(f.get("StartLine", 0)) - 1]
@@ -497,7 +505,7 @@ def main(argv):
             if key in seen:
                 continue
             seen.add(key)
-            rows.append((commit, mask(where), cls, length))
+            rows.append((commit, mask(where).replace("\n", "\\n").replace("\t", "\\t"), cls, length))
         say("%s: REFUSED — this push would publish %d match%s (VX-996). Nothing was pushed."
             % (TAG, len(rows), "" if len(rows) == 1 else "es"))
         for commit, where, cls, length in rows[:MAX_SHOWN]:
