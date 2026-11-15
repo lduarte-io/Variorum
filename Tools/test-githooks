@@ -89,10 +89,11 @@ git fetch -q origin
 echo "test-githooks: installing"
 inst="$(Tools/install-githooks 2>&1)"; irc=$?
 [ "$irc" -eq 0 ] && ok "the installer runs" || bad "the installer runs" "$inst"
-want="$(cd "$T/work" && pwd -P)/Tools/githooks"
+want="$(cd "$(git rev-parse --path-format=absolute --git-common-dir)" && pwd -P)/variorum-hooks"
 got="$(git config --local --get core.hooksPath || true)"
-[ "$(cd "$got" 2>/dev/null && pwd -P)" = "$want" ] && ok "core.hooksPath is the main worktree's Tools/githooks" \
-  || bad "core.hooksPath is the main worktree's Tools/githooks" "got '$got'"
+[ "$(cd "$got" 2>/dev/null && pwd -P)" = "$want" ] && [ -x "$want/pre-push" ] \
+  && ok "core.hooksPath is the clone's own guard shim, inside its git folder (F4)" \
+  || bad "core.hooksPath is the clone's own guard shim, inside its git folder (F4)" "got '$got'"
 inst2="$(Tools/install-githooks 2>&1)"
 case "$inst2" in *"already on"*) ok "the installer is idempotent" ;; *) bad "the installer is idempotent" "$inst2" ;; esac
 Tools/install-githooks --check >/dev/null 2>&1 && ok "--check says the guard is on" || bad "--check says the guard is on" "exit non-zero"
@@ -169,10 +170,11 @@ mkdir -p notes; printf 'clean\n' >notes/id.md; git add notes/id.md
 git -c user.email="$SAMPLE@example.com" commit -q -m "a clean message"
 push -u origin token-identity; expect_refuse "a token in the commit identity refuses" "$SAMPLE" "author" "[test-token]"
 
-# 12. A binary file never blocks.
+# 12. A true binary (NUL bytes) is not read by either scanner — the behaviour as built; scanning
+#     binary blobs is an open question for the author (the record's F7).
 branch_from_main binary
 printf 'PNG\000\001\002 %s \000\377' "$SAMPLE" >img.bin; git add img.bin; git commit -q -m "a binary"
-push -u origin binary; expect_pass "a binary file never blocks"
+push -u origin binary; expect_pass "a binary file (NUL bytes) is not read"
 
 # 13. A push from a second worktree runs the same guard.
 git worktree add -q -b from-worktree "$T/wt" origin/main 2>/dev/null
@@ -243,6 +245,152 @@ cp "$SRC/Tools/githooks/private-tokens.example" "$LIST"
 branch_from_main example-self
 commit_file Tools/githooks/copy-of-example.txt "$(cat "$SRC/Tools/githooks/private-tokens.example")"
 push -u origin example-self; expect_pass "the shipped example loads and does not match its own text"
+write_list
+
+echo "test-githooks: ladder round 1's pins"
+have_gl=0
+if command -v gitleaks >/dev/null 2>&1 || [ -x /opt/homebrew/bin/gitleaks ] || [ -x /usr/local/bin/gitleaks ]; then
+  have_gl=1; PAT="ghp_$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 36)"
+fi
+# Shapes the shipped example must catch or spare, assembled at run time so this file's own text
+# never matches a live list.
+US="/Us""ers"; DUS="-Us""ers-"; SCR="/tmp/cl""aude-501"
+
+# 22 (F1). A push by URL never treats a DIFFERENT remote's history as published.
+git init -q --bare "$T/archive.git"
+git remote add archive "$T/archive.git"
+branch_from_main prefilter
+commit_file notes/old-archive.md "unfiltered $SAMPLE"
+push --no-verify archive prefilter; expect_pass "setup: a second remote holds a token commit (--no-verify)"
+git fetch -q archive
+push "$(git config --get remote.origin.url)" prefilter:refs/heads/k2
+expect_refuse "a URL push never treats another remote's history as published (F1)" "$SAMPLE" "notes/old-archive.md:1" "[test-token]"
+git checkout -q -B url-built origin/published
+commit_file notes/url-new.md "a clean line"
+push "$(git config --get remote.origin.url)" url-built:refs/heads/url-built
+expect_pass "a URL push to the remote's own URL still skips what that remote holds (F1)"
+git remote remove archive
+
+# 23 (F2). No attribute source can hide an added line: committed, info/attributes, global.
+branch_from_main attrs-committed
+commit_file .gitattributes "* -diff"
+commit_file notes/hidden.md "hidden $SAMPLE"
+push -u origin attrs-committed; expect_refuse "a committed -diff attribute cannot hide an added line (F2)" "$SAMPLE" "notes/hidden.md:1" "[test-token]"
+if [ "$have_gl" = 1 ]; then
+  branch_from_main attrs-gitleaks
+  commit_file .gitattributes "* binary"
+  commit_file deploy/hidden.sh "export GITHUB_TOKEN=$PAT"
+  push -u origin attrs-gitleaks; expect_refuse "a binary attribute cannot hide a secret from gitleaks (F2)" "$PAT" "deploy/hidden.sh:1" "[gitleaks:"
+fi
+branch_from_main attrs-info
+info="$(git rev-parse --path-format=absolute --git-common-dir)/info"; mkdir -p "$info"
+printf '*.md -diff\n' >"$info/attributes"
+commit_file notes/info.md "info $SAMPLE"
+push -u origin attrs-info; expect_refuse "an info/attributes -diff cannot hide an added line (F2)" "$SAMPLE" "notes/info.md:1" "[test-token]"
+rm -f "$info/attributes"
+branch_from_main attrs-global
+printf '*.md -diff\n' >"$T/attrs"; git config --global core.attributesFile "$T/attrs"
+commit_file notes/global.md "global $SAMPLE"
+push -u origin attrs-global; expect_refuse "a global attributes file cannot hide an added line (F2)" "$SAMPLE" "notes/global.md:1" "[test-token]"
+git config --global --unset core.attributesFile
+
+# 24 (F3). A planted .gitleaksignore — untracked at the root, or committed — cannot silence gitleaks.
+if [ "$have_gl" = 1 ]; then
+  branch_from_main gl-ignore
+  commit_file deploy/ignored.sh "export GITHUB_TOKEN=$PAT"
+  sha="$(git rev-parse HEAD)"
+  { echo "$sha:deploy/ignored.sh:github-pat:1"; i=1; while [ $i -le 60 ]; do echo ":github-pat:$i"; i=$((i + 1)); done; } >.gitleaksignore
+  push -u origin gl-ignore; expect_refuse "an untracked root .gitleaksignore cannot silence a content finding (F3)" "$PAT" "deploy/ignored.sh:1" "[gitleaks:"
+  branch_from_main gl-ignore-msg
+  commit_file notes/g.md "clean" "rotate the token $PAT tonight"
+  push -u origin gl-ignore-msg; expect_refuse "an untracked root .gitleaksignore cannot silence a message finding (F3)" "$PAT" "commit message" "[gitleaks:"
+  branch_from_main gl-ignore-tracked
+  commit_file deploy/tracked.sh "export GITHUB_TOKEN=$PAT"
+  sha="$(git rev-parse HEAD)"
+  { echo "$sha:deploy/tracked.sh:github-pat:1"; i=1; while [ $i -le 60 ]; do echo ":github-pat:$i"; i=$((i + 1)); done; } >.gitleaksignore
+  git add .gitleaksignore; git commit -q -m "an ignore file"
+  push -u origin gl-ignore-tracked; expect_refuse "a committed .gitleaksignore cannot silence gitleaks (F3)" "$PAT" "deploy/tracked.sh:1" "[gitleaks:"
+  git checkout -q main; rm -f .gitleaksignore
+fi
+
+# 25 (F4). The main worktree on a commit without Tools/githooks: the guard REFUSES, never vanishes.
+seed="$(git rev-list --max-parents=0 main | tail -1)"
+git checkout -q --detach "$seed"
+( cd "$T/wt" && git checkout -q -B wt-vanish origin/main && commit_file notes/vanish.md "vanish $SAMPLE" \
+  && OUT="$(git push -u origin wt-vanish 2>&1)"; echo "rc=$?"; printf '%s\n' "$OUT" ) >"$T/wt.out" 2>&1
+RC=$(sed -n 's/^rc=//p' "$T/wt.out" | head -1); OUT="$(cat "$T/wt.out")"
+expect_refuse "with the main worktree lacking the guard, a push refuses rather than passing unguarded (F4)" "$SAMPLE"
+git checkout -q main
+
+# 26 (F5). A non-noreply identity refuses and says what to run; history the remote holds is not judged.
+IDENT='public-identity@identity re:<(?![^<>]*@users\.noreply\.github\.com>)(?!noreply@github\.com>)[^<>]*>'
+write_list; printf '%s\n' "$IDENT" >>"$LIST"
+branch_from_main id-personal
+mkdir -p notes; printf 'x\n' >notes/idp.md; git add notes/idp.md
+git -c user.email="someone@example.com" commit -q -m "a clean message"
+push -u origin id-personal; expect_refuse "a non-noreply identity refuses and says exactly what to run (F5)" - "[public-identity]" "git config user.email"
+branch_from_main id-history
+printf 'y\n' >notes/idh.md; git add notes/idh.md
+git -c user.email="someone@example.com" commit -q -m "an older commit"
+push --no-verify -u origin id-history; expect_pass "setup: a non-noreply commit the remote already holds"
+git checkout -q -b id-on-top
+commit_file notes/idt.md "a clean line"
+push -u origin id-on-top; expect_pass "identity is judged on outgoing commits only, never on history the remote holds (F5)"
+git checkout -q id-history
+commit_file notes/idn.md "a new noreply commit on the same branch"
+push origin id-history; expect_pass "a branch whose pushed commits carry another address still takes new noreply commits (F5)"
+write_list
+
+# 27 (F6). log.showRoot=false cannot hide a root commit's content.
+git worktree add -q --detach "$T/wt2" origin/main 2>/dev/null
+( cd "$T/wt2" && git checkout -q --orphan orphan-root && git rm -rqf . >/dev/null 2>&1 \
+  && commit_file root.md "root $SAMPLE" && git config --global log.showRoot false \
+  && OUT="$(git push -u origin orphan-root 2>&1)"; echo "rc=$?"; printf '%s\n' "$OUT" ) >"$T/wt2.out" 2>&1
+git config --global --unset log.showRoot
+RC=$(sed -n 's/^rc=//p' "$T/wt2.out" | head -1); OUT="$(cat "$T/wt2.out")"
+expect_refuse "log.showRoot=false cannot hide a root commit's content (F6)" "$SAMPLE" "root.md:1" "[test-token]"
+
+# 28 (N1). A keep glob matches a path holding a space.
+branch_from_main kept-space
+commit_file "kept/a b.txt" "load-bearing $SAMPLE"
+push -u origin kept-space; expect_pass "a keep glob matches a path with a space (N1)"
+
+# 29 (N5). A merge never re-flags a line one of its parents already holds on the remote.
+branch_from_main n5-base
+commit_file notes/n5.md "base line"
+push -u origin n5-base; expect_pass "setup: n5-base pushed clean"
+git checkout -q -B n5-pub n5-base
+printf 'published %s\n' "$SAMPLE" >notes/n5.md; git commit -qam "published"
+push --no-verify -u origin n5-pub; expect_pass "setup: n5-pub holds a token (--no-verify)"
+git checkout -q -B n5-local n5-base
+printf 'local line\n' >notes/n5.md; git commit -qam "local"
+git merge -q --no-commit n5-pub >/dev/null 2>&1
+printf 'published %s\nresolution line\n' "$SAMPLE" >notes/n5.md; git add notes/n5.md; git commit -q -m "merge n5-pub"
+push -u origin n5-local; expect_pass "a merge never re-flags a line its published parent already holds (N5)"
+
+# 30 (N4). A path holding a newline does not shift gitleaks's attribution (a flagged path stays masked).
+if [ "$have_gl" = 1 ]; then
+  branch_from_main n4
+  nl="$(printf 'a\nb.txt')"; printf 'x\n' >"$nl"; git add -- "$nl"
+  printf 'carries %s\n' "$SAMPLE" >"notes-$PAT.txt"; git add -- "notes-$PAT.txt"
+  git commit -q -m "two files"
+  push -u origin n4; expect_refuse "a path holding a newline does not shift gitleaks's attribution (N4)" "$PAT" "[gitleaks:" "[test-token]"
+fi
+
+# 31 (N2). The example's shapes spare the fictional fixture and placeholdered lines, and still catch real shapes.
+cp "$SRC/Tools/githooks/private-tokens.example" "$LIST"
+branch_from_main n2-spare
+commit_file notes/spare.md "$(printf '%s\n%s\n' "realHome: \"$US/someone\"" "$SCR/-<home>-dev-variorum/scratchpad")"
+push -u origin n2-spare; expect_pass "the example spares the fixture's home and a placeholdered scratch path (N2)"
+branch_from_main n2-catch
+commit_file notes/catch.md "$(printf '%s\n%s\n' "cd $US/jdoe/dev" "$SCR/${DUS}jdoe-dev-variorum/x")"
+push -u origin n2-catch; expect_refuse "the example still catches a real home path in both forms (N2)" - "notes/catch.md:1" "notes/catch.md:2" "[home-path]"
+write_list
+
+# 32 (N3). The installer reads a padded !starter line as the starter, as the guard does.
+{ printf '  !starter  \n'; cat "$LIST"; } >"$LIST.tmp" && mv "$LIST.tmp" "$LIST"
+chk="$(Tools/install-githooks --check 2>&1)"
+case "$chk" in *"still the starter"*) ok "the installer reads a padded !starter line as the starter (N3)" ;; *) bad "the installer reads a padded !starter line as the starter (N3)" "$chk" ;; esac
 write_list
 
 echo
