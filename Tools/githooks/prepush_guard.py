@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Variorum's pre-push guard (VX-996): refuse a push that would publish a swept token.
 
-Git runs Tools/githooks/pre-push before every push from a clone whose core.hooksPath points here
-(Tools/install-githooks); the shim execs this file with git's arguments (the remote's name and URL)
-and the push's ref lines on stdin. What the push would PUBLISH is scanned, and nothing else:
+Git runs Tools/githooks/pre-push before every push, through the shim Tools/install-githooks writes into
+the clone's git folder (it runs the MAIN worktree's copy and refuses when that is missing); pre-push
+execs this file with git's arguments (the remote's name and URL) and the push's ref lines on stdin. What the push would PUBLISH is scanned, and nothing else:
 
   content   every line the outgoing commits add (a merge: the lines new against all its parents, --cc)
   message   each outgoing commit's message, and an annotated tag's message

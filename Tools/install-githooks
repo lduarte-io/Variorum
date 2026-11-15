@@ -1,13 +1,15 @@
 #!/bin/bash
 # install-githooks — turn on Variorum's pre-push guard (VX-996) for this clone, every worktree included.
 #
-#   Tools/install-githooks           point core.hooksPath at the guard (idempotent)
+#   Tools/install-githooks           write the guard's shim and point core.hooksPath at it (idempotent)
 #   Tools/install-githooks --check   say whether the guard is on and ready; exit 1 when it is not
 #
-# The hooks path is the MAIN worktree's Tools/githooks, as an absolute path in the clone's shared
-# config, so every worktree of the clone — whatever branch it holds — runs main's reviewed copy of
-# the guard, never a branch's own edit of it. Run it once per clone, on each Mac. It never touches
-# the global config, the commit identity or another clone.
+# The clone's shared core.hooksPath points at a directory this installer owns inside the clone's git
+# folder (<git-common-dir>/variorum-hooks), holding one fixed pre-push shim. The shim runs the MAIN
+# worktree's Tools/githooks/pre-push — main's reviewed copy, whatever branch a worktree holds — and
+# REFUSES when that file is missing (the main worktree on an older commit, a bisect step, an orphan
+# branch), so the guard can never silently vanish. Run it once per clone, on each Mac. It never
+# touches the global config, the commit identity or another clone.
 set -euo pipefail
 
 say() { printf 'install-githooks: %s\n' "$*"; }
@@ -23,20 +25,40 @@ esac
 git rev-parse --git-dir >/dev/null 2>&1 || die "not inside a git clone."
 main_wt="$(git worktree list --porcelain | awk '/^worktree /{ print substr($0, 10); exit }')"
 [ -n "$main_wt" ] || die "could not find this clone's main worktree."
-hooks="$main_wt/Tools/githooks"
 common="$(git rev-parse --path-format=absolute --git-common-dir)"
+shim_dir="$common/variorum-hooks"
+shim="$shim_dir/pre-push"
 current="$(git config --local --get core.hooksPath || true)"
 list="$HOME/.variorum/private-tokens.txt"
+noreply="168489314+lduarte-io@users.noreply.github.com"   # the public commit identity
+
+# The shim, byte for byte. It must stay free of anything the installing checkout could vary.
+shim_text() {
+  cat <<'SHIM'
+#!/bin/sh
+# Variorum's pre-push guard shim (VX-996), written by Tools/install-githooks. It runs the MAIN
+# worktree's Tools/githooks/pre-push and REFUSES when that is missing, so the guard never silently
+# vanishes. Do not edit: re-run Tools/install-githooks.
+main="$(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{ print substr($0, 10); exit }')"
+hook="$main/Tools/githooks/pre-push"
+if [ -n "$main" ] && [ -x "$hook" ]; then
+  exec "$hook" "$@"
+fi
+echo "pre-push guard: REFUSED — the guard is missing from the main worktree (${main:-not found}): it is not on a commit that carries Tools/githooks. Check main out there, then push again (VX-996)." >&2
+echo "\`git push --no-verify\` skips this guard — that is the author's call only, never a session's." >&2
+exit 1
+SHIM
+}
 
 have_gitleaks() {
   command -v gitleaks >/dev/null 2>&1 || [ -x /opt/homebrew/bin/gitleaks ] || [ -x /usr/local/bin/gitleaks ]
 }
 
-# The readiness lines, shared by both modes: what the guard needs beyond the hooks path.
+# The readiness lines, shared by both modes: what the guard needs beyond its shim.
 readiness() {
   local ready=0
   if [ -f "$list" ]; then
-    if grep -qx '!starter' "$list"; then
+    if grep -qE '^[[:space:]]*!starter[[:space:]]*$' "$list"; then
       say "the private list ($list) is still the starter — fill it from the private ledger, then delete its !starter line."
     else
       say "the private list is present ($list)."
@@ -55,21 +77,26 @@ readiness() {
   email="$(git config --get user.email || true)"
   case "$email" in
     *@users.noreply.github.com) ;;
-    *) say "NOTE: this clone's user.email is not a GitHub noreply address; if the private list keeps its public-identity entry, pushes of commits made under it are refused." ;;
+    *) say "NOTE: this clone's user.email is not the GitHub noreply address, so the private list's public-identity entry refuses pushes of commits made under it — run: git config user.email $noreply" ;;
   esac
   return "$ready"
 }
 
+shim_is_current() {
+  [ -x "$shim" ] && [ "$(cat "$shim")" = "$(shim_text)" ]
+}
+
 if [ "$mode" = check ]; then
-  if [ "$current" != "$hooks" ]; then
-    die "the guard is OFF in this clone (core.hooksPath is '${current:-unset}', want '$hooks') — run Tools/install-githooks."
+  if [ "$current" != "$shim_dir" ]; then
+    die "the guard is OFF in this clone (core.hooksPath is '${current:-unset}', want '$shim_dir') — run Tools/install-githooks."
   fi
-  [ -x "$hooks/pre-push" ] || die "core.hooksPath points at '$hooks' but no executable pre-push is there — pull main in $main_wt."
-  if readiness; then say "the guard is ON for every worktree of this clone ($hooks)."; exit 0; fi
+  shim_is_current || die "the guard's shim at $shim is missing or not the installer's — run Tools/install-githooks."
+  [ -x "$main_wt/Tools/githooks/pre-push" ] || die "the shim is on, but the main worktree ($main_wt) has no Tools/githooks/pre-push — every push refuses until main is checked out there."
+  if readiness; then say "the guard is ON for every worktree of this clone ($shim_dir runs $main_wt/Tools/githooks)."; exit 0; fi
   exit 1
 fi
 
-[ -x "$hooks/pre-push" ] || die "the main worktree ($main_wt) has no executable Tools/githooks/pre-push — the guard must be on its main branch first (merge it, then pull there)."
+[ -x "$main_wt/Tools/githooks/pre-push" ] || die "the main worktree ($main_wt) has no executable Tools/githooks/pre-push — the guard must be on its main branch first (merge it, then pull there)."
 
 # A hooks path silently retires every hook in .git/hooks: refuse rather than switch someone's off.
 others=""
@@ -80,14 +107,18 @@ for h in "$common/hooks"/*; do
 done
 [ -z "$others" ] || die "this clone already has hooks in $common/hooks ($others ) — a hooks path would switch them off; move them first."
 
-if [ -n "$current" ] && [ "$current" != "$hooks" ]; then
-  die "core.hooksPath is already set to '$current' — unset it first if the guard should replace it (git config --local --unset core.hooksPath)."
-fi
+# The first build pointed core.hooksPath at the main worktree's Tools/githooks; that value upgrades.
+case "$current" in
+  "" | "$shim_dir" | "$main_wt/Tools/githooks") ;;
+  *) die "core.hooksPath is already set to '$current' — unset it first if the guard should replace it (git config --local --unset core.hooksPath)." ;;
+esac
 
-if [ "$current" = "$hooks" ]; then
-  say "already on: core.hooksPath = $hooks"
+if [ "$current" = "$shim_dir" ] && shim_is_current; then
+  say "already on: core.hooksPath = $shim_dir"
 else
-  git config --local core.hooksPath "$hooks"
-  say "on: core.hooksPath = $hooks (every worktree of this clone)"
+  mkdir -p "$shim_dir"
+  shim_text >"$shim.tmp" && chmod 755 "$shim.tmp" && mv "$shim.tmp" "$shim"
+  git config --local core.hooksPath "$shim_dir"
+  say "on: core.hooksPath = $shim_dir (every worktree of this clone; the shim runs $main_wt/Tools/githooks/pre-push)"
 fi
 readiness || true
