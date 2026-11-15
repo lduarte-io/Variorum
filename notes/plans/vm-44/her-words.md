@@ -80,3 +80,6 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - The guard: "should we make a pre-push guard for private identifiers? … if we do need that, you can start a subagent for it." (VX-996, started.)
 - "you can start the export and share and compare concept for after v1 on subagents." (Started.)
 - "help guide me through the remaining mockup files and then you can make the full plan, the linear tickets, etc."
+- RULED, LS-1 (`sketches/LS-1-note-rows.html`): "List, one preview line (middle)" — title; the time and one line of the note's words; where it lives.
+- RULED, journal rows: "Day first" — the entry's day is its name; the line under carries the time and first words (the Mac's rule).
+- RULED, BK-1 (`sketches/BK-1-bookcase.html`): "Chip row above the list".
