@@ -12,9 +12,10 @@ and the push's ref lines on stdin. What the push would PUBLISH is scanned, and n
   ref       the pushed ref names
 
 "Outgoing" is every commit reachable from a pushed sha and from no ref of the remote being pushed to:
-`git rev-list <pushed shas> --not --remotes=<remote> <the remote's old shas>` (every remote-tracking ref
-when the push names a URL rather than a remote). A new branch scans only what the remote does not
-already hold; a deletion publishes nothing. Cost follows the outgoing set: a few commits take well
+`git rev-list <pushed shas> --not --remotes=<remote> <the remote's old shas>`. A push by URL excludes
+the refs of the remotes whose URL is that URL and no others, so another remote's history (a private
+archive) is never treated as published; a URL no remote answers to excludes only the old ids. A new
+branch scans only what the remote does not already hold; a deletion publishes nothing. Cost follows the outgoing set: a few commits take well
 under a second, 2,728 real commits took about six; only a first push to an empty remote reads it all.
 
 What is read never depends on the clone's attributes or its diff and log settings. git's settings are
@@ -206,10 +207,32 @@ def object_type(sha):
     return git("cat-file", "-t", sha, check=False).strip()
 
 
-def outgoing_revs(remote, updates):
+def remote_urls(name):
+    """Every URL a remote answers to: its configured url and pushurl, and the same after insteadOf."""
+    urls = set()
+    for args in (("config", "--get-all", "remote.%s.url" % name),
+                 ("config", "--get-all", "remote.%s.pushurl" % name),
+                 ("remote", "get-url", "--all", name),
+                 ("remote", "get-url", "--push", "--all", name)):
+        urls.update(u.strip().rstrip("/") for u in git(*args, check=False).split("\n") if u.strip())
+    return urls
+
+
+def published_exclusion(remote, url):
+    """The refs whose history the push target already holds. A NAMED remote: its own
+    remote-tracking refs. A push by URL: the refs of every remote whose URL is that URL, and none
+    other — another remote's history (a private archive, say) is never treated as published, so a
+    URL nothing here answers to excludes only the old ids git passes in (outgoing_revs)."""
+    remotes = git("remote").split()
+    if remote in remotes:
+        return ["--remotes=%s" % remote]
+    target = (url or remote).strip().rstrip("/")
+    return ["--remotes=%s" % name for name in remotes if target in remote_urls(name)]
+
+
+def outgoing_revs(remote, url, updates):
     """The rev-list arguments naming every commit this push would publish (None: no commits)."""
-    remotes = set(git("remote").split())
-    exclude = ["--remotes=%s" % remote] if remote in remotes else ["--remotes"]
+    exclude = published_exclusion(remote, url)
     tips, olds = [], []
     for _local_ref, local_sha, _remote_ref, remote_sha in updates:
         if ZERO_SHA.match(local_sha):
@@ -223,7 +246,8 @@ def outgoing_revs(remote, updates):
                 olds.append(old)
     if not tips:
         return None
-    return tips + ["--not"] + exclude + olds
+    published = exclude + olds
+    return tips + (["--not"] + published if published else [])
 
 
 def unquote(s):
@@ -583,6 +607,7 @@ def masker(entries, flagged):
 
 def main(argv):
     remote = argv[1] if len(argv) > 1 else "origin"
+    url = argv[2] if len(argv) > 2 else remote
     updates = read_updates(sys.stdin)
     if not updates:
         return 0
@@ -594,7 +619,7 @@ def main(argv):
                           "secrets. Installing it is the author's call (brew install gitleaks).")
         if not os.path.isfile(GITLEAKS_CONFIG):
             raise Refusal("the guard's gitleaks config is missing (%s)." % GITLEAKS_CONFIG)
-        revs = outgoing_revs(remote, updates)
+        revs = outgoing_revs(remote, url, updates)
         items, commits = collect_items(revs, updates)
         leaks, flagged = gitleaks_findings(gl, items)
         found = private_findings(items, entries, keeps) + leaks
