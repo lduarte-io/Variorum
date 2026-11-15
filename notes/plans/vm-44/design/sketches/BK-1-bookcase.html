@@ -1,0 +1,208 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BK-1 — the Bookcase on the phone</title><style>
+:root{--room:#E5F0EC;--surface:#FFFFFF;--ink:#29241C;--muted:#8D8578;--meta:#6A6359;--faint:#B5AD9E;
+--accent:#3B6A59;--line:#CBE2D9;--wash:#CBE2D9;--taketint:#E8F2EE;--takeline:#B7D7CB;--alarm:#9B3B2F;
+--star:#3D6B8E;--positive:#5A7D46;
+--serif:"Iowan Old Style","Iowan Old Style BT",Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif;
+--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;padding:36px 40px 80px;background:#F1EFEA;color:#29241C;font-family:var(--sans);font-size:16px;line-height:1.5}
+h1{font:600 30px/1.2 var(--serif);margin:0 0 6px}
+h2{font:600 22px/1.25 var(--serif);margin:52px 0 6px}
+p{margin:8px 0}
+.lede{max-width:900px}
+.q{max-width:900px;border-left:3px solid var(--accent);padding:2px 0 2px 14px;font:italic 17px/1.5 var(--serif);margin:12px 0}
+.row{display:flex;gap:30px;align-items:flex-start;overflow-x:auto;padding:14px 12px 26px}
+.opt{flex:0 0 422px;width:422px}
+.cap{margin:16px 10px 0;font-size:15px;line-height:1.45}
+.cap .id{display:inline-block;font:600 13px var(--sans);letter-spacing:.03em;background:#29241C;color:#fff;border-radius:6px;padding:3px 8px;margin-right:6px}
+.cap .id.mine{background:var(--accent)}
+.cap b{font-weight:600}
+.pick{max-width:900px;background:#fff;border-radius:14px;padding:18px 22px;margin-top:28px;box-shadow:0 0 0 1px #DAD6CC}
+.pick h2{margin-top:0}
+table.legend{border-collapse:collapse;font-size:14px;margin-top:10px}
+table.legend td,table.legend th{border:1px solid #D8D4CA;padding:5px 10px;text-align:left;vertical-align:top}
+table.legend th{background:#E9E6DF;font-weight:600}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+
+/* ---- the phone, 402 x 874 pt, 1 CSS px = 1 pt ---- */
+.phone{position:relative;width:402px;height:874px;margin:10px;border-radius:56px;background:var(--room);overflow:hidden;
+ box-shadow:0 0 0 1px #8b8f92,0 0 0 9px #1c1c1e,0 0 0 10px #55585b;display:flex;flex-direction:column;color:var(--ink);font-family:var(--sans)}
+.sb{flex:none;height:54px;position:relative}
+.sb .time{position:absolute;left:50px;top:18px;font:600 17px var(--sans)}
+.sb .island{position:absolute;left:50%;top:12px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000}
+.sb .sbr{position:absolute;right:36px;top:23px;display:flex;gap:6px;align-items:center}
+.sb .sig{width:17px;height:11px;background:var(--ink);clip-path:polygon(0 100%,100% 0,100% 100%)}
+.sb .wifi{width:15px;height:11px;background:var(--ink);border-radius:50% 50% 0 0/100% 100% 0 0}
+.sb .bat{width:25px;height:12px;border:1.5px solid var(--ink);border-radius:4px;position:relative}
+.sb .bat:after{content:"";position:absolute;left:1.5px;top:1.5px;bottom:1.5px;right:6px;background:var(--ink);border-radius:1.5px}
+.hi{flex:none;height:34px;position:relative}
+.hi:after{content:"";position:absolute;left:50%;bottom:8px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:var(--ink)}
+
+.mast{flex:none;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 16px 0 20px}
+.wingbtn{display:flex;align-items:center;gap:8px;height:48px}
+.wname{font:600 24px/30px var(--serif)}
+.chev{display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--accent);margin-top:4px}
+.mbtns{display:flex;gap:8px}
+.cbtn{width:44px;height:44px;border-radius:22px;background:var(--surface);display:inline-flex;align-items:center;justify-content:center;color:var(--accent);box-shadow:0 0 0 1px var(--line)}
+.pill{height:44px;padding:0 16px;border-radius:22px;background:var(--surface);display:inline-flex;align-items:center;gap:6px;color:var(--accent);box-shadow:0 0 0 1px var(--line);font:400 17px var(--sans)}
+.pill.fill{background:var(--accent);color:#fff;box-shadow:none;font-weight:600}
+.dots{flex:none;display:flex;gap:7px;padding:0 22px;height:22px;align-items:flex-start}
+.dots.c{justify-content:center}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--takeline)}
+.dots i.on{background:var(--accent)}
+.sub{flex:none;padding:2px 20px 10px;font:400 13px/18px var(--sans);color:var(--meta)}
+
+.chips{flex:none;display:flex;gap:6px;align-items:center;height:56px;padding:0 16px;overflow:hidden;white-space:nowrap;position:relative}
+.chips.fade:after{content:"";position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(90deg,rgba(229,240,236,0),var(--room))}
+.chip{flex:none;height:40px;padding:0 14px;border-radius:9px;display:inline-flex;align-items:center;gap:5px;font:400 15px var(--sans);color:var(--meta);background:rgba(255,255,255,.55)}
+.chip.on{background:var(--wash);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--takeline)}
+.sortbtn{margin-left:auto;flex:none;height:44px;padding:0 6px;font:500 15px var(--sans);color:var(--accent);display:flex;align-items:center;gap:6px}
+.seg{margin-left:auto;flex:none;height:40px;border-radius:10px;background:rgba(255,255,255,.55);display:flex;padding:3px;font:500 15px var(--sans);color:var(--meta)}
+.seg span{padding:0 14px;display:flex;align-items:center;border-radius:8px}
+.seg span.on{background:var(--wash);color:var(--ink);font-weight:600}
+
+.list{flex:1;overflow:hidden;position:relative;min-height:0;background:var(--surface);border-top:1px solid var(--line)}
+.brow{display:flex;align-items:center;min-height:64px;padding:8px 20px;gap:12px;border-bottom:1px solid var(--line)}
+.brow .t{font:600 17px/22px var(--serif)}
+.brow .m{font:400 13px/18px var(--sans);color:var(--meta);margin-top:3px}
+.brow .tr{margin-left:auto;display:flex;gap:10px;align-items:center;flex:none}
+.brow.dim{opacity:.45}
+.star{color:var(--star);font-size:15px}
+.fin{color:var(--positive);font:600 16px var(--sans)}
+.badge{height:26px;min-width:26px;padding:0 9px;border-radius:13px;background:var(--accent);color:#fff;font:600 13px/26px var(--sans);text-align:center}
+.gly{display:inline-block;width:22px;text-align:center;color:var(--accent)}
+.sec{display:flex;align-items:flex-end;justify-content:space-between;height:44px;padding:0 20px 8px;font:600 13px var(--sans);letter-spacing:.03em;color:var(--meta)}
+.sec.tap{height:48px;align-items:center;padding:0 20px;font:600 15px var(--sans);letter-spacing:0;color:var(--ink);background:var(--taketint);border-bottom:1px solid var(--line)}
+.sec .n{font-weight:400;color:var(--meta)}
+.shelfrow{display:flex;align-items:center;gap:14px;min-height:76px;padding:10px 20px;border-bottom:1px solid var(--line)}
+.shelfrow .tile{flex:none;width:48px;height:48px;border-radius:11px;background:var(--wash);display:flex;align-items:center;justify-content:center;font:400 22px var(--serif);color:var(--accent)}
+.shelfrow .t{font:600 17px/22px var(--serif)}
+.shelfrow .m{font:400 13px/18px var(--sans);color:var(--meta);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px}
+.go{margin-left:auto;color:var(--faint);font:400 22px var(--sans)}
+.addrow{display:flex;align-items:center;height:52px;padding:0 20px;font:400 17px var(--sans);color:var(--accent)}
+
+.search{flex:none;margin:2px 16px 4px;height:44px;border-radius:12px;background:var(--surface);box-shadow:0 0 0 1px var(--line);display:flex;align-items:center;gap:8px;padding:0 14px;font:400 17px var(--sans);color:var(--meta)}
+.nrow{padding:11px 20px;border-bottom:1px solid var(--line)}
+.nt{font:600 17px/22px var(--serif);display:flex;gap:8px;align-items:baseline}
+.nt span.x{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.np{font:400 15px/20px var(--serif);color:var(--meta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.np b{font:500 14px/20px var(--sans);color:var(--ink);margin-right:8px}
+.nw{font:400 13px/18px var(--sans);color:var(--meta);margin-top:3px}
+.ncard{margin:0 16px 10px;background:var(--surface);padding:13px 16px 12px;border-radius:14px;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.ncard .np2{font:400 15px/20px var(--serif);color:var(--meta);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-height:40px}
+.ncard .nf{display:flex;justify-content:space-between;font:400 13px/18px var(--sans);color:var(--meta);margin-top:8px}
+.pin{color:var(--meta);flex:none}
+
+.nav{flex:none;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.nav .r{display:flex;gap:8px}
+.btitle{flex:none;padding:4px 20px 0;font:600 24px/30px var(--serif)}
+
+.qe{flex:none;margin:8px 16px;display:flex;gap:10px;align-items:flex-end}
+.qebox{flex:1;min-height:52px;border-radius:14px;background:var(--surface);border:1.5px dashed var(--takeline);display:flex;align-items:center;padding:0 16px;font:400 17px/27px var(--serif);color:var(--meta)}
+.qebox.typed{align-items:flex-start;padding:13px 16px;color:var(--ink);display:block}
+.qebox.typed p{margin:0 0 10px}
+.qebox.typed p:last-child{margin:0}
+.caret{display:inline-block;width:2px;height:21px;background:var(--accent);vertical-align:-4px;margin-left:1px}
+.today{flex:none;height:52px;padding:0 14px;border-radius:14px;background:var(--wash);color:var(--accent);font:600 15px var(--sans);display:flex;align-items:center;gap:6px}
+.qact{flex:none;display:flex;align-items:center;gap:8px;margin:0 16px 8px;height:44px}
+.qact .dest{font:400 13px var(--sans);color:var(--meta);margin-right:auto}
+.qact .saved{font:500 13px var(--sans);color:var(--positive);margin-right:auto}
+.receipt{flex:none;margin:0 16px;height:44px;display:flex;align-items:center;justify-content:space-between;font:400 13px var(--sans);color:var(--meta)}
+.receipt b{color:var(--accent);font-weight:600;font-size:15px;padding:12px 0 12px 12px}
+
+.tabs{flex:none;height:56px;display:flex;border-top:1px solid var(--line)}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;font:400 17px var(--sans);color:var(--meta)}
+.tab.on span{background:var(--wash);color:var(--ink);font-weight:600;padding:8px 16px;border-radius:9px}
+.tabs.iw{height:64px}
+.tabs.iw .tab{flex-direction:column;gap:3px;font-size:13px}
+.tabs.iw .tab.on{color:var(--accent);font-weight:600}
+.tabs.iw .tab.on span{background:none;padding:0;color:var(--accent)}
+.systabs{flex:none;height:62px;margin:2px 20px 0;display:flex;gap:10px}
+.syscap{flex:1;border-radius:31px;background:rgba(255,255,255,.78);box-shadow:0 3px 16px rgba(41,36,28,.16),inset 0 0 0 1px rgba(255,255,255,.95);display:flex;padding:4px}
+.sysitem{flex:1;border-radius:27px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:500 10px var(--sans);color:#3c3c43}
+.sysitem.on{background:rgba(120,120,128,.16);color:var(--accent)}
+.syssearch{flex:none;width:62px;border-radius:31px;background:rgba(255,255,255,.78);box-shadow:0 3px 16px rgba(41,36,28,.16),inset 0 0 0 1px rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;color:#3c3c43}
+.wingline{flex:none;height:44px;display:flex;align-items:center;justify-content:center;gap:18px;font:400 15px var(--sans);color:var(--meta);border-top:1px solid var(--line)}
+.wingline b{font:600 17px var(--serif);color:var(--ink);display:flex;align-items:center;gap:6px}
+
+.kb{flex:none;height:330px;background:#D9DCE2;border-radius:26px 26px 0 0;padding:6px 3px 0}
+.kbs{height:40px;display:flex;align-items:center;font:400 17px var(--sans);color:#3c3c43}
+.kbs span{flex:1;text-align:center}
+.kr{display:flex;justify-content:center;gap:6px;margin-top:11px}
+.k{width:33.5px;height:43px;border-radius:6px;background:#fff;font:400 22px var(--sans);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 0 #9a9ca1;color:#000}
+.k.d{background:#B6BAC3;width:44px;font-size:17px}
+.k.s{width:186px}
+.k.w{width:92px;font-size:16px;background:#B6BAC3}
+.k.ret{background:var(--accent);color:#fff;font-weight:600}
+
+.dim{position:absolute;inset:0;background:rgba(41,36,28,.22);z-index:5}
+.menu{position:absolute;z-index:6;left:16px;top:112px;width:300px;border-radius:16px;background:var(--surface);box-shadow:0 12px 40px rgba(41,36,28,.28);overflow:hidden}
+.menu .mi{height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;font:400 17px var(--serif);border-bottom:1px solid #EEF3F0}
+.menu .mi .ck{width:18px;color:var(--accent);font:600 16px var(--sans)}
+.menu .mi .ct{margin-left:auto;font:400 14px var(--sans);color:var(--meta)}
+.menu .mi.on{font-weight:600;background:var(--taketint)}
+.menu .mi.act{font:500 16px var(--sans);color:var(--accent)}
+.menu .mh{padding:10px 16px 6px;font:600 13px var(--sans);color:var(--meta);letter-spacing:.03em}
+
+.zone{position:absolute;left:6px;right:6px;border:2px dashed #B4472F;border-radius:14px;z-index:4;pointer-events:none}
+.zone span{position:absolute;right:6px;bottom:6px;width:24px;height:24px;border-radius:12px;background:#B4472F;color:#fff;font:700 14px/24px var(--sans);text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.zone.t span{bottom:auto;top:6px}
+.zone.b{border-color:#2F5FA8}.zone.b span{background:#2F5FA8}
+.n1,.n2{display:inline-block;width:20px;height:20px;border-radius:10px;color:#fff;font:700 13px/20px var(--sans);text-align:center;vertical-align:1px}
+.n1{background:#B4472F}.n2{background:#2F5FA8}
+.searchrow{flex:none;display:flex;gap:8px;align-items:center;margin:2px 16px 4px}
+.searchrow .search{flex:1;margin:0}
+.kbf{display:flex;justify-content:space-between;padding:14px 28px 0;font:400 26px var(--sans);color:#3c3c43}
+.scrollbar{position:absolute;right:3px;top:30px;width:3px;height:120px;border-radius:2px;background:rgba(41,36,28,.28)}
+</style></head><body><h1>BK-1 — the Bookcase on the phone</h1>
+<p class="lede"><b>BK-1 — the Bookcase's phone shape, inside one wing.</b> Today the phone has no shelves: 23 books from nine wings sit in one flat list,
+“Ideas inbox” twice, and “+ New Book” is the last row, hidden under the capture box. These frames show the Home wing's eleven books on its
+shelves (Writing, Reading &amp; reference, Life, Welcome) plus the starred shelf, Unshelved and All. The 13i sitting ruled “the Bookcase/shelf strip as a list” but not the form.</p>
+<p class="lede">Book rows are the same in every option: a 64 pt row, the name in Iowan 17, one meta line, and at most one mark at the trailing edge
+(the star, the finished ✓, or the count of arrivals waiting).</p>
+<div class="row"><div class="opt"><div class="phone"><div class="sb"><span class="time">9:41</span><span class="island"></span><span class="sbr"><i class="sig"></i><i class="wifi"></i><i class="bat"></i></span></div><div class="mast"><div class="wingbtn"><span class="wname">Home</span><span class="chev"></span></div><div class="mbtns"><span class="cbtn"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg></span><span class="cbtn"><svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><circle cx="5" cy="11" r="1.7"/><circle cx="11" cy="11" r="1.7"/><circle cx="17" cy="11" r="1.7"/></svg></span></div></div><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="chips fade"><span class="chip">★ Starred</span><span class="chip">Unshelved</span><span class="chip on">✎ Writing</span><span class="chip">Reading &amp; reference</span><span class="chip">☼ Life</span><span class="chip">Welcome</span><span class="chip">All</span></div><div class="list"><div class="brow"><div><div class="t">Essays</div><div class="m">8 notes · #essay #goals</div></div><div class="tr"><span class="star">★</span></div></div><div class="brow"><div><div class="t">Blog drafts</div><div class="m">7 notes · #blog #draft</div></div></div><div class="brow"><div><div class="t">Letters</div><div class="m">3 notes · finished</div></div><div class="tr"><span class="fin">✓</span></div></div><div class="brow"><div><div class="t">Ideas inbox</div><div class="m">3 notes · 3 waiting</div></div><div class="tr"><span class="badge">3</span></div></div><div class="addrow">+ New book on Writing</div></div><div class="qe"><div class="qebox">New note…</div><div class="today">✎ Today</div></div><div class="tabs"><div class="tab"><span>Starred</span></div><div class="tab on"><span>Bookcase</span></div><div class="tab"><span>Library</span></div></div><div class="hi"></div></div><div class="cap"><span class="id mine">BK-1 (a)</span><b>A chip row of shelves, one shelf at a time.</b> The Mac's strip at phone size: quiet chips, the solo'd one filled, scrolling sideways with a fade. The screen shows one shelf's books and nothing else — the calmest home. Cost: the strip grows with shelves and the later chips are off-screen; a book on another shelf is two taps away (chip, then book).</div></div><div class="opt"><div class="phone"><div class="sb"><span class="time">9:41</span><span class="island"></span><span class="sbr"><i class="sig"></i><i class="wifi"></i><i class="bat"></i></span></div><div class="mast"><div class="wingbtn"><span class="wname">Home</span><span class="chev"></span></div><div class="mbtns"><span class="cbtn"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg></span><span class="cbtn"><svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><circle cx="5" cy="11" r="1.7"/><circle cx="11" cy="11" r="1.7"/><circle cx="17" cy="11" r="1.7"/></svg></span></div></div><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="list"><div class="sec tap"><span>Unshelved</span><span class="n">2 ⌄</span></div><div class="brow"><div><div class="t">Holidays</div><div class="m">2 notes</div></div></div><div class="brow"><div><div class="t">Kids’ sayings</div><div class="m">4 notes</div></div></div><div class="sec tap"><span>✎ Writing</span><span class="n">4 ⌄</span></div><div class="brow"><div><div class="t">Essays</div><div class="m">8 notes · #essay #goals</div></div><div class="tr"><span class="star">★</span></div></div><div class="brow"><div><div class="t">Blog drafts</div><div class="m">7 notes · #blog #draft</div></div></div><div class="brow"><div><div class="t">Letters</div><div class="m">3 notes · finished</div></div><div class="tr"><span class="fin">✓</span></div></div><div class="brow"><div><div class="t">Ideas inbox</div><div class="m">3 notes · 3 waiting</div></div><div class="tr"><span class="badge">3</span></div></div><div class="sec tap"><span>Reading &amp; reference</span><span class="n">3 ›</span></div><div class="sec tap"><span>☼ Life</span><span class="n">4 ⌄</span></div><div class="brow"><div><div class="t">Journal</div><div class="m">13 entries · daily</div></div><div class="tr"><span class="star">★</span></div></div><div class="brow"><div><div class="t">Recipes</div><div class="m">5 notes · #recipe</div></div></div></div><div class="qe"><div class="qebox">New note…</div><div class="today">✎ Today</div></div><div class="tabs"><div class="tab"><span>Starred</span></div><div class="tab on"><span>Bookcase</span></div><div class="tab"><span>Library</span></div></div><div class="hi"></div></div><div class="cap"><span class="id">BK-1 (b)</span><b>One list, shelves as headers.</b> Everything in the wing in one scroll, each shelf a 48 pt header that folds; tap a header to fold or solo. Nothing is hidden behind a chip. Cost: with eleven books it is already two screens long, the header rows add up, and there is no starred shelf unless it becomes a section too.</div></div><div class="opt"><div class="phone"><div class="sb"><span class="time">9:41</span><span class="island"></span><span class="sbr"><i class="sig"></i><i class="wifi"></i><i class="bat"></i></span></div><div class="mast"><div class="wingbtn"><span class="wname">Home</span><span class="chev"></span></div><div class="mbtns"><span class="cbtn"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg></span><span class="cbtn"><svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><circle cx="5" cy="11" r="1.7"/><circle cx="11" cy="11" r="1.7"/><circle cx="17" cy="11" r="1.7"/></svg></span></div></div><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="list"><div class="shelfrow"><div class="tile">★</div><div><div class="t">Starred</div><div class="m">2 books · Journal, Essays</div></div><span class="go">›</span></div><div class="shelfrow"><div class="tile">✎</div><div><div class="t">Writing</div><div class="m">4 books · Essays, Blog drafts, Letters, Ideas inbox</div></div><span class="go">›</span></div><div class="shelfrow"><div class="tile">R</div><div><div class="t">Reading &amp; reference</div><div class="m">3 books · Reading notes, Quotes, Sources</div></div><span class="go">›</span></div><div class="shelfrow"><div class="tile">☼</div><div><div class="t">Life</div><div class="m">4 books · Journal, Recipes, Lisbon trip, Running log</div></div><span class="go">›</span></div><div class="shelfrow"><div class="tile">W</div><div><div class="t">Welcome</div><div class="m">1 book · The Prince</div></div><span class="go">›</span></div><div class="shelfrow"><div class="tile">–</div><div><div class="t">Unshelved</div><div class="m">2 books · Holidays, Kids’ sayings</div></div><span class="go">›</span></div><div class="shelfrow"><div class="tile">≡</div><div><div class="t">All books</div><div class="m">11 books · every shelf, stacked</div></div><span class="go">›</span></div><div class="addrow">+ New shelf</div></div><div class="qe"><div class="qebox">New note…</div><div class="today">✎ Today</div></div><div class="tabs"><div class="tab"><span>Starred</span></div><div class="tab on"><span>Bookcase</span></div><div class="tab"><span>Library</span></div></div><div class="hi"></div></div><div class="cap"><span class="id">BK-1 (c)</span><b>Two levels: shelves, then books.</b> The Bookcase is a short list of shelves, each naming its first books; tapping one pushes that shelf. The tidiest first screen and the most room per shelf. Cost: every book is one more tap and one more back away, every time.</div></div></div><h2>What the other state of each looks like</h2><div class="row"><div class="opt"><div class="phone"><div class="sb"><span class="time">9:41</span><span class="island"></span><span class="sbr"><i class="sig"></i><i class="wifi"></i><i class="bat"></i></span></div><div class="mast"><div class="wingbtn"><span class="wname">Home</span><span class="chev"></span></div><div class="mbtns"><span class="cbtn"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg></span><span class="cbtn"><svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><circle cx="5" cy="11" r="1.7"/><circle cx="11" cy="11" r="1.7"/><circle cx="17" cy="11" r="1.7"/></svg></span></div></div><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="chips" style="justify-content:flex-end"><span class="chip">Reading &amp; reference</span><span class="chip">☼ Life</span><span class="chip">Welcome</span><span class="chip on">All</span></div><div class="list"><div class="sec"><span>Unshelved <span class="n">· 2</span></span><span class="n"></span></div><div class="brow"><div><div class="t">Holidays</div><div class="m">2 notes</div></div></div><div class="brow"><div><div class="t">Kids’ sayings</div><div class="m">4 notes</div></div></div><div class="sec"><span>✎ Writing <span class="n">· 4</span></span><span class="n"></span></div><div class="brow"><div><div class="t">Essays</div><div class="m">8 notes · #essay #goals</div></div><div class="tr"><span class="star">★</span></div></div><div class="brow"><div><div class="t">Blog drafts</div><div class="m">7 notes · #blog #draft</div></div></div><div class="brow"><div><div class="t">Letters</div><div class="m">3 notes · finished</div></div><div class="tr"><span class="fin">✓</span></div></div><div class="brow"><div><div class="t">Ideas inbox</div><div class="m">3 notes · 3 waiting</div></div><div class="tr"><span class="badge">3</span></div></div><div class="sec"><span>Reading &amp; reference <span class="n">· 3</span></span><span class="n"></span></div><div class="brow"><div><div class="t">Reading notes</div><div class="m">6 notes · #reading</div></div></div></div><div class="qe"><div class="qebox">New note…</div><div class="today">✎ Today</div></div><div class="tabs"><div class="tab"><span>Starred</span></div><div class="tab on"><span>Bookcase</span></div><div class="tab"><span>Library</span></div></div><div class="hi"></div></div><div class="cap"><span class="id">BK-1 (a) · All</span><b>The chip row with “All” chosen.</b> All stacks the shelves in strip order with Unshelved first, as the Mac rules it — which is option (b)'s list, minus the folding. So (a) contains (b): she picks solo or All per wing, and the phone remembers.</div></div><div class="opt"><div class="phone"><div class="sb"><span class="time">9:41</span><span class="island"></span><span class="sbr"><i class="sig"></i><i class="wifi"></i><i class="bat"></i></span></div><div class="nav"><span class="cbtn"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4l-6 6 6 6"/></svg></span><div class="r"><span class="cbtn"><svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><circle cx="5" cy="11" r="1.7"/><circle cx="11" cy="11" r="1.7"/><circle cx="17" cy="11" r="1.7"/></svg></span></div></div><div class="btitle">✎ Writing</div><div class="sub">Home · 4 books</div><div class="list"><div class="brow"><div><div class="t">Essays</div><div class="m">8 notes · #essay #goals</div></div><div class="tr"><span class="star">★</span></div></div><div class="brow"><div><div class="t">Blog drafts</div><div class="m">7 notes · #blog #draft</div></div></div><div class="brow"><div><div class="t">Letters</div><div class="m">3 notes · finished</div></div><div class="tr"><span class="fin">✓</span></div></div><div class="brow"><div><div class="t">Ideas inbox</div><div class="m">3 notes · 3 waiting</div></div><div class="tr"><span class="badge">3</span></div></div><div class="addrow">+ New book on Writing</div></div><div class="qe"><div class="qebox">New note…</div><div class="today">✎ Today</div></div><div class="tabs"><div class="tab"><span>Starred</span></div><div class="tab on"><span>Bookcase</span></div><div class="tab"><span>Library</span></div></div><div class="hi"></div></div><div class="cap"><span class="id">BK-1 (c) · pushed</span><b>A shelf, pushed.</b> The second level of (c). It is the same list as (a)'s solo, reached by a push instead of a chip; the shelf's own menu (rename, glyph, delete) lives in the round button.</div></div></div>
+<div class="pick"><h2>My pick: (a), the chip row, solo by default with All as the last chip</h2>
+<p>It is the Mac's Bookcase read aloud on a phone — the same strip, the same solo-and-All rule, the same starred shelf leading — so the two devices teach each other.
+It is also the calmest answer to “everything just shows up in one bunch”: one wing, one shelf, four or five books, room to breathe.
+And because All is just the last chip, nobody who wants (b)'s one long list loses it.</p>
+<p>Two things the strip needs to be honest on a phone: the row is 56 pt tall so a chip is a real target, and the strip scrolls back to show the solo'd chip
+whenever the screen appears. “New book” is a row at the end of the shelf it will land on and an entry in the round menu, never a row hidden under the capture box.</p></div>
+
+<h2>Legend — the values these frames are drawn with</h2>
+<p class="lede">Study voice under the sea-glass palette, light. Colours are the code's own: the voice's inks from
+<code>App/Variorum/Shared/Theme/VoiceTokens.swift</code> (<code>studyLight</code>), the palette family computed by
+<code>PaletteDerivation.derive</code> from the sea-glass seed <code>#C2DDD3</code> at the bold depth. Sizes are a
+proposed phone layer over those tokens (work-list W-001); they are the proposal these sketches exist to test, not
+values in the build.</p>
+<table class="legend">
+<tr><th>Token</th><th>Value</th><th>Where it comes from</th></tr>
+<tr><td><span class="sw" style="background:#E5F0EC"></span>room</td><td>#E5F0EC</td><td>sea-glass, derived (bold: L .920, S ≤ .75) — the bars: masthead, chips, capture box, tabs</td></tr>
+<tr><td><span class="sw" style="background:#FFFFFF"></span>surface · card</td><td>#FFFFFF</td><td>Study light keeps its own paper under a palette — the lists sit on it, as the Mac's Bookcase column does</td></tr>
+<tr><td><span class="sw" style="background:#CBE2D9"></span>wash · line</td><td>#CBE2D9</td><td>sea-glass, derived (selected chip, hairlines)</td></tr>
+<tr><td><span class="sw" style="background:#B7D7CB"></span>takeLine</td><td>#B7D7CB</td><td>sea-glass, derived (the capture box's dashed edge, chip outline)</td></tr>
+<tr><td><span class="sw" style="background:#3B6A59"></span>accent</td><td>#3B6A59</td><td>sea-glass deepened until it clears 4.5:1 on room and wash (5.3 / 4.6)</td></tr>
+<tr><td><span class="sw" style="background:#29241C"></span>ink</td><td>#29241C</td><td>Study light (13.2:1 on the room)</td></tr>
+<tr><td><span class="sw" style="background:#8D8578"></span>muted</td><td>#8D8578</td><td>Study light — 3.1:1 on this room, so not used for text here</td></tr>
+<tr><td><span class="sw" style="background:#6A6359"></span>meta ink (proposed)</td><td>#6A6359</td><td>not a token today: the corrected muted from <code>sizing-sheet.html</code> (about 5:1 on the room, 5.9:1 on paper), for previews, stamps and meta (W-004)</td></tr>
+<tr><td><span class="sw" style="background:#3D6B8E"></span>star</td><td>#3D6B8E</td><td>Study light (the star stays the voice's blue)</td></tr>
+<tr><td><span class="sw" style="background:#5A7D46"></span>positive</td><td>#5A7D46</td><td>Study light (finished ✓, saved)</td></tr>
+</table>
+<table class="legend">
+<tr><th>Text</th><th>Face and size</th><th>Today (Study)</th></tr>
+<tr><td>Wing / screen title</td><td>Iowan Old Style 24 semibold</td><td>11.5 pt sans "path line"</td></tr>
+<tr><td>Row title (book, note)</td><td>Iowan Old Style 17 semibold, line 22</td><td>Iowan 16</td></tr>
+<tr><td>Preview line · capture text</td><td>Iowan 15 (her words stay in her face) · the capture box types in Iowan 17</td><td>no preview · capture text 11.5</td></tr>
+<tr><td>Meta, stamps, section labels</td><td>SF 13 (the stamp inside a preview line, SF 14 medium)</td><td>11.5</td></tr>
+<tr><td>Chips · tabs and buttons</td><td>SF 15 · SF 17</td><td>11.5</td></tr>
+</table>
+<table class="legend">
+<tr><th>Touch</th><th>Drawn</th><th>Today</th></tr>
+<tr><td>List rows</td><td>62–80 pt tall, the whole row one target</td><td>37–39 pt</td></tr>
+<tr><td>Round and capsule buttons</td><td>44 pt</td><td>14 pt-tall words</td></tr>
+<tr><td>Chips</td><td>40 pt tall in a 56 pt row; the hit area is the row's height</td><td>21–56 × 14 pt</td></tr>
+<tr><td>Tab bar</td><td>56 pt, three 134 pt-wide targets</td><td>35–50 × 14 pt</td></tr>
+<tr><td>Capture box at rest</td><td>52 pt</td><td>about 34 pt</td></tr>
+</table>
+<p class="lede">The type sizes are the five in <code>sketches/sizing-sheet.html</code> (13 · 15 · 17 · 20 · 24) so every sketch for the sitting is one system. The shelf and filter chips keep the Mac strip's near-square shape at 40 pt; the sizing sheet's 32 pt capsule is for a note's facts. The fonts fall back to Palatino or Georgia where Iowan Old Style is not installed. Frames are 402 × 874 pt
+(iPhone 17 Pro), one CSS pixel to the point. Dashed red and blue outlines are annotations, not part of the design.</p>
+</body></html>

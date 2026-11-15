@@ -1,0 +1,17 @@
+VM44-SEED summary (written 2026-11-12 20:47:54 +0000)
+wings: 8 (+ virtual Home)
+shelves: 4
+books live: 23
+gatherings live: 1
+books archived: 1
+books in trash: 1
+notes live: 149
+notes archived: 3
+notes in trash: 3
+arrivals waiting: 3
+fanned blocks: 223
+comments live: 21
+callouts: 11
+commits: 15
+tags: 23
+longest note words (approx): 40035
