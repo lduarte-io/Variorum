@@ -100,3 +100,8 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - The rule editor: "Simple editor" — any/all of tags, starred, not-tag; a nested rule shows as a locked row.
   - The "Open Arrivals first" button on the Finish confirm: "Keep it".
   - Arrivals: "Full-screen review".
+- Books, by a word:
+  - Book views in v1: "Contents and Read" (an Index and a paged reader come after v1).
+  - Shelf management: "Full, behind a ⋯".
+  - A book's word target and note limit: "Show and edit both".
+  - The Journal's new entry: "Foot of the Journal" (the Today button keeps opening the day's first entry).
