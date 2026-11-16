@@ -162,3 +162,10 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - VM-46 on her phone (2026-11-15, late): "i see the right icon. it has been saying syncing for like a minute - kinda weird since it had arleady synced previously tongiht and nothing significant was added. however, it did eventually sync and now says synced 10:30."
   - Orchestrator's note: a minute-long round with nothing new to send is a finding for the performance work (the audit traced a full owner-adoption scan and tombstone scans at every launch and unlock).
 - The trace: "let's do the lag trace now together so that everything can be planned out."
+
+## 2026-11-15, late — the composition approved
+
+- She asked this session to stay the planner: "let's just have you make the tickets and be the planner. your context limit is not *that* full."
+- On the one ordering question (the Writing umbrella): "writing in wave 3 is fine."
+- The approval: "22 is fine, composition is fine." — 22 umbrellas in six waves, as proposed in chat; the plan is `notes/plans/vm-44-mobile-catch-up-plan.md`.
+- Earlier the same evening, closing the loose ends: the six tokens left out of the guard's list stay public ("i think it's fine for those to be there"); the wording pass can wait ("i'm sure it's fine for now"); the older phone safety copy was pruned at her word.

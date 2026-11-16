@@ -221,6 +221,22 @@ CSS = B.CSS + r"""
 .phone.xl .pb{height:52px}
 .phone.xl .stitle{font-size:27px;line-height:33px}
 .phone.xl .trw .p{font-size:20px;line-height:26px}
+/* ---- revision pass ---- */
+.menu .mh{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 2px 16px;min-height:48px}
+.menu .mh .mhm{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.qact{justify-content:flex-start}
+.qact .sp{flex:1}
+.snip{display:flex;align-items:flex-start;gap:4px;padding:12px 4px 12px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+.snip .mid{flex:1;min-width:0}
+.snip .tx{font:400 17px/24px var(--serif);color:var(--ink)}
+.snip .nw{margin-top:4px}
+.snip .rdots{margin:0}
+.scopeseg{flex:none;padding:2px 0 0}
+.scopeseg .segc{margin:0 16px 2px}
+.winglbl{color:var(--meta)}
+.editbox{margin:0 16px 12px;min-height:120px;border-radius:12px;background:var(--surface);box-shadow:0 0 0 2px var(--accent);padding:12px 14px;font:400 17px/24px var(--serif);color:var(--ink)}
+.hand.d:after{left:21px;top:46px;width:2px;height:44px}
+.phone.xl .mkey{font-size:18px;height:40px;border-radius:20px}
 """
 
 # ---------- icons this surface adds ----------
@@ -249,11 +265,10 @@ def qe(text='New note', today=True, cls=''):
 def qe_typed(paras, cap=False, caret=True, today=False):
     ps = ''.join('<p>%s</p>' % p for p in paras[:-1]) + '<p>%s%s</p>' % (paras[-1], '<span class="caret"></span>' if caret else '')
     return '<div class="qe"><div class="qebox typed%s">%s</div>%s</div>' % (' cap' if cap else '', ps, TODAY if today else '')
-def qact(wing, on=True, keys=False):
+def qact(on=True):
     off = '' if on else ' off'
-    k = '<span class="mkey">#tag</span><span class="mkey">title</span>' if keys else ''
-    return ('<div class="qact"><span class="dest" style="margin-right:auto">in %s</span>%s<span class="pill%s">Open</span><span class="pill fill%s">File</span></div>'
-            % (wing, k, off, off))
+    return ('<div class="qact"><span class="mkey">#tag</span><span class="mkey">title</span><span class="sp"></span>'
+            '<span class="pill%s">Open</span><span class="pill fill%s">File</span></div>' % (off, off))
 def rcpt(text, act='', refusal=False, x=False):
     a = '<b>%s</b>' % act if act else ''
     xx = '<span class="x">%s</span>' % I_X if x else ''
@@ -271,20 +286,20 @@ WORK_ALL = [sec("Unshelved", "1"), brow("Ideas inbox", "2 notes · #idea"),
             sec("Projects", "2"), brow("Product specs", "4 notes · #spec", STAR), brow("Meeting notes", "8 notes · #meeting #q4")]
 def home_all(): return [sec("✎ Writing", "4"), *WRITING, sec("Reading &amp; reference", "2"), *READING, sec("☼ Life", "3"), *LIFE, sec("Welcome", "1"), *WELCOME]
 
-def wmast(name, buttons=('search', 'more'), extra=''):
-    return mast(name, buttons=buttons).replace('<div class="mbtns">', '<div class="mbtns">' + extra)
-def home(*over, wing="Home", chipset=None, on=2, rows=None, foot=None, bar=True, cls='', tab=1):
+LOCKB = '<span class="cbtn">%s</span>' % I_LOCK
+def wmast(name, buttons=('search', 'more'), extra='', lock=False):
+    return mast(name, buttons=buttons).replace('<div class="mbtns">', '<div class="mbtns">' + (LOCKB if lock else '') + extra)
+def home(*over, wing="Home", chipset=None, on=2, rows=None, foot=None, bar=True, cls='', tab=1, lock=False, band=''):
     chipset = HOME_CHIPS if chipset is None else chipset
     rows = WRITING + [NEWBOOK] if rows is None else rows
-    return P(wmast(wing), dots(wi(wing)), chips(chipset, on, fade=len(chipset) > 4), lst(*rows),
+    return P(wmast(wing, lock=lock), dots(wi(wing)), chips(chipset, on, fade=len(chipset) > 4), lst(*rows), band,
              foot if foot is not None else qe(), tabs_words(tab) if bar else '', hi() if bar else '', *over, cls=cls)
 
-def wing_menu(on, manage=True):
+def wing_menu(on, more=True):
     rows = ''.join('<div class="mi%s"><span class="ck">%s</span>%s<span class="ct">%s</span></div>' %
                    (' on' if i == on else '', '✓' if i == on else '', html.escape(w), wcount(b, n)) for i, (w, b, n) in enumerate(WINGS))
-    m = ('<div class="mi act">New wing…<span class="opn">open</span></div>'
-         '<div class="mi act" style="border:0">Manage wings…<span class="opn">open</span></div>') if manage else ''
-    return '<div class="dim"></div><div class="menu"><div class="mh">Wings — each a separate library</div>%s%s</div>' % (rows, m)
+    m = '<span class="mhm">%s</span>' % I_MORE if more else '<span style="height:44px"></span>'
+    return '<div class="dim"></div><div class="menu"><div class="mh"><span>Wings</span>%s</div>%s</div>' % (m, rows)
 
 def ctx(top, items, head='', left=None, right=16, width=274):
     pos = ('left:%dpx' % left) if left is not None else ('right:%dpx' % right)
@@ -345,15 +360,22 @@ def room(title, sub, right='', *parts, cls='', bar=True, tab=2, over=()):
     return P(nav(right), '<div class="stitle">%s</div><div class="sub">%s</div>' % (title, sub), *parts,
              tabs_words(tab) if bar else '', hi() if bar else '', *over, cls=cls)
 
+# ---------- frame numbers ----------
+class Num:
+    def __init__(self): self.n = 0
+    def __call__(self):
+        self.n += 1
+        return str(self.n)
+
 # ---------- page writer ----------
 VALUES = """
 <h2>The values these frames are drawn with</h2>
 <p class="lede">Everything inherits <code>sketches/sizing-sheet.html</code>: Study voice under the sea-glass palette; type at 13 · 15 · 17 · 20 · 24
 (Iowan Old Style for her words and for names, SF for chrome); a 44 pt touch minimum; lists and her words on the paper, bars, sheets and section bands on the
-sea-glass room; the corrected meta ink <code>#6A6359</code> and faint <code>#8B7F6A</code>; the dark values are the sheet's <code>.dk</code> set. The shell is her rulings
-(SW-1 the wing band, SW-3 the Bookcase with the one-line box, SW-4 File and Open, LK-5 words on a chip, the Today button) drawn with the round-1 sketch generator's
-frame and the books designer's sheets, so a different pick on an open question is a re-skin. Frames are 402 × 874 pt, one CSS pixel to the point.
-Fonts fall back to Palatino or Georgia where Iowan is not installed. Dashed red and green outlines, the red finger mark and the red “open” tag are annotations, not design.</p>
+sea-glass room; the corrected meta ink <code>#6A6359</code> and faint <code>#8B7F6A</code>; the dark values are the sheet's <code>.dk</code> set. The shell is her rulings:
+the wing title band (SW-1), the Bookcase with the one-line box (SW-3), File and Open (SW-4), shelves as a chip row (BK-1), the bar as three words on roots and
+lists and never inside a note (LK-5), the Today button. Frames are 402 × 874 pt, one CSS pixel to the point.
+Fonts fall back to Palatino or Georgia where Iowan is not installed. Dashed red and blue outlines, the red finger mark and the red “open” tag are annotations, not design.</p>
 """
 def write(fname, title, intro, sections, notes, check_dir=None):
     body = ''.join('<h2>%s</h2>%s%s' % (h, lede, row(*opts)) for h, lede, opts in sections)

@@ -1,5 +1,7 @@
 # VM-44 — the Great Mobile Catch-up: handoff after sitting 1
 
+**Superseded 2026-11-16 by `notes/handoffs/vm-44-handoff.md`:** the plan was approved and the tickets minted in the same session; its "next" list and kickoff message below are history.
+
 Written 2026-11-15, at the close of the first planning session. The effort is NOT finished: the audit, the
 design and her first sitting are done; composing the umbrellas and waves and minting the tickets is the next
 session's work. Ticket: VM-44 (team VM, In Progress) · Branch: `vm-44-mobile-catchup` · Worktree:

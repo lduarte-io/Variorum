@@ -90,12 +90,15 @@ capability survives. The ruled tools, in order of preference:
 4. **No-redirect** — "do it on the Mac" copy is a red flag; a road
    must exist on the phone, even a modest one, except where she has
    ruled the exclusion.
-5. **Exclusion, ruled and recorded** — Compare · the scraps
+5. **Exclusion, ruled and recorded** — the scraps
    drag-into-note door · sticky-note/canvas editing · workspace &
    windowing · two-pane outline · expand-all-fans · side-by-side
    reference panel · ceremonies · iPad (PERMANENT: portrait-locked
    iPhone; declaring iPad capability forbids portrait-only — never
    declare it).
+   *Compare left this list: it is reopened for after the phone's v1
+   (two takes first, then notes as tabs lined up block by block —
+   `notes/plans/vm-44-mobile-catch-up-plan.md`).*
 
 Calm default, depth on demand, is doubly true on a phone: one column,
 one block blooming, machinery summoned per-block. The R58 lean —
@@ -122,6 +125,9 @@ the Mac's default switches.
 1. **The app dies without warning** (background → suspend → kill).
    Pending buffers flush on background (shipped); any future
    multi-step flow must survive interruption mid-step or not exist.
+   Under Castle the library stays OPEN in the background for the idle
+   dial's minutes and a full close always locks; Lock library now is a
+   door on the phone (`notes/plans/vm-44/plans/sitting-1-rulings.md`).
 2. **Text mutates in batches you didn't type** — autocorrect,
    dictation, predictive text strip and rewrite. Identity is a
    re-stamped projection, never attribute inheritance (the spike's
@@ -235,7 +241,7 @@ bookkeeping.
 The active plan: `notes/plans/mobile-parity-round.md` (stages A–D,
 each its OWN `/architect-phase` invocation). **Invoke with the mobile
 plan NAMED explicitly** — e.g. `/architect-phase mobile parity stage
-A` — from the `~/dev/variorum-mobile` worktree; a bare
+A` — from the effort's own `vm-N` worktree; a bare
 `/architect-phase` resolves to the MAC master-plan pointer and is
 always wrong for mobile. The branch & merge discipline in that plan
 binds (pull `main` at stage kickoffs and batch boundaries; prompt her

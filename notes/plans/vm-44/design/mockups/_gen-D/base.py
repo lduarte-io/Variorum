@@ -1,4 +1,5 @@
 # VM-44 designer D — throwaway generator base (static HTML out; no scripts in the output).
+# REVISED after sitting 1: a draft-words registry (dr / drs), the shared Settings list, the switch, the "ruled" tag.
 # Reuses the round-1 sketch generator's frame, CSS and shell helpers so the mockups read as one system.
 import os, html
 
@@ -22,6 +23,31 @@ h3{font:600 17px/1.3 var(--sans);margin:26px 0 4px}
 .lede b{font-weight:600}
 code{font:13px/1.4 "SF Mono",ui-monospace,Menlo,monospace;background:#E6E3DB;padding:1px 5px;border-radius:4px}
 .cap .id.alt{background:#8A5A12}
+.cap .id.st{background:#3B6A59}
+p.ruled{max-width:1000px;margin:8px 0;color:#24221E;font:400 15px/1.5 var(--sans);background:#E3EEE9;border-radius:8px;padding:10px 14px}
+p.ruled b{font-weight:600}
+.held{display:inline-block;font:600 11px var(--sans);letter-spacing:.04em;background:#F3D9D2;color:#7A2A1E;border-radius:4px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+.tog{width:51px;height:31px;border-radius:16px;background:var(--faint2);opacity:.5;position:relative;flex:none;margin-right:12px}
+.tog.on{background:var(--accent);opacity:1}
+.tog:after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:14px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tog.on:after{left:22px}
+.bcard .step{font:600 13px/18px var(--sans);color:var(--meta);margin-bottom:2px}
+.bcard.go{display:flex;align-items:center;gap:12px;padding:10px 4px 10px 16px;min-height:60px}
+.bcard.go .mid{flex:1;min-width:0}
+.bcard.go .t1{font:600 15px/20px var(--sans);color:var(--accent)}
+.bcard.go .t2{font:400 13px/18px var(--serif);color:var(--meta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcard.go .gl{padding:0;width:24px}
+.bcard.go .xx{position:static;flex:none}
+.nchipr{display:flex;gap:8px;margin:0 0 12px}
+.nchipr span{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:16px;box-shadow:inset 0 0 0 1px var(--takeline);font:500 15px/20px var(--sans);color:var(--ink)}
+.nchipr span svg{color:var(--accent)}
+.lnum{flex:none;width:28px;font:600 13px/20px var(--sans);color:var(--meta);font-variant-numeric:tabular-nums}
+.gnav{flex:none;height:48px;display:flex;align-items:center;padding:0 8px;font:600 17px/22px var(--serif)}
+.gnav .cbtn{margin-right:4px}
+.ghead{flex:none;padding:6px 20px 12px}
+.ghead .t{font:600 24px/30px var(--serif)}
+.ghead .m{font:400 13px/18px var(--sans);color:var(--meta);margin-top:2px}
+.grow{display:flex;align-items:center;min-height:56px;padding:8px 20px;border-bottom:1px solid var(--line);font:400 17px/22px var(--serif)}
 .cap small{display:block;margin-top:6px;font-size:13px;color:#5b574f;line-height:1.45}
 .new{display:inline-block;font:600 11px var(--sans);letter-spacing:.04em;background:#F0E3BF;color:#6B4A0C;border-radius:4px;padding:1px 6px;margin-left:4px;vertical-align:1px}
 table.bn{border-collapse:collapse;font-size:14px;margin:12px 0 0;max-width:1500px}
@@ -237,9 +263,25 @@ def mark(size=34):
             '<rect x="17" y="12" width="22" height="30" rx="4" transform="rotate(18 28 46)"/>'
             '<rect x="17" y="10" width="22" height="30" rx="4"/></svg>') % (size, size)
 
+# ---------- the draft-words registry: every line that is a designer's draft (not the Mac's, not the build's) goes through dr() ----------
+_PENDING, _BYPHONE, DRAFTS = [], {}, []
+def dr(line, what):
+    """A drafted line: returns it unchanged and remembers it for wording-list-2.md (filed under the frame it is drawn in)."""
+    _PENDING.append((line, what)); return line
+def drs(frame_id, line, what):
+    """A drafted line used in several frames: filed once under the given frame label."""
+    DRAFTS.append((frame_id, line, what)); return line
+def dump_drafts(name):
+    d = os.environ.get('WORDING_DIR')
+    if d:
+        import json
+        json.dump([list(x) for x in DRAFTS], open(os.path.join(d, name + '.json'), 'w'), ensure_ascii=False, indent=1)
+
 # ---------- frame helpers ----------
 def phone(*parts, cls=''):
-    return '<div class="phone %s">' % cls + sb() + ''.join(parts) + '</div>'
+    h = '<div class="phone %s">' % cls + sb() + ''.join(parts) + '</div>'
+    _BYPHONE.setdefault(h, []).extend(_PENDING); del _PENDING[:]
+    return h
 def dotsrow(n=9, on=0, stat=''):
     d = ''.join('<i%s></i>' % (' class="on"' if i == on else '') for i in range(n)) if n > 1 else ''
     return '<div class="dotsrow"><div class="d">%s</div>%s</div>' % (d, stat)
@@ -289,19 +331,24 @@ def alert(title, msg, buttons):
         title, '<div class="am">%s</div>' % msg if msg else '', b)
 def faceid(top=300): return '<div class="fid" style="top:%dpx">%s<span>Face ID</span></div>' % (top, I_FACE.format(64))
 def caret(): return '<span class="caret"></span>'
-def opt(frame, oid, title, text, mine=False, q=False, small=''):
-    cls = ' mine' if mine else (' alt' if q else '')
+def opt(frame, oid, title, text, mine=False, q=False, small='', st=False):
+    """mine: drawn as she ruled it (green) · q: a question still open (amber) · st: a state frame (dark, light, largest text)"""
+    for line, what in _BYPHONE.get(frame, []):
+        DRAFTS.append((oid, line, what))
+    cls = ' mine' if mine else (' alt' if q else (' st' if st else ''))
     sm = '<small>%s</small>' % small if small else ''
     return '<div class="opt">%s<div class="cap"><span class="id%s">%s</span><b>%s</b> %s%s</div></div>' % (frame, cls, oid, title, text, sm)
 def row(*opts): return '<div class="row">' + ''.join(opts) + '</div>'
-NEW = '<span class="new">PROPOSED WORDS</span>'
+NEW = '<span class="new">draft</span>'
+HELD = '<span class="held">her wording pass</span>'
 
 def page(fname, title, intro, body):
     doc = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
            '<title>%s</title><style>%s%s</style></head><body><h1>%s</h1>%s%s</body></html>') % (esc(title), G1CSS, EXTRA, esc(title), intro, body)
     p = os.path.join(OUT, fname)
     with open(p, 'w') as f: f.write(doc)
-    print(p, len(doc))
+    dump_drafts(fname.replace('.html', ''))
+    print(p, len(doc), '· drafts:', len(DRAFTS))
 
 # ---------- the shell (the graders' picks: SW-1 (a) masthead, SW-3 (b) home, BK-1 (a) chips) — a thin layer ----------
 def shell(listhtml, wing='Home', n=9, on=0, status='', chipset=None, chip_on=0, bandhtml='', rcpt='', tab=1, qe=True, qetext='New note…'):
@@ -315,7 +362,40 @@ def shell(listhtml, wing='Home', n=9, on=0, status='', chipset=None, chip_on=0, 
     return ''.join(parts)
 
 WELCOME_CHIPS = ["★ Starred", "Unshelved", "Welcome", "All"]
-WELCOME_ROWS = [brow("the pocket guide", "start here · lessons you can edit"), brow("the prince", "26 notes · two takes on every paragraph")]
-NEWUSER_ROWS = [brow("journal", "3 entries · daily", STAR), brow("the pocket guide", "start here · lessons you can edit"),
+GUIDE_META = "start here · 10 short lessons"
+WELCOME_ROWS = [brow("the pocket guide", GUIDE_META), brow("the prince", "26 notes · two takes on every paragraph")]
+NEWUSER_ROWS = [brow("journal", "3 entries · daily", STAR), brow("the pocket guide", GUIDE_META),
                 brow("the prince", "26 notes · two takes on every paragraph")]
 EMAIL = 'writer@example.com'
+
+def tog(on=False): return '<span class="tog%s"></span>' % (' on' if on else '')
+
+# ---------- Settings, one list for both files (first-run draws Look, Help and Crash reports; the lock file draws the top) ----------
+S_FOLLOW = "Voice and palette belong to your library, so they change on every device."
+S_OWN = "Light or dark is for this iPhone only."
+S_CRASH = "Off unless you turn it on. A report stays on this iPhone until you choose to send it."
+def settings_inner(castle=True, crash=False, reg=False):
+    """The Settings list. reg=True files its drafted lines once (call it from one frame per file)."""
+    d = (lambda line, what: dr(line, what)) if reg else (lambda line, what: line)
+    lib = [srow("Synced 9:38 AM", sub="Signed in as %s" % EMAIL, val='<span style="color:var(--accent);font:400 17px var(--sans)">Sync now</span>'),
+           srow("Account…", chev=True),
+           srow("Protection…", val="Castle" if castle else "Standard", chev=True)]
+    appearance = ('<div class="srow pad"><div class="lab">%s</div><div class="dial"><span class="on">%s</span><span>%s</span><span>%s</span></div>'
+                  '<div class="sub" style="margin:6px 0 4px">%s</div></div>') % (
+        d("Appearance", "Settings ▸ Look: the light / dark choice."), d("System", "Appearance choice: follow the iPhone."), "Light", "Dark",
+        d(S_OWN, "One line under Appearance: light or dark is each device’s own."))
+    return (sech(d("Library", "Settings group name."), first=True) + sgroup(*lib)
+            + sech(d("Look", "Settings group name.")) + sgroup(srow(d("Voice", "Settings ▸ Look row: Study or Terminal, the library’s synced setting."), val="Study", chev=True),
+                                     srow(d("Palette", "Settings ▸ Look row: the library’s synced palette."), val="Sea-glass", chev=True), appearance)
+            + stext(d(S_FOLLOW, "One line under Voice and Palette: they follow the library on every device."))
+            + sech(d("Writing", "Settings group name.")) + sgroup(srow(d("Writing", "Settings row: opens the writing settings."), sub=d("New blocks, commits, the formatting bar", "One line under the Writing row."), chev=True))
+            + sech(d("Tags", "Settings group name.")) + sgroup(srow("Manage tags", chev=True))
+            + sech(d("Help", "Settings group name.")) + sgroup(srow(d("Take the tour", "Settings ▸ Help row: starts the phone tour again."), chev=True),
+                                     srow("Open the pocket guide", chev=True),
+                                     srow("What’s new", chev=True), srow("Acknowledgments", chev=True))
+            + sech("Crash reports") + sgroup('<div class="srow"><div class="mid"><div class="lab">Collect crash reports</div></div>%s</div>' % tog(crash))
+            + stext(d(S_CRASH, "The one line under the crash-report switch (the Mac’s promise, cut down for the phone)."))
+            + '<div class="stext" style="text-align:center;padding:20px 20px 48px">%s</div>' % d("Variorum for iPhone", "Foot of the Settings list."))
+def settings_body(scroll=0, castle=True, crash=False, reg=False, barh=420):
+    bar = '<div class="scrollbar2" style="top:%dpx;height:%dpx"></div>' % (6 + scroll * 0.6, barh)
+    return '<div class="scrl"><div style="margin-top:-%dpx">%s</div>%s</div>' % (scroll, settings_inner(castle, crash, reg), bar)

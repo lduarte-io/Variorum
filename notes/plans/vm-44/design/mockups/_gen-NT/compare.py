@@ -1,5 +1,6 @@
 # VM-44 mockup — compare-concept.html: Compare on the phone. A CONCEPT, to be built after v1 (W-186, W-177, SC-1).
-# Her idea (tabs you swipe between, lined up block by block), two alternatives, the takes sibling, the doors, honest notes.
+# REVISED after sitting 1: the order is ruled — two takes of one block first, then her idea (notes as tabs, lined up block by block).
+# The two other shapes (one column, the quick flip) are no longer drawn.
 # Draft working record, not canon.
 from base import *
 
@@ -88,8 +89,26 @@ V1 = 'I started copying [[lines]] into a notebook the winter I stopped trusting 
 V3 = 'It was not that he felt any emotion akin to love for Irene Adler. He was, I take it, the most perfect reasoning and observing machine that the world has seen.'
 ROWS3 = [r + (c,) for r, c in zip(ROWS, [('chg', V1), ('moved', S2), ('chg', V3), ('gap', ''), ('gap', '')])]
 
-GAPW = 'Not in this note'
-ONLYW = 'Only in this note'
+GAPW = drs('2 · A3', 'Not in this note', 'Says a block is missing from the note on this tab.')
+ONLYW = drs('2 · A1', 'Only in this note', 'Marks a block the other note does not have.')
+for _f, _l, _w in [
+        ('1 · T1, 2 · A1', 'Changes', 'Chip that turns the change marks on and off.'),
+        ('2 · A9', 'Moved', 'Marks a block that sits in a different place in this note.'),
+        ('2 · A3 alt', '1 block not in this note', 'One-line form of a missing block (the open CMP-1 alternative).'),
+        ('2 · A5', 'Copy to the other note', 'Block menu: adds these words as a take on the matching block.'),
+        ('2 · A5, A7', 'Open this note', 'Leaves Compare and opens the note at this block.'),
+        ('2 · A5', 'Copy text', 'Block menu: copies the block’s words.'),
+        ('2 · A6', 'Show it', 'On an empty place: goes to the note that has the block.'),
+        ('2 · A6', 'Copy it here', 'On an empty place: would copy the block into this note (open, CMP-2).'),
+        ('2 · A7', 'Add a note…', 'Adds a third tab.'),
+        ('1 · T2', 'against chosen', 'Switch in the takes sheet: wash each take against the chosen one.'),
+        ('1 · T2', '5 changes', 'Count under a washed take.'),
+        ('3 · D1', 'Compare with…', 'Row in the note’s menu: opens the picker.'),
+        ('3 · D2', 'Search notes', 'Placeholder in the picker.'),
+        ('3 · D2', 'Saved versions', 'Picker section: the note’s saved versions.'),
+        ('3 · D2', 'Recent notes', 'Picker section.'),
+        ('3 · D4', 'Go to this block', 'Row on a lineage member’s menu.')]:
+    drs(_f, _l, _w)
 
 
 def cell(kind, text, on=True, tap=False, gap_tap=False):
@@ -190,25 +209,25 @@ def A():
     a11 = cmp(0, names=(TA3, TB3), cls='xxl', fadeh=150)
 
     return section(
-        'A — her idea: the notes as tabs, lined up block by block',
+        '2 — then: her idea, the notes as tabs, lined up block by block',
         'Two notes, one tab each. Swipe sideways to change tabs; the page does not move up or down, so the same block sits at the same height in both. '
         'Here: the essay, and the copy she cut down for a talk.',
         row(frame(a1, 'A1', 'She opens Compare from the essay. The first tab is the note she came from.',
                   'The tabs are the two notes’ names; the current one is in ink with a bar under it. A bar at the left of a block means it is different in the other note; '
                   'the washed words are the ones that differ. The fourth block is washed whole: it is only in this note. '
-                  'At the foot: <i class="w">Changes</i> turns the marks on and off; the arrows step to the next change. The pages are for reading; nothing here edits.', 'pick'),
+                  'At the foot: <i class="w">Changes</i> turns the marks on and off; the arrows step to the next change. The pages are for reading; nothing here edits.'),
             frame(a2, 'A2', 'She swipes left. Mid-swipe.',
                   'The talk slides in. Each block meets its partner at the same height across the seam. The bar under the tabs follows her finger. '
-                  'Only the page moves; the top bar, the tabs and the foot stay still.', 'pick'),
+                  'Only the page moves; the top bar, the tabs and the foot stay still.'),
             frame(a3, 'A3', 'The second tab: the talk.',
                   'Same heights. The third block is shorter here, so white space follows it and the next row still starts level. '
                   'The fourth block was cut from the talk: a dotted box holds its place and says <i class="w">Not in this note</i>. The last block is new in the talk. '
-                  'Each tab washes its own words; nothing is struck through, so each page reads as the real note.', 'pick'),
+                  'Each tab washes its own words; nothing is struck through, so each page reads as the real note.'),
             frame(a4, 'A4', 'She taps Changes to turn the marks off.',
                   'A plain page. The blocks keep their places, so swiping still lines up; the box becomes plain white space. The choice is remembered for this compare.'),
             frame(a5, 'A5', 'She taps a block that differs.',
                   '<i class="w">Copy to the other note</i> adds these words as a take on the matching block there. It is never chosen for her and replaces nothing '
-                  '(the Mac’s bring-back rule). No message follows; the block in the other tab now wears the takes mark. '
+                  '(the Mac’s bring-back rule). Nothing is said; the block in the other tab now wears the takes badge. '
                   '<i class="w">Open this note</i> leaves Compare and opens this note at this block, ready to edit. With three notes, the first row asks which one.'))
         + row(frame(a6, 'A6 · CMP-2', 'On the talk, she taps the empty place.',
                   '<i class="w">Show it</i> swipes to the note that has the block. <i class="w">Copy it here</i> would put a copy in this note at this place. '
@@ -216,7 +235,7 @@ def A():
               frame(q1, 'A3 alt · CMP-1', 'The other way to handle a missing block: no padding.',
                     'Each tab keeps its own natural length. A missing block is one line, and no white space follows a shorter block. '
                     'Less blank screen, but only the block at the top of the screen lines up when she swipes; the rest shift. '
-                    'My pick is A3: the same place in every tab is the simpler promise, and it is her words.', 'q'),
+                    'Drawn first is A3: the same place in every tab is the simpler promise, and it is her words. Still open (CMP-1).', 'q'),
               frame(a7, 'A7', 'She taps ⋯.',
                     '<i class="w">Related blocks only</i> (the Mac’s setting) hides everything that has no partner, so no boxes show. '
                     '<i class="w">Add a note…</i> adds a third tab. <i class="w">Open this note</i> opens the current tab’s note.'),
@@ -229,38 +248,6 @@ def A():
         + row(frame(a10, 'A1 dark', 'The first tab in dark.', 'The bar, the washes and the chip use the dark palette’s accent and take tint.'),
               frame(a11, 'A1 · largest text', 'The first tab at the largest text size.',
                     'Her words scale; the rows still match because each row is as tall as its taller version. The tab names shorten in the middle. The foot stays two controls.', 'new')))
-
-
-# ---------------------------------------------------------------- B. the two alternatives
-def B():
-    def src(n):
-        return '<span class="src">%s</span>' % n
-    NA, NB = 'On keeping a commonplace book', 'On keeping a commonplace book — talk'
-
-    def pair(a, b):
-        return ('<div class="blk chg">%s<p>%s</p></div><div class="blk chg pairb">%s<p>%s</p></div>' % (src(NA), T(a), src(NB), T(b)))
-    p1 = '<div class="pg" style="left:0"><div class="t-body">%s%s%s</div></div>' % (pair(E1, K1), cell('same', S2), pair(E3, K3))
-    b1 = phone(cbar(), '<div class="cpage">%s</div>' % p1, over=fade(0, 120) + footbar(True, '1 of 4'))
-    p2 = ('<div class="pg" style="left:0;top:-250px"><div class="t-body">%s%s%s<div class="blk only">%s<p>%s</p></div><div class="blk only pairb" style="margin-top:22px">%s<p>%s</p></div></div></div>'
-          % (pair(E1, K1), cell('same', S2), pair(E3, K3), src('Only in ' + NA), T(E4), src('Only in ' + NB), T(K5)))
-    b2 = phone(cbar(), '<div class="cpage">%s</div>' % p2, over=footbar(True, '4 of 4'))
-
-    hold = '<div class="fbar" style="bottom:26px"><span class="holdb">%sHold to see the other note</span></div>' % I_SWAP
-    held = '<div class="fbar" style="bottom:26px"><span class="holdb down">%sShowing the other note</span></div>' % I_SWAP
-    c1 = phone(topbar('On keeping a commonplace book', right=ib(I_MORE)), '<div class="cpage">%s</div>' % pg(0, False), over=fade(0, 120) + hold)
-    c2 = phone(topbar('On keeping a commonplace book — talk', right=ib(I_MORE)), '<div class="cpage">%s</div>' % pg(1, True), over=fade(0, 120) + held)
-
-    return section(
-        'B — two other shapes, for comparison: (b) one column, (c) a quick flip', 'Drawn smaller. Same two notes.',
-        row(sframe(b1, '(b) 1', 'One column, the pairs stacked.',
-                   'A block that is the same shows once. A block that differs shows twice: this note’s, then the other’s on a tint, each named. No swiping, no empty places.', 'q'),
-            sframe(b2, '(b) 2', 'Further down.',
-                   'A block in only one note shows once and says which. Simple to build. But the page is nearly twice as long, it stops reading like a note, and it only works for two.', 'q'),
-            sframe(c1, '(c) 1', 'A quick flip. The note, at rest.',
-                   'The note as it is, plain. One wide button at the thumb.', 'q'),
-            sframe(c2, '(c) 2', 'She presses and holds.',
-                   'The other note shows in place, lined up and marked; the title changes. Letting go returns. Fast for a glance, but she cannot scroll far or tap a block while holding. '
-                   'It uses the same lined-up pages as A, so it can be added to A later as a second gesture.', 'q')))
 
 
 # ---------------------------------------------------------------- C. two takes of one block
@@ -282,11 +269,11 @@ def C():
     body = (seg + card('chosen', 'take 1 · original', B1, chosen=True) + card('take 2', 'warmer', T(B1WX), '5 changes') + card('take 3', 'shorter', T(B1X), '2 changes') +
             '<div style="flex:1"></div>')
     behind = topbar() + page(blk(B1) + blk(B2) + blk(B3) + blk(B4), mast_html=mast(), pad='10px')
-    t2 = phone(behind, over=dimmer() + sheet(70, 'Takes', body, meta='Block 1 of 4 · 3 takes'))
+    t2 = phone(behind, over=dimmer() + sheet(70, 'Takes', body, meta='I started copying sentences… · 3 takes'))
     return section(
-        'T — the smaller sibling: two takes of one block', 'The Mac’s take diff, in the phone’s take grammar. Likely the first piece worth building (W-177).',
+        '1 — first: two takes of one block', 'Her ruling on the order: “Takes first, then tabs.” This is the Mac’s take diff, in the phone’s take grammar (W-177). It needs nothing moved into shared code and proves the washes on the phone.',
         row(frame(t1, 'T1', 'She swipes a block to peek another take, with Changes on.',
-                  'The peek she already has, plus one chip. On, the words that differ from the chosen take are washed. Off, the peek is plain, as today. The chip is remembered.', 'pick'),
+                  'The pill she already has (opened by a tap on the takes badge), plus one chip. On, the words that differ from the chosen take are washed. Off, the take is plain, as today. The chip is remembered.'),
             frame(t2, 'T2', 'The takes sheet, set to “against chosen”.',
                   'The History pane’s switch (<i class="w">plain · against now</i>), one word changed. Every other take is washed against the chosen one, with a count. '
                   'A take is often a full rewrite; then most of it is washed, which is honest but says little.')))
@@ -322,16 +309,16 @@ def D():
     def lin(verb, words, where, counts, acc=''):
         return ('<div class="lin"><div class="mid"><div class="vb">%s</div><div class="t-prev ell" style="color:var(--ink)">%s</div><div class="t-meta">%s · %s</div></div>%s</div>'
                 % (verb, words, where, counts, acc))
-    fam = ('<div class="seg"><span>commits</span><span class="on">lineage</span></div><div class="gen">this generation</div>' +
+    fam = ('<div class="seg"><span>Commits</span><span class="on">Lineage</span></div><div class="gen">this generation</div>' +
            lin('this block', 'I started copying sentences into a notebook the winter…', 'here', '3 takes · 1 commit') +
            '<div class="gen">came of it</div>' +
            lin('a version', 'I started copying lines into a notebook the winter…', 'in “On keeping a commonplace book — talk”', '1 take', ib(I_MORE, 'mut')) +
            '<div class="band" style="flex:1"></div>')
     m4 = menu([('Go to this block', I_CHEV), ('Compare with now', I_SWAP), ('Bring back as a take', I_FORK)], 'right:14px;top:420px;width:250px')
-    d4 = phone(behind, over=dimmer() + sheet(70, 'History', fam, meta='Block 1 of 4 · I started copying sentences…') + m4)
+    d4 = phone(behind, over=dimmer() + sheet(70, 'History and lineage', fam, meta='I started copying sentences…') + m4)
 
     return section(
-        'D — where Compare is reached from, and how the second note is picked', 'Four doors, one act. Every door lands on A1 with the note she came from as the first tab.',
+        '3 — where Compare is reached from, and how the second note is picked', 'Four doors, one act. Every door lands on A1 with the note she came from as the first tab.',
         row(frame(d1, 'D1', 'The note’s menu.',
                   'Two rows under Versions. <i class="w">Compare with…</i> opens the picker (D2). <i class="w">Compare with latest version</i> is the Mac’s one-press door; '
                   'it shows only while the note has a saved version.'),
@@ -375,46 +362,44 @@ NOTES = (
     '<li><b>More than two notes.</b> What each tab’s marks are measured against needs a rule (A9).</li>'
     '<li><b>Tab names.</b> A note and its duplicate have nearly the same title, so their tabs shorten to nearly the same words (A9). A saved version’s date is clearer than a duplicate’s name.</li>'
     '<li><b>Rewrites.</b> Word washes say little when a take or a block was rewritten whole.</li></ul>'
-    '<h3>What I would build first</h3><ul class="plainl">'
-    '<li><b>First: T, takes against chosen</b> (W-177, S). It needs no hoist and proves the washes on the phone.</li>'
-    '<li><b>Then: A, her tabs, for two notes, read-only, with padded rows</b> (W-186, L). It maps one-to-one onto <code>PostAlignment</code>’s rows, each page stays a real note, and it grows to three or four notes.</li>'
-    '<li><b>(c) the hold</b> comes almost free on top of A (the same pages, a hold instead of a swipe). Add it later if she wants it.</li>'
-    '<li><b>(b) the single column</b> is the cheapest to build, with no heights to match. I would keep it as the fallback if A’s row matching feels rough on a device, not as the first choice: it doubles the page and only works for two.</li></ul>'
-    '<h2>Open questions for the author</h2><ul class="plainl">'
-    '<li><b>SC-1.</b> Which shape: (a) tabs, (b) one column, (c) the hold? And is T, the takes piece, built first? My pick: T, then (a).</li>'
-    '<li><b>CMP-1.</b> A missing block: a box as tall as the block, so everything lines up (A3), or one line and only the top block lines up (A3 alt)? My pick: A3.</li>'
+    '<h3>The order, as ruled</h3><ul class="plainl">'
+    '<li><b>First: two takes of one block</b> (section 1; W-177, S). It needs no hoist and proves the washes on the phone.</li>'
+    '<li><b>Then: her tabs, for two notes, read-only, with padded rows</b> (section 2; W-186, L). It maps one-to-one onto <code>PostAlignment</code>’s rows, each page stays a real note, and it grows to three or four notes.</li>'
+    '<li>Not drawn any more: one column with the pairs stacked, and a hold-to-flip button. The hold uses the same lined-up pages as the tabs, so it could be added later as a second gesture if she asks for it.</li></ul>'
+    '<h2>Still open for the author (none of it gates v1)</h2><ul class="plainl">'
+    '<li><b>CMP-1.</b> A missing block: a box as tall as the block, so everything lines up (A3), or one line and only the top block lines up (A3 alt)? Drawn first: A3.</li>'
     '<li><b>CMP-2.</b> Copying across. Is “add as a take on the matching block” the right meaning of copying a block over? And may a block be copied into a note where it is missing (a new operation)?</li>'
-    '<li><b>CMP-3.</b> Is Compare read-only on the phone, with Open this note as the way to edit? The Mac edits in place. My pick: read-only.</li>'
-    '<li><b>CMP-4.</b> Two notes only at first, or up to four as on the Mac? My pick: two.</li>'
-    '<li><b>CMP-5.</b> Should each page wash only its own words (drawn), or also show the other note’s words struck through? My pick: its own only.</li>'
+    '<li><b>CMP-3.</b> Is Compare read-only on the phone, with Open this note as the way to edit? The Mac edits in place. Drawn: read-only.</li>'
+    '<li><b>CMP-4.</b> Two notes only at first, or up to four as on the Mac? Drawn: two, with three shown once.</li>'
+    '<li><b>CMP-5.</b> Should each page wash only its own words (drawn), or also show the other note’s words struck through?</li>'
     '<li><b>CMP-6.</b> The Mac’s Compare also holds Outline (make an outline note beside the note). Not drawn here; does it come to the phone at all?</li></ul>'
-    '<h2>Every line that is my proposal</h2><ul class="plainl">'
+    '<h2>Every line that is a draft</h2><p class="note">Also listed in <code>design/wording-list-2.md</code>.</p><ul class="plainl">'
     '<li>Screen title: <i class="w">Compare</i>. Tabs: the notes’ own names, shortened in the middle.</li>'
     '<li>Foot: <i class="w">Changes</i> · <i class="w">1 of 4</i>.</li>'
     '<li>On the page: <i class="w">Not in this note</i> · <i class="w">Only in this note</i> · <i class="w">Moved</i> · (A3 alt) <i class="w">1 block not in this note</i>.</li>'
     '<li>A block’s menu: <i class="w">Copy to the other note</i> · <i class="w">Open this note</i> · <i class="w">Copy text</i>. An empty place’s menu: <i class="w">Show it</i> · <i class="w">Copy it here</i>.</li>'
     '<li>The ⋯ menu: <i class="w">Add a note…</i> (and <i class="w">Related blocks only</i>, the Mac’s words).</li>'
-    '<li>(b): <i class="w">Only in ‹note›</i>. (c): <i class="w">Hold to see the other note</i> · <i class="w">Showing the other note</i>.</li>'
     '<li>Takes: <i class="w">Changes</i> · <i class="w">plain · against chosen</i> · <i class="w">5 changes</i>.</li>'
-    '<li>Doors: <i class="w">Compare with…</i> · <i class="w">Search notes</i> · <i class="w">Versions of this note</i> · <i class="w">Saved versions</i> · <i class="w">Recent notes</i> · <i class="w">Go to this block</i>.</li>'
-    '<li>The Mac’s own words, reused: <i class="w">There is no relationship here</i> · <i class="w">Compare with</i> (the picker) · <i class="w">Compare with latest version</i> · <i class="w">Compare with now</i> · '
+    '<li>Doors: <i class="w">Compare with…</i> · <i class="w">Search notes</i> · <i class="w">Saved versions</i> · <i class="w">Recent notes</i> · <i class="w">Go to this block</i>.</li>'
+    '<li>The Mac’s own words, reused: <i class="w">There is no relationship here</i> · <i class="w">Versions of this note</i> · <i class="w">Compare with</i> (the picker) · <i class="w">Compare with latest version</i> · <i class="w">Compare with now</i> · '
     '<i class="w">version of this note</i> · <i class="w">a version</i> · <i class="w">Bring back as a take</i> · <i class="w">Read · Restore · Promote · Delete…</i> · <i class="w">plain · against now</i>.</li></ul>'
     '<h2>Build notes</h2>' + notes_table([
-        ('A1–A11 · the tabs', 'W-186 (after v1, her word)', 'Hoisted PostAlignment, CompareComposition; Core Queries.blockKinship, versionPeers, Domain/TextCompare, Operations.bringBackFromLineage',
+        ('1 · T1–T2 · takes (first)', 'W-177', 'Core Queries.diffPair, Domain/TextCompare; the phone’s existing peek and takes sheet', 'The Changes chip on the peek; the “against chosen” switch', 'The wash is a view; it stores nothing. Off is today’s peek, byte for byte.', 'S'),
+        ('2 · A1–A11 · the tabs (second)', 'W-186 (after v1, her word)', 'Hoisted PostAlignment, CompareComposition; Core Queries.blockKinship, versionPeers, Domain/TextCompare, Operations.bringBackFromLineage',
          'The tab strip; the lined-up row (as tall as its taller version); the dotted place-holder; the Changes chip; the change stepper',
          'Pair by lineage, never by order or by matching text. Gaps and bars only where lineage speaks; two unrelated notes say so and pad nothing. Measure only the rows on screen. Compare writes nothing except A5’s take.', 'L'),
-        ('B · (b) and (c)', 'W-186 alternatives', 'The same brains as A', '(b) the stacked pair; (c) the hold button', '(c) must not fight text selection: the hold is on a button, not on the page.', '(b) M · (c) S on top of A'),
-        ('T1–T2 · takes', 'W-177', 'Core Queries.diffPair, Domain/TextCompare; the phone’s existing peek and takes sheet', 'The Changes chip on the peek; the “against chosen” switch', 'The wash is a view; it stores nothing. Off is today’s peek, byte for byte.', 'S'),
-        ('D1–D4 · the doors', 'W-186; reopens C·V2 (versions in Compare)', 'Shared VersionsCopy; Core noteVersions, latestNoteVersionID, versionPeers; the hoisted picker ranking', 'The picker sheet; two menu rows; two ⋯ rows',
+        ('3 · D1–D4 · the doors', 'W-186; reopens C·V2 (versions in Compare)', 'Shared VersionsCopy; Core noteVersions, latestNoteVersionID, versionPeers; the hoisted picker ranking', 'The picker sheet; two menu rows; two ⋯ rows',
          'Compare with latest version shows only while a saved version exists. A saved version is sealed: it never receives a copy.', 'S'),
     ]) +
     '<p class="note" style="margin-top:14px"><b>Added to the sizing sheet’s vocabulary</b>: the tab strip (44 pt, names at 15 pt, a 3 pt bar under the current one); the lined-up row; '
     'the dotted place-holder and its one-line form; the change bar in the gutter and the whole-block wash; the Changes chip (a word on a 48 pt chip, in her words-on-a-chip grammar); '
-    'the change stepper (a 48 pt capsule, two 44 pt arrows); the hold button; the small frame (a true-size phone drawn at 65%).</p>')
+    'the change stepper (a 48 pt capsule, two 44 pt arrows); the small frame (a true-size phone drawn at 65%).</p>')
 
 INTRO = ('<p class="lede">VM-44, a concept only. Her words: “having thought about it I would like to have a compare mode, maybe with the notes as different tabs that you can swipe between and still '
          'have the notes line up block by block? that’s just one idea on it and again, probably won’t even be in v1 of the mobile app”. '
-         'This reverses the earlier exclusion (MobileSoul §4.5), so it is an open space led by her idea. Nothing here is in v1. Frames read left to right.</p>'
+         'This reverses the earlier exclusion (MobileSoul §4.5). Nothing here is in v1. Frames read left to right.</p>'
+         '<p class="ruled"><b>The order, as she ruled it: “Takes first, then tabs.”</b> Section 1 is comparing two takes of one block, which is built first. Section 2 is her idea, the notes as tabs lined up block by block, which follows. '
+         'Section 3 is how Compare is reached. The two other shapes drawn before (one column, a quick flip) are gone.</p>'
          '<p class="note">What Compare is on the Mac: up to four notes side by side, their blocks paired by lineage (a duplicate’s blocks remember the blocks they came from), never by order or by '
          'matching text; gaps only where that lineage speaks; a note’s duplicates and saved versions offered first. '
          'Seeded content: Essays ▸ “On keeping a commonplace book” and its duplicate “On keeping a commonplace book — talk”, drawn here cut down for a talk: one block reworded, one shortened, one cut, one added.</p>')
@@ -422,13 +407,14 @@ INTRO = ('<p class="lede">VM-44, a concept only. Her words: “having thought ab
 TOK = ('<h2>Token values used</h2><p class="note">Study voice under the sea-glass palette, light, with one dark frame; every size, ink, radius and component is '
        '<code>sketches/sizing-sheet.html</code>’s (type 13 · 15 · 17 · 20 · 24, 44 pt touch minimum, gutter 20). The note’s top bar, masthead, takes peek, takes sheet, History and Versions sheets are '
        '<code>note-write.html</code>’s and <code>takes-and-history.html</code>’s, reused through the same generator (<code>mockups/_gen-NT</code>). '
-       'No keyboard shows in Compare, so the bar above the keyboard is not drawn; no act here leaves a routine receipt. Draft working record, not canon.</p>')
+       'No keyboard shows in Compare, so the capsule above the keyboard is not drawn; nothing here says a line after an act. Draft working record, not canon.</p>')
 
-BODY = A() + B() + C() + D() + NOTES + TOK
+BODY = C() + A() + D() + NOTES + TOK
 
 title = 'Compare on the phone'
 doc = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>%s — concept, after v1</title><meta name="viewport" content="width=device-width,initial-scale=1">'
        '<style>%s</style></head><body><h1>%s <span class="concept">concept, after v1</span></h1>%s%s</body></html>' % (esc(title), CSS + MORE_CSS, title, INTRO, BODY))
 p = os.path.abspath(os.path.join(OUT, 'compare-concept.html'))
 open(p, 'w').write(doc)
-print(p, len(doc))
+dump_drafts('compare-concept')
+print(p, len(doc), '· drafts:', len(DRAFTS))

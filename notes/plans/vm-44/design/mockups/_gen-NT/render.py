@@ -1,12 +1,13 @@
 # Render a mockup headlessly, crop the empty tail, and cut viewing slices (slices go to a scratch dir, the full render to design/renders/).
 import subprocess, sys, os
 from PIL import Image
+Image.MAX_IMAGE_PIXELS = None
 CH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 HERE = os.path.dirname(os.path.abspath(__file__))
 name = sys.argv[1]; scratch = sys.argv[2]
 src = os.path.abspath(os.path.join(HERE, '..', name + '.html'))
 out = os.path.abspath(os.path.join(HERE, '..', '..', 'renders', 'mockup-' + name + '.png'))
-subprocess.run([CH, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--window-size=2200,15500', '--screenshot=' + out, 'file://' + src],
+subprocess.run([CH, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--window-size=2200,' + (sys.argv[3] if len(sys.argv) > 3 else '15500'), '--screenshot=' + out, 'file://' + src],
                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 im = Image.open(out).convert('RGB')
 w, h = im.size
