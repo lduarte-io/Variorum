@@ -49,10 +49,14 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
   status --porcelain`, untracked files included), and a careless add would publish the old binaries; the
   root `.gitignore` line `Tools/StageAmbient/` (M3) is the belt for every other clone. Then refresh the
   coordinator's memory note on the ambient.
-- For the ladder, not built here: the hook ends the show with TERM, which Ambient reads as an `off` (it
-  hands focus back), while `fix-1` says a claim leaves focus where it is — whether a TERM during a claim
-  should take the claim's posture is app-side. And `notes/plan.md` L12's "drift check" (the vendored
-  fixture against Variorum's `Tools/stage`) is not in §11.1's list and was not built.
+- The hook's TERM and focus — RULED app-side (Ambient's `notes/plan.md` §11.2) and BUILT as F2b on
+  Ambient's `fix-1` at `5d7d562`: the show reads the stage as it leaves, and any exit while a claim stands
+  (the hook's TERM included) leaves focus where it is. It depends on the hook sending TERM only after the
+  claim is on disk, which `Tools/stage`'s comment now says (M5).
+- The drift check (`notes/plan.md` L12) — RULED not built (§11.2): while this PR is open, Ambient's
+  vendored `Tests/Fixtures/stage` and Variorum's `main` differ on purpose, so a check against `main` would
+  be red for the wrong reason. The fixture is refreshed by hand whenever `Tools/stage` changes, and the
+  hook's comment names that pin (M6).
 
 ## LIVE STATUS
 

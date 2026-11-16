@@ -70,7 +70,8 @@ mins_left() { read_meta; echo $(( (EXPIRES_EPOCH - $(now) + 59) / 60 )); }
 # this script runs under set -e. ORDER: it is called only AFTER write_meta has put the claim on disk, and
 # Ambient depends on that — the show reads the stage as it leaves, and a claim standing at its exit keeps it
 # from pulling focus back from the walk's app (Ambient's F2b); a TERM sent before the claim is written would
-# read as a plain `off` and hand focus back.
+# read as a plain `off` and hand focus back. Its pin is Ambient's StageClaimTests, run against Ambient's
+# vendored copy of this file (Tests/Fixtures/stage), refreshed by hand whenever this file changes.
 is_named() { # $1 = a process name, $2 = a pid: true while that pid is a live process of that name
   kill -0 "$2" 2>/dev/null || return 1   # (pgrep's sense of the name; a zombie is not live)
   local p
