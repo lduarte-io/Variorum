@@ -6,20 +6,61 @@
 **Cast:** one Opus implementer, headless only (no app launched, no real stage claimed). Not merged: per
 R-997-12 the coordinator trials it from the worktree first and the merge is hers.
 
-FOR A LATER READER: written last (PENDING).
+## FOR A LATER READER
+
+**The mechanism as settled.** The stage ambient grew into Ambient, its own app in its own repo (R-997-1);
+Variorum keeps only two touch points. `Tools/ambient` is a thin door: it execs
+`${AMBIENT_HOME:-~/dev/ambient}/bin/ambient` with its arguments, and where that is missing prints one line
+and exits 1 (`status` prints `OFF`, exit 0). `Tools/stage`'s hook (VX-459) had looked for the process
+`StageAmbient` by name, so it never saw `Ambient` (Ambient's ladder finding F2): the show went only by its
+own 0.25 s poll. The hook now stops exactly the process its own HOME's `~/.variorum/ambient.state` names
+(`PID=`), and only while that process is named `Ambient` (or `StageAmbient`, for the changeover) in `pgrep
+-x`'s sense — TERM, up to 3 s, then KILL — before a claim that is not `HOLD:` returns. Scoping it to the
+state file's pid is what keeps a throwaway-HOME run (Ambient's tests, the coordinator's trial) from ever
+ending the real show, which a by-name stop would; both guards stand (no state file ⇒ nothing; it always
+returns 0). `Tools/StageAmbient/` is gone; the skill names `Ambient` and its new keys.
+
+**The fix as built, one pointer per piece.** `Tools/ambient` (`94075193a`) · the `Tools/stage` hook
+(`17f23dd2f`) · `Tools/StageAmbient/` removed (`979bd07bf`) · `.claude/skills/stage-coordinator/SKILL.md`,
+the ambient lines only (`b506cc7fe`) · the other mentions, each left with a reason (`ff570f996`) · the
+coordinator's trial, `vx-997-coordinator-trial.md` (`8cc063c84`) · in the Ambient repo, branch `l7`:
+`Tests/Fixtures/stage` refreshed and the F2 probe in `StageClaimTests` (`d536e63`) · Ambient's README
+line (piece 8): HELD, settled text in the working notes.
+
+**Her rulings.** R-997-1 (its own repo; `Tools/ambient` stays as a thin command) · R-997-2 (only Esc ends
+it; Space is the next scene; brightness and volume never end it; a stage claim still does) · R-997-8 (a
+focus loss ending it is fine) · R-997-12 (the coordinator trials this before the merge; the merge is hers).
+
+**Evidence.** `bash -n` on both scripts. The door, with a fake command, under `en_US.UTF-8` and `C`:
+arguments and exit codes pass through; the missing case as specified. The hook, with stand-ins under a
+throwaway HOME, both locales: 14 of 14; the old hook fails its four `Ambient` cases. Ambient
+`swift test -c release` at `d536e63`: 355 tests in 39 suites green; with the old fixture the four stop
+pins go red (6 issues) and the two guards stay green. The trial note's hook block, run verbatim through
+zsh and bash: its four `ok` lines and the `after` line; against the old hook, `FAIL`.
+
+**Open items.**
+- Piece 8 (Ambient's README) waits for the round-1 fixes on Ambient's `main`; then `l7` merges
+  `origin/main` and takes the settled text, with this PR's number.
+- The coordinator's trial (`vx-997-coordinator-trial.md`) is owed before the merge; the merge is hers.
+- At the merge: no `StageAmbient` up; then remove the main clone's untracked
+  `Tools/StageAmbient/.build/` (~111 MB) and refresh the coordinator's memory note on the ambient.
+- For the ladder, not built here: the hook ends the show with TERM, which Ambient reads as an `off` (it
+  hands focus back), while `fix-1` says a claim leaves focus where it is — whether a TERM during a claim
+  should take the claim's posture is app-side. And `notes/plan.md` L12's "drift check" (the vendored
+  fixture against Variorum's `Tools/stage`) is not in §11.1's list and was not built.
 
 ## LIVE STATUS
 
 | # | Piece | State |
 |---|---|---|
 | 1 | `Tools/ambient` becomes a thin door to `$AMBIENT_HOME/bin/ambient` | DONE `94075193a` — probed with a fake command under `en_US.UTF-8` and `C` |
-| 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE (this commit) — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
-| 3 | `Tools/StageAmbient/` removed | DONE (this commit) — 17 tracked files; this worktree had no untracked leftovers |
-| 4 | The coordinator skill says what is true of Ambient | DONE (this commit) — the lines that name the ambient only (240 → 246 lines) |
-| 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | IN-PROGRESS — the trial note DONE and walked (this commit); FOR A LATER READER owed, last |
-| 6 | Every other `StageAmbient` mention updated or left with a reason | DONE (this commit) — none needed a change; each left with its reason below |
-| 7 | Ambient repo: `Tests/Fixtures/stage` refreshed + the F2 probe in `StageClaimTests` | NOT-STARTED |
-| 8 | Ambient repo: `README.md` says the synchronous stop is real once this PR merges | NOT-STARTED |
+| 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE `17f23dd2f` — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
+| 3 | `Tools/StageAmbient/` removed | DONE `979bd07bf` — 17 tracked files; this worktree had no untracked leftovers |
+| 4 | The coordinator skill says what is true of Ambient | DONE `b506cc7fe` — the lines that name the ambient only (240 → 246 lines) |
+| 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | DONE — the trial note `8cc063c84`; FOR A LATER READER (this commit) |
+| 6 | Every other `StageAmbient` mention updated or left with a reason | DONE `ff570f996` — none needed a change; each left with its reason below |
+| 7 | Ambient repo: `Tests/Fixtures/stage` refreshed + the F2 probe in `StageClaimTests` | DONE Ambient `l7` `d536e63` — 355 tests green in release; red on the old fixture |
+| 8 | Ambient repo: `README.md` says the synchronous stop is real once this PR merges | HELD — the round-1 fixes are not on Ambient's `main`, and their branch rewrites the same README sentences; the settled text is below |
 
 ## Working notes (the night's record)
 
@@ -104,3 +145,35 @@ FOR A LATER READER: written last (PENDING).
   at the old hook prints `FAIL a walk's claim left it up` in both locales. Step 4 not walked (it is the
   real stage). The first walk printed a bash `Terminated: 15` job notice per fake; the fake now starts
   from a command substitution, so it is no job of that shell and the block prints only its five lines.
+- **The Ambient side: the gate.** §11.1 builds pieces 7–8 after `git merge origin/main` "so the round-1
+  fixes are underneath". At the time (twice checked, `git log origin/main --oneline | grep -c F1` → 0;
+  Ambient `main` at `83a6506`) they were not: they sit on Ambient's `fix-1` branch, unmerged, still
+  without its F1 commit. `fix-1` touches neither `Tests/Fixtures/stage` nor `StageClaimTests.swift`, so
+  piece 7 was built on `83a6506` and will merge clean; piece 8 edits README sentences `fix-1` rewrites
+  (rail 2's F2 sentence, the doors section), so it is held rather than written onto text about to change.
+- **Piece 7, the fixture and the probe** (Ambient `l7`, `d536e63`). `Tests/Fixtures/stage` is
+  byte-identical to this branch's `Tools/stage` (`cmp`), the suite's comment naming `17f23dd2f`. Seven new
+  `StageClaimTests` functions, each under a throwaway HOME with a stand-in started from the test (an
+  ad-hoc-signed copy of `/bin/sleep` named `Ambient`, `StageAmbient` or `Bystander`; a copy of `/bin/bash`
+  named `Ambient` that ignores TERM), liveness read as `pgrep -x` reads it: a claim that is not `HOLD:`
+  stops the show before it returns (both locales); `HOLD:` leaves it and the holder's re-claim to `HOLD
+  FOR …` stops it (both locales); only the show its own HOME names is stopped; a state file naming another
+  program leaves it; no state file leaves it; a lingering `StageAmbient` is stopped; a TERM-deaf show is
+  KILLed and the claim still exits 0. **Evidence:** `swift test -c release` — 355 tests in 39 suites
+  passed (348 before, plus these 7). **Red on old:** with `Tests/Fixtures/stage` swapped to the
+  `5dde1bcf9` copy (from Ambient `main`; the committed `d536e63` the restore point), the four stop pins
+  fail at their `!isUp` expectations — 6 issues across the locale cases — while the two guard pins (no
+  state file; another program) pass on both sides, as guards should; restored by `git checkout`, `cmp`
+  identical, the three stage suites green again (25 tests). No stand-in left running.
+- **Piece 8's settled text, for when `fix-1` is on Ambient's `main`** (a successor merges `origin/main`
+  into `l7` and applies it; `#N` is this branch's Variorum PR, opened by the orchestrator):
+  - Rail 2, replacing `fix-1`'s "Today that poll is all that takes the show down … come with the
+    Variorum-side change (`notes/plan.md`, L7)." with: "Once Variorum's PR #N (`VX-997`, branch
+    `vx-997-ambient-app`) merges, `Tools/stage claim` also stops the show before it returns, for any
+    reason that isn't `HOLD:`, however it was opened: its hook stops the process `~/.variorum/ambient.state`
+    names while that process is named `Ambient` (VX-459, VX-997), and the coordinator's checks look for
+    `Ambient`. Until then the poll is all that takes the show down." (The focus sentence after it stays.)
+  - The doors section: "Variorum's `Tools/stage` hook and the coordinator's checks do not see either door's
+    show yet (rail 2)." → "Once Variorum's PR #N merges, its `Tools/stage` hook stops either door's show and
+    the coordinator's checks see it (rail 2)."; and "(Variorum's `Tools/ambient` becomes a thin exec of it,
+    a later Variorum-side batch)" → "(Variorum's `Tools/ambient` is a thin exec of it once PR #N merges)".
