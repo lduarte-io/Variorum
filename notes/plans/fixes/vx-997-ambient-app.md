@@ -14,7 +14,7 @@ FOR A LATER READER: written last (PENDING).
 |---|---|---|
 | 1 | `Tools/ambient` becomes a thin door to `$AMBIENT_HOME/bin/ambient` | DONE `94075193a` — probed with a fake command under `en_US.UTF-8` and `C` |
 | 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE (this commit) — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
-| 3 | `Tools/StageAmbient/` removed | NOT-STARTED |
+| 3 | `Tools/StageAmbient/` removed | DONE (this commit) — 17 tracked files; this worktree had no untracked leftovers |
 | 4 | The coordinator skill says what is true of Ambient | NOT-STARTED |
 | 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | IN-PROGRESS — this LIVE STATUS from the first commit; the trial note and FOR A LATER READER owed |
 | 6 | Every other `StageAmbient` mention updated or left with a reason | NOT-STARTED |
@@ -60,3 +60,9 @@ FOR A LATER READER: written last (PENDING).
   claim returns (4.5 s under a load average near 60), exit 0. The OLD hook, same probe: the four
   `Ambient` cases (a, c, d's named show, h) stay up — red on old. Machine left clean (no `Ambient`, no
   `StageAmbient`).
+- **Piece 3, the package retired** (R-997-1: Variorum keeps only the thin command). `git rm -r
+  Tools/StageAmbient` — the 17 tracked files (the package, its README, the koi, the claim reader and its
+  tests); all of it lives on, grown, in the Ambient repo (seeded from Variorum `5dde1bcf9`). The record
+  `vx-458-stage-ambient.md` stays as history. Left on disk after the merge, untracked: the main clone's
+  gitignored `Tools/StageAmbient/.build/` (111 MB on 2026-11-16, holding the old `StageAmbient.app`) —
+  removed by hand once no `StageAmbient` runs (open items).
