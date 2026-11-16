@@ -13,7 +13,8 @@ under your own `HOLD:`, exactly as your road does every night. Step 4 is optiona
 bridge claim, made with the worktree's `Tools/stage`.
 
 **Before you start:** no old show is up — `pgrep -x StageAmbient` prints nothing. If one is, stop it with
-main's door while main still has it: `~/dev/variorum/Tools/ambient off`.
+main's door while main still has it: `~/dev/variorum/Tools/ambient off`. From then until the merge, every
+off of a real Ambient goes through the worktree's door (step 4 says why).
 
 ## 1 · The door (nothing real moves)
 
@@ -73,23 +74,34 @@ leaves it up. Nothing here reads or writes the real `~/.variorum`; your hold is 
 
 ## 4 · Optional: the real hook at your next natural GO
 
-With the real show up under your `HOLD:`, make your next `coord-for-*` bridge with the worktree's tool:
+With the real show up under your `HOLD:`, make your next `coord-for-*` bridge with the worktree's tool —
+the claim and the check in ONE command, because the show's own poll quits it within about 0.4 s of any
+claim, so a `pgrep` typed afterwards would pass with or without the hook:
 
 ```
-~/dev/variorum-vx-997/Tools/stage release --who <you> && ~/dev/variorum-vx-997/Tools/stage claim --who coord-for-<x> --reason "GO pending: <x> — …" --minutes 10
-pgrep -x Ambient                                     # nothing: the claim stopped it before returning
+~/dev/variorum-vx-997/Tools/stage release --who <you> && ~/dev/variorum-vx-997/Tools/stage claim --who coord-for-<x> --reason "GO pending: <x> — …" --minutes 10; echo "right after the claim: [$(pgrep -x Ambient | tr '\n' ' ')]"
 ~/dev/variorum-vx-997/Tools/ambient log | tail -2    # the OFF line says why it went
 ~/dev/variorum-vx-997/Tools/ambient off              # AMBIENT OFF (wasn't running) — the pre-GO check as ever
 ```
 
-`main`'s `Tools/stage` does not see `Ambient` (finding F2): until the merge, only the worktree's does.
+Expected: `right after the claim: []`, and the log's last line `OFF     signal TERM (…)` — the hook's TERM,
+sent the moment the claim is on disk. The race: the show polls the claim four times a second, so if its
+poll lands in the few milliseconds between the claim being written and the hook's TERM, the line reads
+`OFF     stage claim who=coord-for-<x> …` instead. The show still went before the claim returned, but by
+its own poll, so that run proves nothing about the hook: try again at a later GO.
+
+`main`'s `Tools/stage` does not see `Ambient` (finding F2): until the merge, only the worktree's does. And
+main's old `Tools/ambient off` looks for `StageAmbient`, finds nothing, and deletes a live Ambient's
+`~/.variorum/ambient.state` — after which no hook can see the show. So: until the merge, every off of a
+real Ambient goes through the worktree's door (`~/dev/variorum-vx-997/Tools/ambient off`).
 
 ## What to report (to the VX-997 orchestrator)
 
 - Step 1: the four outputs and exit codes.
 - Step 2: the ON line (scene, pid), the OFF line (ms), and anything she or you saw on screen that read wrong.
 - Step 3: the five lines as printed.
-- Step 4, if run: whether `pgrep -x Ambient` was empty right after the claim, and the log's OFF line.
+- Step 4, if run: the `right after the claim:` line, and the log's OFF line (`signal TERM` proves the hook;
+  `stage claim` means the poll won the race).
 - Anything in the skill's changed lines (`.claude/skills/stage-coordinator/SKILL.md`, the pre-GO check and
   the "Ambient, the stage ambient" section) that does not match what you saw.
 
