@@ -19,7 +19,8 @@
 # verify-export's one check while every other check still runs, each with ONE sentence naming where it
 # must be and that it is never committed; the checks that read it keep their meaning (an
 # installed copy that differs refuses; an embedded profile that differs FAILs); the in-repo path is
-# never consulted; .gitignore keeps a profile out of Tools/Release. Exit 0 = every case held.
+# never consulted; .gitignore keeps every .provisionprofile and .mobileprovision out of the tree. Exit 0 =
+# every case held.
 set -uo pipefail
 
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
@@ -194,9 +195,16 @@ check "verify-export: with the profile missing, every other section still runs a
 
 # ---------------------------------------------------------------- the repo keeps it out
 echo "-- .gitignore"
-check ".gitignore keeps a provisioning profile out of Tools/Release" "git check-ignore did not match" \
+ignored() {   # ignored <path> — the repo's own ignore rules alone (no global, system or XDG excludes)
   env -u XDG_CONFIG_HOME HOME="$T" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 \
-  git -C "$SRC" check-ignore -q --no-index "Tools/Release/$NAME"
+    git -C "$SRC" check-ignore -q --no-index "$1"
+}
+check ".gitignore keeps a provisioning profile out of Tools/Release" "git check-ignore did not match" \
+  ignored "Tools/Release/$NAME"
+check ".gitignore keeps a provisioning profile out of the whole tree (any folder, any name)" \
+  "git check-ignore did not match" eval 'ignored "$NAME" && ignored "App/Variorum/Some Profile.provisionprofile"'
+check ".gitignore keeps an iOS .mobileprovision out of the whole tree" "git check-ignore did not match" \
+  eval 'ignored "App/Variorum/VariorumMobile/embedded.mobileprovision" && ignored "x.mobileprovision"'
 
 echo
 if [ "$FAIL" -eq 0 ]; then
