@@ -12,8 +12,8 @@ FOR A LATER READER: written last (PENDING).
 
 | # | Piece | State |
 |---|---|---|
-| 1 | `Tools/ambient` becomes a thin door to `$AMBIENT_HOME/bin/ambient` | DONE (this commit) — probed with a fake command under `en_US.UTF-8` and `C` |
-| 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | NOT-STARTED |
+| 1 | `Tools/ambient` becomes a thin door to `$AMBIENT_HOME/bin/ambient` | DONE `94075193a` — probed with a fake command under `en_US.UTF-8` and `C` |
+| 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE (this commit) — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
 | 3 | `Tools/StageAmbient/` removed | NOT-STARTED |
 | 4 | The coordinator skill says what is true of Ambient | NOT-STARTED |
 | 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | IN-PROGRESS — this LIVE STATUS from the first commit; the trial note and FOR A LATER READER owed |
@@ -33,3 +33,30 @@ FOR A LATER READER: written last (PENDING).
   space and an em dash arrive intact; the fake's exit 7 on `off` comes back as 7; missing → `OFF`/0 for
   `status` and for no argument, the one line/1 for `off`; an empty `AMBIENT_HOME` falls back to the
   default path.
+- **Piece 2, the hook — and one decision taken in the build (reversible).** The old hook stopped the
+  show BY NAME (`pgrep -x StageAmbient`, then `Tools/ambient off` or `pkill -x`), so its comment's
+  promise — "it acts only on THIS home's ambient, so a throwaway-HOME run never touches the real one" —
+  held only because no sandbox ever wrote a state file. The F2 probe must write one (a stand-in under a
+  throwaway HOME), and a by-name stop would then end the REAL show if one were up — and Ambient's tests,
+  running in parallel, would stop each other's stand-ins. So the new hook stops exactly the process its
+  own HOME's state file names (`PID=`), and only while that process is named `Ambient` or `StageAmbient`
+  in `pgrep -x`'s sense (a reused pid or another program is left alone): TERM, up to 3 s, then KILL, up
+  to 2 s more — Ambient's own `off`, scoped to one pid. It no longer goes through `Tools/ambient off`:
+  the door's `off` finds the show by name, and under a throwaway HOME with `AMBIENT_HOME` exported it
+  would reach the real show. Both guards stand (no state file ⇒ nothing; it always returns 0, the
+  claim's `STAGE CLAIMED`/`STAGE RENEWED` and exit 0 untouched). Under the real HOME this is the same
+  stop as before, since both of Ambient's doors write the state file only while up, naming themselves.
+- **Piece 2's probe** (a throwaway shell instrument, not kept — the durable pin is piece 7's
+  `StageClaimTests` in the Ambient repo; the coordinator's trial note carries its core). A throwaway HOME
+  per case, `env -i` with `PATH=/usr/bin:/bin`; the stand-ins are ad-hoc-signed copies of `/bin/sleep`
+  named `Ambient`, `StageAmbient` and `Bystander`, and a copy of `/bin/bash` named `Ambient` that ignores
+  TERM (a copied system binary is killed at exec until re-signed). Fourteen checks, `en_US.UTF-8` and `C`
+  both 14/14:
+  a non-HOLD claim with an em dash in its reason stops the named show before returning (`STAGE
+  CLAIMED`, exit 0); `HOLD:` leaves it; the holder's re-claim to `HOLD FOR …` stops it (`STAGE
+  RENEWED`, exit 0); of two shows named `Ambient` only the one this HOME names stops; a state file
+  naming another program, a garbage pid or a dead pid stops nothing and the claim exits 0; no state
+  file stops nothing; a lingering `StageAmbient` stops; a TERM-deaf show is KILLed and gone before the
+  claim returns (4.5 s under a load average near 60), exit 0. The OLD hook, same probe: the four
+  `Ambient` cases (a, c, d's named show, h) stay up — red on old. Machine left clean (no `Ambient`, no
+  `StageAmbient`).

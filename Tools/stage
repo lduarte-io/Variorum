@@ -60,18 +60,35 @@ clear_if_dead() {
 
 mins_left() { read_meta; echo $(( (EXPIRES_EPOCH - $(now) + 59) / 60 )); }
 
-# VX-459: a claim that isn't the coordinator's own idle hold ("HOLD:") takes the screen back from the
-# stage ambient (Tools/ambient) before the claim returns. The ambient also quits itself within ~0.3 s of
-# seeing such a claim; this makes the handoff synchronous. It acts only on THIS home's ambient (its state
-# file), so a Tools/stage run under a throwaway HOME (the ambient's own tests) never touches the real one.
-# It never fails a claim: this script runs under set -e.
+# VX-459, VX-997: a claim that isn't the coordinator's own idle hold ("HOLD:") takes the screen back from
+# Ambient (the show Tools/ambient drives, or one she opened from its icon) before the claim returns. The
+# show also quits itself within ~0.3 s of seeing such a claim; this makes the handoff synchronous. It acts
+# only on THIS home's show: the process its state file's PID= line names, and only while that process is
+# named Ambient (or StageAmbient, the old name, for the changeover). So a Tools/stage run under a
+# throwaway HOME (Ambient's own tests, the coordinator's trial) stops only its own stand-in, never the
+# real show. TERM, up to 3 s for it to go, then KILL, as Ambient's own `off` does. It never fails a claim:
+# this script runs under set -e.
+is_named() { # $1 = a process name, $2 = a pid: true while that pid is a live process of that name
+  kill -0 "$2" 2>/dev/null || return 1   # (pgrep's sense of the name; a zombie is not live)
+  local p
+  for p in $(pgrep -x "$1" 2>/dev/null || true); do [ "$p" = "$2" ] && return 0; done
+  return 1
+}
 ambient_off() { # $1 = the claim's reason
   case "$1" in HOLD:*) return 0 ;; esac
   [ -f "$DIR/ambient.state" ] || return 0
-  pgrep -x StageAmbient >/dev/null 2>&1 || return 0
-  local amb; amb="$(cd "$(dirname "$0")" && pwd)/ambient"
-  if [ -x "$amb" ]; then "$amb" off >/dev/null 2>&1 || true
-  else pkill -TERM -x StageAmbient 2>/dev/null || true; fi
+  local pid name i
+  pid=$(sed -n 's/^PID=//p' "$DIR/ambient.state" 2>/dev/null || true)
+  case "$pid" in (''|*[!0-9]*) return 0 ;; esac
+  if is_named Ambient "$pid"; then name=Ambient
+  elif is_named StageAmbient "$pid"; then name=StageAmbient
+  else return 0; fi
+  kill -TERM "$pid" 2>/dev/null || true
+  i=0; while is_named "$name" "$pid" && [ "$i" -lt 30 ]; do sleep 0.1; i=$((i + 1)); done
+  if is_named "$name" "$pid"; then
+    kill -KILL "$pid" 2>/dev/null || true
+    i=0; while is_named "$name" "$pid" && [ "$i" -lt 20 ]; do sleep 0.1; i=$((i + 1)); done
+  fi
   return 0
 }
 
