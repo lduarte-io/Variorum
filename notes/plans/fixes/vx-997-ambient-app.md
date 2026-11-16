@@ -15,7 +15,7 @@ FOR A LATER READER: written last (PENDING).
 | 1 | `Tools/ambient` becomes a thin door to `$AMBIENT_HOME/bin/ambient` | DONE `94075193a` — probed with a fake command under `en_US.UTF-8` and `C` |
 | 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE (this commit) — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
 | 3 | `Tools/StageAmbient/` removed | DONE (this commit) — 17 tracked files; this worktree had no untracked leftovers |
-| 4 | The coordinator skill says what is true of Ambient | NOT-STARTED |
+| 4 | The coordinator skill says what is true of Ambient | DONE (this commit) — the lines that name the ambient only (240 → 246 lines) |
 | 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | IN-PROGRESS — this LIVE STATUS from the first commit; the trial note and FOR A LATER READER owed |
 | 6 | Every other `StageAmbient` mention updated or left with a reason | NOT-STARTED |
 | 7 | Ambient repo: `Tests/Fixtures/stage` refreshed + the F2 probe in `StageClaimTests` | NOT-STARTED |
@@ -66,3 +66,12 @@ FOR A LATER READER: written last (PENDING).
   `vx-458-stage-ambient.md` stays as history. Left on disk after the merge, untracked: the main clone's
   gitignored `Tools/StageAmbient/.build/` (111 MB on 2026-11-16, holding the old `StageAmbient.app`) —
   removed by hand once no `StageAmbient` runs (open items).
+- **Piece 4, the coordinator skill.** Only the lines that name the ambient changed: the pre-GO check is
+  `pgrep -x Ambient`; the section (now "Ambient, the stage ambient") says `Tools/ambient` is a thin door
+  to `~/dev/ambient/bin/ambient` (or `$AMBIENT_HOME`) and points at that repo's README instead of the
+  retired one; seventeen scenes, black and white and colour; it no longer goes at her touch — of her keys
+  only Esc ends it, Space is the next scene, `⌘,` the settings pane, brightness, volume, the mouse and
+  every other key leave it up (R-997-2); it still goes by itself on any non-`HOLD:` claim and when
+  another app takes the keyboard (R-997-8); she may open it from its icon, the same process; `on` still
+  refuses while she is at the Mac. The `HOLD:` / `HOLD FOR` lines, the RELEASE and closing lines keep
+  their sense, with "the stage ambient" read as "Ambient".
