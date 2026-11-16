@@ -99,3 +99,5 @@ notes/plans/vm-44/atlas/screens/
 notes/plans/vm-44/atlas/recordings/
 notes/plans/vm-44/atlas/index.html
 notes/plans/vm-44/design/renders/
+# VM-44 F device trace — Instruments traces, exports and the session runner stay local (her real library)
+notes/plans/vm-44/audit/traces/
