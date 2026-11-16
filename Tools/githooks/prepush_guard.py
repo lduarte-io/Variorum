@@ -557,7 +557,7 @@ def private_findings(items, entries, keeps):
             if it.scope == "content" and kept(e.cls, it.path, keeps):
                 continue
             col = (" col %d" % (m.start() + 1)) if it.scope in ("content", "message") else ""
-            found.append((it.commit, it.where + col, e.cls, len(m.group(0)), it.scope))
+            found.append((it.commit, it.where + col, e.cls, len(m.group(0)), it.scope, it.text))
     return found
 
 
@@ -621,11 +621,11 @@ def gitleaks_findings(gl, items):
         try:
             it = items[int(f.get("StartLine", 0)) - 1]
         except (ValueError, IndexError):
-            found.append((None, "(scanned text)", rule, None, None))
+            found.append((None, "(scanned text)", rule, None, None, None))
             continue
         if it.scope in ("path", "ref"):
             flagged.add(it.text)
-        found.append((it.commit, it.where, rule, None, it.scope))
+        found.append((it.commit, it.where, rule, None, it.scope, it.text))
     return found, flagged
 
 
@@ -642,6 +642,23 @@ def masker(entries, flagged):
             s = e.rx.sub(MASK, s)
         return s
     return mask
+
+
+def identity_split(found):
+    """Whether the identity findings name this clone's OWN address (re-author advice applies: the
+    author's ruling covers her own address) or someone else's (the ruling is silent: her call)."""
+    own_email = git("config", "--get", "user.email", check=False).strip().lower()
+    own = others = False
+    for _commit, _where, _cls, _length, scope, text in found:
+        if scope != "identity" or text is None:
+            continue
+        m = re.search(r"<([^<>]*)>\s*$", text)
+        email = (m.group(1) if m else "").strip().lower()
+        if own_email and email == own_email:
+            own = True
+        else:
+            others = True
+    return own, others
 
 
 def main(argv):
@@ -670,7 +687,7 @@ def main(argv):
     mask = masker(entries, flagged)
     if found:
         seen, rows = set(), []
-        for commit, where, cls, length, _scope in found:
+        for commit, where, cls, length, _scope, _text in found:
             key = (commit, where, cls)
             if key in seen:
                 continue
@@ -686,12 +703,17 @@ def main(argv):
         say("Rewrite the outgoing commits locally so the value never publishes (amend the commit, or "
             "reset and recommit), then push again. A ruled load-bearing value gets a keep line in %s."
             % LIST_SHOWN)
-        if any(scope == "identity" for _c, _w, _cls, _len, scope in found):
-            say("A commit identity above is not the public one. Run `git config user.email %s` in this "
-                "clone, then re-make the refused commits under it: the last one with `git commit --amend "
-                "--reset-author --no-edit`; several with `git rebase --exec 'git commit --amend "
-                "--reset-author --no-edit' <the remote branch they sit on>`. Only outgoing commits are "
-                "judged \u2014 history the remote already holds never is." % PUBLIC_EMAIL)
+        own, others = identity_split(found)
+        if own:
+            say("A commit identity above is this clone's own address, which is not the public one. Run "
+                "`git config user.email %s` in this clone, then re-make the refused commits under it: the "
+                "last one with `git commit --amend --reset-author --no-edit`; several with `git rebase "
+                "--exec 'git commit --amend --reset-author --no-edit' <the remote branch they sit on>`. "
+                "Only outgoing commits are judged \u2014 history the remote already holds never is."
+                % PUBLIC_EMAIL)
+        if others:
+            say("An identity above is not this clone's own (someone else's commit, or one made under an "
+                "earlier address): whether it publishes is the author's call.")
         say(BYPASS)
         return 1
     note = ""
