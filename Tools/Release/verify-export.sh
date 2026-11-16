@@ -19,6 +19,11 @@
 # byte-identical groups, in the same order, or every item her current build wrote becomes
 # unreachable (KnownIssues: the keychain-access-groups row 13r closes).
 #
+# Section E compares the embedded profile with THE PINNED PROFILE, kept OUTSIDE the repo at
+# ~/.variorum/release/Variorum_Developer_ID.provisionprofile and never committed (VX-999 —
+# profile-path.sh is the one definition of the place). When it is missing, that one check FAILs with one
+# sentence saying where the file must be and where to copy it from; every other check still runs.
+#
 # Exit 0 = every check passed · 1 = at least one FAIL · 2 = usage error.
 set -uo pipefail   # deliberately not -e: every check runs and reports; the verdict counts
 
@@ -28,7 +33,8 @@ AUTHORITY="Developer ID Application: Lillian Duarte (${TEAM})"
 GROUP_DEFAULT="${TEAM}.${BUNDLE_ID}"           # FIRST: items written with no explicit group land here
 GROUP_SHARED="${TEAM}.io.lduarte.Variorum.shared"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-PROFILE_VERSIONED="${HERE}/Variorum_Developer_ID.provisionprofile"
+source "${HERE}/profile-path.sh"   # VX-999: release_profile_path / release_profile_missing
+PROFILE_PINNED="$(release_profile_path)"
 EXPORT_OPTIONS="${HERE}/ExportOptions.plist"
 PB=/usr/libexec/PlistBuddy
 
@@ -169,10 +175,12 @@ if [ -f "$EMB" ] && security cms -D -i "$EMB" > "$PROF" 2>/dev/null; then
   done
   echo "        Entitlements:"
   "$PB" -c "Print :Entitlements" "$PROF" 2>/dev/null | indent | indent
-  if [ -f "$PROFILE_VERSIONED" ] && cmp -s "$EMB" "$PROFILE_VERSIONED"; then
-    ok "embedded profile is BYTE-IDENTICAL to Tools/Release/Variorum_Developer_ID.provisionprofile"
+  if PROFILE_MISSING="$(release_profile_missing "$PROFILE_PINNED")"; then
+    bad "$PROFILE_MISSING"
+  elif cmp -s "$EMB" "$PROFILE_PINNED"; then
+    ok "embedded profile is BYTE-IDENTICAL to the pinned profile ${PROFILE_PINNED}"
   else
-    bad "embedded profile differs from the versioned Tools/Release/Variorum_Developer_ID.provisionprofile"
+    bad "embedded profile differs from the pinned profile ${PROFILE_PINNED}"
   fi
   expect_eq "profile TeamIdentifier" "$(pbget "$PROF" TeamIdentifier:0)" "$TEAM"
   expect_eq "profile Platform" "$(pbget "$PROF" Platform:0)" "OSX"
