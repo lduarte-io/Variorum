@@ -34,7 +34,7 @@ AMBIENT_HOME=/nonexistent ~/dev/variorum-vx-997/Tools/ambient status   # OFF; ex
 ## 2 · On and off for real (under your `HOLD:`, she away from the Mac)
 
 ```
-~/dev/variorum-vx-997/Tools/ambient on      # AMBIENT ON — RUNNING scene=… pid=…   (the first on builds Ambient)
+~/dev/variorum-vx-997/Tools/ambient on      # AMBIENT ON — RUNNING scene=… pid=… since=… bundle=installed (nothing is built)
 pgrep -x Ambient                            # that pid
 ~/dev/variorum-vx-997/Tools/ambient next    # AMBIENT NEXT — dissolving
 ~/dev/variorum-vx-997/Tools/ambient off     # AMBIENT OFF (stopped pid … in … ms)
@@ -82,7 +82,10 @@ leaves it up. Nothing here reads or writes the real `~/.variorum`; your hold is 
 
 With the real show up under your `HOLD:`, make your next `coord-for-*` bridge with the worktree's tool —
 the claim and the check in ONE command, because the show's own poll quits it within about 0.4 s of any
-claim, so a `pgrep` typed afterwards would pass with or without the hook:
+claim, so a `pgrep` typed afterwards would pass with or without the hook. This once, the bridge claim
+comes BEFORE `off`: the reverse of your pre-GO order, where `off` comes first, because the hook can only
+be seen stopping a show that is still up when the claim lands. `off` follows at once, the pre-GO check as
+ever; at every other GO, keep your usual order.
 
 ```
 ~/dev/variorum-vx-997/Tools/stage release --who <you> && ~/dev/variorum-vx-997/Tools/stage claim --who coord-for-<x> --reason "GO pending: <x> — …" --minutes 10; echo "right after the claim: [$(pgrep -x Ambient | tr '\n' ' ')]"
@@ -123,8 +126,9 @@ In this order:
 3. Then this PR merges.
 
 And around the merge:
-- On the Pro, BEFORE the pull: `pgrep -x StageAmbient` prints nothing, then
-  `rm -rf ~/dev/variorum/Tools/StageAmbient` (the old build folder, about 111 MB). The pull deletes the
-  package's own `.gitignore`, and an untracked, un-ignored folder makes `release.sh` refuse a dirty tree;
-  the root `.gitignore` now ignores it in every clone as a belt (`vx-997-ambient-app.md`, open items).
+- On the Pro, AFTER the pull in `~/dev/variorum`, once `pgrep -x StageAmbient` prints nothing:
+  `rm -rf ~/dev/variorum/Tools/StageAmbient`. What the pull leaves there is only old build products, about
+  111 MB, the old `StageAmbient.app` among them; the same merge's root `.gitignore` line keeps them out of
+  `git status`. After the pull no tracked file is left in the folder, so this removes build products only
+  (`vx-997-ambient-app.md`, open items).
 - The coordinator's memory note on the ambient still names `Tools/StageAmbient/`: refresh it.

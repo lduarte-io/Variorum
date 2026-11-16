@@ -25,11 +25,20 @@ returns 0). `Tools/StageAmbient/` is gone; the skill names `Ambient` and its new
 the ambient lines only (`b506cc7fe`) · the other mentions, each left with a reason (`ff570f996`) · the
 coordinator's trial, `vx-997-coordinator-trial.md` (`8cc063c84`) · in the Ambient repo, branch `l7`:
 `Tests/Fixtures/stage` refreshed and the F2 probe in `StageClaimTests` (`d536e63`) · Ambient's README
-line (piece 8): HELD, settled text in the working notes.
+line (piece 8), naming this PR, #8: DONE (`c5458c7`) · round 2's fixes (Ambient's `notes/plan.md` §11.5):
+on `l7`, the script stand-ins' readiness handshake (L2-1, `8f5c657`), the no-state fallback held to the
+road's own two bundles with a test-only override (L2-3, `1844bd5`), a state file counting only while its
+pid is a live `Ambient` or `StageAmbient` (L2-4, `070527c`), `build` and `list` under P-997-4 (L2-5,
+`7faaceb`), the app header, README rail 7 and the pixel-size sentence (L2-6, R2-2, `d0628c4`); here, the
+skill's stand-in line (L2-3, `4bc39dcfe`), the merge order (L2-2, `5dfc41566`), and this record and the
+trial note brought up to date (L2-6, this commit).
 
 **Her rulings.** R-997-1 (its own repo; `Tools/ambient` stays as a thin command) · R-997-2 (only Esc ends
 it; Space is the next scene; brightness and volume never end it; a stage claim still does) · R-997-8 (a
 focus loss ending it is fine) · R-997-12 (the coordinator trials this before the merge; the merge is hers).
+**PROVISIONAL, awaiting her word:** P-997-4 — the command road runs the installed `/Applications/Ambient.app`
+when it is there and is ours, and builds the repo's bundle only when nothing is installed (Ambient's
+`notes/plan.md` §11.4). **Held for her:** M7 (open items).
 
 **Evidence.** `bash -n` on both scripts. The door, with a fake command, under `en_US.UTF-8` and `C`:
 arguments and exit codes pass through; the missing case as specified. The hook, with stand-ins under a
@@ -46,6 +55,14 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
   (`964c807`; red when the hook's order is flipped); P-997-4 in `bin/ambient`, with `which` and
   `bundle=` (`64ec82c`); the header's stop claim (`0245e3d`); piece 8, README naming this PR, #8
   (`c5458c7`).
+- Round 2 (Ambient's `notes/plan.md` §11.5: no BLOCKER, no MAJOR) — DONE, one commit per finding per repo
+  (the pointers above), each bug-class fix with its pin red on the old code: L2-1 by the reviewer's
+  injection (a delay before the trap); L2-3 `theRoadsOwnFallbackTakesNoStandInForTheShow`; L2-4
+  `aStateFileNamingAnotherProgramIsStaleAndOffRemovesIt` and `aStaleStateFileLeavesTheFallbackOn`. With no
+  state file that counts, `bin/ambient` now takes only an `Ambient` running from the installed app or the
+  repo's own bundle for the show. The stage and command-road groups ran 15 times in a row green; 385
+  tests green in release on `l7`.
+- P-997-4 — PROVISIONAL, awaiting her word (her rulings, above): the skill and Ambient's README say so.
 - M7 — HELD FOR HER: the clone URL removed at `6bf14ca78` stays in the branch's earlier pushed commits;
   accept it, or rewrite the unmerged branch before the merge (author-only). Nothing about history changed.
 - The coordinator's trial: steps 1–3 ran clean (Ambient's `notes/plan.md` §11.3); step 4, rewritten for M2,
@@ -56,13 +73,14 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
   `main`'s old one (it builds the repo's bundle and finds the show by name). Then the coordinator re-runs
   the trial's steps 1, 2 and 4 from this worktree on that merged road, expecting `bundle=installed` in the
   RUNNING line and no build; then this PR merges.
-- The merge-in, on the Pro, BEFORE `git pull` in `~/dev/variorum`: check no `StageAmbient` runs
-  (`pgrep -x StageAmbient` prints nothing), then `rm -rf ~/dev/variorum/Tools/StageAmbient` (the old build
-  folder, ~111 MB, holding `StageAmbient.app`). Why: the pull deletes the package's own `.gitignore`, so
-  without it the folder turns untracked and un-ignored, `release.sh` refuses a dirty tree (it counts `git
-  status --porcelain`, untracked files included), and a careless add would publish the old binaries; the
-  root `.gitignore` line `Tools/StageAmbient/` (M3) is the belt for every other clone. Then refresh the
-  coordinator's memory note on the ambient.
+- The merge-in, on the Pro, AFTER `git pull` in `~/dev/variorum`, once no `StageAmbient` runs
+  (`pgrep -x StageAmbient` prints nothing): `rm -rf ~/dev/variorum/Tools/StageAmbient`. Why: what the pull
+  leaves there is only old build products, about 111 MB, the old `StageAmbient.app` among them. The same
+  merge brings the root `.gitignore` line `Tools/StageAmbient/` (M3), so the folder never shows in `git
+  status` and `release.sh`'s clean-tree check is not at stake. After the pull, no tracked file is left in
+  the folder, so the `rm` removes build products only; before it, it would delete the package's tracked
+  files too and leave the tree dirty until the pull. Then refresh the coordinator's memory note on the
+  ambient.
 - The hook's TERM and focus — RULED app-side (Ambient's `notes/plan.md` §11.2) and BUILT as F2b on
   Ambient's `fix-1` at `5d7d562`: the show reads the stage as it leaves, and any exit while a claim stands
   (the hook's TERM included) leaves focus where it is. It depends on the hook sending TERM only after the
@@ -84,7 +102,8 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
 | 6 | Every other `StageAmbient` mention updated or left with a reason | DONE `ff570f996` — none needed a change; each left with its reason below |
 | 7 | Ambient repo: `Tests/Fixtures/stage` refreshed + the F2 probe in `StageClaimTests` | DONE Ambient `l7` `d536e63` — 355 tests green in release; red on the old fixture |
 | 8 | Ambient repo: `README.md` says the synchronous stop is real once this PR merges | DONE Ambient `l7` `c5458c7`, after its round-1 fixes merged (`c74c35b`); it names this PR, #8 |
-| R1 | The cold review (Ambient's `notes/plan.md` §11.4), Variorum side | DONE — the URL out `6bf14ca78`; M2 `362591467`; M3 `aab6f3661`; M5 `f78023c21`; M6 `6ff8fe217`; N1 `96a2f2741` (hook probe re-run, 14/14 in both locales, a TERM-deaf show gone in 2.6–3.1 s); N2 `6c8cb56c8`; the skill's suggestions, M1's line and P-997-4 `3b499fcea`. The Ambient side waits (open items) |
+| R1 | The cold review (Ambient's `notes/plan.md` §11.4), Variorum side | DONE — the URL out `6bf14ca78`; M2 `362591467`; M3 `aab6f3661`; M5 `f78023c21`; M6 `6ff8fe217`; N1 `96a2f2741` (hook probe re-run, 14/14 in both locales, a TERM-deaf show gone in 2.6–3.1 s); N2 `6c8cb56c8`; the skill's suggestions, M1's line and P-997-4 `3b499fcea`. The Ambient side: DONE on `l7` (open items) |
+| R2 | Round 2 (Ambient's `notes/plan.md` §11.5), both repos | DONE — Ambient `l7`: L2-1 `8f5c657`, L2-3 `1844bd5`, L2-4 `070527c`, L2-5 `7faaceb`, L2-6 and R2-2 `d0628c4` (385 tests green in release; the stage groups 15 times in a row green); here: L2-3 `4bc39dcfe`, L2-2 `5dfc41566`, L2-6 (this commit). `Tools/stage` unchanged, so the fixture stands |
 
 ## Working notes (the night's record)
 
