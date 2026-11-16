@@ -16,9 +16,10 @@ execs this file with git's arguments (the remote's name and URL) and the push's 
 records what was fetched, so it speaks only for the fetch URL: a named remote that pushes somewhere
 else excludes only the old ids, and a push by URL excludes the refs of the remotes whose FETCH URL is
 that URL and no others, so another remote's history (a private archive) is never treated as
-published; a URL no remote fetches from excludes only the old ids. A new
-branch scans only what the remote does not already hold; a deletion publishes nothing. Cost follows the outgoing set: a few commits take well
-under a second, 2,728 real commits took about six; only a first push to an empty remote reads it all.
+published; a URL no remote fetches from excludes only the old ids. A new branch scans only what the
+remote does not already hold; a deletion publishes nothing. Cost follows the outgoing set: one to five
+commits took about 0.2 s on the Pro, the whole history (12,385 commits) 76 s, which only a first push
+to an empty remote would read.
 
 What is read never depends on the clone's attributes, its diff and log settings, a `-c` on the push or
 its replace refs. git's settings are pinned (GIT_PINS), the push's GIT_CONFIG_PARAMETERS is dropped and

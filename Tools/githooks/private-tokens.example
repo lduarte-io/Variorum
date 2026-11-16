@@ -34,9 +34,10 @@
 # A Mac home directory, in path form and in the dashed form Claude's project and scratchpad folders
 # use (a scratchpad path carries the home folder dashed, so this shape covers it; a placeholdered
 # "-<home>-" form never matches). Spared: macOS's Shared folder and "someone", the fictional home
-# the test fixtures use.
-home-path re:/Users/(?!Shared\b|someone\b)[A-Za-z0-9._-]{4,}
-home-path re:-Users-(?!someone-)[A-Za-z0-9._]+-
+# the test fixtures use. "Users" keeps its case (a real home is always /Users/…, the dashed form
+# always -Users-…-), so a lower-case "-users-…-" heading slug or setting name never matches.
+home-path re:(?-i:/Users/)(?!Shared\b|someone\b)[A-Za-z0-9._-]{4,}
+home-path re:(?-i:-Users-)(?!someone-)[A-Za-z0-9._]+-
 # A full MCP setup key (the prefix and 43 base64url characters); the tests' short fixtures never match.
 mcp-setup-key re:\bvmk[12]_[A-Za-z0-9_-]{40,}
 # A newer Apple device identifier (8 hex, dash, 16 hex).
