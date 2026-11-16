@@ -67,7 +67,10 @@ mins_left() { read_meta; echo $(( (EXPIRES_EPOCH - $(now) + 59) / 60 )); }
 # named Ambient (or StageAmbient, the old name, for the changeover). So a Tools/stage run under a
 # throwaway HOME (Ambient's own tests, the coordinator's trial) stops only its own stand-in, never the
 # real show. TERM, up to 3 s for it to go, then KILL, as Ambient's own `off` does. It never fails a claim:
-# this script runs under set -e.
+# this script runs under set -e. ORDER: it is called only AFTER write_meta has put the claim on disk, and
+# Ambient depends on that — the show reads the stage as it leaves, and a claim standing at its exit keeps it
+# from pulling focus back from the walk's app (Ambient's F2b); a TERM sent before the claim is written would
+# read as a plain `off` and hand focus back.
 is_named() { # $1 = a process name, $2 = a pid: true while that pid is a live process of that name
   kill -0 "$2" 2>/dev/null || return 1   # (pgrep's sense of the name; a zombie is not live)
   local p
