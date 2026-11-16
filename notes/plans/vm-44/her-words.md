@@ -144,3 +144,9 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - Exporting a note: "Yes, ask which file" — just the text, or with takes and tags; Copy stays the on-screen words.
   - A book as a folder of notes: "this should be a thing after v1. in fact, file a ticket so that it's not just a mobile ticket - this is a good improvement for mac. put it on the todo list. and also, move the \"search not just in one wing\" out of backlog and into todo as well." (VX-1000 minted, Todo; VX-987 moved to Todo.)
 - The Compare concept (`mockups/compare-concept.html`, after v1): "Takes first, then tabs".
+- The short questions, her answers verbatim:
+  - The Private mark on the phone: "follow the same only show it if an mcp is active elsewhere - users who don't have the mac app shouldn't see it"
+    - Orchestrator's note: grants never sync, so the phone cannot know whether an AI client is approved on a Mac. What does sync is the mark itself and the `ai_marks` switch. So the phone draws the eye only where a mark exists and the switch is on — a phone-only user has no marks and never sees one. To confirm with her.
+  - Voice and palette: "follow the library but if the phone has dark mode on, that shouldn't change what your mac is like (the device dark mode)" — voice and palette follow the synced library; light or dark stays each device's own.
+  - The library doors (look inside, open, restore, send a copy): "After v1".
+  - The lag trace: "Your real library".
