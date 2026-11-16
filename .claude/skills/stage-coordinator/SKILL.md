@@ -69,9 +69,13 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
 - `Tools/stage status` (FREE or your own hold) and `date` (re-check the clock after any
   pause; forecasts drift).
 - `Tools/ambient off`, which is synchronous: it prints `AMBIENT OFF …` once Ambient is gone,
-  and exits 0 when it wasn't running. Then `pgrep -x Ambient` must print nothing: Ambient not
-  running. Your `coord-for-*` bridge claim also takes it down (`Tools/stage claim` stops the show for
-  any non-`HOLD:` reason), but the GO still waits for `off`'s confirmation.
+  and exits 0 when it wasn't running. Then `pgrep -x Ambient` and `pgrep -x StageAmbient` must both
+  print nothing: Ambient not running (keep the old name in the check until the old
+  `~/dev/variorum/Tools/StageAmbient/` build folder is gone). A hit whose pid is not the one
+  `~/.variorum/ambient.state` names can be one of Ambient's own test stand-ins, gone within a few
+  seconds: re-check before acting on it. Your `coord-for-*` bridge claim also takes it down
+  (`Tools/stage claim` stops the show for any non-`HOLD:` reason), but the GO still waits for `off`'s
+  confirmation.
 - `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` for app instances. The looser
   `pgrep -fl "Variorum.app/Contents/MacOS"` also matches off-stage builds' link and
   codesign steps, and even headless `xcodebuild` command lines, so pass the strict forms
@@ -214,14 +218,17 @@ nobody is READY: seventeen living pixel scenes, black and white and colour, rota
 never touch it.
 - `on` refuses with one line while any claim's reason doesn't start with exactly `HOLD:`, or while
   someone is using the Mac (HID idle under 2 minutes). It returns once the window is up, and running it
-  again while it's up is harmless.
+  again while it's up is harmless. It runs the installed `/Applications/Ambient.app` — the bundle her
+  icon opens — when that is there, and builds from `~/dev/ambient` only when nothing is installed (that
+  first `on` takes about a minute) (PROVISIONAL P-997-4).
 - It no longer goes at her touch (R-997-2): of her keys only Esc ends it. Space is the next scene, `⌘,`
   opens its settings pane over the show, and brightness, volume, the mouse and every other key leave it
   up. It still goes by itself on any non-HOLD claim: `Tools/stage claim` stops it before the claim
   returns, and the app also quits itself within about 0.3 s. It also goes when another app takes the
-  keyboard (⌘Tab). She may open it herself from its icon; that is the same process and goes the same
-  way. So read `Tools/ambient status` (always exit 0: `RUNNING …` or `OFF`) rather than assuming it's
-  up. `Tools/ambient log` (`~/.variorum/ambient.log`) says why it went.
+  keyboard (⌘Tab). She may open it herself from its icon; that show has the same process NAME,
+  `Ambient`, and the same rules, and goes the same way. So read `Tools/ambient status` (always exit 0:
+  `RUNNING …` or `OFF`) rather than assuming it's up. `Tools/ambient log` (`~/.variorum/ambient.log`)
+  says why it went.
 - Its process is `Ambient` (`pgrep -x Ambient`), never `Variorum`. It posts no input and takes no
   assertion, so HID idle still means her. `--allow-claimant` is a self-test flag and is never used on
   your road.
