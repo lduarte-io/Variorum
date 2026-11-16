@@ -1,7 +1,9 @@
 # gitleaks config for Variorum's pre-push guard (VX-996): gitleaks's default rules, plus the
 # values the open-source sweep ruled PUBLIC, so a commit that re-adds one of their lines is not refused.
-# The guard reads main's copy of this file (core.hooksPath is the main worktree's Tools/githooks), so a
-# branch cannot widen its own allowlist; a new entry is reviewed like any other change.
+# The guard reads the copy in the MAIN worktree (the installer's shim in the clone's git folder runs the
+# main worktree's Tools/githooks), so a branch checked out in another worktree cannot widen its own
+# allowlist. That holds while the main worktree stays on main, the convention CLAUDE.md keeps; a new
+# entry is reviewed like any other change.
 title = "variorum pre-push guard"
 
 [extend]
