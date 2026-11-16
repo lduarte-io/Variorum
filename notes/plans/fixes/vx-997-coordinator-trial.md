@@ -16,6 +16,12 @@ bridge claim, made with the worktree's `Tools/stage`.
 main's door while main still has it: `~/dev/variorum/Tools/ambient off`. From then until the merge, every
 off of a real Ambient goes through the worktree's door (step 4 says why).
 
+**A second run, on the merged road.** The first run (Ambient's `notes/plan.md` §11.3) drove Ambient's old
+road, the one on its `main` then. Once Ambient's `l7` has reached its `main` and `~/dev/ambient` is pulled
+(the merging session says when; "At the merge" below), re-run steps 1, 2 and 4 from this worktree. Step
+2's ON line must end `bundle=installed`, and `on` must build nothing: it answers in seconds, not about a
+minute. Report it as below.
+
 ## 1 · The door (nothing real moves)
 
 ```
@@ -104,9 +110,19 @@ real Ambient goes through the worktree's door (`~/dev/variorum-vx-997/Tools/ambi
   `stage claim` means the poll won the race).
 - Anything in the skill's changed lines (`.claude/skills/stage-coordinator/SKILL.md`, the pre-GO check and
   the "Ambient, the stage ambient" section) that does not match what you saw.
+- The second run: steps 1, 2 and 4 again, with the ON line's `bundle=` and whether `on` built anything.
 
 ## At the merge (the merging session, not the trial)
 
+In this order:
+1. Ambient's `l7` reaches Ambient's `main`, and `~/dev/ambient` is pulled — BEFORE this PR merges. Until
+   then `Tools/ambient` execs Ambient's old road (it builds the repo's bundle and finds the show by name),
+   while the skill on this branch describes `l7`'s (the installed app, the state file's pid).
+2. The coordinator re-runs steps 1, 2 and 4 from this worktree on that merged road ("A second run" above),
+   expecting `bundle=installed` in the RUNNING line and no build.
+3. Then this PR merges.
+
+And around the merge:
 - On the Pro, BEFORE the pull: `pgrep -x StageAmbient` prints nothing, then
   `rm -rf ~/dev/variorum/Tools/StageAmbient` (the old build folder, about 111 MB). The pull deletes the
   package's own `.gitignore`, and an untracked, un-ignored folder makes `release.sh` refuse a dirty tree;

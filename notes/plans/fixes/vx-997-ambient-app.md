@@ -50,6 +50,12 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
   accept it, or rewrite the unmerged branch before the merge (author-only). Nothing about history changed.
 - The coordinator's trial: steps 1–3 ran clean (Ambient's `notes/plan.md` §11.3); step 4, rewritten for M2,
   runs at the live look's GO. The merge is hers.
+- The merge ORDER (L2-2, Ambient's `notes/plan.md` §11.5): Ambient's `l7` reaches Ambient's `main` and
+  `~/dev/ambient` is pulled BEFORE this PR merges. `Tools/ambient` execs whatever `~/dev/ambient` holds,
+  and the skill on this branch describes `l7`'s road (P-997-4's installed app, the state file's pid), not
+  `main`'s old one (it builds the repo's bundle and finds the show by name). Then the coordinator re-runs
+  the trial's steps 1, 2 and 4 from this worktree on that merged road, expecting `bundle=installed` in the
+  RUNNING line and no build; then this PR merges.
 - The merge-in, on the Pro, BEFORE `git pull` in `~/dev/variorum`: check no `StageAmbient` runs
   (`pgrep -x StageAmbient` prints nothing), then `rm -rf ~/dev/variorum/Tools/StageAmbient` (the old build
   folder, ~111 MB, holding `StageAmbient.app`). Why: the pull deletes the package's own `.gitignore`, so
