@@ -86,11 +86,12 @@ A missing list, missing gitleaks, malformed entry, failing scanner or incomplete
    scripts (`Tools/Release/archive-and-export.sh`, `verify-export.sh`) expect
    `Tools/Release/Variorum_Developer_ID.provisionprofile`. vx-988 ruled it KEEP, yet it is in neither the tip nor this
    repo's history. Restored, it would publish the team id, signing cert and profile UUID inside a true binary the guard
-   never reads, with a clean verdict. That session must check it by hand. **CLOSED 2026-11-15 by VX-999:** nothing
-   restores it to the repo. The scripts read the pinned copy from
-   `~/.variorum/release/Variorum_Developer_ID.provisionprofile`, outside the repo, and `.gitignore` keeps a
-   `*.provisionprofile` out of `Tools/Release/` (an accidental add; a forced `git add -f` still could, and the guard
-   still reads no binary).
+   never reads, with a clean verdict. That session must check it by hand. **CLOSED 2026-11-15 by VX-999**
+   (`notes/plans/fixes/vx-999-release-profile-path.md`): the KEEP was superseded at the public flip, where the file was
+   left out of the published tree, and nothing restores it to the repo. The scripts read the pinned copy from
+   `~/.variorum/release/Variorum_Developer_ID.provisionprofile`, outside the repo, and `.gitignore` keeps every
+   `*.provisionprofile` and `*.mobileprovision` out of the tree (an accidental add; a forced `git add -f` still could, and
+   the guard still reads no binary).
 5. **A recorded trade:** gitleaks rules keyed on a file's own name (a `.p12` file) do not fire, because stdin carries no
    path. The private list's path scope is the road for names.
 6. **Process, outside this branch:**
