@@ -1418,7 +1418,10 @@ orchestrator then ruled that U1 lands the use-site line and proceeds; the 28 tes
      `teamID <apple-team-id>`. The method name was confirmed against Xcode 27's own `xcodebuild -help`.
    - `Variorum_Developer_ID.provisionprofile`: her profile, versioned (`cmp`-identical to
      `~/Downloads`; sha256 `f661fdea…eec5c97`). It is not a secret: it ships in every bundle as
-     `embedded.provisionprofile`.
+     `embedded.provisionprofile`. *(Superseded 2026-11-15, VX-999: the file is no longer versioned.
+     It was left out of the public repo at the flip; the scripts read the pinned copy from
+     `~/.variorum/release/Variorum_Developer_ID.provisionprofile`, outside the repo, and it is never
+     committed.)*
    - `verify-export.sh <app> [--compare-with <app>]`: the static drill as PASS/FAIL lines plus a
      VERDICT. It reads signatures only. It checks:
      - the seal: `codesign --verify --deep --strict`;
