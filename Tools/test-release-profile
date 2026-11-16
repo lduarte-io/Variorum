@@ -1,0 +1,222 @@
+#!/bin/bash
+# test-release-profile — where the release road reads its pinned Developer ID provisioning profile
+# (VX-999). No Xcode, no signing, no keychain, no stage, no network.
+#
+#   Tools/test-release-profile
+#
+# The profile is kept OUTSIDE the repo, at ~/.variorum/release/Variorum_Developer_ID.provisionprofile,
+# and is never committed (VARIORUM_RELEASE_PROFILE overrides the place). This copies THIS checkout's
+# Tools/Release scripts into a throwaway tree and runs archive-and-export.sh and verify-export.sh there,
+# with an isolated HOME and stub tools on PATH: `security` logs its calls and passes a fixture file
+# through `cms -D` (the fixtures are plain plists, never a real profile, and no keychain is read);
+# `xcodebuild` answers -version and refuses everything else, so the archive step is the furthest any
+# run reaches; `codesign`, `spctl`, `pgrep`, `git` and `xcode-select` answer inertly. A decoy sits at
+# the OLD in-repo path (Tools/Release/Variorum_Developer_ID.provisionprofile), carrying a UUID the
+# fixture ExportOptions does not name and bytes no case embeds, so any read of it shows.
+#
+# It proves: both scripts read the profile at the outside place, and the install step copies it from
+# there; the override moves the place; a missing profile stops archive-and-export, and FAILs
+# verify-export's one check while every other check still runs, each with ONE sentence naming where it
+# must be and that it is never committed; the checks that read it keep their meaning (an
+# installed copy that differs refuses; an embedded profile that differs FAILs); the in-repo path is
+# never consulted; .gitignore keeps every .provisionprofile and .mobileprovision out of the tree. Exit 0 =
+# every case held.
+set -uo pipefail
+
+SRC="$(cd "$(dirname "$0")/.." && pwd)"
+T="$(mktemp -d "${TMPDIR:-/tmp}/vx999-profile.XXXXXX")"
+trap 'rm -rf "$T"' EXIT
+unset VARIORUM_RELEASE_PROFILE
+
+NAME="Variorum_Developer_ID.provisionprofile"
+SYSPATH="/usr/bin:/bin:/usr/sbin:/sbin"
+GOOD_UUID="11111111-2222-4333-8444-555555555555"    # the fixture ExportOptions names this one
+DECOY_UUID="99999999-8888-4777-8666-555555555555"   # the decoy's; nothing names it
+CERT_BYTES="a test fixture, not a certificate"
+CERT_B64="$(printf '%s' "$CERT_BYTES" | base64)"
+CERT_SHA1="$(printf '%s' "$CERT_BYTES" | shasum -a 1 | cut -d' ' -f1 | tr '[:lower:]' '[:upper:]')"
+LOG="$T/security.log"
+
+PASS=0; FAIL=0; FAILED=""; OUT=""; RC=0
+ok()  { PASS=$((PASS + 1)); printf '  ok    %s\n' "$1"; }
+bad() { FAIL=$((FAIL + 1)); FAILED="$FAILED\n  - $1"; printf '  FAIL  %s — %s\n' "$1" "$2"; }
+check() {   # check <case> <why it failed> <command…>
+  local name="$1" why="$2"; shift 2
+  if "$@"; then ok "$name"; else bad "$name" "$why"; fi
+}
+has()     { printf '%s\n' "$OUT" | grep -qF -- "$1"; }
+lacks()   { ! has "$1"; }
+logged()  { grep -qxF -- "$1" "$LOG"; }
+unlogged() { ! grep -qF -- "$1" "$LOG"; }
+
+# ---------------------------------------------------------------- the stubs
+mkdir -p "$T/bin"
+cat >"$T/bin/security" <<EOF
+#!/bin/bash
+# stub: logs every call; 'cms -D -i FILE' passes FILE through; never a keychain
+printf '%s\n' "\$*" >> '$LOG'
+case "\${1:-}" in
+  cms) [ "\${2:-}" = -D ] && [ "\${3:-}" = -i ] && [ -f "\${4:-}" ] && exec cat "\$4"; exit 1 ;;
+  find-identity) printf '  1) %s "Test Identity"\n     1 valid identities found\n' '$CERT_SHA1'; exit 0 ;;
+esac
+exit 1
+EOF
+cat >"$T/bin/xcodebuild" <<'EOF'
+#!/bin/bash
+# stub: answers -version; refuses everything else (no build, no archive, no export ever runs)
+[ "${1:-}" = -version ] && { echo "Xcode 0.0 (stub)"; echo "Build version stub"; exit 0; }
+echo "stub xcodebuild refuses: $*" >&2
+exit 97
+EOF
+printf '#!/bin/bash\necho /stub/Developer\n' >"$T/bin/xcode-select"
+printf '#!/bin/bash\nexit 1\n' >"$T/bin/pgrep"      # no Variorum instance (a real one is never touched)
+printf '#!/bin/bash\nexit 1\n' >"$T/bin/codesign"
+printf '#!/bin/bash\nexit 1\n' >"$T/bin/spctl"
+cat >"$T/bin/git" <<'EOF'
+#!/bin/bash
+case " $* " in *" rev-parse "*) echo 0000000000000000000000000000000000000000 ;; esac
+exit 0
+EOF
+chmod +x "$T/bin/"*
+
+# ---------------------------------------------------------------- the fixtures
+profile_plist() {   # profile_plist UUID → a decoded-profile fixture
+  cat <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Name</key><string>Test Profile</string>
+	<key>UUID</key><string>$1</string>
+	<key>Entitlements</key><dict><key>com.apple.application-identifier</key><string>TESTTEAM00.io.lduarte.Variorum</string></dict>
+	<key>ExpirationDate</key><date>2099-01-01T00:00:00Z</date>
+	<key>DeveloperCertificates</key><array><data>$CERT_B64</data></array>
+</dict>
+</plist>
+EOF
+}
+export_options() {
+  cat <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key><string>developer-id</string>
+	<key>signingCertificate</key><string>$CERT_SHA1</string>
+	<key>provisioningProfiles</key><dict><key>io.lduarte.Variorum</key><string>$GOOD_UUID</string></dict>
+</dict>
+</plist>
+EOF
+}
+
+# fresh <case> → a throwaway copy of the scripts at $R (the decoy at the old in-repo path), an empty
+# HOME at $H, and an empty security log. Nothing at the outside place until place_outside.
+fresh() {
+  C="$T/$1"; R="$C/repo"; H="$C/home"
+  mkdir -p "$R/Tools/Release" "$H" "$C/tmp"
+  cp -p "$SRC"/Tools/Release/*.sh "$R/Tools/Release/"
+  export_options >"$R/Tools/Release/ExportOptions.plist"
+  DECOY="$R/Tools/Release/$NAME"
+  profile_plist "$DECOY_UUID" >"$DECOY"
+  OUTSIDE="$H/.variorum/release/$NAME"
+  INSTALLED="$H/Library/Developer/Xcode/UserData/Provisioning Profiles/$GOOD_UUID.provisionprofile"
+  : >"$LOG"
+}
+place_outside() { mkdir -p "$(dirname "$OUTSIDE")"; profile_plist "$GOOD_UUID" >"$OUTSIDE"; }
+fake_app() {   # fake_app <embedded-profile-source> → $APP
+  APP="$C/Fake.app"
+  mkdir -p "$APP/Contents/MacOS"
+  printf '<?xml version="1.0" encoding="UTF-8"?>\n<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>io.lduarte.Variorum</string></dict></plist>\n' \
+    >"$APP/Contents/Info.plist"
+  cp "$1" "$APP/Contents/embedded.provisionprofile"
+}
+run_ae() {   # run_ae [VAR=value…] → OUT, RC
+  OUT="$(env "$@" PATH="$T/bin:$SYSPATH" HOME="$H" TMPDIR="$C/tmp" "$R/Tools/Release/archive-and-export.sh" --out "$C/out" 2>&1)"; RC=$?
+}
+run_ve() {   # run_ve [VAR=value…] → OUT, RC
+  OUT="$(env "$@" PATH="$T/bin:$SYSPATH" HOME="$H" TMPDIR="$C/tmp" "$R/Tools/Release/verify-export.sh" "$APP" 2>&1)"; RC=$?
+}
+# sentence_for <place> — the missing-profile sentence appears once, on ONE line that names the place,
+# says it is never committed and where to copy it from, and carries no UUID.
+sentence_for() {
+  local line
+  [ "$(printf '%s\n' "$OUT" | grep -cF "must be at $1")" = 1 ] || return 1
+  line="$(printf '%s\n' "$OUT" | grep -F "must be at $1")"
+  case "$line" in *"never committed"*) ;; *) return 1 ;; esac
+  case "$line" in *"copy it from Xcode's installed profiles, or from the private archive clone"*) ;; *) return 1 ;; esac
+  ! printf '%s\n' "$line" | grep -qiE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+}
+
+echo "test-release-profile: $SRC"
+
+# ---------------------------------------------------------------- archive-and-export.sh
+echo "-- archive-and-export.sh"
+fresh ae-present; place_outside; run_ae
+check "archive-and-export: the profile at ~/.variorum/release/ carries it to the archive step (rc 5, the stub refusing the archive)" \
+  "rc=$RC: $(printf '%s' "$OUT" | grep -E 'REFUSED|FAILED' | head -2 | tr '\n' ' ')" [ "$RC" -eq 5 ]
+check "archive-and-export: decodes the profile at ~/.variorum/release/" \
+  "security was handed: $(grep '^cms' "$LOG" | tr '\n' ' ')" logged "cms -D -i $OUTSIDE"
+check "archive-and-export: installs Xcode's copy from ~/.variorum/release/" \
+  "the installed copy is $( [ -f "$INSTALLED" ] && echo 'not the outside profile' || echo absent)" cmp -s "$INSTALLED" "$OUTSIDE"
+check "archive-and-export: never consults the in-repo path" \
+  "the decoy was read" eval 'unlogged "$DECOY" && lacks "$DECOY_UUID"'
+
+fresh ae-missing; run_ae
+check "archive-and-export: a missing profile refuses (rc 4)" "rc=$RC" [ "$RC" -eq 4 ]
+check "archive-and-export: the refusal is ONE sentence naming ~/.variorum/release/, that it is never committed and where to copy it from (no UUID)" \
+  "said: $(printf '%s' "$OUT" | grep -E 'REFUSED' | head -2 | tr '\n' ' ')" sentence_for "$OUTSIDE"
+check "archive-and-export: with the profile missing, nothing is decoded or installed (the in-repo decoy untouched)" \
+  "security was handed: $(grep '^cms' "$LOG" | tr '\n' ' ')" eval 'unlogged "cms" && [ ! -e "$INSTALLED" ]'
+
+fresh ae-override; ALT="$C/elsewhere/any-name.provisionprofile"; mkdir -p "$C/elsewhere"
+profile_plist "$GOOD_UUID" >"$ALT"; run_ae VARIORUM_RELEASE_PROFILE="$ALT"
+check "archive-and-export: VARIORUM_RELEASE_PROFILE moves the place (decoded and installed from it, rc 5)" \
+  "rc=$RC; security was handed: $(grep '^cms' "$LOG" | tr '\n' ' ')" \
+  eval '[ "$RC" -eq 5 ] && logged "cms -D -i $ALT" && cmp -s "$INSTALLED" "$ALT"'
+
+fresh ae-installed-differs; place_outside
+mkdir -p "$(dirname "$INSTALLED")"; printf 'a different profile\n' >"$INSTALLED"; run_ae
+check "archive-and-export: an installed copy that differs from the pinned profile still refuses (rc 4), nothing overwritten" \
+  "rc=$RC: $(printf '%s' "$OUT" | grep -E 'REFUSED' | head -1)" \
+  eval '[ "$RC" -eq 4 ] && has "differs" && [ "$(cat "$INSTALLED")" = "a different profile" ]'
+
+# ---------------------------------------------------------------- verify-export.sh
+echo "-- verify-export.sh"
+fresh ve-same; place_outside; fake_app "$OUTSIDE"; run_ve
+check "verify-export: an embedded profile equal to the one at ~/.variorum/release/ PASSES the byte-identical check" \
+  "said: $(printf '%s' "$OUT" | grep -F 'embedded profile' | grep -vF 'present' | head -1)" \
+  eval 'printf "%s\n" "$OUT" | grep -F "PASS  embedded profile is BYTE-IDENTICAL" | grep -qF "$OUTSIDE"'
+
+fresh ve-differs; place_outside; fake_app "$DECOY"; run_ve
+check "verify-export: an embedded profile that differs from it FAILS — the in-repo copy is never the reference" \
+  "said: $(printf '%s' "$OUT" | grep -F 'embedded profile' | grep -vF 'present' | head -1)" \
+  eval 'printf "%s\n" "$OUT" | grep -F "FAIL  embedded profile differs" | grep -qF "$OUTSIDE" && lacks "BYTE-IDENTICAL"'
+
+fresh ve-missing; fake_app "$DECOY"; run_ve
+check "verify-export: a missing profile FAILs the byte-identical check with the one sentence (rc 1, never compared with the decoy)" \
+  "rc=$RC; said: $(printf '%s' "$OUT" | grep -E '^(REFUSED|PASS|FAIL)' | grep -F 'profile' | head -2 | tr '\n' ' ')" \
+  eval '[ "$RC" -eq 1 ] && sentence_for "$OUTSIDE" && printf "%s\n" "$OUT" | grep -F "must be at $OUTSIDE" | grep -q "^FAIL  " && lacks "BYTE-IDENTICAL" && lacks "embedded profile differs"'
+check "verify-export: with the profile missing, every other section still runs and the verdict counts" \
+  "said: $(printf '%s' "$OUT" | grep -E '^(REFUSED|VERDICT|PASS  CFBundleIdentifier)|^-- Sparkle' | tr '\n' ' ')" \
+  eval 'has "PASS  CFBundleIdentifier = io.lduarte.Variorum" && has "-- codesign --verify" && has "-- Sparkle" && has "VERDICT: FAIL" && lacks "REFUSED"'
+
+# ---------------------------------------------------------------- the repo keeps it out
+echo "-- .gitignore"
+ignored() {   # ignored <path> — the repo's own ignore rules alone (no global, system or XDG excludes)
+  env -u XDG_CONFIG_HOME HOME="$T" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 \
+    git -C "$SRC" check-ignore -q --no-index "$1"
+}
+check ".gitignore keeps a provisioning profile out of Tools/Release" "git check-ignore did not match" \
+  ignored "Tools/Release/$NAME"
+check ".gitignore keeps a provisioning profile out of the whole tree (any folder, any name)" \
+  "git check-ignore did not match" eval 'ignored "$NAME" && ignored "App/Variorum/Some Profile.provisionprofile"'
+check ".gitignore keeps an iOS .mobileprovision out of the whole tree" "git check-ignore did not match" \
+  eval 'ignored "App/Variorum/VariorumMobile/embedded.mobileprovision" && ignored "x.mobileprovision"'
+
+echo
+if [ "$FAIL" -eq 0 ]; then
+  echo "test-release-profile: ALL $PASS CASES HELD"
+  exit 0
+fi
+printf "test-release-profile: %d held, %d FAILED:%b\n" "$PASS" "$FAIL" "$FAILED"
+exit 1

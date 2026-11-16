@@ -54,7 +54,10 @@ a relocation" rule): the relocated files, and every passage a round cut or rewro
   three pinned `Tools/prod-*.sh`), the team id (`project.pbxproj`, `ProtectionKeychain.swift`'s keychain-group prefix,
   `Tools/Release/verify-export.sh`), and `Tools/Release/ExportOptions.plist` + the binary
   `Tools/Release/Variorum_Developer_ID.provisionprofile` (team id, signing cert, profile UUID) stay as they are; no env-file
-  move. **CLOSED.**
+  move. **CLOSED.** *Superseded at the public flip, for the profile binary alone: the file was left out of the
+  published tree. Since VX-999 (`notes/plans/fixes/vx-999-release-profile-path.md`, 2026-11-15) the release scripts
+  read the pinned copy from `~/.variorum/release/Variorum_Developer_ID.provisionprofile`, outside the repo, and
+  `.gitignore` keeps every provisioning profile out of the tree. The rest of this item stands.*
 - **3 · R-oss-27 — the remaining identifier kinds** (`a9f6e5d5f`, 52 notes): `<oauth-client-id>` (11), 
   `<provisioning-profile-uuid>` (2, notes only), `<supabase-org-id>` (2), `<auth-identity-id>` (3), `<library-uuid>`
   (21 — every library id inside a prefs key, plus the three full library UUIDs wherever they stood), `<simulator-udid>`
@@ -144,7 +147,9 @@ guards), after every round. The app-target test files changed only by a string l
    on the board), home and scratch paths: VX-751's verify list.
 5. **VERIFY — `notes/TICKETS.md` regenerates on main at the next bout:** confirm the VX-910 title is neutral before the
    flip (the orchestrator retitled the ticket on the board; the generated file is never hand-edited).
-6. **Kept on purpose, all ruled:** the load-bearing values (follow-up 2); the 8-hex library/key ids (follow-up 3); her
+6. **Kept on purpose, all ruled:** the load-bearing values (follow-up 2 — the profile binary excepted: superseded at
+   the public flip, the file left out of the published tree; the release road reads it from outside the repo since
+   VX-999, `notes/plans/fixes/vx-999-release-profile-path.md`); the 8-hex library/key ids (follow-up 3); her
    published letter's own name (`LETTER.md`, its read-me copy, the seeder literal pinned byte-equal). (An earlier edition
    of this line listed a 13r capture filename as kept too; no ruling covered it — m-2 neutralized it.)
 7. **CLOSED AS KEEP — the triage residuals** (the orchestrator's dispositions under her refinement: only the ruled class

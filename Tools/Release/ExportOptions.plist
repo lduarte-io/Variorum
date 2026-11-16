@@ -11,14 +11,16 @@
 	     signingCertificate — the SHA-1 of "Developer ID Application: Lillian
 	     Duarte (384925MZJ6)", the ONE certificate the profile below embeds.
 	     provisioningProfiles — "Variorum Developer ID" by UUID; its file is
-	     versioned beside this plist (Variorum_Developer_ID.provisionprofile —
-	     not a secret: it ships inside every exported bundle as
-	     embedded.provisionprofile). Its entitlements carry
+	     pinned OUTSIDE the repo, at
+	     ~/.variorum/release/Variorum_Developer_ID.provisionprofile, and is
+	     never committed (VX-999; Tools/Release/profile-path.sh names the
+	     place). Every exported bundle carries a copy as
+	     embedded.provisionprofile. Its entitlements carry
 	     keychain-access-groups = 384925MZJ6.* — the wildcard that authorizes
 	     BOTH of Variorum.entitlements' groups (the KnownIssues row 13r closes).
 
 	     A renewed certificate or a regenerated profile changes BOTH values
-	     here AND the versioned profile file; archive-and-export.sh refuses
+	     here AND the pinned profile file; archive-and-export.sh refuses
 	     until all three agree (and agree with the Keychain). -->
 	<key>method</key>
 	<string>developer-id</string>

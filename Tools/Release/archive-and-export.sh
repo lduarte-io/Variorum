@@ -29,17 +29,23 @@
 # A1 rail (the 13r plan's U1 RECORD). It runs ONLY at a zero-instance window: it refuses while any
 # Variorum instance runs, and it never quits or kills one.
 #
+# THE PINNED PROFILE lives OUTSIDE the repo, at ~/.variorum/release/Variorum_Developer_ID.provisionprofile,
+# and is never committed (VX-999 — profile-path.sh is the one definition of the place). Step 1 reads it
+# there and refuses when it is missing.
+#
 # Exit: 0 export built and the drill passed · 1 the drill failed · 2 usage · 3 an instance is running
-#       · 4 the signing inputs disagree · 5 archive failed · 6 export failed.
+#       · 4 the signing inputs disagree (the pinned profile missing included) · 5 archive failed
+#       · 6 export failed.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "${HERE}/../.." && pwd)"
+source "${HERE}/profile-path.sh"   # VX-999: release_profile_path / release_profile_missing
 PROJECT="${REPO}/App/Variorum/Variorum.xcodeproj"
 SCHEME="Variorum"
 BUNDLE_ID="io.lduarte.Variorum"
 EXPORT_OPTIONS="${HERE}/ExportOptions.plist"
-PROFILE_VERSIONED="${HERE}/Variorum_Developer_ID.provisionprofile"
+PROFILE_PINNED="$(release_profile_path)"
 PROFILES_DIR="${HOME}/Library/Developer/Xcode/UserData/Provisioning Profiles"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 PB=/usr/libexec/PlistBuddy
@@ -113,8 +119,9 @@ WORK="$(mktemp -d "${TMPDIR:-/tmp}/archive-and-export.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 disagree() { echo "REFUSED: $*" >&2; exit 4; }
 
-security cms -D -i "$PROFILE_VERSIONED" > "${WORK}/profile.plist" 2>/dev/null \
-  || disagree "the versioned profile ${PROFILE_VERSIONED} does not decode"
+if PROFILE_MISSING="$(release_profile_missing "$PROFILE_PINNED")"; then disagree "$PROFILE_MISSING"; fi
+security cms -D -i "$PROFILE_PINNED" > "${WORK}/profile.plist" 2>/dev/null \
+  || disagree "the pinned profile ${PROFILE_PINNED} does not decode"
 P_UUID="$("$PB" -c 'Print :UUID' "${WORK}/profile.plist")"
 P_NAME="$("$PB" -c 'Print :Name' "${WORK}/profile.plist")"
 P_APPID="$("$PB" -c 'Print :Entitlements:com.apple.application-identifier' "${WORK}/profile.plist")"
@@ -124,7 +131,7 @@ O_CERT="$("$PB" -c 'Print :signingCertificate' "$EXPORT_OPTIONS" | tr '[:lower:]
 O_METHOD="$("$PB" -c 'Print :method' "$EXPORT_OPTIONS")"
 
 [ "$O_METHOD" = "developer-id" ] || disagree "ExportOptions method is '${O_METHOD}', not developer-id"
-[ "$P_UUID" = "$O_UUID" ] || disagree "ExportOptions names profile ${O_UUID}, the versioned file is ${P_UUID}"
+[ "$P_UUID" = "$O_UUID" ] || disagree "ExportOptions names profile ${O_UUID}, the pinned file is ${P_UUID}"
 [ "$P_APPID" = "${P_APPID%%.*}.${BUNDLE_ID}" ] || disagree "the profile's application-identifier ${P_APPID} is not for ${BUNDLE_ID}"
 [[ "$P_EXPIRY" > "$(date -u +%Y-%m-%dT%H:%M:%SZ)" ]] || disagree "the profile expired at ${P_EXPIRY}"
 n="$(plutil -extract DeveloperCertificates raw -o - "${WORK}/profile.plist")"
@@ -138,18 +145,18 @@ done
 [ -n "$in_profile" ] || disagree "ExportOptions' signingCertificate ${O_CERT} is not a certificate the profile embeds"
 security find-identity -v -p codesigning > "${WORK}/identities.txt"   # (no `| grep -q` under pipefail)
 grep -q "$O_CERT" "${WORK}/identities.txt" || disagree "no valid codesigning identity ${O_CERT} in the Keychain"
-say "signing inputs agree: profile '${P_NAME}' ${P_UUID} (expires ${P_EXPIRY}) · identity ${O_CERT} in the Keychain and in the profile · method developer-id"
+say "signing inputs agree: profile '${P_NAME}' ${P_UUID} (expires ${P_EXPIRY}; read from ${PROFILE_PINNED}) · identity ${O_CERT} in the Keychain and in the profile · method developer-id"
 
 # ------------------------------------------------------------------ 2. the profile is where xcodebuild looks
 # A double-clicked .provisionprofile lands in System Settings' Device Management store, which
 # xcodebuild does not read; the export resolves profiles from Xcode's own directory, by UUID.
 INSTALLED="${PROFILES_DIR}/${P_UUID}.provisionprofile"
 if [ -f "$INSTALLED" ]; then
-  cmp -s "$INSTALLED" "$PROFILE_VERSIONED" || disagree "${INSTALLED} exists but differs from the versioned profile"
+  cmp -s "$INSTALLED" "$PROFILE_PINNED" || disagree "${INSTALLED} exists but differs from the pinned profile ${PROFILE_PINNED}"
   say "profile already installed: ${INSTALLED}"
 else
   mkdir -p "$PROFILES_DIR"
-  cp -p "$PROFILE_VERSIONED" "$INSTALLED"
+  cp -p "$PROFILE_PINNED" "$INSTALLED"
   say "profile INSTALLED (copied, nothing overwritten): ${INSTALLED}"
 fi
 
