@@ -127,3 +127,6 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - The guard and binary files (VX-996's open question): "i don't think we need to scan binary files like screenshots necessarily? i'm open to changing my mind, but generally I think that I'm working now knowing that my direct feedback to you is going to be in the public record and that screenshots might not be too. so I am adjusting my own habits for work in public (very minimally honestly)."
 - The Air: "i haven't been running any tests on the air or doing any direct development there, it's normally website changes and planning sessions at most." (So its newer Xcode is fine.)
 - The guard's private list: "why can only I help with the token list? what's the deal with that?" (She was right to ask: the sweep's own rule files were on the Air all along. The list is now compiled from them on both Macs.)
+- First run, where "I already use Variorum" lives: "I think I already use variorum welcome card is probably fine" — the welcome card on the Bookcase, no screen in front of it.
+- VX-207's title reworded at her word; the one leftover user name in the old issues export fixed (VX-998).
+- Outside contributors (QUESTIONS #275): "I'm not planning to have outside contributers so might not be an issue." (The guard stays as built.)
