@@ -28,7 +28,7 @@ exactly the commits `git rev-list` names, so a setting nobody has found yet cann
 never read (collect_items). A file git shows as binary because of an attribute (a committed .gitattributes,
 $GIT_DIR/info/attributes, a global attributes file) is read when its blob is text by git's own content
 rule, and a file an attribute forces to text is dropped when its blob is binary by that rule. True
-binaries (a NUL byte in the blob's first 8000 bytes) are not read: an open question for the author.
+binaries (a NUL byte in the blob's first 8000 bytes) are not read: the author's answer (VX-996 F7).
 
 Two scanners read that same set of items. gitleaks runs its generic secret rules (with gitleaks.toml's
 ruled public values allowed) as one `gitleaks stdin` call over every item, from an empty private
@@ -467,8 +467,8 @@ def recover_binary_shown(binaries):
     """Attributes never decide what is read. A section git showed as binary (a -diff or binary
     attribute from a committed .gitattributes, $GIT_DIR/info/attributes or a global attributes
     file) is read when its blob is text by git's own content rule; a section an attribute forced to
-    text is dropped when its blob is binary by that rule. True binaries are not read (F7: binary
-    blobs are an open question for the author)."""
+    text is dropped when its blob is binary by that rule. True binaries are not read (F7, the
+    author's answer: binaries stay unscanned)."""
     items = []
     for commit, path, old_ids, new_id, merge, shown_as_text in binaries:
         if not new_id or ZERO_SHA.match(new_id):

@@ -170,8 +170,8 @@ mkdir -p notes; printf 'clean\n' >notes/id.md; git add notes/id.md
 git -c user.email="$SAMPLE@example.com" commit -q -m "a clean message"
 push -u origin token-identity; expect_refuse "a token in the commit identity refuses" "$SAMPLE" "author" "[test-token]"
 
-# 12. A true binary (NUL bytes) is not read by either scanner — the behaviour as built; scanning
-#     binary blobs is an open question for the author (the record's F7).
+# 12. A true binary (NUL bytes) is not read by either scanner — the author's answer (the record's F7):
+#     binaries stay unscanned.
 branch_from_main binary
 printf 'PNG\000\001\002 %s \000\377' "$SAMPLE" >img.bin; git add img.bin; git commit -q -m "a binary"
 push -u origin binary; expect_pass "a binary file (NUL bytes) is not read"
