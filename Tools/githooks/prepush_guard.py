@@ -263,9 +263,14 @@ def outgoing_revs(remote, url, updates):
     for _local_ref, local_sha, _remote_ref, remote_sha in updates:
         if ZERO_SHA.match(local_sha):
             continue  # a deletion publishes nothing
-        peeled = git("rev-parse", "--verify", "-q", local_sha + "^{commit}", check=False).strip()
-        if peeled:
-            tips.append(peeled)
+        # The guard reads commits (and the tags that lead to them). A ref naming a blob or a tree,
+        # directly or through tags, would publish an object it never reads: refuse it.
+        final = git("rev-parse", "--verify", "-q", local_sha + "^{}", check=False).strip()
+        kind = object_type(final) if final else ""
+        if kind != "commit":
+            raise Refusal("a pushed ref names a %s, not a commit (directly or through a tag); the guard "
+                          "reads only commits and their tags, so it refuses." % (kind or "missing object"))
+        tips.append(final)
         if not ZERO_SHA.match(remote_sha) and object_type(remote_sha):
             old = git("rev-parse", "--verify", "-q", remote_sha + "^{commit}", check=False).strip()
             if old:
@@ -489,16 +494,26 @@ def collect_items(revs, updates):
             if ref and ref != "(delete)":
                 items.append(Item("ref", None, "ref name " + ref, ref))
     for _local_ref, local_sha, _remote_ref, _remote_sha in updates:
-        if ZERO_SHA.match(local_sha) or object_type(local_sha) != "tag":
+        if ZERO_SHA.match(local_sha):
             continue
-        raw = git("cat-file", "tag", local_sha)
-        head, _, message = raw.partition("\n\n")
-        for hl in head.splitlines():
-            if hl.startswith("tagger "):
-                ident = re.sub(r" \d+ [+-]\d{4}$", "", hl[len("tagger "):])
-                items.append(Item("identity", local_sha, "tagger identity", ident))
-        for n, ml in enumerate(message.splitlines(), 1):
-            items.append(Item("message", local_sha, "tag message, line %d" % n, ml))
+        # Every tag in a tag-of-tag chain publishes with the outer one: walk the chain, scanning each.
+        tag_sha, seen = local_sha, set()
+        while object_type(tag_sha) == "tag" and tag_sha not in seen:
+            seen.add(tag_sha)
+            raw = git("cat-file", "tag", tag_sha)
+            head, _, message = raw.partition("\n\n")
+            target = None
+            for hl in head.splitlines():
+                if hl.startswith("object "):
+                    target = hl[len("object "):].strip()
+                elif hl.startswith("tagger "):
+                    ident = re.sub(r" \d+ [+-]\d{4}$", "", hl[len("tagger "):])
+                    items.append(Item("identity", tag_sha, "tagger identity", ident))
+            for n, ml in enumerate(message.splitlines(), 1):
+                items.append(Item("message", tag_sha, "tag message, line %d" % n, ml))
+            if not target:
+                break
+            tag_sha = target
     if revs is None:
         return items, 0
     # Each record starts with a marker carrying a fresh random nonce: no message or blob byte
