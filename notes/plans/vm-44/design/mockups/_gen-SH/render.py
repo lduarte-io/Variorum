@@ -5,9 +5,11 @@ Image.MAX_IMAGE_PIXELS = None
 CH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 HERE = os.path.dirname(os.path.abspath(__file__))
 name, scratch = sys.argv[1], sys.argv[2]
+width = sys.argv[3] if len(sys.argv) > 3 else '2200'
+height = sys.argv[4] if len(sys.argv) > 4 else '16000'
 src = os.path.abspath(os.path.join(HERE, '..', name + '.html'))
 out = os.path.abspath(os.path.join(HERE, '..', '..', 'renders', 'mockup-' + name + '.png'))
-subprocess.run([CH, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--window-size=2200,16000', '--screenshot=' + out, 'file://' + src],
+subprocess.run([CH, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--window-size=%s,%s' % (width, height), '--screenshot=' + out, 'file://' + src],
                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 im = Image.open(out).convert('RGB')
 w, h = im.size

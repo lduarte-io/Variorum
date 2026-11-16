@@ -221,6 +221,31 @@ code{font:13px/1.4 "SF Mono",ui-monospace,Menlo,monospace;background:#E9E7E0;pad
 .phone.xl .qebox{font-size:23px;min-height:60px}
 .phone.xl .stc{font-size:17px;height:30px;border-radius:15px}
 .phone.xl .btn{font-size:22px;height:58px}
+.qe{margin:8px 20px 8px;gap:8px}
+.qebox{min-height:48px;border-radius:12px;border:1.5px dashed #8B7F6A;color:#8B7F6A;padding:0 14px;font:400 17px/24px var(--serif)}
+.phone.dk .qebox{border-color:#736C5D;color:#948C7C}
+.today{height:48px;border-radius:12px;padding:0 14px}
+/* ---- revision pass: the band card, the number pad, the bar's lock cell, the row's visible dots ---- */
+.bcard{flex:none;margin:8px 20px 0;min-height:60px;border-radius:14px;background:var(--surface);box-shadow:0 0 0 1px var(--takeline);display:flex;align-items:center;gap:10px;padding:8px 2px 8px 16px}
+.bcard .mid{flex:1;min-width:0}
+.bcard .b1{font:600 15px/20px var(--sans);color:var(--accent)}
+.bcard .b2{font:400 15px/20px var(--serif);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcard .go{margin:0;color:var(--accent);font:400 22px var(--sans)}
+.bcard .x{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--meta)}
+.bcard .x svg{width:16px;height:16px}
+.kb.num{height:292px;padding:8px 6px 0}
+.kb.num .nr{display:flex;gap:6px;margin-bottom:7px}
+.kb.num .nk{flex:1;height:48px;border-radius:6px;background:#fff;box-shadow:0 1px 0 #9a9ca1;display:flex;align-items:center;justify-content:center;font:400 25px var(--sans);color:#000}
+.kb.num .nk.e{background:transparent;box-shadow:none;font-size:20px}
+.tab.lk{flex:none;width:64px;color:var(--accent);border-left:1px solid var(--line)}
+.rdots{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--accent);margin-right:-10px}
+.grip{color:var(--faint);font:400 20px var(--sans);flex:none;width:28px;text-align:center}
+.readp{flex:1;min-height:0;overflow:hidden;background:var(--surface);border-top:1px solid var(--line);padding:6px 24px 0}
+.readp h4{font:600 20px/26px var(--serif);margin:22px 0 8px}
+.readp p{font:400 17px/27px var(--serif);margin:0 0 14px}
+.readp hr{border:0;border-top:1px solid var(--line);margin:22px 60px 0}
+.prog{height:6px;border-radius:3px;background:var(--wash);margin:8px 0 2px;overflow:hidden}
+.prog i{display:block;height:6px;background:var(--accent);border-radius:3px}
 """
 
 def P(*parts, cls=''):
@@ -286,6 +311,19 @@ def term(label, neg=False, x=True, locked=False):
         return '<div class="term locked">%s<span style="flex:1">%s</span><span class="x">%s</span></div>' % (I_LOCK.replace('width="22" height="22"', 'width="16" height="16"'), label, I_X)
     return '<div class="term"><span>%s</span><span class="nt2%s">not</span><span class="x">%s</span></div>' % (label, ' on' if neg else '', I_X)
 
+TABS = lambda on=1: tabs_words(on)
+def tabs_lock(on=1):
+    return tabs_words(on)[:-6] + '<div class="tab lk">%s</div></div>' % I_LOCK
+def numpad():
+    rows = [("1", "2", "3"), ("4", "5", "6"), ("7", "8", "9"), ("", "0", "⌫")]
+    return '<div class="kb num">%s</div>' % ''.join(
+        '<div class="nr">%s</div>' % ''.join('<span class="nk%s">%s</span>' % (' e' if k in ('', '⌫') else '', k) for k in r) for r in rows)
+def bcard(line, sub='', x=True):
+    s2 = '<div class="b2">%s</div>' % sub if sub else ''
+    return '<div class="bcard"><div class="mid"><div class="b1">%s</div>%s</div><span class="go">›</span>%s</div>' % (line, s2, '<span class="x">%s</span>' % I_X if x else '')
+RDOTS = '<span class="rdots">%s</span>' % I_MORE
+GRIP = '<span class="grip">≡</span>'
+
 def opt(frame, oid, title, text, mine=False, small=False):
     f = '<div class="small">%s</div>' % frame if small else frame
     return '<div class="opt%s">%s<div class="cap"><span class="id%s">%s</span><b>%s</b> %s</div></div>' % (' sm' if small else '', f, ' mine' if mine else '', oid, title, text)
@@ -295,9 +333,10 @@ VALUES = """
 <h2>The values these frames are drawn with</h2>
 <p class="lede">Everything here inherits <code>sketches/sizing-sheet.html</code>: Study voice under the sea-glass palette; type at 13 · 15 · 17 · 20 · 24
 (Iowan Old Style for her words and for names, SF for chrome); a 44 pt touch minimum; lists and prose on the paper, bars, sheets and section bands on the
-sea-glass room; the corrected meta ink <code>#6A6359</code>; the dark values are the sheet's <code>.dk</code> set. The shell (the wing masthead, the
-shelf chips, the tab bar, the capture box) is the graders' picks SW-1 (a), SW-3 (b), BK-1 (a), drawn with the round-1 sketch generator's own frame so a
-different pick is a re-skin. Frames are 402 × 874 pt, one CSS pixel to the point. Fonts fall back to Palatino or Georgia where Iowan is not installed.</p>
+sea-glass room; the corrected meta ink <code>#6A6359</code>; the dark values are the sheet's <code>.dk</code> set. The shell is her rulings: the wing
+title band (SW-1), the Bookcase with the one-line box (SW-3), shelves as a chip row (BK-1), the bar as three words on roots and lists and never inside a
+note (LK-5). Frames are 402 × 874 pt, one CSS pixel to the point. Fonts fall back to Palatino or Georgia where Iowan is not installed. Dashed red
+outlines and the red finger mark are annotations, not design.</p>
 """
 
 def write(fname, title, intro, sections, notes, check_dir=None):
