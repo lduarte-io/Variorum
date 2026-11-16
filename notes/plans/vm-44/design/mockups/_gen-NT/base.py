@@ -191,6 +191,45 @@ table.plain{max-width:2100px}
 table.plain td{font-size:13px;line-height:1.45;max-width:420px}
 table.plain td:first-child{font-weight:650;white-space:nowrap}
 .spin{width:18px;height:18px;border-radius:9px;border:2px solid var(--line);border-top-color:var(--accent);display:inline-block;vertical-align:-3px;margin-right:8px}
+/* ---- revision pass (sitting-1 rulings): the quick row, the compact strip, the name field, the book strip ---- */
+.gc.w{width:auto;padding:0 12px;font:600 15px/1 var(--chrome);color:var(--accent);white-space:nowrap}
+.gc.off{color:var(--faint2);opacity:.6}
+.gc.c{width:31px}
+.gc.c svg{width:19px;height:19px}
+.gc.sepl{box-shadow:-1px 0 0 rgba(127,127,127,.25);margin-left:2px;padding-left:2px;width:46px}
+.namef{flex:1;height:48px;border-radius:24px;background:var(--glass);box-shadow:0 0 0 1px var(--glassEdge),0 4px 16px rgba(0,0,0,.14);display:flex;align-items:center;padding:0 4px 0 18px;gap:6px;
+  font:400 17px/22px var(--chrome);color:var(--ink);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.namef .ph{color:var(--faint2)}
+.namef .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden}
+.bstrip{position:absolute;left:0;right:0;bottom:0;z-index:4;height:82px;padding-bottom:34px;display:flex;align-items:center;background:var(--room);border-top:1px solid var(--line)}
+.bstrip .sb2{width:60px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none}
+.bstrip .sb2 svg{width:22px;height:22px}
+.bstrip .smid{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;font:500 15px/20px var(--chrome);color:var(--ink);white-space:nowrap;overflow:hidden}
+.bstrip .smid span{color:var(--muted2);font-weight:400}
+.bstrip .smid svg{width:16px;height:16px;color:var(--accent);flex:none}
+.pickrow{display:flex;align-items:flex-start;gap:12px;min-height:64px;padding:12px 16px 12px 20px;background:var(--paper);position:relative}
+.pickrow:after{content:"";position:absolute;left:20px;right:0;bottom:0;height:1px;background:var(--line)}
+.pickrow.last:after{display:none}
+.pickrow .mid{flex:1;min-width:0}
+.pickrow .lab{font:400 17px/22px var(--chrome);color:var(--ink);padding:0}
+.pickrow .det{font:400 13px/18px var(--chrome);color:var(--muted2);margin-top:2px}
+.pickrow .ckm{width:24px;height:24px;color:var(--accent);flex:none;margin-top:1px}
+.pickrow .ckm svg{width:22px;height:22px}
+.pickrow .demo{margin-top:10px;display:flex}
+.pickrow .demo .gcap{box-shadow:0 0 0 1px var(--glassEdge);height:44px;background:var(--room)}
+.pickrow .demo .gc{height:40px;width:38px}
+.pickrow .demo .gc.c{width:25px}
+.pickrow .demo .gc svg{width:18px;height:18px}
+.pickrow .demo .gc.c svg{width:15px;height:15px}
+.pill2 .lab small{font:400 13px/18px var(--chrome);color:var(--muted2);margin-left:6px}
+.pill2 .lab svg{width:14px;height:14px;vertical-align:-2px;margin-left:4px;color:var(--muted2)}
+.scope{font:400 13px/18px var(--chrome);color:var(--muted2);padding:0 20px 10px;display:flex;align-items:center;gap:6px}
+.scope b{font-weight:600;color:var(--ink)}
+.scope svg{width:15px;height:15px;color:var(--accent);flex:none}
+.cap .id.ruled{background:#2F6B4F}
+p.ruled{max-width:900px;margin:6px 0;color:#24221E;font-size:13px;background:#E3EEE9;border-radius:8px;padding:8px 12px}
+p.ruled b{font-weight:650}
+.dw{display:inline-block;font:600 10.5px/15px -apple-system,Arial,sans-serif;letter-spacing:.03em;background:#F0E3BF;color:#6B4A0C;border-radius:4px;padding:0 5px;margin-left:4px;vertical-align:1px}
 /* largest standard text size (xxxLarge): her words scale on; chrome stops here */
 .xxl .t-body{font-size:23px;line-height:35px}
 .xxl .t-title{font-size:30px;line-height:36px}
@@ -213,6 +252,30 @@ CSS = _base + '\n' + '\n'.join(_extra) + MINE
 
 def esc(s):
     return html.escape(s, quote=False)
+
+
+# ---- the draft-words registry: every line of copy that is a designer's draft (not the Mac's, not the build's) goes through dr().
+# phone() collects the lines drawn in it; frame() files them under the frame's id; dump_drafts() writes them out for wording-list-2.md.
+_PENDING, _BYPHONE, DRAFTS = [], {}, []
+
+
+def dr(line, what):
+    """A drafted line: returns it unchanged, and remembers it for the wording list."""
+    _PENDING.append((line, what))
+    return line
+
+
+def drs(frame_id, line, what):
+    """A drafted line used in several frames (a shared constant): filed once under the given frame label."""
+    DRAFTS.append((frame_id, line, what))
+    return line
+
+
+def dump_drafts(fname):
+    d = os.environ.get('WORDING_DIR')
+    if d:
+        import json
+        json.dump([list(x) for x in DRAFTS], open(os.path.join(d, fname + '.json'), 'w'), ensure_ascii=False, indent=1)
 
 
 def ic(d, sw=1.7, extra=''):
@@ -360,10 +423,40 @@ AA = 'Aa'
 
 
 def bar(cells=None, receipt='', bottom=333, on=None):
-    """The keyboard bar, LK-4 pick: one glass capsule at the trailing edge; the freed space carries the receipt."""
+    """The keyboard bar as ruled (LK-4): no strip; ONE glass capsule at the trailing edge. The space at its left stays empty
+    except for a removal's line, a refusal, or the commit line."""
     cells = cells if cells is not None else [AA, I_NL, I_FORK, I_MORE]
     cap = '<span class="gcap">%s</span>' % ''.join(gc(c, on == i) for i, c in enumerate(cells))
     return '<div class="fbar" style="bottom:%dpx">%s%s</div>' % (bottom, receipt or '<span></span>', cap)
+
+
+def qrow(bottom=333, undo=True, redo=False, on=None, left=''):
+    """The quick row: the capsule after a tap on its last cell. Close, Undo, Redo, Comment, Commit, then the full block menu."""
+    cells = [('', I_X), ('' if undo else ' off', I_UNDO), ('' if redo else ' off', I_REDO), ('', I_CMT), (' w', 'Commit'), (' sepl', I_MORE)]
+    cap = '<span class="gcap">%s</span>' % ''.join('<span class="gc%s%s">%s</span>' % (c, ' on' if on == i else '', x) for i, (c, x) in enumerate(cells))
+    return '<div class="fbar" style="bottom:%dpx">%s%s</div>' % (bottom, left or '<span></span>', cap)
+
+
+_B = '<b style="font:700 17px/1 var(--chrome)">B</b>'
+_I = '<i style="font:italic 500 18px/1 var(--prose)">I</i>'
+_S = '<s style="font:500 16px/1 var(--chrome)">S</s>'
+_H = '<span style="font:600 19px/1 var(--chrome)">#</span>'
+I_CODE = ic('m7 5.5-4.5 4.5L7 14.5M13 5.5l4.5 4.5-4.5 4.5')
+FMT7 = [I_X, _B + '<i style="font:italic 500 17px/1 var(--prose);margin-left:1px">I</i>', _H, I_BUL, I_CHK, I_OUT, I_IN]
+FMT11 = [I_X, _B, _I, _S, I_CODE, I_LINK, _H, I_BUL, I_CHK, I_OUT, I_IN]
+
+
+def fmt_strip(compact=False, on=None, bottom=333):
+    """The formatting strip (LK-3, a setting): seven big cells with the rest in a menu (default), or all eleven in one compact row."""
+    cells = FMT11 if compact else FMT7
+    cap = '<span class="gcap" style="gap:%dpx">%s</span>' % (0 if compact else 2, ''.join('<span class="gc%s%s">%s</span>' % (' c' if compact else '', ' on' if on == i else '', c) for i, c in enumerate(cells)))
+    return '<div class="fbar" style="bottom:%dpx;justify-content:flex-end">%s</div>' % (bottom, cap)
+
+
+def bookstrip(text='3 of 12', sub='Drafts'):
+    """BK-5 as ruled: the book strip at the foot of a note opened from a book (the books mockup owns its design; this is its place)."""
+    return ('<div class="bstrip"><span class="sb2">%s</span><span class="smid">%s%s<span>&nbsp;· %s</span></span><span class="sb2">%s</span></div>'
+            % (ic('M12.5 4 6.5 10l6 6', 2), I_BOOK, text, sub, ic('M7.5 4 13.5 10l-6 6', 2)))
 
 
 def rcpt(text, act='Undo', ref=False, x=False):
@@ -423,12 +516,17 @@ def alert(top, title, msg, buttons):
 
 
 def phone(*parts, dark=False, over='', cls=''):
-    return ('<div class="phone %s %s">%s<div class="screen">%s</div>%s<div class="home"></div></div>'
-            % ('dk' if dark else 'lt', cls, sb(), ''.join(parts), over))
+    h = ('<div class="phone %s %s">%s<div class="screen">%s</div>%s<div class="home"></div></div>'
+         % ('dk' if dark else 'lt', cls, sb(), ''.join(parts), over))
+    _BYPHONE.setdefault(h, []).extend(_PENDING)
+    del _PENDING[:]
+    return h
 
 
 def frame(ph, fid, title, text, kind=''):
-    """kind: '' plain step · 'pick' my pick · 'q' an open question's alternative · 'new' a state frame"""
+    """kind: '' plain step · 'ruled' her ruling, as drawn · 'q' a question still open · 'new' a state frame"""
+    for line, what in _BYPHONE.get(ph, []):
+        DRAFTS.append((fid, line, what))
     return '<div class="fcol">%s<div class="cap"><span class="id %s">%s</span><b>%s</b> %s</div></div>' % (ph, kind, fid, title, text)
 
 
@@ -451,10 +549,9 @@ def notes_table(rows):
 
 TOKENS = ('<h2>Token values used</h2><p class="note">Study voice under the sea-glass palette, light, with one dark frame of each key screen; every size, ink, radius '
           'and component is <code>sketches/sizing-sheet.html</code>’s (type 13 · 15 · 17 · 20 · 24, 44 pt touch minimum, gutter 20, the corrected muted and faint inks). '
-          'The bar and the masthead are the round-1 picks (<code>LK-4-LK-3-keyboard-bar.html</code>: one capsule, seven cells and a menu; '
-          '<code>NT-5-history-and-commit.html</code>: the masthead that scrolls away, both history doors). She has not ruled on those picks; each is a thin layer here '
-          '(the bar is one helper, the masthead one helper, the markers one helper) so a different pick is a re-skin. Glass is drawn as translucent white; menus and '
-          'alerts are the system’s shapes with the app’s tokens; the keyboard is a simplified drawing at its measured 327 pt. Draft working record, not canon.</p>')
+          'The bar, the masthead and the marks are drawn as she ruled them at sitting 1 (<code>plans/sitting-1-rulings.md</code>); each is still one helper in the generator. '
+          'Glass is drawn as translucent white; menus and alerts are the system’s shapes with the app’s tokens; the keyboard is a simplified drawing at its measured 327 pt. '
+          'A line tagged <span class="dw">draft</span> in a caption is a designer’s wording, listed in <code>design/wording-list-2.md</code> for her wording pass. Draft working record, not canon.</p>')
 
 
 def write(fname, title, intro, body):
@@ -462,4 +559,5 @@ def write(fname, title, intro, body):
            '<style>%s</style></head><body><h1>%s</h1>%s%s%s</body></html>' % (esc(title), CSS, title, intro, body, TOKENS))
     p = os.path.abspath(os.path.join(OUT, fname))
     open(p, 'w').write(doc)
-    print(p, len(doc))
+    dump_drafts(fname.replace('.html', ''))
+    print(p, len(doc), '· drafts:', len(DRAFTS))
