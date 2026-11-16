@@ -159,3 +159,6 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - The capture box's keyboard (found while preparing the trace): "i can't really put the keyboard away unless i hit return on the empty note or click on something else. so maybe that should be fixed? only navigation clears it."
   - Orchestrator's note: a real gap — the home screen needs a way to dismiss the keyboard (a swipe down on the box, a tap outside it, or a Done key). Goes into the capture umbrella.
 - iOS target: asked whether to move to iOS 27; the recommendation to stay on iOS 26 stands unless she says otherwise (the phone app is built with the iOS 27 SDK and runs natively on her phone; the target is only the minimum).
+- VM-46 on her phone (2026-11-15, late): "i see the right icon. it has been saying syncing for like a minute - kinda weird since it had arleady synced previously tongiht and nothing significant was added. however, it did eventually sync and now says synced 10:30."
+  - Orchestrator's note: a minute-long round with nothing new to send is a finding for the performance work (the audit traced a full owner-adoption scan and tombstone scans at every launch and unlock).
+- The trace: "let's do the lag trace now together so that everything can be planned out."
