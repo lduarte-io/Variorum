@@ -132,3 +132,10 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - Outside contributors (QUESTIONS #275): "I'm not planning to have outside contributers so might not be an issue." (The guard stays as built.)
 - VX-999 (the release scripts and the signing profile): "do the script fix - I still need to able to do releases."
 - "let's just finish the loop on what needs to be done post flip now" — the orchestrator's list and its state are in the session's report; CLAUDE.md's Environment section now says where an effort's record lives and drops the retired mobile worktree.
+- The lock mockup (`mockups/lock-and-protection.html`), her answers verbatim:
+  - The dial's default: "this only matters for castle, right?" (Yes — a Standard library never locks. No other default was named, so the existing 10 minutes stands.)
+  - The app switcher while the library is open in the background: "Show the page as today".
+  - Where she lands after a real unlock: "the home screen but there should be a \"back to where i was\" button (doesn't have to be worded exactly like that)"
+  - Lock library now: "there should be a lock icon at the top of the homescreen or in the bottom bar or something"
+- The phone's app icon: "please change the variorum icon to being the actual variorum icon. that should just be done now." (VM-46.)
+- Releases: "i only do run releases from the pro."
