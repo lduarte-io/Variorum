@@ -72,8 +72,9 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
   and exits 0 when it wasn't running. Then `pgrep -x Ambient` and `pgrep -x StageAmbient` must both
   print nothing: Ambient not running (keep the old name in the check until the old
   `~/dev/variorum/Tools/StageAmbient/` build folder is gone). A hit whose pid is not the one
-  `~/.variorum/ambient.state` names can be one of Ambient's own test stand-ins, gone within a few
-  seconds: re-check before acting on it. Your `coord-for-*` bridge claim also takes it down
+  `~/.variorum/ambient.state` names can be one of Ambient's own test stand-ins: processes named
+  `Ambient` that its `swift test` runs from a temporary folder, for a few seconds each and never more
+  than 30 s. Re-check before acting on it. Your `coord-for-*` bridge claim also takes it down
   (`Tools/stage claim` stops the show for any non-`HOLD:` reason), but the GO still waits for `off`'s
   confirmation.
 - `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` for app instances. The looser
