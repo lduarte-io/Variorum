@@ -107,4 +107,39 @@ the twelve words).
 
 ## The tickets
 
-Minted from this plan; each umbrella's members are listed in `notes/plans/vm-44/plans/minted/`.
+Minted 2026-11-15/16: 22 umbrella tickets and 181 member tickets in team VM, project "Mobile — the catch-up &
+launch". Each umbrella's members, the existing tickets re-homed under it, and its open questions are listed in
+`notes/plans/vm-44/plans/minted/umbrella-NN.md`.
+
+| Wave | # | Umbrella | Ticket | Members |
+|---|---|---|---|---|
+| 1 | 1 | Sizes and look | VM-47 | 8 |
+| 1 | 2 | Wings underneath | VM-55 | 8 |
+| 1 | 3 | Timing and the two lags ⚑ | VM-64 | 8 (VM-65, the timing readout, first) |
+| 1 | 4 | Fixes to what's there | VM-78 | 10 |
+| 2 | 5 | Home, wings and capture | VM-72 | 10 |
+| 2 | 6 | The Library | VM-87 | 10 |
+| 2 | 7 | Trash, Archived, Snippets, tags | VM-96 | 8 |
+| 2 | 8 | The lock ⚑ | VM-103 | 10 (VM-104, the probe, first) |
+| 3 | 9 | The Bookcase | VM-112 | 7 |
+| 3 | 10 | Inside a book | VM-120 | 9 |
+| 3 | 11 | Search | VM-130 | 6 |
+| 3 | 12 | Writing | VM-137 | 9 |
+| 4 | 13 | The note's top and sheets | VM-147 | 10 |
+| 4 | 14 | Book settings, rules and states | VM-156 | 10 |
+| 4 | 15 | Arrivals | VM-167 | 8 |
+| 4 | 16 | Speed, second pass ⚑ | VM-176 | 9 (waits on VM-65's numbers) |
+| 5 | 17 | Takes, commits and history | VM-186 | 6 |
+| 5 | 18 | Comments and callouts | VM-192 | 6 |
+| 5 | 19 | First run and joining ⚑ | VM-197 | 9 |
+| 5 | 20 | Export and share | VM-204 | 6 |
+| 6 | 21 | The pocket guide and the tour | VM-210 | 5 |
+| 6 | 22 | Launch readiness | VM-216 | 9 |
+
+**Parked for her (state "Needs Lillian"):** VM-76 (a line after File, and after a copy to another wing) · VM-95
+(tags on Library rows) · VM-15 (the library and the iPhone's own device backup) · VM-166 (where a book's filter
+lives without the Index) · VM-169 (Undo after dismissing an arrival). Each carries its options.
+
+**Running a wave.** An umbrella is kicked off as a run on its own branch (`/run-phase vm-47`, or
+`/architect-phase` where design is still open — her pick at each kickoff). Wave 1's four start together; the
+canon deltas this plan owed are applied (MobileSoul §4.5, §5 and §7; CoreDescription pillar 8).
