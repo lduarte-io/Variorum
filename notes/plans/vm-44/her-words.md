@@ -139,3 +139,8 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - Lock library now: "there should be a lock icon at the top of the homescreen or in the bottom bar or something"
 - The phone's app icon: "please change the variorum icon to being the actual variorum icon. that should just be done now." (VM-46.)
 - Releases: "i only do run releases from the pro."
+- Trash, Archived and tags mockup (`mockups/trash-archive-tags.html`), the designer's three additions: all kept — "Undo after deleting a tag, Unused-tags door in the Trash, Counts in the tag list".
+- Export and share mockup (`mockups/export-and-share.html`):
+  - Exporting a note: "Yes, ask which file" — just the text, or with takes and tags; Copy stays the on-screen words.
+  - A book as a folder of notes: "this should be a thing after v1. in fact, file a ticket so that it's not just a mobile ticket - this is a good improvement for mac. put it on the todo list. and also, move the \"search not just in one wing\" out of backlog and into todo as well." (VX-1000 minted, Todo; VX-987 moved to Todo.)
+- The Compare concept (`mockups/compare-concept.html`, after v1): "Takes first, then tabs".
