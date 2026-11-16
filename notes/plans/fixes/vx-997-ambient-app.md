@@ -16,7 +16,7 @@ FOR A LATER READER: written last (PENDING).
 | 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE (this commit) — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
 | 3 | `Tools/StageAmbient/` removed | DONE (this commit) — 17 tracked files; this worktree had no untracked leftovers |
 | 4 | The coordinator skill says what is true of Ambient | DONE (this commit) — the lines that name the ambient only (240 → 246 lines) |
-| 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | IN-PROGRESS — this LIVE STATUS from the first commit; the trial note and FOR A LATER READER owed |
+| 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | IN-PROGRESS — the trial note DONE and walked (this commit); FOR A LATER READER owed, last |
 | 6 | Every other `StageAmbient` mention updated or left with a reason | DONE (this commit) — none needed a change; each left with its reason below |
 | 7 | Ambient repo: `Tests/Fixtures/stage` refreshed + the F2 probe in `StageClaimTests` | NOT-STARTED |
 | 8 | Ambient repo: `README.md` says the synchronous stop is real once this PR merges | NOT-STARTED |
@@ -90,3 +90,17 @@ FOR A LATER READER: written last (PENDING).
   - Outside this repo (not touched by a build session): the shared memory's
     `coordinator-ambient-scenes.md` — the note the coordinator reads before coordinating — still points
     at `Tools/StageAmbient/`; the orchestrator's to refresh at the merge.
+- **Piece 5, the trial note** (`vx-997-coordinator-trial.md`): four steps from the worktree — the door
+  (nothing real moves), on/next/off for real under the coordinator's own `HOLD:`, the hook under a
+  throwaway HOME with a fake `Ambient` in both locales (one pasteable bash block), and optionally the real
+  hook at the coordinator's next natural bridge claim — then what to report, and the two merge-moment
+  chores (no `StageAmbient` up; the old `.build/` and the memory note). **Walked once by the implementer,
+  with fakes:** step 1 as written — `status` → `OFF` exit 0 through the real door to `~/dev/ambient`;
+  `help` → Ambient's usage, exit 2; a missing command → the one line, exit 1, and `OFF` exit 0 for
+  `status`. Step 2 against a fake command (the real `on` is the coordinator's): `on`, `next`, `off` arrive
+  as given. Step 3 extracted verbatim from the note and run through `zsh -f` and through `bash`: exactly
+  the five lines, four `ok` (both locales: `HOLD:` leaves the fake up; a walk's claim stops it before
+  returning, exit 0) and `after: pgrep -x Ambient -> []`, no trial directory left. The same block pointed
+  at the old hook prints `FAIL a walk's claim left it up` in both locales. Step 4 not walked (it is the
+  real stage). The first walk printed a bash `Terminated: 15` job notice per fake; the fake now starts
+  from a command substitution, so it is no job of that shell and the block prints only its five lines.
