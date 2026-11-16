@@ -32,7 +32,11 @@ It writes two things:
    the default and dark appearances explicitly pin the sea-glass edition on
    the same fill — one icon, never changing with the appearance — and the
    tinted style (a user's own system-wide choice; it monochromes every
-   app's icon) is fed the same art.
+   app's icon) is fed the same art. The document is shared ("squares":
+   "shared"), and the PHONE app compiles this same file (VM-46): the project
+   gives the VariorumMobile target membership of `AppIcon.icon` through a
+   target-membership exception on the Mac's synchronized folder, so one
+   document is both apps' icon and there is no second copy to drift.
 2. `App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset/` — the small
    flat mark the offer line and the About window draw (a vector SVG asset):
    the faithful fan on the icon's ground, on a continuous-corner rounded square

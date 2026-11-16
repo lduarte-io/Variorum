@@ -3,7 +3,8 @@
 Fourteen production-clean vector marks. **THE LOGO IS THE SEA-GLASS CARDS
 (`variorum-cards-sea-glass.svg`, the fan of cards on #C2DDD3), everywhere, from 2026-11-12
 (her word: "make it clear that the seaglass card IS the brand logo from now on,
-everywhere"; VX-993).** It is the app icon (VX-192), the About and offer-line mark, the
+everywhere"; VX-993).** It is the app icon on the Mac (VX-192) and the phone (VM-46, the same
+`.icon` file), the About and offer-line mark, the
 site's link-preview image and the logo on her profiles. Use the app icon's own
 composition (`App/Variorum/Variorum/AppIcon.icon/Assets/cards.svg` on the #C2DDD3 ground),
 so every copy reads as the Dock icon. *History: the striped V was ratified as the logo on

@@ -80,6 +80,16 @@
 		E19B00012F00000000000B01 /* CopiedRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopiedRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E1A460012F00000000004601 /* Exceptions for "Variorum" folder in "VariorumMobile" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AppIcon.icon,
+			);
+			target = E1D2175B2FFCE2C500886CFC /* VariorumMobile */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E1AC00092F0000000000CC09 /* VariorumMCPShim */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -88,6 +98,9 @@
 		};
 		E1C2718A2FFC2F420084BEA6 /* Variorum */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E1A460012F00000000004601 /* Exceptions for "Variorum" folder in "VariorumMobile" target */,
+			);
 			path = Variorum;
 			sourceTree = "<group>";
 		};
