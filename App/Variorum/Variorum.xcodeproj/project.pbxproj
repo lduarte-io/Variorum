@@ -954,6 +954,7 @@
 				DEVELOPMENT_TEAM = 384925MZJ6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Variorum;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Unlock your Variorum library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -989,6 +990,7 @@
 				DEVELOPMENT_TEAM = 384925MZJ6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Variorum;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Unlock your Variorum library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
