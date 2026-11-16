@@ -15,7 +15,7 @@
 # read, and the zero-instance check is ITS OWN step — never chained after a quit with || or ;.
 
 emulate -L zsh 2>/dev/null
-WK_REPO=${WK_REPO:-/Users/lillianduarte/dev/variorum-vx-502}
+WK_REPO=${WK_REPO:-$HOME/dev/variorum-vx-502}
 WK_EV=${WK_EV:-$WK_REPO/App/Variorum/DerivedData/vx502-walk-evidence}        # gitignored (DerivedData/); deleted at close
 WK_BIN=$WK_EV/bin
 WK_APP=${WK_APP:-$WK_REPO/App/Variorum/DerivedData/vx502-walk/Build/Products/Debug/Variorum.app}
@@ -24,7 +24,7 @@ WK_SUPPORT="$HOME/Library/Containers/$WK_DEBUG_ID/Data/Library/Application Suppo
 WK_SLOT="$WK_SUPPORT/Variorum-dev"                                              # the slot FOLDER (top-level files = the library)
 WK_ASIDE="$WK_SUPPORT/Variorum-dev-aside-vx502-asfound"                         # the as-found set, same volume (leg 2 B')
 WK_PICKED="$HOME/Documents/Variorum/Backups"                                    # the dev build's picked backups folder
-WK_PRODREAD=/Users/lillianduarte/dev/variorum/Tools/prod-read.sh                # main's checkout: its .env.supabase.local
+WK_PRODREAD=$HOME/dev/variorum/Tools/prod-read.sh                # main's checkout: its .env.supabase.local
 WK_ALLOW=$HOME/.variorum/prod-test-accounts.env
 WK_DEVHELP=$HOME/.variorum/bin/type-dev-castle-secret
 WK_PRODHELP=$HOME/.variorum/bin/type-prod-test-secret

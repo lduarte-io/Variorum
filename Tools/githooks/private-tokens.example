@@ -1,0 +1,92 @@
+# Variorum pre-push guard — the PRIVATE TOKEN LIST, example and format (VX-996).
+#
+# The live list is ~/.variorum/private-tokens.txt on each Mac. It never enters the repo: the guard
+# (Tools/githooks/pre-push) reads it in place on every push and refuses while it is missing. Start it
+# from this file:
+#
+#     mkdir -p ~/.variorum && cp Tools/githooks/private-tokens.example ~/.variorum/private-tokens.txt
+#
+# then fill in the literal classes from the private ledger and delete the !starter line below.
+#
+# FORMAT — one entry per line; blank lines and lines starting with # are ignored.
+#
+#     <class>[@<scope>,…] lit:<text>      a literal, matched as an UNBOUNDED, case-insensitive substring
+#                                         (no word boundaries: an all-caps possessive still matches)
+#     <class>[@<scope>,…] re:<regex>      a Python regular expression, case-insensitive
+#                                         (write (?-i:…) around a part that must match case)
+#     keep <class> <path-glob>            a ruled load-bearing value: matches of <class> on lines ADDED
+#                                         to files matching the glob are not refused (fnmatch; * crosses /)
+#     !starter                            this list is still the starter: every push says so until removed
+#
+#   <class>  letters, digits, . _ - ; it is what a refusal prints — the matched value never is.
+#   <scope>  where the entry applies; default everywhere. One or more of:
+#            content   lines the outgoing commits add (a merge: the lines it adds beyond its parents)
+#            message   commit messages and annotated tag messages
+#            identity  a commit's author and committer ("Name <email>") and a tag's tagger
+#            path      the paths of files the outgoing commits add, rename or copy
+#            ref       the pushed ref names (branch and tag names)
+#   Text after lit: or re: is trimmed at both ends.
+#
+!starter
+
+# --- class shapes: patterns derivable from the classes alone (no real values) ----------------------
+
+# A Mac home directory, in path form and in the dashed form Claude's project and scratchpad folders
+# use (a scratchpad path carries the home folder dashed, so this shape covers it; a placeholdered
+# "-<home>-" form never matches). Spared: macOS's Shared folder and "someone", the fictional home
+# the test fixtures use. "Users" keeps its case (a real home is always /Users/…, the dashed form
+# always -Users-…-), so a lower-case "-users-…-" heading slug or setting name never matches.
+home-path re:(?-i:/Users/)(?!Shared\b|someone\b)[A-Za-z0-9._-]{4,}
+home-path re:(?-i:-Users-)(?!someone-)[A-Za-z0-9._]+-
+# A full MCP setup key (the prefix and 43 base64url characters); the tests' short fixtures never match.
+mcp-setup-key re:\bvmk[12]_[A-Za-z0-9_-]{40,}
+# A newer Apple device identifier (8 hex, dash, 16 hex).
+device-udid re:\b[0-9A-F]{8}-[0-9A-F]{16}\b
+# A Supabase project URL. The production one is a ruled load-bearing value in the app's config.
+supabase-project-ref re:\b[a-z]{20}\.supabase\.(co|in)\b
+keep supabase-project-ref App/Variorum/Shared/ProjectConfig.swift
+keep supabase-project-ref Tools/prod-*.sh
+# A Tailscale machine name.
+tailnet-host re:\b[a-z0-9-]+\.[a-z0-9-]+\.ts\.net\b
+# The public commit identity is the GitHub noreply address (the author's ruling, VX-996): an OUTGOING
+# commit whose author or committer email is anything else is refused, and the refusal names the
+# exact git config command. History the remote already holds is never judged.
+public-identity@identity re:<(?![^<>]*@users\.noreply\.github\.com>)(?!noreply@github\.com>)[^<>]*>
+
+# --- literal classes: fill from the private ledger (one line per value; the placeholder vocabulary
+#     of notes/plans/fixes/vx-988-oss-fix-pass.md names the classes) ----------------------------------
+#
+# her-email lit:…                (also catches it as a commit identity)
+# signing-email lit:…
+# oauth-account-email lit:…
+# test-account-email lit:…
+# tester-name lit:…              (each name and handle on its own line; names scan UNBOUNDED)
+# test-account lit:…             (the test macOS account's handle and display name)
+# home-path lit:/Users/…         (the real home folder, if the shape above is too loose for you)
+# apple-team-id lit:…
+# keep apple-team-id App/Variorum/Variorum.xcodeproj/project.pbxproj
+# keep apple-team-id App/Variorum/Shared/Protection/ProtectionKeychain.swift
+# keep apple-team-id Tools/Release/verify-export.sh
+# keep apple-team-id Tools/Release/ExportOptions.plist
+# supabase-project-ref lit:…     (the bare ref; the keep lines above already cover it)
+# supabase-org-id lit:…
+# apple-cert-id lit:…
+# signing-cert-sha1 lit:…
+# notary-key-id lit:…
+# notary-submission-id lit:…
+# provisioning-profile-uuid lit:…
+# simulator-udid lit:…           (UUID-shaped, so literals only: a shape would catch every fixture id)
+# oauth-client-id lit:…
+# account-uuid lit:…
+# auth-identity-id lit:…
+# library-uuid lit:…
+# corpus-key-id lit:…
+# key-proof-hash-prefix lit:…
+# dev-key-prefix lit:vmk1_…      (a truncated setup-key prefix; the full-key shape above covers whole keys)
+# server lit:…                   (home-infrastructure hostnames, users, VPN node names)
+# mac-pro lit:…
+# business re:…                  (business, money and job-search terms the ledger ruled out)
+
+# --- a fake entry showing the shape (matches nothing real; written so its own text never matches,
+#     since this file is itself pushed) -------------------------------------------------------------
+example-fake re:not-a-real-value-[0-9]{6}-x

@@ -14,7 +14,7 @@
 # launch (wk_launch_plain); no value is ever printed, logged, captured or committed by this file.
 
 emulate -L zsh 2>/dev/null
-WK_REPO=${WK_REPO:-/Users/lillianduarte/dev/variorum-vx-771}
+WK_REPO=${WK_REPO:-$HOME/dev/variorum-vx-771}
 WK_EV=${WK_EV:-$WK_REPO/App/Variorum/DerivedData/vx771-walk-evidence}      # gitignored (DerivedData/)
 WK_APP=${WK_APP:-$WK_REPO/App/Variorum/DerivedData/vx771-walk/Build/Products/Debug/Variorum.app}
 WK_LEG=${WK_LEG:-W0}
