@@ -130,3 +130,5 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
 - First run, where "I already use Variorum" lives: "I think I already use variorum welcome card is probably fine" — the welcome card on the Bookcase, no screen in front of it.
 - VX-207's title reworded at her word; the one leftover user name in the old issues export fixed (VX-998).
 - Outside contributors (QUESTIONS #275): "I'm not planning to have outside contributers so might not be an issue." (The guard stays as built.)
+- VX-999 (the release scripts and the signing profile): "do the script fix - I still need to able to do releases."
+- "let's just finish the loop on what needs to be done post flip now" — the orchestrator's list and its state are in the session's report; CLAUDE.md's Environment section now says where an effort's record lives and drops the retired mobile worktree.
