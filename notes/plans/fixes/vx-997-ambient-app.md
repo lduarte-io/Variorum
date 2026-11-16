@@ -39,11 +39,13 @@ pins go red (6 issues) and the two guards stay green. The trial note's hook bloc
 zsh and bash: its four `ok` lines and the `after` line; against the old hook, `FAIL`.
 
 **Open items.**
-- Waiting for Ambient's round-1 fix branch to merge to its `main` (they touch `bin/ambient` and
-  `README.md`, which it rewrites): piece 8's README line (settled text in the working notes, with this
-  PR's number); M1's bounded stand-ins and `bin/ambient`'s state-file-first `pid_of`; M5's guard pin;
-  P-997-4 in `bin/ambient` (the skill already says it); and the fixture refresh on `l7` for this
-  round's `Tools/stage` comment and clock changes (N1, M5, M6).
+- The Ambient side, DONE on `l7` once its round-1 fixes merged (`c74c35b`), one commit each, 380 tests
+  green in release: the fixture refresh to `96a2f2741` (`f9b443c`); M1 — stand-ins on a 30 s clock and
+  `bin/ambient` finding the show by the state file's pid, with no state file only an `Ambient` running
+  from an `Ambient.app` bundle (`d69d001`, `82c4fc5`; four pins red on the old road); M5's guard pin
+  (`964c807`; red when the hook's order is flipped); P-997-4 in `bin/ambient`, with `which` and
+  `bundle=` (`64ec82c`); the header's stop claim (`0245e3d`); piece 8, README naming this PR, #8
+  (`c5458c7`).
 - M7 — HELD FOR HER: the clone URL removed at `6bf14ca78` stays in the branch's earlier pushed commits;
   accept it, or rewrite the unmerged branch before the merge (author-only). Nothing about history changed.
 - The coordinator's trial: steps 1–3 ran clean (Ambient's `notes/plan.md` §11.3); step 4, rewritten for M2,
@@ -75,7 +77,7 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
 | 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | DONE — the trial note `8cc063c84`; FOR A LATER READER (this commit) |
 | 6 | Every other `StageAmbient` mention updated or left with a reason | DONE `ff570f996` — none needed a change; each left with its reason below |
 | 7 | Ambient repo: `Tests/Fixtures/stage` refreshed + the F2 probe in `StageClaimTests` | DONE Ambient `l7` `d536e63` — 355 tests green in release; red on the old fixture |
-| 8 | Ambient repo: `README.md` says the synchronous stop is real once this PR merges | HELD — the round-1 fixes are not on Ambient's `main`, and their branch rewrites the same README sentences; the settled text is below |
+| 8 | Ambient repo: `README.md` says the synchronous stop is real once this PR merges | DONE Ambient `l7` `c5458c7`, after its round-1 fixes merged (`c74c35b`); it names this PR, #8 |
 | R1 | The cold review (Ambient's `notes/plan.md` §11.4), Variorum side | DONE — the URL out `6bf14ca78`; M2 `362591467`; M3 `aab6f3661`; M5 `f78023c21`; M6 `6ff8fe217`; N1 `96a2f2741` (hook probe re-run, 14/14 in both locales, a TERM-deaf show gone in 2.6–3.1 s); N2 `6c8cb56c8`; the skill's suggestions, M1's line and P-997-4 `3b499fcea`. The Ambient side waits (open items) |
 
 ## Working notes (the night's record)
