@@ -150,3 +150,7 @@ Draft working record, not canon. Quotes are exact; anything outside quote marks 
   - Voice and palette: "follow the library but if the phone has dark mode on, that shouldn't change what your mac is like (the device dark mode)" — voice and palette follow the synced library; light or dark stays each device's own.
   - The library doors (look inside, open, restore, send a copy): "After v1".
   - The lag trace: "Your real library".
+  - On the Private eye and grants: "should I make a ticket for syncing grants? not sure if it's worth doing so. i've been conflicted on this."
+  - The four note defaults (backspace joins blocks, Seal for Lock note, Merge with next, quotes and spelling like the Mac): "i accept all of these"
+  - Capture and first use: quick notes land in the current wing, and find-now-replace-later, accepted unticked. On the pocket guide and leaving Castle: "the pocket guide needs to be rewritten for mobile. how do you think we should handle that? we also need a mobile tutorial. both of these items should be ticketed. if you can go into castle on phone, you should be able to leave it."
+  - After v1 stays after v1 for import from Files, capture from outside the app, and Settings search. On crash reporting she ticked it for v1 and asked: "how big of a difference does in-app crash reporting make?"
