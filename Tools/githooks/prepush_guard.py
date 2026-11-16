@@ -516,18 +516,20 @@ def collect_items(revs, updates):
             tag_sha = target
     if revs is None:
         return items, 0
-    # Each record starts with a marker carrying a fresh random nonce: no message or blob byte
-    # sequence can forge a record boundary (a NUL can sit in a message, or in a file an attribute
-    # forces to text).
+    # Each record starts with a marker carrying a fresh random nonce, and its fields are separated by
+    # another: no message, name or blob byte sequence can forge a boundary (a NUL can sit in a
+    # message or in a file an attribute forces to text; git keeps a 0x1f inside an author name).
     mark = "VXGUARD%s " % secrets.token_hex(16)
+    fsep = "VXFIELD%s" % secrets.token_hex(16)
     outgoing = git("rev-list", *revs).split()
-    meta = git("log", "--no-color", "--format=" + mark + "%H%x1f%an <%ae>%x1f%cn <%ce>%x1f%B", *revs)
+    meta = git("log", "--no-color", "--format=" + mark + "%H" + fsep + "%an <%ae>" + fsep + "%cn <%ce>"
+               + fsep + "%B", *revs)
     meta_records = meta.split(mark)[1:]
     if os.environ.get("VARIORUM_GUARD_TEST_DROP_RECORD") == "1":
         meta_records = meta_records[:-1]   # the test seam: a read that misses a commit (it can only refuse)
     meta_shas = []
     for rec in meta_records:
-        fields = rec.split("\x1f", 3)
+        fields = rec.split(fsep)
         if len(fields) != 4:
             raise Refusal("the guard could not read every outgoing commit (a log record would not split "
                           "into its fields) — the push cannot be checked.")
@@ -659,6 +661,23 @@ def masker(entries, flagged):
     return mask
 
 
+def printable(text):
+    """A location or sentence safe to print: every control byte (C0, DEL, C1) is escaped, so a
+    crafted path or ref name can never drive the terminal (an ESC sequence) or break a line."""
+    out = []
+    for ch in text:
+        code = ord(ch)
+        if ch == "\n":
+            out.append("\\n")
+        elif ch == "\t":
+            out.append("\\t")
+        elif code < 0x20 or 0x7f <= code < 0xa0:
+            out.append("\\x%02x" % code)
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
 def identity_split(found):
     """Whether the identity findings name this clone's OWN address (re-author advice applies: the
     author's ruling covers her own address) or someone else's (the ruling is silent: her call)."""
@@ -695,7 +714,7 @@ def main(argv):
         leaks, flagged = gitleaks_findings(gl, items)
         found = private_findings(items, entries, keeps) + leaks
     except Refusal as why:
-        say("%s: REFUSED — %s" % (TAG, why))
+        say("%s: REFUSED — %s" % (TAG, printable(str(why))))
         say(BYPASS)
         return 1
 
@@ -707,7 +726,7 @@ def main(argv):
             if key in seen:
                 continue
             seen.add(key)
-            rows.append((commit, mask(where).replace("\n", "\\n").replace("\t", "\\t"), cls, length))
+            rows.append((commit, printable(mask(where)), cls, length))
         say("%s: REFUSED — this push would publish %d match%s (VX-996). Nothing was pushed."
             % (TAG, len(rows), "" if len(rows) == 1 else "es"))
         for commit, where, cls, length in rows[:MAX_SHOWN]:
