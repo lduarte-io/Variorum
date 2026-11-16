@@ -136,8 +136,15 @@ run_ae() {   # run_ae [VAR=value…] → OUT, RC
 run_ve() {   # run_ve [VAR=value…] → OUT, RC
   OUT="$(env "$@" PATH="$T/bin:$SYSPATH" HOME="$H" TMPDIR="$C/tmp" "$R/Tools/Release/verify-export.sh" "$APP" 2>&1)"; RC=$?
 }
-sentence_for() {   # the missing-profile refusal names the place and says it is never committed, once
-  [ "$(printf '%s\n' "$OUT" | grep -cF "must be at $1")" = 1 ] && has "never committed"
+# sentence_for <place> — the missing-profile sentence appears once, on ONE line that names the place,
+# says it is never committed and where to copy it from, and carries no UUID.
+sentence_for() {
+  local line
+  [ "$(printf '%s\n' "$OUT" | grep -cF "must be at $1")" = 1 ] || return 1
+  line="$(printf '%s\n' "$OUT" | grep -F "must be at $1")"
+  case "$line" in *"never committed"*) ;; *) return 1 ;; esac
+  case "$line" in *"copy it from Xcode's installed profiles, or from the private archive clone"*) ;; *) return 1 ;; esac
+  ! printf '%s\n' "$line" | grep -qiE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 }
 
 echo "test-release-profile: $SRC"
@@ -156,7 +163,7 @@ check "archive-and-export: never consults the in-repo path" \
 
 fresh ae-missing; run_ae
 check "archive-and-export: a missing profile refuses (rc 4)" "rc=$RC" [ "$RC" -eq 4 ]
-check "archive-and-export: the refusal is ONE sentence naming ~/.variorum/release/ and that it is never committed" \
+check "archive-and-export: the refusal is ONE sentence naming ~/.variorum/release/, that it is never committed and where to copy it from (no UUID)" \
   "said: $(printf '%s' "$OUT" | grep -E 'REFUSED' | head -2 | tr '\n' ' ')" sentence_for "$OUTSIDE"
 check "archive-and-export: with the profile missing, nothing is decoded or installed (the in-repo decoy untouched)" \
   "security was handed: $(grep '^cms' "$LOG" | tr '\n' ' ')" eval 'unlogged "cms" && [ ! -e "$INSTALLED" ]'

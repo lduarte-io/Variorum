@@ -22,7 +22,7 @@
 # Section E compares the embedded profile with THE PINNED PROFILE, kept OUTSIDE the repo at
 # ~/.variorum/release/Variorum_Developer_ID.provisionprofile and never committed (VX-999 —
 # profile-path.sh is the one definition of the place). When it is missing, that one check FAILs with one
-# sentence saying where the file must be; every other check still runs.
+# sentence saying where the file must be and where to copy it from; every other check still runs.
 #
 # Exit 0 = every check passed · 1 = at least one FAIL · 2 = usage error.
 set -uo pipefail   # deliberately not -e: every check runs and reports; the verdict counts
