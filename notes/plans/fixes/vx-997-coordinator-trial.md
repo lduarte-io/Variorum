@@ -107,6 +107,8 @@ real Ambient goes through the worktree's door (`~/dev/variorum-vx-997/Tools/ambi
 
 ## At the merge (the merging session, not the trial)
 
-- No `StageAmbient` up before the merge (above). After it, `~/dev/variorum/Tools/StageAmbient/.build/`
-  (the old bundle, gitignored, about 111 MB) stays on disk untracked: remove it once no `StageAmbient` runs.
+- On the Pro, BEFORE the pull: `pgrep -x StageAmbient` prints nothing, then
+  `rm -rf ~/dev/variorum/Tools/StageAmbient` (the old build folder, about 111 MB). The pull deletes the
+  package's own `.gitignore`, and an untracked, un-ignored folder makes `release.sh` refuse a dirty tree;
+  the root `.gitignore` now ignores it in every clone as a belt (`vx-997-ambient-app.md`, open items).
 - The coordinator's memory note on the ambient still names `Tools/StageAmbient/`: refresh it.

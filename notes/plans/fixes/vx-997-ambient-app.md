@@ -42,8 +42,13 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
 - Piece 8 (Ambient's README) waits for the round-1 fixes on Ambient's `main`; then `l7` merges
   `origin/main` and takes the settled text, with this PR's number.
 - The coordinator's trial (`vx-997-coordinator-trial.md`) is owed before the merge; the merge is hers.
-- At the merge: no `StageAmbient` up; then remove the main clone's untracked
-  `Tools/StageAmbient/.build/` (~111 MB) and refresh the coordinator's memory note on the ambient.
+- The merge-in, on the Pro, BEFORE `git pull` in `~/dev/variorum`: check no `StageAmbient` runs
+  (`pgrep -x StageAmbient` prints nothing), then `rm -rf ~/dev/variorum/Tools/StageAmbient` (the old build
+  folder, ~111 MB, holding `StageAmbient.app`). Why: the pull deletes the package's own `.gitignore`, so
+  without it the folder turns untracked and un-ignored, `release.sh` refuses a dirty tree (it counts `git
+  status --porcelain`, untracked files included), and a careless add would publish the old binaries; the
+  root `.gitignore` line `Tools/StageAmbient/` (M3) is the belt for every other clone. Then refresh the
+  coordinator's memory note on the ambient.
 - For the ladder, not built here: the hook ends the show with TERM, which Ambient reads as an `off` (it
   hands focus back), while `fix-1` says a claim leaves focus where it is — whether a TERM during a claim
   should take the claim's posture is app-side. And `notes/plan.md` L12's "drift check" (the vendored
@@ -105,9 +110,10 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
 - **Piece 3, the package retired** (R-997-1: Variorum keeps only the thin command). `git rm -r
   Tools/StageAmbient` — the 17 tracked files (the package, its README, the koi, the claim reader and its
   tests); all of it lives on, grown, in the Ambient repo (seeded from Variorum `5dde1bcf9`). The record
-  `vx-458-stage-ambient.md` stays as history. Left on disk after the merge, untracked: the main clone's
-  gitignored `Tools/StageAmbient/.build/` (111 MB on 2026-11-16, holding the old `StageAmbient.app`) —
-  removed by hand once no `StageAmbient` runs (open items).
+  `vx-458-stage-ambient.md` stays as history. Left on disk by the pull: the main clone's
+  `Tools/StageAmbient/.build/` (111 MB on 2026-11-16, holding the old `StageAmbient.app`), no longer
+  ignored once the package's own `.gitignore` goes (the cold review's M3) — so a root `.gitignore` line
+  now covers it, and the merge-in removes it before the pull (open items).
 - **Piece 4, the coordinator skill.** Only the lines that name the ambient changed: the pre-GO check is
   `pgrep -x Ambient`; the section (now "Ambient, the stage ambient") says `Tools/ambient` is a thin door
   to `~/dev/ambient/bin/ambient` (or `$AMBIENT_HOME`) and points at that repo's README instead of the
