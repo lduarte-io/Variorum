@@ -99,3 +99,10 @@ notes/plans/vx-912-b1-screens/
 notes/plans/vx-913-b1-screens/
 notes/plans/vx-913-b2-screens/
 notes/plans/vx-913-b3-screens/
+# VM-44 — the capture's raw screens, clips and render copies stay local (the screens convention)
+notes/plans/vm-44/atlas/screens/
+notes/plans/vm-44/atlas/recordings/
+notes/plans/vm-44/atlas/index.html
+notes/plans/vm-44/design/renders/
+# VM-44 F device trace — Instruments traces, exports and the session runner stay local (her real library)
+notes/plans/vm-44/audit/traces/
