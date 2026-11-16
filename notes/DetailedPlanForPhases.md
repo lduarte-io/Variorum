@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-997 — Ambient: the stage decoration becomes its own app.** The app itself lives in its own repo; this effort is the Variorum side only — `Tools/ambient` becomes a thin door to it, the stage hook and the coordinator skill learn the new process name, `Tools/StageAmbient/` retires | VX-997 · `vx-997-ambient-app` | `~/dev/variorum-vx-997` · Pro | **OPEN 2026-11-16.** Surfaces: `Tools/ambient`, `Tools/stage` (the ambient hook only), `Tools/StageAmbient/`, `.claude/skills/stage-coordinator/`. No app code, no `Sync/`, no custody. The PR waits for the coordinator's trial and her word |
 
 ### Latest closeout
 
