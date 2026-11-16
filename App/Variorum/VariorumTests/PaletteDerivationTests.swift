@@ -153,7 +153,7 @@ struct PaletteDerivationTests {
         let appRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumTests
             .deletingLastPathComponent()  // App/Variorum
-        let iconFile = appRoot.appendingPathComponent("Variorum/AppIcon.icon/icon.json")
+        let iconFile = appRoot.appendingPathComponent("Shared/AppIcon.icon/icon.json")
         let json = try #require(
             try JSONSerialization.jsonObject(with: Data(contentsOf: iconFile)) as? [String: Any])
         let fills = try #require(json["fill-specializations"] as? [[String: Any]])

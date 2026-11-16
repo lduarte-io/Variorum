@@ -10,7 +10,8 @@ VX-192 (her word, same day, after a live trial build): the edition is
 (the faithful red and lavender were considered and set aside before it).
 ONE icon, all of the time (her second VX-177 ruling): the faithful
 edition is pinned for the default AND dark appearances — same sea-glass
-ground, same art — so the Dock and Finder never change with the room. The system's
+ground, same art — so the icon never changes with the room, on the Dock or the
+phone's Home Screen alike. The system's
 user-chosen Tinted/Clear icon styles recolour every app's icon and cannot
 be refused; they are fed the same faithful art so the silhouette stays the
 fan. Nothing is redrawn: the fan's geometry is copied verbatim from the
@@ -21,10 +22,10 @@ the repo root after any change to the source edition:
 
 It writes two things:
 
-1. `App/Variorum/Variorum/AppIcon.icon/` — the macOS 26 app icon as an Icon
-   Composer document (Apple's route since Xcode 26: the SYSTEM applies the
-   squircle mask, so the layer is full-canvas art with no mask, shadow or
-   margin baked in, and the ground is the document's fill). The faithful
+1. `App/Variorum/Shared/AppIcon.icon/` — the app icon of both apps (macOS 26
+   and iOS 26) as an Icon Composer document (Apple's route since Xcode 26: the
+   SYSTEM applies the squircle mask, so the layer is full-canvas art with no
+   mask, shadow or margin baked in, and the ground is the document's fill). The faithful
    edition is a flat print, so the document asks for no Liquid Glass depth
    (no group shadow, no specular, no translucency, the layer's glass off).
    macOS 26 draws icons in four appearances; left unspecified, the system's
@@ -33,9 +34,8 @@ It writes two things:
    the same fill — one icon, never changing with the appearance — and the
    tinted style (a user's own system-wide choice; it monochromes every
    app's icon) is fed the same art. The document is shared ("squares":
-   "shared"), and the PHONE app compiles this same file (VM-46): the project
-   gives the VariorumMobile target membership of `AppIcon.icon` through a
-   target-membership exception on the Mac's synchronized folder, so one
+   "shared") and lives in the cross-platform `Shared/` folder, which both the
+   Mac and the phone (VariorumMobile) targets compile (VM-46), so one
    document is both apps' icon and there is no second copy to drift.
 2. `App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset/` — the small
    flat mark the offer line and the About window draw (a vector SVG asset):
@@ -50,7 +50,7 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 FAITHFUL = ROOT / "notes/brand/variorum-cards-sea-glass.svg"
-ICON_DIR = ROOT / "App/Variorum/Variorum/AppIcon.icon"
+ICON_DIR = ROOT / "App/Variorum/Shared/AppIcon.icon"
 MARK_DIR = ROOT / "App/Variorum/Variorum/Assets.xcassets/VariorumMark.imageset"
 
 GROUND = "#C2DDD3"   # sea-glass — her pick after a live trial (2026-10-12, VX-192)
