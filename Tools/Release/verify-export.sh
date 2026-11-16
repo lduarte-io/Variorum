@@ -21,10 +21,10 @@
 #
 # Section E compares the embedded profile with THE PINNED PROFILE, kept OUTSIDE the repo at
 # ~/.variorum/release/Variorum_Developer_ID.provisionprofile and never committed (VX-999 —
-# profile-path.sh is the one definition of the place). When it is missing the script stops before any
-# check runs, with one sentence saying where it must be.
+# profile-path.sh is the one definition of the place). When it is missing, that one check FAILs with one
+# sentence saying where the file must be; every other check still runs.
 #
-# Exit 0 = every check passed · 1 = at least one FAIL · 2 = usage error, or the pinned profile is missing.
+# Exit 0 = every check passed · 1 = at least one FAIL · 2 = usage error.
 set -uo pipefail   # deliberately not -e: every check runs and reports; the verdict counts
 
 TEAM="384925MZJ6"
@@ -60,7 +60,6 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -d "$APP" ] || { echo "no such app bundle: $APP" >&2; exit 2; }
-if PROFILE_MISSING="$(release_profile_missing "$PROFILE_PINNED")"; then echo "REFUSED: ${PROFILE_MISSING}" >&2; exit 2; fi
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/verify-export.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
@@ -176,7 +175,9 @@ if [ -f "$EMB" ] && security cms -D -i "$EMB" > "$PROF" 2>/dev/null; then
   done
   echo "        Entitlements:"
   "$PB" -c "Print :Entitlements" "$PROF" 2>/dev/null | indent | indent
-  if [ -f "$PROFILE_PINNED" ] && cmp -s "$EMB" "$PROFILE_PINNED"; then
+  if PROFILE_MISSING="$(release_profile_missing "$PROFILE_PINNED")"; then
+    bad "$PROFILE_MISSING"
+  elif cmp -s "$EMB" "$PROFILE_PINNED"; then
     ok "embedded profile is BYTE-IDENTICAL to the pinned profile ${PROFILE_PINNED}"
   else
     bad "embedded profile differs from the pinned profile ${PROFILE_PINNED}"

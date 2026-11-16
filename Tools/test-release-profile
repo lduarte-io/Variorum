@@ -15,8 +15,9 @@
 # fixture ExportOptions does not name and bytes no case embeds, so any read of it shows.
 #
 # It proves: both scripts read the profile at the outside place, and the install step copies it from
-# there; the override moves the place; a missing profile stops both scripts with ONE sentence naming
-# where it must be and that it is never committed; the checks that read it keep their meaning (an
+# there; the override moves the place; a missing profile stops archive-and-export, and FAILs
+# verify-export's one check while every other check still runs, each with ONE sentence naming where it
+# must be and that it is never committed; the checks that read it keep their meaning (an
 # installed copy that differs refuses; an embedded profile that differs FAILs); the in-repo path is
 # never consulted; .gitignore keeps a profile out of Tools/Release. Exit 0 = every case held.
 set -uo pipefail
@@ -184,9 +185,12 @@ check "verify-export: an embedded profile that differs from it FAILS — the in-
   eval 'printf "%s\n" "$OUT" | grep -F "FAIL  embedded profile differs" | grep -qF "$OUTSIDE" && lacks "BYTE-IDENTICAL"'
 
 fresh ve-missing; fake_app "$DECOY"; run_ve
-check "verify-export: a missing profile stops it (rc 2) with the one sentence, before any check runs" \
+check "verify-export: a missing profile FAILs the byte-identical check with the one sentence (rc 1, never compared with the decoy)" \
   "rc=$RC; said: $(printf '%s' "$OUT" | grep -E '^(REFUSED|PASS|FAIL)' | grep -F 'profile' | head -2 | tr '\n' ' ')" \
-  eval '[ "$RC" -eq 2 ] && sentence_for "$OUTSIDE" && ! printf "%s\n" "$OUT" | grep -qE "^(PASS|FAIL) "'
+  eval '[ "$RC" -eq 1 ] && sentence_for "$OUTSIDE" && printf "%s\n" "$OUT" | grep -F "must be at $OUTSIDE" | grep -q "^FAIL  " && lacks "BYTE-IDENTICAL" && lacks "embedded profile differs"'
+check "verify-export: with the profile missing, every other section still runs and the verdict counts" \
+  "said: $(printf '%s' "$OUT" | grep -E '^(REFUSED|VERDICT|PASS  CFBundleIdentifier)|^-- Sparkle' | tr '\n' ' ')" \
+  eval 'has "PASS  CFBundleIdentifier = io.lduarte.Variorum" && has "-- codesign --verify" && has "-- Sparkle" && has "VERDICT: FAIL" && lacks "REFUSED"'
 
 # ---------------------------------------------------------------- the repo keeps it out
 echo "-- .gitignore"
