@@ -5,8 +5,11 @@
 # $AMBIENT_HOME/bin/ambient (AMBIENT_HOME defaults to ~/dev/ambient), and execs it with the same
 # arguments, so these keep working from here exactly as the coordinator types them:
 #
-#   Tools/ambient on [--scene NAME] [--stay] [--min-idle S] [--allow-claimant WHO]
+#   Tools/ambient on [--scene NAME] [--stay] [--min-idle S]
 #   Tools/ambient off | status | next | list | log | build
+#
+# (`on --allow-claimant WHO` passes through too, but it is a self-test flag for a session proving the show
+# in its own stage window — never the coordinator's road.)
 #
 # What each does, the rails, the keys and the scenes: the Ambient repo's README.md (`Tools/ambient help`
 # prints the usage). Where the command is missing, this prints one line saying where Ambient lives (and
