@@ -68,8 +68,9 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
   `${AMBIENT_HOME:-$HOME/dev/ambient}/bin/ambient` with its arguments unchanged, so every subcommand and
   flag the coordinator types (`on --scene … --stay --min-idle … --allow-claimant …`, `off`, `status`,
   `next`, `list`, `log`, `build`, `help`) is the Ambient command's own, exit codes included. Where that
-  command is missing it prints one `AMBIENT MISSING — …` line naming the path it looked at and the clone
-  that provides it, and exits 1; `status` (and no argument, which means `status`) prints `OFF` and exits
+  command is missing it prints one `AMBIENT MISSING — …` line naming the path it looked at, that Ambient
+  lives in its own repo at `~/dev/ambient`, and that `AMBIENT_HOME` can point elsewhere — never a clone
+  URL, since this repo is public (ruled, Ambient's `notes/plan.md` §11.2) — and exits 1; `status` (and no argument, which means `status`) prints `OFF` and exits
   0. Probe, a fake `bin/ambient` that echoes its arguments, under both locales: five arguments including a
   space and an em dash arrive intact; the fake's exit 7 on `off` comes back as 7; missing → `OFF`/0 for
   `status` and for no argument, the one line/1 for `off`; an empty `AMBIENT_HOME` falls back to the

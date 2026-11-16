@@ -1,7 +1,7 @@
 #!/bin/bash
 # ambient — the stage coordinator's door to Ambient (VX-997). Ambient (the living pixel scenes that play
 # on the Pro's built-in screen while the coordinator holds the stage) is its own app in its own repo,
-# cloned to ~/dev/ambient; this script holds none of it. It finds that repo's command road,
+# at ~/dev/ambient; this script holds none of it. It finds that repo's command road,
 # $AMBIENT_HOME/bin/ambient (AMBIENT_HOME defaults to ~/dev/ambient), and execs it with the same
 # arguments, so these keep working from here exactly as the coordinator types them:
 #
@@ -9,8 +9,8 @@
 #   Tools/ambient off | status | next | list | log | build
 #
 # What each does, the rails, the keys and the scenes: the Ambient repo's README.md (`Tools/ambient help`
-# prints the usage). Where the command is missing, this prints one line saying where Ambient lives and
-# how to get it, and exits 1; `status` then prints OFF and exits 0, as it always has.
+# prints the usage). Where the command is missing, this prints one line saying where Ambient lives (and
+# that AMBIENT_HOME can point elsewhere), and exits 1; `status` then prints OFF and exits 0, as it always has.
 
 set -uo pipefail
 
@@ -19,5 +19,5 @@ AMBIENT="${AMBIENT_HOME:-$HOME/dev/ambient}/bin/ambient"
 if [ -x "$AMBIENT" ]; then exec "$AMBIENT" "$@"; fi
 
 if [ "${1:-status}" = status ]; then echo "OFF"; exit 0; fi
-echo "AMBIENT MISSING — no command at $AMBIENT. Ambient lives in its own repo: it is cloned at ~/dev/ambient (or set AMBIENT_HOME to a clone)"
+echo "AMBIENT MISSING — no command at $AMBIENT. Ambient is its own app, in its own repo at ~/dev/ambient; set AMBIENT_HOME to use another folder."
 exit 1
