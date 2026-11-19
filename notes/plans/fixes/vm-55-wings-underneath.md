@@ -361,7 +361,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 3 — VM-63 | DONE but one re-run — its suites ran in the shared window (batch 4's, 2026-11-19): every phone suite green (the hoist pin 5/5, whole phone target); a targeted Mac leg of its groups A–D + `CapabilityRegistryTests` + `StatusCenterTests` green but one test, the new `VM63MacWingBrainsHoistPinTests` pin's test-side dependency scope (fixed c75bdb9af; its re-run alone PENDING). Records: "Batch 3 record", "Batch 4 record" |
 | Main merged in at the seam after batch 3 | DONE (871bde99a — main 359ae214d, VX-980's merge; clean, by the orchestrator; NOT yet built or tested on this branch — batch 4's builds and the shared window are the first on the merged tree) |
 | Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | DONE but one re-run — the door (5c80d058b) green in the whole phone target but the shell pin's test-side premise (fixed 931c77f79); the shared window ran (the whole phone target; a targeted Mac leg in place of the whole Mac target, which runs once at the merge gate); both targets build for testing green at c75bdb9af. PENDING: the follow-up claim — `MobileWingDoorShellTests` and `VM63MacWingBrainsHoistPinTests` alone on c75bdb9af's products. See "Batch 4 record" |
-| Ladder round 1 | IN-PROGRESS — a fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim; the diff is `origin/main...vm-55-wings-underneath` at 5fea9a453 plus this notes commit; findings in `notes/plans/fixes/vm-55-ladder-round1.md` |
+| Ladder round 1 (the FINAL round: 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT) | REVIEWED and adjudicated — three confirmed fixes (findings 2, 5, 7) IN-PROGRESS with the implementer; the fix window PENDING; then the orchestrator's line-by-line check |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
 
@@ -1989,7 +1989,30 @@ c75bdb9af): the phone wing-door types (`MobileWingDoorShellTests`, `MobileWingLi
 
 ### Round 1
 
-*(spawned 2026-11-19 ~09:55 at 5fea9a453 + this notes commit)*
+Spawned 2026-11-19 ~09:57 at 26fd77b82. Findings and the reviewer's final calls, verbatim:
+`notes/plans/fixes/vm-55-ladder-round1.md`. **Result: 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT; all eleven review
+foci checked and found solid.** No new BLOCKER or MAJOR, so by her rule this is the FINAL round: its fixes are
+applied by the implementer and get the orchestrator's line-by-line check against each finding.
+
+The flow as run: findings verbatim → the batch 4 implementer (the freshest context on the tree; past the
+guideline but at the run's tail) answered agree on all seven and disputed none, correcting two facts in finding 2
+(the one `stand` caller is the Mac's `MCPDoor.swift`, and the defect CAN be pinned in the seam's own API) → the
+reviewer conceded both corrections and made the final calls below.
+
+| # | Finding (severity) | Implementer | Reviewer's final call | Disposition |
+|---|---|---|---|---|
+| 1 | Two test-only fixes never ran green (MINOR, process) | agree | CONFIRMED, no code | The two re-runs run in round 1's fix window; the ladder does not close and the merge GO does not rest until both are green |
+| 2 | A standing offer would be invisible and unkillable on the phone (MINOR) | agree — fix now, the second shape | CONFIRMED FIX | `StatusCenter.stand` under the phone placement places an ordinary offer and never sets `standing`; `endStanding` gains a phone arm before the Mac's guard; a pure pin in the phone target (red on old: after the fade `spoken` still reports the stranded offer); P-55-6's note gains the rule |
+| 3 | A probe moved window-to-window keeps the overlay on the old scene (NIT, speculative) | agree, nothing owed | CONFIRMED, no code | Record only — unreachable in the single-scene portrait app |
+| 4 | Directions wear the alarm ink on the phone (NIT) | agree, nothing owed | CONFIRMED, no code | **P-55-19 on her ratify list:** a direction reads in the refusal's alarm ink on the phone — rule the ink or keep it |
+| 5 | The unworded error's dump is logged as public (NIT) | agree — and a second new line | CONFIRMED FIX, scope ruled | `OpsRefusalTable`'s unworded-failure line and `StatusCenter`'s new phone-arm dropped-receipt line both become private; main's own `style=off` line is left alone; a NARROWED source pin (error-named interpolations logged public, over non-test `Shared/` + `VariorumMobile/`, one named exemption — `SampleLibraryWelcome.swift:411`, main's — to be ticketed at closeout) |
+| 6 | The Mac scans cover `Variorum/` plus a hand-kept list of hoisted files (NIT) | agree, nothing owed | CONFIRMED, no code | The convention stands: each hoist adds its file |
+| 7 | VoiceOver loses the page word on the wing door (NIT) | agree — a words-free change exists | CONFIRMED FIX | The door gains an accessibility value reusing the text the line already draws; the three geometry tests assert it (red on old); the missing hint stays the VoiceOver audit's (VM-216's umbrella) |
+
+The fix window (one claim): the finding-2 pin suite, the finding-5 scan pin, the three edited geometry tests,
+`MobileLineShowRuleTests` + `MobileLineDoorTests`, a Mac leg (`VM61MacStatusSeamPinTests`, `StatusCenterTests`,
+`MCPShowOfferFacesTests`, `MCPTrailTests`), finding 1's two owed re-runs, and red-on-old for the new pins from a
+detached snapshot worktree — never a revert in this worktree.
 
 *(rounds, findings, dispositions)*
 

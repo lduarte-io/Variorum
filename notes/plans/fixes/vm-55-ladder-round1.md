@@ -178,3 +178,88 @@ the recorded verdict lines. Fences checked at file level: no `Sources/VariorumCo
 the next"), round 1 closes the ladder once finding 1's two pending re-runs land green and findings
 2/4/5/7's one-line record notes are carried into the ratify list / tickets at the orchestrator's
 discretion.**
+
+## Final calls (after the implementer's responses)
+
+The implementer's agree/dispute came back verbatim (cross-model flow); each call below is final.
+Since round 1 surfaced no new BLOCKER or MAJOR, the ladder closes with these as FINAL-ROUND fixes:
+no later round reads them, so each confirmed fix gets the orchestrator's line-by-line check against
+its finding (CLAUDE.md's final-round rule), and the fix window's claim runs the named suites plus
+finding 1's two owed re-runs.
+
+1. **CONFIRMED — no code owed.** The ladder does not close, and the merge GO does not rest, until
+   `MobileWingDoorShellTests` and `VM63MacWingBrainsHoistPinTests` run green on c75bdb9af-or-later
+   products — in the implementer's standing READY claim or the merge gate's whole-target runs,
+   whichever comes first.
+
+2. **CONFIRMED FIX — build the implementer's second shape, now.** Two concessions first, both the
+   implementer's corrections accepted: the one `stand` caller is `Variorum/Features/MCP/MCPDoor.swift`
+   (:1296, `endStanding` :1455), not an `AppSession` block; and my "no pin possible" was wrong — the
+   defect lives in the seam's own API, so a pure pin needs no caller. The fix as confirmed, exactly:
+   - `Shared/StatusCenter.swift` `stand`: after the empty-text guard and the item's construction,
+     `if placement == .phoneLine { place(item); return item.id }` — `standing` never set; the Mac
+     lines below untouched.
+   - `Shared/StatusCenter.swift` `endStanding`: the phone arm must run BEFORE the Mac's
+     `guard standing?.id == id` (which early-returns on the phone, where `standing` is always nil) —
+     `if placement == .phoneLine { if current?.id == id { current = nil }; return }`, then the Mac's
+     body unchanged. (The wrong order is a silent no-op; the pin's third half below is what catches
+     it.)
+   - **The pin I require** (pure, phone target, beside `MobileLineShowRuleTests`), three halves:
+     (a) under `.phoneLine`, `stand` puts the offer on the line as kind `.offer` with its door and
+     `standing == nil`; (b) after the fade, `current`, `lineItem` AND `spoken` are all nil — **this
+     half is the red-on-old** (on the old code `standing` survives the fade and `spoken` returns it);
+     (c) a second `stand` then `endStanding(id)` while it shows clears the line at once (green on
+     both trees — it guards the new arm's ordering). Red-on-old verified per the standard.
+   - **Mac guards:** no Mac byte may change — `VM61MacStatusSeamPinTests` (the placement default, the
+     routing table, the stand→clear→lineItem→endStanding hold, the source scan), `StatusCenterTests`,
+     `MCPShowOfferFacesTests`, `MCPTrailTests` all run green in the fix window.
+   - **Record:** P-55-6's note gains the rule — "on the phone a standing offer is an ordinary offer
+     until a phone face for standing offers exists" — and the orchestrator carries it to the
+     MCP-on-phone umbrella.
+
+3. **CONFIRMED — no code owed.** Record-only; this file is the record. Dismissed as unreachable in
+   the shipped single-scene app; it survives here for any future multi-window work.
+
+4. **CONFIRMED — no code owed.** The implementer's reading is right: a neutral ink needs a new item
+   fact and a face arm — a design change, hers. One line joins the ratify list, worded:
+   "P-55-7/P-55-11 consequence — a direction reads in the refusal's alarm ink on the phone; rule the
+   ink or keep it." The orchestrator carries it.
+
+5. **CONFIRMED FIX — the two `.private` edits and a NARROWED source pin.** Ruled in: (i)
+   `Shared/OpsRefusalTable.swift:477` → `privacy: .private`; (ii) `Shared/StatusCenter.swift:358`
+   (the NEW phone-arm debug line — her words, note and book titles) → `privacy: .private` (the arm
+   runs only under `.phoneLine`, so no Mac behaviour moves); (iii) line 356, the Mac's `style=off`
+   arm, stays main's bytes — agreed, out of this run's scope. **The pin, narrowed from the
+   implementer's shape:** my own grep of the tip found SIX pre-existing public describing/reflecting
+   log lines the broad scan would trip on (`StarredGatheringSeeder.swift:72`,
+   `SampleLibraryWelcome.swift:401` and `:411`, `SampleLibrarySeeder.swift:1099`,
+   `Shared/Protection/AppDiagnosticsLeaf.swift:32` — a FENCED file — and
+   `MobileFirstWriteFurniture.swift:230`), five of which interpolate OUTCOMES, not errors. So the
+   scan matches ERROR-NAMED interpolations only — `String(describing:` / `String(reflecting:` of a
+   binding named `error`/`err`/`failure` (the VM-62 pin's name-matching precedent) on a line carrying
+   `privacy: .public` — over the non-test sources of `Shared/` and `VariorumMobile/`, with exactly ONE
+   named exemption: `SampleLibraryWelcome.swift:411` (main's pre-existing line, not this run's), each
+   exemption required to match exactly one line (the VM-62 discipline). Red on old at
+   `OpsRefusalTable.swift:477` alone; green on the fix. The exempted main line is named in the
+   closeout's ticket triage (a sweep-ticket candidate, Tests & tooling/Debt). The `trimmed`
+   interpolation at StatusCenter:358 is invisible to a name scan — review guards it, as the
+   implementer said.
+
+6. **CONFIRMED — no code owed.** The hand-kept `hoistedMacBrains` convention stands, declared in both
+   pins; batch 4 added nothing the list needs; finding 2's StatusCenter arms are guarded by the
+   behavioural suites named under call 2, not by the list.
+
+7. **CONFIRMED FIX — the `accessibilityValue` change is ruled IN.** It repairs a regression this run
+   introduced (batch 1's plain line read the whole path to VoiceOver; the door swallowed the page
+   word), it is words-free (reuses exactly the drawn text, so no wording pass is owed), and it keeps
+   every label-finding pin intact. Build: `.accessibilityValue(page + trailing)` after
+   `.accessibilityLabel(wing)` in `MobileWingPath`'s door branch. **The pin I require:** the three
+   geometry tests assert the door's `accessibilityValue` on each real root ("Starred", "Library",
+   "Shelf" plus its drawn count) — red on old, where the value is nil — and
+   `withoutADoorTheLineIsPlainText` stays untouched. The hint (new words) stays VM-216's.
+
+**The fix window, in one claim:** the finding-2 pin suite, the finding-5 scan pin, the three edited
+geometry tests, `MobileLineShowRuleTests` and `MobileLineDoorTests` (they read the line's slots), the
+Mac leg's `VM61MacStatusSeamPinTests` + `StatusCenterTests` + `MCPShowOfferFacesTests` +
+`MCPTrailTests` — plus finding 1's two owed re-runs. The two new red-halves run red-on-old from a
+detached snapshot worktree (the VM-62 method), never a revert in this worktree.
