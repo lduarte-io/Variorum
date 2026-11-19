@@ -142,8 +142,8 @@ public enum SearchComposer {
     // MARK: - The text half → an FTS5 MATCH expression
 
     /// The AST's text half as an FTS5 query; nil when nothing in it can match
-    /// a token (every leaf is punctuation — "—", "#"). Throws when only
-    /// negations remain.
+    /// a token (every leaf folds to nothing the index keeps — punctuation or
+    /// symbols: "—", "#", "+"). Throws when only negations remain.
     public static func ftsMatch(_ text: SearchText) throws -> String? {
         switch text {
         case .word(let word), .phrase(let word):
@@ -178,27 +178,96 @@ public enum SearchComposer {
         }
     }
 
+    // MARK: - The words road (VX-954 — THE ONE READING OF THE TEXT HALF)
+
+    /// **How the question's text half reads to the index** (VX-954 — the
+    /// VX-980 run, batch 1; `notes/plans/fixes/vx-980-search-fixes.md`): the
+    /// ONE reading both predicates below derive from, so the road a question
+    /// takes and what its empty answer says can never disagree.
+    public enum TextHalf: Equatable, Sendable {
+        /// No text half at all (a tag alone, a day alone).
+        case absent
+        /// Something the index can SERVE (`ftsMatch` is non-nil) — or a tree
+        /// of only negations, which the index REFUSES
+        /// (`Refusal.negativeOnlyText`): the words road either way, so a
+        /// folded word beside a negation never turns that refusal into an
+        /// answer.
+        case served
+        /// Typed words that all FOLD TO NOTHING: every leaf punctuation or
+        /// symbols the index's tokenizer keeps no token of
+        /// (`hasTokenCharacter`) — `—`, `+`, a lone `#`.
+        case foldsToNothing
+    }
+
+    /// The question's text half, as the index reads it. Pure over the AST.
+    public static func textHalf(_ query: SearchQuery) -> TextHalf {
+        guard let text = query.text else { return .absent }
+        do {
+            return try ftsMatch(text) != nil ? .served : .foldsToNothing
+        } catch {
+            return .served  // the one refusal: negations alone — the words road refuses it
+        }
+    }
+
+    /// **Does the question take the WORDS road?** Every reader that asks
+    /// "does this question have words" reads THIS one function — the
+    /// text-less tag road's guard (`listingNarrowing`), the facet band's arm
+    /// (`Queries.searchCounts(…facet:…)`), the tag offers
+    /// (`Queries.searchTagOffers`) and the faces' routing (the Library's
+    /// `hasWords`, the book's band, ⌘K's passages) — so a word list that
+    /// FOLDS TO NOTHING beside a tag (`— #flora`, `+ #flora`) IS the tag
+    /// alone, everywhere.
+    ///
+    /// - Served (or refused) words → the words road.
+    /// - No text half → the tag road (or the day's listing).
+    /// - Words that fold to nothing → the tag road when the question names a
+    ///   tag the text-less road can drive from (`drivingTagPaths`, the
+    ///   narrowing's own reading); naming none, they stay a typed search on
+    ///   the words road — the field is not blank and the Library never goes
+    ///   to rest under it — whose empty answer SAYS WHY
+    ///   (`holdsNothingSearchable` — her R-980-5, ruling P-980-1).
+    ///
+    /// Pure over the AST — no read is added to a question (P1).
+    public static func asksWords(_ query: SearchQuery) -> Bool {
+        switch textHalf(query) {
+        case .served: true
+        case .absent: false
+        case .foldsToNothing: !namesADrivingTag(query)
+        }
+    }
+
+    /// **A typed field holding ONLY punctuation or symbols, and no tag** (her
+    /// R-980-5, ruling P-980-1 — "Say why"): words typed, nothing in them the
+    /// index keeps, no tag to answer instead. Such a question is a typed
+    /// search (`asksWords` — the band keeps its honest "nothing found"), and
+    /// its empty answer says WHY in place of "Nothing matches". A wordful
+    /// search that finds nothing, a folded word beside a tag (that is the tag
+    /// alone) and a negation-only tree (it refuses in its own words) are not
+    /// this state. Every face that speaks an empty answer reads this one
+    /// decision. Pure over the AST.
+    public static func holdsNothingSearchable(_ query: SearchQuery) -> Bool {
+        textHalf(query) == .foldsToNothing && !namesADrivingTag(query)
+    }
+
+    /// Does the question name a tag the text-less road can drive from?
+    private static func namesADrivingTag(_ query: SearchQuery) -> Bool {
+        query.filter.map { !drivingTagPaths($0).isEmpty } ?? false
+    }
+
     /// An FTS5 string literal: double quotes, inner quotes doubled.
     static func quoted(_ s: String) -> String {
         "\"" + s.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 
-    /// Does the word hold at least one character `unicode61` keeps as a TOKEN
-    /// character (anything that is not whitespace, punctuation or a control /
-    /// format code — its default separator classes)? A word of separators only
-    /// would be an FTS5 phrase with no tokens.
+    /// Does the INDEX find a token in the word — does its own tokenizer, as
+    /// linked, keep at least one of its characters as a token character? A
+    /// word it finds none in would be an FTS5 phrase with no tokens, which
+    /// matches no row and, beside real words, empties the answer (VX-955).
+    /// The set is the tokenizer's own, measured (`SearchTokenCharacters` —
+    /// never Unicode's general categories, which disagree with SQLite's
+    /// table: symbols and marks separate there, unknown scalars are tokens).
     static func hasTokenCharacter(_ word: String) -> Bool {
-        word.unicodeScalars.contains { scalar in
-            switch scalar.properties.generalCategory {
-            case .spaceSeparator, .lineSeparator, .paragraphSeparator,
-                 .connectorPunctuation, .dashPunctuation, .openPunctuation, .closePunctuation,
-                 .initialPunctuation, .finalPunctuation, .otherPunctuation,
-                 .control, .format, .unassigned, .surrogate:
-                return false
-            default:
-                return true
-            }
-        }
+        SearchTokenCharacters.holdsToken(word)
     }
 
     // MARK: - The passage page
@@ -851,7 +920,9 @@ public enum SearchComposer {
     ///   (the typed tags again — the driver is only the plan's shape — plus an
     ///   armed day, a book-state facet, …).
     ///
-    /// nil when the question has WORDS (the answer sheet's road) or no typed
+    /// nil when the question takes the WORDS road (`asksWords` — the answer
+    /// sheet's; since VX-954 a word list that folds to nothing beside a tag
+    /// does NOT, so `— #flora` narrows exactly as `#flora`) or has no typed
     /// tag to drive from.
     public struct ListingNarrowing: Equatable, Sendable {
         public let driver: String
@@ -872,7 +943,7 @@ public enum SearchComposer {
     public static func listingNarrowing(
         _ query: SearchQuery, kind: ListingKind, wingID: String, environment: Environment
     ) -> ListingNarrowing? {
-        guard query.text == nil, let filter = query.filter else { return nil }
+        guard !asksWords(query), let filter = query.filter else { return nil }
         let paths = drivingTagPaths(filter)
         guard !paths.isEmpty else { return nil }
         let rootWing = environment.wingScope("root.wing_id", wingID)

@@ -1093,6 +1093,19 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// writes a travelling copy of the whole library is not one to reach
     /// by a keystroke.
     case handOffLibrary
+    /// VX-79 (the VX-980 run, batch 2 — R-13o-3's "explicit rebuild door",
+    /// its face at last): Settings ▸ Data Safety's search-index row, two acts
+    /// over the derived local index (`Operations.verifySearchIndex` /
+    /// `rebuildSearchIndex`). `.surface` on the Data Safety precedent above:
+    /// their target is the pane she is looking at, and their per-gesture
+    /// condition (is a check or a rebuild already running?) is the row's own.
+    /// Two declarations rather than one, on the backup acts' grounds: each is
+    /// its own button with its own receipt. Deliberately NOT `.palette` or
+    /// `.menuBar`, and never run by anything but her press: both cost ∝ the
+    /// library (P1 — a deliberate act only, never a keystroke or a launch),
+    /// and the index keeps itself in step on every road (the run record's
+    /// restore-roads trace), so a manual door is a doubt's answer, not a chore.
+    case checkSearchIndex, rebuildSearchIndex
     /// 13r U3-B (R-13r-5) — Settings ▸ Diagnostics' two acts on a RECEIVED
     /// crash report, `.surface` on the Data Safety precedent above: their
     /// target is the report card she is looking at, and the per-gesture
