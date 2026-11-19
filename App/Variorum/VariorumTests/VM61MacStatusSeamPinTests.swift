@@ -110,15 +110,30 @@ struct VM61MacStatusSeamPinTests {
     /// seam's placement through `status`, or names the phone's placement
     /// anywhere; it no longer catches one that sets it through a binding not
     /// named `status` to a value other than `.phoneLine`.
+    ///
+    /// *Extended in VM-63 (VM-55 batch 3 — the wing brains' hoist):* a Mac brain
+    /// that moved to `Shared/` left this walk of `Variorum/`, so the scan also
+    /// reads each HOISTED file by name (`hoistedMacBrains`) for the same four
+    /// words. A hoisted brain speaks on BOTH platforms through the one seam, so
+    /// a phone road said there would be said on the Mac too. Each name must
+    /// exist, so a rename or a stale entry trips here rather than leaving a
+    /// moved brain unscanned.
     @Test func noMacDoorSaysRemovalWithdrawsOrSetsThePlacement() throws {
-        let macRoot = URL(fileURLWithPath: #filePath)
+        let appRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumTests
             .deletingLastPathComponent()  // App/Variorum
-            .appendingPathComponent("Variorum")
+        let macRoot = appRoot.appendingPathComponent("Variorum")
         let walker = try #require(FileManager.default.enumerator(
             at: macRoot, includingPropertiesForKeys: nil))
-        let files = walker.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
+        var files = walker.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
         #expect(!files.isEmpty, "the scan reached the Mac app's sources")
+        let shared = appRoot.appendingPathComponent("Shared")
+        for name in Self.hoistedMacBrains {
+            let file = shared.appendingPathComponent(name)
+            #expect(FileManager.default.fileExists(atPath: file.path),
+                    "the hoisted brain is where this pin reads it: \(name)")
+            files.append(file)
+        }
         let forbidden = ["status.removal(", ".withdraw(owner:", "status.placement =", ".phoneLine"]
         var hits: [String] = []
         for file in files {
@@ -133,4 +148,17 @@ struct VM61MacStatusSeamPinTests {
         }
         #expect(hits.isEmpty, "the Mac took a phone road: \(hits)")
     }
+
+    /// **VM-63 — the Mac brains that moved to `Shared/`**, by file (the hoist's
+    /// record: `notes/plans/fixes/vm-55-wings-underneath.md` ▸ "Batch 3
+    /// record"). Each speaks on the Mac exactly as it did from `Variorum/`, so
+    /// each stays in the scan above.
+    static let hoistedMacBrains = [
+        "WingsModel.swift",
+        "WingBookMoveBrain.swift",
+        "WingDestinationModel.swift",
+        "WingSwitcherBrain.swift",
+        "WingFollowRule.swift",
+        "SearchPickerBrain.swift",
+    ]
 }
