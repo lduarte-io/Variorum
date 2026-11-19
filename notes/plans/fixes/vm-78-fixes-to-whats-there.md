@@ -1075,8 +1075,11 @@ first run, so its first half is reading and writing the probes headless; window 
 
 #### BATCH C — LIVE STATUS
 
-**WINDOW (3) IS OPEN (claim `vm-78`, 08:39:53).** M1–M7 and an M5 re-run are done (results PENDING into this record
-after release). M9's red leg ran on `MobileLivenessTests.swift` at `615a12189`; the file is restored by
+**WHAT IS NOT DONE (first, as the contract asks):** no fix of any kind; VM-24's arm and VM-17's next step are the
+orchestrator's (both STOP AND REPORT — below); the instruments are still in the tree (their removal commit waits for
+the orchestrator's arm decisions, F7). **Window (3) RAN AND CLOSED:** claim `vm-78` 08:39:53 → released 08:50:46, the
+whole matrix plus one M5 re-run, no run killed the host, no new `Variorum*.ips`, no Problem Reporter, the simulator
+shut down, no instance left. M9's red leg ran on `MobileLivenessTests.swift` at `615a12189`; the file is restored by
 `git checkout HEAD --` and `git status` is clean: **no revert is in flight.** No hand-break is in flight. No product
 line changed.
 
@@ -1085,9 +1088,99 @@ line changed.
 
 | Member | State | Pin / instrument (TYPE name for `-only-testing`) |
 |---|---|---|
-| VM-24 | IN-PROGRESS — half 1 DONE (trace, hypotheses, instruments `a570d3960` + `fec0e478b`); half 2 = window (3), MATRIX ONLY, then the arm taken after release (a fix's own red/green in a second short window) | the red itself: `MobileMarkdownCaretTests` · instruments: `MobileCaretReplaceTraceTests`, `MobileCaretReplaceTeethTraceTests` (DIAGNOSTIC) |
-| VM-19 | IN-PROGRESS — pin `615a12189` (RED on the hide-only teardown: PENDING), fix `5ec59922c` + round 1's N5 `839d86dd9` (the `defer` calls the same teardown; GREEN: PENDING); its reproduction is an instrument | pin: `MobileLivenessTests` (`arrivalRaisesFocusBeforeTheObservationLoops`'s VM-19 expectation) · instrument: `MobileStaleResponderTraceTests` (DIAGNOSTIC) |
-| VM-17 | IN-PROGRESS — probe written `a570d3960`, re-shaped to round 1's F2 final call `e3f406086`, (i′) added by round 2's R2-F3 `78179b765`; outcome PENDING (the pile, (i), (i′) or (ii) red ⇒ real: stop and report; all green ⇒ hollow, kept as the guard) | `MobileFanBadgePlacementProbeTests` (`noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote`) |
+| VM-24 | TRACED in window (3) — **NO PRE-DECIDED ARM MAPS: the orchestrator decides** (H1 killed; the gate is never consulted on this road; the red follows attribute fixing's widening of the report; `realPosture` never reached its posture). No fix. The window's results below | the red itself: `MobileMarkdownCaretTests` · instruments: `MobileCaretReplaceTraceTests`, `MobileCaretReplaceTeethTraceTests` (DIAGNOSTIC) |
+| VM-19 | PIN VERIFIED — `615a12189` RED on the hide-only teardown (M9-red: exactly the VM-19 expectation, `:1087`), GREEN on the fix `5ec59922c` + N5 `839d86dd9` (M9-green, 18/18); the desync itself **not reproduced on this toolchain** (M4: no desync in any of the four cases) — the pin stands as test hygiene | pin: `MobileLivenessTests` (`arrivalRaisesFocusBeforeTheObservationLoops`'s VM-19 expectation) · instrument: `MobileStaleResponderTraceTests` (DIAGNOSTIC) |
+| VM-17 | IN-PROGRESS — probe written `a570d3960`, re-shaped to round 1's F2 final call `e3f406086`, (i′) added by round 2's R2-F3 `78179b765`; **REAL by the record's arm — STOP AND REPORT, no product line**: (i), (i′) and (ii) red on the stepped walk (35 · 35 · 9), seen twice alone (M5, M5b); the pile and reach green; the jump road clean | `MobileFanBadgePlacementProbeTests` (`noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote`) |
+
+**WINDOW (3) — RESULTS (2026-11-19, claim `vm-78` 08:39:53–08:50:46, the standing iPhone 17 Pro / iOS 26.2
+simulator booted fresh by id; other sessions were building on this Mac throughout, so no machine was quiet).** Products:
+M1–M7 by `test-without-building` against `DerivedData/vm78-ios`, built at the code of `97282e72f` (the tip's code:
+every later commit is a record); M9's two `xcodebuild test` legs rebuilt the one liveness file. Every log is kept in
+`App/Variorum/DerivedData/logs/vm78-c-<run>.log`, every bundle in `DerivedData/vm78-bundles/c-<run>.xcresult`, every
+`xcodebuild` exited by itself within 5 s of its verdict, `Restarting after unexpected exit` = 0 in every log.
+
+| Run | Swift Testing verdict | Reds, by name | Bundle |
+|---|---|---|---|
+| M1 caret suite alone | 4 tests in 1 suite **failed**, 2 issues (164 s, the fresh boot's first launch) | `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` "hi", "hello there" — `desyncRecoveryCount == 0` (`:215`) — **by design** | reads (4 · 3 passed · 1 failed) |
+| M2 `MobileCaretReplaceTraceTests` | 3 tests in 1 suite passed | — | reads |
+| M3 `MobileCaretReplaceTeethTraceTests` | 1 test in 1 suite passed | — | reads |
+| M4 `MobileStaleResponderTraceTests` | 1 test in 1 suite passed | — | reads |
+| M5 `MobileFanBadgePlacementProbeTests` | 2 tests in 1 suite **failed**, 3 issues | `noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote` — `astray.isEmpty` (`:394`), `misses.isEmpty` (`:396`), `bare.isEmpty` (`:398`) — VM-17's decision (below) | reads |
+| M5b the same, re-run alone | 2 tests in 1 suite **failed**, 3 issues — identical, every count | the same three | reads |
+| M6a, M6b caret suite alone | each 4 tests in 1 suite **failed**, 2 issues | the same two cases as M1 — **by design** | both read |
+| M7 liveness + caret | 22 tests in 2 suites **failed**, 2 issues | the same two caret cases as M1 — **by design**; every liveness test green (the VM-19 expectation included); nothing beyond M1's two | reads |
+| M9-red (`MobileLivenessTests.swift` at `615a12189`) | 18 tests in 1 suite **failed**, 1 issue | `arrivalRaisesFocusBeforeTheObservationLoops` — `!surface.textView.isFirstResponder` (`:1087`) — **by design**; no extra liveness red | reads |
+| M9-green (restored) | 18 tests in 1 suite **passed** | — | reads |
+
+**VM-24 — what the trace shows** (`grep -E 'VM24\|' vm78-c-M2.log`, `vm78-c-M3.log`; lines quoted without stacks):
+- **No gate consult on this road, in any case.** Every act's E1 reads `consults=0 … gateless=1` — e.g.
+  `suitePosture|hi|#1|E1 #1 EDIT at 1 len 5 Δ-3 after 0 gates ⚠ gate-less` then `E1 #2 ⟳ DESYNC RECOVERY`; the gate
+  proxy printed no `gate` line in M2 or M4. The replace's stack: `-[UITextView replaceRange:withText:]` <
+  `-[UITextInputController replaceRange:withText:]` < `-[UITextInputController _replaceRange:withAttributedTextFromKeyboard:…]`
+  < `-[NSTextStorage coordinateEditing:]` < `endEditing` < `processEditing` — no `shouldChangeTextIn` on it. So every
+  report reaches `storageDidEdit` unarmed and routes by `fallbackVerdict`. (M4's four `insertText` acts are gate-less
+  too. The house helper `typeEdit`, `MobileEditorTestSupport.swift:82-103`, calls the gate itself for exactly this
+  reason; whether her device's keyboard roads consult it is not shown by this window.)
+- **The red follows the report's range.** In-act character reports, `willProcess` → `didProcess`:
+  suitePosture "hi" `{1,2}` → `{1,5}` (both worlds, desync 1); "hello there" `{1,11}` → `{1,14}` (both, desync 1);
+  "Hello" #1 `{1,5}` → `{1,5}` (desync 0) but #2 `{1,5}` → `{1,8}` (desync 1). realPosture: every case exact
+  (`{1,2}`, `{1,11}`, `{1,5}`), desync 0 in all six. settleHeld: "hi" `{1,5}` and "hello there" `{1,14}` widened,
+  desync 1; "Hello" exact, desync 0. The widening happens INSIDE `processEditing` (willProcess exact, didProcess past
+  the terminator) — attribute fixing (TEXTKIT2 §3). Exact, `fallbackVerdict` gets the old range `(1,5)` → `.block(0)`;
+  widened, `(1,8)` crosses the separator at 8 → `.refuse` → `desyncRecovery`.
+- **The settle is not involved.** No `WROTE-INSIDE-TRANSACTION` in any M2 case; the in-act `sel`/`chg` come AFTER the
+  edit's `processEditing` (`sel ACT sel={3,0} maskBefore=none maskAfter=none processedDuring=1` — its write is its own
+  transaction, after the desync); `settleHeld` is red with the settle held. M3 shows the converse: the settle's write
+  forced INSIDE the replace's transaction (`settleWroteInside=true`, report `{0,5}` / `{0,8}` / `{0,14}`) desyncs
+  NOTHING (`desync=0` in all six) — round 2's R2-F2 second column, shown by a run: without the widening an
+  in-transaction write routes as `.block(0)`.
+- **Posture.** At the act both postures show the test window key and on the scene, the view first responder, `editable`,
+  `viewMode=en-US`, `modes=["en-US","emoji"]`, `gcKeyboard=true` (a hardware keyboard connected), all text traits
+  default. suitePosture: no keyboard notification (`willShow=0`). realPosture: `waited spins=300` in five of six cases
+  (only "Hello" #1 settled, at 62) — `keyboardWillShow end=0,822 402x363`, then `keyboardWillShow end=0,822 402x52` (the
+  hardware keyboard's bar), one `keyboardDidShow`: willShow 2, didShow 1, never agreeing.
+
+**VM-24 — the arm, by the record's own rules: NO PRE-DECIDED ARM MAPS — the orchestrator decides.** (1) H1's
+confirmation is not met (no in-transaction write; the report starts at 1; `settleHeld` red) — "M2 shows no
+in-transaction write and `settleHeld` still red ⇒ H1 killed; read H4 and the stacks for the writer": H4's read is zero
+consults, and the writer of the range that decides the red is `NSTextStorage`'s own attribute fixing. (2) R2-F2 line
+one: `realPosture`'s `waited spins=300` ⇒ its posture was not reached ⇒ no arm. (3) R2-F2 line two: within ONE posture
+"Hello" #1 (`{1,5}`, green) and #2 (`{1,8}`, red) differ only in the report's range ⇒ fixing's widening, neither arm.
+**The runner's PROPOSED READING (for the orchestrator; not a ruling):** the standing red is a property of the product's
+gate-less road, not of the caret settle and not of key or first responder: an edit that reaches `storageDidEdit`
+without an arming is routed by `fallbackVerdict` from the storage's report, and attribute fixing can widen that report
+past the paragraph's terminator, after which the fallback refuses a plain in-block replace and `desyncRecovery`
+re-renders from the store — where the replace was never autosaved, so (by reading `desyncRecovery`, `:2016-2032`; the
+trace reads the surface before the heal and does not show it) the replaced words go back to the old ones on the
+surface. Which reports get widened is TextKit's (paragraph-style object identity, TEXTKIT2 §3 18k C8): here,
+widened in five of six acts in the same turn as `becomeFirstResponder`, exact in all six after the waited turns and the
+keyboard bar, and not stable across iterations in one posture. So it reads as arm B's protocol (a product mechanism;
+stop, no seam line touched), with reach as the ruling's question: whether any road her phone takes arrives unarmed
+(the gate's own comment expects autocorrect, dictation and marked text to) AND with a widened report. The fallback's
+widening blind spot is in `MobileEditorViewModel.fallbackVerdict` (`:1962-1972`); the test's own posture is NOT shown
+to be the cause, so arm A's fix (waiting in `host`) would make the test green by avoiding the widening, not by
+removing the hazard.
+
+**VM-19 — M4 and M9.** M4: no desync in any of the four cases (`frameWindow|polluted`, `frameWindow|clean`,
+`sceneWindow|polluted`, `sceneWindow|clean`; every report `{1,6}`, gate-less). The polluter was gone by the act in the
+frame-window case (`alive=false`) and alive and still first responder in the scene-window case (`alive=true fr=true`),
+with no desync either way. By the record's rule: **"not reproduced on this toolchain"**; the pin stands as test
+hygiene. M9: **RED on the hide-only teardown, GREEN on the fix** — the pin is real; no extra liveness red in M9-red.
+
+**VM-17 — M5 (and M5b, identical).** (1) THE PILE: green — no two badges coincide, none at block 1. (2) THE
+MEASUREMENT (never asserted): `offscreenDrawn=21 offIdeal=21 largest=9276.0 mean=4716.0` (points) — the load-time
+estimates for off-screen badges stand thousands of points off the idealized layout; the walk's live content height
+33,812 pt. (i) **35 astray**, (i′) **35 misses**, (ii) **9 bare** — ALL on the stepped walk (61 stops); the jump road
+(22 jumps) 0 · 0 · 0. (iii) REACH green: `walkReached=22/22`, `jumpMissed=0`; (i′) asked 76 (walk 54, jump 22),
+skipped 0. Samples: `walk#7@3920 @6890 badge=4581.75 line=4655.75` with (i′) `stands beside the fragment at @6537`;
+`walk#8@4480 @9190 badge=4683.0 line=5943.0` with (i′) `stands beside the fragment at @6890` (a badge 1,260 pt from
+its own block, beside another block's text); bare `walk#10@5600 @9190 line=6207.0 badge=6133.0 drawn=true` (a fan on
+screen whose badge stands 74 pt above it — several bare and astray lines share that 74-pt offset). **The arm, by the
+record's rules: (i), (i′) and (ii) red ⇒ VM-17 is REAL — STOP and report before any product line.** The fix shape the
+reviewer would confirm is written in the arm (resolve in-band badges only; hide a badge as its block leaves the band);
+nothing is built. The HOLLOW reach sentence does not apply. COST NOTE (VM-179's, prints only): 150 blocks — loadOnce
+0.032 s unfanned vs 0.032 s with 22 fans; the `.document` chrome pass cold 0.11 ms vs 1.81 ms, warm 0.05 ms vs 0.30 ms.
+600 blocks — loadOnce 0.116 s vs 0.122 s with 86 fans; the pass cold 0.31 ms vs 6.02 ms, warm 0.19 ms vs 1.24 ms.
 
 **Half 1 — DONE (2026-11-19).** Phone `build-for-testing` signed for `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`
 into `DerivedData/vm78-ios` (no boot): **TEST BUILD SUCCEEDED** at the code of `fec0e478b` (its one later edit is a
