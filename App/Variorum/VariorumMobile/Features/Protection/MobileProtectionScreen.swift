@@ -224,12 +224,11 @@ struct MobileRoadAccountSection: View {
     private func door(_ label: String, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(tokens.chromeLabel(label))
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.accent)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .buttonStyle(.plain)
+        // VM-50: an inline act at 17 with a 44 pt hit area.
+        .buttonStyle(PhoneInlineActStyle(tokens: tokens, role: .control, alignment: .leading))
         .accessibilityLabel(label)
         .disabled(model.presenter.sheet != nil)
     }

@@ -66,12 +66,11 @@ enum MobileProtectionChrome {
     static func door(_ label: String, _ tokens: VoiceTokens, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(tokens.chromeLabel(label))
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.accent)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .buttonStyle(.plain)
+        // VM-50: an inline act at 17 with a 44 pt hit area.
+        .buttonStyle(PhoneInlineActStyle(tokens: tokens, role: .control, alignment: .leading))
         .accessibilityLabel(label)
     }
 
@@ -171,7 +170,7 @@ struct MobileGateChoice: View {
                     .foregroundStyle(selected ? tokens.ink : tokens.phone.muted)
                 Spacer()
             }
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)

@@ -161,10 +161,7 @@ struct MobileRoadLockView: View {
             VStack(spacing: 10) {
                 PeekableSecretField(label: ProtectionWords.passphraseLabel, text: $passphrase, onSubmit: { submitPassphrase() })
                     .submitLabel(.go)
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.ink)
-                    .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
-                    .background(field)
+                    .phoneField(tokens)
                 MobileRoadButton(title: ProtectionWords.openButton, tokens: tokens) { submitPassphrase() }
                     .disabled(lobby.busy || passphrase.isEmpty)
             }
@@ -180,10 +177,8 @@ struct MobileRoadLockView: View {
                     showsWords.toggle()
                 } label: {
                     Text(tokens.chromeLabel(ProtectionWords.wordsDoor))
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, alignment: .leading))
                 if showsWords { wordsField }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -194,10 +189,7 @@ struct MobileRoadLockView: View {
         VStack(spacing: 10) {
             // VX-463 (her ruling: "conceal with a reveal eye"): the passphrase's one shared concealing field.
             PeekableSecretField(label: ProtectionWords.wordsPlaceholder, text: $wordsText)
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.ink)
-                .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
-                .background(field)
+                .phoneField(tokens)
             MobileRoadButton(title: ProtectionWords.wordsButton, tokens: tokens) {
                 let text = wordsText
                 wordsText = ""
@@ -207,11 +199,6 @@ struct MobileRoadLockView: View {
         }
     }
 
-    private var field: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(tokens.card)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
-    }
 
     private func sentence(_ text: String) -> some View {
         Text(text)
@@ -397,7 +384,8 @@ struct MobileNoKeyFileSheet: View {
     }
 }
 
-/// The phone's calm button for these faces (the lobby's own idiom: the accent on a quiet card).
+/// The phone's calm button for these faces (the lobby's own idiom: the accent on a quiet card) —
+/// since VM-50 THE calm button (`PhoneCalmButtonStyle`); this keeps only the label's glyph form.
 struct MobileRoadButton: View {
     let title: String
     var systemImage: String?
@@ -413,16 +401,8 @@ struct MobileRoadButton: View {
                     Text(tokens.chromeLabel(title))
                 }
             }
-            .phoneType(.control, tokens)
-            .foregroundStyle(tokens.accent)
-            .padding(.vertical, 10)
-            .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(tokens.surface)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1)))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneCalmButtonStyle(tokens: tokens))
         .accessibilityLabel(title)
     }
 }

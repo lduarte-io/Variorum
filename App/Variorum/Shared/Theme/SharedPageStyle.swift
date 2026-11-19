@@ -151,21 +151,12 @@ extension View {
 
     /// Field chrome. nil ⇒ `self` (the Mac's default bordered field).
     /// Styled: a visible field — bare iOS text fields carry NO affordance
-    /// at all (this pass's headline UI-principle fix), so the voice's
-    /// card + hairline draw one.
+    /// at all (this pass's headline UI-principle fix) — since VM-50 the
+    /// phone's ONE field (`phoneField`).
     @ViewBuilder
     func pageFieldChrome(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self
-                .phoneType(.control, style.tokens)
-                .foregroundStyle(style.tokens.ink)
-                .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(style.tokens.card)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(style.tokens.line, lineWidth: 1)))
+            self.phoneField(style.tokens)
         } else {
             self
         }
@@ -313,52 +304,36 @@ private struct PageDoorButtonStyle: ButtonStyle {
     }
 }
 
-/// The style's body lives in a View so `isEnabled` is a live environment
-/// read (disabled doors dim — `.plain`-class styles do not dim on their
-/// own).
+/// The style's body: since VM-50 the phone's controls, which carry the
+/// press and disabled read themselves (`PhoneControlFeedback`).
 private struct PageDoorLabel: View {
     let tokens: VoiceTokens
     let form: PageDoor.Form
     let configuration: ButtonStyle.Configuration
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
+        // The press and disabled read ride the controls' own feedback.
         styled
-            .contentShape(Rectangle())
-            .opacity(isEnabled ? (configuration.isPressed ? 0.55 : 1) : 0.35)
     }
 
+    /// VM-50: the phone's controls — a primary act is THE calm button (a
+    /// destructive one in the voice's alarm, which replaces the literal red
+    /// — sheet §D), the CF-3 reveal class the calm button's edge alone, an
+    /// inline door a 17 pt act with a 44 pt hit area.
     @ViewBuilder
     private var styled: some View {
         switch form {
         case .act, .destructive:
-            configuration.label
-                .phoneType(.control, tokens)
-                .foregroundStyle(form == .destructive ? Color.red : tokens.accent)
-                .multilineTextAlignment(.leading)
-                .padding(.vertical, 9)
-                .padding(.horizontal, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(tokens.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(tokens.line, lineWidth: 1)))
+            PhoneCalmButtonStyle(
+                tokens: tokens, tone: form == .destructive ? .alarm : .accent)
+                .makeBody(configuration: configuration)
         case .bordered:
-            configuration.label
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.accent)
-                .multilineTextAlignment(.leading)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(tokens.line, lineWidth: 1))
+            PhoneCalmButtonStyle(tokens: tokens, filled: false)
+                .makeBody(configuration: configuration)
         case .borderless, .inlineAct:
-            configuration.label
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.accent)
-                .padding(.vertical, 6)
+            PhoneInlineActStyle(
+                tokens: tokens, role: .control, alignment: .leading)
+                .makeBody(configuration: configuration)
         }
     }
 }

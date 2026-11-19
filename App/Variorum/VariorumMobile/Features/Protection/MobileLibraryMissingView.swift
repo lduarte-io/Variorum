@@ -39,18 +39,9 @@ struct MobileLibraryMissingView: View {
                         Task { await lobby.startNewLibrary() }
                     } label: {
                         Text(tokens.chromeLabel(ProtectionCopy.libraryMissingStartDoor))
-                            .phoneType(.control, tokens)
-                            .foregroundStyle(tokens.accent)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(tokens.surface)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(tokens.line, lineWidth: 1)))
                     }
-                    .buttonStyle(.plain)
+                    // VM-50: THE calm button (was its own build).
+                    .buttonStyle(PhoneCalmButtonStyle(tokens: tokens))
                     .disabled(lobby.busy || lobby.storeURL == nil)
                     .accessibilityLabel(ProtectionCopy.libraryMissingStartDoor)
                     Text(ProtectionCopy.libraryMissingStartSubline)
