@@ -892,7 +892,11 @@ final class MobileQuickNoteModel {
         AppTiming.boxOpenPressed() // VM-65: the press her lag 2 is measured from
         Task { [weak self] in
             guard let self else { return }
-            if let id = await self.file() { self.pendingOpen = id }
+            if let id = await self.file() {
+                self.pendingOpen = id
+            } else {
+                AppTiming.boxOpenFiledNothing() // VM-64 ladder round 2, finding 8: no Open to time
+            }
         }
     }
 

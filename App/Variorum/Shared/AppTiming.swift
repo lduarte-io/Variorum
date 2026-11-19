@@ -211,6 +211,15 @@ nonisolated enum AppTiming {
         recorder.begin(.boxOpenToKeyboard, staleAfter: screenStale)
     }
 
+    /// …and the press filed nothing (an empty box, a refusal, a withdrawal):
+    /// no note will open, so both spans go unrecorded — otherwise the next note
+    /// painted, or the next keyboard rising, within the stale limit would end
+    /// them as a long, false Open (VM-64 ladder round 2, finding 8).
+    static func boxOpenFiledNothing() {
+        recorder.cancel(.boxOpenToNote)
+        recorder.cancel(.boxOpenToKeyboard)
+    }
+
     /// A filing begins — recorded only when it completes (`boxFilingEnded`).
     static func boxFilingStarted() -> Token? { recorder.start(.boxFile) }
 
