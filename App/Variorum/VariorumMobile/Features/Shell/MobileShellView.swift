@@ -283,7 +283,13 @@ struct MobileShellView: View {
         .task { await starsModel.start() }
         // VM-51: the library's theme — held for the shell's life, so a voice
         // or palette changed on either device lands here and in the editors.
-        .task { await router.theme?.start() }
+        .task {
+            #if DEBUG
+            // The walk's palette seam (DEBUG only; nothing without its env).
+            await MobileWalkLaunch.applyPalette(session)
+            #endif
+            await router.theme?.start()
+        }
         // R27b's starter Journal used to be seeded from HERE, concurrently
         // with the task that composes AppServices — which is what the
         // batch-5 cold review's MAJOR was about: the seed always won that
