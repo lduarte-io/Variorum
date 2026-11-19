@@ -113,6 +113,17 @@ nonisolated enum MobileShellBand {
         return CGFloat(index(of: page) - index(of: current)) * width + drag
     }
 
+    /// **Is a page DRAWN at all** (VM-68 — the Library holds its listings only
+    /// while it is): the current page, or a neighbour the live drag has pulled
+    /// into view — its offset is less than one screen. A degenerate zero-width
+    /// pass draws only the current page (`offset`'s own guard).
+    static func isDrawn(
+        _ page: MobileTab, current: MobileTab, drag: CGFloat, width: CGFloat
+    ) -> Bool {
+        guard width > 0 else { return page == current }
+        return abs(offset(for: page, current: current, drag: drag, width: width)) < width
+    }
+
     /// The share of the screen a drag must cross to land on the next page.
     static let landingShare: CGFloat = 0.28
     /// …with a floor, so a narrow screen (Display Zoom, the smallest

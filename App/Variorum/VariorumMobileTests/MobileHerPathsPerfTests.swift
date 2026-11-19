@@ -623,17 +623,28 @@ struct MobileHerPathsPerfTests {
     /// (the real 500 ms debounce) → the layer's per-save windows (1 s).
     ///
     /// · `library-rereads-per-box-save` / `library-redraws-per-box-save` —
-    ///   the layer's windows over BOTH held listings (all + bookless).
+    ///   the layer's windows over BOTH listings (all + bookless).
     /// · `all-listing-rereads-per-box-save` / `bookless-rereads-per-box-save`
     ///   — the layer's counters, split by listing (the Pool's is the
     ///   corpus × gatherings one, audit F §5).
-    ///   **All four RECORDED: batch 5 (VM-68) stops a write that changes
-    ///   nothing the Library shows from re-running a corpus-sized query or
-    ///   redrawing the hidden Library — its pins turn these into assertions.**
+    ///   **All four ASSERTED ZERO (batch 5, VM-68)** — they read 2, 2, 1, 1
+    ///   before it (the record's BEFORE table). The Library is not on screen,
+    ///   so it holds no listing at all: a write sets off no Library read and
+    ///   no landing, whatever the write. Zero, not one, because nothing waits
+    ///   to be told — the return re-asks (`library-return-*` below).
     /// · `library-listing-fetch-ninewings` / `bookless-listing-fetch-ninewings`
-    ///   — THIS TEST'S clock around the very queries the held listings re-run
-    ///   (`Queries.library` and `Queries.poolPosts`, the phone's 200 limit) on
-    ///   this world: what each re-run costs off the main thread.
+    ///   — THIS TEST'S clock around the queries the held listings re-ran
+    ///   BEFORE batch 5 (`Queries.library` and `Queries.poolPosts`, the
+    ///   phone's 200 limit) on this world — kept, unchanged, as the same-run
+    ///   comparison.
+    /// · `library-page-fetch-ninewings` / `bookless-page-fetch-ninewings` —
+    ///   the same clock around the reads the Library holds SINCE batch 5,
+    ///   only while on screen: the first page of each listing through
+    ///   `catalogNotesPage` (Bookless: its Pool-loose form), the phone's page
+    ///   of 200 — with their query plans printed (`VM64-PLAN|…`).
+    /// · `library-return-rereads` — the Library's reads when she comes back to
+    ///   it after the saves: the held first page's first fetch (one; two when
+    ///   she had scrolled past the first page). RECORDED.
     @Test func typingInTheBoxWakesTheOffScreenLibrary() async throws {
         let world = try DiskWorld.copy(of: try PerfWorlds.nineWings.get(), "box-wakes")
         defer { world.remove() }
@@ -642,9 +653,11 @@ struct MobileHerPathsPerfTests {
             let router = MobileShellRouter()
             let mountedAt = Probe.snap()
             let shell = Mounted(MobileShellView(session: session, services: nil, router: router))
-            await waitUntil("both Library listings' first delivery") {
+            // VM-68: the hidden Library reads its note listing ONCE at mount
+            // (the Library ready) and its Bookless listing not at all — it is
+            // not the filter shown.
+            await waitUntil("the Library's note listing's first delivery") {
                 Probe.delta(.libraryDelivery, since: mountedAt) >= 1
-                    && Probe.delta(.booklessDelivery, since: mountedAt) >= 1
             }
             router.quickNote.text = "Typing in the box"
             await waitUntil("the box's mint") { router.quickNote.postID != nil }
@@ -673,17 +686,59 @@ struct MobileHerPathsPerfTests {
                     booklessRereads.append(Double(Probe.delta(.booklessFetch, since: before)))
                 }
             }
-            // RECORDED (batch 5, VM-68).
             VM64Perf.report("library-rereads-per-box-save", rereads, .count, expecting: Self.runs)
             VM64Perf.report("library-redraws-per-box-save", redraws, .count, expecting: Self.runs)
             VM64Perf.report("all-listing-rereads-per-box-save", allRereads, .count, expecting: Self.runs)
             VM64Perf.report("bookless-rereads-per-box-save", booklessRereads, .count, expecting: Self.runs)
+            // ASSERTED (batch 5, VM-68): the Library off screen does no work
+            // on a write — no read of either listing, no landing. RED before
+            // VM-68 (2 · 2 · 1 · 1 per save: both held listings re-ran and
+            // delivered on every box autosave).
+            #expect(rereads.allSatisfy { $0 == 0 },
+                    "VM-68: a box save re-ran the hidden Library's listings: \(rereads)")
+            #expect(redraws.allSatisfy { $0 == 0 },
+                    "VM-68: a box save landed rows in the hidden Library: \(redraws)")
+            #expect(allRereads.allSatisfy { $0 == 0 },
+                    "VM-68: a box save re-ran the hidden note listing: \(allRereads)")
+            #expect(booklessRereads.allSatisfy { $0 == 0 },
+                    "VM-68: a box save re-ran the Bookless listing, held though not shown: \(booklessRereads)")
+
+            // The return: she goes to the Library after the saves, and back,
+            // five times. (Before VM-68 the listing was held while hidden, so
+            // a return read nothing: 0 — and every save above paid instead.)
+            // The box is filed first, so the first return's count is the
+            // return's alone (a page change files the box — a write the
+            // Library, then on screen, would rightly hear).
+            await router.quickNote.fileOnLeaving()
+            await idle(.milliseconds(800))
+            var returnRereads: [Double] = []
+            for _ in 0..<Self.runs {
+                let returning = Probe.snap()
+                #expect(shell.surface.activate("Library"), "the Library's tab door")
+                await waitUntil(
+                    "the Library's re-ask on return", timeout: .seconds(5), reportTimeout: false
+                ) {
+                    Probe.delta(.libraryFetch, since: returning) >= 1
+                }
+                await idle(.milliseconds(400))
+                returnRereads.append(Double(Probe.delta(.libraryFetch, since: returning)))
+                #expect(shell.surface.activate("Shelf"), "the Shelf's tab door")
+                await shell.surface.settle(10)
+            }
+            // RECORDED (the design's honest cost: one read per return).
+            VM64Perf.report("library-return-rereads", returnRereads, .count, expecting: Self.runs)
 
             var libraryFetch: [Double] = []
             var booklessFetch: [Double] = []
+            var pageFetch: [Double] = []
+            var looseFetch: [Double] = []
             // The phone Library's listing limit (`MobileLibraryViewModel.init`'s
-            // default — the shell builds it with no other value).
+            // default — the shell builds it with no other value), which is
+            // also its page since VM-68.
             let limit = 200
+            // The wing the Library reads (`WingState.readScope`: every wing
+            // until the phone stands in one).
+            let wing = session.wing.readScope
             for _ in 0..<Self.runs {
                 var t0 = CACurrentMediaTime()
                 _ = try await session.database.read { db in
@@ -693,11 +748,131 @@ struct MobileHerPathsPerfTests {
                 t0 = CACurrentMediaTime()
                 _ = try await session.database.read { db in try Queries.poolPosts(db, limit: limit) }
                 booklessFetch.append(milliseconds(since: t0))
+                // VM-68: what the Library holds now, only while on screen.
+                t0 = CACurrentMediaTime()
+                _ = try await session.database.read { db in
+                    try Queries.catalogNotesPage(db, query: "", limit: limit, wingID: wing)
+                }
+                pageFetch.append(milliseconds(since: t0))
+                t0 = CACurrentMediaTime()
+                _ = try await session.database.read { db in
+                    try Queries.catalogNotesPage(db, query: "", limit: limit, wingID: wing, poolLoose: true)
+                }
+                looseFetch.append(milliseconds(since: t0))
             }
             VM64Perf.report("library-listing-fetch-ninewings", libraryFetch, .ms, expecting: Self.runs)
             VM64Perf.report("bookless-listing-fetch-ninewings", booklessFetch, .ms, expecting: Self.runs)
+            VM64Perf.report("library-page-fetch-ninewings", pageFetch, .ms, expecting: Self.runs)
+            VM64Perf.report("bookless-page-fetch-ninewings", looseFetch, .ms, expecting: Self.runs)
+
+            // The two held reads' plans on this world (the record's "a query
+            // plan for each held read"): the SHIPPED statement, caught by a
+            // trace around a real page read and explained with its own bound
+            // values; each walks the touched index and stops when its page
+            // fills; neither scans the notes.
+            for (name, loose) in [("notes-page", false), ("bookless-page", true)] {
+                let plan = try await session.database.read { db -> [String] in
+                    let log = LockIsolated<[String]>([])
+                    db.trace(options: .statement) { event in
+                        guard case .statement(let statement) = event else { return }
+                        let sql = statement.expandedSQL
+                        log.withValue { $0.append(sql) }
+                    }
+                    defer { db.trace(options: .statement, nil) }
+                    _ = try Queries.catalogNotesPage(
+                        db, query: "", limit: limit, wingID: wing, poolLoose: loose)
+                    guard let page = log.value.last(where: { $0.contains("sort_key") }) else { return [] }
+                    return try Row.fetchAll(db, sql: "EXPLAIN QUERY PLAN " + page)
+                        .map { $0["detail"] as String }
+                }
+                for line in plan { print("VM64-PLAN|\(name)-ninewings|\(line)") }
+                #expect(plan.contains { $0.contains("idx_container_touched") },
+                        "\(name) walks the touched index: \(plan)")
+                #expect(!plan.contains { $0 == "SCAN container" || $0 == "SCAN c" },
+                        "\(name) scans the notes: \(plan)")
+            }
 
             await shell.unmount(leavings: 0)
+        }
+    }
+
+    // MARK: 4b · Typing in a note opened from the Library leaves its root alone
+
+    /// **Her path: open a note from a Library row and type in it** (VM-68),
+    /// on the mounted shell over the big world (its short control note is one
+    /// of the Library's two newest rows — test 3's road). The note is pushed
+    /// onto the Library's OWN stack, so the Library's listing is covered — not
+    /// on screen — while she types.
+    ///
+    /// · `library-rereads-per-note-save-covered` /
+    ///   `library-redraws-per-note-save-covered` — the layer's per-save
+    ///   windows over both listings, one note autosave each. **ASSERTED ZERO**:
+    ///   a covered Library holds nothing (the shell's on-screen fact needs its
+    ///   stack at its root). If this reads zero on the pre-VM-68 build too,
+    ///   SwiftUI itself stood the covered root's tasks down, and the record
+    ///   says so.
+    @Test func typingInANoteOpenedFromTheLibraryLeavesTheLibraryAlone() async throws {
+        let world = try DiskWorld.copy(of: try PerfWorlds.big.get(), "covered")
+        defer { world.remove() }
+        let title = MobilePerfFixtureSeeder.controlPostTitle
+
+        try await withHerWorld(world) { session in
+            let router = MobileShellRouter()
+            let mountedAt = Probe.snap()
+            let shell = Mounted(MobileShellView(session: session, services: nil, router: router))
+            await waitUntil("the shell's Library listing") {
+                Probe.delta(.libraryDelivery, since: mountedAt) >= 1
+            }
+            await shell.surface.settle(10)
+            #expect(shell.surface.activate("Library"), "the Library's tab door")
+            await shell.surface.settle(20)
+            let row = shell.surface.visibleElements.first {
+                $0.accessibilityLabel?.hasPrefix(title) == true
+                    && $0.accessibilityTraits.contains(.button)
+            }
+            let before = Probe.snap()
+            guard let row, row.accessibilityActivate() else {
+                Issue.record("the control note's Library row was not on screen; labels were \(Array(shell.surface.visibleLabels.prefix(30)))")
+                await shell.unmount(leavings: 0)
+                return
+            }
+            guard await waitUntil("the opened note's first live delivery", {
+                Probe.delta(.noteProjectionDelivery, since: before) >= 1
+            }) else { await shell.unmount(leavings: 0); return }
+            await idle(.milliseconds(800))
+            guard let model = router.editors.registered.last,
+                  let at = interiorOffset(model, blockIndex: 0)
+            else {
+                Issue.record("no registered editor with a block to type in")
+                await shell.unmount(leavings: 1, report: false)
+                return
+            }
+
+            var rereads: [Double] = []
+            var redraws: [Double] = []
+            for attempt in 0...Self.runs {
+                let storage = try #require(model.textView?.textStorage)
+                let saved = Probe.snap()
+                #expect(typeEdit(model, storage, range: NSRange(location: at + attempt, length: 0),
+                                 replacement: "y"), "the key was accepted")
+                await waitUntil("the note's autosave write") {
+                    Probe.delta(.autosaveWrite, since: saved) >= 1
+                }
+                await idle(.milliseconds(1300))
+                if attempt > 0 {
+                    rereads += Probe.newSamples(.libraryRereadsPerSave, since: saved)
+                    redraws += Probe.newSamples(.libraryRedrawsPerSave, since: saved)
+                }
+            }
+            VM64Perf.report("library-rereads-per-note-save-covered", rereads, .count, expecting: Self.runs)
+            VM64Perf.report("library-redraws-per-note-save-covered", redraws, .count, expecting: Self.runs)
+            #expect(rereads.allSatisfy { $0 == 0 },
+                    "VM-68: a note save re-ran the covered Library's listings: \(rereads)")
+            #expect(redraws.allSatisfy { $0 == 0 },
+                    "VM-68: a note save landed rows in the covered Library: \(redraws)")
+            #expect(model.identityAuditFailures == 0)
+
+            await shell.unmount(leavings: 1, report: false)
         }
     }
 

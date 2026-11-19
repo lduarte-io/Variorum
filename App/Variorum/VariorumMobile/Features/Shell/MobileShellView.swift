@@ -236,7 +236,8 @@ struct MobileShellView: View {
                             tabBar: { tabBar },
                             onOpen: { libraryPath.append($0) },
                             onOpenTrash: { libraryPath.append(MobileRoute.trash) },
-                            onOpenArchive: { libraryPath.append(MobileRoute.archive) })
+                            onOpenArchive: { libraryPath.append(MobileRoute.archive) },
+                            isOnScreen: libraryOnScreen(width: width))
                     }
                 }
             }
@@ -331,6 +332,18 @@ struct MobileShellView: View {
                     for: owner, current: tab, drag: bandDrag, width: width))
             .allowsHitTesting(tab == owner)
             .accessibilityHidden(tab != owner)
+    }
+
+    /// **VM-68 — THE LIBRARY IS ON SCREEN**: its page is drawn at all (the
+    /// current page, or revealed by a band drag — `MobileShellBand.isDrawn`)
+    /// AND its stack is at its root (a note pushed on it covers the listing).
+    /// Its listings are held only while this is true: off screen in the band
+    /// it is alive but idle, so typing in the box or in a note sets off no
+    /// Library read and no redraw; the moment any of it is drawn again, its
+    /// held page's first fetch re-asks it.
+    private func libraryOnScreen(width: CGFloat) -> Bool {
+        libraryPath.isEmpty
+            && MobileShellBand.isDrawn(.library, current: tab, drag: bandDrag, width: width)
     }
 
     /// **THE ROOT-SURFACES-ONLY RULE.** The band pages only while the
