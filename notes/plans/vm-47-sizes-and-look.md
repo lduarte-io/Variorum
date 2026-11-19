@@ -825,8 +825,111 @@ code is SwiftUI the Mac compiles but never renders (the UIKit pieces behind `os(
 
 ### Batch 3 — results (implementer: Opus, 2026-11-19)
 
-**Not done in this batch, first:** PENDING — written at the batch's close (this section is being filled piece by
-piece; LIVE STATUS rows 3.1–3.9 are the truth until then).
+**Not done in this batch, first:** (1) the note in WRITE is not on the paper — its ground is one line in
+`MobileEditorTextView.applyVoiceChrome` (`backgroundColor = face.room`), a file this run may not edit; Write wears the
+VOICE's own room instead (never the palette's tint — her R-47-1 words hold), PROVISIONAL P-47-16, the paper owned by
+VM-137 (three lines: that one and `MobileWriteView`'s two ground lines); (2) the full builds, the suites, VM-54's
+red-on-old and the walk are PENDING — the stage coordinator's QUIET (another run's merge gate) held every full
+`build-for-testing` from mid-batch, so this batch closes its code with the phone APP target building incrementally
+green and the Mac APP target compiled, and the rest waits for "QUIET over" and the stage window (§4 rows 3.6–3.8);
+(3) rows inside SHEETS that carry her words (the Blocks sheet's block previews, the tray's previews) and the three
+UIKit overlays' sheet grounds are left with owners (below) — more than a background line each.
+
+**The hoist (3.1, `dc9a5fd05`).** `ThemeStore` moved whole, by `git mv`, from `Variorum/Theme/` to
+`Shared/Theme/ThemeStore.swift`: the observation (`Queries.themeSettings`), the settings → tokens road
+(`tokens(dark:)`, `tokens(for:)`), every setter (`setVoice`, `setThemePalette`, …), `editingIndicator(of:)` — all
+byte for byte. Stayed behind `#if os(macOS)`: `EditorTypography.adopt(value)` (a Mac-only type) and
+`session.status.receiptStyle = …` (`AppSession.status` is Mac-only). Two ADDITIVE members came with the phone road
+(3.2, `987e9edc5`): `onLanded` (the phone's landing seam — nil on the Mac, so the Mac's loop is unchanged) and
+`init(session:placeholder:)` (default `Queries.ThemeSettings()` — every Mac call site is unchanged). `VoiceTokens.swift`
+is not edited; no Mac view or test changed. (Its doc comment on `resolve(settings:dark:)` still says "the phone's
+voice is LOCAL (LK2), so its road is the four-parameter form … never this" — now stale; the file is fenced, so it is
+recorded here for the next pass that may touch it.)
+
+**The resolution road (3.2 + 3.3, `987e9edc5`) — one pointer per site.**
+
+| Site | Before | Now |
+|---|---|---|
+| `VariorumMobileApp.lockedTokens` (the lobby: lock, words card, library-missing) | `.resolve(voice: MobileVoicePreference.current(), …)` | `.resolve(settings: MobileShellRouter.placeholder, …)` — what a library that has chosen nothing reads, Study under the sea-glass (P-47-15) |
+| `MobileShellView.tokens` (the three roots, every pushed screen and sheet it hands tokens to) | `.resolve(voice: router.voice, …)` | `router.tokens(dark:)` = `VoiceTokens.resolve(settings: router.settings, dark:)`; the shell binds the store (`router.bindTheme(session:)` in its initializer, idempotent per session) and starts it (`.task`) |
+| `MobileWriteScreen.tokens` (the masthead and Write's sheets) | `.resolve(voice: router?.voice ?? fallbackVoice, …)`, and the initializer WROTE `MobileEditorStyle.voice` | `router?.tokens(dark:) ?? .resolve(settings: MobileEditorStyle.settings, …)`; the write and `fallbackVoice` are gone |
+| `MobileSettingsView.tokens` | `.resolve(voice: router.voice, …)` | `router.tokens(dark:)` |
+| `MobileEditorStyle.Face` (the UIKit editor, the keyboard bar, the takes chrome and pill, the three overlays, the block decor) | per-voice static faces over `.resolve(voice:dark:)`, chosen by an unsynchronised global voice | the voice's static face with the palette laid over its seven palette slots (`Face.applying(palette:tint:)` — surface, line, accent, card, take tint, take line, the markdown link) through the four-parameter resolver, resolved once per landed palette for both appearances; every other slot is the voice face's own object |
+
+Light or dark is the device's: the appearance is the `dark:` argument the device's scheme supplies to every road
+(SwiftUI's `colorScheme`; UIKit's dynamic colours), never a setting the phone reads or writes (LK-2). A change made
+on the Mac (or arriving by sync) lands through the store's observation and reaches the chrome (observed) and the
+editor (`MobileShellRouter.adoptLanded` → `MobileEditorStyle.adopt` → `editors.applyVoiceChangeEverywhere()` when
+the face moved).
+
+**QUESTIONS #195 MINOR 3, closed — how.** The review's hazard was `MobileEditorStyle.voice`, a `nonisolated(unsafe)`
+global written from three places and claimed "main-thread" only in a comment. Now: (1) the storage is `@MainActor`
+— the claim is compiler-enforced, and the phone app compiled with every reader main-actor; (2) the app has ONE
+writer, `MobileEditorStyle.adopt(_:)`, called only where the library's settings land (the router's theme seam) — the
+Write screen's init write and the router's init write are deleted; (3) the face is no longer a "third home" of
+voice state with its own truth: it is a cache of the LIBRARY's landed settings, the one truth. The residual, said
+plainly: `voice`'s setter survives as the harness door the suites use (~40 test sites), and the suites still share the
+process-global look — a test that sets a look, awaits, and reads can interleave with another suite at the await (a
+logical, not a data, race). The editor worlds (`withEditorWorld`) now reset the WHOLE look (voice and palette) at
+start, and every look-switching test restores in a `defer`. Making the editor face per-editor (injected, no global)
+needs the fenced editor files — VM-137's.
+
+**The retired preference (3.3).** `VariorumMobile/Theme/MobileVoicePreference.swift` is deleted. Nothing in the
+phone reads its key (`io.lduarte.variorum.mobile.themeVoice`), so a value a device stored under it is simply never
+read — no migration, no crash road (pinned by a source scan, `MobileLibraryLookTests.theRetiredVoicePreferenceIsReadNowhere`;
+a suite never writes the test host's defaults, which are the Debug app's). The two Settings voice rows keep their
+words; a press calls `router.setVoice`, which runs `ThemeStore.setVoice` → `Operations.setThemeVoice` — the Mac
+Settings' own write (`AppSettingsView`'s Picker and RootView's palette commands call the same setter); the row's ✓
+reads the library's voice as it LANDED, so a voice chosen on the Mac shows here.
+
+**The grounds (3.4, `af487bfe7`) — screen by screen.** The rule as built: where her words are listed or read, the
+ground is the paper (`tokens.surface` — the voice's own white in light, the palette's hued paper in dark); bars,
+sheets and bands stay on the room.
+
+| Screen | Paper | Room |
+|---|---|---|
+| Bookcase (root) | the books region and the capture box (`MobileShelfView`, the region's `.background(tokens.surface)`) | the path line, the status lines, the tab bar |
+| Library (root) | the rows, previews, search passages, the books and scraps listings, the Archived row (the scroll region) | the path line, the search field's surround, the filter row, the status lines, the tab bar |
+| Starred (root) | the starred rows | the path line, the error line, the tab bar |
+| A book's contents (pushed) | the whole page (`MobileBookView` ground) | — (its system bar region shows the page's ground; the bar is VM-52's, batch 4) |
+| Archived, Trash (pushed) | the whole page | the report band at the foot |
+| Versions (pushed) | the listing and the reader | the verbs band and the report band |
+| Read (pushed) | the cream page itself (voice-independent, R2 — unchanged) | the room around it is the VOICE's own (`ReadingPageTokens.room`, the Mac's R-13u-10: never the palette's) |
+| Write (pushed) | — | the editor, the screen and the masthead all wear the voice's OWN room (P-47-16 — never the tint; the paper is VM-137's) |
+| Every SwiftUI sheet (Settings, Create Book, Book Details, Tags, Books, More Info, Blocks, Lenses, Note Actions, the tag manager, Acknowledgments, the edit trace) and Protection | — | unchanged, on the room (the sheet's rule) |
+| The three UIKit overlays (takes, comments, block history) | unchanged: the take cards on `card`, the comments and history rows on the overlay's `surface` — her words already on the paper family | the "sheets on the room" half: VM-152 (native sheets) |
+
+Listed and left, with owners: the note in Write on the paper — VM-137 (P-47-16); the Blocks sheet's block previews
+— VM-149 (the blocks list); the tray's previews in the same sheet — VM-153; the three UIKit overlays' grounds —
+VM-152; a peeked take card wears the take tint (R13's takes register — a palette slot, so under a palette it is the
+palette's light tint) — kept as R13's ruled register, for her look pass; the pushed screens' system bar region (it
+shows the page's paper) — VM-52 (batch 4).
+
+**The star (3.5, `af487bfe7`).** The starred rows' ★ (`MobileStarredView`, the phone's only star glyph) reads
+`tokens.star` (blue in every voice) instead of `tokens.accent`.
+
+**The walk's palette seam (3.8, `242c48951`) — an instrument, recorded.** `MobileWalkLaunch` (DEBUG only): when the
+UI-test driver hands `VARIORUM_WALK_PALETTE` in the launch environment, the shell writes that palette into the open
+library through `Operations.setThemePalette` before its store starts. The phone has no palette door and the walk's
+simulator library syncs with nothing; no words, no key of its own, compiled out of Release.
+
+**Tests (written; counts PENDING the stage).** New: `MobileLibraryLookTests` (7 — a fresh library wears Study under
+the sea-glass, chrome and face; a look written elsewhere reaches the phone and its OPEN editor, and `.default`
+returns the voice's static face; light or dark stays the device's and resolving writes nothing; the placeholder IS
+an empty library's read; `adopt` moves the face only when the look moves and shares the voice's colour objects; the
+editor's ground is never the palette's tint, over every palette × voice × appearance; the retired preference is read
+nowhere), `MobileLookSourceTests` (4 — the grounds and Read/Write's room, the star, the phone's no-literal-colour
+twin), `MobileBorderTraitTests` (4, VM-54). Moved: `MobileShellTests.theVoiceDoorWritesTheLibraryAndTheLandingReachesTheOpenSurface`
+(was `theVoiceFlipReachesPreferenceStyleAndTheOpenSurface`), `MobileLivenessTests.aVoiceFlipReachesEveryRegisteredEditor`
+(drives the landing seam), `MobileVoiceTests` (the preference pin retired; the face baseline resets the whole look),
+`withEditorWorld`, and three router constructors (`MobileFilterTests`, `MobileVersionsTests`,
+`MobileProtectionScreenTests`). Red-on-old: the grounds and star source patterns measured over `ea738c49f` — 10 of 10
+checks fail there, 0 of 10 now; the no-literal-colour twin is a new guard (green on old as on new — it finds only
+the canary it allows); `MobileLibraryLookTests` pins new behaviour (a fresh library read Terminal Classic before).
+
+**The Mac suites this batch owes** (every Mac test type that constructs or reads the hoisted store — by name or
+through `withAdoptedTheme` — plus the theme types; 119): see the READY report's `macTypes` array, also kept in §4 row
+3.8 once the window is set.
 
 **VM-54 — the trace and the verdict (code; the on-screen check rides this batch's walk window).**
 
