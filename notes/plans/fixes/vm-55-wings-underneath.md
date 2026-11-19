@@ -1085,6 +1085,14 @@ text (the old doors spoke the dump or "Refused: …").
 
 The strengthened pin commit, by hash: **15f788dfd** (the red-on-old checkout target).
 
+**REPLACED at the coordinator's word (07:25) — no revert in place.** The red-on-old does NOT check out the pin commit in
+this worktree and never replaces `vm55-b1`'s products. Instead a DETACHED SNAPSHOT worktree at 15f788dfd,
+`~/dev/variorum-vm-55-pin` (`git worktree add --detach`), is built for testing HEADLESS before READY into its own DerivedData
+dir, `variorum-vm-55-pin/App/Variorum/DerivedData/vm55-pin` (a cold build, no stage); in the claim the two pin types run
+from the snapshot (xcodebuild run IN the snapshot worktree, so the source scan reads the pin tree's sources); after the
+release the snapshot is removed (`git worktree remove`, its DerivedData with it). This worktree stays on the branch
+throughout — nothing is reverted here at any point.
+
 #### VM-62 — refusals in plain words (a Bug: the mechanism, the pins, the fix)
 
 **Mechanism, traced (inputs → wrong output).** A phone door catches an error and hands its words to the one line (2a's
@@ -1346,6 +1354,19 @@ Leg 3 — **red-on-old** (VM-62's pins; the method above): detached at 15f788dfd
   `.ignoresSafeArea()` stays — the door's frame must stay in window coordinates). Three lines in one file, phone-only,
   no Shared change; the pin goes green unchanged. **Re-run after it:** `MobileMessageLineHostTests` alone, plus
   `MobileMessageLineGeometryTests` and `MobileLineDoorTests` (they read the door frame).
+- **The fix as built (b811aa743, at the coordinator's sequencing; phone only, `Shell/MobileMessageLine.swift`):**
+  `MobileMessageLineModel.safeBottom` (new); the face passes `safeBottom: model.safeBottom` (the reader no longer reads its
+  proxy); the overlay's CONTROLLER feeds it — `viewSafeAreaInsetsDidChange()` and `viewWillLayoutSubviews()` set
+  `model.safeBottom = view.safeAreaInsets.bottom`, guarded so the observed write never loops a layout. (The controller,
+  not the window as first proposed: the controller is what holds the model; same inset, same moment.) `.ignoresSafeArea()`
+  stays. **The pin** is the feature's own host test, red at e8609cc6f's products in the whole phone target (07:06–07:19,
+  door maxY 822 against 796.5, inset 34; red again alone at 07:17:40); it now also asserts `model.safeBottom` equals the
+  window's inset. **The geometry suite never drove a real inset** — `MobileMessageLineGeometryTests` feeds `footOffset`
+  numbers directly, which is how a zero input passed — so a sibling type, `MobileMessageLineInsetTests` (1 test, 2 cases:
+  a fed inset of 34 — a device with a home indicator — and of 0 — one without), stands the face in a real window under the
+  tab bar's 44 and asserts the door sits above the bar and the inset and close above them (≤ 30 pt). On the old face the
+  34 case is red (it read zero). Phone `build-for-testing` green at b811aa743 into `vm55-b1`; nothing the Mac compiles
+  changed. **Re-run: PENDING** — the last batch-2 claim, leg (b).
 - **Leg 3 — red-on-old:** PENDING (its own claim; it now opens with the one Mac type below).
 
 #### 2a follow-up — the Mac seam pin's false positive (owned by 2b, per the brief)
