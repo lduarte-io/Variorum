@@ -152,7 +152,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 |---|---|---|---|
 | 1 · VM-65 | **CLOSED 2026-11-19** | `65d70fe9f` `feef85c7a` `f6389e3b5` `808f333a8` `914278cfa` | code state `808f333a8`; stage results in "Orchestrator's stage results" below |
 | 2 · VM-2 | READY (stage) | `2358f33cb` `76dbf89b2` `f83122794` `1f292b1ec` `5b40f1984` + closeout | see the batch 2 block below |
-| 3 · VM-66 | IN-PROGRESS | live status | see the batch 3 block below |
+| 3 · VM-66 | READY (stage) | `3cb346ebb` `fd9184011` `0bc11d9a9` `51440c726` `284e30c9e` `21fc776fb` `d2cef56be` + closeout | see the batch 3 block below; the BEFORE numbers fill from its stage window |
 | 4 · VM-67 | NOT-STARTED | — | — |
 | 5 · VM-68 | NOT-STARTED | — | — |
 | 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
@@ -302,13 +302,47 @@ still says the open is main-thread — false since 13l L-c (`Shared/AppBootstrap
 | Piece | State |
 |---|---|
 | P1 — this live status | DONE (this commit) |
-| P2 — the nine-wing fixture option (seeder) + its world and shape pin | DONE (`fd9184011`) — build PENDING |
-| P3 — `MobileHerPathsPerfTests` (the VM64-PERF series) | DONE (`0bc11d9a9`) — build PENDING; runs PENDING the stage window |
-| P4 — the launch-path doc corrected; pointers in the walk and shelf suites | IN-PROGRESS — the doc and the walk's pointer landed in `fd9184011`; the shelf suite's pointer after the first build |
-| P5 — builds: phone `build-for-testing` into `DerivedData/vm64-b3/` (no Shared/Core change planned ⇒ no Mac build) | NOT-STARTED |
-| P6 — closeout in §7 + the READY report's stage commands | NOT-STARTED |
+| P2 — the nine-wing fixture option (seeder) + its world and shape pin | DONE (`fd9184011`, `51440c726`) — built; the pin's run PENDING the stage window (group ii) |
+| P3 — `MobileHerPathsPerfTests` (the VM64-PERF series) | DONE (`0bc11d9a9`, `51440c726`, `d2cef56be`) — built; its runs PENDING the stage window (group i, twice) |
+| P4 — the launch-path doc corrected; pointers in the walk and shelf suites | DONE (`fd9184011`, `21fc776fb`) |
+| P5 — builds: phone `build-for-testing` into `DerivedData/vm64-b3/` (no Shared/Core change ⇒ no Mac build) | DONE at `d2cef56be` — `** TEST BUILD SUCCEEDED **`, no warning in a touched file |
+| P6 — closeout in §7 + the READY report's stage commands | DONE (this commit) — its PENDING lines flip after the window |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b3/` (gitignored).
+
+**THE BEFORE NUMBERS (simulator) — PENDING the orchestrator's stage window** (group (i) of §7 batch 3 ▸ "The stage
+window", run twice ALONE; lift with `grep '^VM64-PERF|' <log>`). These are what batches 4–7 are judged against; each
+cell is `median (min–max), n` per run. The predictions are audit F's trace read on today's tree — predictions, never
+assertions.
+
+| Series | Unit | Run 1 | Run 2 | Predicted today | Tightened by |
+|---|---|---|---|---|---|
+| `note-open-to-screen-short` / `-100k` | ms | PENDING | PENDING | — | (batch 6 may move it a little) |
+| `note-open-to-live-short` / `-100k` | ms | PENDING | PENDING | — | batch 6 (the second read goes) |
+| `note-reads-per-open-short` / `-100k` | count | PENDING | PENDING | 2 | batch 6 → 1 |
+| `shell-box-open-to-note` | ms | PENDING | PENDING | — | batches 6, 7 |
+| `shell-box-file` | ms | PENDING | PENDING | — | batch 7 |
+| `shell-box-open-to-live` | ms | PENDING | PENDING | — | batch 6 |
+| `shell-box-editor-builds-per-open` | count | PENDING | PENDING | 1 or 2 (audit F 2D: unknown) | batch 6, only if > 1 |
+| `shell-box-note-reads-per-open` | count | PENDING | PENDING | 2 | batch 6 → 1 |
+| `shell-library-open-to-screen-short` / `-100k` | ms | PENDING | PENDING | — | batch 6 |
+| `shell-library-editor-builds-per-open-short` / `-100k` | count | PENDING | PENDING | 1 or 2 | batch 6, only if > 1 |
+| `shell-library-note-reads-per-open-short` / `-100k` | count | PENDING | PENDING | 2 | batch 6 → 1 |
+| `library-rereads-per-box-save` | count | PENDING | PENDING | 2 (both listings) | batch 5 |
+| `library-redraws-per-box-save` | count | PENDING | PENDING | 2 | batch 5 |
+| `all-listing-rereads-per-box-save` | count | PENDING | PENDING | 1 | batch 5 |
+| `bookless-rereads-per-box-save` | count | PENDING | PENDING | 1 | batch 5 |
+| `library-listing-fetch-ninewings` | ms | PENDING | PENDING | — | batch 5 |
+| `bookless-listing-fetch-ninewings` | ms | PENDING | PENDING | — | batch 5 |
+| `owner-adoption-nothing-to-adopt` | ms | PENDING | PENDING | — | batch 4 |
+| `owner-adoption-rows-nothing-to-adopt` | count | PENDING | PENDING | 0 (ASSERTED) | — (kept 0) |
+| `savepoints-per-note-leaving` | count | PENDING | PENDING | 1 | batch 7 (stays ≥ 1, ASSERTED) |
+| `savepoints-per-backgrounding-standard` | count | PENDING | PENDING | 1 | batch 7 |
+| `savepoints-per-backgrounding-castle` | count | PENDING | PENDING | 3 (audit F 6C) | batch 7 → 1 |
+| `autosave-registry-growth-per-open-close` | count | PENDING | PENDING | 1 | batch 6 → 0 |
+| `note-rereads-per-save-100k` | count | PENDING | PENDING | 1 | wave 4 (VM-176) |
+| `note-deliveries-per-save-100k` | count | PENDING | PENDING | 1 | wave 4 (VM-176) |
+| `note-delivery-ingest-100k` | ms | PENDING | PENDING | — | wave 4 (VM-176) |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -733,3 +767,170 @@ No `Shared/` file changed. The one Core addition is a new type no Mac code refer
 3. **P-2-3 — a composition commit or dictation inside the window is withheld and said** (built) · released when the
    flight commits nothing.
 4. **P-2-5 — insert below's keys land in the new block** (built, the Mac's rule) · exempt insert below.
+
+### Batch 3 · VM-66 — the speed tests run her paths (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** the stage runs are PENDING the orchestrator's window — so the
+BEFORE numbers in §5 are not yet filled, and the new suite and the fixture pins have not yet run (their commands are
+below, runnable by anyone from my built products). No simulator walk of the app: this batch's unit is the test suite
+itself, whose two stage runs ARE its use-shaped evidence (the real screen and the real shell, driven). No fix of any
+kind; no new duration budget (P-66-4); no Core, `Shared/` or `Sync/` line; nothing on her phone.
+
+**Base:** `ba3516a30`. **Commits:** `3cb346ebb` (live status) · `fd9184011` (the nine-wing fixture, its pin, the
+launch-path doc) · `0bc11d9a9` (the suite) · `51440c726` (two compile fixes) · `284e30c9e` (live status) ·
+`21fc776fb` (the shelf suite's pointer) · `d2cef56be` (the Library row found by its title's prefix) · this closeout.
+
+#### What shipped, file by file
+
+- `App/Variorum/VariorumMobile/Features/Perf/MobilePerfFixtureSeeder.swift` — the seeder gains `WingShape`
+  (`.oneWing`, the default, byte-identical: the corpus loop's body was lifted unchanged into `seedCorpusBody`, so the
+  same operations run in the same order and a `.incrementing` world mints the same ids; `.nineWings`, the new option).
+  **What `.nineWings` seeds per wing** (Home plus eight minted wings, `extraWingNames`): its own `perf fixture` tag (a
+  legal per-wing twin; Home's is the caller's) worn by every note in it · a `gathered` tag worn by every third note ·
+  TWO books (`"<wing> notebook i"` / `"… ii"`) · ONE gathering (`"<wing> gathered"`, rule: that wing's `gathered`
+  tag) · its share of the corpus notes dealt round-robin (note n → wing n % 9; each note's prose is the same generator
+  stream as in `.oneWing`), every fourth of them BOOKLESS (a Pool note — some of those gathered, so the Pool's
+  gathering test has rows to exclude). The fixture book and its control (and mega, when asked) posts stay in Home.
+  `SeedResult` gains the shape's facts (`wingCount`, `wingIDs`, `corpusBookCount`, `gatheringCount`,
+  `booklessNoteCount`, `gatheredNoteCount`). The DEBUG door (`findOrSeed`) is untouched and seeds the one-wing shape.
+- `App/Variorum/VariorumMobileTests/MobilePerfWalkTests.swift` — `PerfWorlds.nineWings` (450 corpus notes, 50 per
+  wing, the control post, no mega — PROVISIONAL P-66-2); the shape pin
+  `MobilePerfFixtureTests.theNineWingShapeSeedsEachWingItsOwnLibrary` (per wing: 50 notes, 12 bookless, 2 books, 1
+  gathering, 1 fixture-tag twin, 17 gathered; the control post in Home); **the stale `MobileLaunchPathTests` doc
+  corrected in place** (the open left the main thread at 13l L-c — `AppBootstrap.beginOpening` → the detached
+  `routeAndOpen`; the measurement stays, the P2 claim goes; its `PERF[sim]` label and two comments follow); a pointer
+  on `openSurface` (the windowless editor's open stays what the budgets were derived on; the open she feels is the
+  new suite). No budget changed; no existing pin's assertion changed.
+- `App/Variorum/VariorumMobileTests/MobileShelfPerfTests.swift` — header only: the box's Library-wakes leg is counted
+  in the new suite, and why it lives there.
+- `App/Variorum/VariorumMobileTests/MobileHerPathsPerfTests.swift` — **the new suite** (`.serialized`, nine tests'
+  worth of paths in eight tests), reading VM-65's layer off `AppTiming.recorder`; each test on its own on-disk copy of
+  a static world (`DiskWorld`: `backup(to:)` → `openStore(at:)`, whose migration encrypts it — a WAL pool like her
+  phone's store); the real screen and the real shell mounted in a key window behind a `MountGate` (the bootstrap's
+  `.ready` → `.opening` flip, as a view: removing the content fires every mounted screen's `onDisappear` exactly as
+  the app's state flip does); one `VM64-PERF|…` line per series.
+
+#### The series (what each one reads, and who tightens it)
+
+| Test | Series | Source | World | Asserted? |
+|---|---|---|---|---|
+| `aNoteOpensOnTheRealScreenWithItsLiveUpdatesStarted` | `note-open-to-screen-{short,100k}` | layer span `noteOpenToScreen` (screen built → text on screen) | big (on-disk copy) | no (probe only) |
+| | `note-open-to-live-{short,100k}` | TEST clock: screen built → the first live delivery INGESTED | big | no |
+| | `note-reads-per-open-{short,100k}` | layer window `noteReadsPerOpen` | big | ≥ 1 only; the value RECORDED for batch 6 (2 → 1) |
+| `theCaptureBoxOpensItsNoteThroughTheShellsPush` | `shell-box-open-to-note` | layer span `boxOpenToNote` — the whole of lag 2 | nine wings | no |
+| | `shell-box-file` | layer span `boxFile` | nine wings | no |
+| | `shell-box-open-to-live` | TEST clock: Open → the first live delivery ingested | nine wings | no |
+| | `shell-box-editor-builds-per-open` | layer counters `editorBuilt` ÷ `noteArrival` across the push | nine wings | ≥ 1 only; RECORDED (audit F 2D's twins — batch 6 settles) |
+| | `shell-box-note-reads-per-open` | layer window | nine wings | RECORDED (batch 6) |
+| `aLibraryRowOpensItsNoteThroughTheShellsPush` | `shell-library-open-to-screen-{short,100k}` | layer span `noteOpenToScreen` via the row's push | big | no |
+| | `shell-library-editor-builds-per-open-{short,100k}` · `shell-library-note-reads-per-open-{short,100k}` | layer counters / window | big | RECORDED (batch 6) |
+| `typingInTheBoxWakesTheOffScreenLibrary` | `library-rereads-per-box-save` · `library-redraws-per-box-save` | layer windows (both held listings) | nine wings | RECORDED (batch 5) |
+| | `all-listing-rereads-per-box-save` · `bookless-rereads-per-box-save` | layer counters `libraryFetch` / `booklessFetch` per save | nine wings | RECORDED (batch 5) |
+| | `library-listing-fetch-ninewings` · `bookless-listing-fetch-ninewings` | TEST clock around `Queries.library` / `Queries.poolPosts` (limit 200) — the very queries the held listings re-run | nine wings | no |
+| `ownerAdoptionWithNothingToAdoptIsMeasuredAtFixtureScale` | `owner-adoption-nothing-to-adopt` | layer span `ownerAdoption` | big | RECORDED (batch 4) |
+| | `owner-adoption-rows-nothing-to-adopt` | layer series `ownerAdoptionRows` | big | **ASSERTED 0** (the op's idempotence contract) |
+| `leavingAnEditedNoteCountsItsSavepointAttempts` | `savepoints-per-note-leaving` | layer window `savepointsPerLeaving` from the screen's `onDisappear` | small | **ASSERTED ≥ 1** (an edited note's leaving is savepointed — PR7); the value RECORDED (batch 7) |
+| `backgroundingWithAnEditedNoteOpenCountsItsSavepointAttempts` | `savepoints-per-backgrounding-{standard,castle}` | layer window from `MobileTiming.appLeaving()`, then `mobileScenePhaseChanged(.background, …)` — the app's own two calls | small | **ASSERTED ≥ 1**; the value RECORDED (batch 7: audit F 6C's three → one) |
+| `theAutosaveRegistryAcrossOpensAndCloses` | `autosave-registry-growth-per-open-close` | `AppSession.openAutosaveCount` before/after each open-and-close of a different note (+ a `PERF[sim]` line with the size after five) | small | RECORDED (batch 6: 1 → 0) |
+| `oneTypingPauseInTheHundredKNoteIsMeasured` | `note-rereads-per-save-100k` | layer window `noteRereadsPerSave` | big | RECORDED (wave 4, VM-176) |
+| | `note-deliveries-per-save-100k` | layer counter `noteProjectionDelivery` per save | big | RECORDED (wave 4) |
+| | `note-delivery-ingest-100k` | TEST clock around the model's own `ingest(_:fromDelivery: true)` of a fresh projection (the echo arm) | big | no |
+
+Every measured series runs five times after one unrecorded warm-up (the process's first use of TextKit, the fonts and
+the screen's types is a once-per-launch cost, not a per-open one); each test also asserts it GATHERED its five runs, so
+a dead probe is red, never a silent pass. "Editor constructions per open" is reported on the two SHELL roads only: a
+screen mounted directly is built once by the test by construction, so its count would say nothing.
+
+#### What a hosted test can and cannot reach (the brief's question, answered)
+
+REACHED: the SwiftUI screen and shell, the band (the Library alive off screen), the NavigationStack push and its
+`navigationDestination` builder (so the twin question is answerable), the screen's `.task` (liveness registration, the
+arrival's load and first render, `start()` and its first delivery), the first paint (the layer's display-link tick), the
+editor's and the box's real debounces, the leaving's `onDisappear`, the background flush through the app's own call,
+an encrypted on-disk WAL store. NOT REACHED: the software keyboard (hardware-keyboard mode under `xcodebuild test`, so
+"Tap the box → keyboard up" and "Open → keyboard up in the note" never fill — her phone fills them); a finger (doors are
+driven through UIKit's accessibility activation or the model a face calls); the launch and unlock spans (a test host
+never opens through the bootstrap); sync rounds and their aftershock (no services, signed out); a real lock (the Castle
+arm runs the phone's own `onWillLock` and removes the tree as the state flip does, but closes no pool and drops no
+key); the device's CPU, GPU and flash. Every number is a SIMULATOR number on a machine that may be loaded.
+
+#### PROVISIONAL calls (options weighed; the built one first)
+
+- **P-66-1 — reading the process's ONE recorder, so the suite runs ALONE** (built — the marks feed `AppTiming.recorder`
+  and the listings' fetch closures run on GRDB's queues, which inherit no task-local, so no per-test recorder can be
+  handed to them) · inject a recorder into every mark site (a production change across batch 1's files — not a test
+  batch's) · a task-local override like `MobileEditTrace.testRecorder` (misses every fetch-closure count).
+- **P-66-2 — the nine-wing world's size: 450 notes (50 per wing), no mega post** (built — over the Library's 200-note
+  cut so batch 5's paging question is live; the 100k axis stays the big world's) · 300 notes, the one-wing corpus size
+  (keeps corpus size equal across shapes, but under the cut per wing) · a full 300-note corpus PER wing (2,700 notes —
+  a seeding cost every run pays). Her real note count is unmeasured; her phone's readout will say.
+- **P-66-3 — the savepoint windows are closed by the test** once the leaving's own timed work has finished (the
+  layer's `noteLeave` span, or the background work's `Task`) plus half a second (built — five runs in seconds, nothing
+  else runs between) · wait out each window's 10 s deadline (a minute per series, and the same count).
+- **P-66-4 — no new duration budget** (built — a budget is written with its measured basis, and the basis is the BEFORE
+  numbers these runs produce; the counts carry the assertions later batches add) · generous budgets now, from the audit's
+  older single numbers (no basis on this tree).
+- **P-66-5 — the Castle arm's lock is the phone's `onWillLock` plus the tree's removal** (built — `AppBootstrap.
+  lockOnNewRoad`'s order, minus the pool close and key drop, which no hosted test may do) · drive `bootstrap.lock()`
+  itself (needs a real Castle-road store and custody in the test host — out of a test's reach).
+- **P-66-6 — owner adoption: `AppServices.runOwnerAdoption`'s private body run verbatim** between the layer's own two
+  marks (built) · build a whole `AppServices` (auth, sync, custody — a composition a test host cannot make) · widen
+  the method's visibility (a production change for a test).
+- **P-66-7 — each test on its own on-disk, encrypted copy** (built — her store's shape; the static worlds stay pristine
+  for the other suites) · the static in-memory worlds (a `DatabaseQueue`, no WAL, no encryption — and shared, so a
+  writing test would leak into the fixture pins).
+- **P-66-8 — three durations on the TEST's clock where the layer has none** (open → live, a listing's query, one
+  delivery's ingest), each named so in its series and comment (built) · add marks to the layer (a production change;
+  batch 1's catalog is closed for this batch).
+
+#### The Mac does not change
+
+No `Shared/`, Core or `Sync/` file changed. The one app-target file (the fixture seeder) is phone-only
+(`VariorumMobile/`), and its default shape is byte-identical. No Mac build is owed.
+
+#### Evidence
+
+- Core, headless: none owed (no Core change).
+- Build: phone `build-for-testing` into `DerivedData/vm64-b3/` at `d2cef56be` — `** TEST BUILD SUCCEEDED **`, no warning
+  in a touched file.
+- PENDING (the stage window): group (i) twice → the BEFORE numbers in §5; group (ii) → the fixture pins (incl. the new
+  nine-wing one) and the suites around the touched files green.
+
+#### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+**Group (i) — the BEFORE numbers. Run it ALONE (one suite, its own invocation, nothing else in the process), TWICE.**
+Expect a few minutes per run (two fixture worlds seed first). Lift the numbers with the `grep`.
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileHerPathsPerfTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b3 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-run-N>
+grep '^VM64-PERF|' <log-run-N>
+```
+A count red on a loaded machine is not expected (counts are deterministic); a duration is never asserted. If a run is
+red, the failing test's issue names what it waited for (`VM-66: timed out waiting for …`) or which series came up short.
+
+**Group (ii) — the other phone suites my changes could disturb** (the fixture's file and its worlds, the launch-path
+doc, the shelf suite's header, and the layer the new suite reads):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobilePerfFixtureTests MobilePerfWalkTests MobileLaunchPathTests MobileShelfPerfTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b3 \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+Expected: Swift Testing all green; `MobilePerfFixtureTests` now 7 tests (the nine-wing pin added). The walk's timing
+pins are unchanged, and on a loaded machine a timing red is re-run alone before it counts (§4's rule). Batch 1's
+machinery note applies: poll for the Swift Testing verdict line, not `** TEST EXECUTE **`.
+
+#### For QUESTIONS at the merge (the orchestrator carries these to `notes/QUESTIONS.md`)
+
+1. **P-66-2 — the nine-wing fixture's size** (450 notes, 50 per wing, no mega — built · 300 notes · 300 per wing).
+   Hers to correct once her phone's readout gives her real count.
+2. **P-66-4 — new duration budgets wait for the BEFORE numbers** (built) · budgets now without a basis.
+3. **P-66-5 — the Castle backgrounding arm runs the phone's `onWillLock` and the tree's removal, not the pool close**
+   (built) · a real lock in the test host (not reachable).
+4. **P-66-1, P-66-3, P-66-6, P-66-7, P-66-8** — test-harness shapes (the suite runs alone; windows closed after the
+   leaving's work; the private adoption body run verbatim; per-test encrypted copies; three test-clock durations),
+   recorded for the cold review rather than her ruling.
