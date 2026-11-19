@@ -220,7 +220,7 @@ by this batch).
 
 ### Batch 2 · VM-2 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**REVERT IN FLIGHT (2026-11-19):** the three phone production files (`MobileStructural.swift`, `MobileEditorViewModel.swift`, `MobileEditorTextView.swift`) are being checked out from base `9cf3b3688` over the committed fix `f83122794` to build the red-on-old products; restore = `git checkout HEAD -- <those three files>` and a clean `git status`. The red-on-old proof is a SECOND build of the pins against the pre-fix production files
+**No revert is in flight** (the red-on-old revert ran and is RESTORED: the three phone production files were checked out from base `9cf3b3688` over the fix `f83122794`, the red products built, then `git checkout HEAD -- <the three>`; `git status` and `git diff HEAD` empty after). The red-on-old proof is a SECOND build of the pins against the pre-fix production files
 (`git checkout <base> -- <production files>` AFTER the fix is committed and pushed, build-for-testing into
 `App/Variorum/DerivedData/vm64-b2-red/`, then `git checkout HEAD -- <the same files>` and a clean `git status`). When
 that revert starts, this line changes to name it and the base commit; until then the tree is never mid-revert.
