@@ -359,7 +359,8 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 2a — VM-61 | DONE — its suites ran in batch 2's one window (run by 2b, three claims, 05:56–07:39): the Mac leg 1243/1245 + its Mac pin's re-run green after a test-only fix (8fa80d315, a false positive); the whole phone target 924 of 928 clean + 2 with declared known issues, VM-24's red main's, and one REAL defect its own host pin caught (the line ignored the home-indicator inset) — fixed b811aa743, re-run green (16/16 over the line's four types). Records: "Batch 2a record" and "Batch 2b record" (2a follow-ups 1 and 2) |
 | Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | DONE — P-55-11 (be6f1d0c7) and VM-62 (pins 69005ad4a/15f788dfd, fix e8609cc6f) green in the whole phone target and the Mac leg; VM-62's red-on-old RAN at 15f788dfd from a snapshot worktree: the scan red (97 lines) and all five per-case pins red, the stripper oracle green; the window's two 2a follow-ups fixed and re-run green. Record: "Batch 2b record" |
 | Batch 3 — VM-63 | BUILT (d91f97ca5) — both targets build for testing green; its suites (the Mac and phone TYPE lists in "Batch 3 record") PENDING in the shared window batch 4 runs |
-| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | NOT-STARTED |
+| Main merged in at the seam after batch 3 | DONE (871bde99a — main 359ae214d, VX-980's merge; clean, by the orchestrator; NOT yet built or tested on this branch — batch 4's builds and the shared window are the first on the merged tree) |
+| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
@@ -390,6 +391,12 @@ Notes for the implementers:
   the verdict line, never for the exit; stop your own process once the verdict is in.
 - Batch 1 left ONE DerivedData dir with the fixed tree's products for both targets: `App/Variorum/DerivedData/vm55-b1`
   — later batches build incrementally into it rather than starting a cold one.
+- Main moved under this run at 08:40 (VX-980: Mac search and Settings files, two `Registry/Capability*` lines, six Core
+  search files) and is merged in at 871bde99a. The coordinator's caveat: those Core search changes passed the whole
+  Mac target and Core's headless suite but had NOT run under the phone-hosted suites when they merged — so on the
+  merged tree a red in a phone listing, filter, tag or Trash suite may be main's, not this run's: name it and tell
+  the orchestrator BEFORE chasing it. The ledger's next free QUESTIONS number is #277; MobileSoul's newest parity
+  row is PL-75.
 - Walk screens and logs stay local (the gitignored `*-screens` convention); nothing outside the worktree.
 
 ## Batch records
