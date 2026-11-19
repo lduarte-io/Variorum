@@ -52,8 +52,10 @@ public enum TrashTextMatch {
 
     /// **The field's words.** Whitespace (spaces, tabs, newlines — every
     /// `Character.isWhitespace`) separates; every other character belongs to a
-    /// word. Duplicates collapse (asking `red red` asks `red`), first spelling
-    /// kept, in the order typed. A field of only whitespace asks nothing.
+    /// word. An exact repeat collapses (asking `red red` asks `red`), the first
+    /// kept, in the order typed; spellings that differ only by case or accents
+    /// stay apart (`Red red` asks both — harmless, since the match folds them
+    /// alike). A field of only whitespace asks nothing.
     public static func words(_ field: String) -> [String] {
         var seen: Set<String> = []
         var out: [String] = []
@@ -126,11 +128,14 @@ public enum TrashTextMatch {
     }
 
     /// **The words around `match`, as one line.** Up to `lead` characters before
-    /// and `tail` after, each cut moved to a word's edge (never mid-word: a cut
-    /// inside a word drops the partial word, unless that would drop everything
-    /// on its side); whitespace runs (newlines included) collapse to one space;
-    /// an ellipsis stands where the text was cut, none where the passage reaches
-    /// the text's own start or end. The match itself is never cut.
+    /// and `tail` after. A cut that falls inside a word steps toward the match
+    /// to the nearest whitespace, dropping the partial word — unless no
+    /// whitespace lies between the cut and the match (one long word, or a run
+    /// with no spaces such as CJK, reaches the match): then the cut stays where
+    /// the character limit put it, and that word is kept cut mid-word.
+    /// Whitespace runs (newlines included) collapse to one space; an ellipsis
+    /// stands where the text was cut, none where the passage reaches the text's
+    /// own start or end. The match itself is never cut.
     public static func excerpt(
         _ text: String, around match: Range<String.Index>,
         lead: Int = Passage.lead, tail: Int = Passage.tail
@@ -139,9 +144,10 @@ public enum TrashTextMatch {
             ?? text.startIndex
         var end = text.index(match.upperBound, offsetBy: max(tail, 0), limitedBy: text.endIndex)
             ?? text.endIndex
-        // A cut inside a word moves to that word's edge, away from the match —
-        // unless the side holds nothing but that one word, which is kept whole
-        // rather than leaving the side empty.
+        // A cut inside a word steps toward the match to the nearest whitespace,
+        // dropping the partial word. With no whitespace between the cut and the
+        // match (`gap` is nil) the cut stays where the limit put it: that word
+        // is kept cut mid-word, and the ellipsis marks the cut.
         if start > text.startIndex, start < match.lowerBound,
            !text[text.index(before: start)].isWhitespace, !text[start].isWhitespace,
            let gap = text[start..<match.lowerBound].firstIndex(where: \.isWhitespace)
