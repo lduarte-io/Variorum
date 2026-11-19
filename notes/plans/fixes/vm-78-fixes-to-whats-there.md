@@ -691,7 +691,87 @@ first run, so its first half is reading and writing the probes headless; window 
 
 #### BATCH C — LIVE STATUS
 
-*(the implementer fills this from its first commit)*
+**NOT DONE YET (first, as the contract asks):** no `xcodebuild test` has run for this batch, no simulator booted, no
+product line changed. Every red/green below is **PENDING** the stage window. **No revert is in flight.**
+
+*Implementer: `opus-implementer`, session of 2026-11-19. Half 1 = read, trace, instruments, a green `build-for-testing`
+(no stage); half 2 = the orchestrator's GO window.*
+
+| Member | State | Pin / instrument (TYPE name for `-only-testing`) |
+|---|---|---|
+| VM-24 (+ VM-19) | IN-PROGRESS — half 1: trace + hypotheses written; instruments next | PENDING |
+| VM-17 | IN-PROGRESS — half 1: probe next | PENDING |
+
+**Read in this session (myself):** CLAUDE.md + its loaded canon; MobileSoul §1–5; the resiliency protocol; the catch-up
+plan's inherited rules; sitting-1 rulings; this file's kickoff facts and batch C; TEXTKIT2_NOTES §3–4; the VM-8 record's
+caret-red passages (unit 1 LIVE STATUS, unit 2, L1 run D); VX-282's C-1 whole (merged-tip run → fix leg → decider →
+ruling → final window); the tickets VM-24, VM-19, VM-17 and the duplicates VM-34/36/37/38; audit C·E1/E11/T1 and D-73;
+the code on both roads (below).
+
+**The trace (VM-24) — the road the red test drives, and what is settled about it:**
+- The test (`MobileMarkdownCaretTests.swift:192-232`) hosts the surface (`host(_:)` — a window on the foreground scene,
+  leftovers resigned, `makeKeyAndVisible`, `becomeFirstResponder`), sets the caret to 7 in `*hello *` (the rescue
+  point, honoured), then calls UIKit's `replace(_:withText:)` over `hello` (1,5) and SYNCHRONOUSLY reads
+  `desyncRecoveryCount` — no run-loop turn between `host()` and the replace.
+- The road: UIKit's replace → the gate (`MobileEditorGateDelegate` → `shouldChangeText`, arms `ArmedEdit` for (1,5)) →
+  the storage edit → `MobileStorageObserver` → `storageDidEdit` binds the arming through `ArmedEdit.describes`
+  (`Shared/EditorBrain/EditorEditRouting.swift:140-155`: the report must START at or after the approved location) →
+  else `fallbackVerdict` over the report's `(location, length − delta)` → a report widened over the paragraph's
+  terminator (attribute fixing, TEXTKIT2 §3 iOS) crosses the separator → `.refuse` → `recoverFromUnroutableEdit` →
+  `desyncRecovery` (+1). The caret settle (`settleMarkdownCaret` → `MarkdownFace.settleCaret`,
+  `Shared/MarkdownFace/MarkdownFaceCore.swift:241-277`) runs from `textViewDidChangeSelection` and `textViewDidChange`;
+  its one guard is `storage.editedMask.isEmpty` (empty between `beginEditing` and a transaction's first change).
+- Settled by the record: deterministic for `"hi"` and `"hello there"` (the caret-MOVING replacements), never `"Hello"`
+  (same length, the caret stays put); red ALONE on branch and main (VM-34/37/38); one green whole-target run on
+  2026-10-25 (VM-8 L1); green on 2026-10-14 in C-1's K and final windows (the same host posture). **No product line on
+  this road changed between the Oct 14 green and the first red** — `git log 2d36b2b06..` over the text view, the view
+  model, `Shared/EditorBrain`, `Shared/MarkdownFace`, `MarkdownCaretRescue`: only VX-342's undo wording (Oct 14),
+  VX-806 (Nov 5), VX-683 B (Nov 8) — the last two after the red was already standing. The inert test host (VX-912 B1,
+  Nov 8) did not clear it (VX-915's gate, Nov 9, still red). So the change is environmental or posture, and the
+  mechanism is C-1's: in the polluted posture the settle's write desynced a replace and disappeared with the settle off
+  (C-1 decider D); a `pendingEdit` guard did NOT stop it (c1fix (a)) — so the in-transaction selection report can come
+  BEFORE the gate's consult.
+- Environment read (read-only, no boot): the Simulator app's `ConnectHardwareKeyboard` is 0 (its prefs file unchanged
+  since Aug 31); the device's own `com.apple.keyboard.preferences` reads `HardwareKeyboardLastSeen = true`, and the
+  device's keyboard plists last moved inside C-1's windows (Oct 14, 09:42) and tonight. C-1's logs named a "manual
+  keyboard"; whether a software keyboard presents during these runs is unrecorded — the posture snapshot records it.
+
+**Hypotheses, ranked — each with the one observation that confirms or kills it:**
+1. **H1 — the settle writes INSIDE the replace's storage transaction (the mechanism).** For a caret-moving replace,
+   UIKit reports the selection (`textViewDidChangeSelection`) from inside `coordinateEditing` before the character
+   change; `editedMask` is empty, so the settle's attribute write joins the transaction; the one report starts at the
+   line's first marker (0 < the approved 1), the arming is rejected, the widened fallback crosses the separator.
+   *Confirms:* the trace shows a selection callback during the replace with the mask empty before and non-empty after
+   with NO processEditing between (the write landed inside an open transaction), then one character report at location
+   0 carrying chars+attrs, E1 "arming rejected", desync +1; and the decider (the in-replace settle HELD, replayed after)
+   is green. *Kills:* no in-transaction write (the mask after the callback is empty, or a separate attribute-only
+   report fired), or the character report starts at 1.
+2. **H2 — the posture is not the one the test means (decides test-posture vs product).** When the replace runs, the
+   test's window is not key, or the scene is not foreground-active, or the text view is not first responder of the key
+   window (the keyfix posture not reached on this toolchain: `makeKeyAndVisible`'s promotion is deferred and the test
+   never yields). *Confirms:* the posture snapshot right before the replace shows `key=false` or `fr=false` or an
+   inactive scene; and the same replace after waiting (bounded) until the window is key, the view first responder and
+   the keyboard settled is green. *Kills:* key + first responder + active scene at the replace, and the waited variant
+   still red ⇒ H1 is a PRODUCT mechanism in a real posture (editor seam — stop and report before any fix).
+3. **H3 — the keyboard's state (software vs hardware) changes UIKit's ordering.** *Confirms:* red runs show a software
+   keyboard presenting (keyboard notifications after `becomeFirstResponder`, no `GCKeyboard`) while a green posture
+   shows none, or the reverse. *Kills:* the same keyboard state in red and green variants.
+4. **H4 — the gate is consulted more than once, or for another range, on this road** (the M1 class). *Confirms:* E1
+   shows >1 consult before the report or a consult ≠ (1,5). *Kills:* exactly one consult (1,5) armed, then one report.
+
+**VM-19 (carried):** the ticket owes (a) `MobileLivenessTests` resigning what it raises, and (b) the gate's unrouted
+road traced in a non-key posture. Its own reproduction is an instrument below (a stale first responder left exactly as
+`arrivalRaisesFocusBeforeTheObservationLoops` leaves one, then an `insertText` of a run — C-1's `leaving…` shape —
+in two victim postures, with and without the polluter).
+
+**VM-17 — the read:** the badge's y comes from `firstLineGeometry(atOffset:)`
+(`MobileEditorTextView.swift:603-619`), which forces `.ensuresLayout` FROM the block's own offset; the `.document` pass
+(load, flips, voice) does that for every fanned block (`MobileTakesChrome.swift:195-224`). So VX-230's mechanism — an
+unlaid fragment's `.zero` frame — cannot arise (the frame is laid out), and a pile at block 1 is unlikely as the audit
+says. But TEXTKIT2 §3's VX-246 finding (macOS 27) is exactly this shape: a mid-document `.ensuresLayout` places fragments
+at ESTIMATED offsets until a viewport pass re-positions them. So the probe separates three readings: a pile (two badges
+coincide, or any badge at block 1), an off-screen badge off its own block (against an independent clean TK2 stack laid
+out whole from the start), and a visible badge off its block once scrolled to.
 
 ## The ladder
 
