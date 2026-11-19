@@ -515,8 +515,10 @@ final class MCPSession: @unchecked Sendable {
         if holding { lock.withLock { self.held = held } }
         // VX-951: the transport reports the `initialize` answer once it is
         // written — the gate's first half.
+        // VX-952: and whatever the opening's reader read past that frame — the
+        // stream's next bytes, handed on before the transport's first read.
         let transport = MCPSocketTransport(
-            fd: fd, replay: [opening.firstFrame],
+            fd: fd, replay: [opening.firstFrame], leftover: opening.leftover,
             onOpeningAnswered: { [weak self] in self?.hear(.initializeAnswered) })
         lock.withLock { self.transport = transport }
         // VX-951: the client's `initialized` — the gate's second half (the SDK

@@ -122,10 +122,13 @@ public enum MCPShim {
     /// its notifications skipped, bounded), then answer the frame that ends
     /// it — the `initialize` — with the refusal. A connection that ends or
     /// overruns the line limit first hears the refusal on `id: null` (the
-    /// pre-VX-181 shim's answer to an unreadable first line).
+    /// pre-VX-181 shim's answer to an unreadable first line). VX-952: read in
+    /// chunks; what the reader read past the frame is dropped — the shim
+    /// answers and exits, and nothing reads the client's input after it.
     static func respondToFirstRequest(input: Int32, output: Int32, message: String) {
+        var reader = MCPOpeningWindow.Reader(input)
         let frame: Data
-        switch MCPOpeningWindow.read(from: input, answeringOn: output) {
+        switch MCPOpeningWindow.read(from: &reader, answeringOn: output) {
         case .frame(let opening): frame = opening
         case .ended, .overLimit: frame = Data()
         }

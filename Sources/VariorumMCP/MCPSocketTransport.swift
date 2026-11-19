@@ -15,7 +15,10 @@ import VariorumMCPSocket
 ///
 /// VX-168: the session's handshake has already read the connection's opening
 /// (the preamble and the first frame — `MCPHandshake`); that frame is REPLAYED
-/// as the stream's first line, so the SDK reads the connection whole.
+/// as the stream's first line, so the SDK reads the connection whole. VX-952:
+/// the handshake reads in chunks, so it may have read PAST that frame — those
+/// bytes (`leftover`) are split into lines before the first `read`, exactly as
+/// if a read had returned them, and nothing a client pipelined is lost.
 ///
 /// **VX-933 (the VX-940 run, W4): no write ever WAITS on the cooperative
 /// pool.** A blocking write returns only once the client has read enough; on
@@ -49,6 +52,9 @@ actor MCPSocketTransport: Transport {
     private let continuation: AsyncThrowingStream<Data, Swift.Error>.Continuation
     /// Lines read before the transport existed, yielded first (VX-168).
     private let replay: [Data]
+    /// VX-952: bytes the opening's reader read past the replayed frame — the
+    /// stream's next bytes, read as a first `read` would have returned them.
+    private let leftover: Data
     /// VX-394 (VX-348 U5): the read ended on a message past the cap (answered,
     /// then closed) — the session's end line says so.
     private(set) var endedOverLimit = false
@@ -101,9 +107,10 @@ actor MCPSocketTransport: Transport {
     func setMidFrameProbeForTesting(_ probe: (@Sendable () -> Void)?) { midFrameProbe = probe }
     #endif
 
-    init(fd: Int32, replay: [Data] = [], onOpeningAnswered: (@Sendable () -> Void)? = nil) {
+    init(fd: Int32, replay: [Data] = [], leftover: Data = Data(), onOpeningAnswered: (@Sendable () -> Void)? = nil) {
         self.fd = fd
         self.replay = replay
+        self.leftover = leftover
         self.step = Self.writeStep(fd)
         // VX-951: an opening with no id the SDK could echo is one the SDK never
         // answers as a request either — nothing to report.
@@ -121,9 +128,10 @@ actor MCPSocketTransport: Transport {
         isConnected = true
         let fd = self.fd
         let continuation = self.continuation
+        let leftover = self.leftover
         for line in replay { continuation.yield(line) }
         let reader = Thread { [self] in
-            let end = MCPSocketTransport.readLines(fd: fd, cap: MCPSocketTransport.lineCap) { line in
+            let end = MCPSocketTransport.readLines(fd: fd, cap: MCPSocketTransport.lineCap, initial: leftover) { line in
                 continuation.yield(line)
             }
             if end == .overLimit {
@@ -347,25 +355,34 @@ actor MCPSocketTransport: Transport {
     /// and only the NEW bytes of each read are scanned for a newline, so the
     /// cost is linear in the stream (pre-fix every read re-scanned the whole
     /// pending line: a 16 MiB message arriving ~8 KiB at a time was ~16 GB of
-    /// comparisons — never served in practice).
+    /// comparisons — never served in practice). VX-952: `initial` — the
+    /// opening's leftover — is taken first, exactly as one read's bytes (the
+    /// same split, the same cap, counted from the stream's first byte after
+    /// the replayed frame).
     @discardableResult
-    static func readLines(fd: Int32, cap: Int, yield: (Data) -> Void) -> ReadEnd {
+    static func readLines(fd: Int32, cap: Int, initial: Data = Data(), yield: (Data) -> Void) -> ReadEnd {
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
         var pending = Data()
-        while true {
-            let count = buffer.withUnsafeMutableBytes { read(fd, $0.baseAddress, $0.count) }
-            if count < 0, errno == EINTR { continue }
-            guard count > 0 else { return .closed }
-            var start = 0
-            while let newline = buffer[start..<count].firstIndex(of: UInt8(ascii: "\n")) {
-                guard pending.count + (newline - start) <= cap else { return .overLimit }
-                pending.append(contentsOf: buffer[start..<newline])
+        /// One read's bytes: every complete line yielded, the rest pending;
+        /// false once a line is past the cap.
+        func take(_ bytes: ArraySlice<UInt8>) -> Bool {
+            var start = bytes.startIndex
+            while let newline = bytes[start...].firstIndex(of: UInt8(ascii: "\n")) {
+                guard pending.count + (newline - start) <= cap else { return false }
+                pending.append(contentsOf: bytes[start..<newline])
                 if !pending.isEmpty { yield(pending) }
                 pending = Data()
                 start = newline + 1
             }
-            pending.append(contentsOf: buffer[start..<count])
-            if pending.count > cap { return .overLimit }
+            pending.append(contentsOf: bytes[start...])
+            return pending.count <= cap
+        }
+        if !initial.isEmpty, !take(ArraySlice(initial)) { return .overLimit }
+        while true {
+            let count = buffer.withUnsafeMutableBytes { read(fd, $0.baseAddress, $0.count) }
+            if count < 0, errno == EINTR { continue }
+            guard count > 0 else { return .closed }
+            guard take(buffer[0..<count]) else { return .overLimit }
         }
     }
 

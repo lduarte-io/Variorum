@@ -818,7 +818,8 @@ public final class MCPServerHost: @unchecked Sendable {
     /// window's answers, before each next read), so the cap's sentence lands
     /// on the client's `initialize` — the request it reports — never on a
     /// probe. The window is bounded (`MCPHandshake.preInitializeLimit`) and
-    /// every read in it still runs under the receive timeout.
+    /// every read in it still runs under the receive timeout. VX-952: read in
+    /// chunks; what it read past the frame is dropped with the connection.
     private func refuseOverCap(_ fd: Int32) {
         let thread = Thread {
             var timeout = timeval(tv_sec: 2, tv_usec: 0)
