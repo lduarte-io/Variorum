@@ -29,9 +29,20 @@
 //  RED ON OLD: two elements say it (the sync row's door and the standing row) — run in a detached snapshot with
 //  `MobileSettingsView.swift` from the pre-fix tree (the run record §4, row 5.1).
 //
+//  THE DATABASE THE ROUND READS (the VM-47 fix pass, row R1.3): the chain this pin composes reads `\.database` through
+//  the AMBIENT dependency — `SyncEngine`'s `@Dependency` (captured where `SyncSession.configure` builds it, merged with
+//  the scope its round runs in: `SyncScheduler.trigger`'s Task, which inherits the trigger's task-locals). The app
+//  installs the open library as that ambient value (`AppDatabase.install`), but a TEST bootstrap deliberately never does
+//  (`AppBootstrap.isTestBootstrap`), and the first harness bound nothing: the round's `outboxCount()` read fell through to
+//  the live default, which OPENS the test host's own store (the run record §6, "The pin's unscoped round"). So the chain
+//  now runs inside a scope binding THIS library's database, the outer scope binds a throwaway in-memory FENCE so no read
+//  can reach the live default even if it escapes the inner one, and the pin proves the round counted this library's
+//  outbox (a note planted first), which the fence's or any other store's count cannot equal.
+//
 
 import Dependencies
 import Foundation
+import GRDB
 import SwiftUI
 import Testing
 import VariorumCore
@@ -59,7 +70,10 @@ struct MobileSettingsProtectionDoorTests {
     /// false (not joined: the not-yet face). Both are the doored paused states her report names.
     @Test(arguments: [nil, false] as [Bool?])
     func aDooredSyncRowLeavesExactlyOneProtectionDoor(joined: Bool?) async throws {
-        await withDependencies {
+        // The fence: an escaped ambient read meets this throwaway store, never the live default (see the header).
+        let fence = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = fence
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.uuid = .incrementing
         } operation: { @MainActor in
@@ -78,36 +92,55 @@ struct MobileSettingsProtectionDoorTests {
             }
             #expect(bootstrap.roadStanding?.account != nil, "precondition: the account section stands (the gate's third fact)")
 
-            let auth = AuthSession(
-                configuration: AuthConfiguration(projectURL: URL(string: "https://vm27.invalid")!, apiKey: "k"),
-                store: .inMemory(), http: { _ in throw AuthSessionError.malformedResponse("no network") })
-            let services = AppServices(
-                session: session, storeVariant: .real, backupEnabled: false, auth: auth,
-                makeSyncKeyProvider: { UnenrolledKeyProvider() }, networkPath: nil, legacyCleanup: {})
-            defer { services.stop() }
-            await services.sync.configure(transport: UnreachedTransport(), keyProvider: UnenrolledKeyProvider())
-            services.sync.triggerSync()
-            for _ in 0..<400 where services.sync.status.lastError == nil {
-                try? await Task.sleep(for: .milliseconds(10))
-            }
-            #expect(services.sync.status.lastError == Self.keysLocked,
-                    "precondition: the round refused for keys — the doored paused state")
+            // The chain runs against THIS library's database: the engine `configure` builds captures it, and the
+            // round's Task inherits it from the trigger (see the header).
+            let library = session.database
+            try await withDependencies {
+                $0.database = library
+            } operation: { @MainActor in
+                // The guard's fixture: a note in this library, so its outbox holds rows no other store's does.
+                try session.operations.createPost(title: "VM-27's guard note")
+                let planted = try await library.read { try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0 }
+                #expect(planted > 0, "fixture: the library's outbox holds the planted note's rows")
 
-            let opened = LockIsolated(0)
-            let settings = MobileSettingsView(
-                session: session, router: MobileShellRouter(), services: services,
-                bootstrap: bootstrap, onOpenProtection: { opened.withValue { $0 += 1 } })
-                .environment(\.librarySyncsWithAnAccount, joined)
-            await withHostedSurface(settings) { surface in
-                await surface.settle(30)
-                let labels = surface.visibleLabels
-                let line = joined == false ? SyncStatusRow.notOnYetLabel : SyncStatusRow.lockedLabel
-                #expect(labels.contains(line), "the row stands in its doored paused state — labels were \(labels)")
-                let doors = labels.filter { $0 == SyncRowFace.openProtectionLabel }
-                #expect(doors.count == 1,
-                        "ONE Protection… door on the sheet, never the sync row's beside the standing row — labels were \(labels)")
-                #expect(surface.activate(SyncRowFace.openProtectionLabel), "the one door is a real control")
-                #expect(opened.value == 1, "and it opens the Protection screen")
+                let auth = AuthSession(
+                    configuration: AuthConfiguration(projectURL: URL(string: "https://vm27.invalid")!, apiKey: "k"),
+                    store: .inMemory(), http: { _ in throw AuthSessionError.malformedResponse("no network") })
+                let services = AppServices(
+                    session: session, storeVariant: .real, backupEnabled: false, auth: auth,
+                    makeSyncKeyProvider: { UnenrolledKeyProvider() }, networkPath: nil, legacyCleanup: {})
+                defer { services.stop() }
+                await services.sync.configure(transport: UnreachedTransport(), keyProvider: UnenrolledKeyProvider())
+                services.sync.triggerSync()
+                for _ in 0..<400 where services.sync.status.lastError == nil {
+                    try? await Task.sleep(for: .milliseconds(10))
+                }
+                #expect(services.sync.status.lastError == Self.keysLocked,
+                        "precondition: the round refused for keys — the doored paused state")
+                // THE GUARD: the round's own read (`SyncScheduler.runOneRound`'s `outboxCount()`, published with the
+                // refusal) counted THIS library's outbox — never the fence's, never the live default's (a fresh store
+                // holds none of the planted note's rows, so its count cannot equal this one).
+                let counted = try await library.read { try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0 }
+                #expect(counted >= planted, "nothing took the planted rows out of the outbox (\(planted) → \(counted))")
+                #expect(services.sync.status.pendingPushCount == counted,
+                        "the round read the library's own database (\(counted) outbox rows), not another store's — it read \(services.sync.status.pendingPushCount)")
+
+                let opened = LockIsolated(0)
+                let settings = MobileSettingsView(
+                    session: session, router: MobileShellRouter(), services: services,
+                    bootstrap: bootstrap, onOpenProtection: { opened.withValue { $0 += 1 } })
+                    .environment(\.librarySyncsWithAnAccount, joined)
+                await withHostedSurface(settings) { surface in
+                    await surface.settle(30)
+                    let labels = surface.visibleLabels
+                    let line = joined == false ? SyncStatusRow.notOnYetLabel : SyncStatusRow.lockedLabel
+                    #expect(labels.contains(line), "the row stands in its doored paused state — labels were \(labels)")
+                    let doors = labels.filter { $0 == SyncRowFace.openProtectionLabel }
+                    #expect(doors.count == 1,
+                            "ONE Protection… door on the sheet, never the sync row's beside the standing row — labels were \(labels)")
+                    #expect(surface.activate(SyncRowFace.openProtectionLabel), "the one door is a real control")
+                    #expect(opened.value == 1, "and it opens the Protection screen")
+                }
             }
         }
     }
