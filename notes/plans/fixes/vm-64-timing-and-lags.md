@@ -262,7 +262,7 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 | P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | DONE (this commit) — phone `build-for-testing` green into `DerivedData/vm64-b2/`, no new warning in a touched file; behaviour PENDING the stage window |
 | P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | DONE (this commit) — `MobileStructuralFlightFenceTests` (10), BUILT; green run and red-on-old run PENDING the stage window |
 | P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | DONE — all three `** TEST BUILD SUCCEEDED **` at `f83122794` (the red one over the base's three phone files, cold), no new warning in a touched file |
-| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | FIRST WINDOW RAN — NOT GREEN (traps; the orchestrator's block). r1 READY — `vm64-b2r1` + `vm64-b2r1-red` built; commands in §7 batch 2 ▸ "Iteration r1" |
+| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | Window 1 NOT GREEN · r1 cycle clean alone · the 49 run red on four state-dependent pins. TRACED (§7 batch 2 ▸ "Iteration r1 → r2"): the typed-key pins drove a consult-less road her keyboard never takes; r2 PROPOSED (a removal + keyboard-road pins), NOT built — awaiting the orchestrator's word |
 | P6 — closeout in §7 | DONE (this commit) — its PENDING lines flip after P5 |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
@@ -919,6 +919,131 @@ xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMob
 Then `grep VM2-PROBE` over each log. Products: `vm64-b2r1` built at `05ca99e0d` (the fix + r1's tests);
 `vm64-b2r1-red` = r1's tests over the base's three phone production files (cold; restored after, tree clean). The first
 window's `vm64-b2`, `vm64-b2-red` are superseded (the orchestrator deletes them).
+
+#### Iteration r1 → r2 — the trace the orchestrator asked for (2026-11-19, after the r1 cycle and the 49-type run)
+
+Evidence read for this section (all local, gitignored): `notes/plans/vm64-screens/b2r1-fix.log` and `b2r1-red.log` (the
+r1 cycle: the fence suite + the diagnostic, one host each) and `b2r1-49.log` (the 49 types from `vm64-b2r1`, one host,
+where the fence suite ran AFTER 34 other suites — the block menu, the editor and routing suites, VM-8 unit 2, liveness,
+the caret suite, the markdown suites, savepoint on leaving, the space-eater — and four fence pins went red with a
+recorded desync); her device's E1 readout (`notes/author-reports/2026-08-23-device-walk-and-product-asks.md`).
+
+**The one fact that decides it: a programmatic `UITextView.insertText(_:)` NEVER consults the editor's gate.** Every
+`VM2-PROBE` summary line, p1–p7, both builds, both postures — including p2, p5, p7 with `firstResponder=true` in the
+foreground scene's key window — reads `consults=0 … gateless=1`, and the one event is `EDIT at 12 len 1 Δ+1 after 0
+gates ⚠ gate-less`. So the probes did NOT measure the road I meant them to; neither did any typed-key road in these pins
+(`textView.insertText` / `textView.deleteBackward` — M25 had measured the last two; `insertText` is the third). Every
+UIKit insert in the pins took the GATE-LESS road: no arming, routed by `fallbackVerdict` from the storage report alone.
+Her keyboard is different — her device trace shows a consult before every typed key (`#10 GATE at 129 len 0 repl 1 →
+armed` · `#11 EDIT at 129 len 1 Δ+1 after 4 gates`; autocorrect too: `#28 GATE at 134 len 5 repl 5 → armed`). Since the
+public `insertText` does not consult even as first responder, the keyboard consults through its own entry BEFORE it
+calls `insertText`, and inserts only on a yes.
+
+**1 · Why the guard desyncs on the old code in the key-window posture while probe p5 does not.** Both are gate-less
+programmatic inserts at the minted block's start, routed by the report alone; a gate-less report routes only if it stays
+inside one entry. At a non-last block's start, a report widened forward through the paragraph's terminator crosses the
+separator and refuses (TEXTKIT2 §3's iOS fixing; the same shape as M12). The concrete difference between the two tests'
+states at the insert: **p5 reads the text view's selection (`view.selectedRange`) between the door's return and the
+insert; the old-code guard reads nothing.** Nothing else differs on the road — the door left no deferred projection, no
+forced render and no arming in either (the door's own settle applied; no gate was consulted to arm). The fix build's
+guard passed in the r1 cycle for the matching reason: `MobileEditorTextView.insertText` reads `textView.markedTextRange`
+(inside `deferTypedInputDuringFlight`) before `super.insertText`. What such a read synchronises inside UIKit (the
+selection and typing state after a whole-storage replacement plus a programmatic caret write) is INFERRED, not observed;
+what is measured is that the report's width — and so whether a gate-less insert routes — depends on that state. The
+49-type run proves it is state left in the host process: the same four pins, green with only the probe suite beside
+them, went red after 34 earlier suites (`b2r1-49.log`: the divide pin's three recorded assertions are its replayed X, Y
+and ⌫ each refusing). Which suite's leftover flips it is NOT isolated — and r2 does not need it isolated, because r2
+leaves no gate-less insert anywhere a separator can be crossed (below).
+
+**2 · Why the fix build "no longer desyncs" in the guard, and what the old code does to HER.** The r1 claim is FALSE as
+stated: no line of the fence's landing or settle makes the page hold anything the old code's page did not — the door's
+own settle had already applied on both trees. The fix build's guard routed in the r1 cycle only because of the
+incidental `markedTextRange` read, and it failed in the 49 run. **What the old code does to her: nothing on this road.**
+Her keys are consulted first, the arming binds (`ArmedEdit.describes` takes a report that starts at the approved
+location however far it widens forward — and her device reports a typed key as `len 1` anyway), and the key routes. The
+desync needs a CONSULT-LESS programmatic insert right after a structural render, which no production road performs on
+the pre-fix tree (the bar's acts, Tab and the ⏎ door all pre-gate through `MobileMarkdownActs.gateAllows`). **So this is
+not a second product defect the fence fixes, and the guard is not a red-on-old product pin** — it measured the test road.
+Round 2's M27 ("the first typed edit after a divide is unroutable") is very probably this same test-road phenomenon (its
+record carries the symptom only; round 2's pins typed through programmatic `insertText`). VM-5's "DISSOLVED" was measured
+on a CONSULTED road (`typeEdit`), where it cannot occur — so for her keyboard road it stands; its wider wording ("no road
+through the shared brain reproduces the symptom") is contradicted for the consult-less road (the r1 red build's guard).
+
+**3 · The first window's six traps, restated honestly** (the six stacks stay quoted in §5):
+- `aGatelessEditDuringADivideIsWithheld…` (both trees) — the PROBE's write (a font-only insert at a non-last block's
+  end; M12's shape). r1's fix (one block) holds: green on the fix, red by assertion on the old code, in both r1 runs.
+- `afterTheFlightLandsTypingIsOrdinaryAgain` (both trees) — the consult-less TEST road (programmatic `insertText` right
+  after a divide's render), width-dependent; not a product defect on her road (2 above).
+- `keysTypedWhileADivideLands…`, `aKeyTypedWhileAnExtractLands…`, `aKeyTypedWhileMakeBlockLands…` (fix build) — the
+  FENCE's replay, which is a consult-less programmatic `insertText` at the landed caret: unpoliced (the gate's belts never
+  see a replayed key) and width-dependent (state-dependent: red unmounted in window 1, green keyed alone at 06:32, red
+  keyed after 34 suites at 06:57). A real weakness of r1's replay — but one her keyboard can never reach, because on her
+  phone the stash never holds a key (below).
+- "Posture" was NOT the cure (r1's §5 hypothesis is falsified): keyed, the same pins went red in company.
+
+**What this means for the fence's design (the correction that matters most).** On her phone, a key typed during a
+flight is consulted by the keyboard BEFORE `insertText`; r1's gate belt refuses it; the keyboard therefore never calls
+`insertText`; the override's stash never sees it. **r1 on her phone is already refuse-and-say for every typed key** — the
+"typed keys deferred and replayed, never dropped" claim (P-2-1 (a), the closeout's input table) is FALSE for her
+keyboard: it held only for consult-less programmatic inserts, which only the tests make. Deferral cannot be moved to the
+gate honestly: a consult does not promise an edit (her own trace shows consults with none following — "most gate calls
+before one edit: 4"; round 2's crash trace lists speculative consults as unknown), so stashing at the gate risks
+replaying text she never typed. The batch section's named minimum — refuse and say — is what the phone can honestly do.
+
+**4 · The corrected red-on-old table (r1's red build, one host, no trap):** NINE red — the eight predicted plus the
+guard. Dispositions as r1 stands: the eight are red-on-old pins of the stale write per door (divide ×3 roads, merge ×2,
+extract, make block) and of insert-below's landing change; **the guard's red is the test road, not a product red** (its
+"green on both" claim fails because its typed key is consult-less); `insertBelowTwin…` green on both (HOLLOW, as
+recorded).
+
+**5 · `MobileFlightFenceProbeTests`:** to be DELETED in r2. What it established — `insertText` called programmatically
+never consults the gate, in either posture — is a platform fact for TEXTKIT2 §3 beside M25 (routed at closeout), and r2's
+pins no longer depend on it; nothing in it is red on old where the old code is wrong, so there is no pin to keep.
+
+**PROPOSED r2 — NOT BUILT; the orchestrator asked to be told before any product change.** No file changed in this pass
+but this record, so `vm64-b2r1` is the last product — and it should NOT be the final run's product: its four replay /
+guard pins are state-dependent, as the 49 run showed.
+- **Product (editor seam), a REMOVAL:** take out the input stash and the replay — the `insertText` fence check and the
+  `deleteBackward` override in `MobileEditorTextView` (with `replayDeferredDeleteBackward`), the model's
+  `deferTypedInputDuringFlight` and the drain's replay loop; the brain loses `Input`, `offer`, `deferred` and
+  `Drain.replay` (its headless tests rewritten). KEPT unchanged: the gate belt (refuse, said once as the fence drops), the
+  storage belt (withhold a gate-less block edit, force the re-read), the settle (the fence stays up until the page holds
+  the store), the `flushPendingText` re-read. On her phone this changes nothing (keys were already refused at the gate);
+  it removes a mechanism that only tests could reach and whose pins were pins over nothing reachable. No red-on-r1 pin
+  exists for a removal of an unreachable road — said, not hidden.
+- **Insert below (P-2-5, re-weighed under refuse-and-say):** (a) keep it fenced like every door (keys typed during its
+  flight refused and said); (b) EXEMPT it — its row is hollow (`newBlock` rewrites no text; the window's key records the
+  block's current text, never stale), so refusing there drops her key for no data reason; one line in that door tells the
+  latch not to raise the fence. Recommended: (b). Hers at the merge either way.
+- **Pins:** every typed-key pin drives HER road — the text view's delegate consult, then the insert only on a yes (M25's
+  prescription; on the old code the consult arms and the insert binds, so the old code's stale write reproduces
+  deterministically; on the fix the consult refuses and nothing lands) — for divide (X, Y, ⌫), merge, extract and make
+  block; road B and both road-C pins as they are; the insert-below twin on the keyboard road (and, under (b), a guard
+  that the key lands in the block it was typed in, green on both); the guard `afterTheFlightLands…` on the keyboard road
+  (green on both — a true guard that the fence is down after a landing); the probe suite deleted. No gate-less insert is
+  left in any pin except road C's, which lands in the last block where no separator can be crossed — so every pin is
+  deterministic by construction, whatever an earlier suite leaves in the host.
+- **Builds:** `DerivedData/vm64-b2r2/` (the fix) and `vm64-b2r2-red/` (r2's pins over the base's three phone files),
+  fresh, frozen; the revert announced first. Expected on the red build: the per-door pins red by assertion (divide ×3,
+  merge ×2, extract, make block), the twin, the guard and (under (b)) the insert-below guard green. Expected on the fix:
+  all green, alone and in company — the cycle to prove "in company" is the fence suite run AFTER the caret, liveness and
+  markdown suites from `vm64-b2r2` (the 49-type list does that).
+- **If the orchestrator prefers moving the replay instead of removing it** (pre-gating each replayed key through
+  `inputReplace`, which makes it policed and binding-deterministic): that is buildable too, but it keeps a mechanism her
+  keyboard never reaches; I would not recommend it.
+
+**For the orchestrator (findings, not edits to other records):**
+1. **M27 / the VM-5 record:** the symptom ("the first key after a divide unroutable") reproduces on the pre-fix tree on
+   the CONSULT-LESS programmatic `insertText` road (the r1 red build's guard, keyed posture); it does not reach her
+   keyboard road, which is consulted and binds. VM-5's DISSOLVED verdict holds for the road she types on; its claim that
+   no road reproduces the symptom does not. Not a product defect to fix — a test-road trap for any pin that types through
+   programmatic `insertText` after a render.
+2. **TEXTKIT2 §3, beside M25 (at closeout):** `UITextView.insertText(_:)` called programmatically never consults the
+   delegate — measured on iOS 26.2 (simulator), in no window and as the key window's first responder alike — and its
+   report's width after a whole-storage replacement depends on process state; a pin that types through it routes by
+   `fallbackVerdict` alone.
+3. **The fence's real shape on her phone is refuse-and-say** (P-2-1 (b)); the closeout's P-2-1 and input table above it
+   are corrected by this section and stay as written above it.
 
 ### Batch 3 · VM-66 — the speed tests run her paths (implementer closeout)
 
