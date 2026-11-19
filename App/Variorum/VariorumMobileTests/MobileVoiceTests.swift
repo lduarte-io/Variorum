@@ -90,26 +90,31 @@ struct MobileVoiceTests {
 
     /// The switched style flows into every surface-write value: fonts,
     /// ink, palette, and the paragraph gap + line air all follow the
-    /// live voice. The gap pins the PHONE's A3 spacing-floor constants
-    /// (the LK canon's `.block` 14 px = 1.0 × pointSize, and the ~1.6
-    /// prose line-height via 0.4 × lineSpacing) — the sanctioned flip of
-    /// the earlier Mac-constant 0.5 × pin (the Mac keeps its own).
+    /// live voice. **VM-48 moved these pins to the sizing sheet's note
+    /// body** — Study Iowan 17 on a 27 pt line with a 14 pt paragraph gap,
+    /// Terminal SF Mono 15 on 25 with 12 (two under) — measured at the
+    /// default text size, where `UIFontMetrics` is the identity. (They
+    /// held the A3 spacing floor before: gap 1.0 × and line 0.4 × the
+    /// point size, at 14 / 16.)
     @Test func surfaceWriteValuesFollowTheLiveVoice() {
         MobileEditorStyle.voice = .terminal
         defer { MobileEditorStyle.voice = .terminal }
         let terminalFont = MobileEditorStyle.baseFont
         let terminalStyle = MobileEditorStyle.baseParagraphStyle
-        #expect(terminalStyle.paragraphSpacing == terminalFont.pointSize.rounded())
-        #expect(terminalStyle.lineSpacing == (terminalFont.pointSize * 0.4).rounded())
+        #expect(terminalFont.pointSize == 15)
+        #expect(terminalStyle.paragraphSpacing == 12)
+        #expect(abs(terminalFont.lineHeight + terminalStyle.lineSpacing - 25) <= 0.5,
+                "terminal pitch \(terminalFont.lineHeight + terminalStyle.lineSpacing)")
 
         MobileEditorStyle.voice = .study
         #expect(MobileEditorStyle.baseFont.familyName == "Iowan Old Style")
+        #expect(MobileEditorStyle.baseFont.pointSize == 17)
         #expect(MobileEditorStyle.markdownPalette
                 == MobileEditorStyle.studyFace.palette)
-        #expect(MobileEditorStyle.baseParagraphStyle.paragraphSpacing
-                == MobileEditorStyle.baseFont.pointSize.rounded())
-        #expect(MobileEditorStyle.baseParagraphStyle.lineSpacing
-                == (MobileEditorStyle.baseFont.pointSize * 0.4).rounded())
+        #expect(MobileEditorStyle.baseParagraphStyle.paragraphSpacing == 14)
+        let studyPitch = MobileEditorStyle.baseFont.lineHeight
+            + MobileEditorStyle.baseParagraphStyle.lineSpacing
+        #expect(abs(studyPitch - 27) <= 0.5, "study pitch \(studyPitch)")
         #expect(MobileEditorStyle.baseFont != terminalFont)
     }
 }

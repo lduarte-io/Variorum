@@ -22,8 +22,8 @@
 //  SAME color/font objects (attribute equality in tests, zero rebuild
 //  cost per keystroke).
 //
-//  Typography values are the token layer's own (terminal mono 14 / study
-//  Iowan Old Style 16 — the Mac `EditorTypography.resolve` numbers),
+//  Typography values are the phone layer's `noteBody` role (VM-48: study
+//  Iowan Old Style 17 / terminal mono 15 — the sizing sheet's note body),
 //  wrapped in `UIFontMetrics(.body)` so Dynamic Type scales them
 //  (identity at the default content size, so byte/attribute tests stay
 //  deterministic). PROVISIONAL sizes like everything visual: the mockup's
@@ -108,23 +108,28 @@ nonisolated enum MobileEditorStyle {
                 }
             }
             let metrics = UIFontMetrics(forTextStyle: .body)
+            // VM-48: the note body is the phone layer's `noteBody` role —
+            // Study Iowan 17, Terminal SF Mono 15 (two under) — still
+            // through `UIFontMetrics(.body)`, so it scales across the whole
+            // range and is exact at the default size.
+            let size = PhoneType.spec(.noteBody, voice: voice).size
             switch voice {
             case .terminal:
                 body = metrics.scaledFont(
-                    for: .monospacedSystemFont(ofSize: 14, weight: .regular))
+                    for: .monospacedSystemFont(ofSize: size, weight: .regular))
                 chrome = .monospacedSystemFont(ofSize: 14, weight: .regular)
             case .study:
                 // Iowan Old Style ships on iOS (pinned by
                 // `MobileVoiceTests`); the serif system design is the
                 // never-reached safety net — the Mac resolver's exact
                 // posture (R49: nothing bundled).
-                let serif = UIFont(name: "IowanOldStyle-Roman", size: 16)
-                    ?? UIFont(name: "Iowan Old Style", size: 16)
+                let serif = UIFont(name: "IowanOldStyle-Roman", size: size)
+                    ?? UIFont(name: "Iowan Old Style", size: size)
                     ?? UIFont(
-                        descriptor: UIFont.systemFont(ofSize: 16).fontDescriptor
+                        descriptor: UIFont.systemFont(ofSize: size).fontDescriptor
                             .withDesign(.serif)
-                            ?? UIFont.systemFont(ofSize: 16).fontDescriptor,
-                        size: 16)
+                            ?? UIFont.systemFont(ofSize: size).fontDescriptor,
+                        size: size)
                 body = metrics.scaledFont(for: serif)
                 chrome = .systemFont(ofSize: 14)
             }
@@ -192,21 +197,28 @@ nonisolated enum MobileEditorStyle {
 
     static var markdownPalette: MarkdownFace.Palette { face.palette }
 
+    /// The note body's paragraph gap at the default text size — the sizing
+    /// sheet's 14 for Study, and Terminal's two under (VM-48).
+    static func paragraphGap(_ voice: ThemeVoice) -> CGFloat {
+        voice == .study ? 14 : 12
+    }
+
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
+        let note = PhoneType.spec(.noteBody, voice: voice)
+        // The body's scale against its default size (1 at Large), so the
+        // gap and the line pitch grow with Dynamic Type as the body does.
+        let scale = baseFont.pointSize / note.size
         // Uniform per-PARAGRAPH gap (the 2026-07-12 rule's letter —
         // intra-block newlines and seams alike, boundaries invisible at
-        // rest). PHONE VALUE since the parity A3 spacing floor: the LK
-        // canon's own block gap (mockup `.block margin-bottom:14px` =
-        // 1.0 × the terminal point size; her finding "the spacing needs
-        // to be fixed" — more air generally). The Mac keeps its
-        // EditorTypography 0.5 × constant — this file is the phone's
-        // look half, deliberately phone-local.
-        style.paragraphSpacing = baseFont.pointSize.rounded()
-        // Line air to the canon's prose line-height (~1.62 terminal /
-        // ~1.6 study — one 0.4 × rule lands both voices' numbers over
-        // the fonts' natural boxes).
-        style.lineSpacing = (baseFont.pointSize * 0.4).rounded()
+        // rest). PHONE VALUE: the sizing sheet's note body (VM-48 — "Iowan
+        // 17 · line 27 · gutter 20 · paragraph gap 14"; Terminal two
+        // under). The Mac keeps its EditorTypography 0.5 × constant — this
+        // file is the phone's look half, deliberately phone-local.
+        style.paragraphSpacing = (paragraphGap(voice) * scale).rounded()
+        // Line air to the role's line pitch (Study 27, Terminal 25) over the
+        // font's own line box.
+        style.lineSpacing = max(0, (note.lineHeight * scale - baseFont.lineHeight).rounded())
         return style
     }
 
