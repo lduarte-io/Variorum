@@ -164,8 +164,10 @@ struct MCPNavigationTests {
             MCPNavigator.mountWait = .milliseconds(40)
             defer { MCPNavigator.mountWait = restoreWait }
             door.standingProvider = { (.frontmostMainWindow, router) }
+            // Round 1's F2 (the VX-981 ladder — A JUSTIFIED EDIT, meaning unchanged): the
+            // partial delivery's own verdict; the wire still speaks `partialShowWords`.
             #expect(await door.agentShow(.pin(.takes(noteID: "n1", blockID: "b1"), dial: .moveAtOnce))
-                    == .refuse(MCPShowRule.partialShowWords))
+                    == .partial)
             #expect(session.commandRouter.pendingTakesLanding == nil, "no landing parked for a failed show")
 
             // Arm 2 — she leaves the app during the delivery: the re-check

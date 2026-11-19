@@ -214,8 +214,10 @@ struct MCPCompareLandingTests {
             let restoreWait = MCPNavigator.mountWait
             MCPNavigator.mountWait = .milliseconds(40)
             defer { MCPNavigator.mountWait = restoreWait }
+            // Round 1's F2 (the VX-981 ladder — A JUSTIFIED EDIT, meaning unchanged): the
+            // partial delivery's own verdict; the wire still speaks `partialShowWords`.
             #expect(await door.agentShow(.pin(.compare(noteID: "n9", peerIDs: ["n2"]), dial: .moveAtOnce))
-                    == .refuse(MCPShowRule.partialShowWords))
+                    == .partial)
             #expect(session.commandRouter.pendingCompareLanding == nil, "no landing parked for a failed show")
             #expect(applied == [.compare], "the mode never switched behind her back")
         }

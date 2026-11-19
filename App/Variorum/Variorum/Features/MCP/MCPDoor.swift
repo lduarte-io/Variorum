@@ -1266,8 +1266,11 @@ final class MCPDoor {
     /// Never automatic: only a client's explicit call reaches here.
     ///
     /// Ladder round 1, F-4: the delivery's ANSWER is the delivery's TRUTH — a
-    /// takes/lens/compare landing that never arrived refuses `partialShowWords`
-    /// instead of claiming shown. VX-676: a delivery she LEFT mid-way (the
+    /// takes/lens/compare landing that never arrived answers `.partial` (the
+    /// wire speaks `partialShowWords`) instead of claiming shown; the VX-981
+    /// ladder's round 1, F2: its own verdict, so the tool gives it VX-961's split
+    /// (the note opened, so a failed Activity line is hers, never the client's
+    /// answer). VX-676: a delivery she LEFT mid-way (the
     /// `stillStanding` re-check after the wait's suspension) lands the rest as
     /// the ask — her amendment's letter (PROVISIONAL P-676-4). VX-705: a move
     /// re-reads its place first (the press roads' gone table) and then where
@@ -1317,9 +1320,11 @@ final class MCPDoor {
             case .unfinished:
                 // VX-679: the note opened (the rest never landed) — `opened` too.
                 trail.update { $0.record(show: request, opened: true, at: Date()) }
-                return .refuse(MCPShowRule.partialShowWords)
+                return .partial
             case .interrupted:
-                return presentShowOffer(request) ? .offer : .refuse(MCPShowRule.partialShowWords)
+                // The note had opened before she left (nothing MORE moved): with
+                // no ask to present, the partial show it is (round 1's F2).
+                return presentShowOffer(request) ? .offer : .partial
             }
         }
     }
