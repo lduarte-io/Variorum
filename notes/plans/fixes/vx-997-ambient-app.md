@@ -6,6 +6,9 @@
 **Cast:** one Opus implementer, headless only (no app launched, no real stage claimed). Not merged: per
 R-997-12 the coordinator trials it from the worktree first and the merge is hers.
 
+**History note:** the branch was rewritten once, on 2026-11-19 at the author's word, to reword one line of
+`Tools/ambient` in its early commits; every commit id cited in this record is the rewritten one.
+
 ## FOR A LATER READER
 
 **The mechanism as settled.** The stage ambient grew into Ambient, its own app in its own repo (R-997-1);
@@ -20,17 +23,17 @@ state file's pid is what keeps a throwaway-HOME run (Ambient's tests, the coordi
 ending the real show, which a by-name stop would; both guards stand (no state file ⇒ nothing; it always
 returns 0). `Tools/StageAmbient/` is gone; the skill names `Ambient` and its new keys.
 
-**The fix as built, one pointer per piece.** `Tools/ambient` (`94075193a`) · the `Tools/stage` hook
-(`17f23dd2f`) · `Tools/StageAmbient/` removed (`979bd07bf`) · `.claude/skills/stage-coordinator/SKILL.md`,
-the ambient lines only (`b506cc7fe`) · the other mentions, each left with a reason (`ff570f996`) · the
-coordinator's trial, `vx-997-coordinator-trial.md` (`8cc063c84`) · in the Ambient repo, branch `l7`:
+**The fix as built, one pointer per piece.** `Tools/ambient` (`7ad00c352`) · the `Tools/stage` hook
+(`b55eafd56`) · `Tools/StageAmbient/` removed (`088938309`) · `.claude/skills/stage-coordinator/SKILL.md`,
+the ambient lines only (`2fe2ddfa9`) · the other mentions, each left with a reason (`208598d42`) · the
+coordinator's trial, `vx-997-coordinator-trial.md` (`3412cdab0`) · in the Ambient repo, branch `l7`:
 `Tests/Fixtures/stage` refreshed and the F2 probe in `StageClaimTests` (`d536e63`) · Ambient's README
 line (piece 8), naming this PR, #8: DONE (`c5458c7`) · round 2's fixes (Ambient's `notes/plan.md` §11.5):
 on `l7`, the script stand-ins' readiness handshake (L2-1, `8f5c657`), the no-state fallback held to the
 road's own two bundles with a test-only override (L2-3, `1844bd5`), a state file counting only while its
 pid is a live `Ambient` or `StageAmbient` (L2-4, `070527c`), `build` and `list` under P-997-4 (L2-5,
 `7faaceb`), the app header, README rail 7 and the pixel-size sentence (L2-6, R2-2, `d0628c4`); here, the
-skill's stand-in line (L2-3, `4bc39dcfe`), the merge order (L2-2, `5dfc41566`), and this record and the
+skill's stand-in line (L2-3, `6497432d0`), the merge order (L2-2, `faa6c7d4d`), and this record and the
 trial note brought up to date (L2-6, this commit).
 
 **Her rulings.** R-997-1 (its own repo; `Tools/ambient` stays as a thin command) · R-997-2 (only Esc ends
@@ -49,7 +52,7 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
 
 **Open items.**
 - The Ambient side, DONE on `l7` once its round-1 fixes merged (`c74c35b`), one commit each, 380 tests
-  green in release: the fixture refresh to `96a2f2741` (`f9b443c`); M1 — stand-ins on a 30 s clock and
+  green in release: the fixture refresh to `243302045` (`f9b443c`); M1 — stand-ins on a 30 s clock and
   `bin/ambient` finding the show by the state file's pid, with no state file only an `Ambient` running
   from an `Ambient.app` bundle (`d69d001`, `82c4fc5`; four pins red on the old road); M5's guard pin
   (`964c807`; red when the hook's order is flipped); P-997-4 in `bin/ambient`, with `which` and
@@ -63,7 +66,7 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
   repo's own bundle for the show. The stage and command-road groups ran 15 times in a row green; 385
   tests green in release on `l7`.
 - P-997-4 — PROVISIONAL, awaiting her word (her rulings, above): the skill and Ambient's README say so.
-- M7 — HELD FOR HER: the clone URL removed at `6bf14ca78` stays in the branch's earlier pushed commits;
+- M7 — HELD FOR HER: the clone URL removed at `0286e0d00` stays in the branch's earlier pushed commits;
   accept it, or rewrite the unmerged branch before the merge (author-only). Nothing about history changed.
 - The coordinator's trial: steps 1–3 ran clean (Ambient's `notes/plan.md` §11.3); step 4, rewritten for M2,
   runs at the live look's GO. The merge is hers.
@@ -94,16 +97,16 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
 
 | # | Piece | State |
 |---|---|---|
-| 1 | `Tools/ambient` becomes a thin door to `$AMBIENT_HOME/bin/ambient` | DONE `94075193a` — probed with a fake command under `en_US.UTF-8` and `C` |
-| 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE `17f23dd2f` — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
-| 3 | `Tools/StageAmbient/` removed | DONE `979bd07bf` — 17 tracked files; this worktree had no untracked leftovers |
-| 4 | The coordinator skill says what is true of Ambient | DONE `b506cc7fe` — the lines that name the ambient only (240 → 246 lines) |
-| 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | DONE — the trial note `8cc063c84`; FOR A LATER READER (this commit) |
-| 6 | Every other `StageAmbient` mention updated or left with a reason | DONE `ff570f996` — none needed a change; each left with its reason below |
+| 1 | `Tools/ambient` becomes a thin door to `$AMBIENT_HOME/bin/ambient` | DONE `7ad00c352` — probed with a fake command under `en_US.UTF-8` and `C` |
+| 2 | `Tools/stage`: the ambient hook stops `Ambient` (and a lingering `StageAmbient`) | DONE `b55eafd56` — 14/14 fake cases under both locales; the old hook fails the 4 `Ambient` cases |
+| 3 | `Tools/StageAmbient/` removed | DONE `088938309` — 17 tracked files; this worktree had no untracked leftovers |
+| 4 | The coordinator skill says what is true of Ambient | DONE `2fe2ddfa9` — the lines that name the ambient only (240 → 246 lines) |
+| 5 | This record + `vx-997-coordinator-trial.md` (walked once with fakes) | DONE — the trial note `3412cdab0`; FOR A LATER READER (this commit) |
+| 6 | Every other `StageAmbient` mention updated or left with a reason | DONE `208598d42` — none needed a change; each left with its reason below |
 | 7 | Ambient repo: `Tests/Fixtures/stage` refreshed + the F2 probe in `StageClaimTests` | DONE Ambient `l7` `d536e63` — 355 tests green in release; red on the old fixture |
 | 8 | Ambient repo: `README.md` says the synchronous stop is real once this PR merges | DONE Ambient `l7` `c5458c7`, after its round-1 fixes merged (`c74c35b`); it names this PR, #8 |
-| R1 | The cold review (Ambient's `notes/plan.md` §11.4), Variorum side | DONE — the URL out `6bf14ca78`; M2 `362591467`; M3 `aab6f3661`; M5 `f78023c21`; M6 `6ff8fe217`; N1 `96a2f2741` (hook probe re-run, 14/14 in both locales, a TERM-deaf show gone in 2.6–3.1 s); N2 `6c8cb56c8`; the skill's suggestions, M1's line and P-997-4 `3b499fcea`. The Ambient side: DONE on `l7` (open items) |
-| R2 | Round 2 (Ambient's `notes/plan.md` §11.5), both repos | DONE — Ambient `l7`: L2-1 `8f5c657`, L2-3 `1844bd5`, L2-4 `070527c`, L2-5 `7faaceb`, L2-6 and R2-2 `d0628c4` (385 tests green in release; the stage groups 15 times in a row green); here: L2-3 `4bc39dcfe`, L2-2 `5dfc41566`, L2-6 (this commit). `Tools/stage` unchanged, so the fixture stands |
+| R1 | The cold review (Ambient's `notes/plan.md` §11.4), Variorum side | DONE — the URL out `0286e0d00`; M2 `87c1e2d84`; M3 `7a8f437b9`; M5 `85709718e`; M6 `8d91eb997`; N1 `243302045` (hook probe re-run, 14/14 in both locales, a TERM-deaf show gone in 2.6–3.1 s); N2 `0174f1a3b`; the skill's suggestions, M1's line and P-997-4 `d22b3337b`. The Ambient side: DONE on `l7` (open items) |
+| R2 | Round 2 (Ambient's `notes/plan.md` §11.5), both repos | DONE — Ambient `l7`: L2-1 `8f5c657`, L2-3 `1844bd5`, L2-4 `070527c`, L2-5 `7faaceb`, L2-6 and R2-2 `d0628c4` (385 tests green in release; the stage groups 15 times in a row green); here: L2-3 `6497432d0`, L2-2 `faa6c7d4d`, L2-6 (this commit). `Tools/stage` unchanged, so the fixture stands |
 
 ## Working notes (the night's record)
 
@@ -197,7 +200,7 @@ zsh and bash: its four `ok` lines and the `after` line; against the old hook, `F
   piece 7 was built on `83a6506` and will merge clean; piece 8 edits README sentences `fix-1` rewrites
   (rail 2's F2 sentence, the doors section), so it is held rather than written onto text about to change.
 - **Piece 7, the fixture and the probe** (Ambient `l7`, `d536e63`). `Tests/Fixtures/stage` is
-  byte-identical to this branch's `Tools/stage` (`cmp`), the suite's comment naming `17f23dd2f`. Seven new
+  byte-identical to this branch's `Tools/stage` (`cmp`), the suite's comment naming `b55eafd56`. Seven new
   `StageClaimTests` functions, each under a throwaway HOME with a stand-in started from the test (an
   ad-hoc-signed copy of `/bin/sleep` named `Ambient`, `StageAmbient` or `Bystander`; a copy of `/bin/bash`
   named `Ambient` that ignores TERM), liveness read as `pgrep -x` reads it: a claim that is not `HOLD:`
