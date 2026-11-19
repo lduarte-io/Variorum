@@ -258,8 +258,8 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 
 | Piece | State |
 |---|---|
-| P1 — the brain `StructuralFlightFence` + headless tests | NOT-STARTED |
-| P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | NOT-STARTED |
+| P1 — the brain `StructuralFlightFence` + headless tests | DONE (this commit) — `swift test --filter StructuralFlightFenceTests` 11 tests in 1 suite passed (headless, no stage) |
+| P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | IN-PROGRESS |
 | P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | NOT-STARTED |
 | P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | NOT-STARTED |
 | P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | NOT-STARTED |
