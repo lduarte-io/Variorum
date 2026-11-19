@@ -523,7 +523,10 @@ struct MobileWingDoorShellTests {
                 #expect(await eventually { session.wing.currentID == world.work })
                 await surface.settle(40)
                 #expect(surface.host.presentedViewController == nil, "the list went")
-                #expect(surface.elements(selected: "Shelf"), "landed on the Bookcase")
+                // The tab's word is "Bookcase" (her LK-5, SW-1 — the VM-47 run's
+                // bar, VM-52): MOVED from "Shelf" at the VM-55 re-land, the
+                // landing's fact unchanged (the Shelf page's door is chosen).
+                #expect(surface.elements(selected: "Bookcase"), "landed on the Bookcase")
                 #expect(surface.visibleElements.contains {
                     $0.accessibilityLabel == "Work" && $0.accessibilityTraits.contains(.button)
                 }, "the title names the wing; labels were \(surface.visibleLabels)")
