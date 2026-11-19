@@ -1,0 +1,72 @@
+// INSTRUMENT — NEVER SHIPPED (the VX-981 ladder, round 1's final call on the accept-loop
+// test's bound — VX-1019; `notes/plans/fixes/vx-981-ladder-round1.md`, PASS 2). Kept here
+// whole as the evidence of what the harness-bounded form buys over the 10 s form: run ONCE
+// by copying it into `Tests/VariorumMCPTests/` (working tree only), then deleted.
+//
+// What it does: `MCPAcceptLoopServerTests.transientAcceptFailuresAreRetriedAndTheClientIsServed`'s
+// own world (the five transient accept faults queued) with the server's `initialize` hook HELD
+// 11 s (the host's DEBUG `namingProbe` — the whole connect road waiting as a starved pool made
+// it wait, deterministically), connected under BOTH forms: (A) the test's old 10 s shortening,
+// (B) the harness's own bound (30 s). Expected: A fails "did not finish within 10.0 s", B is
+// served after ~11 s. Each form prints its outcome and elapsed time.
+#if DEBUG
+import Darwin
+import Foundation
+import Testing
+
+@testable import VariorumCore
+@testable import VariorumMCP
+@testable import VariorumMCPSocket
+
+private final class InstrumentFaults: @unchecked Sendable {
+    private let lock = NSLock()
+    private var queued: [Int32] = []
+    private(set) var met = 0
+    func queue(_ codes: [Int32]) { lock.withLock { queued += codes } }
+    func next(_ step: MCPServerHost.AcceptStep) -> Int32? {
+        lock.withLock {
+            guard step == .accept, !queued.isEmpty else { return nil }
+            met += 1
+            return queued.removeFirst()
+        }
+    }
+}
+
+@Suite("INSTRUMENT (VX-1019) — the accept-loop connect, the hook held 11 s, under both bounds", .serialized)
+struct AcceptLoopBoundInstrument {
+    private func connectHeld(bound: Double?) async throws -> String {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        return try await h.within {
+            let faults = InstrumentFaults()
+            h.host.acceptLoopFault = { faults.next($0) }
+            faults.queue([EMFILE, ENFILE, ENOMEM, ENOBUFS, EAGAIN])
+            h.host.namingProbe = { _ in try? await Task.sleep(for: .seconds(11)) }
+            let clock = ContinuousClock()
+            let start = clock.now
+            do {
+                let connection = try await {
+                    if let bound {
+                        return try await HarnessDeadline.$seconds.withValue(bound) { try await h.connect(as: "claude-code") }
+                    }
+                    return try await h.connect(as: "claude-code")
+                }()
+                let elapsed = clock.now - start
+                await h.hangUp(connection)
+                return "SERVED after \(elapsed) (faults met \(faults.met))"
+            } catch {
+                return "FAILED after \(clock.now - start) (faults met \(faults.met)): \(error)"
+            }
+        }
+    }
+
+    @Test func theTenSecondFormAndTheHarnessForm() async throws {
+        let ten = try await connectHeld(bound: 10)
+        print("INSTRUMENT-VX1019 form A (HarnessDeadline 10 s): \(ten)")
+        let harness = try await connectHeld(bound: nil)
+        print("INSTRUMENT-VX1019 form B (the harness's bound, \(HarnessDeadline.seconds) s): \(harness)")
+        #expect(ten.hasPrefix("FAILED"), "form A: \(ten)")
+        #expect(harness.hasPrefix("SERVED"), "form B: \(harness)")
+    }
+}
+#endif

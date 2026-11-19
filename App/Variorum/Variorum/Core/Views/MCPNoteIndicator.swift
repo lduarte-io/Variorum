@@ -65,8 +65,9 @@ nonisolated struct MCPNoteIndicatorState: Equatable, Sendable {
     /// Live Private books holding it, by name.
     var privateBooks: [String] { mark?.viaBooks.map(\.name) ?? [] }
     var isPrivate: Bool { mark?.isPrivate ?? false }
-    /// Nothing to say — the calm state.
-    var isEmpty: Bool { reach.isEmpty && !isPrivate }
+    /// Nothing to say — the calm state. VX-1007: a journal leg draws the eye
+    /// too (`isFenced`), so it is something to say.
+    var isEmpty: Bool { reach.isEmpty && !(mark?.isFenced ?? false) }
 
     static func read(
         _ db: Database, postID: String, includingReach: Bool = true

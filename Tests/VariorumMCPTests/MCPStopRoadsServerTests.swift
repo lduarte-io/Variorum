@@ -157,6 +157,10 @@ struct MCPStopRoadsServerTests {
 
     // MARK: - A CONNECTION ACCEPTED WHILE THE SERVER STOPS is hung up and says why
 
+    // VX-773 (the VX-981 run, batch 4): DEBUG-only — it connects inside the stop through the host's
+    // `stopWindowProbe`. The release-
+    // configuration test build compiles this target where that seam does not exist.
+    #if DEBUG
     /// **RED ON OLD:** the stop's list of connections was taken before its accept
     /// loop stopped, so a client accepted in between was never hung up — it
     /// outlived the stop, served on with the switch OFF, and never said its end.
@@ -186,6 +190,7 @@ struct MCPStopRoadsServerTests {
         #expect(logged.map(\.client) == ["latecomer"] && logged.map(\.act) == [MCPConnectionEnd.serverOff.act],
                 "\(logged)")
     }
+    #endif
 
     // MARK: - VX-777: a stale start's stop says what actually let it go
 

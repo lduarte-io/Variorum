@@ -538,8 +538,9 @@ final class BookPanelModel {
     private(set) var privateMarks: [String: Queries.PrivateMark] = [:]
     /// **VX-831 — the named READINGS that wear the mark** (the shown book; a
     /// gathering never): `Queries.privateBookMarks` over the same ids the
-    /// reading reach holds.
-    private(set) var privateReadingIDs: Set<String> = []
+    /// reading reach holds — its own stamp, and (VX-1007) THE daily Journal's
+    /// marker.
+    private(set) var privateReadingMarks: [String: Queries.PrivateBookMark] = [:]
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -626,8 +627,8 @@ final class BookPanelModel {
     /// VX-831 — hold the named readings' Private marks (beside their reach).
     func holdReadingPrivateMarks(_ ids: [String]) async {
         await PrivateMarkHold.books(session, ids) { [weak self] value in
-            guard let self, self.privateReadingIDs != value else { return }
-            self.privateReadingIDs = value
+            guard let self, self.privateReadingMarks != value else { return }
+            self.privateReadingMarks = value
         }
     }
 

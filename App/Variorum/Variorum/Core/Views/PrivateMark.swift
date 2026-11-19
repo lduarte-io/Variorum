@@ -111,6 +111,40 @@ nonisolated enum PrivateMarkCopy {
     static func clearedNoteStillVia(_ books: [String]) -> String {
         "This note\u{2019}s own mark is off \u{2014} it stays Private via \(booksPhrase(books))."
     }
+
+    // MARK: VX-1007 — the daily Journal, always Private (her ruling
+    // 2026-11-18: "I honestly think it always being private is good … It
+    // should just show as ticked and locked in the immediate sense also.").
+    // Every line below is PROVISIONAL wording for her pass (P-981-B1-4); the
+    // via-Journal hover is hers ("Private — via ‹book›", `markViaHelp`).
+
+    /// The daily Journal's own eye — the hover (no "AI" on the mark's words,
+    /// VX-272's settings-class rule).
+    static let markDailyJournalHelp = "Private \u{2014} always, as your daily Journal"
+    /// A day entry's eye outside the Journal (the fence's leg 1).
+    static let markJournalEntryHelp = "Private \u{2014} always, as a daily Journal entry"
+    /// The daily Journal's eye, pressed: nothing acts, the why is said.
+    static let dailyJournalSaying = "Your daily Journal is always Private, and so is every entry in it."
+    /// A day entry's eye, pressed (no door — no road clears it).
+    static let journalEntrySaying = "A daily Journal entry is always Private, wherever it\u{2019}s filed."
+    /// A Journal member's eye, pressed: the via-book saying's Journal twin —
+    /// never "change it on the book, or move the note" (neither un-privates a
+    /// day entry), with the via arm's one door, "Open ‹Journal›".
+    static func viaJournalSaying(_ books: [String]) -> String {
+        "Private via \(booksPhrase(books)) \u{2014} your daily Journal is always Private."
+    }
+
+    /// The note ▾ menu's line under its ticked, locked row: why it cannot be
+    /// unticked.
+    static func noteAlwaysPrivate(entry: Bool) -> String {
+        entry ? "Always Private \u{2014} a daily Journal entry" : "Always Private \u{2014} in your daily Journal"
+    }
+
+    /// Book Settings' line under the daily Journal's ticked, locked row (in
+    /// the place of `bookCaption`, whose shape it keeps).
+    static let dailyJournalCaption =
+        "Your daily Journal is always Private \u{2014} no AI client can read its entries unless you share "
+        + "one for a single ask."
 }
 
 // (13n-c U3 — VX-271: the Bookcase's "shared with AI" text chip and its
@@ -145,6 +179,28 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
     /// VX-590's fact, the pane's own). Read with the rest, so the row appears
     /// the moment a first client connects.
     var libraryHasHadClient = false
+    /// **VX-1007 — the fence's leg 1:** the note is a day entry
+    /// (`Queries.PrivateMark.journalEntry`).
+    var journalEntry = false
+    /// **VX-1007 — the fence's leg 2:** the daily Journal(s) holding it, by
+    /// name (`Queries.PrivateMark.viaJournals`).
+    var throughJournals: [String] = []
+
+    /// **VX-1007 — always Private:** a journal leg holds, so the row is
+    /// ticked and LOCKED (her ruling — "ticked and locked") whatever its own
+    /// stamp says; the setter's binding refuses to act (the door closed, never
+    /// the op — contract 6).
+    var journalFenced: Bool { journalEntry || !throughJournals.isEmpty }
+
+    /// **VX-1007 — the row's face:** ticked, locked, and the line under it
+    /// that says why (nil: no line). A journal leg: ticked and LOCKED, its own
+    /// stamp or not (PROVISIONAL P-981-B1-2); otherwise the plain toggle on
+    /// the note's own stamp, as before.
+    var rowTicked: Bool { own || journalFenced }
+    var rowLocked: Bool { journalFenced }
+    var alwaysPrivateLine: String? {
+        journalFenced ? PrivateMarkCopy.noteAlwaysPrivate(entry: journalEntry) : nil
+    }
 
     /// **VX-641 — does the note's Private row show?** Once the library has had
     /// a client (her ruling 2026-10-28: "it should be hidden if there's no AI to
@@ -164,14 +220,23 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
         return approvedClients.filter { !reaching.contains($0) }
     }
 
+    /// VX-1007: the note's privacy facts in ONE read — the faces' own fact
+    /// (`Queries.privateMarks`, the plain UNGATED read: the row keeps VX-641,
+    /// so the un-private road survives while the eye is hidden), which carries
+    /// the fence's journal legs beside the Private mark. Its own stamp and its
+    /// Private books are the same predicates the row read before
+    /// (`isNotePrivate` / `privateBooksHolding` — same rows, same order).
     static func read(_ db: Database, postID: String) throws -> NotePrivacyState {
-        NotePrivacyState(
+        let mark = try Queries.privateMarks(db, noteIDs: [postID])[postID]
+        return NotePrivacyState(
             postID: postID,
-            own: try Queries.isNotePrivate(db, postID: postID),
-            throughBooks: try Queries.privateBooksHolding(db, postID: postID),
+            own: mark?.own ?? false,
+            throughBooks: mark?.viaBooks.map(\.name) ?? [],
             sharing: try Queries.mcpNoteSharing(db, noteID: postID),
             approvedClients: try Queries.mcpClients(db, states: [.approved]).map(\.name),
-            libraryHasHadClient: try Queries.mcpLibraryHasHadClient(db))
+            libraryHasHadClient: try Queries.mcpLibraryHasHadClient(db),
+            journalEntry: mark?.journalEntry ?? false,
+            throughJournals: mark?.viaJournals.map(\.name) ?? [])
     }
 
     /// Only a state loaded for THIS note draws (the wing doors' subject rule).
@@ -184,6 +249,14 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
 /// receipt or the operation's own refusal on the one status seam.
 @MainActor
 enum NotePrivacyAct {
+    /// **The row's door** (VX-1007, contract 6): a LOCKED row's door is
+    /// closed — nothing runs (the toggle is disabled too); `setNotePrivate`
+    /// itself keeps its store behaviour for every other caller.
+    static func set(_ on: Bool, state: NotePrivacyState, session: AppSession) async {
+        guard !state.rowLocked else { return }
+        await set(on, postID: state.postID, session: session)
+    }
+
     static func set(_ on: Bool, postID: String, session: AppSession) async {
         do {
             let wrote = try await session.runner.run { try $0.setNotePrivate(postID, on) }
@@ -229,13 +302,18 @@ struct NotePrivacyMenuItems: View {
             // VX-641: the row and its line wait for the library's first client,
             // unless the note is already marked (`showsPrivateRow`).
             if state.showsPrivateRow {
+                // VX-1007: a journal leg reads ticked and LOCKED, with its
+                // why-line (`rowTicked` / `rowLocked` / `alwaysPrivateLine`).
                 Toggle(CapabilityRegistry.capability(.markNotePrivate).verb, isOn: Binding(
-                    get: { state.own },
+                    get: { state.rowTicked },
                     set: { on in
                         let session = session
-                        let postID = postID
-                        Task { await NotePrivacyAct.set(on, postID: postID, session: session) }
+                        Task { await NotePrivacyAct.set(on, state: state, session: session) }
                     }))
+                    .disabled(state.rowLocked)
+                if let why = state.alwaysPrivateLine {
+                    Text(why)
+                }
                 if !state.own, !state.throughBooks.isEmpty {
                     Text(PrivateMarkCopy.throughBooks(state.throughBooks))
                 }

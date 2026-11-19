@@ -21,6 +21,19 @@ import Testing
 // are injected headlessly through the host's DEBUG seam (`acceptLoopFault`, the
 // `stopWindowProbe` pattern). RED by behavioural revert (the loop's old
 // `return` on every failure but EINTR/ECONNABORTED, no state flip).
+//
+// VX-1019 (the VX-981 ladder, round 1 — `notes/plans/fixes/vx-981-ladder-round1.md`):
+// NO PIN HERE SHORTENS THE HARNESS'S BOUND. Every connect runs under
+// `HarnessDeadline.seconds` (30 s) — VX-850's O-7 rule: a bound exists so a server that
+// never answers fails NAMED, and an in-process server under a congested pool answers
+// seconds late. The traced red: under a whole-target parallel run, the server's session
+// task and the client's own connect task each waited up to ~9 s for their first run (the
+// listener and the five retries were done by ~0.4 s every time), against the 10 s these
+// connects once carried (VX-612's shortening) — 2 of 31 whole-target runs on the branch
+// tip, 2 of 24 on the tree before batch 3. Nothing is lost: "the retries are short" is
+// pinned where it is deterministic (`theClassificationAndThePause` — the schedule and its
+// cap), and "served after every fault" still fails, named, at the bound if a retry never
+// serves.
 
 /// Faults queued per step, consumed one per call; an empty queue runs the real call.
 private final class FaultQueue: @unchecked Sendable {
@@ -59,6 +72,10 @@ private func socketExists(_ directory: URL) -> Bool {
 
 @Suite("VX-612 — the accept loop retries what passes and says what doesn't", .serialized)
 struct MCPAcceptLoopServerTests {
+    // VX-773 (the VX-981 run, batch 4): DEBUG-only — every test below but the pure classification drives the host's
+    // `acceptLoopFault` seam. The release-
+    // configuration test build compiles this target where that seam does not exist.
+    #if DEBUG
     private func faulted(_ h: ServerHarness) -> FaultQueue {
         let faults = FaultQueue()
         h.host.acceptLoopFault = { faults.next($0) }
@@ -90,9 +107,7 @@ struct MCPAcceptLoopServerTests {
             let faults = faulted(h)
             let heard = signals(h)
             faults.queue(.accept, [EMFILE, ENFILE, ENOMEM, ENOBUFS, EAGAIN])
-            let connection = try await HarnessDeadline.$seconds.withValue(10) {
-                try await h.connect(as: "claude-code")
-            }
+            let connection = try await h.connect(as: "claude-code")
             #expect(faults.count(.accept) == 5 && faults.remaining(.accept) == 0, "every fault met, then the real accept")
             _ = try h.approve("claude-code", spec())
             #expect(try await connection.client.callTool(name: "list_books", arguments: [:]).isError != true)
@@ -112,9 +127,9 @@ struct MCPAcceptLoopServerTests {
             // the first connection, or the one after the second): each is retried.
             let first = try await h.connect(as: "claude-code")
             faults.queue(.poll, [EAGAIN, ENOMEM, EINTR])
-            let second = try await HarnessDeadline.$seconds.withValue(10) { try await h.connect(as: "codex") }
+            let second = try await h.connect(as: "codex")
             #expect(try await h.eventually { faults.count(.poll) == 3 }, "every fault met")
-            let third = try await HarnessDeadline.$seconds.withValue(10) { try await h.connect(as: "a third") }
+            let third = try await h.connect(as: "a third")
             #expect(h.host.state == .running)
             for connection in [first, second, third] { await h.hangUp(connection) }
         }
@@ -254,6 +269,7 @@ struct MCPAcceptLoopServerTests {
             close(fd)
         }
     }
+    #endif
 
     /// The classification, pure: interrupts and aborted connections again at
     /// once; the resource class after a pause; everything else fatal. The
