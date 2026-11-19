@@ -248,6 +248,18 @@ nothing to undo says so (a refusal) and offers no Redo (VM-16)." — VM-16's doo
 
 ## BATCH 3 — the wing brains move to shared code (VM-63)
 
+**Batches 3 and 4 share ONE stage window (decided at batch 2's close, requested of the coordinator): the whole
+phone target, then the whole Mac target as its own QUIET claim — run by batch 4's implementer on the tree that
+holds both.** So batch 3 has NO window of its own, superseding the "report READY" line of the kickoff below: its
+implementer ends its turn at `BUILT` — both targets build-for-testing green, tests written, the record closed
+with every run marked PENDING for the shared window — and names every file moved, split or newly added (the
+coordinator trial-merges that list against the other wave-1 branches). Two more bindings for the hoist, from
+batch 2: (1) the Mac's behaviour is byte-identical, which includes the status seam — a hoisted brain speaks
+exactly the kinds it spoke on the Mac (a receipt stays a receipt; never `removal`, `withdraw` or the phone's
+placement — `VM61MacStatusSeamPinTests` scans `Variorum/` for those roads, and a moved file leaves that scan, so
+say in the record what now guards the moved brains); (2) merge order — this run is planned as the wave's FIRST
+mobile merger, so the hoist does not wait for, and must not assume, any other umbrella's code.
+
 > You are the implementer for batch 3 of the VM-55 run, in `~/dev/variorum-vm-55` on `vm-55-wings-underneath`.
 > Batches 1 and 2 are on the branch; read their record sections, this file whole and the reading list.
 >
@@ -269,6 +281,10 @@ nothing to undo says so (a refusal) and offers no Redo (VM-16)." — VM-16's doo
 ---
 
 ## BATCH 4 — the interim wing door (VM-225)
+
+**Batch 4's implementer also runs the ONE shared window for batches 3 and 4** (the note under BATCH 3): it reports
+READY for the whole phone target and the whole Mac target once both targets build-for-testing green with its own
+tests written, flips batch 3's PENDING results in batch 3's record, and owns any red in the hoist's suites.
 
 Her word mid-run (2026-11-19, in chat), verbatim: "yeah - go ahead and add the plain interim door to this run. then
 i can just install the build from after wave 1. i'll talk to vm-64 about this." — in answer to the orchestrator's
@@ -335,8 +351,8 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 2a — VM-61 | DONE — its suites ran in batch 2's one window (run by 2b, three claims, 05:56–07:39): the Mac leg 1243/1245 + its Mac pin's re-run green after a test-only fix (8fa80d315, a false positive); the whole phone target 924 of 928 clean + 2 with declared known issues, VM-24's red main's, and one REAL defect its own host pin caught (the line ignored the home-indicator inset) — fixed b811aa743, re-run green (16/16 over the line's four types). Records: "Batch 2a record" and "Batch 2b record" (2a follow-ups 1 and 2) |
 | Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | DONE — P-55-11 (be6f1d0c7) and VM-62 (pins 69005ad4a/15f788dfd, fix e8609cc6f) green in the whole phone target and the Mac leg; VM-62's red-on-old RAN at 15f788dfd from a snapshot worktree: the scan red (97 lines) and all five per-case pins red, the stripper oracle green; the window's two 2a follow-ups fixed and re-run green. Record: "Batch 2b record" |
-| Batch 3 — VM-63 | NOT-STARTED |
-| Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
+| Batch 3 — VM-63 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line; ends at BUILT (no window of its own) |
+| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
