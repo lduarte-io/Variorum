@@ -184,7 +184,7 @@ final class MobileNoteTrayModel {
             }
         } catch is CancellationError {
         } catch {
-            report(.refusal(DeletionRefusal.fallback(error)))
+            report(.refusal(DeletionRefusal.plainFallback(error, roads: .phone)))
         }
     }
 
@@ -392,9 +392,9 @@ final class MobileNoteTrayModel {
     /// fallback, which is why it is never rendered as a receipt.
     static func refusal(_ error: Error, act: DeletionRefusal.Act) -> String {
         guard let error = error as? OperationError else {
-            return DeletionRefusal.fallback(error)
+            return DeletionRefusal.plainFallback(error, roads: .phone)
         }
-        return DeletionRefusal.words(error, act: act)
+        return DeletionRefusal.sentence(error, act: act, roads: .phone)
     }
 }
 

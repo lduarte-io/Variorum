@@ -129,7 +129,7 @@ final class MobileReferencesModel {
                 try Queries.references(db, containerID: postID)
             }
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -155,7 +155,7 @@ final class MobileReferencesModel {
             await refresh()
             return true
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
             await refresh()
             return false
         }
@@ -168,7 +168,7 @@ final class MobileReferencesModel {
             }
             status = nil
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         await refresh()
     }

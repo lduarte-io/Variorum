@@ -144,7 +144,7 @@ final class MobileBlockListModel {
             }
             adopt(value)
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -166,7 +166,7 @@ final class MobileBlockListModel {
             }
         } catch is CancellationError {
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

@@ -248,19 +248,20 @@ final class MobileTakesController {
         } catch let error as OperationError {
             model?.report(Self.chooseRefusalMessage(error))
         } catch {
-            model?.report(String(describing: error))
+            model?.report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
     /// The choose door's refusal copy. The sealed post is the one everyday
     /// case (the brief's named example); rarer races (archived take,
-    /// unplaced block) speak in the operations layer's own words.
+    /// unplaced block) speak the shared table's words, else the one plain
+    /// fallback (VM-62 — never the case name).
     static func chooseRefusalMessage(_ error: OperationError) -> String {
         switch error {
         case .lockedPost:
             "This note is locked — unlock it to choose a take."
         default:
-            String(describing: error)
+            OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 

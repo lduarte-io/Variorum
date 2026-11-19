@@ -145,7 +145,7 @@ enum MobileLine {
         do {
             try await session.runner.run(body)
         } catch {
-            say(DeletionRefusal.words(error, act: act), as: .refusal, session: session)
+            say(DeletionRefusal.sentence(error, act: act, roads: .phone), as: .refusal, session: session)
         }
     }
 
@@ -159,7 +159,7 @@ enum MobileLine {
         } catch {
             say(
                 OpsRefusalCopy.words(for: error, roads: .phone)
-                    ?? DeletionRefusal.words(error, act: .putBack),
+                    ?? DeletionRefusal.sentence(error, act: .putBack, roads: .phone),
                 as: .refusal, session: session)
         }
     }

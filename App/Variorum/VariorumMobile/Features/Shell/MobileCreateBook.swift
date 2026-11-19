@@ -75,7 +75,7 @@ final class MobileCreateBookModel {
             let wing = wingID
             tags = try await session.database.read { try Queries.allTags($0, wingID: wing) }
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -186,7 +186,7 @@ final class MobileCreateBookModel {
             lastError = BookNameCopy.refusal(existing: existing)
             return nil
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }

@@ -865,11 +865,11 @@ final class MobileTakesBrowserController {
     /// The everyday refusals get phone words (the batch-1 posture — and
     /// since parity C4a every named road lives on the PHONE: the lock
     /// and archive redirects dissolved with their doors); rarer races
-    /// speak in the operations layer's own words — the op's real
-    /// message, never invented behavior.
+    /// speak the shared table's words, else the one plain fallback (VM-62 —
+    /// never the case name), never invented behavior.
     static func refusalMessage(_ error: Error, verb: Verb) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
@@ -923,7 +923,7 @@ final class MobileTakesBrowserController {
         case .archivedVariant:
             return Self.archivedTakeRefusal
         default:
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

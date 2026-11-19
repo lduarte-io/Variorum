@@ -96,7 +96,7 @@ final class MobileBookDetailsModel {
             }
             isDaily = dailyID == id
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -168,7 +168,7 @@ final class MobileBookDetailsModel {
             lastError = Self.refusal(error)
             return false
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return false
         }
     }
@@ -191,7 +191,7 @@ final class MobileBookDetailsModel {
             }
             return true
         } catch {
-            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
+            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.sentence(error, roads: .phone)
             return false
         }
     }
@@ -209,7 +209,7 @@ final class MobileBookDetailsModel {
         } catch let error as OperationError {
             lastError = Self.refusal(error)
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         await refresh()
     }
@@ -225,11 +225,14 @@ final class MobileBookDetailsModel {
     /// keeps the two platforms saying the same thing (MobileSoul §3);
     /// without the arm it would fall to `DeletionRefusal.fallback`, whose
     /// honest last resort still ends in a raw `duplicateBookName(name:)`.
+    /// (VM-62: the phone's road ends in the shared table, then the one plain
+    /// fallback — never a dump: Finish on a gathering, Reopen on a sealed
+    /// book.)
     nonisolated static func refusal(_ error: OperationError) -> String {
         if case .duplicateBookName(let existing) = error {
             return BookNameCopy.refusal(existing: existing)
         }
-        return DeletionRefusal.words(error)
+        return DeletionRefusal.sentence(error, roads: .phone)
     }
 }
 

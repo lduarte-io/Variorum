@@ -222,8 +222,33 @@ nonisolated enum DeletionRefusal {
     }
 
     static func words(_ error: Error, act: Act = .delete) -> String {
+        knownWords(error, act: act) ?? fallback(error)
+    }
+
+    /// **VM-62 — the phone's road: never a dump.** The deletion story's own
+    /// words, then the shared table's (on the platform's `roads`), then the
+    /// ONE plain fallback (`OpsRefusalCopy.sentence(for:roads:)`, which logs
+    /// the raw detail). The same arms as `words`, so a sentence the phone
+    /// already spoke never changes — only the last resort does.
+    static func sentence(_ error: Error, act: Act = .delete, roads: OpsRefusalRoads) -> String {
+        knownWords(error, act: act) ?? OpsRefusalCopy.sentence(for: error, roads: roads)
+    }
+
+    /// **VM-62 — `fallback`'s twin on the phone's road**: a `RecoveryRefusal`'s
+    /// own sentence, else the shared table's words, else the one plain
+    /// fallback — never the deletion arms (a door that reached `fallback`
+    /// never meant them), never a dump.
+    static func plainFallback(_ error: Error, roads: OpsRefusalRoads) -> String {
         if let refusal = error as? RecoveryRefusal { return refusal.sentence }
-        guard let error = error as? OperationError else { return fallback(error) }
+        return OpsRefusalCopy.sentence(for: error, roads: roads)
+    }
+
+    /// The deletion story's own words for `error`, or nil where it has none
+    /// (VM-62 split `words` here so the phone's road can end somewhere other
+    /// than the dump; `words` is this plus `fallback`, byte-identical).
+    static func knownWords(_ error: Error, act: Act = .delete) -> String? {
+        if let refusal = error as? RecoveryRefusal { return refusal.sentence }
+        guard let error = error as? OperationError else { return nil }
         switch error {
         case .lockedPost:
             return act == .putBack
@@ -267,7 +292,7 @@ nonisolated enum DeletionRefusal {
             return "That's not in the \(RecoveryCopy.trashSection) any more — "
                 + "only things in the \(RecoveryCopy.trashSection) can be deleted for good."
         default:
-            return fallback(error)
+            return nil
         }
     }
 

@@ -119,7 +119,7 @@ final class MobileMembershipModel {
                 $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id)
             }
         } catch {
-            say(String(describing: error), as: .refusal)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
     }
 
@@ -158,7 +158,7 @@ final class MobileMembershipModel {
                 say(Self.refusal(error, bookName: book.name), as: .refusal)
             }
         } catch {
-            say(String(describing: error), as: .refusal)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
         await refresh()
     }
@@ -195,10 +195,12 @@ final class MobileMembershipModel {
     /// The four book arms stay HERE because they carry the book's NAME, a
     /// context the shared table has no slot for (18m U3's collapse rule);
     /// everything else the table has words for, it says (18m U3 — this arm
-    /// used to dump "Refused: …"), and where it has none this door keeps its
-    /// own fallback.
+    /// used to dump "Refused: …"), and where it has none the one plain
+    /// fallback speaks (VM-62 — never the case name).
     nonisolated static func refusal(_ error: Error, bookName: String?) -> String {
-        guard let error = error as? OperationError else { return String(describing: error) }
+        guard let error = error as? OperationError else {
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
+        }
         let book = bookName.map { "“\($0)”" } ?? "that book"
         switch error {
         case .lockedReading:
@@ -210,7 +212,7 @@ final class MobileMembershipModel {
         case .postNotInReading:
             return "This note isn't in \(book)."
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? "Refused: \(error)"
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 

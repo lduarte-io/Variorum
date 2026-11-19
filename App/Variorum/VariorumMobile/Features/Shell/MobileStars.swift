@@ -143,7 +143,7 @@ final class MobileStarsModel {
                 }
             } catch is CancellationError {
             } catch {
-                speakHomeless(String(describing: error))
+                speakHomeless(OpsRefusalCopy.sentence(for: error, roads: .phone))
             }
         }
     }
@@ -156,7 +156,7 @@ final class MobileStarsModel {
             items = try await session.database.read { try Queries.starred($0, wingID: wing) }
             await resolveNames()
         } catch {
-            speakHomeless(String(describing: error))
+            speakHomeless(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -179,7 +179,7 @@ final class MobileStarsModel {
                     createdAt: header.createdAt))
             })
         } catch {
-            speakHomeless(String(describing: error))
+            speakHomeless(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -209,10 +209,11 @@ final class MobileStarsModel {
                 try ops.setStarred(target, starred: !starred)
             }
             clearError()
-        } catch let error as OperationError {
-            speak("Refused: \(error)", at: home)
         } catch {
-            speak(String(describing: error), at: home)
+            // VM-62 (audit B M2): the shared table's words — the Mac StarsModel's
+            // own (`OpsRefusalCopy.message`) — or the one plain fallback; never
+            // "Refused: …" with the case name.
+            speak(OpsRefusalCopy.sentence(for: error, roads: .phone), at: home)
         }
         await refresh()
     }

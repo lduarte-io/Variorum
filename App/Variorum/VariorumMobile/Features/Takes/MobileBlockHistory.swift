@@ -280,7 +280,7 @@ final class MobileBlockHistoryController {
             guard openBlockID == blockID else { return }
             adopt(value)
         } catch {
-            report(.refusal(String(describing: error)))
+            report(.refusal(OpsRefusalCopy.sentence(for: error, roads: .phone)))
             onChanged?()
         }
     }
@@ -575,7 +575,7 @@ final class MobileBlockHistoryController {
 
     static func refusalMessage(_ error: Error, act: String) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
@@ -585,7 +585,7 @@ final class MobileBlockHistoryController {
             // standing locked-take sentence names the road for both.
             return MobileEditorViewModel.lockedTakeRefusal
         default:
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

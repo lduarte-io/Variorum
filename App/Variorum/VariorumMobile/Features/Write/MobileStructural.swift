@@ -137,7 +137,7 @@ final class MobileStructuralController {
                 try Queries.blockFan(db, blockID: blockID)
             }
         } catch {
-            model.report(String(describing: error))
+            model.report(OpsRefusalCopy.sentence(for: error, roads: .phone))
             return
         }
         let active = fan.filter { $0.deletedAt == nil && $0.status == .active }
@@ -278,7 +278,7 @@ final class MobileStructuralController {
                 return (try active(leadingID), try active(trailingID))
             }
         } catch {
-            model.report(String(describing: error))
+            model.report(OpsRefusalCopy.sentence(for: error, roads: .phone))
             return
         }
 
@@ -962,7 +962,7 @@ final class MobileStructuralController {
         _ error: Error, act: String, nothingWas: String = "changed"
     ) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
@@ -1011,7 +1011,7 @@ final class MobileStructuralController {
                 + "arrived yet, or one that landed since you selected. "
                 + "Nothing was \(nothingWas)."
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

@@ -105,7 +105,7 @@ final class MobileArchiveModel {
                 }
             } catch is CancellationError {
             } catch {
-                lastError = DeletionRefusal.fallback(error)
+                lastError = DeletionRefusal.plainFallback(error, roads: .phone)
             }
         }
     }
@@ -137,9 +137,9 @@ final class MobileArchiveModel {
             // same either way), and the durable fix is an `.unarchive` arm —
             // a FENCED (`Shared/RecoveryActs.swift`) addition, on the next
             // Shared-touching batch's list.
-            lastError = DeletionRefusal.words(error, act: .putBack)
+            lastError = DeletionRefusal.sentence(error, act: .putBack, roads: .phone)
         } catch {
-            lastError = DeletionRefusal.fallback(error)
+            lastError = DeletionRefusal.plainFallback(error, roads: .phone)
         }
     }
 

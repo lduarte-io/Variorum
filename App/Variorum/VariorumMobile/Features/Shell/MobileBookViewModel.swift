@@ -144,7 +144,7 @@ final class MobileBookViewModel {
             }
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 

@@ -224,7 +224,7 @@ final class MobileEditorViewModel {
         // first. Removed at `teardown()`.
         autosaveToken = autosave.observe(
             onError: { [weak self] error in
-                self?.report(String(describing: error))
+                self?.report(OpsRefusalCopy.sentence(for: error, roads: .phone))
             },
             onSettled: { [weak self] in
                 self?.storeWriteGeneration &+= 1
@@ -592,7 +592,7 @@ final class MobileEditorViewModel {
             // being torn down; stringifying the cancellation into the
             // status line told her nothing true.
         } catch {
-            report(String(describing: error))
+            report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -660,7 +660,7 @@ final class MobileEditorViewModel {
             // authority's tombstone arm re-confirms instead of refusing on
             // its last delivery (MAJOR 1): were it still short-circuiting,
             // one dropped stream would make a stale `noteIsGone` terminal.
-            report(String(describing: error))
+            report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -673,7 +673,7 @@ final class MobileEditorViewModel {
             }
         } catch is CancellationError {
         } catch {
-            report(String(describing: error))
+            report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -1076,7 +1076,7 @@ final class MobileEditorViewModel {
             report(copied.message, line: copied.line)
         } catch {
             report(MobileNoteClipboard.Outcome
-                .failed(String(describing: error)).message)
+                .failed(OpsRefusalCopy.sentence(for: error, roads: .phone)).message)
         }
     }
 
@@ -1200,7 +1200,7 @@ final class MobileEditorViewModel {
             }
             adoptHeader(header)
         } catch {
-            report(String(describing: error))
+            report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -1259,7 +1259,7 @@ final class MobileEditorViewModel {
         do {
             report(try await VersionActs.save(session: session, postID: postID), line: .ordinary)
         } catch {
-            report(VersionActs.words(error, seal: .phone))
+            report(VersionActs.sentence(error, roads: .phone))
         }
     }
 
@@ -1288,14 +1288,14 @@ final class MobileEditorViewModel {
     /// *"That note is already gone."*) is byte-identical there, so nothing she
     /// has already seen changes; what changes is everything the `default` used
     /// to dump — `lockedPost` and the whole "already back" family now speak,
-    /// and a case none of them anticipated arrives as a sentence that still
-    /// carries the technical name rather than as `lockedVariant` alone.
+    /// and a case none of them anticipated arrives as a sentence — the shared
+    /// table's, else the one plain fallback (VM-62: never the technical name).
     ///
     /// `act: .delete` is passed explicitly: the same `OperationError` wants
     /// different words at a delete door and a put-back door, which is why
     /// `Act` is a parameter there rather than two functions.
     static func deleteNoteRefusal(_ error: Error) -> String {
-        DeletionRefusal.words(error, act: .delete)
+        DeletionRefusal.sentence(error, act: .delete, roads: .phone)
     }
 
     private func setSeal(locked: Bool) async {
@@ -1317,7 +1317,7 @@ final class MobileEditorViewModel {
             }
             adoptHeader(header)
         } catch {
-            report(String(describing: error))
+            report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -1352,10 +1352,10 @@ final class MobileEditorViewModel {
             if case .invalidEntryDate = error {
                 report(Self.entryDateRefusal)
             } else {
-                report(String(describing: error))
+                report(OpsRefusalCopy.sentence(for: error, roads: .phone))
             }
         } catch {
-            report(String(describing: error))
+            report(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -2317,10 +2317,10 @@ extension MobileEditorViewModel: TailCrystallizerHost {
     var surfaceHasMarkedText: Bool { textView?.markedTextRange != nil }
 
     /// ACCESSOR: the phone's error voice. **18m U3 (ruling V):** it speaks
-    /// the shared refusal table — a raw error dump is not a face — and keeps
-    /// the error's description only where the table has no words.
+    /// the shared refusal table — a raw error dump is not a face — and the
+    /// one plain fallback where the table has no words (VM-62).
     func reportOperationError(_ error: Error) {
-        report(OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error))
+        report(OpsRefusalCopy.sentence(for: error, roads: .phone))
     }
 
     func replaceTailRegion(_ region: NSRange, with normalized: String) {

@@ -85,7 +85,7 @@ final class MobileTagsModel {
                 }
             } catch is CancellationError {
             } catch {
-                lastError = String(describing: error)
+                lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             }
         }
     }
@@ -97,7 +97,7 @@ final class MobileTagsModel {
             let wing = session.wing.currentID
             adopt(try await session.database.read { try Self.listing($0, wingID: wing) })
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -187,7 +187,7 @@ final class MobileTagsModel {
     /// `TagsViewModel.message` semantics mirrored.
     nonisolated static func refusal(_ error: Error) -> String {
         guard let op = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch op {
         case .invalidTagName:
@@ -197,7 +197,8 @@ final class MobileTagsModel {
         case .tagNotFound:
             return "That tag no longer exists."
         default:
-            return "Refused: \(op)"
+            // VM-62: the shared table's words, else the one plain fallback.
+            return OpsRefusalCopy.sentence(for: op, roads: .phone)
         }
     }
 

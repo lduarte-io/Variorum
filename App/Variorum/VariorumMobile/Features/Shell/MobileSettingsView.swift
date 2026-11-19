@@ -445,7 +445,7 @@ struct MobileSettingsView: View {
                 tutorialNote = "The pocket guide is on your shelf."
             }
         } catch {
-            tutorialNote = String(describing: error)
+            tutorialNote = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -473,7 +473,7 @@ struct MobileSettingsView: View {
                 session: session, existing: existing)
             tutorialNote = "The pocket guide is on your shelf."
         } catch {
-            tutorialNote = String(describing: error)
+            tutorialNote = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -507,7 +507,7 @@ struct MobileSettingsView: View {
                 perfNote = "The proving ground is already seeded."
             }
         } catch {
-            perfNote = String(describing: error)
+            perfNote = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
     #endif

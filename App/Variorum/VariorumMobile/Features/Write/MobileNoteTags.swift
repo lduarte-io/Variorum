@@ -90,7 +90,7 @@ final class MobileNoteTagsModel {
             applied = mine
             allTags = all
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 

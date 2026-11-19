@@ -139,7 +139,7 @@ final class MobileScrapsModel {
         } catch is CancellationError {
             itemsTask?.cancel()
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -168,7 +168,7 @@ final class MobileScrapsModel {
                 }
             } catch is CancellationError {
             } catch {
-                self?.lastError = String(describing: error)
+                self?.lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             }
         }
     }
@@ -187,7 +187,7 @@ final class MobileScrapsModel {
             self.pools = pools
             adopt(items)
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -219,7 +219,7 @@ final class MobileScrapsModel {
             await refresh()
             return true
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             await refresh()
             return false
         }

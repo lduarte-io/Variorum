@@ -300,7 +300,7 @@ final class MobileLensesModel {
             }
             viewDiverges = !(editor?.takes.peeks.isEmpty ?? true)
         } catch {
-            say(String(describing: error), as: .refusal)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
     }
 
@@ -327,7 +327,7 @@ final class MobileLensesModel {
             activeLensName = rows.first { $0.id == lensID }?.name
             viewDiverges = !editor.takes.peeks.isEmpty
         } catch {
-            say(String(describing: error), as: .refusal)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
     }
 
@@ -554,7 +554,7 @@ final class MobileLensesModel {
         case OperationError.lockedPost:
             Self.sealedAdoptRefusal
         default:
-            String(describing: error)
+            OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

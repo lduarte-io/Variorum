@@ -109,7 +109,7 @@ final class MobileTrashModel {
                 }
             } catch is CancellationError {
             } catch {
-                lastError = DeletionRefusal.fallback(error)
+                lastError = DeletionRefusal.plainFallback(error, roads: .phone)
             }
         }
     }
@@ -145,12 +145,12 @@ final class MobileTrashModel {
             // room grew a byte-identical twin of it at the split, and two
             // call sites that must change together is the drift shape the
             // shared home exists to end).
-            lastError = DeletionRefusal.words(error, act: .putBack)
+            lastError = DeletionRefusal.sentence(error, act: .putBack, roads: .phone)
         } catch {
             // Includes `RecoveryRefusal` — nothing was attempted, so it is a
             // refusal and never the `putBackUnplaced` RECEIPT the shipped
             // code put in the red slot (§49's MINOR).
-            lastError = DeletionRefusal.fallback(error)
+            lastError = DeletionRefusal.plainFallback(error, roads: .phone)
         }
     }
 
@@ -220,7 +220,7 @@ final class MobileTrashModel {
             }
             pendingConfirm = confirm
         } catch {
-            lastError = DeletionRefusal.fallback(error)
+            lastError = DeletionRefusal.plainFallback(error, roads: .phone)
         }
     }
 
@@ -248,7 +248,7 @@ final class MobileTrashModel {
         } catch {
             // A PURGE refusal, never a put-back one — the seal's way out
             // differs by act, which is why `Act` is a parameter (A1-18).
-            lastError = DeletionRefusal.words(error, act: .delete)
+            lastError = DeletionRefusal.sentence(error, act: .delete, roads: .phone)
         }
     }
 

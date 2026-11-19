@@ -330,7 +330,7 @@ final class MobileLibraryViewModel {
                 }
             } catch is CancellationError {
             } catch {
-                lastError = String(describing: error)
+                lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             }
         }
     }
@@ -350,7 +350,7 @@ final class MobileLibraryViewModel {
                 }
             } catch is CancellationError {
             } catch {
-                lastError = String(describing: error)
+                lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             }
         }
     }
@@ -397,7 +397,7 @@ final class MobileLibraryViewModel {
             // A superseded search's error never lands either (the Mac
             // catch's staleness guard).
             guard activeQuery == trimmed else { return }
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -422,7 +422,7 @@ final class MobileLibraryViewModel {
         do {
             return try await MobileNewNoteDoor.mint(session: session)
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }
@@ -491,7 +491,7 @@ final class MobileLibraryViewModel {
             return true
         } catch {
             receipt = nil
-            lastError = DeletionRefusal.words(error)
+            lastError = DeletionRefusal.sentence(error, roads: .phone)
             return false
         }
     }
