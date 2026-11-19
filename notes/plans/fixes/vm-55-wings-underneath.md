@@ -966,6 +966,9 @@ placement, an edit to the Mac branch, or a Mac door taking a phone road reds the
 - **P-55-6 — an offer on the phone.** No phone door raises one today. Options: (a) the seam carries the kind and the line
   draws an offer always, with its door (the Mac's "a question she cannot see is not asked"); (b) never drawn (her ruling
   names only removals and refusals); (c) drawn only with its door, like a removal. **Built: (a)** — drawn in ink.
+  *(Ladder round 1, finding 2 — the reviewer's final call: on the phone a standing offer is an ordinary offer until a phone
+  face for standing offers exists. `StatusCenter.stand` under `.phoneLine` places the offer on the line and keeps nothing
+  standing; `endStanding` takes it off the line if it still shows. The MCP-on-phone umbrella inherits the rule.)*
 - **P-55-7 — directions.** Sentences that report an outcome different from what she asked: the copy that could not
   follow the screen, "Already collected — …", the Today door's shelving notes. Options: (a) the refusal class (the Mac's
   `direct` — "a direction she must see"; the Mac ⌘J door speaks the shelving note as a refusal; "a door that did nothing
@@ -1983,7 +1986,7 @@ last pin commit (`~/dev/variorum-vm-55-pin2`, its own DerivedData `vm55-pin2`), 
 | Finding 2 pin — `MobileLineStandingOfferTests` (pure, phone) | DONE (35983f69a) |
 | Finding 5 pin — `MobileErrorLogPrivacyPinTests` (source scan, phone; beside VM-62's pins in `MobileRawErrorPinTests.swift`) | DONE (77f591154) — a throwaway mirror of the scan over this tree finds exactly two lines: `Shared/OpsRefusalTable.swift:477` (the red) and `Shared/SampleLibrary/SampleLibraryWelcome.swift:411` (the one named exemption, main's); nothing in the fenced `Shared/Protection/` |
 | Finding 7 pin — the three `MobileWingDoorGeometryTests` root tests assert the door's accessibility value | DONE (this commit — the LAST PIN COMMIT: the snapshot's tree) — Starred "Starred", Library "Library", Shelf "Shelf  ·  0 books" (the page and its drawn count, Study, an empty store); `withoutADoorTheLineIsPlainText` untouched |
-| Finding 2 fix — `StatusCenter.stand` / `endStanding` phone arms | NOT-STARTED |
+| Finding 2 fix — `StatusCenter.stand` / `endStanding` phone arms | DONE (this commit) — `stand`: after the item's construction, `if placement == .phoneLine { place(item); return item.id }`; `endStanding`: `if placement == .phoneLine { if current?.id == id { current = nil }; return }` BEFORE the Mac's `standing` guard; the Mac's lines untouched; P-55-6's note extended |
 | Finding 5 fix — two log lines `.private` | NOT-STARTED |
 | Finding 7 fix — the door's `.accessibilityValue(page + trailing)` | NOT-STARTED |
 | Builds — both targets at the fix tip (`vm55-b1`); the snapshot's phone build (`vm55-pin2`) | NOT-STARTED |

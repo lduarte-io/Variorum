@@ -391,6 +391,15 @@ final class StatusCenter {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         let item = Item(id: id, text: trimmed, action: action, kind: .offer, dismiss: dismiss)
+        // VM-55 ladder round 1, finding 2: the phone's one line has no quiet
+        // slot and no ✕ (P-55-3), so a standing offer is an ORDINARY offer
+        // there until a phone face for standing offers exists — it draws with
+        // its door and fades on the seam's clock, and nothing is kept standing
+        // behind a line no surface draws. The Mac's road below is untouched.
+        if placement == .phoneLine {
+            place(item)
+            return item.id
+        }
         standing = item
         current = item
         quietLine = nil
@@ -409,6 +418,13 @@ final class StatusCenter {
     /// toast, from the toast too. Only the offer named ends — a newer one that
     /// replaced it is never ended by the older one's road.
     func endStanding(_ id: UUID) {
+        // VM-55 ladder round 1, finding 2: on the phone nothing stands (see
+        // `stand`), so ending the offer takes it off the line if it still
+        // shows — BEFORE the Mac's guard, which would return early here.
+        if placement == .phoneLine {
+            if current?.id == id { current = nil }
+            return
+        }
         guard standing?.id == id else { return }
         standing = nil
         if current?.id == id { current = nil }
