@@ -2,8 +2,8 @@
 
 **STATUS: OPEN — re-fitted on 2026-11-19, after the badge fix was taken out and main was merged into the branch;
 brought up to date after the fourth review round, and again after the MCP run (VX-981) was taken in — main was
-merged into the branch a second time (merge commit `d55d22db9`), with no change to any code line.** Still ahead: a
-short test window on that code for the three new safety tests the fourth review asked for, the fifth and last
+merged into the branch a second time (merge commit `d55d22db9`), with no change to any code line — and the short
+test window for the fourth review's three new safety tests has run on that code.** Still ahead: the fifth and last
 review round, and the final gate (the whole phone test suite, the Mac tests over the shared code this run changed,
 and a walk through the changed screens on the simulator), then the merge. Every **PENDING(…)** slot below is filled
 as it happens; nothing marked PENDING has happened yet.
@@ -213,8 +213,14 @@ ruled. None is this run's line, so all three are left as they are; a ticket for 
 - **The re-applied fixes, proved again on the merged code:** against main's versions of the undo and Trash files,
   exactly the six tests that should fail did fail (44 tests ran), and on the branch they pass; then this run's
   tests and the wings run's over the same screens — 283 tests — all passed.
-- PENDING(the short test window for the fourth review's three new tests, on the code with the MCP run taken in
-  (`d55d22db9`): each shown failing against the old faces, then passing).
+- **The fourth review's three new tests, proved** (a short test window on the code with the MCP run taken in,
+  `d55d22db9`, the evening of November 19): with the old faces put back — the date chip reading a date the screen does not
+  watch, "smart" on the new-book sheet and in the note's book list, no "(archived)" mark and Diverge drawn on a
+  gathering in that list, and Book Details' delete message saying "Book" for a gathering — exactly the four tests that should fail did fail (26 tests ran), and each
+  named exactly the old lines; this run's five older tests for the same fixes kept passing on those old faces, which
+  is why the new ones were needed. With the real faces back, all 42 tests passed — the three new tests, the others
+  over the same screens, and the phone's undo tests, run again because the MCP run had changed the undo machinery
+  underneath — they still pass.
 - PENDING(gate 1: the whole phone test suite on the merged code — its result, with the caret test as the one
   expected failure).
 - PENDING(gate 2: the Mac tests over the shared code this run changed — its result).
@@ -235,7 +241,7 @@ three of this run's fixes' old faces — the date chip that waits for the title 
 sheet, and a note's list of books without "(archived)" and with Diverge on a gathering — with none of this run's
 tests noticing. So three new tests now watch those faces directly, and a line-by-line map of what must survive
 goes to the stage coordinator for the other runs. Its five small points are applied: one more test is shown
-failing on the old code in the same test window, sentences are brought up to date, three canon lines wait for your
+failing on the old code in the same test window (it did), sentences are brought up to date, three canon lines wait for your
 call (the section below), the walk's steps are re-worded, and a VoiceOver note goes to VM-218. A fifth round is
 owed, the last under your cap of five. PENDING(ladder round 5: its outcome).
 
