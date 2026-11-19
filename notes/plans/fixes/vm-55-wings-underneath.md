@@ -196,7 +196,10 @@ and says so." — the saying is wave 2's face).
 
 ## BATCH 2 — one message line, and refusals in words (VM-61, VM-62)
 
-**Split at spawn into 2a (VM-61) and 2b (VM-62), a fresh implementer each, each with its own stage window** —
+**Split at spawn into 2a (VM-61) and 2b (VM-62), a fresh implementer each. ONE stage window for both, run by 2b
+(decided 05:10, when 2a stood READY behind a long queue: 2a's two legs were withdrawn, 2b builds on 2a's
+built-for-testing-green tree at once, and 2b's window runs the whole phone target and the Mac leg over both
+members — the original one-window shape of batch 2; 2b flips 2a's PENDING results and owns any red in them)** —
 batch 1's five small members took one implementer past the 500k guideline, and these two are each a unit of
 their own (the seam and its one line; the 69 sites and their pin). 2a builds the kickoff's VM-61 paragraph, its
 tests and its record, and stops; 2b reads 2a's record and builds the VM-62 paragraph, and first applies P-55-11 (the orchestrator's check of 2a,
@@ -331,7 +334,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-60 | DONE (9462d3854) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 2a — VM-61 | IN-PROGRESS — built, pinned and pushed (both targets build-for-testing green); READY for its stage window, results PENDING — the record is under "Batch 2a record" |
-| Batch 2b — VM-62 | NOT-STARTED — a fresh implementer after 2a closes |
+| Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line |
 | Batch 3 — VM-63 | NOT-STARTED |
 | Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
@@ -339,9 +342,13 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Closeout | NOT-STARTED |
 
 Notes for the implementers:
-- Baseline (the last recorded whole-target runs, not re-run at kickoff): whole phone 857 tests / 141 suites at
-  VX-849's close with its declared knowns (`nothingUserFacingNamesTheMac` and four known issues); umbrella
-  VM-78 owns the phone's red tests this wave. A failure outside your diff is recorded, not fixed.
+- Baseline, CORRECTED 05:10 from the coordinator: the freshest whole-phone-target run of main's tree is umbrella
+  VM-47's at 04:40 tonight, whose ONLY pre-existing red was VM-24's caret test,
+  `aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`. `nothingUserFacingNamesTheMac`
+  (`MobileStructuralTests`) was NOT red there — the kickoff note that called it a standing known came from an
+  October record and was stale. So: expect VM-24's red; if `nothingUserFacingNamesTheMac` is red on this branch it
+  is THIS run's (a rendered string naming the Mac) and the batch that drew it fixes it. Every result line says which
+  reds are on main and which are the branch's. A failure outside your diff is recorded, not fixed.
 - Raw-error sites on main at kickoff, 69 across 23 files: `Write/MobileEditorViewModel` 10 ·
   `Shell/MobileShelfViewModel` 5 · `Write/MobileStructural` 4 · `Shell/MobileStars` 4 · `Shell/MobileScraps` 4 ·
   `Shell/MobileLibraryViewModel` 4 · `Write/MobileReferences` 3 · `Write/MobileMembership` 3 ·
