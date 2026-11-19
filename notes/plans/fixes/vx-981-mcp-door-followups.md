@@ -751,5 +751,5 @@ Round 2's fixes go to the implementer that built round 1's (its context holds th
 |---|---|
 | R0 — this record's opening; the reading done (CLAUDE.md + canon, this record's Kickoff, ENVIRONMENT & TRAPS and BATCH 5, MCPSpec whole, SurfaceContracts whole, the residuals ledger, the vx-336 record's D6 / OWED / U7 and U8 stage runs, the catalog whole, the registry's declaration list and the menus) | DONE (this commit) |
 | A1 — the audit's act table (her acts × the catalog), the reads table, the ruled and proposed exceptions, the five named gaps | DONE (this commit) — `notes/plans/vx-981/mcp-parity-audit.md`: 91 act rows (all 243 declarations, each once — its appendix), 16 read rows, the bugs found |
-| A2 — VX-370's measurement recipe (the audit's last section) | NOT-STARTED |
+| A2 — VX-370's measurement recipe (the audit's last section) | DONE (this commit) — the vx-336 U7/U8 method made client-agnostic (the tee, the three prompts, the model's read-back as the check), Codex and Gemini roads from their docs (unconfirmed points marked) |
 | C — this record's closing sections (method, counts, proposed tickets, bugs found, PROVISIONALs); the run's table + ledger flipped | NOT-STARTED |
