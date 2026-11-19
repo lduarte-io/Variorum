@@ -418,7 +418,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Main merged in again before the walk and the gate | DONE (a192ca437 — main 9a78628ea; notes only since the first merge-in) |
 | Ladder round 1 (the FINAL round: 0 BLOCKER · 0 MAJOR · 2 MINOR · 5 NIT) | REVIEWED and adjudicated — the three confirmed fixes (findings 2, 5, 7) APPLIED pin-first (pins 35983f69a, 77f591154, 7af436366 + the pin compile fix 923f14f30; fixes 79e14816f, 725d58f6a, 2278790a5) and GREEN in the fix window (10:29–10:32, products 923f14f30), the pins red on the snapshot as predicted (6 of 8); finding 1's two re-runs GREEN there. REMAINING: the orchestrator's line-by-line check of the three fixes against their findings |
 | The ladder | CLOSED at round 1 (her rule: a round with no new BLOCKER or MAJOR closes it) — the fix window green 2026-11-19 10:29–10:32, the orchestrator's line-by-line check recorded under Round 1 |
-| The simulator walk (the closer; the rows are in "THE WALK AND THE MERGE GATE") | IN-PROGRESS — a fresh closer, spawned at the commit that wrote this line |
+| The simulator walk (the closer; the rows are in "THE WALK AND THE MERGE GATE") | IN-PROGRESS — the closer's record is "### The walk and the gate" under Batch records (its LIVE STATUS); the instruments are being built in a snapshot worktree; the screens folder needs the orchestrator's word (not ignored) |
 | The merge gate (whole phone, whole Mac) | NOT-STARTED — the closer's, after the walk |
 | Closeout | NOT-STARTED |
 
@@ -2075,6 +2075,40 @@ out; the branch tree and the snapshot still throughout):
   xcodebuild exited on its own. Log `vm55-r1-pinred.log`.
 - After: simulator shut down; no Variorum instance (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"` empty); no Problem
   Reporter; no new `Variorum*-*.ips` (newest 05:45, before every window today).
+
+### The walk and the gate
+
+**What this closer has NOT done (first, by the protocol; kept current):** no walk row has run yet and no gate claim has
+run; no product code written (none is owed unless the walk finds a defect). The screens folder the brief names,
+`notes/plans/fixes/vm-55-screens/`, is NOT ignored by this repo (`git check-ignore` exit 1 — `.gitignore` names each
+screens folder one by one; there is no `*-screens` rule), so nothing has been written there: held for the orchestrator's
+word.
+
+Closer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch `vm-55-wings-underneath`,
+tip e19403d86. Reading done in full before anything else: this file whole, CLAUDE.md + loaded canon, the resiliency
+protocol, MobileSoul §1–§5, the catch-up plan's inherited rules, umbrella-02, sitting-1 rulings, audit A
+§1D/§1F/§1I/§3.1, SurfaceContracts' Messages, wing-label and wing-switcher bullets, and the VM-44 atlas's instruments
+(`VM44CaptureSeedTests.swift`, `VM44CaptureWalk.swift`, `phase-b-runbook.sh`) and `walk-findings.md`.
+
+**The instruments (throwaway, never in the PR):** a detached snapshot worktree of the tip,
+`~/dev/variorum-vm-55-walk` (e19403d86), holding the two instrument files only there — a hosted seeder in
+`VariorumMobileTests/` and a UI driver in `VariorumMobileUITests/` — built into its own DerivedData inside it; both are
+removed when the walk is recorded. Nothing under this worktree's `App/` changes for the walk. The dedicated simulator
+device is created for the walk and deleted at its end; its id is never written here.
+
+#### The walk and the gate — LIVE STATUS
+
+| Piece | State |
+|---|---|
+| Record skeleton | DONE (this commit) |
+| The instruments: seeder + UI driver, written and built in the snapshot (one cold build) | IN-PROGRESS — the snapshot exists at e19403d86; the two files and the build remain |
+| The dedicated device (created, never booted outside a claim) | NOT-STARTED |
+| READY for the walk claim | NOT-STARTED |
+| The walk (rows a–l, Study light; a, b, f, g again in Terminal) | NOT-STARTED |
+| The snapshot and its DerivedData removed; the device deleted | NOT-STARTED |
+| The gate's builds (both targets `build-for-testing` into `vm55-b1`, the tree clean and still) | NOT-STARTED — only at the orchestrator's word after the walk |
+| Gate claim (i) — the whole phone target | NOT-STARTED |
+| Gate claim (ii) — the whole Mac target (QUIET) | NOT-STARTED |
 
 ## Ladder
 
