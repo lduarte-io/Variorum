@@ -1,8 +1,93 @@
+diff --git a/Sources/VariorumMCP/MCPServerHost.swift b/Sources/VariorumMCP/MCPServerHost.swift
+index 189ef3fb9..c97f90d49 100644
+--- a/Sources/VariorumMCP/MCPServerHost.swift
++++ b/Sources/VariorumMCP/MCPServerHost.swift
+@@ -399,6 +399,8 @@ public final class MCPServerHost: @unchecked Sendable {
+     /// writes only — the VX-369 sweep's row 19). Read through the host at each
+     /// read, so a probe set after a connection opened still reaches it.
+     var handlerReadProbe: (() throws -> Void)?
++    /// VX981 INSTRUMENT (never shipped): the connect road's steps.
++    var connectTraceProbe: (@Sendable (String) -> Void)?
+ 
+     /// TEST-ONLY (VX-613 — the VX-913 run, B3): THE START'S LATE STEPS, where a
+     /// pin holds a start the way a busy writer holds its sweep — `.swept` once
+@@ -770,6 +772,8 @@ public final class MCPServerHost: @unchecked Sendable {
+         #if DEBUG
+         // VX-776: the failing reader's seam (test-only).
+         session.handlerReadProbe = { [weak self] in try self?.handlerReadProbe?() }
++        session.connectTraceProbe = connectTraceProbe
++        connectTraceProbe?("serve: session made")
+         // VX-951: the naming window's and the gate's seams (test-only).
+         session.namingProbe = { [weak self, weak session] in
+             guard let self, let session else { return }
+diff --git a/Sources/VariorumMCP/MCPSession.swift b/Sources/VariorumMCP/MCPSession.swift
+index fa4166c7c..6123b3f22 100644
+--- a/Sources/VariorumMCP/MCPSession.swift
++++ b/Sources/VariorumMCP/MCPSession.swift
+@@ -141,6 +141,7 @@ final class MCPSession: @unchecked Sendable {
+         Task { [self] in
+             while lock.withLock({ takeOwedAnnounce() }) {
+                 try? await server.notify(ToolListChangedNotification.message())
++                self.vx981("announcer: notice written")
+             }
+         }
+     }
+@@ -436,7 +437,15 @@ final class MCPSession: @unchecked Sendable {
+     }
+ 
+     /// Serve until the connection closes — after the handshake admits it.
++    /// VX981 INSTRUMENT (never shipped).
++    func vx981(_ step: String) {
++        #if DEBUG
++        connectTraceProbe?(step)
++        #endif
++    }
++
+     func run() async {
++        vx981("run: started")
+         let opening: MCPHandshake.Opening
+         switch await MCPHandshake.openingOutcome(fd: fd) {
+         case .opened(let opened): opening = opened
+@@ -449,6 +458,7 @@ final class MCPSession: @unchecked Sendable {
+             _ = await MCPSocketTransport.writeAllOffPool(fd, MCPHandshake.overLimitResponse)  // VX-933
+             return
+         }
++        vx981("run: opening read")
+         let declared = MCPHandshake.initialize(opening.firstFrame)
+         // VX-396 (the VX-912 run, B4): a declared name holding U+0000 is, to
+         // every SQL read and write, the name before the NUL — the admission
+@@ -513,6 +523,7 @@ final class MCPSession: @unchecked Sendable {
+             }
+         }
+         if holding { lock.withLock { self.held = held } }
++        vx981("run: admitted")
+         // VX-951: the transport reports the `initialize` answer once it is
+         // written — the gate's first half.
+         // VX-952: and whatever the opening's reader read past that frame — the
+@@ -622,8 +633,10 @@ final class MCPSession: @unchecked Sendable {
+         }
+         let initializeName = admitted
+         do {
++            vx981("run: handlers set, starting")
+             try await server.start(transport: transport) { [weak self] info, _ in
+                 guard let self else { return }
++                self.vx981("run: initialize hook entered")
+                 // The SDK reads the SAME replayed frame the handshake decided
+                 // on; a name that differs (it cannot, short of two JSON
+                 // readers disagreeing) is refused, never served.
+@@ -791,6 +804,7 @@ final class MCPSession: @unchecked Sendable {
+     /// TEST-ONLY (VX-776): the host's failing reader (`MCPServerHost.handlerReadProbe`),
+     /// set once by the host before the session runs.
+     var handlerReadProbe: (() throws -> Void)?
++    var connectTraceProbe: (@Sendable (String) -> Void)?
+ 
+     /// TEST-ONLY (VX-951): the host's `namingProbe`, run inside the SDK's
+     /// `initialize` hook just after this connection named itself — before the
 diff --git a/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift b/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift
-index 5930c0efb..6f885f062 100644
+index 5930c0efb..3e20dbcb6 100644
 --- a/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift
 +++ b/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift
-@@ -91,12 +91,53 @@ struct MCPAcceptLoopServerTests {
+@@ -91,12 +91,55 @@ struct MCPAcceptLoopServerTests {
          let h = try ServerHarness()
          defer { h.tearDown() }
          try await h.within {
@@ -19,6 +104,7 @@ index 5930c0efb..6f885f062 100644
              let heard = signals(h)
 +            h.host.onConnectionsChanged = { timeline.mark("onConnectionsChanged named=\(h.host.connectedClientNames.sorted())") }
 +            VX981TipProbes.arm(h, timeline)
++        h.host.connectTraceProbe = { timeline.mark($0) }
              faults.queue(.accept, [EMFILE, ENFILE, ENOMEM, ENOBUFS, EAGAIN])
 -            let connection = try await HarnessDeadline.$seconds.withValue(10) {
 -                try await h.connect(as: "claude-code")
@@ -29,6 +115,7 @@ index 5930c0efb..6f885f062 100644
 +            timeline.mark("client socket connected")
 +            _ = MCPShim.writeAll(fd, MCPPreamble.line(key: key))
 +            let transport = HarnessTransport(fd: fd)
++            await transport.setVX981Probe { timeline.mark($0) }
 +            let sdk = Client(name: "claude-code", version: "1.0")
 +            await transport.onDrained { await sdk.disconnect() }
 +            let finished = LockIsolated(false)
@@ -59,11 +146,42 @@ index 5930c0efb..6f885f062 100644
              #expect(faults.count(.accept) == 5 && faults.remaining(.accept) == 0, "every fault met, then the real accept")
              _ = try h.approve("claude-code", spec())
              #expect(try await connection.client.callTool(name: "list_books", arguments: [:]).isError != true)
+diff --git a/Tests/VariorumMCPTests/MCPHarnessClient.swift b/Tests/VariorumMCPTests/MCPHarnessClient.swift
+index 44c6a7808..9e6f55aa7 100644
+--- a/Tests/VariorumMCPTests/MCPHarnessClient.swift
++++ b/Tests/VariorumMCPTests/MCPHarnessClient.swift
+@@ -49,8 +49,13 @@ actor HarnessTransport: Transport {
+     func connect() async throws {
+         try await inner.connect()
+         stream = await inner.receive()
++        vx981Probe?("client: transport connected")
+     }
+ 
++    /// VX981 INSTRUMENT (never shipped).
++    private var vx981Probe: (@Sendable (String) -> Void)?
++    func setVX981Probe(_ probe: (@Sendable (String) -> Void)?) { vx981Probe = probe }
++
+     func disconnect() async {
+         guard !closed else { return }
+         closed = true
+@@ -60,7 +65,11 @@ actor HarnessTransport: Transport {
+         close(fd)
+     }
+ 
+-    func send(_ data: Data) async throws { try await inner.send(data) }
++    func send(_ data: Data) async throws {
++        vx981Probe?("client: send begins")
++        try await inner.send(data)
++        vx981Probe?("client: frame written")
++    }
+ 
+     func receive() -> AsyncThrowingStream<Data, Swift.Error> {
+         receiveCalls += 1
 diff --git a/Tests/VariorumMCPTests/MCPSizeCapTests.swift b/Tests/VariorumMCPTests/MCPSizeCapTests.swift
-index 6a7661628..53c021f8d 100644
+index 6a7661628..ffb27617e 100644
 --- a/Tests/VariorumMCPTests/MCPSizeCapTests.swift
 +++ b/Tests/VariorumMCPTests/MCPSizeCapTests.swift
-@@ -147,15 +147,39 @@ struct MCPSizeCapTests {
+@@ -147,15 +147,40 @@ struct MCPSizeCapTests {
      @Test func aMessageOneByteOverTheSessionCapIsAnsweredThenClosed() async throws {
          let h = try ServerHarness()
          defer { h.tearDown() }
@@ -72,6 +190,7 @@ index 6a7661628..53c021f8d 100644
 +        let timeline = VX981Timeline("sizecap")
 +        h.host.onConnectionsChanged = { timeline.mark("host onConnectionsChanged") }
 +        VX981TipProbes.arm(h, timeline)
++        h.host.connectTraceProbe = { timeline.mark($0) }
 +        let name = "over-the-session-cap"
 +        let socket = try RawSocket(h, timeout: 30)
          defer { socket.close() }

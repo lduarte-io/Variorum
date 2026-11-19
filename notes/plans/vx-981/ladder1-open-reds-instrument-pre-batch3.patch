@@ -1,0 +1,336 @@
+diff --git a/Sources/VariorumMCP/MCPServerHost.swift b/Sources/VariorumMCP/MCPServerHost.swift
+index 35a3fdaf7..3b488ce68 100644
+--- a/Sources/VariorumMCP/MCPServerHost.swift
++++ b/Sources/VariorumMCP/MCPServerHost.swift
+@@ -329,6 +329,8 @@ public final class MCPServerHost: @unchecked Sendable {
+     /// writes only — the VX-369 sweep's row 19). Read through the host at each
+     /// read, so a probe set after a connection opened still reaches it.
+     var handlerReadProbe: (() throws -> Void)?
++    /// VX981 INSTRUMENT (never shipped): the connect road's steps.
++    var connectTraceProbe: (@Sendable (String) -> Void)?
+ 
+     /// TEST-ONLY (VX-613 — the VX-913 run, B3): THE START'S LATE STEPS, where a
+     /// pin holds a start the way a busy writer holds its sweep — `.swept` once
+@@ -669,6 +671,8 @@ public final class MCPServerHost: @unchecked Sendable {
+         #if DEBUG
+         // VX-776: the failing reader's seam (test-only).
+         session.handlerReadProbe = { [weak self] in try self?.handlerReadProbe?() }
++        session.connectTraceProbe = connectTraceProbe
++        connectTraceProbe?("serve: session made")
+         #endif
+         lock.withLock { sessions[session.id] = session }
+         onConnectionsChanged?()
+diff --git a/Sources/VariorumMCP/MCPSession.swift b/Sources/VariorumMCP/MCPSession.swift
+index 06ca95a6b..7e160393a 100644
+--- a/Sources/VariorumMCP/MCPSession.swift
++++ b/Sources/VariorumMCP/MCPSession.swift
+@@ -374,7 +374,15 @@ final class MCPSession: @unchecked Sendable {
+     }
+ 
+     /// Serve until the connection closes — after the handshake admits it.
++    /// VX981 INSTRUMENT (never shipped).
++    func vx981(_ step: String) {
++        #if DEBUG
++        connectTraceProbe?(step)
++        #endif
++    }
++
+     func run() async {
++        vx981("run: started")
+         let opening: MCPHandshake.Opening
+         switch await MCPHandshake.openingOutcome(fd: fd) {
+         case .opened(let opened): opening = opened
+@@ -387,6 +395,7 @@ final class MCPSession: @unchecked Sendable {
+             _ = await MCPSocketTransport.writeAllOffPool(fd, MCPHandshake.overLimitResponse)  // VX-933
+             return
+         }
++        vx981("run: opening read")
+         let declared = MCPHandshake.initialize(opening.firstFrame)
+         // VX-396 (the VX-912 run, B4): a declared name holding U+0000 is, to
+         // every SQL read and write, the name before the NUL — the admission
+@@ -451,6 +460,7 @@ final class MCPSession: @unchecked Sendable {
+             }
+         }
+         if holding { lock.withLock { self.held = held } }
++        vx981("run: admitted")
+         let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
+         lock.withLock { self.transport = transport }
+         await server.withMethodHandler(ListTools.self) { [weak self] _ in
+@@ -544,8 +554,10 @@ final class MCPSession: @unchecked Sendable {
+         }
+         let initializeName = admitted
+         do {
++            vx981("run: handlers set, starting")
+             try await server.start(transport: transport) { [weak self] info, _ in
+                 guard let self else { return }
++                self.vx981("run: initialize hook entered")
+                 // The SDK reads the SAME replayed frame the handshake decided
+                 // on; a name that differs (it cannot, short of two JSON
+                 // readers disagreeing) is refused, never served.
+@@ -660,6 +672,7 @@ final class MCPSession: @unchecked Sendable {
+     func announceToolsChanged() async {
+         guard declaredName != nil, (try? awaitsHerOK()) == false else { return }
+         try? await server.notify(ToolListChangedNotification.message())
++        vx981("announce: notice written")
+     }
+ 
+     /// **The descriptor's end, under ONE lock** (VX-279 — VX-184's ladder,
+@@ -698,6 +711,7 @@ final class MCPSession: @unchecked Sendable {
+     /// TEST-ONLY (VX-776): the host's failing reader (`MCPServerHost.handlerReadProbe`),
+     /// set once by the host before the session runs.
+     var handlerReadProbe: (() throws -> Void)?
++    var connectTraceProbe: (@Sendable (String) -> Void)?
+     #endif
+ 
+     /// **VX-776 — the ONE seam in front of every store read the SDK handlers
+diff --git a/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift b/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift
+index 539aac993..43a8edfaa 100644
+--- a/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift
++++ b/Tests/VariorumMCPTests/MCPAcceptLoopServerTests.swift
+@@ -87,12 +87,55 @@ struct MCPAcceptLoopServerTests {
+         let h = try ServerHarness()
+         defer { h.tearDown() }
+         try await h.within {
+-            let faults = faulted(h)
++            // VX981 INSTRUMENT: the connect's timeline, a watchdog at 9 s (the
++            // client's unread bytes, the host, a whole-process sample).
++            let timeline = VX981Timeline("acceptloop")
++            let faults = FaultQueue()
++            h.host.acceptLoopFault = { step in
++                let code = faults.next(step)
++                timeline.mark("\(step) fault=\(code.map { String($0) } ?? "none")")
++                return code
++            }
+             let heard = signals(h)
++            h.host.onConnectionsChanged = { timeline.mark("onConnectionsChanged named=\(h.host.connectedClientNames.sorted())") }
++            VX981TipProbes.arm(h, timeline)
++        h.host.connectTraceProbe = { timeline.mark($0) }
+             faults.queue(.accept, [EMFILE, ENFILE, ENOMEM, ENOBUFS, EAGAIN])
+-            let connection = try await HarnessDeadline.$seconds.withValue(10) {
+-                try await h.connect(as: "claude-code")
++            let key = try h.setupKey(for: "claude-code")
++            guard case .success(let fd) = MCPSocketRoad.connect(directory: h.directory) else {
++                throw HarnessFailure("could not connect")
++            }
++            timeline.mark("client socket connected")
++            _ = MCPShim.writeAll(fd, MCPPreamble.line(key: key))
++            let transport = HarnessTransport(fd: fd)
++            await transport.setVX981Probe { timeline.mark($0) }
++            let sdk = Client(name: "claude-code", version: "1.0")
++            await transport.onDrained { await sdk.disconnect() }
++            let finished = LockIsolated(false)
++            DispatchQueue(label: "vx981.watchdog").asyncAfter(deadline: .now() + 9) {
++                guard !finished.value else { return }
++                timeline.mark("WATCHDOG 9s: client unread=\(vx981Unread(fd)) host=\(h.host.state) named=\(h.host.connectedClientNames.sorted()) accept faults met=\(faults.count(.accept))")
++                timeline.mark("sampled \(vx981Sample("acceptloop"))")
++            }
++            timeline.mark("connect begins")
++            let connection: HarnessConnection
++            do {
++                let initialized = try await HarnessDeadline.$seconds.withValue(10) {
++                    try await HarnessDeadline.run("connect(as: claude-code)", onTimeout: { Task { await transport.end() } }) {
++                        try await sdk.connect(transport: transport)
++                    }
++                }
++                finished.setValue(true)
++                timeline.mark("connect returned")
++                connection = (HarnessClient(sdk: sdk, transport: transport, initialized: initialized), fd)
++            } catch {
++                finished.setValue(true)
++                timeline.mark("connect threw: \(error)")
++                timeline.report("RED")
++                Task { await sdk.disconnect() }
++                throw error
+             }
++            timeline.report("green")
+             #expect(faults.count(.accept) == 5 && faults.remaining(.accept) == 0, "every fault met, then the real accept")
+             _ = try h.approve("claude-code", spec())
+             #expect(try await connection.client.callTool(name: "list_books", arguments: [:]).isError != true)
+diff --git a/Tests/VariorumMCPTests/MCPHarnessClient.swift b/Tests/VariorumMCPTests/MCPHarnessClient.swift
+index 44c6a7808..9e6f55aa7 100644
+--- a/Tests/VariorumMCPTests/MCPHarnessClient.swift
++++ b/Tests/VariorumMCPTests/MCPHarnessClient.swift
+@@ -49,8 +49,13 @@ actor HarnessTransport: Transport {
+     func connect() async throws {
+         try await inner.connect()
+         stream = await inner.receive()
++        vx981Probe?("client: transport connected")
+     }
+ 
++    /// VX981 INSTRUMENT (never shipped).
++    private var vx981Probe: (@Sendable (String) -> Void)?
++    func setVX981Probe(_ probe: (@Sendable (String) -> Void)?) { vx981Probe = probe }
++
+     func disconnect() async {
+         guard !closed else { return }
+         closed = true
+@@ -60,7 +65,11 @@ actor HarnessTransport: Transport {
+         close(fd)
+     }
+ 
+-    func send(_ data: Data) async throws { try await inner.send(data) }
++    func send(_ data: Data) async throws {
++        vx981Probe?("client: send begins")
++        try await inner.send(data)
++        vx981Probe?("client: frame written")
++    }
+ 
+     func receive() -> AsyncThrowingStream<Data, Swift.Error> {
+         receiveCalls += 1
+diff --git a/Tests/VariorumMCPTests/MCPSizeCapTests.swift b/Tests/VariorumMCPTests/MCPSizeCapTests.swift
+index 6a7661628..ffb27617e 100644
+--- a/Tests/VariorumMCPTests/MCPSizeCapTests.swift
++++ b/Tests/VariorumMCPTests/MCPSizeCapTests.swift
+@@ -147,15 +147,40 @@ struct MCPSizeCapTests {
+     @Test func aMessageOneByteOverTheSessionCapIsAnsweredThenClosed() async throws {
+         let h = try ServerHarness()
+         defer { h.tearDown() }
+-        let socket = try await admittedSession(h, "over-the-session-cap")
++        // VX981 INSTRUMENT: the timeline, every line read, and what the hang-up read saw.
++        let timeline = VX981Timeline("sizecap")
++        h.host.onConnectionsChanged = { timeline.mark("host onConnectionsChanged") }
++        VX981TipProbes.arm(h, timeline)
++        h.host.connectTraceProbe = { timeline.mark($0) }
++        let name = "over-the-session-cap"
++        let socket = try RawSocket(h, timeout: 30)
+         defer { socket.close() }
++        socket.send(preamble: try h.setupKey(for: name), initialize(name))
++        for _ in 0..<16 {
++            guard let object = await socket.next() else { timeline.mark("init read nil"); break }
++            if object["id"] != nil { timeline.mark("init answer read"); break }
++            timeline.mark("init: skipped \(object["method"] ?? "?")")
++        }
++        socket.send(#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#)
++        timeline.mark("initialized sent")
++        _ = try h.approve(name, .init(rung: .read, scopeKind: .wing, scopeID: "", duration: .always))
++        timeline.mark("approved")
+         let call = line(exactly: MCPSocketTransport.lineCap + 1) { listBooks(id: 8, pad: $0) }
++        timeline.mark("line built")
+         sendInBackground(socket.fd, Data((call + "\n").utf8))
+-        let answer = await socket.nextResponse()
++        var answer: [String: Any]? = nil
++        for _ in 0..<16 {
++            guard let object = await socket.next() else { timeline.mark("next nil"); break }
++            if object["id"] != nil { answer = object; timeline.mark("over-cap answer read"); break }
++            timeline.mark("skipped \(object["method"] ?? "?")")
++        }
+         #expect(answer?["id"] is NSNull, "the overrun message's id cannot be read: \(String(describing: answer))")
+         #expect(errorOf(answer).code == MCPShim.refusalCode)
+         #expect(errorOf(answer).message?.contains("16 MiB") == true, "\(String(describing: errorOf(answer).message))")
+-        #expect(await socket.isHungUp(), "then the connection closes")
++        let fd = socket.fd
++        let drain = await HarnessWait.offPool { VX981Drain.read(fd, timeline: timeline) }
++        timeline.report(drain.firstWasEOF ? "green" : "RED read \(drain.bytes.count) B then \(drain.ending): \(drain.text)")
++        #expect(drain.firstWasEOF, "then the connection closes — VX981: read \(drain.bytes.count) B then \(drain.ending): \(drain.text)")
+     }
+ 
+     /// The cap is EXACT whatever the chunking: a line one byte over is over
+diff --git a/Tests/VariorumMCPTests/VX981Probe.swift b/Tests/VariorumMCPTests/VX981Probe.swift
+new file mode 100644
+index 000000000..5e5e5d861
+--- /dev/null
++++ b/Tests/VariorumMCPTests/VX981Probe.swift
+@@ -0,0 +1,92 @@
++import Darwin
++import Foundation
++
++// INSTRUMENT ONLY (VX-981 ladder round 1 — the two open reds). Never shipped:
++// applied to the working tree for the soak, recorded as a patch under
++// notes/plans/vx-981/, then removed.
++
++/// A timeline of marks, relative to its creation, and a report line written to
++/// stderr and to `VX981_PROBE_LOG` (append) when set.
++final class VX981Timeline: @unchecked Sendable {
++    private let lock = NSLock()
++    private let start = ContinuousClock.now
++    private var marks: [String] = []
++    let tag: String
++
++    init(_ tag: String) { self.tag = tag }
++
++    func mark(_ label: String) {
++        let elapsed = ContinuousClock.now - start
++        let ms = Double(elapsed.components.seconds) * 1_000 + Double(elapsed.components.attoseconds) / 1e15
++        let text = "+\((ms * 10).rounded() / 10)ms \(label)"
++        lock.withLock { marks.append(text) }
++    }
++
++    func dump() -> String { lock.withLock { marks.joined(separator: " | ") } }
++
++    func report(_ outcome: String) {
++        var loads = [Double](repeating: 0, count: 3)
++        _ = getloadavg(&loads, 3)
++        let line = "VX981PROBE \(tag) \(outcome) :: load \(loads.map { Int($0) }) :: \(dump())\n"
++        FileHandle.standardError.write(Data(line.utf8))
++        if let path = ProcessInfo.processInfo.environment["VX981_PROBE_LOG"] {
++            if let handle = FileHandle(forWritingAtPath: path) {
++                handle.seekToEndOfFile()
++                handle.write(Data(line.utf8))
++                try? handle.close()
++            } else {
++                FileManager.default.createFile(atPath: path, contents: Data(line.utf8))
++            }
++        }
++    }
++}
++
++/// A whole-process `sample` (1 s) into `VX981_SAMPLE_DIR`, blocking the caller.
++func vx981Sample(_ tag: String) -> String {
++    guard let dir = ProcessInfo.processInfo.environment["VX981_SAMPLE_DIR"] else { return "no-sample-dir" }
++    let path = "\(dir)/sample-\(tag)-\(getpid())-\(Int(Date().timeIntervalSince1970)).txt"
++    let process = Process()
++    process.executableURL = URL(fileURLWithPath: "/usr/bin/sample")
++    process.arguments = ["\(getpid())", "1", "-mayDie", "-file", path]
++    process.standardOutput = FileHandle.nullDevice
++    process.standardError = FileHandle.nullDevice
++    do { try process.run() } catch { return "sample-failed: \(error)" }
++    process.waitUntilExit()
++    return path
++}
++
++/// Bytes a descriptor holds unread right now (`FIONREAD`); -1 on error.
++func vx981Unread(_ fd: Int32) -> Int32 {
++    var count: Int32 = 0
++    let fionread = UInt(0x4004_667F)  // _IOR('f', 127, int)
++    let result = withUnsafeMutablePointer(to: &count) { ioctl(fd, fionread, $0) }
++    return result == 0 ? count : -1
++}
++
++/// What `RawSocket.isHungUp` would have said, plus everything read after it:
++/// reads until EOF, an error (the receive timeout) or 1 MiB. `firstWasEOF` is
++/// exactly `isHungUp()`'s verdict.
++struct VX981Drain: Sendable {
++    let firstWasEOF: Bool
++    let bytes: Data
++    let ending: String
++
++    var text: String { String(decoding: bytes, as: UTF8.self) }
++
++    static func read(_ fd: Int32, timeline: VX981Timeline) -> VX981Drain {
++        var collected = Data()
++        var first: Int? = nil
++        var ending = "cap"
++        var buffer = [UInt8](repeating: 0, count: 65_536)
++        while collected.count < (1 << 20) {
++            let count = Darwin.read(fd, &buffer, buffer.count)
++            if first == nil { first = count; timeline.mark("drain first read=\(count) errno=\(count < 0 ? errno : 0)") }
++            if count == 0 { ending = "EOF"; break }
++            if count < 0 { ending = "read -1 errno \(errno)"; break }
++            collected.append(contentsOf: buffer[0..<count])
++            timeline.mark("drain +\(count) bytes")
++        }
++        timeline.mark("drain ended: \(ending)")
++        return VX981Drain(firstWasEOF: first == 0, bytes: collected, ending: ending)
++    }
++}
+diff --git a/Tests/VariorumMCPTests/VX981TipProbes.swift b/Tests/VariorumMCPTests/VX981TipProbes.swift
+new file mode 100644
+index 000000000..58b074b69
+--- /dev/null
++++ b/Tests/VariorumMCPTests/VX981TipProbes.swift
+@@ -0,0 +1,5 @@
++// INSTRUMENT ONLY (VX-981 ladder round 1). The PRE-BATCH-3 tree's version: the
++// batch-3 seams (`gateEventProbe`, `namingProbe`) do not exist here.
++enum VX981TipProbes {
++    static func arm(_ h: ServerHarness, _ timeline: VX981Timeline) {}
++}
