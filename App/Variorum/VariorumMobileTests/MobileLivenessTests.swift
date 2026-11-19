@@ -1089,8 +1089,11 @@ struct MobileLivenessTests {
         }
     }
 
-    /// The window-hosted tests' teardown (VM-19).
+    /// The window-hosted tests' teardown (VM-19): whatever holds the
+    /// keyboard inside the window lets go BEFORE the window hides — hiding
+    /// alone never resigns a first responder.
     private static func leave(_ window: UIWindow) {
+        window.endEditing(true)
         window.isHidden = true
     }
 
