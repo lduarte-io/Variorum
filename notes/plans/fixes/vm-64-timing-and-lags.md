@@ -183,7 +183,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
 | Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 — the merge, the rebuilds, the red build, the whole Core package — is the merge block's below) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the stage |
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
-| Ladder r2 · fix pass | **IN-PROGRESS** (first turn DONE; the second waits for the final calls and the QUIET window's end) | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, then the agreed no-choice fixes with their pins; the reviewer's final calls, the whole Core package and the final builds in the second turn |
+| Ladder r2 · fix pass | **IN-PROGRESS** (first turn DONE; the final calls are in; the second turn's part A — edits — in progress, its part B — the first compile, the whole Core package, the red build — waits for the QUIET window's end) | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, then the agreed no-choice fixes with their pins; the reviewer's final calls, the whole Core package and the final builds in the second turn |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -805,7 +805,23 @@ written.
 | R2 — the no-choice fixes and their pins (the responses name which) | DONE — findings 1 (delete + ★ legs) and 3 `64af6d64a`, 8(a) `6b6c288b1`, 9 `28dc98ac5`, O-1 `c42078746`; UNCOMPILED (a QUIET window from 15:13 forbids the builds); runs PENDING the stage. HELD for the final call: finding 1's Put back leg; finding 2 (not applied — disputed shape) |
 | R3 — the docs corrections of findings 5 and 6 (the record, the handoff, the closeout drafts) | DONE — the record `f45d25498` (with 8(b)'s note and O-1's commands), the handoff and the drafts `8eeafb614` |
 | R4 — `swift test --filter` for every Core suite touched; §7's "Ladder round 2 — fix pass" closeout; the first turn's report | DONE (this commit) — no Core file changed, so no Core suite touched; §7 ▸ "Ladder round 2 — fix pass" |
-| R5 — second turn: the reviewer's final calls applied; the whole Core package; `vm64-gate2` (phone + Mac) and `vm64-gate2-red` (revert announced first); the hosted commands | NOT-STARTED — the builds also wait for the QUIET window's end (the recipes: §7 ▸ "Ladder round 2 — fix pass") |
+| R5 — second turn: the reviewer's final calls applied; the whole Core package; `vm64-gate2` (phone + Mac) and `vm64-gate2-red` (revert announced first); the hosted commands | TAKEN OVER by the second turn's rows S0–S7 below (a fresh implementer; the first turn's session reached its context limit after its closeout — nothing of its work was uncommitted: the tree was clean and pushed at `31630a151`) |
+
+**Second turn (implementer, opus, fresh; started 2026-11-19, inside the QUIET window that began 15:13).** Base `31630a151`
+(the reviewer's final calls, `notes/plans/fixes/vm-64-ladder-round2.md` ▸ "Final calls (reviewer)"). Part A is edits
+only (legal under QUIET); part B — the pass's FIRST compile, the whole Core package, the red build — waits for the
+orchestrator's word that the window ended. **No revert is in flight.**
+
+| Piece | State |
+|---|---|
+| S0 — this live status | DONE (this commit) |
+| S1 — finding 1's Put back leg, arm (A): ONE line in `MobileLine.putBack` (the success path); the notification's name and its listener in the Library's model, alive only inside a running hold, its own session only; the pin as the final call words it, plus a witness pin whose only road between the Undo and the row is arm (A) (Part of VM-68) | NOT-STARTED |
+| S2 — O-1's condition 2: the company-safe GUARD in `MobileNoteOpenOnceTests` — the hosted open reads the note once by the statement trace; the old shape (`loadOnce()` then `start()`) reads it twice in the same test (VM-66, VM-69); test-only | NOT-STARTED |
+| S3 — record edits: the handoff (P-2-1's scope; VM-226's second road; the gate's own leg; VM-240/241/242 in every list), the closeout drafts ((e)5, (e)6, (b) Born, (c), (d), (g)), the `MobileTimingTests` header (comment only) | NOT-STARTED |
+| S4 — the pass's FIRST compile: phone + Mac `build-for-testing` into `vm64-gate2` | PENDING the QUIET window's end |
+| S5 — the whole Core package, `swift test`, once, on the final tree | PENDING the QUIET window's end |
+| S6 — the red-on-old phone build into `vm64-gate2-red` (the first turn's recipe plus arm (A)'s hunks; announced and committed before it; restored; `git status` / `git diff HEAD` empty) | PENDING the QUIET window's end |
+| S7 — §7 ▸ "Ladder round 2 — fix pass" ▸ its "Second turn" part; the §5 rows flipped | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
