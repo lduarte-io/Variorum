@@ -51,6 +51,18 @@ private func scalarName(_ value: UInt32) -> String { String(format: "U+%04X", va
 
 @Suite("VX-955 — the words search asks the index about follow the index's own tokenizer")
 struct SearchTokenizerSweepTests {
+    /// The table names the options it was measured under, and they are the
+    /// live index's — a migration that changes them must re-measure (the
+    /// sweep below then says what moved).
+    @Test func theTableWasMeasuredUnderTheLiveIndexsTokenizer() throws {
+        let db = try AppDatabase.inMemory()
+        let live = try db.read { db in try liveTokenizerOptions(db) }
+        #expect(live.joined(separator: " ") == SearchTokenCharacters.tokenizerOptions)
+        #expect(SearchTokenCharacters.transitions == SearchTokenCharacters.transitions.sorted()
+                && Set(SearchTokenCharacters.transitions).count == SearchTokenCharacters.transitions.count,
+                "the transition points ascend strictly")
+    }
+
     /// EVERY Unicode scalar (U+0000…U+10FFFF, the surrogates being no
     /// scalars): a one-scalar word is asked of the index exactly when the
     /// linked tokenizer finds a token in it. On a disagreement the message

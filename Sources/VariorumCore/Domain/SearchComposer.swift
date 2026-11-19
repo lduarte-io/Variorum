@@ -142,8 +142,8 @@ public enum SearchComposer {
     // MARK: - The text half → an FTS5 MATCH expression
 
     /// The AST's text half as an FTS5 query; nil when nothing in it can match
-    /// a token (every leaf is punctuation — "—", "#"). Throws when only
-    /// negations remain.
+    /// a token (every leaf folds to nothing the index keeps — punctuation or
+    /// symbols: "—", "#", "+"). Throws when only negations remain.
     public static func ftsMatch(_ text: SearchText) throws -> String? {
         switch text {
         case .word(let word), .phrase(let word):
@@ -183,22 +183,15 @@ public enum SearchComposer {
         "\"" + s.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 
-    /// Does the word hold at least one character `unicode61` keeps as a TOKEN
-    /// character (anything that is not whitespace, punctuation or a control /
-    /// format code — its default separator classes)? A word of separators only
-    /// would be an FTS5 phrase with no tokens.
+    /// Does the INDEX find a token in the word — does its own tokenizer, as
+    /// linked, keep at least one of its characters as a token character? A
+    /// word it finds none in would be an FTS5 phrase with no tokens, which
+    /// matches no row and, beside real words, empties the answer (VX-955).
+    /// The set is the tokenizer's own, measured (`SearchTokenCharacters` —
+    /// never Unicode's general categories, which disagree with SQLite's
+    /// table: symbols and marks separate there, unknown scalars are tokens).
     static func hasTokenCharacter(_ word: String) -> Bool {
-        word.unicodeScalars.contains { scalar in
-            switch scalar.properties.generalCategory {
-            case .spaceSeparator, .lineSeparator, .paragraphSeparator,
-                 .connectorPunctuation, .dashPunctuation, .openPunctuation, .closePunctuation,
-                 .initialPunctuation, .finalPunctuation, .otherPunctuation,
-                 .control, .format, .unassigned, .surrogate:
-                return false
-            default:
-                return true
-            }
-        }
+        SearchTokenCharacters.holdsToken(word)
     }
 
     // MARK: - The passage page
