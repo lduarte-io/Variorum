@@ -361,7 +361,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 3 — VM-63 | DONE but one re-run — its suites ran in the shared window (batch 4's, 2026-11-19): every phone suite green (the hoist pin 5/5, whole phone target); a targeted Mac leg of its groups A–D + `CapabilityRegistryTests` + `StatusCenterTests` green but one test, the new `VM63MacWingBrainsHoistPinTests` pin's test-side dependency scope (fixed c75bdb9af; its re-run alone PENDING). Records: "Batch 3 record", "Batch 4 record" |
 | Main merged in at the seam after batch 3 | DONE (871bde99a — main 359ae214d, VX-980's merge; clean, by the orchestrator; NOT yet built or tested on this branch — batch 4's builds and the shared window are the first on the merged tree) |
 | Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | DONE but one re-run — the door (5c80d058b) green in the whole phone target but the shell pin's test-side premise (fixed 931c77f79); the shared window ran (the whole phone target; a targeted Mac leg in place of the whole Mac target, which runs once at the merge gate); both targets build for testing green at c75bdb9af. PENDING: the follow-up claim — `MobileWingDoorShellTests` and `VM63MacWingBrainsHoistPinTests` alone on c75bdb9af's products. See "Batch 4 record" |
-| Ladder round 1 | NOT-STARTED |
+| Ladder round 1 | IN-PROGRESS — a fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim; the diff is `origin/main...vm-55-wings-underneath` at 5fea9a453 plus this notes commit; findings in `notes/plans/fixes/vm-55-ladder-round1.md` |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
 
@@ -1973,6 +1973,23 @@ off by design). xcodebuild exited on its own. Log `DerivedData/vm55-b4-mac-leg.l
   its 537 tests in one launch).
 
 ## Ladder
+
+Cap FIVE rounds at her word ("up to 5 review rounds as long as a major is found"): a round that surfaces a new
+BLOCKER or MAJOR earns the next; a round with none closes the ladder. A fresh `fable-reviewer` per round, the
+prompt `notes/REVIEW_PROMPT.md` verbatim. Cross-model flow: findings go verbatim to a fresh `opus-implementer`
+(every batch implementer is past the context guideline), its agree-or-dispute returns to the reviewer for the
+final call, the implementer applies the confirmed fixes with red-on-old pins, and the next round's fresh
+reviewer re-checks them. Each round's findings file is `notes/plans/fixes/vm-55-ladder-round<N>.md`; the
+dispositions land here before the next round is spawned.
+
+Owed to the first fix window (two re-runs of test-only fixes made after the shared window, both built green at
+c75bdb9af): the phone wing-door types (`MobileWingDoorShellTests`, `MobileWingListSheetTests`,
+`MobileWingDoorTests`, `MobileWingDoorGeometryTests`, `MobileWingStandTests`) and the Mac
+`VM63MacWingBrainsHoistPinTests`.
+
+### Round 1
+
+*(spawned 2026-11-19 ~09:55 at 5fea9a453 + this notes commit)*
 
 *(rounds, findings, dispositions)*
 
