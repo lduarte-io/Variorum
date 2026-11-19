@@ -1441,7 +1441,7 @@ re-landed on main's message seam.
 
 **NOT YET DONE — this section is a DRAFT, written 2026-11-19 at tip `2f0687fd4` by a closeout drafter (documents
 only; no code, build or stage).** Still ahead when it was written: batch C's window (3) and the arm it decides
-(VM-24, VM-19, VM-17); R2-N1's red/green window; the instruments' removal commit (round 1's F7); ladder round 3
+(VM-24, VM-19, VM-17); the instruments' removal commit (round 1's F7); ladder round 3
 and any round it earns; the merge behind vm-55 with VM-16 re-landed on main's message seam; the gate's three
 claims (the whole phone target, the Mac leg on the merged tree, the simulator walk); the PROVISIONAL bundle and
 F8's question filed in `notes/QUESTIONS.md`; the tickets minted; `Tools/canon-size`; the PR and its merge; the
@@ -1561,9 +1561,10 @@ table below; "red/green" means the pin was seen red on the pre-fix product and g
   R2-N1's `theBookDetailsRowsSpeakTheirCaptionsAsHints`) · `MobileArchivedStarredBookTests`
   (`anArchivedStarredBooksDetailsCarriesTheUnarchiveDoor`, F3's `aRacedUnarchiveSpeaksTheSharedSentence`).
 - *Evidence.* Window (1): red on the seam commit `7c9fc0151`, green on the tip. Window (5): F3 red/green; F5's two
-  guards red only because the reverted row had no label for the driver to find, green on the tip. R2-N1:
-  PENDING(R2-N1 window) — and if the driver cannot read a SwiftUI hint, the modifiers and the pin come out by a new
-  commit and the line goes to VM-218 (round 2's final call): PENDING(outcome).
+  guards red only because the reverted row had no label for the driver to find, green on the tip. R2-N1's window
+  (07:19:38–07:23:59): its pin red on `046a886fc`'s `MobileBookDetails.swift`, green on the tip, F5's guards green
+  on both sides — so the hosted driver can read a SwiftUI hint and the fix stands (round 2's "comes out by a new
+  commit" branch does not apply).
 
 **VM-83 — order, one star door, "gathering" (W-068, W-071, W-073).**
 - *The order (W-068).* Was: the retired `Shared/ShelfOrder.ordered` — pins, then journal-trait books, then the rest
@@ -1641,9 +1642,10 @@ table below; "red/green" means the pin was seen red on the pre-fix product and g
 
 ### The evidence
 
-Every window below was claimed through nov18 under `Tools/stage` and run on the standing phone-suite simulator
-(iPhone 17 Pro, iOS 26.2), addressed by id (never written here). Windows (2), (1) and (5) ran from the
-orchestrator's throwaway detached checkout (`~/dev/variorum-vm-78-pins`, its own DerivedData).
+The phone windows ran on the standing phone-suite simulator (iPhone 17 Pro, iOS 26.2), addressed by id (never
+written here), under `Tools/stage` claims nov18 granted. Windows (2), (1), (5) and R2-N1's ran from the
+orchestrator's throwaway detached checkout (`~/dev/variorum-vm-78-pins`, its own DerivedData); F4's follow-up was
+the orchestrator's too.
 
 | Window | When | What ran | Verdict | Reds, by name | Bundle and log |
 |---|---|---|---|---|---|
@@ -1651,7 +1653,7 @@ orchestrator's throwaway detached checkout (`~/dev/variorum-vm-78-pins`, its own
 | (1) batch A | claimed 05:26:26, released 05:33:04 | checkout at `437696f06`; the eight files at the seam `7c9fc0151`, then the tip; sixteen phone types; the Mac leg | phone RED: 84 tests in 16 suites failed, 52 issues. phone GREEN: 84 tests in 16 suites passed, no known issue. Mac leg: 110 tests in 17 suites passed | exactly the 21 expected: the 18 new pins and the 3 edited existing pins named in batch A's LIVE STATUS | bundles: the record does not say — PENDING(orchestrator: state them). Logs `vm78-window-a-red.log`, `vm78-window-a-green.log`, `vm78-window-a-mac.log` |
 | (5) the round-1 fix pass | claimed 06:26:55, released 06:31:48 | checkout at `140869902`; four product files at `0180727de`, then the tip; ten types | RED: 75 tests in 10 suites failed, 9 issues incl. 2 known. GREEN: 75 tests in 10 suites passed with 2 known issues | four: `aRacedUnarchiveSpeaksTheSharedSentence` (F3) · `theTrashNamesAnUntitledSavedVersionAsOne` (N2) · `theFinishRowsConfirmPresentsAndItsFinishActs` and `theFinishRowsConfirmCancelChangesNothing` (F5's guards, red only for the missing row label). F4's pin did not run (its type was misnamed in the recipe) | RED bundle `fixpass-red.xcresult` UNREADABLE (stopped before it was finalized) — its log `vm78-window-f-red.log` is the evidence; GREEN bundle `fixpass-green.xcresult` reads (75: 74 passed, 1 expected failure, 0 failed); log `vm78-window-f-green.log` |
 | F4's follow-up | 06:52–06:54 | the seeder at `0180727de`, then the tip; one type, `MobilePocketGuideDeletionTests` | RED: 4 tests in 1 suite failed. GREEN: 4 tests in 1 suite passed | one: `theShelfLessonDescribesTheShelfThatExists` (3 issues — the three expectations F4 added) | `f4-red.xcresult` and `f4-green.xcresult` both read; logs `vm78-window-f4-red.log`, `vm78-window-f4-green.log` |
-| R2-N1's pin | PENDING | `MobileBookDetails.swift` at `046a886fc`, then the tip; `MobileBookStateRowTests` + `MobileFinishConfirmTests` | PENDING | expected one: `theBookDetailsRowsSpeakTheirCaptionsAsHints` — PENDING(seen) | PENDING(`r2n1-red`/`r2n1-green` bundles read or unreadable; logs) |
+| R2-N1's pin | claimed 07:19:38, released 07:23:59 | checkout at `ef1430142`; only `MobileBookDetails.swift` at `046a886fc`, then the tip; `MobileBookStateRowTests` + `MobileFinishConfirmTests` | RED: 11 tests in 2 suites failed, 4 issues. GREEN: 11 tests in 2 suites passed, 0 failed | one: `theBookDetailsRowsSpeakTheirCaptionsAsHints` (F5's two guards green on both sides) | RED bundle `r2n1-red.xcresult` UNREADABLE (its `xcodebuild` was still alive 90 s after the verdict and was stopped at the bound) — its log `vm78-window-r2n1-red.log` is the evidence; GREEN bundle `r2n1-green.xcresult` reads; log `vm78-window-r2n1-green.log`. The run's second unreadable red bundle, after `fixpass-red` |
 | (3) batch C, matrix only | PENDING | M1, M2, M3, M4, M5, M6a, M6b, M7, M9-red, M9-green (batch C's matrix) | PENDING | PENDING (M1/M6a/M6b red by design: the standing red's two cases) | PENDING(`c-M*.xcresult` read or unreadable; `vm78-c-<run>.log`) |
 | batch C's second short window | PENDING(if the arm calls for one) | PENDING | PENDING | PENDING | PENDING |
 | VM-16 re-landed | PENDING(after the merge) | its pins against a door that reads the label of a quiet press, then the re-landed door | PENDING | PENDING | PENDING |
@@ -1802,7 +1804,7 @@ changed." · "Unarchive".
 - **VM-94:** the Starred page's "book" kind word on a gathering row.
 - **VM-218 (VoiceOver and text size):** Book Details' name row carries `.accessibilityLabel("Rename Book")`
   (`MobileBookDetails.swift`, the identity block, from before this run), which replaces the book's name for
-  VoiceOver. And R2-N1's line if its fix comes out: PENDING(R2-N1 outcome).
+  VoiceOver. (R2-N1's own fix stands — its window proved it — so no R2-N1 line goes here.)
 - **VM-175 (wave 4):** the Finish confirm's "Open Arrivals first" button.
 - **VM-161 (wave 4, Seal and unseal):** the phone's Unseal; when it lands the sealed sentence names it.
 - **VM-115 and VM-161 (W-070, W-112):** the door-set hoist retires `finishRowAct(for:)`'s phone-side reading of
@@ -1856,7 +1858,8 @@ changed." · "Unarchive".
   `e48ef2f30..db4f1ec6b`): **0 BLOCKER · 0 MAJOR · 3 MINOR · 5 NIT** (findings `a00581328`, final calls
   `874da32d8`); nobody disputed, none FINDER-FIXES; it re-checked every round-1 final call as applied. R2-F1: the
   unreadable red bundle and the bundle rule; R2-F2: two "no arm" lines and arm A's posture expectation; R2-F3: the
-  probe's (i′) (`78179b765`); R2-N1: the rows' hints (`01205f799`, `97282e72f`); R2-N2, N3, N5: record lines
+  probe's (i′) (`78179b765`); R2-N1: the rows' hints (`01205f799`, `97282e72f`; red/green in its own window,
+  07:19:38–07:23:59); R2-N2, N3, N5: record lines
   (`046a886fc`, `ed7b82ef4`); R2-N4: a line for VM-62. It did not close the ladder (F1 stands).
 - **Round 3:** PENDING(round 3) — a fresh `fable-reviewer` reading, as new work, window (3)'s outcome and the
   instruments' removal, (i′) and its run, R2-N1's fix with its red and green, R2-F2's lines, and VM-16 re-landed
@@ -1962,7 +1965,8 @@ another wave-1 run takes 75 first — the PL-25b convention). The line for the m
 >
 > **The windows.** Batch B 68/6 green after its seven reds; batch A 84/16 green after its 21 reds, the Mac's 17 types
 > 110/17 green over the hoists; the fix pass 75/10 green after its four reds; F4's follow-up 4/1 after its one red.
-> PENDING(window 3; R2-N1; the whole phone target; the Mac leg on the merged tree; the walk).
+> R2-N1's pin 11/2 after its one red. PENDING(window 3; the whole phone target; the Mac leg on the merged tree; the
+> walk).
 >
 > **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (the order, the Finish
 > confirm, "(archived)" in pickers, Delete Gathering…, the Trash's first paint). MobileSoul §6: PL-75.
@@ -1990,8 +1994,9 @@ another wave-1 run takes 75 first — the PL-25b convention). The line for the m
 > - **2026-11-19 · VM-78 — Run: Fixes to what's there** (PR PENDING, merge PENDING): ten members in three batches
 >   (B: VM-16/43/3/84/33 · A: VM-81/83/21 · C: VM-24/17) plus VM-20 and VM-19 carried; Fable orchestrated,
 >   Opus implemented, a fresh fable-reviewer per round — round 1 0B/2M/6m/11n, round 2 0B/0M/3m/5n, round 3
->   PENDING; windows (2) 68/6, (1) 84/16 + Mac 110/17, (5) 75/10, F4 4/1, each after its reds; PENDING(window 3,
->   R2-N1, the gate's three claims); PROVISIONALS QUESTIONS PENDING(number); born PENDING.
+>   PENDING; windows (2) 68/6, (1) 84/16 + Mac 110/17, (5) 75/10, F4 4/1, R2-N1 11/2, each after its reds (two red
+>   bundles unreadable, their logs kept); PENDING(window 3, the gate's three claims); PROVISIONALS QUESTIONS
+>   PENDING(number); born PENDING.
 
 **`notes/QUESTIONS.md`, the bundle (draft; the next free number at the merge):**
 
