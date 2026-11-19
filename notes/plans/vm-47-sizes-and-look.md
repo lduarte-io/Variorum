@@ -301,12 +301,12 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 1.3 | The editor's face (`MobileEditorStyle`, face values only: note body per the sheet) | DONE (`575bb8677`) — body = the `noteBody` role (Study Iowan 17, Terminal mono 15) through `UIFontMetrics(.body)`; paragraph gap 14 / 12 and line pitch 27 / 25, both scaling with the body; `MobileVoiceTests` pins moved; the text inset NOT changed; phone `build-for-testing` green; tests PENDING the stage |
 | 1.4 | W-024: `MobileShelfLayout` re-derived from the roles; the quick-entry text is the note body; the hint fits; pins moved | DONE (`6b02c806c`; the filter row's floor and its pins `c1e80f315`) — `quickEntryLineHeight` 24 + `metaLineHeight` 18 replace `smallLineHeight` 14; `bookRowHeight` 44, `writingBoxChromeHeight` 60, both derived on the page; the floor and the collapsed box take the box's line AT THE CURRENT TEXT SIZE (`split(…, lineHeight:)`); the box types `noteBody` on its 24 pt line; the hint shows the longest of its own cuts that fits (P-47-6); the shelf's sites read roles; `MobileShelfLayoutTests` moved + 3 new pins; phone `build-for-testing` green; tests PENDING the stage |
 | 1.5 | The source-scan guard pin (no `tokens.small`, no literal under 13, outside `Spike/`/`Perf/`) | DONE (`bb30a4132`) — `MobilePhoneTypeSourceTests` (3 tests): no Mac type slot, no literal size or caption style under 13, no literal `minimumScaleFactor`; its patterns measured red on `fe85ea6d5` (332 slot reads, 32 sub-13 sites) and clean now; run PENDING the stage |
-| 1.6 | Both schemes `build-for-testing` green → READY for the stage → the stage window: suites + walk captures | IN-PROGRESS — both schemes `build-for-testing` green at `1b2908a64` (`DerivedData/vm47-b1`); READY for the stage, awaiting the orchestrator's GO; then: the whole phone target + the Mac's theme suites, the walk into `notes/plans/vm-47-screens/` |
+| 1.6 | Both schemes `build-for-testing` green → READY for the stage → the stage window: suites + walk captures | DONE for the suites (rows 1.6c–1.6d); the walk MOVED to batch 2's seam (row 1.6e) |
 | 1.6b | CUTOVER (orchestrator, machinery honesty): the batch-1 implementer ended its turn READY at about 650k tokens of context, every piece committed and both schemes building. The stage window (suites, any reds, the walk) goes to a FRESH closer briefed from this record, not to the long session | the closer adds its rows below |
-| 1.6c | The suites, leg 1: the whole phone target (`-only-testing:VariorumMobileTests`, test-without-building from `DerivedData/vm47-b1`, the standing device) | IN-PROGRESS — change of plan: the GO reached the orchestrator while the closer was still reading, so the ORCHESTRATOR runs this leg under its own claim; the closer then dispositions every red it hands over (a pin batch 1 moved by design: move it, the commit says why · a regression: narrow fix, the red as its red-on-old · not this batch's: proven on `fe85ea6d5` or a known flake, recorded, nothing changed). Counts PENDING |
-| 1.6d | The suites, leg 2: the Mac's `Shared/Theme` suites (`ThemeTokenTests PaletteDerivationTests NoLiteralColourTests SharedPageStyleTests PaletteReachTests MarkdownPaletteWritersTests HelperWindowThemeTests`) | IN-PROGRESS — run by the orchestrator after leg 1 (same change of plan); reds dispositioned by the closer as in 1.6c. Counts PENDING |
-| 1.6e | The walk: a dedicated device `vm47-walk` (iPhone 17 Pro, iOS 26.2; created by the closer, not booted; its id lives in the reports, never here), seeded from a fresh install through the app's own doors (a first write lands the Journal and the sample book; the Debug pocket guide gives chapters, a three-take block and a tag; one note to the Trash; a saved version; one comment), driven by a THROWAWAY XCUITest driver kept in the gitignored `notes/plans/vm-47-screens/instruments/` (built through the `TK2SpikeUITests` scheme into its own `DerivedData/vm47-walk`; the copy in `VariorumMobileUITests/` exists only for that build; never committed). Core screens (Bookcase at rest and focused · Library rows with the filter row · search · a note in Write) × Study/Terminal × light/dark × default/largest (AX5); the rest × Study light default, Terminal dark default, Study light largest. Appearance and text size set by `xcrun simctl ui`, the voice by launch argument; captures are the device framebuffer, into `notes/plans/vm-47-screens/` | NOT-STARTED — awaits its own stage GO; the driver's headless build waits for the orchestrator's word (no xcodebuild while the suites run) |
-| 1.6f | The record close: §6 "Batch 1 — results" (counts, every red and its disposition, the walk's captures and findings, what was fixed, what is owned elsewhere); §5 for any new PROVISIONAL; this table flipped | NOT-STARTED |
+| 1.6c | The suites, leg 1: the whole phone target (`-only-testing:VariorumMobileTests`, test-without-building from `DerivedData/vm47-b1`, the standing device) | DONE (run by the ORCHESTRATOR under its own claim — the GO reached it while the closer was still reading) — **883 tests in 145 suites, 19 issues including 8 known** (XCTest "Executed 0"; nothing skipped); three reds, each dispositioned in §6: VM-24's caret suite (not this batch's, nothing changed) · `chromeHoldsAtXXXLargeWhileHerWordsKeepGrowing` (a real defect in the UIKit road, FIXED `4ec664f2b`) · `writingKeepsItsShareUnderAKeyboardSizedRegion` (the pin's denominator carried the path line; the pin MOVED to the rule's room, `29f2cbd41`). Both schemes `build-for-testing` green at `29f2cbd41`. The targeted re-run of the two fixes and the layer: PENDING its own short stage window (§6 names the suites) |
+| 1.6d | The suites, leg 2: the Mac's `Shared/Theme` suites (`ThemeTokenTests PaletteDerivationTests NoLiteralColourTests SharedPageStyleTests PaletteReachTests MarkdownPaletteWritersTests HelperWindowThemeTests`) | DONE (orchestrator) — **42 tests in 7 suites passed**, `** TEST EXECUTE SUCCEEDED **`, no red. The red-2 fix touches only `PhoneType.swift`'s `#if os(iOS)` arm, so the Mac leg stands (Mac `build-for-testing` green at `29f2cbd41`) |
+| 1.6e | The walk: a dedicated device `vm47-walk` (iPhone 17 Pro, iOS 26.2; created by the closer, never booted; its id lives in the reports, never here), seeded from a fresh install through the app's own doors (a first write lands the Journal and the sample book; the Debug pocket guide gives chapters, a three-take block and a tag; one note to the Trash; a saved version; one comment), driven by a THROWAWAY XCUITest driver kept with its runbook in the gitignored `notes/plans/vm-47-screens/instruments/` (`VM47WalkDriver.swift`, `walk.zsh` — each with a header that says how to build and run it cold, the device, the seed steps and every capture by name; built through the `TK2SpikeUITests` scheme into its own `DerivedData/vm47-walk`; the copy in `VariorumMobileUITests/` exists only for that build; never committed). Core screens × Study/Terminal × light/dark × default/largest (AX5); the rest × Study light default, Terminal dark default, Study light largest | MOVED — the orchestrator's call: **batch 1's suites close here; its walk rides batch 2's seam as ONE walk covering batches 1 and 2** (the queue is long, and a walk at the largest size belongs on the fixed tree). The driver's headless build is GREEN at `29f2cbd41` (`** TEST BUILD SUCCEEDED **`; the bundle carries `VM47Walk/test01_seed · test10_core · test20_rest`; the temporary copy removed, tree clean). The filter row at Display Zoom (320 pt) is NOT capturable (simctl cannot switch Display Zoom on) — recorded as not taken; the geometry pins are its evidence |
+| 1.6f | The record close: §6 "Batch 1 — results" (counts, every red and its disposition, what was fixed, what is owned elsewhere); §5 for any new PROVISIONAL; this table flipped | DONE (this commit) for the suites; the walk's findings land with batch 2's walk; the targeted re-run's counts PENDING its stage window. No new PROVISIONAL |
 | 1.7 | §6 "Batch 1 — results" written | DONE (this commit) — counts and the walk PENDING the stage window |
 | 2 | Controls and targets (VM-50; VM-49's application) | NOT-STARTED |
 | 3 | Voice and palette; borders (VM-51, VM-54) | NOT-STARTED |
@@ -343,10 +343,13 @@ ladder's findings and dispositions, the canon deltas, the tickets filed.
 
 ### Batch 1 — results (implementer: Opus, 2026-11-19)
 
-**Not done in this batch, first:** the keyboard bar's 14 pt chrome (`MobileKeyboardBar`, eight `face.chrome`
-reads) is left for VM-137 — the sheet says the bar's shape and its 22 pt glyphs are LK-4/LK-3's, its 48 pt
-row holds, and 14 is above the floor. The stage window (suite counts, walk captures) is PENDING the
-orchestrator's GO. Nothing else in the batch's seven items is left.
+**Not done in this batch, first:** (1) the WALK — moved by the orchestrator to batch 2's seam, as one walk
+covering batches 1 and 2 on the fixed tree (its driver is built and ready, §6 "Stage window" below); (2) the
+targeted re-run of the two red-fixes and the layer is PENDING its own short stage window; (3) the filter row
+at Display Zoom (320 pt) cannot be captured on a simulator — not taken; (4) the keyboard bar's 14 pt chrome
+(`MobileKeyboardBar`, eight `face.chrome` reads) is left for VM-137 — the sheet says the bar's shape and its
+22 pt glyphs are LK-4/LK-3's, its 48 pt row holds, and 14 is above the floor. Nothing else in the batch's
+seven items is left.
 
 **What was built, one pointer per piece.**
 
@@ -396,11 +399,77 @@ surfaceWriteValuesFollowTheLiveVoice` (the editor face), `MobileReadTests.headin
 → `theBoxLinesMatchTheRealFonts`), `MobileFilterRowGeometryTests` (`theChromeFontDoesNotScale…` →
 `theChromeScalesToXXXLargeAndThenHolds`; the two no-shrink pins carry the Terminal-320 known issue, VM-50).
 The Mac's token pins (`ThemeTokenTests`, `PaletteDerivationTests`, `NoLiteralColourTests`, `SharedPageStyleTests`)
-are untouched and PENDING their run. Red-on-old: the type pass is a design row — its evidence is the walk; the
+are untouched (their run: below, green). Red-on-old: the type pass is a design row — its evidence is the walk; the
 guard's patterns were run over the pre-batch tree `fe85ea6d5` (332 Mac type-slot reads and 32 sub-13 sites)
 and over this tree (none).
 
-**Walk captures:** PENDING (the screens list is in the READY report).
+**The stage window (closer: a fresh Opus session, 2026-11-19; machinery note: the orchestrator ran both suite
+legs itself under its own claim, the GO having arrived while the closer was still reading; the closer
+dispositioned the reds, fixed, rebuilt, and built the walk driver).**
+
+- **Leg 1, the whole phone target** (`-only-testing:VariorumMobileTests`, test-without-building from
+  `DerivedData/vm47-b1` at `efe246473`): "Test run with **883 tests in 145 suites** failed after 494.9 s with
+  **19 issues (including 8 known issues)**"; XCTest "Executed 0"; no test skipped. The 8 known issues: the
+  empty-accessibility-tree diagnosis (`MobileTrashTests`) ×2 and the fanned-divide lesson (`MobileTutorialWalkTests`)
+  ×2, both pre-existing; `noFilterDoorIsShrunkToFitEvenAtDisplayZoom` ×2 and
+  `theRealLibrarysRowFitsWithoutShrinkingAtDisplayZoom` ×2, this batch's P-47-7 marks (the Terminal-320 row,
+  VM-50). The 11 real issues are three tests:
+  1. **`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:)`** — 2 of 3
+     cases (`"hi"`, `"hello there"`), `model.desyncRecoveryCount == 0` at :215. **NOT THIS BATCH'S — nothing
+     changed.** It is VM-24 on the board ("red on the iOS 26.2 simulator (pre-existing; cause untraced)"), owned
+     by another run tonight. How we know it predates batch 1: VM-8 unit 2 recorded it red on the pre-batch face
+     (`7e9cdf3fb`, 2026-10-25, "the one pre-existing red suite, VM-24's caret suite") and green later the same
+     day (`b1e32f66d`): it was red, and intermittent, before batch 1's font change existed. Not proven
+     independent of the editor's font; not caused by this batch.
+  2. **`MobilePhoneTypeTests.chromeHoldsAtXXXLargeWhileHerWordsKeepGrowing()`** — 8 issues at :135,
+     `abs(uiLargest - uiHold) < 0.01`, measured 0.333 for `meta`, `sectionHeader`, `control`, `tab` in both
+     voices (`chip` and `controlInline` held). **A REAL DEFECT in the layer's UIKit road — FIXED `4ec664f2b`.**
+     Mechanism: `PhoneType.uiFont` capped a chrome role at `UIFontMetrics.scaledValue(for:)` at xxxLarge while
+     the font itself comes from `scaledFont(for:)`; for the `.footnote` and `.body` anchors `scaledFont` lands a
+     third of a point under `scaledValue` at xxxLarge, so every accessibility size drew the UIKit chrome
+     (the overlays' and keyboard-face reads through `Face.font(_:)`) 1/3 pt larger than xxxLarge — it kept
+     growing past the hold. The cap is now `scaledFont`'s own size at xxxLarge, so xxxLarge and above are one
+     font. The failing test is its red-on-old; its green is PENDING the targeted re-run. (The SwiftUI form's
+     rule, `pointSize(_:at:)`, uses `scaledValue` on both sides and held; it can sit 1/3 pt above the UIKit form
+     at xxxLarge and above — recorded, not visible, not changed.)
+  3. **`MobileShelfRenderedLayoutTests.writingKeepsItsShareUnderAKeyboardSizedRegion()`** — 1 issue at :593,
+     `regions.writing.height / 596 >= 0.42`, measured 242.3 / 596 = 40.7%. **THE PIN'S DENOMINATOR, NOT THE
+     RULE — the pin MOVED `29f2cbd41`.** Mechanism: `MobileShelfLayout.split` still gives the writing region
+     exactly half of the books+writing room (the share cap binds — 14 books want 660 pt, the row cap is 396,
+     half the room 242.3); what moved is the room, because the chrome above it (safe area + the path line)
+     grew 88 → 111.3 pt at 430 pt wide (batch 5's own record: 254 of 596 = 42.6%, region 508). Batch 1 set the
+     path line in the phone's roles (its `+ New Note` and `Settings` doors at the 17 pt `control` size). The
+     0.42 was batch 5's 42.6% less a margin, taken against the WHOLE 596 pt surface, so it pinned the path
+     line's height as much as R27's share. The pin now asserts the rule itself — writing ≥ half of
+     (books + writing) − 1 pt (pre-batch 254 of 508, now 242.3 of 484.7); the floor, stays-on-screen and
+     books-yielded assertions are unchanged; the 932 pt pin (`theWritingRegionIsGenerousOnARealShelf`, ≥ 0.42 of
+     the screen and ≥ 400 pt) is unchanged and green at 45.6%. Its green re-run is PENDING with the others.
+     **A finding the red exposed, owned elsewhere:** the path line grew 23 pt, more than one line's growth.
+     Computed: in Terminal its 13 pt mono path ("~/shelf · 14 books", ≈157 pt) beside two 17 pt mono doors
+     (≈102 + 82 pt), three 16 pt gaps and the 20 pt gutters needs ≈437 pt — more than 430 and 402 — so the
+     path text wraps to a second line (Study, proportional, fits at ≈363 pt). The walk is to confirm it (the
+     Terminal core captures c1/c2); its owner is **VM-53 (batch 5)**, whose roots' ⋯ menu takes `Settings` off
+     the path line — no narrow batch-1 fix keeps every word on one line without a design choice.
+- **Leg 2, the Mac's `Shared/Theme` suites** (the seven types, from `DerivedData/vm47-b1`): "**42 tests in 7
+  suites passed**", `** TEST EXECUTE SUCCEEDED **` — the Mac's token pins byte-identical as ruled (§2 rule 1).
+  The red-2 fix is inside `PhoneType.swift`'s `#if os(iOS)` arm, so the Mac leg stands.
+- **After the fixes:** both schemes `build-for-testing` green at `29f2cbd41` (`DerivedData/vm47-b1`).
+- **The targeted re-run (PENDING its stage window):** `rerun=(MobilePhoneTypeTests MobilePhoneInkTests
+  MobilePhoneMetricsTests MobilePhoneTypeSourceTests MobileShelfLayoutBrainTests MobileShelfRenderedLayoutTests
+  MobileShelfTodayDoorTests MobileFilterRowGeometryTests MobileVoiceTests MobileTakesBrowserTests
+  MobileTakesBrowserSurfaceTests MobileBlockHistoryTests MobileCommentDraftTests)` — the two fixed suites, the
+  rest of the layer, and the UIKit overlays that read the fixed `uiFont`.
+
+**Walk captures:** MOVED to batch 2's seam — ONE walk covering batches 1 and 2 on the fixed tree (the
+orchestrator's call; the stage queue is long). Ready for it: the device `vm47-walk` (iPhone 17 Pro, iOS 26.2,
+created, never booted) and the driver + runbook in the gitignored `notes/plans/vm-47-screens/instruments/`
+(`VM47WalkDriver.swift`, `walk.zsh` — each says how to build and run it cold, the seed steps and every capture by
+name); the driver's headless build is GREEN at `29f2cbd41`. The list it captures: the core set (Bookcase at rest ·
+Bookcase with the box focused · Library rows + filter row · Library search typed + results · a note in Write) ×
+Study/Terminal × light/dark × default/largest (AX5, the orchestrator's word); the rest (Starred, a book's
+contents, Book Details, Read, Create Book, the Tags · membership · More Info · Blocks · Lenses sheets, Note Actions,
+Versions, the Takes · Block History · Comments overlays, Trash, Archived, Settings, Protection) × Study light
+default, Terminal dark default, Study light largest. Not capturable: the filter row at Display Zoom (320 pt).
 
 **Recorded and left, each with an owner.**
 - The keyboard bar's 14 pt chrome — VM-137 (LK-4/LK-3).
@@ -412,6 +481,8 @@ and over this tree (none).
 - The Read page's page meta keeps the page's own ink (#C2BCB0, ~1.9:1 on its cream paper): the page is
   voice-independent and the corrected inks are the voice's — for her look pass.
 - The markdown marker in the editor keeps the voice's own `muted` — VM-137 (the editor's markdown face).
+- The Bookcase path line in Terminal (13 pt path + two 17 pt mono doors ≈ 437 pt) is computed to wrap to two
+  lines at 402 and 430 pt — VM-53 (batch 5: `Settings` moves into the roots' ⋯ menu); the walk confirms it.
 - Terminal at 320 pt cannot hold the five filter words at the floor (P-47-7) — VM-50.
 
 **Self-assessment (for the cold reviewer).** The layer is one table and two forms over it, so a number
