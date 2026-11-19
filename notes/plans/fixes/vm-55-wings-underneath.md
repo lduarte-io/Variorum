@@ -192,6 +192,12 @@ and says so." — the saying is wave 2's face).
 
 ## BATCH 2 — one message line, and refusals in words (VM-61, VM-62)
 
+**Split at spawn into 2a (VM-61) and 2b (VM-62), a fresh implementer each, each with its own stage window** —
+batch 1's five small members took one implementer past the 500k guideline, and these two are each a unit of
+their own (the seam and its one line; the 69 sites and their pin). 2a builds the kickoff's VM-61 paragraph, its
+tests and its record, and stops; 2b reads 2a's record and builds the VM-62 paragraph. Everything else in the
+kickoff binds both.
+
 > You are the implementer for batch 2 of the VM-55 run, in `~/dev/variorum-vm-55` on `vm-55-wings-underneath`.
 > Batch 1 is on the branch; read its record section below, then this file whole and the reading list, plus
 > audit C (`notes/plans/vm-44/audit/C-the-note.md` N1, N5, N20, §2.9, §2.11) and audit B
@@ -319,8 +325,8 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-58 | DONE (301388409) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-60 | DONE (9462d3854) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
-| Batch 2 — VM-61 | IN-PROGRESS — a fresh implementer, spawned at 205abd983 |
-| Batch 2 — VM-62 | IN-PROGRESS — the same implementer, after VM-61 |
+| Batch 2a — VM-61 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line |
+| Batch 2b — VM-62 | NOT-STARTED — a fresh implementer after 2a closes |
 | Batch 3 — VM-63 | NOT-STARTED |
 | Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
