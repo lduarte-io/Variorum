@@ -79,6 +79,21 @@ DECISIONS ON IT (2026-11-19 09:00):**
   storage's own report; when TextKit's attribute fixing widens that report past the block's terminator,
   `fallbackVerdict` refuses a plain in-block replace and desync recovery re-renders from the store. That is a
   product mechanism in the editor's edit routing. **The red test stays red and unwrapped — it is the pin.**
+  **HER RULING (2026-11-19, the morning; a dialog pick in this session, no prose): "Own run after wave 1
+  (Recommended)"** — VM-24 becomes its own short run on merged main as soon as all four mobile runs have merged,
+  before wave 2; it starts with one session on her phone counting how often unwarned edits and snap-backs occur,
+  so the fix has before-and-after numbers; in VM-78 the ticket stays open, the test stays red and unwrapped as
+  the pin, and this record's trace is its record. Her words to the stage coordinator the same morning, verbatim:
+  "I chose the own run after wave 1 option that vm-78 proposed. i want you to message them about this to lock
+  the plan down, but basically i want you to open a new session in tmux once wave 1 is done and merged, and tell
+  it to architect-phase that issue, reporting to you for stage details. just kick that off when wave1 is done
+  for me." So: **VM-78 builds no VM-24 fix.** The later run's kickoff is `notes/plans/vm-24-unwarned-edit-routing.md`
+  (committed with this line); the VM-24 ticket is re-owned out of this umbrella (un-parented, Todo, Area Editor,
+  retitled, related to VM-64 and VX-68, a comment carrying the mechanism and her decision), so this run's
+  closeout cannot close it. What she was told before choosing (the coordinator's facts): no session is fixing
+  VM-24; the other reds being repaired that night were each run's own new tests or code; VM-64's flight fence
+  handles the same kind of unwarned edit in the same file. What follows below is the reasoning as it stood
+  before she ruled.
   **The fix is NOT written in this run tonight**: it is an editor-seam change, not a small fix; another wave-1 run
   (VM-64) holds editor-seam work in the same file this wave; and the author is away. What happens instead: a
   read-only REACH read (which roads on her phone can arrive unarmed with a widened report) and the fix options
