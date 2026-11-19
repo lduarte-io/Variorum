@@ -29,6 +29,8 @@ final class MobileCommentsSheetView: UIView {
     private let doneButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let rowsScroll = UIScrollView()
     private let draftField = UITextView()
+    /// VM-54: the draft field's edge, re-resolved at every light/dark change.
+    private lazy var draftBorder = MobileTraitBorder(draftField)
     private let draftPlaceholder = UILabel()
     private let submitButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let cancelEditButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
@@ -212,8 +214,9 @@ final class MobileCommentsSheetView: UIView {
         draftField.font = face.font(.noteBody)
         draftField.textColor = face.ink
         draftField.backgroundColor = face.card
-        draftField.layer.borderColor = face.line.resolvedColor(
-            with: traitCollection).cgColor
+        // VM-54: the DYNAMIC colour, kept — a CGColor resolved here alone
+        // stayed in the old appearance after a light/dark flip.
+        draftBorder.set(face.line)
         draftField.frame = CGRect(
             x: 16, y: draftY, width: sheetView.bounds.width - 32 - 64, height: 40)
         draftPlaceholder.text = chromeCase(editing ? "Edit the comment…" : "Add a comment…")

@@ -620,6 +620,8 @@ final class MobileTakesCardView: UIView {
     private let bodyLabel = UILabel()
     private let edgeBar = UIView()
     private var editorHost: UIView?
+    /// VM-54: the card's edge, re-resolved at every light/dark change.
+    private lazy var border = MobileTraitBorder(self)
     private let onEdit: () -> Void
     private let onArchive: () -> Void
     private let onDelete: () -> Void
@@ -706,8 +708,9 @@ final class MobileTakesCardView: UIView {
         fanned: Bool = false
     ) {
         backgroundColor = card.isPeeked ? face.takeTint : face.card
-        layer.borderColor = (card.isChosen ? face.chosenMark : face.line)
-            .resolvedColor(with: traitCollection).cgColor
+        // VM-54: the DYNAMIC colour, kept — a CGColor resolved here alone
+        // stayed in the old appearance after a light/dark flip.
+        border.set(card.isChosen ? face.chosenMark : face.line)
         edgeBar.backgroundColor = card.isPeeked ? face.takeLine : .clear
 
         let chrome = face.font(.meta)
@@ -858,6 +861,8 @@ final class MobileArchivedTakeCardView: UIView {
     private let takeLabel = UILabel()
     private let menuButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let bodyLabel = UILabel()
+    /// VM-54: the card's edge, re-resolved at every light/dark change.
+    private lazy var border = MobileTraitBorder(self)
     private let onUnarchive: () -> Void
     private let onDelete: () -> Void
     private let onLabel: () -> Void
@@ -901,7 +906,7 @@ final class MobileArchivedTakeCardView: UIView {
         chromeCase: (String) -> String
     ) {
         backgroundColor = face.card
-        layer.borderColor = face.line.resolvedColor(with: traitCollection).cgColor
+        border.set(face.line)  // VM-54: follows a light/dark flip
 
         let chrome = face.font(.meta)
         stateLabel.text = chromeCase("Archived")

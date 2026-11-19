@@ -455,10 +455,14 @@ final class MobileTakesPillView: UIView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("not used") }
 
+    /// VM-54: the pill's edge, re-resolved at every light/dark change.
+    private lazy var border = MobileTraitBorder(self)
+
     func apply(content: MobileTakesController.PillContent, face: MobileEditorStyle.Face) {
         backgroundColor = face.card
-        layer.borderColor = face.takeLine.resolvedColor(
-            with: traitCollection).cgColor
+        // VM-54: the DYNAMIC colour, kept — a CGColor resolved here alone
+        // stayed in the old appearance after a light/dark flip.
+        border.set(face.takeLine)
         let chrome = face.font(.meta)
         infoLabel.text = content.text
         infoLabel.font = chrome

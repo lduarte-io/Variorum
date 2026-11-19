@@ -377,7 +377,7 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 3.3 | `MobileVoicePreference` retires (an old stored value ignored); the two Settings voice rows write the library's voice through `ThemeStore.setVoice` (R-47-2) | DONE (this commit, with 3.2) — `VariorumMobile/Theme/MobileVoicePreference.swift` deleted (nothing reads the key; a source pin holds it); `MobileShellRouter.setVoice` → `theme.setVoice` (the Mac Settings' write, `Operations.setThemeVoice`); the rows' mark reads the landed library voice |
 | 3.4 | The grounds (R-47-1): her words on the paper (`tokens.surface`), bars/sheets/section bands on the room — at the screens' and sheets' background lines; the rest listed with owners | DONE (this commit) — the roots' list regions (`MobileStarredView`, `MobileShelfView` books + box, `MobileLibraryView` rows/search) `.background(tokens.surface)`; the pushed lists' grounds (`MobileBookView`, `MobileArchiveView`, `MobileTrashView`, `MobileVersions`) `tokens.surface`, their report bands still the room; Read's room around the cream page `ReadingPageTokens.room` (the Mac's R-13u-10); Write's screen ground and masthead the editor's own ground (`ReadingPageTokens.room` — P-47-16); sheets unchanged on the room; what is more than a background line listed in §6 with owners. Source pin `MobileLookSourceTests` (4): patterns measured RED on `ea738c49f` (10 of 10 checks fail) and GREEN now (0 of 10). Phone APP target builds incrementally GREEN (QUIET: the test target's build waits) |
 | 3.5 | The ★ reads `tokens.star` | DONE (this commit) — `MobileStarredView`'s ★ (the phone's only one); pinned by `MobileLookSourceTests.everyStarReadsTheStarToken` (red on old: the accent) |
-| 3.6 | VM-54: the border trace and verdict in §6; if the code does not re-resolve, the fix + a trait-driving pin, red-on-old in a snapshot worktree | NOT-STARTED |
+| 3.6 | VM-54: the border trace and verdict in §6; if the code does not re-resolve, the fix + a trait-driving pin, red-on-old in a snapshot worktree | IN-PROGRESS — DONE: the trace and verdict (§6 "Batch 3 — results": NOT hollow by the code), the fix (`MobileTraitBorder` + the four sites) and the pin `MobileBorderTraitTests` (4) (this commit; the phone APP target builds incrementally green). REMAINING: the pin's compile (the test target's build waits for QUIET); its red-on-old in a SNAPSHOT worktree (`~/dev/variorum-vm-47-rol3`, detached at this commit, the three view files checked out from `af487bfe7`, built into its own `DerivedData/vm47-rol3`; the orchestrator runs `MobileBorderTraitTests` from it — expect RED; the snapshot removed after); the on-screen check in the walk |
 | 3.7 | Tests: the phone's resolution (a settings change re-resolves; no palette → sea-glass; dark stays local; the old key ignored), the star, the grounds, a phone no-literal-colour twin if it is a small source scan | NOT-STARTED |
 | 3.8 | The walk driver COPY extended (voice row, palette, grounds, ★, the VM-54 flip) → `DerivedData/vm47-walk3`; both schemes `build-for-testing` into `DerivedData/vm47-b3` → READY for the stage | NOT-STARTED |
 | 3.9 | §6 "Batch 3 — results" (hoist, road, retired preference, grounds by screen, star, VM-54 trace + verdict, tests PENDING, PROVISIONALs in §5, self-assessment) | NOT-STARTED |
@@ -822,3 +822,35 @@ card's ✓/⋯ gain only what the card's own bounds allow; (5) `PageDoor`'s dest
 alarm instead of the literal red — the phone arm only; the Mac's nil arm is byte-identical. The Mac's look cannot
 have changed: `VoiceTokens.swift` is untouched, `SharedPageStyle`'s nil arms are unchanged, and the new Shared
 code is SwiftUI the Mac compiles but never renders (the UIKit pieces behind `os(iOS)`).
+
+### Batch 3 — results (implementer: Opus, 2026-11-19)
+
+**Not done in this batch, first:** PENDING — written at the batch's close (this section is being filled piece by
+piece; LIVE STATUS rows 3.1–3.9 are the truth until then).
+
+**VM-54 — the trace and the verdict (code; the on-screen check rides this batch's walk window).**
+
+- *The four sites, as they stood at `ea738c49f`.* `MobileTakesCardView.apply` (`MobileTakesBrowserView.swift:709`):
+  `layer.borderColor = (card.isChosen ? face.chosenMark : face.line).resolvedColor(with: traitCollection).cgColor`.
+  `MobileArchivedTakeCardView.apply` (`:904`): `face.line` the same way. `MobileTakesPillView.apply`
+  (`MobileTakesChrome.swift:460`): `face.takeLine` the same way. `MobileCommentsSheetView.layoutChrome`
+  (`MobileCommentsSheetView.swift:215`): `draftField.layer.borderColor = face.line.resolvedColor(with:
+  traitCollection).cgColor`.
+- *The mechanism.* Each takes a DYNAMIC `UIColor` from the face and resolves it into `CALayer.borderColor`, a
+  fixed `CGColor`, for the appearance of that moment. On a light/dark change UIKit re-resolves a view's own
+  `UIColor` properties (the cards' `backgroundColor`, the labels' `textColor`), never a layer's colour. None of the
+  four views registers for trait changes (no `registerForTraitChanges`, no `traitCollectionDidChange` in any of the
+  three files), and none of the four `apply`/`layoutChrome` calls runs from a trait change: the takes browser's and
+  the comments sheet's `render()` run only on their controllers' `onChanged` (a model change —
+  `MobileEditorTextView.swift:291–301`), and the pill's `apply` runs inside `refreshChrome` (a scroll tick, an edit,
+  a peek) only while the pill's block is near the viewport (`MobileTakesChrome.swift:285–301`). The setting call is
+  never inside a layout method of the view whose trait it reads, so iOS's automatic trait tracking does not cover
+  it either. So: flip the appearance with a take card, the pill or the comment draft on screen, and each edge keeps
+  the old appearance's colour until the next model render — the pill's until the next scroll or edit near it.
+- *Verdict from the code: NOT hollow.* Fixed: one helper, `MobileTraitBorder` (`VariorumMobile/Features/Write/
+  MobileTraitBorder.swift`), keeps the dynamic colour and re-resolves it at every change of the view's
+  user-interface style (`registerForTraitChanges([UITraitUserInterfaceStyle.self])`) and at each `set`; the four
+  sites call `border.set(…)` instead of freezing a `CGColor`. Pin: `MobileBorderTraitTests` (4) — each view hosted in
+  a real window overridden light, applied, then the window flipped dark and its traits propagated; the layer's
+  border must read the colour's dark value. Red-on-old: PENDING its snapshot build (QUIET) and stage window. The
+  on-screen check (the flip with a take card, the pill and the comment draft visible): PENDING the walk.
