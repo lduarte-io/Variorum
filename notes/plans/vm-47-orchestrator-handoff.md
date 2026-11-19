@@ -7,7 +7,31 @@ the truth for every piece); this file says what the ORCHESTRATOR was doing and w
 details that do not belong in a public repo (the session scratchpad's path and its script names, subagent ids,
 the simulator ids) are in the orchestrator's private run-state memory, `vm-47-run-state`.
 
-## UPDATE 15:10 — the newest block (after a compaction; the orchestrator resumed at 14:42)
+## UPDATE 15:45 — the newest block
+
+- **The ladder's round 2 is CLOSED:** 0 BLOCKER, 0 MAJOR, 0 MINOR, 2 NIT (`notes/plans/vm-47-ladder-round2.md`:
+  the findings, the implementer's answers, the reviewer's final calls, what changed — one doc-comment sentence in
+  a test file and one reading instruction for the walk; no code). No MAJOR, so no further round is earned by her
+  rule. It read the tree BEFORE the walk: a walk fix is read on its own afterwards (that file's §3 says how).
+- **The coordinator's merge order (its call, 15:40):** the Mac run first, then the two other mobile runs, then
+  THIS RUN LAST. This branch conflicts with both mobile runs: with one in four phone face files
+  (`MobileBookDetails.swift`, `MobileCreateBook.swift`, `MobileMembership.swift`, `MobileWriteView.swift` — its
+  own review found that in three hunks the wrong side compiles and leaves every pin green while drawing the old
+  face, and that one new row of theirs merges cleanly but turns this run's type-slot scan red; it is adding guard
+  pins, and the coordinator sends its hunk-by-hunk map with "main moved"), with the other in
+  `MobileSettingsView.swift`, `VariorumMobileApp.swift` and `.gitignore`.
+- **So a BATCH 7 is owed before the merge gate:** main merged into this branch by ONE fresh implementer (hunk by
+  hunk against that map, the guard pins and this run's three source scans), both schemes rebuilt into a new
+  DerivedData folder, then a short re-capture on the walk device of the screens those files draw (Book Details,
+  Create Book, the membership sheet, Write, Settings) — the walk itself runs on the pre-merge tree, so keep the
+  walk device after part B instead of deleting it — and then the gate (whole phone + whole Mac, once).
+- **This run is the LAST MOBILE MERGER:** the wave-1 device build for her morning install and its self-contained
+  block are this session's, from main's final wave-1 merge commit, once the coordinator confirms it by name
+  (`notes/plans/vm-44/plans/vm-45-install-runbook.md`; the install is her hands).
+- **Canon deltas, tickets and the handoff are written after that final merge-in,** on a tree that holds latest
+  main, before the gate.
+
+## UPDATE 15:10 (after a compaction; the orchestrator resumed at 14:42)
 
 - **R-47-3 is BUILT and recorded** (code tip `864ef813b`: the one word in `MobileShelfView.swift` and four phone
   test files; the record's §1, §4 row R-47-3, §5, §6). The walk app and the phone test host WITH the word are in
