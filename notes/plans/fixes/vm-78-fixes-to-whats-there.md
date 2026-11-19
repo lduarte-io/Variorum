@@ -2258,6 +2258,44 @@ that implementer's LIVE STATUS, under "THE MERGE-IN"); the tickets — VM-17 re-
 commented; the later run's kickoff `notes/plans/vm-17-chrome-geometry.md`. Round 3's disposition of R3-F1 is
 overtaken: the decor no longer waits behind a badge fix — both go to the one run.
 
+### THE MERGE-IN (the back-out, main merged in, the re-land)
+
+*Implementer: a fresh `opus-implementer` (2026-11-19, afternoon), one session, worktree `~/dev/variorum-vm-78`. Three
+pieces in order: (1) the back-out of VM-17's unproven fix (her ruling, BATCH D, "THE WINDOW AND HER RULING");
+(2) `origin/main` (`eb18888db`: VX-980 and VM-55) merged in by a merge commit and this run's proven fixes re-landed
+on VM-55's seams; (3) both targets built for testing, and the recipe for the orchestrator's short window. No
+`xcodebuild test`, no simulator, no walk in this session. **No revert is in flight** — the back-out is made of
+`git revert` COMMITS (history), never a working-tree product revert; a red leg's revert is the orchestrator's, in
+its own checkout.*
+
+#### THE MERGE-IN — LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0 — this LIVE STATUS opens; the trial merge's conflict list | DONE (this commit) |
+| 1a — revert the fix `f869f8667` | NOT-STARTED |
+| 1b — revert the pins `15add793d` | NOT-STARTED |
+| 1c — remove the probe `MobileFanBadgePlacementProbeTests.swift` | NOT-STARTED |
+| 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | NOT-STARTED |
+| 1e — the back-out's check | NOT-STARTED |
+| 2a — the plan, written before the merge starts | NOT-STARTED |
+| 2b — the merge commit (seven conflicts resolved, the re-land) | NOT-STARTED |
+| 2c — the semantic merges git does not flag | NOT-STARTED |
+| 3 — phone + Mac `build-for-testing` on the merged tree | NOT-STARTED |
+| 4 — the window recipe (RED, GREEN, the Mac types) | NOT-STARTED |
+
+**The trial merge** (`git merge-tree --write-tree --name-only HEAD origin/main`, at `de3bb0107` against `eb18888db`,
+nothing touched): exactly the seven expected textual conflicts —
+`VariorumMobile/Features/Shell/MobileBookDetails.swift`, `Shell/MobileShelfViewModel.swift`,
+`Shell/MobileTrashModel.swift`, `Write/MobileMembership.swift`, `Write/MobileUndoDoor.swift`, `notes/MobileSoul.md`,
+`notes/SurfaceContracts.md`. Auto-merged textually, to read by hand: `Shared/RecoveryCopy.swift`,
+`Shell/MobileCreateBook.swift`, `Shell/MobileLibraryView.swift`, `Shell/MobileShelfView.swift`,
+`Shell/MobileTrashView.swift`, `Takes/MobileBlockHistory.swift`, `Write/MobileEditorViewModel.swift`,
+`Write/MobileWriteView.swift`, `VariorumMobileTests/MobileDeletionTests.swift`,
+`VariorumMobileTests/MobileUndoDoorTests.swift`. Batch D's four product/test files and the two measurement files
+are untouched by main (`git diff e48ef2f30 origin/main -- <them>` is empty), so the back-out cannot conflict with
+the merge.
+
 ## The ladder
 
 *(round files `vm-78-ladder-roundN.md` beside this one; findings and dispositions land here before the next round)*
