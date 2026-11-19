@@ -245,6 +245,7 @@ struct MobileWriteScreen: View {
                         .phoneType(.noteTitle, tokens)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
+                        .phoneHitArea(alignment: .leading)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Rename Note")
@@ -252,7 +253,8 @@ struct MobileWriteScreen: View {
                 // The note-tool corner (M3 ≡ R6 joins it): copy · find ·
                 // seal, spaced so three small glyphs stay three separate
                 // taps.
-                HStack(spacing: 14) {
+                // VM-50: icon buttons — 44 × 44 hit areas that touch.
+                HStack(spacing: 0) {
                     copyDoor
                     findDoor
                     sealDoor
@@ -267,13 +269,19 @@ struct MobileWriteScreen: View {
             // no door hides; calm at rest, five bare words fit one
             // line. PROVISIONAL for her sitting).
             membershipChip
-            MobileChipFlow(hSpacing: 12, vSpacing: 4) {
+            // VM-49: each chip answers 44 tall, its hit area reaching 6
+            // into the 12 pt gap on each side (so neighbours' areas touch
+            // and the words keep their places — the flow is shifted back by
+            // the same 6). The capsule look and one sideways row are
+            // VM-148's masthead.
+            MobileChipFlow(hSpacing: 0, vSpacing: 0) {
                 dateChip
                 tagsChip
                 moreInfoChip
                 blocksChip
                 lensChip
             }
+            .padding(.horizontal, -Self.chipHitReach)
             if let canary = model.canaryMessage {
                 Text(canary).phoneType(.meta, tokens).foregroundStyle(.red)  // CANARY: deliberately not the voice's alarm
             }
@@ -292,9 +300,7 @@ struct MobileWriteScreen: View {
                     } label: {
                         Text(tokens.chromeLabel(Self.unlockDoorTitle))
                     }
-                    .phoneType(.controlInline, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens))
                     .accessibilityLabel("Unlock Note")
                 }
             }
@@ -462,6 +468,7 @@ struct MobileWriteScreen: View {
                 .phoneType(.chip, tokens)
                 .foregroundStyle(model.header?.entryDate != nil ? tokens.phone.muted : tokens.phone.faint)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Entry Date")
@@ -480,6 +487,7 @@ struct MobileWriteScreen: View {
                 .phoneType(.chip, tokens)
                 .foregroundStyle(noteTags.chipLine != nil ? tokens.phone.muted : tokens.phone.faint)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Tags")
@@ -498,6 +506,7 @@ struct MobileWriteScreen: View {
                 .phoneType(.chip, tokens)
                 .foregroundStyle(references.references.isEmpty ? tokens.phone.faint : tokens.phone.muted)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("More Info")
@@ -515,6 +524,7 @@ struct MobileWriteScreen: View {
                 .phoneType(.chip, tokens)
                 .foregroundStyle(membership.books.count > 1 ? tokens.accent : tokens.phone.muted)
                 .lineLimit(1)
+                .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Books holding this note")
@@ -543,6 +553,7 @@ struct MobileWriteScreen: View {
                 .phoneType(.chip, tokens)
                 .foregroundStyle(tokens.phone.muted)
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Blocks")
@@ -572,6 +583,7 @@ struct MobileWriteScreen: View {
                         ? tokens.alarm
                         : (lenses.activeLensID != nil ? tokens.accent : tokens.phone.faint))
                 .lineLimit(1)
+                .mastheadChipHitArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(lenses.activeLensHasFallback ? Self.lensFallbackChipLabel : "Lenses")
@@ -580,6 +592,10 @@ struct MobileWriteScreen: View {
     /// The chip's spoken label while the active lens has a fallback — a
     /// glyph is not a sentence, and VoiceOver reads words.
     static let lensFallbackChipLabel = "Lenses — a pick fell back"
+
+    /// How far a masthead chip's hit area reaches into the flow's old 12 pt
+    /// gap on each side (VM-49): half of it, so neighbours' areas touch.
+    static let chipHitReach: CGFloat = 6
 
     /// Copy the whole note (round 2 batch 2 — M3 ≡ R6; her ask: *"a button
     /// added at the top that allows me to copy everything i've written in a
@@ -595,10 +611,8 @@ struct MobileWriteScreen: View {
             Task { await model.copyNote() }
         } label: {
             Image(systemName: "doc.on.doc")
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.phone.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel("Copy Note")
     }
 
@@ -650,10 +664,8 @@ struct MobileWriteScreen: View {
             noteActionsPresented = true
         } label: {
             Image(systemName: "ellipsis")
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.phone.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel(MobileNoteActionsSheet.doorLabel)
     }
 
@@ -669,10 +681,8 @@ struct MobileWriteScreen: View {
             model.presentFind()
         } label: {
             Image(systemName: "magnifyingglass")
-                .phoneType(.control, tokens)
-                .foregroundStyle(tokens.phone.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens))
         .accessibilityLabel("Find in Note")
     }
 
@@ -696,10 +706,19 @@ struct MobileWriteScreen: View {
             }
         } label: {
             Image(systemName: model.isSealed ? "lock.fill" : "lock.open")
-                .phoneType(.control, tokens)
-                .foregroundStyle(model.isSealed ? tokens.accent : tokens.phone.faint)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: model.isSealed ? .accent : .ink))
         .accessibilityLabel(model.isSealed ? Self.unlockDoorTitle : Self.lockDoorTitle)
+    }
+}
+
+private extension View {
+    /// A masthead chip's hit area (VM-49): 44 tall, reaching
+    /// `chipHitReach` past the word on each side, the word drawn where it
+    /// was.
+    func mastheadChipHitArea() -> some View {
+        padding(.horizontal, MobileWriteScreen.chipHitReach)
+            .frame(minHeight: PhoneMetrics.touchMinimum)
+            .contentShape(Rectangle())
     }
 }
