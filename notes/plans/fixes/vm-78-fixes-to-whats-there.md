@@ -1547,6 +1547,157 @@ at ESTIMATED offsets until a viewport pass re-positions them. So the probe separ
 coincide, or any badge at block 1), an off-screen badge off its own block (against an independent clean TK2 stack laid
 out whole from the start), and a visible badge off its block once scrolled to.
 
+#### VM-24 — the mechanism, its reach, and the options
+
+*Written for the author's decision, read-only analysis (no product or test line changed). The orchestrator's decisions
+stand: not test posture; arm A's wait refused; the red test stays red and unwrapped as the pin; the seam fix is HELD for
+her. "SEEN" = shown by window (3)'s trace (`DerivedData/logs/vm78-c-M2.log`, `-M3.log`, kept locally); "BY READING" =
+from the code, not observed.*
+
+**The mechanism, link by link.**
+1. A system edit arrives through UIKit's text-input door: `UITextView.replace(_:withText:)` →
+   `UITextInputController replaceRange:withText:` → `_replaceRange:withAttributedTextFromKeyboard:…` →
+   `NSTextStorage coordinateEditing:` (SEEN: the call stack of every replace in M2).
+2. That door never asks the editor's gate. The gate is the text-view delegate's `shouldChangeTextIn`
+   (`MobileEditorViewModel.swift:2362-2372` → `shouldChangeText`, `:1541`), and the trace recorded zero consults on
+   every replace (SEEN: E1 `consults=0 … gate-less` in all 18 M2 acts and all 6 M3 acts). The repo had measured this
+   before on the same door (mobile round 2's M25, `notes/plans/mobile-round-2.md:2396-2409`: `deleteBackward()` and
+   `replace(_:withText:)` "mutate the storage WITHOUT consulting the delegate at all").
+3. So the edit reaches `storageDidEdit` (`:1828`) with no arming, and its block is decided by `fallbackVerdict`
+   (`:1882`, `:1962-1972`), which recomputes the verdict from the storage's own report of the edited range
+   (BY READING).
+4. That report can be WIDENED by TextKit's attribute fixing, which re-applies the paragraph's style across the whole
+   paragraph, terminator included (TEXTKIT2 §3, the iOS 26 fixing finding). SEEN: for "hi" the storage's
+   `willProcessEditing` range is `{1,2}` (exactly the change) and its `didProcessEditing` range `{1,5}` — the same edit,
+   widened inside `processEditing` past the line's newline.
+5. Exact, the fallback's old range is `(1,5)` — inside block 0 — and the edit routes normally (SEEN: every
+   `realPosture` case, desync 0). Widened, the old range is `(1,8)`, which reaches the separator at offset 8, so
+   `index.verdict` refuses it as crossing a block boundary (SEEN: desync 1 in every widened case; the refusal itself BY
+   READING, `BlockRangeIndex.verdict` through `:1968-1971`).
+6. A refused route takes `.refuse` → `recoverFromUnroutableEdit` → `desyncRecovery` (`:1927-1932`, `:2011-2032`),
+   BEFORE `recordAutosave` runs (`:1901`), so the replacement is never queued for saving (BY READING).
+7. `desyncRecovery` flushes the autosaves already pending (`:2025`), re-reads the note from the store (`:2026-2028`) and
+   re-renders the surface from it (`ingest` with `forceFullRender`, `:2020`, `:2029`). The store never received the
+   replacement, so the re-render puts back the words she had before it (BY READING; the trace reads the surface before
+   the heal, `post-act string="*hi *"`, and does not observe the heal).
+The caret settle plays no part (SEEN: no write inside the transaction in any M2 case; the red persists with the settle
+held; M3 forces the settle's write inside the transaction and nothing desyncs without the widening).
+
+**The reach — which roads on her phone can deliver an edit to `storageDidEdit` UNARMED.** By reading the phone's code:
+| Road | Armed? | Evidence |
+|---|---|---|
+| Keyboard typing (a character key) | **Armed, as far as the evidence goes** — UIKit asks the delegate | her own iPhone (iOS 26.6) recorded `GATE … → armed` before ordinary keystrokes in the E1 capture (`notes/plans/mobile-round-2-crash-trace.md:8-24`); the editor's `insertText` override (`MobileEditorTextView.swift:1014-1020`) adds no gate of its own |
+| Return key | Armed by the product | `MobileMarkdownActs.handleReturnKey` arms before `super.insertText("\n")` (`MobileEditorTextView.swift:1016`; the arming named at `EditorEditRouting.swift:37-39`) |
+| Tab / ⇧Tab and the bar's markdown acts | Armed by the product | `performTabKey` calls `gateAllows` before `super.insertText("\t")` (`MobileEditorTextView.swift:1032-1034`); every act goes through `MobileMarkdownActs.inputReplace`, which calls `gateAllows` first, then `insertText`/`deleteBackward` (`MobileMarkdownActs.swift:38-75`) |
+| The product's programmatic slot/tail writes | Not routed at all | `programmaticReplace` sets `suppressEditProcessing` (`MobileEditorViewModel.swift:2107-2125`); `storageDidEdit` returns early for them (`:1837-1842`) |
+| Autocorrect and predictive replacement | **UNARMED — by the code's own account and her device's** | the model's header: system paths "never consult the gate (autocorrect, dictation, marked text)" (`MobileEditorViewModel.swift:24-31`); the identity note names "autocorrect via `replace(_:withText:)`" (`:13-16`); her 26.6 capture shows `#52 EDIT at 178 len 1 Δ+1 after 0 gates ⚠ gate-less` in ordinary use, and the device walk's legend reads gate-less edits as "just autocorrect and dictation, and it is expected" (`mobile-round-2-device-walk.md:154-155`) |
+| Dictation | **UNARMED**, same sources | as above; the spike's dictation case was a proxy only (`Spike/SpikeScenarios.swift:657-669` — "the real path is a device item") |
+| Marked-text commits (the QWERTY candidate bar, CJK input) | **UNARMED**, same sources | as above (`:24-31`) |
+| The spelling "Replace…" menu | Not established | the phone draws no spelling road of its own (`MobileEditorTextView.swift:936-947` leaves spell-checking alone); the system's menu replace is UIKit's |
+| Paste | Expected armed — the code assumes it | the gate reads `isPasting` (`MobileEditorViewModel.swift:2371`, the paste override `MobileEditorTextView.swift:1097-1100`), which only means anything if UIKit consults the delegate for a paste; not measured here |
+| Find's replace | Off | `supportsTextReplacement` is `false` (`MobileEditorTextView.swift:1074`) |
+
+**What Apple's documentation says about the system-originated roads** (one read-only lookup, 2026-11-19; quotes from
+developer.apple.com):
+- `UITextViewDelegate.textView(_:shouldChangeTextIn:replacementText:)`: "The text view calls this method whenever the
+  user types a new character or deletes an existing character." It never says whether programmatic or system edits
+  call it. Its page metadata marks it deprecated at iOS 27.0, not in iOS 26.
+  (…/uitextviewdelegate/textview(_:shouldchangetextin:replacementtext:))
+- The iOS 26 ranges variant, `textView(_:shouldChangeTextInRanges:replacementText:)`: "If the delegate does not
+  implement this method then the textView:shouldChangeTextInRange:replacementText: method will be called and passed the
+  union range instead." So the phone's single-range gate is still the one UIKit calls, whenever UIKit asks at all.
+- `textViewDidChange(_:)`, for contrast: "This method is not called in response to programmatically initiated changes."
+- `UITextInput.replace(_:withText:)` ("Replaces the text in a document that is in the specified range") and
+  `UIKeyInput.insertText(_:)` say nothing about the delegate.
+- **Autocorrection, predictive text and inline predictions, dictation, the spelling menu, paste, Writing Tools:
+  documentation is silent on whether any of them consults `shouldChangeTextIn` before the change.**
+  - Dictation: the `UITextInput` page says only that "the system automatically inserts recognized phrases".
+  - Writing Tools (WWDC24 session 10168): it "relies on the UITextInput protocol to read and write the text", and it
+    alters the text storage.
+  - Forum posts (not documentation, unconfirmed by Apple): one says autocorrect does not reach `shouldChangeTextIn`.
+- `fixAttributes(in:)`: "assigns the first paragraph style attribute value in each paragraph to all characters of the
+  paragraph. This method extends the range as needed to cover the last paragraph partially contained." Apple does not
+  document that the range reported to `didProcessEditing` grows with it. That growth is this repo's measurement
+  (TEXTKIT2 §3), seen again here (`{1,2}` → `{1,5}`).
+
+Only a device run settles which system roads reach the storage unarmed. Her own device has already shown that some do
+(the 26.6 capture above).
+
+**How often the widening happens — what decides it.** TEXTKIT2 §3 records two facts. On iOS 26, fixing re-propagates
+the paragraph's governing style across the whole paragraph, terminator included (probe-verified). On macOS 27 (18k C8),
+whether fixing CHANGES anything is decided by object identity: when the edited characters already carry the very
+paragraph-style object fixing would apply, nothing changes and the report stays exact (`{2,1}`, not `{2,5}`), and
+content-equal attribute dictionaries are uniqued process-wide, so any other text stack in the process can change the
+answer. Window (3) is consistent with that and adds a frequency picture for this host only: widened in five of six
+replaces made in the same turn as `becomeFirstResponder`, exact in all six made after the
+waited turns and the keyboard bar's presentation, four of six with the settle held, and not stable across two
+iterations of one case ("Hello" #1 exact, #2 widened). The rate on her phone — which depends on where each replacement's attributes come from in a live editing
+session — is not measured. The archived row for this class (KnownIssues row 30, mobile round 2's M12, now **VX-68**,
+Backlog) records an iOS 1-character insert at offset 8 reporting `{8,9}`, and names this class as the "candidate cause
+of 'the note flickered' on her phone".
+
+**What she would see.** The word the keyboard just put in (an autocorrection she accepted, a dictated phrase, a
+committed candidate) snaps back to what was there before, with the note's surface re-rendered around it (a flicker)
+— BY READING (step 7). **Stored text is not put at risk:** a refused route returns before `recordAutosave`
+(`:1927-1932` vs `:1901`), so nothing wrong is ever written; `desyncRecovery` first flushes the edits already pending
+(`:2025`), so her earlier typing is kept; only the one unsaved replacement is lost from the screen. (In a DEBUG build
+the same road fires the editor's assertion seam, `:2019` — her Xcode drops would stop there, which is how VX-68's watch
+row says a flicker should be investigated.)
+
+**Why green on Oct 14 and red from Oct 25, with no product change.** SHOWN: the red follows the widening (step 4), and
+the widening varies with what happened earlier in the process and with the input posture; this window's host had a
+hardware keyboard connected (`gcKeyboard=true` at every act; where a keyboard was posted at all, a 363-pt
+software-keyboard announcement was followed by the 52-pt bar a hardware keyboard shows); the simulator's own keyboard
+preferences read `HardwareKeyboardLastSeen = true` (half 1's environment read, above), and its
+`com.apple.keyboard.plist` last moved on 2026-10-14 at 09:42 — inside C-1's K run, when the test was green. The record's
+other history fits the same picture: a single green whole-target run on 2026-10-25 (VM-8 L1) among reds on that
+toolchain. INFERENCE, not shown: the simulator's keyboard state changed on or after Oct 14 (a hardware keyboard seen),
+which changes what UIKit sets up before a replace and therefore which attributes the replacement carries and whether
+fixing widens its report. No posture snapshot exists from the Oct 14 green to compare, so this cannot be proved after
+the fact; the two facts it rests on (the red follows the widening; the widening follows process state and posture)
+are shown.
+
+**The fix options** (none built; each lives in the editor seam and needs the Fable review; the standing red test is
+each one's first pin):
+1. **Route an unarmed report from the PRE-fixing range.** The storage observer also implements
+   `textStorage(_:willProcessEditing:range:changeInLength:)` (today it has only `didProcessEditing`,
+   `MobileEditorViewModel.swift:2402-2420`) and hands that range — the change itself, before fixing widens it — to
+   `fallbackVerdict` (and to the re-stamp's clamp, TEXTKIT2 §3's rule). *Risk:* `willProcessEditing`'s range still
+   includes any other write inside the same transaction (M3's `{0,5}`, which routes correctly); the delegate order must
+   be re-checked so nothing else reads the range between the two calls; a new storage-delegate callback in the seam;
+   and Apple's page for the delegate's `willProcessEditing` carries a sentence ("Programmatic changes don't cause the
+   object to send this message") that conflicts with `processEditing()`'s own page. This window observed the
+   NOTIFICATION (`willProcessEditingNotification`) firing with the exact range on the gate-less replace, so the fix's
+   pin must drive the very callback it uses.
+   *Pins:* the red test goes green; a new pin for a gate-less insert at a block's end (VX-68's own shape, driven through
+   `replace(_:withText:)`, which is gate-less by construction in the test host); the existing routing suites
+   unchanged. *Mac:* the Mac's `fallbackVerdict` is the same code (`Variorum/Features/Editor/EditorViewModel.swift:
+   1465-1475`) and macOS 26 also widens (TEXTKIT2 §3, 13l); whether macOS ever reaches it unarmed is not shown here. The
+   capture could live in `Shared/EditorBrain` and serve both, or stay phone-only.
+2. **A fallback that tolerates the widening.** When the unarmed report's old range runs past a separator only by the
+   paragraph's own terminator, and the net change (`delta`) fits inside the block the report starts in, route it as that
+   block. *Where:* `fallbackVerdict` or a shared helper beside `BlockRangeIndex.verdict`. *Risk:* the report does not
+   say where the characters really changed, so this is a judgment from a widened range — a real cross-block system edit
+   could be attributed to the wrong block (the DEBUG identity audit would catch it; Release would autosave the wrong
+   block's text). *Pins:* the red test; a cross-block gate-less replace must still refuse. *Mac:* same shape if shared.
+3. **Arm the roads the phone can see.** `MobileEditorTextView` overrides `replace(_:withText:)` (and the other
+   public input doors that skip the delegate) to ask the gate first, as `MobileMarkdownActs.gateAllows` does, so the
+   report binds an arming — and a bound arming never polices the report's extent (`EditorEditRouting.swift:122-133`), so
+   the widening stops mattering. *Risk:* it covers only roads that pass through those public methods; whether
+   autocorrect, dictation and marked-text commits do on a device is not known (the keyboard may reach the input
+   controller below them); a refusal now also blocks a system edit (right for a sealed note). *Pins:* the red test; E1 on
+   a device to see which roads it actually covers. *Mac:* none (AppKit has its own gate road).
+*The runner's view, one line:* option 1 first — it repairs the routing at the cause for every unarmed road at once,
+without having to know which system roads skip the delegate; option 3 can follow as a belt.
+
+**What the test host cannot tell us, and what a device run would add.** The host can only drive public UITextInput
+calls, which are gate-less here by construction (M25), with a hardware keyboard connected; it cannot drive the real
+keyboard's autocorrect, predictive tap, dictation or candidate commit, and it cannot say how often a live session's
+replacements carry a paragraph-style object that makes fixing widen the report. A device run with E1 armed (Settings ▸
+Diagnostics), typing with autocorrect on, accepting predictions, dictating, using the spelling menu and pasting into
+block ends and block middles, would count the gate-less edits per road and the desync recoveries they cause — the
+reach and the rate in one reading. VX-68's watch row has asked for exactly that evidence since round 2.
+
 ## The ladder
 
 *(round files `vm-78-ladder-roundN.md` beside this one; findings and dispositions land here before the next round)*
