@@ -6,7 +6,31 @@ Plan: `notes/plans/vm-44-mobile-catch-up-plan.md` (wave 1, umbrella 3 ⚑ — th
 
 ## FOR A LATER READER
 
-*(Written at closeout from the settled facts. Until then: read §1–§4, then LIVE STATUS in §5.)*
+**What the run was.** The phone's performance umbrella in the mobile catch-up's wave 1 (`/run-phase`, overnight 2026-11-19; Fable orchestrating, a fresh Opus implementer per batch, Fable cold reviews, nov18 on the stage). The wave's one `Sync/`-or-custody slot — and not one line written in `Sources/VariorumCore/Sync/`, `Server/` or custody code. A timing layer and its readout first, then the keystroke fence and five fixes behind her two lags (§2). Seven batches, all closed; ladder round 2, the merge gate and the merge are PENDING(round 2 · gate · merge).
+
+**Per member — the mechanism as settled · the fix as built · one pointer.**
+- **VM-65** — nothing timed what she feels · a bounded Core recorder (O(1) a mark, a 64-ring per series, durations and counts only, signposts); one catalog in `Shared/AppTiming.swift`, inert unless the phone enables it (the Mac records nothing); the readout at Settings ▸ Diagnostics ▸ Timing…, one table per build kept across a quit · `808f333a8`.
+- **VM-2** — the phone's structural doors suspend while the pre-act page stays editable, and the gate never read the latch; a key there recorded the whole pre-act block, flushed after the act, and `autosave`'s rescue kept it, demoting the act's result to a `'conflict'` take · a refuse-and-say fence from the latch to the settled page (`Domain/StructuralFlightFence` + the gate and storage belts); insert below exempt; the undo door hooked · `2a3fd3a52`.
+- **VM-66** — the speed tests skipped her paths · `MobileHerPathsPerfTests` (the real screen and shell, reading VM-65's one recorder — so it runs ALONE) and the `.nineWings` fixture · `App/Variorum/VariorumMobileTests/MobileHerPathsPerfTests.swift`.
+- **VM-67** — `adoptOwnerID` scanned all eleven owner tables in a write transaction at every launch, unlock and sign-in, to change nothing · `v1_38`'s partial indexes (local-only, not a §12 event, marker 15) and a probe before the write, in one writer access · `e6d16fca7`.
+- **VM-68** — the hidden Library held two whole-listing observations re-run on every write, and the listing cut silently at 200 · keyset pages through the Mac's `catalogNotesPage` (+`keys`, +`poolLoose`), held only while drawn, re-asked on return · `dcea98cee`.
+- **VM-69** — an open read the note twice (`loadOnce`, then `start()`'s first fetch), laid the chrome out three times, and the chips read every book and tag · the arrival's load IS the live observation's first value; chrome once; chip-scoped reads · `63ad8b188`.
+- **VM-70** — nothing on the phone released an editor's coordinator (registry +1 per open) · the leaving's last act gives the hold back, the arrival takes it back adopting a re-minted coordinator (the fix pass's `f589d964e` re-observes on both paths) · `36cddcf60`.
+- **VM-71** — every leaving ask was `closeAutoCommit`'s O(note) runner turn, three per Castle backgrounding · the phone's `savepointOnLeaving` reads the owed takes on a reader and asks the runner once for exactly those (`Queries.leavingSavepointCandidates`, `closeAutoCommit(_:takes:)`); who asks is unchanged · `d849b7125`.
+
+**Her rulings (§2, by bullet):** the lags (1st) and the readout (2nd) are why the run exists; the plan's evidence rule (3rd); five ladder rounds, made standing — landed in CLAUDE.md, both phase skills and ProcessHistory (5th); no "before" run on her phone and ONE wave-1 install at her hands (6th — P-64-1 CLOSED, §3); "rule provisionally in my absence" (7th). VM-24's fix is its own run after wave 1 — her pick in the VM-78 run, relayed there.
+
+**Evidence that matters (pointers):** §5 "THE BEFORE NUMBERS" and "THE AFTER NUMBERS" — every count the run set out to change moved and is asserted (reads per open 2 → 1; hidden-Library re-reads and redraws per box save 2 · 2 → 0 · 0; Castle backgrounding savepoints 3 → 1; registry growth 1 → 0); one duration moved outside noise (the 100k note live 496 → 342 ms); a single Library page is NOT faster per fetch. §5 "Batch 6 (r1) and batch 7 — THE STAGE WINDOW ON THE FINAL TREE": 80 types in one host, the only red VM-24's standing caret test. The red-on-old runs: §5's batch 2 r2 cycle, batch 4's P4 (headless), batch 5's red build, the batch 6 and 7 r1 red builds. The Mac pieces in §5 (61/9 · 110/16 · 93/14 · 48/7). The merge gate: PENDING(gate counts).
+
+**The ladder:** the midpoint review (batches 1–4, outside the count, `vm-64-midpoint-review.md`) 0 B · 0 M · 5 minor · 3 nit, and round 1 (the whole diff, `vm-64-ladder-round1.md`) 0 · 0 · 4 · 3 — every finding agreed and dispositioned; finding 1 accepted as arm (a), its bound held by a guard (`84a8acff8`). Round 2: PENDING(round 2).
+
+**Open items:** the PROVISIONAL bundle QUESTIONS #PENDING(QUESTIONS number), led by P-2-1 (refuse-and-say) and P-2-5 (insert below exempt); VM-226 (the tail's idle save mid-flight); VM-227 (a re-show while teardown is suspended stops hearing its coordinator — narrowed, not closed); the residuals table in `vm-64-closeout-drafts.md` ▸ (g); her phone sitting (the wave-1 install, the readout, autocorrect and dictation under the fence); the batches 6 + 7 walk PENDING(walk); the merge gate PENDING(gate).
+
+**Do not trust these without the correction beside them:**
+- **Batch 2's first-version claims** (§7 batch 2's r0 closeout — "typed keys deferred and replayed, never dropped", its input table, "8 failing, 2 passing"): falsified at the first window; corrected in "Iteration r1", "Iteration r1 → r2" and "Iteration r2" below it — on her keyboard even r1 was refuse-and-say.
+- **Batch 6's r0 release** (§7 batch 6 — the `isolated deinit`, hazard (b)'s first text, D-6-3, three pins' rows): falsified, since nothing frees a popped screen's editor promptly in her app; the `[r1: FALSIFIED …]` marks and "Iteration r1" carry the release as built.
+- **Batch 7's hazard (b)** ("nothing can go stale") and hazard (a)'s pop row: true ACROSS asks only; the in-place "[Ladder round 1, finding 1 …]" notes and D-7-1 name the one-ask gap and its bound.
+- **Batch 1's "what each number means" table:** read it with batches 5, 6 and 7's "The timing marks — what they measure now" (deliveries, reads per open and savepoint attempts changed meaning).
 
 ---
 
