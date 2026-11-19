@@ -194,6 +194,12 @@ struct MobileFilterRow<Trailing: View>: View {
                         .foregroundStyle(selection == door ? tokens.ink : tokens.phone.faint)
                         .lineLimit(1)
                         .fixedSize(horizontal: false, vertical: true)
+                        // VM-49: each door answers 44 tall; its width stays
+                        // its word's — the row's one-line budget (#92(b)) is
+                        // what a 44-wide door would spend. The row's rebuild
+                        // (the rooms as chips) is VM-93's; P-47-10.
+                        .frame(minHeight: PhoneMetrics.touchMinimum)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(door.word)
@@ -203,7 +209,6 @@ struct MobileFilterRow<Trailing: View>: View {
             trailing()
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 6)
     }
 }
 

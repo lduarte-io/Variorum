@@ -221,7 +221,7 @@ struct MobileBookView: View {
         }
         .padding(.vertical, 11)
         .padding(.horizontal, 20)
-        .contentShape(Rectangle())
+        .phoneHitArea(alignment: .leading)
     }
 
     private var header: some View {
@@ -260,7 +260,7 @@ struct MobileBookView: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 20)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
     }

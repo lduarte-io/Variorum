@@ -91,15 +91,18 @@ struct MobileStarredView<TabBar: View>: View {
     /// own path-line shape. No doors trail it: nothing is minted here, and
     /// the P38 crowding lesson says a strip earns its doors.
     private var pathLine: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
+        // VM-50: the same 44 pt line as its two siblings' (whose doors are
+        // 44 pt hit areas), so the three roots' content starts level as the
+        // band pages between them.
+        HStack(alignment: .center, spacing: 16) {
             Text(tokens.path([MobileStarsModel.pageName]))
                 .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.phone.muted)
             Spacer()
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .frame(minHeight: PhoneMetrics.touchMinimum)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     /// One starred row — **the retired shelf section's row, MOVED, not
@@ -126,7 +129,7 @@ struct MobileStarredView<TabBar: View>: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // The row's own act, in the phone's established row grammar (the

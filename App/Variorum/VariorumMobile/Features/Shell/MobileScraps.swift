@@ -292,9 +292,11 @@ struct MobileScrapsSection: View {
                 .phoneType(.controlInline, tokens)
                 .foregroundStyle(tokens.accent)
                 .lineLimit(1)
+                // VM-49: the label is the hit area (padding outside a Menu
+                // adds none), at least 44 × 44.
+                .phoneHitArea(alignment: .leading)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
         .accessibilityLabel("Which scraps container is shown")
     }
 
@@ -330,7 +332,7 @@ struct MobileScrapsSection: View {
             }
             .padding(.vertical, 11)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New Scrap")

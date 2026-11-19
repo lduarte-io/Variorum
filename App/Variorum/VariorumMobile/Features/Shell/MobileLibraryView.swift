@@ -182,7 +182,7 @@ struct MobileLibraryView<TabBar: View>: View {
                 }
                 .padding(.vertical, 11)
                 .padding(.horizontal, 12)
-                .contentShape(Rectangle())
+                .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(MobileRecoveryDoors.archiveLabel)
@@ -198,11 +198,14 @@ struct MobileLibraryView<TabBar: View>: View {
     private var pathLine: some View {
         // `spacing: 16` — the Shelf path line's own value, adopted now that
         // this strip carries two trailing doors instead of one.
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
+        // VM-50: the Bookcase's twin — the same controls, the same one line
+        // (🗑 an icon button, + New Note an inline act, hit areas touching).
+        HStack(alignment: .center, spacing: 0) {
             Text(tokens.path(["Library"]))
                 .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.phone.muted)
-            Spacer()
+                .lineLimit(1)
+            Spacer(minLength: PhoneMetrics.Space.s16)
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
             }
@@ -215,30 +218,18 @@ struct MobileLibraryView<TabBar: View>: View {
             } label: {
                 // The ONE door word (P33: the shelf's twin reads it too).
                 Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens))
             .accessibilityLabel("New Note")
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     private var searchField: some View {
         TextField(tokens.chromeLabel("Search notes, books…"), text: $query)
             .textFieldStyle(.plain)
-            .phoneType(.control, tokens)
-            .foregroundStyle(tokens.ink)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(tokens.surface)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(tokens.line, lineWidth: 1)))
+            .phoneField(tokens)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
             .padding(.horizontal, 20)
@@ -297,6 +288,10 @@ struct MobileLibraryView<TabBar: View>: View {
             Image(systemName: MobileSortDoor.symbol)
                 .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.accent)
+                // VM-49: 44 tall; its width stays the glyph's (#92(b)'s
+                // budget — the full 44 × 44 is the Library's sort, VM-90).
+                .frame(minHeight: PhoneMetrics.touchMinimum)
+                .contentShape(Rectangle())
         }
         .accessibilityLabel(
             MobileSortDoor.label(
@@ -365,7 +360,7 @@ struct MobileLibraryView<TabBar: View>: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // Plain, and it carries the META as well as the name — an
@@ -493,7 +488,7 @@ struct MobileLibraryView<TabBar: View>: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // Star (parity C3, her ruling 10): the note row's long-press
@@ -543,7 +538,7 @@ struct MobileLibraryView<TabBar: View>: View {
                     }
                     .padding(.vertical, 10)
                     .padding(.horizontal, 12)
-                    .contentShape(Rectangle())
+                    .phoneHitArea(alignment: .leading)
                 }
                 .buttonStyle(.plain)
             }

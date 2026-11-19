@@ -229,12 +229,22 @@ struct MobileShelfView<TabBar: View>: View {
     /// "~/shelf · 6 books" (terminal) / "Shelf · 6 books" (study); the
     /// + New Note door (P33 — Library's twin, same path-line placement)
     /// and the settings door trailing.
+    ///
+    /// **ONE line at 402 pt in both voices** (VM-50, the batch-1 carry-in:
+    /// Terminal's 13 pt mono path beside two 17 pt mono words needed ~437 pt
+    /// and wrapped). The doors are the phone's controls with 44 pt hit areas
+    /// that touch: 🗑 an icon button, + New Note an inline act (15), Settings
+    /// an icon button (the gear; its word stays its spoken label) —
+    /// PROVISIONAL P-47-9; Settings leaves this line for the roots' ⋯ menu at
+    /// VM-53. The path's own line keeps its place; the hit areas reach into
+    /// the line's air. Pinned by `MobilePathLineGeometryTests`.
     private var pathLine: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 16) {
+        HStack(alignment: .center, spacing: 0) {
             Text(tokens.path(["Shelf"]) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
                 .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.phone.muted)
-            Spacer()
+                .lineLimit(1)
+            Spacer(minLength: PhoneMetrics.Space.s16)
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)
             }
@@ -246,24 +256,19 @@ struct MobileShelfView<TabBar: View>: View {
                 }
             } label: {
                 Text(tokens.chromeLabel(MobileNewNoteDoor.doorTitle))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens))
             .accessibilityLabel("New Note")
             Button {
                 onSettings()
             } label: {
-                Text(tokens.chromeLabel("Settings"))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
+                Image(systemName: MobileSettingsDoor.symbol)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: .accent))
             .accessibilityLabel("Settings")
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .padding(.horizontal, PhoneMetrics.gutter)
+        .padding(.top, PhoneMetrics.Space.s4)
     }
 
     /// One book's row. Since batch 5 the row is an HStack of two doors
@@ -309,7 +314,7 @@ struct MobileShelfView<TabBar: View>: View {
                 // the element came back 17 pt tall against a 39 pt row.)
                 .padding(.vertical, 11)
                 .padding(.leading, 12)
-                .contentShape(Rectangle())
+                .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             if isDaily {
@@ -393,7 +398,7 @@ struct MobileShelfView<TabBar: View>: View {
             }
             .padding(.vertical, 11)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New Book")
@@ -415,19 +420,10 @@ struct MobileShelfView<TabBar: View>: View {
             openToday()
         } label: {
             Text(tokens.chromeLabel(MobileShelfFaces.todayDoorTitle))
-                .phoneType(.chip, tokens)
-                .foregroundStyle(tokens.accent)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(tokens.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(tokens.line, lineWidth: 1)))
-                .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        // VM-50: the chip (sheet §E's Today door — a 32 pt capsule, 15
+        // medium, a 44 pt hit area), replacing the badge's own calm build.
+        .buttonStyle(PhoneChipStyle(tokens: tokens))
         .accessibilityLabel(MobileShelfFaces.todayDoorSpoken)
     }
 
@@ -448,7 +444,7 @@ struct MobileShelfView<TabBar: View>: View {
             }
             .padding(.vertical, 11)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(MobileShelfFaces.todayDoorSpoken)
