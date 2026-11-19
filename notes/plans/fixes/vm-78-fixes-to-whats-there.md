@@ -2197,15 +2197,18 @@ gate (the measured moment depends on the layout pass's order, and another wave-1
 
 ## Closeout
 
-**NOT YET DONE — this section is a DRAFT, written 2026-11-19 at tip `2f0687fd4` by a closeout drafter (documents
-only; no code, build or stage).** Still ahead when it was written: batch C's window (3) and the arm it decides
-(VM-24, VM-19, VM-17); the instruments' removal commit (round 1's F7); ladder round 3
-and any round it earns; the merge behind vm-55 with VM-16 re-landed on main's message seam; the gate's three
-claims (the whole phone target, the Mac leg on the merged tree, the simulator walk); the PROVISIONAL bundle and
-F8's question filed in `notes/QUESTIONS.md`; the tickets minted; `Tools/canon-size`; the PR and its merge; the
-in-flight row retired. Every fact not yet known is a **PENDING(…)** slot for the orchestrator to fill; nothing
-marked PENDING is claimed. Facts here trace to this file, the two round files, the code at `2f0687fd4`, or git;
-the kept window logs' verdict lines were also read back at drafting and agree with the lines below.
+**NOT YET DONE — this section is a DRAFT. First written at tip `2f0687fd4` by a closeout drafter; REFRESHED
+2026-11-19 at tip `f4fce656b` by a closeout refresher (documents only; no code, build or stage).** Done since the
+first draft: batch C's window (3) and the orchestrator's decisions on it; the instruments' removal (`16c75a5bf`);
+batch D's trace, its settle measurement and its build; ladder round 3; her ruling on VM-24. **Still ahead, each a
+PENDING(…) slot below:** batch D's stage window (its red leg, its green leg, the decor reading alone) and the decor
+reading's removal commit; the merge behind vm-55 with VM-16 re-landed on main's message seam; ladder round 4 and
+any round it earns; the gate's three legs (the whole phone target, the Mac suites over the changed `Shared/` files
+on the merged tree, the simulator walk); the shared ledgers at the merge moment (the QUESTIONS bundle and F8's
+question, the tickets minted, `notes/AppSpecRecord.md`, the finals ledger, the master plan's row and paragraph);
+`Tools/canon-size`; the PR and its merge; the in-flight row retired. Nothing marked PENDING is claimed. Facts here
+trace to this file, the three round files, `notes/plans/vm-24-unwarned-edit-routing.md`, the code at `f4fce656b`,
+or git (`git log e48ef2f30..f4fce656b`).
 
 ### Results, member by member
 
@@ -2227,8 +2230,8 @@ table below; "red/green" means the pin was seen red on the pre-fix product and g
 - *Evidence.* Window (2): both red on the pre-fix door, green on the fix.
 - **PENDING(the re-landing):** vm-55 merges first and moves the door's receipt onto its message seam
   (`MobileUndoDoorTests` re-pinned there). An implementer re-lands this rule on that vocabulary — a quiet press
-  refuses and offers no way back — with its pins re-shaped and shown red and green again: PENDING(commits),
-  PENDING(red/green window), read by PENDING(ladder round).
+  refuses and offers no way back — with its pins re-shaped and shown red against a door that reads the label of a
+  quiet press and green again: PENDING(commits), PENDING(red/green window), read by ladder round 4 (PENDING).
 
 **VM-20 — the undo warning's word (carried by VM-16; W-146).**
 - *What was wrong.* The phone's warning detail said "It is saved first" where the Mac says "It is committed
@@ -2367,43 +2370,131 @@ table below; "red/green" means the pin was seen red on the pre-fix product and g
   `GatheringCollectStarReceiptTests` over the hoisted bytes.
 - *Evidence.* Window (1) red/green and its Mac leg green.
 
-**VM-24 — the standing phone red (W-258), and VM-19 it carries (W-259). EDITOR SEAM (test code).**
-- *What is built (no product line changed).* The trace of the road the red test drives and four ranked hypotheses
-  (H1 the settle writing inside the replace's storage transaction; H2 the posture; H3 the keyboard; H4 the gate's
-  consults); three DIAGNOSTIC instruments that assert nothing — `MobileCaretReplaceTraceTests`,
-  `MobileCaretReplaceTeethTraceTests`, `MobileStaleResponderTraceTests` (`a570d3960`, `fec0e478b`); the window's
-  matrix and every arm decided in advance (batch C's LIVE STATUS, with round 1's F6/F7 and round 2's R2-F2
-  applied — `bf257ce34`, `0a49415d7`, `046a886fc`).
-- *VM-19's pin and fix.* The mechanism, C-1's reading: a text view raised in a frame window and then only hidden
-  keeps first responder and desyncs the editor on `insertText`. Pin `615a12189`
-  (`MobileLivenessTests/arrivalRaisesFocusBeforeTheObservationLoops`' VM-19 expectation); fix `5ec59922c` (the
-  arrival test ends editing in its window before hiding it); round 1's N5 `839d86dd9` (the `defer` runs the same
-  teardown on every exit).
-- **PENDING(window 3):** M1–M7's outcome; the arm VM-24 takes (A test posture · B product — stop and report,
-  editor seam · the unmapped posture case, the orchestrator's decision · untraceable) and the evidence that
-  decided it; the mechanism as traced; any fix's commits and its pin's red/green in a second short window (arm A:
-  the fixed caret test seen red under the named hand-break and green without it); VM-19's M4 reading and its pin
-  red (M9-red) and green (M9-green), or "hollow" with `5ec59922c` and `839d86dd9` reverted by new commits.
+**VM-24 — the standing phone red (W-258). EDITOR SEAM. Traced to a product mechanism in the phone editor's edit
+routing; by her ruling it gets its own run after wave 1; this run builds NO fix for it and does not close it.**
+- *What was traced* (window (3); BATCH C, "WINDOW (3) — RESULTS" and "VM-24 — the mechanism, its reach, and the
+  options"; the trace instruments `a570d3960`, `fec0e478b`, removed in `16c75a5bf`). The red test's replace comes
+  through UIKit's text-input door (`replaceRange:withText:` into `NSTextStorage coordinateEditing:`) and the edit
+  gate is never consulted on that road (E1 `consults=0 … gate-less` in every act of M2 and M3), so the edit
+  reaches `storageDidEdit` unarmed and `fallbackVerdict` routes it from the storage's own report. TextKit's
+  attribute fixing widens that report inside `processEditing` (for "hi": `willProcessEditing` `{1,2}`,
+  `didProcessEditing` `{1,5}`); widened past the line's terminator, the old range `(1,8)` reaches the separator,
+  the route is refused, and `desyncRecovery` re-renders the surface from the store — before the replacement was
+  ever queued for saving. The red follows the report's range, not the posture: exact and green in all six
+  real-posture acts, widened in five of six suite-posture acts, and within one posture "Hello" #1 exact and green
+  while #2 is widened and red. H1 (the caret settle writing inside the transaction) is killed: no in-transaction
+  write in any M2 case, the red persists with the settle held, and M3's forced in-transaction write desyncs
+  nothing without the widening. No pre-decided arm mapped (both of round 2's R2-F2 lines were met); arm A's
+  test-side wait was refused, because it would turn the test green by avoiding the condition, not by removing the
+  hazard.
+- *Its reach, by reading the code* (round 3's R3-F5 taken, `76bfc56b6`). Return, Tab and the markdown acts arm at
+  the call. A typed character is asked about but can land unarmed behind a keyboard transaction of its own (her
+  iPhone's E1 #50–#52, `notes/plans/mobile-round-2-crash-trace.md`). Autocorrect, predictive replacement,
+  dictation and marked-text commits reach `storageDidEdit` without the gate by the code's own account. What she
+  would see when a widened report meets one of those roads: the character or word just entered snaps back, with a
+  re-render flicker. Stored text is never at risk: the refused route returns before the autosave is recorded, and
+  the recovery first flushes what was already pending. How often fixing widens the report on a device is
+  unmeasured. It reads as one mechanism with VX-68 (the gate-less insertion watch row).
+- *Her ruling* (2026-11-19, the morning; a dialog pick in the orchestrator's session, no prose): "Own run after
+  wave 1 (Recommended)". The option, as the record states it: VM-24 becomes its own short run on merged main as
+  soon as all four mobile runs have merged, before wave 2, starting with one session on her phone counting how
+  often unwarned edits and snap-backs occur, so the fix has before-and-after numbers. Her words to the stage
+  coordinator the same morning, verbatim: "I chose the own run after wave 1 option that vm-78 proposed. i want you
+  to message them about this to lock the plan down, but basically i want you to open a new session in tmux once
+  wave 1 is done and merged, and tell it to architect-phase that issue, reporting to you for stage details. just
+  kick that off when wave1 is done for me."
+- *What this run did.* The trace and the write-up for her decision (`6b214ad67`, `65fe3a114`; the reach corrected
+  at `76bfc56b6`); the instruments out of the tree before any whole-target run (`16c75a5bf`); the later run's
+  kickoff, `notes/plans/vm-24-unwarned-edit-routing.md` (`f4fce656b`), for `/architect-phase vm-24`, which the
+  stage coordinator launches once all four wave-1 mobile runs have merged; the ticket re-owned out of this umbrella
+  (the orchestrator's live state: un-parented, Todo, Area Editor, retitled, related to VM-64 and VX-68, a comment
+  carrying the mechanism and her decision). *What it did not do:* no fix and no seam line; the caret test stays
+  red and unwrapped as the pin — on this branch and, after the merge, on main, by decision, never wrapped as a
+  known issue — until VM-24's own run turns it green.
+- *Pin.* `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep` — red for "hi"
+  and "hello there" at `desyncRecoveryCount == 0` (`:215`), "Hello" green; red as expected in M1, M6a, M6b and M7.
 
-**VM-17 — do fan badges pile at block 1? (probe first; W-147). EDITOR SEAM (test code).**
-- *What is built (no product line changed).* `MobileFanBadgePlacementProbeTests/noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote`
-  — 150 blocks, 22 fans; reading 1 (the pile) an expectation; reading 2 a printed measurement against an idealized
-  layout; readings (i), (i′), (ii), (iii) the viewport invariant on a stepped walk and on the product's
-  `jumpToBlock` (`a570d3960`; re-shaped to round 1's F2, `e3f406086`; (i′) to round 2's R2-F3, `78179b765`). The
-  brief's pin wording for VM-17 is AMENDED by F2's final call (recorded in batch C's LIVE STATUS). The cost note
-  `vm17CostNote_theDocumentPassOnALongFannedNote` is an instrument for VM-179 and leaves with the removal commit.
-- **PENDING(window 3, M5):** HOLLOW — (1), (i), (i′) and (ii) all green: no product line, the probe kept as the
-  guard, reading 2's numbers and the HOLLOW verdict's reach sentence written here for VM-179 — or REAL — any of
-  them red: stopped and reported before any product line, the fix shape round 1 named written down, not built.
-  PENDING(reading 2's numbers), PENDING(the cost note's numbers), PENDING(any jump-road reach miss and its
-  distance — a ticket to mint).
+**VM-19 — the stale first responder (W-259; carried by VM-24). DONE, as test hygiene.**
+- *The mechanism, C-1's reading.* A text view raised in a frame window and then only hidden keeps first responder,
+  and was read as desyncing the editor on `insertText`.
+- *What changed.* `MobileLivenessTests`' arrival test ends editing in its window before hiding it (`5ec59922c`), on
+  every exit (`839d86dd9`, round 1's N5). Test code only.
+- *Pin.* `615a12189` — `MobileLivenessTests/arrivalRaisesFocusBeforeTheObservationLoops`' VM-19 expectation.
+- *Evidence.* Window (3): M9-red (the test file at `615a12189`, the hide-only teardown) — 18 tests in 1 suite
+  failed, 1 issue, exactly the VM-19 expectation (`:1087`); M9-green — 18 passed. The desync itself did not
+  reproduce on this toolchain: no desync in any of M4's four cases (frame window and scene window, with and
+  without the polluter). The pin stands as test hygiene and claims no more.
+
+**VM-17 — fan badges on a long note (W-147). EDITOR SEAM (the takes chrome and the text view's chrome-geometry
+section). REAL, though not as filed: no pile at block 1, but stray badges in the viewport on a stepped scroll.
+Fixed in this run as batch D — BUILT; its stage window PENDING.**
+- *What window (3) showed* (M5, and M5b identical line for line). Reading 1, the pile: green — no two badges
+  coincide, none at block 1. The viewport invariant on the stepped walk (61 stops): (i) 35 badges astray, (i′) 35
+  misses, (ii) 9 fans on screen with no badge on their line; on the jump road (22 jumps) 0 · 0 · 0; reach (iii)
+  green (`walkReached=22/22`, `jumpMissed=0`; (i′) asked 76, skipped 0). One badge stood 1,260 pt from its own
+  block, beside another block's text; several stood 74 pt off their own line. By the record's arm: REAL — stopped
+  and reported before any product line. Reading 2, printed and never asserted: `offscreenDrawn=21 offIdeal=21
+  largest=9276.0 mean=4716.0` (points), on a live content height of 33,812 pt. No jump-road reach miss, so no
+  jump-road ticket.
+- *The two mechanisms* (batch D's trace, `23f772dba`, read against M5 by round 3). **A — an off-band stale frame:**
+  24 of the 35 strays carry their block's exact load-time value. The load's full pass forced layout at each fan's
+  mid-document offset ahead of its unlaid predecessors, so TextKit placed the fragment at an estimate and later
+  moved it, while the off-band badge kept its frame ("its last resolved frame stands"). **B — an in-band badge read
+  before TextKit placed its fragment:** the other 11, each exactly 74 pt, with all 9 bare lines — read in the scroll
+  tick before TextKit had laid out the new viewport. Round 1's shape ("hide off-band, resolve as it enters") would
+  remove A and not B, so the implementer stopped at the trace (the brief's own rule).
+- *The settle measurement that decided the shape* (an instrument: introduced `35ce90848`, its result written
+  `8f48427b0`, removed `5a57abdf0`; log `vm78-d-measure.log`). At the first subview laid out after the text view's
+  own layout, the unforced first-line read already equals the after-settle read in 118 of 118 band-fan reads (and
+  the idealized layout in all 28 on screen), while the chrome's badge was off in 49 until the chrome read again.
+  Two corrections the round-3 reviewer took: "settled" is true only of what is on screen; and at walk#10 the chrome
+  read back a frame an earlier forced read had left — laid out is not placed. Mount 2 was void (its model was
+  released), and `linkFired=51/61` is R3-F3's stale fallback, not the host.
+- *What changed* (round 3's called shape, S1–S11, built as called — `f869f8667`). The takes chrome draws a fan
+  badge, a peek marker and the choosing pill only from text TextKit has laid out inside its own unpadded viewport
+  (`viewportCharacterRange()`, with the empty last block's end case); the marker and the pill read a union clipped
+  to that viewport; outside it nothing is read, forced or left standing — a view exists only once placed, is hidden
+  with its frame kept while its block is out of the viewport, and is removed when its fan or peek dies. One
+  geometry walk serves every scope (the width escalation is gone), and a second walk runs in the same layout pass
+  from a zero-size anchor subview (`MobileTakesChromeAnchor`) added after TextKit's own subviews. Files:
+  `Takes/MobileTakesChrome.swift`; the "Chrome geometry" section of `Write/MobileEditorTextView.swift`; one comment
+  line in `Write/MobileBlockDecor.swift`. No line in `MobileEditorViewModel.swift`, `Shared/EditorBrain` or any
+  edit routing.
+- *Pins* (`15add793d`). The probe `MobileFanBadgePlacementProbeTests/noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote`,
+  red on file (M5, M5b) and unchanged statement for statement since M5 (R3-N1 — so no second red leg is owed). In
+  `MobileTakesChromeTests`: the re-pinned `perTickRefreshResolvesOnlyNearViewportGeometry` and
+  `aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved` (red on the old chrome by inversion); the new pin
+  `aFarFlipDrawsNoMarkerOrPillUntilItsBlockScrollsIn`; the guard `anEmptyFannedLastBlockWearsItsBadgeWhileTheNotesEndIsOnScreen`
+  (green on both sides by design — if red on the old chrome too, it is dropped in a named commit and the rule kept).
+- *Evidence so far.* Headless only: the phone `build-for-testing` green at the tip (`vm78-d-bft6.log`) and on the
+  red tree, the two product files at `15add793d` (`vm78-d-bft-red.log`). **PENDING(batch D's window):** the red
+  leg (`MobileTakesChromeTests` alone; expected red exactly the three named above), the green leg (the probe and
+  `MobileTakesChromeTests MobileWalkTests MobileConflictDiscoveryTests MobileTakesBrowserSurfaceTests
+  MobileTutorialTakesWalkTests MobileTutorialLibraryWalkTests MobileBlockListTests MobileBlockDecorTests`; expected
+  all green, reading 2 printing `offscreenDrawn=0`), then the decor reading alone. The implementer's risk, said
+  before the window: two windowless tests (`MobileTakesChromeTests.aFlushEndOneLineFannedAndCommentedBlockNeverCrowdsTheBadge`,
+  `MobileTutorialTakesWalkTests.theSwipeLessonPeeksStickyAndTheCheckChooses`) may go red only because the harness
+  gives the view no height; the remedy is their posture, named in LIVE STATUS, never the product. If the probe is
+  not green: S6's pre-decided arm (the anchor at subview index 0) only when every red is the 74-pt class, otherwise
+  stop and report; the probe is never edited. If the fix does not land in this run, the probe file leaves the
+  branch in a named commit VM-17's ticket cites (the live state's rule for the red probe).
+- *The decor — round 3's R3-F1, MAJOR.* The block decor (callout washes and glyphs, comment marks) shares the
+  standing-frame rule and the forced helpers the badge had; nobody had measured it. Disposition (the
+  orchestrator's, taken by the reviewer): batch D stays the badge's, with its markers and pill; the decor gets a
+  ticket carrying a MEASURED reading as its pin — `MobileDecorPlacementReadingTests/theDecorStandsOnItsOwnBlocksInTheViewportOnALongNote`
+  (`211221f6b`, its compile fix `75984c0e6`), run alone by type in batch D's green window, then removed in a named
+  commit before any whole-target run. No decor code changes here; one comment line in `MobileBlockDecor.swift` says
+  the takes chrome no longer shares the decor's band law. **PENDING(batch D's window):** the reading's outcome —
+  decor red ⇒ the decor's ticket starts with that red on file (the ticket's text is under "Tickets to file");
+  decor green ⇒ R3-F1 closes hollow for the decor, said here; its badge expectations red ⇒ batch D's, stop and
+  report. Expected by reading: decor red, badge green. **PENDING(the removal commit).**
 
 ### The evidence
 
 The phone windows ran on the standing phone-suite simulator (iPhone 17 Pro, iOS 26.2), addressed by id (never
 written here), under `Tools/stage` claims nov18 granted. Windows (2), (1), (5) and R2-N1's ran from the
-orchestrator's throwaway detached checkout (`~/dev/variorum-vm-78-pins`, its own DerivedData); F4's follow-up was
-the orchestrator's too.
+orchestrator's throwaway detached checkout (`~/dev/variorum-vm-78-pins`, its own DerivedData); F4's follow-up and
+the settle measurement were the orchestrator's too; window (3) was run from the worktree by a fresh window runner.
 
 | Window | When | What ran | Verdict | Reds, by name | Bundle and log |
 |---|---|---|---|---|---|
@@ -2412,10 +2503,14 @@ the orchestrator's too.
 | (5) the round-1 fix pass | claimed 06:26:55, released 06:31:48 | checkout at `140869902`; four product files at `0180727de`, then the tip; ten types | RED: 75 tests in 10 suites failed, 9 issues incl. 2 known. GREEN: 75 tests in 10 suites passed with 2 known issues | four: `aRacedUnarchiveSpeaksTheSharedSentence` (F3) · `theTrashNamesAnUntitledSavedVersionAsOne` (N2) · `theFinishRowsConfirmPresentsAndItsFinishActs` and `theFinishRowsConfirmCancelChangesNothing` (F5's guards, red only for the missing row label). F4's pin did not run (its type was misnamed in the recipe) | RED bundle `fixpass-red.xcresult` UNREADABLE (stopped before it was finalized) — its log `vm78-window-f-red.log` is the evidence; GREEN bundle `fixpass-green.xcresult` reads (75: 74 passed, 1 expected failure, 0 failed); log `vm78-window-f-green.log` |
 | F4's follow-up | 06:52–06:54 | the seeder at `0180727de`, then the tip; one type, `MobilePocketGuideDeletionTests` | RED: 4 tests in 1 suite failed. GREEN: 4 tests in 1 suite passed | one: `theShelfLessonDescribesTheShelfThatExists` (3 issues — the three expectations F4 added) | `f4-red.xcresult` and `f4-green.xcresult` both read; logs `vm78-window-f4-red.log`, `vm78-window-f4-green.log` |
 | R2-N1's pin | claimed 07:19:38, released 07:23:59 | checkout at `ef1430142`; only `MobileBookDetails.swift` at `046a886fc`, then the tip; `MobileBookStateRowTests` + `MobileFinishConfirmTests` | RED: 11 tests in 2 suites failed, 4 issues. GREEN: 11 tests in 2 suites passed, 0 failed | one: `theBookDetailsRowsSpeakTheirCaptionsAsHints` (F5's two guards green on both sides) | RED bundle `r2n1-red.xcresult` UNREADABLE (its `xcodebuild` was still alive 90 s after the verdict and was stopped at the bound) — its log `vm78-window-r2n1-red.log` is the evidence; GREEN bundle `r2n1-green.xcresult` reads; log `vm78-window-r2n1-green.log`. The run's second unreadable red bundle, after `fixpass-red` |
-| (3) batch C, matrix only | PENDING | M1, M2, M3, M4, M5, M6a, M6b, M7, M9-red, M9-green (batch C's matrix) | PENDING | PENDING (M1/M6a/M6b red by design: the standing red's two cases) | PENDING(`c-M*.xcresult` read or unreadable; `vm78-c-<run>.log`) |
-| batch C's second short window | PENDING(if the arm calls for one) | PENDING | PENDING | PENDING | PENDING |
+| (3) batch C, matrix only | claimed 08:39:53, released 08:50:46 | the worktree; M1–M7 by `test-without-building` against `vm78-ios` built at the code of `97282e72f`, M9's two legs by `xcodebuild test`; the matrix's ten runs (M1, M2, M3, M4, M5, M6a, M6b, M7, M9-red, M9-green) plus one M5 re-run alone (M5b) | M1, M6a, M6b: 4 tests in 1 suite failed, 2 issues each. M2: 3 tests passed; M3, M4: 1 test each passed. M5 and M5b: 2 tests in 1 suite failed, 3 issues each, identical. M7: 22 tests in 2 suites failed, 2 issues. M9-red: 18 tests in 1 suite failed, 1 issue. M9-green: 18 tests in 1 suite passed | M1, M6a, M6b, M7: the caret pin's two cases ("hi", "hello there", `desyncRecoveryCount == 0`), by design — nothing beyond them in M7. M5, M5b: the probe's (i), (i′), (ii) expectations (`astray`, `misses`, `bare`) — VM-17 real. M9-red: the VM-19 expectation (`:1087`), by design | all eleven bundles read (`vm78-bundles/c-<run>.xcresult`); logs `vm78-c-<run>.log`; every `xcodebuild` exited by itself within 5 s of its verdict; no `Restarting after unexpected exit`, no new crash report |
+| the settle measurement | 2026-11-19, between `35ce90848` and round 3's final calls (the record gives no claim times) | `MobileFanBadgeSettleMeasureTests` alone by type — an instrument, not a pin | 1 test in 1 suite passed after 6.685 seconds | none (it asserts nothing about the product) | log `vm78-d-measure.log`; bundle: the record does not say — PENDING(orchestrator: state it) |
+| batch C's second short window | not run | — no arm called for one: VM-24's fix is its own run's, VM-17's became batch D, VM-19 was proved in M9 | — | — | — |
+| batch D, red leg | PENDING | `MobileTakesChrome.swift` and `MobileEditorTextView.swift` at `15add793d`, the tests at the tip; `MobileTakesChromeTests` alone (the red tree proved to build headless, `vm78-d-bft-red.log`) | PENDING | expected exactly: `perTickRefreshResolvesOnlyNearViewportGeometry`, `aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved`, `aFarFlipDrawsNoMarkerOrPillUntilItsBlockScrollsIn` — PENDING | PENDING |
+| batch D, green leg | PENDING | the tip (built headless, `vm78-d-bft6.log`); the probe and the eight chrome types | PENDING | expected none; reading 2 `offscreenDrawn=0` — PENDING | PENDING |
+| batch D, the decor reading | PENDING | `MobileDecorPlacementReadingTests` alone, on the tree with batch D's fix | PENDING | PENDING (decor red ⇒ the ticket's pin; green ⇒ hollow) | PENDING |
 | VM-16 re-landed | PENDING(after the merge) | its pins against a door that reads the label of a quiet press, then the re-landed door | PENDING | PENDING | PENDING |
-| Gate 1: the whole phone target | PENDING | the merged tree, WITHOUT the instruments (F7) | PENDING | PENDING | PENDING |
+| Gate 1: the whole phone target | PENDING | the merged tree, WITHOUT the instruments (F7) and without the decor reading; the probe must be green again there (round 3's last line) | PENDING | the caret pin's two cases red by decision (VM-24's own run), named in the line — PENDING | PENDING |
 | Gate 2: the Mac leg | PENDING | the merged tree; the 17 Mac types over the changed `Shared/` files (batch A's list, plus `UndoWarningWordsTests` and `DestructiveUndoWarningTests`) | PENDING | PENDING | PENDING |
 | Gate 3: the simulator walk | PENDING | the dev-store Debug phone build; one capture per row into PENDING(screens folder), both voices where a face has one | PENDING | — | PENDING(captures) |
 
@@ -2427,7 +2522,8 @@ long-press menu without Pin · the create sheet's Gathering kind · a starred ar
 Details with Unarchive → back on the shelf · the undo door after a quiet press · a restore and its kept moment ·
 the date chip · the Trash's first paint · the divide lesson · F4's "getting around" lesson · round 1's N9: the
 tallest Book Details (an archived, journal-trait book with a rule, a refusal line showing) at the medium and at
-the large detent. PENDING(each row's outcome and capture name).
+the large detent · batch D's: a long fanned note scrolled top to bottom, every badge on its own line.
+PENDING(each row's outcome and capture name).
 
 ### Her rulings built here, against what shipped
 
@@ -2435,9 +2531,9 @@ Her words are quoted exactly as recorded; where the record holds an orchestrator
 rather than her sentence, it says so.
 
 1. **The ladder cap tonight** (Kickoff facts): "sounds good, tonight, up to 5 review rounds as long as a major is
-   found." *Shipped:* round 1 found two MAJORs and earned round 2; round 2 found none. Round 3 is owed by round 1's
-   F1 — new work (batch C's outcome, VM-16 re-landed) has not been cold-read — not earned by a round-2 major; her
-   cap governs every round after it. PENDING(rounds run).
+   found." *Shipped:* round 1 found two MAJORs and earned round 2; round 2 found none, and round 3 was owed by
+   round 1's F1 (new work not yet cold-read); round 3 found one MAJOR (R3-F1), which earns round 4 — owed anyway
+   for batch D's fix and VM-16 re-landed. PENDING(round 4 and any round it earns, within the cap of five).
 2. **Her frame for the night** (Kickoff facts): "and just to be clear, the plan is sequential merges to main,
    overnight provisional running, but I won't get a new phone build until wave 2 is done according to what
    another session said." *Shipped:* the run closes on a simulator walk, with its PROVISIONAL calls bundled. Its
@@ -2462,13 +2558,24 @@ rather than her sentence, it says so.
 6. **Receipts** (her sitting): which acts show a line — "Only removals and refusals". *Shipped:* no new line for
    an ordinary act (Unarchive speaks none; the sheet itself changes); a refusal speaks a sentence on every road this
    run opened (the sealed Reopen, the raced Unarchive). The collect receipt stands by item 3; whether the phone
-   keeps it at all is on the wording pass.
+   keeps it at all is on the wording pass. Batch D adds no line of any kind.
 7. **Words** (her sitting, on the designers' lines): "I think we need to word things more simply." *Shipped:* the
    Mac's own words wherever a Mac face exists; the drafted lines below wait for her pass.
 8. **The insured restore** — QUESTIONS #274 addendum 2, the orchestrator's record of her dialog pick at the
    2026-11-10 sitting: "**P-849-1 RATIFIED + the phone wired** (the insured restore stands; the phone's
    one-argument insurance is VM-43)." *Shipped:* VM-43, the one phone restore door. AppSpec §9 and OverallModel §3
    still mark the rule PROVISIONAL — the proposed change is under "Canon deltas".
+9. **VM-24's road** (2026-11-19, the morning). Her dialog pick in the orchestrator's session, no prose: "Own run
+   after wave 1 (Recommended)" — the option as the record states it: its own short run on merged main as soon as
+   all four mobile runs have merged, before wave 2, starting with one session on her phone counting unwarned edits
+   and snap-backs. Her words to the stage coordinator, verbatim: "I chose the own run after wave 1 option that
+   vm-78 proposed. i want you to message them about this to lock the plan down, but basically i want you to open a
+   new session in tmux once wave 1 is done and merged, and tell it to architect-phase that issue, reporting to you
+   for stage details. just kick that off when wave1 is done for me." *Shipped:* no VM-24 fix in this run; the pin
+   stays red and unwrapped; the kickoff `notes/plans/vm-24-unwarned-edit-routing.md` (`f4fce656b`) for
+   `/architect-phase vm-24`, its first acceptance unit the measurement on her phone; the ticket re-owned out of
+   this umbrella. **Remainder, not this run's:** the coordinator's launch once wave 1 has merged, and the session on
+   her phone (her hands, at that run's start).
 
 **The reconcile CLAUDE.md asks for (re-reading "every", "everywhere", "all" against what shipped):**
 - **W-073, "Say "gathering", never "smart", everywhere"** — the approved plan's row title (her approval of the
@@ -2482,6 +2589,12 @@ rather than her sentence, it says so.
   is a hand-kept list of strings; the Mac's source-scanning ban comes to the phone with VM-212 (round 1's N7).
 - **"every phone restore call site"** (the brief's VM-43 line) — there is one; it is wired.
 - **The receipts ruling** — no ordinary act gained a line; the one kept line (collect) is on the wording pass.
+- **VM-24's ruling** — "all four mobile runs have merged" (the option's words, as the record states them) is
+  carried exactly by the kickoff ("only after all four wave-1 mobile runs (VM-47, VM-55, VM-64, VM-78) have
+  merged"); her own words ("once wave 1 is done and merged") say no more than that.
+- **Batch D's law** — "nothing outside the viewport is read, forced or left standing" is the reviewer's called
+  shape, not her words; it covers the takes chrome's three overlays (badge, marker, pill) and deliberately NOT the
+  block decor, whose remainder is R3-F1's ticket (or its hollow verdict).
 - **Nothing else** in the rulings above says every, everywhere or all.
 
 ### The ratify list (her PROVISIONAL calls)
@@ -2504,13 +2617,14 @@ rather than her sentence, it says so.
 3. **Not PROVISIONAL, named so it is not lost:** the phone's Book Details reads the Mac's finish door table on its
    own side (`finishRowAct(for:)`; Reopen stays drawn on a sealed BOOK and explains, per W-106) until the door sets
    are hoisted — W-070 (VM-115) and W-112 (VM-161) retire this small fork.
-4. PENDING(window 3): any PROVISIONAL call batch C's arm adds (the unmapped posture case is the orchestrator's
-   decision, read by the next cold reviewer).
+4. **Nothing else.** Batch C added no PROVISIONAL (its LIVE STATUS: "PROVISIONAL: none"); batch D added none (its
+   trace: "No PROVISIONAL was ruled and no question is raised"; its build is round 3's called shape). VM-24 is no
+   longer a question: she ruled it (item 9 above).
 
 ### For her wording pass
 
 Every line this run drafted, old beside new. The Mac's own words that are new on the phone (not drafts) follow
-the table.
+the table. Batches C and D render no words.
 
 | Where | Old | New (draft) |
 |---|---|---|
@@ -2537,6 +2651,18 @@ changed." · "Unarchive".
 
 ### Lines for other owners
 
+- **VM-24's own run** (`/architect-phase vm-24`, after all four wave-1 mobile runs merge; the kickoff
+  `notes/plans/vm-24-unwarned-edit-routing.md`): the mechanism, its reach, the three fix options and what only a
+  device can tell are in BATCH C's "VM-24 — the mechanism, its reach, and the options"; the trace instruments can be
+  restored from `a570d3960` and `fec0e478b` (run alone by type, never in a whole-target run). Its first acceptance
+  unit needs her hands: one session on her phone with the E1 trace armed.
+- **VX-68 (the gate-less insertion watch row, Backlog):** reads as one mechanism with VM-24 (an iOS one-character
+  insert reporting `{8,9}`, named there as the candidate cause of "the note flickered"); VM-24's ticket is related to
+  it, and VM-24's run decides whether it closes it.
+- **VM-64 (wave 1, timing and lags):** its flight fence decides what happens to an unwarned edit while a
+  structural act lands, in the same file, and its batch 2 traced the same widened-report mechanism for a bare
+  `insertText` (the kickoff's reading of VM-64's record); VM-24's ticket is related to it, and VM-24's run designs
+  against the fence as merged.
 - **VM-62 (vm-55's run — refusals in words):** `MobileBookDetailsModel.refusal` now forwards `.readingSealed` and
   `.readingNotArchived` to `OpsRefusalCopy.words(for:roads: .phone)`; VM-62's sweep collapses the rest onto the
   table — expect a textual conflict at that function. And round 2's R2-N4, verbatim from the fix pass: "Book
@@ -2548,6 +2674,26 @@ changed." · "Unarchive".
   `MobileBookDetailsModel.refusal` and its rows onto the message seam, give the rows an in-flight latch (the undo
   door's `inFlight`), so the sentence stays for the real race — the book unarchived elsewhere while the sheet is
   open."
+- **VM-179 (wave 4 — "the takes marks lay out only the fanned blocks on screen"):** window (3)'s cost note — 150
+  blocks: load 0.032 s unfanned and with 22 fans, the `.document` chrome pass cold 0.11 ms vs 1.81 ms, warm 0.05 ms
+  vs 0.30 ms; 600 blocks: load 0.116 s vs 0.122 s with 86 fans, the pass cold 0.31 ms vs 6.02 ms, warm 0.19 ms vs
+  1.24 ms — and reading 2 (`offscreenDrawn=21 offIdeal=21 largest=9276.0 mean=4716.0` pt on the 150-block note).
+  What the takes chrome forces per pass, by reading (`bb5087223`): *before*, every full pass forced one
+  `firstLineGeometry` for every fanned block plus a whole-block union per peeked block and the pill's; *after*, every
+  scope reads only the fans whose start is inside TextKit's own unpadded viewport, and the marker and pill only
+  their block's part inside it — twice per layout pass, nothing off screen read or forced. *What is left for
+  VM-179:* the reservation walk on every pass (storage attributes only, no layout); the slot walk to find the fans,
+  now twice per pass (∝ the note's blocks, no geometry); and the block decor's forced reads (R3-F1's ticket).
+- **VM-218 (VoiceOver and text size):** Book Details' name row carries `.accessibilityLabel("Rename Book")`
+  (`MobileBookDetails.swift`, the identity block, from before this run), which replaces the book's name for
+  VoiceOver. And from batch D (`bb5087223`): a fanned block outside TextKit's viewport now exposes NO badge to
+  VoiceOver (no view exists until first placed; one placed earlier is hidden while its block is off screen), where
+  the old chrome exposed a badge for every fan, standing wherever its last read left it; whether a VoiceOver reader
+  needs the fan announced before it is on screen is the VoiceOver pass's question. (R2-N1's own fix stands — its
+  window proved it — so no R2-N1 line goes here.)
+- **VM-188 (wave 5 — the visible badge and the foot pill):** it redraws the badge's face on the takes chrome batch
+  D changed (batch D's brief names the meeting); its redraw meets the viewport law now written in
+  `MobileTakesChrome.swift`'s header.
 - **VM-113 (wave 3, the Bookcase):** the order choice ("a–z or last edited") is hers to build there (her ruling,
   above). Round 1's N6, withdrawn here: `MobileShelfViewModel.orderedBooks` is a computed sort
   (`localizedStandardCompare`) read several times per shelf and Library body — ∝ the books, P1 holds; when the
@@ -2560,15 +2706,10 @@ changed." · "Unarchive".
 - **VM-85:** the Today door's `.wrongKind` note still says "smart book" (`MobileTodayDoor.swift`).
 - **VM-117:** the create sheet's "Create Book" button on the gathering kind (the record named the umbrella, VM-112).
 - **VM-94:** the Starred page's "book" kind word on a gathering row.
-- **VM-218 (VoiceOver and text size):** Book Details' name row carries `.accessibilityLabel("Rename Book")`
-  (`MobileBookDetails.swift`, the identity block, from before this run), which replaces the book's name for
-  VoiceOver. (R2-N1's own fix stands — its window proved it — so no R2-N1 line goes here.)
 - **VM-175 (wave 4):** the Finish confirm's "Open Arrivals first" button.
 - **VM-161 (wave 4, Seal and unseal):** the phone's Unseal; when it lands the sealed sentence names it.
 - **VM-115 and VM-161 (W-070, W-112):** the door-set hoist retires `finishRowAct(for:)`'s phone-side reading of
   the Mac's table.
-- **VM-179 (wave 4):** what forcing `.ensuresLayout` for every fanned block costs on a long note —
-  PENDING(window 3's cost note and reading 2's numbers).
 - **VM-96 / its Trash face (wave 2):** under a kind filter the phone's empty line still says "Nothing in the Trash."
   when other kinds wait (the Mac's ledger-row-2 rule).
 - **VM-99 (wave 2, the Archived room):** only the starred archived book's way out is built here; the Archived
@@ -2578,30 +2719,41 @@ changed." · "Unarchive".
 
 ### Tickets to file (no id invented — each to mint at the merge, with Linear's priority field and no assignee)
 
-1. **To mint on VM** — "The Archive room may paint 'Nothing archived.' before its listing answers." Bug ·
+1. **To mint on VM, ONLY IF the decor reading is red** — "Callout washes, callout glyphs and comment marks can stand
+   away from their own blocks on a long note." Bug · Confirmed · Editor · Medium (the priority is the
+   orchestrator's call; R3-F1 ranked the finding MAJOR because a wash tints whatever text it stands behind) ·
+   Mobile. One-liner: `MobileBlockDecorController` places each overlay from a forced read at its block's own
+   mid-document offset and leaves an off-band overlay's frame standing while TextKit re-positions the fragment — the
+   mechanism VM-17 fixed for the takes chrome (batch D's law: read only inside TextKit's own viewport, nothing left
+   standing). Its pin: the decor reading `MobileDecorPlacementReadingTests` (added `211221f6b`, compile fix
+   `75984c0e6`, removed in PENDING(the removal commit)), its red log and bundle from batch D's window
+   (PENDING(names)). Related VM-17, VM-179. Pointer: this record, round 3's R3-F1. **If the reading is green:** no
+   ticket — R3-F1 closes hollow for the decor, and this record says so.
+2. **To mint on VM** — "The Archive room may paint 'Nothing archived.' before its listing answers." Bug ·
    Suspected · Library & sidebar · Low · Mobile. One-liner: `MobileArchiveView` draws its empty line on
    `model.visible.isEmpty` while `MobileArchiveModel.archived` starts `[]` with no answered flag and is filled by a
    `.task` after the first render — VM-33's class; check first with VM-33's pin shape
    (`MobileTrashTests.theFirstPaintSaysNothingBeforeTheListingAnswers`), fix with its answered gate. Related VM-99.
    Pointer: this record, round 1's N10.
-2. **To mint on VM** — "A book's contents may paint 'No notes in this book yet.' before its listing answers." Bug ·
+3. **To mint on VM** — "A book's contents may paint 'No notes in this book yet.' before its listing answers." Bug ·
    Suspected · Books · Low · Mobile. One-liner: `MobileBookView` draws it on `model.entries.isEmpty` while
    `MobileBookViewModel.entries` starts `[]`; same check and fix as above. Related VM-122. Pointer: round 1's N10.
    *(N10 named both sites in one line; it is split here because a ticket carries one Area.)*
-3. **To mint on VM, or a line on VM-218** — "Book Details' name row hides the book's name from VoiceOver." Bug ·
+4. **To mint on VM, or a line on VM-218** — "Book Details' name row hides the book's name from VoiceOver." Bug ·
    Confirmed (by reading the code; not run) · Books · Low · Mobile. One-liner: the identity block's
    `.accessibilityLabel("Rename Book")` replaces the name it shows. Pointer: round 2's final call on R2-N1.
-4. **To mint on VX** (or a line on a standing VX sweep ticket, if one exists at the merge) — "`Queries.bookshelf`'s
+5. **To mint on VX** (or a line on a standing VX sweep ticket, if one exists at the merge) — "`Queries.bookshelf`'s
    doc still says shelf ordering is the view model's call over `shelfPins`." Debt · Confirmed · Books · Low.
    One-liner: `Sources/VariorumCore/Queries/ShelfQueries.swift:43-44`; both platforms order by `BookcaseBoard`
    since VM-83 and the phone no longer reads `shelfPins` (comment only — this run opened no `Sources/` line).
    Pointer: round 1's N4.
-5. **To mint on VX, only if F8 is answered (a)** — "The membership chip draws Diverge on a gathering's row, then
+6. **To mint on VX, only if F8 is answered (a)** — "The membership chip draws Diverge on a gathering's row, then
    refuses." Bug · Confirmed · Books · Low. One-liner: `MembershipChip.swift:136-145`; the phone stopped drawing it
    at VM-81 (W-110). Pointer: QUESTIONS PENDING(number), F8.
-6. PENDING(window 3): a jump-road reach miss, if M5 shows one (`jumpToBlock` can leave its target off screen after
-   the next viewport pass) — its distance from the `VM17|jump|` line; and any product mechanism batch C stops and
-   reports.
+
+**Not tickets to file:** VM-24 exists and is re-owned (its own run); VX-68's relation is recorded above; window
+(3)'s jump road was clean, so no jump-road ticket; batch D covers the peek markers and the pill, so they need no
+ticket of their own.
 
 ### The ladder
 
@@ -2615,20 +2767,31 @@ changed." · "Unarchive".
 - **Round 2** (`vm-78-ladder-round2.md`; a fresh `fable-reviewer`, opened at `84fe72e50`; the whole diff
   `e48ef2f30..db4f1ec6b`): **0 BLOCKER · 0 MAJOR · 3 MINOR · 5 NIT** (findings `a00581328`, final calls
   `874da32d8`); nobody disputed, none FINDER-FIXES; it re-checked every round-1 final call as applied. R2-F1: the
-  unreadable red bundle and the bundle rule; R2-F2: two "no arm" lines and arm A's posture expectation; R2-F3: the
-  probe's (i′) (`78179b765`); R2-N1: the rows' hints (`01205f799`, `97282e72f`; red/green in its own window,
-  07:19:38–07:23:59); R2-N2, N3, N5: record lines
-  (`046a886fc`, `ed7b82ef4`); R2-N4: a line for VM-62. It did not close the ladder (F1 stands).
-- **Round 3:** PENDING(round 3) — a fresh `fable-reviewer` reading, as new work, window (3)'s outcome and the
-  instruments' removal, (i′) and its run, R2-N1's fix with its red and green, R2-F2's lines, and VM-16 re-landed
-  if that has happened by then. PENDING(its count, its findings' dispositions, and any round it earns — the cap is
-  five tonight, each further round earned by a new BLOCKER or MAJOR).
+  unreadable red bundle and the bundle rule; R2-F2: two "no arm" lines and arm A's posture expectation (both lines
+  were met in window (3)); R2-F3: the probe's (i′) (`78179b765`); R2-N1: the rows' hints (`01205f799`,
+  `97282e72f`; red/green in its own window, 07:19:38–07:23:59); R2-N2, N3, N5: record lines (`046a886fc`,
+  `ed7b82ef4`); R2-N4: a line for VM-62. It did not close the ladder (F1 stands).
+- **Round 3** (`vm-78-ladder-round3.md`; a fresh `fable-reviewer`, opened at `35ce90848`; the whole diff
+  `e48ef2f30..35ce90848`, 67 commits, 49 files): **0 BLOCKER · 1 MAJOR · 5 MINOR · 3 NIT**, none against a product
+  line this run changed (findings `117e8c047`, final calls `b7161468b`, dispositions in this record `76bfc56b6`);
+  nobody disputed, none FINDER-FIXES; it read window (3)'s outcome against its logs, the instruments' removal,
+  reading (i′), R2-N1's fix, the VM-24 write-up, batch D's trace and, in its final calls, the settle measurement's
+  log. R3-F1 (MAJOR): the block decor shares the standing-frame rule — a ticket carrying a measured reading as its
+  pin (the decor reading); R3-F2: three points of the round-1 shape — the same-pass re-read, "a nil viewport
+  resolves nothing", no amendment to reading 1; R3-F3: the instrument's display-link fallback bug, no action;
+  R3-F4: withdrawn; R3-F5: VM-24's reach understated — a typed character can land unarmed; R3-F6: the rule for the
+  red probe and the settle instrument's removal; R3-N1–N3: record lines, the probe's header comment. Its final calls
+  CALLED VM-17's fix shape (S1–S11), which batch D built.
+- **Round 4:** PENDING(round 4) — earned by R3-F1's MAJOR and owed anyway: a fresh `fable-reviewer` reading, as new
+  work, batch D's fix against S1–S11, its windows (the red leg, the green leg, the decor reading's outcome, S6's arm
+  if it was used), and VM-16 re-landed on main's message seam — one round for both. PENDING(its count, its findings'
+  dispositions, and any round it earns — the cap is five, each further round earned by a new BLOCKER or MAJOR).
 
 ### Canon deltas
 
 **Applied in place (SurfaceContracts, The Bookcase and books — one clause each naming the phone, one pointer each;
-applied on the windows' pin evidence; if a walk row fails at gate 3, its clause comes out with the fix's
-revert):**
+`786f50af9`; applied on the windows' pin evidence; if a walk row fails at gate 3, its clause comes out with the
+fix's revert). Re-read at this refresh: each is still true of what is built; batches C and D touch none of them.**
 1. The Bookcase bullet, after "Starred floats first under any order.", added: "The phone's shelf sorts by the same
    a–z rule, starred first, with no order door yet (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`)." (The
    order door is VM-113's, her ruling.)
@@ -2642,10 +2805,33 @@ revert):**
 5. The Delete bullet, after "The Trash's listing never claims emptiness before its first value answers", added: ",
    the phone's included (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`)".
 
-**Canon delta proposed — the orchestrator applies or holds (loaded canon; this drafter does not edit it).** Her
-ruling: QUESTIONS #274 addendum 2, "**P-849-1 RATIFIED + the phone wired** (the insured restore stands; the
-phone's one-argument insurance is VM-43)." — VM-43 has now wired it. Three sites, the pointer staying QUESTIONS
-#274 (its addendum 2 records both the ratification and VM-43):
+**MobileSoul §6:** this run's row, drafted as PL-75 (`224bb9c38`, refreshed at this closeout). **At the merge-in
+both `notes/MobileSoul.md` and `notes/SurfaceContracts.md` conflict textually with VX-980** (merged first, main at
+`359ae214d`; `git merge-tree` names exactly these two files): both runs' lines are kept, and because main's newest
+parity row is already PL-75 (VX-980's), **this run's row takes the next free number at the merge** — the merging
+session renumbers it there and here (this section, FOR A LATER READER, the handoff, the drafts below).
+
+**Sentences to revisit, and after which step** (round 3's R3-N2: neither file may carry the word "PENDING" when
+this run merges, so each canon sentence is written to be true today; `grep -n PENDING notes/MobileSoul.md
+notes/SurfaceContracts.md` answers nothing at this refresh):
+- MobileSoul row, VM-16's sentence ("the undo door's quiet press speaks the shared refusal and offers no way
+  back") — after VM-16 is re-landed on vm-55's message seam: keep it if the re-landed door still does exactly that;
+  reword to the seam's vocabulary if the shape changed.
+- MobileSoul row, VM-17's sentence (the takes chrome reads only inside TextKit's viewport) — after batch D's
+  window: if the probe is green it stands (add "proved" to the verified line); if the fix leaves the branch, the
+  sentence comes out and VM-17 moves to STILL OWED with its ticket.
+- MobileSoul row, the decor's sentence ("owed a measured reading") — after the decor reading: red ⇒ name the minted
+  ticket; green ⇒ "measured hollow (R3-F1)".
+- MobileSoul row, "Verified so far by…" — after the gate: add the whole phone target, the Mac leg on the merged
+  tree and the walk.
+- MobileSoul row, its number — at the merge (above).
+- SurfaceContracts, the five clauses — after gate 3's walk: a failed walk row takes its clause out with the fix's
+  revert.
+
+**Canon delta proposed — the orchestrator applies or holds on the merged tree at the closeout (loaded canon; a
+documents-only drafter does not edit it).** Her ruling: QUESTIONS #274 addendum 2, "**P-849-1 RATIFIED + the
+phone wired** (the insured restore stands; the phone's one-argument insurance is VM-43)." — VM-43 has now wired it.
+Three sites, the pointer staying QUESTIONS #274 (its addendum 2 records both the ratification and VM-43):
 - `notes/AppSpec.md` §9, the "Quiet auto-commits" bullet. Old: "a restore about to replace a buffer's words
   (`restoreCommit(…, insuringBuffer:)`, passed true by the flush-first restore doors — PROVISIONAL, QUESTIONS
   #274)". New: "a restore about to replace a buffer's words (`restoreCommit(…, insuringBuffer:)`, passed true by
@@ -2671,24 +2857,33 @@ phone's one-argument insurance is VM-43)." — VM-43 has now wired it. Three sit
   they are drafts or open questions.
 - The commit vocabulary line (SurfaceContracts, The app) already names "the phone"; VM-20 made it true there. No
   delta needed.
+- SurfaceContracts, The note ("a corner badge only on fanned blocks") — batch D changes where a badge stands, not
+  which blocks wear one; no contract line changes.
+- **For the orchestrator's call, not drafted:** `notes/TEXTKIT2_NOTES.md` §3 has no line yet for the iOS 26.2
+  facts this run measured — attribute fixing widening an unarmed replace's report past the terminator (window (3),
+  `{1,2}` → `{1,5}`), and TextKit laying out the viewport after the chrome's tick and before the first subview
+  laid out after the text view (the settle measurement). Whether they enter it, in which words, is a closeout
+  decision; VM-24's own run will measure more.
 
-**Lines I believe are now false or stale — NOT edited, for the orchestrator:**
+**Lines believed false or stale — NOT edited, for the orchestrator:**
 - SurfaceContracts, the book settings sheet: the Finished confirm's quote "N waiting at the door will be dismissed"
   — the shipped words on both platforms are "N waiting at Arrivals will be dismissed." (`BookStateCopy.waitingLine`,
-  re-worded at 17y B3 (h), R-17y-2, per the code's own comment). Not this run's change.
+  `App/Variorum/Shared/BookStateCopy.swift`, re-worded at 17y B3 (h), R-17y-2, per the code's own comment). Not this
+  run's change; clause 2 above says the phone asks "the same", which is true of the code and of the count.
 - SurfaceContracts still marks P-849-4 ("PROVISIONAL P-849-4, QUESTIONS #274") and P-849-5 ("PROVISIONAL P-849-5,
   QUESTIONS #274") as provisional; #274 addendum 2 ratified both. Not this run's.
-- Core `Queries.bookshelf`'s doc (ticket 4 above).
+- Core `Queries.bookshelf`'s doc (ticket 5 above).
 
 ### MOBILE PARITY
 
-This run is a mobile run's own row: **PL-75** in `notes/MobileSoul.md` §6 (the merging session renumbers it if
-another wave-1 run takes 75 first — the PL-25b convention). The line for the master plan's closeout paragraph:
+This run is a mobile run's own row in `notes/MobileSoul.md` §6, drafted as PL-75 and taking **the next free number
+at the merge** (main's PL-75 is VX-980's). The line for the master plan's closeout paragraph:
 
-> MOBILE PARITY: PL-75 — the phone's existing faces made right (the undo door, insured restores, the date chip, the
-> Trash's first paint, two pocket-guide lessons, the Finish confirm and the book doors, a–z with one star door,
-> "gathering", the collect receipt and "(archived)" marks); zero schema, marker untouched; batch C's outcome
-> PENDING(window 3).
+> MOBILE PARITY: PL-PENDING(number at the merge) — the phone's existing faces made right (the undo door, insured
+> restores, the date chip, the Trash's first paint, two pocket-guide lessons, the Finish confirm and the book doors,
+> a–z with one star door, "gathering", the collect receipt and "(archived)" marks, and the takes chrome's badges on a
+> long note); VM-24's snap-back traced and given its own run after wave 1 (her ruling); the block decor's reading
+> owed to R3-F1's ticket or its hollow verdict; zero schema, marker untouched.
 
 ### To land on main at the merge (the merging session's, on latest main — shared ledgers)
 
@@ -2704,37 +2899,50 @@ another wave-1 run takes 75 first — the PL-25b convention). The line for the m
 > Finish asks with the count when notes wait, says what Finished means, is not drawn on a gathering, and a sealed
 > book's Reopen speaks the shared sentence, while a starred archived book has its way out (VM-81); the shelf sorts
 > a–z with starred first, its Pin door is gone and a gathering is called one in every face the brief named (VM-83);
-> the collect receipt names the star and is honest on an archived gathering, and pickers mark "(archived)" (VM-21).
-> Words hoisted into `App/Variorum/Shared/` (`BookStateCopy`, `ArrivalsCopy.word`, the collect receipt family,
-> `StructuralUndoCopy.discardingUndoDetail`), every Mac string byte-identical. Batch C (VM-24 with VM-19, VM-17):
-> PENDING(window 3's outcome).
+> the collect receipt names the star and is honest on an archived gathering, and pickers mark "(archived)" (VM-21);
+> the takes chrome draws fan badges, peek markers and the choosing pill only from text TextKit has laid out inside
+> its own viewport, so no badge stands astray on a long note (VM-17 — found real on a stepped scroll, two
+> mechanisms, the shape called by round 3; PENDING(its window)). VM-19's test teardown is fixed and its pin proved;
+> its desync did not reproduce. VM-24 — the long-standing caret red — is traced to the phone editor's edit routing
+> (an unarmed edit whose report TextKit's attribute fixing widens past its block's terminator is refused and
+> re-rendered, so the character or word just entered snaps back; stored text is never at risk) and, by her ruling,
+> gets its own run after wave 1; its pin stays red on main by decision. Words hoisted into `App/Variorum/Shared/`
+> (`BookStateCopy`, `ArrivalsCopy.word`, the collect receipt family, `StructuralUndoCopy.discardingUndoDetail`),
+> every Mac string byte-identical.
 >
 > **Her words (2026-11-19, in the orchestrator's session).** "sounds good, tonight, up to 5 review rounds as long as
 > a major is found." · "book order - that's fine to leave it for wave 3. 2 - collect receipt your choice is fine." ·
 > "the phone step is the single wave-1 install after all four runs have merged. I'll do the hands part hands on in
-> the morning." (The whole messages are in the record's Kickoff facts.)
+> the morning." (The whole messages are in the record's Kickoff facts.) On VM-24, a dialog pick, no prose: "Own run
+> after wave 1 (Recommended)"; and to the stage coordinator: "I chose the own run after wave 1 option that vm-78
+> proposed. i want you to message them about this to lock the plan down, but basically i want you to open a new
+> session in tmux once wave 1 is done and merged, and tell it to architect-phase that issue, reporting to you for
+> stage details. just kick that off when wave1 is done for me."
 >
 > **Cast.** Fable orchestrated (briefs, the verification windows from a throwaway checkout, adjudication, records;
-> no batch code); a fresh `opus-implementer` per batch (B, A, C), a fresh one for the round-1 fix pass and a fresh
-> batch C window runner; a fresh `fable-reviewer` per ladder round (the editor seam: VM-84's view model, batch C's
-> caret and badge test code). nov18 coordinated the stage and the merges.
+> no batch code); a fresh `opus-implementer` per batch (B, A, C), a fresh one for the round-1 fix pass, a fresh
+> batch C window runner, and for batch D a fresh one for the trace and another for the build; a fresh
+> `fable-reviewer` per ladder round (the editor seam: VM-84's view model, batch C's caret and badge test code, batch
+> D's takes chrome); documents-only closeout drafters. nov18 coordinated the stage and the merges.
 >
 > **The ladder.** Round 1: 0 BLOCKER, 2 MAJOR (F1 the ladder cannot close before batch C is cold-read; F2 the VM-17
-> probe's vacuous reading), 6 MINOR, 11 NIT. Round 2: 0 BLOCKER, 0 MAJOR, 3 MINOR, 5 NIT. Round 3: PENDING. Every
-> finding dispositioned in the round files.
+> probe's vacuous reading), 6 MINOR, 11 NIT. Round 2: 0 BLOCKER, 0 MAJOR, 3 MINOR, 5 NIT. Round 3: 0 BLOCKER,
+> 1 MAJOR (R3-F1, the block decor shares the badge's standing-frame rule), 5 MINOR, 3 NIT; its final calls called
+> VM-17's fix shape. Round 4: PENDING. Every finding dispositioned in the round files.
 >
 > **The windows.** Batch B 68/6 green after its seven reds; batch A 84/16 green after its 21 reds, the Mac's 17 types
-> 110/17 green over the hoists; the fix pass 75/10 green after its four reds; F4's follow-up 4/1 after its one red.
-> R2-N1's pin 11/2 after its one red. PENDING(window 3; the whole phone target; the Mac leg on the merged tree; the
-> walk).
+> 110/17 green over the hoists; the fix pass 75/10 green after its four reds; F4's follow-up 4/1 after its one red;
+> R2-N1's pin 11/2 after its one red; window (3)'s matrix — the caret pin red by design, VM-17's probe red (real),
+> VM-19's pin red on the old teardown and green on the fix; the settle measurement 1/1. PENDING(batch D's window;
+> the decor reading's outcome; the whole phone target; the Mac leg on the merged tree; the walk).
 >
 > **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (the order, the Finish
-> confirm, "(archived)" in pickers, Delete Gathering…, the Trash's first paint). MobileSoul §6: PL-75.
+> confirm, "(archived)" in pickers, Delete Gathering…, the Trash's first paint). MobileSoul §6: PL-PENDING(number).
 > PENDING(AppSpec §9 / OverallModel §3's #274 lines). `Tools/canon-size`: PENDING.
 >
 > **Provisionals.** QUESTIONS PENDING(number): an archived gathering's add row wears "(archived)"; F8, Diverge on a
-> gathering's row. **Born:** PENDING(ids). **Hers:** the ratify list, the wording pass, PENDING(the wave-1 install,
-> if this run is the last mobile merger).
+> gathering's row. **Born:** PENDING(ids). **Hers:** the ratify list, the wording pass, VM-24's measuring session on
+> her phone at that run's start, PENDING(the wave-1 install, if this run is the last mobile merger).
 
 **`notes/AppSpecRecord.md`, the narrative under its sections (draft):**
 - *§9, `restoreCommit`:* the phone's restore door (Block History) passes `insuringBuffer: true` since VM-78
@@ -2748,17 +2956,26 @@ another wave-1 run takes 75 first — the PL-25b convention). The line for the m
   row, the delete door, confirm and receipt, the membership sheet, the create sheet and the Trash's placeholder;
   the membership sheet marks archived books and draws Diverge on book rows only (PROVISIONAL, F8); the collect
   receipt is the Mac chip's. The "Open Arrivals first" button waits for VM-175.
+- *§12, The note:* on the phone, the takes chrome (fan badges, peek markers, the choosing pill) draws only from
+  text TextKit has laid out inside its own viewport, read twice per layout pass — the second from a zero-size anchor
+  subview after TextKit's own layout, the moment the settle measurement showed carries the placed frame; outside
+  the viewport nothing is read, forced or left standing (VM-17; PENDING(batch D's window)). The block decor keeps
+  the older band law until R3-F1's ticket (or its hollow verdict). VM-24: the phone editor's unarmed edits are
+  routed from the storage's report, which attribute fixing can widen past the block's terminator, refusing a plain
+  in-block edit and re-rendering it away; her ruling gives it its own run after wave 1, measured on her phone before
+  and after (`notes/plans/vm-24-unwarned-edit-routing.md`).
 
 **`notes/plans/run-finals-ledger.md`, the line (draft):**
 
-> - **2026-11-19 · VM-78 — Run: Fixes to what's there** (PR PENDING, merge PENDING): ten members in three batches
->   (B: VM-16/43/3/84/33 · A: VM-81/83/21 · C: VM-24/17) plus VM-20 and VM-19 carried; Fable orchestrated,
->   Opus implemented, a fresh fable-reviewer per round — round 1 0B/2M/6m/11n, round 2 0B/0M/3m/5n, round 3
->   PENDING; windows (2) 68/6, (1) 84/16 + Mac 110/17, (5) 75/10, F4 4/1, R2-N1 11/2, each after its reds (two red
->   bundles unreadable, their logs kept); PENDING(window 3, the gate's three claims); PROVISIONALS QUESTIONS
->   PENDING(number); born PENDING.
+> - **2026-11-19 · VM-78 — Run: Fixes to what's there** (PR PENDING, merge PENDING): ten members in four batches
+>   (B: VM-16/43/3/84/33 · A: VM-81/83/21 · C: VM-24/17 traced, VM-19 · D: VM-17's fix) plus VM-20 and VM-19
+>   carried; VM-24 traced and re-owned to its own run after wave 1 (her ruling); Fable orchestrated, Opus
+>   implemented, a fresh fable-reviewer per round — round 1 0B/2M/6m/11n, round 2 0B/0M/3m/5n, round 3 0B/1M/5m/3n,
+>   round 4 PENDING; windows (2) 68/6, (1) 84/16 + Mac 110/17, (5) 75/10, F4 4/1, R2-N1 11/2, (3) the matrix's ten
+>   runs + M5b, the settle measurement 1/1, each after its reds (two red bundles unreadable, their logs kept);
+>   PENDING(batch D's window, the gate's three claims); PROVISIONALS QUESTIONS PENDING(number); born PENDING.
 
-**`notes/QUESTIONS.md`, the bundle (draft; the next free number at the merge):**
+**`notes/QUESTIONS.md`, the bundle (draft; the next free number, re-checked on latest main at the merge):**
 
 > #PENDING — **THE VM-78 PROVISIONAL BUNDLE (the mobile catch-up's wave 1, umbrella 4; the binding record is
 > `notes/plans/fixes/vm-78-fixes-to-whats-there.md`, FOR A LATER READER at its top; your checklist is
@@ -2768,14 +2985,19 @@ another wave-1 run takes 75 first — the PL-25b convention). The line for the m
 > platforms? (2) **F8 — Diverge on a gathering's row** — the question text in the record's ratify list, PROVISIONAL
 > as built: the phone draws none. (3) **The wording pass:** the divide lesson (VM-3), the "getting around" lesson's
 > two sentences (F4), the create sheet's three gathering lines, the sealed book's Reopen sentence on the phone,
-> whether the phone keeps a collect receipt at all. PENDING(4: anything batch C adds). **Status: OPEN.**
+> whether the phone keeps a collect receipt at all. (VM-24 is not in this bundle: she ruled it — its own run after
+> wave 1.) **Status: OPEN.**
 
 ### Not done, or left for later — honestly
 
 - Everything in this section's first paragraph.
 - No AppSpecRecord, QUESTIONS, master plan, TICKETS or finals-ledger line was written (shared ledgers, the
   merging session's); their drafts are above.
-- No ticket was minted and no Linear state changed.
+- No ticket was minted from this record's list; VM-24's re-owning in Linear is the orchestrator's act (the live
+  state), not this document's.
+- VM-24 is NOT fixed by this run, by her ruling; its pin is red on this branch and will be red on main until its
+  own run.
+- Batch D's fix is built and unproved: nothing about it is claimed beyond its headless builds.
 - The walk has not run, so no face here is proved by use yet; the SurfaceContracts clauses stand on the windows'
   pins until it does.
 - VM-16's rule will be re-landed after the merge; its pins as they stand now pin a door vm-55 rewrites.
