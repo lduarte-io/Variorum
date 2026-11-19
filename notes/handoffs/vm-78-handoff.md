@@ -250,8 +250,9 @@ owed, the last under your cap of five. PENDING(ladder round 5: its outcome).
   failing runs of the first review's fixes and of the VoiceOver-hint fix, and both runs of the badge fix's window,
   could not be opened. The kept logs, under `App/Variorum/DerivedData/logs/` in the worktree, are the evidence,
   and they agree with the record.
-- **This run's parity row is PL-77** in `notes/MobileSoul.md` (it was drafted as 75; the search run and the wings
-  run took 75 and 76 first).
+- **This run's parity row is PL-78** in `notes/MobileSoul.md` (it was drafted as 75; the search run and the wings
+  run took 75 and 76 first, so it was 77 after the first merge with main; the MCP run, VX-981, then merged with its
+  own row as 77, so this one became 78 when main was merged in again).
 - **VM-20 and VM-19 were already closed** as duplicates when the plan was minted; their work is done here under
   VM-16 and VM-24.
 - **The orchestrator did not change hands.** The session's context was compacted once at a clean point, at your

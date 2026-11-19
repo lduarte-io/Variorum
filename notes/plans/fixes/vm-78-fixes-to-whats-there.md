@@ -76,7 +76,8 @@ the VX-981 merge-in; ladder round 5: its count; gate 1, the whole phone target; 
 walk).
 
 **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (`786f50af9`). MobileSoul §6:
-PL-77 (`e24e0fb81`). AppSpec §9 and OverallModel §3: the insured restore no longer PROVISIONAL (`3471d0ad4`; #274
+PL-78 (made true of the tree as PL-77, `e24e0fb81`; renumbered PL-78 at the second merge-in, `d55d22db9`, VX-981's
+row having taken PL-77 on main first). AppSpec §9 and OverallModel §3: the insured restore no longer PROVISIONAL (`3471d0ad4`; #274
 addendum 2). TEXTKIT2_NOTES §3: the two iOS 26.2 facts measured here (`02a3ac002`).
 
 **Open items.** The merge-in once VX-981 has merged, the guards' window on that tree, round 5 and the gate; the
@@ -3196,7 +3197,7 @@ window (4) — RAN").*
 | Piece | State |
 |---|---|
 | 0 — this LIVE STATUS opens | DONE (`648929eff`) |
-| 1 — `notes/MobileSoul.md` row PL-77 made true of HEAD | DONE (`e24e0fb81`) — the takes-chrome claim out; VM-17 (with VM-239 and VM-179, the kickoff named) under STILL OWED; VM-16's sentence as the re-landed door speaks (the one line, a refusal, no way back recorded); the sealed Reopen's sentence credited to VM-62's road; the VM-218 viewport clause out; "Verified so far" = the pre-merge windows + both targets built on the merged tree. `grep -n PENDING` on MobileSoul and SurfaceContracts answers nothing. SurfaceContracts' five clauses re-read in the merged file: all five true of HEAD, each beside VM-55's and VX-980's lines; none changed |
+| 1 — `notes/MobileSoul.md` row PL-77 (its number at this re-fit; PL-78 since the second merge-in, `d55d22db9`) made true of HEAD | DONE (`e24e0fb81`) — the takes-chrome claim out; VM-17 (with VM-239 and VM-179, the kickoff named) under STILL OWED; VM-16's sentence as the re-landed door speaks (the one line, a refusal, no way back recorded); the sealed Reopen's sentence credited to VM-62's road; the VM-218 viewport clause out; "Verified so far" = the pre-merge windows + both targets built on the merged tree. `grep -n PENDING` on MobileSoul and SurfaceContracts answers nothing. SurfaceContracts' five clauses re-read in the merged file: all five true of HEAD, each beside VM-55's and VX-980's lines; none changed |
 | 2 — the three #274 canon sites (AppSpec §9 twice, OverallModel §3) | DONE (`3471d0ad4`) — both checks passed first: QUESTIONS #274 addendum 2 carries "P-849-1 RATIFIED + the phone wired (the insured restore stands; the phone's one-argument insurance is VM-43)", and the phone's one restore door passes `insuringBuffer: true` at HEAD (`Takes/MobileBlockHistory.swift`, `restore(_:of:confirmed:)`, after its flush). Applied verbatim from "Canon delta proposed"; `git diff --word-diff` shows only "PROVISIONAL," dropped and "on both platforms" added, three times; no other word, no reflow |
 | 3 — `notes/TEXTKIT2_NOTES.md` §3: the two iOS 26.2 facts this run measured | DONE (`02a3ac002`) — one "iOS 26.2 measured findings (VM-78 …)" block in §3's own shape, after the macOS 27.0.1 VX-601 block and before "Spell check / completion": (a) the unarmed replace's report widened past the line's terminator inside `processEditing`, with window (3)'s ranges, its five-of-six / six-of-six split and the iteration-to-iteration instability, pointing at VM-24's kickoff; (b) the forced mid-document read's stale frame (9,276 / 4,716 pt at load, 1,260 pt astray, 74 pt short in 11 of 11) against the unforced read at the first subview after the text view's own layout (118 of 118; 28 of 28 on screen; "settled" only on screen), and the first fix built on it failing on the jump road — a measurement, not a recipe, pointing at VM-17's kickoff. Named as measured on the phone suites' simulator, iPhone 17 Pro / iOS 26.2; no id written |
 | 4 — this `## Closeout`, re-fitted section by section | DONE (`92333a505`) — every section from the opening paragraph to "Not done" re-fitted to the settled outcome ("The run's state when ladder round 1 opened" left as written, history): VM-17 and VM-24 as traced findings handed to their own runs, VM-17's first fix and its window as history; every shipped member's row re-checked against the merged tree, the re-land's commit beside the original; batch D's window, the back-out's check and the merge-in's builds in the evidence table; her VM-17 ruling added (item 10) and every ruling re-reconciled; the wording table re-read against HEAD; the owner lines re-pointed (VM-62's moot, R2-N4's latch to a ticket); VM-239 out of "to file"; the canon deltas in the past tense with their commits; every draft for main re-written. Kept as `PENDING(…)` slots, and only these: the re-land's stage window, ladder round 4, the gate's three legs, `Tools/canon-size`, the QUESTIONS number, the minted ticket ids, the PR number and the merge SHA, and the conditional wave-1 install |
@@ -3950,11 +3951,13 @@ none changed.
 5. The Delete bullet, after "The Trash's listing never claims emptiness before its first value answers": ", the
    phone's included (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`)".
 
-**MobileSoul §6, PL-77:** drafted as PL-75 (`224bb9c38`), renumbered PL-77 at the merge-in (`ed1266e2f`; main's
-PL-75 is VX-980's and PL-76 VM-55's), and made true of HEAD at this re-fit (`e24e0fb81`): the takes-chrome claim
-taken out and VM-17 (with VM-239 and VM-179, the kickoff named) moved under STILL OWED; VM-16's sentence said as
-the re-landed door speaks; the sealed Reopen's sentence credited to VM-62's road; the VoiceOver viewport clause
-taken out; "Verified so far" limited to the pre-merge windows and both targets built on the merged tree.
+**MobileSoul §6, PL-78:** drafted as PL-75 (`224bb9c38`), renumbered PL-77 at the first merge-in (`ed1266e2f`;
+main's PL-75 is VX-980's and PL-76 VM-55's), made true of HEAD as PL-77 at this re-fit (`e24e0fb81`): the
+takes-chrome claim taken out and VM-17 (with VM-239 and VM-179, the kickoff named) moved under STILL OWED; VM-16's
+sentence said as the re-landed door speaks; the sealed Reopen's sentence credited to VM-62's road; the VoiceOver
+viewport clause taken out; "Verified so far" limited to the pre-merge windows and both targets built on the merged
+tree. Renumbered **PL-78** at the second merge-in (`d55d22db9`): VX-981's ledger took PL-77 on main first, and its
+row stands before this one; nothing else in the row changed ("THE SECOND MERGE-IN").
 
 **AppSpec §9 (two sites) and OverallModel §3 — the insured restore, ratified** (QUESTIONS #274 addendum 2, "**P-849-1
 RATIFIED + the phone wired** (the insured restore stands; the phone's one-argument insurance is VM-43)"; VM-43 wired
@@ -3982,11 +3985,11 @@ pointing at VM-17's kickoff. Neither is pinned in the tree (the instruments left
 **Sentences to revisit, and after which step** (round 3's R3-N2: neither MobileSoul nor SurfaceContracts may carry
 the word "PENDING" at the merge; `grep -n PENDING notes/MobileSoul.md notes/SurfaceContracts.md` answers nothing at
 this re-fit):
-- After the re-land's window: if VM-16's or VM-33's pins do not go red and then green as the recipe expects, PL-77's
-  VM-16 or VM-33 sentence and SurfaceContracts' clause 5 are revisited with the fix. Moot: the window ran red, then
-  green, as the recipe expected (15:07–15:12).
-- After gate 3: a failed walk row takes its SurfaceContracts clause and its PL-77 sentence out with the fix's revert.
-- At the merge: PL-77's "Verified so far by…" may gain the gate's three legs — written as what ran, never with a
+- After the re-land's window: if VM-16's or VM-33's pins do not go red and then green as the recipe expects, the
+  row's VM-16 or VM-33 sentence (the row was PL-77 when this was written; PL-78 now) and SurfaceContracts' clause 5
+  are revisited with the fix. Moot: the window ran red, then green, as the recipe expected (15:07–15:12).
+- After gate 3: a failed walk row takes its SurfaceContracts clause and its PL-78 sentence out with the fix's revert.
+- At the merge: PL-78's "Verified so far by…" may gain the gate's three legs — written as what ran, never with a
   pending word.
 
 **Weighed and NOT applied:**
@@ -4016,10 +4019,10 @@ this re-fit):
 
 ### MOBILE PARITY
 
-This run is a mobile run's own row in `notes/MobileSoul.md` §6: **PL-77**. The line for the master plan's closeout
-paragraph:
+This run is a mobile run's own row in `notes/MobileSoul.md` §6: **PL-78** (PL-77 until the second merge-in,
+`d55d22db9`, where VX-981's row, merged first, kept PL-77). The line for the master plan's closeout paragraph:
 
-> MOBILE PARITY: PL-77 — the phone's existing faces made right (the undo door's quiet press, insured restores, the
+> MOBILE PARITY: PL-78 — the phone's existing faces made right (the undo door's quiet press, insured restores, the
 > date chip, the Trash's first paint, two pocket-guide lessons, the Finish confirm and the book doors, a–z with one
 > star door, "gathering", the collect line and "(archived)" marks), re-landed on VM-55's message line; VM-24's
 > snap-back and VM-17's stray fan badges traced, and each given its own run after wave 1 by her rulings (VM-17's
@@ -4029,7 +4032,7 @@ paragraph:
 
 **`notes/AppSpecRecord.md`, the dated entry (draft):**
 
-> ## 2026-11-19 — VM-78, Run: Fixes to what's there (the mobile catch-up's wave 1, umbrella 4; SurfaceContracts The Bookcase and books · MobileSoul §6 PL-77 · AppSpec §9 and OverallModel §3, the insured restore ratified · TEXTKIT2_NOTES §3; branch `vm-78-fixes-to-whats-there`, PR PENDING(the PR number), merge PENDING(the merge SHA))
+> ## 2026-11-19 — VM-78, Run: Fixes to what's there (the mobile catch-up's wave 1, umbrella 4; SurfaceContracts The Bookcase and books · MobileSoul §6 PL-78 · AppSpec §9 and OverallModel §3, the insured restore ratified · TEXTKIT2_NOTES §3; branch `vm-78-fixes-to-whats-there`, PR PENDING(the PR number), merge PENDING(the merge SHA))
 >
 > **What landed.** Eight fixes to the phone's existing faces, pin before fix per member, with no `Sync/`, custody,
 > schema or `Sources/` line, re-landed on VM-55's message line at the merge: the undo door's quiet press refuses
@@ -4089,7 +4092,7 @@ paragraph:
 > walk).
 >
 > **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (the order, the Finish
-> confirm, "(archived)" in pickers, Delete Gathering…, the Trash's first paint). MobileSoul §6: PL-77. AppSpec §9
+> confirm, "(archived)" in pickers, Delete Gathering…, the Trash's first paint). MobileSoul §6: PL-78. AppSpec §9
 > (two sites) and OverallModel §3: the insured restore no longer PROVISIONAL (#274 addendum 2). TEXTKIT2_NOTES §3:
 > the two iOS 26.2 facts measured. `Tools/canon-size`: PENDING(the canon-size line, at the merge).
 >
@@ -4134,8 +4137,8 @@ paragraph:
 >   lost or unreadable (batch B's red not kept; fixpass-red, r2n1-red, d-red, d-green unreadable), their logs kept; the re-land's window 44/4 red on exactly its six pins then 283/41 green; round 4's three guards and their window PENDING(the guards' window); PENDING(the gate's three legs);
 >   PROVISIONALS QUESTIONS PENDING(the QUESTIONS number, at the merge); born VM-239 and PENDING(the minted ticket ids).
 
-**`notes/QUESTIONS.md`, the bundle (draft; main's next free number was #278 when the merge-in ran, to be re-checked
-on latest main at the merge):**
+**`notes/QUESTIONS.md`, the bundle (draft; main's next free number is #279 as of the second merge-in — VX-981 took
+#278 — still a slot to re-check on latest main at the merge):**
 
 > #PENDING(the QUESTIONS number, at the merge) — **THE VM-78 PROVISIONAL BUNDLE (the mobile catch-up's wave 1,
 > umbrella 4; the binding record is `notes/plans/fixes/vm-78-fixes-to-whats-there.md`, FOR A LATER READER at its
@@ -4161,7 +4164,7 @@ on latest main at the merge):**
   own run.
 - VM-17 is NOT fixed by this run, by her ruling: its first fix failed its window and was backed out; the takes
   chrome is main's; its pins left the tree and live in history for its own run.
-- The walk has not run, so no face here is proved by use yet; the SurfaceContracts clauses and PL-77 stand on the
+- The walk has not run, so no face here is proved by use yet; the SurfaceContracts clauses and PL-78 stand on the
   pre-merge windows' pins and the merged tree's builds until it does.
 - On the merged tree the re-land's window proved VM-16, VM-20 and VM-33 (and the Trash's two names) red on main's
   files and green on the tip. VM-81's refusals ride main's road (green on both sides by design); VM-21's collect
