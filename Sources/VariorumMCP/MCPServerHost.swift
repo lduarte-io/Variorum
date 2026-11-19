@@ -422,12 +422,6 @@ public final class MCPServerHost: @unchecked Sendable {
     /// TEST-ONLY (VX-951): told every announce-gate event each session hears,
     /// as it hears it (before the gate does). Set before the connection opens.
     var gateEventProbe: (@Sendable (MCPSession, MCPAnnounceGate.Event) -> Void)?
-
-    /// TEST-ONLY (VX-951): the round a grants-fingerprint change runs, run now —
-    /// a grant change landing exactly where a pin needs it (inside a probe).
-    func announceRoundForTesting() async {
-        announceGrantsChanged()
-    }
     #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
@@ -897,7 +891,10 @@ public final class MCPServerHost: @unchecked Sendable {
     /// asked to announce `tools/list_changed`. VX-944 (the VX-981 run, batch 3):
     /// ASKED, never awaited — each session's own announcer sends it, so a client
     /// that stopped reading delays no other session's notice, nor the next
-    /// change's round (it once awaited each session in series).
+    /// change's round (it once awaited each session in series). Internal: the
+    /// announce pins run it directly (a grant change landing exactly where a pin
+    /// needs it, inside a probe — round 1's N4 retired the async test seam that
+    /// only wrapped it).
     func announceGrantsChanged() {
         let live = lock.withLock { Array(sessions.values) }
         for session in live { session.announceToolsChanged() }

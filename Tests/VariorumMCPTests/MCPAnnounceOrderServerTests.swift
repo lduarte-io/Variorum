@@ -20,7 +20,7 @@ import Testing
 // the wire first (the recorded cause of `twoToolsUnderOneNameAreToldApart`'s load
 // flake). The pins make that window DETERMINISTIC: the host's `namingProbe` (DEBUG)
 // runs inside the hook just after the naming, and runs the very round a
-// grants-fingerprint change runs (`announceRoundForTesting`) — the grant change,
+// grants-fingerprint change runs (`announceGrantsChanged`) — the grant change,
 // landed exactly there. No sleep is the mechanism.
 //
 // Bug-class pins are RED on the scaffold (`eb7de82e3` — the gate heard, the
@@ -55,7 +55,7 @@ struct MCPAnnounceOrderServerTests {
             let window = LockIsolated(0)
             host.namingProbe = { _ in
                 window.withValue { $0 += 1 }
-                await host.announceRoundForTesting()
+                host.announceGrantsChanged()
             }
             let client = try await AnnounceRawClient.open(h.directory, key: key, as: "claude-code", id: 41)
             client.startReading()
@@ -90,7 +90,7 @@ struct MCPAnnounceOrderServerTests {
         try await h.within {
             let key = try h.setupKey(for: "claude-code")
             let host = h.host
-            host.namingProbe = { _ in await host.announceRoundForTesting() }
+            host.namingProbe = { _ in host.announceGrantsChanged() }
             let client = try await AnnounceRawClient.open(h.directory, key: key, as: "claude-code", id: 51)
             client.startReading()
             #expect(await client.waitUntil { !$0.isEmpty })
@@ -130,7 +130,7 @@ struct MCPAnnounceOrderServerTests {
             host.namingProbe = { _ in
                 let heard = await pollUntil(HarnessDeadline.seconds) { heardReady.value }
                 readyInWindow.setValue(heard)
-                await host.announceRoundForTesting()
+                host.announceGrantsChanged()
             }
             let client = try await AnnounceRawClient.open(
                 h.directory, key: key, as: "claude-code", id: 61, then: AnnounceRawClient.initialized)
@@ -192,7 +192,7 @@ struct MCPAnnounceOrderServerTests {
             #expect(try h.client("claude-code").state == .pending, "premise: a pending client, outside the fingerprint")
             #expect(client.listChangedCount == 0, "premise: no round is natural here: \(describe(client.lines))")
 
-            for _ in 0..<3 { await host.announceRoundForTesting() }
+            for _ in 0..<3 { host.announceGrantsChanged() }
             #expect(await client.waitUntil { $0.filter(AnnounceRawClient.isListChanged).count >= 3 },
                     "three asks, three notices: \(describe(client.lines))")
             await client.write(AnnounceRawClient.ping(103))
