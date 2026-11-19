@@ -157,7 +157,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | **CLOSED 2026-11-19** (r1) | see the batch 6 block; r1 code `36cddcf60` `9821ffef3` `ce3c4e75b` | first window NOT green (the release lived in `deinit`); r1 green on the final tree — "Orchestrator's stage results" below; residual VM-227 |
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
-| Ladder r1 · fix pass | **IN-PROGRESS** (implementer, first turn) | see the fix-pass block below | findings 2, 3, 5, 6 applied this turn; finding 1 waits on the reviewer's call between its two arms |
+| Ladder r1 · fix pass | **IN-PROGRESS** (first turn ended: only builds left — a QUIET window) | see the fix-pass block below | findings 2, 3, 5, 6 applied and committed; the merge of `origin/main`, the rebuilds and the red build wait for the window's end; finding 1 waits on the reviewer's call between its two arms |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -733,9 +733,9 @@ orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
 | F1 — the responses (round file ▸ "Implementer responses (fix pass)"), committed and pushed before any fix | DONE (`44ac60f8b`); the gated measurement behind finding 1's arm (b) numbers `12d6afde5` (test-only) |
 | F2 — finding 3 (VM-65): `TimingRecorder.end` tells the change handler only when something changed; the pin red, then green, headless | DONE (this commit) — pin `TimingRecorderTests.aNoOpEndIfOpenLeavesTheRecordUnchanged`: RED on the pre-fix tree (4 issues, the two no-op arms at `:446` `:447` `:458` `:459`), green after; `swift test --filter TimingRecorderTests` 32 tests in 1 suite passed |
 | F3 — finding 5 (VM-2): `surfaceSettled()` no longer `mutating`; finding 6 (VM-65): the round's "sent" says it under-reads | DONE — 5: `a578f0b6e` (`StructuralFlightFenceTests` 8 passed, no new warning); 6: this commit (comments in `Shared/AppTiming.swift` only — the catalog line and `syncRoundEnded`; `SyncSession` untouched). No pins (cleanliness) |
-| F4 — finding 2 (VM-70): `takeAutosaveHold` re-observes on both of its paths; the hosted pin; the red build `vm64-fix-red` | IN-PROGRESS — the fix and the pin DONE (this commit): `MobileEditorViewModel.takeAutosaveHold()` — the hold guard's early return became `if !holdsAutosave { … }` around the re-acquire, and the unchanged re-observe runs after it on both paths; pin `MobileNoteHoldTests.aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`. Remaining: the fix build (F5), then the red build `vm64-fix-red` (this pass's tree with that one file at `f4801064e`; the revert is announced here before it starts) |
-| F5 — builds: phone and Mac `build-for-testing` into `vm64-fix`; `swift test` for the touched suites | NOT-STARTED |
-| F6 — §7 "Fix pass" closeout with the stage commands | NOT-STARTED |
+| F4 — finding 2 (VM-70): `takeAutosaveHold` re-observes on both of its paths; the hosted pin; the red build `vm64-fix-red` | DONE but the red build — the fix and the pin `f589d964e` (`takeAutosaveHold`: the hold guard's early return became `if !holdsAutosave { … }` around the re-acquire, the unchanged re-observe after it on both paths; pin `MobileNoteHoldTests.aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`). **HELD:** the red build `vm64-fix-red` (a cold build — the QUIET window from about 12:36 forbids it; recipe in §7 ▸ "Fix pass", reversing only the fix's hunk so it survives the VM-55 merge). No revert is in flight |
+| F5 — builds: phone and Mac `build-for-testing` into `vm64-fix`; `swift test` for the touched suites | DONE at `f589d964e` — phone and Mac `** TEST BUILD SUCCEEDED **` (the Mac finished at 12:37, inside the window's two-minute tail), no warning in a touched file; `swift test --filter 'TimingRecorderTests\|StructuralFlightFenceTests\|LeavingSavepointTests\|LeavingSavepointMeasurementTests'` 48 tests in 4 suites passed (the gated one skipped). **To be REBUILT on the merged tree** once the orchestrator says to merge `origin/main` (VM-55) and the window has ended |
+| F6 — §7 "Fix pass" closeout with the stage commands | DONE (this commit) — §7 ▸ "Ladder round 1 — fix pass"; the turn ENDS here with only builds left (the window): the merge of `origin/main` at the orchestrator's word, then the phone and Mac rebuilds into `vm64-fix`, then the red build, then the stage |
 | F7 — finding 1 (Part of VM-71): HELD for the reviewer's call; the second turn | HELD |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
@@ -3287,3 +3287,115 @@ note → saved" and "Savepoints per leaving" rows (the leaving she only read add
 (`b7-readout.png`). No face changed in this batch, so one voice is enough. Screens go to `notes/plans/vm64-screens/`
 (gitignored). What it leaves on the device: the seeded fixture (if seeded), one typed word in the long note, one filed
 capture.
+
+### Ladder round 1 — fix pass (implementer closeout; first turn)
+
+**Not done in this turn (first, by the record's rule):** finding 1 is NOT applied — it waits for the reviewer's call
+between its two arms (the responses, `notes/plans/fixes/vm-64-ladder-round1.md` ▸ "Implementer responses (fix pass)",
+recommend arm (a)). The red-on-old phone build `vm64-fix-red` is NOT built: a QUIET window (another run's merge gate) began
+at about 12:36 and forbids cold builds; it waits for the window's end and for the merge of `origin/main` (VM-55) the
+orchestrator will ask for first. The hosted pin has not run (the stage). The whole-package `swift test` is owed once, on
+the final tree, in the second turn. The fix products in `vm64-fix` were built at `f589d964e` just before the window and
+will be SUPERSEDED by a rebuild on the merged tree.
+
+**Base:** `4b4d64143`. **Commits:** `1318e0567` (live status) · `44ac60f8b` (the responses, before any fix) · `12d6afde5`
+(the gated measurement behind finding 1's arm (b) numbers — test-only) · `39008cb46` (finding 3 + its pin) · `a578f0b6e`
+(finding 5) · `f4801064e` (finding 6) · `f589d964e` (finding 2 + its pin) · this closeout.
+
+#### What shipped, finding by finding
+
+- **Finding 3 (VM-65) — `Sources/VariorumCore/Diagnostics/TimingRecorder.swift`, `end(_:countingUnmatched:)`.** The
+  locked body now also answers whether the SAVED record moved — a sample recorded, `unmatchedEnds` counted, a stale
+  begin's `abandoned` counted — and the change handler is told only then: the windows' own rule (`openWindow` and
+  `closeWindow` already called `changed()` only `if recorded`). An `endIfOpen` that found nothing open (every keyboard
+  rise asks two) no longer marks the record dirty or schedules a 20 s save of an unchanged table. **Pin**
+  `Tests/VariorumCoreTests/TimingRecorderTests.swift` `aNoOpEndIfOpenLeavesTheRecordUnchanged`: after a save, a no-op
+  `endIfOpen` tells the handler nothing and leaves no unsaved change; the same test's guard arms — a recorded span, an
+  unmatched `end`, a stale begin dropped — each tell it once per save. **RED on the pre-fix tree** (run before the fix:
+  4 issues, exactly the two no-op arms — `:446`, `:447`, `:458`, `:459`), **green after**.
+- **Finding 5 (VM-2) — `Sources/VariorumCore/Domain/StructuralFlightFence.swift`.** `surfaceSettled()` is no longer
+  `mutating`; its doc says it is a query. The name and its one production call site (`MobileEditorViewModel.swift`, the
+  settle) are unchanged — no editor-seam line moved for a cleanliness nit. No pin.
+- **Finding 6 (VM-65) — `App/Variorum/Shared/AppTiming.swift`, comments only.** The catalog line for
+  `syncRoundSent` (the one place every mark's meaning is written) and `syncRoundEnded`'s doc say the count is the
+  outbox's drop, so rows queued during the round are subtracted from it and a mid-round burst under-reads it, down to 0
+  (the clamp). `SyncSession` untouched. No pin.
+- **Finding 2 (VM-70) — `App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift`,
+  `takeAutosaveHold()`.** The hold guard's early return became `if !holdsAutosave { … }` around the re-acquire and the
+  adoption, and the re-observe block — unchanged, idempotent, reading `autosave` at use time — runs after it on BOTH
+  paths. Not the literal hoist: moving the block above the guard would observe the coordinator the editor gave back,
+  which the adopt branch then stops, leaving an adopted coordinator unobserved (r1's
+  `aScreenShownAgainAfterItsLeavingTakesTheHoldBackAndIsWiredToIt`). Nothing else in the hold's lifecycle changed
+  (`releaseAutosaveHold`, `deinit`, `teardown`, `MobileWriteView` untouched); batch 2's fence untouched (the latch hook,
+  the gate and storage belts, the settle); `storageDidEdit`, `fallbackVerdict` and `EditorEditRouting` untouched.
+  **Pin** `App/Variorum/VariorumMobileTests/MobileNoteHoldTests.swift`
+  `aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`: the store held, the leaving parked in its savepoint
+  after teardown ran (asserted: not listening, still holding — the posture, green on both trees), the screen shown again,
+  the store released, the leaving ended: the editor holds AND listens, and what it records reaches the registry (a key,
+  `flushEveryOpenPost`, the stored text). Hosted — PENDING the stage; expected RED on the pre-fix `takeAutosaveHold` at
+  exactly two expectations (`observesAutosave` after the re-show, and again after the leaving ends), green on the fix.
+
+#### VM-227 — narrowed, not closed (the trace is the responses' finding 2)
+
+The covered-and-shown-again roads are pushes on the note's own stack (Note ▸ Versions; the diverged copy's landing,
+R67) and Back — not a tab switch (the band keeps every page mounted and only offsets it, so no `onDisappear`), not a
+sheet. Shown again AFTER the leaving's give-back (the ordinary case): re-observed since batch 6's r1. Shown again after
+teardown but before the give-back (the leaving parked in its savepoint): re-observed by this fix. Shown again WHILE
+teardown is still suspended (her keys pending at the cover and `finish()`'s flush, the mint settle or a pending gesture
+outlasting the push and Back behind a busy runner or writer): still NOT re-observed — the re-show finds the token set,
+teardown's last lines then remove it, and the give-back is skipped. The closing shape, offered for the reviewer's call
+and NOT applied (it changes the leaving's half, outside this fix's fence): at the leaving's last act, if the screen
+arrived again and no token is held, re-observe — one conditional in `releaseAutosaveHold(ifNotShownSince:)`.
+
+#### Evidence
+
+- Headless, the touched Core suites: `swift test --filter 'TimingRecorderTests|StructuralFlightFenceTests|LeavingSavepointTests|LeavingSavepointMeasurementTests'`
+  — **48 tests in 4 suites passed** (the gated measurement skipped ungated: 47 ran). `TimingRecorderTests` alone 32
+  passed; `StructuralFlightFenceTests` alone 8 passed, no warning in the touched file.
+- Builds at `f589d964e` (before the QUIET window): phone `build-for-testing` into `App/Variorum/DerivedData/vm64-fix/`
+  **`** TEST BUILD SUCCEEDED **`** and Mac `build-for-testing` into the same folder **`** TEST BUILD SUCCEEDED **`** (it
+  finished at 12:37, inside the window's two-minute tail) — no warning in a touched file. Both are superseded by the
+  rebuild on the merged tree.
+- Finding 1's arm (b) cost: the responses' table (three calm runs of the gated measurement).
+
+#### The stage window (after the merge and the rebuild; the GO's claim line and UDID fill `<simulator-udid>`)
+
+The red build first (no revert is in flight now; this is the recipe, announced in the live status before it starts —
+it reverses ONLY finding 2's hunk, so it stays right after VM-55's edits to the same file are merged in):
+```
+cd ~/dev/variorum-vm-64
+git diff f4801064e f589d964e -- App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift | git apply -R
+cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm64-fix-red
+cd ~/dev/variorum-vm-64 && git checkout HEAD -- App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift
+git status --short   # must be empty
+```
+(i) the hold suite ALONE on each build:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-fix \
+  -only-testing:VariorumMobileTests/MobileNoteHoldTests 2>&1 | tee <log-fix-hold>
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-fix-red \
+  -only-testing:VariorumMobileTests/MobileNoteHoldTests 2>&1 | tee <log-red-hold>
+```
+Expected: fix — 5 tests in 1 suite passed; red — `aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`
+FAILS with 2 issues (the two `observesAutosave` expectations), the other four pass.
+(ii) the suites around the touched code, fix build, ONE invocation:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileNoteHoldTests MobileNoteOpenOnceTests MobileLeavingSavesOnceTests MobileLivenessTests
+  MobileStructuralFlightFenceTests MobileUndoDoorTests MobileDeferredProjectionRetryTests MobileTypedOverRescueTests
+  MobileSavepointOnLeavingTests MobileVersionsTests MobileNavigationTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-fix \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-fix-company>
+```
+Expected: all green. No Mac hosted run is owed by this pass: its `Shared/` lines are comments, its Core lines are pinned
+headless, and the Mac build compiles them; the run's whole-Mac window covers the rest.
+
+#### For QUESTIONS at the merge
+
+None from this pass — no product behaviour was decided. Finding 1's arm and finding 2's closing conditional are the
+reviewer's calls (engineering).
