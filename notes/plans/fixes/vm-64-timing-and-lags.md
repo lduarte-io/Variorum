@@ -156,7 +156,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | **r1 BUILT · READY for the stage** — the release moved out of `deinit` into the leaving work | see the batch 6 block ▸ "Iteration r1"; r1 products `vm64-b6r1`, red `vm64-b6r1-red` | r0 products `vm64-b6` (to be deleted) |
-| 7 · VM-71 | BUILT · **READY for the stage** | see the batch 7 block; products `vm64-b7` at `c9b574513`, red `vm64-b7-red` | no revert in flight; no line in `Features/Protection/` |
+| 7 · VM-71 | **re-checking on batch 6's r1** (test-only changes; new products `vm64-b7r1`, `vm64-b7r1-red`) | see the batch 7 block; Mac product `vm64-b7` (ran green 10:37) | no revert in flight; no line in `Features/Protection/` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -694,6 +694,25 @@ in this batch's stage commands).
 | P6 — closeout in §7 + READY | DONE (this commit) — §7 batch 7; READY: the stage groups (i)–(v) are in §7 batch 7 ▸ "The stage window"; every hosted run PENDING |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b7/` and `vm64-b7-red/` (gitignored).
+
+**Re-check on batch 6's r1 (the orchestrator's message, after `dd3f11d79`; r1 = `9490642e3` … `7647127f2`).** r1 moved
+the editor's coordinator release out of `deinit` into the leaving work: `MobileWriteView`'s `onDisappear` task now runs
+teardown's flush → `savepointOnLeaving` (this batch's phone branch) → `model.releaseAutosaveHold(ifNotShownSince:)` → the
+leave's mark; the `.task` takes the hold first. Read on this tree: no product line of this batch changes; **two TEST-only
+changes** (so a fresh fix product `vm64-b7r1` is owed, phone only — no `Shared/` or Core file changes, the Mac product
+stays `vm64-b7`): (1) `MobileLeavingSavesOnceTests`' notes said a screen's leaving ends at "its editor's end of life" —
+r0's mechanism, under which its five holder-count waits could only pass when the host died; under r1 they pass at the
+leaving's last act — the waits and their deadlines stand, the words are corrected; (2) one pin added for hazard (c) under
+r1: a key typed AFTER the lock's flush, whose landing meets the closed pool, is KEPT pending by the release (the phone's
+`releaseAutosave` drops an entry only at zero holders AND a clean coordinator — `Shared/AppSession.swift:476-481`), not
+dropped. The closeout's r0 lines are corrected in place (§7 batch 7 ▸ "Re-check on batch 6's r1").
+
+| r1 re-check piece | State |
+|---|---|
+| Q1 — the re-check, per pin, and the plan (this paragraph) | DONE (this commit) |
+| Q2 — the two test changes | NOT-STARTED |
+| Q3 — builds: phone `build-for-testing` into `vm64-b7r1` (fix); the red `vm64-b7r1-red` (the four production files at `dfdd94b5a` over today's tip; revert announced first) | NOT-STARTED |
+| Q4 — §7: the r1 re-check, the corrected lines, the stage commands on the new folders | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
