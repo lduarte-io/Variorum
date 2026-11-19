@@ -1450,7 +1450,8 @@ section), SurfaceContracts' Messages bullet, the wing label and the wing switche
 |---|---|
 | Record skeleton | DONE (635f351d6) |
 | The moves and splits (both targets' sources) | DONE (4fad0a2cf — committed NOT YET BUILT, said so in its message; a QUIET window held every full build) — the table below |
-| Test-file edits (the moved face's source pin; the VM-61 and VM-62 Mac pins' scans extended to the hoisted files) | DONE (4fad0a2cf; the VM-62 scan in the record commit after it) |
+| Test-file edits (the moved face's source pin; the VM-61 and VM-62 Mac pins' scans extended to the hoisted files) | DONE (4fad0a2cf; the VM-62 scan 1081c42bd) — results PENDING (the shared window) |
+| The Mac seam pin (`VM63MacWingBrainsHoistPinTests`, 2 tests — the refusal words' road, no platform fork) | DONE (this commit) — results PENDING (the shared window) |
 | The phone compile-level pin (`MobileWingBrainsHoistTests`, 5 tests) | DONE (4fad0a2cf) — results PENDING (the shared window) |
 | Mac `build-for-testing` (`Variorum`, macOS, `vm55-b1`) | NOT-STARTED — held for the coordinator's QUIET all-clear |
 | Phone `build-for-testing` (`VariorumMobile`, the simulator, `vm55-b1`) | NOT-STARTED — held for the same all-clear |
@@ -1486,7 +1487,7 @@ Paths under `App/Variorum/`.
   above); `Variorum/Core/Views/WingSwitcherBrain.swift` → `Shared/WingSwitcherBrain.swift` (header comment only).
 - **Added:** `Shared/SearchPickerBrain.swift` · `Shared/WingFollowRule.swift` · `Shared/WingBookMoveBrain.swift` ·
   `Shared/WingDestinationModel.swift` · `Variorum/Core/Views/WingsModel+Mac.swift` · `Variorum/Core/Views/WingNoteDoors.swift`
-  · `VariorumMobileTests/MobileWingBrainsHoistTests.swift`.
+  · `VariorumMobileTests/MobileWingBrainsHoistTests.swift` · `VariorumTests/VM63MacWingBrainsHoistPinTests.swift`.
 - **Edited (the remaining half of a split):** `Variorum/Core/Views/SearchPicker.swift` (`normalized` out; `enum` →
   `extension`) · `Variorum/Workspace/WingFollow.swift` (the rule out; the rest as extensions) ·
   `Variorum/Core/Views/WingBookMoves.swift` (the rule, the acts and their words out) ·
@@ -1551,7 +1552,9 @@ would). *A throwaway mirror of both scans over the tree at the record commit fou
 #### Byte-identical on the Mac — what would fail, per moved brain, had its behaviour changed
 
 VM-63 is Debt (a hoist): red-on-old does not bind. The pins are the Mac suites that already drive each brain, unedited but
-for one source pin's path:
+for one source pin's path — plus, for the one seam that changed text on the Mac's path (the refusal words), the new
+`VM63MacWingBrainsHoistPinTests` (the wing suites provoke only worded refusals, where the Mac's road and the phone's
+agree):
 
 - **`WingsModel`** (rows, names, destinations, switch, mint, rename, delete, the note acts, the signal, the reach):
   `WingSwitcherTests` — Home-first rows and destinations; the mint's receipt `WingCopy.minted` and the taken-name refusal
@@ -1590,6 +1593,15 @@ named file): listed in the Mac TYPE list below.
   `theDestinationSelectorAndTheBookMoveAskBuildOnThePhone` (the selector over the wings' rows, its prompt and foot; the book
   move's ask with its preview — the destination's twin named; an ask says nothing) ·
   `aRefusalSpeaksTheHandedInWordsAndALandedActSaysAReceipt`. Results PENDING (the shared window).
+- **New, Mac:** `VariorumTests/VM63MacWingBrainsHoistPinTests.swift`, type `VM63MacWingBrainsHoistPinTests` (2):
+  `theMacsWingsBrainSpeaksTheMacsRefusalWords` — the one seam that changed text on the Mac's path, pinned where the wing
+  suites cannot see it: they only provoke WORDED refusals (the taken-name one), on which the Mac's `message(for:)` and the
+  phone's `sentence(for:roads:)` agree; this pin drives `WingsModel(session:).refusalWords` on the cases where the roads
+  part — the Mac-only arms `lockedReading` and `wingMoveChangedSince`, and an error no table words (described on the Mac,
+  the plain fallback on the phone's road) — and asserts the Mac's words, and that each case does part the roads ·
+  `theHoistedBrainsCarryNoPlatformForkAndNoFace` — no `#if os(` and no AppKit / UIKit / SwiftUI import in the hoisted files
+  (review focus 7; the phone target compiling them is the other half). A mirror of the scan over the tree finds none.
+  Results PENDING (the shared window).
 - **Edited, Mac:** `WingPaletteDoorsTests` (one `Self.source(...)` path, marked A JUSTIFIED EDIT — the bar's modifier is a
   face and lives in `WingNoteDoors.swift` now, byte for byte); `VM61MacStatusSeamPinTests` and `VM62MacRefusalWordsPinTests`
   (each scan also reads the hoisted files, above). No Mac assertion changed.
@@ -1614,7 +1626,7 @@ named file): listed in the Mac TYPE list below.
   RuleEditorMakeTagTests SidebarNoteRowMenuTests TutorialBooksLessonTests TutorialBooksRitualTests VM61MacStatusSeamPinTests
   VocabularySweepTests WingBookMoveDoorTests WingChordsAndLabelDoorTests WingDeliberateLandingTests
   WingDestinationsDeadWingTests WingFollowDecisionTests WingFollowTests JournalWingFollowTests WingNumberKeysTests
-  WingPaletteDoorsTests WingSwitcherChordTests WingSwitcherTests` (28)
+  WingPaletteDoorsTests WingSwitcherChordTests WingSwitcherTests VM63MacWingBrainsHoistPinTests` (29, the new pin last)
 - (B) every type whose file names a piece left in a split file: `AlertCancelSweepTests ShiftEntryDateDoorTests
   VersionDoorsTests` (3)
 - (C) the source walks over `Variorum/` and `Shared/`: `BadgeFamilySplitTests ChromeLineLimitTests ChromeMenuRowSizeTests
