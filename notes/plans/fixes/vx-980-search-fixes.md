@@ -423,7 +423,22 @@ No other string was added or changed.
 
 ## THE LADDER
 
-*PENDING — round by round: the reviewer cast and why, the findings file, each finding's disposition.*
+### ROUND 1 (2026-11-19, fable-reviewer, cold; findings file notes/plans/fixes/vx-980-ladder-round1.md)
+
+**Tally: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT.** Per R-980-4 a further round runs only while the round before it found a MAJOR or a BLOCKER — this one found neither; the fixes below are re-checked by the standing re-check.
+
+**The fix pass (cross-model):** a fresh `opus-implementer`, seated 2026-11-19 with no batch context, read the findings file, this record (Kickoff, ENVIRONMENT & TRAPS, BATCH 3 whole, Review foci), `vx-980-her-rulings.md`, CLAUDE.md's Phase execution and `notes/SessionResiliencyProtocol.md`, and the named code (`RecoveryView.swift`'s model, `TrashSearchModelTests.swift`, `Domain/TrashTextMatch.swift`, and `AppDatabase.observe(tracking:)`), and traced each finding itself. Every claim below is PENDING until its run is named. **No revert is in flight** (the revert leg is the orchestrator's, in the gate snapshot).
+
+**MINOR-1 — a stale observation answer can land between `ask(_:)` and the restarted task.** **AGREED — PENDING (pin, fix).**
+- *The traced mechanism (mine).* `ask(_:)` (`RecoveryView.swift`) sets `askedWords`, lowers `trashListingLoaded` and bumps `restartToken`, but leaves `listingQuestion` where it was; only the next `startTrash()` body moves it, and that body runs when the view's `.task(id:)` restart is scheduled — a later main-actor job than the one that ran `ask`. The old start's `for try await` resumes on the main actor too; an answer already on its way when `ask` runs reaches `answers(question)`, whose guard `question == listingQuestion` still passes, and `adoptListing` raises `trashListingLoaded` with the old question's rows. Concretely: words that match nothing, esc pressed while the search's answer is in flight → `clearSearch()` → `ask([])` → the search's empty answer lands → `trash = []`, `trashListingLoaded = true`, `isSearching == false`, `kindFilter == nil` → `trashEmptyStateLine` returns `RecoveryCopy.trashEmptyLine(filteredBy: nil, …)`, which is always "The Trash is empty." — over a Trash holding rows, with the rows blanked, until the new start answers.
+- *One correction to the finding's wording (the class stands).* `AppDatabase.observe(tracking:)` applies `.removeDuplicates()` (`Sources/VariorumCore/Persistence/AppDatabase.swift:294`), so once an empty search answer has been adopted, a later re-read that is also empty is never delivered — "one more empty answer" from a re-read cannot arrive. The reachable instance is an answer still in flight when the words change: the search question's own first answer (her esc inside the first read's latency), or a re-read whose value differs (a commit in `Queries.trashTables` that changes the answer). The pin holds the first answer for that reason.
+- *Pin:* PENDING. *Fix:* PENDING — `listingQuestion &+= 1` inside `ask(_:)`, beside the `restartToken` bump; `startTrash`'s own bump stays.
+
+**NIT-1 — `TrashTextMatch.excerpt`'s comment says a lone over-long word is "kept whole".** **AGREED — PENDING.** Traced: when the cut falls inside a word and no whitespace lies between the cut and the match (`gap` is nil), `start`/`end` stay where the character limit put them, so that word is kept CUT mid-word with the ellipsis — the batch's own residual 2. The comment also says the cut moves "away from the match"; the start cut moves FORWARD to the first whitespace after it, toward the match, dropping the partial word. Comment-only; the code is the recorded intended behaviour.
+
+**NIT-2 — `TrashTextMatch.words`' "Duplicates collapse … first spelling kept" overpromises.** **AGREED — PENDING.** Traced: the dedup set is of exact strings, so `Red red` keeps both (`TrashTextMatchTests` already pins `words("red Red red") == ["red", "Red"]`); both match identically because the match folds case and accents. Comment-only.
+
+**Evidence:** PENDING — the core suites, `build-for-testing` into `App/Variorum/DerivedData/vx980-l1`, the app TYPE and test names for the gate, the fix commit's hash for the revert leg.
 
 ## CLOSEOUT
 
