@@ -308,6 +308,71 @@ struct MobileNoteEntryDateTests {
         }
     }
 
+    /// **VM-84 — the date chip follows the date when the title does not move.**
+    /// The chip read `header?.entryDate`, and `header` is `@ObservationIgnored`
+    /// (editor internals, never observed), so the masthead re-rendered on a
+    /// date change ONLY when the title changed in the same pass — an untitled
+    /// note's displayed title IS its date. On a TITLED note nothing the chip
+    /// observed changed, so it kept the old day.
+    ///
+    /// The pin holds exactly what the chip observes (`dateChipDay`, its one
+    /// read) under `withObservationTracking` — SwiftUI's own mechanism for
+    /// re-rendering a body — through both roads: the model's own door, and
+    /// the op from elsewhere (the day shift) followed by the header door's
+    /// store re-read. **Red on old:** neither change wakes the chip.
+    @Test func theDateChipFollowsTheDateWhenTheTitleDoesNot() async throws {
+        try await withEditorWorld { session, _ in
+            let postID = try await session.runner.run { ops -> String in
+                let post = try ops.createPost(title: "Kept title")
+                try ops.setEntryDate(post.id, entryDate: "2026-08-09")
+                return post.id
+            }
+            let (model, _) = makeEditor(session, postID: postID)
+            await model.loadOnce()
+            #expect(MobileWriteScreen.dateChipDay(model) == "2026-08-09")
+            #expect(model.displayTitle == "Kept title")
+
+            // Road 1: the chip's own door (Set in the date alert).
+            let wokeByDoor = LockIsolated(false)
+            withObservationTracking {
+                _ = MobileWriteScreen.dateChipDay(model)
+            } onChange: {
+                wokeByDoor.setValue(true)
+            }
+            await model.setEntryDate("2026-08-10")
+            #expect(wokeByDoor.value, "a date change must wake the chip")
+            #expect(MobileWriteScreen.dateChipDay(model) == "2026-08-10")
+            #expect(model.displayTitle == "Kept title", "the title never moved")
+
+            // Road 2: the op from elsewhere (the day shift), then the header
+            // door's store re-read — the road a sync delivery also takes.
+            let wokeByShift = LockIsolated(false)
+            withObservationTracking {
+                _ = MobileWriteScreen.dateChipDay(model)
+            } onChange: {
+                wokeByShift.setValue(true)
+            }
+            _ = try await session.runner.run { ops in
+                try ops.shiftEntryDate(postID, byDays: 1)
+            }
+            await model.confirmNoteStillLive()
+            #expect(wokeByShift.value, "a shifted date must wake the chip")
+            #expect(MobileWriteScreen.dateChipDay(model) == "2026-08-11")
+
+            // P3's half (green on both sides): a header refresh that changes
+            // nothing the chip shows wakes nothing — the chip does not
+            // re-render the masthead on every header delivery.
+            let wokeByNothing = LockIsolated(false)
+            withObservationTracking {
+                _ = MobileWriteScreen.dateChipDay(model)
+            } onChange: {
+                wokeByNothing.setValue(true)
+            }
+            await model.confirmNoteStillLive()
+            #expect(!wokeByNothing.value, "an unchanged header wakes nothing")
+        }
+    }
+
     /// C2 ladder R1-2 (red-on-old): an untitled, UNDATED note's masthead
     /// falls back to its created DAY through the SAME DisplayTitle chain
     /// the Library row reads — two surfaces must never disagree on one

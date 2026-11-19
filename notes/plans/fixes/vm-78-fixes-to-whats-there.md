@@ -166,7 +166,7 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 | VM-16 (+VM-20) | IN-PROGRESS — code + pins committed (`48055fa9c`); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ Mac guard `UndoWarningWordsTests`) |
 | VM-43 | IN-PROGRESS — `insuringBuffer: true` wired at the ONE phone call site (`MobileBlockHistory.swift` `restore`; grep of `VariorumMobile/` + `Shared/` finds no other); pins written; compile + red/green **PENDING** | `MobileBlockHistoryTests` |
 | VM-3 | IN-PROGRESS — the lesson's two prose blocks rewritten (`MobileTutorialSeeder.swift`, "divide with takes"); the walk pin unwrapped from `withKnownIssue` and flipped to keep-on-top; an exact-words pin added; compile + red/green **PENDING** | `MobileTutorialStructureWalkTests` |
-| VM-84 | NOT-STARTED — an observed `entryDate` mirror set in `adoptHeader` | `MobileEditorHeaderChipTests` (new) |
+| VM-84 | IN-PROGRESS — piece 1 committed: the seam `MobileWriteScreen.dateChipDay` (still reads `header`, behaviour unchanged) + the pin (EXPECTED RED at this commit); piece 2 (the fix) next | `MobileNoteEntryDateTests` |
 | VM-33 | NOT-STARTED — the answered flag (`trashListingLoaded`), the Mac's VX-678 rule | `MobileTrashTests` |
 
 **Traced mechanisms (read in this session, before any code):**
@@ -205,7 +205,7 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
   | block 1 | Dividing a block that has several takes follows one simple rule on the phone: the take you're READING is cut in two, and every other take rides along whole — copied onto both halves, so nothing needs a matching cut and nothing is lost. | Dividing a block that has several takes follows one simple rule on the phone: the take you're reading is cut in two, and every other take rides along whole onto the top block, so nothing needs a matching cut and nothing is lost. |
   | block 2 | The extra copies are quick to delete where you don't want them — quicker than hunting for a lost take ever was. The original block keeps everything, off-stage, in lineage. | The bottom block holds just the second half. The original block keeps everything, off-stage, in lineage. |
 
-  ("READING" lost its capitals per her no-shouting rule; the new text is 60 words to the old 72.) The Mac's guide is
+  ("READING" lost its capitals per her no-shouting rule; the new text is 59 words to the old 72.) The Mac's guide is
   untouched. The walk pin `theFannedDivideLessonLandsKeepOnTop` (was `…LandsTheDuplicateShape`, wrapped) now
   asserts plainly: top block = the cut's first half + the other take whole (2 takes); bottom block = the second half
   alone (1 take); the original released with both takes in lineage. It is green on both sides by design (the

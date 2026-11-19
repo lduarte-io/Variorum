@@ -454,17 +454,25 @@ struct MobileWriteScreen: View {
     /// identity line — the date is note identity exactly as membership
     /// is, and the alert-confirmed chip is the rename door's own grammar.
     private var dateChip: some View {
-        Button {
-            dateField = model.header?.entryDate ?? ""
+        let day = Self.dateChipDay(model)
+        return Button {
+            dateField = Self.dateChipDay(model) ?? ""
             datePresented = true
         } label: {
-            Text(model.header?.entryDate ?? tokens.chromeLabel("no date"))
+            Text(day ?? tokens.chromeLabel("no date"))
                 .font(tokens.small)
-                .foregroundStyle(model.header?.entryDate != nil ? tokens.muted : tokens.faint)
+                .foregroundStyle(day != nil ? tokens.muted : tokens.faint)
                 .lineLimit(1)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Entry Date")
+    }
+
+    /// **The date chip's one fact** (VM-84): the day it shows, read in ONE
+    /// place — the chip's words, its ink and the alert's seed — so what the
+    /// chip OBSERVES is exactly what a pin can hold.
+    static func dateChipDay(_ model: MobileEditorViewModel) -> String? {
+        model.header?.entryDate
     }
 
     /// The tags chip (parity C3 — "tag posts", the LK5 expansion's "full
