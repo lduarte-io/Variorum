@@ -507,8 +507,16 @@ struct MobileHerPathsPerfTests {
                     // The band's settle animation, and a laid-out lazy list.
                     await shell.surface.settle(20)
 
+                    // The row's button, found by its title (the row's spoken
+                    // label begins with it — the Library suites match rows
+                    // the same way), and pressed through UIKit's own
+                    // activation dispatch.
+                    let matches = shell.surface.visibleElements.filter {
+                        $0.accessibilityLabel?.hasPrefix(title) == true
+                    }
+                    let row = matches.first { $0.accessibilityTraits.contains(.button) } ?? matches.first
                     let before = Probe.snap()
-                    guard shell.surface.activate(title) else {
+                    guard let row, row.accessibilityActivate() else {
                         let labels = Array(shell.surface.visibleLabels.prefix(30))
                         Issue.record("the \(label) note's Library row was not on screen; labels were \(labels)")
                         await shell.unmount(leavings: 0)
