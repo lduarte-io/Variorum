@@ -1,12 +1,22 @@
 //
 //  ThemeStore.swift
-//  Variorum
+//  Variorum (Shared — the Mac and the phone)
 //
 //  Phase 13, B1 — the live theme: observes the synced appearance settings
 //  (Queries.themeSettings — a bounded fetch over the tiny setting table)
 //  and resolves VoiceTokens per color scheme. Setters go through the
 //  operations runner like every write. Views take the store from the
 //  environment and never hold literal colors.
+//
+//  VM-51 (the VM-47 run, batch 3 — QUESTIONS #199's deferred hoist): MOVED
+//  here from the Mac's `Theme/` so the phone wears the library's voice and
+//  palette through the same store (her LK-1/LK-2: voice and palette follow
+//  the synced library; light or dark stays each device's own). A move, not a
+//  rewrite: the observation, the resolver road and every setter are the
+//  Mac's, byte for byte. The two adoptions that are the Mac's alone — the
+//  editor typography (`EditorTypography`, Mac-only) and the receipt style
+//  (`AppSession.status`, Mac-only) — stay where they were, behind the
+//  platform check.
 //
 
 import Foundation
@@ -47,6 +57,7 @@ final class ThemeStore {
                 try Queries.themeSettings(db)
             }) {
                 settings = value
+                #if os(macOS)
                 EditorTypography.adopt(value)
                 // 18i (her R-Q5): the receipt style is adopted HERE too,
                 // for the same reason and by the same rule — a settings
@@ -56,6 +67,7 @@ final class ThemeStore {
                 // compile-time value is already her default, so the gap
                 // before the first emission behaves as the store says.
                 session.status.receiptStyle = value.receiptStyle
+                #endif
             }
         } catch is CancellationError {
         } catch {
