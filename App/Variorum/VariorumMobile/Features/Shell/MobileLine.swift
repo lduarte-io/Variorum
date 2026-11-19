@@ -31,7 +31,7 @@ import VariorumCore
 @MainActor
 enum MobileLine {
     /// What a message IS — the door's own answer.
-    enum Class {
+    enum Class: Equatable {
         /// Nothing happened (or a direction she must see), and this says why.
         /// Always drawn.
         case refusal
@@ -44,7 +44,7 @@ enum MobileLine {
     }
 
     /// The roads a removal's Undo may take — each one already exists.
-    enum Undo {
+    enum Undo: Equatable {
         /// The note's structural undo door (M20 — `MobileUndoDoor.beginUndo`
         /// from the receipt surface, so A12's warning presents from the note's
         /// own host). The line is the note screen's: it is withdrawn as the
@@ -72,6 +72,15 @@ enum MobileLine {
     static func say(
         _ text: String?, as cls: Class, session: AppSession, door: MobileUndoDoor? = nil
     ) {
+        // **The note's Undo never outlives its moment** (M20's `didSet` law —
+        // "a stale Undo button left standing beside a NEW sentence would offer
+        // to reverse something the sentence does not name" — carried onto the
+        // one line). A structural Undo names the stack's top AS IT WAS; any
+        // later word from the same note — a refusal, a removal, an ordinary
+        // act the line drops, a success clearing its slot, an undo from the ⋯
+        // sheet — may have moved that top, so the note's own standing Undo
+        // line is taken back first.
+        if let door { withdrawNoteLine(of: door, session: session) }
         let words = text ?? ""
         switch cls {
         case .refusal:
