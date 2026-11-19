@@ -329,7 +329,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-58 | DONE (301388409) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-60 | DONE (9462d3854) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
-| Batch 2a — VM-61 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line |
+| Batch 2a — VM-61 | IN-PROGRESS — the implementer's record is under "Batch 2a record" (its own LIVE STATUS) |
 | Batch 2b — VM-62 | NOT-STARTED — a fresh implementer after 2a closes |
 | Batch 3 — VM-63 | NOT-STARTED |
 | Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
@@ -580,6 +580,34 @@ batch touched — `MobileLibraryTests` `MobileLibrarySortTests` `MobileNavigatio
 - `notes/SurfaceContracts.md` — none (the phone's surfaces enter as each umbrella ships them; the catch-up plan's own
   line).
 - AppSpec — none.
+
+### Batch 2a record
+
+**What this batch did NOT do (first, by the protocol):** nothing of VM-62 (batch 2b's) — no raw-error site is reworded;
+where a slot that moves carries `String(describing: error)` today, its words ride onto the line unchanged and the site
+is listed below for 2b. No new undo road (scope call 7). No restyle (VM-47 owns sizes: the line wears today's tokens).
+Nothing under `Features/Protection/`, `Shared/Protection/`, `Sources/VariorumCore/Sync/` or custody. No Core change.
+The use-shaped simulator walk is the run's, at the end.
+
+Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch
+`vm-55-wings-underneath`. Reading done in full before code (CLAUDE.md + loaded canon, MobileSoul §1–§5, the resiliency
+protocol, the catch-up plan's inherited rules, umbrella-02, sitting-1 rulings, audit A §1D/§1F/§1I/§3.1, audit C N1/N5/N20
+and §2, audit B §0.6/I3/I4/M2, this file whole, SurfaceContracts' Messages and wing bullets, the note-write mockup's D
+frames and build notes, the home-wings, library-and-search, trash-archive-tags, comments-and-callouts and takes mockups'
+line notes, `wording-list-2.md`). DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental, both targets).
+
+#### Batch 2a LIVE STATUS
+
+| Piece | State |
+|---|---|
+| Record skeleton | IN-PROGRESS — this commit |
+| The inventory (every slot outside Protection: file · words · class · what became of it) | NOT-STARTED |
+| The seam shared (`StatusCenter` to `Shared/`, `session.status` on both platforms, the phone's placement rule) | NOT-STARTED |
+| The phone's one line (the face, hosted once by the shell) | NOT-STARTED |
+| The slots moved onto the line (Shell, Write, Takes) | NOT-STARTED |
+| Tests (the seam's kinds, the phone's show rule, the Mac byte-identical pin, the moved slots) | NOT-STARTED |
+| Phone + Mac `build-for-testing` | NOT-STARTED |
+| Stage window | NOT-STARTED — READY handed to the orchestrator when the above are green |
 
 ## Ladder
 
