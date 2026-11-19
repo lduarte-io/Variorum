@@ -358,7 +358,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 2a — VM-61 | DONE — its suites ran in batch 2's one window (run by 2b, three claims, 05:56–07:39): the Mac leg 1243/1245 + its Mac pin's re-run green after a test-only fix (8fa80d315, a false positive); the whole phone target 924 of 928 clean + 2 with declared known issues, VM-24's red main's, and one REAL defect its own host pin caught (the line ignored the home-indicator inset) — fixed b811aa743, re-run green (16/16 over the line's four types). Records: "Batch 2a record" and "Batch 2b record" (2a follow-ups 1 and 2) |
 | Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | DONE — P-55-11 (be6f1d0c7) and VM-62 (pins 69005ad4a/15f788dfd, fix e8609cc6f) green in the whole phone target and the Mac leg; VM-62's red-on-old RAN at 15f788dfd from a snapshot worktree: the scan red (97 lines) and all five per-case pins red, the stripper oracle green; the window's two 2a follow-ups fixed and re-run green. Record: "Batch 2b record" |
-| Batch 3 — VM-63 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line; ends at BUILT (no window of its own). Its own LIVE STATUS: "Batch 3 record" |
+| Batch 3 — VM-63 | BUILT (d91f97ca5) — both targets build for testing green; its suites (the Mac and phone TYPE lists in "Batch 3 record") PENDING in the shared window batch 4 runs |
 | Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
@@ -1436,7 +1436,7 @@ Leg 3 — **red-on-old** (VM-62's pins; the method above): detached at 15f788dfd
 
 ### Batch 3 record
 
-**What this batch did NOT do (first, by the protocol):** *(kept current; final at BUILT)* no test run of any kind — this
+**What this batch did NOT do (first, by the protocol):** *(final at BUILT, d91f97ca5)* no test run of any kind — this
 batch has NO stage window (the note under BATCH 3): every suite below is PENDING for the ONE shared window batch 4's
 implementer runs (the whole phone target, then the whole Mac target as its own QUIET claim). No phone face and no phone
 behaviour (the phone only COMPILES the moved brains; nothing in `VariorumMobile/` constructs them — batch 4 composes
@@ -1460,9 +1460,9 @@ section), SurfaceContracts' Messages bullet, the wing label and the wing switche
 | Test-file edits (the moved face's source pin; the VM-61 and VM-62 Mac pins' scans extended to the hoisted files) | DONE (4fad0a2cf; the VM-62 scan 1081c42bd) — results PENDING (the shared window) |
 | The Mac seam pin (`VM63MacWingBrainsHoistPinTests`, 2 tests — the refusal words' road, no platform fork) | DONE (34b332fba) — results PENDING (the shared window) |
 | The phone compile-level pin (`MobileWingBrainsHoistTests`, 5 tests) | DONE (4fad0a2cf) — results PENDING (the shared window) |
-| Mac `build-for-testing` (`Variorum`, macOS, `vm55-b1`) | NOT-STARTED — held for the coordinator's QUIET all-clear |
-| Phone `build-for-testing` (`VariorumMobile`, the simulator, `vm55-b1`) | NOT-STARTED — held for the same all-clear |
-| **NEXT (for this session or a successor)** | When the coordinator's QUIET window ends: from `App/Variorum/`, `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile -destination id=<the window's standing simulator — its id is in the coordinator's messages and the local batch-2 build logs, never in a record> -derivedDataPath DerivedData/vm55-b1` and `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vm55-b1` (incremental, logs `DerivedData/vm55-b3-{phone,mac}-build.log`, foreground, polled for the verdict line); fix any compile error in its own commit; flip the two build rows; end at BUILT. Every source and test commit above is parse-checked (`swiftc -parse`) but NOT compiled. |
+| Mac `build-for-testing` (`Variorum`, macOS, `vm55-b1`) | DONE — GREEN at d91f97ca5 ("** TEST BUILD SUCCEEDED **", exit 0; log `DerivedData/vm55-b3-mac-build2.log`). The first run, at 9fb315ad6 after the QUIET window's all-clear (08:33), was green too with ONE warning in the new pin (an `await` on the synchronous `withDependencies` overload) — fixed test-only in d91f97ca5 and rebuilt green; no diagnostic in any moved, split or new file |
+| Phone `build-for-testing` (`VariorumMobile`, the window's standing simulator, `vm55-b1`) | DONE — GREEN at 9fb315ad6 ("** TEST BUILD SUCCEEDED **", exit 0; log `DerivedData/vm55-b3-phone-build.log`; no diagnostic in any moved or new file). Nothing the phone compiles changed after it (d91f97ca5 is a Mac test file) |
+| **BUILT** | Both targets build for testing green; every source and test commit compiled. Nothing remains but the suites, which run in the ONE shared window batch 4's implementer holds (the TYPE lists below) — every result PENDING there |
 | The shared window's suites (run by batch 4's implementer) | PENDING — the TYPE lists below |
 
 #### The brain/face table (file by file — every `Wing*` file in `Core/Views/` and `Workspace/`, plus the one non-wing file a moved brain needed)
@@ -1615,8 +1615,8 @@ named file): listed in the Mac TYPE list below.
   (each scan also reads the hoisted files, above). No Mac assertion changed.
 - **Mac tests that reach a moved type through the Mac module** keep compiling: `Shared/` compiles into the `Variorum`
   module, so `@testable import Variorum` still sees every moved type under its own name, and every Mac construction site
-  says `WingsModel(session:)`, which the Mac's convenience init answers. CONFIRMED by the Mac `build-for-testing` — PENDING
-  (the QUIET window).
+  says `WingsModel(session:)`, which the Mac's convenience init answers. CONFIRMED: the Mac `build-for-testing` compiled the
+  whole `VariorumTests` bundle green at d91f97ca5 with no change to any of those files.
 
 #### For the shared window (run by batch 4's implementer) — every run below is PENDING
 
