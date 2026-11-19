@@ -285,6 +285,32 @@ longer read (and an old stored value ignored without a crash).
 This batch needs the Mac suites that cover `Shared/Theme` and `ThemeStore` in its stage window as well as
 the phone's.
 
+**Carried in (orchestrator, at the batch-2 seam):**
+
+- *What is under you.* Batches 1 and 2 and the midway review's fix pass are in the tree: the type roles
+  (`PhoneType`), the two phone inks (`PhoneInks`, read as `tokens.phone.muted/faint`; their floors are
+  computed over every palette and voice, so they stand under a palette as they are), the metrics
+  (`PhoneMetrics`) and the shared controls (`PhoneControls`). §6 holds each batch's results; the midway
+  review and its dispositions are `notes/plans/vm-47-ladder-midway.md`. Build screens' grounds and the voice
+  row on those controls; add no private button, field or header (a source pin holds that).
+- *Build products.* Yours is `App/Variorum/DerivedData/vm47-b3`. Do not build into or delete
+  `DerivedData/vm47-b2` (the fix pass's re-run reads it) or `DerivedData/vm47-walk` (batches 1 and 2's walk
+  reads it) until the orchestrator says each is finished. For this batch's own walk, extend a COPY of the
+  driver and build it into `DerivedData/vm47-walk3`.
+- *The fix pass's stage window is pending* (the 13 pt floor in `PhoneType.uiFont`, `8bea26402`, its
+  red-on-old in a snapshot). The orchestrator runs it and hands this batch's implementer the result lines to
+  record in `notes/plans/vm-47-ladder-midway.md` §2 and §4's M rows.
+- *The voice row's place.* Settings is rebuilt in batch 5. Here the existing two voice rows in
+  `Shell/MobileSettingsView.swift` simply become the door that writes the library's voice (R-47-2), through
+  the same operation or setting write the Mac's Settings uses; no new row design.
+- *Other runs' files.* VM-55 is hoisting the status seam and the wing state through `Shared/AppSession.swift`,
+  `Shared/AppBootstrap.swift` and `Shared/WingState.swift` tonight. If the theme store's wiring needs a line
+  in one of those, keep it to that line and name the file and line in the report, so the merge can be
+  planned.
+- *The Mac suites this batch owes at its window:* every Mac test type that constructs or reads the hoisted
+  theme store (grep the Mac tests for it and list the types), beside the seven theme types. The whole Mac
+  target runs at the merge gate.
+
 ### Batch 4 — the bottom bar (VM-52)
 
 The ticket: "The bar is three 11.5 pt words about 14 pt tall, the inactive ones faint, and it disappears on
@@ -344,6 +370,7 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 2.8d | The path line's red-on-old (`47ee432fc`'s pin, `MobilePathLineGeometryTests`) — **in a SNAPSHOT, so this run's worktree never sits reverted** (the orchestrator's change of road, replacing the in-tree revert): a detached worktree `~/dev/variorum-vm-47-rol` at `09fba8983` (never committed in); there `git checkout 91d406593 --` `MobileShelfView.swift` + `MobileLibraryView.swift` (they changed only in `47ee432fc` since — a clean revert of exactly the fix; the trash door's icon button, `MobileRecoveryDoors.swift`, is NOT reverted, so its 44 × 44 stays green and the red rides the path's wrap and the two word doors' ~22 pt height); `build-for-testing` for the phone scheme into the snapshot's own `App/Variorum/DerivedData/vm47-rol` (headless); then, in a short stage window the orchestrator obtains, only `-only-testing:VariorumMobileTests/MobilePathLineGeometryTests` from that snapshot — expect RED; the snapshot is removed after | DONE — **PROVEN red on old, green on new.** The snapshot (`09fba8983` + the two files from `91d406593`, staged there only, never committed; 39 + 50 lines, `47ee432fc`'s own counts) built GREEN into `vm47-rol`; the orchestrator ran the one type on the standing device: "Test run with 2 tests in 1 suite failed after 6.874 seconds with 22 issues" — `theBookcasePathLineIsOneLineAtFourHundredTwoInBothVoices()` 18 issues (`path.height < 26` :86 ×3, the 44 × 44 bound :93 ×8, on-the-path's-line :96 ×7), `theLibraryPathLineDoorsAnswerAcrossFortyFour()` 4 issues (:128 ×2, :129 ×2); both green on the fixed tree in the 06:26 whole-target run. The snapshot is REMOVED (`git worktree remove --force`; the worktree list no longer holds it); **this run's worktree carried no revert at any point** |
 | 2.8e | The walk (batches 1 + 2's ONE walk): device `vm47-walk` (iPhone 17 Pro, iOS 26.2, never booted), the driver built at `09fba8983` into `DerivedData/vm47-walk` (the app code is identical at `057c7cd87`); the seed; the core five × Study/Terminal × light/dark × default/AX5; the rest × Study light default, Terminal dark default, Study light AX5; every capture looked at against the sheet | NOT-STARTED — READY. Planned: 123 captures (seed 3 · core 6 × 8 = 48 · rest 24 × 3 = 72). The runbook `walk.zsh` (gitignored) gained a 30 s settle after boot, a per-run capture count, and exact-name instance checks (`pgrep -x`) in `walk_close`; the driver needed no change (every label and identifier it drives checked against the code at `057c7cd87`) |
 | 2.8f | The record close: §6 "Batch 1 — results" and "Batch 2 — results" PENDING slots filled (counts, each red and its disposition, the red-on-old line, the walk screen by screen, what was fixed, what is owned elsewhere and by which ticket); §5 for any new PROVISIONAL; these rows flipped | IN-PROGRESS — DONE: the suites' counts, the three reds and their dispositions, the red-on-old lines, rows 2.4–2.8d flipped, P-47-14 in §5 (this commit). REMAINING: the targeted re-run's counts (`MobilePhoneControlsTests`), the walk's captures and findings screen by screen (row 2.8e), then this row |
+| 2.9 | Batch 2's remaining evidence: the walk (row 2.8e) runs from `DerivedData/vm47-walk` when its stage slot comes (the orchestrator runs the capture lines); the captures are read at the batch-3 seam | PENDING the stage |
 | 3 | Voice and palette; borders (VM-51, VM-54) | NOT-STARTED |
 | 4 | The bottom bar (VM-52) | NOT-STARTED |
 | 5 | Settings (VM-53, VM-27) | NOT-STARTED |
