@@ -813,3 +813,19 @@ Round 2's fixes go to the implementer that built round 1's (its context holds th
 - Every other test in each leg green. Gate tree clean after; no Variorum instance, no Problem Reporter, no new `Variorum*.ips`; the true tree rebuilt headless after release. **Every fix of both ladder rounds now has its app-target evidence.**
 
 **Orchestrator's check at the seam (batch 5, 2026-11-19 12:46):** the audit is on file — `notes/plans/vx-981/mcp-parity-audit.md` — and the batch changed no file outside `notes/`. Method as recorded: all 243 capability declarations placed in exactly one row (script-checked), the editor's command file walked whole, all 319 public operations swept for doors the registry does not declare, against a catalog of 74 tools (10 read · 6 suggest · 14 write new · 44 edit). Counts: 91 act rows — 46 covered, 10 ruled exceptions, 35 gaps (23 proposed as tickets, five of them already open tickets; 12 proposed as exceptions) — and 16 read rows. All five gaps the ticket named are confirmed. **The audit decides nothing:** its proposed tickets (T1–T22) and proposed exceptions (E1–E12) go to her as one bundle at the merge; VX-368 moves to Needs Lillian with the audit as its pointer, never Done by this run's word. **One BUG found and ticketed now: VX-1026** (Medium, Bug, Confirmed, Todo — `list_notes` on a book lists the hand order, not her order: the sort, pins and chapters), traced in the code, not fixed here (the code tree is final and gated). The nit (`list_wings`' description names six of the ten tools taking its `wing_id`) rides VX-1026's touch or her wording pass. VX-370's recipe is the audit's last section; the ticket stays Needs Lillian (R-981-1).
+
+## CLOSEOUT — what was written
+
+*(A FRESH Opus implementer, the closeout session — DOCUMENTS ONLY: no file under `Sources/`, `App/`, `Tests/` or `Tools/` changed; no build, no test, no stage claim. Read in this session, nothing delegated: CLAUDE.md and its loaded canon; this record whole; both ladder files whole; the parity audit (its For a later reader, the proposed tickets and exceptions, the bugs found, VX-370's recipe); `notes/MCPSpec.md` and `notes/SurfaceContracts.md` in full; for shape only, the VX-915 record's FOR A LATER READER and CLOSEOUT DRAFTS, the VX-915 handoff, the newest entries of `notes/AppSpecRecord.md`, QUESTIONS #270–#276, the master plan's in-flight table and latest closeout, the run-finals ledger's last entries and the MobileSoul parity ledger's last rows. The shared ledgers are NOT edited here: their texts are drafted in `notes/plans/fixes/vx-981-closeout-drafts.md` for the merge moment.)*
+
+**LIVE STATUS (flipped in the same commit as each piece):**
+
+| Piece | State |
+|---|---|
+| C0 — this section opened | DONE (this commit) |
+| C1 — the canon lines in place (MCPSpec, SurfaceContracts, AppSpec §12's optional clause), each edit word-diff-checked | NOT-STARTED |
+| C2 — `Tools/canon-size` run, its line kept | NOT-STARTED |
+| C3 — FOR A LATER READER written at the top | NOT-STARTED |
+| C4 — THE RULINGS RECONCILED at the end | NOT-STARTED |
+| C5 — the closeout drafts file (QUESTIONS #277, AppSpecRecord, master plan, run-finals ledger, MobileSoul, the handoff, release-notes material) | NOT-STARTED |
+| C6 — this section closed: every canon edit old → new, the PENDING slots, what was not settled | NOT-STARTED |
