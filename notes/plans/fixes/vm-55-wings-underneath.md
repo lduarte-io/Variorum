@@ -280,10 +280,10 @@ this file whole, SurfaceContracts' "The app" and "The Bookcase and books" wing b
 | Piece | State |
 |---|---|
 | Record skeleton | DONE (this commit) |
-| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | IN-PROGRESS — code landed in the VM-56+57 commit (compiles; phone build-for-testing green); remains: its tests (PENDING) |
-| VM-57 — every listing reads the current wing | IN-PROGRESS — call sites landed in the VM-56+57 commit (Library All/Notes, Pool, Books+Shelf, search, Starred, Archived, Trash; Snippets untouched); remains: tests (PENDING) |
-| VM-58 — mints in the current wing | NOT-STARTED |
-| VM-60 — the tag manager per wing | NOT-STARTED |
+| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | DONE (219b4ac62) — tests in the tests commit: `MobileWingStandTests` (5) + the Mac pin `VM56MacWingScopePinTests` (2); runs PENDING the stage window |
+| VM-57 — every listing reads the current wing | DONE (219b4ac62) — tests `MobileWingListingTests` (8); runs PENDING the stage window |
+| VM-58 — mints in the current wing | DONE (301388409; the new root tag rides 9462d3854) — tests `MobileWingMintTests` (4); runs PENDING |
+| VM-60 — the tag manager per wing | DONE (9462d3854) — tests `MobileWingTagManagerTests` (2); runs PENDING |
 | VM-59 — the wing-blind pickers (pins, then fix, separate commits) | NOT-STARTED |
 | Mac + phone `build-for-testing` | NOT-STARTED |
 | Stage window: VM-59 red-on-old, then the batch's suites green | NOT-STARTED — PENDING the coordinator's claim line |
