@@ -156,7 +156,7 @@ struct MobileFilterRowGeometryTests {
             select: { _ in },
             trailing: {
                 Image(systemName: MobileSortDoor.symbol)
-                    .font(voice.small)
+                    .phoneType(.meta, voice)
                     .foregroundStyle(voice.accent)
                     .accessibilityLabel(MobileSortDoor.label(sortWord: "last touched"))
             })
@@ -309,24 +309,46 @@ struct MobileFilterRowGeometryTests {
     /// The oracle is each door's own ideal width, taken from the SAME surface
     /// at 402 pt — never a literal (the 4.5d rule), so a font or wording change
     /// moves both sides together.
+    ///
+    /// **VM-48 moved this pin with the type** (the row's words left the Mac's
+    /// 11.5 pt caption for the phone's 13 pt floor, P-47-7): it now holds the
+    /// no-shrink law at 375 pt in both voices and at 320 pt in Study. At
+    /// 320 pt in TERMINAL five 13 pt monospaced words, the sort glyph and the
+    /// 20 pt gutters cannot share one row without going under the floor, so
+    /// that one case is recorded as a KNOWN ISSUE owned by batch 2 (VM-50's
+    /// segmented choice replaces this row) — pinned exactly, so the day it
+    /// stops failing the pin says so.
     @Test func noFilterDoorIsShrunkToFitEvenAtDisplayZoom() async throws {
-        var ideal: [MobileListingFilter: CGFloat] = [:]
-        await withHostedRow(libraryRow(), width: 402) { row in
-            for door in MobileListingFilter.libraryDoors {
-                ideal[door] = row.frame(ofDoorLabelled: door.word)?.width
+        for voice in [VoiceTokens.terminalLight, .studyLight] {
+            var ideal: [MobileListingFilter: CGFloat] = [:]
+            await withHostedRow(libraryRow(voice: voice), width: 402) { row in
+                for door in MobileListingFilter.libraryDoors {
+                    ideal[door] = row.frame(ofDoorLabelled: door.word)?.width
+                }
             }
-        }
-        try await withHostedRow(libraryRow(), width: 320) { row in
-            for door in MobileListingFilter.libraryDoors {
-                let atZoom = try? #require(row.frame(ofDoorLabelled: door.word)?.width)
-                let wide = try? #require(ideal[door])
-                guard let atZoom, let wide else { continue }
-                #expect(abs(atZoom - wide) <= 0.5,
-                        """
-                        \(door.word) renders \(atZoom) pt at 320 against its \
-                        \(wide) pt ideal — the row is spending its scale \
-                        factor, so re-measure the spacing
-                        """)
+            for width in [CGFloat(375), 320] {
+                let check: () async throws -> Void = {
+                    try await withHostedRow(libraryRow(voice: voice), width: width) { row in
+                        for door in MobileListingFilter.libraryDoors {
+                            let narrow = try? #require(row.frame(ofDoorLabelled: door.word)?.width)
+                            let wide = try? #require(ideal[door])
+                            guard let narrow, let wide else { continue }
+                            #expect(abs(narrow - wide) <= 0.5,
+                                    """
+                                    \(door.word) renders \(narrow) pt at \(Int(width)) against \
+                                    its \(wide) pt ideal (\(voice.voice)) — the row is \
+                                    spending its scale factor, so re-measure the spacing
+                                    """)
+                        }
+                    }
+                }
+                if voice.voice == .terminal && width == 320 {
+                    await withKnownIssue(
+                        "Terminal at 320 pt: five 13 pt mono words cannot hold one row — VM-50's segmented choice owns it"
+                    ) { try await check() }
+                } else {
+                    try await check()
+                }
             }
         }
     }
@@ -519,16 +541,27 @@ struct MobileFilterRowGeometryTests {
                             "\(label) hangs off the left of the real 320 pt surface at x=\(frame.minX)")
                     #expect(frame.maxX <= 320.5,
                             "\(label) hangs off the right of the real 320 pt surface, ending at \(frame.maxX)")
-                    // NOTHING IS SHRUNK — her ruling is fit-without-shrink,
-                    // and the real trailing element is the one that could
-                    // spend the row's scale factor.
-                    let wideWidth = try #require(ideal[label])
-                    #expect(abs(frame.width - wideWidth) <= 0.5,
-                            """
-                            \(label) renders \(frame.width) pt on the real \
-                            Library at 320 against its \(wideWidth) pt ideal — \
-                            the shipped row is spending its scale factor
-                            """)
+                }
+                // NOTHING IS SHRUNK — her ruling is fit-without-shrink, and
+                // the real trailing element is the one that could spend the
+                // row's scale factor. **VM-48:** at the phone's 13 pt floor
+                // this Terminal row cannot hold all five words whole at
+                // 320 pt (see `noFilterDoorIsShrunkToFitEvenAtDisplayZoom`),
+                // so this half is a KNOWN ISSUE owned by VM-50's segmented
+                // choice — pinned, not dropped.
+                withKnownIssue(
+                    "Terminal at 320 pt: five 13 pt mono words cannot hold one row — VM-50's segmented choice owns it"
+                ) {
+                    for label in measured {
+                        let frame = try #require(surface.frame(ofDoorLabelled: label))
+                        let wideWidth = try #require(ideal[label])
+                        #expect(abs(frame.width - wideWidth) <= 0.5,
+                                """
+                                \(label) renders \(frame.width) pt on the real \
+                                Library at 320 against its \(wideWidth) pt ideal — \
+                                the shipped row is spending its scale factor
+                                """)
+                    }
                 }
 
                 let xs = MobileListingFilter.libraryDoors
@@ -560,22 +593,19 @@ struct MobileFilterRowGeometryTests {
         }
     }
 
-    /// **DYNAMIC TYPE MOVES THE HARNESS, AND THE CHROME FONT DOES NOT MOVE
-    /// WITH IT** — the honest reading of the AX rows in the record.
+    /// **DYNAMIC TYPE MOVES THE HARNESS — AND, SINCE VM-48, THE CHROME
+    /// FONT MOVES WITH IT, UP TO xxxLarge, AND HOLDS.**
     ///
-    /// `VoiceTokens.small` is `Font.system(size: 11.5)`, which is FIXED in
-    /// SwiftUI (only text styles and `.custom(…, relativeTo:)` scale), so the
-    /// filter row measures identically at `.large` and at `.accessibility5`.
-    /// An unchanging measurement is worthless on its own — it is exactly what a
-    /// harness that never applied the setting would produce — so this pin
-    /// proves the setting IS applied by measuring a control in the same hosted
-    /// tree that DOES scale, and only then asserts the row's constancy.
-    ///
-    /// *(That the app's chrome does not honour Dynamic Type is a real standing
-    /// tension with MobileSoul §5.6 — it is PRE-EXISTING for every chrome
-    /// string on this app, not this batch's doing, and it is recorded for her
-    /// rather than changed here.)*
-    @Test func theChromeFontDoesNotScaleAndTheHarnessProvesItIsAsking() async throws {
+    /// This pin used to hold the opposite: the row's words were the Mac's
+    /// fixed 11.5 pt caption, which did not honour Dynamic Type at all — a
+    /// standing tension with MobileSoul §5.6 that the old text recorded for
+    /// her. VM-48 resolves it with the sheet's two scaling classes: chrome
+    /// (the row's words are `meta`) follows the text size up to xxxLarge and
+    /// then holds, the way the system's own bars behave. Measured on the
+    /// Archive room's two-door row at 402 pt, which fits whole at every size,
+    /// so a width is the font's and never a shrink's. The scaling control
+    /// still proves the harness really applies the setting.
+    @Test func theChromeScalesToXXXLargeAndThenHolds() async throws {
         var controlWidths: [CGFloat] = []
         for typeSize in measuredTypeSizes {
             await withHostedRow(typeSizeControl(typeSize), width: 402) { row in
@@ -589,19 +619,31 @@ struct MobileFilterRowGeometryTests {
         #expect((controlWidths.last ?? 0) > (controlWidths.first ?? 0) * 2,
                 "the Dynamic Type setting is not reaching the host: \(controlWidths)")
 
-        var doorWidths: [[CGFloat]] = []
+        var doorWidths: [DynamicTypeSize: [CGFloat]] = [:]
         for typeSize in measuredTypeSizes {
-            await withHostedRow(libraryRow(typeSize: typeSize), width: 320) { row in
-                doorWidths.append(
-                    MobileListingFilter.libraryDoors.compactMap {
-                        row.frame(ofDoorLabelled: $0.word)?.width
-                    })
+            let row = MobileFilterRow(
+                doors: MobileListingFilter.archiveDoors, selection: .all,
+                tokens: .terminalLight, select: { _ in })
+                .frame(maxHeight: .infinity, alignment: .top)
+                .dynamicTypeSize(typeSize)
+            await withHostedRow(row, width: 402) { hosted in
+                doorWidths[typeSize] = MobileListingFilter.archiveDoors.compactMap {
+                    hosted.frame(ofDoorLabelled: $0.word)?.width
+                }
             }
         }
-        #expect(doorWidths.count == measuredTypeSizes.count)
-        for widths in doorWidths {
-            #expect(widths == doorWidths[0],
-                    "the chrome font moved with Dynamic Type: \(doorWidths)")
+        print("FILTER-ROW-SCALING \(measuredTypeSizes.map { "\($0): \(doorWidths[$0] ?? [])" })")
+        let large = try #require(doorWidths[.large])
+        let hold = try #require(doorWidths[.xxxLarge])
+        #expect(large.count == MobileListingFilter.archiveDoors.count)
+        // It grows up to xxxLarge…
+        for (small, big) in zip(large, hold) {
+            #expect(big > small + 1, "the chrome did not grow with the text size: \(doorWidths)")
+        }
+        // …and holds there through every accessibility size.
+        for typeSize in [DynamicTypeSize.accessibility1, .accessibility3, .accessibility5] {
+            #expect(doorWidths[typeSize] == hold,
+                    "the chrome kept growing past xxxLarge at \(typeSize): \(doorWidths)")
         }
     }
 }

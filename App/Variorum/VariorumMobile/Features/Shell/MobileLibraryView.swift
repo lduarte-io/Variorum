@@ -295,7 +295,7 @@ struct MobileLibraryView<TabBar: View>: View {
             }
         } label: {
             Image(systemName: MobileSortDoor.symbol)
-                .phoneType(.chip, tokens)
+                .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.accent)
         }
         .accessibilityLabel(
