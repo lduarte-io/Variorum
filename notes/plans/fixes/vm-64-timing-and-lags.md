@@ -262,7 +262,7 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 | P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | DONE (this commit) — phone `build-for-testing` green into `DerivedData/vm64-b2/`, no new warning in a touched file; behaviour PENDING the stage window |
 | P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | DONE (this commit) — `MobileStructuralFlightFenceTests` (10), BUILT; green run and red-on-old run PENDING the stage window |
 | P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | DONE — all three `** TEST BUILD SUCCEEDED **` at `f83122794` (the red one over the base's three phone files, cold), no new warning in a touched file |
-| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | Window 1 NOT GREEN · r1 cycle clean alone · the 49 run red on four state-dependent pins. TRACED (§7 batch 2 ▸ "Iteration r1 → r2"): the typed-key pins drove a consult-less road her keyboard never takes; r2 PROPOSED (a removal + keyboard-road pins), NOT built — awaiting the orchestrator's word |
+| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | Window 1 NOT GREEN · r1 cycle clean alone · the 49 run red on four state-dependent pins · TRACED · r2 APPROVED and BUILT (`vm64-b2r2`, `vm64-b2r2-red`) — READY for (i) the fence suite alone on each build, (ii) the 49 types from `vm64-b2r2` |
 | P6 — closeout in §7 | DONE (this commit) — its PENDING lines flip after P5 |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
@@ -316,7 +316,7 @@ TEXTKIT2 §3 gains the measured `insertText` line. **No revert is in flight** un
 | P-r2-3 — the pins on her keyboard's road (+ the undo door's pin, the insert-below exemption pin, the guard); the probe suite deleted | DONE (this commit) — 10 pins BUILT; runs PENDING the stage |
 | P-r2-4 — TEXTKIT2 §3's measured line | DONE (`9b1451cad`) |
 | P-r2-5 — the r2 closeout section (before the final builds) | DONE (this commit) — §7 batch 2 ▸ "Iteration r2" |
-| P-r2-6 — builds: phone `vm64-b2r2` · Mac (the brain is Core) · pre-fix `vm64-b2r2-red` (revert announced first) | IN-PROGRESS — phone and Mac `build-for-testing` DONE (TEST BUILD SUCCEEDED at `2a3fd3a52`; no new warning in a touched file). **REVERT IN FLIGHT:** the four phone production files (`MobileStructural.swift`, `MobileEditorViewModel.swift`, `MobileEditorTextView.swift`, `MobileUndoDoor.swift`) checked out from base `9cf3b3688` over `d92f2e408` for `vm64-b2r2-red`; restore = `git checkout HEAD -- <the four>`, then a clean `git status` |
+| P-r2-6 — builds: phone `vm64-b2r2` · Mac (the brain is Core) · pre-fix `vm64-b2r2-red` (revert announced first) | DONE — phone and Mac `build-for-testing` into `vm64-b2r2` (TEST BUILD SUCCEEDED at `2a3fd3a52`, no new warning in a touched file); `vm64-b2r2-red` = r2's pins over the base's four phone production files, built cold, TEST BUILD SUCCEEDED, files RESTORED (`git status`, `git diff HEAD` empty). **No revert is in flight.** READY for the stage (§7 batch 2 ▸ "Iteration r2" ▸ the commands) |
 
 
 ### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
