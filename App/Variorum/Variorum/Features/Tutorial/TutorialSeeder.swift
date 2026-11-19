@@ -2814,15 +2814,16 @@ enum TutorialSeeder {
             // copy pass): the truth-pass rule (VX-197) for this run's and
             // VX-771's write-new acts — a gathering minted on a wing
             // (create_gathering, VX-769) and a note born wearing its tags
-            // (create_note's tags, VX-814). VX-943 (the VX-915 run, batch 6 —
-            // the truth-pass rule again; PROVISIONAL words, her bundle): the
-            // link's opposite, unlink_versions, taught where link_versions is.
+            // (create_note's tags, VX-814). VX-943 (the VX-915 run, batch 6)
+            // taught the link's opposite here; VX-977 (the VX-981 run, batch 2 —
+            // her ruling on P-915-B6-1) moved unlink_versions to EDIT, so the
+            // clause moves to the Edit card below (the truth-pass rule).
             "Write new: it can also make new notes, books, gatherings, chapters and "
             + "tags, file notes into books and chapters, and give a book a rule that "
             + "collects notes by tag. A note it makes can wear its tags from the "
             + "start. It can add blocks at the end of a note, duplicate a "
             + "note to work on a copy, and link two notes as versions by naming "
-            + "which paragraphs match, or remove a link it made.",
+            + "which paragraphs match.",
 
             // VX-168 U2: Edit's step named the deliberate acts — choosing a
             // take, committing one (VX-169), making a lens the note (VX-174,
@@ -2846,6 +2847,9 @@ enum TutorialSeeder {
             // VX-807). (The replace form of a take's edit, old_str/new_str, is
             // the wire's mechanic and stays the tool description's: "change …
             // takes" and the commit sentence below are true of both forms.)
+            // VX-977 (the VX-981 run, batch 2 — her ruling on P-915-B6-1,
+            // PROVISIONAL words): unlinking two notes as versions joins the
+            // library's list, on its rung's card (the truth-pass rule).
             "Edit: it can also do most of what you can do at the keyboard. In a "
             + "note, it can change, choose, commit, lock or unlock, archive or "
             + "delete takes, restore a commit or rename it, make a lens the note or "
@@ -2853,7 +2857,8 @@ enum TutorialSeeder {
             + "delete blocks, put a deleted block or take back from the note's tray, "
             + "set the note's date, and edit, delete or restore any comment. Across "
             + "the library, it can take a tag off a note or swap one tag for another "
-            + "across a wing, take a note out of a book, star, unstar, rename, "
+            + "across a wing, unlink two notes as versions, take a note out of a "
+            + "book, star, unstar, rename, "
             + "archive or delete notes, books and gatherings, finish or reopen a "
             + "book, set a book's order, reorder a book's notes and chapters, rename "
             + "or delete a chapter, and move a whole book to another wing. When it "

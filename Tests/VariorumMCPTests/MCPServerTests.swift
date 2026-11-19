@@ -374,9 +374,11 @@ struct MCPServerTests {
         // create_gathering (write new on the wing, create_book's decision).
         // VX-943 (the VX-915 run, batch 6 — justified edit, the ritual): and
         // unlink_versions (link_versions' opposite, write new on both notes).
+        // VX-977 (the VX-981 run, batch 2 — justified edit, the ritual; her
+        // ruling on P-915-B6-1): unlink_versions LEAVES write new for edit.
         #expect(Set(MCPToolCatalog.writeNew.map(\.name))
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
-                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions", "unlink_versions",
+                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions",
                     "insert_blocks", "duplicate_note", "copy_note_to_wing", "create_gathering"])
         // 13n-c U6 (justified edit, the ritual): edit gains the per-item
         // note move across wings (VX-160). VX-168 U2 (justified
@@ -411,7 +413,10 @@ struct MCPServerTests {
                     "move_book_to_wing",
                     // VX-812 (the VX-809 run, batch 3 — justified edit, the ritual):
                     // tag A → tag B across the client's reach in a wing.
-                    "replace_tag"])
+                    "replace_tag",
+                    // VX-977 (the VX-981 run, batch 2 — justified edit, the ritual;
+                    // her ruling on P-915-B6-1): a version link taken back, at edit.
+                    "unlink_versions"])
         // VX-811 (the VX-808 run, Unit B2 — justified edit, the ritual): the
         // read rung's one WRITE, its own list (A-808-8): never read-only.
         #expect(MCPToolCatalog.proposing.map(\.name) == ["propose_notes_to_book"])

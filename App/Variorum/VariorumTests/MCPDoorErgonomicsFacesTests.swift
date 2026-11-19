@@ -91,7 +91,7 @@ struct MCPDoorErgonomicsFacesTests {
     /// "⌥⌘Z undoes" — the receipt naming both notes, and Activity in words for
     /// the landed, the counted and the refused row. Red on old by absence (the
     /// act, the tool and the words did not exist).
-    @Test func theUnlinkSaysWhatLandedAndIsOneUndoAtWriteNew() {
+    @Test func theUnlinkSaysWhatLandedAndIsOneUndoAtEdit() {
         // A JUSTIFIED EDIT (the VX-915 gate36 disposition): the first words, "removed
         // the version link between “one” and “two”", made a 73-character line against
         // `MCPReceiptCopy.budget` (72), so `line()` always spoke its count fallback
@@ -116,7 +116,10 @@ struct MCPDoorErgonomicsFacesTests {
                 == "a-client removed 3 version links from \u{201C}a letter\u{201D}")
         #expect(line("unlink_versions", allowed: false)
                 == "a-client was refused removing a version link from \u{201C}a letter\u{201D}")
-        #expect(MCPToolFacts.rung(of: "unlink_versions") == .writeNew,
-                "the agent's ask she relayed — the same permission level as link_versions (P-915-B6-1, open)")
+        // VX-977 (the VX-981 run, batch 2 — A JUSTIFIED EDIT; the test renamed from
+        // "…AtWriteNew"): her ruling on P-915-B6-1 — edit on both notes.
+        #expect(MCPToolFacts.rung(of: "unlink_versions") == .edit,
+                "her ruling: \"i imagine with edit to both, they should also be able to unlink something a user made\"")
+        #expect(MCPToolFacts.rung(of: "link_versions") == .writeNew, "making the link stays write new (R-VX187-1)")
     }
 }
