@@ -31,8 +31,8 @@ struct MobileSettingsView: View {
     /// like `services`: the sheet says nothing about what it does not have.
     var bootstrap: AppBootstrap? = nil
     /// VM-8 unit 1 (PROVISIONAL P-VM8-2): the shell's door to the phone's Protection screen — dismisses Settings and
-    /// pushes the screen (the settings-sheet grammar, the pocket guide's precedent). nil ⇒ neither the row nor the sync
-    /// row's *Protection…* door renders (P-2).
+    /// pushes the screen (the settings-sheet grammar, the pocket guide's precedent). nil ⇒ the Protection row does not
+    /// render (P-2). Since VM-27 it is the sheet's ONE Protection door — the sync row is never handed one here.
     var onOpenProtection: (() -> Void)? = nil
     #if DEBUG
     /// FIX-B4 (Stage B ladder round 1, NIT 2 — fire-and-DO): the shell's
@@ -123,9 +123,12 @@ struct MobileSettingsView: View {
                 // own — the old 14+6 composition is the nil arm's).
                 SyncStatusRow(services: services)
                     .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
-                    // VM-8 unit 1 (VX-486's door, the phone's home): the keys-locked and not-on-yet rows' *Protection…*
-                    // door opens the phone's Protection screen — only where that screen can act (P-2).
-                    .environment(\.protectionPaneDoor, protectionDoor.map { open in ProtectionPaneDoor { open() } })
+                    // VM-27 (her report — "file the double protections as a bug"): the row gets NO Protection door
+                    // here. Its keys-locked and not-yet faces used to draw their own *Protection…* door directly above
+                    // the standing row below — one gate (`protectionDoor`) fed both, so the sheet said the word twice.
+                    // The standing row is the one door: it is on this sheet whenever the row's door could be, and in
+                    // every other state too. A doored paused state says its sentence alone (the face's P-2 arm).
+                    .environment(\.protectionPaneDoor, nil)
                     .padding(.horizontal, 20)
             } else {
                 Text(tokens.chromeLabel("Starting…"))
