@@ -2274,7 +2274,7 @@ its own checkout.*
 |---|---|
 | 0 — this LIVE STATUS opens; the trial merge's conflict list | DONE (this commit) |
 | 1a — revert the fix `f869f8667` | DONE (this commit) — `git revert --no-commit f869f8667`; its three product files restored to their state before it (`MobileTakesChrome.swift`, `MobileEditorTextView.swift`, `MobileBlockDecor.swift`); the commit's one record line (batch D's build row 2) is KEPT as written — the record is history, and the revert conflicted there only |
-| 1b — revert the pins `15add793d` | NOT-STARTED |
+| 1b — revert the pins `15add793d` | DONE (this commit) — `git revert --no-commit 15add793d`: `MobileTakesChromeTests.swift` back to its state before batch D (the re-pins, the marker-and-pill pin and the empty-last-block guard out), and the probe's three header lines (R3-N3) back to `16c75a5bf`'s; the commit's one record line kept as written, as in 1a |
 | 1c — remove the probe `MobileFanBadgePlacementProbeTests.swift` | NOT-STARTED |
 | 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | NOT-STARTED |
 | 1e — the back-out's check | NOT-STARTED |
