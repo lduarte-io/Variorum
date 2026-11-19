@@ -300,7 +300,9 @@ to a gate arming and whose fallback span crossed a separator. Per crashing test:
   road changes in r2 with its own red-on-old.
 - r1 pieces: the test changes + the diagnostic suite — DONE (this commit); fix build `DerivedData/vm64-b2r1/` TEST BUILD
   SUCCEEDED, no warning in a touched file (the deprecated `UIWindow(frame:)` fallback copied from the caret suite was
-  replaced by requiring the scene). The pre-fix build `vm64-b2r1-red/`: NEXT (revert announced in its own commit).
+  replaced by requiring the scene). The pre-fix build `vm64-b2r1-red/`: **REVERT IN FLIGHT** — the three phone production
+  files checked out from base `9cf3b3688` over `05ca99e0d`; restore = `git checkout HEAD -- <the three>`, then a clean
+  `git status`.
 
 
 ### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
