@@ -65,6 +65,63 @@ VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94, VM-218, VM-99 and VM-179.
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
+### CURRENT STATE — 2026-11-19, late morning (she is back). Read this block; what follows it is the night's log, kept as written.
+
+- **Proved red on the old code and green on the fix, in stage windows:** batch B (VM-16 with VM-20, VM-43, VM-3,
+  VM-84, VM-33), batch A (VM-81, VM-83, VM-21, and the Mac's 17 types over the hoisted words), every fix of
+  ladder rounds 1 and 2 (F3, F4, F5, N2, R2-N1), and VM-19's teardown pin.
+- **VM-24 is RULED** (her dialog pick and her words to the coordinator, both verbatim in the night's log below):
+  its own run after wave 1, `/architect-phase vm-24`, launched by the coordinator once all four mobile runs have
+  merged; kickoff `notes/plans/vm-24-unwarned-edit-routing.md`; the ticket re-owned out of this umbrella. **This
+  run builds no VM-24 fix, and the caret test stays red and unwrapped on main by decision.** Wherever this file
+  still says "held for the author" about VM-24 (batch C's LIVE STATUS row, the intro of "VM-24 — the mechanism,
+  its reach, and the options", batch D's brief), read: ruled 2026-11-19, its own run after wave 1.
+- **VM-17's fix is BUILT, not yet proved** (batch D, "The build — LIVE STATUS": pins `15add793d`, fix
+  `f869f8667`, the decor reading `211221f6b` and `75984c0e6`). It is built to the shape ROUND 3's reviewer called
+  from the settle measurement — viewport-scoped geometry and a second geometry walk inside the same layout pass
+  — not to round 1's pre-confirmed shape, which reached only one of the two mechanisms the trace found. Round 4
+  reads it (the night's log below says "round 3"; that was before batch D stopped at its trace).
+- **Queued on the stage, READY with the coordinator:** batch D's window, run by the orchestrator from the
+  throwaway checkout — RED (`MobileTakesChromeTests` on the old chrome; exactly three reds expected:
+  `perTickRefreshResolvesOnlyNearViewportGeometry`, `aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved`,
+  `aFarFlipDrawsNoMarkerOrPillUntilItsBlockScrollsIn`), GREEN (the probe, which must turn green, plus the chrome
+  types: `MobileTakesChromeTests`, `MobileWalkTests`, `MobileConflictDiscoveryTests`,
+  `MobileTakesBrowserSurfaceTests`, `MobileTutorialTakesWalkTests`, `MobileTutorialLibraryWalkTests`,
+  `MobileBlockListTests`, `MobileBlockDecorTests`, with `MobileBlockMenuTests` optional — batch D's build
+  corrected round 3's "nine types" to this list), then `MobileDecorPlacementReadingTests` ALONE. Pre-decided arm
+  if the probe still shows only the 74-pt class: the anchor moves to `insertSubview(_:at: 0)`, rebuilt, re-run;
+  any other probe red, or a badge red inside the decor reading: stop and report.
+- **The ladder:** rounds 1, 2 and 3 are closed with every finding dispositioned. Her ruling was "tonight, up to 5
+  review rounds as long as a major is found"; round 3 found a MAJOR, so round 4 is earned under it and is owed by
+  round 1's F1 in any case. Round 4 runs under that allowance and she is told; a round 5 would be hers to allow.
+- **What remains, in order:**
+  1. Batch D's window; then flip batch D's rows, remove the decor reading's file in a named commit, and write the
+     decor ticket (to mint on VM at the closeout: Bug · Confirmed · Editor · High if the reading is red — the
+     fan badge's own class and priority; no ticket and R3-F1 closes hollow if it is green).
+  2. The merge-in, behind VM-55 (VX-980 is already on main, `359ae214d`): `origin/main` into this branch by a
+     merge commit; `notes/MobileSoul.md` and `notes/SurfaceContracts.md` keep BOTH runs' lines; this run's parity
+     row takes the next free number; an implementer re-lands VM-16 on VM-55's message seam and resolves the
+     Book Details, Shelf, Trash and Membership conflicts, its pins shown red and green again. On the merged tree
+     the orchestrator applies two canon deltas and names both in the handoff for her eyes: dropping
+     "PROVISIONAL" from the insured restore in AppSpec §9 and OverallModel §3 (QUESTIONS #274 addendum 2), and
+     the iOS 26.2 facts this run measured into `notes/TEXTKIT2_NOTES.md` §3 (a mid-document forced layout leaves
+     estimates behind; inside the layout pass, after the text view's own layout, the unforced read is settled).
+  3. Ladder round 4 — a fresh `fable-reviewer` reads batch D's fix against the called shape, its window, and
+     VM-16 re-landed, in one round.
+  4. The gate, three claims: the whole phone target (the probe green again on the merged tree; the caret test the
+     one standing red, by decision) · the Mac suites over `Shared/ShelfOrder.swift`, `Shared/BookcaseBoard.swift`
+     and the BookStateCopy hoist on the merged tree · the simulator walk.
+  5. The closeout's slots, the shared ledgers on latest main at the merge moment, `Tools/canon-size`, the PR
+     `VM-78: …` merged as a merge commit at the coordinator's GO, the in-flight row retired, the worktrees and
+     the branch removed.
+  6. If this run is the last mobile merger: the wave-1 phone install is prepared (the device build from merged
+     main and a paste-ready kickoff). Then the coordinator launches VM-24's run.
+- **For her sitting:** the two PROVISIONAL calls (an archived gathering's add row wearing "(archived)"; no
+  Diverge on a gathering row on the phone — F8's question); the wording pass; the tickets to file, now including
+  the decor's; the two canon deltas named in step 2; and, at VM-24's run, the session on her phone.
+
+### The night's log of this section (2026-11-19, as written at the time)
+
 *As of 2026-11-19 07:30, tip after the closeout drafts (`7cb529765` and this commit). The author is away until
 morning; nothing is held for her hands yet. The closeout's writing is DRAFTED with PENDING slots (this file's
 Closeout and FOR A LATER READER, five phone clauses in `notes/SurfaceContracts.md`, `notes/MobileSoul.md` row
