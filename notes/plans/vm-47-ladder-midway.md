@@ -57,11 +57,78 @@ Recommended disposition: the MAJOR goes to the implementer (one function, its pi
 
 | # | Finding | Implementer | Reviewer's final call | What changed |
 |---|---|---|---|---|
-| M-1 | MAJOR — `PhoneType.uiFont` has no 13 pt floor (the UIKit form renders under the floor at the small text settings); `Face.body` shares the gap | PENDING | PENDING | PENDING |
-| m-1 | MINOR — `baseParagraphStyle`'s scale is launch-time while the body font auto-adjusts mid-run; the comment overstates; not in a "recorded and left" list | PENDING | PENDING | PENDING |
-| m-2 | MINOR — the segmented bridge's shown selection can go stale if a site refuses a change (no site does; hollow-pin hazard) | PENDING | PENDING | PENDING |
-| n-1 | NIT — the `weight:` override keeps the regular face's `lineSpacing` | PENDING | PENDING | PENDING |
-| n-2 | NIT — the SwiftUI hold can sit 1/3 pt above the UIKit hold at xxxLarge and above (already recorded in batch 1) | PENDING | PENDING | PENDING |
+| M-1 | MAJOR — `PhoneType.uiFont` has no 13 pt floor (the UIKit form renders under the floor at the small text settings); `Face.body` shares the gap | **AGREE** (traced). `uiFont` floors neither class; at xSmall/Small/Medium the UIFontMetrics curves put Terminal `rowPreview` ≈10.4, `meta`/`chip`/`controlInline` 12.0, Terminal `rowTitle` ≈12.4 while the SwiftUI form holds 13. Fix: floor in `uiFont` (a fixed 13 pt `baseUIFont` when the scaled size lands under it); pin `uiFont` ≥ 13 over every role × voice × setting, red on old. `Face.body`: RECORD for VM-137, not fix (§2a) | PENDING | PENDING |
+| m-1 | MINOR — `baseParagraphStyle`'s scale is launch-time while the body font auto-adjusts mid-run; the comment overstates; not in a "recorded and left" list | **AGREE** — take the record line (+ correct the overstating comment, `MobileEditorStyle.swift` only). A per-category re-derivation cannot be honest without the text view's trait-change road (`MobileEditorTextView`, off-limits). Not pinned: a record entry, not a fix (§2a) | PENDING | PENDING |
+| m-2 | MINOR — the segmented bridge's shown selection can go stale if a site refuses a change (no site does; hollow-pin hazard) | **AGREE** — a contract-comment sentence in `PhoneSegmentedChoice` only; all three sites assign unconditionally (checked), so any fix would be hollow (§2a) | PENDING | PENDING |
+| n-1 | NIT — the `weight:` override keeps the regular face's `lineSpacing` | **AGREE**, no action — at its one site (Done, `.control` semibold) the label is one line (`lineLimit(1)`), so `lineSpacing` never acts, and SF Pro/Mono keep one line height across weights (§2a) | PENDING | PENDING |
+| n-2 | NIT — the SwiftUI hold can sit 1/3 pt above the UIKit hold at xxxLarge and above (already recorded in batch 1) | **AGREE**, no action — already in batch 1's results; the M-1 floor does not touch the top end | PENDING | PENDING |
+
+### 2a. The implementer's answers (the closer, Opus, 2026-11-19 — answers only; nothing changed this turn)
+
+**M-1 — AGREE.** Traced in `PhoneType.swift`: `pointSize(_:at:)` (the SwiftUI rule) returns `max(floorSize, …)` for
+both classes; `uiFont(_:voice:compatibleWith:)` returns `metrics.scaledFont(for: base, compatibleWith: traits)` raw
+for `.fullRange` and caps only the top (`maximumPointSize`) for `.holdsAtXXXLarge` — no lower bound in either arm.
+Apple's text-style curves at the three below-default settings (subheadline 12 · 13 · 14 against 15 at Large;
+footnote 12 · 12 · 12 against 13; headline 14 · 15 · 16 against 17) put, at xSmall, Terminal `rowPreview` (13, the
+two-under rule) at ≈ 10.4, `meta` and `sectionHeader` at 12.0, `chip` and `controlInline` at 12.0, Terminal `rowTitle`
+(15) at ≈ 12.4 — and `meta` stays 12.0 through Small and Medium. The rule the batch states ("nothing on the phone is
+set below 13", the sizing sheet §A, the record's batch-1 item 2) and the SwiftUI form both say 13, so the same role
+draws two sizes on one screen (the overlays' and the segmented choice's UIKit text beside SwiftUI chrome). The live
+UIKit sites are the 34 `face.font(_:)` reads in the three overlays, the takes chrome and the block decor's mark, plus
+`PhoneSegmentedControlBridge` (PhoneControls.swift:612). None of them sets `adjustsFontForContentSizeCategory` (only
+the editor's text view and the emoji field do — checked by grep), and the bridge re-resolves on every update with its
+category passed explicitly, so a FIXED 13 pt font at the floor costs those sites nothing they have today.
+*What I would change:* in `uiFont`, after the class's own arm, `guard scaled.pointSize < floorSize else { return scaled }`
+and return `baseUIFont(spec, voice: voice, pointSize: floorSize)` — the reviewer's fix shape, one function, Large and
+above byte-unchanged. *The pin (red on old):* `MobilePhoneTypeTests` gains the UIKit twin of
+`nothingIsEverBelowThirteenPoints` — every role × both voices × all twelve settings,
+`PhoneType.uiFont(role, voice:, compatibleWith: UITraitCollection(preferredContentSizeCategory:)).pointSize >= 13`; red
+on this tree (≈ 10.4 for Terminal `rowPreview` at xSmall, 12.0 for `meta`), proved by reverting `uiFont` alone on a
+committed tree (or the snapshot road), green after.
+*`Face.body` — the alternative I would take: RECORD for VM-137, do not fix here.* `Face.init`
+(MobileEditorStyle.swift:110–135) builds the editor's body with `UIFontMetrics(.body).scaledFont(for:)` — the gap is
+real but narrow: Study's 17 pt body lands at 14 at xSmall (clear); only Terminal's 15 pt body goes under, ≈ 12.4 at
+xSmall (13.2 at Small clears). A floor there would have to be a fixed, non-metrics font, and the editor's text view
+sets `adjustsFontForContentSizeCategory = true` (MobileEditorTextView.swift:933 — the file this run does not edit),
+which re-scales only metrics-made fonts: a floored body would stop following the text size mid-run when she raises
+it — trading 0.6 pt under the floor at one setting in one voice for an editor that no longer grows until relaunch.
+That is the editor's text-size story, VM-137's. The fix pass would add one line to batch 1's "Recorded and left":
+*Terminal's note body in the editor draws ≈ 12.4 pt at the xSmall text setting (`Face.body`, UIFontMetrics(.body),
+no floor; Study clears at 14) — VM-137, with the editor's text-size road.*
+
+**m-1 — AGREE; I would take the record line, plus correcting the comment.** Traced: `terminalFace` / `studyFace` are
+`static let` (MobileEditorStyle.swift:173–174), so `Face.body` is resolved once per process at the then-current
+category; `baseParagraphStyle` (:206–223) computes `scale = baseFont.pointSize / note.size` from that cached font, so
+the paragraph gap and line air are launch-time, while the text view (`adjustsFontForContentSizeCategory`, :933 of the
+untouched `MobileEditorTextView`) re-scales the drawn body mid-run. Launch at any size is right; a mid-run change
+leaves the gap at the launch scale until relaunch — the same staleness the pre-batch constants had (they never
+scaled at all), so not a regression, but the comment "the gap and the line pitch grow with Dynamic Type as the body
+does" overstates it and no "Recorded and left" list carries it. Re-deriving per current category inside
+`baseParagraphStyle` would not be honest on its own: the font every write uses (`baseFont`) would stay launch-size
+while the style moved, and the paragraphs already in the text storage keep the style they were written with — the
+real fix is the text view's trait-change road, which is VM-137's file. *What I would change:* the comment, to say
+the scale is the body's at launch (mid-run changes re-scale the drawn body through the text view, not this gap —
+VM-137), and one line in batch 1's "Recorded and left" naming it for VM-137. No pin: a record entry and a comment,
+not a behaviour change.
+
+**m-2 — AGREE; a contract-comment sentence only.** Traced: a tap moves `UISegmentedControl.selectedSegmentIndex`
+natively, then `.valueChanged` → the coordinator → `PhoneSegmentedChoice`'s `onSelect`, which calls `select` only when
+the value differs; `updateUIView` re-applies `selection` only when SwiftUI re-renders, which happens only if `select`
+wrote observed state. A site that refused a change would leave the control showing the refused segment. All three
+sites assign unconditionally — `MobileBlockList.swift:463` (`segment = $0`), `MobileCreateBook.swift:253`
+(`model.kind = $0`) and `:285` (`model.joinAll = $0`) — so no failing-on-old test exists and a code fix would be a
+hollow pin. *What I would change:* one sentence in the selection-contract comment — a site whose `select` may refuse
+must force an update (or the bridge will show the refused segment). No pin.
+
+**n-1 — AGREE, no action.** Traced: `PhoneTypeModifier.face` keeps `rawFace`'s `lineSpacing` (computed from the
+role's own weight) when it re-weights the font. Its one user is `PhoneTextButtonStyle(closing: true)` — the `.control`
+role at semibold, which is SF Pro (Study) or SF Mono (Terminal), never Iowan; the label is `.lineLimit(1)`, so
+`lineSpacing` never acts on it, and the system faces keep one line height across weights. It would matter only if a
+prose role were re-weighted on a multi-line site; none is.
+
+**n-2 — AGREE, no action.** Batch 1's results record it (the SwiftUI hold uses `scaledValue`, the UIKit hold
+`scaledFont`'s own xxxLarge size, ≤ 1/3 pt apart at xxxLarge and above). The M-1 floor touches only the bottom end,
+so it neither widens nor closes that gap.
 
 The reviewer's two "open items the record already owns": the `MobilePhoneControlsTests` re-run ran at 06:56,
 after the review began — "Test run with 13 tests in 1 suite passed after 17.405 seconds", both fixed tests
