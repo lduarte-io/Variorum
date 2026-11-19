@@ -220,7 +220,7 @@ by this batch).
 
 ### Batch 2 · VM-2 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**No revert is in flight.** The red-on-old proof is a SECOND build of the pins against the pre-fix production files
+**REVERT IN FLIGHT (2026-11-19):** the three phone production files (`MobileStructural.swift`, `MobileEditorViewModel.swift`, `MobileEditorTextView.swift`) are being checked out from base `9cf3b3688` over the committed fix `f83122794` to build the red-on-old products; restore = `git checkout HEAD -- <those three files>` and a clean `git status`. The red-on-old proof is a SECOND build of the pins against the pre-fix production files
 (`git checkout <base> -- <production files>` AFTER the fix is committed and pushed, build-for-testing into
 `App/Variorum/DerivedData/vm64-b2-red/`, then `git checkout HEAD -- <the same files>` and a clean `git status`). When
 that revert starts, this line changes to name it and the base commit; until then the tree is never mid-revert.
@@ -258,7 +258,7 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 
 | Piece | State |
 |---|---|
-| P1 — the brain `StructuralFlightFence` + headless tests | DONE (this commit) — `swift test --filter StructuralFlightFenceTests` 11 tests in 1 suite passed (headless, no stage) |
+| P1 — the brain `StructuralFlightFence` + headless tests | DONE (`76dbf89b2`; `putBack` removed at `f83122794` as dead API — the face replays whole and at once) — `swift test --filter StructuralFlightFenceTests` 10 tests in 1 suite passed (headless, no stage) |
 | P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | DONE (this commit) — phone `build-for-testing` green into `DerivedData/vm64-b2/`, no new warning in a touched file; behaviour PENDING the stage window |
 | P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | DONE (this commit) — `MobileStructuralFlightFenceTests` (10), BUILT; green run and red-on-old run PENDING the stage window |
 | P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | NOT-STARTED |
