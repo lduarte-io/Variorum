@@ -83,7 +83,12 @@ struct RawSocket {
         return nil
     }
 
-    /// After the server's answers: EOF within the receive timeout.
+    /// After the server's answers: EOF within the receive timeout — the VERY NEXT
+    /// byte is the end, so nothing at all of the door's follows the last answer.
+    /// The strict check: every connection that no client owns (refused before any
+    /// session exists, or a pending client — outside the grants fingerprint, so no
+    /// notice is ever owed to it) relies on it as its guard that nothing of the
+    /// door's follows (round 1's F1 final call — the VX-981 ladder).
     func isHungUp() async -> Bool {
         let fd = self.fd
         return await HarnessWait.offPool {
@@ -92,7 +97,88 @@ struct RawSocket {
         }
     }
 
+    /// A raw client over a descriptor the test made itself (a socketpair's end —
+    /// the hang-up reads' own pins, no server), its reads bounded by `seconds`.
+    init(adopting fd: Int32, timeout seconds: Int) {
+        var timeout = timeval(tv_sec: seconds, tv_usec: 0)
+        _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        self.fd = fd
+    }
+
+    /// **After the server's answers on an APPROVED connection: the hang-up, with
+    /// only the door's own notices before it** (round 1's F1 — the VX-981 ladder).
+    /// An approval owes the connection 0 or 1 `notifications/tools/list_changed`
+    /// (the host's observation skips its first value, so nothing a test reads
+    /// tells which), and nothing orders that notice against the last answer — so
+    /// the strict `isHungUp()` would read a late notice's first byte as "not hung
+    /// up". This reads whole lines to EOF under the socket's own receive bound and
+    /// REPORTS what it read (`HangUpRead`); `isOnlyNoticesThenEOF` is the verdict.
+    func readToHangUp() async -> HangUpRead {
+        let fd = self.fd
+        return await HarnessWait.offPool { RawSocket.readToHangUp(fd) }
+    }
+
+    /// The blocking read behind `readToHangUp()` (off the pool — its caller hops).
+    static func readToHangUp(_ fd: Int32) -> HangUpRead {
+        // F1-S SCAFFOLD (pin before fix): TODAY's verdict — the very next byte
+        // must be the end. The fix reads whole lines to EOF.
+        var byte: UInt8 = 0
+        let count = read(fd, &byte, 1)
+        if count == 0 { return HangUpRead(lines: [], ending: .eof) }
+        if count < 0 { return HangUpRead(lines: [], ending: errno == EAGAIN ? .boundPassed : .readError(errno)) }
+        return HangUpRead(lines: [], ending: .tornLine(Data([byte])))
+    }
+
     func close() { Darwin.close(fd) }
+}
+
+/// **What a hang-up read found after the door's last answer** (round 1's F1 —
+/// the VX-981 ladder): every whole line it read, in order, and how the read
+/// ended — printed by a failing pin, so a red says what arrived instead of EOF.
+struct HangUpRead: Sendable, Equatable, CustomStringConvertible {
+    enum Ending: Sendable, Equatable {
+        /// `read` returned 0: the server closed the connection.
+        case eof
+        /// Bytes with no newline before EOF (a torn line) — these bytes.
+        case tornLine(Data)
+        /// The socket's receive bound passed with no EOF (`EAGAIN`).
+        case boundPassed
+        /// `read` failed with this `errno`.
+        case readError(Int32)
+        /// More lines than any hang-up owes (`lineCap`) — the read stops so a
+        /// server that never closes cannot hold the suite.
+        case tooManyLines
+    }
+
+    /// The most lines a hang-up read takes before it stops (`.tooManyLines`).
+    static let lineCap = 64
+
+    let lines: [Data]
+    let ending: Ending
+
+    /// TRUE only when every line read is a `notifications/tools/list_changed`
+    /// notification (a JSON object with that `method` and no `id` key) and EOF
+    /// follows; FALSE on a line carrying an `id`, any other method, a torn line,
+    /// a read error, or the bound passing.
+    var isOnlyNoticesThenEOF: Bool { ending == .eof && lines.allSatisfy(Self.isListChangedNotice) }
+
+    static func isListChangedNotice(_ line: Data) -> Bool {
+        guard let object = try? JSONSerialization.jsonObject(with: line) as? [String: Any] else { return false }
+        return object["method"] as? String == "notifications/tools/list_changed" && object["id"] == nil
+    }
+
+    var description: String {
+        let shown = lines.map { "«\(String(decoding: $0.prefix(200), as: UTF8.self))»" }
+        let ended: String = switch ending {
+        case .eof: "then EOF"
+        case .tornLine(let bytes):
+            "then \(bytes.count) bytes with no newline before EOF: «\(String(decoding: bytes.prefix(200), as: UTF8.self))»"
+        case .boundPassed: "then no EOF within the receive bound"
+        case .readError(let code): "then a read error (errno \(code))"
+        case .tooManyLines: "then still more (over \(Self.lineCap) lines)"
+        }
+        return "read \(lines.count) line(s) \(shown.joined(separator: " ")) \(ended)"
+    }
 }
 
 /// The JSON-RPC error object of an answer, flattened for pins.
