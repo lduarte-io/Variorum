@@ -155,7 +155,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 3 · VM-66 | **CLOSED 2026-11-19** | see the batch 3 block; built at `d2cef56be` | the BEFORE numbers are in "Orchestrator's stage results" below |
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | BUILT · headless green · **READY for the stage** | see the batch 5 block; code `8f1adc87c` + `5ba59a6c8`, products at `dcea98cee` (merged tree) | — |
-| 6 · VM-69 · VM-70 | IN-PROGRESS (headless) | see the batch 6 block | first commit `f0e2e696c` (the midpoint review's finding 1) |
+| 6 · VM-69 · VM-70 | BUILT · **READY for the stage** | see the batch 6 block; products `vm64-b6` at `24fa9a5e2`, red `vm64-b6-red` | first commit `f0e2e696c` (the midpoint review's finding 1) |
 | 7 · VM-71 | NOT-STARTED | — | — |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
@@ -560,7 +560,7 @@ open, though the masthead shows only the note's own rows; the two sheets already
 | P5 — the chips' scoped reads | DONE (this commit) — `MobileMembershipModel.refreshChip()` (`readingsContaining` only), `MobileNoteTagsModel.refreshChip()` (`postTags` only), the masthead's two chip tasks call them; the sheets' `.task { refresh() }` unchanged. Phone `build-for-testing` into `DerivedData/vm64-b6/` `** TEST BUILD SUCCEEDED **` (P3–P5 together), no warning in a touched file |
 | P6 — the pins: the perf suite's counts asserted (reads 1, builds 1, registry 0); the hazard pins (a)–(d); the chrome count | DONE (`68d630d96` + this commit) — `MobileHerPathsPerfTests` (five series asserted; the registry series through `MountedBuilt`, a screen built and let go as the shell's destination does); new `MobileNoteOpenOnceTests` (6: the chrome once, the chips' trace, hazards (a), (b)×3, (c)) and `MobileChipScopeTests` (3: hazard (d)); phone `build-for-testing` into `vm64-b6` `** TEST BUILD SUCCEEDED **`, no warning in a touched or new file; runs PENDING the stage |
 | P7 — builds: phone `build-for-testing` into `DerivedData/vm64-b6/`; red-on-old into `vm64-b6-red/` | DONE — fix products `vm64-b6` built at `24fa9a5e2` (the tree's code state; later commits are record-only) `** TEST BUILD SUCCEEDED **`; red-on-old `vm64-b6-red` `** TEST BUILD SUCCEEDED **` (cold), restored. No Mac build: no `Shared/` or Core file changed, and the Mac compiles none of the four files |
-| P8 — closeout in §7 + READY | NOT-STARTED |
+| P8 — closeout in §7 + READY | DONE (this commit) — §7 batch 6; READY: the stage groups (i)–(iv) are in §7 batch 6 ▸ "The stage window"; every run PENDING |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b6/` and `vm64-b6-red/` (gitignored).
 
@@ -2145,3 +2145,356 @@ dev-store simulator, signed out: seed more than 200 notes (Settings ▸ "Seed th
 open the Library, scroll to the end — the oldest notes come on screen (capture: the listing's foot past note 200); type
 in the capture box, swipe to the Library — the box's note leads (capture); Bookless shows the loose notes (capture);
 Settings ▸ timing… after the walk — "Library re-reads per save" holds no new non-zero samples from the box's saves.
+
+### Batch 6 · VM-69 · VM-70 — a note is read once, and released when it closes (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** every hosted run is PENDING the orchestrator's stage window —
+the perf suite's five asserted series (fix and red), the new suites (fix and red), the editor and Write suites in company,
+and the walk with its captures (groups (i)–(iv) below, runnable from the built products by anyone). The AFTER durations
+(`note-open-to-live-*`, `shell-box-open-to-live`, …) therefore have no numbers yet. No headless suite reaches this batch:
+no Core, `Shared/` or `Sync/` file changed (so no `swift test` and no Mac build was owed — the Mac compiles none of the
+four changed files).
+
+**Base:** `d893fae63` (main's VX-980 merged in). **Commits:** `f0e2e696c` (the midpoint review's finding 1 — the fence's
+projection-seam comment, alone, "Part of VM-2") · `1423defca` (live status) · `c8f95ea6f` (the INSTRUMENT: the projection
+road's chrome passes counted, no behaviour change — the red-on-old base) · `63ad8b188` (VM-69: one read; the chrome once)
+· `9ad4a880d` (VM-70: the release) · `3d43fe52e` (the chips) · `68d630d96` (the perf suite's assertions) · `24fa9a5e2` (the
+new suites; the fix products `vm64-b6` are this tree) · `5608b7e52` / `7770b4fb5` (the red-on-old revert announced, built,
+restored) · this closeout.
+
+#### The midpoint review's finding 1 (the first commit)
+
+`MobileEditorViewModel.applyProjection`'s settling hook said the drain "replays her keys through the input road" — r1's
+mechanism, removed whole at r2. Reworded to r2's truth (comment only, no pin): the drain only REPORTS — it lowers the
+fence and, if anything was refused or withheld, says the one sentence through `report` (the status line and its action);
+deferring keeps those status/undo writes out of a projection apply and reads the settle rule after the apply's own
+bookkeeping. Read against r2's closeout ("the drain's one sentence") and `drainFlightFence()` before writing it.
+
+#### The mechanisms, as traced on this tree (audit F 2C/2D, §4, §12.4; audit C §2.16 — TRACED as written, lines moved)
+
+- **Two whole-note reads per open (VM-69).** The screen's `.task` registers (`MobileLivenessAuthority.takeLiveness(refresh:
+  false)`: the flush, one indexed header read), then `arrive` → `loadOnce` (projection + header, one read), then `start()`,
+  whose two `ValueObservation`s each begin with a FIRST FETCH — the header again, and the WHOLE projection again — and
+  deliver it (`ingest(fromDelivery: true)` → `ledger.matches` O(note) → `.adoptEcho` → a `.document` chrome pass). The
+  BEFORE table: `*-note-reads-per-open-*` 2 in every run, five series.
+- **The chrome three times (VM-69).** Per open, `renderFull` laid the chrome out as its last act; `ingest` then laid it
+  out again over the same inputs (`takes.adoptFans` and `presentations` are adopted BEFORE the apply); the first delivery's
+  `ingest` a third time. Each pass is O(the note's decorated blocks) once the page has width (`refreshChrome` →
+  `blockRangesByID` + both controllers; `.ensuresLayout` per fanned block).
+- **The registry grows by one per note opened (VM-70).** The editor acquires the post's coordinator at `init`
+  (`session.autosave(forPost:)`); nothing on the phone ever released an editor's (`releaseAutosave`'s one phone caller is
+  the quick note). The BEFORE table: growth 1 per open-and-close. Every filing (`flushEveryOpenPost`), every sync round's
+  flush-first (`flushPendingTypingBeforeRound` → `hasPendingAutosave`) and every background flush walked them all.
+- **The chips read every book and every tag (VM-69).** The books and tags chips' mount tasks called the SHEETS' full
+  `refresh()` — `Queries.readings(db)` (every book, for "Add to a book") and `Queries.allTags(db)` (every tag, for the
+  suggestions) — at every open, though the masthead shows only the note's own rows; both sheets already re-read on appear
+  (their own `.task { refresh() }`). References already read only the note's rows.
+- **The twin graph (audit F 2D / audit C §2.16) is NOT on these roads:** `*-editor-builds-per-open` read 1 in every BEFORE
+  run. Nothing to fix; it is now an asserted guard (and the release at the model's end of life covers a twin anyway — a
+  discarded twin acquires, then releases at its death).
+
+#### What shipped, file by file
+
+- `VariorumMobile/Features/Write/MobileEditorViewModel.swift` (the editor seam):
+  - **`loadLive()`** — the arrival's ONE read: both live observations start (`observeContainerHeader`, the counted
+    `takesObservation()`), their first values are the load (header adopted, then the projection through `ingest` —
+    `loadOnce`'s order), the running iterators are kept in `liveHeader` / `liveTakes`, and VM-65's
+    `noteProjectionDelivered(first: true)` marks the live updates' first delivery at its true moment (this one). A
+    re-arrival (`loaded` already true) takes its first value as a DELIVERY (MAJOR 3's signal arm). A failure falls back to
+    `loadOnce()` (which speaks as it always did); a cancellation paints nothing. `arrive` calls it instead of `loadOnce`.
+  - **`observeHeader` / `observeTakesProjection`** continue the arrival's iterators (`next(isolation: #isolation)`, on the
+    main actor as the old `for try await` ran), or start their own when no arrival preceded (`loadOnce` + `start` — the
+    harness's road, unchanged). `takesObservation()` is the one home of the counted fetch.
+  - **`loadOnce()`** unchanged (the harness's and the fallback's road).
+  - **The chrome once** — `layOutChrome()` (counted: `projectionChromePasses`, the instrument) is the projection road's one
+    whole-document pass; `renderFull` and `applyDifferential` call it as their last act, and `ingest` calls it only when
+    the arm did not (`chromeLaidOutByApply`).
+  - **`isolated deinit { session.releaseAutosave(forPost: postID) }`** — the one release for the one acquisition.
+  - The finding-1 comment.
+- `VariorumMobile/Features/Write/MobileMembership.swift` — `refreshChip()`: `Queries.readingsContaining` only, ordered by
+  the same `ordered`; cancellation silent; any other failure falls back to `refresh()`. `refresh()` untouched.
+- `VariorumMobile/Features/Write/MobileNoteTags.swift` — `refreshChip()`: `Queries.postTags` only; the same fallbacks.
+  `refresh()` untouched.
+- `VariorumMobile/Features/Write/MobileWriteView.swift` — the books and tags chips' `.task(id:)` call `refreshChip()`.
+  Nothing else in the screen changed (the `.task` wiring — register, arrive, start — is byte-identical).
+- `VariorumMobileTests/MobileHerPathsPerfTests.swift` — five series asserted (below); `MountedBuilt` (a screen built
+  inside the gate's body, as the shell's destination builds it) for the registry series only; the header notes it.
+- `VariorumMobileTests/MobileNoteOpenOnceTests.swift` (new, 6) and `VariorumMobileTests/MobileChipScopeTests.swift` (new,
+  3).
+
+#### Round trips per open, before → after (the brief's "no redundant round trips")
+
+| Step | Before | After |
+|---|---|---|
+| Liveness grant (register) | flush + header read | unchanged — the authority's pen precondition, read after the flush |
+| Arrival | `loadOnce`: projection + header (1 trip) | the two observations' first reads, concurrent (header · projection) |
+| Live updates' start | header read + WHOLE projection read (2 trips) | none — the arrival's observations continue |
+| Chips | 3 concurrent: books (feed + EVERY BOOK), tags (note's + EVERY TAG), references | 3 concurrent: books (feed), tags (note's), references |
+
+Whole-note reads 2 → 1; header reads 3 → 2; serial trips before the first paint unchanged (liveness, then the load); the
+trips after the paint 5 → 3. **Not removed, and why:** the liveness grant's header read and the header observation's first
+read both read the one header row — the first is the authority's precondition for handing over the pen (after the flush,
+before the grant; 4.5c's MAJOR 1/2 rule that every refusal is store-confirmed), the second is the start of the live header
+GRDB cannot begin without a fetch. Folding them would move the authority's grant after the arrival — a liveness design
+change, not this unit's (recorded as an option below). The books chip's own feed (`readingsContaining`, the Mac chip's
+read, Core, byte-identical) lists the readings once internally to test each gathering's rule — author-scale; narrowing it
+is a Core change both platforms share (option below).
+
+#### The chrome's three layout passes — what they become
+
+**One per open.** (1) `renderFull`'s — KEPT: the render replaced every character and every range on the page, so the
+fans' badges and pill anchors, the gutter's comment marks and the callout frames must be placed on the new page, and
+they cannot be placed before the page exists. (2) `ingest`'s second pass over the same inputs — GONE (`chromeLaidOutByApply`).
+(3) The first delivery's — GONE with the second read. Untouched and still needed: the arms that rewrite nothing in the
+view (an echo, a deferral, a refetch) still get `ingest`'s pass — a take can arrive without a byte of text moving (pinned:
+a branched take's delivery lays the chrome out); the text view's own `.nearViewport` passes (`layoutSubviews`) and the
+width-change escalation inside the controllers are how the chrome follows scrolling and the first real layout — not
+projection-road passes, unchanged; `installTakes`' pass at attach runs over an empty page. Side effect of the same
+mechanism, stated: a DIFFERENTIAL delivery (a remote text change) now lays the chrome out once, not twice.
+
+#### The hazards — each with its traced mechanism and its pin
+
+**(a) A remote change between the one load and the live updates' first delivery still reaches the page.** There is no
+longer a "between": the load IS the live observation's first value. What remains is the window inside GRDB between an
+observation's first fetch and its tracking start, and GRDB closes it by contract: on a POOL (her phone's store) the first
+fetch runs on a reader inside a WAL-snapshot transaction, then the observation takes the WRITER, compares the snapshot with
+the writer's and — if anything committed — fetches again and notifies, and only then (same writer access) adds its
+transaction observer, so no commit can fall between the compare and the tracking start
+(`.build/checkouts/GRDB.swift/GRDB/ValueObservation/Observers/ValueConcurrentObserver.swift`, `asyncStartObservation`;
+without a snapshot it refetches unconditionally); on a queue the first fetch and the tracking start are one writer access.
+The values wait in the stream (unbounded buffering) until `start()` takes the iterator — same main actor, same `.task`,
+nothing between `arrive` returning and `start()` beginning. A delivery is ingested as a signal (`refetchFresh` → the fresh
+read → `.differential`). **Pin:** `MobileNoteOpenOnceTests.aWriteLandingAfterTheOpensOneReadReachesThePage` — an on-disk
+encrypted POOL; a write HOLDS the writer and commits a change only after the arrival painted the old text; the page must
+end on the change. A guard: green on both trees (the old second read covered the same window the same way).
+
+**(b) The release never drops unsaved text, never races the leaving savepoint, never takes a coordinator another holder
+needs.** Mechanism: the release is the model's `isolated deinit`, and the model's last strong reference on the leaving road
+is the screen's `onDisappear` task, which holds it across `teardown()` (the canary, the gesture task, `finish()`: the tail
+mint and the flush) and `savepointOnLeaving` (which flushes the EXISTING coordinator again, then `closeAutoCommit`) — so the
+release comes after both, by construction (the Mac's 18k C1 shape, `EditorViewModel`'s own `isolated deinit`). The session's
+phone rule (`releaseAutosave`, `Shared/AppSession.swift`, unchanged) drops the entry only at ZERO holders and a CLEAN
+coordinator: a second tab's editor on the same note holds its own acquisition; the quick note holds its own (adopt) and
+releases its own (reset); a coordinator left dirty (a refused write) stays reachable to every flush walk. The lock road:
+`mobileWillLock` runs `editors.flushAll()` and the savepoints while every model is alive and holding; then the state flip
+removes the tree, each screen's `onDisappear` runs (unchanged — batch 7's), and each model releases into the OLD session
+afterwards — so every flush walk on that road still reaches every coordinator that could hold text. A covered screen (a
+push on top) keeps its model and its hold: the deinit is the only point that runs exactly once per acquisition (a covered
+screen can be torn down and shown again). **Pins** (`MobileNoteOpenOnceTests`): `closingANoteLandsItsTextThenGivesItsCoordinatorBack`
+(a key in the debounce at the close lands, the savepoint lands, the registry is back — red on the pre-fix tree on the
+give-back); `theReleaseWaitsForTheLeavingSavepoint` (the writer held as the note closes: the entry stays held while the
+leaving work waits, and goes only after it lands — red on the pre-fix tree on the give-back; a release at the close itself
+would be red on the hold); `aCoordinatorAnotherHolderNeedsIsNeverLetGo` (two tabs on one note, then the quick note's hold:
+each close gives back one hold, the entry stays while anyone holds it, the remaining editor records into the registry's
+coordinator — red on the pre-fix tree). And the perf suite's registry series, asserted zero.
+
+**(c) A stood-down editor on another tab keeps working; `takeLiveness(refresh:)` still gets a current page.** Unchanged
+mechanisms, re-read after the change: a stood-down editor's live updates run for its life (`start()` never consults
+liveness), so a write anywhere reaches its page (delivery → refetch → `.differential`; with a shared coordinator dirty from
+the live tab's typing it defers, and the coordinator's settle — every observer's `onSettled` — re-reads it); the tab
+switch's grant (flush → header confirm → `refreshTakesFromStore`, a fresh read through the one projection door) is
+untouched; the one change on that road is `ingest`'s chrome rule, which only drops a duplicate pass. **Pin:**
+`aStoodDownEditorKeepsWorkingAndTheTabSwitchGetsACurrentPage` — two tab stacks on one note through the real screens (both
+arrived through the one read): the live tab's typing reaches the stood-down page; the tab switch moves the pen over a
+current page; the other direction too. A guard: green on both trees.
+
+**(d) The chips' scoped reads show exactly what the full reads showed.** The chip reads ARE the full reads' own
+statements for what the chip shows — `readingsContaining` then the same `ordered`; `postTags` — so the rows, their order
+and every field (the archived stamp included) are the same values; only the sheet's every-book / every-tag listings are no
+longer read by the chip, and the sheets read them on appear exactly as before. A failure falls back to `refresh()`.
+**Pins:** `MobileChipScopeTests` (3 — a note in two books, one ARCHIVED, and a gathering; books and a gathering it is not
+in; three tags, two worn; a reference: the same ids, order, names, kinds and archived state, the same chip words; the
+chip's sheet lists unread, the full read's still filled); and the red-on-old one,
+`MobileNoteOpenOnceTests.openingANoteReadsNoListingOfEveryBookOrEveryTag` (the store's statement trace over the real
+screen's open: no every-tag listing, and no every-book listing beyond the feed's own — on the pre-fix tree one of each
+more).
+
+#### The keystroke fence still means the same thing (batch 2's conditions, read after this change)
+
+`flightSurfaceHoldsTheStore` is `!forceFullRender && pendingProjection == nil`, and `settleFlightSurface` re-reads through
+`awaitMintSettle` + `refreshTakesFromStore`; this batch touches neither flag's writers nor that road. The settling hook in
+`applyProjection` is unchanged (only its comment, finding 1). `ingest`'s new rule decides only whether `layOutChrome` runs —
+no flag the fence reads. The arrival's change cannot meet a flight: no structural door is reachable before the page has
+rendered, and the latch is down at arrival. On a RE-arrival the first value now takes the delivery arm: if it does not
+match the page it parks as `pendingProjection` until the fresh read applies it — so a fence that were settling then would
+keep failing CLOSED until the page holds the store, which is the fence's own rule ("the page holds the store" means the
+same thing). `flushPendingText`'s fence re-read is untouched. **`storageDidEdit`, `fallbackVerdict` and `EditorEditRouting`
+are not touched** (VM-78's VM-24 question stays theirs); `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePoint…`
+is expected in main's shape (2 of 3 cases, 2 issues) — this batch changes no routing.
+
+#### The pins, and what each build should show
+
+| Pin | Fix (`vm64-b6`) | Pre-fix (`vm64-b6-red`) | Kind |
+|---|---|---|---|
+| perf `aNoteOpensOnTheRealScreen…` — `note-reads-per-open-{short,100k}` == 1 | green | RED (2, both) | VM-69 product |
+| perf `theCaptureBoxOpensItsNoteThroughTheShellsPush` — reads == 1; builds == 1 | green | RED on reads (2); builds green | VM-69 product + twin guard |
+| perf `aLibraryRowOpensItsNoteThroughTheShellsPush` — reads == 1 (short, 100k); builds == 1 | green | RED on reads (2, both); builds green | VM-69 product + twin guard |
+| perf `theAutosaveRegistryAcrossOpensAndCloses` — growth == 0 | green | RED (1) | VM-70 product |
+| perf, the other five tests | green, unchanged | green | — |
+| `anOpenAsksForTheWholeDocumentChromeOnce` | green (1) | RED (3); the branched-take guard green | VM-69 product |
+| `openingANoteReadsNoListingOfEveryBookOrEveryTag` | green | RED (one every-tag listing; two every-book listings for one feed) | VM-69 product |
+| `aWriteLandingAfterTheOpensOneReadReachesThePage` | green | green | hazard (a) guard |
+| `closingANoteLandsItsTextThenGivesItsCoordinatorBack` | green | RED on the give-back; text + savepoint green | VM-70 product |
+| `theReleaseWaitsForTheLeavingSavepoint` | green | RED on the give-back; the hold green | VM-70 product (ordering) |
+| `aCoordinatorAnotherHolderNeedsIsNeverLetGo` | green | RED (holds never given back) | VM-70 product |
+| `aStoodDownEditorKeepsWorkingAndTheTabSwitchGetsACurrentPage` | green | green | hazard (c) guard |
+| `MobileChipScopeTests` (3) | green | not built (names the new reads) | hazard (d) guard |
+
+Row dispositions: **VM-69 — FIXED** (one read; the chrome once; the chips' reads) with the red-on-old pins above. **VM-70 —
+FIXED** with its pins. **The twin (audit F 2D / audit C §2.16) — DISMISSED AS HOLLOW on today's roads** (builds per open 1
+in every BEFORE run, the box's and the Library's), held by an asserted guard; the release-at-death closes the leak class a
+twin would leave, should one ever be built.
+
+#### The timing marks (batch 1's) — what they measure now (said, per the record's rule)
+
+`noteReadsPerOpen` still counts whole-note reads from the arrival to the live updates' first delivery; the first delivery
+is now the arrival's own (the observation's first value — `noteProjectionDelivered(first: true)` is called there), so the
+window closes after ONE read. `noteProjectionLoad` now marks only `loadOnce` (the harness's and the failure fallback's
+road); the screen's read is the observation's counted fetch. `note-open-to-live-*` / `shell-box-open-to-live` (the test's
+clocks) end at that same first delivery, so they now end at the arrival's ingest — the second read's cost leaves them.
+Nothing else moved.
+
+#### The Mac does not change in behaviour
+
+No `Shared/`, Core or `Sync/` file changed; the four changed production files are phone-only (`VariorumMobile/`). The
+phone's release goes through `AppSession.releaseAutosave`'s existing phone branch; the Mac's branch and its 18k C1 drop are
+untouched.
+
+#### Merging with VM-78 and VM-55 — where a hand is needed
+
+Read from `origin/vm-78-fixes-to-whats-there` and `origin/vm-55-wings-underneath` against their merge-bases; nothing merged
+or cherry-picked.
+- **VM-78** adds the observed `entryDate` mirror, set in `adoptHeader`, and the date chip reads it. This batch keeps
+  `adoptHeader` the one header door — `loadLive` and the continued header observation both adopt through it — so the
+  mirror is set at the arrival before the first ingest, as with `loadOnce`. VM-78's `dateChip` lines and this batch's chip
+  `.task` lines are separate hunks; its `MobileMembership` row statics land before `// MARK: - Reads`, this batch's
+  `refreshChip()` after `refresh()`. Expected clean.
+- **VM-55** rewrites the catch lines of `loadOnce`, `observeHeader` and `observeTakesProjection` (raw error dumps →
+  `report(OpsRefusalCopy.sentence…)`), and the `refresh()` bodies of the books and tags models (wing-scoped listings,
+  `say(…)`). This batch's hunks sit beside those with unchanged lines between, and its new code carries NO error words of
+  its own: `loadLive` falls back to `loadOnce` and `refreshChip` to `refresh()`, so VM-55's wording rules reach every
+  failure here once merged. The chip reads need no wing (`readingsContaining` and `postTags` are note-scoped); the
+  sheets' `refresh()` takes VM-55's wing scope as written. **If git conflicts**, it will be at `refresh()`'s closing
+  lines in `MobileMembership` / `MobileNoteTags` or at the observation loops' last lines: keep VM-55's bodies and catch
+  lines AND this batch's loop heads and `refreshChip()` — they do not overlap in meaning. The red-on-old chips pin matches
+  the listings by their SQL prefix, which VM-55's wing-scoped forms share, so it stays meaningful after the merge.
+
+#### Residuals (traced, not fixed here — owners for the orchestrator to assign)
+
+1. **A covered screen loses its autosave observer.** `onDisappear` runs `teardown()`, which calls
+   `autosave.stopObserving(autosaveToken)`; if the screen was only COVERED (Versions or a diverged copy pushed on its
+   stack) and is shown again, `.task` re-runs register → arrive → start, and nothing re-observes — so on that page a flush
+   settle no longer bumps `storeWriteGeneration` or calls `applyPendingIfClean`, and the autosave's `onError` no longer
+   reaches the status line. A delivery deferred while she types then waits for the next clean delivery; a fence settling
+   there fails closed until then. Traced by reading; whether SwiftUI's NavigationStack fires `onDisappear` on a covered
+   destination was not measured here. Pre-existing; outside this unit (it is the leaving road's, batch 7's area, or the
+   Writing umbrella's). Proposed: a VM ticket with a hosted pin (push Versions, pop, type, a remote change).
+2. **A coordinator left dirty at its last release stays forever** (the phone's `releaseAutosave` keeps it and nothing
+   later drops it once it lands). Pre-existing rule, rare (a refused write at leaving), bounded by such notes. Not changed.
+3. **The arrival's two header reads** (the liveness grant's, the header observation's first) — options in "Design calls".
+4. **`readingsContaining`'s internal every-reading listing** (the gatherings' rule leg) — options in "Design calls".
+
+#### Design calls (options weighed; none is a product decision, none is hers)
+
+- **D-6-1 — how the open reads once.** (a) **built:** the arrival starts the live observations and their first values
+  are the load; `start()` continues them. (b) keep `loadOnce` and start the live updates with a change-signal
+  (`DatabaseRegionObservation`, no first fetch) established BEFORE the load — also one read, but the delivery road changes
+  shape (signal-then-fetch everywhere) and the observation must be started before the flush's write. (c) keep both reads
+  and only suppress the second's delivery — saves nothing that matters. (a) changes the least and leans on GRDB's
+  documented no-missed-change contract.
+- **D-6-2 — a re-arrival's first value as a delivery.** (a) **built:** the second read that used to follow a re-arrival's
+  load is gone, so its value is a signal (adopted when the page holds it, else settled by the fresh-read road); (b) treat
+  it as `loadOnce`'s was (authoritative, may rewrite at once) — would drop the healing the old second read happened to give
+  when a settle landed between the read and its use.
+- **D-6-3 — where the release lives.** (a) **built:** the model's `isolated deinit` (the Mac's 18k C1 shape; exactly once
+  per acquisition; after the leaving work by construction); (b) the end of `onDisappear`'s task — wrong for a covered
+  screen that comes back (its model would keep recording into a coordinator the registry no longer holds, and a second
+  tab would mint a twin coordinator — the S3 BLOCKER's class); (c) a new `AppSession` hook — unnecessary, and in VM-55's
+  file.
+- **D-6-4 — the chips.** (a) **built:** a chip read per chip (what it shows), the sheets' full reads unchanged on appear;
+  (b) one combined chip read for all three chips (one trip instead of three concurrent ones — a composition change across
+  three models); (c) narrow `readingsContaining`'s gathering leg in Core (both platforms' read; author-scale gain).
+- **D-6-5 — the arrival's header reads.** Not built: (a) let the register road skip its header confirm and take the
+  arrival's header first value as the liveness answer (moves the pen grant after the load — the authority's ruled order);
+  (b) keep (today).
+- **D-6-6 — the chrome once by a flag set inside `layOutChrome`** rather than a return value from `applyProjection`
+  (whose direct callers and pins would all change shape).
+
+#### For QUESTIONS at the merge
+
+None — no product behaviour was decided here; the design calls above are engineering and are for the cold review.
+
+#### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+Products: fix `App/Variorum/DerivedData/vm64-b6/` (built at `24fa9a5e2`), pre-fix `App/Variorum/DerivedData/vm64-b6-red/`
+(the four Write files at the instrument commit `c8f95ea6f`; `MobileChipScopeTests` absent). If `vm64-b6-red` is ever lost,
+rebuild it by: `git checkout c8f95ea6f -- App/Variorum/VariorumMobile/Features/Write/{MobileEditorViewModel,MobileMembership,MobileNoteTags,MobileWriteView}.swift`,
+move `App/Variorum/VariorumMobileTests/MobileChipScopeTests.swift` out of the folder, `build-for-testing` into
+`DerivedData/vm64-b6-red`, then `git checkout HEAD --` the four files and move the suite back.
+
+**Group (i) — the perf suite ALONE, fix build, twice** (it reads the process's one timing recorder):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6 \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-b6-perf-1>
+grep '^VM64-PERF|' <log-b6-perf-1>
+```
+Expected: 9 tests pass; `*-note-reads-per-open-*` 1 (five series); `*-editor-builds-per-open*` 1; registry growth 0;
+batch 5's four box-save zeros unchanged. The AFTER durations for §5's table come from these two runs.
+
+**Group (ii) — the pre-fix build, each suite ALONE:**
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6-red \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-b6-red-perf>
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6-red \
+  -only-testing:VariorumMobileTests/MobileNoteOpenOnceTests 2>&1 | tee <log-b6-red-once>
+```
+Expected: perf — RED `aNoteOpensOnTheRealScreen…` (reads 2, both notes), `theCaptureBoxOpens…` (reads 2),
+`aLibraryRowOpens…` (reads 2, both), `theAutosaveRegistry…` (growth 1); the other five green. OpenOnce — RED
+`anOpenAsksForTheWholeDocumentChromeOnce` (3), `openingANoteReadsNoListing…`, `closingANote…`, `theReleaseWaits…`,
+`aCoordinatorAnotherHolder…`; GREEN `aWriteLandingAfter…` and `aStoodDownEditor…` (the guards). The give-back pins wait
+10 s for a release that never comes on this build — slow, by design.
+
+**Group (iii) — the batch's suites with the editor and Write suites, fix build, ONE invocation:**
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileNoteOpenOnceTests MobileChipScopeTests
+  MobileStructuralFlightFenceTests MobileStructuralTests MobileSelectionActsTests
+  MobileEditorMaterializationTests MobileCanaryTests MobileEditorRoutingTests MobileEditorCrystallizationTests
+  MobileEditorProjectionTests MobileTypewriterRoomTests MobileNoteSealTests MobileFindInNoteTests
+  MobileEditRoutingBindingTests MobileIdentityAuditSeparatorTests MobileBulkArmingTests MobileCanaryTeardownTests
+  MobileEditRoutingCrashTests MobileEditRouteArmsTests MobileWholeBlockDeleteBrainTests MobileWholeBlockDeleteTests
+  MobileCrossBlockEditBrainTests MobileCrossBlockEditTests MobileMarkdownRenderTests MobileMarkdownReturnTests
+  MobileMarkdownActsTests MobileCheckboxTapTests MobileMarkdownCaretTests MobileTakesTests MobileTakesBrowserTests
+  MobileTakesBrowserSurfaceTests MobileTakesChromeTests MobileTakeReorderTests MobileTakeToBlockTests
+  MobileTakeLockTests MobileUndoDoorTests MobileBlockMenuTests MobileCommentsTests MobileBlockDecorTests
+  MobileWalkTests MobileTrailingNewlinesTests MobileSpaceEaterTests MobileCRLFCaptureTests
+  MobileWriteScrollAuthorityTests MobileScrollAuthorityBrainTests MobileLivenessTests
+  MobileDeferredProjectionRetryTests MobileTypedOverRescueTests MobileEditTraceTests MobileKeyDoorPostureTests
+  MobileSavepointOnLeavingTests
+  MobileMembershipTests MobileNoteTagsTests MobileNoteRenameTests MobileNoteEntryDateTests MobileReferencesTests
+  MobileTagManagerTests MobileBlockListTests MobileBlockSelectionTests MobileNoteTrayTests MobileDeletionTests
+  MobileTrashTests MobileVersionsTests MobileNavigationTests MobileShellTests MobileMenuVocabularyTests
+  MobileRefusalTableTests MobileQuickNoteTests MobileQuickNoteUnderLockTests MobileLockTeardownTests
+  MobileRelockCoordinatorTests MobileRelockPolicyTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-b6-company>
+```
+Expected: all green but VM-24's standing `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePoint…` in main's
+shape (2 of 3 cases, 2 issues). Optional, heavier: `MobilePerfWalkTests` (it opens through `loadOnce`, unchanged).
+
+**Group (iv) — the walk (the batch's use-shaped evidence; the orchestrator's hands or a GO to me).** The Debug app on a
+dev-store simulator, signed out, never Resume; both voices for the masthead. (1) Settings ▸ "Seed the 100k fixture" if the
+store is empty; open a short note from the Library, back; open "the long haul", back; open the short note again — capture
+the masthead with its chips (Study), then switch the voice to Terminal in Settings and capture the same masthead
+(`b6-chips-study.png`, `b6-chips-terminal.png`). (2) Tap the books chip: the sheet opens with "Add to a book" listed
+(capture `b6-books-sheet.png`); Done; tap the tags chip: suggestions listed (capture `b6-tags-sheet.png`). (3) Type a word
+in the note, go back at once — the word is in the note when reopened (capture `b6-reopened.png`). (4) Settings ▸ timing… —
+the "Note reads per open" row reads 1 across its samples (capture `b6-readout.png`). Screens go to
+`notes/plans/vm64-screens/` (gitignored). What it leaves on the device: the seeded fixture and one typed word in the short
+note.
