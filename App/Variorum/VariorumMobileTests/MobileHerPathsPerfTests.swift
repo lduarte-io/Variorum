@@ -1427,9 +1427,12 @@ struct MobileHerPathsPerfTests {
     /// note on why `Mounted` would keep the editor alive here).
     ///
     /// `autosave-registry-growth-per-open-close`: **ASSERTED ZERO (batch 6,
-    /// VM-70)** — the BEFORE table read 1 in every run. The editor releases
-    /// its one acquisition at its end of life, which the leaving task holds
-    /// past the flush and the leaving savepoint. Red on the pre-fix tree (1).
+    /// VM-70)** — the BEFORE table read 1 in every run. The editor gives its
+    /// one acquisition back as the LEAVING's last act (batch 6's r1): the
+    /// screen's one leaving task runs teardown's flush, then the leaving
+    /// savepoint, then `releaseAutosaveHold(ifNotShownSince:)` — never at the
+    /// editor's end of life, which SwiftUI reaches on its own schedule. Red on
+    /// the pre-fix tree (1).
     /// The wait for the release is bounded and not itself a failure: the
     /// count after it is the assertion.
     @Test func theAutosaveRegistryAcrossOpensAndCloses() async throws {

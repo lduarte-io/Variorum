@@ -776,12 +776,12 @@ The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) a
 | M0 — this live status, before any tree change | DONE (this commit) |
 | M1 — `git merge origin/main` (a merge commit); the two Shell conflicts re-landed hunk by hunk, each with its reason | DONE (`f03d59ae3`; the hunks and reasons in §7 ▸ "The merge of main (VM-55)…") — exactly the two expected files conflicted, no notes file; batch 5's four raw `lastError` lines converted in the merge by its recipe |
 | M2 — (a) the wing: the Library's two paged listings scoped as VM-55's were; a switch re-asks; a hidden switch honoured on return; VM-55's Library wing pins re-landed on the paged model | DONE (this commit) — no product line: the key already carries the wing. Test side: `holdLibraryAsItsViewDoes` (`MobileWingsTests.swift`); VM-55's four Library pins re-landed on it, expectations unchanged; a hosted GUARD for the hidden switch (`MobileLibraryPagingTests`); the wing lines in `theHoldKeyNamesTheShownListing`; the nine-wing perf comparison scoped like for like; two model comments. Build PENDING (M10); runs PENDING the stage |
-| M3 — (b) the one message line: this run's phone code routed through VM-55's seam (every raw error, every direct status write) | NOT-STARTED |
-| M4 — (c) `Shared/AppSession.swift` read (the phone's `savepointOnLeaving` branch, `releaseAutosave`, the status seam's move; the Mac's savepoint statements byte-identical) | NOT-STARTED |
-| M5 — (d) `MobileShellView.swift`: the wing door beside `libraryOnScreen` / `isDrawn`, both new `MobileLibraryView` arguments, batch 1's marks | NOT-STARTED |
-| M6 — (e) every `AppTiming` catalog series and counter has its call site | NOT-STARTED |
-| M7 — (f) the fence and the hold read on the merged tree (no change unless (b) needs a routing line) | NOT-STARTED |
-| M8 — step 3: the `MobileHerPathsPerfTests` registry comment corrected (comment only) | NOT-STARTED |
+| M3 — (b) the one message line: this run's phone code routed through VM-55's seam (every raw error, every direct status write) | DONE — nothing beyond the merge's four conversions: every other site already reaches VM-55's seam (§7 (b)); the scans' mirrors clean; P-2-2 meets VM-61 → QUESTIONS |
+| M4 — (c) `Shared/AppSession.swift` read (the phone's `savepointOnLeaving` branch, `releaseAutosave`, the status seam's move; the Mac's savepoint statements byte-identical) | DONE — both functions byte-identical to `48919f693`; no change |
+| M5 — (d) `MobileShellView.swift`: the wing door beside `libraryOnScreen` / `isDrawn`, both new `MobileLibraryView` arguments, batch 1's marks | DONE — both runs' additions kept; no change after the resolution |
+| M6 — (e) every `AppTiming` catalog series and counter has its call site | DONE — none dropped, none moved; no change |
+| M7 — (f) the fence and the hold read on the merged tree (no change unless (b) needs a routing line) | DONE — the merge brought exactly VM-55's lines into the four seam files; no change |
+| M8 — step 3: the `MobileHerPathsPerfTests` registry comment corrected (comment only) | DONE (this commit) |
 | M9 — the whole Core package, `swift test`, once, at the end of the edits | NOT-STARTED |
 | M10 — phone and Mac `build-for-testing`, cold, into `vm64-gate` | NOT-STARTED |
 | M11 — the finding-2 red build into `vm64-gate-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
@@ -3556,3 +3556,150 @@ clean, in the struct's declaration order):
 - **After `.task { await starsModel.start() }`: our `.onAppear { MobileTiming.homeAppeared() }` (VM-65's "home on
   screen") vs VM-55's `.task { await wings.track() }` (the held wings read — a dead wing returns the phone Home).** Took
   BOTH, VM-55's task first. *Reason:* two independent modifiers on the shell; neither reads the other.
+
+#### (a) The wing — the Library and Bookless listings, a switch, a hidden switch (commit `fa4a8c58a`)
+
+**Checked:** on the merged tree the paged hold's question carries `wing: session.wing.readScope`
+(`MobileLibraryViewModel.question(_:)`), and VM-56 made `WingState.readScope` return `currentID` on the phone
+(`Shared/WingState.swift`), so both listings read exactly the scope VM-55's listings read: the notes page
+`catalogNotesPage(…, wingID: wing)` where VM-55 read `observeLibrary(…, wingID: wing)`, and the loose page
+`catalogNotesPage(…, wingID: wing, poolLoose: true)` where VM-55 read `poolPosts(…, wingID: wing)` — the loose class is
+pinned identical to `poolPosts`' over every wing scope in Core (`LibraryPoolPagingTests`, batch 5). `WingState` is
+`@Observable`, and `MobileLibraryView` reads the hold key in its body (`model.hold(onScreen: isOnScreen)` →
+`readScope`), so a switch changes the key and `.task(id: hold)` restarts the hold: on screen, the restarted hold's held
+page is the new wing's first page; hidden, its `prime` reads the new wing once and nothing is held; at the return the key
+is the new wing's in any case (the first fetch of the held page re-asks). VM-55's door lands on the Shelf
+(`selectPage(.shelf)`), so a pick from the Library root hides the Library in the same moment — the restart reads the new
+wing's page once, and the return re-asks it. **No product line was needed**: the key already carried the wing; only
+`MobileWingScope.follow` around the listings was dropped (H1, H3).
+
+**Changed (all test-side, plus comments in the model):**
+- **VM-55's Library pins no longer meant anything as written** — they drove `startAll()` / `startBookless()`, which under
+  VM-55 WERE the view's road and followed the wing themselves; under batch 5 they hold ONE question for as long as they
+  run (the view's key is what restarts), so a switch would leave the old wing's rows standing and four pins would go red
+  for a reason that is not a product fault. **Replaced by** the Library held exactly as its view holds it:
+  `holdLibraryAsItsViewDoes(_:onScreen:)` (`VariorumMobileTests/MobileWingsTests.swift`, beside VM-55's `eventually`) —
+  the hold key read under observation tracking (`Observations { model.hold(onScreen:) }`, as the view's body reads it)
+  and `model.hold(key)` restarted on each change, cancelling the one before, as `.task(id:)` does. The four pins' DRIVER
+  line is the only change; their expectations, names and fixtures are VM-55's, byte for byte:
+  `MobileWingListingTests.theLibraryListsOnlyTheCurrentWingAndFollowsIt`, `MobileWingListingTests.thePoolListsOnlyTheCurrentWing`
+  (it also sets `filter = .bookless` first — the Bookless listing is held while its filter shows),
+  `MobileWingStandTests.aWingArrivingDeletedBySyncReturnsThePhoneHomeAndTheListingsFollow`,
+  `MobileWingDoorTests.aPickSwitchesLandsOnTheBookcaseAndEveryRootRescopes` (its Shelf and Starred still follow through
+  `MobileWingScope.follow`, untouched). A key that stopped carrying the wing, or a wing the key could not observe, leaves
+  the old rows standing and these go red.
+- **New GUARD (hosted, the mounted shell):** `MobileLibraryPagingTests.aWingSwitchedWhileTheLibraryIsAwayIsHonouredOnTheReturn`
+  — the Library seen in Home, left for the Shelf, the wing switched there by VM-55's door (the name on the Shelf's root,
+  then the "Work" row), the Library's tab door: Work's note listed, Home's not. Green by design on the merged tree.
+- **Model-level wing lines** added to batch 5's own `MobileLibraryPagingRulesTests.theHoldKeyNamesTheShownListing`: the
+  question's wing is the current wing, and a switch changes both the shown and the hidden key.
+- **Comments only** in `MobileLibraryViewModel.swift`: `Question.wing`'s doc (the current wing on the phone since VM-56; a
+  switch is a new question) and `startAll()`'s (it holds one question; following is the view's key).
+- **The nine-wing perf comparison** (`MobileHerPathsPerfTests.typingInTheBoxWakesTheOffScreenLibrary`, RECORDED series —
+  none asserted): the two page reads already take `readScope`, which on the merged tree is Home (one ninth of the world);
+  the two pre-batch-5 comparison reads were unscoped. Scoped them by the same `wing` (VM-57's scope for those very
+  queries), so the same-run comparison stays like for like. **Said, per the record's rule:** on the merged tree
+  `library-page-fetch-ninewings`, `bookless-page-fetch-ninewings`, `library-listing-fetch-ninewings` and
+  `bookless-listing-fetch-ninewings` measure the CURRENT WING (Home), where batch 3's BEFORE and the final tree's AFTER
+  tables (§5) measured every wing; the plans printed (`VM64-PLAN|…`) carry the wing predicate too. No other series moves.
+
+**VM-55's pins that cover the Library's wing scope (by TYPE):** `MobileWingListingTests` (the two above, and
+`searchAsksTheCurrentWing` — the search's own wing, untouched, still keyed by `model.wingID`) · `MobileWingStandTests`
+(the sync-death pin above) · `MobileWingDoorTests` (the pick pin above) · `MobileWingDoorShellTests` (the mounted shell,
+the pick from the Library root — untouched) · `MobileWingDoorGeometryTests` (`theLibraryRootsDoor` — untouched). This
+merge's: `MobileLibraryPagingTests` (the new guard) · `MobileLibraryPagingRulesTests` (the hold key's wing lines).
+
+**For the cold reviewer — one difference the merge kept, read before (a):** VM-55's `follow` cancelled the old wing's run
+AND WAITED for it to end before the new one started ("a listing never shows two wings"). `.task(id:)` cancels the old hold
+and starts the new one without waiting. What remains of the old run: its held observation's stream ends at cancellation
+(no further landing); its in-flight one-shot reads (`prime`, `reread`, `loadMore`) are GRDB async reads, which throw
+`CancellationError` when cancelled mid-read (the read is interrupted), so only a read that had already FINISHED in the
+instant before the switch can still land — and `reread` / `loadMore` then also drop on their question/generation guards;
+`prime` lands it (it has no guard after its await), replacing the rows with the old wing's page until the next landing.
+That window is the same one batch 5 already had for a sort or filter change; the wing adds a trigger, not a mechanism.
+No pin can hold it deterministically and no line was written for it; it is named here so the reviewer can judge it.
+
+#### (b) The one message line (no commit beyond the merge)
+
+**Checked:** a mirror of VM-55's `MobileNoRawErrorPinTests.noPhoneSourceRendersARawError` over every `.swift` under
+`VariorumMobile/` on the merged tree (its patterns: `String(describing:`, `String(reflecting:`, `.localizedDescription`,
+an interpolated `\(error|err|failure|op)`, `"Refused: \(…)"`, `DeletionRefusal.fallback(`/`.words(`,
+`OpsRefusalCopy.message(`, `VersionActs.words(`; logger lines exempt) finds only VM-55's two named exemptions
+(`MobileStarterJournal.swift`) and one logger line (`MobileFirstWriteFurniture.swift`). A mirror of
+`MobileErrorLogPrivacyPinTests` over `Shared/` + `VariorumMobile/` finds only its named exemption
+(`SampleLibraryWelcome.swift`). This run's phone code, read site by site:
+- batch 5's Library model — four raw `lastError` writes (`prime`, `holdFirstPage`, `reread`, `loadMore`): converted to
+  `OpsRefusalCopy.sentence(for: error, roads: .phone)` IN THE MERGE (`f03d59ae3`, H2/H3 and the recipe); the slot's
+  `didSet` (VM-55's) speaks each on the line. Red without: `MobileNoRawErrorPinTests` (four offending lines).
+- batch 6's arrival fallback (`loadLive` → `loadOnce`, whose catch VM-55 converted to `report(OpsRefusalCopy.sentence…)`),
+  the chips' fallbacks (`refreshChip` → `refresh()`, whose catches VM-55 routed through `say(…, as: .refusal)` /
+  the slot's `didSet`), and `takeAutosaveHold`'s error hook (→ `reportOperationError`, which VM-55 made
+  `report(OpsRefusalCopy.sentence…)` — the same road `init`'s hook speaks): already on VM-55's seam, nothing to change.
+- batch 2's fence: the gate belt's `refuse(StructuralUndoCopy.anotherIsLanding)` (VM-55 made `refuse` call `report`) and
+  the drain's `report(StructuralUndoCopy.anotherIsLanding, action: statusAction)` — both now reach `MobileLine.say(…, as:
+  .refusal, door: undoDoor)`, the line, with the one existing sentence. Nothing to change.
+- batch 1's timing store (`MobileTimingStore`) shows no message (its file failures are `try?`, silent); the readout's
+  text (`MobileTimingCopy.report`) is a table, not a status. Nothing to change.
+- No site was left on the generic road for want of a sentence.
+**One consequence, carried to QUESTIONS below (P-2-2 meets VM-61):** `MobileLine.say` first takes back the note's
+standing structural-Undo line (VM-61's carriage of M20's law) before it speaks. So when a removal-class door (merge,
+block delete, archive, whole-paragraph delete, the cross-block compound) refused or withheld a key during its flight, the
+drain's sentence replaces that door's line AND its Undo; the model's `statusAction` still holds `.undo`, which no face
+draws since VM-61 took the masthead's row, and the Undo stays in the ⋯ sheet. P-2-2 said "keeps the door's action" —
+true of the masthead row it was written against, not of the one line.
+
+#### (c) `Shared/AppSession.swift` (no change)
+
+Merged clean. `savepointOnLeaving` and `releaseAutosave` are byte-identical to this branch before the merge (extracted from
+`48919f693` and `HEAD` and compared: 98 and 21 lines, no difference) — so the Mac's statements on the savepoint road are
+unchanged by the merge, and the phone's branch (batch 7, with the ladder's corrected comments — the one-ask gap and its
+bound) and the phone's `releaseAutosave` (an entry goes only at zero holders and a clean coordinator) stand as built. The
+merge's only change in the file is VM-55's: `let status = StatusCenter()` left the second `#if os(macOS)` block for the
+shared section beside `undoMenuState` (line ~233), so the phone's `report` reaches `session.status`.
+
+#### (d) `MobileShellView.swift` (the one resolved hunk, nothing else)
+
+Read the merged file: VM-55's `wings` / `wingDoor` state and init, the three roots' `wingName:` / `onWingDoor:`, the
+wing list sheet, `.onChange(of: wingDoor.landings) { selectPage(.shelf) }`, `.task { await wings.track() }`, the message
+line's host and the tab bar's measured height — beside batch 5's `isOnScreen: libraryOnScreen(width: width)` and
+`libraryOnScreen` (`libraryPath.isEmpty && MobileShellBand.isDrawn(…)`), and batch 1's `.onAppear {
+MobileTiming.homeAppeared() }`. A pick's landing goes through `selectPage(.shelf)`, so the Library's on-screen fact
+falls with the page change and the hold restarts as (a) says; the list sheet over the Library root leaves the Library
+drawn (held) while it stands — the drawn-at-all rule (P-68-3). Both runs' additions are kept; nothing changed after the
+resolution.
+
+#### (e) The timing marks (no change)
+
+Every case of `AppTiming`'s catalog (23 series, 14 counters) is referenced by its mark function, and every mark function
+has its app call site on the merged tree (a grep of `AppTiming.<fn>(` over `Shared/`, `VariorumMobile/`, `Variorum/`):
+in the shared files — `MobileQuickNote.swift` (`boxOpenPressed`, `boxFilingStarted`/`Ended`, `boxFocused`),
+`MobileShellView.swift` (`MobileTiming.homeAppeared` → `homeOnScreen`), `MobileWriteView.swift` (`noteRequested`,
+`noteArrived`, `noteLeaving`, `noteLeft`), `MobileEditorViewModel.swift` (`editorBuilt`, `noteProjectionLoaded`,
+`noteProjectionFetched`, `noteProjectionDelivered` ×2, `noteProjectionRefreshed`, `MobileTiming.noteRendered` →
+`notePainted`), `MobileLibraryViewModel.swift` (`libraryFetched`, `libraryDelivered`), `AppSession.swift`
+(`savepointAttempted`, Mac and phone), `AppBootstrap.swift` (`libraryOpened`, `unlockAccepted`); and outside them
+`AutosaveCoordinator.swift`, `AppServices.swift`, `SyncSession.swift`, `MobileTiming.swift`, `MobileRoadFaces.swift`,
+`VariorumMobileApp.swift`. `openLeavingWindow`, `afterNextFrame` and `NextFrameTick.schedule` are internal helpers. The
+merge DROPPED none and MOVED none (the timing files themselves are untouched by it; only line numbers shifted). What
+the marks measure is unchanged, with one scope note: "Library ready" (the note listing's first landing) and the
+Library's fetch/delivery counters now count reads of the current wing's listing (VM-56) — the count, not the meaning.
+
+#### (f) The fence and the hold (no change)
+
+The merge brought into `MobileEditorViewModel.swift`, `MobileStructural.swift`, `MobileUndoDoor.swift` and
+`MobileWriteView.swift` exactly VM-55's own changed lines (each file's merge diff compared with VM-55's diff from the
+base: identical), so nothing of this run's was altered there. Read on the merged tree: the latch hooks
+(`structuralInFlight` / `inFlight` `didSet` → `structuralFlightChanged()`), the Insert Below exemption, the gate belt
+(`refusesPolicedEdit` → `refuse(…anotherIsLanding)` → `report` → the line), the storage belt and the settle, the drain
+(deferred out of a projection apply, as before — VM-55's `report` adds a status write, still outside the apply),
+`reportOperationError` (VM-55's `report(OpsRefusalCopy.sentence…)`), `takeAutosaveHold` (both paths re-observe; its
+hook through `reportOperationError`) and `releaseAutosaveHold`; and the leaving task's order — VM-55's
+`MobileLine.withdrawNoteLine` and `deregister` first (synchronous, before the task), then in the one task
+`teardown()` (the flush) → `savepointOnLeaving` → `releaseAutosaveHold(ifNotShownSince:)` → `AppTiming.noteLeft`.
+`storageDidEdit`'s routing, `fallbackVerdict` and `EditorEditRouting` not opened.
+
+#### Step 3 — the registry comment (comment only)
+
+`MobileHerPathsPerfTests.theAutosaveRegistryAcrossOpensAndCloses`' doc said the editor "releases its one acquisition at its
+end of life, which the leaving task holds" — r0's mechanism. Now: the release is the leaving's last act (teardown's flush,
+the leaving savepoint, then `releaseAutosaveHold(ifNotShownSince:)`), never at the editor's end of life.
