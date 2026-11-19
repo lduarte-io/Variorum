@@ -44,6 +44,7 @@
 //
 
 import Foundation
+import VariorumCore
 
 nonisolated enum DataSafetyCopy {
     /// 13r U3-A — R-13r-14: the second-folder section's title, in ONE place,
@@ -85,6 +86,88 @@ nonisolated enum DataSafetyCopy {
         but it is still inside that backup file, and stays there until the backup is \
         rotated away or you delete the file.
         """
+
+    // MARK: - The search index (VX-79 — the VX-980 run record's BATCH 2)
+    //
+    // Every word here is PROVISIONAL (her R-980-4: "provisional wording is fine for now, you can keep them listed") and
+    // listed under RENDERED STRINGS in the run record for her wording pass. ONE home: the pane, the registry's two verbs
+    // and the Settings search row all read these.
+
+    /// The row's section title — and its Settings search row's (one text).
+    static let searchIndexSection = "Search index"
+
+    /// The row's one line: what the index is, in her terms.
+    static let searchIndexWhatItIs = """
+        Search reads an index Variorum keeps on this Mac, built from your notes. Nothing of yours lives only in \
+        the index, so checking it or rebuilding it is always safe.
+        """
+
+    /// The two doors' verbs (the registry's declarations read these).
+    static let searchIndexCheckDoor = "Check Index"
+    static let searchIndexRebuildDoor = "Rebuild Index"
+    /// Both declarations' unavailable note (the backup acts' shape: where the act lives).
+    static let searchIndexDoorsLiveThere = "The search index is checked and rebuilt in Settings \u{25B8} Data Safety."
+
+    /// While a door runs — the row says so, and both doors wait.
+    static let searchIndexChecking = "Checking the search index against your notes\u{2026}"
+    static let searchIndexRebuilding = "Rebuilding the search index from your notes\u{2026}"
+
+    /// What a finished act says: the state the index is in NOW, with the integrity check's honest numbers — never a
+    /// bare "done". Pure (pinned).
+    static func searchIndexReceipt(rebuilt: Bool, _ found: SearchIndexIntegrity) -> String {
+        let entries = "\(found.docCount.formatted()) \(found.docCount == 1 ? "entry" : "entries")"
+        if found.isHealthy {
+            return rebuilt
+                ? "Rebuilt from your notes. The search index is in step with them \u{2014} \(entries)."
+                : "The search index is in step with your notes \u{2014} \(entries)."
+        }
+        let parts = searchIndexDrift(found)
+        return rebuilt
+            ? "Rebuilt from your notes, but the search index is still out of step with them: \(parts). "
+                + "Your notes themselves are untouched."
+            : "The search index is out of step with your notes: \(parts). Rebuild it to fix that."
+    }
+
+    /// The numbers the integrity check carries, said plainly: what is missing, what is left over, what is out of
+    /// date, and whether its words match the notes'.
+    static func searchIndexDrift(_ found: SearchIndexIntegrity) -> String {
+        var parts: [String] = []
+        let missing = found.missing.count
+        if missing > 0 {
+            parts.append(missing == 1
+                ? "1 piece of writing is missing from it"
+                : "\(missing.formatted()) pieces of writing are missing from it")
+        }
+        let orphaned = found.orphaned.count
+        if orphaned > 0 {
+            parts.append(orphaned == 1
+                ? "1 entry points at writing that is gone"
+                : "\(orphaned.formatted()) entries point at writing that is gone")
+        }
+        let drift = found.factDrift.count
+        if drift > 0 {
+            parts.append(drift == 1
+                ? "1 entry has out-of-date details"
+                : "\(drift.formatted()) entries have out-of-date details")
+        }
+        if !found.indexMatchesContent {
+            parts.append("the words it holds differ from your notes")
+        }
+        switch parts.count {
+        case 0: return "its entries disagree with your notes"
+        case 1: return parts[0]
+        default: return parts.dropLast().joined(separator: ", ") + " and " + parts[parts.count - 1]
+        }
+    }
+
+    /// A door that could not run says the system's reason, as a refusal. The rebuild is one transaction, so a
+    /// failed one changed nothing.
+    static func searchIndexRefusal(rebuilt: Bool, reason: String) -> String {
+        let reason = reason.hasSuffix(".") ? String(reason.dropLast()) : reason
+        return rebuilt
+            ? "Couldn't rebuild the search index: \(reason). Nothing was changed."
+            : "Couldn't check the search index: \(reason)."
+    }
 
     // MARK: - The runbook
 

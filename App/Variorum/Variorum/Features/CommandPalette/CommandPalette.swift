@@ -168,10 +168,13 @@ final class PaletteModel {
     /// The palette's question for the index: the field's words through the
     /// one v1 grammar (R-13o-8), the passages that are BODY hits — never a
     /// title (the note row above already says it) and never a book's name
-    /// (the book row does). nil without words.
+    /// (the book row does). nil without words — the ONE core predicate's call
+    /// (`SearchComposer.asksWords`, VX-954: `— #tag` asks nothing here, as
+    /// `#tag` does; a field of only punctuation keeps today's reading and its
+    /// "all matches" row, PROVISIONAL P-980-1 (a)).
     nonisolated static func passageQuestion(_ text: String) -> SearchQuery? {
         var query = SearchQueryParser.parse(text)
-        guard query.text != nil else { return nil }
+        guard SearchComposer.asksWords(query) else { return nil }
         let body: SearchFilter = .all([.not(.docKind(.title)), .not(.family(.books))])
         query.filter = query.filter.map { .all([$0, body]) } ?? body
         return query

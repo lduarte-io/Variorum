@@ -32,12 +32,12 @@ struct DataSafetyPane: View {
     let services: AppServices?
     @State private var model: DataSafetyModel
 
-    /// P-1: the five acts this surface renders, declared once and walked
+    /// P-1: the seven acts this surface renders, declared once and walked
     /// (pre-13x 3b: the decrypted export joins; 13x F1 R1-MAJOR: the
-    /// hand-off twin joins).
+    /// hand-off twin joins; VX-79: the search index's two doors join).
     static let surfaceCapabilities: [CapabilityID] = [
         .backUpNow, .chooseBackupFolder, .forgetBackupFolder, .exportPlaintextLibrary,
-        .handOffLibrary,
+        .handOffLibrary, .checkSearchIndex, .rebuildSearchIndex,
     ]
 
     /// pre-13x 3b (copy §4): the decrypted export's brain, made when the door
@@ -73,7 +73,19 @@ struct DataSafetyPane: View {
             // sign-in, and the facts are re-read on every refresh.
             signedIn: { services?.account.variorum != nil },
             // VX-309 U1a (VX-397): this Mac's pairs of this library per place.
-            roadCounts: roadStanding?.copyCounts))
+            roadCounts: roadStanding?.copyCounts,
+            // VX-79: the search index's two doors, over the session's serial
+            // off-main runner (P2) — never run by anything but her press.
+            searchIndexDoors: services.map { Self.searchIndexDoors(runner: $0.session.runner) }))
+    }
+
+    /// VX-79 — the row's two acts, the core's maintenance doors
+    /// (`Operations+SearchIndex.swift`) through the runner every operation
+    /// takes off the main thread.
+    static func searchIndexDoors(runner: OperationsRunner) -> DataSafetyModel.SearchIndexDoors {
+        DataSafetyModel.SearchIndexDoors(
+            check: { try await runner.run { try $0.verifySearchIndex() } },
+            rebuild: { try await runner.run { try $0.rebuildSearchIndex() } })
     }
 
     var body: some View {
@@ -91,6 +103,9 @@ struct DataSafetyPane: View {
                 plaintextExportSection
                 syncSection
                 restoreSection
+                // VX-79: after the copies and restore matter, before the log
+                // (PROVISIONAL P-980-2).
+                searchIndexSection
                 logSection
             } else {
                 Section("Backups") {
@@ -518,6 +533,49 @@ struct DataSafetyPane: View {
     private var syncing: Bool {
         guard let services else { return false }
         return services.sync.allowsSync && services.sync.isConfigured
+    }
+
+    // MARK: - The search index (VX-79 — R-13o-3's rebuild door, its face)
+
+    /// The search index's row: one line saying what the index is, the two
+    /// declared doors, and what the last press found — the state the index is
+    /// in, never a bare "done". Nothing runs until she presses; while one act
+    /// runs the row says so and both doors wait.
+    @ViewBuilder
+    private var searchIndexSection: some View {
+        if model.drawsSearchIndexRow {
+            Section(DataSafetyCopy.searchIndexSection) {
+                Text(DataSafetyCopy.searchIndexWhatItIs)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button(CapabilityRegistry.capability(.checkSearchIndex).verb) {
+                        Task { await model.checkSearchIndex() }
+                    }
+                    .disabled(model.searchIndexWorking)
+                    Button(CapabilityRegistry.capability(.rebuildSearchIndex).verb) {
+                        Task { await model.rebuildSearchIndex() }
+                    }
+                    .disabled(model.searchIndexWorking)
+                    if model.searchIndexWorking { ProgressView().controlSize(.small) }
+                    Spacer()
+                }
+                if let line = DataSafetyModel.searchIndexLine(model.searchIndex) {
+                    if line.alarm {
+                        Text(line.text)
+                            .font(.caption)
+                            .alarmVoice()
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(line.text)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - The log (behind the face, per her ruling)

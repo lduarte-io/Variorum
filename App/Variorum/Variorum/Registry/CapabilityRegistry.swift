@@ -2829,6 +2829,22 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: "The travelling copy is made while your library is open — "
                 + "File ▸ Send Library to Another Mac…, or Settings ▸ Data Safety.",
             availability: always),
+        // VX-79 (the VX-980 run, batch 2): the search index's two doors — the
+        // backup acts' shape exactly (`.surface` only, app scope, always
+        // available as an ACT; the one-flight condition is the row's own).
+        // Their verbs are the row's words' ONE home (`DataSafetyCopy`).
+        Capability(
+            id: .checkSearchIndex, verb: DataSafetyCopy.searchIndexCheckDoor, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: DataSafetyCopy.searchIndexDoorsLiveThere,
+            availability: always),
+        Capability(
+            id: .rebuildSearchIndex, verb: DataSafetyCopy.searchIndexRebuildDoor, scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: DataSafetyCopy.searchIndexDoorsLiveThere,
+            availability: always),
 
         // MARK: Diagnostics (13r U3-B — Settings ▸ Diagnostics, R-13r-5)
         // The Data Safety shape: `.surface`, app scope, always available as
