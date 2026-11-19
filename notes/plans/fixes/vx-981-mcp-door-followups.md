@@ -16,7 +16,7 @@ Ticket: VX-981 · Project: none (an umbrella over MCP-area tickets) · Branch: `
 |---|---|
 | Kickoff: roster, worktree, in-flight row (`bc8f3d03a` on main), this record | DONE |
 | BATCH 1 — the Journal shows as Private (VX-1007) | READY — code + pins at `366fb5213` (core green, red-on-old verified); the app-target gate + its red leg and the walk wait for the orchestrator's stage window (BATCH 1 RECORD → GATE TYPES, WALK SCRIPT LINES) |
-| BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961 · riders VX-133 · VX-705) | NOT-STARTED |
+| BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961 · riders VX-133 · VX-705) | IN-PROGRESS — the implementer's BATCH 2 RECORD (end of file) carries the live pieces |
 | BATCH 3 — announces in order, never waiting on a stall (VX-951 · VX-944) | NOT-STARTED |
 | BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963 · rider VX-773) | NOT-STARTED |
 | BATCH 5 — the parity audit (VX-368); the output-cap measurement (VX-370) HELD | NOT-STARTED |
@@ -336,7 +336,7 @@ No revert is in flight (row V's revert was restored and verified).
 | Piece | State |
 |---|---|
 | R0 — this record's opening: the traced mechanisms, the design per member, the commit plan | DONE (this commit) |
-| 977-P — VX-977's pins (the rung matrix, the two-store arms) + the existing unlink suite's justified grant edits; run RED on the old rung | NOT-STARTED |
+| 977-P — VX-977's pins (the rung matrix, the two-store arms) + the existing unlink suite's justified grant edits; run RED on the old rung | DONE (this commit) — RED on the old rung: `swift test --filter MCPUnlinkVersionsServerTests` → "Test run with 13 tests in 1 suite failed … with 19 issues" (the two new pins 5 + 11, the ask-rung justified edit 1, the description 2; the nine others green). Evidence under PINS |
 | 977-F — VX-977: `unlink_versions` at EDIT (catalog + the act's two rung steps + the ask's rung), the description, the field guide's lesson 3 (Write new loses the clause, Edit gains it), the comments; pins GREEN | NOT-STARTED |
 | 979 — VX-979: the title-free arm for the link/unlink pair (app copy) + boundary pins (compile) | NOT-STARTED |
 | 961-P / 961-F — VX-961: `show_in_app`'s two landed arms (the move, the ask) split from their Activity line; pins RED then GREEN; the app's words | NOT-STARTED |
