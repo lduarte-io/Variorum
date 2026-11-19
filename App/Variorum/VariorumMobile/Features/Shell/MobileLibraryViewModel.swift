@@ -313,34 +313,47 @@ final class MobileLibraryViewModel {
     /// Everything, newest first under the picked stamp (the Mac
     /// library's own observation shape; `.lastTouched` is the standing
     /// default).
+    ///
+    /// VM-57: the wing the phone stands in — re-read for each wing
+    /// (`MobileWingScope.follow`).
     func startAll() async {
-        do {
-            for try await items in session.database.observeLibrary(
-                sort: sort, direction: .desc, limit: listingLimit
-            ) {
-                all = items
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await items in session.database.observeLibrary(
+                    sort: sort, direction: .desc, limit: listingLimit, wingID: wing
+                ) {
+                    all = items
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = String(describing: error)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
         }
     }
 
     /// The bookless filter — the Pool's phone home (`Queries.poolPosts`:
     /// no live curated membership AND no smart book collecting).
+    ///
+    /// VM-57: the current wing's Pool, re-read for each wing.
     func startBookless() async {
-        do {
-            let limit = listingLimit
-            for try await items in session.database.observe({ db in
-                try Queries.poolPosts(db, limit: limit)
-            }) {
-                bookless = items
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                let limit = listingLimit
+                for try await items in session.database.observe({ db in
+                    try Queries.poolPosts(db, limit: limit, wingID: wing)
+                }) {
+                    bookless = items
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = String(describing: error)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
         }
     }
+
+    /// VM-57 — the wing the phone stands in (the search task re-keys on it,
+    /// so a standing query re-asks in the new wing).
+    var wingID: String { session.wing.currentID }
 
     /// ONE-SHOT search over the standing catalog scope. An
     /// empty/whitespace query clears the search (the listing returns).
@@ -354,8 +367,12 @@ final class MobileLibraryViewModel {
             return
         }
         do {
+            // VM-57: the current wing's catalog. (Core lists snippet hits in
+            // every wing — the one shared room; this face drops pool-home
+            // hits anyway, below.)
+            let wing = session.wing.currentID
             let found = try await session.database.read { db in
-                try Queries.searchCatalog(db, query: trimmed)
+                try Queries.searchCatalog(db, query: trimmed, wingID: wing)
             }
             guard activeQuery == trimmed else { return }
             // Book and post hits navigate as themselves; block hits

@@ -59,22 +59,28 @@ final class MobileShelfViewModel {
     }
 
     /// The held half: books + pins + the daily designation (all tiny).
+    ///
+    /// VM-57: the books of the wing the phone stands in (the Shelf AND the
+    /// Library's Books filter, which wears this same model), re-read for
+    /// each wing.
     func start() async {
-        do {
-            for try await value in session.database.observe({ db in
-                Snapshot(
-                    books: try Queries.bookshelf(db),
-                    pins: try Queries.shelfPins(db),
-                    dailyBookID: try Queries.dailyJournalBookID(db))
-            }) {
-                observationTicks += 1
-                books = value.books
-                pins = value.pins
-                dailyBookID = value.dailyBookID
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await value in session.database.observe({ db in
+                    Snapshot(
+                        books: try Queries.bookshelf(db, wingID: wing),
+                        pins: try Queries.shelfPins(db),
+                        dailyBookID: try Queries.dailyJournalBookID(db))
+                }) {
+                    observationTicks += 1
+                    books = value.books
+                    pins = value.pins
+                    dailyBookID = value.dailyBookID
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = String(describing: error)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
         }
     }
 

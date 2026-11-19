@@ -280,8 +280,8 @@ this file whole, SurfaceContracts' "The app" and "The Bookcase and books" wing b
 | Piece | State |
 |---|---|
 | Record skeleton | DONE (this commit) |
-| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | NOT-STARTED — design: `WingState.readScope` returns `currentID` on both platforms; the bootstrap's memory block un-fenced; a phone `MobileWingModel` holds `Queries.wings` (revalidate + count through `WingState`, the Mac `WingsModel.adopt`'s three steps) and gives the roots the wing's name; each root's path line leads with the wing's name |
-| VM-57 — every listing reads the current wing | NOT-STARTED — design: one phone helper `MobileWingScope.follow` re-runs a held listing for each wing the phone stands in (the old run finishes before the new one starts); call sites pass `wingID:` |
+| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | IN-PROGRESS — code landed in the VM-56+57 commit (compiles; phone build-for-testing green); remains: its tests (PENDING) |
+| VM-57 — every listing reads the current wing | IN-PROGRESS — call sites landed in the VM-56+57 commit (Library All/Notes, Pool, Books+Shelf, search, Starred, Archived, Trash; Snippets untouched); remains: tests (PENDING) |
 | VM-58 — mints in the current wing | NOT-STARTED |
 | VM-60 — the tag manager per wing | NOT-STARTED |
 | VM-59 — the wing-blind pickers (pins, then fix, separate commits) | NOT-STARTED |

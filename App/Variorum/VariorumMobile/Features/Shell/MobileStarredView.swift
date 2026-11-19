@@ -46,6 +46,9 @@ struct MobileStarredView<TabBar: View>: View {
     /// star door (the Mac StarDoor's one-value discipline).
     @Bindable var stars: MobileStarsModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
     @ViewBuilder let tabBar: () -> TabBar
     /// A row's destination, through the model's own route brain — the
     /// Library's callback shape.
@@ -92,7 +95,8 @@ struct MobileStarredView<TabBar: View>: View {
     /// the P38 crowding lesson says a strip earns its doors.
     private var pathLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path([MobileStarsModel.pageName]))
+            Text(tokens.path(MobileWingTitle.components(
+                wing: wingName, page: MobileStarsModel.pageName)))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()

@@ -87,15 +87,22 @@ final class MobileArchiveModel {
     /// `observeLibrary` and `observeTrash`, and rolling this one by hand
     /// would make one of three sibling reads take a different road for no
     /// reason.
+    ///
+    /// VM-57: the Archived room of the wing the phone stands in (per wing,
+    /// as on the Mac), re-read for each wing.
     func start() async {
-        do {
-            let limit = window + 1
-            for try await value in session.database.observeArchivedPosts(limit: limit) {
-                (archived, truncated) = TrashListing.windowed(value, window: window)
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                let limit = window + 1
+                for try await value in session.database.observeArchivedPosts(
+                    limit: limit, wingID: wing
+                ) {
+                    (archived, truncated) = TrashListing.windowed(value, window: window)
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = DeletionRefusal.fallback(error)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = DeletionRefusal.fallback(error)
         }
     }
 

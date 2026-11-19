@@ -127,25 +127,33 @@ final class MobileStarsModel {
 
     /// Held: the rows she starred — ∝ the stars she keeps, never the corpus
     /// (VX-643's P1 check, `StarsP1Tests`; the Mac StarsModel's own note).
+    ///
+    /// VM-57: the stars of the wing the phone stands in
+    /// (`Queries.starred(_:wingID:)` — the Mac's read, P-13id-U5-10: the
+    /// list stays one store-wide list, each wing shows its own), re-read for
+    /// each wing.
     func start() async {
-        do {
-            for try await value in session.database.observe({ db in
-                try Queries.starred(db)
-            }) {
-                items = value
-                await resolveNames()
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await value in session.database.observe({ db in
+                    try Queries.starred(db, wingID: wing)
+                }) {
+                    items = value
+                    await resolveNames()
+                }
+            } catch is CancellationError {
+            } catch {
+                speakHomeless(String(describing: error))
             }
-        } catch is CancellationError {
-        } catch {
-            speakHomeless(String(describing: error))
         }
     }
 
     /// One-shot for headless determinism (the observation echoes it in
-    /// production).
+    /// production). VM-57: the current wing's stars.
     func refresh() async {
         do {
-            items = try await session.database.read { try Queries.starred($0) }
+            let wing = session.wing.currentID
+            items = try await session.database.read { try Queries.starred($0, wingID: wing) }
             await resolveNames()
         } catch {
             speakHomeless(String(describing: error))

@@ -48,6 +48,9 @@ struct MobileLibraryView<TabBar: View>: View {
     /// `MobileShelfPerfTests` reads.
     let books: MobileShelfViewModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
     /// **The Two-rooms doors** (batch 6c — her QUESTIONS #84 ruling). Batch
@@ -137,7 +140,8 @@ struct MobileLibraryView<TabBar: View>: View {
         .task(id: model.filter) {
             if model.filter == .scraps { await scraps.start() }
         }
-        .task(id: query) { await model.search(query) }
+        // VM-57: a standing query re-asks when the wing changes.
+        .task(id: [model.wingID, query]) { await model.search(query) }
         // PR1's confirm — a real `@Bindable` projection (§15's trap (a))
         // AND `presenting:`, which is the half batch 4 was missing: without
         // it the note to delete was read back AFTER SwiftUI's dismissal had
@@ -199,7 +203,7 @@ struct MobileLibraryView<TabBar: View>: View {
         // `spacing: 16` — the Shelf path line's own value, adopted now that
         // this strip carries two trailing doors instead of one.
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path(["Library"]))
+            Text(tokens.path(MobileWingTitle.components(wing: wingName, page: "Library")))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()

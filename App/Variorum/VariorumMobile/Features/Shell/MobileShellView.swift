@@ -142,6 +142,9 @@ struct MobileShellView: View {
     /// The starred set (parity C3 — ONE model threaded to every surface
     /// carrying the star door, the Mac StarDoor discipline).
     @State private var starsModel: MobileStarsModel
+    /// VM-56 — the wing the phone stands in: the held wings read (a wing
+    /// that dies returns the phone to Home) and its name, the roots' title.
+    @State private var wingModel: MobileWingModel
     @State private var settingsPresented = false
     /// VM-8 unit 2 — F-U2-E (PROVISIONAL P-VM8-8): the open library's protection receipts on the phone — the faces'
     /// `speak` door, shown by the Protection screen (one shell per open: a re-keying act's receipt owed to its reopen is
@@ -167,6 +170,7 @@ struct MobileShellView: View {
         _trashModel = State(initialValue: MobileTrashModel(session: session))
         _archiveModel = State(initialValue: MobileArchiveModel(session: session))
         _starsModel = State(initialValue: MobileStarsModel(session: session))
+        _wingModel = State(initialValue: MobileWingModel(session: session))
         // The quick-note box's session (round 2, M5). Bound HERE and not
         // in a `.task` deliberately: `bind` is idempotent and writes only
         // `@ObservationIgnored` storage, so it cannot re-enter the view
@@ -198,6 +202,7 @@ struct MobileShellView: View {
                     stack(path: $starredPath, owner: .starred) {
                         MobileStarredView(
                             stars: starsModel, tokens: tokens,
+                            wingName: wingModel.currentName,
                             tabBar: { tabBar },
                             onOpen: { starredPath.append($0) })
                     }
@@ -207,6 +212,7 @@ struct MobileShellView: View {
                         MobileShelfView(
                             model: shelfModel, stars: starsModel,
                             quickNote: router.quickNote, tokens: tokens,
+                            wingName: wingModel.currentName,
                             tabBar: { tabBar },
                             onOpenBook: { id in
                                 leavingShelf { shelfPath.append(MobileRoute.book(id)) }
@@ -233,6 +239,7 @@ struct MobileShellView: View {
                             // observation and one set of row faces, never a second.
                             books: shelfModel,
                             tokens: tokens,
+                            wingName: wingModel.currentName,
                             tabBar: { tabBar },
                             onOpen: { libraryPath.append($0) },
                             onOpenTrash: { libraryPath.append(MobileRoute.trash) },
@@ -275,6 +282,7 @@ struct MobileShellView: View {
         .onAppear { attachProtectionReceipts() }
         .onChange(of: bootstrap?.roadStanding.map { ObjectIdentifier($0) }) { _, _ in attachProtectionReceipts() }
         .task { await starsModel.start() }
+        .task { await wingModel.track() }
         // R27b's starter Journal used to be seeded from HERE, concurrently
         // with the task that composes AppServices — which is what the
         // batch-5 cold review's MAJOR was about: the seed always won that

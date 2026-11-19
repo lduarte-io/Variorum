@@ -88,18 +88,25 @@ final class MobileTrashModel {
     /// row 11 — her D1 revision: takes never row in a global Trash, on either
     /// platform). One decision, one adoption line; the phone's FACE (its
     /// chip row and its two lists) is mobile's own round to reshape.
+    ///
+    /// VM-57: the Trash of the wing the phone stands in (per wing, as on the
+    /// Mac) — the same wing `TrashPurge`'s Empty Trash counts and takes
+    /// through `WingState.readScope`, so the door takes exactly what this
+    /// room shows. Re-read for each wing.
     func startTrash() async {
         let kinds = TrashScope.kinds(filter: kindFilter)
-        do {
-            for try await value in session.database.observeTrash(
-                now: session.now, kinds: kinds, oldestFirst: oldestFirst,
-                limit: window + 1
-            ) {
-                (trash, trashTruncated) = TrashListing.windowed(value, window: window)
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await value in session.database.observeTrash(
+                    now: session.now, kinds: kinds, oldestFirst: oldestFirst,
+                    limit: window + 1, wingID: wing
+                ) {
+                    (trash, trashTruncated) = TrashListing.windowed(value, window: window)
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = DeletionRefusal.fallback(error)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = DeletionRefusal.fallback(error)
         }
     }
 

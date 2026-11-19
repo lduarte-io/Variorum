@@ -62,6 +62,9 @@ struct MobileShelfView<TabBar: View>: View {
     /// so the app-lifecycle seam can reach it; the shelf only wears it.
     @Bindable var quickNote: MobileQuickNoteModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
     @ViewBuilder let tabBar: () -> TabBar
     let onOpenBook: (String) -> Void
     /// Open a note straight into typing — the Today button's landing AND
@@ -224,7 +227,7 @@ struct MobileShelfView<TabBar: View>: View {
     /// and the settings door trailing.
     private var pathLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path(["Shelf"]) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
+            Text(tokens.path(MobileWingTitle.components(wing: wingName, page: "Shelf")) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()
