@@ -1751,7 +1751,133 @@ Opened 2026-11-19 after window (3) proved VM-17 real. One member, one acceptance
 
 #### BATCH D — LIVE STATUS
 
-*(the implementer fills this from its first commit)*
+**WHAT IS NOT DONE (first, as the contract asks): NOTHING IS BUILT. The implementer STOPPED before any product line,
+by the brief's own rule** ("if your trace says the confirmed shape would NOT remove a symptom — the 74-pt offset in
+particular — STOP and report that before building anything"). The trace below says exactly that: the confirmed shape
+removes the large strays (an off-band stale frame) and does NOT remove the 74-pt offsets (an IN-BAND badge resolved
+against a fragment TextKit re-positions after the read). No product, test or probe file changed; no
+`build-for-testing` was run (nothing to build); no stage, no simulator. **No revert is in flight; `git status` is
+clean.** (2026-11-19, a fresh `opus-implementer`.)
+
+| Member | State |
+|---|---|
+| VM-17 | **IN-PROGRESS — STOPPED AT THE TRACE, before code.** What remains: the reviewer's final call on a shape that also removes symptom B (options below), most likely after one short measuring window; then the build, the probe green in a window, the chrome suites green by type, the walk row. The pin stands as it is (red on the unfixed chrome, M5/M5b). |
+
+**THE TRACE (by reading the chrome and window (3)'s kept logs — `DerivedData/logs/vm78-c-M5.log` and `-M5b.log`; their
+`VM17|` geometry lines are IDENTICAL line for line, only the cost note's timings differ).**
+
+*Where the badge comes from.* Every pass resolves a fanned block's badge through `firstLineGeometry`
+(`Takes/MobileTakesChrome.swift:211` → `Write/MobileEditorTextView.swift:603-619`, `.ensuresLayout` from the block's own
+offset at `:611`) and writes the frame in content coordinates (`MobileTakesChrome.swift:216-221`). A FULL pass resolves
+every fan: the `.document` scope (`:155-157`; callers `MobileEditorTextView.swift:287` and the model's
+`refreshChrome()` calls) and the first `.nearViewport` pass after mount, which escalates to full on the width change
+(`:158-162`, `lastFullPassWidth` starts at −1). A scroll tick (`layoutSubviews` → `refreshChrome(.nearViewport)`,
+`MobileEditorTextView.swift:340-349`, the chrome AFTER `super.layoutSubviews()`) resolves only fans inside the band
+(`nearViewportBand`, `:587-598`: TextKit's `viewportRange` in characters ± `max(its length, 512)`); an off-band fan that
+already has a badge is skipped and "its last resolved frame stands" (`MobileTakesChrome.swift:206-209`).
+
+*Symptom A — the large strays (24 of the 35 (i) lines, their 24 (i′) misses; the 1,260-pt one among them): an
+OFF-BAND STALE FRAME from the load's full pass.* At load the full pass forces layout at each fan's mid-document offset,
+ahead of its unlaid predecessors, so TextKit places it at an estimate (TEXTKIT2 §3, VX-246 U4b fact 1): the load lines
+step 1,095.25 pt per fan where the settled layout steps ~1,551 (`@9190` at 4683.0, settled 6207.0). TextKit then moves the
+fragment as its viewport passes lay out the text above (`@9190`: 4683 → 5943 at walk#8 → 6207 at walk#10), while the
+badge, off-band, keeps 4683. At walk#8 (visible 4480..5180) that frame stands in the viewport beside the fragment at
+`@6890`, 1,260 pt from its own line — and `@9190` is still outside the band (its line is 763 pt below the visible
+bottom). **Every one of the 24 large-offset lines carries its block's exact LOAD value** (`@11490` 5778.25, `@13790`
+6873.5, `@16090` 7968.75, … `@48337` 23302.25 — each equal to its `VM17|load|` line). **The confirmed shape removes this
+class**: the full pass would resolve in-band fans only and hide the rest, and a tick would hide a badge as its block
+leaves the band.
+
+*Symptom B — the 74-pt offsets (the other 11 (i) lines, their 11 (i′) misses, and ALL 9 (ii) bare lines): an IN-BAND
+badge resolved against a fragment TextKit re-positions after the read.* The eleven cases, every one exactly 74.0 pt:
+
+| stop (visible rect) | block | line | badge | line vs the visible bottom |
+|---|---|---|---|---|
+| walk#7 (3920..4620) | `@6890` | 4655.75 | 4581.75 | 36 pt below it |
+| walk#10 (5600..6300) | `@9190` | 6207.0 | 6133.0 | 93 pt above it |
+| walk#13 (7280..7980) | `@11490` | 7758.25 | 7684.25 | 222 above |
+| walk#21 (11760..12460) | `@18390` | 12412.0 | 12338.0 | 48 above |
+| walk#24 (13440..14140) | `@20690` | 13963.25 | 13889.25 | 177 above |
+| walk#32 (17920..18620) | `@27590` | 18617.0 | 18543.0 | 3 above |
+| walk#35 (19600..20300) | `@29890` | 20168.25 | 20094.25 | 132 above |
+| walk#43 (24080..24780) | `@36802` | 24822.0 | 24748.0 | 42 below |
+| walk#46 (25760..26460) | `@39109` | 26373.25 | 26299.25 | 87 above |
+| walk#49 (27440..28140) | `@41416` | 27924.5 | 27850.5 | 216 above |
+| walk#57 (31920..32620) | `@48337` | 32578.25 | 32504.25 | 42 above |
+
+Three facts decide it. (1) **Each line equals the idealized layout** (its `VM17|load|` `ideal=`): TextKit has settled the
+fragment by the probe's read. (2) **Each badge holds a value it was never loaded with**, so a pass re-resolved it after
+load — e.g. `@6890` loaded at 3587.75, but at walk#6 (visible 3360..4060) no badge was in view, so it had already moved,
+and at walk#7 it stands at 4581.75; `@9190` went 4683.0 (walk#8) → 6133.0 (walk#10). (3) **Each block came into the
+visible rect AT THAT STOP** (every line was below the previous stop's visible rect; each lies within 222 pt above, or 42
+pt below, the bottom edge), so it is inside the band at that stop whichever viewport the band was computed from — the
+pad is a viewport of characters, the step 560 pt. So the chrome's in-band read in that cycle returned a frame 74 pt
+short, and TextKit moved the fragment AFTER that read: the read is `.ensuresLayout` from the block's offset while the
+text just above it (below the previous viewport) is not yet laid out, so the fragment is placed ahead of its unlaid
+predecessors at an estimate (TEXTKIT2 §3, VX-246 U4b fact 1); TextKit's viewport pass then lays out that stretch and
+re-positions it (fact 2) — after the chrome's last read of the cycle, and nothing runs the chrome again until the next
+scroll tick. The next stop is clean (walk#11 shows `@9190` on its line; walk#22 `@18390`). Whether TextKit's viewport
+layout for the new bounds runs after the text view's own `layoutSubviews` (in a subview's pass) or in a later display
+pass that does not re-dirty the text view's layout, reading cannot say; the effect is the same. (The constant 74 fits a
+gap of the same shape every time — the note's 7-periodic paragraphs, the paragraphs just above each fan — a guess, not
+needed for the verdict.)
+
+**So, by reading, on the confirmed shape as written:** the 24 load-value strays go; the 11 in-band 74-pt badges stay,
+because "resolves it as it enters" keeps exactly the forced in-band read that makes them. Expected on the probe: (1)
+green; (i) **~11** red, (i′) **~11**, (ii) **~9** — the pin stays red — unless the changed layout history (no load-time
+forced reads below the fold) happens to remove them, which reading cannot promise. (iii) green.
+
+**THE OPTIONS for a shape that would also remove symptom B (for the reviewer's final call; none built):**
+- **(a) The confirmed shape plus one deferred re-read.** After a pass that resolved a band fan, ONE coalesced main-queue
+  hop re-runs `.nearViewport` (equality-gated, so a settled hop writes nothing; it re-arms only when a frame moved, with
+  a small budget per occasion — the shape of the Mac inline editor's settle net, TEXTKIT2 §3). It removes B only if the
+  hop lands after TextKit's re-positioning: UNMEASURED on iOS 26.2. Smallest change, wholly in `MobileTakesChrome.swift`.
+- **(b) The Mac's rule made literal in full (VX-246 U4/U4b):** no forcing read in the badge pass at all — read the
+  in-band fan's first fragment UNFORCED (`options: []`), draw its badge only from a `.layoutAvailable` fragment within
+  TextKit's own viewport range, hide it otherwise; plus (a)'s hop, so a fan newly exposed this tick is badged once
+  TextKit has placed it. This removes the cause (no layout ahead of predecessors, so no estimate to read) and all of the
+  badge pass's forced layout (VM-179's whole share). Without the hop, a fan just scrolled onto the screen would be bare
+  until the next tick (the Mac's own recorded Write residual) and (ii) would read it red. Needs `firstLineGeometry`'s
+  unforced twin — a geometry-helper line in `MobileEditorTextView.swift` or a private read in the chrome.
+- **(c) Lay out the band contiguously before the reads:** one `.ensuresLayout` run from the viewport's start through the
+  band's last fan, so no fan is laid out ahead of its predecessors. Cost ∝ the band (at most three viewports of
+  characters, P1-honest); unmeasured whether TextKit's next viewport pass would still re-base what it laid out.
+
+**The implementer's recommendation:** a short measuring window FIRST (an instrument, not a fix): at a walk stop, print
+each band fan's frame as the chrome reads it inside `layoutSubviews`, after one main-queue hop, and after the settle —
+which says whether (a)'s hop lands after TextKit's re-positioning. If it does, build **(b)** (the most spec-defensible:
+the Mac's measured rule — "a frame read with `options: []` is a position only in `.layoutAvailable`", "never force
+layout from a mid-document location" — and the cheapest under P1); if it does not, the re-read needs a later trigger,
+and that is the reviewer's to shape. Either way the confirmed shape's hide rules stay (they are what remove A).
+
+**What else the shape meets (recorded, not acted on):**
+- **The peek markers** (`MobileTakesChrome.swift:253-283`) share the standing-frame rule (`:256-261`) and their in-band
+  read is the same forced kind (`blockRectsUnion`, `MobileEditorTextView.swift:623-642`, `.ensuresLayout` at `:631`), so
+  they carry both symptoms' exposure; the pill too (`:286-308`, off-band untouched, in-band `blockRectsUnion`). Whichever
+  shape is called, the markers ride it, or the record names them for a ticket (no id invented).
+- **An existing guard the confirmed shape contradicts by design:** `MobileTakesChromeTests.perTickRefreshResolvesOnlyNearViewportGeometry`'s
+  `.document` half expects the full pass to resolve the far fan (`MobileTakesChromeTests.swift:534-538`,
+  `lastGeometryResolvedBlockIDs.contains(seed.far)`). Under "the `.document` pass resolves badges for in-band blocks
+  only", that expectation inverts; its `badgeView(for: seed.far) != nil` (`:529`) holds only if a hidden badge is kept as
+  a hidden view rather than removed. The fix's commit would re-word that half, said in its message.
+- **How the probe reads a hidden badge** (`MobileFanBadgePlacementProbeTests.swift:232`): `drawn` = in the text view, not
+  `isHidden`, alpha above 0.01. A hidden badge is never (i)'s or (i′)'s subject, and (ii) still demands a DRAWN badge
+  within 1 pt on every laid-out fanned first line on screen — so hiding cannot buy a green: a fan on screen with its
+  badge hidden reads bare.
+- **VM-179's number, by reading (before):** a full pass forces one `firstLineGeometry` per fanned block (22 on the probe's
+  note, 86 on the 600-block note), plus one `blockRectsUnion` per peeked block and one for the pill's block; window
+  (3)'s cost note measured it at 1.81 ms cold / 0.30 ms warm (150 blocks) and 6.02 / 1.24 ms (600). Under the confirmed
+  shape a full pass would force only the band's fans (one to three on the probe's note at its 700-pt viewport); under
+  (b), none. **What of VM-179 this would leave:** under the confirmed shape, the per-tick forced reads of band fans and
+  the markers'/pill's forced reads; under (b), the markers' and the pill's only.
+- **The test types that exercise the chrome** (for the window's `-only-testing` list, beside the probe):
+  `ONLY=(MobileFanBadgePlacementProbeTests MobileTakesChromeTests MobileWalkTests MobileConflictDiscoveryTests
+  MobileTakesBrowserSurfaceTests MobileTutorialTakesWalkTests MobileTutorialLibraryWalkTests MobileBlockListTests
+  MobileBlockMenuTests)` — the first five read badges or markers, or tap the badge, directly; the two tutorial walks
+  drive the peek marker and `refreshChrome`; `MobileBlockListTests` reads `firstLineGeometry` through the jump road
+  (`jumpToBlock`), and `MobileBlockMenuTests` the block decor that shares the one refresh door (`refreshChrome`).
+- **No PROVISIONAL was ruled and no question is raised for `notes/QUESTIONS.md`:** the open point is a fix shape for the
+  reviewer's final call, not product behaviour.
 
 ## The ladder
 
