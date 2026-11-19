@@ -304,6 +304,20 @@ to a gate arming and whose fallback span crossed a separator. Per crashing test:
   phone production files checked out from base `9cf3b3688` over `05ca99e0d` and RESTORED (`git status`, `git diff HEAD`
   empty after). **No revert is in flight.** r1 is READY for the next short stage cycle (§7 batch 2 ▸ r1's commands).
 
+**Iteration r2 (APPROVED by the orchestrator, 2026-11-19 — its calls are quoted in §7 batch 2 ▸ "Iteration r2").** Refuse-and-
+say; the hold-and-replay mechanism removed whole; insert below exempt; the structural undo door hooked to the same fence;
+every typed-key pin on her keyboard's road (the delegate consult, then the insert only on a yes); the probe suite deleted;
+TEXTKIT2 §3 gains the measured `insertText` line. **No revert is in flight** until P-r2-6 says so.
+
+| r2 piece | State |
+|---|---|
+| P-r2-1 — the brain without the input queue (`StructuralFlightFence`) + its tests rewritten | DONE (this commit) — `swift test --filter StructuralFlightFenceTests` 8 tests in 1 suite passed (headless) |
+| P-r2-2 — the face: the stash and replay removed; insert below exempt; the undo door's latch hooked; landing only when no fencing latch is up | DONE (this commit) — phone `build-for-testing` into `vm64-b2r2` TEST BUILD SUCCEEDED, no new warning in a touched file |
+| P-r2-3 — the pins on her keyboard's road (+ the undo door's pin, the insert-below exemption pin, the guard); the probe suite deleted | DONE (this commit) — 10 pins BUILT; runs PENDING the stage |
+| P-r2-4 — TEXTKIT2 §3's measured line | NOT-STARTED |
+| P-r2-5 — the r2 closeout section (before the final builds) | NOT-STARTED |
+| P-r2-6 — builds: phone `vm64-b2r2` · Mac (the brain is Core) · pre-fix `vm64-b2r2-red` (revert announced first) | NOT-STARTED |
+
 
 ### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
 

@@ -6,44 +6,42 @@
 //  `notes/plans/fixes/vm-64-timing-and-lags.md`, batch 2; the VM-5 pass's
 //  MAJOR 1, whose measured probe 2 these pins invert).
 //
-//  THE WINDOW, MADE DETERMINISTIC. Every phone structural door flushes, then
-//  suspends — the fan read, the operation, the settle's read — while the page
-//  still shows the note as it was. The in-memory world is a `DatabaseQueue`
-//  (reads and writes share one serial queue), so holding that queue parks the
-//  door at its first store trip after the flush: exactly the production window,
-//  stretched until the pin releases it. The Mac's twin holds its writer with a
-//  sleep (`ReturnKeyTraceTests.aKeystrokeDuringTheFlightIsDeferredNeverDropped`);
-//  this hold is released by the pin itself, so no timing decides the outcome.
+//  THE WINDOW, MADE DETERMINISTIC. Every phone structural door — and the
+//  structural undo/redo door — flushes, then suspends (the fan read, the
+//  operation, the settle's read) while the page still shows the note as it
+//  was. The in-memory world is a `DatabaseQueue` (reads and writes share one
+//  serial queue), so holding that queue parks the door at its first store trip
+//  after the flush: exactly the production window, stretched until the pin
+//  releases it, so no timing decides the outcome.
 //
-//  THE THREE ROADS an edit can take into that window, each driven through the
-//  real surface where one exists (§34's M25: "drive the real surface, and verify
-//  the path you drove is the path you meant"):
-//    · A — a TYPED key: `UITextView.insertText` / `deleteBackward` on the mounted
-//      Write text view (the keyboard's own entry points);
-//    · B — an edit the page's GATE is asked about (`typeEdit`: the delegate
-//      consult, then the storage write — a paste, a formatting act, an
-//      autocorrection that asks);
-//    · C — an edit that reaches the text with NO gate consult (a storage write
-//      with no consult — the system's own rewrites; M25 measured
-//      `deleteBackward()`/`replace(_:withText:)` taking this road).
+//  THE ROADS an edit can take into that window:
+//    · A — HER KEYBOARD's road (`keyboardType` / `keyboardDelete`): the gate is
+//      asked first and the key inserted only on a yes — what her device's E1
+//      trace shows for every typed key. (r1's pins typed through a bare
+//      programmatic `insertText`, which never asks the gate: a road no keyboard
+//      takes, whose report's width — and so whether it routes — depended on
+//      what an earlier suite left in the host. r2 removed that road from every
+//      pin; TEXTKIT2 §3 records the measurement.)
+//    · B — the model's own gate then a storage write (`typeEdit` — the same
+//      consult, made by the harness rather than through the view's delegate);
+//    · C — an edit that reaches the text with NO gate consult (the system's own
+//      rewrites), written into the LAST block so its widened report can never
+//      cross a separator (round 2's M12 is that other shape, and not this
+//      batch's).
 //
-//  RED ON OLD (the pre-fix tree, `9cf3b3688`): on every road the window's edit
-//  routes against the old tiling, records the WHOLE old block, and the door's
-//  own settle writes it after the operation — since VX-683 B as a RESCUE, so
-//  the old text keeps the chosen take and the operation's real result becomes
-//  a spurious `'conflict'` take. Each pin names the shape it fails with.
+//  RED ON OLD (the pre-fix tree, `9cf3b3688`): the window's edit is approved,
+//  records the WHOLE old block, and the door's own settle writes it after the
+//  operation — since VX-683 B as a RESCUE, so the old text keeps the chosen take
+//  and the operation's real result becomes a spurious `'conflict'` take. Each
+//  product pin names the shape it fails with; the two guards say they are green
+//  on both trees, and why.
 //
-//  These pins use ONLY API that exists on the pre-fix tree, so the same file
-//  builds against it for the red run.
-//
-//  r1 (after the first stage window — the record's §5 "Iteration r1"): every
-//  pin now types in the posture her phone types in — the foreground scene's
-//  key window, the Write text view its first responder, any responder an
-//  earlier suite left behind resigned first (`MobileMarkdownCaretTests.host`,
-//  VX-282 C-1's measured posture; VM-19 names the polluted one). And a debug
-//  assertion inside a pin is RECORDED AS A FAILING ISSUE (`withDesyncsRecorded`)
-//  instead of killing the host — never swallowed: the pin goes red, the run
-//  survives, and every pin reports.
+//  Every pin types in the posture her phone types in (the foreground scene's
+//  key window, the Write text view first responder, leftovers resigned), and a
+//  debug assertion inside a pin is RECORDED AS A FAILING ISSUE
+//  (`withDesyncsRecorded`) — never swallowed: the pin goes red, the host
+//  survives. These pins use ONLY API that exists on the pre-fix tree, so the
+//  same file builds against it for the red run.
 //
 
 import Dependencies
@@ -87,14 +85,16 @@ private final class StoreHold {
     }
 }
 
-/// Runs `door` with the store held, waits until its flight is up and parked on
-/// the store, runs `inTheWindow` there, then releases the store and lets the
-/// door land. Finishes with a flush, so whatever the window's edits recorded
-/// has reached the store before the pin reads it. The hold is ALWAYS released,
-/// whatever the window throws — a pin that failed must not hang the run.
+/// Runs `door` with the store held, waits until its flight is up (`flying`)
+/// and parked on the store, runs `inTheWindow` there, then releases the store
+/// and lets the door land. Finishes with a flush, so whatever the window's
+/// edits recorded has reached the store before the pin reads it. The hold is
+/// ALWAYS released, whatever the window throws — a pin that failed must not
+/// hang the run.
 @MainActor
 private func duringTheFlight(
     _ model: MobileEditorViewModel, db: AppDatabase,
+    flying: @escaping @MainActor () -> Bool,
     door: @escaping @MainActor () async -> Void,
     inTheWindow: @MainActor () throws -> Void
 ) async throws {
@@ -102,14 +102,13 @@ private func duringTheFlight(
     try await hold.take(db)
     let flight = Task { @MainActor in await door() }
     var spins = 0
-    while !model.structural.structuralInFlight, spins < 5000 {
+    while !flying(), spins < 5000 {
         spins += 1
         await Task.yield()
     }
     var failure: Error?
     do {
-        try #require(model.structural.structuralInFlight,
-                     "the flight is up and parked on the held store")
+        try #require(flying(), "the flight is up and parked on the held store")
         try inTheWindow()
     } catch {
         failure = error
@@ -118,6 +117,61 @@ private func duringTheFlight(
     await flight.value
     await model.autosave.flushNow()
     if let failure { throw failure }
+}
+
+/// A structural door's flight (the controller's latch).
+@MainActor
+private func duringTheFlight(
+    _ model: MobileEditorViewModel, db: AppDatabase,
+    door: @escaping @MainActor () async -> Void,
+    inTheWindow: @MainActor () throws -> Void
+) async throws {
+    try await duringTheFlight(
+        model, db: db, flying: { model.structural.structuralInFlight },
+        door: door, inTheWindow: inTheWindow)
+}
+
+// MARK: - Her keyboard's road
+
+/// **A typed key, the way HER keyboard types it**: the gate is asked first
+/// and the key is inserted only on a yes. Her device's E1 trace shows a gate
+/// consult before every typed key (`notes/author-reports/2026-08-23-device-
+/// walk-and-product-asks.md` — `GATE … → armed`, then `EDIT … after 1 gate`);
+/// a bare programmatic `insertText` never asks the gate at all (TEXTKIT2 §3,
+/// measured at VM-2 r1), so a pin that types through it drives a road no
+/// keyboard takes. With the arming in place the insert binds to it however
+/// far iOS widens the report, so this road is deterministic in any company.
+@MainActor
+@discardableResult
+private func keyboardType(_ textView: UITextView, _ text: String) -> Bool {
+    let range = textView.selectedRange
+    guard textView.delegate?.textView?(
+        textView, shouldChangeTextIn: range, replacementText: text) ?? true
+    else { return false }
+    textView.insertText(text)
+    return true
+}
+
+/// ⌫ the way her keyboard deletes: the gate asked about the span it would
+/// remove (the selection, else the one composed character before the caret),
+/// then the delete only on a yes.
+@MainActor
+@discardableResult
+private func keyboardDelete(_ textView: UITextView) -> Bool {
+    let selection = textView.selectedRange
+    let span: NSRange
+    if selection.length > 0 {
+        span = selection
+    } else {
+        guard selection.location > 0 else { return false }
+        span = (textView.textStorage.string as NSString)
+            .rangeOfComposedCharacterSequence(at: selection.location - 1)
+    }
+    guard textView.delegate?.textView?(
+        textView, shouldChangeTextIn: span, replacementText: "") ?? true
+    else { return false }
+    textView.deleteBackward()
+    return true
 }
 
 // MARK: - The posture and the assertion seam
@@ -211,17 +265,6 @@ private func markerInUnplacedTakes(_ db: AppDatabase, _ marker: String) async th
     }
 }
 
-/// How often `marker` occurs across the note's rendered text.
-private func occurrences(of marker: String, in texts: [String]) -> Int {
-    texts.joined(separator: "\n").components(separatedBy: marker).count - 1
-}
-
-/// The note's rendered text with every `marker` taken out — what the operation
-/// alone should have left.
-private func withoutMarker(_ marker: String, _ texts: [String]) -> [String] {
-    texts.map { $0.replacingOccurrences(of: marker, with: "") }
-}
-
 /// The DEBUG identity oracle and the desync heal stayed quiet (the batch's
 /// "the DEBUG identity audit quiet").
 @MainActor
@@ -240,17 +283,16 @@ struct MobileStructuralFlightFenceTests {
 
     // MARK: Divide — the three roads
 
-    /// **Road A, divide (THE PIN — probe 2 inverted).** Keys typed at the
-    /// caret while the divide lands — a ⌫ among them — wait for the flight
-    /// and replay, in order, at the caret it lands: the start of the minted
-    /// half, which is where she was typing. Nothing is lost; nothing reads
-    /// twice.
+    /// **THE PIN (probe 2 inverted), her keyboard's road.** Keys typed at the
+    /// caret while the divide lands — a ⌫ among them — are refused at the
+    /// gate, and the refusal is said once the flight lands; the divide lands
+    /// whole, nothing reads twice, no stale write is rescued.
     ///
-    /// RED ON OLD: the keys landed in the OLD block A at offset 12 and its
-    /// whole text was written after the divide — `["Alpha beta. XGamma
-    /// delta.", "Gamma delta.", …]`, the moved half reading twice, plus a
-    /// spurious conflict take holding the divide's real `"Alpha beta."`.
-    @Test func keysTypedWhileADivideLandsReplayAtTheLandedCaret() async throws {
+    /// RED ON OLD: the gate approved them; the whole OLD block was written
+    /// after the divide — `["Alpha beta. XGamma delta.", "Gamma delta.", …]`,
+    /// the moved half reading twice — plus a spurious conflict take holding
+    /// the divide's real `"Alpha beta."`, and no sentence.
+    @Test func keysTypedWhileADivideLandsAreRefusedAndSaid() async throws {
         try await withDesyncsRecorded { try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
             let (model, surface) = await makeSurfaceEditor(session, postID: postID)
@@ -262,25 +304,27 @@ struct MobileStructuralFlightFenceTests {
             try await duringTheFlight(model, db: db, door: {
                 await model.structural.divide(atSurfaceCaret: 12)
             }, inTheWindow: {
-                textView.insertText("X")
-                textView.insertText("Y")
-                textView.deleteBackward()
+                keyboardType(textView, "X")
+                keyboardType(textView, "Y")
+                keyboardDelete(textView)
             })
 
             #expect(try await storedBlockTexts(db, postID: postID)
-                == ["Alpha beta.", "XGamma delta.", Self.seedB],
-                "the divide landed and her keys followed it, ⌫ included")
+                == ["Alpha beta.", "Gamma delta.", Self.seedB],
+                "the divide landed whole and nothing typed in its window reached the store")
             #expect(try await conflictTakes(db) == 0, "no stale write was rescued")
+            #expect(model.statusMessage == StructuralUndoCopy.anotherIsLanding,
+                    "the refusal is said after the flight lands")
+            #expect(model.statusAction == .undo, "the divide's own Undo stays beside it")
             expectQuietIdentity(model)
         } }
     }
 
-    /// **Road B, divide.** An edit the gate is asked about while the divide
-    /// lands is refused, and the refusal is SAID once the flight lands (the
-    /// door's own receipt would otherwise wipe it before she could read it).
+    /// **Road B, divide.** The same refusal through the harness's own gate
+    /// consult (`typeEdit`) — the model-level twin of the keyboard road.
     ///
-    /// RED ON OLD: the gate approved it; `["Alpha beta. Gamma delta.X",
-    /// "Gamma delta.", …]` plus a conflict take, and the status line empty.
+    /// RED ON OLD: `["Alpha beta. Gamma delta.X", "Gamma delta.", …]`, a
+    /// conflict take, and the status line empty.
     @Test func anEditTheGateIsAskedAboutDuringADivideIsRefusedAndSaid() async throws {
         try await withDesyncsRecorded { try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
@@ -310,21 +354,16 @@ struct MobileStructuralFlightFenceTests {
     /// **Road C, divide.** An edit that reaches the text with no gate consult
     /// (the system's own rewrites) is withheld: nothing of it is written, the
     /// page is re-read from the store before the flight ends, and the
-    /// withholding is said.
+    /// withholding is said. ONE block, so the write lands in the last block,
+    /// where its widened report routes to `.block(0)` — the edit the storage
+    /// belt exists to withhold (in a block with a separator after it the same
+    /// write is round 2's M12 on either tree: unroutable, healed by a re-read,
+    /// never a stale write).
     ///
-    /// RED ON OLD: routed by `fallbackVerdict` to `.block(0)` and written whole
-    /// after the divide — `["Alpha beta. Gamma delta.X", "Gamma delta."]` plus
-    /// a conflict take.
+    /// RED ON OLD: routed to `.block(0)` and written whole after the divide —
+    /// `["Alpha beta. Gamma delta.X", "Gamma delta."]` plus a conflict take.
     @Test func aGatelessEditDuringADivideIsWithheldAndThePageReReadFromTheStore() async throws {
         try await withDesyncsRecorded { try await withEditorWorld { session, db in
-            // r1: ONE block, so the window's gate-less write lands in the LAST
-            // block. Its report is widened through the paragraph (TEXTKIT2 §3's
-            // iOS fixing finding); in a block with a separator after it that
-            // widened span is unroutable on EITHER tree — round 2's M12, which
-            // heals by re-reading the page and writes nothing stale — and the
-            // first window's trap of this pin on both trees was exactly that
-            // shape. In the last block the same write routes to `.block(0)`,
-            // which is the edit the storage belt exists to withhold.
             let postID = try await makePost(session, blocks: [Self.seedA])
             let (model, surface) = await makeSurfaceEditor(session, postID: postID)
             let window = try host(surface)
@@ -351,14 +390,15 @@ struct MobileStructuralFlightFenceTests {
 
     // MARK: Merge — prose must not land in a released block
 
-    /// **Road A, merge.** A key typed in the trailing block while it merges
-    /// with the one above waits and replays into the MERGED block — exactly
-    /// once, and never in either released source.
+    /// **Her keyboard's road, merge.** A key typed in the trailing block
+    /// while it merges with the one above is refused and said — it can never
+    /// reach the released source's take.
     ///
-    /// RED ON OLD: the key was written into the trailing block's take after the
-    /// merge released it — the merged block holds no `X` and a released source
-    /// does (the VM-5 record's "typed prose silently leaves the note").
-    @Test func aKeyTypedWhileAMergeLandsEndsUpInTheMergedBlock() async throws {
+    /// RED ON OLD: the key was approved and written into the trailing block's
+    /// take after the merge released it — `markerInUnplacedTakes == 1`, the
+    /// prose gone from the note (the VM-5 record's "typed prose silently
+    /// leaves the note").
+    @Test func aKeyTypedWhileAMergeLandsNeverLandsInAReleasedSource() async throws {
         try await withDesyncsRecorded { try await withEditorWorld { session, db in
             let postID = try await makePost(
                 session, blocks: ["First half.", "Second half goes here."])
@@ -373,22 +413,21 @@ struct MobileStructuralFlightFenceTests {
             try await duringTheFlight(model, db: db, door: {
                 await model.structural.mergeWithPrevious(atSurfaceCaret: range.location + 3)
             }, inTheWindow: {
-                textView.insertText("X")
+                keyboardType(textView, "X")
             })
 
-            let texts = try await storedBlockTexts(db, postID: postID)
-            #expect(texts.count == 1, "the two blocks merged")
-            #expect(withoutMarker("X", texts) == ["First half.\nSecond half goes here."])
-            #expect(occurrences(of: "X", in: texts) == 1, "her key is in the note, once")
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["First half.\nSecond half goes here."])
             #expect(try await markerInUnplacedTakes(db, "X") == 0,
                     "nothing she typed landed in a released source")
             #expect(try await conflictTakes(db) == 0)
+            #expect(model.statusMessage == StructuralUndoCopy.anotherIsLanding)
             expectQuietIdentity(model)
         } }
     }
 
-    /// **Road C, merge.** A gate-less edit into the trailing block while it
-    /// merges is withheld — it can never reach the released source's take.
+    /// **Road C, merge.** A gate-less edit into the trailing (last) block while
+    /// it merges is withheld — it can never reach the released source's take.
     ///
     /// RED ON OLD: `markerInUnplacedTakes == 1` — the edit's whole-block text
     /// was written into the released trailing source.
@@ -420,13 +459,13 @@ struct MobileStructuralFlightFenceTests {
 
     // MARK: Extract and Make Block — the lifted span must not read twice
 
-    /// **Road A, extract.** A key typed at the end of the source while its
-    /// first sentence is extracted waits and replays at the landed caret; the
-    /// extracted span reads once.
+    /// **Her keyboard's road, extract.** A key typed at the end of the source
+    /// while its first sentence is extracted is refused and said; the span
+    /// reads once.
     ///
-    /// RED ON OLD: the source's whole OLD text (span included) was written over
-    /// the remainder after the extract — `["Alpha beta.", "Alpha beta. Gamma
-    /// delta.X", …]`, the span twice, plus a conflict take.
+    /// RED ON OLD: the source's whole OLD text (span included) was written
+    /// over the remainder — `["Alpha beta.", "Alpha beta. Gamma delta.X", …]`,
+    /// the span twice, plus a conflict take.
     @Test func aKeyTypedWhileAnExtractLandsNeverDuplicatesTheSpan() async throws {
         try await withDesyncsRecorded { try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
@@ -434,27 +473,26 @@ struct MobileStructuralFlightFenceTests {
             let window = try host(surface)
             defer { dismiss(window, surface) }
             let textView = surface.textView
-            let end = (Self.seedA as NSString).length
-            textView.selectedRange = NSRange(location: end, length: 0)
+            textView.selectedRange = NSRange(location: (Self.seedA as NSString).length, length: 0)
 
             try await duringTheFlight(model, db: db, door: {
                 await model.structural.extractSelection(range: NSRange(location: 0, length: 11))
             }, inTheWindow: {
-                textView.insertText("X")
+                keyboardType(textView, "X")
             })
 
-            let texts = try await storedBlockTexts(db, postID: postID)
-            #expect(withoutMarker("X", texts) == ["Alpha beta.", "Gamma delta.", Self.seedB],
-                    "the span was lifted out once and the source kept only the rest")
-            #expect(occurrences(of: "X", in: texts) == 1, "her key is in the note, once")
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["Alpha beta.", "Gamma delta.", Self.seedB],
+                "the span was lifted out once and the source kept only the rest")
             #expect(try await conflictTakes(db) == 0)
+            #expect(model.statusMessage == StructuralUndoCopy.anotherIsLanding)
             expectQuietIdentity(model)
         } }
     }
 
-    /// **Road A, make block.** The composed middle-span act (two divides as
-    /// one compound): a key typed at the source's end while it lands never
-    /// resurrects the pre-op text.
+    /// **Her keyboard's road, make block** (two divides as one compound): a key
+    /// typed at the source's end while it lands never resurrects the pre-op
+    /// text.
     ///
     /// RED ON OLD: `["Alpha beta. Gamma delta. Epsilon zeta.X", "Gamma
     /// delta.", "Epsilon zeta.", …]` plus a conflict take.
@@ -472,94 +510,104 @@ struct MobileStructuralFlightFenceTests {
                 await model.structural.makeBlockFromSelection(
                     range: NSRange(location: 12, length: 12))  // "Gamma delta."
             }, inTheWindow: {
-                textView.insertText("X")
-            })
-
-            let texts = try await storedBlockTexts(db, postID: postID)
-            #expect(withoutMarker("X", texts)
-                == ["Alpha beta.", "Gamma delta.", "Epsilon zeta.", Self.seedB])
-            #expect(occurrences(of: "X", in: texts) == 1)
-            #expect(try await conflictTakes(db) == 0)
-            expectQuietIdentity(model)
-        } }
-    }
-
-    // MARK: Insert block below — the twin, and what the fence changes there
-
-    /// **The insert-below twin of probe 2 — HOLLOW ON OLD, recorded as such.**
-    /// `newBlock` rewrites no existing text, so a key typed into block A while
-    /// it lands records A's CURRENT text: no stale write was ever possible on
-    /// this door, and this oracle (never lost, never duplicated, no rescue)
-    /// holds on both trees. Kept so the door stays covered by the oracle the
-    /// other three are pinned to.
-    @Test func insertBelowTwinNoKeyTypedDuringTheFlightIsLostOrDuplicated() async throws {
-        try await withDesyncsRecorded { try await withEditorWorld { session, db in
-            let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
-            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
-            let window = try host(surface)
-            defer { dismiss(window, surface) }
-            let textView = surface.textView
-            let blockA = try #require(model.index.entries.first?.blockID)
-            textView.selectedRange = NSRange(
-                location: (Self.seedA as NSString).length, length: 0)
-
-            try await duringTheFlight(model, db: db, door: {
-                await model.structural.insertBlockBelow(blockID: blockA)
-            }, inTheWindow: {
-                textView.insertText("X")
-            })
-
-            let texts = try await storedBlockTexts(db, postID: postID)
-            #expect(withoutMarker("X", texts) == [Self.seedA, "", Self.seedB])
-            #expect(occurrences(of: "X", in: texts) == 1)
-            #expect(try await conflictTakes(db) == 0)
-            expectQuietIdentity(model)
-        } }
-    }
-
-    /// **What the fence changes on insert-below — a BEHAVIOUR pin, not a bug
-    /// pin.** The fence is the one latch every door shares, so a key typed
-    /// while New Block Below lands now waits and lands at the caret the door
-    /// lands: IN THE NEW BLOCK, which is the Mac's own rule for its ⌘⇧⏎ flight
-    /// (`runStructural`'s deferred keys land at the landed caret) and the
-    /// door's own receipt ("type away"). On the old tree the key went into A
-    /// (`["Alpha beta. Gamma delta.X", "", …]`) — a misplacement, not a stale
-    /// write; red there by design of the change, recorded in the record.
-    @Test func aKeyTypedWhileInsertBelowLandsGoesIntoTheNewBlock() async throws {
-        try await withDesyncsRecorded { try await withEditorWorld { session, db in
-            let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
-            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
-            let window = try host(surface)
-            defer { dismiss(window, surface) }
-            let textView = surface.textView
-            let blockA = try #require(model.index.entries.first?.blockID)
-            textView.selectedRange = NSRange(
-                location: (Self.seedA as NSString).length, length: 0)
-
-            try await duringTheFlight(model, db: db, door: {
-                await model.structural.insertBlockBelow(blockID: blockA)
-            }, inTheWindow: {
-                textView.insertText("X")
+                keyboardType(textView, "X")
             })
 
             #expect(try await storedBlockTexts(db, postID: postID)
-                == [Self.seedA, "X", Self.seedB])
+                == ["Alpha beta.", "Gamma delta.", "Epsilon zeta.", Self.seedB])
+            #expect(try await conflictTakes(db) == 0)
+            #expect(model.statusMessage == StructuralUndoCopy.anotherIsLanding)
+            expectQuietIdentity(model)
+        } }
+    }
+
+    // MARK: The structural undo door — the same window
+
+    /// **Her keyboard's road, the undo door.** An undo of a divide is a
+    /// structural flight with the same window (flush → the inverse on the
+    /// runner → the settle's read) over a page that still shows the divided
+    /// note. A key typed into the first half while it lands is refused and
+    /// said; the undo lands whole; the undo's own Redo stays beside the
+    /// sentence.
+    ///
+    /// RED ON OLD: the key was approved and the first half's OLD text
+    /// (`"Alpha beta.X"`) written after the inverse restored the whole —
+    /// the undo reverses itself (`["Alpha beta.X", …]`) and the restored text
+    /// lands in a spurious conflict take.
+    @Test func aKeyTypedWhileAnUndoLandsIsRefusedAndTheUndoLandsWhole() async throws {
+        try await withDesyncsRecorded { try await withEditorWorld { session, db in
+            let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
+            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+            let window = try host(surface)
+            defer { dismiss(window, surface) }
+            let textView = surface.textView
+
+            await model.structural.divide(atSurfaceCaret: 12)
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == ["Alpha beta.", "Gamma delta.", Self.seedB], "precondition: divided")
+            textView.selectedRange = NSRange(location: 11, length: 0)  // "Alpha beta.|"
+
+            try await duringTheFlight(model, db: db, flying: { model.undoDoor.inFlight }, door: {
+                await model.undoDoor.beginUndo(from: .receipt)
+            }, inTheWindow: {
+                keyboardType(textView, "X")
+            })
+
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == [Self.seedA, Self.seedB], "the undo landed whole")
+            #expect(try await conflictTakes(db) == 0, "no stale write was rescued")
+            #expect(model.statusMessage == StructuralUndoCopy.anotherIsLanding)
+            #expect(model.statusAction == .redo, "the undo's own Redo stays beside it")
+            expectQuietIdentity(model)
+        } }
+    }
+
+    // MARK: Insert block below — exempt (its row is hollow)
+
+    /// **Insert Below is EXEMPT from the fence** (PROVISIONAL — the
+    /// orchestrator's r2 call; hers at the merge, the alternative being to
+    /// fence it like every door). `newBlock` rewrites no existing text, so a
+    /// key typed into the block above while it lands records that block's
+    /// CURRENT text: never lost, never duplicated, no rescue — and the door's
+    /// own receipt, not a refusal. GREEN ON BOTH TREES by design: the pre-fix
+    /// tree did exactly this (the row was hollow), and the fix keeps it.
+    @Test func aKeyTypedWhileInsertBelowLandsIsNeitherLostNorDuplicated() async throws {
+        try await withDesyncsRecorded { try await withEditorWorld { session, db in
+            let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
+            let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+            let window = try host(surface)
+            defer { dismiss(window, surface) }
+            let textView = surface.textView
+            let blockA = try #require(model.index.entries.first?.blockID)
+            textView.selectedRange = NSRange(
+                location: (Self.seedA as NSString).length, length: 0)
+
+            try await duringTheFlight(model, db: db, door: {
+                await model.structural.insertBlockBelow(blockID: blockA)
+            }, inTheWindow: {
+                keyboardType(textView, "X")
+            })
+
+            #expect(try await storedBlockTexts(db, postID: postID)
+                == [Self.seedA + "X", "", Self.seedB],
+                "the key landed where she typed it, once; the new block stands empty")
+            #expect(try await conflictTakes(db) == 0)
+            #expect(model.statusMessage == MobileStructuralController.blockInsertedStatus,
+                    "the door's own receipt — nothing was refused")
             expectQuietIdentity(model)
         } }
     }
 
     // MARK: The fence is gone once the flight has landed
 
-    /// After a flight lands, typing is ordinary again: the very next key
-    /// lands at once, through the gate, and is saved.
+    /// **A guard, GREEN ON BOTH TREES:** after a flight lands, typing is
+    /// ordinary again — the very next key, typed the way her keyboard types
+    /// it, lands at once and is saved, and nothing is said.
     ///
-    /// **What the first window showed (r1):** typed from no window at all,
-    /// this key — at the START of the minted half — trapped the host on BOTH
-    /// trees (the report did not bind; the fallback's span crossed the
-    /// separator). No fence code is on that road. It now types in her posture;
-    /// if it still fails there, the defect is round 2's M27 (the first key
-    /// after a divide unroutable) and pre-existing, not the fence's — the
-    /// diagnostic suite `MobileFlightFenceProbeTests` says which.
+    /// r1 typed this key through a bare programmatic `insertText` (no gate
+    /// consult): its report's width then depended on what earlier suites left
+    /// in the host, and it desynced on BOTH trees in some company — a road no
+    /// keyboard takes (§7 batch 2 ▸ "Iteration r1 → r2"). Her road binds.
     @Test func afterTheFlightLandsTypingIsOrdinaryAgain() async throws {
         try await withDesyncsRecorded { try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: [Self.seedA, Self.seedB])
@@ -570,7 +618,7 @@ struct MobileStructuralFlightFenceTests {
 
             await model.structural.divide(atSurfaceCaret: 12)
             #expect(!model.structural.structuralInFlight)
-            textView.insertText("Z")
+            #expect(keyboardType(textView, "Z"), "the gate is open again")
             #expect(model.autosave.isDirty, "the key landed and recorded at once")
             await model.autosave.flushNow()
             #expect(try await storedBlockTexts(db, postID: postID)

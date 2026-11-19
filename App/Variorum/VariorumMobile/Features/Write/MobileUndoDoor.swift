@@ -122,7 +122,18 @@ final class MobileUndoDoor {
     /// One flight at a time — the structural doors' latch, same reason: an
     /// inverse is a DB write, and a second press inside the first's
     /// suspension would pop a second entry she never asked for.
-    private(set) var inFlight = false
+    /// **VM-2 — the undo door's flight raises the page's keystroke fence too.**
+    /// An undo or a redo flushes, runs the inverse on the runner and settles
+    /// through `refreshTakesFromStore` — the structural doors' exact window,
+    /// over a page that still shows the note as it was before the inverse; a
+    /// key typed there would record the old block whole and reverse the undo
+    /// (the model's `structuralFlightChanged` carries the rule).
+    private(set) var inFlight = false {
+        didSet {
+            guard inFlight != oldValue else { return }
+            model?.structuralFlightChanged()
+        }
+    }
 
     init(session: AppSession) {
         self.session = session

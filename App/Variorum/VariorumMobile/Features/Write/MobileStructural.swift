@@ -68,16 +68,29 @@ final class MobileStructuralController {
     /// **VM-2 — the latch also raises the page's keystroke fence.** Every
     /// door below suspends between its flush and its settle while the page
     /// still shows the note as it was; the fence (`StructuralFlightFence`,
-    /// the model's `structuralFlightChanged`) keeps typed keys waiting and
-    /// every other edit off the store for exactly that window — the Mac's
-    /// `runStructural` rule. Hooked HERE, at the one latch, so no door can
-    /// fly unfenced and none of their bodies changes.
+    /// the model's `structuralFlightChanged`) refuses every edit the gate is
+    /// asked about and keeps every gate-less edit off the store for exactly
+    /// that window. Hooked HERE, at the one latch, so no door can fly
+    /// unfenced — the one exemption is declared below.
     private(set) var structuralInFlight = false {
         didSet {
             guard structuralInFlight != oldValue else { return }
-            model?.structuralFlightChanged(up: structuralInFlight)
+            model?.structuralFlightChanged()
         }
     }
+
+    /// **VM-2 — Insert Below's flight raises no fence** (PROVISIONAL, the
+    /// orchestrator's call at the r2 iteration; hers at the merge — the
+    /// alternative is to fence it like every door). `newBlock` rewrites no
+    /// existing text, so a key typed into the block above while it lands
+    /// records that block's CURRENT text — never stale (its store pin is green
+    /// on the pre-fix tree too); refusing it would cost her a key for no data
+    /// reason. The door sets this false for its own flight only.
+    private var flightFencesTyping = true
+
+    /// The fact the model's fence reads: a structural flight is up AND it is
+    /// one that fences typing.
+    var holdsFencingFlight: Bool { structuralInFlight && flightFencesTyping }
 
     init(session: AppSession) {
         self.session = session
@@ -534,8 +547,9 @@ final class MobileStructuralController {
             model.report("Another structural change is still landing.")
             return
         }
+        flightFencesTyping = false  // VM-2: exempt — see `flightFencesTyping`
         structuralInFlight = true
-        defer { structuralInFlight = false }
+        defer { structuralInFlight = false; flightFencesTyping = true }
 
         if model.isSealed {
             model.report("This note is locked — unlock it to add a block.")

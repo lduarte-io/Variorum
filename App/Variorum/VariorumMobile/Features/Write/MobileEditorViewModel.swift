@@ -1057,43 +1057,46 @@ final class MobileEditorViewModel {
 
     /// **The window this closes** (the VM-5 pass's MAJOR 1, measured there
     /// as probe 2; the record `notes/plans/fixes/vm-64-timing-and-lags.md`
-    /// batch 2). Every `MobileStructuralController` door flushes and then
-    /// SUSPENDS — its fan read, the operation, its settle's read — while the
+    /// batch 2). Every structural door — `MobileStructuralController`'s and
+    /// the structural undo/redo door's (`MobileUndoDoor`) — flushes and then
+    /// SUSPENDS (its fan read, the operation, its settle's read) while the
     /// page and `index` still show the note as it was. An edit landing there
     /// routes against the old tiling; `recordAutosave` records the WHOLE old
     /// block text; the door's own settle flushes it after the operation. Since
     /// VX-683 B that write RESCUES rather than clobbering (the op's real
     /// result becomes a spurious `'conflict'` take), so a divide still reads
-    /// its moved half twice, an extract its span twice, and a merge leaves
-    /// her prose in a released source's take, gone from the note.
+    /// its moved half twice, an extract its span twice, an undo reverses
+    /// itself, and a merge leaves her prose in a released source's take.
     ///
-    /// **The fence (the Mac's `runStructural` rule, UIKit-spelled):** typed
-    /// keys wait and replay at the landed caret (the text view's
-    /// `insertText`/`deleteBackward`); any other edit the gate is asked about
-    /// is refused; an edit that reaches the text with no gate consult keeps
-    /// the tiling but writes nothing toward the store, and the surface is
-    /// re-read before the fence drops. Anything refused or withheld is said
-    /// once, as the fence drops, in the sentence every structural door
-    /// already speaks.
+    /// **The fence — REFUSE AND SAY** (`StructuralFlightFence` carries the
+    /// why: her keyboard asks the gate BEFORE it inserts, so a key cannot be
+    /// held and replayed honestly): while a flight is landing the gate
+    /// refuses every edit it is asked about, typed keys included; an edit that
+    /// reaches the text with no gate consult keeps the tiling but writes
+    /// nothing toward the store, and the surface is re-read before the fence
+    /// drops; anything refused or withheld is said once, as the fence drops,
+    /// in the sentence every structural door already speaks.
     ///
-    /// The latch is the controller's; this is called on each edge of it.
-    func structuralFlightChanged(up: Bool) {
-        if up {
+    /// Called on EVERY edge of either door's latch. The fence flies while any
+    /// FENCING latch is up and lands only when none is — so an undo landing
+    /// inside a divide's flight (or the reverse) never drops the other's
+    /// fence. Insert Below holds the structural latch WITHOUT fencing (its
+    /// `newBlock` rewrites no text, so its window holds no stale write —
+    /// `MobileStructuralController.holdsFencingFlight`).
+    func structuralFlightChanged() {
+        if structural.holdsFencingFlight || undoDoor.inFlight {
             flightFence.flightBegan()
             return
         }
+        // No fencing latch is up. Nothing to land unless a flight was flying
+        // (an exempt door's own edges, or a fence already settling, pass by).
+        guard flightFence.phase == .flying else { return }
         switch flightFence.flightLanded(surfaceSettled: flightSurfaceHoldsTheStore) {
         case .drain:
             drainFlightFence()
         case .awaitSettle:
             settleFlightSurface()
         }
-    }
-
-    /// The text view's typed-input doors ask this first. True = the key is
-    /// held for the fence's drain (the caller must not perform it).
-    func deferTypedInputDuringFlight(_ input: StructuralFlightFence.Input) -> Bool {
-        flightFence.offer(input, composing: textView?.markedTextRange != nil)
     }
 
     /// The fence's settle rule, read from this model's own two facts.
@@ -1106,10 +1109,10 @@ final class MobileEditorViewModel {
     /// parked behind a mint or a dirty buffer, or a withheld edit owes a
     /// re-read): re-read it, at most `flightSettleAttempts` times, then rely on
     /// the next projection to apply (`applyProjection`'s settling hook). Until
-    /// then the fence stays up: keys keep waiting, nothing is written against
-    /// the old page. Fail-CLOSED on purpose — a key that waits a little
-    /// longer is delayed; a key replayed into a page that has not settled is
-    /// exactly the stale write this fence exists to stop.
+    /// then the fence stays up: a key typed into the old page is refused,
+    /// nothing is written against it. Fail-CLOSED on purpose — a refusal said
+    /// a moment longer costs a key; a key approved over a page that has not
+    /// settled is exactly the stale write this fence exists to stop.
     private func settleFlightSurface() {
         Task { @MainActor [weak self] in
             for _ in 0..<Self.flightSettleAttempts {
@@ -1129,29 +1132,13 @@ final class MobileEditorViewModel {
         drainFlightFence()
     }
 
-    /// Lowers the fence: the sentence first (a refusal the replay itself
-    /// meets is later, more specific, and wins), then her keys, in the order
-    /// she pressed them, at the caret the flight landed — each through the
-    /// ordinary policed road, exactly as if typed now. The receipt's action
-    /// (the door's Undo) is kept beside the sentence.
-    ///
-    /// **Residual, stated:** if the page's view is already gone (a pop that
-    /// released it in the same instant), there is no caret to replay at and
-    /// the held keys go with the view — the Mac's stash has the same
-    /// lifetime (`EditorTextView.deferredKeyEvents`).
+    /// Lowers the fence, saying the sentence once if anything was refused or
+    /// withheld while it was up (the door's own receipt would otherwise have
+    /// cleared the gate's refusal before she could read it). The receipt's
+    /// action (the door's Undo or Redo) is kept beside the sentence.
     private func drainFlightFence() {
-        let drained = flightFence.drain()
-        if drained.speak {
+        if flightFence.drain() {
             report(StructuralUndoCopy.anotherIsLanding, action: statusAction)
-        }
-        guard let textView else { return }
-        for input in drained.replay {
-            switch input {
-            case .insert(let text):
-                textView.insertText(text)
-            case .deleteBackward:
-                textView.replayDeferredDeleteBackward()
-            }
         }
     }
 
@@ -1714,13 +1701,13 @@ final class MobileEditorViewModel {
         guard let replacement else { return true } // attribute-only
         // **VM-2 — THE FLIGHT BELT.** A structural flight is landing: the
         // page still shows the note as it was, so an edit approved here
-        // would record a whole block the operation is rewriting. Typed keys
-        // never reach this line during a flight (the text view holds them for
-        // the fence's drain); what does — a paste, a formatting act, an
-        // autocorrection that asks — is refused, and the fence says so again
-        // as it drops (the door's own receipt would otherwise clear this
-        // line before she could read it). Below the three belts above: a
-        // gone, stood-down or sealed note's truth is the more lasting one.
+        // would record a whole block the operation is rewriting. Every edit
+        // the gate is asked about is refused — her typed keys and ⌫ (her
+        // keyboard asks here BEFORE it inserts), a paste, a formatting act,
+        // an autocorrection — and the fence says so again as it drops (the
+        // door's own receipt would otherwise clear this line before she could
+        // read it). Below the three belts above: a gone, stood-down or sealed
+        // note's truth is the more lasting one.
         if flightFence.refusesPolicedEdit() {
             pendingEdit = nil
             bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
