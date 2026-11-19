@@ -79,7 +79,7 @@ struct MobileLibraryPagingTests {
         return (shelf, observing)
     }
 
-    private static func title(_ index: Int) -> String { String(format: "Paged note %03d", index) }
+    private nonisolated static func title(_ index: Int) -> String { String(format: "Paged note %03d", index) }
 
     /// **THE 201ST NOTE IS REACHABLE BY SCROLLING** — W-037, her "a page, never
     /// a cap" (the Mac's 17y B1 (k) letter: *"we need an area in which people
@@ -102,7 +102,7 @@ struct MobileLibraryPagingTests {
             let (shelf, observing) = await startedShelf(session)
             defer { observing.cancel() }
 
-            try await withHostedSurface(
+            await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: MobileScrapsModel(session: session),
                     stars: MobileStarsModel(session: session), books: shelf,
@@ -148,7 +148,7 @@ struct MobileLibraryPagingTests {
             let (shelf, observing) = await startedShelf(session)
             defer { observing.cancel() }
 
-            try await withHostedSurface(
+            await withHostedSurface(
                 MobileLibraryView(
                     model: library, scraps: MobileScrapsModel(session: session),
                     stars: MobileStarsModel(session: session), books: shelf,
