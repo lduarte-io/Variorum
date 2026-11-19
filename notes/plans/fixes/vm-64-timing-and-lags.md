@@ -151,7 +151,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | Batch | State | Commits | Notes |
 |---|---|---|---|
 | 1 · VM-65 | IN-PROGRESS | — | see the batch 1 block below |
-| 2 · VM-2 | IN-PROGRESS | — | see the batch 2 block below |
+| 2 · VM-2 | READY (stage) | `2358f33cb` `76dbf89b2` `f83122794` `1f292b1ec` `5b40f1984` + closeout | see the batch 2 block below |
 | 3 · VM-66 | NOT-STARTED | — | — |
 | 4 · VM-67 | NOT-STARTED | — | — |
 | 5 · VM-68 | NOT-STARTED | — | — |
@@ -261,9 +261,9 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 | P1 — the brain `StructuralFlightFence` + headless tests | DONE (`76dbf89b2`; `putBack` removed at `f83122794` as dead API — the face replays whole and at once) — `swift test --filter StructuralFlightFenceTests` 10 tests in 1 suite passed (headless, no stage) |
 | P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | DONE (this commit) — phone `build-for-testing` green into `DerivedData/vm64-b2/`, no new warning in a touched file; behaviour PENDING the stage window |
 | P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | DONE (this commit) — `MobileStructuralFlightFenceTests` (10), BUILT; green run and red-on-old run PENDING the stage window |
-| P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | NOT-STARTED |
-| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | NOT-STARTED |
-| P6 — closeout in §7 | NOT-STARTED |
+| P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | DONE — all three `** TEST BUILD SUCCEEDED **` at `f83122794` (the red one over the base's three phone files, cold), no new warning in a touched file |
+| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | READY — awaiting the window; the commands are in §7 batch 2 ▸ "The stage window" |
+| P6 — closeout in §7 | DONE (this commit) — its PENDING lines flip after P5 |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
 build), both gitignored.
@@ -462,3 +462,223 @@ them as empty BY DESIGN of the instrument (no `keyboardDidShow`), and they are f
 4. **P-65-7 — a sync round's exact rows** need a `Sync/` line (the engine's reports on the scheduler's status); today's
    readout says "about". Hers to schedule if the approximations prove too blunt for the minute-long empty round.
 5. **The labels** (every string in `MobileTimingCopy`, and the section and footer words) — her wording pass.
+
+### Batch 2 · VM-2 — the keystroke fence for structural flights (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** the stage runs are PENDING the orchestrator's window — the
+pins' green run, the red-on-old run, and the phone editor suites (the commands are below, runnable by anyone from my
+built products). No simulator walk: the window is the milliseconds between a menu tap and the settled page, which a
+hand cannot hit on purpose; the hosted pins drive the real Write text view's own key entry points (`insertText`,
+`deleteBackward`) through a deterministically held flight instead (an ordinary-use smoke is offered below as optional).
+Not touched, by the unit's line: the structural UNDO door (`MobileUndoDoor`, its own `inFlight` latch — the same window,
+recorded below as a follow-up), the crystallizer's declared arms, `runStructural` (Mac), `BlockRangeIndex`, `Sync/`.
+
+**Base:** `9cf3b3688`. **Commits:** `2358f33cb` (live status) · `76dbf89b2` (the brain) · `f83122794` (the face + the
+pins) · `1f292b1ec` / `5b40f1984` (the red-on-old revert announced, then restored) · this closeout.
+
+#### The mechanism, as traced on this tree (the VM-5 record's MAJOR 1, re-verified and corrected)
+
+A phone structural door raises `structuralInFlight`, flushes (`flushPendingText`), then suspends — the fan read, the
+operation on the runner, and its own settle (`refreshTakesFromStore`: flush, read, ingest) — while the page and
+`BlockRangeIndex` still show the note as it was. Nothing consulted the latch outside `MobileStructural.swift`: the gate
+(`shouldChangeText`) approved a keystroke there as `.block(i)` against the old tiling; `recordAutosave` recorded the
+WHOLE old block text; the door's own settle flushed it after the operation committed. The gate-less roads (M25's
+measured programmatic `deleteBackward()`/`replace(_:withText:)`, and the system's composition commits and dictation)
+took the same `.block(i)` arm through `fallbackVerdict`. **Correction to the VM-5 record:** the flush is no longer
+unconditional — since VX-683 B it carries `expectedText` (the ledger's pre-edit text), the row no longer holds it, and
+`Operations.autosave` RESCUES: the old block text + the keystroke keeps the chosen take and the operation's real
+result becomes a spurious `'conflict'` take. Net effect per door, all measured shapes the pins name:
+divide — the moved half reads twice; extract / make block — the lifted span reads twice; merge — her prose lands in a
+RELEASED source's take (no rescue: the row still holds the snapshot), gone from the note. **Insert below** rewrites no
+existing text, so its keystroke wrote A's CURRENT text — never stale (its twin is HOLLOW, below).
+
+#### What shipped, file by file
+
+- `Sources/VariorumCore/Domain/StructuralFlightFence.swift` — the rule, pure (the `MarkdownCaretRescue` precedent for a
+  live-surface brain in Core, so `swift test` reaches it): phases `open · flying · settling`; `offer` (a typed key is
+  deferred while up; a composition in progress never is); `refusesPolicedEdit` / `withholdsSystemEdit` (true while up,
+  each leaving a one-sentence debt); `flightLanded(surfaceSettled:)` → `.drain` or `.awaitSettle`; `surfaceSettled()`;
+  `drain()` (lowers, hands back the keys in order and whether to speak); the settle rule
+  `surfaceHoldsTheStore(forcedRenderOwed:projectionDeferred:)`. Logs nothing, persists nothing.
+- `Tests/VariorumCoreTests/StructuralFlightFenceTests.swift` — 10 headless tests.
+- `App/Variorum/VariorumMobile/Features/Write/MobileStructural.swift` — ONE change: the latch's `didSet` calls
+  `model?.structuralFlightChanged(up:)` on each edge, so every door that holds the latch (divide, merge, extract, make
+  block, insert below, delete, archive, the whole-block delete, the cross-block compound) is fenced and no door body
+  changed.
+- `App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift` — the face:
+  - `flightFence` (state, readable); `structuralFlightChanged(up:)` (raise; at the latch's fall, drain if the page holds
+    the store, else `settleFlightSurface`); `deferTypedInputDuringFlight` (the text view asks first);
+  - **the settle** — `flightSurfaceHoldsTheStore` (no `forceFullRender`, no `pendingProjection`); `settleFlightSurface`
+    re-reads at most three times (`awaitMintSettle` + `refreshTakesFromStore`), then waits for the next applied
+    projection (`applyProjection`'s settling hook, which schedules the drain on the next turn — never from inside the
+    apply). FAIL-CLOSED by design (P-2-4);
+  - **the drain** — speaks `StructuralUndoCopy.anotherIsLanding` (the one home of the sentence every door already says)
+    with the receipt's action (the door's Undo) kept, then replays the keys in order at the landed caret: `insertText`
+    through the text view (UIKit consults the gate — the walk suites' measured road), a held ⌫ through
+    `replayDeferredDeleteBackward`;
+  - **the gate belt** in `shouldChangeText` (after the gone / stood-down / sealed belts and the attribute-only return):
+    refuse with the sentence, disarming `pendingEdit` and `bulkPending` (NIT 4's doctrine);
+  - **the storage belt** in `storageDidEdit`'s `.block(i)` arm: the tiling and the re-stamp run as ever (the identity
+    audit stays coherent), `recordAutosave` does NOT, and `forceFullRender` is set so the settle re-reads the page from
+    the store. The tail arms are untouched (no block text, nothing stale; P-a's measured mint interleavings stand);
+  - **the door contract** (`flushPendingText`): while a fence is up and a forced render is owed (a gate-less edit
+    landed during the door's own flush suspension), the page is re-read before the door plans against it — the
+    pre-fence behaviour there was a dirty buffer refusing the door; this keeps the plan honest without a new refusal.
+- `App/Variorum/VariorumMobile/Features/Write/MobileEditorTextView.swift` — `insertText` asks the fence FIRST (so a ⏎
+  waits whole and its list continuation runs at the replay); a new `deleteBackward` override does the same;
+  `replayDeferredDeleteBackward` runs a held ⌫ through the pre-gated `MobileMarkdownActs.inputReplace` (a programmatic
+  `deleteBackward()` never consults the gate — M25), over the selection or the one composed character before the caret.
+- `App/Variorum/VariorumMobileTests/MobileStructuralFlightFenceTests.swift` — 10 hosted pins (below). They use only API
+  that exists on the base tree, so the same file builds against it for the red run.
+
+#### What each kind of input gets during a flight (the batch's question, answered)
+
+| Input | Road | Under the fence |
+|---|---|---|
+| Typed character, ⏎, ⌫ (software or hardware keyboard) | `insertText` / `deleteBackward` | **deferred** in order, replayed at the landed caret through the policed road — never dropped. If UIKit's ⌫ ever arrives by a private road that skips the override, it meets the gate belt instead (refused, said) |
+| Paste, a formatting-bar act, Tab, an edit-menu act | the gate (pre-gated or UIKit's consult) | **refused**, said once as the fence drops |
+| An autocorrection that consults the gate | the gate | **refused** — her typed word stays as she typed it; said |
+| An autocorrection / programmatic replace that does not consult | gate-less storage report | **withheld** — the page is re-read from the store; said |
+| Marked text (a composition in progress) | never deferred | its updates and its commit meet the gate (refused) or arrive gate-less (withheld); **a composition committed inside the window is the one case where her own text is refused rather than delayed** — said, never silent |
+| Dictation | gate-less | **withheld**, said |
+| Keys typed after the latch falls but before a deferred settle lands | `insertText` / `deleteBackward` | still deferred (the fence stays up until the page holds the store) |
+
+Autocorrect after the flight: the held keys replay before her next keystroke, so the keyboard's word context is whole
+again and the next space autocorrects as usual.
+
+#### The pins (red-on-old by the second build; PENDING the stage window)
+
+| Pin (`MobileStructuralFlightFenceTests`) | Road · door | Expected on the OLD build (`vm64-b2-red`) |
+|---|---|---|
+| `keysTypedWhileADivideLandsReplayAtTheLandedCaret` — **THE PIN (probe 2 inverted)** | A (X, Y, ⌫) · divide | RED: store `["Alpha beta. XGamma delta.", "Gamma delta.", …]` (or `…XYGamma…` if the off-window programmatic ⌫ never reaches storage) and `conflictTakes == 1` |
+| `anEditTheGateIsAskedAboutDuringADivideIsRefusedAndSaid` | B · divide | RED: `["Alpha beta. Gamma delta.X", "Gamma delta.", …]`, a conflict take, `statusMessage == nil` |
+| `aGatelessEditDuringADivideIsWithheldAndThePageReReadFromTheStore` | C · divide | RED: the same store, a conflict take, the page holding the duplicate, `statusMessage == nil` |
+| `aKeyTypedWhileAMergeLandsEndsUpInTheMergedBlock` | A · merge | RED: `occurrences(X) == 0` in the note and `markerInUnplacedTakes == 1` (in the released source) |
+| `aGatelessEditDuringAMergeNeverLandsInAReleasedSource` | C · merge | RED: `markerInUnplacedTakes == 1`, `statusMessage == nil` |
+| `aKeyTypedWhileAnExtractLandsNeverDuplicatesTheSpan` | A · extract | RED: `["Alpha beta.", "Alpha beta. Gamma delta.X", …]` (the span twice) + a conflict take |
+| `aKeyTypedWhileMakeBlockLandsNeverResurrectsTheWholeSource` | A · make block | RED: `["Alpha beta. Gamma delta. Epsilon zeta.X", "Gamma delta.", "Epsilon zeta.", …]` + a conflict take |
+| `insertBelowTwinNoKeyTypedDuringTheFlightIsLostOrDuplicated` | A · insert below | **GREEN on old — HOLLOW** for the stale-write claim (see below) |
+| `aKeyTypedWhileInsertBelowLandsGoesIntoTheNewBlock` | A · insert below | RED by design of the change, not a bug pin: old `["Alpha beta. Gamma delta.X", "", …]` (P-2-5) |
+| `afterTheFlightLandsTypingIsOrdinaryAgain` | — | GREEN on both (a guard: the fence is gone after a landing; nothing is said when nothing was refused) |
+
+So the red run expects **8 failing, 2 passing**; the green run expects **10 passing**. Every pin also asserts the DEBUG
+identity audit quiet (`identityAuditFailures == 0`) and no desync heal (`desyncRecoveryCount == 0`). The window is made
+deterministic by holding the in-memory store's one serial queue (a `DatabaseQueue`) from a detached write until the pin
+releases it, which parks the door at its first store trip after the flush — the Mac twin's sleeping-writer technique
+without the timing. The hold is always released, even when a pin fails, so a red run cannot hang.
+
+**Row dispositions:** divide · merge · extract · make block — **FIXED** with their pins (red-on-old PENDING the run).
+**Insert below — DISMISSED AS HOLLOW** for the stale-write claim (its twin is green on both trees: `newBlock` rewrites no
+existing text, so the window's keystroke records A's current text). The fence still covers it by construction (one
+latch), which changes where such a key lands — the new block, the Mac's rule — pinned as a behaviour (P-2-5), not
+claimed as a fix. **Delete · archive · whole-block delete · cross-block compound** share the latch and are fenced by
+construction; traced by reading only (no pin claimed): a keystroke into a block a delete tombstones used to be written
+into the tombstoned take, refused, and kept pending forever (`isDirty` stuck, the raw error in the status line).
+
+#### Evidence so far
+
+- Core, headless (no stage): `swift test --filter StructuralFlightFenceTests` — **10 tests in 1 suite passed**.
+- Builds, all `** TEST BUILD SUCCEEDED **`, no new warning in a touched file (the one warning in
+  `MobileStructural.swift`, `intra` never used in `divide`, is pre-existing and untouched): phone `build-for-testing` of
+  the fix (`DerivedData/vm64-b2/`), phone `build-for-testing` of the pins over the base production files
+  (`DerivedData/vm64-b2-red/`, built cold), Mac `build-for-testing` (`DerivedData/vm64-b2/`).
+- PENDING (the stage window): the green run, the red run, the phone editor suites.
+
+#### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+Green — the pins and the phone editor suites over the fix:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileStructuralFlightFenceTests MobileStructuralTests MobileSelectionActsTests
+  MobileEditorMaterializationTests MobileCanaryTests MobileEditorRoutingTests MobileEditorCrystallizationTests
+  MobileEditorProjectionTests MobileTypewriterRoomTests MobileNoteSealTests MobileFindInNoteTests
+  MobileEditRoutingBindingTests MobileIdentityAuditSeparatorTests MobileBulkArmingTests MobileCanaryTeardownTests
+  MobileEditRoutingCrashTests MobileEditRouteArmsTests MobileWholeBlockDeleteBrainTests MobileWholeBlockDeleteTests
+  MobileCrossBlockEditBrainTests MobileCrossBlockEditTests MobileMarkdownRenderTests MobileMarkdownReturnTests
+  MobileMarkdownActsTests MobileCheckboxTapTests MobileMarkdownCaretTests MobileTakesTests MobileTakesBrowserTests
+  MobileTakesBrowserSurfaceTests MobileTakesChromeTests MobileTakeReorderTests MobileTakeToBlockTests
+  MobileTakeLockTests MobileUndoDoorTests MobileBlockMenuTests MobileCommentsTests MobileBlockDecorTests
+  MobileWalkTests MobileTrailingNewlinesTests MobileSpaceEaterTests MobileCRLFCaptureTests
+  MobileWriteScrollAuthorityTests MobileScrollAuthorityBrainTests MobileLivenessTests
+  MobileDeferredProjectionRetryTests MobileTypedOverRescueTests MobileEditTraceTests MobileKeyDoorPostureTests
+  MobileSavepointOnLeavingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b2 \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+Red-on-old — the same pins over the BASE production files (expect 8 failing, 2 passing, as tabled above):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b2-red \
+  -only-testing:VariorumMobileTests/MobileStructuralFlightFenceTests
+```
+If `vm64-b2-red` is ever lost, it is rebuilt from the committed tree by: `git checkout 9cf3b3688 --
+App/Variorum/VariorumMobile/Features/Write/{MobileStructural,MobileEditorViewModel,MobileEditorTextView}.swift`, the
+same `build-for-testing` into `DerivedData/vm64-b2-red`, then `git checkout HEAD --` the same three files (safe against
+`f83122794` and every later commit of this batch: no other production file of the fix exists).
+
+Optional, heavier: `MobilePerfWalkTests` (the 100k typing walk — the fence adds one O(1) check per key at
+`insertText`; batch 3 runs this suite anyway). Optional ordinary-use smoke on the Debug phone app (signed out, no
+Resume): open a note, ⋯ ▸ Divide Block, keep typing at once; ⋯ ▸ Merge with Previous, keep typing; ⋯ ▸ New Block
+Below, type — each act lands, the typing follows it, nothing is said. No Mac test run is needed: the only Core change
+is a new type no Mac code calls (the Mac build compiles it).
+
+#### PROVISIONAL calls (options weighed; the built one first)
+
+- **P-2-1 — the fence's shape.** (a) **built:** typed keys deferred and replayed (the Mac's R1-2), every other edit
+  refused or withheld, either said once; (b) refuse-and-speak everything (the batch's named minimum — drops her typed
+  keys with a sentence); (c) defer everything (not honest on iOS: an autocorrection and a composition are bound to
+  ranges and to the keyboard's own state, and replaying them against a rewritten page would land them in the wrong
+  text).
+- **P-2-2 — the sentence after the flight.** (a) **built:** `StructuralUndoCopy.anotherIsLanding`, said as the fence
+  drops if anything was refused or withheld, the door's Undo kept beside it — it replaces a WORDED receipt (insert
+  below's "New block added below — type away.", delete's and archive's) in that rare case; (b) say it only when the
+  status line is empty (leaves a refusal silent on the worded doors); (c) a new sentence naming what was refused (new
+  copy — hers).
+- **P-2-3 — gate-less edits are always withheld**, even when the flight then commits nothing (a refused divide): (a)
+  **built** — simple, never stale, said; (b) release them when no operation committed (needs a commit signal from
+  every door and a delivery fence over held bytes; recorded as the road if (a)'s rare drop ever matters).
+- **P-2-4 — the settle fails CLOSED.** (a) **built:** if three re-reads cannot settle the page, keys keep waiting
+  until the next projection applies (in production the live observation delivers after every write); (b) fail open
+  after N re-reads (an editor never looks frozen, but a key could again build on a page that has not settled).
+- **P-2-5 — insert below's keys land in the new block** (the Mac's rule for its own ⌘⇧⏎ flight; the door's receipt
+  says "type away"): (a) **built** — the one latch fences every door alike; (b) exempt insert below from the fence
+  (its keys would keep going into the block above, the pre-fix placement).
+- **P-2-6 — a held ⏎ replays whole**, so its list continuation is decided at the replay against the settled page (the
+  Mac's replayed ⏎ "claims and chains exactly as a typed one").
+
+#### Residuals and follow-ups (traced, not fixed here — owners for the orchestrator to assign)
+
+1. **The structural UNDO door** (`MobileUndoDoor.undo` / `redo`, its own `inFlight` latch: flush → `stack.undo` on the
+   runner → `refreshTakesFromStore`) has the same window — a keystroke while an undo of a divide lands records the
+   pre-undo block text. A sibling door outside this batch's named unit; with the fence in place the fix is one more
+   latch hook (both latches must be down before the fence lands). Proposed owner: a rider on wave 3's Writing
+   umbrella or a VM ticket.
+2. **The leading-run attachment mid-flight** (`TailCrystallizer.attachLeadingTailRunIfNeeded`): if the tail's idle
+   clock fires while a divide or merge of the note's LAST block is landing, it records that block's ledger text + the
+   newline run — the old text. Not a keystroke in the window (an earlier keystroke's timer), so outside this unit.
+   Holding the tail for the fence (the Mac's `holdsTailForStructuralFlight: structuralInFlight`) was weighed and
+   REJECTED here: `finish()`'s backstop mint goes through the same hold, so a teardown that lands mid-flight would skip
+   it and lose the open tail. Proposed owner: the same Writing umbrella, with a pin.
+3. **A pop in the same instant as a flight** (SwiftUI may release the text view concurrently with `onDisappear`): keys
+   held at that moment have no caret to replay at and go with the view — the Mac's stash has the same lifetime.
+4. **The phone's own walk of the window** cannot be made by hand; the device's autocorrect / dictation / composition
+   behaviour under the fence is reasoned from M25 and the pins' three roads, not seen on her phone. MobileSoul §5.2's
+   standing obligation ("any new editor behavior must pass the autocorrect/dictation test on device") rides her
+   wave-1 install sitting.
+
+#### The Mac does not change (review focus 8)
+
+No `Shared/` file changed. The one Core addition is a new type no Mac code references; the Mac test build compiles it.
+`runStructural`, `EditorTextView` and every Mac editor seam are byte-untouched.
+
+#### For QUESTIONS at the merge (the orchestrator carries these to `notes/QUESTIONS.md`)
+
+1. **P-2-1 — the fence's shape** on the phone: defer typed keys + refuse/withhold the rest, said once (built) · refuse
+   and say everything · defer everything.
+2. **P-2-2 — the after-flight sentence** replacing a worded receipt when something was refused (built) · only when the
+   status line is empty · a new sentence (her wording).
+3. **P-2-3 — a composition commit or dictation inside the window is withheld and said** (built) · released when the
+   flight commits nothing.
+4. **P-2-5 — insert below's keys land in the new block** (built, the Mac's rule) · exempt insert below.
