@@ -80,7 +80,7 @@ extension View {
     @ViewBuilder
     func pageProse(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.body).foregroundStyle(style.tokens.ink)
+            self.phoneType(.rowPreview, style.tokens).foregroundStyle(style.tokens.ink)
         } else {
             self
         }
@@ -90,7 +90,7 @@ extension View {
     @ViewBuilder
     func pageSecondary(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.body).foregroundStyle(style.tokens.muted)
+            self.phoneType(.rowPreview, style.tokens).foregroundStyle(style.tokens.phone.muted)
         } else {
             self.foregroundStyle(.secondary)
         }
@@ -102,7 +102,7 @@ extension View {
     @ViewBuilder
     func pageWarning(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.body).foregroundStyle(Color.orange)
+            self.phoneType(.rowPreview, style.tokens).foregroundStyle(Color.orange)
         } else {
             self.foregroundStyle(.orange)
         }
@@ -112,7 +112,7 @@ extension View {
     @ViewBuilder
     func pageCaption(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.small).foregroundStyle(style.tokens.muted)
+            self.phoneType(.meta, style.tokens).foregroundStyle(style.tokens.phone.muted)
         } else {
             self.font(.caption).foregroundStyle(.secondary)
         }
@@ -122,7 +122,7 @@ extension View {
     @ViewBuilder
     func pageCaptionWarning(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.small).foregroundStyle(Color.orange)
+            self.phoneType(.meta, style.tokens).foregroundStyle(Color.orange)
         } else {
             self.font(.caption).foregroundStyle(.orange)
         }
@@ -132,7 +132,7 @@ extension View {
     @ViewBuilder
     func pageCaptionError(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.small).foregroundStyle(style.tokens.alarm)
+            self.phoneType(.meta, style.tokens).foregroundStyle(style.tokens.alarm)
         } else {
             self.font(.caption).foregroundStyle(.red)
         }
@@ -143,7 +143,7 @@ extension View {
     @ViewBuilder
     func pageCaptionProminent(_ style: SharedPageStyle?) -> some View {
         if let style {
-            self.font(style.tokens.small).foregroundStyle(style.tokens.ink)
+            self.phoneType(.meta, style.tokens).foregroundStyle(style.tokens.ink)
         } else {
             self.font(.caption)
         }
@@ -157,7 +157,7 @@ extension View {
     func pageFieldChrome(_ style: SharedPageStyle?) -> some View {
         if let style {
             self
-                .font(style.tokens.body)
+                .phoneType(.control, style.tokens)
                 .foregroundStyle(style.tokens.ink)
                 .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
                 .background(
@@ -210,7 +210,7 @@ struct PageHeading: View {
     var body: some View {
         if let style {
             Text(style.chrome(title))
-                .font(style.tokens.heading)
+                .phoneType(.sectionHeader, style.tokens)
                 .foregroundStyle(style.tokens.ink)
                 .accessibilityLabel(title)
         } else {
@@ -333,7 +333,7 @@ private struct PageDoorLabel: View {
         switch form {
         case .act, .destructive:
             configuration.label
-                .font(tokens.body)
+                .phoneType(.control, tokens)
                 .foregroundStyle(form == .destructive ? Color.red : tokens.accent)
                 .multilineTextAlignment(.leading)
                 .padding(.vertical, 9)
@@ -346,7 +346,7 @@ private struct PageDoorLabel: View {
                                 .stroke(tokens.line, lineWidth: 1)))
         case .bordered:
             configuration.label
-                .font(tokens.body)
+                .phoneType(.control, tokens)
                 .foregroundStyle(tokens.accent)
                 .multilineTextAlignment(.leading)
                 .padding(.vertical, 8)
@@ -356,7 +356,7 @@ private struct PageDoorLabel: View {
                         .stroke(tokens.line, lineWidth: 1))
         case .borderless, .inlineAct:
             configuration.label
-                .font(tokens.body)
+                .phoneType(.control, tokens)
                 .foregroundStyle(tokens.accent)
                 .padding(.vertical, 6)
         }

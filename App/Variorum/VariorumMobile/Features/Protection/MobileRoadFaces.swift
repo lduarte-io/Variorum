@@ -46,7 +46,7 @@ struct MobileRoadLockView: View {
             VStack(spacing: 18) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 30, weight: .light))
-                    .foregroundStyle(tokens.muted)
+                    .foregroundStyle(tokens.phone.muted)
                 if face.preDesignStore {
                     // VM-8 unit 1 (F-U4-2) — RULE 26 before unlock: a store from before this design (its key files' names
                     // alone say so). HER face, her words only — the lead heading the card (no lobby title — P-VX329-U4-1),
@@ -60,13 +60,13 @@ struct MobileRoadLockView: View {
                 if let message = lobby.message { alarm(message) }
                 if lobby.busy {
                     HStack(spacing: 6) {
-                        TravellingDotsIndicator(ink: tokens.muted)
+                        TravellingDotsIndicator(ink: tokens.phone.muted)
                         // Under her pre-design face nothing is opening (Start fresh… is running): the dots alone, no words
                         // beyond hers (the Mac's own rule).
                         if !face.preDesignStore {
                             Text(tokens.chromeLabel(ProtectionWords.opening))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
+                                .phoneType(.meta, tokens)
+                                .foregroundStyle(tokens.phone.muted)
                         }
                     }
                 }
@@ -99,7 +99,7 @@ struct MobileRoadLockView: View {
     @ViewBuilder
     private var preDesignFace: some View {
         Text(ProtectionWords.preDesignLead)
-            .font(tokens.title)
+            .phoneType(.screenTitle, tokens)
             .foregroundStyle(tokens.ink)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
@@ -114,7 +114,7 @@ struct MobileRoadLockView: View {
     @ViewBuilder
     private var standingLobby: some View {
                 Text(tokens.chromeLabel(ProtectionWords.lobbyTitle))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                     .multilineTextAlignment(.center)
                 if let nothing = face.noKeyFileAnywhere {
@@ -127,8 +127,8 @@ struct MobileRoadLockView: View {
                             }
                             .disabled(lobby.busy)
                             Text(ProtectionCopy.libraryMissingStartSubline)
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
+                                .phoneType(.meta, tokens)
+                                .foregroundStyle(tokens.phone.muted)
                                 .multilineTextAlignment(.center)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -152,8 +152,8 @@ struct MobileRoadLockView: View {
         }
         if let line = face.touchIDLineWords {
             Text(line)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -161,7 +161,7 @@ struct MobileRoadLockView: View {
             VStack(spacing: 10) {
                 PeekableSecretField(label: ProtectionWords.passphraseLabel, text: $passphrase, onSubmit: { submitPassphrase() })
                     .submitLabel(.go)
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.ink)
                     .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
                     .background(field)
@@ -180,7 +180,7 @@ struct MobileRoadLockView: View {
                     showsWords.toggle()
                 } label: {
                     Text(tokens.chromeLabel(ProtectionWords.wordsDoor))
-                        .font(tokens.small)
+                        .phoneType(.controlInline, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -194,7 +194,7 @@ struct MobileRoadLockView: View {
         VStack(spacing: 10) {
             // VX-463 (her ruling: "conceal with a reveal eye"): the passphrase's one shared concealing field.
             PeekableSecretField(label: ProtectionWords.wordsPlaceholder, text: $wordsText)
-                .font(tokens.body)
+                .phoneType(.control, tokens)
                 .foregroundStyle(tokens.ink)
                 .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
                 .background(field)
@@ -215,15 +215,15 @@ struct MobileRoadLockView: View {
 
     private func sentence(_ text: String) -> some View {
         Text(text)
-            .font(tokens.body)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.rowPreview, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
     }
 
     private func alarm(_ text: String) -> some View {
         Text(text)
-            .font(tokens.small)
+            .phoneType(.meta, tokens)
             .foregroundStyle(tokens.alarm)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
@@ -247,13 +247,13 @@ struct MobileLibraryWordsCard: View {
             VStack(spacing: 18) {
                 Image(systemName: "key")
                     .font(.system(size: 28, weight: .light))
-                    .foregroundStyle(tokens.muted)
+                    .foregroundStyle(tokens.phone.muted)
                 Text(tokens.chromeLabel(ProtectionWords.wordsCardTitle))
-                    .font(tokens.title)
+                    .phoneType(.screenTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 Text(ProtectionWords.wordsCardLead)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.rowPreview, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(alignment: .top, spacing: 28) {
@@ -262,11 +262,11 @@ struct MobileLibraryWordsCard: View {
                             ForEach(column, id: \.number) { entry in
                                 HStack(spacing: 8) {
                                     Text("\(entry.number)")
-                                        .font(tokens.mono)
-                                        .foregroundStyle(tokens.muted)
+                                        .phoneType(.mono, tokens)
+                                        .foregroundStyle(tokens.phone.muted)
                                         .frame(minWidth: 20, alignment: .trailing)
                                     Text(entry.word)
-                                        .font(tokens.mono)
+                                        .phoneType(.mono, tokens)
                                         .foregroundStyle(tokens.ink)
                                         .lineLimit(1)
                                 }
@@ -280,8 +280,8 @@ struct MobileLibraryWordsCard: View {
                 .padding(.horizontal, 16)
                 .background(RoundedRectangle(cornerRadius: 10).fill(tokens.card))
                 Text(ProtectionWords.wordsCardFoot)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.meta, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 MobileRoadButton(title: ProtectionWords.wordsCardButton, tokens: tokens) { model.iveWrittenThemDown() }
@@ -306,10 +306,10 @@ struct MobileRoadInterludeCard: View {
             VStack(spacing: 18) {
                 Image(systemName: isOffer ? "key" : "info.circle")
                     .font(.system(size: 28, weight: .light))
-                    .foregroundStyle(tokens.muted)
+                    .foregroundStyle(tokens.phone.muted)
                 if let sentence = model.sentence {
                     Text(sentence)
-                        .font(tokens.body)
+                        .phoneType(.rowPreview, tokens)
                         .foregroundStyle(tokens.ink)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
@@ -345,12 +345,12 @@ struct MobileRoadInterludeCard: View {
                 }
                 if let message = model.message {
                     Text(message)
-                        .font(tokens.small)
+                        .phoneType(.meta, tokens)
                         .foregroundStyle(tokens.alarm)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if model.busy { TravellingDotsIndicator(ink: tokens.muted) }
+                if model.busy { TravellingDotsIndicator(ink: tokens.phone.muted) }
             }
             .padding(.horizontal, 28)
             .padding(.vertical, 48)
@@ -376,16 +376,16 @@ struct MobileNoKeyFileSheet: View {
         VStack(spacing: 18) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 28, weight: .light))
-                .foregroundStyle(tokens.muted)
+                .foregroundStyle(tokens.phone.muted)
             Text(ProtectionWords.noKeyFileAfterAQuietOpen)
-                .font(tokens.body)
+                .phoneType(.rowPreview, tokens)
                 .foregroundStyle(tokens.ink)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             if accountRoad {
                 Text(ProtectionWords.noKeyFileAnywhereAccountRoad)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.rowPreview, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -413,7 +413,7 @@ struct MobileRoadButton: View {
                     Text(tokens.chromeLabel(title))
                 }
             }
-            .font(tokens.body)
+            .phoneType(.control, tokens)
             .foregroundStyle(tokens.accent)
             .padding(.vertical, 10)
             .padding(.horizontal, 16)

@@ -37,27 +37,27 @@ import VariorumCore
 enum MobileProtectionChrome {
     static func heading(_ text: String, _ tokens: VoiceTokens) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.sectionHeader, tokens)
+            .foregroundStyle(tokens.phone.muted)
     }
 
     static func line(_ text: String, _ tokens: VoiceTokens) -> some View {
         Text(text)
-            .font(tokens.body)
+            .phoneType(.rowPreview, tokens)
             .foregroundStyle(tokens.ink)
             .fixedSize(horizontal: false, vertical: true)
     }
 
     static func caption(_ text: String, _ tokens: VoiceTokens) -> some View {
         Text(text)
-            .font(tokens.small)
-            .foregroundStyle(tokens.muted)
+            .phoneType(.meta, tokens)
+            .foregroundStyle(tokens.phone.muted)
             .fixedSize(horizontal: false, vertical: true)
     }
 
     static func alarm(_ text: String, _ tokens: VoiceTokens) -> some View {
         Text(text)
-            .font(tokens.small)
+            .phoneType(.meta, tokens)
             .foregroundStyle(tokens.alarm)
             .fixedSize(horizontal: false, vertical: true)
     }
@@ -66,7 +66,7 @@ enum MobileProtectionChrome {
     static func door(_ label: String, _ tokens: VoiceTokens, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(tokens.chromeLabel(label))
-                .font(tokens.body)
+                .phoneType(.control, tokens)
                 .foregroundStyle(tokens.accent)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
@@ -78,17 +78,17 @@ enum MobileProtectionChrome {
     /// A sheet's title.
     static func title(_ text: String, _ tokens: VoiceTokens) -> some View {
         Text(tokens.chromeLabel(text))
-            .font(tokens.title)
+            .phoneType(.screenTitle, tokens)
             .foregroundStyle(tokens.ink)
     }
 
     /// An act running: the dots and the act's own word.
     static func working(_ text: String, _ tokens: VoiceTokens) -> some View {
         HStack(spacing: 6) {
-            TravellingDotsIndicator(ink: tokens.muted)
+            TravellingDotsIndicator(ink: tokens.phone.muted)
             Text(tokens.chromeLabel(text))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
         }
     }
 }
@@ -98,7 +98,7 @@ extension View {
     func mobileSecretFieldChrome(_ tokens: VoiceTokens) -> some View {
         textInputAutocapitalization(.never)
             .autocorrectionDisabled()
-            .font(tokens.body)
+            .phoneType(.control, tokens)
             .foregroundStyle(tokens.ink)
             .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
             .background(
@@ -124,8 +124,8 @@ struct MobilePassphraseHintLine: View {
     var body: some View {
         if let hint = NewPassphraseRule.hint(passphrase) {
             Text(hint)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+                .phoneType(.meta, tokens)
+                .foregroundStyle(tokens.phone.muted)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityLabel(hint)
         }
@@ -148,7 +148,7 @@ struct MobileGateChoice: View {
                 row(.alwaysAsk, ProtectionWords.gateAlwaysAsk)
             } else {
                 Text(ProtectionWords.gateAlwaysAsk)
-                    .font(tokens.body)
+                    .phoneType(.control, tokens)
                     .foregroundStyle(tokens.ink)
                 MobileProtectionChrome.caption(ProtectionWords.touchIDNotSetUpOnThisMac, tokens)
             }
@@ -165,10 +165,10 @@ struct MobileGateChoice: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: selected ? "largecircle.fill.circle" : "circle")
-                    .foregroundStyle(selected ? tokens.accent : tokens.muted)
+                    .foregroundStyle(selected ? tokens.accent : tokens.phone.muted)
                 Text(label)
-                    .font(tokens.body)
-                    .foregroundStyle(selected ? tokens.ink : tokens.muted)
+                    .phoneType(.control, tokens)
+                    .foregroundStyle(selected ? tokens.ink : tokens.phone.muted)
                 Spacer()
             }
             .contentShape(Rectangle())
@@ -328,7 +328,7 @@ struct MobileSetPassphraseSheet: View {
                         .mobileSecretFieldChrome(tokens)
                 }
                 if let refusal = model.refusal { MobileProtectionChrome.alarm(refusal, tokens) }
-                if model.busy { TravellingDotsIndicator(ink: tokens.muted) }
+                if model.busy { TravellingDotsIndicator(ink: tokens.phone.muted) }
                 HStack(spacing: 16) {
                     MobileRoadButton(title: ProtectionWords.setPassphraseCancel, tokens: tokens) { model.cancel() }
                         .disabled(model.busy)
@@ -370,8 +370,8 @@ struct MobileRoadKeyDoorConfirmSheet: View {
                 MobileProtectionChrome.title(model.title, tokens)
                 ForEach(Array(model.door.sentences.enumerated()), id: \.offset) { index, sentence in
                     Text(sentence)
-                        .font(tokens.body)
-                        .foregroundStyle(index == 0 ? tokens.ink : tokens.muted)
+                        .phoneType(.rowPreview, tokens)
+                        .foregroundStyle(index == 0 ? tokens.ink : tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if model.asksCurrent {
@@ -501,13 +501,13 @@ struct MobileRoadSecretCheckSheet: View {
                     ForEach(Array(outcome.lines.enumerated()), id: \.offset) { index, line in
                         if index == 0 && outcome.warns {
                             Text(line)
-                                .font(tokens.body)
+                                .phoneType(.rowPreview, tokens)
                                 .foregroundStyle(tokens.alarm)
                                 .fixedSize(horizontal: false, vertical: true)
                         } else {
                             Text(line)
-                                .font(tokens.body)
-                                .foregroundStyle(index == 0 ? tokens.ink : tokens.muted)
+                                .phoneType(.rowPreview, tokens)
+                                .foregroundStyle(index == 0 ? tokens.ink : tokens.phone.muted)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -574,7 +574,7 @@ struct MobileRoadCrossingsSection: View {
         if let faces = model.faces {
             VStack(alignment: .leading, spacing: 10) {
                 Text(ProtectionWords.postureLine(faces.mode))
-                    .font(tokens.body.weight(.semibold))
+                    .phoneType(.rowTitle, tokens)
                     .foregroundStyle(tokens.ink)
                 ForEach(Self.rows(faces), id: \.self) { row in
                     switch row {
@@ -620,7 +620,7 @@ struct MobileRoadCrossingsSection: View {
                             model.cancelTouchID()
                         }
                         .disabled(model.gateBusy)
-                        if model.gateBusy { TravellingDotsIndicator(ink: tokens.muted) }
+                        if model.gateBusy { TravellingDotsIndicator(ink: tokens.phone.muted) }
                         MobileRoadButton(title: ProtectionWords.gateRowTouchIDButton, tokens: tokens) { useFaceID() }
                             .disabled(gatePassphrase.isEmpty || model.gateBusy)
                     }
@@ -662,14 +662,14 @@ struct MobileRoadCrossingConfirmSheet: View {
                 MobileProtectionChrome.title(model.title, tokens)
                 ForEach(Array(model.door.sentences.enumerated()), id: \.offset) { _, sentence in
                     Text(sentence)
-                        .font(tokens.body)
-                        .foregroundStyle(Self.hers.contains(sentence) ? tokens.ink : tokens.muted)
+                        .phoneType(.rowPreview, tokens)
+                        .foregroundStyle(Self.hers.contains(sentence) ? tokens.ink : tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                     if sentence == ProtectionWords.copiesUnderAKeyThisMacCantDelete {
                         ForEach(model.door.undeletableCopies, id: \.self) { copy in
                             Text("\u{2022} \(copy)")
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
+                                .phoneType(.meta, tokens)
+                                .foregroundStyle(tokens.phone.muted)
                         }
                     }
                 }
@@ -739,12 +739,12 @@ struct MobileRoadSignedOutCastleSheet: View {
                 MobileProtectionChrome.title(model.title, tokens)
                 ForEach(Array(model.sentences.enumerated()), id: \.offset) { _, sentence in
                     Text(sentence)
-                        .font(tokens.body)
-                        .foregroundStyle(tokens.muted)
+                        .phoneType(.rowPreview, tokens)
+                        .foregroundStyle(tokens.phone.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let refusal = model.refusal { MobileProtectionChrome.alarm(refusal, tokens) }
-                if model.busy { TravellingDotsIndicator(ink: tokens.muted) }
+                if model.busy { TravellingDotsIndicator(ink: tokens.phone.muted) }
                 HStack(spacing: 16) {
                     MobileRoadButton(title: ProtectionWords.accountCancel, tokens: tokens) { model.cancel() }
                         .disabled(model.busy)

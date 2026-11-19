@@ -24,14 +24,14 @@ struct MobileAcknowledgmentsSheet: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text(tokens.path(["Acknowledgments"]))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                    .phoneType(.screenTitle, tokens)
+                    .foregroundStyle(tokens.phone.muted)
                 Spacer()
                 Button {
                     dismiss()
                 } label: {
                     Text(tokens.chromeLabel("Done"))
-                        .font(tokens.small)
+                        .phoneType(.control, tokens)
                         .foregroundStyle(tokens.accent)
                 }
                 .buttonStyle(.plain)
@@ -43,21 +43,21 @@ struct MobileAcknowledgmentsSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     Text(AcknowledgmentsCopy.intro)
-                        .font(tokens.body)
+                        .phoneType(.rowPreview, tokens)
                         .foregroundStyle(tokens.ink)
                         .fixedSize(horizontal: false, vertical: true)
                     ForEach(AcknowledgmentsCopy.all) { notice in
                         VStack(alignment: .leading, spacing: 6) {
                             Text(notice.name)
-                                .font(tokens.heading)
+                                .phoneType(.rowTitle, tokens)
                                 .foregroundStyle(tokens.ink)
                             Text(notice.role)
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
+                                .phoneType(.meta, tokens)
+                                .foregroundStyle(tokens.phone.muted)
                                 .fixedSize(horizontal: false, vertical: true)
                             Text(notice.text)
-                                .font(.system(size: 10, design: .monospaced))
-                                .foregroundStyle(tokens.muted)
+                                .phoneType(.meta, tokens)
+                                .foregroundStyle(tokens.phone.muted)
                                 .textSelection(.enabled)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
