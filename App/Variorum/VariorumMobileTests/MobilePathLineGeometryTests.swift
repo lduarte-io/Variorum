@@ -39,14 +39,15 @@ struct MobilePathLineGeometryTests {
     /// VM-53: the shell's Settings door in the environment, as the shell hands
     /// it — so the roots' ⋯ menu stands on the line the way it does on the phone.
     private func shelf(
-        _ session: AppSession, tokens: VoiceTokens, width: CGFloat
+        _ session: AppSession, tokens: VoiceTokens, width: CGFloat,
+        wing: String? = nil, onWingDoor: (() -> Void)? = nil
     ) -> HostedSurface<some View> {
         HostedSurface(
             MobileShelfView(
                 model: MobileShelfViewModel(session: session),
                 stars: MobileStarsModel(session: session),
                 quickNote: MobileQuickNoteModel(session: session),
-                tokens: tokens, tabBar: { EmptyView() },
+                tokens: tokens, wingName: wing, onWingDoor: onWingDoor, tabBar: { EmptyView() },
                 onOpenBook: { _ in }, onOpenForWriting: { _ in },
                 onOpenTrash: {})
                 .environment(\.mobileSettingsDoor, MobileSettingsDoor {}),
@@ -105,6 +106,74 @@ struct MobilePathLineGeometryTests {
                         #expect(hit.maxX <= width - 8 + 0.5,
                                 "\(door) leaves the surface at \(Int(width)): \(hit)")
                     }
+                }
+            }
+        }
+    }
+
+    /// **THE VM-55 RE-LAND, MEETING 1 — the wing door on this line.** VM-55's
+    /// interim wing door (`MobileWingPath`) leads the path with the wing's name
+    /// and makes the title a door; VM-55's own pins hold its target at 44 × 44
+    /// inside the line (`MobileWingDoorGeometryTests`). On this run's line the
+    /// door's target is the line's own 44 (the hit-area helper, nothing handed
+    /// back), so BOTH hold at once: the door a 44 × 44 target that never grows
+    /// the line, this run's three doors 44 × 44 on the door's own line, after it
+    /// and inside the surface — at 402 and 430 in both voices, with the long
+    /// case (a two-digit count). Measured with the real fonts: Terminal's
+    /// "~/home/shelf  ·  14 books" beside the doors wants ≈ 438 pt, so at 402
+    /// the words do not all fit and the path — the line's one flexible member —
+    /// truncates at its tail (P-47-9's rule; PROVISIONAL P-47-27), never a door
+    /// and never a second line. The + New Note door keeps its whole word.
+    @Test func theBookcaseLineWithItsWingDoorHoldsOneLineAndEveryTarget() async throws {
+        try await withEditorWorld { session, _ in
+            for index in 0..<14 {
+                _ = try await session.runner.run { ops in
+                    try ops.createReading(name: "Volume \(index)", kind: .book)
+                }
+            }
+            for tokens in [VoiceTokens.terminalLight, .studyLight] {
+                for width in [CGFloat(402), 430] {
+                    var presses = 0
+                    let surface = shelf(
+                        session, tokens: tokens, width: width,
+                        wing: WingWords.home, onWingDoor: { presses += 1 })
+                    defer { surface.tearDown() }
+                    await surface.settle(40)
+                    let door = try #require(
+                        surface.visibleElements.first {
+                            $0.accessibilityLabel == WingWords.home
+                                && $0.accessibilityTraits.contains(.button)
+                        },
+                        "no wing door in \(tokens.voice) at \(Int(width)): \(surface.visibleLabels)")
+                    let wing = door.accessibilityFrame
+                    #expect(wing.width >= 43.5 && wing.height >= 43.5,
+                            "the wing door answers across 44 × 44 in \(tokens.voice) at \(Int(width)): \(wing)")
+                    #expect(wing.height <= 44.5,
+                            "the wing door never grows the line in \(tokens.voice) at \(Int(width)): \(wing)")
+                    #expect(wing.minX >= PhoneMetrics.gutter - 0.5, "the door starts at the gutter: \(wing)")
+                    for label in [MobileRecoveryDoors.trashLabel, "New Note", MobileRootMenu.spokenLabel] {
+                        let hit = try #require(
+                            frame(surface, label),
+                            "the \(label) door is missing in \(tokens.voice): \(surface.visibleLabels)")
+                        #expect(hit.width >= 43.5 && hit.height >= 43.5,
+                                "\(label) answers across 44 × 44 in \(tokens.voice) at \(Int(width)): \(hit)")
+                        #expect(hit.height <= 44.5, "\(label) keeps the one 44 pt row: \(hit)")
+                        #expect(abs(hit.midY - wing.midY) <= 2,
+                                "\(label) is off the wing door's line: \(hit.midY) vs \(wing.midY)")
+                        #expect(hit.minX >= wing.maxX - 0.5, "\(label) overlaps the wing door: \(hit) vs \(wing)")
+                        #expect(hit.maxX <= width - 8 + 0.5, "\(label) leaves the surface at \(Int(width)): \(hit)")
+                    }
+                    // + New Note keeps its whole word on the line (a squeezed
+                    // word door would wrap inside its 44 — batch 2's old red).
+                    let word = tokens.chromeLabel(MobileNewNoteDoor.doorTitle)
+                    let font = PhoneType.uiFont(.controlInline, voice: tokens.voice)
+                    let wordWidth = ceil((word as NSString).size(withAttributes: [.font: font]).width)
+                    let newNote = try #require(frame(surface, "New Note"))
+                    #expect(newNote.width >= wordWidth - 1,
+                            "+ New Note keeps its word whole in \(tokens.voice) at \(Int(width)): \(newNote), word \(wordWidth)")
+                    #expect(door.accessibilityActivate(), "the wing door is a real control")
+                    await surface.settle(5)
+                    #expect(presses == 1, "pressing the wing door opens the list")
                 }
             }
         }
