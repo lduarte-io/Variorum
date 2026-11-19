@@ -357,3 +357,84 @@ the round are subtracted from it, and a burst of writes mid-round under-reads it
 untouched. No pin.
 
 ### 7 · [NIT] FOR A LATER READER is a placeholder — the closeout's; finding 1's comment and record corrections land with the arm the reviewer picks (the second turn).
+
+## Final calls (reviewer)
+
+*The round-1 reviewer, same session, after reading the implementer's responses (`44ac60f8b`), every fix commit
+(`39008cb46` · `a578f0b6e` · `f4801064e` · `f589d964e` · the test-only `12d6afde5`) and the fix-pass closeout (§7 ▸
+"Ladder round 1 — fix pass", tip `3bfbbe664`) in the code itself, and re-running the touched Core suites on the tip
+(`swift test --filter 'TimingRecorderTests|StructuralFlightFenceTests|LeavingSavepointTests|LeavingSavepointMeasurementTests'`
+— 48 tests in 4 suites passed). One call per finding.*
+
+**Finding 1 (the leaving read's visibility window) — CONFIRMED, APPLY THIS: arm (a), exactly as the implementer
+specified, nothing of arm (b).** I re-checked the trace's three legs myself: the sync engine's apply does write
+through the database WRITER, never the runner (`AppDatabase.applyingRemote` :319/:339, called from
+`SyncEngine.swift` :285/:737 — so it can commit inside the gap without queue-ordering against the leaving's turn);
+her own typing is structurally inside (teardown's flush and the branch's flush precede the read in the same task,
+and the screen is gone); and the S5 case loses nothing — her words live on the conflict take, a live synced row,
+savepointed at its next leaving, while the listed take's savepoint at THIS turn holds the row's then-current text,
+which is exactly what the insurance occasion insures. The old road's catch of an in-gap apply was a property of
+timing, not a promise: the spec (OverallModel §3, AppSpec §9) defines the occasion as one quiet savepoint per
+EDITED take when the note stops being shown, deduped — it names no visibility point, and every take she edited is
+listed and written under (a), so this is an engineering call inside D-7-1's recorded frame, not undefined product
+behavior for QUESTIONS. Arm (b)'s own table disqualifies it: ~11–12 ms of O(note) work back on the one serial
+runner and the writer on EVERY edited leaving of a long note (the measured 1.07 → ~13 ms, i.e. re-growing the
+exact 1D class this unit removed, surrendering ~6% of the win as a floor), to close a window that needs a pull
+applying to that very note within milliseconds of a pop — while the read-only case (the common one) keeps its gap
+under (b) anyway, so (b) does not even restore the old point. **What lands (the implementer, second turn):**
+(i) the guard test in `LeavingSavepointTests` as proposed — the read lists the edited take; a direct `UPDATE`
+dirties a second (the apply's shape); `closeAutoCommit(_:takes:)` with the read's list writes the edited take
+only; the next read lists the second; the next ask writes it — green by design, NAMED a guard of the bound, never
+a pin; (ii) the comment corrections: the `AppSession.swift` phone branch's "anything that landed between two asks
+… exactly as before" sentence rewritten to name the one-ask gap and its bound (a write committing between the
+read's snapshot and the turn is the NEXT ask's — the same leaving's later ask on the Castle and lock roads, the
+note's next leaving on the pop road; her typing always inside), and `closeAutoCommit(_:takes:)`'s doc gaining "the
+rows equal the whole op's when the list covers the dirty set AT THE TURN; a take another writer dirtied after the
+read is the next ask's"; (iii) the record corrections in §7 batch 7: hazard (b)'s "nothing can go stale" qualified
+to ACROSS asks with the in-ask window named, the hazard (a) table's pop row gaining the same clause, and D-7-1
+gaining the visibility-point note (the read's snapshot vs the old turn-start, and why accepted); (iv) the gated
+measurement (`12d6afde5`) stays as the recorded cost of the road not taken. No pin — said honestly: under (a) this
+finding is the correction of an over-claim, not a bug fix; the bound itself is what the guard holds.
+
+**Finding 2 (the re-show mid-leaving never re-observes) — CONFIRMED AS APPLIED.** The implementer's objection to my
+literal hoist is correct and I adopt it: moving the block above the guard would observe the given-back coordinator,
+and the adopt branch then stops that very token and nils it, leaving the ADOPTED coordinator unobserved — breaking
+r1's `aScreenShownAgainAfterItsLeavingTakesTheHoldBackAndIsWiredToIt`. The shape built — the early return becomes
+`if !holdsAutosave { … }` around the re-acquire/adopt, the idempotent re-observe running after it on BOTH paths —
+is my intent done right, and `f589d964e` touches nothing else (release, deinit, teardown, the view, the fence all
+byte-unchanged; verified in the diff). The pin's posture is sound: the held writer parks the leaving in its
+savepoint turn (the candidates read passes on a WAL reader; the runner's write waits), teardown has cleared the
+token, and the two `observesAutosave` expectations are exactly where the pre-fix code fails. CONDITIONS, owed
+before this round closes (the second turn + the stage): the red build `vm64-fix-red` reverses ONLY finding 2's
+hunk as the recipe says; the pin runs RED on it at the two named expectations and GREEN on the fix build, alone
+and in the company run; `MobileNoteHoldTests`' other four stay green on the fix. Those runs are the next checker's
+to read (or the orchestrator's line-by-line if this proves the final round).
+
+**The remaining road (re-show while teardown itself is still suspended; the offered conditional in
+`releaseAutosaveHold(ifNotShownSince:)`) — DISMISSED from this fix pass: it stays with VM-227.** The trace is
+good and I accept it as the ticket's map, but the conditional is new behavior on the leaving's half of a lifecycle
+whose pins stabilized only after r0 was falsified at a stage window; its road requires teardown's own flush, mint
+settle or pending gesture to outlast a full push-and-Back behind a busy writer — strictly rarer than the window
+finding 2 just closed — and its pin (a re-show while teardown's flush waits on the held writer with a key pending)
+deserves a pin-first session of its own, not a rider inside a QUIET window. What lands instead: the record already
+says "VM-227 — narrowed, not closed" with the three sub-cases (keep it verbatim), and at the merge the orchestrator
+points VM-227's body at the responses' finding-2 trace and the offered shape + pin sketch, so that fix session
+starts from a traced mechanism instead of a suspicion.
+
+**Finding 3 (`TimingRecorder.end` dirty on a no-op) — CONFIRMED AS APPLIED.** The `kept` discipline matches the
+windows' own rule arm for arm (no-op `endIfOpen` → nothing; a counted unmatched end, a stale drop, a recorded
+sample → one `changed()` each); the pin covers all four arms with the handler-count oracle and ran red-on-old at
+exactly the two no-op arms (4 issues, recorded); 32/32 green on the tip in my own run.
+
+**Finding 5 (`surfaceSettled()` mutating) — CONFIRMED AS APPLIED.** `mutating` dropped, the doc now says QUERY,
+no call-site or editor-seam line moved; keeping the name is the right economy. 8/8 green on the tip.
+
+**Finding 6 (the round's "sent" clamp) — CONFIRMED AS APPLIED.** Said at the catalog line — the one place every
+mark's meaning lives — and at the clamp; `SyncSession` untouched, comments only, which is what a NIT earns.
+
+**Findings 4 and 7** stand as written for the orchestrator and the closeout: the batches 6+7 walk (or the recorded
+substitution decision with her rule quoted) before the run closes; FOR A LATER READER at closeout; finding 1's
+corrections land with this ruling's arm (a) list above.
+
+*No FINDER-FIXES: every confirmed fix is either applied and verified or fully specified above for the implementer's
+second turn; nothing here needs the reviewer's own hands, and nothing touches `Sync/`.*
