@@ -2867,9 +2867,104 @@ not merged). **No revert is in flight.***
 | 1 — G1, `MobileNoteEntryDateTests.noPhoneFaceReadsTheEditorsUnobservedHeaderDate` | DONE (`43fec9e9c`; `MobileMembershipTests.swift`, beside the date pin) — walks `VariorumMobile/` from `#filePath`, skips `Features/Write/MobileEditorViewModel.swift`, expects > 60 files; lines from `MobileNoRawErrorPinTests.strippingComments(_:)`; offender = `/\.header[?!]?\.entryDate\b/`; the message names the remedy (`MobileWriteScreen.dateChipDay(model)`). The date pin's doc gains the seam/face sentence. Compiled at piece 4 |
 | 2 — G2, `MobileGatheringWordTests.noPhoneStringLiteralSaysSmart` with its oracle and two exemptions | DONE (`e9823efaf`; `MobileBookFixesTests.swift`, after `noRenderedStringInTheseFacesSaysSmart`, whose doc is re-worded) — roots `VariorumMobile/` and `Shared/`, each asserted to exist and walked > 60 (88 and 148 files at HEAD); literals from `MobileNoRedirectSweepTests.stringLiteralContents(of:)`; the Mac's whole-word rule as a private copy with its oracle ("smart", "Smart Book", "a smart book" hit; `isSmart`, "smartphone" do not); two exact `(file, literal, why)` exemptions, each required to match once — the predicate run by hand over HEAD's two roots finds exactly those two literals, byte for byte. Compiled at piece 4 |
 | 3 — G3, `MobileMembershipSheetFaceTests` (the premise check first) | DONE (`905a12eb0`, one `try` dropped at piece 4; `MobileBookFixesTests.swift`, after `MobileCollectReceiptTests`) — one test, `theSheetMarksAnArchivedBookAndAGatheringAndDrawsDivergeOnTheBookOnly`: the fixture as called (tag `quote`, book "Old projects", gathering "Quotes" on `.tag(quote)`, a note added, the book archived, the note tagged); the premise `model.books.map(\.name) == ["Old projects", "Quotes"]` as a `#require` with its own message, so a fixture red stops the test; the real `MobileMembershipSheet(model:tokens: .studyLight, onOpenNote: nil)` under `withHostedSurface` (its own dead-tree check), settled; on `visibleLabels`: "Old projects (archived)", "Quotes", "gathering", no whole-word "smart", exactly one "diverge" — each its own expectation. Compiled at piece 4; first run in the guards' window |
-| 4 — compile proof: an incremental phone `build-for-testing` into `vm78-ios` | DONE (this piece's commit) — from `App/Variorum/`, the merge-in's own invocation: `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile -destination "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2" -derivedDataPath DerivedData/vm78-ios` (no boot), behind a watchdog that would have stopped it at a seventh compile outside the test target: **TEST BUILD SUCCEEDED**, 5 compiles, all in `VariorumMobileTests`, none in `VariorumMobile` or `VariorumCore` (log `App/Variorum/DerivedData/logs/vm78-r4-guards-ios-build.log`). Its one new warning — `try` before G3's `withHostedSurface`, whose body throws nothing — was answered by dropping the `try`; rebuilt: **TEST BUILD SUCCEEDED**, 3 test-target compiles, no warning on a guard line (`…-ios-build-2.log`). Guards at `MobileMembershipTests.swift:396` (G1), `MobileBookFixesTests.swift:749` (G2), `:957`/`:967` (G3) |
-| 5 — the guards' window recipe (the red patch, the expected reds and greens, the green leg) | IN-PROGRESS — **the red tree's hand edits are being applied in this worktree to four committed product files** (`Write/MobileWriteView.swift`, `Shell/MobileCreateBook.swift`, `Write/MobileMembership.swift`, `Shell/MobileBookDetails.swift`) to write `App/Variorum/DerivedData/vm78-scripts/guards-red.patch`; the restore is `git checkout HEAD -- <those four>` (HEAD holds the pre-edit state; nothing of them is uncommitted). If this row still says IN-PROGRESS, check `git status` and restore |
+| 4 — compile proof: an incremental phone `build-for-testing` into `vm78-ios` | DONE (`ed64cf950`) — from `App/Variorum/`, the merge-in's own invocation: `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile -destination "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2" -derivedDataPath DerivedData/vm78-ios` (no boot), behind a watchdog that would have stopped it at a seventh compile outside the test target: **TEST BUILD SUCCEEDED**, 5 compiles, all in `VariorumMobileTests`, none in `VariorumMobile` or `VariorumCore` (log `App/Variorum/DerivedData/logs/vm78-r4-guards-ios-build.log`). Its one new warning — `try` before G3's `withHostedSurface`, whose body throws nothing — was answered by dropping the `try`; rebuilt: **TEST BUILD SUCCEEDED**, 3 test-target compiles, no warning on a guard line (`…-ios-build-2.log`). Guards at `MobileMembershipTests.swift:396` (G1), `MobileBookFixesTests.swift:749` (G2), `:957`/`:967` (G3) |
+| 5 — the guards' window recipe (the red patch, the expected reds and greens, the green leg) | DONE (this piece's commit) — "The guards' window recipe" below. The red tree's hand edits were made in this worktree (announced in `2959d432c` before they began), saved to the local patch, built (incremental, **TEST BUILD SUCCEEDED**), then restored with `git checkout HEAD --` and rebuilt (**TEST BUILD SUCCEEDED**); `git status` clean after. **No revert is in flight** |
 | 6 — the NITs (R4-N2 … R4-N5) and round 4's slots filled, one documents commit | NOT-STARTED |
+
+#### The guards' window recipe (round 4's red legs — for the orchestrator)
+
+*Run from the orchestrator's own throwaway checkout, never this worktree, **on the tree AFTER the VX-981 merge-in**
+(the reviewer's condition 4; the plan's step (iii)), with that checkout's own DerivedData; bundles checked with
+`xcresulttool` and logs kept under `App/Variorum/DerivedData/logs/` (round 2's R2-F1 rule).*
+
+**What the red leg is** (condition 1, in one sentence): the red tree applies VM-47's reads and words in THIS
+branch's styling — which at every site is the pre-fix line (`e48ef2f30`'s own at the date chip, the create sheet
+and the membership row; main's `eb18888db` one-argument receipt at Book Details' delete line) — because VM-47's
+styling types (`.phoneType`, `tokens.phone`, `PhoneInlineActStyle`, `PhoneSegmentedChoice`) do not exist on this
+branch, and no guard's predicate reads styling. (At the kind row the pre-fix line names "Smart Book" as a literal
+where VM-47's side names it through `kindWord`; the word scan reads the literal the same way in either.)
+
+**The red tree — an exact patch:** `App/Variorum/DerivedData/vm78-scripts/guards-red.patch` (local, gitignored,
+never in the PR; copy it into the throwaway checkout). Written from `git diff` at `2959d432c`: 93 lines, four
+files, nine hunks; `git apply --check` passes at HEAD. VX-981 touches none of the four files, none of the guard
+files and none of the helpers they read (checked against its tip `1a283f390`), so the patch applies on the merged
+tree as written; if `git apply --check` refuses there, stop and ask — never resolve the patch by hand. Its sites:
+- `VariorumMobile/Features/Write/MobileWriteView.swift:449`, `:451` — the chip's label reads
+  `model.header?.entryDate` (G1).
+- `VariorumMobile/Features/Shell/MobileCreateBook.swift:321-323` — the kind row's three literal doors, "Smart
+  Book" among them; `:343` — the no-tags literal "…a smart book collects by them." (G2).
+- `VariorumMobile/Features/Write/MobileMembership.swift:347` — the row's name is `MobileShelfFaces.name(for:)`;
+  `:351-352` — the mark is the literal "smart"; `:357-364` — the `rowCarriesDiverge` `if` unwrapped (G3; the
+  "smart" literal is G2's third).
+- `VariorumMobile/Features/Shell/MobileBookDetails.swift:306-307` — the delete line is
+  `RecoveryCopy.movedToTrashReceipt(.book),` (R4-N1's one line).
+
+**The red tree compiles — by build:** applied in this worktree at `2959d432c` and built incrementally into
+`vm78-ios` with the merge-in's invocation: **TEST BUILD SUCCEEDED**, 9 compiles, all in `VariorumMobile`; its one
+new warning is `initialization of immutable value 'day' was never used` at `MobileWriteView.swift:444` — the
+finding's link 4 tell, expected (log `App/Variorum/DerivedData/logs/vm78-r4-guards-red-ios-build.log`). Restored
+with `git checkout HEAD --` the four files (`status lines=0 diff-vs-HEAD lines=0`) and rebuilt: **TEST BUILD
+SUCCEEDED** (`…-r4-guards-restored-ios-build.log`). The predicates run by hand over the red tree: G1's pattern
+finds exactly `MobileWriteView.swift:449` and `:451`; G2's finds the three literals below and the two exempt ones.
+
+**The types** (each checked against the sources): `MobileNoteEntryDateTests` (`MobileMembershipTests.swift`);
+`MobileGatheringWordTests`, `MobileMembershipSheetFaceTests`, `MobileCollectReceiptTests`,
+`MobileBookStateRowTests` (all `MobileBookFixesTests.swift`).
+
+```zsh
+# RED — in the throwaway checkout, on the tree after the VX-981 merge-in
+git apply --check guards-red.patch && git apply guards-red.patch
+TYPES=(
+  -only-testing:VariorumMobileTests/MobileNoteEntryDateTests
+  -only-testing:VariorumMobileTests/MobileGatheringWordTests
+  -only-testing:VariorumMobileTests/MobileMembershipSheetFaceTests
+  -only-testing:VariorumMobileTests/MobileCollectReceiptTests
+  -only-testing:VariorumMobileTests/MobileBookStateRowTests
+)
+xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -derivedDataPath <the checkout's own DerivedData> \
+  -resultBundlePath App/Variorum/DerivedData/vm78-bundles/r4-guards-red.xcresult "${TYPES[@]}"
+# restore before GREEN — the status must print nothing
+git checkout HEAD -- \
+  App/Variorum/VariorumMobile/Features/Write/MobileWriteView.swift \
+  App/Variorum/VariorumMobile/Features/Shell/MobileCreateBook.swift \
+  App/Variorum/VariorumMobile/Features/Write/MobileMembership.swift \
+  App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift
+git status --short
+# GREEN — the restored tip, the same types
+xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -derivedDataPath <the checkout's own DerivedData> \
+  -resultBundlePath App/Variorum/DerivedData/vm78-bundles/r4-guards-green.xcresult "${TYPES[@]}"
+```
+
+**Expected RED, by name, and no other** (condition 3):
+1. `MobileNoteEntryDateTests/noPhoneFaceReadsTheEditorsUnobservedHeaderDate` — its offenders exactly
+   `MobileWriteView.swift:449` and `MobileWriteView.swift:451`.
+2. `MobileGatheringWordTests/noPhoneStringLiteralSaysSmart` — its offenders exactly three literals:
+   `MobileCreateBook.swift: "Smart Book"`, `MobileCreateBook.swift: "No tags yet — notes get tags first; a smart
+   book collects by them."`, `MobileMembership.swift: "smart"`; its exemption check and walk counts green (both
+   exemptions matched once).
+3. `MobileMembershipSheetFaceTests/theSheetMarksAnArchivedBookAndAGatheringAndDrawsDivergeOnTheBookOnly` — the
+   premise passes; four expectations fail, each its own: no "Old projects (archived)" (the row says "Old
+   projects"); no "gathering"; a label says "smart"; "diverge" counted 2. Its "Quotes" expectation passes.
+4. `MobileGatheringWordTests/bookDetailsDeleteLineNamesAGathering` — at `MobileBookFixesTests.swift:666` only (the
+   line says "Book moved to the Trash…"); `:665` and the book half at `:672` green.
+
+Anything else red is a finding.
+
+**Expected GREEN on the red tree, by name** (condition 2 — the finding's link 3, shown): the five seam pins
+`theDateChipFollowsTheDateWhenTheTitleDoesNot`, `theMembershipAndCreateSheetsSayGathering`,
+`noRenderedStringInTheseFacesSaysSmart`, `pickersMarkAnArchivedBook`, `divergeIsNotDrawnOnAGatheringRow`, and every
+other test of the five types. A seam pin red there is reported as it fell, never explained away. The result line
+names the four reds and these five greens.
+
+**Expected GREEN leg:** every test of the five types green on the restored tree, with `git status --short`
+printing nothing between the legs.
+
+**The window's result:** PENDING(round 4's guards' window: when, both verdict lines, every red by name, the five
+seam pins' outcome on the red tree, bundles and logs).
 
 ## Closeout
 
