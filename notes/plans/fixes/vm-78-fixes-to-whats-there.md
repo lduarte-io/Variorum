@@ -56,7 +56,7 @@ remainders are carried by VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94, 
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
-*As of 2026-11-19 07:45, tip after the closeout drafts (`7cb529765` and this commit). The author is away until
+*As of 2026-11-19 07:30, tip after the closeout drafts (`7cb529765` and this commit). The author is away until
 morning; nothing is held for her hands yet. The closeout's writing is DRAFTED with PENDING slots (this file's
 Closeout and FOR A LATER READER, five phone clauses in `notes/SurfaceContracts.md`, `notes/MobileSoul.md` row
 PL-75, `notes/handoffs/vm-78-handoff.md`); what remains is filling the slots as the steps below land. One canon
