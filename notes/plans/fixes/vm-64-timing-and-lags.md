@@ -182,7 +182,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | 6 · VM-69 · VM-70 | **CLOSED 2026-11-19** (r1) | see the batch 6 block; r1 code `36cddcf60` `9821ffef3` `ce3c4e75b` | first window NOT green (the release lived in `deinit`); r1 green on the final tree — "Orchestrator's stage results" below; residual VM-227 |
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
 | Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 — the merge, the rebuilds, the red build, the whole Core package — is the merge block's below) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the stage |
-| The merge of main (VM-55) | **IN-PROGRESS** (implementer, opus; started 2026-11-19) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
+| The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -782,10 +782,10 @@ The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) a
 | M6 — (e) every `AppTiming` catalog series and counter has its call site | DONE — none dropped, none moved; no change |
 | M7 — (f) the fence and the hold read on the merged tree (no change unless (b) needs a routing line) | DONE — the merge brought exactly VM-55's lines into the four seam files; no change |
 | M8 — step 3: the `MobileHerPathsPerfTests` registry comment corrected (comment only) | DONE (this commit) |
-| M9 — the whole Core package, `swift test`, once, at the end of the edits | NOT-STARTED |
+| M9 — the whole Core package, `swift test`, once, at the end of the edits | DONE at `66ac9d503` — 4,913 tests in 710 suites passed, 0 failed (MCP 703/130 · Core 4,178/576 with 5 declared known issues · StringsWorkbook 32/4); 15 gated harnesses skipped; §7 ▸ "Evidence" |
 | M10 — phone and Mac `build-for-testing`, cold, into `vm64-gate` | DONE at `f4068b3cf` — phone (`generic/platform=iOS Simulator`) `** TEST BUILD SUCCEEDED **`, 0 errors, first try; Mac (`platform=macOS`) `** TEST BUILD SUCCEEDED **`, 0 errors. No warning in a line the merge or this session wrote (the two nearest are pre-existing: `MobileStructural.swift:122`'s unused `intra`, 2026-08; VM-55's `MobileUndoDoorTests` `try`s). Logs `App/Variorum/DerivedData/vm64-gate-{phone,mac}-build.log` (local) |
 | M11 — the finding-2 red build into `vm64-gate-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | DONE — announced at `fe7bc1960`; the recipe's reverse patch applied cleanly on the merged tree (finding 2's hunk in `takeAutosaveHold` alone; the pin file kept); phone `build-for-testing` into `vm64-gate-red` `** TEST BUILD SUCCEEDED **`, 0 errors; restored by `git checkout HEAD --` the one file; `git status` and `git diff HEAD` empty |
-| M12 — §7's section, the hosted commands, the report | NOT-STARTED |
+| M12 — §7's section, the hosted commands, the report | DONE (this commit) — §7 ▸ "The merge of main (VM-55) and what it re-landed" |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -3703,3 +3703,87 @@ hook through `reportOperationError`) and `releaseAutosaveHold`; and the leaving 
 `MobileHerPathsPerfTests.theAutosaveRegistryAcrossOpensAndCloses`' doc said the editor "releases its one acquisition at its
 end of life, which the leaving task holds" — r0's mechanism. Now: the release is the leaving's last act (teardown's flush,
 the leaving savepoint, then `releaseAutosaveHold(ifNotShownSince:)`), never at the editor's end of life.
+
+#### Evidence (headless and built; no hosted run — the stage is the orchestrator's)
+
+- **The whole Core package, `swift test`, once, at the end of the edits** (tree `66ac9d503`; no Core line changed by the
+  merge — VM-55 wrote zero `Sources/` lines — or by this session): **4,913 tests in 710 suites passed, 0 failed**, across
+  the three test products — `VariorumMCPTests` 703 in 130 · `VariorumCoreTests` 4,178 in 576 "with 5 known issues" ·
+  `StringsWorkbookTests` 32 in 4; XCTest "Executed 0 tests" ×3. The 5 known issues are declared (`withKnownIssue`):
+  `PairInvariantPinsTests.theGuardBitesOnALockOffTheVaultsDescriptorAndAStaleCopy` 4 and
+  `PairCatchUpTests.theResidualCastleAlwaysAskWithOnlyAPassphraseAtTheLobbyHealsAtTheWords` 1. 15 gated harnesses skipped
+  (counted in N by Swift Testing — the resiliency protocol's note): `aFirstCatchUpsApplyTimedByPhase`,
+  `aLeavingSavepointOnAHundredThousandWordNote`, `basicOfflineEditsConvergeOverTheRealServer`, `bench(notes:)`,
+  `directCost(shape:)`, `fts5InsertCostByTableShape`, `memberIDPredicateVersusTheJoin`,
+  `ownerAdoptionWithNothingToAdoptOnAnEncryptedStoreAtHerScale`, `plans`, `prefixSizing(prefix:)`,
+  `probeTheLinkedSQLite`, `seamHistoryCost`, `theThreeRoads`, `variantInsertCostByTriggerSet`,
+  `writeLatencyWithHeldObservations(shape:)`. Log `App/Variorum/DerivedData/vm64-gate-swifttest.log` (local).
+- **Builds** (M10, M11): `vm64-gate` — phone and Mac `build-for-testing` at `f4068b3cf`, both SUCCEEDED, 0 errors (every
+  commit after it is this record alone, so the products are the tip's code); `vm64-gate-red` — phone, finding 2's hunk
+  reversed, SUCCEEDED, restored. Products: `App/Variorum/DerivedData/vm64-gate/Build/Products/{VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64,Variorum_Variorum_macosx27.0-arm64}.xctestrun`
+  and `App/Variorum/DerivedData/vm64-gate-red/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`.
+- **Scans** (mirrors, (b)): VM-55's two source-scan pins clean on the merged tree but for their named exemptions.
+
+#### The stage commands (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+(i) **The ladder's finding-2 pin**, the hold suite ALONE on each build:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate \
+  -only-testing:VariorumMobileTests/MobileNoteHoldTests 2>&1 | tee <log-gate-hold>
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate-red \
+  -only-testing:VariorumMobileTests/MobileNoteHoldTests 2>&1 | tee <log-gate-red-hold>
+```
+Expected: `vm64-gate` — 5 tests in 1 suite passed. `vm64-gate-red` — `aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator`
+FAILS with 2 issues (the two `observesAutosave` expectations — after the re-show, and again after the leaving ends);
+the other four pass.
+
+(ii) **The merge's own types**, ONE invocation, `vm64-gate`:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileWingListingTests MobileWingStandTests MobileWingDoorTests MobileWingDoorShellTests
+  MobileWingDoorGeometryTests MobileWingListSheetTests MobileLibraryPagingTests MobileLibraryPagingRulesTests
+  MobileNoRawErrorPinTests MobileErrorLogPrivacyPinTests MobileLineShowRuleTests MobileLineDoorTests
+  MobileStructuralFlightFenceTests MobileUndoDoorTests MobileNoteOpenOnceTests MobileLeavingSavesOnceTests
+  MobileLibraryTests MobileFilterTests MobileNavigationTests MobileShellTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-gate-merge>
+```
+Expected: all green — VM-55's four re-landed pins with their unchanged expectations, the new guard
+`MobileLibraryPagingTests.aWingSwitchedWhileTheLibraryIsAwayIsHonouredOnTheReturn`, `theHoldKeyNamesTheShownListing`
+with its wing lines, the two scans (no offender), the fence suite and the undo door in company.
+(iii) **The perf suite ALONE**, `vm64-gate` (it reads the process's one recorder; the nine-wing fetch series now read the
+current wing — (a)): `-only-testing:VariorumMobileTests/MobileHerPathsPerfTests`; expected 13 passed.
+(iv) **The merge gate** — the whole phone target and the whole Mac target from `vm64-gate` (`.xctestrun` above), the
+orchestrator's windows. Expected reds from main only: VM-24's `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`
+(2 of 3 cases) on the phone; on the Mac the standing flake VX-701 if it appears (re-run alone).
+
+#### For QUESTIONS at the merge
+
+1. **P-2-2 meets VM-61's one line — the fence's sentence after a removal-class door's flight.** P-2-2 (batch 2, r2): when
+   keys were refused or withheld during a flight, the after-flight sentence ("Another structural change is still
+   landing.") replaces the door's worded receipt and "keeps the door's action" — written against the masthead's status
+   row, which drew the Undo beside it. VM-61 retired that row: the one line draws a refusal without an Undo, and
+   `MobileLine.say` first takes back the note's standing structural-Undo line (M20's law carried onto the line). So after
+   a merge, a block delete, an archive, a whole-paragraph delete or the cross-block compound whose flight refused a key,
+   the line ends on the refusal with no Undo; the Undo stays in the ⋯ sheet (and the model's `statusAction` still holds
+   it, unread). Options: (a) **as merged** — no line written; the refusal wins the line, VM-61's law holds; (b) the drain
+   speaks through the door's own class (`.removal(.structural)` with the sentence), keeping the Undo beside it — a refusal
+   drawn in a removal's ink, outside VM-61's class table; (c) a seam change letting a refusal carry its door's Undo — new
+   behaviour in VM-61's seam. **Left at (a), PROVISIONAL**; hers with P-2-2 and P-55-3/P-55-5. No other product question
+   from the merge.
+
+#### What a cold reviewer should read first
+
+1. **H3's trap** — "ours" in every diff3 region compiles to `holdFirstPage` with no catch (the 3-way applies VM-55's
+   removal of the base `startBookless` catch to the shared text). Verify by diffing `MobileLibraryViewModel.swift` at
+   `f03d59ae3` against both parents: against `d10b167b2` it differs by VM-55's six hunks and the four converted lines
+   only; against `eb18888db` by batch 5's whole listings section, minus VM-55's `follow` bodies.
+2. **The re-landed VM-55 pins** — `holdLibraryAsItsViewDoes` against `MobileLibraryView`'s `.task(id: hold)`: is the
+   helper the view's road, and do the four pins still mean what VM-55 wrote (their expectations are unchanged)?
+3. **`.task(id:)` cancels, `follow` awaited** — the stale-landing window in (a) and why it is batch 5's existing one.
+4. **The nine-wing comparison's scope** ((a), last bullet) — a recorded series re-scoped so the comparison stays like for like.
+5. **P-2-2** above.
