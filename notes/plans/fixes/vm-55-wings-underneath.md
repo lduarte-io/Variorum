@@ -1972,6 +1972,23 @@ off by design). xcodebuild exited on its own. Log `DerivedData/vm55-b4-mac-leg.l
 - After: no Variorum instance; no Problem Reporter; no new `Variorum*-*.ips`; no What's New interference seen (the run completed
   its 537 tests in one launch).
 
+#### Ladder round 1 fixes (the final round's three confirmed fixes — findings 2, 5, 7; `vm-55-ladder-round1.md` ▸ "Final calls")
+
+Applied by batch 4's implementer, exactly as the reviewer's final calls confirm them, nothing wider. Pins first, each committed
+alone on a tree with none of the fixes; then the fixes. Red-on-old by the VM-62 method: a DETACHED snapshot worktree at the
+last pin commit (`~/dev/variorum-vm-55-pin2`, its own DerivedData `vm55-pin2`), never a revert in this worktree.
+
+| Piece | State |
+|---|---|
+| Finding 2 pin — `MobileLineStandingOfferTests` (pure, phone) | DONE (this commit) |
+| Finding 5 pin — `MobileErrorLogPrivacyPinTests` (source scan, phone; beside VM-62's pins) | NOT-STARTED |
+| Finding 7 pin — the three `MobileWingDoorGeometryTests` root tests assert the door's accessibility value | NOT-STARTED |
+| Finding 2 fix — `StatusCenter.stand` / `endStanding` phone arms | NOT-STARTED |
+| Finding 5 fix — two log lines `.private` | NOT-STARTED |
+| Finding 7 fix — the door's `.accessibilityValue(page + trailing)` | NOT-STARTED |
+| Builds — both targets at the fix tip (`vm55-b1`); the snapshot's phone build (`vm55-pin2`) | NOT-STARTED |
+| The fix window (one claim: Mac leg, phone leg, red-on-old from the snapshot) | NOT-STARTED — PENDING |
+
 ## Ladder
 
 Cap FIVE rounds at her word ("up to 5 review rounds as long as a major is found"): a round that surfaces a new
