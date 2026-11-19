@@ -7,10 +7,17 @@
 //  LIVE STATUS). They exist to answer, in one stage window, WHERE the
 //  surface and the model first disagree on the standing caret red
 //  (`MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePoint…`)
-//  and on VM-19's stale-first-responder desync.
+//  and on VM-19's stale-first-responder desync. THREE suite types, each run
+//  ALONE by type name so no instrument's posture reaches another:
+//  `MobileCaretReplaceTraceTests` (the red replace in the suite's posture,
+//  in the real posture after a bounded wait, and with the settle held for
+//  the act), `MobileCaretReplaceTeethTraceTests` (a settle write made to
+//  land inside the replace's transaction by hand) and
+//  `MobileStaleResponderTraceTests` (VM-19's leftover, then an insert).
 //
-//  Every test here PRINTS a trace — every line tagged `VM24|…` or
-//  `VM19|…`, read from the run's log with `grep -E '^VM(24|19)\|'` — and
+//  Every test here PRINTS a trace, line by line as it happens — every line
+//  tagged `VM24|…` or `VM19|…`, read from the run's log with
+//  `grep -E 'VM(24|19)\|'` — and
 //  asserts NOTHING about the outcome it measures (a red here would be a
 //  harness failure, never a finding). What each line carries:
 //  - `posture[…]`: the app, every scene and window (key, hidden, level,
@@ -80,10 +87,11 @@ final class CaretInputTrace {
 
     init(tag: String) { self.tag = tag }
 
-    func note(_ line: String) { lines.append(line) }
-
-    func dump() {
-        for line in lines { print("\(tag)|\(line)") }
+    /// Printed AS NOTED (a host crash mid-act keeps every line before it)
+    /// and kept for the verdict.
+    func note(_ line: String) {
+        lines.append(line)
+        print("\(tag)|\(line)")
     }
 
     // MARK: Watching
@@ -417,9 +425,11 @@ final class WeakTextView {
 
 // MARK: - The instruments
 
+/// The rescue-point replace, traced (the shared body of the VM-24 suites).
 @MainActor
-@Suite("VM-24 / VM-19 — the caret red's trace (DIAGNOSTIC; prints, asserts nothing)", .serialized)
-struct MobileCaretReplaceTraceTests {
+enum CaretReplaceTrace {
+    nonisolated static let replacements = ["Hello", "hi", "hello there"]
+
     enum Variant: String, Sendable, CaseIterable {
         /// The red test's own posture and timing: no turn between host and act.
         case suitePosture
@@ -436,14 +446,14 @@ struct MobileCaretReplaceTraceTests {
         case writeInsideByHand
     }
 
-    @Test(arguments: Variant.allCases, ["Hello", "hi", "hello there"])
-    func vm24_traceTheRescuePointReplace(_ variant: Variant, _ replacement: String) async throws {
+    /// Two fresh worlds per case (does the red hold within one process?).
+    static func run(_ variant: Variant, _ replacement: String) async throws {
         for iteration in 1...2 {
             try await traceOneReplace(variant, replacement, iteration: iteration)
         }
     }
 
-    private func traceOneReplace(
+    private static func traceOneReplace(
         _ variant: Variant, _ replacement: String, iteration: Int
     ) async throws {
         try await withEditorAssertionsMuted {
@@ -468,7 +478,7 @@ struct MobileCaretReplaceTraceTests {
                 }
 
                 view.selectedRange = NSRange(location: 7, length: 0)
-                let honouredBefore = (1..<7).allSatisfy { Self.isItalic(storage, at: $0) }
+                let honouredBefore = (1..<7).allSatisfy { isItalic(storage, at: $0) }
                 trace.note("pre-act honoured=\(honouredBefore) string=\(storage.string.debugDescription) sel=\(CaretInputTrace.range(view.selectedRange)) desync=\(model.desyncRecoveryCount)")
                 trace.posture("at-act", testWindow: window, view: view)
 
@@ -504,18 +514,58 @@ struct MobileCaretReplaceTraceTests {
                 let length = (replacement as NSString).length
                 let caret = view.selectedRange
                 let honouredAfter = caret == NSRange(location: length + 2, length: 0)
-                    ? (1..<(length + 2)).allSatisfy { Self.isItalic(storage, at: $0) }
+                    ? (1..<(length + 2)).allSatisfy { isItalic(storage, at: $0) }
                     : nil
                 trace.note("post-act string=\(storage.string.debugDescription) sel=\(CaretInputTrace.range(caret)) desync=\(model.desyncRecoveryCount) audit=\(model.identityAuditFailures) indexLen=\(model.index.documentLength) storageLen=\(storage.length) honouredAtRescue=\(honouredAfter.map(String.init(describing:)) ?? "n/a")")
                 trace.posture("after-act", testWindow: window, view: view)
                 trace.note("VERDICT variant=\(variant.rawValue) case=\(replacement.debugDescription) iteration=\(iteration) desync=\(model.desyncRecoveryCount - desyncBefore) settleWroteInside=\(trace.settleWroteInsideTransaction) held=\(trace.heldSettles) firstCharReport=\(trace.firstCharacterReport.map(CaretInputTrace.range) ?? "none")/\(trace.firstCharacterReportMask) key=\(window.isKeyWindow) fr=\(view.isFirstResponder) kbdWillShow=\(trace.keyboard.willShow)")
-                trace.dump()
             }
         }
     }
 
-    // MARK: VM-19 — a stale first responder, then an insert of a run
+    static func isItalic(_ storage: NSTextStorage, at offset: Int) -> Bool {
+        (storage.attribute(.font, at: offset, effectiveRange: nil) as? UIFont)?
+            .fontDescriptor.symbolicTraits.contains(.traitItalic) ?? false
+    }
+}
 
+/// VM-24 — the red test's replace in three postures (run ALONE by type).
+@MainActor
+@Suite("VM-24 — the caret red's trace: suite posture, real posture, settle held (DIAGNOSTIC)", .serialized)
+struct MobileCaretReplaceTraceTests {
+    @Test(arguments: CaretReplaceTrace.replacements)
+    func vm24_suitePosture(_ replacement: String) async throws {
+        try await CaretReplaceTrace.run(.suitePosture, replacement)
+    }
+
+    @Test(arguments: CaretReplaceTrace.replacements)
+    func vm24_realPosture(_ replacement: String) async throws {
+        try await CaretReplaceTrace.run(.realPosture, replacement)
+    }
+
+    @Test(arguments: CaretReplaceTrace.replacements)
+    func vm24_settleHeld(_ replacement: String) async throws {
+        try await CaretReplaceTrace.run(.settleHeld, replacement)
+    }
+}
+
+/// VM-24 — the assertion's teeth, its own type (it opens a storage
+/// transaction around UIKit's replace; if TextKit objects, only this run
+/// pays).
+@MainActor
+@Suite("VM-24 — the assertion's teeth: a settle write inside the replace's transaction (DIAGNOSTIC)", .serialized)
+struct MobileCaretReplaceTeethTraceTests {
+    @Test(arguments: CaretReplaceTrace.replacements)
+    func vm24_writeInsideByHand(_ replacement: String) async throws {
+        try await CaretReplaceTrace.run(.writeInsideByHand, replacement)
+    }
+}
+
+/// VM-19 — a stale first responder, then an insert of a run (run ALONE by
+/// type: its polluter must not reach another suite).
+@MainActor
+@Suite("VM-19 — a stale first responder, then an insert of a run (DIAGNOSTIC)", .serialized)
+struct MobileStaleResponderTraceTests {
     enum Victim: String, Sendable, CaseIterable {
         /// The caret suite's posture before VX-282's keyfix (C-1's red one).
         case frameWindow
@@ -581,13 +631,7 @@ struct MobileCaretReplaceTraceTests {
                 trace.uninstall(from: view)
                 trace.note("post-act string=\(storage.string.debugDescription) sel=\(CaretInputTrace.range(view.selectedRange)) desync=\(model.desyncRecoveryCount) audit=\(model.identityAuditFailures) indexLen=\(model.index.documentLength) storageLen=\(storage.length)")
                 trace.note("VERDICT victim=\(victim.rawValue) polluted=\(polluted) desync=\(model.desyncRecoveryCount - desyncBefore) settleWroteInside=\(trace.settleWroteInsideTransaction) firstCharReport=\(trace.firstCharacterReport.map(CaretInputTrace.range) ?? "none")/\(trace.firstCharacterReportMask) key=\(window.isKeyWindow) fr=\(view.isFirstResponder) polluterFR=\(polluter?.value?.isFirstResponder ?? false) kbdWillShow=\(trace.keyboard.willShow)")
-                trace.dump()
             }
         }
-    }
-
-    private static func isItalic(_ storage: NSTextStorage, at offset: Int) -> Bool {
-        (storage.attribute(.font, at: offset, effectiveRange: nil) as? UIFont)?
-            .fontDescriptor.symbolicTraits.contains(.traitItalic) ?? false
     }
 }
