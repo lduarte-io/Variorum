@@ -1794,3 +1794,186 @@ Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operation
 `build-for-testing` into `DerivedData/vm64-b4-red`, `git checkout HEAD --` the same two files (clean `git status`),
 then group (i) against `vm64-b4-red` — expect the owner test RED on its VM-67 assertions (BEGIN + eleven UPDATEs,
 `→ SCAN <t>`), every other test as in batch 3's BEFORE run.
+
+### Batch 5 · VM-68 — the Library pages and stops re-reading (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** the phone and Mac products are NOT YET BUILT — a quiet window
+(another session's merge gate) held the machine when the code was written, so no `build-for-testing` ran; the build,
+the red-on-old build and every hosted run are PENDING (the commands are below). No simulator walk yet (PENDING the
+stage). Row previews are not built (wave 2 — where they attach is said below). No new copy, no new face. No schema, no
+`Sync/`, no `SearchComposer` line. VX-618 is NOT closed by this batch (below).
+
+**Base:** `35a3bea7a`. **Commits:** `d8b64dd34` (live status, the Core lines said first) · `3c931e33c` (Core: the
+Pool's predicates' one home, the page's keys and its Pool-loose form, the Core pins) · `8f1adc87c` (phone, WIP — written
+under the quiet window, unbuilt) · this closeout.
+
+#### The mechanism, as traced on this tree (audit F §5/§7/§8 P1.1–P1.2, A·B1/B2 — TRACED as written)
+
+The Library root is mounted for the shell's whole life, offset a screen away in the band (`MobileShellView.swift:227-241`),
+and its view held TWO observations unconditionally (`MobileLibraryView.swift:130-131`): `Queries.library(limit: 200)`
+(ordered by `COALESCE(last_touched_at, created_at)`, which no index holds — a full scan and top-N sort of the posts) and
+`Queries.poolPosts(limit: 200)` (`notePoolListingSQL`: every live note probed for a home, every bookless note tested
+against every live gathering's rule, then `ROW_NUMBER`/`COUNT(*) OVER` over both classes). `AppDatabase.observe` tracks
+whole tables, and every autosave rewrites the `container` row (VX-618's full-record update), so each capture-box save —
+and each note save, each mint, each sync apply and push bookkeeping — re-ran both and delivered both to a Library she
+could not see: the BEFORE table's **2 re-reads · 2 redraws per box save** (1 + 1 by listing). And the note listing was a
+silent CUT at 200: note 201 had no road but a title search.
+
+#### What shipped, file by file
+
+- `Sources/VariorumCore/Queries/ShelfQueries.swift` — the Pool's two predicates lifted, unchanged, into one home:
+  `poolShownByGathering` (the live, unarchived gatherings' OR, each COALESCEd to 0) and `poolHomeExistsSQL` (a live MEMBER
+  row of a LIVE BOOK); `notePoolListingSQL` reads them and is **byte-identical** (pinned against a frozen verbatim copy of
+  the base's builder, text AND arguments, across six kinds of gathering and every wing scope). New `poolLooseFilter` —
+  the loose class as one predicate: `CASE WHEN <home> THEN 0 ELSE NOT <shown> END`, so a note with a home never pays a
+  rule probe.
+- `Sources/VariorumCore/Queries/LibraryPaging.swift` (said first in LIVE STATUS, with why) — `CatalogNotesPage.keys`
+  (each hit's sort key, which the statement already selected for the cursor; additive, defaulted); `catalogNotesPage(…,
+  poolLoose:)` (default false: the shipped statement byte for byte — pinned against a frozen copy across every sort,
+  direction, cursor, wing scope and narrowing) adds the loose predicate to each arm and names the plain arm's table `c`.
+- `Tests/VariorumCoreTests/LibraryPoolPagingTests.swift` — 8 tests (below).
+- `App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift` — the listings' machinery (MARK "The
+  listings: pages, held only while shown"): `Listing` / `Question` / `Hold` / `ListingPage`; `hold(_:)` (the view's one
+  task); `prime` (one read per question, shown or not); `holdFirstPage` (the on-screen observation of the shown listing's
+  first page); `followFirstPage` + `reread` (a deeper listing re-asked in place, single-flight — the Mac's
+  `followListingMove`); `loadMore` / `rowAppeared` / `askForMore` (the next page, with a `wantsMore` ask that survives a
+  superseding landing); `land` / `append` / `place` (generation-guarded; "listed once, where first read"; the timing marks);
+  `read` (the one read — `catalogNotesPage`, its Pool-loose form for Bookless) and `timelineItems` (page → rows, the key as
+  the stamp). `startAll` / `startBookless` stay (the on-screen hold, the pins' road). `union` gains `notesComplete`
+  (default true — every existing caller unchanged); `emptyListing` waits for the Bookless door's first answer and reads
+  its store fact from that read.
+- `…/Shell/MobileLibraryView.swift` — `isOnScreen` (default true); ONE `.task(id: hold)` replaces the two always-on
+  tasks; the scraps task stands down while hidden too; a note row's `onAppear` asks for the next page; the stale "cuts
+  silently" comment replaced.
+- `…/Shell/MobileShellBand.swift` — `isDrawn` (pure): a page is drawn while any of it shows.
+- `…/Shell/MobileShellView.swift` — `libraryOnScreen(width:)` = the Library's stack at its root AND its page drawn (the
+  current page, or revealed by a band drag), passed as `isOnScreen`.
+- `…/Shell/MobileListingFilters.swift` — two doc lines (the Bookless read's name).
+- `App/Variorum/VariorumMobileTests/MobileLibraryPagingTests.swift` (3, red-on-old-able), `MobileLibraryPagingRulesTests.swift`
+  (9 + parameter cases, VM-68's API), `MobileHerPathsPerfTests.swift` (batch 5's series only — below).
+
+#### The shape chosen, and what it costs per write (brief items 2–4)
+
+| | Hidden (a band neighbour, or covered by a note on its own stack) | On screen |
+|---|---|---|
+| Note listing (All/Notes) | **nothing held — 0 reads, 0 landings per write.** Read ONCE per question (the mount's prime: "Library ready") | ONE observation of the FIRST page (`listingLimit` = 200, a bounded keyset page): per write to `container`/`wing`, one seek down `idx_container_touched` stopping at the page (+ the never-touched notes' arm, ∝ those — the paging read's recorded design); a delivery lands directly while only that page is listed, else ONE statement to the listed depth (single-flight) |
+| Bookless | nothing held, not even read (not the filter shown) | the same, Pool-loose: per write to its region (`container`, `reading_post`, `reading`, `post_tag`, `tag`, the ★ `setting` when a ★ gathering exists, `wing`), a walk of the touched index testing each walked note's home (one seek) and, only for a homeless one, the gatherings' rule probes — stopping when the page fills |
+| Scraps | stood down | `MobileScrapsModel.start()` as before |
+
+**Plans** (headless, `LibraryPoolPagingTests.thePlansOfTheTwoHeldPagesAreSeeks`, `VM68-PLAN|…`; the nine-wing fixture's
+are printed by the hosted series, `VM64-PLAN|…` — PENDING the stage): notes-head — `SEARCH container USING INDEX
+idx_container_touched (last_touched_at>?)` for the touched arm, `(last_touched_at=?)` for the never-touched arm, each a
+co-routine under `MERGE (UNION ALL)`; bookless-head — the same two seeks on `c`, with per walked row `SEARCH rp USING INDEX
+idx_reading_post_post (post_id=?)` → `SEARCH r … (id=?)` and, per tag term, `SEARCH root … (id=?)` · `SEARCH applied USING
+INDEX uq_tag_path_live` · `SEARCH pt USING INDEX uq_post_tag_live (tag_id=? AND post_id=?)`. No arm scans `container`.
+**VM steps** (`theLoosePagesWorkIsFlatInTheCorpusWhileThePoolsGrows`, headless, page 40, the never-touched notes and the
+gatherings' wearers held fixed): the first loose page **6,332 → 6,164** at 300 → 1,200 notes (flat); the Mac's Pool
+statement (= the phone's Bookless re-read before this batch) **77,461 → 306,988** (∝ notes).
+
+**The floor, said plainly:** a loose page must find a page of loose notes, so a wing holding FEWER loose notes than a
+page is walked to its end (each walked note one home seek) — never worse than the Pool statement, which walks every note
+and sorts; on the nine-wing fixture's all-wing scope (≈75 loose of 450) the first Bookless page is that case. Only an
+index on "loose" could beat it, and loose-ness is a function of the gatherings' rules — no column holds it (no schema
+change proposed).
+
+**Why `observe(tracking:)` buys nothing here:** both listings' answers genuinely depend on `container`'s per-autosave
+stamp (the edited sort's order), and autosave writes the full record (VX-618), so a named-region trigger would still wake
+at autosave rate. The win is not narrowing the wake; it is holding nothing while nothing is shown.
+
+#### The hidden Library, and why the return can never show a stale list (brief item 3)
+
+**Built: stand down, and re-ask on return** (not a held trigger). The view's task key carries the on-screen fact; it
+flips TRUE the moment any of the Library is drawn — the tab door's tap, the FIRST point of a band drag's reveal, a pop
+back to its root — which restarts the task, and the restarted held page's FIRST fetch is the re-ask (GRDB's
+`ValueObservation` observes every commit after that fetch, so nothing written from then on is missed; a listing deeper
+than the page is re-read to its depth on that first delivery). What can show before the re-ask lands is the pre-return
+rows, for one bounded statement (the simulator's `library-page-fetch-ninewings`, PENDING). A held "dirty" trigger was
+weighed and not built: it would still wake at autosave rate (above) and could not show anything sooner than the re-ask
+does — the rows on screen at the reveal are the same either way.
+
+#### The pins
+
+| Pin | Kind | Pre-VM-68 | VM-68 |
+|---|---|---|---|
+| `MobileHerPathsPerfTests.typingInTheBoxWakesTheOffScreenLibrary` — `library-rereads-per-box-save` / `-redraws-` / `all-listing-rereads-` / `bookless-rereads-per-box-save` **ASSERTED 0** | bug pin | RED (2 · 2 · 1 · 1 — the BEFORE table) PENDING the red build's run | 0 · 0 · 0 · 0 PENDING. **Why zero, not one:** nothing is held while hidden, so nothing waits to be told of a write; the cost moved to the return (`library-return-rereads`, recorded: 1 per return) |
+| `MobileHerPathsPerfTests.typingInANoteOpenedFromTheLibraryLeavesTheLibraryAlone` — `library-rereads-` / `library-redraws-per-note-save-covered` **ASSERTED 0** | bug pin, or HOLLOW | PENDING — red if SwiftUI kept the covered root's tasks alive under a push; if it reads 0 on the old build too, SwiftUI already stood them down and this row is hollow (recorded so, the `libraryPath.isEmpty` term then a stated belt) | 0 PENDING |
+| `MobileLibraryPagingTests.theTwoHundredAndFirstNoteIsReachableByScrolling` (230 notes, the default page, scrolled like a thumb) | bug pin | RED expected (the 200 cut) PENDING | PENDING |
+| `MobileLibraryPagingTests.theBooklessDoorListsEveryLooseNote` (12 loose, page 5) | bug pin | RED expected (`poolPosts(limit: 5)`) PENDING | PENDING |
+| `MobileLibraryPagingTests.aNoteMintedWhileTheLibraryIsAwayIsListedWhenSheReturns` | GUARD (green on both) | PENDING | PENDING |
+| `MobileLibraryPagingRulesTests` (paging walks every note once in `Queries.library`'s order for all four sorts · a hidden Library holds nothing and the return re-asks · a deeper listing follows its first page · a new question starts over · the Bookless line waits for its answer · the hold key · the union withholds · page → rows · `isDrawn`) | design pins (VM-68's API — not in the red build) | — | PENDING |
+| Core `LibraryPoolPagingTests` (the Mac's two statements byte-identical · the loose pages ARE `poolPosts`' loose class, ids and stamps, every wing scope, pages of 1/4/50/500, over books, a deleted book, arrivals, a stray gathering row, tag/★/NOT/malformed/archived gatherings, a second wing, archived/deleted/never-touched notes · the class follows the Pool's own acts · the keys ARE `Queries.library`'s stamps for the four phone sorts · the loose page seeks the touched index · the VM steps · the plans) | guards + P1 | the byte-identity guards GREEN on the base builders (run before the extraction) | **8 tests green headless**; with the neighbours **169 tests in 23 suites** |
+
+**The red-on-old build** (PENDING — announced in LIVE STATUS before it starts): after the fix is committed and pushed,
+`git checkout 35a3bea7a -- App/Variorum/VariorumMobile/Features/Shell/{MobileLibraryViewModel,MobileLibraryView,MobileShellView,MobileShellBand,MobileListingFilters}.swift`,
+move `MobileLibraryPagingRulesTests.swift` out of the test folder (it names VM-68's API), `build-for-testing` into
+`DerivedData/vm64-b5-red/`, then `git checkout HEAD --` the five files, put the rules file back, `git status` clean. Core
+stays at the fix there: its changes are additive and the old phone code calls only the unchanged statements
+(`Queries.library`, `poolPosts` — byte-identical), so the red build IS the old phone's behaviour.
+
+#### The timing marks (batch 1's) — what they measure now
+
+"Launch/Unlock → Library ready" is unchanged in meaning: the note listing's first landing is the mount's prime, which
+runs whether or not the Library is on screen. `libraryFetch` / `booklessFetch` still count every Library read (prime,
+held page, re-ask, next page); `libraryDelivery` / `booklessDelivery` now count landings that CHANGED the rows (before:
+every distinct observation delivery — the same thing in practice, since `removeDuplicates` delivered only changed values;
+a re-ask that lands identical rows draws nothing and is not counted).
+
+#### Row previews (wave 2) — where they attach (brief item 5)
+
+Never inside `read` (the held page's fetch): a preview read attaches beside `place(_:page:in:)` as a ONE-SHOT read over the
+LANDED rows' ids — bounded, flat in a note's length (Core's `leadingBlockTexts` with a cap, the Mac's `loadNearExtras`
+road) — and re-reads only the rows a landing changed. The held page stays ∝ the page.
+
+#### The Mac does not change in behaviour
+
+Its Pool statement and its catalog page statement are byte-identical (pinned, frozen copies); `keys` and `poolLoose` are
+additive with defaults; no Mac file changed. Its suites over these reads are group (iii) below (PENDING).
+
+#### VX-618 — not closed
+
+The phone's Library half of "autosave's full-record updates wake every observation" is answered by holding nothing while
+hidden, not by narrowing the region; the Mac's sidebar listing and every mounted editor's projection still wake at
+autosave rate. The ticket stays open for its own road (the operations seam).
+
+#### Merging with VM-55 (wings underneath) — where a hand is needed
+
+- `MobileLibraryViewModel.swift`: VM-55 rewrote `startAll`/`startBookless` around `MobileWingScope.follow` with
+  `wingID: wing`, and routed `lastError` through `MobileLine` / `OpsRefusalCopy`. Take THIS batch's listing section
+  whole; DROP the `follow` wrapper around the listings (the hold key already restarts on a wing change — `Question.wing`
+  is `session.wing.readScope`, which VM-55 makes the current wing on the phone, and reading it in the view's body tracks
+  it); KEEP VM-55's `lastError` didSet and map this batch's `lastError = String(describing: error)` lines to
+  `OpsRefusalCopy.sentence(for: error, roads: .phone)`; keep VM-55's `wingID` and search re-key.
+- `MobileLibraryView.swift`: both add a stored property (`wingName` after `tokens`; `isOnScreen` after `onOpenArchive`)
+  and both edit the task block — keep both.
+- `MobileShellView.swift`: both add an argument to the `MobileLibraryView(…)` call — keep both.
+- `MobileHerPathsPerfTests` is this run's only; VM-55 does not touch Core's `LibraryPaging.swift` / `ShelfQueries.swift`.
+
+#### PROVISIONAL and design calls (options weighed; the built one first)
+
+- **P-68-1 — the page is 200** (the phone's window before paging, so the resting listing is byte-for-byte what it was;
+  fewer landings) · the Mac's 80, growing to 1,280 (a smaller held page; a visible change at rest).
+- **P-68-2 — stand down and re-ask on return** (built) · a constant-region "dirty" trigger held while hidden (still wakes
+  at autosave rate — VX-618 — and shows nothing sooner) · the listed depth held while on screen (∝ the depth per write).
+- **P-68-3 — "on screen" is drawn-at-all (a band drag's reveal counts) and at the stack's root** (built) · the current
+  tab only (a drag would reveal pre-return rows for the whole drag).
+- **P-68-4 — in All, a book older than the last listed note waits until the notes around it are read** (built — the
+  rows are always the true head of the union; nothing jumps) · show every book at once (older books sit at the listing's
+  end and move up as pages land) · page the books too (no read pages them; they are author-scale).
+- **P-68-5 — no face for paging** (built — the rows continue, the Mac's precedent; brief item 6) · a quiet "Loading…"
+  row at the foot (new copy).
+- **P-68-6 — the Bookless door says nothing until its first answer** (built — no false empty line on the first switch)
+  · speak at once (a flash of "No bookless notes…" before the rows).
+- **P-68-7 — the scraps listing stands down while hidden too** (built — "the hidden Library does not work") · leave it
+  held while its filter shows.
+
+#### For QUESTIONS at the merge (the orchestrator carries these to `notes/QUESTIONS.md`)
+
+1. **P-68-4 — books in a paged All:** withheld until the notes around them are read (built) · all at once · paged. Hers
+   only if she sees it; it is what makes the union honest under paging.
+2. **P-68-5 — paging has no face** (built) · a quiet foot row (would need her words).
+3. **P-68-1 — the page size, 200** (built) · the Mac's 80-and-growing.
+
+#### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
+
+PENDING the builds (`DerivedData/vm64-b5/` and `vm64-b5-red/`), which wait for the quiet window to end. The commands are
+written into this section with the builds.
