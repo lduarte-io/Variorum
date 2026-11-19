@@ -2804,6 +2804,73 @@ measurement behind it: at that moment the unforced read equals the settled posit
 windows, and VM-16 re-landed on main's message seam. The probe must be green again on the merged tree at the
 gate (the measured moment depends on the layout pass's order, and another wave-1 run works in the same file).
 
+### Round 4 — `vm-78-ladder-round4.md` (a fresh `fable-reviewer`; diff `eb18888db..acb441110`)
+
+**0 BLOCKER · 1 MAJOR · 0 MINOR · 5 NIT**, all new in the round, none against a product line as it stands on the
+tree (findings `3396c4611`; the implementer's answers, the orchestrator's answers on the process half and the
+final calls `a3d5d9030`). Nobody disputed a finding; none is FINDER-FIXES. The implementer corrected the
+evidence in five places and tightened two guards, and the final calls take each. The MAJOR is about the NEXT
+wave-1 merge: VM-47's merge conflicts with this run on four phone files, the other side of each hunk is the face
+before this run's fix, and this run's pins hold seams, not faces. Dispositions:
+
+| Finding | Final call | What changes |
+|---|---|---|
+| R4-F1 MAJOR — the next wave-1 merge conflicts on three unpinned faces (the date chip, the create sheet, the membership row) | CONFIRMED AS AMENDED | three guards — G1 `noPhoneFaceReadsTheEditorsUnobservedHeaderDate`, G2 `noPhoneStringLiteralSaysSmart`, G3 `MobileMembershipSheetFaceTests` — each shown red on the wrong side in ONE red build and green after; "The map, final" (round 4's file) handed to the stage coordinator at this run's merge; the process plan (i)–(vi) below |
+| R4-N1 NIT — pins red on the merged tree by reading only | CONFIRMED AS AMENDED | one pin, not three — the Book Details join (`bookDetailsDeleteLineNamesAGathering`); its one hand-reverted line rides the guards' red build. The line-CLASS assertions are main's own behaviour and green on both sides; elsewhere "by reading" stands |
+| R4-N2 NIT — sentences the re-fit and the window's result left stale; one false | CONFIRMED | the implementer's sentences, each written to what is true when it is written (the finals-ledger draft's "a second session took over" is the false one) |
+| R4-N3 NIT — three stale canon lines with no owner outside the working record | CONFIRMED | a handoff sub-section "Three canon lines I did not change, for your call" and to-file item 7; no canon line edited by this run |
+| R4-N4 NIT — the walk's rows predate the merge | CONFIRMED AS AMENDED | the re-worded rows (N9 with a refusal raised from the sheet by a taken name; the sealed Reopen and the collect line captured with their sheets up); "a refused Finish" withdrawn as a capture; the date-chip row added; every row walked on the tree that merges |
+| R4-N5 NIT — the date chip's label hides its day from VoiceOver | CONFIRMED | a line on VM-218, folded into to-file item 3 and the handoff's ticket line; no code |
+
+**The map** for the hunks is round 4's "The map, final" (`notes/plans/fixes/vm-78-ladder-round4.md`): what of
+this run must survive each hunk of the four files, the three lines no hunk will show, the guards, and the five
+shared files VM-64's textually clean merge must be read against. It is handed over as written, never re-typed.
+
+**The process plan, as the reviewer called it:**
+- **(i)** The guards and the NIT changes now, headless: one commit per guard with its doc-comment edit, the record
+  and handoff sentences in their own commit, the phone target built for testing afterwards.
+- **(ii)** A second merge-in once VX-981 has merged: the `notes/SurfaceContracts.md` resolution (both runs' lines
+  kept) listed in the record, and a by-eye read of THREE auto-merged files — `BookSettingsSheet.swift`,
+  `ShelfViewModel.swift` and `notes/AppSpec.md`; both targets built for testing on that tree.
+- **(iii)** One short stage window on THAT tree: the guards' red legs as accepted (the recipe below), then green
+  over the same types.
+- **(iv)** Round 5 opens only after (ii) and (iii). It reads the three guards and their doc edits, the window's
+  logs and bundles, the VX-981 merge-in, the NIT edits and the map.
+- **(v)** In this exact order: the gate's READY is sent first; round 5 is spawned on the coordinator's word that
+  this run's gate is NEXT, with no other run's GO ahead of it. If the coordinator answers that VM-64 is ahead:
+  wait for its merge, take it in, list it in the record as (ii) does, run the short window's GREEN leg again on
+  that tree (the red legs are not owed twice — the guards did not change), and only then open round 5, which
+  reads that merge-in too. A code fix round 5 confirms re-runs the leg it touches and, as a final round's fix,
+  gets the orchestrator's line-by-line check against its finding.
+- **(vi)** If a merge-in still lands after round 5 has opened: when it is textually clean and `git diff` shows
+  this run's lines in `MobileEditorViewModel.swift` and `MobileWriteView.swift` exactly as the map states them,
+  no line was typed — the implementer's and the orchestrator's read of the five shared files against the map, the
+  three guards green and the gate's legs on that tree are the evidence, and it is put to the author plainly as
+  unread by a cold round, hers to allow or to send to an extra read. When ANY line in those two files is resolved
+  by hand, it is not covered: the editor-seam class takes a Fable read, which only she waives — asked before the
+  merge, not after.
+- This run merges only after the guards' window: with VM-47's ladder closed, the guards on main are its merge-in's
+  only reader besides its own orchestrator.
+
+**Round 5 is earned (the MAJOR) and is the last under the cap of five.** If it finds a BLOCKER or a MAJOR, the cap
+is reached and what follows is hers to say.
+
+#### Round 4's fix pass — LIVE STATUS
+
+*A fresh `opus-implementer` (2026-11-19, evening), worktree `~/dev/variorum-vm-78`; tests and documents only — no
+product line, no `xcodebuild test`, no simulator, no stage. `origin/main` is NOT merged in this pass (VX-981 has
+not merged). **No revert is in flight.***
+
+| Piece | State |
+|---|---|
+| 0 — this section and its LIVE STATUS | DONE (this commit) |
+| 1 — G1, `MobileNoteEntryDateTests.noPhoneFaceReadsTheEditorsUnobservedHeaderDate` | NOT-STARTED |
+| 2 — G2, `MobileGatheringWordTests.noPhoneStringLiteralSaysSmart` with its oracle and two exemptions | NOT-STARTED |
+| 3 — G3, `MobileMembershipSheetFaceTests` (the premise check first) | NOT-STARTED |
+| 4 — compile proof: an incremental phone `build-for-testing` into `vm78-ios` | NOT-STARTED |
+| 5 — the guards' window recipe (the red patch, the expected reds and greens, the green leg) | NOT-STARTED |
+| 6 — the NITs (R4-N2 … R4-N5) and round 4's slots filled, one documents commit | NOT-STARTED |
+
 ## Closeout
 
 #### THE CLOSEOUT RE-FIT — LIVE STATUS
