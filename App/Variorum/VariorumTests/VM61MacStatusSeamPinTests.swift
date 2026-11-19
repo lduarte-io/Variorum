@@ -101,6 +101,15 @@ struct VM61MacStatusSeamPinTests {
     }
 
     /// **Byte-identical by construction**: no Mac door takes the phone's roads.
+    ///
+    /// *Narrowed in batch 2's window (VM-55 batch 2b, a 2a follow-up):* the bare
+    /// `.placement =` matched `WingLabelPlacementView`'s own layout property
+    /// (`self.placement = placement`, VX-833) — a false positive. The words are
+    /// now the seam's own spelling, `status.placement =`, plus the one harmful
+    /// value, `.phoneLine`: the scan still catches a Mac door that sets the
+    /// seam's placement through `status`, or names the phone's placement
+    /// anywhere; it no longer catches one that sets it through a binding not
+    /// named `status` to a value other than `.phoneLine`.
     @Test func noMacDoorSaysRemovalWithdrawsOrSetsThePlacement() throws {
         let macRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumTests
@@ -110,7 +119,7 @@ struct VM61MacStatusSeamPinTests {
             at: macRoot, includingPropertiesForKeys: nil))
         let files = walker.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
         #expect(!files.isEmpty, "the scan reached the Mac app's sources")
-        let forbidden = ["status.removal(", ".withdraw(owner:", ".placement ="]
+        let forbidden = ["status.removal(", ".withdraw(owner:", "status.placement =", ".phoneLine"]
         var hits: [String] = []
         for file in files {
             let text = try String(contentsOf: file, encoding: .utf8)
