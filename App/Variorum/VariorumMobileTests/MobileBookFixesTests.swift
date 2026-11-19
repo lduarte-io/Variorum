@@ -699,11 +699,12 @@ struct MobileGatheringWordTests {
     }
 
     /// The brief's pin — no phone string these faces render says "smart", in
-    /// any case. A HAND-KEPT LIST of what these faces render, not a source
-    /// scan (round 1, N7): a new literal in these faces would pass it. The
-    /// Mac's source-scanning ban (`DeadVocabularyTests`) is the mechanism to
-    /// adopt for the phone once the last two sites go (the Today door's note,
-    /// VM-85; the pocket guide, VM-212).
+    /// any case, checked on the PURE FUNCTIONS that build them (a hand-kept
+    /// list, round 1's N7). The source scan over every phone literal is
+    /// `noPhoneStringLiteralSaysSmart` below (ladder round 4, G2), with the
+    /// last two sites (the Today door's note, VM-85; the pocket guide,
+    /// VM-212) exempted by their exact literal; this list stays as the check
+    /// on the functions.
     @Test func noRenderedStringInTheseFacesSaysSmart() {
         let gathering = reading("Reading notes", kind: .gathering)
         let trashed = Queries.TrashItem(
@@ -726,6 +727,101 @@ struct MobileGatheringWordTests {
         for line in rendered {
             #expect(line.range(of: "smart", options: .caseInsensitive) == nil, "\(line)")
         }
+    }
+
+    /// **The "smart" faces — a source guard** (VM-78 ladder round 4, R4-F1,
+    /// G2). The pins above read pure functions, so a face that stops calling
+    /// them passes them all — and the next wave-1 merge conflicts on the
+    /// create sheet's kind row and no-tags line and on the membership row,
+    /// where the other side is the face from before W-073. This walk reads
+    /// every string literal under `VariorumMobile/` and `Shared/` (Shared
+    /// views render on the phone) and fails on "smart" as a WHOLE word in any
+    /// case — the Mac's rule (`DeadVocabularyTests.containsWord`), copied
+    /// below because it lives in the Mac's test target.
+    ///
+    /// Literals come from `MobileNoRedirectSweepTests.stringLiteralContents`,
+    /// so two literals on one line never join; its known limit — a literal
+    /// nested inside an interpolation is not read — holds for none of the
+    /// sites this guard knows. The two that stay are exempted by FILE AND
+    /// EXACT LITERAL, each required to match exactly once: a re-worded or
+    /// retired site trips its own entry, so the entry leaves with it (VM-85,
+    /// VM-212). A third entry is the author's call, never a fix for a red.
+    @Test func noPhoneStringLiteralSaysSmart() throws {
+        // The rule's own oracle (the Mac twin's cases): a word hits; an
+        // identifier or a longer word does not.
+        #expect(Self.containsWord("smart", in: "smart"))
+        #expect(Self.containsWord("smart", in: "Smart Book"))
+        #expect(Self.containsWord("smart", in: "a smart book"))
+        #expect(!Self.containsWord("smart", in: "isSmart"))
+        #expect(!Self.containsWord("smart", in: "smartphone"))
+
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumMobileTests
+            .deletingLastPathComponent()  // App/Variorum
+        let roots = [
+            appRoot.appendingPathComponent("VariorumMobile", isDirectory: true),
+            appRoot.appendingPathComponent("Shared", isDirectory: true),
+        ]
+        let exempt: [(file: String, literal: String, why: String)] = [
+            (file: "MobileTodayDoor.swift",
+             literal: "Entry saved. Your daily journal is a smart book, which can't hold entries "
+                + "\u{2014} choose a hand-picked book as your daily journal (a book's details has the door).",
+             why: "the Today door's `.wrongKind` note — VM-85 gives it the Mac's words"),
+            (file: "MobileTutorialSeeder.swift",
+             literal: "hand-picked, a dated journal, or a smart book collecting by ",
+             why: "the pocket guide's shelf lesson — VM-212 rewrites the guide for the phone"),
+        ]
+        var walked = [Int](repeating: 0, count: roots.count)
+        var offenders: [String] = []
+        var exemptHits = [Int](repeating: 0, count: exempt.count)
+        for (index, root) in roots.enumerated() {
+            #expect(FileManager.default.fileExists(atPath: root.path),
+                    "sweep root missing: \(root.lastPathComponent)")
+            let walk = try #require(FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: nil))
+            for case let url as URL in walk where url.pathExtension == "swift" {
+                walked[index] += 1
+                let source = try String(contentsOf: url, encoding: .utf8)
+                for literal in MobileNoRedirectSweepTests.stringLiteralContents(of: source)
+                where Self.containsWord("smart", in: literal) {
+                    if let hit = exempt.firstIndex(where: {
+                        $0.file == url.lastPathComponent && $0.literal == literal
+                    }) {
+                        exemptHits[hit] += 1
+                        continue
+                    }
+                    offenders.append("\(url.lastPathComponent): \"\(literal)\"")
+                }
+            }
+        }
+        #expect(walked[0] > 60, "the walk must reach the phone's sources (walked \(walked[0]))")
+        #expect(walked[1] > 60, "the walk must reach the shared sources (walked \(walked[1]))")
+        #expect(offenders.isEmpty, """
+            A phone string says "smart" — the kind is a GATHERING (W-073). Speak the \
+            shared words (`MobileCreateBookModel.kindLabel` and `.noTagsLine`, \
+            `MobileMembershipModel.kindMark(for:)`, `MobileShelfFaces.gatheringWord`):
+            \(offenders.joined(separator: "\n"))
+            """)
+        let misfits = exempt.indices.filter { exemptHits[$0] != 1 }
+            .map { "\(exempt[$0].file): \"\(exempt[$0].literal)\" matched \(exemptHits[$0])" }
+        #expect(misfits.isEmpty, "every exemption covers exactly one literal — \(misfits)")
+        #expect(exempt.allSatisfy { !$0.why.isEmpty })
+    }
+
+    /// The Mac's whole-word rule (`DeadVocabularyTests.containsWord`, in the
+    /// Mac's test target), copied: case-insensitive, and a hit only where
+    /// neither neighbour is a letter, a digit or an underscore.
+    private static func containsWord(_ word: String, in text: String) -> Bool {
+        var search = text.startIndex..<text.endIndex
+        while let range = text.range(of: word, options: .caseInsensitive, range: search) {
+            let before = range.lowerBound > text.startIndex
+                ? text[text.index(before: range.lowerBound)] : " "
+            let after = range.upperBound < text.endIndex ? text[range.upperBound] : " "
+            let boundary: (Character) -> Bool = { !($0.isLetter || $0.isNumber || $0 == "_") }
+            if boundary(before) && boundary(after) { return true }
+            search = range.upperBound..<text.endIndex
+        }
+        return false
     }
 }
 
