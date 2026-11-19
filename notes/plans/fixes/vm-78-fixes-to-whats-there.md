@@ -74,6 +74,21 @@ the stage rule, the report shape — after this blockquote.)*
   sequential merges to main, overnight provisional running, but I won't get a new phone build until wave 2 is
   done according to what another session said." This run closes on a simulator walk, not her phone; its
   PROVISIONAL calls are bundled for her next sitting.
+- **Her rulings later the same night (2026-11-19, in this session), verbatim:** "letting alll my sessions know
+  this - which is good, since three of your fixes will solve active hazards. i resolved that issue with vx-64.
+  book order - that's fine to leave it for wave 3. 2 - collect receipt your choice is fine.  resolved the
+  previous install blocker with vm-55. now, i'll plan to have the wave 1 build installed on my phone after the
+  last vm has merged in, prepared by the last one - a new session should be able to help me with the install if
+  i don't want to wake a stale cache. sound good? the phone step is the single wave-1 install after all four
+  runs have merged. I'll do the hands part hands on in the morning." What they answer here: **VM-83's order** is
+  a–z, digit-aware, starred first, and the visible order choice waits for the Bookcase in wave 3 (VM-113);
+  **VM-21's collect receipt** is kept and made true (whether the line exists at all still goes to her wording
+  pass); **the phone step** is ONE wave-1 install after all four mobile runs have merged, prepared by the last
+  merger (the device build from merged main and a paste-ready install kickoff a fresh session can run with her,
+  per `notes/plans/vm-44/plans/vm-45-install-runbook.md`), her hands in the morning.
+- **She is away overnight** (relayed by nov18, her words to it: "rule provisionally in my absence, i'll check in
+  in the morning"): a fork that does not gate a member is ruled PROVISIONAL and bundled; nothing author-only is
+  touched; no question dialogs.
 - **`App/Variorum/Shared/` changes** (the `BookStateCopy` words hoist, batch A) ⇒ the merge gate adds the Mac
   suites beside the whole phone target (nov18's rule).
 - **Riders:** none offered. Every open VM ticket already has its umbrella and wave in the approved plan
@@ -169,13 +184,28 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 *Implementer: `opus-implementer`, session of 2026-11-19. Half 1 = code + pins + a green `build-for-testing` (no
 `xcodebuild test`, no simulator); half 2 = the stage window's red-on-old + green runs. **No revert is in flight.***
 
+**Half 2 — DONE (2026-11-19, stage window (2), claimed 04:03:11, released 04:07:08; run by the orchestrator as a
+verification act from a throwaway detached checkout at `d17e61b2d` with its own DerivedData, so batch A's
+implementer kept the worktree to itself; the recipe above, unchanged).**
+- **RED run (the seven files at their pre-fix versions):** Swift Testing 68 tests in 6 suites FAILED, 20 issues
+  including 2 known. Failed — exactly the seven expected and no other: `aQuietUndoSpeaksTheRefusalAndOffersNoRedo`
+  · `aQuietRedoSpeaksTheRefusalAndOffersNoUndo` · `theWarningsDetailSaysCommittedInTheMacsSentence` ·
+  `aRestoreKeepsTheReplacedWordsAsAQuietSavepoint` · `theFannedDivideLessonSaysKeepOnTop` ·
+  `theDateChipFollowsTheDateWhenTheTitleDoesNot` · `theFirstPaintSaysNothingBeforeTheListingAnswers`.
+- **GREEN run (the tip, restored; `git diff HEAD` empty in the checkout):** Swift Testing 68 tests in 6 suites
+  PASSED with 2 known issues (the designed `MobileTrashTests` diagnostic,
+  `anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`); 0 failed.
+- **VM-33 is REAL, not hollow:** its first-paint pin went red on the pre-fix tree.
+- Still owed outside this window: the Mac guard `UndoWarningWordsTests` (+ `DestructiveUndoWarningTests`) in the
+  merge gate's Mac leg; the walk captures for these five rows in the gate's walk leg.
+
 | Member | State | Pin (TYPE name for `-only-testing`) |
 |---|---|---|
-| VM-16 (+VM-20) | IN-PROGRESS — code + pins committed (`48055fa9c`, `a11af21d0`); builds GREEN; red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ the Mac guard `UndoWarningWordsTests`, Mac leg) |
-| VM-43 | IN-PROGRESS — `insuringBuffer: true` at the ONE phone call site (`0f8ca319d`); builds GREEN; red-on-old + green **PENDING** | `MobileBlockHistoryTests` |
-| VM-3 | IN-PROGRESS — lesson rewritten (DRAFT for her wording pass), pin unwrapped + flipped, words pin added (`c29095d35`, `a11af21d0`); builds GREEN; red-on-old + green **PENDING** | `MobileTutorialStructureWalkTests` |
-| VM-84 | IN-PROGRESS — seam + pin (`2d66e9a30`), fix (`f933a4663`); builds GREEN; red-on-old + green **PENDING** | `MobileNoteEntryDateTests` |
-| VM-33 | IN-PROGRESS — REAL by reading; fix + pins (`e1d709b1b`); builds GREEN; red-on-old **PENDING — it is the proof**: a green-on-old makes the member HOLLOW (then revert the fix, keep the pin as a guard, record it) | `MobileTrashTests` |
+| VM-16 (+VM-20) | DONE (`48055fa9c`, `a11af21d0`) — red-on-old and green VERIFIED in window (2); the Mac guard waits for the gate's Mac leg | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ the Mac guard `UndoWarningWordsTests`, Mac leg) |
+| VM-43 | DONE (`0f8ca319d`) — `insuringBuffer: true` at the ONE phone call site; red-on-old and green VERIFIED in window (2) | `MobileBlockHistoryTests` |
+| VM-3 | DONE (`c29095d35`, `a11af21d0`) — lesson rewritten (DRAFT for her wording pass), pin unwrapped + flipped, words pin added; red-on-old and green VERIFIED in window (2) | `MobileTutorialStructureWalkTests` |
+| VM-84 | DONE (seam + pin `2d66e9a30`, fix `f933a4663`) — red-on-old and green VERIFIED in window (2) | `MobileNoteEntryDateTests` |
+| VM-33 | DONE (`e1d709b1b`) — REAL: its first-paint pin went red on the pre-fix tree, green on the fix (window (2)) | `MobileTrashTests` |
 
 **Half 1 — DONE (2026-11-19):** every member's code + pins committed and pushed; phone `build-for-testing`
 (`-destination 'generic/platform=iOS Simulator'`, DerivedData `vm78-ios`, `CODE_SIGNING_ALLOWED=NO`) **TEST BUILD
