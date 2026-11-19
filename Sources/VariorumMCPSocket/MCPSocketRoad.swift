@@ -155,6 +155,9 @@ public enum MCPSocketRoad {
             close(probe)
             throw ListenError(kind: .alreadyServed)
         }
+        #if DEBUG
+        listenProbes.run(path, .probed)
+        #endif
         Darwin.unlink(path)
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else { throw ListenError(kind: .failed(step: "socket", errno: errno)) }
@@ -165,6 +168,9 @@ public enum MCPSocketRoad {
             close(fd)
             throw ListenError(kind: .failed(step: "bind", errno: code))
         }
+        #if DEBUG
+        listenProbes.run(path, .bound)
+        #endif
         guard chmod(path, 0o600) == 0 else {
             let code = errno
             close(fd)
@@ -184,6 +190,41 @@ public enum MCPSocketRoad {
     public static func unlink(directory: URL, name: String = socketName) {
         Darwin.unlink(socketPath(directory: directory, name: name))
     }
+
+    #if DEBUG
+    // MARK: - TEST-ONLY (VX-959 — the VX-981 run, batch 4)
+
+    /// TEST-ONLY: the two steps of `listen` a pin holds a host at, so two hosts
+    /// racing for ONE socket path can be ordered without a sleep — `.probed`
+    /// once the probe found nothing answering, before the stale-file unlink;
+    /// `.bound` once the socket is bound, before `chmod` and `listen` (the gap
+    /// in which a probe of the path is refused, `ECONNREFUSED`).
+    enum ListenStep: Equatable, Sendable { case probed, bound }
+
+    /// TEST-ONLY: set (nil clears) the probe `listen` runs at each step for
+    /// one socket path — keyed by the path, so a pin reaches only its own
+    /// directory's hosts while other suites bind theirs. Runs on the listening
+    /// thread, outside every lock.
+    static func setListenProbeForTesting(path: String, _ probe: (@Sendable (ListenStep) -> Void)?) {
+        listenProbes.set(path, probe)
+    }
+
+    private static let listenProbes = ListenProbes()
+
+    private final class ListenProbes: @unchecked Sendable {
+        private let lock = NSLock()
+        private var probes: [String: @Sendable (ListenStep) -> Void] = [:]
+
+        func set(_ path: String, _ probe: (@Sendable (ListenStep) -> Void)?) {
+            lock.withLock { probes[path] = probe }
+        }
+
+        func run(_ path: String, _ step: ListenStep) {
+            let probe = lock.withLock { probes[path] }
+            probe?(step)
+        }
+    }
+    #endif
 
     /// A peer that vanishes must never raise SIGPIPE in this process (the app
     /// would die of a closed client): writes fail with EPIPE instead.

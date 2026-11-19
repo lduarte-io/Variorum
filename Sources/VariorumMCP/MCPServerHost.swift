@@ -335,8 +335,13 @@ public final class MCPServerHost: @unchecked Sendable {
     /// the while-connected sweep has run and before the bind, `.bound` once the
     /// listener is bound and before it is published. Runs on the starting
     /// thread; set before `start()`.
+    ///
+    /// VX-959 (the VX-981 run, batch 4): `.waitsForTheDirectory` — a start
+    /// about to WAIT for another host's bind road on the same socket path, told
+    /// before it waits, so a pin can let the other host go without a sleep.
+    /// (The scaffold declares it; the serialized bind road fires it.)
     var startStepProbe: ((StartStep) -> Void)?
-    enum StartStep: Equatable, Sendable { case swept, bound }
+    enum StartStep: Equatable, Sendable { case swept, bound, waitsForTheDirectory }
 
     /// TEST-ONLY (VX-951 — the VX-981 run, batch 3): run by every session this
     /// host serves INSIDE the SDK's `initialize` hook, just after the connection
