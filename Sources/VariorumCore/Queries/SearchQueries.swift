@@ -608,7 +608,9 @@ extension Queries {
         guard facet != .all else {
             return try searchCounts(db, query: query, scope: scope, calendar: calendar)
         }
-        if query.text != nil {
+        // VX-954: the words road is the ONE predicate's call — a word list
+        // that folds to nothing beside a tag takes the tag road's arm below.
+        if SearchComposer.asksWords(query) {
             return try searchCounts(db, query: facet.narrowing(query), scope: scope, calendar: calendar)
         }
         return try searchCounts(db, query: query, scope: scope, calendar: calendar)?

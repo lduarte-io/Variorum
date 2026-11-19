@@ -107,4 +107,58 @@ struct SearchFoldedWordsBesideATagTests {
             #expect(beside == alone, "\(text) answers \(beside), but #flora answers \(alone)")
         }
     }
+
+    /// THE ONE PREDICATE, pure (`SearchComposer.asksWords`): words the index
+    /// serves take the words road; no text half takes the tag road; words
+    /// that fold to nothing take the tag road when a tag can drive it; and a
+    /// tree of only negations stays on the words road — where it keeps
+    /// refusing — with or without a folded word or a tag beside it.
+    @Test func theOnePredicateReadsTheTextHalfAsTheIndexDoes() {
+        let flora = SearchFilter.tagPath("flora")
+        #expect(SearchComposer.asksWords(question("red ")))
+        #expect(SearchComposer.asksWords(question("red + #flora")), "a served word beside a symbol and a tag")
+        #expect(SearchComposer.asksWords(question("1 + 1")))
+        #expect(!SearchComposer.asksWords(question("#flora")))
+        #expect(!SearchComposer.asksWords(question("— #flora")) && !SearchComposer.asksWords(question("+ #flora")))
+        #expect(!SearchComposer.asksWords(SearchQuery(filter: .all([flora, .starred]))))
+        #expect(SearchComposer.asksWords(SearchQuery(text: .not(.word("red")))))
+        #expect(SearchComposer.asksWords(SearchQuery(text: .all([.word("—"), .not(.word("red"))]), filter: flora)),
+                "a negation beside a folded word and a tag still refuses on the words road")
+        #expect(SearchComposer.asksWords(SearchQuery(text: .all([.word("+"), .not(.word("red"))]), filter: flora)))
+        // A tag the text-less road cannot drive from (under ANY) leaves a
+        // folded word on the words road — the narrowing's own reading.
+        #expect(SearchComposer.asksWords(SearchQuery(text: .word("—"), filter: .any([flora, .starred]))))
+    }
+
+    /// **PROVISIONAL P-980-1 (a)** — a field holding ONLY punctuation or
+    /// symbols asks nothing the index can serve and names no tag: it keeps
+    /// today's reading — the words road, nothing found ("nothing found" over
+    /// "Nothing matches"), never blanked into the Library at rest — with or
+    /// without an armed day or book state beside it. Its numbers say nothing
+    /// under every facet, no listing is narrowed, and a word that literally
+    /// names a tag still offers it, as today. Pinned so a change is
+    /// deliberate (options (b) and (c) are in the run record).
+    @Test(arguments: ["—", "+", "#", "…", "\"—\"", "— +", "$ ©"])
+    func aFieldOfOnlyPunctuationOrSymbolsKeepsTodaysReading(_ text: String) throws {
+        let asked = question(text)
+        #expect(asked.text != nil && SearchComposer.asksWords(asked), "\(text) stays on the words road")
+        var dated = asked
+        dated.filter = .days(SearchDayRange(field: .edited, start: "2026-01-01T00:00:00Z", end: "2026-01-02T00:00:00Z"))
+        var stated = asked
+        stated.filter = .bookState(.living)
+        #expect(SearchComposer.asksWords(dated) && SearchComposer.asksWords(stated),
+                "\(text) beside an armed day or book state stays on the words road too")
+        try withOperations { ops, db in
+            try flora(ops)
+            let said = try answer(db, asked)
+            for (facet, counts) in said.bands {
+                let living = counts.flatMap { $0 }?.living
+                #expect(living == nil || living == SearchCounts.Kinds(books: 0, notes: 0, passages: 0, scraps: 0),
+                        "\(text) under \(facet): nothing found")
+            }
+            #expect(said.narrowedNotes.isEmpty && said.taggedBlocks.isEmpty && said.associatedBooks.isEmpty)
+            let named = ["—", "+", "…"].filter { text.contains($0) }
+            #expect(Set(said.offers) == Set(named), "\(text): a word that names a tag still offers it, as today")
+        }
+    }
 }

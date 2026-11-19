@@ -178,6 +178,47 @@ public enum SearchComposer {
         }
     }
 
+    // MARK: - The words road (VX-954 — THE ONE PREDICATE)
+
+    /// **Does the question take the WORDS road?** (VX-954 — the VX-980 run,
+    /// batch 1; `notes/plans/fixes/vx-980-search-fixes.md`.) Every reader
+    /// that asks "does this question have words" reads THIS one function —
+    /// the text-less tag road's guard (`listingNarrowing`), the facet band's
+    /// arm (`Queries.searchCounts(…facet:…)`), the tag offers
+    /// (`Queries.searchTagOffers`) and the faces' routing (the Library's
+    /// `hasWords`, the book's band, ⌘K's passages) — so a word list that
+    /// FOLDS TO NOTHING beside a tag (`— #flora`, `+ #flora`) IS the tag
+    /// alone, everywhere.
+    ///
+    /// - The text half has something the index can SERVE (`ftsMatch` is
+    ///   non-nil) → words. A tree of only negations counts as served: it
+    ///   stays on the words road, where the index keeps refusing it
+    ///   (`Refusal.negativeOnlyText`) — a folded word beside a negation never
+    ///   turns that refusal into an answer.
+    /// - No text half at all (a tag alone, a day alone) → no words.
+    /// - Words that FOLD TO NOTHING (every leaf is punctuation or symbols the
+    ///   index's tokenizer drops — `hasTokenCharacter`) → no words when the
+    ///   question names a tag the text-less road can drive from
+    ///   (`drivingTagPaths`, the narrowing's own reading); naming none, still
+    ///   words — **PROVISIONAL P-980-1 (a)**: a field holding only
+    ///   punctuation or symbols keeps today's reading (the field is not
+    ///   blank, nothing is found — "nothing found" over "Nothing matches"),
+    ///   never blanked into the Library at rest.
+    ///
+    /// Pure over the AST — no read is added to a question (P1).
+    public static func asksWords(_ query: SearchQuery) -> Bool {
+        guard let text = query.text else { return false }
+        let served: Bool
+        do {
+            served = try ftsMatch(text) != nil
+        } catch {
+            served = true  // the one refusal: negations alone — the words road refuses it
+        }
+        if served { return true }
+        guard let filter = query.filter else { return true }  // P-980-1 (a)
+        return drivingTagPaths(filter).isEmpty                 // P-980-1 (a) beside a day or a state
+    }
+
     /// An FTS5 string literal: double quotes, inner quotes doubled.
     static func quoted(_ s: String) -> String {
         "\"" + s.replacingOccurrences(of: "\"", with: "\"\"") + "\""
@@ -844,7 +885,9 @@ public enum SearchComposer {
     ///   (the typed tags again — the driver is only the plan's shape — plus an
     ///   armed day, a book-state facet, …).
     ///
-    /// nil when the question has WORDS (the answer sheet's road) or no typed
+    /// nil when the question takes the WORDS road (`asksWords` — the answer
+    /// sheet's; since VX-954 a word list that folds to nothing beside a tag
+    /// does NOT, so `— #flora` narrows exactly as `#flora`) or has no typed
     /// tag to drive from.
     public struct ListingNarrowing: Equatable, Sendable {
         public let driver: String
@@ -865,7 +908,7 @@ public enum SearchComposer {
     public static func listingNarrowing(
         _ query: SearchQuery, kind: ListingKind, wingID: String, environment: Environment
     ) -> ListingNarrowing? {
-        guard query.text == nil, let filter = query.filter else { return nil }
+        guard !asksWords(query), let filter = query.filter else { return nil }
         let paths = drivingTagPaths(filter)
         guard !paths.isEmpty else { return nil }
         let rootWing = environment.wingScope("root.wing_id", wingID)
