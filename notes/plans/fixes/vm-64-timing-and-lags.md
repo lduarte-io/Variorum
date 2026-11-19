@@ -11,7 +11,7 @@ Plan: `notes/plans/vm-44-mobile-catch-up-plan.md` (wave 1, umbrella 3 ⚑ — th
 **Per member — the mechanism as settled · the fix as built · one pointer.**
 - **VM-65** — nothing timed what she feels · a bounded Core recorder (O(1) a mark, a 64-ring per series, durations and counts only, signposts); one catalog in `Shared/AppTiming.swift`, inert unless the phone enables it (the Mac records nothing); the readout at Settings ▸ Diagnostics ▸ Timing…, one table per build kept across a quit · `808f333a8`.
 - **VM-2** — the phone's structural doors suspend while the pre-act page stays editable, and the gate never read the latch; a key there recorded the whole pre-act block, flushed after the act, and `autosave`'s rescue kept it, demoting the act's result to a `'conflict'` take · a refuse-and-say fence from the latch to the settled page (`Domain/StructuralFlightFence` + the gate and storage belts); insert below exempt; the undo door hooked · `2a3fd3a52`.
-- **VM-66** — the speed tests skipped her paths · `MobileHerPathsPerfTests` (the real screen and shell, reading VM-65's one recorder — so it runs ALONE) and the `.nineWings` fixture · `App/Variorum/VariorumMobileTests/MobileHerPathsPerfTests.swift`.
+- **VM-66** — the speed tests skipped her paths · `MobileHerPathsPerfTests` (the real screen and shell, reading VM-65's one recorder — so it runs ALONE, gated since ladder round 2: `TEST_RUNNER_VM66_PERF=1`) and the `.nineWings` fixture · `App/Variorum/VariorumMobileTests/MobileHerPathsPerfTests.swift`.
 - **VM-67** — `adoptOwnerID` scanned all eleven owner tables in a write transaction at every launch, unlock and sign-in, to change nothing · `v1_38`'s partial indexes (local-only, not a §12 event, marker 15) and a probe before the write, in one writer access · `e6d16fca7`.
 - **VM-68** — the hidden Library held two whole-listing observations re-run on every write, and the listing cut silently at 200 · keyset pages through the Mac's `catalogNotesPage` (+`keys`, +`poolLoose`), held only while drawn, re-asked on return · `dcea98cee`.
 - **VM-69** — an open read the note twice (`loadOnce`, then `start()`'s first fetch), laid the chrome out three times, and the chips read every book and tag · the arrival's load IS the live observation's first value; chrome once; chip-scoped reads · `63ad8b188`.
@@ -1049,7 +1049,7 @@ marks, the readout) · `808f333a8` (one table per build — the author's sharpen
 | Note reads per open (window) | the screen's `.task` | the live observation's first delivery (or 10 s) | counts `loadOnce` + every observation fetch; audit F 2C predicts 2 |
 | Note re-reads per save (window) | before each autosave write | the next save or 1 s | every MOUNTED editor's re-fetch counts (audit F §7) |
 | Library re-reads / redraws per save (windows) | as above | as above | both held listings (all + bookless) |
-| Savepoints per leaving (window) | a note's `.onDisappear` or the app's backgrounding (`keepFirst`) | 10 s | a Castle backgrounding's lock teardown counts inside its leaving |
+| Savepoints per leaving (window) | a note's `.onDisappear` or the app's backgrounding (`keepFirst`) | 10 s | a Castle backgrounding's lock teardown counts inside its leaving. *[Ladder round 2, finding 8(b): no act closes this window early, so two leavings inside ten seconds are ONE sample holding both — leave about ten seconds between leavings when reading it (the handoff's readout step says so). Closing it at `noteLeft` was weighed and not built: the window does not record whether a note's leaving or the app's backgrounding opened it, and a backgrounding's window must keep counting through the removed screens' own leavings.]* |
 
 Totals (monotonic): notes opened (arrivals) · editors built (÷ opened > 1 = audit F 2D's twins, settled by the count) ·
 note reads at open / live / at a tab switch · note redraws live · Library and bookless reads and redraws · saves ·
@@ -1617,7 +1617,12 @@ guard pins are state-dependent, as the 49 run showed.
 
 What is dropped, and how she knows: a key, autocorrection or dictation chunk that meets a landing flight is not
 written; the sentence "Another structural change is still landing." stands in the status line after the flight (with
-the door's Undo/Redo kept beside it). Nothing reaches the store stale; nothing leaves silently.
+the door's Undo/Redo kept beside it). Nothing reaches the store stale; nothing leaves silently. *[Ladder round 2,
+finding 6 — both clauses over-claim on the merged tree. Since VM-55's one message line the sentence is a REFUSAL on
+that line, drawn with no Undo (`MobileLine.say` takes back the note's standing Undo line first); the door's Undo stays
+in the note's ⋯ sheet — "P-2-2 meets the one message line", the merge-in closeout's QUESTIONS item. And "nothing reaches
+the store stale" is the fence's claim for what it refuses or withholds only: VM-226 (the tail's idle save mid-flight)
+and round 2's finding 2 (the settle read in flight) are open roads.]*
 
 **The pins (r2), and the corrected red-on-old table** — PENDING the stage; expected:
 
@@ -1839,11 +1844,14 @@ No `Shared/`, Core or `Sync/` file changed. The one app-target file (the fixture
 #### The stage window (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
 
 **Group (i) — the BEFORE numbers. Run it ALONE (one suite, its own invocation, nothing else in the process), TWICE.**
-Expect a few minutes per run (two fixture worlds seed first). Lift the numbers with the `grep`.
+Expect a few minutes per run (two fixture worlds seed first). Lift the numbers with the `grep`. *[Ladder round 2, O-1:
+the suite is GATED since then — a run that does not hand the test runner `TEST_RUNNER_VM66_PERF=1` skips it (and Swift
+Testing still counts the 13 skipped in "N tests … passed": read the skipped lines). The command below carries the switch;
+the BEFORE runs at `vm64-b3` predate the gate and ran without it.]*
 ```
 cd ~/dev/variorum-vm-64/App/Variorum
 tests=(MobileHerPathsPerfTests)
-xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+TEST_RUNNER_VM66_PERF=1 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
   -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b3 \
   ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-run-N>
 grep '^VM64-PERF|' <log-run-N>
@@ -2263,7 +2271,7 @@ silent CUT at 200: note 201 had no road but a title search.
 
 | | Hidden (a band neighbour, or covered by a note on its own stack) | On screen |
 |---|---|---|
-| Note listing (All/Notes) | **nothing held — 0 reads, 0 landings per write.** Read ONCE per question (the mount's prime: "Library ready") | ONE observation of the FIRST page (`listingLimit` = 200, a bounded keyset page): per write to `container`/`wing`, one seek down `idx_container_touched` stopping at the page (+ the never-touched notes' arm, ∝ those — the paging read's recorded design); a delivery lands directly while only that page is listed, else ONE statement to the listed depth (single-flight) |
+| Note listing (All/Notes) | **nothing held — 0 reads, 0 landings per write.** Read ONCE per question (the mount's prime: "Library ready") | ONE observation of the FIRST page (`listingLimit` = 200, a bounded keyset page): per write to `container`/`wing`, one seek down `idx_container_touched` stopping at the page (+ the never-touched notes' arm, ∝ those — the paging read's recorded design); a delivery lands directly while only that page is listed, else ONE statement to the listed depth (single-flight). *[Ladder round 2, finding 5 — "one seek … stopping at the page" is the EDITED sort's, in a wing holding at least a page of notes. Under the other three phone sorts (created, date, last meaningful edit) the page is `catalogNotesPage`'s single arm with no index on its key: a top-N pass over the store's live notes (no index carries the wing either), ∝ the note count (the paging read's own header says so of the Mac). And under the edited sort in a wing holding FEWER notes than a page — any small wing, since the phone stands in one — the touched arm is forced onto `idx_container_touched` (`INDEXED BY`), which carries neither kind nor wing, so `LIMIT limit + 1` never fills and the walk reaches the index's end, fetching every live container in the store to test it: ∝ the store. Neither is a regression (the old listings scanned and sorted every post at every write, hidden or not; the Mac's catalog has the same shape), and while the Library is on screen little is typed; ticketed for wave 4's ranking.]* |
 | Bookless | nothing held, not even read (not the filter shown) | the same, Pool-loose: per write to its region (`container`, `reading_post`, `reading`, `post_tag`, `tag`, the ★ `setting` when a ★ gathering exists, `wing`), a walk of the touched index testing each walked note's home (one seek) and, only for a homeless one, the gatherings' rule probes — stopping when the page fills |
 | Scraps | stood down | `MobileScrapsModel.start()` as before |
 
@@ -2277,7 +2285,7 @@ INDEX uq_tag_path_live` · `SEARCH pt USING INDEX uq_post_tag_live (tag_id=? AND
 gatherings' wearers held fixed): the first loose page **6,332 → 6,164** at 300 → 1,200 notes (flat); the Mac's Pool
 statement (= the phone's Bookless re-read before this batch) **77,461 → 306,988** (∝ notes).
 
-**The floor, said plainly:** a loose page must find a page of loose notes, so a wing holding FEWER loose notes than a
+**The floor, said plainly:** *[Ladder round 2, finding 5: this floor is the Bookless page's; the note listing has its own two, stated in the cost table's "On screen" cell above.]* a loose page must find a page of loose notes, so a wing holding FEWER loose notes than a
 page is walked to its end (each walked note one home seek) — never worse than the Pool statement, which walks every note
 and sorts; on the nine-wing fixture's all-wing scope (≈75 loose of 450) the first Bookless page is that case. Only an
 index on "loose" could beat it, and loose-ness is a function of the gatherings' rules — no column holds it (no schema
@@ -3776,7 +3784,9 @@ Expected: all green — VM-55's four re-landed pins with their unchanged expecta
 `MobileLibraryPagingTests.aWingSwitchedWhileTheLibraryIsAwayIsHonouredOnTheReturn`, `theHoldKeyNamesTheShownListing`
 with its wing lines, the two scans (no offender), the fence suite and the undo door in company.
 (iii) **The perf suite ALONE**, `vm64-gate` (it reads the process's one recorder; the nine-wing fetch series now read the
-current wing — (a)): `-only-testing:VariorumMobileTests/MobileHerPathsPerfTests`; expected 13 passed.
+current wing — (a)): `-only-testing:VariorumMobileTests/MobileHerPathsPerfTests`; expected 13 passed. *[Ladder round 2, O-1: on a tree from `c42078746` on, the suite is gated — the same run needs
+`TEST_RUNNER_VM66_PERF=1` in front of `xcodebuild`, and a whole-target run (iv) SKIPS its 13 (counted in Swift Testing's
+"N tests … passed"; read the skipped lines). `vm64-gate`'s products predate the gate and run it without the switch.]*
 (iv) **The merge gate** — the whole phone target and the whole Mac target from `vm64-gate` (`.xctestrun` above), the
 orchestrator's windows. Expected reds from main only: VM-24's `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`
 (2 of 3 cases) on the phone; on the Mac the standing flake VX-701 if it appears (re-run alone).
