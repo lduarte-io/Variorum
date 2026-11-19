@@ -56,7 +56,13 @@ remainders are carried by VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94, 
 
 ## The orchestrator's live state (kept current; a resuming session reads this first)
 
-*As of 2026-11-19 07:15, tip `ef1430142`. The author is away until morning; nothing is held for her hands yet.*
+*As of 2026-11-19 07:45, tip after the closeout drafts (`7cb529765` and this commit). The author is away until
+morning; nothing is held for her hands yet. The closeout's writing is DRAFTED with PENDING slots (this file's
+Closeout and FOR A LATER READER, five phone clauses in `notes/SurfaceContracts.md`, `notes/MobileSoul.md` row
+PL-75, `notes/handoffs/vm-78-handoff.md`); what remains is filling the slots as the steps below land. One canon
+delta is PROPOSED and not applied — dropping "PROVISIONAL" from the insured restore in AppSpec §9 and OverallModel
+§3, per QUESTIONS #274 addendum 2 (Closeout, "Canon delta proposed"): the orchestrator applies it on the merged
+tree at the closeout, and the handoff names it for her eyes.*
 
 **Done and proved (red on the old code, green on the fix, in a stage window):** batch B — VM-16 (+VM-20), VM-43,
 VM-3, VM-84, VM-33 (window 2); batch A — VM-81, VM-83, VM-21, with the Mac's 17 types over the hoisted words green
@@ -67,10 +73,7 @@ closed with every finding dispositioned ("The ladder").
 1. **Batch C's matrix, window (3), 25 minutes** — driven by the fresh batch C runner in this worktree (the
    original implementer's context was spent; the runner has read everything and is waiting). Matrix only: no fix
    is written, built or run inside the claim. Its GO is relayed with the claim line and the simulator's UDID.
-2. **R2-N1's pin, 6 minutes** — run by the orchestrator from the throwaway detached checkout
-   (`~/dev/variorum-vm-78-pins`, its own DerivedData; one pre-fix file staged, pre-built), as windows 1, 2 and 5
-   were. If the hosted driver cannot read a SwiftUI hint (the fixed tip reads nil), the modifiers and the pin come
-   out by a new commit (round 2's final call).
+2. ~~R2-N1's pin~~ — RAN 07:19–07:24 and proved (red on the pre-fix file, green on the tip; the fix stands).
 
 **Then, in order:**
 3. Read window (3)'s trace with the runner's report and DECIDE THE ARM for VM-24 (the orchestrator's decision
@@ -1004,7 +1007,7 @@ before the pin (`MobileBookDetails.swift` is byte-identical there and at the pin
 
 | Finding | State | Pin (TYPE / test) |
 |---|---|---|
-| R2-N1 (VM-81) | DONE — pin `01205f799`, fix `97282e72f` (the four act rows on `MobileBookDetailsSheet` keep the verb as their label and carry the caption they draw as `.accessibilityHint`, unvoiced: Finish/Reopen `finishCaption(for:)` · Unarchive `pausedSentence(for:)` when it has one, else none · Archive `archiveDailyJournalDetail` · Delete `deleteBookKeepsItsNotes`; no new words); phone `build-for-testing` GREEN; red/green **PENDING** (it rides the next short window) | `MobileBookStateRowTests/theBookDetailsRowsSpeakTheirCaptionsAsHints` |
+| R2-N1 (VM-81) | DONE — pin `01205f799`, fix `97282e72f` (the four act rows on `MobileBookDetailsSheet` keep the verb as their label and carry the caption they draw as `.accessibilityHint`, unvoiced: Finish/Reopen `finishCaption(for:)` · Unarchive `pausedSentence(for:)` when it has one, else none · Archive `archiveDailyJournalDetail` · Delete `deleteBookKeepsItsNotes`; no new words); phone `build-for-testing` GREEN; red on the pre-fix file and green on the tip VERIFIED in its own window (claimed 07:19:38, released 07:23:59: RED 11 tests in 2 suites with this pin the only red, GREEN 11/2; the hosted driver reads a SwiftUI hint, so the fix stands; `r2n1-red.xcresult` unreadable, its log kept) | `MobileBookStateRowTests/theBookDetailsRowsSpeakTheirCaptionsAsHints` |
 | R2-N2 | DONE — the recipe's `ONLY` array marked "as run in window (5)", the follow-up's leg and results beside it, the re-run line; F4's row flipped to VERIFIED; R2-F1's bundle lines landed here (the orchestrator's call) | — |
 | R2-N4 | DONE — no code; the line for VM-62's run, with the reviewer's clause, under "Lines for other owners" | — |
 
