@@ -64,15 +64,40 @@ delta is PROPOSED and not applied — dropping "PROVISIONAL" from the insured re
 §3, per QUESTIONS #274 addendum 2 (Closeout, "Canon delta proposed"): the orchestrator applies it on the merged
 tree at the closeout, and the handoff names it for her eyes.*
 
+**WINDOW (3) RAN (08:39–08:50; BATCH C's LIVE STATUS, "WINDOW (3) — RESULTS", `6b214ad67`) AND THE ORCHESTRATOR'S
+DECISIONS ON IT (2026-11-19 09:00):**
+- **VM-17 is REAL** (the probe's reading 1 green — no pile at block 1; readings (i), (i′), (ii) red on the stepped
+  walk, identically twice: stray badges in the viewport, one 1,260 pt from its own block, several 74 pt off their
+  line; the jump road clean; reach complete). By the batch's arm no product line was touched in the window. **It
+  is fixed in this run, as BATCH D** (below the batches): the reviewer's pre-confirmed fix shape (round 1, F2's
+  final call — an off-band badge does not stand), the probe as its pin (already seen red on the unfixed chrome),
+  green in a short window, then read by ladder round 3.
+- **VM-24: no pre-decided arm mapped, and the decision is: NOT test posture.** Arm A's fix (a wait in the caret
+  suite's `host`) is REFUSED — it would turn the test green by avoiding the condition, not by removing the hazard.
+  The trace killed H1 (the caret settle writes nothing inside the transaction) and showed the mechanism: on this
+  road the edit gate is never consulted, so the replace reaches `storageDidEdit` unarmed and is routed from the
+  storage's own report; when TextKit's attribute fixing widens that report past the block's terminator,
+  `fallbackVerdict` refuses a plain in-block replace and desync recovery re-renders from the store. That is a
+  product mechanism in the editor's edit routing. **The red test stays red and unwrapped — it is the pin.**
+  **The fix is NOT written in this run tonight**: it is an editor-seam change, not a small fix; another wave-1 run
+  (VM-64) holds editor-seam work in the same file this wave; and the author is away. What happens instead: a
+  read-only REACH read (which roads on her phone can arrive unarmed with a widened report) and the fix options
+  are written into BATCH C; the decision — fix it here as its own batch with its own Fable round, or hand the
+  mechanism to the seam's umbrella — is HELD for her sitting. VM-24 stays open; nothing is wrapped as a known
+  issue.
+- **VM-19:** its pin is proved (red on the hide-only teardown at `615a12189`, green on the fix); the desync itself
+  did not reproduce on this toolchain (M4, four cases); the pin stands as test hygiene.
+- **The instruments leave now** (round 1's F7): the three trace suites and the cost note are removed in a named
+  commit before any further window — their traces and numbers are in the record, and the commits that carried
+  them stay in history for whoever fixes VM-24.
+
 **Done and proved (red on the old code, green on the fix, in a stage window):** batch B — VM-16 (+VM-20), VM-43,
 VM-3, VM-84, VM-33 (window 2); batch A — VM-81, VM-83, VM-21, with the Mac's 17 types over the hoisted words green
 (window 1); ladder round 1's fixes — F3, F5, N2 (window 5) and F4 (its follow-up). Ladder rounds 1 and 2 are
 closed with every finding dispositioned ("The ladder").
 
 **Queued on the stage (nov18 schedules; READY sent for both):**
-1. **Batch C's matrix, window (3), 25 minutes** — driven by the fresh batch C runner in this worktree (the
-   original implementer's context was spent; the runner has read everything and is waiting). Matrix only: no fix
-   is written, built or run inside the claim. Its GO is relayed with the claim line and the simulator's UDID.
+1. ~~Batch C's matrix, window (3)~~ — RAN 08:39–08:50 (above).
 2. ~~R2-N1's pin~~ — RAN 07:19–07:24 and proved (red on the pre-fix file, green on the tip; the fix stands).
 
 **Then, in order:**
