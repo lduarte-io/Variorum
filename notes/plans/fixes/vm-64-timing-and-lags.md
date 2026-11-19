@@ -766,7 +766,7 @@ orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
 
 ### The merge of main (VM-55) · LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**No revert is in flight.** Base: `48919f693` (this branch) · `origin/main` `eb18888db` (VM-55's merge `66337ff08` + its
+**A REVERT IS STARTING (M11)** — on the committed tree at this commit: `git diff f4801064e f589d964e -- App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift | git apply -R` (finding 2's hunk in `takeAutosaveHold` alone — checked to apply cleanly on the merged tree), the phone built for testing into `vm64-gate-red`, then `git checkout HEAD -- App/Variorum/VariorumMobile/Features/Write/MobileEditorViewModel.swift`. A successor finding that file modified: `git diff HEAD` shows exactly the reverted hunk; restore with that checkout (the tree is committed, so it is safe). Base: `48919f693` (this branch) · `origin/main` `eb18888db` (VM-55's merge `66337ff08` + its
 notes-only ledger commit; merge-base `359ae214d`). DerivedData: `App/Variorum/DerivedData/vm64-gate/` (phone + Mac, the
 merged tree) and `vm64-gate-red/` (phone, finding 2's hunk reversed) — gitignored; no other batch's folder is written.
 The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) and what it re-landed".
@@ -784,7 +784,7 @@ The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) a
 | M8 — step 3: the `MobileHerPathsPerfTests` registry comment corrected (comment only) | DONE (this commit) |
 | M9 — the whole Core package, `swift test`, once, at the end of the edits | NOT-STARTED |
 | M10 — phone and Mac `build-for-testing`, cold, into `vm64-gate` | DONE at `f4068b3cf` — phone (`generic/platform=iOS Simulator`) `** TEST BUILD SUCCEEDED **`, 0 errors, first try; Mac (`platform=macOS`) `** TEST BUILD SUCCEEDED **`, 0 errors. No warning in a line the merge or this session wrote (the two nearest are pre-existing: `MobileStructural.swift:122`'s unused `intra`, 2026-08; VM-55's `MobileUndoDoorTests` `try`s). Logs `App/Variorum/DerivedData/vm64-gate-{phone,mac}-build.log` (local) |
-| M11 — the finding-2 red build into `vm64-gate-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
+| M11 — the finding-2 red build into `vm64-gate-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | IN-PROGRESS — announced (this commit); the revert, the build and the restore follow |
 | M12 — §7's section, the hosted commands, the report | NOT-STARTED |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
