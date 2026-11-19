@@ -155,8 +155,8 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 3 · VM-66 | **CLOSED 2026-11-19** | see the batch 3 block; built at `d2cef56be` | the BEFORE numbers are in "Orchestrator's stage results" below |
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
-| 6 · VM-69 · VM-70 | **r1 BUILT · READY for the stage** — the release moved out of `deinit` into the leaving work | see the batch 6 block ▸ "Iteration r1"; r1 products `vm64-b6r1`, red `vm64-b6r1-red` | r0 products `vm64-b6` (to be deleted) |
-| 7 · VM-71 | BUILT on r1 · **READY for the phone stage** (Mac piece GREEN 10:37) | see the batch 7 block; phone products `vm64-b7r1` at `a61e4f7c9`, red `vm64-b7r1-red`; Mac `vm64-b7` | no revert in flight; no line in `Features/Protection/` |
+| 6 · VM-69 · VM-70 | **CLOSED 2026-11-19** (r1) | see the batch 6 block; r1 code `36cddcf60` `9821ffef3` `ce3c4e75b` | first window NOT green (the release lived in `deinit`); r1 green on the final tree — "Orchestrator's stage results" below; residual VM-227 |
+| 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -810,6 +810,67 @@ dropped. The closeout's r0 lines are corrected in place (§7 batch 7 ▸ "Re-che
 - **What it showed (the implementer's r1 trace, its §7 "Iteration r1"):** the release sat in the editor's `deinit`, and nothing in her app is shown to free a popped screen's editor promptly — the perf series passed only because its harness destroys its host. VM-70 was therefore not fixed for her road at r0. r1 moves the release out of `deinit`: it is now the last act of the leaving's one task (flush, savepoint, release), with the hold taken back when a screen shows again.
 
 **Batch 7 · VM-71 — the Mac piece, 2026-11-19 10:37, GREEN:** the seven types over the shared savepoint road (`SavepointOnLeaveTests` · the three autosave-registry suites · `MacWillLockTests` · `AutosaveCoordinatorTests` · `TestHostInertTests`) from `vm64-b7` at `c9b574513` — 48 tests in 7 suites passed (load averages 24 109 156). Log `b7-mac.log`. Batch 6's r1 changed phone files only, so that Mac product is still the tip's Mac code. The phone piece is owed, and it runs from products built on r1.
+
+**Batch 6 (r1) and batch 7 — THE STAGE WINDOW ON THE FINAL TREE, 2026-11-19 10:54–11:09: GREEN. BATCHES 6 AND 7 CLOSED.** Products: `vm64-b6r1` (the tip's code at `ce3c4e75b`) for batch 6's own suites; `vm64-b7r1` (built at `a61e4f7c9`, the tip's code with batch 7's last test change) for the perf suite and the company run; `vm64-b6r1-red` and `vm64-b7r1-red` for the pre-fix runs. One host process and no restart in every invocation; no trap, no crash report. Logs kept locally: `notes/plans/vm64-screens/r1-*.log`, `final-*.log`, `b7r1-*.log`.
+- **Batch 6's release, the calm re-run the first window asked for.** `MobileNoteOpenOnceTests` alone on the fix build (10:54:31, load averages 132.61 44.67 67.56): 10 tests in 1 suite passed. The three release pins RAN AND PASSED far inside their 10 s guard — `closingANoteLandsItsTextThenGivesItsCoordinatorBack` 0.08 s · `theReleaseWaitsForTheLeavingSavepoint` 0.72 s · `aCoordinatorAnotherHolderNeedsIsNeverLetGo` 0.63 s — so no load could flip them: at r0 the release lived in a `deinit` nothing on her road reaches, a product fault the load never explained. The recorded probe line: `built-screen|leaving-done=true|alive-after-close=true|after-update=false|…|holders=0` (the editor outlives its close until SwiftUI's next update; the hold is already back). The shell-pop probe could not drive the Back button in process (`no-back-door`) — that road is the walk's. `MobileNoteHoldTests` alone: 4 tests passed.
+- **Batch 6's red build** (`MobileNoteOpenOnceTests` alone): RAN AND FAILED `anOpenAsksForTheWholeDocumentChromeOnce` · `openingANoteReadsNoListingOfEveryBookOrEveryTag` · the three release pins (each at its 10 s guard) · `anEditorThatNeverArrivedGivesItsHoldBack`; the two hazard guards and the two probes passed.
+- **Batch 7's red build:** `MobileLeavingSavesOnceTests` alone — RAN AND FAILED the five designed (`poppingAChangedNoteLeavesOneSavepointAndAgainAfterTheNextChange` · `aStandardBackgroundingLeavesOneSavepointAndThePopAfterAChangeAnother` · `aCastleBackgroundingSavepointsOnceBeforeTheStoreCloses` · `theLockSavepointsOnceBeforeTheStoreCloses` · `leavingANoteSheOnlyReadAsksTheRunnerForNothing`); the tab-switch test and the closed-store guard passed. The perf suite alone — RAN AND FAILED `backgroundingWithAnEditedNoteOpenCountsItsSavepointAttempts` (Castle 3) · `lockingWithAnEditedNoteOpenCountsItsSavepointAttempts` (2) · `leavingTheHundredKNoteHoldsTheRunnerOnlyForWhatItOwes`; the other ten passed.
+- **The company run on the final tree:** 80 types in ONE invocation from `vm64-b7r1` (batch 6's 73, `MobileNoteHoldTests`, and the six of batch 7's not already there), one host process — 580 test starts, 575 passed, 1 test failed: "578 tests in 80 suites failed with 4 issues (including 2 known issues)". The fence suite, both batch-6 suites, the hold suite and batch 7's leaving suite are whole-green in company. The only red is VM-24's standing caret test in main's shape (2 of 3 cases, 2 issues); the two known issues are `MobileTrashTests`' designed one, twice.
+- **The perf suite alone, twice, on the final tree** (13 tests passed both times; run 1 at 10:56:40, load 102.66 95.88 87.38; run 2 at 10:58:56, load 16.42 63.23 75.44 — run 2 is the calmer one).
+
+**THE AFTER NUMBERS — the final tree (batches 1–7), simulator (iPhone 17 Pro, iOS 26.2), Debug build, n = 5 per series; median (min–max). BEFORE is batch 3's run 2.**
+
+| Series | unit | BEFORE (batch 3, run 2) | AFTER run 1 (load 102.7) | AFTER run 2 (load 16.4) |
+|---|---|---|---|---|
+| `note-open-to-screen-short` | ms | 53.53 (46.93–64.85) | 61.63 (46.56–62.77) | 46.28 (43.16–52.28) |
+| `note-open-to-live-short` | ms | 37.92 (33.32–73.00) | 43.28 (38.94–46.35) | 42.30 (30.28–43.73) |
+| `note-reads-per-open-short` | count | 2 | 1 | 1 |
+| `note-open-to-screen-100k` | ms | 361.61 (357.77–365.59) | 345.20 (341.41–361.87) | 356.73 (342.97–361.77) |
+| `note-open-to-live-100k` | ms | 496.14 (494.37–500.23) | 340.95 (339.48–343.57) | 342.86 (340.56–347.08) |
+| `note-reads-per-open-100k` | count | 2 | 1 | 1 |
+| `shell-box-open-to-note` | ms | 58.08 (57.14–63.81) | 61.57 (30.06–75.50) | 64.90 (58.54–73.86) |
+| `shell-box-file` | ms | 3.60 (3.28–7.62) | 6.01 (4.08–7.71) | 8.07 (5.01–12.98) |
+| `shell-box-open-to-live` | ms | 35.46 (33.96–36.10) | 36.21 (32.13–49.63) | 35.42 (35.28–49.33) |
+| `shell-box-editor-builds-per-open` | count | 1 | 1 | 1 |
+| `shell-box-note-reads-per-open` | count | 2 | 1 | 1 |
+| `shell-library-open-to-screen-short` | ms | 49.41 (39.95–50.90) | 40.97 (34.84–51.27) | 44.32 (33.45–57.52) |
+| `shell-library-editor-builds-per-open-short` | count | 1 | 1 | 1 |
+| `shell-library-note-reads-per-open-short` | count | 2 | 1 | 1 |
+| `shell-library-open-to-screen-100k` | ms | 326.34 (315.22–329.84) | 323.84 (316.95–330.05) | 347.97 (312.12–365.52) |
+| `shell-library-editor-builds-per-open-100k` | count | 1 | 1 | 1 |
+| `shell-library-note-reads-per-open-100k` | count | 2 | 1 | 1 |
+| `library-rereads-per-box-save` | count | 2 | 0 | 0 |
+| `library-redraws-per-box-save` | count | 2 | 0 | 0 |
+| `all-listing-rereads-per-box-save` | count | 1 | 0 | 0 |
+| `bookless-rereads-per-box-save` | count | 1 | 0 | 0 |
+| `library-return-rereads` | count | — | 1 | 1 |
+| `library-listing-fetch-ninewings` | ms | 1.14 (1.09–1.47) | 1.07 (1.02–1.50) | 1.16 (0.97–5.61) |
+| `bookless-listing-fetch-ninewings` | ms | 6.53 (6.35–7.09) | 6.43 (6.11–7.32) | 6.86 (5.68–18.15) |
+| `library-page-fetch-ninewings` | ms | — | 1.88 (1.84–2.17) | 1.90 (1.64–3.77) |
+| `bookless-page-fetch-ninewings` | ms | — | 8.08 (7.90–8.64) | 8.21 (7.39–13.95) |
+| `library-rereads-per-note-save-covered` | count | — | 0 | 0 |
+| `library-redraws-per-note-save-covered` | count | — | 0 | 0 |
+| `owner-adoption-nothing-to-adopt` | ms | 1.16 (1.04–1.30) | 0.80 (0.78–0.96) | 0.77 (0.73–0.84) |
+| `owner-adoption-rows-nothing-to-adopt` | count | 0 | 0 | 0 |
+| `savepoints-per-note-leaving` | count | 1 | 1 | 1 |
+| `savepoints-per-backgrounding-standard` | count | 1 | 1 | 1 |
+| `savepoints-per-backgrounding-castle` | count | 3 | 1 | 1 |
+| `savepoints-per-lock` | count | — | 1 | 1 |
+| `leaving-100k-runner-hold-read` | ms | — | 0.56 (0.22–9.89) | 0.47 (0.30–8.82) |
+| `leaving-100k-to-saved-read` | ms | — | 6.80 (4.37–7.40) | 6.69 (4.95–7.43) |
+| `leaving-100k-writer-take-reads-read` | count | — | 0 | 0 |
+| `leaving-100k-writer-take-scans-read` | count | — | 0 | 0 |
+| `leaving-100k-runner-hold-edited` | ms | — | 7.18 (6.74–7.72) | 6.71 (3.46–7.73) |
+| `leaving-100k-to-saved-edited` | ms | — | 20.31 (19.75–20.47) | 19.68 (13.18–21.36) |
+| `leaving-100k-writer-take-reads-edited` | count | — | 1 | 1 |
+| `leaving-100k-writer-take-scans-edited` | count | — | 0 | 0 |
+| `box-first-save-after-100k-leaving` | ms | — | 8.14 (6.56–9.58) | 7.83 (7.49–9.11) |
+| `autosave-registry-growth-per-open-close` | count | 1 | 0 | 0 |
+| `note-rereads-per-save-100k` | count | 1 | 1 | 1 |
+| `note-deliveries-per-save-100k` | count | 1 | 1 | 1 |
+| `note-delivery-ingest-100k` | ms | 4.49 (3.92–4.80) | 4.31 (3.90–4.82) | 3.83 (3.42–3.99) |
+
+**Reading them:** every count the run set out to change has changed and is now asserted — a note is read **1** time per open (was 2); the hidden Library does **0** re-reads and **0** redraws per capture-box save (was 2 and 2); backgrounding under Castle makes **1** savepoint attempt (was 3) and the lock 1; the autosave registry grows by **0** per open-and-close (was 1); leaving the 100k note after only reading it reads **0** takes on the writer and holds the runner about half a millisecond, and after one edit reads **1**. One duration moved outside noise: the 100k note is live about 150 ms sooner after opening (496 → 342 ms), which is the second read removed. The others are unchanged within run-to-run range, and they are small simulator figures at fixture scale: the readout on her wave-1 build is what will say how much of what she feels this run removed.
 
 ## 6. Review foci (written at plan time, before any code)
 
