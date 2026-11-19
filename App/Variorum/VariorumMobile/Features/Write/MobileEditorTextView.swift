@@ -1012,11 +1012,51 @@ final class MobileEditorTextView: UITextView {
     /// this door like any ⏎ — when the soft-newline gesture lands, it must
     /// gain the Mac's ⇧⏎ exclusion.
     override func insertText(_ text: String) {
+        // VM-2: while a structural flight lands, a typed key waits for the
+        // fence's drain and replays at the landed caret (the Mac's
+        // `beginDeferringKeystrokes`; the model's `structuralFlightChanged`
+        // carries the why). First, so a ⏎ waits whole — its list
+        // continuation runs at the replay, against the settled page.
+        if let editorModel, editorModel.deferTypedInputDuringFlight(.insert(text)) {
+            return
+        }
         if text == "\n", markedTextRange == nil {
             MobileMarkdownActs.handleReturnKey(in: self) { super.insertText("\n") }
             return
         }
         super.insertText(text)
+    }
+
+    /// VM-2: the delete key's half of the fence — a ⌫ pressed while a
+    /// structural flight lands waits for the drain like any typed key.
+    override func deleteBackward() {
+        if let editorModel, editorModel.deferTypedInputDuringFlight(.deleteBackward) {
+            return
+        }
+        super.deleteBackward()
+    }
+
+    /// **VM-2 — a held ⌫, replayed through the POLICED road.** A programmatic
+    /// `deleteBackward()` never consults the gate (§34's M25, measured), so
+    /// the replay names the exact span the key would delete — the selection,
+    /// else the one composed character before the caret — and runs it through
+    /// the ordinary pre-gated input door, which arms the verdict the storage
+    /// report then consumes (a ⌫ at a block's start meets the gate's own
+    /// answer, exactly as a typed one would).
+    func replayDeferredDeleteBackward() {
+        let selection = selectedRange
+        guard selection.location != NSNotFound,
+              selection.upperBound <= textStorage.length
+        else { return }
+        let span: NSRange
+        if selection.length > 0 {
+            span = selection
+        } else {
+            guard selection.location > 0 else { return }
+            span = (textStorage.string as NSString)
+                .rangeOfComposedCharacterSequence(at: selection.location - 1)
+        }
+        MobileMarkdownActs.inputReplace(self, range: span, with: "")
     }
 
     // MARK: Tab / ⇧Tab (13k K8 — batch 2)

@@ -148,6 +148,12 @@ final class MobileEditorViewModel {
     /// than a verdict that does (gate-less paths use the report-derived
     /// cost; churn is approximate by design — SyncSpec §6).
     @ObservationIgnored private var pendingEdit: ArmedEdit?
+    /// **VM-2 — the keystroke fence around a structural flight** (the pure
+    /// rule is `StructuralFlightFence`, core Domain; this model is its face).
+    /// Raised and landed by `MobileStructuralController`'s one latch
+    /// (`structuralFlightChanged`); read by the text view's two typed-input
+    /// doors, the gate, and the storage report. Readable so pins can see it.
+    @ObservationIgnored private(set) var flightFence = StructuralFlightFence()
     @ObservationIgnored private var suppressEditProcessing = false
     /// One mint batch in flight (the crystallizer's; read-only here, as before).
     var mintInFlight: Bool { crystallizer.mintInFlight }
@@ -831,6 +837,14 @@ final class MobileEditorViewModel {
             pendingProjection = new
             applyPendingIfClean()
         }
+        // VM-2: a fence still waiting for its flight's surface to settle
+        // drops at the first projection that leaves the page holding the
+        // store — on the next turn, never from inside this apply (the drain
+        // replays her keys through the input road, which must not re-enter
+        // the projection door mid-flight). A no-op otherwise.
+        if flightFence.phase == .settling {
+            Task { @MainActor [weak self] in self?.drainFlightFenceIfSettled() }
+        }
     }
 
     /// Full materialization through the shared core with the phone's base
@@ -1025,7 +1039,120 @@ final class MobileEditorViewModel {
             report(Self.unsavedChangesRefusal)
             return false
         }
+        // VM-2: a structural door calls this before it plans against the page
+        // (a divide snaps its cut in the page's text, a span act plans over
+        // it). If the flight's storage belt withheld an edit while this flush
+        // was suspended, the page holds bytes the store never saw — before
+        // the belt, that edit would have dirtied the buffer and refused the
+        // door here. Re-read the page instead, so the plan is made against
+        // the store's text; the withheld bytes are spoken for as the fence
+        // drops. Only ever true inside a flight.
+        if flightFence.isUp, forceFullRender {
+            await refreshTakesFromStore()
+        }
         return true
+    }
+
+    // MARK: - VM-2: the keystroke fence around a structural flight
+
+    /// **The window this closes** (the VM-5 pass's MAJOR 1, measured there
+    /// as probe 2; the record `notes/plans/fixes/vm-64-timing-and-lags.md`
+    /// batch 2). Every `MobileStructuralController` door flushes and then
+    /// SUSPENDS — its fan read, the operation, its settle's read — while the
+    /// page and `index` still show the note as it was. An edit landing there
+    /// routes against the old tiling; `recordAutosave` records the WHOLE old
+    /// block text; the door's own settle flushes it after the operation. Since
+    /// VX-683 B that write RESCUES rather than clobbering (the op's real
+    /// result becomes a spurious `'conflict'` take), so a divide still reads
+    /// its moved half twice, an extract its span twice, and a merge leaves
+    /// her prose in a released source's take, gone from the note.
+    ///
+    /// **The fence (the Mac's `runStructural` rule, UIKit-spelled):** typed
+    /// keys wait and replay at the landed caret (the text view's
+    /// `insertText`/`deleteBackward`); any other edit the gate is asked about
+    /// is refused; an edit that reaches the text with no gate consult keeps
+    /// the tiling but writes nothing toward the store, and the surface is
+    /// re-read before the fence drops. Anything refused or withheld is said
+    /// once, as the fence drops, in the sentence every structural door
+    /// already speaks.
+    ///
+    /// The latch is the controller's; this is called on each edge of it.
+    func structuralFlightChanged(up: Bool) {
+        if up {
+            flightFence.flightBegan()
+            return
+        }
+        switch flightFence.flightLanded(surfaceSettled: flightSurfaceHoldsTheStore) {
+        case .drain:
+            drainFlightFence()
+        case .awaitSettle:
+            settleFlightSurface()
+        }
+    }
+
+    /// The text view's typed-input doors ask this first. True = the key is
+    /// held for the fence's drain (the caller must not perform it).
+    func deferTypedInputDuringFlight(_ input: StructuralFlightFence.Input) -> Bool {
+        flightFence.offer(input, composing: textView?.markedTextRange != nil)
+    }
+
+    /// The fence's settle rule, read from this model's own two facts.
+    private var flightSurfaceHoldsTheStore: Bool {
+        StructuralFlightFence.surfaceHoldsTheStore(
+            forcedRenderOwed: forceFullRender, projectionDeferred: pendingProjection != nil)
+    }
+
+    /// The door's own settle did not leave the page holding the store (it was
+    /// parked behind a mint or a dirty buffer, or a withheld edit owes a
+    /// re-read): re-read it, at most `flightSettleAttempts` times, then rely on
+    /// the next projection to apply (`applyProjection`'s settling hook). Until
+    /// then the fence stays up: keys keep waiting, nothing is written against
+    /// the old page. Fail-CLOSED on purpose — a key that waits a little
+    /// longer is delayed; a key replayed into a page that has not settled is
+    /// exactly the stale write this fence exists to stop.
+    private func settleFlightSurface() {
+        Task { @MainActor [weak self] in
+            for _ in 0..<Self.flightSettleAttempts {
+                guard let self, self.flightFence.phase == .settling else { return }
+                if self.flightSurfaceHoldsTheStore { break }
+                await self.awaitMintSettle()
+                await self.refreshTakesFromStore()
+            }
+            self?.drainFlightFenceIfSettled()
+        }
+    }
+
+    private static let flightSettleAttempts = 3
+
+    private func drainFlightFenceIfSettled() {
+        guard flightSurfaceHoldsTheStore, flightFence.surfaceSettled() else { return }
+        drainFlightFence()
+    }
+
+    /// Lowers the fence: the sentence first (a refusal the replay itself
+    /// meets is later, more specific, and wins), then her keys, in the order
+    /// she pressed them, at the caret the flight landed — each through the
+    /// ordinary policed road, exactly as if typed now. The receipt's action
+    /// (the door's Undo) is kept beside the sentence.
+    ///
+    /// **Residual, stated:** if the page's view is already gone (a pop that
+    /// released it in the same instant), there is no caret to replay at and
+    /// the held keys go with the view — the Mac's stash has the same
+    /// lifetime (`EditorTextView.deferredKeyEvents`).
+    private func drainFlightFence() {
+        let drained = flightFence.drain()
+        if drained.speak {
+            report(StructuralUndoCopy.anotherIsLanding, action: statusAction)
+        }
+        guard let textView else { return }
+        for input in drained.replay {
+            switch input {
+            case .insert(let text):
+                textView.insertText(text)
+            case .deleteBackward:
+                textView.replayDeferredDeleteBackward()
+            }
+        }
     }
 
     // MARK: - Find in note (parity C4b item 3 — the ⌘F family's phone
@@ -1585,6 +1712,21 @@ final class MobileEditorViewModel {
             return false
         }
         guard let replacement else { return true } // attribute-only
+        // **VM-2 — THE FLIGHT BELT.** A structural flight is landing: the
+        // page still shows the note as it was, so an edit approved here
+        // would record a whole block the operation is rewriting. Typed keys
+        // never reach this line during a flight (the text view holds them for
+        // the fence's drain); what does — a paste, a formatting act, an
+        // autocorrection that asks — is refused, and the fence says so again
+        // as it drops (the door's own receipt would otherwise clear this
+        // line before she could read it). Below the three belts above: a
+        // gone, stood-down or sealed note's truth is the more lasting one.
+        if flightFence.refusesPolicedEdit() {
+            pendingEdit = nil
+            bulkPending = false  // armed BESIDE it; it goes with it (NIT 4)
+            refuse(StructuralUndoCopy.anotherIsLanding)
+            return false
+        }
         let verdict = index.verdict(
             replacing: range,
             replacementIsSingleNewline: replacement == "\n",
@@ -1901,9 +2043,22 @@ final class MobileEditorViewModel {
             // arrived attribute-stripped; identity is re-derived from the
             // index, never inherited.
             restampProjection(over: editedRange)
-            recordAutosave(
-                entryIndex: i, editedRange: editedRange, delta: delta,
-                exactCost: exactCost)
+            // **VM-2 — THE STORAGE BELT.** During a structural flight the
+            // gate refuses every edit it is asked about, so a block edit
+            // arriving here is one that never asked (a system rewrite — a
+            // composition commit, dictation, a programmatic replace — M25's
+            // measured bypass). The tiling above stays coherent with the
+            // page; nothing of it is written toward the store, because the
+            // whole-block text it would record is the OLD block's; and the
+            // page is re-read from the store before the fence drops, so the
+            // bytes the store never saw cannot linger unsaved.
+            if flightFence.withholdsSystemEdit() {
+                forceFullRender = true
+            } else {
+                recordAutosave(
+                    entryIndex: i, editedRange: editedRange, delta: delta,
+                    exactCost: exactCost)
+            }
         case .tail:
             guard index.applyTailEdit(lengthDelta: delta) else {
                 recoverFromUnroutableEdit()

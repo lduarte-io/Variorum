@@ -114,7 +114,8 @@ public struct StructuralFlightFence: Equatable, Sendable {
     }
 
     /// The face re-read the surface. True when a drain is now owed (the
-    /// fence was settling); false when there was nothing to wait for.
+    /// fence was settling); false when there was nothing to wait for. The
+    /// fence stays up until the drain actually runs.
     public mutating func surfaceSettled() -> Bool {
         phase == .settling
     }
@@ -133,9 +134,11 @@ public struct StructuralFlightFence: Equatable, Sendable {
     }
 
     /// Lowers the fence and hands back what it held. The caller replays the
-    /// inputs in order through the page's ordinary, policed input road; if a
-    /// replayed input starts something that must finish first, the caller
-    /// stops and `putBack`s the rest.
+    /// inputs in order, at once, through the page's ordinary, policed input
+    /// road — each one offered back to this (now open, now empty) fence on
+    /// the way, which lets it pass. The fence stays up until this runs, so a
+    /// key pressed while a drain is still owed queues behind the ones before
+    /// it: her keys land in the order she pressed them.
     public mutating func drain() -> Drain {
         phase = .open
         let drained = Drain(replay: deferred, speak: owesSentence)
@@ -144,21 +147,13 @@ public struct StructuralFlightFence: Equatable, Sendable {
         return drained
     }
 
-    /// Returns inputs a stopped replay did not reach, AHEAD of anything typed
-    /// since, so her keys always land in the order she pressed them.
-    public mutating func putBack(_ inputs: [Input]) {
-        deferred = inputs + deferred
-    }
-
     // MARK: The three kinds of edit
 
     /// A typed input arrived. True = deferred (the caller must not perform
-    /// it). Deferred while the fence is up — and also while earlier inputs
-    /// are still waiting, so a key pressed after the fence dropped can never
-    /// overtake the ones pressed before. A composition in progress is never
-    /// deferred.
+    /// it). Deferred while the fence is up; a composition in progress is
+    /// never deferred.
     public mutating func offer(_ input: Input, composing: Bool) -> Bool {
-        guard !composing, isUp || !deferred.isEmpty else { return false }
+        guard !composing, isUp else { return false }
         deferred.append(input)
         return true
     }

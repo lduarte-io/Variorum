@@ -172,31 +172,4 @@ struct StructuralFlightFenceTests {
         #expect(!StructuralFlightFence.surfaceHoldsTheStore(
             forcedRenderOwed: true, projectionDeferred: true))
     }
-
-    // MARK: - Order survives a stopped replay
-
-    /// A replay that has to stop part-way (a replayed key started something
-    /// that must finish first) puts the rest back AHEAD of anything typed
-    /// since — and while those wait, new keys queue behind them even though
-    /// the fence itself is open.
-    @Test func aStoppedReplayKeepsHerOrder() {
-        var fence = StructuralFlightFence()
-        fence.flightBegan()
-        _ = fence.offer(.insert("1"), composing: false)
-        _ = fence.offer(.insert("2"), composing: false)
-        _ = fence.offer(.insert("3"), composing: false)
-        _ = fence.flightLanded(surfaceSettled: true)
-        let drained = fence.drain()
-        // "1" replayed; the replay stops before "2".
-        fence.putBack(Array(drained.replay.dropFirst()))
-        #expect(!fence.isUp)
-        let r25 = fence.offer(.insert("4"), composing: false)
-        #expect(r25,
-                "a key pressed now must not overtake 2 and 3")
-        let r26 = fence.refusesPolicedEdit()
-        #expect(r26 == false,
-                "the fence itself is open — only typed keys queue behind the waiting ones")
-        let r27 = fence.drain()
-        #expect(r27.replay == [.insert("2"), .insert("3"), .insert("4")])
-    }
 }

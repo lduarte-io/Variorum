@@ -64,7 +64,20 @@ final class MobileStructuralController {
     weak var model: MobileEditorViewModel?
 
     /// One structural flight at a time (the Mac's latch, the same copy).
-    private(set) var structuralInFlight = false
+    ///
+    /// **VM-2 — the latch also raises the page's keystroke fence.** Every
+    /// door below suspends between its flush and its settle while the page
+    /// still shows the note as it was; the fence (`StructuralFlightFence`,
+    /// the model's `structuralFlightChanged`) keeps typed keys waiting and
+    /// every other edit off the store for exactly that window — the Mac's
+    /// `runStructural` rule. Hooked HERE, at the one latch, so no door can
+    /// fly unfenced and none of their bodies changes.
+    private(set) var structuralInFlight = false {
+        didSet {
+            guard structuralInFlight != oldValue else { return }
+            model?.structuralFlightChanged(up: structuralInFlight)
+        }
+    }
 
     init(session: AppSession) {
         self.session = session
