@@ -14,6 +14,12 @@
 //  pins are `MobileLibraryPagingTests` and the four ASSERTED zeros in
 //  `MobileHerPathsPerfTests`.
 //
+//  *(The VM-64 ladder's round 2 adds pins here that name only API older than
+//  that round — the row delete, the line's Put back and its witness, the two
+//  wing pins — so this file IS in that round's red-on-old build
+//  (`vm64-gate2-red`, which reverses only the round's own hunks, VM-68 kept);
+//  each pin's doc says what it shows there.)*
+//
 
 import Dependencies
 import Foundation
@@ -155,6 +161,95 @@ struct MobileLibraryPagingRulesTests {
             }
             #expect(model.all.map(\.postID) == expected.map(\.postID),
                     "the listed depth is kept, in the listing's order")
+        }
+    }
+
+    /// **The line's own Undo returns a row deleted past the first page** (VM-64
+    /// ladder round 2, finding 1 — the Put back leg, arm (A); the pin as the
+    /// reviewer's final call words it). Two pages listed, held on screen; the
+    /// seventh row deleted through its own door until it is gone; then the
+    /// message line's own Undo — Put back, read off the line as it spoke — is
+    /// pressed: the note is listed again, in `Queries.library`'s first eight, and
+    /// no note twice. The Put back stamps none of the sort keys, so the held
+    /// first page does not change and nothing is delivered: only the line's
+    /// signal (`.variorumPutBackLanded`) re-asks the listing.
+    ///
+    /// RED ON OLD — on the first turn's tree (the delete leg in, arm (A) not):
+    /// the row never returns while the hold stands (the last two expectations).
+    /// On `vm64-gate2-red`, where the delete leg is reversed too, the row never
+    /// LEAVES, so this pin is red at its premise only and its Put back arm is
+    /// vacuous there; the witness below is the Put back arm's own red-on-old.
+    /// (Old API only: in the red-on-old build.)
+    @Test func aPutBackThroughTheLinesUndoReturnsARowPastTheFirstPage() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await seed(session, 12)
+            let model = MobileLibraryViewModel(session: session, listingLimit: 4)
+            let held = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { held.cancel() }
+            await settle { model.all.count == 4 }
+            await model.loadMore(.notes)
+            #expect(model.all.count == 8, "the premise: two pages listed")
+            let doomed = model.all[6]
+            #expect(await model.confirmDeleteNote(doomed))
+            let undo = try #require(session.status.current?.action, "the line offers its Undo (Put back)")
+            await settle { !model.all.contains { $0.postID == doomed.postID } }
+            #expect(!model.all.contains { $0.postID == doomed.postID },
+                    "the premise: the deleted note left the listing")
+
+            undo.perform()
+            await settle { model.all.contains { $0.postID == doomed.postID } }
+            #expect(model.all.contains { $0.postID == doomed.postID },
+                    "the note Put back is listed again")
+            let expected = try await db.read {
+                try Queries.library($0, sort: .lastTouched, direction: .desc, limit: 8)
+            }
+            #expect(model.all.map(\.postID) == expected.map(\.postID),
+                    "in its place, the listed depth kept, in the listing's order")
+            #expect(Set(model.all.map(\.postID)).count == model.all.count, "no note twice")
+        }
+    }
+
+    /// **WITNESS — the Put back arm's red-on-old on the one red build** (VM-64
+    /// ladder round 2, finding 1, arm (A)). The same world and the same line's
+    /// Undo, but between the delete and the Undo the Library leaves and comes
+    /// back (the hold ended and taken again — a band swipe away and back), and
+    /// the return's re-ask makes the listing honest on EVERY build: the deleted
+    /// note is gone whether or not the delete leg re-asked. So between the
+    /// Undo and the row there is only arm (A).
+    ///
+    /// RED ON OLD — on `vm64-gate2-red` (every production hunk of this pass
+    /// reversed, arm (A)'s included): after the Undo nothing re-asks, the row
+    /// stays missing (the last two expectations). (Old API only.)
+    @Test func aPutBackAfterTheLibraryCameBackReturnsARowPastTheFirstPage() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await seed(session, 12)
+            let model = MobileLibraryViewModel(session: session, listingLimit: 4)
+            let first = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { first.cancel() }
+            await settle { model.all.count == 4 }
+            await model.loadMore(.notes)
+            #expect(model.all.count == 8, "the premise: two pages listed")
+            let doomed = model.all[6]
+            #expect(await model.confirmDeleteNote(doomed))
+            let undo = try #require(session.status.current?.action, "the line offers its Undo (Put back)")
+
+            first.cancel()
+            await first.value
+            let back = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { back.cancel() }
+            await settle { model.all.count == 8 && !model.all.contains { $0.postID == doomed.postID } }
+            #expect(!model.all.contains { $0.postID == doomed.postID },
+                    "the premise: the return re-asked — the deleted note is gone")
+
+            undo.perform()
+            await settle { model.all.contains { $0.postID == doomed.postID } }
+            #expect(model.all.contains { $0.postID == doomed.postID },
+                    "the note Put back is listed again")
+            let expected = try await db.read {
+                try Queries.library($0, sort: .lastTouched, direction: .desc, limit: 8)
+            }
+            #expect(model.all.map(\.postID) == expected.map(\.postID),
+                    "in its place, the listed depth kept, in the listing's order")
         }
     }
 

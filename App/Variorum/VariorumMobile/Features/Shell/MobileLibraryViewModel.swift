@@ -534,7 +534,9 @@ final class MobileLibraryViewModel {
     private func holdFirstPage(_ question: Question) async {
         let state = paging(question.listing)
         state.holds += 1
+        let putBack = listenForPutBack(question.listing)
         defer {
+            NotificationCenter.default.removeObserver(putBack)
             state.holds -= 1
             state.follow?.cancel()
             state.follow = nil
@@ -597,6 +599,34 @@ final class MobileLibraryViewModel {
               rows(listing).count > listingLimit
         else { return }
         followFirstPage(landed)
+    }
+
+    /// **A Put back through the phone's one message line re-asks the HELD
+    /// listing** (VM-64 ladder round 2, finding 1, arm (A)). The line's Undo after
+    /// a removal — this listing's own row delete, the note's ⋯ sheet, Versions, a
+    /// book's delete — runs the Trash's Put back (`MobileLine.putBack`), whose
+    /// landing moves none of the phone's sort keys, so a note returning past the
+    /// first page (or a book's members leaving the loose class) leaves the held
+    /// page byte-identical and nothing is delivered. The line posts ONE signal on
+    /// a landed Put back (`.variorumPutBackLanded`, its object the session; a
+    /// refused one posts nothing) — the Mac's own shape, `.variorumNotesDeleted`,
+    /// a signal posted after the write lands and the listing re-asking on it.
+    ///
+    /// **Scope:** the listener lives only inside a running hold — so only while
+    /// the Library's view is on screen and holding this listing (hidden, the
+    /// return re-asks anyway) — and hears only ITS session's signal
+    /// (NotificationCenter's object filter is identity). It answers through
+    /// `reaskAfterRowAct`, so every guard there applies: a Put back inside the
+    /// first page stays the held observation's, a deeper one is one statement to
+    /// the listed depth. No second spelling of the op, its refusal or the line.
+    /// `queue: .main` and the line's own actor put the delivery on the main
+    /// thread (the codebase's keyboard-observer shape).
+    private func listenForPutBack(_ listing: Listing) -> any NSObjectProtocol {
+        NotificationCenter.default.addObserver(
+            forName: .variorumPutBackLanded, object: session, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.reaskAfterRowAct(listing) }
+        }
     }
 
     /// **A row's ★ landed** (the row's long-press; the view tells the model once
@@ -915,4 +945,15 @@ final class MobileLibraryViewModel {
         DisplayTitle.note(
             title: item.title, entryDate: item.entryDate, createdAt: item.createdAt)
     }
+}
+
+extension Notification.Name {
+    /// **A Put back landed through the phone's one message line** (VM-64 ladder
+    /// round 2, finding 1, arm (A)) — posted by `MobileLine.putBack` after the
+    /// Trash's Put back op returns, a note's or a book's, its object the
+    /// `AppSession` it ran in; never on a refusal. Declared here, with its one
+    /// listener (`MobileLibraryViewModel.listenForPutBack`), so the line's file
+    /// carries only the post. A signal, as the Mac's `.variorumNotesDeleted` is:
+    /// it says what happened, and the listener decides what it means for its rows.
+    nonisolated static let variorumPutBackLanded = Notification.Name("io.lduarte.Variorum.mobile.putBackLanded")
 }
