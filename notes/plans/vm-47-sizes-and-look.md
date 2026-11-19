@@ -270,7 +270,14 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | Batch | Piece | State |
 |---|---|---|
 | 0 | Kickoff: worktree, branch, in-flight row (main `635f7b93f`), VM-47 In Progress, announced to nov18 | DONE |
-| 1 | The phone layer: type, inks, metrics (VM-48; VM-49's constants) | NOT-STARTED |
+| 1 | The phone layer: type, inks, metrics (VM-48; VM-49's constants) | IN-PROGRESS — pieces below |
+| 1.1 | The layer in `Shared/Theme/`: the role table (both voices, SwiftUI + UIKit forms, two scaling classes), the two corrected inks (derived, floors pinned over every palette and voice), the metrics constants and the 44 pt hit-area helper; its tests | NOT-STARTED |
+| 1.2 | Every phone type site reads a role — one commit per screen family (Shell · Write sheets · Takes/Read · Protection · the UIKit overlays) | NOT-STARTED |
+| 1.3 | The editor's face (`MobileEditorStyle`, face values only: note body per the sheet) | NOT-STARTED |
+| 1.4 | W-024: `MobileShelfLayout` re-derived from the roles; the quick-entry text is the note body; the hint fits; pins moved | NOT-STARTED |
+| 1.5 | The source-scan guard pin (no `tokens.small`, no literal under 13, outside `Spike/`/`Perf/`) | NOT-STARTED |
+| 1.6 | Both schemes `build-for-testing` green → READY for the stage → the stage window: suites + walk captures | NOT-STARTED |
+| 1.7 | §6 "Batch 1 — results" written | NOT-STARTED |
 | 2 | Controls and targets (VM-50; VM-49's application) | NOT-STARTED |
 | 3 | Voice and palette; borders (VM-51, VM-54) | NOT-STARTED |
 | 4 | The bottom bar (VM-52) | NOT-STARTED |
