@@ -34,6 +34,59 @@ extension Queries {
             .flatMap(SavepointCadence.init(rawValue:)) ?? .everySession
     }
 
+    /// **The takes a leaving savepoint would write** (VM-71 — the VM-64 run,
+    /// batch 7; the record `notes/plans/fixes/vm-64-timing-and-lags.md`).
+    ///
+    /// `Operations.closeAutoCommit`'s own rule, asked as a READ: the live,
+    /// unlocked takes under the note's live placements whose text differs
+    /// from their last savepoint (a take never savepointed counts when it
+    /// holds any text) — and none at all when the note is gone or sealed, or
+    /// the cadence does not save on leaving. Ordered by id, as the op commits.
+    ///
+    /// **Why it exists:** the phone asks for a leaving savepoint on every road
+    /// out of a note, and a Castle backgrounding asks up to three times for
+    /// one leaving (audit F 6C). Each ask used to be a write transaction on
+    /// the ONE serial runner that decoded every take of the note to find the
+    /// dirty ones — O(note), holding the runner (and the capture box's first
+    /// save behind it, audit F 1D) even when nothing had changed. This read
+    /// answers the same question on a READER connection, in SQL, so an ask
+    /// that finds nothing owed never reaches the runner, and one that does
+    /// hands it exactly these takes (`closeAutoCommit(_:takes:)`, which
+    /// re-checks each inside its own transaction).
+    ///
+    /// **Text equality is byte equality here** (SQLite's BINARY), where the
+    /// op's `isDirty` compares Swift strings (canonical equivalence). So this
+    /// set CONTAINS every take the op would commit: a byte difference that
+    /// Swift reads as the same text is listed here and skipped by the op's
+    /// re-check — never the other way round. Cost: ∝ the note's takes, as a
+    /// read; never the corpus (P1).
+    public static func leavingSavepointCandidates(
+        _ db: Database, containerID: String
+    ) throws -> [String] {
+        guard let container = try Container.fetchOne(db, key: containerID),
+              container.deletedAt == nil,
+              !container.locked
+        else { return [] }
+        guard try savepointCadence(db).savesOnLeaving else { return [] }
+        return try String.fetchAll(
+            db,
+            sql: """
+                SELECT v.id FROM variant v
+                JOIN container_block cb
+                  ON cb.block_id = v.block_id
+                 AND cb.container_id = ?
+                 AND cb.deleted_at IS NULL
+                WHERE v.deleted_at IS NULL AND v.locked = 0
+                  AND v.working_text IS NOT COALESCE(
+                        (SELECT cp.text FROM commit_point cp
+                          WHERE cp.variant_id = v.id
+                          ORDER BY cp.created_at DESC, cp.id DESC LIMIT 1),
+                        '')
+                ORDER BY v.id
+                """,
+            arguments: [containerID])
+    }
+
     /// **History pruning** (Phase 13j batch 6b, her round-9 ruling): does
     /// the purge janitor mint savepoint purge intents? Absent or
     /// unrecognized reads as her default, `.standard` — the
