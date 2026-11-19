@@ -26,12 +26,12 @@ final class MobileCommentsSheetView: UIView {
     private let dimView = UIView()
     private let sheetView = UIView()
     private let headerLabel = UILabel()
-    private let doneButton = UIButton(type: .custom)
+    private let doneButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let rowsScroll = UIScrollView()
     private let draftField = UITextView()
     private let draftPlaceholder = UILabel()
-    private let submitButton = UIButton(type: .custom)
-    private let cancelEditButton = UIButton(type: .custom)
+    private let submitButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
+    private let cancelEditButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     /// **RUN A ladder round 2 (the MAJOR)** — why the box is not empty:
     /// the line a restored refused draft wears. Its own register (accent,
     /// never the alarm) — nothing is being refused (the pad's rule for
@@ -281,7 +281,7 @@ final class MobileCommentsSheetView: UIView {
             _ title: String, x: CGFloat, color: UIColor, identifier: String,
             action: @escaping () -> Void
         ) -> UIButton {
-            let button = UIButton(type: .custom)
+            let button = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
             button.setTitle(chromeCase(title), for: .normal)
             button.setTitleColor(color, for: .normal)
             button.titleLabel?.font = face.font(.controlInline)

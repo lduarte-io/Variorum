@@ -93,17 +93,12 @@ enum MobileProtectionChrome {
 }
 
 extension View {
-    /// The lobby's field idiom (`MobileRoadLockView`): a quiet card around the shared concealing field.
+    /// The lobby's field idiom (`MobileRoadLockView`) around the shared concealing field — since VM-50
+    /// the phone's ONE field (`phoneField`).
     func mobileSecretFieldChrome(_ tokens: VoiceTokens) -> some View {
         textInputAutocapitalization(.never)
             .autocorrectionDisabled()
-            .phoneType(.control, tokens)
-            .foregroundStyle(tokens.ink)
-            .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(tokens.card)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1)))
+            .phoneField(tokens)
     }
 
     /// A protection sheet's room: the voice's room fills the whole sheet (unit 1's C05 — never the system's grey).

@@ -332,12 +332,12 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 1.7 | §6 "Batch 1 — results" written | DONE (this commit) — counts and the walk PENDING the stage window |
 | 2 | Controls and targets (VM-50; VM-49's application) | IN-PROGRESS — pieces below (implementer: Opus, 2026-11-19) |
 | 2.1 | The shared controls in `Shared/Theme/PhoneControls.swift` (text button, inline act, icon button, chip, field, the one calm button, sheet header, segmented choice on the system control, section header, menu row; the UIKit hit-area button for the overlays) + their geometry tests | DONE (this commit) — `PhoneControls.swift` + `PhoneType`'s `weight:` override + `MobilePhoneControlsTests` (14 tests); phone `build-for-testing` green; Mac build PENDING (running); tests PENDING the stage |
-| 2.2 | Adoption, one commit per screen family, retiring each private build with its last user (the five calm buttons, the three fields, the ten sheet headers, the word-row choices) — Shell roots · book sheets · Write masthead · Write sheets · Shell sheets/screens · Protection · the UIKit overlays | IN-PROGRESS — Shell roots DONE (this commit: the Bookcase and Library path lines on the controls — 🗑 icon button, + New Note inline act, Settings a gear icon button (P-47-9), one 44 pt line, Starred's line level with them; the today badge a chip; the Library search on `phoneField`; every root row, the archive row, the scraps picker and the book's rows/doors given `phoneHitArea`; the filter doors and the sort glyph 44 tall, widths kept (P-47-10)); phone `build-for-testing` green. Book sheets DONE (this commit: Book Details and Create Book on the sheet header; Create Book's name a `phoneField`, its kind and its OR/AND on the segmented choice, its Create on the calm button; Book Details' act rows on `PhoneMenuRowStyle`, the rename name and the daily row 44 tall; the segmented choice sizes segments by their words, `PhoneSegmentWidths`; the path-line pin `MobilePathLineGeometryTests` written, red-on-old PENDING the stage). Write masthead DONE (this commit: its four tools are icon buttons — 22 pt glyphs in ink (the seal in the accent while sealed), 44 × 44 hit areas touching, the row kept; the title and the membership chip 44 tall; the five flow chips 44 tall reaching 6 into the old 12 pt gap (words where they were); Unlock Note an inline act; the receipt's Undo/Redo LEFT for VM-61 — a 44 pt row there would deepen the prose's jump on every act). Write sheets DONE (this commit: the sheet header on Tags, More Info, Books, Note Actions, Blocks (its Select door a text button beside Done), Lenses, the edit trace (path title kept muted) — and the Tag manager's; the tag field a `phoneField`; Note Actions' rows the menu row (64 with a detail line); the block list's segments on the segmented choice and its rows 44 tall; every inline act (✕ remove, diverge/remove/open copy, Put back/Delete now, the takes fold, restore/promote/delete, Delete N) on `PhoneInlineActStyle`; the lens rows, suggestion rows, link rows and + rows 44 tall; the leading door words (save/adopt, Refresh/Clear, back to listing) inline acts at 17). Shell sheets/screens DONE (this commit: Settings and Acknowledgments on the sheet header, path titles kept muted; Settings' door words (Protection…, Acknowledgments, Manage Tags, Edit trace…, the DEBUG doors) inline acts at 17 with 44 pt hit areas — the list's shape stays batch 5's; the voice rows and the edit-trace toggle 44 tall; the Trash's Empty Trash, sort, and row acts and the Archive's row acts inline acts; the Trash's seven kinds on FILTER CHIPS (the chip gains a selected state — P-47-11); the tag manager's + new tag 44 tall). Protection DONE (this commit: `MobileRoadButton` and the library-missing Start door on THE calm button; the lock face's two fields and the shared pages' `pageFieldChrome` on `phoneField` (the private `field` card retired); `PageDoor`'s styled arms on the controls — .act/.destructive the calm button (destructive in the alarm, replacing the literal red), .bordered the calm button's edge alone, .borderless/.inlineAct the inline act at 17 — the Mac's nil arms untouched; the words disclosure an inline act; both protection door builders inline acts at 17; the gate's radio rows 44 tall). NEXT: the UIKit overlays |
-| 2.3 | The 44 pt hit area on every remaining G §2 site where it is a one-line change (`phoneHitArea()`) | NOT-STARTED |
-| 2.4 | The path line (Terminal wraps at 402): doors as inline acts / icon buttons with 44 pt hit areas, ONE line at 402 in both voices; red-on-old geometry pin | NOT-STARTED |
-| 2.5 | The source pin: the retired private button/field/header builds are gone | NOT-STARTED |
+| 2.2 | Adoption, one commit per screen family, retiring each private build with its last user (the five calm buttons, the three fields, the ten sheet headers, the word-row choices) — Shell roots · book sheets · Write masthead · Write sheets · Shell sheets/screens · Protection · the UIKit overlays | IN-PROGRESS — Shell roots DONE (this commit: the Bookcase and Library path lines on the controls — 🗑 icon button, + New Note inline act, Settings a gear icon button (P-47-9), one 44 pt line, Starred's line level with them; the today badge a chip; the Library search on `phoneField`; every root row, the archive row, the scraps picker and the book's rows/doors given `phoneHitArea`; the filter doors and the sort glyph 44 tall, widths kept (P-47-10)); phone `build-for-testing` green. Book sheets DONE (this commit: Book Details and Create Book on the sheet header; Create Book's name a `phoneField`, its kind and its OR/AND on the segmented choice, its Create on the calm button; Book Details' act rows on `PhoneMenuRowStyle`, the rename name and the daily row 44 tall; the segmented choice sizes segments by their words, `PhoneSegmentWidths`; the path-line pin `MobilePathLineGeometryTests` written, red-on-old PENDING the stage). Write masthead DONE (this commit: its four tools are icon buttons — 22 pt glyphs in ink (the seal in the accent while sealed), 44 × 44 hit areas touching, the row kept; the title and the membership chip 44 tall; the five flow chips 44 tall reaching 6 into the old 12 pt gap (words where they were); Unlock Note an inline act; the receipt's Undo/Redo LEFT for VM-61 — a 44 pt row there would deepen the prose's jump on every act). Write sheets DONE (this commit: the sheet header on Tags, More Info, Books, Note Actions, Blocks (its Select door a text button beside Done), Lenses, the edit trace (path title kept muted) — and the Tag manager's; the tag field a `phoneField`; Note Actions' rows the menu row (64 with a detail line); the block list's segments on the segmented choice and its rows 44 tall; every inline act (✕ remove, diverge/remove/open copy, Put back/Delete now, the takes fold, restore/promote/delete, Delete N) on `PhoneInlineActStyle`; the lens rows, suggestion rows, link rows and + rows 44 tall; the leading door words (save/adopt, Refresh/Clear, back to listing) inline acts at 17). Shell sheets/screens DONE (this commit: Settings and Acknowledgments on the sheet header, path titles kept muted; Settings' door words (Protection…, Acknowledgments, Manage Tags, Edit trace…, the DEBUG doors) inline acts at 17 with 44 pt hit areas — the list's shape stays batch 5's; the voice rows and the edit-trace toggle 44 tall; the Trash's Empty Trash, sort, and row acts and the Archive's row acts inline acts; the Trash's seven kinds on FILTER CHIPS (the chip gains a selected state — P-47-11); the tag manager's + new tag 44 tall). Protection DONE (this commit: `MobileRoadButton` and the library-missing Start door on THE calm button; the lock face's two fields and the shared pages' `pageFieldChrome` on `phoneField` (the private `field` card retired); `PageDoor`'s styled arms on the controls — .act/.destructive the calm button (destructive in the alarm, replacing the literal red), .bordered the calm button's edge alone, .borderless/.inlineAct the inline act at 17 — the Mac's nil arms untouched; the words disclosure an inline act; both protection door builders inline acts at 17; the gate's radio rows 44 tall). the UIKit overlays DONE (this commit: Done, Branch/Blank, Turn takes into blocks, the cards' ✓/⋯, Add/Save, Cancel, the comments' Edit/Delete/Restore and the history act are `PhoneHitAreaButton` — 44 × 44 within each button's superview; structure untouched); the fourth field build (`mobileSecretFieldChrome`) on `phoneField`. ALL FAMILIES DONE; phone `build-for-testing` green; Mac green at `a77374d8a` |
+| 2.3 | The 44 pt hit area on every remaining G §2 site where it is a one-line change (`phoneHitArea()`) | DONE — inside each family's commit; the per-site outcome is §6's T1–T109 table |
+| 2.4 | The path line (Terminal wraps at 402): doors as inline acts / icon buttons with 44 pt hit areas, ONE line at 402 in both voices; red-on-old geometry pin | DONE (`47ee432fc` the fix, `0b2df787f` the pin `MobilePathLineGeometryTests`) — red-on-old PENDING its revert run in the suites window (no revert in flight now) |
+| 2.5 | The source pin: the retired private button/field/header builds are gone | DONE (this commit) — `MobilePhoneControlsSourceTests`; its patterns measured by script red on `751765baf` (11 · 4 · 5 · 13 · 4), clean now; run PENDING the stage |
 | 2.6 | The walk driver extended for the batch's surfaces; rebuilt headless into `DerivedData/vm47-walk`; both schemes `build-for-testing` green into `DerivedData/vm47-b2` → READY for the stage | NOT-STARTED |
-| 2.7 | §6 "Batch 2 — results": each control with its pointer and sizes, the retired builds, the T1–T109 inventory with owners, tests (PENDING), PROVISIONAL calls in §5, self-assessment | NOT-STARTED |
+| 2.7 | §6 "Batch 2 — results": each control with its pointer and sizes, the retired builds, the T1–T109 inventory with owners, tests (PENDING), PROVISIONAL calls in §5, self-assessment | DONE (this commit) — counts PENDING; P-47-9…13 in §5 |
 | 2.8 | The stage windows (suites; then the walk, both batches' captures, looked at) — run at the orchestrator's GO | NOT-STARTED |
 | 3 | Voice and palette; borders (VM-51, VM-54) | NOT-STARTED |
 | 4 | The bottom bar (VM-52) | NOT-STARTED |
@@ -360,6 +360,11 @@ Each batch's implementer adds its own piece rows under its batch line as it star
 | P-47-6 | The quick-entry hint at the note-body size (42 characters; Terminal 380 pt at 15 pt mono against a 338 pt box) | (a) the longest of the hint's own cuts that fits — the hint, "new note — just start typing", "new note" (no new words) · (b) let it wrap (breaks her one-line-at-rest ruling) · (c) new shorter words — the sheet draws "New note", but no wording-list draft exists, so that waits for her wording pass | (a) | PROVISIONAL (batch 1); the capture box's rebuild (SW-3/SW-4, umbrella 5) may replace it |
 | P-47-7 | The Library/Archive filter row's five words | (a) `meta` 13, the floor: one unshrunk row at 375 and 402 pt in both voices and 320 pt in Study; Terminal at 320 pt (Display Zoom) cannot hold five 13 pt mono words + the glyph + the 20 pt gutters, so the last words truncate (no word below 13 pt) · (b) `chip` 15, the sheet's named role for filters: shrinks at 375 Terminal and 320 Study, overflows Terminal 320 · (c) scroll or wrap the row — against her #92(b) | (a); the Terminal-320 gap is a named `withKnownIssue` in two pins, owned by VM-50 (batch 2's segmented choice replaces the row) | PROVISIONAL (batch 1) |
 | P-47-8 | Role judgment calls (the brief's "the smaller of the two candidates") | listed per family in §6 "Batch 1 — results", the role-map table | the smaller candidate each time | PROVISIONAL (batch 1) |
+| P-47-9 | The Bookcase path line's doors, so the line holds ONE line at 402 pt in both voices (Terminal needed ≈437 pt with two 17 pt word doors) | (a) 🗑 an icon button, + New Note an inline act (15, its word kept), Settings an icon button (a gear, "Settings" its spoken label) — ≈390 pt in Terminal at 402 · (b) all three icons (fits 375 too; loses the + New Note word, a ruled P33 door) · (c) words at 15 and the path text truncating (keeps every door word; cuts her count at 402) | (a); at 375 pt Terminal the path text, the line's one flexible member, truncates rather than wrap | PROVISIONAL (batch 2); Settings leaves the line for the roots' ⋯ menu at VM-53 (batch 5) |
+| P-47-10 | The Library/Archive filter row (her #92(b): one visible row, no scroll, the sort shrinks to a glyph) | (a) keep the five word doors and the sort glyph, each 44 pt TALL, widths their words' · (b) the system segmented control — wider per word (segment padding, and the system truncates a word it cannot fit — the lookup's fact), so Terminal no longer fits at 375 pt and her #92(b) breaks · (c) filter chips in a row that scrolls (the library mockup's rooms as chips — but scrolling is what #92(b) declined) | (a); the row's rebuild (the rooms as chips, the sort beside the field) is VM-93 / VM-90's, and the Terminal-320 known issue (P-47-7) moves with it | PROVISIONAL (batch 2) |
+| P-47-11 | The Trash's seven kinds (All · Notes · Books · Blocks · Takes · Snippet groups · Originals) | (a) filter chips in their scrolling row — the sheet's chip is "filters … one row that scrolls sideways"; the chosen one on the wash in her ink, the others edged in the take line, muted · (b) the segmented choice — seven words cannot share 362 pt without truncating · (c) a Menu — not a door a pin can drive (§15's trap (b)) | (a); the chip gained a `selected` state for it | PROVISIONAL (batch 2) |
+| P-47-12 | The masthead (VM-148 rebuilds it): "hit areas on its icons and chips only" | (a) the four tools as the icon button (22 pt glyph in ink, 44 × 44, centres 44 apart — the sheet's §B for exactly T39–T42), the row kept; the chips 44 tall in the same flow, their hit areas reaching 6 into the old 12 pt gaps · (b) the tools' glyphs left at 17 in faint with only a 44 pt frame · (c) the chips as 32 pt capsules (the sheet's chip — VM-148's one sideways row) | (a); the title row now gives its title 54 pt less (four 44 pt tools); the masthead grows by the chips' rows | PROVISIONAL (batch 2) |
+| P-47-13 | Sheet headers whose title was a muted path (Settings, Acknowledgments, the edit trace) and Create Book's Cancel | the shared header with the path title kept muted and Cancel in Done's place (semibold) · the header's ink title everywhere · Cancel at regular weight | the first: the words on screen are unchanged | PROVISIONAL (batch 2) |
 
 Held for her hands: the wave-1 install on her phone (one install from merged main, after all four runs,
 prepared by the last merger; the hands part is hers in the morning) — it is where she judges P-47-1's
@@ -524,3 +529,199 @@ arithmetic, made to keep it in LINES now that the box's text scales), and (4) th
 is now 24 pt beside four 17 pt icons (VM-148 rebuilds it). The Mac's look cannot have changed:
 `VoiceTokens.swift` is untouched, `SharedPageStyle`'s nil arms are byte-identical, and every other
 `Shared/` addition is new code the Mac compiles but never renders.
+
+### Batch 2 — results (implementer: Opus, 2026-11-19)
+
+**Not done in this batch, first:** (1) the stage windows — the suites and the walk (both batches' captures)
+are PENDING the orchestrator's GOs, so every test count below is PENDING and the path line's red-on-old is
+PENDING its revert run inside the suites window; (2) the editor's text inset is NOT changed — it is not
+"15 → 20": the inset is 15 pt plus the container's 5 pt fragment padding, so the visible margin is already the
+20 pt gutter (`MobileEditorTextView.swift:953`'s own comment); a 20 there would draw 25. Recorded for VM-137;
+the file is untouched; (3) the overlays' own comment draft field (T65), the history rows' fixed heights (T71)
+and the take card's body (T63) are left with their owners (the overlays keep their structure); (4) the Library
+filter row is NOT on the segmented choice (P-47-10), so P-47-7's Terminal-320 known issue stays, re-owned to
+VM-93.
+
+**The controls — one pointer each (`Shared/Theme/PhoneControls.swift`), sizes as the sheet draws them (P-47-1).**
+
+| Control | Symbol | Sizes |
+|---|---|---|
+| Text button | `PhoneTextButtonStyle(tokens:tone:closing:)` | label `control` 17 in the accent (`closing` = semibold, the Done); 12 inside each side; at least 64 × 44 |
+| Inline act | `PhoneInlineActStyle(tokens:tone:role:alignment:)` | label `controlInline` 15 (or `control` 17 for a standalone door word) drawn at its own size; `phoneHitArea` 44 × 44 at least; `alignment` keeps a short word on its row's edge |
+| Icon button | `PhoneIconButtonStyle(tokens:tone:)` + `PhoneGlyphModifier` / `PhoneControlGlyph.pointSize` | a 22 pt glyph (chrome: follows `.body` to xxxLarge, holds) in ink; 44 × 44, neighbours touch |
+| Chip | `PhoneChipStyle(tokens:selected:)` | `chip` 15 medium; 32 pt capsule, 12 side padding, in a 44 pt hit area; a fact chip = the wash + the accent; a filter chip = the wash + ink when chosen, no fill + the take-line edge + corrected muted when not (P-47-11) |
+| Field | `View.phoneField(_:role:)` | paper (`surface`), the take line as edge, radius 12, 12 inside, 8 above/below, at least 44 tall; typed text `control` 17 |
+| The calm button | `PhoneCalmButtonStyle(tokens:tone:fullWidth:filled:)` | paper fill + take-line edge (`filled: false` = the edge alone), radius 12, 12 inside, label `control` 17, at least 64 × 44; `fullWidth` spans the sheet |
+| Sheet header | `PhoneSheetHeader(_:tokens:titleInk:doneWord:done:)` (+ a `trailing:` form) | title `screenTitle` 20 at the gutter; Done the text button, semibold, its hit area 8 from the edge (it reaches 12 into the sheet's 20 pt gutter); row at least 56; Done's label is the site's own voiced word (no re-label) |
+| Segmented choice | `PhoneSegmentedChoice(_:selection:tokens:word:select:)` over `PhoneSegmentedControl` (iOS) and `PhoneSegmentWidths` (pure) | the system `UISegmentedControl`; words `chip` 15 medium (UIKit form, the text size's), the chosen in ink on the paper, the others corrected muted; at least 44 tall; segments sized by their words (+12 each side, the rest shared; shrunk evenly when they cannot fit); one spoken element per segment — the PLAIN word, the button trait, `.selected` — activatable |
+| Section header | `PhoneSectionHeader(_:tokens:)` | `sectionHeader` 13 semibold, corrected muted, 24 above, 8 below (built and pinned; adopted nowhere yet — no G §2 site is one; the screens adopt it as their umbrellas rebuild them) |
+| Menu row | `PhoneMenuRow(_:detail:glyph:tone:tokens:action:)` and `PhoneMenuRowStyle(minHeight:)` | at least 44 (one line) / 52 (with a glyph) / 64 (with a detail line); glyph 22 in the accent, 12, label `control` 17 in ink (alarm when removing), detail `meta` 13 corrected muted; the whole row one target |
+| The overlays' UIKit hit area | `PhoneHitAreaButton` (iOS) | a `UIButton` whose touch region reaches `PhoneMetrics.hitOutset` past its frame (44 × 44 at least) — its frame and drawing untouched |
+| (The layer) | `View.phoneType(_:_:weight:)` in `PhoneType.swift` | the closing act's semibold, size and scaling still the role's |
+
+**The private builds retired, each with its last user:** the five calm buttons — `PageDoor`'s `.act` arm
+(`SharedPageStyle`), `MobileRoadButton`'s body (the struct stays as a thin label wrapper — other code names it),
+the library-missing Start door, Create Book's button, the today badge (now the chip, sheet §E's Today door);
+the fields — the Library search, the tag field and Create Book's name (v8 h12 surface r8), `pageFieldChrome`'s
+styled arm, the lock face's two fields and its private `field` card, and a fourth build the audit did not count,
+`mobileSecretFieldChrome` (all now `phoneField`); the ten SwiftUI sheet headers of T72 plus Book Details' and
+Create Book's (twelve, all `PhoneSheetHeader`); the word-row choices — Create Book's kind, OR/AND and the block
+list's segments (the segmented choice) and the Trash's kinds (filter chips, P-47-11); the fifth row, the Library
+filter row, stays words (P-47-10). Held by `MobilePhoneControlsSourceTests` (below).
+
+**The inventory — every G §2 site (T1–T109).** ADOPTED = on a shared control · HIT AREA = given 44 pt through
+`phoneHitArea` / a 44 pt frame / `PhoneHitAreaButton` · OK = already ≥ 44 × 44 · LEFT = with the open ticket
+that owns it (owners from `notes/TICKETS.md` and `notes/plans/vm-44/plans/minted/`).
+
+| ID | Site | Outcome |
+|---|---|---|
+| T1 | Tab bar | LEFT — VM-52 (this run's batch 4) |
+| T2 | 🗑 trash door (Shelf, Library) | ADOPTED — icon button |
+| T3 | Shelf + New Note | ADOPTED — inline act (15) |
+| T4 | Shelf Settings | ADOPTED — icon button, the gear (P-47-9) |
+| T5 | Shelf book row | HIT AREA (row already 44 by `bookRowHeight`) |
+| T6 | ✎ today badge | ADOPTED — chip |
+| T7 | + New Book row | HIT AREA |
+| T8 | today fallback row | HIT AREA |
+| T9 | book row long-press | system menu — n/a (visible doors: VM-86; the book menu: VM-115) |
+| T10 | quick-note box at rest | LEFT — VM-74 (the capture box at the foot) |
+| T11 | quick-note open ↵ | LEFT — VM-73 (File and Open) — inside the box's measured chrome (`writingBoxChromeHeight`), not a one-line change |
+| T12 | Starred row | HIT AREA |
+| T13 | Library + New Note | ADOPTED — inline act |
+| T14 | Library search field | ADOPTED — field |
+| T15 | filter doors ×5 | HIT AREA — 44 tall, word-wide (P-47-10); the full 44 × 44 and the row: LEFT — VM-93 |
+| T16 | sort glyph | HIT AREA — 44 tall, glyph-wide (#92(b)'s budget); full: LEFT — VM-90 |
+| T17 | Library note row | HIT AREA |
+| T18 | Library book row | HIT AREA |
+| T19 | search hit row | HIT AREA |
+| T20 | Archived row | HIT AREA |
+| T21 | scraps pool picker (`Menu`) | HIT AREA (on the Menu's label) |
+| T22 | + new scrap | HIT AREA |
+| T23 | book nav bar details · read | OK (system) |
+| T24 | book contents note row | HIT AREA |
+| T25 | + New Note / + New Chapter rows | HIT AREA |
+| T26 | Book Details Done | ADOPTED — sheet header |
+| T27 | book name (rename) | HIT AREA |
+| T28 | Finish / Reopen | ADOPTED — menu row |
+| T29 | Use as Daily Journal | HIT AREA (its disabled read — the ✓ — kept, so not the dimming row style) |
+| T30 | Delete Book… / Archive | ADOPTED — menu row |
+| T31 | Create Book close | ADOPTED — sheet header (Cancel, P-47-13) |
+| T32 | book-name field | ADOPTED — field |
+| T33 | kind doors | ADOPTED — segmented choice |
+| T34 | tag picker rows | HIT AREA |
+| T35 | OR / AND | ADOPTED — segmented choice |
+| T36 | Create Book | ADOPTED — calm button, full width |
+| T37 | Read page body | OK |
+| T38 | Write title (rename) | HIT AREA |
+| T39–T42 | masthead copy · find · lock · ⋯ | ADOPTED — icon buttons (P-47-12); the masthead's rebuild: VM-148 |
+| T43 | membership chip | HIT AREA (44 tall) |
+| T44–T48 | date · tags · more info · blocks · lens chips | HIT AREA (44 tall, reaching 6 into the old gaps — P-47-12); capsules and one row: LEFT — VM-148 |
+| T49 | Unlock Note | ADOPTED — inline act |
+| T50 | receipt Undo / Redo | LEFT — VM-61 (the one message line at the foot; a 44 pt row in the masthead would deepen the prose's jump on every act) |
+| T51 | ⑂ fan badge | LEFT — VM-188 (the visible badge) / VM-195 (the marks' cluster in a 44 pt hit area); a gutter button's region over the text is the editor's touch road |
+| T52 | ●n comment marker | LEFT — VM-195 |
+| T53, T54 | takes pill ‹ › ✓ | LEFT — VM-188 (the pill at the foot) |
+| T55 | keyboard bar resting trio | OK |
+| T56 | formatting strip ×11 | her ruled exception (R22/R25) — VM-139 |
+| T57 | Takes Done | HIT AREA (`PhoneHitAreaButton`) |
+| T58 | Branch this one / Blank | HIT AREA |
+| T59 | Turn takes into blocks | HIT AREA |
+| T60, T61 | take card ✓ / ⋯ | HIT AREA (within the card's bounds) |
+| T62 | archived card ⋯ | HIT AREA |
+| T63 | take card body | LEFT — VM-152 (native sheets) / VM-189 |
+| T64 | Comments Done | HIT AREA |
+| T65 | comment draft field | LEFT — VM-14 (the field above the keyboard) / VM-193 |
+| T66 | Add / Save | HIT AREA |
+| T67 | Cancel (editing) | HIT AREA |
+| T68 | per-comment Edit / Delete / Restore; the deleted fold | HIT AREA |
+| T69 | Block history Done | HIT AREA |
+| T70 | history row act | HIT AREA |
+| T71 | history rows (fixed 30–34) | LEFT — VM-41 (History and lineage as one sheet) / VM-152 |
+| T72 | the ten SwiftUI sheets' Done | ADOPTED — sheet header (Tags, More Info, Books, Note Actions, Blocks, Lenses, Tag manager, Acknowledgments, the edit trace, Settings) |
+| T73 | Tags type field | ADOPTED — field |
+| T74 | ✕ remove | ADOPTED — inline act |
+| T75 | suggestion rows | HIT AREA |
+| T76 | link row | HIT AREA |
+| T77 | + add a link | HIT AREA |
+| T78 | diverge / remove | ADOPTED — inline act |
+| T79 | open copy | ADOPTED — inline act |
+| T80 | + book rows | HIT AREA |
+| T81 | Note Actions rows | ADOPTED — menu row (64, a detail line) |
+| T82 | Select / Done picking | ADOPTED — text button, in the sheet header's trailing slot |
+| T83 | block list segments | ADOPTED — segmented choice |
+| T84 | Delete N | ADOPTED — inline act (alarm) |
+| T85 | block list rows | HIT AREA (44 tall; they carried no padding); reorder and the bulk bar: VM-149 |
+| T86 | tray takes fold | ADOPTED — inline act |
+| T87 | tray Put back / Delete now | ADOPTED — inline acts; their separation (opposite sides or the remover behind a menu, sheet §B): LEFT — VM-153 |
+| T88 | Lenses "the note" row | HIT AREA |
+| T89 | lens rows | HIT AREA |
+| T90 | restore · save · save into · adopt | ADOPTED — inline acts (the save doors at 17) |
+| T91 | Versions back to listing | ADOPTED — inline act (17) |
+| T92 | version row | OK (and a hit area) |
+| T93 | restore / promote / delete | ADOPTED — inline acts |
+| T94 | Trash sort | ADOPTED — inline act |
+| T95 | Empty Trash | ADOPTED — inline act (alarm, 17) |
+| T96 | Trash kind doors | ADOPTED — filter chips (P-47-11) |
+| T97 | Trash row Put back · Delete now · Open note | ADOPTED — inline acts; their separation: LEFT — VM-100 (the Trash's rows and Select) |
+| T98 | Archive row Unarchive · Open note | ADOPTED — inline acts |
+| T99 | Settings voice rows | HIT AREA |
+| T100 | Settings doors (Protection…, Acknowledgments, Manage Tags, edit trace, DEBUG rows) | ADOPTED — inline acts at 17; the record toggle HIT AREA; the list's shape: VM-53 (batch 5) |
+| T101 | Settings sync row doors (`PageDoor`) | ADOPTED — calm button / inline act (the phone arms) |
+| T102 | Tag manager + new tag | HIT AREA |
+| T103 | Tag manager rows (long-press only) | LEFT — VM-86 (every act a visible door) / VM-101 |
+| T104 | `MobileRoadButton` | ADOPTED — calm button |
+| T105 | passphrase / twelve-words fields | ADOPTED — field |
+| T106 | use the twelve words | ADOPTED — inline act |
+| T107 | Protection screen doors | ADOPTED — inline acts (17) |
+| T108 | gate radio rows | HIT AREA |
+| T109 | library-missing Start | ADOPTED — calm button |
+
+Tally: 107 sites + T72's ten — no site without an owner. LEFT: T1, T10, T11, T50, T51, T52, T53, T54, T63, T65,
+T71, T103, plus the widths of T15/T16 and the layouts of T44–T48, T87, T97.
+
+**The path line (the batch-1 carry-in), traced and fixed.** Mechanism: in Terminal every glyph is SF Mono; the
+path "~/shelf · 14 books" (≈157 pt at 13) beside the 🗑, "+ new note" and "settings" at 17 (≈102 + 82) with three
+16 pt gaps and the 20 pt gutters needs ≈437 pt — over 402 and 430 — so the path text, the HStack's one flexible
+member, wrapped (+23 pt of chrome). Fix: the doors are the controls with touching 44 pt hit areas (🗑 and the
+gear icon buttons, + New Note an inline act at 15) — ≈390 pt in Terminal at 402; the line is centred, 44 tall,
+4 pt under the safe area (its drawn path text where it was); Starred's line takes the same 44 pt so the three
+roots start level as the band pages. Pin: `MobilePathLineGeometryTests` (the path text one line, every door
+44 × 44 on the path's line, after it, inside the surface — Terminal and Study, 402 and 430; and the Library's
+twin). Red-on-old: PENDING — run in the suites window against `MobileShelfView.swift` / `MobileLibraryView.swift`
+reverted to `91d406593`'s (committed tree first; the revert named in §4 before it starts).
+
+**Tests (all PENDING the stage window).** New: `MobilePhoneControlsTests` (14 — each control's hit area and
+minimum, the header's 56 row and its Done 8 from the edge, the header's Done driven by its voiced word, the
+segmented choice's selection contract in both voices, the section header's air, the menu row's three floors,
+the UIKit button's region), `MobilePathLineGeometryTests` (2), `MobilePhoneControlsSourceTests` (2 — its
+patterns measured by script over the pre-batch tree `751765baf`: 11 Done literals, 4 field insets, 5 calm
+paddings (2 the allowed cards), 13 paper shapes (2 the allowed cards), 4 word rows; clean now). Suites the
+batch's changes touch and that must stay green: `MobileFilterRowGeometryTests` and `MobileFilterTests` (the
+filter doors now 44 tall), `MobileBlockListTests` and `MobileNoteTrayTests` (the segments are the segmented
+choice — driven by their plain words through the new elements), `MobileShelfLayoutTests` /
+`MobileShelfRenderedLayoutTests` / `MobileShelfTodayDoorTests` (the path line now 44 tall; the today chip),
+`MobileQuickNoteTests`, `MobileNavigationTests`, `MobileTrashTests`, the protection suites, the takes/comments/
+history suites (the overlays' buttons are the hit-area subclass), and on the Mac `SharedPageStyleTests` (the nil
+arms untouched).
+
+**Recorded and left, each with an owner.**
+- The editor's text inset — not changed (see the first paragraph) — VM-137.
+- The filter row at 320 pt Terminal (P-47-7's known issue) — VM-93, with P-47-10.
+- The receipt's Undo/Redo still 20 pt tall in the masthead — VM-61.
+- The masthead's title now has 54 pt less beside four 44 pt tools; copy and seal move into the ⋯ at VM-148.
+- A remover beside a restorer on the same row (Trash, tray) — VM-100, VM-153 (sheet §B's rule).
+- The section header is built but not yet adopted anywhere (no G §2 site is one) — each screen's umbrella.
+- The sheets' grabber and detents (sheet §E's "real sheets with detents") — VM-152.
+
+**Self-assessment (for the cold reviewer, against the sheet and audit G).** The controls are one file, styles
+over batch 1's roles and metrics, so a size changes in one place. The riskiest calls: (1) the segmented choice is
+the system control with its accessibility replaced by my own per-segment elements (needed so a segment speaks its
+plain word and a pin can drive it; the lookup confirmed an override must list every segment, which it does) and
+its segment widths set by me from the words — the suites and the walk are its first real look; (2) the filter
+row kept as words (P-47-10) against the brief's list of five word rows — argued from her #92(b) and the system
+control's truncation; (3) the masthead's tools moved to 22 pt glyphs in ink inside a row kept as built
+(P-47-12), which tightens the title; (4) the overlays' hit areas cannot reach outside a button's superview, so a
+card's ✓/⋯ gain only what the card's own bounds allow; (5) `PageDoor`'s destructive arm now wears the voice's
+alarm instead of the literal red — the phone arm only; the Mac's nil arm is byte-identical. The Mac's look cannot
+have changed: `VoiceTokens.swift` is untouched, `SharedPageStyle`'s nil arms are unchanged, and the new Shared
+code is SwiftUI the Mac compiles but never renders (the UIKit pieces behind `os(iOS)`).

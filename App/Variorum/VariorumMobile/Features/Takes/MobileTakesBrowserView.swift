@@ -48,18 +48,18 @@ final class MobileTakesBrowserView: UIView {
     private let dimView = UIView()
     private let sheetView = UIView()
     private let headerLabel = UILabel()
-    private let doneButton = UIButton(type: .custom)
+    private let doneButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let cardsScroll = UIScrollView()
     private let footerLabel = UILabel()
-    private let branchButton = UIButton(type: .custom)
-    private let blankButton = UIButton(type: .custom)
+    private let branchButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
+    private let blankButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     /// **BATCH 7 — the sheet's ACTIONS ROW** (PL-10(d), E6b's one door).
     /// A block-scoped act among take-scoped ones, so it gets its own line
     /// above the mint footer rather than a fourth word crowding it, and it
     /// renders ONLY while a fan exists (P-2: `canTurnTakesIntoBlocks`) — so
     /// the calm one-take sheet is byte-identical to the one that shipped and
     /// gives up no card height. PROVISIONAL placement, recorded.
-    private let takesToBlocksButton = UIButton(type: .custom)
+    private let takesToBlocksButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
 
     /// THE one live card editor (P3): a single instance that moves onto
     /// whichever card is being edited.
@@ -615,8 +615,8 @@ final class MobileTakesCardView: UIView {
     let variantID: String
     private let stateLabel = UILabel()
     private let takeLabel = UILabel()
-    private let chooseButton = UIButton(type: .custom)
-    private let menuButton = UIButton(type: .custom)
+    private let chooseButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
+    private let menuButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let bodyLabel = UILabel()
     private let edgeBar = UIView()
     private var editorHost: UIView?
@@ -856,7 +856,7 @@ final class MobileArchivedTakeCardView: UIView {
     let variantID: String
     private let stateLabel = UILabel()
     private let takeLabel = UILabel()
-    private let menuButton = UIButton(type: .custom)
+    private let menuButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let bodyLabel = UILabel()
     private let onUnarchive: () -> Void
     private let onDelete: () -> Void

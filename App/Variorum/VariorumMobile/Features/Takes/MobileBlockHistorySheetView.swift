@@ -58,7 +58,7 @@ final class MobileBlockHistorySheetView: UIView {
     private let sheetView = UIView()
     private let headerLabel = UILabel()
     private let statusLabel = UILabel()
-    private let doneButton = UIButton(type: .custom)
+    private let doneButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private let table = UITableView(frame: .zero, style: .plain)
 
     private var pageWasEditable = true
@@ -325,7 +325,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
     /// is to read the laid-out label, so the pin reads it.
     let titleLabel = UILabel()
     let metaLabel = UILabel()
-    private let actButton = UIButton(type: .custom)
+    private let actButton = PhoneHitAreaButton(type: .custom)  // VM-49: a 44 × 44 hit area, drawn as before
     private var act: Act?
     private var onAct: ((Act) -> Void)?
 
