@@ -210,8 +210,10 @@ struct MobileShelfView<TabBar: View>: View {
         }
     }
 
-    /// "~/home/shelf · 6 books" (terminal) / "Home · Shelf · 6 books" (study)
-    /// — the wing's name leading (VM-56) and the wing door (VM-225,
+    /// "~/home/bookcase · 6 books" (terminal) / "Home · Bookcase · 6 books"
+    /// (study) — the page word is the tab's, "Bookcase" (R-47-3: her ruling
+    /// that this line matches the tab, the swipe names and the Mac; it read
+    /// "Shelf" before) — the wing's name leading (VM-56) and the wing door (VM-225,
     /// `MobileWingPath`); the + New Note door (P33 — Library's twin, same
     /// path-line placement) and the ⋯ menu trailing.
     ///
@@ -226,7 +228,7 @@ struct MobileShelfView<TabBar: View>: View {
     private var pathLine: some View {
         HStack(alignment: .center, spacing: 0) {
             MobileWingPath(
-                tokens: tokens, wing: wingName, page: "Shelf",
+                tokens: tokens, wing: wingName, page: "Bookcase",  // R-47-3: the tab's word
                 trailing: tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"),
                 onDoor: onWingDoor)
             Spacer(minLength: PhoneMetrics.Space.s16)
