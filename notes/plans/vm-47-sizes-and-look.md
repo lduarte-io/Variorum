@@ -347,7 +347,7 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 3 | Voice and palette; borders (VM-51, VM-54) | NOT-STARTED |
 | 4 | The bottom bar (VM-52) | NOT-STARTED |
 | 5 | Settings (VM-53, VM-27) | NOT-STARTED |
-| — | The midway cold review, after batch 2 (her word; Fable, fresh) | NOT-STARTED |
+| — | The midway cold review, after batch 2 (her word; Fable, fresh) | IN-PROGRESS — scope: batches 1 and 2, the diff `fe85ea6d5..7250b9bd8`; `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings and dispositions land in `notes/plans/vm-47-ladder-midway.md`. Still owed to the two batches while it reads (neither edits the tree): the `MobilePhoneControlsTests` re-run of the two test-only fixes, and the walk (row 2.8e), whose capture lines the orchestrator runs |
 | — | The ladder (Fable, fresh reviewer per round; up to five rounds while a round finds a MAJOR — her word) | NOT-STARTED |
 | — | Closeout | NOT-STARTED |
 
