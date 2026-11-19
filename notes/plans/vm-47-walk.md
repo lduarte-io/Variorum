@@ -72,6 +72,11 @@ numbers: "Grounds", §A type, §B touch, §C spacing, §D the two inks, §E comp
   32 pt capsule, 44 pt area; receipt line — one line 44 tall at the foot, words 15 corrected muted, the act 15 semibold in
   the accent; tab bar — Starred · Bookcase · Library at 17, the current one semibold in ink on a chip (the wash, radius 12),
   the others regular corrected muted, the hairline above, the room down to the home indicator.
+- **The one message line's place (batch 6's meeting 2; the ladder's R2-n1):** where a bar is on screen — a root, a pushed
+  list — the line sits ABOVE it, never over its doors (m1, m2); inside a note in Write there is no bar, so a line showing
+  there sits at the foot (just above the home indicator, or above the keyboard when it is up), never lifted a bar's height
+  over empty space — a lifted line inside a note is a finding (name the capture and what led to it: no test drives a note
+  pushed over a list, R2-n1).
 
 **Already recorded with an owner — describe if seen, do not count as new:** the three UIKit overlays' fixed frames and
 hand-built sheets (VM-152 — their text can outgrow a frame above xxxLarge); Settings rows that do not exist on the phone yet
@@ -122,7 +127,7 @@ only); `seaglass-study-light-ax5--` (the wider pass only). Where part B shares a
 | c3 | `c3-library-rows.png` | the Library root | the path line "Home · Library" + 🗑 + "+ New Note" + ⋯ on one line; the search field (paper, the take-line edge, radius 12, ≥ 44 tall) on the room; the filter row "All · Books · Notes · Bookless · Scraps" at 13 pt in ONE row, no word shrunk or cut, the sort glyph at its end (P-47-7, P-47-10); rows on the PAPER (notes and books interleaved: titles 17, dates 13 corrected muted, each ≥ 44); the bar with "Library" on the chip; the keyboard should be DOWN — if it is up, the log line `NOTE the keyboard is still up after leaving the box` says the app left it up after the box (describe it) |
 | c4 | `c4-library-search.png` | "swipe" typed into the field, the keyboard up | the typed text 17 (at AX5 about 23 pt, the field still about 44 tall — P-47-14); the hits listing under it |
 | c4 | `c4-library-search-results.png` | the same, the keyboard down | hit rows on the paper: title 17 in ink, detail 13 corrected muted |
-| c5 | `c5-note-write.png` | the lesson "swipe & choose" open in Write | **the masthead on the PAPER** (P-47-17): the title 24 semibold (Terminal 22) in ink, on one line beside the four tools; the tools — copy, find, lock, ⋯ — 22 pt glyphs in INK with touching 44 pt areas (P-47-12); the membership chip and the five chips (date · tags · more info · blocks · lens) at 15, in a wrapping flow, each 44 tall; **her prose on the PAPER** (P-47-16): body 17 on a 27 line (Terminal 15/25) at 20 pt margins; the ⑂ badge in the gutter of the fanned block; NO bottom bar; the system back bar above the masthead (P-47-20) |
+| c5 | `c5-note-write.png` | the lesson "swipe & choose" open in Write | **the masthead on the PAPER** (P-47-17): the title 24 semibold (Terminal 22) in ink, on one line beside the four tools; the tools — copy, find, lock, ⋯ — 22 pt glyphs in INK with touching 44 pt areas (P-47-12); the membership chip and the five chips (date · tags · more info · blocks · lens) at 15, in a wrapping flow, each 44 tall; **her prose on the PAPER** (P-47-16): body 17 on a 27 line (Terminal 15/25) at 20 pt margins; the ⑂ badge in the gutter of the fanned block; NO bottom bar; the system back bar above the masthead (P-47-20); no message line lifted inside the note — if one shows, it sits at the foot (§2, R2-n1) |
 | c6 | `c6-note-peek-take-tint.png` | default size only: an in-page swipe on the fanned block — the next take peeking | the peeked take on the TAKE TINT, the pill (‹ n/m ›) near it; legible in light and dark |
 | c7 | `c7-callout-comment.png` | default only: the lesson "comments & callouts" in Write | the callout's wash (blue, 💡) behind block 2 and the comment mark (●n in the comment ink) beside block 1, both clear on the paper in light and dark |
 | c8 | `c8-caret.png` | default only: the prose tapped — the caret, the keyboard and its bar up | the caret visible on the paper; the keyboard bar's three resting cells |
@@ -145,13 +150,13 @@ The app's appearance choice is flipped AGAINST the simulator: in Study light (si
 | s05 | `s05-voice-flipped-bookcase.png` | Done → the Bookcase in the other voice | the root follows the library's new voice (the voice is then set back) |
 | s06 | `s06-appearance-<dark\|light>-settings.png` | Appearance pressed against the simulator | the sheet redrawn in the chosen appearance at once (this phone's own choice, LK-1/LK-2) |
 | s07 | `s07-appearance-<dark\|light>-bookcase.png` | Done → the Bookcase | the root (room, paper, bar) in the chosen appearance |
-| s08 | `s08-appearance-<dark\|light>-note.png` | a note in Write | the UIKit editor in the chosen appearance (her prose on that appearance's paper), the masthead too |
+| s08 | `s08-appearance-<dark\|light>-note.png` | a note in Write | the UIKit editor in the chosen appearance (her prose on that appearance's paper), the masthead too; no message line lifted inside the note (§2, R2-n1) |
 | s09 | `s09-appearance-<dark\|light>-takes-overlay.png` | the takes overlay opened | a UIKit overlay in the chosen appearance (cards and their edges) |
 | s10 | `s10-appearance-<light\|dark>-chosen.png` | the simulator's own word pressed | the sheet in the simulator's appearance again, that segment chosen |
 | s11 | `s11-appearance-follow-system.png` | Follow system pressed | the same look; "Follow system" chosen |
 | s12 | `s12-note-actions-settings-row.png` | a note's ⋯ sheet | the header "Note" with Done; menu rows — Save a Version and Versions… 17 in the accent with 13 detail lines, ≥ 64; a "Settings" row ≥ 44 with no detail; Delete Note… last in the alarm |
 | s13 | `s13-settings-over-the-note.png` | its Settings row pressed | the Settings sheet over the note (VM-53: Settings from a note) |
-| s14 | `s14-back-on-the-note.png` | Done | back on the note in Write |
+| s14 | `s14-back-on-the-note.png` | Done | back on the note in Write; no message line lifted inside the note (§2, R2-n1) |
 
 ### 3d. The bar's roads and VM-55's faces — part B (`seaglass-study-light-default--`, `seaglass-terminal-dark-default--`)
 
@@ -162,7 +167,7 @@ The app's appearance choice is flipped AGAINST the simulator: in Study light (si
 | b3 | `b3-bookcase-root-after.png` | "Bookcase" tapped | the Bookcase ROOT — the Trash it left is gone (the stack returned to its root) |
 | b4 | `b4-book-contents-bar-top-edge.png` | the pocket guide's contents | the bar on a pushed list; the top edge: back + "Details" · "Read" in the system bar; the book's name 20; rows on the paper |
 | b5 | `b5-book-read-no-bar.png` | the book's Read | NO bar (P-47-18); the cream page on the voice's own room |
-| b6 | `b6-note-from-book-no-bar.png` | a note opened from the book ("your first take") | Write; NO bar |
+| b6 | `b6-note-from-book-no-bar.png` | a note opened from the book ("your first take") | Write; NO bar; no message line lifted inside the note — this is a note pushed over a list, the road no test drives (§2, R2-n1) |
 | b7 | `b7-bookcase-from-its-book.png` | "Bookcase" (the current tab) tapped from the book | the Bookcase ROOT (the current tab pops its own stack) |
 | b8 | `b8-versions-listing-bar.png` | Note ▸ Versions… on the fanned lesson | the listing wears the bar ("Library" on the chip); the seeded moment's row |
 | b9 | `b9-versions-reader-no-bar.png` | the moment read | NO bar; the "‹ Versions" door |
