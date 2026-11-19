@@ -51,6 +51,15 @@ final class MobileTrashModel {
 
     private(set) var trash: [Queries.TrashItem] = []
     private(set) var trashTruncated = false
+    /// **HAS THE LISTING ANSWERED YET?** (VM-33 — the Mac's VX-678 rule,
+    /// VX-670's honesty bar: `RecoveryViewModel.trashListingLoaded`.) `trash`
+    /// starts as `[]`, and an empty array cannot say "not yet" and "nothing"
+    /// at once — the view drew "Nothing in the Trash." on the first paint of
+    /// a Trash holding things, until the first value landed. Lowered whenever
+    /// the listing's query restarts (a filter, a sort), raised by the value
+    /// that answers it; a failed listing never raises it (the red slot speaks
+    /// instead, and the empty line stays unsaid rather than guess).
+    private(set) var trashListingLoaded = false
     private(set) var lastError: String?
     /// A landed act's own words — kept apart from `lastError` so a success
     /// is never rendered in the red slot.
@@ -90,12 +99,16 @@ final class MobileTrashModel {
     /// chip row and its two lists) is mobile's own round to reshape.
     func startTrash() async {
         let kinds = TrashScope.kinds(filter: kindFilter)
+        // A new query has not answered yet — whatever rows the last one left
+        // stay drawn, but no empty sentence speaks for it (the Mac's rule).
+        trashListingLoaded = false
         do {
             for try await value in session.database.observeTrash(
                 now: session.now, kinds: kinds, oldestFirst: oldestFirst,
                 limit: window + 1
             ) {
                 (trash, trashTruncated) = TrashListing.windowed(value, window: window)
+                trashListingLoaded = true
             }
         } catch is CancellationError {
         } catch {

@@ -72,6 +72,15 @@ struct MobileTrashView: View {
     static let allFilterWord = "All"
     static let emptyTrashLine = "Nothing in the Trash."
 
+    /// **The empty line, or nil while there is nothing true to say** (VM-33 —
+    /// the Mac's `RecoveryViewModel.trashEmptyStateLine` rule). Before the
+    /// listing's first value it is nil, never the false "Nothing in the
+    /// Trash." — the face draws nothing in its place (calm, no spinner).
+    static func emptyStateLine(_ model: MobileTrashModel) -> String? {
+        guard model.trashListingLoaded, model.trash.isEmpty else { return nil }
+        return emptyTrashLine
+    }
+
     static func truncationMarker(shown: Int) -> String {
         "Showing the first \(shown) — narrow the filter to see more."
     }
@@ -81,8 +90,8 @@ struct MobileTrashView: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 trashHeader
                 filterRow
-                if model.trash.isEmpty {
-                    emptyLine(Self.emptyTrashLine)
+                if let line = Self.emptyStateLine(model) {
+                    emptyLine(line)
                 } else {
                     ForEach(model.trash, id: \.id) { item in
                         trashRow(item)

@@ -167,7 +167,7 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 | VM-43 | IN-PROGRESS — `insuringBuffer: true` wired at the ONE phone call site (`MobileBlockHistory.swift` `restore`; grep of `VariorumMobile/` + `Shared/` finds no other); pins written; compile + red/green **PENDING** | `MobileBlockHistoryTests` |
 | VM-3 | IN-PROGRESS — the lesson's two prose blocks rewritten (`MobileTutorialSeeder.swift`, "divide with takes"); the walk pin unwrapped from `withKnownIssue` and flipped to keep-on-top; an exact-words pin added; compile + red/green **PENDING** | `MobileTutorialStructureWalkTests` |
 | VM-84 | IN-PROGRESS — piece 1 (`2d66e9a30`): the seam `MobileWriteScreen.dateChipDay` (read `header`, behaviour unchanged) + the pin, red at that commit by design; piece 2: the fix (an observed `entryDate` mirror); compile + red/green **PENDING** | `MobileNoteEntryDateTests` |
-| VM-33 | NOT-STARTED — the answered flag (`trashListingLoaded`), the Mac's VX-678 rule | `MobileTrashTests` |
+| VM-33 | IN-PROGRESS — REAL by reading (the first render precedes `.task`; `trash` starts `[]`); the Mac's rule built on the phone model; pins written; compile + red/green **PENDING** (the red-on-old run is the proof the brief asked for) | `MobileTrashTests` |
 
 **Traced mechanisms (read in this session, before any code):**
 - **VM-16.** `MobileUndoDoor.runUndo` / `redo` called `UndoStack.undo(with:)` / `redo(with:)`, which return the
@@ -232,6 +232,20 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
   holds the chip's one read under `withObservationTracking` (SwiftUI's re-render mechanism) because the chip's
   rendered day is not in the accessibility tree (its label is "Entry Date"); the seam commit `2d66e9a30` is the
   "old" for the revert (it reads `header`, byte-for-byte the shipped behaviour).
+- VM-33: **check first, by reading** — `MobileTrashView` is pushed; its body draws on the first render, and the
+  observation starts in `.task(id: model.restartToken)`, which SwiftUI runs only after that render; `trash` starts
+  `[]` (`MobileTrashModel`), and the body drew "Nothing in the Trash." on `model.trash.isEmpty`. So every opening of a
+  non-empty Trash painted "empty" until `observeTrash`'s first value landed — the Mac's VX-670 mechanism exactly.
+  **The proof is the pin**, which holds the observation back by construction (the surface is built and laid out
+  with no `await`, so the `.task` cannot run) and reads the first paint; it must go red on the pre-fix tree in the
+  stage window, or the member is hollow and gets reverted. **Fix:** `MobileTrashModel.trashListingLoaded` (lowered
+  when `startTrash` begins, raised by each value) and `MobileTrashView.emptyStateLine(_:)` (nil until answered, then
+  the line when empty). **Not hoisted:** the Mac's rule (`RecoveryViewModel.trashEmptyStateLine`) is a computed
+  property over the Mac model's own state (its filter, its unfiltered-total flag, `RecoveryCopy`'s filter-aware
+  words), not a pure function, so per the brief the phone carries the same two-line answered gate on its own
+  model rather than a hoist. **Noted, not touched (out of scope):** under a kind filter the phone's line still
+  says "Nothing in the Trash." even when other kinds wait — the Mac's ledger-row-2 rule; the phone's Trash face is
+  wave 2's (VM-96).
 
 ### BATCH A — books (VM-81 · VM-83 · VM-21)
 
