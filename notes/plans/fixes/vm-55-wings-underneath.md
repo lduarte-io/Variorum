@@ -23,6 +23,10 @@ just shows up in one bunch but it's hard to find items in the library." · "I ha
 well with many." · on which acts show a line: "Only removals and refusals" · "i feel like it'll feel too noisy" ·
 "I think we need to word things more simply."
 
+Mid-run, in chat (2026-11-19), verbatim: on the Protection screen's receipts being ticketed under the lock
+umbrella (VM-103) at closeout — "yeah that's fine." · on the ladder — "also, up to 5 review rounds as long as a
+major is found."
+
 Rulings this run builds (`notes/plans/vm-44/plans/sitting-1-rulings.md`): SW-1 (the wing's name is the title on
 every root; the swipe, dots and dropdown are wave 2) · SW-5 (a quick note lands in the current wing, in the Pool) ·
 Receipts (no line for ordinary acts; a short line with Undo only when something leaves the page, and for
@@ -49,7 +53,8 @@ VM-61 · VM-59 waits on nothing. Commit messages say `Part of VM-<member>`.
 Fable orchestrates · one `opus-implementer` per batch, a fresh one each batch, strictly one at a time · the cold
 review is `fable-reviewer` (the standing default; batch 2 edits error-wording expressions inside the phone's
 editor-seam files, and batch 1 changes what a shared default means on iOS) · a fresh reviewer per ladder round,
-hard cap three.
+cap FIVE for this run at her word above (CLAUDE.md's standing cap of three is not edited on it): a round that
+surfaces a new BLOCKER or MAJOR earns the next, up to round 5; a round with none closes the ladder.
 
 ## What every batch reads first (the implementer's own reading, never delegated)
 
@@ -59,6 +64,35 @@ umbrella inherits") · `notes/plans/vm-44/plans/minted/umbrella-02.md` · `notes
 `notes/plans/vm-44/audit/A-shell-library-wings.md` (§1D, §1F, §1I, §3.1 for every batch) · this file, whole ·
 `notes/SurfaceContracts.md` — "The app" (the Messages bullet and the wing label) and "The Bookcase and books"
 (the wing switcher bullet) · the batch's mockup build notes named below.
+
+## The stage this window (the coordinator `nov18`'s protocol, received at kickoff)
+
+- REQUEST → READY (a separate ping, exact TYPE lists) → GO (only from nov18, with the exact claim line) → RELEASE
+  (release, then ONE result line). Claim name `vm-55`. Implementers relay through the orchestrator.
+- `xcodebuild build` / `build-for-testing` and headless `swift build`/`swift test` need no stage; EVERY
+  `xcodebuild test` (test-without-building included) and any simulator boot does.
+- Never wait on her while holding a claim. Ask for more time before T−10; `Tools/stage renew` RESETS the clock.
+- QUIET windows (every whole-Mac-target run, every merge-gate window): no whole-package `swift test`, no cold or
+  full build-for-testing while one is announced.
+- Result lines: executed counts or no verdict; `-only-testing` takes TYPE names in a zsh ARRAY; "Executed 0" with
+  TEST SUCCEEDED counts only for a Swift Testing suite, with its pass count; name EVERY failing test; say the sim is
+  shut down, no Variorum instance left, any new crash report or Problem Reporter window; say which reds were load
+  re-runs (a timing red under load is re-run alone before it counts).
+- The phone suites run on the window's one standing simulator (iPhone 17 Pro, iOS 26.2; its id is in the
+  coordinator's messages, never in a record — the pre-push guard refuses it), shared by the four mobile runs one at
+  a time: boot fresh inside the claim, let it settle, shut it down before release. The closing walk seeds its
+  two-wing library on a DEDICATED device this run creates and deletes at close.
+- This run's windows: batches 1 and 2 one READY each; batch 3 one claim, two legs (the Mac wing suites — the Mac
+  test host is the dev-store Debug app, dismiss a What's New sheet — then the phone); the merge window is three
+  claims in order: whole phone target · whole Mac target (QUIET) · the walk. The merge GO rests on whole-target
+  phone AND Mac of the tree that merges; code landing after means one more whole-target window.
+- Merge: ask nov18 first. Umbrella VM-78's VM-81 waits on this run's VM-62, which argues for this run merging
+  before VM-78; batch 3's file moves are the hardest thing for the others to merge over — tell nov18 as soon as the
+  merge is in sight.
+- Overlaps nov18 tracks: `Shared/AppSession.swift` (VM-64) · `MobileEditorViewModel` (VM-64, VM-78) ·
+  `MobileShellView` (VM-47) · `MobileShelfViewModel`, `MobileCreateBook`, `MobileMembership`, `MobileTrash*`
+  (VM-78) · line-level type edits across most phone files (VM-47).
+- DerivedData: one dir per batch under `App/Variorum/DerivedData/vm55-*`, superseded ones dropped.
 
 ## Scope calls made at kickoff (the orchestrator's; each is on the ratify list)
 
@@ -80,7 +114,7 @@ umbrella inherits") · `notes/plans/vm-44/plans/minted/umbrella-02.md` · `notes
 6. **Protection faces are not touched.** `Features/Protection/` and `Shared/Protection/` are Castle faces
    (CastleRules is their contract, and the wave's custody slot is VM-64's). VM-61's audit row D-27 (Protection's
    receipts wait until the screen reopens) is the remainder; the closeout tickets it into the lock umbrella
-   (VM-103).
+   (VM-103) — confirmed by her mid-run ("yeah that's fine.").
 7. **A line with Undo only where an undo road already exists** (structural undo, Put back, unarchive). No new
    undo road is invented here; a removal whose Undo needs one is named in the batch record and stays with the
    umbrella that owns its act.
