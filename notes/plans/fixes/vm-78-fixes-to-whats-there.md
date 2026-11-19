@@ -2735,9 +2735,9 @@ clash, the implementer STOPS and reports before any file under `App/` or `Source
 
 | Piece | State |
 |---|---|
-| 0 — this section, its LIVE STATUS and the plan (written before the merge starts) | IN-PROGRESS — this commit |
-| 1 — the merge commit (`git merge --no-ff origin/main` at `ad5053002`) | NOT-STARTED — two textual conflicts expected, resolved as "The plan" says; any other conflict, or one under `App/` or `Sources/`, stops the session |
-| 2 — the reads git does not flag | NOT-STARTED — the list at the plan's foot |
+| 0 — this section, its LIVE STATUS and the plan (written before the merge starts) | DONE (`d73f63067`) |
+| 1 — the merge commit (`git merge --no-ff origin/main` at `ad5053002`) | DONE (`d55d22db9`, parents `d73f63067` and `ad5053002`) — exactly the two expected conflicts, both in notes, resolved as planned ("The merge commit" below); nothing under `App/` or `Sources/` resolved by hand |
+| 2 — the reads git does not flag | DONE (this commit) — "The reads, each with what it showed" below: no clash; nothing under `App/` or `Sources/` changed |
 | 3 — the renumbering: this run's parity row PL-78; the next free QUESTIONS number #279 | NOT-STARTED |
 | 4 — both targets `build-for-testing` on the merged tree, headless | NOT-STARTED |
 | 5 — the red patch's `git apply --check` on the merged tree; the guards' window recipe corrected in place | NOT-STARTED |
@@ -2800,6 +2800,133 @@ AppSpec's three sites; the core — VX-981's `UndoStack` diff against the phone'
 `redoReporting`) and its two pin types, and every reader of the two changed query files under the phone and
 `Shared/`; the symbol sweep (what VX-981 changed or removed under `Shared/` and `Sources/` that a file this run
 changed calls); "The map, final" against the merged tree; and the guards G1 and G2 by their predicates.
+
+**The merge commit (piece 1): `d55d22db9`** — `git fetch origin` first (main still `ad5053002`), then `git merge
+--no-ff --no-commit origin/main`: git reported exactly the two planned conflicts (`notes/MobileSoul.md`,
+`notes/SurfaceContracts.md`; `git diff --name-only --diff-filter=U` named those two and no other) and auto-merged
+the other three both-sides files. A true two-parent merge (parents `d73f63067`, `ad5053002`); pushed with a
+fast-forward-only pull before it, never a rebase (a rebase would flatten the merge).
+- **`notes/MobileSoul.md`** — both rows kept: VX-981's row stays **PL-77** where main has it; this run's row follows it
+  as **PL-78** (its heading was its one "PL-77": the row's other PL numbers — PL-23 … PL-76 — each name another row,
+  counted with `grep -o`). Against main the merged file adds exactly this run's one row; against this run's tip it
+  adds VX-981's row and changes this row's number, nothing else.
+- **`notes/SurfaceContracts.md`, line 34** — main's line with this run's two clauses at their own places, done by an
+  exact-substitution script (each substitution asserted to match once) that also built the other road — this run's
+  line with VX-981's one sentence inserted before "The State section ends with the wing row" — and asserted the two
+  results equal. Checked after: the merged file against main differs by exactly this run's five clauses (`:30`,
+  `:34` ×2, `:36` ×2, word-diff), and against this run's tip by exactly VX-981's hunks (`:14`–`:15`, `:34`'s one
+  sentence, `:38`, `:56`). `grep -n PENDING notes/MobileSoul.md notes/SurfaceContracts.md` answers nothing.
+
+**The reads, each with what it showed (piece 2; by reading — nothing here was built or run except where it says).**
+- **`BookSettingsSheet.swift` (Mac), merged.** The merged file against main is exactly this run's one hunk
+  (`CollectingCopy`, `:197–204`: `finishedCaption = BookStateCopy.finishedMeans + " A finished book opens as pure
+  text."`, `sealedCaption = BookStateCopy.sealedMeans`); against this run's tip it is exactly VX-981's diff, line
+  for line (the `+`/`-` lines of `git diff HEAD^1 HEAD` equal those of `git diff eb18888db origin/main`, by `diff`):
+  `BookSettingsFace.PrivateRow` / `privateRow(isPrivate:isDailyJournal:)` (`:292–304`), `isDailyJournal` (`:335`),
+  the facts read (`:377`, `:382`), `setPrivate`'s guard (`:437`), `factsKey` (`:642`), the Private row (`:826–837`). **Do they
+  meet?** In ONE function only: `state(_:)` (`:780`) reads this run's two constants at `:806` and `:812` and draws
+  VX-981's Private row at `:826–837`, but neither run changed a line the other wrote — this run changed the two
+  constants' definitions, not their use sites; VX-981's row reads `PrivateMarkCopy`'s captions, never
+  `CollectingCopy` or `BookStateCopy`; no shared state (VX-981's `isDailyJournal` is read only by its own row and
+  `setPrivate`), no shared string. No clash.
+- **`ShelfViewModel.swift` (Mac), merged.** Against main: exactly this run's diff; against this run's tip: exactly
+  VX-981's (both by the same `diff` of `+`/`-` lines). This run's lines: `nonisolated extension BookcaseCopy`
+  (`:737`, its doc `:733–736`) — the type itself is declared once, `nonisolated enum BookcaseCopy` in
+  `Shared/CollectReceiptCopy.swift:21`. VX-981's: `privateBookMarks: [String: Queries.PrivateBookMark]` (`:79`, its
+  doc `:74–78`) and `holdPrivateMarks`' `:367–368`. **Do they meet?** No — different members of different types, no
+  shared string. `git grep privateBookIDs` over `App/`, `Sources/` and `Tests/` at the merged tip: no hit anywhere
+  (VX-981 renamed every reader itself: `ShelfView.swift`, `LibraryCatalog*`, `BookPanel*`). And VX-981's code adds
+  no reader of any word family this run moved or changed (`BookcaseCopy`, `CollectingCopy`, `BookStateCopy`,
+  `ArrivalsCopy`, `CollectReceiptCopy`, `RecoveryCopy`, `StructuralUndoCopy`, `ShelfOrder`, `BookcaseBoard`,
+  `AddToBookCopy`, `MembershipChoice`, `BookArrivals`, `BookStateDoors`, `ShellActions`): 0 added lines under
+  `App/`, `Sources/`, `Tests/` name one.
+- **`notes/AppSpec.md`, merged.** This run's two §9 sites survive (word-diff against main: "on both platforms" added at
+  each, "PROVISIONAL," dropped at each — "Quiet auto-commits": "…passed true by the flush-first restore doors on
+  both platforms — QUESTIONS #274)"; `restoreCommit`: "…the restore doors on both platforms flush pending typing
+  first and pass it true (QUESTIONS #274; VX-849)"; `grep -c 'PROVISIONAL, QUESTIONS #274'` → 0). VX-981's §12 line
+  survives (word-diff against this run's tip: only ", and the eye marks everything the fence holds, the daily
+  Journal and its entries included, derived and never stamped (VX-1007)" after "(VX-934)" in the MCP door bullet).
+  **Contradiction?** None: one is the insured restore's doors, the other the Private eye's reach; neither sentence
+  names the other's subject, and VX-981's says nothing of the phone (which draws no eye yet — VX-981's PL-77 (a),
+  VM-209).
+- **The core — `Operations/UndoStack.swift` against the phone's undo door.** VX-981's diff is 77 added lines and NO
+  removed line (`git diff eb18888db HEAD`): the `Walk` struct, `walkObservers`, `newestEntryID`,
+  `entryIDs(newerThan:)`, `addWalkObserver` / `removeWalkObserver`, `notifyWalk`, and one line in each of
+  `undoReporting` and `redoReporting` — `notifyWalk(Walk(…, changed: changed))` after `notifyChange()` and before the
+  `return`. What the door relies on (`MobileUndoDoor.swift` `runUndo` `:213`, `redo()` `:271`): the return shape
+  `Outcome?` with `.label` and `.changed` — UNCHANGED (`public struct Outcome` `:85`, both functions' signatures
+  `:431`, `:467`); the quiet-press signal `changed == false` — UNCHANGED (the same `entry.inverse` / `reapply`
+  result; the lock section that retires a quiet entry is untouched); nil for nothing to undo or redo — UNCHANGED (the
+  same `guard`s); ordering — the stack's mutation and `notifyChange()` happen exactly as before, and the one new call
+  runs after both, synchronously, before the door sees the outcome. With no observer `notifyWalk` copies an empty
+  dictionary and calls nothing. The ONLY registration in the tree is the Mac's MCP door
+  (`App/Variorum/Variorum/Features/MCP/MCPDoor.swift:395`, removed at `:560`; the phone target compiles
+  `VariorumMobile/` and `Shared/`, neither of which names `addWalkObserver` — `git grep`). The two pin types read
+  `topLabel`, `topRedoLabel`, `depth`, `redoDepth`, `UndoStack.Entry` and `PendingUndoWarning`; none of those
+  members, nor `register`, `withCompound`, `setChangeObserver` or `pendingUndoWarning`, appears in VX-981's added
+  lines. **Nothing the door or its pins rely on changed.** VX-981's own parity row says the same from its side
+  ("the phone's undo door runs over the same stack and registers no observer"). Both pin types join the guards'
+  window's green leg (piece 5) as the run-time check.
+- **The core — the two query files' readers on the phone and in `Shared/`.** VX-981 changed `privateBookMarks` and
+  `privateBookMarksDrawn` (return type `Set<String>` → `[String: PrivateBookMark]`), widened `PrivateMark.init`
+  (two defaulted parameters — source-compatible) and added `journalFenced`/`isFenced`, and factored `mcpNoteFacts`'
+  two journal legs into named fragments (`journalEntryLegForNote`, `journalMemberLegForNote`, `fenceMemberRowSQL`) —
+  the same SQL text, the same signature. `git grep` of `VariorumMobile/`, `VariorumMobileTests/` and `Shared/`, at
+  this run's tip and on main, for every one of those names and for `PrivateMark`, `PrivateMarkHold`, `Queries.mcp`,
+  `MCPGrant`, `PrivateMarkCopy`, `PrivateMarkFace`: **no reader**; the one hit is a doc comment in
+  `Shared/WingsModel.swift:57` naming `Queries.mcpWingReaches`, which VX-981 did not touch.
+- **The sweep — what VX-981 changed or removed under `Shared/` and `Sources/` that a file THIS run changed calls.**
+  Under `Shared/`: nothing changed. Under `Sources/`, the changed or removed declarations (`git diff eb18888db
+  origin/main -- Sources/`, every removed line declaring a `func`/`var`/`let`/`init`/`case`/type): the core three
+  above; and in `VariorumMCP` / `VariorumMCPSocket` — `MCPSocketTransport.init(fd:replay:)`, `readLines`,
+  `MCPSession.announceToolsChanged`, `MCPServerHost.StartStep`, `MCPOpeningWindow.readLine` / `nextLine` /
+  `read(startingWith:from:answeringOn:)` / `read(from:answeringOn:)` among others. This run's 41 changed Swift files
+  (`git diff eb18888db f411f2246 --name-only`) grepped for every one of those names plus `privateBookIDs`,
+  `MCPServerHost`, `MCPSession`, `MCPShowTool`, `MCPToolCatalog`, `MCPWriteTools`, `MCPHandshake`, `MCPReceipt` and
+  the walk API: hits ONLY in `BookSettingsSheet.swift` and `ShelfViewModel.swift`, and only in VX-981's own lines
+  there (the reads above show those merged files equal each side's own diff). None of the 41 imports `VariorumMCP`
+  or `VariorumMCPSocket`. **No call of this run's meets a changed symbol.**
+- **"The map, final" (round 4's file) against the merged tree.** VX-981 changed NO phone or `Shared/` file: `git diff
+  HEAD^1 HEAD -- App/Variorum/VariorumMobile App/Variorum/VariorumMobileTests App/Variorum/Shared` is 0 bytes, so every
+  line the map names stands byte for byte as at `f411f2246`, line numbers included. Checked on the merged tree by
+  grep: `MobileWriteView.swift` — `let day = Self.dateChipDay(model)` (`:444`), the seed `dateField =
+  Self.dateChipDay(model) ?? ""` (`:446`), the label reads `day` (`:449`, `:451`), `.accessibilityLabel("Entry
+  Date")` (`:455`), `dateChipDay` returns `model.entryDate` (`:463–464`), no `.header?.entryDate` in the file;
+  `MobileEditorViewModel.swift` — `private(set) var entryDate: String?` observed (`:118`; only `header` is
+  `@ObservationIgnored`, `:137`), the one `header = value` inside `adoptHeader(_:)` (`:695–696`) with `entryDate =
+  value?.entryDate` two lines under it (`:698`); `MobileCreateBook.swift` — `kindRow`/`kindDoor` (`:319`, `:328`)
+  over `kindLabel`, `caption(for: model.kind)` (`:316`), `noTagsLine` (`:343`); `MobileMembership.swift` —
+  `memberRowName(for: book)` (`:347`), `kindMark(for: book)` (`:351`), Diverge inside `if
+  MobileMembershipModel.rowCarriesDiverge(book)` (`:357`) with `.font(tokens.small)` at `:361`, `addRowLabel` on both
+  add lists (`:388`, `:395`), the collect line `say(AddToBookCopy.collected(result, gatheringName: book.name), as:
+  .refusal)` (`:200`); `MobileBookDetails.swift` — `deleteRow(_ kind: ReadingKind)` (`:579`) with
+  `deleteDoorTitle(for: kind)` and `.accessibilityHint(RecoveryCopy.deleteBookKeepsItsNotes)` (`:584`, `:596`,
+  `:598`), `finishRow(_:)` wholly inside `if let act = MobileBookDetailsModel.finishRowAct(for: book.reading)`
+  (`:627–628`) with `requestFinish()` / `setFinished(false)` (`:633–634`), the verb and caption with `.lineLimit(3)`
+  and the row's label and hint (`:640`, `:647`, `:650`, `:659–660`), `unarchiveRow(_:)` (`:551`) with its two
+  `.font(…)` at `:558`, `:563`, `.lineLimit(3)` (`:565`), its label and hint (`:571`, `:574`), `deleteBook()`'s
+  `movedToTrashReceipt(.book, isGathering: book?.reading.kind == .gathering)` (`:306–307`), `nameLine` (`:175`), the
+  Finish confirm on `finishConfirmPresented` / `pendingFinish` (`:247`, `:479–481`); `MobileShelfView`'s `rowActs`
+  with no Pin (`:313`); `MobileTrashView`'s `emptyStateLine` gate on `trashListingLoaded` (`:80`) and `rowTitle`
+  over `RecoveryCopy.rowKind(item)` (`:295`); `MobileShelfFaces.deleteDoorTitle(for:)` (`:140`); `MobileUndoDoor`'s
+  `undoReporting` / `redoReporting` (`:213`, `:271`); `MobileLibraryView.swift` — this run changed comments only
+  (no non-comment `+`/`-` line against `eb18888db`); the three guards present (G1 `MobileMembershipTests.swift:396`,
+  G2 `MobileBookFixesTests.swift:749`, G3 `:957`/`:967`). **Every map line is still true of the merged tree.** Two
+  map lines are facts of OTHER trees, not checkable here and untouched by this merge: VM-47's styling types
+  (`.phoneType`, `tokens.phone`, `PhoneInlineActStyle`, `PhoneSegmentedChoice` — on VM-47's branch only) and VM-64's
+  `refreshChip()` / `inFlight` observer (on VM-64's branch only).
+- **The guards by their predicates, over the merged sources (grep, comments included and then read).** G1
+  (`\.header[?!]?\.entryDate\b`, `.swift` under `VariorumMobile/`, the model's file skipped): **no hit**, 87 files in
+  the walk (> 60) — what round 4's record says it answers at HEAD (green). G2 (string literals, whole-word "smart",
+  `VariorumMobile/` 88 files and `Shared/` 148 — the same counts round 4 recorded at HEAD): the only hits inside
+  string literals are the two exempt ones, `MobileTodayDoor.swift:76` (the `.wrongKind` sentence, VM-85) and
+  `MobileTutorialSeeder.swift:295` ("hand-picked, a dated journal, or a smart book collecting by ", VM-212); every
+  other whole-word "smart" in those roots sits in a comment — what round 4's record says it answers at HEAD (green,
+  both exemptions matched once). G3 is a hosted face test with no source predicate; the two files it hosts
+  (`MobileMembership.swift`, `MobileBookFixesTests.swift`) are byte-identical to `f411f2246`'s.
+- **Also re-checked, for the handoff's "Three canon lines I did not change":** on the merged `SurfaceContracts.md`
+  all three still stand as the handoff quotes them ("N waiting at the door will be dismissed" once; "PROVISIONAL
+  P-849-5, QUESTIONS #274; VX-849)"; "PROVISIONAL P-849-4, QUESTIONS #274; VX-443)") — VX-981 touched none of them.
 
 ## The ladder
 
