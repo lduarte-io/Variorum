@@ -418,13 +418,13 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 3.13 | VM-54's red-on-old — run by the ORCHESTRATOR from the existing snapshot `~/dev/variorum-vm-47-rol3` (built, row 3.6) | NOT-STARTED |
 | 3.14 | The walk — ONE walk for batches 1, 2 and 3 on device `vm47-walk3`, in two parts with a seam between (each about 30 minutes; part A ends with the device SHUT DOWN, its seeded library kept; part B ends with `walk_close` and the device's deletion): A = create, boot, the seed, the core screens under the sea-glass × Study/Terminal × light/dark × default/AX5; B = boot, the core under teal & rust (Study light, Study dark, default), the wider pass × sea-glass Study light default · Terminal dark default · Study light AX5, the voice row once per voice, VM-54's flip once per voice; every capture looked at against the sheet | NOT-STARTED |
 | 3.15 | The record close: §6 "Batch 3 — results" PENDING slots filled (counts, each red and its disposition, VM-54's red-on-old line, the walk screen by screen); one line each under batches 1 and 2's results that their walk is this one; §5 for any new PROVISIONAL; these rows flipped | NOT-STARTED |
-| 4 | The bottom bar (VM-52) | IN-PROGRESS — pieces below (implementer: Opus, 2026-11-19; build products `DerivedData/vm47-b4`) |
+| 4 | The bottom bar (VM-52) | READY for the stage — pieces below (implementer: Opus, 2026-11-19; build products `DerivedData/vm47-b4`, the walk `DerivedData/vm47-walk4`); W-009 DEFERRED with owners (P-47-20) |
 | 4.0 | Reading: §1–§6, CLAUDE.md + canon, the resiliency protocol, MobileSoul §3–§5, the catch-up plan's rules, sitting-1 rulings (LK-5, SW-1, LK-6), her words, the sizing sheet (B, C, E's tab bar), audit G (T1, §3.3, §4.5, §5.5, §5.7), audit A (A3, §2, §4), the mockup's bar and its build notes (and the book, trash and note mockups' top rows), the shell, band, router, every pushed screen's navigation lines, the layer, the controls, the shell's and the shelf's tests; the sibling branches' shell diffs read (VM-55's message line keys its inset to the bar; VM-55 and VM-64 tests drive the tab by the word "Shelf") | DONE |
-| 4.1 | The bar's face, `Features/Shell/MobileTabBar.swift` (new): Starred · Bookcase · Library at the `tab` role (17, chrome — holds at xxxLarge), the current word semibold in ink on a chip (the wash, radius 12), the others regular in the corrected muted; each cell a third of the width and at least 56 tall (LK-5's 56 pt target — the whole cell answers); the chip's side padding 16 → 8 → 4 by a pure fit rule, the word shrinking to the floor only when even 4 cannot fit (320 pt at xxxLarge in Terminal); the bar on the room to the home indicator, the hairline above; the shell's `tabBar` reads it; Shelf → Bookcase in the word and the spoken label (SW-1), `MobileNavigationTests` moved with the reason; pins `MobileTabBarTests` (geometry + the fit rule) | IN-PROGRESS — the face is in (`9c76b335c`: `MobileTabBar.swift`; `PhoneType`'s one additive form, `phoneType(_:_:weight:shrinkingToFloor:)`; the shell's `tabBar` reads it; `MobileNavigationTests` moved to "Bookcase"); the phone APP target builds GREEN into `vm47-b4`. The pins (this commit): `MobileTabBarTests` — the fit (pure, every shipped width × both voices × xSmall…AX5; Display Zoom shrinks to the floor and still fits; the rule's order), the bar alone (three cells a third wide and ≥ 56 tall, one row in band order, the selection, buttons, the chrome holding at AX5; each door calls the road with its page); phone `build-for-testing` GREEN into `vm47-b4`. REMAINING: the Mac build (`Shared/` changed); counts PENDING the stage |
-| 4.2 | Where it shows: on the three roots (as today) and on every pushed LIST (a book's contents, Trash, Archived, Versions' listing — the shell's destination builder); hidden inside a note (Write), on a book's Read page, in Versions' reader and on Protection (PROVISIONAL P-47-18 — the words' hold); a tab tap from a pushed list returns to that root (the left stack pops to its root, so a hidden stack is always at its root — the invariant VM-55's wing landing relies on; PROVISIONAL P-47-19); pins on the mounted shell | IN-PROGRESS — the code is in (`9c76b335c`: the destination builder's three `.safeAreaInset` lines and `MobileVersionsScreen`'s `listingBar`; `tabSelected` + `popToRoot`; P-47-18's comment on the Protection route). The pins (this commit, in `MobileTabBarTests`): the mounted shell's doors 56 tall, a third of the screen, at the foot (RED ON OLD for "Starred" and "Library" — the pre-batch doors were word-sized); a pushed list (the Trash) wears the bar, the current tab returns to the root, another tab leaves the stack at its root; inside a note no door on screen, the Versions listing wears it and a tab from it closes the note under it; the Versions reader wears none; the route rule as the destination builder's source. REMAINING: §5's two rows; counts PENDING the stage |
-| 4.3 | W-009 — the pushed screens' top edge: each screen's system bar traced from the code (table in §6), then the fix (design PENDING the external facts on iOS 26's hidden-bar swipe-back) | NOT-STARTED |
-| 4.4 | Both schemes `build-for-testing` into `DerivedData/vm47-b4` (the Mac only if `Shared/` changed); the walk's capture list; READY for the stage | NOT-STARTED |
-| 4.5 | §6 "Batch 4 — results" (the bar with pointers and sizes, where it shows and why, each pushed screen's top edge before/after, the `MobileShellView.swift` line ranges changed, tests PENDING, PROVISIONALs in §5, self-assessment) | NOT-STARTED |
+| 4.1 | The bar's face, `Features/Shell/MobileTabBar.swift` (new): Starred · Bookcase · Library at the `tab` role (17, chrome — holds at xxxLarge), the current word semibold in ink on a chip (the wash, radius 12), the others regular in the corrected muted; each cell a third of the width and at least 56 tall (LK-5's 56 pt target — the whole cell answers); the chip's side padding 16 → 8 → 4 by a pure fit rule, the word shrinking to the floor only when even 4 cannot fit (320 pt at xxxLarge in Terminal); the bar on the room to the home indicator, the hairline above; the shell's `tabBar` reads it; Shelf → Bookcase in the word and the spoken label (SW-1), `MobileNavigationTests` moved with the reason; pins `MobileTabBarTests` (geometry + the fit rule) | DONE (`9c76b335c` the face, `35fc0a461` the pins) — `MobileTabBar.swift` (`MobileTabBar`, `MobileTabBarMetrics`); `PhoneType`'s one additive form `phoneType(_:_:weight:shrinkingToFloor:)`; the shell's `tabBar` reads it; `MobileNavigationTests` moved to "Bookcase"; `MobileTabBarTests` (10). Phone and Mac `build-for-testing` into `vm47-b4` GREEN at `35fc0a461`; counts PENDING the stage |
+| 4.2 | Where it shows: on the three roots (as today) and on every pushed LIST (a book's contents, Trash, Archived, Versions' listing — the shell's destination builder); hidden inside a note (Write), on a book's Read page, in Versions' reader and on Protection (PROVISIONAL P-47-18 — the words' hold); a tab tap from a pushed list returns to that root (the left stack pops to its root, so a hidden stack is always at its root — the invariant VM-55's wing landing relies on; PROVISIONAL P-47-19); pins on the mounted shell | DONE (`9c76b335c` the code, `35fc0a461` the pins) — the destination builder's three list lines + `MobileVersionsScreen`'s `listingBar`; `tabSelected` + `popToRoot`; P-47-18 and P-47-19 in §5; counts PENDING the stage |
+| 4.3 | W-009 — the pushed screens' top edge: each screen's system bar traced from the code (table in §6), then the fix (design PENDING the external facts on iOS 26's hidden-bar swipe-back) | DONE (the trace, this commit) — §6's table: every pushed screen's top edge from the code; the fix DEFERRED with owners (P-47-20: the system bar kept — the back door and both swipe-backs; the mockups keep that row) — the external facts from one Sonnet lookup (read-only); the walk captures every top edge |
+| 4.4 | Both schemes `build-for-testing` into `DerivedData/vm47-b4` (the Mac only if `Shared/` changed); the walk's capture list; READY for the stage | DONE — phone and Mac `build-for-testing` into `DerivedData/vm47-b4` GREEN at `35fc0a461`; the walk driver + runbook (gitignored `VM47Walk4Driver.swift`, `walk4.zsh` — `test40_bar`, 73 captures into `b4/`, device `vm47-walk4`) built GREEN into `DerivedData/vm47-walk4` from this tree; READY for the stage (the window's lines are §6 "Batch 4 — results") |
+| 4.5 | §6 "Batch 4 — results" (the bar with pointers and sizes, where it shows and why, each pushed screen's top edge before/after, the `MobileShellView.swift` line ranges changed, tests PENDING, PROVISIONALs in §5, self-assessment) | DONE (this commit) — §6 "Batch 4 — results"; P-47-18…21 in §5. Counts, the optional red-on-old line and the walk's findings PENDING the stage |
 | 5 | Settings (VM-53, VM-27) | NOT-STARTED |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks. The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) is still queued |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
@@ -459,6 +459,10 @@ Each batch's implementer adds its own piece rows under its batch line as it star
 | P-47-16 | The ground under the note in WRITE — R-47-1 ("prose should not be on the tint"), whose test is the paper wherever her words are written; the editor's ground is one line in the fenced `MobileEditorTextView.applyVoiceChrome` | (a) the PAPER — `tokens.surface` as the settings road resolves it (the voice's own paper in light, the palette's hued paper in dark, R51's room staying black): the Mac's editor (`EditorSurfaceChrome.paper`) and the sheet's note body · (b) the voice's OWN room under every palette (the Mac's `ReadingPageTokens.room` precedent, R-13u-10) — never the tint, but not the paper; batch 3's first build · (c) the library's room — the tint under her words, against R-47-1 | (a), by piece 3.10 (the record's authorized exception to rule 7): `Face.paper` (= `surface`, the Mac's name for it), the text view's background reads it (ONE line), the Write screen's ground and masthead `tokens.surface`; the option left is (b) | PROVISIONAL (batch 3, piece 3.10) — the walk's look at the caret, the selection wash, the take tint, a callout's wash and the comment mark on the paper is row 3.14 |
 | P-47-14 | The role of a field's typed text (a tag, a book's name, a search, a passphrase) — the sheet names its two scaling classes (her words: full range; chrome: holds at xxxLarge) and places field text in neither | (a) as built — the `control` role, chrome: it grows to xxxLarge (17 → 23 pt) and holds, so a one-line field stays 44 pt at every size (a 23 pt line + 8 + 8 ≈ 43.4 fits the floor) · (b) her words' class — what she types into a field scales across the whole range like the sheet's "her words", so fields grow past 44 at the accessibility sizes | (a); the control is unchanged (`phoneField`'s `role:` already carries either); the batch-2 field pin first assumed (b) and was corrected to (a)'s arithmetic (`7762aef3b`) | PROVISIONAL (batch 2, the closer) — hers: which class a field's text is |
 | P-47-17 | Write's masthead ground (her title, the four tools, the chips — one view with one background) — piece 3.10's text says both "the two ground lines batch 3 named follow, so the screen ground and the editor agree" and "the masthead stays chrome, on the room" | (a) the PAPER, one ground with the page and the editor — the Mac's note masthead (`PostDetailView`, `.background(tokens.surface)`) and the sizing sheet's note title (drawn on the paper; R-47-1's test: her words on the paper) · (b) the library's room (chrome on the room) — puts her title on the tint in light · (c) the title on the paper and the tools on the room — needs the masthead's rebuild (VM-148: the title on its own row) | (a) — the Mac's behaviour first, then the sheet (§2 rule 3); (b) is one line (`MobileWriteView`'s masthead `.background`) | PROVISIONAL (batch 3, piece 3.10, the closer) — the orchestrator's read of its own clause, then hers |
+| P-47-18 | Where the bar shows beyond her ruling's two words ("Roots and lists, not notes") — the pushed screens that are neither a list nor a note | (a) the three roots and the pushed LISTS only (a book's contents, Trash, Archived, Versions' listing); none on a book's Read page or Versions' reader (her words read full-screen — "not notes" read as "not where her words are the page"), none on Protection (a settings page; while new twelve words are held it gives no way off but her close — `navigationBarBackButtonHidden` — and a tab would be one) · (b) every pushed screen that is not Write (Read, the reader and Protection included) — the literal "not notes" · (c) Protection with the bar except while words are held | (a) — the calmer screens, and the words' hold unbroken. Settings' own pushed screens (the tag manager, Acknowledgments, the edit trace) live inside the Settings SHEET, which covers the bar in every option | PROVISIONAL (batch 4) — hers: whether Read and Protection carry it |
+| P-47-19 | A tab tapped from a pushed list — "returns to that root" — and what happens to the stack she leaves | (a) the stack being left returns to ITS root (unanimated, as its page slides away), then the page changes; the current tab from a pushed list pops to its root — so a hidden stack always stands at its root (the band never reveals a pushed screen; VM-55's wing landing relies on the same) · (b) the system tab bar's memory: each stack keeps its place, a tap on the current tab pops to its root — a swipe could then land on a pushed screen where the band is masked, and a note under a list (Versions over its note) stays mounted out of sight | (a), `MobileShellView.tabSelected`; a note under a list closes exactly as Back would close it (its leaving savepoint included) | PROVISIONAL (batch 4) |
+| P-47-20 | W-009 — "an empty system bar with a back chevron above the app's own masthead" (inferred from code; not yet seen) | (a) KEEP the system bar on every pushed screen — it is the back door, the edge swipe-back and iOS 26's content swipe-back; every later mockup keeps that row (a book, the Trash, the note: a 48–52 pt top row with the round back button and the screen's own doors, the title below in the app's type), so what is "empty" is the row's trailing side, which each screen's own umbrella fills as its mockup draws it · (b) hide the system bar on the back-only screens and put a back icon button in each screen's own header — six screen files (three being edited tonight by VM-55 and VM-78), and with the bar hidden the edge swipe-back has historically stopped (no source confirms iOS 26 changed it; the content swipe with a hidden bar is unconfirmed — the lookup, §6) · (c) the screen's title in the system bar (`navigationTitle`, inline or `inlineLarge`) and the app's own title line dropped — the system's type, not the voice's, and a per-screen edit | (a) — nothing in this batch changes a pushed screen's top edge; the trace is §6's table with an owner per screen (VM-148 Write · VM-122 a book's contents and Read · VM-100 Trash/Archived · VM-110 Protection · Versions: VM-147's umbrella), and the walk captures every top edge (b4, b6, b7, b9, b14, b15) for her look | PROVISIONAL (batch 4) — W-009 DEFERRED with owners |
+| P-47-21 | The bar's drawn numbers (built against the mockup, which is not a pixel contract; with P-47-1) | as built: cells a third × at least 56 (LK-5), growing with the words to ~60 at xxxLarge and holding (the mockup's large frame draws 64); the word at the `tab` role (17, SF Pro / SF Mono, chrome); the chip 8 above and below the word, 16 to each side stepping to 8 then 4 where the cell is narrow (the mockup: 8 × 16, and 8 × 9 in its large frame), radius 12 (the layer's standard — the mockup draws 9; the layer has 6 · 12 · capsule), the wash, the word semibold in her ink; the others regular in the corrected muted (the sheet's "others corrected muted"; the mockup's meta ink); the hairline in the palette's line; the room to the home indicator · the bar stays above the keyboard while the capture box or the Library search is focused, as before — the mockup's "the bar leaves while the keyboard is up" is the capture box's row (VM-73), not built here | as listed | PROVISIONAL (batch 4) — her look at the walk's b1–b5 |
 
 Held for her hands: the wave-1 install on her phone (one install from merged main, after all four runs,
 prepared by the last merger; the hands part is hers in the morning) — it is where she judges P-47-1's
@@ -1108,3 +1112,160 @@ built after piece 3.10's sources; the copy removed, the tree clean).
   a real window overridden light, applied, then the window flipped dark and its traits propagated; the layer's
   border must read the colour's dark value. Red-on-old: PENDING its snapshot build (QUIET) and stage window. The
   on-screen check (the flip with a take card, the pill and the comment draft visible): PENDING the walk.
+
+### Batch 4 — results (implementer: Opus, 2026-11-19)
+
+**Not done in this batch, first:** (1) **W-009's fix — DEFERRED with owners (P-47-20).** No pushed screen's top edge
+changes: keeping the system bar keeps the back door and both swipe-backs, every later mockup keeps that row with the
+screen's own doors in it, and the fix that removes it (hide the bar, a back door in each screen's header) touches six
+screen files three runs are editing tonight and has historically cost the edge swipe-back. The trace is below; the walk
+captures every top edge for her look. (2) The suites, the optional red-on-old run and the walk are PENDING the stage.
+(3) The mockup's "the bar leaves while the keyboard is up" is the capture box's row (VM-73); not built (P-47-21).
+(4) VM-55's message line keys its lift to the roots (`pagingAllowed ? tabBarHeight : 0`); with the bar now on pushed
+lists too, the re-land must key it to "a bar is on screen" (below, "For the re-land").
+
+**The bar — one pointer per piece** (`9c76b335c`; numbers PROVISIONAL with P-47-1, P-47-21).
+
+| Piece | Where | What |
+|---|---|---|
+| The face | `VariorumMobile/Features/Shell/MobileTabBar.swift` — `MobileTabBar` | Starred · Bookcase · Library (`MobileTabBar.word` — SW-1's Bookcase; Starred is `MobileStarsModel.pageName`), in band order (`MobileShellBand.pages`); the words at the `tab` role (17 pt, chrome: follows the text size to xxxLarge and holds; never under 13); the current one semibold in her ink on a chip (the palette's wash, radius 12, 8 above and below the word); the others regular in the corrected muted (`tokens.phone.muted` — they were faint); each a `Button` speaking its plain word with `.isSelected` when current |
+| The targets | `MobileTabBarMetrics.target` (56), `.cellVertical` (8); `phoneHitArea()` | each cell a third of the bar and at least 56 tall — the whole cell answers (LK-5; sheet §B); the cell is the chip plus 8 above and below, so it grows with the words to ≈ 60 at xxxLarge and holds |
+| The fit | `MobileTabBarMetrics.chipSide(wordWidth:cellWidth:)`, `.wordWidth(_:voice:at:)`, `.chipSides` (16 · 8 · 4) | the chip's sides are the widest of 16, 8, 4 that let the word (measured semibold, its widest face) fit its cell at the current text size; only where even 4 cannot — 320 pt Display Zoom at the larger sizes — does the word shrink, never below the floor (`phoneType(_:_:weight:shrinkingToFloor:)`) |
+| The ground | `MobileTabBar.body` | the room, reaching past the home indicator (`ignoresSafeArea(.container, edges: .bottom)` — on a pushed list the page under it is the paper); the hairline above in the palette's line |
+| The layer's one addition | `Shared/Theme/PhoneType.swift` — `phoneType(_:_:weight:shrinkingToFloor:)` | additive: a site's own weight on a label that may shrink to the floor (the two existing forms each took one). The Mac compiles it and never calls it |
+| The shell reads it | `MobileShellView.tabBar` | `MobileTabBar(current: tab, tokens: tokens, select: { tabSelected($0) })`; the private `tabDoor` is gone |
+
+**Where it shows, and why** (`9c76b335c`; the destination builder decides, so a note pushed over a list covers the bar
+— hidden inside a note by construction, never by a flag).
+
+| Screen | Bar | Why |
+|---|---|---|
+| Starred · Bookcase · Library (roots) | yes — each root draws it at its foot, as before | her ruling: roots |
+| A book's contents (`.book`) | yes — `.safeAreaInset(edge: .bottom, spacing: 0) { tabBar }` | a list |
+| Trash (`.trash`), Archived (`.archive`) | yes — the same line | lists; the bar sits under their report bands |
+| Versions (`.versions`) | the LISTING only — `MobileVersionsScreen(…, listingBar: AnyView(tabBar))`, shown while `model.reading == nil` | the listing is a list; a moment read is her words |
+| Write (`.note`) | no | her ruling: "not notes" |
+| A book's Read page (`.bookRead`) | no | her words read full-screen (P-47-18) |
+| Protection (`.protection`) | no | not a root or a list; while new words are held it gives no way off but her close, and a tab would be one (P-47-18) |
+| Settings and every sheet | — | sheets cover the bar (unchanged) |
+
+**The tab road** (`MobileShellView.tabSelected`, `popToRoot(_:animated:)`; P-47-19). A tap on the CURRENT tab from a
+pushed list pops that stack to its root (animated — the system's tab grammar). A tap on ANOTHER tab first returns the
+stack being left to its root (unanimated — the slide is the motion), then changes the page through `selectPage`, the
+one road a swipe also takes (the liveness hand-off, A5-8's leaving-files-it rule, the settle — all unchanged). So a
+hidden stack always stands at its root, as it did when the bar showed on roots only: the band never reveals a pushed
+screen, and VM-55's wing landing ("the landing always shows the Bookcase itself") stays true.
+
+**W-009 — each pushed screen's top edge, from the code** (unchanged by this batch; P-47-20; the walk's captures named).
+
+| Screen | The system bar today (code) | Under it (the app's own) | Owner of the top row |
+|---|---|---|---|
+| A book's contents | inline, no title; the back door + **Details + Read** (`MobileBookView` `.toolbar`, trailing) — NOT empty: the a-book mockup's own shape | the book's name (`screenTitle`) | VM-122 ("its doors in the top bar") · b6 |
+| Read | inline, no title, no items — the back door alone | the cream page, the book's title on it | VM-122 · b7 |
+| Write | no navigation-bar line at all (the default bar, no title) — the back door alone | the masthead: title + four tools, then the chips (`safeAreaInset(edge: .top)`) | VM-148 ("a slim bar once you scroll"; the note-write mockup's top bar: back + tools) · b9 |
+| Trash | inline — the back door alone | "~/trash" (`screenTitle`, muted) + sort + Empty Trash; the 30-day note | VM-100 (trash-archive-tags §1) · b4 |
+| Archived | inline — the back door alone | "~/archived" + its promise | VM-99/VM-100 (§2) · b14 |
+| Versions | inline — the back door alone | "~/versions" header; the reader's "‹ Versions" door | VM-147's umbrella (Note ▸ Versions; no member names its top row — to be placed at that kickoff) · b10, b11 |
+| Protection | inline — the back door alone, hidden while new words are held | its sections | VM-110 · b15 |
+
+The external facts behind keeping the bar (a Sonnet lookup, read-only, sources in its report): a hidden navigation bar
+has historically disabled the edge swipe-back (`interactivePopGestureRecognizer`; Apple forum threads 2022–2024), and
+no source confirms iOS 26 changed that; iOS 26's content-area swipe-back (`interactiveContentPopGestureRecognizer`,
+WWDC25 284) is unconfirmed with the bar hidden; iOS 26's bar is transparent by default with the back button on its own
+glass, and Apple's guidance is to remove custom bar backgrounds (`toolbarBackground`) — so the bar region's ground
+was left as the system draws it.
+
+**`MobileShellView.swift` — the lines this batch changed** (pre-batch `54cbcb9e5` line numbers → this branch's):
+11–15 → 11–16 (the header comment's bar sentence) · after 468 → 469–470 (the book's bar line) · after 487 → 491 (the
+Trash's) · after 491 → 496 (the Archive's) · 496 → 501–505 (the Versions constructor with `listingBar`) · after 497 →
+507–510 (P-47-18's comment on the Protection route) · 578–624 → 591–642 (the `tabBar` property's body and its doc
+comment; `tabDoor` removed; `tabSelected` and `popToRoot` added). No path line, swipe, relock landing, `selectPage` or
+`pagingAllowed` line was touched; nothing was reordered or renamed.
+
+**For the re-land (VM-55 merges first; read-only reads of the sibling branches):**
+- VM-55 adds `.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabBarHeight = $0 }` at the end of the
+  OLD `tabBar` body — re-attach it to `MobileTabBar(…)` in the new `tabBar`; and its `MobileMessageLineHost(…,
+  chromeInset: pagingAllowed ? tabBarHeight : 0)` assumes the bar shows on roots only — with the bar on pushed lists
+  it should lift wherever a bar is on screen (a pushed list's bar is the same height; a note's screen has none).
+- Tests on sibling branches that drive the tab by the word **"Shelf"** must move to **"Bookcase"**: VM-55
+  `MobileWingDoorTests.swift:383` (`root: "Shelf"` — if it names the tab) and `:503` (`elements(selected: "Shelf")`);
+  VM-64 `MobileHerPathsPerfTests.swift:789` (`activate("Shelf")`); and on every branch `MobileNavigationTests`
+  (moved here). The path line's own "Shelf" word (`tokens.path(["Shelf"])`, and VM-55's `page: "Shelf"`) is NOT the
+  tab and is untouched.
+- Batch 3's walk driver (`VM47Walk3Driver.swift`, gitignored) drives `goTab("Shelf")` — right for the app it was
+  built against (`4cca58a8e`); batch 4's copy drives "Bookcase".
+- `MobileVersions.swift`: VM-55 removes the `.safeAreaInset(edge: .bottom) { reportLine }` line this batch's listing
+  bar sits after (adjacent lines; the bar line stays).
+
+**Tests (written; counts PENDING the stage).** New, `VariorumMobileTests/MobileTabBarTests.swift` (10):
+`theFitKeepsEveryWordWholeOnEveryShippedWidth` (375 · 393 · 402 · 430 · 440 × both voices × xSmall · Large · xxxLarge ·
+AX5 — every word fits unshrunk; 16 pt sides at the default size on 402) · `theFitRuleTakesTheWidestSideThatFits` ·
+`atDisplayZoomAWordShrinksNoFurtherThanTheFloorAndStillFits` (320 pt: a word that cannot hold its size fits at 13 pt
+with 4 pt sides; the shrinking cases are printed) · `theBarHasThreeCellsAThirdWideAndFiftySixTall` (both voices, 402
+and 375, Large/xxxLarge/AX5: ≥ 56 tall, a third wide, one row in band order, the selection, buttons; AX5 = xxxLarge) ·
+`eachDoorCallsTheTabRoadWithItsOwnPage` · `onTheMountedShellTheDoorsAreFiftySixTallAndAThirdOfTheScreen` (**red on
+old** for "Starred" and "Library": the pre-batch doors were the words' own frames) ·
+`aPushedListWearsTheBarAndATabTapReturnsToThatRoot` (the Trash) · `insideANoteTheBarIsGoneAndTheVersionsListingWearsIt`
+(Write: no door on screen; Versions' listing: the bar; a tab from it closes the note under it — the liveness authority
+empties) · `theVersionsReaderDoesNotWearTheBar` · `theRouteRuleIsTheDestinationBuilders` (source: the list arms carry the
+bar; `bookRead`, `note`, `protection` do not). Moved: `MobileNavigationTests.theTabBarCarriesThreeDoorsAndEachOneMovesTheBand`
+— "Shelf" → "Bookcase" (SW-1; the page is still `.shelf`). Untouched and expected green: `MobileShelfLayoutTests` /
+`MobileShelfRenderedLayoutTests` / `MobilePathLineGeometryTests` / `MobileShelfTodayDoorTests` host the roots with
+`tabBar: { EmptyView() }`, so the bar's new height (≈ 40 → 56 at the default size) never enters their arithmetic; on
+a device the shelf's measured region is that much smaller and `MobileShelfLayout`'s floor guarantee — pinned over
+regions from 60 pt up — holds; the brain is unchanged (W-024's arithmetic needed no re-derivation).
+The source pins stay clean: no `minimumScaleFactor(` in a phone file (the shrink is the layer's `shrinkingToFloor`), no
+literal size, no private control build.
+
+**Builds — GREEN (headless, no stage):** phone `build-for-testing` into `DerivedData/vm47-b4` at `35fc0a461`
+(`** TEST BUILD SUCCEEDED **`); Mac `build-for-testing` into `vm47-b4` at `35fc0a461` (`** TEST BUILD SUCCEEDED **`
+— `Shared/` changed by one additive extension); the walk driver (`walk4.zsh` `walk_build`) into
+`DerivedData/vm47-walk4` from this tree (`** TEST BUILD SUCCEEDED **`; the temporary copy removed; tree clean).
+
+**The stage window (READY — the orchestrator's GO):**
+- Phone, the whole target: from `App/Variorum/`, `xcodebuild test-without-building -scheme VariorumMobile -destination
+  'id=<the standing device>' -derivedDataPath DerivedData/vm47-b4 -only-testing:VariorumMobileTests`.
+- Mac (`Shared/Theme/PhoneType.swift` changed): `mac=(ThemeTokenTests PaletteDerivationTests NoLiteralColourTests
+  SharedPageStyleTests PaletteReachTests MarkdownPaletteWritersTests HelperWindowThemeTests)` from `vm47-b4` (no Mac
+  code or Mac test reads the phone layer — grep).
+- Red-on-old (optional — W-007 is a design row her ruling settles, so the geometry oracle is its evidence; offered
+  because it is cheap): a detached snapshot `~/dev/variorum-vm-47-rol4` at this branch's head, `git checkout 54cbcb9e5 --
+  App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift` (staged there only — `MobileTabBar.swift` and
+  `MobileVersions.swift`' default parameter keep the test target compiling), phone `build-for-testing` into its own
+  `App/Variorum/DerivedData/vm47-rol4`, then `-only-testing:VariorumMobileTests/MobileTabBarTests
+  -only-testing:VariorumMobileTests/MobileNavigationTests`. Expected RED: the mounted-shell doors (≈ 20 tall,
+  word-wide; no "Bookcase"), the pushed Trash (no bar), the Versions listing (no bar), the route rule (source), and
+  `MobileNavigationTests` (no "Bookcase"); expected GREEN: the fit, the bar alone, the reader. Then remove the snapshot.
+- The walk (`notes/plans/vm-47-screens/instruments/walk4.zsh`, gitignored; its header is the runbook): `source` it,
+  then `WALK_DEADLINE=HH:MM walk_bar` — device `vm47-walk4` created, seeded and deleted inside the claim; 73 captures
+  into `notes/plans/vm-47-screens/b4/`: under the sea-glass, all eight of Study/Terminal × light/dark × default/AX5 —
+  b1 Bookcase · b2 Starred · b3 Library, each with the bar · b4 the Trash with the bar and its top edge · b5 Library
+  tapped from the Trash; and at Study light default, Terminal dark default and Study light AX5 also — b6 a book's
+  contents and its top edge · b7 its Read page (no bar) · b8 Bookcase tapped from the book · b9 a note in Write (no bar;
+  the empty system bar above the masthead) · b10 Versions' listing (the bar) · b11 a moment read (no bar) · b12
+  Bookcase tapped from Versions · b13 the Library after (its root) · b14 Archived (the bar) · b15 Protection (no bar).
+  What to look at: the three words whole at AX5 in Terminal; the chip on the current word; the inactive words
+  readable (corrected muted); the bar on the room against a paper page (b4, b6, b14); the hairline; no bar in b7, b9,
+  b11, b15; b5/b8/b12/b13 land on roots; and each pushed screen's top edge for P-47-20.
+
+**PROVISIONAL calls added (§5):** P-47-18 (where the bar shows beyond the ruling: none on Read, the Versions reader,
+Protection), P-47-19 (a tab from a pushed list returns the left stack to its root), P-47-20 (W-009: the system bar kept;
+DEFERRED with owners), P-47-21 (the bar's drawn numbers; the keyboard rule left to VM-73). No QUESTIONS edit on this
+branch (the merge carries §5).
+
+**Self-assessment (for the cold reviewer).** The bar is one view over the layer — the `tab` role, the spacing scale's
+steps, the standard radius, the hit-area helper — so its numbers live in one place, and where it shows is decided by
+the destination builder rather than a flag, so "hidden inside a note" cannot drift: a note pushed over a list covers
+the list's bar. The riskiest calls: (1) **W-009 deferred** — the ticket names it, and this batch changes no top edge;
+the case for keeping the bar is the back gestures and the mockups' own top rows, and the walk shows her what is there;
+(2) **P-47-19's pop on leaving** happens in the same render as the page's settle, so the leaving page shows its root
+while it slides away — the walk's b5/b12 capture after the settle, not during; if it reads badly the option is to pop
+when the settle completes; (3) the **mounted-shell pins** rest on the harness walking raw subviews (the offscreen roots
+are in every walk, so a door counts only on the window) and on UIKit removing a covered root's view from the window
+after a push — if it ever kept it, the "inside a note" absence check would go red (a false red, never a false green);
+(4) **the fit** measures a word with UIKit's font at the role's resolved size while SwiftUI draws it — the same faces
+(SF Pro / SF Mono / the system font at a size), so the two agree, and the bar's first frame (before its width is
+measured) takes the widest sides, which the second pass corrects; (5) **the taller bar** gives the shelf's measured
+region ≈ 16 pt less at the default size (and above the keyboard, where the bar still rides) — the floor guarantee is the
+brain's and holds; the mockup's "the bar leaves while the keyboard is up" is VM-73's. The Mac cannot have changed:
+`VoiceTokens.swift` is untouched and the one `Shared/` change is an additive extension the Mac never calls.
