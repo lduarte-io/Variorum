@@ -383,12 +383,11 @@ assertions.
 
 ### Batch 4 · VM-67 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**A REVERT IS IN FLIGHT — the second one, for the headless BEFORE number** (the first, the red-on-old, ran and was
-restored — P4): after this commit is pushed, `git checkout 96dfa82b5 -- Sources/VariorumCore/Persistence/Migrations.swift
-Sources/VariorumCore/Operations/OwnerIdentity.swift`, `VARIORUM_VM67_MEASURE=1 swift test --filter
-OwnerAdoptionMeasurementTests`, then `git checkout HEAD --` the same two files and a clean `git status`. If this line still
-reads "in flight" in a later session, restore with `git checkout HEAD -- <the two files>` (safe — the fix is committed)
-and check `git diff HEAD` is empty. Base: `96dfa82b5`.
+**No revert is in flight.** Two reverts RAN and are RESTORED, each of the same two files
+(`Sources/VariorumCore/Persistence/Migrations.swift`, `Sources/VariorumCore/Operations/OwnerIdentity.swift`) to base
+`96dfa82b5` after the fix was committed and pushed, each restored by `git checkout HEAD --` with `git status` and
+`git diff HEAD` empty after: (1) the red-on-old (P4); (2) the headless BEFORE number (P6). The suites are green again
+on the restored tree.
 
 **The mechanism, re-verified on this tree (audit F 3A/6A — still TRACED as written):** `AppServices.connectSyncIfAllowed`
 (`Shared/AppServices.swift:518`) runs `runOwnerAdoption` (:584) first on every launch with a persisted session, every
@@ -429,7 +428,7 @@ owner-carrying table, through SQLCipher's page decrypt, holding the runner AND t
 | P3 — the op (probe-then-write) + the Core pins and state-transition tests | DONE (this commit) — `OwnerAdoptionTests` (8) + `OwnerIdentityTests` (8): 16 tests in 2 suites passed. On the SCHEMA-ONLY tree (`0e9948d03`: the index landed, the op unchanged) the same suite ran 8 tests, 4 issues: the three "writes nothing" pins red (the op ran `BEGIN IMMEDIATE TRANSACTION`, eleven `UPDATE … WHERE owner_id IS NULL`, `COMMIT TRANSACTION` with nothing unowned), the plan pins GREEN — the index alone fixes the scan; the probe is what stops the write |
 | P4 — red-on-old (revert the two production files, run the pins, restore) | DONE — on the pre-fix tree `OwnerAdoptionTests` ran 8 tests, **5 failed with 7 issues**: `withNothingUnownedTheWriterRunsNoTransactionAndNoWrite` (BEGIN IMMEDIATE + eleven UPDATEs + COMMIT) · `everyStatementReachesAnOwnerTableOnlyThroughItsUnownedIndex` ×2 (adopting AND idle: `UPDATE container … → SCAN container`, `→ SCAN block`, … every owner table) · `signedOutRows…` (its idempotent second pass wrote) · `anAccountChange…` ×2 (both quiet passes wrote) · `aStoreFromBeforeTheIndex…` (scanned). GREEN on both trees, by design (they pin S4 behaviour that must not move): `everyOwnerTableHoldsARowFromTheSeed` (the seed's guard), `theMixedCaseAdoptsOnlyTheUnownedRows`, `aRowFromAWriteAlreadyQueuedIsAdoptedByThatPass`. Restored; green again |
 | P5 — the hosted assertion in `MobileHerPathsPerfTests` | DONE (this commit) — inside `ownerAdoptionWithNothingToAdoptIsMeasuredAtFixtureScale`, AFTER its measured series (which stays untraced and unchanged): one more pass traced on the store's writer asserts no write statement and every statement through its unowned-row index (the `OwnerAdoptionTrace` helper, nonisolated); no other series touched. Phone `build-for-testing` into `DerivedData/vm64-b4/` `** TEST BUILD SUCCEEDED **`, no warning in a touched file; its run PENDING the stage window |
-| P6 — `swift test` (touched suites + migrations / schema / sync-schema suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b4/` | NOT-STARTED |
+| P6 — `swift test` (touched suites + migrations / schema / sync-schema suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b4/` | DONE — `swift test --filter 'OwnerAdoptionTests\|OwnerIdentityTests\|MigrationTests\|BlockCommentTests\|SyncSchemaTests\|AuthRLSDDLTests\|StorePlaintextExportTests\|PlaintextExportImportTests\|LocalMachineryRecreationTests\|LibraryClassifier\|MultiTenantSyncTests\|StoreEncryption\|TriggerTests\|ArrivalsPinsSchemaEventTests\|AppDatabase'` **242 tests in 20 suites passed**; phone `build-for-testing` (generic iOS Simulator) and Mac `build-for-testing` into `DerivedData/vm64-b4/`, both `** TEST BUILD SUCCEEDED **`, no warning in a touched file. **The headless before/after** (`OwnerAdoptionMeasurementTests`, gated `VARIORUM_VM67_MEASURE=1`; Mac M3, Debug, an ENCRYPTED on-disk WAL store holding 61,700 owned rows in the owner tables; n = 5): BEFORE (pre-fix tree) warm **11.14 ms (10.98–11.18)**, cold (store reopened per pass) **11.10 ms (10.97–11.27)**; AFTER warm **0.79 ms (0.78–0.81)** / **0.83 (0.81–0.85)** on a second run, cold **0.86 ms (0.83–0.90)** / **0.85 (0.85–0.87)** — about 13× on a Mac; a Mac number, never a phone number. The simulator's before/after is `owner-adoption-nothing-to-adopt` in `MobileHerPathsPerfTests` (BEFORE: batch 3's window; AFTER: this batch's) |
 | P7 — closeout in §7 (the S4 road list, the three options with plans, the first-seconds report) + READY | NOT-STARTED |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b4/` (gitignored).
