@@ -618,7 +618,7 @@ line notes, `wording-list-2.md`). DerivedData: `App/Variorum/DerivedData/vm55-b1
 | Phone `build-for-testing` (`VariorumMobile`, the window's simulator) | DONE — green at the commit after 4df669dd7 (the face fills the window: the door's frame in window coordinates, the foot measured from the window's foot — found on re-reading before READY, never run red) |
 | Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 64df336d8 (same DerivedData dir; nothing compiled into the Mac changed after it) |
 | The line and the lock (the coordinator's check before READY: relock, the app-switcher snapshot, the non-ready states) | DONE (6699560ce) — traced below; the snapshot road WAS open and is closed in the host (`Probe` follows its scene's edges); pin `MobileMessageLineSceneTests`; both targets rebuilt for testing green at 6699560ce |
-| Stage window | PENDING — READY handed to the orchestrator at this commit; no revert is in flight |
+| Stage window | RUN BY 2b (batch 2's one window, split into three claims). **Mac leg DONE 2026-11-19 05:56–06:05:** 1245 tests in 172 suites, 1243 passed, 1 skipped (the gated share-faces harness), **1 FAILED — `VM61MacStatusSeamPinTests.noMacDoorSaysRemovalWithdrawsOrSetsThePlacement`, this run's own pin, a FALSE POSITIVE** (traced in "Batch 2b record" ▸ the window's results; fix sequenced by the coordinator). Phone whole-target leg PENDING (its own claim). |
 
 #### What shipped — the seam's shape, and why
 
@@ -875,7 +875,7 @@ roads: .phone) ?? String(describing: error))` (`reportOperationError`); `Takes/M
 `say(String(describing: error), as: .refusal)` ×2. Also for 2b's no-raw-error pin: the line renders `Item.text` in
 `Shell/MobileMessageLine.swift` — every raw site's words reach the screen THERE now.
 
-#### Tests (written; results PENDING — the stage window)
+#### Tests (written; results: the Mac leg ran in batch 2's window — see "Batch 2b record" ▸ the window's results; the phone leg PENDING)
 
 Phone (`VariorumMobileTests`), new — file `MobileMessageLineTests.swift`, four types: `MobileLineShowRuleTests` (11: the
 phone's placement; the show-rule table over every kind × style; ordinary dropped AT the seam; refusal; removal with its
@@ -1031,7 +1031,7 @@ only). DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental, both target
 | VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | DONE (69005ad4a, in `MobileRawErrorPinTests.swift`, type `MobileRefusalSentencePinTests`) — red-on-old and green runs PENDING (the stage window) |
 | VM-62 fix | DONE (e8609cc6f) — the scan's throwaway mirror counts 0 offending lines on it (2 exemptions, 1 match each); `MobileRefusalFallbackTests` (phone) and `VM62MacRefusalWordsPinTests` (Mac) written; results PENDING |
 | Phone + Mac `build-for-testing` at the batch's last code commit | DONE — both green at e8609cc6f (`vm55-b1`, incremental) |
-| Stage window (2a's suites + 2b's; red-on-old) | PENDING — READY handed to the orchestrator at the commit after e8609cc6f (this record); the legs and types are under "Batch 2's one stage window"; no revert is in flight; the worktree is on the branch |
+| Stage window (2a's suites + 2b's; red-on-old) | IN-PROGRESS — split into three claims by the coordinator. **Leg 2 (Mac) DONE** 05:56–06:05: 1245 tests / 172 suites, 1243 passed, 1 skipped, 1 failed (2a's `VM61MacStatusSeamPinTests.noMacDoorSaysRemovalWithdrawsOrSetsThePlacement` — a false positive of its source scan, traced below; the fix is NOT applied — the coordinator sequences it after the phone leg, which needs a still tree). Leg 1 (whole phone target) and leg 3 (red-on-old at 15f788dfd) PENDING, each its own claim. No revert is in flight; the worktree is on the branch at the record commit; products unchanged since e8609cc6f. |
 
 #### P-55-11 — a direction keeps its line (the orchestrator's ruling, applied)
 
@@ -1275,7 +1275,34 @@ Leg 3 — **red-on-old** (VM-62's pins; the method above): detached at 15f788dfd
 `-only-testing` `MobileNoRawErrorPinTests` `MobileRefusalSentencePinTests` on the same simulator, back to the branch.
 ~12 min (most of it the incremental build). After the release: the green products rebuilt (build only).
 
-**Results:** PENDING (this section is filled in the window).
+**Results.**
+
+- **Leg 2 — the Mac** (claim `vm-55`, 05:56:15 → released 06:05:05; renewed once by the coordinator at 06:03:42; the
+  dev-store Debug test host; test-without-building on e8609cc6f's products, the 172 types above): Swift Testing **"Test run
+  with 1245 tests in 172 suites failed after 455.826 seconds with 1 issue"** — 1243 passed, 1 skipped (`captureTheShareFaces`,
+  its suite "13n-c U3 — the share faces, captured (a harness)" gated off), **1 failed**; XCTest "Executed 0 tests" (Swift
+  Testing suites). No load re-run: the red is a source scan, deterministic, not timing or pointer. No What's New sheet drawn;
+  no Variorum instance left (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"` both empty); no Problem Reporter; no new
+  `Variorum-*.ips` (the newest are `VariorumMobile-*` from 05:39–05:45, before the claim — another run's). Machinery
+  honesty: the FIRST launch inside the claim selected nothing — the type list sat in an unquoted zsh variable, which zsh does
+  not word-split, so xcodebuild got ONE `-only-testing` argument naming no test ("Executed 0", no Swift Testing line, 0
+  tests run; log `vm55-b2-mac-test-unsplit.log`); re-launched at once with one argument per type (`xargs`), the run above.
+- **The red — `VM61MacStatusSeamPinTests.noMacDoorSaysRemovalWithdrawsOrSetsThePlacement` (2a's Mac pin, VM-61): this
+  branch's, and a FALSE POSITIVE.** The issue: `the Mac took a phone road: ["WingToolbarLabel.swift:217: .placement ="]`.
+  Traced: the pin's source scan forbids the bare substring `.placement =` anywhere in `App/Variorum/Variorum/`; line 217 of
+  `Core/Views/WingToolbarLabel.swift` is `self.placement = placement` in `WingLabelPlacementView.init` — the wing label's
+  LAYOUT placement (`WingLabelSpace.Placement`, VX-833/VX-844, on main long before this run), nothing to do with
+  `StatusCenter.placement`. No Mac door sets the seam's placement, says `status.removal(` or `withdraw(owner:` (the pin's
+  other two words found nothing); the Mac's seam behaviour is pinned green by the same suite's three other tests and by
+  `StatusCenterTests`, `StatusSeamVocabularyTests`, `StatusToastPlacement*Tests`. Not main's: the pin is new on this branch.
+  **The smallest fix (NOT applied — the phone leg needs a still tree; the coordinator sequences it):** in
+  `VariorumTests/VM61MacStatusSeamPinTests.swift:113`, narrow the third word to the seam's own spelling and the one value
+  that matters — `["status.removal(", ".withdraw(owner:", "status.placement =", ".phoneLine"]` (grep at 83183bfc3: neither
+  `status.placement` nor `.phoneLine` occurs in the Mac sources, so the narrowed scan is green and still trips on a Mac door
+  that sets the seam to the phone's placement). Test-only; it changes no product the phone leg runs. After it, the one
+  suite re-runs alone (`-only-testing:VariorumTests/VM61MacStatusSeamPinTests`, under a claim).
+- **Leg 1 — the whole phone target:** PENDING (its own claim).
+- **Leg 3 — red-on-old:** PENDING (its own claim).
 
 ## Ladder
 
