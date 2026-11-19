@@ -27,6 +27,17 @@ Mid-run, in chat (2026-11-19), verbatim: on the Protection screen's receipts bei
 umbrella (VM-103) at closeout — "yeah that's fine." · on the ladder — "also, up to 5 review rounds as long as a
 major is found."
 
+On the interim wing door (2026-11-19, in chat), verbatim: "yeah - go ahead and add the plain interim door to this
+run. then i can just install the build from after wave 1. i'll talk to vm-64 about this." Then, on the phone
+install: "ok - this resolves the previous blocker. i'll tell everyone. but now, i'll plan to have the wave 1 build
+installed on my phone after the last vm has merged in, by the last one. sound good? the phone step is the single
+wave-1 install after all four runs have merged. whoever is last can probably do it overnight over wifi." The
+orchestrator's answer, OPEN with her: one install after all four merge, yes; unattended over wifi, no as the
+install runbook stands (`notes/plans/vm-44/plans/vm-45-install-runbook.md` — the phone unlocked and awake at three
+points, Variorum fully quit before the safety copy, cable-proven only); offered instead: the last merger builds
+the Release app overnight and checks main's sync marker against production's, and the install runs at her first
+touch in the morning.
+
 Rulings this run builds (`notes/plans/vm-44/plans/sitting-1-rulings.md`): SW-1 (the wing's name is the title on
 every root; the swipe, dots and dropdown are wave 2) · SW-5 (a quick note lands in the current wing, in the Pool) ·
 Receipts (no line for ordinary acts; a short line with Undo only when something leaves the page, and for
@@ -44,6 +55,7 @@ refusals) · Words (short and plain; the Mac's own words wherever a Mac face exi
 | VM-61 | One message line: Undo when something leaves the page, and refusals | Feature | W-012 | 2 |
 | VM-62 | Refusals in plain words, never raw error text | Bug · Confirmed | W-013 | 2 |
 | VM-63 | Move the Mac's wing brains to shared code | Debt · Confirmed | W-016 | 3 |
+| VM-225 | An interim wing door: tap the wing's name on a root and pick from a list (minted mid-run at her word; a sub-issue of VM-55) | Feature | — (the tap half of W-017, pulled forward) | 4 |
 
 Order (Linear's blocked-by): VM-57, VM-58, VM-60 wait on VM-56 · VM-63 waits on VM-61 · VM-62 lands best after
 VM-61 · VM-59 waits on nothing. Commit messages say `Part of VM-<member>`.
@@ -96,7 +108,8 @@ umbrella inherits") · `notes/plans/vm-44/plans/minted/umbrella-02.md` · `notes
 
 ## Scope calls made at kickoff (the orchestrator's; each is on the ratify list)
 
-1. **No switcher in this run.** The swipe, dots, dropdown, follow and wing management are wave 2 (VM-72's
+1. **(SUPERSEDED mid-run by her word — batch 4, VM-225: a plain interim door joins this run; the rest of this
+   call stands as written for the swipe, dots, management and follow.)** **No switcher in this run.** The swipe, dots, dropdown, follow and wing management are wave 2 (VM-72's
    umbrella; W-017, W-018, W-020, W-021). After this run the phone stands in the wing its device memory names
    (Home on a device that never switched) with no door to change it. Tests switch through `WingState.switchTo`;
    the simulator walk sets the memory key before launch. **For her:** a build of main between this merge and
@@ -241,6 +254,42 @@ nothing to undo says so (a refusal) and offers no Redo (VM-16)." — VM-16's doo
 
 ---
 
+## BATCH 4 — the interim wing door (VM-225)
+
+Her word mid-run (2026-11-19, in chat), verbatim: "yeah - go ahead and add the plain interim door to this run. then
+i can just install the build from after wave 1. i'll talk to vm-64 about this." — in answer to the orchestrator's
+offer: "Tap the wing's name on a root, pick from a list of your wings, land on that wing's Bookcase. That is the
+tap half of what you ruled for the wing title; the swipe, dots, wing management and following a note stay in
+wave 2." It supersedes scope call 1's "no door": after this run the phone can change wings, plainly.
+
+> You are the implementer for batch 4 of the VM-55 run, in `~/dev/variorum-vm-55` on `vm-55-wings-underneath`.
+> Batches 1–3 are on the branch; read their record sections, this file whole and the reading list, plus the wing
+> switcher frames and build notes of `notes/plans/vm-44/design/mockups/home-wings-capture.html`.
+>
+> **VM-225 — a plain interim door, one acceptance unit.** On each root (Starred, the Shelf, the Library) the
+> wing's name in the path line (batch 1's P-55-2 shape) is a door: a tap opens a plain native list of the wings in
+> the switcher's order (Home first), the current one marked; a pick switches the app's wing through the shared
+> `WingState`, lands on that wing's Bookcase — the current wing included (the mockup's build note) — and every
+> root re-scopes (batch 1's follow). No line is shown for the switch (her ruling: only removals and refusals).
+> Compose the wing brains batch 3 moved to `Shared/` (the rows, the order, the adopt and revalidate); fold batch
+> 1's interim `MobileWingModel` into them where they now cover it — never fork a brain on the phone. The list is
+> read when it opens, off the main thread. The door's hit area is at least 44 pt tall; otherwise today's tokens
+> and layout, no restyle (umbrella VM-47 owns sizes, wave 2 replaces this door whole).
+> **Not in this batch:** the swipe and its dots, sizes beside the names, the ⋯ and wing management (make, rename,
+> delete, move everything), following a note to its wing, moving or copying a note or book to a wing — all wave 2
+> (VM-80 and umbrella VM-72).
+> **PROVISIONAL calls to make and record** (2–3 options each, build the most defensible): what a switch does to
+> screens already pushed on the three stacks (unruled until VM-80; the least destructive reading — nothing she
+> has open is closed — unless the code makes that unsafe, and say why); whether the name is a door while the
+> library has one wing (the Mac's ⌘L speaks a note there); the empty-wing lines that assume Home (batch 1's
+> observation 3) only if a one-word fix exists in the Mac's own words — otherwise leave them and say so.
+> **Tests:** the pick's state transitions (switch, land on the Bookcase, re-scope, remembered across a rebuilt
+> session), the dead-wing return while the list is open, the one-wing case, a geometry check of the door's hit
+> area. Stage rule as before: report READY with TYPE names and minutes, wait for the claim line.
+>
+> **Report back with** what shipped, how the hoisted brains were composed and what was folded, the PROVISIONAL
+> calls, test counts, commits, anything for the author.
+
 ## Review foci (written at plan time, before any implementation)
 
 1. `readScope` on iOS: every Shared caller, and every Shared door that takes "what the surface shows" — does
@@ -265,14 +314,15 @@ nothing to undo says so (a refusal) and offers no Redo (VM-16)." — VM-16's doo
 | Piece | State |
 |---|---|
 | Kickoff: worktree, branch, in-flight row (`c269aa3d7` on main), this plan | DONE |
-| Batch 1 — VM-56 | NOT-STARTED |
-| Batch 1 — VM-57 | NOT-STARTED |
-| Batch 1 — VM-58 | NOT-STARTED |
-| Batch 1 — VM-60 | NOT-STARTED |
-| Batch 1 — VM-59 | NOT-STARTED |
-| Batch 2 — VM-61 | NOT-STARTED |
-| Batch 2 — VM-62 | NOT-STARTED |
+| Batch 1 — VM-56 | DONE (219b4ac62) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
+| Batch 1 — VM-57 | DONE (219b4ac62) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
+| Batch 1 — VM-58 | DONE (301388409) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
+| Batch 1 — VM-60 | DONE (9462d3854) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
+| Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
+| Batch 2 — VM-61 | IN-PROGRESS — a fresh implementer, spawned at 205abd983 |
+| Batch 2 — VM-62 | IN-PROGRESS — the same implementer, after VM-61 |
 | Batch 3 — VM-63 | NOT-STARTED |
+| Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
@@ -294,6 +344,11 @@ Notes for the implementers:
 - The other wave-1 umbrellas are live in their own worktrees tonight (VM-47 sizes and look · VM-64 timing and
   the two lags, holding the custody slot · VM-78 fixes). Merges serialize through `nov18`; the later merger
   merges main in. Keep diffs narrow and never restyle.
+- Machinery seen in batch 1's window: after a phone run's verdict line lands, `xcodebuild` may not exit (it sat
+  about five minutes printing only `IDESchemeActionSDKRecord … invalidDigitCount` lines, twice). Poll the log for
+  the verdict line, never for the exit; stop your own process once the verdict is in.
+- Batch 1 left ONE DerivedData dir with the fixed tree's products for both targets: `App/Variorum/DerivedData/vm55-b1`
+  — later batches build incrementally into it rather than starting a cold one.
 - Walk screens and logs stay local (the gitignored `*-screens` convention); nothing outside the worktree.
 
 ## Batch records
