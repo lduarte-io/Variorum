@@ -2030,6 +2030,25 @@ reviewer conceded both corrections and made the final calls below.
 | 6 | The Mac scans cover `Variorum/` plus a hand-kept list of hoisted files (NIT) | agree, nothing owed | CONFIRMED, no code | The convention stands: each hoist adds its file |
 | 7 | VoiceOver loses the page word on the wing door (NIT) | agree — a words-free change exists | CONFIRMED FIX | The door gains an accessibility value reusing the text the line already draws; the three geometry tests assert it (red on old); the missing hint stays the VoiceOver audit's (VM-216's umbrella) |
 
+**The orchestrator's line-by-line check of the final round's fixes (2026-11-19, before the fix window; read
+against each finding and its final call):**
+- Finding 2 — `79e14816f`, `Shared/StatusCenter.swift`: `stand` returns through `place(item)` under the phone
+  placement, after the empty-text guard and before `standing` is ever set; `endStanding`'s phone arm sits before
+  the Mac's guard and clears `current` only for the id named. Exactly the two arms the final call wrote; the
+  Mac's lines below each are untouched. Pin `35983f69a` (`MobileLineStandingOfferTests`, three tests, pure):
+  the stranded-offer half reads `lineItem` and `spoken` after the fade, which is the red-on-old half; the
+  ordering half ends an older offer without ending the newer.
+- Finding 5 — `725d58f6a`: the unworded-failure line (`Shared/OpsRefusalTable.swift`) and the phone arm's
+  dropped-receipt line (`Shared/StatusCenter.swift`) are `.private`; main's `style=off` line is unchanged in the
+  same hunk. Pin `77f591154` (+ `923f14f30`, a compile fix to its message, no assertion changed):
+  `MobileErrorLogPrivacyPinTests` walks non-test `Shared/` and `VariorumMobile/`, matches error-named
+  describing/reflecting interpolations logged public, and carries the ONE named exemption
+  (`SampleLibraryWelcome.swift`'s line, main's), which must match exactly one line.
+- Finding 7 — `2278790a5`, `MobileWingDoor.swift`: `.accessibilityValue(page + trailing)` beside the unchanged
+  label. Pin `7af436366`: the three real-root geometry tests assert the value ("Starred", "Shelf" with its count
+  as drawn, "Library"); the plain-line test is untouched.
+- Nothing wider than the three final calls is in those commits. The runs are the fix window's.
+
 The fix window (one claim): the finding-2 pin suite, the finding-5 scan pin, the three edited geometry tests,
 `MobileLineShowRuleTests` + `MobileLineDoorTests`, a Mac leg (`VM61MacStatusSeamPinTests`, `StatusCenterTests`,
 `MCPShowOfferFacesTests`, `MCPTrailTests`), finding 1's two owed re-runs, and red-on-old for the new pins from a
