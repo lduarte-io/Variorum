@@ -152,7 +152,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 |---|---|---|---|
 | 1 · VM-65 | **CLOSED 2026-11-19** | `65d70fe9f` `feef85c7a` `f6389e3b5` `808f333a8` `914278cfa` | code state `808f333a8`; stage results in "Orchestrator's stage results" below |
 | 2 · VM-2 | READY (stage) | `2358f33cb` `76dbf89b2` `f83122794` `1f292b1ec` `5b40f1984` + closeout | see the batch 2 block below |
-| 3 · VM-66 | NOT-STARTED | — | — |
+| 3 · VM-66 | IN-PROGRESS | live status | see the batch 3 block below |
 | 4 · VM-67 | NOT-STARTED | — | — |
 | 5 · VM-68 | NOT-STARTED | — | — |
 | 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
@@ -267,6 +267,48 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 
 DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
 build), both gitignored.
+
+### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight, and none is planned.** Batch 3 is a TEST batch (VM-66 is Debt · Tests & tooling): it fixes no
+behaviour, so it owes no red-on-old pin. Its counts that measure a defect are RECORDED, never asserted, so batches 4–7
+can each turn one into an assertion that is red on today's code. No production behaviour changes; the one app-target
+file touched is the DEBUG-door fixture seeder (an additive option, today's shape byte-identical).
+
+**Audit F re-verified against this branch's tree** (base `ba3516a30`): the walk's `openSurface` still never calls
+`start()` (`MobilePerfWalkTests.swift:188-205`); `MobileShelfPerfTests` still counts only the shelf's observation; the
+fixture is still one wing (`MobilePerfFixtureSeeder.swift`); `MobileLaunchPathTests`' doc (`MobilePerfWalkTests.swift:949-994`)
+still says the open is main-thread — false since 13l L-c (`Shared/AppBootstrap.swift:314-334`, the detached
+`routeAndOpen`). Batch 1's marks are where its closeout says (`MobileWriteView.swift:154/201/226`,
+`MobileEditorViewModel.swift:202/589/682/685/815`, `MobileLibraryViewModel.swift:324-346`, `MobileQuickNote.swift:883/935`,
+`AutosaveCoordinator.swift:225-234`, `AppSession.swift:661`, `AppServices.swift:587-595`). The test host runs
+`VariorumMobileApp.init` → `MobileTiming.start()`, so the app's ONE recorder is live there (and never persists —
+`MobileTiming.persists`).
+
+**The settled design:**
+- **One new suite, `MobileHerPathsPerfTests`** (`.serialized`), which drives the REAL screen and the REAL shell and READS
+  batch 1's spans, windows and counters off `AppTiming.recorder` (the one the marks feed — a test cannot hand the marks a
+  recorder of its own, since GRDB's fetch closures do not inherit task-locals). Because that recorder is process-global,
+  **the suite must run alone in its own `xcodebuild` invocation** (group (i) of the READY report) — any other suite
+  running in parallel in the same process would add its opens and saves to these windows. Every measured series runs
+  n ≥ 5 and prints ONE line `VM64-PERF|<series>|n=…|median=…|min=…|max=…|<unit>`.
+- **Its worlds are on-disk copies** (`AppDatabase.backup(to:)` → `openStore(at:)`, the launch-path precedent — a WAL pool,
+  encrypted by the open's own migration, as on her phone) of the static fixture worlds, one copy per test, so nothing it
+  writes reaches the shared static worlds the other perf suites pin.
+- **The fixture gains `.nineWings`** beside `.oneWing` (the default, unchanged): the same corpus generator, spread over
+  nine wings, each with its own tag vocabulary, two books, one gathering and bookless (Pool) notes; a shape pin of its own.
+- **The stale launch-path doc** is corrected in place.
+
+| Piece | State |
+|---|---|
+| P1 — this live status | DONE (this commit) |
+| P2 — the nine-wing fixture option (seeder) + its world and shape pin | NOT-STARTED — design above |
+| P3 — `MobileHerPathsPerfTests` (the VM64-PERF series) | NOT-STARTED — design above |
+| P4 — the launch-path doc corrected; pointers in the walk and shelf suites | NOT-STARTED |
+| P5 — builds: phone `build-for-testing` into `DerivedData/vm64-b3/` (no Shared/Core change planned ⇒ no Mac build) | NOT-STARTED |
+| P6 — closeout in §7 + the READY report's stage commands | NOT-STARTED |
+
+DerivedData: `App/Variorum/DerivedData/vm64-b3/` (gitignored).
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
