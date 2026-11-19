@@ -258,8 +258,9 @@ struct VariorumMobileApp: App {
                 savepoint = { postID in await session.savepointOnLeaving(postID) }
             }
             // VM-65: a leaving of the app — counted (its savepoint tries are
-            // tallied) and the timing record written NOW, then again once the
-            // leaving's work is done (a kill in the background loses nothing).
+            // tallied) and the timing record saved NOW (off the main thread),
+            // then again once the leaving's work is done, so a kill in the
+            // background loses nothing the leaving measured.
             if phase == .background { MobileTiming.appLeaving() }
             let leaving = mobileScenePhaseChanged(
                 phase, editors: shellRouter.editors, sync: services?.sync,
@@ -268,7 +269,7 @@ struct VariorumMobileApp: App {
             if phase == .background, let leaving {
                 Task {
                     await leaving.value
-                    MobileTiming.persist()
+                    MobileTiming.saveNow()
                 }
             }
         }

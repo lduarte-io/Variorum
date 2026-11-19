@@ -391,47 +391,17 @@ nonisolated enum AppTiming {
     /// A round whose chain was replaced or stopped mid-round: not measured.
     static func syncRoundDropped(_ token: Token?) { recorder.discard(token) }
 
-    // MARK: - Survival (persisted outside the store — numbers only)
-
-    /// The `UserDefaults` key the record is kept under between launches.
-    static let archiveKey = "VariorumTimingRecord"
-
-    /// Writes the record (durations and counts, keyed by the catalog's names,
-    /// plus the build they were measured on) to `defaults`.
-    static func persist(to defaults: UserDefaults = .standard, build: String) {
-        guard isEnabled,
-              let data = try? JSONEncoder().encode(recorder.archive(build: build))
-        else { return }
-        defaults.set(data, forKey: archiveKey)
-    }
-
-    /// Restores the record `persist` wrote — only when it was measured on THIS
-    /// build, so a new install (the BEFORE build, then the tip) starts clean
-    /// and the two never mix. Returns whether anything was restored.
-    @discardableResult
-    static func restore(from defaults: UserDefaults = .standard, build: String) -> Bool {
-        guard let data = defaults.data(forKey: archiveKey),
-              let archive = try? JSONDecoder().decode(TimingArchive.self, from: data),
-              archive.build == build
-        else {
-            defaults.removeObject(forKey: archiveKey)
-            return false
-        }
-        return recorder.restore(archive)
-    }
-
-    /// Forgets the record, in memory and on disk.
-    static func reset(defaults: UserDefaults = .standard) {
-        recorder.reset()
-        defaults.removeObject(forKey: archiveKey)
-    }
+    // (Survival — one table per build, in a file in the app's own container,
+    // saved in batches off every timed path — is the phone's:
+    // `MobileTiming` + `MobileTimingStore`, over Core's `TimingBook`.)
 
     // MARK: - The process's own facts (no store, no ids of hers)
 
     /// The running binary's build fingerprint: the main executable's `LC_UUID`,
     /// which every link of new code changes. The phone's build number is not
-    /// stamped (CFBundleVersion stays 1), so this is what tells two installs
-    /// apart. nil only if the header cannot be read.
+    /// stamped (CFBundleVersion is 1 for every build — verified in the project
+    /// file at this batch), so the number alone cannot tell two installs apart;
+    /// this can. nil only if the header cannot be read.
     static func buildFingerprint() -> String? {
         guard let header = _dyld_get_image_header(0) else { return nil }
         let headerSize = header.pointee.magic == MH_MAGIC_64

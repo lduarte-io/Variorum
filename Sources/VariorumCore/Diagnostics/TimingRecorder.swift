@@ -56,6 +56,13 @@
 //  · **Instruments sees the same spans**: each span is also an `os_signpost`
 //    interval (the caller's signposter — the app's is subsystem
 //    `io.lduarte.Variorum`, category `timing`).
+//  · **Saving is the app's, and never on a timed path.** The recorder never
+//    writes anything anywhere; it tells a change handler about the FIRST
+//    change after the record was last taken for saving (one atomic exchange
+//    per mark), so the app can batch a save for later, off the main thread. A
+//    persisted record comes back by `absorb`, which folds it UNDER what the
+//    new process has already measured — so a launch never waits on a file.
+//    One table per build is `TimingBook`'s.
 //
 
 import Foundation
@@ -135,25 +142,47 @@ public struct TimingSnapshot<Series: TimingSeriesKey, Counter: TimingCounterKey>
     public var abandoned: Int
     /// Ends that found no open span.
     public var unmatchedEnds: Int
+    /// When the first sample or count of this record landed (nil — nothing
+    /// yet). The readout says "since" its day.
+    public var since: Date?
 
     public func stats(_ key: Series) -> TimingStats? { series[key] }
     public func counter(_ key: Counter) -> Int { counters[key] ?? 0 }
 }
 
-/// The persisted shape (`TimingRecorder.archive` / `restore`): numbers keyed
-/// by the catalog's raw names, plus the build they were measured on.
+/// The persisted shape of one build's record (`TimingRecorder.archive`,
+/// `restore`, `absorb`; `TimingBook` keeps one per build): numbers keyed by the
+/// catalog's raw names, the build they were measured on, and the day the
+/// record began.
 public struct TimingArchive: Codable, Sendable, Equatable {
     public static let currentVersion = 1
 
     public var version: Int
-    /// Whatever the app uses to tell one build from another; a record is only
-    /// restored into the build that measured it (the caller's check).
+    /// The key that tells one build from another (the caller's — the phone's
+    /// is its version, build number and executable fingerprint).
     public var build: String
+    /// How the readout names the build (display only).
+    public var label: String?
+    /// When the record's first sample or count landed.
+    public var since: Date?
     public var series: [String: TimingStats]
     public var counters: [String: Int]
     public var restarts: Int
     public var abandoned: Int
     public var unmatchedEnds: Int
+
+    /// An empty record for `build`.
+    public init(build: String, label: String? = nil) {
+        self.version = TimingArchive.currentVersion
+        self.build = build
+        self.label = label
+        self.since = nil
+        self.series = [:]
+        self.counters = [:]
+        self.restarts = 0
+        self.abandoned = 0
+        self.unmatchedEnds = 0
+    }
 }
 
 // MARK: - The recorder
@@ -179,25 +208,34 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
         var restarts = 0
         var abandoned = 0
         var unmatchedEnds = 0
+        var since: Date?
     }
 
     public let capacity: Int
     private let enabled: Atomic<Bool>
     private let state = Mutex(State())
     private let clock: @Sendable () -> TimingInstant
+    private let date: @Sendable () -> Date
     private let signposter: OSSignposter?
+    /// Set by the first change after a save (`archive(…, markingSaved: true)`),
+    /// so the change handler hears about a dirty record ONCE per save, not per
+    /// mark — saving is the app's to batch, off the paths being timed.
+    private let dirty = Atomic<Bool>(false)
+    private let changeHandler = Mutex<(@Sendable () -> Void)?>(nil)
 
     public init(
         capacity: Int = TimingStats.defaultCapacity,
         enabled: Bool = false,
         signposter: OSSignposter? = nil,
-        clock: @escaping @Sendable () -> TimingInstant = TimingClock.now
+        clock: @escaping @Sendable () -> TimingInstant = TimingClock.now,
+        date: @escaping @Sendable () -> Date = { Date() }
     ) {
         precondition(capacity > 0, "a timing ring needs at least one slot")
         self.capacity = capacity
         self.enabled = Atomic(enabled)
         self.signposter = signposter
         self.clock = clock
+        self.date = date
     }
 
     // MARK: Enabling
@@ -217,6 +255,18 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
         }
         for (key, signpost) in open { endSignpost(key, signpost) }
     }
+
+    // MARK: Saving (the app's, batched — never on a timed path)
+
+    /// `handler` is called — on whatever thread made the change — at the first
+    /// change after the record was last taken for saving, and not again until
+    /// it is taken again. O(1): one atomic exchange per change.
+    public func setChangeHandler(_ handler: (@Sendable () -> Void)?) {
+        changeHandler.withLock { $0 = handler }
+    }
+
+    /// Whether something changed since the record was last taken for saving.
+    public var hasUnsavedChanges: Bool { dirty.load(ordering: .relaxed) }
 
     // MARK: Keyed spans
 
@@ -274,6 +324,7 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
             return (ms, .some(open.signpost))
         }
         if let signpost { endSignpost(series, signpost) }
+        changed()
         return recorded
     }
 
@@ -308,6 +359,7 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
         guard isEnabled else { return nil }
         let ms = TimingClock.milliseconds(from: token.start, to: clock())
         state.withLock { record(ms, into: token.series, &$0) }
+        changed()
         return ms
     }
 
@@ -324,6 +376,7 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
     public func record(_ series: Series, value: Double) {
         guard isEnabled else { return }
         state.withLock { record(value, into: series, &$0) }
+        changed()
     }
 
     /// Adds `n` to `counter`, and to every open window that counts it.
@@ -332,6 +385,7 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
         let now = clock()
         state.withLock { s in
             s.counters[counter, default: 0] += n
+            noteFirst(&s)
             guard !s.windows.isEmpty else { return }
             for key in Array(s.windows.keys) {
                 guard var window = s.windows[key] else { continue }
@@ -343,6 +397,7 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
                 }
             }
         }
+        changed()
     }
 
     // MARK: Counting windows
@@ -355,29 +410,36 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
     ) {
         guard isEnabled else { return }
         let now = clock()
-        state.withLock { s in
+        let recorded = state.withLock { s -> Bool in
+            var recorded = false
             if let open = s.windows[series] {
                 if now >= open.deadline {
                     closeExpired(series, open, &s)
+                    recorded = true
                 } else if policy == .keepFirst {
-                    return
+                    return false
                 } else {
                     s.windows[series] = nil
                     record(Double(open.tally), into: series, &s)
+                    recorded = true
                 }
             }
             s.windows[series] = Window(
                 deadline: now &+ TimingClock.nanoseconds(duration), counting: counting, tally: 0)
+            return recorded
         }
+        if recorded { changed() }
     }
 
     /// Records the open window's tally now (a no-op when none is open).
     public func closeWindow(_ series: Series) {
         guard isEnabled else { return }
-        state.withLock { s in
-            guard let open = s.windows.removeValue(forKey: series) else { return }
+        let recorded = state.withLock { s -> Bool in
+            guard let open = s.windows.removeValue(forKey: series) else { return false }
             record(Double(open.tally), into: series, &s)
+            return true
         }
+        if recorded { changed() }
     }
 
     /// Drops the open window without recording.
@@ -392,14 +454,18 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
     /// Readable while disabled (the record outlives the switch).
     public func snapshot() -> TimingSnapshot<Series, Counter> {
         let now = clock()
-        return state.withLock { s in
+        let (snap, recorded) = state.withLock { s -> (TimingSnapshot<Series, Counter>, Bool) in
+            var recorded = false
             for (key, window) in s.windows where now >= window.deadline {
                 closeExpired(key, window, &s)
+                recorded = true
             }
-            return TimingSnapshot(
+            return (TimingSnapshot(
                 series: s.series, counters: s.counters, restarts: s.restarts,
-                abandoned: s.abandoned, unmatchedEnds: s.unmatchedEnds)
+                abandoned: s.abandoned, unmatchedEnds: s.unmatchedEnds, since: s.since), recorded)
         }
+        if recorded { changed() }
+        return snap
     }
 
     /// Back to nothing recorded. Open spans and windows are dropped too.
@@ -410,16 +476,24 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
             return open
         }
         for (key, signpost) in open { endSignpost(key, signpost) }
+        changed()
     }
 
-    /// The record as numbers keyed by the catalog's raw names.
-    public func archive(build: String) -> TimingArchive {
+    /// The record as numbers keyed by the catalog's raw names. `markingSaved`:
+    /// the caller is about to save it, so the next change is news again (the
+    /// mark happens BEFORE the read, so a change racing the save is never
+    /// lost — at worst it is saved twice).
+    public func archive(build: String, label: String? = nil, markingSaved: Bool = false) -> TimingArchive {
+        if markingSaved { dirty.store(false, ordering: .relaxed) }
         let snap = snapshot()
-        return TimingArchive(
-            version: TimingArchive.currentVersion, build: build,
-            series: Dictionary(uniqueKeysWithValues: snap.series.map { ($0.key.rawValue, $0.value) }),
-            counters: Dictionary(uniqueKeysWithValues: snap.counters.map { ($0.key.rawValue, $0.value) }),
-            restarts: snap.restarts, abandoned: snap.abandoned, unmatchedEnds: snap.unmatchedEnds)
+        var archive = TimingArchive(build: build, label: label)
+        archive.since = snap.since
+        archive.series = Dictionary(uniqueKeysWithValues: snap.series.map { ($0.key.rawValue, $0.value) })
+        archive.counters = Dictionary(uniqueKeysWithValues: snap.counters.map { ($0.key.rawValue, $0.value) })
+        archive.restarts = snap.restarts
+        archive.abandoned = snap.abandoned
+        archive.unmatchedEnds = snap.unmatchedEnds
+        return archive
     }
 
     /// Replaces the record with `archive`'s numbers. Names this catalog no
@@ -429,21 +503,7 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
     @discardableResult
     public func restore(_ archive: TimingArchive) -> Bool {
         guard archive.version == TimingArchive.currentVersion else { return false }
-        var fresh = State()
-        for (name, stats) in archive.series {
-            guard let key = Series(rawValue: name) else { continue }
-            var ringed = TimingStats(capacity: capacity)
-            for value in stats.retained { ringed.record(value) }
-            ringed.adoptCount(max(stats.count, ringed.count), last: stats.last)
-            fresh.series[key] = ringed
-        }
-        for (name, value) in archive.counters {
-            guard let key = Counter(rawValue: name) else { continue }
-            fresh.counters[key] = max(0, value)
-        }
-        fresh.restarts = max(0, archive.restarts)
-        fresh.abandoned = max(0, archive.abandoned)
-        fresh.unmatchedEnds = max(0, archive.unmatchedEnds)
+        let fresh = merged(archive, into: State())
         let open = state.withLock { s -> [(Series, OSSignpostIntervalState?)] in
             let open = s.pending.map { ($0.key, $0.value.signpost) }
             s = fresh
@@ -453,15 +513,68 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
         return true
     }
 
+    /// Folds a persisted record UNDER what is already recorded: per series the
+    /// archived samples come first and the live ones after them (the ring
+    /// keeps the newest), counts add up, and the record's first day is the
+    /// earlier one. Open spans and windows stay open. This is what lets a
+    /// launch start measuring at once and read its file afterwards, off the
+    /// path it is timing. False (nothing changed) for another version.
+    @discardableResult
+    public func absorb(_ archive: TimingArchive) -> Bool {
+        guard archive.version == TimingArchive.currentVersion else { return false }
+        state.withLock { s in s = merged(archive, into: s) }
+        return true
+    }
+
     // MARK: - Private
+
+    /// `archive` folded under `live` (see `absorb`); `restore` folds it under
+    /// an empty state.
+    private func merged(_ archive: TimingArchive, into live: State) -> State {
+        var s = live
+        for (name, stats) in archive.series {
+            guard let key = Series(rawValue: name) else { continue }
+            let current = s.series[key]
+            var ringed = TimingStats(capacity: capacity)
+            for value in stats.retained { ringed.record(value) }
+            if let current { for value in current.retained { ringed.record(value) } }
+            ringed.adoptCount(stats.count + (current?.count ?? 0), last: current?.last ?? stats.last)
+            s.series[key] = ringed
+        }
+        for (name, value) in archive.counters {
+            guard let key = Counter(rawValue: name) else { continue }
+            s.counters[key, default: 0] += max(0, value)
+        }
+        s.restarts += max(0, archive.restarts)
+        s.abandoned += max(0, archive.abandoned)
+        s.unmatchedEnds += max(0, archive.unmatchedEnds)
+        switch (archive.since, s.since) {
+        case let (old?, new?): s.since = min(old, new)
+        case let (old?, nil): s.since = old
+        default: break
+        }
+        return s
+    }
 
     private func record(_ value: Double, into series: Series, _ s: inout State) {
         s.series[series, default: TimingStats(capacity: capacity)].record(value)
+        noteFirst(&s)
+    }
+
+    /// The record's first day: stamped by its first sample or count.
+    private func noteFirst(_ s: inout State) {
+        if s.since == nil { s.since = date() }
     }
 
     private func closeExpired(_ series: Series, _ window: Window, _ s: inout State) {
         s.windows[series] = nil
         record(Double(window.tally), into: series, &s)
+    }
+
+    /// The first change after a save tells the handler; later ones do not.
+    private func changed() {
+        guard !dirty.exchange(true, ordering: .relaxed) else { return }
+        changeHandler.withLock { $0 }?()
     }
 
     private func beginSignpost(_ series: Series) -> OSSignpostIntervalState? {

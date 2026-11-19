@@ -6,9 +6,12 @@
 //  Timing… (PROVISIONAL P-65-1: beside the edit trace, the precedent for a
 //  diagnostic shipped in Release; the alternative recorded in the run's §7).
 //  Per span: how many runs, the median, the range, the last — then the per-act
-//  counts and the raw totals. Copy puts exactly what is on screen on the
-//  clipboard as plain text (`TimingReport`, Core), so she can paste it to a
-//  session. Reset forgets the record, in memory and on disk.
+//  counts and the raw totals. THIS build's table first, then the PREVIOUS
+//  build's under it when one is kept (the author's sharpening: the before and
+//  after read on the phone itself), each headed by its build and the day it
+//  began collecting. Copy puts exactly what is on screen on the clipboard as
+//  plain text (`TimingReport`, Core), both tables, so she can paste it to a
+//  session. Reset clears THIS build's table only (PROVISIONAL P-65-4).
 //
 //  Every label below is DRAFT for her wording pass (the record lists them).
 //  The readout shows labels and numbers — never a note's text, title or id.
@@ -84,38 +87,73 @@ enum MobileTimingCopy {
         (.appLeaving, "App left"),
     ]
 
-    static var configuration: String {
-        #if DEBUG
-        return "Debug"
-        #else
-        return "Release"
-        #endif
+    static let thisBuild = "This build"                           // DRAFT
+    static let previousBuild = "Previous build"                   // DRAFT
+
+    /// One build's table, from wherever it is read: the live record (this
+    /// build) or the kept file (the previous build).
+    struct Table {
+        var label: String
+        var since: Date?
+        var stats: (AppTimingSeries) -> TimingStats?
+        var counter: (AppTimingCounter) -> Int
+        var restarts: Int
+        var abandoned: Int
+        var unmatchedEnds: Int
     }
 
-    /// The whole readout as plain text — the screen shows it, Copy copies it.
-    static func report(_ snap: TimingSnapshot<AppTimingSeries, AppTimingCounter>, build: String) -> String {
+    static func table(
+        _ snap: TimingSnapshot<AppTimingSeries, AppTimingCounter>, label: String
+    ) -> Table {
+        Table(
+            label: label, since: snap.since, stats: { snap.stats($0) }, counter: { snap.counter($0) },
+            restarts: snap.restarts, abandoned: snap.abandoned, unmatchedEnds: snap.unmatchedEnds)
+    }
+
+    static func table(_ archive: TimingArchive) -> Table {
+        Table(
+            label: archive.label ?? archive.build, since: archive.since,
+            stats: { archive.series[$0.rawValue] }, counter: { archive.counters[$0.rawValue] ?? 0 },
+            restarts: archive.restarts, abandoned: archive.abandoned,
+            unmatchedEnds: archive.unmatchedEnds)
+    }
+
+    /// The whole readout as plain text — the screen shows it, Copy copies it:
+    /// this build's table, then the previous build's when one is kept, each
+    /// headed by its build and the day it began collecting.
+    static func report(current: Table, previous: Table?) -> String {
+        var out = block(current, heading: thisBuild)
+        if let previous { out += "\n\n" + block(previous, heading: previousBuild) }
+        return out
+    }
+
+    private static func block(_ table: Table, heading: String) -> String {
         var sections = spans.map { section in
             TimingReport.Section(
                 section.heading,
-                lines: section.rows.map { .init($0.1, snap.stats($0.0), unit: .milliseconds) })
+                lines: section.rows.map { .init($0.1, table.stats($0.0), unit: .milliseconds) })
         }
         sections.append(TimingReport.Section(
             "Counts",                                             // DRAFT
-            lines: counts.map { .init($0.1, snap.stats($0.0), unit: .count) }))
+            lines: counts.map { .init($0.1, table.stats($0.0), unit: .count) }))
         sections.append(TimingReport.Section(
             "Totals",                                             // DRAFT
-            totals: totals.map { .init($0.1, snap.counter($0.0)) }))
+            totals: totals.map { .init($0.1, table.counter($0.0)) }))
+        let since = table.since.map {
+            "collecting since " + $0.formatted(date: .abbreviated, time: .omitted)  // DRAFT
+        } ?? "nothing collected yet"                              // DRAFT
         return TimingReport.text(
-            title: title.uppercased(),
+            title: "\(title.uppercased()) — \(heading.uppercased())",
             header: [
-                "\(configuration) · build \(build.prefix(8))",
-                "ms; median and range over the last \(TimingStats.defaultCapacity) runs",  // DRAFT
+                table.label,
+                since,
+                "n = runs; median and range over the last \(TimingStats.defaultCapacity); ms",  // DRAFT
             ],
             sections: sections,
             footer: [
-                "Restarted before they ended: \(snap.restarts)",   // DRAFT
-                "Ended too late to count: \(snap.abandoned)",      // DRAFT
-                "Ended with no start: \(snap.unmatchedEnds)",      // DRAFT
+                "Restarted before they ended: \(table.restarts)",  // DRAFT
+                "Ended too late to count: \(table.abandoned)",     // DRAFT
+                "Ended with no start: \(table.unmatchedEnds)",     // DRAFT
             ])
     }
 }
@@ -210,7 +248,10 @@ struct MobileTimingView: View {
 
     private func refresh() {
         let snap = AppTiming.recorder.snapshot()
-        anything = !snap.series.isEmpty || !snap.counters.isEmpty
-        text = MobileTimingCopy.report(snap, build: MobileTiming.build)
+        let previous = MobileTiming.previousBuild
+        anything = !snap.series.isEmpty || !snap.counters.isEmpty || previous != nil
+        text = MobileTimingCopy.report(
+            current: MobileTimingCopy.table(snap, label: MobileTiming.build.label),
+            previous: previous.map(MobileTimingCopy.table))
     }
 }

@@ -188,7 +188,7 @@ hold at this branch's base `21747b9de`: `MobileWriteView.swift` 143-226, `Mobile
 | P2 — the catalog, the one recorder (`Shared/AppTiming.swift`) + `endIfOpen` in the brain | DONE (this commit) — brain 25/25 |
 | P3 — the marks (phone + Shared sites) | DONE (this commit) — phone Debug `build-for-testing` green, no warning in a touched file; the walk PENDING |
 | P4 — the readout + the Settings row | DONE (this commit) — face PENDING the walk |
-| P4b — **survival reworked to the author's sharpening (below)**: per-build tables in a file in the app's container, deferred saves off the timed path, the previous build's table on the readout, since-days | IN-PROGRESS — the UserDefaults persistence in this commit is superseded by it |
+| P4b — **survival reworked to the author's sharpening (below)**: per-build tables in a file in the app's container, deferred saves off the timed path, the previous build's table on the readout, since-days | DONE (this commit) — Core `TimingBook` + the recorder's since-day, change handler and `absorb`; brain 31/31 headless; the phone's `MobileTimingStore` (`Library/Application Support/Timing/timing.json`, saves 20 s after the first unsaved change and at every backgrounding, on its own utility queue); the readout shows this build then the previous; new phone suite `MobileTimingTests` (4) BUILT, its run PENDING the stage window |
 
 **The author's sharpening (relayed by the orchestrator mid-batch, 2026-11-19; she will NOT run the readout tonight — "leave
 it in the handoff bundle for me to do later"; the BEFORE build may live on her phone for days, the AFTER build installed

@@ -375,6 +375,168 @@ struct TimingRecorderTests {
         #expect(stats.last == 5)
     }
 
+    // MARK: - The author's sharpening: per-build tables that survive a quit
+
+    /// A wall clock the test sets by hand.
+    final class HandDate: Sendable {
+        private let now = Mutex(Date(timeIntervalSince1970: 1_763_510_400))  // a fixed day
+        func read() -> Date { now.withLock { $0 } }
+        func advance(days: Double) { now.withLock { $0 += days * 86_400 } }
+    }
+
+    /// THE RECORD'S FIRST DAY: stamped by its first sample or count (never by
+    /// a begin), carried by the archive, and cleared by a reset.
+    @Test func theRecordKnowsTheDayOfItsFirstSample() {
+        let clock = HandClock()
+        let day = HandDate()
+        let timing = TimingRecorder<Series, Counter>(
+            enabled: true, clock: { clock.read() }, date: { day.read() })
+        timing.begin(.openToNote, staleAfter: .seconds(30))
+        #expect(timing.snapshot().since == nil)                   // a begin is not a sample
+        let first = day.read()
+        timing.count(.read)
+        day.advance(days: 3)
+        timing.record(.rows, value: 1)
+        #expect(timing.snapshot().since == first)                 // the FIRST, not the latest
+        #expect(timing.archive(build: "b").since == first)
+        timing.reset()
+        #expect(timing.snapshot().since == nil)
+        timing.record(.rows, value: 1)
+        #expect(timing.snapshot().since == day.read())
+    }
+
+    /// SAVES ARE BATCHED: the change handler hears the FIRST change after the
+    /// record was taken for saving, once — not once per mark — and a save
+    /// re-arms it. A change racing the save is never lost.
+    @Test func theChangeHandlerHearsTheFirstChangeAfterEachSave() {
+        let clock = HandClock()
+        let timing = recorder(clock: clock)
+        let calls = Mutex(0)
+        timing.setChangeHandler { calls.withLock { $0 += 1 } }
+        timing.begin(.openToNote, staleAfter: .seconds(30))       // a begin changes nothing kept
+        #expect(calls.withLock { $0 } == 0)
+        for _ in 0..<50 { timing.count(.read) }
+        timing.record(.rows, value: 2)
+        #expect(calls.withLock { $0 } == 1)
+        #expect(timing.hasUnsavedChanges)
+        _ = timing.archive(build: "b", markingSaved: true)
+        #expect(!timing.hasUnsavedChanges)
+        timing.count(.read)
+        #expect(calls.withLock { $0 } == 2)
+        _ = timing.archive(build: "b")                            // a read alone does not re-arm
+        timing.count(.read)
+        #expect(calls.withLock { $0 } == 2)
+    }
+
+    /// ABSORB folds a persisted record UNDER the live one: the archived samples
+    /// first, the live ones after (the ring keeps the newest), counts add, the
+    /// earlier first day wins, and a span open across it stays open.
+    @Test func absorbFoldsAPersistedRecordUnderTheLiveOne() throws {
+        let clock = HandClock()
+        let day = HandDate()
+        let older = TimingRecorder<Series, Counter>(
+            capacity: 4, enabled: true, clock: { clock.read() }, date: { day.read() })
+        for value in [1.0, 2, 3] { older.record(.rows, value: value) }
+        older.count(.save, by: 5)
+        let archived = older.archive(build: "b")
+
+        day.advance(days: 2)
+        let live = TimingRecorder<Series, Counter>(
+            capacity: 4, enabled: true, clock: { clock.read() }, date: { day.read() })
+        live.begin(.openToNote, staleAfter: .seconds(30))
+        live.record(.rows, value: 10)
+        live.record(.rows, value: 11)
+        live.count(.save, by: 2)
+        #expect(live.absorb(archived))
+
+        let snap = live.snapshot()
+        let rows = try #require(snap.stats(.rows))
+        #expect(rows.count == 5)
+        #expect(rows.retained == [2, 3, 10, 11])                  // newest four, live last
+        #expect(rows.last == 11)
+        #expect(snap.counter(.save) == 7)
+        #expect(snap.since == archived.since)                     // the earlier day
+        #expect(live.isOpen(.openToNote))                         // untouched
+    }
+
+    /// PER-BUILD KEYING: a new build gets a fresh table and the old one becomes
+    /// the previous table, untouched; the same build coming back finds its own.
+    @Test func eachBuildKeepsItsOwnTable() {
+        var book = TimingBook()
+        #expect(book.open(build: "before", label: "1.0 (1) · BEFORE") == nil)
+        var before = TimingArchive(build: "before", label: "1.0 (1) · BEFORE")
+        before.counters["read"] = 3
+        book.store(before)
+
+        // The AFTER build installed in place: a fresh table in front, BEFORE kept.
+        #expect(book.open(build: "after", label: "1.0 (1) · AFTER") == nil)
+        #expect(book.current?.build == "after")
+        #expect(book.current?.counters.isEmpty == true)           // nothing blended in
+        #expect(book.previous == before)
+
+        var after = TimingArchive(build: "after", label: "1.0 (1) · AFTER")
+        after.counters["read"] = 9
+        book.store(after)
+        #expect(book.previous == before)                          // storing one never touches the other
+
+        // Going back to BEFORE (reinstalled) finds its own table again.
+        let reopened = book.open(build: "before", label: "1.0 (1) · BEFORE")
+        #expect(reopened == before)
+        #expect(book.current == before && book.previous == after)
+    }
+
+    /// THE BOUND: at most two tables — opening a third build drops the oldest.
+    @Test func theBookKeepsAtMostTwoBuilds() {
+        var book = TimingBook()
+        for name in ["one", "two", "three", "four"] {
+            book.open(build: name, label: name)
+        }
+        #expect(book.builds.count == TimingBook.keptBuilds)
+        #expect(book.builds.map(\.build) == ["four", "three"])
+        book.store(TimingArchive(build: "five"))
+        #expect(book.builds.map(\.build) == ["five", "four"])
+    }
+
+    /// THE ROUND-TRIP THROUGH THE PERSISTED FORM: a recorder's record, kept in
+    /// the book, written, read back in a "new process", and absorbed there,
+    /// comes back number for number — and a malformed or future file reads as
+    /// no book at all.
+    @Test func aRecordSurvivesTheBookAndTheFile() throws {
+        let clock = HandClock()
+        let day = HandDate()
+        let first = TimingRecorder<Series, Counter>(
+            capacity: 4, enabled: true, clock: { clock.read() }, date: { day.read() })
+        for value in 1...6 { first.record(.rows, value: Double(value)) }
+        first.begin(.tapToKeyboard, staleAfter: .seconds(30))
+        clock.advance(ms: 280)
+        first.end(.tapToKeyboard)
+        first.count(.build, by: 2)
+        _ = first.end(.openToNote)
+
+        var book = TimingBook()
+        book.open(build: "b1", label: "1.0 (1) · B1")
+        book.store(first.archive(build: "b1", label: "1.0 (1) · B1", markingSaved: true))
+        let bytes = try book.encoded()
+
+        var reread = try #require(TimingBook.decode(bytes))
+        #expect(reread == book)
+        let opened = reread.open(build: "b1", label: "1.0 (1) · B1")
+        let kept = try #require(opened)
+        let second = TimingRecorder<Series, Counter>(
+            capacity: 4, enabled: true, clock: { clock.read() }, date: { day.read() })
+        #expect(second.absorb(kept))
+        let a = first.snapshot()
+        let b = second.snapshot()
+        #expect(a.series == b.series)
+        #expect(a.counters == b.counters)
+        #expect(a.unmatchedEnds == b.unmatchedEnds && a.since == b.since)
+
+        #expect(TimingBook.decode(Data("not a book".utf8)) == nil)
+        var future = book
+        future.version = TimingBook.currentVersion + 1
+        #expect(TimingBook.decode(try future.encoded()) == nil)
+    }
+
     // MARK: - Concurrency
 
     /// Marks arrive from many threads at once (a listing's fetch closure counts
