@@ -437,10 +437,25 @@ struct PhoneTypeModifier: ViewModifier {
     /// (the quick-entry box's 24 pt line — sheet §E) overrides the role's;
     /// it scales with the size like the role's own.
     var linePitch: CGFloat?
+    /// A site whose drawing names its own weight for the role (the closing
+    /// act's semibold Done — sheet §B, VM-50) overrides the role's weight;
+    /// the size, family and scaling stay the role's.
+    var weight: PhoneTypeSpec.Weight?
     @Environment(\.dynamicTypeSize) private var typeSize
 
     /// The role at this environment's text size: font, line spacing, size.
     private var face: (font: Font, lineSpacing: CGFloat, pointSize: CGFloat) {
+        let base = rawFace
+        guard let weight else { return base }
+        let spec = PhoneType.spec(role, voice: voice)
+        let reweighted = PhoneTypeSpec(
+            family: spec.family, weight: weight, size: spec.size,
+            lineHeight: spec.lineHeight, anchor: spec.anchor, scaling: spec.scaling)
+        return (PhoneType.font(reweighted, voice: voice, pointSize: base.pointSize),
+                base.lineSpacing, base.pointSize)
+    }
+
+    private var rawFace: (font: Font, lineSpacing: CGFloat, pointSize: CGFloat) {
         #if os(iOS)
         let resolved = PhoneType.resolved(role, voice: voice, at: typeSize.phoneCategory)
         if let linePitch {
@@ -492,6 +507,14 @@ extension View {
     ) -> some View {
         modifier(PhoneTypeModifier(
             role: role, voice: tokens.voice, shrinksToFloor: shrinkingToFloor))
+    }
+
+    /// A role at a weight of its site's own (the closing act's semibold —
+    /// sheet §B); the size and scaling stay the role's.
+    func phoneType(
+        _ role: PhoneTypeRole, _ tokens: VoiceTokens, weight: PhoneTypeSpec.Weight
+    ) -> some View {
+        modifier(PhoneTypeModifier(role: role, voice: tokens.voice, weight: weight))
     }
 }
 
