@@ -114,7 +114,14 @@ final class MobileShellRouter {
     /// Bind the open library's theme (the shell's initializer — idempotent per
     /// session, so a re-render keeps the running store). The store's landing
     /// seam is this router's `adoptLanded`, so a value the store lands reaches
-    /// the editors whichever device wrote it.
+    /// the editors whichever device wrote it. The bind is per SESSION but the
+    /// store is STARTED by the shell's `.task`, once per shell identity: today
+    /// every new session reaches the shell through a non-ready bootstrap state
+    /// (`AppBootstrap.beginOpening` writes `.opening` before its awaited open),
+    /// which remounts the shell. A road that swapped sessions WITHOUT leaving
+    /// `.ready` would leave the new store unstarted — and every `@State` model
+    /// the shell built from the old session — so it must key the shell on its
+    /// session (VM-47 ladder round 1, R1-m1).
     func bindTheme(session: AppSession) {
         let id = ObjectIdentifier(session)
         guard themeSession != id else { return }

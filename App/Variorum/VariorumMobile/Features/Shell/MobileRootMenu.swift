@@ -68,6 +68,8 @@ struct MobileRootMenu: View {
 
     /// **The menu's items, as data** — what the menu draws, in order. Today one:
     /// Settings, where the shell gave the door. Later umbrellas append theirs.
+    /// An item's word is its identity in the menu (`Item.id`), so each item's
+    /// word must be distinct.
     static func items(settings: MobileSettingsDoor?) -> [Item] {
         var items: [Item] = []
         if let settings {
