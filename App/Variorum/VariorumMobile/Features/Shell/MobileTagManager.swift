@@ -252,16 +252,7 @@ struct MobileTagManagerSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Tags"))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Tags"), tokens: tokens) { dismiss() }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(model.tags, id: \.id) { tag in

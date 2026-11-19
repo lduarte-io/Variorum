@@ -215,16 +215,7 @@ struct MobileMembershipSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Books"))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Books"), tokens: tokens) { dismiss() }
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     membershipSection
@@ -250,10 +241,8 @@ struct MobileMembershipSheet: View {
                             onOpenNote(copy)
                         } label: {
                             Text(tokens.chromeLabel(openCopyLabel))
-                                .phoneType(.controlInline, tokens)
-                                .foregroundStyle(tokens.accent)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                     }
                 }
             }
@@ -292,16 +281,12 @@ struct MobileMembershipSheet: View {
                     Button(tokens.chromeLabel("diverge")) {
                         Task { await model.diverge(for: book) }
                     }
-                    .phoneType(.controlInline, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     if MobileMembershipModel.rowCarriesRemove(book) {
                         Button(tokens.chromeLabel("remove")) {
                             Task { await model.remove(from: book) }
                         }
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.phone.muted)
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     }
                 }
                 .padding(.vertical, 4)
@@ -343,7 +328,7 @@ struct MobileMembershipSheet: View {
                 Spacer()
             }
             .padding(.vertical, 4)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
     }

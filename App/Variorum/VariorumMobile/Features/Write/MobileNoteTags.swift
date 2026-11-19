@@ -147,16 +147,7 @@ struct MobileNoteTagsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Tags"))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("Tags"), tokens: tokens) { dismiss() }
             typeField
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
@@ -182,16 +173,7 @@ struct MobileNoteTagsSheet: View {
             text: $typed
         )
         .textFieldStyle(.plain)
-        .phoneType(.control, tokens)
-        .foregroundStyle(tokens.ink)
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(tokens.surface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(tokens.line, lineWidth: 1)))
+        .phoneField(tokens)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .focused($typedFocused)
@@ -235,9 +217,7 @@ struct MobileNoteTagsSheet: View {
                         let model = model
                         Task { await model.remove(tag) }
                     }
-                    .phoneType(.controlInline, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .muted))
                     .accessibilityLabel("Remove tag \(tag.path)")
                 }
                 .padding(.vertical, 4)
@@ -272,7 +252,7 @@ struct MobileNoteTagsSheet: View {
                             Spacer()
                         }
                         .padding(.vertical, 4)
-                        .contentShape(Rectangle())
+                        .phoneHitArea(alignment: .leading)
                     }
                     .buttonStyle(.plain)
                 }

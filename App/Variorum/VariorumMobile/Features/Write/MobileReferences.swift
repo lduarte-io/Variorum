@@ -181,16 +181,7 @@ struct MobileReferencesSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("More Info"))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel("More Info"), tokens: tokens) { dismiss() }
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     if model.references.isEmpty {
@@ -258,7 +249,7 @@ struct MobileReferencesSheet: View {
                         Spacer()
                     }
                     .padding(.vertical, 6)
-                    .contentShape(Rectangle())
+                    .phoneHitArea(alignment: .leading)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Open \(title)")
@@ -308,7 +299,7 @@ struct MobileReferencesSheet: View {
                 Spacer()
             }
             .padding(.vertical, 8)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Add a Link")

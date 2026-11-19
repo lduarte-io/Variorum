@@ -307,11 +307,20 @@ struct MobileBlockListSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(tokens.chromeLabel("Blocks"))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
+            PhoneSheetHeader(
+                title: tokens.chromeLabel("Blocks"), tokens: tokens,
+                // **THE SHEET'S OWN DISMISS LEAVES PICKING MODE TOO** (the
+                // fix wave, MINOR 1). `exitSelection`'s doc states the rule
+                // — *"a selection that outlived its surface would offer acts
+                // on blocks she is no longer looking at"* — and this is the
+                // sheet's PRIMARY exit; without it, picking survived the
+                // dismissal and the sheet reopened armed, with the picks and
+                // the delete verb still on the banner.
+                done: {
+                    model.exitSelection()
+                    dismiss()
+                }
+            ) {
                 // PR20's entry door: chrome, and only where there is a
                 // delete road to reach and blocks to pick (P-2). It swaps
                 // to "Done" while picking, which is also how she leaves.
@@ -330,9 +339,7 @@ struct MobileBlockListSheet: View {
                         if model.isSelecting { model.exitSelection() }
                         else { model.enterSelection() }
                     }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneTextButtonStyle(tokens: tokens))
                     // An EXPLICIT label, because while picking this button
                     // and the sheet's dismiss both render the word "Done".
                     // The dismiss keeps its implicit label untouched — a
@@ -343,20 +350,6 @@ struct MobileBlockListSheet: View {
                             ? MobileBlockSelectionCopy.doneSelectingLabel
                             : MobileBlockSelectionCopy.selectLabel)
                 }
-                // **THE SHEET'S OWN DISMISS LEAVES PICKING MODE TOO** (the
-                // fix wave, MINOR 1). `exitSelection`'s doc states the rule
-                // — *"a selection that outlived its surface would offer acts
-                // on blocks she is no longer looking at"* — and this is the
-                // sheet's PRIMARY exit; without it, picking survived the
-                // dismissal and the sheet reopened armed, with the picks and
-                // the delete verb still on the banner.
-                Button(tokens.chromeLabel("Done")) {
-                    model.exitSelection()
-                    dismiss()
-                }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
             }
             if tray != nil { segmentStrip }
             if model.isSelecting, segment == .inTheNote { selectionBanner }
@@ -453,35 +446,21 @@ struct MobileBlockListSheet: View {
                 ) {
                     model.deleteConfirmPresented = true
                 }
-                .phoneType(.controlInline, tokens)
-                .foregroundStyle(tokens.alarm)
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .alarm))
                 .accessibilityLabel(
                     MobileBlockSelectionCopy.deleteVerb(picked: model.selection.count))
             }
         }
     }
 
-    /// Plain doors in a row — the Library/Trash filter row's grammar, never a
-    /// `Menu` or a `Picker`: a door a pin can drive (§15's trap (b), and the
-    /// measured reason — a `Menu`'s rows come back as an EMPTY accessibility
-    /// tree).
+    /// VM-50: the system's segmented choice (was a row of plain words).
+    /// Still never a `Menu`: each segment is a door a pin can drive by its
+    /// plain word (§15's trap (b) — `PhoneSegmentedChoice` speaks one
+    /// activatable element per segment, `.isSelected` on the chosen one).
     private var segmentStrip: some View {
-        HStack(spacing: 16) {
-            ForEach(MobileBlocksSegment.allCases) { option in
-                Button {
-                    segment = option
-                } label: {
-                    Text(tokens.chromeLabel(option.word))
-                        .phoneType(.chip, tokens)
-                        .foregroundStyle(segment == option ? tokens.ink : tokens.phone.faint)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(option.word)
-                .accessibilityAddTraits(segment == option ? .isSelected : [])
-            }
-            Spacer(minLength: 0)
-        }
+        PhoneSegmentedChoice(
+            MobileBlocksSegment.allCases, selection: segment, tokens: tokens,
+            word: \.word, select: { segment = $0 })
     }
 
     private var inTheNoteList: some View {
@@ -532,6 +511,8 @@ struct MobileBlockListSheet: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, model.isSelecting ? 2 : 0)
+                        // VM-49: a row answers 44 tall (it carried no padding).
+                        .frame(minHeight: PhoneMetrics.touchMinimum)
                         .background(picked ? tokens.accent.opacity(0.12) : .clear)
                         .contentShape(Rectangle())
                     }

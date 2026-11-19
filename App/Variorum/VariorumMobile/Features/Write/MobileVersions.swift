@@ -417,7 +417,7 @@ struct MobileVersionsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 10)
             .padding(.horizontal, 12)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         // The row IS the Read door, so it says so — `VersionsPath.openVerb`
@@ -437,10 +437,9 @@ struct MobileVersionsView: View {
                         model.closeReader()
                     } label: {
                         Text(tokens.chromeLabel(Self.backToListing))
-                            .phoneType(.control, tokens)
-                            .foregroundStyle(tokens.accent)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(
+                        tokens: tokens, role: .control, alignment: .leading))
                     .accessibilityLabel(Self.backToListing)
                     Spacer()
                 }
@@ -484,30 +483,24 @@ struct MobileVersionsView: View {
                 model.pendingRestore = item
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.restoreVerb))
-                    .phoneType(.controlInline, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
             .accessibilityLabel(VersionsPath.restoreVerb)
             Button {
                 let model = model
                 Task { await model.promote(item) }
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.promoteVerb))
-                    .phoneType(.controlInline, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
             .accessibilityLabel(VersionsPath.promoteVerb)
             Spacer(minLength: 0)
             Button {
                 model.pendingDelete = item
             } label: {
                 Text(tokens.chromeLabel(VersionsPath.deleteVerb))
-                    .phoneType(.controlInline, tokens)
-                    .foregroundStyle(tokens.alarm)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .alarm))
             .accessibilityLabel(VersionsPath.deleteVerb)
         }
         .padding(.horizontal, 20)

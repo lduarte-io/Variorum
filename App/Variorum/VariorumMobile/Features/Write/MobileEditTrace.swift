@@ -539,22 +539,12 @@ struct MobileEditTraceView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tokens.path(["Settings", "edit-trace"]))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                    .lineLimit(1)
-                Spacer()
-                Button { dismiss() } label: {
-                    Text(tokens.chromeLabel("Done"))
-                        .phoneType(.control, tokens)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 12)
+            PhoneSheetHeader(
+                tokens.path(["Settings", "edit-trace"]), tokens: tokens,
+                titleInk: tokens.phone.muted
+            ) { dismiss() }
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.top, PhoneMetrics.Space.s8)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
@@ -592,19 +582,17 @@ struct MobileEditTraceView: View {
                     copied = true
                 } label: {
                     Text(tokens.chromeLabel(copied ? "Copied" : "Copy"))
-                        .phoneType(.control, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 .accessibilityLabel("Copy the edit trace")
                 Button {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel("Refresh"))
-                        .phoneType(.control, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 Spacer()
                 Button {
                     MobileEditTrace.clear()
@@ -612,10 +600,9 @@ struct MobileEditTraceView: View {
                     refresh()
                 } label: {
                     Text(tokens.chromeLabel("Clear"))
-                        .phoneType(.control, tokens)
-                        .foregroundStyle(tokens.phone.muted)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .muted, role: .control, alignment: .leading))
                 .accessibilityLabel("Clear the edit trace")
             }
             .padding(.horizontal, 20)

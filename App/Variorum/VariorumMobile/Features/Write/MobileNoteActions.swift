@@ -93,16 +93,7 @@ struct MobileNoteActionsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(tokens.chromeLabel(Self.sheetTitle))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button(tokens.chromeLabel("Done")) { dismiss() }
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
-                    .buttonStyle(.plain)
-            }
+            PhoneSheetHeader(tokens.chromeLabel(Self.sheetTitle), tokens: tokens) { dismiss() }
             // The note's two TIME controls first — the grain pairing the
             // phone teaches here instead of with chords (finding 2).
             saveVersionRow
@@ -333,7 +324,8 @@ struct MobileNoteActionsSheet: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        // VM-50: the menu row — a title and a detail line, 64 at least.
+        .buttonStyle(PhoneMenuRowStyle(minHeight: PhoneControlMetrics.menuRowWithDetail))
         .accessibilityLabel(title)
     }
 }

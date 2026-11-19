@@ -577,10 +577,8 @@ struct MobileNoteTraySection: View {
             Text(tokens.chromeLabel(
                 (takesShown ? "\u{25BE} " : "\u{25B8} ")
                 + RecoveryCopy.trayTakesDisclosure(model.takes.count)))
-                .phoneType(.controlInline, tokens)
-                .foregroundStyle(tokens.accent)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneInlineActStyle(tokens: tokens, alignment: .leading))
         .accessibilityLabel(RecoveryCopy.trayTakesDisclosure(model.takes.count))
         if takesShown {
             ForEach(model.takes) { take in
@@ -671,10 +669,8 @@ struct MobileNoteTraySection: View {
                     Task { await putBack() }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel(verbLabel)
             }
         }
@@ -701,10 +697,8 @@ struct MobileNoteTraySection: View {
                     Task { await model.putBackTake(take.variantID) }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel(
                     "\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(.take))")
                 // The purge door, on the ONE surface a take has one (her G5
@@ -714,10 +708,8 @@ struct MobileNoteTraySection: View {
                     model.requestDeleteNowTake(take)
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.deleteNowVerb))
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.alarm)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .alarm))
                 .accessibilityLabel(
                     "\(RecoveryCopy.deleteNowVerb) \(RecoveryCopy.rowKind(.take))")
                 Spacer(minLength: 0)
