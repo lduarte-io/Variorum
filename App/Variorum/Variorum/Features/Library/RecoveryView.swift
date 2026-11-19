@@ -248,9 +248,104 @@ final class RecoveryViewModel {
     /// also waits for the unfiltered total, because its wording depends on it.
     var trashEmptyStateLine: String? {
         guard trashListingLoaded, trash.isEmpty else { return nil }
+        // VX-93 (R-980-12): words asked and nothing matching is the FILTERED
+        // empty — the search's own sentence, never "The Trash is empty." (the
+        // Trash may hold plenty). It needs no total: it speaks of the words.
+        if isSearching { return TrashSearchCopy.noMatches(filteredBy: kindFilter) }
         if kindFilter != nil, !trashTotalLoaded { return nil }
         return RecoveryCopy.trashEmptyLine(
             filteredBy: kindFilter, holdsOtherKinds: !trashIsEmptyUnfiltered)
+    }
+
+    // MARK: The search inside the Trash (VX-93 — R-980-9…12)
+
+    /// **The field's words, as typed** — her text, which the field shows. It
+    /// starts empty on every visit (a visit builds its own model; leaving
+    /// clears it too — `RecoveryView.body`'s `onDisappear`).
+    private(set) var searchText = ""
+
+    /// **The words the listing answers** — `searchText`'s words
+    /// (`TrashTextMatch.words`) once the typing pauses (`TrashSearchTiming`),
+    /// at once when they empty. A change restarts the listing (`restartToken`)
+    /// exactly as the kind filter and the sort do: the narrowing is applied in
+    /// the read, so the window holds the right rows.
+    private(set) var askedWords: [String] = []
+
+    /// Row id → its ONE passage line (R-980-11), on the rows matched by text
+    /// they do not already show. Empty while no words are asked.
+    private(set) var passages: [String: String] = [:]
+
+    /// Words are asked: the listing is the Trash narrowed to them.
+    var isSearching: Bool { !askedWords.isEmpty }
+
+    /// The pause before a typed word is asked (a seam for the pins).
+    @ObservationIgnored var searchDebounce: Duration = TrashSearchTiming.debounce
+    @ObservationIgnored private var pendingAsk: Task<Void, Never>?
+
+    /// **The QUESTION token** (the VX-408 precedent, `LibraryCatalogModel.read`):
+    /// each start of the listing is a new question, and an answer that arrives
+    /// for an older one is dropped — a superseded question never lands its rows
+    /// over the newer question's.
+    @ObservationIgnored private(set) var listingQuestion: UInt64 = 0
+
+    #if DEBUG
+    /// **The pin seam** (DEBUG only; nil everywhere but the pins): awaited by
+    /// the listing AFTER a value arrives and BEFORE the question guard, with
+    /// that start's question — so a pin can hold one question's answer until a
+    /// newer one has landed, the order a serial store never produces alone.
+    @ObservationIgnored var listingAnswerGate: (@MainActor (_ question: UInt64) async -> Void)?
+    #endif
+
+    /// Her typing (or a cut, a paste — any edit of the field's text). The
+    /// listing answers once she pauses; a field emptied answers at once.
+    func editSearch(_ text: String) {
+        searchText = text
+        pendingAsk?.cancel()
+        pendingAsk = nil
+        let words = TrashTextMatch.words(text)
+        guard words != askedWords else { return }  // a space typed asks nothing new
+        guard !words.isEmpty else {
+            ask(words)
+            return
+        }
+        let delay = searchDebounce
+        pendingAsk = Task { [weak self] in
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled, let self else { return }
+            self.pendingAsk = nil
+            self.ask(words)
+        }
+    }
+
+    /// ⏎ — the typed words, asked now.
+    func askSearchNow() {
+        pendingAsk?.cancel()
+        pendingAsk = nil
+        ask(TrashTextMatch.words(searchText))
+    }
+
+    /// Esc (and leaving the Trash) — the field emptied, the Trash whole again.
+    func clearSearch() {
+        pendingAsk?.cancel()
+        pendingAsk = nil
+        searchText = ""
+        ask([])
+    }
+
+    private func ask(_ words: [String]) {
+        guard words != askedWords else { return }
+        askedWords = words
+        // A new question has not answered yet: the rows on screen stay drawn,
+        // but no empty sentence speaks for them (VX-670's walk finding 1).
+        trashListingLoaded = false
+        restartToken &+= 1
+    }
+
+    /// What a row SHOWS, as `RecoveryView.trashRow` draws it — its name, else
+    /// its first line (`TrayRowPreview.line`) — so a passage is owed only
+    /// where the row does not already show the words (R-980-11).
+    nonisolated static func shownText(_ item: Queries.TrashItem) -> String {
+        item.title ?? TrayRowPreview.line(item.text)
     }
 
     private(set) var lastError: String?
@@ -300,25 +395,57 @@ final class RecoveryViewModel {
     /// surface's; one decision now answers for both platforms.
     func startTrash() async {
         let kinds = TrashScope.kinds(filter: kindFilter)
+        // VX-93: this start is a new question; an older start's answers drop.
+        listingQuestion &+= 1
+        let question = listingQuestion
+        let words = askedWords
         // Walk finding 1: a new query has not answered yet — whatever rows
         // the last one left stay drawn, but no empty sentence speaks for it.
         trashListingLoaded = false
         do {
-            // 13i-d U5: the CURRENT WING's Trash (her per-library ruling).
-            for try await value in session.database.observeTrash(
-                now: session.now, kinds: kinds, oldestFirst: oldestFirst,
-                limit: Self.window + 1, wingID: session.wing.currentID
-            ) {
-                (trash, trashTruncated) = TrashListing.windowed(
-                    value, window: Self.window)
-                trashListingLoaded = true
-                await refreshPoolHomes()
-                await refreshBookNoteCounts()
+            if words.isEmpty {
+                // 13i-d U5: the CURRENT WING's Trash (her per-library ruling).
+                for try await value in session.database.observeTrash(
+                    now: session.now, kinds: kinds, oldestFirst: oldestFirst,
+                    limit: Self.window + 1, wingID: session.wing.currentID
+                ) {
+                    guard await answers(question) else { return }
+                    await adoptListing(value, passages: [:])
+                }
+            } else {
+                // VX-93: the SAME listing (wing, window, purge fence, kinds,
+                // order), narrowed to the rows holding every word — read on a
+                // reader, off the main thread, woken by the listing's own
+                // named region.
+                for try await answer in session.database.observeTrashSearch(
+                    now: session.now, words: words, kinds: kinds, oldestFirst: oldestFirst,
+                    limit: Self.window + 1, wingID: session.wing.currentID,
+                    shows: Self.shownText
+                ) {
+                    guard await answers(question) else { return }
+                    await adoptListing(answer.items, passages: answer.passages)
+                }
             }
         } catch is CancellationError {
         } catch {
             lastError = DeletionRefusal.fallback(error)
         }
+    }
+
+    /// Does an answer for `question` still answer the listing's question?
+    private func answers(_ question: UInt64) async -> Bool {
+        #if DEBUG
+        if let gate = listingAnswerGate { await gate(question) }
+        #endif
+        return question == listingQuestion
+    }
+
+    private func adoptListing(_ value: [Queries.TrashItem], passages: [String: String]) async {
+        (trash, trashTruncated) = TrashListing.windowed(value, window: Self.window)
+        self.passages = passages
+        trashListingLoaded = true
+        await refreshPoolHomes()
+        await refreshBookNoteCounts()
     }
 
     /// Ledger row 2: the UNFILTERED truth, live. One row is the whole
@@ -906,6 +1033,9 @@ struct RecoveryView: View {
         }
         .background(tokens.room)
         .coordinateSpace(name: TrashMessageFoot.space)
+        // VX-93 (R-980-12): the field is empty on every visit — a visit builds
+        // its own model, and leaving clears the words besides.
+        .onDisappear { model.clearSearch() }
     }
 
     /// The band, drawn only while a line speaks — the order ArchivedView's
@@ -1153,6 +1283,23 @@ struct RecoveryView: View {
     /// and, since batch 6b, the Empty Trash door (in-Trash only, forever).
     private var controls: some View {
         HStack(spacing: 12) {
+            // VX-93 (R-980-12): the Trash's own search, always here, beside the
+            // kind filter — both narrow, neither resets the other. Its width
+            // is the row's to give and never its text's, so typing moves
+            // nothing; it is never a key-view stop (`TrashSearchTextField`).
+            TrashSearchTextField(
+                text: model.searchText,
+                prompt: tokens.chromeLabel(TrashSearchCopy.prompt),
+                font: SidebarSearchFieldLayout.font(for: tokens.voice),
+                ink: NSColor(tokens.ink),
+                promptInk: NSColor(tokens.faint),
+                onEdit: { model.editSearch($0) },
+                onSubmit: { model.askSearchNow() },
+                onEscape: { model.clearSearch() })
+            .frame(minWidth: TrashSearchFieldLayout.minWidth, maxWidth: TrashSearchFieldLayout.maxWidth)
+            .fixedSize(horizontal: false, vertical: true)
+            .help(TrashSearchCopy.help)
+            .trashFootProbe("field")
             Picker("Show", selection: Binding(
                 get: { model.kindFilter },
                 set: { model.kindFilter = $0 })) {
@@ -1227,6 +1374,55 @@ struct RecoveryView: View {
     @ViewBuilder
     private func trashRow(
         _ item: Queries.TrashItem, namesItsHome: Bool = true
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            trashRowLine(item, namesItsHome: namesItsHome)
+            // VX-93 (R-980-11): ONE quiet line under a row the search found by
+            // text it does not already show — the words around the first
+            // match, in the row's muted small type. Her words, so no
+            // `chromeLabel` (a voice's lowercasing never reaches her text).
+            if let passage = model.passages[item.id] {
+                Text(passage)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .trashFootProbe("passage:\(item.id)")
+            }
+        }
+        // The CALM ROW (the reference artifact's `.c-row`): content on the
+        // card surface inside a hairline, never a list separator. The row's
+        // own padding is the card's, so the indentation every nested caller
+        // applies still reads as indentation.
+        //
+        // VX-671: a PICKED row wears the Library's pick grammar (row 56 —
+        // the wash and a tinted border, never a system highlight).
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(
+            model.selectedRows.contains(item.id) ? tokens.wash : tokens.card,
+            in: RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8).stroke(
+                model.selectedRows.contains(item.id) ? tokens.accent.opacity(0.42) : tokens.line,
+                lineWidth: 1))
+        // VX-671: the row's body picks (the shared click brain, `rowClick`;
+        // the row's own buttons keep their clicks). A Trash row opens
+        // nothing, so a quick second click is simply another click with the
+        // keyboard's chord — a ⌘-double-click toggles twice, as it reads.
+        .contentShape(Rectangle())
+        .rowClick(
+            onClick: { modifiers in pick(item.id, modifiers) },
+            onDoubleClick: { pick(item.id, RowClickModifier.currentModifiers) })
+        .trashFootProbe("row:\(item.id)")
+    }
+
+    /// The row's one line — its name or first line, its kind, its context,
+    /// its clock and its doors (unchanged by VX-93; the passage line sits
+    /// under it inside the same card).
+    @ViewBuilder
+    private func trashRowLine(
+        _ item: Queries.TrashItem, namesItsHome: Bool
     ) -> some View {
         HStack(spacing: 6) {
             Text(item.title ?? TrayRowPreview.line(item.text))
@@ -1318,30 +1514,6 @@ struct RecoveryView: View {
                 .help("Skips the rest of the \(TrashWindow.days) days — asked to confirm every time")
             }
         }
-        // The CALM ROW (the reference artifact's `.c-row`): content on the
-        // card surface inside a hairline, never a list separator. The row's
-        // own padding is the card's, so the indentation every nested caller
-        // applies still reads as indentation.
-        //
-        // VX-671: a PICKED row wears the Library's pick grammar (row 56 —
-        // the wash and a tinted border, never a system highlight).
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
-        .background(
-            model.selectedRows.contains(item.id) ? tokens.wash : tokens.card,
-            in: RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8).stroke(
-                model.selectedRows.contains(item.id) ? tokens.accent.opacity(0.42) : tokens.line,
-                lineWidth: 1))
-        // VX-671: the row's body picks (the shared click brain, `rowClick`;
-        // the row's own buttons keep their clicks). A Trash row opens
-        // nothing, so a quick second click is simply another click with the
-        // keyboard's chord — a ⌘-double-click toggles twice, as it reads.
-        .contentShape(Rectangle())
-        .rowClick(
-            onClick: { modifiers in pick(item.id, modifiers) },
-            onDoubleClick: { pick(item.id, RowClickModifier.currentModifiers) })
     }
 
     private func pick(_ id: String, _ modifiers: EventModifiers) {
