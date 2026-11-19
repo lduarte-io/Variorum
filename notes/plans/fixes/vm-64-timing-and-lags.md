@@ -298,6 +298,9 @@ to a gate arming and whose fallback span crossed a separator. Per crashing test:
   and without a divide before it. If it still fails to bind in the production posture, that is a pre-existing product
   defect (round 2's M27, never truly dissolved — VM-5's probe typed at block ENDS through the harness) and the replay
   road changes in r2 with its own red-on-old.
+- r1 pieces: the test changes + the diagnostic suite — DONE (this commit); fix build `DerivedData/vm64-b2r1/` TEST BUILD
+  SUCCEEDED, no warning in a touched file (the deprecated `UIWindow(frame:)` fallback copied from the caret suite was
+  replaced by requiring the scene). The pre-fix build `vm64-b2r1-red/`: NEXT (revert announced in its own commit).
 
 
 ### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
