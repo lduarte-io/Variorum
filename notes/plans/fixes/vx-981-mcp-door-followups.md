@@ -347,7 +347,7 @@ No revert is in flight (row V's revert was restored and verified).
 | V — headless suites green with counts; `build-for-testing`; revert checks | NOT-STARTED |
 | C — the record's closing sections; the run's table + ledger flipped | NOT-STARTED |
 
-No revert is in flight (the 977/961 revert check ran and was restored — PINS below).
+**REVERT IN FLIGHT (announced before it starts):** the VX-133 revert check — `git checkout f42c0670f -- Sources/VariorumCore/Operations/UndoStack.swift Sources/VariorumMCP/MCPReceiptRun.swift Sources/VariorumMCP/MCPWriteTools.swift` (the scaffold), the three pin suites, then the restore by `git checkout a8148e782 -- <the three>` and the commit check. If this line still stands, a successor restores those three files from `a8148e782` before anything else. (The 977/961 check ran and was restored — PINS below.)
 
 **THE MECHANISMS, TRACED (inputs → wrong state or output), at `2ecf42a3e`:**
 
