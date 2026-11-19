@@ -1308,9 +1308,7 @@ final class MCPDoor {
                 // ASK on the same place is not ended here — no press road ends one for
                 // another request; her take of it says gone and lets it go.
                 trail.update { $0.forget(placeOf: request.target) }
-                if let change = lastChange, MCPTrail.placeKey(change.target) == MCPTrail.placeKey(request.target) {
-                    lastChange = nil
-                }
+                retireLastChange(ifAt: request.target)
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return .refuse(MCPShowRule.goneWords(request.target))
             }
@@ -1401,6 +1399,7 @@ final class MCPDoor {
             guard await self.placeStands(request.target) else {
                 // VX-679: a gone place's rows go with it (a dead door — P-2).
                 self.trail.update { $0.forget(placeOf: request.target) }
+                self.retireLastChange(ifAt: request.target)  // R2-F1 (VX-1025)
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return
             }
@@ -1434,6 +1433,7 @@ final class MCPDoor {
             guard let self else { return }
             guard await self.placeStands(request.target) else {
                 self.trail.update { $0.forget(placeOf: request.target) }
+                self.retireLastChange(ifAt: request.target)  // R2-F1 (VX-1025)
                 session.status.refuse(MCPShowOfferCopy.gone(request))
                 return
             }
@@ -1467,6 +1467,18 @@ final class MCPDoor {
     private func placeStands(_ target: MCPShowTarget) async -> Bool {
         guard let stands = await read({ try MCPDoor.showTargetStands($0, target) }) else { return true }
         return stands
+    }
+
+    /// **A place the door's re-read proved GONE stops lighting ⌥⌘O** (round 2's R2-F1, the VX-981
+    /// ladder — VX-1025; PROVISIONAL P-981-L1-1): the ONE rule every gone road runs — her take of an
+    /// ask, an ask row's press (`landAsk`), a receipt's Open › / a write row / ⌥⌘O (`openShow`), and
+    /// the move at once. The last change goes when it names the SAME PLACE (`MCPTrail.placeKey`): a
+    /// receipt's target and a press's differ in shape (`.takes(n, b)`, `.note(n, b, nil)`,
+    /// `.note(n, nil, nil)`), and `showTargetStands` decides at the place's grain, so a change on a
+    /// gone place could only refuse (MCPSpec: "a gone last change no longer lighting ⌥⌘O"; P-FL2-1).
+    private func retireLastChange(ifAt target: MCPShowTarget) {
+        guard let change = lastChange, MCPTrail.placeKey(change.target) == MCPTrail.placeKey(target) else { return }
+        lastChange = nil
     }
 
     /// **F-L2 — her press's delivery**: the navigator's road, unchanged, and a
@@ -1543,7 +1555,7 @@ final class MCPDoor {
         Task { @MainActor [weak self] in
             guard let self else { return }
             guard await self.placeStands(change.target) else {
-                if self.lastChange?.target == change.target { self.lastChange = nil }
+                self.retireLastChange(ifAt: change.target)  // R2-F1 (VX-1025): by place, never the exact target
                 // VX-679: and the place's trail rows go with it (a dead door — P-2).
                 self.trail.update { $0.forget(placeOf: change.target) }
                 session.status.refuse(MCPReceiptCopy.gone(change.target, title: change.title, client: change.clientName))
