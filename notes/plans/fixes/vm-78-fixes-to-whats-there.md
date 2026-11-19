@@ -67,6 +67,36 @@ VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94, VM-218, VM-99 and VM-179.
 
 ### CURRENT STATE — 2026-11-19, late morning (she is back). Read this block; what follows it is the night's log, kept as written.
 
+**UPDATE — 2026-11-19, 14:10. This paragraph outranks the bullets under it wherever they differ.**
+- **Batch D's window ran (12:21–12:28) and VM-17's fix FAILED it** (BATCH D, "THE WINDOW AND HER RULING"): the
+  scrolling road went clean, but the jump road left the target fan with no badge, four jumps missed, and eight
+  tests were red on the fix. The decor reading, run alone, was red as a measurement: callout washes, glyphs and
+  comment marks stray the same way.
+- **HER RULING (a dialog pick, 2026-11-19): "Take it out, own run (Recommended)"** — the unproven fix is backed
+  out of VM-78 with a plain revert commit; the probe and the measurement tests leave the branch in named commits
+  the tickets cite, so main gets no new red test; VM-17, the callout and comment finding (VM-239, minted) and
+  wave 4's VM-179 become one run after wave 1, kickoff `notes/plans/vm-17-chrome-geometry.md`. VM-17 is re-owned
+  out of this umbrella. **So this run closes on EIGHT proved members (VM-16 with VM-20, VM-43, VM-3, VM-84,
+  VM-33, VM-81, VM-83, VM-21) plus VM-19's pin; VM-24 and VM-17 each go to their own run with this record as
+  their evidence.**
+- **VM-55 has merged** (main `eb18888db`, after VX-980). The merge-in is unblocked.
+- **What remains, in order (this replaces the list below):**
+  1. ONE implementer session: (a) the back-out — batch D's product and pin commits reverted, the probe and the
+     decor reading removed, each in a named commit, checked by `git diff 76bfc56b6 -- App/` showing nothing left
+     of batch D but the settle instrument's absence; (b) `origin/main` merged in by a merge commit — the five
+     conflicted phone files resolved, `notes/MobileSoul.md` and `notes/SurfaceContracts.md` keeping BOTH runs'
+     lines, this run's parity row renumbered to the next free number (PL-77 when this was written); (c) VM-16
+     re-landed on VM-55's message seam and VM-81's sealed-Reopen sentence riding VM-62's table, the affected
+     pins re-shaped and listed for a red/green window; (d) both targets built.
+  2. A short stage window for the re-landed pins (red on the merged tree with the re-land reverted, then green).
+  3. Ladder round 4 — a fresh `fable-reviewer` over the back-out and the merged tree's re-land. With batch D
+     gone it reads no new editor-seam fix.
+  4. The gate: the whole phone target on the merged tree (one standing red, VM-24's caret test, by decision) ·
+     the Mac leg over the changed `Shared/` files · the simulator walk.
+  5. The closeout documents re-fitted to this outcome (they were refreshed BEFORE the window and still describe
+     VM-17's fix as built and pending), the two canon deltas named below, the shared ledgers at the merge
+     moment, the PR.
+
 - **Proved red on the old code and green on the fix, in stage windows:** batch B (VM-16 with VM-20, VM-43, VM-3,
   VM-84, VM-33), batch A (VM-81, VM-83, VM-21, and the Mac's 17 types over the hoisted words), every fix of
   ladder rounds 1 and 2 (F3, F4, F5, N2, R2-N1), and VM-19's teardown pin.
@@ -2173,6 +2203,60 @@ reading is unproven. The new pin and the guard are hosted for exactly this reaso
   place (R3-N3; the line count kept, `fanEvery` left as it is). In M5 the pin ran first, before the cost note
   (`vm78-c-M5.log`), so its red owes nothing to its neighbour; reading 1 is not amended (R3-F2's third point: no
   badge view exists that was never placed), so no second red leg for the probe is owed.
+
+#### BATCH D — THE WINDOW AND HER RULING (written by the orchestrator, 2026-11-19 14:10)
+
+**The window (claimed 12:21:06, released 12:27:59; run by the orchestrator from the throwaway detached checkout at
+`f4fce656b`, whose code is this branch's code up to `7e5eb2a58`; logs
+`App/Variorum/DerivedData/logs/vm78-window-d-{red,green,decor}.log`). THE FIX IS NOT PROVED.**
+
+- **RED leg** — `MobileTakesChromeTests` on the old chrome (the two product files at `15add793d`): 15 tests in 1
+  suite FAILED, 9 issues. The three expected ran and failed (`perTickRefreshResolvesOnlyNearViewportGeometry` 4
+  issues · `aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved` 1 ·
+  `aFarFlipDrawsNoMarkerOrPillUntilItsBlockScrollsIn` 3) — and a fourth: the new guard
+  `anEmptyFannedLastBlockWearsItsBadgeWhileTheNotesEndIsOnScreen` (`:754`, the badge not drawn), red on the OLD
+  chrome too. By round 3's final call that guard is recorded and dropped; what it saw on today's chrome is
+  unexplained and goes to the later run as an observation.
+- **GREEN leg** — the fix, ten types: 67 tests in 10 suites FAILED, 13 issues, EIGHT tests red.
+  - The probe `noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote` ran and failed on `bare.isEmpty`
+    (`:400`) and `jumpMissed.isEmpty` (`:406`). `VM17|SUMMARY fans=22 astray=0 bare=17 misses=0 asked=29 (walk
+    28, jump 1) skipped=1 walkReached=22 jumpMissed=4`; `VM17|reading2|offscreenDrawn=0`. So the SCROLLING road
+    is clean — no astray badge, no (i′) miss, every fan reached — and every one of the 17 bare lines is on the
+    JUMP road (`VM17|bare|jump@… badge=none drawn=false`): after `jumpToBlock` the target fan stands on screen
+    with no badge; four far targets were not reached at all (`reachedTarget=false`). That is the final call's
+    arm "(ii) red on the jump road: stop and report".
+  - `MobileTakesChromeTests`: `perTickRefreshResolvesOnlyNearViewportGeometry` (`:598` the NEAR badge is nil;
+    `:630` the far fragment IS laid out) · `badgeAppearsOnlyOnFannedBlocksAndOnlyTheyReserveSpace` (`:210`,
+    `:211` badge nil) · `aFlushEndOneLineFannedAndCommentedBlockNeverCrowdsTheBadge` (`:417` badge nil) ·
+    `theChromeRestylesWithTheVoice` (`:994`, `:1002`) · the guard (`:754`).
+  - `MobileTutorialTakesWalkTests.theSwipeLessonPeeksStickyAndTheCheckChooses` (`:805` marker nil, `:806` pill
+    not showing) · `MobileWalkTests.walk5_takesBadgePeekAndChoose` (`:351` badge nil).
+  - Two of these were named in advance as a possible windowless-host effect; five were not. In six of the seven
+    the failing expectation is EXISTENCE (the view was never made), which fits a host with no viewport or no
+    layout pass, but nothing in the log shows the viewport: it is NOT established, and the lot is the fix's.
+- **The decor reading, alone** — `MobileDecorPlacementReadingTests`: 1 test in 1 suite FAILED, 9 issues, as a
+  measurement. `VM17D|SUMMARY stops=61 jumps=70 callouts=30 commented=50 fans=22 inView(washes=155 glyphs=126
+  marks=192) washAstray=225 washBare=17 glyphAstray=51 glyphBare=13 markAstray=122 markBare=23 badgeAstray=4
+  badgeBare=5 reach(wash=30/30 glyph=30/30 mark=50/50) jumpMissed=22`. **R3-F1 is real for the decor**, and its
+  ticket is minted: **VM-239**. (The badge counts inside it are the unproved fix's.)
+- Bundles: `d-red` and `d-green` unreadable (both runs failed and lingered the full 90 s), `d-decor` reads. No
+  host restart and no zero-executed line in any of the three logs. The crash report stamped 12:05:44 on that
+  machine predates the claim and is not this window's.
+
+**HER RULING (2026-11-19, a dialog pick in the orchestrator's session, no prose).** Asked: "VM-17, the stray fan
+badges on long notes: the fix I built this morning did not pass its stage window. Should I keep working it inside
+VM-78, or take it out and give it its own run?" — with the window's result, the reasons and three options — she
+chose **"Take it out, own run (Recommended)"**, worded to her as: "I back the unproven fix out of VM-78 with a
+plain revert commit, and the probe and measurement tests leave the branch in named commits the tickets cite, so
+main gets no new red test. VM-17, the callout/comment finding and wave 4's VM-179 become one run after wave 1
+with all of last night's evidence as its starting point. VM-78 then merges its eight proven fixes plus the
+test-hygiene pin."
+
+**What follows from it, in this run:** the back-out (the next implementer's first piece; its commits are named in
+that implementer's LIVE STATUS, under "THE MERGE-IN"); the tickets — VM-17 re-owned out of the umbrella
+(Confirmed, retitled, a comment with the evidence), VM-239 minted (Bug · Confirmed · Editor · High), VM-179
+commented; the later run's kickoff `notes/plans/vm-17-chrome-geometry.md`. Round 3's disposition of R3-F1 is
+overtaken: the decor no longer waits behind a badge fix — both go to the one run.
 
 ## The ladder
 
