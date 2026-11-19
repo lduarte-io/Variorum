@@ -163,8 +163,8 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 
 | Member | State | Pin (TYPE name for `-only-testing`) |
 |---|---|---|
-| VM-16 (+VM-20) | IN-PROGRESS — code + pins committed; compile **PENDING** (first `build-for-testing`); red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ Mac guard `UndoWarningWordsTests`) |
-| VM-43 | NOT-STARTED — wire `insuringBuffer: true` at the one phone call site (`MobileBlockHistory.swift:483`) | `MobileBlockHistoryTests` |
+| VM-16 (+VM-20) | IN-PROGRESS — code + pins committed (`48055fa9c`); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ Mac guard `UndoWarningWordsTests`) |
+| VM-43 | IN-PROGRESS — `insuringBuffer: true` wired at the ONE phone call site (`MobileBlockHistory.swift` `restore`; grep of `VariorumMobile/` + `Shared/` finds no other); pins written; compile + red/green **PENDING** | `MobileBlockHistoryTests` |
 | VM-3 | NOT-STARTED — rewrite the lesson's two prose blocks; unwrap + flip the pin to keep-on-top | `MobileTutorialWalkTests` |
 | VM-84 | NOT-STARTED — an observed `entryDate` mirror set in `adoptHeader` | `MobileEditorHeaderChipTests` (new) |
 | VM-33 | NOT-STARTED — the answered flag (`trashListingLoaded`), the Mac's VX-678 rule | `MobileTrashTests` |

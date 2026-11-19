@@ -461,6 +461,14 @@ final class MobileBlockHistoryController {
     /// restore itself is FLUSH-FIRST like every phone door that rewrites a
     /// buffer (a pending flush landing after it would overwrite the restored
     /// text with the stale surface — the stale-flush class).
+    ///
+    /// **And it INSURES the words it replaces** (VM-43 — her ruling, QUESTIONS
+    /// #274 addendum 2: "Ratify + wire the phone."; AppSpec §9 `restoreCommit`).
+    /// `insuringBuffer: true` keeps one quiet `auto` savepoint of the buffer
+    /// inside the restore's own transaction, deduped against the take's last
+    /// savepoint — so typing past a commit is never lost to a restore. The
+    /// flush above is what makes it whole: the savepoint holds what she
+    /// typed, pending keystrokes included (the Mac's restore doors' order).
     func restore(_ commit: CommitPoint, of variantID: String, confirmed: Bool = false)
         async
     {
@@ -480,7 +488,7 @@ final class MobileBlockHistoryController {
         }
         do {
             try await runner.run { ops in
-                try ops.restoreCommit(variantID, commitID: commit.id)
+                try ops.restoreCommit(variantID, commitID: commit.id, insuringBuffer: true)
             }
             await model.refreshTakesFromStore()
             report(.receipt(BlockHistoryCopy.restoredSavepoint))
