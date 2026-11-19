@@ -133,7 +133,7 @@ struct DataSafetyRoadCountsTests {
     /// The composition: the pane hands the open library's road to the model; the faces build it from the open's session.
     @Test func thePaneHandsTheOpenLibrarysRoadToTheModel() throws {
         let pane = try VX379PaneRowsTests.code("Variorum/Features/Settings/DataSafetyPane.swift")
-        #expect(pane.contains("roadCounts: roadStanding?.copyCounts))"))
+        #expect(pane.contains("roadCounts: roadStanding?.copyCounts"))
         let faces = try VX379PaneRowsTests.code("Shared/Protection/ProtectionOpenFaces.swift")
         #expect(faces.contains("await Task.detached(priority: .utility) { ProtectionCopyCounts.read(session) }.value"))
     }

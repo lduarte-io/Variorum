@@ -116,7 +116,9 @@ struct BookSearchSheet: View {
                             .onAppear { Task { await model.loadMoreGroups() } }
                     }
                     if model.groups.isEmpty {
-                        Text(tokens.chromeLabel(BookSearchCopy.nothingRow))
+                        // R-980-5: the one decision every answer sheet reads.
+                        Text(tokens.chromeLabel(SearchAnswerCopy.emptyAnswer(
+                            for: model.question, otherwise: BookSearchCopy.nothingRow)))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                             .padding(24)

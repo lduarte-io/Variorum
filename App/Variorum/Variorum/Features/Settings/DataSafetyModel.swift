@@ -24,6 +24,7 @@
 //
 
 import Foundation
+import GRDB  // `DatabaseError` — a failed index act's reason is SQLite's own message
 import Observation
 import VariorumCore
 
@@ -81,13 +82,45 @@ final class DataSafetyModel {
     /// silent outcome (P-2's letter applied to a Settings pane).
     private(set) var note: String?
 
+    // MARK: - The search index's row (VX-79 — the VX-980 run record's BATCH 2)
+
+    /// The row's two acts.
+    nonisolated enum SearchIndexAct: Sendable, Equatable {
+        case check, rebuild
+    }
+
+    /// What the row says under its doors. Nothing until she presses — the
+    /// row never runs anything by itself (P1: both acts cost ∝ the library).
+    nonisolated enum SearchIndexState: Sendable, Equatable {
+        case quiet
+        /// One act in flight: the row says so and both doors wait.
+        case working(SearchIndexAct)
+        /// The act landed: the state the index is in NOW (the integrity
+        /// check's answer — a rebuild's is what it leaves).
+        case found(SearchIndexAct, SearchIndexIntegrity)
+        /// The act could not run: the system's reason.
+        case refused(SearchIndexAct, reason: String)
+    }
+
+    /// The two doors' work — composed by the pane over the session's serial
+    /// off-main runner (P2), injected here so the pins drive the row without
+    /// a store. nil — no library's services — draws no row.
+    nonisolated struct SearchIndexDoors: Sendable {
+        var check: @Sendable () async throws -> SearchIndexIntegrity
+        var rebuild: @Sendable () async throws -> SearchIndexIntegrity
+    }
+
+    private let searchIndexDoors: SearchIndexDoors?
+    private(set) var searchIndex: SearchIndexState = .quiet
+
     init(
         backup: StoreBackup?,
         defaults: @escaping @Sendable () -> UserDefaults = { .standard },
         sync: SyncSession? = nil,
         database: AppDatabase? = nil,
         signedIn: @escaping () -> Bool = { false },
-        roadCounts: (() async -> RoadCopyCounts)? = nil
+        roadCounts: (() async -> RoadCopyCounts)? = nil,
+        searchIndexDoors: SearchIndexDoors? = nil
     ) {
         self.backup = backup
         self.defaults = defaults
@@ -95,6 +128,64 @@ final class DataSafetyModel {
         self.database = database
         self.signedIn = signedIn
         self.roadCounts = roadCounts
+        self.searchIndexDoors = searchIndexDoors
+    }
+
+    /// Whether the row draws: inside the pane's wired arm (the pane's own
+    /// standing-state rule), and only where its doors were composed.
+    var drawsSearchIndexRow: Bool { isWired && searchIndexDoors != nil }
+
+    /// One act in flight — both doors wait.
+    var searchIndexWorking: Bool {
+        if case .working = searchIndex { return true }
+        return false
+    }
+
+    /// The Check door's act — writes nothing; says what it found.
+    func checkSearchIndex() async { await runSearchIndex(.check) }
+
+    /// The Rebuild door's act — re-derives the index from her notes, then
+    /// says the state it leaves.
+    func rebuildSearchIndex() async { await runSearchIndex(.rebuild) }
+
+    /// ONE flight per press: the working state is set before the first
+    /// suspension, on the main actor, so a second press (either door) finds
+    /// it and starts nothing.
+    private func runSearchIndex(_ act: SearchIndexAct) async {
+        guard let doors = searchIndexDoors, !searchIndexWorking else { return }
+        searchIndex = .working(act)
+        do {
+            let found = try await (act == .check ? doors.check() : doors.rebuild())
+            searchIndex = .found(act, found)
+        } catch {
+            searchIndex = .refused(act, reason: Self.systemReason(error))
+        }
+    }
+
+    /// The line under the doors, and whether it wears the alarm voice. Pure.
+    nonisolated static func searchIndexLine(_ state: SearchIndexState) -> (text: String, alarm: Bool)? {
+        switch state {
+        case .quiet:
+            return nil
+        case .working(.check):
+            return (DataSafetyCopy.searchIndexChecking, false)
+        case .working(.rebuild):
+            return (DataSafetyCopy.searchIndexRebuilding, false)
+        case .found(let act, let found):
+            return (DataSafetyCopy.searchIndexReceipt(rebuilt: act == .rebuild, found), !found.isHealthy)
+        case .refused(let act, let reason):
+            return (DataSafetyCopy.searchIndexRefusal(rebuilt: act == .rebuild, reason: reason), true)
+        }
+    }
+
+    /// The system's reason, as a sentence's tail: SQLite's own message for a
+    /// database error (never the statement — GRDB's description appends the
+    /// SQL), else the error's localized description.
+    nonisolated static func systemReason(_ error: any Error) -> String {
+        if let error = error as? DatabaseError {
+            return error.message ?? "\(error.resultCode)"
+        }
+        return error.localizedDescription
     }
 
     /// True when this app can back up at all — false only when the store
