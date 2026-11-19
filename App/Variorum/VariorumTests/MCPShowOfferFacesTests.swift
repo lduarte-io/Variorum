@@ -628,6 +628,81 @@ struct MCPShowOfferFacesTests {
         }
     }
 
+    // MARK: - VX-705 (the VX-981 run, batch 2 — a rider, R-981-2): the move-at-once road re-reads
+
+    /// **VX-705 — RED ON OLD: a move at once whose place DIED since the wire's read opens nothing
+    /// and says so.** The wire decides the target at READ (it was live and readable), then awaits
+    /// the app's delivery; under move at once with Variorum in front the `.navigate` arm adopted
+    /// the target directly — none of the press roads' gone-check (F-L2) — so a deletion landing
+    /// between the read and the adopt (her own Delete, a sync apply) opened a tombstone's empty
+    /// page silently, recorded the trail row "opened" and answered the client `shown`.
+    ///
+    /// THE HOOK (deterministic, no sleeps): `agentShow` reads where she stands FIRST
+    /// (`standingProvider`), after the wire's read and before the adopt — the deletion lands
+    /// inside that read, exactly in the window. Now the place is re-read before the move
+    /// (`showTargetStands`, the press roads' one table): gone ⇒ nothing opens, no trail row, her
+    /// seam says the press roads' own gone words, and the client hears the one not-shared shape
+    /// (the answer a call one moment later gets — PROVISIONAL P-981-B2-5). Old: four failing
+    /// expectations (the page opened, `.navigate`, nothing said, a trail row).
+    @Test func aMoveAtOnceWhosePlaceDiedSinceTheWiresReadOpensNothingAndSaysSo() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "gone at once")
+            let noteID = post.id
+            let rig = Rig(session, standing: .frontmostMainWindow)
+            defer { rig.door.detach() }
+            let resting = rig.router.workspace.focusedSelection
+            let router = rig.router
+            let operations = session.operations
+            var deletedInTheWindow = false
+            rig.door.standingProvider = {
+                if !deletedInTheWindow {
+                    deletedInTheWindow = true
+                    try? operations.deleteContainer(noteID)  // lands between the wire's read and the adopt
+                }
+                return (.frontmostMainWindow, router)
+            }
+
+            let verdict = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: noteID, blockID: nil, select: nil), clientName: "claude-code",
+                title: "gone at once", dial: .moveAtOnce, activityKind: "note", activityID: noteID))
+
+            let selection = rig.router.workspace.focusedSelection
+            let words = session.status.current?.text ?? "nothing"
+            let saidIt = session.status.current?.kind == .refusal
+                && words == "\u{201C}gone at once\u{201D} is gone, so claude-code's ask was let go."
+            let noRow = rig.door.trail.trail.isEmpty
+            let notShared = "That note isn't shared with this client, or doesn't exist. The author can share it "
+                + "from Variorum \u{25B8} Settings \u{25B8} MCP."
+            #expect(deletedInTheWindow, "the hook ran in the window")
+            #expect(selection == resting, "RED ON OLD: the dead note's page opened — \(String(describing: selection))")
+            #expect(verdict == .refuse(notShared), "RED ON OLD: the client heard shown — \(verdict)")
+            #expect(saidIt, "RED ON OLD: her seam says the press roads' gone words — said: \(words)")
+            #expect(noRow, "RED ON OLD: a trail row for a place that never opened")
+        }
+    }
+
+    /// **VX-705 — the GUARD: a move at once whose place STANDS moves exactly as before** — the note
+    /// opens in place, `.navigate`, nothing refused, its trail row `opened`. Green on both trees: it
+    /// keeps the pin above able to tell a dead place from a live one.
+    @Test func aMoveAtOnceWhosePlaceStandsStillMoves() async throws {
+        try await withSession { (session: AppSession, _: AppDatabase) async throws in
+            let post = try session.operations.createPost(title: "standing at once")
+            let noteID = post.id
+            let rig = Rig(session, standing: .frontmostMainWindow)
+            defer { rig.door.detach() }
+            let verdict = await rig.door.agentShow(MCPShowRequest(
+                target: .note(noteID: noteID, blockID: nil, select: nil), clientName: "claude-code",
+                title: "standing at once", dial: .moveAtOnce, activityKind: "note", activityID: noteID))
+            let opened = rig.router.workspace.focusedSelection == .post(noteID)
+            let quiet = session.status.current == nil
+            let row = rig.door.trail.trail.entries.first?.kind == .opened
+            #expect(verdict == .navigate)
+            #expect(opened, "the note opened")
+            #expect(quiet, "nothing refused")
+            #expect(row, "its trail row reads opened")
+        }
+    }
+
     // MARK: - VX-675: a saved version, full size
 
     /// A version target opens the VX-440 full-size page — its own destination
