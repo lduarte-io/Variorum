@@ -193,13 +193,69 @@ struct MobilePhoneControlsTests {
             #expect(probe.size.height >= 43.5, "field \(probe.size)")
             #expect(abs(probe.size.width - (402 - 40)) <= 0.5, "the field spans its row: \(probe.size)")
         }
+        // **With the text size.** A field's typed text is the `control`
+        // role — chrome, so it grows to xxxLarge (17 → 23) and holds there.
+        // A 23 pt line (~27.4) and the field's 8 above and below still sit
+        // inside the 44 floor, so a control field is 44 at EVERY size: it
+        // holds its grown text without clipping it, and never outgrows the
+        // floor. (This case first asserted `> 44` at xxxLarge — which the
+        // layer's own numbers cannot reach: the batch-2 window measured
+        // 44.0.) What the pin holds instead: at every size the field is at
+        // least 44 AND at least its text's line plus its 8 + 8; the chrome
+        // field holds past xxxLarge; and a field holding her words (the
+        // `noteBody` role, which scales across the whole range) does grow
+        // past the floor at the accessibility sizes.
+        func lineHeight(_ role: PhoneTypeRole, _ size: DynamicTypeSize) -> CGFloat {
+            let spec = PhoneType.spec(role, voice: .study)
+            let point = PhoneType.resolved(role, voice: .study, at: size.phoneCategory).pointSize
+            return PhoneType.baseUIFont(spec, voice: .study, pointSize: point).lineHeight
+        }
+        var heights: [DynamicTypeSize: CGFloat] = [:]
+        for size in [DynamicTypeSize.large, .xxxLarge, .accessibility5] {
+            try await hosted(
+                TextField("Search", text: .constant(""))
+                    .phoneField(.studyLight)
+                    .onGeometryChange(for: CGSize.self) { $0.size } action: { probe.size = $0 }
+                    .dynamicTypeSize(size)
+            ) { _ in
+                heights[size] = probe.size.height
+                #expect(probe.size.height >= 43.5, "the field is at least 44 at \(size): \(probe.size)")
+                let needs = lineHeight(.control, size) + 2 * PhoneMetrics.Space.s8
+                #expect(probe.size.height >= needs - 0.5,
+                        "the field holds its text's line at \(size): \(probe.size) needs \(needs)")
+            }
+        }
+        #expect(heights[.accessibility5] == heights[.xxxLarge],
+                "a control field is chrome: it holds past xxxLarge: \(heights)")
         try await hosted(
-            TextField("Search", text: .constant(""))
-                .phoneField(.studyLight)
+            TextField("A note", text: .constant(""))
+                .phoneField(.studyLight, role: .noteBody)
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { probe.size = $0 }
-                .dynamicTypeSize(.xxxLarge)
+                .dynamicTypeSize(.accessibility5)
         ) { _ in
-            #expect(probe.size.height > 44, "the field grows with the text size: \(probe.size)")
+            let needs = lineHeight(.noteBody, .accessibility5) + 2 * PhoneMetrics.Space.s8
+            #expect(probe.size.height > 44 && probe.size.height >= needs - 1,
+                    "a field holding her words grows with the text size: \(probe.size) needs \(needs)")
+        }
+        // **With what is typed.** The field sets a floor and no ceiling: a
+        // field that wraps (every phone site today is one line, which
+        // scrolls) grows by its lines.
+        var oneLine: CGFloat = 0
+        for text in ["one line", "one line\na second line\na third line"] {
+            try await hosted(
+                TextField("Search", text: .constant(text), axis: .vertical)
+                    .phoneField(.studyLight)
+                    .onGeometryChange(for: CGSize.self) { $0.size } action: { probe.size = $0 }
+                    .padding(.horizontal, 20)
+            ) { _ in
+                if oneLine == 0 {
+                    oneLine = probe.size.height
+                } else {
+                    let needs = 3 * lineHeight(.control, .large) + 2 * PhoneMetrics.Space.s8
+                    #expect(probe.size.height > oneLine && probe.size.height >= needs - 1,
+                            "the field grows with its lines: \(probe.size.height) vs one line \(oneLine), three need \(needs)")
+                }
+            }
         }
     }
 
