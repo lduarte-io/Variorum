@@ -153,7 +153,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 1 · VM-65 | **CLOSED 2026-11-19** | `65d70fe9f` `feef85c7a` `f6389e3b5` `808f333a8` `914278cfa` | code state `808f333a8`; stage results in "Orchestrator's stage results" below |
 | 2 · VM-2 | **NOT GREEN at its first stage window** — back with its implementer | `2358f33cb` `76dbf89b2` `f83122794` `1f292b1ec` `5b40f1984` + closeout | see the batch 2 block below |
 | 3 · VM-66 | READY (stage) | `3cb346ebb` `fd9184011` `0bc11d9a9` `51440c726` `284e30c9e` `21fc776fb` `d2cef56be` + closeout | see the batch 3 block below; the BEFORE numbers fill from its stage window |
-| 4 · VM-67 | NOT-STARTED | — | — |
+| 4 · VM-67 | IN-PROGRESS (implementer, opus) | — | see the batch 4 block below |
 | 5 · VM-68 | NOT-STARTED | — | — |
 | 6 · VM-69 · VM-70 | NOT-STARTED | — | — |
 | 7 · VM-71 | NOT-STARTED | — | — |
@@ -380,6 +380,57 @@ assertions.
 | `note-rereads-per-save-100k` | count | PENDING | PENDING | 1 | wave 4 (VM-176) |
 | `note-deliveries-per-save-100k` | count | PENDING | PENDING | 1 | wave 4 (VM-176) |
 | `note-delivery-ingest-100k` | ms | PENDING | PENDING | — | wave 4 (VM-176) |
+
+### Batch 4 · VM-67 — LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** The red-on-old proof runs AFTER the fix is committed and pushed: `git checkout <base> --
+Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operations/OwnerIdentity.swift`, the pin suite
+run headless, then `git checkout HEAD --` the same two files and a clean `git status`. When that revert starts, this
+line changes to name it and the base commit; until then the tree is never mid-revert. Base: `96dfa82b5`.
+
+**The mechanism, re-verified on this tree (audit F 3A/6A — still TRACED as written):** `AppServices.connectSyncIfAllowed`
+(`Shared/AppServices.swift:518`) runs `runOwnerAdoption` (:584) first on every launch with a persisted session, every
+unlock (a fresh `AppServices.start`), every sign-in, Resume and the first round after an account act; it runs
+`Operations.adoptOwnerID` (`Operations/OwnerIdentity.swift:87`) on the ONE serial runner, which opens ONE write
+transaction and runs `UPDATE <t> SET owner_id = ? WHERE owner_id IS NULL` for each of the eleven synced tables that carry
+`owner_id` (container, block, tag, wing, shelf, reading, reference, canvas_layout, lens, block_comment, purge_intent). No
+index serves `owner_id IS NULL` (`Migrations.swift` has none), so each UPDATE is `SCAN <t>` — a full read of every
+owner-carrying table, through SQLCipher's page decrypt, holding the runner AND the writer, even when nothing is unowned.
+
+**The settled design:**
+- **Schema (its own commit, first):** `v1_38_owner_adoption_index` — eleven partial indexes
+  `idx_<table>_unowned ON <table>(owner_id) WHERE owner_id IS NULL`, one per owner-carrying synced table. Empty in
+  steady state; holds exactly the rows adoption exists to find. LOCAL ONLY — not a SyncSpec §12 lockstep event
+  (v1_34 / v1_36's class: no table, no column, no classification; the marker stays 15). Verified: no in-flight branch
+  adds a migration (`git fetch`; every remote branch's diff against main touches no `Persistence/` file), so `v1_38` is
+  free. Query plans (sqlite 3.54 CLI, to be re-read through the real SQLCipher build by the pin): the probe and the
+  UPDATE both `SEARCH <t> USING (COVERING) INDEX idx_<t>_unowned (owner_id=?)`; `owner_id = ?` and
+  `owner_id IS NOT NULL AND owner_id != ?` keep their plans (the partial index is unusable for them — no plan churn).
+- **The op:** `adoptOwnerID` becomes probe-then-write inside ONE writer access (`writeWithoutTransaction` — on the
+  writer's own FIFO queue, so it sees every write queued ahead of it: today's visibility, exactly): per table an
+  `EXISTS` probe through the partial index; nothing unowned ⇒ the all-zero report, NO transaction opened, nothing
+  written; otherwise today's UPDATE set unchanged inside ONE IMMEDIATE transaction (GRDB's own `write` shape). The
+  predicate, the call sites and the occasions are unchanged, so every row today's code adopts is adopted at the same
+  occasion.
+- **`AppServices`: unchanged** — the "Owner check at start" span and the rows-stamped sample keep measuring the same
+  thing (the op's wall time on the runner; the report's total).
+- **The pins:** Core headless — nothing to adopt ⇒ the writer runs no BEGIN and no UPDATE (a GRDB statement trace); every
+  statement adoption runs reaches an owner table only through its adoption index (`EXPLAIN QUERY PLAN` of each traced
+  statement); state transitions per road (signed-out mints in every owner table, live and tombstoned; the mixed case;
+  an account change; outbox and `updated_at`); a schema pin that every owner-carrying table carries its index. Hosted —
+  the same two guarantees asserted in `MobileHerPathsPerfTests` at fixture scale on the encrypted on-disk store.
+
+| Piece | State |
+|---|---|
+| P1 — this live status | DONE (this commit) |
+| P2 — the schema commit (`v1_38`) + the index-set pins' justified edits | NOT-STARTED |
+| P3 — the op (probe-then-write) + the Core pins and state-transition tests | NOT-STARTED |
+| P4 — red-on-old (revert the two production files, run the pins, restore) | NOT-STARTED |
+| P5 — the hosted assertion in `MobileHerPathsPerfTests` | NOT-STARTED |
+| P6 — `swift test` (touched suites + migrations / schema / sync-schema suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b4/` | NOT-STARTED |
+| P7 — closeout in §7 (the S4 road list, the three options with plans, the first-seconds report) + READY | NOT-STARTED |
+
+DerivedData: `App/Variorum/DerivedData/vm64-b4/` (gitignored).
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
