@@ -893,6 +893,32 @@ extension Queries {
     /// can never drift apart.
     static let dailyJournalLegForBook = "(r.profile IS NOT NULL AND r.profile = '\(dailyJournalBookProfile)')"
 
+    /// **The fence's MEMBER ROW** (VX-1007 named it — the text the journal
+    /// member leg has always read): a live member row (status 'member' — an
+    /// arrival is never membership) of a live reading (an ARCHIVED reading is
+    /// alive). Expects the membership aliased `rp` and the reading `r`. Read by
+    /// the member leg below and by the faces' via-Journal read
+    /// (`privateMarkViaJournalSQL`), so the two can never drift apart.
+    static let fenceMemberRowSQL = "rp.deleted_at IS NULL AND rp.status = 'member' AND r.deleted_at IS NULL"
+
+    /// **The fence's leg 1 for a note** (D-1, P-13nc-1): its OWN day-entry
+    /// shape, `profile = 'journal'` — the shape ⌘J's `createOrOpenJournalEntry`
+    /// and the Journal's `newJournalEntry` mint (the copy roads carry it), so a
+    /// day entry stays per-ask wherever it is later filed. A NULL profile
+    /// reads NULL (false). Expects the note aliased `c`. Read by
+    /// `mcpNoteFacts` and by the faces (`privateMarkJournalEntrySQL`) — VX-1007.
+    static let journalEntryLegForNote = "(c.profile = 'journal')"
+
+    /// **The fence's leg 2 for a note** (VX-163): a live MEMBER of a live
+    /// reading wearing THE daily Journal's marker — every live bearer, a
+    /// not-yet-converged stale one included (the conservative direction); an
+    /// archived daily Journal is alive, so it fences. Built from the two
+    /// fragments above. Expects the note aliased `c`.
+    static let journalMemberLegForNote = """
+        EXISTS (SELECT 1 FROM reading_post rp JOIN reading r ON r.id = rp.reading_id
+                WHERE rp.post_id = c.id AND \(fenceMemberRowSQL) AND \(dailyJournalLegForBook))
+        """
+
     /// **Does MEMBERSHIP in this book fence a note?** (A-809-11 — the VX-809
     /// run record, BATCH 3): the fence's two BOOK legs, on the SAME two
     /// fragments the member legs above read (never a parallel fence) — THE

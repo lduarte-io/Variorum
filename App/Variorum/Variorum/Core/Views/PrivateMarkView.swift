@@ -66,6 +66,20 @@ nonisolated enum PrivateMarkFace {
         case viaBooks([Queries.BookRef])
         /// A book's own mark.
         case ownBook
+        /// **VX-1007 — a live member of THE daily Journal** (the fence's leg
+        /// 2; a day entry filed there too): the via-book form naming the
+        /// Journal(s) first, then any Private book holding it. Always Private:
+        /// no press clears it — its own stamp included, which the locked row
+        /// hides (contract 6).
+        case viaJournal([Queries.BookRef])
+        /// **VX-1007 — a day entry outside the Journal** (the fence's leg 1,
+        /// `profile = 'journal'` — private wherever it is filed, D-1): no road
+        /// clears it; the mark speaks a saying.
+        case journalEntry
+        /// **VX-1007 — THE daily Journal's own book mark** (the fence's book
+        /// leg): always Private, the saying only — never `setBookPrivate`, its
+        /// own stamp included (the row is locked).
+        case dailyJournal
     }
 
     /// What a press on the mark does.
@@ -77,6 +91,13 @@ nonisolated enum PrivateMarkFace {
         /// Nothing can act here: say so, naming the books, with a door to the
         /// first one.
         case sayVia([Queries.BookRef])
+        /// VX-1007 — nothing can act: the Journal's saying, naming the books,
+        /// with ONE door to the first (the Journal).
+        case sayViaJournal([Queries.BookRef])
+        /// VX-1007 — nothing can act: the day entry's saying, no door.
+        case sayJournalEntry
+        /// VX-1007 — nothing can act: the daily Journal's saying, no door.
+        case sayDailyJournal
     }
 
     /// **A note row's mark** — the fact alone. (VX-934: the badge family's
@@ -89,8 +110,8 @@ nonisolated enum PrivateMarkFace {
 
     /// **A book row's mark** — its own stamp (the facts never name a
     /// gathering).
-    static func book(marked: Bool) -> Mark? {
-        marked ? .ownBook : nil
+    static func book(_ fact: Queries.PrivateBookMark?) -> Mark? {
+        fact?.own == true ? .ownBook : nil
     }
 
     // (The note's masthead — the in-note indicator — reads `note(_:)` exactly
@@ -106,6 +127,11 @@ nonisolated enum PrivateMarkFace {
         case .ownNote(let via): PrivateMarkCopy.markOwnNoteAlsoViaHelp(via.map(\.name))
         case .viaBooks(let books): PrivateMarkCopy.markViaHelp(books.map(\.name))
         case .ownBook: PrivateMarkCopy.markOwnBookHelp
+        // VX-1007: the via-book form is hers ("Private — via ‹book›"), the
+        // Journal named as any book is.
+        case .viaJournal(let books): PrivateMarkCopy.markViaHelp(books.map(\.name))
+        case .journalEntry: PrivateMarkCopy.markJournalEntryHelp
+        case .dailyJournal: PrivateMarkCopy.markDailyJournalHelp
         }
     }
 
@@ -114,6 +140,9 @@ nonisolated enum PrivateMarkFace {
         case .ownNote(let via): .unmarkNote(stillVia: via)
         case .viaBooks(let books): .sayVia(books)
         case .ownBook: .unmarkBook
+        case .viaJournal(let books): .sayViaJournal(books)
+        case .journalEntry: .sayJournalEntry
+        case .dailyJournal: .sayDailyJournal
         }
     }
 }
@@ -152,17 +181,35 @@ enum PrivateMarkAct {
                 session.status.refuse(OpsRefusalCopy.message(for: error))
             }
         case .sayVia(let books):
-            let words = PrivateMarkCopy.viaBookSaying(books.map(\.name))
-            guard let first = books.first else {
-                session.status.refuse(words)
-                return
-            }
-            session.status.offer(
-                words,
-                action: .init(label: PrivateMarkCopy.openBookDoor(first.name)) {
-                    MembershipChip.ascend(bookID: first.id, postID: subjectID)
-                })
+            say(PrivateMarkCopy.viaBookSaying(books.map(\.name)), openingFirstOf: books, at: subjectID, session: session)
+        // VX-1007 — the Journal's three arms act on NOTHING (no op runs, no
+        // stamp is written or cleared — the rows are locked there): each says
+        // why it is always Private; a via-Journal mark carries ONE door, the
+        // Journal opened at the note (the via-book arm's ascent).
+        case .sayViaJournal(let books):
+            say(PrivateMarkCopy.viaJournalSaying(books.map(\.name)), openingFirstOf: books, at: subjectID,
+                session: session)
+        case .sayJournalEntry:
+            session.status.refuse(PrivateMarkCopy.journalEntrySaying)
+        case .sayDailyJournal:
+            session.status.refuse(PrivateMarkCopy.dailyJournalSaying)
         }
+    }
+
+    /// A saying with one door to the first-named book, opened at the note (an
+    /// OFFER on the seam); with no book, a refusal (a door that did nothing).
+    private static func say(
+        _ words: String, openingFirstOf books: [Queries.BookRef], at subjectID: String, session: AppSession
+    ) {
+        guard let first = books.first else {
+            session.status.refuse(words)
+            return
+        }
+        session.status.offer(
+            words,
+            action: .init(label: PrivateMarkCopy.openBookDoor(first.name)) {
+                MembershipChip.ascend(bookID: first.id, postID: subjectID)
+            })
     }
 }
 
@@ -197,10 +244,11 @@ enum PrivateMarkHold {
     /// The BOOKS' twin (gated the same way; reads `reading` only — never at
     /// autosave rate).
     static func books(
-        _ session: AppSession, _ ids: [String], land: @escaping @MainActor (Set<String>) -> Void
+        _ session: AppSession, _ ids: [String],
+        land: @escaping @MainActor ([String: Queries.PrivateBookMark]) -> Void
     ) async {
         guard !ids.isEmpty else {
-            land([])
+            land([:])
             return
         }
         do {

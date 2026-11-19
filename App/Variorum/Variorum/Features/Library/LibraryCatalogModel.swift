@@ -680,17 +680,17 @@ final class LibraryCatalogModel {
     }
 
     /// **VX-831 — the LISTED books that wear the Private mark** (their own
-    /// stamp; a gathering never — `Queries.privateBookMarks`), held while
-    /// they are listed, only while a client is approved (R-878-K3). Reads
-    /// `reading` only.
-    private(set) var privateBookIDs: Set<String> = []
+    /// stamp — and, VX-1007, THE daily Journal's marker; a gathering never —
+    /// `Queries.privateBookMarks`), held while they are listed, only while a
+    /// client is approved (R-878-K3). Reads `reading` only.
+    private(set) var privateBookMarks: [String: Queries.PrivateBookMark] = [:]
 
     /// VX-831 — hold the listed books' marks (the view's `.task(id:
     /// listedBookIDs)` beside the reach's).
     func holdBookMarks(_ ids: [String]) async {
         await PrivateMarkHold.books(session, ids) { [weak self] value in
-            guard let self, self.privateBookIDs != value else { return }
-            self.privateBookIDs = value
+            guard let self, self.privateBookMarks != value else { return }
+            self.privateBookMarks = value
         }
     }
 
