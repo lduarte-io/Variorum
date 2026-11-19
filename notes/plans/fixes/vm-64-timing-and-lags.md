@@ -262,11 +262,43 @@ typed keys DEFERRED and replayed, everything else REFUSED or WITHHELD, and eithe
 | P2 — the phone's face (latch hook, input stash, gate belt, storage belt, landing + settle heal) | DONE (this commit) — phone `build-for-testing` green into `DerivedData/vm64-b2/`, no new warning in a touched file; behaviour PENDING the stage window |
 | P3 — the hosted pins (probe 2 inverted per door: divide · merge · extract · make block · insert below; the three input roads on divide) | DONE (this commit) — `MobileStructuralFlightFenceTests` (10), BUILT; green run and red-on-old run PENDING the stage window |
 | P4 — builds: phone `build-for-testing` green (`DerivedData/vm64-b2/`) · red-on-old build (`DerivedData/vm64-b2-red/`) · Mac `build-for-testing` (Core changed) | DONE — all three `** TEST BUILD SUCCEEDED **` at `f83122794` (the red one over the base's three phone files, cold), no new warning in a touched file |
-| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | READY — awaiting the window; the commands are in §7 batch 2 ▸ "The stage window" |
+| P5 — stage window (the orchestrator's GO): the pins green, the red build red, the phone editor suites green | FIRST WINDOW RAN — NOT GREEN (traps; the orchestrator's block). r1 IN-PROGRESS (diagnosis above) |
 | P6 — closeout in §7 | DONE (this commit) — its PENDING lines flip after P5 |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b2/` (green) and `App/Variorum/DerivedData/vm64-b2-red/` (the red-on-old
 build), both gitignored.
+
+**Iteration r1 (after the first stage window, 2026-11-19 — the batch came back NOT GREEN; see the orchestrator's §5 block).**
+Diagnosis from the logs, the six crash reports and the code (no stage). Every trap is the SAME road: `storageDidEdit`'s
+`.refuse` arm (`MobileEditorViewModel.swift:1934` pre-fix / `:2089` fix), i.e. a character edit whose report did NOT bind
+to a gate arming and whose fallback span crossed a separator. Per crashing test:
+- `aGatelessEditDuringADivideIsWithheld…` (pre-fix AND fix): **the PROBE's own write**, not the fence. `systemEdit`
+  inserts with font-only attributes at the END of a non-last block; iOS paragraph-style fixing widens the report forward
+  through the paragraph's terminator (TEXTKIT2 §3's iOS finding; round 2's M12), so `fallbackVerdict`'s old span covers
+  the separator and refuses — the verdict is `.refuse` before the fence's belt (in the `.block(i)` arm) is ever reached.
+  Same write, same trap, on both trees; the merge pin's identical write in the LAST block routed on both (no separator
+  past it). FIX: test-only — the window's gate-less edit lands in the last block (a routable edit, the belt's real job).
+  M12 itself (an unroutable gate-less insert in a non-last block) heals by re-rendering from the store and writes nothing
+  stale on either tree; it stays round 2's row, not this batch's.
+- `afterTheFlightLandsTypingIsOrdinaryAgain` (pre-fix AND fix): a plain UIKit `insertText` at the START of a non-empty,
+  non-last block after a divide — no fence code involved (it traps on the pre-fix tree). The same road traps the three
+  replays on the fix build: `keysTypedWhileADivideLands…`, `aKeyTypedWhileAnExtractLands…`, `aKeyTypedWhileMakeBlock…`
+  (the stack: `drainFlightFence` → `MobileEditorTextView.insertText` → `super.insertText` → the report). Every one of the
+  four lands at a non-empty block's START; every UIKit insert that routed was mid-block, at a block's end, into an empty
+  block, or in the last block. The fence's logic sends nothing down this road — it REPLAYS at the landed caret, which for
+  divide / extract / make block is always such a start. WHY the arming did not bind there is NOT settled by reading. The
+  recorded candidate is VM-19's class (VX-282 C-1, measured): `insertText` driven into a text view that is not the key
+  window's first responder while another responder holds the keyboard's input session — and these pins host the view in
+  no window at all, unlike the posture her phone types in (`MobileMarkdownCaretTests.host`).
+- What r1 builds (test-only; no product line changes until the question is settled): (1) the pins take the production
+  posture (the foreground scene's key window, the text view first responder, leftovers resigned; `.serialized`); (2) a
+  debug assertion inside a pin is RECORDED AS A FAILING ISSUE, never swallowed, so the host survives and every pin
+  reports; (3) road C as above; (4) a diagnostic suite (`MobileFlightFenceProbeTests`, prints `VM2-PROBE` lines from the
+  E1 trace) that answers, in the same short cycle, whether a UIKit insert at a block start binds in each posture, with
+  and without a divide before it. If it still fails to bind in the production posture, that is a pre-existing product
+  defect (round 2's M27, never truly dissolved — VM-5's probe typed at block ENDS through the harness) and the replay
+  road changes in r2 with its own red-on-old.
+
 
 ### Batch 3 · VM-66 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
