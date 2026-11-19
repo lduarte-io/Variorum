@@ -159,17 +159,31 @@ nonisolated enum MobileReadPage {
 // MARK: - The phone's FACE on the shared brain (13u1 UNIT 1)
 
 /// The reading page's type scale, which the two platforms deliberately
-/// disagree about: 16 pt base here against the Mac's 15 — phone type is
-/// bigger. The BRAIN is shared; the FACE is not, which is the hoist rule
-/// read correctly rather than flattened.
+/// disagree about: 17 pt base here against the Mac's 15 — phone type is
+/// bigger (VM-48: the sizing sheet's "Reading page" row, serif 17 · line 27,
+/// scaling with the text size). The BRAIN is shared; the FACE is not, which
+/// is the hoist rule read correctly rather than flattened.
 extension FlowParagraph {
-    func font(_ page: ReadingPageTokens) -> Font {
+    /// The paragraph's size at the default text size: the body, or a
+    /// heading scaled from it.
+    var readingSize: CGFloat {
         switch style {
         case .heading(let level):
             let scale: CGFloat = level == 1 ? 1.6 : (level == 2 ? 1.35 : 1.15)
-            return .system(size: (16 * scale).rounded(), weight: .semibold, design: .serif)
+            return (PhoneType.ReadingFace.body.size * scale).rounded()
         case .body, .bullet, .checkbox:
-            return page.serif
+            return PhoneType.ReadingFace.body.size
         }
+    }
+
+    var readingWeight: PhoneTypeSpec.Weight {
+        if case .heading = style { return .semibold }
+        return .regular
+    }
+
+    /// The body carries the page's line pitch; a heading keeps its own line.
+    var readingPitch: CGFloat? {
+        if case .heading = style { return nil }
+        return PhoneType.readingBodyLineHeight
     }
 }
