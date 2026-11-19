@@ -512,12 +512,13 @@ DerivedData: `App/Variorum/DerivedData/vm64-b5/` (gitignored).
 
 ### Batch 6 · VM-69 · VM-70 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**A REVERT IS IN FLIGHT (the red-on-old build), from `24fa9a5e2` (committed and pushed):** the four production files
-(`MobileEditorViewModel`, `MobileMembership`, `MobileNoteTags`, `MobileWriteView` under `VariorumMobile/Features/Write/`)
-checked out at the INSTRUMENT commit `c8f95ea6f` (today's behaviour + the counter), and `MobileChipScopeTests.swift`
-moved aside to `App/Variorum/DerivedData/vm64-b6-aside/` (it names the new chip reads); `build-for-testing` into
-`App/Variorum/DerivedData/vm64-b6-red/`; then `git checkout HEAD --` the four files, the test file moved back, and a
-clean `git status`. If this line still reads IN FLIGHT, restore exactly that way.
+**No revert is in flight.** The red-on-old revert RAN and is RESTORED: from `24fa9a5e2` (committed and pushed, announced
+at `5608b7e52`), the four production files (`MobileEditorViewModel`, `MobileMembership`, `MobileNoteTags`,
+`MobileWriteView` under `VariorumMobile/Features/Write/`) were checked out at the INSTRUMENT commit `c8f95ea6f` (today's
+behaviour + the counter) and `MobileChipScopeTests.swift` moved aside (it names the new chip reads);
+`build-for-testing` into `App/Variorum/DerivedData/vm64-b6-red/` `** TEST BUILD SUCCEEDED **` (cold); then
+`git checkout HEAD --` the four files, the suite moved back, the aside folder removed — `git status` and `git diff HEAD`
+empty.
 
 **Audit F re-verified on this tree** (`d893fae63` + `f0e2e696c`): the screen's `.task` registers (the liveness grant's
 flush + one header read, `MobileLivenessAuthority.swift:154-265`), then `arrive` → `loadOnce` (projection + header in one
@@ -558,7 +559,7 @@ open, though the masthead shows only the note's own rows; the two sheets already
 | P4 — VM-70: the release at the model's end of life | DONE (`9ad4a880d`) — `isolated deinit { session.releaseAutosave(forPost:) }`; built; behaviour PENDING the stage |
 | P5 — the chips' scoped reads | DONE (this commit) — `MobileMembershipModel.refreshChip()` (`readingsContaining` only), `MobileNoteTagsModel.refreshChip()` (`postTags` only), the masthead's two chip tasks call them; the sheets' `.task { refresh() }` unchanged. Phone `build-for-testing` into `DerivedData/vm64-b6/` `** TEST BUILD SUCCEEDED **` (P3–P5 together), no warning in a touched file |
 | P6 — the pins: the perf suite's counts asserted (reads 1, builds 1, registry 0); the hazard pins (a)–(d); the chrome count | DONE (`68d630d96` + this commit) — `MobileHerPathsPerfTests` (five series asserted; the registry series through `MountedBuilt`, a screen built and let go as the shell's destination does); new `MobileNoteOpenOnceTests` (6: the chrome once, the chips' trace, hazards (a), (b)×3, (c)) and `MobileChipScopeTests` (3: hazard (d)); phone `build-for-testing` into `vm64-b6` `** TEST BUILD SUCCEEDED **`, no warning in a touched or new file; runs PENDING the stage |
-| P7 — builds: phone `build-for-testing` into `DerivedData/vm64-b6/`; red-on-old into `vm64-b6-red/` | NOT-STARTED |
+| P7 — builds: phone `build-for-testing` into `DerivedData/vm64-b6/`; red-on-old into `vm64-b6-red/` | DONE — fix products `vm64-b6` built at `24fa9a5e2` (the tree's code state; later commits are record-only) `** TEST BUILD SUCCEEDED **`; red-on-old `vm64-b6-red` `** TEST BUILD SUCCEEDED **` (cold), restored. No Mac build: no `Shared/` or Core file changed, and the Mac compiles none of the four files |
 | P8 — closeout in §7 + READY | NOT-STARTED |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b6/` and `vm64-b6-red/` (gitignored).
