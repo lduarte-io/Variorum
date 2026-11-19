@@ -690,8 +690,12 @@ your choice is fine."
 
 *Implementer: a fresh `opus-implementer` (2026-11-19), taking over batches A and B's round-1 findings; the final calls
 are `vm-78-ladder-round1.md` "Final calls" (`90610aa92`). Headless only: code, pins, `build-for-testing` on both
-targets, and a build of the RED tree; the fix-pin window is the orchestrator's, from its own checkout. **No revert is
-in flight.** The pre-fix-pass tip ("old" for this window) is `0180727de`.*
+targets, and a build of the RED tree; the fix-pin window is the orchestrator's, from its own checkout. **REVERT IN
+FLIGHT (a headless build only) — the four product files below at `0180727de`; restore = `git checkout HEAD --
+App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift
+App/Variorum/VariorumMobile/Features/Tutorial/MobileTutorialSeeder.swift
+App/Variorum/VariorumMobile/Features/Shell/MobileTrashView.swift App/Variorum/Shared/BookcaseBoard.swift`.** The
+pre-fix-pass tip ("old" for this window) is `0180727de`.*
 
 | Finding | State | Pin (TYPE / test) |
 |---|---|---|
