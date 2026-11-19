@@ -2272,17 +2272,17 @@ its own checkout.*
 
 | Piece | State |
 |---|---|
-| 0 — this LIVE STATUS opens; the trial merge's conflict list | DONE (this commit) |
-| 1a — revert the fix `f869f8667` | DONE (this commit) — `git revert --no-commit f869f8667`; its three product files restored to their state before it (`MobileTakesChrome.swift`, `MobileEditorTextView.swift`, `MobileBlockDecor.swift`); the commit's one record line (batch D's build row 2) is KEPT as written — the record is history, and the revert conflicted there only |
-| 1b — revert the pins `15add793d` | DONE (this commit) — `git revert --no-commit 15add793d`: `MobileTakesChromeTests.swift` back to its state before batch D (the re-pins, the marker-and-pill pin and the empty-last-block guard out), and the probe's three header lines (R3-N3) back to `16c75a5bf`'s; the commit's one record line kept as written, as in 1a |
-| 1c — remove the probe `MobileFanBadgePlacementProbeTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `a570d3960` (introduced), `e3f406086`, `78179b765` (the body M5/M5b ran), `16c75a5bf` (its header shifted two lines), `15add793d` (R3-N3's header — its last edition). The kickoff `notes/plans/vm-17-chrome-geometry.md` said "restore it from the commit before VM-78's back-out commit", which is ambiguous once the back-out is four commits: corrected in place to `git checkout 15add793d -- <its path>` |
-| 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `211221f6b` (introduced), `75984c0e6` (its last edition, as run alone in batch D's window). The kickoff's wording for it is right as written |
-| 1e — the back-out's check | DONE (this commit) — output below |
-| 2a — the plan, written before the merge starts | DONE (this commit) — "The plan" below |
-| 2b — the merge commit (seven conflicts resolved, the re-land) | DONE (`ed1266e2f`, merging `origin/main` at `eb18888db`) — per file in "The re-land, file by file" below; compile PENDING (row 3) |
-| 2c — the semantic merges git does not flag | DONE — in the merge commit `ed1266e2f` (`requestFinish`'s refusals onto VM-62's road; Book Details' delete line names a gathering); the pins re-shaped to the one line `c652d1669`; the join's own pin `bookDetailsDeleteLineNamesAGathering` (this commit); every listed file read against the merged product ("The semantic read" below) |
-| 3 — phone + Mac `build-for-testing` on the merged tree | DONE — phone (signed, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot, DerivedData `vm78-ios`) **TEST BUILD SUCCEEDED** at `c652d1669` (log `App/Variorum/DerivedData/logs/vm78-mergein-ios-build.log`) and again with this commit's pin (`…-ios-build-2.log`); Mac (`-scheme Variorum -destination 'platform=macOS'`, DerivedData `vm78-mac`) **TEST BUILD SUCCEEDED** at `c652d1669` (`…-mac-build.log`; this commit is phone-test-only). 0 errors; no warning in a line this merge-in wrote |
-| 4 — the window recipe (RED, GREEN, the Mac types) | DONE (this commit) — "The window recipe" below; its runs are the orchestrator's, PENDING |
+| 0 — this LIVE STATUS opens; the trial merge's conflict list | DONE (`0f2094dc2`) |
+| 1a — revert the fix `f869f8667` | DONE (`b69d5d12e`) — `git revert --no-commit f869f8667`; its three product files restored to their state before it (`MobileTakesChrome.swift`, `MobileEditorTextView.swift`, `MobileBlockDecor.swift`); the commit's one record line (batch D's build row 2) is KEPT as written — the record is history, and the revert conflicted there only |
+| 1b — revert the pins `15add793d` | DONE (`feabe164c`) — `git revert --no-commit 15add793d`: `MobileTakesChromeTests.swift` back to its state before batch D (the re-pins, the marker-and-pill pin and the empty-last-block guard out), and the probe's three header lines (R3-N3) back to `16c75a5bf`'s; the commit's one record line kept as written, as in 1a |
+| 1c — remove the probe `MobileFanBadgePlacementProbeTests.swift` | DONE (`1981d4041`) — `git rm`; the commits that hold it: `a570d3960` (introduced), `e3f406086`, `78179b765` (the body M5/M5b ran), `16c75a5bf` (its header shifted two lines), `15add793d` (R3-N3's header — its last edition). The kickoff `notes/plans/vm-17-chrome-geometry.md` said "restore it from the commit before VM-78's back-out commit", which is ambiguous once the back-out is four commits: corrected in place to `git checkout 15add793d -- <its path>` |
+| 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | DONE (`7d84e4b22`) — `git rm`; the commits that hold it: `211221f6b` (introduced), `75984c0e6` (its last edition, as run alone in batch D's window). The kickoff's wording for it is right as written |
+| 1e — the back-out's check | DONE (`79fa4d36d`) — output below |
+| 2a — the plan, written before the merge starts | DONE (`b83463516`) — "The plan" below |
+| 2b — the merge commit (seven conflicts resolved, the re-land) | DONE (`ed1266e2f`, merging `origin/main` at `eb18888db`) — per file in "The re-land, file by file" below; both targets build (row 3) |
+| 2c — the semantic merges git does not flag | DONE — in the merge commit `ed1266e2f` (`requestFinish`'s refusals onto VM-62's road; Book Details' delete line names a gathering); the pins re-shaped to the one line `c652d1669`; the join's own pin `bookDetailsDeleteLineNamesAGathering` (`8d2b9f8bf`); every listed file read against the merged product ("The semantic read" below) |
+| 3 — phone + Mac `build-for-testing` on the merged tree | DONE — phone (signed, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot, DerivedData `vm78-ios`) **TEST BUILD SUCCEEDED** at `c652d1669` (log `App/Variorum/DerivedData/logs/vm78-mergein-ios-build.log`) and again at `8d2b9f8bf` with the join's pin (`…-ios-build-2.log`); Mac (`-scheme Variorum -destination 'platform=macOS'`, DerivedData `vm78-mac`) **TEST BUILD SUCCEEDED** at `c652d1669` (`…-mac-build.log`; nothing the Mac compiles changed after it). 0 errors; no warning in a line this merge-in wrote |
+| 4 — the window recipe (RED, GREEN, the Mac types) | DONE (`5906d1a59`) — "The window recipe" below; its runs are the orchestrator's, PENDING |
 
 **The trial merge** (`git merge-tree --write-tree --name-only HEAD origin/main`, at `de3bb0107` against `eb18888db`,
 nothing touched): exactly the seven expected textual conflicts —
@@ -2404,7 +2404,7 @@ this run's behavior on top.
   Details, the phone's Trash first paint). None of main's lines already states those phone behaviors, so no clause
   was dropped.
 
-**The pins re-shaped (each still asserts this run's rule, now also where she reads it — `session.status.current`, the
+**The pins re-shaped (`c652d1669`; each still asserts this run's rule, now also where she reads it — `session.status.current`, the
 one line — beside the model's own record, which VM-61 keeps):**
 - `MobileUndoDoorTests` — `aQuietUndoSpeaksTheRefusalAndOffersNoRedo`, `aQuietRedoSpeaksTheRefusalAndOffersNoUndo`:
   the quiet press's line exists, is `.refusal`, carries `undoFoundNothing` / `redoFoundNothing` and no action; the
@@ -2445,7 +2445,7 @@ the assertions:
   — this run's composer speaks the same bytes), `MobileLineDoorTests` (a book's delete line from the row and from
   Book Details — byte-identical for a book), `MobileRefusalSentencePinTests` (Finish on a gathering and Reopen on a
   sealed book through `setFinished`, which still exists), `MobileWingListingTests`, `MobileWingBlindPickerTests`.
-- **The join's own pin (this commit):** `MobileGatheringWordTests/bookDetailsDeleteLineNamesAGathering` — Book
+- **The join's own pin (`8d2b9f8bf`):** `MobileGatheringWordTests/bookDetailsDeleteLineNamesAGathering` — Book
   Details' delete of a gathering speaks "Gathering moved to the Trash…" as a removal line; a book's is unchanged.
   Red against main's `MobileBookDetails.swift` by reading; no file-swap red leg exists for it (main's file lacks
   every symbol the batch-A pins name).
