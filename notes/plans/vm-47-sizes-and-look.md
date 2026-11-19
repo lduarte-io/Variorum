@@ -218,6 +218,28 @@ areas here, not a new layout. The editor's text inset (15 → 20) is one constan
 change it only if it is exactly that, with its pin, and say so in the report — otherwise record it for
 VM-137.
 
+**Carried in from batch 1 (orchestrator, at the batch-1 seam):**
+
+- *The path line wraps in Terminal.* Batch 1 set the Shelf's and Library's path-line doors ("+ New Note",
+  "Settings", the 🗑) at the 17 pt control role; beside the 13 pt path, Terminal's mono line needs about
+  437 pt and wraps at 402 and 430 pt (Study fits), which made the chrome above the books 23 pt taller. The
+  sheet's own words are "Inline acts inside a row: 15". Resolve it in this batch's control adoption: the
+  path line's doors are inline acts (15) or icon buttons with 44 pt hit areas, the line stays ONE line at
+  402 pt in both voices, and a geometry pin holds that. Settings leaves the path line in batch 5 (the ⋯
+  menu); do not move it now.
+- *Batch 1's two fixes are PENDING their re-run* (the UIKit chrome's hold at xxxLarge, `4ec664f2b`; the
+  keyboard-sized shelf pin, `29f2cbd41`). The orchestrator runs that re-run in a short stage window while
+  this batch builds; if it comes back red the orchestrator hands the red to this batch's implementer.
+- *One walk covers batches 1 and 2.* The driver and runbook are in
+  `notes/plans/vm-47-screens/instruments/` (gitignored: `VM47WalkDriver.swift`, `walk.zsh`, each with a
+  cold-use header), built into `DerivedData/vm47-walk`, for the device `vm47-walk`. This batch's implementer
+  extends the driver for the surfaces it changes (new accessibility identifiers, the sheet header, the
+  segmented choice) and runs the walk in its own stage window at the batch's end: the core screens in all
+  eight combinations of Study/Terminal × light/dark × default/largest (AX5), the rest at Study light
+  default, Terminal dark default and Study light largest — the list is in §6 "Batch 1 — results".
+- *The keyboard bar's 14 pt chrome* stays as it is (VM-138/VM-139 own the bar's shape and glyph sizes); its
+  three resting cells are already 62 × 48.
+
 Close with the honest inventory: a table in §6 of every G §2 site (T1–T109) — adopted a shared control ·
 given a 44 pt hit area · left, and which open ticket owns it. No site is left without an owner.
 
