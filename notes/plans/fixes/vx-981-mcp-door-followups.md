@@ -15,7 +15,7 @@ Ticket: VX-981 · Project: none (an umbrella over MCP-area tickets) · Branch: `
 | Piece | State |
 |---|---|
 | Kickoff: roster, worktree, in-flight row (`bc8f3d03a` on main), this record | DONE |
-| BATCH 1 — the Journal shows as Private (VX-1007) | NOT-STARTED |
+| BATCH 1 — the Journal shows as Private (VX-1007) | IN-PROGRESS — implementer live; its LIVE STATUS is the BATCH 1 RECORD below |
 | BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961) | NOT-STARTED |
 | BATCH 3 — announces in order, never waiting on a stall (VX-951 · VX-944) | NOT-STARTED |
 | BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963) | NOT-STARTED |
@@ -182,3 +182,27 @@ The contract the fix must keep, each with a pin or a named existing pin: VX-258'
 ## BATCH RECORDS
 
 *(Each implementer appends its `### BATCH N — RECORD` below.)*
+
+### BATCH 1 — RECORD (VX-1007 — the daily Journal shows as Private)
+
+**Not done in this batch (first line, by the protocol):** no `xcodebuild test` run (no stage claim — the app-target gate and its red-on-old leg are the orchestrator's window); no walk (the orchestrator's closing walk runs the WALK SCRIPT LINES below); no canon file edited (the CANON LINES EARNED are drafts); `notes/QUESTIONS.md` untouched (the PROVISIONALs below wait for the merge).
+
+**LIVE STATUS (implementer, flipped in the same commit as each piece):**
+
+| Piece | State |
+|---|---|
+| R0 — this record's opening: the traced mechanism, the design, the commit plan | DONE (this commit) |
+| S — the scaffold + pins: the new fact/face types with the OLD behaviour, every pin written; core pins run RED | NOT-STARTED |
+| F1 — core: the fence's journal legs as named fragments (one site), the faces' Journal facts read from them | NOT-STARTED |
+| F2 — app: the eye's Journal arms, the two Private rows ticked-and-locked with the why-line | NOT-STARTED |
+| V — the revert check (core files to S → red → restored); `build-for-testing` | NOT-STARTED |
+| C — the record's closing sections (sentences, canon drafts, gate types, walk script, VM-209, self-assessment); the run's table + ledger flipped | NOT-STARTED |
+
+No revert is in flight.
+
+**The mechanism, traced (inputs → wrong output):** the fence's three legs are derived in ONE place, `Queries.mcpNoteFacts` (`Sources/VariorumCore/Queries/MCPGrantQueries.swift`): leg 1 `(c.profile = 'journal')` (the day-entry shape ⌘J's `createOrOpenJournalEntry` and the Journal's `newJournalEntry` mint — `Operations+Container.swift:101/168`), leg 2 an `EXISTS` over a live member row of a live reading wearing `dailyJournalLegForBook` (`profile = 'daily'`), leg 3 `privateLegForNote` (`ai_private_at`, own or via a live Private book); a book's facts (`mcpReadingFacts`) read `dailyJournalLegForBook` OR `privateLegForBook`. The faces read a SEPARATE fact family, `Queries.privateMarks` / `privateBookMarks` (`Queries/PrivateMarkQueries.swift`), whose three statements (`privateMarkOwnSQL`, `privateMarkViaSQL`, `privateBookMarkSQL`) spell ONLY leg 3 (`ai_private_at IS NOT NULL`). Every eye host (`PrivateMarkHold.notes/books` → `PrivateMarkFace.note(_:)` / `book(marked:)`, `App/Variorum/Variorum/Core/Views/PrivateMarkView.swift`) and the masthead (`MCPNoteIndicatorState.read`) therefore get nil for a day entry and an empty set for THE daily Journal → no eye. The two Private rows read leg 3 alone too: the note ▾ menu's `NotePrivacyState.read` (`Queries.isNotePrivate` + `privateBooksHolding`) binds its toggle to `own`; Book Settings' `BookSettingsModel.load` binds the toggle to `Queries.isBookPrivate` → unticked on the Journal and on a day entry while the fence answers both as fenced. Her report's two symptoms are both this one read.
+
+**The design (built as below; PROVISIONALs listed at the end):**
+- **Core, ONE derivation.** The fence's two journal legs become named fragments beside `dailyJournalLegForBook` in `MCPGrantQueries.swift` — `fenceMemberRowSQL` (a live member row of a live reading), `journalEntryLegForNote` (leg 1), `journalMemberLegForNote` (leg 2, built from the two) — and `mcpNoteFacts` reads them (the same SQL text, factored; its answers unchanged). The faces' Journal facts are two new id-driven statements built FROM those fragments: `privateMarkJournalEntrySQL` (leg 1 per drawn note) and `privateMarkViaJournalSQL` (leg 2's books per drawn note, by name). `Queries.PrivateMark` gains `journalEntry` + `viaJournals` (defaulted, so every existing construction reads unchanged); `isPrivate` keeps its meaning (the Private-mark leg) and `isFenced` is new (any leg — exactly `mcpNoteFacts`' fence). `privateBookMarks` / `privateBookMarksDrawn` answer `[id: PrivateBookMark(own:dailyJournal:)]` (books only — a gathering never), the statement reading `privateLegForBook` and `dailyJournalLegForBook` themselves. The gate (`privateMarkGateOpen`) is untouched and still first.
+- **App, the faces.** `PrivateMarkFace.note`: a journal leg wins the face — a live member of the daily Journal (with or without the day-entry shape) wears `.viaJournal(books)` (the via-book form naming the Journal — the hover is her "Private — via ‹book›"; the press SAYS, with one door "Open ‹Journal›", and writes nothing); a day entry outside the Journal wears `.journalEntry` (a saying, no door); otherwise today's arms byte-for-byte. `PrivateMarkFace.book`: the daily Journal wears `.dailyJournal` (a saying, no door, never `setBookPrivate`) — even if it also carries its own stamp; else `.ownBook` as today. The rows: the note ▾ menu's toggle and Book Settings' toggle read ticked and DISABLED wherever a journal leg holds, with one why-line; the setters' bindings refuse to act there (the door closed, never the op — contract 6). VX-641's appearance rule is unchanged (a journal leg is not a "mark": the row still waits for the library's first client).
+- **Commit plan (pin before fix):** S = the new types and fields with the OLD behaviour (the journal fields never filled, the book dict own-only, the faces' journal arms declared but never chosen, the rows never locked) + every pin → the core pins run RED on S; F1 = core behaviour → core GREEN; F2 = app behaviour → `build-for-testing`; V = `git checkout <S> -- <core files>` → RED → `git checkout <F1> -- …` → GREEN, tree clean.
