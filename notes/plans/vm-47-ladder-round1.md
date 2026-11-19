@@ -170,5 +170,89 @@ and walks) coming back as the record expects — a red there re-opens as its own
 
 ## 2. Dispositions
 
-PENDING — the cross-model flow: these findings go to the implementer verbatim; its agree/dispute returns to
-this reviewer for the final call.
+The cross-model flow: the findings went to the implementer (the batch-3 closer, Opus, 2026-11-19) verbatim; its
+agree/dispute below returns to this reviewer for the final call. Nothing was changed for this step — the reviewer
+calls first.
+
+| # | Finding | Implementer | What would change | Pin | Reviewer's final call |
+|---|---|---|---|---|---|
+| R1-m1 | [MINOR] the theme store's start is per shell identity, its bind per session | **AGREE** — hollow; the premise re-traced against `AppBootstrap` and holds (§2a) | one sentence in `MobileShellRouter.bindTheme`'s doc comment (§2a gives it) | none possible: no reachable input produces the state; a pin would be hollow by the protocol | PENDING |
+| R1-n1 | [NIT] `MobileRootMenu.Item.id` is the title | **AGREE** | one sentence in `items(settings:)`'s doc comment (§2a) | none useful: with one item a uniqueness pin is green on both sides | PENDING |
+| R1-n2 | [NIT] two adjacent dividers in the note's ⋯ sheet | **AGREE** on the effect, with one correction to the mechanism (§2a) | nothing now — VM-61 / VM-148's next touch of the sheet | none (a `Divider` is not an accessibility element; a geometry pin would be heavier than the defect) | PENDING |
+| R1-n3 | [NIT] the bar's first frame at width 0 assumes the widest chip sides | **AGREE** — no action | nothing | none (one frame; not observable in process) | PENDING |
+| R1-n4 | [NIT] a doubled word in `MobileReadView`'s ground comment | **DISPUTE** — the doubled word is not in the file (§2a) | nothing — the line is her R-13u-10 words, verbatim | — | PENDING |
+
+### 2a. The implementer's answers
+
+**R1-m1 (MINOR) — AGREE, hollow; the premise checked against the bootstrap.**
+- *The two halves, as the reviewer says.* `MobileShellRouter.bindTheme(session:)` (`MobileShellRouter.swift:114–125`)
+  is idempotent per `ObjectIdentifier(session)` and mints a NEW `ThemeStore` for a new session; the store is
+  started only by the shell's `.task` (`MobileShellView.swift:288–294`, `await router.theme?.start()`), which runs
+  once per appearance of that view identity and is never re-keyed on the session. The shell is mounted in the app's
+  `switch bootstrap.state` under `case .ready(let session)` (`VariorumMobileApp.swift:69`).
+- *The premise — "every session change passes through a non-ready case" — holds.* `AppBootstrap.state` is written
+  `.ready(_)` in exactly ONE place: the open's landing (`AppBootstrap.swift:506`), reached only through
+  `beginOpening` (`:314–330`), which writes `state = .opening` synchronously and then AWAITS a detached open
+  (`routeAndOpen` — the road's facts, `openStore`, the migration set, off the main actor) before landing. Every road
+  that replaces the session goes there through a non-ready state written BEFORE awaited off-main work: the lock
+  (`lockOnNewRoad`, `:1471–1479`: `.opening`, then the lobby, which waits for her unlock), the re-key
+  (`reopenAround`, `:1342–1349`), "make this my library" (`makeThisMyLibrary`, `:959`), bringing in a plaintext
+  export (`bringInPlaintextExport`, `:824`); and the empty-slot adoption (`makeThisMyLibraryInTheEmptySlot`, `:889`)
+  starts only from a non-ready state (the missing library or the lobby) and then calls `beginOpening`. The app's
+  one other `.ready` match (`VariorumMobileApp.swift:255`) is the scene-phase handler reading the session, not a mount. Each awaits real I/O (closing the pool, re-keying, opening and
+  migrating), so SwiftUI renders the non-ready branch in between, the shell leaves the tree, its `.task` is
+  cancelled, and the next `.ready` mounts a fresh shell whose `.task` starts the new store. No road writes `.ready`
+  over `.ready`.
+- *A second road I checked — identifier reuse.* `bindTheme` keys on `ObjectIdentifier(session)`, and an identifier
+  can be reused once its object is freed; a NEW session at an OLD session's address would be mistaken for the old one
+  and keep the old store. It cannot happen: the held store retains its session strongly (`ThemeStore.swift:31`,
+  `private let session: AppSession`), so the old session cannot be freed — nor its address reused — while the router
+  still holds the store that names it. And a remount over the SAME session (re-keyed nothing) re-runs `start()` on
+  the kept store, which opens a fresh observation each call (`ThemeStore.start`, `:66–87`; a cancelled loop ends on
+  `CancellationError`) — correct.
+- *What the reviewer's coupling shares, said for the comment.* The theme store is not the only thing built for the
+  shell's identity: every model the shell holds (`shelfModel`, `libraryModel`, `starsModel`, `trashModel`, …) is
+  `@State` initialized from `session` in `MobileShellView.init` (`:165–170`), and `router.quickNote.bind(session:)`
+  (`:176`) has the same per-session idempotence. So a road that swapped sessions without leaving `.ready` would leave
+  the WHOLE shell on the old session, not only the theme; the remedy then is keying the shell on its session in the
+  app's ready branch (`.id(ObjectIdentifier(session))`), which restarts the theme's task with it.
+- *The change I would make* (`MobileShellRouter.swift`, `bindTheme`'s doc comment, after its last sentence "…reaches
+  the editors whichever device wrote it."): *"The bind is per SESSION but the store is STARTED by the shell's
+  `.task`, once per shell identity: today every new session reaches the shell through a non-ready bootstrap state
+  (`AppBootstrap.beginOpening` writes `.opening` before its awaited open), which remounts the shell. A road that
+  swapped sessions WITHOUT leaving `.ready` would leave the new store unstarted — and every `@State` model the shell
+  built from the old session — so it must key the shell on its session (VM-47 ladder round 1, R1-m1)."* No code
+  change; no pin (unreachable).
+
+**R1-n1 (NIT) — AGREE.** `MobileRootMenu.Item.id` is `title` (`MobileRootMenu.swift:66`) and the menu's `ForEach(items)`
+(`:83`) keys on it; two items with one word would collide. Today `items(settings:)` (`:71–77`) holds one. *The change I
+would make:* in `items(settings:)`'s doc comment, after "Later umbrellas append theirs.": *"An item's word is its
+identity in the menu (`Item.id`), so each item's word must be distinct."* No pin: with one item a uniqueness check
+is green on both sides.
+
+**R1-n2 (NIT) — AGREE on the effect; the mechanism is a little different from the finding's words.** The sheet's
+body (`MobileNoteActions.swift:101–115`) is: Divider (`:108`) · `undoRow` · `redoRow` · `settingsRow` · Divider
+(`:112`) · `deleteRow`, and `settingsRow` (`:269–277`) draws its OWN leading Divider (`:271`). With both stacks empty
+(`undoRow`/`redoRow` render nothing — P-2) and the shell's door present, the adjacent pair is the body's divider
+BEFORE the undo group (`:108`) and `settingsRow`'s own (`:271`) — not a divider "after `redoRow`'s empty slot". The
+pre-run shape (`fe85ea6d5`, `:110` and `:113`) doubled the same way when both rows were absent, as the reviewer says;
+outside a shell (no door) today's sheet doubles exactly as it did before. *If it is done:* `settingsRow` draws its
+leading divider only when an undo or redo row renders (`if door.undoLabel != nil || door.redoLabel != nil`), so the
+group's two dividers never touch — a one-line condition, but a layout change on a sheet VM-61/VM-148 rebuild; I
+agree with "no action now". No pin: a `Divider` is not an accessibility element.
+
+**R1-n3 (NIT) — AGREE, no action.** `MobileTabBar`'s width is `@State` 0 until `onGeometryChange` reports
+(`MobileTabBar.swift:101, 121`); `chipSide(_:)` returns the widest side (16) at width 0 (`:165`) and the chip then
+does not shrink (`shrinkingToFloor: side == nil` is false), so at AX5 in Terminal the first layout may draw a chip
+that does not fit, corrected on the first geometry pass. Assuming the narrowest instead would make the default
+size's first frame the wrong one. Already batch 4's self-assessment risk 4. No pin (one frame, not observable
+in process).
+
+**R1-n4 (NIT) — DISPUTE: there is no doubled word.** `MobileReadView.swift:115–118` reads: *"VM-51: the room around
+the cream page is the VOICE's own, never the / palette's — the Mac's rule (R-13u-10, her "leave that white so that /
+the cream read page isn't on a colorful background"; R2: only the / room follows the voice), now that the phone
+wears a palette."* — "never the / palette's" and "so that / the cream read page" (her words, verbatim, as the
+Mac's `VoiceTokens.swift:454–455`, `ReadModeView.swift:848–849` and `ReadPageRoomTests.swift:6–7` quote them). A
+script over every comment line of the file at `c5dbae56b` (the reviewer's HEAD) and at HEAD finds no word repeated
+across a line break and none within a line; the comment was written once (`af487bfe7`) and not touched since.
+Nothing to change — and the "so that the" is hers, so it must not be edited.
