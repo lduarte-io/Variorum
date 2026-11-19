@@ -562,7 +562,7 @@ phone and whole Mac targets for that tree; its findings are read by the ladder's
 | 5.6 | §6 "Batch 5 — results" + the new PROVISIONALs in §5 | DONE (this commit) — P-47-22…26 in §5, the palette row held for the orchestrator to ticket; the short piece's counts RUN (row 5.7); the red-on-old line PENDING its re-run (row R1.5) and the whole targets after VM-55's re-land; the walk's findings PENDING the run's one walk (§3) |
 | 5.6b | CUTOVER (orchestrator, machinery honesty): the batch-5 implementer ended READY at about 713k tokens of context, every piece committed; its stage work is run by the orchestrator | DONE |
 | 5.7 | The short piece — fourteen phone types, VM-27's red-on-old from `~/dev/variorum-vm-47-rol5`, fifteen Mac types — run by the ORCHESTRATOR | RUN (12:02–12:10, the standing device; logs in the orchestrator's session scratchpad) — **(a)** the fourteen phone types from `vm47-b5` (the tree at `32f9c605e`): "Test run with 80 tests in 14 suites failed after 71.618 seconds with 1 issue"; thirteen suites passed — `MobileSettingsListTests`, `MobileAppearanceTests`, `MobileRootMenuTests`, `MobileNavigationTests` (`theTabBarCarriesThreeDoorsAndEachOneMovesTheBand()` GREEN: `8eb727f2e` verified), `MobileProtectionCompositionTests`, `MobilePathLineGeometryTests`, `MobileTabBarTests`, `MobileShellTests`, `MobileLookSourceTests`, `MobilePhoneControlsSourceTests`, `MobilePhoneTypeSourceTests`, `MobileSharedPageStyleTests`, `MobileLibraryLookTests`; ONE red, the VM-27 pin's `joined → nil` case: "@Dependency(\.database) has no test implementation, but was accessed from a test context" (recorded at `AppDatabase+Dependency.swift:188`, the read `SyncEngine.swift:68`) — a HARNESS defect, traced in §6 "Batch 5 — results" ("The pin's unscoped round") and fixed in row R1.3; the `joined → false` case passed. **(b)** VM-27's red-on-old from the snapshot: NOT PROVEN — the same unscoped read fell through to the live default, whose open of the simulator test host's own store failed ("sqlcipher_page_cipher: hmac check failed for pgno=1") and stopped the host (`AppDatabase+Dependency.swift:19`, fatal error); the relaunch executed 0 tests; no "two Protection…" failure was reached. Re-run owed on the corrected pin from a re-made snapshot (row R1.5) — since RUN and PROVEN there (13:32–13:35: green on the fixed tree, red on the snapshot, both cases); the stray store removed. **(c)** the fifteen Mac types from `vm47-b5`: "Test run with 84 tests in 15 suites passed after 16.489 seconds" |
-| 6 | The re-land of VM-55 (its branch tip merged in ahead of its PR; 23 conflict files; its new faces on this run's layer; the path lines, the bar and message line, the tab's word, the wing landing) | IN-PROGRESS — **the merge is COMMITTED: `0ff256975`** (VM-55's tip `49e795bb6` into `5bc1174fd`; all 23 conflicts resolved file by file, the phone scheme `build-for-testing` into `DerivedData/vm47-b6` GREEN on the merge tree before the commit). The per-file log kept while it was open is the gitignored `notes/plans/vm-47-screens/b6-reland-log.md` (§6 "Batch 6 — results" carries it). NEXT: pieces 6.2–6.6 (drafted in the gitignored `notes/plans/vm-47-screens/b6-drafts/`, dry-run on copies), then the builds and §6. Pieces below (implementer: Opus, 2026-11-19; build products `DerivedData/vm47-b6`; NO revert is in flight in this worktree) |
+| 6 | The re-land of VM-55 (its branch tip merged in ahead of its PR; 23 conflict files; its new faces on this run's layer; the path lines, the bar and message line, the tab's word, the wing landing) | READY for the stage — the code and pins DONE (6.1–6.6), both schemes GREEN into `vm47-b6` (6.7), §6 written (6.8); the whole phone target and the Mac list PENDING the stage, then the whole Mac target and the run's one walk. Earlier: **the merge is COMMITTED: `0ff256975`** (VM-55's tip `49e795bb6` into `5bc1174fd`; all 23 conflicts resolved file by file, the phone scheme `build-for-testing` into `DerivedData/vm47-b6` GREEN on the merge tree before the commit). The per-file log kept while it was open is the gitignored `notes/plans/vm-47-screens/b6-reland-log.md` (§6 "Batch 6 — results" carries it). NEXT: pieces 6.2–6.6 (drafted in the gitignored `notes/plans/vm-47-screens/b6-drafts/`, dry-run on copies), then the builds and §6. Pieces below (implementer: Opus, 2026-11-19; build products `DerivedData/vm47-b6`; NO revert is in flight in this worktree) |
 | 6.0 | Reading: §1–§6 (batch 1's role map, batch 2's controls and path-line fix, batch 3's grounds, batch 4's bar and "For the re-land", batch 5's doors and line ranges), CLAUDE.md + canon, the resiliency protocol, the sizing sheet §A–§E (the receipt line), VM-55's record whole (`notes/plans/fixes/vm-55-wings-underneath.md` on its branch: batches 1, 2a, 2b, 3, 4, the walk, round 1), this run's layer (`PhoneType`, `PhoneInks`, `PhoneMetrics`, `PhoneControls`, `MobileTabBar`, `MobileRootMenu`) and the guards | DONE |
 | 6.1 | The merge: the 23 conflict files resolved one by one so both runs' intent survives (VM-55's behaviour, words, views and parameters; this run's roles, inks, spacing, controls, grounds, bar), never by file; VM-55's auto-merged lines in those files onto the layer; compile fixes; then the merge commit (its message lists the 23 files and each decision) | DONE (`0ff256975`) — 23 resolved (the log's table, carried into §6); one compile fix beyond them (VM-55's `MobileWingDoorTests` drops batch 5's retired `onSettings:`); meeting 2's shell lines in the merge (the bar measured on `MobileTabBar`; the lift keyed to `barOnScreen`); phone `build-for-testing` into `vm47-b6` GREEN at the merge tree (`** TEST BUILD SUCCEEDED **`, 0 errors) |
 | 6.2 | VM-55's new faces on this run's layer (`MobileMessageLine` — the sizing sheet's receipt line; `MobileWingDoor` — the door and the list sheet; any other new phone view), so the three source scans (`MobilePhoneTypeSourceTests`, `MobilePhoneControlsSourceTests`, `MobileLookSourceTests`) are clean over the merged tree — measured before and after by their own patterns | DONE (this commit) — `MobileWingPath` (the door's title and the plain line `meta`, one line, the corrected muted; the door's target the hit-area helper's 44 on the line's own box — the 14/6 hand-back and `MobileWingDoorMetrics`' two padding constants gone); `MobileWingListSheet` on `PhoneSheetHeader`, the gutter, a row's name `control` in ink and its ✓ `meta`; `MobileMessageLine` as the sizing sheet's receipt line (words `controlInline` 15 with 12 above and below, the removal in `tokens.phone.muted`, the act `PhoneInlineActStyle(weight: .semibold)` across 44 × 44, the line 44 at the gutter) in the library's look (the model's `look:`, the shell passes `router.tokens(dark:)`); `PhoneInlineActStyle` gains an additive `weight:`; one stale `ThemeStore` comment. The scans' mirrors over the tree: BEFORE 8 slot reads · 0 sub-13 · 1 control signature · 0 look (+ 4 voice-ink reads); AFTER 0 · 0 · 0 · 0 (+ 0). Phone `build-for-testing` into `vm47-b6` GREEN |
@@ -570,8 +570,8 @@ phone and whole Mac targets for that tree; its findings are read by the ladder's
 | 6.4 | Meeting 2 — the bar and the message line: VM-55's measurement re-attached to `MobileTabBar`; the line's lift keyed to "a bar is on screen" (roots and pushed lists) | DONE (the shell's lines in the merge `0ff256975`; the pins this commit) — VM-55's measurement re-attached to `MobileTabBar` (the `tabBar` property); the lift is `barOnScreen` = a root (`pagingAllowed`) OR a pushed list on the visible stack showing its bar (`listBar(owner)`, counted per stack by its own appear/disappear — `listBarsShowing`); NEW `MobileTabBarTests.theMessageLineClearsTheBarWhereverABarIsOnScreen` (the line's model through the shell's host probe: a root ≥ 56, the pushed Trash ≥ 56 — red on the old rule by construction — a note 0); MOVED `theRouteRuleIsTheDestinationBuilders` to the counted form (the rule it holds unchanged); the counts PENDING the stage |
 | 6.5 | Meeting 3 — the tab's word: tests that drive the tab by "Shelf" move to "Bookcase" (reason stated); the Bookcase root's path word read in both voices and recorded | DONE (this commit) — VM-55's `MobileWingDoorShellTests.fromTheLibraryAPickLandsOnTheWingsBookcase` MOVED: `elements(selected: "Shelf")` → "Bookcase" (LK-5, SW-1 — the tab's word; the fact unchanged); no other test of either run drives the tab by "Shelf" (grep — `MobileWingsTests:189–190` and `MobileWingDoorTests:263, 394–395` are the PATH word). The root's path word: VM-55's door changed that line's words (P-55-2), so they stand — the merged Bookcase root reads "Home · Shelf · N books" (Study) / "~/home/shelf · N books" (Terminal) under a tab that says Bookcase; put to her as P-47-28 (§5) |
 | 6.6 | Meeting 4 — the wing landing: batch 4's tab road (P-47-19) against VM-55's landing, confirmed from the code; pinned if no pin of either run holds it | DONE (this commit) — the two agree (VM-55's landing is `selectPage(.shelf)` and touches no stack, P-55-14; batch 4's tab road returns the stack being left to its root first, P-47-19; the door is drawn only on a root); no pin of either run held the pair: NEW `MobileTabBarTests.aWingLandingAfterAListWasLeftShowsTheBookcaseItself` (the Trash pushed on the Bookcase's stack, Library by its tab, the wing door, Work: the landing is Work's Bookcase ROOT, no Trash); the counts PENDING the stage |
-| 6.7 | Builds — after the orchestrator's "QUIET over": phone, then Mac, `build-for-testing` into `DerivedData/vm47-b6`, one at a time | NOT-STARTED |
-| 6.8 | §6 "Batch 6 — results" (the tip, the merge commit, the 23 files, the four decisions, the faces and roles, every moved pin, the scans' before/after, the builds, the stage lines); READY for the stage | NOT-STARTED |
+| 6.7 | Builds — after the orchestrator's "QUIET over": phone, then Mac, `build-for-testing` into `DerivedData/vm47-b6`, one at a time | DONE — after "QUIET over" (13:32), one at a time, into `vm47-b6`: phone GREEN on the merge tree (before its commit), after 6.2, and after the pins (`b20b04fad`); Mac GREEN at `b20b04fad` (`Shared/Theme/` changed: `PhoneInlineActStyle`'s additive `weight:`, one `ThemeStore` comment). `origin/main` `eb18888db` (VM-55's PR #13) merged in at `e72323130` — notes and ledgers only, so the products stand. `vm47-b5` deleted |
+| 6.8 | §6 "Batch 6 — results" (the tip, the merge commit, the 23 files, the four decisions, the faces and roles, every moved pin, the scans' before/after, the builds, the stage lines); READY for the stage | DONE (this commit) — §6 "Batch 6 — results"; P-47-27, P-47-28 (and P-47-8's batch-6 rows) in §5; READY for the stage (the lines are §6's) |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks — each step since DONE (rows M.1–M.6), and round 1 found the fix pass APPLIED AS CONFIRMED (`vm-47-ladder-round1.md` §1). The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) was then still queued — since SUPERSEDED (row 2.9; the run's one walk, §3) |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
 | M.2 | M-1: the 13 pt floor in `PhoneType.uiFont` (`#if os(iOS)` arm, BOTH scaling classes: a resolved font under `floorSize` returns `baseUIFont(…, pointSize: floorSize)`); its pin, the UIKit twin of `nothingIsEverBelowThirteenPoints` in `MobilePhoneTypeTests` (every role × both voices × all twelve settings) | DONE (this commit) — `uiFont` = the class's scaled font (`scaledUIFont`, unchanged) then the floor; the pin `theUIKitFormIsNeverBelowThirteenPointsEither()`; build M.4, red-on-old M.5, run M.6 — each since DONE (rows M.4–M.6) |
@@ -1734,3 +1734,198 @@ Bookcase as before; (6) **`PhoneMenuRow` and the sync row's phone arm are `Share
 the nil arm of the sync row byte-identical), and the Mac never renders either. The Mac's look cannot have changed:
 `VoiceTokens.swift` is untouched, no Mac view's source changed, and the Mac file that changed lost only a declaration
 that now lives in `Shared/`.
+
+### Batch 6 — results (implementer: Opus, 2026-11-19)
+
+**Not done in this batch, first:** (1) no test of any kind ran here — every suite (the whole phone target from
+`DerivedData/vm47-b6`, the Mac list below) is PENDING the orchestrator's stage window, and so is the run's one walk (§3);
+(2) ~~`origin/main` merged on top~~ — DONE: VM-55's PR landed mid-batch and `origin/main` `eb18888db` was merged in at
+`e72323130` (notes and ledgers only, no conflict); (3) no red-on-old was run: the four meetings are design decisions with pins that hold the
+joint invariant, and meeting 2's lift pin is red on the old rule by construction (below); (4) nothing of VM-55's
+behaviour or words changed but the tab's word in one of its pins (meeting 3) — the Bookcase root's PATH word stays VM-55's
+"Shelf" and is put to her (P-47-28); (5) the path line's Terminal truncation with a wing name is PROVISIONAL (P-47-27).
+
+**The merge.** `git merge --no-ff origin/vm-55-wings-underneath` at VM-55's tip **`49e795bb6`** (fetched 2026-11-19),
+into this branch at `5bc1174fd`; merge base `9a78628ea` (main). The merge commit: **`0ff256975`** (parents `5bc1174fd`, `49e795bb6`). 23 files conflicted,
+all phone faces (the brief's list exactly); VM-55's other 67 files merged clean (its seven `Shared/` brains, the moved Mac
+wing files, its new phone views, tests and records — the two runs' `Shared/` and Mac file sets are disjoint). While the
+merge was open its log was the gitignored `notes/plans/vm-47-screens/b6-reland-log.md`; what it says is below.
+
+**The 23 files — what each resolution is** (the rule: VM-55's behaviour, words, views and parameters; this run's drawing):
+
+| # | File | Resolution |
+|---|---|---|
+| 1 | `Read/MobileReadView` | VM-55's removal of the book's error slot (VM-61) — this run had only re-typed it |
+| 2 | `Shell/MobileArchiveView` | VM-55's retirement of the report band; this run's ground comment ("the report band below stays on the room") made true |
+| 3 | `Shell/MobileBookDetails` | the sheet's error slot removed (VM-55) |
+| 4 | `Shell/MobileBookView` | both slots onto the one line (VM-55) — the doors' refusal and the header's error |
+| 5 | `Shell/MobileCreateBook` | the sheet's error slot removed (VM-55) |
+| 6 | `Shell/MobileLibraryView` | **more than mechanical:** this run's paper ground KEPT on the list + VM-55's three slot removals; the path line is this run's 44 pt line (center, spacing 0, `Spacer(minLength: 16)`, 🗑 · + New Note · ⋯) with VM-55's `MobileWingPath` in place of the plain `Text` |
+| 7 | `Shell/MobileQuickNote` | the box's error line removed (VM-55); her words stay in the box |
+| 8 | `Shell/MobileScraps` | the section's error line removed (VM-55) |
+| 9 | `Shell/MobileShelfView` | **more than mechanical:** VM-55's slot removals; this run's path line with `MobileWingPath(page: "Shelf", trailing: "  ·  N books")`; the line's doc comment names the wing as drawn |
+| 10 | `Shell/MobileShellView` | **more than mechanical:** both tasks (the library's theme; the held wings read); this run's tab road kept, VM-55's bar measurement re-attached to `MobileTabBar`; the line's lift keyed to a bar on screen (meeting 2) |
+| 11 | `Shell/MobileStarredView` | **more than mechanical:** this run's paper ground and 44 pt line, VM-55's slot removal and `MobileWingPath` |
+| 12 | `Shell/MobileTagManager` | **more than mechanical:** the shared `PhoneSheetHeader` (VM-50) carrying VM-55's wing-naming title (`model.title`, "Tags — in ‹wing›"); the error slot removed |
+| 13 | `Shell/MobileTrashView` | VM-55's retirement of the report band; this run's ground comment made true |
+| 14 | `Takes/MobileBlockHistorySheetView` | the overlay's status label stood down (VM-55) |
+| 15 | `Takes/MobileLenses` | the sheet's status line removed (VM-55) |
+| 16 | `Write/MobileBlockList` | the sheet's status line removed (VM-55) |
+| 17 | `Write/MobileMembership` | the sheet's status line removed (VM-55) |
+| 18 | `Write/MobileNoteActions` | the `reportLine` retired (VM-55); this run's batch-5 Settings row stands |
+| 19 | `Write/MobileNoteTags` | the sheet's status line removed (VM-55) |
+| 20 | `Write/MobileNoteTray` | the tray's status line removed (VM-55) |
+| 21 | `Write/MobileReferences` | the sheet's status line removed (VM-55) |
+| 22 | `Write/MobileVersions` | **more than mechanical:** this run's listing bar kept (VM-52), VM-55's report band removed; the ground comment made true |
+| 23 | `Write/MobileWriteView` | the masthead's receipt row and its Undo/Redo onto the one line (VM-55 — batch 2 had left T50 for VM-61); piece 3.10's grounds untouched |
+
+Beyond the 23, inside the merge: VM-55's `MobileWingDoorTests` drops the `onSettings:` argument batch 5 retired (compile
+only, no assertion).
+
+**VM-55's new faces on this run's layer (piece 6.2, `1f9781ab8`; its pins `b20b04fad`) — the role each site took.**
+
+| Site | Before (VM-55, main's tokens) | Now |
+|---|---|---|
+| `MobileWingPath` — the door's title (an `AttributedString`: lead · the wing's name · the rest) | `tokens.small`, lead/rest `tokens.muted`, the name `tokens.accent`; the target the line's 14/6 paddings handed back by negative padding to reach 44 | `meta` (the root path line's role, batch 1's map), lead/rest `tokens.phone.muted`, the name in the accent; ONE line (`lineLimit(1)`); the target the hit-area helper's 44 on the leading edge — the line is already this run's one 44 pt line, so nothing is handed back and the line does not grow |
+| `MobileWingPath` — the plain line (no door wired) | `tokens.small`, `tokens.muted` | `meta`, `tokens.phone.muted`, one line — the line batch 2 drew |
+| `MobileWingDoorMetrics` | `minimumSide` 44 + the roots' paddings 14 / 6 | `minimumSide = PhoneMetrics.touchMinimum`; the two paddings removed (they named a layout that is gone; nothing else read them) |
+| `MobileWingListSheet` — the header | a hand-built HStack: title `tokens.title`, Done `tokens.small` (the controls pin's "Done literal") | `PhoneSheetHeader` (VM-50) with VM-55's words, the Mac's ▾ list header; Done the closing act, 64 × 44 |
+| `MobileWingListSheet` — a row | ✓ and the name `tokens.body`; 44 tall | the name a menu row's label, `control` 17 in her ink (sheet §E; P-47-8: `control` over `rowTitle`, the same size); the ✓ `meta` in the accent (batch 1's picker ✓); 44 tall; the sheet padded by the gutter |
+| `MobileMessageLine` — the words | `tokens.small`; refusal alarm · removal `tokens.muted` · offer ink | the receipt line (sheet §E): `controlInline` 15, chrome; refusal alarm · removal `tokens.phone.muted` · offer ink; 12 above and below, so one line of words is the line's 44 |
+| `MobileMessageLine` — the act (Undo) | `tokens.small` in the accent, a bare `.plain` button (≈ 14 pt tall) | `PhoneInlineActStyle(weight: .semibold)` — 15 semibold in the accent across a 44 × 44 hit area (the control gains an additive `weight:`) |
+| `MobileMessageLine` — the line | padding 20 / 8, spacing 10 | `minHeight: 44`, the gutter, spacing 12; the room and the hairline unchanged |
+| `MobileMessageLine` — its look | `VoiceTokens.resolve(voice:dark:)` — the palette-less road (the voice's bare colours) | the library's look: the model takes `look:` and the shell hands `router.tokens(dark:)` (VM-51's settings road); a harness with no look keeps the voice's own |
+
+VM-55's words, classes, timing and placement are untouched (the line's `footOffset`, `takesTouch`, the probe's scene
+edges, every door's class and words).
+
+**The source scans — before and after** (each suite's own patterns run by script over the tree; the mirror validated
+against the recorded counts: 332 slot reads and 32 sub-13 sites on `fe85ea6d5`, 33 control signatures on `751765baf`):
+
+| Scan | The merged tree, before 6.2 | After 6.2 |
+|---|---|---|
+| `MobilePhoneTypeSourceTests` — Mac type slots | 8: `MobileMessageLine.swift:142, 156`; `MobileWingDoor.swift:163, 186, 235, 240, 266, 270` | 0 |
+| `MobilePhoneTypeSourceTests` — sub-13 / caption / scale factor | 0 | 0 |
+| `MobilePhoneControlsSourceTests` | 1: `MobileWingDoor.swift:239` (a sheet's own Done) | 0 |
+| `MobileLookSourceTests` (grounds, ★, literal colour) | 0 | 0 |
+| the voice's own small inks (`tokens.muted/faint` — the layer's rule, not a scan) | 4: `MobileWingDoor.swift:187, 197, 201`, `MobileMessageLine.swift:189` | 0 |
+
+**Where the two runs meet — the four decisions.**
+
+1. **The roots' path lines.** What I found: VM-55's door assumed the roots' pre-VM-47 line (11.5 pt text, 14 above, 6
+   below) and handed those paddings back so its 44 pt target covered the line; this run's line is ONE 44 pt line whose
+   doors are 44 pt controls (batch 2) with the ⋯ (batch 5). VM-55's pins hold the RULE, not the paddings (target ≥ 44 ×
+   44, below the status bar, not into what is drawn under the line, a real control; the value), so none of them moved.
+   Built: the door's target is the line's own 44 (the hit-area helper), the title `meta` on one line; the paddings and
+   their hand-back are gone. The numbers measured with the real fonts: in Terminal at 402 the Bookcase's
+   "~/home/shelf  ·  14 books" wants ≈ 438 pt beside the doors (≈ 422 with one book), Study's ≈ 376 — so at 402 in
+   Terminal the words cannot all fit once a wing's name leads, and the path truncates at its tail (P-47-9's rule): every
+   target stays 44, the line stays one line, the ⋯ is on all three roots. Put to her as **P-47-27** (§5) with the other
+   roads. Pinned: `MobilePathLineGeometryTests.theBookcaseLineWithItsWingDoorHoldsOneLineAndEveryTarget` (new — 402 and
+   430, both voices, 14 books: the wing door ≥ 44 × 44 and never taller, the three doors ≥ 44 × 44 on its line, after it,
+   inside; + New Note's word whole; the door fires) beside VM-55's `MobileWingDoorGeometryTests` (unmoved) and batch 2's
+   two cases (unmoved — they host the plain line). Commit `0cf6596a6`.
+2. **The bar and the message line.** VM-55's `.onGeometryChange` rode the old `tabBar` body (it auto-merged INTO
+   `tabSelected`); re-attached to `MobileTabBar` in the `tabBar` property. VM-55's lift `pagingAllowed ? tabBarHeight : 0`
+   was the roots' rule; the bar now also rides pushed lists (VM-52), so the lift is `barOnScreen`: `pagingAllowed` (a
+   root) OR a pushed list on the visible stack showing its own bar — `listBar(owner)`, the same bar counted per stack by
+   its own `onAppear`/`onDisappear` (`listBarsShowing`), so a note pushed over a list, a pop, or the Versions reader
+   replacing its listing drops the lift to the safe area's foot. Pinned:
+   `MobileTabBarTests.theMessageLineClearsTheBarWhereverABarIsOnScreen` (new — the line's own model read through the
+   shell's host probe: a root ≥ 56, the pushed Trash ≥ 56 — red on the old rule by construction, `pagingAllowed` false
+   there — a note 0). This run's `theRouteRuleIsTheDestinationBuilders` MOVED to the counted form (`listBar(owner)`): the
+   rule it holds is unchanged. Commits: the shell's lines in the merge `0ff256975`; the pins `3204f42fd`.
+3. **The tab's word.** The tab is "Bookcase" (LK-5, SW-1). VM-55's `MobileWingDoorShellTests` (`MobileWingDoorTests.swift`)
+   drove the landing's check by "Shelf" → MOVED to "Bookcase" (the fact unchanged: the Shelf page's door is chosen). No
+   other test of either run drives the tab by "Shelf" (grep: `MobileWingsTests:189–190` and `MobileWingDoorTests:263, 394–395`
+   are the PATH word, not the tab). The root's own path word: VM-55's door changed that line's words (the wing's name
+   leads — P-55-2), so its words stand: the merged Bookcase root reads **"Home · Shelf · N books"** (Study) and
+   **"~/home/shelf · N books"** (Terminal) under a tab that says Bookcase — recorded, and put to her as **P-47-28** (§5). Commit `a511366b4`.
+4. **The wing landing.** VM-55's landing is `selectPage(.shelf)` and touches no stack (P-55-14), relying on the Shelf's
+   stack standing at its root while hidden; batch 4's tab road keeps exactly that (P-47-19 — a tab from a pushed list
+   returns the stack being left to its root first), and the wing door is drawn only on a root. The two agree. No pin of
+   either run held the pair, so: `MobileTabBarTests.aWingLandingAfterAListWasLeftShowsTheBookcaseItself` (new — the Trash
+   pushed on the Bookcase's stack, Library by its tab, the wing door, Work picked: the landing is Work's Bookcase ROOT, no
+   Trash, Work's door on screen; `3204f42fd`). The one edge both records name stands: a STANDING shell adopting a Protection request
+   selects the Shelf without popping the stack it leaves (P-55-14's edge; reachable only after a re-keying act).
+
+**Every pin of either run that moved, with the reason:** VM-55's `MobileWingDoorShellTests.fromTheLibraryAPickLandsOnTheWingsBookcase`
+— "Shelf" → "Bookcase" (meeting 3); VM-55's `MobileWingDoorGeometryTests.theShelfRootsDoor` — the `onSettings:` argument
+dropped (batch 5's retired parameter; compile only); this run's `MobileTabBarTests.theRouteRuleIsTheDestinationBuilders` —
+`{ tabBar }` → `{ listBar(owner) }` (meeting 2's counted bar; the rule unchanged); this run's
+`MobilePhoneControlsTests.theInlineActAnswersAcrossFortyFourWithoutMovingItsWord` — gains a weighted act (the control's
+new `weight:`). No pin's assertion was weakened.
+
+**New tests (5) and one new case, PENDING the stage:** `MobilePathLineGeometryTests.theBookcaseLineWithItsWingDoorHoldsOneLineAndEveryTarget`,
+`MobileTabBarTests.theMessageLineClearsTheBarWhereverABarIsOnScreen`, `MobileTabBarTests.aWingLandingAfterAListWasLeftShowsTheBookcaseItself`,
+and the new suite `MobileMessageLineFaceTests` (`theLinesActAnswersAcrossFortyFourOnAFortyFourLine` — red on VM-55's face
+by construction, its act a ≈ 14 pt word; `theLineWearsTheLibrarysLook`); the added case: the weighted inline act in `MobilePhoneControlsTests.theInlineActAnswersAcrossFortyFourWithoutMovingItsWord`.
+
+**Builds — GREEN (headless, no stage), into `App/Variorum/DerivedData/vm47-b6`, one at a time, after the coordinator's
+"QUIET over" (13:32):** phone on the merge tree before its commit (`** TEST BUILD SUCCEEDED **`, 0 errors — the merge was
+committed only then), again after piece 6.2 and after the pins (`b20b04fad` — the code of every later commit); Mac at
+`b20b04fad` (`** TEST BUILD SUCCEEDED **`, 0 errors; `Shared/Theme/` changed). `origin/main` (`eb18888db` — VM-55's PR
+#13 landed) was merged in after (`e72323130`): notes and ledgers only (`git diff --stat HEAD...origin/main -- App Sources
+Tests Server` empty), no conflict, so the products stand. `DerivedData/vm47-b5` deleted at the orchestrator's word.
+
+**The stage lines (READY — the orchestrator's GO; nothing here has run):**
+- Phone, the whole target: from `App/Variorum/`, `xcodebuild test-without-building -scheme VariorumMobile -destination
+  'id=<the standing device>' -derivedDataPath DerivedData/vm47-b6 -only-testing:VariorumMobileTests`. Expected from main:
+  VM-24's caret test (2 of 3 cases) and the declared known issues (`MobileTrashTests` ×2, `MobileTutorialWalkTests` ×2,
+  P-47-7's four filter-row marks). Batch 6's own to call out: `MobilePathLineGeometryTests`, `MobileTabBarTests`,
+  `MobileMessageLineFaceTests`, `MobilePhoneControlsTests`, `MobileWingDoorTests` (its four types:
+  `MobileWingDoorTests`, `MobileWingDoorGeometryTests`, `MobileWingListSheetTests`, `MobileWingDoorShellTests`),
+  `MobileMessageLineTests`' types (`MobileLineShowRuleTests`, `MobileMessageLineGeometryTests`,
+  `MobileMessageLineSceneTests`, `MobileMessageLineHostTests`, `MobileMessageLineInsetTests`, `MobileLineDoorTests`),
+  `MobileUndoDoorTests`, the three source guards and VM-55's `MobileNoRawErrorPinTests` / `MobileErrorLogPrivacyPinTests`.
+- Mac — the theme-store types of batch 3 (102), batch 5's fifteen, VM-55's four Mac pins (`WingPaletteDoorsTests` is
+  already among the 102): 114 types, each checked declared exactly once as a suite type in `VariorumTests/`:
+  ```zsh
+mac=(BlockHistoryCommitsCaptureTests BlockHistoryHostTests BlockHistoryPaneTests BlocksArrivalMeasureTests
+BookCarryLiveBlockTests BookEditHereRiderTests BookFoldDisclosureTests BookIndexCarryAnchorTests
+BookIndexCarryBlockTests BookIndexTakesTests BookIndexToOutlineBlockLandingTests BookIndexToOutlineCarryTests
+BookLeavingSavepointTests BookMastheadMountedTests BookNoteBoxOpenDoorTests BookOpenDoorMountTests
+BookPanelDragGateTests BookPanelOpenNoteMarkTests CanvasArrivalTests ChromeMinHeightTests CommitBarLayoutTests
+CompareCommentGutterTests CompareLensesAlignmentTests CompareToggleIdentityTests CurrentBlockContinuityTests
+DebugOracleSingletonWindowTests DebugOracleTwoWindowTests IndexClickCaretTests IndexTierMetricsTests
+InlineEditorWidthReflowTests LandingOffsetTests LibraryControlsGeometryTests LibraryListFaceRigTests
+LibraryListFaceTests LibraryPanelHostTests LibrarySearchLandingTests MCPAsksWaitCaptureTests MCPGrantSheetCaptureTests
+MCPGrantSheetU2CaptureTests MCPPaneTabsCaptureTests MCPPaneTabsTests MCPShareFacesCaptureTests MastheadLayoutTests
+MastheadStampTests ModeSwitchCarryTests ModeSwitchFeelTests NewNoteInBookTests NoteBoxCompositionTests
+NoteBoxGeometryTests NoteOpenLandingTests NoteVersionsPaneTests OpenListDragMountTests OpenListLayoutMountTests
+OutlineRoomTests OutsideWriteLivePaneTests PagesArrowKeysHostTests PostDetailRoutingTests PostRescueFaceTests
+QuickEntryOpeningScopeTests ReadArrivalMeasureTests ReadLandingTests ReadModeTests ReadNoteHeightsCalibrationTests
+ReadNoteLandingTests ReadingFlowEstimateMeasureTests ReadingFlowLandingTests RestoreLandingRewriteHopTests
+RestoreLandingTests SavepointCommitDoorTests SearchEmptyAnswerSentenceTests SideColumnTests
+SidebarNoteBoxDoorFacesTests SidebarNoteRowMenuTests SidebarRowLeadsTests SidebarSearchFieldPlaceTests
+SidebarSectionWindowMountTests SidebarSmokeTests SnippetsLandingTests StarredScrollMountTests StatusCenterTests
+SurfaceSizeMemoryTests TakesCommentGutterTests TakesEntryBandTests TitleQuickfillTests TourClosingCardTests
+TrayPanelMoveTests TutorialMCPChapterCaptureTests VX176LibraryTintTests VX343WhatsNewCaptureTests
+VX347CommitLeavesMountTests VX349ListHeaderRestTests VX350SearchToggleMountTests VX895SearchFacetHeaderTests
+VersionDoorsTests WingPaletteDoorsTests ThemeTokenTests PaletteDerivationTests NoLiteralColourTests
+SharedPageStyleTests PaletteReachTests MarkdownPaletteWritersTests HelperWindowThemeTests AppearanceChoiceTests
+SyncLockedRowTests SyncProgressRowTests SyncRetryingRowTests SyncOutOfDateFaceTests SyncStalledRowTests
+NotOnYetWordsTests HostedSyncTierFaceTests VM56MacWingScopePinTests VM61MacStatusSeamPinTests
+VM62MacRefusalWordsPinTests VM63MacWingBrainsHoistPinTests)
+  ```
+  from `App/Variorum/`: `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS'
+  -derivedDataPath DerivedData/vm47-b6 $(for t in $mac; do print -- "-only-testing:VariorumTests/$t"; done)`.
+- The whole Mac target and the run's one walk follow on this tree (§3).
+
+**New rendered lines:** none. (The wing list's header, rows and Done keep VM-55's words; the receipt line keeps VM-55's;
+the Bookcase root's path word is VM-55's — P-47-28 asks.)
+
+**Recorded, not fixed (owners):** the line over a SHEET on a pushed list lifts by the bar under the sheet (VM-55's own
+root behaviour, now on lists too — the sheet covers the bar); a standing shell's Protection adoption can leave a hidden
+stack off its root (P-55-14's edge — VM-110 / VM-80); the empty-wing lines that assume Home (P-55-16 — VM-72).
+
+**Self-assessment (for the cold reviewer).** The resolutions are mostly VM-55 retiring a per-screen slot that this run
+had only re-typed — the slot goes, VM-55's comment stays. The places where both intents were written into one line are
+the three roots' path lines, the shell, the tag manager's header and Versions' insets. The riskiest calls: (1) the
+**bar-on-screen count** rests on SwiftUI firing `onAppear`/`onDisappear` for a list's bar as a note is pushed over it and
+as it is popped (the same UIKit fact batch 4's mounted pins rest on) — a missed disappear would leave the line lifted
+inside a note, which the new pin reds; (2) the **path line's truncation** in Terminal (P-47-27) is real at 402 pt — her
+look at the walk decides it; (3) the **message line's 44 pt act** makes the line taller (≈ 30 → 44) and its foot is VM-55's
+placement exactly, so VM-55's host and inset pins' bounds hold with nothing to spare (the act's foot IS the bar's top);
+(4) the line's **look** is read through a closure in its own window's body — observation tracks it as the shell's own
+reads do.
