@@ -159,7 +159,20 @@ Ticket: VX-980 · Project-less umbrella (the sub-issues are the roster) · Branc
 
 #### BATCH 2 — LIVE STATUS
 
-*The implementer writes this from its first commit.*
+**NOT DONE BY THE IMPLEMENTER (first, by the contract):** PENDING — written at the batch's close.
+
+*Implementer: opus-implementer, seated 2026-11-19 (after her 04:16 leave — every unruled call here is PROVISIONAL). Every claim is PENDING until its run is named.* **No revert is in flight** (a feature batch: the pins state the new contract; the restore-road pins are guard pins over shipped roads).
+
+**The reading (done before code, none delegated):** CLAUDE.md and its auto-loaded canon · this file's Kickoff, ENVIRONMENT & TRAPS, BATCH 2 and Review foci · `vx-980-her-rulings.md` whole (R-980-2, R-980-4 bind this batch; her 04:16 leave) · `notes/SurfaceContracts.md` "The app" and "Doors to the outside" (portability and protection, read to know the roads) · `notes/plans/phase-13o-search.md` (R-13o-3, R-13o-4 and its §R-13o-4 RECORD, U1 item 3, the U1 RECORD's P5 row, LADDER ROUND 1's MINOR-3 and its disposition) · `notes/SessionResiliencyProtocol.md`. Code read: `Operations+SearchIndex.swift`, `Persistence/SearchIndex.swift`, `DataSafetyPane.swift`, `DataSafetyModel.swift`, `DataSafetyCopy.swift`, `SettingsShape.swift`, `AppSettingsView.swift` (the composition, `paneRowIDs`), `SettingsSceneContent.swift` (the non-ready arms), the registry's Data Safety declarations (`Capability.swift`, `CapabilityRegistry.swift`), `OperationsRunner.swift`; the restore roads (READ ONLY — fenced for editing): `ProtectionCopyDoors.swift`, `SQLCipherLibraryLeaf.swift`, `FileBackupsLeaf.swift`, `Protection/Files/ProtectionLibraryFiles.swift`, `Protection/Executor/Acts/Copies.swift`, `AppBootstrap.sendLibrary`, `StorePlaintextExport.swift`, `Operations+PlaintextExportImport.swift`, `LocalMachineryRecreation.swift`, `Migrations.swift` v1_22→v1_37, `SyncSchema.swift` (`SyncRow.apply`).
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | This LIVE STATUS | DONE (this commit) |
+| 2 | THE RESTORE-ROADS TRACE — guard pins (tests only) over every road reachable headless; the trace written for her (section below) | NOT-STARTED — the pins first: if a road can leave the index out of step, STOP and report |
+| 3 | Registry: two Data Safety acts declared the pane's way (`.surface` only) + the Settings catalog row | NOT-STARTED |
+| 4 | The row: model state + the pane's section + its words | NOT-STARTED |
+| 5 | App tests (written + compiled; RUN at the gate) | NOT-STARTED |
+| 6 | Evidence: `build-for-testing` (`DerivedData/vx980-b2`), core runs, self-assessment | NOT-STARTED |
 
 ### BATCH 3 — a search inside the Trash (VX-93)
 
