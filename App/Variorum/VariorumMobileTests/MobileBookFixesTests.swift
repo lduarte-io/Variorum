@@ -16,6 +16,7 @@
 import Foundation
 import GRDB
 import Testing
+import UIKit  // the hosted guards read the presented `UIAlertController`
 import VariorumCore
 @testable import VariorumMobile
 
@@ -76,7 +77,6 @@ struct MobileFinishConfirmTests {
             let confirm = try #require(model.pendingFinish, "the door asks first")
             #expect(confirm.title == title)
             #expect(confirm.line == line)
-            #expect(confirm.pendingArrivals == 2)
             #expect(try await isLocked(db, bookID) == false, "asking finishes nothing")
             #expect(try await liveArrivals(db, bookID) == 2, "asking dismisses nothing")
 
@@ -90,7 +90,10 @@ struct MobileFinishConfirmTests {
     }
 
     /// RED ON OLD (the door finished at once). Cancel leaves the book exactly
-    /// as it was.
+    /// as it was. The alert's Cancel acts nothing; what clears the confirm is
+    /// the binding SwiftUI writes back on dismissal (`finishConfirmPresented =
+    /// false` — the shelf delete's rule), so that is the road this drives
+    /// (round 1, F5: the retired `cancelFinish()` was a road the face never took).
     @Test func cancellingTheConfirmLeavesTheBookAsItWas() async throws {
         try await withEditorWorld { session, db in
             let bookID = try await session.runner.run { ops in
@@ -100,10 +103,103 @@ struct MobileFinishConfirmTests {
             await model.refresh()
             await model.requestFinish()
             #expect(model.pendingFinish?.line == "1 waiting at Arrivals will be dismissed.")
-            model.cancelFinish()
+            model.finishConfirmPresented = false
             #expect(model.pendingFinish == nil)
             #expect(try await isLocked(db, bookID) == false)
             #expect(try await liveArrivals(db, bookID) == 1)
+        }
+    }
+
+    /// GREEN ON BOTH SIDES (round 1, F5 — batch 4.5b's ordering, stated at
+    /// the model): a real tap writes the binding back BEFORE the action's
+    /// task runs, so the confirm must reach the act as its parameter. Write
+    /// the binding back first, then confirm: the book still finishes and
+    /// what waited is dismissed.
+    @Test func aConfirmWhoseBindingWasWrittenBackFirstStillFinishes() async throws {
+        try await withEditorWorld { session, db in
+            let bookID = try await session.runner.run { ops in
+                try bookWithArrivals(ops, waiting: 2)
+            }
+            let model = MobileBookDetailsModel(session: session, readingID: bookID)
+            await model.refresh()
+            await model.requestFinish()
+            let confirm = try #require(model.pendingFinish, "the door asks first")
+
+            model.finishConfirmPresented = false
+            #expect(model.pendingFinish == nil, "the write-back clears the confirm")
+            await model.confirmFinish(confirm)
+
+            #expect(try await isLocked(db, bookID), "the confirm still finishes the book")
+            #expect(try await liveArrivals(db, bookID) == 0, "…and nothing waits")
+            #expect(model.lastError == nil)
+        }
+    }
+
+    /// **The confirm's FACE** (round 1, F5 — a GUARD, green on the tip by
+    /// design, not a red-on-old pin): the real sheet, the Finish row driven by
+    /// its label, the alert that really presents (title and line exact — the
+    /// `presenting:` value), and its real Finish action acting on the confirm
+    /// it was handed. `writeBack: {}` — the sheet owns its model, so the
+    /// binding's write-back is not simulated here (the
+    /// `aRefusedDeleteIsSpokenOnTheSheetThatRaisedIt` precedent); the
+    /// ordering is pinned at the model, above. On a product whose Finish row
+    /// has no label this goes red at the door's label, which says nothing
+    /// about the confirm.
+    @Test func theFinishRowsConfirmPresentsAndItsFinishActs() async throws {
+        try await withEditorWorld { session, db in
+            let bookID = try await session.runner.run { ops in
+                try bookWithArrivals(ops, waiting: 2)
+            }
+            try await withHostedSurface(
+                MobileBookDetailsSheet(session: session, readingID: bookID, tokens: .terminalLight)
+            ) { surface in
+                await surface.settle(30)
+                #expect(surface.activate(BookStateCopy.finishVerb),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                let alert = try #require(surface.presentedAlert, "the confirm must actually present")
+                let title: String = "Finish \u{201C}Ideas inbox\u{201D}?"
+                let line: String = "2 waiting at Arrivals will be dismissed."
+                #expect(alert.title == title)
+                #expect(alert.message == line)
+                let actions: [String] = surface.alertActionTitles.map { $0.lowercased() }
+                #expect(actions.contains("finish"))
+                #expect(actions.contains("cancel"))
+                #expect(try await isLocked(db, bookID) == false, "the confirm alone finishes nothing")
+
+                #expect(surface.tapAlertAction(BookStateCopy.finishVerb, writeBack: {}),
+                        "the confirm's Finish must be drivable")
+                for _ in 0..<200 {
+                    if try await isLocked(db, bookID) { break }
+                    await surface.settle(2)
+                }
+            }
+            #expect(try await isLocked(db, bookID), "the confirm's Finish finishes the book")
+            #expect(try await liveArrivals(db, bookID) == 0, "…and dismisses what waited")
+        }
+    }
+
+    /// The same face's Cancel (a GUARD, as above): its real action changes
+    /// nothing in the store.
+    @Test func theFinishRowsConfirmCancelChangesNothing() async throws {
+        try await withEditorWorld { session, db in
+            let bookID = try await session.runner.run { ops in
+                try bookWithArrivals(ops, waiting: 1)
+            }
+            try await withHostedSurface(
+                MobileBookDetailsSheet(session: session, readingID: bookID, tokens: .terminalLight)
+            ) { surface in
+                await surface.settle(30)
+                #expect(surface.activate(BookStateCopy.finishVerb),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                _ = try #require(surface.presentedAlert, "the confirm must actually present")
+                #expect(surface.tapAlertAction("Cancel", writeBack: {}),
+                        "the confirm's Cancel must be drivable")
+                await surface.settle(40)
+            }
+            #expect(try await isLocked(db, bookID) == false, "Cancel finishes nothing")
+            #expect(try await liveArrivals(db, bookID) == 1, "…and dismisses nothing")
         }
     }
 
@@ -229,6 +325,32 @@ struct MobileArchivedStarredBookTests {
             #expect(shelf.contains { $0.reading.id == bookID }, "unarchiving returns it to the shelf")
         }
     }
+
+    /// RED ON THE PRE-FIX-PASS TIP (round 1, F3): the sheet reads once and
+    /// after its own acts, so a book unarchived elsewhere while it is open — or
+    /// a second press queued behind the first — meets `readingNotArchived`,
+    /// which fell to `DeletionRefusal`'s fallback and reached her as the raw
+    /// enum. It speaks the shared table's sentence.
+    @Test func aRacedUnarchiveSpeaksTheSharedSentence() async throws {
+        try await withEditorWorld { session, db in
+            let bookID = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(name: "Old projects", kind: .book)
+                try ops.archiveReading(book.id)
+                return book.id
+            }
+            let model = MobileBookDetailsModel(session: session, readingID: bookID)
+            await model.refresh()
+            // Unarchived elsewhere while the sheet stands on it.
+            try await session.runner.run { ops in _ = try ops.unarchiveReading(bookID) }
+
+            await model.unarchive()
+
+            let sentence: String = "That book isn't archived any more \u{2014} nothing changed."
+            #expect(model.lastError == sentence)
+            let archived = try await db.read { db in try Queries.reading(db, id: bookID)?.archivedAt }
+            #expect(archived == nil, "the book stays out of the archive")
+        }
+    }
 }
 
 // MARK: - VM-83: the shelf's order (W-068 — her ruling: a–z now, the choice in wave 3)
@@ -263,6 +385,48 @@ struct MobileShelfOrderTests {
             #expect(names == expected,
                     "starred first, then a–z — case-blind and digit-aware; a journal is a book like any other")
             #expect(ids.count == 6)
+        }
+    }
+
+    /// A GUARD (round 1, N1 — green on the tip by design): a star taken or
+    /// given while the shelf is OPEN moves the book, through the row's own
+    /// Star door. The held observation reads the union star inside its
+    /// region (`Queries.bookshelf` → `starredReadingIDs`), so the order
+    /// follows without a re-open — the coverage the retired pin test carried.
+    @Test func aStarTakenWithTheShelfOpenReordersIt() async throws {
+        try await withEditorWorld { session, _ in
+            let ids = try await session.runner.run { ops -> [String: String] in
+                var ids: [String: String] = [:]
+                for name in ["Zebra", "apple", "Book 10", "Book 2", "Yak"] {
+                    ids[name] = try ops.createReading(name: name, kind: .book).id
+                }
+                ids["Dreams"] = try ops.createReading(
+                    name: "Dreams", kind: .book, profile: "journal",
+                    sortField: .entryDate, sortDir: .desc).id
+                try ops.setStarred(.reading(ids["Yak"] ?? ""), starred: true)
+                return ids
+            }
+            let model = MobileShelfViewModel(session: session)
+            let stars = MobileStarsModel(session: session)
+            let observation = Task { await model.start() }
+            defer { observation.cancel() }
+            await settle { model.books.count == 6 }
+            await stars.refresh()
+
+            let book10 = try #require(ids["Book 10"])
+            await stars.toggle(.reading(book10), from: .shelf)
+            let starredBoth: [String] = ["Book 10", "Yak", "apple", "Book 2", "Dreams", "Zebra"]
+            await settle { model.orderedBooks.map(\.reading.name) == starredBoth }
+            #expect(model.orderedBooks.map(\.reading.name) == starredBoth,
+                    "a star given with the shelf open floats the book at once")
+
+            let yak = try #require(ids["Yak"])
+            await stars.refresh()
+            await stars.toggle(.reading(yak), from: .shelf)
+            let yakUnstarred: [String] = ["Book 10", "apple", "Book 2", "Dreams", "Yak", "Zebra"]
+            await settle { model.orderedBooks.map(\.reading.name) == yakUnstarred }
+            #expect(model.orderedBooks.map(\.reading.name) == yakUnstarred,
+                    "a star taken back returns the book to its a–z place")
         }
     }
 }
@@ -406,8 +570,27 @@ struct MobileGatheringWordTests {
         #expect(MobileTrashView.rowTitle(book) == "(empty book)")
     }
 
-    /// THE SWEEP (the brief's pin): no phone string these faces render says
-    /// "smart", in any case.
+    /// RED ON THE PRE-FIX-PASS TIP (round 1, N2): with the row in hand the
+    /// placeholder reads `RecoveryCopy.rowKind(item)` — the shared file's rule
+    /// "wherever the row itself is in hand", and the word the row's own meta
+    /// line already speaks — so an untitled saved version is named as one,
+    /// never "(empty note)".
+    @Test func theTrashNamesAnUntitledSavedVersionAsOne() {
+        let version = Queries.TrashItem(
+            kind: .note, id: "v", deletedAt: "2026-11-19T00:00:00.000Z", versionOfNoteID: "n")
+        let expected: String = "(empty \(RecoveryCopy.rowKind(version)))"
+        #expect(MobileTrashView.rowTitle(version) == expected)
+        #expect(MobileTrashView.rowTitle(version) != "(empty note)")
+        let note = Queries.TrashItem(kind: .note, id: "p", deletedAt: "2026-11-19T00:00:00.000Z")
+        #expect(MobileTrashView.rowTitle(note) == "(empty note)", "a plain note keeps its word")
+    }
+
+    /// The brief's pin — no phone string these faces render says "smart", in
+    /// any case. A HAND-KEPT LIST of what these faces render, not a source
+    /// scan (round 1, N7): a new literal in these faces would pass it. The
+    /// Mac's source-scanning ban (`DeadVocabularyTests`) is the mechanism to
+    /// adopt for the phone once the last two sites go (the Today door's note,
+    /// VM-85; the pocket guide, VM-212).
     @Test func noRenderedStringInTheseFacesSaysSmart() {
         let gathering = reading("Reading notes", kind: .gathering)
         let trashed = Queries.TrashItem(

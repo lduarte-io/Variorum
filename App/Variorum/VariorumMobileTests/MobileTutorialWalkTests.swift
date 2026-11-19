@@ -1167,11 +1167,12 @@ struct MobileTutorialStructureWalkTests {
 @MainActor
 @Suite("Mobile tutorial walk — the library of things")
 struct MobileTutorialLibraryWalkTests {
-    /// The shelf's promise: the pinned guide sits first, wearing LK5's
-    /// faces (note count + the tag's leaf).
+    /// The shelf's promise: the starred guide sits first, wearing LK5's
+    /// faces (note count + the tag's leaf). (The seeder's `setShelfPinned`
+    /// IS the star since 13i-d; the phone's Pin door is retired — VM-83.)
     @Test func theShelfShowsThePinnedGuideFirstWithItsFaces() async throws {
         try await withPocketGuideWorld { session, db, bookID in
-            // A rival book, unpinned — pin order must beat name order.
+            // A rival book, unstarred — the star must beat name order.
             _ = try await session.runner.run { ops in
                 try ops.createReading(name: "a rival almanac", kind: .book)
             }
@@ -1183,7 +1184,7 @@ struct MobileTutorialLibraryWalkTests {
 
             let ordered = shelf.orderedBooks
             #expect(ordered.first?.reading.id == bookID,
-                    "pinned books always sit first — the guide leads the shelf")
+                    "starred books always sit first — the guide leads the shelf")
             let guide = try #require(ordered.first)
             #expect(shelf.rowName(for: guide) == MobileTutorialSeeder.bookName)
             #expect(shelf.rowMeta(for: guide)
@@ -1600,6 +1601,13 @@ struct MobilePocketGuideDeletionTests {
     /// batch 5 had replaced with a BADGE, and `grep` found no mention of the
     /// quick-note box anywhere in the seeder — the surface that batch made
     /// half the shelf.
+    ///
+    /// **VM-78 round 1, F4 — RED ON THE PRE-FIX-PASS TIP:** VM-83 retired the
+    /// shelf row's Pin door, so "a long press on a book row pins or unpins it"
+    /// became false. The lesson's first sentence now says what the shelf does
+    /// (a DRAFT for her wording pass — the run record has old and new side by
+    /// side), and the later "A long press also STARS" loses the "also" the
+    /// dropped clause held up.
     @Test func theShelfLessonDescribesTheShelfThatExists() async throws {
         try await withPocketGuideWorld { _, db, bookID in
             let prose = try await db.read { db in
@@ -1618,6 +1626,12 @@ struct MobilePocketGuideDeletionTests {
             #expect(prose.contains("open ↵"))
             // The retired shape is gone.
             #expect(!prose.contains("✎ Today's Entry opens today's journal page"))
+            // F4: the shelf's order and its one star door, as they are now.
+            let firstSentence: String =
+                "The SHELF is home: your books at the top, starred books first \u{2014} this one is starred."
+            #expect(prose.contains(firstSentence))
+            #expect(!prose.contains("pins or unpins"), "the shelf row has no Pin door")
+            #expect(prose.contains("A long press STARS a note or a book"))
         }
     }
 }

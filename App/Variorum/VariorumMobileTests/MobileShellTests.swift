@@ -94,16 +94,17 @@ struct MobileShellTests {
 
     /// The held observation delivers books (with their union star) + the daily mark, and
     /// the row faces compose from a real store (tags one-shot).
-    @Test func theShelfObservationDeliversBooksPinsAndTheDailyMark() async throws {
+    @Test func theShelfObservationDeliversBooksStarsAndTheDailyMark() async throws {
         try await withEditorWorld { session, _ in
-            let (bookID, pinnedID) = try await session.runner.run { ops -> (String, String) in
+            let (bookID, starredID) = try await session.runner.run { ops -> (String, String) in
                 let journal = try ops.createReading(
                     name: "Journal", kind: .book, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
                 try ops.setDailyJournalBook(journal.id)
-                let pinned = try ops.createReading(name: "Essays", kind: .book)
-                try ops.setShelfPinned(pinned.id, pinned: true)
-                return (journal.id, pinned.id)
+                let starred = try ops.createReading(name: "Essays", kind: .book)
+                // The core op's older name: `setShelfPinned` IS `setStarred` since 13i-d.
+                try ops.setShelfPinned(starred.id, pinned: true)
+                return (journal.id, starred.id)
             }
             let model = MobileShelfViewModel(session: session)
             let observation = Task { await model.start() }
@@ -115,10 +116,10 @@ struct MobileShellTests {
             #expect(model.books.count == 2)
             // VM-83: the shelf reads the union star its listing carries (the
             // retired pin list went with the Pin door).
-            #expect(model.books.first { $0.reading.id == pinnedID }?.starred == true)
+            #expect(model.books.first { $0.reading.id == starredID }?.starred == true)
             #expect(model.dailyBookID == bookID)
-            #expect(model.orderedBooks.map(\.reading.id) == [pinnedID, bookID],
-                    "the pinned book leads; the journal follows")
+            #expect(model.orderedBooks.map(\.reading.id) == [starredID, bookID],
+                    "the starred book leads; the journal follows")
             #expect(model.rowMeta(for: model.orderedBooks[1]) == "0 entries · daily")
         }
     }

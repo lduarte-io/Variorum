@@ -686,6 +686,30 @@ your choice is fine."
 2. **The collect receipt** is kept and made true (it names the star; it is honest when the gathering is archived).
    "Should this line exist at all" still goes on the list for her wording pass.
 
+#### Round 1 fix pass — LIVE STATUS (batches A and B's findings: F3, F4, F5, F8, N1–N4, N6–N11)
+
+*Implementer: a fresh `opus-implementer` (2026-11-19), taking over batches A and B's round-1 findings; the final calls
+are `vm-78-ladder-round1.md` "Final calls" (`90610aa92`). Headless only: code, pins, `build-for-testing` on both
+targets, and a build of the RED tree; the fix-pin window is the orchestrator's, from its own checkout. **No revert is
+in flight.** The pre-fix-pass tip ("old" for this window) is `0180727de`.*
+
+| Finding | State | Pin (TYPE / test) |
+|---|---|---|
+| F3 (VM-81) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` |
+| F4 (VM-83) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileTutorialLibraryWalkTests/theShelfLessonDescribesTheShelfThatExists` |
+| F5 (VM-81) | IN-PROGRESS — the cancel pin re-pointed, the write-back assertion and the two hosted guards written; fix NOT-STARTED | `MobileFinishConfirmTests` |
+| F8 (VM-81) | no code — the question below, for the orchestrator to file at the merge | — |
+| N1 (VM-83) | IN-PROGRESS — guard written | `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` |
+| N2 (VM-83) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` |
+| N3 (VM-81) | IN-PROGRESS — the test's `pendingArrivals` assertion removed; fix NOT-STARTED | (the existing `MobileFinishConfirmTests`) |
+| N4 (VM-83) | IN-PROGRESS — test renamed; the `BookcaseBoard` comment NOT-STARTED | `MobileShellTests/theShelfObservationDeliversBooksStarsAndTheDailyMark` |
+| N6 | WITHDRAWN — one line for VM-113's kickoff (below) | — |
+| N7 (VM-83) | IN-PROGRESS — the sweep test's doc says what it is | — |
+| N8 (VM-81) | NOT-STARTED — comment only | — |
+| N9 | a walk row (below) | — |
+| N10 | a ticket line for the orchestrator (below) | — |
+| N11 | the window's two bundles (the recipe below); batch B's lost RED bundle recorded as lost | — |
+
 ### BATCH C — the probe and the red test (VM-17 · VM-24, which carries VM-19) — EDITOR SEAM, test and badge code
 
 Both are trace-first members; a hollow result closes its ticket honestly. This batch is stage-bound from its
