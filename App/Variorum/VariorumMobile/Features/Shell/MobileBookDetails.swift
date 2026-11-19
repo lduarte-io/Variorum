@@ -527,6 +527,8 @@ struct MobileBookDetailsSheet: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(MobileShelfFaces.archiveDailyJournalDoorTitle)
+        // Ladder round 2, R2-N1: the caption the row draws, for VoiceOver.
+        .accessibilityHint(MobileShelfFaces.archiveDailyJournalDetail)
     }
 
     /// **VM-81 (W-120) — Unarchive**, an archived book's way out: a plain
@@ -555,6 +557,9 @@ struct MobileBookDetailsSheet: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(BookStateCopy.unarchiveVerb)
+        // Ladder round 2, R2-N1: the pause sentence the row draws, when it
+        // draws one — no hint otherwise.
+        .accessibilityHint(ifAny: BookArchiveCopy.pausedSentence(for: reading))
     }
 
     /// **Delete Book…** (PR4) — a plain Button, like every other act row
@@ -577,6 +582,8 @@ struct MobileBookDetailsSheet: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(MobileShelfFaces.deleteDoorTitle(for: kind))
+        // Ladder round 2, R2-N1: the caption the row draws, for VoiceOver.
+        .accessibilityHint(RecoveryCopy.deleteBookKeepsItsNotes)
     }
 
     /// The identity block — the name row IS the rename door (the
@@ -635,8 +642,10 @@ struct MobileBookDetailsSheet: View {
             .buttonStyle(.plain)
             // Round 1, F5: the row's verb as its label, like the archive,
             // unarchive and delete rows beside it — so VoiceOver and the
-            // hosted pin name the door, not the caption.
+            // hosted pin name the door. Round 2, R2-N1: the caption the row
+            // draws is its hint, so VoiceOver still hears what Finished means.
             .accessibilityLabel(act == .reopen ? BookStateCopy.reopenVerb : BookStateCopy.finishVerb)
+            .accessibilityHint(MobileBookDetailsModel.finishCaption(for: book.reading))
         }
     }
 
@@ -661,5 +670,19 @@ struct MobileBookDetailsSheet: View {
         }
         .buttonStyle(.plain)
         .disabled(model.isDaily)
+    }
+}
+
+private extension View {
+    /// A VoiceOver hint only when there is one to give (ladder round 2,
+    /// R2-N1 — the Unarchive row's pause sentence is drawn only for a living
+    /// book or a gathering; elsewhere the row carries no hint at all).
+    @ViewBuilder
+    func accessibilityHint(ifAny hint: String?) -> some View {
+        if let hint {
+            accessibilityHint(hint)
+        } else {
+            self
+        }
     }
 }
