@@ -3889,8 +3889,7 @@ files=(App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift
   App/Variorum/VariorumMobile/Features/Perf/MobileTimingView.swift)
 git diff 85762803a HEAD -- $files | git apply -R
 mkdir -p App/Variorum/DerivedData/vm64-gate2-aside
-git mv -k App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift App/Variorum/DerivedData/vm64-gate2-aside/ 2>/dev/null \
-  || mv App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift App/Variorum/DerivedData/vm64-gate2-aside/
+mv App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift App/Variorum/DerivedData/vm64-gate2-aside/
 cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
   -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm64-gate2-red
 cd ~/dev/variorum-vm-64 && git checkout HEAD -- $files App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift
