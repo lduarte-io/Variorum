@@ -95,10 +95,14 @@ final class MobileLibraryViewModel {
     /// notes; what distinguishes them since her #93(b) is that `.all` also
     /// carries the BOOKS — see `rows(books:)`, which is what the surface
     /// renders.
+    ///
+    /// **Only while the rows answer the current wing** (VM-64 ladder round 2,
+    /// finding 3 — `answersCurrentWing`): a listing that last landed in another
+    /// wing draws nothing until its first fetch in this one lands.
     var visible: [Queries.TimelineItem] {
         switch filter {
-        case .all, .notes: return all
-        case .bookless: return bookless
+        case .all, .notes: return answersCurrentWing(.notes) ? all : []
+        case .bookless: return answersCurrentWing(.bookless) ? bookless : []
         // Books are readings and scraps are blocks — neither is a note, so
         // this note listing is empty under both. Their rows come from the
         // shelf model and `MobileScrapsModel` respectively.
@@ -160,7 +164,12 @@ final class MobileLibraryViewModel {
     /// the first switch to the door); its store fact is the read's own
     /// (`ListingPage.wingHasNotes` — asked in the same read when the loose
     /// class is empty), never a note listing read at another moment.
+    ///
+    /// A listing whose rows answer another wing says nothing either (VM-64
+    /// ladder round 2, finding 3): its rows are not drawn meanwhile, and an
+    /// empty line there would be a claim about the wrong wing — or a flash.
     func emptyListing(booksShown: Int) -> EmptyListing? {
+        if let shown = shownListing, !answersCurrentWing(shown) { return nil }
         if filter == .bookless, !booklessLoaded { return nil }
         let storeNotes = filter == .bookless ? (booklessWingHasNotes ? 1 : 0) : all.count
         return Self.emptyListing(
@@ -188,10 +197,14 @@ final class MobileLibraryViewModel {
     /// The books passed in are the SURFACE's windowed set — the `.books`
     /// filter's own rows and its own window, so a book reads identically
     /// under either door and neither listing invents a second row rule.
+    ///
+    /// While the note listing answers another wing (finding 3) the books wait
+    /// with it: drawn alone for that read, they would re-position as the notes
+    /// land (the union's own "nothing jumps").
     func rows(books: [Queries.ShelfBook]) -> [MobileLibraryRow] {
         Self.union(
-            notes: visible, books: filter == .all ? books : [], sort: sort,
-            notesComplete: !allHasMore)
+            notes: visible, books: filter == .all && answersCurrentWing(.notes) ? books : [],
+            sort: sort, notesComplete: !allHasMore)
     }
 
     /// **THE BOOK'S STAMP UNDER THE ACTIVE SORT — PROVISIONAL** (her ruling
@@ -406,6 +419,10 @@ final class MobileLibraryViewModel {
         /// The in-place re-ask of a deeper listing, single-flight.
         var follow: Task<Void, Never>?
         var followAgain = false
+        /// How many of this listing's holds are running (`holdFirstPage`) — a
+        /// count, since `.task(id:)` starts the next hold before the last one's
+        /// `defer` has run. An act on a row re-asks only a HELD listing.
+        var holds = 0
     }
 
     @ObservationIgnored private let notesPaging = Paging()
@@ -424,6 +441,24 @@ final class MobileLibraryViewModel {
     private(set) var booklessWingHasNotes = true
     /// "The library ready" is the note listing's FIRST landing (VM-65).
     @ObservationIgnored private var notesLandedOnce = false
+
+    /// **The wing each listing's rows answer** (VM-64 ladder round 2, finding
+    /// 3) — absent until the listing first lands. OBSERVED, unlike `Paging`: a
+    /// landing that moves only the wing (two empty listings) must redraw too.
+    private(set) var landedWing: [Listing: String?] = [:]
+
+    /// **Whether `listing`'s rows answer the wing the phone stands in.** A
+    /// switch made while a listing was not held — Bookless while All showed, or
+    /// either while the Library was hidden (VM-55's door lands on the Shelf) —
+    /// leaves its rows naming the previous wing until its first fetch in this
+    /// one lands. Wings isolate totally, so those rows are drawn as nothing and
+    /// say nothing meanwhile: a pure read in the body's own pass, so no frame
+    /// draws another wing's notes (a tap there would open the other wing's
+    /// note). A listing that never landed keeps its own rules.
+    private func answersCurrentWing(_ listing: Listing) -> Bool {
+        guard let landed = landedWing[listing] else { return true }
+        return landed == session.wing.readScope
+    }
 
     /// How near the end a row must come on screen for the next page to be
     /// asked for — about two screens of rows, so a page is in hand before she
@@ -498,7 +533,9 @@ final class MobileLibraryViewModel {
     /// that page alone; a deeper listing is re-asked in place instead.
     private func holdFirstPage(_ question: Question) async {
         let state = paging(question.listing)
+        state.holds += 1
         defer {
+            state.holds -= 1
             state.follow?.cancel()
             state.follow = nil
             state.followAgain = false
@@ -539,6 +576,37 @@ final class MobileLibraryViewModel {
             state.follow = nil
             self?.askForMore(question.listing)
         }
+    }
+
+    /// **An act on the listing's OWN rows re-asks it in place** (VM-64 ladder
+    /// round 2, finding 1 — the Mac's `LibraryCatalogModel.refresh`, "after an
+    /// act on the listing's own rows"). Only the FIRST page is held (P1), and
+    /// `AppDatabase.observe` delivers only a page that CHANGED, so an act on a
+    /// row past it — a delete, a ★ that moves a note out of the loose class —
+    /// leaves that page byte-identical: nothing is delivered and the row would
+    /// stay listed until she left the Library and came back. Inside the first
+    /// page the held observation already answers, so only a listing deeper than
+    /// a page is re-asked: one statement to the listed depth through the
+    /// follow's single-flight road (∝ what is listed, once per act), for the
+    /// question its rows answer (a newer question's own first landing answers
+    /// otherwise), and only while the listing is held (hidden, the return
+    /// re-asks anyway).
+    private func reaskAfterRowAct(_ listing: Listing) {
+        let state = paging(listing)
+        guard state.holds > 0, let landed = state.question, landed == question(listing),
+              rows(listing).count > listingLimit
+        else { return }
+        followFirstPage(landed)
+    }
+
+    /// **A row's ★ landed** (the row's long-press; the view tells the model once
+    /// the stars model's toggle has run). Only the Bookless listing's class can
+    /// move — a ★ gathering now shows (or stops showing) the note, or a living
+    /// book whose rule carries a ★ term seats it, and a note with a home is not
+    /// loose. All and Notes list every note whatever its stars or books, so a
+    /// star never changes which notes they list.
+    func rowStarLanded() {
+        if shownListing == .bookless { reaskAfterRowAct(.bookless) }
     }
 
     /// The listed depth, re-asked in place.
@@ -616,6 +684,10 @@ final class MobileLibraryViewModel {
         if state.question != question { state.wantsMore = false }  // a new question starts at the top
         state.generation += 1
         state.question = question
+        if landedWing[question.listing] != .some(question.wing) {
+            // finding 3: the rows' wing, observed (`.some`: a nil scope is a value, never a removal)
+            landedWing[question.listing] = .some(question.wing)
+        }
         place(page.items, page: page, in: question.listing)
         askForMore(question.listing)
     }
@@ -823,6 +895,9 @@ final class MobileLibraryViewModel {
             // VM-61: something left the page — the line, with Undo as Put
             // back (the Trash's own road for a note).
             MobileLine.say(receipt, as: .removal(.putBackNote(item.postID)), session: session)
+            // VM-64 ladder round 2, finding 1: a row past the first page leaves
+            // the listing only by a re-ask (the held page did not change).
+            if let listing = shownListing { reaskAfterRowAct(listing) }
             return true
         } catch {
             receipt = nil

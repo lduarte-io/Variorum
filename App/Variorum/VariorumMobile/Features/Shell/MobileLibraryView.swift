@@ -504,7 +504,13 @@ struct MobileLibraryView<TabBar: View>: View {
             Button(tokens.chromeLabel(
                 MobileStarsModel.doorTitle(starred: stars.isStarred(target)))) {
                 let stars = stars
-                Task { await stars.toggle(target, from: .library) }
+                let model = model
+                Task {
+                    await stars.toggle(target, from: .library)
+                    // VM-64 ladder round 2, finding 1: a ★ can move a Bookless
+                    // row past the first page out of (or into) the loose class.
+                    model.rowStarLanded()
+                }
             }
             // Delete the note (round 2 batch 4 — PR1): the row's
             // long-press, beside Star, the phone's established

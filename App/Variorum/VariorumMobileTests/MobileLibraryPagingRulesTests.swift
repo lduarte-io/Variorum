@@ -125,6 +125,103 @@ struct MobileLibraryPagingRulesTests {
         }
     }
 
+    /// **A row deleted past the first page leaves the listing** (VM-64 ladder
+    /// round 2, finding 1 — the Mac's `refresh` after an act on its own rows).
+    /// Two pages listed, held on screen; the seventh row deleted through its
+    /// own door: it leaves, and the listing keeps its LISTED depth (the row
+    /// below moves up — the re-ask reads to the depth she scrolled to) in
+    /// `Queries.library`'s order.
+    ///
+    /// RED ON OLD: only the first page is held, it did not change, and
+    /// `AppDatabase.observe` delivers only a changed value — so nothing landed
+    /// and the deleted note stayed listed. (Old API only: this pin is in the
+    /// red-on-old build.)
+    @Test func aRowDeletedPastTheFirstPageLeavesTheListing() async throws {
+        try await withEditorWorld { session, db in
+            _ = try await seed(session, 12)
+            let model = MobileLibraryViewModel(session: session, listingLimit: 4)
+            let held = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { held.cancel() }
+            await settle { model.all.count == 4 }
+            await model.loadMore(.notes)
+            #expect(model.all.count == 8, "the premise: two pages listed")
+            let doomed = model.all[6]
+            #expect(await model.confirmDeleteNote(doomed))
+            await settle { !model.all.contains { $0.postID == doomed.postID } }
+            #expect(!model.all.contains { $0.postID == doomed.postID },
+                    "the deleted note left the listing")
+            let expected = try await db.read {
+                try Queries.library($0, sort: .lastTouched, direction: .desc, limit: 8)
+            }
+            #expect(model.all.map(\.postID) == expected.map(\.postID),
+                    "the listed depth is kept, in the listing's order")
+        }
+    }
+
+    /// **A listing's rows are drawn only while they answer the current wing**
+    /// (VM-64 ladder round 2, finding 3). Bookless held on screen in Home lists
+    /// Home's loose note; the hold ends; the wing switches while the Library is
+    /// hidden (VM-55's door lands on the Shelf), so the hidden hold reads the
+    /// note listing alone and Bookless still holds Home's rows. Until Work's
+    /// first page lands the door draws NO Home note and says no empty line;
+    /// on screen again it lists Work's.
+    ///
+    /// RED ON OLD: `visible` was Home's row — another wing's note, drawn and
+    /// tappable. (The empty line and the return are guards, green on both.)
+    @Test func aWingSwitchedWhileBooklessWasNotHeldDrawsNoOtherWingsRows() async throws {
+        try await withEditorWorld { session, _ in
+            let world = try TwoWingWorld.make(session)
+            let model = MobileLibraryViewModel(session: session)
+            model.filter = .bookless
+            let inHome = Task { await model.hold(model.hold(onScreen: true)) }
+            await settle { model.bookless.map(\.postID) == [world.homeNote] }
+            #expect(model.visible.map(\.postID) == [world.homeNote], "the premise: Home's loose note")
+            inHome.cancel()
+            await inHome.value
+
+            session.wing.switchTo(world.work)
+            await model.hold(model.hold(onScreen: false))  // hidden: the note listing alone
+            #expect(!model.visible.contains { $0.postID == world.homeNote },
+                    "no frame draws another wing's note")
+            #expect(model.visible.isEmpty)
+            #expect(model.emptyListing(booksShown: 0) == nil, "and no empty line flashes meanwhile")
+
+            let inWork = Task { await model.hold(model.hold(onScreen: true)) }
+            defer { inWork.cancel() }
+            await settle { model.visible.map(\.postID) == [world.workNote] }
+            #expect(model.visible.map(\.postID) == [world.workNote], "the return lists Work's")
+        }
+    }
+
+    /// **The same, by the filter door** (finding 3's other trigger): Bookless
+    /// last landed in Home; the wing switched while All showed; the Bookless door
+    /// opened before its first fetch in Work draws no Home note and says nothing.
+    ///
+    /// RED ON OLD: `visible` was Home's row.
+    @Test func aDoorOpenedAfterAWingSwitchDrawsNoOtherWingsRows() async throws {
+        try await withEditorWorld { session, _ in
+            let world = try TwoWingWorld.make(session)
+            let model = MobileLibraryViewModel(session: session)
+            model.filter = .bookless
+            let inHome = Task { await model.hold(model.hold(onScreen: true)) }
+            await settle { model.bookless.map(\.postID) == [world.homeNote] }
+            inHome.cancel()
+            await inHome.value
+
+            model.filter = .all
+            session.wing.switchTo(world.work)
+            let onAll = Task { await model.hold(model.hold(onScreen: true)) }
+            await settle { model.all.map(\.postID) == [world.workNote] }
+            onAll.cancel()
+            await onAll.value
+
+            model.filter = .bookless  // the door, before its first fetch in Work
+            #expect(!model.visible.contains { $0.postID == world.homeNote },
+                    "the door draws no other wing's note")
+            #expect(model.emptyListing(booksShown: 0) == nil)
+        }
+    }
+
     /// **A new question starts over**: flipping the sort while two pages are
     /// listed lands the new sort's FIRST page, not the old depth.
     @Test func aNewQuestionStartsAtItsFirstPage() async throws {
