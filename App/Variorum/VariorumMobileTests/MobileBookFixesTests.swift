@@ -285,6 +285,65 @@ struct MobileBookStateRowTests {
         #expect(!MobileMembershipModel.rowCarriesDiverge(reading("G", kind: .gathering)))
         #expect(MobileMembershipModel.rowCarriesDiverge(reading("B")))
     }
+
+    /// RED ON THE PRE-R2-N1 TIP (ladder round 2, R2-N1): each act row's
+    /// explicit label is its verb, which replaced the label SwiftUI built from
+    /// the row's two texts — so VoiceOver heard "Finish" and not the caption
+    /// beside it (the old Finish row's joined label, "finish, finished means
+    /// …", is printed in the fix-pin window's red log). The verb stays the
+    /// label (F5's guards drive it); each row's own drawn caption is its
+    /// hint, unvoiced as the labels are. Two mounts: an archived book with a
+    /// rule (Finish, Unarchive with its pause sentence, Delete) and the daily
+    /// Journal (Archive). The sealed caption rides the same
+    /// `finishCaption(for:)` that `theFinishCaptionSaysWhatFinishedMeans` pins.
+    @Test func theBookDetailsRowsSpeakTheirCaptionsAsHints() async throws {
+        try await withEditorWorld { session, _ in
+            let bookID = try await session.runner.run { ops -> String in
+                let tag = try ops.createTag(name: "harbor")
+                let book = try ops.createReading(
+                    name: "Old projects", kind: .book, querySpec: try RuleGrammar.encode(.tag(tag.id)))
+                try ops.archiveReading(book.id)
+                return book.id
+            }
+            try await withHostedSurface(
+                MobileBookDetailsSheet(session: session, readingID: bookID, tokens: .terminalLight)
+            ) { surface in
+                await surface.settle(30)
+                let finish = try #require(surface.element(labeled: BookStateCopy.finishVerb),
+                                          "labels were \(surface.visibleLabels)")
+                let unarchive = try #require(surface.element(labeled: BookStateCopy.unarchiveVerb),
+                                             "labels were \(surface.visibleLabels)")
+                let delete = try #require(
+                    surface.element(labeled: MobileShelfFaces.deleteDoorTitle(for: .book)),
+                    "labels were \(surface.visibleLabels)")
+                let finishHint: String = BookStateCopy.finishedMeans
+                let pausedHint: String = BookArchiveCopy.pausedBook
+                let deleteHint: String = RecoveryCopy.deleteBookKeepsItsNotes
+                #expect(finish.accessibilityHint == finishHint)
+                #expect(unarchive.accessibilityHint == pausedHint)
+                #expect(delete.accessibilityHint == deleteHint)
+            }
+        }
+        try await withEditorWorld { session, _ in
+            let journalID = try await session.runner.run { ops -> String in
+                let journal = try ops.createReading(
+                    name: "Journal", kind: .book, profile: "journal",
+                    sortField: .entryDate, sortDir: .desc)
+                try ops.setDailyJournalBook(journal.id)
+                return journal.id
+            }
+            try await withHostedSurface(
+                MobileBookDetailsSheet(session: session, readingID: journalID, tokens: .terminalLight)
+            ) { surface in
+                await surface.settle(30)
+                let archive = try #require(
+                    surface.element(labeled: MobileShelfFaces.archiveDailyJournalDoorTitle),
+                    "labels were \(surface.visibleLabels)")
+                let archiveHint: String = MobileShelfFaces.archiveDailyJournalDetail
+                #expect(archive.accessibilityHint == archiveHint)
+            }
+        }
+    }
 }
 
 // MARK: - VM-81: a starred archived book's way out (W-120)
