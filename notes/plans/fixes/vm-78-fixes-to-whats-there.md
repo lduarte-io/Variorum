@@ -165,7 +165,7 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 |---|---|---|
 | VM-16 (+VM-20) | IN-PROGRESS — code + pins committed (`48055fa9c`); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileUndoDoorTests`, `MobileUndoWarningWordsTests` (+ Mac guard `UndoWarningWordsTests`) |
 | VM-43 | IN-PROGRESS — `insuringBuffer: true` wired at the ONE phone call site (`MobileBlockHistory.swift` `restore`; grep of `VariorumMobile/` + `Shared/` finds no other); pins written; compile + red/green **PENDING** | `MobileBlockHistoryTests` |
-| VM-3 | NOT-STARTED — rewrite the lesson's two prose blocks; unwrap + flip the pin to keep-on-top | `MobileTutorialWalkTests` |
+| VM-3 | IN-PROGRESS — the lesson's two prose blocks rewritten (`MobileTutorialSeeder.swift`, "divide with takes"); the walk pin unwrapped from `withKnownIssue` and flipped to keep-on-top; an exact-words pin added; compile + red/green **PENDING** | `MobileTutorialStructureWalkTests` |
 | VM-84 | NOT-STARTED — an observed `entryDate` mirror set in `adoptHeader` | `MobileEditorHeaderChipTests` (new) |
 | VM-33 | NOT-STARTED — the answered flag (`trashListingLoaded`), the Mac's VX-678 rule | `MobileTrashTests` |
 
@@ -179,6 +179,38 @@ Five independent fixes; four are in the plan's "should not wait" set or Urgent. 
 - **VM-20.** The phone's A12 detail (`MobileUndoDoor.discardingUndoDetail`) said "It is saved first"; the Mac's
   (`ShellActions.discardingUndoDetail`, Mac-local) says "It is committed first". VX-342 has already landed on the
   Mac (no shouted capitals in either detail), so nothing shouted is carried.
+- **VM-43.** `MobileBlockHistoryController.restore` (flush-first already) called `ops.restoreCommit(variantID,
+  commitID:)` with no `insuringBuffer`, so the words a restore replaced were kept nowhere. It is the only
+  `restoreCommit` call under `VariorumMobile/` and `Shared/`.
+- **VM-3.** The phone's fanned divide is keep-on-top (`MobileStructural.swift` → `KeepOnTopDivide.compose` →
+  `divideW`: the displayed take is cut, every other take parks whole on the TOP block); the "divide with takes"
+  lesson still taught the duplicate shape, and its walk pin asserted that shape inside `withKnownIssue`.
+
+**What changed, file by file (half 1):**
+- VM-16: `VariorumMobile/Features/Write/MobileUndoDoor.swift` `runUndo` and `redo()` — `undoReporting` /
+  `redoReporting`; three arms each (changed → receipt + the other direction; quiet → the shared refusal, no action;
+  nil → "No structural change to …").
+- VM-20: `Shared/StructuralUndoCopy.swift` gains `discardingUndoDetail(_:readBackFrom:)` (the Mac's sentence, moved);
+  `Variorum/Registry/ShellActions.swift` `discardingUndoDetail` forwards with "the take's history (⌘S's list)" (bytes
+  unchanged, pinned exactly in the Mac's `UndoWarningWordsTests`); `MobileUndoDoor.discardingUndoDetail` forwards
+  with "the block's Block History". No PROVISIONAL: the Mac's sentence had no shouted capitals to drop.
+- VM-43: `VariorumMobile/Features/Takes/MobileBlockHistory.swift` `restore(_:of:confirmed:)` passes
+  `insuringBuffer: true`.
+- VM-3: `VariorumMobile/Features/Tutorial/MobileTutorialSeeder.swift`, the "divide with takes" lesson's blocks 1–2
+  (blocks 3–4, the ferry and the try-it line, unchanged and still true). **The wording is a DRAFT for her wording
+  pass:**
+
+  | | Old (taught the retired duplicate divide) | New (draft — what the phone does) |
+  |---|---|---|
+  | block 1 | Dividing a block that has several takes follows one simple rule on the phone: the take you're READING is cut in two, and every other take rides along whole — copied onto both halves, so nothing needs a matching cut and nothing is lost. | Dividing a block that has several takes follows one simple rule on the phone: the take you're reading is cut in two, and every other take rides along whole onto the top block, so nothing needs a matching cut and nothing is lost. |
+  | block 2 | The extra copies are quick to delete where you don't want them — quicker than hunting for a lost take ever was. The original block keeps everything, off-stage, in lineage. | The bottom block holds just the second half. The original block keeps everything, off-stage, in lineage. |
+
+  ("READING" lost its capitals per her no-shouting rule; the new text is 60 words to the old 72.) The Mac's guide is
+  untouched. The walk pin `theFannedDivideLessonLandsKeepOnTop` (was `…LandsTheDuplicateShape`, wrapped) now
+  asserts plainly: top block = the cut's first half + the other take whole (2 takes); bottom block = the second half
+  alone (1 take); the original released with both takes in lineage. It is green on both sides by design (the
+  phone's divide did not change); `theFannedDivideLessonSaysKeepOnTop` (exact words, no "both halves"/"copies") is
+  the red-on-old pin.
 
 ### BATCH A — books (VM-81 · VM-83 · VM-21)
 

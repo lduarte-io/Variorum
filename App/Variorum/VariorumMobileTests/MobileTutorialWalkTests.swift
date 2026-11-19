@@ -959,35 +959,45 @@ struct MobileTutorialStructureWalkTests {
         }
     }
 
-    /// The fanned-divide lesson: swipe to the take you want cut, then
-    /// divide — the PEEKED take is cut in two, every other take rides
-    /// whole onto BOTH successors, and the original keeps everything
-    /// off-stage (Q-M2, her duplicate shape, on the lesson's own ferry).
-    ///
-    /// **KNOWN ISSUE (13u1 ladder round 1 — `KnownIssuesAndTechDebt.md`'s
-    /// row, owner the mobile project): the phone's tutorial still TEACHES
-    /// the retired duplicate-divide default.** Her U-2 (2026-09-06) made a
-    /// fanned divide KEEP-ON-TOP on both platforms and 18c flipped the
-    /// phone's behaviour in lockstep — but this lesson's prose was never
-    /// rewritten, so the pin, which drives the lesson's own gesture and
-    /// asserts the shape the LESSON promises, fails against the app the
-    /// lesson no longer describes. The pin is doing its job; the lesson and
-    /// the pin come right TOGETHER at the mobile project's rewrite, which
-    /// removes this wrapper. Wrapped rather than left red so the suite's
-    /// green signal stays meaningful (the suite's standing pattern), and
-    /// wrapped WHOLE knowingly: until the rewrite, anything else this body
-    /// would catch is muted with it — re-exposed the day the wrapper goes.
-    /// If the wrapper itself ever fails ("issue did not occur"), the app has
-    /// regressed BACK to the duplicate shape: that is the tripwire, loud.
-    @Test func theFannedDivideLessonLandsTheDuplicateShape() async throws {
-        try await withKnownIssue(
-            "the phone's tutorial teaches the retired duplicate-divide default — KnownIssuesAndTechDebt row (owner: the mobile project); the lesson's rewrite fixes prose + pin and removes this wrapper"
-        ) {
-            try await Self.fannedDivideLessonDuplicateShapeBody()
+    /// **The fanned-divide lesson TEACHES keep-on-top** (VM-3 — the phone
+    /// divides keep-on-top since her U-2 and 18c's lockstep flip; the lesson
+    /// said "copied onto both halves" until this rewrite). Its two prose
+    /// blocks, pinned exactly — a DRAFT for her wording pass — and nothing in
+    /// the lesson says the retired shape. **Red on old:** the seeded prose was
+    /// the duplicate lesson.
+    @Test func theFannedDivideLessonSaysKeepOnTop() async throws {
+        try await withPocketGuideWorld { _, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "divide with takes") }
+            let texts = try await storedBlockTexts(db, postID: lesson)
+            #expect(texts.count == 4, "two prose blocks, the ferry, the try-it line: \(texts)")
+            #expect(texts.first
+                == "Dividing a block that has several takes follows one simple rule on the "
+                + "phone: the take you're reading is cut in two, and every other take rides "
+                + "along whole onto the top block, so nothing needs a matching cut and "
+                + "nothing is lost.")
+            #expect(texts.dropFirst().first
+                == "The bottom block holds just the second half. The original block keeps "
+                + "everything, off-stage, in lineage.")
+            for text in texts {
+                #expect(!text.contains("both halves"), "the retired duplicate shape: \(text)")
+                #expect(!text.contains("copies"), "the retired duplicate shape: \(text)")
+            }
         }
     }
 
-    private static func fannedDivideLessonDuplicateShapeBody() async throws {
+    /// The fanned-divide lesson, walked: swipe to the take you want cut, then
+    /// divide — the PEEKED take is cut in two, every other take rides whole
+    /// onto the TOP block, the bottom block holds just the second half, and
+    /// the original keeps everything off-stage (her U-2 keep-on-top, on the
+    /// lesson's own ferry).
+    ///
+    /// **Unwrapped at VM-3.** It stood wrapped in `withKnownIssue` while the
+    /// lesson taught the retired duplicate divide and this pin asserted the
+    /// shape the LESSON promised; the lesson now teaches what the phone does,
+    /// so the pin asserts that truth plainly. (Green on both sides of VM-3's
+    /// product change by design — the phone's divide never changed here; the
+    /// words pin above is the red one.)
+    @Test func theFannedDivideLessonLandsKeepOnTop() async throws {
         try await withPocketGuideWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "divide with takes") }
             let (model, _) = await makeLessonSurface(session, postID: lesson)
@@ -1015,17 +1025,10 @@ struct MobileTutorialStructureWalkTests {
                 $0.hasPrefix("The storm stayed in everyone's coat pockets")
             })
 
-            // Every other take rode whole onto BOTH successors.
-            let successors = model.slots.filter { $0.blockID != ferry.blockID }
-                .filter { slot in
-                    slot.text == "At dawn the ferry crossed."
-                        || slot.text?.hasPrefix("The storm stayed") == true
-                }
-            #expect(successors.count == 2)
-            for slot in successors {
-                #expect(try await db.read { try fanCount($0, blockID: slot.blockID) } == 2,
-                        "each successor carries its cut half plus the duplicate")
-                let texts = try await db.read { [id = slot.blockID] db in
+            // Every other take rode whole onto the TOP block; the bottom block
+            // holds just the second half (the lesson's two promises).
+            func activeTexts(_ blockID: String) async throws -> [String] {
+                try await db.read { db in
                     try String.fetchAll(
                         db,
                         sql: """
@@ -1033,11 +1036,21 @@ struct MobileTutorialStructureWalkTests {
                             WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
                             ORDER BY fan_position, id
                             """,
-                        arguments: [id])
+                        arguments: [blockID])
                 }
-                #expect(texts.contains(ferryText),
-                        "the un-cut take rides along whole — nothing needs a matching cut")
             }
+            let top = try #require(model.slots.first { $0.text == "At dawn the ferry crossed." })
+            let bottom = try #require(model.slots.first {
+                $0.text?.hasPrefix("The storm stayed") == true
+            })
+            let topTexts = try await activeTexts(top.blockID)
+            let bottomTexts = try await activeTexts(bottom.blockID)
+            #expect(topTexts.count == 2,
+                    "the top block carries the cut's first half plus the take that rode along")
+            #expect(topTexts.contains(ferryText),
+                    "the un-cut take rides along whole onto the top block — no matching cut")
+            #expect(bottomTexts.count == 1, "the bottom block holds just the second half: \(bottomTexts)")
+            #expect(!bottomTexts.contains(ferryText), "nothing was copied onto the bottom block")
 
             // The original keeps everything, off-stage, in lineage.
             let ferryPlacements = try await db.read { [id = ferry.blockID] db in

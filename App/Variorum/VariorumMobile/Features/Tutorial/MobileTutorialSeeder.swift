@@ -590,15 +590,20 @@ enum MobileTutorialSeeder {
             + "divide's cut.",
         ])
 
+        // VM-3: these two blocks taught the retired duplicate divide
+        // ("copied onto both halves"); the phone divides KEEP-ON-TOP (her
+        // U-2, `MobileStructural.divide` → `KeepOnTopDivide`): the read take
+        // is cut, every other take rides whole onto the TOP block. A DRAFT
+        // for her wording pass (the old and new text side by side in
+        // `notes/plans/fixes/vm-78-fixes-to-whats-there.md`, BATCH B).
         let fannedDivide = try lesson(structure, "divide with takes", [
             "Dividing a block that has several takes follows one simple "
-            + "rule on the phone: the take you're READING is cut in two, "
-            + "and every other take rides along whole — copied onto both "
-            + "halves, so nothing needs a matching cut and nothing is lost.",
+            + "rule on the phone: the take you're reading is cut in two, "
+            + "and every other take rides along whole onto the top block, "
+            + "so nothing needs a matching cut and nothing is lost.",
 
-            "The extra copies are quick to delete where you don't want "
-            + "them — quicker than hunting for a lost take ever was. The "
-            + "original block keeps everything, off-stage, in lineage.",
+            "The bottom block holds just the second half. The original "
+            + "block keeps everything, off-stage, in lineage.",
 
             "The ferry crossed at dawn. Nobody on board spoke about the "
             + "storm.",
