@@ -705,14 +705,26 @@ from the throwaway detached checkout at `140869902`, the four product files at `
 - **GREEN (the tip, restored; `git diff HEAD` empty):** 75 tests in 10 suites PASSED with 2 known issues (the
   designed `MobileTrashTests` diagnostic, on both sides); 0 failed. The cancel pin, the write-back assertion and
   N1's guard were green on both sides, as designed.
-- **F4's pin DID NOT RUN in this window, so F4 is not yet proved.** The recipe named the wrong type for it:
+- **F4's pin DID NOT RUN in this window.** The recipe named the wrong type for it:
   `theShelfLessonDescribesTheShelfThatExists` lives in `MobilePocketGuideDeletionTests`, not
-  `MobileTutorialLibraryWalkTests` (corrected in this section). A 6-minute follow-up window for that one type —
-  red with only `MobileTutorialSeeder.swift` at `0180727de`, then green — is queued; its result is recorded here
-  when it runs. **F4 red/green: PENDING.**
-- The result bundles are kept (N11): `App/Variorum/DerivedData/vm78-bundles/fixpass-red.xcresult` and
-  `fixpass-green.xcresult`. On the red leg `xcodebuild` was still alive 40 s after its verdict line and was
-  stopped; the counts are the Swift Testing verdict's.
+  `MobileTutorialLibraryWalkTests`. (The wrong name came from round 1's own text, and this pass carried it without
+  checking the struct; the two fix-pass commit messages keep it as history.) The follow-up below proved it.
+- **Bundles (R2-F1's call):** the RED leg's bundle `App/Variorum/DerivedData/vm78-bundles/fixpass-red.xcresult` is
+  **UNREADABLE** — its `xcodebuild` was stopped 40 s after the verdict line, before it had finalized the bundle (no
+  `Info.plist`). Its evidence is the kept log `App/Variorum/DerivedData/logs/vm78-window-f-red.log` (75 tests in 10
+  suites failed, 9 issues including 2 known, the four reds above and no other; the log also prints the old Finish
+  row's joined label, R2-N1's premise). The GREEN bundle `fixpass-green.xcresult` **reads** (75 tests: 74 passed,
+  1 expected failure, 0 failed). From here on (R2-F1): up to 90 s of grace for `xcodebuild` to exit after its
+  verdict; `xcrun xcresulttool get test-results summary --path <bundle>` afterwards; "reads" or "unreadable — the
+  log is the evidence" beside each run; the log kept whatever the bundle does.
+
+**F4's follow-up window — RUN (2026-11-19, 06:52–06:54, by the orchestrator; one type):**
+- **RED** (only `MobileTutorialSeeder.swift` at `0180727de`): 4 tests in 1 suite, FAILED —
+  `theShelfLessonDescribesTheShelfThatExists` ran and failed with 3 issues (the three expectations F4 added), no
+  other red. Bundle `f4-red.xcresult` reads; log `App/Variorum/DerivedData/logs/vm78-window-f4-red.log`.
+- **GREEN** (the tip, restored): 4 tests in 1 suite PASSED. Bundle `f4-green.xcresult` reads; log
+  `App/Variorum/DerivedData/logs/vm78-window-f4-green.log`.
+- **F4 is VERIFIED: red on the pre-fix-pass seeder, green on the tip.**
 
 **Headless — DONE (2026-11-19):** pins and guards `72fa54dc8`; VM-81's fixes `326d61da4`; VM-83's fixes `36ace0aa5`.
 - Phone `build-for-testing` (signed, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot, DerivedData
@@ -728,7 +740,7 @@ from the throwaway detached checkout at `140869902`, the four product files at `
 | Finding | State | Pin (TYPE / test) |
 |---|---|---|
 | F3 (VM-81) | DONE — pin `72fa54dc8`, fix in the VM-81 fix commit after it; red on the pre-fix-pass tip and green VERIFIED in window (5) | `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` |
-| F4 (VM-83) | DONE — pin `72fa54dc8` (+ the neighbouring test's message reworded), fix in the VM-83 fix commit (the lesson's first sentence, the dangling "also"; a DRAFT for her wording pass, below); `build-for-testing` GREEN; red/green **PENDING — the pin did not run in window (5); the follow-up window is queued** | `MobilePocketGuideDeletionTests/theShelfLessonDescribesTheShelfThatExists` |
+| F4 (VM-83) | DONE — pin `72fa54dc8` (+ the neighbouring test's message reworded), fix in the VM-83 fix commit (the lesson's first sentence, the dangling "also"; a DRAFT for her wording pass, below); `build-for-testing` GREEN; red on the pre-fix-pass seeder and green VERIFIED in the follow-up window (06:52–06:54; it did not run in window (5) — the type was misnamed) | `MobilePocketGuideDeletionTests/theShelfLessonDescribesTheShelfThatExists` |
 | F5 (VM-81) | DONE — tests `72fa54dc8` (the cancel pin re-pointed to the binding, the write-back assertion, two hosted guards), fix in the VM-81 fix commit (the row's label, `cancelFinish()` deleted); `build-for-testing` GREEN; the window's lines VERIFIED in window (5) (the two guards red for the missing label only, green on the tip; the cancel pin and the write-back assertion green on both sides) | `MobileFinishConfirmTests` |
 | F8 (VM-81) | no code — the question below, for the orchestrator to file at the merge | — |
 | N1 (VM-83) | DONE — guard `72fa54dc8` (green on both sides by design); green on both sides in window (5) | `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` |
@@ -756,7 +768,11 @@ batches A and B).**
    Restore with `git checkout HEAD -- <the same four files>` (the old versions are staged by the checkout) and confirm
    `git status` clean before the GREEN run.
 2. The types (the reviewer's ten) and the two runs, each keeping its result bundle (N11; the bundle path must not
-   exist beforehand; `App/Variorum/DerivedData/` is gitignored):
+   exist beforehand; `App/Variorum/DerivedData/` is gitignored). **This `ONLY` array is AS RUN IN WINDOW (5), left as
+   it ran:** it lists `MobileTutorialLibraryWalkTests` (the reworded neighbouring message) but not
+   `MobilePocketGuideDeletionTests`, where F4's pin lives, so F4's pin did not run there (R2-N2). The follow-up's
+   one-type leg, which did run it, is beside it below. **A full re-run of this recipe carries BOTH
+   `MobileTutorialLibraryWalkTests` and `MobilePocketGuideDeletionTests`** (eleven types).
    ```zsh
    ONLY=(
      -only-testing:VariorumMobileTests/MobileFinishConfirmTests
@@ -782,6 +798,17 @@ batches A and B).**
      -resultBundlePath App/Variorum/DerivedData/vm78-bundles/fixpass-green.xcresult "${ONLY[@]}"
    ```
    (The DerivedData paths are this worktree's; a separate checkout uses its own, as window (1) did.)
+   **The follow-up's one-type leg (as run 06:52–06:54; results above):**
+   ```zsh
+   # RED — only the seeder at 0180727de
+   git checkout 0180727de -- App/Variorum/VariorumMobile/Features/Tutorial/MobileTutorialSeeder.swift
+   xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+     -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+     -derivedDataPath App/Variorum/DerivedData/vm78-ios-red \
+     -resultBundlePath App/Variorum/DerivedData/vm78-bundles/f4-red.xcresult \
+     -only-testing:VariorumMobileTests/MobilePocketGuideDeletionTests
+   # GREEN — git checkout HEAD -- <the seeder>; git status clean; the same type, f4-green.xcresult, DerivedData vm78-ios
+   ```
 3. **Expected RED on the reverted product, by name and reason — five, and no other:**
    - `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` — F3: `lastError` is the raw fallback
      ("That couldn't be done — readingNotArchived(…).").
@@ -831,7 +858,18 @@ compromise (MobileSoul §3). PROVISIONAL as built: the phone's (a)."
 **Lines for other owners (the orchestrator places them):**
 - **F3, for vm-55's run (VM-62):** `MobileBookDetailsModel.refusal` now forwards `.readingSealed` and
   `.readingNotArchived` to `OpsRefusalCopy.words(for:roads: .phone)`; VM-62's sweep collapses the rest onto the
-  table — expect a textual conflict at that function.
+  table — expect a textual conflict at that function. **And (ladder round 2, R2-N4):** "Book Details' act rows
+  (Unarchive here; Finish, Reopen and Archive share the shape) start one task per press with no in-flight latch. A
+  double press on Unarchive that lands before the first press's re-read meets `readingNotArchived` and shows 'That
+  book isn't archived any more — nothing changed.' under the book the first press did unarchive. Only Unarchive's
+  second press is visible today — a second Finish or Reopen repeats an operation that is safe to repeat, and Archive
+  dismisses its sheet. When the sweep moves `MobileBookDetailsModel.refusal` and its rows onto the message seam,
+  give the rows an in-flight latch (the undo door's `inFlight`), so the sentence stays for the real race — the book
+  unarchived elsewhere while the sheet is open."
+- **R2-N1's neighbour, for the orchestrator to place (no id invented; nothing changed here):** "Book Details' name
+  row carries `.accessibilityLabel(\"Rename Book\")` (`MobileBookDetails.swift`, `identityBlock`, from before this
+  run), which replaces the book's name for VoiceOver — the sheet's one place the name is shown is not spoken." For
+  the owner of the phone's VoiceOver pass.
 - **N4, an owner for the core doc line** (this run opens no `Sources/` line): "core `Queries.bookshelf`'s doc
   (`Sources/VariorumCore/Queries/ShelfQueries.swift:43-44`) still says pin/journal ordering is the view model's call
   over `shelfPins`; the phone orders by `BookcaseBoard` since VM-83." — a line on the standing sweep ticket, or the
@@ -857,6 +895,48 @@ with a rule (so Finish with its three-line caption, the daily row, Unarchive wit
 with a refusal line showing — captured at the MEDIUM detent and at LARGE (the sheet offers both). A clipped medium
 detent is reported with its capture, not fixed unasked. (The phone's fonts are fixed sizes today; if VM-47 raises
 them, re-take this row on the merged tree.)
+
+##### Round 2 — the fix pass's rows (ladder round 2's final calls, `vm-78-ladder-round2.md`, `874da32d8`)
+
+*The same implementer, headless. **No revert is in flight.** "Old" for R2-N1's window is `046a886fc`, the commit
+before the pin (`MobileBookDetails.swift` is byte-identical there and at the pin commit).*
+
+| Finding | State | Pin (TYPE / test) |
+|---|---|---|
+| R2-N1 (VM-81) | DONE — pin `01205f799`, fix `97282e72f` (the four act rows on `MobileBookDetailsSheet` keep the verb as their label and carry the caption they draw as `.accessibilityHint`, unvoiced: Finish/Reopen `finishCaption(for:)` · Unarchive `pausedSentence(for:)` when it has one, else none · Archive `archiveDailyJournalDetail` · Delete `deleteBookKeepsItsNotes`; no new words); phone `build-for-testing` GREEN; red/green **PENDING** (it rides the next short window) | `MobileBookStateRowTests/theBookDetailsRowsSpeakTheirCaptionsAsHints` |
+| R2-N2 | DONE — the recipe's `ONLY` array marked "as run in window (5)", the follow-up's leg and results beside it, the re-run line; F4's row flipped to VERIFIED; R2-F1's bundle lines landed here (the orchestrator's call) | — |
+| R2-N4 | DONE — no code; the line for VM-62's run, with the reviewer's clause, under "Lines for other owners" | — |
+
+**R2-N1's window (one short leg pair, riding the next window this run owes):**
+- RED: revert ONE product file — `git checkout 046a886fc -- App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift`
+  — tests at the tip; restore with `git checkout HEAD -- <that file>` and confirm `git status` clean before GREEN.
+  The red tree compiles by construction: the pin calls only symbols that exist at `046a886fc` (the fix adds the
+  modifiers and a file-private helper the test never names); the orchestrator builds it in its own checkout.
+- Types: `MobileBookStateRowTests` (the pin), plus `MobileFinishConfirmTests` so the final call's "F5's two guards
+  stay green" is SEEN with the hints on the same rows (the call named one type; the second costs two hosted mounts).
+  ```zsh
+  ONLY=(
+    -only-testing:VariorumMobileTests/MobileBookStateRowTests
+    -only-testing:VariorumMobileTests/MobileFinishConfirmTests
+  )
+  ```
+  Bundles under `App/Variorum/DerivedData/vm78-bundles/` (`r2n1-red.xcresult`, `r2n1-green.xcresult`), logs under
+  `App/Variorum/DerivedData/logs/`, R2-F1's grace and `xcresulttool` read beside each.
+- **Expected RED, one and no other:** `MobileBookStateRowTests/theBookDetailsRowsSpeakTheirCaptionsAsHints` — every
+  hint is nil on the old rows (the `#require`s by label pass; the four hint expectations fail).
+- **Expected GREEN on both sides:** the rest of `MobileBookStateRowTests` (`theFinishCaptionSaysWhatFinishedMeans`,
+  `finishIsNotDrawnOnAGathering`, `reopenOnASealedBookSpeaksTheSharedSentence`, `divergeIsNotDrawnOnAGatheringRow`)
+  and every `MobileFinishConfirmTests` test, F5's two hosted guards included (the labels are unchanged; a hint does
+  not move a label).
+- **The final call's rule after the window:** if the fixed tip still reads nil for every row, the driver cannot see
+  a SwiftUI hint and the fix is unproved — the modifiers and the pin then come out by a NEW commit, and the finding
+  leaves as a line for the owner of the phone's VoiceOver pass, with the run's evidence (the old Finish row's joined
+  label in `vm78-window-f-red.log`). That decision is made after the window, not before.
+
+**Headless — DONE (2026-11-19):** phone `build-for-testing` (signed, `platform=iOS Simulator,name=iPhone 17
+Pro,OS=26.2`, no boot, DerivedData `vm78-ios`) **TEST BUILD SUCCEEDED** at `97282e72f`'s code; log
+`App/Variorum/DerivedData/logs/vm78-fixpass-r2n1-build.log`. No Mac build: the R2-N1 fix touches one phone file
+and no `Shared/` or Mac file. No `xcodebuild test`, no simulator.
 
 ### BATCH C — the probe and the red test (VM-17 · VM-24, which carries VM-19) — EDITOR SEAM, test and badge code
 
