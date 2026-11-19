@@ -183,7 +183,7 @@ After batch 7: the ladder (Fable; up to FIVE rounds by her ruling in §2, a furt
 | 7 · VM-71 | **CLOSED 2026-11-19** | see the batch 7 block; built at `c9b574513`, re-checked on r1 (`a61e4f7c9`) | Mac and phone pieces green on the final tree; PROVISIONAL P-71-1; the combined walk for batches 6 and 7 is owed before the run closes |
 | Ladder r1 · fix pass | **IN-PROGRESS** (second turn, part 1 done; part 2 — the merge, the rebuilds, the red build, the whole Core package — is the merge block's below) | see the fix-pass block below | the reviewer's final calls applied (finding 1 arm (a); 2, 3, 5, 6 confirmed as applied); owed: the stage |
 | The merge of main (VM-55) | **DONE 2026-11-19** — merge `f03d59ae3`; stage runs owed (the orchestrator's) | see "The merge of main (VM-55) · LIVE STATUS" below | merge `origin/main` at `eb18888db` (VM-55's `66337ff08`); re-land the two conflicted Shell files; the semantic merge (a)–(f); builds into `vm64-gate` / `vm64-gate-red` |
-| Ladder r2 · fix pass | **IN-PROGRESS** (first turn) | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, then the agreed no-choice fixes with their pins; the reviewer's final calls, the whole Core package and the final builds in the second turn |
+| Ladder r2 · fix pass | **IN-PROGRESS** (first turn DONE; the second waits for the final calls and the QUIET window's end) | see "Ladder round 2 — fix pass · LIVE STATUS" below | the responses first, then the agreed no-choice fixes with their pins; the reviewer's final calls, the whole Core package and the final builds in the second turn |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -801,11 +801,11 @@ written.
 | Piece | State |
 |---|---|
 | R0 — this live status | DONE (this commit) |
-| R1 — the responses (round file ▸ "Implementer responses (round 2 fix pass)"), committed and pushed before any code | NOT-STARTED |
-| R2 — the no-choice fixes and their pins (the responses name which) | NOT-STARTED |
-| R3 — the docs corrections of findings 5 and 6 (the record, the handoff, the closeout drafts) | NOT-STARTED |
-| R4 — `swift test --filter` for every Core suite touched; §7's "Ladder round 2 — fix pass" closeout; the first turn's report | NOT-STARTED |
-| R5 — second turn: the reviewer's final calls applied; the whole Core package; `vm64-gate2` (phone + Mac) and `vm64-gate2-red` (revert announced first); the hosted commands | NOT-STARTED |
+| R1 — the responses (round file ▸ "Implementer responses (round 2 fix pass)"), committed and pushed before any code | DONE (`35551e25f`) |
+| R2 — the no-choice fixes and their pins (the responses name which) | DONE — findings 1 (delete + ★ legs) and 3 `64af6d64a`, 8(a) `6b6c288b1`, 9 `28dc98ac5`, O-1 `c42078746`; UNCOMPILED (a QUIET window from 15:13 forbids the builds); runs PENDING the stage. HELD for the final call: finding 1's Put back leg; finding 2 (not applied — disputed shape) |
+| R3 — the docs corrections of findings 5 and 6 (the record, the handoff, the closeout drafts) | DONE — the record `f45d25498` (with 8(b)'s note and O-1's commands), the handoff and the drafts `8eeafb614` |
+| R4 — `swift test --filter` for every Core suite touched; §7's "Ladder round 2 — fix pass" closeout; the first turn's report | DONE (this commit) — no Core file changed, so no Core suite touched; §7 ▸ "Ladder round 2 — fix pass" |
+| R5 — second turn: the reviewer's final calls applied; the whole Core package; `vm64-gate2` (phone + Mac) and `vm64-gate2-red` (revert announced first); the hosted commands | NOT-STARTED — the builds also wait for the QUIET window's end (the recipes: §7 ▸ "Ladder round 2 — fix pass") |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -3817,3 +3817,139 @@ orchestrator's windows. Expected reds from main only: VM-24's `MobileMarkdownCar
 3. **`.task(id:)` cancels, `follow` awaited** — the stale-landing window in (a) and why it is batch 5's existing one.
 4. **The nine-wing comparison's scope** ((a), last bullet) — a recorded series re-scoped so the comparison stays like for like.
 5. **P-2-2** above.
+
+### Ladder round 2 — fix pass (implementer closeout; first turn)
+
+**Not done in this turn (first, by the record's rule):** NO BUILD of any kind — a QUIET window (another run's merge gate)
+began at 15:13, so the phone and Mac `build-for-testing` into `App/Variorum/DerivedData/vm64-gate2/` and the red-on-old
+phone build into `vm64-gate2-red/` are OWED (recipes below); every new and changed app-target line is therefore UNCOMPILED
+as this is written. No hosted run (the stage's). Finding 1's Put back leg is NOT applied (its seam is in VM-55's
+`MobileLine`, fenced — the responses' arms (A)/(B)/(C), waiting for the final call). Finding 2 is NOT applied
+(the specified one-fact shape fences her ordinary road; it rides VM-226 — the responses). The whole Core package
+`swift test` is owed once, on the final tree, in the second turn. No Core file changed this turn, so no Core suite was
+touched or run. No line in `Sources/VariorumCore/Sync/`, `Server/`, custody/keychain code or
+`VariorumMobile/Features/Protection/`; no schema change; `MobileEditorViewModel.swift` untouched; VM-55's `MobileLine`,
+wing door and `MobileWingScope` untouched; no shared ledger edited; no new user-facing copy.
+
+**Base:** `85762803a`. **Commits:** `9c21ee40f` (live status) · `35551e25f` (the responses, before any code) ·
+`64af6d64a` (findings 1 and 3 + pins) · `6b6c288b1` (finding 8(a) + pin) · `28dc98ac5` (finding 9) · `c42078746` (O-1) ·
+`f45d25498` (the record's corrections) · `8eeafb614` (the handoff and the drafts) · this closeout.
+
+#### What changed, finding by finding
+
+| # | Call | What landed |
+|---|---|---|
+| 1 · MAJOR (Part of VM-68) | AGREE; delete and ★ legs applied; Put back leg waits | `MobileLibraryViewModel.swift`: `reaskAfterRowAct(_:)` (re-asks the shown listing at its listed depth through `followFirstPage`, only when deeper than a page, only for the question its rows answer, only while held — a new `Paging.holds` count raised and lowered by `holdFirstPage`), called by `confirmDeleteNote` after the op lands; `rowStarLanded()` (Bookless only). `MobileLibraryView.swift`: the row's star button tells the model after `stars.toggle`. The enumeration of every Library-row and line act is the responses' table |
+| 2 · MINOR (VM-2) | AGREE with the hole; DISPUTE the one-fact shape | nothing — the trace and the VM-226 proposal (the reviewer's pin + an ordinary-road guard with the live observation running) are the responses' |
+| 3 · MINOR (Part of VM-68) | AGREE; applied as proposed + the union's books | `MobileLibraryViewModel.swift`: an OBSERVED `landedWing` set in `land`; `answersCurrentWing(_:)` gates `visible`, `emptyListing` and `rows(books:)`'s books |
+| 4 · MINOR | the orchestrator's | its stage results go in §5 (the orchestrator's) |
+| 5 · MINOR (Part of VM-68) | AGREE | §7 batch 5's cost table "On screen" cell and its floor paragraph's scope (in place, first text kept); the handoff's "Rulings reconciled" row; the drafts' (b) VM-68 paragraph and (g) row 23. Ticket body: the report |
+| 6 · MINOR (VM-2) | AGREE | the handoff's P-2-1 and P-2-2 (P-2-2 now carries the one-line meeting, options (a)–(c), in plain words); the drafts' bundle P-2-1 clause and P-2-2; the drafts' (e)5 fence line narrowed to the reviewer's guarantee; §7 batch 2 r2's "What is dropped" paragraph marked in place |
+| 7 · NIT | AGREE | VM-227's paragraph: the report |
+| 8 · NIT (VM-65) | (a) applied; (b) the caveat | (a) `Shared/AppTiming.swift` `boxOpenFiledNothing()` (the recorder's existing `cancel`, both Open spans) called from `MobileQuickNote.open()` when `file()` returns nil. (b) the handoff's readout step ("leave about ten seconds between the two") and a bracketed note on batch 1's "what each number means" row — why not the code: the responses |
+| 9 · NIT (VM-65) | applied | `MobileTiming.swift`: `print` → `fingerprint`. `MobileTimingView.swift`: the heading no longer `.uppercased()` (the readout alone forced capitals on screen — the edit trace's screen draws mixed case, Settings' header is a plain label); `MobileTimingTests`' three heading expectations follow, plus one holding the title not upper-cased. The recorder: unchanged |
+| O-1 (VM-66) | applied | `MobileHerPathsPerfTests`: `.enabled(if:)` on `VM66_PERF` (`TEST_RUNNER_VM66_PERF=1`), its display name, the skip's comment, the header's mechanism sentence corrected; the record's batch 3 group (i), the merge-in (iii), the handoff's "The next runs", the drafts' VM-66 paragraph, (e)6 and the PR line corrected. Confirmed by reading: the scheme's `parallelizable = "NO"` is built into the phone xctestrun as `InProcessParallelizationEnabled = false` |
+
+**The Mac does not change:** the one `Shared/` line is a new static function in `AppTiming` (the box's cancel), whose only
+caller is the phone's `MobileQuickNote`; on the Mac it has no caller and every mark stays one relaxed atomic load. Checked
+by grep: `boxOpenFiledNothing` appears in `Shared/AppTiming.swift` and `VariorumMobile/Features/Shell/MobileQuickNote.swift`
+only. Every other production line is phone-only (`VariorumMobile/`). The Mac build is owed with the phone's (`vm64-gate2`).
+
+#### The pins, and what each build should show
+
+| Pin | Kind | `vm64-gate2-red` (expected) | `vm64-gate2` (expected) |
+|---|---|---|---|
+| `MobileLibraryPagingRulesTests.aRowDeletedPastTheFirstPageLeavesTheListing` | bug pin (finding 1, delete) | RED — 2 issues ("the deleted note left the listing"; "the listed depth is kept") | green |
+| `MobileLibraryPagingRulesTests.aWingSwitchedWhileBooklessWasNotHeldDrawsNoOtherWingsRows` | bug pin (finding 3) | RED — 2 issues ("no frame draws another wing's note"; `visible.isEmpty`); the empty-line and return expectations green | green |
+| `MobileLibraryPagingRulesTests.aDoorOpenedAfterAWingSwitchDrawsNoOtherWingsRows` | bug pin (finding 3, the filter door) | RED — 1 issue ("the door draws no other wing's note") | green |
+| `MobileLibraryRowActsTests.aStarThatTakesADeepRowOutOfTheLooseClassReAsksBookless` | design pin (finding 1, ★ — names the new door) | NOT IN THE BUILD (moved aside) | green |
+| `MobileBoxOpenTimingTests.anOpenThatFilesNothingLeavesNoOpenSpan` | bug pin (finding 8(a)) | RED — 4 issues (both spans open; a false sample each) | green |
+| `MobileBoxOpenTimingTests.anOpenThatFilesIsStillTimed` | guard | green | green |
+| `MobileTimingTests.theReadoutShowsThisBuildThenThePreviousOne` | finding 9's expectations | RED — 3 issues (the heading line twice, the title not upper-cased) | green |
+| The rest of `MobileLibraryPagingRulesTests`, `MobileTimingTests` | unchanged | green | green |
+| Finding 1's Put back pin (press the line's own Undo after a deep delete; the row listed again) | bug pin | — lands with the final call's arm (second turn) | — |
+
+#### The builds owed (when the QUIET window ends — the second turn, on the final tree)
+
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm64-gate2
+xcodebuild build-for-testing -project Variorum.xcodeproj -scheme Variorum \
+  -destination 'platform=macOS' -derivedDataPath DerivedData/vm64-gate2
+```
+The red-on-old phone build (announced in the live status and committed before it starts; it reverses THIS PASS'S
+production hunks only — findings 1, 3, 8(a) and 9 — and moves aside the one pin file that names the new door):
+```
+cd ~/dev/variorum-vm-64
+files=(App/Variorum/VariorumMobile/Features/Shell/MobileLibraryViewModel.swift
+  App/Variorum/VariorumMobile/Features/Shell/MobileLibraryView.swift
+  App/Variorum/VariorumMobile/Features/Shell/MobileQuickNote.swift
+  App/Variorum/Shared/AppTiming.swift
+  App/Variorum/VariorumMobile/Features/Perf/MobileTimingView.swift)
+git diff 85762803a HEAD -- $files | git apply -R
+mkdir -p App/Variorum/DerivedData/vm64-gate2-aside
+git mv -k App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift App/Variorum/DerivedData/vm64-gate2-aside/ 2>/dev/null \
+  || mv App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift App/Variorum/DerivedData/vm64-gate2-aside/
+cd App/Variorum && xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vm64-gate2-red
+cd ~/dev/variorum-vm-64 && git checkout HEAD -- $files App/Variorum/VariorumMobileTests/MobileLibraryRowActsTests.swift
+rm -rf App/Variorum/DerivedData/vm64-gate2-aside
+git status --short   # must be empty
+```
+(`MobileTiming.swift`'s rename is not reversed: it changes no behaviour. If the Put back leg lands in the second turn,
+its hunks join the reversed set.)
+
+#### The hosted commands (the orchestrator's stage; the GO's claim line and UDID fill `<simulator-udid>`)
+
+(i) **The red-on-old run**, ONE invocation from `vm64-gate2-red`:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileLibraryPagingRulesTests MobileBoxOpenTimingTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate2-red \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-r2-red>
+```
+Expected: exactly the RED column above, every other test in those three suites green.
+
+(ii) **The fix and its company**, ONE invocation from `vm64-gate2`:
+```
+tests=(MobileLibraryPagingRulesTests MobileLibraryRowActsTests MobileBoxOpenTimingTests MobileTimingTests
+  MobileLibraryPagingTests MobileLibraryTests MobileLibrarySortTests MobileFilterTests MobileEmptyStoreTests
+  MobileWingListingTests MobileWingStandTests MobileWingDoorTests MobileWingDoorShellTests MobileLineDoorTests
+  MobileLineShowRuleTests MobileStarsTests MobileQuickNoteTests MobileNoRawErrorPinTests MobileHerPathsPerfTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate2 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-r2-fix>
+```
+Expected: all green, and `MobileHerPathsPerfTests`' 13 SKIPPED (no switch handed — the gate's own proof; Swift Testing
+counts them in "N tests … passed", so read the skipped lines).
+
+(iii) **The perf suite gated and alone**, `vm64-gate2`:
+```
+TEST_RUNNER_VM66_PERF=1 xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-gate2 \
+  -only-testing:VariorumMobileTests/MobileHerPathsPerfTests 2>&1 | tee <log-r2-perf>
+```
+Expected: 13 tests in 1 suite passed, none skipped.
+
+(iv) **The merge gate** — the whole phone target and the whole Mac target from `vm64-gate2`: the perf suite's 13 skipped
+on the phone; the expected reds are main's (VM-24's caret test, 2 of 3 cases; VX-701 on the Mac if it appears).
+
+#### For QUESTIONS at the merge
+
+None from this pass — no product behaviour was decided. Finding 1's Put back arm and finding 2's disposition are the
+reviewer's engineering calls; P-2-2's options (a)–(c), already the merge-in closeout's item, now also sit in the handoff
+and the drafts' bundle.
+
+#### What a cold reviewer should read first
+
+1. **Finding 2's dispute** (the responses): the ordinary road where a delivery's `.refetchFresh` re-read is in flight at
+   the latch drop after the door's own settle rendered the post-act page — is today's "settled" right there, and does
+   the one-fact shape refuse keys on it?
+2. **`reaskAfterRowAct`'s guards** — the `holds` count against `.task(id:)`'s overlap (the next hold starts before the
+   last one's `defer`), and the question match.
+3. **`landedWing` is observed** (a landing that moves only the wing must redraw) and `.some(question.wing)` (a nil scope
+   is a value, never a removal); and the union's books withheld while the notes answer another wing.
+4. **The uncompiled state** — no build ran this turn (QUIET); the second turn's builds are the first compile of these
+   lines.
