@@ -51,7 +51,11 @@ final class MobileTrashModel {
 
     private(set) var trash: [Queries.TrashItem] = []
     private(set) var trashTruncated = false
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
     /// A landed act's own words — kept apart from `lastError` so a success
     /// is never rendered in the red slot.
     private(set) var receipt: String?
@@ -128,6 +132,9 @@ final class MobileTrashModel {
         receipt = nil
         do {
             receipt = try await TrashPutBack.run(session: session, item: item)
+            // VM-61: a Put back is a restoration — an ordinary act, no line
+            // (PROVISIONAL P-55-4); the row leaving the Trash is the answer.
+            MobileLine.say(receipt, as: .ordinary, session: session)
         } catch let error as OperationError {
             // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
             // 6c cold review's n5 retired the one-line forward — the Archive
@@ -202,6 +209,9 @@ final class MobileTrashModel {
             guard let confirm = try await TrashPurge.emptyTrashConfirm(session: session)
             else {
                 receipt = RecoveryCopy.emptyTrashConfirm([:])
+                // VM-61: the door did nothing — a refusal (the contract's
+                // "a door that did nothing speaks a refusal").
+                MobileLine.say(receipt, as: .refusal, session: session)
                 return
             }
             pendingConfirm = confirm
@@ -227,6 +237,10 @@ final class MobileTrashModel {
         receipt = nil
         do {
             receipt = try await TrashPurge.confirm(session: session, confirm)
+            // VM-61: something left the page for good — the line, with no
+            // Undo (a purge has no road back; her 13j receipt says the truth
+            // of the now/janitor split).
+            MobileLine.say(receipt, as: .removal(nil), session: session)
         } catch {
             // A PURGE refusal, never a put-back one — the seal's way out
             // differs by act, which is why `Act` is a parameter (A1-18).

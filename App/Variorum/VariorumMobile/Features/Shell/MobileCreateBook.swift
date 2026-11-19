@@ -51,7 +51,11 @@ final class MobileCreateBookModel {
     /// AND vs OR when several tags are picked (the Mac's radio pair).
     var joinAll = false
     private(set) var tags: [Tag] = []
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession) {
         self.session = session
@@ -243,9 +247,8 @@ struct MobileCreateBookSheet: View {
                 tagPicker
             }
             Spacer(minLength: 0)
-            if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-            }
+            // VM-61: a refusal (a taken name, a store error) speaks on the
+            // shell's one line, which draws above this sheet.
             Button {
                 Task {
                     if let id = await model.create() {

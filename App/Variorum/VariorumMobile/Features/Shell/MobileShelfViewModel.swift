@@ -32,8 +32,14 @@ final class MobileShelfViewModel {
     private(set) var bookTags: [String: [String]] = [:]
     /// 13i-a: gatherings' rule tags as live paths (rules hold IDs now).
     private(set) var ruleTags: [String: [String]] = [:]
-    private(set) var lastError: String?
-    /// The Today door's shelving note (not an error — rendered muted).
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
+    /// The Today door's shelving note (not an error — rendered muted), and
+    /// the book doors' receipts. VM-61: each write below speaks on the one
+    /// line with its own class.
     private(set) var lastReport: String?
 
     /// How many values the HELD books observation has delivered. Test
@@ -198,6 +204,8 @@ final class MobileShelfViewModel {
             }
             lastError = nil
             lastReport = RecoveryCopy.movedToTrashReceipt(.book)
+            MobileLine.say(
+                lastReport, as: .removal(.putBackBook(book.reading.id)), session: session)
             return true
         } catch {
             lastReport = nil
@@ -217,6 +225,8 @@ final class MobileShelfViewModel {
             try await session.runner.run { ops in try ops.archiveReading(book.reading.id) }
             lastError = nil
             lastReport = MobileShelfFaces.archivedDailyJournalReceipt(name: book.reading.name)
+            MobileLine.say(
+                lastReport, as: .removal(.unarchiveBook(book.reading.id)), session: session)
         } catch {
             lastReport = nil
             lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
@@ -230,6 +240,9 @@ final class MobileShelfViewModel {
         do {
             let outcome = try await MobileTodayDoor.open(session: session, day: day)
             lastReport = outcome.note
+            // The entry opened but was NOT filed — a direction she must see
+            // (the Mac ⌘J door's own class: `status.refuse(note)`).
+            MobileLine.say(outcome.note, as: .refusal, session: session)
             return outcome.postID
         } catch {
             lastError = String(describing: error)

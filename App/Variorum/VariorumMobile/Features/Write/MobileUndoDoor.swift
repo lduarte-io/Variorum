@@ -208,9 +208,13 @@ final class MobileUndoDoor {
             // A landed undo can itself be redone, so the receipt offers the
             // OTHER direction — the ping-pong her R10 asked for, reachable
             // without opening anything.
+            // VM-61: the Mac's classes (`ShellActions`) — a landed undo is an
+            // ordinary act (no line on the phone; Redo stays in the ⋯ sheet),
+            // nothing to undo is a refusal.
             model.report(
                 label.map(StructuralUndoCopy.undone) ?? StructuralUndoCopy.nothingToUndo,
-                action: label == nil ? nil : .redo)
+                action: label == nil ? nil : .redo,
+                line: label == nil ? .refusal : .ordinary)
         } catch {
             // A failed inverse STAYS on the stack (the UndoStack doctrine):
             // she resolves the refusal — unseal the note, say — and presses
@@ -248,7 +252,8 @@ final class MobileUndoDoor {
             await model.refreshTakesFromStore()
             model.report(
                 label.map(StructuralUndoCopy.redone) ?? StructuralUndoCopy.nothingToRedo,
-                action: label == nil ? nil : .undo)
+                action: label == nil ? nil : .undo,
+                line: label == nil ? .refusal : .ordinary)
         } catch {
             model.report(StructuralUndoCopy.redoFailed(Self.refusal(error)))
         }

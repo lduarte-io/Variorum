@@ -46,7 +46,11 @@ final class MobileTagsModel {
     /// header ("Tags — in ‹wing›") can never name a wing other than the one
     /// listed, and a rename of that wing re-titles it live.
     private(set) var shownWingName = WingWords.home
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession) {
         self.session = session
@@ -324,12 +328,8 @@ struct MobileTagManagerSheet: View {
                     newTagRow
                 }
             }
-            if let error = model.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            // VM-61: a refusal here speaks on the shell's one line, which
+            // draws above this sheet.
         }
         .padding(20)
         .background(tokens.room.ignoresSafeArea())

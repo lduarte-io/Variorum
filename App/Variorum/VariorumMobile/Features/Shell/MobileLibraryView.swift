@@ -99,32 +99,8 @@ struct MobileLibraryView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
-            if let error = model.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let receipt = model.receipt {
-                // A landed act's own words, in the muted slot — never the
-                // red one (the Mac recovery model's split).
-                Text(tokens.chromeLabel(receipt))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let starsError = stars.error(on: .library) {
-                // A star refusal fired HERE (D2 — one home per refusal,
-                // clearing after a beat; "spoken where the door fired"
-                // is now structurally true, not hoped).
-                Text(tokens.chromeLabel(starsError))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-61: the Library's error, its delete line and a star refusal
+            // speak on the shell's one line (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())

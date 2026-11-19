@@ -72,7 +72,11 @@ final class MobileLibraryViewModel {
     /// nil = no search active (the listing shows); [] = a query with no
     /// hits (the empty state speaks).
     private(set) var hits: [Queries.CatalogHit]?
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession, listingLimit: Int = 200) {
         self.session = session
@@ -481,6 +485,9 @@ final class MobileLibraryViewModel {
             }
             lastError = nil
             receipt = RecoveryCopy.movedToTrashReceipt(.note)
+            // VM-61: something left the page — the line, with Undo as Put
+            // back (the Trash's own road for a note).
+            MobileLine.say(receipt, as: .removal(.putBackNote(item.postID)), session: session)
             return true
         } catch {
             receipt = nil

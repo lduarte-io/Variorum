@@ -224,7 +224,7 @@ final class MobileEditorViewModel {
         // first. Removed at `teardown()`.
         autosaveToken = autosave.observe(
             onError: { [weak self] error in
-                self?.statusMessage = String(describing: error)
+                self?.report(String(describing: error))
             },
             onSettled: { [weak self] in
                 self?.storeWriteGeneration &+= 1
@@ -592,7 +592,7 @@ final class MobileEditorViewModel {
             // being torn down; stringifying the cancellation into the
             // status line told her nothing true.
         } catch {
-            statusMessage = String(describing: error)
+            report(String(describing: error))
         }
     }
 
@@ -660,7 +660,7 @@ final class MobileEditorViewModel {
             // authority's tombstone arm re-confirms instead of refusing on
             // its last delivery (MAJOR 1): were it still short-circuiting,
             // one dropped stream would make a stale `noteIsGone` terminal.
-            statusMessage = String(describing: error)
+            report(String(describing: error))
         }
     }
 
@@ -673,7 +673,7 @@ final class MobileEditorViewModel {
             }
         } catch is CancellationError {
         } catch {
-            statusMessage = String(describing: error)
+            report(String(describing: error))
         }
     }
 
@@ -978,9 +978,18 @@ final class MobileEditorViewModel {
     /// The status voice for sibling objects' refusals (the takes ✓ door;
     /// S2 batch 2 widened it to optional so a verb's SUCCESS clears the
     /// previous refusal — the Mac `run()`'s clearing posture).
-    func report(_ message: String?, action: StatusAction? = nil) {
+    ///
+    /// **VM-61 — and it speaks on the phone's ONE line.** `line` is the
+    /// message's class, decided by the door (`MobileLine.Class`; a bare call
+    /// is a refusal — the class every one of this funnel's ~100 bare writers
+    /// carries, the Mac forwarder's own default); the masthead no longer
+    /// draws this slot, the shell's line does.
+    func report(
+        _ message: String?, action: StatusAction? = nil, line: MobileLine.Class = .refusal
+    ) {
         statusMessage = message
         statusAction = action
+        MobileLine.say(message, as: line, session: session, door: undoDoor)
     }
 
     // MARK: - The pending-text contract
@@ -1063,7 +1072,8 @@ final class MobileEditorViewModel {
             // The receipt carries the projection's OWN answer about which
             // road it took — so the one copy that cannot follow the screen
             // (the callout corner) says so instead of reading as ordinary.
-            report(MobileNoteClipboard.copy(projection, to: destination).message)
+            let copied = MobileNoteClipboard.copy(projection, to: destination)
+            report(copied.message, line: copied.line)
         } catch {
             report(MobileNoteClipboard.Outcome
                 .failed(String(describing: error)).message)
@@ -1228,7 +1238,7 @@ final class MobileEditorViewModel {
             try await session.runner.run { [postID] ops in
                 try ops.deleteContainer(postID)
             }
-            report(RecoveryCopy.movedToTrashReceipt(.note))
+            report(RecoveryCopy.movedToTrashReceipt(.note), line: .removal(.putBackNote(postID)))
             return true
         } catch {
             report(Self.deleteNoteRefusal(error))
@@ -1247,7 +1257,7 @@ final class MobileEditorViewModel {
     /// the acting door is standing (the ⋯ sheet, or the masthead).
     func saveVersion() async {
         do {
-            report(try await VersionActs.save(session: session, postID: postID))
+            report(try await VersionActs.save(session: session, postID: postID), line: .ordinary)
         } catch {
             report(VersionActs.words(error, seal: .phone))
         }
@@ -2232,7 +2242,7 @@ final class MobileEditorViewModel {
         + "\(MobileBlockMenuController.mergeTitle)), which brings every take along."
 
     private func refuse(_ message: String) {
-        statusMessage = message
+        report(message)
     }
 
     /// **18m U3 (ruling G):** the gate's four refusals are ONE shared brain
@@ -2310,7 +2320,7 @@ extension MobileEditorViewModel: TailCrystallizerHost {
     /// the shared refusal table — a raw error dump is not a face — and keeps
     /// the error's description only where the table has no words.
     func reportOperationError(_ error: Error) {
-        statusMessage = OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
+        report(OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error))
     }
 
     func replaceTailRegion(_ region: NSRange, with normalized: String) {

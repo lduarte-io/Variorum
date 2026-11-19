@@ -184,7 +184,7 @@ final class MobileNoteTrayModel {
             }
         } catch is CancellationError {
         } catch {
-            status = .refusal(DeletionRefusal.fallback(error))
+            report(.refusal(DeletionRefusal.fallback(error)))
         }
     }
 
@@ -348,7 +348,7 @@ final class MobileNoteTrayModel {
         pendingConfirm = nil
         status = nil
         do {
-            report(.receipt(try await TrashPurge.confirm(session: session, confirm)))
+            report(.receipt(try await TrashPurge.confirm(session: session, confirm)), removal: true)
         } catch {
             // A PURGE refusal, never a put-back one — the seal's way out
             // differs by act, which is why `Act` is a parameter (A1-18).
@@ -367,8 +367,15 @@ final class MobileNoteTrayModel {
 
     // MARK: - Status / refusal voice
 
-    private func report(_ status: RecoveryStatus) {
+    /// VM-61: spoken on the phone's one line. A Put back here is a
+    /// restoration — an ordinary act, no line (PROVISIONAL P-55-4); a take's
+    /// Delete Now took something off the page for good (`removal`, no Undo —
+    /// a purge has no road back); a refusal always speaks.
+    private func report(_ status: RecoveryStatus, removal: Bool = false) {
         self.status = status
+        let line: MobileLine.Class = status.isRefusal
+            ? .refusal : (removal ? .removal(nil) : .ordinary)
+        MobileLine.say(status.text, as: line, session: session)
     }
 
     /// **The ONE deletion-refusal home, called directly** (A1-18; the 6c cold
@@ -481,13 +488,7 @@ struct MobileNoteTraySection: View {
             case .archived: archivedSection
             case .leaving: leavingSection
             }
-            if let status = model.status {
-                Text(tokens.chromeLabel(status.text))
-                    .font(tokens.small)
-                    .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityLabel(status.text)
-            }
+            // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         // The held observation, alive only while this segment is on screen

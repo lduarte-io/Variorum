@@ -115,33 +115,8 @@ struct MobileShelfView<TabBar: View>: View {
                 // nothing here wakes the text layer (P3).
                 .animation(.easeOut(duration: 0.18), value: quickNote.isFocused)
             }
-            if let report = model.lastReport {
-                Text(tokens.chromeLabel(report))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let error = model.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let starsError = stars.error(on: .shelf) {
-                // A star refusal fired HERE (D2 — one home per refusal:
-                // it speaks at its own door's root and clears after a
-                // beat; the old one-field rendering sat on both tabs).
-                Text(tokens.chromeLabel(starsError))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-61: the shelf's report, its error and a star refusal speak
+            // on the shell's one line (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())

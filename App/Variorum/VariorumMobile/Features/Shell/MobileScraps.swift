@@ -52,7 +52,11 @@ final class MobileScrapsModel {
     /// pool read carries no limit), so the marker can say how much of
     /// the head is unloaded.
     private(set) var totalCount = 0
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
     private(set) var selectedPoolID: String?
     @ObservationIgnored private var itemsTask: Task<Void, Never>?
     @ObservationIgnored private var observedPoolID: String?
@@ -270,12 +274,7 @@ struct MobileScrapsSection: View {
                 .padding(.horizontal, 12)
         }
         mintRow
-        if let error = model.lastError {
-            Text(error)
-                .font(tokens.small)
-                .foregroundStyle(tokens.alarm)
-                .padding(.horizontal, 12)
-        }
+        // VM-61: a refusal here speaks on the shell's one line.
     }
 
     /// Which scraps container the section shows (several pools only —

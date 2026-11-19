@@ -36,7 +36,12 @@ final class MobileNoteTagsModel {
 
     private(set) var applied: [Tag] = []
     private(set) var allTags: [Tag] = []
-    private(set) var status: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); the sheet no longer
+    /// draws it.
+    private(set) var status: String? {
+        didSet { MobileLine.refuse(status, session: session) }
+    }
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -170,12 +175,7 @@ struct MobileNoteTagsSheet: View {
                 VStack(alignment: .leading, spacing: 10) {
                     appliedSection
                     suggestionSection
-                    if let status = model.status {
-                        Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                 }
             }
         }

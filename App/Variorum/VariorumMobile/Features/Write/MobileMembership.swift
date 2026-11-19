@@ -49,6 +49,15 @@ final class MobileMembershipModel {
     private(set) var addableBooks: [Reading] = []
     private(set) var addableSmartBooks: [Reading] = []
     private(set) var status: String?
+
+    /// VM-61: the slot speaks on the phone's one line with the class its door
+    /// gives it — joining, collecting, leaving a book and diverging are
+    /// ordinary acts (no line — her ruling; leaving a book takes a pointer
+    /// away, never the note: PROVISIONAL P-55-4); a refusal always speaks.
+    private func say(_ text: String, as line: MobileLine.Class) {
+        status = text
+        MobileLine.say(text, as: line, session: session)
+    }
     /// The last diverge's landing (R67: the copy is one tap away).
     private(set) var divergedCopyID: String?
     private(set) var divergedBookName: String?
@@ -109,7 +118,7 @@ final class MobileMembershipModel {
                 $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id)
             }
         } catch {
-            status = String(describing: error)
+            say(String(describing: error), as: .refusal)
         }
     }
 
@@ -120,9 +129,9 @@ final class MobileMembershipModel {
             _ = try await session.runner.run { [postID] ops in
                 try ops.addPostToReading(postID, to: book.id)
             }
-            status = "Added to “\(book.name)”."
+            say("Added to “\(book.name)”.", as: .ordinary)
         } catch {
-            status = Self.refusal(error, bookName: book.name)
+            say(Self.refusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -133,17 +142,21 @@ final class MobileMembershipModel {
             let result = try await session.runner.run { [postID] ops in
                 try ops.collectPostIntoSmartReading(postID, into: book.id)
             }
-            status = result.alreadyMatched
-                ? "Already collected — it matches “\(book.name)”'s filter."
-                : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
+            // Already matching did nothing — a refusal (a door that did
+            // nothing says so); a tagging that seats it is ordinary.
+            if result.alreadyMatched {
+                say("Already collected — it matches “\(book.name)”'s filter.", as: .refusal)
+            } else {
+                say("Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter.", as: .ordinary)
+            }
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
-                status = "“\(book.name)” can't take this note: \(reason)"
+                say("“\(book.name)” can't take this note: \(reason)", as: .refusal)
             } else {
-                status = Self.refusal(error, bookName: book.name)
+                say(Self.refusal(error, bookName: book.name), as: .refusal)
             }
         } catch {
-            status = String(describing: error)
+            say(String(describing: error), as: .refusal)
         }
         await refresh()
     }
@@ -153,9 +166,9 @@ final class MobileMembershipModel {
             try await session.runner.run { [postID] ops in
                 try ops.removePostFromReading(postID, from: book.id)
             }
-            status = "Removed from “\(book.name)” — the note itself is untouched."
+            say("Removed from “\(book.name)” — the note itself is untouched.", as: .ordinary)
         } catch {
-            status = Self.refusal(error, bookName: book.name)
+            say(Self.refusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -168,9 +181,9 @@ final class MobileMembershipModel {
             let result = try await session.divergeForBook(postID, in: book.id)
             divergedCopyID = result.copy.post.id
             divergedBookName = book.name
-            status = "Diverged — “\(book.name)” holds the copy now, in the same place; the original is untouched elsewhere."
+            say("Diverged — “\(book.name)” holds the copy now, in the same place; the original is untouched elsewhere.", as: .ordinary)
         } catch {
-            status = Self.divergeRefusal(error, bookName: book.name)
+            say(Self.divergeRefusal(error, bookName: book.name), as: .refusal)
         }
         await refresh()
     }
@@ -244,12 +257,7 @@ struct MobileMembershipSheet: View {
                             .foregroundStyle(tokens.faint)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    if let status = model.status {
-                        Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                     if let copy = model.divergedCopyID, let onOpenNote {
                         Button {
                             dismiss()

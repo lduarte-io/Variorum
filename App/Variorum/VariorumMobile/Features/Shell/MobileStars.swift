@@ -226,6 +226,7 @@ final class MobileStarsModel {
         errorClearTask = nil
         errorHome = nil
         lastError = message
+        MobileLine.refuse(message, session: session)  // VM-61: the one line
     }
 
     /// A door refusal: spoken at its root, cleared after the cadence
@@ -233,6 +234,7 @@ final class MobileStarsModel {
     private func speak(_ message: String, at home: DoorHome) {
         lastError = message
         errorHome = home
+        MobileLine.refuse(message, session: session)  // VM-61: the one line
         errorClearTask?.cancel()
         errorClearTask = Task { [weak self] in
             guard let delay = self?.errorClearDelay else { return }

@@ -108,6 +108,17 @@ final class MobileVersionsModel {
     private(set) var readingBlocks: [String] = []
 
     private(set) var status: RecoveryStatus?
+
+    /// VM-61: the slot speaks on the phone's one line. A restore and a
+    /// promote are ordinary acts (no line — her ruling; PROVISIONAL P-55-4);
+    /// a delete moved the moment to the Trash, so it is a removal whose Undo
+    /// is the Trash's own Put back (`undo`); a refusal always speaks.
+    private func report(_ status: RecoveryStatus, undo: MobileLine.Undo? = nil) {
+        self.status = status
+        let line: MobileLine.Class = status.isRefusal
+            ? .refusal : (undo.map { .removal($0) } ?? .ordinary)
+        MobileLine.say(status.text, as: line, session: session)
+    }
     /// Restore's confirm — her ratified #80(d): *"i like restore having a
     /// confirm"*. Held as the pending SUBJECT so the alert can carry it into
     /// its action closure (`presenting:`) rather than read it back after
@@ -136,7 +147,7 @@ final class MobileVersionsModel {
             }
             (versions, truncated) = TrashListing.windowed(rows, window: window)
         } catch {
-            status = .refusal(VersionActs.words(error, seal: .phone))
+            report(.refusal(VersionActs.words(error, seal: .phone)))
         }
     }
 
@@ -164,7 +175,7 @@ final class MobileVersionsModel {
             // three acts over an unread subject. The refusal is spoken on
             // the listing instead, which is where she can act on it.
             closeReader()
-            status = .refusal(VersionActs.words(error, seal: .phone))
+            report(.refusal(VersionActs.words(error, seal: .phone)))
         }
     }
 
@@ -184,11 +195,11 @@ final class MobileVersionsModel {
         do {
             let receipt = try await VersionActs.restore(
                 session: session, postID: postID, versionID: item.postID)
-            status = .receipt(receipt)
+            report(.receipt(receipt))
             closeReader()
             await load()
         } catch {
-            status = .refusal(VersionActs.words(error, seal: .phone))
+            report(.refusal(VersionActs.words(error, seal: .phone)))
         }
     }
 
@@ -200,11 +211,11 @@ final class MobileVersionsModel {
         do {
             let receipt = try await VersionActs.promote(
                 session: session, postID: postID, versionID: item.postID)
-            status = .receipt(receipt)
+            report(.receipt(receipt))
             closeReader()
             await load()
         } catch {
-            status = .refusal(VersionActs.words(error, seal: .phone))
+            report(.refusal(VersionActs.words(error, seal: .phone)))
         }
     }
 
@@ -218,11 +229,11 @@ final class MobileVersionsModel {
         do {
             let receipt = try await VersionActs.delete(
                 session: session, versionID: item.postID)
-            status = .receipt(receipt)
+            report(.receipt(receipt), undo: .putBackNote(item.postID))
             closeReader()
             await load()
         } catch {
-            status = .refusal(VersionActs.words(error, seal: .phone))
+            report(.refusal(VersionActs.words(error, seal: .phone)))
         }
     }
 
@@ -323,7 +334,6 @@ struct MobileVersionsView: View {
         }
         .background(tokens.room.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) { reportLine }
         .task { await model.load() }
         .alert(
             VersionsPath.restoreConfirmTitle,
@@ -534,20 +544,6 @@ struct MobileVersionsView: View {
             .accessibilityLabel(text)
     }
 
-    /// Receipt or refusal, CLASSED where it was produced (`RecoveryStatus`,
-    /// the shared rule) — never guessed from the text by this view.
-    @ViewBuilder
-    private var reportLine: some View {
-        if let status = model.status {
-            Text(tokens.chromeLabel(status.text))
-                .font(tokens.small)
-                .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.muted)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 8)
-                .background(tokens.room)
-                .accessibilityLabel(status.text)
-        }
-    }
+    // VM-61: this screen's receipt or refusal speaks on the shell's one
+    // line (`MobileMessageLine`), never in a slot of its own.
 }

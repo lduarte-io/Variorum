@@ -208,7 +208,7 @@ final class MobileBlockHistoryController {
         }
         do {
             try await runner.run { ops in _ = try ops.commit(variantID, kind: .manual) }
-            model.report(Self.committedStatus)
+            model.report(Self.committedStatus, line: .ordinary)
             if isOpen { await refresh() }
         } catch {
             model.report(Self.refusalMessage(error, act: "commit this take"))
@@ -280,7 +280,7 @@ final class MobileBlockHistoryController {
             guard openBlockID == blockID else { return }
             adopt(value)
         } catch {
-            status = .refusal(String(describing: error))
+            report(.refusal(String(describing: error)))
             onChanged?()
         }
     }
@@ -558,6 +558,11 @@ final class MobileBlockHistoryController {
     private func report(_ status: RecoveryStatus) {
         self.status = status
         onChanged?()
+        // VM-61: spoken on the phone's one line. Every receipt this face
+        // makes is a restoration (a commit restored, a take unarchived or put
+        // back, an original brought back) — an ordinary act, no line
+        // (PROVISIONAL P-55-4); a refusal always speaks.
+        MobileLine.say(status.text, as: status.isRefusal ? .refusal : .ordinary, session: session)
     }
 
     // MARK: - Refusal copy (the ops' real refusals, phone words)

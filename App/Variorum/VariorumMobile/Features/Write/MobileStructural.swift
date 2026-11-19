@@ -196,7 +196,7 @@ final class MobileStructuralController {
             // receipt slot carries the bare Undo and no new chatter — the
             // calmest shape, and it leaves every shipped "says nothing"
             // pin true.
-            model.report(nil, action: .undo)
+            model.report(nil, action: .undo, line: .ordinary)
             await model.refreshTakesFromStore()
             if let range = model.rangeOfBlock(landingBlockID) {
                 model.textView?.selectedRange = NSRange(location: range.location, length: 0)
@@ -317,7 +317,7 @@ final class MobileStructuralController {
         }
         do {
             let mergedBlockID = try await session.runner.run(body)
-            model.report(nil, action: .undo)  // the bare Undo — see divide
+            model.report(nil, action: .undo, line: .removal(.structural))  // the bare Undo — see divide
             await model.refreshTakesFromStore()
             // Caret at the join: right where the trailing half begins
             // (the Mac's instant-merge caret rule; the carry-all's chosen
@@ -391,7 +391,7 @@ final class MobileStructuralController {
                 // status line, its transient face. PROVISIONAL).
                 model.report(
                     otherTakes > 0 ? Self.fannedExtractHint(otherTakes) : nil,
-                    action: .undo)
+                    action: .undo, line: .ordinary)
                 await model.refreshTakesFromStore()
                 if let landing = model.rangeOfBlock(result.block.id) {
                     model.textView?.selectedRange = NSRange(
@@ -419,7 +419,7 @@ final class MobileStructuralController {
                         return first.block.id
                     }
                 }
-                model.report(nil, action: .undo)  // the bare Undo — see divide
+                model.report(nil, action: .undo, line: .ordinary)  // the bare Undo — see divide
                 await model.refreshTakesFromStore()
                 if let landing = model.rangeOfBlock(middleID) {
                     model.textView?.selectedRange = NSRange(
@@ -533,7 +533,7 @@ final class MobileStructuralController {
             let result = try await session.runner.run { [postID = model.postID] ops in
                 try ops.newBlock(in: postID, text: "", at: .after(blockID))
             }
-            model.report(Self.blockInsertedStatus)
+            model.report(Self.blockInsertedStatus, line: .ordinary)
             await model.refreshTakesFromStore()
             if let range = model.rangeOfBlock(result.block.id) {
                 model.textView?.selectedRange = NSRange(location: range.location, length: 0)
@@ -587,7 +587,7 @@ final class MobileStructuralController {
             model.report(
                 Self.blockDeletedStatus
                     + (await strandedOriginalsNote(blockIDs: [blockID]) ?? ""),
-                action: .undo)
+                action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret(landing)
         } catch {
@@ -643,7 +643,7 @@ final class MobileStructuralController {
             try await session.runner.run { ops in
                 try ops.archiveBlock(blockID)
             }
-            model.report(Self.blockArchivedStatus, action: .undo)
+            model.report(Self.blockArchivedStatus, action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret(landing)
         } catch {
@@ -738,7 +738,7 @@ final class MobileStructuralController {
             model.report(
                 Self.blocksDeletedStatus(blockIDs.count)
                     + (await strandedOriginalsNote(blockIDs: blockIDs) ?? ""),
-                action: .undo)
+                action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret(landing)
             return true
@@ -839,7 +839,7 @@ final class MobileStructuralController {
             // WORDLESS — this fires at keystroke rate, from ⌫ or from typing
             // over a selection, so a sentence would be noise — and the bare
             // Undo is the whole affordance.
-            model.report(nil, action: .undo)
+            model.report(nil, action: .undo, line: .removal(.structural))
             await model.refreshTakesFromStore()
             landCaret((blockID: outcome.caretBlockID, offset: outcome.caretOffset))
         } catch {

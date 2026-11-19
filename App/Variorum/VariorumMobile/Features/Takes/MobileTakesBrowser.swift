@@ -611,7 +611,7 @@ final class MobileTakesBrowserController {
                 try ops.reorderTake(
                     variantID, to: delta < 0 ? .before(anchor) : .after(anchor))
             }
-            model.report(delta < 0 ? Self.movedUpNote : Self.movedDownNote)
+            model.report(delta < 0 ? Self.movedUpNote : Self.movedDownNote, line: .ordinary)
             await model.refreshTakesFromStore()
             onChanged?()
         } catch {
@@ -658,7 +658,10 @@ final class MobileTakesBrowserController {
                 try await self.runner.run { ops in
                     _ = try ops.takeToBlockBelow(blockID, variantID: variantID)
                 }
-                model.report(MobileTakeStructureCopy.movedNote, action: .undo)
+                // VM-61: the original take is ARCHIVED — something left the
+                // page (the fan), so the line keeps its Undo.
+                model.report(
+                    MobileTakeStructureCopy.movedNote, action: .undo, line: .removal(.structural))
                 await model.refreshTakesFromStore()
                 await self.reloadArchived()
                 self.onChanged?()
@@ -691,7 +694,7 @@ final class MobileTakesBrowserController {
                     MobileTakeStructureCopy.convertedNote(
                         blocks: result.converted.count,
                         skippedBlanks: result.skippedBlankTakes),
-                    action: .undo)
+                    action: .undo, line: .removal(.structural))
                 await model.refreshTakesFromStore()
                 await self.reloadArchived()
                 self.onChanged?()

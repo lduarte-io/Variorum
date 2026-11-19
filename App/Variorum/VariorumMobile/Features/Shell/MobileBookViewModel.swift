@@ -46,7 +46,11 @@ final class MobileBookViewModel {
     private(set) var truncated = false
     /// A STORE-READ failure — the screen's own, not a tap's. It belongs to
     /// the header, where the book's identity is.
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
     /// **A DOOR'S REFUSAL, HELD APART FROM THE SCREEN'S OWN ERROR** (the
     /// batch-10 cold review, MAJOR 2). The two doors sit at the BOTTOM of
     /// the contents list; a refusal rendered only in the header spoke
@@ -55,7 +59,13 @@ final class MobileBookViewModel {
     /// which is exactly what the finished-book divergence (doors stay so
     /// they can EXPLAIN) cannot afford. One slot per speaker: this one
     /// renders beside the doors.
-    private(set) var doorRefusal: String?
+    ///
+    /// VM-61: the one line speaks it now, wherever the door sits — the line
+    /// is always at the screen's foot, so a refused door is never a screen
+    /// away from what she reads.
+    private(set) var doorRefusal: String? {
+        didSet { MobileLine.refuse(doorRefusal, session: session) }
+    }
 
     init(session: AppSession, readingID: String, window: Int = 300) {
         self.session = session

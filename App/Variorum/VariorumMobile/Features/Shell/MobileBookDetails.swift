@@ -50,7 +50,11 @@ final class MobileBookDetailsModel {
     private(set) var book: Queries.ShelfBook?
     private(set) var tagPaths: [String] = []
     private(set) var isDaily = false
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession, readingID: String) {
         self.session = session
@@ -153,6 +157,12 @@ final class MobileBookDetailsModel {
                 try ops.deleteReading(id)
             }
             lastError = nil
+            // VM-61: the shelf row's own delete line, said by this door too —
+            // the same act, the same words, the same Put back (her ruling: a
+            // delete answers with a line and Undo).
+            MobileLine.say(
+                RecoveryCopy.movedToTrashReceipt(.book),
+                as: .removal(.putBackBook(id)), session: session)
             return true
         } catch let error as OperationError {
             lastError = Self.refusal(error)
@@ -172,6 +182,13 @@ final class MobileBookDetailsModel {
         do {
             try await session.runner.run { ops in try ops.archiveReading(id) }
             lastError = nil
+            // VM-61: the shelf row's own archive line (same act, same words),
+            // with Undo as the existing unarchive.
+            if let name = book?.reading.name {
+                MobileLine.say(
+                    MobileShelfFaces.archivedDailyJournalReceipt(name: name),
+                    as: .removal(.unarchiveBook(id)), session: session)
+            }
             return true
         } catch {
             lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
@@ -266,9 +283,8 @@ struct MobileBookDetailsSheet: View {
                     deleteRow
                 }
             }
-            if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-            }
+            // VM-61: a refusal here speaks on the shell's one line, which
+            // draws above this sheet.
             Spacer(minLength: 0)
         }
         .padding(20)
