@@ -554,16 +554,18 @@ public final class MCPServerHost: @unchecked Sendable {
         guard still else { return .notSuspended }
         startObservingGrants()
         // VX-944 (the VX-981 run, batch 3): nothing here waits on a client. The
-        // held admissions are store work only (the one op, a close line that
-        // never waits, the naming signal, an announce that only asks) and run as
-        // ONE group — none behind another; then every connection is ASKED to
-        // announce, so a client that stopped reading can no longer keep this
-        // resume — and the door's unlock face behind it — from returning.
-        await withTaskGroup(of: Void.self) { group in
-            for session in live where session.isHeld {
-                group.addTask { _ = await session.admitIfHeld() }
-            }
-        }
+        // held admissions run ONE AT A TIME, and none can hold this resume on a
+        // client: every step of an admission is store work or a signal that never
+        // waits (the one op's write, a close line that only tries its lock, the
+        // naming signal, an announce that only ASKS). Serial on purpose (round 1's
+        // N1, the VX-981 ladder): a task group would return no sooner — it returns
+        // only when every child has, and the store serializes the writes anyway —
+        // while it let up to `sessionCap` synchronous writes sit on cooperative-pool
+        // threads at once behind the one writer, where this loop holds one. Then
+        // every connection is ASKED to announce, so a client that stopped reading
+        // can no longer keep this resume — and the door's unlock face behind it —
+        // from returning.
+        for session in live where session.isHeld { _ = await session.admitIfHeld() }
         for session in live { session.announceToolsChanged() }
         onConnectionsChanged?()
         if died != nil { onStateChanged?() }
