@@ -318,3 +318,77 @@ struct MobileRefusalSentencePinTests {
         }
     }
 }
+
+// MARK: - VM-55 ladder round 1, finding 5 — an error's dump is never logged in public
+
+/// **No source the phone compiles logs an error's dump with `privacy: .public`**
+/// (VM-55 ladder round 1, finding 5 — NIT, confirmed). VM-62 moved the raw
+/// detail of an unworded failure off the screen and into the unified log; an
+/// error's associated values can carry ids and, for some cases, names she
+/// typed, so the dump is logged `.private` — kept for an attached debugger,
+/// redacted in a persisted archive or a sysdiagnose.
+///
+/// **What it checks** (narrowed at the reviewer's final call): over the
+/// non-test sources of `Shared/` and `VariorumMobile/` — every file the phone
+/// target compiles — comments stripped (`MobileNoRawErrorPinTests`' own
+/// stripper), any line that holds an ERROR-NAMED dump
+/// (`String(describing:` / `String(reflecting:` of a binding named `error`,
+/// `err` or `failure` — VM-62's name-matching precedent) AND `privacy: .public`.
+/// One named exemption, main's pre-existing line, which must match exactly one
+/// line. **What it cannot see:** an error passed through another name first,
+/// and a public interpolation of her words that is not an error (the
+/// dropped-receipt debug line's `trimmed` — review guards that one).
+/// **Red on old** at `OpsRefusalTable.swift`'s unworded-failure line alone.
+@Suite("VM-55 round 1, finding 5 — no error's dump is logged in public")
+struct MobileErrorLogPrivacyPinTests {
+    private static var errorDump: Regex<Substring> {
+        /String\(\s*(?:describing|reflecting):\s*(?:error|err|failure)\b/
+    }
+
+    private static var publicPrivacy: Regex<Substring> { /privacy:\s*\.public\b/ }
+
+    /// Each must match EXACTLY one line (a stale or doubled entry trips).
+    private static let exempt: [(file: String, line: String, why: String)] = [
+        ("SampleLibraryWelcome.swift",
+         "log.error(\"welcome arrangement failed: \\(String(describing: error), privacy: .public)\")",
+         "main's pre-existing line, not this run's — named for the closeout's ticket triage "
+            + "(a sweep-ticket candidate)"),
+    ]
+
+    @Test func noErrorsDumpIsLoggedInPublic() throws {
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumMobileTests
+            .deletingLastPathComponent()  // App/Variorum
+        var walked = 0
+        var offenders: [String] = []
+        var exemptHits = [Int](repeating: 0, count: Self.exempt.count)
+        for folder in ["Shared", "VariorumMobile"] {
+            let root = appRoot.appendingPathComponent(folder, isDirectory: true)
+            #expect(FileManager.default.fileExists(atPath: root.path), "the sweep root \(folder) is missing")
+            let walk = try #require(FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: nil))
+            for case let url as URL in walk where url.pathExtension == "swift" {
+                walked += 1
+                let source = try String(contentsOf: url, encoding: .utf8)
+                for (number, line) in MobileNoRawErrorPinTests.strippingComments(source).enumerated() {
+                    guard line.contains(Self.errorDump), line.contains(Self.publicPrivacy) else { continue }
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    if let index = Self.exempt.firstIndex(where: {
+                        $0.file == url.lastPathComponent && trimmed == $0.line
+                    }) {
+                        exemptHits[index] += 1
+                        continue
+                    }
+                    offenders.append("\(folder)/…/\(url.lastPathComponent):\(number + 1) \(trimmed)")
+                }
+            }
+        }
+        #expect(walked > 150, "the walk must actually reach the phone's sources (walked \(walked))")
+        #expect(offenders.isEmpty,
+                "an error's dump logged in public — \(offenders.count) found:\n"
+                    + offenders.joined(separator: "\n"))
+        let misfits = Self.exempt.indices.filter { exemptHits[$0] != 1 }
+            .map { "\(Self.exempt[$0].file): \"\(Self.exempt[$0].line)\" matched \(exemptHits[$0])" }
+        #expect(misfits.isEmpty, "every exemption covers exactly one line — \(misfits)")
+    }
+}
