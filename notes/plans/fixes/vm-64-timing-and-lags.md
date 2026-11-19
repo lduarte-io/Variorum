@@ -383,10 +383,11 @@ assertions.
 
 ### Batch 4 · VM-67 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**No revert is in flight.** The red-on-old proof runs AFTER the fix is committed and pushed: `git checkout <base> --
-Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operations/OwnerIdentity.swift`, the pin suite
-run headless, then `git checkout HEAD --` the same two files and a clean `git status`. When that revert starts, this
-line changes to name it and the base commit; until then the tree is never mid-revert. Base: `96dfa82b5`.
+**A REVERT IS IN FLIGHT (started after `e6d16fca7` was committed and pushed):** `git checkout 96dfa82b5 --
+Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operations/OwnerIdentity.swift` (the pre-fix
+schema AND op), the pin suite run headless, then `git checkout HEAD --` the same two files and a clean `git status`.
+If this line still reads "in flight" in a later session, the tree may be mid-revert: restore with
+`git checkout HEAD -- <the two files>` (safe — the fix is committed) and check `git diff HEAD` is empty. Base: `96dfa82b5`.
 
 **The mechanism, re-verified on this tree (audit F 3A/6A — still TRACED as written):** `AppServices.connectSyncIfAllowed`
 (`Shared/AppServices.swift:518`) runs `runOwnerAdoption` (:584) first on every launch with a persisted session, every
