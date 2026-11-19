@@ -51,6 +51,8 @@ final class MobileBookDetailsModel {
     private(set) var tagPaths: [String] = []
     private(set) var isDaily = false
     private(set) var lastError: String?
+    /// VM-81 — the Finish confirm on screen (nil = none asked).
+    private(set) var pendingFinish: FinishConfirm?
 
     init(session: AppSession, readingID: String) {
         self.session = session
@@ -69,6 +71,36 @@ final class MobileBookDetailsModel {
     /// The rename face's gate (the create sheet's rule: no nameless book).
     nonisolated static func canRename(_ name: String) -> Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    /// VM-81 — the finish row's one act, or nil where no such door is drawn.
+    nonisolated enum FinishRowAct: Equatable, Sendable {
+        case finish
+        case reopen
+    }
+
+    /// **Which finish door the row draws** (VM-81, W-106).
+    nonisolated static func finishRowAct(for reading: Reading) -> FinishRowAct? {
+        reading.locked ? .reopen : .finish
+    }
+
+    /// **What the finish row says beside its door** (VM-81, W-106).
+    nonisolated static func finishCaption(for reading: Reading) -> String {
+        reading.locked
+            ? "finished — its notes and order are frozen"
+            : "a finished book reads ✓ and freezes its notes"
+    }
+
+    /// **VM-81 — the Finish confirm, whole** (W-105): the alert's only input,
+    /// so nothing it says can be read from a stale second piece of state (the
+    /// Mac's `BookStateConfirm` lesson). `pendingArrivals` is the act's own
+    /// set, read by the dismissal's predicate.
+    nonisolated struct FinishConfirm: Equatable, Identifiable, Sendable {
+        let readingID: String
+        let title: String
+        let line: String
+        let pendingArrivals: Int
+        var id: String { readingID }
     }
 
     // MARK: - Reads
@@ -113,6 +145,41 @@ final class MobileBookDetailsModel {
         await run {
             finished ? try $0.lockReading(id) : try $0.unlockReading(id)
         }
+    }
+
+    /// **The Finish door was pressed** (VM-81, W-105).
+    func requestFinish() async {
+        await setFinished(true)
+    }
+
+    /// The confirm's Finish. The confirm is PASSED IN, never read back (the
+    /// shelf's `confirmDeleteBook` rule — a binding setter clears
+    /// `pendingFinish` before an action's task runs).
+    func confirmFinish(_ confirm: FinishConfirm) async {
+        pendingFinish = nil
+        await setFinished(true)
+    }
+
+    func cancelFinish() {
+        pendingFinish = nil
+    }
+
+    /// The alert host's binding (`confirmDeleteBook`'s rule: the setter only
+    /// ever clears; the act takes its subject as a parameter).
+    var finishConfirmPresented: Bool {
+        get { pendingFinish != nil }
+        set { if !newValue { pendingFinish = nil } }
+    }
+
+    /// **VM-81 (W-120) — whether this book's way out of the archive is drawn.**
+    var offersUnarchive: Bool {
+        book?.reading.archivedAt != nil
+    }
+
+    /// Unarchive — `unarchiveReading`, the book back on the shelf whole.
+    func unarchive() async {
+        let id = readingID
+        await run { _ = try $0.unarchiveReading(id) }
     }
 
     /// Rename — free on a finished book (the Mac's renameReading has no
@@ -263,7 +330,7 @@ struct MobileBookDetailsSheet: View {
                 if MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading) {
                     archiveRow
                 } else {
-                    deleteRow
+                    deleteRow(book.reading.kind)
                 }
             }
             if let error = model.lastError {
@@ -288,7 +355,7 @@ struct MobileBookDetailsSheet: View {
         }
         // PR4's confirm — a real `@State` binding (§15's trap (a)).
         .alert(
-            MobileShelfFaces.deleteBookConfirmTitle,
+            MobileShelfFaces.deleteConfirmTitle(for: model.book?.reading.kind ?? .book),
             isPresented: $deletePresented
         ) {
             Button(tokens.chromeLabel("Delete"), role: .destructive) {
@@ -338,12 +405,12 @@ struct MobileBookDetailsSheet: View {
 
     /// **Delete Book…** (PR4) — a plain Button, like every other act row
     /// here, so it is a door a pin can actually drive (§15's trap (b)).
-    private var deleteRow: some View {
+    private func deleteRow(_ kind: ReadingKind) -> some View {
         Button {
             deletePresented = true
         } label: {
             HStack {
-                Text(tokens.chromeLabel(MobileShelfFaces.deleteBookDoorTitle))
+                Text(tokens.chromeLabel(MobileShelfFaces.deleteDoorTitle(for: kind)))
                     .font(tokens.body)
                     .foregroundStyle(tokens.alarm)
                 Spacer()
@@ -355,7 +422,7 @@ struct MobileBookDetailsSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(MobileShelfFaces.deleteBookDoorTitle)
+        .accessibilityLabel(MobileShelfFaces.deleteDoorTitle(for: kind))
     }
 
     /// The identity block — the name row IS the rename door (the
@@ -383,27 +450,34 @@ struct MobileBookDetailsSheet: View {
     }
 
     /// Finish / Reopen — one state-mirroring row (the Mac menu's words).
+    @ViewBuilder
     private func finishRow(_ book: Queries.ShelfBook) -> some View {
-        let finished = book.reading.locked
-        return Button {
-            let model = model
-            Task { await model.setFinished(!finished) }
-        } label: {
-            HStack {
-                Text(tokens.chromeLabel(finished ? "Reopen" : "Finish"))
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.accent)
-                Spacer()
-                Text(tokens.chromeLabel(finished
-                    ? "finished — its notes and order are frozen"
-                    : "a finished book reads ✓ and freezes its notes"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(2)
+        if let act = MobileBookDetailsModel.finishRowAct(for: book.reading) {
+            Button {
+                let model = model
+                Task {
+                    switch act {
+                    case .finish: await model.requestFinish()
+                    case .reopen: await model.setFinished(false)
+                    }
+                }
+            } label: {
+                HStack {
+                    Text(tokens.chromeLabel(act == .reopen
+                        ? BookStateCopy.reopenVerb : BookStateCopy.finishVerb))
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.accent)
+                    Spacer()
+                    Text(tokens.chromeLabel(
+                        MobileBookDetailsModel.finishCaption(for: book.reading)))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(2)
+                }
+                .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
     }
 
     /// The daily-designation road (curated journal books only — P-2).

@@ -66,8 +66,9 @@ struct MobileShellTests {
                     for: smart, curatedTags: [:], ruleTags: [smart.reading.id: ["books"]])
                 == ["books"],
                 "a gathering's tags are its rule's, resolved")
+        // VM-83 (W-073): the kind word is "gathering", never "smart".
         #expect(MobileShelfFaces.meta(for: smart, tagPaths: ["books"], isDaily: false)
-            == "smart · #books", "derived membership is never a count")
+            == "gathering · #books", "derived membership is never a count")
     }
 
     /// LK5's rider: ✓ finished is a STATE riding the NAME (the Mac
@@ -131,7 +132,9 @@ struct MobileShellTests {
                 try? await Task.sleep(for: .milliseconds(1))
             }
             #expect(model.books.count == 2)
-            #expect(model.pins == [pinnedID])
+            // VM-83: the shelf reads the union star its listing carries (the
+            // retired pin list went with the Pin door).
+            #expect(model.books.first { $0.reading.id == pinnedID }?.starred == true)
             #expect(model.dailyBookID == bookID)
             #expect(model.orderedBooks.map(\.reading.id) == [pinnedID, bookID],
                     "the pinned book leads; the journal follows")

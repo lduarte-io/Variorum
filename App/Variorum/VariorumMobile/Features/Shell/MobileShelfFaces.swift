@@ -142,6 +142,16 @@ nonisolated enum MobileShelfFaces {
     static let deleteBookDoorTitle = "Delete Book…"
     static let deleteBookConfirmTitle = "Delete Book"
 
+    /// The delete door's label for a reading of `kind` (VM-83, W-073).
+    static func deleteDoorTitle(for kind: ReadingKind) -> String {
+        deleteBookDoorTitle
+    }
+
+    /// The delete confirm's title for a reading of `kind` (VM-83, W-073).
+    static func deleteConfirmTitle(for kind: ReadingKind) -> String {
+        deleteBookConfirmTitle
+    }
+
     /// **13i-e U2 — the daily Journal's doors (the sitting record §10; P-2):**
     /// "the daily Journal can be archived, never deleted; it returns when a
     /// day arrives" — so both doors that offer Delete on a book offer ARCHIVE
@@ -180,5 +190,25 @@ nonisolated enum MobileShelfFaces {
         return "\(subject) to the \(RecoveryCopy.trashSection) for "
             + "\(TrashWindow.days) days. \(RecoveryCopy.deleteBookKeepsItsNotes) "
             + "You can put it back from there until then."
+    }
+}
+
+/// **One act on a shelf row's long-press menu** (VM-83) — the menu as DATA
+/// (P-1: gating is data, never a per-view if), so the row's doors are pinned
+/// rather than promised. `MobileShelfViewModel.rowActs(for:starred:)` decides
+/// which a row carries; the view renders them in order.
+nonisolated enum MobileShelfRowAct: Equatable, Sendable {
+    case pin(pinned: Bool)
+    case star(starred: Bool)
+    case archiveDailyJournal
+    case delete(ReadingKind)
+
+    var title: String {
+        switch self {
+        case .pin(let pinned): MobileShelfFaces.pinDoorTitle(pinned: pinned)
+        case .star(let starred): MobileStarsModel.doorTitle(starred: starred)
+        case .archiveDailyJournal: MobileShelfFaces.archiveDailyJournalDoorTitle
+        case .delete(let kind): MobileShelfFaces.deleteDoorTitle(for: kind)
+        }
     }
 }

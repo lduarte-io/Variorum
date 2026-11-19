@@ -115,6 +115,18 @@ final class MobileShelfViewModel {
             isDaily: showingDailyMarker && book.reading.id == dailyBookID)
     }
 
+    /// **The row's long-press menu, as data** (VM-83, W-071): the acts in the
+    /// order the view draws them. `starred` is the stars model's answer (the
+    /// Star door's own state source).
+    func rowActs(for book: Queries.ShelfBook, starred: Bool) -> [MobileShelfRowAct] {
+        [
+            .pin(pinned: pins.contains(book.reading.id)),
+            .star(starred: starred),
+            MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading)
+                ? .archiveDailyJournal : .delete(book.reading.kind),
+        ]
+    }
+
     /// Pin / unpin (parity C2 — the [B1] record's deliberately-deferred
     /// ACT; the phone has RENDERED pin order since S3): one reversible
     /// toggle through the core's own `setShelfPinned` (append-to-pin-order

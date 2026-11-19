@@ -85,6 +85,28 @@ final class MobileMembershipModel {
         reading.kind == .book
     }
 
+    /// **Whether a row carries Diverge** (VM-81, W-110).
+    nonisolated static func rowCarriesDiverge(_ reading: Reading) -> Bool {
+        true
+    }
+
+    /// The small kind word a membership row wears after its name (VM-83,
+    /// W-073), or nil for a book.
+    nonisolated static func kindMark(for reading: Reading) -> String? {
+        reading.kind == .gathering ? "smart" : nil
+    }
+
+    /// A membership row's name (VM-21, F5).
+    nonisolated static func memberRowName(for reading: Reading) -> String {
+        MobileShelfFaces.name(for: reading)
+    }
+
+    /// An "Add to a book" row's label, before the face's "+ " (VM-21, F5): a
+    /// book by its name, a gathering by its name and the R98 road.
+    nonisolated static func addRowLabel(for reading: Reading) -> String {
+        reading.kind == .gathering ? "\(reading.name) (by tagging)" : reading.name
+    }
+
     // MARK: - Reads
 
     func refresh() async {
@@ -279,22 +301,24 @@ struct MobileMembershipSheet: View {
         } else {
             ForEach(model.books, id: \.id) { book in
                 HStack(spacing: 10) {
-                    Text(tokens.chromeLabel(MobileShelfFaces.name(for: book)))
+                    Text(tokens.chromeLabel(MobileMembershipModel.memberRowName(for: book)))
                         .font(tokens.body)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
-                    if book.kind == .gathering {
-                        Text(tokens.chromeLabel("smart"))
+                    if let mark = MobileMembershipModel.kindMark(for: book) {
+                        Text(tokens.chromeLabel(mark))
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)
                     }
                     Spacer()
-                    Button(tokens.chromeLabel("diverge")) {
-                        Task { await model.diverge(for: book) }
+                    if MobileMembershipModel.rowCarriesDiverge(book) {
+                        Button(tokens.chromeLabel("diverge")) {
+                            Task { await model.diverge(for: book) }
+                        }
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .buttonStyle(.plain)
                     }
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .buttonStyle(.plain)
                     if MobileMembershipModel.rowCarriesRemove(book) {
                         Button(tokens.chromeLabel("remove")) {
                             Task { await model.remove(from: book) }
@@ -318,12 +342,16 @@ struct MobileMembershipSheet: View {
                     .foregroundStyle(tokens.faint)
                     .padding(.top, 6)
                 ForEach(model.addableBooks, id: \.id) { book in
-                    addRow(book.name) { await model.add(to: book) }
+                    addRow(MobileMembershipModel.addRowLabel(for: book)) {
+                        await model.add(to: book)
+                    }
                 }
                 // R98: smart books collect by filter — adding IS tagging,
                 // and the door says so.
                 ForEach(model.addableSmartBooks, id: \.id) { book in
-                    addRow("\(book.name) (by tagging)") { await model.collect(into: book) }
+                    addRow(MobileMembershipModel.addRowLabel(for: book)) {
+                        await model.collect(into: book)
+                    }
                 }
             }
         }

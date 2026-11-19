@@ -81,6 +81,33 @@ final class MobileCreateBookModel {
         return true
     }
 
+    // MARK: - The sheet's words (VM-83, W-073 — pure, so they are pinned)
+
+    /// The kind door's word.
+    nonisolated static func kindLabel(_ kind: BookKind) -> String {
+        switch kind {
+        case .notes: return "Book"
+        case .journal: return "Journal Book"
+        case .smartFromTags: return "Smart Book"
+        }
+    }
+
+    /// The caption under the kind row — what the chosen kind makes.
+    nonisolated static func caption(for kind: BookKind) -> String {
+        switch kind {
+        case .notes:
+            return "A book holds a hand-picked, ordered note list."
+        case .journal:
+            return "A journal book holds dated entries, one after another."
+        case .smartFromTags:
+            return "A smart book collects notes by these tags — the tags stay on the notes."
+        }
+    }
+
+    /// The tag picker's empty state.
+    nonisolated static let noTagsLine =
+        "No tags yet — notes get tags first; a smart book collects by them."
+
     /// The spec construction IS the promotion (the Mac
     /// `PromoteTagsSheet.spec`'s exact rule, mirrored): OR → `tags`,
     /// AND → `tagsAll`.
@@ -261,21 +288,14 @@ struct MobileCreateBookSheet: View {
     }
 
     private var caption: String {
-        switch model.kind {
-        case .notes:
-            return "A book holds a hand-picked, ordered note list."
-        case .journal:
-            return "A journal book holds dated entries, one after another."
-        case .smartFromTags:
-            return "A smart book collects notes by these tags — the tags stay on the notes."
-        }
+        MobileCreateBookModel.caption(for: model.kind)
     }
 
     private var kindRow: some View {
         HStack(spacing: 18) {
-            kindDoor("Book", .notes)
-            kindDoor("Journal Book", .journal)
-            kindDoor("Smart Book", .smartFromTags)
+            ForEach(MobileCreateBookModel.BookKind.allCases, id: \.self) { kind in
+                kindDoor(MobileCreateBookModel.kindLabel(kind), kind)
+            }
             Spacer()
         }
     }
@@ -295,7 +315,7 @@ struct MobileCreateBookSheet: View {
     private var tagPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             if model.tags.isEmpty {
-                Text(tokens.chromeLabel("No tags yet — notes get tags first; a smart book collects by them."))
+                Text(tokens.chromeLabel(MobileCreateBookModel.noTagsLine))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
             } else {

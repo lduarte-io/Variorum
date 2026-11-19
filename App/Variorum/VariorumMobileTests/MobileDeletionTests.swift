@@ -456,12 +456,12 @@ struct MobileDeletionTests {
                     session: session, readingID: readingID, tokens: .terminalLight)
             ) { surface in
                 await surface.settle(30)
-                #expect(surface.activate(MobileShelfFaces.deleteBookDoorTitle),
+                #expect(surface.activate(MobileShelfFaces.deleteDoorTitle(for: .book)),
                         "labels were \(surface.visibleLabels)")
                 await surface.settle(40)
                 let alert = try #require(surface.presentedAlert,
                                          "the confirm must actually present")
-                #expect(alert.title == MobileShelfFaces.deleteBookConfirmTitle)
+                #expect(alert.title == MobileShelfFaces.deleteConfirmTitle(for: .book))
                 #expect(alert.message?.contains("Field Notes") == true,
                         "the confirm names what it destroys (principle M-E)")
                 #expect(alert.message?.contains(
@@ -504,7 +504,7 @@ struct MobileDeletionTests {
                 shelf.requestDeleteBook(book)
                 await surface.settle(40)
                 let alert = try #require(surface.presentedAlert)
-                #expect(alert.title == MobileShelfFaces.deleteBookConfirmTitle)
+                #expect(alert.title == MobileShelfFaces.deleteConfirmTitle(for: .book))
                 #expect(alert.message?.contains("Shelf Book") == true)
             }
         }
@@ -517,7 +517,7 @@ struct MobileDeletionTests {
             .contains(RecoveryCopy.deleteBookKeepsItsNotes))
         #expect(MobileShelfFaces.deleteBookConfirmDetail(name: nil)
             .hasPrefix("The book goes"))
-        #expect(MobileShelfFaces.deleteBookDoorTitle == "Delete Book…")
+        #expect(MobileShelfFaces.deleteDoorTitle(for: .book) == "Delete Book…")
     }
 }
 

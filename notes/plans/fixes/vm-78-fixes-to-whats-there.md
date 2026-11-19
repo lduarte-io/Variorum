@@ -393,11 +393,25 @@ flight.***
 | Piece | State | Pin (TYPE name for `-only-testing`) |
 |---|---|---|
 | The hoist (words) | DONE (`68f7e7eab`) — Mac `build` GREEN | the Mac's existing copy pins (Mac leg) |
-| VM-21's hoist (the collect receipt family) | DONE (this commit) — Mac `build` GREEN | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
-| Seams + pins (all three members) | NOT-STARTED | — |
+| VM-21's hoist (the collect receipt family) | DONE (`4118af9b3`) — Mac `build` GREEN | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
+| Seams + pins (all three members) | DONE (this commit) — phone `build-for-testing` GREEN (unsigned, generic sim); every pin compiles against this tree; red-on-old **PENDING** (stage window) | see the members' rows |
 | VM-81 | NOT-STARTED | — |
 | VM-83 | NOT-STARTED | — |
 | VM-21 | NOT-STARTED | — |
+
+**The seam commit (the "old" of the revert recipe).** Each pin needs a testable surface the fix then changes, so the
+seam commit adds those surfaces with the SHIPPED behaviour, byte for byte, and wires the faces through them:
+`MobileBookDetailsModel` — `finishRowAct(for:)` (always drawn: finish/reopen by `locked`), `finishCaption(for:)` (the
+shipped two captions), `FinishConfirm` + `pendingFinish` + `requestFinish()` (acts at once, as shipped) +
+`confirmFinish(_:)` / `cancelFinish()` / `finishConfirmPresented`, `offersUnarchive` + `unarchive()` (never drawn: an
+archived book never resolved); `MobileMembershipModel` — `rowCarriesDiverge` (always true), `kindMark(for:)`
+("smart"), `memberRowName(for:)`, `addRowLabel(for:)` (bare names); `MobileShelfFaces` — `deleteDoorTitle(for:)` /
+`deleteConfirmTitle(for:)` (always the book's words) and `MobileShelfRowAct` (pin · star · archive/delete), with
+`MobileShelfViewModel.rowActs(for:starred:)` and the row's `.contextMenu` rendering it in the shipped order;
+`MobileCreateBookModel` — `kindLabel(_:)`, `caption(for:)`, `noTagsLine` (the shipped words). Pins:
+`VariorumMobileTests/MobileBookFixesTests.swift`; the existing tests whose words change (`MobileBookDetailsTests`,
+`MobileShellTests`, `MobileWalkTests`, `MobileDeletionTests`) were edited in the same commit to the new words / the
+kind-aware seam functions, so they are pins too.
 
 **What moved, and where (the hoist — words only; every Mac string byte-identical):**
 - `App/Variorum/Shared/BookStateCopy.swift` (new) declares `enum BookStateCopy` with `finishVerb`, `reopenVerb`,
@@ -419,6 +433,15 @@ flight.***
   moved verbatim from the Mac's `Core/Views/MembershipChoice.swift` — the chip's receipt composer, which the phone's
   membership sheet (the chip's twin) now speaks. Both Mac files now extend the shared enums; the board's own
   `collectReceipt` / `alreadyShowing`, the shelf verbs and the chip's other words stay Mac-side.
+
+**Her rulings on this batch's two forks (2026-11-19, in the orchestrator's session; relayed by the orchestrator) —
+RULED, not PROVISIONAL. Her words, verbatim:** "book order - that's fine to leave it for wave 3. 2 - collect receipt
+your choice is fine."
+1. **The shelf's order** becomes a–z, digit-aware, starred first (`BookcaseBoard.ordered(…, mode: .alphabetical)`);
+   the visible "a–z or last edited" choice is left to the Bookcase's real chrome in wave 3 (VM-113). No order door
+   is built here.
+2. **The collect receipt** is kept and made true (it names the star; it is honest when the gathering is archived).
+   "Should this line exist at all" still goes on the list for her wording pass.
 
 ### BATCH C — the probe and the red test (VM-17 · VM-24, which carries VM-19) — EDITOR SEAM, test and badge code
 

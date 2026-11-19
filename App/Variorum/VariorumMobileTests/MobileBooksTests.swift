@@ -315,8 +315,9 @@ struct MobileBookDetailsTests {
 
             let smart = MobileBookDetailsModel(session: session, readingID: smartID)
             await smart.refresh()
-            #expect(smart.tagPaths == ["sea"], "a smart book's tags are its own spec")
-            #expect(smart.metaLine == "smart · #sea")
+            #expect(smart.tagPaths == ["sea"], "a gathering's tags are its own rule")
+            // VM-83 (W-073): the kind word is "gathering", never "smart".
+            #expect(smart.metaLine == "gathering · #sea")
 
             #expect(MobileBookView.detailsDoorTitle == "Details")
         }
