@@ -334,7 +334,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-60 | DONE (9462d3854) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 2a — VM-61 | IN-PROGRESS — built, pinned and pushed (both targets build-for-testing green); READY for its stage window, results PENDING — the record is under "Batch 2a record" |
-| Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line |
+| Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | IN-PROGRESS — a fresh implementer; its record and LIVE STATUS are under "Batch 2b record" |
 | Batch 3 — VM-63 | NOT-STARTED |
 | Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
@@ -836,25 +836,30 @@ a take's delete or archive in the takes browser (VM-186; draft "Take deleted"); 
 8. `Takes/MobileBlockHistory.swift` — "Committed — a saved moment of this take is kept."
 9. `Shared/BlockHistoryFace.swift` via `Takes/MobileBlockHistory.swift` — "Saved moment restored into this take — the
    moments themselves are never overwritten, so nothing was lost." · "Take unarchived — it's back in this block's fan." ·
-   "Take put back — it's in this block's fan again." · "Take put back — it was archived, so it's in this block's archived
-   takes, not the fan. Unarchive it there to bring it back." · the bring-back-an-original receipts (`PreservedOriginPutBack`).
+   "Take put back — it's in this block's fan again." · ~~"Take put back — it was archived, so it's in this block's archived
+   takes, not the fan. Unarchive it there to bring it back."~~ (called back — a direction, P-55-11, batch 2b) · the
+   bring-back-an-original receipt "Put back where it came from." (`PreservedOriginPutBack`) — ~~its end-of-note edition~~
+   (called back, P-55-11).
 10. `Shared/RecoveryCopy.swift` via `Write/MobileNoteTray.swift` and `Shell/MobileTrashModel.swift` (Put back) — "Put back
-    where it was." · "Put back where it came from." · the end-of-note and unplaced landings (`putBackAtEnd`,
-    `putBackUnplaced`) · "‹Kind› put back." · "“‹book›” is back with its note." / "… with its ‹N› notes." · "Take put back
-    — it was archived when it was deleted, so it's among its block's archived takes, not the fan. Unarchive it there to
-    bring it back." (and the active-take edition).
+    where it was." · "Put back where it came from." · ~~the end-of-note and unplaced landings (`putBackAtEnd`,
+    `putBackUnplaced`)~~ (called back — directions, P-55-11, batch 2b) · "‹Kind› put back." · "“‹book›” is back with its
+    note." / "… with its ‹N› notes." · ~~"Take put back — it was archived when it was deleted, so it's among its block's
+    archived takes, not the fan. Unarchive it there to bring it back."~~ (called back, P-55-11) (and the active-take
+    edition, "Take put back.", which stays silent).
 11. `Shell/MobileArchiveModel.swift` — "Unarchived — it's back in the library."
 12. `Shared/VersionsCopy.swift` via `Write/MobileVersions.swift` — "The note says this again — and where it was a moment
     ago is saved in Versions, so you can go back." · "This moment is a note of its own now, in the Library. It has left
     Versions."
-13. `Write/MobileMembership.swift` — "Added to “‹book›”." · "Added by tagging #‹tags› — “‹book›” collects by filter." ·
-    "Removed from “‹book›” — the note itself is untouched." · "Diverged — “‹book›” holds the copy now, in the same place;
-    the original is untouched elsewhere."
+13. `Write/MobileMembership.swift` — "Added to “‹book›”." · ~~"Added by tagging #‹tags› — “‹book›” collects by
+    filter."~~ (called back — a direction, P-55-11, batch 2b) · "Removed from “‹book›” — the note itself is untouched." ·
+    "Diverged — “‹book›” holds the copy now, in the same place; the original is untouched elsewhere."
 14. `Takes/MobileLenses.swift` — "Adopted — the note now shows this view. The old arrangement is kept as the lens
     “‹name›”." · "Take unarchived — this lens is showing its pick again." · "Take put back — this lens is showing its pick
-    again." (and its archived edition).
+    again." · ~~its archived edition, "Take put back — it came back archived, so this pick still shows the note's take.
+    Restore again to unarchive it."~~ (called back — a direction, P-55-11, batch 2b).
 
 The models still hold each sentence (the pins read them); calling one back is a one-word class change at its door.
+*(Struck lines: called back by P-55-11 — the orchestrator's ruling, applied by batch 2b; see "Batch 2b record".)*
 
 #### Raw-error sites carried over for batch 2b (VM-62)
 
@@ -1000,6 +1005,33 @@ Kept as 2a built, on her ratify list: P-55-3 (a refusal fades on the seam's cloc
 draw a refusal that stays until her ✕ or next act) · P-55-4 · P-55-5 · P-55-6 · P-55-8 · P-55-9 · P-55-10 · the
 commit's line silent in Block History (the note-write mockup keeps a commit line with "Name…" for the future
 quick row — that face is its own ticket's).
+
+### Batch 2b record
+
+**What this batch did NOT do (first, by the protocol):** *(kept current; final at the batch's close)* nothing under
+`Features/Protection/`, `Shared/Protection/`, `Sources/VariorumCore/Sync/`, custody/keychain code or
+`Shared/AppBootstrap.swift`; no Core change; no seam behaviour or control flow changed in the editor-seam files (the
+error-to-words expressions only — each line named below); no Mac sentence changed; no restyle; no new undo road. The
+use-shaped simulator walk is the run's, at the end.
+
+Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch
+`vm-55-wings-underneath`. Reading done in full before code: CLAUDE.md + loaded canon, MobileSoul §1–§5, the resiliency
+protocol, the catch-up plan's inherited rules, umbrella-02, sitting-1 rulings, audit A §1D/§1F/§1I/§3.1, audit C N1/N5/§2.11,
+audit B §0.6/I3/I4/M2, this file whole (2a's record whole, the orchestrator's check), SurfaceContracts' Messages and wing
+bullets, the note-write mockup's D and G4 build notes, TEXTKIT2_NOTES §0/§4 (the seam files are touched in expressions
+only). DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental, both targets).
+
+#### Batch 2b LIVE STATUS
+
+| Piece | State |
+|---|---|
+| Record skeleton | DONE (this commit) |
+| P-55-11 — a direction keeps its line (Trash, tray, Block History, lenses, membership; the shared answer) | IN-PROGRESS — code + pins written, both targets build-for-testing green before commit; results PENDING (the stage window) |
+| VM-62 pin (red on this tree) | NOT-STARTED |
+| VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | NOT-STARTED |
+| VM-62 fix | NOT-STARTED |
+| Phone + Mac `build-for-testing` at the batch's last code commit | NOT-STARTED |
+| Stage window (2a's suites + 2b's; red-on-old) | NOT-STARTED — READY at the end; no revert is in flight |
 
 ## Ladder
 

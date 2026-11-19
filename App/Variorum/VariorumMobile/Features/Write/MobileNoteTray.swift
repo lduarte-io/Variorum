@@ -253,7 +253,8 @@ final class MobileNoteTrayModel {
             let landing = try await session.runner.run { ops in
                 try ops.unarchiveBlock(blockID)
             }
-            report(.receipt(RecoveryCopy.landingReceipt(landing)))
+            report(.receipt(RecoveryCopy.landingReceipt(landing)),
+                   direction: RecoveryCopy.isDirection(landing))
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -268,7 +269,8 @@ final class MobileNoteTrayModel {
             let landing = try await session.runner.run { ops in
                 try ops.restoreBlock(blockID)
             }
-            report(.receipt(RecoveryCopy.landingReceipt(landing)))
+            report(.receipt(RecoveryCopy.landingReceipt(landing)),
+                   direction: RecoveryCopy.isDirection(landing))
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -281,8 +283,9 @@ final class MobileNoteTrayModel {
     func putBackOriginal(_ blockID: String) async {
         status = nil
         do {
-            report(.receipt(try await PreservedOriginPutBack.run(
-                session: session, postID: postID, blockID: blockID)))
+            let answer = try await PreservedOriginPutBack.answer(
+                session: session, postID: postID, blockID: blockID)
+            report(.receipt(answer.receipt), direction: answer.isDirection)
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -299,7 +302,8 @@ final class MobileNoteTrayModel {
             let restored = try await session.runner.run { ops in
                 try ops.restoreVariant(variantID)
             }
-            report(.receipt(RecoveryCopy.takeRestoredReceipt(restored)))
+            report(.receipt(RecoveryCopy.takeRestoredReceipt(restored)),
+                   direction: RecoveryCopy.isDirection(restored))
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -370,10 +374,14 @@ final class MobileNoteTrayModel {
     /// VM-61: spoken on the phone's one line. A Put back here is a
     /// restoration — an ordinary act, no line (PROVISIONAL P-55-4); a take's
     /// Delete Now took something off the page for good (`removal`, no Undo —
-    /// a purge has no road back); a refusal always speaks.
-    private func report(_ status: RecoveryStatus, removal: Bool = false) {
+    /// a purge has no road back); a refusal always speaks. P-55-11: a Put back
+    /// that landed somewhere other than where she would look (`direction`)
+    /// keeps its line in P-55-7's class; the model's record stays a receipt.
+    private func report(
+        _ status: RecoveryStatus, removal: Bool = false, direction: Bool = false
+    ) {
         self.status = status
-        let line: MobileLine.Class = status.isRefusal
+        let line: MobileLine.Class = status.isRefusal || direction
             ? .refusal : (removal ? .removal(nil) : .ordinary)
         MobileLine.say(status.text, as: line, session: session)
     }

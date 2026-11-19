@@ -131,10 +131,14 @@ final class MobileTrashModel {
         lastError = nil
         receipt = nil
         do {
-            receipt = try await TrashPutBack.run(session: session, item: item)
+            let answer = try await TrashPutBack.answer(session: session, item: item)
+            receipt = answer.receipt
             // VM-61: a Put back is a restoration — an ordinary act, no line
             // (PROVISIONAL P-55-4); the row leaving the Trash is the answer.
-            MobileLine.say(receipt, as: .ordinary, session: session)
+            // P-55-11: unless it landed somewhere other than where she would
+            // look (the end of the note, set aside, among the archived takes)
+            // — a direction keeps its line, in P-55-7's class.
+            MobileLine.say(receipt, as: answer.isDirection ? .refusal : .ordinary, session: session)
         } catch let error as OperationError {
             // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
             // 6c cold review's n5 retired the one-line forward — the Archive

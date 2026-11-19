@@ -51,9 +51,10 @@ final class MobileMembershipModel {
     private(set) var status: String?
 
     /// VM-61: the slot speaks on the phone's one line with the class its door
-    /// gives it — joining, collecting, leaving a book and diverging are
-    /// ordinary acts (no line — her ruling; leaving a book takes a pointer
-    /// away, never the note: PROVISIONAL P-55-4); a refusal always speaks.
+    /// gives it — joining, leaving a book and diverging are ordinary acts (no
+    /// line — her ruling; leaving a book takes a pointer away, never the
+    /// note: PROVISIONAL P-55-4); a refusal always speaks, and so does a
+    /// gathering's collect-by-tagging, a direction (PROVISIONAL P-55-11).
     private func say(_ text: String, as line: MobileLine.Class) {
         status = text
         MobileLine.say(text, as: line, session: session)
@@ -143,11 +144,12 @@ final class MobileMembershipModel {
                 try ops.collectPostIntoSmartReading(postID, into: book.id)
             }
             // Already matching did nothing — a refusal (a door that did
-            // nothing says so); a tagging that seats it is ordinary.
+            // nothing says so). A tagging that seats it applied tags she did
+            // not ask for by name — a direction (P-55-11), in P-55-7's class.
             if result.alreadyMatched {
                 say("Already collected — it matches “\(book.name)”'s filter.", as: .refusal)
             } else {
-                say("Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter.", as: .ordinary)
+                say("Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter.", as: .refusal)
             }
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {

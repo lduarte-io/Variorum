@@ -112,16 +112,44 @@ enum TrashPutBack {
         case bookWhole(notes: Int)
         /// The op reports no landing of its own.
         case plain
+
+        /// **P-55-11 (VM-55 batch 2b) — a put back that is a DIRECTION**: the
+        /// act landed somewhere other than where she would look for it — a
+        /// block at the end of its note or set aside because its place is
+        /// gone, a take back among the ARCHIVED takes rather than in the fan.
+        /// A fact of the outcome, so it lives beside it; each platform's face
+        /// decides what a direction draws (the phone's one line keeps it, in
+        /// the refusal class — P-55-7's "a direction she must see").
+        var isDirection: Bool {
+            switch self {
+            case .block(let landing): return RecoveryCopy.isDirection(landing)
+            case .take(let status): return RecoveryCopy.isDirection(status)
+            case .bookWhole, .plain: return false
+            }
+        }
+    }
+
+    /// The receipt AND whether it is a direction (P-55-11) — `run`'s whole
+    /// answer, for a face that shows a direction differently from a plain
+    /// put back. `run` forwards here, so its receipt is byte-identical.
+    nonisolated struct Answer: Equatable, Sendable {
+        let receipt: String
+        let isDirection: Bool
     }
 
     /// Puts one Trash row back; returns the RECEIPT to show.
     static func run(session: AppSession, item: Queries.TrashItem) async throws -> String {
+        try await answer(session: session, item: item).receipt
+    }
+
+    /// Puts one Trash row back; returns the receipt and its direction flag.
+    static func answer(session: AppSession, item: Queries.TrashItem) async throws -> Answer {
         // A preserved original was never DELETED — putting it back means
         // PLACING it, which is the shared composition's job (it re-reads its
         // landing at act time, because a listing is a projection).
         if item.kind == .preservedOriginal {
             guard let noteID = item.noteID else { throw RecoveryRefusal.originalHasNoNote }
-            return try await PreservedOriginPutBack.run(
+            return try await PreservedOriginPutBack.answer(
                 session: session, postID: noteID, blockID: item.id)
         }
         let database = session.database
@@ -152,13 +180,15 @@ enum TrashPutBack {
                 return .plain  // handled above
             }
         }
+        let receipt: String
         switch outcome {
-        case .block(let landing): return RecoveryCopy.landingReceipt(landing)
-        case .take(let status): return RecoveryCopy.takeRestoredReceipt(status)
-        case .bookWhole(let notes): return RecoveryCopy.bookPutBackWhole(item.title, notes: notes)
+        case .block(let landing): receipt = RecoveryCopy.landingReceipt(landing)
+        case .take(let status): receipt = RecoveryCopy.takeRestoredReceipt(status)
+        case .bookWhole(let notes): receipt = RecoveryCopy.bookPutBackWhole(item.title, notes: notes)
         // VX-611: a gathering's row says "Gathering put back."
-        case .plain: return RecoveryCopy.putBackReceipt(item.kind, isGathering: item.isGathering)
+        case .plain: receipt = RecoveryCopy.putBackReceipt(item.kind, isGathering: item.isGathering)
         }
+        return Answer(receipt: receipt, isDirection: outcome.isDirection)
     }
 }
 
@@ -272,6 +302,16 @@ enum PreservedOriginPutBack {
     static func run(
         session: AppSession, postID: String, blockID: String
     ) async throws -> String {
+        try await answer(session: session, postID: postID, blockID: blockID).receipt
+    }
+
+    /// The receipt and whether it is a DIRECTION (P-55-11): an original with
+    /// no successor left to land beside goes to the END of the note — the
+    /// `putBackAtEnd` landing, somewhere other than where it stood. `run`
+    /// forwards here, so its receipt is byte-identical.
+    static func answer(
+        session: AppSession, postID: String, blockID: String
+    ) async throws -> TrashPutBack.Answer {
         // 13l row 26: the home's KIND rides the same read the landing does —
         // the "at the end" sentence names what it landed IN, and a scraps
         // area is not a note. `.post` is the fallback only where the row has
@@ -287,7 +327,9 @@ enum PreservedOriginPutBack {
         try await session.runner.run { ops in
             _ = try ops.placeBlock(blockID, in: postID, at: insert)
         }
-        return landing == nil ? RecoveryCopy.putBackAtEnd(home) : RecoveryCopy.putBackBeside
+        return landing == nil
+            ? TrashPutBack.Answer(receipt: RecoveryCopy.putBackAtEnd(home), isDirection: true)
+            : TrashPutBack.Answer(receipt: RecoveryCopy.putBackBeside, isDirection: false)
     }
 }
 

@@ -484,6 +484,9 @@ final class MobileLensesModel {
         }
         do {
             let receipt: String
+            // P-55-11: a take that came back ARCHIVED leaves the pick still
+            // dangling — a direction she must see, kept in P-55-7's class.
+            var line = MobileLine.Class.ordinary
             switch dangle.state {
             case .archived:
                 try await session.runner.run { ops in
@@ -497,13 +500,14 @@ final class MobileLensesModel {
                 receipt = restored == .archived
                     ? Self.restoredDeletedButArchived
                     : Self.restoredDeleted
+                if RecoveryCopy.isDirection(restored) { line = .refusal }
             case .gone, .foreign:
                 return  // unreachable — the guard above
             }
             await editor?.refreshTakesFromStore()
             await refresh()
             if let activeLensID { await activate(activeLensID) }
-            say(receipt, as: .ordinary)
+            say(receipt, as: line)
         } catch {
             say(Self.refusalMessage(error), as: .refusal)
         }
