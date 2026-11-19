@@ -91,12 +91,14 @@ final class MCPSession: @unchecked Sendable {
     private var announceGate = MCPAnnounceGate()
 
     /// Hear one of the gate's events (the transport's report, the client's
-    /// `initialized`, its first served request).
+    /// `initialized`, its first served request). The event that OPENS the gate
+    /// with an announce remembered sends the one catch-up.
     private func hear(_ event: MCPAnnounceGate.Event) {
         #if DEBUG
         gateEventProbe?(event)
         #endif
-        _ = lock.withLock { announceGate.hear(event) }
+        guard lock.withLock({ announceGate.hear(event) }) else { return }
+        Task { [self] in try? await server.notify(ToolListChangedNotification.message()) }
     }
 
     /// The client's self-declared name, once `initialize` has run — and,
@@ -692,8 +694,14 @@ final class MCPSession: @unchecked Sendable {
     /// VX-258: a connection whose key still waits for her OK has nothing new
     /// to read; the moment she allows it (the binding is part of the grants
     /// fingerprint), it is told.
+    ///
+    /// VX-951 (the VX-981 run, batch 3 — her R-981-3): and only through this
+    /// connection's gate — while it is shut (the `initialize` answer not yet
+    /// written, or the client not yet ready) the announce is remembered, and
+    /// the gate's opening sends exactly one (`hear`).
     func announceToolsChanged() async {
         guard declaredName != nil, (try? awaitsHerOK()) == false else { return }
+        guard lock.withLock({ announceGate.announce() }) else { return }
         try? await server.notify(ToolListChangedNotification.message())
     }
 
