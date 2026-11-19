@@ -88,10 +88,11 @@ public struct StructuralFlightFence: Equatable, Sendable {
         return .awaitSettle
     }
 
-    /// The face re-read the surface. True when a drain is now owed (the
-    /// fence was settling); false when there was nothing to wait for. The
-    /// fence stays up until the drain actually runs.
-    public mutating func surfaceSettled() -> Bool {
+    /// A QUERY, asked once the face has re-read the surface and found it holds
+    /// the store: is a drain owed now? True when the fence was settling; false
+    /// when there was nothing to wait for. It changes nothing — the fence
+    /// stays up until the drain actually runs.
+    public func surfaceSettled() -> Bool {
         phase == .settling
     }
 
