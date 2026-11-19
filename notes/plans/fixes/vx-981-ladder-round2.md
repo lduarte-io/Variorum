@@ -74,3 +74,22 @@ BLOCKER 0 · MAJOR 0 · MINOR 1 (R2-F1) · NIT 3 (R2-N1, R2-N2, R2-N3). No new B
 9. **Authored sentences** — none new or changed in the round (searched the added literals: only test fixtures and comments).
 
 **Also checked:** commit messages carry the mechanism and the pin and no attribution trailer (all 18 commits of the round); the release-configuration split is not regressed by the round (the new suite and helpers use no DEBUG-only member; the GUARD lives in the `#if DEBUG` order file; `receiptRunLine`'s only readers are in the Debug-only app test target); the GATE TYPES list covers every app test type that reads `agentShow`, the trail's forget, `lastShow`/⌥⌘O or the receipt run (searched); the LIVE STATUS table and THE LEDGER read true against PASS 2's dispositions at this HEAD (F3's pattern did not recur), but for R2-N2's cast line.
+
+## IMPLEMENTER RESPONSES AND FIXES — round 2
+
+*(The implementer that built round 1's PASS 2, same-model flow: agree/dispute per finding, the orchestrator's arbitration in the run record's `### ROUND 2` applied. Read in this session: this file whole; the run record's `### ROUND 2`; the four gone arms of `MCPDoor` (`takeShowOffer`, `landAsk`, `openShow`, `agentShow`'s move arm), `MCPDoor+Trail.openTrailEntry`, `MCPTrail.forget` / `placeKey` / `land`, `MCPDoor.showTargetStands`, and every app pin on `lastShow` / ⌥⌘O. A final round's fixes: the diff is kept to what the calls ask, and the lines changed per finding are named below. No `Shared/`, capability, `Sync/`, core, schema or editor-seam line.)*
+
+**LIVE STATUS (flipped in the same commit as each piece):**
+
+| Piece | State |
+|---|---|
+| R2-F1-P — the two app-target pins, committed before the fix | DONE (this commit) — see R2-F1 below |
+| R2-F1-F — ONE place-match helper on all four gone roads | NOT-STARTED |
+| R2-N1 — the three test docs said as the code does | NOT-STARTED |
+| R2-N2 — the record's (closed by the orchestrator at `919bd322c`) | DONE — nothing for the implementer |
+| R2-N3 + P-981-L1-1's QUESTIONS text rewritten (in round 1's PASS 2 section) | NOT-STARTED |
+| V — targeted headless runs; `build-for-testing` at the closing tip; each red leg checked to reverse-apply clean and compile | NOT-STARTED |
+
+No revert is in flight.
+
+**R2-F1 — AGREE, and fix (a) as arbitrated.** *Traced (inputs → wrong state):* `takeShowOffer`'s and `landAsk`'s gone arms (`MCPDoor.swift`) forget the place's rows and refuse, and never read or write `lastChange`; `openShow`'s retires it only on `lastChange?.target == change.target`. A last change is one value keyed on its receipt's exact target, and receipts on one note carry different shapes by act (`.takes(n, b)`, `.note(n, b, nil)`, `.note(n, nil, nil)`), so (1) a client's write on n then its ask on n, n deleted, her take → the ask let go, the rows gone, ⌥⌘O still lit (`aiLastChangeAvailable` = `showOffer != nil || lastShow != nil`); (2) client A's `.takes(n, b1)` row, client B's `.note(n, b2, nil)` last change, n deleted, her press on A's row → `openShow(.takes(n, b1))` → both rows forgotten, ⌥⌘O still lit. **Why retiring by PLACE never drops a change she can still open (the dispute test, failed):** `showTargetStands` decides at exactly `MCPTrail.placeKey`'s grain — the note-family targets (`.note`, `.takes`, `.lens`, `.compare` by its anchor) all re-read `mcpNoteFacts(noteID)`, the key `note:‹id›`; a version re-reads its note and `isVersionHistory` under the key `version:‹id›` (a version is one note's); a book `reading(id)` under `book:‹id›`; a wing `wingIsLive` under `wing:‹id›` — so any last change on a place proved gone would itself re-read gone, and its press could only refuse. No pinned behaviour breaks: every app pin asserting a last change STAYS (`MCPTrailTests`' dismiss and Clear All, `MCPNavigationTests`' grey/lit pair, the receipt guards) presses no gone place.
