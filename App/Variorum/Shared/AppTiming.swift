@@ -102,7 +102,8 @@ nonisolated enum AppTimingSeries: String, TimingSeriesKey {
     /// Library listing deliveries (redraws) in the second after a save.
     case libraryRedrawsPerSave
     /// Savepoint attempts inside one leaving — a note's pop, or the app's
-    /// backgrounding with everything it sets off (audit F 6C: up to three).
+    /// backgrounding with everything it sets off (audit F 6C: up to three;
+    /// VM-71: one per note that owes one — `savepointAttempt` below).
     case savepointsPerLeaving
 
     var signpostName: StaticString {
@@ -158,7 +159,12 @@ nonisolated enum AppTimingCounter: String, TimingCounterKey {
     case booklessDelivery
     /// One autosave write landed (a take's buffer).
     case autosaveWrite
-    /// One `savepointOnLeaving` attempt.
+    /// One leaving savepoint the store's runner was asked to write. Until
+    /// VM-71 every `savepointOnLeaving` call was one; since VM-71 the phone
+    /// asks the runner only for a note its read found owing one (a take that
+    /// differs from its last savepoint), so a repeated ask in one leaving that
+    /// finds nothing owed is not an attempt. The same quantity before and
+    /// after: runner turns for a leaving savepoint.
     case savepointAttempt
     /// A note was left (popped) / the app was left (backgrounded).
     case noteLeaving
@@ -274,7 +280,8 @@ nonisolated enum AppTiming {
         openLeavingWindow()
     }
 
-    /// `AppSession.savepointOnLeaving` was asked to run.
+    /// `AppSession.savepointOnLeaving` asked the runner for a leaving
+    /// savepoint (on the phone, only when something was owed — VM-71).
     static func savepointAttempted() { recorder.count(.savepointAttempt) }
 
     /// An autosave write is about to land: the wake-ups it sets off are counted

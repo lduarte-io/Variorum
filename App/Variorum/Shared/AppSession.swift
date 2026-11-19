@@ -643,7 +643,10 @@ final class AppSession {
     /// half of the ruling; everything that DECIDES anything (the dedupe, the
     /// cadence modes, the seal, the vanished container) lives in
     /// `Operations.closeAutoCommit`, so a second platform owes a hook, never
-    /// a rule (MobileSoul's brains-in-core line).
+    /// a rule (MobileSoul's brains-in-core line). *(VM-71: the phone asks the
+    /// same rule first as a READ — `Queries.leavingSavepointCandidates`, Core
+    /// too — and hands the runner only the takes owed; the branch below says
+    /// why. The Mac's road is unchanged.)*
     ///
     /// **Flush-first is load-bearing, not tidiness:** `closeAutoCommit` reads
     /// `working_text` ROWS, and the leaving gesture arrives inside the
@@ -658,6 +661,7 @@ final class AppSession {
     /// is already gone — nothing was lost, because the flush landed the text
     /// and the next leaving tries again.
     func savepointOnLeaving(_ postID: String) async {
+        #if os(macOS)
         AppTiming.savepointAttempted() // VM-65 (inert on the Mac — `AppTiming`)
         // The EXISTING coordinator, never a minted one: a post no surface
         // opened has nothing pending by construction, and minting here would
@@ -671,23 +675,75 @@ final class AppSession {
         // through it, which is why its filing flushes before it savepoints
         // and why it now RELEASES the entry afterwards. The reasoning above
         // stands on its own; the example was simply wrong.)
-        #if os(macOS)
+        //
         // 18k C1: this is also the Mac registry's ONE drop — see
         // `releaseAutosave(forPost:)` for why the release itself never is.
         let leaving = markLeaving(postID)
-        #endif
         await flushExistingAutosave(forPost: postID)
         let landed = (try? await runner.run { ops in
             try ops.closeAutoCommit(postID)
         }) != nil
-        #if os(macOS)
         // A savepoint that did not land (a locked or failing store) keeps the
         // entry: the note still owes it, and ⌘Q or the lock tries again.
         if landed, let leaving, leaving.unheld {
             dropAfterLeaving(postID, acquisitions: leaving.acquisitions)
         }
         #else
-        _ = landed
+        // **VM-71 (the VM-64 run, batch 7) — THE PHONE ASKS THE STORE FIRST,
+        // AND THE RUNNER ONLY FOR WHAT IS OWED.** The phone asks for a leaving
+        // savepoint on every road out of a note — the pop, the capture box's
+        // filing, the background flush, the lock's teardown, and the screens
+        // that teardown removes — so a Castle backgrounding asked THREE times
+        // for one leaving and a lock twice (audit F 6C). Every ask was
+        // `closeAutoCommit` on the ONE serial runner: a write transaction that
+        // decodes every take of the note to find the changed ones, O(note),
+        // holding the runner and the writer even when nothing had changed —
+        // so the capture box's first save, typed just after leaving a long
+        // note, queued behind it (audit F 1D).
+        //
+        // So the dedupe — `closeAutoCommit`'s own rule, "a take whose text
+        // differs from its last savepoint" — is asked FIRST, as a READ
+        // (`Queries.leavingSavepointCandidates`, a reader connection: never the
+        // runner, never the writer), and the runner is asked only when a take
+        // is owed, and only for those takes (`closeAutoCommit(_:takes:)`, which
+        // re-checks each inside its own transaction and writes exactly the
+        // rows the whole op would). A second ask in the same leaving finds the
+        // takes already savepointed and asks the runner for nothing; anything
+        // that landed between two asks — her typing, a sync round's apply — is
+        // still owed and still savepointed, exactly as before. WHO asks, and
+        // in what order against the lock, is untouched.
+        //
+        // The flush stays first, for the reason above: the read must see her
+        // last keystrokes.
+        await flushExistingAutosave(forPost: postID)
+        let owed: [String]?
+        do {
+            owed = try await database.read { db in
+                try Queries.leavingSavepointCandidates(db, containerID: postID)
+            }
+        } catch is StoreLockedError {
+            // The library closed under the leaving (the lock's teardown removes
+            // the screens as the pool closes): nothing can be written to it, so
+            // there is nothing to ask — the attempt this replaces failed here
+            // and was swallowed. Whatever the note still owes stays in its
+            // rows, and the next leaving's read finds it.
+            return
+        } catch {
+            // Any other read failure: today's whole-note savepoint, as before.
+            owed = nil
+        }
+        if let owed, owed.isEmpty { return }
+        // VM-65's mark, where the runner is asked (on the phone every call
+        // reached the runner until VM-71, so the series counts the same thing
+        // before and after: runner turns for a leaving savepoint).
+        AppTiming.savepointAttempted()
+        _ = try? await runner.run { ops in
+            if let owed {
+                try ops.closeAutoCommit(postID, takes: owed)
+            } else {
+                try ops.closeAutoCommit(postID)
+            }
+        }
         #endif
     }
 
