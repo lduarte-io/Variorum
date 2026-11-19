@@ -307,9 +307,13 @@ struct MobileWingDoorGeometryTests {
     /// trait; its target is at least 44 × 44, starts below the status bar's
     /// inset, and reaches no lower than the top of the first thing drawn under
     /// the line (the search field, the books, the first row); and pressing it
-    /// fires the door.
+    /// fires the door. VM-55 ladder round 1, finding 7: the door's
+    /// accessibility VALUE is the rest of the line as it is drawn (the page,
+    /// and the Shelf's count) — so VoiceOver reads "Home, Library", as batch
+    /// 1's plain line read the whole path (red on the tree before the fix,
+    /// where the value is nil).
     private func measure<V: View>(
-        _ surface: HostedSurface<V>, pressed: () -> Int, root: String,
+        _ surface: HostedSurface<V>, pressed: () -> Int, root: String, value: String,
         sourceLocation: SourceLocation = #_sourceLocation
     ) async throws {
         surface.host.additionalSafeAreaInsets.top = Self.statusBarInset
@@ -321,6 +325,9 @@ struct MobileWingDoorGeometryTests {
             },
             "\(root): no door named Home; labels were \(surface.visibleLabels)",
             sourceLocation: sourceLocation)
+        #expect(door.accessibilityValue == value,
+                "\(root): the door's value is \(door.accessibilityValue ?? "nil")",
+                sourceLocation: sourceLocation)
         let frame = door.accessibilityFrame
         #expect(frame.height >= MobileWingDoorMetrics.minimumSide,
                 "\(root): the target is \(frame.height) pt tall", sourceLocation: sourceLocation)
@@ -361,7 +368,8 @@ struct MobileWingDoorGeometryTests {
                     wingName: "Home", onWingDoor: { presses += 1 },
                     tabBar: { EmptyView() }, onOpen: { _ in })
             ) { surface in
-                try await measure(surface, pressed: { presses }, root: "Starred")
+                try await measure(
+                    surface, pressed: { presses }, root: "Starred", value: MobileStarsModel.pageName)
             }
         }
     }
@@ -380,7 +388,11 @@ struct MobileWingDoorGeometryTests {
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
                     onSettings: {}, onOpenTrash: {})
             ) { surface in
-                try await measure(surface, pressed: { presses }, root: "Shelf")
+                // The page and the count, as the line draws them (an empty
+                // store: no books).
+                try await measure(
+                    surface, pressed: { presses }, root: "Shelf",
+                    value: "Shelf" + Self.study.chromeLabel("  ·  0 books"))
             }
         }
     }
@@ -399,7 +411,7 @@ struct MobileWingDoorGeometryTests {
                     tabBar: { EmptyView() },
                     onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
             ) { surface in
-                try await measure(surface, pressed: { presses }, root: "Library")
+                try await measure(surface, pressed: { presses }, root: "Library", value: "Library")
             }
         }
     }

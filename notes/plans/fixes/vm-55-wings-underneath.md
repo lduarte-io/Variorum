@@ -1981,8 +1981,8 @@ last pin commit (`~/dev/variorum-vm-55-pin2`, its own DerivedData `vm55-pin2`), 
 | Piece | State |
 |---|---|
 | Finding 2 pin — `MobileLineStandingOfferTests` (pure, phone) | DONE (35983f69a) |
-| Finding 5 pin — `MobileErrorLogPrivacyPinTests` (source scan, phone; beside VM-62's pins in `MobileRawErrorPinTests.swift`) | DONE (this commit) — a throwaway mirror of the scan over this tree finds exactly two lines: `Shared/OpsRefusalTable.swift:477` (the red) and `Shared/SampleLibrary/SampleLibraryWelcome.swift:411` (the one named exemption, main's); nothing in the fenced `Shared/Protection/` |
-| Finding 7 pin — the three `MobileWingDoorGeometryTests` root tests assert the door's accessibility value | NOT-STARTED |
+| Finding 5 pin — `MobileErrorLogPrivacyPinTests` (source scan, phone; beside VM-62's pins in `MobileRawErrorPinTests.swift`) | DONE (77f591154) — a throwaway mirror of the scan over this tree finds exactly two lines: `Shared/OpsRefusalTable.swift:477` (the red) and `Shared/SampleLibrary/SampleLibraryWelcome.swift:411` (the one named exemption, main's); nothing in the fenced `Shared/Protection/` |
+| Finding 7 pin — the three `MobileWingDoorGeometryTests` root tests assert the door's accessibility value | DONE (this commit — the LAST PIN COMMIT: the snapshot's tree) — Starred "Starred", Library "Library", Shelf "Shelf  ·  0 books" (the page and its drawn count, Study, an empty store); `withoutADoorTheLineIsPlainText` untouched |
 | Finding 2 fix — `StatusCenter.stand` / `endStanding` phone arms | NOT-STARTED |
 | Finding 5 fix — two log lines `.private` | NOT-STARTED |
 | Finding 7 fix — the door's `.accessibilityValue(page + trailing)` | NOT-STARTED |
