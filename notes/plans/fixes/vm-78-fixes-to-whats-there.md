@@ -2277,7 +2277,7 @@ its own checkout.*
 | 1b — revert the pins `15add793d` | DONE (this commit) — `git revert --no-commit 15add793d`: `MobileTakesChromeTests.swift` back to its state before batch D (the re-pins, the marker-and-pill pin and the empty-last-block guard out), and the probe's three header lines (R3-N3) back to `16c75a5bf`'s; the commit's one record line kept as written, as in 1a |
 | 1c — remove the probe `MobileFanBadgePlacementProbeTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `a570d3960` (introduced), `e3f406086`, `78179b765` (the body M5/M5b ran), `16c75a5bf` (its header shifted two lines), `15add793d` (R3-N3's header — its last edition). The kickoff `notes/plans/vm-17-chrome-geometry.md` said "restore it from the commit before VM-78's back-out commit", which is ambiguous once the back-out is four commits: corrected in place to `git checkout 15add793d -- <its path>` |
 | 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `211221f6b` (introduced), `75984c0e6` (its last edition, as run alone in batch D's window). The kickoff's wording for it is right as written |
-| 1e — the back-out's check | NOT-STARTED |
+| 1e — the back-out's check | DONE (this commit) — output below |
 | 2a — the plan, written before the merge starts | NOT-STARTED |
 | 2b — the merge commit (seven conflicts resolved, the re-land) | NOT-STARTED |
 | 2c — the semantic merges git does not flag | NOT-STARTED |
@@ -2295,6 +2295,22 @@ nothing touched): exactly the seven expected textual conflicts —
 `VariorumMobileTests/MobileUndoDoorTests.swift`. Batch D's four product/test files and the two measurement files
 are untouched by main (`git diff e48ef2f30 origin/main -- <them>` is empty), so the back-out cannot conflict with
 the merge.
+
+**The back-out's check (1e), as run at `7d84e4b22`:**
+- `git log --oneline e48ef2f30..HEAD -- <file>` for each of the four files names ONLY batch D's two commits and
+  their reverts — so the claim "batch D was the only thing in this run that touched them" is TRUE:
+  `Takes/MobileTakesChrome.swift`, `Write/MobileEditorTextView.swift`, `Write/MobileBlockDecor.swift` →
+  `f869f8667`, `b69d5d12e` (its revert); `VariorumMobileTests/MobileTakesChromeTests.swift` → `15add793d`,
+  `feabe164c` (its revert).
+- `git diff e48ef2f30 HEAD -- App/Variorum/VariorumMobile/Features/Takes/MobileTakesChrome.swift
+  App/Variorum/VariorumMobile/Features/Write/MobileEditorTextView.swift
+  App/Variorum/VariorumMobile/Features/Write/MobileBlockDecor.swift
+  App/Variorum/VariorumMobileTests/MobileTakesChromeTests.swift` prints NOTHING (0 bytes).
+- None of `MobileFanBadgePlacementProbeTests`, `MobileDecorPlacementReadingTests`, `MobileFanBadgeSettleMeasureTests`,
+  `MobileCaretReplaceTraceTests` exists in the tree: `git ls-files` and `git grep` over `App/*.swift` find no file and
+  no type of those names (the last two left earlier, `5a57abdf0` and `16c75a5bf`).
+- KEPT: `MobileLivenessTests.swift` (VM-19's pin and fix, +23/−1 against `e48ef2f30`);
+  `MobileMarkdownCaretTests.swift` untouched against `e48ef2f30` (VM-24's pin, red by her decision).
 
 ## The ladder
 
