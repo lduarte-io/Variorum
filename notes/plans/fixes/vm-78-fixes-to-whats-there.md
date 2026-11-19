@@ -696,6 +696,24 @@ targets, and a build of the RED tree; the fix-pin window is the orchestrator's, 
 in flight** (the red-tree build's revert, `8ea7f4e52`, was restored with `git checkout HEAD --`; `git status` clean).
 The pre-fix-pass tip ("old" for this window) is `0180727de`.*
 
+**The fix-pin window — RUN (2026-11-19, stage window (5), claimed 06:26:55, released 06:31:48; by the orchestrator
+from the throwaway detached checkout at `140869902`, the four product files at `0180727de` for the red leg):**
+- **RED:** Swift Testing 75 tests in 10 suites FAILED, 9 issues including 2 known. Failed — four, and no other:
+  `aRacedUnarchiveSpeaksTheSharedSentence` (F3) · `theTrashNamesAnUntitledSavedVersionAsOne` (N2) ·
+  `theFinishRowsConfirmPresentsAndItsFinishActs` and `theFinishRowsConfirmCancelChangesNothing` (F5's guards —
+  red only because the reverted Finish row has no label for the driver to find).
+- **GREEN (the tip, restored; `git diff HEAD` empty):** 75 tests in 10 suites PASSED with 2 known issues (the
+  designed `MobileTrashTests` diagnostic, on both sides); 0 failed. The cancel pin, the write-back assertion and
+  N1's guard were green on both sides, as designed.
+- **F4's pin DID NOT RUN in this window, so F4 is not yet proved.** The recipe named the wrong type for it:
+  `theShelfLessonDescribesTheShelfThatExists` lives in `MobilePocketGuideDeletionTests`, not
+  `MobileTutorialLibraryWalkTests` (corrected in this section). A 6-minute follow-up window for that one type —
+  red with only `MobileTutorialSeeder.swift` at `0180727de`, then green — is queued; its result is recorded here
+  when it runs. **F4 red/green: PENDING.**
+- The result bundles are kept (N11): `App/Variorum/DerivedData/vm78-bundles/fixpass-red.xcresult` and
+  `fixpass-green.xcresult`. On the red leg `xcodebuild` was still alive 40 s after its verdict line and was
+  stopped; the counts are the Swift Testing verdict's.
+
 **Headless — DONE (2026-11-19):** pins and guards `72fa54dc8`; VM-81's fixes `326d61da4`; VM-83's fixes `36ace0aa5`.
 - Phone `build-for-testing` (signed, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot, DerivedData
   `vm78-ios`) **TEST BUILD SUCCEEDED** at `36ace0aa5`'s code (and at `72fa54dc8` — the pins against the pre-fix
@@ -709,12 +727,12 @@ The pre-fix-pass tip ("old" for this window) is `0180727de`.*
 
 | Finding | State | Pin (TYPE / test) |
 |---|---|---|
-| F3 (VM-81) | DONE — pin `72fa54dc8`, fix in the VM-81 fix commit after it; phone `build-for-testing` GREEN; red/green **PENDING** (the fix-pin window) | `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` |
-| F4 (VM-83) | DONE — pin `72fa54dc8` (+ the neighbouring test's message reworded), fix in the VM-83 fix commit (the lesson's first sentence, the dangling "also"; a DRAFT for her wording pass, below); `build-for-testing` GREEN; red/green **PENDING** | `MobileTutorialLibraryWalkTests/theShelfLessonDescribesTheShelfThatExists` |
-| F5 (VM-81) | DONE — tests `72fa54dc8` (the cancel pin re-pointed to the binding, the write-back assertion, two hosted guards), fix in the VM-81 fix commit (the row's label, `cancelFinish()` deleted); `build-for-testing` GREEN; the window's lines **PENDING** | `MobileFinishConfirmTests` |
+| F3 (VM-81) | DONE — pin `72fa54dc8`, fix in the VM-81 fix commit after it; red on the pre-fix-pass tip and green VERIFIED in window (5) | `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` |
+| F4 (VM-83) | DONE — pin `72fa54dc8` (+ the neighbouring test's message reworded), fix in the VM-83 fix commit (the lesson's first sentence, the dangling "also"; a DRAFT for her wording pass, below); `build-for-testing` GREEN; red/green **PENDING — the pin did not run in window (5); the follow-up window is queued** | `MobilePocketGuideDeletionTests/theShelfLessonDescribesTheShelfThatExists` |
+| F5 (VM-81) | DONE — tests `72fa54dc8` (the cancel pin re-pointed to the binding, the write-back assertion, two hosted guards), fix in the VM-81 fix commit (the row's label, `cancelFinish()` deleted); `build-for-testing` GREEN; the window's lines VERIFIED in window (5) (the two guards red for the missing label only, green on the tip; the cancel pin and the write-back assertion green on both sides) | `MobileFinishConfirmTests` |
 | F8 (VM-81) | no code — the question below, for the orchestrator to file at the merge | — |
-| N1 (VM-83) | DONE — guard `72fa54dc8` (green on both sides by design); the window's line **PENDING** | `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` |
-| N2 (VM-83) | DONE — pin `72fa54dc8`, fix in the VM-83 fix commit (`rowTitle` reads `RecoveryCopy.rowKind(item)`); red/green **PENDING** | `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` |
+| N1 (VM-83) | DONE — guard `72fa54dc8` (green on both sides by design); green on both sides in window (5) | `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` |
+| N2 (VM-83) | DONE — pin `72fa54dc8`, fix in the VM-83 fix commit (`rowTitle` reads `RecoveryCopy.rowKind(item)`); red on the pre-fix-pass tip and green VERIFIED in window (5) | `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` |
 | N3 (VM-81) | DONE — the test's `pendingArrivals` assertion removed `72fa54dc8`; the field gone and `confirmFinish` acting on `confirm.readingID` in the VM-81 fix commit | (the existing `MobileFinishConfirmTests`) |
 | N4 (VM-83) | DONE in part — test renamed `72fa54dc8`; the `Shared/BookcaseBoard.swift` comment in the VM-83 fix commit (Mac `build-for-testing` GREEN); the core doc line left (owner line below) | `MobileShellTests/theShelfObservationDeliversBooksStarsAndTheDailyMark` |
 | N6 | WITHDRAWN — one line for VM-113's kickoff (below) | — |
@@ -767,7 +785,7 @@ batches A and B).**
 3. **Expected RED on the reverted product, by name and reason — five, and no other:**
    - `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` — F3: `lastError` is the raw fallback
      ("That couldn't be done — readingNotArchived(…).").
-   - `MobileTutorialLibraryWalkTests/theShelfLessonDescribesTheShelfThatExists` — F4: the old lesson (the new first
+   - `MobilePocketGuideDeletionTests/theShelfLessonDescribesTheShelfThatExists` — F4: the old lesson (the new first
      sentence absent, "pins or unpins" present, "A long press also STARS").
    - `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` — N2: "(empty note)".
    - `MobileFinishConfirmTests/theFinishRowsConfirmPresentsAndItsFinishActs` and
