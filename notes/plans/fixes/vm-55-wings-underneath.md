@@ -1451,10 +1451,11 @@ section), SurfaceContracts' Messages bullet, the wing label and the wing switche
 | Record skeleton | DONE (635f351d6) |
 | The moves and splits (both targets' sources) | DONE (4fad0a2cf — committed NOT YET BUILT, said so in its message; a QUIET window held every full build) — the table below |
 | Test-file edits (the moved face's source pin; the VM-61 and VM-62 Mac pins' scans extended to the hoisted files) | DONE (4fad0a2cf; the VM-62 scan 1081c42bd) — results PENDING (the shared window) |
-| The Mac seam pin (`VM63MacWingBrainsHoistPinTests`, 2 tests — the refusal words' road, no platform fork) | DONE (this commit) — results PENDING (the shared window) |
+| The Mac seam pin (`VM63MacWingBrainsHoistPinTests`, 2 tests — the refusal words' road, no platform fork) | DONE (34b332fba) — results PENDING (the shared window) |
 | The phone compile-level pin (`MobileWingBrainsHoistTests`, 5 tests) | DONE (4fad0a2cf) — results PENDING (the shared window) |
 | Mac `build-for-testing` (`Variorum`, macOS, `vm55-b1`) | NOT-STARTED — held for the coordinator's QUIET all-clear |
 | Phone `build-for-testing` (`VariorumMobile`, the simulator, `vm55-b1`) | NOT-STARTED — held for the same all-clear |
+| **NEXT (for this session or a successor)** | When the coordinator's QUIET window ends: from `App/Variorum/`, `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile -destination id=<the window's standing simulator — its id is in the coordinator's messages and the local batch-2 build logs, never in a record> -derivedDataPath DerivedData/vm55-b1` and `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme Variorum -destination platform=macOS -derivedDataPath DerivedData/vm55-b1` (incremental, logs `DerivedData/vm55-b3-{phone,mac}-build.log`, foreground, polled for the verdict line); fix any compile error in its own commit; flip the two build rows; end at BUILT. Every source and test commit above is parse-checked (`swiftc -parse`) but NOT compiled. |
 | The shared window's suites (run by batch 4's implementer) | PENDING — the TYPE lists below |
 
 #### The brain/face table (file by file — every `Wing*` file in `Core/Views/` and `Workspace/`, plus the one non-wing file a moved brain needed)
