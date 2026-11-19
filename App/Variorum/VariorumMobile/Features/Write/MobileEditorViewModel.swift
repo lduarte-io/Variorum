@@ -247,6 +247,28 @@ final class MobileEditorViewModel {
 
     @ObservationIgnored private var autosaveToken: UUID?
 
+    /// **VM-70 — the ONE release for the ONE acquisition in `init`** (audit F
+    /// §4/§12.4: nothing on the phone released an editor's coordinator, so the
+    /// session's registry grew by one per note opened, and every filing, every
+    /// background flush and every sync round's flush-first walked them all).
+    /// The Mac's own shape (`EditorViewModel`, 18k C1): the instance's death is
+    /// the one point that runs exactly once per acquisition — a model built
+    /// and discarded by a view re-init acquires too and never sees
+    /// `onDisappear`, while a kept one can be torn down more than once (a
+    /// screen covered by a push, then shown again).
+    ///
+    /// **It lands after the note's pending text and its leaving savepoint, by
+    /// construction:** the screen's `onDisappear` task holds this model across
+    /// `teardown()` (the flush) and `savepointOnLeaving` (which flushes again,
+    /// then savepoints), so the last reference goes only when both are done.
+    /// What the session does with the release is `releaseAutosave(forPost:)`'s
+    /// phone rule, unchanged: the entry goes only when NO holder is left (a
+    /// second tab's editor on the same note, the quick note) and nothing is
+    /// pending — a dirty coordinator stays reachable to every flush walk.
+    isolated deinit {
+        session.releaseAutosave(forPost: postID)
+    }
+
     /// The store-write freshness generation (S3 ladder, MAJOR 3 — the
     /// retired Phase 8 VM's `readGeneration` fence restored): bumped
     /// whenever OUR writes settle (flush settle, mint finish), so a fresh
