@@ -15,6 +15,16 @@ import GRDB
 // `setBookPrivate`'s `wrongReadingKind`; a stale synced stamp on one is never
 // drawn).
 //
+// VX-1007 (the VX-981 run, batch 1 — her report: "the journal does not wear
+// the private eye icon & it doesn't show with "private" ticked in its book
+// settings"; her ruling: "It should just show as ticked and locked"): the
+// facts also carry the fence's two JOURNAL legs — a note's own day-entry shape
+// and its live membership in THE daily Journal; a book's daily marker — read
+// through the fence's OWN fragments (`journalEntryLegForNote`,
+// `fenceMemberRowSQL`, `dailyJournalLegForBook` in `MCPGrantQueries.swift`),
+// so the faces say Private exactly where the fence holds. Derived at read:
+// nothing is ever stamped for the Journal or its entries.
+//
 // P1 — the shared icon's law, bound identically: computed for the ids a host
 // DRAWS, never the corpus. Each statement is driven by the ids
 // (`json_each … CROSS JOIN`, the `ownershipFactsSQL` discipline): a
@@ -72,35 +82,48 @@ extension Queries {
         }
     }
 
-    /// **The Private marks of the notes a host draws** — only the MARKED ids
-    /// appear (an unmarked note is absent: the calm case reads nothing back).
-    /// ∝ the ids passed.
+    /// **The Private marks of the notes a host draws** — only the ids the
+    /// fence holds appear (an unfenced note is absent: the calm case reads
+    /// nothing back). VX-1007: the Private-mark leg AND the fence's two
+    /// journal legs, each read through the fence's own fragments — so the face
+    /// says Private exactly where `mcpNoteFacts` says fenced. Four id-driven
+    /// statements, ∝ the ids passed.
     public static func privateMarks(
         _ db: Database, noteIDs: [String]
     ) throws -> [String: PrivateMark] {
         guard !noteIDs.isEmpty else { return [:] }
         let json = String(decoding: try JSONEncoder().encode(noteIDs), as: UTF8.self)
-        let own = Set(try String.fetchAll(db, sql: privateMarkOwnSQL, arguments: [json]))
-        var via: [String: [BookRef]] = [:]
-        for row in try Row.fetchAll(db, sql: privateMarkViaSQL, arguments: [json]) {
-            let postID: String = row["post_id"]
-            via[postID, default: []].append(BookRef(id: row["reading_id"], name: row["name"]))
+        func books(_ sql: String) throws -> [String: [BookRef]] {
+            var held: [String: [BookRef]] = [:]
+            for row in try Row.fetchAll(db, sql: sql, arguments: [json]) {
+                let postID: String = row["post_id"]
+                held[postID, default: []].append(BookRef(id: row["reading_id"], name: row["name"]))
+            }
+            return held
         }
+        let own = Set(try String.fetchAll(db, sql: privateMarkOwnSQL, arguments: [json]))
+        let via = try books(privateMarkViaSQL)
+        let entries = Set(try String.fetchAll(db, sql: privateMarkJournalEntrySQL, arguments: [json]))
+        let journals = try books(privateMarkViaJournalSQL)
         var marks: [String: PrivateMark] = [:]
-        for id in own.union(via.keys) {
-            marks[id] = PrivateMark(own: own.contains(id), viaBooks: via[id] ?? [])
+        for id in own.union(via.keys).union(entries).union(journals.keys) {
+            marks[id] = PrivateMark(
+                own: own.contains(id), viaBooks: via[id] ?? [],
+                journalEntry: entries.contains(id), viaJournals: journals[id] ?? [])
         }
         return marks
     }
 
     /// **The BOOKS among `readingIDs` that wear the mark** — live books with
-    /// their own stamp. A gathering never does. ∝ the ids passed.
+    /// their own stamp, or (VX-1007) wearing THE daily Journal's marker: the
+    /// fence's two book legs (`mcpBookFacts`), read through its own
+    /// fragments. A gathering never does. ∝ the ids passed.
     public static func privateBookMarks(_ db: Database, readingIDs: [String]) throws -> [String: PrivateBookMark] {
         guard !readingIDs.isEmpty else { return [:] }
         let json = String(decoding: try JSONEncoder().encode(readingIDs), as: UTF8.self)
         var marks: [String: PrivateBookMark] = [:]
-        for id in try String.fetchAll(db, sql: privateBookMarkSQL, arguments: [json]) {
-            marks[id] = PrivateBookMark(own: true)
+        for row in try Row.fetchAll(db, sql: privateBookMarkSQL, arguments: [json]) {
+            marks[row["id"]] = PrivateBookMark(own: row["own"], dailyJournal: row["daily"])
         }
         return marks
     }
@@ -160,11 +183,16 @@ extension Queries {
         ORDER BY r.name COLLATE NOCASE, r.id
         """
 
-    /// A book's own mark. One placeholder.
+    /// A book's mark — its own stamp (`privateLegForBook`) and THE daily
+    /// Journal's marker (`dailyJournalLegForBook`, VX-1007), the fence's two
+    /// book legs by their own fragments; live BOOKS only (an archived book is
+    /// alive). One placeholder.
     static let privateBookMarkSQL = """
-        SELECT r.id FROM json_each(?) j
+        SELECT r.id, \(privateLegForBook) AS own, \(dailyJournalLegForBook) AS daily
+        FROM json_each(?) j
         CROSS JOIN reading r ON r.id = j.value
-        WHERE r.deleted_at IS NULL AND r.kind = 'book' AND r.ai_private_at IS NOT NULL
+        WHERE r.deleted_at IS NULL AND r.kind = 'book'
+          AND (\(privateLegForBook) OR \(dailyJournalLegForBook))
         """
 
     // MARK: - VX-1007 — the fence's journal legs, as the faces read them

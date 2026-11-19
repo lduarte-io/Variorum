@@ -511,6 +511,10 @@ extension Queries {
     ///    a live reading carrying one (R-13nb-4, privacy winning ties; v1_25's
     ///    columns, wired at U2 — the `privateLeg` fragments below).
     ///
+    /// **VX-1007:** legs 1–2 are the named fragments `journalEntryLegForNote`
+    /// and `journalMemberLegForNote` (the same text, factored), which the
+    /// faces' Journal facts read too (`Queries.privateMarks`) — one spelling.
+    ///
     /// A note is fenced iff any leg holds. Only live non-version POSTS have
     /// facts: a missing, tombstoned, scraps-group or version container reads
     /// nil, which every tool answers exactly as it answers an unshared note
@@ -527,10 +531,8 @@ extension Queries {
             sql: """
                 SELECT c.id,
                        \(effectiveWingSQL("c.wing_id")) AS wing,
-                       (c.profile = 'journal') AS own_journal,
-                       EXISTS (SELECT 1 FROM reading_post rp JOIN reading r ON r.id = rp.reading_id
-                               WHERE rp.post_id = c.id AND rp.deleted_at IS NULL AND rp.status = 'member'
-                                 AND r.deleted_at IS NULL AND \(dailyJournalLegForBook)) AS member_journal,
+                       \(journalEntryLegForNote) AS own_journal,
+                       \(journalMemberLegForNote) AS member_journal,
                        \(privateLegForNote) AS private_mark
                 FROM json_each(?) j CROSS JOIN container c ON c.id = j.value
                 WHERE c.deleted_at IS NULL AND c.kind = 'post'
