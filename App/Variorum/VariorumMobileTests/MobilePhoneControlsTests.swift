@@ -114,6 +114,9 @@ struct MobilePhoneControlsTests {
                 }
                 .buttonStyle(PhoneInlineActStyle(tokens: .studyLight))
                 Button("Put back") {}.buttonStyle(PhoneInlineActStyle(tokens: .studyLight, alignment: .leading))
+                // A site's own weight (the receipt line's semibold Undo — the
+                // VM-55 re-land): the same 44 × 44.
+                Button("Undo") {}.buttonStyle(PhoneInlineActStyle(tokens: .studyLight, weight: .semibold))
             }
         ) { surface in
             let edit = try frame(surface, "Edit")
@@ -123,6 +126,8 @@ struct MobilePhoneControlsTests {
             #expect(probe.size.width < 44, "the word is narrower than its hit area: \(probe.size)")
             let putBack = try frame(surface, "Put back")
             #expect(putBack.height >= 43.5 && putBack.width >= 43.5)
+            let undo = try frame(surface, "Undo")
+            #expect(undo.height >= 43.5 && undo.width >= 43.5, "a weighted inline act \(undo)")
         }
     }
 
