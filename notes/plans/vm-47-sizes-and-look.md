@@ -405,6 +405,85 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
   file (`notes/plans/vm-47-walk-b3.md`); it does not edit code while you are live. Defects it finds, and any
   red from batch 4's first suite run, come to a fix batch after yours.
 
+### Batch 6 — the re-land of VM-55 (Wings underneath)
+
+VM-55 merges to `main` before this run (the stage coordinator's order). Its branch and this one edit the same
+phone files line by line: this run moved every type, ink, spacing and control site; VM-55 changed the same
+files' error and receipt lines (the one message line, refusals in words), scoped every listing to the wing,
+fixed the pickers, and put an interim wing door on each root's path line. A trial merge at its tip
+`49e795bb6` conflicts in 23 files, all under `App/Variorum/VariorumMobile/Features/`: `Read/MobileReadView` ·
+`Shell/` `MobileArchiveView`, `MobileBookDetails`, `MobileBookView`, `MobileCreateBook`, `MobileLibraryView`,
+`MobileQuickNote`, `MobileScraps`, `MobileShelfView`, `MobileShellView`, `MobileStarredView`,
+`MobileTagManager`, `MobileTrashView` · `Takes/` `MobileBlockHistorySheetView`, `MobileLenses` · `Write/`
+`MobileBlockList`, `MobileMembership`, `MobileNoteActions`, `MobileNoteTags`, `MobileNoteTray`,
+`MobileReferences`, `MobileVersions`, `MobileWriteView`. It also adds `Shell/MobileLine.swift`,
+`MobileMessageLine.swift`, `MobileWing.swift`, `MobileWingDoor.swift` and seven brains under `Shared/`.
+
+**The road.** The re-land starts before VM-55's PR lands, by merging its branch tip
+(`origin/vm-55-wings-underneath`) into this branch; its code is at its merge gate, so the tip is expected to
+stand. When its PR merges, `origin/main` is merged in on top (a small merge: its gate's record commits and
+main's ledgers). If its tip moves first, the orchestrator says so and the new commits are merged the same
+way. One implementer session; this is a batch of its own, nothing else rides it.
+
+**The rule for every conflict: both runs' intent survives.** From VM-55: its behaviour, its expressions, its
+words, its new views and parameters (which line a refusal speaks on, which wing a listing reads, which tag a
+picker offers). From this run: how the line is DRAWN — the type role (`.phoneType`), the phone inks
+(`tokens.phone.muted/faint`), the spacing scale and gutter, the shared controls and hit areas, the grounds
+(her words on the paper, bars and sheets on the room), the bar. Neither side's hunk is taken whole where the
+other also changed the line; read both sides of every conflict and write the line that carries both. Never
+resolve by file (`--ours`/`--theirs`).
+
+**VM-55's new faces wear this run's layer.** Its new and changed phone code still reads the Mac's type slots
+and the voice's own small inks in places (it was written on main). This run's source guards scan the whole
+phone tree and will go red on them: `MobilePhoneTypeSourceTests` (no `tokens.small/body/title/heading/mono`,
+nothing under 13 pt, no literal `minimumScaleFactor`), `MobilePhoneControlsSourceTests` (no private button,
+field or header builds), `MobileLookSourceTests` (grounds, the ★'s token, no literal colour). Bring each such
+site onto the role it IS (batch 1's role map in §6 is the precedent; the smaller candidate where unclear,
+listed), the wing door and the message line included. The message line is a receipt/refusal line: the
+sizing sheet's "Receipt line" (words 15, the act 15 semibold in the accent, a 44 pt hit area) is its
+anatomy if VM-55's own sizes are the old caption's; VM-55's WORDS and timing do not change.
+
+**Where the two runs meet by design, each a decision written in §6 with both runs' pins green afterwards:**
+
+1. *The roots' path lines.* VM-55's wing door makes the path line 44 pt tall where the wing's name is a
+   door, and its pins (`MobileWingDoorGeometryTests`, `MobileWingDoorShellTests`) assume the roots'
+   pre-VM-47 paddings (14 above, 6 below). This run changed the same lines: batch 2's doors (inline act,
+   icon buttons, one line at 402 pt in both voices — `MobilePathLineGeometryTests`) and batch 5's ⋯ menu.
+   Find the numbers under which BOTH hold: the wing door a 44 pt target, the line one line at 402 pt in
+   both voices, this run's doors 44 pt, the ⋯ menu present on all three roots. If VM-55's pins hold
+   literal paddings that this run's scale changed, the pin moves to the rule it protects (as this run's
+   keyboard-share pin did), with the reason in the commit — never a silent overwrite of VM-55's pins. If
+   the numbers genuinely cannot both hold, STOP on that point, write the options in §5 as a question for
+   her, build the option that keeps every target at 44 pt, and say so.
+2. *The bar and the message line.* VM-55 attached its `.onGeometryChange` to the old `tabBar` body and keyed
+   its `chromeInset` to `pagingAllowed ? tabBarHeight : 0`. The bar is now `MobileTabBar` and also shows on
+   pushed lists: re-attach the measurement to `MobileTabBar`, and key the inset to "a bar is on screen"
+   (the shell's own rule from batch 4), so the message line clears the bar on a pushed list too.
+3. *The tab's word.* The tab is "Bookcase" (her LK-5 and SW-1). Tests that drive it by "Shelf" move to
+   "Bookcase" with the reason stated (VM-55's `MobileWingDoorTests` and any other). The root's own path
+   word: read what the merged Bookcase root's path line now says in both voices. If the root still titles
+   itself "Shelf" while its tab says "Bookcase", that is one screen under two names; her rulings name the
+   page Bookcase, so the path word follows (a rendered-word change: list it in §6's new lines) — unless
+   VM-55's wing door has already changed that line's words, in which case keep VM-55's words and record
+   what the line says.
+4. *The wing landing.* Batch 4's tab road returns the stack being left to its root (P-47-19), which VM-55's
+   wing landing relies on; confirm from VM-55's code that the two agree, and pin it if no pin of either run
+   holds it.
+
+**Hard lines.** No production behaviour of VM-55 changes; no word of VM-55's changes except item 3's.
+`Shared/Theme/VoiceTokens.swift`, `MobileEditorTextView.swift`, `MobileEditorViewModel.swift`,
+`Shared/EditorBrain/`, everything under `Sources/` and VM-55's `Shared/` brains are not edited (a brain that
+needs a line to compile against this run's API is named in the report first). The Mac's look does not
+change. The merge commit's message lists the 23 files and each design decision in a line.
+
+**Builds and evidence.** `App/Variorum/DerivedData/vm47-b6`, one build at a time, never during a QUIET
+window the orchestrator relays; `vm47-b5` and the snapshot `~/dev/variorum-vm-47-rol5` are not touched
+(a pending stage window reads them). When both schemes' `build-for-testing` are green: READY with the whole
+phone target, the Mac list (the theme-store types of §6 "Batch 3 — results", batch 5's fifteen, and VM-55's
+Mac pin types `VM56MacWingScopePinTests`, `VM61MacStatusSeamPinTests`, `VM62MacRefusalWordsPinTests`,
+`VM63MacWingBrainsHoistPinTests`, `WingPaletteDoorsTests`, each verified as a suite type), and the list of
+decisions for §6 "Batch 6 — results". The whole Mac target and the run's one walk follow on this tree.
+
 ### One walk for the whole run
 
 At the stage coordinator's ask and the orchestrator's decision (2026-11-19, 10:50), ONE walk in two parts stands for
@@ -483,6 +562,7 @@ phone and whole Mac targets for that tree; its findings are read by the ladder's
 | 5.6 | §6 "Batch 5 — results" + the new PROVISIONALs in §5 | DONE (this commit) — P-47-22…26 in §5, the palette row held for the orchestrator to ticket; the short piece's counts RUN (row 5.7); the red-on-old line PENDING its re-run (row R1.5) and the whole targets after VM-55's re-land; the walk's findings PENDING the run's one walk (§3) |
 | 5.6b | CUTOVER (orchestrator, machinery honesty): the batch-5 implementer ended READY at about 713k tokens of context, every piece committed; its stage work is run by the orchestrator | DONE |
 | 5.7 | The short piece — fourteen phone types, VM-27's red-on-old from `~/dev/variorum-vm-47-rol5`, fifteen Mac types — run by the ORCHESTRATOR | RUN (12:02–12:10, the standing device; logs in the orchestrator's session scratchpad) — **(a)** the fourteen phone types from `vm47-b5` (the tree at `32f9c605e`): "Test run with 80 tests in 14 suites failed after 71.618 seconds with 1 issue"; thirteen suites passed — `MobileSettingsListTests`, `MobileAppearanceTests`, `MobileRootMenuTests`, `MobileNavigationTests` (`theTabBarCarriesThreeDoorsAndEachOneMovesTheBand()` GREEN: `8eb727f2e` verified), `MobileProtectionCompositionTests`, `MobilePathLineGeometryTests`, `MobileTabBarTests`, `MobileShellTests`, `MobileLookSourceTests`, `MobilePhoneControlsSourceTests`, `MobilePhoneTypeSourceTests`, `MobileSharedPageStyleTests`, `MobileLibraryLookTests`; ONE red, the VM-27 pin's `joined → nil` case: "@Dependency(\.database) has no test implementation, but was accessed from a test context" (recorded at `AppDatabase+Dependency.swift:188`, the read `SyncEngine.swift:68`) — a HARNESS defect, traced in §6 "Batch 5 — results" ("The pin's unscoped round") and fixed in row R1.3; the `joined → false` case passed. **(b)** VM-27's red-on-old from the snapshot: NOT PROVEN — the same unscoped read fell through to the live default, whose open of the simulator test host's own store failed ("sqlcipher_page_cipher: hmac check failed for pgno=1") and stopped the host (`AppDatabase+Dependency.swift:19`, fatal error); the relaunch executed 0 tests; no "two Protection…" failure was reached. Re-run owed on the corrected pin from a re-made snapshot (row R1.5). **(c)** the fifteen Mac types from `vm47-b5`: "Test run with 84 tests in 15 suites passed after 16.489 seconds" |
+| 6 | The re-land of VM-55 (its branch tip merged in ahead of its PR; 23 conflict files; its new faces on this run's layer; the path lines, the bar and message line, the tab's word, the wing landing) | NOT-STARTED — the implementer adds its piece rows here |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks — each step since DONE (rows M.1–M.6), and round 1 found the fix pass APPLIED AS CONFIRMED (`vm-47-ladder-round1.md` §1). The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) was then still queued — since SUPERSEDED (row 2.9; the run's one walk, §3) |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
 | M.2 | M-1: the 13 pt floor in `PhoneType.uiFont` (`#if os(iOS)` arm, BOTH scaling classes: a resolved font under `floorSize` returns `baseUIFont(…, pointSize: floorSize)`); its pin, the UIKit twin of `nothingIsEverBelowThirteenPoints` in `MobilePhoneTypeTests` (every role × both voices × all twelve settings) | DONE (this commit) — `uiFont` = the class's scaled font (`scaledUIFont`, unchanged) then the floor; the pin `theUIKitFormIsNeverBelowThirteenPointsEither()`; build M.4, red-on-old M.5, run M.6 — each since DONE (rows M.4–M.6) |
