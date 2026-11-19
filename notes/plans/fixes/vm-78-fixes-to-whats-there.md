@@ -67,6 +67,13 @@ VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94, VM-218, VM-99 and VM-179.
 
 ### CURRENT STATE — 2026-11-19, late morning (she is back). Read this block; what follows it is the night's log, kept as written.
 
+**UPDATE — 2026-11-19, 14:45 (the newest; it outranks everything below it).** Step 1 of the 14:10 list is DONE:
+the back-out and the merge-in are committed ("### THE MERGE-IN", tip `9ee926cb1`; merge commit `ed1266e2f` over
+main `eb18888db`), both targets build on the merged tree, and the four chrome files equal main's. The re-land's
+stage window is queued with the coordinator and has NOT run until a result is written here. The orchestrator's
+context had passed the cutover guideline: `notes/plans/vm-78-orchestrator-handoff.md` carries a paste-ready
+kickoff and the remaining steps for a successor.
+
 **UPDATE — 2026-11-19, 14:10. This paragraph outranks the bullets under it wherever they differ.**
 - **Batch D's window ran (12:21–12:28) and VM-17's fix FAILED it** (BATCH D, "THE WINDOW AND HER RULING"): the
   scrolling road went clean, but the jump road left the target fan with no badge, four jumps missed, and eight
