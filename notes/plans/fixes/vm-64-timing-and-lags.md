@@ -156,7 +156,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | **r1 BUILT · READY for the stage** — the release moved out of `deinit` into the leaving work | see the batch 6 block ▸ "Iteration r1"; r1 products `vm64-b6r1`, red `vm64-b6r1-red` | r0 products `vm64-b6` (to be deleted) |
-| 7 · VM-71 | **re-checking on batch 6's r1** (test-only changes; new products `vm64-b7r1`, `vm64-b7r1-red`) | see the batch 7 block; Mac product `vm64-b7` (ran green 10:37) | no revert in flight; no line in `Features/Protection/` |
+| 7 · VM-71 | BUILT on r1 · **READY for the phone stage** (Mac piece GREEN 10:37) | see the batch 7 block; phone products `vm64-b7r1` at `a61e4f7c9`, red `vm64-b7r1-red`; Mac `vm64-b7` | no revert in flight; no line in `Features/Protection/` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -635,11 +635,10 @@ batch 7's `MobileLeavingSavesOnceTests` assumes too):**
 
 ### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**A REVERT IS STARTING (r1 red build — announced before it starts).** From `a61e4f7c9` + this commit (committed and
-pushed), the same four production files are checked out at `dfdd94b5a` over today's tip (batch 6's r1 included);
-phone `build-for-testing` into `App/Variorum/DerivedData/vm64-b7r1-red/`; then `git checkout HEAD --` the four and a clean
-`git status`. A successor finding this line: `git diff HEAD` shows what is reverted; restore with `git checkout HEAD --
-<the four files>`. **(The r0 red build, kept as written:)** The red-on-old revert RAN and is RESTORED: from `c9b574513` (the fix and the pins, committed
+**No revert is in flight.** The r1 red build RAN and is RESTORED: from `b6a047e82` (committed and pushed, the revert
+announced there), the four production files were checked out at `dfdd94b5a` over today's tip (batch 6's r1 included);
+phone `build-for-testing` into `App/Variorum/DerivedData/vm64-b7r1-red/` `** TEST BUILD SUCCEEDED **` (cold); then
+`git checkout HEAD --` the four — `git status` and `git diff HEAD` empty. **(The r0 red build, kept as written:)** The red-on-old revert RAN and is RESTORED: from `c9b574513` (the fix and the pins, committed
 and pushed; announced at `ba675754d`), the batch's four production files — `Sources/VariorumCore/Queries/IdleCommit.swift`,
 `Sources/VariorumCore/Operations/Operations+Variant.swift`, `App/Variorum/Shared/AppSession.swift`,
 `App/Variorum/Shared/AppTiming.swift` — were checked out at the base `dfdd94b5a`; phone `build-for-testing` into
@@ -715,8 +714,8 @@ dropped. The closeout's r0 lines are corrected in place (§7 batch 7 ▸ "Re-che
 |---|---|
 | Q1 — the re-check, per pin, and the plan (this paragraph) | DONE (this commit) |
 | Q2 — the two test changes | DONE (this commit) — `MobileLeavingSavesOnceTests`: the host's note and the header say the leaving ends at its LAST act (r1), and the new `aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped` (7 tests now). Build PENDING (Q3) |
-| Q3 — builds: phone `build-for-testing` into `vm64-b7r1` (fix); the red `vm64-b7r1-red` (the four production files at `dfdd94b5a` over today's tip; revert announced first) | IN-PROGRESS — fix `vm64-b7r1` built at `a61e4f7c9`'s tree `** TEST BUILD SUCCEEDED **` (cold), no warning in a touched file; NEXT the red build (the revert above) |
-| Q4 — §7: the r1 re-check, the corrected lines, the stage commands on the new folders | NOT-STARTED |
+| Q3 — builds: phone `build-for-testing` into `vm64-b7r1` (fix); the red `vm64-b7r1-red` (the four production files at `dfdd94b5a` over today's tip; revert announced first) | DONE — fix `vm64-b7r1` built at `a61e4f7c9`'s tree `** TEST BUILD SUCCEEDED **` (cold), no warning in a touched file; red `vm64-b7r1-red` `** TEST BUILD SUCCEEDED **` (cold), restored. No Mac build: no `Shared/` or Core file changed (the Mac product stays `vm64-b7`) |
+| Q4 — §7: the r1 re-check, the corrected lines, the stage commands on the new folders | DONE (`b6a047e82`) — §7 batch 7 ▸ "Re-check on batch 6's r1"; READY |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
