@@ -7,6 +7,26 @@ the truth for every piece); this file says what the ORCHESTRATOR was doing and w
 details that do not belong in a public repo (the session scratchpad's path and its script names, subagent ids,
 the simulator ids) are in the orchestrator's private run-state memory, `vm-47-run-state`.
 
+## UPDATE 15:10 — the newest block (after a compaction; the orchestrator resumed at 14:42)
+
+- **R-47-3 is BUILT and recorded** (code tip `864ef813b`: the one word in `MobileShelfView.swift` and four phone
+  test files; the record's §1, §4 row R-47-3, §5, §6). The walk app and the phone test host WITH the word are in
+  `DerivedData/vm47-walk`; `vm47-b6` is still `b20b04fad`'s. Its implementer ended; no agent is running.
+- **Step 3 (the Mac leg) is DONE:** 565 tests in 114 suites passed, 4 pre-existing known issues, one launch
+  (§4 row 6.10). The stage was released at 15:06:42 and the result line sent.
+- **READY with the coordinator, in its order after another run's merge gate:** a short phone window for the nine
+  types that read the Bookcase root's line or drive its tab (from `DerivedData/vm47-walk`), then the walk's part
+  A, then part B.
+- **For her, from R-47-3's build:** with the longer word, Study's line with a two-digit count ("Home · Bookcase
+  ·  14 books") measures about 403 pt on a 402 pt screen, so its tail may be cut there as Terminal's already is
+  (P-47-27 carries it; the walk's c1 captures show it). Words that still say "shelf", left because the ruling
+  names the top line: the book row's long-press door "Pin to Shelf Top" / "Unpin from Shelf Top" (the Bookcase
+  rows' rebuild owns them), the pocket guide's seeded prose and the DEBUG guide door's note (their own tickets);
+  one stale comment in `Shared/OpsRefusalTable.swift` ("the phone's area is still "Shelf" until its catch-up").
+- **Record rows still to flip at the next record pass:** §4 rows 4, 4.1, 4.2, 4.5, 5 and 5.6 say "the whole phone
+  and whole Mac targets PENDING" — row 6.9 answers the phone half; the whole Mac target runs once, as the merge
+  gate.
+
 ## UPDATE 14:35 — newer than "State at writing" and step 1 of "Next, in order" below
 
 - **Step 1 is DONE.** The whole phone target on the re-landed tree ran 14:06–14:18 and is at baseline: 1,045
