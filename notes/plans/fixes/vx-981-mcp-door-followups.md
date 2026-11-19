@@ -677,3 +677,18 @@ No revert is in flight (the 977/961 and 133 revert checks ran and were restored 
   - **C** (`UndoStack.swift`, `MCPReceiptRun.swift`, `MCPWriteTools.swift` at `f42c0670f`; 3 tests in 1 suite, 5 issues): `fourActsThreeUndoneTheLineSaysOne`, `aRunWalkedBackToNothingThenReadsAsOneAct`.
   - **D** (`MCPToolCatalog.swift`, `MCPWriteTools+UnlinkVersions.swift`, `TutorialSeeder.swift` at `63d409d84`; 14 tests in 2 suites, 5 issues): `lessonThreeHowMuchWhereHowLong`, `theUnlinkSaysWhatLandedAndIsOneUndoAtEdit`.
 - Every other test in each leg green. Gate tree clean after; no Variorum instance, no Problem Reporter, no new `Variorum-*.ips`. Batch 2's app-target evidence is COMPLETE; its live wire round rides the closing walk.
+
+## THE MERGE-IN (2026-11-19 09:03, merge `c7ea26c74`): origin/main `9a78628ea` merged in — a merge-in, never a rebase — textually clean
+
+Main carried VX-980 (the search umbrella: PR #11, merge `ed4d87cb7`, and PR #12's record) and the stage coordinator's PR #10. It brought Mac search and Settings files, two capability lines (`.checkSearchIndex`, `.rebuildSearchIndex`) and six core search files; this run has added no capability or registry line in any batch. `swift build` on the merged tree: complete.
+
+**The MCP target on the merged tree, headless (the wire's search reads the composer VX-980 changed): no answer changed that a pin notices** — three whole-target runs, 739 tests in 138 suites each: run 1 one red, run 2 green, run 3 one red.
+
+**OPEN — two reds under whole-target parallel load, each green alone; UNTRACED (no mechanism, so no fix yet — the hallucination guard):**
+- Run 1 (machine load averages 72 / 103 / 157 — other runs were building): `MCPSizeCapTests.aMessageOneByteOverTheSessionCapIsAnsweredThenClosed` — `MCPSizeCapTests.swift:158`, "Expectation failed: await socket.isHungUp()". The suite alone, six times: green six of six.
+- Run 3 (load averages 18 / 62 / 129): `MCPAcceptLoopServerTests.transientAcceptFailuresAreRetriedAndTheClientIsServed` — `MCPAcceptLoopServerTests.swift:90`, "connect(as: claude-code) did not finish within 10.0 s — the harness's time limit (VX-132)". The suite alone, six times: green six of six (about 2.8 s each).
+- Batch 4's implementer ran the whole target alone three times green at `c43595bef`, before this merge-in. Whether either red exists on main, or on this branch before batches 3–4 (`77aebf864`), is NOT yet measured. Both tests sit on roads batches 3 and 4 changed (the connection's close after an answer; the accept loop and the bind road), so neither is written off as load until a soak on both trees says so. Owner: the ladder's fix session (a soak of the whole target on this tip and on the pre-batch-3 tree, the failing connection's state sampled when a red shows).
+
+## THE LADDER — ROUNDS
+
+*(One ladder over the run's whole diff — `git diff origin/main...HEAD` after the merge-in; a fresh cold `fable-reviewer` per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings land in `notes/plans/fixes/vx-981-ladder-round<N>.md` before any fix session sees them; the cap is five rounds, R-981-5. BATCH 5 (the parity audit, a document) runs after the ladder's code rounds, in a stage-queue gap; the closing walk runs on the ladder's final tree.)*
