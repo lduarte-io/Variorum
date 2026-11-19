@@ -225,6 +225,7 @@ struct MobileLibraryView<TabBar: View>: View {
             }
             .buttonStyle(PhoneInlineActStyle(tokens: tokens))
             .accessibilityLabel("New Note")
+            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }
         .padding(.horizontal, PhoneMetrics.gutter)
         .padding(.top, PhoneMetrics.Space.s4)

@@ -91,8 +91,8 @@ struct MobileStarredView<TabBar: View>: View {
     }
 
     /// "~/starred" (terminal) / "Starred" (study) — the two sibling roots'
-    /// own path-line shape. No doors trail it: nothing is minted here, and
-    /// the P38 crowding lesson says a strip earns its doors.
+    /// own path-line shape. Nothing is minted here (P38: a strip earns its
+    /// doors), so the one door trailing it is the roots' ⋯ menu (VM-53).
     private var pathLine: some View {
         // VM-50: the same 44 pt line as its two siblings' (whose doors are
         // 44 pt hit areas), so the three roots' content starts level as the
@@ -102,6 +102,7 @@ struct MobileStarredView<TabBar: View>: View {
                 .phoneType(.meta, tokens)
                 .foregroundStyle(tokens.phone.muted)
             Spacer()
+            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }
         .frame(minHeight: PhoneMetrics.touchMinimum)
         .padding(.horizontal, PhoneMetrics.gutter)

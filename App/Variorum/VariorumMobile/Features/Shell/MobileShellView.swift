@@ -47,9 +47,9 @@ enum MobileRoute: Hashable {
     /// pushed over it. The phone covers and stands its editor down, which is
     /// the honest answer to a Mac side panel it cannot have.
     case versions(String)
-    /// **Settings ▸ Protection** (VM-8 unit 1, PROVISIONAL P-VM8-2): the phone's Protection screen, pushed on the shelf's
-    /// stack — Settings is the shelf's own door (the pocket guide's precedent) — and pushed again after an act's reopen
-    /// (F-U1-3: the shell adopts `ProtectionController.settingsRequest`).
+    /// **Settings ▸ Protection** (VM-8 unit 1, PROVISIONAL P-VM8-2): the phone's Protection screen, pushed on the stack
+    /// Settings was opened over (VM-53, P-47-23: every root and a note carry Settings' door now) — and on the shelf's
+    /// again after an act's reopen (F-U1-3: the shell adopts `ProtectionController.settingsRequest`).
     case protection
 }
 
@@ -223,7 +223,6 @@ struct MobileShellView: View {
                                     shelfPath.append(MobileRoute.note(id, focus: true))
                                 }
                             },
-                            onSettings: { settingsPresented = true },
                             // Finding 1: a deleted BOOK rows in the Trash while
                             // books live here, so the Shelf renders the same door.
                             onOpenTrash: {
@@ -270,6 +269,8 @@ struct MobileShellView: View {
                 including: pagingAllowed ? .all : .subviews)
         }
         // (13p Batch 4's notice bar — today's nudge and reminder — left with today's road at VX-329 U1.)
+        // VM-53: Settings' door from every root's ⋯ menu and a note's ⋯ sheet (`MobileRootMenu.swift`).
+        .environment(\.mobileSettingsDoor, MobileSettingsDoor { settingsPresented = true })
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
         }
@@ -305,10 +306,10 @@ struct MobileShellView: View {
 
     /// The Settings sheet. FIX-B4 (fire-and-DO): the DEBUG "Open the
     /// pocket guide" door really OPENS the book — dismiss the sheet and
-    /// push the book's contents onto the SHELF stack (Settings is the
-    /// shelf's own door, so the shelf tab is the visible one whenever
-    /// this fires; the tab itself is deliberately not written — the tab
-    /// doors own the liveness handoff).
+    /// push the book's contents onto the VISIBLE stack (VM-53: Settings
+    /// opens from every root and a note now, so it is no longer always the
+    /// shelf's; the tab itself is deliberately not written — the tab doors
+    /// own the liveness handoff).
     private var settingsSheet: some View {
         #if DEBUG
         return MobileSettingsView(
@@ -317,7 +318,7 @@ struct MobileShellView: View {
             onOpenProtection: { openProtection() },
             onOpenTutorialBook: { bookID in
                 settingsPresented = false
-                shelfPath.append(MobileRoute.book(bookID))
+                push(.book(bookID), in: tab)
             })
         #else
         return MobileSettingsView(
@@ -548,11 +549,14 @@ struct MobileShellView: View {
         return true
     }
 
-    /// VM-8 unit 1 — Settings' *Protection…* door (and the sync row's): Settings goes, the screen is pushed on the
-    /// shelf's stack (leaving the shelf files the quick-note box first — A5-8).
+    /// VM-8 unit 1 — Settings' *Protection…* door: Settings goes, the screen is pushed on the VISIBLE stack (VM-53 —
+    /// Settings opens from every root and from a note now, so the screen lands where she is and Back returns her there;
+    /// it was the shelf's, when Settings was the shelf's own door). Leaving the shelf files the quick-note box first
+    /// (A5-8); on another root the box is already filed. PROVISIONAL P-47-23.
     private func openProtection() {
         settingsPresented = false
-        leavingShelf { shelfPath.append(MobileRoute.protection) }
+        let here = tab
+        leavingShelf { push(.protection, in: here) }
     }
 
     /// A5-8 — LEAVING MINTS AND CLEARS. Every road OFF the shelf root

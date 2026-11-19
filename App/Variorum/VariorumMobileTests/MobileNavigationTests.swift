@@ -377,8 +377,7 @@ struct MobileNavigationTests {
                 MobileShelfView(
                     model: shelf, stars: stars, quickNote: MobileQuickNoteModel(),
                     tokens: .terminalLight, tabBar: { EmptyView() },
-                    onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onSettings: {})
+                    onOpenBook: { _ in }, onOpenForWriting: { _ in })
             ) { surface in
                 await surface.settle(30)
                 let labels = surface.visibleLabels

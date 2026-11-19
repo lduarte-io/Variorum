@@ -142,8 +142,7 @@ private func shelfSurface(
         MobileShelfView(
             model: shelf, stars: stars, quickNote: box,
             tokens: tokens, tabBar: { EmptyView() },
-            onOpenBook: { _ in }, onOpenForWriting: { _ in },
-            onSettings: {}),
+            onOpenBook: { _ in }, onOpenForWriting: { _ in }),
         size: size)
 }
 

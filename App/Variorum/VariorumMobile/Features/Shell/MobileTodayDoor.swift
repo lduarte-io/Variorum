@@ -101,11 +101,6 @@ enum MobileNewNoteDoor {
     }
 }
 
-/// **The Bookcase path line's Settings door, as a glyph** (VM-50 — the path
-/// line holds ONE line at 402 pt in both voices only with Settings drawn as
-/// an icon button; PROVISIONAL P-47-9). The word stays its spoken label
-/// ("Settings"), so VoiceOver and every pin that drives it by name are
-/// unchanged. The door leaves the path line for the roots' ⋯ menu at VM-53.
-enum MobileSettingsDoor {
-    static let symbol = "gearshape"
-}
+// (The Bookcase path line's Settings gear — VM-50, P-47-9 — retired into the
+// roots' ⋯ menu at VM-53: `MobileRootMenu.swift`, where `MobileSettingsDoor`
+// is now the shell's Settings door itself.)

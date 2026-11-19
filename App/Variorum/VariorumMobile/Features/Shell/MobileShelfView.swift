@@ -67,7 +67,6 @@ struct MobileShelfView<TabBar: View>: View {
     /// Open a note straight into typing — the Today button's landing AND
     /// the + New Note door's (P33: "the note opens for writing").
     let onOpenForWriting: (String) -> Void
-    let onSettings: () -> Void
     /// **The Trash room's door, SECOND renderer** (batch 6c — the design
     /// record's finding 1, and PROVISIONAL by its Q6). Books live HERE and
     /// a deleted book rows in the Trash, so a trash door reachable only from
@@ -232,16 +231,16 @@ struct MobileShelfView<TabBar: View>: View {
 
     /// "~/shelf · 6 books" (terminal) / "Shelf · 6 books" (study); the
     /// + New Note door (P33 — Library's twin, same path-line placement)
-    /// and the settings door trailing.
+    /// and the ⋯ menu trailing.
     ///
     /// **ONE line at 402 pt in both voices** (VM-50, the batch-1 carry-in:
     /// Terminal's 13 pt mono path beside two 17 pt mono words needed ~437 pt
     /// and wrapped). The doors are the phone's controls with 44 pt hit areas
-    /// that touch: 🗑 an icon button, + New Note an inline act (15), Settings
-    /// an icon button (the gear; its word stays its spoken label) —
-    /// PROVISIONAL P-47-9; Settings leaves this line for the roots' ⋯ menu at
-    /// VM-53. The path's own line keeps its place; the hit areas reach into
-    /// the line's air. Pinned by `MobilePathLineGeometryTests`.
+    /// that touch: 🗑 an icon button, + New Note an inline act (15), and —
+    /// since VM-53 — the roots' one ⋯ menu (`MobileRootMenu`, the same 44 pt
+    /// icon door), where Settings went from its gear (PROVISIONAL P-47-9). The
+    /// path's own line keeps its place; the hit areas reach into the line's
+    /// air. Pinned by `MobilePathLineGeometryTests`.
     private var pathLine: some View {
         HStack(alignment: .center, spacing: 0) {
             Text(tokens.path(["Shelf"]) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
@@ -263,13 +262,7 @@ struct MobileShelfView<TabBar: View>: View {
             }
             .buttonStyle(PhoneInlineActStyle(tokens: tokens))
             .accessibilityLabel("New Note")
-            Button {
-                onSettings()
-            } label: {
-                Image(systemName: MobileSettingsDoor.symbol)
-            }
-            .buttonStyle(PhoneIconButtonStyle(tokens: tokens, tone: .accent))
-            .accessibilityLabel("Settings")
+            MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }
         .padding(.horizontal, PhoneMetrics.gutter)
         .padding(.top, PhoneMetrics.Space.s4)

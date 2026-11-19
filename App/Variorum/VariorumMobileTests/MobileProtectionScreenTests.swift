@@ -400,7 +400,9 @@ struct MobileProtectionCompositionTests {
         #expect(settings.contains("if let protectionDoor {"))
         let shell = try Self.code("VariorumMobile/Features/Shell/MobileShellView.swift")
         #expect(shell.contains("onOpenProtection: { openProtection() }"))
-        #expect(shell.contains("leavingShelf { shelfPath.append(MobileRoute.protection) }"))
+        // MOVED at VM-53 (batch 5): Settings opens from every root and a note now, so the screen is pushed on the
+        // VISIBLE stack (P-47-23) — it was the shelf's when Settings was the shelf's own door.
+        #expect(shell.contains("leavingShelf { push(.protection, in: here) }"))
     }
 
     /// **Ladder round 1's NIT-2 — RED ON THE PRE-L1 TREE:** before the app's services are composed (the `.ready` arm's

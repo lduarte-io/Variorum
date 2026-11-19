@@ -36,9 +36,11 @@ import VariorumCore
 @Suite("The path line — one line, 44 pt doors (VM-50)", .serialized)
 struct MobilePathLineGeometryTests {
 
+    /// VM-53: the shell's Settings door in the environment, as the shell hands
+    /// it — so the roots' ⋯ menu stands on the line the way it does on the phone.
     private func shelf(
         _ session: AppSession, tokens: VoiceTokens, width: CGFloat
-    ) -> HostedSurface<MobileShelfView<EmptyView>> {
+    ) -> HostedSurface<some View> {
         HostedSurface(
             MobileShelfView(
                 model: MobileShelfViewModel(session: session),
@@ -46,7 +48,8 @@ struct MobilePathLineGeometryTests {
                 quickNote: MobileQuickNoteModel(session: session),
                 tokens: tokens, tabBar: { EmptyView() },
                 onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                onSettings: {}, onOpenTrash: {}),
+                onOpenTrash: {})
+                .environment(\.mobileSettingsDoor, MobileSettingsDoor {}),
             size: CGSize(width: width, height: 852))
     }
 
@@ -86,7 +89,9 @@ struct MobilePathLineGeometryTests {
                     #expect(path.height < 26,
                             "the path line wrapped in \(tokens.voice) at \(Int(width)) pt: \(path)")
 
-                    for door in [MobileRecoveryDoors.trashLabel, "New Note", "Settings"] {
+                    // VM-53 MOVED this list's last door: the Settings gear retired into the
+                    // roots' ⋯ menu ("More"), the same 44 pt icon door in its place.
+                    for door in [MobileRecoveryDoors.trashLabel, "New Note", MobileRootMenu.spokenLabel] {
                         let hit = try #require(
                             frame(surface, door),
                             "the \(door) door is missing in \(tokens.voice): \(surface.visibleLabels)")
@@ -117,13 +122,15 @@ struct MobilePathLineGeometryTests {
                     stars: MobileStarsModel(session: session),
                     books: shelfModel, tokens: tokens, tabBar: { EmptyView() },
                     onOpen: { _ in }, onOpenTrash: {}, onOpenArchive: {})
+                    .environment(\.mobileSettingsDoor, MobileSettingsDoor {})
                 try await withHostedSurface(view, size: CGSize(width: 402, height: 852)) { surface in
                     await surface.settle(40)
                     let path = try #require(
                         pathFrame(surface, startingWith: tokens.path(["Library"])),
                         "labels: \(surface.visibleLabels)")
                     #expect(path.height < 26)
-                    for door in [MobileRecoveryDoors.trashLabel, "New Note"] {
+                    // VM-53: the roots' ⋯ menu joins the line.
+                    for door in [MobileRecoveryDoors.trashLabel, "New Note", MobileRootMenu.spokenLabel] {
                         let hit = try #require(frame(surface, door), "labels: \(surface.visibleLabels)")
                         #expect(hit.width >= 43.5 && hit.height >= 43.5, "\(door) \(hit)")
                         #expect(abs(hit.midY - path.midY) <= 2, "\(door) is off the path's line")
