@@ -214,6 +214,9 @@ struct MobileWriteScreen: View {
             .onDisappear {
                 let model = model
                 let session = session
+                // VM-61: a line still offering this note's structural Undo is
+                // taken back — that door goes with the note.
+                MobileLine.withdrawNoteLine(of: model.undoDoor, session: session)
                 router?.editors.deregister(model)
                 // **PR7 — the OTHER leaving road** (round 2 batch 4). The
                 // note is popped or replaced: land what is pending, then
@@ -314,29 +317,13 @@ struct MobileWriteScreen: View {
                     .accessibilityLabel("Unlock Note")
                 }
             }
-            // **THE RECEIPT, and since round 2 batch 4 its ACTION** (M20 ≡
-            // her R10): *"the phone ALREADY shows a receipt after a
-            // structural act … and an Undo action on that receipt is the
-            // standard iOS shape."*
-            //
-            // The row renders for EITHER half. Several structural acts —
-            // divide, merge, Make Block, the cross-block edit — deliberately
-            // say nothing (the text rearranging on screen is the report),
-            // and they now carry a BARE Undo: the way back with no new
-            // chatter, which is both the calmer surface and the reason every
-            // shipped "this act says nothing" pin stays true.
-            //
-            // The button's WORDS come from the live stack, so it can never
-            // name an entry that has since moved, and it renders only while
-            // the stack really holds that end (P-2).
-            if model.statusMessage != nil || model.statusAction != nil {
-                HStack(spacing: 10) {
-                    if let status = model.statusMessage {
-                        Text(status).font(tokens.small).foregroundStyle(tokens.muted)
-                    }
-                    receiptAction
-                }
-            }
+            // **THE RECEIPT LEFT THE MASTHEAD** (VM-61 — her VM-44 ruling and
+            // the note-write mockup's D4/D4b: "It never enters the masthead and
+            // never moves the prose"). What this row drew — a refusal, a
+            // receipt, a removal's Undo — speaks on the shell's ONE line
+            // (`MobileMessageLine`); the structural Undo rides that line over
+            // the same door (`MobileUndoDoor.beginUndo(from: .receipt)`), and
+            // A12's warning still presents from this masthead's alert host.
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         // The A3 spacing floor: the canon's masthead frame (`.notetitle
@@ -620,45 +607,6 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Copy Note")
-    }
-
-    /// **The receipt's action** (M20). It offers the direction the last
-    /// act left available: Undo after a structural act, Redo right after an
-    /// undo (the ping-pong her R10 asked for). Rendered only when the stack
-    /// really holds that end — a receipt can outlive its entry, and a
-    /// button that would pop somebody else's act is worse than no button.
-    @ViewBuilder
-    private var receiptAction: some View {
-        switch model.statusAction {
-        case .undo:
-            if let label = model.undoDoor.undoLabel {
-                Button {
-                    let door = model.undoDoor
-                    Task { await door.beginUndo(from: .receipt) }
-                } label: {
-                    Text(tokens.chromeLabel("Undo"))
-                }
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-                .buttonStyle(.plain)
-                .accessibilityLabel(StructuralUndoCopy.undoDoorTitle(label))
-            }
-        case .redo:
-            if let label = model.undoDoor.redoLabel {
-                Button {
-                    let door = model.undoDoor
-                    Task { await door.redo() }
-                } label: {
-                    Text(tokens.chromeLabel("Redo"))
-                }
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-                .buttonStyle(.plain)
-                .accessibilityLabel(StructuralUndoCopy.redoDoorTitle(label))
-            }
-        case nil:
-            EmptyView()
-        }
     }
 
     /// The note's ⋯ (round 2 batch 4): the note-scale acts sheet — M20's

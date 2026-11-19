@@ -100,16 +100,11 @@ nonisolated struct SearchPickerArrangement: Identifiable, Equatable, Sendable {
     let sections: [SearchPickerSection]
 }
 
-/// **THE BRAIN** — pure, so the pins read it without a window.
-nonisolated enum SearchPickerBrain {
-    /// The query as the picker reads it: trimmed; a leading "#" dropped (she
-    /// may type a tag the way it reads).
-    static func normalized(_ query: String) -> String {
-        var trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        while trimmed.hasPrefix("#") { trimmed.removeFirst() }
-        return trimmed.trimmingCharacters(in: .whitespaces)
-    }
-
+/// **THE BRAIN** — pure, so the pins read it without a window. (VM-63: its
+/// query rule, `normalized`, lives in `Shared/SearchPickerBrain.swift`, which
+/// declares the type — the wing switcher's shared brain reads it; the rest of
+/// the brain is the Mac's, here.)
+nonisolated extension SearchPickerBrain {
     /// The options a query shows, in the host's order: an empty query shows
     /// them all; otherwise every option whose text CONTAINS the query,
     /// case- and diacritic-insensitively.

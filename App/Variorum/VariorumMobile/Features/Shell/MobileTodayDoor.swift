@@ -38,9 +38,15 @@ enum MobileTodayDoor {
         session: AppSession, day: String? = nil, calendar: Calendar = .current
     ) async throws -> Outcome {
         let entryDay = day ?? JournalDay.dayString(from: Date(), calendar: calendar)
+        // VM-58: the wing she stands in — Core's own input (VX-435): a living
+        // Journal's entry is born beside the Journal, wherever it is; only
+        // when NO Journal lives do the entry and the fresh Journal land
+        // where she stands. The Mac's Today door passes the same.
+        let standingWing = session.wing.currentID
         let opened: (postID: String, shelving: Operations.DailyBookShelving) =
             try await session.runner.run { ops in
-                let entry = try ops.createOrOpenJournalEntry(entryDate: entryDay)
+                let entry = try ops.createOrOpenJournalEntry(
+                    entryDate: entryDay, standingWing: standingWing)
                 return (entry.container.id,
                         ops.shelveInDailyJournalBook(entry.container.id))
             }
@@ -91,9 +97,13 @@ enum MobileNewNoteDoor {
     static let doorTitle = "+ New Note"
 
     /// Mints the nameless bookless note; returns its id.
+    ///
+    /// VM-58: born in the wing the phone stands in (the Mac's ⌘N: "what she
+    /// makes there lives there") — so it lands in that wing's Pool.
     static func mint(session: AppSession) async throws -> String {
+        let wing = session.wing.currentID
         let id = try await session.runner.run { ops in
-            try ops.createPost(title: nil)
+            try ops.createPost(title: nil, wingId: wing)
         }.id
         // Act 0 (R-pre13u-1): the first-write signal. Announce, move on.
         session.noteFirstWrite()

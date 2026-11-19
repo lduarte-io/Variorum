@@ -113,20 +113,11 @@ struct MobileBookView: View {
                         .padding(20)
                 }
                 bookDoors
-                // **A REFUSAL SPEAKS WHERE THE TAP WAS** (the batch-10 cold
-                // review, MAJOR 2). The doors trail the contents list, so on
-                // a book longer than a screen the header's slot is off the
-                // top of the viewport and a refused door read as nothing
-                // happening. This is the phone's own root-slot grammar —
-                // `MobileStarredView` puts `stars.error(on:)` beside the door
-                // that fired it for exactly this reason.
-                if let refusal = model.doorRefusal {
-                    Text(refusal)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.alarm)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 12)
-                }
+                // **A REFUSAL SPEAKS WHERE SHE CAN SEE IT** (the batch-10 cold
+                // review, MAJOR 2: the header's slot was off the top of a long
+                // book's viewport). VM-61: it speaks on the shell's ONE line,
+                // always at the screen's foot — never a screen away from the
+                // door that fired it, however long the book.
             }
         }
         .background(tokens.room.ignoresSafeArea())
@@ -233,9 +224,7 @@ struct MobileBookView: View {
                     .font(tokens.title)
                     .foregroundStyle(reading.locked ? tokens.accent : tokens.ink)
             }
-            if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-            }
+            // VM-61: a store-read error speaks on the shell's one line.
         }
         .padding(.horizontal, 20)
         .padding(.top, 10)

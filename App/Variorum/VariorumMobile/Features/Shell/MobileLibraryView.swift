@@ -48,6 +48,12 @@ struct MobileLibraryView<TabBar: View>: View {
     /// `MobileShelfPerfTests` reads.
     let books: MobileShelfViewModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
     /// **The Two-rooms doors** (batch 6c — her QUESTIONS #84 ruling). Batch
@@ -107,32 +113,8 @@ struct MobileLibraryView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
-            if let error = model.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let receipt = model.receipt {
-                // A landed act's own words, in the muted slot — never the
-                // red one (the Mac recovery model's split).
-                Text(tokens.chromeLabel(receipt))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let starsError = stars.error(on: .library) {
-                // A star refusal fired HERE (D2 — one home per refusal,
-                // clearing after a beat; "spoken where the door fired"
-                // is now structurally true, not hoped).
-                Text(tokens.chromeLabel(starsError))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-61: the Library's error, its delete line and a star refusal
+            // speak on the shell's one line (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
@@ -151,7 +133,8 @@ struct MobileLibraryView<TabBar: View>: View {
         .task(id: holdsScraps) {
             if holdsScraps { await scraps.start() }
         }
-        .task(id: query) { await model.search(query) }
+        // VM-57: a standing query re-asks when the wing changes.
+        .task(id: [model.wingID, query]) { await model.search(query) }
         // PR1's confirm — a real `@Bindable` projection (§15's trap (a))
         // AND `presenting:`, which is the half batch 4 was missing: without
         // it the note to delete was read back AFTER SwiftUI's dismissal had
@@ -213,9 +196,8 @@ struct MobileLibraryView<TabBar: View>: View {
         // `spacing: 16` — the Shelf path line's own value, adopted now that
         // this strip carries two trailing doors instead of one.
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path(["Library"]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: "Library", onDoor: onWingDoor)
             Spacer()
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)

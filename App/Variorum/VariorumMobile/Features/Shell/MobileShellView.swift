@@ -142,11 +142,23 @@ struct MobileShellView: View {
     /// The starred set (parity C3 — ONE model threaded to every surface
     /// carrying the star door, the Mac StarDoor discipline).
     @State private var starsModel: MobileStarsModel
+    /// VM-56 — the wing the phone stands in: the held wings read (a wing
+    /// that dies returns the phone to Home) and its name, the roots' title.
+    /// VM-225 — the SHARED brain (VM-63's hoist; batch 1's interim holder
+    /// folded into it), and the interim wing door over it.
+    @State private var wings: WingsModel
+    @State private var wingDoor: MobileWingDoor
     @State private var settingsPresented = false
     /// VM-8 unit 2 — F-U2-E (PROVISIONAL P-VM8-8): the open library's protection receipts on the phone — the faces'
     /// `speak` door, shown by the Protection screen (one shell per open: a re-keying act's receipt owed to its reopen is
     /// spoken into the shell that re-pushes the screen).
     @State private var protectionReceipts = MobileProtectionReceipts()
+    /// VM-61 — the phone's ONE message line (the face of `session.status`),
+    /// hosted once, here, above everything this shell presents.
+    @State private var messageLine: MobileMessageLineModel
+    /// VM-61 — the tab bar's drawn height, so the line sits above its doors on
+    /// a root (measured, never assumed: umbrella VM-47 owns the bar's size).
+    @State private var tabBarHeight: CGFloat = 0
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
     // Stage 0 TK2 spike auto-run (KEPT — the executable §5 form).
@@ -167,6 +179,16 @@ struct MobileShellView: View {
         _trashModel = State(initialValue: MobileTrashModel(session: session))
         _archiveModel = State(initialValue: MobileArchiveModel(session: session))
         _starsModel = State(initialValue: MobileStarsModel(session: session))
+        let wings = MobileWingDoor.phoneWings(session)
+        _wings = State(initialValue: wings)
+        _wingDoor = State(initialValue: MobileWingDoor(
+            wings: wings,
+            // P-55-18: a switch files the box's draft in its own wing first.
+            fileCaptureFirst: { [quickNote = router.quickNote] in
+                await quickNote.fileOnLeaving()
+            }))
+        _messageLine = State(initialValue: MobileMessageLineModel(
+            status: session.status, voice: { [router] in router.voice }))
         // The quick-note box's session (round 2, M5). Bound HERE and not
         // in a `.task` deliberately: `bind` is idempotent and writes only
         // `@ObservationIgnored` storage, so it cannot re-enter the view
@@ -198,6 +220,8 @@ struct MobileShellView: View {
                     stack(path: $starredPath, owner: .starred) {
                         MobileStarredView(
                             stars: starsModel, tokens: tokens,
+                            wingName: MobileWingTitle.name(of: wings),
+                            onWingDoor: { wingDoor.open() },
                             tabBar: { tabBar },
                             onOpen: { starredPath.append($0) })
                     }
@@ -207,6 +231,8 @@ struct MobileShellView: View {
                         MobileShelfView(
                             model: shelfModel, stars: starsModel,
                             quickNote: router.quickNote, tokens: tokens,
+                            wingName: MobileWingTitle.name(of: wings),
+                            onWingDoor: { wingDoor.open() },
                             tabBar: { tabBar },
                             onOpenBook: { id in
                                 leavingShelf { shelfPath.append(MobileRoute.book(id)) }
@@ -233,6 +259,8 @@ struct MobileShellView: View {
                             // observation and one set of row faces, never a second.
                             books: shelfModel,
                             tokens: tokens,
+                            wingName: MobileWingTitle.name(of: wings),
+                            onWingDoor: { wingDoor.open() },
                             tabBar: { tabBar },
                             onOpen: { libraryPath.append($0) },
                             onOpenTrash: { libraryPath.append(MobileRoute.trash) },
@@ -263,10 +291,28 @@ struct MobileShellView: View {
                 bandGesture(width: width),
                 including: pagingAllowed ? .all : .subviews)
         }
+        // VM-61: the one message line — its own overlay window over this
+        // scene, above every sheet and alert this shell presents; it lifts
+        // over the tab bar while a root (and so the bar) is showing.
+        .background(MobileMessageLineHost(
+            model: messageLine, chromeInset: pagingAllowed ? tabBarHeight : 0))
         // (13p Batch 4's notice bar — today's nudge and reminder — left with today's road at VX-329 U1.)
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
         }
+        // VM-225 — the interim wing door's plain list (the name on any root
+        // opens it). A pick lands on the wing's Bookcase: the door counts the
+        // landing, and the shell shows the Shelf page through its one page
+        // road (P-55-14: no stack is touched, so nothing she has open is
+        // closed. The Shelf's own stack is never left holding a screen while
+        // hidden — a page is left only from its root, and the protection
+        // ask selects the Shelf before it pushes — so the landing always
+        // shows the Bookcase itself).
+        .sheet(isPresented: $wingDoor.isOpen) {
+            MobileWingListSheet(door: wingDoor, tokens: tokens)
+                .presentationDetents([.medium, .large])
+        }
+        .onChange(of: wingDoor.landings) { _, _ in selectPage(.shelf) }
         // VM-8 unit 1 — F-U1-3: a reopen's ask for Protection, adopted once (a fresh shell on appear; a standing one on
         // change).
         .onAppear { adoptProtectionRequest() }
@@ -276,6 +322,7 @@ struct MobileShellView: View {
         .onAppear { attachProtectionReceipts() }
         .onChange(of: bootstrap?.roadStanding.map { ObjectIdentifier($0) }) { _, _ in attachProtectionReceipts() }
         .task { await starsModel.start() }
+        .task { await wings.track() }
         // VM-65: the timing layer's "home on screen" (launch and unlock).
         .onAppear { MobileTiming.homeAppeared() }
         // R27b's starter Journal used to be seeded from HERE, concurrently
@@ -601,6 +648,8 @@ struct MobileShellView: View {
         .overlay(alignment: .top) {
             Rectangle().fill(tokens.line).frame(height: 1)
         }
+        // VM-61: the message line sits above the bar's doors on a root.
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabBarHeight = $0 }
     }
 
     /// A tab door. The BODY moved to `selectPage` at batch 10 so the swipe

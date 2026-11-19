@@ -80,7 +80,11 @@ final class MobileLibraryViewModel {
     /// nil = no search active (the listing shows); [] = a query with no
     /// hits (the empty state speaks).
     private(set) var hits: [Queries.CatalogHit]?
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession, listingLimit: Int = 200) {
         self.session = session
@@ -476,7 +480,7 @@ final class MobileLibraryViewModel {
             land(page, question)
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -504,7 +508,7 @@ final class MobileLibraryViewModel {
             }
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -540,7 +544,7 @@ final class MobileLibraryViewModel {
             land(page, question)
         } catch is CancellationError {
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -564,7 +568,7 @@ final class MobileLibraryViewModel {
             return
         } catch {
             state.loadingMore = false
-            if state.generation == generation { lastError = String(describing: error) }
+            if state.generation == generation { lastError = OpsRefusalCopy.sentence(for: error, roads: .phone) }
             return
         }
         state.loadingMore = false
@@ -678,6 +682,10 @@ final class MobileLibraryViewModel {
         }
     }
 
+    /// VM-57 — the wing the phone stands in (the search task re-keys on it,
+    /// so a standing query re-asks in the new wing).
+    var wingID: String { session.wing.currentID }
+
     /// ONE-SHOT search over the standing catalog scope. An
     /// empty/whitespace query clears the search (the listing returns).
     /// Stale results are dropped (the latest typed query wins).
@@ -690,8 +698,12 @@ final class MobileLibraryViewModel {
             return
         }
         do {
+            // VM-57: the current wing's catalog. (Core lists snippet hits in
+            // every wing — the one shared room; this face drops pool-home
+            // hits anyway, below.)
+            let wing = session.wing.currentID
             let found = try await session.database.read { db in
-                try Queries.searchCatalog(db, query: trimmed)
+                try Queries.searchCatalog(db, query: trimmed, wingID: wing)
             }
             guard activeQuery == trimmed else { return }
             // Book and post hits navigate as themselves; block hits
@@ -712,7 +724,7 @@ final class MobileLibraryViewModel {
             // A superseded search's error never lands either (the Mac
             // catch's staleness guard).
             guard activeQuery == trimmed else { return }
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -737,7 +749,7 @@ final class MobileLibraryViewModel {
         do {
             return try await MobileNewNoteDoor.mint(session: session)
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }
@@ -800,10 +812,13 @@ final class MobileLibraryViewModel {
             }
             lastError = nil
             receipt = RecoveryCopy.movedToTrashReceipt(.note)
+            // VM-61: something left the page — the line, with Undo as Put
+            // back (the Trash's own road for a note).
+            MobileLine.say(receipt, as: .removal(.putBackNote(item.postID)), session: session)
             return true
         } catch {
             receipt = nil
-            lastError = DeletionRefusal.words(error)
+            lastError = DeletionRefusal.sentence(error, roads: .phone)
             return false
         }
     }

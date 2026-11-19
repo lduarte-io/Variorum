@@ -46,6 +46,12 @@ struct MobileStarredView<TabBar: View>: View {
     /// star door (the Mac StarDoor's one-value discipline).
     @Bindable var stars: MobileStarsModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     /// A row's destination, through the model's own route brain — the
     /// Library's callback shape.
@@ -71,17 +77,8 @@ struct MobileStarredView<TabBar: View>: View {
                 }
                 .padding(.horizontal, 8)
             }
-            if let error = stars.error(on: .starred) {
-                // D2's rule: a refusal speaks at ITS OWN door's root. An
-                // un-star fired from this page reports here, and a homeless
-                // (store-read) error reports on every root including this one.
-                Text(tokens.chromeLabel(error))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-61: a star refusal speaks on the shell's one line
+            // (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
@@ -92,9 +89,9 @@ struct MobileStarredView<TabBar: View>: View {
     /// the P38 crowding lesson says a strip earns its doors.
     private var pathLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path([MobileStarsModel.pageName]))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: MobileStarsModel.pageName,
+                onDoor: onWingDoor)
             Spacer()
         }
         .padding(.horizontal, 20)

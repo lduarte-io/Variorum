@@ -229,7 +229,12 @@ final class MobileQuickNoteModel {
     /// rather than opening it. The row now goes with the text.
     var visibleState: SaveState { mints ? saveState : .idle }
 
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); the box no longer
+    /// draws it — her words stay in the box either way.
+    private(set) var lastError: String? {
+        didSet { if let session { MobileLine.refuse(lastError, session: session) } }
+    }
     /// The box holding at a boundary it cannot cross (Q1) — a quiet note,
     /// never the red error slot: nothing failed, and nothing was lost.
     /// Cleared by the next change the box CAN take, and by a reset.
@@ -708,13 +713,17 @@ final class MobileQuickNoteModel {
         cancelMintClock()
         let snapshot = text
         let undoLabel = MobileQuickNoteCopy.undoLabel
+        // VM-58 — her SW-5: a quick note lands in the CURRENT wing, in its
+        // Pool (the Bookcase entry bar's rule on the Mac).
+        let wing = session.wing.currentID
         saveState = .saving
         let task = Task<String?, Never> { [weak self] in
             do {
                 let result = try await session.runner.run { ops in
                     // A5-2: `importPost`, not `newBlock` — the paste that
                     // arrived before the mint segments correctly for free.
-                    try ops.importPost(title: nil, text: snapshot, undoLabel: undoLabel)
+                    try ops.importPost(
+                        title: nil, text: snapshot, undoLabel: undoLabel, wingId: wing)
                 }
                 // Act 0 (R-pre13u-1): the first-write signal — the box is
                 // the phone's fastest capture path, so it is also the
@@ -1177,14 +1186,8 @@ struct MobileQuickNoteBox: View {
                     .lineLimit(3)
                     .accessibilityLabel(note)
             }
-            if let error = model.lastError {
-                // `lineLimit` beside a growing chrome text is standing law
-                // (P-8, the b6dae25 class).
-                Text(error)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.alarm)
-                    .lineLimit(3)
-            }
+            // VM-61: a refused filing speaks on the shell's one line; her
+            // words stay in the box.
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 8)

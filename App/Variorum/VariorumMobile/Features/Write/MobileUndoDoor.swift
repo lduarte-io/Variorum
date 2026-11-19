@@ -219,9 +219,13 @@ final class MobileUndoDoor {
             // A landed undo can itself be redone, so the receipt offers the
             // OTHER direction — the ping-pong her R10 asked for, reachable
             // without opening anything.
+            // VM-61: the Mac's classes (`ShellActions`) — a landed undo is an
+            // ordinary act (no line on the phone; Redo stays in the ⋯ sheet),
+            // nothing to undo is a refusal.
             model.report(
                 label.map(StructuralUndoCopy.undone) ?? StructuralUndoCopy.nothingToUndo,
-                action: label == nil ? nil : .redo)
+                action: label == nil ? nil : .redo,
+                line: label == nil ? .refusal : .ordinary)
         } catch {
             // A failed inverse STAYS on the stack (the UndoStack doctrine):
             // she resolves the refusal — unseal the note, say — and presses
@@ -259,7 +263,8 @@ final class MobileUndoDoor {
             await model.refreshTakesFromStore()
             model.report(
                 label.map(StructuralUndoCopy.redone) ?? StructuralUndoCopy.nothingToRedo,
-                action: label == nil ? nil : .undo)
+                action: label == nil ? nil : .undo,
+                line: label == nil ? .refusal : .ordinary)
         } catch {
             model.report(StructuralUndoCopy.redoFailed(Self.refusal(error)))
         }
@@ -300,18 +305,20 @@ final class MobileUndoDoor {
     /// The everyday refusals in phone words. **18m U3:** the shared refusal
     /// table speaks everything it has words for — the seal included ("This
     /// note is locked — unlock it first.": the ONE stem in the phone's door
-    /// words, act-less because an undo has no one act to name) — and the
-    /// operations layer's own description stands where it has none. Only the
+    /// words, act-less because an undo has no one act to name) — and the one
+    /// plain fallback stands where it has none (VM-62). Only the
     /// locked-take arm stays: it names the phone's takes-sheet road. (The
     /// Mac's undo door already spoke the table, so the two undo-failure lines
     /// now read the same but for each platform's door words.)
     static func refusal(_ error: Error) -> String {
-        guard let error = error as? OperationError else { return String(describing: error) }
+        guard let error = error as? OperationError else {
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
+        }
         switch error {
         case .lockedVariant:
             return MobileEditorViewModel.lockedTakeRefusal
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }
