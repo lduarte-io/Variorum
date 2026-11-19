@@ -710,7 +710,7 @@ dropped. The closeout's r0 lines are corrected in place (§7 batch 7 ▸ "Re-che
 | r1 re-check piece | State |
 |---|---|
 | Q1 — the re-check, per pin, and the plan (this paragraph) | DONE (this commit) |
-| Q2 — the two test changes | NOT-STARTED |
+| Q2 — the two test changes | DONE (this commit) — `MobileLeavingSavesOnceTests`: the host's note and the header say the leaving ends at its LAST act (r1), and the new `aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped` (7 tests now). Build PENDING (Q3) |
 | Q3 — builds: phone `build-for-testing` into `vm64-b7r1` (fix); the red `vm64-b7r1-red` (the four production files at `dfdd94b5a` over today's tip; revert announced first) | NOT-STARTED |
 | Q4 — §7: the r1 re-check, the corrected lines, the stage commands on the new folders | NOT-STARTED |
 

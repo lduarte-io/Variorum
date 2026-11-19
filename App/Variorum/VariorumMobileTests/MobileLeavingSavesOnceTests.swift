@@ -25,7 +25,12 @@
 //  · **(c) under Castle the savepoint is in the store before the store
 //    closes** — the lock here closes a REAL pool (the bootstrap's binding,
 //    `asRebindable`), after the tree comes down, so the removed screen's own
-//    ask meets a closed store; nothing is lost and nothing is written after;
+//    ask meets a closed store; nothing is lost and nothing is written after.
+//    And since batch 6 r1 that removed screen's leaving ALSO gives its
+//    coordinator back, after its savepoint: a key typed after the lock's flush,
+//    whose landing meets the closed pool, is KEPT by that release (the phone's
+//    `releaseAutosave` drops only a clean coordinator at zero holders) and
+//    lands once the store is open again — never dropped;
 //  · **the runner's side, RED on the pre-fix build:** on each road the
 //    store's writer runs no scan of the note's takes (`closeAutoCommit`'s
 //    whole-note read) — one last-savepoint read per take owed, and that is
@@ -68,9 +73,13 @@ private final class LeaveGate {
 }
 
 /// A note screen built INSIDE the host's body, as the shell's destination
-/// builds it — so when the gate closes nothing outside the tree keeps the
-/// screen or its editor alive, and the editor's end of life (its coordinator's
-/// release, batch 6) marks the end of its leaving.
+/// builds it. **When its leaving has ended:** the screen's `onDisappear` task
+/// runs teardown's flush, then the leaving savepoint, then gives the editor's
+/// hold on its coordinator back (`releaseAutosaveHold` — batch 6 r1: the
+/// release is the leaving's LAST act, not the editor's death, so it comes
+/// while this host stays up). So the session's holder count for the note
+/// falling to zero says the savepoint has run — the waits below read it, and
+/// their bound is a hang guard, not a timing assumption.
 private struct LeaveHost: View {
     let gate: LeaveGate
     let build: @MainActor () -> MobileWriteScreen
@@ -423,6 +432,54 @@ struct MobileLeavingSavesOnceTests {
                 #expect(writer.scans == 0, "VM-71: the lock scanned the note's takes on the writer (\(writer.scans))")
                 #expect(writer.takeReads == 1, "VM-71: one take owed, one read — ran \(writer.takeReads)")
             }
+        }
+    }
+
+    // MARK: (c), under batch 6 r1 — the release after a closed store keeps what did not land
+
+    /// **A release racing the pool close never drops unsaved text.** Since
+    /// batch 6 r1 the removed screen's leaving gives its coordinator back as its
+    /// last act — after its flush and its savepoint, in one task. Here a key
+    /// arrives AFTER the lock's own flush and savepoint (the lock is async; the
+    /// page stays live through its awaits) and the pool closes before the
+    /// screen's leaving can land it: the leaving's flush is refused, the
+    /// savepoint's read meets the closed store, and the release finds the
+    /// coordinator DIRTY — so the phone's `releaseAutosave` keeps the entry (it
+    /// drops one only at zero holders AND clean), the key stays reachable to
+    /// every flush walk, and it lands once the store is open again. The lock's
+    /// savepoint holds what had landed before it. A guard on both builds (the
+    /// release is batch 6's, the same on each).
+    @Test func aKeyThatMeetsTheClosedStoreIsKeptByTheReleaseNotDropped() async throws {
+        try await withLockableWorld { session, store in
+            let postID = try await seedLeftNote(session)
+            let start = session.openAutosaveCount
+            let router = MobileShellRouter()
+            let screen = LeavingScreen {
+                MobileWriteScreen(session: session, postID: postID, router: router, tab: .shelf)
+            }
+            defer { screen.tearDown() }
+            #expect(await eventually { router.editors.registered.last?.textView?.textStorage.length ?? 0 > 0 })
+            try typeKey("X", into: router)
+
+            // The lock's teardown lands "X" and savepoints it…
+            await mobileWillLock(session: session, editors: router.editors, stopServices: {})()
+            // …and one more key arrives before the tree comes down.
+            try typeKey("Y", into: router)
+            #expect(session.hasPendingAutosave, "the late key waits in the debounce")
+            screen.close()
+            store.binding.lock()
+            #expect(await eventually { session.autosaveHolderCount(forPost: postID) == 0 },
+                    "the removed screen's leaving ended — its hold given back")
+            #expect(session.openAutosaveCount == start + 1,
+                    "the release KEPT the dirty coordinator — nothing pending is ever dropped")
+            #expect(session.hasPendingAutosave, "the late key is still held, reachable to every flush walk")
+
+            try store.reopen()  // the unlock
+            await session.flushEveryOpenPost()
+            #expect(try await storedTakeText(store.view, postID: postID) == "BaseYX.",
+                    "the late key landed once the store was open again")
+            #expect(try await autoSavepoints(store.view, postID: postID) == ["Base.", "BaseX."],
+                    "the lock's savepoint holds what had landed before it closed the store")
         }
     }
 
