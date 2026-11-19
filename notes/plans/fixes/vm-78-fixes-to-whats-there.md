@@ -1871,16 +1871,18 @@ changed." · "Unarchive".
 **Applied in place (SurfaceContracts, The Bookcase and books — one clause each naming the phone, one pointer each;
 applied on the windows' pin evidence; if a walk row fails at gate 3, its clause comes out with the fix's
 revert):**
-1. The Bookcase bullet, after "Starred floats first under any order.": the phone's shelf sorts by the same a–z rule
-   with starred first and no order door until its Bookcase (VM-113).
-2. The book settings sheet bullet, the Finished state door: the phone's Book Details asks the same, with the same
-   count, and only when N > 0.
-3. The same bullet's last sentence, "The pickers, chips and Book Panel mark "(archived)"": the phone's membership
-   sheet too.
-4. The Delete bullet, "Delete Gathering… on a gathering, everywhere the door draws (…; VX-611)": the phone's shelf
-   row and Book Details too.
-5. The Delete bullet, "The Trash's listing never claims emptiness before its first value answers": the phone's
-   Trash too.
+1. The Bookcase bullet, after "Starred floats first under any order.", added: "The phone's shelf sorts by the same
+   a–z rule, starred first, with no order door yet (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`)." (The
+   order door is VM-113's, her ruling.)
+2. The book settings sheet bullet, the Finished state door, after "only when N > 0", added: "; the phone's Book
+   Details asks the same, by the same count — `notes/plans/fixes/vm-78-fixes-to-whats-there.md`".
+3. The same bullet's last sentence now reads: "The pickers, chips and Book Panel mark "(archived)", and so does the
+   phone's membership sheet (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`)."
+4. The Delete bullet, after "Delete Gathering… on a gathering, everywhere the door draws", added: ", the phone's
+   shelf row and Book Details included", and the pointer joins the bracket: "(the one capability's verb by kind;
+   VX-611; `notes/plans/fixes/vm-78-fixes-to-whats-there.md`)".
+5. The Delete bullet, after "The Trash's listing never claims emptiness before its first value answers", added: ",
+   the phone's included (`notes/plans/fixes/vm-78-fixes-to-whats-there.md`)".
 
 **Canon delta proposed — the orchestrator applies or holds (loaded canon; this drafter does not edit it).** Her
 ruling: QUESTIONS #274 addendum 2, "**P-849-1 RATIFIED + the phone wired** (the insured restore stands; the
