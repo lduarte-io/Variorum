@@ -346,7 +346,7 @@ No revert is in flight (row V's revert was restored and verified).
 | V — headless suites green with counts; `build-for-testing`; revert checks | NOT-STARTED |
 | C — the record's closing sections; the run's table + ledger flipped | NOT-STARTED |
 
-No revert is in flight.
+**REVERT IN FLIGHT (announced before it starts):** the revert checks for VX-977 and VX-961 — `git checkout 63d409d84 -- Sources/VariorumMCP/MCPToolCatalog.swift "Sources/VariorumMCP/MCPWriteTools+UnlinkVersions.swift"` and `git checkout 974e38d69 -- Sources/VariorumMCP/MCPShowTool.swift`, then the two pin suites, then the restore by `git checkout d483e61ea -- <the three>` and the commit check (`git status` clean, `git diff HEAD` empty). If this line still stands, a successor restores those three files from `d483e61ea` before anything else.
 
 **THE MECHANISMS, TRACED (inputs → wrong state or output), at `2ecf42a3e`:**
 
