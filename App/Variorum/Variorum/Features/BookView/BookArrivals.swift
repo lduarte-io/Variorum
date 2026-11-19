@@ -79,17 +79,15 @@ import VariorumCore
 /// receipts and the refusals (the `SplitAtNewlinesCopy` reason: a receipt
 /// worded at two sites is how copy drifts). Wording PROVISIONAL —
 /// 13s re-voices the app; this is the plan §3's "N at the door", quiet.
-nonisolated enum ArrivalsCopy {
+///
+/// VM-78 batch A: **THE ONE WORD** (`ArrivalsCopy.word`) lives in
+/// `Shared/ArrivalsCopy.swift` — the finish confirm's line, shared with the
+/// phone, says it. This extension keeps the Mac's sentences.
+nonisolated extension ArrivalsCopy {
     /// The judgment doors' verbs (the registry's `verb`; the face renders
     /// them through `chromeLabel`, so the Terminal voice lowercases them).
     static let addVerb = "Add"
     static let dismissVerb = "Dismiss"
-
-    /// **THE ONE WORD** (17y B3 item (h) — R-17y-2, her pick): the dial's
-    /// "wait at Arrivals", the door, the popover, the refusals and the
-    /// finish confirm all say it. 13s may re-voice sentences; the WORD is
-    /// settled.
-    static let word = "Arrivals"
 
     /// What the door draws beside its icon: the count when something waits
     /// (PRESENCE), nothing when nothing does (CALM — her "calm when nothing

@@ -386,7 +386,32 @@ the merge gate); the batch's suites green by TYPE name in window (1).
 
 #### BATCH A — LIVE STATUS
 
-*(the implementer fills this from its first commit)*
+*Implementer: `opus-implementer`, session of 2026-11-19. Half 1 = code + pins + a green `build-for-testing` on BOTH
+targets (no `xcodebuild test`, no simulator); half 2 = the stage window's red-on-old + green runs. **No revert is in
+flight.***
+
+| Piece | State | Pin (TYPE name for `-only-testing`) |
+|---|---|---|
+| The hoist (words) | DONE (this commit) — Mac `build` GREEN | the Mac's existing copy pins (Mac leg) |
+| VM-21's hoist (the collect receipt family) | IN-PROGRESS — next commit | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
+| Seams + pins (all three members) | NOT-STARTED | — |
+| VM-81 | NOT-STARTED | — |
+| VM-83 | NOT-STARTED | — |
+| VM-21 | NOT-STARTED | — |
+
+**What moved, and where (the hoist — words only; every Mac string byte-identical):**
+- `App/Variorum/Shared/BookStateCopy.swift` (new) declares `enum BookStateCopy` with `finishVerb`, `reopenVerb`,
+  `deleteVerb`, `deleteVerb(_:)`, `deleteDoorLabel(_:)`, `quoted(_:)`, `waitingLine(_:)`,
+  `finishNeedsConfirm(pendingArrivals:)` — moved verbatim from the Mac's `Features/Readings/BookStateDoors.swift` —
+  plus `finishTitle(_:)` (the finish confirm's title, which the Mac's `BookStateCopy.finish(…)` now composes from —
+  same bytes), `finishedMeans` (the first sentence of the Mac's `CollectingCopy.finishedCaption`) and `sealedMeans`
+  (the Mac's `CollectingCopy.sealedCaption`, whole). The Mac's `BookStateDoors.swift` now EXTENDS the enum
+  (`nonisolated extension BookStateCopy`); `BookSettingsSheet.swift`'s `CollectingCopy.finishedCaption` is
+  `BookStateCopy.finishedMeans + " A finished book opens as pure text."` and `sealedCaption` is
+  `BookStateCopy.sealedMeans` (bytes unchanged). Not hoisted (per the brief): `BookStateConfirm`, the door sets,
+  anything reaching the capability registry.
+- `App/Variorum/Shared/ArrivalsCopy.swift` (new) declares `enum ArrivalsCopy` with `word` only (`waitingLine` needs
+  it); the Mac's `Features/BookView/BookArrivals.swift` now extends it.
 
 ### BATCH C — the probe and the red test (VM-17 · VM-24, which carries VM-19) — EDITOR SEAM, test and badge code
 

@@ -170,57 +170,32 @@ nonisolated struct BookStateConfirm: Identifiable, Equatable, Sendable {
 /// Every word the state doors say. Wording PROVISIONAL — 13s re-voices the
 /// app; the TRUTH each sentence states is ruled (the sitting record §5, §6,
 /// §24; the §25 lessons 1, 5, 6 — no sentence here may make one false).
-nonisolated enum BookStateCopy {
+///
+/// **VM-78 batch A — the words the phone speaks too live in
+/// `Shared/BookStateCopy.swift`** (`finishVerb`, `reopenVerb`, `deleteVerb`,
+/// `deleteVerb(_:)`, `deleteDoorLabel(_:)`, `quoted(_:)`, `waitingLine(_:)`,
+/// `finishNeedsConfirm(pendingArrivals:)`, `finishTitle(_:)`, and the
+/// Finished/Sealed captions' shared sentences). This extension keeps the
+/// Mac's own: the confirms, the receipts, the refusals.
+nonisolated extension BookStateCopy {
     // The registry's verbs (title case — the shelf menu's own grammar).
-    static let finishVerb = "Finish"
-    static let reopenVerb = "Reopen"
     static let sealVerb = "Seal\u{2026}"
     static let unsealVerb = "Unseal"
     static let ownVerb = "Own Its Notes\u{2026}"
     static let unownVerb = "Stop Owning"
-    static let deleteVerb = "Delete Book"
     /// R-13ic-4's door on the rule editor's gathering gate.
     static let deleteGatheringDoor = "Delete this gathering\u{2026}"
-
-    /// **VX-611 — the delete door's verb, chosen by the reading's KIND.** ONE
-    /// capability (`.deleteBook`, P-1 — the registry keeps the book's verb as
-    /// its declared word); every renderer of its door on a ROW (the Bookcase
-    /// row's menu, `BookRowMenu`, the Archived books group's button) and the
-    /// rule editor's gathering-gate hover draw these words instead of the
-    /// registry's, so a gathering's door says what it deletes. Its confirm
-    /// already did (`deleteGathering` — "Delete Gathering").
-    static func deleteVerb(_ kind: ReadingKind) -> String {
-        kind == .gathering ? "Delete Gathering" : deleteVerb
-    }
-
-    /// The row's door label: the kind's verb and the ellipsis (it asks first).
-    static func deleteDoorLabel(_ kind: ReadingKind) -> String {
-        deleteVerb(kind) + "\u{2026}"
-    }
 
     static let unavailableNote =
         "A book's state lives on the book \u{2014} right-click it on the Bookcase, or open its "
         + "settings (the gear)."
 
-    static func quoted(_ name: String) -> String { "\u{201C}\(name)\u{201D}" }
-
     // MARK: Finish (§24 — the confirm carries ONE line, and only when N > 0)
-
-    /// §24's line ("N waiting at the door will be dismissed"), its door
-    /// re-worded to the ONE word at 17y B3 item (h) — R-17y-2: "the door
-    /// line's 'N at the door' idiom re-words to the Arrivals family"
-    /// (PROVISIONAL P-17y-B3-h3 on the sentence; 13s re-voices).
-    static func waitingLine(_ count: Int) -> String {
-        "\(count) waiting at \(ArrivalsCopy.word) will be dismissed."
-    }
-
-    /// The finish asks ONLY when something is waiting — else it acts.
-    static func finishNeedsConfirm(pendingArrivals: Int) -> Bool { pendingArrivals > 0 }
 
     static func finish(readingID: String, name: String, pendingArrivals: Int) -> BookStateConfirm {
         BookStateConfirm(
             act: .finishBook, readingID: readingID,
-            title: "Finish \(quoted(name))?",
+            title: finishTitle(name),
             lines: [waitingLine(pendingArrivals)], list: [], after: [],
             confirmLabel: "Finish")
     }
