@@ -1076,7 +1076,22 @@ struct MobileLivenessTests {
             }
             arrival.cancel()
             #expect(rose, "arrival raises the keyboard — two taps to typing")
+
+            // VM-19 (PIN — red on the teardown that only hides the window):
+            // no first responder outlives this test. A text view left first
+            // responder in a hidden window keeps the keyboard's input
+            // session, and a later suite's editor then desyncs on an
+            // `insertText` of a run in that posture (VX-282 C-1's decider;
+            // the trace is `MobileCaretReplaceTraceTests`' VM-19 instrument).
+            Self.leave(window)
+            #expect(!surface.textView.isFirstResponder,
+                    "VM-19: the raised surface lets go of the keyboard before its window hides")
         }
+    }
+
+    /// The window-hosted tests' teardown (VM-19).
+    private static func leave(_ window: UIWindow) {
+        window.isHidden = true
     }
 
     // MARK: MINOR 2 — the voice flip reaches every registered editor
