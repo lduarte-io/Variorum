@@ -98,6 +98,32 @@ struct MobilePhoneTypeTests {
         }
     }
 
+    /// **…and in the UIKit form too** (the midway review's M-1): the
+    /// overlays, the takes chrome and the segmented choice read
+    /// `PhoneType.uiFont`, and below the default setting the anchors' curves
+    /// took it under the floor (Terminal `rowPreview` ≈ 10.4 at xSmall,
+    /// `meta` 12.0 through xSmall–Medium) while the SwiftUI form held 13 —
+    /// one role, two sizes on one screen. RED ON OLD by reverting `uiFont`
+    /// alone. A floored font keeps the role's own face.
+    @Test func theUIKitFormIsNeverBelowThirteenPointsEither() {
+        for voice in ThemeVoice.allCases {
+            for role in PhoneTypeRole.allCases {
+                for setting in Self.everySetting {
+                    let font = PhoneType.uiFont(
+                        role, voice: voice,
+                        compatibleWith: UITraitCollection(preferredContentSizeCategory: setting))
+                    #expect(font.pointSize >= PhoneType.floorSize,
+                            "\(role) \(voice) UIKit at \(setting.rawValue): \(font.pointSize)")
+                }
+            }
+        }
+        let smallest = UITraitCollection(preferredContentSizeCategory: .extraSmall)
+        #expect(PhoneType.uiFont(.rowPreview, voice: .study, compatibleWith: smallest)
+                    .familyName == "Iowan Old Style")
+        #expect(PhoneType.uiFont(.rowPreview, voice: .terminal, compatibleWith: smallest)
+                    .fontDescriptor.symbolicTraits.contains(.traitMonoSpace))
+    }
+
     /// At the default setting every role is exactly its table size, in both
     /// forms (identity at Large, so a hosted surface measures the sheet).
     @Test func atTheDefaultSizeEveryRoleIsItsTableSize() {

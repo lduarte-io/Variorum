@@ -334,11 +334,30 @@ extension PhoneType {
     /// chrome. A label that sets `adjustsFontForContentSizeCategory` keeps it
     /// current as the setting changes; one that does not keeps the size it
     /// was made at.
+    ///
+    /// **The floor holds here too** (the midway review's M-1): below the
+    /// default setting the anchors' curves take a role under 13 pt (Terminal
+    /// `rowPreview` ≈ 10.4 at xSmall, `meta` 12.0 through xSmall–Medium), so
+    /// a resolved font under `floorSize` — in either class — is replaced by
+    /// the role's face at exactly 13, as the SwiftUI rule (`pointSize`)
+    /// already does. That floored font is fixed at 13; the UIKit chrome
+    /// re-resolves its fonts per layout or update and none of it sets
+    /// `adjustsFontForContentSizeCategory`, so nothing that follows the
+    /// setting today stops following it.
     static func uiFont(
         _ role: PhoneTypeRole, voice: ThemeVoice,
         compatibleWith traits: UITraitCollection? = nil
     ) -> UIFont {
         let spec = spec(role, voice: voice)
+        let scaled = scaledUIFont(spec, voice: voice, compatibleWith: traits)
+        guard scaled.pointSize < floorSize else { return scaled }
+        return baseUIFont(spec, voice: voice, pointSize: floorSize)
+    }
+
+    /// The role's UIKit font by its class, before the floor.
+    private static func scaledUIFont(
+        _ spec: PhoneTypeSpec, voice: ThemeVoice, compatibleWith traits: UITraitCollection?
+    ) -> UIFont {
         let base = baseUIFont(spec, voice: voice, pointSize: spec.size)
         let metrics = UIFontMetrics(forTextStyle: spec.anchor.textStyle)
         switch spec.scaling {
