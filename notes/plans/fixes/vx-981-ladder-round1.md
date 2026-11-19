@@ -266,3 +266,34 @@ The skipped first value is a product fact too: a fingerprint change that commits
 ### PASS 2, in one list
 
 Headless: F1 (the reader, its socketpair pin, line 158) · the accept-loop bound (three lines, the instrument run once and recorded) · F2's scaffold, pin and fix · N1 · N2 · N4 · N5 (the stall test's A half, the sleep, the new GUARD, R-944-ONLY re-run). App target, for the orchestrator's window: F2's door change and two justified edits · F4's pin, fix and red leg · N3. Then the whole `VariorumMCPTests` target alone and `build-for-testing`, counts recorded. Records: F3's rows; BATCH 2's erratum; P-981-L1-1 and P-981-B2-3's third speaker for QUESTIONS at the merge; the two canon drafts amended; the accept-loop ticket.
+
+## PASS 2 — round 1's fixes as built
+
+*(A FRESH Opus implementer, the ladder's fix session, PASS 2 — the FINAL CALLS above are the work order; where a response and a call differ, the call governs. Read in this session, nothing delegated: CLAUDE.md and its loaded canon; the run record's LIVE STATUS, Kickoff (R-981-1…7), ENVIRONMENT & TRAPS, REVIEW FOCI, THE LADDER, THE LEDGER, THE MERGE-IN, the gates' results and the batch records' parts each fix touches; this file whole; `notes/MCPSpec.md` whole; SurfaceContracts → The app and Doors to the outside; `notes/SessionResiliencyProtocol.md`; the code each call names. No `Sync/`, schema, custody or editor-seam line; no write of `ai_private_at`, `sealed_at` or `owned`; no `App/Variorum/Shared/` file and no capability or registry line is planned — any that becomes needed is named here the moment it is decided.)*
+
+**Not done in PASS 2 (first line, by the protocol):** no `xcodebuild test` (no stage claim — the app-target types and F4's red leg are the orchestrator's window; GATE TYPES below); no canon file edited (CANON LINES EARNED are drafts); `notes/QUESTIONS.md` untouched (P-981-L1-1 and P-981-B2-3's addendum wait here for the merge). **F3 is the orchestrator's** and was closed at `b94229687` (checked at this session's start: the run's LIVE STATUS rows and THE LEDGER read current against the GATE sections and round 1) — nothing for PASS 2.
+
+**LIVE STATUS (flipped in the same commit as each piece):**
+
+| Piece | State |
+|---|---|
+| R0 — this section opened; the plan below | DONE (this commit) |
+| F1-S — `RawSocket`'s second hang-up reader declared with TODAY's verdict (the one-byte check) + its socketpair pin (arms i–v); RED | NOT-STARTED |
+| F1-F — the reader built (whole lines to EOF under the receive bound, only `list_changed` notices, reporting what it read); `MCPSizeCapTests:158` reads through it and prints it; the revert check | NOT-STARTED |
+| VX-1019 — the accept-loop suite's three 10 s connect bounds give way to the harness's; the suite-head comment; the 11 s `namingProbe` instrument run ONCE against both forms, recorded and kept under `notes/plans/vx-981/` | NOT-STARTED |
+| F2-S — `MCPShowRule.Verdict.partial` declared with today's behaviour (the tool's `try log`; the door's first switch returns it as it is) + the pin and its twin; RED | NOT-STARTED |
+| F2-F — the tool's `.partial` arm through the caught road (today's row, `allowed: false`); the guard's doc corrected; the revert check | NOT-STARTED |
+| F2-D — the door answers `.partial` on `.unfinished` and as `.interrupted`'s fallback; the two justified app edits; BATCH 2 — RECORD's erratum line | NOT-STARTED |
+| N2 — `MCPShim.readFirstLine`'s doc | NOT-STARTED |
+| N5 — the stall pin's A half (at least its two notices, nothing else after its answer), the 200 ms sleep gone; the counts GUARD in `MCPAnnounceOrderServerTests`; R-944-ONLY re-run on the edited tests | NOT-STARTED |
+| N4 — `announceRoundForTesting()` gone; its call sites call `host.announceGrantsChanged()`; the docs naming it corrected | NOT-STARTED |
+| N1 — the resume's held admissions serial again, the doc saying why | NOT-STARTED |
+| F4-P — the pin (app target, `MCPShowOfferFacesTests`), committed before the fix | NOT-STARTED |
+| F4-F — the VX-705 gone arm forgets the place's trail rows and a last change on that place (PROVISIONAL P-981-L1-1, option (a)) | NOT-STARTED |
+| N3 — `MCPDoor.receiptWindow` gone (the test reads `MCPReceiptRun.window`); `receiptRunLine` under `#if DEBUG` | NOT-STARTED |
+| V — `build-for-testing` at the tip; F4's red leg reverse-applied and compiled, then restored; the whole `VariorumMCPTests` target alone ×3 | NOT-STARTED |
+| C — the closing sections (dispositions, AUTHORED SENTENCES, CANON LINES EARNED, the QUESTIONS texts, GATE TYPES and red legs, the three runs, the self-check) | NOT-STARTED |
+
+No revert is in flight.
+
+**The order, and why:** the headless pieces first (F1, the accept bound, F2's tool, N2), then N5 BEFORE N4 and N1 — R-944-ONLY reverse-applies the VX-944 fix commit `92565842d` to `MCPSession.swift` and `MCPServerHost.swift` (gate B34's leg-E shape), and both N4 and N1 edit lines that commit wrote; run on N5's tree it reverse-applies clean, and the new GUARD compiles there because it calls the seam N4 removes only afterwards. Then the app pieces (F4 pin before fix, N3), one `build-for-testing`, F4's red leg compiled, and the three whole-target runs at the end.
