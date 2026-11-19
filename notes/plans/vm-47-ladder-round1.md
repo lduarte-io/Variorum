@@ -256,3 +256,25 @@ Mac's `VoiceTokens.swift:454–455`, `ReadModeView.swift:848–849` and `ReadPag
 script over every comment line of the file at `c5dbae56b` (the reviewer's HEAD) and at HEAD finds no word repeated
 across a line break and none within a line; the comment was written once (`af487bfe7`) and not touched since.
 Nothing to change — and the "so that the" is hers, so it must not be edited.
+
+### 2b. The reviewer's final calls (verbatim, 2026-11-19)
+
+The reviewer's reply was cut off once by a usage limit and resumed in the same session; nothing in the worktree
+changed in between. Its reply:
+
+**1 (MINOR, theme store started per shell while bound per session) — CONFIRMED as the implementer proposes.** Its premise-check strengthens the trace: one `.ready` assignment site reached only through `.opening`; every session-replacing road passes through a non-ready state; the identifier-collision case is ruled out because the held store keeps the old session alive. The remedy sentence lands on `bindTheme`'s doc comment as the implementer worded it (the coupling is the shell's generally; keying the shell on its session is the remedy). No code, no pin — hollow as filed.
+
+**2 (NIT, menu items identified by their title) — CONFIRMED as the implementer proposes.** One sentence in `items(settings:)`'s doc comment: each item's word must be distinct, since the word is the identity. No pin.
+
+**3 (NIT, adjacent dividers in the note's ⋯ sheet) — CONFIRMED as the implementer proposes, with its corrected mechanism adopted as the record's.** The touching pair is the body's unconditional divider before the undo group (`MobileNoteActions.swift:108`) and the Settings row's own leading divider (`:271`); my "after redoRow's empty slot" was the same adjacency described loosely. Leaving it to VM-61/VM-148 is ACCEPTABLE: not a regression (the empty-stacks state drew a doubled hairline before this run), and the honest fix is not one line — the Settings row's leading divider is load-bearing whenever undo or redo renders, so removing the double needs the sheet's rows to go subview-aware (the `MobileSettingsGroup` shape), exactly that sheet's next-touch work. Condition: the §2 disposition row names the owner (VM-61/VM-148) so the hand-off is on the page.
+
+**4 (NIT, tab bar's first frame assumes widest chip padding) — CONFIRMED, no action.** One frame, corrected by the first geometry pass, already batch 4's recorded risk.
+
+**5 (NIT, doubled word in `MobileReadView`'s comment) — DISMISSED; the implementer's dispute is correct and the finding was my error.** I re-read lines 115–118 myself before ruling: the text runs "never the / palette's …" and "… so that / the cream read page …" — no doubled word at my reviewed HEAD or now. My evidence was a FILTERED diff grep (matching only lines containing "room"/"background") that dropped lines 116–118's middles and juxtaposed line 115's trailing "the" with line 117's leading "the" — I cited grep output as if it were a reading. Line 117 quotes her R-13u-10 words verbatim and must not be edited. Withdrawn and recorded as wrong, not deferred.
+
+**The confirmed fix pass, in full** (the implementer applies; nothing is FINDER-FIXES; nothing goes to QUESTIONS): (1) one doc-comment sentence on `MobileShellRouter.bindTheme`; (2) one doc-comment sentence on `MobileRootMenu.items(settings:)`; (3) no code — the divider pair recorded in §2 with its owner; (4) nothing; (5) nothing — §2 records the dismissal and the filtered-grep reason. No rendered word, no behaviour change ⇒ no pin anywhere; no stage window owed for this pass beyond a compile. §1's pending-evidence list (batch 3's Mac leg and walk, batch 4/5 counts, VM-27's red-on-old snapshot run, the batches-4/5 walk, the post-re-land whole targets) stands unchanged. Round-1 tally after dispositions: 0 BLOCKER · 0 MAJOR · 1 MINOR · 3 NIT confirmed · 1 NIT dismissed — no MAJOR, so under her five-round rule no further round is earned, subject to the owed evidence coming back as the record expects.
+
+**The orchestrator's note on rounds.** By her rule this ladder has earned no further round on its findings. One
+more cold read is taken anyway, as round 2, because substantial change enters after this round: VM-55's merge
+re-landed across the phone's root and sheet files, and whatever the run's one walk turns up. Round 2 reads those
+and this pass's two comment sentences.
