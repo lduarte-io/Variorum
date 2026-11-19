@@ -732,8 +732,9 @@ struct MobileHerPathsPerfTests {
     /// · `library-listing-fetch-ninewings` / `bookless-listing-fetch-ninewings`
     ///   — THIS TEST'S clock around the queries the held listings re-ran
     ///   BEFORE batch 5 (`Queries.library` and `Queries.poolPosts`, the
-    ///   phone's 200 limit) on this world — kept, unchanged, as the same-run
-    ///   comparison.
+    ///   phone's 200 limit) on this world — kept as the same-run comparison,
+    ///   in the wing the Library reads (every wing before the merge of main —
+    ///   VM-55; the current wing, Home, since — the scope VM-57 gave them).
     /// · `library-page-fetch-ninewings` / `bookless-page-fetch-ninewings` —
     ///   the same clock around the reads the Library holds SINCE batch 5,
     ///   only while on screen: the first page of each listing through
@@ -833,17 +834,23 @@ struct MobileHerPathsPerfTests {
             // default — the shell builds it with no other value), which is
             // also its page since VM-68.
             let limit = 200
-            // The wing the Library reads (`WingState.readScope`: every wing
-            // until the phone stands in one).
+            // The wing the Library reads (`WingState.readScope`). Every wing
+            // until the phone stood in one; since the merge of main (VM-55,
+            // VM-56/57) it is the CURRENT wing — Home here, one ninth of this
+            // world — for the page reads below AND for the two pre-batch-5
+            // queries, which VM-57 scoped the same way (`observeLibrary(…,
+            // wingID:)`, `poolPosts(…, wingID:)`), so the same-run comparison
+            // stays like for like. (Batch 3's BEFORE and batch 7's AFTER tables
+            // were taken over EVERY wing, before the merge.)
             let wing = session.wing.readScope
             for _ in 0..<Self.runs {
                 var t0 = CACurrentMediaTime()
                 _ = try await session.database.read { db in
-                    try Queries.library(db, sort: .lastTouched, direction: .desc, limit: limit)
+                    try Queries.library(db, sort: .lastTouched, direction: .desc, limit: limit, wingID: wing)
                 }
                 libraryFetch.append(milliseconds(since: t0))
                 t0 = CACurrentMediaTime()
-                _ = try await session.database.read { db in try Queries.poolPosts(db, limit: limit) }
+                _ = try await session.database.read { db in try Queries.poolPosts(db, limit: limit, wingID: wing) }
                 booklessFetch.append(milliseconds(since: t0))
                 // VM-68: what the Library holds now, only while on screen.
                 t0 = CACurrentMediaTime()

@@ -12,7 +12,9 @@
 //  (the note listing cut silently at 200, the Bookless one at its window) and
 //  the return pin is a GUARD, green on both (the old listing was held live
 //  while hidden; the new one re-asks on return). The model's own rules are
-//  `MobileLibraryPagingRulesTests`.
+//  `MobileLibraryPagingRulesTests`. Since the merge of main (VM-55, "Wings
+//  underneath"): `aWingSwitchedWhileTheLibraryIsAwayIsHonouredOnTheReturn`, a
+//  GUARD over VM-55's interim wing door and this suite's return.
 //
 
 import Dependencies
@@ -201,6 +203,58 @@ struct MobileLibraryPagingTests {
                 #expect(labels.contains { $0.hasPrefix("Arrived while away") },
                         "the return shows a stale listing — labels were \(Array(labels.prefix(20)))")
                 #expect(labels.contains { $0.hasPrefix("Standing note 3") })
+            }
+        }
+    }
+
+    /// **A WING SWITCHED WHILE THE LIBRARY IS AWAY IS HONOURED ON THE RETURN** —
+    /// a GUARD, written at the merge of main (VM-55, "Wings underneath") into
+    /// this run, on the mounted shell: the Library is seen in Home, left for the
+    /// Shelf, the wing switched THERE by VM-55's interim wing door (the name on
+    /// the Shelf's root, a row of its list), and the Library's tab door then
+    /// shows the new wing's note and not the old wing's. Hidden, the Library
+    /// holds nothing (VM-68); its hold key carries the wing (`Question.wing` —
+    /// `WingState.readScope`, the current wing on the phone since VM-56), so the
+    /// return's held page is the new wing's whether or not the hidden page's
+    /// task restarted on the switch. A key that dropped the wing, or a return
+    /// that re-showed the rows it left, goes red here.
+    @Test func aWingSwitchedWhileTheLibraryIsAwayIsHonouredOnTheReturn() async throws {
+        try await withEditorWorld { session, _ in
+            let work = try await session.runner.run { ops in
+                let work = try ops.createWing(name: "Work").id
+                let home = try ops.createPost(title: "A note in Home")
+                _ = try ops.newBlock(in: home.id, text: "Home words.", at: .end)
+                let away = try ops.createPost(title: "A note in Work", wingId: work)
+                _ = try ops.newBlock(in: away.id, text: "Work words.", at: .end)
+                return work
+            }
+            await withHostedSurface(
+                MobileShellView(session: session, services: nil, router: MobileShellRouter())
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate("Library"), "the Library's tab door")
+                await surface.settle(40)
+                var labels = surface.visibleLabels
+                #expect(labels.contains { $0.hasPrefix("A note in Home") },
+                        "Home's Library lists Home's note — labels were \(Array(labels.prefix(20)))")
+                #expect(!labels.contains { $0.hasPrefix("A note in Work") }, "Home's Library lists Work's note")
+
+                // Away on the Shelf: the wing is switched by the name on ITS root.
+                #expect(surface.activate("Shelf"), "the Shelf's tab door")
+                await surface.settle(40)
+                #expect(surface.activate("Home"), "the name is a door — labels were \(surface.visibleLabels)")
+                await surface.settle(30)
+                #expect(surface.activate("Work"), "the list's row — labels were \(surface.visibleLabels)")
+                #expect(await eventually { session.wing.currentID == work }, "the shared wing switched")
+                await surface.settle(40)
+
+                #expect(surface.activate("Library"), "the Library's tab door")
+                await surface.settle(40)
+                labels = surface.visibleLabels
+                #expect(labels.contains { $0.hasPrefix("A note in Work") },
+                        "the return shows the old wing's listing — labels were \(Array(labels.prefix(20)))")
+                #expect(!labels.contains { $0.hasPrefix("A note in Home") },
+                        "the return still lists the old wing's note")
             }
         }
     }

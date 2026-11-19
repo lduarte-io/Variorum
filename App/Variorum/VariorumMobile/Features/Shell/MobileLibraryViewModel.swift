@@ -358,7 +358,13 @@ final class MobileLibraryViewModel {
         /// (edited, newest first — `poolPosts`' `stamp DESC, id DESC`).
         let sort: Queries.LibrarySort
         /// The wing the reads are scoped to: `WingState.readScope`, the one
-        /// seam every shared read takes its wing from (nil = every wing).
+        /// seam every shared read takes its wing from (nil = every wing). On
+        /// the phone it is the CURRENT wing since VM-56 (VM-55's run), so a
+        /// wing switch is a new question: the view's hold key changes, its
+        /// task restarts, and the restarted hold's first fetch is the new
+        /// wing's page — the re-read VM-57 asked of every phone listing (its
+        /// own model followed the wing with `MobileWingScope.follow`; this one
+        /// is keyed, as the Mac's views are).
         let wing: String?
     }
 
@@ -463,7 +469,9 @@ final class MobileLibraryViewModel {
     }
 
     /// The note listing, held (the shell's own road is `hold(_:)`; this is
-    /// its on-screen half, which the pins drive directly).
+    /// its on-screen half, which the pins drive directly). It holds ONE
+    /// question — the wing included — for as long as it runs: following a
+    /// change of sort or wing is the view's key (`hold(onScreen:)`), never this.
     func startAll() async { await holdFirstPage(question(.notes)) }
 
     /// The Bookless listing, held — the Pool's phone home.

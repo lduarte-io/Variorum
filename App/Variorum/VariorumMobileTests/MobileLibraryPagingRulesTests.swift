@@ -166,7 +166,9 @@ struct MobileLibraryPagingRulesTests {
     }
 
     /// The hold key: a note listing per filter (none for Books and Scraps),
-    /// the sort for the note listing only, and the screen.
+    /// the sort for the note listing only, the wing, and the screen. *(The
+    /// wing's lines: the merge of main — VM-55 — where the phone's read scope
+    /// became the current wing.)*
     @Test func theHoldKeyNamesTheShownListing() async throws {
         try await withEditorWorld { session, _ in
             let model = MobileLibraryViewModel(session: session)
@@ -183,6 +185,14 @@ struct MobileLibraryPagingRulesTests {
             model.setSort(.createdAt)
             #expect(model.hold(onScreen: true) != before, "a sort flip restarts the hold")
             #expect(model.hold(onScreen: false) != model.hold(onScreen: true))
+            // The wing: the question reads the phone's current wing, so a switch
+            // restarts the hold (the view's task re-keys) — shown or hidden.
+            #expect(model.hold(onScreen: true).question?.wing == session.wing.currentID)
+            let inHome = (shown: model.hold(onScreen: true), hidden: model.hold(onScreen: false))
+            session.wing.switchTo("vm64-merge-wing")
+            #expect(model.hold(onScreen: true).question?.wing == "vm64-merge-wing")
+            #expect(model.hold(onScreen: true) != inHome.shown, "a wing switch restarts the shown hold")
+            #expect(model.hold(onScreen: false) != inHome.hidden, "and the hidden one")
         }
     }
 
