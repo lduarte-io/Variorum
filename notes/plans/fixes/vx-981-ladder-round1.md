@@ -85,3 +85,19 @@ None.
 - **VX-133's design** (entry tokens and walk observers in core, wider than the rider's first shape): additive, small, and exact where label-matching could not be; the positional stamp fails safe (nothing is stamped unless the undoable receipts and the registered entries agree in number, and an unstamped receipt counts as it always did). One writer road stamps (`MCPWriteTools.call` is the only `executor.run` in the module). The door subscribes per session and lets go with it; the cross-session token collision is pinned. The residual the record names (a walk reaching the door before its receipt's hop) needs her keypress inside the microseconds between an act's body and its receipt's enqueue.
 - **The run's provisionals that narrow or extend her words are listed with options and reach QUESTIONS at the merge** — P-981-B3-2 (only `tools/list` and `tools/call` count as "its first request"; a client that only pings and never says `initialized` hears no notice), P-981-B2-5 (the wire's answer when a move's place died — the brief's premise was wrong and the record says so), P-981-B1-2/-3 (a journal leg wins the face; the note row locked too). Each is the most spec-defensible of its options as built; none is a ruling made here.
 - **Architecture rules:** no `Shared/`, phone, `Sync/`, custody, schema or editor-seam line; no capability or registry line; the faces' rules are pure (`PrivateMarkFace`, `BookSettingsFace.privateRow`, `MCPAnnounceGate`, `MCPReceiptRun`); every DEBUG seam is inside `#if DEBUG` and every test that drives one is guarded (the release-configuration build is the record's evidence — not re-run here); no core API the phone or `Shared/` calls changed shape (searched).
+
+## IMPLEMENTER RESPONSES — round 1
+
+*(A fresh Opus implementer, the ladder's fix session, PASS 1 — responses and the open reds only; no product fix before the reviewer's final calls. Read in this session, nothing delegated: CLAUDE.md and its loaded canon; the run record's LIVE STATUS, Kickoff, ENVIRONMENT & TRAPS, REVIEW FOCI, THE LADDER, THE LEDGER, THE MERGE-IN and the batch records' parts each finding touches; this file whole; `notes/MCPSpec.md` whole; SurfaceContracts → The app and Doors to the outside; `notes/SessionResiliencyProtocol.md`; the code each finding names.)*
+
+**LIVE STATUS (flipped in the same commit as each piece):**
+
+| Piece | State |
+|---|---|
+| R1 — this section opened; the instruments written and recorded (`notes/plans/vx-981/ladder1-open-reds-instrument-tip.patch`) | DONE (this commit) |
+| S — the soak: 12 whole-`VariorumMCPTests` runs on the tip (`b1351cca2` + the instrument) beside 12 on the pre-batch-3 tree (`77aebf864` + the same instrument, throwaway worktree `~/dev/variorum-vx-981-soak`), side by side, started 09:46 | IN-PROGRESS — the instrument is UNCOMMITTED in this worktree's working tree (`Tests/VariorumMCPTests/MCPSizeCapTests.swift`, `MCPAcceptLoopServerTests.swift`, the two new `VX981*.swift` files); a successor restores with `git checkout HEAD -- <the two files>` and deletes the two new files |
+| P — the per-finding responses (F1 · F2 · F3 · F4 · N1–N5) | IN-PROGRESS |
+| O — THE OPEN REDS section: the counts per tree, what the instruments read, the mechanism or what remains unknown | NOT-STARTED |
+| C — the instrument removed from the working tree, the throwaway worktree removed, the section closed | NOT-STARTED |
+
+No revert is in flight. No product or test line of the run is changed by PASS 1 (the instrument is working-tree only and leaves with C).
