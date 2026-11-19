@@ -345,9 +345,16 @@ extension PhoneType {
         case .fullRange:
             return metrics.scaledFont(for: base, compatibleWith: traits)
         case .holdsAtXXXLarge:
-            let hold = metrics.scaledValue(
-                for: spec.size,
-                compatibleWith: UITraitCollection(preferredContentSizeCategory: chromeHold))
+            // The cap is the size `scaledFont` ITSELF gives at xxxLarge, not
+            // `scaledValue`'s: for the .footnote and .body anchors the two
+            // differ by a third of a point, so a `scaledValue` cap let the
+            // UIKit chrome keep growing that third past xxxLarge
+            // (`chromeHoldsAtXXXLargeWhileHerWordsKeepGrowing`, red at the
+            // batch-1 stage window).
+            let hold = metrics.scaledFont(
+                for: base,
+                compatibleWith: UITraitCollection(preferredContentSizeCategory: chromeHold)
+            ).pointSize
             return metrics.scaledFont(for: base, maximumPointSize: hold, compatibleWith: traits)
         }
     }
