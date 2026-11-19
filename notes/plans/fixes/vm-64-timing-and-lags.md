@@ -155,7 +155,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 3 · VM-66 | **CLOSED 2026-11-19** | see the batch 3 block; built at `d2cef56be` | the BEFORE numbers are in "Orchestrator's stage results" below |
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
-| 6 · VM-69 · VM-70 | **r1 IN-PROGRESS** — the first window NOT GREEN on the three release pins (red on both builds); the release moves out of `deinit` | see the batch 6 block ▸ "Iteration r1" | r0 products `vm64-b6` at `24fa9a5e2` |
+| 6 · VM-69 · VM-70 | **r1 BUILT · READY for the stage** — the release moved out of `deinit` into the leaving work | see the batch 6 block ▸ "Iteration r1"; r1 products `vm64-b6r1`, red `vm64-b6r1-red` | r0 products `vm64-b6` (to be deleted) |
 | 7 · VM-71 | BUILT · **READY for the stage** | see the batch 7 block; products `vm64-b7` at `c9b574513`, red `vm64-b7-red` | no revert in flight; no line in `Features/Protection/` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
@@ -630,8 +630,8 @@ batch 7's `MobileLeavingSavesOnceTests` assumes too):**
 | R1 — this trace and the decision | DONE (this commit) |
 | R2 — the product: the hold given back by the leaving, taken back by the arrival; `deinit` the remainder | DONE (this commit) — `MobileEditorViewModel`: `holdsAutosave`, `arrivalCount`, `takeAutosaveHold()`, `releaseAutosaveHold(ifNotShownSince:)`, `observesAutosave`, `autosave` a `private(set) var`, `deinit` releases only a hold still held; `MobileWriteView`: the `.task` takes the hold first, `onDisappear` captures the arrival and its task releases after the savepoint, before the leave's mark. Build PENDING (R4) |
 | R3 — the pins: `MobileNoteHoldTests`; the probe; the three pins' notes | DONE (`9821ffef3` + this commit's two compile fixes) — `MobileNoteHoldTests` (4, names the new API); in `MobileNoteOpenOnceTests` the three pins' notes, `anEditorThatNeverArrivedGivesItsHoldBack` (red on old), `probeWhenAClosedScreensEditorIsFreed` and `probeAPoppedNotesEditorInTheShell` (RECORDED, `VM70-PROBE|…`) |
-| R4 — builds `vm64-b6r1` (fix) and `vm64-b6r1-red` (revert announced first) | IN-PROGRESS — fix `vm64-b6r1` `** TEST BUILD SUCCEEDED **` at this commit's tree, no warning in a touched or new file. **A REVERT IS IN FLIGHT from this commit:** the four Write files (`MobileEditorViewModel`, `MobileMembership`, `MobileNoteTags`, `MobileWriteView`) checked out at the instrument commit `c8f95ea6f` over today's tree (batch 7's Core and `Shared/` kept), `MobileChipScopeTests.swift` and `MobileNoteHoldTests.swift` moved to `App/Variorum/DerivedData/vm64-b6r1-aside/`; build into `vm64-b6r1-red`; then `git checkout HEAD --` the four files, the two suites moved back, `git status` clean. If this cell still says IN FLIGHT, restore exactly that way |
-| R5 — §7 r1 section (the falsified r0 lines marked) + READY | NOT-STARTED |
+| R4 — builds `vm64-b6r1` (fix) and `vm64-b6r1-red` (revert announced first) | DONE — fix `vm64-b6r1` built at `ce3c4e75b`'s tree `** TEST BUILD SUCCEEDED **`, no warning in a touched or new file; red `vm64-b6r1-red` (the four Write files at `c8f95ea6f` over today's tree, batch 7's Core and `Shared/` included; the two new-API suites aside) `** TEST BUILD SUCCEEDED **` (cold) — it compiles. **No revert is in flight:** the four files restored by `git checkout HEAD --`, the two suites moved back, the aside folder removed, `git status` clean but this record |
+| R5 — §7 r1 section (the falsified r0 lines marked) + READY | DONE (this commit) — §7 batch 6 ▸ "Iteration r1"; the r0 lines the window falsified carry `[r1: FALSIFIED …]` in place, kept as written; READY |
 
 ### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -2409,7 +2409,9 @@ encrypted POOL; a write HOLDS the writer and commits a change only after the arr
 end on the change. A guard: green on both trees (the old second read covered the same window the same way).
 
 **(b) The release never drops unsaved text, never races the leaving savepoint, never takes a coordinator another holder
-needs.** Mechanism: the release is the model's `isolated deinit`, and the model's last strong reference on the leaving road
+needs.** **[r1: FALSIFIED by the first stage window — in a live host the editor OUTLIVES its leaving work (the three
+release pins red on both builds); the release moved into the leaving work. See "Iteration r1" below. The text that
+follows is kept as written.]** Mechanism: the release is the model's `isolated deinit`, and the model's last strong reference on the leaving road
 is the screen's `onDisappear` task, which holds it across `teardown()` (the canary, the gesture task, `finish()`: the tail
 mint and the flush) and `savepointOnLeaving` (which flushes the EXISTING coordinator again, then `closeAutoCommit`) — so the
 release comes after both, by construction (the Mac's 18k C1 shape, `EditorViewModel`'s own `isolated deinit`). The session's
@@ -2474,9 +2476,9 @@ is expected in main's shape (2 of 3 cases, 2 issues) — this batch changes no r
 | `anOpenAsksForTheWholeDocumentChromeOnce` | green (1) | RED (3); the branched-take guard green | VM-69 product |
 | `openingANoteReadsNoListingOfEveryBookOrEveryTag` | green | RED (one every-tag listing; two every-book listings for one feed) | VM-69 product |
 | `aWriteLandingAfterTheOpensOneReadReachesThePage` | green | green | hazard (a) guard |
-| `closingANoteLandsItsTextThenGivesItsCoordinatorBack` | green | RED on the give-back; text + savepoint green | VM-70 product |
-| `theReleaseWaitsForTheLeavingSavepoint` | green | RED on the give-back; the hold green | VM-70 product (ordering) |
-| `aCoordinatorAnotherHolderNeedsIsNeverLetGo` | green | RED (holds never given back) | VM-70 product |
+| `closingANoteLandsItsTextThenGivesItsCoordinatorBack` | green | RED on the give-back; text + savepoint green | VM-70 product **[r1: FALSIFIED — red on the fix build too]** |
+| `theReleaseWaitsForTheLeavingSavepoint` | green | RED on the give-back; the hold green | VM-70 product (ordering) **[r1: FALSIFIED — red on the fix build too]** |
+| `aCoordinatorAnotherHolderNeedsIsNeverLetGo` | green | RED (holds never given back) | VM-70 product **[r1: FALSIFIED — red on the fix build too]** |
 | `aStoodDownEditorKeepsWorkingAndTheTabSwitchGetsACurrentPage` | green | green | hazard (c) guard |
 | `MobileChipScopeTests` (3) | green | not built (names the new reads) | hazard (d) guard |
 
@@ -2546,7 +2548,7 @@ or cherry-picked.
   load is gone, so its value is a signal (adopted when the page holds it, else settled by the fresh-read road); (b) treat
   it as `loadOnce`'s was (authoritative, may rewrite at once) — would drop the healing the old second read happened to give
   when a settle landed between the read and its use.
-- **D-6-3 — where the release lives.** (a) **built:** the model's `isolated deinit` (the Mac's 18k C1 shape; exactly once
+- **D-6-3 — where the release lives.** **[r1: SUPERSEDED — see "Iteration r1" ▸ D-6-3r1.]** (a) **built:** the model's `isolated deinit` (the Mac's 18k C1 shape; exactly once
   per acquisition; after the leaving work by construction); (b) the end of `onDisappear`'s task — wrong for a covered
   screen that comes back (its model would keep recording into a coordinator the registry no longer holds, and a second
   tab would mint a twin coordinator — the S3 BLOCKER's class); (c) a new `AppSession` hook — unnecessary, and in VM-55's
@@ -2638,6 +2640,169 @@ in the note, go back at once — the word is in the note when reopened (capture 
 the "Note reads per open" row reads 1 across its samples (capture `b6-readout.png`). Screens go to
 `notes/plans/vm64-screens/` (gitignored). What it leaves on the device: the seeded fixture and one typed word in the short
 note.
+
+#### Iteration r1 — the release moves into the leaving work (after the first stage window, 2026-11-19)
+
+**Not done in r1 (first):** every hosted run is PENDING the next window — the note-open suite alone on each r1 build, the
+73-type list from the r1 fix build (commands below). The trace's probes are RECORDED lines that window will print.
+
+**What the first window showed** (10:10–10:28; the orchestrator's message and the logs `notes/plans/vm64-screens/b6-*.log`):
+the perf suite alone, fix build, twice — 10 of 10 (reads per open 1, editor builds 1, registry growth 0 through
+`MountedBuilt`); the 73 types in one host — green but VM-24's standing caret test (main's shape) and three of this
+batch's pins; the note-open suite alone — the same three at their 10 s deadlines, the other four green; the red build —
+every designed red, and the same three. **`closingANoteLandsItsTextThenGivesItsCoordinatorBack`,
+`theReleaseWaitsForTheLeavingSavepoint` and `aCoordinatorAnotherHolderNeedsIsNeverLetGo` were red on BOTH builds** — in
+each the typed text and the leaving savepoint landed (those expectations passed), and the editor never released.
+
+**The trace, per pin and for the product** (the full text is §5 batch 6 ▸ "Iteration r1"):
+- **Per pin — (A), the harness: the live host keeps the editor.** Every reference our code keeps was read: the
+  `onDisappear` task (ended — its savepoint landed), the `.task` and `start()`'s loops (end at the stream's
+  cancellation; the iterators hold no model), the liveness authority (`weak`, deregistered), the router (none), the text
+  view, gate delegate, storage observer, chrome/decor controllers, pan router and siblings (all `weak`), the crystallizer's
+  tasks (transient). What is left is SwiftUI/UIKit's hosting of the removed screen (its `@State`, the representable's
+  struct — `MobileWriteView.model`, strong — and the sheet/alert/inset content closures, each capturing the screen value
+  whose `State(initialValue:)` stores the editor). The pins' `BuiltScreen` keeps its window and hosting controller until
+  the test's `defer`; the perf series' `MountedBuilt` tears its window down and lets its host go BEFORE it waits — the one
+  road that released. Which object inside SwiftUI/UIKit holds it is not readable from our side; two RECORDED probes print
+  the stage at which the editor is freed (`probeWhenAClosedScreensEditorIsFreed`: after the close, a SwiftUI update, the
+  window's teardown, the host's release; `probeAPoppedNotesEditorInTheShell`: the real shell's NavigationStack pop through
+  the navigation bar's Back).
+- **For the product — (B).** Her shell is a live host for the app's life; a popped destination's state is freed on
+  SwiftUI's schedule; no pin on this branch shows that happens promptly, or at all, while the host lives. r0's release
+  therefore depended on a deallocation her hands are not shown to cause: **VM-70 was not shown fixed for her road**.
+- **The Mac (18k C1) and why its lifetimes are different:** a Mac release only DECREMENTS — the drop is the leaving
+  savepoint's (`dropAfterLeaving`), and ⌘Q/the lock savepoint whatever is still held — so a late death there only delays a
+  drop (18k measured the deaths on the dev store). On the phone the release IS the drop, so a late or missing death is
+  the growth VM-70 measures.
+
+**What changed (r1), file by file:**
+- `VariorumMobile/Features/Write/MobileEditorViewModel.swift` — the hold FOLLOWS THE SCREEN:
+  `holdsAutosave` (true from `init`'s acquisition), `arrivalCount`; **`takeAutosaveHold()`** — the arrival's first act:
+  counts the arrival and, if a leaving gave the hold back, re-acquires through `session.autosave(forPost:)` with the
+  editor's own clock; if the registry hands back a DIFFERENT coordinator (the entry dropped clean and was minted again —
+  by this call or by another tab's editor of the same note) the editor ADOPTS it (a belt flush of the old one if dirty,
+  its observer dropped, `autosave` re-pointed), and in either case ends observing the coordinator it records into (the
+  hooks `init` makes; the error hook through `reportOperationError`, so VM-55's wording reaches it). **`releaseAutosaveHold
+  (ifNotShownSince:)`** — the leaving's last act: gives the hold back unless the screen arrived again since the leaving
+  began. **`deinit`** releases only a hold still held (a twin, a harness model). `autosave` is a `private(set) var`;
+  `observesAutosave` for pins. The r0 `deinit` doc is replaced by the r1 one (it says why).
+- `VariorumMobile/Features/Write/MobileWriteView.swift` — the `.task` takes the hold first (before the liveness grant's
+  flush); `onDisappear` captures `model.arrivalCount`, and its task releases after `savepointOnLeaving`, before the leave's
+  timing mark. **The order on every leaving is now explicit and in one task: teardown's flush → the leaving savepoint
+  (batch 7's phone branch: its flush, the read, the one runner turn) → the give-back → the mark** — the order batch 7's
+  `MobileLeavingSavesOnceTests` reads off the store (it waits for `autosaveHolderCount == 0` as the leaving's end; with
+  r0 that wait could only pass by the host's death, with r1 it is the leaving's last act).
+- `VariorumMobileTests/MobileNoteOpenOnceTests.swift` — the three pins unchanged in what they assert (their notes say the
+  give-back is the leaving's completion and the bound a hang guard); new `anEditorThatNeverArrivedGivesItsHoldBack`; the
+  two probes.
+- `VariorumMobileTests/MobileNoteHoldTests.swift` (new, 4, names the new API — set aside for the red build): the screen's
+  own sequences, deterministic — a re-show after the give-back takes it back and is wired to it; a re-show JOINS the
+  coordinator another tab opened meanwhile (one coordinator per note); a re-show before the leaving finished keeps its
+  hold (the leaving parked on a held store); the order flush → savepoint → give-back.
+
+**Hazard (b), re-traced for r1.** Never drops unsaved text: the give-back follows `teardown()`'s flush and the leaving
+savepoint's own flush in the same task, and the phone's `releaseAutosave` still keeps a DIRTY coordinator whatever the
+holders. Never races the savepoint: it is the next statement after `savepointOnLeaving` returns. Never takes a
+coordinator another holder needs: holds are counted per holder (a second tab's editor, the quick note) and the entry goes
+only at zero. The lock road: `mobileWillLock` flushes and savepoints while every editor holds; the state flip removes the
+tree; each screen's `onDisappear` task runs its leaving and gives its hold back into the OLD session — unchanged
+(batch 7's) in who asks and when. **New with r1 — the screen shown again:** a destination covered by a push gets
+`onDisappear` (its leaving runs and gives the hold back) and, popped back to, a new `.task` (`takeAutosaveHold` takes it
+again, adopting the registry's coordinator if the entry was re-minted, so two coordinators for one note cannot stand); a
+re-show before the leaving ended keeps the hold (the arrival count). **A residual stays (r0's residual 1, narrowed):**
+teardown's `stopObserving` on a covered screen — r1's re-take re-wires the observer whenever a hold was given back;
+a re-show that lands BEFORE its leaving's teardown finished keeps the hold and still loses the observer (the teardown's
+last line runs after the re-show). Pre-existing; owner as proposed for residual 1.
+
+**The keystroke fence:** untouched by r1 — neither flag the fence reads (`forceFullRender`, `pendingProjection`) is
+written by the hold; the re-take may re-point `autosave`, which the fence never reads, and only when the screen arrives
+(no structural flight can be in the air before the page is live again).
+
+**The Mac:** no `Shared/` or Core file changed in r1 either; the phone's `releaseAutosave` and the Mac's 18k C1 drop are
+untouched.
+
+**Merging (r1's additions):** VM-55 edits the top of `onDisappear` (a `MobileLine` withdraw before the deregister) and
+`init`'s `onError` line; r1's lines are the `.task`'s first statements, a capture beside `let leaving`, one call inside
+the leaving task, the `autosave` declaration, two assignments after `init`'s acquisition, and the block that replaced the
+r0 `deinit` — none overlaps. VM-78 touches none of them.
+
+**D-6-3r1 — where the release lives (supersedes D-6-3).** (a) **built:** the leaving work's last act, and the arrival
+takes it back (adopting a re-minted coordinator) — deterministic, no dependence on any deallocation, one release per
+acquisition with `deinit` as the remainder; (b) r0's `isolated deinit` alone — falsified for a live host (above); (c) keep
+the hold for a COVERED screen and release only for a POPPED one (`isPresented` / a NavigationStack signal) — not readable
+reliably from the destination, and unverifiable in process (the pop is not drivable — the probe records whether it is);
+(d) an `AppSession` re-adopt hook so a re-show re-inserts its OWN coordinator — avoids the re-point only when no other
+tab minted meanwhile, still needs it when one did, and lands in VM-55's file.
+
+**The corrected red-on-old table (r1 products: fix `vm64-b6r1`, pre-fix `vm64-b6r1-red` = the four Write files at the
+instrument commit `c8f95ea6f` over today's tree, batch 7's Core and `Shared/` included; `MobileChipScopeTests` and
+`MobileNoteHoldTests` absent there):**
+
+| Pin | Fix (`vm64-b6r1`) | Pre-fix (`vm64-b6r1-red`) | Kind |
+|---|---|---|---|
+| perf: reads per open == 1 (screen ×2, box, Library ×2) | green | RED (2) | VM-69 product |
+| perf: editor builds per open == 1 | green | green | twin guard |
+| perf: registry growth == 0 | green | RED (1) | VM-70 product |
+| `anOpenAsksForTheWholeDocumentChromeOnce` | green (1) | RED (3) | VM-69 product |
+| `openingANoteReadsNoListingOfEveryBookOrEveryTag` | green | RED | VM-69 product |
+| `aWriteLandingAfterTheOpensOneReadReachesThePage` | green | green | hazard (a) guard |
+| `closingANoteLandsItsTextThenGivesItsCoordinatorBack` | green | RED on the give-back | VM-70 product |
+| `theReleaseWaitsForTheLeavingSavepoint` | green | RED on the give-back (the hold green) | VM-70 product (order) |
+| `aCoordinatorAnotherHolderNeedsIsNeverLetGo` | green | RED | VM-70 product |
+| `anEditorThatNeverArrivedGivesItsHoldBack` | green | RED | VM-70 product (the twin) |
+| `aStoodDownEditorKeepsWorkingAndTheTabSwitchGetsACurrentPage` | green | green | hazard (c) guard |
+| `probeWhenAClosedScreensEditorIsFreed`, `probeAPoppedNotesEditorInTheShell` | pass (RECORDED lines) | pass (RECORDED lines) | the trace |
+| `MobileNoteHoldTests` (4) | green | not built | VM-70 r1 (the re-show roads, the order) |
+| `MobileChipScopeTests` (3) | green | not built | hazard (d) guard |
+
+**The commands (the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down):**
+(i) the note-open suite ALONE on each build, then the hold suite alone on the fix build:
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6r1 \
+  -only-testing:VariorumMobileTests/MobileNoteOpenOnceTests 2>&1 | tee <log-b6r1-once>
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6r1-red \
+  -only-testing:VariorumMobileTests/MobileNoteOpenOnceTests 2>&1 | tee <log-b6r1-once-red>
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6r1 \
+  -only-testing:VariorumMobileTests/MobileNoteHoldTests 2>&1 | tee <log-b6r1-hold>
+grep '^VM70-PROBE|' <log-b6r1-once> <log-b6r1-once-red>
+```
+Expected: fix — 10 of 10 green (r0's 7 — the r0 closeout's "6" miscounted them — plus the twin pin and the two probes); pre-fix — RED as tabled (the give-back pins wait 10 s each), the guards and probes pass;
+hold — 4 of 4. The probe lines say at which stage the editor was freed in a live host, and whether the shell's pop was
+drivable and freed it.
+(ii) the 73 types plus the hold suite, ONE invocation, fix build (the first window's list, `MobileNoteHoldTests` added):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileNoteOpenOnceTests MobileChipScopeTests MobileNoteHoldTests
+  MobileStructuralFlightFenceTests MobileStructuralTests MobileSelectionActsTests
+  MobileEditorMaterializationTests MobileCanaryTests MobileEditorRoutingTests MobileEditorCrystallizationTests
+  MobileEditorProjectionTests MobileTypewriterRoomTests MobileNoteSealTests MobileFindInNoteTests
+  MobileEditRoutingBindingTests MobileIdentityAuditSeparatorTests MobileBulkArmingTests MobileCanaryTeardownTests
+  MobileEditRoutingCrashTests MobileEditRouteArmsTests MobileWholeBlockDeleteBrainTests MobileWholeBlockDeleteTests
+  MobileCrossBlockEditBrainTests MobileCrossBlockEditTests MobileMarkdownRenderTests MobileMarkdownReturnTests
+  MobileMarkdownActsTests MobileCheckboxTapTests MobileMarkdownCaretTests MobileTakesTests MobileTakesBrowserTests
+  MobileTakesBrowserSurfaceTests MobileTakesChromeTests MobileTakeReorderTests MobileTakeToBlockTests
+  MobileTakeLockTests MobileUndoDoorTests MobileBlockMenuTests MobileCommentsTests MobileBlockDecorTests
+  MobileWalkTests MobileTrailingNewlinesTests MobileSpaceEaterTests MobileCRLFCaptureTests
+  MobileWriteScrollAuthorityTests MobileScrollAuthorityBrainTests MobileLivenessTests
+  MobileDeferredProjectionRetryTests MobileTypedOverRescueTests MobileEditTraceTests MobileKeyDoorPostureTests
+  MobileSavepointOnLeavingTests
+  MobileMembershipTests MobileNoteTagsTests MobileNoteRenameTests MobileNoteEntryDateTests MobileReferencesTests
+  MobileTagManagerTests MobileBlockListTests MobileBlockSelectionTests MobileNoteTrayTests MobileDeletionTests
+  MobileTrashTests MobileVersionsTests MobileNavigationTests MobileShellTests MobileMenuVocabularyTests
+  MobileRefusalTableTests MobileQuickNoteTests MobileQuickNoteUnderLockTests MobileLockTeardownTests
+  MobileRelockCoordinatorTests MobileRelockPolicyTests MobileTimingTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b6r1 \
+  ${tests/#/-only-testing:VariorumMobileTests/} 2>&1 | tee <log-b6r1-company>
+```
+Expected: all green but VM-24's standing `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePoint…` (main's
+shape). The perf suite (alone) is unchanged by r1 in what it asserts; its registry series now passes by the leaving's
+give-back rather than the host's death — it can ride the next perf window. Batch 7's `MobileLeavingSavesOnceTests` waits
+on the same give-back, and its products (`vm64-b7`) are r0's — it should be rebuilt on r1 before its window counts.
 
 ### Batch 7 · VM-71 — leaving saves once (implementer closeout)
 
