@@ -7,6 +7,32 @@ the truth for every piece); this file says what the ORCHESTRATOR was doing and w
 details that do not belong in a public repo (the session scratchpad's path and its script names, subagent ids,
 the simulator ids) are in the orchestrator's private run-state memory, `vm-47-run-state`.
 
+## UPDATE 14:35 — newer than "State at writing" and step 1 of "Next, in order" below
+
+- **Step 1 is DONE.** The whole phone target on the re-landed tree ran 14:06–14:18 and is at baseline: 1,045
+  tests in 179 suites, one host launch; the only red is VM-24's caret test (2 of 3 cases); 8 known issues (the
+  four standing, this run's four filter-row marks). VM-55's wing-door suites and this run's path-line suite pass
+  on one tree; the message line's, the wing landing's, the tab bar's, the Protection door's, Settings', the
+  appearance choice's and the bottom bar's suites pass. The standing simulator's test-host container lists
+  `Variorum-dev` only. The stage was released at 14:18:14 and the result line sent. This result is NOT yet in
+  the run record: the next agent that commits the record writes it into §4 (batch 6) and §6 "Batch 6 — results",
+  with her two unrecorded quotes into §1 (they are in the run-state memory).
+- **Step 2 is DONE as far as the build.** The walk driver and the phone test host are built
+  (`App/Variorum/DerivedData/vm47-walk`); the walker ended "WALK READY" and only DRIVES; `notes/plans/vm-47-walk.md`
+  is whole for a fresh reader (§1 the captures' file names, §2 the standard, §3 every capture and what to check,
+  §4 the screen rows for verdicts).
+- **The orchestrator holds no stage claim and no agent is running.**
+- **The coordinator's order (its call, 14:30):** another run's walk pass (to 14:58 at the latest) → another
+  run's 20-minute phone window → THIS RUN'S MAC LEG (step 3: 114 types, 25 minutes) → another run's merge gate
+  (a QUIET window of about 80 minutes: no cold builds or whole-package runs) → THIS RUN'S WALK PART A (30
+  minutes, 99 captures) at that gate's release → PART B (50 minutes, 182 captures, resized from part A's
+  measured timings; a merge gate that is READY goes ahead of it). Each piece gets its own GO with a claim line.
+- **Part A's result line** owes the coordinator: the walk device's id, the captures counted and where they sit,
+  the eight combinations each judged from its captures (the fresh reader's verdicts, sent as a follow-up if the
+  reading is not finished inside the claim), the device shut down with its library kept, its container's
+  Application Support listing, no Problem Reporter, no new crash report, the measured timings and the resized
+  ask for part B.
+
 ## Read first, in this order
 
 1. This file.
