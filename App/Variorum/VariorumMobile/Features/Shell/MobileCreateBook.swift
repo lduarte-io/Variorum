@@ -37,6 +37,12 @@ final class MobileCreateBookModel {
     }
 
     @ObservationIgnored private let session: AppSession
+    /// **VM-58 — the wing this sheet mints in**, read ONCE when the sheet
+    /// opens: the wing the phone stands in. One snapshot names the wing for
+    /// the per-wing name guard (VX-816) and the mint — the Mac's VX-889 rule
+    /// for its own gathering mint ("one snapshot names the wing for the name
+    /// guard, the mint and the rule's tag vocabulary").
+    @ObservationIgnored let wingID: String
 
     var name = ""
     var kind: BookKind = .notes
@@ -49,6 +55,7 @@ final class MobileCreateBookModel {
 
     init(session: AppSession) {
         self.session = session
+        self.wingID = session.wing.currentID
     }
 
     /// One-shot: the taxonomy for the smart picker (author-scale rows).
@@ -124,32 +131,34 @@ final class MobileCreateBookModel {
     private func createOnce() async -> String? {
         guard canCreate else { return nil }
         let bookName = name.trimmingCharacters(in: .whitespaces)
+        // VM-58: the sheet's one wing snapshot — the guard and the mint agree.
+        let wing = wingID
         do {
             let id: String
             switch kind {
             case .notes:
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
-                    return try ops.createReading(name: bookName, kind: .book)
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
+                    return try ops.createReading(name: bookName, kind: .book, wingId: wing)
                 }.id
             case .journal:
                 // The Mac create alert's journal shape, byte-mirrored:
                 // curated, profile 'journal', dated order ascending.
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
                     return try ops.createReading(
                         name: bookName, kind: .book,
                         profile: Queries.journalTraitProfile,
-                        sortField: .entryDate, sortDir: .desc)
+                        sortField: .entryDate, sortDir: .desc, wingId: wing)
                 }.id
             case .smartFromTags:
                 let paths = selectedTagPaths.sorted()
                 let all = joinAll && paths.count > 1
                 let json = try Self.spec(paths: paths, joinAll: all).encodedJSON()
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
                     return try ops.createReading(
-                        name: bookName, kind: .gathering, querySpec: json)
+                        name: bookName, kind: .gathering, querySpec: json, wingId: wing)
                 }.id
             }
             lastError = nil

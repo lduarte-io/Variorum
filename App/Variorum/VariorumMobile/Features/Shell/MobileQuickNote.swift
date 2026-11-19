@@ -708,13 +708,17 @@ final class MobileQuickNoteModel {
         cancelMintClock()
         let snapshot = text
         let undoLabel = MobileQuickNoteCopy.undoLabel
+        // VM-58 — her SW-5: a quick note lands in the CURRENT wing, in its
+        // Pool (the Bookcase entry bar's rule on the Mac).
+        let wing = session.wing.currentID
         saveState = .saving
         let task = Task<String?, Never> { [weak self] in
             do {
                 let result = try await session.runner.run { ops in
                     // A5-2: `importPost`, not `newBlock` — the paste that
                     // arrived before the mint segments correctly for free.
-                    try ops.importPost(title: nil, text: snapshot, undoLabel: undoLabel)
+                    try ops.importPost(
+                        title: nil, text: snapshot, undoLabel: undoLabel, wingId: wing)
                 }
                 // Act 0 (R-pre13u-1): the first-write signal — the box is
                 // the phone's fastest capture path, so it is also the
