@@ -552,9 +552,9 @@ open, though the masthead shows only the note's own rows; the two sheets already
 | P0 — the midpoint review's finding 1 (the fence's projection-seam comment) | DONE (`f0e2e696c`) |
 | P1 — this live status | DONE (this commit) |
 | P2 — the instrument: the projection road's document-scope chrome requests counted (no behaviour change) | DONE (this commit) — `projectionChromePasses` + `layOutChrome()` at the three projection-road call sites (`ingest`, `renderFull`, `applyDifferential`); the build PENDING P7. **This commit is the red-on-old base** (today's behaviour + the counter) |
-| P3 — VM-69: the arrival through the live observation; the chrome once | NOT-STARTED |
-| P4 — VM-70: the release at the model's end of life | NOT-STARTED |
-| P5 — the chips' scoped reads | NOT-STARTED |
+| P3 — VM-69: the arrival through the live observation; the chrome once | DONE (`63ad8b188`) — `loadLive` (`arrive`'s load), `start()` continues `liveHeader`/`liveTakes`, `takesObservation()` one home for the counted fetch, `ingest`'s chrome only when the arm did not lay it out; phone `build-for-testing` SUCCEEDED (P5's build), no warning in a touched file; behaviour PENDING the stage |
+| P4 — VM-70: the release at the model's end of life | DONE (`9ad4a880d`) — `isolated deinit { session.releaseAutosave(forPost:) }`; built; behaviour PENDING the stage |
+| P5 — the chips' scoped reads | DONE (this commit) — `MobileMembershipModel.refreshChip()` (`readingsContaining` only), `MobileNoteTagsModel.refreshChip()` (`postTags` only), the masthead's two chip tasks call them; the sheets' `.task { refresh() }` unchanged. Phone `build-for-testing` into `DerivedData/vm64-b6/` `** TEST BUILD SUCCEEDED **` (P3–P5 together), no warning in a touched file |
 | P6 — the pins: the perf suite's counts asserted (reads 1, builds 1, registry 0); the hazard pins (a)–(d); the chrome count | NOT-STARTED |
 | P7 — builds: phone `build-for-testing` into `DerivedData/vm64-b6/`; red-on-old into `vm64-b6-red/` | NOT-STARTED |
 | P8 — closeout in §7 + READY | NOT-STARTED |

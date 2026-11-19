@@ -489,7 +489,9 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Tags")
-        .task(id: model.postID) { await noteTags.refresh() }
+        // VM-69: the chip's own read — this note's tags, never the vocabulary
+        // (the sheet reads that on appear).
+        .task(id: model.postID) { await noteTags.refreshChip() }
     }
 
     /// The "more info" chip (parity C3 — her own name for the surface):
@@ -524,7 +526,9 @@ struct MobileWriteScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Books holding this note")
-        .task(id: model.postID) { await membership.refresh() }
+        // VM-69: the chip's own read — the books holding this note, never
+        // every book (the sheet reads those on appear).
+        .task(id: model.postID) { await membership.refreshChip() }
     }
 
     private var chipLabel: String {
