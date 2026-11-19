@@ -358,9 +358,9 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 2a — VM-61 | DONE — its suites ran in batch 2's one window (run by 2b, three claims, 05:56–07:39): the Mac leg 1243/1245 + its Mac pin's re-run green after a test-only fix (8fa80d315, a false positive); the whole phone target 924 of 928 clean + 2 with declared known issues, VM-24's red main's, and one REAL defect its own host pin caught (the line ignored the home-indicator inset) — fixed b811aa743, re-run green (16/16 over the line's four types). Records: "Batch 2a record" and "Batch 2b record" (2a follow-ups 1 and 2) |
 | Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | DONE — P-55-11 (be6f1d0c7) and VM-62 (pins 69005ad4a/15f788dfd, fix e8609cc6f) green in the whole phone target and the Mac leg; VM-62's red-on-old RAN at 15f788dfd from a snapshot worktree: the scan red (97 lines) and all five per-case pins red, the stripper oracle green; the window's two 2a follow-ups fixed and re-run green. Record: "Batch 2b record" |
-| Batch 3 — VM-63 | BUILT (d91f97ca5) — both targets build for testing green; its suites (the Mac and phone TYPE lists in "Batch 3 record") PENDING in the shared window batch 4 runs |
+| Batch 3 — VM-63 | DONE but one re-run — its suites ran in the shared window (batch 4's, 2026-11-19): every phone suite green (the hoist pin 5/5, whole phone target); a targeted Mac leg of its groups A–D + `CapabilityRegistryTests` + `StatusCenterTests` green but one test, the new `VM63MacWingBrainsHoistPinTests` pin's test-side dependency scope (fixed c75bdb9af; its re-run alone PENDING). Records: "Batch 3 record", "Batch 4 record" |
 | Main merged in at the seam after batch 3 | DONE (871bde99a — main 359ae214d, VX-980's merge; clean, by the orchestrator; NOT yet built or tested on this branch — batch 4's builds and the shared window are the first on the merged tree) |
-| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | BUILT (5c80d058b) — the merged tree built green first (step 0); the door, its pins and the fold are in; both targets build for testing green; READY for the shared window (the whole phone target, then the whole Mac target, QUIET) — every result PENDING. See "Batch 4 record" |
+| Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | DONE but one re-run — the door (5c80d058b) green in the whole phone target but the shell pin's test-side premise (fixed 931c77f79); the shared window ran (the whole phone target; a targeted Mac leg in place of the whole Mac target, which runs once at the merge gate); both targets build for testing green at c75bdb9af. PENDING: the follow-up claim — `MobileWingDoorShellTests` and `VM63MacWingBrainsHoistPinTests` alone on c75bdb9af's products. See "Batch 4 record" |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
 | Closeout | NOT-STARTED |
@@ -1467,13 +1467,13 @@ section), SurfaceContracts' Messages bullet, the wing label and the wing switche
 |---|---|
 | Record skeleton | DONE (635f351d6) |
 | The moves and splits (both targets' sources) | DONE (4fad0a2cf — committed NOT YET BUILT, said so in its message; a QUIET window held every full build) — the table below |
-| Test-file edits (the moved face's source pin; the VM-61 and VM-62 Mac pins' scans extended to the hoisted files) | DONE (4fad0a2cf; the VM-62 scan 1081c42bd) — results PENDING (the shared window) |
-| The Mac seam pin (`VM63MacWingBrainsHoistPinTests`, 2 tests — the refusal words' road, no platform fork) | DONE (34b332fba) — results PENDING (the shared window) |
-| The phone compile-level pin (`MobileWingBrainsHoistTests`, 5 tests) | DONE (4fad0a2cf) — results PENDING (the shared window) |
+| Test-file edits (the moved face's source pin; the VM-61 and VM-62 Mac pins' scans extended to the hoisted files) | DONE (4fad0a2cf; the VM-62 scan 1081c42bd) — GREEN in the shared window's targeted Mac leg (09:39–09:44, products 5c80d058b): `WingPaletteDoorsTests`, `VM61MacStatusSeamPinTests`, `VM62MacRefusalWordsPinTests` all passed |
+| The Mac seam pin (`VM63MacWingBrainsHoistPinTests`, 2 tests — the refusal words' road, no platform fork) | DONE (34b332fba) — the targeted Mac leg: `theHoistedBrainsCarryNoPlatformForkAndNoFace` GREEN; `theMacsWingsBrainSpeaksTheMacsRefusalWords` RED, 1 issue, red again ALONE (09:44) — a TEST-SIDE defect: every assertion held, but its `withDependencies` set only the database and `AppSession.init` reads `\.date`, so swift-dependencies recorded an issue for the live value. Fixed test-only (c75bdb9af — the scope supplies date and uuid, the Mac wing suites' own harness shape; Mac `build-for-testing` green at c75bdb9af). Its re-run alone is PENDING (batch 4's follow-up claim) |
+| The phone compile-level pin (`MobileWingBrainsHoistTests`, 5 tests) | DONE (4fad0a2cf) — GREEN 5/5 in the shared window's whole phone target (09:20–09:37, products 5c80d058b) |
 | Mac `build-for-testing` (`Variorum`, macOS, `vm55-b1`) | DONE — GREEN at d91f97ca5 ("** TEST BUILD SUCCEEDED **", exit 0; log `DerivedData/vm55-b3-mac-build2.log`). The first run, at 9fb315ad6 after the QUIET window's all-clear (08:33), was green too with ONE warning in the new pin (an `await` on the synchronous `withDependencies` overload) — fixed test-only in d91f97ca5 and rebuilt green; no diagnostic in any moved, split or new file |
 | Phone `build-for-testing` (`VariorumMobile`, the window's standing simulator, `vm55-b1`) | DONE — GREEN at 9fb315ad6 ("** TEST BUILD SUCCEEDED **", exit 0; log `DerivedData/vm55-b3-phone-build.log`; no diagnostic in any moved or new file). Nothing the phone compiles changed after it (d91f97ca5 is a Mac test file) |
 | **BUILT** | Both targets build for testing green; every source and test commit compiled. Nothing remains but the suites, which run in the ONE shared window batch 4's implementer holds (the TYPE lists below) — every result PENDING there |
-| The shared window's suites (run by batch 4's implementer) | PENDING — the TYPE lists below |
+| The shared window's suites (run by batch 4's implementer) | DONE but one re-run — the whole phone target (949 tests: every batch-3 phone suite green — the hoist pin 5/5, batch 1's wing suites, `nothingUserFacingNamesTheMac`) and a TARGETED Mac leg in place of the whole Mac target (the coordinator and the orchestrator's call: groups A–D below plus `CapabilityRegistryTests` and `StatusCenterTests`, 74 types; the whole Mac target runs once at the merge gate): 537 tests, 535 passed, the one red the VM-63 pin's test-side scope (fixed c75bdb9af, re-run PENDING). Detail: "Batch 4 record" ▸ the shared window's results |
 
 #### The brain/face table (file by file — every `Wing*` file in `Core/Views/` and `Workspace/`, plus the one non-wing file a moved brain needed)
 
@@ -1565,7 +1565,7 @@ name to exist (a rename or a stale entry trips it instead of leaving a brain uns
 that named `OpsRefusalCopy.sentence(` itself, instead of speaking the words it is handed, would change the Mac's words). On
 the phone side, `MobileWingBrainsHoistTests.aRefusalSpeaksTheHandedInWordsAndALandedActSaysAReceipt` runs a refusal (it
 lands as `.refusal` in the handed-in words) and a landed mint (its receipt draws nothing on the phone's line — a `removal`
-would). *A throwaway mirror of both scans over the tree at the record commit found no hit.* (PENDING the real runs.)
+would). *A throwaway mirror of both scans over the tree at the record commit found no hit.* (The real runs: both scans GREEN in the targeted Mac leg; the phone pin GREEN in the whole phone target — 2026-11-19, products 5c80d058b.)
 
 #### Byte-identical on the Mac — what would fail, per moved brain, had its behaviour changed
 
@@ -1628,7 +1628,7 @@ named file): listed in the Mac TYPE list below.
   says `WingsModel(session:)`, which the Mac's convenience init answers. CONFIRMED: the Mac `build-for-testing` compiled the
   whole `VariorumTests` bundle green at d91f97ca5 with no change to any of those files.
 
-#### For the shared window (run by batch 4's implementer) — every run below is PENDING
+#### For the shared window (run by batch 4's implementer) — RUN 2026-11-19 (results in "Batch 4 record" ▸ the shared window's results): the phone list in the whole phone target, green; groups A–D in the targeted Mac leg, green but the VM-63 pin's one test (test-side, fixed c75bdb9af, re-run PENDING)
 
 **Phone:** the whole phone target (the window's plan). Focused, for attribution: `MobileWingBrainsHoistTests` (new) ·
 `MobileWingStandTests` `MobileWingListingTests` `MobileWingMintTests` `MobileWingTagManagerTests`
@@ -1702,8 +1702,10 @@ named file): listed in the Mac TYPE list below.
 
 ### Batch 4 record
 
-**What this batch did NOT do (first, by the protocol):** *(final at READY, 5c80d058b)* **no test has run yet** — every suite
-is PENDING for the shared window this batch's READY asks for. Not the swipe or its dots, sizes beside the names, the ⋯ or wing
+**What this batch did NOT do (first, by the protocol):** *(updated after the shared window, c75bdb9af)* **two re-runs are still
+owed** — `MobileWingDoorShellTests` (phone) and batch 3's `VM63MacWingBrainsHoistPinTests` (Mac), each red on a test-side premise
+in the window and fixed test-only since; and the WHOLE Mac target did not run here (a targeted 74-type leg did — the whole target
+runs once at the merge gate). Not the swipe or its dots, sizes beside the names, the ⋯ or wing
 management (make, rename, delete, move everything), following a note to its wing, or moving or copying a note or book to a wing
 (all wave 2 — VM-80, umbrella VM-72); no restyle of the roots beyond the door itself (the path line keeps its tokens, sizes and
 letters; it is 10 pt taller so the door's 44 pt target is real — P-55-17); no fix to the empty-wing lines (P-55-16); no line of
@@ -1724,11 +1726,13 @@ frames 5–15 and its build notes, wording list 1's wing rows. DerivedData: `App
 |---|---|
 | Record skeleton | DONE (this commit) |
 | 0 — build the merged tree (main 359ae214d merged at 871bde99a) | DONE — at fb6b90ee0, both targets `build-for-testing` GREEN, nothing to fix: phone ("** TEST BUILD SUCCEEDED **", no `error:`; log `DerivedData/vm55-b4-phone-merge-build.log`), then Mac (same; `vm55-b4-mac-merge-build.log`). No diagnostic in any file this run moved, split or added; the warnings are pre-existing ones in untouched test files. So no semantic conflict with VX-980's Mac search/Settings/Capability changes showed at compile time. |
-| 1 — VM-225, the interim wing door (code + pins) | DONE (5c80d058b) — every result PENDING (the shared window) |
+| 1 — VM-225, the interim wing door (code + pins) | DONE (5c80d058b; the shell pin's voice fix 931c77f79) — GREEN in the whole phone target but one pin: 18 of 19 batch-4 tests passed; `MobileWingDoorShellTests` red on a test-side premise (the unvoiced header), fixed test-only 931c77f79, its re-run alone PENDING |
 | Phone + Mac `build-for-testing` on the final tree | DONE — both GREEN at 5c80d058b into `vm55-b1`: phone ("** TEST BUILD SUCCEEDED **", exit 0, no diagnostic in any file this batch touched; log `vm55-b4-phone-build3.log`), Mac (same; `vm55-b4-mac-build1.log`). The record commits after it change no product. |
 | READY for the shared window (batches 3 + 4) | DONE (the report ending this session's first turn) — the two claims and the TYPE lists below |
-| The shared window — claim (i) the whole phone target | PENDING |
-| The shared window — claim (ii) the whole Mac target (QUIET) | PENDING |
+| The shared window — claim (i) the whole phone target | DONE (09:20:51–09:37:32, products 5c80d058b) — 949 tests in 161 suites: 947 passed (2 with declared known issues), 2 failed (VM-24's main red; this branch's `MobileWingDoorShellTests`, red again alone), 0 skipped. Below |
+| The shared window — claim (ii) — CHANGED to a targeted Mac leg (74 types, not QUIET; the whole Mac target runs once at the merge gate — the coordinator's and the orchestrator's call) | DONE (09:39:23–09:44:18, products 5c80d058b) — 537 tests in 74 suites: 535 passed (2 with declared known issues), 1 failed (batch 3's `VM63MacWingBrainsHoistPinTests` test-side scope, red again alone; fixed test-only c75bdb9af), 1 skipped (a gated capture harness). Below |
+| Fixes after the release (test-only) and the rebuild | DONE — 931c77f79 (the phone shell pin compares the voiced header; the same unvoiced premise removed from the list pin and the plain-line pin, latent there because they host in Study), c75bdb9af (the Mac hoist pin's dependency scope). Both targets `build-for-testing` GREEN at c75bdb9af (`vm55-b4-phone-build4.log`, `vm55-b4-mac-build2.log`) |
+| The follow-up claim: `MobileWingDoorShellTests` alone (phone) + `VM63MacWingBrainsHoistPinTests` alone (Mac), on c75bdb9af's products | PENDING |
 
 #### What shipped — VM-225 (5c80d058b)
 
@@ -1914,6 +1918,59 @@ about 6,400 tests in roughly 50 minutes). New and changed types to call out: bat
 `VM61MacStatusSeamPinTests` `VM62MacRefusalWordsPinTests` `WingPaletteDoorsTests` (edited), and its four attribution groups
 (A)–(D) in "Batch 3 record" ▸ "For the shared window"; batch 4's one Mac-compiled change, the hoisted header's forward —
 `VocabularySweepTests` (it pins `WingCopy.switcherHeader`), with `WingSwitcherTests` and `WingSwitcherChordTests` beside it.
+*(Claim (ii) was changed at the GO to a targeted Mac leg — below.)*
+
+#### The shared window's results (2026-11-19)
+
+**Claim (i) — the whole phone target** (claim `vm-55` 09:20:51 → released 09:37:32; the standing iPhone 17 Pro simulator booted
+fresh, settled 30 s; `test-without-building` on 5c80d058b's products, `-only-testing:VariorumMobileTests` one literal argument;
+tests selected and starting by 09:23:50; the tree still from launch to verdict): Swift Testing **"Test run with 949 tests in 161
+suites failed after 508.188 seconds with 7 issues (including 4 known issues)"** — 947 passed (945 clean; 2 with their DECLARED
+known issues: `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` 2,
+`MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape` 2), **2 failed**, 0 skipped (no `skipped:` lines); XCTest
+"Executed 0". xcodebuild lingered after the verdict and was stopped by hand after 90 s. Log `DerivedData/vm55-b4-phone-window.log`.
+- **Red 1 — `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`**, 2 of 3 cases ("hi",
+  "hello there"): **main's**, VM-24's known red.
+- **Red 2 — `MobileWingDoorShellTests.fromTheLibraryAPickLandsOnTheWingsBookcase`: THIS BRANCH'S, test-side.** 1 issue at
+  `MobileWingDoorTests.swift:496`: labels were `["wings — each a separate library", "Done", "Home", "Work"]`, expected
+  "Wings — each a separate library". **Traced:** the mounted shell runs in the Terminal voice (the test world's default), which
+  lowercases chrome on every phone sheet title (`tokens.chromeLabel`); the pin compared the drawn header with the unvoiced
+  constant. Every other expectation in the test passed — the name opened a real sheet, "Work" was pressed, the shared wing
+  switched, the sheet went, it landed on the Shelf's Bookcase, the title door named Work, no line. **Re-run ALONE in the claim
+  (09:37): red again, identically** — deterministic, not load. **Fixed test-only (931c77f79):** the pin compares the header as
+  the shell's voice draws it. The same unvoiced premise was latent in two more batch-4 pins that host in Study (the list pin's
+  header, the plain-line pin's "Home · Starred" literal) — both now compare what the voice draws. Every door label the pins
+  find by name ("Home", "Work", the tab doors) is an explicit accessibility label — a name, never voiced — so it is right in
+  both voices. **Re-run alone PENDING** (the follow-up claim).
+- **The new and changed types:** batch 4 — `MobileWingDoorTests` 9/9 · `MobileWingDoorGeometryTests` 4/4 (the 44 pt target on
+  all three real roots) · `MobileWingListSheetTests` 1/1 · `MobileWingDoorShellTests` 0/1 (above) · `MobileWingStandTests` 6/6
+  (the fold's edited pins); batch 3 — `MobileWingBrainsHoistTests` 5/5; batch 1's VM-57/58/59/60 suites green; the sweeps —
+  `MobileStructuralTests.nothingUserFacingNamesTheMac` passed, `MobileNoRawErrorPinTests` 2/2.
+- After: simulator shut down; no Variorum instance (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"` empty); no Problem
+  Reporter; no new `Variorum*-*.ips` (newest 05:45, before the window).
+
+**Claim (ii) — CHANGED at the GO to a targeted Mac leg** (the coordinator's and the orchestrator's call: 74 types, not QUIET; the
+whole Mac target runs once at the merge gate). The types: batch 3's groups (A) 29, (B) 3, (C) 37, (D) 3, plus
+`CapabilityRegistryTests` and `StatusCenterTests`, one `-only-testing:VariorumTests/<Type>` argument each (each checked declared
+once). Claim `vm-55` 09:39:23 → released 09:44:18; `test-without-building` on 5c80d058b's Mac products; the dev-store Debug test
+host; tests starting by 09:39:45; the tree still. Swift Testing **"Test run with 537 tests in 74 suites failed after 199.619
+seconds with 5 issues (including 4 known issues)"** — 535 passed (533 clean; 2 with DECLARED known issues,
+`IndexTierMetricsTests`' `theBookIndexsLivePaneIsItsReadTierLineForLine` and `theReadEditLivePaneIsItsReadTierLineForLine`, 2
+each), **1 failed**, 1 skipped (`MCPAsksWaitCaptureTests` — "13n-c U4 — asks wait + the keyboard, captured (a harness)", gated
+off by design). xcodebuild exited on its own. Log `DerivedData/vm55-b4-mac-leg.log`.
+- **The red — `VM63MacWingBrainsHoistPinTests.theMacsWingsBrainSpeaksTheMacsRefusalWords` (batch 3's new pin): THIS BRANCH'S,
+  test-side.** "@Dependency(\.date) has no test implementation, but was accessed from a test context" at `AppSession.swift:858`:
+  the pin's `withDependencies` set only the database, and `AppSession.init` reads the date. Every assertion held (the three
+  parting cases spoke the Mac's words; the log shows the phone road's plain fallback being asked for comparison). Not a pointer
+  or timing red; **re-run ALONE in the claim (09:44): red again, identically.** **Fixed test-only (c75bdb9af):** the scope
+  supplies `date` and `uuid`, the Mac wing suites' own harness shape. **Re-run alone PENDING** (the follow-up claim).
+- **Green on the merged tree:** the whole wing family (`WingSwitcherTests`, `WingSwitcherChordTests`, `WingDeliberateLandingTests`,
+  `WingDestinationsDeadWingTests`, `WingFollowDecisionTests`, `WingFollowTests`, `JournalWingFollowTests`, `WingNumberKeysTests`,
+  `WingPaletteDoorsTests`, `WingBookMoveDoorTests`, `WingChordsAndLabelDoorTests`), `VM61MacStatusSeamPinTests`,
+  `VM62MacRefusalWordsPinTests`, `VocabularySweepTests` (the hoisted header's forward), group (C)'s source walks, group (D),
+  `CapabilityRegistryTests` and `StatusCenterTests` — every one of the 74 types but the VM-63 pin's one test.
+- After: no Variorum instance; no Problem Reporter; no new `Variorum*-*.ips`; no What's New interference seen (the run completed
+  its 537 tests in one launch).
 
 ## Ladder
 
