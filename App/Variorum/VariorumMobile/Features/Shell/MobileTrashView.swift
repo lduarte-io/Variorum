@@ -143,10 +143,9 @@ struct MobileTrashView: View {
                         Task { await model.requestEmptyTrash() }
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.emptyTrashVerb))
-                            .phoneType(.control, tokens)
-                            .foregroundStyle(tokens.alarm)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(
+                        tokens: tokens, tone: .alarm, role: .control, alignment: .leading))
                     .accessibilityLabel(RecoveryCopy.emptyTrashVerb)
                 }
             }
@@ -165,10 +164,8 @@ struct MobileTrashView: View {
             model.setOldestFirst(!model.oldestFirst)
         } label: {
             Text(tokens.chromeLabel(model.oldestFirst ? "oldest first" : "newest first"))
-                .phoneType(.controlInline, tokens)
-                .foregroundStyle(tokens.accent)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
         .accessibilityLabel("Sort")
     }
 
@@ -176,17 +173,18 @@ struct MobileTrashView: View {
     /// row's grammar), never a `Menu`: a door a pin can drive.
     private var filterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
+            // VM-50: filter chips (seven words do not share a segmented
+            // choice at phone width; the sheet's chip is "filters … one row
+            // that scrolls sideways") — P-47-11.
+            HStack(spacing: PhoneMetrics.Space.s8) {
                 ForEach(Array(Self.filterKinds.enumerated()), id: \.offset) { _, kind in
                     let word = kind.map(RecoveryCopy.kindLabel) ?? Self.allFilterWord
                     Button {
                         model.setKindFilter(kind)
                     } label: {
                         Text(tokens.chromeLabel(word))
-                            .phoneType(.chip, tokens)
-                            .foregroundStyle(model.kindFilter == kind ? tokens.ink : tokens.phone.faint)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneChipStyle(tokens: tokens, selected: model.kindFilter == kind))
                     .accessibilityLabel(word)
                     .accessibilityAddTraits(model.kindFilter == kind ? .isSelected : [])
                 }
@@ -251,10 +249,8 @@ struct MobileTrashView: View {
                     Task { await model.putBack(item) }
                 } label: {
                     Text(tokens.chromeLabel(RecoveryCopy.putBackVerb))
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel("\(RecoveryCopy.putBackVerb) \(RecoveryCopy.rowKind(item))")
                 // **Delete Now lives HERE and nowhere else** (her round-3
                 // rider: never a full delete from inside a note). A
@@ -265,10 +261,8 @@ struct MobileTrashView: View {
                         model.requestDeleteNow(item)
                     } label: {
                         Text(tokens.chromeLabel(RecoveryCopy.deleteNowVerb))
-                            .phoneType(.controlInline, tokens)
-                            .foregroundStyle(tokens.alarm)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .alarm))
                     .accessibilityLabel(
                         "\(RecoveryCopy.deleteNowVerb) \(RecoveryCopy.rowKind(item))")
                 }
@@ -278,10 +272,8 @@ struct MobileTrashView: View {
                         onOpen(noteID)
                     } label: {
                         Text(tokens.chromeLabel("Open note"))
-                            .phoneType(.controlInline, tokens)
-                            .foregroundStyle(tokens.accent)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                     .accessibilityLabel("Open note")
                 }
                 Spacer(minLength: 0)

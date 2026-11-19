@@ -87,23 +87,11 @@ struct MobileSettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tokens.path(["Settings"]))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                Spacer()
-                Button {
-                    dismiss()
-                } label: {
-                    Text(tokens.chromeLabel("Done"))
-                        .phoneType(.control, tokens)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 14)
+            PhoneSheetHeader(
+                tokens.path(["Settings"]), tokens: tokens, titleInk: tokens.phone.muted
+            ) { dismiss() }
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.top, PhoneMetrics.Space.s8)
 
             Text(tokens.chromeLabel("Voice"))
                 .phoneType(.sectionHeader, tokens)
@@ -151,10 +139,9 @@ struct MobileSettingsView: View {
                     protectionDoor()
                 } label: {
                     Text(tokens.chromeLabel(SyncRowFace.openProtectionLabel))
-                        .phoneType(.control, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(
+                    tokens: tokens, tone: .accent, role: .control, alignment: .leading))
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 .accessibilityLabel(SyncRowFace.openProtectionLabel)
@@ -173,10 +160,9 @@ struct MobileSettingsView: View {
                 acknowledgmentsPresented = true
             } label: {
                 Text(tokens.chromeLabel("Acknowledgments"))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             .accessibilityLabel("Acknowledgments")
@@ -197,10 +183,9 @@ struct MobileSettingsView: View {
                 tagsPresented = true
             } label: {
                 Text(tokens.chromeLabel(MobileTagManagerSheet.doorTitle))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             .accessibilityLabel("Manage Tags")
@@ -273,6 +258,7 @@ struct MobileSettingsView: View {
                     .phoneType(.control, tokens)
                     .foregroundStyle(traceArmed ? tokens.accent : tokens.phone.muted)
                     .lineLimit(2)
+                    .phoneHitArea(alignment: .leading)
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 20)
@@ -283,10 +269,9 @@ struct MobileSettingsView: View {
                 tracePresented = true
             } label: {
                 Text(tokens.chromeLabel("Edit trace…"))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             .accessibilityLabel("Open the edit trace")
@@ -304,20 +289,18 @@ struct MobileSettingsView: View {
                 Task { await openGuideDoor() }
             } label: {
                 Text(tokens.chromeLabel("Open the pocket guide"))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             Button {
                 Task { await restoreGuideDoor() }
             } label: {
                 Text(tokens.chromeLabel("Restore the pocket guide…"))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             if let tutorialNote {
@@ -339,10 +322,9 @@ struct MobileSettingsView: View {
                 Task { await perfDoor() }
             } label: {
                 Text(tokens.chromeLabel("Seed the 100k fixture"))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             if let perfNote {
@@ -362,10 +344,9 @@ struct MobileSettingsView: View {
                 spikePresented = true
             } label: {
                 Text(tokens.chromeLabel("TK2 Spike"))
-                    .phoneType(.control, tokens)
-                    .foregroundStyle(tokens.accent)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PhoneInlineActStyle(
+                tokens: tokens, tone: .accent, role: .control, alignment: .leading))
             .padding(.horizontal, 20)
             // (The pre-13x batch 0 keychain probe row lived here — deleted
             // at batch 2a with the real Apple-key item, row 12.)
@@ -538,7 +519,7 @@ struct MobileSettingsView: View {
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 20)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])

@@ -159,19 +159,15 @@ struct MobileArchiveView: View {
                     Task { await model.unarchive(item) }
                 } label: {
                     Text(tokens.chromeLabel(Self.unarchiveVerb))
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel(Self.unarchiveVerb)
                 Button {
                     onOpen(item.postID)
                 } label: {
                     Text(tokens.chromeLabel("Open note"))
-                        .phoneType(.controlInline, tokens)
-                        .foregroundStyle(tokens.accent)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PhoneInlineActStyle(tokens: tokens, tone: .accent))
                 .accessibilityLabel("Open note")
                 Spacer(minLength: 0)
             }

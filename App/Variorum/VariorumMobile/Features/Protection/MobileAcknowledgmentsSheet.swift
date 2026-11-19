@@ -22,23 +22,11 @@ struct MobileAcknowledgmentsSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text(tokens.path(["Acknowledgments"]))
-                    .phoneType(.screenTitle, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                Spacer()
-                Button {
-                    dismiss()
-                } label: {
-                    Text(tokens.chromeLabel("Done"))
-                        .phoneType(.control, tokens)
-                        .foregroundStyle(tokens.accent)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 14)
+            PhoneSheetHeader(
+                tokens.path(["Acknowledgments"]), tokens: tokens, titleInk: tokens.phone.muted
+            ) { dismiss() }
+            .padding(.horizontal, PhoneMetrics.gutter)
+            .padding(.top, PhoneMetrics.Space.s8)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {

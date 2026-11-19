@@ -365,7 +365,7 @@ struct MobileTagManagerSheet: View {
             Spacer()
         }
         .padding(.vertical, 9)
-        .contentShape(Rectangle())
+        .phoneHitArea(alignment: .leading)
         .contextMenu {
             Button(tokens.chromeLabel("New Child Tag…")) {
                 nameField = ""
@@ -396,7 +396,7 @@ struct MobileTagManagerSheet: View {
                 Spacer()
             }
             .padding(.vertical, 11)
-            .contentShape(Rectangle())
+            .phoneHitArea(alignment: .leading)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New Tag")

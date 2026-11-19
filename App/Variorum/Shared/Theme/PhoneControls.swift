@@ -238,20 +238,41 @@ enum PhoneControlGlyph {
 /// **The chip** — a fact or a filter on a 32 pt capsule: `chip` 15 medium in
 /// the accent on the wash, 12 to each side, inside a 44 pt hit area (6 above
 /// and below — sheet §B: "Capsule 32 tall, hit area 44 tall").
+///
+/// A FILTER chip says whether it is chosen (`selected` non-nil): the chosen
+/// one on the wash in her ink, the others with no fill, the take line as
+/// their edge, in the corrected muted — the same capsule either way, so a
+/// row of filters never moves when the choice does (PROVISIONAL P-47-11).
 struct PhoneChipStyle: ButtonStyle {
     let tokens: VoiceTokens
+    /// nil for a fact chip; true / false for a filter chip.
+    var selected: Bool?
 
     func makeBody(configuration: Configuration) -> some View {
         PhoneControlFeedback(
             label: configuration.label
                 .phoneType(.chip, tokens)
-                .foregroundStyle(tokens.accent)
+                .foregroundStyle(ink)
                 .lineLimit(1)
                 .padding(.horizontal, PhoneControlMetrics.insidePadding)
                 .frame(minHeight: PhoneControlMetrics.chipHeight)
-                .background(Capsule().fill(tokens.wash))
+                .background(
+                    Capsule()
+                        .fill(selected == false ? Color.clear : tokens.wash)
+                        .overlay(
+                            Capsule().stroke(
+                                selected == false ? tokens.takeLine : Color.clear,
+                                lineWidth: 1)))
                 .phoneHitArea(),
             pressed: configuration.isPressed)
+    }
+
+    private var ink: Color {
+        switch selected {
+        case nil: tokens.accent
+        case true?: tokens.ink
+        case false?: tokens.phone.muted
+        }
     }
 }
 
