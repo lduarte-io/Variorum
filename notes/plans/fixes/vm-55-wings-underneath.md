@@ -333,8 +333,8 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-58 | DONE (301388409) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-60 | DONE (9462d3854) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
-| Batch 2a — VM-61 | IN-PROGRESS — built, pinned and pushed (both targets build-for-testing green); READY for its stage window, results PENDING — the record is under "Batch 2a record" |
-| Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | IN-PROGRESS — a fresh implementer; its record and LIVE STATUS are under "Batch 2b record" |
+| Batch 2a — VM-61 | IN-PROGRESS — built and pinned; its suites ran in batch 2's one window (run by 2b): the Mac leg 1243/1245 (one false positive in its Mac pin, fixed test-only at 8fa80d315, re-run PENDING); the whole phone target 924 of 928 passed clean + 2 with declared known issues, one BRANCH red — its host pin `theLineFloatsOverTheAppAndOnlyItsDoorTakesATouch`, a REAL defect (the line ignores the home-indicator inset), traced, fix sequenced by the coordinator — see "Batch 2b record" |
+| Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | IN-PROGRESS — P-55-11 and VM-62 built and GREEN in the whole phone target (928 tests, their suites all passed) and the Mac leg; red-on-old (VM-62's pins at 15f788dfd) and the two 2a follow-ups' re-runs PENDING — its record and LIVE STATUS are under "Batch 2b record" |
 | Batch 3 — VM-63 | NOT-STARTED |
 | Batch 4 — VM-225 (the interim wing door) | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
@@ -618,7 +618,7 @@ line notes, `wording-list-2.md`). DerivedData: `App/Variorum/DerivedData/vm55-b1
 | Phone `build-for-testing` (`VariorumMobile`, the window's simulator) | DONE — green at the commit after 4df669dd7 (the face fills the window: the door's frame in window coordinates, the foot measured from the window's foot — found on re-reading before READY, never run red) |
 | Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 64df336d8 (same DerivedData dir; nothing compiled into the Mac changed after it) |
 | The line and the lock (the coordinator's check before READY: relock, the app-switcher snapshot, the non-ready states) | DONE (6699560ce) — traced below; the snapshot road WAS open and is closed in the host (`Probe` follows its scene's edges); pin `MobileMessageLineSceneTests`; both targets rebuilt for testing green at 6699560ce |
-| Stage window | RUN BY 2b (batch 2's one window, split into three claims). **Mac leg DONE 2026-11-19 05:56–06:05:** 1245 tests in 172 suites, 1243 passed, 1 skipped (the gated share-faces harness), **1 FAILED — `VM61MacStatusSeamPinTests.noMacDoorSaysRemovalWithdrawsOrSetsThePlacement`, this run's own pin, a FALSE POSITIVE** (traced in "Batch 2b record" ▸ the window's results; fix sequenced by the coordinator). Phone whole-target leg PENDING (its own claim). |
+| Stage window | RUN BY 2b (batch 2's one window, split into three claims). **Mac leg DONE 2026-11-19 05:56–06:05:** 1245 tests in 172 suites, 1243 passed, 1 skipped (the gated share-faces harness), **1 FAILED — `VM61MacStatusSeamPinTests.noMacDoorSaysRemovalWithdrawsOrSetsThePlacement`, this run's own pin, a FALSE POSITIVE** (traced in "Batch 2b record" ▸ the window's results; fix sequenced by the coordinator). **Phone whole-target leg DONE 07:06–07:19** (see "Batch 2b record" ▸ the window's results): 928 tests in 155 suites, 924 passed, 2 passed with their declared known issues, 0 skipped, **2 failed — VM-24's caret test (main's, expected) and this batch's host pin `MobileMessageLineHostTests.theLineFloatsOverTheAppAndOnlyItsDoorTakesATouch` (a REAL defect: the line ignores the home-indicator inset; re-run alone, red again identically; traced; fix sequenced by the coordinator)**. Every other 2a suite green (the show rule, the geometry rules, the scene/lock pin, the doors, the rewritten placement pins). |
 
 #### What shipped — the seam's shape, and why
 
@@ -875,7 +875,7 @@ roads: .phone) ?? String(describing: error))` (`reportOperationError`); `Takes/M
 `say(String(describing: error), as: .refusal)` ×2. Also for 2b's no-raw-error pin: the line renders `Item.text` in
 `Shell/MobileMessageLine.swift` — every raw site's words reach the screen THERE now.
 
-#### Tests (written; results: the Mac leg ran in batch 2's window — see "Batch 2b record" ▸ the window's results; the phone leg PENDING)
+#### Tests (written; results: both legs ran in batch 2's window — see "Batch 2b record" ▸ the window's results: all green but `MobileMessageLineHostTests` (a real defect, traced there) and the Mac pin's false positive (fixed test-only))
 
 Phone (`VariorumMobileTests`), new — file `MobileMessageLineTests.swift`, four types: `MobileLineShowRuleTests` (11: the
 phone's placement; the show-rule table over every kind × style; ordinary dropped AT the seam; refusal; removal with its
@@ -1026,12 +1026,12 @@ only). DerivedData: `App/Variorum/DerivedData/vm55-b1` (incremental, both target
 | Piece | State |
 |---|---|
 | Record skeleton | DONE (this commit) |
-| P-55-11 — a direction keeps its line (Trash, tray, Block History, lenses, membership; the shared answer) | DONE (be6f1d0c7) — both targets build-for-testing green at it; `MobileLineDirectionTests` results PENDING (the stage window) |
-| VM-62 pin (red on this tree) | DONE (69005ad4a; strengthened in the next commit, still before any fix — it also catches the `"Refused: \(…)"` idiom under any binding name, found at `MobileTagManager`'s `\(op)`) — `MobileNoRawErrorPinTests` + `MobileRefusalSentencePinTests`, compiled green on the unfixed tree; the scan's throwaway mirror counts 97 offending lines there; red-on-old RUN PENDING (the stage window, AT the strengthened pin commit — see "Red-on-old, the method") |
-| VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | DONE (69005ad4a, in `MobileRawErrorPinTests.swift`, type `MobileRefusalSentencePinTests`) — red-on-old and green runs PENDING (the stage window) |
-| VM-62 fix | DONE (e8609cc6f) — the scan's throwaway mirror counts 0 offending lines on it (2 exemptions, 1 match each); `MobileRefusalFallbackTests` (phone) and `VM62MacRefusalWordsPinTests` (Mac) written; results PENDING |
+| P-55-11 — a direction keeps its line (Trash, tray, Block History, lenses, membership; the shared answer) | DONE (be6f1d0c7) — `MobileLineDirectionTests` GREEN in the whole phone target (07:06–07:19); the Mac's put-back faces green in the Mac leg |
+| VM-62 pin (red on this tree) | DONE (69005ad4a, strengthened at 15f788dfd) — `MobileNoRawErrorPinTests` GREEN on the fix (whole phone target); red-on-old RUN PENDING (the third claim, AT 15f788dfd) |
+| VM-62 per-case pins (Finish on a gathering, Reopen on a sealed book, rename, unseal, star) | DONE (69005ad4a, type `MobileRefusalSentencePinTests`) — GREEN on the fix (whole phone target); red-on-old PENDING (the third claim) |
+| VM-62 fix | DONE (e8609cc6f) — GREEN: `MobileRefusalFallbackTests`, the rewritten `MobileRefusalTableTests`, every suite over a changed phone file (the whole phone target, 07:06–07:19) and `VM62MacRefusalWordsPinTests` + the Mac refusal/recovery suites (the Mac leg, 05:56–06:05) |
 | Phone + Mac `build-for-testing` at the batch's last code commit | DONE — both green at e8609cc6f (`vm55-b1`, incremental) |
-| Stage window (2a's suites + 2b's; red-on-old) | IN-PROGRESS — split into three claims by the coordinator. **Leg 2 (Mac) DONE** 05:56–06:05: 1245 tests / 172 suites, 1243 passed, 1 skipped, 1 failed (2a's `VM61MacStatusSeamPinTests.noMacDoorSaysRemovalWithdrawsOrSetsThePlacement` — a false positive of its source scan, traced below; the fix is NOT applied — the coordinator sequences it after the phone leg, which needs a still tree). The pin's fix is in (8fa80d315, test-only; the Mac test bundle rebuilt, the phone products untouched since e8609cc6f) — its re-run opens the third claim. Leg 1 (whole phone target) and leg 3 (red-on-old at 15f788dfd) PENDING, each its own claim. No revert is in flight; the worktree is on the branch. |
+| Stage window (2a's suites + 2b's; red-on-old) | IN-PROGRESS — three claims. **Leg 2 (Mac) DONE** 05:56–06:05 (1243/1245; one false positive in 2a's Mac pin, fixed test-only 8fa80d315). **Leg 1 (whole phone target) DONE** 07:06–07:19 (928 tests: 924 passed, 2 passed with declared known issues, 2 failed — VM-24 main's, and 2a's host pin, a REAL defect traced below, fix NOT applied — the coordinator sequences it). Leg 3 (the Mac pin's re-run, then red-on-old at 15f788dfd) PENDING — the coordinator's word first. No revert is in flight; the worktree is on the branch, still; the phone products are e8609cc6f's. |
 
 #### P-55-11 — a direction keeps its line (the orchestrator's ruling, applied)
 
@@ -1301,7 +1301,51 @@ Leg 3 — **red-on-old** (VM-62's pins; the method above): detached at 15f788dfd
   `status.placement` nor `.phoneLine` occurs in the Mac sources, so the narrowed scan is green and still trips on a Mac door
   that sets the seam to the phone's placement). Test-only; it changes no product the phone leg runs. After it, the one
   suite re-runs alone (`-only-testing:VariorumTests/VM61MacStatusSeamPinTests`, under a claim).
-- **Leg 1 — the whole phone target:** PENDING (its own claim).
+- **Leg 1 — the whole phone target** (claim `vm-55`, 07:06:17 → released 07:19:19; the standing iPhone 17 Pro simulator booted
+  fresh 07:06:25 and settled 30 s; test-without-building on e8609cc6f's products — the phone products untouched since; the
+  tree still — nothing edited from launch to verdict; `-only-testing:VariorumMobileTests` as one literal argument, 39 tests
+  seen starting within 45 s): Swift Testing **"Test run with 928 tests in 155 suites failed after 504.576 seconds with 7
+  issues (including 4 known issues)"** — 924 passed, 2 passed with their DECLARED known issues (`MobileTrashTests.
+  anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` 2, `MobileTutorialWalkTests.
+  theFannedDivideLessonLandsTheDuplicateShape` 2 — both `withKnownIssue` on main, files untouched by this branch), 0
+  skipped, **2 failed**; XCTest "Executed 0" (Swift Testing suites). One test run, no host relaunch. xcodebuild lingered
+  after the verdict (the `invalidDigitCount` lines) and was stopped by hand.
+  - **Red 1 — `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep(_:)`**, 2 of its 3
+    cases ("hi", "hello there"): **main's**, VM-24's known red (the corrected baseline).
+  - **Red 2 — `MobileMessageLineHostTests.theLineFloatsOverTheAppAndOnlyItsDoorTakesATouch`: THIS BRANCH'S (2a, VM-61), a
+    REAL defect.** Re-run ALONE inside the claim (07:17:40): red again, identically — not load. Below, as 2a's second
+    follow-up.
+  - Everything this batch built is green: `MobileLineDirectionTests` (P-55-11), `MobileNoRawErrorPinTests`,
+    `MobileRefusalSentencePinTests`, `MobileRefusalFallbackTests`, `MobileRefusalTableTests` (the two justified edits), and
+    `MobileStructuralTests.nothingUserFacingNamesTheMac` (green — no rendered string of this run names the Mac). Every other
+    2a suite is green too: `MobileLineShowRuleTests`, `MobileMessageLineGeometryTests`, `MobileMessageLineSceneTests`,
+    `MobileLineDoorTests`, and the rewritten placement pins in `MobileUndoDoorTests`, `MobileDeletionTests`,
+    `MobileNavigationTests`.
+  - After: simulator shut down; no Variorum instance (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"` empty); no Problem
+    Reporter; no new `VariorumMobile-*.ips` or `Variorum-*.ips` (the newest are from 05:39–05:45, before the claim).
+
+#### 2a follow-up 2 — the one line sits below the tab bar's top and in the home-indicator zone (a REAL defect, traced)
+
+- **The red:** `theLineFloatsOverTheAppAndOnlyItsDoorTakesATouch`, `VariorumMobileTests/MobileMessageLineTests.swift:304` —
+  "above the tab bar's inset — door (129.67, 808.0, 28.67, 14.0), safe 34.0": `door.maxY` 822 against the bound 796.5
+  (874 − 34 − 44 + 0.5). Run twice (the whole target, and alone): the same frame both times.
+- **Mechanism, traced:** the face (`Shell/MobileMessageLine.swift`, `MobileMessageLineView.body`, lines ~101–120) lays the
+  line out inside `GeometryReader { proxy in … }.ignoresSafeArea()` and lifts it by `footOffset(keyboardOverlap:,
+  safeBottom: proxy.safeAreaInsets.bottom, chromeInset:)`. With `.ignoresSafeArea()` on the reader, the proxy reports a
+  bottom inset of **0**, so the lift is `max(0, 0 + 44, 0) = 44` — the line's foot at the window's foot − 44 (the door's
+  bottom at 874 − 44 − 8, the line's own vertical padding = 822, exactly the red). The rule `footOffset` is right (its pure
+  pin is green); its INPUT is wrong. **In the app:** every root's tab bar is the last row of a VStack INSIDE the safe area
+  (`MobileLibraryView`/`MobileShelfView`/`MobileStarredView` — only their background ignores it), so the measured
+  `tabBarHeight` excludes the home indicator; the line therefore sits one home-indicator inset (34 pt on this device) too
+  low — over the top of the tab bar's doors on every root — and, inside a note (no bar), in the home-indicator zone. The
+  keyboard case is unaffected (its overlap exceeds the inset).
+- **The smallest fix (NOT applied — the coordinator sequences it):** take the bottom inset from UIKit, which the host
+  already holds, instead of the ignoring reader: a `safeBottom` on `MobileMessageLineModel`, set by the overlay window
+  (`MobileMessageLineWindow`: override `safeAreaInsetsDidChange()` → `model.safeBottom = safeAreaInsets.bottom`, and once
+  as it is raised), and the face's `safeBottom: model.safeBottom` in place of `proxy.safeAreaInsets.bottom` (the
+  `.ignoresSafeArea()` stays — the door's frame must stay in window coordinates). Three lines in one file, phone-only,
+  no Shared change; the pin goes green unchanged. **Re-run after it:** `MobileMessageLineHostTests` alone, plus
+  `MobileMessageLineGeometryTests` and `MobileLineDoorTests` (they read the door frame).
 - **Leg 3 — red-on-old:** PENDING (its own claim; it now opens with the one Mac type below).
 
 #### 2a follow-up — the Mac seam pin's false positive (owned by 2b, per the brief)
