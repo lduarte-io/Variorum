@@ -413,7 +413,7 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 3.9 | §6 "Batch 3 — results" (hoist, road, retired preference, grounds by screen, star, VM-54 trace + verdict, tests PENDING, PROVISIONALs in §5, self-assessment) | DONE for the code (this commit) — counts, the red-on-old line, the walk's findings PENDING their windows |
 | 3.9b | CUTOVER (orchestrator, machinery honesty): the batch-3 implementer ended its turn READY at about 675k tokens of context, every piece committed; main merged in at `40352bde2` (the search run's Mac and Core files; nothing under `Shared/` or `VariorumMobile/`). What remains — piece 3.10, the rebuilds on the merged tree, the stage windows, the record's close — goes to a FRESH closer briefed from this record (no design latitude outside 3.10) | DONE — the closer read §1–§6, CLAUDE.md, the resiliency protocol, the sizing sheet's grounds and §A–§E, the theme layer, `MobileEditorStyle`, the fenced line, `MobileWriteView`'s grounds, the router's theme seam, the Mac's `EditorView`/`PostDetailView` grounds, the three look suites and both walk instruments, and added the rows below |
 | 3.10 | Piece 3.10 — the note in Write on the paper (the record's named exception to rule 7): the face's paper value; the ONE line in `MobileEditorTextView.applyVoiceChrome`; `MobileWriteView`'s two ground lines; the pin; the source pin extended to Write; P-47-16 rewritten | DONE (this commit) — `Face.paper` (= `surface`, computed: the Mac's own `EditorSurfaceChrome.paper` = `NSColor(tokens.surface)`; no second stored value — the face already carried the paper as `surface`, which the overlays' sheets and the keyboard bar read); `backgroundColor = face.room` → `face.paper` (the file's ONE changed line; its stale doc comment two lines up left, recorded for VM-137); the screen ground and the masthead `tokens.surface` (the helper `groundUnderHerWords` removed; the masthead reading is P-47-17); pins: `MobileLibraryLookTests.theEditorsGroundIsThePaper` (a real text view's background over both voices × light/dark × sea-glass and teal & rust — replaces `theEditorsGroundIsNeverThePalettesTint`), `MobileLookSourceTests.theNoteInWriteIsOnThePaper` (its patterns measured by script: 5 of 7 checks fail on `76b85bdae`, 0 of 7 now — the two Read checks are batch 3's and hold on both); P-47-16 rewritten, P-47-17 new. Builds PENDING (row 3.11); counts PENDING (row 3.12) |
-| 3.11 | The rebuilds on the merged tree, headless: phone + Mac `build-for-testing` into `DerivedData/vm47-b3`; the walk driver into `DerivedData/vm47-walk3` (AFTER 3.10 — the walk's app is built there); the runbook split into part A and part B (the coordinator's word) | NOT-STARTED |
+| 3.11 | The rebuilds on the merged tree, headless: phone + Mac `build-for-testing` into `DerivedData/vm47-b3`; the walk driver into `DerivedData/vm47-walk3` (AFTER 3.10 — the walk's app is built there); the runbook split into part A and part B (the coordinator's word) | DONE — at `4cca58a8e`: phone `** TEST BUILD SUCCEEDED **` (09:01–09:02), Mac `** TEST BUILD SUCCEEDED **` (09:02–09:06), the walk driver `** TEST BUILD SUCCEEDED **` (09:12; five tests in the bundle; tree clean); the runbook split (`walk_part_a` 67 captures · `walk_part_b` 115) with a time guard, the second palette's raw value fixed (`teal_rust` — the old name would have walked the sea-glass twice), the paper check and the Trash chip added (§6, "The walk"); the Mac list RECOMPUTED (102 types, each verified a declared test type — §6) |
 | 3.12 | The suites window — the whole phone target + the Mac's theme-store types — run by the ORCHESTRATOR under its own claim; every red handed to the closer by name with its log | NOT-STARTED — the lines are in the closer's READY report |
 | 3.13 | VM-54's red-on-old — run by the ORCHESTRATOR from the existing snapshot `~/dev/variorum-vm-47-rol3` (built, row 3.6) | NOT-STARTED |
 | 3.14 | The walk — ONE walk for batches 1, 2 and 3 on device `vm47-walk3`, in two parts with a seam between (each about 30 minutes; part A ends with the device SHUT DOWN, its seeded library kept; part B ends with `walk_close` and the device's deletion): A = create, boot, the seed, the core screens under the sea-glass × Study/Terminal × light/dark × default/AX5; B = boot, the core under teal & rust (Study light, Study dark, default), the wider pass × sea-glass Study light default · Terminal dark default · Study light AX5, the voice row once per voice, VM-54's flip once per voice; every capture looked at against the sheet | NOT-STARTED |
@@ -964,11 +964,44 @@ twin), `MobileBorderTraitTests` (4, VM-54). Moved: `MobileShellTests.theVoiceDoo
 checks fail there, 0 of 10 now; the no-literal-colour twin is a new guard (green on old as on new — it finds only
 the canary it allows); `MobileLibraryLookTests` pins new behaviour (a fresh library read Terminal Classic before).
 
-**The Mac suites this batch owes** (every Mac test type that constructs or reads the hoisted store — by name or
-through `withAdoptedTheme` — plus the seven theme types; 119 types, computed by a scan of `VariorumTests/` for
-`ThemeStore` per test type, whole files where the store is used by a file-level helper, and the callers of
-`withAdoptedTheme`): handed to the orchestrator as a zsh array in the READY report. The whole Mac target runs at the
-merge gate.
+**The Mac suites this batch owes** (recomputed by the closer at `4cca58a8e`, on the merged tree — the implementer's
+119-type list lived only in its READY report, never in the repo, so it is replaced here rather than trusted unseen).
+The rule: every Mac test type whose own body names `ThemeStore`, or calls a global helper whose body does (transitively;
+a `private` helper counts only in its own file: `withAdoptedTheme`, and the file-private `mount`/`mountedBoard`,
+`mountBar`, `mountBook` (BookNoteBoxDoorsTests' — OwnershipBadgeTests' own `mountBook` builds no store),
+`mountCompare`/`mountTakes`, `withMastheadBook`), or uses one of the nine non-suite rigs that build a store
+(`DebugOracleWindowRig`, `DoorBoxHost`, `NoteBoxOracleHost`, `OpenListDragHost`, `OpenListOracleHost`,
+`SavepointFieldRig`, `SectionWindowHost`, `SidebarFieldHost`, `StarredOracleHost`), plus the seven theme types. **102
+types**, each checked by grep to be declared exactly once as a `struct`/`class` in `App/Variorum/VariorumTests/` with
+`@Test`s in its body (all Swift Testing suites; no nested suite, no file name standing in for a type). The
+difference from 119 is the rule's grain (types, not whole files: the files that name the store hold 148 test types).
+```zsh
+mac=(BlockHistoryCommitsCaptureTests BlockHistoryHostTests BlockHistoryPaneTests BlocksArrivalMeasureTests
+BookCarryLiveBlockTests BookEditHereRiderTests BookFoldDisclosureTests BookIndexCarryAnchorTests
+BookIndexCarryBlockTests BookIndexTakesTests BookIndexToOutlineBlockLandingTests BookIndexToOutlineCarryTests
+BookLeavingSavepointTests BookMastheadMountedTests BookNoteBoxOpenDoorTests BookOpenDoorMountTests
+BookPanelDragGateTests BookPanelOpenNoteMarkTests CanvasArrivalTests ChromeMinHeightTests CommitBarLayoutTests
+CompareCommentGutterTests CompareLensesAlignmentTests CompareToggleIdentityTests CurrentBlockContinuityTests
+DebugOracleSingletonWindowTests DebugOracleTwoWindowTests IndexClickCaretTests IndexTierMetricsTests
+InlineEditorWidthReflowTests LandingOffsetTests LibraryControlsGeometryTests LibraryListFaceRigTests
+LibraryListFaceTests LibraryPanelHostTests LibrarySearchLandingTests MCPAsksWaitCaptureTests
+MCPGrantSheetCaptureTests MCPGrantSheetU2CaptureTests MCPPaneTabsCaptureTests MCPPaneTabsTests
+MCPShareFacesCaptureTests MastheadLayoutTests MastheadStampTests ModeSwitchCarryTests ModeSwitchFeelTests
+NewNoteInBookTests NoteBoxCompositionTests NoteBoxGeometryTests NoteOpenLandingTests NoteVersionsPaneTests
+OpenListDragMountTests OpenListLayoutMountTests OutlineRoomTests OutsideWriteLivePaneTests PagesArrowKeysHostTests
+PostDetailRoutingTests PostRescueFaceTests QuickEntryOpeningScopeTests ReadArrivalMeasureTests ReadLandingTests
+ReadModeTests ReadNoteHeightsCalibrationTests ReadNoteLandingTests ReadingFlowEstimateMeasureTests
+ReadingFlowLandingTests RestoreLandingRewriteHopTests RestoreLandingTests SavepointCommitDoorTests
+SearchEmptyAnswerSentenceTests SideColumnTests SidebarNoteBoxDoorFacesTests SidebarNoteRowMenuTests
+SidebarRowLeadsTests SidebarSearchFieldPlaceTests SidebarSectionWindowMountTests SidebarSmokeTests
+SnippetsLandingTests StarredScrollMountTests StatusCenterTests SurfaceSizeMemoryTests TakesCommentGutterTests
+TakesEntryBandTests TitleQuickfillTests TourClosingCardTests TrayPanelMoveTests TutorialMCPChapterCaptureTests
+VX176LibraryTintTests VX343WhatsNewCaptureTests VX347CommitLeavesMountTests VX349ListHeaderRestTests
+VX350SearchToggleMountTests VX895SearchFacetHeaderTests VersionDoorsTests WingPaletteDoorsTests ThemeTokenTests
+PaletteDerivationTests NoLiteralColourTests SharedPageStyleTests PaletteReachTests MarkdownPaletteWritersTests
+HelperWindowThemeTests)
+```
+The whole Mac target runs at the merge gate.
 
 **For `notes/QUESTIONS.md` at the merge (this branch does not edit it):** #199 — the `ThemeStore` hoist, deferred
 2026-08-31, LANDED here (`dc9a5fd05`); #195 MINOR 3 — CLOSED (`987e9edc5`, `90228e98a`): main-actor storage, one app
@@ -990,7 +1023,7 @@ first look; (6) a **window before the first landing**: a Write screen opened bef
 look. The Mac cannot have changed: `VoiceTokens.swift` is untouched; `ThemeStore` moved whole with two additive
 members whose defaults are the Mac's; no Mac view or test file changed.
 
-**Piece 3.10 — the note in Write on the paper (the closer, `PENDING-hash`; the record's authorized exception to rule
+**Piece 3.10 — the note in Write on the paper (the closer, `4cca58a8e`; the record's authorized exception to rule
 7).** The face already carried the paper: `Face.surface`, re-derived under a palette through the same four-parameter
 resolver the settings road calls (`applying(palette:tint:)`), so it is `tokens.surface` as the settings road resolves
 it in every voice, appearance and palette, `.default` included; the overlays' three sheets
@@ -1022,6 +1055,26 @@ the masthead and the fenced line on the paper; no room under her words in Write)
 `theReadPageNeverSitsOnThePalettesRoom` (Read unchanged) — the patterns measured by script: 5 of 7 checks fail on
 `76b85bdae`, 0 of 7 now. Counts PENDING the suites window (row 3.12); the eye check on the paper (caret, selection
 wash, take tint, a callout's wash, the comment mark — light and dark) PENDING the walk (row 3.14).
+
+**The walk — trimmed by the closer to two ~30-minute parts (row 3.14; the instruments are gitignored).**
+`notes/plans/vm-47-screens/instruments/walk3.zsh` (its header is the runbook: `walk_build`, then `WALK_DEADLINE=HH:MM
+walk_part_a`, the seam, `WALK_DEADLINE=HH:MM walk_part_b`) and `VM47Walk3Driver.swift`. PART A (67 captures): create
+and boot `vm47-walk3`, the seed (3), the core under the sea-glass × Study/Terminal × light/dark × default/AX5 (8 × 6),
+and at the default size piece 3.10's paper check (4 × 4: c6 the take tint, c7 a callout's wash and the comment mark,
+c8 the caret, c9 the selection wash); the device then SHUT DOWN, its seeded library kept. PART B (115): boot; the core
+under teal & rust, Study light and dark, default, with the paper check (2 × 10); the wider pass at sea-glass Study light
+default (25 — every screen batches 1 and 2 listed: Starred, a book's contents, Book Details, Read, Create Book and its
+segmented choice, Tags, membership, More Info, Blocks and its segment, Lenses, Note Actions, Versions, the Takes,
+Block History and Comments overlays, Trash and a filter chip pressed, Archived, Settings, Protection); VM-54's flip once
+per voice (2 × 6); the voice row once per voice (2 × 4); the wider pass at sea-glass Terminal dark default (25) and at
+sea-glass Study light AX5 (25); `walk_close` (the device deleted). 182 in all. A time guard (`walk_step`) skips a
+step that will not fit before the claim's end with three minutes left for the close, and logs it NOT CAPTURED; step
+timings land in `b3/logs/timings.txt`. **An instrument defect found and fixed before any run:** the runbook named the
+second palette `tealAndRust` (the Swift case), but the Debug walk seam reads `ThemePalette(rawValue:)` — the raw value
+is `teal_rust` — and silently writes nothing for an unknown value, so every "other palette" capture would have been
+the sea-glass again. The driver rebuilt into `DerivedData/vm47-walk3` at `4cca58a8e` (`** TEST BUILD SUCCEEDED **`;
+the bundle carries `test01_seed · test10_core · test20_rest · test25_voice · test30_flip`; the walked app's binary
+built after piece 3.10's sources; the copy removed, the tree clean).
 
 **VM-54 — the trace and the verdict (code; the on-screen check rides this batch's walk window).**
 
