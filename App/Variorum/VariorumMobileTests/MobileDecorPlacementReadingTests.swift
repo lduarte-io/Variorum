@@ -399,12 +399,17 @@ struct MobileDecorPlacementReadingTests {
                 await Self.settle(view)
                 let chrome = try #require(view.takesChrome, "takes chrome installed")
                 let decor = try #require(view.blockDecor, "block decor installed")
-                func decorated(_ ids: [String]) throws -> [Decorated] {
-                    try ids.map { Decorated(blockID: $0, range: try #require(model.rangeOfBlock($0))) }
+                var ranges: [String: NSRange] = [:]
+                for id in seed.callouts + seed.commented + seed.fanned {
+                    let range = try #require(model.rangeOfBlock(id), "every decorated block has a range")
+                    ranges[id] = range
                 }
-                calloutBlocks = try decorated(seed.callouts)
-                commentedBlocks = try decorated(seed.commented)
-                fanBlocks = try decorated(seed.fanned)
+                func decorated(_ ids: [String]) -> [Decorated] {
+                    ids.compactMap { id in ranges[id].map { Decorated(blockID: id, range: $0) } }
+                }
+                calloutBlocks = decorated(seed.callouts)
+                commentedBlocks = decorated(seed.commented)
+                fanBlocks = decorated(seed.fanned)
                 #expect(view.contentSize.height > 6_000, "non-vacuity: the note dwarfs the viewport")
 
                 var offset: CGFloat = 0
