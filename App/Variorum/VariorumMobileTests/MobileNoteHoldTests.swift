@@ -22,6 +22,7 @@
 
 import Dependencies
 import Foundation
+import GRDB
 import Testing
 import UIKit
 import VariorumCore

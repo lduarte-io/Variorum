@@ -556,7 +556,7 @@ struct MobileNoteOpenOnceTests {
             var screen: BuiltScreen? = BuiltScreen {
                 MobileWriteScreen(session: session, postID: note.postID, router: router, tab: .library)
             }
-            guard await eventually({ (editor(router, at: 0)?.fullRenderCount ?? 0) >= 1 }) else {
+            guard await eventually(.seconds(10), { (editor(router, at: 0)?.fullRenderCount ?? 0) >= 1 }) else {
                 print("VM70-PROBE|built-screen|no-arrival")
                 screen?.tearDown()
                 return
@@ -564,8 +564,8 @@ struct MobileNoteOpenOnceTests {
             probe = editor(router, at: 0)
             screen?.close()
             let leavingDone = await eventuallyAsync {
-                router.editors.registered.isEmpty
-                    && ((try? await autoCommits(db, variantID: note.variantID)) ?? 0) >= 1
+                guard router.editors.registered.isEmpty else { return false }
+                return ((try? await autoCommits(db, variantID: note.variantID)) ?? 0) >= 1
             }
             try? await Task.sleep(for: .milliseconds(500))
             let afterClose = probe != nil
@@ -613,7 +613,7 @@ struct MobileNoteOpenOnceTests {
                 print("VM70-PROBE|shell-pop|no-row|labels=\(shell.visibleLabels.prefix(20).joined(separator: ","))")
                 return
             }
-            guard await eventually({ (editor(router, at: 0)?.fullRenderCount ?? 0) >= 1 }) else {
+            guard await eventually(.seconds(10), { (editor(router, at: 0)?.fullRenderCount ?? 0) >= 1 }) else {
                 print("VM70-PROBE|shell-pop|no-arrival")
                 return
             }
@@ -628,8 +628,8 @@ struct MobileNoteOpenOnceTests {
                 return
             }
             let leavingDone = await eventuallyAsync {
-                router.editors.registered.isEmpty
-                    && ((try? await autoCommits(db, variantID: note.variantID)) ?? 0) >= 1
+                guard router.editors.registered.isEmpty else { return false }
+                return ((try? await autoCommits(db, variantID: note.variantID)) ?? 0) >= 1
             }
             try? await Task.sleep(for: .milliseconds(500))
             let aliveSoon = probe != nil

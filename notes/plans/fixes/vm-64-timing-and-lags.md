@@ -629,8 +629,8 @@ batch 7's `MobileLeavingSavesOnceTests` assumes too):**
 |---|---|
 | R1 — this trace and the decision | DONE (this commit) |
 | R2 — the product: the hold given back by the leaving, taken back by the arrival; `deinit` the remainder | DONE (this commit) — `MobileEditorViewModel`: `holdsAutosave`, `arrivalCount`, `takeAutosaveHold()`, `releaseAutosaveHold(ifNotShownSince:)`, `observesAutosave`, `autosave` a `private(set) var`, `deinit` releases only a hold still held; `MobileWriteView`: the `.task` takes the hold first, `onDisappear` captures the arrival and its task releases after the savepoint, before the leave's mark. Build PENDING (R4) |
-| R3 — the pins: `MobileNoteHoldTests`; the probe; the three pins' notes | NOT-STARTED |
-| R4 — builds `vm64-b6r1` (fix) and `vm64-b6r1-red` (revert announced first) | NOT-STARTED |
+| R3 — the pins: `MobileNoteHoldTests`; the probe; the three pins' notes | DONE (`9821ffef3` + this commit's two compile fixes) — `MobileNoteHoldTests` (4, names the new API); in `MobileNoteOpenOnceTests` the three pins' notes, `anEditorThatNeverArrivedGivesItsHoldBack` (red on old), `probeWhenAClosedScreensEditorIsFreed` and `probeAPoppedNotesEditorInTheShell` (RECORDED, `VM70-PROBE|…`) |
+| R4 — builds `vm64-b6r1` (fix) and `vm64-b6r1-red` (revert announced first) | IN-PROGRESS — fix `vm64-b6r1` `** TEST BUILD SUCCEEDED **` at this commit's tree, no warning in a touched or new file. **A REVERT IS IN FLIGHT from this commit:** the four Write files (`MobileEditorViewModel`, `MobileMembership`, `MobileNoteTags`, `MobileWriteView`) checked out at the instrument commit `c8f95ea6f` over today's tree (batch 7's Core and `Shared/` kept), `MobileChipScopeTests.swift` and `MobileNoteHoldTests.swift` moved to `App/Variorum/DerivedData/vm64-b6r1-aside/`; build into `vm64-b6r1-red`; then `git checkout HEAD --` the four files, the two suites moved back, `git status` clean. If this cell still says IN FLIGHT, restore exactly that way |
 | R5 — §7 r1 section (the falsified r0 lines marked) + READY | NOT-STARTED |
 
 ### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
