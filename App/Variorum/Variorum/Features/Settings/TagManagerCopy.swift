@@ -16,8 +16,11 @@ nonisolated enum TagManagerCopy {
     /// "in ‹wing›" is the window toolbar's own phrase for the wing you're in
     /// (VX-552's label beside New Note), so the two read as one sentence; the
     /// header voices it as chrome, the toolbar's way. Home is "Home".
+    ///
+    /// VM-60: the sentence's one home is `WingWords.tagsTitle` (shared, so the
+    /// phone's tag manager says it too); this forwards, byte-identical.
     static func title(wingName: String) -> String {
-        "Tags \u{2014} in \(wingName)"
+        WingWords.tagsTitle(wingName: wingName)
     }
 
     // MARK: - VX-840 — the unused-tags sweep (PROVISIONAL words, hers to tune)

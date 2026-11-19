@@ -138,14 +138,29 @@ enum VersionActs {
     /// default would make one platform's words silently the other's — each
     /// door decides.
     static func words(_ error: Error, seal: SealedNoteCopy.Words) -> String {
+        if let known = knownWords(error, seal: seal) { return known }
+        return error is OperationError ? DeletionRefusal.words(error) : DeletionRefusal.fallback(error)
+    }
+
+    /// **VM-62 — the phone's road: never a dump.** This family's own words,
+    /// then the deletion story's and the shared table's on the platform's
+    /// `roads` (whose seal words this family's seal arm speaks), then the ONE
+    /// plain fallback — the same arms as `words`, only the last resort
+    /// differs.
+    static func sentence(_ error: Error, roads: OpsRefusalRoads) -> String {
+        knownWords(error, seal: roads.seal) ?? DeletionRefusal.sentence(error, roads: roads)
+    }
+
+    /// The family's own words for `error`, or nil where it has none (VM-62
+    /// split `words` here; `words` is this plus the deletion story's dumping
+    /// last resort, byte-identical).
+    static func knownWords(_ error: Error, seal: SealedNoteCopy.Words) -> String? {
         if let refusal = error as? Refusal {
             switch refusal {
             case .unsavedChanges: return OpsRefusalCopy.unsavedChanges
             }
         }
-        guard let error = error as? OperationError else {
-            return DeletionRefusal.fallback(error)
-        }
+        guard let error = error as? OperationError else { return nil }
         switch error {
         case .notVersionHistory:
             return "That isn't one of this note's saved versions any more."
@@ -159,7 +174,7 @@ enum VersionActs {
         case .containerNotFound:
             return "That version is already gone."
         default:
-            return DeletionRefusal.words(error)
+            return nil
         }
     }
 }

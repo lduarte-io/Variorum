@@ -541,8 +541,16 @@ struct MobileNavigationTests {
     /// real door is activated through UIKit's own dispatch, and the sentence
     /// is measured against the door's own frame.
     ///
-    /// RED-ON-OLD: render the refusal only in `header` (the shipped shape)
-    /// and the sentence lands ~500 pt ABOVE the door instead of beneath it.
+    /// RED-ON-OLD (as shipped at batch 10): render the refusal only in
+    /// `header` and the sentence landed ~500 pt ABOVE the door.
+    ///
+    /// **VM-61 (2026-11-19): the refusal speaks on the shell's ONE line** —
+    /// always at the screen's foot, above the tab bar or the keyboard, so it is
+    /// never a screen away from the door whatever the book's length (the line's
+    /// placement is `MobileMessageLineHostTests`' pin). This pin now asserts the
+    /// door's refusal reached the one seam as a refusal, and that the book's
+    /// page keeps no slot of its own for it. **A regression trips it:** a door
+    /// refusal that never reached the seam leaves `current` nil.
     @Test func aRefusedBookDoorSpeaksBesideTheDoorSheTapped() async throws {
         try await withEditorWorld { session, _ in
             let bookID = try await session.runner.run { ops -> String in
@@ -569,21 +577,14 @@ struct MobileNavigationTests {
                         "labels were \(surface.visibleLabels)")
                 #expect(surface.activate(MobileBookView.newNoteDoorTitle),
                         "labels were \(surface.visibleLabels)")
-                for _ in 0..<200 where !surface.visibleLabels.contains(sentence) {
+                for _ in 0..<200 where session.status.current == nil {
                     await surface.settle(1)
                 }
-                let door = try #require(
-                    surface.element(labeled: MobileBookView.newNoteDoorTitle))
-                let voice = try #require(
-                    surface.element(labeled: sentence),
-                    "the refusal must be ON SCREEN; labels were \(surface.visibleLabels)")
-                let doorFrame = door.accessibilityFrame
-                let voiceFrame = voice.accessibilityFrame
-                #expect(voiceFrame.height > 0, "the sentence has a real frame: \(voiceFrame)")
-                #expect(voiceFrame.minY >= doorFrame.minY,
-                        "the refusal renders BENEATH the door that fired it — door \(doorFrame), refusal \(voiceFrame)")
-                #expect(voiceFrame.minY - doorFrame.maxY < 80,
-                        "and immediately beneath it, not a screen away — door \(doorFrame), refusal \(voiceFrame)")
+                let line = try #require(session.status.current, "the one line speaks it")
+                #expect(line.kind == .refusal)
+                #expect(line.text == sentence)
+                #expect(!surface.visibleLabels.contains(sentence),
+                        "the book's page keeps no slot of its own — labels were \(surface.visibleLabels)")
             }
         }
     }

@@ -185,23 +185,12 @@ final class MobileBlockHistorySheetView: UIView {
             x: sheetView.bounds.width - doneButton.bounds.width - 20, y: 10,
             width: doneButton.bounds.width, height: 24)
 
-        // A receipt is not a refusal — the SHARED classification decides the
-        // colour, never the words (`RecoveryStatus`).
-        var statusHeight: CGFloat = 0
-        if let status = history.status {
-            statusLabel.isHidden = false
-            statusLabel.text = status.text
-            statusLabel.font = face.chrome.withSize(12)
-            statusLabel.textColor = status.isRefusal ? face.alarm : face.muted
-            let width = sheetView.bounds.width - 40
-            let size = statusLabel.sizeThatFits(
-                CGSize(width: width, height: .greatestFiniteMagnitude))
-            statusLabel.frame = CGRect(x: 20, y: 40, width: width, height: size.height)
-            statusHeight = size.height + 8
-        } else {
-            statusLabel.isHidden = true
-            statusLabel.text = nil
-        }
+        // VM-61: this face's receipt or refusal speaks on the shell's ONE
+        // line (`MobileMessageLine`, above this overlay), so the in-sheet
+        // label stands down and the rows keep their top.
+        let statusHeight: CGFloat = 0
+        statusLabel.isHidden = true
+        statusLabel.text = nil
 
         let top = 40 + statusHeight
         table.frame = CGRect(
