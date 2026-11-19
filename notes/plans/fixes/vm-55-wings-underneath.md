@@ -329,7 +329,7 @@ DerivedData: one dir, `App/Variorum/DerivedData/vm55-b1` (gitignored), phone and
 | VM-59 — the wing-blind pickers | DONE in code — pins a690c8262 (THE RED-ON-OLD TREE), fix 171f514ad (the green tree); the red run and the green run PENDING the stage window |
 | Phone `build-for-testing` (`VariorumMobile`, the simulator's id) | DONE — green at 171f514ad |
 | Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 171f514ad (same DerivedData dir) |
-| Stage window | READY reported to the orchestrator — PENDING the coordinator's claim line. Plan, in order: (1) boot the simulator (iPhone 17 Pro, iOS 26.2 — the coordinator's simulator, addressed by its id) fresh and let it settle; (2) the GREEN phone run on the built tree (171f514ad) — the PHONE SUITES below; (3) the Mac leg — the MAC SUITES; (4) VM-59's red-on-old cycle — write "revert in flight" here first, then `git checkout a690c8262 -- App/Variorum/VariorumMobile/Features/Write/MobileNoteTags.swift App/Variorum/VariorumMobile/Features/Write/MobileMembership.swift App/Variorum/VariorumMobile/Features/Shell/MobileCreateBook.swift`, `git diff` shows exactly 171f514ad's fix reverted, incremental phone build-for-testing, run `MobileWingBlindPickerTests` alone (expect 3 red), then `git checkout HEAD -- <the same three files>` and `git diff` empty; (5) shut the simulator down, `Tools/stage release --who vm-55`. **No revert is in flight at this line.** |
+| Stage window | IN-PROGRESS — claim taken 03:50 (35 min). Leg 1 (phone, 32 suites) DONE: 251/251 passed (Swift Testing; XCTest "Executed 0"; no `skipped:` lines; the 2 known issues are `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`'s declared ones). xcodebuild hung after the run's last line and was stopped by hand at 04:00. Leg 2 (Mac) running. **Leg 3 — REVERT ABOUT TO BE IN FLIGHT:** the three VM-59 fix files go back to a690c8262 for the red-on-old run; if this line is the last word, restore with `git checkout HEAD -- App/Variorum/VariorumMobile/Features/Write/MobileNoteTags.swift App/Variorum/VariorumMobile/Features/Write/MobileMembership.swift App/Variorum/VariorumMobile/Features/Shell/MobileCreateBook.swift` and check `git diff` is empty. |
 
 #### VM-56 — the phone stands in one wing (W-015, W-019)
 
@@ -462,7 +462,7 @@ batch touched — `MobileLibraryTests` `MobileLibrarySortTests` `MobileNavigatio
 `MobileBookCreateTests` `MobileBookNameGuardTests` `MobileBookPinTests` `MobileBookDetailsTests` `MobileQuickNoteTests`
 `MobileFilterTests` `MobileFilterRowGeometryTests` `MobileShelfPerfTests` `MobileScrapsTests` `MobileDeletionTests`
 `MobileShellTests` `MobileEmptyStoreTests` `MobileDailyJournalArchiveTests` `MobileStarterJournalTests`
-`MobileShelfLayoutTests` `MobileWriteLatchTests` `MobileRefusalTableTests`.
+`MobileShelfLayoutBrainTests` `MobileShelfRenderedLayoutTests` (the two types file `MobileShelfLayoutTests.swift` declares — the coordinator caught the file name) `MobileWriteLatchTests` `MobileRefusalTableTests`.
 **MAC SUITES:** `VM56MacWingScopePinTests` `SettingsTagsWingFollowTests` `WingSwitcherTests`.
 Results: PENDING.
 
