@@ -2722,8 +2722,10 @@ The Mac's `savepointOnLeaving` runs the same statements in the same order (the d
 Core APIs have one caller, the phone's branch. PENDING: the Mac suites over the shared types (group (iv)) —
 `SavepointOnLeaveTests` (the six leaving roads' one entry), `AutosaveRegistryReleaseTests`,
 `AutosaveRegistryLifecycleTests` and `AutosaveRegistryReleaseGuardTests` (18k C1's drop rides this function),
-`MacWillLockTests`, `AutosaveCoordinatorTests`, `TestHostInertTests`. Core, headless: the four neighbouring savepoint
-suites green with the new one (P2).
+`MacWillLockTests`, `AutosaveCoordinatorTests`, `TestHostInertTests`. Core, headless, on the final tree: `swift test --filter
+'IdleCommitSweepTests|InsureTakesTests|SearchSavepointFacetTests|SavepointNameTests|LeavingSavepointTests|InvariantSweepTests|SavepointCadenceTests|SampleLibraryDedupeRepairTests|BlockVariantOperationsTests|LibraryDaySearchTests|SearchSavepointCaptureTests|LeavingSavepointMeasurementTests'`
+— **121 tests in 15 suites passed** (one of them the gated measurement, skipped ungated; every suite near
+`closeAutoCommit`, the cadence and the idle sweep).
 
 #### Merging with VM-55, VM-47 and VM-78 — where a hand is needed
 
