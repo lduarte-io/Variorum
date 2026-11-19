@@ -85,6 +85,13 @@ DECISIONS ON IT (2026-11-19 09:00):**
   are written into BATCH C; the decision — fix it here as its own batch with its own Fable round, or hand the
   mechanism to the seam's umbrella — is HELD for her sitting. VM-24 stays open; nothing is wrapped as a known
   issue.
+  **Its reach, as written up after the window (BATCH C, "VM-24 — the mechanism, its reach, and the options",
+  `65fe3a114`):** by the code's own account and an earlier device capture, autocorrect, predictive replacement,
+  dictation and marked-text commits reach `storageDidEdit` without the gate; typing, Return, Tab and the markdown
+  acts are armed. What she would see when a widened report meets one of those roads: the word the keyboard just
+  put in snaps back, with a re-render flicker; stored text is never at risk. How often fixing widens the report
+  on a device is unmeasured. This looks like one mechanism with VX-68 (the gate-less insertion watch row). So
+  the held decision is a real one, and it leads the handoff.
 - **VM-19:** its pin is proved (red on the hide-only teardown at `615a12189`, green on the fix); the desync itself
   did not reproduce on this toolchain (M4, four cases); the pin stands as test hygiene.
 - **The instruments leave now** (round 1's F7): the three trace suites and the cost note are removed in a named
@@ -1697,6 +1704,54 @@ replacements carry a paragraph-style object that makes fixing widen the report. 
 Diagnostics), typing with autocorrect on, accepting predictions, dictating, using the spelling menu and pasting into
 block ends and block middles, would count the gate-less edits per road and the desync recoveries they cause — the
 reach and the rate in one reading. VX-68's watch row has asked for exactly that evidence since round 2.
+
+### BATCH D — VM-17's fix: an off-band fan badge does not stand (the takes chrome; read by ladder round 3)
+
+Opened 2026-11-19 after window (3) proved VM-17 real. One member, one acceptance unit, a fresh implementer.
+
+- **What is wrong (seen, twice identically — BATCH C, "WINDOW (3) — RESULTS"):** on a long note with many fanned
+  blocks, stepping the page leaves stray fan badges in the viewport. The `.document` pass resolves EVERY fanned
+  block's badge through a mid-document forced layout (`Takes/MobileTakesChrome.swift` ~:195-224, through
+  `firstLineGeometry` in `Write/MobileEditorTextView.swift` ~:603-619, `.ensuresLayout`), and on later scroll
+  ticks an off-band block's "last resolved frame stands" (~:206-209). TextKit then re-positions fragments
+  (TEXTKIT2_NOTES §3), so a badge keeps a frame its block has left: one stood 1,260 pt from its own block, and
+  several sat 74 pt off their own line. There is no pile at block 1 (reading 1 is green) and the jump road is
+  clean; the defect is on steady scrolling.
+- **The fix shape — the cold reviewer's, confirmed in advance (round 1, F2's final call; quote it, build it):**
+  "the Mac's rule made literal — an off-band badge does not stand: the `.document` pass resolves badges for
+  in-band blocks only and hides the rest, the `.nearViewport` pass hides a badge as its block leaves the band
+  and resolves it as it enters (tail reservations untouched — they are storage truth). The peek markers share
+  the standing-frame rule (`MobileTakesChrome.swift:256`); the fix covers them or a ticket names them."
+  The Mac's own fix for the same class is VX-246's U4 (`notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`, U4
+  UNIT RECORD; TEXTKIT2_NOTES §3) — read it for the rule, not to copy code.
+- **The pin:** `MobileFanBadgePlacementProbeTests.noFanBadgePilesAndNoneStandsAstrayInTheViewportOnALongNote` —
+  readings (i), (i′), (ii). It is ALREADY seen red on the unfixed chrome (M5 and M5b, bundles
+  `c-M5.xcresult` / `c-M5b.xcresult`). The fix turns it green in a short stage window; reading (iii) (reach) must
+  stay green, and reading 1 too. The probe is NOT edited to make it pass; if the fix changes what "drawn" means
+  (a hidden badge), say exactly how the probe reads a hidden badge and prove by reading that (ii) still demands a
+  badge on every on-screen fan.
+- **What must not change:** which blocks wear a badge (fanned blocks only, count-free — SurfaceContracts, The
+  note); the badge's look and its tap/swipe hit-testing for on-screen fans; the tail reservations; the takes
+  browser; and P3 — nothing here may force layout for blocks outside the band (the fix should REDUCE forced
+  layout, which is also VM-179's cost: record the `.document` pass's cost before and after by reading or a
+  headless measure, for that ticket — do not chase further savings here).
+- **The editor seam:** `firstLineGeometry` lives in `MobileEditorTextView.swift`. Prefer a fix that stays in
+  `MobileTakesChrome.swift` (which blocks it asks about, when it hides). If a line in `MobileEditorTextView.swift`
+  must change, keep it to the geometry helper, say so first in LIVE STATUS, and touch nothing in the text view's
+  input, selection or storage roads. No line in `MobileEditorViewModel.swift`, `Shared/EditorBrain` or any edit
+  routing — VM-24's mechanism is NOT this batch's and is held for the author.
+- **Other tickets this meets, for the record (do not widen scope):** VM-179 (wave 4 — "the takes marks lay out
+  only the fanned blocks on screen") is largely this fix's shape: say in LIVE STATUS what of VM-179 this leaves.
+  VM-188 (wave 5 — the visible badge and the foot pill) redraws the badge's face later.
+- **Evidence:** the probe green on the fix in a stage window (and, since red-on-old is already on file from
+  window (3), no second red leg is needed unless the probe file changes — then red-on-old is shown again for the
+  changed probe); the takes suites that exercise the chrome green by TYPE (name them: grep the tests for
+  `MobileTakesChrome` / the badge layer); a walk row for the gate — a long fanned note scrolled top to bottom,
+  badges on their own lines.
+
+#### BATCH D — LIVE STATUS
+
+*(the implementer fills this from its first commit)*
 
 ## The ladder
 
