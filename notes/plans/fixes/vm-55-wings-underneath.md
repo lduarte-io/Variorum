@@ -351,7 +351,7 @@ wave 2." It supersedes scope call 1's "no door": after this run the phone can ch
 | Batch 1 — VM-59 | DONE (pins a690c8262, fix 171f514ad; red on old 3/3 in the stage window) — the batch closed green at 205abd983: phone 251 tests / 32 suites, Mac 13 / 3 |
 | Batch 2a — VM-61 | DONE — its suites ran in batch 2's one window (run by 2b, three claims, 05:56–07:39): the Mac leg 1243/1245 + its Mac pin's re-run green after a test-only fix (8fa80d315, a false positive); the whole phone target 924 of 928 clean + 2 with declared known issues, VM-24's red main's, and one REAL defect its own host pin caught (the line ignored the home-indicator inset) — fixed b811aa743, re-run green (16/16 over the line's four types). Records: "Batch 2a record" and "Batch 2b record" (2a follow-ups 1 and 2) |
 | Batch 2b — VM-62 (+ P-55-11, + batch 2's one stage window) | DONE — P-55-11 (be6f1d0c7) and VM-62 (pins 69005ad4a/15f788dfd, fix e8609cc6f) green in the whole phone target and the Mac leg; VM-62's red-on-old RAN at 15f788dfd from a snapshot worktree: the scan red (97 lines) and all five per-case pins red, the stripper oracle green; the window's two 2a follow-ups fixed and re-run green. Record: "Batch 2b record" |
-| Batch 3 — VM-63 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line; ends at BUILT (no window of its own) |
+| Batch 3 — VM-63 | IN-PROGRESS — a fresh implementer, spawned at the commit that wrote this line; ends at BUILT (no window of its own). Its own LIVE STATUS: "Batch 3 record" |
 | Batch 4 — VM-225 (the interim wing door) + the shared window for batches 3 and 4 | NOT-STARTED |
 | Ladder round 1 | NOT-STARTED |
 | The simulator walk (use-shaped evidence: a two-wing library, the three roots, a refusal line, a removal line with Undo) | NOT-STARTED |
@@ -1426,6 +1426,35 @@ Leg 3 — **red-on-old** (VM-62's pins; the method above): detached at 15f788dfd
   `vm55-b1`); nothing that compiles into the phone changed, and the phone products built at e8609cc6f stand.
 - **Re-run: DONE GREEN** — `VM61MacStatusSeamPinTests` alone, the last claim's leg (a), 07:35–07:36: 4/4 passed,
   `noMacDoorSaysRemovalWithdrawsOrSetsThePlacement` green.
+
+### Batch 3 record
+
+**What this batch did NOT do (first, by the protocol):** *(kept current; final at BUILT)* no test run of any kind — this
+batch has NO stage window (the note under BATCH 3): every suite below is PENDING for the ONE shared window batch 4's
+implementer runs (the whole phone target, then the whole Mac target as its own QUIET claim). No phone face and no phone
+behaviour (the phone only COMPILES the moved brains; nothing in `VariorumMobile/` constructs them — batch 4 composes
+them). No Mac behaviour change (no Mac caller, word, kind or flow edited — the moved code is byte-for-byte except the
+seams named below). Nothing under `Features/Protection/`, `Shared/Protection/`, `Sources/VariorumCore/Sync/`, custody or
+the editor seam; no Core change; `Shared/AppSession.swift` untouched.
+
+Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch
+`vm-55-wings-underneath`. Reading done in full before code: CLAUDE.md + loaded canon, MobileSoul §1–§5, the resiliency
+protocol, the catch-up plan's inherited rules, umbrella-02, sitting-1 rulings, audit A §1D/§1F/§1I/§3.1, this file whole
+(batch 1's record — `MobileWingModel`/`MobileWingScope`; 2a's — the shared seam and its observation 4; 2b's; the BATCH 4
+section), SurfaceContracts' Messages bullet, the wing label and the wing switcher bullet. DerivedData:
+`App/Variorum/DerivedData/vm55-b1` (incremental, both targets).
+
+#### Batch 3 LIVE STATUS
+
+| Piece | State |
+|---|---|
+| Record skeleton | DONE (this commit) |
+| The moves and splits (both targets' sources) | NOT-STARTED — the table below is the settled design |
+| Test-file edits (the moved face's source pin; the VM-61 Mac pin's scan extended to the hoisted files) | NOT-STARTED |
+| The phone compile-level pin (`MobileWingBrainsHoistTests`) | NOT-STARTED |
+| Mac `build-for-testing` (`Variorum`, macOS, `vm55-b1`) | NOT-STARTED — held for the coordinator's QUIET all-clear |
+| Phone `build-for-testing` (`VariorumMobile`, the simulator, `vm55-b1`) | NOT-STARTED — held for the same all-clear |
+| The shared window's suites (run by batch 4's implementer) | PENDING — the TYPE lists below |
 
 ## Ladder
 
