@@ -799,9 +799,6 @@ final class MCPSession: @unchecked Sendable {
     /// as this session hears it, before the gate does. Set once by the host
     /// before the session runs.
     var gateEventProbe: ((MCPAnnounceGate.Event) -> Void)?
-
-    /// TEST-ONLY (VX-951): the gate as it stands.
-    var announceGateForTesting: MCPAnnounceGate { lock.withLock { announceGate } }
     #endif
 
     /// **VX-776 — the ONE seam in front of every store read the SDK handlers
