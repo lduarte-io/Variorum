@@ -5,9 +5,10 @@ the merges. Branch `vm-78-fixes-to-whats-there`, worktree `~/dev/variorum-vm-78`
 
 ## FOR A LATER READER
 
-*Written 2026-11-19 at the closeout re-fit (tip `3107de895`), from the settled facts. Its `PENDING(…)` slots — the
-re-land's window, ladder round 4, the gate, the QUESTIONS number — are filled at the merge. Everything below this
-section is the night's working record.*
+*Written 2026-11-19 at the closeout re-fit (tip `3107de895`), from the settled facts; ladder round 4's outcome added
+at its fix pass. Its `PENDING(…)` slots — the merge-in once VX-981 has merged and the guards' window on that tree,
+ladder round 5, the gate, the QUESTIONS number — are filled as each lands, the last at the merge. Everything below
+this section is the night's working record.*
 
 **What the run was.** The mobile catch-up's wave 1, umbrella 4: ten small fixes to faces the phone already had, pin
 before fix per member, with no `Sync/`, custody, schema or `Sources/` line — batches B, A and C, then D for VM-17's
@@ -65,16 +66,22 @@ probe red (35 astray · 35 misses · 9 bare), VM-19's pin red on the old teardow
 window: the fix not proved (eight reds; 17 bare on the jump road), the decor reading red. The back-out's check
 (`79fa4d36d`); both targets build for testing on the merged tree (`c652d1669`, `8d2b9f8bf`). Five bundles are lost
 or unreadable; the kept logs under `App/Variorum/DerivedData/logs/` are the evidence. Ladder: round 1 0 BLOCKER / 2
-MAJOR / 6 MINOR / 11 NIT; round 2 0 / 0 / 3 / 5; round 3 0 / 1 / 5 / 3. The re-land's window on the merged
-tree: 44 tests in 4 suites red on exactly the six expected pins, then 283 tests in 41 suites green, both bundles
-read. PENDING(ladder round 4; gate 1, the whole phone target; gate 2, the Mac leg; gate 3, the simulator walk).
+MAJOR / 6 MINOR / 11 NIT; round 2 0 / 0 / 3 / 5; round 3 0 / 1 / 5 / 3; round 4 0 / 1 / 0 / 5 — its MAJOR,
+R4-F1: the next wave-1 merge (VM-47's) conflicts on three faces this run's pins hold only at the seam, so three
+guards hold the faces (`noPhoneFaceReadsTheEditorsUnobservedHeaderDate` `43fec9e9c`, `noPhoneStringLiteralSaysSmart`
+`e9823efaf`, `MobileMembershipSheetFaceTests` `905a12eb0`; compiled headless `ed64cf950`) and its map goes to the
+coordinator at the merge. The re-land's window on the merged tree: 44 tests in 4 suites red on exactly the six
+expected pins, then 283 tests in 41 suites green, both bundles read. PENDING(the guards' window on the tree after
+the VX-981 merge-in; ladder round 5: its count; gate 1, the whole phone target; gate 2, the Mac leg; gate 3, the simulator
+walk).
 
 **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (`786f50af9`). MobileSoul §6:
 PL-77 (`e24e0fb81`). AppSpec §9 and OverallModel §3: the insured restore no longer PROVISIONAL (`3471d0ad4`; #274
 addendum 2). TEXTKIT2_NOTES §3: the two iOS 26.2 facts measured here (`02a3ac002`).
 
-**Open items.** The re-land's window, round 4 and the gate; the shared ledgers, the PR and its merge; her ratify
-list and wording pass; the tickets to mint (the Closeout's list — VM-239 is minted); VM-24's and VM-17's own runs.
+**Open items.** The merge-in once VX-981 has merged, the guards' window on that tree, round 5 and the gate; the
+shared ledgers, the PR and its merge, and round 4's map handed to the coordinator; her ratify list and wording
+pass; the tickets to mint (the Closeout's list — VM-239 is minted); VM-24's and VM-17's own runs.
 The remainders are carried by VM-24, VM-17, VM-239, VM-179, VM-175, VM-161, VM-113, VM-212, VM-85, VM-117, VM-94,
 VM-218, VM-99 and VM-96's Trash face.
 
@@ -2868,8 +2875,8 @@ not merged). **No revert is in flight.***
 | 2 — G2, `MobileGatheringWordTests.noPhoneStringLiteralSaysSmart` with its oracle and two exemptions | DONE (`e9823efaf`; `MobileBookFixesTests.swift`, after `noRenderedStringInTheseFacesSaysSmart`, whose doc is re-worded) — roots `VariorumMobile/` and `Shared/`, each asserted to exist and walked > 60 (88 and 148 files at HEAD); literals from `MobileNoRedirectSweepTests.stringLiteralContents(of:)`; the Mac's whole-word rule as a private copy with its oracle ("smart", "Smart Book", "a smart book" hit; `isSmart`, "smartphone" do not); two exact `(file, literal, why)` exemptions, each required to match once — the predicate run by hand over HEAD's two roots finds exactly those two literals, byte for byte. Compiled at piece 4 |
 | 3 — G3, `MobileMembershipSheetFaceTests` (the premise check first) | DONE (`905a12eb0`, one `try` dropped at piece 4; `MobileBookFixesTests.swift`, after `MobileCollectReceiptTests`) — one test, `theSheetMarksAnArchivedBookAndAGatheringAndDrawsDivergeOnTheBookOnly`: the fixture as called (tag `quote`, book "Old projects", gathering "Quotes" on `.tag(quote)`, a note added, the book archived, the note tagged); the premise `model.books.map(\.name) == ["Old projects", "Quotes"]` as a `#require` with its own message, so a fixture red stops the test; the real `MobileMembershipSheet(model:tokens: .studyLight, onOpenNote: nil)` under `withHostedSurface` (its own dead-tree check), settled; on `visibleLabels`: "Old projects (archived)", "Quotes", "gathering", no whole-word "smart", exactly one "diverge" — each its own expectation. Compiled at piece 4; first run in the guards' window |
 | 4 — compile proof: an incremental phone `build-for-testing` into `vm78-ios` | DONE (`ed64cf950`) — from `App/Variorum/`, the merge-in's own invocation: `xcodebuild build-for-testing -project Variorum.xcodeproj -scheme VariorumMobile -destination "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2" -derivedDataPath DerivedData/vm78-ios` (no boot), behind a watchdog that would have stopped it at a seventh compile outside the test target: **TEST BUILD SUCCEEDED**, 5 compiles, all in `VariorumMobileTests`, none in `VariorumMobile` or `VariorumCore` (log `App/Variorum/DerivedData/logs/vm78-r4-guards-ios-build.log`). Its one new warning — `try` before G3's `withHostedSurface`, whose body throws nothing — was answered by dropping the `try`; rebuilt: **TEST BUILD SUCCEEDED**, 3 test-target compiles, no warning on a guard line (`…-ios-build-2.log`). Guards at `MobileMembershipTests.swift:396` (G1), `MobileBookFixesTests.swift:749` (G2), `:957`/`:967` (G3) |
-| 5 — the guards' window recipe (the red patch, the expected reds and greens, the green leg) | DONE (this piece's commit) — "The guards' window recipe" below. The red tree's hand edits were made in this worktree (announced in `2959d432c` before they began), saved to the local patch, built (incremental, **TEST BUILD SUCCEEDED**), then restored with `git checkout HEAD --` and rebuilt (**TEST BUILD SUCCEEDED**); `git status` clean after. **No revert is in flight** |
-| 6 — the NITs (R4-N2 … R4-N5) and round 4's slots filled, one documents commit | NOT-STARTED |
+| 5 — the guards' window recipe (the red patch, the expected reds and greens, the green leg) | DONE (`1a2f5c539`) — "The guards' window recipe" below. The red tree's hand edits were made in this worktree (announced in `2959d432c` before they began), saved to the local patch, built (incremental, **TEST BUILD SUCCEEDED**), then restored with `git checkout HEAD --` and rebuilt (**TEST BUILD SUCCEEDED**); `git status` clean after. **No revert is in flight** |
+| 6 — the NITs (R4-N2 … R4-N5) and round 4's slots filled, one documents commit | DONE (this commit) — R4-N2's sentences (FOR A LATER READER's slots line, evidence and open items; the Closeout's opening paragraph, the results intro, "Sentences to revisit", "Not done" and the finals-ledger draft's false line), each true when written; R4-N3's handoff sub-section and to-file item 7; R4-N4's walk rows and the date-chip row; R4-N5's line on VM-218 and the folded to-file item 3 (record and handoff); round 4's count and outcome in FOR A LATER READER, the Closeout (results, rulings, the ladder, the drafts) and the handoff, with `PENDING(ladder round 5: …)` the slot that remains; the map's line under "Lines for other owners". **No revert is in flight; the fix pass is done** |
 
 #### The guards' window recipe (round 4's red legs — for the orchestrator)
 
@@ -2998,8 +3005,9 @@ out; the back-out (the fix and its pins reverted, the probe and the decor readin
 `origin/main` (`eb18888db`: VX-980 and VM-55) merged in by `ed1266e2f`, the run's fixes re-landed on VM-55's seams,
 the pins re-shaped to the one message line (`c652d1669`), the merge's one semantic join pinned (`8d2b9f8bf`), and
 both targets built for testing on the merged tree; the re-land's stage window (red on exactly its six pins, then
-green); ladder rounds 1, 2 and 3; the canon deltas (below). **Still
-ahead, each a `PENDING(…)` slot below:** ladder round 4 and any round it earns; the
+green); ladder rounds 1, 2, 3 and 4, and round 4's three guards (built and compiled headless; their window is
+ahead); the canon deltas (below). **Still ahead, each a `PENDING(…)` slot below:** the merge-in once VX-981 has
+merged, the guards' window on that tree, and ladder round 5 (the last under the cap of five); the
 gate's three legs (the whole phone target, the Mac leg, the simulator walk); the shared ledgers at the merge moment
 (the QUESTIONS number, the minted ticket ids); `Tools/canon-size`; the PR and its merge SHA. Nothing marked PENDING
 is claimed. Facts here trace to this file, the three round files, the two kickoffs
@@ -3016,7 +3024,8 @@ below; "red/green" means the pin was seen red on the pre-fix product and green o
 how a fix sits on the merged tree where VM-55 had moved its seams: the merge commit `ed1266e2f` (main's structure in
 every file, this run's behavior on top — "THE MERGE-IN", "The re-land, file by file"), with the pins re-shaped to
 read the one line (`c652d1669`). Every pre-merge window ran on the code before the merge; on the merged tree the
-fixes are built for testing and read, and their windows are the slots below.
+re-land's window ran red on its six pins against main's files and green over 41 types (the evidence table), and
+the gate's legs are the slots below.
 
 **VM-16 — the undo door (Urgent; W-145).**
 - *What was wrong.* `MobileUndoDoor.runUndo` / `redo()` called `UndoStack.undo(with:)` / `redo(with:)`, which hand
@@ -3036,8 +3045,8 @@ fixes are built for testing and read, and their windows are the slots below.
 - *Evidence.* Window (2): both red on the pre-fix door, green on the fix. On the merged tree: built; red against
   main's door by reading ("THE MERGE-IN", "The pins re-shaped"); proved again in the re-land's window
   (2026-11-19, 15:07–15:12): `aQuietUndoSpeaksTheRefusalAndOffersNoRedo` and `aQuietRedoSpeaksTheRefusalAndOffersNoUndo`
-  red with `MobileUndoDoor.swift` at `eb18888db`, green on the tip. Read by ladder round 4 as new work —
-  PENDING(ladder round 4).
+  red with `MobileUndoDoor.swift` at `eb18888db`, green on the tip. Read by ladder round 4 as new work: no
+  finding against it (round 4's clean bill).
 
 **VM-20 — the undo warning's word (carried by VM-16; W-146).**
 - *What was wrong.* The phone's warning detail said "It is saved first" where the Mac says "It is committed
@@ -3354,21 +3363,31 @@ slots at the table's foot.
 | the back-out's check | git only, at `7d84e4b22` (`79fa4d36d`) | `git log` / `git diff e48ef2f30..` over the four chrome files; `git ls-files` and `git grep` for the instrument types | the four files print nothing against `e48ef2f30`; no instrument type in the tree; VM-19's and VM-24's test files kept | — | — |
 | the merge-in's builds | the merged tree, headless | phone signed `build-for-testing` (`platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot) at `c652d1669` and again at `8d2b9f8bf`; Mac `build-for-testing` at `c652d1669` (nothing the Mac compiles changed after it) | TEST BUILD SUCCEEDED, all three; 0 errors; no warning in a line the merge-in wrote | — | logs `vm78-mergein-ios-build.log`, `vm78-mergein-ios-build-2.log`, `vm78-mergein-mac-build.log` |
 | the re-land's window | claimed 15:07:05, released 15:12:40 (2026-11-19) | RED — `MobileUndoDoor.swift`, `MobileTrashModel.swift`, `MobileTrashView.swift` at `eb18888db`, the tests at the tip, four types; GREEN — the tip's code (`9ee926cb1`), 41 phone types ("THE MERGE-IN" → "The window recipe"); both legs from the orchestrator's throwaway checkout and its own products, one simulator boot | RED: 44 tests in 4 suites failed, 17 issues incl. 2 known. GREEN: 283 tests in 41 suites passed with 2 known issues (the designed `MobileTrashTests` diagnostic, on both sides) | exactly the six expected on the RED leg and no other: `aQuietUndoSpeaksTheRefusalAndOffersNoRedo` · `aQuietRedoSpeaksTheRefusalAndOffersNoUndo` · `theWarningsDetailSaysCommittedInTheMacsSentence` · `theFirstPaintSaysNothingBeforeTheListingAnswers` · `theTrashNamesAnUntitledGatheringAGathering` · `theTrashNamesAnUntitledSavedVersionAsOne`; none on the GREEN | `r-red.xcresult` and `r-green.xcresult` under `vm78-bundles/`, both read (the recipe's `mergein-…` names were not used); logs `vm78-window-r-red.log`, `vm78-window-r-green.log` |
+| round 4's guards, headless | 2026-11-19, evening (no claim — builds only) | the three guards (`43fec9e9c`, `e9823efaf`, `905a12eb0`): an incremental phone `build-for-testing` into `vm78-ios` at `905a12eb0` and again at `ed64cf950`; then the red tree (the local `guards-red.patch`) built at `2959d432c`, restored and built again | TEST BUILD SUCCEEDED, all four builds; the test target alone recompiled for the guards, the four patched app files for the red tree; the red tree's one new warning is the unused `day` (`MobileWriteView.swift:444`), as R4-F1's link 4 predicts | — (no test ran) | logs `vm78-r4-guards-ios-build.log`, `…-ios-build-2.log`, `vm78-r4-guards-red-ios-build.log`, `vm78-r4-guards-restored-ios-build.log` |
+| round 4's guards' window | PENDING(the guards' window: when — on the tree after the VX-981 merge-in, from the orchestrator's throwaway checkout) | RED — the tree with `guards-red.patch` applied, five types; GREEN — the restored tree, the same types ("The ladder" → "Round 4" → "The guards' window recipe") | PENDING(the guards' window: both verdict lines) | PENDING(the guards' window: every red by name — expected exactly G1, G2, G3 and `bookDetailsDeleteLineNamesAGathering`, with the five seam pins green on the red tree) | PENDING(the guards' window: bundles and logs) |
 | Gate 1: the whole phone target | PENDING(gate 1: when) | the merged tip, the whole `VariorumMobile` test target | PENDING(gate 1: the verdict line) | PENDING(gate 1: every red by name — the one standing red by decision is VM-24's caret pin, `MobileMarkdownCaretTests.aReplaceThroughTheInputRoadAtARescuePointKeepsTheSurfaceInStep`) | PENDING(gate 1: bundle and log) |
 | Gate 2: the Mac leg | PENDING(gate 2: when) | the merged tip; the Mac types over the changed `Shared/` files — tier 1's 17 and tier 2's ("THE MERGE-IN" → "The window recipe") | PENDING(gate 2: the verdict line) | PENDING(gate 2: every red by name) | PENDING(gate 2: bundle and log) |
 | Gate 3: the simulator walk | PENDING(gate 3: when) | the dev-store Debug phone build; one capture per row (below), both voices where a face has one | — | — | PENDING(gate 3: the screens folder and each row's capture) |
 
-**The walk's rows (gate 3), collected from the record:** Book Details' Finish with notes waiting (the confirm and
-its count; Cancel leaves the book; Finish dismisses) · Finish absent on a gathering's Details · a sealed book's
-Reopen sentence · the membership sheet on a note in a gathering (no Diverge; the "gathering" mark; an archived
-book "(archived)" in the add list; a ★-rule collect's line) · the shelf in a–z with a starred book first and a
-long-press menu without Pin · a gathering's delete from the shelf row and from Book Details, the line naming a
-gathering (added at this re-fit for the merge's one semantic join) · the create sheet's Gathering kind · a starred archived book from Starred → its Details with Unarchive
-→ back on the shelf · the undo door after a quiet press (the refusal on the one line) · a restore and its kept
-moment · the date chip · the Trash's first paint · the divide lesson · F4's "getting around" lesson · round 1's
-N9: the tallest Book Details (an archived, journal-trait book with a rule, a refusal line showing) at the medium
-and at the large detent. (No fan-badge row: VM-17 left the run.) PENDING(gate 3: each row's outcome and capture
-name).
+**The walk's rows (gate 3), collected from the record — every row walked on the tree that merges (round 4's
+R4-N4):** Book Details' Finish with notes waiting (the confirm and its count; Cancel leaves the book; Finish
+dismisses) · Finish absent on a gathering's Details · a sealed book's Reopen — its refusal on the one line,
+captured with Book Details still up: the line readable, and where it stands against the sheet's last row (a
+refused Finish has no walkable road — a store error, or the book deleted elsewhere while the sheet is up — and
+rides the same line as the sealed Reopen, so this row covers it) · the membership sheet on a note in a gathering
+(no Diverge; the "gathering" mark; an archived book "(archived)" in the add list; a ★-rule collect's line,
+captured with the membership sheet still up, the line readable above it) · the shelf in a–z with a starred book
+first and a long-press menu without Pin · a gathering's delete from the shelf row and from Book Details, the line
+naming a gathering (added at the re-fit for the merge's one semantic join) · the create sheet's Gathering kind · a
+starred archived book from Starred → its Details with Unarchive → back on the shelf · the undo door after a quiet
+press (the refusal on the one line) · a restore and its kept moment · the date chip on a TITLED note — set a date,
+the chip shows it at once (VM-84's case) · the Trash's first paint · the divide lesson · F4's "getting around"
+lesson · round 1's N9: the tallest Book Details — an archived, journal-trait book with a rule (Finish with its
+three-line caption, the daily row, Unarchive with its pause sentence, Delete) — with a refusal standing on the one
+line (raised from the sheet itself: Rename Book to a live book's name in the same wing — the per-wing name guard
+refuses), at the medium and at the large detent: at the medium detent, does the line cover the sheet's last row
+(Delete), and is the line readable? On the tree that merges — with VM-47's sizes if VM-47 has merged first (N9's
+own re-take note). (No fan-badge row: VM-17 left the run.) PENDING(gate 3: each row's outcome and capture name).
 
 ### Her rulings built here, against what shipped
 
@@ -3378,8 +3397,10 @@ rather than her sentence, it says so.
 1. **The ladder cap tonight** (Kickoff facts): "sounds good, tonight, up to 5 review rounds as long as a major is
    found." *Shipped:* round 1 found two MAJORs and earned round 2; round 2 found none, and round 3 was owed by
    round 1's F1 (new work not yet cold-read); round 3 found one MAJOR (R3-F1), which earns round 4 — which reads
-   the back-out, the merge resolutions and VM-16 re-landed. PENDING(ladder round 4: its count and dispositions; a
-   further round only on a new BLOCKER or MAJOR, within the cap of five).
+   the back-out, the merge resolutions and VM-16 re-landed, and found one MAJOR (R4-F1, the next merge's three
+   unpinned faces), which earns round 5 — the last under the cap of five, which she made the standing rule the same
+   night ("The ladder"). PENDING(ladder round 5: its count; a BLOCKER or MAJOR there reaches the cap, and what
+   follows is hers to say).
 2. **Her frame for the night** (Kickoff facts): "and just to be clear, the plan is sequential merges to main,
    overnight provisional running, but I won't get a new phone build until wave 2 is done according to what
    another session said." *Shipped:* the run closes on a simulator walk, with its PROVISIONAL calls bundled. Its
@@ -3565,7 +3586,10 @@ and since the merge main's road speaks it too.)
   history in batch D's record, not shipped.
 - **VM-218 (VoiceOver and text size):** Book Details' name row carries `.accessibilityLabel("Rename Book")`
   (`MobileBookDetails.swift`, the identity block, from before this run), which replaces the book's name for
-  VoiceOver. (R2-N1's own fix stands — its window proved it.)
+  VoiceOver. (R2-N1's own fix stands — its window proved it.) And the masthead's date chip carries
+  `.accessibilityLabel("Entry Date")` (`MobileWriteView.swift`, from before this run), which replaces the day it
+  shows — VoiceOver hears "Entry Date" and never the date; an `.accessibilityValue` of the day would carry it (and
+  would let a hosted pin read what the chip draws). Round 4's R4-N5; no code in this run.
 - **VM-188 (wave 5 — the visible badge and the foot pill):** it redraws the badge's face on the takes chrome; the
   rule it meets is whatever VM-17's run lands.
 - **VM-113 (wave 3, the Bookcase):** the order choice ("a–z or last edited") is hers to build there (her ruling,
@@ -3588,6 +3612,17 @@ and since the merge main's road speaks it too.)
   when other kinds wait (the Mac's ledger-row-2 rule).
 - **VM-99 (wave 2, the Archived room):** only the starred archived book's way out is built here; the Archived
   room's books group is VM-99's.
+- **The stage coordinator, for VM-47's and VM-64's orchestrators — round 4's map:** at this run's merge, "The map,
+  final" (`notes/plans/fixes/vm-78-ladder-round4.md`) goes to the coordinator for its "main moved" message to both
+  orchestrators, as written, never re-typed: what of this run must survive each hunk of `MobileWriteView.swift`,
+  `MobileCreateBook.swift`, `MobileMembership.swift` and `MobileBookDetails.swift`; the five shared files VM-64's
+  textually clean merge is read against; and the three guards on main (`noPhoneFaceReadsTheEditorsUnobservedHeaderDate`,
+  `noPhoneStringLiteralSaysSmart`, `MobileMembershipSheetFaceTests`), each fixed by the map, never by editing the
+  guard. After the join, VM-47's three source scans (`MobilePhoneTypeSourceTests`, `MobilePhoneControlsSourceTests`,
+  `MobileLookSourceTests`) read this run's lines by styling alone, and the type scan reds three of them that no hunk
+  will show — the Unarchive row's two `.font(…)` in `MobileBookDetails.swift` (HEAD `:558`, `:563`) and the Diverge
+  button's `.font(tokens.small)` in `MobileMembership.swift` (HEAD `:361`): restyled as the map says, never answered
+  by putting back the other side's read or word, and never by unwrapping the `if`.
 - **The merging session (shared ledgers):** the QUESTIONS bundle and F8's question; the tickets below; the dated
   entry, the narrative and the finals-ledger line under "To land on main at the merge".
 
@@ -3611,10 +3646,12 @@ and since the merge main's road speaks it too.)
    Suspected · Books · Low · Mobile. One-liner: `MobileBookView` draws it on `model.entries.isEmpty` while
    `MobileBookViewModel.entries` starts `[]`; same check and fix as above. Related VM-122. Pointer: round 1's N10.
    *(N10 named both sites in one line; it is split here because a ticket carries one Area.)* (Still so at HEAD.)
-3. **To mint on VM, or a line on VM-218** — "Book Details' name row hides the book's name from VoiceOver." Bug ·
-   Confirmed (by reading the code; not run) · Books · Low · Mobile. One-liner: the identity block's
-   `.accessibilityLabel("Rename Book")` replaces the name it shows. Pointer: round 2's final call on R2-N1. (Still
-   so at HEAD.)
+3. **To mint on VM, or a line on VM-218** — "Book Details' name row and the note's date chip hide what they show
+   from VoiceOver." Bug · Confirmed (by reading the code; not run) · Books · Low · Mobile. One-liner: the identity
+   block's `.accessibilityLabel("Rename Book")` replaces the name it shows, and the masthead date chip's
+   `.accessibilityLabel("Entry Date")` (`MobileWriteView.swift`) replaces the day it shows. A ticket takes one Area:
+   minted rather than lined onto VM-218, the merging session picks it or splits the item. Pointer: round 2's final
+   call on R2-N1; round 4's R4-N5. (Still so at HEAD.)
 4. **To mint on VX** (or a line on a standing VX sweep ticket, if one exists at the merge) — "`Queries.bookshelf`'s
    doc still says shelf ordering is the view model's call over `shelfPins`." Debt · Confirmed · Books · Low.
    One-liner: `Sources/VariorumCore/Queries/ShelfQueries.swift:43-44`; both platforms order by `BookcaseBoard`
@@ -3629,6 +3666,15 @@ and since the merge main's road speaks it too.)
    them the undo door's `inFlight`, so "That book isn't archived any more — nothing changed." stays for the real
    race. Pointer: round 2's R2-N4 (the line under VM-62 above), whose intended owner, VM-62's sweep, merged without
    it.
+7. **To mint on VX** (round 4's R4-N3) — "SurfaceContracts quotes the Finish confirm as 'at the door' and keeps two
+   ratified PROVISIONAL marks." Debt · Confirmed · Low · Wording. One-liner: `notes/SurfaceContracts.md` — the book
+   settings sheet's Finished door quotes "N waiting at the door will be dismissed" (the shipped words are "N waiting
+   at Arrivals will be dismissed.", `Shared/BookStateCopy.swift`, re-worded under R-17y-2); the Takes bullet's
+   "PROVISIONAL P-849-5, QUESTIONS #274; VX-849" and Library protection's "PROVISIONAL P-849-4, QUESTIONS #274;
+   VX-443", both ratified at #274 addendum 2. A ticket takes ONE Area and the three lines sit on three surfaces (the
+   book settings sheet — Books; the take's ring — Takes & Lenses; the key file — Castle & sync): the merging session
+   picks the Area or splits the item. None of the three lines is edited by this run; they are in the handoff for her
+   call. Pointer: round 4's R4-N3; "Lines believed false or stale" above.
 
 **Not tickets to file:** VM-24 and VM-17 exist and are re-owned (each its own run); VM-179 exists and joins VM-17's
 run; VX-68's relation is recorded above; window (3)'s jump road was clean on the unfixed chrome, and the first
@@ -3664,11 +3710,18 @@ pill share the badge's rule and are in the record VM-17's run reads, so they nee
   unarmed; R3-F6: the rule for the red probe and the settle instrument's removal; R3-N1–N3: record lines, the
   probe's header comment. Its final calls CALLED VM-17's fix shape (S1–S11), which batch D built exactly and which
   failed its window; the shape left the tree with the back-out and is not assumed by VM-17's run.
-- **Round 4:** PENDING(ladder round 4 — a fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, writing
-  `notes/plans/fixes/vm-78-ladder-round4.md`, reading as new work the back-out, the merge resolutions and VM-16
-  re-landed (`git diff eb18888db...HEAD` against merged main; `a00581328..HEAD` since round 2's review): its count,
-  its findings' dispositions, and any round it earns — a further round only on a new BLOCKER or MAJOR, within the
-  cap of five). With batch D gone it reads no new editor-seam fix.
+- **Round 4** (`vm-78-ladder-round4.md`; a fresh `fable-reviewer`; the diff `eb18888db..acb441110`): **0 BLOCKER ·
+  1 MAJOR · 0 MINOR · 5 NIT** (findings `3396c4611`, final calls `a3d5d9030`); nobody disputed a finding, none
+  FINDER-FIXES; no defect in the back-out, the merge resolutions or VM-16 re-landed. R4-F1 (MAJOR): the next wave-1
+  merge (VM-47's) conflicts on four phone files, the other side of each hunk is the face before this run's fix, and
+  the pins hold seams — three guards (`43fec9e9c`, `e9823efaf`, `905a12eb0`), shown red in one build on the tree
+  after the VX-981 merge-in, and "The map, final" handed to the coordinator at the merge; R4-N1: the one pin with no
+  seen red (Book Details' join) rides that build; R4-N2: stale sentences and one false one, re-written; R4-N3: three
+  canon lines for her call and a to-file item; R4-N4: the walk's rows re-worded; R4-N5: a line on VM-218. The
+  dispositions and the process plan: "The ladder" → "Round 4".
+- **Round 5:** PENDING(ladder round 5 — a fresh `fable-reviewer`, opened after the merge-in that follows VX-981's
+  merge and the guards' window on that tree, on the coordinator's word that this run's gate is next; it reads the
+  three guards, their window, that merge-in, the NIT edits and the map; the last round under the cap of five).
 
 ### Canon deltas
 
@@ -3722,7 +3775,8 @@ pointing at VM-17's kickoff. Neither is pinned in the tree (the instruments left
 the word "PENDING" at the merge; `grep -n PENDING notes/MobileSoul.md notes/SurfaceContracts.md` answers nothing at
 this re-fit):
 - After the re-land's window: if VM-16's or VM-33's pins do not go red and then green as the recipe expects, PL-77's
-  VM-16 or VM-33 sentence and SurfaceContracts' clause 5 are revisited with the fix.
+  VM-16 or VM-33 sentence and SurfaceContracts' clause 5 are revisited with the fix. Moot: the window ran red, then
+  green, as the recipe expected (15:07–15:12).
 - After gate 3: a failed walk row takes its SurfaceContracts clause and its PL-77 sentence out with the fix's revert.
 - At the merge: PL-77's "Verified so far by…" may gain the gate's three legs — written as what ran, never with a
   pending word.
@@ -3811,7 +3865,9 @@ paragraph:
 > **The ladder.** Round 1: 0 BLOCKER, 2 MAJOR (F1 the ladder cannot close before batch C is cold-read; F2 the VM-17
 > probe's vacuous reading), 6 MINOR, 11 NIT. Round 2: 0 BLOCKER, 0 MAJOR, 3 MINOR, 5 NIT. Round 3: 0 BLOCKER,
 > 1 MAJOR (R3-F1, the block decor shares the badge's standing-frame rule), 5 MINOR, 3 NIT; its final calls called
-> VM-17's fix shape, which failed its window. Round 4: PENDING(ladder round 4: its count). Every finding
+> VM-17's fix shape, which failed its window. Round 4: 0 BLOCKER, 1 MAJOR
+> (R4-F1 — the next wave-1 merge conflicts on three faces the pins held only at the seam; three guards and a
+> hunk-by-hunk map), 0 MINOR, 5 NIT. Round 5: PENDING(ladder round 5: its count). Every finding
 > dispositioned in the round files.
 >
 > **The windows.** Batch B 68/6 green after its seven reds; batch A 84/16 green after its 21 reds, the Mac's 17 types
@@ -3820,7 +3876,8 @@ paragraph:
 > VM-19's pin red on the old teardown and green on the fix; the settle measurement 1/1; batch D's window — the fix
 > NOT proved (eight reds on its green leg, the jump road unbadged), the decor reading red (VM-239); both targets
 > built for testing on the merged tree. The re-land's window: 44 tests in 4 suites red on exactly the six expected
-> pins, then 283 tests in 41 suites green. PENDING(gate 1, the whole phone target; gate 2, the Mac leg; gate 3, the
+> pins, then 283 tests in 41 suites green. PENDING(round 4's guards' window, red then green, on the tree after the
+> VX-981 merge-in; gate 1, the whole phone target; gate 2, the Mac leg; gate 3, the
 > walk).
 >
 > **Canon.** SurfaceContracts › The Bookcase and books: five clauses naming the phone (the order, the Finish
@@ -3862,11 +3919,11 @@ paragraph:
 >   ten members in four batches (B: VM-16/43/3/84/33 · A: VM-81/83/21 · C: VM-24/17 traced, VM-19 · D: VM-17's
 >   fix, which failed its window and was backed out) plus VM-20 and VM-19 carried; EIGHT members shipped, re-landed
 >   on VM-55's message line by the merge-in; VM-24 and VM-17 (with VM-239 and VM-179) each to its own run after
->   wave 1 (her rulings); Fable orchestrated (a second session took over at a clean seam), Opus implemented, a fresh fable-reviewer per round —
->   round 1 0B/2M/6m/11n, round 2 0B/0M/3m/5n, round 3 0B/1M/5m/3n, round 4 PENDING(ladder round 4: its count);
+>   wave 1 (her rulings); Fable orchestrated (one session throughout, its context compacted once at a clean seam at her word), Opus implemented, a fresh fable-reviewer per round —
+>   round 1 0B/2M/6m/11n, round 2 0B/0M/3m/5n, round 3 0B/1M/5m/3n, round 4 0B/1M/0m/5n, round 5 PENDING(ladder round 5: its count);
 >   windows (2) 68/6, (1) 84/16 + Mac 110/17, (5) 75/10, F4 4/1, R2-N1 11/2, (3) the matrix's ten runs + M5b, the
 >   settle measurement 1/1, each after its reds; batch D's window red (the fix not proved, the decor red); five bundles
->   lost or unreadable (batch B's red not kept; fixpass-red, r2n1-red, d-red, d-green unreadable), their logs kept; the re-land's window 44/4 red on exactly its six pins then 283/41 green; PENDING(the gate's three legs);
+>   lost or unreadable (batch B's red not kept; fixpass-red, r2n1-red, d-red, d-green unreadable), their logs kept; the re-land's window 44/4 red on exactly its six pins then 283/41 green; round 4's three guards and their window PENDING(the guards' window); PENDING(the gate's three legs);
 >   PROVISIONALS QUESTIONS PENDING(the QUESTIONS number, at the merge); born VM-239 and PENDING(the minted ticket ids).
 
 **`notes/QUESTIONS.md`, the bundle (draft; main's next free number was #278 when the merge-in ran, to be re-checked
@@ -3885,8 +3942,9 @@ on latest main at the merge):**
 
 ### Not done, or left for later — honestly
 
-- Everything in this section's opening paragraph marked "Still ahead": the re-land's stage window, ladder round 4,
-  the gate's three legs, the shared ledgers, `Tools/canon-size`, the PR and its merge.
+- Everything in this section's opening paragraph marked "Still ahead": the merge-in once VX-981 has merged, the
+  guards' window on that tree, ladder round 5, the gate's three legs, the shared ledgers, `Tools/canon-size`, the PR
+  and its merge.
 - No AppSpecRecord, QUESTIONS, master plan, TICKETS or finals-ledger line was written (shared ledgers, the merging
   session's); their drafts are above.
 - No ticket was minted from this record's "To file" list; VM-239's minting and VM-24's and VM-17's re-owning in
@@ -3897,8 +3955,11 @@ on latest main at the merge):**
   chrome is main's; its pins left the tree and live in history for its own run.
 - The walk has not run, so no face here is proved by use yet; the SurfaceContracts clauses and PL-77 stand on the
   pre-merge windows' pins and the merged tree's builds until it does.
-- The re-landed fixes (VM-16, VM-20, VM-33, VM-81's and VM-83's joins, VM-21's line class) are built and read on
-  the merged tree; their own red/green on that tree is the re-land's window, not yet run.
+- On the merged tree the re-land's window proved VM-16, VM-20 and VM-33 (and the Trash's two names) red on main's
+  files and green on the tip. VM-81's refusals ride main's road (green on both sides by design); VM-21's collect
+  words and VM-83's shelf delete words are red against main by reading only (seen red in window (1) on the models'
+  slots; the line class is main's own); Book Details' delete join (`bookDetailsDeleteLineNamesAGathering`) is shown
+  red by one hand-reverted line in the guards' window (round 4's R4-N1).
 
 ### The run's state when ladder round 1 opened (2026-11-19, tip `e2c4c0c6e`)
 

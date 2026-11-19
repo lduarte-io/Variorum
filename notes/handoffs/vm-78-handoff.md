@@ -1,10 +1,11 @@
 # VM-78 — Fixes to what's there: your handoff
 
-**STATUS: OPEN — re-fitted on 2026-11-19, after the badge fix was taken out and main was merged into the branch.**
-Still ahead: a short test window for the fixes re-applied after the merge, the fourth review round, and the final
-gate (the whole phone test suite, the Mac tests over the shared code this run changed, and a walk through the
-changed screens on the simulator). Every **PENDING(…)** slot below is filled at the merge; nothing marked PENDING
-has happened yet.
+**STATUS: OPEN — re-fitted on 2026-11-19, after the badge fix was taken out and main was merged into the branch;
+brought up to date after the fourth review round.** Still ahead: taking in the MCP run (VX-981) once it has merged
+to main, a short test window on that code for the three new safety tests the fourth review asked for, the fifth
+and last review round, and the final gate (the whole phone test suite, the Mac tests over the shared code this
+run changed, and a walk through the changed screens on the simulator). Every **PENDING(…)** slot below is filled
+as it happens; nothing marked PENDING has happened yet.
 
 *How to read this file:* **VM-NNN** and **VX-NNN** are tickets on the board. A **test window** is a test run on the
 shared Mac, granted by the stage coordinator. The **review** is the cold code review, one fresh reviewer per
@@ -38,6 +39,7 @@ READER section is the short version, and its Closeout section has the detail.
   be reopened here." — does "here" read wrongly when the phone has no Unseal yet?), and whether the phone keeps a
   line at all after collecting a note into a gathering.
 - [ ] **Two canon lines I changed, for your eyes** — the section of that name below.
+- [ ] **Three canon lines I did not change, for your call** — the section of that name below.
 - [ ] **The tickets filed** — the list at the bottom.
 - [ ] PENDING(the single wave-1 phone install — only if this run is the last of the four mobile runs to merge: the
   device build from merged main, and a paste-ready kickoff a fresh session can run with you, per
@@ -171,6 +173,22 @@ no more:
   own layout, an UNFORCED read is already placed — a measurement, not a recipe." — the badge measurement, and
   that the first fix built on it still failed on the jump road; VM-17's run owns the rule.
 
+## Three canon lines I did not change, for your call
+
+The fourth review found three lines in `notes/SurfaceContracts.md` that no longer match what shipped or what you
+ruled. None is this run's line, so all three are left as they are; a ticket for them is in the list at the bottom.
+
+1. **The Finish confirm's words.** The book settings sheet's line quotes the confirm as "N waiting at the door will
+   be dismissed". Both platforms show "N waiting at Arrivals will be dismissed." (re-worded under your R-17y-2
+   ruling). Old: 'the confirm carries "N waiting at the door will be dismissed" only when N > 0'. New: 'the
+   confirm carries "N waiting at Arrivals will be dismissed." only when N > 0'.
+2. **The flushed blur's mark (P-849-5).** The Takes line still ends "(PROVISIONAL P-849-5, QUESTIONS #274;
+   VX-849)". You ratified it at QUESTIONS #274 addendum 2 ("P-849-5 RATIFIED as built"). Old: "(PROVISIONAL
+   P-849-5, QUESTIONS #274; VX-849)". New: "(QUESTIONS #274; VX-849)".
+3. **The fenced delete-at-open's mark (P-849-4).** The Library protection line still says "— PROVISIONAL P-849-4,
+   QUESTIONS #274; VX-443)". You ratified it at the same addendum ("P-849-4 RATIFIED as built"). Old: "—
+   PROVISIONAL P-849-4, QUESTIONS #274; VX-443)". New: "— QUESTIONS #274; VX-443)".
+
 ## The evidence, in a few lines
 
 - **Before the merge:** every one of the eight fixes and every review fix was shown failing on the old code and
@@ -186,6 +204,8 @@ no more:
 - **The re-applied fixes, proved again on the merged code:** against main's versions of the undo and Trash files,
   exactly the six tests that should fail did fail (44 tests ran), and on the branch they pass; then this run's
   tests and the wings run's over the same screens — 283 tests — all passed.
+- PENDING(the short test window for the fourth review's three new tests, on the code after the MCP run is taken
+  in: each shown failing against the old faces, then passing).
 - PENDING(gate 1: the whole phone test suite on the merged code — its result, with the caret test as the one
   expected failure).
 - PENDING(gate 2: the Mac tests over the shared code this run changed — its result).
@@ -199,8 +219,16 @@ meant to catch — plus small fixes, all applied and proved. The second round fo
 read the editor findings and found one major point: the callout colours and comment marks share the badges' old
 rule (now VM-239). It also corrected how far the snap-back reaches — an ordinary typed letter can be caught by it
 too — and that correction is in the section on VM-24. The same round set the shape of the badge fix, which was
-built exactly and then failed its window. A fourth round is owed; with the badge fix gone, it reads the back-out,
-the merge and the undo fix re-applied. PENDING(ladder round 4: its outcome).
+built exactly and then failed its window. The fourth round read the back-out, the merge and the undo fix
+re-applied, and found nothing wrong in them. Its one major point is about the next merge: the sizes-and-look run
+(VM-47) changes the same lines on four phone screens, and taking its side of those lines would quietly bring back
+three of this run's fixes' old faces — the date chip that waits for the title to change, "smart" on the new-book
+sheet, and a note's list of books without "(archived)" and with Diverge on a gathering — with none of this run's
+tests noticing. So three new tests now watch those faces directly, and a line-by-line map of what must survive
+goes to the stage coordinator for the other runs. Its five small points are applied: one more test is shown
+failing on the old code in the same test window, sentences are brought up to date, three canon lines wait for your
+call (the section below), the walk's steps are re-worded, and a VoiceOver note goes to VM-218. A fifth round is
+owed, the last under your cap of five. PENDING(ladder round 5: its outcome).
 
 ## What a later reader would otherwise trip on
 
@@ -250,7 +278,8 @@ Tickets filed:
 - [ ] VM-239 (High, Bug, Todo): callout colours, their glyphs and comment marks stand away from their own blocks on a long note; joins VM-17's run.
 - [ ] PENDING(id) (Low, Bug, Todo): the Archive room may show "Nothing archived." before its list loads (the Trash's old flash).
 - [ ] PENDING(id) (Low, Bug, Todo): a book's contents may show "No notes in this book yet." before its list loads.
-- [ ] PENDING(id, or a line on VM-218) (Low, Bug, Todo): Book Details' name row hides the book's name from VoiceOver.
+- [ ] PENDING(id, or a line on VM-218) (Low, Bug, Todo): Book Details' name row and the note's date chip hide what they show from VoiceOver (the book's name; the note's day).
 - [ ] PENDING(id, or a line on VM-156) (Low, Bug, Todo): pressing Unarchive twice quickly in Book Details shows a refusal under the book the first press unarchived.
 - [ ] PENDING(id) (Low, Debt, Backlog): a core comment still describes the shelf's retired pin order.
 - [ ] PENDING(id, only if your answer to call 2 is that neither platform offers it) (Low, Bug, Backlog): the Mac's book chip offers Diverge on a gathering's row, then refuses.
+- [ ] PENDING(id) (Low, Debt, Backlog): three lines in `notes/SurfaceContracts.md` that no longer match — the Finish confirm quoted "at the door", and two marks you ratified still saying PROVISIONAL (P-849-4, P-849-5); they sit on three different screens, so this may become more than one ticket.
