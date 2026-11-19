@@ -447,17 +447,23 @@ struct PhoneMenuRow: View {
     var glyph: String?
     var tone: PhoneActTone = .ink
     let tokens: VoiceTokens
+    /// The row's side inset, INSIDE its target (VM-53): a full-width list row
+    /// (Settings) passes the gutter, so the whole row answers edge to edge
+    /// while its words sit at the gutter. 0 — a row inside a padded sheet.
+    var inset: CGFloat = 0
     let action: () -> Void
 
     init(
         _ title: String, detail: String? = nil, glyph: String? = nil,
-        tone: PhoneActTone = .ink, tokens: VoiceTokens, action: @escaping () -> Void
+        tone: PhoneActTone = .ink, tokens: VoiceTokens, inset: CGFloat = 0,
+        action: @escaping () -> Void
     ) {
         self.title = title
         self.detail = detail
         self.glyph = glyph
         self.tone = tone
         self.tokens = tokens
+        self.inset = inset
         self.action = action
     }
 
@@ -490,6 +496,7 @@ struct PhoneMenuRow: View {
                 Spacer(minLength: 0)
             }
             .padding(.vertical, PhoneMetrics.Space.s4)
+            .padding(.horizontal, inset)
         }
         .buttonStyle(PhoneMenuRowStyle(
             minHeight: Self.minHeight(hasGlyph: glyph != nil, hasDetail: detail != nil)))

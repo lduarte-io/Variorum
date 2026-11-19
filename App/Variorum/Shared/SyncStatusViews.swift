@@ -509,19 +509,21 @@ struct SyncStatusRow: View {
                     rowLabel(for: face.kind)
                 }
                 if !face.doors.isEmpty {
-                    HStack(spacing: 14) {
+                    // VM-53 (the VM-47 run, batch 5): the doors are the phone's
+                    // inline acts at 17 with 44 pt hit areas (they were 11.5 pt
+                    // plain words) — the press and disabled read are the
+                    // control's own, so no second dimming here.
+                    HStack(spacing: PhoneMetrics.Space.s16) {
                         ForEach(face.doors) { door in
                             Button {
                                 perform(door.act)
                             } label: {
                                 Text(style.chrome(door.label))
-                                    .font(style.tokens.small)
-                                    .foregroundStyle(style.tokens.accent)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(PhoneInlineActStyle(
+                                tokens: style.tokens, role: .control, alignment: .leading))
                             .accessibilityLabel(door.label)
                             .disabled(!door.enabled)
-                            .opacity(door.enabled ? 1 : 0.35)
                         }
                     }
                 }
@@ -534,7 +536,10 @@ struct SyncStatusRow: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .font(style.tokens.small)
+            // VM-53: the row's own line (the syncing and retrying lines carry
+            // no caption modifier of their own) in the phone's meta role — the
+            // Mac's 11.5 pt small slot never reaches the phone (sheet §A).
+            .phoneType(.meta, style.tokens)
             .foregroundStyle(style.tokens.ink)
             .padding(.vertical, 6)
         } else {
