@@ -118,15 +118,30 @@ struct RawSocket {
         return await HarnessWait.offPool { RawSocket.readToHangUp(fd) }
     }
 
-    /// The blocking read behind `readToHangUp()` (off the pool — its caller hops).
+    /// The blocking read behind `readToHangUp()` (off the pool — its caller hops):
+    /// whole lines until `read` returns 0, each `read` under the socket's own
+    /// receive bound; at most `HangUpRead.lineCap` lines.
     static func readToHangUp(_ fd: Int32) -> HangUpRead {
-        // F1-S SCAFFOLD (pin before fix): TODAY's verdict — the very next byte
-        // must be the end. The fix reads whole lines to EOF.
-        var byte: UInt8 = 0
-        let count = read(fd, &byte, 1)
-        if count == 0 { return HangUpRead(lines: [], ending: .eof) }
-        if count < 0 { return HangUpRead(lines: [], ending: errno == EAGAIN ? .boundPassed : .readError(errno)) }
-        return HangUpRead(lines: [], ending: .tornLine(Data([byte])))
+        var lines: [Data] = []
+        var pending = Data()
+        var buffer = [UInt8](repeating: 0, count: 4_096)
+        while true {
+            let count = buffer.withUnsafeMutableBytes { read(fd, $0.baseAddress, $0.count) }
+            if count < 0, errno == EINTR { continue }
+            if count < 0 {
+                let code = errno
+                return HangUpRead(lines: lines, ending: code == EAGAIN ? .boundPassed : .readError(code))
+            }
+            if count == 0 {
+                return HangUpRead(lines: lines, ending: pending.isEmpty ? .eof : .tornLine(pending))
+            }
+            pending.append(contentsOf: buffer[0..<count])
+            while let newline = pending.firstIndex(of: UInt8(ascii: "\n")) {
+                lines.append(Data(pending[pending.startIndex..<newline]))
+                pending = Data(pending[(newline + 1)...])
+                if lines.count > HangUpRead.lineCap { return HangUpRead(lines: lines, ending: .tooManyLines) }
+            }
+        }
     }
 
     func close() { Darwin.close(fd) }
