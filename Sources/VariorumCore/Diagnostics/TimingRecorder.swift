@@ -244,11 +244,24 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
     /// stale (counted, never recorded).
     @discardableResult
     public func end(_ series: Series) -> Double? {
+        end(series, countingUnmatched: true)
+    }
+
+    /// `end` for a moment that closes a span only when one is waiting — the
+    /// keyboard rises for many reasons and ends a tap's span only after a tap;
+    /// a first paint ends the Open press's span only after an Open press.
+    /// Nothing open is the ordinary case here, so it is not counted.
+    @discardableResult
+    public func endIfOpen(_ series: Series) -> Double? {
+        end(series, countingUnmatched: false)
+    }
+
+    private func end(_ series: Series, countingUnmatched: Bool) -> Double? {
         guard isEnabled else { return nil }
         let now = clock()
         let (recorded, signpost) = state.withLock { s -> (Double?, OSSignpostIntervalState??) in
             guard let open = s.pending.removeValue(forKey: series) else {
-                s.unmatchedEnds += 1
+                if countingUnmatched { s.unmatchedEnds += 1 }
                 return (nil, nil)
             }
             let elapsed = now > open.start ? now - open.start : 0

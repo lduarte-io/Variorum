@@ -658,6 +658,7 @@ final class AppSession {
     /// is already gone — nothing was lost, because the flush landed the text
     /// and the next leaving tries again.
     func savepointOnLeaving(_ postID: String) async {
+        AppTiming.savepointAttempted() // VM-65 (inert on the Mac — `AppTiming`)
         // The EXISTING coordinator, never a minted one: a post no surface
         // opened has nothing pending by construction, and minting here would
         // cache a coordinator — and, on the Mac, a quit registration — for a

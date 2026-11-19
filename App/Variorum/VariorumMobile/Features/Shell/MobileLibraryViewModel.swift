@@ -315,9 +315,17 @@ final class MobileLibraryViewModel {
     /// default).
     func startAll() async {
         do {
-            for try await items in session.database.observeLibrary(
-                sort: sort, direction: .desc, limit: listingLimit
-            ) {
+            // VM-65: `observeLibrary`'s own body (`observe { Queries.library }`),
+            // spelled out so its fetch can count its re-runs for the timing
+            // layer; the first delivery is "the Library ready".
+            let (sort, limit) = (sort, listingLimit)
+            var first = true
+            for try await items in session.database.observe({ db in
+                AppTiming.libraryFetched(bookless: false)
+                return try Queries.library(db, sort: sort, direction: .desc, limit: limit)
+            }) {
+                AppTiming.libraryDelivered(bookless: false, first: first)
+                first = false
                 all = items
             }
         } catch is CancellationError {
@@ -332,8 +340,10 @@ final class MobileLibraryViewModel {
         do {
             let limit = listingLimit
             for try await items in session.database.observe({ db in
-                try Queries.poolPosts(db, limit: limit)
+                AppTiming.libraryFetched(bookless: true) // VM-65
+                return try Queries.poolPosts(db, limit: limit)
             }) {
+                AppTiming.libraryDelivered(bookless: true, first: false) // VM-65
                 bookless = items
             }
         } catch is CancellationError {

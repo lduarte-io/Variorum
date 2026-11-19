@@ -26,7 +26,7 @@ import VariorumCore
 @main
 struct VariorumMobileApp: App {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var bootstrap = AppBootstrap()
+    @State private var bootstrap: AppBootstrap
     @State private var services: AppServices?
     /// The shell's shared routing state: the active editor (for the
     /// background flush) + the one voice authority (LK2).
@@ -49,6 +49,14 @@ struct VariorumMobileApp: App {
     private var roadRule27Owed: Bool {
         guard let standing = bootstrap.roadStanding, standing.faces.noKeyFileAnywhere != nil else { return false }
         return rule27SaidFor != ObjectIdentifier(standing)
+    }
+
+    /// VM-65: the timing layer turns on FIRST — before the bootstrap is built,
+    /// because building it begins opening the store, and the open's own marks
+    /// must land (`MobileTiming.start`).
+    init() {
+        MobileTiming.start()
+        _bootstrap = State(initialValue: AppBootstrap())
     }
 
     /// The lobby's voice comes from the DEVICE preference, not the store —
@@ -249,10 +257,20 @@ struct VariorumMobileApp: App {
             if case .ready(let session) = bootstrap.state {
                 savepoint = { postID in await session.savepointOnLeaving(postID) }
             }
-            mobileScenePhaseChanged(
+            // VM-65: a leaving of the app — counted (its savepoint tries are
+            // tallied) and the timing record written NOW, then again once the
+            // leaving's work is done (a kill in the background loses nothing).
+            if phase == .background { MobileTiming.appLeaving() }
+            let leaving = mobileScenePhaseChanged(
                 phase, editors: shellRouter.editors, sync: services?.sync,
                 quickNote: shellRouter.quickNote, savepoint: savepoint,
                 relock: relockCoordinator())
+            if phase == .background, let leaving {
+                Task {
+                    await leaving.value
+                    MobileTiming.persist()
+                }
+            }
         }
     }
 

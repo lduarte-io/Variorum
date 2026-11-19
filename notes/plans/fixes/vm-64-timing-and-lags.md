@@ -185,9 +185,21 @@ hold at this branch's base `21747b9de`: `MobileWriteView.swift` 143-226, `Mobile
 | Piece | State |
 |---|---|
 | P1 — the brain + headless tests (Core `Diagnostics/`) | DONE — `TimingStats` · `TimingRecorder` · `TimingReport`; `swift test --filter TimingRecorderTests` 24/24 in 1 suite green (headless, no stage) |
-| P2 — the catalog, the one recorder, persistence glue (`Shared/AppTiming.swift`) | NOT-STARTED |
-| P3 — the marks (phone + Shared sites) | NOT-STARTED |
-| P4 — the readout + the Settings row | NOT-STARTED |
+| P2 — the catalog, the one recorder (`Shared/AppTiming.swift`) + `endIfOpen` in the brain | DONE (this commit) — brain 25/25 |
+| P3 — the marks (phone + Shared sites) | DONE (this commit) — phone Debug `build-for-testing` green, no warning in a touched file; the walk PENDING |
+| P4 — the readout + the Settings row | DONE (this commit) — face PENDING the walk |
+| P4b — **survival reworked to the author's sharpening (below)**: per-build tables in a file in the app's container, deferred saves off the timed path, the previous build's table on the readout, since-days | IN-PROGRESS — the UserDefaults persistence in this commit is superseded by it |
+
+**The author's sharpening (relayed by the orchestrator mid-batch, 2026-11-19; she will NOT run the readout tonight — "leave
+it in the handoff bundle for me to do later"; the BEFORE build may live on her phone for days, the AFTER build installed
+over it much later):** (1) the statistics PERSIST across a full quit and an install-in-place — durations and counts only,
+bounded, local, outside the store, in the app's own container; O(1) per mark; no write on the path it times (batched or
+deferred; a crash loses at most the unsaved tail); (2) samples kept PER BUILD (her words name the bundle's build number plus
+the short version for display); a new build never blends into the old; the previous build's table stays readable on the
+readout under this build's, Copy exports both each headed by its build; Reset clears this build's table only (what clears
+the older one: simple, PROVISIONAL); (3) the readout says since when each table has collected (the day of its first sample)
+and how many samples each span holds. Brain tests for the per-build keying, the bound, and the round-trip through the
+persisted form.
 | P5 — builds: phone Debug `build-for-testing`, phone Release `build`, Mac `build-for-testing` | NOT-STARTED |
 | P6 — stage window (GO from the orchestrator): phone suites + the simulator walk + captures | NOT-STARTED |
 | P7 — closeout in §7; the BEFORE commit named here | NOT-STARTED |

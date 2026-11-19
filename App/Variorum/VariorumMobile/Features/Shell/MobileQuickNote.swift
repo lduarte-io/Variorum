@@ -880,6 +880,7 @@ final class MobileQuickNoteModel {
     /// nothing navigates onto a note whose words are still in the box.
     /// `file()` carries the whole rule.)*
     func open() {
+        AppTiming.boxOpenPressed() // VM-65: the press her lag 2 is measured from
         Task { [weak self] in
             guard let self else { return }
             if let id = await self.file() { self.pendingOpen = id }
@@ -928,6 +929,12 @@ final class MobileQuickNoteModel {
     /// itself. **A leaving that fails keeps her text and says why.**
     @discardableResult
     private func file() async -> String? {
+        // VM-65: a filing is timed only when it completes — the box let go of
+        // a note it filed (the `minted` road's end); every other road out
+        // discards the timing.
+        let timing = AppTiming.boxFilingStarted()
+        var filed = false
+        defer { AppTiming.boxFilingEnded(timing, filed: filed) }
         guard postID != nil || mints else {
             // An empty (or whitespace-only) box that never minted: there
             // is nothing to keep and nothing to file.
@@ -1050,6 +1057,7 @@ final class MobileQuickNoteModel {
         }
         reset()
         handOffCount += 1
+        filed = true
         return minted
     }
 
@@ -1181,6 +1189,9 @@ struct MobileQuickNoteBox: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 8)
         .onChange(of: focused) { _, isFocused in
+            // VM-65: the timing layer's "tap the box" — waiting for a keyboard
+            // only when one is not already up.
+            if isFocused { AppTiming.boxFocused(keyboardAlreadyUp: MobileTiming.keyboardIsUp) }
             // Her 2026-08-30 ruling needs the SHELF to know: the two
             // regions are sized from this, so focus has to leave the box.
             model.setFocused(isFocused)

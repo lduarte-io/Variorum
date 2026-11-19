@@ -219,13 +219,19 @@ final class AutosaveCoordinator {
         var firstError: Error?
         for (variantID, entry) in batch.sorted(by: { $0.key < $1.key }) {
             defer { inFlight.remove(variantID) }
+            // VM-65: the wake-ups a save sets off are counted from BEFORE the
+            // write (its re-fetches can start before this resumes); inert on
+            // the Mac (`AppTiming`).
+            AppTiming.autosaveWillWrite()
             do {
                 try await runner.run { ops in
                     try ops.autosave(
                         variantID, text: entry.text, charDelta: entry.charDelta,
                         expectedText: entry.expectedText)
                 }
+                AppTiming.autosaveWrote()
             } catch {
+                AppTiming.autosaveRefused()
                 if var newer = pending[variantID] {
                     newer.charDelta += entry.charDelta
                     // VX-683 B: the refused text never landed, so the newer

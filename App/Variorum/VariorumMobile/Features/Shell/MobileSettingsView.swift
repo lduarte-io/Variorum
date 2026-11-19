@@ -55,6 +55,9 @@ struct MobileSettingsView: View {
     /// arming after a relaunch.
     @State private var traceArmed = false
     @State private var tracePresented = false
+    /// VM-65: the timing readout's sheet (always recording on the phone — no
+    /// arming; the door only reads).
+    @State private var timingPresented = false
     // (The Encryption Explained restore row's state — pre-13x F2 — left
     // with the row at 13s-b U1b, R-13s-37.)
     #if DEBUG
@@ -290,6 +293,20 @@ struct MobileSettingsView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 4)
             .accessibilityLabel("Open the edit trace")
+            // VM-65 (PROVISIONAL P-65-1): the timing readout — her moments'
+            // numbers, before and after every speed fix. Release-live, like the
+            // edit trace beside it.
+            Button {
+                timingPresented = true
+            } label: {
+                Text(tokens.chromeLabel(MobileTimingCopy.door))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            .accessibilityLabel("Open the timing readout")
 
             #if DEBUG
             Divider()
@@ -387,6 +404,9 @@ struct MobileSettingsView: View {
         }
         .sheet(isPresented: $tracePresented) {
             MobileEditTraceView(tokens: tokens)
+        }
+        .sheet(isPresented: $timingPresented) {
+            MobileTimingView(tokens: tokens)
         }
         .onAppear { traceArmed = MobileEditTrace.isArmed }
         #if DEBUG

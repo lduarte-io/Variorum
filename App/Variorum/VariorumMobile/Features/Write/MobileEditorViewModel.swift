@@ -193,6 +193,7 @@ final class MobileEditorViewModel {
         debounce: Duration = .milliseconds(500),
         sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
     ) {
+        AppTiming.editorBuilt() // VM-65: builds ÷ arrivals > 1 is audit F 2D's twin graph
         self.session = session
         self.postID = postID
         // S3 ladder, round-1 BLOCKER: the ONE per-post coordinator (the N3
@@ -579,6 +580,7 @@ final class MobileEditorViewModel {
 
     /// One authoritative load (first paint + deterministic tests).
     func loadOnce() async {
+        AppTiming.noteProjectionLoaded() // VM-65: a whole-note read
         do {
             let value = try await session.database.read { [postID] db in
                 (projection: try Queries.takesProjection(db, post: postID),
@@ -666,7 +668,16 @@ final class MobileEditorViewModel {
 
     private func observeTakesProjection() async {
         do {
-            for try await value in session.database.observeTakes(postID) {
+            // VM-65: `observeTakes`'s own body (`observe { takesProjection }`),
+            // spelled out so its fetch can count itself — every run, the first
+            // and each re-run on a write anywhere — for the timing layer.
+            var first = true
+            for try await value in session.database.observe({ [postID] db in
+                AppTiming.noteProjectionFetched()
+                return try Queries.takesProjection(db, post: postID)
+            }) {
+                AppTiming.noteProjectionDelivered(first: first)
+                first = false
                 // A delivery is a SIGNAL, never surface-rewrite authority
                 // (S3 ladder, MAJOR 3 — the shared policy's delivery arm).
                 ingest(value, fromDelivery: true)
@@ -795,6 +806,7 @@ final class MobileEditorViewModel {
         case .initialRender:
             renderFull(new, preserveTail: false)
             loaded = true
+            MobileTiming.noteRendered() // VM-65: the note's text is on screen one frame on
         case .deferUntilClean:
             pendingProjection = new
         case .forcedFullRender:
@@ -1436,6 +1448,7 @@ final class MobileEditorViewModel {
     /// adopts cleanly instead of deferring against a dirty buffer).
     func refreshTakesFromStore() async {
         await autosave.flushNow()
+        AppTiming.noteProjectionRefreshed() // VM-65: a whole-note read
         guard let fresh = try? await session.database.read({ [postID] in
             try Queries.takesProjection($0, post: postID)
         }) else { return }

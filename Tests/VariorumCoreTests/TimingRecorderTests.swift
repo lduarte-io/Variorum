@@ -152,6 +152,25 @@ struct TimingRecorderTests {
         #expect(timing.end(.openToNote) == 7)
     }
 
+    /// `endIfOpen`: a moment that only sometimes closes a span (the keyboard
+    /// rising) records when a span waits, and is silent — not an unmatched
+    /// end — when none does. A stale begin is still dropped.
+    @Test func endIfOpenRecordsAWaitingSpanAndIsSilentOtherwise() {
+        let clock = HandClock()
+        let timing = recorder(clock: clock)
+        #expect(timing.endIfOpen(.tapToKeyboard) == nil)
+        #expect(timing.snapshot().unmatchedEnds == 0)
+        timing.begin(.tapToKeyboard, staleAfter: .seconds(30))
+        clock.advance(ms: 280)
+        #expect(timing.endIfOpen(.tapToKeyboard) == 280)
+        timing.begin(.tapToKeyboard, staleAfter: .seconds(1))
+        clock.advance(ms: 5_000)
+        #expect(timing.endIfOpen(.tapToKeyboard) == nil)
+        let snap = timing.snapshot()
+        #expect(snap.abandoned == 1 && snap.unmatchedEnds == 0)
+        #expect(snap.stats(.tapToKeyboard)?.retained == [280])
+    }
+
     @Test func aCancelledSpanRecordsNothing() {
         let clock = HandClock()
         let timing = recorder(clock: clock)
