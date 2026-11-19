@@ -27,7 +27,10 @@ import Testing
 /// · byte-different but canonically-equal text is listed by the read and
 ///   committed by neither op (the read is a superset, never a subset);
 /// · the narrowed op's statements scale with the takes listed, the whole op's
-///   with the note.
+///   with the note;
+/// · and one GUARD (green by design, not a pin — the ladder's round 1, finding
+///   1): a take another writer dirties between the read and the turn is not
+///   written by that ask, stays owed, and the next ask writes it.
 @Suite("VM-71 — a leaving's savepoint, read first, written for exactly the takes owed")
 struct LeavingSavepointTests {
 
@@ -204,6 +207,53 @@ struct LeavingSavepointTests {
             #expect(try db.fetchInt(
                 "SELECT COUNT(*) FROM commit_point WHERE variant_id = ?", [foreign.variant.id]) == 0,
                     "a take of another note is never written by this note's leaving")
+        }
+    }
+
+    // MARK: The one-ask gap, and what bounds it — a GUARD
+
+    /// **A GUARD of the bound, never a pin** (the VM-64 ladder, round 1,
+    /// finding 1 — the reviewer's call: arm (a)). Green by design: it fixes no
+    /// bug and has no red-on-old side. The phone's leaving asks the store first
+    /// (the read, on a reader) and the runner after (the turn, its own write
+    /// transaction), so a take ANOTHER writer dirties between the two — the sync
+    /// engine's apply writes straight through the writer, which a direct
+    /// `UPDATE` stands in for here — is not written by THAT ask. What this holds
+    /// is the bound the ladder accepted: the take stays owed (its text differs
+    /// from its last savepoint), the next ask's read lists it, and the next ask
+    /// writes it, holding the text it holds then. (Her own typing is never in
+    /// the gap: the leaving's flush lands it before the read, in the same task.)
+    @Test("GUARD — a take another writer dirties between the read and the turn is the next ask's")
+    func aTakeDirtiedBetweenTheReadAndTheTurnIsTheNextAsks() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "note", profile: .blog)
+            let edited = try ops.seedBlock(in: post.id, text: "her words")
+            let other = try ops.seedBlock(in: post.id, text: "a second take")
+            _ = try ops.closeAutoCommit(post.id)  // left before: both savepointed once
+            try ops.autosave(edited.variant.id, text: "her words, edited", charDelta: 8)
+
+            let listed = try db.read { try Queries.leavingSavepointCandidates($0, containerID: post.id) }
+            #expect(listed == [edited.variant.id], "the read lists the take she edited")
+
+            // The gap: another writer dirties the second take, straight to its row.
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE variant SET working_text = ? WHERE id = ?",
+                    arguments: ["a second take, changed on another device", other.variant.id])
+            }
+
+            let written = try ops.closeAutoCommit(post.id, takes: listed)
+            #expect(written.map(\.variantId) == [edited.variant.id], "this ask writes what its read listed")
+            #expect(written.map(\.text) == ["her words, edited"])
+
+            // The bound: still owed, listed by the next read, written by the next ask.
+            let next = try db.read { try Queries.leavingSavepointCandidates($0, containerID: post.id) }
+            #expect(next == [other.variant.id], "the dirtied take stays owed")
+            let nextWritten = try ops.closeAutoCommit(post.id, takes: next)
+            #expect(nextWritten.map(\.variantId) == [other.variant.id])
+            #expect(nextWritten.map(\.text) == ["a second take, changed on another device"])
+            #expect(try db.read { try Queries.leavingSavepointCandidates($0, containerID: post.id) }.isEmpty,
+                    "and then nothing is owed")
         }
     }
 
