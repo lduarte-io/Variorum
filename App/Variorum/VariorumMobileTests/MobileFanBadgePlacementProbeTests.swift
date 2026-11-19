@@ -55,9 +55,9 @@
 //          every fanned block meets it at least once across the walk, and on
 //          each road (i′) asked at least one badge. These say "the probe did
 //          not reach…": a red there is the probe's, never VM-17's.
-//  (1), (i), (i′) or (ii) red ⇒ VM-17 is real (stop and report before any
-//  product line — the record's arm). All green ⇒ hollow: this stays as the
-//  guard.
+//  VM-17 IS REAL (window (3): (i), (i′), (ii) red, M5 = M5b) and this is its
+//  PIN: red on the pre-fix chrome (the `:211`/`:206-209` cites above are that
+//  chrome's), green on batch D's fix (round 3's called shape, S1–S11).
 //  The cost note that rode beside it (VM-179's numbers) left with the trace
 //  instruments; its numbers are in the record, its code in history
 //  (`a570d3960`).

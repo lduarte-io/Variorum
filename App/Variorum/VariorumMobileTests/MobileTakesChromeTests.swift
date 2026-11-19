@@ -112,6 +112,84 @@ private func tailReservation(_ view: MobileEditorTextView, at location: Int) -> 
     -(governingStyle(view, at: location)?.tailIndent ?? 0)
 }
 
+/// VM-17's truth reads (batch D): the first-line fragment at a surface
+/// offset read UNFORCED (`options: []` — the read lays nothing out), its
+/// top in the text view's own (content) coordinates and whether TextKit has
+/// laid it out. nil = no fragment there.
+@MainActor
+private func unforcedFirstLine(
+    _ view: MobileEditorTextView, atOffset offset: Int
+) -> (top: CGFloat, laidOut: Bool)? {
+    guard let tlm = view.textLayoutManager,
+          let cm = tlm.textContentManager,
+          let location = cm.location(tlm.documentRange.location, offsetBy: offset)
+    else { return nil }
+    var result: (CGFloat, Bool)?
+    tlm.enumerateTextLayoutFragments(from: location, options: []) { fragment in
+        result = (
+            view.textContainerInset.top + fragment.layoutFragmentFrame.minY,
+            fragment.state == .layoutAvailable)
+        return false
+    }
+    return result
+}
+
+/// Whether TextKit has laid out the first fragment at a surface offset —
+/// read unforced; no fragment reads as not laid out.
+@MainActor
+private func isLaidOut(_ view: MobileEditorTextView, atOffset offset: Int) -> Bool {
+    unforcedFirstLine(view, atOffset: offset)?.laidOut ?? false
+}
+
+/// An overlay she could see: in the text view, not hidden, not faded out.
+@MainActor
+private func isDrawn(_ overlay: UIView, in view: MobileEditorTextView) -> Bool {
+    overlay.superview === view && !overlay.isHidden && overlay.alpha > 0.01
+}
+
+/// VM-17's two hosted pins mount the way `MobileFanBadgePlacementProbeTests`
+/// does — a window on the scene, shown, never key, no first responder
+/// planted — so TextKit's viewport is the page's real 700 pt (windowless,
+/// the container's keyboard guide collapses — `MobileTypewriterRoomTests`
+/// and `MobileBlockListTests` record it — and these pins read the viewport).
+@MainActor
+private func makeHostedSurface(
+    _ session: AppSession, postID: String
+) async -> (model: MobileEditorViewModel, surface: MobileWriteSurfaceView, window: UIWindow) {
+    let (model, surface) = await makeSurfaceEditor(session, postID: postID)
+    let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+    let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+    let window = scene.map { UIWindow(windowScene: $0) }
+        ?? UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
+    window.frame = CGRect(x: 0, y: 0, width: 393, height: 700)
+    let controller = UIViewController()
+    controller.view.addSubview(surface)
+    window.rootViewController = controller
+    window.isHidden = false
+    await settleHosted(surface.textView)
+    return (model, surface, window)
+}
+
+/// The hosted pins' teardown (VM-19's rule: nothing in the window keeps the
+/// keyboard past the test).
+@MainActor
+private func unhost(_ window: UIWindow) {
+    window.endEditing(true)
+    window.isHidden = true
+    window.rootViewController = nil
+}
+
+/// The probe's settle: window layout passes, main-actor sleeps (display
+/// passes) and yields (main-queue hops).
+@MainActor
+private func settleHosted(_ view: UIView, turns: Int = 6) async {
+    for _ in 0..<turns {
+        (view.window ?? view).layoutIfNeeded()
+        try? await Task.sleep(for: .milliseconds(10))
+        await Task.yield()
+    }
+}
+
 // MARK: - The suite
 
 @MainActor
@@ -474,14 +552,21 @@ struct MobileTakesChromeTests {
 
     @Test func perTickRefreshResolvesOnlyNearViewportGeometry() async throws {
         // The S2 ladder round-1 MINOR-3 call-shape pin (P-8: per-tick
-        // cost ∝ realized rows, never the post). A long post with a
-        // fanned block at the top (in the viewport) and one far below:
-        // a `.nearViewport` pass — the layoutSubviews tick's scope —
-        // forces geometry ONLY for the near block, while the far block's
-        // gutter reservation survives untouched (storage truth — B3's
-        // mechanism needs no geometry to verify); a `.document` pass
-        // resolves both. On the old code every fanned block was
-        // layout-forced per tick.
+        // cost ∝ realized rows, never the post), RE-PINNED at VM-17
+        // (batch D; round 3's called shape S1–S4, S9 — `notes/plans/
+        // fixes/vm-78-ladder-round3.md`). A long post with a fanned block
+        // at the top (in the viewport) and one far below. VM-17's law: a
+        // takes overlay is drawn only from text TextKit has laid out in
+        // its own viewport — outside it nothing is read, nothing is
+        // forced and nothing stands. So EVERY scope (`.nearViewport`, the
+        // layoutSubviews tick's; `.document`, the full pass's) reads the
+        // near block only; the far block never gets a badge VIEW (one
+        // exists only once placed), is never layout-forced (its first
+        // fragment stays unlaid), and its gutter reservation stands all
+        // the same (storage truth — B3's mechanism needs no geometry to
+        // verify). RED-ON-OLD: the old full pass resolved the far badge
+        // through a forced read (a badge view, the fragment laid out, the
+        // far block in the resolved set).
         try await withEditorWorld { session, db in
             let seed = try await session.runner.run { ops in
                 let post = try ops.createPost(title: "long", profile: .blog)
@@ -506,11 +591,13 @@ struct MobileTakesChromeTests {
                 Issue.record("takes chrome not installed")
                 return
             }
-            // Both fanned blocks carry badges and tail reservations (full
-            // passes ran at load); the far one sits far outside the
-            // 700 pt viewport.
+            // Both fanned blocks carry tail reservations (storage truth,
+            // every pass); only the near one wears a badge — the far one
+            // sits far outside TextKit's viewport, so no badge view was
+            // ever made for it (VM-17: a view exists only once placed).
             #expect(chrome.badgeView(for: seed.near) != nil)
-            #expect(chrome.badgeView(for: seed.far) != nil)
+            #expect(chrome.badgeView(for: seed.far) == nil,
+                    "an off-viewport fan gets no badge view (VM-17 — nothing is placed outside TextKit's viewport)")
             let nearRange = try #require(model.rangeOfBlock(seed.near))
             let farRange = try #require(model.rangeOfBlock(seed.far))
             #expect(tailReservation(view, at: nearRange.location)
@@ -526,16 +613,146 @@ struct MobileTakesChromeTests {
             #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.near))
             #expect(!chrome.lastGeometryResolvedBlockIDs.contains(seed.far),
                     "a scroll tick must not force layout of far-off-screen fragments (P-8; TEXTKIT2 §2)")
-            #expect(chrome.badgeView(for: seed.far) != nil)
+            #expect(chrome.badgeView(for: seed.far) == nil,
+                    "a tick places nothing outside TextKit's viewport (VM-17)")
             #expect(tailReservation(view, at: farRange.location)
                     == MobileTakesChromeController.gutterWidth,
                     "the off-band reservation survives — storage truth, undisturbed by a tick")
 
-            // The full pass (every content/geometry input axis) resolves
-            // both — the scope discriminates, the vocabulary doesn't shrink.
+            // The full pass (every content/geometry input axis) shares the
+            // ONE geometry walk (VM-17, S4): it reads the near block and
+            // still never the far one — and leaves the far block's first
+            // fragment unlaid (the old full pass forced it).
             chrome.refresh(scope: .document)
             #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.near))
-            #expect(chrome.lastGeometryResolvedBlockIDs.contains(seed.far))
+            #expect(!chrome.lastGeometryResolvedBlockIDs.contains(seed.far),
+                    "the full pass reads nothing outside TextKit's viewport (VM-17, S4)")
+            #expect(!isLaidOut(view, atOffset: farRange.location),
+                    "the full pass forced the far block's layout (VM-17: nothing is forced outside the viewport; TEXTKIT2 §3)")
+            #expect(model.identityAuditFailures == 0)
+            #expect(!view.canaryFired)
+        }
+    }
+
+    /// VM-17 (batch D — round 3's called shape S2, S3, S9; `notes/plans/
+    /// fixes/vm-78-ladder-round3.md`): the peek MARKER and the PILL keep the
+    /// badge's law — a takes overlay is drawn only from text TextKit has
+    /// laid out in its own viewport. A flip on a fanned block far below the
+    /// fold makes NO marker view, shows NO pill (it stays alive for its
+    /// block, hidden) and forces no layout there; scrolled in by a layout
+    /// pass, the marker stands on its own block and the pill shows under
+    /// it. RED-ON-OLD: the old full pass made the far block's marker
+    /// through a forced union (laying the block out) and showed the pill
+    /// wherever that estimate put it.
+    @Test func aFarFlipDrawsNoMarkerOrPillUntilItsBlockScrollsIn() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "far flip", profile: .blog)
+                _ = try ops.newBlock(
+                    in: post.id, text: "The opening block.", at: .end, registeringUndo: false)
+                let filler = String(
+                    repeating: "A steady filler paragraph that wraps across the "
+                        + "surface a few times to build real height. ",
+                    count: 5)
+                for _ in 0..<40 {
+                    _ = try ops.newBlock(in: post.id, text: filler, at: .end, registeringUndo: false)
+                }
+                let far = try ops.newBlock(
+                    in: post.id, text: "The far fanned block.", at: .end, registeringUndo: false)
+                for _ in 0..<4 {
+                    _ = try ops.newBlock(in: post.id, text: filler, at: .end, registeringUndo: false)
+                }
+                let farTake = try ops.branchVariant(far.block.id, from: far.variant.id)
+                try ops.autosave(farTake.id, text: "Far, the other way.", charDelta: 5)
+                return (postID: post.id, far: far.block.id)
+            }
+            let (model, surface, window) = await makeHostedSurface(session, postID: seed.postID)
+            defer { unhost(window) }
+            let view = surface.textView
+            let chrome = try #require(view.takesChrome, "takes chrome installed")
+            // The pill's fade must not decide this pin (its timer is real).
+            chrome.pillFadeDelay = 600
+            #expect(view.contentSize.height > 2_000, "the post must dwarf the viewport")
+            let far = try #require(model.rangeOfBlock(seed.far)).location
+
+            // The flip, far below the fold.
+            model.takes.flip(blockID: seed.far, forward: true)
+            #expect(model.takes.isPeeking(seed.far), "the flip peeked (this pin's own premise)")
+            #expect(chrome.markerView(for: seed.far) == nil,
+                    "a peek far below the fold gets no marker view (VM-17 — nothing is placed outside TextKit's viewport)")
+            #expect(!chrome.pillIsShowing,
+                    "the pill does not show while its block is outside TextKit's viewport (VM-17)")
+            #expect(!isLaidOut(view, atOffset: far),
+                    "the flip's chrome pass forced the far block's layout (VM-17: nothing is forced outside the viewport)")
+
+            // Scroll it in: unanimated steps of 0.8 of a page, ONE layout
+            // pass each (the end re-read live — TK2's estimate moves it),
+            // until the far block's first line is laid out on screen.
+            var offset: CGFloat = 0
+            var arrived: (top: CGFloat, laidOut: Bool)?
+            for _ in 0..<400 {
+                let end = max(
+                    0, view.contentSize.height + view.adjustedContentInset.bottom - view.bounds.height)
+                if offset >= end - 0.5 { break }
+                offset = min(offset + 0.8 * view.bounds.height, end)
+                view.setContentOffset(CGPoint(x: 0, y: offset), animated: false)
+                (view.window ?? view).layoutIfNeeded()
+                if let line = unforcedFirstLine(view, atOffset: far), line.laidOut,
+                   line.top >= view.bounds.minY, line.top < view.bounds.maxY {
+                    arrived = line
+                    break
+                }
+            }
+            let line = try #require(
+                arrived,
+                "the walk never brought the far block on screen (a red here is this pin's own, never VM-17's)")
+            let marker = try #require(
+                chrome.markerView(for: seed.far),
+                "the far block is on screen and peeked, but wears no marker (VM-17)")
+            #expect(isDrawn(marker, in: view), "the marker is drawn once its block is on screen")
+            // The marker's frame is the block's union outset by 2 pt above.
+            #expect(abs(marker.frame.minY - (line.top - 2)) <= 1,
+                    "the marker stands off its own block: marker top \(marker.frame.minY), block line \(line.top) (VM-17)")
+            #expect(chrome.pillIsShowing, "the pill shows once its block is on screen")
+            #expect(chrome.pillBlockID == seed.far)
+            if let pill = chrome.pillView {
+                #expect(pill.frame.minY >= marker.frame.maxY - 1,
+                        "the pill rides UNDER its block: pill \(pill.frame.minY), marker bottom \(marker.frame.maxY)")
+            }
+            #expect(model.identityAuditFailures == 0)
+            #expect(!view.canaryFired)
+        }
+    }
+
+    /// VM-17 (batch D — round 3's S1 end rule; a GUARD, green on both
+    /// sides by design): a fanned LAST block that displays an EMPTY take
+    /// starts at the very end of the text, where a strict viewport bound
+    /// would never count it inside; it still wears its badge while the end
+    /// of the note is on screen. If this is red on the OLD chrome too, that
+    /// case never drew a badge: the record says so, this guard is dropped
+    /// and the rule kept (the final call's own instruction).
+    @Test func anEmptyFannedLastBlockWearsItsBadgeWhileTheNotesEndIsOnScreen() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "empty last", profile: .blog)
+                _ = try ops.newBlock(
+                    in: post.id, text: "A short opening line.", at: .end, registeringUndo: false)
+                let last = try ops.newBlock(in: post.id, text: "", at: .end, registeringUndo: false)
+                let take = try ops.branchVariant(last.block.id, from: last.variant.id)
+                try ops.autosave(take.id, text: "A take with words.", charDelta: 18)
+                return (postID: post.id, last: last.block.id)
+            }
+            let (model, surface, window) = await makeHostedSurface(session, postID: seed.postID)
+            defer { unhost(window) }
+            let view = surface.textView
+            let chrome = try #require(view.takesChrome, "takes chrome installed")
+            #expect(model.slot(for: seed.last)?.hasFan == true, "the guard's premise: the last block is fanned")
+            let range = try #require(model.rangeOfBlock(seed.last))
+            #expect(range.length == 0 && range.location == view.textStorage.length,
+                    "the guard's premise: the empty last block starts at the very end of the text — range \(range), length \(view.textStorage.length)")
+            let badge = chrome.badgeView(for: seed.last)
+            #expect(badge.map { isDrawn($0, in: view) } == true,
+                    "an empty fanned last block on screen wears no badge (VM-17's S1 end rule)")
             #expect(model.identityAuditFailures == 0)
             #expect(!view.canaryFired)
         }
@@ -556,7 +773,10 @@ struct MobileTakesChromeTests {
     /// geometry-forced the far block — run red on that tree before the
     /// fix landed. The write-free and no-exclusions halves are GUARDS
     /// against regrowth, not the discriminator (recorded per the
-    /// hallucination guard).
+    /// hallucination guard). RE-PINNED at VM-17 (batch D, round 3's S9):
+    /// the far block wears no badge VIEW after the keystroke (one exists
+    /// only once placed inside TextKit's viewport) — red on the old chrome,
+    /// whose load-time full pass made one for every fan.
     @Test func aKeystrokesChromePassIsEditScopedAndWriteFreeWhenNothingMoved() async throws {
         try await withEditorWorld { session, db in
             let seed = try await session.runner.run { ops in
@@ -612,9 +832,12 @@ struct MobileTakesChromeTests {
             // resolve; the FAR block is never layout-forced by a keystroke…
             #expect(!chrome.lastGeometryResolvedBlockIDs.contains(seed.far),
                     "a keystroke must never force far-off-screen layout (FB2-1; P-8)")
-            // …its chrome survives (badge frame content-anchored,
-            // reservation storage truth)…
-            #expect(chrome.badgeView(for: seed.far) != nil)
+            // …it wears no badge view at all (VM-17, re-pinned at batch D:
+            // a view exists only once placed, and the far block was never
+            // in TextKit's viewport), while its reservation — storage
+            // truth — survives…
+            #expect(chrome.badgeView(for: seed.far) == nil,
+                    "an off-viewport fan gets no badge view (VM-17 — nothing is placed outside TextKit's viewport)")
             let farAfter = try #require(model.rangeOfBlock(seed.far))
             #expect(tailReservation(view, at: farAfter.location)
                     == MobileTakesChromeController.gutterWidth)
