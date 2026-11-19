@@ -229,7 +229,13 @@ struct MobilePhoneControlsTests {
             let probe = Probe()
             try await hosted(
                 VStack(alignment: .leading, spacing: 0) {
-                    PhoneSheetHeader("Tags", tokens: tokens, done: {})
+                    // The title voiced as every site hands it (`chromeLabel`
+                    // or `path`): the header draws and speaks its title
+                    // exactly as given, so a path title passes through
+                    // un-re-voiced. (This case first built it raw — "Tags" —
+                    // and looked for the voiced "tags", which Terminal
+                    // could never draw: the batch-2 window's red.)
+                    PhoneSheetHeader(tokens.chromeLabel("Tags"), tokens: tokens, done: {})
                         .onGeometryChange(for: CGSize.self) { $0.size } action: { probe.size = $0 }
                     Text("content")
                 }
