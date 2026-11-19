@@ -81,6 +81,18 @@ actor MCPSocketTransport: Transport {
     /// VX-933: writes handed to the writer and not yet ended. While any is,
     /// every write goes behind it (never the fast road), so the order holds.
     private var handedOver = 0
+    /// **VX-951: the opening's answer, reported** (the VX-981 run, batch 3 —
+    /// `MCPAnnounceGate`'s first half). The replayed opening frame (the
+    /// `initialize` the handshake decided on) is a request; `openingID` is its
+    /// id, read with the SDK's own `ID` decoding, kept until a frame this
+    /// transport sends ANSWERS it (a response — no method — carrying that id).
+    /// That frame's write ended, `onOpeningAnswered` is called, once: from then
+    /// on nothing this connection is sent can precede the answer on the wire.
+    /// Only frames sent BEFORE the answer are read for their id (one, for every
+    /// client the door has met — the answer is the first frame the SDK sends);
+    /// nil once answered, or when no report was asked for.
+    private var openingID: MCP.ID?
+    private var onOpeningAnswered: (@Sendable () -> Void)?
     #if DEBUG
     /// TEST-ONLY (VX-933): run in the gap between a frame's first bytes (the
     /// fast road) and its rest's hand-over — the write lock free, the stream
@@ -89,10 +101,15 @@ actor MCPSocketTransport: Transport {
     func setMidFrameProbeForTesting(_ probe: (@Sendable () -> Void)?) { midFrameProbe = probe }
     #endif
 
-    init(fd: Int32, replay: [Data] = []) {
+    init(fd: Int32, replay: [Data] = [], onOpeningAnswered: (@Sendable () -> Void)? = nil) {
         self.fd = fd
         self.replay = replay
         self.step = Self.writeStep(fd)
+        // VX-951: an opening with no id the SDK could echo is one the SDK never
+        // answers as a request either — nothing to report.
+        let opening = onOpeningAnswered == nil ? nil : replay.first.flatMap { Self.identity(of: $0)?.id }
+        self.openingID = opening
+        self.onOpeningAnswered = opening == nil ? nil : onOpeningAnswered
         self.logger = Logger(label: "variorum.mcp.socket", factory: { _ in SwiftLogNoOpLogHandler() })
         var made: AsyncThrowingStream<Data, Swift.Error>.Continuation!
         self.stream = AsyncThrowingStream { made = $0 }
@@ -144,9 +161,45 @@ actor MCPSocketTransport: Transport {
         guard isConnected else { throw MCPError.transportError(POSIXError(.ENOTCONN)) }
         var framed = data
         framed.append(UInt8(ascii: "\n"))
-        if let failure = await deliver(framed) {
+        // VX-951: taken BEFORE the write (a send entering meanwhile reads no
+        // id), reported once the write has ended.
+        let answered = answersTheOpening(data)
+        let failure = await deliver(framed)
+        answered?()
+        if let failure {
             throw MCPError.transportError(POSIXError(POSIXErrorCode(rawValue: failure) ?? .EIO))
         }
+    }
+
+    /// **VX-951** — `data` is the answer to the opening (a response carrying
+    /// its id): the report is taken (once), to be called once the frame is
+    /// written. nil for every other frame, and for every frame after the answer
+    /// (nothing is decoded then).
+    private func answersTheOpening(_ data: Data) -> (@Sendable () -> Void)? {
+        guard let opening = openingID,
+              let frame = Self.identity(of: data), frame.method == nil, frame.id == opening
+        else { return nil }
+        openingID = nil
+        defer { onOpeningAnswered = nil }
+        return onOpeningAnswered
+    }
+
+    /// A frame's id and method, decoded exactly as the SDK decodes a message's
+    /// id (`MCP.ID` — a `null` id is the empty string, as the SDK reads and
+    /// echoes it); nil when the frame is no JSON object.
+    private struct Identity: Decodable {
+        let id: MCP.ID?
+        let method: String?
+        private enum CodingKeys: String, CodingKey { case id, method }
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = container.contains(.id) ? try container.decode(MCP.ID.self, forKey: .id) : nil
+            method = try container.decodeIfPresent(String.self, forKey: .method)
+        }
+    }
+
+    private static func identity(of frame: Data) -> Identity? {
+        try? JSONDecoder().decode(Identity.self, from: frame)
     }
 
     /// **VX-933 — every write's one road.** While nothing of this connection

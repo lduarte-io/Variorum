@@ -337,6 +337,22 @@ public final class MCPServerHost: @unchecked Sendable {
     /// thread; set before `start()`.
     var startStepProbe: ((StartStep) -> Void)?
     enum StartStep: Equatable, Sendable { case swept, bound }
+
+    /// TEST-ONLY (VX-951 — the VX-981 run, batch 3): run by every session this
+    /// host serves INSIDE the SDK's `initialize` hook, just after the connection
+    /// named itself and before its answer is written — the window a grant change
+    /// landed in. Set before the connection opens.
+    var namingProbe: ((MCPSession) async -> Void)?
+
+    /// TEST-ONLY (VX-951): told every announce-gate event each session hears,
+    /// as it hears it (before the gate does). Set before the connection opens.
+    var gateEventProbe: (@Sendable (MCPSession, MCPAnnounceGate.Event) -> Void)?
+
+    /// TEST-ONLY (VX-951): the round a grants-fingerprint change runs, run now —
+    /// a grant change landing exactly where a pin needs it (inside a probe).
+    func announceRoundForTesting() async {
+        await announceGrantsChanged()
+    }
     #endif
 
     /// **VX-394 — say every live connection's end NOW, before the store goes**
@@ -669,6 +685,15 @@ public final class MCPServerHost: @unchecked Sendable {
         #if DEBUG
         // VX-776: the failing reader's seam (test-only).
         session.handlerReadProbe = { [weak self] in try self?.handlerReadProbe?() }
+        // VX-951: the naming window's and the gate's seams (test-only).
+        session.namingProbe = { [weak self, weak session] in
+            guard let self, let session else { return }
+            await self.namingProbe?(session)
+        }
+        session.gateEventProbe = { [weak self, weak session] event in
+            guard let self, let session else { return }
+            self.gateEventProbe?(session, event)
+        }
         #endif
         lock.withLock { sessions[session.id] = session }
         onConnectionsChanged?()
@@ -774,13 +799,19 @@ public final class MCPServerHost: @unchecked Sendable {
                 for try await _ in observed {
                     if first { first = false; continue }
                     guard let self else { return }
-                    let live = self.lock.withLock { Array(self.sessions.values) }
-                    for session in live { await session.announceToolsChanged() }
+                    await self.announceGrantsChanged()
                     self.onConnectionsChanged?()
                 }
             } catch {}
         }
         lock.withLock { observation = task }
+    }
+
+    /// **The round a grants-fingerprint change runs:** every live session is
+    /// asked to announce `tools/list_changed`.
+    func announceGrantsChanged() async {
+        let live = lock.withLock { Array(sessions.values) }
+        for session in live { await session.announceToolsChanged() }
     }
 
     /// Everything the tool list depends on, in one small value: the decided

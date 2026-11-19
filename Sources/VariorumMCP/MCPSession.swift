@@ -83,6 +83,22 @@ final class MCPSession: @unchecked Sendable {
     /// client already holds; nothing read). nil until the first list.
     private var lastListed: [Tool]?
 
+    // MARK: - The announce's gate (VX-951 — the VX-981 run, batch 3)
+
+    /// **This connection's announce gate** (`MCPAnnounceGate`, her R-981-3):
+    /// shut until the `initialize` answer is written AND the client is ready.
+    /// Guarded by `lock`.
+    private var announceGate = MCPAnnounceGate()
+
+    /// Hear one of the gate's events (the transport's report, the client's
+    /// `initialized`, its first served request).
+    private func hear(_ event: MCPAnnounceGate.Event) {
+        #if DEBUG
+        gateEventProbe?(event)
+        #endif
+        _ = lock.withLock { announceGate.hear(event) }
+    }
+
     /// The client's self-declared name, once `initialize` has run — and,
     /// VX-258, only once the connection IS that client: nil while its key
     /// waits for her OK, so a waiting connection never counts as the name's
@@ -451,10 +467,22 @@ final class MCPSession: @unchecked Sendable {
             }
         }
         if holding { lock.withLock { self.held = held } }
-        let transport = MCPSocketTransport(fd: fd, replay: [opening.firstFrame])
+        // VX-951: the transport reports the `initialize` answer once it is
+        // written — the gate's first half.
+        let transport = MCPSocketTransport(
+            fd: fd, replay: [opening.firstFrame],
+            onOpeningAnswered: { [weak self] in self?.hear(.initializeAnswered) })
         lock.withLock { self.transport = transport }
+        // VX-951: the client's `initialized` — the gate's second half (the SDK
+        // keeps no such state of its own, and answers nothing to it).
+        await server.onNotification(InitializedNotification.self) { [weak self] _ in
+            self?.hear(.clientInitialized)
+        }
         await server.withMethodHandler(ListTools.self) { [weak self] _ in
             guard let self else { return .init(tools: []) }
+            // VX-951 (b′): a client that lists without ever saying
+            // `initialized` has finished initializing all the same.
+            self.hear(.clientRequest)
             // VX-818 (F-15b (i)): while the library is locked, the list this
             // connection was last served — nothing read (a held one: none).
             if self.latch.isShut { return .init(tools: self.listedWhileLocked) }
@@ -477,6 +505,8 @@ final class MCPSession: @unchecked Sendable {
         }
         await server.withMethodHandler(CallTool.self) { [weak self] params in
             guard let self else { throw MCPError.internalError("The session ended.") }
+            // VX-951 (b′): so has a client that calls a tool.
+            self.hear(.clientRequest)
             // VX-818 (her R-818, A-809-20): THE LIBRARY IS LOCKED — checked at
             // the call door AHEAD OF EVERYTHING: no name, no waiting check (a
             // store read), no schema, no decision, nothing logged or spent.
@@ -560,6 +590,11 @@ final class MCPSession: @unchecked Sendable {
                 // observation as before). VX-818: a HELD connection names no
                 // one yet — its admission says so when it lands.
                 if !self.isHeld { self.onNamed() }
+                #if DEBUG
+                // VX-951's pins: the window between the naming and the
+                // answer's write, where a grant change can land.
+                await self.namingProbe?()
+                #endif
             }
             // VX-818: the library came back between this connection's hold and
             // now, so the host's resume may have passed it by — decide it here
@@ -698,6 +733,19 @@ final class MCPSession: @unchecked Sendable {
     /// TEST-ONLY (VX-776): the host's failing reader (`MCPServerHost.handlerReadProbe`),
     /// set once by the host before the session runs.
     var handlerReadProbe: (() throws -> Void)?
+
+    /// TEST-ONLY (VX-951): the host's `namingProbe`, run inside the SDK's
+    /// `initialize` hook just after this connection named itself — before the
+    /// answer is written. Set once by the host before the session runs.
+    var namingProbe: (() async -> Void)?
+
+    /// TEST-ONLY (VX-951): the host's `gateEventProbe`, told each gate event
+    /// as this session hears it, before the gate does. Set once by the host
+    /// before the session runs.
+    var gateEventProbe: ((MCPAnnounceGate.Event) -> Void)?
+
+    /// TEST-ONLY (VX-951): the gate as it stands.
+    var announceGateForTesting: MCPAnnounceGate { lock.withLock { announceGate } }
     #endif
 
     /// **VX-776 — the ONE seam in front of every store read the SDK handlers
