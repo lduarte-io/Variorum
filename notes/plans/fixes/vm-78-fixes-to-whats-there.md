@@ -87,9 +87,13 @@ DECISIONS ON IT (2026-11-19 09:00):**
   issue.
   **Its reach, as written up after the window (BATCH C, "VM-24 — the mechanism, its reach, and the options",
   `65fe3a114`):** by the code's own account and an earlier device capture, autocorrect, predictive replacement,
-  dictation and marked-text commits reach `storageDidEdit` without the gate; typing, Return, Tab and the markdown
-  acts are armed. What she would see when a widened report meets one of those roads: the word the keyboard just
-  put in snaps back, with a re-render flicker; stored text is never at risk. How often fixing widens the report
+  dictation and marked-text commits reach `storageDidEdit` without the gate. Return, Tab and the markdown acts arm
+  at the call; a typed character is asked about but can land unarmed behind a keyboard transaction (E1 #50–#52 —
+  round 3's R3-F5 corrected the first reading, which had typing as armed). So ORDINARY TYPING is on this road
+  too in some keyboard transactions. What she would see when a widened report meets one of those roads: the
+  character or word just put in snaps back, with a re-render flicker; stored text is never at risk. For the
+  options this means: arming the visible roads cannot cover an arming spent before its edit lands, while routing
+  from the pre-fixing range does not depend on the arming at all. How often fixing widens the report
   on a device is unmeasured. This looks like one mechanism with VX-68 (the gate-less insertion watch row). So
   the held decision is a real one, and it leads the handoff.
 - **VM-19:** its pin is proved (red on the hide-only teardown at `615a12189`, green on the fix); the desync itself
@@ -113,7 +117,12 @@ closed with every finding dispositioned ("The ladder").
    are all green; VM-19's pin red-on-old and green.
 4. Any fix the arm calls for is written and built headless, then proved in a second short window. A product
    mechanism in the editor is reported, never fixed in passing (editor seam).
-5. The instruments' removal commit (round 1's F7) BEFORE any whole-target run.
+5. The instruments' removal BEFORE any whole-target run (round 1's F7): the three trace suites and the cost note
+   are out (`16c75a5bf`); `MobileFanBadgeSettleMeasureTests` and the decor reading leave in named commits too
+   (round 3's R3-F6, R3-F1). **The rule for the red probe:** `MobileFanBadgePlacementProbeTests` is VM-17's pin
+   and is red on the tip until batch D's fix lands. If that fix does NOT land in this run, the probe file leaves
+   the branch in a named commit VM-17's ticket cites — never a second standing red on main without the author's
+   word, never wrapped as a known issue.
 6. **Ladder round 3** — a fresh `fable-reviewer`, owed by round 1's F1 whatever round 2 found: it reads window
    (3)'s outcome and the removal, reading (i′) and its run, R2-N1's fix and its red/green, R2-F2's lines, and
    VM-16 re-landed (step 7) if that has happened by then. Cap: five rounds tonight, each further one earned by a
@@ -1593,11 +1602,11 @@ held; M3 forces the settle's write inside the transaction and nothing desyncs wi
 **The reach — which roads on her phone can deliver an edit to `storageDidEdit` UNARMED.** By reading the phone's code:
 | Road | Armed? | Evidence |
 |---|---|---|
-| Keyboard typing (a character key) | **Armed, as far as the evidence goes** — UIKit asks the delegate | her own iPhone (iOS 26.6) recorded `GATE … → armed` before ordinary keystrokes in the E1 capture (`notes/plans/mobile-round-2-crash-trace.md:8-24`); the editor's `insertText` override (`MobileEditorTextView.swift:1014-1020`) adds no gate of its own |
+| Keyboard typing (a character key) | **Asked, but not thereby armed when it lands** (round 3, R3-F5) | UIKit consults the delegate for a typed character, and the arming is spent at the first storage report that follows, whether or not that report is the keystroke (`MobileEditorViewModel.swift:1855-1856`). When the keyboard lands a transaction of its own first, the typed character is routed unarmed by `fallbackVerdict`: her iPhone recorded exactly that in ordinary use (E1 #50–#52 — armed at 178, a different edit at 177 rejected the arming, the insert at 178 "after 0 gates"; `notes/plans/mobile-round-2-crash-trace.md:8-24`). The editor's `insertText` override (`MobileEditorTextView.swift:1014-1020`) adds no gate of its own |
 | Return key | Armed by the product | `MobileMarkdownActs.handleReturnKey` arms before `super.insertText("\n")` (`MobileEditorTextView.swift:1016`; the arming named at `EditorEditRouting.swift:37-39`) |
 | Tab / ⇧Tab and the bar's markdown acts | Armed by the product | `performTabKey` calls `gateAllows` before `super.insertText("\t")` (`MobileEditorTextView.swift:1032-1034`); every act goes through `MobileMarkdownActs.inputReplace`, which calls `gateAllows` first, then `insertText`/`deleteBackward` (`MobileMarkdownActs.swift:38-75`) |
 | The product's programmatic slot/tail writes | Not routed at all | `programmaticReplace` sets `suppressEditProcessing` (`MobileEditorViewModel.swift:2107-2125`); `storageDidEdit` returns early for them (`:1837-1842`) |
-| Autocorrect and predictive replacement | **UNARMED — by the code's own account and her device's** | the model's header: system paths "never consult the gate (autocorrect, dictation, marked text)" (`MobileEditorViewModel.swift:24-31`); the identity note names "autocorrect via `replace(_:withText:)`" (`:13-16`); her 26.6 capture shows `#52 EDIT at 178 len 1 Δ+1 after 0 gates ⚠ gate-less` in ordinary use, and the device walk's legend reads gate-less edits as "just autocorrect and dictation, and it is expected" (`mobile-round-2-device-walk.md:154-155`) |
+| Autocorrect and predictive replacement | **UNARMED — by the code's own account** (the capture's `#52` line is the TYPED insert, row above — R3-F5) | the model's header: system paths "never consult the gate (autocorrect, dictation, marked text)" (`MobileEditorViewModel.swift:24-31`); the identity note names "autocorrect via `replace(_:withText:)`" (`:13-16`); the device walk's legend reads gate-less edits as "just autocorrect and dictation, and it is expected" (`mobile-round-2-device-walk.md:154-155`) |
 | Dictation | **UNARMED**, same sources | as above; the spike's dictation case was a proxy only (`Spike/SpikeScenarios.swift:657-669` — "the real path is a device item") |
 | Marked-text commits (the QWERTY candidate bar, CJK input) | **UNARMED**, same sources | as above (`:24-31`) |
 | The spelling "Replace…" menu | Not established | the phone draws no spelling road of its own (`MobileEditorTextView.swift:936-947` leaves spell-checking alone); the system's menu replace is UIKit's |
@@ -2001,6 +2010,36 @@ read the kept logs for window (5)'s red leg and F4's follow-up). Dispositions:
 **The ladder does not close on round 2** (round 1's F1): a further fresh round reads window (3)'s outcome and the
 instruments' removal, reading (i′) and its run, R2-N1's fix with its red and green, R2-F2's lines, and VM-16
 re-landed on main's message seam.
+
+### Round 3 — `vm-78-ladder-round3.md` (a fresh `fable-reviewer`; opened at tip `35ce90848`)
+
+**0 BLOCKER · 1 MAJOR · 5 MINOR · 3 NIT**, none against a product line this run changed (findings `117e8c047`,
+final calls `b7161468b`; none disputed, none FINDER-FIXES). It read window (3)'s outcome, the instruments' removal,
+reading (i′), R2-N1's fix, the VM-24 write-up, batch D's trace and the closeout drafts; its final calls also read
+the settle measurement's log. Dispositions:
+
+| Finding | Final call | What changes |
+|---|---|---|
+| R3-F1 MAJOR — the block decor (callout washes and glyphs, comment marks) shares the standing-frame rule and the forced helpers; unmeasured | CONFIRMED; the orchestrator's disposition taken | batch D stays the badge's (with its markers and pill); the decor gets a ticket carrying a MEASURED reading as its pin — its own test type, run alone in the fix's green window (red ⇒ the ticket starts with red on file; green ⇒ hollow for the decor), then out of the tree in a named commit; one comment line in `MobileBlockDecor.swift`, no decor code |
+| R3-F2 MINOR — three places where "in-band only, hide the rest" as worded falls short | CONFIRMED | they become the fix shape's same-pass re-read, "a nil viewport resolves nothing", and no amendment to reading 1 |
+| R3-F3 MINOR — the instrument's display-link fallback bug | CONFIRMED as a bug; no action | nothing was decided on the `link` moment; the instrument leaves |
+| R3-F4 MINOR — two readings the instrument did not take | WITHDRAWN | the branch `passEnd` was to split never occurred; every pass now ends with a re-read inside the layout pass, never on a hop |
+| R3-F5 MINOR — VM-24's reach was understated | CONFIRMED | the reach table's typing row and the live state reworded: a typed character can land unarmed; the options' consequence written; it leads the handoff |
+| R3-F6 MINOR — the steps to the gate pre-dated the second red test and the new instrument | CONFIRMED | live state step 5 names them and the rule for the red probe |
+| R3-N1, R3-N2 | CONFIRMED | a sentence that the pin test is unchanged since M5; the closeout drafts refreshed before the gate, with `grep -n PENDING notes/MobileSoul.md notes/SurfaceContracts.md` answering nothing as a merge precondition |
+| R3-N3 | CONFIRMED in part | the probe's header comment updated; the `fanEvery` tidy withdrawn so the pin's compiled bytes stay what M5 ran |
+
+**VM-17's fix shape is called** (round 3's "Final calls", written to be built from): geometry scoped to TextKit's
+viewport — no read begins outside it; a badge or marker view exists only once placed, is hidden with its frame
+kept when its block leaves the viewport, removed when its fan or peek dies; one geometry walk for every scope;
+and a second geometry walk in the same layout pass from a zero-size anchor subview's `layoutSubviews`, on the
+fresh viewport (the measured moment: after the text view's own layout, before anything is drawn). The settle
+measurement behind it: at that moment the unforced read equals the settled position in 118 of 118 band-fan reads
+(the ideal layout in all 28 on-screen ones), while the chrome's badge was off in 49 until it read again.
+
+**Round 4 is earned (a MAJOR) and owed anyway:** one fresh round reads batch D's fix against the shape, its
+windows, and VM-16 re-landed on main's message seam. The probe must be green again on the merged tree at the
+gate (the measured moment depends on the layout pass's order, and another wave-1 run works in the same file).
 
 ## Closeout
 
