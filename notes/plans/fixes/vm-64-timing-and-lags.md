@@ -821,8 +821,8 @@ orchestrator's word that the window ended. **No revert is in flight.**
 | S3b — part B's builder (a FRESH implementer, opus; the QUIET window ENDED by the orchestrator's word): main's `7629cf049` (the VX-981 run's merge) merged in, a merge commit, before any build; its three Core files read against this run's callers | DONE (`f850d1af4`) — the trial and the merge clean, no conflict in any file; the semantic check is §7 ▸ "Ladder round 2 — fix pass, second turn" ▸ "Part B" (no collision) |
 | S4 — the pass's FIRST compile: phone + Mac `build-for-testing` into `vm64-gate2` | DONE — both built at `74d91c666` (the merged tree; nothing but this record changes after it): phone `** TEST BUILD SUCCEEDED **`, 0 errors; Mac `** TEST BUILD SUCCEEDED **`, 0 errors; NO compile fix needed; no warning in a line this pass wrote |
 | S5 — the whole Core package, `swift test`, once, on the final tree | DONE — on `74d91c666`'s code (`e1e87dda0`'s tree; no code edit followed): `VariorumMCPTests` 746 tests in 139 suites passed · `VariorumCoreTests` 4,193 in 578 passed with 5 known issues · `StringsWorkbookTests` 32 in 4 passed — 4,971 in 721, no red; the 15 gated harnesses skipped (counted in N), the five known issues the baseline's |
-| S6 — the red-on-old phone build into `vm64-gate2-red` (the first turn's recipe plus arm (A)'s hunks; announced and committed before it; restored; `git status` / `git diff HEAD` empty) | **REVERT STARTING after this commit** — the recipe in §7 ▸ "Ladder round 2 — fix pass, second turn" ▸ "The builds", unchanged (no compile fix touched its files): `git diff 85762803a HEAD` over the six production files reversed with `git apply -R`; `MobileLibraryRowActsTests.swift` moved to the gitignored `App/Variorum/DerivedData/vm64-gate2-aside/`; the restore is `git checkout HEAD --` of those seven paths (the tree is committed, so that restore is safe) |
-| S7 — §7 ▸ "Ladder round 2 — fix pass" ▸ its "Second turn" part; the §5 rows flipped | IN-PROGRESS — §7 ▸ "Ladder round 2 — fix pass, second turn" written (`500c907b1`) with part B's results as PENDING slots (the compile fixes, the builds' verdicts, the whole Core package); filled and the rows flipped after part B. **The turn ENDS here under QUIET, owing S4–S6** |
+| S6 — the red-on-old phone build into `vm64-gate2-red` (the first turn's recipe plus arm (A)'s hunks; announced and committed before it; restored; `git status` / `git diff HEAD` empty) | DONE — **no revert is in flight; the tree is restored.** Announced at `b44622e62` and built there with the recipe exactly (`git diff 85762803a HEAD` over the six production files reversed; `MobileLibraryRowActsTests.swift` aside): `** TEST BUILD SUCCEEDED **`, 0 errors; restored by `git checkout HEAD --` of the seven paths, the aside folder removed, `git status --short` and `git diff HEAD --stat` both empty |
+| S7 — §7 ▸ "Ladder round 2 — fix pass" ▸ its "Second turn" part; the §5 rows flipped | DONE (this commit) — the section written by the second turn (`500c907b1`) with part B's results as PENDING slots; part B's builder filled them: §7 ▸ "… second turn" ▸ "Part B" (the merge and its semantic check, the builds, the whole-package counts, the products' SHAs), "Compile fixes" NONE, the stage commands (i)–(iv) unchanged (no test's name or count moved). The FOR A LATER READER and the gate/merge/round-3 `PENDING(…)` slots stay the orchestrator's. *(The second turn's text of this cell, kept: "IN-PROGRESS — … filled and the rows flipped after part B. The turn ENDS here under QUIET, owing S4–S6".)* |
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
@@ -3979,11 +3979,13 @@ and the drafts' bundle.
 
 ### Ladder round 2 — fix pass, second turn (implementer closeout)
 
-**Not done yet (first, by the record's rule):** part B — the pass's FIRST compile (phone and Mac `build-for-testing`
-into `App/Variorum/DerivedData/vm64-gate2/`), the whole Core package `swift test` once on the final tree, and the
-red-on-old phone build into `vm64-gate2-red/` — waits for the orchestrator's word that the QUIET window (from 15:13)
-has ended, so EVERY app-target line of this pass, the first turn's and this turn's, is still UNCOMPILED as this part is
-written, and no pin of the pass has run. No hosted run (the stage's). No line in `Sources/VariorumCore/Sync/`, `Server/`,
+**Not done (first, by the record's rule — rewritten at part B's close; part B is DONE, below):** NO PIN OF THE PASS HAS
+RUN — every hosted run is the orchestrator's stage window ((i)–(iv) below, from the products part B built); the pass's
+lines now COMPILE (phone and Mac) but are unproven by any run until then. The merge gate, the batches 6 + 7 walk and
+round 3 (if any) are the orchestrator's. *(The first text, kept: "part B — the pass's FIRST compile …, the whole Core
+package `swift test` once on the final tree, and the red-on-old phone build into `vm64-gate2-red/` — waits for the
+orchestrator's word that the QUIET window (from 15:13) has ended, so EVERY app-target line of this pass … is still
+UNCOMPILED as this part is written, and no pin of the pass has run.")* No line in `Sources/VariorumCore/Sync/`, `Server/`,
 custody/keychain code or `VariorumMobile/Features/Protection/`; no schema change; `MobileEditorViewModel.swift` untouched
 by the whole pass (`storageDidEdit`'s routing, `fallbackVerdict`, `EditorEditRouting` not opened); VM-55's `MobileLine.swift`
 gains exactly ONE line and no other VM-55 file is touched; no new user-facing copy; no shared ledger edited.
@@ -4017,10 +4019,84 @@ App/Variorum/Shared Sources` is empty); over the whole pass the one `Shared/` li
 `AppTiming.boxOpenFiledNothing` (its only caller `MobileQuickNote.swift`; on the Mac no caller, every mark one relaxed
 atomic load). The Mac build is owed with the phone's because of that line.
 
+#### Part B — the merge of main (VX-981), the first compile, the whole Core package, the red build (builder; a FRESH session)
+
+**Machinery honesty:** a third session, opus, fresh, briefed by the orchestrator after the QUIET window ended — the
+second turn's session had reached its context limit at `e3412bee4` with the tree clean and pushed; nothing was adopted
+from a dead tree. **Commits:** `f850d1af4` (the merge) · `74d91c666` (live status) · `e1e87dda0` (S4) · `b44622e62` (S5,
+and the revert announced before it started) · this closeout. **Every commit after `74d91c666` is this record alone**
+(`git diff --stat 74d91c666 HEAD` names only `notes/plans/fixes/vm-64-timing-and-lags.md`), so `74d91c666` IS the final
+code tree.
+
+**(1) Main's `7629cf049` merged in — `f850d1af4`, "Merge main (VX-981) into vm-64-timing-and-lags".** `git merge-tree`
+first (clean), then `git merge --no-ff 7629cf049` (a merge commit; never a rebase or squash); no conflict in any file,
+code or notes. `7629cf049` is a true merge on `eb18888db`, which the branch already held, so it brought the VX-981 branch
+alone: Core's `Operations/UndoStack.swift`, `Queries/MCPGrantQueries.swift`, `Queries/PrivateMarkQueries.swift`, the
+`VariorumMCP`/`VariorumMCPSocket` sources, their tests, the project file (`MARKETING_VERSION` 1.4 → 1.5, both Mac
+configurations — nothing else in it), the Mac app's MCP door and its Private-mark faces (`Core/Views/` `MCPNoteIndicator`,
+`PrivateMark`, `PrivateMarkView`; the Library catalog, the Shelf, the book panel and settings sheet; the tutorial
+seeder), `ReleaseNotes-1.5.md`, thirteen Mac test files (`VariorumTests/` — the whole Mac target's count at the merge
+gate rises by them), and VX-981's notes. Nothing under `App/Variorum/Shared/`, `VariorumMobile/` or
+`VariorumMobileTests/`. `git merge-base --is-ancestor 7629cf049 HEAD` holds.
+
+**(2) The semantic check — NO COLLISION.** Read: `git diff eb18888db 7629cf049 --` the three Core files.
+- **`UndoStack.swift` against the phone's undo door** (`VariorumMobile/Features/Write/MobileUndoDoor.swift`, hooked to
+  the keystroke fence by this run): VX-981's change is ADDITIVE — a `Walk` value, `newestEntryID`,
+  `entryIDs(newerThan:)`, `addWalkObserver`/`removeWalkObserver`, and one `notifyWalk(…)` call after `notifyChange()` at
+  the end of `undo(with:)` and `redo(with:)`, outside the lock. The door calls exactly `pendingUndoWarning(with:)`,
+  `undo(with:)` and `redo(with:)`: their signatures, their `Outcome`, the failed-inverse-stays rule and the change
+  observer are unchanged. The fence hook is the DOOR's own `inFlight` latch (raised before the awaited runner call,
+  lowered in its `defer`, `model?.structuralFlightChanged()` on each flip) — it reads nothing of the stack's, so the
+  added notify (synchronous, on the runner's thread, before the call returns) cannot move the latch's timing. The only
+  walk observer in the tree is the Mac's `MCPDoor` (`Features/MCP/MCPDoor.swift:395`); on the phone the walk list is
+  empty.
+- **`PrivateMarkQueries.swift`**: `privateBookMarks` / `privateBookMarksDrawn` change their RETURN TYPE (`Set<String>` →
+  `[String: PrivateBookMark]`) and `PrivateMark` gains `journalEntry`/`viaJournals`/`journalFenced`/`isFenced`
+  (`isPrivate` keeps its meaning, "by the mark"). Nothing this run wrote, and nothing under `Shared/` or `VariorumMobile/`,
+  calls any of them (grep: no match) — the Mac's callers came with the merge, and both builds below compile them.
+- **`MCPGrantQueries.swift`**: the journal legs factored into named fragments (`journalEntryLegForNote`,
+  `journalMemberLegForNote`, `fenceMemberRowSQL`), the same SQL text; nothing this run calls.
+
+**(3) The first compile — both builds GREEN, NO compile fix.** Built at `74d91c666` (the merged tree):
+- phone — `xcodebuild build-for-testing -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+  -derivedDataPath DerivedData/vm64-gate2`: `** TEST BUILD SUCCEEDED **`, 0 errors; no warning in any of the pass's 13
+  files (the cold build's 153 distinct warnings are all in files the pass did not touch). Product:
+  `vm64-gate2/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`.
+- Mac — `-scheme Variorum -destination 'platform=macOS'`, same folder: `** TEST BUILD SUCCEEDED **`, 0 errors; no warning
+  in `Shared/AppTiming.swift`. Product: `vm64-gate2/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`.
+- Logs and stamps beside the folders (gitignored): `DerivedData/vm64-gate2-phone-build.log` / `-phone.sha`,
+  `vm64-gate2-mac-build.log` / `-mac.sha`.
+
+**(4) The whole Core package — `swift test`, once, on the final code tree** (run at `e1e87dda0`, whose code is
+`74d91c666`'s; `DerivedData/vm64-gate2-swifttest.log` / `.sha`): **4,971 tests in 721 suites, no red** —
+`VariorumMCPTests` 746 tests in 139 suites passed · `VariorumCoreTests` 4,193 tests in 578 suites passed with 5 known
+issues · `StringsWorkbookTests` 32 tests in 4 suites passed. Against this branch's baseline (4,913 in 710: 703/130 ·
+4,178/576 · 32/4) that is **+58 tests and +11 suites, every one VX-981's** (+43/+9 in the MCP product, +15/+2 in Core —
+`UndoStackWalkTests`, `JournalPrivateFacesTests` and the rest of its diff, +59 −1 `@Test` lines and +11 `@Suite` lines
+in `git diff eb18888db 7629cf049 -- Tests`); this pass changed no Core file and no Core test. The five known issues, by
+name, the baseline's: `theGuardBitesOnALockOffTheVaultsDescriptorAndAStaleCopy()` (4 — `PairInvariantPinsTests.swift:218`
+×2, `:223` ×2) and `theResidualCastleAlwaysAskWithOnlyAPassphraseAtTheLobbyHealsAtTheWords()` (1 —
+`PairCatchUpTests.swift:408`). Skipped (counted in N): the 15 gated harness tests and 8 gated suites, the same as the
+baseline log's.
+
+**(5) The red-on-old phone build — GREEN, the tree restored.** Announced in the live status and committed
+(`b44622e62`) before it started; the recipe in "The builds" below, run exactly — no compile fix touched any file it
+reverses, so it still reverses exactly the pass's behaviour: `git diff 85762803a HEAD --` the six production files
+(`MobileLibraryViewModel.swift`, `MobileLibraryView.swift`, `MobileLine.swift`, `MobileQuickNote.swift`,
+`Shared/AppTiming.swift`, `MobileTimingView.swift`; 145 insertions, 7 deletions — `git log 85762803a..HEAD` over them
+names only the pass's four code commits `64af6d64a` `6b6c288b1` `28dc98ac5` `686a07d13`, the VX-981 merge touching none)
+reversed by `git apply -R`; `MobileLibraryRowActsTests.swift` moved to the gitignored `DerivedData/vm64-gate2-aside/`;
+built at `b44622e62` with that reversal into `DerivedData/vm64-gate2-red`: `** TEST BUILD SUCCEEDED **`, 0 errors (the
+four pin files compiled in it; `MobileLibraryRowActsTests` not); restored by `git checkout HEAD --` of the seven paths
+and the aside folder removed — `git status --short` and `git diff HEAD --stat` both EMPTY afterwards. Product:
+`vm64-gate2-red/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.1-arm64-x86_64.xctestrun`; log and stamp
+`DerivedData/vm64-gate2-red-build.log` / `-red.sha`. (`MobileTiming.swift`'s rename stays unreversed, as the recipe
+says: it changes no behaviour.)
+
 #### Compile fixes to the first turn's lines
 
-PENDING(part B — the first compile). If any is needed it is minimal, to the intent the first turn's responses and
-closeout state, and listed here line by line.
+**NONE.** The pass's first compile (part B (3)) built every line of both turns — the first turn's and the second's —
+with 0 errors on the phone and the Mac and no warning in a line the pass wrote; no line was edited to make it build.
 
 #### The pins, and what each build should show (the whole pass)
 
@@ -4039,7 +4115,8 @@ closeout state, and listed here line by line.
 | the rest of `MobileLibraryPagingRulesTests`, `MobileTimingTests`, `MobileNoteOpenOnceTests` | unchanged | green | green |
 
 **Run headless:** nothing — no Core file changed in either turn, so no Core suite is touched by the pass and none ran
-under QUIET. The whole Core package: PENDING(part B).
+under QUIET. The whole Core package: GREEN on the final tree, 4,971 tests in 721 suites, the five known issues the
+baseline's (part B (4)).
 
 #### The builds (part B — when the orchestrator says the QUIET window has ended; on the final tree)
 
@@ -4071,12 +4148,17 @@ cd ~/dev/variorum-vm-64 && git checkout HEAD -- $files App/Variorum/VariorumMobi
 rm -rf App/Variorum/DerivedData/vm64-gate2-aside
 git status --short; git diff HEAD --stat   # both must be empty
 ```
-Results: PENDING(part B) — each build's verdict, its error count and any warning in a touched line.
+Results (part B (3)–(5)): phone `vm64-gate2` `** TEST BUILD SUCCEEDED **` 0 errors · Mac `vm64-gate2` `** TEST BUILD
+SUCCEEDED **` 0 errors · `swift test` 4,971 in 721, no red, 5 known issues · phone `vm64-gate2-red` `** TEST BUILD
+SUCCEEDED **` 0 errors, the tree restored (both checks empty) — no warning in a touched line; no compile fix.
 
 #### The hosted commands — FINAL (the orchestrator's stage; the GO's claim line and UDID fill `<simulator-udid>`; boot fresh, settle, run, shut down)
 
-Products: `App/Variorum/DerivedData/vm64-gate2/` (phone + Mac, the fix) and `vm64-gate2-red/` (phone, this pass's
-production hunks reversed) — PENDING(part B). Poll for the Swift Testing verdict line, not `** TEST EXECUTE **`.
+Products: `App/Variorum/DerivedData/vm64-gate2/` (phone + Mac, the fix — built at `74d91c666`, the final code tree)
+and `vm64-gate2-red/` (phone, this pass's production hunks reversed — built at `b44622e62` with the six files reversed to
+`85762803a` and `MobileLibraryRowActsTests.swift` aside); every commit after `74d91c666` is this record alone. **No
+compile fix changed any test's name or count, so (i)–(iv) stand exactly as written below** (TYPE names, zsh arrays,
+the expected reds). Poll for the Swift Testing verdict line, not `** TEST EXECUTE **`.
 
 (i) **The red-on-old run**, ONE invocation from `vm64-gate2-red`:
 ```
@@ -4152,4 +4234,8 @@ decided (a listing made honest after a Put back is the Mac's own rule, `LibraryC
    liveness grant's `refresh: false` at a first open (no read of its own folded in); arm 2 telling two from one.
 4. **Finding 2 is OPEN under VM-226**, and the fence suite still has no world that runs the editor's live observation
    (`makeSurfaceEditor` calls `loadOnce()` only) — the drafts' residuals row 48.
-5. **The uncompiled state** until part B's builds: the first compile of both turns' lines.
+5. **The uncompiled state** until part B's builds: the first compile of both turns' lines. *(Part B: compiled — phone
+   and Mac green with no compile fix; the red build green; the whole Core package green on the merged tree. What
+   remains unproven is every run: (i)–(iv).)*
+6. **VX-981's merge** (part B (1)–(2)): `UndoStack`'s walk observers beside the phone's undo door's fence hook, and
+   `privateBookMarks`' new return type — checked, no collision; read it again if a hosted red lands near either.
