@@ -156,7 +156,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
 | 6 · VM-69 · VM-70 | BUILT · **READY for the stage** | see the batch 6 block; products `vm64-b6` at `24fa9a5e2`, red `vm64-b6-red` | first commit `f0e2e696c` (the midpoint review's finding 1) |
-| 7 · VM-71 | NOT-STARTED | — | — |
+| 7 · VM-71 | IN-PROGRESS | see the batch 7 block | live status first; no revert in flight |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
@@ -563,6 +563,64 @@ open, though the masthead shows only the note's own rows; the two sheets already
 | P8 — closeout in §7 + READY | DONE (this commit) — §7 batch 6; READY: the stage groups (i)–(iv) are in §7 batch 6 ▸ "The stage window"; every run PENDING |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b6/` and `vm64-b6-red/` (gitignored).
+
+### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
+
+**No revert is in flight.** The red-on-old proof will be a second build of the pins against the batch's production files
+at this batch's base, made only AFTER the fix is committed and pushed, announced here first, restored with
+`git checkout HEAD --` and a clean `git status`.
+
+**Base:** `dfdd94b5a` (batch 6 BUILT and waiting for its window; its three release pins in `MobileNoteOpenOnceTests` are
+in this batch's stage commands).
+
+**Audit F re-verified on this tree** (the lines moved, the shape did not — all TRACED as written):
+- **1D** — a pop: `MobileWriteScreen.onDisappear` (`MobileWriteView.swift:210-232`) → `teardown()` (the flush, a runner
+  write per dirty take) → `AppSession.savepointOnLeaving` (`Shared/AppSession.swift:660-692`) → `runner.run {
+  closeAutoCommit }`. `closeAutoCommit` (`Sources/VariorumCore/Operations/Operations+Variant.swift:311-320`) opens ONE
+  write transaction and, in `autoCommitDirtyVariants` (`:388-411`), decodes EVERY live unlocked take of the note with its
+  whole `working_text` and runs one last-commit read per take (`isDirty`, `:710-720`) — O(note), holding the ONE serial
+  runner (`Shared/OperationsRunner.swift:17-31`) and the writer, whether or not anything changed. The box's mint
+  (`MobileQuickNote.swift:704-735`, `runner.run { importPost }`) queues behind it.
+- **6C** — a Castle backgrounding: `mobileScenePhaseChanged(.background)` (`MobileShellRouter.swift:306-363`) →
+  `performBackgroundFlush` (`:208-277`) asks for every registered note's savepoint (`:256-261`) → the network round
+  (`:275-276`) → `relock.didLeaveTheScreen()` (`:351`) → `bootstrap.lock()` → `lockOnNewRoad`
+  (`Shared/AppBootstrap.swift:1477-1499`): `runWillLock` → `mobileWillLock` (`Features/Protection/MobileRelock.swift:80-96`)
+  asks AGAIN (`:91-93`), then `state = .opening` (`:1485`) removes the tree and each mounted screen's `onDisappear` asks a
+  THIRD time, racing the pool close (`:1490-1495`). The BEFORE table: 3 (Standard 1, a pop 1). The lock road alone (Lock
+  now, the crossings' `runWillLock`) asks twice: `mobileWillLock`, then the teardown's `onDisappear`.
+- **6B** — the network round inside the grant before the lock: as written; NOT this batch's (wave 2, VM-103).
+
+**The settled design — the dedupe is `closeAutoCommit`'s own rule, read OFF the runner:**
+- **Core, additive (the Mac calls neither):** `Queries.leavingSavepointCandidates(db, containerID:)` — the takes a
+  leaving savepoint would write (`closeAutoCommit`'s exact predicate: live, unlocked takes under the note's live
+  placements whose text differs from their last savepoint; none when the note is gone, sealed, or the cadence does not
+  save on leaving), in SQL, as a READ; and `Operations.closeAutoCommit(_:takes:)` — `closeAutoCommit`'s own checks
+  re-run inside one transaction for exactly the listed takes (each re-verified: still live, unlocked, placed in the note,
+  dirty), so its rows equal `closeAutoCommit(_:)`'s whenever the list covers the dirty set. `closeAutoCommit(_:)` and
+  `autoCommitDirtyVariants` are untouched.
+- **`AppSession.savepointOnLeaving`, the phone's branch only** (`#if os(macOS)` keeps the Mac's statements exactly):
+  flush (unchanged) → the candidates on a READER (never the runner, never the writer) → nothing owed: done, the runner
+  never asked → owed: ONE runner turn writing exactly those takes. A closed store (`StoreLockedError`) skips quietly
+  (nothing can be written there — today's attempt failed and was swallowed); any other read failure falls back to
+  today's full `closeAutoCommit`.
+- **Who asks is unchanged on every road** — the lock does not move: no line in `MobileRelock.swift`,
+  `MobileShellRouter.swift`, `MobileWriteView.swift`, `MobileQuickNote.swift` or `AppBootstrap.swift`. The repeats are
+  answered by the store: a later ask in the same leaving finds the takes already savepointed and asks the runner for
+  nothing; a write that landed in between (hers or a sync round's) is still savepointed, exactly as today.
+- **The timing mark** (`AppTiming.savepointAttempted`) moves to the runner ask on the phone. On the old tree every
+  `savepointOnLeaving` call reached the runner, so before and after it counts the same quantity — runner turns for a
+  leaving savepoint (said here, per the record's rule on marks).
+
+| Piece | State |
+|---|---|
+| P1 — this live status | DONE (this commit) |
+| P2 — Core: the candidates read + the narrowed op + headless pins (equivalence, re-verification, every refusal) + a gated measurement | NOT-STARTED |
+| P3 — the phone's branch of `savepointOnLeaving` + the mark | NOT-STARTED |
+| P4 — the pins: perf suite (Castle 3 → 1 asserted, the lock road 2 → 1, note-leaving and Standard guards, the 100k leaving's writer statements, the runner-hold probe, the box's first mint after the 100k leaving); a company-safe suite for hazards (a)–(c) | NOT-STARTED |
+| P5 — builds: Core `swift test` (touched + savepoint suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b7/`; the red-on-old phone build into `vm64-b7-red/` (revert announced first) | NOT-STARTED |
+| P6 — closeout in §7 + READY | NOT-STARTED |
+
+DerivedData: `App/Variorum/DerivedData/vm64-b7/` and `vm64-b7-red/` (gitignored).
 
 ### Orchestrator's stage results (the PENDING lines above and in §7 are settled here; pipelined run — the orchestrator ran each window from the batch's built products)
 
