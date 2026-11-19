@@ -783,7 +783,7 @@ The record of what was checked and changed: §7 ▸ "The merge of main (VM-55) a
 | M7 — (f) the fence and the hold read on the merged tree (no change unless (b) needs a routing line) | DONE — the merge brought exactly VM-55's lines into the four seam files; no change |
 | M8 — step 3: the `MobileHerPathsPerfTests` registry comment corrected (comment only) | DONE (this commit) |
 | M9 — the whole Core package, `swift test`, once, at the end of the edits | NOT-STARTED |
-| M10 — phone and Mac `build-for-testing`, cold, into `vm64-gate` | NOT-STARTED |
+| M10 — phone and Mac `build-for-testing`, cold, into `vm64-gate` | DONE at `f4068b3cf` — phone (`generic/platform=iOS Simulator`) `** TEST BUILD SUCCEEDED **`, 0 errors, first try; Mac (`platform=macOS`) `** TEST BUILD SUCCEEDED **`, 0 errors. No warning in a line the merge or this session wrote (the two nearest are pre-existing: `MobileStructural.swift:122`'s unused `intra`, 2026-08; VM-55's `MobileUndoDoorTests` `try`s). Logs `App/Variorum/DerivedData/vm64-gate-{phone,mac}-build.log` (local) |
 | M11 — the finding-2 red build into `vm64-gate-red` (announced and committed before the revert; restored; `git status` / `git diff HEAD` empty) | NOT-STARTED |
 | M12 — §7's section, the hosted commands, the report | NOT-STARTED |
 
