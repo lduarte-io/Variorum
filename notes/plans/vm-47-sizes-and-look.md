@@ -461,14 +461,14 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 4.3 | W-009 — the pushed screens' top edge: each screen's system bar traced from the code (table in §6), then the fix (design PENDING the external facts on iOS 26's hidden-bar swipe-back) | DONE (the trace, this commit) — §6's table: every pushed screen's top edge from the code; the fix DEFERRED with owners (P-47-20: the system bar kept — the back door and both swipe-backs; the mockups keep that row) — the external facts from one Sonnet lookup (read-only); the walk captures every top edge |
 | 4.4 | Both schemes `build-for-testing` into `DerivedData/vm47-b4` (the Mac only if `Shared/` changed); the walk's capture list; READY for the stage | DONE — phone and Mac `build-for-testing` into `DerivedData/vm47-b4` GREEN at `35fc0a461`; the walk driver + runbook (gitignored `VM47Walk4Driver.swift`, `walk4.zsh` — `test40_bar`, 73 captures into `b4/`, device `vm47-walk4`) built GREEN into `DerivedData/vm47-walk4` from this tree; READY for the stage (the window's lines are §6 "Batch 4 — results") |
 | 4.5 | §6 "Batch 4 — results" (the bar with pointers and sizes, where it shows and why, each pushed screen's top edge before/after, the `MobileShellView.swift` line ranges changed, tests PENDING, PROVISIONALs in §5, self-assessment) | DONE (this commit) — §6 "Batch 4 — results"; P-47-18…21 in §5. Counts, the optional red-on-old line and the walk's findings PENDING the stage |
-| 5 | Settings (VM-53, VM-27) | IN-PROGRESS — pieces below (implementer: Opus, 2026-11-19; build products `DerivedData/vm47-b5`, the walk `DerivedData/vm47-walk5`; NO revert is in flight in this worktree at any point — VM-27's red-on-old is a detached snapshot) |
+| 5 | Settings (VM-53, VM-27) | READY for the stage — pieces below; the window's lines are §6 "Batch 5 — results" ("The stage window") (implementer: Opus, 2026-11-19; build products `DerivedData/vm47-b5`, the walk `DerivedData/vm47-walk5`; NO revert is in flight in this worktree at any point — VM-27's red-on-old is a detached snapshot) |
 | 5.0 | Reading: §1–§6, CLAUDE.md + canon, the resiliency protocol, MobileSoul §3–§5, the catch-up plan's rules, sitting-1 rulings (LK-1, LK-2, the lock-and-protection table), her words, the sizing sheet (B, C, E), audit G (§5.11, T99–T101), audit D (§3 item 5, §3.5, §4(d), D-38), audit A (A5, H3), CastleRules in full, the lock-and-protection mockup's S1–S3 + build notes, the home mockup's ⋯ menu (frame 34) + build notes, wording list 2's Settings drafts; the code (Settings, the sync row and its door, `SharedPageStyle`, the Protection entry, the tag manager, Acknowledgments, the edit trace, the three roots' path lines, the shell, `MobileNoteActions`, `ThemeStore`, the router, `PhoneControls`, the Mac's `AppearanceChoice` and its tests) and the suites around them | DONE |
-| 5.1 | VM-27: the trace (which door stays and why), the pin `MobileSettingsProtectionDoorTests` (Settings mounted over the phone's own bootstrap with its account section, real services whose sync row is in a doored paused state: exactly ONE "Protection…" door, and it opens the screen), the fix as its own commit, the moved source pin; the red-on-old snapshot `~/dev/variorum-vm-47-rol5` built | IN-PROGRESS — DONE: the pin (`aea9a30d9`), the fix + the moved source pin (`9c9aa4b6c`: the sync row in Settings is handed NO Protection door — `.environment(\.protectionPaneDoor, nil)`; the standing row stays, gated on the same `protectionDoor`, so it stands whenever the row's door could; a doored paused state says its sentence alone — the shared face's P-2 arm); phone `build-for-testing` into `vm47-b5` GREEN at `9c9aa4b6c`. REMAINING: the snapshot (detached at `9c9aa4b6c`, `MobileSettingsView.swift` from `aea9a30d9` staged there only) built into its own DerivedData — at row 5.5. (Coordinator hand-off, own commit `8eb727f2e`: `MobileNavigationTests`' selection helper counts only buttons — recorded under batch 4's results.) |
+| 5.1 | VM-27: the trace (which door stays and why), the pin `MobileSettingsProtectionDoorTests` (Settings mounted over the phone's own bootstrap with its account section, real services whose sync row is in a doored paused state: exactly ONE "Protection…" door, and it opens the screen), the fix as its own commit, the moved source pin; the red-on-old snapshot `~/dev/variorum-vm-47-rol5` built | IN-PROGRESS — DONE: the pin (`aea9a30d9`), the fix + the moved source pin (`9c9aa4b6c`: the sync row in Settings is handed NO Protection door — `.environment(\.protectionPaneDoor, nil)`; the standing row stays, gated on the same `protectionDoor`, so it stands whenever the row's door could; a doored paused state says its sentence alone — the shared face's P-2 arm); phone `build-for-testing` into `vm47-b5` GREEN at `9c9aa4b6c`. The snapshot — CHANGED to the final tree: `~/dev/variorum-vm-47-rol5` detached at `32f9c605e`, the fix's ONE line reverted there only (staged, never committed), built GREEN into its own `App/Variorum/DerivedData/vm47-rol5`; its run PENDING the stage (expected RED, both cases). (Coordinator hand-off, own commit `8eb727f2e`: `MobileNavigationTests`' selection helper counts only buttons — recorded under batch 4's results.) |
 | 5.2 | The list's shape on the shared controls: the sheet header over ONE scrolling list; groups under section headers (the drafts' group names) on the room, rows on the paper with hairlines from the gutter; every row a menu row (whole row answering, ≥ the sheet's minimum) or a labelled segmented choice; the sync row's styled arm on the controls (its 11.5 pt doors); the voice rows → one segmented choice, words kept | DONE (this commit; tests PENDING) — `MobileSettingsView`: the header over ONE `ScrollView`; `MobileSettingsGroup` (the section name on the room, rows full width on the paper, a hairline between rows from the gutter, none left behind by an absent row); groups Library (the sync row · Protection…) · Look (Voice: Terminal | Study · Appearance: Follow system | Light | Dark — both `PhoneSegmentedChoice`) · Tags (Manage Tags) · Help (Acknowledgments) · Diagnostics (Record edit trace — the system switch · Edit trace…) · DEBUG: Tutorial (dev store) · Performance (dev store) · TK2 Spike; every door a `PhoneMenuRow` (≥ 44, the gutter INSIDE the target — `PhoneMenuRow`'s additive `inset:`); the sync row's styled arm (`Shared/SyncStatusViews.swift`): its doors inline acts at 17 with 44 pt hit areas, its own line the `meta` role (both were the Mac's 11.5 pt slot) — the Mac's nil arm byte-identical. Phone `build-for-testing` GREEN |
-| 5.3 | The appearance choice (VM-53 / LK-1, LK-2): the Mac's brain shared (`AppearanceChoice`'s pure enum hoisted to `Shared/Theme/`, the Mac's AppKit mapping and controller left in its file); the phone's owner (`UserDefaults`, never the `setting` table) applied at the windows (reaches SwiftUI, the UIKit editor and overlays, sheets, the lobby); the Settings row; tests | DONE (code `a83c586f3`; tests PENDING) — the brain shared — `AppearanceChoice`'s pure enum moved to `Shared/Theme/AppearanceChoiceRule.swift` (cases, key `appearanceChoice`, the remembered rule byte for byte; + `isDark(system:)` and the iOS twin `userInterfaceStyle`), the Mac's file keeps its AppKit `appearanceName` (now an extension) and its owner, so its `NSAppearance(named:)` line stays where the Mac's pin looks; the phone's owner `MobileAppearanceController` (`VariorumMobile/Features/Shell/MobileAppearance.swift`: this device's `UserDefaults`, applied as each window's `overrideUserInterfaceStyle` on change and as each window becomes visible; inert in a test host) held by `MobileShellRouter.appearance`; the lobby's tokens read it (`VariorumMobileApp.lockedTokens`, one expression). Phone `build-for-testing` GREEN. the Settings row rode 5.2's commit (`70368f6dc`). Tests (this commit; counts PENDING): `MobileAppearanceTests` (7) — the UIKit twin and the key, `isDark(system:)`, remembered on this device + a strange value, a change reaching the window's SwiftUI and UIKit, a window shown after the choice wearing it and the watch ending with its owner, never the `setting` table (a contract pin, hollow by construction — the owner holds no store), the test host's owner inert; `MobileSettingsListTests` (5 + 1 parameterized) — scrolls at AX5 (red on old: no scroll view), whole-row doors ≥ 44 at Large and AX5, the sync row's doors ≥ 44 (red on old: 11.5 pt words), the groups and the two choices (a segment drives the phone's owner), the appearance words the Mac's own (its row's source). Mac `build-for-testing` into `vm47-b5` GREEN at `70368f6dc` (every `Shared/` change of the batch; nothing under `Shared/` since) |
+| 5.3 | The appearance choice (VM-53 / LK-1, LK-2): the Mac's brain shared (`AppearanceChoice`'s pure enum hoisted to `Shared/Theme/`, the Mac's AppKit mapping and controller left in its file); the phone's owner (`UserDefaults`, never the `setting` table) applied at the windows (reaches SwiftUI, the UIKit editor and overlays, sheets, the lobby); the Settings row; tests | DONE (code `a83c586f3`; tests PENDING) — the brain shared — `AppearanceChoice`'s pure enum moved to `Shared/Theme/AppearanceChoiceRule.swift` (cases, key `appearanceChoice`, the remembered rule byte for byte; + `isDark(system:)` and the iOS twin `userInterfaceStyle`), the Mac's file keeps its AppKit `appearanceName` (now an extension) and its owner, so its `NSAppearance(named:)` line stays where the Mac's pin looks; the phone's owner `MobileAppearanceController` (`VariorumMobile/Features/Shell/MobileAppearance.swift`: this device's `UserDefaults`, applied as each window's `overrideUserInterfaceStyle` on change and as each window becomes visible; inert in a test host) held by `MobileShellRouter.appearance`; the lobby's tokens read it (`VariorumMobileApp.lockedTokens`, one expression). Phone `build-for-testing` GREEN; the Settings row rode 5.2's commit (`70368f6dc`). Tests (this commit; counts PENDING): `MobileAppearanceTests` (7) — the UIKit twin and the key, `isDark(system:)`, remembered on this device + a strange value, a change reaching the window's SwiftUI and UIKit, a window shown after the choice wearing it and the watch ending with its owner, never the `setting` table (a contract pin, hollow by construction — the owner holds no store), the test host's owner inert; `MobileSettingsListTests` (5 + 1 parameterized) — scrolls at AX5 (red on old: no scroll view), whole-row doors ≥ 44 at Large and AX5, the sync row's doors ≥ 44 (red on old: 11.5 pt words), the groups and the two choices (a segment drives the phone's owner), the appearance words the Mac's own (its row's source). Mac `build-for-testing` into `vm47-b5` GREEN at `70368f6dc` (every `Shared/` change of the batch; nothing under `Shared/` since) |
 | 5.4 | The doors: ONE ⋯ menu on all three roots carrying Settings (the Bookcase's gear retires into it); a note's own door (the note's ⋯ sheet); Protection opens on the visible stack now that Settings opens from every root and a note; tests; the shared-risk files' line ranges recorded | DONE (this commit; tests PENDING) — `MobileRootMenu.swift` (new: the shell's door `MobileSettingsDoor` in the environment, the ⋯ `MobileRootMenu` — a system `Menu`, its items as data, PROVISIONAL P-47-22); ONE line on each root's path line (the Bookcase's gear and its `onSettings` retire into it; the gear's `MobileSettingsDoor.symbol` enum removed from `MobileTodayDoor.swift`); the shell injects the door (one line) and drops the shelf's `onSettings`; `openProtection` and the DEBUG guide door push on the VISIBLE stack (P-47-23); the note's ⋯ sheet (`MobileNoteActions.swift`) gains a Settings row that opens the shell's sheet once its own has gone (`onDisappear`), `actRow`'s detail optional. Tests: `MobileRootMenuTests` (5) new; `MobilePathLineGeometryTests` and `MobileProtectionScreenTests.settingsOpensTheScreenOnlyWhereItCanAct` moved with their reasons; six suites drop the retired `onSettings:` argument. Line ranges in the shared-risk files (pre-batch-5 `9438f7b27` → this commit): `MobileShellView.swift` 50–52 → 50–52 (the protection route's doc) · 226 → removed (`onSettings:`) · after 272 → 272–273 (the door's injection) · 308–311 → 309–312 (the DEBUG guide door's doc) · 320 → 321 (its push) · 551–552 → 552–555 (`openProtection`'s doc) · 555 → 558–559 (its push); `MobileShelfView.swift` 70 → removed (`onSettings`) · 235 → 234 and 240–244 → 239–243 (the path line's doc) · 266–272 → 265 (the gear → the ⋯ line); `MobileLibraryView.swift` after 227 → 228 (the ⋯ line); `MobileStarredView.swift` 94–95 → 94–95 (doc) · after 104 → 105 (the ⋯ line). No path-line padding, wing-door line, swipe, `selectPage` or `pagingAllowed` line touched; nothing reordered or renamed. Phone `build-for-testing` GREEN |
-| 5.5 | Builds (phone + Mac `build-for-testing` into `vm47-b5`; the snapshot into its own DerivedData); the walk driver (a copy of batch 4's, extended for Settings) into `vm47-walk5`; READY for the stage | NOT-STARTED |
-| 5.6 | §6 "Batch 5 — results" + the new PROVISIONALs in §5 | NOT-STARTED |
+| 5.5 | Builds (phone + Mac `build-for-testing` into `vm47-b5`; the snapshot into its own DerivedData); the walk driver (a copy of batch 4's, extended for Settings) into `vm47-walk5`; READY for the stage | DONE — phone GREEN at `32f9c605e`; Mac GREEN at `70368f6dc` (no `Shared/` or Mac change after it); the snapshot GREEN; the walk driver (gitignored `VM47Walk5Driver.swift` + `walk5.zsh` — two parts, 73 + 62 = 135 captures into `b5/`, device `vm47-walk5`) built GREEN into `vm47-walk5`; one build at a time (the coordinator's LOAD note); the warm-start repair is §6's machinery note |
+| 5.6 | §6 "Batch 5 — results" + the new PROVISIONALs in §5 | DONE (this commit) — P-47-22…26 in §5, the palette row held for the orchestrator to ticket; counts, the red-on-old line and the walk's findings PENDING the stage |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks. The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) is still queued |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
 | M.2 | M-1: the 13 pt floor in `PhoneType.uiFont` (`#if os(iOS)` arm, BOTH scaling classes: a resolved font under `floorSize` returns `baseUIFont(…, pointSize: floorSize)`); its pin, the UIKit twin of `nothingIsEverBelowThirteenPoints` in `MobilePhoneTypeTests` (every role × both voices × all twelve settings) | DONE (this commit) — `uiFont` = the class's scaled font (`scaledUIFont`, unchanged) then the floor; the pin `theUIKitFormIsNeverBelowThirteenPointsEither()`; build M.4, red-on-old M.5, run M.6 PENDING |
@@ -506,11 +506,18 @@ Each batch's implementer adds its own piece rows under its batch line as it star
 | P-47-19 | A tab tapped from a pushed list — "returns to that root" — and what happens to the stack she leaves | (a) the stack being left returns to ITS root (unanimated, as its page slides away), then the page changes; the current tab from a pushed list pops to its root — so a hidden stack always stands at its root (the band never reveals a pushed screen; VM-55's wing landing relies on the same) · (b) the system tab bar's memory: each stack keeps its place, a tap on the current tab pops to its root — a swipe could then land on a pushed screen where the band is masked, and a note under a list (Versions over its note) stays mounted out of sight | (a), `MobileShellView.tabSelected`; a note under a list closes exactly as Back would close it (its leaving savepoint included) | PROVISIONAL (batch 4) |
 | P-47-20 | W-009 — "an empty system bar with a back chevron above the app's own masthead" (inferred from code; not yet seen) | (a) KEEP the system bar on every pushed screen — it is the back door, the edge swipe-back and iOS 26's content swipe-back; every later mockup keeps that row (a book, the Trash, the note: a 48–52 pt top row with the round back button and the screen's own doors, the title below in the app's type), so what is "empty" is the row's trailing side, which each screen's own umbrella fills as its mockup draws it · (b) hide the system bar on the back-only screens and put a back icon button in each screen's own header — six screen files (three being edited tonight by VM-55 and VM-78), and with the bar hidden the edge swipe-back has historically stopped (no source confirms iOS 26 changed it; the content swipe with a hidden bar is unconfirmed — the lookup, §6) · (c) the screen's title in the system bar (`navigationTitle`, inline or `inlineLarge`) and the app's own title line dropped — the system's type, not the voice's, and a per-screen edit | (a) — nothing in this batch changes a pushed screen's top edge; the trace is §6's table with an owner per screen (VM-148 Write · VM-122 a book's contents and Read · VM-100 Trash/Archived · VM-110 Protection · Versions: VM-147's umbrella), and the walk captures every top edge (b4, b6, b7, b9, b14, b15) for her look | PROVISIONAL (batch 4) — W-009 DEFERRED with owners |
 | P-47-21 | The bar's drawn numbers (built against the mockup, which is not a pixel contract; with P-47-1) | as built: cells a third × at least 56 (LK-5), growing with the words to ~60 at xxxLarge and holding (the mockup's large frame draws 64); the word at the `tab` role (17, SF Pro / SF Mono, chrome); the chip 8 above and below the word, 16 to each side stepping to 8 then 4 where the cell is narrow (the mockup: 8 × 16, and 8 × 9 in its large frame), radius 12 (the layer's standard — the mockup draws 9; the layer has 6 · 12 · capsule), the wash, the word semibold in her ink; the others regular in the corrected muted (the sheet's "others corrected muted"; the mockup's meta ink); the hairline in the palette's line; the room to the home indicator · the bar stays above the keyboard while the capture box or the Library search is focused, as before — the mockup's "the bar leaves while the keyboard is up" is the capture box's row (VM-73), not built here | as listed | PROVISIONAL (batch 4) — her look at the walk's b1–b5 |
+| P-47-22 | The ⋯ menu on a root (VM-53; the home mockup's frame 34, "one menu on all three roots", carrying Settings today) | (a) the system `Menu` — the pull-down the mockup draws, anchored at the ⋯; its rows cannot be driven by the in-process harness (`MobileSurfaceDriver`'s measured header), so the pins hold the door on each root and the items as data and the walk drives the real menu · (b) a sheet of menu rows — the note's ⋯ grammar (`MobileNoteActionsSheet`), drivable in process, but one sheet in front of Settings while Settings is its only row · (c) the ⋯ opening Settings directly until a second item exists — a ⋯ that promises a menu and is a door | (a), `MobileRootMenu.swift`; its glyph in the accent (the gear's tone, whose place it takes), spoken "More" | PROVISIONAL (batch 5) — her look at part B's s5-01/05/06 |
+| P-47-23 | Where Protection opens now that Settings opens from every root and from a note (it was pushed on the SHELF's stack because Settings was the shelf's own door — P-VM8-2) | (a) pushed on the VISIBLE stack — where she is; Back returns her there (over a note when she came from one) · (b) the shelf's stack after a tab change — the stack she leaves popped to its root (P-47-19's invariant), so a note she came from closes · (c) pushed INSIDE the Settings sheet, as the lock mockup's S1 draws ("Protection… pushes section D inside this sheet, so Done returns her to where she was") — a navigation stack in the sheet, and the re-key reopen's adoption (F-U1-3) re-homed with it | (a) — `MobileShellView.openProtection` (and the DEBUG pocket-guide door, the same road); the reopen's adoption keeps the shelf's stack (a fresh shell after a reopen) | PROVISIONAL (batch 5) — (c) is the mockup's and the larger change |
+| P-47-24 | The appearance row's words (VM-53 — the brief: "the Mac's own words for the same rows") | (a) the Mac's own row (`AppearanceChoiceRow`): "Appearance" · "Follow system" · "Light" · "Dark", and NO line beneath it — her 2026-10-13 General ruling on the Mac ("no explanation beneath") · (b) the wording list's drafts (lock-and-protection S1, first-run E1): "System" for the first segment, and "Light or dark is for this iPhone only." under the row (with "Voice and palette belong to your library, so they change on every device." under the voice) | (a); a phone pin holds the three words to the Mac row's source (`MobileSettingsListTests.theAppearanceWordsAreTheMacsOwn`) | PROVISIONAL (batch 5) — her wording pass |
+| P-47-25 | The list's names (VM-53): the group names where a row had none, and the voice choice's label | the group names as drafted — "Library" (the sync row, Protection…), "Look" (Voice, Appearance), "Help" (Acknowledgments) — beside today's "Tags" and "Diagnostics"; the voice choice keeps today's word "Voice" (also the draft) where the Mac's ruled word for the same control is "Theme" (her 2026-10-13 General ruling) · or "Theme" for the voice · or today's section words ("Voice", "Sync") as group names | the drafts, and "Voice" | PROVISIONAL (batch 5) — her wording pass |
+| P-47-26 | The list's drawn parts and numbers (built against the mockup, which is not a pixel contract; with P-47-1) | as built: a door is the menu row (`PhoneMenuRow`, label 17 in ink, the whole row one target, ≥ 44 — sheet §C's one-line menu row) with no chevron and no trailing value (the mockup draws 52 pt rows with "›" and values like "Castle" and "Study" — values the phone does not hold today); a choice is the label on its own line over the system segmented control (three words and a label do not share a line at 402 pt in Terminal); the sync row's doors are inline acts at 17 in a row under its line (the mockup's single trailing act); the edit trace's on/off is the system switch (it was a text button whose words flipped to "Recording edit trace — tap to stop" — those words retire); no foot line ("Variorum for iPhone" is drafted, not built) | as listed | PROVISIONAL (batch 5) — her look at part B |
 
 Held for her hands: the wave-1 install on her phone (one install from merged main, after all four runs,
 prepared by the last merger; the hands part is hers in the morning) — it is where she judges P-47-1's
-numbers at true size; her glance at which Protection door stayed (VM-27); the wording pass over any new
-line.
+numbers at true size; her glance at which Protection door stayed (VM-27 — the standing row; batch 5's §6); the wording pass over any new
+line (batch 5's are listed in its §6, "Every new rendered line"). For the orchestrator to ticket at closeout (batch 5):
+a palette row on the phone — the lock mockup's S1 draws "Palette · Sea-glass ›" in Look, but no work-list row or
+ticket owns a palette chooser on the phone (W-005 was wearing the palette, done by VM-51); not built here.
 
 ## 6. Results, review and closeout
 
@@ -1315,3 +1322,177 @@ measured) takes the widest sides, which the second pass corrects; (5) **the tall
 region ≈ 16 pt less at the default size (and above the keyboard, where the bar still rides) — the floor guarantee is the
 brain's and holds; the mockup's "the bar leaves while the keyboard is up" is VM-73's. The Mac cannot have changed:
 `VoiceTokens.swift` is untouched and the one `Shared/` change is an additive extension the Mac never calls.
+
+### Batch 5 — results (implementer: Opus, 2026-11-19)
+
+**Not done in this batch, first:** (1) the suites, VM-27's red-on-old run and the walk are PENDING the stage (the lines
+are "The stage window" below; every build is green). (2) The sync row's DOORED states (VM-27's locked and not-yet)
+cannot be walked: the walk's dev store never syncs (A4), so the mounted pin `MobileSettingsProtectionDoorTests` is that
+evidence; part B logs it NOT REACHABLE. (3) Rows whose features do not exist on the phone yet are not built (the brief):
+the palette chooser (no owner — §5, for the orchestrator to ticket), the dial and Lock now (VM-25), leaving Castle
+(VM-109), the writing and document settings (VM-11, W-212), crash reports (VM-220), What's new (VM-221), the tour and
+the pocket guide's Help rows (VM-215, VM-211), Settings search (W-215, after v1). (4) The edit trace's two rows still
+ship in Release — W-214 is VM-13's (the experiment retires at its close); this batch only groups them. (5) The ⋯ menu's
+own rows cannot be driven in process (P-47-22) — the walk's part B is their look.
+
+**VM-27 — the trace, and which door stayed.** *Mechanism* (`MobileSettingsView` at `9438f7b27`): ONE closure,
+`protectionDoor` (the shell's road, the app's services, and an account section on the open library — P-2), fed TWO
+renderers on the sheet: the sync row, through `.environment(\.protectionPaneDoor, protectionDoor.map { … })`, which made
+`SyncRowFace.face(canOpenProtection: true)` mint its *Protection…* door for the keys refusal (`.keysLocked`, and
+`.notOnYet` over a library that has not joined); and the standing row directly below, `if let protectionDoor { … }`.
+One gate, so whenever the row's door rendered the standing row did too: the word twice, stacked. *Which stayed:* the
+STANDING row — on the phone it is on this sheet in every state the row's door could render (the same gate) and in every
+other state too, so it is the door that never leaves; the lock mockup's build note says the same ("One Protection row,
+always: the sync row's door and the standing button must never both render"). *The fix* (`9c9aa4b6c`): Settings hands
+the sync row NO door (`.environment(\.protectionPaneDoor, nil)`), so a doored paused state says its sentence alone —
+the shared face's own P-2 arm, already pinned on the Mac (`SyncLockedRowTests.withNoProtectionPaneTheLockedRowSaysTheSentenceAlone`).
+No word changed (CastleRules read in full: nothing here says anything about encryption, backups, the words or the
+passphrase); no protection behaviour changed; the Mac's sidebar row keeps its door (its composition is untouched).
+*The pin* (`aea9a30d9`, before the fix): `MobileSettingsProtectionDoorTests` — the sheet mounted over the PHONE'S OWN
+bootstrap on a planted road (its account section made), real `AppServices` over its session whose chain refuses for keys
+(`UnenrolledKeyProvider`; the transport is never reached), one round run; the locked face (record fact unknown) and the
+not-yet face (`librarySyncsWithAnAccount` false): exactly ONE element says "Protection…", and pressing it opens the
+screen. *Red on old:* a detached snapshot `~/dev/variorum-vm-47-rol5` at `32f9c605e` with the fix's ONE line reverted
+there only (staged, never committed — the sync row handed `protectionDoor.map { … }` again), built GREEN into its own
+`App/Variorum/DerivedData/vm47-rol5`; run PENDING (expected: both cases RED, two "Protection…" elements). This worktree
+never carried a revert. Her glance at which door stayed is held (§5).
+
+**The list (VM-53) — groups and rows, one pointer each** (`70368f6dc`; `MobileSettingsView.swift`).
+
+| Group (its name) | Rows | Built on |
+|---|---|---|
+| — the header | `~/settings` / "Settings" · Done | `PhoneSheetHeader` (unchanged, P-47-13), outside the scroll |
+| Library (draft) | the sync row · Protection… (when it can act) | `SyncStatusRow`'s phone arm (its doors now inline acts at 17 with 44 pt hit areas, its line the `meta` role — `Shared/SyncStatusViews.swift`; they were the Mac's 11.5 pt slot); `PhoneMenuRow` |
+| Look (draft) | Voice: Terminal \| Study · Appearance: Follow system \| Light \| Dark | `PhoneSegmentedChoice` ×2 under a `control` label (`choiceRow`) |
+| Tags | Manage Tags | `PhoneMenuRow` |
+| Help (draft) | Acknowledgments | `PhoneMenuRow` |
+| Diagnostics | Record edit trace (the system switch) · Edit trace… | `Toggle` tinted with the accent; `PhoneMenuRow` |
+| DEBUG: Tutorial (dev store) | Open the pocket guide · Restore the pocket guide… · its outcome line | `PhoneMenuRow`; a `meta` line |
+| DEBUG: Performance (dev store) | Seed the 100k fixture · its outcome line | `PhoneMenuRow`; a `meta` line |
+| DEBUG: (unnamed) | TK2 Spike | `PhoneMenuRow` |
+
+The shape: the header stays put; under it ONE `ScrollView`; `MobileSettingsGroup` (phone-local composition, not a
+control) draws the section name (`PhoneSectionHeader` — 24 above, 8 below, at the gutter) on the room, then the rows
+full width on the paper with a hairline between rows from the gutter (`Group(subviews:)`, so a row the caller does not
+render — a door that cannot act — leaves no hairline). Every door is a `PhoneMenuRow` with the gutter INSIDE its target
+(the control's one additive parameter, `inset:` — default 0, so no existing use moves), so the whole row answers edge to
+edge at ≥ 44; the list grows with the text size and scrolls (the mockup's S1 at the largest text). Today's rows only,
+grouped; nothing renamed but the section words the drafts replace (P-47-25).
+
+**The appearance choice (VM-53, W-213; LK-1/LK-2) — brain, storage, reach.**
+- *The brain is the Mac's, shared* (`a83c586f3`): `AppearanceChoice`'s pure enum moved from the Mac's
+  `Variorum/Theme/AppearanceChoice.swift` to `Shared/Theme/AppearanceChoiceRule.swift` — its three cases, its key and its
+  remembered rule byte for byte; the phone's two additions are `isDark(system:)` and the iOS twin `userInterfaceStyle`.
+  The Mac's file keeps its AppKit half (`appearanceName`, now an extension) beside its one owner, so its
+  `NSAppearance(named:)` line stays exactly where the Mac's pin (`MarkdownPaletteWritersTests.appearanceIsAppWide`)
+  looks; the Mac's behaviour and tests are unchanged (Mac `build-for-testing` green at `70368f6dc`; its types are in the
+  window's Mac list). A whole-file move (batch 3's `ThemeStore` precedent) was weighed and set aside on reading that
+  pin: it would have taken the AppKit line out of the folder the pin walks and turned it red.
+- *Storage:* this device's `UserDefaults`, key `appearanceChoice` (the Mac's key, in the phone's own domain) — never the
+  `setting` table; the owner holds no store at all.
+- *The owner:* `MobileAppearanceController` (`VariorumMobile/Features/Shell/MobileAppearance.swift`), held app-lived by
+  `MobileShellRouter.appearance` (so the lobby wears it before a library opens). It writes each window's
+  `overrideUserInterfaceStyle` — on a change, to every window of the app's connected scenes, and to each window AS IT
+  BECOMES VISIBLE (`UIWindow.didBecomeVisibleNotification`, delivered on the posting thread), so a launch's first frame
+  is drawn in the choice. Inert in a test runner's host (a scratch domain, no window — VX-604's posture).
+- *What it reaches:* everything in the window — the SwiftUI chrome (every `@Environment(\.colorScheme)` reader), the
+  UIKit editor and the three overlays (their dynamic colours; `MobileTraitBorder`'s trait registration, VM-54), every
+  sheet, alert and menu presented there, the keyboard, the status bar; and the lobby, whose tokens are resolved at the
+  app's root where no window override is seen — `VariorumMobileApp.lockedTokens` reads
+  `appearance.choice.isDark(system:)` (one expression).
+- *What it does not reach:* the launch screen (the system's, before any window); the Mac (nothing syncs); the library's
+  voice and palette (the library's, R-47-2/LK-1).
+- *The row:* Look ▸ Appearance, the Mac's words (P-47-24).
+
+**The doors** (`e622cbbb9`) — `VariorumMobile/Features/Shell/MobileRootMenu.swift` (new): the shell's Settings door
+(`MobileSettingsDoor`) handed down through the environment (the `ProtectionPaneDoor` precedent) and the ⋯
+(`MobileRootMenu`: a system `Menu`, its items as data, P-47-22). ONE line on each root's path line; the Bookcase's
+gear and its `onSettings` parameter retire into it (the gear's `MobileSettingsDoor.symbol` enum removed from
+`MobileTodayDoor.swift`). A note's own door: the note's ⋯ sheet (`MobileNoteActions.swift`) gains a Settings row that
+closes that sheet and asks the shell for Settings once it has gone (`onDisappear`), so two presentations never overlap;
+Done returns her to the note. Protection (and the DEBUG pocket-guide door) now open on the VISIBLE stack (P-47-23).
+*The four shared-risk files — line ranges changed* (pre-batch-5 `9438f7b27` → `e622cbbb9`):
+`MobileShellView.swift` 50–52 → 50–52 (the protection route's doc) · 226 → removed (`onSettings:`) · after 272 → 272–273
+(the door's injection) · 308–311 → 309–312 (the DEBUG guide door's doc) · 320 → 321 (its push) · 551–552 → 552–555
+(`openProtection`'s doc) · 555 → 558–559 (its push); `MobileShelfView.swift` 70 → removed (`onSettings`) · 235 → 234
+and 240–244 → 239–243 (the path line's doc) · 266–272 → 265 (the gear → the ⋯ line); `MobileLibraryView.swift` after
+227 → 228 (the ⋯ line); `MobileStarredView.swift` 94–95 → 94–95 (its doc) · after 104 → 105 (the ⋯ line). No path-line
+padding, wing-door line, swipe, `selectPage` or `pagingAllowed` line was touched; nothing reordered or renamed. *For the
+re-land:* VM-55's interim wing door shares these path lines — the ⋯ is the line's last member on each root; any new
+`MobileShelfView(…, onSettings: …)` construction on a sibling branch drops that argument (the parameter is gone).
+
+**Every new rendered line** (for her wording pass): group names "Library", "Look", "Help" (drafts, wording list 2,
+lock-and-protection S1); the appearance row "Appearance" · "Follow system" · "Light" · "Dark" (the Mac's own,
+`AppearanceChoiceRow`); the ⋯'s spoken name "More" (VoiceOver only, iOS's word for a ⋯); the note sheet's "Settings"
+row (today's word, a new place) and the ⋯ menu's "Settings" item (the same). Retired: the "Sync" and the "Voice" section
+words (Voice is now the choice's label), "Recording edit trace — tap to stop" (the switch says it). Kept: Terminal ·
+Study, Protection…, Manage Tags, Acknowledgments, Diagnostics, Record edit trace, Edit trace…, Starting…, the DEBUG doors.
+
+**Tests — written; every count PENDING the stage.** New: `MobileSettingsProtectionDoorTests` (1 test × 2 cases, VM-27 —
+red on old in the snapshot, PENDING); `MobileSettingsListTests` (5 tests, 6 cases — scrolls at AX5, red on old by
+construction: the old sheet had no scroll view; whole-row doors at Large and AX5, red on old: word-wide targets; the
+sync row's doors ≥ 44, red on old: 11.5 pt words; the groups and the two choices — a segment drives the phone's owner;
+the appearance words held to the Mac's row); `MobileAppearanceTests` (7 — the UIKit twin and the key, `isDark`, remembered
+on this device, a change reaching the window's SwiftUI and UIKit, a window shown after the choice wearing it, never the
+`setting` table — a contract pin, hollow by construction (the owner holds no store), the test host's owner inert);
+`MobileRootMenuTests` (5 — the items, the ⋯ on each root in both voices, none without a shell, the mounted shell's three
+⋯ and no gear, a note's door through the whole shell — red on old: no row). Moved, each with its reason in place:
+`MobileProtectionScreenTests.settingsOpensTheScreenOnlyWhereItCanAct` (VM-27: it held the doubled door; VM-53: Protection
+on the visible stack); `MobilePathLineGeometryTests` (both cases: the gear → the ⋯); six suites drop the retired
+`onSettings:` argument (`MobileDeletionTests`, `MobileEmptyStoreTests`, `MobilePathLineGeometryTests`,
+`MobileNavigationTests`, `MobileShelfTodayDoorTests`, `MobileShelfLayoutTests`); the coordinator's hand-off
+`MobileNavigationTests` (`8eb727f2e`, recorded under batch 4).
+
+**Builds — GREEN (headless, no stage):** phone `build-for-testing` into `DerivedData/vm47-b5` at `32f9c605e`
+(`** TEST BUILD SUCCEEDED **`); Mac `build-for-testing` into `vm47-b5` at `70368f6dc` — every `Shared/` change of the
+batch (nothing under `Shared/` or the Mac target changed after it); the VM-27 snapshot into its own `vm47-rol5`; the walk
+driver (`walk5.zsh` `walk_build`) into `DerivedData/vm47-walk5` from this tree (the copy removed; tree clean).
+*Machinery note:* `vm47-b5` was warm-started as an APFS clone of `vm47-b4`; when the coordinator removed `vm47-b4` the
+clone's package state still named `vm47-b4`'s artifacts and one build failed on them. Repaired by pointing
+`SourcePackages/workspace-state.json` at `vm47-b5`'s own copies and dropping the cached build descriptions; build
+outputs had always gone to `vm47-b5` (only `vm47-b4`'s artifacts were read), so nothing was ever written into
+`vm47-b4`. `vm47-walk5` and the snapshot's packages were seeded the same way, their paths rewritten to their own.
+
+**The stage window (READY — the orchestrator's GO):**
+- Phone, the whole target: from `App/Variorum/`, `xcodebuild test-without-building -scheme VariorumMobile -destination
+  'id=<the standing device>' -derivedDataPath DerivedData/vm47-b5 -only-testing:VariorumMobileTests`.
+- Mac (`Shared/` changed — the rule, `PhoneControls`, the sync row's phone arm; and the Mac's own `AppearanceChoice.swift`):
+  ```zsh
+  mac=(ThemeTokenTests PaletteDerivationTests NoLiteralColourTests SharedPageStyleTests PaletteReachTests
+  MarkdownPaletteWritersTests HelperWindowThemeTests AppearanceChoiceTests SyncLockedRowTests SyncProgressRowTests
+  SyncRetryingRowTests SyncOutOfDateFaceTests SyncStalledRowTests NotOnYetWordsTests HostedSyncTierFaceTests)
+  ```
+  from `DerivedData/vm47-b5` (each checked to be declared exactly once as a suite type in `VariorumTests/`).
+- VM-27's red-on-old: from `~/dev/variorum-vm-47-rol5/App/Variorum`, `xcodebuild test-without-building -scheme
+  VariorumMobile -destination 'id=<the standing device>' -derivedDataPath DerivedData/vm47-rol5
+  -only-testing:VariorumMobileTests/MobileSettingsProtectionDoorTests` — expected RED: both cases of
+  `aDooredSyncRowLeavesExactlyOneProtectionDoor(joined:)` (two "Protection…" elements); then
+  `git worktree remove --force ~/dev/variorum-vm-47-rol5`.
+- The walk (`notes/plans/vm-47-screens/instruments/walk5.zsh`, gitignored; its header is the runbook — ONE walk for
+  batches 4 and 5, two parts with a seam): `source` it, then `WALK_DEADLINE=HH:MM walk_part_a` (device `vm47-walk5`
+  created, booted, seeded; batch 4's bar walk, 73 captures into `notes/plans/vm-47-screens/b5/`; ends SHUT DOWN, its
+  library kept) and, in a later claim, `WALK_DEADLINE=HH:MM walk_part_b` (boots it; batch 5's Settings walk, 62 captures;
+  `walk_close` deletes the device) — 135 in all. What to look at in part B: the list at AX5 in Terminal (nothing clipped,
+  it scrolls — s5-02…04); every row's ground on the paper and the names on the room; the ONE Protection door; the ⋯ open
+  on each root (s5-01, 05, 06); Settings over a note and Done back on it (s5-08…10); the flipped appearance reaching the
+  sheet, the Bookcase and the UIKit editor (s5-11…13) and Follow system again (s5-14).
+
+**PROVISIONAL calls added (§5):** P-47-22 (the ⋯ is the system menu), P-47-23 (Protection on the visible stack), P-47-24
+(the appearance row in the Mac's words, no line beneath), P-47-25 (the group names; "Voice" kept), P-47-26 (the list's
+drawn parts and numbers). No QUESTIONS edit on this branch (the merge carries §5).
+
+**Self-assessment (for the cold reviewer).** VM-27 is one line with a mounted, behaviour-red pin; the risk there is only
+the pin's world (a real services chain refusing for keys) — the Mac's suites build the same refusal the same way. The
+riskiest calls: (1) **the appearance owner writes UIKit windows** rather than SwiftUI's `preferredColorScheme` — the
+Mac's F-9 reasoning carried over; its first-frame claim rests on `didBecomeVisibleNotification` being delivered during
+the window's showing, which `aWindowShownAfterTheChoiceWearsItAndTheWatchEndsWithItsOwner` pins (if UIKit delivers it
+later, that pin goes red and the claim must be re-said); (2) **the brain's move edits a Mac file** — the enum's
+declaration left it for an extension; behaviour byte-identical and the Mac's pins in the window's list; (3) **the ⋯ is
+the system menu** whose rows no in-process pin can drive (P-47-22) — the items are data, the door is mounted, the walk
+is the real look; (4) **the note's door asks for Settings from `onDisappear`** of the note's sheet so the two sheets never
+overlap — `aNotesActionsOpenSettingsThroughTheWholeShell` drives the whole road; (5) **Protection now lands on the
+visible stack** (P-47-23) — the reopen's adoption still uses the shelf's, so after a re-keying act she lands on the
+Bookcase as before; (6) **`PhoneMenuRow` and the sync row's phone arm are `Shared/`** — additive (`inset:` defaults to 0;
+the nil arm of the sync row byte-identical), and the Mac never renders either. The Mac's look cannot have changed:
+`VoiceTokens.swift` is untouched, no Mac view's source changed, and the Mac file that changed lost only a declaration
+that now lives in `Shared/`.
