@@ -184,3 +184,176 @@ comment corrections (AppSession phone branch; hazard (b) "nothing can go stale")
 
 *(Findings 3 and 5 are the midpoint review's pre-agreed items landing in this fix pass, restated here so the pass
 has its round-1 row; findings 1 and 2 are new; finding 4 is a closeout gate, not code.)*
+
+---
+
+## Implementer responses (fix pass)
+
+*The fix pass's implementer (Opus, fresh, cross-model flow): one entry per finding, written before any fix and committed
+first. Each says agree or dispute with its ground; the reviewer makes the final call on each. Line numbers are at
+`4b4d64143`. The fix pass's own record is the run record §5 ▸ "Ladder round 1 — fix pass" and §7 ▸ "Fix pass".*
+
+### 1 · [MINOR] the leaving's read narrows its visibility window — AGREE with the mechanism; recommend ARM (a); neither applied yet
+
+**The trace, on today's code (the pop road).** `MobileWriteScreen.onDisappear`'s one task (`MobileWriteView.swift:234-241`)
+runs `teardown()` — `finish()`: the tail's mint, then `autosave.flushNow()` (`MobileEditorViewModel.swift:815-827`) —
+then `savepointOnLeaving`'s phone branch (`Shared/AppSession.swift:691-747`): its flush (`:718`, a no-op after teardown),
+the candidates READ on a pool reader (`:720-723`, a WAL snapshot taken at the read's start), then — only when something is
+owed (`:735`) — one runner turn, `closeAutoCommit(_:takes:)` (`:740-746` → `Operations+Variant.swift:342-373`), which
+opens its own write transaction and re-checks ONLY the listed takes.
+
+**Which writes can commit between the read's snapshot and the runner turn's transaction, for this note's takes:**
+- **the sync engine's apply** — it writes through the database WRITER directly, never the runner
+  (`AppDatabase.applyingRemote`, `Persistence/AppDatabase.swift:339-353`, called at `Sync/SyncEngine.swift:1008`; the pull's
+  staging at `:676`): a remote `working_text`, a repair, and **the S5 rescue** — a pull meeting her not-yet-pushed row
+  leaves the server's text on the row and moves HER words onto a new `'conflict'` take (SyncSpec §5/§6), a take never
+  savepointed;
+- a runner turn queued ahead of the leaving's (the runner runs one body at a time, `Shared/OperationsRunner.swift:17-31`)
+  that names this note — on the phone only an act from ANOTHER screen, such as the shared structural undo stack's door
+  on a different note, pressed inside the gap;
+- another tab's editor of the same note — only after a tab switch, her typing and its 500 ms debounce, so never inside a
+  gap of milliseconds; and that note is shown again, so its own leaving owes it.
+- **Never her typing in the screen she left:** teardown's flush and the branch's flush land it in the same task before
+  the read, and the screen is gone.
+
+**What the old code guaranteed.** One write transaction on the runner decided and wrote (`closeAutoCommit(_:)`,
+`Operations+Variant.swift:311-320` → `autoCommitDirtyVariants` `:441-464`): every write committed before that transaction
+began was seen — an apply holding the writer when the turn asked (the turn waited behind it), and runner turns queued
+ahead. A write committing after it was missed then too. So the old visibility point is the runner turn's transaction
+start; today's is the read's snapshot — earlier by the read's own time (~6 ms at 100k words, Mac, headless) plus, when
+something is owed, the runner hop and any wait for the writer. The gap is wide only when the writer is busy at the
+leaving: a pull applying.
+
+**Each arm, in both cases:**
+
+| | Something owed (she edited) | Nothing owed (she only read it) |
+|---|---|---|
+| Old (pre-VM-71) | sees every write committed before the turn's transaction | the same — the turn always ran |
+| (a) as built, comments corrected | writes each listed take still owed at the turn, holding its text then; a take only another writer dirtied after the snapshot is not written by THIS ask — it stays owed (its text differs from its last savepoint), and the next ask's read lists it. On the Castle and lock roads that ask comes in the same leaving (`mobileWillLock`'s, inside `runWillLock`, while the store is open); on the pop road it is the note's next leaving on this phone. The S5 case: her edited take is written holding the server's text the rescue left on it; her words, on the new conflict take, are kept by S5 as a live, synced take and are savepointed at the next leaving | no runner turn; a write after the snapshot is the next leaving's |
+| (b) the turn re-reads and writes the union | the turn runs the candidates read inside its own transaction and writes the union, each take re-checked — it sees exactly what the whole op would see at the same moment (the old point, restored), her words on a conflict take included. (Since that read is a byte superset and every listed take still owed is in it, the union IS the in-turn read; the first read only decides whether to ask.) | **unchanged from (a):** no turn runs, so no transaction can re-read. Closing it needs a runner or writer turn on every leaving — the 6C/1D cost this unit removed |
+
+**The cost of (b), measured by batch 7's own headless method** (`VARIORUM_VM71_MEASURE=1 swift test --filter
+LeavingSavepointMeasurementTests`; the Mac, Debug, an encrypted on-disk WAL store, one note of 1,370 blocks / 131,520 words,
+every take savepointed once; n = 5 per series; three calm runs, load averages 8–14; median (min–max)). A new gated series
+emulates (b)'s turn exactly — the read inside one write transaction, then the union re-checked and written, as
+`closeAutoCommit(_:takes:)` re-checks — beside the existing series in the same runs:
+
+| Series | run 1 | run 2 | run 3 |
+|---|---|---|---|
+| (b)'s runner turn, one take edited | 12.84 (12.34–13.41) | 12.40 (12.33–13.32) | 13.55 (13.33–14.01) |
+| today's runner turn, one take edited (`closeAutoCommit(_:takes:)`) | 1.07 (0.95–1.16) | 0.98 (0.95–1.02) | 1.06 (0.99–1.12) |
+| the read alone, inside a write transaction on the writer | 11.69 (11.00–12.03) | 11.13 (11.06–12.12) | 11.75 (11.72–11.96) |
+| the read alone, on a reader (today's) | 5.97 (5.89–6.08) | 6.00 (5.84–6.05) | 6.09 (5.78–6.49) |
+| the pre-VM-71 whole op, one take edited | 211.30 (210.46–214.36) | 210.56 (209.98–211.88) | 211.77 (210.24–220.28) |
+
+So (b) adds ~11–12 ms of O(note) work to the runner and the writer on every leaving of a 100k note she edited — the same
+read costs about twice as much inside a write transaction as on a reader — keeping roughly 94% of 1D's win (211 → ~13 ms
+instead of 211 → ~1 ms) and making the runner turn grow with the note again whenever she edited. On the simulator the
+edited leaving's runner hold (6.71 ms, the AFTER table's run 2) and the box's first save behind it (7.83 ms) would each
+grow by about that much — an estimate, not a stage number; on her phone, unmeasured. A Mac number, never a phone number.
+
+**Recommendation: (a).**
+1. The gap never admits her own words on this road (the flush lands them first, in the same task, and the screen is
+   gone). It admits another device's writes through sync, and her words only in the S5 case — where S5 itself is what
+   keeps them, as a live synced take, and the next leaving savepoints it.
+2. The occasion's rule is one savepoint per take she edited in the session that ends ("one quiet savepoint per edited
+   take when the note stops being shown anywhere", OverallModel §3): (a) writes every such take at the turn. A remote
+   edit's savepoint belongs to the cadence of the device that made it; the old road caught one only when the apply
+   happened to commit before its turn — a write a millisecond later was missed then as now. That is timing, not a
+   guarantee the spec names.
+3. (b) buys the old point back only when she also edited, at O(note) on the one serial runner on every such leaving —
+   the class 1D removed — to cover a gap that needs a pull applying to that very note within milliseconds of her
+   leaving; and the read-only case keeps its gap under either arm.
+4. Under (a) the consequence is bounded and can be pinned: the take stays owed and the next ask writes it. Nothing of
+   hers is ever lost; the text is in the store and syncs.
+
+**The pin, per arm.**
+- **(a)** has no red-on-old pin — it fixes no bug; the narrowed point is the design, said honestly. I propose one
+  headless GUARD of the bound in `LeavingSavepointTests`: the read lists the one edited take → a direct `UPDATE` dirties a
+  second take (as an apply writes) → `closeAutoCommit(_:takes:)` with the read's list writes the edited take only → the
+  next read lists the second → the next ask writes it. Green by design (new API), named as a guard. With it, the
+  corrections: the branch's comment (`AppSession.swift:711-714` — "anything that landed between two asks … exactly as
+  before" — rewritten to name the gap inside one ask and what bounds it), `closeAutoCommit(_:takes:)`'s doc
+  (`Operations+Variant.swift:330-334` — the rows equal the whole op's when the list covers the dirty set AT THE TURN; a
+  take another writer dirtied after the read is the next ask's), and the record: §7 batch 7 ▸ hazard (b)'s "nothing can
+  go stale" (true across asks, not inside one), D-7-1, and the hazard (a) table's pop row.
+- **(b)**: the reviewer's race pin, hosted (`MobileLeavingSavesOnceTests`' world): edit take 1 and let it land, hold the
+  writer with an uncommitted `UPDATE` dirtying take 2, leave (the read runs, lists take 1, the turn waits on the writer),
+  release after the read has returned, and the leaving must still savepoint take 2 — red on this tree, green on the
+  pre-VM-71 tree (`vm64-b7r1-red` holds those four production files) and on (b). Beside it a headless Core pin of the
+  op's new contract: the list `[take 1]`, take 2 dirtied after the read, `closeAutoCommit(_:takes:)` writes both — red on
+  this tree, which I would run red and green myself. (b)'s code: the in-turn read inside `closeAutoCommit(_:takes:)`
+  (the Mac's `closeAutoCommit(_:)` untouched), its doc and the branch's comment, the gated series kept as its cost.
+
+The measurement series behind the table is committed after this section as a test-only, gated instrument
+(`LeavingSavepointMeasurementTests`' `union-turn-one-edit` and `read-on-writer-clean`), so the numbers reproduce from
+the repo whichever arm is chosen.
+
+### 2 · [MINOR] a screen shown again before its leaving finished never re-observes — AGREE; applied this pass, in the shape below; VM-227 NARROWED, not closed
+
+**Traced as written.** Cover → `onDisappear`'s task: `teardown()`, whose last lines stop observing
+(`MobileEditorViewModel.swift:406-409`), then the savepoint, then `releaseAutosaveHold(ifNotShownSince:)` (`:337-341`),
+which gives nothing back when the screen arrived again. Re-show → `.task` → `takeAutosaveHold()` (`:307-332`) returns at
+`guard !holdsAutosave` (`:309`), before the re-observe (`:322-331`).
+
+**The shape, and why not the literal hoist.** Moving the `if autosaveToken == nil { … }` block above the guard would
+break the re-acquire path the r1 pins hold: it would observe the coordinator the editor GAVE BACK, then the adopt branch
+(`:313-321`) would stop that very token and nil it, leaving the adopted coordinator unobserved
+(`MobileNoteHoldTests.aScreenShownAgainAfterItsLeavingTakesTheHoldBackAndIsWiredToIt`). So: the guard's early return
+becomes `if !holdsAutosave { … }` around the re-acquire, and the re-observe block, unchanged, runs after it on BOTH paths.
+The reviewer's intent exactly (it is idempotent — it observes only when no token is held — and reads `autosave` at use
+time); nothing else in the hold's lifecycle moves; batch 2's fence untouched.
+
+**Pin:** `MobileNoteHoldTests.aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator` — the parked-leaving
+posture of the suite's own `aScreenShownAgainBeforeItsLeavingFinishedKeepsItsHold` (the store held, so the leaving waits
+in its savepoint after teardown ran), the screen shown again, the store released, the leaving ends: the editor still
+holds AND observes, and what it observes is the registry's coordinator for the note. Red on the pre-fix
+`takeAutosaveHold` (the red build `vm64-fix-red`: this pass's tree with that one function as it was), green on the fix.
+Hosted — the stage runs it.
+
+**What it closes, and what it does not — the VM-227 question, by trace.** The roads where a note screen is covered and
+shown again with the SAME model are pushes on its own stack — Note ▸ Versions (`onOpenVersions`) and the diverged copy's
+landing (`onOpenNote`, R67) — then Back (`MobileShellView.swift:476-483`). A tab switch is not one: the band keeps every
+page mounted and only offsets it (`MobileShellView.swift:10-15`, `:326-335`), so no `onDisappear` fires; a sheet is not
+one either. On the push-and-Back road, by when the re-show lands against the cover's leaving:
+- **after the leaving's give-back** — the ordinary case, a push and Back take most of a second, the leaving
+  milliseconds: re-observed since batch 6's r1 (`takeAutosaveHold` re-acquires and observes). VM-227's text ("nothing
+  adds it back when it shows again") describes the tree before r1.
+- **after teardown, before the give-back** (the leaving parked in its savepoint: the read, or its runner turn behind a
+  busy runner or writer): re-observed by THIS fix — the pin above.
+- **while teardown itself is still suspended** — her keys pending at the cover, so `finish()`'s flush (or the tail's
+  mint settle, or a pending gesture) outlasts the push and Back behind a busy runner or writer: **NOT re-observed.** The
+  re-show's `takeAutosaveHold` finds the token still set and does nothing; teardown's last lines then remove it; the
+  give-back is skipped (shown again). The screen holds and does not listen until a full leave-and-return.
+So VM-227 is **narrowed, not closed**, by this fix. The one shape I traced that closes the last road too: at the leaving's
+last act, when the screen arrived again (`arrivalCount != arrival`) and no token is held, re-observe — one conditional
+in `releaseAutosaveHold(ifNotShownSince:)`. It changes the leaving's half of the lifecycle, outside this fix's fence, so
+it is NOT applied; offered for the reviewer's call (its pin: the same suite, a re-show while teardown's flush waits on
+the held writer with a key pending — red on this pass's tree).
+
+### 3 · [MINOR] `TimingRecorder.end` marks the record changed on a no-op — AGREE (pre-agreed at the midpoint); applied this pass
+
+`end(_:countingUnmatched:)` (`Diagnostics/TimingRecorder.swift:309-329`) calls `changed()` on every path. The fix is the
+windows' own shape (`openWindow`/`closeWindow`, `:431`, `:442` — `if recorded { changed() }`): the locked body reports
+whether something kept changed — a sample recorded, `unmatchedEnds` counted, a stale begin's `abandoned` counted — and
+only then is the change handler told. **Pin:** `TimingRecorderTests.aNoOpEndIfOpenLeavesTheRecordUnchanged` — after a
+save, an `endIfOpen` with nothing open tells the handler nothing and leaves no unsaved change (red on this tree); guard
+arms in the same test: an unmatched `end`, a stale end and a recorded end each tell it once per save. Headless — run red,
+then green, by me.
+
+### 4 · [MINOR] the batches 6+7 combined walk is owed — the orchestrator's (queued on the stage); nothing in this pass moves what that walk exercises.
+
+### 5 · [NIT] `surfaceSettled()` is `mutating` and reads like an event — AGREE (pre-agreed); applied this pass
+
+`mutating` dropped (`Domain/StructuralFlightFence.swift:94-96`) and its doc says it is a QUERY ("whether a drain is
+owed now"). The name stays: its one production caller is in the editor seam (`MobileEditorViewModel.swift:1341`), and a
+rename there buys no behaviour; the call sites compile unchanged. No pin (cleanliness); `StructuralFlightFenceTests` green.
+
+### 6 · [NIT] the round's "sent" under-reads under a mid-round burst — AGREE; applied this pass
+
+Said where the series' meaning lives — the catalog line (`Shared/AppTiming.swift:86-88`, the one place every mark's
+meaning is written) and the clamp (`syncRoundEnded`, `:385-390`): the count is the outbox's drop, so rows queued during
+the round are subtracted from it, and a burst of writes mid-round under-reads it, down to 0. Comment only; `SyncSession`
+untouched. No pin.
+
+### 7 · [NIT] FOR A LATER READER is a placeholder — the closeout's; finding 1's comment and record corrections land with the arm the reviewer picks (the second turn).
