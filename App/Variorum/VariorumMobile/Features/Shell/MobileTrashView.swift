@@ -309,8 +309,10 @@ struct MobileTrashView: View {
         if let text = item.text, !text.isEmpty { return text }
         // VM-83 (W-073): an untitled GATHERING is named by its own kind word
         // (VX-611's rule — the row's kind word already was), never "(empty
-        // book)".
-        return "(empty \(RecoveryCopy.rowKind(item.kind, isGathering: item.isGathering)))"
+        // book)". Round 1, N2: the ITEM overload, the shared file's rule
+        // wherever the row is in hand — so an untitled saved version is
+        // named as one too, as its meta line already says.
+        return "(empty \(RecoveryCopy.rowKind(item)))"
     }
 
     /// The row's second line: what it is · where it came from · and the

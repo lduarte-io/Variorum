@@ -696,15 +696,15 @@ in flight.** The pre-fix-pass tip ("old" for this window) is `0180727de`.*
 | Finding | State | Pin (TYPE / test) |
 |---|---|---|
 | F3 (VM-81) | DONE — pin `72fa54dc8`, fix in the VM-81 fix commit after it; phone `build-for-testing` GREEN; red/green **PENDING** (the fix-pin window) | `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` |
-| F4 (VM-83) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileTutorialLibraryWalkTests/theShelfLessonDescribesTheShelfThatExists` |
+| F4 (VM-83) | DONE — pin `72fa54dc8` (+ the neighbouring test's message reworded), fix in the VM-83 fix commit (the lesson's first sentence, the dangling "also"; a DRAFT for her wording pass, below); `build-for-testing` GREEN; red/green **PENDING** | `MobileTutorialLibraryWalkTests/theShelfLessonDescribesTheShelfThatExists` |
 | F5 (VM-81) | DONE — tests `72fa54dc8` (the cancel pin re-pointed to the binding, the write-back assertion, two hosted guards), fix in the VM-81 fix commit (the row's label, `cancelFinish()` deleted); `build-for-testing` GREEN; the window's lines **PENDING** | `MobileFinishConfirmTests` |
 | F8 (VM-81) | no code — the question below, for the orchestrator to file at the merge | — |
-| N1 (VM-83) | IN-PROGRESS — guard written | `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` |
-| N2 (VM-83) | IN-PROGRESS — pin written; fix NOT-STARTED | `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` |
+| N1 (VM-83) | DONE — guard `72fa54dc8` (green on both sides by design); the window's line **PENDING** | `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` |
+| N2 (VM-83) | DONE — pin `72fa54dc8`, fix in the VM-83 fix commit (`rowTitle` reads `RecoveryCopy.rowKind(item)`); red/green **PENDING** | `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` |
 | N3 (VM-81) | DONE — the test's `pendingArrivals` assertion removed `72fa54dc8`; the field gone and `confirmFinish` acting on `confirm.readingID` in the VM-81 fix commit | (the existing `MobileFinishConfirmTests`) |
-| N4 (VM-83) | IN-PROGRESS — test renamed; the `BookcaseBoard` comment NOT-STARTED | `MobileShellTests/theShelfObservationDeliversBooksStarsAndTheDailyMark` |
+| N4 (VM-83) | DONE in part — test renamed `72fa54dc8`; the `Shared/BookcaseBoard.swift` comment in the VM-83 fix commit (Mac `build-for-testing` GREEN); the core doc line left (owner line below) | `MobileShellTests/theShelfObservationDeliversBooksStarsAndTheDailyMark` |
 | N6 | WITHDRAWN — one line for VM-113's kickoff (below) | — |
-| N7 (VM-83) | IN-PROGRESS — the sweep test's doc says what it is | — |
+| N7 (VM-83) | DONE in part — the sweep test's doc says what it is (`72fa54dc8`); the source scan comes with VM-212 (below) | — |
 | N8 (VM-81) | DONE — comment only, in the VM-81 fix commit | — |
 | N9 | a walk row (below) | — |
 | N10 | a ticket line for the orchestrator (below) | — |
