@@ -1060,7 +1060,9 @@ struct MobileLivenessTests {
             let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
             window.addSubview(surface)
             window.makeKeyAndVisible()
-            defer { window.isHidden = true }
+            // VM-19 (round 1 N5): the teardown is certain on every exit; the
+            // explicit call below is where its expectation reads it.
+            defer { Self.leave(window) }
             model.attach(textView: surface.textView)
 
             // The screen's exact wiring order: arrive first, loops after.
