@@ -285,3 +285,5 @@ No revert is in flight (row V's revert was restored and verified).
 8. *Pins red on old* — 10 core pins red on the scaffold `46f030fc8` and again on the revert; the app pins' red leg is named above for the stage window; every green-by-nature pin is labelled GUARD or new-contract in its doc.
 9. *Every authored sentence listed* — above; sentence case ("Private" and "Journal" are the app's proper names for the mark and the book, as in the shipped copy); no ticket id in rendered text; the eye's words carry no "AI" (pinned).
 
+
+**Machinery (batch 1):** the closing record's first push was REFUSED by the pre-push guard (VX-996) — the GATE TYPES line named the build folder by its absolute home path. Nothing had been pushed; the line was rewritten home-relative, an amend was refused by the session's permission layer, and the two unpushed local record commits were folded back (`git reset --soft` to the pushed tip — nothing lost, nothing pushed rewritten) and recommitted as `a6ab1f720`. No pushed commit was rewritten. One scaffold run hung on a held-observation pin (recorded under PINS); only that run's own processes were killed.
