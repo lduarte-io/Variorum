@@ -62,7 +62,7 @@ final class MobileShellRouter {
     /// `@ObservationIgnored` for the `quickNote` reason: it is bound from the
     /// shell's initializer, which must never write observed state; a reader
     /// observes the STORE's own `settings`. Nil before the shell binds one
-    /// (harness and preview use): the placeholder governs.
+    /// (harness and preview use): `settings` says what governs then.
     @ObservationIgnored private(set) var theme: ThemeStore?
     /// Which session `theme` serves — the shell's initializer re-runs on
     /// every parent render, and a bind for the same session keeps its store.
@@ -85,8 +85,12 @@ final class MobileShellRouter {
         return settings
     }
 
-    /// The library's landed settings — the phone's look (LK-1).
-    var settings: Queries.ThemeSettings { theme?.settings ?? Self.placeholder }
+    /// The library's landed settings — the phone's look (LK-1). A bound store
+    /// holds the placeholder until its first landing. With no library bound
+    /// (harness and preview use only — the shell binds before its first read)
+    /// it is the editor face's own look, so a hosted masthead and the editor
+    /// below it agree.
+    var settings: Queries.ThemeSettings { theme?.settings ?? MobileEditorStyle.settings }
 
     /// The library's voice (R-47-2's rows read it).
     var voice: ThemeVoice { settings.voice }

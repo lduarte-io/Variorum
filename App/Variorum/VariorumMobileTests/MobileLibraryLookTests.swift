@@ -196,10 +196,17 @@ struct MobileLibraryLookTests {
         let db = try AppDatabase.inMemory()
         let empty = try await db.read { try Queries.themeSettings($0) }
         #expect(MobileShellRouter.placeholder == empty)
-        // A router with no library bound wears it.
-        let router = MobileShellRouter()
-        #expect(router.settings == empty)
-        #expect(router.tokens(dark: false) == VoiceTokens.resolve(settings: empty, dark: false))
+        try await withEditorWorld { session, _ in
+            // A router BOUND to a library wears the placeholder until the
+            // store's first landing (the shell's first frame).
+            let router = MobileShellRouter()
+            router.bindTheme(session: session)
+            #expect(router.settings == empty)
+            #expect(router.tokens(dark: false) == VoiceTokens.resolve(settings: empty, dark: false))
+            // With NO library bound (harness use only), the router reports the
+            // editor face's own look, so a hosted masthead and the editor agree.
+            #expect(MobileShellRouter().settings == MobileEditorStyle.settings)
+        }
     }
 
     // MARK: - The editor face's one writer
