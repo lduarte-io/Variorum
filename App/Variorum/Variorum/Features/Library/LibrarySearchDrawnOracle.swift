@@ -29,6 +29,9 @@ enum LibrarySearchDrawnSlot: String, Hashable {
     case groupsHeader
     /// The band's counts line ("— 7 notes · 7 passages").
     case countsLine
+    /// The answer sheet's empty sentence ("Nothing matches.", or the field's
+    /// reason when it holds nothing searchable — R-980-5, the VX-980 run).
+    case emptyAnswer
 }
 
 #if DEBUG

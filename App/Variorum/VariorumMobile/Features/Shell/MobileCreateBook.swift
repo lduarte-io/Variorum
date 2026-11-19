@@ -37,6 +37,12 @@ final class MobileCreateBookModel {
     }
 
     @ObservationIgnored private let session: AppSession
+    /// **VM-58 — the wing this sheet mints in**, read ONCE when the sheet
+    /// opens: the wing the phone stands in. One snapshot names the wing for
+    /// the per-wing name guard (VX-816) and the mint — the Mac's VX-889 rule
+    /// for its own gathering mint ("one snapshot names the wing for the name
+    /// guard, the mint and the rule's tag vocabulary").
+    @ObservationIgnored let wingID: String
 
     var name = ""
     var kind: BookKind = .notes
@@ -45,21 +51,31 @@ final class MobileCreateBookModel {
     /// AND vs OR when several tags are picked (the Mac's radio pair).
     var joinAll = false
     private(set) var tags: [Tag] = []
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession) {
         self.session = session
+        self.wingID = session.wing.currentID
     }
 
     /// One-shot: the taxonomy for the smart picker (author-scale rows).
     /// One flight at a time — this sheet's only write is the mint.
     let latch = MobileWriteLatch()
 
+    ///
+    /// VM-59: the BOOK's own wing's vocabulary — the sheet's one snapshot,
+    /// the wing the mint lands in, where Core resolves the rule's paths. A
+    /// path from another wing would have become a dead term.
     func loadTags() async {
         do {
-            tags = try await session.database.read { try Queries.allTags($0) }
+            let wing = wingID
+            tags = try await session.database.read { try Queries.allTags($0, wingID: wing) }
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -159,32 +175,34 @@ final class MobileCreateBookModel {
     private func createOnce() async -> String? {
         guard canCreate else { return nil }
         let bookName = name.trimmingCharacters(in: .whitespaces)
+        // VM-58: the sheet's one wing snapshot — the guard and the mint agree.
+        let wing = wingID
         do {
             let id: String
             switch kind {
             case .notes:
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
-                    return try ops.createReading(name: bookName, kind: .book)
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
+                    return try ops.createReading(name: bookName, kind: .book, wingId: wing)
                 }.id
             case .journal:
                 // The Mac create alert's journal shape, byte-mirrored:
                 // curated, profile 'journal', dated order ascending.
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
                     return try ops.createReading(
                         name: bookName, kind: .book,
                         profile: Queries.journalTraitProfile,
-                        sortField: .entryDate, sortDir: .desc)
+                        sortField: .entryDate, sortDir: .desc, wingId: wing)
                 }.id
             case .smartFromTags:
                 let paths = selectedTagPaths.sorted()
                 let all = joinAll && paths.count > 1
                 let json = try Self.spec(paths: paths, joinAll: all).encodedJSON()
                 id = try await session.runner.run { ops in
-                    try ops.assertBookNameIsFree(bookName, inWing: "")  // VX-816: the phone mints in Home
+                    try ops.assertBookNameIsFree(bookName, inWing: wing)  // VX-816: per wing
                     return try ops.createReading(
-                        name: bookName, kind: .gathering, querySpec: json)
+                        name: bookName, kind: .gathering, querySpec: json, wingId: wing)
                 }.id
             }
             lastError = nil
@@ -203,7 +221,7 @@ final class MobileCreateBookModel {
             lastError = BookNameCopy.refusal(existing: existing)
             return nil
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return nil
         }
     }
@@ -264,9 +282,8 @@ struct MobileCreateBookSheet: View {
                 tagPicker
             }
             Spacer(minLength: 0)
-            if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-            }
+            // VM-61: a refusal (a taken name, a store error) speaks on the
+            // shell's one line, which draws above this sheet.
             Button {
                 Task {
                     if let id = await model.create() {

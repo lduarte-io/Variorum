@@ -51,7 +51,11 @@ final class MobileBookDetailsModel {
     private(set) var book: Queries.ShelfBook?
     private(set) var tagPaths: [String] = []
     private(set) var isDaily = false
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
     /// VM-81 — the Finish confirm on screen (nil = none asked).
     private(set) var pendingFinish: FinishConfirm?
 
@@ -140,7 +144,7 @@ final class MobileBookDetailsModel {
             }
             isDaily = dailyID == id
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -207,11 +211,11 @@ final class MobileBookDetailsModel {
                 return (reading.name, try Queries.pendingArrivalCount(db, readingID: id))
             }
         } catch {
-            lastError = DeletionRefusal.words(error)
+            lastError = DeletionRefusal.sentence(error, roads: .phone)
             return
         }
         guard let opening else {
-            lastError = DeletionRefusal.words(OperationError.readingNotFound(id: id))
+            lastError = DeletionRefusal.sentence(OperationError.readingNotFound(id: id), roads: .phone)
             return
         }
         guard BookStateCopy.finishNeedsConfirm(pendingArrivals: opening.waiting) else {
@@ -294,12 +298,20 @@ final class MobileBookDetailsModel {
                 try ops.deleteReading(id)
             }
             lastError = nil
+            // VM-61: the shelf row's own delete line, said by this door too —
+            // the same act, the same words, the same Put back (her ruling: a
+            // delete answers with a line and Undo). VM-83 (W-073): the shelf
+            // row's words name a GATHERING a gathering, so this door's do too.
+            MobileLine.say(
+                RecoveryCopy.movedToTrashReceipt(
+                    .book, isGathering: book?.reading.kind == .gathering),
+                as: .removal(.putBackBook(id)), session: session)
             return true
         } catch let error as OperationError {
             lastError = Self.refusal(error)
             return false
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             return false
         }
     }
@@ -313,9 +325,16 @@ final class MobileBookDetailsModel {
         do {
             try await session.runner.run { ops in try ops.archiveReading(id) }
             lastError = nil
+            // VM-61: the shelf row's own archive line (same act, same words),
+            // with Undo as the existing unarchive.
+            if let name = book?.reading.name {
+                MobileLine.say(
+                    MobileShelfFaces.archivedDailyJournalReceipt(name: name),
+                    as: .removal(.unarchiveBook(id)), session: session)
+            }
             return true
         } catch {
-            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.words(error)
+            lastError = OpsRefusalCopy.words(for: error, roads: .phone) ?? DeletionRefusal.sentence(error, roads: .phone)
             return false
         }
     }
@@ -333,7 +352,7 @@ final class MobileBookDetailsModel {
         } catch let error as OperationError {
             lastError = Self.refusal(error)
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         await refresh()
     }
@@ -349,26 +368,20 @@ final class MobileBookDetailsModel {
     /// keeps the two platforms saying the same thing (MobileSoul §3);
     /// without the arm it would fall to `DeletionRefusal.fallback`, whose
     /// honest last resort still ends in a raw `duplicateBookName(name:)`.
+    /// (VM-62: the phone's road ends in the shared table, then the one plain
+    /// fallback — never a dump: Finish on a gathering, Reopen on a sealed
+    /// book.)
     nonisolated static func refusal(_ error: OperationError) -> String {
         if case .duplicateBookName(let existing) = error {
             return BookNameCopy.refusal(existing: existing)
         }
-        // VM-81 (W-106): Reopen on a SEALED book (`unlockReading` refuses
-        // `readingSealed`) fell to `DeletionRefusal.fallback` and reached her
-        // as the raw enum. It speaks the shared table's sentence, the phone's
-        // roads (no Unseal door named — the phone has none yet). Round 1, F3:
-        // Unarchive's one foreseeable refusal joins it — a book unarchived
-        // elsewhere while this sheet is open, or a second press queued behind
-        // the first, meets `readingNotArchived` ("That book isn't archived any
-        // more — nothing changed."). Only these: VM-62 sweeps the other
-        // raw-dump sites.
-        switch error {
-        case .readingSealed, .readingNotArchived:
-            if let words = OpsRefusalCopy.words(for: error, roads: .phone) { return words }
-        default:
-            break
-        }
-        return DeletionRefusal.words(error)
+        // VM-81 (W-106) and round 1's F3 — Reopen on a SEALED book
+        // (`readingSealed`) and a raced Unarchive (`readingNotArchived`) —
+        // ride this road since VM-62: `DeletionRefusal` has no arm for either,
+        // so both reach the shared table's sentence on the phone's roads ("This
+        // book is sealed, so it can't be reopened here." · "That book isn't
+        // archived any more — nothing changed."), never the raw enum.
+        return DeletionRefusal.sentence(error, roads: .phone)
     }
 }
 
@@ -438,9 +451,8 @@ struct MobileBookDetailsSheet: View {
                     deleteRow(book.reading.kind)
                 }
             }
-            if let error = model.lastError {
-                Text(error).font(tokens.small).foregroundStyle(tokens.alarm)
-            }
+            // VM-61: a refusal here speaks on the shell's one line, which
+            // draws above this sheet.
             Spacer(minLength: 0)
         }
         .padding(20)

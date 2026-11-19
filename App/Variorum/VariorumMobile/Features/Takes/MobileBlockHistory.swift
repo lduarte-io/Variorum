@@ -208,7 +208,7 @@ final class MobileBlockHistoryController {
         }
         do {
             try await runner.run { ops in _ = try ops.commit(variantID, kind: .manual) }
-            model.report(Self.committedStatus)
+            model.report(Self.committedStatus, line: .ordinary)
             if isOpen { await refresh() }
         } catch {
             model.report(Self.refusalMessage(error, act: "commit this take"))
@@ -280,7 +280,7 @@ final class MobileBlockHistoryController {
             guard openBlockID == blockID else { return }
             adopt(value)
         } catch {
-            status = .refusal(String(describing: error))
+            report(.refusal(OpsRefusalCopy.sentence(for: error, roads: .phone)))
             onChanged?()
         }
     }
@@ -536,7 +536,8 @@ final class MobileBlockHistoryController {
                 try ops.restoreVariant(variantID)
             }
             await model?.refreshTakesFromStore()
-            report(.receipt(BlockPastCopy.restored(restored)))
+            report(.receipt(BlockPastCopy.restored(restored)),
+                   direction: RecoveryCopy.isDirection(restored))
             await refresh()
         } catch {
             report(.refusal(Self.refusalMessage(error, act: "put this take back")))
@@ -552,9 +553,9 @@ final class MobileBlockHistoryController {
         guard let model else { return }
         status = nil
         do {
-            let receipt = try await PreservedOriginPutBack.run(
+            let answer = try await PreservedOriginPutBack.answer(
                 session: session, postID: model.postID, blockID: originBlockID)
-            report(.receipt(receipt))
+            report(.receipt(answer.receipt), direction: answer.isDirection)
             await refresh()
         } catch {
             report(.refusal(Self.refusalMessage(error, act: "bring this original back")))
@@ -563,16 +564,26 @@ final class MobileBlockHistoryController {
 
     // MARK: - Status
 
-    private func report(_ status: RecoveryStatus) {
+    private func report(_ status: RecoveryStatus, direction: Bool = false) {
         self.status = status
         onChanged?()
+        // VM-61: spoken on the phone's one line. Every receipt this face
+        // makes is a restoration (a commit restored, a take unarchived or put
+        // back, an original brought back) — an ordinary act, no line
+        // (PROVISIONAL P-55-4); a refusal always speaks. P-55-11: a restoration
+        // that landed somewhere other than where she would look (`direction` —
+        // a take back among the archived takes, an original at the note's end)
+        // keeps its line in P-55-7's class; the face's record stays a receipt.
+        MobileLine.say(
+            status.text, as: status.isRefusal || direction ? .refusal : .ordinary,
+            session: session)
     }
 
     // MARK: - Refusal copy (the ops' real refusals, phone words)
 
     static func refusalMessage(_ error: Error, act: String) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
@@ -582,7 +593,7 @@ final class MobileBlockHistoryController {
             // standing locked-take sentence names the road for both.
             return MobileEditorViewModel.lockedTakeRefusal
         default:
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

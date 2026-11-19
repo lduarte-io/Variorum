@@ -455,17 +455,17 @@ final class MobileBlockMenuController {
     /// The everyday cases in phone words (the S2 posture). **18m U3:** the
     /// seal speaks the ONE stem in the phone's door words, with this door's
     /// act; the rest is the shared refusal table's words where it has them,
-    /// and this door's own fallback where it has none.
+    /// and the one plain fallback where it has none (VM-62).
     static func refusalMessage(_ error: Error, act: String) -> String {
         guard let error = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch error {
         case .lockedPost:
             return SealedNoteCopy.sentence(act: act, words: .phone)
         default:
             return OpsRefusalCopy.words(for: error, roads: .phone)
-                ?? DeletionRefusal.fallback(error)
+                ?? DeletionRefusal.plainFallback(error, roads: .phone)
         }
     }
 }

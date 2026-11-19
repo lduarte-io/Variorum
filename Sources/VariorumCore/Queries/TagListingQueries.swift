@@ -71,11 +71,13 @@ extension Queries {
     /// **The tags a question's WORDS name** (VX-84b — D-2: the band offers
     /// `tag: #path ›` for a plain word that names a tag). The wing's live
     /// vocabulary through the one composer, the decision `SearchTagOffer`'s
-    /// (its one pure home). Library scope only; empty without words.
+    /// (its one pure home). Library scope only; empty without words — the
+    /// words road being the ONE predicate's (`SearchComposer.asksWords`,
+    /// VX-954: `— #flora` offers what `#flora` offers).
     public static func searchTagOffers(
         _ db: Database, query: SearchQuery, scope: SearchScope
     ) throws -> [SearchTagOffer.Offer] {
-        guard query.text != nil, case .library = scope.within else { return [] }
+        guard SearchComposer.asksWords(query), case .library = scope.within else { return [] }
         let statement = SearchComposer.wingTagVocabulary(
             wingID: scope.wingID, environment: try searchEnvironment(db))
         let vocabulary = try String.fetchAll(db, sql: statement.sql, arguments: arguments(statement.arguments))

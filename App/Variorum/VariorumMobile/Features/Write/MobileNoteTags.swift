@@ -36,7 +36,12 @@ final class MobileNoteTagsModel {
 
     private(set) var applied: [Tag] = []
     private(set) var allTags: [Tag] = []
-    private(set) var status: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); the sheet no longer
+    /// draws it.
+    private(set) var status: String? {
+        didSet { MobileLine.refuse(status, session: session) }
+    }
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -68,16 +73,24 @@ final class MobileNoteTagsModel {
 
     // MARK: - Reads
 
+    ///
+    /// VM-59: the suggestions are the NOTE's own wing's vocabulary (the wing
+    /// `TypedTagPath.apply` resolves a tapped path in) — never every wing's,
+    /// where a tap on another wing's path minted a same-path twin here, and
+    /// never the app's current wing, which differs while a note from another
+    /// wing is open.
     func refresh() async {
         do {
             let postID = postID
             let (mine, all) = try await session.database.read { db in
-                (try Queries.postTags(db, postID: postID), try Queries.allTags(db))
+                let wing = try Queries.effectiveWing(db, ofPost: postID) ?? ""
+                return (try Queries.postTags(db, postID: postID),
+                        try Queries.allTags(db, wingID: wing))
             }
             applied = mine
             allTags = all
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -162,12 +175,7 @@ struct MobileNoteTagsSheet: View {
                 VStack(alignment: .leading, spacing: 10) {
                     appliedSection
                     suggestionSection
-                    if let status = model.status {
-                        Text(status)
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                 }
             }
         }

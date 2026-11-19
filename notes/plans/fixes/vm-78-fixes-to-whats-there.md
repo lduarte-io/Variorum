@@ -2279,8 +2279,8 @@ its own checkout.*
 | 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `211221f6b` (introduced), `75984c0e6` (its last edition, as run alone in batch D's window). The kickoff's wording for it is right as written |
 | 1e — the back-out's check | DONE (this commit) — output below |
 | 2a — the plan, written before the merge starts | DONE (this commit) — "The plan" below |
-| 2b — the merge commit (seven conflicts resolved, the re-land) | NOT-STARTED |
-| 2c — the semantic merges git does not flag | NOT-STARTED |
+| 2b — the merge commit (seven conflicts resolved, the re-land) | DONE (the merge commit — `origin/main` at `eb18888db`; its hash is the next record commit's) — per file in "The re-land, file by file" below; compile PENDING (row 3) |
+| 2c — the semantic merges git does not flag | IN-PROGRESS — in the merge commit: `MobileBookDetails.requestFinish`'s two refusals moved onto VM-62's road, Book Details' delete line names a gathering; the phone sources scanned by hand for VM-62's forbidden expressions (clean but main's three exempt/log lines). NEXT: the pins re-shaped to the one line (their own commit), then the compiler, then every test file read against the merged product |
 | 3 — phone + Mac `build-for-testing` on the merged tree | NOT-STARTED |
 | 4 — the window recipe (RED, GREEN, the Mac types) | NOT-STARTED |
 
@@ -2349,6 +2349,60 @@ structure wins and this run's BEHAVIOR is re-landed onto it in main's vocabulary
   onto the line; this run's tests that read a slot; `MobileEditorViewModel` (the `entryDate` mirror at the one
   `header` assignment), `MobileWriteView` (`dateChipDay`), `MobileTrashView`, `MobileShelfView` /
   `MobileShelfFaces`, `MobileCreateBook`, `Shared/RecoveryCopy.swift`, `MobileDeletionTests`.
+
+**The re-land, file by file (the merge commit; line numbers are the merged tree's).** Main's structure in every file;
+this run's behavior on top.
+- **`Write/MobileUndoDoor.swift` — VM-16 needed exactly** (main's door still read `undo(with:)` / `redo(with:)`;
+  VM-55 did not change the calls). Main's change: the receipt left the masthead (VM-61) — a landed press is
+  `.ordinary` (nothing on the line; the ⋯ sheet's Undo/Redo rows stay; the model still records `statusAction`),
+  nothing on the stack is `.refusal`; refusals through `OpsRefusalCopy.sentence` (VM-62). On main a QUIET press was
+  therefore SILENT on the line while the model recorded "Undid: X" and a way back that acts on another entry. This
+  run's rule, re-landed: `runUndo` reads `undoReporting` (`:213`) and `redo()` reads `redoReporting` (`:271`);
+  changed → main's report exactly (`undone`/`redone`, `action: .redo`/`.undo`, `line: .ordinary`); QUIET →
+  `report(StructuralUndoCopy.undoFoundNothing(label), line: .refusal)` (`:231`) / `redoFoundNothing` (`:282`), no
+  action recorded or offered; nil → main's `nothingToUndo` / `nothingToRedo` as `.refusal`. VM-20:
+  `discardingUndoDetail` forwards to `StructuralUndoCopy.discardingUndoDetail(_:readBackFrom:)` (`:317`; main's file
+  still said "It is saved first").
+- **`Shell/MobileBookDetails.swift` — VM-81, F3, F5, N3, R2-N1.** Main's change: `lastError` speaks on the one line
+  from its `didSet` (`:56`); dumps → `OpsRefusalCopy.sentence`; `refusal(_:)` → `DeletionRefusal.sentence(error,
+  roads: .phone)`; delete and archive now say the shelf row's removal lines. **Main had ALREADY fixed this run's two
+  forwarded refusals:** `DeletionRefusal.knownWords` has no arm for `.readingSealed` or `.readingNotArchived`, so
+  VM-62's road reaches the table, whose phone sentences are byte-identical to this run's pins — this run's
+  forwarding arm is DELETED (`refusal(_:)`, `:384`, a comment says why). Re-landed whole: `pendingFinish` (`:60`),
+  `finishRowAct` (`:96`), `finishCaption` (`:107`), `FinishConfirm` (`:117`), `archivedBook` (`:160`), `nameLine`
+  (`:175`), `requestFinish` (`:205` — its two `DeletionRefusal.words(…)` moved onto main's road, `:214`, `:218`;
+  VM-62's scan forbids the old one), `confirmFinish` (`:236`), `finishConfirmPresented` (`:247`, no `cancelFinish`),
+  `offersUnarchive` / `unarchive` (`:253`, `:258` — ordinary, no line: P-55-4), the sheet's rows with their labels
+  and hints (`unarchiveRow` `:551`, `deleteRow(_:)` `:579`, `finishRow` `:627`, the hints `:543`, `:574`, `:598`,
+  `:660`). **One semantic join:** main's new delete line from Book Details said "Book moved to the Trash…" for a
+  gathering; it now composes `RecoveryCopy.movedToTrashReceipt(.book, isGathering:)` (`:307`) — this run's W-073
+  rule on main's P-55-8 line (the same act says the same line as the shelf row, whose words name a gathering).
+- **`Shell/MobileShelfViewModel.swift` — VM-83.** Main's change: the held listing runs per wing
+  (`MobileWingScope.follow`, `bookshelf(db, wingID:)`), refusals onto the line, the delete and archive removal
+  lines. Re-landed: `start()` (`:72`) inside main's follow with no `pins` in the snapshot; `orderedBooks` (`:112`) =
+  `BookcaseBoard.ordered(…, .alphabetical)` — the wing-scoped listing, ordered by this run's rule; `rowActs`
+  (`:139`); `setPinned` retired (`:147`, main's refusal-road edit of it dropped with it); the delete receipt names a
+  gathering (`:216`) and main's removal line speaks it.
+- **`Shell/MobileTrashModel.swift` — VM-33.** Main's change: the listing runs once per wing inside
+  `MobileWingScope.follow`. Re-landed: `trashListingLoaded` (`:63`) is lowered at the TOP of each follow run
+  (`:117` — the first run and every wing's re-run) and raised by each value (`:124`); its doc says a failed listing
+  speaks on the line, not a red slot.
+- **`Write/MobileMembership.swift` — VM-81 W-110, VM-21, VM-83.** Main's change: the note's own wing's books
+  (`:150`), `say(_:as:)` onto the line. Re-landed: `rowCarriesDiverge` (`:104`), `kindMark` (`:111`),
+  `memberRowName` (`:119`), `addRowLabel` (`:132`), and the collect receipt `AddToBookCopy.collected(…)` spoken
+  `.refusal` (`:200`) — the class main gives BOTH collect arms (already matched: a door that did nothing; tagging: a
+  direction, P-55-11); for a star or an archived gathering this run's words, for a live tags-only or already-matched
+  collect byte-identical to main's (so main's `MobileLineDirectionTests` collect pin keeps its words).
+- **`notes/MobileSoul.md`.** Main added PL-75 (VX-980) and PL-76 (VM-55); this run's row, drafted as PL-75, is
+  **PL-77**, after them. Its only self-number was its heading (every other PL number in it names another row).
+  **For the closeout pass, not done here:** the row still describes VM-17's takes-chrome change as gained and the
+  decor reading as owed — both now false after the back-out (VM-17 and VM-239 went to their own run).
+- **`notes/SurfaceContracts.md`.** Main changed the Delete bullet (the Trash's own search) and the wing switcher
+  bullet (the phone's wings) and added the phone's message-line clause; this run's five clauses are kept beside
+  main's words: the Bookcase (the phone's shelf order), the book settings sheet (two: the phone's Finish confirm, the
+  membership sheet's "(archived)"), the Delete bullet (two: Delete Gathering… on the phone's shelf row and Book
+  Details, the phone's Trash first paint). None of main's lines already states those phone behaviors, so no clause
+  was dropped.
 
 ## The ladder
 

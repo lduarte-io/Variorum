@@ -127,28 +127,36 @@ final class MobileStarsModel {
 
     /// Held: the rows she starred — ∝ the stars she keeps, never the corpus
     /// (VX-643's P1 check, `StarsP1Tests`; the Mac StarsModel's own note).
+    ///
+    /// VM-57: the stars of the wing the phone stands in
+    /// (`Queries.starred(_:wingID:)` — the Mac's read, P-13id-U5-10: the
+    /// list stays one store-wide list, each wing shows its own), re-read for
+    /// each wing.
     func start() async {
-        do {
-            for try await value in session.database.observe({ db in
-                try Queries.starred(db)
-            }) {
-                items = value
-                await resolveNames()
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await value in session.database.observe({ db in
+                    try Queries.starred(db, wingID: wing)
+                }) {
+                    items = value
+                    await resolveNames()
+                }
+            } catch is CancellationError {
+            } catch {
+                speakHomeless(OpsRefusalCopy.sentence(for: error, roads: .phone))
             }
-        } catch is CancellationError {
-        } catch {
-            speakHomeless(String(describing: error))
         }
     }
 
     /// One-shot for headless determinism (the observation echoes it in
-    /// production).
+    /// production). VM-57: the current wing's stars.
     func refresh() async {
         do {
-            items = try await session.database.read { try Queries.starred($0) }
+            let wing = session.wing.currentID
+            items = try await session.database.read { try Queries.starred($0, wingID: wing) }
             await resolveNames()
         } catch {
-            speakHomeless(String(describing: error))
+            speakHomeless(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -171,7 +179,7 @@ final class MobileStarsModel {
                     createdAt: header.createdAt))
             })
         } catch {
-            speakHomeless(String(describing: error))
+            speakHomeless(OpsRefusalCopy.sentence(for: error, roads: .phone))
         }
     }
 
@@ -201,10 +209,11 @@ final class MobileStarsModel {
                 try ops.setStarred(target, starred: !starred)
             }
             clearError()
-        } catch let error as OperationError {
-            speak("Refused: \(error)", at: home)
         } catch {
-            speak(String(describing: error), at: home)
+            // VM-62 (audit B M2): the shared table's words — the Mac StarsModel's
+            // own (`OpsRefusalCopy.message`) — or the one plain fallback; never
+            // "Refused: …" with the case name.
+            speak(OpsRefusalCopy.sentence(for: error, roads: .phone), at: home)
         }
         await refresh()
     }
@@ -218,6 +227,7 @@ final class MobileStarsModel {
         errorClearTask = nil
         errorHome = nil
         lastError = message
+        MobileLine.refuse(message, session: session)  // VM-61: the one line
     }
 
     /// A door refusal: spoken at its root, cleared after the cadence
@@ -225,6 +235,7 @@ final class MobileStarsModel {
     private func speak(_ message: String, at home: DoorHome) {
         lastError = message
         errorHome = home
+        MobileLine.refuse(message, session: session)  // VM-61: the one line
         errorClearTask?.cancel()
         errorClearTask = Task { [weak self] in
             guard let delay = self?.errorClearDelay else { return }

@@ -31,13 +31,18 @@ import VariorumCore
 @MainActor
 @Suite("Mobile structural undo/redo — M20's two doors")
 struct MobileUndoDoorTests {
-    // MARK: - The receipt's Undo (the door that matters most)
+    // MARK: - The line's Undo (the door that matters most)
+    //
+    // **VM-61 (2026-11-19): the receipt left the masthead for the shell's ONE
+    // line** (her VM-44 ruling; the note-write mockup's D4/D4b). These pins
+    // follow it: a removal's Undo is the line's own real Button, mounted and
+    // activated through UIKit's dispatch exactly as the masthead's was; a
+    // divide and a landed undo say nothing, and their doors are the ⋯ sheet's.
 
     /// **THE PIN THIS ROW EXISTS FOR.** Delete two whole paragraphs with
     /// her own gesture — the one R13 stripped the confirm from — then mount
-    /// the REAL masthead and press the REAL "Undo" that appears beside the
-    /// receipt. The blocks come back, in place, from a control a finger
-    /// could reach.
+    /// the REAL message line and press the REAL "Undo" it carries. The blocks
+    /// come back, in place, from a control a finger could reach.
     ///
     /// It drives `accessibilityActivate()`, which is UIKit's own activation
     /// dispatch for a SwiftUI Button (the road VoiceOver takes) — not the
@@ -53,13 +58,16 @@ struct MobileUndoDoorTests {
             await model.structural.deleteWholeBlockRun(Array(doomed))
             #expect(try await storedBlockTexts(db, postID: postID) == ["Third para."])
             #expect(model.statusMessage == MobileStructuralController.blocksDeletedStatus(2))
-            #expect(model.statusAction == .undo, "the receipt carries the way back")
+            #expect(model.statusAction == .undo, "the model records the way back")
+            #expect(session.status.current?.leavesPage == true, "the line speaks it")
 
             try await withHostedSurface(
-                MobileWriteScreen(session: session, postID: postID, editor: model)
+                MobileMessageLineView(model: MobileMessageLineModel(
+                    status: session.status, voice: { .terminal }))
             ) { surface in
-                // The REAL button is on screen, and says what it will do.
-                let undo = try #require(surface.element(labeled: "Undo Delete Blocks"))
+                // The REAL button is on the line.
+                let undo = try #require(surface.element(labeled: MobileLine.undoLabel),
+                                        "labels were \(surface.visibleLabels)")
                 #expect(undo.accessibilityActivate(), "UIKit fires the real control")
                 await surface.settle(30)
             }
@@ -70,9 +78,12 @@ struct MobileUndoDoorTests {
         }
     }
 
-    /// The mirror, from the same place: after an undo the receipt offers
-    /// **Redo**, and pressing it re-applies — the ping-pong her R10 asked
-    /// for, without opening anything.
+    /// **A landed undo says nothing, and its Redo is the ⋯ sheet's** (VM-61 —
+    /// her ruling: no line for an ordinary act; the note-write mockup's table,
+    /// "Undo · Redo — nothing said; the page shows it"). This pin used to
+    /// press the receipt's own Redo — R10's ping-pong, retired with the
+    /// masthead receipt; the line drops "Undid: …" and the persistent door
+    /// carries the Redo.
     @Test func theReceiptsRedoButtonReAppliesWhatWasUndone() async throws {
         try await withEditorWorld { session, db in
             let postID = try await makePost(
@@ -84,24 +95,27 @@ struct MobileUndoDoorTests {
             #expect(try await storedBlockTexts(db, postID: postID)
                 == ["First para.", "Second para."])
             #expect(model.statusMessage == StructuralUndoCopy.undone("Delete Blocks"))
-            #expect(model.statusAction == .redo)
+            #expect(model.statusAction == .redo, "the model records the way forward")
+            #expect(session.status.current == nil, "the line says nothing for a landed undo")
 
             try await withHostedSurface(
                 MobileWriteScreen(session: session, postID: postID, editor: model)
             ) { surface in
-                let redo = try #require(surface.element(labeled: "Redo Delete Blocks"))
-                #expect(redo.accessibilityActivate())
+                #expect(surface.activate(MobileNoteActionsSheet.doorLabel))
+                await surface.settle(40)
+                #expect(surface.activate("Redo Delete Blocks"),
+                        "labels were \(surface.visibleLabels)")
                 await surface.settle(30)
             }
             #expect(try await storedBlockTexts(db, postID: postID) == ["Second para."])
         }
     }
 
-    /// **Divide says nothing and still offers the way back.** Four
-    /// structural acts deliberately report no sentence (the text
-    /// rearranging on screen IS the report); the receipt slot carries a
-    /// BARE Undo for them, which is what let this batch add the affordance
-    /// without changing a single shipped "this act says nothing" pin.
+    /// **Divide says nothing, and its way back is the ⋯ sheet's** (VM-61 —
+    /// the note-write mockup's D3: "Nothing is said: nothing left the page").
+    /// The masthead's bare Undo for the silent acts retired with the masthead
+    /// receipt; a divide puts nothing on the line, and the persistent door
+    /// undoes it.
     @Test func aSilentStructuralActStillWearsTheUndoDoor() async throws {
         try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: ["One two three four."])
@@ -111,12 +125,15 @@ struct MobileUndoDoorTests {
             await model.structural.divide(atSurfaceCaret: 8)
             #expect(try await storedBlockTexts(db, postID: postID) == ["One two", "three four."])
             #expect(model.statusMessage == nil, "divide still says nothing")
-            #expect(model.statusAction == .undo, "…and still offers the way back")
+            #expect(model.statusAction == .undo, "the model records the way back")
+            #expect(session.status.current == nil, "and the line says nothing either")
 
             try await withHostedSurface(
                 MobileWriteScreen(session: session, postID: postID, editor: model)
             ) { surface in
-                #expect(surface.activate("Undo Divide"))
+                #expect(surface.activate(MobileNoteActionsSheet.doorLabel))
+                await surface.settle(40)
+                #expect(surface.activate("Undo Divide"), "labels were \(surface.visibleLabels)")
                 await surface.settle(30)
             }
             #expect(try await storedBlockTexts(db, postID: postID) == ["One two three four."])
@@ -280,7 +297,12 @@ struct MobileUndoDoorTests {
             try await withHostedSurface(
                 MobileWriteScreen(session: session, postID: postID, editor: model)
             ) { surface in
-                #expect(surface.activate("Undo Divide"))
+                // VM-61: the RECEIPT surface's Undo is the one line's door
+                // (`MobileLine.Undo.structural`), drawn on a removal; a divide
+                // no longer draws a line, so this pin presses the door the
+                // line presses. The subject — A12's host on the receipt
+                // surface and its confirm→act edge — is unchanged.
+                await model.undoDoor.beginUndo(from: .receipt)
                 await surface.settle(40)
                 let alert = try #require(surface.presentedAlert,
                                          "A12's warning must actually present")
@@ -376,7 +398,8 @@ struct MobileUndoDoorTests {
             try await withHostedSurface(
                 MobileWriteScreen(session: session, postID: postID, editor: model)
             ) { surface in
-                #expect(surface.activate("Undo Divide"))
+                // VM-61: the door the one line presses (see the pin above).
+                await model.undoDoor.beginUndo(from: .receipt)
                 await surface.settle(40)
                 _ = try #require(surface.presentedAlert)
                 #expect(surface.tapAlertAction(

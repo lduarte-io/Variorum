@@ -203,9 +203,12 @@ final class MobileUndoDoor {
             // label for a QUIET press too: an inverse that found the act's
             // result already gone (her Put back, a restore, a sync apply)
             // wrote nothing and RETIRED its entry, leaving the redo stack as
-            // it was. Read as a label, that press said "Undid: X" and offered
-            // a Redo whose press re-applied the redo stack's top — a
-            // DIFFERENT entry from the one the sentence named.
+            // it was. Read as a label, that press passed for a landed undo:
+            // the masthead said "Undid: X" and offered a Redo whose press
+            // re-applied the redo stack's top — a DIFFERENT entry from the one
+            // the sentence named — and on the one line (VM-61) the same press
+            // said nothing at all, as an ordinary act, while the model
+            // recorded that Redo.
             let outcome = try await session.runner.run { ops in
                 try stack.undoReporting(with: ops)
             }
@@ -214,17 +217,21 @@ final class MobileUndoDoor {
             // structural door settles.
             await model.refreshTakesFromStore()
             if let outcome, outcome.changed {
-                // A landed undo can itself be redone, so the receipt offers
-                // the OTHER direction — the ping-pong her R10 asked for,
-                // reachable without opening anything.
-                model.report(StructuralUndoCopy.undone(outcome.label), action: .redo)
+                // A landed undo can itself be redone, so the model records the
+                // OTHER direction (R10's ping-pong; VM-61: an ordinary act —
+                // the Mac's class, `ShellActions` — so the phone's line says
+                // nothing, and Redo stays in the ⋯ sheet).
+                model.report(
+                    StructuralUndoCopy.undone(outcome.label), action: .redo, line: .ordinary)
             } else if let outcome {
-                // A quiet press did nothing, so it speaks a refusal and
-                // offers NO way back (AppSpec §12; the Mac's door): there is
-                // nothing of this entry's for a redo to put back.
-                model.report(StructuralUndoCopy.undoFoundNothing(outcome.label))
+                // VM-16: a QUIET press did nothing, so it speaks a REFUSAL on
+                // the line and records NO way back (AppSpec §12; the Mac's
+                // door): there is nothing of this entry's for a redo to put
+                // back — the redo stack's top is another entry.
+                model.report(StructuralUndoCopy.undoFoundNothing(outcome.label), line: .refusal)
             } else {
-                model.report(StructuralUndoCopy.nothingToUndo)
+                // Nothing on the stack: a refusal (VM-61's class).
+                model.report(StructuralUndoCopy.nothingToUndo, line: .refusal)
             }
         } catch {
             // A failed inverse STAYS on the stack (the UndoStack doctrine):
@@ -265,11 +272,16 @@ final class MobileUndoDoor {
             }
             await model.refreshTakesFromStore()
             if let outcome, outcome.changed {
-                model.report(StructuralUndoCopy.redone(outcome.label), action: .undo)
+                // VM-61: a landed redo is ordinary — no line; Undo stays in
+                // the ⋯ sheet, and the model records it.
+                model.report(
+                    StructuralUndoCopy.redone(outcome.label), action: .undo, line: .ordinary)
             } else if let outcome {
-                model.report(StructuralUndoCopy.redoFoundNothing(outcome.label))
+                // VM-16: the quiet mirror — a refusal, and no Undo recorded
+                // (the undo stack's top is another entry).
+                model.report(StructuralUndoCopy.redoFoundNothing(outcome.label), line: .refusal)
             } else {
-                model.report(StructuralUndoCopy.nothingToRedo)
+                model.report(StructuralUndoCopy.nothingToRedo, line: .refusal)
             }
         } catch {
             model.report(StructuralUndoCopy.redoFailed(Self.refusal(error)))
@@ -309,18 +321,20 @@ final class MobileUndoDoor {
     /// The everyday refusals in phone words. **18m U3:** the shared refusal
     /// table speaks everything it has words for — the seal included ("This
     /// note is locked — unlock it first.": the ONE stem in the phone's door
-    /// words, act-less because an undo has no one act to name) — and the
-    /// operations layer's own description stands where it has none. Only the
+    /// words, act-less because an undo has no one act to name) — and the one
+    /// plain fallback stands where it has none (VM-62). Only the
     /// locked-take arm stays: it names the phone's takes-sheet road. (The
     /// Mac's undo door already spoke the table, so the two undo-failure lines
     /// now read the same but for each platform's door words.)
     static func refusal(_ error: Error) -> String {
-        guard let error = error as? OperationError else { return String(describing: error) }
+        guard let error = error as? OperationError else {
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
+        }
         switch error {
         case .lockedVariant:
             return MobileEditorViewModel.lockedTakeRefusal
         default:
-            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }

@@ -1109,6 +1109,26 @@ nonisolated enum RecoveryCopy {
         status == .archived ? takeRestoredArchived : putBackReceipt(.take)
     }
 
+    /// **P-55-11 (VM-55 batch 2b) — which put-back answers are DIRECTIONS.**
+    /// A block back in its own place is just back; one at the END of its note,
+    /// or set aside because its note is gone, landed somewhere other than where
+    /// she would look — the receipt is a direction she must see. Read beside
+    /// `landingReceipt`, from the same answer, so the words and the class can
+    /// never disagree.
+    static func isDirection(_ landing: Operations.BlockRestoreLanding) -> Bool {
+        switch landing {
+        case .itsOldPlace: return false
+        case .endOfNote, .unplaced: return true
+        }
+    }
+
+    /// The take's twin (P-55-11): a take back among the ARCHIVED takes rather
+    /// than in the fan (the exact flip, #68(b)) is a direction; one back in
+    /// the fan is just back. Read beside `takeRestoredReceipt`.
+    static func isDirection(_ status: VariantStatus) -> Bool {
+        status == .archived
+    }
+
     /// The archived edition. Its two siblings word the same fact for the
     /// surface each speaks on; this is the Trash's, and it is the one BOTH
     /// platforms read.
