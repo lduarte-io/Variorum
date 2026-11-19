@@ -2720,6 +2720,87 @@ end.
 - **Not run here:** the Mac types above. The coordinator sized this run's gate as the WHOLE Mac target beside the
   whole phone target, which covers tier 1 and tier 2.
 
+### THE SECOND MERGE-IN (main after VX-981)
+
+*Implementer: a fresh `opus-implementer` (2026-11-19, evening), one session, worktree `~/dev/variorum-vm-78`, from the
+tip `f411f2246`. One job — round 4's process plan, step (ii): `origin/main` merged in again after VX-981 (the MCP door
+umbrella, merged to main as `7629cf049`, PR #14; its notes-only ledger commit `ce153a715`; then a board snapshot
+`ad5053002`, `notes/TICKETS.md` only), every resolution recorded, and both targets built for testing on that tree. No
+new behaviour; no product line is expected to change; no `xcodebuild test`, no simulator boot, no stage claim, no
+app launch. **No revert is in flight** — the guards' red patch is checked with `git apply --check` only, never
+applied in this worktree. Rule for this section: if the merged tree fails to compile, or a read below shows a real
+clash, the implementer STOPS and reports before any file under `App/` or `Sources/` changes.*
+
+#### THE SECOND MERGE-IN — LIVE STATUS
+
+| Piece | State |
+|---|---|
+| 0 — this section, its LIVE STATUS and the plan (written before the merge starts) | IN-PROGRESS — this commit |
+| 1 — the merge commit (`git merge --no-ff origin/main` at `ad5053002`) | NOT-STARTED — two textual conflicts expected, resolved as "The plan" says; any other conflict, or one under `App/` or `Sources/`, stops the session |
+| 2 — the reads git does not flag | NOT-STARTED — the list at the plan's foot |
+| 3 — the renumbering: this run's parity row PL-78; the next free QUESTIONS number #279 | NOT-STARTED |
+| 4 — both targets `build-for-testing` on the merged tree, headless | NOT-STARTED |
+| 5 — the red patch's `git apply --check` on the merged tree; the guards' window recipe corrected in place | NOT-STARTED |
+| 6 — the sentences made true (FOR A LATER READER, the Closeout, the author handoff); the evidence row | NOT-STARTED |
+
+**The plan (piece 0), written before the merge starts.**
+
+*The trial merge* (`git merge-tree --write-tree --name-only HEAD origin/main`; HEAD `f411f2246` against `origin/main`
+`ad505300207b7a6d15f005d3c217dedf5edbb5c9`; nothing touched): exit 1, tree `2ce6ed846`; exactly TWO textual
+conflicts — `notes/MobileSoul.md` and `notes/SurfaceContracts.md`; auto-merged without a conflict:
+`App/Variorum/Variorum/Features/BookView/BookSettingsSheet.swift`, `App/Variorum/Variorum/Features/Shelf/ShelfViewModel.swift`,
+`notes/AppSpec.md`. No conflict under `App/` or `Sources/`.
+
+*What main brings since the first merge-in's base `eb18888db`:* 121 commits (`git log --oneline HEAD..origin/main`)
+and 94 files (`git diff eb18888db origin/main --stat`: 8,121 insertions, 386 deletions) — VX-981's door
+(`Sources/VariorumMCP/`, `Sources/VariorumMCPSocket/`), three core files (`Operations/UndoStack.swift`, additive;
+`Queries/MCPGrantQueries.swift`; `Queries/PrivateMarkQueries.swift`), Mac faces and their tests, the 1.5 version and
+release notes (`project.pbxproj`, `ReleaseNotes-1.5.md`), its records, the shared ledgers (QUESTIONS #278, the
+master plan, the AppSpecRecord entry, the finals ledger) and its canon lines. **Not one file under
+`App/Variorum/Shared/`, `App/Variorum/VariorumMobile/` or `App/Variorum/VariorumMobileTests/`** (a grep of main's
+name list for those three roots: 0 lines). VX-981's own record says the same ("no `App/Variorum/Shared/` line; one
+core file, `Operations/UndoStack.swift` (additive)" — its FOR A LATER READER).
+
+*The files both sides changed since `eb18888db`* (`comm -12` of `git diff eb18888db origin/main --name-only` and
+`git diff eb18888db f411f2246 --name-only`): exactly the five the orchestrator's read named, no sixth.
+- **`BookSettingsSheet.swift` (Mac).** This run: `CollectingCopy.finishedCaption` and `.sealedCaption` composed over
+  `BookStateCopy.finishedMeans` / `.sealedMeans` (the bytes unchanged; HEAD `:197–204`, inside `CollectingCopy`).
+  VX-981 (VX-1007): a new
+  `BookSettingsFace.PrivateRow` with `privateRow(isPrivate:isDailyJournal:)`; `BookSettingsModel.isDailyJournal`; the
+  facts read gaining `Queries.privateBookMarks(…)[readingID]?.dailyJournal`; `setPrivate`'s early return on the
+  Journal; `factsKey` gaining the profile; the Private toggle reading the row (ticked, locked, disabled, its
+  caption). *Resolution:* git's auto-merge, then read by eye — each run's lines intact, and whether they meet.
+- **`ShelfViewModel.swift` (Mac).** This run: `nonisolated enum BookcaseCopy` became `nonisolated extension
+  BookcaseCopy`, the collect/mint receipt family moved to `Shared/CollectReceiptCopy.swift` (HEAD `:732–737`, the
+  removed functions below it).
+  VX-981: `privateBookIDs: Set<String>` became `privateBookMarks: [String: Queries.PrivateBookMark]` with its doc,
+  and `holdPrivateMarks`' two lines (HEAD `:74–79`, `:365–368`). *Resolution:* auto-merge, then read; plus a grep
+  that no file this run changed reads `privateBookIDs`.
+- **`notes/AppSpec.md`.** This run: §9's "Quiet auto-commits" and `restoreCommit` — "PROVISIONAL," dropped and "on
+  both platforms" added at each site (`3471d0ad4`). VX-981: §12 "Doors to the outside", the MCP door bullet — ", and
+  the eye marks everything the fence holds, the daily Journal and its entries included, derived and never stamped
+  (VX-1007)". *Resolution:* auto-merge, then read the three sites against each other.
+- **`notes/MobileSoul.md`.** Both runs appended one row after PL-76, each numbered PL-77. *Resolution (a conflict):*
+  keep both; VX-981's row stays PL-77 where main has it; this run's row follows it as **PL-78** — its heading is its
+  only self-number (every other PL number inside it names another row, checked by grep before the edit).
+- **`notes/SurfaceContracts.md`.** Both runs changed ONE line, 34 (the book settings sheet bullet); this run alone also
+  `:30` (the Bookcase) and `:36` (Delete); VX-981 alone `:14`–`:15` (the AI section, messages), `:38` (the Private
+  mark) and `:56` (the MCP door). On line 34 VX-981 inserts one sentence — "On THE daily Journal the State
+  section's Private row reads ticked and LOCKED, one line saying why in the caption's place (PROVISIONAL
+  P-981-B1-6); the note ▾ menu's Private row reads the same on a note a journal leg fences (PROVISIONAL
+  P-981-B1-3); neither locked row's door writes (VX-1007)." — before "The State section ends with the wing row";
+  this run's two clauses sit further along the same line (the Finished door's "…only when N > 0; the phone's Book
+  Details asks the same, by the same count — `…`)" and the last sentence's "…mark "(archived)", and so does the
+  phone's membership sheet (`…`)."). *Resolution (a conflict):* main's line 34 with this run's two edits applied at
+  their own places; checked by word-diff that the resolved line differs from main's by exactly this run's two
+  edits and from this run's by exactly VX-981's one sentence.
+
+*The reads planned after the merge (piece 2), each written below with what it showed:* the two Mac files by eye;
+AppSpec's three sites; the core — VX-981's `UndoStack` diff against the phone's undo door (`undoReporting` /
+`redoReporting`) and its two pin types, and every reader of the two changed query files under the phone and
+`Shared/`; the symbol sweep (what VX-981 changed or removed under `Shared/` and `Sources/` that a file this run
+changed calls); "The map, final" against the merged tree; and the guards G1 and G2 by their predicates.
+
 ## The ladder
 
 *(round files `vm-78-ladder-roundN.md` beside this one; findings and dispositions land here before the next round)*
