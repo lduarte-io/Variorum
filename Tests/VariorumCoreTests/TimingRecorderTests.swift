@@ -428,6 +428,50 @@ struct TimingRecorderTests {
         #expect(calls.withLock { $0 } == 2)
     }
 
+    /// **A NO-OP END CHANGES NOTHING KEPT** (the VM-64 ladder, round 1, finding 3
+    /// — the midpoint review's finding 6). `endIfOpen` with nothing open is the
+    /// ordinary case — every keyboard rise asks it — and it records nothing and
+    /// counts nothing, so the change handler must not hear of it: telling it
+    /// scheduled a save of an unchanged table. Every end that DID change the
+    /// record still tells it, once per save: a recorded span, an unmatched
+    /// `end` (counted), a stale begin dropped (counted). RED on the pre-fix tree
+    /// at the first two expectations.
+    @Test func aNoOpEndIfOpenLeavesTheRecordUnchanged() {
+        let clock = HandClock()
+        let timing = recorder(clock: clock)
+        let calls = Mutex(0)
+        timing.setChangeHandler { calls.withLock { $0 += 1 } }
+
+        #expect(timing.endIfOpen(.tapToKeyboard) == nil)
+        #expect(calls.withLock { $0 } == 0, "an end with nothing open and nothing counted changes nothing")
+        #expect(!timing.hasUnsavedChanges)
+
+        // A recorded span is a change.
+        timing.begin(.tapToKeyboard, staleAfter: .seconds(30))
+        clock.advance(ms: 40)
+        #expect(timing.endIfOpen(.tapToKeyboard) == 40)
+        #expect(calls.withLock { $0 } == 1)
+        _ = timing.archive(build: "b", markingSaved: true)
+
+        // Nothing open again: still nothing.
+        #expect(timing.endIfOpen(.tapToKeyboard) == nil)
+        #expect(calls.withLock { $0 } == 1)
+        #expect(!timing.hasUnsavedChanges)
+
+        // An unmatched `end` is COUNTED — a change.
+        #expect(timing.end(.openToNote) == nil)
+        #expect(calls.withLock { $0 } == 2)
+        _ = timing.archive(build: "b", markingSaved: true)
+
+        // A stale begin dropped is COUNTED — a change, through either end.
+        timing.begin(.tapToKeyboard, staleAfter: .seconds(1))
+        clock.advance(ms: 5_000)
+        #expect(timing.endIfOpen(.tapToKeyboard) == nil)
+        #expect(calls.withLock { $0 } == 3)
+        let snap = timing.snapshot()
+        #expect(snap.abandoned == 1 && snap.unmatchedEnds == 1)
+    }
+
     /// ABSORB folds a persisted record UNDER the live one: the archived samples
     /// first, the live ones after (the ring keeps the newest), counts add, the
     /// earlier first day wins, and a span open across it stays open.

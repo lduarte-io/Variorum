@@ -309,22 +309,26 @@ public final class TimingRecorder<Series: TimingSeriesKey, Counter: TimingCounte
     private func end(_ series: Series, countingUnmatched: Bool) -> Double? {
         guard isEnabled else { return nil }
         let now = clock()
-        let (recorded, signpost) = state.withLock { s -> (Double?, OSSignpostIntervalState??) in
+        // `kept`: whether the record that is SAVED moved — a sample, or one of
+        // the footer's counts. An `endIfOpen` that found nothing open moves
+        // neither (the open spans are never saved), so it tells the change
+        // handler nothing — the windows' own rule (`openWindow`, `closeWindow`).
+        let (recorded, signpost, kept) = state.withLock { s -> (Double?, OSSignpostIntervalState??, Bool) in
             guard let open = s.pending.removeValue(forKey: series) else {
                 if countingUnmatched { s.unmatchedEnds += 1 }
-                return (nil, nil)
+                return (nil, nil, countingUnmatched)
             }
             let elapsed = now > open.start ? now - open.start : 0
             guard elapsed <= open.staleAfter else {
                 s.abandoned += 1
-                return (nil, .some(open.signpost))
+                return (nil, .some(open.signpost), true)
             }
             let ms = TimingClock.milliseconds(from: open.start, to: now)
             record(ms, into: series, &s)
-            return (ms, .some(open.signpost))
+            return (ms, .some(open.signpost), true)
         }
         if let signpost { endSignpost(series, signpost) }
-        changed()
+        if kept { changed() }
         return recorded
     }
 

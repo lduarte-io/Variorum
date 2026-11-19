@@ -730,8 +730,8 @@ orchestrator's frozen `vm64-b7r1/` and `vm64-b7/` are never written.
 | Piece | State |
 |---|---|
 | F0 — this live status | DONE (this commit) |
-| F1 — the responses (round file ▸ "Implementer responses (fix pass)"), committed and pushed before any fix | NOT-STARTED |
-| F2 — finding 3 (VM-65): `TimingRecorder.end` tells the change handler only when something changed; the pin red, then green, headless | NOT-STARTED |
+| F1 — the responses (round file ▸ "Implementer responses (fix pass)"), committed and pushed before any fix | DONE (`44ac60f8b`); the gated measurement behind finding 1's arm (b) numbers `12d6afde5` (test-only) |
+| F2 — finding 3 (VM-65): `TimingRecorder.end` tells the change handler only when something changed; the pin red, then green, headless | DONE (this commit) — pin `TimingRecorderTests.aNoOpEndIfOpenLeavesTheRecordUnchanged`: RED on the pre-fix tree (4 issues, the two no-op arms at `:446` `:447` `:458` `:459`), green after; `swift test --filter TimingRecorderTests` 32 tests in 1 suite passed |
 | F3 — finding 5 (VM-2): `surfaceSettled()` no longer `mutating`; finding 6 (VM-65): the round's "sent" says it under-reads | NOT-STARTED |
 | F4 — finding 2 (VM-70): `takeAutosaveHold` re-observes on both of its paths; the hosted pin; the red build `vm64-fix-red` | NOT-STARTED |
 | F5 — builds: phone and Mac `build-for-testing` into `vm64-fix`; `swift test` for the touched suites | NOT-STARTED |
