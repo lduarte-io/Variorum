@@ -392,8 +392,8 @@ flight.***
 
 | Piece | State | Pin (TYPE name for `-only-testing`) |
 |---|---|---|
-| The hoist (words) | DONE (this commit) — Mac `build` GREEN | the Mac's existing copy pins (Mac leg) |
-| VM-21's hoist (the collect receipt family) | IN-PROGRESS — next commit | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
+| The hoist (words) | DONE (`68f7e7eab`) — Mac `build` GREEN | the Mac's existing copy pins (Mac leg) |
+| VM-21's hoist (the collect receipt family) | DONE (this commit) — Mac `build` GREEN | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
 | Seams + pins (all three members) | NOT-STARTED | — |
 | VM-81 | NOT-STARTED | — |
 | VM-83 | NOT-STARTED | — |
@@ -412,6 +412,13 @@ flight.***
   anything reaching the capability registry.
 - `App/Variorum/Shared/ArrivalsCopy.swift` (new) declares `enum ArrivalsCopy` with `word` only (`waitingLine` needs
   it); the Mac's `Features/BookView/BookArrivals.swift` now extends it.
+- `App/Variorum/Shared/CollectReceiptCopy.swift` (new, VM-21) declares `enum BookcaseCopy` with the collect/mint
+  receipt family moved verbatim from the Mac's `Features/Shelf/ShelfViewModel.swift` (`shownByTagging`,
+  `taggedWhileArchived`, `alreadyMatchesWhileArchived`, `shownByMint`, and their private `shownNowTail`,
+  `shownAfterUnarchiveTail`, `wore`), and `enum AddToBookCopy` with `byTagging` and `collected(_:gatheringName:)`
+  moved verbatim from the Mac's `Core/Views/MembershipChoice.swift` — the chip's receipt composer, which the phone's
+  membership sheet (the chip's twin) now speaks. Both Mac files now extend the shared enums; the board's own
+  `collectReceipt` / `alreadyShowing`, the shelf verbs and the chip's other words stay Mac-side.
 
 ### BATCH C — the probe and the red test (VM-17 · VM-24, which carries VM-19) — EDITOR SEAM, test and badge code
 
