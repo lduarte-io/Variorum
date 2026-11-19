@@ -143,7 +143,9 @@ enum MobileTimingCopy {
             "collecting since " + $0.formatted(date: .abbreviated, time: .omitted)  // DRAFT
         } ?? "nothing collected yet"                              // DRAFT
         return TimingReport.text(
-            title: "\(title.uppercased()) — \(heading.uppercased())",
+            // The words as drafted, never forced into capitals (her sentence-case
+            // rule; VM-64 ladder round 2, finding 9) — the wording pass is hers.
+            title: "\(title) — \(heading)",
             header: [
                 table.label,
                 since,

@@ -58,14 +58,14 @@ enum MobileTiming {
         let info = Bundle.main.infoDictionary ?? [:]
         let short = info["CFBundleShortVersionString"] as? String ?? "?"
         let number = info["CFBundleVersion"] as? String ?? "?"
-        let print = AppTiming.buildFingerprint() ?? "unknown"
+        let fingerprint = AppTiming.buildFingerprint() ?? "unknown"
         #if DEBUG
         let configuration = "Debug"
         #else
         let configuration = "Release"
         #endif
-        return ("\(short)|\(number)|\(print)",
-                "\(short) (\(number)) \(configuration) · \(print.prefix(8))")
+        return ("\(short)|\(number)|\(fingerprint)",
+                "\(short) (\(number)) \(configuration) · \(fingerprint.prefix(8))")
     }()
 
     /// A test runner's host keeps a recorder (the speed tests read it) but

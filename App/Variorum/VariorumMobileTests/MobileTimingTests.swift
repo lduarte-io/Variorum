@@ -53,11 +53,14 @@ struct MobileTimingTests {
         let current = MobileTimingCopy.table(recorder.snapshot(), label: "1.0 (1) Debug · AFTER")
 
         let alone = MobileTimingCopy.report(current: current, previous: nil)
-        #expect(alone.contains(MobileTimingCopy.thisBuild.uppercased()))
+        // VM-64 ladder round 2, finding 9: the heading is the words as drafted,
+        // never forced into capitals (her sentence-case rule).
+        #expect(alone.contains("\(MobileTimingCopy.title) — \(MobileTimingCopy.thisBuild)"))
+        #expect(!alone.contains(MobileTimingCopy.title.uppercased()))
         #expect(alone.contains("1.0 (1) Debug · AFTER"))
         #expect(alone.contains("collecting since "))
         #expect(alone.contains("n 1 · median 312 ms"))
-        #expect(!alone.contains(MobileTimingCopy.previousBuild.uppercased()))
+        #expect(!alone.contains(MobileTimingCopy.previousBuild))
 
         var before = TimingArchive(build: "before", label: "1.0 (1) Release · BEFORE")
         before.series[AppTimingSeries.boxTapToKeyboard.rawValue] = {
@@ -66,7 +69,7 @@ struct MobileTimingTests {
             return stats
         }()
         let both = MobileTimingCopy.report(current: current, previous: MobileTimingCopy.table(before))
-        #expect(both.contains(MobileTimingCopy.previousBuild.uppercased()))
+        #expect(both.contains("\(MobileTimingCopy.title) — \(MobileTimingCopy.previousBuild)"))
         #expect(both.contains("1.0 (1) Release · BEFORE"))
         #expect(both.contains("n 1 · median 940 ms"))
         #expect(both.contains("nothing collected yet"))     // BEFORE's archive carries no first day
