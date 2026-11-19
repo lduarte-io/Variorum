@@ -166,6 +166,12 @@ final class MobileEditorViewModel {
     /// Full surface renders performed — the echo pin's oracle (an autosave
     /// echo must not rewrite the surface).
     @ObservationIgnored private(set) var fullRenderCount = 0
+    /// **VM-69 — the whole-document chrome passes the PROJECTION road asks
+    /// for** (a full render's, a differential's, an ingest's — `layOutChrome`).
+    /// Each is O(the note's decorated blocks) once the page is laid out
+    /// (audit F §4: "the chrome is laid out three times" per open). The pins
+    /// read it; nothing in the app decides anything from it.
+    @ObservationIgnored private(set) var projectionChromePasses = 0
     /// DEBUG identity-audit failures — the obligation-1 oracle; asserts
     /// fire in debug, this counter lets tests observe without dying.
     @ObservationIgnored private(set) var identityAuditFailures = 0
@@ -620,7 +626,7 @@ final class MobileEditorViewModel {
         // S4: callout frames adopt the same way (decor bookkeeping).
         presentations = projection.presentations
         applyProjection(takes.overlay(projection.slots), fromDelivery: fromDelivery)
-        textView?.refreshChrome()
+        layOutChrome()
         // S2 batch 2: an open browser re-renders its cards from the fresh
         // fan state (and closes if its block left the surface). S4: the
         // comments sheet follows the same discipline. C4a: the history
@@ -893,7 +899,7 @@ final class MobileEditorViewModel {
         }
         auditIdentityProjection()
         textView?.canaryCheckpointAfterMutation()
-        textView?.refreshChrome()
+        layOutChrome()
     }
 
     /// Same block sequence, changed texts: replace only changed slots,
@@ -937,6 +943,13 @@ final class MobileEditorViewModel {
         // still missing it (round-2 ladder round 2, NIT 3) — `renderFull`,
         // `programmaticReplace`'s callers and the take-swap door all check.
         textView?.canaryCheckpointAfterMutation()
+        layOutChrome()
+    }
+
+    /// **The projection road's one whole-document chrome pass** (VM-69 —
+    /// counted, so a pin can hold how many an open asks for).
+    private func layOutChrome() {
+        projectionChromePasses += 1
         textView?.refreshChrome()
     }
 

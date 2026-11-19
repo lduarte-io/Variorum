@@ -551,7 +551,7 @@ open, though the masthead shows only the note's own rows; the two sheets already
 |---|---|
 | P0 — the midpoint review's finding 1 (the fence's projection-seam comment) | DONE (`f0e2e696c`) |
 | P1 — this live status | DONE (this commit) |
-| P2 — the instrument: the projection road's document-scope chrome requests counted (no behaviour change) | NOT-STARTED |
+| P2 — the instrument: the projection road's document-scope chrome requests counted (no behaviour change) | DONE (this commit) — `projectionChromePasses` + `layOutChrome()` at the three projection-road call sites (`ingest`, `renderFull`, `applyDifferential`); the build PENDING P7. **This commit is the red-on-old base** (today's behaviour + the counter) |
 | P3 — VM-69: the arrival through the live observation; the chrome once | NOT-STARTED |
 | P4 — VM-70: the release at the model's end of life | NOT-STARTED |
 | P5 — the chips' scoped reads | NOT-STARTED |
