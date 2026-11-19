@@ -311,6 +311,36 @@ the phone's.
   theme store (grep the Mac tests for it and list the types), beside the seven theme types. The whole Mac
   target runs at the merge gate.
 
+**Piece 3.10 — the note in Write on the paper (orchestrator, at the batch-3 seam; a NAMED exception to
+rule 7).** Batch 3 left Write on the voice's own room (P-47-16) because the editor's ground is one line in a
+fenced file. That keeps her prose off the tint, but it is not the paper: the lists are on `#FFFFFF`, Write on
+Study's own `#FAF8F3`, and in dark the lists are on the palette's paper while Write is on black. R-47-1's
+test is "wherever her words are read or written the ground is the paper", the sizing sheet draws Write on the
+paper, and the Mac's own editor reads its paper (`EditorView.swift`, `scrollView.backgroundColor =
+chrome.paper`). So this piece is authorized, and it is exactly this and no more:
+
+- `Write/MobileEditorTextView.swift`, `applyVoiceChrome`: the ONE line `backgroundColor = face.room` reads a
+  new face value for the paper instead (`tokens.surface` as the settings road resolves it, palette and all).
+  No other line of that file changes; `MobileEditorViewModel.swift` and `Shared/EditorBrain/` stay untouched.
+- `Write/MobileEditorStyle.swift` gains that face value; the face's `room` stays what the overlays, sheets and
+  bars read (they sit on the room).
+- `Write/MobileWriteView.swift`: the two ground lines batch 3 named follow, so the screen ground and the
+  editor agree; the masthead stays chrome, on the room.
+- A pin that the editor's ground is the paper in both voices, light and dark, under the sea-glass and one
+  other palette, and that an overlay still reads the room; the grounds' source pin (`MobileLookSourceTests`)
+  extended to Write. Check by eye in the walk that the caret, the selection wash, the take tint, a callout's
+  wash and the comment mark read correctly on the paper in light and in dark.
+- P-47-16 is rewritten to say what is built (the paper, by this one line) and the option left (the voice's
+  own room). The ladder's Fable reviewer reads the line as editor-seam class.
+
+**The stage work for batch 3 goes to a fresh closer** (the batch-3 implementer ended READY at about 675k
+tokens of context, every piece committed). Main was merged in at this seam (`40352bde2`: the search run's Mac
+and Core files; nothing under `Shared/` or `VariorumMobile/`), so the products are rebuilt before any window.
+**One walk now covers batches 1, 2 and 3**: batch 3's driver (`VM47Walk3Driver.swift`, `walk3.zsh`, device
+`vm47-walk3`) captures the same core and wider screens as the batches-1-and-2 walk, now under the palette
+she will actually see, so the older walk (device `vm47-walk`, `DerivedData/vm47-walk`) is retired unrun and
+removed.
+
 ### Batch 4 — the bottom bar (VM-52)
 
 The ticket: "The bar is three 11.5 pt words about 14 pt tall, the inactive ones faint, and it disappears on
@@ -370,7 +400,7 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 2.8d | The path line's red-on-old (`47ee432fc`'s pin, `MobilePathLineGeometryTests`) — **in a SNAPSHOT, so this run's worktree never sits reverted** (the orchestrator's change of road, replacing the in-tree revert): a detached worktree `~/dev/variorum-vm-47-rol` at `09fba8983` (never committed in); there `git checkout 91d406593 --` `MobileShelfView.swift` + `MobileLibraryView.swift` (they changed only in `47ee432fc` since — a clean revert of exactly the fix; the trash door's icon button, `MobileRecoveryDoors.swift`, is NOT reverted, so its 44 × 44 stays green and the red rides the path's wrap and the two word doors' ~22 pt height); `build-for-testing` for the phone scheme into the snapshot's own `App/Variorum/DerivedData/vm47-rol` (headless); then, in a short stage window the orchestrator obtains, only `-only-testing:VariorumMobileTests/MobilePathLineGeometryTests` from that snapshot — expect RED; the snapshot is removed after | DONE — **PROVEN red on old, green on new.** The snapshot (`09fba8983` + the two files from `91d406593`, staged there only, never committed; 39 + 50 lines, `47ee432fc`'s own counts) built GREEN into `vm47-rol`; the orchestrator ran the one type on the standing device: "Test run with 2 tests in 1 suite failed after 6.874 seconds with 22 issues" — `theBookcasePathLineIsOneLineAtFourHundredTwoInBothVoices()` 18 issues (`path.height < 26` :86 ×3, the 44 × 44 bound :93 ×8, on-the-path's-line :96 ×7), `theLibraryPathLineDoorsAnswerAcrossFortyFour()` 4 issues (:128 ×2, :129 ×2); both green on the fixed tree in the 06:26 whole-target run. The snapshot is REMOVED (`git worktree remove --force`; the worktree list no longer holds it); **this run's worktree carried no revert at any point** |
 | 2.8e | The walk (batches 1 + 2's ONE walk): device `vm47-walk` (iPhone 17 Pro, iOS 26.2, never booted), the driver built at `09fba8983` into `DerivedData/vm47-walk` (the app code is identical at `057c7cd87`); the seed; the core five × Study/Terminal × light/dark × default/AX5; the rest × Study light default, Terminal dark default, Study light AX5; every capture looked at against the sheet | NOT-STARTED — READY. Planned: 123 captures (seed 3 · core 6 × 8 = 48 · rest 24 × 3 = 72). The runbook `walk.zsh` (gitignored) gained a 30 s settle after boot, a per-run capture count, and exact-name instance checks (`pgrep -x`) in `walk_close`; the driver needed no change (every label and identifier it drives checked against the code at `057c7cd87`) |
 | 2.8f | The record close: §6 "Batch 1 — results" and "Batch 2 — results" PENDING slots filled (counts, each red and its disposition, the red-on-old line, the walk screen by screen, what was fixed, what is owned elsewhere and by which ticket); §5 for any new PROVISIONAL; these rows flipped | IN-PROGRESS — DONE: the suites' counts, the three reds and their dispositions, the red-on-old lines, rows 2.4–2.8d flipped, P-47-14 in §5 (this commit). REMAINING: the targeted re-run's counts (`MobilePhoneControlsTests`), the walk's captures and findings screen by screen (row 2.8e), then this row |
-| 2.9 | Batch 2's remaining evidence: the walk (row 2.8e) runs from `DerivedData/vm47-walk` when its stage slot comes (the orchestrator runs the capture lines); the captures are read at the batch-3 seam | PENDING the stage |
+| 2.9 | Batch 2's remaining evidence: the walk — CHANGED at the batch-3 seam: ONE walk covers batches 1, 2 and 3, on batch 3's driver and tree (rows under batch 3); the batches-1-and-2 walk on the `09fba8983` build is retired unrun, its device and DerivedData removed | SUPERSEDED by batch 3's walk |
 | 3 | Voice and palette; borders (VM-51, VM-54) | READY for the stage (code, records and builds done; suites, VM-54's red-on-old and the walk PENDING) — pieces below (implementer: Opus, 2026-11-19; build products `DerivedData/vm47-b3`, walk `DerivedData/vm47-walk3`) |
 | 3.1 | The hoist: `ThemeStore` moves `Variorum/Theme/` → `Shared/Theme/` (a move; the two Mac-only adoptions — `EditorTypography.adopt`, the receipt style into `session.status` — behind `#if os(macOS)`); Mac `build-for-testing` green | DONE (this commit) — `git mv` to `Shared/Theme/ThemeStore.swift` (history kept); the header says what moved; `EditorTypography.adopt` and `session.status.receiptStyle` behind `#if os(macOS)` (both Mac-only types/members); nothing else changed. Mac AND phone `build-for-testing` into `vm47-b3` GREEN (`** TEST BUILD SUCCEEDED **` each); the Mac suites PENDING the stage |
 | 3.2 | The phone's resolution road: the shell router holds the library's theme (the hoisted store, bound per session, started by the shell); the five palette-less sites read `VoiceTokens.resolve(settings:dark:)`; `MobileEditorStyle`'s UIKit face resolves voice + palette + tint from the landed settings with ONE main-actor writer (QUESTIONS #195 MINOR 3); light/dark stays the device's | DONE (this commit, with 3.3 — the voice door's source and its write are one seam) — `ThemeStore` gains `onLanded` (the phone's landing seam; nil on the Mac) and `init(session:placeholder:)` (default = the Mac's); `MobileShellRouter` holds the store (`bindTheme(session:)`, `settings`, `voice`, `tokens(dark:)`, `adoptLanded(_:)`, `placeholder`); the shell binds and `.task`-starts it; the five sites: `VariorumMobileApp.lockedTokens` (the placeholder, P-47-15), `MobileShellView.tokens`, `MobileWriteScreen.tokens` (the global write and `fallbackVoice` gone), `MobileSettingsView.tokens`, `MobileEditorStyle` (`adopt(_:)` + `Face.applying(palette:tint:)`; storage `@MainActor`; `Face.room` the voice's own room, P-47-16); tests moved (`MobileShellTests`, `MobileLivenessTests`, `MobileVoiceTests`, `withEditorWorld`, three router constructors) + new `MobileLibraryLookTests` (7); phone `build-for-testing` GREEN; Mac: the APP target compiled with no error, then the build was STOPPED in the test target at the coordinator's QUIET (another run's merge gate); after "QUIET over" (08:33) BOTH schemes `build-for-testing` into `vm47-b3` GREEN at `c87407b93` (`** TEST BUILD SUCCEEDED **` each — the three new suites compile); tests PENDING the stage |
