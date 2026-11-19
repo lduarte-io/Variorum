@@ -402,10 +402,15 @@ struct MobileBookDetailsSheet: View {
             }
             if let book = model.book {
                 identityBlock(book)
-                Divider().overlay(tokens.line)
-                finishRow(book)
-                if MobileBookDetailsModel.showsDailyDoor(book.reading) {
-                    dailyRow
+                // VM-81: a gathering draws no Finish (and no daily door), so the
+                // state group — and its divider — draws only when it holds a row.
+                if MobileBookDetailsModel.finishRowAct(for: book.reading) != nil
+                    || MobileBookDetailsModel.showsDailyDoor(book.reading) {
+                    Divider().overlay(tokens.line)
+                    finishRow(book)
+                    if MobileBookDetailsModel.showsDailyDoor(book.reading) {
+                        dailyRow
+                    }
                 }
                 Divider().overlay(tokens.line)
                 if model.offersUnarchive {
@@ -607,11 +612,13 @@ struct MobileBookDetailsSheet: View {
                         .font(tokens.body)
                         .foregroundStyle(tokens.accent)
                     Spacer()
+                    // The Mac's sentence is longer than the shipped caption:
+                    // three lines, the archive row's own cap.
                     Text(tokens.chromeLabel(
                         MobileBookDetailsModel.finishCaption(for: book.reading)))
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
-                        .lineLimit(2)
+                        .lineLimit(3)
                 }
                 .contentShape(Rectangle())
             }

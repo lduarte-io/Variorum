@@ -77,6 +77,10 @@ struct MobileShelfView<TabBar: View>: View {
     var onOpenTrash: (() -> Void)?
 
     @State private var createBookPresented = false
+    /// VM-83: the delete confirm's title, held so a gathering's never flashes
+    /// the book's word while the alert animates away (the model clears
+    /// `pendingDeleteBook` on dismissal).
+    @State private var deleteTitle = MobileShelfFaces.deleteConfirmTitle(for: .book)
 
     var body: some View {
         VStack(spacing: 0) {
@@ -155,8 +159,9 @@ struct MobileShelfView<TabBar: View>: View {
         // the book from the SAME captured value, so it can never blank
         // mid-presentation either.
         .alert(
-            MobileShelfFaces.deleteConfirmTitle(
-                for: model.pendingDeleteBook?.reading.kind ?? .book),
+            model.pendingDeleteBook.map {
+                MobileShelfFaces.deleteConfirmTitle(for: $0.reading.kind)
+            } ?? deleteTitle,
             isPresented: $model.deleteBookPresented,
             presenting: model.pendingDeleteBook
         ) { book in
@@ -168,6 +173,9 @@ struct MobileShelfView<TabBar: View>: View {
         } message: { book in
             Text(MobileShelfFaces.deleteBookConfirmDetail(
                 name: book.reading.name))
+        }
+        .onChange(of: model.pendingDeleteBook) { _, book in
+            if let book { deleteTitle = MobileShelfFaces.deleteConfirmTitle(for: book.reading.kind) }
         }
     }
 
