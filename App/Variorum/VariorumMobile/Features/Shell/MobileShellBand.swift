@@ -120,7 +120,9 @@ nonisolated enum MobileShellBand {
     static func isDrawn(
         _ page: MobileTab, current: MobileTab, drag: CGFloat, width: CGFloat
     ) -> Bool {
-        guard width > 0 else { return page == current }
+        // (By index, as every rule here compares pages: `MobileTab`'s
+        // equality is main-actor, and this brain is nonisolated.)
+        guard width > 0 else { return index(of: page) == index(of: current) }
         return abs(offset(for: page, current: current, drag: drag, width: width)) < width
     }
 
