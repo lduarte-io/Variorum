@@ -368,6 +368,42 @@ so the sheet says the same word twice whenever the sync row is in a doored pause
 Trace which door stays (the ticket's lean: the standing row, since on the phone it is always on the same
 sheet); pin red-on-old; her glance is owed on which one stayed (held for her sitting).
 
+**Carried in to batch 5 (orchestrator, at the batch-4 seam):**
+
+- *What is under you.* Batches 1–4 are in the tree: the type roles, the two inks, the metrics and the shared
+  controls (`Shared/Theme/Phone*.swift`), the library's voice and palette through the hoisted theme store
+  (`Shared/Theme/ThemeStore.swift`, held by `MobileShellRouter`), the grounds (her words on the paper, bars
+  and sheets on the room), and the bottom bar (`Shell/MobileTabBar.swift`), which now also shows on pushed
+  lists. §6 holds each batch's results. Settings is built on the shared controls only: the sheet header, the
+  section header, the menu row, the segmented choice, the calm button; no private builds (a source pin holds
+  that), and system controls styled by the layer where one fits (the ticket's agent note).
+- *The voice rows.* Batch 3 made the two existing voice rows write the library's voice (R-47-2). They move
+  into the new list as one choice; their words stay.
+- *Light · dark · follow the system* is this phone's own preference and never syncs (AppSpec §12: "appearance
+  (follow system, light, dark) is a local preference"; her ruling LK-1/LK-2). Use the Mac's own brain and
+  storage shape for it if it is or can be shared without changing the Mac; say what you found. The choice
+  must reach the UIKit editor and the overlays as well as SwiftUI (batch 3's `MobileTraitBorder` is how the
+  borders follow a flip).
+- *The doors.* Batch 2 left Settings as a gear on the Bookcase's path line (P-47-9); this batch moves it into
+  ONE ⋯ menu that all three roots carry, and gives a note its own door to Settings (the note's actions).
+  Another run (VM-55) is putting an interim wing door on each root's path line tonight and merges before us:
+  keep the ⋯ menu's edit on each root to the fewest lines, do not touch the wing door's lines or the path
+  line's paddings, and name every line range you change in the three root views and `MobileShellView.swift`.
+- *VM-27.* Trace which Protection door stays before changing anything; the pin is red on old in a snapshot
+  worktree, never by reverting this worktree.
+- *Build products and the walk.* Yours is `App/Variorum/DerivedData/vm47-b5`. Do not build into or delete
+  `vm47-b3`, `vm47-b4`, `vm47-walk3`, `vm47-walk4`, or the snapshot and gate worktrees beside this one
+  (`~/dev/variorum-vm-47-rol3`, `~/dev/variorum-vm-47-gate*`). **One walk covers batches 4 and 5**: batch 4's
+  driver and runbook (`notes/plans/vm-47-screens/instruments/VM47Walk4Driver.swift`, `walk4.zsh`, gitignored,
+  73 captures of the bar) were built and not run; extend a COPY into a batch-5 driver that keeps batch 4's
+  captures and adds Settings (the list scrolled top to bottom in Study and Terminal, light and dark, default
+  and AX5; the ⋯ menu on each root; the door from a note; the appearance choice flipped; the Protection row
+  in the sync row's doored state if the seeded store can reach it), built into `DerivedData/vm47-walk5`, in
+  two parts with a seam and a time guard as batch 3's runbook does.
+- *While you build,* a closer is finishing batch 3's stage work and writes its walk findings into its own
+  file (`notes/plans/vm-47-walk-b3.md`); it does not edit code while you are live. Defects it finds, and any
+  red from batch 4's first suite run, come to a fix batch after yours.
+
 ## 4. LIVE STATUS
 
 | Batch | Piece | State |
