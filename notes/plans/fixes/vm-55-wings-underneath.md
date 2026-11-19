@@ -284,7 +284,7 @@ this file whole, SurfaceContracts' "The app" and "The Bookcase and books" wing b
 | VM-57 — every listing reads the current wing | DONE (219b4ac62) — tests `MobileWingListingTests` (8); runs PENDING the stage window |
 | VM-58 — mints in the current wing | DONE (301388409; the new root tag rides 9462d3854) — tests `MobileWingMintTests` (4); runs PENDING |
 | VM-60 — the tag manager per wing | DONE (9462d3854) — tests `MobileWingTagManagerTests` (2); runs PENDING |
-| VM-59 — the wing-blind pickers (pins, then fix, separate commits) | NOT-STARTED |
+| VM-59 — the wing-blind pickers (pins, then fix, separate commits) | IN-PROGRESS — the three pins committed (this commit, the PIN COMMIT — its tree is the red-on-old tree); the fix follows in its own commit; red-on-old and green runs PENDING the stage window |
 | Mac + phone `build-for-testing` | NOT-STARTED |
 | Stage window: VM-59 red-on-old, then the batch's suites green | NOT-STARTED — PENDING the coordinator's claim line |
 
