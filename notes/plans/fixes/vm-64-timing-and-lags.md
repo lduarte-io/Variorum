@@ -383,11 +383,11 @@ assertions.
 
 ### Batch 4 · VM-67 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**A REVERT IS IN FLIGHT (started after `e6d16fca7` was committed and pushed):** `git checkout 96dfa82b5 --
-Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operations/OwnerIdentity.swift` (the pre-fix
-schema AND op), the pin suite run headless, then `git checkout HEAD --` the same two files and a clean `git status`.
-If this line still reads "in flight" in a later session, the tree may be mid-revert: restore with
-`git checkout HEAD -- <the two files>` (safe — the fix is committed) and check `git diff HEAD` is empty. Base: `96dfa82b5`.
+**No revert is in flight.** The red-on-old revert RAN and is RESTORED: after `e6d16fca7` was pushed, `git checkout
+96dfa82b5 -- Sources/VariorumCore/Persistence/Migrations.swift Sources/VariorumCore/Operations/OwnerIdentity.swift`
+(the pre-fix schema AND op), the pin suite run headless (result in P4 below), then `git checkout HEAD --` the same two
+files; `git status` and `git diff HEAD` empty after, and the suite green again (8 tests in 1 suite passed). Base:
+`96dfa82b5`.
 
 **The mechanism, re-verified on this tree (audit F 3A/6A — still TRACED as written):** `AppServices.connectSyncIfAllowed`
 (`Shared/AppServices.swift:518`) runs `runOwnerAdoption` (:584) first on every launch with a persisted session, every
@@ -426,7 +426,7 @@ owner-carrying table, through SQLCipher's page decrypt, holding the runner AND t
 | P1 — this live status | DONE (this commit) |
 | P2 — the schema commit (`v1_38`) + the index-set pins' justified edits | DONE (this commit) — `swift test --filter 'MigrationTests\|BlockCommentTests'` 44 tests in 5 suites passed (the new `theOwnerAdoptionIndexesArriveForAnOlderStoreOnePerOwnerTable` among them); `SyncSchemaTests\|AuthRLSDDLTests\|LocalMachineryRecreationTests\|StorePlaintextExportTests\|PlaintextExportImportTests\|LibraryClassifier` 133 tests in 6 suites passed — the registry walk (`SyncSchemaTests.swift:14-19`, `type = 'table'`), the column walk (`:93`) and the mirror-marker pin (`AuthRLSDDLTests.swift:934-949` against the constant `SyncSchema.swift:170`) all untouched by an index |
 | P3 — the op (probe-then-write) + the Core pins and state-transition tests | DONE (this commit) — `OwnerAdoptionTests` (8) + `OwnerIdentityTests` (8): 16 tests in 2 suites passed. On the SCHEMA-ONLY tree (`0e9948d03`: the index landed, the op unchanged) the same suite ran 8 tests, 4 issues: the three "writes nothing" pins red (the op ran `BEGIN IMMEDIATE TRANSACTION`, eleven `UPDATE … WHERE owner_id IS NULL`, `COMMIT TRANSACTION` with nothing unowned), the plan pins GREEN — the index alone fixes the scan; the probe is what stops the write |
-| P4 — red-on-old (revert the two production files, run the pins, restore) | NOT-STARTED |
+| P4 — red-on-old (revert the two production files, run the pins, restore) | DONE — on the pre-fix tree `OwnerAdoptionTests` ran 8 tests, **5 failed with 7 issues**: `withNothingUnownedTheWriterRunsNoTransactionAndNoWrite` (BEGIN IMMEDIATE + eleven UPDATEs + COMMIT) · `everyStatementReachesAnOwnerTableOnlyThroughItsUnownedIndex` ×2 (adopting AND idle: `UPDATE container … → SCAN container`, `→ SCAN block`, … every owner table) · `signedOutRows…` (its idempotent second pass wrote) · `anAccountChange…` ×2 (both quiet passes wrote) · `aStoreFromBeforeTheIndex…` (scanned). GREEN on both trees, by design (they pin S4 behaviour that must not move): `everyOwnerTableHoldsARowFromTheSeed` (the seed's guard), `theMixedCaseAdoptsOnlyTheUnownedRows`, `aRowFromAWriteAlreadyQueuedIsAdoptedByThatPass`. Restored; green again |
 | P5 — the hosted assertion in `MobileHerPathsPerfTests` | NOT-STARTED |
 | P6 — `swift test` (touched suites + migrations / schema / sync-schema suites); phone + Mac `build-for-testing` into `DerivedData/vm64-b4/` | NOT-STARTED |
 | P7 — closeout in §7 (the S4 road list, the three options with plans, the first-seconds report) + READY | NOT-STARTED |
