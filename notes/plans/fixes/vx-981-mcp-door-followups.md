@@ -15,13 +15,15 @@ Ticket: VX-981 · Project: none (an umbrella over MCP-area tickets) · Branch: `
 | Piece | State |
 |---|---|
 | Kickoff: roster, worktree, in-flight row (`bc8f3d03a` on main), this record | DONE |
-| BATCH 1 — the Journal shows as Private (VX-1007) | READY — code + pins at `366fb5213` (core green, red-on-old verified); the app-target gate + its red leg and the walk wait for the orchestrator's stage window (BATCH 1 RECORD → GATE TYPES, WALK SCRIPT LINES) |
-| BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961 · riders VX-133 · VX-705) | READY — code + pins at `b69e3a35f` (headless green: MCP 714/133, core 842/162; red-on-old/scaffold verified by revert for 977 · 961 · 133); `build-for-testing` green; the app-target gate + red legs A–D and the walk wait for the orchestrator's stage window (BATCH 2 RECORD → GATE TYPES, WALK SCRIPT LINES); P-981-B2-5 corrects the brief's VX-705 premise |
-| BATCH 3 — announces in order, never waiting on a stall (VX-951 · VX-944) | READY — code + pins at `6c7042c81` (headless green: MCP 726/136, core 4,083/564; six bug-class pins red on the scaffold and on the revert, four named reverts exact; the soak 600/600 alone and 3,232 under a parallel core run with the old announce red alone at 475 and 296); bft3 green; the app pin + its red leg E wait for the orchestrator's stage window (BATCH 3 RECORD → GATE TYPES); P-981-B3-2/3 |
-| BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963 · rider VX-773) | READY — code + pins at `5ec6bb6fe` (headless green: the whole MCP target alone 739/138 ×3 after QUIET; VX-959's 4 pins red on the scaffold (7 issues) and on R-959-ALL, 2 on R-959-OUTSIDE; VX-963's guards red under R-963-T/W; VX-952's handoff red under R-952-H); bft4 green; the release-configuration test build runs to its end (VX-773); the app-target gate types wait for the orchestrator's window (BATCH 4 RECORD → GATE TYPES — no app pin, no red leg); P-981-B4-1/2 are implementation choices, nothing for her |
-| BATCH 5 — the parity audit (VX-368); the output-cap measurement (VX-370) HELD | NOT-STARTED |
-| Gates (Mac suites under a stage claim), the closing walk | NOT-STARTED |
-| The ladder (cold review of the whole diff, up to three rounds) | NOT-STARTED |
+| BATCH 1 — the Journal shows as Private (VX-1007) | DONE but for the walk — code + pins at `366fb5213`; GATE A green (234 tests in 31 suites) with its red leg exact (8 of 13 red on the old code); the walk rides the closing walk |
+| BATCH 2 — the wire's ruled small fixes (VX-977 · VX-979 · VX-961 · riders VX-133 · VX-705) | DONE but for the wire round — code + pins at `b69e3a35f`; GATE B2 green (415 tests in 61 suites) with red legs A–D exact; the live wire round rides the closing walk |
+| BATCH 3 — announces in order, never waiting on a stall (VX-951 · VX-944) | READY — code + pins at `6c7042c81`, headless green (MCP 726/136; the soak 600/600 alone, 3,232 under load); the app pin `MCPAnnounceStallDoorTests` + leg E wait for `vx981-gate-b34` (READY, queued) |
+| BATCH 4 — the socket's edges (VX-959 · VX-952 · VX-963 · rider VX-773) | READY — code + pins at `c43595bef`, headless green (the whole MCP target alone 739/138 ×3); its app types ride `vx981-gate-b34` (READY, queued) |
+| BATCH 5 — the parity audit (VX-368); the output-cap measurement (VX-370) HELD | NOT-STARTED — runs after the ladder's code rounds, in a stage-queue gap |
+| Gates (Mac suites under a stage claim), the closing walk | GATE A RAN (05:33–05:38, batch 1) · GATE B2 RAN (06:42–06:52, batch 2) · `vx981-gate-b34` READY and queued (batches 3–4 on the merged tree + leg E) · the closing walk and the merge gate NOT-STARTED |
+| The ladder (cold review of the whole diff, cap five, R-981-5) | ROUND 1 RAN (`notes/plans/fixes/vx-981-ladder-round1.md`, `180c9b1ea`): 0 BLOCKER · 0 MAJOR · 4 MINOR · 5 NIT — responses, final calls and the fix session next; round 2 re-reviews the fixes; cap five (R-981-5) |
+| The merge-in of main | DONE — `c7ea26c74` (origin/main `9a78628ea`), clean; repeated before the merge gate if main moves |
+| OPEN — two reds under whole-target load, each green alone (THE MERGE-IN section) | UNTRACED — the fix session's soak owns them; round 1's F1 names a candidate mechanism for the first |
 | Closeout: canon deltas, QUESTIONS bundle, handoff, PR, merge through nov18 | NOT-STARTED |
 
 No revert is in flight.
@@ -201,19 +203,19 @@ Cold review of the run's whole diff by a fresh `fable-reviewer` each round, `not
 
 | Member | Batch | State | Disposition |
 |---|---|---|---|
-| VX-1007 | 1 | READY (batch 1) | FIXED pending the gate: core pins green, red on `46f030fc8` and on the revert; app-target types + walk at the stage window |
-| VX-977 | 2 | READY (batch 2) | FIXED pending the gate: unlink at edit on both notes (catalog, act, asks, description, lesson 3); 19 red on the old rung and on the revert; catalog arms identical A/B/C; app leg D at the window |
-| VX-979 | 2 | READY (batch 2) | BUILT (Improvement): the title-free arm, her words + the link twin + the one-note form (P-981-B2-1/-2); boundary pin compiled; app leg A at the window |
-| VX-961 | 2 | READY (batch 2) | FIXED pending the gate: the move and the ask split from their line (VX-775's road); 6 red on old and on the revert; words P-981-B2-3; app leg B at the window |
-| VX-951 | 3 | READY (batch 3) | FIXED pending the gate: her (b′) gate — the answer written AND the client ready (`initialized` or a first `tools/list`/`tools/call`, P-981-B3-2), one catch-up; 7 red on the scaffold and on the revert; the flake's soak 0 in 3,832 (old: red at 475 and 296) |
-| VX-944 | 3 | READY (batch 3) | FIXED pending the gate: each connection's own announcer, the rounds and the resume only ask; 2 red on the scaffold and on R-944-ONLY; both riders in (`MCPStalledReaderPoolTests`); app leg E at the window; P-981-B3-3 (no deadline) |
-| VX-959 | 4 | READY (batch 4) | FIXED pending the gate: the bind road one host at a time per socket path (`73be30aa7`); 4 pins red on the scaffold (7 issues) and on R-959-ALL, R-959-OUTSIDE reds C and D; P-981-B4-1 (in-process — the residuals named) |
+| VX-1007 | 1 | READY (batch 1) | FIXED — core pins green, red on `46f030fc8` and on the revert; GATE A green with its red leg exact; the walk rides the closing walk |
+| VX-977 | 2 | READY (batch 2) | FIXED (app types owed at `vx981-gate-b34` where the member is batch 3–4's; batches 1–2's gates ran green): unlink at edit on both notes (catalog, act, asks, description, lesson 3); 19 red on the old rung and on the revert; catalog arms identical A/B/C; gate B2 green, app leg D RAN red |
+| VX-979 | 2 | READY (batch 2) | BUILT (Improvement): the title-free arm, her words + the link twin + the one-note form (P-981-B2-1/-2); gate B2 green, app leg A RAN red |
+| VX-961 | 2 | READY (batch 2) | FIXED (app types owed at `vx981-gate-b34` where the member is batch 3–4's; batches 1–2's gates ran green): the move and the ask split from their line (VX-775's road); 6 red on old and on the revert; words P-981-B2-3; gate B2 green, app leg B RAN red (round 1's F2: the partial-show arm is not covered — open) |
+| VX-951 | 3 | READY (batch 3) | FIXED (app types owed at `vx981-gate-b34` where the member is batch 3–4's; batches 1–2's gates ran green): her (b′) gate — the answer written AND the client ready (`initialized` or a first `tools/list`/`tools/call`, P-981-B3-2), one catch-up; 7 red on the scaffold and on the revert; the flake's soak 0 in 3,832 (old: red at 475 and 296) |
+| VX-944 | 3 | READY (batch 3) | FIXED (app types owed at `vx981-gate-b34` where the member is batch 3–4's; batches 1–2's gates ran green): each connection's own announcer, the rounds and the resume only ask; 2 red on the scaffold and on R-944-ONLY; both riders in (`MCPStalledReaderPoolTests`); app leg E at the window; P-981-B3-3 (no deadline) |
+| VX-959 | 4 | READY (batch 4) | FIXED (app types owed at `vx981-gate-b34` where the member is batch 3–4's; batches 1–2's gates ran green): the bind road one host at a time per socket path (`73be30aa7`); 4 pins red on the scaffold (7 issues) and on R-959-ALL, R-959-OUTSIDE reds C and D; P-981-B4-1 (in-process — the residuals named) |
 | VX-952 | 4 | READY (batch 4) | BUILT (Improvement): the opening reads in chunks (17 reads for a full 1 MiB line, was 1,048,577) and hands its leftover to the transport (`5e544a5e8`); 7 new-contract pins; the handoff's teeth R-952-H (3 pipelining pins red); two justified edits, no answer changed |
 | VX-963 | 4 | READY (batch 4) | DISMISSED AS ALREADY FIXED by VX-933 (`396bd0cfe` + `bbf4f6729`, merged `99e1c2631`); guard pins `MCPStalledReaderPoolTests`; two new guards (the SDK's response path, the window's answers), red under R-963-T / R-963-W; no product line |
 | VX-368 | 5 | Todo | — |
 | VX-370 | 5 | Needs Lillian | R-981-1: waits on a second MCP client on the Pro, hers |
-| VX-133 | 2 (rider) | READY (batch 2) | FIXED pending the gate: the run counts the acts that stand (entry tokens, stack walks, `MCPReceiptRun`); 13 red on the scaffold and on the revert; P-981-B2-4; app leg C at the window |
-| VX-705 | 2 (rider) | READY (batch 2) | FIXED pending the gate: pin first (`5f2f53eba`), the move-at-once re-read; red by mechanism until app leg B runs; P-981-B2-5 (the brief's premise corrected) |
+| VX-133 | 2 (rider) | READY (batch 2) | FIXED (app types owed at `vx981-gate-b34` where the member is batch 3–4's; batches 1–2's gates ran green): the run counts the acts that stand (entry tokens, stack walks, `MCPReceiptRun`); 13 red on the scaffold and on the revert; P-981-B2-4; gate B2 green, app leg C RAN red |
+| VX-705 | 2 (rider) | READY (batch 2) | FIXED (app types owed at `vx981-gate-b34` where the member is batch 3–4's; batches 1–2's gates ran green): pin first (`5f2f53eba`), the move-at-once re-read; its pin RAN red on the old code at gate B2 (leg B) — the finding is real; P-981-B2-5 (the brief's premise corrected) |
 | VX-773 | 4 (rider) | READY (batch 4) | FIXED (tests only, `a7b7883a2`): six files' DEBUG-seam tests guarded; the release-configuration test build runs to its end (0 errors, on the guarded tests and again on the closing tree); the Debug list unchanged but for the batch's 13 new tests |
 
 ## BATCH RECORDS
