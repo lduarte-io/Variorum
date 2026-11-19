@@ -172,14 +172,14 @@ final class MobileBlockHistorySheetView: UIView {
         sheetView.backgroundColor = face.surface
 
         headerLabel.text = chromeCase(BlockHistoryPath.name)
-        headerLabel.font = face.chrome.withSize(13)
+        headerLabel.font = face.font(.screenTitle)
         headerLabel.textColor = face.muted
         headerLabel.sizeToFit()
         headerLabel.frame.origin = CGPoint(x: 20, y: 14)
 
         doneButton.setTitle(chromeCase("Done"), for: .normal)
         doneButton.setTitleColor(face.accent, for: .normal)
-        doneButton.titleLabel?.font = face.chrome.withSize(12.5)
+        doneButton.titleLabel?.font = face.font(.control)
         doneButton.sizeToFit()
         doneButton.frame = CGRect(
             x: sheetView.bounds.width - doneButton.bounds.width - 20, y: 10,
@@ -191,7 +191,7 @@ final class MobileBlockHistorySheetView: UIView {
         if let status = history.status {
             statusLabel.isHidden = false
             statusLabel.text = status.text
-            statusLabel.font = face.chrome.withSize(12)
+            statusLabel.font = face.font(.meta)
             statusLabel.textColor = status.isRefusal ? face.alarm : face.muted
             let width = sheetView.bounds.width - 40
             let size = statusLabel.sizeThatFits(
@@ -360,7 +360,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
         metaLabel.isHidden = false
         titleLabel.font = face.body
         titleLabel.textColor = face.ink
-        metaLabel.font = face.chrome.withSize(11.5)
+        metaLabel.font = face.font(.meta)
         metaLabel.textColor = face.muted
         // RESET BOTH LINE CAPS ON EVERY CONFIGURE (batch 6a's cold review,
         // M1 — and the recycled-cell rule this file's own header states):
@@ -372,7 +372,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
         switch row {
         case .sectionHeader(let title, let explainer):
             accessibilityIdentifier = "blockHistory.section.\(title)"
-            titleLabel.font = face.chrome.withSize(12.5)
+            titleLabel.font = face.font(.sectionHeader)
             titleLabel.textColor = face.muted
             titleLabel.text = MobileEditorStyle.chromeCase(title)
             // UNBOUNDED, and the row is measured to fit it (see
@@ -388,7 +388,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
 
         case .takeHeader(let variantID, let title, let focused, let savepoints, let expanded):
             accessibilityIdentifier = "blockHistory.take.\(variantID)"
-            titleLabel.font = face.chrome.withSize(12.5)
+            titleLabel.font = face.font(.sectionHeader)
             titleLabel.textColor = focused ? face.chosenMark : face.ink
             titleLabel.numberOfLines = 1
             let mark = focused ? " \u{00B7} \(BlockHistoryPath.focusedMark)" : ""
@@ -399,7 +399,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
 
         case .quietRun(_, let count, let expanded):
             accessibilityIdentifier = "blockHistory.run"
-            titleLabel.font = face.chrome.withSize(11.5)
+            titleLabel.font = face.font(.meta)
             titleLabel.textColor = face.muted
             titleLabel.numberOfLines = 1
             titleLabel.text = MobileEditorStyle.chromeCase(
@@ -426,7 +426,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
 
         case .quiet(let line):
             accessibilityIdentifier = "blockHistory.quiet"
-            titleLabel.font = face.chrome.withSize(12)
+            titleLabel.font = face.font(.meta)
             titleLabel.textColor = face.muted
             titleLabel.text = MobileEditorStyle.chromeCase(line)
             metaLabel.isHidden = true
@@ -477,7 +477,7 @@ final class MobileBlockHistoryCell: UITableViewCell {
         actButton.isHidden = false
         actButton.setTitle(MobileEditorStyle.chromeCase(title), for: .normal)
         actButton.setTitleColor(tint, for: .normal)
-        actButton.titleLabel?.font = face.chrome.withSize(12)
+        actButton.titleLabel?.font = face.font(.controlInline)
         actButton.accessibilityIdentifier = identifier
         actButton.accessibilityLabel = label
     }
@@ -503,12 +503,12 @@ final class MobileBlockHistoryCell: UITableViewCell {
         let titleHeight = (MobileEditorStyle.chromeCase(title) as NSString)
             .boundingRect(
                 with: bounds, options: [.usesLineFragmentOrigin, .usesFontLeading],
-                attributes: [.font: face.chrome.withSize(12.5)], context: nil)
+                attributes: [.font: face.font(.sectionHeader)], context: nil)
             .height
         let metaHeight = (MobileEditorStyle.chromeCase(explainer) as NSString)
             .boundingRect(
                 with: bounds, options: [.usesLineFragmentOrigin, .usesFontLeading],
-                attributes: [.font: face.chrome.withSize(11.5)], context: nil)
+                attributes: [.font: face.font(.meta)], context: nil)
             .height
         return max(ceil(titleHeight) + 2 + ceil(metaHeight) + 8,
                    MobileBlockHistoryController.Row.sectionHeaderFloor)

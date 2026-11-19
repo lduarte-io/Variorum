@@ -298,27 +298,27 @@ final class MobileTakesBrowserView: UIView {
             width: bounds.width, height: max(bounds.height - Self.sheetTop, 0))
         sheetView.backgroundColor = face.surface
 
-        let chrome = face.chrome.withSize(13)
+        let chrome = face.font(.controlInline)
         if let (k, n) = browser.headerOrdinal() {
             headerLabel.text = chromeCase("Takes · block \(k) of \(n)")
         } else {
             headerLabel.text = chromeCase("Takes")
         }
-        headerLabel.font = chrome
+        headerLabel.font = face.font(.screenTitle)
         headerLabel.textColor = face.muted
         headerLabel.sizeToFit()
         headerLabel.frame.origin = CGPoint(x: 20, y: 14)
 
         doneButton.setTitle(chromeCase("Done"), for: .normal)
         doneButton.setTitleColor(face.accent, for: .normal)
-        doneButton.titleLabel?.font = face.chrome.withSize(12.5)
+        doneButton.titleLabel?.font = face.font(.control)
         doneButton.sizeToFit()
         doneButton.frame = CGRect(
             x: sheetView.bounds.width - doneButton.bounds.width - 20, y: 10,
             width: doneButton.bounds.width, height: 24)
 
         footerLabel.text = chromeCase("+ New take")
-        footerLabel.font = chrome
+        footerLabel.font = face.font(.sectionHeader)
         footerLabel.textColor = face.muted
         footerLabel.sizeToFit()
         branchButton.setTitle(chromeCase("Branch this one ⧉"), for: .normal)
@@ -435,7 +435,7 @@ final class MobileTakesBrowserView: UIView {
         } else {
             archivedHeader.isHidden = false
             archivedHeader.text = chromeCase("Archived · \(archivedCards.count)")
-            archivedHeader.font = face.chrome.withSize(12)
+            archivedHeader.font = face.font(.sectionHeader)
             archivedHeader.textColor = face.muted
             archivedHeader.sizeToFit()
             y += 6
@@ -710,7 +710,7 @@ final class MobileTakesCardView: UIView {
             .resolvedColor(with: traitCollection).cgColor
         edgeBar.backgroundColor = card.isPeeked ? face.takeLine : .clear
 
-        let chrome = face.chrome.withSize(12)
+        let chrome = face.font(.meta)
         let state: String
         if card.isChosen {
             state = chromeCase("✓ Chosen")
@@ -736,7 +736,7 @@ final class MobileTakesCardView: UIView {
         chooseButton.titleLabel?.font = chrome
 
         menuButton.setTitleColor(face.muted, for: .normal)
-        menuButton.titleLabel?.font = face.chrome.withSize(14)
+        menuButton.titleLabel?.font = face.font(.control)
         // Rebuilt per apply, so the lock row MIRRORS the take's state
         // (parity C4a — the seal glyph's one-reversible-tap grammar,
         // menu-rowed) and a voice flip reaches an already-built card.
@@ -903,7 +903,7 @@ final class MobileArchivedTakeCardView: UIView {
         backgroundColor = face.card
         layer.borderColor = face.line.resolvedColor(with: traitCollection).cgColor
 
-        let chrome = face.chrome.withSize(12)
+        let chrome = face.font(.meta)
         stateLabel.text = chromeCase("Archived")
         stateLabel.font = chrome
         stateLabel.textColor = face.muted
@@ -914,7 +914,7 @@ final class MobileArchivedTakeCardView: UIView {
         takeLabel.isHidden = (card.label ?? "").isEmpty
 
         menuButton.setTitleColor(face.muted, for: .normal)
-        menuButton.titleLabel?.font = face.chrome.withSize(14)
+        menuButton.titleLabel?.font = face.font(.control)
         // **NO `Block History…` ROW HERE, and the absence is deliberate**
         // (batch 9). Her letter says *"each take"*, and an archived take is
         // one — but the door's whole gain over the retired block-⋯ row is

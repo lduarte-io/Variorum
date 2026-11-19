@@ -192,16 +192,16 @@ final class MobileCommentsSheetView: UIView {
             width: bounds.width, height: max(bounds.height - Self.sheetTop, 0))
         sheetView.backgroundColor = face.surface
 
-        let chrome = face.chrome.withSize(13)
+        let chrome = face.font(.control)
         headerLabel.text = chromeCase("Comments")
-        headerLabel.font = chrome
+        headerLabel.font = face.font(.screenTitle)
         headerLabel.textColor = face.muted
         headerLabel.sizeToFit()
         headerLabel.frame.origin = CGPoint(x: 20, y: 14)
 
         doneButton.setTitle(chromeCase("Done"), for: .normal)
         doneButton.setTitleColor(face.accent, for: .normal)
-        doneButton.titleLabel?.font = face.chrome.withSize(12.5)
+        doneButton.titleLabel?.font = face.font(.control)
         doneButton.sizeToFit()
         doneButton.frame = CGRect(
             x: sheetView.bounds.width - doneButton.bounds.width - 20, y: 10,
@@ -209,7 +209,7 @@ final class MobileCommentsSheetView: UIView {
 
         let editing = comments.editingID != nil
         let draftY = sheetView.bounds.height - 56
-        draftField.font = face.chrome.withSize(13)
+        draftField.font = face.font(.noteBody)
         draftField.textColor = face.ink
         draftField.backgroundColor = face.card
         draftField.layer.borderColor = face.line.resolvedColor(
@@ -217,7 +217,7 @@ final class MobileCommentsSheetView: UIView {
         draftField.frame = CGRect(
             x: 16, y: draftY, width: sheetView.bounds.width - 32 - 64, height: 40)
         draftPlaceholder.text = chromeCase(editing ? "Edit the comment…" : "Add a comment…")
-        draftPlaceholder.font = face.chrome.withSize(13)
+        draftPlaceholder.font = face.font(.noteBody)
         draftPlaceholder.textColor = face.muted
         draftPlaceholder.sizeToFit()
         draftPlaceholder.frame.origin = CGPoint(x: 8, y: 10)
@@ -231,7 +231,7 @@ final class MobileCommentsSheetView: UIView {
 
         cancelEditButton.setTitle(chromeCase("Cancel"), for: .normal)
         cancelEditButton.setTitleColor(face.muted, for: .normal)
-        cancelEditButton.titleLabel?.font = face.chrome.withSize(11.5)
+        cancelEditButton.titleLabel?.font = face.font(.controlInline)
         cancelEditButton.isHidden = !editing
         cancelEditButton.frame = CGRect(
             x: draftField.frame.maxX + 8, y: draftY - 24, width: 52, height: 20)
@@ -242,7 +242,7 @@ final class MobileCommentsSheetView: UIView {
         let restoredShown = comments.restoredNote != nil
         restoredLabel.text = comments.restoredNote.map(chromeCase)
         restoredLabel.isHidden = !restoredShown
-        restoredLabel.font = face.chrome.withSize(11.5)
+        restoredLabel.font = face.font(.meta)
         restoredLabel.textColor = face.accent
         restoredLabel.frame = CGRect(
             x: 16, y: draftY - 24, width: draftField.frame.width, height: 18)
@@ -261,11 +261,11 @@ final class MobileCommentsSheetView: UIView {
         let width = rowsScroll.bounds.width
 
         func addLabelRow(
-            _ text: String, color: UIColor, size: CGFloat, identifier: String
+            _ text: String, color: UIColor, role: PhoneTypeRole, identifier: String
         ) -> UILabel {
             let label = UILabel()
             label.text = text
-            label.font = face.chrome.withSize(size)
+            label.font = face.font(role)
             label.textColor = color
             label.numberOfLines = 0
             label.accessibilityIdentifier = identifier
@@ -284,7 +284,7 @@ final class MobileCommentsSheetView: UIView {
             let button = UIButton(type: .custom)
             button.setTitle(chromeCase(title), for: .normal)
             button.setTitleColor(color, for: .normal)
-            button.titleLabel?.font = face.chrome.withSize(11.5)
+            button.titleLabel?.font = face.font(.controlInline)
             button.accessibilityIdentifier = identifier
             button.addAction(UIAction { _ in action() }, for: .touchUpInside)
             button.sizeToFit()
@@ -298,16 +298,16 @@ final class MobileCommentsSheetView: UIView {
         if comments.comments.isEmpty {
             _ = addLabelRow(
                 chromeCase("No comments on this block yet."),
-                color: face.muted, size: 12, identifier: "comments.empty")
+                color: face.muted, role: .meta, identifier: "comments.empty")
             y += 8
         }
         for comment in comments.comments {
             _ = addLabelRow(
-                comment.text, color: face.ink, size: 13,
+                comment.text, color: face.ink, role: .rowPreview,
                 identifier: "comments.row.\(comment.id)")
             _ = addLabelRow(
                 comment.createdAt.formatted(date: .abbreviated, time: .shortened),
-                color: face.muted, size: 10.5,
+                color: face.muted, role: .meta,
                 identifier: "comments.date.\(comment.id)")
             let editButton = addButton(
                 "Edit", x: 0, color: face.accent,
@@ -343,12 +343,12 @@ final class MobileCommentsSheetView: UIView {
             if comments.deletedShown {
                 for comment in comments.deleted {
                     let label = addLabelRow(
-                        comment.text, color: face.muted, size: 11.5,
+                        comment.text, color: face.muted, role: .rowPreview,
                         identifier: "comments.deletedRow.\(comment.id)")
                     label.attributedText = NSAttributedString(
                         string: comment.text,
                         attributes: [
-                            .font: face.chrome.withSize(11.5),
+                            .font: face.font(.rowPreview),
                             .foregroundColor: face.muted,
                             .strikethroughStyle: NSUnderlineStyle.single.rawValue,
                         ])

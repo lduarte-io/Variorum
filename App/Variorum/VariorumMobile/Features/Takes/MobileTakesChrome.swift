@@ -220,7 +220,7 @@ final class MobileTakesChromeController {
                 height: max(line.firstLineHeight, 18))
             if badge.frame != frame { badge.frame = frame }
             badge.setTitleColor(face.muted, for: .normal)
-            badge.titleLabel?.font = face.chrome.withSize(12)
+            badge.titleLabel?.font = face.font(.meta)
         }
         for (blockID, badge) in badges where !seen.contains(blockID) {
             badge.removeFromSuperview()
@@ -459,13 +459,13 @@ final class MobileTakesPillView: UIView {
         backgroundColor = face.card
         layer.borderColor = face.takeLine.resolvedColor(
             with: traitCollection).cgColor
-        let chrome = face.chrome.withSize(12)
+        let chrome = face.font(.meta)
         infoLabel.text = content.text
         infoLabel.font = chrome
         infoLabel.textColor = face.muted
         for button in [previousButton, nextButton] {
             button.setTitleColor(face.muted, for: .normal)
-            button.titleLabel?.font = face.chrome.withSize(15)
+            button.titleLabel?.font = face.font(.controlInline)
         }
         chooseButton.setTitleColor(face.chosenMark, for: .normal)
         chooseButton.titleLabel?.font = chrome.bold

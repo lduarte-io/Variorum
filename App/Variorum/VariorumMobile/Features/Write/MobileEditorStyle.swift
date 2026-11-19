@@ -58,6 +58,8 @@ nonisolated enum MobileEditorStyle {
     /// dark resolve from the token layer per the current trait — R51's
     /// black rooms ride the system scheme with no re-render needed).
     struct Face {
+        /// Which voice this face is (VM-48: its type roles resolve from it).
+        let voice: ThemeVoice
         let body: UIFont
         /// Chrome type (the keyboard bar's act titles): mono in the
         /// terminal voice, the system sans in study — the mockups' own
@@ -97,6 +99,7 @@ nonisolated enum MobileEditorStyle {
         let palette: MarkdownFace.Palette
 
         init(voice: ThemeVoice) {
+            self.voice = voice
             func dynamic(_ key: KeyPath<VoiceTokens, Color>) -> UIColor {
                 UIColor { traits in
                     UIColor(VoiceTokens.resolve(
@@ -126,7 +129,11 @@ nonisolated enum MobileEditorStyle {
                 chrome = .systemFont(ofSize: 14)
             }
             ink = dynamic(\.ink)
-            muted = dynamic(\.muted)
+            // VM-48: the phone layer's corrected muted (sheet §D) — the
+            // voice's own hue, darker, clearing 4.5:1 on every shipped
+            // ground. The markdown marker below keeps the voice's own muted
+            // (the editor's markdown face is VM-137's).
+            muted = PhoneInks.uiColor(.muted, voice: voice)
             room = dynamic(\.room)
             surface = dynamic(\.surface)
             line = dynamic(\.line)
@@ -146,6 +153,14 @@ nonisolated enum MobileEditorStyle {
                 // in both appearances with no storage write at all — which
                 // is why the phone never showed this defect.
                 prose: dynamic(\.ink))
+        }
+
+        /// VM-48: the phone layer's UIKit type — a role in this face's voice
+        /// (`PhoneType.uiFont`: scaled with the text size, chrome held at
+        /// xxxLarge). The UIKit chrome reads its type through here.
+        @MainActor
+        func font(_ role: PhoneTypeRole) -> UIFont {
+            PhoneType.uiFont(role, voice: voice)
         }
     }
 
