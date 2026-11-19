@@ -184,7 +184,7 @@ hold at this branch's base `21747b9de`: `MobileWriteView.swift` 143-226, `Mobile
 
 | Piece | State |
 |---|---|
-| P1 — the brain + headless tests (Core `Diagnostics/`) | NOT-STARTED |
+| P1 — the brain + headless tests (Core `Diagnostics/`) | DONE — `TimingStats` · `TimingRecorder` · `TimingReport`; `swift test --filter TimingRecorderTests` 24/24 in 1 suite green (headless, no stage) |
 | P2 — the catalog, the one recorder, persistence glue (`Shared/AppTiming.swift`) | NOT-STARTED |
 | P3 — the marks (phone + Shared sites) | NOT-STARTED |
 | P4 — the readout + the Settings row | NOT-STARTED |
