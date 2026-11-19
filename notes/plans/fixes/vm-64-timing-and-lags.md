@@ -155,7 +155,7 @@ After batch 7: the whole-phone and whole-Mac windows, then the ladder (Fable, up
 | 3 · VM-66 | **CLOSED 2026-11-19** | see the batch 3 block; built at `d2cef56be` | the BEFORE numbers are in "Orchestrator's stage results" below |
 | 4 · VM-67 | **CLOSED 2026-11-19** | see the batch 4 block; schema `0e9948d03`, op `e6d16fca7`, built at `8e4e73e01` | headless whole package, phone and Mac pieces green — "Orchestrator's stage results" below |
 | 5 · VM-68 | **CLOSED 2026-11-19** | see the batch 5 block; built on the merged tree at `dcea98cee` | suites, red-on-old and the walk in "Orchestrator's stage results" below; PROVISIONAL P-68-1, P-68-4, P-68-5 |
-| 6 · VM-69 · VM-70 | BUILT · **READY for the stage** | see the batch 6 block; products `vm64-b6` at `24fa9a5e2`, red `vm64-b6-red` | first commit `f0e2e696c` (the midpoint review's finding 1) |
+| 6 · VM-69 · VM-70 | **r1 IN-PROGRESS** — the first window NOT GREEN on the three release pins (red on both builds); the release moves out of `deinit` | see the batch 6 block ▸ "Iteration r1" | r0 products `vm64-b6` at `24fa9a5e2` |
 | 7 · VM-71 | BUILT · **READY for the stage** | see the batch 7 block; products `vm64-b7` at `c9b574513`, red `vm64-b7-red` | no revert in flight; no line in `Features/Protection/` |
 
 ### Batch 1 · VM-65 — LIVE STATUS (implementer, opus; started 2026-11-19)
@@ -563,6 +563,75 @@ open, though the masthead shows only the note's own rows; the two sheets already
 | P8 — closeout in §7 + READY | DONE (this commit) — §7 batch 6; READY: the stage groups (i)–(iv) are in §7 batch 6 ▸ "The stage window"; every run PENDING |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b6/` and `vm64-b6-red/` (gitignored).
+
+**Iteration r1 (after the first stage window, 10:10–10:28 — the orchestrator's message; logs `notes/plans/vm64-screens/b6-*.log`).**
+What ran: the perf suite alone on the fix build, twice — 10 of 10 (reads per open 1, registry growth 0 through
+`MountedBuilt`); the 73 types in one host — green but VM-24's standing caret test and THREE release pins
+(`closingANoteLandsItsTextThenGivesItsCoordinatorBack` `givenBack`; `theReleaseWaitsForTheLeavingSavepoint` the give-back;
+`aCoordinatorAnotherHolderNeedsIsNeverLetGo`, 4 issues — the shelf's hold never came back, holders 3 after the quick
+note's acquire); the note-open suite ALONE: the same three at their 10 s deadlines (neither company nor load); the red
+build: the perf suite's four reds as designed, the note-open suite's chrome-once and chips-trace reds as designed AND the
+same three. **Those three are red on BOTH builds — they proved nothing.** In each, the text landed and the savepoint
+landed (their other expectations passed): the leaving work ran to its end, and the editor still never released.
+
+**The trace (read on this tree; per pin and for the product):**
+- **What holds the editor in the three pins — the LIVE HOST, not our code.** Every reference our code keeps to the
+  editor was read: the screen's `onDisappear` task ends with the savepoint (it did — the savepoint landed); the screen's
+  `.task` and `start()`'s two loops end at the stream's cancellation (the iterators hold no model); the liveness
+  authority's entries are `weak` and the screen deregisters; the router holds none; the text view (`editorModel`), the
+  gate delegate, the storage observer, the chrome and decor controllers, the pan router and every sibling hold it `weak`;
+  the crystallizer's tasks are transient. What remains is the SwiftUI/UIKit hosting of the removed screen — its
+  `@State`, the representable's struct (`MobileWriteView.model`, strong), the six `.sheet` and two `.alert` content
+  closures and the `safeAreaInset` closure (each captures the screen value, whose `State(initialValue:)` stores the
+  editor). The pins' host (`BuiltScreen`) stays up — window, hosting controller — until the test's `defer`; the perf
+  series' `MountedBuilt` tears its window down and lets its host go BEFORE it waits, and there the release came. So per
+  pin: **(A) for the harness** — the retain is the live host's, on both builds. Which object inside SwiftUI/UIKit
+  holds it is not readable from our side; r1 adds a RECORDED probe (`VM70-PROBE|…`) that reads, through a weak
+  reference, at which stage of a host's life the editor is freed — after the close, after a SwiftUI update, after the
+  window's teardown, after the host's release — and the same on the REAL shell's NavigationStack pop (the Library row,
+  then the navigation bar's Back).
+- **For the product: (B).** Her shell is a live host for the app's whole life; a popped destination's state is freed on
+  SwiftUI's schedule, and nothing on this branch pins that it is freed promptly, or at all, while the host lives — the
+  one road that showed a release did so only by destroying the host. So r0's release depended on a deallocation her
+  hands do not demonstrably cause: **VM-70 is not shown fixed for her road**, and an `isolated deinit` is the wrong
+  place for the phone's release.
+- **Why the Mac's 18k C1 is safe and the phone's lifetimes differ:** on the Mac a release only DECREMENTS — the entry's
+  drop is the leaving savepoint's (`dropAfterLeaving`), and ⌘Q/the lock savepoint any entry still held — so a late death
+  only delays a drop, never loses text, never costs a savepoint (18k measured it on the dev store). The phone's release
+  IS the drop (`releaseAutosave`'s phone branch, at zero holders and clean), so on the phone a late or missing death is
+  exactly the growth VM-70 measures.
+
+**The r1 design (the release moves OUT of `deinit`, into the leaving work — the order flush, savepoint, release, which
+batch 7's `MobileLeavingSavesOnceTests` assumes too):**
+- **The leaving's last act gives the hold back** — the screen's `onDisappear` task: `teardown()` (the flush), then
+  `savepointOnLeaving` (batch 7's phone branch: its flush, the read, the one runner turn), then
+  `model.releaseAutosaveHold(ifNotShownSince:)`, then the leave's timing mark. Deterministic: no wait on any deallocation.
+- **A screen shown again takes it back** — the screen's `.task` begins with `model.takeAutosaveHold()`: it counts the
+  arrival and, if the hold was given back, re-acquires through `session.autosave(forPost:)`. If the registry hands back a
+  DIFFERENT coordinator (the entry dropped clean and was re-minted, perhaps by another tab's editor of the same note), the
+  editor ADOPTS it (stops observing its old one, observes the new) — so two coordinators for one note can never stand
+  (the S3 BLOCKER's class). A screen shown again BEFORE its leaving finished keeps its hold: the leaving releases only if
+  no arrival came after it (the arrival count captured at `onDisappear`).
+- **`deinit` releases only a hold no leaving gave back** (a twin built by a view re-init, a harness model) — exactly one
+  release per acquisition, as before.
+- `autosave` becomes a `private(set) var` (every reader goes through `model.autosave` / `host.autosave` at use time —
+  read on this tree); the re-mint passes the editor's own clock parameters. No `Shared/`, Core or `Sync/` change; the
+  phone's `releaseAutosave` rule unchanged.
+- **Pins:** the three release pins stay (now deterministic — the registry's release IS the leaving's last act; their
+  bound is a hang guard, not a timing assumption); new `MobileNoteHoldTests` (names the new API — set aside for the red
+  build): a re-show after the give-back takes it back and is wired to it; a re-show of the note opened meanwhile on
+  another tab joins that tab's coordinator; a re-show before the leaving finished keeps its hold; a twin gives its hold
+  back at its end; the order (flush, savepoint, release). The probe above, recorded. Red build: the four Write files at
+  the instrument commit `c8f95ea6f`, on today's tree (batch 7's Core and `Shared/` included).
+- **Kept as written:** the r0 closeout's claims in §7; the lines the stage falsified are marked there.
+
+| r1 piece | State |
+|---|---|
+| R1 — this trace and the decision | DONE (this commit) |
+| R2 — the product: the hold given back by the leaving, taken back by the arrival; `deinit` the remainder | NOT-STARTED |
+| R3 — the pins: `MobileNoteHoldTests`; the probe; the three pins' notes | NOT-STARTED |
+| R4 — builds `vm64-b6r1` (fix) and `vm64-b6r1-red` (revert announced first) | NOT-STARTED |
+| R5 — §7 r1 section (the falsified r0 lines marked) + READY | NOT-STARTED |
 
 ### Batch 7 · VM-71 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
