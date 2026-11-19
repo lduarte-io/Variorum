@@ -203,6 +203,71 @@ private func milliseconds(since start: CFTimeInterval) -> Double {
     (CACurrentMediaTime() - start) * 1000
 }
 
+// MARK: - Owner adoption, watched on the store's writer (VM-67)
+
+/// **VM-67 (the VM-64 run, batch 4)** — what owner adoption runs on the store's
+/// WRITER connection, and what each statement's query plan reads: the hosted twin
+/// of the Core pins (`Tests/VariorumCoreTests/OwnerAdoptionTests.swift`).
+/// Nonisolated so the trace closure GRDB calls on its writer queue carries no
+/// actor isolation of the test's.
+nonisolated enum OwnerAdoptionTrace {
+    struct Statement: Sendable {
+        let sql: String
+        let expandedSQL: String
+        var verb: String { String(sql.drop { $0.isWhitespace }.prefix { !$0.isWhitespace }).uppercased() }
+    }
+
+    static let writeVerbs: Set<String> = [
+        "BEGIN", "COMMIT", "END", "SAVEPOINT", "RELEASE", "UPDATE", "INSERT", "DELETE", "REPLACE",
+    ]
+
+    /// Starts recording every statement the writer runs (until `stop`).
+    static func start(on db: AppDatabase) throws -> LockIsolated<[Statement]> {
+        let log = LockIsolated<[Statement]>([])
+        try db.writeWithoutTransaction { connection in
+            connection.trace(options: .statement) { event in
+                guard case .statement(let statement) = event else { return }
+                let entry = Statement(sql: statement.sql, expandedSQL: statement.expandedSQL)
+                log.withValue { $0.append(entry) }
+            }
+        }
+        return log
+    }
+
+    static func stop(on db: AppDatabase) throws {
+        try db.writeWithoutTransaction { $0.trace(options: .statement, nil) }
+    }
+
+    /// Each data statement's query plan: a plan line that reads an owner table
+    /// must read it through that table's unowned-row index (`idx_<t>_unowned`).
+    static func planReadings(
+        _ db: AppDatabase, _ statements: [Statement]
+    ) throws -> (violations: [String], reached: Set<String>, ownerTables: Set<String>) {
+        try db.writeWithoutTransaction { connection in
+            let ownerTables = try SyncSchema.tables.map(\.name).filter { table in
+                try Row.fetchAll(connection, sql: "PRAGMA table_info(\(table))")
+                    .contains { ($0["name"] as String) == "owner_id" }
+            }
+            var violations: [String] = []
+            var reached: Set<String> = []
+            for statement in statements where ["SELECT", "UPDATE", "DELETE", "INSERT", "WITH"].contains(statement.verb) {
+                let details = try Row.fetchAll(connection, sql: "EXPLAIN QUERY PLAN " + statement.expandedSQL)
+                    .map { $0["detail"] as String }
+                for detail in details {
+                    for table in ownerTables {
+                        let reads = ["SCAN \(table)", "SEARCH \(table)", "SCAN TABLE \(table)", "SEARCH TABLE \(table)"]
+                            .contains { detail == $0 || detail.hasPrefix($0 + " ") }
+                        guard reads else { continue }
+                        reached.insert(table)
+                        if !detail.contains("idx_\(table)_unowned") { violations.append("\(statement.sql) → \(detail)") }
+                    }
+                }
+            }
+            return (violations, reached, Set(ownerTables))
+        }
+    }
+}
+
 // MARK: - The worlds: on-disk copies of the static fixture worlds
 
 /// One test's own store: an on-disk copy of a static fixture world, opened
@@ -654,6 +719,10 @@ struct MobileHerPathsPerfTests {
     /// · `owner-adoption-rows-nothing-to-adopt` — **ASSERTED zero**: adoption
     ///   is idempotent by contract ("a second run adopts nothing",
     ///   `Operations.adoptOwnerID`), and batch 4 must keep it so.
+    /// · **VM-67's guarantee, ASSERTED** after the series (batch 4): with
+    ///   nothing unowned, a pass runs no write statement on the store's
+    ///   writer and reads every owner table only through its unowned-row
+    ///   index — red on the pre-fix build (`OwnerAdoptionTrace`).
     @Test func ownerAdoptionWithNothingToAdoptIsMeasuredAtFixtureScale() async throws {
         let world = try DiskWorld.copy(of: try PerfWorlds.big.get(), "owner")
         defer { world.remove() }
@@ -686,6 +755,27 @@ struct MobileHerPathsPerfTests {
             // ASSERTED — the idempotence contract.
             #expect(rows.allSatisfy { $0 == 0 }, "nothing unowned ⇒ nothing adopted")
             print("PERF[sim] owner adoption — the first run stamped \(first ?? -1) rows at the 100k scale")
+
+            // VM-67 (the VM-64 run, batch 4) — THE GUARANTEE behind the series
+            // above, ASSERTED here at fixture scale on the encrypted on-disk
+            // store: with nothing unowned, one more pass (after the series, so
+            // the measured runs stay untraced; the op called the way
+            // `runOwnerAdoption` calls it) runs NO write statement on the
+            // store's writer — no BEGIN, no UPDATE, no COMMIT — and every
+            // statement it runs reads an owner table only through that
+            // table's unowned-row index (v1_38), never a scan. RED on the
+            // pre-fix build: BEGIN IMMEDIATE + eleven UPDATEs, each
+            // `SCAN <table>` over the whole fixture.
+            let log = try OwnerAdoptionTrace.start(on: world.db)
+            let quiet = try await session.runner.run { ops in try ops.adoptOwnerID() }
+            try OwnerAdoptionTrace.stop(on: world.db)
+            let statements = log.value
+            #expect(quiet.total == 0)
+            let writes = statements.filter { OwnerAdoptionTrace.writeVerbs.contains($0.verb) }
+            #expect(writes.isEmpty, "VM-67: nothing unowned ⇒ no write statement; ran \(writes.map(\.sql))")
+            let plans = try OwnerAdoptionTrace.planReadings(world.db, statements)
+            #expect(plans.violations.isEmpty, "VM-67: adoption scanned an owner table: \(plans.violations)")
+            #expect(plans.reached == plans.ownerTables, "VM-67: every owner table checked (the oracle ran)")
         }
     }
 
