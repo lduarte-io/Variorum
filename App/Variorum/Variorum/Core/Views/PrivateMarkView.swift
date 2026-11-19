@@ -44,6 +44,16 @@
 //    server's switch is OFF the eye still draws, in the dimmed ink, its hover
 //    appending "The MCP server is off." (`MCPServerOffFace`, the shared
 //    icon's own rule).
+//  - VX-1007 (her report 2026-11-18: "the journal does not wear the private
+//    eye icon"; her ruling: "I honestly think it always being private is
+//    good … It should just show as ticked and locked"): the eye draws wherever
+//    the FENCE holds, its two journal legs included — THE daily Journal's
+//    own book row (`.dailyJournal`), a member of it (`.viaJournal`, the
+//    via-book form naming the Journal), a day entry outside it
+//    (`.journalEntry`) — from the facts' journal fields (the fence's own
+//    fragments). Those arms act on NOTHING: no stamp is written or cleared
+//    (the rows are locked there); each says why, the via arm with one door to
+//    the Journal. Every gate above is unchanged.
 //
 //  Pieces (P-9): the RULE (`PrivateMarkFace` — pure), the WORDS
 //  (`PrivateMarkCopy`, in PrivateMark.swift beside the row's), the ACT
@@ -103,15 +113,30 @@ nonisolated enum PrivateMarkFace {
     /// **A note row's mark** — the fact alone. (VX-934: the badge family's
     /// switch no longer reaches it; the AI pair's switch is the FACE's —
     /// `PrivateMarkView` reads it off the road, as the shared icon does.)
+    ///
+    /// **VX-1007 — a journal leg WINS the face** (PROVISIONAL P-981-B1-2):
+    /// the note is always Private there and its row is locked, so the eye
+    /// never offers to clear a stamp the row hides. A member of the daily
+    /// Journal wears the via-book form naming the Journal(s) first, then any
+    /// Private book (once each); a day entry outside it, the entry arm. With no
+    /// journal leg, today's arms byte for byte.
     static func note(_ fact: Queries.PrivateMark?) -> Mark? {
-        guard let fact, fact.isPrivate else { return nil }
+        guard let fact, fact.isFenced else { return nil }
+        if !fact.viaJournals.isEmpty {
+            let journals = Set(fact.viaJournals.map(\.id))
+            return .viaJournal(fact.viaJournals + fact.viaBooks.filter { !journals.contains($0.id) })
+        }
+        if fact.journalEntry { return .journalEntry }
         return fact.own ? .ownNote(alsoVia: fact.viaBooks) : .viaBooks(fact.viaBooks)
     }
 
     /// **A book row's mark** — its own stamp (the facts never name a
-    /// gathering).
+    /// gathering). VX-1007: THE daily Journal wears its own arm, its own stamp
+    /// or not — its row is locked, so its eye never clears a stamp.
     static func book(_ fact: Queries.PrivateBookMark?) -> Mark? {
-        fact?.own == true ? .ownBook : nil
+        guard let fact else { return nil }
+        if fact.dailyJournal { return .dailyJournal }
+        return fact.own ? .ownBook : nil
     }
 
     // (The note's masthead — the in-note indicator — reads `note(_:)` exactly

@@ -193,10 +193,14 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
     var journalFenced: Bool { journalEntry || !throughJournals.isEmpty }
 
     /// **VX-1007 — the row's face:** ticked, locked, and the line under it
-    /// that says why (nil: no line).
-    var rowTicked: Bool { own }
-    var rowLocked: Bool { false }
-    var alwaysPrivateLine: String? { nil }
+    /// that says why (nil: no line). A journal leg: ticked and LOCKED, its own
+    /// stamp or not (PROVISIONAL P-981-B1-2); otherwise the plain toggle on
+    /// the note's own stamp, as before.
+    var rowTicked: Bool { own || journalFenced }
+    var rowLocked: Bool { journalFenced }
+    var alwaysPrivateLine: String? {
+        journalFenced ? PrivateMarkCopy.noteAlwaysPrivate(entry: journalEntry) : nil
+    }
 
     /// **VX-641 — does the note's Private row show?** Once the library has had
     /// a client (her ruling 2026-10-28: "it should be hidden if there's no AI to
@@ -216,14 +220,23 @@ nonisolated struct NotePrivacyState: Equatable, Sendable {
         return approvedClients.filter { !reaching.contains($0) }
     }
 
+    /// VX-1007: the note's privacy facts in ONE read — the faces' own fact
+    /// (`Queries.privateMarks`, the plain UNGATED read: the row keeps VX-641,
+    /// so the un-private road survives while the eye is hidden), which carries
+    /// the fence's journal legs beside the Private mark. Its own stamp and its
+    /// Private books are the same predicates the row read before
+    /// (`isNotePrivate` / `privateBooksHolding` — same rows, same order).
     static func read(_ db: Database, postID: String) throws -> NotePrivacyState {
-        NotePrivacyState(
+        let mark = try Queries.privateMarks(db, noteIDs: [postID])[postID]
+        return NotePrivacyState(
             postID: postID,
-            own: try Queries.isNotePrivate(db, postID: postID),
-            throughBooks: try Queries.privateBooksHolding(db, postID: postID),
+            own: mark?.own ?? false,
+            throughBooks: mark?.viaBooks.map(\.name) ?? [],
             sharing: try Queries.mcpNoteSharing(db, noteID: postID),
             approvedClients: try Queries.mcpClients(db, states: [.approved]).map(\.name),
-            libraryHasHadClient: try Queries.mcpLibraryHasHadClient(db))
+            libraryHasHadClient: try Queries.mcpLibraryHasHadClient(db),
+            journalEntry: mark?.journalEntry ?? false,
+            throughJournals: mark?.viaJournals.map(\.name) ?? [])
     }
 
     /// Only a state loaded for THIS note draws (the wing doors' subject rule).

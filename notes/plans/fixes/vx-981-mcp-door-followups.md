@@ -194,7 +194,7 @@ The contract the fix must keep, each with a pin or a named existing pin: VX-258'
 | R0 — this record's opening: the traced mechanism, the design, the commit plan | DONE (this commit) |
 | S — the scaffold + pins: the new fact/face types with the OLD behaviour, every pin written; core pins run RED | DONE (this commit — its hash is the commit that adds this line; the red run is under PINS below) |
 | F1 — core: the fence's journal legs as named fragments (one site), the faces' Journal facts read from them | DONE (this commit; green run under PINS) |
-| F2 — app: the eye's Journal arms, the two Private rows ticked-and-locked with the why-line | NOT-STARTED |
+| F2 — app: the eye's Journal arms, the two Private rows ticked-and-locked with the why-line | DONE (this commit; `build-for-testing` TEST BUILD SUCCEEDED; the app-target run is the orchestrator's gate) |
 | V — the revert check (core files to S → red → restored); `build-for-testing` | NOT-STARTED |
 | C — the record's closing sections (sentences, canon drafts, gate types, walk script, VM-209, self-assessment); the run's table + ledger flipped | NOT-STARTED |
 

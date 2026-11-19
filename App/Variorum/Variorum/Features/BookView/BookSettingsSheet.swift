@@ -298,7 +298,9 @@ nonisolated enum BookSettingsFace {
     }
 
     static func privateRow(isPrivate: Bool, isDailyJournal: Bool) -> PrivateRow {
-        PrivateRow(ticked: isPrivate, locked: false, caption: PrivateMarkCopy.bookCaption)
+        isDailyJournal
+            ? PrivateRow(ticked: true, locked: true, caption: PrivateMarkCopy.dailyJournalCaption)
+            : PrivateRow(ticked: isPrivate, locked: false, caption: PrivateMarkCopy.bookCaption)
     }
 
     /// 13i-e U2 — the State section's Archived row: Archive or Unarchive, from
@@ -368,13 +370,16 @@ final class BookSettingsModel {
         let ids = Array(RuleGrammar.tagIDs(of: RuleGrammar.decode(reading.querySpec)))
             + reading.autoTagIDs
         let readingID = readingID
-        guard let (paths, hides, marked, hadClient) = try? await session.database.read({ db in
+        guard let (paths, hides, marked, hadClient, daily) = try? await session.database.read({ db in
             (try Queries.tagPaths(db, ids: ids), try Queries.hideOwnedDefault(db),
-             try Queries.isBookPrivate(db, readingID: readingID), try Queries.mcpLibraryHasHadClient(db))
+             try Queries.isBookPrivate(db, readingID: readingID), try Queries.mcpLibraryHasHadClient(db),
+             // VX-1007: the fence's book leg, through the faces' one fact.
+             try Queries.privateBookMarks(db, readingIDs: [readingID])[readingID]?.dailyJournal ?? false)
         }) else { return }
         self.paths = paths
         hideOwnedDefault = hides
         isPrivate = marked
+        isDailyJournal = daily
         libraryHasHadClient = hadClient
         notePrivateRowShown()
     }
@@ -636,8 +641,10 @@ struct BookSettingsSheet: View {
 
     private var factsKey: String {
         guard let reading = structure.reading else { return "" }
+        // VX-1007: and the profile — the daily marker moving re-reads the
+        // Private row's lock.
         return [reading.querySpec ?? "", reading.autoTagIds ?? "",
-                "\(String(describing: reading.hideOwned))"].joined(separator: "|")
+                "\(String(describing: reading.hideOwned))", reading.profile ?? ""].joined(separator: "|")
     }
 
     // MARK: Sections
