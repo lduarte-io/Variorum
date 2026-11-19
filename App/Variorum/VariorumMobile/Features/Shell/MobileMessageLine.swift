@@ -326,6 +326,9 @@ struct MobileMessageLineHost: UIViewRepresentable {
             }
         }
 
+        /// The scene whose activation the overlay follows (set while raised).
+        private(set) weak var observedScene: UIWindowScene?
+
         private func raise(over scene: UIWindowScene) {
             guard overlay == nil else { return }
             let overlay = MobileMessageLineWindow(windowScene: scene)
@@ -333,12 +336,58 @@ struct MobileMessageLineHost: UIViewRepresentable {
             overlay.backgroundColor = .clear
             overlay.isOpaque = false
             overlay.rootViewController = MobileMessageLineController(model: model)
-            // Visible, never key: `isHidden = false`, not makeKeyAndVisible.
-            overlay.isHidden = false
+            // Visible, never key: `isHidden = false`, not makeKeyAndVisible —
+            // and never over a scene that is not active (below).
+            overlay.isHidden = scene.activationState != .foregroundActive
             self.overlay = overlay
+            observe(scene)
         }
 
+        // MARK: The scene's edges (VM-61 — the app-switcher snapshot)
+
+        /// **The line never rides into the app-switcher snapshot.** The
+        /// snapshot cover (`SnapshotPrivacy`) is a redaction applied through
+        /// the SHELL's environment, and an environment cannot reach this
+        /// window, so the overlay follows the scene itself: hidden the moment
+        /// the scene resigns active (before iOS snapshots it — a notification,
+        /// posted synchronously, rather than a SwiftUI phase that lands a pass
+        /// later), every standing line withdrawn once it goes to the
+        /// background (a 6 s line never outlives her leaving the app), shown
+        /// again when the scene is active. A transient interruption (Control
+        /// Center, a system alert) hides a line without losing it.
+        private func observe(_ scene: UIWindowScene) {
+            let center = NotificationCenter.default
+            center.addObserver(
+                self, selector: #selector(sceneWillResignActive),
+                name: UIScene.willDeactivateNotification, object: scene)
+            center.addObserver(
+                self, selector: #selector(sceneDidEnterBackground),
+                name: UIScene.didEnterBackgroundNotification, object: scene)
+            center.addObserver(
+                self, selector: #selector(sceneDidBecomeActive),
+                name: UIScene.didActivateNotification, object: scene)
+            observedScene = scene
+        }
+
+        @objc func sceneWillResignActive() {
+            overlay?.isHidden = true
+        }
+
+        @objc func sceneDidEnterBackground() {
+            overlay?.isHidden = true
+            model.status.clear()
+        }
+
+        @objc func sceneDidBecomeActive() {
+            overlay?.isHidden = false
+        }
+
+        /// The shell is gone (its view left the window, or SwiftUI dismantled
+        /// it — a lock, a re-key's reopen, any state but `.ready`): the
+        /// overlay goes with it, before whatever replaces the shell draws.
         func takeDown() {
+            NotificationCenter.default.removeObserver(self)
+            observedScene = nil
             overlay?.isHidden = true
             overlay?.rootViewController = nil
             overlay = nil

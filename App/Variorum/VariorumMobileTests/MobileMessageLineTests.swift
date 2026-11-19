@@ -275,6 +275,10 @@ struct MobileMessageLineHostTests {
             root.view.addSubview(probe)
             let overlay = try #require(probe.overlay, "joining a scene's window raises the overlay")
             #expect(overlay.windowLevel > app.windowLevel, "above the app's window and its sheet")
+            if scene.activationState != .foregroundActive {
+                #expect(overlay.isHidden, "never shown over a scene that is not active")
+                probe.sceneDidBecomeActive()
+            }
             #expect(!overlay.isHidden)
             #expect(!overlay.canBecomeKey)
             #expect(app.isKeyWindow, "the app's window keeps key (and the keyboard)")
@@ -316,6 +320,72 @@ struct MobileMessageLineHostTests {
             #expect(probe.overlay == nil, "the overlay goes with the shell")
             #expect(overlay.isHidden)
             root.dismiss(animated: false)
+        }
+    }
+}
+
+// MARK: - The line, the lock and the app-switcher snapshot
+
+@MainActor
+@Suite("VM-61 — the one line never shows over an inactive scene nor past its shell")
+struct MobileMessageLineSceneTests {
+    /// **The line and the lock.** The app-switcher cover (`SnapshotPrivacy`)
+    /// is a redaction through the SHELL's environment, which cannot reach the
+    /// overlay window — so the overlay follows its scene: hidden as the scene
+    /// resigns active (before iOS snapshots it), every standing line withdrawn
+    /// on the way to the background, shown again when active. And a lock, or
+    /// any state but `.ready`, removes the shell — whose dismantle takes the
+    /// overlay down and stops it following the scene.
+    ///
+    /// **How a regression trips it:** an overlay raised visible over an
+    /// inactive scene, not hidden on resigning active (the snapshot), keeping a
+    /// line past the background, losing a line on a transient interruption, or
+    /// outliving its shell's dismantle each reds one expectation here; an
+    /// observer never registered reds `observedScene`.
+    @Test func theLineNeverShowsOverAnInactiveSceneNorPastItsShell() async throws {
+        try await withEditorWorld { session, _ in
+            let scene = try #require(
+                UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
+                "the test host has a window scene")
+            let app = UIWindow(windowScene: scene)
+            let root = UIViewController()
+            app.rootViewController = root
+            app.isHidden = false
+            defer {
+                app.isHidden = true
+                app.rootViewController = nil
+            }
+            let model = MobileMessageLineModel(status: session.status, voice: { .terminal })
+            let probe = MobileMessageLineHost.Probe(model: model)
+            root.view.addSubview(probe)
+            let overlay = try #require(probe.overlay)
+            #expect(probe.observedScene === scene, "it follows its own scene's edges")
+            #expect(overlay.isHidden == (scene.activationState != .foregroundActive),
+                    "never shown over a scene that is not active")
+            probe.sceneDidBecomeActive()
+            session.status.refuse("That couldn't be done.")
+            #expect(!overlay.isHidden)
+
+            // Resigning active (the app switcher, Control Center): hidden
+            // before the snapshot, and the line kept.
+            probe.sceneWillResignActive()
+            #expect(overlay.isHidden, "never in the app-switcher snapshot")
+            #expect(session.status.current != nil, "a transient interruption loses nothing")
+            probe.sceneDidBecomeActive()
+            #expect(!overlay.isHidden)
+
+            // To the background: hidden, and every standing line withdrawn.
+            probe.sceneDidEnterBackground()
+            #expect(overlay.isHidden)
+            #expect(session.status.current == nil, "a line never outlives her leaving the app")
+            probe.sceneDidBecomeActive()
+
+            // The shell dismantled — a lock, a reopen, any state but `.ready`.
+            MobileMessageLineHost.dismantleUIView(probe, coordinator: ())
+            #expect(probe.overlay == nil)
+            #expect(overlay.isHidden, "gone before whatever replaces the shell draws")
+            #expect(probe.observedScene == nil, "and it follows the scene no more")
+            probe.removeFromSuperview()
         }
     }
 }

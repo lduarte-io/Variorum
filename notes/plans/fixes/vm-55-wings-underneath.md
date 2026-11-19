@@ -609,6 +609,7 @@ line notes, `wording-list-2.md`). DerivedData: `App/Variorum/DerivedData/vm55-b1
 | The inventory, the dropped lines, the 2b carry-over, the PROVISIONALs | DONE (this commit) |
 | Phone `build-for-testing` (`VariorumMobile`, the window's simulator) | DONE — green at the commit after 4df669dd7 (the face fills the window: the door's frame in window coordinates, the foot measured from the window's foot — found on re-reading before READY, never run red) |
 | Mac `build-for-testing` (`Variorum`, macOS) | DONE — green at 64df336d8 (same DerivedData dir; nothing compiled into the Mac changed after it) |
+| The line and the lock (the coordinator's check before READY: relock, the app-switcher snapshot, the non-ready states) | DONE (this commit) — traced below; the snapshot road WAS open and is closed in the host (`Probe` follows its scene's edges); pin `MobileMessageLineSceneTests`; both targets rebuilt for testing green at this commit |
 | Stage window | PENDING — READY handed to the orchestrator at this commit; no revert is in flight |
 
 #### What shipped — the seam's shape, and why
@@ -686,6 +687,41 @@ receipts gained their class (`copyNote` binds its outcome to pass `copied.line`;
 postID))`; `saveVersion` → `.ordinary`). `Write/MobileStructural.swift`: nine `model.report(…)` receipts gained `line:` —
 divide, extract, Make Block, New Block Below `.ordinary`; merge, block delete, archive, whole-paragraph delete, the
 cross-block compound `.removal(.structural)`. `Shared/EditorBrain/` and `Write/MobileEditorTextView.swift` untouched.
+
+#### The line and the lock (answered from the code at the coordinator's ask, before the stage window)
+
+Who owns the overlay window's lifetime: **the shell.** `MobileShellView`'s `.background(MobileMessageLineHost(…))` places
+one `Probe`; the probe raises the overlay when it joins a window with a scene (`didMoveToWindow`) and takes it down when it
+leaves its window or SwiftUI dismantles it (`takeDown`: hidden, root controller dropped, released). The shell exists only
+while `AppBootstrap.state` is `.ready` (`VariorumMobileApp`'s `switch bootstrap.state` — every other case renders a
+different view, with no animation or transition on the switch).
+
+1. **A relock while a line stands — the line cannot show over the lock screen.** `AppBootstrap.lockOnNewRoad()` (Lock Now,
+   the relock coordinator's idle dial and full-close roads all end at `bootstrap.lock()`) runs `onWillLock`, then sets
+   `state = .opening` synchronously and only later `finish(.roadLobby …)`. `.opening` replaces the shell with
+   `MobileStoreOpeningView` in the same update, so the probe is dismantled and the overlay hidden before the lobby (a
+   later state, after a detached task) can draw. The `StatusCenter` is the closed session's; the reopen mints a fresh one.
+   Pin: `MobileMessageLineSceneTests` (the dismantle road: overlay gone and hidden, the scene no longer observed) and
+   `MobileMessageLineHostTests` (the leave-the-window road).
+2. **The app-switcher snapshot — it COULD show there; closed now.** `SnapshotPrivacy` is not a covering view: it is
+   `.redacted(reason: .privacy)` applied to the shell's SwiftUI tree (and its presented sheets, through the environment)
+   while the scene is not active, redacting only `privacySensitive` spans. An environment cannot reach a separate
+   window's hosting controller, so a standing line would have ridden into the snapshot unredacted, above the page. (No
+   line carries a `privacySensitive` span — Protection's faces do not speak through it — so it carried at most what the
+   page shows; it was still a road the cover did not close.) **Fixed in the host only** (`Shell/MobileMessageLine.swift`,
+   `Probe`): it observes its own scene — `UIScene.willDeactivateNotification` hides the overlay (posted synchronously
+   before iOS snapshots the scene; a SwiftUI scene phase lands a pass later), `didEnterBackgroundNotification` hides it
+   and withdraws every standing line (`status.clear()` — a 6 s line never outlives her leaving the app),
+   `didActivateNotification` shows it again; an overlay raised over a scene that is not active starts hidden. A transient
+   interruption (Control Center, a system alert) hides a line without losing it. `SnapshotPrivacy.swift`, Protection and
+   the app file are untouched. Pin: `MobileMessageLineSceneTests.theLineNeverShowsOverAnInactiveSceneNorPastItsShell`
+   (drives the three edges and asserts hidden / kept / withdrawn / shown, and that the observer is registered on its own
+   scene).
+3. **Any non-ready state (the lobby, library-missing, failed, the words card, the interlude, opening) — the line cannot
+   show there.** Every road out of `.ready` assigns another `State` case (`state = .opening` at the reopen and lock seams,
+   `finish(…)` for the lobby and the faces), and each case renders a view other than the shell, so the probe is
+   dismantled and the overlay is down before the replacing view draws — the same mechanism as 1, pinned by the same
+   dismantle pin.
 
 #### The inventory (every per-screen message slot outside `Features/Protection/`, at kickoff)
 
@@ -832,7 +868,8 @@ Phone (`VariorumMobileTests`), new — file `MobileMessageLineTests.swift`, four
 phone's placement; the show-rule table over every kind × style; ordinary dropped AT the seam; refusal; removal with its
 Undo; the wordless-Undo exception; an ordinary act never sweeps a refusal; `receipt_style` not read; the fade; a
 speaker's withdrawal; the copy outcomes' classes) · `MobileMessageLineGeometryTests` (3: `footOffset`, `takesTouch`,
-`keyboardOverlap`) · `MobileMessageLineHostTests` (1: the host in a REAL scene window under a presented sheet — level,
+`keyboardOverlap`) · `MobileMessageLineSceneTests` (1: never over an inactive scene, never in the app-switcher snapshot,
+withdrawn on the way to the background, gone with its shell) · `MobileMessageLineHostTests` (1: the host in a REAL scene window under a presented sheet — level,
 never key, a touch only on the door, above the tab bar's inset and then the keyboard, nothing after the line goes, the
 overlay goes with the probe) · `MobileLineDoorTests` (11: a deleted note's line + Undo = Put back, store read back; a
 deleted book from the row and from Book Details, same line, Undo = Put back; the Journal's archive + Undo = unarchive; a
