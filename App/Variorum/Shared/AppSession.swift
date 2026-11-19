@@ -706,12 +706,24 @@ final class AppSession {
         // (`Queries.leavingSavepointCandidates`, a reader connection: never the
         // runner, never the writer), and the runner is asked only when a take
         // is owed, and only for those takes (`closeAutoCommit(_:takes:)`, which
-        // re-checks each inside its own transaction and writes exactly the
-        // rows the whole op would). A second ask in the same leaving finds the
-        // takes already savepointed and asks the runner for nothing; anything
-        // that landed between two asks — her typing, a sync round's apply — is
-        // still owed and still savepointed, exactly as before. WHO asks, and
-        // in what order against the lock, is untouched.
+        // re-checks each inside its own transaction). A second ask in the same
+        // leaving finds the takes already savepointed and asks the runner for
+        // nothing; anything that landed between two asks is still owed, and the
+        // later ask savepoints it. WHO asks, and in what order against the
+        // lock, is untouched.
+        //
+        // **The one-ask gap, and its bound** (the VM-64 ladder, round 1, finding
+        // 1 — accepted as the design's cost). The read and the turn are two
+        // transactions, so one ask sees what had committed at the READ's
+        // snapshot, not at the runner turn's start as the whole op did. A take
+        // ANOTHER writer dirties between the two — the sync engine's apply, which
+        // writes through the writer and never queues on the runner — is not
+        // written by this ask: it stays owed, and the NEXT ask writes it (the
+        // same leaving's later ask on the Castle and lock roads; the note's next
+        // leaving on the pop road). Her typing is always inside: the flush below
+        // lands it before the read, in this same task, and the screen is gone.
+        // Closing the gap would put the O(note) read back on the runner on every
+        // edited leaving (the run record's D-7-1).
         //
         // The flush stays first, for the reason above: the read must see her
         // last keystrokes.

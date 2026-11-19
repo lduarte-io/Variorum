@@ -327,11 +327,15 @@ extension Operations {
     /// listed take that is STILL a live, unlocked take under one of the note's
     /// live placements and STILL differs from its last savepoint — each
     /// re-checked here, inside this one transaction, on one clock read, in id
-    /// order. So when `variantIDs` covers the note's dirty takes (what
-    /// `Queries.leavingSavepointCandidates` reads), the rows written are
-    /// exactly `closeAutoCommit(_:)`'s; a listed take that has since become
-    /// clean, moved out, been locked or tombstoned is skipped, never
-    /// committed.
+    /// order. So when `variantIDs` covers the note's dirty takes AT THE TURN
+    /// (what `Queries.leavingSavepointCandidates` read, when nothing has
+    /// dirtied another take since), the rows written are exactly
+    /// `closeAutoCommit(_:)`'s; a listed take that has since become clean,
+    /// moved out, been locked or tombstoned is skipped, never committed. A take
+    /// ANOTHER writer dirtied after the read (a sync apply) is not listed, so
+    /// it is not written here: it stays owed and is the next ask's (the VM-64
+    /// ladder, round 1, finding 1 — the one-ask gap, accepted; the phone
+    /// caller's comment in `AppSession.savepointOnLeaving` says what bounds it).
     ///
     /// **Why a second form:** the phone's leaving road reads the owed takes
     /// on a READER first, so its one runner turn is O(the takes she changed)
