@@ -694,3 +694,20 @@ Main carried VX-980 (the search umbrella: PR #11, merge `ed4d87cb7`, and PR #12'
 ## THE LADDER — ROUNDS
 
 *(One ladder over the run's whole diff — `git diff origin/main...HEAD` after the merge-in; a fresh cold `fable-reviewer` per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; findings land in `notes/plans/fixes/vx-981-ladder-round<N>.md` before any fix session sees them; the cap is five rounds, R-981-5. BATCH 5 (the parity audit, a document) runs after the ladder's code rounds, in a stage-queue gap; the closing walk runs on the ladder's final tree.)*
+
+## GATE B34 RAN — batches 3–4's app-target gate on the MERGED tree (2026-11-19 09:44:36–09:50:23, claim `vx981-gate-b34`, nov18's GO; the orchestrator's window; the gate worktree at `7d600df2d`; logs `DerivedData/logs/gate-b34-{green,redE}.log`)
+
+- **Green:** "Test run with 108 tests in 16 suites passed after 39.214 seconds", `** TEST SUCCEEDED **`; 16 suite passes, no reds, no load re-runs. The 14 types BATCH 3 — RECORD and BATCH 4 — RECORD name, plus `CapabilityRegistryTests` and `ShellChromeTests` (main's two new capability lines are under this tree; no batch of this run added one) — both green.
+- **Red leg E, adapted:** as BATCH 3 — RECORD wrote it (the two files checked out at `c96d86777`) it would have discarded batch 4's later changes to the same files, so the leg ran as the VX-944 fix commit `92565842d` REVERSE-APPLIED to `Sources/VariorumMCP/MCPSession.swift` and `MCPServerHost.swift` on the tip (it applies clean and compiles): "Test run with 1 test in 1 suite failed after 11.165 seconds with 1 issue" — the pin RAN and failed: `theUnlockRunsThePanesRefreshWhileAClientHasStoppedReading`. Files restored, the gate tree clean.
+- No Variorum instance left, no Problem Reporter, no new `Variorum*.ips`. Batches 3–4's app-target evidence is COMPLETE on the merged tree.
+
+### ROUND 1 (2026-11-19, a fresh `fable-reviewer`, cold; the findings file `notes/plans/fixes/vx-981-ladder-round1.md` at `180c9b1ea`): 0 BLOCKER · 0 MAJOR · 4 MINOR · 5 NIT
+
+Clean bill on all nine review foci. F3 (this record's LIVE STATUS and ledger were stale) is the orchestrator's and was closed at `b1351cca2`. The fix session — a FRESH `opus-implementer`, every batch implementer having ended past the 500k guideline — ran PASS 1 (no product or test fix): its AGREE/DISPUTE per finding and the open reds' investigation are appended to the findings file (tip `baebf96ed`), the instruments kept whole under `notes/plans/vx-981/`.
+
+**The two open reds, as PASS 1 measured them** (31 whole-target runs on the tip and 24 on `77aebf864`, the branch just before batch 3, side by side under machine load 18–640):
+- **The accept-loop red — TRACED, pre-existing, not caused by this run:** red 2 of 31 on the tip and 2 of 24 on the older tree. The listener and the retry are never the wait; in a red the server's session task and the client's connect task each waited about 9 s for a thread on a pool shared with CPU-bound test bodies on an oversubscribed machine. The test cuts the harness's 30 s connect bound to 10 s (VX-612's shortening). Proposed fix: test-only, the harness's own bound.
+- **The size-cap red — mechanism CONFIRMED (round 1's F1), a test race:** the reviewer's instrument reproduced the exact signature 10 of 10 — the over-cap answer, then a 62-byte `list_changed` notice, then EOF — so only the hang-up read fails; live it showed 0 of 55. Batch 3 moved the notice later (it rides the gate's catch-up), narrowing the window from never under 1.46 s to as little as 265 ms.
+- **Also seen, not one of the two:** on the OLDER tree one whole-target run hung with the CPU idle for 12 minutes in `MCPReaderAfterCloseTests.aReusedNumberKeepsItsBytesAfterTheSessionEnds(.clientHangsUp)` — untraced, possibly on main; ticketed (see the ledger of born tickets at closeout).
+
+The reviewer's final calls on the responses come next (the same reviewer session), then PASS 2 applies the confirmed fixes with their pins, then ROUND 2 re-reviews them.
