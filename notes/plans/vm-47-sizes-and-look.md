@@ -494,6 +494,33 @@ phone and whole Mac targets for that tree; its findings are read by the ladder's
 (`VM47Walk3Driver.swift` + `walk3.zsh`, `VM47Walk5Driver.swift` + `walk5.zsh`, gitignored in
 `notes/plans/vm-47-screens/instruments/`) stay as the sources for one unified driver.
 
+**The walk's brief (orchestrator, at the batch-6 seam).** It runs on the re-landed tree (code `b20b04fad`,
+VM-55 merged in), so it is also the first look at the two runs together. One driver, built from the existing
+instruments (the oldest pair, `VM47WalkDriver.swift` + `walk.zsh`, are batches 1 and 2's and are superseded by
+batch 3's; batch 4's and batch 5's each extend a copy), a dedicated device `vm47-walk` that the runbook
+creates and deletes, captures to `notes/plans/vm-47-screens/final/` (gitignored), two parts with a seam and a
+time guard, each ending with the device shut down:
+
+- *Part A (about 35 minutes):* create, boot, the seed; the core screens under the sea-glass in all eight
+  combinations of Study/Terminal × light/dark × default/AX5 — the Bookcase root at rest and with the capture
+  box focused (the path line with the wing door, the ⋯, the bar), the Library (rows on the paper, the filter
+  row, search), a note in Write (masthead, chips, prose on the paper; at the default size the paper checks:
+  the take tint, a callout's wash with the comment mark, the caret, the selection wash).
+- *Part B (about 40 minutes), most important first:* the second palette (`teal_rust`) core in Study light
+  and dark; Settings (the list top to bottom, the voice choice flipped, the appearance choice set to light,
+  dark and back to follow-the-system, the ⋯ menu on each root, the door from a note); the bar on a pushed
+  list and a tab tapped from it, a note and a Read page without it; VM-55's faces on this run's layer (the
+  wing door's sheet, the one message line after a removal with its Undo, clearing the bar on a root and on a
+  pushed list); VM-54's flip (take cards, the pill, the comment draft) once per voice; then the wider pass
+  at Study light default, Terminal dark default and Study light AX5 (Starred, a book's contents, Book
+  Details, Create Book with its segmented choice, the Tags, membership, More Info, Blocks and Lenses sheets,
+  Note Actions and Versions, the Takes, Comments and Block History overlays, a book's Read page, Trash with
+  its chips, Archived, the Protection screen).
+
+Every capture is read by the walker against the sizing sheet; the findings land in
+`notes/plans/vm-47-walk.md` (committed), each a defect of this run (fixed narrowly, with a test where one can
+hold it, and re-captured), a defect another ticket owns (named), or a question for her (§5).
+
 ## 4. LIVE STATUS
 
 | Batch | Piece | State |
@@ -572,6 +599,7 @@ phone and whole Mac targets for that tree; its findings are read by the ladder's
 | 6.6 | Meeting 4 — the wing landing: batch 4's tab road (P-47-19) against VM-55's landing, confirmed from the code; pinned if no pin of either run holds it | DONE (this commit) — the two agree (VM-55's landing is `selectPage(.shelf)` and touches no stack, P-55-14; batch 4's tab road returns the stack being left to its root first, P-47-19; the door is drawn only on a root); no pin of either run held the pair: NEW `MobileTabBarTests.aWingLandingAfterAListWasLeftShowsTheBookcaseItself` (the Trash pushed on the Bookcase's stack, Library by its tab, the wing door, Work: the landing is Work's Bookcase ROOT, no Trash); the counts PENDING the stage |
 | 6.7 | Builds — after the orchestrator's "QUIET over": phone, then Mac, `build-for-testing` into `DerivedData/vm47-b6`, one at a time | DONE — after "QUIET over" (13:32), one at a time, into `vm47-b6`: phone GREEN on the merge tree (before its commit), after 6.2, and after the pins (`b20b04fad`); Mac GREEN at `b20b04fad` (`Shared/Theme/` changed: `PhoneInlineActStyle`'s additive `weight:`, one `ThemeStore` comment). `origin/main` `eb18888db` (VM-55's PR #13) merged in at `e72323130` — notes and ledgers only, so the products stand. `vm47-b5` deleted |
 | 6.8 | §6 "Batch 6 — results" (the tip, the merge commit, the 23 files, the four decisions, the faces and roles, every moved pin, the scans' before/after, the builds, the stage lines); READY for the stage | DONE (this commit) — §6 "Batch 6 — results"; P-47-27, P-47-28 (and P-47-8's batch-6 rows) in §5; READY for the stage (the lines are §6's) |
+| W | The run's ONE walk (two parts, device `vm47-walk`, the unified driver) and its findings in `notes/plans/vm-47-walk.md`; on the re-landed tree beside the whole phone target and a targeted Mac leg (114 types), both run by the orchestrator | NOT-STARTED — the walker adds its piece rows here |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | CLOSED (the fix pass's window ran 08:35–08:39, rows M.5–M.6) — FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks — each step since DONE (rows M.1–M.6), and round 1 found the fix pass APPLIED AS CONFIRMED (`vm-47-ladder-round1.md` §1). The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) was then still queued — since SUPERSEDED (row 2.9; the run's one walk, §3) |
 | M.1 | The implementer's answers (all five AGREE) and the reviewer's final calls (all five CONFIRMED; M-1 with its two precisions) — `vm-47-ladder-midway.md` §2, §2a, §2b | DONE (`347869d52`, `594052b88`) |
 | M.2 | M-1: the 13 pt floor in `PhoneType.uiFont` (`#if os(iOS)` arm, BOTH scaling classes: a resolved font under `floorSize` returns `baseUIFont(…, pointSize: floorSize)`); its pin, the UIKit twin of `nothingIsEverBelowThirteenPoints` in `MobilePhoneTypeTests` (every role × both voices × all twelve settings) | DONE (this commit) — `uiFont` = the class's scaled font (`scaledUIFont`, unchanged) then the floor; the pin `theUIKitFormIsNeverBelowThirteenPointsEither()`; build M.4, red-on-old M.5, run M.6 — each since DONE (rows M.4–M.6) |
