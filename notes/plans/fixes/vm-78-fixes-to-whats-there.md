@@ -2278,7 +2278,7 @@ its own checkout.*
 | 1c — remove the probe `MobileFanBadgePlacementProbeTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `a570d3960` (introduced), `e3f406086`, `78179b765` (the body M5/M5b ran), `16c75a5bf` (its header shifted two lines), `15add793d` (R3-N3's header — its last edition). The kickoff `notes/plans/vm-17-chrome-geometry.md` said "restore it from the commit before VM-78's back-out commit", which is ambiguous once the back-out is four commits: corrected in place to `git checkout 15add793d -- <its path>` |
 | 1d — remove the decor reading `MobileDecorPlacementReadingTests.swift` | DONE (this commit) — `git rm`; the commits that hold it: `211221f6b` (introduced), `75984c0e6` (its last edition, as run alone in batch D's window). The kickoff's wording for it is right as written |
 | 1e — the back-out's check | DONE (this commit) — output below |
-| 2a — the plan, written before the merge starts | NOT-STARTED |
+| 2a — the plan, written before the merge starts | DONE (this commit) — "The plan" below |
 | 2b — the merge commit (seven conflicts resolved, the re-land) | NOT-STARTED |
 | 2c — the semantic merges git does not flag | NOT-STARTED |
 | 3 — phone + Mac `build-for-testing` on the merged tree | NOT-STARTED |
@@ -2311,6 +2311,44 @@ the merge.
   no type of those names (the last two left earlier, `5a57abdf0` and `16c75a5bf`).
 - KEPT: `MobileLivenessTests.swift` (VM-19's pin and fix, +23/−1 against `e48ef2f30`);
   `MobileMarkdownCaretTests.swift` untouched against `e48ef2f30` (VM-24's pin, red by her decision).
+
+**The plan (2a), written from main's versions before the merge starts** — the rule for every code conflict: main's
+structure wins and this run's BEHAVIOR is re-landed onto it in main's vocabulary.
+- `Write/MobileUndoDoor.swift` (VM-16, VM-20). Main's door STILL calls `undo(with:)` / `redo(with:)`, so the
+  label-for-a-quiet-press bug is live there: a quiet press reports `undone(label)` with `action: .redo` (the
+  mirror `.undo`) and `line: .ordinary` — on the phone the line drops it, so the press is SILENT and the model
+  records a stale way back. VM-16 is needed exactly: main's file as the base, `runUndo` / `redo` re-landed on
+  `undoReporting` / `redoReporting` — changed → main's report unchanged (`undone`/`redone`, `.redo`/`.undo`,
+  `.ordinary`); quiet → `report(StructuralUndoCopy.undoFoundNothing(label))` / `redoFoundNothing`, the funnel's
+  default class `.refusal`, no action; nothing on the stack → main's `nothingToUndo` / `nothingToRedo` refusal.
+  VM-20: `discardingUndoDetail` forwards to `StructuralUndoCopy.discardingUndoDetail(_:readBackFrom:)` (main's
+  file still has the "It is saved first" copy).
+- `Shell/MobileBookDetails.swift` (VM-81, F3, F5, N3, R2-N1). Main: `lastError` speaks on the line from its
+  `didSet`; every raw dump → `OpsRefusalCopy.sentence(for:roads:)`; `refusal(_:)` ends in
+  `DeletionRefusal.sentence(error, roads: .phone)`, whose road reaches the table for `.readingSealed` and
+  `.readingNotArchived` (`DeletionRefusal.knownWords` has no arm for either; the table words both, the same bytes
+  this run pinned) — so this run's forwarding arm is DELETED and main's road speaks both. Re-landed whole: the
+  Finish confirm (`requestFinish` / `confirmFinish` / `finishConfirmPresented`, no `cancelFinish`), `finishRowAct`,
+  `finishCaption`, the archived book's resolve (`archivedBook`, `nameLine`, `offersUnarchive`, `unarchive`), the
+  sheet's rows with their labels and hints. `requestFinish`'s two `DeletionRefusal.words(…)` move to main's road
+  (`DeletionRefusal.sentence(…, roads: .phone)`; VM-62's scan forbids the old road).
+- `Shell/MobileShelfViewModel.swift` (VM-83). Main: `MobileWingScope.follow` + `bookshelf(_:wingID:)`, the line.
+  Re-landed: no `pins` in the snapshot, `orderedBooks` = `BookcaseBoard.ordered(…, .alphabetical)`, `rowActs`,
+  `setPinned` retired, the gathering-aware delete receipt (spoken by main's removal line).
+- `Shell/MobileTrashModel.swift` (VM-33). Main: the listing runs once per wing inside `MobileWingScope.follow`.
+  Re-landed: `trashListingLoaded` lowered at the top of EACH wing run (the first and every restart) and raised by
+  each value.
+- `Write/MobileMembership.swift` (VM-81 W-110, VM-21, VM-83). Main: the note's own wing's books, `say(_:as:)`.
+  Re-landed: `rowCarriesDiverge`, `kindMark`, `memberRowName`, `addRowLabel`, and the collect receipt =
+  `AddToBookCopy.collected(…)` spoken as `.refusal` — the class main gives BOTH collect arms (already-matched: a
+  door that did nothing; tagging: a direction, P-55-11).
+- `notes/MobileSoul.md`, `notes/SurfaceContracts.md`: both runs' lines kept; this run's row takes the next free
+  PL number.
+- Semantic merges to hunt after it compiles: VM-62's source scan (`MobileNoRawErrorPinTests`) over this run's new
+  phone lines (`String(describing:`, `DeletionRefusal.words(` …); every slot of this run's new code that main moved
+  onto the line; this run's tests that read a slot; `MobileEditorViewModel` (the `entryDate` mirror at the one
+  `header` assignment), `MobileWriteView` (`dateChipDay`), `MobileTrashView`, `MobileShelfView` /
+  `MobileShelfFaces`, `MobileCreateBook`, `Shared/RecoveryCopy.swift`, `MobileDeletionTests`.
 
 ## The ladder
 
