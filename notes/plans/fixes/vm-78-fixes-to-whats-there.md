@@ -1962,8 +1962,7 @@ and that is the reviewer's to shape. Either way the confirmed shape's hide rules
 **WHAT IS NOT DONE (first): the build is IN PROGRESS — nothing below is verified on the stage.** A fresh
 `opus-implementer` (2026-11-19) builds round 3's called shape (`vm-78-ladder-round3.md`, "Final calls" → "VM-17's fix —
 the shape, as called", S1–S11) exactly, in five pieces plus two headless builds. It runs no `xcodebuild test` and boots
-no simulator: every red and green below is the orchestrator's window, PENDING. **No revert is in flight; `git status`
-is clean at each commit.** (The implementer's proposed shape that the reviewer amended went to the reviewer as an
+no simulator: every red and green below is the orchestrator's window, PENDING. **REVERT IN FLIGHT (the red tree's headless build):** `MobileTakesChrome.swift` and `MobileEditorTextView.swift` are checked out at `15add793d` (the commit before piece 2) in this worktree; restore = `git checkout HEAD -- App/Variorum/VariorumMobile/Features/Takes/MobileTakesChrome.swift App/Variorum/VariorumMobile/Features/Write/MobileEditorTextView.swift` (both are committed at the tip, so the restore is safe). (The implementer's proposed shape that the reviewer amended went to the reviewer as an
 answer and is not on file in the repo; the four amended points are the ones marked "(changed)" in S1, S2, S3 and S5.)
 
 | Piece | State |
