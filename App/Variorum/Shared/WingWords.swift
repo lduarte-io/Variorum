@@ -44,6 +44,14 @@ nonisolated enum WingWords {
         }
     }
 
+    /// **Settings ▸ Tags' header** (VX-838, R-828-2 — "Tags — in ‹wing›"):
+    /// the vocabulary is per wing, so the tag list says whose it is. HOISTED
+    /// from the Mac's `TagManagerCopy.title` at VM-60 (the VM-55 run) so the
+    /// phone's tag manager says the Mac's own words; the Mac forwards here.
+    static func tagsTitle(wingName: String) -> String {
+        "Tags \u{2014} in \(wingName)"
+    }
+
     /// R-13id-2's refusal, naming what remains — and, since 13i-d U5b, the
     /// R-13id-4 ROAD (R-13id-6 item 9: "the delete refusal's words gain '— or
     /// move everything to another wing'"; P-2 — the bulk door exists now).
