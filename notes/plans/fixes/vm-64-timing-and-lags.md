@@ -512,10 +512,12 @@ DerivedData: `App/Variorum/DerivedData/vm64-b5/` (gitignored).
 
 ### Batch 6 · VM-69 · VM-70 — LIVE STATUS (implementer, opus; started 2026-11-19)
 
-**No revert is in flight.** The red-on-old build will be the batch's pins over the production files checked out at the
-INSTRUMENT commit (P2 below — the counter only, today's behaviour), after the fix is committed and pushed, into
-`App/Variorum/DerivedData/vm64-b6-red/`, then `git checkout HEAD --` the same files and a clean `git status`. This line
-changes to name the revert before it starts.
+**A REVERT IS IN FLIGHT (the red-on-old build), from `24fa9a5e2` (committed and pushed):** the four production files
+(`MobileEditorViewModel`, `MobileMembership`, `MobileNoteTags`, `MobileWriteView` under `VariorumMobile/Features/Write/`)
+checked out at the INSTRUMENT commit `c8f95ea6f` (today's behaviour + the counter), and `MobileChipScopeTests.swift`
+moved aside to `App/Variorum/DerivedData/vm64-b6-aside/` (it names the new chip reads); `build-for-testing` into
+`App/Variorum/DerivedData/vm64-b6-red/`; then `git checkout HEAD --` the four files, the test file moved back, and a
+clean `git status`. If this line still reads IN FLIGHT, restore exactly that way.
 
 **Audit F re-verified on this tree** (`d893fae63` + `f0e2e696c`): the screen's `.task` registers (the liveness grant's
 flush + one header read, `MobileLivenessAuthority.swift:154-265`), then `arrive` → `loadOnce` (projection + header in one
