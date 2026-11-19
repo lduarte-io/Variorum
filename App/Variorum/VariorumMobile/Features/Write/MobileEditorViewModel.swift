@@ -49,7 +49,11 @@ final class MobileEditorViewModel {
 
     private let session: AppSession
     let postID: String
-    @ObservationIgnored let autosave: AutosaveCoordinator
+    /// The post's ONE coordinator (the session's registry's). A `var` since
+    /// VM-70 r1, and re-pointed in exactly one place: a screen shown again
+    /// that is handed a DIFFERENT coordinator than the one it gave back
+    /// adopts it (`takeAutosaveHold`). Every reader reads it at use time.
+    @ObservationIgnored private(set) var autosave: AutosaveCoordinator
     /// The takes/peek brain (S2 batch 1) — a SIBLING object per the S1
     /// ladder's binding NIT-3: the VM only routes (overlay at ingest, the
     /// targeted display apply below); every takes decision lives there.
@@ -217,6 +221,8 @@ final class MobileEditorViewModel {
         // clock parameters apply only when this call MINTS the coordinator
         // (the harness's deterministic sleep; production passes defaults).
         self.autosave = session.autosave(forPost: postID, debounce: debounce, sleep: sleep)
+        self.autosaveDebounce = debounce
+        self.autosaveSleep = sleep
         self.takes = MobileTakesController(runner: session.runner)
         self.takesBrowser = MobileTakesBrowserController(session: session)
         self.comments = MobileCommentsController(session: session)
@@ -247,26 +253,99 @@ final class MobileEditorViewModel {
 
     @ObservationIgnored private var autosaveToken: UUID?
 
-    /// **VM-70 — the ONE release for the ONE acquisition in `init`** (audit F
+    /// **VM-70 — the editor's hold on its post's coordinator, given back when
+    /// its screen LEAVES and taken back if the screen is shown again** (audit F
     /// §4/§12.4: nothing on the phone released an editor's coordinator, so the
     /// session's registry grew by one per note opened, and every filing, every
     /// background flush and every sync round's flush-first walked them all).
-    /// The Mac's own shape (`EditorViewModel`, 18k C1): the instance's death is
-    /// the one point that runs exactly once per acquisition — a model built
-    /// and discarded by a view re-init acquires too and never sees
-    /// `onDisappear`, while a kept one can be torn down more than once (a
-    /// screen covered by a push, then shown again).
     ///
-    /// **It lands after the note's pending text and its leaving savepoint, by
-    /// construction:** the screen's `onDisappear` task holds this model across
-    /// `teardown()` (the flush) and `savepointOnLeaving` (which flushes again,
-    /// then savepoints), so the last reference goes only when both are done.
-    /// What the session does with the release is `releaseAutosave(forPost:)`'s
+    /// **r1 — why not at the model's death** (r0 released in an `isolated
+    /// deinit`, the Mac's 18k C1 shape): the first stage window showed a
+    /// closed screen's editor ALIVE ten seconds after its leaving work ended
+    /// while its host lived, on both builds — SwiftUI frees a removed screen's
+    /// state on its own schedule, and her shell is a host that lives for the
+    /// app's life. On the Mac a release only decrements (the drop is the
+    /// leaving savepoint's, and ⌘Q/the lock savepoint what is still held), so
+    /// a late death costs nothing there; on the phone the release IS the drop,
+    /// so a late or missing death is exactly the growth VM-70 measures. The
+    /// release is therefore the leaving work's LAST act, deterministic: the
+    /// screen's `onDisappear` task runs `teardown()` (the flush), then
+    /// `savepointOnLeaving` (its own flush, then the savepoint), then
+    /// `releaseAutosaveHold(ifNotShownSince:)`.
+    ///
+    /// What the session does with a release is `releaseAutosave(forPost:)`'s
     /// phone rule, unchanged: the entry goes only when NO holder is left (a
     /// second tab's editor on the same note, the quick note) and nothing is
     /// pending — a dirty coordinator stays reachable to every flush walk.
-    isolated deinit {
+    @ObservationIgnored private(set) var holdsAutosave = true
+
+    /// How many times this editor's screen has ARRIVED (its `.task` began).
+    /// The leaving captures it at `onDisappear`; a leaving gives the hold back
+    /// only if no arrival came after it — a screen covered by a push and shown
+    /// again before its leaving work finished keeps its hold.
+    @ObservationIgnored private(set) var arrivalCount = 0
+
+    /// The clock the editor's own acquisition used — a re-mint at a re-show
+    /// passes the same (the harness's deterministic sleep; production's
+    /// defaults).
+    @ObservationIgnored private let autosaveDebounce: Duration
+    @ObservationIgnored private let autosaveSleep: @Sendable (Duration) async throws -> Void
+
+    /// Whether this editor is listening to the coordinator it records into —
+    /// the pins read it; nothing in the app decides anything from it.
+    var observesAutosave: Bool { autosaveToken != nil }
+
+    /// **The arrival's first act** (the screen's `.task`, before the liveness
+    /// grant's flush): count the arrival, and if a leaving gave the hold back,
+    /// take it again. The registry hands back the post's ONE coordinator; if
+    /// that is not the one this editor gave back — the entry dropped clean and
+    /// was minted again (by another tab's editor of the same note, or by this
+    /// very call) — the editor ADOPTS it, so two coordinators for one note
+    /// can never stand (the S3 ladder BLOCKER's class). Either way the editor
+    /// ends wired to the coordinator it records into. A first arrival holds
+    /// already (`init` acquired) and only counts.
+    func takeAutosaveHold() async {
+        arrivalCount += 1
+        guard !holdsAutosave else { return }
+        holdsAutosave = true
+        let current = session.autosave(
+            forPost: postID, debounce: autosaveDebounce, sleep: autosaveSleep)
+        if current !== autosave {
+            // The one given back is clean by construction (the registry drops
+            // only a clean entry, and nothing records while the screen is
+            // gone) — landed anyway if it is not, before it is let go.
+            if autosave.isDirty { await autosave.flushNow() }
+            if let token = autosaveToken { autosave.stopObserving(token) }
+            autosaveToken = nil
+            autosave = current
+        }
+        if autosaveToken == nil {
+            // `init`'s two hooks, re-made for the coordinator this editor now
+            // records into (the leaving's `teardown()` stopped the old one).
+            autosaveToken = autosave.observe(
+                onError: { [weak self] error in self?.reportOperationError(error) },
+                onSettled: { [weak self] in
+                    self?.storeWriteGeneration &+= 1
+                    self?.applyPendingIfClean()
+                })
+        }
+    }
+
+    /// **The leaving's last act** — after `teardown()`'s flush and the leaving
+    /// savepoint: give the hold back, unless the screen arrived again since the
+    /// leaving began (`arrival` is the count `onDisappear` captured).
+    func releaseAutosaveHold(ifNotShownSince arrival: Int) {
+        guard holdsAutosave, arrivalCount == arrival else { return }
+        holdsAutosave = false
         session.releaseAutosave(forPost: postID)
+    }
+
+    /// The remainder: a hold no leaving gave back — a model built by a view
+    /// re-init and discarded (it acquired in `init` and never arrived), or a
+    /// harness model — is given back at the model's end of life. Exactly one
+    /// release per acquisition, whichever road ends it.
+    isolated deinit {
+        if holdsAutosave { session.releaseAutosave(forPost: postID) }
     }
 
     /// The store-write freshness generation (S3 ladder, MAJOR 3 — the
