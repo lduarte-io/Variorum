@@ -1,7 +1,13 @@
 //
 //  WingSwitcherBrain.swift
-//  Variorum (MAC ONLY) — Core/Views (the ⌘L switcher and the mastheads'
-//  cycling word both read it)
+//  Variorum (shared: Mac + Mobile) — the Mac's ⌘L switcher, its mastheads'
+//  cycling word and its destination selector all read it. VM-63 (the VM-55
+//  run, batch 3) moved it here from `Variorum/Core/Views/` byte for byte: a
+//  pure rule (Foundation and the picker's shared query rule,
+//  `SearchPickerBrain.normalized`, only), so a phone wing face composes the
+//  same order and the same "next wing" (`next(after:in:)`). The keys that
+//  drive it on the Mac (held ⌘, L, Esc) stay with the Mac's face
+//  (`WingSwitcherSheet.swift`'s `WingSwitcherKeys`).
 //
 //  13n-c U4 — ⌘L, THE WING SWITCHER (VX-157, hers, ratified: "i like
 //  Command L" — "press opens the switcher, typing filters, holding ⌘ and

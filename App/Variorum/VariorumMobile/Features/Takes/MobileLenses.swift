@@ -133,6 +133,14 @@ final class MobileLensesModel {
     /// Refusals + outcomes, one voice (the sheet renders it).
     private(set) var status: String?
 
+    /// VM-61: the slot speaks on the phone's one line with its door's class —
+    /// adopting a view and bringing a pick back are ordinary acts (no line —
+    /// her ruling); a refusal always speaks.
+    private func say(_ text: String, as line: MobileLine.Class) {
+        status = text
+        MobileLine.say(text, as: line, session: session)
+    }
+
     /// **ONE ADOPT AT A TIME** (the Fable sweep's finding 1, 2026-08-30).
     /// `adoptView`'s door is a persistent plain `Button { Task { … } }` in
     /// `saveDoors` — not an alert action, not a `UIMenu` row, so nothing
@@ -292,7 +300,7 @@ final class MobileLensesModel {
             }
             viewDiverges = !(editor?.takes.peeks.isEmpty ?? true)
         } catch {
-            status = String(describing: error)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
     }
 
@@ -319,7 +327,7 @@ final class MobileLensesModel {
             activeLensName = rows.first { $0.id == lensID }?.name
             viewDiverges = !editor.takes.peeks.isEmpty
         } catch {
-            status = String(describing: error)
+            say(OpsRefusalCopy.sentence(for: error, roads: .phone), as: .refusal)
         }
     }
 
@@ -365,7 +373,7 @@ final class MobileLensesModel {
             await refresh()
             return true
         } catch {
-            status = Self.refusalMessage(error)
+            say(Self.refusalMessage(error), as: .refusal)
             return false
         }
     }
@@ -405,7 +413,7 @@ final class MobileLensesModel {
             }
             await refresh()
         } catch {
-            status = Self.refusalMessage(error)
+            say(Self.refusalMessage(error), as: .refusal)
         }
     }
 
@@ -443,10 +451,10 @@ final class MobileLensesModel {
             activeLensID = nil
             activeLensName = nil
             await editor?.refreshTakesFromStore()
-            status = Self.adoptedStatus(preservationName: preservation.name)
+            say(Self.adoptedStatus(preservationName: preservation.name), as: .ordinary)
             await refresh()
         } catch {
-            status = Self.refusalMessage(error)
+            say(Self.refusalMessage(error), as: .refusal)
         }
     }
 
@@ -471,11 +479,14 @@ final class MobileLensesModel {
     func restoreDangling(_ dangle: Dangle) async {
         status = nil
         guard dangle.isRestorable else {
-            status = Self.nothingToRestore
+            say(Self.nothingToRestore, as: .refusal)
             return
         }
         do {
             let receipt: String
+            // P-55-11: a take that came back ARCHIVED leaves the pick still
+            // dangling — a direction she must see, kept in P-55-7's class.
+            var line = MobileLine.Class.ordinary
             switch dangle.state {
             case .archived:
                 try await session.runner.run { ops in
@@ -489,15 +500,16 @@ final class MobileLensesModel {
                 receipt = restored == .archived
                     ? Self.restoredDeletedButArchived
                     : Self.restoredDeleted
+                if RecoveryCopy.isDirection(restored) { line = .refusal }
             case .gone, .foreign:
                 return  // unreachable — the guard above
             }
             await editor?.refreshTakesFromStore()
             await refresh()
             if let activeLensID { await activate(activeLensID) }
-            status = receipt
+            say(receipt, as: line)
         } catch {
-            status = Self.refusalMessage(error)
+            say(Self.refusalMessage(error), as: .refusal)
         }
     }
 
@@ -511,7 +523,7 @@ final class MobileLensesModel {
             }
             await refresh()
         } catch {
-            status = Self.refusalMessage(error)
+            say(Self.refusalMessage(error), as: .refusal)
         }
     }
 
@@ -529,7 +541,7 @@ final class MobileLensesModel {
             }
             await refresh()
         } catch {
-            status = Self.refusalMessage(error)
+            say(Self.refusalMessage(error), as: .refusal)
         }
     }
 
@@ -542,7 +554,7 @@ final class MobileLensesModel {
         case OperationError.lockedPost:
             Self.sealedAdoptRefusal
         default:
-            String(describing: error)
+            OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }
@@ -593,12 +605,7 @@ struct MobileLensSheet: View {
                     }
                     Divider()
                     saveDoors
-                    if let status = model.status {
-                        Text(status)
-                            .phoneType(.meta, tokens)
-                            .foregroundStyle(tokens.phone.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                 }
             }
         }

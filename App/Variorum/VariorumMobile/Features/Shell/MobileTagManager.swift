@@ -41,22 +41,52 @@ final class MobileTagsModel {
     @ObservationIgnored private let session: AppSession
 
     private(set) var tags: [Tag] = []
-    private(set) var lastError: String?
+    /// **VM-60 — the wing `tags` IS, named** (the Mac `TagsViewModel`'s
+    /// `shownWing`, R-828-2): read in the SAME read as the list, so the
+    /// header ("Tags — in ‹wing›") can never name a wing other than the one
+    /// listed, and a rename of that wing re-titles it live.
+    private(set) var shownWingName = WingWords.home
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
 
     init(session: AppSession) {
         self.session = session
     }
 
+    /// One read's answer: the wing's vocabulary and the wing's name.
+    nonisolated struct Listing: Equatable, Sendable {
+        let tags: [Tag]
+        let wingName: String
+    }
+
+    /// The wing's taxonomy and its name, one read (`TagsViewModel.start`'s).
+    nonisolated static func listing(_ db: Database, wingID: String) throws -> Listing {
+        Listing(
+            tags: try Queries.allTags(db, wingID: wingID),
+            wingName: try Queries.wingName(db, id: wingID, home: WingWords.home)
+                ?? WingWords.home)
+    }
+
     /// The live taxonomy (author-scale metadata — the Mac TagsViewModel's
     /// own unbounded observation; cost ∝ tag count, never corpus).
+    ///
+    /// VM-60: the CURRENT WING's vocabulary (R-13ia-1 — tags are per wing),
+    /// re-read for each wing the phone stands in.
     func start() async {
-        do {
-            for try await value in session.database.observeTags() {
-                tags = value
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                for try await value in session.database.observe({ db in
+                    try Self.listing(db, wingID: wing)
+                }) {
+                    adopt(value)
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = String(describing: error)
         }
     }
 
@@ -64,10 +94,21 @@ final class MobileTagsModel {
     /// paint drive this; the observation echoes it in production).
     func refresh() async {
         do {
-            tags = try await session.database.read { try Queries.allTags($0) }
+            let wing = session.wing.currentID
+            adopt(try await session.database.read { try Self.listing($0, wingID: wing) })
         } catch {
-            lastError = String(describing: error)
+            lastError = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
+    }
+
+    private func adopt(_ listing: Listing) {
+        tags = listing.tags
+        shownWingName = listing.wingName
+    }
+
+    /// The header — the Mac's own words (`WingWords.tagsTitle`).
+    var title: String {
+        WingWords.tagsTitle(wingName: shownWingName)
     }
 
     // MARK: - Pure brains (pinned)
@@ -133,17 +174,20 @@ final class MobileTagsModel {
     /// duplicate refuses through the op's own guard): creates the plan's
     /// missing segments through the standing ops and returns the LEAF's
     /// id.
+    ///
+    /// VM-60: `wingID` — the wing a ROOT segment is born in ('' = Home, the
+    /// forwarder's old reach); a child is born in its parent's.
     nonisolated static func createMissing(
-        _ plan: TypedPathPlan, ops: Operations
+        _ plan: TypedPathPlan, ops: Operations, wingID: String = ""
     ) throws -> String? {
-        try TypedTagPath.createMissing(plan, ops: ops)
+        try TypedTagPath.createMissing(plan, ops: ops, wingID: wingID)
     }
 
     /// Refusal copy in phone words (no platform names) — the Mac
     /// `TagsViewModel.message` semantics mirrored.
     nonisolated static func refusal(_ error: Error) -> String {
         guard let op = error as? OperationError else {
-            return String(describing: error)
+            return OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         switch op {
         case .invalidTagName:
@@ -153,14 +197,18 @@ final class MobileTagsModel {
         case .tagNotFound:
             return "That tag no longer exists."
         default:
-            return "Refused: \(op)"
+            // VM-62: the shared table's words, else the one plain fallback.
+            return OpsRefusalCopy.sentence(for: op, roads: .phone)
         }
     }
 
     // MARK: - Acts (every one an existing core operation)
 
+    /// VM-60: a ROOT tag is born in the wing the phone stands in (the Mac's
+    /// `TagsViewModel.createTag`); a child in its parent's (the op's rule).
     func create(parentID: String?, name: String) async {
-        await run { ops in _ = try ops.createTag(parent: parentID, name: name) }
+        let wing = parentID == nil ? session.wing.currentID : nil
+        await run { ops in _ = try ops.createTag(parent: parentID, name: name, wingID: wing) }
     }
 
     /// The "+ new tag" door — the typed-path road (FIX-C3a): a typed
@@ -178,7 +226,10 @@ final class MobileTagsModel {
             return
         }
         do {
-            let live = try await session.database.read { try Queries.allTags($0) }
+            // VM-60: the current wing's vocabulary — a typed path resolves
+            // (and mints its missing root) there, never in another library.
+            let wing = session.wing.currentID
+            let live = try await session.database.read { try Queries.allTags($0, wingID: wing) }
             guard let plan = Self.typedPathPlan(segments: segments, live: live) else {
                 return
             }
@@ -189,7 +240,7 @@ final class MobileTagsModel {
                 return
             }
             try await session.runner.run { [plan] ops in
-                _ = try MobileTagsModel.createMissing(plan, ops: ops)
+                _ = try MobileTagsModel.createMissing(plan, ops: ops, wingID: wing)
             }
             lastError = nil
         } catch {
@@ -252,7 +303,9 @@ struct MobileTagManagerSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            PhoneSheetHeader(tokens.chromeLabel("Tags"), tokens: tokens) { dismiss() }
+            // VM-60: the list names its wing — the Mac's Settings ▸ Tags
+            // words (R-828-2) — on the shared sheet header (VM-50).
+            PhoneSheetHeader(tokens.chromeLabel(model.title), tokens: tokens) { dismiss() }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(model.tags, id: \.id) { tag in
@@ -267,12 +320,8 @@ struct MobileTagManagerSheet: View {
                     newTagRow
                 }
             }
-            if let error = model.lastError {
-                Text(error)
-                    .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.alarm)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            // VM-61: a refusal here speaks on the shell's one line, which
+            // draws above this sheet.
         }
         .padding(20)
         .background(tokens.room.ignoresSafeArea())

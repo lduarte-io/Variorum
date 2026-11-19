@@ -57,7 +57,12 @@ final class MobileBlockListModel {
     @ObservationIgnored let postID: String
 
     private(set) var rows: [Queries.TOCRow] = []
-    private(set) var status: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); the sheet no longer
+    /// draws it.
+    private(set) var status: String? {
+        didSet { MobileLine.refuse(status, session: session) }
+    }
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -139,7 +144,7 @@ final class MobileBlockListModel {
             }
             adopt(value)
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -161,7 +166,7 @@ final class MobileBlockListModel {
             }
         } catch is CancellationError {
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 }
@@ -520,12 +525,7 @@ struct MobileBlockListSheet: View {
                     .accessibilityLabel(MobileBlockListModel.handle(row))
                     .accessibilityAddTraits(picked ? .isSelected : [])
                 }
-                if let status = model.status {
-                    Text(status)
-                        .phoneType(.meta, tokens)
-                        .foregroundStyle(tokens.phone.muted)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
             }
         }
     }

@@ -223,8 +223,13 @@ struct MobileDeletionTests {
     /// refusal vocabulary already names: the note is **already gone**, which
     /// is exactly what a second tab's delete leaves behind.
     ///
-    /// **Red on old:** remove the sheet's `reportLine` and the refusal is
-    /// nowhere in the sheet's tree.
+    /// **VM-61 (2026-11-19): the refusal speaks on the shell's ONE line now,
+    /// which draws ABOVE the sheet** (its own overlay window — the layering is
+    /// `MobileMessageLineHostTests`' pin). So the sheet keeps no slot of its
+    /// own, and this pin reads the one seam: the refusal reached it as a
+    /// refusal, while the sheet stayed up. **A regression trips it:** a sheet
+    /// act whose refusal never reached the seam (or reached it as a receipt the
+    /// phone drops) leaves `current` nil or wrongly classed.
     @Test func aRefusedDeleteIsSpokenOnTheSheetThatRaisedIt() async throws {
         try await withEditorWorld { session, _ in
             let postID = try await makePost(session, blocks: ["Already gone."])
@@ -252,8 +257,11 @@ struct MobileDeletionTests {
                         "the sheet stayed up — labels were \(labels)")
                 let message = try #require(model.statusMessage, "the act refused in words")
                 #expect(message == "That note is already gone.")
-                #expect(labels.contains { $0.contains(message) },
-                        "the refusal is ON the sheet — labels were \(labels)")
+                let line = try #require(session.status.current, "the one line speaks it")
+                #expect(line.kind == .refusal)
+                #expect(line.text == message, "the refusal is ON the line, above the sheet")
+                #expect(!labels.contains { $0.contains(message) },
+                        "and the sheet keeps no slot of its own — labels were \(labels)")
             }
         }
     }

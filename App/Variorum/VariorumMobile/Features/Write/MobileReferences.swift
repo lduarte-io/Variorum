@@ -37,7 +37,12 @@ final class MobileReferencesModel {
     @ObservationIgnored let postID: String
 
     private(set) var references: [Reference] = []
-    private(set) var status: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); the sheet no longer
+    /// draws it.
+    private(set) var status: String? {
+        didSet { MobileLine.refuse(status, session: session) }
+    }
 
     init(session: AppSession, postID: String) {
         self.session = session
@@ -124,7 +129,7 @@ final class MobileReferencesModel {
                 try Queries.references(db, containerID: postID)
             }
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
     }
 
@@ -150,7 +155,7 @@ final class MobileReferencesModel {
             await refresh()
             return true
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
             await refresh()
             return false
         }
@@ -163,7 +168,7 @@ final class MobileReferencesModel {
             }
             status = nil
         } catch {
-            status = String(describing: error)
+            status = OpsRefusalCopy.sentence(for: error, roads: .phone)
         }
         await refresh()
     }
@@ -195,12 +200,7 @@ struct MobileReferencesSheet: View {
                         row(reference)
                     }
                     addRow
-                    if let status = model.status {
-                        Text(status)
-                            .phoneType(.meta, tokens)
-                            .foregroundStyle(tokens.phone.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
                 }
             }
         }

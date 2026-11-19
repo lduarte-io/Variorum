@@ -95,10 +95,9 @@ struct MobileTrashView: View {
             .padding(.horizontal, 8)
         }
         // VM-51 (R-47-1, "prose should not be on the tint"): the Trash's rows
-        // on the paper; the report band below stays on the room.
+        // on the paper (its answers speak on the shell's one line, VM-61).
         .background(tokens.surface.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) { reportLine }
         // The filter and the sort are applied IN SQL, so a change restarts
         // the observation rather than re-sorting a window of the wrong set.
         .task(id: model.restartToken) { await model.startTrash() }
@@ -211,27 +210,8 @@ struct MobileTrashView: View {
             .accessibilityLabel(text)
     }
 
-    /// The receipts and refusals, pinned to the bottom so an act's answer
-    /// is readable wherever she is scrolled.
-    @ViewBuilder
-    private var reportLine: some View {
-        if model.receipt != nil || model.lastError != nil {
-            VStack(alignment: .leading, spacing: 2) {
-                if let receipt = model.receipt {
-                    Text(tokens.chromeLabel(receipt))
-                        .phoneType(.meta, tokens)
-                        .foregroundStyle(tokens.phone.muted)
-                }
-                if let error = model.lastError {
-                    Text(error).phoneType(.meta, tokens).foregroundStyle(tokens.alarm)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
-            .background(tokens.room)
-        }
-    }
+    // VM-61: this room's receipts and refusals speak on the shell's one
+    // line (`MobileMessageLine`), never in a slot of its own.
 
     // MARK: - Rows
 

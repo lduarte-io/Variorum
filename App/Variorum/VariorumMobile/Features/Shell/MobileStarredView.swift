@@ -46,6 +46,12 @@ struct MobileStarredView<TabBar: View>: View {
     /// star door (the Mac StarDoor's one-value discipline).
     @Bindable var stars: MobileStarsModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     /// A row's destination, through the model's own route brain — the
     /// Library's callback shape.
@@ -74,33 +80,26 @@ struct MobileStarredView<TabBar: View>: View {
             // VM-51 (R-47-1, "prose should not be on the tint"): her list on
             // the paper; the path line and the tab bar stay on the room.
             .background(tokens.surface)
-            if let error = stars.error(on: .starred) {
-                // D2's rule: a refusal speaks at ITS OWN door's root. An
-                // un-star fired from this page reports here, and a homeless
-                // (store-read) error reports on every root including this one.
-                Text(tokens.chromeLabel(error))
-                    .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-61: a star refusal speaks on the shell's one line
+            // (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
     }
 
-    /// "~/starred" (terminal) / "Starred" (study) — the two sibling roots'
-    /// own path-line shape. Nothing is minted here (P38: a strip earns its
-    /// doors), so the one door trailing it is the roots' ⋯ menu (VM-53).
+    /// "~/home/starred" (terminal) / "Home · Starred" (study) — the wing's name
+    /// leading (VM-56) and the wing door (VM-225, `MobileWingPath`); the two
+    /// sibling roots' own path-line shape. Nothing is minted here (P38: a
+    /// strip earns its doors), so the one door trailing it is the roots' ⋯
+    /// menu (VM-53).
     private var pathLine: some View {
         // VM-50: the same 44 pt line as its two siblings' (whose doors are
         // 44 pt hit areas), so the three roots' content starts level as the
         // band pages between them.
         HStack(alignment: .center, spacing: 16) {
-            Text(tokens.path([MobileStarsModel.pageName]))
-                .phoneType(.meta, tokens)
-                .foregroundStyle(tokens.phone.muted)
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: MobileStarsModel.pageName,
+                onDoor: onWingDoor)
             Spacer()
             MobileRootMenu(tokens: tokens)  // VM-53: the roots' one ⋯ menu (Settings)
         }

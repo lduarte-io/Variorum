@@ -62,6 +62,12 @@ struct MobileShelfView<TabBar: View>: View {
     /// so the app-lifecycle seam can reach it; the shelf only wears it.
     @Bindable var quickNote: MobileQuickNoteModel
     let tokens: VoiceTokens
+    /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
+    /// name is the title on every root); nil while unknown.
+    var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     let onOpenBook: (String) -> Void
     /// Open a note straight into typing — the Today button's landing AND
@@ -122,33 +128,8 @@ struct MobileShelfView<TabBar: View>: View {
                 // nothing here wakes the text layer (P3).
                 .animation(.easeOut(duration: 0.18), value: quickNote.isFocused)
             }
-            if let report = model.lastReport {
-                Text(tokens.chromeLabel(report))
-                    .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let error = model.lastError {
-                Text(error)
-                    .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.alarm)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
-            if let starsError = stars.error(on: .shelf) {
-                // A star refusal fired HERE (D2 — one home per refusal:
-                // it speaks at its own door's root and clears after a
-                // beat; the old one-field rendering sat on both tabs).
-                Text(tokens.chromeLabel(starsError))
-                    .phoneType(.meta, tokens)
-                    .foregroundStyle(tokens.phone.muted)
-                    .lineLimit(3)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 4)
-            }
+            // VM-61: the shelf's report, its error and a star refusal speak
+            // on the shell's one line (`MobileMessageLine`), never here.
             tabBar()
         }
         .background(tokens.room.ignoresSafeArea())
@@ -229,9 +210,10 @@ struct MobileShelfView<TabBar: View>: View {
         }
     }
 
-    /// "~/shelf · 6 books" (terminal) / "Shelf · 6 books" (study); the
-    /// + New Note door (P33 — Library's twin, same path-line placement)
-    /// and the ⋯ menu trailing.
+    /// "~/home/shelf · 6 books" (terminal) / "Home · Shelf · 6 books" (study)
+    /// — the wing's name leading (VM-56) and the wing door (VM-225,
+    /// `MobileWingPath`); the + New Note door (P33 — Library's twin, same
+    /// path-line placement) and the ⋯ menu trailing.
     ///
     /// **ONE line at 402 pt in both voices** (VM-50, the batch-1 carry-in:
     /// Terminal's 13 pt mono path beside two 17 pt mono words needed ~437 pt
@@ -243,10 +225,10 @@ struct MobileShelfView<TabBar: View>: View {
     /// air. Pinned by `MobilePathLineGeometryTests`.
     private var pathLine: some View {
         HStack(alignment: .center, spacing: 0) {
-            Text(tokens.path(["Shelf"]) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
-                .phoneType(.meta, tokens)
-                .foregroundStyle(tokens.phone.muted)
-                .lineLimit(1)
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: "Shelf",
+                trailing: tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"),
+                onDoor: onWingDoor)
             Spacer(minLength: PhoneMetrics.Space.s16)
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)

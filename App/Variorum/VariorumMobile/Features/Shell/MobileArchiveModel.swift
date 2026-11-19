@@ -57,7 +57,11 @@ final class MobileArchiveModel {
     /// therefore SELECTS, and `visible` says plainly which doors show rows.
     var filter: MobileListingFilter = .all
 
-    private(set) var lastError: String?
+    /// VM-61: every value this slot holds is a refusal, so it speaks on the
+    /// phone's one line as it is set (nil says nothing); no screen draws it.
+    private(set) var lastError: String? {
+        didSet { MobileLine.refuse(lastError, session: session) }
+    }
     /// A landed act's own words — kept apart from `lastError` so a success
     /// is never rendered in the red slot.
     private(set) var receipt: String?
@@ -87,15 +91,22 @@ final class MobileArchiveModel {
     /// `observeLibrary` and `observeTrash`, and rolling this one by hand
     /// would make one of three sibling reads take a different road for no
     /// reason.
+    ///
+    /// VM-57: the Archived room of the wing the phone stands in (per wing,
+    /// as on the Mac), re-read for each wing.
     func start() async {
-        do {
-            let limit = window + 1
-            for try await value in session.database.observeArchivedPosts(limit: limit) {
-                (archived, truncated) = TrashListing.windowed(value, window: window)
+        await MobileWingScope.follow(session.wing) { [self] wing in
+            do {
+                let limit = window + 1
+                for try await value in session.database.observeArchivedPosts(
+                    limit: limit, wingID: wing
+                ) {
+                    (archived, truncated) = TrashListing.windowed(value, window: window)
+                }
+            } catch is CancellationError {
+            } catch {
+                lastError = DeletionRefusal.plainFallback(error, roads: .phone)
             }
-        } catch is CancellationError {
-        } catch {
-            lastError = DeletionRefusal.fallback(error)
         }
     }
 
@@ -109,6 +120,9 @@ final class MobileArchiveModel {
                 try ops.unarchiveContainer(item.postID)
             }
             receipt = Self.unarchivedReceipt
+            // VM-61: an unarchive is a restoration — an ordinary act, no line
+            // (PROVISIONAL P-55-4); the row leaving the room is the answer.
+            MobileLine.say(receipt, as: .ordinary, session: session)
         } catch let error as OperationError {
             // **The ONE deletion-refusal home, called DIRECTLY** (A1-18; the
             // 6c cold review's n5 retired the one-line forward that used to
@@ -123,9 +137,9 @@ final class MobileArchiveModel {
             // same either way), and the durable fix is an `.unarchive` arm —
             // a FENCED (`Shared/RecoveryActs.swift`) addition, on the next
             // Shared-touching batch's list.
-            lastError = DeletionRefusal.words(error, act: .putBack)
+            lastError = DeletionRefusal.sentence(error, act: .putBack, roads: .phone)
         } catch {
-            lastError = DeletionRefusal.fallback(error)
+            lastError = DeletionRefusal.plainFallback(error, roads: .phone)
         }
     }
 

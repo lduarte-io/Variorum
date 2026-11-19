@@ -28,30 +28,20 @@
 //  SWITCHER makes is never undone by this: only a fresh open or a focus move
 //  is followed, never a standing pane.
 //
+//  VM-63 (the VM-55 run, batch 3): the RULE — `Decision`, `decision(current:
+//  subjectWing:)` and the "Now in …" words — moved to shared code
+//  (`Shared/WingFollowRule.swift`, which declares the type), so the hoisted
+//  `WingsModel` speaks the same receipt on either platform. This file keeps
+//  the Mac's ACT, as extensions: the pane subject's wing (`SidebarSelection`
+//  is the Mac's), the follow and its per-window wiring (`WorkspaceModel`), and
+//  the Open rows' indicator reads and hover.
+//
 
 import Foundation
 import GRDB
 import VariorumCore
 
-nonisolated enum WingFollow {
-    /// What the follow does for a subject living in `subjectWing` (nil = not
-    /// a wing-bearing subject, or unknown) while the app stands in `current`.
-    enum Decision: Equatable {
-        case stay
-        case switchTo(String)
-    }
-
-    static func decision(current: String, subjectWing: String?) -> Decision {
-        guard let subjectWing, subjectWing != current else { return .stay }
-        return .switchTo(subjectWing)
-    }
-
-    /// The quiet receipt (wording PROVISIONAL — 13s re-voices). Home is a
-    /// place-name, never quoted; a wing she named is hers.
-    static func nowIn(_ wingName: String, isHome: Bool) -> String {
-        isHome ? "Now in Home." : "Now in \u{201C}\(wingName)\u{201D}."
-    }
-
+nonisolated extension WingFollow {
     /// The Open row's indicator words and hover (P-17y-B3-f4).
     static func indicatorHelp(_ wingName: String) -> String {
         "In the wing \u{201C}\(wingName)\u{201D} \u{2014} opening it takes you there"

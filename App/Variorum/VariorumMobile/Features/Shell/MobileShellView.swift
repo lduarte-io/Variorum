@@ -143,11 +143,30 @@ struct MobileShellView: View {
     /// The starred set (parity C3 — ONE model threaded to every surface
     /// carrying the star door, the Mac StarDoor discipline).
     @State private var starsModel: MobileStarsModel
+    /// VM-56 — the wing the phone stands in: the held wings read (a wing
+    /// that dies returns the phone to Home) and its name, the roots' title.
+    /// VM-225 — the SHARED brain (VM-63's hoist; batch 1's interim holder
+    /// folded into it), and the interim wing door over it.
+    @State private var wings: WingsModel
+    @State private var wingDoor: MobileWingDoor
     @State private var settingsPresented = false
     /// VM-8 unit 2 — F-U2-E (PROVISIONAL P-VM8-8): the open library's protection receipts on the phone — the faces'
     /// `speak` door, shown by the Protection screen (one shell per open: a re-keying act's receipt owed to its reopen is
     /// spoken into the shell that re-pushes the screen).
     @State private var protectionReceipts = MobileProtectionReceipts()
+    /// VM-61 — the phone's ONE message line (the face of `session.status`),
+    /// hosted once, here, above everything this shell presents.
+    @State private var messageLine: MobileMessageLineModel
+    /// VM-61 — the tab bar's drawn height, so the line sits above its doors on
+    /// a root and (VM-52) a pushed list (measured on `MobileTabBar`, never
+    /// assumed: umbrella VM-47 owns the bar's size).
+    @State private var tabBarHeight: CGFloat = 0
+    /// VM-47 (the VM-55 re-land, meeting 2) — the bars a pushed LIST is
+    /// showing now, per stack (VM-52 gives each list its own bar; a note
+    /// pushed over a list covers it, the Versions reader leaves its listing's).
+    /// Counted by the list bars' own appear and disappear, so the one line
+    /// clears a bar wherever one is on screen — `barOnScreen`.
+    @State private var listBarsShowing: [MobileTab: Int] = [:]
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
     // Stage 0 TK2 spike auto-run (KEPT — the executable §5 form).
@@ -168,6 +187,16 @@ struct MobileShellView: View {
         _trashModel = State(initialValue: MobileTrashModel(session: session))
         _archiveModel = State(initialValue: MobileArchiveModel(session: session))
         _starsModel = State(initialValue: MobileStarsModel(session: session))
+        let wings = MobileWingDoor.phoneWings(session)
+        _wings = State(initialValue: wings)
+        _wingDoor = State(initialValue: MobileWingDoor(
+            wings: wings,
+            // P-55-18: a switch files the box's draft in its own wing first.
+            fileCaptureFirst: { [quickNote = router.quickNote] in
+                await quickNote.fileOnLeaving()
+            }))
+        _messageLine = State(initialValue: MobileMessageLineModel(
+            status: session.status, voice: { [router] in router.voice }))
         // The quick-note box's session (round 2, M5). Bound HERE and not
         // in a `.task` deliberately: `bind` is idempotent and writes only
         // `@ObservationIgnored` storage, so it cannot re-enter the view
@@ -205,6 +234,8 @@ struct MobileShellView: View {
                     stack(path: $starredPath, owner: .starred) {
                         MobileStarredView(
                             stars: starsModel, tokens: tokens,
+                            wingName: MobileWingTitle.name(of: wings),
+                            onWingDoor: { wingDoor.open() },
                             tabBar: { tabBar },
                             onOpen: { starredPath.append($0) })
                     }
@@ -214,6 +245,8 @@ struct MobileShellView: View {
                         MobileShelfView(
                             model: shelfModel, stars: starsModel,
                             quickNote: router.quickNote, tokens: tokens,
+                            wingName: MobileWingTitle.name(of: wings),
+                            onWingDoor: { wingDoor.open() },
                             tabBar: { tabBar },
                             onOpenBook: { id in
                                 leavingShelf { shelfPath.append(MobileRoute.book(id)) }
@@ -239,6 +272,8 @@ struct MobileShellView: View {
                             // observation and one set of row faces, never a second.
                             books: shelfModel,
                             tokens: tokens,
+                            wingName: MobileWingTitle.name(of: wings),
+                            onWingDoor: { wingDoor.open() },
                             tabBar: { tabBar },
                             onOpen: { libraryPath.append($0) },
                             onOpenTrash: { libraryPath.append(MobileRoute.trash) },
@@ -268,12 +303,31 @@ struct MobileShellView: View {
                 bandGesture(width: width),
                 including: pagingAllowed ? .all : .subviews)
         }
+        // VM-61: the one message line — its own overlay window over this
+        // scene, above every sheet and alert this shell presents; it lifts
+        // over the tab bar wherever a bar is on screen — a root, and (VM-52)
+        // a pushed list.
+        .background(MobileMessageLineHost(
+            model: messageLine, chromeInset: barOnScreen ? tabBarHeight : 0))
         // (13p Batch 4's notice bar — today's nudge and reminder — left with today's road at VX-329 U1.)
         // VM-53: Settings' door from every root's ⋯ menu and a note's ⋯ sheet (`MobileRootMenu.swift`).
         .environment(\.mobileSettingsDoor, MobileSettingsDoor { settingsPresented = true })
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
         }
+        // VM-225 — the interim wing door's plain list (the name on any root
+        // opens it). A pick lands on the wing's Bookcase: the door counts the
+        // landing, and the shell shows the Shelf page through its one page
+        // road (P-55-14: no stack is touched, so nothing she has open is
+        // closed. The Shelf's own stack is never left holding a screen while
+        // hidden — a page is left only from its root, and the protection
+        // ask selects the Shelf before it pushes — so the landing always
+        // shows the Bookcase itself).
+        .sheet(isPresented: $wingDoor.isOpen) {
+            MobileWingListSheet(door: wingDoor, tokens: tokens)
+                .presentationDetents([.medium, .large])
+        }
+        .onChange(of: wingDoor.landings) { _, _ in selectPage(.shelf) }
         // VM-8 unit 1 — F-U1-3: a reopen's ask for Protection, adopted once (a fresh shell on appear; a standing one on
         // change).
         .onAppear { adoptProtectionRequest() }
@@ -292,6 +346,7 @@ struct MobileShellView: View {
             #endif
             await router.theme?.start()
         }
+        .task { await wings.track() }
         // R27b's starter Journal used to be seeded from HERE, concurrently
         // with the task that composes AppServices — which is what the
         // batch-5 cold review's MAJOR was about: the seed always won that
@@ -358,6 +413,16 @@ struct MobileShellView: View {
         case .shelf: return shelfPath.isEmpty
         case .library: return libraryPath.isEmpty
         }
+    }
+
+    /// **A bar is on screen** (the VM-55 re-land, meeting 2): a root (every
+    /// root draws the bar at its foot — the visible stack at its root is
+    /// `pagingAllowed`), or a pushed list on the visible stack wearing its own
+    /// (VM-52's destination builder — `listBar`). Inside a note, on Read, the
+    /// Versions reader and Protection there is none, and the line keeps to the
+    /// safe area's foot.
+    private var barOnScreen: Bool {
+        pagingAllowed || (listBarsShowing[tab] ?? 0) > 0
     }
 
     /// The page drag. The latch is taken ONCE per gesture and honoured for
@@ -468,7 +533,7 @@ struct MobileShellView: View {
                 // on a tombstone.
                 onDeleted: { pop(in: owner) })
                 // VM-52: a LIST — the bar rides its foot.
-                .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }
+                .safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }
         case .bookRead(let readingID):
             MobileReadView(
                 session: session, readingID: readingID, tokens: tokens,
@@ -489,12 +554,12 @@ struct MobileShellView: View {
             MobileTrashView(
                 model: trashModel, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) })
-                .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }  // VM-52: a list
+                .safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }  // VM-52: a list
         case .archive:
             MobileArchiveView(
                 model: archiveModel, tokens: tokens,
                 onOpen: { push(.note($0, focus: false), in: owner) })
-                .safeAreaInset(edge: .bottom, spacing: 0) { tabBar }  // VM-52: a list
+                .safeAreaInset(edge: .bottom, spacing: 0) { listBar(owner) }  // VM-52: a list
         case .versions(let postID):
             // Built per push: a note's moments are that note's, and this
             // screen's whole lifetime is one visit (the read is the note's
@@ -503,7 +568,7 @@ struct MobileShellView: View {
             // moment's words are read (the reader is her words, not a list).
             MobileVersionsScreen(
                 session: session, postID: postID, tokens: tokens,
-                listingBar: AnyView(tabBar))
+                listingBar: AnyView(listBar(owner)))
         case .protection:
             // VM-52: NO bar here (PROVISIONAL P-47-18) — not a root, not a
             // list, and while new words are held on screen it gives no way off
@@ -604,6 +669,21 @@ struct MobileShellView: View {
     /// would be a page a VoiceOver user cannot reach at all.
     private var tabBar: some View {
         MobileTabBar(current: tab, tokens: tokens, select: { tabSelected($0) })
+            // VM-61: the message line sits above the bar's doors — measured on
+            // the bar itself (re-attached here at the VM-55 re-land: VM-55's
+            // measurement rode the old `tabBar` body, which `MobileTabBar`
+            // replaced). Every copy of the bar is one height.
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tabBarHeight = $0 }
+    }
+
+    /// **A pushed list's bar** — the bar, counted while it shows (it appears
+    /// with its list and leaves when a note is pushed over the list, the list is
+    /// popped, or the Versions reader replaces its listing), so `barOnScreen`
+    /// knows the one line has a bar to clear on this stack.
+    private func listBar(_ owner: MobileTab) -> some View {
+        tabBar
+            .onAppear { listBarsShowing[owner, default: 0] += 1 }
+            .onDisappear { listBarsShowing[owner, default: 0] -= 1 }
     }
 
     /// **A TAB TAP RETURNS TO THAT ROOT** (VM-52 — the ticket's "changing

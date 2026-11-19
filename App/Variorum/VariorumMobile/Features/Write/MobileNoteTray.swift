@@ -184,7 +184,7 @@ final class MobileNoteTrayModel {
             }
         } catch is CancellationError {
         } catch {
-            status = .refusal(DeletionRefusal.fallback(error))
+            report(.refusal(DeletionRefusal.plainFallback(error, roads: .phone)))
         }
     }
 
@@ -253,7 +253,8 @@ final class MobileNoteTrayModel {
             let landing = try await session.runner.run { ops in
                 try ops.unarchiveBlock(blockID)
             }
-            report(.receipt(RecoveryCopy.landingReceipt(landing)))
+            report(.receipt(RecoveryCopy.landingReceipt(landing)),
+                   direction: RecoveryCopy.isDirection(landing))
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -268,7 +269,8 @@ final class MobileNoteTrayModel {
             let landing = try await session.runner.run { ops in
                 try ops.restoreBlock(blockID)
             }
-            report(.receipt(RecoveryCopy.landingReceipt(landing)))
+            report(.receipt(RecoveryCopy.landingReceipt(landing)),
+                   direction: RecoveryCopy.isDirection(landing))
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -281,8 +283,9 @@ final class MobileNoteTrayModel {
     func putBackOriginal(_ blockID: String) async {
         status = nil
         do {
-            report(.receipt(try await PreservedOriginPutBack.run(
-                session: session, postID: postID, blockID: blockID)))
+            let answer = try await PreservedOriginPutBack.answer(
+                session: session, postID: postID, blockID: blockID)
+            report(.receipt(answer.receipt), direction: answer.isDirection)
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -299,7 +302,8 @@ final class MobileNoteTrayModel {
             let restored = try await session.runner.run { ops in
                 try ops.restoreVariant(variantID)
             }
-            report(.receipt(RecoveryCopy.takeRestoredReceipt(restored)))
+            report(.receipt(RecoveryCopy.takeRestoredReceipt(restored)),
+                   direction: RecoveryCopy.isDirection(restored))
         } catch {
             report(.refusal(Self.refusal(error, act: .putBack)))
         }
@@ -348,7 +352,7 @@ final class MobileNoteTrayModel {
         pendingConfirm = nil
         status = nil
         do {
-            report(.receipt(try await TrashPurge.confirm(session: session, confirm)))
+            report(.receipt(try await TrashPurge.confirm(session: session, confirm)), removal: true)
         } catch {
             // A PURGE refusal, never a put-back one — the seal's way out
             // differs by act, which is why `Act` is a parameter (A1-18).
@@ -367,8 +371,19 @@ final class MobileNoteTrayModel {
 
     // MARK: - Status / refusal voice
 
-    private func report(_ status: RecoveryStatus) {
+    /// VM-61: spoken on the phone's one line. A Put back here is a
+    /// restoration — an ordinary act, no line (PROVISIONAL P-55-4); a take's
+    /// Delete Now took something off the page for good (`removal`, no Undo —
+    /// a purge has no road back); a refusal always speaks. P-55-11: a Put back
+    /// that landed somewhere other than where she would look (`direction`)
+    /// keeps its line in P-55-7's class; the model's record stays a receipt.
+    private func report(
+        _ status: RecoveryStatus, removal: Bool = false, direction: Bool = false
+    ) {
         self.status = status
+        let line: MobileLine.Class = status.isRefusal || direction
+            ? .refusal : (removal ? .removal(nil) : .ordinary)
+        MobileLine.say(status.text, as: line, session: session)
     }
 
     /// **The ONE deletion-refusal home, called directly** (A1-18; the 6c cold
@@ -377,9 +392,9 @@ final class MobileNoteTrayModel {
     /// fallback, which is why it is never rendered as a receipt.
     static func refusal(_ error: Error, act: DeletionRefusal.Act) -> String {
         guard let error = error as? OperationError else {
-            return DeletionRefusal.fallback(error)
+            return DeletionRefusal.plainFallback(error, roads: .phone)
         }
-        return DeletionRefusal.words(error, act: act)
+        return DeletionRefusal.sentence(error, act: act, roads: .phone)
     }
 }
 
@@ -481,13 +496,7 @@ struct MobileNoteTraySection: View {
             case .archived: archivedSection
             case .leaving: leavingSection
             }
-            if let status = model.status {
-                Text(tokens.chromeLabel(status.text))
-                    .phoneType(.meta, tokens)
-                    .foregroundStyle(status.isRefusal ? tokens.alarm : tokens.phone.muted)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityLabel(status.text)
-            }
+            // VM-61: this sheet's message speaks on the shell's one line, which draws above it.
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         // The held observation, alive only while this segment is on screen
