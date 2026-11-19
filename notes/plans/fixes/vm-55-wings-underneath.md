@@ -266,6 +266,28 @@ Notes for the implementers:
 
 *(each implementer writes its own section here)*
 
+### Batch 1 record
+
+**What this batch did NOT do (first, by the protocol):** PENDING — written at the batch's close.
+
+Implementer: `opus-implementer` (Opus, xhigh), one session. Worktree `~/dev/variorum-vm-55`, branch
+`vm-55-wings-underneath`. Reading list done in full before code (CLAUDE.md + loaded canon, MobileSoul §1–§5, the
+resiliency protocol, the catch-up plan's inherited rules, umbrella-02, sitting-1 rulings, audit A §1D/§1F/§1I/§3.1,
+this file whole, SurfaceContracts' "The app" and "The Bookcase and books" wing bullets, both mockups' build notes).
+
+#### Batch 1 LIVE STATUS
+
+| Piece | State |
+|---|---|
+| Record skeleton | DONE (this commit) |
+| VM-56 — the current wing on the phone (readScope, bootstrap memory, held wings observation, root titles) | NOT-STARTED — design: `WingState.readScope` returns `currentID` on both platforms; the bootstrap's memory block un-fenced; a phone `MobileWingModel` holds `Queries.wings` (revalidate + count through `WingState`, the Mac `WingsModel.adopt`'s three steps) and gives the roots the wing's name; each root's path line leads with the wing's name |
+| VM-57 — every listing reads the current wing | NOT-STARTED — design: one phone helper `MobileWingScope.follow` re-runs a held listing for each wing the phone stands in (the old run finishes before the new one starts); call sites pass `wingID:` |
+| VM-58 — mints in the current wing | NOT-STARTED |
+| VM-60 — the tag manager per wing | NOT-STARTED |
+| VM-59 — the wing-blind pickers (pins, then fix, separate commits) | NOT-STARTED |
+| Mac + phone `build-for-testing` | NOT-STARTED |
+| Stage window: VM-59 red-on-old, then the batch's suites green | NOT-STARTED — PENDING the coordinator's claim line |
+
 ## Ladder
 
 *(rounds, findings, dispositions)*
