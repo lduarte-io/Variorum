@@ -10,17 +10,21 @@
 //  wave-2 wing face — this run builds no switcher, so a phone that never
 //  switched stands in Home).
 //
-//  Three small pieces, each a FACE-side holder over the shared brain
+//  Small pieces, each a FACE-side read over the shared brains
 //  (`Shared/WingState` — the current wing, its device memory, `revalidate`;
-//  Core `Queries.wings`), never a second rule:
+//  `Shared/WingsModel` — the held wings read; Core `Queries.wings`), never a
+//  second rule:
 //
-//  · `MobileWingModel` — the HELD wings observation (the `wing` table alone,
-//    a handful of rows): a wing deleted here, or arriving deleted by sync,
-//    returns the phone to Home through `WingState.revalidate`, the same three
-//    steps the Mac's `WingsModel.adopt` takes; and it names the current wing
-//    for the roots' titles. VM-63 (batch 3) hoists the Mac's `WingsModel` to
-//    `Shared/`; wave 2's wing face composes that, and this holder folds into
-//    it then.
+//  · **FOLDED at VM-225 (batch 4):** batch 1's interim `MobileWingModel` — the
+//    HELD wings observation that returned the phone Home when its wing died,
+//    and named the wing for the roots' titles — is gone. Its `track` / `load` /
+//    `adopt` were the Mac `WingsModel`'s three steps, and VM-63 (batch 3)
+//    moved that brain to `Shared/`, so the shell now holds the shared
+//    `WingsModel` itself (`MobileWingDoor.phoneWings`). The one thing the
+//    shared brain does NOT say is batch 1's title rule — never a false
+//    "Home" before the wings are read (`WingsModel.currentName` falls back
+//    to "Home") — so that stays here, as a pure read over the brain's rows
+//    (`MobileWingTitle.name`).
 //  · `MobileWingScope.follow` — a held listing runs ONCE PER WING the phone
 //    stands in: when the wing changes, the old run is cancelled and FINISHED
 //    before the new one starts, so a listing never shows two wings at once
@@ -29,68 +33,13 @@
 //    models follow it themselves, so a listing's re-read is a model fact the
 //    pins can drive, and the views' task lines are untouched.
 //  · `MobileWingTitle` — what a root's path line says: the wing's name first,
-//    then the page (P-55-2, PROVISIONAL — the batch record has the options).
+//    then the page (P-55-2, PROVISIONAL — the batch record has the options);
+//    since VM-225 the wing's name is a DOOR there (`MobileWingDoor.swift`).
 //
 
 import Foundation
-import GRDB // AsyncValueObservation iteration (member import visibility)
 import Observation
 import VariorumCore
-
-@MainActor
-@Observable
-final class MobileWingModel {
-    @ObservationIgnored let session: AppSession
-
-    /// The live ADDITIONAL wings, in switcher order (Home is virtual).
-    private(set) var wings: [Wing] = []
-    /// Whether the held read has delivered once — until then a non-Home
-    /// wing's name is not known, and the title says nothing rather than
-    /// a false "Home".
-    private(set) var loaded = false
-
-    init(session: AppSession) {
-        self.session = session
-    }
-
-    /// Held — the `wing` table alone (a handful of rows; no keystroke, no
-    /// note write and no book write wakes it — P1).
-    func track() async {
-        do {
-            for try await value in session.database.observe({ db in try Queries.wings(db) }) {
-                adopt(value)
-            }
-        } catch {}
-    }
-
-    /// One-shot (headless determinism; the observation echoes it).
-    func load() async {
-        if let value = try? await session.database.read({ try Queries.wings($0) }) {
-            adopt(value)
-        }
-    }
-
-    /// The Mac `WingsModel.adopt`'s steps over the shared `WingState`: the
-    /// count, then a wing that died (here, or on another device) returns the
-    /// app to Home.
-    func adopt(_ new: [Wing]) {
-        wings = new
-        loaded = true
-        session.wing.noteWingCount(new.count + 1)
-        let live = Set(new.map(\.id))
-        session.wing.revalidate { $0.isEmpty || live.contains($0) }
-    }
-
-    /// The current wing's name — "Home" for the virtual wing (`WingWords`),
-    /// a live wing's own name, nil while a non-Home wing's name is not yet
-    /// read (never a false "Home"). A rename arriving by sync re-titles it
-    /// (the held read watches the `wing` table).
-    var currentName: String? {
-        let id = session.wing.currentID
-        if id.isEmpty { return WingWords.home }
-        return wings.first { $0.id == id }?.name
-    }
-}
 
 /// **A held listing, once per wing** (VM-57).
 @MainActor
@@ -145,5 +94,41 @@ nonisolated enum MobileWingTitle {
     static func components(wing: String?, page: String) -> [String] {
         guard let wing, !wing.isEmpty else { return [page] }
         return [wing, page]
+    }
+
+    /// **The roots' title — batch 1's rule, kept through the fold (VM-225).**
+    /// "Home" for the virtual wing (known without a read), a live wing's own
+    /// name once the wings are read, and nil while a non-Home wing's name is
+    /// NOT yet read — never a false "Home" (the shared brain's
+    /// `WingsModel.currentName` falls back to "Home" for an unread id, which is
+    /// right for its Mac faces and wrong for a title). A rename arriving by
+    /// sync re-titles the roots through the held read; a wing that died is
+    /// gone from `wings`, and the revalidation the same read runs has already
+    /// returned the phone Home.
+    static func name(currentID: String, wings: [Wing]) -> String? {
+        if currentID.isEmpty { return WingWords.home }
+        return wings.first { $0.id == currentID }?.name
+    }
+
+    /// The shell's read of it, over the shared brain the shell holds.
+    @MainActor
+    static func name(of wings: WingsModel) -> String? {
+        name(currentID: wings.currentID, wings: wings.wings)
+    }
+
+    /// **The path line, in three pieces, so the wing's name can be a door
+    /// (VM-225)** — the voice's prefix ("~/" in Terminal, nothing in Study),
+    /// the wing's name as the voice writes it, and everything after it. The
+    /// three pieces put together are, byte for byte, the line batch 1 drew
+    /// (`VoiceTokens.path` over `components`, plus the root's own trailing
+    /// words — the Shelf's book count), so making the name a door changes no
+    /// letter of the line (pinned).
+    @MainActor
+    static func doorParts(
+        _ tokens: VoiceTokens, wing: String, page: String, trailing: String = ""
+    ) -> (lead: String, door: String, rest: String) {
+        (lead: tokens.pathPrefix,
+         door: tokens.chromeLabel(wing),
+         rest: tokens.pathSeparator + tokens.chromeLabel(page) + trailing)
     }
 }

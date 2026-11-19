@@ -107,19 +107,28 @@ struct MobileWingStandTests {
 
     /// A wing deleted HERE while the phone stands in it returns the phone to
     /// Home through the held wings read.
+    ///
+    /// VM-225 (batch 4) — A JUSTIFIED EDIT of this pin and the next two:
+    /// batch 1's interim `MobileWingModel` was FOLDED into the shared
+    /// `WingsModel` (VM-63's hoist — the same `track`/`load`/`adopt`), which is
+    /// what the shell now holds (`MobileWingDoor.phoneWings`). Each pin drives
+    /// that brain and asserts the same facts: "the held read delivered" is its
+    /// rows naming the wing (the folded holder's `loaded`), and the title is
+    /// `MobileWingTitle.name`, batch 1's rule kept on the phone side.
     @Test func aWingDeletedHereReturnsThePhoneHome() async throws {
         try await withEditorWorld { session, _ in
             let empty = try session.operations.createWing(name: "Scratch")
             session.wing.switchTo(empty.id)
-            let wings = MobileWingModel(session: session)
+            let wings = MobileWingDoor.phoneWings(session)
             let held = Task { await wings.track() }
             defer { held.cancel() }
-            #expect(await eventually { wings.loaded })
+            #expect(await eventually { wings.wings.map(\.id) == [empty.id] },
+                    "the held read delivered")
             #expect(session.wing.currentID == empty.id)
             try session.operations.deleteWing(empty.id)
             #expect(await eventually { session.wing.currentID == "" },
                     "the dead wing returned the phone to Home")
-            #expect(wings.currentName == "Home")
+            #expect(MobileWingTitle.name(of: wings) == "Home")
         }
     }
 
@@ -131,7 +140,7 @@ struct MobileWingStandTests {
         try await withEditorWorld { session, db in
             let world = try TwoWingWorld.make(session)
             session.wing.switchTo(world.work)
-            let wings = MobileWingModel(session: session)
+            let wings = MobileWingDoor.phoneWings(session)
             let library = MobileLibraryViewModel(session: session)
             let heldWings = Task { await wings.track() }
             let heldLibrary = Task { await library.startAll() }
@@ -155,15 +164,18 @@ struct MobileWingStandTests {
     @Test func everyRootIsTitledWithTheWingsName() async throws {
         try await withEditorWorld { session, _ in
             let world = try TwoWingWorld.make(session)
-            let wings = MobileWingModel(session: session)
-            #expect(wings.currentName == "Home", "Home is known without a read")
+            let wings = MobileWingDoor.phoneWings(session)
+            #expect(MobileWingTitle.name(of: wings) == "Home", "Home is known without a read")
             session.wing.switchTo(world.work)
-            #expect(wings.currentName == nil, "not yet read — never a false Home")
+            #expect(MobileWingTitle.name(of: wings) == nil, "not yet read — never a false Home")
+            // Why the rule stays on the phone side through the fold: the
+            // shared brain's own name falls back to "Home" for an unread id.
+            #expect(wings.currentName == "Home")
             await wings.load()
-            #expect(wings.currentName == "Work")
+            #expect(MobileWingTitle.name(of: wings) == "Work")
             try session.operations.renameWing(world.work, to: "Office")
             await wings.load()
-            #expect(wings.currentName == "Office", "a rename re-titles the roots")
+            #expect(MobileWingTitle.name(of: wings) == "Office", "a rename re-titles the roots")
         }
     }
 

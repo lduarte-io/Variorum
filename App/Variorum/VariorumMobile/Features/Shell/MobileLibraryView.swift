@@ -51,6 +51,9 @@ struct MobileLibraryView<TabBar: View>: View {
     /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
     /// name is the title on every root); nil while unknown.
     var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     let onOpen: (MobileRoute) -> Void
     /// **The Two-rooms doors** (batch 6c — her QUESTIONS #84 ruling). Batch
@@ -179,9 +182,8 @@ struct MobileLibraryView<TabBar: View>: View {
         // `spacing: 16` — the Shelf path line's own value, adopted now that
         // this strip carries two trailing doors instead of one.
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path(MobileWingTitle.components(wing: wingName, page: "Library")))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: "Library", onDoor: onWingDoor)
             Spacer()
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)

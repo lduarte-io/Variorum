@@ -65,6 +65,9 @@ struct MobileShelfView<TabBar: View>: View {
     /// VM-56 — the wing the phone stands in, named (her SW-1: the wing's
     /// name is the title on every root); nil while unknown.
     var wingName: String? = nil
+    /// VM-225 — the wing's name in the path line is the interim wing door
+    /// (the shell opens the list); nil in harness use draws the plain line.
+    var onWingDoor: (() -> Void)? = nil
     @ViewBuilder let tabBar: () -> TabBar
     let onOpenBook: (String) -> Void
     /// Open a note straight into typing — the Today button's landing AND
@@ -202,9 +205,10 @@ struct MobileShelfView<TabBar: View>: View {
     /// and the settings door trailing.
     private var pathLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 16) {
-            Text(tokens.path(MobileWingTitle.components(wing: wingName, page: "Shelf")) + tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
+            MobileWingPath(
+                tokens: tokens, wing: wingName, page: "Shelf",
+                trailing: tokens.chromeLabel("  ·  \(model.books.count) book\(model.books.count == 1 ? "" : "s")"),
+                onDoor: onWingDoor)
             Spacer()
             if let onOpenTrash {
                 MobileTrashDoor(tokens: tokens, act: onOpenTrash)

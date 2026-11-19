@@ -129,8 +129,9 @@ nonisolated extension WingCopy {
         + "note \u{2014} right-click its row in the Library or the Pool, or open it and use "
         + "its note \u{25BE} menu."
 
-    /// The switcher list's header (13i-d U6 (b)).
-    static let switcherHeader = "Wings \u{2014} each a separate library"
+    /// The switcher list's header (13i-d U6 (b)) — since VM-225 declared in
+    /// `WingWords` (the phone's door says it too); forwarded, byte for byte.
+    static let switcherHeader = WingWords.switcherHeader
     static let newWingTitle = "New Wing"
     static let renameWingTitle = "Rename Wing"
 
