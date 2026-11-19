@@ -302,22 +302,27 @@ final class MobileEditorViewModel {
     /// was minted again (by another tab's editor of the same note, or by this
     /// very call) — the editor ADOPTS it, so two coordinators for one note
     /// can never stand (the S3 ladder BLOCKER's class). Either way the editor
-    /// ends wired to the coordinator it records into. A first arrival holds
-    /// already (`init` acquired) and only counts.
+    /// ends wired to the coordinator it records into — and so does a screen
+    /// shown again BEFORE its leaving gave the hold back (the leaving parked
+    /// in its savepoint after teardown stopped the listening: it still holds,
+    /// so there is nothing to re-acquire, but it must listen again — the VM-64
+    /// ladder's round 1, finding 2). A first arrival holds already (`init`
+    /// acquired, and listens) and only counts.
     func takeAutosaveHold() async {
         arrivalCount += 1
-        guard !holdsAutosave else { return }
-        holdsAutosave = true
-        let current = session.autosave(
-            forPost: postID, debounce: autosaveDebounce, sleep: autosaveSleep)
-        if current !== autosave {
-            // The one given back is clean by construction (the registry drops
-            // only a clean entry, and nothing records while the screen is
-            // gone) — landed anyway if it is not, before it is let go.
-            if autosave.isDirty { await autosave.flushNow() }
-            if let token = autosaveToken { autosave.stopObserving(token) }
-            autosaveToken = nil
-            autosave = current
+        if !holdsAutosave {
+            holdsAutosave = true
+            let current = session.autosave(
+                forPost: postID, debounce: autosaveDebounce, sleep: autosaveSleep)
+            if current !== autosave {
+                // The one given back is clean by construction (the registry drops
+                // only a clean entry, and nothing records while the screen is
+                // gone) — landed anyway if it is not, before it is let go.
+                if autosave.isDirty { await autosave.flushNow() }
+                if let token = autosaveToken { autosave.stopObserving(token) }
+                autosaveToken = nil
+                autosave = current
+            }
         }
         if autosaveToken == nil {
             // `init`'s two hooks, re-made for the coordinator this editor now

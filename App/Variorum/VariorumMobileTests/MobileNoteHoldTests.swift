@@ -180,6 +180,70 @@ struct MobileNoteHoldTests {
         }
     }
 
+    /// **…and it LISTENS to the coordinator it records into** (the VM-64
+    /// ladder, round 1, finding 2). The same parked leaving: teardown has run —
+    /// its last act stopped this editor listening — and the leaving waits in
+    /// its savepoint on the held store when the screen arrives again. The
+    /// arrival must wire the editor back to its coordinator even though it
+    /// still holds it (no give-back happened), or a flush settle no longer
+    /// bumps its write generation or applies a deferred projection, and the
+    /// coordinator's errors no longer reach its status line — until a full
+    /// leave-and-return. RED on the pre-fix `takeAutosaveHold`, which returned
+    /// at its hold guard before the re-observe.
+    @Test func aScreenShownAgainBeforeItsLeavingFinishedListensToItsCoordinator() async throws {
+        try await withEditorWorld { session, db in
+            let note = try await seed(session)
+            let (model, storage) = makeEditor(session, postID: note.postID)
+            await arrive(model)
+            await model.arrive(focus: false)
+            #expect(model.observesAutosave, "an arrived editor listens")
+
+            let entered = LockIsolated(false)
+            let gate = DispatchSemaphore(value: 0)
+            let held = Task.detached {
+                try await db.write { _ in
+                    entered.setValue(true)
+                    gate.wait()
+                }
+            }
+            var released = false
+            defer { if !released { gate.signal() } }
+            var spins = 0
+            while !entered.value, spins < 5000 {
+                spins += 1
+                try await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(entered.value, "the store is held")
+
+            let leaving = Task { await leave(model, session) }
+            try await Task.sleep(for: .milliseconds(300))
+            // The posture: teardown ran to its end (nothing was pending, so it
+            // never waited) and the leaving is parked in its savepoint.
+            #expect(!model.observesAutosave, "teardown stopped listening; the leaving waits on the store")
+            #expect(model.holdsAutosave, "…and has not given the hold back")
+
+            await arrive(model)
+            #expect(model.arrivalCount == 2)
+            #expect(model.observesAutosave, "shown again, it listens again — before the leaving ends")
+
+            released = true
+            gate.signal()
+            try await held.value
+            await leaving.value
+            #expect(model.holdsAutosave, "the leaving gave nothing back (the screen arrived again)")
+            #expect(model.observesAutosave, "and the editor still listens to the coordinator it records into")
+            #expect(session.autosaveHolderCount(forPost: note.postID) == 1)
+
+            #expect(typeEdit(model, storage, range: NSRange(location: 4, length: 0), replacement: "L"))
+            #expect(session.hasPendingAutosave, "what it records is the registry's coordinator's")
+            await session.flushEveryOpenPost()
+            #expect(try await storedText(db, variantID: note.variantID) == "BaseL.")
+
+            await leave(model, session)
+            #expect(session.autosaveHolderCount(forPost: note.postID) == 0)
+        }
+    }
+
     /// **The order is the flush, the savepoint, THEN the give-back** — read off
     /// the model, not the store: the leaving's text lands and its savepoint
     /// lands while the hold is still held, and only the leaving's last act
