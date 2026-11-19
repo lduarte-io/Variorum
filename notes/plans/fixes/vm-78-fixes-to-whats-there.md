@@ -506,7 +506,9 @@ refuses (VM-81 · W-110 below).
    membership sheet on a note in a gathering (no diverge; the "gathering" mark; an archived book "(archived)" in the
    add list; a ★-rule collect's receipt), the shelf in a–z with a starred book first and a long-press menu without
    Pin, the create sheet's Gathering kind, a starred archived book opened from Starred → its Details with Unarchive →
-   back on the shelf. Both voices where the face has one.
+   back on the shelf. Both voices where the face has one. **Added by round 1 (N9):** the tallest Book Details — an
+   archived, journal-trait book with a rule, a refusal line showing — at the medium detent and at large (the fix
+   pass's LIVE STATUS, below); and the pocket guide's "getting around" lesson as F4 reworded it.
 6. Release the stage (sim shut down, no Variorum instance left), flip this table, report.
 
 ```zsh
@@ -690,12 +692,20 @@ your choice is fine."
 
 *Implementer: a fresh `opus-implementer` (2026-11-19), taking over batches A and B's round-1 findings; the final calls
 are `vm-78-ladder-round1.md` "Final calls" (`90610aa92`). Headless only: code, pins, `build-for-testing` on both
-targets, and a build of the RED tree; the fix-pin window is the orchestrator's, from its own checkout. **REVERT IN
-FLIGHT (a headless build only) — the four product files below at `0180727de`; restore = `git checkout HEAD --
-App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift
-App/Variorum/VariorumMobile/Features/Tutorial/MobileTutorialSeeder.swift
-App/Variorum/VariorumMobile/Features/Shell/MobileTrashView.swift App/Variorum/Shared/BookcaseBoard.swift`.** The
-pre-fix-pass tip ("old" for this window) is `0180727de`.*
+targets, and a build of the RED tree; the fix-pin window is the orchestrator's, from its own checkout. **No revert is
+in flight** (the red-tree build's revert, `8ea7f4e52`, was restored with `git checkout HEAD --`; `git status` clean).
+The pre-fix-pass tip ("old" for this window) is `0180727de`.*
+
+**Headless — DONE (2026-11-19):** pins and guards `72fa54dc8`; VM-81's fixes `326d61da4`; VM-83's fixes `36ace0aa5`.
+- Phone `build-for-testing` (signed, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot, DerivedData
+  `vm78-ios`) **TEST BUILD SUCCEEDED** at `36ace0aa5`'s code (and at `72fa54dc8` — the pins against the pre-fix
+  product).
+- Mac `build-for-testing` (DerivedData `vm78-mac`) **TEST BUILD SUCCEEDED** at `36ace0aa5` (the pass touches one
+  `Shared/` comment and moves no string).
+- **The RED tree builds:** the four product files below reverted to `0180727de`, the tests at `36ace0aa5`, phone
+  `build-for-testing` into a separate DerivedData `vm78-ios-red` (so the tip's products stay warm): **TEST BUILD
+  SUCCEEDED**; then restored.
+- No `xcodebuild test`, no simulator, no walk.
 
 | Finding | State | Pin (TYPE / test) |
 |---|---|---|
@@ -713,6 +723,122 @@ pre-fix-pass tip ("old" for this window) is `0180727de`.*
 | N9 | a walk row (below) | — |
 | N10 | a ticket line for the orchestrator (below) | — |
 | N11 | the window's two bundles (the recipe below); batch B's lost RED bundle recorded as lost | — |
+
+**The fix-pin window — the recipe (the orchestrator runs it from its own checkout at the fix pass's tip, as for
+batches A and B).**
+1. "Old" is the PRE-FIX-PASS TIP, literally: only the product files this pass changed, reverted to `0180727de`; the
+   tests stay at the tip (the red tree's build is proven above):
+   ```zsh
+   git checkout 0180727de -- \
+     App/Variorum/VariorumMobile/Features/Shell/MobileBookDetails.swift \
+     App/Variorum/VariorumMobile/Features/Tutorial/MobileTutorialSeeder.swift \
+     App/Variorum/VariorumMobile/Features/Shell/MobileTrashView.swift \
+     App/Variorum/Shared/BookcaseBoard.swift
+   ```
+   Restore with `git checkout HEAD -- <the same four files>` (the old versions are staged by the checkout) and confirm
+   `git status` clean before the GREEN run.
+2. The types (the reviewer's ten) and the two runs, each keeping its result bundle (N11; the bundle path must not
+   exist beforehand; `App/Variorum/DerivedData/` is gitignored):
+   ```zsh
+   ONLY=(
+     -only-testing:VariorumMobileTests/MobileFinishConfirmTests
+     -only-testing:VariorumMobileTests/MobileArchivedStarredBookTests
+     -only-testing:VariorumMobileTests/MobileBookStateRowTests
+     -only-testing:VariorumMobileTests/MobileShelfOrderTests
+     -only-testing:VariorumMobileTests/MobileGatheringWordTests
+     -only-testing:VariorumMobileTests/MobileTutorialLibraryWalkTests
+     -only-testing:VariorumMobileTests/MobileShellTests
+     -only-testing:VariorumMobileTests/MobileBookDetailsTests
+     -only-testing:VariorumMobileTests/MobileDeletionTests
+     -only-testing:VariorumMobileTests/MobileTrashTests
+   )
+   # RED — the four files at 0180727de
+   xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+     -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+     -derivedDataPath App/Variorum/DerivedData/vm78-ios-red \
+     -resultBundlePath App/Variorum/DerivedData/vm78-bundles/fixpass-red.xcresult "${ONLY[@]}"
+   # GREEN — the tip, restored
+   xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+     -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+     -derivedDataPath App/Variorum/DerivedData/vm78-ios \
+     -resultBundlePath App/Variorum/DerivedData/vm78-bundles/fixpass-green.xcresult "${ONLY[@]}"
+   ```
+   (The DerivedData paths are this worktree's; a separate checkout uses its own, as window (1) did.)
+3. **Expected RED on the reverted product, by name and reason — five, and no other:**
+   - `MobileArchivedStarredBookTests/aRacedUnarchiveSpeaksTheSharedSentence` — F3: `lastError` is the raw fallback
+     ("That couldn't be done — readingNotArchived(…).").
+   - `MobileTutorialLibraryWalkTests/theShelfLessonDescribesTheShelfThatExists` — F4: the old lesson (the new first
+     sentence absent, "pins or unpins" present, "A long press also STARS").
+   - `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` — N2: "(empty note)".
+   - `MobileFinishConfirmTests/theFinishRowsConfirmPresentsAndItsFinishActs` and
+     `MobileFinishConfirmTests/theFinishRowsConfirmCancelChangesNothing` — F5's two hosted GUARDS, red **because the
+     reverted Finish row has no accessibility label for the driver to find** (`surface.activate("Finish")` returns
+     false, so no alert is presented to read). This is NOT "the confirm was broken": both are guards, green on the
+     tip by design.
+4. **Expected GREEN on both sides:** `MobileFinishConfirmTests/cancellingTheConfirmLeavesTheBookAsItWas` (now drives
+   the binding), `MobileFinishConfirmTests/aConfirmWhoseBindingWasWrittenBackFirstStillFinishes` (the write-back
+   assertion), `MobileShelfOrderTests/aStarTakenWithTheShelfOpenReordersIt` (N1's guard),
+   `MobileShellTests/theShelfObservationDeliversBooksStarsAndTheDailyMark` (renamed, N4), and every other test in the
+   ten types. `MobileTrashTests` carries its DESIGNED known issue
+   (`anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`) on both sides. Anything else red is a finding.
+5. GREEN: every test in the ten types passes. Release the stage, record both verdict lines and the bundles' paths
+   here.
+
+**F4 — the lesson's words, a DRAFT for her wording pass** (the "getting around" lesson, block 1; only the changed
+sentences):
+
+| | Old (false since VM-83 retired the Pin door) | New (draft) |
+|---|---|---|
+| first sentence | The SHELF is home: your books at the top, with this one pinned first — pinned books always sit first, and a long press on a book row pins or unpins it. | The SHELF is home: your books at the top, starred books first — this one is starred. |
+| the star door | A long press also STARS a note or a book — starred things sit above everything at the shelf's very top, and the same press takes the star back off. | A long press STARS a note or a book — starred things sit above everything at the shelf's very top, and the same press takes the star back off. |
+
+("this one starred first" was not promised: starred books sort a–z among themselves, and a starred Journal can
+lead.) **Named for VM-212 (wave 6), not changed here:** in the same paragraph, "starred things sit above everything
+at the shelf's very top" — false for notes since the starred list moved to its own page (an earlier round's batch
+10); the paragraph's "a smart book collecting by tags" (already on VM-212's list); the seeder's cleanup comment
+about "the shelf-pins setting" (`MobileTutorialSeeder.cleanup`). The neighbouring test
+(`theShelfShowsThePinnedGuideFirstWithItsFaces`) had its message and comments reworded to "starred"; its function
+name is kept (the final call named the message).
+
+**F8 — the question, for the orchestrator to file in `notes/QUESTIONS.md` at the merge (PROVISIONAL as built: the
+phone draws none):** "Diverge on a gathering's row in a note's books list. The Mac's chip draws 'diverge' on every
+row and a gathering refuses with the tag road (13f W23; `MembershipChip.swift:136-145`; its comment's 'her ruled
+shape' is the 13f orchestrator's batch-5 adjudication — `notes/plans/phase-13f-workspace.md`, 'the orchestrator's
+adjudication — batch 5 CLOSES' — which endorsed the refusal's sentence and, for the W22 offer, P-2's 'never offer an
+act that could only refuse'; no words of hers were found for either reading). The phone since VM-81 (W-110, 'a
+door drawn where it can't act') draws none. Options: (a) neither draws it — the Mac follows in a VX ticket (Books,
+Low); (b) both draw it and refuse with the road — the phone reverts W-110; (c) keep the difference as a recorded
+compromise (MobileSoul §3). PROVISIONAL as built: the phone's (a)."
+
+**Lines for other owners (the orchestrator places them):**
+- **F3, for vm-55's run (VM-62):** `MobileBookDetailsModel.refusal` now forwards `.readingSealed` and
+  `.readingNotArchived` to `OpsRefusalCopy.words(for:roads: .phone)`; VM-62's sweep collapses the rest onto the
+  table — expect a textual conflict at that function.
+- **N4, an owner for the core doc line** (this run opens no `Sources/` line): "core `Queries.bookshelf`'s doc
+  (`Sources/VariorumCore/Queries/ShelfQueries.swift:43-44`) still says pin/journal ordering is the view model's call
+  over `shelfPins`; the phone orders by `BookcaseBoard` since VM-83." — a line on the standing sweep ticket, or the
+  next core touch.
+- **N6 (withdrawn), for VM-113's kickoff:** `MobileShelfViewModel.orderedBooks` is a computed sort
+  (`localizedStandardCompare`) read several times per shelf and Library body — ∝ the books, P1 holds; when the order
+  becomes a live choice there, decide whether to sort once where the observation delivers.
+- **N7, for VM-212 (the later of the last two phone "smart" sites; VM-85 holds the other):** once both sites are
+  gone, adopt the Mac's source-scanning ban (`DeadVocabularyTests`) for the phone in place of
+  `noRenderedStringInTheseFacesSaysSmart`'s hand-kept list.
+- **N10, a ticket line (no id invented):** "Bug · Suspected · Low — the Archive room and a book's contents may paint
+  their empty line before the first listing lands (VM-33's class). `MobileArchiveView.swift:74` draws 'Nothing
+  archived.' on `model.visible.isEmpty` (`MobileArchiveModel.archived` starts `[]`, no answered flag);
+  `MobileBookView.swift:100` draws 'No notes in this book yet.' on `model.entries.isEmpty`
+  (`MobileBookViewModel.entries` starts `[]`); both are filled by a `.task` after the first render. Check first with
+  VM-33's pin shape (`MobileTrashTests.theFirstPaintSaysNothingBeforeTheListingAnswers`); the fix is VM-33's
+  answered gate." Owner: wave 2's room work (the Archived room, W-117).
+- **N11:** batch B's RED result bundle was not kept — its reds are attested by the verdict line above and the round-1
+  reviewer's per-pin reading. From this window on, both bundles are kept until the run closes.
+
+**N9 — a walk row (added to batch A's walk, step 5):** the tallest Book Details — an ARCHIVED, journal-trait book
+with a rule (so Finish with its three-line caption, the daily row, Unarchive with its pause sentence, and Delete),
+with a refusal line showing — captured at the MEDIUM detent and at LARGE (the sheet offers both). A clipped medium
+detent is reported with its capture, not fixed unasked. (The phone's fonts are fixed sizes today; if VM-47 raises
+them, re-take this row on the merged tree.)
 
 ### BATCH C — the probe and the red test (VM-17 · VM-24, which carries VM-19) — EDITOR SEAM, test and badge code
 
