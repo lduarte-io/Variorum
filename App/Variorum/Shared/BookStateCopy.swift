@@ -44,6 +44,10 @@ nonisolated enum BookStateCopy {
 
     static func quoted(_ name: String) -> String { "\u{201C}\(name)\u{201D}" }
 
+    /// The archived book's way out (13i-e U2) — VM-81 (W-120): the phone's
+    /// Book Details draws it on an archived book.
+    static let unarchiveVerb = "Unarchive"
+
     // MARK: Finish (§24 — the confirm carries ONE line, and only when N > 0)
 
     /// §24's line ("N waiting at the door will be dismissed"), its door

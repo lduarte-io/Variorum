@@ -395,7 +395,7 @@ flight.***
 | The hoist (words) | DONE (`68f7e7eab`) — Mac `build` GREEN | the Mac's existing copy pins (Mac leg) |
 | VM-21's hoist (the collect receipt family) | DONE (`4118af9b3`) — Mac `build` GREEN | the Mac's `GatheringCollectReceiptTests`, `GatheringCollectStarReceiptTests` (Mac leg) |
 | Seams + pins (all three members) | DONE (this commit) — phone `build-for-testing` GREEN (unsigned, generic sim); every pin compiles against this tree; red-on-old **PENDING** (stage window) | see the members' rows |
-| VM-81 | IN-PROGRESS — the Finish confirm (W-105) DONE (this commit), phone `build-for-testing` GREEN; the caption, Finish off gatherings, the sealed Reopen's words, Diverge off gathering rows, and the archived book's way out are NEXT; red-on-old + green **PENDING** | `MobileFinishConfirmTests`, `MobileBookStateRowTests`, `MobileArchivedStarredBookTests` |
+| VM-81 | IN-PROGRESS — code DONE: the Finish confirm (`aa4a8670f`), the rest (this commit); phone `build-for-testing` + Mac `build` GREEN; red-on-old + green **PENDING** (stage window) | `MobileFinishConfirmTests`, `MobileBookStateRowTests`, `MobileArchivedStarredBookTests` (+ `MobileBookDetailsTests`) |
 | VM-83 | NOT-STARTED | — |
 | VM-21 | NOT-STARTED | — |
 
@@ -433,6 +433,49 @@ kind-aware seam functions, so they are pins too.
   moved verbatim from the Mac's `Core/Views/MembershipChoice.swift` — the chip's receipt composer, which the phone's
   membership sheet (the chip's twin) now speaks. Both Mac files now extend the shared enums; the board's own
   `collectReceipt` / `alreadyShowing`, the shelf verbs and the chip's other words stay Mac-side.
+
+**Traced mechanisms and what changed (read in this session before any code; file:line at the fix commits):**
+- **VM-81 · W-105 (the Finish confirm).** `MobileBookDetailsSheet.finishRow` called `setFinished(true)` →
+  `lockReading`, whose `finishReadingRows` runs `dismissPendingArrivals` in the same transaction (AppSpec §9), so a
+  Finish pressed while notes waited at Arrivals tombstoned them unseen. Fix (`MobileBookDetails.swift`
+  `requestFinish()`): read the book and `Queries.pendingArrivalCount` (the dismissal's own predicate,
+  `pendingArrivalRowsWhere` — never a second definition) fresh; `BookStateCopy.finishNeedsConfirm` → set
+  `pendingFinish` (`FinishConfirm`: title `BookStateCopy.finishTitle(name)`, line `BookStateCopy.waitingLine(N)`)
+  and act nothing; else act at once. The sheet hosts `.alert(…, presenting: model.pendingFinish)` with Finish
+  (`BookStateCopy.finishVerb`) and Cancel; `confirmFinish(_:)` takes the confirm as a parameter (the shelf delete's
+  rule). "Open Arrivals first" is NOT built (VM-175, wave 4).
+- **VM-81 · W-106 (the caption).** "a finished book reads ✓ and freezes its notes" / "finished — its notes and order
+  are frozen" — false: a finished book's text stays editable. `finishCaption(for:)` = `BookStateCopy.finishedMeans`
+  (the Mac's settings caption, its first sentence — the second, "A finished book opens as pure text.", is the Mac's
+  own and false on the phone, which opens a book to its contents) on an open or finished book;
+  `BookStateCopy.sealedMeans` (the Mac's sealed caption) on a sealed one, where "the writing inside can still change"
+  would be false. Not PROVISIONAL: both are the Mac's sentences.
+- **VM-81 · W-106 (Finish on gatherings).** The row drew Finish on every reading; `lockReading` refuses a gathering
+  `wrongReadingKind` (a raw dump on the phone). `finishRowAct(for:)` reads the Mac's `BookStateDoorSet` finish pair:
+  a gathering draws nothing, unless ALREADY finished (legacy) — then Reopen alone, its way out. A sealed BOOK keeps
+  Reopen (the brief). This is a phone-side reading of the Mac's table until W-070/W-112 hoist the door sets — the one
+  small fork this batch carries, named so it is retired then.
+- **VM-81 · W-106 (Reopen on a sealed book).** `unlockReading` → `reopenReadingRows` refuses `readingSealed`;
+  `MobileBookDetailsModel.refusal` sent every non-name refusal to `DeletionRefusal.words`, which has no arm for it, so
+  she read "That couldn't be done — readingSealed(id: …)." Fix: that ONE arm routes through
+  `OpsRefusalCopy.words(for:roads: .phone)` → "This book is sealed, so it can't be reopened here." (the phone's roads
+  name no Unseal door). **For her wording pass (not reworded — shared copy):** the sentence names no door the phone
+  lacks, but "here" quietly implies somewhere else can; the phone's Unseal arrives with VM-161 (wave 4), when the
+  roads' `bookSeal.verb` fills and the sentence becomes "…— unseal it to reopen it."
+- **VM-81 · W-110 (Diverge on gathering rows).** `MobileMembershipSheet.membershipSection` drew "diverge" on every
+  row; `divergePostForReading` refuses a gathering. `rowCarriesDiverge(_:)` = book rows only. **Noted:** the Mac's
+  chip still draws it on gathering rows and refuses (its 13f W23 comment: "silence where the row looks actionable is
+  the confusion"); the catch-up plan's W-110 rules the phone's, so the two platforms now differ here — a line for the
+  orchestrator (the Mac side is not this batch's surface).
+- **VM-81 · W-120 (the starred archived book).** `MobileBookDetailsModel.refresh` resolved the book from
+  `Queries.bookshelf`, whose `bookcaseReadings` drops `archived_at IS NOT NULL`; `Queries.starred` keeps archived
+  readings and archiving never unstars, so Starred → the book → Details showed an empty sheet with no way back. Fix:
+  `archivedBook(_:id:absentFrom:)` resolves the live archived reading when the shelf does not hold it (counts for that
+  one book: `liveMemberNoteCount`, `readingSections`); `nameLine` wears the shared mark (`BookArchiveCopy.name` —
+  "Old projects (archived)"); `offersUnarchive` draws an Unarchive row (`BookStateCopy.unarchiveVerb`, hoisted from
+  the Mac's extension in this commit; the visible pause beside it when `BookArchiveCopy.pausedSentence` has one) above
+  Delete (the Mac's archived rows: Unarchive + Delete; the daily Journal keeps no Delete on the phone). `unarchive()`
+  runs `unarchiveReading`; no receipt (no line for an ordinary act — the sheet itself changes).
 
 **Her rulings on this batch's two forks (2026-11-19, in the orchestrator's session; relayed by the orchestrator) —
 RULED, not PROVISIONAL. Her words, verbatim:** "book order - that's fine to leave it for wave 3. 2 - collect receipt

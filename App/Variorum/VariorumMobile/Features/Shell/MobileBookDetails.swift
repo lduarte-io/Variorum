@@ -37,6 +37,7 @@
 //
 
 import Foundation
+import GRDB // `Database` in the archived-book read's signature
 import Observation
 import SwiftUI
 import VariorumCore
@@ -79,16 +80,28 @@ final class MobileBookDetailsModel {
         case reopen
     }
 
-    /// **Which finish door the row draws** (VM-81, W-106).
+    /// **Which finish door the row draws** (VM-81, W-106) — the Mac's finish
+    /// pair (`BookStateDoorSet`), read for the phone's one row: a GATHERING
+    /// has no Finish (`lockReading` refuses it `wrongReadingKind` — P-2: a
+    /// door that can never act is not drawn), and one ALREADY finished (a
+    /// legacy 13i-b finish, or one synced so) keeps Reopen as its way out. A
+    /// SEALED book keeps Reopen too, by the batch's brief: the phone has no
+    /// Unseal door until wave 4 (VM-161), so the door stays and its refusal
+    /// explains in the shared sentence. (A phone-side reading of the Mac's
+    /// table until the door sets are hoisted — W-070, W-112.)
     nonisolated static func finishRowAct(for reading: Reading) -> FinishRowAct? {
-        reading.locked ? .reopen : .finish
+        guard reading.kind == .book else { return reading.locked ? .reopen : nil }
+        return reading.locked ? .reopen : .finish
     }
 
-    /// **What the finish row says beside its door** (VM-81, W-106).
+    /// **What the finish row says beside its door** (VM-81, W-106). The
+    /// shipped "freezes its notes" was false — a finished book's text stays
+    /// editable (AppSpec §7: assembly frozen, intake paused). The Mac's
+    /// settings caption, its first sentence (the second says how a finished
+    /// book opens on the Mac); a SEALED book says the sealed caption, because
+    /// there the writing really can't change.
     nonisolated static func finishCaption(for reading: Reading) -> String {
-        reading.locked
-            ? "finished — its notes and order are frozen"
-            : "a finished book reads ✓ and freezes its notes"
+        reading.sealedAt != nil ? BookStateCopy.sealedMeans : BookStateCopy.finishedMeans
     }
 
     /// **VM-81 — the Finish confirm, whole** (W-105): the alert's only input,
@@ -111,13 +124,15 @@ final class MobileBookDetailsModel {
     func refresh() async {
         do {
             let id = readingID
-            let (books, tags, rules, dailyID) = try await session.database.read { db in
-                (try Queries.bookshelf(db),
-                 try Queries.shelfBookTags(db),
-                 try Queries.ruleTagPaths(db),
-                 try Queries.dailyJournalBookID(db))
+            let (books, tags, rules, dailyID, archived) = try await session.database.read { db in
+                let books = try Queries.bookshelf(db)
+                return (books,
+                        try Queries.shelfBookTags(db),
+                        try Queries.ruleTagPaths(db),
+                        try Queries.dailyJournalBookID(db),
+                        try Self.archivedBook(db, id: id, absentFrom: books))
             }
-            book = books.first { $0.reading.id == id }
+            book = books.first { $0.reading.id == id } ?? archived
             if let book {
                 tagPaths = MobileShelfFaces.tagPaths(
                     for: book, curatedTags: tags, ruleTags: rules)
@@ -128,9 +143,33 @@ final class MobileBookDetailsModel {
         }
     }
 
-    /// The identity block's two lines, through the ONE faces brain.
+    /// **VM-81 (W-120) — an ARCHIVED book resolves too.** The shelf's listing
+    /// drops archived books (R-13ie-1 — the one choke point,
+    /// `bookcaseReadings`), but archiving never unstars, so an archived book
+    /// still opens from Starred — and its Details was EMPTY, with no way back.
+    /// Only when the shelf does not hold it: the live, archived reading, with
+    /// the shelf row's counts read for this one book (`liveMemberNoteCount` —
+    /// the book's live member notes, the set the shelf's count counts).
+    nonisolated static func archivedBook(
+        _ db: Database, id: String, absentFrom shelf: [Queries.ShelfBook]
+    ) throws -> Queries.ShelfBook? {
+        guard !shelf.contains(where: { $0.reading.id == id }),
+              let reading = try Queries.reading(db, id: id), reading.archivedAt != nil
+        else { return nil }
+        return Queries.ShelfBook(
+            reading: reading,
+            postCount: try Queries.liveMemberNoteCount(db, readingID: id),
+            sectionCount: try Queries.readingSections(db, readingID: id).count)
+    }
+
+    /// The identity block's two lines, through the ONE faces brain. An
+    /// archived book says so in the shared mark ("Name (archived)" —
+    /// `BookArchiveCopy`, the pickers' and chips' word).
     var nameLine: String? {
-        book.map { MobileShelfFaces.name(for: $0) }
+        book.map {
+            BookArchiveCopy.name(
+                MobileShelfFaces.name(for: $0), archived: $0.reading.archivedAt != nil)
+        }
     }
 
     var metaLine: String? {
@@ -310,6 +349,15 @@ final class MobileBookDetailsModel {
         if case .duplicateBookName(let existing) = error {
             return BookNameCopy.refusal(existing: existing)
         }
+        // VM-81 (W-106): Reopen on a SEALED book (`unlockReading` refuses
+        // `readingSealed`) fell to `DeletionRefusal.fallback` and reached her
+        // as the raw enum. It speaks the shared table's sentence, the phone's
+        // roads (no Unseal door named — the phone has none yet). Only this
+        // arm: VM-62 sweeps the other raw-dump sites.
+        if case .readingSealed = error,
+           let words = OpsRefusalCopy.words(for: error, roads: .phone) {
+            return words
+        }
         return DeletionRefusal.words(error)
     }
 }
@@ -360,8 +408,16 @@ struct MobileBookDetailsSheet: View {
                     dailyRow
                 }
                 Divider().overlay(tokens.line)
-                // 13i-e U2 (P-2): the daily Journal's row is ARCHIVE.
-                if MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading) {
+                if model.offersUnarchive {
+                    // VM-81 (W-120): an archived book's way out. Delete stays
+                    // beside it (the Mac's archived rows: Unarchive + Delete);
+                    // the daily Journal keeps no Delete on the phone.
+                    unarchiveRow(book.reading)
+                    if !MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading) {
+                        deleteRow(book.reading.kind)
+                    }
+                } else if MobileShelfFaces.offersArchiveInsteadOfDelete(book.reading) {
+                    // 13i-e U2 (P-2): the daily Journal's row is ARCHIVE.
                     archiveRow
                 } else {
                     deleteRow(book.reading.kind)
@@ -456,6 +512,34 @@ struct MobileBookDetailsSheet: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(MobileShelfFaces.archiveDailyJournalDoorTitle)
+    }
+
+    /// **VM-81 (W-120) — Unarchive**, an archived book's way out: a plain
+    /// Button acting at once (`unarchiveReading`; Archive is its way back, as
+    /// on the Mac), beside the visible pause when there is one
+    /// (`BookArchiveCopy.pausedSentence` — a living book or a gathering). No
+    /// line after it: the sheet itself changes (the mark and this row go).
+    private func unarchiveRow(_ reading: Reading) -> some View {
+        Button {
+            let model = model
+            Task { await model.unarchive() }
+        } label: {
+            HStack {
+                Text(tokens.chromeLabel(BookStateCopy.unarchiveVerb))
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.accent)
+                Spacer()
+                if let paused = BookArchiveCopy.pausedSentence(for: reading) {
+                    Text(tokens.chromeLabel(paused))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(3)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(BookStateCopy.unarchiveVerb)
     }
 
     /// **Delete Book…** (PR4) — a plain Button, like every other act row

@@ -20,9 +20,10 @@
 //    remove, and a door that can never act isn't rendered (P-2).
 //  · DIVERGE FOR THIS BOOK (W23) through the SHARED flush-first entry
 //    (`AppSession.divergeForBook` — the R1-4 class: the copy carries
-//    what she just typed). A smart row's diverge refuses honestly and
-//    names the tag road (her ruled shape — silence where the row looks
-//    actionable is the confusion).
+//    what she just typed). VM-81 (W-110, the catch-up plan): a gathering's
+//    row no longer draws it — the op refuses a gathering, and P-2 says a
+//    door that can never act is not drawn. (The Mac's chip still draws it
+//    and refuses, the older 13f W23 shape; the model keeps that refusal.)
 //
 //  Phone wording deltas from the Mac, deliberate and recorded: no
 //  "⌥⌘Z undoes it" tail (the phone has no structural undo — the
@@ -85,9 +86,13 @@ final class MobileMembershipModel {
         reading.kind == .book
     }
 
-    /// **Whether a row carries Diverge** (VM-81, W-110).
+    /// **Whether a row carries Diverge** (VM-81, W-110): a BOOK row only. A
+    /// gathering has no membership row to swap — `divergePostForReading`
+    /// refuses it (`wrongReadingKind`) — and P-2 says a door that can never
+    /// act is not drawn. (`divergeRefusal`'s gathering arm stays as the
+    /// model's honest answer should anything else reach it.)
     nonisolated static func rowCarriesDiverge(_ reading: Reading) -> Bool {
-        true
+        reading.kind == .book
     }
 
     /// The small kind word a membership row wears after its name (VM-83,

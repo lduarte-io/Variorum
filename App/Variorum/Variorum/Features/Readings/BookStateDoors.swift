@@ -448,7 +448,8 @@ nonisolated extension BookStateCopy {
     // the OWNED book's two-choice confirm is the delete confirm's twin)
 
     static let archiveVerb = "Archive"
-    static let unarchiveVerb = "Unarchive"
+    // `unarchiveVerb` lives in `Shared/BookStateCopy.swift` (VM-81 — the
+    // phone's Book Details draws the door too).
 
     /// The door's label: an OWNED book's Archive ASKS (the two choices), so it
     /// carries the ellipsis; every other Archive acts at once.
