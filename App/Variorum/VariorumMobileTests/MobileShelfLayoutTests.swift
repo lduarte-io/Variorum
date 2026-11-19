@@ -590,8 +590,22 @@ struct MobileShelfRenderedLayoutTests {
             print("PERF[sim] shelf regions at 596 pt (keyboard-sized, OPEN) — books \(regions.books) · writing \(regions.writing)")
             #expect(regions.writing.height >= MobileShelfLayout.minimumWritingHeight,
                     "the ruled writing area must survive the keyboard — got \(regions.writing.height) pt")
-            #expect(regions.writing.height / 596 >= 0.42,
-                    "and it keeps its SHARE of the smaller room: \(regions.writing.height / 596)")
+            // And it keeps its SHARE of the smaller room — measured against
+            // the room R27's rule shares (books + writing: everything under
+            // the path line), where the books may never take more than half.
+            // **VM-48 moved this from `writing / 596 >= 0.42`:** that bound
+            // was batch 5's measurement (254 of 596, 42.6%) less a margin,
+            // taken against the WHOLE surface, so its denominator carried the
+            // chrome above the region (88 pt then, the path line one 11.5 pt
+            // line). Batch 1 set the path line in the phone's roles (its
+            // doors at the 17 pt control size) and the region's top moved
+            // 88 → 111.3 at 430 pt, while the split still gives writing
+            // exactly half (242.3 of 484.7) — the rule held; the proxy, which
+            // measured the path line as much as the share, fell to 40.7%.
+            let room = regions.books.height + regions.writing.height
+            #expect(regions.writing.height
+                        >= room * (1 - MobileShelfLayout.maximumBooksShare) - 1,
+                    "and it keeps its SHARE of the smaller room: \(regions.writing.height) of \(room)")
             #expect(regions.writing.maxY <= 596 + 1,
                     "and it is not pushed off the bottom — \(regions.writing)")
             // The BOOKS are what yielded — the whole point of the design.
