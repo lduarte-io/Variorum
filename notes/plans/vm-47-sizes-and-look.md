@@ -378,9 +378,9 @@ sheet); pin red-on-old; her glance is owed on which one stayed (held for her sit
 | 3.4 | The grounds (R-47-1): her words on the paper (`tokens.surface`), bars/sheets/section bands on the room — at the screens' and sheets' background lines; the rest listed with owners | DONE (this commit) — the roots' list regions (`MobileStarredView`, `MobileShelfView` books + box, `MobileLibraryView` rows/search) `.background(tokens.surface)`; the pushed lists' grounds (`MobileBookView`, `MobileArchiveView`, `MobileTrashView`, `MobileVersions`) `tokens.surface`, their report bands still the room; Read's room around the cream page `ReadingPageTokens.room` (the Mac's R-13u-10); Write's screen ground and masthead the editor's own ground (`ReadingPageTokens.room` — P-47-16); sheets unchanged on the room; what is more than a background line listed in §6 with owners. Source pin `MobileLookSourceTests` (4): patterns measured RED on `ea738c49f` (10 of 10 checks fail) and GREEN now (0 of 10). Phone APP target builds incrementally GREEN (QUIET: the test target's build waits) |
 | 3.5 | The ★ reads `tokens.star` | DONE (this commit) — `MobileStarredView`'s ★ (the phone's only one); pinned by `MobileLookSourceTests.everyStarReadsTheStarToken` (red on old: the accent) |
 | 3.6 | VM-54: the border trace and verdict in §6; if the code does not re-resolve, the fix + a trait-driving pin, red-on-old in a snapshot worktree | IN-PROGRESS — DONE: the trace and verdict (§6 "Batch 3 — results": NOT hollow by the code), the fix (`MobileTraitBorder` + the four sites) and the pin `MobileBorderTraitTests` (4) (this commit; the phone APP target builds incrementally green). REMAINING: the pin's compile (the test target's build waits for QUIET); its red-on-old in a SNAPSHOT worktree — MADE: `~/dev/variorum-vm-47-rol3`, detached at `72ae64daa`, the three view files checked out from `af487bfe7` and staged there only (they changed only in `1c3621719` since — a clean revert of exactly the fix: 7 lines in, 19 out; `MobileTraitBorder` stays, unused there; the pin's test file is the fixed tree's); its phone `build-for-testing` into its own `App/Variorum/DerivedData/vm47-rol3` waits for QUIET; then the orchestrator runs `MobileBorderTraitTests` from it — expect RED; the snapshot removed after. THIS worktree carries no revert. The on-screen check rides the walk |
-| 3.7 | Tests: the phone's resolution (a settings change re-resolves; no palette → sea-glass; dark stays local; the old key ignored), the star, the grounds, a phone no-literal-colour twin if it is a small source scan | NOT-STARTED |
+| 3.7 | Tests: the phone's resolution (a settings change re-resolves; no palette → sea-glass; dark stays local; the old key ignored), the star, the grounds, a phone no-literal-colour twin if it is a small source scan | DONE (written, `987e9edc5` … `5b5d7b9be`) — `MobileLibraryLookTests` (7), `MobileLookSourceTests` (4, incl. the phone's no-literal-colour twin — none existed), `MobileBorderTraitTests` (4); moved pins in §6. COMPILE of the test target and every count PENDING (QUIET, then the stage) |
 | 3.8 | The walk driver COPY extended (voice row, palette, grounds, ★, the VM-54 flip) → `DerivedData/vm47-walk3`; both schemes `build-for-testing` into `DerivedData/vm47-b3` → READY for the stage | IN-PROGRESS — DONE: the instruments (gitignored `notes/plans/vm-47-screens/instruments/VM47Walk3Driver.swift` + `walk3.zsh`, each with a cold-use header: the voice set through the Settings row, the second palette through the launch environment, `test25_voice`, `test30_flip` with the runbook's flip watcher; captures to `vm-47-screens/b3/`, device `vm47-walk3` created and deleted inside the window); the walk's palette seam in the Debug app (`MobileWalkLaunch`, DEBUG only — `VARIORUM_WALK_PALETTE` → `setThemePalette` at the shell's start) (this commit; phone APP target incremental build GREEN). REMAINING, held by the coordinator's QUIET: `walk_build` into `vm47-walk3`; both schemes' full `build-for-testing` into `vm47-b3`; then READY |
-| 3.9 | §6 "Batch 3 — results" (hoist, road, retired preference, grounds by screen, star, VM-54 trace + verdict, tests PENDING, PROVISIONALs in §5, self-assessment) | NOT-STARTED |
+| 3.9 | §6 "Batch 3 — results" (hoist, road, retired preference, grounds by screen, star, VM-54 trace + verdict, tests PENDING, PROVISIONALs in §5, self-assessment) | DONE for the code (this commit) — counts, the red-on-old line, the walk's findings PENDING their windows |
 | 4 | The bottom bar (VM-52) | NOT-STARTED |
 | 5 | Settings (VM-53, VM-27) | NOT-STARTED |
 | — | The midway cold review, after batch 2 (her word; Fable, fresh) | FINDINGS IN — 0 BLOCKER · 1 MAJOR · 2 MINOR · 2 NIT, verbatim in `notes/plans/vm-47-ladder-midway.md` §1, with a clean bill. The MAJOR: `PhoneType.uiFont` has no 13 pt floor. NEXT: the implementer's agree/dispute → the reviewer's final call → the implementer applies (red-on-old pin) → a short stage re-run; the ladder's round 1 re-checks. The `MobilePhoneControlsTests` re-run ran green at 06:56 (13 tests in 1 suite, both fixed tests green by name); the walk (row 2.8e) is still queued |
@@ -928,8 +928,32 @@ checks fail there, 0 of 10 now; the no-literal-colour twin is a new guard (green
 the canary it allows); `MobileLibraryLookTests` pins new behaviour (a fresh library read Terminal Classic before).
 
 **The Mac suites this batch owes** (every Mac test type that constructs or reads the hoisted store — by name or
-through `withAdoptedTheme` — plus the theme types; 119): see the READY report's `macTypes` array, also kept in §4 row
-3.8 once the window is set.
+through `withAdoptedTheme` — plus the seven theme types; 119 types, computed by a scan of `VariorumTests/` for
+`ThemeStore` per test type, whole files where the store is used by a file-level helper, and the callers of
+`withAdoptedTheme`): handed to the orchestrator as a zsh array in the READY report. The whole Mac target runs at the
+merge gate.
+
+**For `notes/QUESTIONS.md` at the merge (this branch does not edit it):** #199 — the `ThemeStore` hoist, deferred
+2026-08-31, LANDED here (`dc9a5fd05`); #195 MINOR 3 — CLOSED (`987e9edc5`, `90228e98a`): main-actor storage, one app
+writer where the library's settings land; the residual (the suites share the process-global look across awaits)
+stated above, owned with the editor seam (VM-137). P-47-15 and P-47-16 (§5) are this batch's new PROVISIONAL calls.
+
+**Self-assessment (for the cold reviewer).** The road is the Mac's own, reused: the hoisted store, the settings →
+tokens road, the Mac Settings' voice write — the phone adds a landing seam (`onLanded`), a placeholder, and the UIKit
+face's adoption. The riskiest calls: (1) **Write is not on the paper** (P-47-16) — the editor's ground lives in a
+fenced file, so Write wears the voice's own room; her words are never on the tint, but the sheet's paper is not
+there, and a reader of R-47-1's "the note in Write … the paper" will see the gap; (2) **the placeholder** (P-47-15)
+diverges from the Mac's storeless Terminal on purpose, to avoid a wrong-voice frame at every launch; (3) **the global
+look** is still a process global (main-actor now, one app writer) because the fenced editor files read it statically
+— the tests' shared-global residual is stated, not removed; (4) **a pure palette change re-bases open editors'
+storage** (`applyVoiceChange` — attributes only, O(open note), at a rare deliberate act), where the Mac takes a
+cheaper colour-only road; the phone's editor files are fenced and the road is the LK2 flip's, already pinned; (5) **the
+grounds are background lines**: the roots' list regions, not whole screens, so the bars keep the room — under the
+sea-glass the roots read as a tinted band, a white page, a tinted bar, as the sizing sheet draws; the walk is its
+first look; (6) a **window before the first landing**: a Write screen opened before the theme store's first emission
+(a few milliseconds after the shell's first render — no tap can land there) would wear the editor face's previous
+look. The Mac cannot have changed: `VoiceTokens.swift` is untouched; `ThemeStore` moved whole with two additive
+members whose defaults are the Mac's; no Mac view or test file changed.
 
 **VM-54 — the trace and the verdict (code; the on-screen check rides this batch's walk window).**
 
