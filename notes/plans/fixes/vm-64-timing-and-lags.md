@@ -200,9 +200,9 @@ readout under this build's, Copy exports both each headed by its build; Reset cl
 the older one: simple, PROVISIONAL); (3) the readout says since when each table has collected (the day of its first sample)
 and how many samples each span holds. Brain tests for the per-build keying, the bound, and the round-trip through the
 persisted form.
-| P5 — builds: phone Debug `build-for-testing`, phone Release `build`, Mac `build-for-testing` | NOT-STARTED |
-| P6 — stage window (GO from the orchestrator): phone suites + the simulator walk + captures | NOT-STARTED |
-| P7 — closeout in §7; the BEFORE commit named here | NOT-STARTED |
+| P5 — builds: phone Debug `build-for-testing`, phone Release `build`, Mac `build-for-testing` | DONE at `808f333a8` — all three `** … SUCCEEDED **`, no warning in a touched file (DerivedData `App/Variorum/DerivedData/vm64-b1/`) |
+| P6 — stage window (GO from the orchestrator): phone suites + the simulator walk + captures | READY — awaiting the GO; the commands are in §7 batch 1 ▸ "The stage window" |
+| P7 — closeout in §7; the BEFORE commit named here | IN-PROGRESS — §7 written; its PENDING lines flip after P6 |
 
 DerivedData: `App/Variorum/DerivedData/vm64-b1/` (gitignored). Screens: `notes/plans/vm64-screens/` (gitignored, added
 by this batch).
@@ -227,3 +227,183 @@ by this batch).
 ## 7. Batch closeouts, findings and dispositions
 
 *(Each implementer writes its batch's closeout here; the ladder's findings and their dispositions follow.)*
+
+### Batch 1 · VM-65 — the timing layer and its readout (implementer closeout)
+
+**Not done in this batch (first, by the record's rule):** no fix of any kind (the batch section's "not in this batch");
+nothing on her phone (HELD for her sitting — and, at her word tonight, she will not run the readout now: "leave it in the
+handoff bundle for me to do later"); the exact rows-sent and rows-received of a sync round (they live in the engine's
+round report, a `Sources/VariorumCore/Sync/` line this run may not write — the readout carries honest approximations,
+P-65-7); the phone suites' and the walk's results are PENDING the stage window (P6) as this section is first written.
+
+**Base:** `21747b9de`. **Commits:** `65d70fe9f` (live status) · `feef85c7a` (the brain) · `f6389e3b5` (the catalog, the
+marks, the readout) · `808f333a8` (one table per build — the author's sharpening) · PENDING (the stage results).
+
+#### What shipped, file by file
+
+- `Sources/VariorumCore/Diagnostics/` — a new Core folder (the timing layer is neither a domain rule nor a query; Core is
+  where headless `swift test` reaches it):
+  - `TimingStats.swift` — one series: a fixed ring (64), all-time count, last; median / min / max computed at read time
+    over the ring. Equality is over contents (a ring rebuilt from a file starts its cursor at zero). Codable, held to the
+    ring's invariants on decode.
+  - `TimingRecorder.swift` — the brain, generic over the catalog's two `String`-backed enums. Keyed spans (`begin`
+    restarts an open one; `end` drops a begin older than its stale limit; `endIfOpen` for moments that only sometimes
+    close a span), token spans (re-entrant), value samples, counters, COUNTING WINDOWS (events of named counters from an
+    opening act to a close or deadline, recorded as one sample; `keepFirst` / `restart`), `os_signpost` intervals per span
+    (subsystem `io.lduarte.Variorum`, category `timing`). Inert unless enabled (one relaxed atomic load). The day of the
+    first sample; a change handler told about the FIRST change after a save (one atomic exchange per mark); `archive`,
+    `restore`, and `absorb` (a kept table folded UNDER what a new process already measured). No entry point takes a
+    string.
+  - `TimingReport.swift` — the readout's plain text (two lines per entry: label, then `n · median · range · last`).
+  - `TimingBook.swift` — one table per BUILD: this build's and the previous build's; a third build drops the oldest;
+    storing one build never touches another; Codable; a malformed or future file reads as no book.
+- `App/Variorum/Shared/AppTiming.swift` — the catalog (23 series, 14 counters) and the ONE recorder, disabled until the
+  phone enables it; every mark's meaning in one place (call sites are one line); the process's true start (`sysctl`
+  `kinfo_proc`) and the executable's build fingerprint (`LC_UUID`).
+- `App/Variorum/VariorumMobile/Features/Perf/MobileTiming.swift` — the phone's half: `start()` (enable, launch spans from
+  the process's true start, the file's load, the change handler, the keyboard watch); the next-frame tick (a one-shot
+  `CADisplayLink`); `MobileTimingStore` (the timing file).
+- `App/Variorum/VariorumMobile/Features/Perf/MobileTimingView.swift` — the readout sheet and its words (`MobileTimingCopy`,
+  every label DRAFT).
+- The marks (each a pure append unless said): `VariorumMobileApp.swift` (an explicit `init` so the layer turns on BEFORE
+  the bootstrap begins opening; backgrounding counts a leaving and saves) · `Shared/AppBootstrap.swift` (`finish(.ready)` =
+  library open; the lobby's `opened` = unlock accepted) · `MobileRoadFaces.swift` (lock screen showing) ·
+  `MobileShellView.swift` (home on screen) · `MobileWriteView.swift` (`init` = a note requested; `.task` = arrival;
+  `.onDisappear` = a leaving, timed to its savepoint) · `MobileEditorViewModel.swift` (`init` = an editor built; `loadOnce`;
+  the live observation spelled as `observeTakes`' own body so its fetch counts itself; first and later deliveries;
+  `refreshTakesFromStore`; the first render) · `MobileQuickNote.swift` (`open()` = the press; `file()` timed when it
+  completes; the box taking focus) · `MobileLibraryViewModel.swift` (both held listings' fetches and deliveries — the note
+  listing spelled as `observeLibrary`'s own body; its first delivery = Library ready) · `Shared/AppSession.swift`
+  (`savepointOnLeaving` = an attempt) · `Shared/AutosaveCoordinator.swift` (around each take's write) ·
+  `Shared/AppServices.swift` (owner adoption timed, its rows counted — the op's report, previously discarded, is now read)
+  · `Shared/SyncSession.swift` (the round, from the scheduler's own public status) · `MobileSettingsView.swift` (the
+  "Timing…" row).
+- Tests: `Tests/VariorumCoreTests/TimingRecorderTests.swift` (31, headless) · `VariorumMobileTests/MobileTimingTests.swift`
+  (4: readout coverage of every series and counter; both tables in order; the file keeping builds apart across "quits").
+
+#### What each number means (so a later batch reads it right)
+
+| Series (readout label, DRAFT) | Begins | Ends | Notes |
+|---|---|---|---|
+| Tap the box → keyboard up | the box takes focus (`.onChange(of: focused)`), only if no keyboard is up | `keyboardDidShow` | P-65-6: starts when the app PROCESSES the tap; time the main thread spends before processing it is outside |
+| File → box clear | `file()` starts | `file()` returns having filed a note | empty box, refusal, withdrawal: discarded, never recorded |
+| Open → note on screen | `open()` (⏎ or the open door) | the display-link tick after the new note's first render | the whole of lag 2 |
+| Open → keyboard up in the note | `open()` | `keyboardDidShow` | |
+| Open a note → on screen | `MobileWriteScreen.init` (every road: Library, book, box, Starred) | as above | a rebuild of the same screen restarts it (a few ms short, never a stale begin) |
+| Leave a note → saved | `.onDisappear` | its teardown and `savepointOnLeaving` done | |
+| Launch → lock screen / library open / home on screen / Library ready | the process's start (kernel's, so pre-main time is inside) | the lobby's next frame / `finish(.ready)` / the shell's next frame / the Library's first listing | the lock screen cancels the other three (what follows waits on her) |
+| Unlock → library open / home / Library ready | the lobby's `opened` (Face ID or passphrase accepted) | as above | |
+| Owner check at start | `runOwnerAdoption` | its return (refused too) | + "rows stamped" |
+| Sync round | the status turns syncing | it stops, or the completed count moves | + "rows sent (about)" = outbox at start − still owed after; "changes received (about)" = the pull cursor's advance (counts this device's own pushed rows too) — P-65-7 |
+| Note reads per open (window) | the screen's `.task` | the live observation's first delivery (or 10 s) | counts `loadOnce` + every observation fetch; audit F 2C predicts 2 |
+| Note re-reads per save (window) | before each autosave write | the next save or 1 s | every MOUNTED editor's re-fetch counts (audit F §7) |
+| Library re-reads / redraws per save (windows) | as above | as above | both held listings (all + bookless) |
+| Savepoints per leaving (window) | a note's `.onDisappear` or the app's backgrounding (`keepFirst`) | 10 s | a Castle backgrounding's lock teardown counts inside its leaving |
+
+Totals (monotonic): notes opened (arrivals) · editors built (÷ opened > 1 = audit F 2D's twins, settled by the count) ·
+note reads at open / live / at a tab switch · note redraws live · Library and bookless reads and redraws · saves ·
+savepoint tries · notes left · app left. The footer: spans restarted, ended too late to count, ended with no start.
+
+#### The author's sharpening (mid-batch, 2026-11-19 — an author-driven change, recorded as such)
+
+Relayed by the orchestrator: she will NOT run the readout tonight ("leave it in the handoff bundle for me to do later");
+the BEFORE build may live on her phone for days and the AFTER build is installed over it much later. Built to it:
+(1) the record survives a full quit and an install in place — `Library/Application Support/Timing/timing.json` in the
+app's container, outside the store, numbers only (plus each table's build key, label and first day); saves are BATCHED off
+every timed path — the recorder tells the store about the first unsaved change, the store writes 20 s later on its own
+serial utility queue, and at once (same queue, its own background-task grant) at every backgrounding, so **a crash loses
+at most the last 20 seconds of marks**; the launch never waits on the file (the kept table is read on the store's queue
+and `absorb`ed under what the launch already measured). (2) One table per build; a new build never blends into the old;
+the previous build's table stays readable under this one's on the readout, and Copy exports both, each headed by its
+build. **Reset clears THIS build's table only; the previous one is cleared only by aging out when a third build opens**
+(P-65-4). (3) Each table says the day it began collecting, and every row its `n`. **One deviation, forced and recorded
+(P-65-3):** her words key a table on the bundle's build number, but the phone does not stamp it — every phone build says
+`1` (`CURRENT_PROJECT_VERSION = 1`; only the Mac target runs `StampBuildNumber.sh`) — so the key is the short version +
+the build number + the executable's fingerprint, and the label shows all three. Her rule (never blend two builds) holds;
+her literal key would have broken it.
+
+#### PROVISIONAL calls (options weighed; the built one first)
+
+- **P-65-1 — the readout's home:** Settings ▸ Diagnostics, a "Timing…" row beside "Edit trace…" (built — the brief's
+  proposed home, the Release-shipped precedent) · its own Settings section · DEBUG-only (rejected: her phone runs Release).
+- **P-65-2 — always recording on the phone, no arming switch** (built — her BEFORE numbers must not depend on remembering
+  to arm; cost is O(1) per mark at act cadence) · an arming switch like the edit trace's.
+- **P-65-3 — the build key** (above): version + number + fingerprint (built) · the number alone (blends BEFORE into AFTER)
+  · stamp the phone's build number (wave 6's build-stamping row, VM-216 — not this batch's file set).
+- **P-65-4 — what clears the previous build's table:** only a third build's arrival (built — simple) · a second
+  "Clear previous" door · keep more than two.
+- **P-65-5 — "on screen":** the display-link tick after the render (built — the frame carrying the text has been
+  committed) · the render's return (misses the layout it sets off) · a `CATransaction` completion (unreliable without
+  animations).
+- **P-65-6 — "tap the box":** the box taking focus (built — zero behaviour change) · the physical touch (needs an event
+  timestamp from UIKit — a gesture or `sendEvent` hook on a surface wave 2 owns).
+- **P-65-7 — a round's rows:** two cheap local readings in `SyncSession` (built — no `Sync/` line; labelled "about") ·
+  exact counts from the engine's push/pull reports surfaced on the scheduler's status (a `Sync/` line — the author's slot
+  rules and another batch).
+- **P-65-8 — Reset asks nothing** (built — the edit trace's Clear precedent) · a confirm (protects BEFORE numbers from a
+  stray press).
+
+#### The Mac does not change (review focus 8)
+
+Every shared mark (`AppBootstrap`, `AppSession`, `AppServices`, `AutosaveCoordinator`, `SyncSession`) calls into the one
+recorder, which only `MobileTiming.start()` enables — the Mac never calls it — so on the Mac each mark is one relaxed
+atomic load and a return: nothing recorded, saved or signposted, no file, no reads. Two lines change shape without
+changing behaviour: `runOwnerAdoption` now keeps the op's report it used to discard (`_ =`), and `SyncSession`'s status
+loop consults the round timing before assigning (an early return while disabled). The phone's two observations keep
+their exact bodies (`observeTakes` = `observe { takesProjection }`; `observeLibrary`'s defaults `profile: nil, wingID:
+nil`). PENDING: the Mac suites over those shared types (below).
+
+#### Evidence
+
+- Core, headless (no stage): `swift test --filter TimingRecorderTests` — **31 tests in 1 suite passed** (statistics, the
+  ring's bound, an unmatched begin, a re-entrant keyed span and overlapping token spans, stale ends, windows, the disabled
+  recorder, the since-day, the change handler, absorb, per-build keying, the two-build bound, the round-trip through the
+  persisted form, concurrency).
+- Builds at `808f333a8`: phone Debug `build-for-testing` · phone Release `build` · Mac `build-for-testing` — all succeeded;
+  no warning in a touched file.
+- PENDING (P6): the phone suites (`MobileTimingTests` + the touched suites), the Mac suites over the shared types, and
+  the simulator walk with its captures in `notes/plans/vm64-screens/`.
+
+#### The stage window (what P6 runs — the GO's claim line and UDID fill `<simulator-udid>`)
+
+Phone (boot fresh inside the claim, settle, then `test-without-building` over this batch's products; a zsh array):
+```
+cd ~/dev/variorum-vm-64/App/Variorum
+tests=(MobileTimingTests MobileQuickNoteTests MobileQuickNoteReadFailureTests MobileShelfPerfTests MobileLibraryTests
+  MobileLibrarySortTests MobileFilterTests MobileSavepointOnLeavingTests MobileRoundOccasionTests MobileNavigationTests
+  MobileLivenessTests MobilePerfFixtureTests MobilePerfWalkTests MobileLaunchPathTests MobileEditTraceTests MobileWalkTests
+  MobileDeferredProjectionRetryTests MobileConflictDiscoveryTests MobileTypedOverRescueTests MobileTakesTests
+  MobileLockTeardownTests MobileRelockCoordinatorTests MobileQuickNoteUnderLockTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme VariorumMobile \
+  -destination "platform=iOS Simulator,id=<simulator-udid>" -derivedDataPath DerivedData/vm64-b1 \
+  ${tests/#/-only-testing:VariorumMobileTests/}
+```
+Mac (the shared types; the recorder stays disabled there, so these prove "unchanged"):
+```
+tests=(AutosaveCoordinatorTests AutosaveConsolidationTests SavepointOnLeaveTests SyncBeforeRoundTests FirstRoundRoadTests
+  SyncSessionFenceTests Phase9cAuthWiringTests AppBootstrapOffMainTests TestHostInertTests)
+xcodebuild test-without-building -project Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
+  -derivedDataPath DerivedData/vm64-b1 ${tests/#/-only-testing:VariorumTests/}
+```
+The walk (Debug phone app, dev store, signed out, never Resume, no test account): install
+`DerivedData/vm64-b1/Build/Products/Debug-iphonesimulator/VariorumMobile.app` on the booted simulator; `simctl launch`
+(a cold launch); tap the box, type a line, Open (⏎), back, Library ▸ open that note, back; Settings ▸ Timing…; capture.
+Hands: the VM-8 precedent (Device Hub hosts the simulator; captures `simctl io … screenshot` only; taps `cliclick` at
+host points from a template-match calibration; keys by System Events to Device Hub, frontmost verified; the author guard
+before every GUI act) — throwaway helpers in the session scratchpad, never committed. **Known limit:** in hardware-
+keyboard mode (VM-10's record: this machine's headless simulator stays there) the software keyboard never rises, so the
+two "→ keyboard up" spans can only fill if Device Hub can toggle the software keyboard; if it cannot, the walk records
+them as empty BY DESIGN of the instrument (no `keyboardDidShow`), and they are first filled on her phone.
+
+#### For QUESTIONS at the merge (the orchestrator carries these to `notes/QUESTIONS.md`)
+
+1. **P-65-3 — the build key.** Her words: keyed on the bundle's build number. The phone's build number is never stamped
+   (always `1`). Options: (a) version + number + executable fingerprint (built); (b) stamp the phone's build number (the
+   Mac's `StampBuildNumber.sh` phase on the phone target — wave 6's build stamping) and key on the number alone; (c) the
+   number alone as it stands (blends every build — rejected).
+2. **P-65-4 — clearing the previous build's table.** (a) Only a newer build's arrival ages it out (built); (b) a "Clear
+   previous" door beside Reset; (c) keep more than two builds.
+3. **P-65-1, P-65-2, P-65-8 — the readout's home, always-on recording, Reset without a confirm** (options above).
+4. **P-65-7 — a sync round's exact rows** need a `Sync/` line (the engine's reports on the scheduler's status); today's
+   readout says "about". Hers to schedule if the approximations prove too blunt for the minute-long empty round.
+5. **The labels** (every string in `MobileTimingCopy`, and the section and footer words) — her wording pass.
