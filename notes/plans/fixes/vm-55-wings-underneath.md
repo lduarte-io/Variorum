@@ -1,6 +1,6 @@
 # VM-55 — Run: Wings underneath (mobile catch-up, wave 1, umbrella 2)
 
-**STATUS: GATE GREEN 2026-11-19 — built, reviewed, walked and gated; the PR is open and waits for the coordinator's merge GO.** Overnight run under `/run-phase vm-55`; stage coordinator `nov18`.
+**STATUS: CLOSED 2026-11-19** — PR #13, merge `66337ff08`; QUESTIONS #277; the handoff `notes/handoffs/vm-55-handoff.md`.
 Ticket VM-55 (team VM, project "Mobile — the catch-up & launch") · branch `vm-55-wings-underneath` · worktree
 `~/dev/variorum-vm-55` · Pro · ONE PR titled `VM-55: Wings underneath`.
 
@@ -11,7 +11,7 @@ message line, stops rendering raw error text, and the Mac's wing brains move to 
 VM-56 · VM-57 · VM-58 · VM-59 · VM-60 · VM-61 · VM-62 · VM-63 and, minted mid-run at her word, VM-225 — built in
 four batches (batch 2 in two halves), each by a fresh `opus-implementer`, with one `fable-reviewer` round and a
 fresh closer for the walk and the gate. Zero `Sources/` lines, zero schema, nothing under `Sync/`, custody,
-Protection or the editor brain; the sync marker is untouched. ‹MERGE-LINE›
+Protection or the editor brain; the sync marker is untouched. Merged by PR #13, merge `66337ff08`.
 
 **As built, one pointer per piece** (paths under `App/Variorum/`):
 - *The phone stands in one wing (VM-56).* `Shared/WingState.swift` — `readScope` is the current wing on both
@@ -53,7 +53,7 @@ merge gate: the whole phone target 953 tests / 163 suites with main's one red (V
 Mac target 6,409 tests / 1,111 suites in one launch — 1 failed, the standing flake `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` (VX-701), green when re-run alone; 13 standing known issues; 31 gated harnesses skipped.
 
 **Open, and where it lives.**
-- Nineteen PROVISIONAL calls, P-55-1 … P-55-19: QUESTIONS #‹QN›; her checklist is
+- Nineteen PROVISIONAL calls, P-55-1 … P-55-19: QUESTIONS #277; her checklist is
   `notes/handoffs/vm-55-handoff.md`.
 - The Protection screen's messages and two raw-error faces on the custody road: VM-229, VM-230 (under VM-103).
 - Phone words for the wing brains' four Mac-worded sentences and the empty-wing lines: VM-231 (under VM-72).

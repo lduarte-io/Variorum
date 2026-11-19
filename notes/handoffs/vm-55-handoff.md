@@ -1,6 +1,6 @@
 # VM-55 — Wings underneath: your morning handoff
 
-**STATUS: DRAFT (2026-11-19) — built, reviewed, walked and gated; the PR is open and waits for the merge. This line is replaced when the run merges.**
+**STATUS: FINAL (closed 2026-11-19 — PR #13, merge commit 66337ff08; the decisions are QUESTIONS #277; everything below is settled).**
 
 *How to read the ids in this file:* **VM-NNN** and **VX-NNN** are tickets on the board. **P-55-N** is a
 provisional call built while you were away, waiting for you; all of them are QUESTIONS #277. A **window** is a
@@ -183,6 +183,9 @@ lists each with its file (`notes/plans/fixes/vm-55-wings-underneath.md`, batch 2
 - The interim wing door is temporary. VM-80 replaces it whole, and a note on VM-80 says what exists.
 - The Protection screen was not touched: its messages still use their own lines (VM-229), and two failures there
   can still show raw error text (VM-230). Both sit under the lock umbrella, VM-103.
+- Who merges this in next (the coordinator's trial merges at the merge): VM-47 has already merged it in cleanly;
+  VM-64 meets it in two phone files; VM-78 in five phone files plus MobileSoul and SurfaceContracts; VX-981 in
+  SurfaceContracts only.
 - `Tools/canon-size`: 143,078 of 150,000 (headroom 6,922); no crossing.
 
 ## Tickets filed
