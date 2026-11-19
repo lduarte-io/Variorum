@@ -102,15 +102,25 @@ final class MobileMembershipModel {
         reading.kind == .gathering ? MobileShelfFaces.gatheringWord : nil
     }
 
-    /// A membership row's name (VM-21, F5).
+    /// A membership row's name (VM-21, F5): the name with the finished state,
+    /// and an ARCHIVED book marked in the shared words — "Name (archived)",
+    /// `BookArchiveCopy` (SurfaceContracts: "The pickers, chips and Book Panel
+    /// mark '(archived)'"; the Mac chip's own membership rows).
     nonisolated static func memberRowName(for reading: Reading) -> String {
-        MobileShelfFaces.name(for: reading)
+        BookArchiveCopy.name(
+            MobileShelfFaces.name(for: reading), archived: reading.archivedAt != nil)
     }
 
-    /// An "Add to a book" row's label, before the face's "+ " (VM-21, F5): a
-    /// book by its name, a gathering by its name and the R98 road.
+    /// An "Add to a book" row's label, before the face's "+ " (VM-21, F5): the
+    /// list is `Queries.readings`, archived books included (explicit adds stay
+    /// open — 13i-e), and an archived one was listed bare. A book by its name,
+    /// marked "(archived)" when it is; a gathering by its name and the R98
+    /// road ("by tagging", the Mac's word), marked too when archived —
+    /// PROVISIONAL (the Mac chip's picker marks only books; the run record
+    /// lists the options).
     nonisolated static func addRowLabel(for reading: Reading) -> String {
-        reading.kind == .gathering ? "\(reading.name) (by tagging)" : reading.name
+        let name = BookArchiveCopy.name(reading)
+        return reading.kind == .gathering ? "\(name) (\(AddToBookCopy.byTagging))" : name
     }
 
     // MARK: - Reads
@@ -149,15 +159,23 @@ final class MobileMembershipModel {
         await refresh()
     }
 
-    /// R98 — a smart book accepts by TAGGING (apply-and-report).
+    /// R98 — a gathering accepts by TAGGING (apply-and-report).
+    ///
+    /// VM-21 (F4): the receipt is the Mac chip's own composer
+    /// (`AddToBookCopy.collected`, hoisted to `Shared/`), so it is TRUE —
+    /// a collect that set the star names it ("Starred — the gathering shows
+    /// it now." / "Tagged #x and starred — …"), and an ARCHIVED gathering,
+    /// which shows nothing anywhere, says when it will ("…the gathering shows
+    /// it once it's unarchived."). The op's in-transaction facts decide
+    /// (`SmartCollectResult.starred` / `.gatheringArchived`). Kept and made
+    /// true by her ruling (2026-11-19); whether the phone keeps this line at
+    /// all is on her wording-pass list.
     func collect(into book: Reading) async {
         do {
             let result = try await session.runner.run { [postID] ops in
                 try ops.collectPostIntoSmartReading(postID, into: book.id)
             }
-            status = result.alreadyMatched
-                ? "Already collected — it matches “\(book.name)”'s filter."
-                : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
+            status = AddToBookCopy.collected(result, gatheringName: book.name)
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
                 status = "“\(book.name)” can't take this note: \(reason)"

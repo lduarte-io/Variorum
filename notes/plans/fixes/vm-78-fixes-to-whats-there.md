@@ -397,7 +397,7 @@ flight.***
 | Seams + pins (all three members) | DONE (this commit) — phone `build-for-testing` GREEN (unsigned, generic sim); every pin compiles against this tree; red-on-old **PENDING** (stage window) | see the members' rows |
 | VM-81 | IN-PROGRESS — code DONE: the Finish confirm (`aa4a8670f`), the rest (this commit); phone `build-for-testing` + Mac `build` GREEN; red-on-old + green **PENDING** (stage window) | `MobileFinishConfirmTests`, `MobileBookStateRowTests`, `MobileArchivedStarredBookTests` (+ `MobileBookDetailsTests`) |
 | VM-83 | IN-PROGRESS — code DONE (this commit); phone + Mac `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileShelfOrderTests`, `MobileShelfRowActsTests`, `MobileGatheringWordTests` (+ `MobileShellTests`, `MobileBookDetailsTests`, `MobileWalkTests`, `MobileDeletionTests`) |
-| VM-21 | NOT-STARTED | — |
+| VM-21 | IN-PROGRESS — code DONE (this commit); phone `build-for-testing` GREEN; red-on-old + green **PENDING** (stage window) | `MobileCollectReceiptTests` |
 
 **The seam commit (the "old" of the revert recipe).** Each pin needs a testable surface the fix then changes, so the
 seam commit adds those surfaces with the SHIPPED behaviour, byte for byte, and wires the faces through them:
@@ -516,6 +516,25 @@ kind-aware seam functions, so they are pins too.
   Starred page's "book" kind word on a gathering row (wave 2's Starred page); the delete confirm's detail "Its notes
   stay in the library." on a gathering (true, if odd — the Mac's gathering confirm says "No note is touched: a
   gathering holds none."; a wording-pass line).
+
+- **VM-21 · F4 (the collect receipt — her ruling, below).** `MobileMembershipModel.collect(into:)` composed its own
+  receipt: "Added by tagging ‹paths› — “X” collects by filter." on every non-matched collect — so a ★-only collect
+  read "Added by tagging  — …" (no star named, an empty tag list), a tag+★ collect never named the star, and on an
+  ARCHIVED gathering (which assembles empty everywhere, 13i-e) it claimed the gathering shows the note. Fix: the
+  status is `AddToBookCopy.collected(result, gatheringName:)` — the Mac chip's composer, hoisted (`4118af9b3`); the
+  op's own `SmartCollectResult.starred` / `.gatheringArchived` decide. Arms: "Starred — the gathering shows it now." ·
+  "Tagged #x and starred — the gathering shows it now." · "Tagged #x — the gathering shows it once it's unarchived."
+  (and "It already matches — …once it's unarchived."); a live tags-only collect and an already-matching one keep the
+  chip's shipped words (the controls). **On her wording-pass list:** whether the phone keeps a collect line at all.
+- **VM-21 · F5 (the "(archived)" marks).** The add list is `Queries.readings` (archived books included — explicit adds
+  stay open) and named them bare; the membership rows too. Fix: `addRowLabel(for:)` = `BookArchiveCopy.name(reading)`
+  (+ " (by tagging)" — `AddToBookCopy.byTagging`, hoisted — on a gathering); `memberRowName(for:)` =
+  `BookArchiveCopy.name(MobileShelfFaces.name(for:), archived:)` ("Old projects ✓ (archived)"). **PROVISIONAL —
+  an archived GATHERING's add row:** (a) mark it too, "Quotes (archived) (by tagging)" — BUILT: SurfaceContracts says
+  "The pickers, chips and Book Panel mark '(archived)'" without a kind exception, and the collect receipt's archived
+  arm then has a mark to agree with; (b) the Mac chip's picker exactly — gatherings carry only "by tagging", unmarked;
+  (c) list no archived gathering in the add list at all (not the contract: explicit adds stay open). Question for her
+  (the orchestrator files it): does an archived gathering's add row wear "(archived)" on both platforms?
 
 **Her rulings on this batch's two forks (2026-11-19, in the orchestrator's session; relayed by the orchestrator) —
 RULED, not PROVISIONAL. Her words, verbatim:** "book order - that's fine to leave it for wave 3. 2 - collect receipt
