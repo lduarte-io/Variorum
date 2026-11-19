@@ -234,9 +234,11 @@ struct MCPShowTool: Sendable {
                     try log(clientName, kind, id, title, allowed: false)
                     return Outcome(text: words, isError: true)
                 case .partial:
-                    // F2-S SCAFFOLD (pin before fix): TODAY's behaviour — exactly
-                    // `.refuse(partialShowWords)`'s road.
-                    try log(clientName, kind, id, title, allowed: false)
+                    // Round 1's F2 (the VX-981 ladder): the note OPENED in front
+                    // of her and the rest never landed — her view moved, so the
+                    // line's failure is hers, never this call's answer (VX-961's
+                    // split); the line is TODAY's row, logged as the refusal it is.
+                    recordShown(clientName, kind, id, title, act: MCPToolCatalog.showInApp.name, allowed: false)
                     return Outcome(text: MCPShowRule.partialShowWords, isError: true)
                 }
             }
@@ -502,12 +504,17 @@ struct MCPShowTool: Sendable {
     /// — the store's words in VX-369's form, no receipts: a show is no write),
     /// while the client is answered the act's own answer byte for byte (R-825 —
     /// her app-side state never reaches the wire). One attempt, nothing
-    /// synthesized: `list_my_activity` simply lacks the row. The refusal arms
-    /// keep `log` — nothing landed there, so the store's failure stays the
-    /// call's own answer (the write family's refusal-line posture).
-    private func recordShown(_ clientName: String, _ kind: String, _ id: String, _ title: String?, act: String) {
+    /// synthesized: `list_my_activity` simply lacks the row. Round 1's F2 (the
+    /// VX-981 ladder): a PARTIAL show (`.partial` — the note opened, the rest
+    /// never landed) takes this road too, its row the refusal it is
+    /// (`allowed: false`). The refusal arms where NOTHING landed keep `log` — the
+    /// store's failure stays the call's own answer (the write family's
+    /// refusal-line posture).
+    private func recordShown(
+        _ clientName: String, _ kind: String, _ id: String, _ title: String?, act: String, allowed: Bool = true
+    ) {
         do {
-            try log(clientName, kind, id, title, allowed: true, act: act)
+            try log(clientName, kind, id, title, allowed: allowed, act: act)
         } catch {
             hooks.onActivityLogFailure?(
                 MCPActivityLogFailure(

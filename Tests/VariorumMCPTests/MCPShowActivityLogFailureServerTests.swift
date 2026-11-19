@@ -138,7 +138,8 @@ struct MCPShowActivityLogFailureServerTests {
     /// A GUARD (green on both trees): a REFUSED show keeps the write family's refusal-line posture —
     /// nothing landed, so a store that cannot take the refusal's line answers VX-369's store-failure
     /// sentence ("…may not have landed…", true: nothing did) and the app hears no landed-act failure.
-    /// The never dial's refusal stands for every refusal arm.
+    /// The never dial's refusal stands for every refusal arm where nothing landed (round 1's F2, the
+    /// VX-981 ladder: a PARTIAL show — the note opened — is no such arm; its pin is above).
     @Test func aRefusedShowKeepsTheRefusalLinesPosture() async throws {
         let broken = try await show(.refuse(MCPShowRule.neverWords), logFails: true)
         #expect(broken.isError && broken.answer.hasPrefix("Variorum's library store refused the work"),
