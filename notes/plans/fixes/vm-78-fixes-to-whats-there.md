@@ -2282,7 +2282,7 @@ its own checkout.*
 | 2b — the merge commit (seven conflicts resolved, the re-land) | DONE (`ed1266e2f`, merging `origin/main` at `eb18888db`) — per file in "The re-land, file by file" below; compile PENDING (row 3) |
 | 2c — the semantic merges git does not flag | DONE — in the merge commit `ed1266e2f` (`requestFinish`'s refusals onto VM-62's road; Book Details' delete line names a gathering); the pins re-shaped to the one line `c652d1669`; the join's own pin `bookDetailsDeleteLineNamesAGathering` (this commit); every listed file read against the merged product ("The semantic read" below) |
 | 3 — phone + Mac `build-for-testing` on the merged tree | DONE — phone (signed, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`, no boot, DerivedData `vm78-ios`) **TEST BUILD SUCCEEDED** at `c652d1669` (log `App/Variorum/DerivedData/logs/vm78-mergein-ios-build.log`) and again with this commit's pin (`…-ios-build-2.log`); Mac (`-scheme Variorum -destination 'platform=macOS'`, DerivedData `vm78-mac`) **TEST BUILD SUCCEEDED** at `c652d1669` (`…-mac-build.log`; this commit is phone-test-only). 0 errors; no warning in a line this merge-in wrote |
-| 4 — the window recipe (RED, GREEN, the Mac types) | NOT-STARTED |
+| 4 — the window recipe (RED, GREEN, the Mac types) | DONE (this commit) — "The window recipe" below; its runs are the orchestrator's, PENDING |
 
 **The trial merge** (`git merge-tree --write-tree --name-only HEAD origin/main`, at `de3bb0107` against `eb18888db`,
 nothing touched): exactly the seven expected textual conflicts —
@@ -2458,6 +2458,188 @@ the assertions:
   quiet press is a refusal in main's classes (the Mac door's own); the collect receipt keeps this run's words in
   the class main gives the act; Unarchive from Details stays silent (main's P-55-4: an unarchive is ordinary);
   Book Details' delete line is main's P-55-8 (already PROVISIONAL there) speaking this run's ruled W-073 words.
+
+**The window recipe (4) — for the orchestrator's short window, run from its own checkout at this branch's tip; the
+implementer ran no `xcodebuild test` and booted no simulator.**
+
+*RED leg — the re-landed fixes' product files at main's merged version, the tests at the tip.* VM-16 is re-landed
+on main's door, and VM-33's gate was re-placed inside main's per-wing follow, so those two are the legs; every
+other re-land either is main's own fix now (the sealed and raced-Unarchive refusals — green on both sides by
+design) or cannot be file-swapped (main's `MobileBookDetails`, `MobileShelfViewModel`, `MobileMembership` lack the
+symbols batch A's pins name). The tree compiles **by reading**: the three files at `eb18888db` declare every symbol
+the tip names in them, and the only symbol the tip adds to the pair (`MobileTrashModel.trashListingLoaded`) is read
+only by `MobileTrashView`, which reverts with it (grep over `VariorumMobile/` and `VariorumMobileTests/`). Not built
+by the implementer — build it in the window's own DerivedData.
+```zsh
+git checkout eb18888db -- \
+  App/Variorum/VariorumMobile/Features/Write/MobileUndoDoor.swift \
+  App/Variorum/VariorumMobile/Features/Shell/MobileTrashModel.swift \
+  App/Variorum/VariorumMobile/Features/Shell/MobileTrashView.swift
+RED=(
+  -only-testing:VariorumMobileTests/MobileUndoDoorTests
+  -only-testing:VariorumMobileTests/MobileUndoWarningWordsTests
+  -only-testing:VariorumMobileTests/MobileTrashTests
+  -only-testing:VariorumMobileTests/MobileGatheringWordTests
+)
+xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -derivedDataPath <the checkout's red DerivedData> \
+  -resultBundlePath App/Variorum/DerivedData/vm78-bundles/mergein-red.xcresult "${RED[@]}"
+# restore: git checkout HEAD -- <the same three files>; `git status` clean before GREEN
+```
+**Expected RED, by name — six, and no other:**
+1. `MobileUndoDoorTests/aQuietUndoSpeaksTheRefusalAndOffersNoRedo` — main's door classes the quiet press ordinary:
+   `statusMessage` "Undid: Delete Block", `statusAction` `.redo`, and the line's `#require` finds nothing.
+2. `MobileUndoDoorTests/aQuietRedoSpeaksTheRefusalAndOffersNoUndo` — the mirror ("Redid: Delete Block", `.undo`).
+3. `MobileUndoWarningWordsTests/theWarningsDetailSaysCommittedInTheMacsSentence` — main's detail says "It is saved
+   first" (VM-20).
+4. `MobileTrashTests/theFirstPaintSaysNothingBeforeTheListingAnswers` — main's view draws "Nothing in the Trash." on
+   `model.trash.isEmpty` (VM-33).
+5. `MobileGatheringWordTests/theTrashNamesAnUntitledGatheringAGathering` — main's `rowTitle` says "(empty book)"
+   (W-073, rides the Trash view's revert).
+6. `MobileGatheringWordTests/theTrashNamesAnUntitledSavedVersionAsOne` — "(empty note)" (N2, the same).
+
+**Expected GREEN on both sides:** `aLandedRedoStillOffersItsUndo` and every other `MobileUndoDoorTests` test (main's
+five rewritten pins included); `theWarningsDetailSaysBeforeInLowercaseAndShoutsNothing`;
+`anEmptyTrashSaysSoOnceTheListingAnswers` and the rest of `MobileTrashTests` (its DESIGNED known issue,
+`anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, on both sides); the rest of
+`MobileGatheringWordTests`, `bookDetailsDeleteLineNamesAGathering` included (Book Details is not reverted). Anything
+else red is a finding.
+
+*GREEN leg — the tip, restored; every test TYPE this run owns or edited, then main's types over the files this run
+changed.* Expected: all green; the one standing phone red (VM-24's `MobileMarkdownCaretTests`) is NOT in the list.
+```zsh
+GREEN=(
+  # this run's own and edited files (TYPE names, checked against the sources)
+  -only-testing:VariorumMobileTests/MobileUndoDoorTests
+  -only-testing:VariorumMobileTests/MobileUndoWarningWordsTests
+  -only-testing:VariorumMobileTests/MobileBlockHistoryTests
+  -only-testing:VariorumMobileTests/MobileTrashTests
+  -only-testing:VariorumMobileTests/MobileFinishConfirmTests
+  -only-testing:VariorumMobileTests/MobileBookStateRowTests
+  -only-testing:VariorumMobileTests/MobileArchivedStarredBookTests
+  -only-testing:VariorumMobileTests/MobileShelfOrderTests
+  -only-testing:VariorumMobileTests/MobileShelfRowActsTests
+  -only-testing:VariorumMobileTests/MobileGatheringWordTests
+  -only-testing:VariorumMobileTests/MobileCollectReceiptTests
+  -only-testing:VariorumMobileTests/MobileBookCreateTests
+  -only-testing:VariorumMobileTests/MobileBookDetailsTests
+  -only-testing:VariorumMobileTests/MobileBookNameGuardTests
+  -only-testing:VariorumMobileTests/MobileMembershipTests
+  -only-testing:VariorumMobileTests/MobileNoteRenameTests
+  -only-testing:VariorumMobileTests/MobileNoteEntryDateTests
+  -only-testing:VariorumMobileTests/MobileShellTests
+  -only-testing:VariorumMobileTests/MobileWalkTests
+  -only-testing:VariorumMobileTests/MobileDeletionTests
+  -only-testing:VariorumMobileTests/MobileLivenessTests
+  -only-testing:VariorumMobileTests/MobileTutorialBookShapeTests
+  -only-testing:VariorumMobileTests/MobileTutorialDoorTests
+  -only-testing:VariorumMobileTests/MobileTutorialWritingWalkTests
+  -only-testing:VariorumMobileTests/MobileTutorialTakesWalkTests
+  -only-testing:VariorumMobileTests/MobileTutorialStructureWalkTests
+  -only-testing:VariorumMobileTests/MobileTutorialLibraryWalkTests
+  -only-testing:VariorumMobileTests/MobilePocketGuidePrivacyTests
+  -only-testing:VariorumMobileTests/MobileTutorialStarCapTests
+  -only-testing:VariorumMobileTests/MobilePocketGuideDeletionTests
+  -only-testing:VariorumMobileTests/MobileTakesChromeTests
+  -only-testing:VariorumMobileTests/MobileFilterTests
+  # main's (VM-55) types over files this run changed
+  -only-testing:VariorumMobileTests/MobileLineDirectionTests
+  -only-testing:VariorumMobileTests/MobileLineDoorTests
+  -only-testing:VariorumMobileTests/MobileLineShowRuleTests
+  -only-testing:VariorumMobileTests/MobileNoRawErrorPinTests
+  -only-testing:VariorumMobileTests/MobileRefusalSentencePinTests
+  -only-testing:VariorumMobileTests/MobileErrorLogPrivacyPinTests
+  -only-testing:VariorumMobileTests/MobileWingListingTests
+  -only-testing:VariorumMobileTests/MobileWingBlindPickerTests
+  -only-testing:VariorumMobileTests/MobileNavigationTests
+)
+xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme VariorumMobile \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -derivedDataPath App/Variorum/DerivedData/vm78-ios \
+  -resultBundlePath App/Variorum/DerivedData/vm78-bundles/mergein-green.xcresult "${GREEN[@]}"
+```
+(`MobileTakesChromeTests`, `MobileTutorialTakesWalkTests` and `MobileWalkTests` are the back-out's evidence too:
+batch D's window had their chrome tests red on the reverted fix; they run here on the restored chrome. The
+signed `build-for-testing` into `vm78-ios` is current at `8d2b9f8bf`, so this leg starts built.)
+
+*The Mac types that read the `Shared/` files this run changed* (`ShelfOrder`, `BookcaseBoard`, `BookStateCopy`,
+`ArrivalsCopy`, `CollectReceiptCopy`, `RecoveryCopy`, `StructuralUndoCopy`), found by grepping `VariorumTests/` for
+the moved symbols and reading each matched file's TYPE names (a file can hold several). Tier 1 is batch A's and
+batch B's proven list (window (1), 110/17); tier 2 is the rest of the grep's reach plus main's three Mac scan pins,
+which read the Mac sources this run changed. Some tier-2 files are serialized or pointer-driven suites — the
+window's usual idle-machine check applies.
+```zsh
+MAC1=(
+  -only-testing:VariorumTests/BookStateDoorsTests
+  -only-testing:VariorumTests/BookSettingsSheetTests
+  -only-testing:VariorumTests/GatheringKindWordTests
+  -only-testing:VariorumTests/ArrivalsDoorPlacementTests
+  -only-testing:VariorumTests/BookArrivalsTests
+  -only-testing:VariorumTests/GatheringCollectReceiptTests
+  -only-testing:VariorumTests/GatheringCollectStarReceiptTests
+  -only-testing:VariorumTests/VocabularySweepTests
+  -only-testing:VariorumTests/BookArchiveDoorActTests
+  -only-testing:VariorumTests/BookSettingsArchiveRowTests
+  -only-testing:VariorumTests/ArchivedBooksGroupTests
+  -only-testing:VariorumTests/ShelfModelTests
+  -only-testing:VariorumTests/TutorialBooksLessonTests
+  -only-testing:VariorumTests/TutorialMCPChapterTests
+  -only-testing:VariorumTests/GatheringRuleGateTests
+  -only-testing:VariorumTests/UndoWarningWordsTests
+  -only-testing:VariorumTests/DestructiveUndoWarningTests
+)
+MAC2=(
+  -only-testing:VariorumTests/VM61MacStatusSeamPinTests
+  -only-testing:VariorumTests/VM62MacRefusalWordsPinTests
+  -only-testing:VariorumTests/VM63MacWingBrainsHoistPinTests
+  -only-testing:VariorumTests/BookArchivedLineTests
+  -only-testing:VariorumTests/BookDeleteAndDuplicateTests
+  -only-testing:VariorumTests/BookStructureModelTests
+  -only-testing:VariorumTests/JournalBooksTests
+  -only-testing:VariorumTests/BookDropTests
+  -only-testing:VariorumTests/BookPanelDragGateTests
+  -only-testing:VariorumTests/NewNoteInBookTests
+  -only-testing:VariorumTests/BookArchiveDeclarationTests
+  -only-testing:VariorumTests/ArchivedMarkTests
+  -only-testing:VariorumTests/ComesBackReceiptTests
+  -only-testing:VariorumTests/WingContentsArchivedWordsTests
+  -only-testing:VariorumTests/TutorialBooksRitualTests
+  -only-testing:VariorumTests/ConfirmCommaWordsTests
+  -only-testing:VariorumTests/AscentKindWordsTests
+  -only-testing:VariorumTests/BookCopyFamilyTests
+  -only-testing:VariorumTests/OwnershipBadgeTests
+  -only-testing:VariorumTests/UnfiledWordTests
+  -only-testing:VariorumTests/BookArrivalsReviewTests
+  -only-testing:VariorumTests/ArrivalArmsTests
+  -only-testing:VariorumTests/BookcasePlacingGripTests
+  -only-testing:VariorumTests/BookcaseStarredShelfBrainTests
+  -only-testing:VariorumTests/BookcaseStarredShelfDropTests
+  -only-testing:VariorumTests/AddToBookMintTests
+  -only-testing:VariorumTests/MCPWingFacesTests
+  -only-testing:VariorumTests/TagAndFolderTests
+  -only-testing:VariorumTests/FreeTypedTagTests
+  -only-testing:VariorumTests/PromoteAndPaletteTests
+  -only-testing:VariorumTests/BookcaseBoardBrainTests
+  -only-testing:VariorumTests/MoveToShelfGateTests
+  -only-testing:VariorumTests/BookcaseViewModelTests
+  -only-testing:VariorumTests/BookcaseMastheadPopoverTests
+  -only-testing:VariorumTests/NoteDeletionDeclarationTests
+  -only-testing:VariorumTests/NoteDeletionActTests
+  -only-testing:VariorumTests/NoteDeletionNavigateAwayTests
+  -only-testing:VariorumTests/NoteDeleteConfirmEdgeTests
+  -only-testing:VariorumTests/SnippetsVocabularyTests
+  -only-testing:VariorumTests/SnippetFilterTests
+  -only-testing:VariorumTests/SnippetsGroupDoorsTests
+  -only-testing:VariorumTests/BookDoorsEverywhereTests
+  -only-testing:VariorumTests/BookCollectingDoorsTests
+  -only-testing:VariorumTests/SnippetGroupTrashTests
+  -only-testing:VariorumTests/IAAndTrashShapeTests
+)
+xcodebuild test -project App/Variorum/Variorum.xcodeproj -scheme Variorum -destination 'platform=macOS' \
+  -derivedDataPath App/Variorum/DerivedData/vm78-mac "${MAC1[@]}" "${MAC2[@]}"
+```
+(`vm78-mac` is built for testing at `c652d1669`; nothing the Mac compiles changed after it.)
 
 ## The ladder
 
